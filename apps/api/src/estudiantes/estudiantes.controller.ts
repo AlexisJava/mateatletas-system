@@ -38,7 +38,7 @@ export class EstudiantesController {
     @Body() createDto: CreateEstudianteDto,
     @GetUser() user: any,
   ) {
-    return this.estudiantesService.create(user.sub, createDto);
+    return this.estudiantesService.create(user.id, createDto);
   }
 
   /**
@@ -49,7 +49,7 @@ export class EstudiantesController {
    */
   @Get()
   async findAll(@Query() query: QueryEstudiantesDto, @GetUser() user: any) {
-    return this.estudiantesService.findAllByTutor(user.sub, query);
+    return this.estudiantesService.findAllByTutor(user.id, query);
   }
 
   /**
@@ -59,7 +59,7 @@ export class EstudiantesController {
    */
   @Get('count')
   async count(@GetUser() user: any) {
-    const count = await this.estudiantesService.countByTutor(user.sub);
+    const count = await this.estudiantesService.countByTutor(user.id);
     return { count };
   }
 
@@ -70,7 +70,7 @@ export class EstudiantesController {
    */
   @Get('estadisticas')
   async getEstadisticas(@GetUser() user: any) {
-    return this.estudiantesService.getEstadisticas(user.sub);
+    return this.estudiantesService.getEstadisticas(user.id);
   }
 
   /**
@@ -83,7 +83,7 @@ export class EstudiantesController {
   @Get(':id')
   @UseGuards(EstudianteOwnershipGuard)
   async findOne(@Param('id') id: string, @GetUser() user: any) {
-    return this.estudiantesService.findOne(id, user.sub);
+    return this.estudiantesService.findOne(id, user.id);
   }
 
   /**
@@ -101,7 +101,7 @@ export class EstudiantesController {
     @Body() updateDto: UpdateEstudianteDto,
     @GetUser() user: any,
   ) {
-    return this.estudiantesService.update(id, user.sub, updateDto);
+    return this.estudiantesService.update(id, user.id, updateDto);
   }
 
   /**
@@ -114,7 +114,7 @@ export class EstudiantesController {
   @Delete(':id')
   @UseGuards(EstudianteOwnershipGuard)
   async remove(@Param('id') id: string, @GetUser() user: any) {
-    await this.estudiantesService.remove(id, user.sub);
+    await this.estudiantesService.remove(id, user.id);
     return {
       message: 'Estudiante eliminado exitosamente',
     };
