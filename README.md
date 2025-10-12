@@ -105,6 +105,38 @@ npm run clean
 - **@mateatletas/api**: API backend (NestJS)
 - **@mateatletas/shared**: Tipos y utilidades compartidas
 
+## 📚 Documentación
+
+- **[QUICK_START.md](./QUICK_START.md)** - Guía de inicio rápido
+- **[CHECKPOINT_FASE_1.md](./CHECKPOINT_FASE_1.md)** - Estado completo de Fase 1
+- **[docs/ARCHITECTURE_FASE_1.md](./docs/ARCHITECTURE_FASE_1.md)** - Diagramas y arquitectura
+- **[docs/README.md](./docs/README.md)** - Índice completo de documentación
+- **[apps/api/src/auth/README.md](./apps/api/src/auth/README.md)** - Documentación del módulo Auth
+- **[apps/api/CURL_EXAMPLES.md](./apps/api/CURL_EXAMPLES.md)** - Ejemplos de uso de la API
+
+## 🎨 Componentes UI
+
+Ver el showcase interactivo de todos los componentes:
+```
+http://localhost:3000/showcase
+```
+
+Componentes disponibles:
+- **Button** - 4 variantes, 3 tamaños, estado loading
+- **Input** - Con validación y mensajes de error
+- **Card** - Con título opcional y efecto hover
+
+## 🔐 API Endpoints
+
+| Método | Endpoint           | Auth | Descripción              |
+|--------|-------------------|------|--------------------------|
+| POST   | `/auth/register`  | ❌   | Registrar nuevo tutor    |
+| POST   | `/auth/login`     | ❌   | Login y obtener token    |
+| GET    | `/auth/profile`   | ✅   | Obtener perfil           |
+| POST   | `/auth/logout`    | ✅   | Cerrar sesión            |
+
+Ver ejemplos completos: [apps/api/CURL_EXAMPLES.md](./apps/api/CURL_EXAMPLES.md)
+
 ## Variables de Entorno
 
 Las variables de entorno se encuentran en el archivo `.env` en la raíz del monorepo:
@@ -139,13 +171,26 @@ NEXT_PUBLIC_API_URL="http://localhost:3001/api"
   - ConfigModule para variables de entorno
   - Health check endpoint: `/api/health`
 
-## Próximos Pasos
+## 🚀 Estado Actual
 
-1. Configurar base de datos (Prisma/PostgreSQL)
-2. Implementar autenticación (JWT)
-3. Crear módulos de usuarios, atletas, entrenadores
-4. Conectar frontend con backend
-5. Implementar design system completo
+### ✅ Fase 1: Sistema de Autenticación (COMPLETADO)
+
+- ✅ Base de datos configurada (PostgreSQL + Prisma)
+- ✅ Autenticación JWT implementada
+- ✅ Módulo Auth completo con guards y strategies
+- ✅ 4 endpoints REST funcionales
+- ✅ Cliente Axios con interceptors
+- ✅ Store Zustand con persistencia
+- ✅ Componentes UI (Button, Input, Card) con estilo Crash Bandicoot
+
+**📚 Ver documentación completa**: [CHECKPOINT_FASE_1.md](./CHECKPOINT_FASE_1.md)
+
+### 🔜 Próximos Pasos (Fase 2)
+
+- [ ] Crear páginas de login y registro
+- [ ] Implementar dashboard protegido
+- [ ] Agregar navbar con estado de autenticación
+- [ ] Middleware de protección de rutas
 
 ## Comandos Útiles
 

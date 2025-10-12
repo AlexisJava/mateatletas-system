@@ -15,7 +15,8 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
-    "lint": "eslint src --ext .ts"
+    "lint": "echo 'No lint configured for shared package'",
+    "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

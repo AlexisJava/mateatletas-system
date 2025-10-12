@@ -18,3 +18,46 @@ model TestModel {
 
   @@map("test_models")
 }
+
+/// Modelo principal para tutores/docentes de la plataforma
+/// Representa a los usuarios educadores que crean y gestionan contenido educativo
+model Tutor {
+  /// Identificador único del tutor (CUID para mejor distribución)
+  id String @id @default(cuid())
+
+  /// Email único del tutor - usado para autenticación
+  /// IMPORTANTE: Debe estar indexado para búsquedas rápidas en login
+  email String @unique
+
+  /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
+  /// Se maneja solo en backend para seguridad
+  password_hash String
+
+  /// Nombre del tutor
+  nombre String
+
+  /// Apellido del tutor
+  apellido String
+
+  /// Documento Nacional de Identidad (opcional)
+  dni String?
+
+  /// Teléfono de contacto (opcional)
+  telefono String?
+
+  /// Fecha en que el tutor se registró en la plataforma
+  fecha_registro DateTime @default(now())
+
+  /// Indica si el tutor completó el proceso de onboarding inicial
+  /// Se usa para redirigir a nuevos tutores al flujo de configuración
+  ha_completado_onboarding Boolean @default(false)
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("tutores")
+}
