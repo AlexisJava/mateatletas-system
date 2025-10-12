@@ -17,7 +17,7 @@ export class EstudianteOwnershipGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const tutorId = request.user?.sub; // Del JWT
+    const tutorId = request.user?.id; // Del JWT Strategy (user.id, NO user.sub)
     const estudianteId = request.params.id; // De la URL
 
     if (!tutorId) {
