@@ -52,6 +52,9 @@ model Tutor {
   /// Se usa para redirigir a nuevos tutores al flujo de configuración
   ha_completado_onboarding Boolean @default(false)
 
+  /// Relación con estudiantes (un tutor puede tener muchos estudiantes)
+  estudiantes Estudiante[]
+
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
 
@@ -60,4 +63,87 @@ model Tutor {
 
   /// Mapeo al nombre de tabla en la base de datos
   @@map("tutores")
+}
+
+/// Modelo para estudiantes asociados a un tutor
+/// Representa a los alumnos que utilizarán la plataforma
+model Estudiante {
+  /// Identificador único del estudiante
+  id String @id @default(cuid())
+
+  /// Nombre del estudiante
+  nombre String
+
+  /// Apellido del estudiante
+  apellido String
+
+  /// Fecha de nacimiento del estudiante (para calcular edad)
+  fecha_nacimiento DateTime
+
+  /// Nivel escolar del estudiante: Primaria, Secundaria, Universidad
+  nivel_escolar String
+
+  /// URL de la foto de perfil del estudiante (opcional)
+  foto_url String?
+
+  /// ID del tutor que gestiona este estudiante
+  tutor_id String
+
+  /// Relación con el tutor (muchos estudiantes pertenecen a un tutor)
+  tutor Tutor @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+
+  /// ID del equipo al que pertenece el estudiante (opcional, para gamificación)
+  equipo_id String?
+
+  /// Relación con el equipo (muchos estudiantes pueden estar en un equipo)
+  equipo Equipo? @relation(fields: [equipo_id], references: [id], onDelete: SetNull)
+
+  /// Puntos totales acumulados por el estudiante (gamificación)
+  puntos_totales Int @default(0)
+
+  /// Nivel actual del estudiante en el sistema de gamificación
+  nivel_actual Int @default(1)
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("estudiantes")
+}
+
+/// Modelo para equipos de gamificación
+/// Representa los equipos a los que pueden unirse los estudiantes
+model Equipo {
+  /// Identificador único del equipo
+  id String @id @default(cuid())
+
+  /// Nombre único del equipo (Fénix, Dragón, Tigre, Águila)
+  nombre String @unique
+
+  /// Color primario del equipo en formato hexadecimal
+  color_primario String
+
+  /// Color secundario del equipo en formato hexadecimal
+  color_secundario String
+
+  /// URL del ícono del equipo (opcional)
+  icono_url String?
+
+  /// Puntos totales acumulados por el equipo
+  puntos_totales Int @default(0)
+
+  /// Relación con estudiantes (un equipo puede tener muchos estudiantes)
+  estudiantes Estudiante[]
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("equipos")
 }
