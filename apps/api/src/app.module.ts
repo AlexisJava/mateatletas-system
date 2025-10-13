@@ -12,6 +12,7 @@ import { PagosModule } from './pagos/pagos.module';
 import { ClasesModule } from './clases/clases.module';
 import { AsistenciaModule } from './asistencia/asistencia.module';
 import { AdminModule } from './admin/admin.module';
+import { GamificacionModule } from './gamificacion/gamificacion.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AdminModule } from './admin/admin.module';
     ClasesModule,
     AsistenciaModule,
     AdminModule,
+    GamificacionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
