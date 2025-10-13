@@ -1,4 +1,3 @@
-// @ts-nocheck - Complex Prisma types, runtime works correctly
 import {
   Controller,
   Get,
@@ -8,38 +7,40 @@ import {
   Param,
   Body,
   UseGuards,
-  Request,
   Query,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { ClasesService } from './clases.service';
 import { CrearClaseDto } from './dto/crear-clase.dto';
 import { ReservarClaseDto } from './dto/reservar-clase.dto';
 import { RegistrarAsistenciaDto } from './dto/registrar-asistencia.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { GetUser } from '../auth/decorators/get-user.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Role, Roles } from '../auth/decorators/roles.decorator';
 
 interface AuthenticatedRequest extends Request {
   user: {
     id: string;
     email: string;
-    role: string;
+    role: Role;
   };
 }
 
 @Controller('clases')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ClasesController {
   constructor(private readonly clasesService: ClasesService) {}
 
   // ==================== ENDPOINTS PARA ADMIN ====================
 
   /**
-   * Programar una nueva clase (Admin)
+   * Programar una nueva clase (Solo Admin)
    * POST /api/clases
-   */
+  */
   @Post()
-  async programarClase(@Body() dto: CrearClaseDto, @Request() req) {
-    // TODO: Add RolesGuard to restrict to Admin only
+  @Roles(Role.Admin)
+  async programarClase(@Body() dto: CrearClaseDto) {
     return this.clasesService.programarClase(dto);
   }
 
@@ -48,6 +49,7 @@ export class ClasesController {
    * GET /api/clases/admin/todas
    */
   @Get('admin/todas')
+  @Roles(Role.Admin)
   async listarTodasLasClases(
     @Query('fechaDesde') fechaDesde?: string,
     @Query('fechaHasta') fechaHasta?: string,
@@ -55,7 +57,6 @@ export class ClasesController {
     @Query('docenteId') docenteId?: string,
     @Query('rutaCurricularId') rutaCurricularId?: string,
   ) {
-    // TODO: Add RolesGuard to restrict to Admin only
     return this.clasesService.listarTodasLasClases({
       fechaDesde: fechaDesde ? new Date(fechaDesde) : undefined,
       fechaHasta: fechaHasta ? new Date(fechaHasta) : undefined,
@@ -70,9 +71,13 @@ export class ClasesController {
    * PATCH /api/clases/:id/cancelar
    */
   @Patch(':id/cancelar')
-  async cancelarClase(@Param('id') id: string, @Request() req) {
+  @Roles(Role.Admin, Role.Docente)
+  async cancelarClase(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
     const userId = req.user.id;
-    const userRole = req.user.role; // Asumiendo que el JWT incluye el rol
+    const userRole = req.user.role;
     return this.clasesService.cancelarClase(id, userId, userRole);
   }
 
@@ -83,7 +88,8 @@ export class ClasesController {
    * GET /api/clases
    */
   @Get()
-  async listarClasesParaTutor(@Request() req) {
+  @Roles(Role.Tutor)
+  async listarClasesParaTutor(@Req() req: AuthenticatedRequest) {
     const tutorId = req.user.id;
     return this.clasesService.listarClasesParaTutor(tutorId);
   }
@@ -93,10 +99,11 @@ export class ClasesController {
    * POST /api/clases/:id/reservar
    */
   @Post(':id/reservar')
+  @Roles(Role.Tutor)
   async reservarClase(
     @Param('id') claseId: string,
     @Body() dto: ReservarClaseDto,
-    @Request() req,
+    @Req() req: AuthenticatedRequest,
   ) {
     const tutorId = req.user.id;
     return this.clasesService.reservarClase(claseId, tutorId, dto);
@@ -107,7 +114,11 @@ export class ClasesController {
    * DELETE /api/clases/reservas/:id
    */
   @Delete('reservas/:id')
-  async cancelarReserva(@Param('id') inscripcionId: string, @Request() req) {
+  @Roles(Role.Tutor)
+  async cancelarReserva(
+    @Param('id') inscripcionId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
     const tutorId = req.user.id;
     return this.clasesService.cancelarReserva(inscripcionId, tutorId);
   }
@@ -119,8 +130,9 @@ export class ClasesController {
    * GET /api/clases/docente/mis-clases
    */
   @Get('docente/mis-clases')
+  @Roles(Role.Docente)
   async listarClasesDeDocente(
-    @Request() req,
+    @Req() req: AuthenticatedRequest,
     @Query('incluirPasadas') incluirPasadas?: string,
   ) {
     const docenteId = req.user.id;
@@ -135,10 +147,11 @@ export class ClasesController {
    * POST /api/clases/:id/asistencia
    */
   @Post(':id/asistencia')
+  @Roles(Role.Docente)
   async registrarAsistencia(
     @Param('id') claseId: string,
     @Body() dto: RegistrarAsistenciaDto,
-    @Request() req,
+    @Req() req: AuthenticatedRequest,
   ) {
     const docenteId = req.user.id;
     return this.clasesService.registrarAsistencia(claseId, docenteId, dto);
@@ -151,6 +164,7 @@ export class ClasesController {
    * GET /api/clases/:id
    */
   @Get(':id')
+  @Roles(Role.Admin, Role.Docente, Role.Tutor)
   async obtenerClase(@Param('id') id: string) {
     return this.clasesService.obtenerClase(id);
   }
@@ -160,6 +174,7 @@ export class ClasesController {
    * GET /api/clases/rutas-curriculares
    */
   @Get('metadata/rutas-curriculares')
+  @Roles(Role.Admin, Role.Docente, Role.Tutor)
   async listarRutasCurriculares() {
     return this.clasesService.listarRutasCurriculares();
   }

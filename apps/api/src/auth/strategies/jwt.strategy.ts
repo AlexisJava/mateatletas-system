@@ -71,6 +71,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           updatedAt: true,
         },
       });
+    } else if (role === 'admin') {
+      user = await this.prisma.admin.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          nombre: true,
+          apellido: true,
+          fecha_registro: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
     } else {
       // Por defecto buscar como tutor
       user = await this.prisma.tutor.findUnique({

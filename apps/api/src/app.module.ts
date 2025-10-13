@@ -11,6 +11,7 @@ import { CatalogoModule } from './catalogo/catalogo.module';
 import { PagosModule } from './pagos/pagos.module';
 import { ClasesModule } from './clases/clases.module';
 import { AsistenciaModule } from './asistencia/asistencia.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AsistenciaModule } from './asistencia/asistencia.module';
     PagosModule,
     ClasesModule,
     AsistenciaModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

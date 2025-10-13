@@ -269,7 +269,22 @@ echo -e "\n============================================================"
 echo "📍 SLICE #7: CLASES Y RESERVAS"
 echo "============================================================"
 
-echo -e "\n1️⃣ Listando rutas curriculares..."
+echo -e "\n1️⃣ Login como Admin para crear clases..."
+# Usar admin de seed (email: admin@mateatletas.com, password: Admin123!)
+ADMIN_LOGIN=$(curl -s -X POST "$BASE_URL/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@mateatletas.com", "password": "Admin123!"}')
+
+ADMIN_TOKEN=$(echo $ADMIN_LOGIN | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+
+if [ ! -z "$ADMIN_TOKEN" ]; then
+  echo "✅ Admin autenticado"
+else
+  echo "⚠️ No se pudo autenticar como admin - intentando crear clase con tutor"
+  ADMIN_TOKEN=$TOKEN
+fi
+
+echo -e "\n2️⃣ Listando rutas curriculares..."
 RUTAS=$(curl -s -X GET "$BASE_URL/clases/metadata/rutas-curriculares" \
   -H "Authorization: Bearer $TOKEN")
 
@@ -283,11 +298,11 @@ else
   ERRORS=$((ERRORS + 1))
 fi
 
-echo -e "\n2️⃣ Programando clase (como admin/tutor)..."
+echo -e "\n3️⃣ Programando clase (como Admin)..."
 TOMORROW=$(date -d "tomorrow 10:00" -u +"%Y-%m-%dT%H:%M:%S.000Z" 2>/dev/null || date -v+1d -u +"%Y-%m-%dT10:00:00.000Z")
 
 CLASE=$(curl -s -X POST "$BASE_URL/clases" \
-  -H "Authorization: Bearer $TOKEN" \
+  -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d "{
     \"rutaCurricularId\": \"$RUTA_ID\",
@@ -307,7 +322,7 @@ else
   CLASE_ID=$(echo $CLASES_DISP | grep -o '"id":"[^"]*' | head -1 | cut -d'"' -f4)
 fi
 
-echo -e "\n3️⃣ Reservando cupo para María..."
+echo -e "\n4️⃣ Reservando cupo para María (como tutor)..."
 RESERVA=$(curl -s -X POST "$BASE_URL/clases/$CLASE_ID/reservar" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -326,7 +341,7 @@ else
   ERRORS=$((ERRORS + 1))
 fi
 
-echo -e "\n4️⃣ Verificando clase con inscripción..."
+echo -e "\n5️⃣ Verificando clase con inscripción..."
 DETALLE=$(curl -s -X GET "$BASE_URL/clases/$CLASE_ID" \
   -H "Authorization: Bearer $TOKEN")
 

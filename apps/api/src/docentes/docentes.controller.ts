@@ -13,6 +13,8 @@ import { CreateDocenteDto } from './dto/create-docente.dto';
 import { UpdateDocenteDto } from './dto/update-docente.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Role, Roles } from '../auth/decorators/roles.decorator';
 
 /**
  * Controller para endpoints de docentes
@@ -20,7 +22,7 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
  * Incluye endpoints para Admin y para Docentes (self-service)
  */
 @Controller('docentes')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class DocentesController {
   constructor(private readonly docentesService: DocentesService) {}
 
@@ -30,7 +32,7 @@ export class DocentesController {
    * @returns Docente creado
    */
   @Post()
-  // TODO: Agregar @Roles('Admin') cuando el guard esté implementado
+  @Roles(Role.Admin)
   async create(@Body() createDto: CreateDocenteDto) {
     return this.docentesService.create(createDto);
   }
@@ -40,7 +42,7 @@ export class DocentesController {
    * @returns Lista de docentes
    */
   @Get()
-  // TODO: Agregar @Roles('Admin') cuando el guard esté implementado
+  @Roles(Role.Admin)
   async findAll() {
     return this.docentesService.findAll();
   }
@@ -51,7 +53,7 @@ export class DocentesController {
    * @returns Perfil del docente
    */
   @Get('me')
-  // TODO: Agregar @Roles('Docente') cuando el guard esté implementado
+  @Roles(Role.Docente)
   async getProfile(@GetUser() user: any) {
     return this.docentesService.findById(user.id);
   }
@@ -63,7 +65,7 @@ export class DocentesController {
    * @returns Docente actualizado
    */
   @Patch('me')
-  // TODO: Agregar @Roles('Docente') cuando el guard esté implementado
+  @Roles(Role.Docente)
   async updateProfile(
     @GetUser() user: any,
     @Body() updateDto: UpdateDocenteDto,
@@ -77,7 +79,7 @@ export class DocentesController {
    * @returns Docente encontrado
    */
   @Get(':id')
-  // TODO: Agregar @Roles('Admin') cuando el guard esté implementado
+  @Roles(Role.Admin)
   async findOne(@Param('id') id: string) {
     return this.docentesService.findById(id);
   }
@@ -89,7 +91,7 @@ export class DocentesController {
    * @returns Docente actualizado
    */
   @Patch(':id')
-  // TODO: Agregar @Roles('Admin') cuando el guard esté implementado
+  @Roles(Role.Admin)
   async update(@Param('id') id: string, @Body() updateDto: UpdateDocenteDto) {
     return this.docentesService.update(id, updateDto);
   }
@@ -100,7 +102,7 @@ export class DocentesController {
    * @returns Mensaje de confirmación
    */
   @Delete(':id')
-  // TODO: Agregar @Roles('Admin') cuando el guard esté implementado
+  @Roles(Role.Admin)
   async remove(@Param('id') id: string) {
     return this.docentesService.remove(id);
   }

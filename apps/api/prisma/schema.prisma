@@ -119,6 +119,9 @@ model Estudiante {
   /// Relación con registros de asistencia
   asistencias Asistencia[]
 
+  /// Relación con alertas administrativas
+  alertas Alerta[]
+
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
 
@@ -198,6 +201,37 @@ model Docente {
 
   /// Mapeo al nombre de tabla en la base de datos
   @@map("docentes")
+}
+
+/// Modelo para administradores del sistema
+/// Tienen acceso completo al dashboard administrativo
+model Admin {
+  /// Identificador único del admin (CUID)
+  id String @id @default(cuid())
+
+  /// Email único del admin - usado para autenticación
+  email String @unique
+
+  /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
+  password_hash String
+
+  /// Nombre del admin
+  nombre String
+
+  /// Apellido del admin
+  apellido String
+
+  /// Fecha en que el admin fue creado
+  fecha_registro DateTime @default(now())
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("admins")
 }
 
 /// Enum para tipos de productos disponibles
@@ -461,6 +495,9 @@ model Clase {
   /// Relación con registros de asistencia
   asistencias Asistencia[]
 
+  /// Relación con alertas administrativas
+  alertas Alerta[]
+
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
 
@@ -579,4 +616,54 @@ model Asistencia {
 
   /// Índice para búsquedas por estado
   @@index([estado])
+}
+
+// ============================================================================
+// SLICE #9: ADMIN COPILOT - ALERTAS
+// ============================================================================
+
+/// Modelo para alertas administrativas generadas desde observaciones de docentes
+/// Permite al admin detectar y resolver situaciones que requieren atención
+model Alerta {
+  /// Identificador único de la alerta
+  id String @id @default(cuid())
+
+  /// ID del estudiante relacionado con la alerta
+  estudiante_id String
+
+  /// Relación con el estudiante
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  /// ID de la clase donde se generó la alerta
+  clase_id String
+
+  /// Relación con la clase
+  clase Clase @relation(fields: [clase_id], references: [id], onDelete: Cascade)
+
+  /// Descripción de la alerta (observaciones del docente)
+  descripcion String
+
+  /// Fecha de creación de la alerta
+  fecha DateTime @default(now())
+
+  /// Indica si la alerta ha sido resuelta
+  resuelta Boolean @default(false)
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("alertas")
+
+  /// Índice para búsquedas por estudiante
+  @@index([estudiante_id])
+
+  /// Índice para búsquedas por estado de resolución
+  @@index([resuelta])
+
+  /// Índice para búsquedas por fecha
+  @@index([fecha])
 }

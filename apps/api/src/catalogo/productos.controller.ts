@@ -14,6 +14,8 @@ import { CrearProductoDto } from './dto/crear-producto.dto';
 import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TipoProducto } from '@prisma/client';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Role, Roles } from '../auth/decorators/roles.decorator';
 
 /**
  * Controller para gestionar productos del catálogo
@@ -78,7 +80,8 @@ export class ProductosController {
    * TODO: Agregar guard de rol Admin
    */
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
   async create(@Body() createDto: CrearProductoDto) {
     return this.productosService.create(createDto);
   }
@@ -90,7 +93,8 @@ export class ProductosController {
    * TODO: Agregar guard de rol Admin
    */
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
   async update(
     @Param('id') id: string,
     @Body() updateDto: ActualizarProductoDto,
@@ -109,7 +113,8 @@ export class ProductosController {
    * - hardDelete: 'true' para eliminación permanente
    */
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
   async remove(
     @Param('id') id: string,
     @Query('hardDelete') hardDelete?: string,

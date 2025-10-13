@@ -9,6 +9,7 @@ import { PrismaService } from '../core/database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+import { Role } from './decorators/roles.decorator';
 
 /**
  * Servicio de autenticación para tutores
@@ -73,12 +74,15 @@ export class AuthService {
 
     return {
       message: 'Tutor registrado exitosamente',
-      user: tutor,
+      user: {
+        ...tutor,
+        role: Role.Tutor,
+      },
     };
   }
 
   /**
-   * Autentica un usuario (tutor o docente)
+   * Autentica un usuario (tutor, docente o admin)
    * @param loginDto - Credenciales del usuario
    * @returns Token JWT y datos del usuario
    * @throws UnauthorizedException si las credenciales son inválidas
@@ -101,7 +105,15 @@ export class AuthService {
       role = 'docente';
     }
 
-    // 3. Verificar que el usuario exista
+    // 3. Si no es docente, buscar como admin
+    if (!user) {
+      user = await this.prisma.admin.findUnique({
+        where: { email },
+      });
+      role = 'admin';
+    }
+
+    // 4. Verificar que el usuario exista
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -132,7 +144,7 @@ export class AuthService {
           role: 'tutor',
         },
       };
-    } else {
+    } else if (role === 'docente') {
       return {
         access_token: accessToken,
         user: {
@@ -143,6 +155,18 @@ export class AuthService {
           titulo: user.titulo,
           bio: user.bio,
           role: 'docente',
+        },
+      };
+    } else {
+      return {
+        access_token: accessToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          fecha_registro: user.fecha_registro,
+          role: 'admin',
         },
       };
     }
@@ -190,7 +214,58 @@ export class AuthService {
    * @returns Datos del tutor (sin password_hash)
    * @throws NotFoundException si el tutor no existe
    */
-  async getProfile(userId: string) {
+  async getProfile(userId: string, role: string) {
+    const normalizedRole = (role as Role) ?? Role.Tutor;
+
+    if (normalizedRole === Role.Docente) {
+      const docente = await this.prisma.docente.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          nombre: true,
+          apellido: true,
+          titulo: true,
+          bio: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!docente) {
+        throw new NotFoundException('Docente no encontrado');
+      }
+
+      return {
+        ...docente,
+        role: Role.Docente,
+      };
+    }
+
+    if (normalizedRole === Role.Admin) {
+      const admin = await this.prisma.admin.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          nombre: true,
+          apellido: true,
+          fecha_registro: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!admin) {
+        throw new NotFoundException('Admin no encontrado');
+      }
+
+      return {
+        ...admin,
+        role: Role.Admin,
+      };
+    }
+
     const tutor = await this.prisma.tutor.findUnique({
       where: { id: userId },
       select: {
@@ -212,7 +287,10 @@ export class AuthService {
       throw new NotFoundException('Tutor no encontrado');
     }
 
-    return tutor;
+    return {
+      ...tutor,
+      role: Role.Tutor,
+    };
   }
 
   /**

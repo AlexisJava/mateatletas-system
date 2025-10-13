@@ -68,12 +68,12 @@ export class AuthController {
    * @returns 200 OK - Datos completos del tutor (sin password_hash)
    * @throws 401 Unauthorized - Token JWT inválido o no proporcionado
    * @throws 404 Not Found - Tutor no encontrado en la base de datos
-   */
+  */
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async getProfile(@GetUser('id') userId: string) {
-    return this.authService.getProfile(userId);
+  async getProfile(@GetUser() user: any) {
+    return this.authService.getProfile(user.id, user.role);
   }
 
   /**
