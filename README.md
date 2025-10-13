@@ -4,7 +4,7 @@ Monorepo para la plataforma Mateatletas, construido con Turborepo.
 
 ## 📋 Estado del Proyecto
 
-**Fase Actual:** 7 Slices Implementados y Testeados
+**Fase Actual:** 8 Slices Implementados y Testeados
 **Estado:** ✅ Producción Ready (Backend API)
 
 ### Slices Completados
@@ -18,6 +18,7 @@ Monorepo para la plataforma Mateatletas, construido con Turborepo.
 | 5 | Catálogo de Productos | ✅ | ✅ |
 | 6 | Pagos (MercadoPago) | ✅ | ✅ |
 | 7 | Clases y Reservas | ✅ | ✅ |
+| 8 | **Asistencia** | ✅ | ✅ |
 
 ## 🚀 Inicio Rápido
 
@@ -70,6 +71,7 @@ npm run dev:web
 ./tests/scripts/test-catalogo.sh
 ./tests/scripts/test-clases-simple.sh
 ./tests/scripts/test-pagos-simple.sh
+./tests/scripts/test-asistencia.sh
 ```
 
 Ver documentación completa: [docs/testing/TESTING_SUMMARY.md](docs/testing/TESTING_SUMMARY.md)
