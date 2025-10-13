@@ -10,6 +10,7 @@ import { DocentesModule } from './docentes/docentes.module';
 import { CatalogoModule } from './catalogo/catalogo.module';
 import { PagosModule } from './pagos/pagos.module';
 import { ClasesModule } from './clases/clases.module';
+import { AsistenciaModule } from './asistencia/asistencia.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ClasesModule } from './clases/clases.module';
     CatalogoModule,
     PagosModule,
     ClasesModule,
+    AsistenciaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

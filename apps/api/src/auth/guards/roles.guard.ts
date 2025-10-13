@@ -40,9 +40,13 @@ export class RolesGuard implements CanActivate {
     }
 
     // Verificar si el usuario tiene alguno de los roles requeridos
-    // El campo 'role' no está en el modelo Tutor de Prisma, pero está en el payload JWT
-    // Por lo tanto, verificamos si el usuario es de tipo 'tutor' (el único rol actual)
-    // En el futuro, si agregamos más roles al sistema, esta lógica se expandirá
-    return requiredRoles.some((role) => role === Role.TUTOR);
+    // El campo 'role' viene del payload JWT y se agrega al user object
+    const userRole = user.role;
+
+    if (!userRole) {
+      return false;
+    }
+
+    return requiredRoles.some((role) => role === userRole);
   }
 }
