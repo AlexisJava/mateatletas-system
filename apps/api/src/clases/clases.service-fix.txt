@@ -1,0 +1,6 @@
+Línea 210: .forEach((estudiante) => {
+Línea 211: estudiante.inscripciones_curso.forEach((inscripcion) => {
+Línea 369: .some((insc) => insc.producto_id === clase.producto_id)
+Línea 396: await this.prisma.$transaction(async (tx) => {
+Línea 462: await this.prisma.$transaction(async (tx) => {
+Línea 508: clase.inscripciones.map((i) => i.estudiante_id)

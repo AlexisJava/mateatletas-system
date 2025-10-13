@@ -30,7 +30,8 @@ export class CreateEquipoDto {
   @IsString()
   @IsNotEmpty({ message: 'El color primario es requerido' })
   @Matches(/^#[0-9A-F]{6}$/i, {
-    message: 'El color primario debe ser un código hexadecimal válido (ej: #FF6B35)',
+    message:
+      'El color primario debe ser un código hexadecimal válido (ej: #FF6B35)',
   })
   color_primario!: string;
 

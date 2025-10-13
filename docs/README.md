@@ -4,110 +4,122 @@ Bienvenido a la documentación completa del proyecto Mateatletas.
 
 ---
 
-## 🗂️ Índice de Documentación
+## 🗂️ Estructura de Documentación
 
-### 📄 Documentos Principales (Raíz del Proyecto)
-
-| Documento | Descripción | Última Actualización |
-|-----------|-------------|---------------------|
-| [CHECKPOINT_FASE_0.md](../CHECKPOINT_FASE_0.md) | Setup inicial del monorepo | 2025-10-12 |
-| [CHECKPOINT_FASE_1.md](../CHECKPOINT_FASE_1.md) | Sistema de autenticación completo | 2025-10-12 |
-| [QUICK_START.md](../QUICK_START.md) | Guía de inicio rápido | 2025-10-12 |
-| [SESSION_SUMMARY.md](../SESSION_SUMMARY.md) | Resumen de la sesión de desarrollo | 2025-10-12 |
-| [GITHUB_SETUP.md](../GITHUB_SETUP.md) | Configuración de GitHub | 2025-10-12 |
-
-### 🏗️ Arquitectura (docs/)
-
-| Documento | Descripción |
-|-----------|-------------|
-| [ARCHITECTURE_FASE_1.md](./ARCHITECTURE_FASE_1.md) | Arquitectura detallada con diagramas |
-
-### 🎯 Guías de Construcción (docs/)
-
-| Documento | Descripción |
-|-----------|-------------|
-| [guia-de-construccion.md](./guia-de-construccion.md) | Guía general de construcción |
-| [manual-construccion-diseno-fases.md](./manual-construccion-diseno-fases.md) | Manual de diseño por fases |
-| [frontend-arquitectura.md](./frontend-arquitectura.md) | Arquitectura del frontend |
-| [slice-1.md](./slice-1.md) | Documentación del slice 1 |
-
-### 🔐 Backend - Auth Module (apps/api/)
-
-| Documento | Descripción |
-|-----------|-------------|
-| [apps/api/src/auth/README.md](../apps/api/src/auth/README.md) | Módulo de autenticación |
-| [apps/api/CURL_EXAMPLES.md](../apps/api/CURL_EXAMPLES.md) | Ejemplos de uso con cURL |
-
-### 🎨 Frontend (apps/web/)
-
-| Documento | Descripción |
-|-----------|-------------|
-| [apps/web/src/lib/README.md](../apps/web/src/lib/README.md) | Cliente Axios y API |
-| [apps/web/src/store/README.md](../apps/web/src/store/README.md) | Store Zustand de autenticación |
+```
+docs/
+├── api-specs/        # Especificaciones de endpoints y módulos
+├── architecture/     # Diagramas y documentación de arquitectura
+├── development/      # Guías de desarrollo y setup
+├── slices/          # Documentación por vertical slice
+├── testing/         # Resultados y guías de testing
+├── archived/        # Documentos históricos
+└── README.md        # Este archivo
+```
 
 ---
 
-## 🚀 Por Dónde Empezar
+## 🎯 Inicio Rápido
 
 ### Para Nuevos Desarrolladores
 
-1. **Lee primero**: [QUICK_START.md](../QUICK_START.md)
-2. **Entiende el setup**: [CHECKPOINT_FASE_0.md](../CHECKPOINT_FASE_0.md)
-3. **Revisa la arquitectura**: [ARCHITECTURE_FASE_1.md](./ARCHITECTURE_FASE_1.md)
-4. **Explora el código**: Empieza por los componentes UI en `/apps/web/src/components/ui/`
+1. **Lee primero**: [development/QUICK_START.md](development/QUICK_START.md)
+2. **Setup inicial**: [development/setup_inicial.md](development/setup_inicial.md)
+3. **Arquitectura**: [architecture/ARCHITECTURE_FASE_1.md](architecture/ARCHITECTURE_FASE_1.md)
+4. **Testing**: [testing/TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md)
 
-### Para Trabajar con Auth
+### Para Trabajar con APIs
 
-1. **Backend**: [apps/api/src/auth/README.md](../apps/api/src/auth/README.md)
-2. **Frontend**: [apps/web/src/store/README.md](../apps/web/src/store/README.md)
-3. **Ejemplos**: [apps/api/CURL_EXAMPLES.md](../apps/api/CURL_EXAMPLES.md)
-
-### Para Entender la Fase Actual
-
-1. **Estado del proyecto**: [CHECKPOINT_FASE_1.md](../CHECKPOINT_FASE_1.md)
-2. **Resumen de sesión**: [SESSION_SUMMARY.md](../SESSION_SUMMARY.md)
+1. **Autenticación**: [api-specs/Autenticacion.md](api-specs/Autenticacion.md)
+2. **Estudiantes**: [api-specs/estudiantes.md](api-specs/estudiantes.md)
+3. **Docentes**: [api-specs/docentes.md](api-specs/docentes.md)
+4. **Ver todos**: [api-specs/](api-specs/)
 
 ---
 
-## 📋 Fases del Proyecto
+## 📋 Documentos por Categoría
 
-### ✅ Fase 0: Setup Inicial
-**Estado**: Completado
-- Configuración del monorepo con Turborepo
-- Setup de NestJS y Next.js
-- Configuración de PostgreSQL con Docker
-- Setup de Prisma
+### 🏗️ Arquitectura
 
-**Documento**: [CHECKPOINT_FASE_0.md](../CHECKPOINT_FASE_0.md)
+| Documento | Descripción |
+|-----------|-------------|
+| [arquitectura-de-software.md](architecture/arquitectura-de-software.md) | Arquitectura general del sistema |
+| [ARCHITECTURE_FASE_1.md](architecture/ARCHITECTURE_FASE_1.md) | Arquitectura detallada Fase 1 |
+| [frontend-arquitectura.md](architecture/frontend-arquitectura.md) | Arquitectura del frontend Next.js |
+| [documento-tecnico-del-backend.md](architecture/documento-tecnico-del-backend.md) | Especificaciones técnicas del backend |
+| [design-system.md](architecture/design-system.md) | Sistema de diseño y componentes |
+| [context.md](architecture/context.md) | Contexto general del proyecto |
 
-### ✅ Fase 1: Sistema de Autenticación
-**Estado**: Completado
-- Modelo Tutor en Prisma
-- Módulo Auth completo (NestJS)
-- Guards, Strategies, Decorators
-- Cliente Axios con interceptors
-- Store Zustand con persist
-- Componentes UI (Button, Input, Card)
-- 4 endpoints funcionales
+### 🔧 Desarrollo
 
-**Documentos**:
-- [CHECKPOINT_FASE_1.md](../CHECKPOINT_FASE_1.md) - Detalles completos
-- [ARCHITECTURE_FASE_1.md](./ARCHITECTURE_FASE_1.md) - Diagramas y flujos
-- [SESSION_SUMMARY.md](../SESSION_SUMMARY.md) - Resumen ejecutivo
+| Documento | Descripción |
+|-----------|-------------|
+| [QUICK_START.md](development/QUICK_START.md) | Guía de inicio rápido |
+| [setup_inicial.md](development/setup_inicial.md) | Configuración inicial paso a paso |
+| [guia-de-construccion.md](development/guia-de-construccion.md) | Guía general de construcción |
+| [manual-construccion-diseno-fases.md](development/manual-construccion-diseno-fases.md) | Manual de diseño por fases |
+| [prisma-schema-unificado.md](development/prisma-schema-unificado.md) | Documentación del schema de Prisma |
+| [CONTRIBUTING.md](development/CONTRIBUTING.md) | Guía de contribución |
+| [DEVELOPMENT.md](development/DEVELOPMENT.md) | Guía de desarrollo |
+| [GITHUB_SETUP.md](development/GITHUB_SETUP.md) | Configuración de GitHub |
 
-### 🔄 Fase 2: Páginas de Autenticación (TODO)
-**Estado**: Pendiente
-- Página de login
-- Página de registro
-- Dashboard protegido
-- Navbar con estado de auth
-- Middleware de protección de rutas
+### 📡 API Specs
 
-### 🔮 Fases Futuras
-- Fase 3: Gestión de Atletas
-- Fase 4: Sistema de Ejercicios
-- Fase 5: Planes de Entrenamiento
-- Fase 6: Dashboard de Progreso
+| Módulo | Documento |
+|--------|-----------|
+| **Auth** | [Autenticacion.md](api-specs/Autenticacion.md) |
+| **Tutores** | [tutores.md](api-specs/tutores.md) |
+| **Estudiantes** | [estudiantes.md](api-specs/estudiantes.md) |
+| **Docentes** | [docentes.md](api-specs/docentes.md) |
+| **Catálogo** | [catalogo.md](api-specs/catalogo.md) |
+| **Clases** | [clases.md](api-specs/clases.md) |
+| **Reservas** | [reserva_clase.md](api-specs/reserva_clase.md) |
+| **Asistencia** | [asistencia.md](api-specs/asistencia.md) |
+| **Pagos** | [pagos.md](api-specs/pagos.md) |
+| **Gamificación** | [gamificacion_puntos_logros.md](api-specs/gamificacion_puntos_logros.md) |
+| **Admin** | [admin_copiloto.md](api-specs/admin_copiloto.md) |
+
+### 📦 Slices Implementados
+
+| Slice | Documento | Estado |
+|-------|-----------|--------|
+| #1 | [slice-1.md](slices/slice-1.md) | ✅ Completado |
+| #2 | [slice-2.md](slices/slice-2.md) | ✅ Completado |
+| #6 | [SLICE_6_PAGOS_SUMMARY.md](slices/SLICE_6_PAGOS_SUMMARY.md) | ✅ Completado |
+
+### 🧪 Testing
+
+| Documento | Descripción |
+|-----------|-------------|
+| [TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md) | Resumen completo de todos los tests |
+
+Ver también: [../tests/README.md](../tests/README.md) para scripts de testing
+
+---
+
+## 🚀 Estado del Proyecto
+
+### ✅ Slices Completados (7/10)
+
+| # | Slice | Estado | Tests | Documentación |
+|---|-------|--------|-------|---------------|
+| 1 | Autenticación (JWT) | ✅ | ✅ | [Autenticacion.md](api-specs/Autenticacion.md) |
+| 2 | Estudiantes (CRUD) | ✅ | ✅ | [estudiantes.md](api-specs/estudiantes.md) |
+| 3 | Equipos (Gamificación) | ✅ | ✅ | [gamificacion_puntos_logros.md](api-specs/gamificacion_puntos_logros.md) |
+| 4 | Docentes | ✅ | ✅ | [docentes.md](api-specs/docentes.md) |
+| 5 | Catálogo de Productos | ✅ | ✅ | [catalogo.md](api-specs/catalogo.md) |
+| 6 | Pagos (MercadoPago) | ✅ | ✅ | [pagos.md](api-specs/pagos.md) |
+| 7 | Clases y Reservas | ✅ | ✅ | [clases.md](api-specs/clases.md) |
+
+### 🔜 Próximos Slices
+
+| # | Slice | Estado | Documentación |
+|---|-------|--------|---------------|
+| 8 | Sistema de Asistencia | 📋 Planificado | [asistencia.md](api-specs/asistencia.md) |
+| 9 | Reserva de Clase | 📋 Planificado | [reserva_clase.md](api-specs/reserva_clase.md) |
+| 10 | Admin Copilot | 📋 Planificado | [admin_copiloto.md](api-specs/admin_copiloto.md) |
+
+Ver detalles completos: [testing/TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md)
 
 ---
 
@@ -115,126 +127,112 @@ Bienvenido a la documentación completa del proyecto Mateatletas.
 
 ### ¿Cómo hacer...?
 
-- **Registrar un usuario**: Ver [CURL_EXAMPLES.md](../apps/api/CURL_EXAMPLES.md)
-- **Usar componentes UI**: Ver [ComponentShowcase.tsx](../apps/web/src/components/ui/ComponentShowcase.tsx)
-- **Proteger una ruta**: Ver [auth/README.md](../apps/api/src/auth/README.md)
-- **Usar el store de auth**: Ver [store/README.md](../apps/web/src/store/README.md)
-- **Ejecutar migraciones**: Ver [QUICK_START.md](../QUICK_START.md)
+- **Setup inicial**: [development/setup_inicial.md](development/setup_inicial.md)
+- **Ejecutar tests**: [testing/TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md)
+- **Usar una API**: Ver [api-specs/](api-specs/)
+- **Contribuir**: [development/CONTRIBUTING.md](development/CONTRIBUTING.md)
+- **Entender arquitectura**: [architecture/ARCHITECTURE_FASE_1.md](architecture/ARCHITECTURE_FASE_1.md)
 
 ### ¿Dónde está...?
 
-- **Backend**: `apps/api/src/`
-- **Frontend**: `apps/web/src/`
-- **Componentes UI**: `apps/web/src/components/ui/`
-- **Documentación**: `docs/` y raíz del proyecto
-- **Migraciones**: `apps/api/prisma/migrations/`
+- **Código Backend**: `../apps/api/src/`
+- **Código Frontend**: `../apps/web/src/`
+- **Tests**: `../tests/scripts/`
+- **Migraciones**: `../apps/api/prisma/migrations/`
+- **Docs de módulos**: En subcarpetas de `../apps/api/src/`
+
+---
+
+## 📊 Documentos Archivados
+
+Documentos históricos que ya no son relevantes pero se mantienen para referencia:
+
+- [archived/AUDITORIA_COMPLETA.md](archived/AUDITORIA_COMPLETA.md)
+- [archived/FIXES_APPLIED.md](archived/FIXES_APPLIED.md)
+- [archived/TECHNICAL_DEBT.md](archived/TECHNICAL_DEBT.md)
+- [archived/TECHNICAL_DEBT_RESOLVED.md](archived/TECHNICAL_DEBT_RESOLVED.md)
+- [archived/INFORME_LIMPIEZA.md](archived/INFORME_LIMPIEZA.md)
+- [archived/PLAN_MAESTRO_DEFINITIVO.md](archived/PLAN_MAESTRO_DEFINITIVO.md)
 
 ---
 
 ## 🛠️ Comandos Rápidos
 
 ```bash
-# Ver esta documentación
-cat docs/README.md
+# Ver documentación de testing
+cat docs/testing/TESTING_SUMMARY.md
 
-# Iniciar desarrollo
-npm run dev
+# Ver especificaciones de API
+ls docs/api-specs/
 
-# Build completo
-npm run build
-
-# Ver showcase de componentes
-# http://localhost:3000/showcase
+# Ejecutar tests
+cd tests/scripts && ./test-integration-full.sh
 
 # Ver guía rápida
-cat QUICK_START.md
+cat docs/development/QUICK_START.md
 
-# Ver arquitectura detallada
-cat docs/ARCHITECTURE_FASE_1.md
-```
-
----
-
-## 📊 Estructura del Proyecto
-
-```
-Mateatletas-Ecosystem/
-├── docs/                          ← Esta carpeta
-│   ├── README.md                  ← Este archivo
-│   ├── ARCHITECTURE_FASE_1.md     ← Diagramas y flujos
-│   ├── guia-de-construccion.md
-│   ├── manual-construccion-diseno-fases.md
-│   ├── frontend-arquitectura.md
-│   └── slice-1.md
-│
-├── apps/
-│   ├── api/                       ← Backend NestJS
-│   │   ├── src/
-│   │   │   └── auth/              ← Módulo de autenticación
-│   │   │       └── README.md      ← Doc del módulo
-│   │   ├── prisma/
-│   │   │   └── schema.prisma
-│   │   └── CURL_EXAMPLES.md       ← Ejemplos de API
-│   │
-│   └── web/                       ← Frontend Next.js
-│       └── src/
-│           ├── components/ui/     ← Componentes reutilizables
-│           ├── lib/               ← Axios y API client
-│           │   └── README.md      ← Doc de lib
-│           └── store/             ← Estado global
-│               └── README.md      ← Doc de store
-│
-├── CHECKPOINT_FASE_0.md           ← Setup inicial
-├── CHECKPOINT_FASE_1.md           ← Fase 1 completa
-├── QUICK_START.md                 ← Guía rápida
-└── SESSION_SUMMARY.md             ← Resumen de sesión
+# Ver arquitectura
+cat docs/architecture/ARCHITECTURE_FASE_1.md
 ```
 
 ---
 
 ## 📚 Recursos Externos
 
-### Tecnologías Utilizadas
-
+### Tecnologías Backend
 - **NestJS**: https://docs.nestjs.com/
-- **Next.js**: https://nextjs.org/docs
 - **Prisma**: https://www.prisma.io/docs
-- **Zustand**: https://zustand-demo.pmnd.rs/
-- **Tailwind CSS**: https://tailwindcss.com/docs
-- **Turborepo**: https://turbo.build/repo/docs
-
-### Librerías de Auth
-
 - **Passport.js**: https://www.passportjs.org/
 - **JWT**: https://jwt.io/
-- **bcrypt**: https://www.npmjs.com/package/bcrypt
+
+### Tecnologías Frontend
+- **Next.js**: https://nextjs.org/docs
+- **Tailwind CSS**: https://tailwindcss.com/docs
+- **Zustand**: https://zustand-demo.pmnd.rs/
+
+### DevOps
+- **Turborepo**: https://turbo.build/repo/docs
+- **Docker**: https://docs.docker.com/
 
 ---
 
-## 🤝 Contribuir
+## 🤝 Contribuir a la Documentación
 
 ### Agregar Nueva Documentación
 
-1. Crea el archivo en la carpeta apropiada (`docs/` o raíz)
-2. Actualiza este `README.md` con el nuevo enlace
-3. Usa formato Markdown consistente
-4. Incluye fecha de última actualización
+1. Determina la categoría apropiada:
+   - `api-specs/` - Especificaciones de endpoints
+   - `architecture/` - Documentación de arquitectura
+   - `development/` - Guías de desarrollo
+   - `slices/` - Documentación de slices
+   - `testing/` - Testing y QA
 
-### Actualizar Documentación Existente
+2. Crea el archivo con formato `.md`
 
-1. Edita el archivo correspondiente
-2. Actualiza la fecha de última modificación
-3. Si cambias estructura, actualiza índices
+3. Actualiza este `README.md` con el nuevo enlace
+
+4. Incluye fecha de última actualización al final del documento
+
+### Formato Recomendado
+
+```markdown
+# Título del Documento
+
+Breve descripción del propósito.
+
+## Sección 1
+
+Contenido...
+
+## Sección 2
+
+Contenido...
 
 ---
 
-## 📞 Contacto
-
-Para preguntas sobre la documentación o el proyecto:
-
-1. Revisa la documentación existente
-2. Busca en los archivos README de cada módulo
-3. Consulta [QUICK_START.md](../QUICK_START.md) para troubleshooting
+**Última actualización:** YYYY-MM-DD
+**Autor:** Nombre
+```
 
 ---
 
@@ -242,19 +240,28 @@ Para preguntas sobre la documentación o el proyecto:
 
 Para un nuevo desarrollador, recomendamos leer en este orden:
 
-- [ ] [QUICK_START.md](../QUICK_START.md) - Configuración inicial
-- [ ] [CHECKPOINT_FASE_1.md](../CHECKPOINT_FASE_1.md) - Estado actual
-- [ ] [ARCHITECTURE_FASE_1.md](./ARCHITECTURE_FASE_1.md) - Arquitectura
-- [ ] [apps/api/src/auth/README.md](../apps/api/src/auth/README.md) - Backend Auth
-- [ ] [apps/web/src/store/README.md](../apps/web/src/store/README.md) - Frontend State
-- [ ] [ComponentShowcase.tsx](../apps/web/src/components/ui/ComponentShowcase.tsx) - Componentes UI
+- [ ] [development/QUICK_START.md](development/QUICK_START.md) - Configuración inicial (10 min)
+- [ ] [development/setup_inicial.md](development/setup_inicial.md) - Setup detallado (15 min)
+- [ ] [architecture/ARCHITECTURE_FASE_1.md](architecture/ARCHITECTURE_FASE_1.md) - Arquitectura (20 min)
+- [ ] [testing/TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md) - Estado de tests (10 min)
+- [ ] [api-specs/Autenticacion.md](api-specs/Autenticacion.md) - API de Auth (5 min)
+- [ ] Explorar otros módulos en [api-specs/](api-specs/) según necesidad
 
-**Tiempo estimado**: 30-45 minutos
+**Tiempo estimado total**: ~60 minutos
 
-Después de leer estos documentos, tendrás una comprensión completa del proyecto y podrás comenzar a desarrollar.
+Después de leer estos documentos, tendrás una comprensión completa del proyecto.
 
 ---
 
-**Última Actualización**: 2025-10-12
-**Mantenedor**: Equipo Mateatletas
-**Versión**: 1.0
+## 📞 Obtener Ayuda
+
+1. **Revisa la documentación relevante** en esta carpeta
+2. **Busca en los archivos README** de cada módulo en `apps/`
+3. **Consulta los tests** en `../tests/scripts/` para ejemplos prácticos
+4. **Revisa el código** - está bien documentado con comentarios
+
+---
+
+**Última Actualización**: 2025-10-13
+**Versión**: 2.0 (Post-organización)
+**Slices Completados**: 7/10

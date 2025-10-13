@@ -55,6 +55,12 @@ model Tutor {
   /// Relación con estudiantes (un tutor puede tener muchos estudiantes)
   estudiantes Estudiante[]
 
+  /// Relación con membresías (un tutor puede tener varias membresías a lo largo del tiempo)
+  membresias Membresia[]
+
+  /// Relación con inscripciones a clases (reservas que hizo el tutor para sus estudiantes)
+  inscripciones_clase InscripcionClase[]
+
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
 
@@ -104,6 +110,15 @@ model Estudiante {
   /// Nivel actual del estudiante en el sistema de gamificación
   nivel_actual Int @default(1)
 
+  /// Relación con inscripciones a cursos (un estudiante puede inscribirse a múltiples cursos)
+  inscripciones_curso InscripcionCurso[]
+
+  /// Relación con inscripciones a clases (reservas a clases en vivo)
+  inscripciones_clase InscripcionClase[]
+
+  /// Relación con registros de asistencia
+  asistencias Asistencia[]
+
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
 
@@ -146,4 +161,422 @@ model Equipo {
 
   /// Mapeo al nombre de tabla en la base de datos
   @@map("equipos")
+}
+
+/// Modelo para docentes (profesores) de la plataforma
+/// Representa a los usuarios educadores que dictan clases
+model Docente {
+  /// Identificador único del docente
+  id String @id @default(cuid())
+
+  /// Email único del docente - usado para autenticación
+  email String @unique
+
+  /// Hash bcrypt de la contraseña
+  password_hash String
+
+  /// Nombre del docente
+  nombre String
+
+  /// Apellido del docente
+  apellido String
+
+  /// Título profesional (ej: "Profesor de Matemática")
+  titulo String?
+
+  /// Biografía o descripción del docente
+  bio String?
+
+  /// Relación con clases (un docente puede dictar muchas clases)
+  clases Clase[]
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("docentes")
+}
+
+/// Enum para tipos de productos disponibles
+enum TipoProducto {
+  Suscripcion    // Plan de suscripción mensual/anual
+  Curso          // Curso individual con fechas específicas
+  RecursoDigital // Materiales digitales (libros, guías, etc.)
+}
+
+/// Enum para estados de membresía
+enum EstadoMembresia {
+  Pendiente  // Pago iniciado, esperando confirmación de webhook
+  Activa     // Pago confirmado por webhook
+  Atrasada   // Pago vencido
+  Cancelada  // Membresía cancelada manualmente
+}
+
+/// Enum para estados de inscripción a cursos
+enum EstadoInscripcionCurso {
+  PreInscrito // Inscrito antes del inicio del curso
+  Activo      // Curso en progreso
+  Finalizado  // Curso completado
+}
+
+/// Modelo para productos del catálogo
+/// Representa los productos que se pueden comprar: suscripciones, cursos, recursos
+model Producto {
+  /// Identificador único del producto
+  id String @id @default(cuid())
+
+  /// Nombre del producto (ej: "Suscripción Mensual", "Curso de Álgebra")
+  nombre String
+
+  /// Descripción detallada del producto
+  descripcion String?
+
+  /// Precio del producto en pesos (formato decimal para precisión)
+  precio Decimal @db.Decimal(10, 2)
+
+  /// Tipo de producto (Suscripcion, Curso, RecursoDigital)
+  tipo TipoProducto
+
+  /// Indica si el producto está activo y disponible para compra
+  activo Boolean @default(true)
+
+  // --- Campos específicos para tipo Curso ---
+
+  /// Fecha de inicio del curso (solo para tipo Curso)
+  fecha_inicio DateTime?
+
+  /// Fecha de finalización del curso (solo para tipo Curso)
+  fecha_fin DateTime?
+
+  /// Cupo máximo de estudiantes (solo para tipo Curso)
+  cupo_maximo Int?
+
+  // --- Campos específicos para tipo Suscripcion ---
+
+  /// Duración en meses de la suscripción (1=mensual, 12=anual, etc.)
+  duracion_meses Int? @default(1)
+
+  /// Relación con membresías (muchas membresías pueden usar este producto)
+  membresias Membresia[]
+
+  /// Relación con inscripciones a cursos (muchos estudiantes pueden comprar este curso)
+  inscripciones_curso InscripcionCurso[]
+
+  /// Relación con clases (si es un curso, puede tener clases asociadas)
+  clases Clase[]
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("productos")
+}
+
+/// Modelo para membresías de suscripción
+/// Vincula un tutor con un producto de tipo Suscripcion
+model Membresia {
+  /// Identificador único de la membresía
+  id String @id @default(cuid())
+
+  /// ID del tutor propietario de la membresía
+  tutor_id String
+
+  /// Relación con el tutor
+  tutor Tutor @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+
+  /// ID del producto de suscripción
+  producto_id String
+
+  /// Relación con el producto
+  producto Producto @relation(fields: [producto_id], references: [id])
+
+  /// Estado actual de la membresía
+  estado EstadoMembresia @default(Pendiente)
+
+  /// Fecha de inicio de la membresía (se llena cuando webhook confirma)
+  fecha_inicio DateTime?
+
+  /// Fecha del próximo pago (se calcula cuando webhook confirma)
+  fecha_proximo_pago DateTime?
+
+  /// ID de preferencia de MercadoPago (para tracking)
+  preferencia_id String?
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("membresias")
+
+  /// Índice para búsquedas rápidas por tutor y estado
+  @@index([tutor_id, estado])
+
+  /// Índice para búsquedas por preferencia de MP
+  @@index([preferencia_id])
+}
+
+/// Modelo para inscripciones a cursos
+/// Vincula un estudiante con un producto de tipo Curso
+model InscripcionCurso {
+  /// Identificador único de la inscripción
+  id String @id @default(cuid())
+
+  /// ID del estudiante inscrito
+  estudiante_id String
+
+  /// Relación con el estudiante
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  /// ID del producto curso
+  producto_id String
+
+  /// Relación con el producto
+  producto Producto @relation(fields: [producto_id], references: [id])
+
+  /// Estado de la inscripción
+  estado EstadoInscripcionCurso @default(PreInscrito)
+
+  /// Fecha de inscripción
+  fecha_inscripcion DateTime @default(now())
+
+  /// ID de preferencia de MercadoPago (para tracking)
+  preferencia_id String?
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("inscripciones_curso")
+
+  /// Índice único para evitar inscripciones duplicadas
+  @@unique([estudiante_id, producto_id])
+
+  /// Índice para búsquedas rápidas
+  @@index([estudiante_id, estado])
+
+  /// Índice para búsquedas por preferencia de MP
+  @@index([preferencia_id])
+}
+
+// ============================================================================
+// SLICE #7: CLASES (ACADÉMICO)
+// ============================================================================
+
+/// Enum para estados de clase
+enum EstadoClase {
+  Programada // Clase programada y disponible
+  Cancelada  // Clase cancelada por admin o docente
+}
+
+/// Enum para estados de asistencia
+enum EstadoAsistencia {
+  Presente  // Estudiante asistió
+  Ausente   // Estudiante no asistió
+  Justificado // Ausencia justificada
+}
+
+/// Modelo para rutas curriculares (temas/categorías de clases)
+/// Representa los temas o áreas de conocimiento de las clases
+model RutaCurricular {
+  /// Identificador único de la ruta
+  id String @id @default(cuid())
+
+  /// Nombre de la ruta (ej: "Lógica", "Álgebra", "Geometría")
+  nombre String @unique
+
+  /// Color hexadecimal para identificación visual (opcional)
+  color String?
+
+  /// Descripción de la ruta curricular
+  descripcion String?
+
+  /// Relación con clases (muchas clases pueden usar esta ruta)
+  clases Clase[]
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("rutas_curriculares")
+}
+
+/// Modelo para clases programadas
+/// Representa una clase en vivo programada por un admin
+model Clase {
+  /// Identificador único de la clase
+  id String @id @default(cuid())
+
+  /// ID de la ruta curricular (tema de la clase)
+  ruta_curricular_id String
+
+  /// Relación con la ruta curricular
+  rutaCurricular RutaCurricular @relation(fields: [ruta_curricular_id], references: [id])
+
+  /// ID del docente asignado a la clase
+  docente_id String
+
+  /// Relación con el docente
+  docente Docente @relation(fields: [docente_id], references: [id])
+
+  /// Fecha y hora de inicio de la clase
+  fecha_hora_inicio DateTime
+
+  /// Duración de la clase en minutos
+  duracion_minutos Int
+
+  /// Estado de la clase (Programada, Cancelada)
+  estado EstadoClase @default(Programada)
+
+  /// Cupo máximo de estudiantes
+  cupos_maximo Int
+
+  /// Cupos ocupados actualmente
+  cupos_ocupados Int @default(0)
+
+  /// ID del producto curso (opcional - si null es clase de suscripción general)
+  /// Si tiene valor, solo estudiantes con InscripcionCurso activa pueden reservar
+  producto_id String?
+
+  /// Relación con el producto (si es clase de curso específico)
+  producto Producto? @relation(fields: [producto_id], references: [id])
+
+  /// Relación con inscripciones (reservas de estudiantes)
+  inscripciones InscripcionClase[]
+
+  /// Relación con registros de asistencia
+  asistencias Asistencia[]
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("clases")
+
+  /// Índice para búsquedas por docente
+  @@index([docente_id])
+
+  /// Índice para búsquedas por fecha
+  @@index([fecha_hora_inicio])
+
+  /// Índice para búsquedas por estado
+  @@index([estado])
+
+  /// Índice para búsquedas por producto
+  @@index([producto_id])
+}
+
+/// Modelo para inscripciones a clases (reservas)
+/// Vincula un estudiante con una clase específica
+model InscripcionClase {
+  /// Identificador único de la inscripción
+  id String @id @default(cuid())
+
+  /// ID de la clase
+  clase_id String
+
+  /// Relación con la clase
+  clase Clase @relation(fields: [clase_id], references: [id], onDelete: Cascade)
+
+  /// ID del estudiante inscrito
+  estudiante_id String
+
+  /// Relación con el estudiante
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  /// ID del tutor que realizó la reserva
+  tutor_id String
+
+  /// Relación con el tutor
+  tutor Tutor @relation(fields: [tutor_id], references: [id])
+
+  /// Fecha de la inscripción
+  fecha_inscripcion DateTime @default(now())
+
+  /// Observaciones o notas sobre la inscripción
+  observaciones String?
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("inscripciones_clase")
+
+  /// Constraint único para evitar reservas duplicadas
+  @@unique([clase_id, estudiante_id])
+
+  /// Índice para búsquedas por estudiante
+  @@index([estudiante_id])
+
+  /// Índice para búsquedas por tutor
+  @@index([tutor_id])
+}
+
+/// Modelo para registro de asistencia
+/// Registra la asistencia y feedback del docente después de la clase
+model Asistencia {
+  /// Identificador único del registro de asistencia
+  id String @id @default(cuid())
+
+  /// ID de la clase
+  clase_id String
+
+  /// Relación con la clase
+  clase Clase @relation(fields: [clase_id], references: [id], onDelete: Cascade)
+
+  /// ID del estudiante
+  estudiante_id String
+
+  /// Relación con el estudiante
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  /// Estado de asistencia (Presente, Ausente, Justificado)
+  estado EstadoAsistencia
+
+  /// Observaciones del docente sobre el estudiante en esta clase
+  observaciones String?
+
+  /// Puntos otorgados al estudiante en esta clase (para gamificación)
+  puntos_otorgados Int @default(0)
+
+  /// Fecha y hora del registro de asistencia
+  fecha_registro DateTime @default(now())
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("asistencias")
+
+  /// Constraint único para evitar registros duplicados
+  @@unique([clase_id, estudiante_id])
+
+  /// Índice para búsquedas por estudiante
+  @@index([estudiante_id])
+
+  /// Índice para búsquedas por estado
+  @@index([estado])
 }

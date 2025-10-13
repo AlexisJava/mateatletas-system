@@ -34,10 +34,7 @@ export class EstudiantesController {
    * @returns Estudiante creado
    */
   @Post()
-  async create(
-    @Body() createDto: CreateEstudianteDto,
-    @GetUser() user: any,
-  ) {
+  async create(@Body() createDto: CreateEstudianteDto, @GetUser() user: any) {
     return this.estudiantesService.create(user.id, createDto);
   }
 

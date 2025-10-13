@@ -182,6 +182,19 @@ export class EstudiantesService {
       }
     }
 
+    // Validar que el equipo existe si se está asignando
+    if (updateDto.equipo_id) {
+      const equipoExists = await this.prisma.equipo.findUnique({
+        where: { id: updateDto.equipo_id },
+      });
+
+      if (!equipoExists) {
+        throw new NotFoundException(
+          `Equipo con ID ${updateDto.equipo_id} no encontrado`,
+        );
+      }
+    }
+
     // Actualizar estudiante
     const estudiante = await this.prisma.estudiante.update({
       where: { id },

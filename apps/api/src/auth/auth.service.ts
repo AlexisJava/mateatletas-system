@@ -78,49 +78,74 @@ export class AuthService {
   }
 
   /**
-   * Autentica un tutor existente
-   * @param loginDto - Credenciales del tutor
-   * @returns Token JWT y datos del tutor
+   * Autentica un usuario (tutor o docente)
+   * @param loginDto - Credenciales del usuario
+   * @returns Token JWT y datos del usuario
    * @throws UnauthorizedException si las credenciales son inválidas
    */
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    // 1. Buscar tutor por email (incluir password_hash para validación)
-    const tutor = await this.prisma.tutor.findUnique({
+    // 1. Intentar buscar como tutor primero
+    let user: any = await this.prisma.tutor.findUnique({
       where: { email },
     });
 
-    // 2. Verificar que el tutor exista
-    if (!tutor) {
-      // Log genérico por seguridad - no revelar si el email existe
+    let role = 'tutor';
+
+    // 2. Si no es tutor, buscar como docente
+    if (!user) {
+      user = await this.prisma.docente.findUnique({
+        where: { email },
+      });
+      role = 'docente';
+    }
+
+    // 3. Verificar que el usuario exista
+    if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // 3. Comparar contraseña con bcrypt
-    const isPasswordValid = await bcrypt.compare(password, tutor.password_hash);
+    // 4. Comparar contraseña con bcrypt
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // 4. Generar token JWT
-    const accessToken = this.generateJwtToken(tutor.id, tutor.email);
+    // 5. Generar token JWT con el rol correspondiente
+    const accessToken = this.generateJwtToken(user.id, user.email, role);
 
-    // 5. Retornar token y datos del tutor (sin password_hash)
-    return {
-      access_token: accessToken,
-      user: {
-        id: tutor.id,
-        email: tutor.email,
-        nombre: tutor.nombre,
-        apellido: tutor.apellido,
-        dni: tutor.dni,
-        telefono: tutor.telefono,
-        fecha_registro: tutor.fecha_registro,
-        ha_completado_onboarding: tutor.ha_completado_onboarding,
-      },
-    };
+    // 6. Retornar token y datos del usuario (estructura diferente según rol)
+    if (role === 'tutor') {
+      return {
+        access_token: accessToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          dni: user.dni,
+          telefono: user.telefono,
+          fecha_registro: user.fecha_registro,
+          ha_completado_onboarding: user.ha_completado_onboarding,
+          role: 'tutor',
+        },
+      };
+    } else {
+      return {
+        access_token: accessToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          titulo: user.titulo,
+          bio: user.bio,
+          role: 'docente',
+        },
+      };
+    }
   }
 
   /**
@@ -191,17 +216,22 @@ export class AuthService {
   }
 
   /**
-   * Genera un token JWT para un tutor
-   * @param tutorId - ID del tutor
-   * @param email - Email del tutor
+   * Genera un token JWT para un usuario
+   * @param userId - ID del usuario
+   * @param email - Email del usuario
+   * @param role - Rol del usuario ('tutor' o 'docente')
    * @returns Token JWT firmado
    * @private
    */
-  private generateJwtToken(tutorId: string, email: string): string {
+  private generateJwtToken(
+    userId: string,
+    email: string,
+    role: string = 'tutor',
+  ): string {
     const payload = {
-      sub: tutorId, // Subject (ID del usuario)
+      sub: userId, // Subject (ID del usuario)
       email: email,
-      role: 'tutor', // Rol del usuario
+      role: role, // Rol del usuario
     };
 
     return this.jwtService.sign(payload);

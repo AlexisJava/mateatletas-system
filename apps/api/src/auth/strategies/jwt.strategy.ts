@@ -52,32 +52,50 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @returns Usuario completo desde la base de datos
    */
   async validate(payload: JwtPayload) {
-    const { sub: tutorId } = payload;
+    const { sub: userId, role } = payload;
 
-    // Buscar el tutor en la base de datos
-    const tutor = await this.prisma.tutor.findUnique({
-      where: { id: tutorId },
-      select: {
-        id: true,
-        email: true,
-        nombre: true,
-        apellido: true,
-        dni: true,
-        telefono: true,
-        fecha_registro: true,
-        ha_completado_onboarding: true,
-        createdAt: true,
-        updatedAt: true,
-        // IMPORTANTE: NO seleccionar password_hash por seguridad
-      },
-    });
+    let user;
 
-    // Si el tutor no existe, el token es inválido
-    if (!tutor) {
+    // Buscar según el rol especificado en el token
+    if (role === 'docente') {
+      user = await this.prisma.docente.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          nombre: true,
+          apellido: true,
+          titulo: true,
+          bio: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+    } else {
+      // Por defecto buscar como tutor
+      user = await this.prisma.tutor.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          nombre: true,
+          apellido: true,
+          dni: true,
+          telefono: true,
+          fecha_registro: true,
+          ha_completado_onboarding: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+    }
+
+    // Si el usuario no existe, el token es inválido
+    if (!user) {
       throw new UnauthorizedException('Token inválido o usuario no encontrado');
     }
 
-    // El objeto tutor se inyectará en request.user
-    return tutor;
+    // El objeto user se inyectará en request.user
+    return { ...user, role };
   }
 }
