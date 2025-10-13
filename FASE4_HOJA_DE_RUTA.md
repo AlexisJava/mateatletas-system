@@ -407,3 +407,35 @@ _Las notas se irán agregando aquí mientras avanzo..._
 
 **Próximo:** Testing y documentación final
 
+
+### 🎮 MODO DEMO ACTIVADO - Mock Auth Bypass (Oct 13, 2025)
+**Archivo:** `/app/estudiante/layout.tsx`
+
+**Razón:** Permitir visualización del portal sin sistema de auth de estudiantes completo
+
+**Mock User Creado:**
+- ID: `mock-student-123`
+- Email: `estudiante@demo.com`
+- Nombre: Alex Matemático
+- Rol: `estudiante`
+- Equipo: ASTROS
+- Puntos: 850
+- Nivel: 5
+
+**Comportamiento:**
+- ✅ Bypass completo de autenticación
+- ✅ No requiere login ni token
+- ✅ Acceso directo a todas las rutas estudiante
+- ✅ Usuario mock seteado automáticamente en auth store
+
+**Rutas Accesibles:**
+- http://localhost:3000/estudiante/dashboard
+- http://localhost:3000/estudiante/logros
+- http://localhost:3000/estudiante/ranking
+
+**Documentación:** Ver `FASE4_MOCK_MODE.md` para detalles completos
+
+⚠️ **IMPORTANTE:** Este mock es TEMPORAL y debe ser removido antes de producción
+
+**Próximo:** Implementar auth real de estudiantes o mantener mock para demo
+
