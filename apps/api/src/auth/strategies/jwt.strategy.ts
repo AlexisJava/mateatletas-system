@@ -57,7 +57,38 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     let user;
 
     // Buscar según el rol especificado en el token
-    if (role === 'docente') {
+    if (role === 'estudiante') {
+      user = await this.prisma.estudiante.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          nombre: true,
+          apellido: true,
+          fecha_nacimiento: true,
+          nivel_escolar: true,
+          foto_url: true,
+          puntos_totales: true,
+          nivel_actual: true,
+          tutor: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+            },
+          },
+          equipo: {
+            select: {
+              id: true,
+              nombre: true,
+              color_primario: true,
+            },
+          },
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+    } else if (role === 'docente') {
       user = await this.prisma.docente.findUnique({
         where: { id: userId },
         select: {

@@ -95,4 +95,37 @@ export class AsistenciaController {
   async obtenerResumenDocente(@GetUser() user: any) {
     return this.asistenciaService.obtenerResumenDocente(user.id);
   }
+
+  /**
+   * Obtener todas las observaciones del docente
+   * GET /api/asistencia/docente/observaciones
+   * Rol: Docente
+   */
+  @Get('docente/observaciones')
+  @Roles(Role.Docente)
+  async obtenerObservacionesDocente(
+    @GetUser() user: any,
+    @Query('estudianteId') estudianteId?: string,
+    @Query('fechaDesde') fechaDesde?: string,
+    @Query('fechaHasta') fechaHasta?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.asistenciaService.obtenerObservacionesDocente(user.id, {
+      estudianteId,
+      fechaDesde,
+      fechaHasta,
+      limit: limit ? parseInt(limit) : 20,
+    });
+  }
+
+  /**
+   * Obtener reportes y gráficos del docente
+   * GET /api/asistencia/docente/reportes
+   * Rol: Docente
+   */
+  @Get('docente/reportes')
+  @Roles(Role.Docente)
+  async obtenerReportesDocente(@GetUser() user: any) {
+    return this.asistenciaService.obtenerReportesDocente(user.id);
+  }
 }

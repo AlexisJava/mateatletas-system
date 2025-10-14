@@ -2,12 +2,13 @@ import { SetMetadata } from '@nestjs/common';
 
 /**
  * Enum de roles disponibles en la plataforma
- * Roles: Tutor (tutores/padres), Docente (profesores), Admin (administradores)
+ * Roles: Tutor (tutores/padres), Docente (profesores), Admin (administradores), Estudiante (alumnos)
  */
 export enum Role {
   Tutor = 'tutor',
   Docente = 'docente',
   Admin = 'admin',
+  Estudiante = 'estudiante',
 }
 
 /**

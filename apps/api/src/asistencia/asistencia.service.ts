@@ -450,4 +450,207 @@ export class AsistenciaService {
       clases: resumen,
     };
   }
+
+  /**
+   * Obtener todas las observaciones del docente con filtros
+   */
+  async obtenerObservacionesDocente(
+    docenteId: string,
+    filtros: {
+      estudianteId?: string;
+      fechaDesde?: string;
+      fechaHasta?: string;
+      limit?: number;
+    },
+  ) {
+    const where: any = {
+      clase: {
+        docente_id: docenteId, // Filtrar por docente a través de la relación con clase
+      },
+      observaciones: { not: null }, // Solo registros con observaciones
+    };
+
+    // Filtrar por estudiante si se especifica
+    if (filtros.estudianteId) {
+      where.estudiante_id = filtros.estudianteId;
+    }
+
+    // Filtrar por rango de fechas
+    if (filtros.fechaDesde || filtros.fechaHasta) {
+      where.createdAt = {};
+      if (filtros.fechaDesde) {
+        where.createdAt.gte = new Date(filtros.fechaDesde);
+      }
+      if (filtros.fechaHasta) {
+        where.createdAt.lte = new Date(filtros.fechaHasta);
+      }
+    }
+
+    const observaciones = await this.prisma.asistencia.findMany({
+      where,
+      include: {
+        estudiante: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            foto_url: true,
+          },
+        },
+        clase: {
+          select: {
+            id: true,
+            fecha_hora_inicio: true,
+            rutaCurricular: {
+              select: {
+                nombre: true,
+                color: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: filtros.limit || 20,
+    });
+
+    return observaciones;
+  }
+
+  /**
+   * Obtener reportes detallados para el docente (gráficos y estadísticas)
+   */
+  async obtenerReportesDocente(docenteId: string) {
+    // 1. Obtener todas las asistencias del docente
+    const todasAsistencias = await this.prisma.asistencia.findMany({
+      where: {
+        clase: {
+          docente_id: docenteId, // Filtrar por docente a través de la relación con clase
+        },
+      },
+      include: {
+        estudiante: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            foto_url: true,
+          },
+        },
+        clase: {
+          select: {
+            fecha_hora_inicio: true,
+            rutaCurricular: {
+              select: { nombre: true, color: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // 2. Asistencia semanal (últimas 8 semanas)
+    const hoy = new Date();
+    const hace8Semanas = new Date(hoy.getTime() - 8 * 7 * 24 * 60 * 60 * 1000);
+
+    const asistenciasSemana = todasAsistencias.filter(
+      (a) => new Date(a.createdAt) >= hace8Semanas,
+    );
+
+    // Agrupar por semana
+    const porSemana: Record<string, { presentes: number; ausentes: number; total: number }> = {};
+
+    asistenciasSemana.forEach((a) => {
+      const fecha = new Date(a.createdAt);
+      const semana = `Sem ${Math.floor((hoy.getTime() - fecha.getTime()) / (7 * 24 * 60 * 60 * 1000))}`;
+
+      if (!porSemana[semana]) {
+        porSemana[semana] = { presentes: 0, ausentes: 0, total: 0 };
+      }
+
+      porSemana[semana].total++;
+      if (a.estado === EstadoAsistencia.Presente) {
+        porSemana[semana].presentes++;
+      } else if (a.estado === EstadoAsistencia.Ausente) {
+        porSemana[semana].ausentes++;
+      }
+    });
+
+    // 3. Top 10 estudiantes más frecuentes
+    const porEstudiante: Record<string, { nombre: string; foto_url: string | null; asistencias: number }> = {};
+
+    todasAsistencias.forEach((a: any) => {
+      if (a.estado === EstadoAsistencia.Presente) {
+        const key = a.estudiante_id;
+        if (!porEstudiante[key]) {
+          porEstudiante[key] = {
+            nombre: `${a.estudiante.nombre} ${a.estudiante.apellido}`,
+            foto_url: a.estudiante.foto_url || null,
+            asistencias: 0,
+          };
+        }
+        porEstudiante[key].asistencias++;
+      }
+    });
+
+    const topEstudiantes = Object.values(porEstudiante)
+      .sort((a, b) => b.asistencias - a.asistencias)
+      .slice(0, 10);
+
+    // 4. Asistencia por ruta curricular
+    const porRuta: Record<string, { presentes: number; total: number; color: string }> = {};
+
+    todasAsistencias.forEach((a: any) => {
+      const rutaNombre = a.clase.rutaCurricular.nombre;
+      if (!porRuta[rutaNombre]) {
+        porRuta[rutaNombre] = {
+          presentes: 0,
+          total: 0,
+          color: a.clase.rutaCurricular.color || '#6B7280', // Default color if null
+        };
+      }
+
+      porRuta[rutaNombre].total++;
+      if (a.estado === EstadoAsistencia.Presente) {
+        porRuta[rutaNombre].presentes++;
+      }
+    });
+
+    const porRutaArray = Object.entries(porRuta).map(([nombre, data]) => ({
+      ruta: nombre,
+      color: data.color,
+      presentes: data.presentes,
+      total: data.total,
+      porcentaje: data.total > 0 ? ((data.presentes / data.total) * 100).toFixed(1) : '0',
+    }));
+
+    // 5. Estadísticas generales
+    const totalPresentes = todasAsistencias.filter(
+      (a) => a.estado === EstadoAsistencia.Presente,
+    ).length;
+    const totalAusentes = todasAsistencias.filter(
+      (a) => a.estado === EstadoAsistencia.Ausente,
+    ).length;
+    const totalJustificados = todasAsistencias.filter(
+      (a) => a.estado === EstadoAsistencia.Justificado,
+    ).length;
+
+    const porcentajeGlobal =
+      todasAsistencias.length > 0
+        ? ((totalPresentes / todasAsistencias.length) * 100).toFixed(1)
+        : '0';
+
+    return {
+      estadisticas_globales: {
+        total_registros: todasAsistencias.length,
+        total_presentes: totalPresentes,
+        total_ausentes: totalAusentes,
+        total_justificados: totalJustificados,
+        porcentaje_asistencia: parseFloat(porcentajeGlobal),
+      },
+      asistencia_semanal: porSemana,
+      top_estudiantes: topEstudiantes,
+      por_ruta_curricular: porRutaArray,
+    };
+  }
 }
