@@ -82,6 +82,79 @@ export class AuthService {
   }
 
   /**
+   * Autentica un estudiante con sus credenciales propias
+   * @param loginDto - Credenciales del estudiante
+   * @returns Token JWT y datos del estudiante
+   * @throws UnauthorizedException si las credenciales son inválidas
+   */
+  async loginEstudiante(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+
+    // 1. Buscar estudiante por email
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { email },
+      include: {
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+        equipo: {
+          select: {
+            id: true,
+            nombre: true,
+            color_primario: true,
+          },
+        },
+      },
+    });
+
+    // 2. Verificar que el estudiante exista y tenga credenciales configuradas
+    if (!estudiante || !estudiante.password_hash || !estudiante.email) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    // 3. Comparar contraseña con bcrypt
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      estudiante.password_hash,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    // 4. Generar token JWT
+    const accessToken = this.generateJwtToken(
+      estudiante.id,
+      estudiante.email,
+      'estudiante',
+    );
+
+    // 5. Retornar token y datos del estudiante
+    return {
+      access_token: accessToken,
+      user: {
+        id: estudiante.id,
+        email: estudiante.email,
+        nombre: estudiante.nombre,
+        apellido: estudiante.apellido,
+        fecha_nacimiento: estudiante.fecha_nacimiento,
+        nivel_escolar: estudiante.nivel_escolar,
+        foto_url: estudiante.foto_url,
+        puntos_totales: estudiante.puntos_totales,
+        nivel_actual: estudiante.nivel_actual,
+        equipo: estudiante.equipo,
+        tutor: estudiante.tutor,
+        role: 'estudiante',
+      },
+    };
+  }
+
+  /**
    * Autentica un usuario (tutor, docente o admin)
    * @param loginDto - Credenciales del usuario
    * @returns Token JWT y datos del usuario
@@ -215,9 +288,8 @@ export class AuthService {
    * @throws NotFoundException si el tutor no existe
    */
   async getProfile(userId: string, role: string) {
-    const normalizedRole = (role as Role) ?? Role.Tutor;
-
-    if (normalizedRole === Role.Docente) {
+    // Comparar directamente con strings en lugar de usar el enum
+    if (role === 'docente') {
       const docente = await this.prisma.docente.findUnique({
         where: { id: userId },
         select: {
@@ -238,11 +310,11 @@ export class AuthService {
 
       return {
         ...docente,
-        role: Role.Docente,
+        role: 'docente',
       };
     }
 
-    if (normalizedRole === Role.Admin) {
+    if (role === 'admin') {
       const admin = await this.prisma.admin.findUnique({
         where: { id: userId },
         select: {
@@ -262,10 +334,41 @@ export class AuthService {
 
       return {
         ...admin,
-        role: Role.Admin,
+        role: 'admin',
       };
     }
 
+    if (role === 'estudiante') {
+      const estudiante = await this.prisma.estudiante.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          nombre: true,
+          apellido: true,
+          fecha_nacimiento: true,
+          nivel_escolar: true,
+          foto_url: true,
+          puntos_totales: true,
+          nivel_actual: true,
+          equipo_id: true,
+          tutor_id: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!estudiante) {
+        throw new NotFoundException('Estudiante no encontrado');
+      }
+
+      return {
+        ...estudiante,
+        role: 'estudiante',
+      };
+    }
+
+    // Por defecto, asumir que es tutor
     const tutor = await this.prisma.tutor.findUnique({
       where: { id: userId },
       select: {
@@ -289,7 +392,7 @@ export class AuthService {
 
     return {
       ...tutor,
-      role: Role.Tutor,
+      role: 'tutor',
     };
   }
 

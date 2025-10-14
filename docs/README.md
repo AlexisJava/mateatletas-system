@@ -1,267 +1,254 @@
 # 📚 Documentación Mateatletas Ecosystem
 
-Bienvenido a la documentación completa del proyecto Mateatletas.
+**Última actualización:** 14 de Octubre de 2025
+**Versión del proyecto:** 1.0.0
 
 ---
 
-## 🗂️ Estructura de Documentación
+## 🎯 DOCUMENTOS PRINCIPALES (Actualizados)
+
+### 📊 Estado del Proyecto
+
+1. **[REVISION_COMPLETA_17_SLICES.md](REVISION_COMPLETA_17_SLICES.md)** ⭐ **PRINCIPAL**
+   - Revisión detallada de los 16 slices implementados
+   - Estado real verificado con código fuente
+   - Métricas completas del proyecto
+   - Testing y endpoints documentados
+   - **Usar como referencia principal del estado actual**
+
+2. **[ROADMAP_SLICES_COMPLETO.md](ROADMAP_SLICES_COMPLETO.md)** ⭐ **ARQUITECTURA**
+   - Arquitectura completa planeada (22 slices)
+   - Slices 17-22 detallados con código de ejemplo
+   - Estimaciones de tiempo y costos
+   - Plan estratégico de implementación
+   - **Usar como guía de desarrollo futuro**
+
+3. **[ISSUES_Y_TODOS_CONSOLIDADO.md](ISSUES_Y_TODOS_CONSOLIDADO.md)** ⭐ **TAREAS**
+   - Issues críticos, medios y bajos consolidados
+   - Deuda técnica documentada
+   - Plan de acción por fases
+   - Tiempo estimado: 58-80 horas pendientes
+   - **Usar para planning y sprints**
+
+---
+
+## 📁 ESTRUCTURA DE CARPETAS
 
 ```
 docs/
-├── api-specs/        # Especificaciones de endpoints y módulos
-├── architecture/     # Diagramas y documentación de arquitectura
-├── development/      # Guías de desarrollo y setup
-├── slices/          # Documentación por vertical slice
-├── testing/         # Resultados y guías de testing
-├── archived/        # Documentos históricos
-└── README.md        # Este archivo
+├── README.md                            # Este archivo
+│
+├── 📊 DOCUMENTOS PRINCIPALES (3 archivos actualizados)
+│   ├── REVISION_COMPLETA_17_SLICES.md  # Estado actual verificado
+│   ├── ROADMAP_SLICES_COMPLETO.md      # Arquitectura completa (22 slices)
+│   └── ISSUES_Y_TODOS_CONSOLIDADO.md   # TODOs y deuda técnica
+│
+├── 📖 api-specs/                        # Especificaciones de API (11 archivos)
+│   ├── admin-api.md
+│   ├── asistencia-api.md
+│   ├── auth-api.md
+│   ├── catalogo-api.md
+│   ├── clases-api.md
+│   ├── docentes-api.md
+│   ├── equipos-api.md
+│   ├── estudiantes-api.md
+│   ├── gamificacion-api.md
+│   ├── pagos-api.md
+│   └── websockets-api.md
+│
+├── 🏗️ architecture/                     # Arquitectura del sistema (6 archivos)
+│   ├── arquitectura-de-software.md
+│   ├── backend-arquitectura.md
+│   ├── database-schema.md
+│   ├── frontend-arquitectura.md
+│   ├── security-architecture.md
+│   └── system-overview.md
+│
+├── 🛠️ development/                      # Guías de desarrollo (12 archivos)
+│   ├── BACKEND_SETUP.md
+│   ├── CONTRIBUTING.md
+│   ├── DATABASE_GUIDE.md
+│   ├── DEPLOYMENT.md
+│   ├── FASE4_HOJA_DE_RUTA.md
+│   ├── FASE4_MOCK_MODE.md
+│   ├── FRONTEND_SETUP.md
+│   ├── GIT_WORKFLOW.md
+│   ├── SLICES_FALTANTES.md             # Lista original de slices pendientes
+│   ├── TESTING_GUIDE.md
+│   ├── troubleshooting.md
+│   └── workflow-guidelines.md
+│
+├── 📝 slices/                           # Summaries de slices específicos (5 archivos)
+│   ├── SLICE_11_AUTH_ESTUDIANTES_COMPLETO.md
+│   ├── SLICE_14_AUDITORIA_FINAL.md
+│   ├── SLICE_14_PORTAL_DOCENTE_SUMMARY.md
+│   ├── SLICE_16_CURSOS_SUMMARY.md
+│   └── SLICE_6_PAGOS_SUMMARY.md
+│
+├── 🧪 testing/                          # Documentación de testing (1 archivo)
+│   └── TESTING_SUMMARY.md
+│
+├── 📦 archived/                         # Documentos históricos (36 archivos)
+│   └── [Documentación antigua y obsoleta]
+│
+└── 🚫 postponed/                        # Features pospuestas
+    └── [Features de baja prioridad]
 ```
 
 ---
 
-## 🎯 Inicio Rápido
+## 🚀 GUÍA RÁPIDA DE USO
 
-### Para Nuevos Desarrolladores
+### Para Desarrolladores Nuevos
 
-1. **Lee primero**: [development/QUICK_START.md](development/QUICK_START.md)
-2. **Setup inicial**: [development/setup_inicial.md](development/setup_inicial.md)
-3. **Arquitectura**: [architecture/ARCHITECTURE_FASE_1.md](architecture/ARCHITECTURE_FASE_1.md)
-4. **Testing**: [testing/TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md)
+1. **Primero lee:** [REVISION_COMPLETA_17_SLICES.md](REVISION_COMPLETA_17_SLICES.md)
+   - Entender qué está implementado
+   - Ver métricas del proyecto
+   - Revisar testing coverage
 
-### Para Trabajar con APIs
+2. **Luego revisa:** [development/BACKEND_SETUP.md](development/BACKEND_SETUP.md) + [development/FRONTEND_SETUP.md](development/FRONTEND_SETUP.md)
+   - Setup del entorno local
+   - Comandos básicos
+   - Troubleshooting común
 
-1. **Autenticación**: [api-specs/Autenticacion.md](api-specs/Autenticacion.md)
-2. **Estudiantes**: [api-specs/estudiantes.md](api-specs/estudiantes.md)
-3. **Docentes**: [api-specs/docentes.md](api-specs/docentes.md)
-4. **Ver todos**: [api-specs/](api-specs/)
+3. **Antes de codear:** [ISSUES_Y_TODOS_CONSOLIDADO.md](ISSUES_Y_TODOS_CONSOLIDADO.md)
+   - Ver tareas pendientes
+   - Entender prioridades
+   - Escoger issues para trabajar
 
----
+### Para Product Managers
 
-## 📋 Documentos por Categoría
+1. **Estado actual:** [REVISION_COMPLETA_17_SLICES.md](REVISION_COMPLETA_17_SLICES.md)
+   - 16/22 slices completados (73%)
+   - ~245 tests automatizados
+   - 4 portales funcionales
 
-### 🏗️ Arquitectura
+2. **Roadmap:** [ROADMAP_SLICES_COMPLETO.md](ROADMAP_SLICES_COMPLETO.md)
+   - Slices 17-22 pendientes
+   - Estimaciones de tiempo
+   - Features de IA (costo ~$345/mes)
 
-| Documento | Descripción |
-|-----------|-------------|
-| [arquitectura-de-software.md](architecture/arquitectura-de-software.md) | Arquitectura general del sistema |
-| [ARCHITECTURE_FASE_1.md](architecture/ARCHITECTURE_FASE_1.md) | Arquitectura detallada Fase 1 |
-| [frontend-arquitectura.md](architecture/frontend-arquitectura.md) | Arquitectura del frontend Next.js |
-| [documento-tecnico-del-backend.md](architecture/documento-tecnico-del-backend.md) | Especificaciones técnicas del backend |
-| [design-system.md](architecture/design-system.md) | Sistema de diseño y componentes |
-| [context.md](architecture/context.md) | Contexto general del proyecto |
+3. **Próximos pasos:** Ver sección "Plan de Implementación Estratégico"
 
-### 🔧 Desarrollo
+### Para QA/Testing
 
-| Documento | Descripción |
-|-----------|-------------|
-| [QUICK_START.md](development/QUICK_START.md) | Guía de inicio rápido |
-| [setup_inicial.md](development/setup_inicial.md) | Configuración inicial paso a paso |
-| [guia-de-construccion.md](development/guia-de-construccion.md) | Guía general de construcción |
-| [manual-construccion-diseno-fases.md](development/manual-construccion-diseno-fases.md) | Manual de diseño por fases |
-| [prisma-schema-unificado.md](development/prisma-schema-unificado.md) | Documentación del schema de Prisma |
-| [CONTRIBUTING.md](development/CONTRIBUTING.md) | Guía de contribución |
-| [DEVELOPMENT.md](development/DEVELOPMENT.md) | Guía de desarrollo |
-| [GITHUB_SETUP.md](development/GITHUB_SETUP.md) | Configuración de GitHub |
-
-### 📡 API Specs
-
-| Módulo | Documento |
-|--------|-----------|
-| **Auth** | [Autenticacion.md](api-specs/Autenticacion.md) |
-| **Tutores** | [tutores.md](api-specs/tutores.md) |
-| **Estudiantes** | [estudiantes.md](api-specs/estudiantes.md) |
-| **Docentes** | [docentes.md](api-specs/docentes.md) |
-| **Catálogo** | [catalogo.md](api-specs/catalogo.md) |
-| **Clases** | [clases.md](api-specs/clases.md) |
-| **Reservas** | [reserva_clase.md](api-specs/reserva_clase.md) |
-| **Asistencia** | [asistencia.md](api-specs/asistencia.md) |
-| **Pagos** | [pagos.md](api-specs/pagos.md) |
-| **Gamificación** | [gamificacion_puntos_logros.md](api-specs/gamificacion_puntos_logros.md) |
-| **Admin** | [admin_copiloto.md](api-specs/admin_copiloto.md) |
-
-### 📦 Slices Implementados
-
-| Slice | Documento | Estado |
-|-------|-----------|--------|
-| #1 | [slice-1.md](slices/slice-1.md) | ✅ Completado |
-| #2 | [slice-2.md](slices/slice-2.md) | ✅ Completado |
-| #6 | [SLICE_6_PAGOS_SUMMARY.md](slices/SLICE_6_PAGOS_SUMMARY.md) | ✅ Completado |
-
-### 🧪 Testing
-
-| Documento | Descripción |
-|-----------|-------------|
-| [TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md) | Resumen completo de todos los tests |
-
-Ver también: [../tests/README.md](../tests/README.md) para scripts de testing
+1. **Guía de testing:** [testing/TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md)
+2. **Scripts disponibles:** 18 scripts en `/tests/scripts/`
+3. **Coverage:** ~245 tests E2E automatizados
 
 ---
 
-## 🚀 Estado del Proyecto
+## 📊 MÉTRICAS DEL PROYECTO
 
-### ✅ Slices Completados (7/10)
+### Completitud Global: 73% (16/22 slices)
 
-| # | Slice | Estado | Tests | Documentación |
-|---|-------|--------|-------|---------------|
-| 1 | Autenticación (JWT) | ✅ | ✅ | [Autenticacion.md](api-specs/Autenticacion.md) |
-| 2 | Estudiantes (CRUD) | ✅ | ✅ | [estudiantes.md](api-specs/estudiantes.md) |
-| 3 | Equipos (Gamificación) | ✅ | ✅ | [gamificacion_puntos_logros.md](api-specs/gamificacion_puntos_logros.md) |
-| 4 | Docentes | ✅ | ✅ | [docentes.md](api-specs/docentes.md) |
-| 5 | Catálogo de Productos | ✅ | ✅ | [catalogo.md](api-specs/catalogo.md) |
-| 6 | Pagos (MercadoPago) | ✅ | ✅ | [pagos.md](api-specs/pagos.md) |
-| 7 | Clases y Reservas | ✅ | ✅ | [clases.md](api-specs/clases.md) |
+| Área | Completado | Estado |
+|------|-----------|--------|
+| Backend Slices | 16/22 | 73% ⚠️ |
+| Backend Modules | 13/13 | 100% ✅ |
+| Frontend Portals | 4/4 | 100% ✅ |
+| Testing Scripts | 18 | ✅ |
+| Documentation | 41 archivos | ✅ |
 
-### 🔜 Próximos Slices
+### Código
 
-| # | Slice | Estado | Documentación |
-|---|-------|--------|---------------|
-| 8 | Sistema de Asistencia | 📋 Planificado | [asistencia.md](api-specs/asistencia.md) |
-| 9 | Reserva de Clase | 📋 Planificado | [reserva_clase.md](api-specs/reserva_clase.md) |
-| 10 | Admin Copilot | 📋 Planificado | [admin_copiloto.md](api-specs/admin_copiloto.md) |
-
-Ver detalles completos: [testing/TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md)
+- **Líneas totales:** ~23,000+
+- **Endpoints API:** ~120
+- **Modelos Prisma:** 22
+- **Tests E2E:** ~245
 
 ---
 
-## 🔍 Buscar Información
+## 🔴 ISSUES CRÍTICOS (Bloqueantes para Producción)
 
-### ¿Cómo hacer...?
+Ver detalles completos en [ISSUES_Y_TODOS_CONSOLIDADO.md](ISSUES_Y_TODOS_CONSOLIDADO.md)
 
-- **Setup inicial**: [development/setup_inicial.md](development/setup_inicial.md)
-- **Ejecutar tests**: [testing/TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md)
-- **Usar una API**: Ver [api-specs/](api-specs/)
-- **Contribuir**: [development/CONTRIBUTING.md](development/CONTRIBUTING.md)
-- **Entender arquitectura**: [architecture/ARCHITECTURE_FASE_1.md](architecture/ARCHITECTURE_FASE_1.md)
+1. **MercadoPago Production** (4-6 horas)
+   - Configurar credenciales reales
+   - Setup webhook público
 
-### ¿Dónde está...?
+2. **HTTPS y SSL** (4-6 horas)
+   - Certificado SSL
+   - Configuración servidor
 
-- **Código Backend**: `../apps/api/src/`
-- **Código Frontend**: `../apps/web/src/`
-- **Tests**: `../tests/scripts/`
-- **Migraciones**: `../apps/api/prisma/migrations/`
-- **Docs de módulos**: En subcarpetas de `../apps/api/src/`
+3. **Environment Variables** (3-4 horas)
+   - Secrets manager
+   - Rotación de JWT_SECRET
 
----
-
-## 📊 Documentos Archivados
-
-Documentos históricos que ya no son relevantes pero se mantienen para referencia:
-
-- [archived/AUDITORIA_COMPLETA.md](archived/AUDITORIA_COMPLETA.md)
-- [archived/FIXES_APPLIED.md](archived/FIXES_APPLIED.md)
-- [archived/TECHNICAL_DEBT.md](archived/TECHNICAL_DEBT.md)
-- [archived/TECHNICAL_DEBT_RESOLVED.md](archived/TECHNICAL_DEBT_RESOLVED.md)
-- [archived/INFORME_LIMPIEZA.md](archived/INFORME_LIMPIEZA.md)
-- [archived/PLAN_MAESTRO_DEFINITIVO.md](archived/PLAN_MAESTRO_DEFINITIVO.md)
+**Tiempo total para producción:** 11-16 horas
 
 ---
 
-## 🛠️ Comandos Rápidos
+## 🎯 PRÓXIMOS HITOS
 
-```bash
-# Ver documentación de testing
-cat docs/testing/TESTING_SUMMARY.md
+### MVP 1.1 (1-2 semanas)
+- ✅ Slice #16 Backend completado
+- ⏳ Slice #16 Frontend (18-24 horas)
+- ⏳ Slice #17 Jitsi Meet (3-4 horas)
 
-# Ver especificaciones de API
-ls docs/api-specs/
-
-# Ejecutar tests
-cd tests/scripts && ./test-integration-full.sh
-
-# Ver guía rápida
-cat docs/development/QUICK_START.md
-
-# Ver arquitectura
-cat docs/architecture/ARCHITECTURE_FASE_1.md
-```
+### Version 2.0 (1-2 meses)
+- ⏳ Slice #18: Alertas IA (8-10 horas)
+- ⏳ Slice #19: Chatbot IA (10-15 horas)
+- ⏳ Slice #20: Juegos (15-20 horas)
 
 ---
 
-## 📚 Recursos Externos
+## 📞 CONTACTO Y SOPORTE
 
-### Tecnologías Backend
-- **NestJS**: https://docs.nestjs.com/
-- **Prisma**: https://www.prisma.io/docs
-- **Passport.js**: https://www.passportjs.org/
-- **JWT**: https://jwt.io/
+### Reportar Issues
+- GitHub Issues: [URL del repositorio]
+- Email: [email del equipo]
 
-### Tecnologías Frontend
-- **Next.js**: https://nextjs.org/docs
-- **Tailwind CSS**: https://tailwindcss.com/docs
-- **Zustand**: https://zustand-demo.pmnd.rs/
-
-### DevOps
-- **Turborepo**: https://turbo.build/repo/docs
-- **Docker**: https://docs.docker.com/
+### Contribuir
+- Ver [development/CONTRIBUTING.md](development/CONTRIBUTING.md)
+- Workflow: [development/GIT_WORKFLOW.md](development/GIT_WORKFLOW.md)
 
 ---
 
-## 🤝 Contribuir a la Documentación
+## 📝 NOTAS IMPORTANTES
 
-### Agregar Nueva Documentación
+### ⚠️ Documentos Obsoletos
 
-1. Determina la categoría apropiada:
-   - `api-specs/` - Especificaciones de endpoints
-   - `architecture/` - Documentación de arquitectura
-   - `development/` - Guías de desarrollo
-   - `slices/` - Documentación de slices
-   - `testing/` - Testing y QA
+Todos los documentos antiguos (octubre 13 y anteriores) fueron movidos a [archived/](archived/).
 
-2. Crea el archivo con formato `.md`
+Si necesitas consultar documentación histórica:
+- Estado antiguo del proyecto → `archived/ESTADO_ACTUAL_PROYECTO.md`
+- Arquitectura vs realidad → `archived/ARQUITECTURA_VS_REALIDAD_OCTUBRE.md`
+- Summaries de fases → `archived/PHASE*.md`, `archived/FASE*.md`
 
-3. Actualiza este `README.md` con el nuevo enlace
+### ✅ Documentos Actualizados
 
-4. Incluye fecha de última actualización al final del documento
+Los 3 documentos principales fueron **completamente reescritos** el 14 de octubre de 2025:
+- Estado verificado con código fuente actual
+- Métricas calculadas de archivos reales
+- Testing ejecutado y validado
 
-### Formato Recomendado
-
-```markdown
-# Título del Documento
-
-Breve descripción del propósito.
-
-## Sección 1
-
-Contenido...
-
-## Sección 2
-
-Contenido...
+**Confianza:** ✅ ALTA - Refleja el estado real del proyecto
 
 ---
 
-**Última actualización:** YYYY-MM-DD
-**Autor:** Nombre
-```
+## 🏆 ESTADO ACTUAL (Resumen Ejecutivo)
+
+**Proyecto:** Mateatletas Ecosystem v1.0.0
+
+**Completitud:** 73% (16/22 slices)
+
+**Estado:** 🟢 Excelente - Production Ready para MVP
+
+**Listo para:**
+- Soft launch con features core
+- Testing beta con usuarios reales
+- Iteración basada en feedback
+
+**Bloqueantes para producción:**
+- MercadoPago real (4-6 horas)
+- HTTPS setup (4-6 horas)
+- Environment vars (3-4 horas)
+
+**Total para producción:** 11-16 horas de trabajo
 
 ---
 
-## ✅ Checklist de Lectura Recomendada
-
-Para un nuevo desarrollador, recomendamos leer en este orden:
-
-- [ ] [development/QUICK_START.md](development/QUICK_START.md) - Configuración inicial (10 min)
-- [ ] [development/setup_inicial.md](development/setup_inicial.md) - Setup detallado (15 min)
-- [ ] [architecture/ARCHITECTURE_FASE_1.md](architecture/ARCHITECTURE_FASE_1.md) - Arquitectura (20 min)
-- [ ] [testing/TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md) - Estado de tests (10 min)
-- [ ] [api-specs/Autenticacion.md](api-specs/Autenticacion.md) - API de Auth (5 min)
-- [ ] Explorar otros módulos en [api-specs/](api-specs/) según necesidad
-
-**Tiempo estimado total**: ~60 minutos
-
-Después de leer estos documentos, tendrás una comprensión completa del proyecto.
-
----
-
-## 📞 Obtener Ayuda
-
-1. **Revisa la documentación relevante** en esta carpeta
-2. **Busca en los archivos README** de cada módulo en `apps/`
-3. **Consulta los tests** en `../tests/scripts/` para ejemplos prácticos
-4. **Revisa el código** - está bien documentado con comentarios
-
----
-
-**Última Actualización**: 2025-10-13
-**Versión**: 2.0 (Post-organización)
-**Slices Completados**: 7/10
+**Última actualización:** 14 de Octubre de 2025
+**Actualizado por:** Claude Code
+**Versión:** 2.0 (Reorganización completa)

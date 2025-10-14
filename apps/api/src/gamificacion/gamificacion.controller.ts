@@ -1,7 +1,18 @@
-import { Controller, Get, Post, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, UseGuards, Request } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { GamificacionService } from './gamificacion.service';
+
+/**
+ * DTOs para las peticiones
+ */
+export class OtorgarPuntosDto {
+  estudianteId!: string;
+  accionId!: string;
+  claseId?: string;
+  contexto?: string;
+}
 
 /**
  * Controlador de Gamificación
@@ -55,6 +66,41 @@ export class GamificacionController {
   @Get('progreso/:estudianteId')
   async getProgreso(@Param('estudianteId') estudianteId: string) {
     return this.gamificacionService.getProgresoEstudiante(estudianteId);
+  }
+
+  /**
+   * GET /gamificacion/acciones
+   * Obtener lista de acciones puntuables disponibles (para docentes)
+   */
+  @Get('acciones')
+  @Roles(Role.Docente, Role.Admin)
+  async getAcciones() {
+    return this.gamificacionService.getAccionesPuntuables();
+  }
+
+  /**
+   * GET /gamificacion/historial/:estudianteId
+   * Historial de puntos obtenidos por un estudiante
+   */
+  @Get('historial/:estudianteId')
+  async getHistorial(@Param('estudianteId') estudianteId: string) {
+    return this.gamificacionService.getHistorialPuntos(estudianteId);
+  }
+
+  /**
+   * POST /gamificacion/puntos
+   * Otorgar puntos a un estudiante (solo docentes y admins)
+   */
+  @Post('puntos')
+  @Roles(Role.Docente, Role.Admin)
+  async otorgarPuntos(@Body() dto: OtorgarPuntosDto, @Request() req: any) {
+    return this.gamificacionService.otorgarPuntos(
+      req.user.id,
+      dto.estudianteId,
+      dto.accionId,
+      dto.claseId,
+      dto.contexto,
+    );
   }
 
   /**

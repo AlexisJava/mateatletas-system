@@ -13,6 +13,7 @@ import { ClasesModule } from './clases/clases.module';
 import { AsistenciaModule } from './asistencia/asistencia.module';
 import { AdminModule } from './admin/admin.module';
 import { GamificacionModule } from './gamificacion/gamificacion.module';
+import { CursosModule } from './cursos/cursos.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { GamificacionModule } from './gamificacion/gamificacion.module';
     AsistenciaModule,
     AdminModule,
     GamificacionModule,
+    CursosModule, // SLICE #16: Estructura de cursos y lecciones
   ],
   controllers: [AppController],
   providers: [AppService],

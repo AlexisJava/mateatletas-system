@@ -77,6 +77,14 @@ model Estudiante {
   /// Identificador único del estudiante
   id String @id @default(cuid())
 
+  /// Email único del estudiante - usado para autenticación propia
+  /// IMPORTANTE: Debe estar indexado para búsquedas rápidas en login
+  email String? @unique
+
+  /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
+  /// Permite que el estudiante acceda al portal con sus propias credenciales
+  password_hash String?
+
   /// Nombre del estudiante
   nombre String
 
@@ -121,6 +129,15 @@ model Estudiante {
 
   /// Relación con alertas administrativas
   alertas Alerta[]
+
+  /// Relación con puntos obtenidos (historial de gamificación)
+  puntosObtenidos PuntoObtenido[]
+
+  /// Relación con logros desbloqueados
+  logrosDesbloqueados LogroDesbloqueado[]
+
+  /// Relación con progreso de lecciones (cursos asincrónicos)
+  progresoLecciones ProgresoLeccion[]
 
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
@@ -192,6 +209,12 @@ model Docente {
 
   /// Relación con clases (un docente puede dictar muchas clases)
   clases Clase[]
+
+  /// Relación con puntos otorgados (un docente puede otorgar muchos puntos)
+  puntosOtorgados PuntoObtenido[] @relation("PuntosOtorgados")
+
+  /// Relación con logros desbloqueados (un docente puede aprobar muchos logros)
+  logrosAprobados LogroDesbloqueado[] @relation("LogrosAprobados")
 
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
@@ -301,6 +324,9 @@ model Producto {
 
   /// Relación con clases (si es un curso, puede tener clases asociadas)
   clases Clase[]
+
+  /// Relación con módulos (para cursos asincrónicos)
+  modulos Modulo[]
 
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
@@ -498,6 +524,9 @@ model Clase {
   /// Relación con alertas administrativas
   alertas Alerta[]
 
+  /// Relación con puntos obtenidos en esta clase
+  puntosObtenidos PuntoObtenido[]
+
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
 
@@ -667,3 +696,435 @@ model Alerta {
   /// Índice para búsquedas por fecha
   @@index([fecha])
 }
+
+// ============================================================================
+// SISTEMA DE GAMIFICACIÓN COMPLETO
+// ============================================================================
+
+/// Modelo para acciones puntuables (configuración de gamificación)
+/// Define las acciones por las cuales un docente puede otorgar puntos
+model AccionPuntuable {
+  /// Identificador único de la acción
+  id String @id @default(cuid())
+
+  /// Nombre de la acción (ej: "Razonamiento destacado", "Participación activa")
+  nombre String @unique
+
+  /// Descripción de la acción
+  descripcion String
+
+  /// Cantidad de puntos que otorga esta acción
+  puntos Int
+
+  /// Indica si la acción está activa
+  activo Boolean @default(true)
+
+  /// Relación con puntos obtenidos (historial de uso)
+  puntosObtenidos PuntoObtenido[]
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("acciones_puntuables")
+}
+
+/// Modelo para logros/insignias (configuración de gamificación)
+/// Define los logros que los estudiantes pueden desbloquear
+model Logro {
+  /// Identificador único del logro
+  id String @id @default(cuid())
+
+  /// Nombre del logro (ej: "Primera Clase", "Asistencia Perfecta")
+  nombre String @unique
+
+  /// Descripción del logro
+  descripcion String
+
+  /// Icono o emoji del logro
+  icono String
+
+  /// Puntos extra que otorga desbloquear este logro
+  puntos Int @default(0)
+
+  /// URL de la imagen del badge (opcional)
+  imagen_url String?
+
+  /// Requisito o condición para desbloquear (texto descriptivo)
+  requisito String?
+
+  /// Indica si el logro está activo
+  activo Boolean @default(true)
+
+  /// Relación con logros desbloqueados por estudiantes
+  logrosDesbloqueados LogroDesbloqueado[]
+
+  /// Relación con lecciones que desbloquean este logro
+  leccionesDesbloque Leccion[]
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("logros")
+}
+
+/// Modelo para registro de puntos obtenidos (tabla transaccional)
+/// Cada registro representa un evento donde un estudiante ganó puntos
+model PuntoObtenido {
+  /// Identificador único del registro
+  id String @id @default(cuid())
+
+  /// ID del estudiante que obtuvo los puntos
+  estudiante_id String
+
+  /// Relación con el estudiante
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  /// ID del docente que otorgó los puntos
+  docente_id String
+
+  /// Relación con el docente
+  docente Docente @relation("PuntosOtorgados", fields: [docente_id], references: [id])
+
+  /// ID de la acción puntuable
+  accion_id String
+
+  /// Relación con la acción puntuable
+  accion AccionPuntuable @relation(fields: [accion_id], references: [id])
+
+  /// ID de la clase donde se ganaron los puntos (opcional)
+  clase_id String?
+
+  /// Relación con la clase (opcional)
+  clase Clase? @relation(fields: [clase_id], references: [id], onDelete: SetNull)
+
+  /// Cantidad de puntos otorgados (se guarda para preservar historial)
+  puntos Int
+
+  /// Contexto o razón adicional (opcional)
+  contexto String?
+
+  /// Fecha y hora en que se otorgaron los puntos
+  fecha_otorgado DateTime @default(now())
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("puntos_obtenidos")
+
+  /// Índice para búsquedas por estudiante
+  @@index([estudiante_id])
+
+  /// Índice para búsquedas por docente
+  @@index([docente_id])
+
+  /// Índice para búsquedas por acción
+  @@index([accion_id])
+
+  /// Índice para búsquedas por fecha
+  @@index([fecha_otorgado])
+}
+
+/// Modelo para logros desbloqueados (tabla transaccional)
+/// Registra cuando un estudiante desbloquea un logro
+model LogroDesbloqueado {
+  /// Identificador único del registro
+  id String @id @default(cuid())
+
+  /// ID del estudiante que desbloqueó el logro
+  estudiante_id String
+
+  /// Relación con el estudiante
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  /// ID del logro desbloqueado
+  logro_id String
+
+  /// Relación con el logro
+  logro Logro @relation(fields: [logro_id], references: [id])
+
+  /// ID del docente que otorgó el logro (opcional, puede ser automático)
+  docente_id String?
+
+  /// Relación con el docente (opcional)
+  docente Docente? @relation("LogrosAprobados", fields: [docente_id], references: [id])
+
+  /// Fecha y hora en que se desbloqueó el logro
+  fecha_obtenido DateTime @default(now())
+
+  /// Contexto o razón del desbloqueo (opcional)
+  contexto String?
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("logros_desbloqueados")
+
+  /// Constraint único: un estudiante solo puede desbloquear un logro una vez
+  @@unique([estudiante_id, logro_id])
+
+  /// Índice para búsquedas por estudiante
+  @@index([estudiante_id])
+
+  /// Índice para búsquedas por logro
+  @@index([logro_id])
+
+  /// Índice para búsquedas por fecha
+  @@index([fecha_obtenido])
+}
+
+// ============================================================================
+// SLICE #16: ESTRUCTURA DE CURSOS Y LECCIONES
+// Sistema de contenido educativo asincrónico (E-Learning)
+// Basado en mejores prácticas de Ed-Tech: Chunking, Progressive Disclosure,
+// Microlearning, Multi-modal Learning
+// ============================================================================
+
+/// Módulo dentro de un curso
+/// Agrupa lecciones relacionadas temáticamente
+/// Ejemplo: "Módulo 1: Variables y Expresiones"
+model Modulo {
+  /// Identificador único del módulo
+  id String @id @default(cuid())
+
+  /// ID del producto (curso) al que pertenece
+  producto_id String
+
+  /// Título del módulo visible para estudiantes
+  /// Ejemplo: "Fundamentos de Álgebra"
+  titulo String
+
+  /// Descripción breve del módulo (opcional)
+  /// Ayuda al estudiante a entender qué aprenderá
+  descripcion String? @db.Text
+
+  /// Orden de presentación del módulo dentro del curso
+  /// 1, 2, 3... Permite reordenamiento manual
+  orden Int
+
+  /// Duración estimada total del módulo en minutos
+  /// Suma automática de duraciones de lecciones
+  duracion_estimada_minutos Int @default(0)
+
+  /// Cantidad de puntos totales que otorga completar el módulo
+  /// Suma de puntos_por_completar de todas las lecciones
+  puntos_totales Int @default(0)
+
+  /// Si está publicado y visible para estudiantes
+  publicado Boolean @default(false)
+
+  /// Relación con el producto (curso)
+  producto Producto @relation(fields: [producto_id], references: [id], onDelete: Cascade)
+
+  /// Lecciones que pertenecen a este módulo
+  lecciones Leccion[]
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("modulos")
+
+  /// Índice compuesto para ordenamiento eficiente
+  @@index([producto_id, orden])
+
+  /// Índice para búsquedas por producto
+  @@index([producto_id])
+}
+
+/// Tipos de contenido educativo soportados
+/// Cada tipo requiere renderizado diferente en frontend
+enum TipoContenido {
+  Video              // YouTube, Vimeo, URL directa
+  Texto              // Markdown con explicaciones, ejemplos
+  Quiz               // Preguntas de opción múltiple
+  Tarea              // Ejercicios para practicar
+  JuegoInteractivo   // Mini-juegos educativos (futuro)
+  Lectura            // PDFs, artículos externos
+  Practica           // Ejercicios interactivos
+}
+
+/// Lección individual dentro de un módulo
+/// Unidad mínima de aprendizaje (Microlearning)
+/// Duración recomendada: 5-15 minutos
+model Leccion {
+  /// Identificador único de la lección
+  id String @id @default(cuid())
+
+  /// ID del módulo al que pertenece
+  modulo_id String
+
+  /// Título de la lección visible para estudiantes
+  /// Debe ser descriptivo y claro
+  /// Ejemplo: "Cómo resolver ecuaciones lineales"
+  titulo String
+
+  /// Descripción opcional de la lección
+  /// Resumen de lo que aprenderá el estudiante
+  descripcion String? @db.Text
+
+  /// Tipo de contenido de esta lección
+  tipo_contenido TipoContenido
+
+  /// Contenido de la lección (formato según tipo)
+  /// - Video: URL del video
+  /// - Texto: Markdown con el contenido
+  /// - Quiz: JSON con preguntas y opciones
+  /// - Tarea: JSON con instrucciones y rubrica
+  contenido String @db.Text
+
+  /// Orden de presentación dentro del módulo
+  /// 1, 2, 3... Permite reordenamiento manual
+  orden Int
+
+  /// Puntos otorgados al completar esta lección
+  /// Incentiva al estudiante a terminar
+  /// Rango recomendado: 5-20 puntos por lección
+  puntos_por_completar Int @default(10)
+
+  /// ID del logro que se desbloquea al completar (opcional)
+  /// Ejemplo: "Maestro del Álgebra" al terminar módulo completo
+  logro_desbloqueable_id String?
+
+  /// Duración estimada en minutos
+  /// Ayuda al estudiante a planificar su tiempo
+  /// Rango recomendado: 5-15 minutos (Microlearning)
+  duracion_estimada_minutos Int?
+
+  /// Si la lección está publicada y visible
+  activo Boolean @default(true)
+
+  /// Recursos adicionales (opcional)
+  /// JSON con links, PDFs, etc.
+  /// Ejemplo: {"links": ["https://...", "https://..."], "pdfs": ["url1"]}
+  recursos_adicionales String? @db.Text
+
+  /// Prerequisito (opcional)
+  /// ID de lección que debe completarse antes
+  /// Implementa Progressive Disclosure
+  leccion_prerequisito_id String?
+
+  /// Relación con el módulo
+  modulo Modulo @relation(fields: [modulo_id], references: [id], onDelete: Cascade)
+
+  /// Relación con logro desbloqueable (opcional)
+  logro Logro? @relation(fields: [logro_desbloqueable_id], references: [id])
+
+  /// Relación con lección prerequisito (self-referencia)
+  leccionPrerequisito Leccion?  @relation("LeccionPrerequisito", fields: [leccion_prerequisito_id], references: [id])
+  leccionesDependientes Leccion[] @relation("LeccionPrerequisito")
+
+  /// Progreso de estudiantes en esta lección
+  progresos ProgresoLeccion[]
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("lecciones")
+
+  /// Índice compuesto para ordenamiento eficiente
+  @@index([modulo_id, orden])
+
+  /// Índice para búsquedas por módulo
+  @@index([modulo_id])
+
+  /// Índice para búsquedas por tipo de contenido
+  @@index([tipo_contenido])
+}
+
+/// Progreso de un estudiante en una lección específica
+/// Tracking granular del aprendizaje (Learning Analytics)
+model ProgresoLeccion {
+  /// Identificador único del progreso
+  id String @id @default(cuid())
+
+  /// ID del estudiante
+  estudiante_id String
+
+  /// ID de la lección
+  leccion_id String
+
+  /// Si la lección fue completada
+  /// true = estudiante terminó y marcó como completada
+  completada Boolean @default(false)
+
+  /// Porcentaje de progreso (0-100)
+  /// Útil para lecciones largas o videos
+  /// 0 = no iniciado, 50 = a la mitad, 100 = completado
+  progreso Int @default(0)
+
+  /// Fecha y hora en que inició la lección
+  fecha_inicio DateTime @default(now())
+
+  /// Fecha y hora en que completó la lección (si aplica)
+  fecha_completada DateTime?
+
+  /// Tiempo total invertido en minutos (opcional)
+  /// Útil para analytics y métricas de engagement
+  tiempo_invertido_minutos Int?
+
+  /// Calificación obtenida (para quizzes)
+  /// Rango: 0-100 (porcentaje)
+  calificacion Int?
+
+  /// Número de intentos (para quizzes/tareas)
+  intentos Int @default(0)
+
+  /// Notas del estudiante (opcional)
+  /// Permite al estudiante tomar apuntes privados
+  notas_estudiante String? @db.Text
+
+  /// Última respuesta del estudiante (para quizzes/tareas)
+  /// JSON con las respuestas dadas
+  ultima_respuesta String? @db.Text
+
+  /// Relación con estudiante
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  /// Relación con lección
+  leccion Leccion @relation(fields: [leccion_id], references: [id], onDelete: Cascade)
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("progreso_lecciones")
+
+  /// Constraint único: un estudiante solo puede tener un progreso por lección
+  @@unique([estudiante_id, leccion_id])
+
+  /// Índice para búsquedas por estudiante
+  @@index([estudiante_id])
+
+  /// Índice para búsquedas por lección
+  @@index([leccion_id])
+
+  /// Índice para búsquedas de lecciones completadas
+  @@index([estudiante_id, completada])
+}
+

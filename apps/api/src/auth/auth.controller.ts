@@ -60,6 +60,21 @@ export class AuthController {
   }
 
   /**
+   * POST /api/auth/estudiante/login
+   * Autentica un estudiante con sus credenciales propias y genera un token JWT
+   *
+   * @param loginDto - Credenciales del estudiante (email, password)
+   * @returns 200 OK - { access_token, user } con token JWT válido
+   * @throws 401 Unauthorized - Credenciales inválidas o estudiante sin credenciales configuradas
+   * @throws 400 Bad Request - Datos de entrada inválidos
+   */
+  @Post('estudiante/login')
+  @HttpCode(HttpStatus.OK)
+  async loginEstudiante(@Body() loginDto: LoginDto) {
+    return this.authService.loginEstudiante(loginDto);
+  }
+
+  /**
    * GET /api/auth/profile
    * Obtiene el perfil del tutor autenticado
    * Requiere token JWT válido en el header Authorization

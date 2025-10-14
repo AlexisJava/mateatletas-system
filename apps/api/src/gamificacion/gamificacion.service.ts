@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../core/prisma/prisma.service';
+import { PrismaService } from '../core/database/prisma.service';
+import { EstadoAsistencia } from '@prisma/client';
 
 /**
  * Servicio de Gamificación
@@ -24,7 +25,7 @@ export class GamificacionService {
           include: {
             clase: {
               include: {
-                ruta_curricular: true,
+                rutaCurricular: true,
                 docente: {
                   select: { nombre: true, apellido: true },
                 },
@@ -33,12 +34,12 @@ export class GamificacionService {
           },
         },
         asistencias: {
-          orderBy: { fecha: 'desc' },
+          orderBy: { createdAt: 'desc' },
           take: 10,
           include: {
             clase: {
               include: {
-                ruta_curricular: true,
+                rutaCurricular: true,
               },
             },
           },
@@ -50,9 +51,9 @@ export class GamificacionService {
       throw new Error('Estudiante no encontrado');
     }
 
-    // Calcular puntos totales
+    // Calcular puntos totales basados en asistencias
     const puntosAsistencia = estudiante.asistencias.filter(
-      (a) => a.estado === 'Presente',
+      (a) => a.estado === EstadoAsistencia.Presente,
     ).length * 10;
 
     // Calcular próximas clases
@@ -67,7 +68,7 @@ export class GamificacionService {
         estado: 'Programada',
       },
       include: {
-        ruta_curricular: true,
+        rutaCurricular: true,
         docente: {
           select: { nombre: true, apellido: true },
         },
@@ -76,21 +77,24 @@ export class GamificacionService {
       take: 5,
     });
 
-    // Ranking del equipo
-    const equipoRanking = await this.getEquipoRanking(estudiante.equipo_id);
+    // Ranking del equipo (solo si tiene equipo)
+    const equipoRanking = estudiante.equipo_id
+      ? await this.getEquipoRanking(estudiante.equipo_id)
+      : [];
 
     return {
       estudiante: {
         id: estudiante.id,
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
-        avatar: estudiante.avatar,
+        foto_url: estudiante.foto_url,
         equipo: estudiante.equipo,
       },
       stats: {
-        puntosToales: puntosAsistencia + estudiante.puntos_extra,
-        clasesAsistidas: estudiante.asistencias.filter((a) => a.estado === 'Presente')
-          .length,
+        puntosToales: estudiante.puntos_totales,
+        clasesAsistidas: estudiante.asistencias.filter(
+          (a) => a.estado === EstadoAsistencia.Presente,
+        ).length,
         clasesTotales: estudiante.inscripciones_clase.length,
         racha: await this.calcularRacha(estudianteId),
       },
@@ -176,7 +180,7 @@ export class GamificacionService {
     const asistencias = await this.prisma.asistencia.findMany({
       where: {
         estudiante_id: estudianteId,
-        estado: 'Presente',
+        estado: EstadoAsistencia.Presente,
       },
     });
 
@@ -210,32 +214,33 @@ export class GamificacionService {
       where: { estudiante_id: estudianteId },
       include: {
         clase: {
-          include: { ruta_curricular: true },
+          include: { rutaCurricular: true },
         },
       },
     });
 
-    const puntosAsistencia = asistencias.filter((a) => a.estado === 'Presente')
-      .length * 10;
+    const puntosAsistencia = asistencias.filter(
+      (a) => a.estado === EstadoAsistencia.Presente,
+    ).length * 10;
 
     // Puntos por ruta
     const puntosPorRuta: Record<string, number> = {};
     asistencias
-      .filter((a) => a.estado === 'Presente')
+      .filter((a) => a.estado === EstadoAsistencia.Presente)
       .forEach((a) => {
-        const rutaNombre = a.clase.ruta_curricular?.nombre || 'General';
+        const rutaNombre = a.clase.rutaCurricular?.nombre || 'General';
         puntosPorRuta[rutaNombre] = (puntosPorRuta[rutaNombre] || 0) + 10;
       });
 
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
-      select: { puntos_extra: true },
+      select: { puntos_totales: true },
     });
 
     return {
-      total: puntosAsistencia + (estudiante?.puntos_extra || 0),
+      total: estudiante?.puntos_totales || 0,
       asistencia: puntosAsistencia,
-      extras: estudiante?.puntos_extra || 0,
+      extras: (estudiante?.puntos_totales || 0) - puntosAsistencia,
       porRuta: puntosPorRuta,
     };
   }
@@ -253,8 +258,10 @@ export class GamificacionService {
       throw new Error('Estudiante no encontrado');
     }
 
-    // Ranking del equipo
-    const rankingEquipo = await this.getEquipoRanking(estudiante.equipo_id);
+    // Ranking del equipo (solo si tiene equipo)
+    const rankingEquipo = estudiante.equipo_id
+      ? await this.getEquipoRanking(estudiante.equipo_id)
+      : [];
 
     // Ranking global
     const rankingGlobal = await this.getRankingGlobal();
@@ -281,14 +288,14 @@ export class GamificacionService {
 
     const progresoPorRuta = await Promise.all(
       rutas.map(async (ruta) => {
-        const clasesTotales = await this.prisma.clase.countMany({
+        const clasesTotales = await this.prisma.clase.count({
           where: { ruta_curricular_id: ruta.id },
         });
 
         const clasesAsistidas = await this.prisma.asistencia.count({
           where: {
             estudiante_id: estudianteId,
-            estado: 'Presente',
+            estado: EstadoAsistencia.Presente,
             clase: {
               ruta_curricular_id: ruta.id,
             },
@@ -309,6 +316,148 @@ export class GamificacionService {
     );
 
     return progresoPorRuta;
+  }
+
+  /**
+   * Obtener acciones puntuables disponibles
+   * Para mostrar en el UI del docente
+   */
+  async getAccionesPuntuables() {
+    return this.prisma.accionPuntuable.findMany({
+      where: { activo: true },
+      orderBy: { puntos: 'desc' },
+    });
+  }
+
+  /**
+   * Obtener historial de puntos otorgados a un estudiante
+   */
+  async getHistorialPuntos(estudianteId: string) {
+    return this.prisma.puntoObtenido.findMany({
+      where: { estudiante_id: estudianteId },
+      include: {
+        accion: true,
+        docente: {
+          select: { nombre: true, apellido: true },
+        },
+        clase: {
+          select: {
+            id: true,
+            fecha_hora_inicio: true,
+            rutaCurricular: {
+              select: { nombre: true, color: true },
+            },
+          },
+        },
+      },
+      orderBy: { fecha_otorgado: 'desc' },
+      take: 50,
+    });
+  }
+
+  /**
+   * Otorgar puntos a un estudiante
+   * Llamado por docentes para premiar acciones destacadas
+   */
+  async otorgarPuntos(
+    docenteId: string,
+    estudianteId: string,
+    accionId: string,
+    claseId?: string,
+    contexto?: string,
+  ) {
+    // 1. Validar que la acción existe y está activa
+    const accion = await this.prisma.accionPuntuable.findUnique({
+      where: { id: accionId },
+    });
+
+    if (!accion || !accion.activo) {
+      throw new Error('Acción puntuable no encontrada o inactiva');
+    }
+
+    // 2. Validar que el estudiante existe
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: estudianteId },
+    });
+
+    if (!estudiante) {
+      throw new Error('Estudiante no encontrado');
+    }
+
+    // 3. Validar que el docente existe
+    const docente = await this.prisma.docente.findUnique({
+      where: { id: docenteId },
+    });
+
+    if (!docente) {
+      throw new Error('Docente no encontrado');
+    }
+
+    // 4. Si se especifica clase_id, validar que existe y que el estudiante está inscrito
+    if (claseId) {
+      const clase = await this.prisma.clase.findUnique({
+        where: { id: claseId },
+        include: {
+          inscripciones: {
+            where: { estudiante_id: estudianteId },
+          },
+        },
+      });
+
+      if (!clase) {
+        throw new Error('Clase no encontrada');
+      }
+
+      if (clase.inscripciones.length === 0) {
+        throw new Error('El estudiante no está inscrito en esta clase');
+      }
+    }
+
+    // 5. Crear registro de punto obtenido
+    const puntoObtenido = await this.prisma.puntoObtenido.create({
+      data: {
+        estudiante_id: estudianteId,
+        docente_id: docenteId,
+        accion_id: accionId,
+        clase_id: claseId,
+        puntos: accion.puntos,
+        contexto: contexto,
+      },
+      include: {
+        accion: true,
+        estudiante: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            puntos_totales: true,
+          },
+        },
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+      },
+    });
+
+    // 6. Actualizar puntos_totales del estudiante
+    await this.prisma.estudiante.update({
+      where: { id: estudianteId },
+      data: {
+        puntos_totales: {
+          increment: accion.puntos,
+        },
+      },
+    });
+
+    return {
+      success: true,
+      puntoObtenido,
+      mensaje: `Se otorgaron ${accion.puntos} puntos a ${estudiante.nombre} ${estudiante.apellido}`,
+    };
   }
 
   /**
@@ -333,10 +482,10 @@ export class GamificacionService {
     const asistencias = await this.prisma.asistencia.findMany({
       where: {
         estudiante_id: estudianteId,
-        estado: 'Presente',
+        estado: EstadoAsistencia.Presente,
       },
-      orderBy: { fecha: 'desc' },
-      select: { fecha: true },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
     });
 
     if (asistencias.length === 0) return 0;
@@ -344,7 +493,8 @@ export class GamificacionService {
     let racha = 1;
     for (let i = 1; i < asistencias.length; i++) {
       const diff =
-        asistencias[i - 1].fecha.getTime() - asistencias[i].fecha.getTime();
+        asistencias[i - 1].createdAt.getTime() -
+        asistencias[i].createdAt.getTime();
       const days = diff / (1000 * 60 * 60 * 24);
 
       if (days <= 1.5) {
@@ -364,22 +514,25 @@ export class GamificacionService {
   private async getEquipoRanking(equipoId: string) {
     const estudiantes = await this.prisma.estudiante.findMany({
       where: { equipo_id: equipoId },
-      include: {
-        asistencias: {
-          where: { estado: 'Presente' },
-        },
+      select: {
+        id: true,
+        nombre: true,
+        apellido: true,
+        foto_url: true,
+        puntos_totales: true,
+      },
+      orderBy: {
+        puntos_totales: 'desc',
       },
     });
 
-    return estudiantes
-      .map((e) => ({
-        id: e.id,
-        nombre: e.nombre,
-        apellido: e.apellido,
-        avatar: e.avatar,
-        puntos: e.asistencias.length * 10 + e.puntos_extra,
-      }))
-      .sort((a, b) => b.puntos - a.puntos);
+    return estudiantes.map((e) => ({
+      id: e.id,
+      nombre: e.nombre,
+      apellido: e.apellido,
+      avatar: e.foto_url,
+      puntos: e.puntos_totales,
+    }));
   }
 
   /**
@@ -388,22 +541,20 @@ export class GamificacionService {
   private async getRankingGlobal() {
     const estudiantes = await this.prisma.estudiante.findMany({
       include: {
-        asistencias: {
-          where: { estado: 'Presente' },
-        },
         equipo: true,
+      },
+      orderBy: {
+        puntos_totales: 'desc',
       },
     });
 
-    return estudiantes
-      .map((e) => ({
-        id: e.id,
-        nombre: e.nombre,
-        apellido: e.apellido,
-        avatar: e.avatar,
-        equipo: e.equipo,
-        puntos: e.asistencias.length * 10 + e.puntos_extra,
-      }))
-      .sort((a, b) => b.puntos - a.puntos);
+    return estudiantes.map((e) => ({
+      id: e.id,
+      nombre: e.nombre,
+      apellido: e.apellido,
+      avatar: e.foto_url,
+      equipo: e.equipo,
+      puntos: e.puntos_totales,
+    }));
   }
 }
