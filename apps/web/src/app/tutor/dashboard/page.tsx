@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Home,
   Users,
@@ -21,91 +22,205 @@ import {
   Video,
   Book
 } from 'lucide-react';
+import { useAuthStore } from '@/store/auth.store';
+import apiClient from '@/lib/axios';
 
 type TabType = 'resumen' | 'hijos' | 'calendario' | 'pagos' | 'ayuda';
 
+interface Estudiante {
+  id: string;
+  nombre: string;
+  apellido: string;
+  fecha_nacimiento: Date;
+  grado_escolar?: string;
+}
+
+interface Clase {
+  id: string;
+  fecha_hora_inicio: Date;
+  ruta_curricular: {
+    nombre: string;
+  };
+  docente: {
+    user: {
+      nombre: string;
+      apellido: string;
+    };
+  };
+  inscripciones: Array<{
+    estudiante: Estudiante;
+  }>;
+}
+
+interface Membresia {
+  id: string;
+  estado: string;
+  fecha_inicio: Date;
+  fecha_fin: Date;
+  producto: {
+    nombre: string;
+    precio: number;
+  };
+}
+
 export default function TutorDashboard() {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useAuthStore();
   const [activeTab, setActiveTab] = useState<TabType>('resumen');
 
-  // Datos de ejemplo (luego vienen del backend)
-  const tutorName = "Carlos";
+  // Estado para datos del backend
+  const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
+  const [clases, setClases] = useState<Clase[]>([]);
+  const [membresia, setMembresia] = useState<Membresia | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const stats = {
-    hijosRegistrados: 2,
-    clasesEstaSemana: 5,
-    asistencia: 92,
-    logrosTotales: 19
+  // Protección de ruta: solo tutores autenticados
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+        return;
+      }
+      if (user?.role !== 'tutor') {
+        router.push('/');
+        return;
+      }
+
+      // Cargar datos del dashboard
+      loadDashboardData();
+    }
+  }, [isAuthenticated, isLoading, user, router]);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+
+      // Cargar estudiantes, clases y membresía en paralelo
+      const [estudiantesRes, clasesRes, membresiaRes] = await Promise.all([
+        apiClient.get('/estudiantes'),
+        apiClient.get('/clases'),
+        apiClient.get('/pagos/membresia'),
+      ]);
+
+      setEstudiantes(estudiantesRes.data || []);
+      setClases(clasesRes || []);
+      setMembresia(membresiaRes.membresia || null);
+    } catch (error) {
+      console.error('Error cargando datos del dashboard:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const hijos = [
-    {
-      id: '1',
-      name: 'María Rodríguez',
-      age: 12,
-      grade: '7mo grado',
-      initials: 'MR',
-      xp: 6200,
-      streak: 15,
-      achievements: 12,
-      nextClass: {
-        subject: 'Álgebra Avanzada',
-        time: 'Hoy 16:00',
-        teacher: 'Ana García'
-      },
-      subjects: [
-        { name: 'Matemáticas', progress: 85 },
-        { name: 'Física', progress: 72 },
-        { name: 'Programación', progress: 90 }
-      ]
-    },
-    {
-      id: '2',
-      name: 'Juan Rodríguez',
-      age: 9,
-      grade: '4to grado',
-      initials: 'JR',
-      xp: 3800,
-      streak: 8,
-      achievements: 7,
-      nextClass: {
-        subject: 'Geometría Básica',
-        time: 'Mañana 15:00',
-        teacher: 'Carlos López'
-      },
-      subjects: [
-        { name: 'Matemáticas', progress: 78 },
-        { name: 'Ciencias', progress: 82 },
-        { name: 'Robótica', progress: 65 }
-      ]
-    }
-  ];
+  // Mostrar loading mientras se verifica autenticación
+  if (isLoading || loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-slate-100">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const clasesHoy = [
-    {
-      id: '1',
-      time: '14:00',
-      subject: 'Álgebra Avanzada',
-      teacher: 'Ana García',
-      child: 'María',
-      status: 'upcoming'
-    },
-    {
-      id: '2',
-      time: '16:00',
-      subject: 'Programación Python',
-      teacher: 'Carlos López',
-      child: 'María',
-      status: 'upcoming'
-    },
-    {
-      id: '3',
-      time: '17:00',
-      subject: 'Robótica Inicial',
-      teacher: 'Laura Martínez',
-      child: 'Juan',
-      status: 'upcoming'
+  const tutorName = user?.nombre || "Tutor";
+
+  // Calcular estadísticas a partir de datos reales
+  const calcularEdad = (fechaNacimiento: Date) => {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
     }
-  ];
+    return edad;
+  };
+
+  // Filtrar clases de hoy
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const manana = new Date(hoy);
+  manana.setDate(manana.getDate() + 1);
+
+  const clasesHoyData = clases.filter((clase) => {
+    const fechaClase = new Date(clase.fecha_hora_inicio);
+    return fechaClase >= hoy && fechaClase < manana;
+  });
+
+  // Filtrar clases de esta semana
+  const inicioSemana = new Date(hoy);
+  inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+  const finSemana = new Date(inicioSemana);
+  finSemana.setDate(inicioSemana.getDate() + 7);
+
+  const clasesEstaSemana = clases.filter((clase) => {
+    const fechaClase = new Date(clase.fecha_hora_inicio);
+    return fechaClase >= inicioSemana && fechaClase < finSemana;
+  });
+
+  const stats = {
+    hijosRegistrados: estudiantes.length,
+    clasesEstaSemana: clasesEstaSemana.length,
+    asistencia: 92, // TODO: calcular desde backend
+    logrosTotales: 0, // TODO: calcular desde gamificación
+  };
+
+  // Transformar estudiantes a formato de la UI
+  const hijos = estudiantes.map((est) => {
+    const edad = calcularEdad(est.fecha_nacimiento);
+    const initials = `${est.nombre.charAt(0)}${est.apellido.charAt(0)}`.toUpperCase();
+
+    // Encontrar próxima clase para este estudiante
+    const proximasClases = clases
+      .filter((clase) => {
+        return clase.inscripciones.some((insc) => insc.estudiante.id === est.id);
+      })
+      .filter((clase) => new Date(clase.fecha_hora_inicio) > new Date())
+      .sort((a, b) => new Date(a.fecha_hora_inicio).getTime() - new Date(b.fecha_hora_inicio).getTime());
+
+    const proximaClase = proximasClases[0];
+
+    return {
+      id: est.id,
+      name: `${est.nombre} ${est.apellido}`,
+      age: edad,
+      grade: est.grado_escolar || 'Sin especificar',
+      initials,
+      xp: 0, // TODO: calcular desde gamificación
+      streak: 0, // TODO: calcular desde gamificación
+      achievements: 0, // TODO: calcular desde gamificación
+      nextClass: proximaClase
+        ? {
+            subject: proximaClase.ruta_curricular.nombre,
+            time: new Date(proximaClase.fecha_hora_inicio).toLocaleString('es-AR', {
+              weekday: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            teacher: `${proximaClase.docente.user.nombre} ${proximaClase.docente.user.apellido}`,
+          }
+        : null,
+      subjects: [], // TODO: calcular progreso desde cursos
+    };
+  });
+
+  // Transformar clases de hoy a formato de la UI
+  const clasesHoy = clasesHoyData.map((clase) => {
+    const estudianteInscrito = clase.inscripciones[0]?.estudiante;
+    return {
+      id: clase.id,
+      time: new Date(clase.fecha_hora_inicio).toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      subject: clase.ruta_curricular.nombre,
+      teacher: `${clase.docente.user.nombre} ${clase.docente.user.apellido}`,
+      child: estudianteInscrito ? estudianteInscrito.nombre : 'Sin asignar',
+      status: 'upcoming',
+    };
+  });
 
   const tabs = [
     { id: 'resumen', label: 'Resumen', icon: Home },
@@ -157,10 +272,10 @@ export default function TutorDashboard() {
           <TabMisHijos hijos={hijos} />
         )}
         {activeTab === 'calendario' && (
-          <TabCalendario />
+          <TabCalendario clases={clases} estudiantes={estudiantes} />
         )}
         {activeTab === 'pagos' && (
-          <TabPagos />
+          <TabPagos membresia={membresia} />
         )}
         {activeTab === 'ayuda' && (
           <TabAyuda />
@@ -213,29 +328,35 @@ function TabResumen({ stats, clasesHoy, hijos }: any) {
             📅 Clases de Hoy
           </h3>
           <div className="space-y-3">
-            {clasesHoy.map((clase: any) => (
-              <div key={clase.id} className="bg-white rounded-lg p-4 border-l-4 border-indigo-500 shadow-sm">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">
-                        {clase.time}
-                      </span>
-                      <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded">
-                        {clase.child}
-                      </span>
+            {clasesHoy.length > 0 ? (
+              clasesHoy.map((clase: any) => (
+                <div key={clase.id} className="bg-white rounded-lg p-4 border-l-4 border-indigo-500 shadow-sm">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded">
+                          {clase.time}
+                        </span>
+                        <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded">
+                          {clase.child}
+                        </span>
+                      </div>
+                      <h4 className="font-semibold text-slate-900">{clase.subject}</h4>
+                      <p className="text-sm text-slate-600 mt-1">
+                        👨‍🏫 Prof. {clase.teacher}
+                      </p>
                     </div>
-                    <h4 className="font-semibold text-slate-900">{clase.subject}</h4>
-                    <p className="text-sm text-slate-600 mt-1">
-                      👨‍🏫 Prof. {clase.teacher}
-                    </p>
+                    <button className="px-3 py-1 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm rounded-lg hover:shadow-md transition-all">
+                      Unirse
+                    </button>
                   </div>
-                  <button className="px-3 py-1 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm rounded-lg hover:shadow-md transition-all">
-                    Unirse
-                  </button>
                 </div>
+              ))
+            ) : (
+              <div className="bg-white rounded-lg p-8 text-center border border-slate-200">
+                <p className="text-slate-500">No hay clases programadas para hoy</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -245,31 +366,44 @@ function TabResumen({ stats, clasesHoy, hijos }: any) {
             👨‍👩‍👧‍👦 Mis Hijos
           </h3>
           <div className="space-y-3">
-            {hijos.map((hijo: any) => (
-              <div key={hijo.id} className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
-                      {hijo.initials}
+            {hijos.length > 0 ? (
+              hijos.map((hijo: any) => (
+                <div key={hijo.id} className="bg-white rounded-lg p-4 border border-slate-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+                        {hijo.initials}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-900">{hijo.name}</h4>
+                        <p className="text-sm text-slate-600">{hijo.age} años • {hijo.grade}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900">{hijo.name}</h4>
-                      <p className="text-sm text-slate-600">{hijo.age} años • {hijo.grade}</p>
+                    {hijo.streak > 0 && (
+                      <div className="text-right">
+                        <p className="text-sm text-slate-600">Racha</p>
+                        <p className="text-lg font-bold text-amber-600">🔥 {hijo.streak} días</p>
+                      </div>
+                    )}
+                  </div>
+                  {hijo.nextClass && (
+                    <div className="mt-3 pt-3 border-t border-slate-200">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-600">Próxima clase:</span>
+                        <span className="font-medium text-slate-900">{hijo.nextClass.time}</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-slate-600">Racha</p>
-                    <p className="text-lg font-bold text-amber-600">🔥 {hijo.streak} días</p>
-                  </div>
+                  )}
                 </div>
-                <div className="mt-3 pt-3 border-t border-slate-200">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-600">Próxima clase:</span>
-                    <span className="font-medium text-slate-900">{hijo.nextClass.time}</span>
-                  </div>
-                </div>
+              ))
+            ) : (
+              <div className="bg-white rounded-lg p-8 text-center border border-slate-200">
+                <p className="text-slate-500 mb-4">Aún no has registrado estudiantes</p>
+                <button className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg hover:shadow-md transition-all">
+                  Agregar Hijo/a
+                </button>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -299,6 +433,23 @@ function StatCard({ label, value, subtitle, icon: Icon }: any) {
 // ============================================================================
 
 function TabMisHijos({ hijos }: any) {
+  if (hijos.length === 0) {
+    return (
+      <div className="h-full flex items-center justify-center p-6">
+        <div className="text-center bg-white rounded-lg p-12 border border-slate-200 shadow-sm max-w-md">
+          <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-4">
+            <Users className="w-8 h-8 text-indigo-600" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-900 mb-2">No hay estudiantes registrados</h3>
+          <p className="text-slate-600 mb-6">Comienza agregando a tu primer hijo/a para acceder a las clases y contenido educativo.</p>
+          <button className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-md transition-all">
+            Agregar Hijo/a
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full overflow-hidden flex flex-col">
       {/* Grid de Hijos (2 columnas simétricas) */}
@@ -352,11 +503,18 @@ function TabMisHijos({ hijos }: any) {
             </div>
 
             {/* Próxima clase */}
-            <div className="bg-white rounded-lg p-4 border-l-4 border-indigo-500">
-              <p className="text-xs text-slate-600 mb-1">Próxima Clase</p>
-              <p className="font-semibold text-slate-900">{hijo.nextClass.subject}</p>
-              <p className="text-sm text-slate-600">{hijo.nextClass.time}</p>
-            </div>
+            {hijo.nextClass ? (
+              <div className="bg-white rounded-lg p-4 border-l-4 border-indigo-500">
+                <p className="text-xs text-slate-600 mb-1">Próxima Clase</p>
+                <p className="font-semibold text-slate-900">{hijo.nextClass.subject}</p>
+                <p className="text-sm text-slate-600">{hijo.nextClass.time}</p>
+              </div>
+            ) : (
+              <div className="bg-slate-100 rounded-lg p-4 border-l-4 border-slate-300">
+                <p className="text-xs text-slate-600 mb-1">Próxima Clase</p>
+                <p className="text-sm text-slate-500">No hay clases programadas</p>
+              </div>
+            )}
 
             {/* Botón de acción */}
             <button className="w-full mt-4 px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-lg hover:shadow-md transition-all">
@@ -418,35 +576,77 @@ function TabMisHijos({ hijos }: any) {
 // TAB CALENDARIO
 // ============================================================================
 
-function TabCalendario() {
-  const weekDays = [
-    {
-      name: 'Lunes',
-      date: '14 Octubre 2024',
-      classCount: 2,
-      classes: [
-        { id: '1', time: '14:00', subject: 'Álgebra', teacher: 'Ana García', child: 'María' },
-        { id: '2', time: '16:00', subject: 'Programación', teacher: 'Carlos López', child: 'María' }
-      ]
-    },
-    {
-      name: 'Martes',
-      date: '15 Octubre 2024',
-      classCount: 1,
-      classes: [
-        { id: '3', time: '15:00', subject: 'Geometría', teacher: 'Laura Martínez', child: 'Juan' }
-      ]
-    },
-    {
-      name: 'Miércoles',
-      date: '16 Octubre 2024',
-      classCount: 2,
-      classes: [
-        { id: '4', time: '14:00', subject: 'Física', teacher: 'Ana García', child: 'María' },
-        { id: '5', time: '17:00', subject: 'Robótica', teacher: 'Carlos López', child: 'Juan' }
-      ]
-    }
-  ];
+function TabCalendario({ clases, estudiantes }: { clases: Clase[]; estudiantes: Estudiante[] }) {
+  // Agrupar clases por día de la semana
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  // Obtener inicio de la semana (domingo)
+  const inicioSemana = new Date(hoy);
+  inicioSemana.setDate(hoy.getDate() - hoy.getDay());
+
+  // Generar próximos 7 días
+  const diasSemana = Array.from({ length: 7 }, (_, i) => {
+    const fecha = new Date(inicioSemana);
+    fecha.setDate(inicioSemana.getDate() + i);
+    return fecha;
+  });
+
+  // Agrupar clases por día
+  const weekDays = diasSemana.map((fecha) => {
+    const inicioDia = new Date(fecha);
+    inicioDia.setHours(0, 0, 0, 0);
+    const finDia = new Date(fecha);
+    finDia.setHours(23, 59, 59, 999);
+
+    const clasesDelDia = clases
+      .filter((clase) => {
+        const fechaClase = new Date(clase.fecha_hora_inicio);
+        return fechaClase >= inicioDia && fechaClase <= finDia;
+      })
+      .map((clase) => {
+        const estudianteInscrito = clase.inscripciones[0]?.estudiante;
+        return {
+          id: clase.id,
+          time: new Date(clase.fecha_hora_inicio).toLocaleTimeString('es-AR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          subject: clase.ruta_curricular.nombre,
+          teacher: `${clase.docente.user.nombre} ${clase.docente.user.apellido}`,
+          child: estudianteInscrito ? estudianteInscrito.nombre : 'Sin asignar',
+        };
+      });
+
+    return {
+      name: fecha.toLocaleDateString('es-AR', { weekday: 'long' }),
+      date: fecha.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }),
+      classCount: clasesDelDia.length,
+      classes: clasesDelDia,
+    };
+  }).filter((dia) => dia.classCount > 0); // Solo mostrar días con clases
+
+  if (weekDays.length === 0) {
+    return (
+      <div className="h-full flex items-center justify-center p-6">
+        <div className="text-center bg-white rounded-lg p-12 border border-slate-200 shadow-sm max-w-md">
+          <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-4">
+            <Calendar className="w-8 h-8 text-indigo-600" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-900 mb-2">No hay clases programadas</h3>
+          <p className="text-slate-600 mb-6">Aún no tienes clases reservadas para esta semana.</p>
+          <button className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-md transition-all">
+            Ver Clases Disponibles
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const inicioSemanaStr = inicioSemana.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+  const finSemanaDate = new Date(inicioSemana);
+  finSemanaDate.setDate(inicioSemana.getDate() + 6);
+  const finSemanaStr = finSemanaDate.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
     <div className="p-6 space-y-4 overflow-y-auto h-full">
@@ -459,7 +659,7 @@ function TabCalendario() {
             <ChevronLeft className="w-5 h-5" />
           </button>
           <span className="text-sm font-medium text-slate-700">
-            14 - 20 Octubre 2024
+            {inicioSemanaStr} - {finSemanaStr}
           </span>
           <button className="px-3 py-2 text-slate-600 hover:text-slate-900">
             <ChevronRight className="w-5 h-5" />
@@ -517,51 +717,100 @@ function TabCalendario() {
 // TAB PAGOS
 // ============================================================================
 
-function TabPagos() {
-  const payments = [
-    { id: '1', date: '1 Oct 2024', concept: 'Membresía Mensual - Octubre', amount: 200, status: 'Pagado' },
-    { id: '2', date: '1 Sep 2024', concept: 'Membresía Mensual - Septiembre', amount: 200, status: 'Pagado' },
-    { id: '3', date: '1 Ago 2024', concept: 'Membresía Mensual - Agosto', amount: 200, status: 'Pagado' }
-  ];
+function TabPagos({ membresia }: { membresia: Membresia | null }) {
+  const tieneMembresia = membresia && membresia.estado === 'Activa';
+
+  // Mock payments for now (TODO: fetch from backend)
+  const payments = tieneMembresia
+    ? [
+        {
+          id: '1',
+          date: new Date(membresia.fecha_inicio).toLocaleDateString('es-AR'),
+          concept: `${membresia.producto.nombre}`,
+          amount: membresia.producto.precio,
+          status: 'Pagado',
+        },
+      ]
+    : [];
 
   return (
     <div className="grid grid-cols-[40%_60%] gap-6 p-6 h-full overflow-hidden">
       {/* Columna Izquierda - Resumen de Pagos */}
       <div className="space-y-4 overflow-y-auto">
         {/* Estado de cuenta */}
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg p-6 text-white shadow-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <CheckCircle className="w-5 h-5" />
-            <span className="text-sm font-medium">Estado de Cuenta</span>
+        {tieneMembresia ? (
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg p-6 text-white shadow-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle className="w-5 h-5" />
+              <span className="text-sm font-medium">Estado de Cuenta</span>
+            </div>
+            <p className="text-3xl font-bold mb-1">Al Día ✓</p>
+            <p className="text-sm text-emerald-100">
+              Tu membresía está activa y al corriente
+            </p>
           </div>
-          <p className="text-3xl font-bold mb-1">Al Día ✓</p>
-          <p className="text-sm text-emerald-100">
-            Tu membresía está activa y al corriente
-          </p>
-        </div>
+        ) : (
+          <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg p-6 text-white shadow-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-5 h-5" />
+              <span className="text-sm font-medium">Estado de Cuenta</span>
+            </div>
+            <p className="text-3xl font-bold mb-1">Sin Membresía</p>
+            <p className="text-sm text-amber-100">
+              Adquiere una membresía para acceder a todas las clases
+            </p>
+          </div>
+        )}
 
         {/* Total abonado */}
-        <div className="bg-slate-50 rounded-lg p-6 border border-slate-200 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-600 mb-4">
-            Información de Pago
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-slate-600">Total Abonado (2024)</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">$2,400</p>
-            </div>
-            <div className="pt-4 border-t border-slate-200">
-              <p className="text-sm text-slate-600">Último Pago</p>
-              <p className="text-lg font-semibold text-slate-900 mt-1">$200</p>
-              <p className="text-xs text-slate-500 mt-1">1 de Octubre, 2024</p>
-            </div>
-            <div className="pt-4 border-t border-slate-200">
-              <p className="text-sm text-slate-600">Próximo Pago</p>
-              <p className="text-lg font-semibold text-slate-900 mt-1">$200</p>
-              <p className="text-xs text-slate-500 mt-1">1 de Noviembre, 2024</p>
+        {tieneMembresia && (
+          <div className="bg-slate-50 rounded-lg p-6 border border-slate-200 shadow-sm">
+            <h3 className="text-sm font-semibold text-slate-600 mb-4">
+              Información de Pago
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-slate-600">Membresía Activa</p>
+                <p className="text-xl font-bold text-slate-900 mt-1">{membresia.producto.nombre}</p>
+              </div>
+              <div className="pt-4 border-t border-slate-200">
+                <p className="text-sm text-slate-600">Último Pago</p>
+                <p className="text-lg font-semibold text-slate-900 mt-1">${membresia.producto.precio}</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {new Date(membresia.fecha_inicio).toLocaleDateString('es-AR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </p>
+              </div>
+              <div className="pt-4 border-t border-slate-200">
+                <p className="text-sm text-slate-600">Vencimiento</p>
+                <p className="text-lg font-semibold text-slate-900 mt-1">
+                  {new Date(membresia.fecha_fin).toLocaleDateString('es-AR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {!tieneMembresia && (
+          <div className="bg-slate-50 rounded-lg p-6 border border-slate-200 shadow-sm">
+            <h3 className="text-sm font-semibold text-slate-600 mb-4">
+              Adquiere una Membresía
+            </h3>
+            <p className="text-sm text-slate-600 mb-4">
+              Accede a todas las clases, contenido educativo y beneficios exclusivos.
+            </p>
+            <button className="w-full px-4 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-md transition-all">
+              Ver Planes
+            </button>
+          </div>
+        )}
 
         {/* Método de pago */}
         <div className="bg-slate-50 rounded-lg p-6 border border-slate-200 shadow-sm">
@@ -589,55 +838,66 @@ function TabPagos() {
           <h3 className="text-lg font-semibold text-slate-900">
             Historial de Pagos
           </h3>
-          <select className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 bg-white">
-            <option>Últimos 3 meses</option>
-            <option>Últimos 6 meses</option>
-            <option>Este año</option>
-            <option>Todo el historial</option>
-          </select>
+          {payments.length > 0 && (
+            <select className="px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-700 bg-white">
+              <option>Últimos 3 meses</option>
+              <option>Últimos 6 meses</option>
+              <option>Este año</option>
+              <option>Todo el historial</option>
+            </select>
+          )}
         </div>
 
         {/* Tabla de pagos */}
-        <div className="overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-200">
-                <th className="text-left text-xs font-semibold text-slate-600 pb-3">
-                  Fecha
-                </th>
-                <th className="text-left text-xs font-semibold text-slate-600 pb-3">
-                  Concepto
-                </th>
-                <th className="text-right text-xs font-semibold text-slate-600 pb-3">
-                  Monto
-                </th>
-                <th className="text-right text-xs font-semibold text-slate-600 pb-3">
-                  Estado
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments.map(payment => (
-                <tr key={payment.id} className="border-b border-slate-100">
-                  <td className="py-3 text-sm text-slate-900">
-                    {payment.date}
-                  </td>
-                  <td className="py-3 text-sm text-slate-700">
-                    {payment.concept}
-                  </td>
-                  <td className="py-3 text-sm font-semibold text-slate-900 text-right">
-                    ${payment.amount}
-                  </td>
-                  <td className="py-3 text-right">
-                    <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded">
-                      {payment.status}
-                    </span>
-                  </td>
+        {payments.length > 0 ? (
+          <div className="overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left text-xs font-semibold text-slate-600 pb-3">
+                    Fecha
+                  </th>
+                  <th className="text-left text-xs font-semibold text-slate-600 pb-3">
+                    Concepto
+                  </th>
+                  <th className="text-right text-xs font-semibold text-slate-600 pb-3">
+                    Monto
+                  </th>
+                  <th className="text-right text-xs font-semibold text-slate-600 pb-3">
+                    Estado
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {payments.map(payment => (
+                  <tr key={payment.id} className="border-b border-slate-100">
+                    <td className="py-3 text-sm text-slate-900">
+                      {payment.date}
+                    </td>
+                    <td className="py-3 text-sm text-slate-700">
+                      {payment.concept}
+                    </td>
+                    <td className="py-3 text-sm font-semibold text-slate-900 text-right">
+                      ${payment.amount}
+                    </td>
+                    <td className="py-3 text-right">
+                      <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded">
+                        {payment.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg p-8 text-center border border-slate-200">
+            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-8 h-8 text-slate-400" />
+            </div>
+            <p className="text-slate-500">No hay pagos registrados</p>
+          </div>
+        )}
       </div>
     </div>
   );
