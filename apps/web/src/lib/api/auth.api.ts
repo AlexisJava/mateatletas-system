@@ -1,0 +1,124 @@
+import apiClient from '../axios';
+
+/**
+ * Tipos para los requests de autenticación
+ */
+
+export interface RegisterData {
+  email: string;
+  password: string;
+  nombre: string;
+  apellido: string;
+  dni?: string;
+  telefono?: string;
+}
+
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+/**
+ * Tipos para las responses de autenticación
+ */
+
+export type AuthRole = 'tutor' | 'docente' | 'admin' | 'estudiante';
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  nombre: string;
+  apellido: string;
+  role: AuthRole;
+  dni?: string | null;
+  telefono?: string | null;
+  fecha_registro?: string;
+  ha_completado_onboarding?: boolean;
+  titulo?: string | null;
+  bio?: string | null;
+  fecha_nacimiento?: string;
+  nivel_escolar?: string;
+  foto_url?: string | null;
+  puntos_totales?: number;
+  nivel_actual?: number;
+  equipo?: {
+    id: string;
+    nombre: string;
+    color_primario: string;
+  } | null;
+  tutor?: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+  } | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+  user: AuthUser;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  user: AuthUser;
+}
+
+export interface LogoutResponse {
+  message: string;
+  description: string;
+}
+
+/**
+ * API de autenticación
+ * Funciones para comunicarse con los endpoints de auth del backend
+ */
+export const authApi = {
+  /**
+   * Registra un nuevo tutor en la plataforma
+   * @param data - Datos del tutor a registrar
+   * @returns Promise con el tutor creado
+   */
+  register: (data: RegisterData): Promise<RegisterResponse> => {
+    return apiClient.post('/auth/register', data);
+  },
+
+  /**
+   * Autentica un tutor existente
+   * @param data - Credenciales del tutor (email, password)
+   * @returns Promise con el token JWT y datos del usuario
+   */
+  login: (data: LoginData): Promise<LoginResponse> => {
+    return apiClient.post('/auth/login', data);
+  },
+
+  /**
+   * Obtiene el perfil del tutor autenticado
+   * Requiere token JWT en localStorage (se adjunta automáticamente)
+   * @returns Promise con los datos del tutor
+   */
+  getProfile: (): Promise<AuthUser> => {
+    return apiClient.get('/auth/profile');
+  },
+
+  /**
+   * Autentica un estudiante con sus credenciales propias
+   * @param data - Credenciales del estudiante (email, password)
+   * @returns Promise con el token JWT y datos del estudiante
+   */
+  loginEstudiante: (data: LoginData): Promise<LoginResponse> => {
+    return apiClient.post('/auth/estudiante/login', data);
+  },
+
+  /**
+   * Cierra la sesión del usuario
+   * Requiere token JWT en localStorage (se adjunta automáticamente)
+   * Nota: El token debe ser eliminado manualmente del localStorage después de llamar a esta función
+   * @returns Promise con mensaje de confirmación
+   */
+  logout: (): Promise<LogoutResponse> => {
+    return apiClient.post('/auth/logout');
+  },
+};
