@@ -302,7 +302,16 @@ export class PagosService {
    */
   async procesarWebhookMercadoPago(body: any) {
     this.logger.log('📩 Webhook recibido de MercadoPago');
-    this.logger.debug(`Webhook body: ${JSON.stringify(body)}`);
+
+    // Log sanitizado - NO exponer payload completo que puede contener datos sensibles
+    const sanitizedLog = {
+      type: body.type,
+      action: body.action,
+      dataId: body.data?.id,
+      liveMode: body.live_mode,
+      timestamp: new Date().toISOString(),
+    };
+    this.logger.debug(`Webhook sanitizado: ${JSON.stringify(sanitizedLog)}`);
 
     // En modo mock, ignorar webhooks
     if (this.mockMode) {

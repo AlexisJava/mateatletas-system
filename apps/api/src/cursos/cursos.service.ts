@@ -537,38 +537,55 @@ export class CursosService {
   }
 
   /**
-   * Obtener siguiente lección disponible para el estudiante
-   * Implementa Progressive Disclosure
+   * Obtiene la siguiente lección disponible para un estudiante
+   * Implementa Progressive Disclosure (una lección a la vez)
+   *
+   * OPTIMIZADO: Elimina N+1 queries cargando todo el progreso en una sola consulta.
+   * Antes: N queries (una por cada lección)
+   * Ahora: 2 queries (módulos + progreso completo)
    */
   async getSiguienteLeccion(productoId: string, estudianteId: string) {
+    // 1. Obtener módulos con lecciones del producto
     const modulos = await this.findModulosByProducto(productoId);
 
+    // 2. Extraer todos los IDs de lecciones del curso
+    const leccionIds = modulos.flatMap((modulo) =>
+      modulo.lecciones.map((leccion) => leccion.id)
+    );
+
+    if (leccionIds.length === 0) {
+      return null; // Curso sin lecciones
+    }
+
+    // 3. OPTIMIZACIÓN: Cargar TODO el progreso del estudiante en UNA SOLA query
+    const progresos = await this.prisma.progresoLeccion.findMany({
+      where: {
+        estudiante_id: estudianteId,
+        leccion_id: { in: leccionIds },
+      },
+      select: {
+        leccion_id: true,
+        completada: true,
+      },
+    });
+
+    // 4. Crear un Map para acceso O(1) en lugar de queries repetidas
+    const progresoMap = new Map<string, boolean>();
+    progresos.forEach((p) => {
+      progresoMap.set(p.leccion_id, p.completada);
+    });
+
+    // 5. Iterar sobre módulos y lecciones con progreso ya cargado en memoria
     for (const modulo of modulos) {
       for (const leccion of modulo.lecciones) {
-        // Verificar si ya está completada
-        const progreso = await this.prisma.progresoLeccion.findUnique({
-          where: {
-            estudiante_id_leccion_id: {
-              estudiante_id: estudianteId,
-              leccion_id: leccion.id,
-            },
-          },
-        });
+        // Verificar si ya está completada (O(1) lookup)
+        const completada = progresoMap.get(leccion.id) ?? false;
+        if (completada) continue;
 
-        if (progreso?.completada) continue;
-
-        // Verificar prerequisito
+        // Verificar prerequisito (O(1) lookup si existe)
         if (leccion.leccion_prerequisito_id) {
-          const prerequisito = await this.prisma.progresoLeccion.findUnique({
-            where: {
-              estudiante_id_leccion_id: {
-                estudiante_id: estudianteId,
-                leccion_id: leccion.leccion_prerequisito_id,
-              },
-            },
-          });
-
-          if (!prerequisito?.completada) continue;
+          const prerequisitoCompletado = progresoMap.get(leccion.leccion_prerequisito_id) ?? false;
+          if (!prerequisitoCompletado) continue;
         }
 
         // Esta es la siguiente lección disponible

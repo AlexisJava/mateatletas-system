@@ -6,6 +6,9 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
 import { Role } from '../auth/decorators/roles.decorator';
+import { AdminStatsService } from './services/admin-stats.service';
+import { AdminAlertasService } from './services/admin-alertas.service';
+import { AdminUsuariosService } from './services/admin-usuarios.service';
 
 type TutorRecordWithRelations = Prisma.TutorGetPayload<{
   include: {
@@ -34,10 +37,19 @@ type UserRecordWithDependencies =
   | { role: Role.Docente; record: DocenteRecordWithRelations }
   | { role: Role.Admin; record: Prisma.AdminGetPayload<{}> };
 
-
+/**
+ * Servicio principal de administración
+ * REFACTORIZADO: Delega operaciones específicas a servicios especializados
+ * Mantiene compatibilidad con controlador existente actuando como facade
+ */
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private statsService: AdminStatsService,
+    private alertasService: AdminAlertasService,
+    private usuariosService: AdminUsuariosService,
+  ) {}
 
   /**
    * Obtener estadísticas del dashboard administrativo

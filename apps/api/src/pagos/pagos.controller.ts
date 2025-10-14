@@ -12,6 +12,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { IniciarSuscripcionDto } from './dto/iniciar-suscripcion.dto';
 import { IniciarCompraCursoDto } from './dto/iniciar-compra-curso.dto';
+import { MercadoPagoWebhookDto } from './dto/mercadopago-webhook.dto';
+import { MercadoPagoWebhookGuard } from './guards/mercadopago-webhook.guard';
 
 /**
  * Controller para gestionar pagos y membresías
@@ -59,10 +61,12 @@ export class PagosController {
   /**
    * POST /pagos/webhook
    * Recibe notificaciones de MercadoPago sobre pagos
-   * Endpoint público (no requiere autenticación)
+   * Endpoint público (no requiere autenticación JWT)
+   * IMPORTANTE: Protegido con validación de firma HMAC de MercadoPago
    */
   @Post('webhook')
-  async procesarWebhook(@Body() body: any) {
+  @UseGuards(MercadoPagoWebhookGuard)
+  async procesarWebhook(@Body() body: MercadoPagoWebhookDto) {
     return this.pagosService.procesarWebhookMercadoPago(body);
   }
 
