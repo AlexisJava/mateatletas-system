@@ -96,17 +96,21 @@ export default function TutorDashboard() {
       setLoading(true);
 
       // Cargar estudiantes, clases y membresía en paralelo
+      // NOTA: apiClient ya retorna response.data automáticamente (ver axios interceptor)
       const [estudiantesRes, clasesRes, membresiaRes] = await Promise.all([
         apiClient.get('/estudiantes'),
         apiClient.get('/clases'),
         apiClient.get('/pagos/membresia'),
       ]);
 
-      setEstudiantes(estudiantesRes.data || []);
+      // estudiantesRes ya es { data: [...], total: X, page: Y }
+      console.log('📊 Datos del backend:', { estudiantesRes, clasesRes, membresiaRes });
+
+      setEstudiantes(estudiantesRes?.data || []);
       setClases(clasesRes || []);
-      setMembresia(membresiaRes.membresia || null);
+      setMembresia(membresiaRes?.membresia || null);
     } catch (error) {
-      console.error('Error cargando datos del dashboard:', error);
+      console.error('❌ Error cargando datos del dashboard:', error);
     } finally {
       setLoading(false);
     }
