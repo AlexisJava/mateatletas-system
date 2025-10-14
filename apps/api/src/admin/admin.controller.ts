@@ -16,6 +16,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { CrearRutaDto } from './dto/crear-ruta.dto';
 import { ActualizarRutaDto } from './dto/actualizar-ruta.dto';
+import { CrearAlertaDto } from './dto/crear-alerta.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -115,18 +116,11 @@ export class AdminController {
    * Rol: Admin
    */
   @Post('alertas')
-  async crearAlerta(
-    @Body()
-    body: {
-      estudianteId: string;
-      claseId: string;
-      descripcion: string;
-    },
-  ) {
+  async crearAlerta(@Body() dto: CrearAlertaDto) {
     return this.adminService.crearAlerta(
-      body.estudianteId,
-      body.claseId,
-      body.descripcion,
+      dto.estudianteId,
+      dto.claseId,
+      dto.descripcion,
     );
   }
 
