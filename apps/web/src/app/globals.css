@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Colores del design system Crash Bandicoot - Paleta oficial */
+  --color-primary: #ff6b35;       /* Naranja vibrante */
+  --color-secondary: #f7b801;     /* Amarillo dorado */
+  --color-accent: #00d9ff;        /* Cyan brillante */
+  --color-success: #4caf50;       /* Verde éxito */
+  --color-danger: #f44336;        /* Rojo peligro */
+  --color-dark: #2a1a5e;          /* Morado oscuro */
+  --color-light: #fff9e6;         /* Beige claro */
+
+  /* Aliases para compatibilidad */
+  --color-orange-primary: var(--color-primary);
+  --color-yellow-energy: var(--color-secondary);
+  --color-blue-primary: var(--color-accent);
+  --color-green-success: var(--color-success);
+  --color-red-error: var(--color-danger);
+  --color-purple-special: var(--color-dark);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Fuentes */
+  --font-lilita: 'Lilita One', cursive;
+  --font-fredoka: 'Fredoka', sans-serif;
+  --font-sans: var(--font-fredoka);
+
+  /* Sombras chunky (sin blur) */
+  --shadow-chunky-sm: 3px 3px 0px rgba(0,0,0,1);
+  --shadow-chunky-md: 5px 5px 0px rgba(0,0,0,1);
+  --shadow-chunky-lg: 8px 8px 0px rgba(0,0,0,1);
+}
+
+:root {
+  /* Ecosistema del Tutor - Intensidad Media */
+  --background: #f8f9fa;          /* Gris muy claro, más suave que blanco puro */
+  --foreground: #212529;           /* Gris oscuro para texto, menos agresivo que negro puro */
+  --background-card: #ffffff;      /* Blanco para cards */
+  --border-subtle: #dee2e6;        /* Bordes suaves */
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-fredoka);
+  font-weight: 400;               /* Peso normal por defecto */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-lilita);
+}
+
+/* Aplicar Fredoka globalmente */
+* {
+  font-family: var(--font-fredoka);
+}
+
+/* Mantener Lilita One para títulos */
+.font-lilita,
+[class*="text-"] h1,
+[class*="text-"] h2,
+[class*="text-"] h3 {
+  font-family: var(--font-lilita);
+}
