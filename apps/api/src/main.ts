@@ -9,8 +9,19 @@ async function bootstrap() {
   // Global prefix for all routes
   app.setGlobalPrefix('api');
 
-  // Enable CORS
-  app.enableCors();
+  // Enable CORS with secure configuration
+  app.enableCors({
+    origin: [
+      'http://localhost:3000', // Frontend development
+      'http://localhost:3002', // Frontend alternative port
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+    ].filter(Boolean), // Remove undefined values
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    exposedHeaders: ['Content-Disposition'], // Para descargas de archivos
+    maxAge: 3600, // Cache preflight requests por 1 hora
+  });
 
   // Global validation pipe
   app.useGlobalPipes(

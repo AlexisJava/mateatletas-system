@@ -22,6 +22,10 @@ import {
   LogOut,
   ChevronDown,
 } from 'lucide-react';
+import MisHijosTab from './MisHijosTab';
+import CalendarioTab from './CalendarioTab';
+import PagosTab from './PagosTab';
+import AyudaTab from './AyudaTab';
 
 interface DashboardViewProps {
   user: any;
@@ -370,9 +374,9 @@ export default function DashboardView({
                                   </span>
                                 </div>
                                 <div className="flex-1">
-                                  <h3 className="font-bold text-gray-900">{clase.ruta_curricular.nombre}</h3>
+                                  <h3 className="font-bold text-gray-900">{clase.ruta_curricular?.nombre || 'Clase sin ruta asignada'}</h3>
                                   <p className="text-sm text-gray-600">
-                                    {estudianteInscrito?.nombre} • Prof. {clase.docente.user.nombre}
+                                    {estudianteInscrito?.nombre} • Prof. {clase.docente?.user?.nombre || 'Docente'}
                                   </p>
                                 </div>
                               </div>
@@ -400,15 +404,17 @@ export default function DashboardView({
             </div>
           )}
 
-          {/* Otros tabs placeholder */}
-          {activeTab !== 'dashboard' && (
-            <div className="h-full flex items-center justify-center bg-white rounded-xl shadow-lg border-2 border-gray-300">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-gray-900 mb-2">Próximamente</p>
-                <p className="text-gray-600">La pestaña "{tabs.find(t => t.id === activeTab)?.label}" está en desarrollo</p>
-              </div>
-            </div>
-          )}
+          {/* Mis Hijos Tab */}
+          {activeTab === 'hijos' && <MisHijosTab estudiantes={estudiantes} />}
+
+          {/* Calendario Tab */}
+          {activeTab === 'calendario' && <CalendarioTab />}
+
+          {/* Pagos Tab */}
+          {activeTab === 'pagos' && <PagosTab />}
+
+          {/* Ayuda Tab */}
+          {activeTab === 'ayuda' && <AyudaTab />}
         </div>
       </main>
     </div>

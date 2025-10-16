@@ -439,7 +439,7 @@ export default function AdminProductosPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Fecha de Inicio *
+                        Fecha de Inicio
                       </label>
                       <input
                         type="date"
@@ -450,11 +450,12 @@ export default function AdminProductosPage() {
                         }`}
                       />
                       {formErrors.fechaInicio && <p className="text-red-500 text-sm mt-1">{formErrors.fechaInicio}</p>}
+                      <p className="text-xs text-gray-500 mt-1">Opcional si especificás duración en meses</p>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Fecha de Fin *
+                        Fecha de Fin
                       </label>
                       <input
                         type="date"
@@ -465,24 +466,45 @@ export default function AdminProductosPage() {
                         }`}
                       />
                       {formErrors.fechaFin && <p className="text-red-500 text-sm mt-1">{formErrors.fechaFin}</p>}
+                      <p className="text-xs text-gray-500 mt-1">Opcional si especificás duración en meses</p>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Cupo Máximo *
-                    </label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={formData.cupoMaximo || ''}
-                      onChange={(e) => setFormData({ ...formData, cupoMaximo: parseInt(e.target.value) || undefined })}
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent ${
-                        formErrors.cupoMaximo ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Ej: 30"
-                    />
-                    {formErrors.cupoMaximo && <p className="text-red-500 text-sm mt-1">{formErrors.cupoMaximo}</p>}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Duración (meses)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={formData.duracionMeses || ''}
+                        onChange={(e) => setFormData({ ...formData, duracionMeses: parseInt(e.target.value) || undefined })}
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent ${
+                          formErrors.duracionMeses ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        placeholder="Ej: 9"
+                      />
+                      {formErrors.duracionMeses && <p className="text-red-500 text-sm mt-1">{formErrors.duracionMeses}</p>}
+                      <p className="text-xs text-gray-500 mt-1">Ej: "Exploradores Matemáticos de 9 meses"</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Cupo Máximo *
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={formData.cupoMaximo || ''}
+                        onChange={(e) => setFormData({ ...formData, cupoMaximo: parseInt(e.target.value) || undefined })}
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent ${
+                          formErrors.cupoMaximo ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        placeholder="Ej: 30"
+                      />
+                      {formErrors.cupoMaximo && <p className="text-red-500 text-sm mt-1">{formErrors.cupoMaximo}</p>}
+                    </div>
                   </div>
                 </div>
               )}

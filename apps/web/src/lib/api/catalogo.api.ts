@@ -9,35 +9,32 @@ import { Producto, TipoProducto } from '@/types/catalogo.types';
  * Obtener todos los productos
  */
 export const getProductos = async (): Promise<Producto[]> => {
-  console.log('🟠 [CATALOGO API] getProductos - llamando a /productos');
-  const response = await axios.get('/productos');
-  console.log('🟠 [CATALOGO API] getProductos - response:', response);
-  // El interceptor ya retorna response.data, así que response ES la data
-  return response as any;
+  // El interceptor ya retorna response.data
+  return await axios.get<Producto[]>('/productos');
 };
 
 /**
  * Obtener producto por ID
  */
 export const getProductoPorId = async (id: string): Promise<Producto> => {
-  const response = await axios.get(`/productos/${id}`);
-  return response.data;
+  // El interceptor ya retorna response.data
+  return await axios.get<Producto>(`/productos/${id}`);
 };
 
 /**
  * Obtener solo cursos
  */
 export const getCursos = async (): Promise<Producto[]> => {
-  const response = await axios.get('/productos/cursos');
-  return response.data;
+  // El interceptor ya retorna response.data
+  return await axios.get<Producto[]>('/productos/cursos');
 };
 
 /**
  * Obtener solo suscripciones
  */
 export const getSuscripciones = async (): Promise<Producto[]> => {
-  const response = await axios.get('/productos/suscripciones');
-  return response.data;
+  // El interceptor ya retorna response.data
+  return await axios.get<Producto[]>('/productos/suscripciones');
 };
 
 /**

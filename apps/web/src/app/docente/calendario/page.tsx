@@ -367,6 +367,9 @@ function EventoCard({ evento, onClick, colorAccent }: EventoCardProps) {
     badgeColor = evento.recordatorio.completado
       ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
       : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+  } else if (evento.tipo === TipoEvento.NOTA && evento.nota) {
+    infoAdicional = evento.nota.categoria || '📝 Nota';
+    badgeColor = 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300';
   }
 
   return (
@@ -428,6 +431,22 @@ function EventoCard({ evento, onClick, colorAccent }: EventoCardProps) {
               +{evento.tarea.subtareas.length - 3} más...
             </p>
           )}
+        </div>
+      )}
+
+      {/* Contenido preview para Notas */}
+      {evento.tipo === TipoEvento.NOTA && evento.nota?.contenido && (
+        <div className="mt-3 pl-9">
+          <div className="glass-card p-3 rounded-lg">
+            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 font-mono whitespace-pre-wrap">
+              {evento.nota.contenido}
+            </p>
+            {evento.nota.contenido.length > 150 && (
+              <p className="text-xs text-purple-600 dark:text-purple-400 mt-2">
+                Click para ver contenido completo...
+              </p>
+            )}
+          </div>
         </div>
       )}
     </motion.div>

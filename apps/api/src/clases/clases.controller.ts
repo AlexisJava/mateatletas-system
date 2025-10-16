@@ -95,6 +95,28 @@ export class ClasesController {
   }
 
   /**
+   * GET /api/clases/calendario - Obtener calendario de clases del tutor
+   * Para el portal de tutores - pestaña "Calendario"
+   * Muestra las clases de los estudiantes del tutor filtradas por mes/año
+   * @param req - Request con usuario autenticado
+   * @param mes - Mes (1-12, opcional)
+   * @param anio - Año (opcional)
+   * @returns Clases del tutor organizadas por fecha
+   */
+  @Get('calendario')
+  @Roles(Role.Tutor)
+  async obtenerCalendarioTutor(
+    @Req() req: AuthenticatedRequest,
+    @Query('mes') mes?: string,
+    @Query('anio') anio?: string,
+  ) {
+    const tutorId = req.user.id;
+    const mesNum = mes ? parseInt(mes, 10) : undefined;
+    const anioNum = anio ? parseInt(anio, 10) : undefined;
+    return this.clasesService.obtenerCalendarioTutor(tutorId, mesNum, anioNum);
+  }
+
+  /**
    * Reservar un cupo en una clase
    * POST /api/clases/:id/reservar
    */

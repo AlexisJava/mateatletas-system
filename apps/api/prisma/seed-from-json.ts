@@ -418,20 +418,21 @@ async function loadFromJSON() {
           continue;
         }
 
-        await prisma.evento.create({
-          data: {
-            titulo: evento.titulo,
-            descripcion: evento.descripcion,
-            fecha_inicio: new Date(evento.fecha_inicio),
-            fecha_fin: evento.fecha_fin ? new Date(evento.fecha_fin) : null,
-            todo_el_dia: evento.todo_el_dia || false,
-            tipo: evento.tipo as TipoEvento,
-            color: evento.color || '#6366F1',
-            recordatorio: evento.recordatorio || false,
-            minutos_antes: evento.minutos_antes,
-            docente_id: docenteId,
-          },
-        });
+        // Skip - old evento structure no longer compatible with new Calendar system
+        // await prisma.evento.create({
+        //   data: {
+        //     titulo: evento.titulo,
+        //     descripcion: evento.descripcion,
+        //     fecha_inicio: new Date(evento.fecha_inicio),
+        //     fecha_fin: evento.fecha_fin ? new Date(evento.fecha_fin) : null,
+        //     todo_el_dia: evento.todo_el_dia || false,
+        //     tipo: evento.tipo as TipoEvento,
+        //     color: evento.color || '#6366F1',
+        //     recordatorio: evento.recordatorio || false,
+        //     minutos_antes: evento.minutos_antes,
+        //     docente_id: docenteId,
+        //   },
+        // });
         console.log(`   • ${evento.tipo}: ${evento.titulo}`);
       }
     }

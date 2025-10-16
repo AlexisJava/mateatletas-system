@@ -14,6 +14,6 @@ export class LoginDto {
    * Contraseña del tutor
    */
   @IsString()
-  @MinLength(1, { message: 'La contraseña es requerida' })
+  @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
   password!: string;
 }

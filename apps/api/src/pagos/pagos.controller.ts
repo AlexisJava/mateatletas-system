@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   Query,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PagosService } from './pagos.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -16,6 +17,7 @@ import { IniciarSuscripcionDto } from './dto/iniciar-suscripcion.dto';
 import { IniciarCompraCursoDto } from './dto/iniciar-compra-curso.dto';
 import { MercadoPagoWebhookDto } from './dto/mercadopago-webhook.dto';
 import { MercadoPagoWebhookGuard } from './guards/mercadopago-webhook.guard';
+import { SkipThrottle } from '@nestjs/throttler';
 
 /**
  * Controller para gestionar pagos y membresías
@@ -65,8 +67,10 @@ export class PagosController {
    * Recibe notificaciones de MercadoPago sobre pagos
    * Endpoint público (no requiere autenticación JWT)
    * IMPORTANTE: Protegido con validación de firma HMAC de MercadoPago
+   * Sin rate limiting para permitir múltiples webhooks de MP
    */
   @Post('webhook')
+  @SkipThrottle() // Exceptuar del rate limiting
   @UseGuards(MercadoPagoWebhookGuard)
   async procesarWebhook(@Body() body: MercadoPagoWebhookDto) {
     return this.pagosService.procesarWebhookMercadoPago(body);
@@ -90,6 +94,19 @@ export class PagosController {
       estado: membresia.estado,
       membresia,
     };
+  }
+
+  /**
+   * GET /pagos/historial - Obtener historial completo de pagos del tutor
+   * Para el portal de tutores - pestaña "Pagos"
+   * Incluye: membresías, cursos, estados, fechas, montos
+   * @param user - Usuario autenticado (tutor)
+   * @returns Historial de pagos ordenado por fecha descendente
+   */
+  @Get('historial')
+  @UseGuards(JwtAuthGuard)
+  async obtenerHistorialPagos(@GetUser() user: any) {
+    return this.pagosService.obtenerHistorialPagosTutor(user.id);
   }
 
   /**
@@ -141,10 +158,17 @@ export class PagosController {
   /**
    * POST /pagos/mock/activar-membresia/:id
    * Activa una membresía manualmente (solo para testing en modo mock)
-   * Endpoint público para facilitar testing
+   * PROTEGIDO: Solo Admin + Solo en modo desarrollo
+   * @deprecated Solo usar en desarrollo/testing
    */
   @Post('mock/activar-membresia/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
   async activarMembresiaMock(@Param('id') membresiaId: string) {
+    // Verificación adicional: solo permitir en desarrollo
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException('Mock endpoint disabled in production');
+    }
     return this.pagosService.activarMembresiaMock(membresiaId);
   }
 }

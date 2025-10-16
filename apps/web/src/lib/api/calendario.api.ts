@@ -1,4 +1,4 @@
-import { api } from './axios';
+import apiClient from '../axios';
 import type {
   Evento,
   CreateTareaDto,
@@ -17,17 +17,17 @@ import type {
 // ==================== CREAR EVENTOS ====================
 
 export const crearTarea = async (data: CreateTareaDto): Promise<Evento> => {
-  const response = await api.post('/eventos/tareas', data);
+  const response = await apiClient.post('/eventos/tareas', data);
   return response.data;
 };
 
 export const crearRecordatorio = async (data: CreateRecordatorioDto): Promise<Evento> => {
-  const response = await api.post('/eventos/recordatorios', data);
+  const response = await apiClient.post('/eventos/recordatorios', data);
   return response.data;
 };
 
 export const crearNota = async (data: CreateNotaDto): Promise<Evento> => {
-  const response = await api.post('/eventos/notas', data);
+  const response = await apiClient.post('/eventos/notas', data);
   return response.data;
 };
 
@@ -41,28 +41,28 @@ export const obtenerEventos = async (filtros?: FiltrosCalendario): Promise<Event
   if (filtros?.tipo) params.append('tipo', filtros.tipo);
   if (filtros?.busqueda) params.append('busqueda', filtros.busqueda);
   
-  const response = await api.get(`/eventos?${params.toString()}`);
+  const response = await apiClient.get(`/eventos?${params.toString()}`);
   return response.data;
 };
 
 export const obtenerEvento = async (id: string): Promise<Evento> => {
-  const response = await api.get(`/eventos/${id}`);
+  const response = await apiClient.get(`/eventos/${id}`);
   return response.data;
 };
 
 export const obtenerVistaAgenda = async (): Promise<VistaAgendaData> => {
-  const response = await api.get('/eventos/vista-agenda');
-  return response.data;
+  const response = await apiClient.get('/eventos/vista-agenda');
+  return response.data || response;
 };
 
 export const obtenerVistaSemana = async (fecha?: string): Promise<Evento[]> => {
   const params = fecha ? `?fecha=${fecha}` : '';
-  const response = await api.get(`/eventos/vista-semana${params}`);
+  const response = await apiClient.get(`/eventos/vista-semana${params}`);
   return response.data;
 };
 
 export const obtenerEstadisticas = async (): Promise<EstadisticasCalendario> => {
-  const response = await api.get('/eventos/estadisticas');
+  const response = await apiClient.get('/eventos/estadisticas');
   return response.data;
 };
 
@@ -72,7 +72,7 @@ export const actualizarTarea = async (
   id: string,
   data: Partial<CreateTareaDto>
 ): Promise<Evento> => {
-  const response = await api.patch(`/eventos/tareas/${id}`, data);
+  const response = await apiClient.patch(`/eventos/tareas/${id}`, data);
   return response.data;
 };
 
@@ -80,7 +80,7 @@ export const actualizarRecordatorio = async (
   id: string,
   data: Partial<CreateRecordatorioDto>
 ): Promise<Evento> => {
-  const response = await api.patch(`/eventos/recordatorios/${id}`, data);
+  const response = await apiClient.patch(`/eventos/recordatorios/${id}`, data);
   return response.data;
 };
 
@@ -88,7 +88,7 @@ export const actualizarNota = async (
   id: string,
   data: Partial<CreateNotaDto>
 ): Promise<Evento> => {
-  const response = await api.patch(`/eventos/notas/${id}`, data);
+  const response = await apiClient.patch(`/eventos/notas/${id}`, data);
   return response.data;
 };
 
@@ -97,7 +97,7 @@ export const actualizarFechasEvento = async (
   fecha_inicio: string,
   fecha_fin: string
 ): Promise<Evento> => {
-  const response = await api.patch(`/eventos/${id}/fechas`, {
+  const response = await apiClient.patch(`/eventos/${id}/fechas`, {
     fecha_inicio,
     fecha_fin,
   });
@@ -107,7 +107,7 @@ export const actualizarFechasEvento = async (
 // ==================== ELIMINAR EVENTOS ====================
 
 export const eliminarEvento = async (id: string): Promise<void> => {
-  await api.delete(`/eventos/${id}`);
+  await apiClient.delete(`/eventos/${id}`);
 };
 
 // ==================== UTILIDADES ====================

@@ -20,9 +20,9 @@ export class AsistenciaService {
     claseId: string,
     estudianteId: string,
     dto: MarcarAsistenciaDto,
-    docenteId: string,
+    docenteId: string | null,
   ) {
-    // 1. Verificar que la clase existe y el docente es el titular
+    // 1. Verificar que la clase existe y el docente es el titular (si aplica)
     const clase = await this.prisma.clase.findUnique({
       where: { id: claseId },
     });
@@ -31,7 +31,8 @@ export class AsistenciaService {
       throw new NotFoundException('Clase no encontrada');
     }
 
-    if (clase.docente_id !== docenteId) {
+    // Solo validar docente si docenteId está presente (no para auto-registro)
+    if (docenteId !== null && clase.docente_id !== docenteId) {
       throw new ForbiddenException(
         'Solo el docente titular puede marcar asistencia',
       );
