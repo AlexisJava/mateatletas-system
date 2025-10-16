@@ -21,3 +21,7 @@ export { Avatar } from './Avatar';
 export { Badge } from './Badge';
 
 export { Select } from './Select';
+
+export { Breadcrumbs } from './Breadcrumbs';
+
+export { ToastProvider, toast } from './Toast';
