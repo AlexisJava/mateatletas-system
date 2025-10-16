@@ -1,10 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
+import {
+  PrismaExceptionFilter,
+  HttpExceptionFilter,
+  AllExceptionsFilter,
+} from './common/filters';
+import { LoggerService } from './common/logger/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Obtener instancia del LoggerService para los filters
+  const logger = app.get(LoggerService);
 
   // Global prefix for all routes
   app.setGlobalPrefix('api');
@@ -43,8 +51,13 @@ async function bootstrap() {
     }),
   );
 
-  // Global exception filters
-  app.useGlobalFilters(new PrismaExceptionFilter());
+  // Global exception filters (orden importa: más específico a más general)
+  // 1. AllExceptionsFilter - Catch-all para errores no manejados
+  app.useGlobalFilters(new AllExceptionsFilter(logger));
+  // 2. HttpExceptionFilter - Errores HTTP específicos
+  app.useGlobalFilters(new HttpExceptionFilter(logger));
+  // 3. PrismaExceptionFilter - Errores de base de datos
+  app.useGlobalFilters(new PrismaExceptionFilter(logger));
 
   const port = process.env.PORT ?? 3001;
   await app.listen(port);

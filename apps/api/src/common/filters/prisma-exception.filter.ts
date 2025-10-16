@@ -3,35 +3,52 @@ import {
   Catch,
   ArgumentsHost,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
+import { LoggerService } from '../logger/logger.service';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Global exception filter para manejar errores de Prisma
- * Convierte errores de BD en respuestas HTTP apropiadas
+ * Convierte errores de BD en respuestas HTTP apropiadas con logging estructurado
  */
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(PrismaExceptionFilter.name);
+  constructor(private readonly logger: LoggerService) {
+    this.logger.setContext('PrismaExceptionFilter');
+  }
 
   catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest();
+    const request = ctx.getRequest<Request>();
+
+    // Generar ID único para rastrear el error
+    const errorId = uuidv4();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Error en la base de datos';
     let details: string | undefined;
 
-    // Log del error para debugging
-    this.logger.error({
-      code: exception.code,
-      meta: exception.meta,
-      message: exception.message,
-      path: request.url,
-    });
+    // Log del error con contexto completo
+    this.logger.logDatabase(
+      `Prisma Error: ${exception.code}`,
+      exception.message,
+    );
+
+    this.logger.error(
+      `Database error: ${exception.code}`,
+      exception.stack,
+      {
+        errorId,
+        code: exception.code,
+        meta: exception.meta,
+        path: request.url,
+        method: request.method,
+        userId: (request as any).user?.id,
+      },
+    );
 
     // Mapear códigos de error de Prisma a respuestas HTTP
     switch (exception.code) {
@@ -121,6 +138,8 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       error: this.getErrorName(status),
       timestamp: new Date().toISOString(),
       path: request.url,
+      method: request.method,
+      errorId, // ID único para rastreo
     };
 
     // Agregar detalles solo si existen
@@ -129,7 +148,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     }
 
     // En desarrollo, agregar información adicional
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
       errorResponse.prismaCode = exception.code;
       errorResponse.prismaMessage = exception.message;
       if (exception.meta) {
