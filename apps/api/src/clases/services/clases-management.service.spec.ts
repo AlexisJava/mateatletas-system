@@ -59,6 +59,9 @@ describe('ClasesManagementService', () => {
             producto: {
               findUnique: jest.fn(),
             },
+            tutor: {
+              findUnique: jest.fn(),
+            },
             clase: {
               create: jest.fn(),
               findUnique: jest.fn(),
@@ -380,6 +383,266 @@ describe('ClasesManagementService', () => {
 
       // Assert
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('listarClasesParaTutor', () => {
+    const mockTutor = {
+      id: 'tutor-1',
+      email: 'tutor@test.com',
+      estudiantes: [
+        {
+          id: 'est-1',
+          inscripciones_curso: [
+            { producto_id: 'curso-1' },
+            { producto_id: 'curso-2' },
+          ],
+        },
+      ],
+    };
+
+    const mockClasesDisponibles = [
+      {
+        id: 'clase-1',
+        estado: 'Programada',
+        fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+        producto_id: null,
+        inscripciones: [],
+      },
+      {
+        id: 'clase-2',
+        estado: 'Programada',
+        fecha_hora_inicio: new Date('2025-12-02T10:00:00Z'),
+        producto_id: 'curso-1',
+        inscripciones: [{ id: 'insc-1', estudiante_id: 'est-1' }],
+      },
+    ];
+
+    it('should return available classes for tutor', async () => {
+      // Arrange
+      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockClasesDisponibles as any);
+
+      // Act
+      const result = await service.listarClasesParaTutor('tutor-1');
+
+      // Assert
+      expect(result).toBeDefined();
+      expect(result).toHaveLength(2);
+    });
+
+    it('should throw NotFoundException if tutor not found', async () => {
+      // Arrange
+      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.listarClasesParaTutor('non-existent')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.listarClasesParaTutor('non-existent')).rejects.toThrow(
+        'Tutor no encontrado',
+      );
+    });
+
+    it('should filter classes based on active course enrollments', async () => {
+      // Arrange
+      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
+
+      // Act
+      await service.listarClasesParaTutor('tutor-1');
+
+      // Assert
+      expect(findManySpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: [
+              { producto_id: null },
+              { producto_id: { in: ['curso-1', 'curso-2'] } },
+            ],
+          }),
+        }),
+      );
+    });
+
+    it('should only return programmed and future classes', async () => {
+      // Arrange
+      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
+
+      // Act
+      await service.listarClasesParaTutor('tutor-1');
+
+      // Assert
+      expect(findManySpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            estado: 'Programada',
+            fecha_hora_inicio: { gte: expect.any(Date) },
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('obtenerCalendarioTutor', () => {
+    const mockTutor = {
+      id: 'tutor-1',
+      estudiantes: [{ id: 'est-1' }, { id: 'est-2' }],
+    };
+
+    const mockClases = [
+      {
+        id: 'clase-1',
+        fecha_hora_inicio: new Date('2025-12-15T10:00:00Z'),
+        inscripciones: [{ estudiante_id: 'est-1' }],
+      },
+      {
+        id: 'clase-2',
+        fecha_hora_inicio: new Date('2025-12-20T14:00:00Z'),
+        inscripciones: [{ estudiante_id: 'est-2' }],
+      },
+    ];
+
+    it('should return calendar for specified month and year', async () => {
+      // Arrange
+      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockClases as any);
+
+      // Act
+      const result = await service.obtenerCalendarioTutor('tutor-1', 12, 2025);
+
+      // Assert
+      expect(result).toBeDefined();
+      expect(result.mes).toBe(12);
+      expect(result.anio).toBe(2025);
+      expect(result.clases).toHaveLength(2);
+      expect(result.total).toBe(2);
+    });
+
+    it('should use current month/year if not provided', async () => {
+      // Arrange
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1;
+      const currentYear = now.getFullYear();
+
+      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
+
+      // Act
+      const result = await service.obtenerCalendarioTutor('tutor-1');
+
+      // Assert
+      expect(result.mes).toBe(currentMonth);
+      expect(result.anio).toBe(currentYear);
+    });
+
+    it('should throw BadRequestException for invalid month', async () => {
+      // Act & Assert
+      await expect(service.obtenerCalendarioTutor('tutor-1', 13, 2025)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.obtenerCalendarioTutor('tutor-1', 0, 2025)).rejects.toThrow(
+        'El mes debe estar entre 1 y 12',
+      );
+    });
+
+    it('should throw NotFoundException if tutor not found', async () => {
+      // Arrange
+      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(service.obtenerCalendarioTutor('non-existent', 12, 2025)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should return empty array if tutor has no students', async () => {
+      // Arrange
+      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue({
+        ...mockTutor,
+        estudiantes: [],
+      } as any);
+
+      // Act
+      const result = await service.obtenerCalendarioTutor('tutor-1', 12, 2025);
+
+      // Assert
+      expect(result.clases).toEqual([]);
+      expect(result.total).toBe(0);
+    });
+
+    it('should filter classes by date range correctly', async () => {
+      // Arrange
+      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
+
+      // Act
+      await service.obtenerCalendarioTutor('tutor-1', 12, 2025);
+
+      // Assert
+      expect(findManySpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            fecha_hora_inicio: {
+              gte: expect.any(Date),
+              lte: expect.any(Date),
+            },
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('listarClasesDeDocente', () => {
+    const mockClases = [
+      {
+        id: 'clase-1',
+        docente_id: 'doc-1',
+        fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+      },
+      {
+        id: 'clase-2',
+        docente_id: 'doc-1',
+        fecha_hora_inicio: new Date('2024-01-01T10:00:00Z'),
+      },
+    ];
+
+    it('should return future classes by default', async () => {
+      // Arrange
+      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([mockClases[0]] as any);
+
+      // Act
+      const result = await service.listarClasesDeDocente('doc-1');
+
+      // Assert
+      expect(findManySpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            docente_id: 'doc-1',
+            fecha_hora_inicio: { gte: expect.any(Date) },
+          }),
+        }),
+      );
+      expect(result).toBeDefined();
+    });
+
+    it('should include past classes when incluirPasadas is true', async () => {
+      // Arrange
+      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockClases as any);
+
+      // Act
+      const result = await service.listarClasesDeDocente('doc-1', true);
+
+      // Assert
+      expect(findManySpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            docente_id: 'doc-1',
+          },
+        }),
+      );
+      expect(result).toHaveLength(2);
     });
   });
 });
