@@ -21,9 +21,8 @@
   --color-foreground: var(--foreground);
 
   /* Fuentes */
-  --font-lilita: 'Lilita One', cursive;
-  --font-fredoka: 'Fredoka', sans-serif;
-  --font-sans: var(--font-fredoka);
+  --font-nunito: 'Nunito', sans-serif;
+  --font-sans: var(--font-nunito);
 
   /* Sombras chunky (sin blur) */
   --shadow-chunky-sm: 3px 3px 0px rgba(0,0,0,1);
@@ -32,33 +31,227 @@
 }
 
 :root {
-  /* Ecosistema del Tutor - Intensidad Media */
+  /* Ecosistema del Tutor - Intensidad Media (MODO CLARO) */
   --background: #f8f9fa;          /* Gris muy claro, más suave que blanco puro */
   --foreground: #212529;           /* Gris oscuro para texto, menos agresivo que negro puro */
   --background-card: #ffffff;      /* Blanco para cards */
   --border-subtle: #dee2e6;        /* Bordes suaves */
+
+  /* Portal Docente - Modo Claro con Purple Gradients */
+  --docente-bg-gradient-start: #f0f4ff;    /* Azul muy claro */
+  --docente-bg-gradient-mid: #f5f3ff;      /* Púrpura muy claro */
+  --docente-bg-gradient-end: #fdf4ff;      /* Rosa muy claro */
+  --docente-bg-card: #ffffff;              /* Cards blancos */
+  --docente-bg-hover: #f8f9fc;             /* Hover state */
+  --docente-border: #e5e7eb;               /* Bordes sutiles */
+  --docente-text: #1e1b4b;                 /* Texto principal (indigo oscuro) */
+  --docente-text-muted: #6b7280;           /* Texto secundario */
+  --docente-shadow: rgba(99, 102, 241, 0.1);
+  --docente-glass-bg: rgba(255, 255, 255, 0.65);
+  --docente-glass-border: rgba(139, 92, 246, 0.15);
+  --docente-accent: #8b5cf6;               /* Púrpura vibrante */
+  --docente-accent-hover: #7c3aed;         /* Púrpura oscuro */
+
+  /* Portal Admin - Mismo diseño que Docente (Purple) */
+  --admin-bg-gradient-start: #f0f4ff;
+  --admin-bg-gradient-mid: #f5f3ff;
+  --admin-bg-gradient-end: #fdf4ff;
+  --admin-bg-card: #ffffff;
+  --admin-bg-hover: #f8f9fc;
+  --admin-border: #e5e7eb;
+  --admin-text: #1e1b4b;
+  --admin-text-muted: #6b7280;
+  --admin-shadow: rgba(99, 102, 241, 0.1);
+  --admin-glass-bg: rgba(255, 255, 255, 0.65);
+  --admin-glass-border: rgba(139, 92, 246, 0.15);
+  --admin-accent: #8b5cf6;
+  --admin-accent-hover: #7c3aed;
+
+  /* Portal Estudiante - Modo Claro con Turquoise Gradients */
+  --estudiante-bg-gradient-start: #ecfeff;    /* Cyan muy claro */
+  --estudiante-bg-gradient-mid: #f0fdfa;      /* Teal muy claro */
+  --estudiante-bg-gradient-end: #f0f9ff;      /* Sky muy claro */
+  --estudiante-bg-card: #ffffff;              /* Cards blancos */
+  --estudiante-bg-hover: #f0fdf9;             /* Hover state */
+  --estudiante-border: #e5e7eb;               /* Bordes sutiles */
+  --estudiante-text: #134e4a;                 /* Texto principal (teal oscuro) */
+  --estudiante-text-muted: #6b7280;           /* Texto secundario */
+  --estudiante-shadow: rgba(20, 184, 166, 0.1);
+  --estudiante-glass-bg: rgba(255, 255, 255, 0.65);
+  --estudiante-glass-border: rgba(20, 184, 166, 0.15);
+  --estudiante-accent: #14b8a6;               /* Turquesa vibrante */
+  --estudiante-accent-hover: #0d9488;         /* Turquesa oscuro */
+}
+
+.dark {
+  /* Modo Oscuro - Purple/Violet Theme */
+  --background: #0f0a1f;                   /* Casi negro con tinte púrpura */
+  --foreground: #f1f5f9;                   /* Texto claro */
+  --background-card: #1e293b;              /* Cards oscuros */
+  --border-subtle: #334155;                /* Bordes en oscuro */
+
+  /* Portal Docente - Modo Oscuro Purple Dream */
+  --docente-bg-gradient-start: #0f0a1f;    /* Púrpura muy oscuro */
+  --docente-bg-gradient-mid: #1e1b4b;      /* Indigo oscuro */
+  --docente-bg-gradient-end: #312e81;      /* Indigo medio */
+  --docente-bg-card: #1e1b4b;              /* Cards con tinte púrpura */
+  --docente-bg-hover: #2e2a5f;             /* Hover state */
+  --docente-border: #3730a3;               /* Bordes púrpura */
+  --docente-text: #f1f5f9;                 /* Texto claro */
+  --docente-text-muted: #a5b4fc;           /* Texto secundario indigo claro */
+  --docente-shadow: rgba(139, 92, 246, 0.25);
+  --docente-glass-bg: rgba(30, 27, 75, 0.6);
+  --docente-glass-border: rgba(167, 139, 250, 0.2);
+  --docente-accent: #a78bfa;               /* Púrpura claro */
+  --docente-accent-hover: #8b5cf6;         /* Púrpura vibrante */
+
+  /* Portal Admin - Modo Oscuro (igual que Docente) */
+  --admin-bg-gradient-start: #0f0a1f;
+  --admin-bg-gradient-mid: #1e1b4b;
+  --admin-bg-gradient-end: #312e81;
+  --admin-bg-card: #1e1b4b;
+  --admin-bg-hover: #2e2a5f;
+  --admin-border: #3730a3;
+  --admin-text: #f1f5f9;
+  --admin-text-muted: #a5b4fc;
+  --admin-shadow: rgba(139, 92, 246, 0.25);
+  --admin-glass-bg: rgba(30, 27, 75, 0.6);
+  --admin-glass-border: rgba(167, 139, 250, 0.2);
+  --admin-accent: #a78bfa;
+  --admin-accent-hover: #8b5cf6;
+
+  /* Portal Estudiante - Modo Oscuro Turquoise Dream */
+  --estudiante-bg-gradient-start: #042f2e;    /* Teal muy oscuro */
+  --estudiante-bg-gradient-mid: #134e4a;      /* Teal oscuro */
+  --estudiante-bg-gradient-end: #115e59;      /* Teal medio */
+  --estudiante-bg-card: #134e4a;              /* Cards con tinte teal */
+  --estudiante-bg-hover: #1e5e5b;             /* Hover state */
+  --estudiante-border: #0f766e;               /* Bordes teal */
+  --estudiante-text: #f1f5f9;                 /* Texto claro */
+  --estudiante-text-muted: #5eead4;           /* Texto secundario teal claro */
+  --estudiante-shadow: rgba(20, 184, 166, 0.25);
+  --estudiante-glass-bg: rgba(19, 78, 74, 0.6);
+  --estudiante-glass-border: rgba(94, 234, 212, 0.2);
+  --estudiante-accent: #2dd4bf;               /* Turquesa claro */
+  --estudiante-accent-hover: #14b8a6;         /* Turquesa vibrante */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-fredoka);
+  font-family: var(--font-nunito);
   font-weight: 400;               /* Peso normal por defecto */
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-lilita);
+  font-family: var(--font-nunito);
 }
 
-/* Aplicar Fredoka globalmente */
+/* Aplicar Nunito globalmente como fuente oficial de Mateatletas Club */
 * {
-  font-family: var(--font-fredoka);
+  font-family: var(--font-nunito);
 }
 
-/* Mantener Lilita One para títulos */
-.font-lilita,
-[class*="text-"] h1,
-[class*="text-"] h2,
-[class*="text-"] h3 {
-  font-family: var(--font-lilita);
+/* ==========================================
+   GLASSMORPHISM CARDS - PORTAL DOCENTE
+   ========================================== */
+
+.glass-card {
+  @apply backdrop-blur-xl bg-white/65 dark:bg-indigo-950/60;
+  @apply border border-purple-200/30 dark:border-purple-700/30;
+  @apply shadow-2xl shadow-purple-200/20 dark:shadow-purple-900/30;
+  @apply rounded-3xl;
+  /* NO padding por defecto - cada componente controla su propio padding */
+}
+
+.glass-card-padded {
+  @apply backdrop-blur-xl bg-white/65 dark:bg-indigo-950/60;
+  @apply border border-purple-200/30 dark:border-purple-700/30;
+  @apply shadow-2xl shadow-purple-200/20 dark:shadow-purple-900/30;
+  @apply rounded-3xl p-6;
+}
+
+.glass-card-strong {
+  @apply backdrop-blur-xl bg-white/80 dark:bg-indigo-950/80;
+  @apply border border-purple-300/40 dark:border-purple-600/40;
+  @apply shadow-2xl shadow-purple-300/30 dark:shadow-purple-800/40;
+  @apply rounded-3xl;
+  /* NO padding por defecto - cada componente controla su propio padding */
+}
+
+.glass-nav {
+  @apply backdrop-blur-2xl bg-white/70 dark:bg-indigo-950/70;
+  @apply border-b border-purple-200/30 dark:border-purple-700/30;
+  @apply shadow-lg shadow-purple-200/10 dark:shadow-purple-900/20;
+}
+
+/* Transiciones suaves */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effects */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px 0 rgba(139, 92, 246, 0.2);
+}
+
+/* Animaciones sutiles */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in-right 0.4s ease-out;
+}
+
+/* Badge con glow effect */
+.badge-glow {
+  box-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 107, 53, 0.8);
+  }
+}
+
+/* Scrollbar Styling */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
