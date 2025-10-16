@@ -132,25 +132,25 @@ export class AsistenciaService {
       }
     }
 
-    // Obtener todas las inscripciones de la clase
-    const inscripciones = await this.prisma.inscripcionClase.findMany({
-      where: { clase_id: claseId },
-      include: {
-        estudiante: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            nivel_escolar: true,
+    // Optimizado: Una sola query usando Promise.all + include relaciones
+    const [inscripciones, asistencias] = await Promise.all([
+      this.prisma.inscripcionClase.findMany({
+        where: { clase_id: claseId },
+        include: {
+          estudiante: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+              nivel_escolar: true,
+            },
           },
         },
-      },
-    });
-
-    // Obtener todas las asistencias de la clase
-    const asistencias = await this.prisma.asistencia.findMany({
-      where: { clase_id: claseId },
-    });
+      }),
+      this.prisma.asistencia.findMany({
+        where: { clase_id: claseId },
+      }),
+    ]);
 
     // Crear un mapa de asistencias por estudiante_id
     const asistenciaMap = new Map(
@@ -205,13 +205,15 @@ export class AsistenciaService {
       throw new NotFoundException('Clase no encontrada');
     }
 
-    const inscripciones = await this.prisma.inscripcionClase.findMany({
-      where: { clase_id: claseId },
-    });
-
-    const asistencias = await this.prisma.asistencia.findMany({
-      where: { clase_id: claseId },
-    });
+    // Optimizado: Ejecutar queries en paralelo
+    const [inscripciones, asistencias] = await Promise.all([
+      this.prisma.inscripcionClase.findMany({
+        where: { clase_id: claseId },
+      }),
+      this.prisma.asistencia.findMany({
+        where: { clase_id: claseId },
+      }),
+    ]);
 
     // Crear mapa de asistencias por estudiante_id
     const asistenciaMap = new Map(
@@ -273,25 +275,7 @@ export class AsistenciaService {
       whereInscripcion.clase_id = filtros.clase_id;
     }
 
-    // Obtener inscripciones del estudiante
-    const inscripciones = await this.prisma.inscripcionClase.findMany({
-      where: whereInscripcion,
-      include: {
-        clase: {
-          select: {
-            id: true,
-            fecha_hora_inicio: true,
-            duracion_minutos: true,
-            estado: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    // Obtener asistencias del estudiante
+    // Optimizado: Ejecutar queries en paralelo
     const whereAsistencia: any = {
       estudiante_id: estudianteId,
     };
@@ -300,9 +284,27 @@ export class AsistenciaService {
       whereAsistencia.clase_id = filtros.clase_id;
     }
 
-    const asistencias = await this.prisma.asistencia.findMany({
-      where: whereAsistencia,
-    });
+    const [inscripciones, asistencias] = await Promise.all([
+      this.prisma.inscripcionClase.findMany({
+        where: whereInscripcion,
+        include: {
+          clase: {
+            select: {
+              id: true,
+              fecha_hora_inicio: true,
+              duracion_minutos: true,
+              estado: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.asistencia.findMany({
+        where: whereAsistencia,
+      }),
+    ]);
 
     // Crear mapa de asistencias por clase_id
     const asistenciaMap = new Map(asistencias.map((a) => [a.clase_id, a]));
@@ -357,24 +359,20 @@ export class AsistenciaService {
    * Obtener resumen de asistencia del docente
    */
   async obtenerResumenDocente(docenteId: string) {
-    // Obtener todas las clases del docente
+    // Optimizado: Obtener clases del docente primero, luego asistencias en paralelo
     const clases = await this.prisma.clase.findMany({
       where: { docente_id: docenteId },
       include: {
         inscripciones: true,
+        asistencias: true, // Incluir asistencias directamente en la query
       },
       orderBy: {
         fecha_hora_inicio: 'desc',
       },
     });
 
-    // Obtener todas las asistencias de las clases del docente
-    const claseIds = clases.map((c) => c.id);
-    const asistencias = await this.prisma.asistencia.findMany({
-      where: {
-        clase_id: { in: claseIds },
-      },
-    });
+    // Crear array plano de asistencias desde las clases
+    const asistencias = clases.flatMap((clase) => clase.asistencias);
 
     // Crear mapa de asistencias por clase_id y estudiante_id
     const asistenciaMap = new Map<string, Map<string, any>>();
