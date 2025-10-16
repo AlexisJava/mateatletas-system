@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getErrorMessage } from '@/lib/utils/error-handler';
 import apiClient from '@/lib/axios';
 
 interface Estudiante {
@@ -37,10 +38,10 @@ export default function AdminEstudiantesPage() {
       setError(null);
       // Endpoint para admin que trae TODOS los estudiantes
       const response = await apiClient.get('/estudiantes/admin/all');
-      setEstudiantes(response || []);
-    } catch (err: any) {
+      setEstudiantes((response || []) as unknown as Estudiante[]);
+    } catch (err: unknown) {
       console.error('Error cargando estudiantes:', err);
-      setError(err.response?.data?.message || 'Error al cargar estudiantes');
+      setError(getErrorMessage(err, 'Error al cargar estudiantes'));
     } finally {
       setIsLoading(false);
     }

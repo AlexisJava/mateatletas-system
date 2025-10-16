@@ -62,7 +62,7 @@ export interface RegisterResponse {
 }
 
 export interface LoginResponse {
-  access_token: string;
+  // Ya NO retorna access_token (va en httpOnly cookie)
   user: AuthUser;
 }
 
@@ -87,8 +87,9 @@ export const authApi = {
 
   /**
    * Autentica un tutor existente
+   * El token se guarda automáticamente como httpOnly cookie en el backend
    * @param data - Credenciales del tutor (email, password)
-   * @returns Promise con el token JWT y datos del usuario
+   * @returns Promise con los datos del usuario (sin token)
    */
   login: (data: LoginData): Promise<LoginResponse> => {
     return apiClient.post('/auth/login', data);
@@ -96,7 +97,7 @@ export const authApi = {
 
   /**
    * Obtiene el perfil del tutor autenticado
-   * Requiere token JWT en localStorage (se adjunta automáticamente)
+   * El token se envía automáticamente como httpOnly cookie
    * @returns Promise con los datos del tutor
    */
   getProfile: (): Promise<AuthUser> => {
@@ -105,8 +106,9 @@ export const authApi = {
 
   /**
    * Autentica un estudiante con sus credenciales propias
+   * El token se guarda automáticamente como httpOnly cookie en el backend
    * @param data - Credenciales del estudiante (email, password)
-   * @returns Promise con el token JWT y datos del estudiante
+   * @returns Promise con los datos del estudiante (sin token)
    */
   loginEstudiante: (data: LoginData): Promise<LoginResponse> => {
     return apiClient.post('/auth/estudiante/login', data);
@@ -114,8 +116,7 @@ export const authApi = {
 
   /**
    * Cierra la sesión del usuario
-   * Requiere token JWT en localStorage (se adjunta automáticamente)
-   * Nota: El token debe ser eliminado manualmente del localStorage después de llamar a esta función
+   * El backend elimina la httpOnly cookie automáticamente
    * @returns Promise con mensaje de confirmación
    */
   logout: (): Promise<LogoutResponse> => {

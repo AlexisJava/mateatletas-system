@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, FileText, BookOpen, ClipboardList, Download, Copy, Check, History, Users, Calendar, Tag, Search, Filter, X, Edit2, Trash2 } from 'lucide-react';
+import { Sparkles, FileText, ClipboardList, Copy, Check, History, Users, Search, Filter, X, Trash2, BookOpen, Download } from 'lucide-react';
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.3, ease: 'easeOut' },
+  transition: { duration: 0.3 },
 };
 
 type ResourceType = 'plan-clase' | 'ejercicios' | 'evaluacion' | 'guia-estudio';
@@ -16,7 +16,7 @@ interface ResourceTemplate {
   id: ResourceType;
   title: string;
   description: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   prompt: string;
 }
 
@@ -98,8 +98,8 @@ export default function PlanificadorAIPage() {
     if (saved) {
       try {
         setSavedResources(JSON.parse(saved));
-      } catch (error) {
-        console.error('Error loading saved resources:', error);
+      } catch (error: any) {
+        console.error("Error:", error as any);
       }
     }
   }, []);
@@ -110,6 +110,9 @@ export default function PlanificadorAIPage() {
     setSavedResources(resources);
   };
 
+  // Get current template based on selectedType
+  const template = selectedType ? resourceTemplates.find(t => t.id === selectedType) : null;
+
   const handleGenerate = async () => {
     if (!selectedType || !topic) return;
 
@@ -117,7 +120,6 @@ export default function PlanificadorAIPage() {
 
     // Simular generación con IA
     setTimeout(() => {
-      const template = resourceTemplates.find(t => t.id === selectedType);
       const mockContent = generateMockContent(selectedType, topic, grade, duration, additionalInfo);
       setGeneratedContent(mockContent);
       setIsGenerating(false);
@@ -127,7 +129,6 @@ export default function PlanificadorAIPage() {
   const handleSaveResource = () => {
     if (!generatedContent || !selectedType || !topic) return;
 
-    const template = resourceTemplates.find(t => t.id === selectedType);
     const newResource: SavedResource = {
       id: Date.now().toString(),
       type: selectedType,
@@ -670,7 +671,6 @@ ${info ? `\n## Recursos adicionales\n${info}` : ''}`,
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredResources.map((resource) => {
-                  const template = resourceTemplates.find(t => t.id === resource.type);
                   const Icon = template?.icon || FileText;
 
                   return (

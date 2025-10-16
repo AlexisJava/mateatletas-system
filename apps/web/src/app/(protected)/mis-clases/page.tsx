@@ -31,12 +31,12 @@ export default function MisClasesPage() {
   // Separar reservas en futuras y pasadas
   const reservasFuturas = misReservas.filter((reserva) => {
     if (!reserva.clase) return false;
-    return new Date(reserva.clase.fechaHora).getTime() > Date.now();
+    return new Date(reserva.clase.fecha_hora_inicio).getTime() > Date.now();
   });
 
   const reservasPasadas = misReservas.filter((reserva) => {
     if (!reserva.clase) return false;
-    return new Date(reserva.clase.fechaHora).getTime() <= Date.now();
+    return new Date(reserva.clase.fecha_hora_inicio).getTime() <= Date.now();
   });
 
   // Handler para cancelar reserva
@@ -64,7 +64,7 @@ export default function MisClasesPage() {
     if (!reserva.clase) return null;
 
     const { clase } = reserva;
-    const fecha = new Date(clase.fechaHora);
+    const fecha = new Date(clase.fecha_hora_inicio);
     const fechaFormateada = new Intl.DateTimeFormat('es-ES', {
       weekday: 'short',
       day: 'numeric',
@@ -74,7 +74,7 @@ export default function MisClasesPage() {
       hour: '2-digit',
       minute: '2-digit',
     }).format(fecha);
-    const colorRuta = clase.rutaCurricular?.color || '#00d9ff';
+    const colorRuta = clase.ruta_curricular?.color || '#00d9ff';
     const today = new Date();
     const esHoy =
       fecha.getDate() === today.getDate() &&
@@ -104,7 +104,7 @@ export default function MisClasesPage() {
                 borderColor: colorRuta,
               }}
             >
-              📚 {clase.rutaCurricular?.nombre || 'Sin ruta'}
+              📚 {clase.ruta_curricular?.nombre || 'Sin ruta'}
             </Badge>
 
             {esHoy && esFutura && (
@@ -121,7 +121,9 @@ export default function MisClasesPage() {
           </div>
 
           {/* Título */}
-          <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark">{clase.titulo}</h3>
+          <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark">
+            {clase.ruta_curricular?.nombre || 'Clase de Matemáticas'}
+          </h3>
 
           {/* Info grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -147,7 +149,7 @@ export default function MisClasesPage() {
                   {fechaFormateada}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {horaFormateada} • {clase.duracionMinutos} min
+                  {horaFormateada} • {clase.duracion_minutos} min
                 </p>
               </div>
             </div>
@@ -159,7 +161,7 @@ export default function MisClasesPage() {
                 <div>
                   <p className="text-xs text-gray-500">Docente</p>
                   <p className="font-bold text-dark">
-                    {clase.docente.user.nombre} {clase.docente.user.apellido}
+                    {clase.docente?.user?.nombre} {clase.docente?.user?.apellido}
                   </p>
                 </div>
               </div>

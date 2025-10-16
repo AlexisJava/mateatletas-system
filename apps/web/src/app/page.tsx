@@ -8,18 +8,13 @@ import {
   Users,
   Award,
   TrendingUp,
-  BookOpen,
   Clock,
   Target,
-  Star,
   Shield,
   Sparkles,
   ArrowRight,
   Brain,
-  Gamepad2,
-  LineChart,
   Video,
-  MessageSquare,
   CheckCircle,
   XCircle,
   ChevronDown,
@@ -31,9 +26,7 @@ import {
   Rocket,
   Cpu,
   Globe,
-  Monitor,
   Lightbulb,
-  Trophy,
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -340,56 +333,6 @@ export default function LandingPage() {
     },
   ];
 
-  const vsCompetitors = [
-    {
-      feature: 'Clases en Vivo con Docentes',
-      mateatletas: true,
-      smartick: false,
-      matific: false,
-    },
-    {
-      feature: 'Programación (Python, JS)',
-      mateatletas: true,
-      smartick: false,
-      matific: false,
-    },
-    {
-      feature: 'Ciencias (Física, Química)',
-      mateatletas: true,
-      smartick: false,
-      matific: false,
-    },
-    {
-      feature: 'Arte Digital & Creative Coding',
-      mateatletas: true,
-      smartick: false,
-      matific: false,
-    },
-    {
-      feature: 'IA Copiloto Personal',
-      mateatletas: true,
-      smartick: false,
-      matific: false,
-    },
-    {
-      feature: 'Proyectos Interdisciplinarios',
-      mateatletas: true,
-      smartick: false,
-      matific: false,
-    },
-    {
-      feature: 'Portfolio Digital',
-      mateatletas: true,
-      smartick: false,
-      matific: false,
-    },
-    {
-      feature: 'Solo Matemáticas Automatizadas',
-      mateatletas: false,
-      smartick: true,
-      matific: true,
-    },
-  ];
 
   const faqs = [
     {

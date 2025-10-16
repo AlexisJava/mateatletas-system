@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDocenteStore } from '@/store/docente.store';
 import { useAsistenciaStore } from '@/store/asistencia.store';
-import { Button } from '@/components/ui';
 import { EstadoClase } from '@/types/clases.types';
 
 /**
@@ -37,7 +36,7 @@ export default function DocenteDashboard() {
    */
   const proximasClases = (misClases || [])
     .filter((clase) => clase.estado === EstadoClase.Programada)
-    .sort((a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime())
+    .sort((a, b) => new Date(a.fecha_hora_inicio).getTime() - new Date(b.fecha_hora_inicio).getTime())
     .slice(0, 5);
 
   /**
@@ -162,21 +161,21 @@ export default function DocenteDashboard() {
                     {clase.titulo}
                   </h3>
                   <p className="text-sm text-purple-600 dark:text-purple-300 mt-1">
-                    {formatFecha(clase.fechaHora)} • {clase.duracionMinutos} min
+                    {formatFecha(clase.fecha_hora_inicio)} • {clase.duracion_minutos} min
                   </p>
                   <div className="flex items-center gap-4 mt-2">
                     <span className="text-xs text-purple-500 dark:text-purple-400">
-                      Cupo: {clase.cupoDisponible}/{clase.cupoMaximo}
+                      Cupo: {clase.cupo_disponible}/{clase.cupo_maximo}
                     </span>
-                    {clase.rutaCurricular && (
+                    {clase.ruta_curricular && (
                       <span
                         className="text-xs px-2 py-1 rounded-full font-semibold"
                         style={{
-                          backgroundColor: `${clase.rutaCurricular.color}20`,
-                          color: clase.rutaCurricular.color,
+                          backgroundColor: `${clase.ruta_curricular.color}20`,
+                          color: clase.ruta_curricular.color,
                         }}
                       >
-                        {clase.rutaCurricular.nombre}
+                        {clase.ruta_curricular.nombre}
                       </span>
                     )}
                   </div>

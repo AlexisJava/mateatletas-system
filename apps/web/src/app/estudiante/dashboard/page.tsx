@@ -9,7 +9,9 @@ import { AvatarSelector } from '@/components/estudiantes/AvatarSelector';
 import { WelcomeAnimation } from '@/components/animations/WelcomeAnimation';
 import { LevelUpAnimation } from '@/components/animations/LevelUpAnimation';
 import apiClient from '@/lib/axios';
-import { Calendar, User, Clock, TrendingUp, BookOpen, Bell } from 'lucide-react';
+import { Calendar, Bell, TrendingUp, BookOpen, User, Clock } from 'lucide-react';
+import type { Clase } from '@/types/clases.types';
+import type { ProximaClase } from '@/lib/api/gamificacion.api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -52,7 +54,7 @@ export default function EstudianteDashboard() {
   }, []);
 
   // Calculate class status
-  const getClaseStatus = (clase: any) => {
+  const getClaseStatus = (clase: Clase | ProximaClase) => {
     const now = currentTime.getTime();
     const inicio = new Date(clase.fecha_hora_inicio).getTime();
     const fin = inicio + (clase.duracion_minutos * 60 * 1000);
@@ -111,7 +113,7 @@ export default function EstudianteDashboard() {
     : [
         {
           id: 'mock-clase-1',
-          rutaCurricular: {
+          ruta_curricular: {
             nombre: 'Álgebra Básica',
             color: '#8B5CF6'
           },
@@ -290,9 +292,9 @@ export default function EstudianteDashboard() {
                         <div className="flex items-center gap-2 mb-2">
                           <div
                             className="w-2 h-2 rounded-full animate-pulse"
-                            style={{ backgroundColor: proximasClases[0].rutaCurricular.color }}
+                            style={{ backgroundColor: proximasClases[0].ruta_curricular.color }}
                           />
-                          <h4 className="font-bold text-white text-base truncate">{proximasClases[0].rutaCurricular.nombre}</h4>
+                          <h4 className="font-bold text-white text-base truncate">{proximasClases[0].ruta_curricular.nombre}</h4>
                         </div>
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2 text-xs text-gray-300 truncate">
@@ -524,24 +526,35 @@ export default function EstudianteDashboard() {
       {/* Modals */}
       {avatarSelectorOpen && (
         <AvatarSelector
-          currentAvatar={estudiante.avatar_url}
+          isOpen={avatarSelectorOpen}
+          studentId={estudiante.id}
+          currentAvatar={estudiante.avatar_url || ''}
           onSelect={handleAvatarSelect}
           onClose={() => setAvatarSelectorOpen(false)}
         />
       )}
 
-      {showWelcome && dashboard && (
+      {showWelcome && dashboard && nivel && (
         <WelcomeAnimation
           studentName={estudiante.nombre}
-          level={nivel?.nivelActual || 1}
+          nivel={nivel}
           onComplete={handleWelcomeComplete}
         />
       )}
 
-      {showLevelUp && nivel && (
+      {showLevelUp && nivel && previousLevel && (
         <LevelUpAnimation
-          newLevel={nivel.nivelActual}
-          levelName={nivel.nombre}
+          nivelAnterior={{
+            numero: previousLevel,
+            nombre: `Nivel ${previousLevel}`,
+            icono: nivel.icono,
+          }}
+          nivelNuevo={{
+            numero: nivel.nivelActual,
+            nombre: nivel.nombre,
+            icono: nivel.icono,
+            color: nivel.color,
+          }}
           onComplete={() => setShowLevelUp(false)}
         />
       )}

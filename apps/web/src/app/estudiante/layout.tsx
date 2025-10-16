@@ -3,18 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
-import { ThemeProvider, useTheme } from '@/lib/theme/ThemeContext';
+import { ThemeProvider } from '@/lib/theme/ThemeContext';
 import {
   LayoutDashboard,
   BookOpen,
   Trophy,
   BarChart3,
-  User,
   LogOut,
-  Sun,
-  Moon,
-  Bell,
-  Menu,
   X,
   Rocket,
 } from 'lucide-react';
@@ -72,7 +67,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
             return;
           }
           setIsValidating(false);
-        } catch (error) {
+        } catch (error: unknown) {
           router.push('/login');
         }
       }
@@ -267,15 +262,3 @@ function LoadingScreen() {
   );
 }
 
-function NotificationButton({ count }: { count: number }) {
-  return (
-    <button className="relative p-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all duration-200">
-      <Bell className="w-5 h-5 text-gray-300" />
-      {count > 0 && (
-        <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-pink-500 to-rose-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg shadow-pink-500/50">
-          {count}
-        </span>
-      )}
-    </button>
-  );
-}

@@ -28,12 +28,12 @@ export enum EstadoInscripcion {
  */
 export interface Membresia {
   id: string;
-  tutorId: string;
-  productoId: string;
+  tutor_id: string;
+  producto_id: string;
   estado: EstadoMembresia;
-  fechaInicio: string | null;
-  fechaVencimiento: string | null;
-  pagoId: string;
+  fecha_inicio: string | null;
+  fecha_vencimiento: string | null;
+  pago_id: string;
   createdAt: string;
   updatedAt: string;
   producto?: Producto;
@@ -44,11 +44,11 @@ export interface Membresia {
  */
 export interface InscripcionCurso {
   id: string;
-  estudianteId: string;
-  productoId: string;
+  estudiante_id: string;
+  producto_id: string;
   estado: EstadoInscripcion;
-  fechaInscripcion: string | null;
-  pagoId: string;
+  fecha_inscripcion: string | null;
+  pago_id: string;
   createdAt: string;
   updatedAt: string;
   producto?: Producto;
@@ -59,12 +59,12 @@ export interface InscripcionCurso {
  */
 export interface Pago {
   id: string;
-  tutorId: string;
+  tutor_id: string;
   monto: number;
-  metodoPago: string;
-  estadoPago: string;
-  mercadoPagoId: string | null;
-  mercadoPagoStatus: string | null;
+  metodo_pago: string;
+  estado_pago: string;
+  mercado_pago_id: string | null;
+  mercado_pago_status: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -97,6 +97,6 @@ export interface CrearPreferenciaCursoRequest {
  * Response de estado de membresía
  */
 export interface EstadoMembresiaResponse {
-  tieneMembresia: boolean;
+  tiene_membresia: boolean;
   membresia: Membresia | null;
 }

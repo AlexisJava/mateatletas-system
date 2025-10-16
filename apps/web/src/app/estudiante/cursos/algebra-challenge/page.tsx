@@ -4,13 +4,12 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
-import { useGamificacionStore } from '@/store/gamificacion.store';
+import {} from '@/store/gamificacion.store';
 import {
   Target,
   Clock,
   Star,
   Trophy,
-  Zap,
   CheckCircle2,
   XCircle,
   ArrowLeft,
@@ -39,7 +38,7 @@ interface Ecuacion {
 
 export default function AlgebraChallengePage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const {} = useAuthStore();
 
   // Estado del juego
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'finished'>('idle');

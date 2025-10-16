@@ -2,7 +2,11 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
+  Logger,
 } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { PrismaService } from '../core/database/prisma.service';
 import { CrearProductoDto } from './dto/crear-producto.dto';
 import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
@@ -14,7 +18,12 @@ import { TipoProducto } from '@prisma/client';
  */
 @Injectable()
 export class ProductosService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(ProductosService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   /**
    * Crea un nuevo producto en el catálogo
@@ -59,8 +68,22 @@ export class ProductosService {
    * @param tipo - Filtro opcional por tipo de producto
    * @param soloActivos - Si true, solo devuelve productos activos
    * @returns Lista de productos
+   *
+   * CACHE: Este endpoint está cacheado por 5 minutos
+   * El catálogo de productos cambia con poca frecuencia
    */
   async findAll(tipo?: TipoProducto, soloActivos: boolean = true) {
+    // Construir cache key basado en los filtros
+    const cacheKey = `productos_${tipo || 'all'}_${soloActivos ? 'activos' : 'todos'}`;
+
+    // Intentar obtener del cache
+    const cached = await this.cacheManager.get(cacheKey);
+    if (cached) {
+      this.logger.debug(`Productos obtenidos del cache: ${cacheKey}`);
+      return cached;
+    }
+
+    // Si no está en cache, consultar la BD
     const where: any = {};
 
     if (tipo) {
@@ -71,10 +94,16 @@ export class ProductosService {
       where.activo = true;
     }
 
-    return await this.prisma.producto.findMany({
+    const productos = await this.prisma.producto.findMany({
       where,
       orderBy: [{ tipo: 'asc' }, { createdAt: 'desc' }],
     });
+
+    // Guardar en cache por 5 minutos (300000ms)
+    await this.cacheManager.set(cacheKey, productos, 300000);
+    this.logger.debug(`Productos guardados en cache (5 min): ${cacheKey}`);
+
+    return productos;
   }
 
   /**

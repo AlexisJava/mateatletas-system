@@ -4,7 +4,24 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useGamificacionStore } from '@/store/gamificacion.store';
 import { useAuthStore } from '@/store/auth.store';
-import { Trophy, Crown, Users, TrendingUp } from 'lucide-react';
+import { Crown, Users, TrendingUp, Trophy } from 'lucide-react';
+
+interface EstudianteRanking {
+  id: string;
+  nombre: string;
+  apellido: string;
+  puntos: number;
+  avatar_url?: string | null;
+  equipo?: { nombre: string; color: string };
+}
+
+interface RankingData {
+  equipoActual: { nombre: string; color: string } | null;
+  posicionEquipo: number;
+  posicionGlobal: number;
+  rankingEquipo: EstudianteRanking[];
+  rankingGlobal: EstudianteRanking[];
+}
 
 export default function RankingPage() {
   const { ranking, fetchRanking, isLoading } = useGamificacionStore();
@@ -17,7 +34,7 @@ export default function RankingPage() {
   }, [user?.id]);
 
   // Mock data
-  const mockRanking = {
+  const mockRanking: RankingData = {
     equipoActual: { nombre: 'Fénix', color: '#F59E0B' },
     posicionEquipo: 2,
     posicionGlobal: 15,
@@ -83,7 +100,7 @@ export default function RankingPage() {
     ],
   };
 
-  const data = ranking || mockRanking;
+  const data: RankingData = (ranking as unknown as RankingData) || mockRanking;
 
   if (isLoading) {
     return (
@@ -124,8 +141,8 @@ export default function RankingPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-black/20 rounded-xl p-4 border border-white/20">
               <p className="text-white/80 text-sm mb-1 font-semibold">Tu Equipo</p>
-              <p className="text-2xl font-black text-white" style={{ color: data.equipoActual.color }}>
-                {data.equipoActual.nombre}
+              <p className="text-2xl font-black text-white" style={{ color: data.equipoActual?.color ?? '#3B82F6' }}>
+                {data.equipoActual?.nombre ?? 'Sin equipo'}
               </p>
             </div>
             <div className="bg-black/20 rounded-xl p-4 border border-white/20">
@@ -150,7 +167,7 @@ export default function RankingPage() {
             <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl shadow-2xl border-2 border-purple-500/50 p-6 flex flex-col h-full">
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
                 <Users className="w-7 h-7 text-purple-400" />
-                Ranking de {data.equipoActual.nombre}
+                Ranking de {data.equipoActual?.nombre ?? 'Tu Equipo'}
               </h2>
 
               <div className="flex-1 space-y-4 overflow-hidden">

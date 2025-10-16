@@ -104,7 +104,7 @@ export function ModalNota({ isOpen, onClose, notaExistente }: ModalNotaProps) {
       }
       onClose();
       resetForm();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al guardar nota:', error);
     }
   };

@@ -9,7 +9,6 @@ import apiClient from '@/lib/axios';
 import {
   Brain,
   Sparkles,
-  Trophy,
   ArrowLeft,
   CheckCircle,
   XCircle,
@@ -307,7 +306,7 @@ export default function EvaluacionDiagnosticaPage() {
           if (user?.id) {
             await fetchDashboard(user.id);
           }
-        } catch (error) {
+        } catch (error: unknown) {
           console.error('Error registrando puntos:', error);
         }
 

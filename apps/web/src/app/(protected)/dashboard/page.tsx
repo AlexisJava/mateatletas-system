@@ -97,10 +97,10 @@ export default function DashboardPage() {
       const estudiantesArray = estudiantesRes?.data || [];
       console.log('👥 Estudiantes parseados:', estudiantesArray, 'length:', estudiantesArray.length);
 
-      setEstudiantes(estudiantesArray);
-      setClases(clasesRes || []);
-      setMembresia(membresiaRes?.membresia || null);
-    } catch (error) {
+      setEstudiantes(estudiantesArray as unknown as Estudiante[]);
+      setClases((clasesRes || []) as unknown as Clase[]);
+      setMembresia(((membresiaRes as any)?.membresia || null) as Membresia | null);
+    } catch (error: unknown) {
       console.error('❌ Error cargando datos del dashboard:', error);
     } finally {
       setLoading(false);
@@ -130,17 +130,17 @@ export default function DashboardPage() {
   });
 
   // Si NO tiene hijos → Mostrar Onboarding
-  if (!hasChildren) {
-    return <OnboardingView user={user} />;
+  if (!hasChildren || !user) {
+    return <OnboardingView user={user!} />;
   }
 
   // Si SÍ tiene hijos → Mostrar Dashboard completo
   return (
     <DashboardView
-      user={user}
-      estudiantes={estudiantes}
-      clases={clases}
-      membresia={membresia}
+      user={user!}
+      estudiantes={estudiantes as any}
+      clases={clases as any}
+      membresia={membresia as any}
     />
   );
 }

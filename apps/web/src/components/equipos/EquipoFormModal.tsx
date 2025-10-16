@@ -153,7 +153,7 @@ export default function EquipoFormModal({
 
       await onSubmit(dataToSubmit);
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al guardar equipo:', error);
       // El error se muestra a través del toast o del estado global
     } finally {

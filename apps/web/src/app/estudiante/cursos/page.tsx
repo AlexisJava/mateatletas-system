@@ -31,7 +31,7 @@ import {
 export default function EstudiarPage() {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { dashboard, fetchDashboard, isLoading } = useGamificacionStore();
+  const { fetchDashboard, isLoading } = useGamificacionStore();
   const [filtroCategoria, setFiltroCategoria] = useState('todos');
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export default function EstudiarPage() {
       ? juegos
       : juegos.filter((j) => j.categoria === filtroCategoria);
 
-  const handleJuegoClick = (juego: any) => {
+  const handleJuegoClick = (juego: { id: string; nombre: string; descripcion?: string; desbloqueado?: boolean }) => {
     if (!juego.desbloqueado) {
       return;
     }
@@ -249,7 +249,6 @@ export default function EstudiarPage() {
         {/* Grid de Juegos - Responsive con scroll natural */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-6">
           {juegosFiltrados.map((juego, index) => {
-            const Icon = juego.icono;
 
             return (
               <motion.div

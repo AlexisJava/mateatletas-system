@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../core/database/prisma.service';
+import { Request } from 'express';
 
 /**
  * Payload del JWT token
@@ -18,7 +19,7 @@ export interface JwtPayload {
  * Estrategia JWT para validar tokens de autenticación
  *
  * Esta estrategia:
- * 1. Extrae el token del header Authorization (Bearer token)
+ * 1. Extrae el token desde httpOnly cookie (fallback a Bearer header)
  * 2. Valida el token usando el JWT_SECRET
  * 3. Extrae el payload y busca al usuario en la base de datos
  * 4. Inyecta el usuario completo en request.user
@@ -37,8 +38,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     super({
-      // Extraer token del header: "Authorization: Bearer <token>"
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      // Extraer token desde cookie 'auth-token' o fallback a Bearer header
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request) => {
+          // Prioridad 1: Intentar desde cookie
+          const token = request?.cookies?.['auth-token'];
+          if (token) return token;
+
+          // Prioridad 2: Fallback a Bearer header (para Swagger y tests)
+          const bearerToken =
+            ExtractJwt.fromAuthHeaderAsBearerToken()(request);
+          return bearerToken;
+        },
+      ]),
       // No ignorar la expiración del token
       ignoreExpiration: false,
       // Secret para verificar la firma del token

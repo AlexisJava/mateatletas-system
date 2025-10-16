@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/utils/error-handler';
 import { create } from 'zustand';
 import {
   ListaAsistencia,
@@ -138,8 +139,8 @@ export const useAsistenciaStore = create<AsistenciaStore>((set, get) => ({
     try {
       const lista = await getAsistenciaClase(claseId);
       set({ listaAsistencia: lista, isLoading: false });
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Error al cargar lista de asistencia';
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error, 'Error al cargar lista de asistencia');
       set({ error: errorMsg, isLoading: false });
       console.error('Error fetchListaAsistencia:', error);
     }
@@ -159,8 +160,8 @@ export const useAsistenciaStore = create<AsistenciaStore>((set, get) => ({
 
       set({ isLoadingMarcacion: false });
       return true;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Error al marcar asistencia';
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error, 'Error al marcar asistencia');
       set({ error: errorMsg, isLoadingMarcacion: false });
       console.error('Error marcarAsistencia:', error);
       return false;
@@ -172,8 +173,8 @@ export const useAsistenciaStore = create<AsistenciaStore>((set, get) => ({
     try {
       const stats = await getEstadisticasClase(claseId);
       set({ estadisticas: stats, isLoading: false });
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Error al cargar estadísticas';
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error, 'Error al cargar estadísticas');
       set({ error: errorMsg, isLoading: false });
       console.error('Error fetchEstadisticas:', error);
     }
@@ -184,8 +185,8 @@ export const useAsistenciaStore = create<AsistenciaStore>((set, get) => ({
     try {
       const hist = await getHistorialEstudiante(estudianteId);
       set({ historial: hist, isLoading: false });
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Error al cargar historial';
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error, 'Error al cargar historial');
       set({ error: errorMsg, isLoading: false });
       console.error('Error fetchHistorialEstudiante:', error);
     }
@@ -196,8 +197,8 @@ export const useAsistenciaStore = create<AsistenciaStore>((set, get) => ({
     try {
       const resumen = await getResumenDocente();
       set({ resumenDocente: resumen, isLoading: false });
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Error al cargar resumen del docente';
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error, 'Error al cargar resumen del docente');
       set({ error: errorMsg, isLoading: false });
       console.error('Error fetchResumenDocente:', error);
     }

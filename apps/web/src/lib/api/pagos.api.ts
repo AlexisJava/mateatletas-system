@@ -3,6 +3,7 @@
  */
 
 import axios from '../axios';
+import { isAxiosError } from '@/lib/utils/error-handler';
 import {
   PreferenciaPago,
   CrearPreferenciaSuscripcionRequest,
@@ -49,8 +50,8 @@ export const getMembresiaActual = async (): Promise<Membresia | null> => {
   try {
     const response = await axios.get<Membresia>('/pagos/membresia');
     return response.data;
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+    if (isAxiosError(error) && error.response?.status === 404) {
       return null; // No tiene membresía
     }
     throw error;

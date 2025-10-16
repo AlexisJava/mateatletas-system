@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/utils/error-handler';
 import { create } from 'zustand';
 import { equiposApi } from '@/lib/api/equipos.api';
 import type {
@@ -78,12 +79,12 @@ export const useEquiposStore = create<EquiposState>((set) => ({
         totalPages: response.metadata?.totalPages || 0,
         isLoading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al cargar equipos:', error);
       set({
         equipos: [],
         total: 0,
-        error: error.response?.data?.message || 'Error al cargar equipos',
+        error: getErrorMessage(error, 'Error al cargar equipos'),
         isLoading: false,
       });
     }
@@ -102,11 +103,11 @@ export const useEquiposStore = create<EquiposState>((set) => ({
         equipoActual: equipo,
         isLoading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`Error al cargar equipo ${id}:`, error);
       set({
         equipoActual: null,
-        error: error.response?.data?.message || 'Error al cargar equipo',
+        error: getErrorMessage(error, 'Error al cargar equipo'),
         isLoading: false,
       });
     }
@@ -129,10 +130,10 @@ export const useEquiposStore = create<EquiposState>((set) => ({
       }));
 
       return nuevoEquipo;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al crear equipo:', error);
       const errorMessage =
-        error.response?.data?.message || 'Error al crear equipo';
+        getErrorMessage(error, 'Error al crear equipo');
       set({
         error: errorMessage,
         isLoading: false,
@@ -163,10 +164,10 @@ export const useEquiposStore = create<EquiposState>((set) => ({
       }));
 
       return equipoActualizado;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`Error al actualizar equipo ${id}:`, error);
       const errorMessage =
-        error.response?.data?.message || 'Error al actualizar equipo';
+        getErrorMessage(error, 'Error al actualizar equipo');
       set({
         error: errorMessage,
         isLoading: false,
@@ -191,10 +192,10 @@ export const useEquiposStore = create<EquiposState>((set) => ({
         equipoActual: state.equipoActual?.id === id ? null : state.equipoActual,
         isLoading: false,
       }));
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`Error al eliminar equipo ${id}:`, error);
       const errorMessage =
-        error.response?.data?.message || 'Error al eliminar equipo';
+        getErrorMessage(error, 'Error al eliminar equipo');
       set({
         error: errorMessage,
         isLoading: false,
@@ -216,12 +217,12 @@ export const useEquiposStore = create<EquiposState>((set) => ({
         estadisticas,
         isLoading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al cargar estadísticas:', error);
       set({
         estadisticas: null,
         error:
-          error.response?.data?.message || 'Error al cargar estadísticas',
+          getErrorMessage(error, 'Error al cargar estadísticas'),
         isLoading: false,
       });
     }
@@ -249,10 +250,10 @@ export const useEquiposStore = create<EquiposState>((set) => ({
       }));
 
       return equipoActualizado;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`Error al recalcular puntos del equipo ${id}:`, error);
       const errorMessage =
-        error.response?.data?.message || 'Error al recalcular puntos';
+        getErrorMessage(error, 'Error al recalcular puntos');
       set({
         error: errorMessage,
         isLoading: false,

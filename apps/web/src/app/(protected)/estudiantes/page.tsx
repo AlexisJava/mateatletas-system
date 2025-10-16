@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEstudiantesStore } from '@/store/estudiantes.store';
-import { Button, Select } from '@/components/ui';
+import { Select } from '@/components/ui';
 import { EstudianteCard } from '@/components/estudiantes/EstudianteCard';
 import { EstudianteFormModal } from '@/components/estudiantes/EstudianteFormModal';
-import { Plus, Users } from 'lucide-react';
+import { Users, Plus } from 'lucide-react';
 import type { Estudiante } from '@/types/estudiante';
 
 /**
@@ -38,7 +38,7 @@ export default function EstudiantesPage() {
     if (confirm('¿Estás seguro de eliminar este estudiante?')) {
       try {
         await deleteEstudiante(id);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error al eliminar:', error);
       }
     }

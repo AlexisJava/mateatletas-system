@@ -13,7 +13,6 @@ import {
   Target,
   Video,
   TrendingUp,
-  Award
 } from 'lucide-react';
 
 /**
@@ -43,7 +42,7 @@ interface Estudiante {
 interface Grupo {
   id: string;
   nombre: string;
-  rutaCurricular: {
+  ruta_curricular: {
     nombre: string;
     color: string;
   };
@@ -71,13 +70,13 @@ export default function GrupoDetalladoPage() {
       try {
         const response = await apiClient.get(`/grupos/${grupoId}`);
         setGrupo(response.data);
-      } catch (error) {
-        console.error('Error cargando grupo:', error);
+      } catch (error: any) {
+        console.error("Error:", error as any);
         // Mock data
         const mockGrupo: Grupo = {
           id: grupoId,
           nombre: 'Grupo Alfa',
-          rutaCurricular: {
+          ruta_curricular: {
             nombre: 'Álgebra Básica',
             color: '#8B5CF6'
           },
@@ -273,7 +272,7 @@ export default function GrupoDetalladoPage() {
               >
                 <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></div>
                 <p className="text-sm text-purple-600 dark:text-purple-300 font-bold">
-                  {grupo.rutaCurricular.nombre}
+                  {grupo.ruta_curricular.nombre}
                 </p>
               </motion.div>
             </div>
@@ -305,7 +304,6 @@ export default function GrupoDetalladoPage() {
               transition={{ type: "spring", stiffness: 300 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative">
@@ -324,7 +322,6 @@ export default function GrupoDetalladoPage() {
               transition={{ type: "spring", stiffness: 300 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-emerald-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative">
@@ -343,7 +340,6 @@ export default function GrupoDetalladoPage() {
               transition={{ type: "spring", stiffness: 300 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative">
@@ -362,7 +358,6 @@ export default function GrupoDetalladoPage() {
               transition={{ type: "spring", stiffness: 300 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-rose-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative">

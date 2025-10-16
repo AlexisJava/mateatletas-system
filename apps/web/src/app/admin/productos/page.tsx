@@ -1,39 +1,40 @@
 'use client';
+import { Button } from '@/components/ui';
 
 import { useEffect, useState } from 'react';
 import { useAdminStore } from '@/store/admin.store';
-import { Button } from '@/components/ui';
+import { Producto, CrearProductoDto } from '@/lib/api/catalogo.api';
+import { TipoProducto } from '@/types/catalogo.types';
 
 type ModalType = 'create' | 'edit' | 'delete' | 'view' | null;
-type ProductType = 'Suscripcion' | 'Curso' | 'RecursoDigital';
 
 interface ProductForm {
   nombre: string;
   descripcion: string;
   precio: number;
-  tipo: ProductType;
+  tipo: TipoProducto;
   activo: boolean;
   // For Curso
-  fechaInicio?: string;
-  fechaFin?: string;
-  cupoMaximo?: number;
+  fecha_inicio?: string;
+  fecha_fin?: string;
+  cupo_maximo?: number;
   // For Suscripcion
-  duracionMeses?: number;
+  duracion_meses?: number;
 }
 
 const emptyForm: ProductForm = {
   nombre: '',
   descripcion: '',
   precio: 0,
-  tipo: 'Suscripcion',
+  tipo: TipoProducto.Suscripcion,
   activo: true,
 };
 
 export default function AdminProductosPage() {
   const { products, fetchProducts, createProduct, updateProduct, deleteProduct, isLoading, error } = useAdminStore();
   const [modalType, setModalType] = useState<ModalType>(null);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [filter, setFilter] = useState<'all' | ProductType | 'inactive'>('all');
+  const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
+  const [filter, setFilter] = useState<'all' | TipoProducto | 'inactive'>('all');
   const [showInactive, setShowInactive] = useState(true);
   const [formData, setFormData] = useState<ProductForm>(emptyForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -42,7 +43,7 @@ export default function AdminProductosPage() {
     fetchProducts(showInactive);
   }, [showInactive]);
 
-  const filteredProducts = products.filter((p: any) => {
+  const filteredProducts = products.filter((p) => {
     if (filter === 'inactive') return !p.activo;
     if (filter === 'all') return true;
     return p.tipo === filter;
@@ -54,19 +55,19 @@ export default function AdminProductosPage() {
     if (!formData.nombre.trim()) errors.nombre = 'El nombre es requerido';
     if (formData.precio < 0) errors.precio = 'El precio debe ser mayor o igual a 0';
 
-    if (formData.tipo === 'Curso') {
-      if (!formData.fechaInicio) errors.fechaInicio = 'La fecha de inicio es requerida';
-      if (!formData.fechaFin) errors.fechaFin = 'La fecha de fin es requerida';
-      if (!formData.cupoMaximo || formData.cupoMaximo < 1) errors.cupoMaximo = 'El cupo debe ser al menos 1';
+    if (formData.tipo === TipoProducto.Curso) {
+      if (!formData.fecha_inicio) errors.fecha_inicio = 'La fecha de inicio es requerida';
+      if (!formData.fecha_fin) errors.fecha_fin = 'La fecha de fin es requerida';
+      if (!formData.cupo_maximo || formData.cupo_maximo < 1) errors.cupo_maximo = 'El cupo debe ser al menos 1';
 
-      if (formData.fechaInicio && formData.fechaFin && formData.fechaInicio >= formData.fechaFin) {
-        errors.fechaFin = 'La fecha de fin debe ser posterior a la fecha de inicio';
+      if (formData.fecha_inicio && formData.fecha_fin && formData.fecha_inicio >= formData.fecha_fin) {
+        errors.fecha_fin = 'La fecha de fin debe ser posterior a la fecha de inicio';
       }
     }
 
-    if (formData.tipo === 'Suscripcion') {
-      if (!formData.duracionMeses || formData.duracionMeses < 1) {
-        errors.duracionMeses = 'La duración debe ser al menos 1 mes';
+    if (formData.tipo === TipoProducto.Suscripcion) {
+      if (!formData.duracion_meses || formData.duracion_meses < 1) {
+        errors.duracion_meses = 'La duración debe ser al menos 1 mes';
       }
     }
 
@@ -77,7 +78,7 @@ export default function AdminProductosPage() {
   const handleCreateProduct = async () => {
     if (!validateForm()) return;
 
-    const productData: any = {
+    const productData: Partial<CrearProductoDto> = {
       nombre: formData.nombre,
       descripcion: formData.descripcion,
       precio: formData.precio,
@@ -85,15 +86,15 @@ export default function AdminProductosPage() {
       activo: formData.activo,
     };
 
-    if (formData.tipo === 'Curso') {
-      productData.fechaInicio = formData.fechaInicio;
-      productData.fechaFin = formData.fechaFin;
-      productData.cupoMaximo = formData.cupoMaximo;
-    } else if (formData.tipo === 'Suscripcion') {
-      productData.duracionMeses = formData.duracionMeses;
+    if (formData.tipo === TipoProducto.Curso) {
+      productData.fecha_inicio = formData.fecha_inicio;
+      productData.fecha_fin = formData.fecha_fin;
+      productData.cupo_maximo = formData.cupo_maximo;
+    } else if (formData.tipo === TipoProducto.Suscripcion) {
+      productData.duracion_meses = formData.duracion_meses;
     }
 
-    const success = await createProduct(productData);
+    const success = await createProduct(productData as CrearProductoDto);
     if (success) {
       closeModal();
       resetForm();
@@ -103,19 +104,19 @@ export default function AdminProductosPage() {
   const handleUpdateProduct = async () => {
     if (!validateForm() || !selectedProduct) return;
 
-    const productData: any = {
+    const productData: Partial<CrearProductoDto> = {
       nombre: formData.nombre,
       descripcion: formData.descripcion,
       precio: formData.precio,
       activo: formData.activo,
     };
 
-    if (formData.tipo === 'Curso') {
-      productData.fechaInicio = formData.fechaInicio;
-      productData.fechaFin = formData.fechaFin;
-      productData.cupoMaximo = formData.cupoMaximo;
-    } else if (formData.tipo === 'Suscripcion') {
-      productData.duracionMeses = formData.duracionMeses;
+    if (formData.tipo === TipoProducto.Curso) {
+      productData.fecha_inicio = formData.fecha_inicio;
+      productData.fecha_fin = formData.fecha_fin;
+      productData.cupo_maximo = formData.cupo_maximo;
+    } else if (formData.tipo === TipoProducto.Suscripcion) {
+      productData.duracion_meses = formData.duracion_meses;
     }
 
     const success = await updateProduct(selectedProduct.id, productData);
@@ -133,7 +134,7 @@ export default function AdminProductosPage() {
     }
   };
 
-  const openModal = (type: ModalType, product?: any) => {
+  const openModal = (type: ModalType, product?: Producto) => {
     setSelectedProduct(product || null);
     if (type === 'edit' && product) {
       setFormData({
@@ -142,10 +143,10 @@ export default function AdminProductosPage() {
         precio: product.precio,
         tipo: product.tipo,
         activo: product.activo,
-        fechaInicio: product.fecha_inicio || product.fechaInicio || '',
-        fechaFin: product.fecha_fin || product.fechaFin || '',
-        cupoMaximo: product.cupo_maximo || product.cupoMaximo || undefined,
-        duracionMeses: product.duracion_meses || product.duracionMeses || undefined,
+        fecha_inicio: product.fecha_inicio || '',
+        fecha_fin: product.fecha_fin || '',
+        cupo_maximo: product.cupo_maximo || undefined,
+        duracion_meses: product.duracion_meses || undefined,
       });
     }
     setModalType(type);
@@ -163,16 +164,16 @@ export default function AdminProductosPage() {
     setFormErrors({});
   };
 
-  const tipoColors: Record<ProductType, string> = {
-    Suscripcion: 'bg-blue-100 text-blue-800',
-    Curso: 'bg-purple-100 text-purple-800',
-    RecursoDigital: 'bg-green-100 text-green-800',
+  const tipoColors: Record<TipoProducto, string> = {
+    [TipoProducto.Suscripcion]: 'bg-blue-100 text-blue-800',
+    [TipoProducto.Curso]: 'bg-purple-100 text-purple-800',
+    [TipoProducto.Recurso]: 'bg-green-100 text-green-800',
   };
 
-  const tipoIcons: Record<ProductType, string> = {
-    Suscripcion: '📅',
-    Curso: '📚',
-    RecursoDigital: '📄',
+  const tipoIcons: Record<TipoProducto, string> = {
+    [TipoProducto.Suscripcion]: '📅',
+    [TipoProducto.Curso]: '📚',
+    [TipoProducto.Recurso]: '📄',
   };
 
   return (
@@ -195,10 +196,10 @@ export default function AdminProductosPage() {
       {/* Filters */}
       <div className="flex justify-between items-center">
         <div className="flex gap-2">
-          {(['all', 'Suscripcion', 'Curso', 'RecursoDigital', 'inactive'] as const).map((f) => (
+          {(['all', TipoProducto.Suscripcion, TipoProducto.Curso, TipoProducto.Recurso, 'inactive'] as const).map((f) => (
             <button
               key={f}
-              onClick={() => setFilter(f)}
+              onClick={() => setFilter(f as any)}
               className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                 filter === f
                   ? 'bg-[#ff6b35] text-white shadow-md'
@@ -225,25 +226,25 @@ export default function AdminProductosPage() {
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
           <div className="text-sm font-medium text-blue-700">Suscripciones</div>
           <div className="text-2xl font-bold text-blue-900">
-            {products.filter((p: any) => p.tipo === 'Suscripcion').length}
+            {products.filter((p) => p.tipo === TipoProducto.Suscripcion).length}
           </div>
         </div>
         <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
           <div className="text-sm font-medium text-purple-700">Cursos</div>
           <div className="text-2xl font-bold text-purple-900">
-            {products.filter((p: any) => p.tipo === 'Curso').length}
+            {products.filter((p) => p.tipo === TipoProducto.Curso).length}
           </div>
         </div>
         <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
           <div className="text-sm font-medium text-green-700">Recursos</div>
           <div className="text-2xl font-bold text-green-900">
-            {products.filter((p: any) => p.tipo === 'RecursoDigital').length}
+            {products.filter((p) => p.tipo === TipoProducto.Recurso).length}
           </div>
         </div>
         <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
           <div className="text-sm font-medium text-gray-700">Total Activos</div>
           <div className="text-2xl font-bold text-gray-900">
-            {products.filter((p: any) => p.activo).length}
+            {products.filter((p) => p.activo).length}
           </div>
         </div>
       </div>
@@ -274,7 +275,7 @@ export default function AdminProductosPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product: any) => (
+          {filteredProducts.map((product) => (
             <div
               key={product.id}
               className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow ${
@@ -283,8 +284,8 @@ export default function AdminProductosPage() {
             >
               {/* Product Header */}
               <div className="flex justify-between items-start mb-4">
-                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${tipoColors[product.tipo as ProductType]}`}>
-                  {tipoIcons[product.tipo as ProductType]} {product.tipo}
+                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${tipoColors[product.tipo as TipoProducto]}`}>
+                  {tipoIcons[product.tipo as TipoProducto]} {product.tipo}
                 </span>
                 {!product.activo && (
                   <span className="px-2 py-1 text-xs font-semibold rounded bg-red-100 text-red-800">
@@ -311,12 +312,12 @@ export default function AdminProductosPage() {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Inicio:</span>
                       <span className="font-medium">
-                        {new Date(product.fecha_inicio || product.fechaInicio).toLocaleDateString('es-ES')}
+                        {product.fecha_inicio ? new Date(product.fecha_inicio).toLocaleDateString('es-ES') : 'N/A'}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Cupos:</span>
-                      <span className="font-medium">{product.cupo_maximo || product.cupoMaximo}</span>
+                      <span className="font-medium">{product.cupo_maximo}</span>
                     </div>
                   </>
                 )}
@@ -325,7 +326,7 @@ export default function AdminProductosPage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Duración:</span>
                     <span className="font-medium">
-                      {product.duracion_meses || product.duracionMeses} {(product.duracion_meses || product.duracionMeses) === 1 ? 'mes' : 'meses'}
+                      {product.duracion_meses} {(product.duracion_meses) === 1 ? 'mes' : 'meses'}
                     </span>
                   </div>
                 )}
@@ -420,19 +421,19 @@ export default function AdminProductosPage() {
                   </label>
                   <select
                     value={formData.tipo}
-                    onChange={(e) => setFormData({ ...formData, tipo: e.target.value as ProductType })}
+                    onChange={(e) => setFormData({ ...formData, tipo: e.target.value as TipoProducto })}
                     disabled={modalType === 'edit'}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent disabled:bg-gray-100"
                   >
-                    <option value="Suscripcion">Suscripción</option>
-                    <option value="Curso">Curso</option>
-                    <option value="RecursoDigital">Recurso Digital</option>
+                    <option value={TipoProducto.Suscripcion}>Suscripción</option>
+                    <option value={TipoProducto.Curso}>Curso</option>
+                    <option value={TipoProducto.Recurso}>Recurso Digital</option>
                   </select>
                 </div>
               </div>
 
               {/* Curso-specific fields */}
-              {formData.tipo === 'Curso' && (
+              {formData.tipo === TipoProducto.Curso && (
                 <div className="border-t pt-4 space-y-4">
                   <h4 className="font-semibold text-gray-700">Información del Curso</h4>
 
@@ -443,13 +444,13 @@ export default function AdminProductosPage() {
                       </label>
                       <input
                         type="date"
-                        value={formData.fechaInicio}
-                        onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
+                        value={formData.fecha_inicio}
+                        onChange={(e) => setFormData({ ...formData, fecha_inicio: e.target.value })}
                         className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent ${
-                          formErrors.fechaInicio ? 'border-red-500' : 'border-gray-300'
+                          formErrors.fecha_inicio ? 'border-red-500' : 'border-gray-300'
                         }`}
                       />
-                      {formErrors.fechaInicio && <p className="text-red-500 text-sm mt-1">{formErrors.fechaInicio}</p>}
+                      {formErrors.fecha_inicio && <p className="text-red-500 text-sm mt-1">{formErrors.fecha_inicio}</p>}
                       <p className="text-xs text-gray-500 mt-1">Opcional si especificás duración en meses</p>
                     </div>
 
@@ -459,13 +460,13 @@ export default function AdminProductosPage() {
                       </label>
                       <input
                         type="date"
-                        value={formData.fechaFin}
-                        onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })}
+                        value={formData.fecha_fin}
+                        onChange={(e) => setFormData({ ...formData, fecha_fin: e.target.value })}
                         className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent ${
-                          formErrors.fechaFin ? 'border-red-500' : 'border-gray-300'
+                          formErrors.fecha_fin ? 'border-red-500' : 'border-gray-300'
                         }`}
                       />
-                      {formErrors.fechaFin && <p className="text-red-500 text-sm mt-1">{formErrors.fechaFin}</p>}
+                      {formErrors.fecha_fin && <p className="text-red-500 text-sm mt-1">{formErrors.fecha_fin}</p>}
                       <p className="text-xs text-gray-500 mt-1">Opcional si especificás duración en meses</p>
                     </div>
                   </div>
@@ -478,14 +479,14 @@ export default function AdminProductosPage() {
                       <input
                         type="number"
                         min="1"
-                        value={formData.duracionMeses || ''}
-                        onChange={(e) => setFormData({ ...formData, duracionMeses: parseInt(e.target.value) || undefined })}
+                        value={formData.duracion_meses || ''}
+                        onChange={(e) => setFormData({ ...formData, duracion_meses: parseInt(e.target.value) || undefined })}
                         className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent ${
-                          formErrors.duracionMeses ? 'border-red-500' : 'border-gray-300'
+                          formErrors.duracion_meses ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="Ej: 9"
                       />
-                      {formErrors.duracionMeses && <p className="text-red-500 text-sm mt-1">{formErrors.duracionMeses}</p>}
+                      {formErrors.duracion_meses && <p className="text-red-500 text-sm mt-1">{formErrors.duracion_meses}</p>}
                       <p className="text-xs text-gray-500 mt-1">Ej: "Exploradores Matemáticos de 9 meses"</p>
                     </div>
 
@@ -496,21 +497,21 @@ export default function AdminProductosPage() {
                       <input
                         type="number"
                         min="1"
-                        value={formData.cupoMaximo || ''}
-                        onChange={(e) => setFormData({ ...formData, cupoMaximo: parseInt(e.target.value) || undefined })}
+                        value={formData.cupo_maximo || ''}
+                        onChange={(e) => setFormData({ ...formData, cupo_maximo: parseInt(e.target.value) || undefined })}
                         className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent ${
-                          formErrors.cupoMaximo ? 'border-red-500' : 'border-gray-300'
+                          formErrors.cupo_maximo ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="Ej: 30"
                       />
-                      {formErrors.cupoMaximo && <p className="text-red-500 text-sm mt-1">{formErrors.cupoMaximo}</p>}
+                      {formErrors.cupo_maximo && <p className="text-red-500 text-sm mt-1">{formErrors.cupo_maximo}</p>}
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Suscripcion-specific fields */}
-              {formData.tipo === 'Suscripcion' && (
+              {formData.tipo === TipoProducto.Suscripcion && (
                 <div className="border-t pt-4">
                   <h4 className="font-semibold text-gray-700 mb-4">Información de Suscripción</h4>
 
@@ -521,14 +522,14 @@ export default function AdminProductosPage() {
                     <input
                       type="number"
                       min="1"
-                      value={formData.duracionMeses || ''}
-                      onChange={(e) => setFormData({ ...formData, duracionMeses: parseInt(e.target.value) || undefined })}
+                      value={formData.duracion_meses || ''}
+                      onChange={(e) => setFormData({ ...formData, duracion_meses: parseInt(e.target.value) || undefined })}
                       className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent ${
-                        formErrors.duracionMeses ? 'border-red-500' : 'border-gray-300'
+                        formErrors.duracion_meses ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Ej: 1"
                     />
-                    {formErrors.duracionMeses && <p className="text-red-500 text-sm mt-1">{formErrors.duracionMeses}</p>}
+                    {formErrors.duracion_meses && <p className="text-red-500 text-sm mt-1">{formErrors.duracion_meses}</p>}
                   </div>
                 </div>
               )}
@@ -571,8 +572,8 @@ export default function AdminProductosPage() {
           <div className="bg-white rounded-lg p-6 max-w-lg w-full shadow-xl">
             <div className="flex justify-between items-start mb-6">
               <h3 className="text-2xl font-bold text-[#2a1a5e]">Detalles del Producto</h3>
-              <span className={`px-3 py-1 text-xs font-semibold rounded-full ${tipoColors[selectedProduct.tipo as ProductType]}`}>
-                {tipoIcons[selectedProduct.tipo as ProductType]} {selectedProduct.tipo}
+              <span className={`px-3 py-1 text-xs font-semibold rounded-full ${tipoColors[selectedProduct.tipo as TipoProducto]}`}>
+                {tipoIcons[selectedProduct.tipo as TipoProducto]} {selectedProduct.tipo}
               </span>
             </div>
 
@@ -612,27 +613,27 @@ export default function AdminProductosPage() {
                   <div>
                     <div className="text-sm font-medium text-gray-500">Fecha de Inicio</div>
                     <div className="text-sm text-gray-900 mt-1">
-                      {new Date(selectedProduct.fecha_inicio || selectedProduct.fechaInicio).toLocaleDateString('es-ES', {
+                      {selectedProduct.fecha_inicio ? new Date(selectedProduct.fecha_inicio).toLocaleDateString('es-ES', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'
-                      })}
+                      }) : 'N/A'}
                     </div>
                   </div>
                   <div>
                     <div className="text-sm font-medium text-gray-500">Fecha de Fin</div>
                     <div className="text-sm text-gray-900 mt-1">
-                      {new Date(selectedProduct.fecha_fin || selectedProduct.fechaFin).toLocaleDateString('es-ES', {
+                      {selectedProduct.fecha_fin ? new Date(selectedProduct.fecha_fin).toLocaleDateString('es-ES', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'
-                      })}
+                      }) : 'N/A'}
                     </div>
                   </div>
                   <div>
                     <div className="text-sm font-medium text-gray-500">Cupo Máximo</div>
                     <div className="text-sm text-gray-900 mt-1">
-                      {selectedProduct.cupo_maximo || selectedProduct.cupoMaximo} estudiantes
+                      {selectedProduct.cupo_maximo} estudiantes
                     </div>
                   </div>
                 </div>
@@ -642,7 +643,7 @@ export default function AdminProductosPage() {
                 <div className="pt-4 border-t">
                   <div className="text-sm font-medium text-gray-500">Duración</div>
                   <div className="text-sm text-gray-900 mt-1">
-                    {selectedProduct.duracion_meses || selectedProduct.duracionMeses} {(selectedProduct.duracion_meses || selectedProduct.duracionMeses) === 1 ? 'mes' : 'meses'}
+                    {selectedProduct.duracion_meses} {(selectedProduct.duracion_meses) === 1 ? 'mes' : 'meses'}
                   </div>
                 </div>
               )}

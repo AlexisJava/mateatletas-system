@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
+import { AuthUser } from '@/lib/api/auth.api';
 import Link from 'next/link';
 import {
   Users,
@@ -17,7 +18,7 @@ import {
 } from 'lucide-react';
 
 interface OnboardingViewProps {
-  user: any;
+  user: AuthUser;
 }
 
 export default function OnboardingView({ user }: OnboardingViewProps) {

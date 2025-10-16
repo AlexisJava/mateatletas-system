@@ -14,27 +14,27 @@ const colorMap = {
   gold: {
     bg: 'bg-gradient-to-br from-yellow-400 to-orange-500',
     shadow: 'rgba(255, 215, 0, 0.6)',
-    glow: '#FFD700',
+    _glow: '#FFD700',
   },
   blue: {
     bg: 'bg-gradient-to-br from-cyan-400 to-blue-500',
     shadow: 'rgba(0, 217, 255, 0.6)',
-    glow: '#00D9FF',
+    _glow: '#00D9FF',
   },
   purple: {
     bg: 'bg-gradient-to-br from-purple-400 to-pink-500',
     shadow: 'rgba(139, 92, 246, 0.6)',
-    glow: '#8B5CF6',
+    _glow: '#8B5CF6',
   },
   pink: {
     bg: 'bg-gradient-to-br from-pink-400 to-rose-500',
     shadow: 'rgba(236, 72, 153, 0.6)',
-    glow: '#EC4899',
+    _glow: '#EC4899',
   },
   green: {
     bg: 'bg-gradient-to-br from-green-400 to-emerald-500',
     shadow: 'rgba(74, 222, 128, 0.6)',
-    glow: '#4ADE80',
+    _glow: '#4ADE80',
   },
 };
 
@@ -50,22 +50,22 @@ export function GlowingBadge({
   intensity = 'medium',
   pulse = true,
 }: GlowingBadgeProps) {
-  const { bg, shadow, glow } = colorMap[color];
-  const glowSize = intensityMap[intensity];
+  const { bg, shadow } = colorMap[color];
+  const _glowSize = intensityMap[intensity];
 
   return (
     <motion.div
       className={`relative inline-block p-4 rounded-2xl border-3 border-black ${bg}`}
       style={{
-        boxShadow: `5px 5px 0px rgba(0,0,0,1), ${glowSize} ${shadow}`,
+        boxShadow: `5px 5px 0px rgba(0,0,0,1), ${_glowSize} ${shadow}`,
       }}
       animate={
         pulse
           ? {
               boxShadow: [
-                `5px 5px 0px rgba(0,0,0,1), ${glowSize} ${shadow}`,
-                `5px 5px 0px rgba(0,0,0,1), 0 0 ${parseInt(glowSize.split(' ')[2]) + 20}px ${shadow}`,
-                `5px 5px 0px rgba(0,0,0,1), ${glowSize} ${shadow}`,
+                `5px 5px 0px rgba(0,0,0,1), ${_glowSize} ${shadow}`,
+                `5px 5px 0px rgba(0,0,0,1), 0 0 ${parseInt(_glowSize.split(' ')[2]) + 20}px ${shadow}`,
+                `5px 5px 0px rgba(0,0,0,1), ${_glowSize} ${shadow}`,
               ],
             }
           : undefined
@@ -77,7 +77,7 @@ export function GlowingBadge({
       }}
       whileHover={{
         scale: 1.05,
-        boxShadow: `8px 8px 0px rgba(0,0,0,1), 0 0 ${parseInt(glowSize.split(' ')[2]) + 30}px ${shadow}`,
+        boxShadow: `8px 8px 0px rgba(0,0,0,1), 0 0 ${parseInt(_glowSize.split(' ')[2]) + 30}px ${shadow}`,
       }}
     >
       {/* Shine effect */}

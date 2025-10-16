@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { getErrorMessage } from '@/lib/utils/error-handler';
 import apiClient from '@/lib/axios';
 
 interface Pago {
@@ -47,10 +48,10 @@ export default function AdminPagosPage() {
       setIsLoading(true);
       setError(null);
       const response = await apiClient.get('/pagos/admin/all');
-      setPagos(response || []);
-    } catch (err: any) {
+      setPagos((response || []) as unknown as Pago[]);
+    } catch (err: unknown) {
       console.error('Error cargando pagos:', err);
-      setError(err.response?.data?.message || 'Error al cargar pagos');
+      setError(getErrorMessage(err, 'Error al cargar pagos'));
     } finally {
       setIsLoading(false);
     }

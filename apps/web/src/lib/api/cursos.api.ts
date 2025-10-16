@@ -39,7 +39,7 @@ export interface Leccion {
   titulo: string;
   descripcion: string | null;
   tipo_contenido: TipoContenido;
-  contenido: any; // JSON con contenido específico por tipo
+  contenido: Record<string, unknown>; // JSON con contenido específico por tipo
   orden: number;
   duracion_estimada_minutos: number;
   puntos: number;
@@ -60,7 +60,7 @@ export interface ProgresoLeccion {
   calificacion: number | null;
   intentos: number;
   notas_estudiante: string | null;
-  ultima_respuesta: any | null;
+  ultima_respuesta: Record<string, unknown> | null;
   fecha_completado: string | null;
   createdAt: string;
   updatedAt: string;
@@ -96,7 +96,7 @@ export interface CreateLeccionDto {
   titulo: string;
   descripcion?: string;
   tipo_contenido: TipoContenido;
-  contenido: any;
+  contenido: Record<string, unknown>;
   orden?: number;
   duracion_estimada_minutos: number;
   puntos?: number;
@@ -109,7 +109,7 @@ export interface UpdateLeccionDto {
   titulo?: string;
   descripcion?: string;
   tipo_contenido?: TipoContenido;
-  contenido?: any;
+  contenido?: Record<string, unknown>;
   orden?: number;
   duracion_estimada_minutos?: number;
   puntos?: number;
@@ -123,7 +123,7 @@ export interface CompletarLeccionDto {
   tiempo_invertido_minutos?: number;
   calificacion?: number;
   notas_estudiante?: string;
-  ultima_respuesta?: any;
+  ultima_respuesta?: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -258,7 +258,7 @@ export const completarLeccion = async (
 ): Promise<{
   progreso: ProgresoLeccion;
   puntos_ganados: number;
-  logro_desbloqueado: any | null;
+  logro_desbloqueado: Record<string, unknown> | null;
 }> => {
   return axios.post(`/cursos/lecciones/${leccionId}/completar`, data);
 };

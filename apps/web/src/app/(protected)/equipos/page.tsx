@@ -52,7 +52,7 @@ export default function EquiposPage() {
    * Cargar equipos con filtros
    */
   const handleFetchEquipos = () => {
-    const params: any = { sortBy, order };
+    const params: Record<string, string> = { sortBy, order };
     if (searchTerm.trim()) {
       params.search = searchTerm.trim();
     }

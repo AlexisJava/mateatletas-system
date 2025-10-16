@@ -22,7 +22,8 @@ export function SoundEffect({ sound, play = false, volume = 0.3 }: SoundEffectPr
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      audioContextRef.current = new AudioContextClass();
     }
   }, []);
 
@@ -69,7 +70,8 @@ export function useSoundEffect() {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      audioContextRef.current = new AudioContextClass();
     }
   }, []);
 

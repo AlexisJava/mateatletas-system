@@ -2,7 +2,44 @@
 
 import { useState, useEffect } from 'react';
 import apiClient from '@/lib/axios';
-import { Users, TrendingUp, Award, Calendar, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Estudiante } from '@/types/estudiante';
+import { Users, Calendar, CheckCircle, Award, TrendingUp } from 'lucide-react';
+
+interface InsigniaEstudiante {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  icono_url?: string;
+}
+
+interface Asistencia {
+  id: string;
+  presente: boolean;
+  fecha: string;
+}
+
+interface InscripcionClaseDetalle {
+  id: string;
+  estudiante_id: string;
+  clase_id: string;
+  estado: string;
+  createdAt: string;
+  clase: {
+    id: string;
+    fecha_hora_inicio: string;
+    ruta_curricular?: {
+      nombre: string;
+      color: string;
+    } | null;
+    docente?: {
+      id: string;
+      user?: {
+        nombre: string;
+        apellido: string;
+      };
+    };
+  };
+}
 
 interface EstudianteDetalle {
   id: string;
@@ -15,10 +52,10 @@ interface EstudianteDetalle {
   perfil_gamificacion: {
     nivel: number;
     puntos_totales: number;
-    insignias_estudiante: any[];
+    insignias_estudiante: InsigniaEstudiante[];
   } | null;
-  inscripciones_clase: any[];
-  asistencias: any[];
+  inscripciones_clase: InscripcionClaseDetalle[];
+  asistencias: Asistencia[];
   estadisticas: {
     total_clases: number;
     clases_presente: number;
@@ -30,7 +67,7 @@ interface EstudianteDetalle {
 }
 
 interface Props {
-  estudiantes: any[];
+  estudiantes: Estudiante[];
 }
 
 export default function MisHijosTab({ estudiantes }: Props) {
@@ -52,13 +89,13 @@ export default function MisHijosTab({ estudiantes }: Props) {
     }
   }, [selectedStudent]);
 
-  const loadStudentDetail = async (estudianteId: string) => {
+  const loadStudentDetail = async (estudiante_id: string) => {
     try {
       setLoading(true);
-      const response = await apiClient.get(`/estudiantes/${estudianteId}/detalle-completo`);
+      const response = await apiClient.get(`/estudiantes/${estudiante_id}/detalle-completo`);
       console.log('📊 Detalle del estudiante:', response);
-      setStudentDetail(response);
-    } catch (error) {
+      setStudentDetail(response as unknown as EstudianteDetalle);
+    } catch (error: unknown) {
       console.error('❌ Error cargando detalle del estudiante:', error);
     } finally {
       setLoading(false);
@@ -201,7 +238,7 @@ export default function MisHijosTab({ estudiantes }: Props) {
               <h3 className="text-lg font-bold text-gray-900 mb-3">Últimas 10 Clases Inscritas</h3>
               <div className="space-y-2">
                 {studentDetail.inscripciones_clase.length > 0 ? (
-                  studentDetail.inscripciones_clase.slice(0, 10).map((inscripcion: any) => {
+                  studentDetail.inscripciones_clase.slice(0, 10).map((inscripcion) => {
                     const clase = inscripcion.clase;
                     const fechaClase = new Date(clase.fecha_hora_inicio);
 

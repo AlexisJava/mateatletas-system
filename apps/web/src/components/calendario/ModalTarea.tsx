@@ -11,7 +11,6 @@ import {
   Tag,
   Calendar,
   Clock,
-  AlertCircle,
   Target,
   Zap,
 } from 'lucide-react';
@@ -21,10 +20,8 @@ import type {
   UpdateTareaDto,
   Subtarea,
   Evento,
-  EstadoTarea,
-  PrioridadTarea,
 } from '@/types/calendario.types';
-import { TipoEvento } from '@/types/calendario.types';
+import { TipoEvento, EstadoTarea, PrioridadTarea } from '@/types/calendario.types';
 
 interface ModalTareaProps {
   isOpen: boolean;
@@ -42,8 +39,8 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
   const [horaInicio, setHoraInicio] = useState('09:00');
   const [fechaFin, setFechaFin] = useState('');
   const [horaFin, setHoraFin] = useState('10:00');
-  const [estado, setEstado] = useState<EstadoTarea>('PENDIENTE');
-  const [prioridad, setPrioridad] = useState<PrioridadTarea>('MEDIA');
+  const [estado, setEstado] = useState<EstadoTarea>(EstadoTarea.PENDIENTE);
+  const [prioridad, setPrioridad] = useState<PrioridadTarea>(PrioridadTarea.MEDIA);
   const [porcentajeCompletado, setPorcentajeCompletado] = useState(0);
   const [categoria, setCategoria] = useState('');
   const [etiquetas, setEtiquetas] = useState<string[]>([]);
@@ -88,8 +85,8 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
     setHoraInicio('09:00');
     setFechaFin(ahora.toISOString().split('T')[0]);
     setHoraFin('10:00');
-    setEstado('PENDIENTE');
-    setPrioridad('MEDIA');
+    setEstado(EstadoTarea.PENDIENTE);
+    setPrioridad(PrioridadTarea.MEDIA);
     setPorcentajeCompletado(0);
     setCategoria('');
     setEtiquetas([]);
@@ -129,7 +126,7 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
       }
       onClose();
       resetForm();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al guardar tarea:', error);
     }
   };
@@ -172,38 +169,40 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
 
   const getPrioridadIcon = (prioridad: PrioridadTarea) => {
     switch (prioridad) {
-      case 'URGENTE':
+      case PrioridadTarea.URGENTE:
         return '🔴';
-      case 'ALTA':
+      case PrioridadTarea.ALTA:
         return '🟠';
-      case 'MEDIA':
+      case PrioridadTarea.MEDIA:
         return '🟡';
-      case 'BAJA':
+      case PrioridadTarea.BAJA:
         return '🟢';
     }
   };
 
   const getPrioridadColor = (prioridad: PrioridadTarea) => {
     switch (prioridad) {
-      case 'URGENTE':
+      case PrioridadTarea.URGENTE:
         return 'from-red-500 to-rose-600';
-      case 'ALTA':
+      case PrioridadTarea.ALTA:
         return 'from-orange-500 to-amber-600';
-      case 'MEDIA':
+      case PrioridadTarea.MEDIA:
         return 'from-yellow-500 to-orange-500';
-      case 'BAJA':
+      case PrioridadTarea.BAJA:
         return 'from-green-500 to-emerald-600';
     }
   };
 
   const getEstadoColor = (estado: EstadoTarea) => {
     switch (estado) {
-      case 'COMPLETADA':
+      case EstadoTarea.COMPLETADA:
         return 'from-green-500 to-emerald-600';
-      case 'EN_PROGRESO':
+      case EstadoTarea.EN_PROGRESO:
         return 'from-blue-500 to-indigo-600';
-      case 'PENDIENTE':
+      case EstadoTarea.PENDIENTE:
         return 'from-purple-500 to-violet-600';
+      case EstadoTarea.CANCELADA:
+        return 'from-gray-500 to-slate-600';
     }
   };
 
@@ -288,9 +287,9 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
                     estado
                   )} shadow-lg focus:ring-2 focus:ring-purple-500 cursor-pointer`}
                 >
-                  <option value="PENDIENTE">⏸️ Pendiente</option>
-                  <option value="EN_PROGRESO">▶️ En Progreso</option>
-                  <option value="COMPLETADA">✅ Completada</option>
+                  <option value={EstadoTarea.PENDIENTE}>⏸️ Pendiente</option>
+                  <option value={EstadoTarea.EN_PROGRESO}>▶️ En Progreso</option>
+                  <option value={EstadoTarea.COMPLETADA}>✅ Completada</option>
                 </select>
               </div>
 
@@ -306,10 +305,10 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
                     prioridad
                   )} shadow-lg focus:ring-2 focus:ring-purple-500 cursor-pointer`}
                 >
-                  <option value="BAJA">{getPrioridadIcon('BAJA')} Baja</option>
-                  <option value="MEDIA">{getPrioridadIcon('MEDIA')} Media</option>
-                  <option value="ALTA">{getPrioridadIcon('ALTA')} Alta</option>
-                  <option value="URGENTE">{getPrioridadIcon('URGENTE')} Urgente</option>
+                  <option value={PrioridadTarea.BAJA}>{getPrioridadIcon(PrioridadTarea.BAJA)} Baja</option>
+                  <option value={PrioridadTarea.MEDIA}>{getPrioridadIcon(PrioridadTarea.MEDIA)} Media</option>
+                  <option value={PrioridadTarea.ALTA}>{getPrioridadIcon(PrioridadTarea.ALTA)} Alta</option>
+                  <option value={PrioridadTarea.URGENTE}>{getPrioridadIcon(PrioridadTarea.URGENTE)} Urgente</option>
                 </select>
               </div>
             </div>

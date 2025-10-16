@@ -52,7 +52,7 @@ export function ClassReservationModal({
   if (!clase) return null;
 
   // Formatear fecha y hora
-  const fecha = new Date(clase.fechaHora);
+  const fecha = new Date(clase.fecha_hora_inicio);
   const fechaFormateada = new Intl.DateTimeFormat('es-ES', {
     weekday: 'long',
     day: 'numeric',
@@ -62,7 +62,7 @@ export function ClassReservationModal({
   }).format(fecha);
 
   // Color de la ruta
-  const colorRuta = clase.rutaCurricular?.color || '#00d9ff';
+  const colorRuta = clase.ruta_curricular?.color || '#00d9ff';
 
   // Handler de confirmación
   const handleConfirm = async () => {
@@ -118,7 +118,7 @@ export function ClassReservationModal({
               <div>
                 <p className="text-xs text-gray-500">Ruta</p>
                 <p className="font-bold text-dark">
-                  {clase.rutaCurricular?.nombre || 'Sin ruta'}
+                  {clase.ruta_curricular?.nombre || 'Sin ruta'}
                 </p>
               </div>
             </div>
@@ -141,7 +141,7 @@ export function ClassReservationModal({
                 <div>
                   <p className="text-xs text-gray-500">Docente</p>
                   <p className="font-bold text-dark">
-                    {clase.docente.user.nombre} {clase.docente.user.apellido}
+                    {clase.docente?.user?.nombre} {clase.docente?.user?.apellido}
                   </p>
                 </div>
               </div>
@@ -153,7 +153,7 @@ export function ClassReservationModal({
               <div>
                 <p className="text-xs text-gray-500">Cupos disponibles</p>
                 <p className="font-bold text-dark">
-                  {clase.cupoDisponible} de {clase.cupoMaximo}
+                  {clase.cupo_disponible} de {clase.cupo_maximo}
                 </p>
               </div>
             </div>

@@ -6,7 +6,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
  * Características:
  * - Base URL desde variable de entorno
  * - Timeout de 10 segundos
- * - Interceptor de request: adjunta token JWT automáticamente
+ * - withCredentials: true para enviar cookies httpOnly automáticamente
  * - Interceptor de response: maneja errores 401 (redirección a login)
  */
 
@@ -16,23 +16,17 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // CRÍTICO: Envía cookies automáticamente
 });
 
 /**
  * Request Interceptor
- * Adjunta automáticamente el token JWT a cada request si existe en localStorage
+ * Ya NO es necesario adjuntar el token manualmente.
+ * Las cookies httpOnly se envían automáticamente con withCredentials: true
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Verificar si estamos en el navegador (Next.js puede renderizar en el servidor)
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('auth-token');
-
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-
+    // Las cookies se envían automáticamente, no hay nada que hacer aquí
     return config;
   },
   (error: AxiosError) => {
@@ -43,7 +37,7 @@ apiClient.interceptors.request.use(
 /**
  * Response Interceptor
  * - Extrae data directamente de respuestas exitosas (2xx)
- * - Maneja errores 401: elimina token y redirige a login
+ * - Maneja errores 401: redirige a login (la cookie se limpia en el backend)
  * - Propaga otros errores para manejo en componentes
  */
 apiClient.interceptors.response.use(
@@ -56,8 +50,8 @@ apiClient.interceptors.response.use(
     if (typeof window !== 'undefined') {
       // Si es 401 Unauthorized, el token es inválido o expiró
       if (error.response?.status === 401) {
-        // Eliminar token del localStorage
-        localStorage.removeItem('auth-token');
+        // Ya NO necesitamos eliminar de localStorage (usamos cookies httpOnly)
+        // La cookie se limpia automáticamente en el backend al hacer logout
 
         // Redirigir a login solo si no estamos ya en la página de login
         const currentPath = window.location.pathname;

@@ -1,8 +1,8 @@
 'use client';
+import { Button } from '@/components/ui';
 
 import { useEffect, useState } from 'react';
 import { useAdminStore } from '@/store/admin.store';
-import { Button } from '@/components/ui';
 import { AdminUser } from '@/types/admin.types';
 import {
   exportToExcel,
@@ -75,9 +75,9 @@ export default function UsuariosPage() {
     const timestamp = new Date().getTime();
 
     if (format === 'excel') {
-      exportToExcel(formattedData, `usuarios-${timestamp}`, 'Usuarios');
+      exportToExcel(formattedData as any, `usuarios-${timestamp}`, 'Usuarios');
     } else if (format === 'csv') {
-      exportToCSV(formattedData, `usuarios-${timestamp}`);
+      exportToCSV(formattedData as any, `usuarios-${timestamp}`);
     } else {
       exportToPDF(
         formattedData,

@@ -27,7 +27,7 @@ import {
 } from 'recharts';
 
 export default function AdminReportesPage() {
-  const { dashboard, stats, users, classes, fetchDashboard, fetchStats, fetchUsers, fetchClasses, isLoading } = useAdminStore();
+  const { stats, users, classes, fetchDashboard, fetchStats, fetchUsers, fetchClasses, isLoading } = useAdminStore();
   const [exportStatus, setExportStatus] = useState<{ success: boolean; message: string } | null>(null);
   const [dateRange, setDateRange] = useState<{ start: string; end: string }>({
     start: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
@@ -51,14 +51,14 @@ export default function AdminReportesPage() {
   }, [exportStatus]);
 
   const handleExportUsers = async (format: 'excel' | 'csv' | 'pdf') => {
-    const formattedData = formatUsersForExport(users);
+    const formattedData = formatUsersForExport(users as any);
     const timestamp = new Date().getTime();
     let result;
 
     if (format === 'excel') {
-      result = exportToExcel(formattedData, `usuarios-${timestamp}`, 'Usuarios');
+      result = exportToExcel(formattedData as any, `usuarios-${timestamp}`, 'Usuarios');
     } else if (format === 'csv') {
-      result = exportToCSV(formattedData, `usuarios-${timestamp}`);
+      result = exportToCSV(formattedData as any, `usuarios-${timestamp}`);
     } else {
       result = exportToPDF(
         formattedData,
@@ -107,10 +107,10 @@ export default function AdminReportesPage() {
 
   const handleGenerateFullReport = async () => {
     const result = generateSystemReport({
-      users,
-      classes,
+      users: users as any,
+      classes: classes as any,
       products: [], // Will be added when products page is complete
-      stats
+      stats: stats as any
     });
 
     setExportStatus(result);
@@ -134,8 +134,8 @@ export default function AdminReportesPage() {
     return userDate >= startDate && userDate <= endDate;
   });
 
-  const filteredClasses = classes.filter((c: any) => {
-    const classDate = new Date(c.fecha_hora_inicio || c.fechaHoraInicio);
+  const filteredClasses = classes.filter((c) => {
+    const classDate = new Date(c.fecha_hora_inicio || c.fecha_hora_inicio);
     const startDate = new Date(dateRange.start);
     const endDate = new Date(dateRange.end);
     endDate.setHours(23, 59, 59, 999);
@@ -149,8 +149,8 @@ export default function AdminReportesPage() {
   };
 
   const classesByStatus = {
-    programadas: filteredClasses.filter((c: any) => c.estado === 'Programada').length,
-    canceladas: filteredClasses.filter((c: any) => c.estado === 'Cancelada').length,
+    programadas: filteredClasses.filter((c) => c.estado === 'Programada').length,
+    canceladas: filteredClasses.filter((c) => c.estado === 'Cancelada').length,
   };
 
   // Prepare data for charts
@@ -176,11 +176,11 @@ export default function AdminReportesPage() {
   ];
 
   // Classes by curriculum route (filtered)
-  const classesByRoute = filteredClasses.reduce((acc: any, clase: any) => {
-    const route = clase.ruta_curricular?.nombre || clase.rutaCurricular?.nombre || 'Sin Ruta';
+  const classesByRoute = filteredClasses.reduce((acc, clase) => {
+    const route = clase.ruta_curricular?.nombre || clase.ruta_curricular?.nombre || 'Sin Ruta';
     acc[route] = (acc[route] || 0) + 1;
     return acc;
-  }, {});
+  }, {} as Record<string, number>);
 
   const routeData = Object.entries(classesByRoute).map(([name, value]) => ({
     name,
@@ -188,7 +188,7 @@ export default function AdminReportesPage() {
   }));
 
   // Custom tooltip for charts
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string }>; label?: string }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
@@ -313,7 +313,7 @@ export default function AdminReportesPage() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                label={(props: any) => `${props.name}: ${(props.percent * 100).toFixed(0)}%`}
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
@@ -353,7 +353,7 @@ export default function AdminReportesPage() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                label={(props: any) => `${props.name}: ${(props.percent * 100).toFixed(0)}%`}
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"

@@ -61,11 +61,11 @@ export const getProductById = async (id: string) => {
   return axios.get(`/productos/${id}`);
 };
 
-export const createProduct = async (data: any) => {
+export const createProduct = async (data: Record<string, unknown>) => {
   return axios.post('/productos', data);
 };
 
-export const updateProduct = async (id: string, data: any) => {
+export const updateProduct = async (id: string, data: Record<string, unknown>) => {
   return axios.patch(`/productos/${id}`, data);
 };
 

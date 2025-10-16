@@ -24,6 +24,14 @@ export interface Producto {
   activo: boolean;
   createdAt: string;
   updatedAt: string;
+
+  // Campos específicos para tipo Curso
+  fecha_inicio?: string | null;
+  fecha_fin?: string | null;
+  cupo_maximo?: number | null;
+
+  // Campos específicos para tipo Suscripcion
+  duracion_meses?: number | null;
 }
 
 /**

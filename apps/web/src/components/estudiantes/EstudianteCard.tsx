@@ -1,6 +1,5 @@
 'use client';
 
-import { Avatar, Badge, Button } from '@/components/ui';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import type { Estudiante } from '@/types/estudiante';
 

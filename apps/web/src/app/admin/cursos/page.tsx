@@ -1,9 +1,10 @@
 'use client';
+import { Button } from '@/components/ui';
+import { getErrorMessage } from '@/lib/utils/error-handler';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminStore } from '@/store/admin.store';
-import { Button } from '@/components/ui';
 import {
   getModulosByProducto,
   createModulo,
@@ -12,6 +13,7 @@ import {
   type Modulo,
   type CreateModuloDto
 } from '@/lib/api/cursos.api';
+import { Producto } from '@/types/catalogo.types';
 
 export default function AdminCursosPage() {
   const router = useRouter();
@@ -36,7 +38,7 @@ export default function AdminCursosPage() {
   }, []);
 
   // Filtrar solo cursos
-  const cursos = products.filter((p: any) => p.tipo === 'Curso' && p.activo);
+  const cursos = products.filter((p) => p.tipo === 'Curso' && p.activo);
 
   const loadModulos = async (productoId: string) => {
     setLoadingModulos(true);
@@ -44,15 +46,15 @@ export default function AdminCursosPage() {
     try {
       const data = await getModulosByProducto(productoId);
       setModulos(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al cargar módulos');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al cargar módulos'));
       setModulos([]);
     } finally {
       setLoadingModulos(false);
     }
   };
 
-  const handleSelectCurso = async (curso: any) => {
+  const handleSelectCurso = async (curso: Producto) => {
     setSelectedCurso(curso);
     await loadModulos(curso.id);
   };
@@ -65,8 +67,8 @@ export default function AdminCursosPage() {
       await createModulo(selectedCurso.id, formData);
       await loadModulos(selectedCurso.id);
       closeModuloModal();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al crear módulo');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al crear módulo'));
     }
   };
 
@@ -78,8 +80,8 @@ export default function AdminCursosPage() {
       await updateModulo(editingModulo.id, formData);
       await loadModulos(selectedCurso.id);
       closeModuloModal();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al actualizar módulo');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al actualizar módulo'));
     }
   };
 
@@ -90,8 +92,8 @@ export default function AdminCursosPage() {
       setError(null);
       await deleteModulo(moduloId);
       await loadModulos(selectedCurso.id);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al eliminar módulo');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al eliminar módulo'));
     }
   };
 
@@ -165,7 +167,7 @@ export default function AdminCursosPage() {
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
-                {cursos.map((curso: any) => (
+                {cursos.map((curso) => (
                   <button
                     key={curso.id}
                     onClick={() => handleSelectCurso(curso)}
@@ -179,7 +181,7 @@ export default function AdminCursosPage() {
                     </p>
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                       <span>${curso.precio}</span>
-                      <span>Cupo: {curso.cupoMaximo || 0}</span>
+                      <span>Cupo: {curso.cupo_maximo || 0}</span>
                     </div>
                   </button>
                 ))}
@@ -231,7 +233,7 @@ export default function AdminCursosPage() {
                 </div>
               ) : (
                 <div className="divide-y divide-gray-200">
-                  {modulos.map((modulo, index) => (
+                  {modulos.map((modulo) => (
                     <div key={modulo.id} className="p-6 hover:bg-gray-50 transition">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">

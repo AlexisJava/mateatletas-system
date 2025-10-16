@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import apiClient from '@/lib/axios';
-import { Calendar, ChevronLeft, ChevronRight, Clock, User, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, ChevronLeft, CheckCircle, XCircle, Clock, User, ChevronRight } from 'lucide-react';
 
 interface Clase {
   id: string;
@@ -74,8 +74,8 @@ export default function CalendarioTab() {
         },
       });
       console.log('📅 Calendario del tutor:', response);
-      setCalendarioData(response);
-    } catch (error) {
+      setCalendarioData(response as unknown as CalendarioData);
+    } catch (error: unknown) {
       console.error('❌ Error cargando calendario:', error);
     } finally {
       setLoading(false);

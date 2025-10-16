@@ -8,9 +8,14 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 /**
+ * Type for exportable data records
+ */
+type ExportableData = Record<string, string | number | boolean | null | undefined>;
+
+/**
  * Exporta datos a archivo Excel (.xlsx)
  */
-export const exportToExcel = (data: any[], filename: string, sheetName = 'Datos') => {
+export const exportToExcel = (data: ExportableData[], filename: string, sheetName = 'Datos') => {
   try {
     // Crear workbook
     const wb = XLSX.utils.book_new();
@@ -25,7 +30,7 @@ export const exportToExcel = (data: any[], filename: string, sheetName = 'Datos'
     XLSX.writeFile(wb, `${filename}.xlsx`);
 
     return { success: true, message: 'Archivo Excel generado exitosamente' };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error al exportar a Excel:', error);
     return { success: false, message: 'Error al generar archivo Excel' };
   }
@@ -34,7 +39,7 @@ export const exportToExcel = (data: any[], filename: string, sheetName = 'Datos'
 /**
  * Exporta datos a archivo CSV
  */
-export const exportToCSV = (data: any[], filename: string) => {
+export const exportToCSV = (data: ExportableData[], filename: string) => {
   try {
     // Convertir a worksheet y luego a CSV
     const ws = XLSX.utils.json_to_sheet(data);
@@ -54,7 +59,7 @@ export const exportToCSV = (data: any[], filename: string) => {
     document.body.removeChild(link);
 
     return { success: true, message: 'Archivo CSV generado exitosamente' };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error al exportar a CSV:', error);
     return { success: false, message: 'Error al generar archivo CSV' };
   }
@@ -64,7 +69,7 @@ export const exportToCSV = (data: any[], filename: string) => {
  * Exporta datos a PDF con tabla
  */
 export const exportToPDF = (
-  data: any[],
+  data: ExportableData[],
   filename: string,
   title: string,
   columns: { header: string; dataKey: string }[]
@@ -109,7 +114,7 @@ export const exportToPDF = (
     doc.save(`${filename}.pdf`);
 
     return { success: true, message: 'Archivo PDF generado exitosamente' };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error al exportar a PDF:', error);
     return { success: false, message: 'Error al generar archivo PDF' };
   }
@@ -131,7 +136,7 @@ export const exportChartToPNG = (chartElement: HTMLElement, filename: string) =>
     });
 
     return { success: true, message: 'Imagen generada exitosamente' };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error al exportar gráfico:', error);
     return { success: false, message: 'Error al generar imagen' };
   }
@@ -141,7 +146,7 @@ export const exportChartToPNG = (chartElement: HTMLElement, filename: string) =>
  * Formatea datos de usuarios para exportación
  */
 export const formatUsersForExport = (users: any[]) => {
-  return users.map(user => ({
+  return users.map((user: any) => ({
     'ID': user.id,
     'Nombre': `${user.nombre} ${user.apellido}`,
     'Email': user.email,
@@ -155,15 +160,15 @@ export const formatUsersForExport = (users: any[]) => {
  * Formatea datos de clases para exportación
  */
 export const formatClassesForExport = (classes: any[]) => {
-  return classes.map(clase => ({
+  return classes.map((clase: any) => ({
     'ID': clase.id,
-    'Ruta Curricular': clase.ruta_curricular?.nombre || clase.rutaCurricular?.nombre || '-',
-    'Docente': `${clase.docente?.nombre || ''} ${clase.docente?.apellido || ''}`.trim() || '-',
-    'Fecha': new Date(clase.fecha_hora_inicio || clase.fechaHoraInicio).toLocaleDateString('es-ES'),
-    'Hora': new Date(clase.fecha_hora_inicio || clase.fechaHoraInicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-    'Duración (min)': clase.duracion_minutos || clase.duracionMinutos,
-    'Cupos Ocupados': clase.cupos_ocupados || clase.cuposOcupados || 0,
-    'Cupos Máximos': clase.cupos_maximo || clase.cuposMaximo,
+    'Ruta Curricular': clase.ruta_curricular?.nombre || '-',
+    'Docente': `${clase.docente?.user?.nombre || ''} ${clase.docente?.user?.apellido || ''}`.trim() || '-',
+    'Fecha': new Date(clase.fecha_hora_inicio).toLocaleDateString('es-ES'),
+    'Hora': new Date(clase.fecha_hora_inicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+    'Duración (min)': clase.duracion_minutos,
+    'Cupos Ocupados': clase.cupo_maximo - clase.cupo_disponible,
+    'Cupos Máximos': clase.cupo_maximo,
     'Estado': clase.estado
   }));
 };
@@ -171,29 +176,36 @@ export const formatClassesForExport = (classes: any[]) => {
 /**
  * Formatea datos de productos para exportación
  */
-export const formatProductsForExport = (products: any[]) => {
+export const formatProductsForExport = (products: ExportableData[]) => {
   return products.map(product => ({
     'ID': product.id,
     'Nombre': product.nombre,
     'Tipo': product.tipo,
-    'Precio': `$${product.precio.toLocaleString()}`,
+    'Precio': `$${(product.precio || 0).toLocaleString()}`,
     'Descripción': product.descripcion || '-',
     'Estado': product.activo ? 'Activo' : 'Inactivo',
-    'Fecha Inicio': product.fecha_inicio ? new Date(product.fecha_inicio).toLocaleDateString('es-ES') : '-',
-    'Fecha Fin': product.fecha_fin ? new Date(product.fecha_fin).toLocaleDateString('es-ES') : '-',
+    'Fecha Inicio': product.fecha_inicio ? new Date(String(product.fecha_inicio)).toLocaleDateString('es-ES') : '-',
+    'Fecha Fin': product.fecha_fin ? new Date(String(product.fecha_fin)).toLocaleDateString('es-ES') : '-',
     'Cupo Máximo': product.cupo_maximo || '-',
     'Duración (meses)': product.duracion_meses || '-'
   }));
 };
 
+interface SystemReportStats {
+  totalUsers?: number;
+  totalClasses?: number;
+  totalProducts?: number;
+  [key: string]: string | number | undefined;
+}
+
 /**
  * Genera reporte completo del sistema en PDF
  */
 export const generateSystemReport = (data: {
-  users: any[];
-  classes: any[];
-  products: any[];
-  stats: any;
+  users: ExportableData[];
+  classes: ExportableData[];
+  products: ExportableData[];
+  stats: SystemReportStats;
 }) => {
   try {
     const doc = new jsPDF();
@@ -229,9 +241,9 @@ export const generateSystemReport = (data: {
     yPosition += 7;
     doc.text(`Total de Productos: ${data.products.length}`, 20, yPosition);
     yPosition += 7;
-    doc.text(`Clases Activas: ${data.classes.filter((c: any) => c.estado === 'Programada').length}`, 20, yPosition);
+    doc.text(`Clases Activas: ${data.classes.filter((c) => c.estado === 'Programada').length}`, 20, yPosition);
     yPosition += 7;
-    doc.text(`Productos Activos: ${data.products.filter((p: any) => p.activo).length}`, 20, yPosition);
+    doc.text(`Productos Activos: ${data.products.filter((p) => p.activo).length}`, 20, yPosition);
     yPosition += 15;
 
     // Nueva página para usuarios
@@ -281,7 +293,7 @@ export const generateSystemReport = (data: {
     doc.save(`reporte-sistema-${new Date().getTime()}.pdf`);
 
     return { success: true, message: 'Reporte completo generado exitosamente' };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error al generar reporte:', error);
     return { success: false, message: 'Error al generar reporte' };
   }
