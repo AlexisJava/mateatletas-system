@@ -10,7 +10,7 @@ interface Notificacion {
   mensaje: string;
   leida: boolean;
   createdAt: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 const tipoIcons = {
@@ -58,7 +58,7 @@ export default function NotificationCenter() {
         const data = await response.json();
         setNotificaciones(data);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching notifications:', error);
     } finally {
       setLoading(false);
@@ -78,7 +78,7 @@ export default function NotificationCenter() {
         const data = await response.json();
         setUnreadCount(data.count);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching unread count:', error);
     }
   };
@@ -98,7 +98,7 @@ export default function NotificationCenter() {
         n.id === id ? { ...n, leida: true } : n
       ));
       setUnreadCount(Math.max(0, unreadCount - 1));
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error marking notification as read:', error);
     }
   };
@@ -116,7 +116,7 @@ export default function NotificationCenter() {
       // Actualizar localmente
       setNotificaciones(notificaciones.map(n => ({ ...n, leida: true })));
       setUnreadCount(0);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error marking all as read:', error);
     }
   };
@@ -137,7 +137,7 @@ export default function NotificationCenter() {
       if (notif && !notif.leida) {
         setUnreadCount(Math.max(0, unreadCount - 1));
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error deleting notification:', error);
     }
   };

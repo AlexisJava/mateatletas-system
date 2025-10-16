@@ -17,8 +17,8 @@ import {
 export const getClases = async (filtros?: FiltroClases): Promise<Clase[]> => {
   const params = new URLSearchParams();
 
-  if (filtros?.rutaCurricularId) {
-    params.append('rutaCurricularId', filtros.rutaCurricularId);
+  if (filtros?.ruta_curricular_id) {
+    params.append('rutaCurricularId', filtros.ruta_curricular_id);
   }
   if (filtros?.fechaDesde) {
     params.append('fechaDesde', filtros.fechaDesde);

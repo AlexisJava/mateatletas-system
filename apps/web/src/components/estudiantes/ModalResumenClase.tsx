@@ -54,7 +54,7 @@ interface ModalResumenClaseProps {
 }
 
 export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) {
-  const [showConfetti, setShowConfetti] = useState(resumen.puntosGanados > 50);
+  const [showConfetti, _setShowConfetti] = useState(resumen.puntosGanados > 50);
 
   const participacionColor =
     resumen.estadisticas.participacion >= 80

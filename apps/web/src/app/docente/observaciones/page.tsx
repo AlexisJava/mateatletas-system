@@ -10,7 +10,7 @@ import { es } from 'date-fns/locale';
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.3, ease: 'easeOut' },
+  transition: { duration: 0.3 },
 };
 
 export default function DocenteObservacionesPage() {
@@ -40,8 +40,8 @@ export default function DocenteObservacionesPage() {
         fechaHasta: filtros.fechaHasta || undefined,
       });
       setObservaciones(data);
-    } catch (error) {
-      console.error('Error al cargar observaciones:', error);
+    } catch (error: any) {
+      console.error("Error:", error as any);
     } finally {
       setIsLoading(false);
     }
@@ -376,7 +376,7 @@ export default function DocenteObservacionesPage() {
                         Observación
                       </label>
                       <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                        <p className="text-gray-700">{selectedObservacion.observacion}</p>
+                        <p className="text-gray-700">{selectedObservacion.observaciones}</p>
                       </div>
                     </div>
 

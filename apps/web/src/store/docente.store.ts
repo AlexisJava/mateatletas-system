@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/utils/error-handler';
 import { create } from 'zustand';
 import { Clase } from '@/types/clases.types';
 import { getMisClasesDocente, cancelarClase, getClaseById } from '@/lib/api/clases.api';
@@ -109,8 +110,8 @@ export const useDocenteStore = create<DocenteStore>((set, get) => ({
     try {
       const clases = await getMisClasesDocente(incluir);
       set({ misClases: clases, isLoading: false });
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Error al cargar clases';
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error, 'Error al cargar clases');
       set({ error: errorMsg, isLoading: false });
       console.error('Error fetchMisClases:', error);
     }
@@ -121,8 +122,8 @@ export const useDocenteStore = create<DocenteStore>((set, get) => ({
     try {
       const clase = await getClaseById(claseId);
       set({ claseActual: clase, isLoading: false });
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Error al cargar detalle de clase';
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error, 'Error al cargar detalle de clase');
       set({ error: errorMsg, isLoading: false });
       console.error('Error fetchClaseDetalle:', error);
     }
@@ -138,8 +139,8 @@ export const useDocenteStore = create<DocenteStore>((set, get) => ({
 
       set({ isLoadingAction: false });
       return true;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Error al cancelar clase';
+    } catch (error: unknown) {
+      const errorMsg = getErrorMessage(error, 'Error al cancelar clase');
       set({ error: errorMsg, isLoadingAction: false });
       console.error('Error cancelarClase:', error);
       return false;

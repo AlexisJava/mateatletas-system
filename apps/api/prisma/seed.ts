@@ -3,22 +3,42 @@ import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
+/**
+ * Función principal de seeding
+ * Ejecuta seeds según el entorno (NODE_ENV)
+ *
+ * - production: Solo datos esenciales (Admin, Rutas Curriculares)
+ * - development: Datos completos de prueba
+ */
 async function main() {
-  console.log('🌱 Iniciando seed de la base de datos...\n');
+  const env = process.env.NODE_ENV || 'development';
+  console.log(`🌱 Iniciando seed de la base de datos (${env})...\n`);
 
-  await seedAdmin();
-  await seedDocente();
-  await seedTutor();
-  await seedEquipos();
-  await seedRutasCurriculares();
-  await seedProductos();
-  await seedAccionesPuntuables();
-  await seedLogros();
-  // await seedEstudiantesConCredenciales(); // TODO: Re-enable after adding email to Estudiante model
-  await seedCursoFundamentosAlgebra();
-  await seedInscripcionEstudiante();
+  if (env === 'production') {
+    // PRODUCTION: Solo datos esenciales
+    console.log('🏭 Modo PRODUCCIÓN: Creando solo datos esenciales\n');
+    await seedAdmin();
+    await seedRutasCurriculares(); // Las rutas son necesarias para el sistema
+    await seedProductos(); // Productos del catálogo (pueden ser reales)
+    await seedAccionesPuntuables(); // Configuración de gamificación
+    await seedLogros(); // Logros del sistema
+  } else {
+    // DEVELOPMENT/TEST: Datos completos de prueba
+    console.log('🧪 Modo DESARROLLO: Creando datos de prueba completos\n');
+    await seedAdmin();
+    await seedDocente();
+    await seedTutor();
+    await seedEquipos();
+    await seedRutasCurriculares();
+    await seedProductos();
+    await seedAccionesPuntuables();
+    await seedLogros();
+    // await seedEstudiantesConCredenciales(); // TODO: Re-enable after adding email to Estudiante model
+    await seedCursoFundamentosAlgebra();
+    await seedInscripcionEstudiante();
+  }
 
-  console.log('\n🎉 Seed completado exitosamente!');
+  console.log(`\n🎉 Seed completado exitosamente (${env})!`);
 }
 
 async function seedAdmin() {

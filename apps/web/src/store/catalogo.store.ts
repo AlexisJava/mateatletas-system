@@ -1,3 +1,4 @@
+import { getErrorMessage, isAxiosError } from '@/lib/utils/error-handler';
 /**
  * Zustand Store para Catálogo de Productos
  */
@@ -41,15 +42,17 @@ export const useCatalogoStore = create<CatalogoStore>((set, get) => ({
 
       // El axios interceptor ya retorna response.data directamente
       // Pero el backend puede estar retornando { data: productos }
-      const productos = Array.isArray(response) ? response : (response?.data || []);
+      const productos = Array.isArray(response) ? response : ((response as any)?.data || []);
 
       console.log('🟡 [CATALOGO STORE] fetchProductos - SUCCESS:', productos.length, 'productos');
       set({ productos, isLoading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('🔴 [CATALOGO STORE] fetchProductos - ERROR:', error);
-      console.error('🔴 [CATALOGO STORE] Error response:', error.response?.data);
+      if (isAxiosError(error)) {
+        console.error('🔴 [CATALOGO STORE] Error response:', error.response?.data);
+      }
       set({
-        error: error.response?.data?.message || 'Error al cargar productos',
+        error: getErrorMessage(error, 'Error al cargar productos'),
         isLoading: false,
       });
     }
@@ -61,9 +64,9 @@ export const useCatalogoStore = create<CatalogoStore>((set, get) => ({
     try {
       const producto = await catalogoApi.getProductoPorId(id);
       set({ productoSeleccionado: producto, isLoading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({
-        error: error.response?.data?.message || 'Error al cargar producto',
+        error: getErrorMessage(error, 'Error al cargar producto'),
         isLoading: false,
       });
     }

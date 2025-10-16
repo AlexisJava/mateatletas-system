@@ -6,7 +6,8 @@ import { useAuthStore } from '@/store/auth.store';
 import apiClient from '@/lib/axios';
 import { LoadingSpinner } from '@/components/effects';
 import { ModalResumenClase } from '@/components/estudiantes/ModalResumenClase';
-import { ArrowLeft, Users, Clock, Video, Mic, MicOff, VideoOff } from 'lucide-react';
+import { JitsiParticipant } from '@/types/jitsi.types';
+import { ArrowLeft, Users, Video, Mic, Clock } from 'lucide-react';
 
 /**
  * T025 - Integración Videollamada con Auto-Join (Jitsi Meet)
@@ -20,7 +21,7 @@ import { ArrowLeft, Users, Clock, Video, Mic, MicOff, VideoOff } from 'lucide-re
 
 interface ClaseData {
   id: string;
-  rutaCurricular: {
+  ruta_curricular: {
     nombre: string;
     color: string;
   };
@@ -51,7 +52,7 @@ export default function SalaClasePage() {
       try {
         const response = await apiClient.get(`/clases/${claseId}`);
         setClase(response.data);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error cargando clase:', error);
       } finally {
         setIsLoading(false);
@@ -143,7 +144,8 @@ export default function SalaClasePage() {
         registrarAsistencia();
       });
 
-      api.addEventListener('participantJoined', (participant: any) => {
+      api.addEventListener('participantJoined', (...args: unknown[]) => {
+        const participant = args[0] as JitsiParticipant;
         console.log('Participante unido:', participant);
       });
 
@@ -155,8 +157,8 @@ export default function SalaClasePage() {
           try {
             // Obtener resumen de la clase (TODO: endpoint real)
             const resumen = {
-              claseNombre: clase.rutaCurricular.nombre,
-              duracionMinutos: clase.duracion_minutos,
+              claseNombre: clase.ruta_curricular.nombre,
+              duracion_minutos: clase.duracion_minutos,
               puntosGanados: Math.floor(Math.random() * 100) + 50, // Mock
               insigniasDesbloqueadas: [
                 {
@@ -181,7 +183,7 @@ export default function SalaClasePage() {
 
             setResumenData(resumen);
             setShowResumen(true);
-          } catch (error) {
+          } catch (error: unknown) {
             console.error('Error obteniendo resumen:', error);
             // Redirigir directamente si hay error
             router.push('/estudiante/dashboard');
@@ -200,7 +202,7 @@ export default function SalaClasePage() {
         presente: true,
       });
       console.log('Asistencia registrada automáticamente');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error registrando asistencia:', error);
     }
   };
@@ -259,11 +261,11 @@ export default function SalaClasePage() {
             <div className="flex items-center gap-3">
               <div
                 className="w-3 h-3 rounded-full animate-pulse"
-                style={{ backgroundColor: clase.rutaCurricular.color }}
+                style={{ backgroundColor: clase.ruta_curricular.color }}
               />
               <div>
                 <h1 className="text-white font-bold text-lg">
-                  {clase.rutaCurricular.nombre}
+                  {clase.ruta_curricular.nombre}
                 </h1>
                 <p className="text-gray-400 text-sm">
                   Prof. {clase.docente.nombre} {clase.docente.apellido}
@@ -338,9 +340,4 @@ export default function SalaClasePage() {
   );
 }
 
-// Extend Window interface for Jitsi
-declare global {
-  interface Window {
-    JitsiMeetExternalAPI: any;
-  }
-}
+// Types are imported from @/types/jitsi.types

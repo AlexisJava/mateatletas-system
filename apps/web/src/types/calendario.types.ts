@@ -67,7 +67,7 @@ export interface Evento {
   tarea?: Tarea;
   recordatorio?: Recordatorio;
   nota?: Nota;
-  clase?: any; // Tipo Clase del sistema
+  clase?: Record<string, unknown>; // Tipo Clase del sistema
 }
 
 // Tarea completa
@@ -144,6 +144,11 @@ export interface CreateNotaDto extends CreateEventoBase {
   categoria?: string;
   color?: string;
 }
+
+// Update DTOs
+export type UpdateTareaDto = Partial<CreateTareaDto>;
+export type UpdateRecordatorioDto = Partial<CreateRecordatorioDto>;
+export type UpdateNotaDto = Partial<CreateNotaDto>;
 
 // Vista Agenda agrupada
 export interface VistaAgendaData {

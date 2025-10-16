@@ -28,7 +28,7 @@ export function ClassCard({
   showReserveButton = true,
 }: ClassCardProps) {
   // Formatear fecha y hora
-  const fecha = new Date(clase.fechaHora);
+  const fecha = new Date(clase.fecha_hora_inicio);
   const fechaFormateada = new Intl.DateTimeFormat('es-ES', {
     weekday: 'short',
     day: 'numeric',
@@ -40,11 +40,11 @@ export function ClassCard({
   }).format(fecha);
 
   // Determinar color de la ruta curricular
-  const colorRuta = clase.rutaCurricular?.color || '#00d9ff';
+  const colorRuta = clase.ruta_curricular?.color || '#00d9ff';
 
   // Determinar si hay cupos disponibles
-  const sinCupos = clase.cupoDisponible === 0;
-  const pocoCupo = clase.cupoDisponible <= 3 && clase.cupoDisponible > 0;
+  const sinCupos = clase.cupo_disponible === 0;
+  const pocoCupo = clase.cupo_disponible <= 3 && clase.cupo_disponible > 0;
 
   // Badge de cupo
   const cupoColor = sinCupos
@@ -83,7 +83,7 @@ export function ClassCard({
               borderColor: colorRuta,
             }}
           >
-            📚 {clase.rutaCurricular?.nombre || 'Sin ruta'}
+            📚 {clase.ruta_curricular?.nombre || 'Sin ruta'}
           </Badge>
 
           {sinCupos && (
@@ -113,7 +113,7 @@ export function ClassCard({
             <div>
               <p className="font-bold text-dark capitalize">{fechaFormateada}</p>
               <p className="text-gray-600">
-                {horaFormateada} • {clase.duracionMinutos} min
+                {horaFormateada} • {clase.duracion_minutos} min
               </p>
             </div>
           </div>
@@ -123,7 +123,7 @@ export function ClassCard({
             <div className="flex items-center gap-2 text-sm">
               <span className="text-xl">👨‍🏫</span>
               <p className="text-gray-700">
-                {clase.docente.user.nombre} {clase.docente.user.apellido}
+                {clase.docente?.user?.nombre} {clase.docente?.user?.apellido}
               </p>
             </div>
           )}
@@ -139,7 +139,7 @@ export function ClassCard({
             >
               {sinCupos
                 ? 'Sin cupos'
-                : `${clase.cupoDisponible}/${clase.cupoMaximo} disponibles`}
+                : `${clase.cupo_disponible}/${clase.cupo_maximo} disponibles`}
             </div>
           </div>
         </div>

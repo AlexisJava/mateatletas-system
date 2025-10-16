@@ -1,5 +1,19 @@
 import apiClient from '../axios';
 
+export interface ProximaClase {
+  id: string;
+  fecha_hora_inicio: string;
+  duracion_minutos: number;
+  ruta_curricular: {
+    nombre: string;
+    color: string;
+  };
+  docente: {
+    nombre: string;
+    apellido: string;
+  };
+}
+
 export interface DashboardData {
   estudiante: {
     id: string;
@@ -36,9 +50,9 @@ export interface DashboardData {
       puntosRequeridos: number;
     } | null;
   };
-  proximasClases: any[];
-  equipoRanking: any[];
-  ultimasAsistencias: any[];
+  proximasClases: ProximaClase[];
+  equipoRanking: Array<Record<string, unknown>>;
+  ultimasAsistencias: Array<Record<string, unknown>>;
 }
 
 export interface Logro {
@@ -48,6 +62,7 @@ export interface Logro {
   icono: string;
   puntos: number;
   categoria: string;
+  rareza?: string;
   desbloqueado: boolean;
   fecha_desbloqueo?: Date;
 }
@@ -60,11 +75,11 @@ export interface Puntos {
 }
 
 export interface Ranking {
-  equipoActual: any;
+  equipoActual: Record<string, unknown> | null;
   posicionEquipo: number;
   posicionGlobal: number;
-  rankingEquipo: any[];
-  rankingGlobal: any[];
+  rankingEquipo: Array<Record<string, unknown>>;
+  rankingGlobal: Array<Record<string, unknown>>;
 }
 
 export interface Progreso {
@@ -149,7 +164,7 @@ export const gamificacionApi = {
   /**
    * Desbloquear logro
    */
-  desbloquearLogro: async (logroId: string): Promise<any> => {
+  desbloquearLogro: async (logroId: string): Promise<unknown> => {
     return await apiClient.post(`/gamificacion/logros/${logroId}/desbloquear`);
   },
 
@@ -170,7 +185,7 @@ export const gamificacionApi = {
   /**
    * Otorgar puntos a un estudiante (docentes)
    */
-  otorgarPuntos: async (data: OtorgarPuntosData): Promise<any> => {
+  otorgarPuntos: async (data: OtorgarPuntosData): Promise<unknown> => {
     return await apiClient.post('/gamificacion/puntos', data);
   },
 };

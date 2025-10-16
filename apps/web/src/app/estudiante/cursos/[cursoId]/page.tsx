@@ -73,13 +73,13 @@ export default function CursoViewerPage() {
     await fetchProgresoCurso(cursoId);
   };
 
-  const handleModuloClick = async (modulo: any) => {
+  const handleModuloClick = async (modulo: { id: string; titulo: string; descripcion?: string }) => {
     setSelectedModulo(modulo);
     setLoadingLecciones(true);
     try {
       const leccionesData = await getLeccionesByModulo(modulo.id);
       setLecciones(leccionesData);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al cargar lecciones:', error);
       setLecciones([]);
     } finally {
@@ -227,7 +227,11 @@ export default function CursoViewerPage() {
                 <ChunkyCard
                   key={modulo.id}
                   gradient={getModuloGradient(index)}
-                  onClick={() => handleModuloClick(modulo)}
+                  onClick={() => handleModuloClick({
+                    id: modulo.id,
+                    titulo: modulo.titulo,
+                    descripcion: modulo.descripcion ?? undefined
+                  })}
                   className={selectedModulo?.id === modulo.id ? 'ring-4 ring-yellow-400' : ''}
                 >
                   <div className="p-4">

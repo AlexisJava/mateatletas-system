@@ -72,7 +72,7 @@ export const useEstudiantesStore = create<EstudiantesState>((set) => ({
         limit: response.metadata?.limit || 10,
         isLoading: false,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       set({
         error: err.response?.data?.message || 'Error al cargar estudiantes',
@@ -94,7 +94,7 @@ export const useEstudiantesStore = create<EstudiantesState>((set) => ({
         estudianteActual: estudiante,
         isLoading: false,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       set({
         error: err.response?.data?.message || 'Error al cargar estudiante',
@@ -119,7 +119,7 @@ export const useEstudiantesStore = create<EstudiantesState>((set) => ({
       }));
 
       return nuevoEstudiante;
-    } catch (error) {
+    } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       set({
         error: err.response?.data?.message || 'Error al crear estudiante',
@@ -148,7 +148,7 @@ export const useEstudiantesStore = create<EstudiantesState>((set) => ({
             : state.estudianteActual,
         isUpdating: false,
       }));
-    } catch (error) {
+    } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       set({
         error:
@@ -175,7 +175,7 @@ export const useEstudiantesStore = create<EstudiantesState>((set) => ({
           state.estudianteActual?.id === id ? null : state.estudianteActual,
         isDeleting: false,
       }));
-    } catch (error) {
+    } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       set({
         error: err.response?.data?.message || 'Error al eliminar estudiante',
@@ -192,7 +192,7 @@ export const useEstudiantesStore = create<EstudiantesState>((set) => ({
     try {
       const equipos = await estudiantesApi.getEquipos();
       set({ equipos });
-    } catch (error) {
+    } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       set({
         error: err.response?.data?.message || 'Error al cargar equipos',

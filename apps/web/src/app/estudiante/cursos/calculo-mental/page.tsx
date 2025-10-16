@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
-import { useGamificacionStore } from '@/store/gamificacion.store';
+import {} from '@/store/gamificacion.store';
 import {
   Brain,
   Clock,
@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   XCircle,
   ArrowLeft,
-  Sparkles,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -38,7 +37,7 @@ interface Pregunta {
 
 export default function CalculoMentalPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const {} = useAuthStore();
 
   // Estado del juego
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'finished'>('idle');

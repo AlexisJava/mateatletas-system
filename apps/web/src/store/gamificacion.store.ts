@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/utils/error-handler';
 import { create } from 'zustand';
 import {
   gamificacionApi,
@@ -50,9 +51,9 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
     try {
       const data = await gamificacionApi.getDashboard(estudianteId);
       set({ dashboard: data, isLoading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({
-        error: error.response?.data?.message || 'Error al cargar dashboard',
+        error: getErrorMessage(error, 'Error al cargar dashboard'),
         isLoading: false,
       });
     }
@@ -66,9 +67,9 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
     try {
       const logros = await gamificacionApi.getLogros(estudianteId);
       set({ logros, isLoading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({
-        error: error.response?.data?.message || 'Error al cargar logros',
+        error: getErrorMessage(error, 'Error al cargar logros'),
         isLoading: false,
       });
     }
@@ -81,7 +82,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
     try {
       const puntos = await gamificacionApi.getPuntos(estudianteId);
       set({ puntos });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al cargar puntos:', error);
     }
   },
@@ -94,9 +95,9 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
     try {
       const ranking = await gamificacionApi.getRanking(estudianteId);
       set({ ranking, isLoading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({
-        error: error.response?.data?.message || 'Error al cargar ranking',
+        error: getErrorMessage(error, 'Error al cargar ranking'),
         isLoading: false,
       });
     }
@@ -109,7 +110,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
     try {
       const progreso = await gamificacionApi.getProgreso(estudianteId);
       set({ progreso });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al cargar progreso:', error);
     }
   },
@@ -134,7 +135,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
         logros,
         logroRecienDesbloqueado: logroDesbloqueado || null,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al desbloquear logro:', error);
     }
   },

@@ -15,8 +15,6 @@ import { createTheme, alpha } from '@mui/material/styles';
 
 const PRIMARY_GRADIENT = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
 const SECONDARY_GRADIENT = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
-const SUCCESS_GRADIENT = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
-const WARNING_GRADIENT = 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
 
 export const lightTheme = createTheme({
   palette: {
@@ -124,6 +122,7 @@ export const lightTheme = createTheme({
     '0 88px 352px rgba(0,0,0,0.7)',
     '0 96px 384px rgba(0,0,0,0.75)',
     '0 104px 416px rgba(0,0,0,0.8)',
+    '0 112px 448px rgba(0,0,0,0.85)',
   ],
   components: {
     MuiButton: {
@@ -330,6 +329,7 @@ export const darkTheme = createTheme({
     '0 88px 352px rgba(0,0,0,0.95)',
     '0 96px 384px rgba(0,0,0,0.95)',
     '0 104px 416px rgba(0,0,0,0.95)',
+    '0 112px 448px rgba(0,0,0,0.95)',
   ],
   components: {
     MuiButton: {

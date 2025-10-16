@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Clock,
   Users,
@@ -37,10 +37,10 @@ interface ClaseInminente {
   titulo: string;
   grupoNombre: string;
   grupoId: string;
-  fechaHora: string;
+  fecha_hora: string;
   duracion: number;
   estudiantesInscritos: number;
-  cupoMaximo: number;
+  cupo_maximo: number;
   estado: 'PRÓXIMA' | 'AHORA' | 'PASADA';
   minutosParaEmpezar: number;
 }
@@ -70,12 +70,11 @@ export default function DocenteDashboardNew() {
   const [claseInminente, setClaseInminente] = useState<ClaseInminente | null>(null);
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [stats, setStats] = useState<StatsResumen | null>(null);
-  const [now, setNow] = useState(new Date());
 
   // Update clock every minute
   useEffect(() => {
     const interval = setInterval(() => {
-      setNow(new Date());
+      // setNow(new Date());
     }, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -101,10 +100,10 @@ export default function DocenteDashboardNew() {
         titulo: 'Álgebra Básica',
         grupoNombre: 'Grupo Alfa',
         grupoId: 'grupo-alfa',
-        fechaHora: new Date(Date.now() + 15 * 60000).toISOString(), // En 15 minutos
+        fecha_hora: new Date(Date.now() + 15 * 60000).toISOString(), // En 15 minutos
         duracion: 60,
         estudiantesInscritos: 12,
-        cupoMaximo: 15,
+        cupo_maximo: 15,
         estado: 'PRÓXIMA',
         minutosParaEmpezar: 15,
       };
@@ -138,8 +137,8 @@ export default function DocenteDashboardNew() {
       setClaseInminente(mockClase);
       setAlertas(mockAlertas);
       setStats(mockStats);
-    } catch (error) {
-      console.error('Error fetching dashboard:', error);
+    } catch (error: any) {
+      console.error("Error:", error as any);
       toast.error('Error al cargar el dashboard');
     } finally {
       setIsLoading(false);
@@ -236,7 +235,7 @@ export default function DocenteDashboardNew() {
                   >
                     <Users className="w-4 h-4" />
                     {claseInminente.grupoNombre} •{' '}
-                    {claseInminente.estudiantesInscritos}/{claseInminente.cupoMaximo} estudiantes
+                    {claseInminente.estudiantesInscritos}/{claseInminente.cupo_maximo} estudiantes
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
@@ -251,7 +250,7 @@ export default function DocenteDashboardNew() {
                     {getCountdownText(claseInminente.minutosParaEmpezar)}
                   </div>
                   <div className="text-xs text-purple-600 dark:text-purple-300 font-bold mt-1">
-                    {new Date(claseInminente.fechaHora).toLocaleTimeString('es-ES', {
+                    {new Date(claseInminente.fecha_hora).toLocaleTimeString('es-ES', {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Award, Star, Trophy, Target, Zap, CheckCircle, Users } from 'lucide-react';
+import { X, Award, Trophy, CheckCircle, Users } from 'lucide-react';
 import apiClient from '@/lib/axios';
 
 /**
@@ -151,7 +151,7 @@ export function ModalAsignarInsignia({
         onInsigniaAsignada?.();
         onClose();
       }, 2000);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error asignando insignia:', error);
       alert('Error al asignar insignia. Intenta nuevamente.');
     } finally {

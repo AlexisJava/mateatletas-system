@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getErrorMessage } from '@/lib/utils/error-handler';
 import { motion } from 'framer-motion';
 import { getReportesDocente, ReportesDocente } from '@/lib/api/asistencia.api';
 import { LoadingSpinner } from '@/components/effects';
@@ -35,7 +36,7 @@ ChartJS.register(
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.3, ease: 'easeOut' },
+  transition: { duration: 0.3 },
 };
 
 export default function DocenteReportesPage() {
@@ -52,8 +53,8 @@ export default function DocenteReportesPage() {
       setIsLoading(true);
       const data = await getReportesDocente();
       setReportes(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al cargar reportes');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al cargar reportes'));
     } finally {
       setIsLoading(false);
     }

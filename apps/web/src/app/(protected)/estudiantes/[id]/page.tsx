@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEstudiantesStore } from '@/store/estudiantes.store';
 import { Button, Avatar, Badge, Card } from '@/components/ui';
-import { ArrowLeft, Edit, Trash2, Award, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, TrendingUp, Award } from 'lucide-react';
 
 /**
  * Página de perfil de estudiante
@@ -41,7 +41,7 @@ export default function EstudianteProfilePage() {
       try {
         await deleteEstudiante(id);
         router.push('/estudiantes');
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error:', error);
       }
     }

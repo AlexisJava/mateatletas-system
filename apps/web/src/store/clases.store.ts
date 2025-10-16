@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/utils/error-handler';
 /**
  * Zustand Store para Clases y Reservas
  */
@@ -53,9 +54,9 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
       const { filtros } = get();
       const clases = await clasesApi.getClases(filtros);
       set({ clases, isLoading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({
-        error: error.response?.data?.message || 'Error al cargar clases',
+        error: getErrorMessage(error, 'Error al cargar clases'),
         isLoading: false,
       });
     }
@@ -67,9 +68,9 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
     try {
       const misReservas = await clasesApi.getMisReservas();
       set({ misReservas, isLoading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({
-        error: error.response?.data?.message || 'Error al cargar reservas',
+        error: getErrorMessage(error, 'Error al cargar reservas'),
         isLoading: false,
       });
     }
@@ -81,10 +82,10 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
     try {
       const rutasCurriculares = await clasesApi.getRutasCurriculares();
       set({ rutasCurriculares, isLoading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({
         error:
-          error.response?.data?.message || 'Error al cargar rutas curriculares',
+          getErrorMessage(error, 'Error al cargar rutas curriculares'),
         isLoading: false,
       });
     }
@@ -117,7 +118,7 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
       // Decrementar cupo disponible en la clase
       const clasesActualizadas = clases.map((clase) =>
         clase.id === claseId
-          ? { ...clase, cupoDisponible: clase.cupoDisponible - 1 }
+          ? { ...clase, cupo_disponible: clase.cupo_disponible - 1 }
           : clase
       );
 
@@ -128,9 +129,9 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({
-        error: error.response?.data?.message || 'Error al reservar clase',
+        error: getErrorMessage(error, 'Error al reservar clase'),
         isLoading: false,
       });
       return false;
@@ -156,8 +157,8 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
 
       // Incrementar cupo disponible en la clase
       const clasesActualizadas = clases.map((clase) =>
-        clase.id === reservaCancelada?.claseId
-          ? { ...clase, cupoDisponible: clase.cupoDisponible + 1 }
+        clase.id === reservaCancelada?.clase_id
+          ? { ...clase, cupo_disponible: clase.cupo_disponible + 1 }
           : clase
       );
 
@@ -168,9 +169,9 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
       });
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({
-        error: error.response?.data?.message || 'Error al cancelar reserva',
+        error: getErrorMessage(error, 'Error al cancelar reserva'),
         isLoading: false,
       });
       return false;

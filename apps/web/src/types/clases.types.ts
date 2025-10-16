@@ -29,27 +29,27 @@ export enum EstadoClase {
  */
 export interface Clase {
   id: string;
-  docenteId: string;
-  rutaCurricularId: string;
-  titulo: string;
-  descripcion: string | null;
-  fechaHora: string; // ISO 8601
-  duracionMinutos: number;
-  cupoMaximo: number;
-  cupoDisponible: number;
-  estado: EstadoClase;
+  docente_id: string;
+  ruta_curricular_id: string;
+  fecha_hora_inicio: string; // ISO 8601 DateTime
+  duracion_minutos: number;
+  cupo_maximo: number;
+  cupo_disponible: number;
+  estado: EstadoClase | 'Programada' | 'EnCurso' | 'Finalizada' | 'Cancelada';
+  titulo?: string;
+  descripcion?: string;
   createdAt: string;
   updatedAt: string;
 
   // Relaciones opcionales
   docente?: {
     id: string;
-    user: {
+    user?: {
       nombre: string;
       apellido: string;
     };
   };
-  rutaCurricular?: RutaCurricular;
+  ruta_curricular?: RutaCurricular;
   inscripciones?: InscripcionClase[];
 }
 
@@ -58,9 +58,9 @@ export interface Clase {
  */
 export interface InscripcionClase {
   id: string;
-  claseId: string;
-  estudianteId: string;
-  tutorId: string;
+  clase_id: string;
+  estudiante_id: string;
+  tutor_id: string;
   createdAt: string;
 
   // Relaciones opcionales
@@ -76,7 +76,7 @@ export interface InscripcionClase {
  * Filtro para clases
  */
 export interface FiltroClases {
-  rutaCurricularId?: string;
+  ruta_curricular_id?: string;
   fechaDesde?: string;
   fechaHasta?: string;
   soloDisponibles?: boolean;
@@ -86,5 +86,5 @@ export interface FiltroClases {
  * Datos para crear una reserva
  */
 export interface CrearReservaDto {
-  estudianteId: string;
+  estudiante_id: string;
 }

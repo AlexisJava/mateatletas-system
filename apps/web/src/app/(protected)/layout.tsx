@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
-import { Button } from '@/components/ui';
 
 /**
  * Protected Layout - Envuelve todas las rutas que requieren autenticación
@@ -26,7 +25,7 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { user, logout, checkAuth } = useAuthStore();
+  const { checkAuth } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const hasValidatedRef = useRef(false);
 
@@ -56,7 +55,7 @@ export default function ProtectedLayout({
         await checkAuth();
         // Token válido, continuar
         setIsValidating(false);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error validando autenticación:', error);
         // Token inválido o error de red, redirigir a login
         router.push('/login');
@@ -69,10 +68,6 @@ export default function ProtectedLayout({
   /**
    * Maneja el logout del usuario
    */
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
-  };
 
   /**
    * Muestra spinner mientras valida autenticación

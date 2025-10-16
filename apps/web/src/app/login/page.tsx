@@ -63,7 +63,7 @@ export default function LoginPage() {
       }
       // El useEffect manejará la redirección
       setIsRedirecting(true);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error al iniciar sesión:', err);
 
       // Determinar mensaje de error según el tipo

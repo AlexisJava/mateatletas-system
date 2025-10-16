@@ -1,8 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ActivityCard } from './ActivityCard';
-import { Award, Zap, Target } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -34,14 +32,7 @@ interface MisLogrosCardProps {
   delay?: number;
 }
 
-const categoriaConfig = {
-  racha: { color: '#f97316', icon: Zap },
-  puntos: { color: '#fbbf24', icon: Target },
-  asistencia: { color: '#10b981', icon: Award },
-  excelencia: { color: '#a855f7', icon: Award },
-};
-
-export function MisLogrosCard({ estudianteId, logros = [], onVerTodos, delay = 0 }: MisLogrosCardProps) {
+export function MisLogrosCard({ logros = [], onVerTodos, delay = 0 }: MisLogrosCardProps) {
   // Mock data si no hay logros
   const mockLogros: Logro[] = [
     {
@@ -99,8 +90,6 @@ export function MisLogrosCard({ estudianteId, logros = [], onVerTodos, delay = 0
       ) : (
         <div className="space-y-3">
           {ultimosLogros.map((logro, index) => {
-            const categoria = categoriaConfig[logro.categoria || 'excelencia'];
-
             return (
               <motion.div
                 key={logro.id}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDocenteStore } from '@/store/docente.store';
-import { Button, Breadcrumbs, toast } from '@/components/ui';
+import { Breadcrumbs, toast } from '@/components/ui';
 import { Clase, EstadoClase } from '@/types/clases.types';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -12,14 +12,14 @@ import {
   Users,
   Clock,
   Calendar,
-  BookOpen,
+
   AlertCircle,
   CheckCircle2,
   XCircle,
   LayoutGrid,
   List,
-  Send,
-  ChevronRight,
+
+
   Eye,
   Sparkles,
 } from 'lucide-react';
@@ -89,7 +89,7 @@ export default function MisClasesPage() {
     };
 
     clases.forEach((clase) => {
-      const fechaClase = new Date(clase.fechaHora);
+      const fechaClase = new Date(clase.fecha_hora_inicio);
       const fechaClaseSinHora = new Date(
         fechaClase.getFullYear(),
         fechaClase.getMonth(),
@@ -110,7 +110,7 @@ export default function MisClasesPage() {
     // Ordenar cada grupo por fecha
     Object.keys(grupos).forEach((key) => {
       grupos[key as keyof typeof grupos].sort(
-        (a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime()
+        (a, b) => new Date(a.fecha_hora_inicio).getTime() - new Date(b.fecha_hora_inicio).getTime()
       );
     });
 
@@ -144,7 +144,7 @@ export default function MisClasesPage() {
   /**
    * Manejar envío de recordatorio
    */
-  const handleEnviarRecordatorio = (claseId: string) => {
+  const handleEnviarRecordatorio = (_claseId: string) => {
     toast.success('Recordatorio enviado a todos los estudiantes');
     // TODO: Implementar envío real de notificaciones
   };
@@ -168,15 +168,19 @@ export default function MisClasesPage() {
   /**
    * Obtener color del estado
    */
-  const getEstadoColor = (estado: EstadoClase) => {
+  const getEstadoColor = (estado: EstadoClase | 'Programada' | 'EnCurso' | 'Finalizada' | 'Cancelada') => {
     switch (estado) {
       case EstadoClase.Programada:
+      case 'Programada':
         return 'bg-[#4caf50] text-white';
       case EstadoClase.EnCurso:
+      case 'EnCurso':
         return 'bg-[#f7b801] text-[#2a1a5e]';
       case EstadoClase.Finalizada:
+      case 'Finalizada':
         return 'bg-gray-400 text-white';
       case EstadoClase.Cancelada:
+      case 'Cancelada':
         return 'bg-[#f44336] text-white';
       default:
         return 'bg-gray-300 text-gray-800';
@@ -484,7 +488,7 @@ interface ClaseGroupProps {
   puedeRegistrarAsistencia: (clase: Clase) => boolean;
   getEstadoColor: (estado: EstadoClase) => string;
   formatFecha: (isoDate: string) => string;
-  router: any;
+  router: ReturnType<typeof useRouter>;
 }
 
 function ClaseGroup({
@@ -570,23 +574,21 @@ interface ClaseCardProps {
   puedeRegistrarAsistencia: (clase: Clase) => boolean;
   getEstadoColor: (estado: EstadoClase) => string;
   formatFecha: (isoDate: string) => string;
-  router: any;
+  router: ReturnType<typeof useRouter>;
 }
 
 function ClaseCard({
   clase,
   onIniciarClase,
-  onEnviarRecordatorio,
   onCancelar,
   puedeCancelar,
   puedeRegistrarAsistencia,
   getEstadoColor,
-  formatFecha,
   router,
 }: ClaseCardProps) {
   const esHoy = () => {
     const hoy = new Date();
-    const fechaClase = new Date(clase.fechaHora);
+    const fechaClase = new Date(clase.fecha_hora_inicio);
     return (
       hoy.getDate() === fechaClase.getDate() &&
       hoy.getMonth() === fechaClase.getMonth() &&
@@ -602,7 +604,7 @@ function ClaseCard({
     <motion.div
       whileHover={{ y: -4 }}
       className="glass-card p-5 border-l-4 hover:shadow-2xl hover:shadow-purple-200/30 dark:hover:shadow-purple-900/40 transition-all cursor-pointer group"
-      style={{ borderLeftColor: clase.rutaCurricular?.color || '#8b5cf6' }}
+      style={{ borderLeftColor: clase.ruta_curricular?.color || '#8b5cf6' }}
       onClick={() => router.push(`/docente/grupos/${clase.id}`)}
     >
       {/* Header */}
@@ -611,19 +613,19 @@ function ClaseCard({
           <h3 className="text-lg font-bold text-indigo-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">
             {clase.titulo}
           </h3>
-          {clase.rutaCurricular && (
+          {clase.ruta_curricular && (
             <span
               className="inline-block px-2 py-0.5 rounded-md text-xs font-bold mt-1"
               style={{
-                backgroundColor: `${clase.rutaCurricular.color}20`,
-                color: clase.rutaCurricular.color,
+                backgroundColor: `${clase.ruta_curricular.color}20`,
+                color: clase.ruta_curricular.color,
               }}
             >
-              {clase.rutaCurricular.nombre}
+              {clase.ruta_curricular.nombre}
             </span>
           )}
         </div>
-        <span className={`px-2 py-1 rounded-lg text-xs font-bold ${getEstadoColor(clase.estado)}`}>
+        <span className={`px-2 py-1 rounded-lg text-xs font-bold ${getEstadoColor(clase.estado as any)}`}>
           {clase.estado}
         </span>
       </div>
@@ -633,19 +635,19 @@ function ClaseCard({
         <div className="flex items-center gap-2 text-sm">
           <Calendar className="w-4 h-4 text-purple-500 dark:text-purple-400" />
           <span className="text-purple-600 dark:text-purple-300 font-medium truncate">
-            {new Date(clase.fechaHora).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}
+            {new Date(clase.fecha_hora_inicio).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}
           </span>
         </div>
         <div className="flex items-center gap-2 text-sm">
           <Clock className="w-4 h-4 text-purple-500 dark:text-purple-400" />
           <span className="text-purple-600 dark:text-purple-300 font-medium">
-            {clase.duracionMinutos}min
+            {clase.duracion_minutos}min
           </span>
         </div>
         <div className="flex items-center gap-2 text-sm">
           <Users className="w-4 h-4 text-purple-500 dark:text-purple-400" />
           <span className="text-purple-600 dark:text-purple-300 font-medium">
-            {clase.cupoMaximo - clase.cupoDisponible}/{clase.cupoMaximo}
+            {clase.cupo_maximo - clase.cupo_disponible}/{clase.cupo_maximo}
           </span>
         </div>
         <div className="flex items-center gap-2 text-sm">
@@ -713,17 +715,13 @@ function ClaseCard({
 function ClaseRow({
   clase,
   onIniciarClase,
-  onEnviarRecordatorio,
-  onCancelar,
-  puedeCancelar,
   puedeRegistrarAsistencia,
   getEstadoColor,
-  formatFecha,
   router,
 }: ClaseCardProps) {
   const esHoy = () => {
     const hoy = new Date();
-    const fechaClase = new Date(clase.fechaHora);
+    const fechaClase = new Date(clase.fecha_hora_inicio);
     return (
       hoy.getDate() === fechaClase.getDate() &&
       hoy.getMonth() === fechaClase.getMonth() &&
@@ -735,16 +733,16 @@ function ClaseRow({
     <motion.div
       whileHover={{ x: 4 }}
       className="glass-card p-4 border-l-4 hover:shadow-lg hover:shadow-purple-200/20 dark:hover:shadow-purple-900/30 transition-all"
-      style={{ borderLeftColor: clase.rutaCurricular?.color || '#8b5cf6' }}
+      style={{ borderLeftColor: clase.ruta_curricular?.color || '#8b5cf6' }}
     >
       <div className="flex items-center gap-4">
         {/* Hora */}
         <div className="flex flex-col items-center justify-center w-20 flex-shrink-0">
           <div className="text-2xl font-black text-indigo-900 dark:text-white">
-            {new Date(clase.fechaHora).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(clase.fecha_hora_inicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
           </div>
           <div className="text-xs font-bold text-purple-600 dark:text-purple-300">
-            {new Date(clase.fechaHora).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}
+            {new Date(clase.fecha_hora_inicio).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' })}
           </div>
         </div>
 
@@ -756,30 +754,30 @@ function ClaseRow({
                 {clase.titulo}
               </h3>
               <div className="flex items-center gap-3 mt-1">
-                {clase.rutaCurricular && (
+                {clase.ruta_curricular && (
                   <span
                     className="px-2 py-0.5 rounded text-xs font-bold"
                     style={{
-                      backgroundColor: `${clase.rutaCurricular.color}20`,
-                      color: clase.rutaCurricular.color,
+                      backgroundColor: `${clase.ruta_curricular.color}20`,
+                      color: clase.ruta_curricular.color,
                     }}
                   >
-                    {clase.rutaCurricular.nombre}
+                    {clase.ruta_curricular.nombre}
                   </span>
                 )}
                 <span className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-300 font-medium">
                   <Users className="w-3.5 h-3.5" />
-                  {clase.cupoMaximo - clase.cupoDisponible}/{clase.cupoMaximo}
+                  {clase.cupo_maximo - clase.cupo_disponible}/{clase.cupo_maximo}
                 </span>
                 <span className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-300 font-medium">
                   <Clock className="w-3.5 h-3.5" />
-                  {clase.duracionMinutos}min
+                  {clase.duracion_minutos}min
                 </span>
               </div>
             </div>
 
             {/* Estado */}
-            <span className={`px-2 py-1 rounded-lg text-xs font-bold ${getEstadoColor(clase.estado)}`}>
+            <span className={`px-2 py-1 rounded-lg text-xs font-bold ${getEstadoColor(clase.estado as any)}`}>
               {clase.estado}
             </span>
           </div>

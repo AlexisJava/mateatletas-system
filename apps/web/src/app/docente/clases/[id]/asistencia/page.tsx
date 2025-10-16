@@ -1,11 +1,11 @@
 'use client';
+import { Button } from '@/components/ui';
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAsistenciaStore } from '@/store/asistencia.store';
 import { useDocenteStore } from '@/store/docente.store';
 import { AttendanceList, AttendanceStatsCard } from '@/components/docente';
-import { Button } from '@/components/ui';
 import { MarcarAsistenciaDto } from '@/types/asistencia.types';
 
 /**
@@ -50,10 +50,10 @@ export default function AsistenciaPage() {
    * Manejar marcación de asistencia
    */
   const handleMarcarAsistencia = async (
-    estudianteId: string,
+    estudiante_id: string,
     data: MarcarAsistenciaDto
   ): Promise<boolean> => {
-    const success = await marcarAsistencia(claseId, estudianteId, data);
+    const success = await marcarAsistencia(claseId, estudiante_id, data);
 
     if (success) {
       // Mostrar mensaje de éxito temporal
@@ -104,7 +104,7 @@ export default function AsistenciaPage() {
         <div
           className="bg-white rounded-lg shadow-md p-6 border-l-4"
           style={{
-            borderLeftColor: claseActual.rutaCurricular?.color || '#ff6b35',
+            borderLeftColor: claseActual.ruta_curricular?.color || '#ff6b35',
           }}
         >
           <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
@@ -118,26 +118,26 @@ export default function AsistenciaPage() {
               <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-gray-600">
                 <span className="flex items-center gap-2">
                   <span>📅</span>
-                  {formatFecha(claseActual.fechaHora)}
+                  {formatFecha(claseActual.fecha_hora_inicio)}
                 </span>
                 <span className="flex items-center gap-2">
                   <span>⏱️</span>
-                  {claseActual.duracionMinutos} minutos
+                  {claseActual.duracion_minutos} minutos
                 </span>
                 <span className="flex items-center gap-2">
                   <span>👥</span>
-                  {claseActual.cupoMaximo - claseActual.cupoDisponible}/
-                  {claseActual.cupoMaximo} inscritos
+                  {claseActual.cupo_maximo - claseActual.cupo_disponible}/
+                  {claseActual.cupo_maximo} inscritos
                 </span>
-                {claseActual.rutaCurricular && (
+                {claseActual.ruta_curricular && (
                   <span
                     className="px-3 py-1 rounded-full text-xs font-semibold"
                     style={{
-                      backgroundColor: `${claseActual.rutaCurricular.color}20`,
-                      color: claseActual.rutaCurricular.color,
+                      backgroundColor: `${claseActual.ruta_curricular.color}20`,
+                      color: claseActual.ruta_curricular.color,
                     }}
                   >
-                    {claseActual.rutaCurricular.nombre}
+                    {claseActual.ruta_curricular.nombre}
                   </span>
                 )}
               </div>

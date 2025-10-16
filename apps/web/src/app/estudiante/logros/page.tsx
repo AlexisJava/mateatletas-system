@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-confetti';
 import { useGamificacionStore } from '@/store/gamificacion.store';
 import { useAuthStore } from '@/store/auth.store';
-import { Trophy, Lock, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Lock, Star, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
 
 export default function LogrosPage() {
   const { logros, fetchLogros, logroRecienDesbloqueado } = useGamificacionStore();
@@ -186,7 +186,7 @@ export default function LogrosPage() {
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto lg:overflow-hidden">
             {logrosEnPagina.map((logro, index) => {
-              const rareza = rarezaColors[logro.rareza || 'común'];
+              const rareza = rarezaColors[(logro.rareza || 'común') as keyof typeof rarezaColors];
 
               return (
                 <motion.div
@@ -300,7 +300,7 @@ export default function LogrosPage() {
               exit={{ scale: 0.8, y: 20 }}
               onClick={(e) => e.stopPropagation()}
               className={`bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 max-w-md w-full border-2 shadow-2xl border-${
-                rarezaColors[selectedLogro.rareza || 'común'].border
+                rarezaColors[(selectedLogro.rareza || 'común') as keyof typeof rarezaColors].border
               }`}
             >
               <div className="text-center">
@@ -314,7 +314,7 @@ export default function LogrosPage() {
 
                 <div
                   className={`inline-block px-4 py-2 rounded-full text-sm font-bold text-white mb-4 bg-gradient-to-r ${
-                    rarezaColors[selectedLogro.rareza || 'común'].bg
+                    rarezaColors[(selectedLogro.rareza || 'común') as keyof typeof rarezaColors].bg
                   }`}
                 >
                   {selectedLogro.rareza?.toUpperCase()}

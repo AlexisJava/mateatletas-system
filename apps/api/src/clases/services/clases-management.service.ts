@@ -4,7 +4,10 @@ import {
   BadRequestException,
   ForbiddenException,
   Logger,
+  Inject,
 } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { PrismaService } from '../../core/database/prisma.service';
 import { CrearClaseDto } from '../dto/crear-clase.dto';
 
@@ -16,7 +19,10 @@ import { CrearClaseDto } from '../dto/crear-clase.dto';
 export class ClasesManagementService {
   private readonly logger = new Logger(ClasesManagementService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   /**
    * Programar una nueva clase (solo Admin)
@@ -457,10 +463,29 @@ export class ClasesManagementService {
 
   /**
    * Obtener rutas curriculares (para formularios)
+   *
+   * CACHE: Este endpoint está cacheado por 10 minutos
+   * Las rutas curriculares rara vez cambian (son datos estáticos)
    */
   async listarRutasCurriculares() {
-    return this.prisma.rutaCurricular.findMany({
+    const cacheKey = 'rutas_curriculares_all';
+
+    // Intentar obtener del cache
+    const cached = await this.cacheManager.get(cacheKey);
+    if (cached) {
+      this.logger.debug('Rutas curriculares obtenidas del cache');
+      return cached;
+    }
+
+    // Si no está en cache, consultar la BD
+    const rutas = await this.prisma.rutaCurricular.findMany({
       orderBy: { nombre: 'asc' },
     });
+
+    // Guardar en cache por 10 minutos (600000ms)
+    await this.cacheManager.set(cacheKey, rutas, 600000);
+    this.logger.debug('Rutas curriculares guardadas en cache (10 min)');
+
+    return rutas;
   }
 }

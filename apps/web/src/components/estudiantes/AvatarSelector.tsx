@@ -52,7 +52,7 @@ export function AvatarSelector({
     try {
       await onSelect(selectedStyle);
       onClose();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al seleccionar avatar:', error);
     } finally {
       setIsLoading(false);

@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import apiClient from '@/lib/axios';
-import { CreditCard, DollarSign, CheckCircle, XCircle, Clock, TrendingUp, Award, Calendar } from 'lucide-react';
+import { Membresia, InscripcionCurso } from '@/types/pago.types';
+import { Producto } from '@/types/catalogo.types';
+import { CreditCard, DollarSign, CheckCircle, Calendar, Clock, Award, XCircle } from 'lucide-react';
 
 interface Pago {
   id: string;
@@ -13,6 +15,7 @@ interface Pago {
     nombre: string;
     tipo: string;
     descripcion?: string;
+    precio?: number;
   };
   membresia?: {
     estado: string;
@@ -28,6 +31,19 @@ interface Pago {
   };
 }
 
+interface MembresiaActual extends Membresia {
+  producto: Producto;
+}
+
+interface InscripcionCursoActiva extends InscripcionCurso {
+  producto: Producto;
+  estudiante: {
+    id: string;
+    nombre: string;
+    apellido: string;
+  };
+}
+
 interface HistorialData {
   historial: Pago[];
   resumen: {
@@ -38,8 +54,8 @@ interface HistorialData {
     pagos_rechazados: number;
   };
   activos: {
-    membresia_actual: any | null;
-    inscripciones_cursos_activas: any[];
+    membresia_actual: MembresiaActual | null;
+    inscripciones_cursos_activas: InscripcionCursoActiva[];
   };
 }
 
@@ -56,8 +72,8 @@ export default function PagosTab() {
       setLoading(true);
       const response = await apiClient.get('/pagos/historial');
       console.log('💳 Historial de pagos:', response);
-      setHistorialData(response);
-    } catch (error) {
+      setHistorialData(response as unknown as HistorialData);
+    } catch (error: unknown) {
       console.error('❌ Error cargando historial de pagos:', error);
     } finally {
       setLoading(false);

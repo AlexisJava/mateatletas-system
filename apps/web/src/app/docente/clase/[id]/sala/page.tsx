@@ -3,9 +3,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
-import apiClient from '@/lib/axios';
 import { LoadingSpinner } from '@/components/effects';
 import { ModalAsignarInsignia } from '@/components/docente/ModalAsignarInsignia';
+import { JitsiParticipant } from '@/types/jitsi.types';
 import {
   ArrowLeft,
   Users,
@@ -14,7 +14,7 @@ import {
   Award,
   UserCheck,
   UserX,
-  Target,
+
   Wifi
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,7 +32,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface ClaseData {
   id: string;
-  rutaCurricular: {
+  ruta_curricular: {
     nombre: string;
     color: string;
   };
@@ -58,7 +58,7 @@ interface EstudianteClase {
 interface ParticipanteConectado {
   id: string;
   displayName: string;
-  estudianteId?: string;
+  estudiante_id?: string;
 }
 
 export default function SalaClaseDocentePage() {
@@ -84,7 +84,7 @@ export default function SalaClaseDocentePage() {
         // TODO: Reemplazar con endpoint real
         const mockClase: ClaseData = {
           id: claseId,
-          rutaCurricular: {
+          ruta_curricular: {
             nombre: 'Álgebra Básica',
             color: '#8B5CF6'
           },
@@ -118,8 +118,8 @@ export default function SalaClaseDocentePage() {
           duracion_minutos: 60
         };
         setClase(mockClase);
-      } catch (error) {
-        console.error('Error cargando clase:', error);
+      } catch (error: any) {
+        console.error("Error:", error as any);
       } finally {
         setIsLoading(false);
       }
@@ -214,21 +214,23 @@ export default function SalaClaseDocentePage() {
         console.log('Docente unido a la videollamada');
       });
 
-      api.addEventListener('participantJoined', (participant: any) => {
+      api.addEventListener('participantJoined', (...args: unknown[]) => {
+        const participant = args[0] as JitsiParticipant;
         console.log('Participante unido:', participant);
         setParticipantesConectados((prev) => [
           ...prev,
           {
-            id: participant.id,
-            displayName: participant.displayName,
+            id: participant.participantId || '',
+            displayName: participant.displayName || 'Desconocido',
           },
         ]);
       });
 
-      api.addEventListener('participantLeft', (participant: any) => {
+      api.addEventListener('participantLeft', (...args: unknown[]) => {
+        const participant = args[0] as JitsiParticipant;
         console.log('Participante salió:', participant);
         setParticipantesConectados((prev) =>
-          prev.filter((p) => p.id !== participant.id)
+          prev.filter((p) => p.id !== participant.participantId)
         );
       });
 
@@ -459,11 +461,11 @@ export default function SalaClaseDocentePage() {
               <div className="flex items-center gap-3">
                 <div
                   className="w-3 h-3 rounded-full animate-pulse"
-                  style={{ backgroundColor: clase.rutaCurricular.color }}
+                  style={{ backgroundColor: clase.ruta_curricular.color }}
                 />
                 <div>
                   <h1 className="text-white font-bold text-lg">
-                    {clase.rutaCurricular.nombre} - {clase.grupo.nombre}
+                    {clase.ruta_curricular.nombre} - {clase.grupo.nombre}
                   </h1>
                   <p className="text-gray-400 text-sm">
                     Vista Docente
@@ -522,8 +524,4 @@ export default function SalaClaseDocentePage() {
   );
 }
 
-declare global {
-  interface Window {
-    JitsiMeetExternalAPI: any;
-  }
-}
+// Types are imported from @/types/jitsi.types

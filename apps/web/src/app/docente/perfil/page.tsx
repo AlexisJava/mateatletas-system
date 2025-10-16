@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getErrorMessage } from '@/lib/utils/error-handler';
 import { motion } from 'framer-motion';
 import { docentesApi, Docente, UpdateDocenteData } from '@/lib/api/docentes.api';
 import { useAuthStore } from '@/store/auth.store';
@@ -9,11 +10,11 @@ import { LoadingSpinner } from '@/components/effects';
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, ease: 'easeOut' }
+  transition: { duration: 0.4 }
 };
 
 export default function DocentePerfilPage() {
-  const { user } = useAuthStore();
+  const {} = useAuthStore();
   const [docente, setDocente] = useState<Docente | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -43,8 +44,8 @@ export default function DocentePerfilPage() {
           titulo_profesional: data.titulo_profesional || '',
           biografia: data.biografia || '',
         });
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Error al cargar perfil');
+      } catch (err: unknown) {
+        setError(getErrorMessage(err, 'Error al cargar perfil'));
       } finally {
         setIsLoading(false);
       }
@@ -75,8 +76,8 @@ export default function DocentePerfilPage() {
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al actualizar perfil');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al actualizar perfil'));
     } finally {
       setIsSaving(false);
     }
@@ -268,7 +269,7 @@ export default function DocentePerfilPage() {
             >
               {isSaving ? (
                 <>
-                  <LoadingSpinner size="sm" color="white" />
+                  <LoadingSpinner size="sm" />
                   Guardando...
                 </>
               ) : (

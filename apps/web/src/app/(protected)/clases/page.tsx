@@ -56,9 +56,9 @@ export default function ClasesPage() {
   const claseCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     clases.forEach((clase) => {
-      if (clase.rutaCurricularId) {
-        counts[clase.rutaCurricularId] =
-          (counts[clase.rutaCurricularId] || 0) + 1;
+      if (clase.ruta_curricular_id) {
+        counts[clase.ruta_curricular_id] =
+          (counts[clase.ruta_curricular_id] || 0) + 1;
       }
     });
     return counts;
@@ -74,10 +74,10 @@ export default function ClasesPage() {
   // Handler para confirmar reserva
   const handleConfirmReserva = async (
     claseId: string,
-    estudianteId: string
+    estudiante_id: string
   ) => {
     setIsReserving(true);
-    const success = await reservarClase(claseId, { estudianteId });
+    const success = await reservarClase(claseId, { estudiante_id: estudiante_id });
 
     if (success) {
       setModalOpen(false);
@@ -92,7 +92,7 @@ export default function ClasesPage() {
 
   // Handler para cambiar filtro de ruta
   const handleRutaChange = (rutaId: string | undefined) => {
-    setFiltros({ rutaCurricularId: rutaId });
+    setFiltros({ ruta_curricular_id: rutaId });
   };
 
   return (
@@ -115,7 +115,7 @@ export default function ClasesPage() {
         <Card>
           <RutaFilter
             rutasCurriculares={rutasCurriculares}
-            rutaActiva={filtros.rutaCurricularId}
+            rutaActiva={filtros.ruta_curricular_id}
             onRutaChange={handleRutaChange}
             claseCounts={claseCounts}
           />
@@ -170,14 +170,14 @@ export default function ClasesPage() {
                 No hay clases disponibles
               </h3>
               <p className="text-gray-600">
-                {filtros.rutaCurricularId
+                {filtros.ruta_curricular_id
                   ? 'No hay clases para esta ruta curricular en este momento'
                   : 'No hay clases programadas en este momento'}
               </p>
             </div>
-            {filtros.rutaCurricularId && (
+            {filtros.ruta_curricular_id && (
               <button
-                onClick={() => setFiltros({ rutaCurricularId: undefined })}
+                onClick={() => setFiltros({ ruta_curricular_id: undefined })}
                 className="
                   px-6 py-3
                   bg-primary

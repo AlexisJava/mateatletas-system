@@ -1,8 +1,8 @@
 'use client';
+import { Button } from '@/components/ui';
 
 import { useEffect, useState } from 'react';
 import { useAdminStore } from '@/store/admin.store';
-import { Button } from '@/components/ui';
 import * as adminApi from '@/lib/api/admin.api';
 import {
   exportToExcel,
@@ -10,6 +10,7 @@ import {
   exportToPDF,
   formatClassesForExport
 } from '@/lib/utils/export.utils';
+import { Clase } from '@/types/clases.types';
 
 type ModalType = 'create' | 'cancel' | 'view' | null;
 
@@ -24,11 +25,11 @@ export default function AdminClasesPage() {
   const [rutas, setRutas] = useState<any[]>([]);
   const [docentes, setDocentes] = useState<any[]>([]);
   const [formData, setFormData] = useState({
-    rutaCurricularId: '',
-    docenteId: '',
-    fechaHoraInicio: '',
-    duracionMinutos: 60,
-    cuposMaximo: 10,
+    ruta_curricular_id: '',
+    docente_id: '',
+    fecha_hora_inicio: '',
+    duracion_minutos: 60,
+    cupo_maximo: 10,
   });
 
   useEffect(() => {
@@ -42,21 +43,27 @@ export default function AdminClasesPage() {
         adminApi.getRutasCurriculares(),
         adminApi.getDocentes(),
       ]);
-      setRutas(rutasData);
-      setDocentes(docentesData);
-    } catch (err) {
+      setRutas(rutasData as unknown as unknown[]);
+      setDocentes(docentesData as unknown as unknown[]);
+    } catch (err: unknown) {
       console.error('Error loading form data:', err);
     }
   };
 
   const filteredClasses = filter === 'all'
     ? classes
-    : classes.filter((c: any) => c.estado === filter);
+    : classes.filter((c) => c.estado === filter);
 
   const handleCreateClass = async () => {
     // Convert local datetime to ISO 8601
-    const isoDate = new Date(formData.fechaHoraInicio).toISOString();
-    const success = await createClass({ ...formData, fechaHoraInicio: isoDate });
+    const isoDate = new Date(formData.fecha_hora_inicio).toISOString();
+    const success = await createClass({
+      rutaCurricularId: formData.ruta_curricular_id,
+      docenteId: formData.docente_id,
+      fechaHoraInicio: isoDate,
+      duracionMinutos: formData.duracion_minutos,
+      cuposMaximo: formData.cupo_maximo,
+    });
     if (success) {
       closeModal();
       resetForm();
@@ -71,7 +78,7 @@ export default function AdminClasesPage() {
     }
   };
 
-  const openModal = (type: ModalType, clase?: any) => {
+  const openModal = (type: ModalType, clase?: Clase) => {
     setSelectedClass(clase || null);
     setModalType(type);
   };
@@ -83,11 +90,11 @@ export default function AdminClasesPage() {
 
   const resetForm = () => {
     setFormData({
-      rutaCurricularId: '',
-      docenteId: '',
-      fechaHoraInicio: '',
-      duracionMinutos: 60,
-      cuposMaximo: 10,
+      ruta_curricular_id: '',
+      docente_id: '',
+      fecha_hora_inicio: '',
+      duracion_minutos: 60,
+      cupo_maximo: 10,
     });
   };
 
@@ -200,13 +207,13 @@ export default function AdminClasesPage() {
         <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
           <div className="text-sm font-medium text-green-700">Programadas</div>
           <div className="text-2xl font-bold text-green-900">
-            {classes.filter((c: any) => c.estado === 'Programada').length}
+            {classes.filter((c) => c.estado === 'Programada').length}
           </div>
         </div>
         <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
           <div className="text-sm font-medium text-red-700">Canceladas</div>
           <div className="text-2xl font-bold text-red-900">
-            {classes.filter((c: any) => c.estado === 'Cancelada').length}
+            {classes.filter((c) => c.estado === 'Cancelada').length}
           </div>
         </div>
       </div>
@@ -261,39 +268,39 @@ export default function AdminClasesPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredClasses.map((clase: any) => (
+              {filteredClasses.map((clase) => (
                 <tr key={clase.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-gray-900">
-                      {clase.ruta_curricular?.nombre || clase.rutaCurricular?.nombre || 'N/A'}
+                      {clase.ruta_curricular?.nombre || clase.ruta_curricular?.nombre || 'N/A'}
                     </div>
                     <div className="text-sm text-gray-500">
-                      Prof. {clase.docente?.nombre || 'N/A'} {clase.docente?.apellido || ''}
+                      Prof. {clase.docente?.user?.nombre || 'N/A'} {clase.docente?.user?.apellido || ''}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {new Date(clase.fecha_hora_inicio || clase.fechaHoraInicio).toLocaleDateString('es-ES')}
+                      {new Date(clase.fecha_hora_inicio || clase.fecha_hora_inicio).toLocaleDateString('es-ES')}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {new Date(clase.fecha_hora_inicio || clase.fechaHoraInicio).toLocaleTimeString('es-ES', {
+                      {new Date(clase.fecha_hora_inicio || clase.fecha_hora_inicio).toLocaleTimeString('es-ES', {
                         hour: '2-digit',
                         minute: '2-digit'
                       })}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {clase.duracion_minutos || clase.duracionMinutos} min
+                    {clase.duracion_minutos || clase.duracion_minutos} min
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {clase.cupos_ocupados || clase.cuposOcupados || 0} / {clase.cupos_maximo || clase.cuposMaximo}
+                      {clase.cupo_maximo - clase.cupo_disponible} / {clase.cupo_maximo}
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                       <div
                         className="bg-[#ff6b35] h-2 rounded-full"
                         style={{
-                          width: `${((clase.cupos_ocupados || clase.cuposOcupados || 0) / (clase.cupos_maximo || clase.cuposMaximo)) * 100}%`
+                          width: `${((clase.cupo_maximo - clase.cupo_disponible) / clase.cupo_maximo) * 100}%`
                         }}
                       ></div>
                     </div>
@@ -339,8 +346,8 @@ export default function AdminClasesPage() {
                     Ruta Curricular *
                   </label>
                   <select
-                    value={formData.rutaCurricularId}
-                    onChange={(e) => setFormData({ ...formData, rutaCurricularId: e.target.value })}
+                    value={formData.ruta_curricular_id}
+                    onChange={(e) => setFormData({ ...formData, ruta_curricular_id: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
                     required
                   >
@@ -358,8 +365,8 @@ export default function AdminClasesPage() {
                     Docente *
                   </label>
                   <select
-                    value={formData.docenteId}
-                    onChange={(e) => setFormData({ ...formData, docenteId: e.target.value })}
+                    value={formData.docente_id}
+                    onChange={(e) => setFormData({ ...formData, docente_id: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
                     required
                   >
@@ -380,8 +387,8 @@ export default function AdminClasesPage() {
                   </label>
                   <input
                     type="datetime-local"
-                    value={formData.fechaHoraInicio}
-                    onChange={(e) => setFormData({ ...formData, fechaHoraInicio: e.target.value })}
+                    value={formData.fecha_hora_inicio}
+                    onChange={(e) => setFormData({ ...formData, fecha_hora_inicio: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
                     required
                   />
@@ -394,8 +401,8 @@ export default function AdminClasesPage() {
                   <input
                     type="number"
                     min="15"
-                    value={formData.duracionMinutos}
-                    onChange={(e) => setFormData({ ...formData, duracionMinutos: parseInt(e.target.value) })}
+                    value={formData.duracion_minutos}
+                    onChange={(e) => setFormData({ ...formData, duracion_minutos: parseInt(e.target.value) })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
                     required
                   />
@@ -409,8 +416,8 @@ export default function AdminClasesPage() {
                 <input
                   type="number"
                   min="1"
-                  value={formData.cuposMaximo}
-                  onChange={(e) => setFormData({ ...formData, cuposMaximo: parseInt(e.target.value) })}
+                  value={formData.cupo_maximo}
+                  onChange={(e) => setFormData({ ...formData, cupo_maximo: parseInt(e.target.value) })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
                   required
                 />
@@ -425,7 +432,7 @@ export default function AdminClasesPage() {
                 variant="primary"
                 onClick={handleCreateClass}
                 className="flex-1"
-                disabled={!formData.rutaCurricularId || !formData.docenteId || !formData.fechaHoraInicio}
+                disabled={!formData.ruta_curricular_id || !formData.docente_id || !formData.fecha_hora_inicio}
               >
                 Crear Clase
               </Button>
@@ -440,7 +447,7 @@ export default function AdminClasesPage() {
           <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
             <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">¿Cancelar clase?</h3>
             <p className="text-gray-600 mb-2">
-              Estás por cancelar la clase de <strong>{selectedClass.ruta_curricular?.nombre || selectedClass.rutaCurricular?.nombre}</strong>
+              Estás por cancelar la clase de <strong>{selectedClass.ruta_curricular?.nombre || selectedClass.ruta_curricular?.nombre}</strong>
             </p>
             <p className="text-sm text-red-600 mb-6">Los estudiantes inscritos serán notificados.</p>
             <div className="flex gap-3">
@@ -470,10 +477,10 @@ export default function AdminClasesPage() {
                 <div>
                   <div className="text-sm font-medium text-gray-500">Ruta Curricular</div>
                   <div className="text-lg font-bold text-gray-900 mt-1">
-                    {selectedClass.ruta_curricular?.nombre || selectedClass.rutaCurricular?.nombre}
+                    {selectedClass.ruta_curricular?.nombre || selectedClass.ruta_curricular?.nombre}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {selectedClass.ruta_curricular?.descripcion || selectedClass.rutaCurricular?.descripcion}
+                    {selectedClass.ruta_curricular?.descripcion || selectedClass.ruta_curricular?.descripcion}
                   </div>
                 </div>
                 <div>
@@ -491,7 +498,7 @@ export default function AdminClasesPage() {
                 <div>
                   <div className="text-sm font-medium text-gray-500">Fecha</div>
                   <div className="text-sm text-gray-900 mt-1">
-                    {new Date(selectedClass.fecha_hora_inicio || selectedClass.fechaHoraInicio).toLocaleDateString('es-ES', {
+                    {new Date(selectedClass.fecha_hora_inicio || selectedClass.fecha_hora_inicio).toLocaleDateString('es-ES', {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
@@ -502,7 +509,7 @@ export default function AdminClasesPage() {
                 <div>
                   <div className="text-sm font-medium text-gray-500">Hora</div>
                   <div className="text-sm text-gray-900 mt-1">
-                    {new Date(selectedClass.fecha_hora_inicio || selectedClass.fechaHoraInicio).toLocaleTimeString('es-ES', {
+                    {new Date(selectedClass.fecha_hora_inicio || selectedClass.fecha_hora_inicio).toLocaleTimeString('es-ES', {
                       hour: '2-digit',
                       minute: '2-digit'
                     })}
@@ -511,7 +518,7 @@ export default function AdminClasesPage() {
                 <div>
                   <div className="text-sm font-medium text-gray-500">Duración</div>
                   <div className="text-sm text-gray-900 mt-1">
-                    {selectedClass.duracion_minutos || selectedClass.duracionMinutos} minutos
+                    {selectedClass.duracion_minutos || selectedClass.duracion_minutos} minutos
                   </div>
                 </div>
               </div>
@@ -520,13 +527,13 @@ export default function AdminClasesPage() {
                 <div>
                   <div className="text-sm font-medium text-gray-500">Cupos</div>
                   <div className="text-sm text-gray-900 mt-1">
-                    {selectedClass.cupos_ocupados || selectedClass.cuposOcupados || 0} / {selectedClass.cupos_maximo || selectedClass.cuposMaximo}
+                    {selectedClass.cupos_ocupados || selectedClass.cuposOcupados || 0} / {selectedClass.cupos_maximo || selectedClass.cupo_maximo}
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                     <div
                       className="bg-[#ff6b35] h-2 rounded-full"
                       style={{
-                        width: `${((selectedClass.cupos_ocupados || selectedClass.cuposOcupados || 0) / (selectedClass.cupos_maximo || selectedClass.cuposMaximo)) * 100}%`
+                        width: `${((selectedClass.cupos_ocupados || selectedClass.cuposOcupados || 0) / (selectedClass.cupos_maximo || selectedClass.cupo_maximo)) * 100}%`
                       }}
                     ></div>
                   </div>

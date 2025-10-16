@@ -11,7 +11,7 @@ import {
   Calendar,
   FileText,
   BarChart3,
-  User,
+
   LogOut,
   Sun,
   Moon,
@@ -78,7 +78,7 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
             return;
           }
           setIsValidating(false);
-        } catch (error) {
+        } catch (error: any) {
           router.push('/login');
         }
       }

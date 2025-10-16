@@ -63,7 +63,8 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
 
       /**
-       * Login: Autentica al usuario y guarda el token
+       * Login: Autentica al usuario
+       * El token se guarda automáticamente como httpOnly cookie en el backend
        * @param email - Email del usuario
        * @param password - Contraseña del usuario
        * @throws Error si las credenciales son inválidas
@@ -71,23 +72,20 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string) => {
         set({ isLoading: true });
 
-        // Limpiar token previo antes de intentar login
-        localStorage.removeItem('auth-token');
-
         try {
           const response = await authApi.login({ email, password });
 
-          // Guardar token en localStorage (para el interceptor de axios)
-          localStorage.setItem('auth-token', response.access_token);
+          // Ya NO guardamos token en localStorage (se usa httpOnly cookie)
+          // El backend configura la cookie automáticamente
 
-          // Actualizar estado
+          // Actualizar estado (sin token)
           set({
             user: response.user as User,
-            token: response.access_token,
+            token: null, // Ya no guardamos el token aquí
             isAuthenticated: true,
             isLoading: false,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           set({ isLoading: false });
           throw error; // Propagar error para manejo en componente
         }
@@ -95,6 +93,7 @@ export const useAuthStore = create<AuthState>()(
 
       /**
        * Login Estudiante: Autentica a un estudiante con sus credenciales propias
+       * El token se guarda automáticamente como httpOnly cookie en el backend
        * @param email - Email del estudiante
        * @param password - Contraseña del estudiante
        * @throws Error si las credenciales son inválidas
@@ -102,23 +101,20 @@ export const useAuthStore = create<AuthState>()(
       loginEstudiante: async (email: string, password: string) => {
         set({ isLoading: true });
 
-        // Limpiar token previo antes de intentar login
-        localStorage.removeItem('auth-token');
-
         try {
           const response = await authApi.loginEstudiante({ email, password });
 
-          // Guardar token en localStorage (para el interceptor de axios)
-          localStorage.setItem('auth-token', response.access_token);
+          // Ya NO guardamos token en localStorage (se usa httpOnly cookie)
+          // El backend configura la cookie automáticamente
 
-          // Actualizar estado
+          // Actualizar estado (sin token)
           set({
             user: response.user as User,
-            token: response.access_token,
+            token: null, // Ya no guardamos el token aquí
             isAuthenticated: true,
             isLoading: false,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           set({ isLoading: false });
           throw error; // Propagar error para manejo en componente
         }
@@ -138,7 +134,7 @@ export const useAuthStore = create<AuthState>()(
 
           // Hacer login automáticamente después del registro
           await get().login(data.email, data.password);
-        } catch (error) {
+        } catch (error: unknown) {
           set({ isLoading: false });
           throw error; // Propagar error para manejo en componente
         }
@@ -146,19 +142,18 @@ export const useAuthStore = create<AuthState>()(
 
       /**
        * Logout: Cierra la sesión del usuario
-       * Limpia el estado y elimina el token de localStorage
+       * El backend elimina la httpOnly cookie automáticamente
        */
       logout: async () => {
         try {
-          // Intentar llamar al endpoint de logout del backend
-          // (opcional, el token se invalida en el cliente de todos modos)
+          // Llamar al endpoint de logout del backend
+          // El backend limpia la cookie httpOnly automáticamente
           await authApi.logout();
-        } catch (error) {
+        } catch (error: unknown) {
           // Ignorar errores del backend en logout
           console.error('Error en logout del backend:', error);
         } finally {
-          // Limpiar token de localStorage
-          localStorage.removeItem('auth-token');
+          // Ya NO necesitamos limpiar localStorage (no hay token aquí)
 
           // Limpiar estado
           set({
@@ -172,40 +167,27 @@ export const useAuthStore = create<AuthState>()(
 
       /**
        * CheckAuth: Verifica si hay una sesión activa al cargar la app
-       * Lee el token de localStorage y obtiene el perfil del usuario
+       * Intenta obtener el perfil del usuario (el token va en la cookie httpOnly)
        * Si el token es inválido o expiró, limpia el estado
        */
       checkAuth: async () => {
-        const token = localStorage.getItem('auth-token');
-
-        if (!token) {
-          // No hay token, usuario no autenticado
-          set({
-            user: null,
-            token: null,
-            isAuthenticated: false,
-            isLoading: false,
-          });
-          return;
-        }
-
         set({ isLoading: true });
 
         try {
-          // Obtener perfil del usuario usando el token
+          // Intentar obtener perfil del usuario
+          // El token se envía automáticamente como cookie httpOnly
           const profile = await authApi.getProfile();
 
           // Actualizar estado con los datos del usuario
           set({
             user: profile as User,
-            token: token,
+            token: null, // No guardamos token en el store
             isAuthenticated: true,
             isLoading: false,
           });
         } catch {
-          // Token inválido o expirado
-          // Limpiar todo (el interceptor ya redirigió a /login si fue 401)
-          localStorage.removeItem('auth-token');
+          // Token inválido, expirado o no existe
+          // El interceptor ya redirigió a /login si fue 401
           set({
             user: null,
             token: null,

@@ -121,7 +121,7 @@ const TextoContent = ({ texto }: { texto: string }) => (
 );
 
 // Componente para Quiz
-const QuizContent = ({ preguntas }: { preguntas: any[] }) => {
+const QuizContent = ({ preguntas }: { preguntas: Array<{ id: string; pregunta: string; opciones: string[]; respuesta_correcta: number }> }) => {
   const [respuestas, setRespuestas] = useState<Record<number, number>>({});
   const [mostrarResultado, setMostrarResultado] = useState(false);
 
@@ -218,7 +218,7 @@ export default function LeccionPlayerPage() {
       const data = await getLeccion(leccionId);
       setLeccion(data);
       setTiempoInicio(Date.now());
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al cargar lección:', error);
     } finally {
       setIsLoading(false);
@@ -250,7 +250,7 @@ export default function LeccionPlayerPage() {
         console.error('❌ [LECCION] completarLeccion failed:', result);
         alert('Error al completar la lección. Por favor intenta de nuevo.');
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('❌ [LECCION] Error completando lección:', error);
       alert(`Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
@@ -266,8 +266,8 @@ export default function LeccionPlayerPage() {
     try {
       switch (leccion.tipo_contenido) {
         case 'Video':
-          const videoUrl = leccion.contenido?.url || leccion.contenido?.videoUrl || '';
-          if (!videoUrl) {
+          const videoUrl = (leccion.contenido as any)?.url || (leccion.contenido as any)?.videoUrl || '';
+          if (!videoUrl || typeof videoUrl !== 'string') {
             console.error('❌ [LECCION] Video URL not found in contenido:', leccion.contenido);
             return (
               <ChunkyCard gradient="linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)">
@@ -283,10 +283,10 @@ export default function LeccionPlayerPage() {
 
         case 'Texto':
         case 'Lectura':
-          return <TextoContent texto={leccion.contenido.texto || leccion.contenido.contenido || ''} />;
+          return <TextoContent texto={(leccion.contenido as any).texto || (leccion.contenido as any).contenido || ''} />;
 
         case 'Quiz':
-          return <QuizContent preguntas={leccion.contenido.preguntas || []} />;
+          return <QuizContent preguntas={(leccion.contenido as any).preguntas || []} />;
 
         case 'Tarea':
           return (
@@ -294,11 +294,11 @@ export default function LeccionPlayerPage() {
               <div className="p-8">
                 <h3 className="text-2xl font-black text-gray-900 mb-4">📋 Tarea</h3>
                 <div className="prose">
-                  <p className="text-gray-700">{leccion.contenido.descripcion}</p>
-                  {leccion.contenido.instrucciones && (
+                  <p className="text-gray-700">{(leccion.contenido as any).descripcion}</p>
+                  {(leccion.contenido as any).instrucciones && (
                     <div className="mt-4">
                       <h4 className="font-bold">Instrucciones:</h4>
-                      <p>{leccion.contenido.instrucciones}</p>
+                      <p>{(leccion.contenido as any).instrucciones}</p>
                     </div>
                   )}
                 </div>
@@ -317,7 +317,7 @@ export default function LeccionPlayerPage() {
             </ChunkyCard>
           );
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('❌ [LECCION] Error rendering contenido:', error);
       return (
         <ChunkyCard gradient="linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%)">

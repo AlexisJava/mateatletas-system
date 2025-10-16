@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
+import { AuthUser } from '@/lib/api/auth.api';
+import { Estudiante } from '@/types/estudiante';
+import { Clase } from '@/types/clases.types';
+import { Membresia } from '@/types/pago.types';
 import {
   Users,
   Calendar,
-  Trophy,
-  BookOpen,
-  Plus,
   Star,
   Clock,
   CreditCard,
@@ -17,8 +18,6 @@ import {
   Home,
   DollarSign,
   UserCheck,
-  Zap,
-  Download,
   LogOut,
   ChevronDown,
 } from 'lucide-react';
@@ -28,10 +27,10 @@ import PagosTab from './PagosTab';
 import AyudaTab from './AyudaTab';
 
 interface DashboardViewProps {
-  user: any;
-  estudiantes: any[];
-  clases: any[];
-  membresia: any | null;
+  user: AuthUser;
+  estudiantes: Estudiante[];
+  clases: Clase[];
+  membresia: Membresia | null;
 }
 
 type TabType = 'dashboard' | 'hijos' | 'calendario' | 'pagos' | 'ayuda';
@@ -85,11 +84,11 @@ export default function DashboardView({
 
   // Transformar estudiantes a formato UI
   const hijosData = estudiantes.map((est) => {
-    const edad = calcularEdad(est.fecha_nacimiento);
+    const edad = calcularEdad(new Date(est.fecha_nacimiento));
     const initials = `${est.nombre.charAt(0)}${est.apellido.charAt(0)}`.toUpperCase();
 
     const proximasClases = clases
-      .filter((clase) => clase.inscripciones.some((insc: any) => insc.estudiante.id === est.id))
+      .filter((clase) => clase.inscripciones?.some((insc) => insc.estudiante?.id === est.id))
       .filter((clase) => new Date(clase.fecha_hora_inicio) > new Date())
       .sort((a, b) => new Date(a.fecha_hora_inicio).getTime() - new Date(b.fecha_hora_inicio).getTime());
 
@@ -351,7 +350,7 @@ export default function DashboardView({
                   {clasesHoy.length > 0 ? (
                     <div className="space-y-3">
                       {clasesHoy.map((clase) => {
-                        const estudianteInscrito = clase.inscripciones[0]?.estudiante;
+                        const estudianteInscrito = clase.inscripciones?.[0]?.estudiante;
                         return (
                           <div
                             key={clase.id}

@@ -13,7 +13,6 @@ import {
   BookOpenCheck,
   CreditCard,
   BarChart3,
-  User,
   LogOut,
   Sun,
   Moon,
@@ -81,7 +80,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             return;
           }
           setIsValidating(false);
-        } catch (error) {
+        } catch (error: any) {
           router.push('/login');
         }
       }

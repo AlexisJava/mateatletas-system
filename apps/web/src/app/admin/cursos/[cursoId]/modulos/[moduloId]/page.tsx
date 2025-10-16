@@ -1,8 +1,9 @@
 'use client';
+import { Button } from '@/components/ui';
+import { getErrorMessage } from '@/lib/utils/error-handler';
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Button } from '@/components/ui';
 import {
   getModulo,
   getLeccionesByModulo,
@@ -29,7 +30,6 @@ export default function ModuloDetailPage() {
   const router = useRouter();
   const params = useParams();
   const moduloId = params?.moduloId as string;
-  const cursoId = params?.cursoId as string;
 
   const [modulo, setModulo] = useState<Modulo | null>(null);
   const [lecciones, setLecciones] = useState<Leccion[]>([]);
@@ -66,8 +66,8 @@ export default function ModuloDetailPage() {
       ]);
       setModulo(moduloData);
       setLecciones(leccionesData);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al cargar datos');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al cargar datos'));
     } finally {
       setIsLoading(false);
     }
@@ -79,8 +79,8 @@ export default function ModuloDetailPage() {
       await createLeccion(moduloId, formData);
       await loadData();
       closeLeccionModal();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al crear lección');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al crear lección'));
     }
   };
 
@@ -92,8 +92,8 @@ export default function ModuloDetailPage() {
       await updateLeccion(editingLeccion.id, formData);
       await loadData();
       closeLeccionModal();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al actualizar lección');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al actualizar lección'));
     }
   };
 
@@ -104,8 +104,8 @@ export default function ModuloDetailPage() {
       setError(null);
       await deleteLeccion(leccionId);
       await loadData();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al eliminar lección');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Error al eliminar lección'));
     }
   };
 
