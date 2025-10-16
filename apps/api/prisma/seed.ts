@@ -14,7 +14,7 @@ async function main() {
   await seedProductos();
   await seedAccionesPuntuables();
   await seedLogros();
-  await seedEstudiantesConCredenciales();
+  // await seedEstudiantesConCredenciales(); // TODO: Re-enable after adding email to Estudiante model
   await seedCursoFundamentosAlgebra();
   await seedInscripcionEstudiante();
 
