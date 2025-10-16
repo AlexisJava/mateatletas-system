@@ -17,19 +17,46 @@ export class NotificacionesService {
   }
 
   /**
-   * Obtener todas las notificaciones de un docente
+   * Obtener todas las notificaciones de un docente con paginación
    * Ordenadas por fecha (más recientes primero)
+   * @param docenteId - ID del docente
+   * @param soloNoLeidas - Filtrar solo no leídas (default: false)
+   * @param page - Número de página (default: 1)
+   * @param limit - Registros por página (default: 20)
    */
-  async findAll(docenteId: string, soloNoLeidas = false) {
-    return this.prisma.notificacion.findMany({
-      where: {
-        docente_id: docenteId,
-        ...(soloNoLeidas && { leida: false }),
+  async findAll(
+    docenteId: string,
+    soloNoLeidas = false,
+    page: number = 1,
+    limit: number = 20,
+  ) {
+    const skip = (page - 1) * limit;
+    const where = {
+      docente_id: docenteId,
+      ...(soloNoLeidas && { leida: false }),
+    };
+
+    const [notificaciones, total] = await Promise.all([
+      this.prisma.notificacion.findMany({
+        where,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      this.prisma.notificacion.count({ where }),
+    ]);
+
+    return {
+      data: notificaciones,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    };
   }
 
   /**

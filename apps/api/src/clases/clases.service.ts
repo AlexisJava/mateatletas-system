@@ -50,17 +50,21 @@ export class ClasesService {
   }
 
   /**
-   * Listar todas las clases (Admin)
+   * Listar todas las clases (Admin) con paginación
    * DELEGACIÓN: ClasesManagementService
    */
-  async listarTodasLasClases(filtros?: {
-    fechaDesde?: Date;
-    fechaHasta?: Date;
-    estado?: 'Programada' | 'Cancelada';
-    docenteId?: string;
-    rutaCurricularId?: string;
-  }) {
-    return this.managementService.listarTodasLasClases(filtros);
+  async listarTodasLasClases(
+    filtros?: {
+      fechaDesde?: Date;
+      fechaHasta?: Date;
+      estado?: 'Programada' | 'Cancelada';
+      docenteId?: string;
+      rutaCurricularId?: string;
+    },
+    page?: number,
+    limit?: number,
+  ) {
+    return this.managementService.listarTodasLasClases(filtros, page, limit);
   }
 
   /**

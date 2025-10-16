@@ -293,25 +293,40 @@ export class EstudiantesService {
    * Obtiene TODOS los estudiantes (solo para admin)
    * @returns Lista completa de estudiantes con tutor y equipo
    */
-  async findAll() {
-    const estudiantes = await this.prisma.estudiante.findMany({
-      include: {
-        tutor: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
-          },
-        },
-        equipo: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+  async findAll(page: number = 1, limit: number = 50) {
+    const skip = (page - 1) * limit;
 
-    return estudiantes;
+    const [estudiantes, total] = await Promise.all([
+      this.prisma.estudiante.findMany({
+        include: {
+          tutor: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+              email: true,
+            },
+          },
+          equipo: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      this.prisma.estudiante.count(),
+    ]);
+
+    return {
+      data: estudiantes,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   /**

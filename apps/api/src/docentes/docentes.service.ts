@@ -53,18 +53,39 @@ export class DocentesService {
   }
 
   /**
-   * Obtiene todos los docentes del sistema
-   * @returns Lista de docentes sin contraseñas
+   * Obtiene todos los docentes del sistema con paginación
+   * @param page - Número de página (default: 1)
+   * @param limit - Registros por página (default: 20)
+   * @returns Lista paginada de docentes sin contraseñas
    */
-  async findAll() {
-    const docentes = await this.prisma.docente.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+  async findAll(page: number = 1, limit: number = 20) {
+    const skip = (page - 1) * limit;
+
+    const [docentes, total] = await Promise.all([
+      this.prisma.docente.findMany({
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      this.prisma.docente.count(),
+    ]);
 
     // Excluir passwords de todos los docentes
-    return docentes.map(({ password_hash: _password_hash, ...docente }) => docente);
+    const docentesSinPassword = docentes.map(
+      ({ password_hash: _password_hash, ...docente }) => docente,
+    );
+
+    return {
+      data: docentesSinPassword,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   /**
