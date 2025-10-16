@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Nunito } from 'next/font/google';
 import './globals.css';
+import { QueryProvider } from '@/lib/providers/QueryProvider';
 
 // Nunito: Fuente oficial de Mateatletas Club
 const nunito = Nunito({
@@ -24,7 +25,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${nunito.variable} antialiased`}>
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

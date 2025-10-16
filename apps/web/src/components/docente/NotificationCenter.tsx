@@ -1,64 +1,40 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Bell, Check, CheckCheck, X } from 'lucide-react';
-import { useNotificacionesStore } from '@/store/notificaciones.store';
+import { useNotificationCenter } from '@/lib/hooks/useNotificaciones';
 import {
   getNotificacionIcon,
   getNotificacionColor,
   formatearTiempoRelativo,
 } from '@/lib/api/notificaciones.api';
 
+/**
+ * NotificationCenter - Migrado a React Query
+ *
+ * Beneficios vs Zustand:
+ * - ✅ Cache automático con invalidación inteligente
+ * - ✅ Background refetching cada 30s (sin setInterval manual)
+ * - ✅ Optimistic updates para UX instantáneo
+ * - ✅ Loading/error states automáticos
+ * - ✅ Menos boilerplate (~50% menos código)
+ * - ✅ DevTools para debugging
+ */
 export default function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Un solo hook reemplaza todo el store + useEffect
   const {
     notificaciones,
-    countNoLeidas,
+    count: countNoLeidas,
     isLoading,
     error,
-    fetchNotificaciones,
-    fetchCount,
-    marcarComoLeida,
-    marcarTodasLeidas,
+    marcarLeida,
+    marcarTodas,
     eliminar,
-    resetError,
-  } = useNotificacionesStore();
-
-  // Fetch inicial y polling cada 30 segundos
-  useEffect(() => {
-    fetchNotificaciones();
-    fetchCount();
-
-    // Polling para mantener contador actualizado
-    const interval = setInterval(() => {
-      fetchCount();
-    }, 30000); // 30 segundos
-
-    return () => clearInterval(interval);
-  }, [fetchNotificaciones, fetchCount]);
-
-  // Cerrar error después de 5 segundos
-  useEffect(() => {
-    if (error) {
-      const timeout = setTimeout(() => {
-        resetError();
-      }, 5000);
-      return () => clearTimeout(timeout);
-    }
-  }, [error, resetError]);
-
-  const handleMarcarComoLeida = async (id: string) => {
-    await marcarComoLeida(id);
-  };
-
-  const handleMarcarTodasLeidas = async () => {
-    await marcarTodasLeidas();
-  };
-
-  const handleEliminar = async (id: string) => {
-    await eliminar(id);
-  };
+    isMarking,
+    isDeleting,
+  } = useNotificationCenter();
 
   return (
     <div className="relative">
@@ -103,12 +79,13 @@ export default function NotificationCenter() {
                   </h3>
                   {countNoLeidas > 0 && (
                     <button
-                      onClick={handleMarcarTodasLeidas}
+                      onClick={() => marcarTodas()}
+                      disabled={isMarking}
                       className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1
-                               transition-smooth font-medium"
+                               transition-smooth font-medium disabled:opacity-50"
                     >
                       <CheckCheck className="w-4 h-4" />
-                      Marcar todas
+                      {isMarking ? 'Marcando...' : 'Marcar todas'}
                     </button>
                   )}
                 </div>
@@ -172,18 +149,22 @@ export default function NotificationCenter() {
                                 <div className="flex items-center gap-2">
                                   {!notif.leida && (
                                     <button
-                                      onClick={() => handleMarcarComoLeida(notif.id)}
+                                      onClick={() => marcarLeida(notif.id)}
+                                      disabled={isMarking}
                                       className="text-xs text-blue-500 hover:text-blue-600
-                                               transition-smooth p-1 hover:bg-blue-50 rounded"
+                                               transition-smooth p-1 hover:bg-blue-50 rounded
+                                               disabled:opacity-50"
                                       title="Marcar como leída"
                                     >
                                       <Check className="w-4 h-4" />
                                     </button>
                                   )}
                                   <button
-                                    onClick={() => handleEliminar(notif.id)}
+                                    onClick={() => eliminar(notif.id)}
+                                    disabled={isDeleting}
                                     className="text-xs text-red-500 hover:text-red-600
-                                             transition-smooth p-1 hover:bg-red-50 rounded"
+                                             transition-smooth p-1 hover:bg-red-50 rounded
+                                             disabled:opacity-50"
                                     title="Eliminar"
                                   >
                                     <X className="w-4 h-4" />
