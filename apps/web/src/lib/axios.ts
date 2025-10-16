@@ -36,27 +36,100 @@ apiClient.interceptors.request.use(
 
 /**
  * Response Interceptor
- * - Extrae data directamente de respuestas exitosas (2xx)
- * - Maneja errores 401: redirige a login (la cookie se limpia en el backend)
- * - Propaga otros errores para manejo en componentes
+ *
+ * IMPORTANTE: Este interceptor retorna `response.data` directamente.
+ * Esto significa que cuando llamas:
+ *
+ *   const result = await axios.get('/endpoint')
+ *
+ * `result` ya contiene los datos, NO `result.data`.
+ *
+ * Para type safety, usa type assertion en los archivos API:
+ *   return await axios.get('/endpoint') as unknown as TipoEsperado[]
+ *
+ * Manejo de Errores HTTP:
+ * - 401 Unauthorized: Redirige a login (sesión expirada)
+ * - 403 Forbidden: Muestra mensaje de acceso denegado
+ * - 404 Not Found: Recurso no encontrado
+ * - 422 Unprocessable Entity: Errores de validación
+ * - 500 Internal Server Error: Error del servidor
  */
 apiClient.interceptors.response.use(
   (response) => {
     // Retornar solo la data para simplificar el uso en componentes
     return response.data;
   },
-  (error: AxiosError) => {
+  (error: AxiosError<{ message?: string; errors?: Record<string, string[]> }>) => {
     // Verificar si estamos en el navegador
     if (typeof window !== 'undefined') {
-      // Si es 401 Unauthorized, el token es inválido o expiró
-      if (error.response?.status === 401) {
-        // Ya NO necesitamos eliminar de localStorage (usamos cookies httpOnly)
-        // La cookie se limpia automáticamente en el backend al hacer logout
+      const status = error.response?.status;
+      const currentPath = window.location.pathname;
+      const isAuthPage = currentPath === '/login' || currentPath === '/register';
 
-        // Redirigir a login solo si no estamos ya en la página de login
-        const currentPath = window.location.pathname;
-        if (currentPath !== '/login' && currentPath !== '/register') {
-          window.location.href = '/login';
+      switch (status) {
+        case 401: {
+          // Unauthorized - Sesión expirada o inválida
+          console.warn('🔒 Sesión expirada. Redirigiendo a login...');
+
+          // Redirigir a login solo si no estamos en páginas de auth
+          if (!isAuthPage) {
+            // Guardar la URL actual para redirigir después del login
+            sessionStorage.setItem('redirectAfterLogin', currentPath);
+            window.location.href = '/login';
+          }
+          break;
+        }
+
+        case 403: {
+          // Forbidden - Acceso denegado
+          console.error('🚫 Acceso denegado:', error.response?.data?.message);
+
+          // Opcional: Mostrar un toast o notificación
+          if (typeof window !== 'undefined' && (window as unknown as { showToast?: (msg: string, type: string) => void }).showToast) {
+            (window as unknown as { showToast: (msg: string, type: string) => void }).showToast(
+              error.response?.data?.message || 'No tienes permisos para realizar esta acción',
+              'error'
+            );
+          }
+          break;
+        }
+
+        case 404: {
+          // Not Found - Recurso no encontrado
+          console.error('❌ Recurso no encontrado:', error.config?.url);
+          break;
+        }
+
+        case 422: {
+          // Unprocessable Entity - Errores de validación
+          const validationErrors = error.response?.data?.errors;
+          console.error('⚠️ Errores de validación:', validationErrors);
+          break;
+        }
+
+        case 500: {
+          // Internal Server Error
+          console.error('💥 Error del servidor:', error.response?.data?.message);
+
+          // Opcional: Mostrar un toast o notificación
+          if (typeof window !== 'undefined' && (window as unknown as { showToast?: (msg: string, type: string) => void }).showToast) {
+            (window as unknown as { showToast: (msg: string, type: string) => void }).showToast(
+              'Ocurrió un error en el servidor. Por favor, intenta de nuevo.',
+              'error'
+            );
+          }
+          break;
+        }
+
+        default: {
+          // Otros errores
+          if (error.response) {
+            console.error(`❓ Error HTTP ${status}:`, error.response.data);
+          } else if (error.request) {
+            console.error('🌐 Sin respuesta del servidor. Verifica tu conexión.');
+          } else {
+            console.error('⚙️ Error en la configuración de la petición:', error.message);
+          }
         }
       }
     }
