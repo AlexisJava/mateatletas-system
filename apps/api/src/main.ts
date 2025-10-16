@@ -23,12 +23,23 @@ async function bootstrap() {
     maxAge: 3600, // Cache preflight requests por 1 hora
   });
 
-  // Global validation pipe
+  // Global validation pipe with advanced options
   app.useGlobalPipes(
     new ValidationPipe({
+      // Seguridad: elimina propiedades no definidas en el DTO
       whitelist: true,
+      // Seguridad: lanza error si hay propiedades extra (evita ataques de mass assignment)
       forbidNonWhitelisted: true,
+      // Transformación automática de tipos y decoradores (@Trim, @Capitalize, etc.)
       transform: true,
+      // Habilita conversión implícita de tipos (ej: '123' → 123)
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      // Mensajes de error más descriptivos
+      disableErrorMessages: false,
+      // Validación de parámetros de rutas y queries
+      validateCustomDecorators: true,
     }),
   );
 
