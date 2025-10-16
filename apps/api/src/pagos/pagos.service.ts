@@ -528,6 +528,125 @@ export class PagosService {
   }
 
   /**
+   * Obtiene el historial COMPLETO de pagos de un tutor
+   * Para el portal de tutores - pestaña "Pagos"
+   * Incluye: todos los pagos (membresías y cursos), con detalles de producto, estudiante y estado
+   * @param tutorId - ID del tutor
+   * @returns Historial de pagos ordenado por fecha descendente con resumen
+   * FIXED: Ahora usa Membresia e InscripcionCurso en lugar del modelo Pago inexistente
+   */
+  async obtenerHistorialPagosTutor(tutorId: string) {
+    // 1. Verificar que el tutor existe
+    const tutor = await this.prisma.tutor.findUnique({
+      where: { id: tutorId },
+    });
+
+    if (!tutor) {
+      throw new NotFoundException('Tutor no encontrado');
+    }
+
+    // 2. Obtener membresías del tutor (historial)
+    const membresias = await this.prisma.membresia.findMany({
+      where: { tutor_id: tutorId },
+      include: {
+        producto: {
+          select: {
+            id: true,
+            nombre: true,
+            descripcion: true,
+            tipo: true,
+            precio: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // 3. Obtener inscripciones a cursos de los estudiantes del tutor
+    const estudiantes = await this.prisma.estudiante.findMany({
+      where: { tutor_id: tutorId },
+      select: { id: true },
+    });
+
+    const inscripcionesCursos = await this.prisma.inscripcionCurso.findMany({
+      where: {
+        estudiante_id: { in: estudiantes.map((e) => e.id) },
+      },
+      include: {
+        producto: {
+          select: {
+            id: true,
+            nombre: true,
+            precio: true,
+            tipo: true,
+          },
+        },
+        estudiante: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // 4. Unificar historial (membresías + cursos)
+    const historial = [
+      ...membresias.map((m) => ({
+        id: m.id,
+        tipo: 'membresia' as const,
+        producto: m.producto,
+        estado: m.estado,
+        fecha: m.createdAt,
+        monto: m.producto.precio,
+        estudiante: null,
+      })),
+      ...inscripcionesCursos.map((i) => ({
+        id: i.id,
+        tipo: 'curso' as const,
+        producto: i.producto,
+        estado: i.estado,
+        fecha: i.createdAt,
+        monto: i.producto.precio,
+        estudiante: i.estudiante,
+      })),
+    ].sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+
+    // 5. Calcular resumen
+    const totalPagos = historial.length;
+    const membresiasPagadas = membresias.filter((m) => m.estado === 'Activa').length;
+    const cursosPagados = inscripcionesCursos.filter((i) => i.estado === 'Activo').length;
+
+    const totalGastado =
+      membresias.filter(m => m.estado === 'Activa').reduce((sum, m) => sum + Number(m.producto.precio), 0) +
+      inscripcionesCursos.filter(i => i.estado === 'Activo').reduce((sum, i) => sum + Number(i.producto.precio), 0);
+
+    // 6. Obtener membresía activa actual
+    const membresiaActual = await this.obtenerMembresiaTutor(tutorId);
+
+    // 7. Obtener inscripciones activas
+    const inscripcionesActivas = inscripcionesCursos.filter(
+      (i) => i.estado === 'Activo',
+    );
+
+    return {
+      historial,
+      resumen: {
+        total_pagos: totalPagos,
+        total_gastado: totalGastado,
+        membresias_activas: membresiasPagadas,
+        cursos_activos: cursosPagados,
+      },
+      activos: {
+        membresia_actual: membresiaActual,
+        inscripciones_cursos_activas: inscripcionesActivas,
+      },
+    };
+  }
+
+  /**
    * Activa una membresía manualmente (SOLO PARA TESTING EN MODO MOCK)
    */
   async activarMembresiaMock(membresiaId: string) {

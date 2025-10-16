@@ -84,6 +84,20 @@ export class EstudiantesController {
   }
 
   /**
+   * GET /estudiantes/:id/detalle-completo - Obtener detalle COMPLETO del estudiante
+   * Para el portal de tutores - pestaña "Mis Hijos"
+   * Incluye: gamificación, asistencias, inscripciones, estadísticas
+   * @param id - ID del estudiante
+   * @param user - Usuario autenticado (tutor)
+   * @returns Detalle completo del estudiante con todas sus métricas
+   */
+  @Get(':id/detalle-completo')
+  @UseGuards(EstudianteOwnershipGuard)
+  async getDetalleCompleto(@Param('id') id: string, @GetUser() user: any) {
+    return this.estudiantesService.getDetalleCompleto(id, user.id);
+  }
+
+  /**
    * GET /estudiantes/:id - Obtener un estudiante específico
    * Verifica ownership del estudiante
    * @param id - ID del estudiante

@@ -89,10 +89,6 @@ export default function AdminPagosPage() {
     );
   };
 
-  const totalRecaudado = pagos
-    .filter((p) => p.estado === 'Aprobado')
-    .reduce((sum, p) => sum + p.monto, 0);
-
   if (isLoading) {
     return (
       <div className="text-center py-12">
@@ -110,6 +106,12 @@ export default function AdminPagosPage() {
       </div>
     );
   }
+
+  // Calcular estadísticas de forma segura
+  const pagosArray = Array.isArray(pagos) ? pagos : [];
+  const totalRecaudado = pagosArray
+    .filter((p) => p.estado === 'Aprobado')
+    .reduce((sum, p) => sum + p.monto, 0);
 
   return (
     <div className="space-y-6">
@@ -129,12 +131,12 @@ export default function AdminPagosPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg p-6">
           <p className="text-sm text-gray-600 mb-1">Total de Pagos</p>
-          <p className="text-3xl font-bold text-gray-900">{pagos.length}</p>
+          <p className="text-3xl font-bold text-gray-900">{pagosArray.length}</p>
         </div>
         <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg p-6">
           <p className="text-sm text-gray-600 mb-1">Pagos Aprobados</p>
           <p className="text-3xl font-bold text-green-600">
-            {pagos.filter((p) => p.estado === 'Aprobado').length}
+            {pagosArray.filter((p) => p.estado === 'Aprobado').length}
           </p>
         </div>
         <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg p-6">
@@ -146,7 +148,7 @@ export default function AdminPagosPage() {
       </div>
 
       {/* Lista de pagos */}
-      {pagos.length === 0 ? (
+      {pagosArray.length === 0 ? (
         <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg p-12 text-center">
           <span className="text-6xl mb-4 block">💳</span>
           <h3 className="text-2xl font-bold text-gray-900 mb-2">No hay pagos</h3>
@@ -184,7 +186,7 @@ export default function AdminPagosPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {pagos.map((pago) => (
+                {pagosArray.map((pago) => (
                   <tr key={pago.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {formatFecha(pago.fecha_pago)}

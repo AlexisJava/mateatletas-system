@@ -344,6 +344,100 @@ export class EstudiantesService {
   }
 
   /**
+   * Obtiene el detalle COMPLETO de un estudiante
+   * Incluye: gamificación, asistencias, inscripciones, estadísticas
+   * Para el portal de tutores - pestaña "Mis Hijos"
+   * @param estudianteId - ID del estudiante
+   * @param tutorId - ID del tutor (para verificar ownership)
+   * @returns Detalle completo del estudiante con todas sus métricas
+   */
+  async getDetalleCompleto(estudianteId: string, tutorId: string) {
+    // Verificar que el estudiante pertenece al tutor
+    const estudiante = await this.prisma.estudiante.findFirst({
+      where: {
+        id: estudianteId,
+        tutor_id: tutorId,
+      },
+      include: {
+        equipo: true,
+        logrosDesbloqueados: {
+          include: {
+            logro: true,
+          },
+          orderBy: {
+            fecha_obtenido: 'desc',
+          },
+        },
+        inscripciones_clase: {
+          include: {
+            clase: {
+              include: {
+                rutaCurricular: true,
+                docente: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: {
+            clase: {
+              fecha_hora_inicio: 'desc',
+            },
+          },
+          take: 10, // Últimas 10 inscripciones
+        },
+        asistencias: {
+          include: {
+            clase: {
+              include: {
+                rutaCurricular: true,
+              },
+            },
+          },
+          orderBy: {
+            clase: {
+              fecha_hora_inicio: 'desc',
+            },
+          },
+          take: 20, // Últimas 20 asistencias
+        },
+      },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException(
+        'Estudiante no encontrado o no pertenece a este tutor',
+      );
+    }
+
+    // Calcular estadísticas
+    const totalClases = estudiante.asistencias.length;
+    const clasesPresente = estudiante.asistencias.filter(
+      (a) => a.estado === 'Presente',
+    ).length;
+    const tasaAsistencia =
+      totalClases > 0 ? Math.round((clasesPresente / totalClases) * 100) : 0;
+
+    return {
+      ...estudiante,
+      edad: this.calcularEdad(estudiante.fecha_nacimiento),
+      estadisticas: {
+        total_clases: totalClases,
+        clases_presente: clasesPresente,
+        tasa_asistencia: tasaAsistencia,
+        nivel: estudiante.nivel_actual,
+        puntos: estudiante.puntos_totales,
+        logros: estudiante.logrosDesbloqueados?.length || 0,
+      },
+    };
+  }
+
+  /**
    * Calcula la edad en años desde una fecha de nacimiento
    * @param fechaNacimiento - Fecha de nacimiento
    * @returns Edad en años

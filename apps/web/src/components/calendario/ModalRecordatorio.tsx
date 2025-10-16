@@ -1,42 +1,52 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { X, Bell, Calendar, Clock, Check, Palette } from 'lucide-react';
 import { useCalendarioStore } from '@/store/calendario.store';
-import { Modal } from '@/components/ui/Modal';
-import {
-  TipoEvento,
+import type {
   CreateRecordatorioDto,
+  UpdateRecordatorioDto,
+  Evento,
 } from '@/types/calendario.types';
+import { TipoEvento } from '@/types/calendario.types';
 
 interface ModalRecordatorioProps {
   isOpen: boolean;
   onClose: () => void;
-  recordatorioExistente?: any;
+  recordatorioExistente?: Evento;
 }
 
 const COLORES_PREDEFINIDOS = [
-  { nombre: 'Indigo', hex: '#6366f1' },
-  { nombre: 'Azul', hex: '#3b82f6' },
-  { nombre: 'Verde', hex: '#10b981' },
-  { nombre: 'Amarillo', hex: '#f59e0b' },
-  { nombre: 'Rojo', hex: '#ef4444' },
-  { nombre: 'Rosa', hex: '#ec4899' },
-  { nombre: 'Morado', hex: '#8b5cf6' },
+  { nombre: 'Indigo', hex: '#6366f1', from: 'from-indigo-500', to: 'to-indigo-600' },
+  { nombre: 'Azul', hex: '#3b82f6', from: 'from-blue-500', to: 'to-blue-600' },
+  { nombre: 'Morado', hex: '#8b5cf6', from: 'from-purple-500', to: 'to-purple-600' },
+  { nombre: 'Rosa', hex: '#ec4899', from: 'from-pink-500', to: 'to-pink-600' },
+  { nombre: 'Rojo', hex: '#ef4444', from: 'from-red-500', to: 'to-red-600' },
+  { nombre: 'Naranja', hex: '#f97316', from: 'from-orange-500', to: 'to-orange-600' },
+  { nombre: 'Verde', hex: '#10b981', from: 'from-green-500', to: 'to-green-600' },
+  { nombre: 'Celeste', hex: '#06b6d4', from: 'from-cyan-500', to: 'to-cyan-600' },
 ];
 
-export function ModalRecordatorio({ isOpen, onClose, recordatorioExistente }: ModalRecordatorioProps) {
-  const { crearRecordatorio, actualizarRecordatorio, isLoading } = useCalendarioStore();
+export function ModalRecordatorio({
+  isOpen,
+  onClose,
+  recordatorioExistente,
+}: ModalRecordatorioProps) {
+  const { crearRecordatorio, actualizarRecordatorio } = useCalendarioStore();
 
+  // Form state
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [fechaInicio, setFechaInicio] = useState('');
-  const [horaInicio, setHoraInicio] = useState('');
+  const [horaInicio, setHoraInicio] = useState('09:00');
   const [fechaFin, setFechaFin] = useState('');
-  const [horaFin, setHoraFin] = useState('');
+  const [horaFin, setHoraFin] = useState('09:00');
   const [esTodoElDia, setEsTodoElDia] = useState(false);
   const [color, setColor] = useState('#6366f1');
   const [completado, setCompletado] = useState(false);
 
+  // Load existing recordatorio data
   useEffect(() => {
     if (recordatorioExistente) {
       setTitulo(recordatorioExistente.titulo);
@@ -76,7 +86,7 @@ export function ModalRecordatorio({ isOpen, onClose, recordatorioExistente }: Mo
       ? `${fechaFin}T23:59:59.999Z`
       : `${fechaFin}T${horaFin}:00.000Z`;
 
-    const recordatorioData: CreateRecordatorioDto = {
+    const recordatorioData: CreateRecordatorioDto | UpdateRecordatorioDto = {
       titulo,
       descripcion: descripcion || undefined,
       tipo: TipoEvento.RECORDATORIO,
@@ -89,9 +99,12 @@ export function ModalRecordatorio({ isOpen, onClose, recordatorioExistente }: Mo
 
     try {
       if (recordatorioExistente) {
-        await actualizarRecordatorio(recordatorioExistente.id, recordatorioData);
+        await actualizarRecordatorio(
+          recordatorioExistente.id,
+          recordatorioData as UpdateRecordatorioDto
+        );
       } else {
-        await crearRecordatorio(recordatorioData);
+        await crearRecordatorio(recordatorioData as CreateRecordatorioDto);
       }
       onClose();
       resetForm();
@@ -103,152 +116,215 @@ export function ModalRecordatorio({ isOpen, onClose, recordatorioExistente }: Mo
   const resetForm = () => {
     setTitulo('');
     setDescripcion('');
+    const ahora = new Date();
+    setFechaInicio(ahora.toISOString().split('T')[0]);
+    setHoraInicio('09:00');
+    setFechaFin(ahora.toISOString().split('T')[0]);
+    setHoraFin('09:00');
+    setEsTodoElDia(false);
     setColor('#6366f1');
     setCompletado(false);
   };
 
+  const colorSeleccionado = COLORES_PREDEFINIDOS.find((c) => c.hex === color);
+
+  if (!isOpen) return null;
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={recordatorioExistente ? 'Editar Recordatorio' : 'Nuevo Recordatorio'}
-    >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Título */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Título *
-          </label>
-          <input
-            type="text"
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
-            required
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-            placeholder="Ej: Llamar a los padres de Juan"
-          />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="relative glass-card max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+      >
+        {/* Header with dynamic gradient based on selected color */}
+        <div
+          className={`p-6 flex items-center justify-between bg-gradient-to-r ${
+            colorSeleccionado ? `${colorSeleccionado.from} ${colorSeleccionado.to}` : 'from-indigo-500 to-indigo-600'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Bell className="w-6 h-6 text-white" />
+            </div>
+            <h2 className="text-2xl font-black text-white">
+              {recordatorioExistente ? 'Editar Recordatorio' : 'Nuevo Recordatorio'}
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
-        {/* Descripción */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Descripción
-          </label>
-          <textarea
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            rows={2}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-            placeholder="Detalles adicionales..."
-          />
-        </div>
-
-        {/* Fechas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Content */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* TÃ­tulo */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Fecha *
+            <label className="block text-sm font-bold text-indigo-900 dark:text-white mb-2">
+              TÃ­tulo del Recordatorio *
             </label>
             <input
-              type="date"
-              value={fechaInicio}
-              onChange={(e) => {
-                setFechaInicio(e.target.value);
-                setFechaFin(e.target.value);
-              }}
+              type="text"
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              placeholder="Ej: ReuniÃ³n de equipo"
+              className="w-full px-4 py-3 glass-card focus:ring-2 focus:ring-purple-500 rounded-xl font-semibold text-indigo-900 dark:text-white placeholder:text-purple-400/60"
             />
           </div>
-          {!esTodoElDia && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Hora
-              </label>
-              <input
-                type="time"
-                value={horaInicio}
-                onChange={(e) => {
-                  setHoraInicio(e.target.value);
-                  setHoraFin(e.target.value);
-                }}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-          )}
-        </div>
 
-        {/* Todo el día */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="todoElDiaRecordatorio"
-            checked={esTodoElDia}
-            onChange={(e) => setEsTodoElDia(e.target.checked)}
-            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-          />
-          <label htmlFor="todoElDiaRecordatorio" className="text-sm text-gray-700 dark:text-gray-300">
-            Todo el día
-          </label>
-        </div>
-
-        {/* Color */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Color
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {COLORES_PREDEFINIDOS.map((colorPredef) => (
-              <button
-                key={colorPredef.hex}
-                type="button"
-                onClick={() => setColor(colorPredef.hex)}
-                className={`w-10 h-10 rounded-lg transition-all ${
-                  color === colorPredef.hex
-                    ? 'ring-2 ring-offset-2 ring-blue-500 scale-110'
-                    : 'hover:scale-105'
-                }`}
-                style={{ backgroundColor: colorPredef.hex }}
-                title={colorPredef.nombre}
-              />
-            ))}
+          {/* DescripciÃ³n */}
+          <div>
+            <label className="block text-sm font-bold text-indigo-900 dark:text-white mb-2">
+              DescripciÃ³n
+            </label>
+            <textarea
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+              rows={3}
+              placeholder="Agrega detalles adicionales..."
+              className="w-full px-4 py-3 glass-card focus:ring-2 focus:ring-purple-500 rounded-xl font-medium text-indigo-900 dark:text-white placeholder:text-purple-400/60"
+            />
           </div>
-        </div>
 
-        {/* Completado (solo en edición) */}
-        {recordatorioExistente && (
-          <div className="flex items-center gap-2">
+          {/* Todo el dÃ­a toggle */}
+          <div className="flex items-center gap-3 glass-card p-4 rounded-xl">
             <input
               type="checkbox"
-              id="completadoRecordatorio"
+              id="todoElDia"
+              checked={esTodoElDia}
+              onChange={(e) => setEsTodoElDia(e.target.checked)}
+              className="w-5 h-5 rounded accent-purple-600 cursor-pointer"
+            />
+            <label
+              htmlFor="todoElDia"
+              className="flex-1 text-sm font-bold text-indigo-900 dark:text-white cursor-pointer"
+            >
+              Todo el dÃ­a
+            </label>
+          </div>
+
+          {/* Fechas */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-indigo-900 dark:text-white mb-2 flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Fecha {!esTodoElDia && 'Inicio'} *
+              </label>
+              <input
+                type="date"
+                value={fechaInicio}
+                onChange={(e) => {
+                  setFechaInicio(e.target.value);
+                  if (esTodoElDia) setFechaFin(e.target.value);
+                }}
+                required
+                className="w-full px-4 py-3 glass-card focus:ring-2 focus:ring-purple-500 rounded-xl font-semibold text-indigo-900 dark:text-white"
+              />
+            </div>
+            {!esTodoElDia && (
+              <div>
+                <label className="block text-sm font-bold text-indigo-900 dark:text-white mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Hora
+                </label>
+                <input
+                  type="time"
+                  value={horaInicio}
+                  onChange={(e) => {
+                    setHoraInicio(e.target.value);
+                    setHoraFin(e.target.value);
+                  }}
+                  className="w-full px-4 py-3 glass-card focus:ring-2 focus:ring-purple-500 rounded-xl font-semibold text-indigo-900 dark:text-white"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Color Picker */}
+          <div>
+            <label className="block text-sm font-bold text-indigo-900 dark:text-white mb-3 flex items-center gap-2">
+              <Palette className="w-4 h-4" />
+              Color del Recordatorio
+            </label>
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+              {COLORES_PREDEFINIDOS.map((colorOption) => (
+                <button
+                  key={colorOption.hex}
+                  type="button"
+                  onClick={() => setColor(colorOption.hex)}
+                  className={`group relative h-12 rounded-xl transition-all duration-200 ${
+                    color === colorOption.hex
+                      ? 'ring-4 ring-purple-500 ring-offset-2 scale-110'
+                      : 'hover:scale-105'
+                  } bg-gradient-to-br ${colorOption.from} ${colorOption.to} shadow-lg`}
+                  title={colorOption.nombre}
+                >
+                  {color === colorOption.hex && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Check className="w-6 h-6 text-white drop-shadow-lg" />
+                    </div>
+                  )}
+                  <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-semibold text-indigo-900 dark:text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    {colorOption.nombre}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Completado toggle */}
+          <div className="flex items-center gap-3 glass-card p-4 rounded-xl">
+            <input
+              type="checkbox"
+              id="completado"
               checked={completado}
               onChange={(e) => setCompletado(e.target.checked)}
-              className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+              className="w-5 h-5 rounded accent-green-600 cursor-pointer"
             />
-            <label htmlFor="completadoRecordatorio" className="text-sm text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="completado"
+              className="flex-1 text-sm font-bold text-indigo-900 dark:text-white cursor-pointer flex items-center gap-2"
+            >
+              <Check className="w-4 h-4" />
               Marcar como completado
             </label>
           </div>
-        )}
 
-        {/* Botones */}
-        <div className="flex gap-3 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? 'Guardando...' : recordatorioExistente ? 'Actualizar' : 'Crear Recordatorio'}
-          </button>
-        </div>
-      </form>
-    </Modal>
+          {/* Footer - Botones */}
+          <div className="flex gap-3 justify-end pt-4 border-t-2 border-purple-100 dark:border-purple-900">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-3 glass-card rounded-xl font-bold text-indigo-900 dark:text-white hover-lift"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className={`px-6 py-3 text-white rounded-xl font-bold hover-lift shadow-lg bg-gradient-to-r ${
+                colorSeleccionado ? `${colorSeleccionado.from} ${colorSeleccionado.to}` : 'from-indigo-500 to-indigo-600'
+              }`}
+              style={{
+                boxShadow: `0 10px 25px -5px ${color}40`,
+              }}
+            >
+              {recordatorioExistente ? 'Guardar Cambios' : 'Crear Recordatorio'}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </div>
   );
 }

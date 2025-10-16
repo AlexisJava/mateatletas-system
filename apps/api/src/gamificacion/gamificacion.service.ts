@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { EstadoAsistencia } from '@prisma/client';
 
@@ -48,7 +48,7 @@ export class GamificacionService {
     });
 
     if (!estudiante) {
-      throw new Error('Estudiante no encontrado');
+      throw new NotFoundException('Estudiante no encontrado');
     }
 
     // Obtener información del nivel actual
@@ -95,7 +95,7 @@ export class GamificacionService {
         equipo: estudiante.equipo,
       },
       stats: {
-        puntosToales: estudiante.puntos_totales,
+        puntosTotales: estudiante.puntos_totales,
         clasesAsistidas: estudiante.asistencias.filter(
           (a) => a.estado === EstadoAsistencia.Presente,
         ).length,
@@ -338,7 +338,7 @@ export class GamificacionService {
     });
 
     if (!estudiante) {
-      throw new Error('Estudiante no encontrado');
+      throw new NotFoundException('Estudiante no encontrado');
     }
 
     // Ranking del equipo (solo si tiene equipo)
@@ -455,7 +455,7 @@ export class GamificacionService {
     });
 
     if (!accion || !accion.activo) {
-      throw new Error('Acción puntuable no encontrada o inactiva');
+      throw new NotFoundException('Acción puntuable no encontrada o inactiva');
     }
 
     // 2. Validar que el estudiante existe
@@ -464,7 +464,7 @@ export class GamificacionService {
     });
 
     if (!estudiante) {
-      throw new Error('Estudiante no encontrado');
+      throw new NotFoundException('Estudiante no encontrado');
     }
 
     // 3. Validar que el docente existe
@@ -473,7 +473,7 @@ export class GamificacionService {
     });
 
     if (!docente) {
-      throw new Error('Docente no encontrado');
+      throw new NotFoundException('Docente no encontrado');
     }
 
     // 4. Si se especifica clase_id, validar que existe y que el estudiante está inscrito
@@ -488,11 +488,11 @@ export class GamificacionService {
       });
 
       if (!clase) {
-        throw new Error('Clase no encontrada');
+        throw new NotFoundException('Clase no encontrada');
       }
 
       if (clase.inscripciones.length === 0) {
-        throw new Error('El estudiante no está inscrito en esta clase');
+        throw new BadRequestException('El estudiante no está inscrito en esta clase');
       }
     }
 

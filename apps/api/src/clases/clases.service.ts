@@ -247,6 +247,121 @@ export class ClasesService {
   }
 
   /**
+   * Obtener calendario de clases para un tutor (filtrado por mes/año)
+   * Para el portal de tutores - pestaña "Calendario"
+   * Muestra TODAS las clases donde sus estudiantes están inscritos
+   * @param tutorId - ID del tutor
+   * @param mes - Mes (1-12, opcional). Si no se proporciona, usa mes actual
+   * @param anio - Año (opcional). Si no se proporciona, usa año actual
+   * @returns Clases con inscripciones de los estudiantes del tutor
+   */
+  async obtenerCalendarioTutor(
+    tutorId: string,
+    mes?: number,
+    anio?: number,
+  ) {
+    // 1. Si no se proporciona mes/año, usar fecha actual
+    const ahora = new Date();
+    const mesSeleccionado = mes ?? ahora.getMonth() + 1; // getMonth() retorna 0-11
+    const anioSeleccionado = anio ?? ahora.getFullYear();
+
+    // 2. Validar mes
+    if (mesSeleccionado < 1 || mesSeleccionado > 12) {
+      throw new BadRequestException('El mes debe estar entre 1 y 12');
+    }
+
+    // 3. Calcular rango de fechas del mes
+    const fechaInicio = new Date(anioSeleccionado, mesSeleccionado - 1, 1);
+    const fechaFin = new Date(anioSeleccionado, mesSeleccionado, 0, 23, 59, 59);
+
+    // 4. Obtener estudiantes del tutor
+    const tutor = await this.prisma.tutor.findUnique({
+      where: { id: tutorId },
+      include: {
+        estudiantes: {
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!tutor) {
+      throw new NotFoundException('Tutor no encontrado');
+    }
+
+    const estudiantesIds = tutor.estudiantes.map((e) => e.id);
+
+    if (estudiantesIds.length === 0) {
+      return {
+        mes: mesSeleccionado,
+        anio: anioSeleccionado,
+        clases: [],
+        total: 0,
+      };
+    }
+
+    // 5. Buscar clases donde los estudiantes del tutor están inscritos
+    const clases = await this.prisma.clase.findMany({
+      where: {
+        fecha_hora_inicio: {
+          gte: fechaInicio,
+          lte: fechaFin,
+        },
+        inscripciones: {
+          some: {
+            estudiante_id: { in: estudiantesIds },
+          },
+        },
+      },
+      include: {
+        rutaCurricular: {
+          select: { nombre: true, color: true },
+        },
+        docente: {
+          select: { nombre: true, apellido: true },
+        },
+        producto: {
+          select: { nombre: true, tipo: true },
+        },
+        inscripciones: {
+          where: {
+            estudiante_id: { in: estudiantesIds },
+          },
+          include: {
+            estudiante: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                avatar_url: true,
+              },
+            },
+          },
+        },
+        asistencias: {
+          where: {
+            estudiante_id: { in: estudiantesIds },
+          },
+          select: {
+            id: true,
+            estudiante_id: true,
+            estado: true,
+          },
+        },
+      },
+      orderBy: {
+        fecha_hora_inicio: 'asc',
+      },
+    });
+
+    return {
+      mes: mesSeleccionado,
+      anio: anioSeleccionado,
+      clases,
+      total: clases.length,
+    };
+  }
+
+  /**
    * Listar clases de un docente
    */
   async listarClasesDeDocente(docenteId: string, incluirPasadas = false) {

@@ -92,7 +92,12 @@ export default function DashboardPage() {
 
       console.log('📊 Datos del backend:', { estudiantesRes, clasesRes, membresiaRes });
 
-      setEstudiantes(estudiantesRes?.data || []);
+      // El endpoint /estudiantes devuelve { data: [...], metadata: {...} }
+      // Axios interceptor ya extrajo response.data, entonces estudiantesRes ES {data: [...], metadata: {...}}
+      const estudiantesArray = estudiantesRes?.data || [];
+      console.log('👥 Estudiantes parseados:', estudiantesArray, 'length:', estudiantesArray.length);
+
+      setEstudiantes(estudiantesArray);
       setClases(clasesRes || []);
       setMembresia(membresiaRes?.membresia || null);
     } catch (error) {
@@ -116,6 +121,13 @@ export default function DashboardPage() {
 
   // Determinar si tiene hijos o no
   const hasChildren = estudiantes.length > 0;
+
+  console.log('🔍 Estado del dashboard:', {
+    estudiantes,
+    estudiantesLength: estudiantes.length,
+    hasChildren,
+    showingView: hasChildren ? 'DashboardView' : 'OnboardingView'
+  });
 
   // Si NO tiene hijos → Mostrar Onboarding
   if (!hasChildren) {

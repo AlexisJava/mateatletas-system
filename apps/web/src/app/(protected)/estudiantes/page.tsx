@@ -184,8 +184,16 @@ export default function EstudiantesPage() {
               setEstudianteEdit(null);
             }}
             estudiante={estudianteEdit}
-            onSuccess={() => {
-              fetchEstudiantes();
+            onSuccess={async () => {
+              const hadNoStudents = estudiantes.length === 0;
+              console.log('🎯 onSuccess triggered!', { hadNoStudents, estudianteEdit });
+              await fetchEstudiantes();
+
+              // Si era el primer estudiante, redirigir al dashboard
+              if (hadNoStudents && !estudianteEdit) {
+                console.log('✅ Redirigiendo al dashboard...');
+                setTimeout(() => router.push('/dashboard'), 500);
+              }
             }}
           />
         </div>

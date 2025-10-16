@@ -147,7 +147,7 @@ export class AsistenciaController {
     return this.asistenciaService.marcarAsistencia(
       dto.claseId,
       estudianteId,
-      { presente: dto.presente },
+      { estado: dto.presente ? 'PRESENTE' : 'AUSENTE' } as any,
       null, // No es marcado por un docente, es auto-registro
     );
   }

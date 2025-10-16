@@ -222,11 +222,13 @@ export class EventosService {
    */
   async getVistaAgenda(docenteId: string) {
     const ahora = new Date();
+    const hace7Dias = new Date();
+    hace7Dias.setDate(hace7Dias.getDate() - 7);
     const enUnMes = new Date();
     enUnMes.setDate(enUnMes.getDate() + 30);
 
     const eventos = await this.findAll(docenteId, {
-      fechaInicio: ahora,
+      fechaInicio: hace7Dias,
       fechaFin: enUnMes,
     });
 

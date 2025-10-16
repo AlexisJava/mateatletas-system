@@ -7,6 +7,7 @@ import {
   IsDateString,
   IsInt,
   Min,
+  IsPositive,
   ValidateIf,
   IsBoolean,
 } from 'class-validator';
@@ -26,7 +27,7 @@ export class CrearProductoDto {
   descripcion?: string;
 
   @IsNumber({}, { message: 'El precio debe ser un número' })
-  @Min(0, { message: 'El precio debe ser mayor o igual a 0' })
+  @IsPositive({ message: 'El precio debe ser mayor a 0' })
   @IsNotEmpty({ message: 'El precio es requerido' })
   precio!: number;
 
@@ -81,11 +82,20 @@ export class CrearProductoDto {
   @IsOptional()
   cupoMaximo?: number; // Alias camelCase
 
-  // --- Campos específicos para tipo Suscripcion ---
+  // --- Campos específicos para tipo Suscripcion Y Curso ---
+  // Los cursos PUEDEN tener duración en meses (ej: "Exploradores Matemáticos de 9 meses")
+  // O pueden tener fechas específicas (fecha_inicio + fecha_fin)
 
-  @ValidateIf((o) => o.tipo === 'Suscripcion')
+  @ValidateIf((o) => o.tipo === 'Suscripcion' || o.tipo === 'Curso')
   @IsInt({ message: 'La duración debe ser un número entero de meses' })
   @Min(1, { message: 'La duración debe ser al menos 1 mes' })
   @IsOptional()
   duracion_meses?: number;
+
+  // Alias camelCase para duracion_meses
+  @ValidateIf((o) => o.tipo === 'Suscripcion' || o.tipo === 'Curso')
+  @IsInt({ message: 'La duración debe ser un número entero de meses' })
+  @Min(1, { message: 'La duración debe ser al menos 1 mes' })
+  @IsOptional()
+  duracionMeses?: number;
 }
