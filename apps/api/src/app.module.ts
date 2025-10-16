@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppConfigModule } from './core/config/config.module';
 import { DatabaseModule } from './core/database/database.module';
+import { LoggerModule } from './common/logger/logger.module';
 import { AuthModule } from './auth/auth.module';
 import { EstudiantesModule } from './estudiantes/estudiantes.module';
 import { EquiposModule } from './equipos/equipos.module';
@@ -17,7 +18,8 @@ import { CursosModule } from './cursos/cursos.module';
 import { NotificacionesModule } from './notificaciones/notificaciones.module';
 import { EventosModule } from './eventos/eventos.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { APP_GUARD } from '@nestjs/core';
     ]),
     AppConfigModule,
     DatabaseModule,
+    LoggerModule, // Logging estructurado global
     AuthModule,
     EstudiantesModule,
     EquiposModule,
@@ -52,6 +55,11 @@ import { APP_GUARD } from '@nestjs/core';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    // Aplicar logging interceptor globalmente
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
     },
   ],
 })
