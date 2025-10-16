@@ -10,28 +10,47 @@ import {
   Query,
 } from '@nestjs/common';
 import { EventosService } from './eventos.service';
-import { CreateEventoDto } from './dto/create-evento.dto';
-import { UpdateEventoDto } from './dto/update-evento.dto';
+import {
+  CreateTareaDto,
+  CreateRecordatorioDto,
+  CreateNotaDto,
+} from './dto/create-evento.dto';
+import {
+  UpdateTareaDto,
+  UpdateRecordatorioDto,
+  UpdateNotaDto,
+} from './dto/update-evento.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { GetUser } from '../auth/decorators/get-user.decorator';
+import { TipoEvento } from '@prisma/client';
 
 /**
- * Controlador de Eventos
+ * Controlador de Eventos - Sistema de Calendario Completo
  *
- * Endpoints para gestionar el calendario del docente
+ * Endpoints organizados por tipo de evento:
  *
- * Rutas:
- * - GET    /eventos                 - Lista de eventos con filtros opcionales
- * - GET    /eventos/mes/:year/:month - Eventos del mes
- * - GET    /eventos/semana          - Eventos de la semana
- * - GET    /eventos/dia             - Eventos del día
- * - GET    /eventos/estadisticas    - Estadísticas de eventos
- * - GET    /eventos/:id             - Detalle de evento
- * - POST   /eventos                 - Crear evento
- * - PATCH  /eventos/:id             - Actualizar evento
- * - DELETE /eventos/:id             - Eliminar evento
+ * **TAREAS:**
+ * - POST   /eventos/tareas           - Crear tarea
+ * - PATCH  /eventos/tareas/:id       - Actualizar tarea
+ *
+ * **RECORDATORIOS:**
+ * - POST   /eventos/recordatorios    - Crear recordatorio
+ * - PATCH  /eventos/recordatorios/:id - Actualizar recordatorio
+ *
+ * **NOTAS:**
+ * - POST   /eventos/notas            - Crear nota
+ * - PATCH  /eventos/notas/:id        - Actualizar nota
+ *
+ * **GENERAL:**
+ * - GET    /eventos                  - Lista de todos los eventos con filtros
+ * - GET    /eventos/vista-agenda     - Vista Agenda (agrupada por días)
+ * - GET    /eventos/vista-semana     - Vista Semana (grid semanal)
+ * - GET    /eventos/estadisticas     - Estadísticas del calendario
+ * - GET    /eventos/:id              - Detalle de evento
+ * - PATCH  /eventos/:id/fechas       - Actualizar fechas (Drag & Drop)
+ * - DELETE /eventos/:id              - Eliminar evento
  *
  * Todos los endpoints requieren:
  * - Autenticación JWT
@@ -43,93 +62,116 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
 export class EventosController {
   constructor(private readonly eventosService: EventosService) {}
 
+  // ==================== CREAR EVENTOS ====================
+
   /**
-   * Crear un nuevo evento
+   * Crear una Tarea completa
    *
-   * POST /eventos
-   * Body: CreateEventoDto
+   * POST /eventos/tareas
+   * Body: CreateTareaDto
    */
-  @Post()
-  async create(
+  @Post('tareas')
+  async createTarea(
     @GetUser('id') docenteId: string,
-    @Body() createEventoDto: CreateEventoDto,
+    @Body() createTareaDto: CreateTareaDto,
   ) {
-    return this.eventosService.create(docenteId, createEventoDto);
+    return this.eventosService.createTarea(docenteId, createTareaDto);
   }
 
   /**
-   * Obtener todos los eventos del docente
-   * Con filtros opcionales por rango de fechas
+   * Crear un Recordatorio
+   *
+   * POST /eventos/recordatorios
+   * Body: CreateRecordatorioDto
+   */
+  @Post('recordatorios')
+  async createRecordatorio(
+    @GetUser('id') docenteId: string,
+    @Body() createRecordatorioDto: CreateRecordatorioDto,
+  ) {
+    return this.eventosService.createRecordatorio(
+      docenteId,
+      createRecordatorioDto,
+    );
+  }
+
+  /**
+   * Crear una Nota
+   *
+   * POST /eventos/notas
+   * Body: CreateNotaDto
+   */
+  @Post('notas')
+  async createNota(
+    @GetUser('id') docenteId: string,
+    @Body() createNotaDto: CreateNotaDto,
+  ) {
+    return this.eventosService.createNota(docenteId, createNotaDto);
+  }
+
+  // ==================== LEER EVENTOS ====================
+
+  /**
+   * Obtener todos los eventos del docente con filtros
    *
    * GET /eventos
    * Query params opcionales:
    * - fechaInicio: ISO date string
    * - fechaFin: ISO date string
+   * - tipo: CLASE | TAREA | RECORDATORIO | NOTA
+   * - busqueda: texto a buscar en título y descripción
    */
   @Get()
   async findAll(
     @GetUser('id') docenteId: string,
     @Query('fechaInicio') fechaInicio?: string,
     @Query('fechaFin') fechaFin?: string,
+    @Query('tipo') tipo?: TipoEvento,
+    @Query('busqueda') busqueda?: string,
   ) {
-    const inicio = fechaInicio ? new Date(fechaInicio) : undefined;
-    const fin = fechaFin ? new Date(fechaFin) : undefined;
+    const options: any = {};
 
-    return this.eventosService.findAll(docenteId, inicio, fin);
+    if (fechaInicio) options.fechaInicio = new Date(fechaInicio);
+    if (fechaFin) options.fechaFin = new Date(fechaFin);
+    if (tipo) options.tipo = tipo;
+    if (busqueda) options.busqueda = busqueda;
+
+    return this.eventosService.findAll(docenteId, options);
   }
 
   /**
-   * Obtener eventos del mes
+   * Obtener Vista Agenda (agrupada por días)
    *
-   * GET /eventos/mes/:year/:month
-   * Params:
-   * - year: número (ej: 2025)
-   * - month: número 1-12 (ej: 1 = enero)
+   * GET /eventos/vista-agenda
+   *
+   * Retorna eventos agrupados:
+   * {
+   *   hoy: [],
+   *   manana: [],
+   *   proximos7Dias: [],
+   *   masAdelante: []
+   * }
    */
-  @Get('mes/:year/:month')
-  async findEventosDelMes(
-    @GetUser('id') docenteId: string,
-    @Param('year') year: string,
-    @Param('month') month: string,
-  ) {
-    const yearNum = parseInt(year, 10);
-    const monthNum = parseInt(month, 10);
-
-    return this.eventosService.findEventosDelMes(docenteId, yearNum, monthNum);
+  @Get('vista-agenda')
+  async getVistaAgenda(@GetUser('id') docenteId: string) {
+    return this.eventosService.getVistaAgenda(docenteId);
   }
 
   /**
-   * Obtener eventos de la semana
+   * Obtener Vista Semana (grid semanal)
    *
-   * GET /eventos/semana
+   * GET /eventos/vista-semana
    * Query params:
    * - fecha: ISO date string (cualquier día de la semana deseada)
    * Si no se provee, usa la semana actual
    */
-  @Get('semana')
-  async findEventosDeLaSemana(
+  @Get('vista-semana')
+  async getVistaSemana(
     @GetUser('id') docenteId: string,
     @Query('fecha') fecha?: string,
   ) {
     const fechaBase = fecha ? new Date(fecha) : new Date();
-    return this.eventosService.findEventosDeLaSemana(docenteId, fechaBase);
-  }
-
-  /**
-   * Obtener eventos del día
-   *
-   * GET /eventos/dia
-   * Query params:
-   * - fecha: ISO date string
-   * Si no se provee, usa el día actual
-   */
-  @Get('dia')
-  async findEventosDelDia(
-    @GetUser('id') docenteId: string,
-    @Query('fecha') fecha?: string,
-  ) {
-    const fechaBase = fecha ? new Date(fecha) : new Date();
-    return this.eventosService.findEventosDelDia(docenteId, fechaBase);
+    return this.eventosService.getVistaSemana(docenteId, fechaBase);
   }
 
   /**
@@ -155,20 +197,78 @@ export class EventosController {
     return this.eventosService.findOne(id, docenteId);
   }
 
+  // ==================== ACTUALIZAR EVENTOS ====================
+
   /**
-   * Actualizar un evento
+   * Actualizar una Tarea
    *
-   * PATCH /eventos/:id
-   * Body: UpdateEventoDto
+   * PATCH /eventos/tareas/:id
+   * Body: UpdateTareaDto
    */
-  @Patch(':id')
-  async update(
+  @Patch('tareas/:id')
+  async updateTarea(
     @Param('id') id: string,
     @GetUser('id') docenteId: string,
-    @Body() updateEventoDto: UpdateEventoDto,
+    @Body() updateTareaDto: UpdateTareaDto,
   ) {
-    return this.eventosService.update(id, docenteId, updateEventoDto);
+    return this.eventosService.updateTarea(id, docenteId, updateTareaDto);
   }
+
+  /**
+   * Actualizar un Recordatorio
+   *
+   * PATCH /eventos/recordatorios/:id
+   * Body: UpdateRecordatorioDto
+   */
+  @Patch('recordatorios/:id')
+  async updateRecordatorio(
+    @Param('id') id: string,
+    @GetUser('id') docenteId: string,
+    @Body() updateRecordatorioDto: UpdateRecordatorioDto,
+  ) {
+    return this.eventosService.updateRecordatorio(
+      id,
+      docenteId,
+      updateRecordatorioDto,
+    );
+  }
+
+  /**
+   * Actualizar una Nota
+   *
+   * PATCH /eventos/notas/:id
+   * Body: UpdateNotaDto
+   */
+  @Patch('notas/:id')
+  async updateNota(
+    @Param('id') id: string,
+    @GetUser('id') docenteId: string,
+    @Body() updateNotaDto: UpdateNotaDto,
+  ) {
+    return this.eventosService.updateNota(id, docenteId, updateNotaDto);
+  }
+
+  /**
+   * Actualizar fechas de un evento (para Drag & Drop)
+   *
+   * PATCH /eventos/:id/fechas
+   * Body: { fecha_inicio: string, fecha_fin: string }
+   */
+  @Patch(':id/fechas')
+  async updateFechas(
+    @Param('id') id: string,
+    @GetUser('id') docenteId: string,
+    @Body() body: { fecha_inicio: string; fecha_fin: string },
+  ) {
+    return this.eventosService.updateFechas(
+      id,
+      docenteId,
+      new Date(body.fecha_inicio),
+      new Date(body.fecha_fin),
+    );
+  }
+
+  // ==================== ELIMINAR EVENTOS ====================
 
   /**
    * Eliminar un evento

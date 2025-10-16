@@ -537,6 +537,9 @@ model Clase {
   /// Relación con puntos obtenidos en esta clase
   puntosObtenidos PuntoObtenido[]
 
+  /// Relación con eventos (para reprogramaciones/recuperaciones)
+  eventos Evento[]
+
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
 
@@ -1195,8 +1198,8 @@ enum TipoNotificacion {
   @@map("tipo_notificacion")
 }
 
-/// Eventos y recordatorios personalizados para docentes
-/// Permite a los docentes crear eventos en su calendario
+/// Eventos del calendario del docente
+/// Modelo base polimórfico: puede ser Clase, Tarea, Recordatorio o Nota
 model Evento {
   /// Identificador único del evento
   id String @id @default(cuid())
@@ -1207,26 +1210,17 @@ model Evento {
   /// Descripción detallada del evento
   descripcion String? @db.Text
 
+  /// Tipo de evento (CLASE, TAREA, RECORDATORIO, NOTA)
+  tipo TipoEvento
+
   /// Fecha y hora de inicio del evento
   fecha_inicio DateTime
 
-  /// Fecha y hora de fin del evento (opcional para eventos puntuales)
-  fecha_fin DateTime?
+  /// Fecha y hora de fin del evento
+  fecha_fin DateTime
 
   /// Indica si el evento dura todo el día
-  todo_el_dia Boolean @default(false)
-
-  /// Tipo de evento
-  tipo TipoEvento
-
-  /// Color personalizado para el evento en el calendario (formato hex)
-  color String? @default("#6366F1")
-
-  /// Indica si debe crear un recordatorio
-  recordatorio Boolean @default(false)
-
-  /// Minutos antes del evento para mostrar el recordatorio
-  minutos_antes Int? @default(30)
+  es_todo_el_dia Boolean @default(false)
 
   /// ID del docente al que pertenece el evento
   docente_id String
@@ -1234,28 +1228,178 @@ model Evento {
   /// Relación con el docente
   docente Docente @relation(fields: [docente_id], references: [id], onDelete: Cascade)
 
+  /// ID de la clase relacionada (para reprogramación/recuperación)
+  clase_id String?
+
+  /// Relación con la clase del sistema
+  clase Clase? @relation(fields: [clase_id], references: [id], onDelete: SetNull)
+
   /// Timestamp de creación del evento
   createdAt DateTime @default(now())
 
   /// Timestamp de última actualización del evento
   updatedAt DateTime @updatedAt
 
+  /// Relaciones polimórficas con tipos específicos
+  tarea Tarea?
+  recordatorio Recordatorio?
+  nota Nota?
+
   /// Mapeo al nombre de tabla en la base de datos
   @@map("eventos")
 
-  /// Índice para búsquedas por docente y fecha
+  /// Índices para optimización de consultas
   @@index([docente_id, fecha_inicio])
+  @@index([tipo])
+  @@index([docente_id, tipo])
+  @@index([clase_id])
 }
 
-/// Tipos de eventos disponibles
+/// Tipos de eventos disponibles en el calendario
 enum TipoEvento {
-  Recordatorio    // Recordatorio personal
-  Reunion         // Reunión con padres, colegas, etc.
-  TareaPendiente  // Tarea administrativa pendiente
-  Cumpleaños      // Cumpleaños de estudiante
-  Otro            // Otro tipo de evento
+  CLASE           // Clase del sistema (para reprogramación/recuperación)
+  TAREA           // Tarea administrativa/pedagógica
+  RECORDATORIO    // Recordatorio simple
+  NOTA            // Nota/apunte de texto largo
 
   @@map("tipo_evento")
+}
+
+/// Estados de una tarea
+enum EstadoTarea {
+  PENDIENTE       // Tarea pendiente de iniciar
+  EN_PROGRESO     // Tarea en proceso
+  COMPLETADA      // Tarea finalizada
+  CANCELADA       // Tarea cancelada
+
+  @@map("estado_tarea")
+}
+
+/// Niveles de prioridad para tareas
+enum PrioridadTarea {
+  BAJA            // Prioridad baja
+  MEDIA           // Prioridad media
+  ALTA            // Prioridad alta
+  URGENTE         // Prioridad urgente
+
+  @@map("prioridad_tarea")
+}
+
+/// Tarea administrativa/pedagógica del docente
+/// Extensión del modelo Evento para tareas con funcionalidad completa
+model Tarea {
+  /// Identificador único de la tarea
+  id String @id @default(cuid())
+
+  /// ID del evento base asociado
+  evento_id String @unique
+
+  /// Relación con el evento base
+  evento Evento @relation(fields: [evento_id], references: [id], onDelete: Cascade)
+
+  /// Estado actual de la tarea
+  estado EstadoTarea @default(PENDIENTE)
+
+  /// Nivel de prioridad de la tarea
+  prioridad PrioridadTarea @default(MEDIA)
+
+  /// Porcentaje de completitud (0-100)
+  porcentaje_completado Int @default(0)
+
+  /// Categoría personalizada de la tarea (ej: "Planificación", "Evaluación")
+  categoria String?
+
+  /// Etiquetas para organización (array de strings)
+  etiquetas String[]
+
+  /// Subtareas en formato JSON
+  /// Estructura: [{id: string, titulo: string, completada: boolean, orden: number}]
+  subtareas Json @default("[]")
+
+  /// Archivos adjuntos en formato JSON
+  /// Estructura: [{id: string, nombre: string, url: string, tipo: string, tamaño: number}]
+  archivos Json @default("[]")
+
+  /// ID de clase relacionada (opcional)
+  clase_relacionada_id String?
+
+  /// ID de estudiante relacionado (opcional)
+  estudiante_relacionado_id String?
+
+  /// Tiempo estimado para completar en minutos
+  tiempo_estimado_minutos Int?
+
+  /// Tiempo real invertido en minutos
+  tiempo_real_minutos Int?
+
+  /// Configuración de recurrencia en formato JSON
+  /// Estructura: {tipo: 'DIARIA'|'SEMANAL'|'MENSUAL', intervalo: number, dias_semana: number[], fecha_fin: string, excepciones: string[]}
+  recurrencia Json?
+
+  /// Recordatorios configurados en formato JSON
+  /// Estructura: [{minutos_antes: number, enviado: boolean}]
+  recordatorios Json @default("[]")
+
+  /// Fecha de completitud
+  completedAt DateTime?
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("tareas")
+
+  /// Índices para optimización
+  @@index([estado])
+  @@index([prioridad])
+  @@index([categoria])
+}
+
+/// Recordatorio simple para el docente
+/// Extensión del modelo Evento para recordatorios básicos
+model Recordatorio {
+  /// Identificador único del recordatorio
+  id String @id @default(cuid())
+
+  /// ID del evento base asociado
+  evento_id String @unique
+
+  /// Relación con el evento base
+  evento Evento @relation(fields: [evento_id], references: [id], onDelete: Cascade)
+
+  /// Indica si el recordatorio fue completado/marcado
+  completado Boolean @default(false)
+
+  /// Color personalizado del recordatorio (formato hex)
+  color String @default("#6366f1")
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("recordatorios")
+}
+
+/// Nota de texto largo para el docente
+/// Extensión del modelo Evento para notas/apuntes
+model Nota {
+  /// Identificador único de la nota
+  id String @id @default(cuid())
+
+  /// ID del evento base asociado
+  evento_id String @unique
+
+  /// Relación con el evento base
+  evento Evento @relation(fields: [evento_id], references: [id], onDelete: Cascade)
+
+  /// Contenido de la nota (texto largo)
+  contenido String @db.Text
+
+  /// Categoría de la nota (opcional)
+  categoria String?
+
+  /// Color personalizado de la nota (formato hex)
+  color String @default("#8b5cf6")
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("notas")
+
+  /// Índice para búsquedas por categoría
+  @@index([categoria])
 }
 
 /// Configuración de niveles del sistema de gamificación
@@ -1292,4 +1436,3 @@ model NivelConfig {
   /// Mapeo al nombre de tabla en la base de datos
   @@map("niveles_config")
 }
-

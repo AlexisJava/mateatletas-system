@@ -1,30 +1,28 @@
 import { Module } from '@nestjs/common';
 import { EventosService } from './eventos.service';
 import { EventosController } from './eventos.controller';
-import { DatabaseModule } from '../core/database/database.module';
+import { PrismaService } from '../core/database/prisma.service';
 
 /**
- * Módulo de Eventos
+ * Módulo de Eventos - Sistema de Calendario Completo
  *
- * Gestiona el sistema de calendario del docente
+ * Gestiona el sistema de calendario del docente con tipos de eventos:
+ * - CLASE: Referencias a clases para reprogramación
+ * - TAREA: Sistema robusto de tareas con subtareas, archivos, recurrencia
+ * - RECORDATORIO: Recordatorios simples
+ * - NOTA: Notas de texto largo
  *
  * Características:
- * - Crear, leer, actualizar y eliminar eventos
- * - Filtrado por fechas (día, semana, mes)
- * - Recordatorios configurables
- * - Tipos de eventos (Recordatorio, Reunión, Tarea, Cumpleaños, Otro)
- * - Colores personalizables
- * - Eventos de todo el día
- *
- * Integración:
- * - Frontend: react-big-calendar
- * - Notificaciones: EventosService se puede usar en NotificacionesService
- *   para enviar recordatorios automáticos
+ * - CRUD completo para cada tipo de evento
+ * - Vista Agenda (agrupada por días)
+ * - Vista Semana (grid semanal)
+ * - Filtrado avanzado y búsqueda
+ * - Drag & Drop support
+ * - Estadísticas
  */
 @Module({
-  imports: [DatabaseModule],
   controllers: [EventosController],
-  providers: [EventosService],
+  providers: [EventosService, PrismaService],
   exports: [EventosService],
 })
 export class EventosModule {}
