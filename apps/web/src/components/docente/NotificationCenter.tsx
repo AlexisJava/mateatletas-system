@@ -1,154 +1,63 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Bell, Check, CheckCheck, X, Calendar, AlertCircle, Award, Info } from 'lucide-react';
-
-interface Notificacion {
-  id: string;
-  tipo: 'ClaseProxima' | 'AsistenciaPendiente' | 'EstudianteAlerta' | 'ClaseCancelada' | 'LogroEstudiante' | 'Recordatorio' | 'General';
-  titulo: string;
-  mensaje: string;
-  leida: boolean;
-  createdAt: string;
-  metadata?: Record<string, unknown>;
-}
-
-const tipoIcons = {
-  ClaseProxima: Calendar,
-  AsistenciaPendiente: AlertCircle,
-  EstudianteAlerta: AlertCircle,
-  ClaseCancelada: X,
-  LogroEstudiante: Award,
-  Recordatorio: Bell,
-  General: Info,
-};
-
-const tipoColors = {
-  ClaseProxima: 'text-blue-500 bg-blue-100 dark:bg-blue-900/30',
-  AsistenciaPendiente: 'text-orange-500 bg-orange-100 dark:bg-orange-900/30',
-  EstudianteAlerta: 'text-red-500 bg-red-100 dark:bg-red-900/30',
-  ClaseCancelada: 'text-gray-500 bg-gray-100 dark:bg-gray-900/30',
-  LogroEstudiante: 'text-green-500 bg-green-100 dark:bg-green-900/30',
-  Recordatorio: 'text-purple-500 bg-purple-100 dark:bg-purple-900/30',
-  General: 'text-blue-500 bg-blue-100 dark:bg-blue-900/30',
-};
+import { Bell, Check, CheckCheck, X } from 'lucide-react';
+import { useNotificacionesStore } from '@/store/notificaciones.store';
+import {
+  getNotificacionIcon,
+  getNotificacionColor,
+  formatearTiempoRelativo,
+} from '@/lib/api/notificaciones.api';
 
 export default function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
-  const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(false);
 
+  const {
+    notificaciones,
+    countNoLeidas,
+    isLoading,
+    error,
+    fetchNotificaciones,
+    fetchCount,
+    marcarComoLeida,
+    marcarTodasLeidas,
+    eliminar,
+    resetError,
+  } = useNotificacionesStore();
+
+  // Fetch inicial y polling cada 30 segundos
   useEffect(() => {
-    fetchNotifications();
-    fetchUnreadCount();
-  }, []);
+    fetchNotificaciones();
+    fetchCount();
 
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/notificaciones', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+    // Polling para mantener contador actualizado
+    const interval = setInterval(() => {
+      fetchCount();
+    }, 30000); // 30 segundos
 
-      if (response.ok) {
-        const data = await response.json();
-        setNotificaciones(data);
-      }
-    } catch (error: unknown) {
-      console.error('Error fetching notifications:', error);
-    } finally {
-      setLoading(false);
+    return () => clearInterval(interval);
+  }, [fetchNotificaciones, fetchCount]);
+
+  // Cerrar error después de 5 segundos
+  useEffect(() => {
+    if (error) {
+      const timeout = setTimeout(() => {
+        resetError();
+      }, 5000);
+      return () => clearTimeout(timeout);
     }
+  }, [error, resetError]);
+
+  const handleMarcarComoLeida = async (id: string) => {
+    await marcarComoLeida(id);
   };
 
-  const fetchUnreadCount = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/notificaciones/count', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUnreadCount(data.count);
-      }
-    } catch (error: unknown) {
-      console.error('Error fetching unread count:', error);
-    }
+  const handleMarcarTodasLeidas = async () => {
+    await marcarTodasLeidas();
   };
 
-  const markAsRead = async (id: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3001/api/notificaciones/${id}/leer`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      // Actualizar localmente
-      setNotificaciones(notificaciones.map(n =>
-        n.id === id ? { ...n, leida: true } : n
-      ));
-      setUnreadCount(Math.max(0, unreadCount - 1));
-    } catch (error: unknown) {
-      console.error('Error marking notification as read:', error);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      await fetch('http://localhost:3001/api/notificaciones/leer-todas', {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      // Actualizar localmente
-      setNotificaciones(notificaciones.map(n => ({ ...n, leida: true })));
-      setUnreadCount(0);
-    } catch (error: unknown) {
-      console.error('Error marking all as read:', error);
-    }
-  };
-
-  const deleteNotification = async (id: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3001/api/notificaciones/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      // Actualizar localmente
-      const notif = notificaciones.find(n => n.id === id);
-      setNotificaciones(notificaciones.filter(n => n.id !== id));
-      if (notif && !notif.leida) {
-        setUnreadCount(Math.max(0, unreadCount - 1));
-      }
-    } catch (error: unknown) {
-      console.error('Error deleting notification:', error);
-    }
-  };
-
-  const getTimeAgo = (date: string) => {
-    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
-
-    if (seconds < 60) return 'Ahora';
-    if (seconds < 3600) return `Hace ${Math.floor(seconds / 60)}m`;
-    if (seconds < 86400) return `Hace ${Math.floor(seconds / 3600)}h`;
-    return `Hace ${Math.floor(seconds / 86400)}d`;
+  const handleEliminar = async (id: string) => {
+    await eliminar(id);
   };
 
   return (
@@ -160,16 +69,16 @@ export default function NotificationCenter() {
                    bg-[var(--docente-bg-card)] border border-[var(--docente-border)]
                    hover:bg-[var(--docente-bg-hover)] transition-smooth
                    shadow-md hover:shadow-lg"
-        aria-label="Notifications"
+        aria-label="Notificaciones"
       >
         <Bell className="w-5 h-5 text-[var(--docente-text)]" />
 
         {/* Unread Badge */}
-        {unreadCount > 0 && (
+        {countNoLeidas > 0 && (
           <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs
                          rounded-full flex items-center justify-center font-bold
                          animate-pulse">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {countNoLeidas > 9 ? '9+' : countNoLeidas}
           </span>
         )}
       </button>
@@ -192,9 +101,9 @@ export default function NotificationCenter() {
                   <h3 className="text-lg font-semibold text-[var(--docente-text)]">
                     Notificaciones
                   </h3>
-                  {unreadCount > 0 && (
+                  {countNoLeidas > 0 && (
                     <button
-                      onClick={markAllAsRead}
+                      onClick={handleMarcarTodasLeidas}
                       className="text-sm text-blue-500 hover:text-blue-600 flex items-center gap-1
                                transition-smooth font-medium"
                     >
@@ -205,22 +114,31 @@ export default function NotificationCenter() {
                 </div>
               </div>
 
+              {/* Error Message */}
+              {error && (
+                <div className="p-3 bg-red-50 border-b border-red-200">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+
               {/* Notifications List */}
               <div className="max-h-96 overflow-y-auto">
-                {loading ? (
+                {isLoading ? (
                   <div className="p-8 text-center text-[var(--docente-text-muted)]">
-                    Cargando...
+                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <p>Cargando notificaciones...</p>
                   </div>
                 ) : notificaciones.length === 0 ? (
                   <div className="p-8 text-center text-[var(--docente-text-muted)]">
                     <Bell className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>No hay notificaciones</p>
+                    <p className="font-medium">No hay notificaciones</p>
+                    <p className="text-sm mt-1">Te avisaremos cuando haya novedades</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-[var(--docente-border)]">
                     {notificaciones.map((notif) => {
-                      const IconComponent = tipoIcons[notif.tipo];
-                      const colorClass = tipoColors[notif.tipo];
+                      const icon = getNotificacionIcon(notif.tipo);
+                      const colorClass = getNotificacionColor(notif.tipo);
 
                       return (
                         <div
@@ -230,8 +148,8 @@ export default function NotificationCenter() {
                         >
                           <div className="flex gap-3">
                             {/* Icon */}
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${colorClass}`}>
-                              <IconComponent className="w-5 h-5" />
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${colorClass}`}>
+                              <span className="text-xl">{icon}</span>
                             </div>
 
                             {/* Content */}
@@ -249,23 +167,23 @@ export default function NotificationCenter() {
                               </p>
                               <div className="flex items-center justify-between mt-2">
                                 <span className="text-xs text-[var(--docente-text-muted)]">
-                                  {getTimeAgo(notif.createdAt)}
+                                  {formatearTiempoRelativo(notif.createdAt)}
                                 </span>
                                 <div className="flex items-center gap-2">
                                   {!notif.leida && (
                                     <button
-                                      onClick={() => markAsRead(notif.id)}
+                                      onClick={() => handleMarcarComoLeida(notif.id)}
                                       className="text-xs text-blue-500 hover:text-blue-600
-                                               transition-smooth"
+                                               transition-smooth p-1 hover:bg-blue-50 rounded"
                                       title="Marcar como leída"
                                     >
                                       <Check className="w-4 h-4" />
                                     </button>
                                   )}
                                   <button
-                                    onClick={() => deleteNotification(notif.id)}
+                                    onClick={() => handleEliminar(notif.id)}
                                     className="text-xs text-red-500 hover:text-red-600
-                                             transition-smooth"
+                                             transition-smooth p-1 hover:bg-red-50 rounded"
                                     title="Eliminar"
                                   >
                                     <X className="w-4 h-4" />
@@ -280,6 +198,15 @@ export default function NotificationCenter() {
                   </div>
                 )}
               </div>
+
+              {/* Footer */}
+              {notificaciones.length > 0 && (
+                <div className="p-3 border-t border-[var(--docente-border)] bg-gray-50 dark:bg-gray-900/20">
+                  <p className="text-xs text-center text-[var(--docente-text-muted)]">
+                    {notificaciones.length} notificación{notificaciones.length !== 1 ? 'es' : ''} total{notificaciones.length !== 1 ? 'es' : ''}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </>
