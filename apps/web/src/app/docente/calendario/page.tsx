@@ -9,6 +9,7 @@ import { es } from 'date-fns/locale';
 import type { Evento } from '@/types/calendario.types';
 import { getColorPorTipo, getIconoPorTipo, formatearHora } from '@/lib/api/calendario.api';
 import { TipoEvento, EstadoTarea, PrioridadTarea } from '@/types/calendario.types';
+import { ModalTarea, ModalRecordatorio, ModalNota } from '@/components/calendario';
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -33,12 +34,16 @@ export default function DocenteCalendarioPage() {
     estadisticas,
     isLoading,
     error,
+    modalAbierto,
+    tipoModalCreacion,
+    eventoSeleccionado,
     cargarVistaAgenda,
     cargarVistaSemana,
     cargarEstadisticas,
     setVistaActiva,
     abrirModalCreacion,
     setEventoSeleccionado,
+    cerrarModal,
   } = useCalendarioStore();
 
   useEffect(() => {
@@ -172,6 +177,23 @@ export default function DocenteCalendarioPage() {
           )}
         </AnimatePresence>
       </motion.div>
+
+      {/* Modals de Creación/Edición */}
+      <ModalTarea
+        isOpen={modalAbierto && tipoModalCreacion === TipoEvento.TAREA}
+        onClose={cerrarModal}
+        tareaExistente={eventoSeleccionado?.tipo === TipoEvento.TAREA ? eventoSeleccionado : undefined}
+      />
+      <ModalRecordatorio
+        isOpen={modalAbierto && tipoModalCreacion === TipoEvento.RECORDATORIO}
+        onClose={cerrarModal}
+        recordatorioExistente={eventoSeleccionado?.tipo === TipoEvento.RECORDATORIO ? eventoSeleccionado : undefined}
+      />
+      <ModalNota
+        isOpen={modalAbierto && tipoModalCreacion === TipoEvento.NOTA}
+        onClose={cerrarModal}
+        notaExistente={eventoSeleccionado?.tipo === TipoEvento.NOTA ? eventoSeleccionado : undefined}
+      />
     </div>
   );
 }
