@@ -1,25 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getMisClasesDocente } from '@/lib/api/clases.api';
-import { Clase } from '@/types/clases.types';
+import { useCalendarioStore } from '@/store/calendario.store';
 import { LoadingSpinner } from '@/components/effects';
-import {
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  addDays,
-  addMonths,
-  subMonths,
-  format,
-  isSameMonth,
-  isSameDay,
-  isToday,
-  parseISO,
-} from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import type { Evento } from '@/types/calendario.types';
+import { getColorPorTipo, getIconoPorTipo, formatearHora } from '@/lib/api/calendario.api';
+import { TipoEvento, EstadoTarea, PrioridadTarea } from '@/types/calendario.types';
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -27,63 +16,38 @@ const fadeIn = {
   transition: { duration: 0.3, ease: 'easeOut' },
 };
 
+/**
+ * Página de Calendario del Docente
+ *
+ * Sistema completo de calendario con:
+ * - Vista Agenda (principal): agrupación inteligente por días
+ * - Vista Semana: grid semanal con timeline
+ * - Gestión de Tareas, Recordatorios y Notas
+ * - Integración con Clases del sistema
+ */
 export default function DocenteCalendarioPage() {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [clases, setClases] = useState<Clase[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
-  const [vistaActual, setVistaActual] = useState<'calendario' | 'lista'>('calendario');
+  const {
+    vistaActiva,
+    vistaAgenda,
+    vistaSemana,
+    estadisticas,
+    isLoading,
+    error,
+    cargarVistaAgenda,
+    cargarVistaSemana,
+    cargarEstadisticas,
+    setVistaActiva,
+    abrirModalCreacion,
+    setEventoSeleccionado,
+  } = useCalendarioStore();
 
-  // Fetch clases del docente
   useEffect(() => {
-    const fetchClases = async () => {
-      try {
-        setIsLoading(true);
-        const data = await getMisClasesDocente(true); // Incluir pasadas para calendario completo
-        setClases(data);
-      } catch (error) {
-        console.error('Error al cargar clases:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchClases();
+    // Cargar vista inicial y estadísticas
+    cargarVistaAgenda();
+    cargarEstadisticas();
   }, []);
 
-  // Obtener clases de un día específico
-  const getClasesDelDia = (dia: Date): Clase[] => {
-    if (!clases) return [];
-    return clases.filter((clase) => {
-      const fechaClase = parseISO(clase.fecha_hora_inicio);
-      return isSameDay(fechaClase, dia);
-    });
-  };
-
-  // Generar días del calendario (grid 7x6)
-  const generarDiasCalendario = () => {
-    const startDate = startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 1 }); // Lunes
-    const endDate = endOfWeek(endOfMonth(currentMonth), { weekStartsOn: 1 });
-
-    const dias: Date[] = [];
-    let dia = startDate;
-
-    while (dia <= endDate) {
-      dias.push(dia);
-      dia = addDays(dia, 1);
-    }
-
-    return dias;
-  };
-
-  const dias = generarDiasCalendario();
-
-  // Navegar mes
-  const mesAnterior = () => setCurrentMonth(subMonths(currentMonth, 1));
-  const mesSiguiente = () => setCurrentMonth(addMonths(currentMonth, 1));
-  const irHoy = () => setCurrentMonth(new Date());
-
-  if (isLoading) {
+  if (isLoading && !vistaAgenda) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <LoadingSpinner size="lg" />
@@ -92,370 +56,401 @@ export default function DocenteCalendarioPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <motion.div {...fadeIn}>
         {/* Header */}
-        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-indigo-900 dark:text-white">Calendario de Clases</h1>
-            <p className="text-purple-600 dark:text-purple-300 mt-1">
-              {clases?.length || 0} clases programadas
-            </p>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-indigo-900 dark:text-white mb-2">
+            Calendario y Agenda
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Gestiona tus tareas, recordatorios, notas y clases
+          </p>
+        </div>
 
-          {/* Controles de vista */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setVistaActual('calendario')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                vistaActual === 'calendario'
-                  ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-purple-500/40'
-                  : 'glass-card text-indigo-900 dark:text-white hover:bg-white/60 dark:hover:bg-indigo-900/60'
-              }`}
-            >
-              📅 Calendario
-            </button>
-            <button
-              onClick={() => setVistaActual('lista')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                vistaActual === 'lista'
-                  ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-purple-500/40'
-                  : 'glass-card text-indigo-900 dark:text-white hover:bg-white/60 dark:hover:bg-indigo-900/60'
-              }`}
-            >
-              📋 Lista
-            </button>
+        {/* Estadísticas */}
+        {estadisticas && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            <StatCard
+              titulo="Total Eventos"
+              valor={estadisticas.total}
+              color="bg-indigo-500"
+              icono="📅"
+            />
+            <StatCard
+              titulo="Tareas"
+              valor={estadisticas.totalTareas}
+              color="bg-amber-500"
+              icono="✓"
+            />
+            <StatCard
+              titulo="Pendientes"
+              valor={estadisticas.tareasPendientes}
+              color="bg-orange-500"
+              icono="⏳"
+            />
+            <StatCard
+              titulo="Recordatorios"
+              valor={estadisticas.totalRecordatorios}
+              color="bg-blue-500"
+              icono="🔔"
+            />
+            <StatCard
+              titulo="Notas"
+              valor={estadisticas.totalNotas}
+              color="bg-violet-500"
+              icono="📝"
+            />
+          </div>
+        )}
+
+        {/* Barra de acciones */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex flex-wrap gap-4 items-center justify-between">
+            {/* Botones de vista */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setVistaActiva('agenda')}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  vistaActiva === 'agenda'
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                📋 Vista Agenda
+              </button>
+              <button
+                onClick={() => setVistaActiva('semana')}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  vistaActiva === 'semana'
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                📆 Vista Semana
+              </button>
+            </div>
+
+            {/* Botones de creación */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => abrirModalCreacion(TipoEvento.TAREA)}
+                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+              >
+                ✓ Nueva Tarea
+              </button>
+              <button
+                onClick={() => abrirModalCreacion(TipoEvento.RECORDATORIO)}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+              >
+                🔔 Recordatorio
+              </button>
+              <button
+                onClick={() => abrirModalCreacion(TipoEvento.NOTA)}
+                className="px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+              >
+                📝 Nota
+              </button>
+            </div>
           </div>
         </div>
 
-        {vistaActual === 'calendario' ? (
-          <>
-            {/* Controles de navegación */}
-            <div className="glass-card-strong p-4 mb-6">
-              <div className="flex justify-between items-center">
-                <button
-                  onClick={mesAnterior}
-                  className="p-2 hover:bg-purple-100/60 dark:hover:bg-purple-900/40 rounded-lg transition-colors"
-                  aria-label="Mes anterior"
-                >
-                  <svg
-                    className="w-6 h-6 text-indigo-900 dark:text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
+        {/* Error display */}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+            <p className="text-red-800 dark:text-red-200">{error}</p>
+          </div>
+        )}
 
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-indigo-900 dark:text-white capitalize">
-                    {format(currentMonth, 'MMMM yyyy', { locale: es })}
-                  </h2>
-                  <button
-                    onClick={irHoy}
-                    className="text-sm text-purple-600 dark:text-purple-300 hover:underline mt-1 font-medium"
-                  >
-                    Ir a hoy
-                  </button>
-                </div>
+        {/* Contenido de vistas */}
+        <AnimatePresence mode="wait">
+          {vistaActiva === 'agenda' && vistaAgenda && (
+            <VistaAgenda data={vistaAgenda} onEventoClick={setEventoSeleccionado} />
+          )}
+          {vistaActiva === 'semana' && vistaSemana && (
+            <VistaSemana eventos={vistaSemana} onEventoClick={setEventoSeleccionado} />
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </div>
+  );
+}
 
-                <button
-                  onClick={mesSiguiente}
-                  className="p-2 hover:bg-purple-100/60 dark:hover:bg-purple-900/40 rounded-lg transition-colors"
-                  aria-label="Mes siguiente"
-                >
-                  <svg
-                    className="w-6 h-6 text-indigo-900 dark:text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
+// ==================== COMPONENTES ====================
 
-            {/* Calendario Grid */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              {/* Días de la semana */}
-              <div className="grid grid-cols-7 bg-gray-50 border-b">
-                {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((dia) => (
-                  <div
-                    key={dia}
-                    className="py-3 text-center text-sm font-semibold text-gray-700"
-                  >
-                    {dia}
-                  </div>
-                ))}
-              </div>
+interface StatCardProps {
+  titulo: string;
+  valor: number;
+  color: string;
+  icono: string;
+}
 
-              {/* Grid de días */}
-              <div className="grid grid-cols-7 divide-x divide-y">
-                {dias.map((dia, index) => {
-                  const clasesDelDia = getClasesDelDia(dia);
-                  const esDelMesActual = isSameMonth(dia, currentMonth);
-                  const esHoy = isToday(dia);
+function StatCard({ titulo, valor, color, icono }: StatCardProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
+    >
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-2xl">{icono}</span>
+        <span className={`${color} text-white text-2xl font-bold px-3 py-1 rounded-lg`}>
+          {valor}
+        </span>
+      </div>
+      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{titulo}</p>
+    </motion.div>
+  );
+}
 
-                  return (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: index * 0.01 }}
-                      onClick={() => setSelectedDay(dia)}
-                      className={`min-h-[120px] p-2 cursor-pointer transition-all hover:bg-gray-50 ${
-                        !esDelMesActual ? 'bg-gray-100/50 text-gray-400' : ''
-                      } ${esHoy ? 'bg-blue-50' : ''}`}
-                    >
-                      {/* Número del día */}
-                      <div className="flex justify-between items-start mb-1">
-                        <span
-                          className={`text-sm font-semibold ${
-                            esHoy
-                              ? 'bg-[#ff6b35] text-white rounded-full w-7 h-7 flex items-center justify-center'
-                              : ''
-                          }`}
-                        >
-                          {format(dia, 'd')}
-                        </span>
-                        {clasesDelDia.length > 0 && (
-                          <span className="text-xs bg-[#ff6b35] text-white rounded-full px-2 py-0.5">
-                            {clasesDelDia.length}
-                          </span>
-                        )}
-                      </div>
+// ==================== VISTA AGENDA ====================
 
-                      {/* Mini cards de clases */}
-                      <div className="space-y-1">
-                        {clasesDelDia.slice(0, 2).map((clase) => (
-                          <div
-                            key={clase.id}
-                            className="text-xs p-1 rounded truncate"
-                            style={{
-                              backgroundColor: clase.rutaCurricular?.color + '20' || '#f3f4f6',
-                              borderLeft: `3px solid ${clase.rutaCurricular?.color || '#9ca3af'}`,
-                            }}
-                          >
-                            <div className="font-medium truncate">
-                              {format(parseISO(clase.fecha_hora_inicio), 'HH:mm')}
-                            </div>
-                            <div className="truncate text-gray-700">
-                              {clase.rutaCurricular?.nombre || 'Clase'}
-                            </div>
-                          </div>
-                        ))}
-                        {clasesDelDia.length > 2 && (
-                          <div className="text-xs text-gray-500 pl-1">
-                            +{clasesDelDia.length - 2} más
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
+interface VistaAgendaProps {
+  data: {
+    hoy: Evento[];
+    manana: Evento[];
+    proximos7Dias: Evento[];
+    masAdelante: Evento[];
+  };
+  onEventoClick: (evento: Evento) => void;
+}
 
-            {/* Modal de día seleccionado */}
-            <AnimatePresence>
-              {selectedDay && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-                  onClick={() => setSelectedDay(null)}
-                >
-                  <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
-                    onClick={(e) => e.stopPropagation()}
-                    className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-auto"
-                  >
-                    <div className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-2xl font-bold text-gray-900">
-                            {format(selectedDay, 'EEEE d', { locale: es })}
-                          </h3>
-                          <p className="text-gray-600 capitalize">
-                            {format(selectedDay, 'MMMM yyyy', { locale: es })}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => setSelectedDay(null)}
-                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                          <svg
-                            className="w-6 h-6"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                      </div>
+function VistaAgenda({ data, onEventoClick }: VistaAgendaProps) {
+  return (
+    <motion.div
+      key="vista-agenda"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      className="space-y-6"
+    >
+      {/* Hoy */}
+      <GrupoEventos
+        titulo="📌 Hoy"
+        subtitulo={format(new Date(), "EEEE, d 'de' MMMM", { locale: es })}
+        eventos={data.hoy}
+        onEventoClick={onEventoClick}
+        colorAccent="border-l-indigo-500"
+      />
 
-                      {/* Lista de clases del día */}
-                      <div className="space-y-3">
-                        {getClasesDelDia(selectedDay).length === 0 ? (
-                          <p className="text-gray-500 text-center py-8">
-                            No hay clases programadas para este día
-                          </p>
-                        ) : (
-                          getClasesDelDia(selectedDay).map((clase) => (
-                            <div
-                              key={clase.id}
-                              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                            >
-                              <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <span
-                                      className="w-3 h-3 rounded-full"
-                                      style={{ backgroundColor: clase.rutaCurricular?.color }}
-                                    />
-                                    <h4 className="font-semibold text-gray-900">
-                                      {clase.rutaCurricular?.nombre}
-                                    </h4>
-                                  </div>
-                                  <p className="text-sm text-gray-600 mb-2">
-                                    🕐 {format(parseISO(clase.fecha_hora_inicio), 'HH:mm')} -{' '}
-                                    {format(
-                                      addDays(
-                                        parseISO(clase.fecha_hora_inicio),
-                                        clase.duracion_minutos / 1440
-                                      ),
-                                      'HH:mm'
-                                    )}{' '}
-                                    ({clase.duracion_minutos} min)
-                                  </p>
-                                  <p className="text-sm text-gray-600">
-                                    👥 {clase.cupos_ocupados}/{clase.cupos_maximo} estudiantes
-                                  </p>
-                                </div>
-                                <span
-                                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                    clase.estado === 'Programada'
-                                      ? 'bg-green-100 text-green-800'
-                                      : 'bg-red-100 text-red-800'
-                                  }`}
-                                >
-                                  {clase.estado}
-                                </span>
-                              </div>
+      {/* Mañana */}
+      {data.manana.length > 0 && (
+        <GrupoEventos
+          titulo="☀️ Mañana"
+          subtitulo={format(new Date(Date.now() + 86400000), "EEEE, d 'de' MMMM", { locale: es })}
+          eventos={data.manana}
+          onEventoClick={onEventoClick}
+          colorAccent="border-l-blue-500"
+        />
+      )}
 
-                              <div className="mt-3 flex gap-2">
-                                <a
-                                  href={`/docente/clases/${clase.id}/asistencia`}
-                                  className="text-sm text-[#ff6b35] hover:underline"
-                                >
-                                  Ver asistencia →
-                                </a>
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                </motion.div>
+      {/* Próximos 7 días */}
+      {data.proximos7Dias.length > 0 && (
+        <GrupoEventos
+          titulo="📅 Próximos 7 días"
+          eventos={data.proximos7Dias}
+          onEventoClick={onEventoClick}
+          colorAccent="border-l-violet-500"
+        />
+      )}
+
+      {/* Más adelante */}
+      {data.masAdelante.length > 0 && (
+        <GrupoEventos
+          titulo="🔮 Más adelante"
+          eventos={data.masAdelante}
+          onEventoClick={onEventoClick}
+          colorAccent="border-l-gray-400"
+        />
+      )}
+
+      {/* Mensaje vacío */}
+      {data.hoy.length === 0 &&
+        data.manana.length === 0 &&
+        data.proximos7Dias.length === 0 &&
+        data.masAdelante.length === 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
+            <div className="text-6xl mb-4">📭</div>
+            <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              No hay eventos próximos
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400">
+              Crea una tarea, recordatorio o nota para comenzar
+            </p>
+          </div>
+        )}
+    </motion.div>
+  );
+}
+
+interface GrupoEventosProps {
+  titulo: string;
+  subtitulo?: string;
+  eventos: Evento[];
+  onEventoClick: (evento: Evento) => void;
+  colorAccent?: string;
+}
+
+function GrupoEventos({ titulo, subtitulo, eventos, onEventoClick, colorAccent = 'border-l-gray-400' }: GrupoEventosProps) {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+      <div className="mb-4">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-white">{titulo}</h2>
+        {subtitulo && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">{subtitulo}</p>
+        )}
+      </div>
+
+      <div className="space-y-3">
+        {eventos.map((evento) => (
+          <EventoCard
+            key={evento.id}
+            evento={evento}
+            onClick={() => onEventoClick(evento)}
+            colorAccent={colorAccent}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface EventoCardProps {
+  evento: Evento;
+  onClick: () => void;
+  colorAccent?: string;
+}
+
+function EventoCard({ evento, onClick, colorAccent }: EventoCardProps) {
+  const icono = getIconoPorTipo(evento.tipo);
+  const color = getColorPorTipo(evento.tipo);
+
+  // Determinar info adicional según tipo
+  let infoAdicional = '';
+  let badgeColor = 'bg-gray-100 text-gray-700';
+
+  if (evento.tipo === TipoEvento.TAREA && evento.tarea) {
+    const { estado, prioridad, porcentaje_completado } = evento.tarea;
+    infoAdicional = `${estado} • ${prioridad} • ${porcentaje_completado}%`;
+
+    if (estado === EstadoTarea.COMPLETADA) {
+      badgeColor = 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
+    } else if (prioridad === PrioridadTarea.URGENTE) {
+      badgeColor = 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300';
+    } else if (estado === EstadoTarea.EN_PROGRESO) {
+      badgeColor = 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+    }
+  } else if (evento.tipo === TipoEvento.RECORDATORIO && evento.recordatorio) {
+    infoAdicional = evento.recordatorio.completado ? '✓ Completado' : 'Pendiente';
+    badgeColor = evento.recordatorio.completado
+      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+      : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+  }
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
+      onClick={onClick}
+      className={`border-l-4 ${colorAccent} bg-gray-50 dark:bg-gray-700/50 rounded-r-xl p-4 cursor-pointer hover:shadow-md transition-all`}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3 flex-1">
+          <span className="text-2xl">{icono}</span>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+              {evento.titulo}
+            </h3>
+            {evento.descripcion && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1 mt-1">
+                {evento.descripcion}
+              </p>
+            )}
+            <div className="flex items-center gap-2 mt-2 text-xs text-gray-500 dark:text-gray-400">
+              <span>⏰ {formatearHora(evento.fecha_inicio)}</span>
+              {!evento.es_todo_el_dia && (
+                <span>→ {formatearHora(evento.fecha_fin)}</span>
               )}
-            </AnimatePresence>
-          </>
-        ) : (
-          /* Vista de Lista */
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Todas las Clases
-            </h2>
-            <div className="space-y-3">
-              {!clases || clases.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  No hay clases programadas
-                </p>
-              ) : (
-                clases
-                  .sort(
-                    (a, b) =>
-                      new Date(a.fecha_hora_inicio).getTime() -
-                      new Date(b.fecha_hora_inicio).getTime()
-                  )
-                  .map((clase) => (
-                    <div
-                      key={clase.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: clase.rutaCurricular?.color }}
-                            />
-                            <h4 className="font-semibold text-gray-900">
-                              {clase.rutaCurricular?.nombre}
-                            </h4>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-1">
-                            📅{' '}
-                            {format(parseISO(clase.fecha_hora_inicio), "EEEE d 'de' MMMM, yyyy", {
-                              locale: es,
-                            })}
-                          </p>
-                          <p className="text-sm text-gray-600 mb-1">
-                            🕐 {format(parseISO(clase.fecha_hora_inicio), 'HH:mm')} (
-                            {clase.duracion_minutos} min)
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            👥 {clase.cupos_ocupados}/{clase.cupos_maximo} estudiantes
-                          </p>
-                        </div>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            clase.estado === 'Programada'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          {clase.estado}
-                        </span>
-                      </div>
-
-                      <div className="mt-3 flex gap-2">
-                        <a
-                          href={`/docente/clases/${clase.id}/asistencia`}
-                          className="text-sm bg-[#ff6b35] text-white px-4 py-2 rounded-lg hover:bg-[#ff5722] transition-colors"
-                        >
-                          Ver asistencia
-                        </a>
-                      </div>
-                    </div>
-                  ))
+              {evento.es_todo_el_dia && (
+                <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded">
+                  Todo el día
+                </span>
               )}
             </div>
           </div>
+        </div>
+
+        {infoAdicional && (
+          <span className={`text-xs font-medium px-2 py-1 rounded ${badgeColor} whitespace-nowrap`}>
+            {infoAdicional}
+          </span>
         )}
-      </motion.div>
-    </div>
+      </div>
+
+      {/* Subtareas preview para Tareas */}
+      {evento.tipo === TipoEvento.TAREA && evento.tarea?.subtareas && evento.tarea.subtareas.length > 0 && (
+        <div className="mt-3 pl-9 space-y-1">
+          {evento.tarea.subtareas.slice(0, 3).map((subtarea: any) => (
+            <div key={subtarea.id} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+              <input
+                type="checkbox"
+                checked={subtarea.completada}
+                readOnly
+                className="w-3 h-3 rounded border-gray-300"
+              />
+              <span className={subtarea.completada ? 'line-through' : ''}>{subtarea.titulo}</span>
+            </div>
+          ))}
+          {evento.tarea.subtareas.length > 3 && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              +{evento.tarea.subtareas.length - 3} más...
+            </p>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+// ==================== VISTA SEMANA ====================
+
+interface VistaSemanaProps {
+  eventos: Evento[];
+  onEventoClick: (evento: Evento) => void;
+}
+
+function VistaSemana({ eventos, onEventoClick }: VistaSemanaProps) {
+  return (
+    <motion.div
+      key="vista-semana"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6"
+    >
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Vista Semana</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Próximamente: Grid semanal interactivo con timeline
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        {eventos.map((evento) => (
+          <EventoCard
+            key={evento.id}
+            evento={evento}
+            onClick={() => onEventoClick(evento)}
+            colorAccent="border-l-indigo-500"
+          />
+        ))}
+
+        {eventos.length === 0 && (
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            No hay eventos esta semana
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 }
