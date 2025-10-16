@@ -69,106 +69,127 @@ export default function EstudiantesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff6b35]"></div>
+      <div className="h-screen flex items-center justify-center bg-slate-100">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-indigo-600 border-t-transparent mb-4"></div>
+          <p className="text-lg font-semibold text-gray-700">Cargando estudiantes...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-[#2a1a5e]">Mis Estudiantes</h1>
-          <p className="text-gray-600 mt-2">
-            Gestiona a tus estudiantes y su progreso
-          </p>
-        </div>
-        <Button variant="primary" size="lg" onClick={handleAddNew}>
-          <Plus className="w-5 h-5 mr-2" />
-          Agregar Estudiante
-        </Button>
-      </div>
-
-      {/* Filtros */}
-      {estudiantes.length > 0 && (
-        <div className="bg-white rounded-xl border-4 border-black shadow-[5px_5px_0px_rgba(0,0,0,1)] p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select
-              label="Filtrar por nivel"
-              options={[
-                { value: '', label: 'Todos los niveles' },
-                { value: 'Primaria', label: 'Primaria' },
-                { value: 'Secundaria', label: 'Secundaria' },
-                { value: 'Universidad', label: 'Universidad' },
-              ]}
-              value={filtroNivel}
-              onChange={(e) => setFiltroNivel(e.target.value)}
-            />
-            <Select
-              label="Filtrar por equipo"
-              options={[
-                { value: '', label: 'Todos los equipos' },
-                ...(equipos || []).map((eq) => ({
-                  value: eq.id,
-                  label: eq.nombre,
-                })),
-              ]}
-              value={filtroEquipo}
-              onChange={(e) => setFiltroEquipo(e.target.value)}
-            />
+    <div className="min-h-screen bg-slate-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 font-[family-name:var(--font-fredoka)]">
+                Mis Estudiantes
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Gestiona a tus estudiantes y su progreso
+              </p>
+            </div>
+            <button
+              onClick={handleAddNew}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transition-all"
+              style={{
+                background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
+              }}
+            >
+              <Plus className="w-5 h-5" />
+              Agregar Estudiante
+            </button>
           </div>
-        </div>
-      )}
 
-      {/* Lista de estudiantes */}
-      {estudiantesFiltrados.length === 0 ? (
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-4 border-black shadow-[5px_5px_0px_rgba(0,0,0,1)] p-12 text-center">
-          <Users className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-2xl font-bold text-gray-700 mb-2">
-            {estudiantes.length === 0
-              ? '¡Aún no tienes estudiantes!'
-              : 'No hay estudiantes con estos filtros'}
-          </h3>
-          <p className="text-gray-600 mb-6">
-            {estudiantes.length === 0
-              ? 'Agrega tu primer estudiante para comenzar'
-              : 'Intenta cambiar los filtros'}
-          </p>
-          {estudiantes.length === 0 && (
-            <Button variant="primary" size="lg" onClick={handleAddNew}>
-              <Plus className="w-5 h-5 mr-2" />
-              Agregar Primer Estudiante
-            </Button>
+          {/* Filtros */}
+          {estudiantes.length > 0 && (
+            <div className="bg-white rounded-xl border-2 border-gray-300 shadow-lg p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Select
+                  label="Filtrar por nivel"
+                  options={[
+                    { value: '', label: 'Todos los niveles' },
+                    { value: 'Primaria', label: 'Primaria' },
+                    { value: 'Secundaria', label: 'Secundaria' },
+                    { value: 'Universidad', label: 'Universidad' },
+                  ]}
+                  value={filtroNivel}
+                  onChange={(e) => setFiltroNivel(e.target.value)}
+                />
+                <Select
+                  label="Filtrar por equipo"
+                  options={[
+                    { value: '', label: 'Todos los equipos' },
+                    ...(equipos || []).map((eq) => ({
+                      value: eq.id,
+                      label: eq.nombre,
+                    })),
+                  ]}
+                  value={filtroEquipo}
+                  onChange={(e) => setFiltroEquipo(e.target.value)}
+                />
+              </div>
+            </div>
           )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {estudiantesFiltrados.map((estudiante) => (
-            <EstudianteCard
-              key={estudiante.id}
-              estudiante={estudiante}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onView={handleView}
-            />
-          ))}
-        </div>
-      )}
 
-      {/* Modal de agregar/editar */}
-      <EstudianteFormModal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setEstudianteEdit(null);
-        }}
-        estudiante={estudianteEdit}
-        onSuccess={() => {
-          fetchEstudiantes();
-        }}
-      />
+          {/* Lista de estudiantes */}
+          {estudiantesFiltrados.length === 0 ? (
+            <div className="bg-white rounded-xl border-2 border-gray-300 shadow-lg p-12 text-center">
+              <Users className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-2xl font-bold text-gray-900 mb-2 font-[family-name:var(--font-fredoka)]">
+                {estudiantes.length === 0
+                  ? '¡Aún no tienes estudiantes!'
+                  : 'No hay estudiantes con estos filtros'}
+              </h3>
+              <p className="text-gray-600 mb-6">
+                {estudiantes.length === 0
+                  ? 'Agrega tu primer estudiante para comenzar'
+                  : 'Intenta cambiar los filtros'}
+              </p>
+              {estudiantes.length === 0 && (
+                <button
+                  onClick={handleAddNew}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transition-all"
+                  style={{
+                    background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
+                  }}
+                >
+                  <Plus className="w-5 h-5" />
+                  Agregar Primer Estudiante
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {estudiantesFiltrados.map((estudiante) => (
+                <EstudianteCard
+                  key={estudiante.id}
+                  estudiante={estudiante}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onView={handleView}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Modal de agregar/editar */}
+          <EstudianteFormModal
+            isOpen={showModal}
+            onClose={() => {
+              setShowModal(false);
+              setEstudianteEdit(null);
+            }}
+            estudiante={estudianteEdit}
+            onSuccess={() => {
+              fetchEstudiantes();
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

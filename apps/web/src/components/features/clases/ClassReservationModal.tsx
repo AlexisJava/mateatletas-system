@@ -92,7 +92,7 @@ export function ClassReservationModal({
         {/* Header */}
         <div className="text-center space-y-4 mb-6">
           <div className="text-6xl">🎫</div>
-          <h2 className="font-lilita text-4xl text-dark">Reservar clase</h2>
+          <h2 className="font-[family-name:var(--font-fredoka)] text-4xl text-dark">Reservar clase</h2>
         </div>
 
         {/* Detalles de la clase */}
@@ -109,7 +109,7 @@ export function ClassReservationModal({
               <p className="text-xs font-bold text-gray-500 uppercase">
                 Clase
               </p>
-              <h3 className="font-lilita text-2xl text-dark">{clase.titulo}</h3>
+              <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark">{clase.titulo}</h3>
             </div>
 
             {/* Ruta */}

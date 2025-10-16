@@ -2,431 +2,549 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import CountUp from 'react-countup';
 import { useGamificacionStore } from '@/store/gamificacion.store';
 import { useAuthStore } from '@/store/auth.store';
 import { LoadingSpinner } from '@/components/effects';
-
-// Animaciones SMOOTH - profesionales
-const smoothFadeIn = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
-};
-
-// Componente de Card Chunky
-const ChunkyCard = ({
-  children,
-  gradient,
-  delay = 0,
-  className = ""
-}: {
-  children: React.ReactNode;
-  gradient: string;
-  delay?: number;
-  className?: string;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.95 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{
-      duration: 0.3,
-      delay,
-      ease: [0.25, 0.1, 0.25, 1]
-    }}
-    className={`relative overflow-hidden ${className}`}
-    style={{
-      background: gradient,
-      borderRadius: '16px',
-      border: '5px solid #000',
-      boxShadow: '8px 8px 0 0 rgba(0, 0, 0, 1)',
-    }}
-  >
-    {children}
-  </motion.div>
-);
-
-// Botón Chunky smooth
-const ChunkyButton = ({
-  children,
-  color,
-  onClick,
-  className = ""
-}: {
-  children: React.ReactNode;
-  color: string;
-  onClick?: () => void;
-  className?: string;
-}) => {
-  const [isPressed, setIsPressed] = useState(false);
-
-  return (
-    <motion.button
-      onClick={onClick}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
-      whileHover={{
-        x: -2,
-        y: -2,
-        transition: { duration: 0.2, ease: 'easeOut' }
-      }}
-      whileTap={{
-        x: 0,
-        y: 0,
-        transition: { duration: 0.1 }
-      }}
-      className={`w-full font-bold text-white relative ${className}`}
-      style={{
-        background: color,
-        borderRadius: '12px',
-        border: '4px solid #000',
-        boxShadow: isPressed ? 'none' : '6px 6px 0 0 rgba(0, 0, 0, 1)',
-        textShadow: '2px 2px 0 #000',
-        transition: 'box-shadow 0.1s ease-out',
-      }}
-    >
-      {children}
-    </motion.button>
-  );
-};
+import { AvatarSelector } from '@/components/estudiantes/AvatarSelector';
+import { WelcomeAnimation } from '@/components/animations/WelcomeAnimation';
+import { LevelUpAnimation } from '@/components/animations/LevelUpAnimation';
+import apiClient from '@/lib/axios';
+import { Calendar, User, Clock, TrendingUp, BookOpen, Bell } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export default function EstudianteDashboard() {
   const { dashboard, fetchDashboard, isLoading } = useGamificacionStore();
   const { user } = useAuthStore();
-  const [mounted, setMounted] = useState(false);
+  const [avatarSelectorOpen, setAvatarSelectorOpen] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [previousLevel, setPreviousLevel] = useState<number | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    setMounted(true);
     if (user?.id && user?.role === 'estudiante') {
       fetchDashboard(user.id);
     }
+
+    const welcomeShown = sessionStorage.getItem('welcomeShown');
+    if (!welcomeShown && dashboard?.nivel) {
+      setShowWelcome(true);
+    }
   }, [user?.id]);
 
-  const mockData = {
-    estudiante: {
-      nombre: 'Juan',
-      apellido: 'Pérez',
-      equipo: { nombre: 'ASTROS', color: '#FFD600' },
-    },
-    stats: {
-      puntosToales: 1250,
-      clasesAsistidas: 23,
-      clasesTotales: 30,
-      racha: 7,
-    },
-    proximasClases: [
-      {
-        id: '1',
-        ruta_curricular: { nombre: 'Geometría', color: '#10B981' },
-        docente: { nombre: 'María', apellido: 'González' },
-        fecha_hora_inicio: new Date(Date.now() + 86400000),
-      },
-    ],
-    equipoRanking: [
-      { nombre: 'María', apellido: 'López', puntos: 1890, id: '1' },
-      { nombre: 'Juan', apellido: 'Pérez', puntos: 1250, id: '2' },
-      { nombre: 'Ana', apellido: 'Martínez', puntos: 1100, id: '3' },
-    ],
+  useEffect(() => {
+    if (dashboard?.nivel?.nivelActual) {
+      if (previousLevel && dashboard.nivel.nivelActual > previousLevel) {
+        setShowLevelUp(true);
+      }
+      setPreviousLevel(dashboard.nivel.nivelActual);
+    }
+  }, [dashboard?.nivel?.nivelActual]);
+
+  // Update current time every minute for class button
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Calculate class status
+  const getClaseStatus = (clase: any) => {
+    const now = currentTime.getTime();
+    const inicio = new Date(clase.fecha_hora_inicio).getTime();
+    const fin = inicio + (clase.duracion_minutos * 60 * 1000);
+
+    const minutosParaInicio = Math.floor((inicio - now) / (60 * 1000));
+    const minutosDesdeInicio = Math.floor((now - inicio) / (60 * 1000));
+
+    if (now < inicio) {
+      // Antes de la clase
+      if (minutosParaInicio <= 15) {
+        return { tipo: 'proximamente', texto: `Comienza en ${minutosParaInicio} min`, color: 'yellow' };
+      }
+      return { tipo: 'pendiente', texto: 'Próximamente', color: 'gray' };
+    } else if (now >= inicio && now < fin) {
+      // Durante la clase
+      if (minutosDesdeInicio <= 15) {
+        return { tipo: 'activa', texto: '¡ENTRAR A CLASE EN VIVO!', color: 'green' };
+      }
+      return { tipo: 'en_progreso', texto: 'Clase en progreso', color: 'yellow' };
+    } else {
+      // Después de la clase
+      return { tipo: 'finalizada', texto: 'Clase finalizada', color: 'gray' };
+    }
   };
 
-  const data = dashboard || mockData;
+  const handleAvatarSelect = async (avatarStyle: string) => {
+    if (!dashboard?.estudiante?.id) return;
 
-  if (isLoading) {
+    await apiClient.patch(`/estudiantes/${dashboard.estudiante.id}/avatar`, {
+      avatar_url: avatarStyle,
+    });
+
+    if (user?.id) {
+      await fetchDashboard(user.id);
+    }
+  };
+
+  const handleWelcomeComplete = () => {
+    sessionStorage.setItem('welcomeShown', 'true');
+    setShowWelcome(false);
+  };
+
+  if (isLoading || !dashboard) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-900">
-        <LoadingSpinner size="lg" text="Cargando..." />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <LoadingSpinner size="lg" text="Cargando tu dashboard..." />
       </div>
     );
   }
 
+  const { estudiante, stats, nivel, proximasClases: proximasClasesBackend } = dashboard;
+
+  // Mock de próximas clases si no hay ninguna
+  const proximasClases = proximasClasesBackend && proximasClasesBackend.length > 0
+    ? proximasClasesBackend
+    : [
+        {
+          id: 'mock-clase-1',
+          rutaCurricular: {
+            nombre: 'Álgebra Básica',
+            color: '#8B5CF6'
+          },
+          docente: {
+            nombre: 'María',
+            apellido: 'González'
+          },
+          fecha_hora_inicio: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // En 5 minutos
+          duracion_minutos: 60
+        }
+      ];
+
+  // Mock de tareas asignadas (luego conectar con backend)
+  const tareasAsignadas = [
+    {
+      id: '1',
+      titulo: 'Ejercicios de Álgebra',
+      descripcion: 'Resolver ecuaciones lineales del tema 3',
+      profesor: 'Prof. García',
+      fechaLimite: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 días
+      completada: false,
+      rutaCurricular: { nombre: 'Álgebra', color: '#8B5CF6' },
+    },
+    {
+      id: '2',
+      titulo: 'Práctica de Geometría',
+      descripcion: 'Identificar ángulos y triángulos',
+      profesor: 'Prof. Martínez',
+      fechaLimite: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 días
+      completada: false,
+      rutaCurricular: { nombre: 'Geometría', color: '#10B981' },
+    },
+  ];
+
   return (
-    <div
-      className="flex flex-col p-4 gap-4 h-full overflow-hidden"
-      style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #164e63 50%, #0f172a 100%)'
-      }}
-    >
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="h-full max-w-7xl mx-auto flex flex-col gap-4">
 
-      {/* Header Compacto - CELESTE EDUCATIVO */}
-      <ChunkyCard
-        gradient="linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)"
-        delay={0}
-        className="flex-shrink-0"
-      >
-        <div className="px-6 py-3 relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent" />
-          <div className="relative z-10">
-            <h1
-              className="text-2xl font-bold text-white leading-tight"
-              style={{
-                textShadow: '3px 3px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000',
-              }}
-            >
-              ¡HOLA, {data.estudiante.nombre.toUpperCase()}!
-            </h1>
-            <p
-              className="text-white text-base font-semibold"
-              style={{ textShadow: '2px 2px 0 #000' }}
-            >
-              Equipo: <span style={{ color: '#FFD600' }}>{data.estudiante.equipo.nombre}</span>
-            </p>
-          </div>
-        </div>
-      </ChunkyCard>
-
-      {/* Grid 2x2 - ESTÁTICO SIN SCROLL */}
-      <div className="flex-1 grid grid-cols-2 gap-4 overflow-hidden min-h-0">
-
-        {/* TOP LEFT: Portal de Competición - CELESTE PRINCIPAL */}
-        <ChunkyCard
-          gradient="linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)"
-          delay={0.1}
+        {/* Header - TAMAÑOS ORIGINALES */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 rounded-3xl shadow-2xl overflow-hidden border-2 border-purple-400 flex-shrink-0"
         >
-          <div className="p-6 h-full flex flex-col relative">
-            <h2
-              className="text-2xl font-bold text-white mb-4 relative z-10"
-              style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000' }}
-            >
-              PORTAL DE COMPETICIÓN
-            </h2>
+          <div className="p-4 relative overflow-hidden">
+            {/* Patrón de fondo */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0" style={{
+                backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                backgroundSize: '20px 20px'
+              }} />
+            </div>
 
-            {data.proximasClases.length === 0 ? (
-              <p className="text-white/90 text-lg">No tenés clases programadas</p>
-            ) : (
-              <div className="flex-1 flex flex-col justify-between relative z-10">
-                <div>
-                  {data.proximasClases.slice(0, 1).map((clase) => (
-                    <div key={clase.id} className="mb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div
-                          className="w-4 h-4 rounded-full border-2 border-black"
-                          style={{ backgroundColor: clase.ruta_curricular.color }}
-                        />
-                        <p className="text-white font-bold text-xl">
-                          {clase.ruta_curricular.nombre}
-                        </p>
-                      </div>
-                      <p className="text-white/80 text-base">
-                        Prof. {clase.docente.nombre} {clase.docente.apellido}
-                      </p>
-                      <p className="text-cyan-100 font-bold text-base mt-1">
-                        Mañana - 16:00 hs
-                      </p>
+            <div className="relative z-10 flex items-center gap-4">
+              {/* Avatar */}
+              <button
+                onClick={() => setAvatarSelectorOpen(true)}
+                className="relative group"
+              >
+                <div className="absolute inset-0 bg-white rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity" />
+                <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-xl">
+                  {estudiante.avatar_url ? (
+                    <img
+                      src={`https://api.dicebear.com/7.x/${estudiante.avatar_url}/svg?seed=${estudiante.id}`}
+                      alt={estudiante.nombre}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-2xl font-bold">
+                      {estudiante.nombre.charAt(0)}
                     </div>
-                  ))}
+                  )}
                 </div>
+              </button>
 
-                <ChunkyButton color="#0ea5e9" className="py-3 text-xl">
-                  ¡A LA ARENA!
-                </ChunkyButton>
+              {/* Info del estudiante */}
+              <div className="flex-1">
+                <h2 className="text-4xl font-black text-white drop-shadow-lg">
+                  ¡Hola, {estudiante.nombre}! 👋
+                </h2>
+                <p className="text-white/90 text-base font-semibold">
+                  Equipo {estudiante.equipo?.nombre}
+                </p>
+              </div>
+
+              {/* Badge de Nivel */}
+              {nivel && (
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                  <div className="text-center">
+                    <div className="text-xs text-gray-200 font-semibold">NIVEL {nivel.nivelActual}</div>
+                    <div className="text-lg font-bold text-white">{nivel.nombre}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Barra de Progreso */}
+            {nivel && (
+              <div className="relative z-10 mt-3">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-xs text-white/90 font-bold">
+                    💎 {stats.puntosToales} pts
+                  </span>
+                  {nivel.siguienteNivel && (
+                    <span className="text-xs text-white/90 font-bold">
+                      {nivel.puntosParaSiguienteNivel} pts para nivel {nivel.siguienteNivel.nivel}
+                    </span>
+                  )}
+                </div>
+                <div className="relative w-full h-3 bg-black/30 rounded-full overflow-hidden backdrop-blur-sm border border-white/20">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${nivel.porcentajeProgreso}%` }}
+                    transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
+                    className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-full"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+                  </motion.div>
+                </div>
               </div>
             )}
           </div>
-        </ChunkyCard>
 
-        {/* TOP RIGHT: Inicio de Circuito - CELESTE SECUNDARIO */}
-        <ChunkyCard
-          gradient="linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)"
-          delay={0.2}
-        >
-          <div className="p-6 h-full flex flex-col relative">
-            <h2
-              className="text-2xl font-bold text-white mb-4 relative z-10"
-              style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000' }}
-            >
-              INICIO DE CIRCUITO
-            </h2>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-4 divide-x divide-white/10 bg-black/20 backdrop-blur-sm">
+            <div className="p-3 text-center hover:bg-white/5 transition-colors">
+              <div className="text-2xl mb-0.5">💎</div>
+              <div className="text-2xl font-black text-yellow-400">{stats.puntosToales}</div>
+              <div className="text-[10px] text-gray-300 font-semibold">Puntos</div>
+            </div>
+            <div className="p-3 text-center hover:bg-white/5 transition-colors">
+              <div className="text-2xl mb-0.5">📚</div>
+              <div className="text-2xl font-black text-blue-400">{stats.clasesAsistidas}</div>
+              <div className="text-[10px] text-gray-300 font-semibold">Clases</div>
+            </div>
+            <div className="p-3 text-center hover:bg-white/5 transition-colors">
+              <div className="text-2xl mb-0.5">🔥</div>
+              <div className="text-2xl font-black text-orange-400">{stats.racha}</div>
+              <div className="text-[10px] text-gray-300 font-semibold">Racha</div>
+            </div>
+            <div className="p-3 text-center hover:bg-white/5 transition-colors">
+              <div className="text-2xl mb-0.5">⭐</div>
+              <div className="text-2xl font-black text-purple-400">{nivel?.nivelActual || 1}</div>
+              <div className="text-[10px] text-gray-300 font-semibold">Nivel</div>
+            </div>
+          </div>
+        </motion.div>
 
-            <div className="flex-1 flex flex-col justify-between relative z-10">
-              <div>
-                <p className="text-white text-base mb-3 font-semibold">Desafío del Día</p>
-                <div
-                  className="rounded-lg p-3 mb-3"
-                  style={{
-                    background: 'rgba(0,0,0,0.2)',
-                    border: '3px solid #000'
-                  }}
-                >
-                  <p className="text-white font-bold text-lg mb-1">Álgebra Rápida</p>
-                  <p className="text-white/90 text-base">10 ecuaciones en 5 min</p>
+        {/* Grid - Responsive: 1 col mobile, 2 cols desktop */}
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto md:overflow-hidden min-h-0">
+
+          {/* CARD 1: Próxima Clase */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="relative group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity" />
+            <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border-2 border-blue-500/50 p-4 hover:border-blue-500 transition-all h-full flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xl font-bold text-white">Próxima Clase</h3>
+                <Calendar className="w-6 h-6 text-blue-400" />
+              </div>
+
+              {proximasClases && proximasClases.length > 0 ? (
+                (() => {
+                  const claseStatus = getClaseStatus(proximasClases[0]);
+                  const isActiva = claseStatus.tipo === 'activa';
+                  const isProximamente = claseStatus.tipo === 'proximamente';
+                  const isPendiente = claseStatus.tipo === 'pendiente';
+
+                  return (
+                    <div className="flex-1 flex flex-col min-h-0">
+                      <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-3 mb-3 border border-blue-500/30 flex-1 overflow-hidden">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div
+                            className="w-2 h-2 rounded-full animate-pulse"
+                            style={{ backgroundColor: proximasClases[0].rutaCurricular.color }}
+                          />
+                          <h4 className="font-bold text-white text-base truncate">{proximasClases[0].rutaCurricular.nombre}</h4>
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-2 text-xs text-gray-300 truncate">
+                            <User className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">Prof. {proximasClases[0].docente.nombre}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm font-semibold text-cyan-400">
+                            <Clock className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">
+                              {format(new Date(proximasClases[0].fecha_hora_inicio), "d 'de' MMMM 'a las' HH:mm", { locale: es })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Botón Dinámico */}
+                      <button
+                        disabled={isPendiente || claseStatus.tipo === 'finalizada'}
+                        onClick={() => {
+                          if (isActiva || isProximamente) {
+                            // TODO: Abrir sala de videollamada
+                            window.open(`/clase/${proximasClases[0].id}/sala`, '_blank');
+                          }
+                        }}
+                        className={`
+                          w-full font-bold py-2.5 text-sm rounded-xl transition-all relative overflow-hidden
+                          ${isActiva ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/50 animate-pulse' : ''}
+                          ${isProximamente ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/50' : ''}
+                          ${isPendiente ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : ''}
+                          ${claseStatus.tipo === 'en_progreso' ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white' : ''}
+                          ${claseStatus.tipo === 'finalizada' ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : ''}
+                        `}
+                      >
+                        {isActiva && (
+                          <span className="absolute inset-0 bg-white/20 animate-ping" />
+                        )}
+                        <span className="relative z-10 flex items-center justify-center gap-2">
+                          {isActiva && '🔴'} {claseStatus.texto}
+                        </span>
+                      </button>
+                    </div>
+                  );
+                })()
+              ) : (
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-gray-400 text-sm text-center">No hay clases programadas</p>
                 </div>
+              )}
+            </div>
+          </motion.div>
 
-                <div className="flex gap-3 text-sm">
-                  <span className="text-cyan-100 font-bold">+50 pts</span>
-                  <span className="text-white/80">5 min</span>
+          {/* CARD 2: Mi Progreso */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="relative group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity" />
+            <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border-2 border-orange-500/50 p-4 hover:border-orange-500 transition-all h-full flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xl font-bold text-white">Mi Progreso</h3>
+                <TrendingUp className="w-6 h-6 text-orange-400" />
+              </div>
+
+              <div className="flex-1 grid grid-cols-2 gap-3">
+                <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl p-3 border border-orange-500/30 text-center">
+                  <div className="text-3xl font-black text-yellow-400 mb-0.5">{stats.puntosToales}</div>
+                  <div className="text-xs text-gray-300 font-semibold">Puntos Totales</div>
+                </div>
+                <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl p-3 border border-orange-500/30 text-center">
+                  <div className="text-3xl font-black text-blue-400 mb-0.5">{stats.clasesAsistidas}</div>
+                  <div className="text-xs text-gray-300 font-semibold">Clases Asistidas</div>
+                </div>
+                <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl p-3 border border-orange-500/30 text-center">
+                  <div className="text-3xl font-black text-orange-400 mb-0.5">{stats.racha}</div>
+                  <div className="text-xs text-gray-300 font-semibold">Racha 🔥</div>
+                </div>
+                <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-xl p-3 border border-orange-500/30 text-center">
+                  <div className="text-3xl font-black text-purple-400 mb-0.5">{nivel?.nivelActual || 1}</div>
+                  <div className="text-xs text-gray-300 font-semibold">Nivel Actual</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* CARD 3: Estudiar (Juegos Educativos) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="relative group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity" />
+            <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border-2 border-cyan-500/50 p-4 hover:border-cyan-500 transition-all h-full flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xl font-bold text-white">Estudiar</h3>
+                <BookOpen className="w-6 h-6 text-cyan-400" />
+              </div>
+
+              {/* Botón DESTACADO: Evaluación Diagnóstica */}
+              <button
+                onClick={() => window.location.href = '/estudiante/evaluacion'}
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-3 text-sm rounded-xl hover:shadow-lg hover:shadow-orange-500/50 transition-all mb-3 border-2 border-orange-400 animate-pulse"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-2xl">🧠</span>
+                  <span>Evaluación Diagnóstica</span>
+                </div>
+              </button>
+
+              <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
+                <button
+                  onClick={() => window.location.href = '/estudiante/cursos/calculo-mental'}
+                  className="w-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-3 border border-blue-500/30 text-left hover:from-blue-500/30 hover:to-cyan-500/30 transition-all"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-3xl">🧮</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate">Cálculo Mental Rápido</p>
+                      <p className="text-xs text-cyan-400">Resuelve operaciones • +10 pts</p>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => window.location.href = '/estudiante/cursos/algebra-challenge'}
+                  className="w-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-3 border border-purple-500/30 text-left hover:from-purple-500/30 hover:to-pink-500/30 transition-all"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-3xl">🎯</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate">Álgebra Challenge</p>
+                      <p className="text-xs text-purple-400">Despeja ecuaciones • +20 pts</p>
+                    </div>
+                  </div>
+                </button>
+
+                <button className="w-full bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl p-3 border border-green-500/30 text-left hover:from-green-500/30 hover:to-emerald-500/30 transition-all">
+                  <div className="flex items-center gap-2">
+                    <span className="text-3xl">📐</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate">Geometría Quiz</p>
+                      <p className="text-xs text-green-400">Identifica figuras • +15 pts</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <button
+                onClick={() => window.location.href = '/estudiante/cursos'}
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-2.5 text-sm rounded-xl hover:shadow-lg hover:shadow-cyan-500/50 transition-all mt-3"
+              >
+                Ver Todos los Juegos 🎮
+              </button>
+            </div>
+          </motion.div>
+
+          {/* CARD 4: Tareas Asignadas (NUEVA) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="relative group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity" />
+            <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border-2 border-pink-500/50 p-4 hover:border-pink-500 transition-all h-full flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xl font-bold text-white">Tareas Asignadas</h3>
+                <div className="relative">
+                  <Bell className="w-6 h-6 text-pink-400" />
+                  {tareasAsignadas.length > 0 && (
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold border-2 border-slate-900"
+                    >
+                      {tareasAsignadas.length}
+                    </motion.div>
+                  )}
                 </div>
               </div>
 
-              <ChunkyButton color="#06b6d4" className="py-3 text-xl">
-                ¡VAMOS!
-              </ChunkyButton>
-            </div>
-          </div>
-        </ChunkyCard>
-
-        {/* BOTTOM LEFT: Estadísticas - CELESTE OSCURO CON ACENTOS FUNCIONALES */}
-        <ChunkyCard
-          gradient="linear-gradient(135deg, #0c4a6e 0%, #0e7490 100%)"
-          delay={0.3}
-        >
-          <div className="p-6 h-full flex flex-col relative">
-            <h2
-              className="text-2xl font-bold text-white mb-4 relative z-10"
-              style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000' }}
-            >
-              TUS ESTADÍSTICAS
-            </h2>
-
-            <div className="flex-1 grid grid-cols-2 gap-3 relative z-10">
-              {/* Puntos - AMARILLO (funcional) */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5, duration: 0.3, ease: 'easeOut' }}
-                className="rounded-lg p-3 text-center flex flex-col justify-center"
-                style={{
-                  background: '#FFD700',
-                  border: '3px solid #000',
-                  boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 1)',
-                }}
-              >
-                <div className="text-sm font-semibold text-black/70 mb-1">PUNTOS</div>
-                <div className="text-3xl font-bold text-black leading-tight">
-                  {mounted && <CountUp end={data.stats.puntosToales} duration={1.5} separator="," />}
-                </div>
-              </motion.div>
-
-              {/* Clases - VERDE (funcional) */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6, duration: 0.3, ease: 'easeOut' }}
-                className="rounded-lg p-3 text-center flex flex-col justify-center"
-                style={{
-                  background: '#10b981',
-                  border: '3px solid #000',
-                  boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 1)',
-                }}
-              >
-                <div className="text-sm font-semibold text-white mb-1" style={{ textShadow: '1px 1px 0 #000' }}>CLASES</div>
-                <div className="text-3xl font-bold text-white leading-tight" style={{ textShadow: '2px 2px 0 #000' }}>
-                  {mounted && <CountUp end={data.stats.clasesAsistidas} duration={1.5} />}/{data.stats.clasesTotales}
-                </div>
-              </motion.div>
-
-              {/* Racha - ROJO/NARANJA (funcional) */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.7, duration: 0.3, ease: 'easeOut' }}
-                className="rounded-lg p-3 text-center flex flex-col justify-center"
-                style={{
-                  background: '#f97316',
-                  border: '3px solid #000',
-                  boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 1)',
-                }}
-              >
-                <div className="text-sm font-semibold text-white mb-1" style={{ textShadow: '1px 1px 0 #000' }}>RACHA</div>
-                <div className="text-3xl font-bold text-white leading-tight" style={{ textShadow: '2px 2px 0 #000' }}>
-                  {mounted && <CountUp end={data.stats.racha} duration={1.5} />}
-                </div>
-              </motion.div>
-
-              {/* Ranking - MORADO (funcional) */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.8, duration: 0.3, ease: 'easeOut' }}
-                className="rounded-lg p-3 text-center flex flex-col justify-center"
-                style={{
-                  background: '#a855f7',
-                  border: '3px solid #000',
-                  boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 1)',
-                }}
-              >
-                <div className="text-sm font-semibold text-white mb-1" style={{ textShadow: '1px 1px 0 #000' }}>EQUIPO</div>
-                <div className="text-3xl font-bold text-white leading-tight" style={{ textShadow: '2px 2px 0 #000' }}>
-                  #{data.equipoRanking.findIndex((e) => e.id === '2') + 1}
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </ChunkyCard>
-
-        {/* BOTTOM RIGHT: Top 3 Equipo - CELESTE CLARO */}
-        <ChunkyCard
-          gradient="linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)"
-          delay={0.4}
-        >
-          <div className="p-6 h-full flex flex-col relative">
-            <h2
-              className="text-2xl font-bold text-white mb-4 relative z-10"
-              style={{ textShadow: '2px 2px 0 #000, -1px -1px 0 #000' }}
-            >
-              TOP 3 EQUIPO
-            </h2>
-
-            <div className="flex-1 flex flex-col gap-3 relative z-10">
-              {data.equipoRanking.slice(0, 3).map((estudiante, index) => {
-                const bgColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
-                const esYo = estudiante.id === '2';
-
-                return (
-                  <motion.div
-                    key={estudiante.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{
-                      delay: 0.6 + index * 0.1,
-                      duration: 0.3,
-                      ease: 'easeOut'
-                    }}
-                    className="rounded-lg p-3 flex items-center gap-3"
-                    style={{
-                      background: esYo ? '#0ea5e9' : bgColors[index],
-                      border: '3px solid #000',
-                      boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 1)',
-                    }}
-                  >
-                    <span className="text-2xl font-bold" style={{ color: esYo ? '#fff' : '#000', textShadow: esYo ? '1px 1px 0 #000' : 'none' }}>#{index + 1}</span>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className="font-bold text-base truncate"
-                        style={{
-                          color: esYo ? '#fff' : '#000',
-                          textShadow: esYo ? '1px 1px 0 #000' : 'none',
-                        }}
-                      >
-                        {estudiante.nombre} {estudiante.apellido}
-                        {esYo && (
-                          <span className="ml-2 text-xs bg-yellow-300 text-black px-2 py-1 rounded-full border-2 border-black">
-                            VOS
-                          </span>
-                        )}
-                      </p>
-                      <p
-                        className="text-sm font-semibold"
-                        style={{
-                          color: esYo ? '#fff' : '#000',
-                          textShadow: esYo ? '1px 1px 0 #000' : 'none',
-                        }}
-                      >
-                        {estudiante.puntos} pts
-                      </p>
+              <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
+                {tareasAsignadas.length > 0 ? (
+                  tareasAsignadas.map((tarea) => (
+                    <div
+                      key={tarea.id}
+                      className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-xl p-3 border border-pink-500/30 hover:from-pink-500/30 hover:to-purple-500/30 transition-all cursor-pointer"
+                    >
+                      <div className="flex items-start gap-2 mb-1.5">
+                        <div
+                          className="w-2 h-2 rounded-full mt-1 flex-shrink-0"
+                          style={{ backgroundColor: tarea.rutaCurricular.color }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-bold text-white mb-0.5 truncate">{tarea.titulo}</h4>
+                          <p className="text-xs text-gray-400 line-clamp-1">{tarea.descripcion}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-gray-400">{tarea.profesor}</span>
+                        <span className="text-pink-400 font-semibold">
+                          Vence: {format(tarea.fechaLimite, "d MMM", { locale: es })}
+                        </span>
+                      </div>
                     </div>
-                  </motion.div>
-                );
-              })}
+                  ))
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center">
+                    <div className="text-5xl mb-2">✅</div>
+                    <p className="text-gray-400 text-sm">No hay tareas pendientes</p>
+                    <p className="text-gray-500 text-xs">¡Estás al día!</p>
+                  </div>
+                )}
+              </div>
+
+              {tareasAsignadas.length > 0 && (
+                <button className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold py-2.5 text-sm rounded-xl hover:shadow-lg hover:shadow-pink-500/50 transition-all mt-3">
+                  Ver Todas las Tareas
+                </button>
+              )}
             </div>
+          </motion.div>
 
-            <ChunkyButton color="#0891b2" className="py-3 text-base mt-3">
-              Ver Ranking Completo →
-            </ChunkyButton>
-          </div>
-        </ChunkyCard>
-
+        </div>
       </div>
+
+      {/* Modals */}
+      {avatarSelectorOpen && (
+        <AvatarSelector
+          currentAvatar={estudiante.avatar_url}
+          onSelect={handleAvatarSelect}
+          onClose={() => setAvatarSelectorOpen(false)}
+        />
+      )}
+
+      {showWelcome && dashboard && (
+        <WelcomeAnimation
+          studentName={estudiante.nombre}
+          level={nivel?.nivelActual || 1}
+          onComplete={handleWelcomeComplete}
+        />
+      )}
+
+      {showLevelUp && nivel && (
+        <LevelUpAnimation
+          newLevel={nivel.nivelActual}
+          levelName={nivel.nombre}
+          onComplete={() => setShowLevelUp(false)}
+        />
+      )}
     </div>
   );
 }

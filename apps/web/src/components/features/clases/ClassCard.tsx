@@ -94,7 +94,7 @@ export function ClassCard({
         </div>
 
         {/* Título de la clase */}
-        <h3 className="font-lilita text-2xl text-dark line-clamp-2">
+        <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark line-clamp-2">
           {clase.titulo}
         </h3>
 

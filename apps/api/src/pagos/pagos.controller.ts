@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { PagosService } from './pagos.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { IniciarSuscripcionDto } from './dto/iniciar-suscripcion.dto';
 import { IniciarCompraCursoDto } from './dto/iniciar-compra-curso.dto';
@@ -122,6 +124,18 @@ export class PagosController {
       estudianteId,
       user.id,
     );
+  }
+
+  /**
+   * GET /pagos/admin/all
+   * Obtiene TODOS los pagos (solo admin)
+   * Incluye información de tutor, producto, membresía e inscripción
+   */
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  async obtenerTodosPagos() {
+    return this.pagosService.findAllPagos();
   }
 
   /**

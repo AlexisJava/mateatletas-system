@@ -105,13 +105,13 @@ export function ProductModal({
               </Badge>
 
               {/* Título */}
-              <h2 className="font-lilita text-4xl text-dark leading-tight">
+              <h2 className="font-[family-name:var(--font-fredoka)] text-4xl text-dark leading-tight">
                 {producto.nombre}
               </h2>
 
               {/* Precio */}
               <div className="flex items-baseline gap-2">
-                <span className="font-lilita text-5xl text-primary">
+                <span className="font-[family-name:var(--font-fredoka)] text-5xl text-primary">
                   ${producto.precio}
                 </span>
                 {producto.duracion_dias && (
@@ -126,7 +126,7 @@ export function ProductModal({
 
         {/* Descripción */}
         <div>
-          <h3 className="font-lilita text-2xl text-dark mb-3">
+          <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark mb-3">
             📝 Descripción
           </h3>
           <p className="text-gray-700 leading-relaxed">
@@ -136,7 +136,7 @@ export function ProductModal({
 
         {/* Beneficios */}
         <div>
-          <h3 className="font-lilita text-2xl text-dark mb-3">
+          <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark mb-3">
             ✨ Incluye
           </h3>
           <ul className="space-y-2">

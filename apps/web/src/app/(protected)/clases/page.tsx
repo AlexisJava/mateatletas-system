@@ -102,7 +102,7 @@ export default function ClasesPage() {
         <div className="flex items-center justify-center gap-3">
           <span className="text-6xl">📚</span>
         </div>
-        <h1 className="font-lilita text-5xl text-[#2a1a5e]">
+        <h1 className="font-[family-name:var(--font-fredoka)] text-5xl text-[#2a1a5e]">
           Clases Disponibles
         </h1>
         <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -166,7 +166,7 @@ export default function ClasesPage() {
           <div className="text-center space-y-4">
             <div className="text-7xl">📚</div>
             <div>
-              <h3 className="font-lilita text-3xl text-[#2a1a5e] mb-2">
+              <h3 className="font-[family-name:var(--font-fredoka)] text-3xl text-[#2a1a5e] mb-2">
                 No hay clases disponibles
               </h3>
               <p className="text-gray-600">
@@ -214,7 +214,7 @@ export default function ClasesPage() {
 
           {/* Info adicional */}
           <Card className="bg-gradient-to-r from-[#00d9ff]/10 to-[#f7b801]/10 border-2 border-[#00d9ff]">
-            <h3 className="font-lilita text-2xl text-dark mb-4">
+            <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark mb-4">
               💡 ¿Cómo funciona?
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

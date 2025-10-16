@@ -1,0 +1,407 @@
+{
+  "tutores": [
+    {
+      "id": 1,
+      "nombre": "María González",
+      "email": "maria.gonzalez@test.com",
+      "password": "Test123!",
+      "dni": "12345678",
+      "telefono": "+54 11 1234-5678",
+      "ha_completado_onboarding": true,
+      "membresia_id": 1,
+      "estudiantes_ids": [1, 2, 3]
+    },
+    {
+      "id": 2,
+      "nombre": "Carlos Rodríguez",
+      "email": "carlos.rodriguez@test.com",
+      "password": "Test123!",
+      "ha_completado_onboarding": false,
+      "membresia_id": null,
+      "estudiantes_ids": []
+    },
+    {
+      "id": 3,
+      "nombre": "Ana Martínez",
+      "email": "ana.martinez@test.com",
+      "password": "Test123!",
+      "ha_completado_onboarding": true,
+      "membresia_id": 2,
+      "estudiantes_ids": [4, 5]
+    }
+  ],
+  "docentes": [
+    {
+      "id": 1,
+      "nombre": "Juan Pérez",
+      "email": "juan.perez@docente.com",
+      "password": "Test123!",
+      "titulo": "Licenciado en Matemática",
+      "bio": "10 años de experiencia enseñando álgebra",
+      "materias": ["Álgebra", "Geometría"]
+    },
+    {
+      "id": 2,
+      "nombre": "Laura Sánchez",
+      "email": "laura.sanchez@docente.com",
+      "password": "Test123!",
+      "titulo": "Profesora de Matemática",
+      "bio": "Especialista en lógica y razonamiento",
+      "materias": ["Lógica", "Trigonometría"]
+    }
+  ],
+  "admin": {
+    "id": 1,
+    "nombre": "Super",
+    "apellido": "Admin",
+    "email": "admin@mateatletas.com",
+    "password": "Admin123!"
+  },
+  "equipos": [
+    { "id": 1, "nombre": "Fénix", "color": "rojo" },
+    { "id": 2, "nombre": "Dragón", "color": "azul" },
+    { "id": 3, "nombre": "Tigre", "color": "naranja" },
+    { "id": 4, "nombre": "Águila", "color": "verde" }
+  ],
+  "estudiantes": [
+    {
+      "id": 1,
+      "nombre": "Sofía González",
+      "email": "sofia.gonzalez@estudiante.com",
+      "password": "Test123!",
+      "edad": 10,
+      "nivel": 2,
+      "equipo_id": 1,
+      "puntos": 150,
+      "clases_reservadas": [5],
+      "tutor_id": 1
+    },
+    {
+      "id": 2,
+      "nombre": "Lucas González",
+      "email": "lucas.gonzalez@estudiante.com",
+      "password": "Test123!",
+      "edad": 14,
+      "nivel": 3,
+      "equipo_id": 2,
+      "puntos": 280,
+      "clases_reservadas": [5, 8],
+      "tutor_id": 1
+    },
+    {
+      "id": 3,
+      "nombre": "Valentina González",
+      "email": "valentina.gonzalez@estudiante.com",
+      "password": "Test123!",
+      "edad": 8,
+      "nivel": 1,
+      "equipo_id": 1,
+      "puntos": 80,
+      "clases_reservadas": [6],
+      "tutor_id": 1
+    },
+    {
+      "id": 4,
+      "nombre": "Mateo Martínez",
+      "email": "mateo.martinez@estudiante.com",
+      "password": "Test123!",
+      "edad": 12,
+      "nivel": 2,
+      "equipo_id": 3,
+      "puntos": 200,
+      "clases_reservadas": [],
+      "tutor_id": 3
+    },
+    {
+      "id": 5,
+      "nombre": "Emma Martínez",
+      "email": "emma.martinez@estudiante.com",
+      "password": "Test123!",
+      "edad": 16,
+      "nivel": 4,
+      "equipo_id": 4,
+      "puntos": 350,
+      "clases_reservadas": [7],
+      "tutor_id": 3
+    }
+  ],
+  "productos": [
+    { "id": 1, "nombre": "Suscripción Mensual", "precio": 5000, "tipo": "membresía" },
+    { "id": 2, "nombre": "Suscripción Anual", "precio": 50000, "tipo": "membresía" },
+    { "id": 3, "nombre": "Curso de Álgebra", "precio": 8000, "tipo": "curso" },
+    { "id": 4, "nombre": "Curso de Geometría", "precio": 8000, "tipo": "curso" },
+    { "id": 5, "nombre": "Recurso Digital (guía)", "precio": 2000, "tipo": "recurso" },
+    {
+      "id": 6,
+      "nombre": "Curso de Lógica Avanzada",
+      "precio": 10000,
+      "tipo": "curso",
+      "fecha_inicio": "2025-10-21",
+      "fecha_fin": "2025-12-13",
+      "cupo": 20
+    },
+    {
+      "id": 7,
+      "nombre": "Curso de Cálculo I",
+      "precio": 12000,
+      "tipo": "curso",
+      "fecha_inicio": "2025-10-28",
+      "fecha_fin": "2026-01-12",
+      "cupo": 15
+    }
+  ],
+  "membresias": [
+    {
+      "id": 1,
+      "tutor_id": 1,
+      "producto_id": 1,
+      "estado": "activa",
+      "fecha_inicio": "2025-09-29",
+      "proximo_pago": "2025-10-29",
+      "preferencia_mp": "pref_test_001"
+    },
+    {
+      "id": 2,
+      "tutor_id": 3,
+      "producto_id": 1,
+      "estado": "atrasada",
+      "fecha_inicio": "2025-09-09",
+      "proximo_pago": "2025-10-09",
+      "preferencia_mp": "pref_test_002"
+    }
+  ],
+  "inscripciones_cursos": [
+    {
+      "id": 1,
+      "estudiante_id": 2,
+      "curso_id": 3,
+      "estado": "activo",
+      "fecha_inscripcion": "2025-10-04"
+    },
+    {
+      "id": 2,
+      "estudiante_id": 5,
+      "curso_id": 4,
+      "estado": "finalizado",
+      "fecha_inscripcion": "2025-08-10"
+    }
+  ],
+  "rutasCurriculares": [
+    "Álgebra",
+    "Geometría",
+    "Lógica",
+    "Trigonometría",
+    "Cálculo",
+    "Estadística"
+  ],
+  "clases": [
+    { "id": 1, "titulo": "Álgebra Básica", "docente_id": 1, "fecha": "2025-10-11", "estudiantes": [1, 2] },
+    { "id": 2, "titulo": "Geometría Plana", "docente_id": 1, "fecha": "2025-10-09", "estudiantes": [5] },
+    { "id": 3, "titulo": "Lógica Proposicional", "docente_id": 2, "fecha": "2025-10-07", "estudiantes": [2] },
+    { "id": 4, "titulo": "Trigonometría", "docente_id": 2, "fecha": "2025-10-04", "estudiantes": [5] },
+    { "id": 5, "titulo": "Álgebra Intermedia", "docente_id": 1, "fecha": "2025-10-14", "estudiantes": [1, 2] },
+    { "id": 6, "titulo": "Geometría Analítica", "docente_id": 1, "fecha": "2025-10-14", "estudiantes": [3] },
+    { "id": 7, "titulo": "Lógica Avanzada", "docente_id": 2, "fecha": "2025-10-15", "estudiantes": [5] },
+    { "id": 8, "titulo": "Álgebra Lineal", "docente_id": 1, "fecha": "2025-10-16", "estudiantes": [2] },
+    { "id": 9, "titulo": "Geometría Espacial", "docente_id": 1, "fecha": "2025-10-17", "estudiantes": [] },
+    { "id": 10, "titulo": "Trigonometría Avanzada", "docente_id": 2, "fecha": "2025-10-18", "estudiantes": [] },
+    { "id": 11, "titulo": "Cálculo Diferencial", "docente_id": 2, "fecha": "2025-10-19", "estudiantes": [] },
+    { "id": 12, "titulo": "Estadística Básica", "docente_id": 2, "fecha": "2025-10-21", "estudiantes": [] }
+  ],
+  "inscripciones_clases": [
+    { "id": 1, "estudiante_id": 1, "clase_id": 1, "asistencia": true },
+    { "id": 2, "estudiante_id": 2, "clase_id": 1, "asistencia": true },
+    { "id": 3, "estudiante_id": 2, "clase_id": 3, "asistencia": false },
+    { "id": 4, "estudiante_id": 5, "clase_id": 2, "asistencia": true },
+    { "id": 5, "estudiante_id": 5, "clase_id": 4, "asistencia": true },
+    { "id": 6, "estudiante_id": 1, "clase_id": 5, "asistencia": null },
+    { "id": 7, "estudiante_id": 2, "clase_id": 5, "asistencia": null },
+    { "id": 8, "estudiante_id": 3, "clase_id": 6, "asistencia": null },
+    { "id": 9, "estudiante_id": 5, "clase_id": 7, "asistencia": null },
+    { "id": 10, "estudiante_id": 2, "clase_id": 8, "asistencia": null }
+  ],
+  "asistencias": [
+    {
+      "id": 1,
+      "estudiante_id": 1,
+      "clase_id": 1,
+      "estado": "Presente",
+      "puntos": 20,
+      "comentario": "Excelente participación"
+    },
+    {
+      "id": 2,
+      "estudiante_id": 2,
+      "clase_id": 1,
+      "estado": "Presente",
+      "puntos": 25,
+      "comentario": "Muy buen razonamiento"
+    },
+    {
+      "id": 3,
+      "estudiante_id": 2,
+      "clase_id": 3,
+      "estado": "Ausente",
+      "puntos": 0,
+      "comentario": "No asistió"
+    },
+    {
+      "id": 4,
+      "estudiante_id": 5,
+      "clase_id": 2,
+      "estado": "Presente",
+      "puntos": 30,
+      "comentario": "Destacada en geometría"
+    },
+    {
+      "id": 5,
+      "estudiante_id": 5,
+      "clase_id": 4,
+      "estado": "Presente",
+      "puntos": 25,
+      "comentario": "Buena comprensión"
+    }
+  ],
+  "pagos": [
+    {
+      "id": 1,
+      "tutor_id": 1,
+      "concepto": "Suscripción Mensual",
+      "monto": 5000,
+      "estado": "aprobado",
+      "fecha": "2025-09-29",
+      "mp_id": "123456789"
+    },
+    {
+      "id": 2,
+      "estudiante_id": 2,
+      "concepto": "Curso de Álgebra",
+      "monto": 8000,
+      "estado": "aprobado",
+      "fecha": "2025-10-04",
+      "mp_id": "123456790"
+    },
+    {
+      "id": 3,
+      "tutor_id": 3,
+      "concepto": "Suscripción Mensual",
+      "monto": 5000,
+      "estado": "pendiente",
+      "fecha": "2025-09-09",
+      "mp_id": "123456791"
+    }
+  ],
+  "notificaciones": [
+    {
+      "docente_id": 1,
+      "tipo": "ClaseProxima",
+      "titulo": "Clase próxima",
+      "mensaje": "La clase 'Introducción al Álgebra' comienza mañana a las 10:00",
+      "leida": false,
+      "metadata": {
+        "clase_id": 1
+      }
+    },
+    {
+      "docente_id": 1,
+      "tipo": "AsistenciaPendiente",
+      "titulo": "Asistencia pendiente",
+      "mensaje": "Recuerda registrar la asistencia de la clase 'Fundamentos de Geometría'",
+      "leida": false,
+      "metadata": {
+        "clase_id": 2
+      }
+    },
+    {
+      "docente_id": 1,
+      "tipo": "LogroEstudiante",
+      "titulo": "Logro desbloqueado",
+      "mensaje": "Sofía García ha desbloqueado: Primera Racha - 7 días consecutivos",
+      "leida": true,
+      "metadata": {
+        "estudiante_id": 1,
+        "logro": "Primera Racha"
+      }
+    },
+    {
+      "docente_id": 2,
+      "tipo": "ClaseProxima",
+      "titulo": "Clase próxima",
+      "mensaje": "La clase 'Lógica Proposicional' comienza en 2 horas",
+      "leida": false,
+      "metadata": {
+        "clase_id": 3
+      }
+    },
+    {
+      "docente_id": 2,
+      "tipo": "Recordatorio",
+      "titulo": "Recordatorio",
+      "mensaje": "Reunión con coordinación académica a las 15:00",
+      "leida": false,
+      "metadata": {}
+    }
+  ],
+  "eventos": [
+    {
+      "docente_id": 1,
+      "titulo": "Reunión de equipo docente",
+      "descripcion": "Revisión del plan curricular del mes",
+      "fecha_inicio": "2025-10-16T14:00:00.000Z",
+      "fecha_fin": "2025-10-16T15:30:00.000Z",
+      "todo_el_dia": false,
+      "tipo": "Reunion",
+      "color": "#3B82F6",
+      "recordatorio": true,
+      "minutos_antes": 30
+    },
+    {
+      "docente_id": 1,
+      "titulo": "Preparar material de clase",
+      "descripcion": "Crear ejercicios para clase de álgebra lineal",
+      "fecha_inicio": "2025-10-17T10:00:00.000Z",
+      "fecha_fin": null,
+      "todo_el_dia": false,
+      "tipo": "TareaPendiente",
+      "color": "#F59E0B",
+      "recordatorio": true,
+      "minutos_antes": 60
+    },
+    {
+      "docente_id": 1,
+      "titulo": "Cumpleaños de Sofía García",
+      "descripcion": null,
+      "fecha_inicio": "2025-10-20T00:00:00.000Z",
+      "fecha_fin": null,
+      "todo_el_dia": true,
+      "tipo": "Cumpleaños",
+      "color": "#EC4899",
+      "recordatorio": true,
+      "minutos_antes": 1440
+    },
+    {
+      "docente_id": 1,
+      "titulo": "Revisar exámenes",
+      "descripcion": "Corregir evaluaciones del módulo 3",
+      "fecha_inicio": "2025-10-18T16:00:00.000Z",
+      "fecha_fin": "2025-10-18T18:00:00.000Z",
+      "todo_el_dia": false,
+      "tipo": "TareaPendiente",
+      "color": "#F59E0B",
+      "recordatorio": false,
+      "minutos_antes": null
+    },
+    {
+      "docente_id": 2,
+      "titulo": "Capacitación pedagógica",
+      "descripcion": "Workshop sobre nuevas metodologías de enseñanza",
+      "fecha_inicio": "2025-10-22T09:00:00.000Z",
+      "fecha_fin": "2025-10-22T13:00:00.000Z",
+      "todo_el_dia": false,
+      "tipo": "Reunion",
+      "color": "#3B82F6",
+      "recordatorio": true,
+      "minutos_antes": 120
+    }
+  ]
+}

@@ -5,23 +5,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-confetti';
 import { useGamificacionStore } from '@/store/gamificacion.store';
 import { useAuthStore } from '@/store/auth.store';
-import toast from 'react-hot-toast';
+import { Trophy, Lock, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function LogrosPage() {
-  const { logros, fetchLogros, logroRecienDesbloqueado, clearLogroModal } =
-    useGamificacionStore();
+  const { logros, fetchLogros, logroRecienDesbloqueado } = useGamificacionStore();
   const { user } = useAuthStore();
   const [showConfetti, setShowConfetti] = useState(false);
   const [selectedLogro, setSelectedLogro] = useState<any>(null);
+  const [filtroCategoria, setFiltroCategoria] = useState('todos');
+  const [paginaActual, setPaginaActual] = useState(0);
 
   useEffect(() => {
-    // Obtener logros del estudiante actual
     if (user?.id && user?.role === 'estudiante') {
       fetchLogros(user.id);
     }
   }, [user?.id]);
 
-  // Logros mock
+  // Logros mock (mejorados)
   const mockLogros = [
     {
       id: 'primera-clase',
@@ -30,6 +30,7 @@ export default function LogrosPage() {
       icono: '🎓',
       puntos: 50,
       categoria: 'inicio',
+      rareza: 'común',
       desbloqueado: true,
     },
     {
@@ -39,6 +40,7 @@ export default function LogrosPage() {
       icono: '⭐',
       puntos: 100,
       categoria: 'asistencia',
+      rareza: 'raro',
       desbloqueado: true,
     },
     {
@@ -48,6 +50,7 @@ export default function LogrosPage() {
       icono: '🔥',
       puntos: 150,
       categoria: 'progreso',
+      rareza: 'raro',
       desbloqueado: false,
     },
     {
@@ -57,6 +60,7 @@ export default function LogrosPage() {
       icono: '📐',
       puntos: 200,
       categoria: 'maestria',
+      rareza: 'épico',
       desbloqueado: false,
     },
     {
@@ -66,6 +70,7 @@ export default function LogrosPage() {
       icono: '🤝',
       puntos: 120,
       categoria: 'social',
+      rareza: 'raro',
       desbloqueado: false,
     },
     {
@@ -75,25 +80,8 @@ export default function LogrosPage() {
       icono: '🔥',
       puntos: 180,
       categoria: 'racha',
+      rareza: 'épico',
       desbloqueado: true,
-    },
-    {
-      id: 'racha-30',
-      nombre: 'Racha de 30 Días',
-      descripcion: 'Asististe 30 días consecutivos',
-      icono: '🔥🔥',
-      puntos: 500,
-      categoria: 'racha',
-      desbloqueado: false,
-    },
-    {
-      id: 'mvp-mes',
-      nombre: 'MVP del Mes',
-      descripcion: 'Fuiste el estudiante con más puntos del mes',
-      icono: '👑',
-      puntos: 300,
-      categoria: 'elite',
-      desbloqueado: false,
     },
   ];
 
@@ -101,269 +89,251 @@ export default function LogrosPage() {
   const desbloqueados = logrosData.filter((l) => l.desbloqueado).length;
   const porcentaje = (desbloqueados / logrosData.length) * 100;
 
-  // Efecto cuando se desbloquea un logro
+  const categorias = [
+    { id: 'todos', nombre: 'Todos', icono: '🏆' },
+    { id: 'inicio', nombre: 'Inicio', icono: '🎓' },
+    { id: 'racha', nombre: 'Rachas', icono: '🔥' },
+    { id: 'progreso', nombre: 'Progreso', icono: '📈' },
+  ];
+
+  const rarezaColors = {
+    común: { bg: 'from-gray-500 to-gray-600', border: 'gray-500' },
+    raro: { bg: 'from-blue-500 to-cyan-500', border: 'blue-500' },
+    épico: { bg: 'from-purple-500 to-pink-500', border: 'purple-500' },
+    legendario: { bg: 'from-yellow-500 to-orange-500', border: 'yellow-500' },
+  };
+
   useEffect(() => {
     if (logroRecienDesbloqueado) {
       setShowConfetti(true);
       setSelectedLogro(logroRecienDesbloqueado);
-      toast.success(`¡Desbloqueaste: ${logroRecienDesbloqueado.nombre}!`, {
-        icon: logroRecienDesbloqueado.icono,
-        duration: 5000,
-      });
-
-      setTimeout(() => {
-        setShowConfetti(false);
-      }, 5000);
+      setTimeout(() => setShowConfetti(false), 5000);
     }
   }, [logroRecienDesbloqueado]);
 
-  const handleLogroClick = (logro: any) => {
-    if (logro.desbloqueado) {
-      setSelectedLogro(logro);
-    }
-  };
+  const logrosFiltrados =
+    filtroCategoria === 'todos'
+      ? logrosData
+      : logrosData.filter((l) => l.categoria === filtroCategoria);
+
+  // Paginación: mostrar 6 logros por página (2x3)
+  const LOGROS_POR_PAGINA = 6;
+  const totalPaginas = Math.ceil(logrosFiltrados.length / LOGROS_POR_PAGINA);
+  const logrosEnPagina = logrosFiltrados.slice(
+    paginaActual * LOGROS_POR_PAGINA,
+    (paginaActual + 1) * LOGROS_POR_PAGINA
+  );
+
+  useEffect(() => {
+    setPaginaActual(0);
+  }, [filtroCategoria]);
 
   return (
-    <div
-      className="h-full overflow-y-auto p-4 space-y-6"
-      style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #164e63 50%, #0f172a 100%)'
-      }}
-    >
-      {/* Confetti cuando se desbloquea logro */}
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
       {showConfetti && <Confetti recycle={false} numberOfPieces={500} />}
 
-      {/* Header con progreso - CELESTE CHUNKY */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-        className="rounded-2xl p-8"
-        style={{
-          background: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
-          border: '5px solid #000',
-          boxShadow: '8px 8px 0 0 rgba(0, 0, 0, 1)',
-        }}
-      >
-        <h1
-          className="text-4xl font-bold text-white mb-4"
-          style={{ textShadow: '3px 3px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000' }}
+      <div className="h-full max-w-7xl mx-auto flex flex-col gap-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 rounded-3xl shadow-2xl border-2 border-purple-400 p-6 flex-shrink-0"
         >
-          TUS LOGROS
-        </h1>
-        <p
-          className="text-white text-lg mb-4 font-semibold"
-          style={{ textShadow: '2px 2px 0 #000' }}
-        >
-          Has desbloqueado {desbloqueados} de {logrosData.length} logros
-        </p>
-
-        {/* Progress Bar - CHUNKY */}
-        <div
-          className="relative w-full h-10 rounded-full overflow-hidden"
-          style={{
-            background: '#0c4a6e',
-            border: '4px solid #000',
-            boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 1)',
-          }}
-        >
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${porcentaje}%` }}
-            transition={{ duration: 1.5, ease: 'easeOut' }}
-            className="h-full flex items-center justify-center"
-            style={{
-              background: 'linear-gradient(90deg, #FFD700 0%, #FFA500 100%)',
-            }}
-          >
-            <span
-              className="text-black font-bold text-base"
-              style={{ textShadow: '1px 1px 0 rgba(255,255,255,0.5)' }}
-            >
-              {Math.round(porcentaje)}%
-            </span>
-          </motion.div>
-        </div>
-      </motion.div>
-
-      {/* Grid de Logros - CHUNKY STYLE */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {logrosData.map((logro, index) => (
-          <motion.div
-            key={logro.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.05, duration: 0.3, ease: 'easeOut' }}
-            whileHover={{
-              scale: logro.desbloqueado ? 1.03 : 1.01,
-              y: logro.desbloqueado ? -4 : 0,
-              transition: { duration: 0.2, ease: 'easeOut' }
-            }}
-            onClick={() => handleLogroClick(logro)}
-            className="relative cursor-pointer rounded-2xl p-6"
-            style={{
-              background: logro.desbloqueado
-                ? 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)'
-                : '#1e293b',
-              border: '4px solid #000',
-              boxShadow: logro.desbloqueado
-                ? '6px 6px 0 0 rgba(0, 0, 0, 1)'
-                : '4px 4px 0 0 rgba(0, 0, 0, 1)',
-              opacity: logro.desbloqueado ? 1 : 0.5,
-            }}
-          >
-            {/* Lock overlay para bloqueados */}
-            {!logro.desbloqueado && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-xl">
-                <span className="text-6xl">🔒</span>
-              </div>
-            )}
-
-            <div className="relative z-10 text-center">
-              {/* Icono */}
-              <motion.div
-                animate={
-                  logro.desbloqueado
-                    ? { scale: [1, 1.1, 1] }
-                    : {}
-                }
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatDelay: 3,
-                  ease: 'easeInOut',
-                }}
-                className="text-6xl mb-3"
-              >
-                {logro.icono}
-              </motion.div>
-
-              {/* Nombre */}
-              <h3
-                className="text-lg font-bold mb-2"
-                style={{
-                  color: logro.desbloqueado ? '#000' : '#64748b',
-                  textShadow: logro.desbloqueado ? '1px 1px 0 rgba(255,255,255,0.3)' : 'none',
-                }}
-              >
-                {logro.nombre}
-              </h3>
-
-              {/* Descripción */}
-              <p
-                className="text-sm mb-3"
-                style={{
-                  color: logro.desbloqueado ? '#000' : '#475569',
-                }}
-              >
-                {logro.descripcion}
+          <div className="flex items-center gap-4 mb-4">
+            <Trophy className="w-14 h-14 text-white" />
+            <div>
+              <h1 className="text-4xl font-black text-white drop-shadow-lg">Mis Logros</h1>
+              <p className="text-white/90 text-lg font-semibold">
+                {desbloqueados} de {logrosData.length} desbloqueados
               </p>
-
-              {/* Puntos */}
-              <div
-                className="inline-block px-3 py-2 rounded-lg text-sm font-bold"
-                style={{
-                  background: logro.desbloqueado ? '#fff' : '#334155',
-                  color: logro.desbloqueado ? '#000' : '#64748b',
-                  border: '2px solid #000',
-                  boxShadow: '2px 2px 0 0 rgba(0, 0, 0, 1)',
-                }}
-              >
-                +{logro.puntos} pts
-              </div>
             </div>
-          </motion.div>
-        ))}
+          </div>
+
+          {/* Progress Bar */}
+          <div className="relative w-full h-4 bg-black/30 rounded-full overflow-hidden border border-white/20">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${porcentaje}%` }}
+              transition={{ duration: 1.5, delay: 0.3, ease: 'easeOut' }}
+              className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+            </motion.div>
+          </div>
+          <div className="text-center mt-1">
+            <span className="text-sm text-white/80 font-bold">{Math.round(porcentaje)}% completado</span>
+          </div>
+        </motion.div>
+
+        {/* Filtros de Categoría */}
+        <div className="flex flex-wrap gap-3 flex-shrink-0">
+          {categorias.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setFiltroCategoria(cat.id)}
+              className={`px-5 py-3 rounded-xl text-base font-semibold transition-all ${
+                filtroCategoria === cat.id
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/50 scale-105'
+                  : 'bg-slate-800 text-gray-300 hover:bg-slate-700 border-2 border-purple-500/30'
+              }`}
+            >
+              {cat.icono} {cat.nombre}
+            </button>
+          ))}
+        </div>
+
+        {/* Grid de Logros - Responsive: 1 col mobile, 2 cols tablet, 3 cols desktop */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto lg:overflow-hidden">
+            {logrosEnPagina.map((logro, index) => {
+              const rareza = rarezaColors[logro.rareza || 'común'];
+
+              return (
+                <motion.div
+                  key={logro.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1, duration: 0.3 }}
+                  whileHover={logro.desbloqueado ? { scale: 1.05, y: -8 } : {}}
+                  onClick={() => logro.desbloqueado && setSelectedLogro(logro)}
+                  className="relative group cursor-pointer"
+                >
+                  {/* Glow Effect */}
+                  {logro.desbloqueado && (
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-r ${rareza.bg} rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 transition-opacity`}
+                    />
+                  )}
+
+                  {/* Card */}
+                  <div
+                    className={`relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl shadow-2xl border-2 p-8 h-full flex flex-col items-center justify-center ${
+                      logro.desbloqueado
+                        ? `border-${rareza.border}/50 hover:border-${rareza.border} transition-all`
+                        : 'border-gray-700 opacity-50'
+                    }`}
+                  >
+                    {/* Lock overlay */}
+                    {!logro.desbloqueado && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-3xl z-10">
+                        <Lock className="w-20 h-20 text-gray-400" />
+                      </div>
+                    )}
+
+                    <div className="relative z-0 text-center flex flex-col items-center justify-center h-full">
+                      {/* Icono */}
+                      <motion.div
+                        animate={logro.desbloqueado ? { scale: [1, 1.1, 1] } : {}}
+                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                        className="text-8xl mb-4"
+                      >
+                        {logro.icono}
+                      </motion.div>
+
+                      {/* Rareza Badge */}
+                      {logro.desbloqueado && (
+                        <div
+                          className={`inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-3 bg-gradient-to-r ${rareza.bg} border border-white/20`}
+                        >
+                          {logro.rareza?.toUpperCase()}
+                        </div>
+                      )}
+
+                      {/* Nombre */}
+                      <h3 className="text-xl font-bold text-white mb-3">{logro.nombre}</h3>
+
+                      {/* Descripción */}
+                      <p className="text-base text-gray-400 mb-4">{logro.descripcion}</p>
+
+                      {/* Puntos */}
+                      {logro.desbloqueado && (
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500/20 border border-green-500/30 text-green-400 text-base font-bold">
+                          <Star className="w-5 h-5" />
+                          +{logro.puntos} pts
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Paginación */}
+          {totalPaginas > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-6 flex-shrink-0">
+              <button
+                onClick={() => setPaginaActual((p) => Math.max(0, p - 1))}
+                disabled={paginaActual === 0}
+                className="p-3 rounded-xl bg-slate-800 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all border-2 border-purple-500/30"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <span className="text-white font-bold text-lg">
+                Página {paginaActual + 1} de {totalPaginas}
+              </span>
+              <button
+                onClick={() => setPaginaActual((p) => Math.min(totalPaginas - 1, p + 1))}
+                disabled={paginaActual === totalPaginas - 1}
+                className="p-3 rounded-xl bg-slate-800 text-white hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all border-2 border-purple-500/30"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Modal de Logro Desbloqueado - CHUNKY */}
+      {/* Modal de Logro */}
       <AnimatePresence>
         {selectedLogro && selectedLogro.desbloqueado && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
             onClick={() => setSelectedLogro(null)}
-            className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.8, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.8, y: 20 }}
-              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="rounded-3xl p-8 max-w-md w-full"
-              style={{
-                background: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
-                border: '6px solid #000',
-                boxShadow: '12px 12px 0 0 rgba(0, 0, 0, 1)',
-              }}
+              className={`bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 max-w-md w-full border-2 shadow-2xl border-${
+                rarezaColors[selectedLogro.rareza || 'común'].border
+              }`}
             >
               <div className="text-center">
                 <motion.div
-                  animate={{
-                    scale: [1, 1.15, 1],
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
+                  animate={{ scale: [1, 1.15, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
                   className="text-9xl mb-4"
                 >
                   {selectedLogro.icono}
                 </motion.div>
 
-                <h2
-                  className="text-3xl font-bold text-white mb-2"
-                  style={{ textShadow: '3px 3px 0 #000' }}
-                >
-                  ¡{selectedLogro.nombre}!
-                </h2>
-
-                <p
-                  className="text-white text-lg mb-6 font-semibold"
-                  style={{ textShadow: '2px 2px 0 #000' }}
-                >
-                  {selectedLogro.descripcion}
-                </p>
-
                 <div
-                  className="rounded-2xl p-4 mb-6"
-                  style={{
-                    background: '#FFD700',
-                    border: '4px solid #000',
-                    boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 1)',
-                  }}
+                  className={`inline-block px-4 py-2 rounded-full text-sm font-bold text-white mb-4 bg-gradient-to-r ${
+                    rarezaColors[selectedLogro.rareza || 'común'].bg
+                  }`}
                 >
-                  <p className="text-black font-bold text-2xl">
-                    +{selectedLogro.puntos} Puntos
-                  </p>
+                  {selectedLogro.rareza?.toUpperCase()}
                 </div>
 
-                <motion.button
-                  whileHover={{
-                    x: -2,
-                    y: -2,
-                    transition: { duration: 0.2, ease: 'easeOut' }
-                  }}
-                  whileTap={{
-                    x: 0,
-                    y: 0,
-                    transition: { duration: 0.1 }
-                  }}
+                <h2 className="text-3xl font-bold text-white mb-2">{selectedLogro.nombre}</h2>
+
+                <p className="text-white/80 text-lg mb-6">{selectedLogro.descripcion}</p>
+
+                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl p-4 mb-6 border border-yellow-500/30">
+                  <p className="text-yellow-400 font-bold text-2xl">+{selectedLogro.puntos} Puntos</p>
+                </div>
+
+                <button
                   onClick={() => setSelectedLogro(null)}
-                  className="px-8 py-3 rounded-xl text-white font-bold text-lg"
-                  style={{
-                    background: '#0891b2',
-                    border: '4px solid #000',
-                    boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 1)',
-                    textShadow: '2px 2px 0 #000',
-                  }}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all"
                 >
-                  ¡Genial!
-                </motion.button>
+                  ¡Genial! 🎉
+                </button>
               </div>
             </motion.div>
           </motion.div>

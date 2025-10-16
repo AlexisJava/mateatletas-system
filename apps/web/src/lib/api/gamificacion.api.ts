@@ -5,7 +5,8 @@ export interface DashboardData {
     id: string;
     nombre: string;
     apellido: string;
-    avatar?: string;
+    avatar_url?: string;
+    foto_url?: string;
     equipo: {
       id: string;
       nombre: string;
@@ -17,6 +18,23 @@ export interface DashboardData {
     clasesAsistidas: number;
     clasesTotales: number;
     racha: number;
+  };
+  nivel: {
+    nivelActual: number;
+    nombre: string;
+    descripcion: string;
+    puntosActuales: number;
+    puntosMinimos: number;
+    puntosMaximos: number;
+    puntosParaSiguienteNivel: number;
+    porcentajeProgreso: number;
+    color: string;
+    icono: string;
+    siguienteNivel: {
+      nivel: number;
+      nombre: string;
+      puntosRequeridos: number;
+    } | null;
   };
   proximasClases: any[];
   equipoRanking: any[];

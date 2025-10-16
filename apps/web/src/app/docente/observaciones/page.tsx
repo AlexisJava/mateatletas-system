@@ -85,18 +85,18 @@ export default function DocenteObservacionesPage() {
       <motion.div {...fadeIn}>
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Mis Observaciones</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-3xl font-bold text-indigo-900 dark:text-white">Mis Observaciones</h1>
+          <p className="text-purple-600 dark:text-purple-300 mt-1">
             {observacionesFiltradas.length} observaciones registradas
           </p>
         </div>
 
         {/* Filtros y búsqueda */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="glass-card-strong p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Búsqueda */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-indigo-900 dark:text-white mb-2">
                 Buscar
               </label>
               <input
@@ -104,33 +104,33 @@ export default function DocenteObservacionesPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Nombre del estudiante, observación, ruta..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
+                className="w-full px-4 py-2 bg-white/40 dark:bg-indigo-900/40 border border-purple-200/50 dark:border-purple-700/50 rounded-lg text-indigo-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
 
             {/* Fecha desde */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-indigo-900 dark:text-white mb-2">
                 Desde
               </label>
               <input
                 type="date"
                 value={filtros.fechaDesde}
                 onChange={(e) => setFiltros({ ...filtros, fechaDesde: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
+                className="w-full px-4 py-2 bg-white/40 dark:bg-indigo-900/40 border border-purple-200/50 dark:border-purple-700/50 rounded-lg text-indigo-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
 
             {/* Fecha hasta */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-indigo-900 dark:text-white mb-2">
                 Hasta
               </label>
               <input
                 type="date"
                 value={filtros.fechaHasta}
                 onChange={(e) => setFiltros({ ...filtros, fechaHasta: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
+                className="w-full px-4 py-2 bg-white/40 dark:bg-indigo-900/40 border border-purple-200/50 dark:border-purple-700/50 rounded-lg text-indigo-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -139,13 +139,13 @@ export default function DocenteObservacionesPage() {
           <div className="mt-4 flex gap-3">
             <button
               onClick={limpiarFiltros}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 glass-card text-indigo-900 dark:text-white hover:bg-purple-100/60 dark:hover:bg-purple-900/40 rounded-lg transition-colors"
             >
               Limpiar filtros
             </button>
             <button
               onClick={fetchObservaciones}
-              className="px-4 py-2 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff5722] transition-colors"
+              className="px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg shadow-lg shadow-purple-500/40 hover:shadow-xl hover:shadow-purple-500/50 transition-all"
             >
               Aplicar filtros
             </button>
@@ -153,11 +153,11 @@ export default function DocenteObservacionesPage() {
         </div>
 
         {/* Lista de observaciones */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="glass-card-strong overflow-hidden">
           {observacionesFiltradas.length === 0 ? (
             <div className="p-12 text-center">
               <svg
-                className="w-16 h-16 mx-auto text-gray-300 mb-4"
+                className="w-16 h-16 mx-auto text-purple-300 dark:text-purple-700 mb-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -169,19 +169,19 @@ export default function DocenteObservacionesPage() {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <p className="text-gray-500 text-lg">No hay observaciones registradas</p>
-              <p className="text-gray-400 text-sm mt-1">
+              <p className="text-indigo-900 dark:text-white text-lg font-semibold">No hay observaciones registradas</p>
+              <p className="text-purple-600 dark:text-purple-300 text-sm mt-1">
                 Las observaciones aparecerán aquí cuando las registres en las clases
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-purple-200/20 dark:divide-purple-700/20">
               {observacionesFiltradas.map((obs) => (
                 <motion.div
                   key={obs.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="p-6 hover:bg-purple-50/30 dark:hover:bg-purple-900/20 transition-colors cursor-pointer"
                   onClick={() => setSelectedObservacion(obs)}
                 >
                   <div className="flex justify-between items-start">
@@ -203,10 +203,10 @@ export default function DocenteObservacionesPage() {
 
                         {/* Nombre y fecha */}
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-lg font-semibold text-indigo-900 dark:text-white">
                             {obs.estudiante.nombre} {obs.estudiante.apellido}
                           </h3>
-                          <div className="flex items-center gap-3 text-sm text-gray-600">
+                          <div className="flex items-center gap-3 text-sm text-purple-600 dark:text-purple-300">
                             <span>
                               📅{' '}
                               {format(parseISO(obs.clase.fecha_hora_inicio), 'dd MMM yyyy', {

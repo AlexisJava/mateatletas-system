@@ -94,7 +94,7 @@ export function LevelUpAnimation({ show, level, onComplete }: LevelUpAnimationPr
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                <h1 className="font-lilita text-6xl text-white mb-2" style={{ textShadow: '4px 4px 0px rgba(0,0,0,1)' }}>
+                <h1 className="font-[family-name:var(--font-fredoka)] text-6xl text-white mb-2" style={{ textShadow: '4px 4px 0px rgba(0,0,0,1)' }}>
                   LEVEL UP!
                 </h1>
                 <motion.p

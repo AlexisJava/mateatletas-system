@@ -100,6 +100,10 @@ model Estudiante {
   /// URL de la foto de perfil del estudiante (opcional)
   foto_url String?
 
+  /// URL o identificador del avatar personalizable del estudiante
+  /// Puede ser una URL de Dicebear API o un identificador de avatar predefinido
+  avatar_url String? @default("avataaars")
+
   /// ID del tutor que gestiona este estudiante
   tutor_id String
 
@@ -215,6 +219,12 @@ model Docente {
 
   /// Relación con logros desbloqueados (un docente puede aprobar muchos logros)
   logrosAprobados LogroDesbloqueado[] @relation("LogrosAprobados")
+
+  /// Relación con notificaciones (un docente puede tener muchas notificaciones)
+  notificaciones Notificacion[]
+
+  /// Relación con eventos (un docente puede tener muchos eventos)
+  eventos Evento[]
 
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
@@ -1126,5 +1136,160 @@ model ProgresoLeccion {
 
   /// Índice para búsquedas de lecciones completadas
   @@index([estudiante_id, completada])
+}
+
+// ============================================
+// NOTIFICACIONES Y EVENTOS PARA DOCENTES
+// ============================================
+
+/// Sistema de notificaciones para docentes
+/// Permite notificar eventos importantes como clases próximas, alertas de estudiantes, etc.
+model Notificacion {
+  /// Identificador único de la notificación
+  id String @id @default(cuid())
+
+  /// Tipo de notificación
+  tipo TipoNotificacion
+
+  /// Título de la notificación
+  titulo String
+
+  /// Mensaje descriptivo de la notificación
+  mensaje String @db.Text
+
+  /// Indica si la notificación ha sido leída
+  leida Boolean @default(false)
+
+  /// ID del docente al que pertenece la notificación
+  docente_id String
+
+  /// Relación con el docente
+  docente Docente @relation(fields: [docente_id], references: [id], onDelete: Cascade)
+
+  /// Metadata adicional en formato JSON (clase_id, estudiante_id, etc)
+  metadata Json?
+
+  /// Timestamp de creación de la notificación
+  createdAt DateTime @default(now())
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("notificaciones")
+
+  /// Índice para búsquedas rápidas por docente y estado de lectura
+  @@index([docente_id, leida])
+
+  /// Índice para ordenamiento por fecha
+  @@index([docente_id, createdAt])
+}
+
+/// Tipos de notificaciones disponibles
+enum TipoNotificacion {
+  ClaseProxima        // Clase programada en las próximas 24h
+  AsistenciaPendiente // Asistencia sin registrar 2h después de la clase
+  EstudianteAlerta    // Estudiante con baja asistencia (<70%)
+  ClaseCancelada      // Clase cancelada por el sistema o admin
+  LogroEstudiante     // Estudiante alcanzó un logro importante
+  Recordatorio        // Recordatorio personalizado
+  General             // Notificación general del sistema
+
+  @@map("tipo_notificacion")
+}
+
+/// Eventos y recordatorios personalizados para docentes
+/// Permite a los docentes crear eventos en su calendario
+model Evento {
+  /// Identificador único del evento
+  id String @id @default(cuid())
+
+  /// Título del evento
+  titulo String
+
+  /// Descripción detallada del evento
+  descripcion String? @db.Text
+
+  /// Fecha y hora de inicio del evento
+  fecha_inicio DateTime
+
+  /// Fecha y hora de fin del evento (opcional para eventos puntuales)
+  fecha_fin DateTime?
+
+  /// Indica si el evento dura todo el día
+  todo_el_dia Boolean @default(false)
+
+  /// Tipo de evento
+  tipo TipoEvento
+
+  /// Color personalizado para el evento en el calendario (formato hex)
+  color String? @default("#6366F1")
+
+  /// Indica si debe crear un recordatorio
+  recordatorio Boolean @default(false)
+
+  /// Minutos antes del evento para mostrar el recordatorio
+  minutos_antes Int? @default(30)
+
+  /// ID del docente al que pertenece el evento
+  docente_id String
+
+  /// Relación con el docente
+  docente Docente @relation(fields: [docente_id], references: [id], onDelete: Cascade)
+
+  /// Timestamp de creación del evento
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del evento
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("eventos")
+
+  /// Índice para búsquedas por docente y fecha
+  @@index([docente_id, fecha_inicio])
+}
+
+/// Tipos de eventos disponibles
+enum TipoEvento {
+  Recordatorio    // Recordatorio personal
+  Reunion         // Reunión con padres, colegas, etc.
+  TareaPendiente  // Tarea administrativa pendiente
+  Cumpleaños      // Cumpleaños de estudiante
+  Otro            // Otro tipo de evento
+
+  @@map("tipo_evento")
+}
+
+/// Configuración de niveles del sistema de gamificación
+/// Define los nombres creativos y requisitos para cada nivel
+model NivelConfig {
+  /// Número del nivel (1, 2, 3, etc.)
+  nivel Int @id
+
+  /// Nombre creativo del nivel
+  /// Ejemplos: "Explorador Numérico", "Maestro del Cálculo", "Genio Matemático"
+  nombre String
+
+  /// Descripción del nivel
+  descripcion String
+
+  /// Puntos mínimos requeridos para alcanzar este nivel
+  puntos_minimos Int
+
+  /// Puntos máximos antes de pasar al siguiente nivel
+  puntos_maximos Int
+
+  /// Color hex asociado al nivel para UI
+  color String @default("#6366F1")
+
+  /// Icono o emoji asociado al nivel
+  icono String @default("🌟")
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("niveles_config")
 }
 

@@ -51,6 +51,9 @@ export class GamificacionService {
       throw new Error('Estudiante no encontrado');
     }
 
+    // Obtener información del nivel actual
+    const nivelInfo = await this.getNivelInfo(estudiante.puntos_totales);
+
     // Calcular puntos totales basados en asistencias
     const puntosAsistencia = estudiante.asistencias.filter(
       (a) => a.estado === EstadoAsistencia.Presente,
@@ -88,6 +91,7 @@ export class GamificacionService {
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
         foto_url: estudiante.foto_url,
+        avatar_url: estudiante.avatar_url,
         equipo: estudiante.equipo,
       },
       stats: {
@@ -98,10 +102,89 @@ export class GamificacionService {
         clasesTotales: estudiante.inscripciones_clase.length,
         racha: await this.calcularRacha(estudianteId),
       },
+      nivel: nivelInfo,
       proximasClases,
       equipoRanking,
       ultimasAsistencias: estudiante.asistencias.slice(0, 5),
     };
+  }
+
+  /**
+   * Obtener información del nivel basado en los puntos totales
+   */
+  async getNivelInfo(puntosActuales: number) {
+    // Buscar el nivel actual del estudiante
+    const nivelActual = await this.prisma.nivelConfig.findFirst({
+      where: {
+        puntos_minimos: { lte: puntosActuales },
+        puntos_maximos: { gte: puntosActuales },
+      },
+    });
+
+    // Buscar el siguiente nivel
+    const siguienteNivel = await this.prisma.nivelConfig.findFirst({
+      where: {
+        nivel: { gt: nivelActual?.nivel || 1 },
+      },
+      orderBy: { nivel: 'asc' },
+    });
+
+    if (!nivelActual) {
+      // Si no hay nivel configurado, retornar nivel 1 por defecto
+      return {
+        nivelActual: 1,
+        nombre: 'Explorador Numérico',
+        descripcion: 'Empezando tu viaje',
+        puntosActuales,
+        puntosMinimos: 0,
+        puntosMaximos: 499,
+        puntosParaSiguienteNivel: 500 - puntosActuales,
+        porcentajeProgreso: (puntosActuales / 500) * 100,
+        color: '#10b981',
+        icono: '🌱',
+        siguienteNivel: {
+          nivel: 2,
+          nombre: 'Aprendiz Matemático',
+          puntosRequeridos: 500,
+        },
+      };
+    }
+
+    const puntosEnNivel = puntosActuales - nivelActual.puntos_minimos;
+    const puntosNecesariosEnNivel =
+      nivelActual.puntos_maximos - nivelActual.puntos_minimos;
+    const porcentajeProgreso = (puntosEnNivel / puntosNecesariosEnNivel) * 100;
+
+    return {
+      nivelActual: nivelActual.nivel,
+      nombre: nivelActual.nombre,
+      descripcion: nivelActual.descripcion,
+      puntosActuales,
+      puntosMinimos: nivelActual.puntos_minimos,
+      puntosMaximos: nivelActual.puntos_maximos,
+      puntosParaSiguienteNivel: siguienteNivel
+        ? siguienteNivel.puntos_minimos - puntosActuales
+        : 0,
+      porcentajeProgreso: Math.min(Math.round(porcentajeProgreso), 100),
+      color: nivelActual.color,
+      icono: nivelActual.icono,
+      siguienteNivel: siguienteNivel
+        ? {
+            nivel: siguienteNivel.nivel,
+            nombre: siguienteNivel.nombre,
+            puntosRequeridos: siguienteNivel.puntos_minimos,
+          }
+        : null,
+    };
+  }
+
+  /**
+   * Obtener todos los niveles configurados
+   */
+  async getAllNiveles() {
+    return this.prisma.nivelConfig.findMany({
+      orderBy: { nivel: 'asc' },
+    });
   }
 
   /**
