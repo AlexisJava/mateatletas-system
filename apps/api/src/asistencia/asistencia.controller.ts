@@ -128,4 +128,27 @@ export class AsistenciaController {
   async obtenerReportesDocente(@GetUser() user: any) {
     return this.asistenciaService.obtenerReportesDocente(user.id);
   }
+
+  /**
+   * T080 - Registro Automático de Asistencia
+   * Auto-registro de asistencia cuando estudiante entra a videollamada
+   * POST /api/asistencia
+   * Rol: Estudiante
+   */
+  @Post()
+  @Roles(Role.Estudiante)
+  async autoRegistrarAsistencia(
+    @Body() dto: { claseId: string; presente: boolean },
+    @GetUser() user: any,
+  ) {
+    // El estudianteId se obtiene del usuario autenticado
+    const estudianteId = user.estudiante?.id || user.id;
+
+    return this.asistenciaService.marcarAsistencia(
+      dto.claseId,
+      estudianteId,
+      { presente: dto.presente },
+      null, // No es marcado por un docente, es auto-registro
+    );
+  }
 }

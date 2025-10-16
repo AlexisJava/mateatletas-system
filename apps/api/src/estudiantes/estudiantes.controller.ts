@@ -14,6 +14,8 @@ import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { QueryEstudiantesDto } from './dto/query-estudiantes.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { EstudianteOwnershipGuard } from './guards/estudiante-ownership.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 
@@ -36,6 +38,17 @@ export class EstudiantesController {
   @Post()
   async create(@Body() createDto: CreateEstudianteDto, @GetUser() user: any) {
     return this.estudiantesService.create(user.id, createDto);
+  }
+
+  /**
+   * GET /estudiantes/admin/all - Listar TODOS los estudiantes (solo admin)
+   * @returns Lista completa de estudiantes
+   */
+  @Get('admin/all')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
+  async findAllForAdmin() {
+    return this.estudiantesService.findAll();
   }
 
   /**
@@ -99,6 +112,20 @@ export class EstudiantesController {
     @GetUser() user: any,
   ) {
     return this.estudiantesService.update(id, user.id, updateDto);
+  }
+
+  /**
+   * PATCH /estudiantes/:id/avatar - Actualizar avatar del estudiante
+   * @param id - ID del estudiante
+   * @param body - { avatar_url: string }
+   * @returns Estudiante actualizado con nuevo avatar
+   */
+  @Patch(':id/avatar')
+  async updateAvatar(
+    @Param('id') id: string,
+    @Body() body: { avatar_url: string },
+  ) {
+    return this.estudiantesService.updateAvatar(id, body.avatar_url);
   }
 
   /**

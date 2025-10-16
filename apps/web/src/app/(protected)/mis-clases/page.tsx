@@ -121,7 +121,7 @@ export default function MisClasesPage() {
           </div>
 
           {/* Título */}
-          <h3 className="font-lilita text-2xl text-dark">{clase.titulo}</h3>
+          <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark">{clase.titulo}</h3>
 
           {/* Info grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -203,7 +203,7 @@ export default function MisClasesPage() {
         <div className="flex items-center justify-center gap-3">
           <span className="text-6xl">🎫</span>
         </div>
-        <h1 className="font-lilita text-5xl text-[#2a1a5e]">Mis Clases</h1>
+        <h1 className="font-[family-name:var(--font-fredoka)] text-5xl text-[#2a1a5e]">Mis Clases</h1>
         <p className="text-gray-600 text-lg max-w-2xl mx-auto">
           Gestiona las clases reservadas para tus estudiantes
         </p>
@@ -214,19 +214,19 @@ export default function MisClasesPage() {
         <Card className="bg-gradient-to-r from-[#00d9ff]/20 to-[#f7b801]/20 border-2 border-[#00d9ff]">
           <div className="flex flex-wrap items-center justify-around gap-6">
             <div className="text-center">
-              <p className="text-4xl font-lilita text-[#2a1a5e]">
+              <p className="text-4xl font-[family-name:var(--font-fredoka)] text-[#2a1a5e]">
                 {reservasFuturas.length}
               </p>
               <p className="text-sm text-gray-600">Próximas clases</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-lilita text-[#2a1a5e]">
+              <p className="text-4xl font-[family-name:var(--font-fredoka)] text-[#2a1a5e]">
                 {reservasPasadas.length}
               </p>
               <p className="text-sm text-gray-600">Clases completadas</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-lilita text-[#2a1a5e]">
+              <p className="text-4xl font-[family-name:var(--font-fredoka)] text-[#2a1a5e]">
                 {misReservas.length}
               </p>
               <p className="text-sm text-gray-600">Total de reservas</p>
@@ -277,7 +277,7 @@ export default function MisClasesPage() {
           <div className="text-center space-y-4">
             <div className="text-7xl">🎫</div>
             <div>
-              <h3 className="font-lilita text-3xl text-[#2a1a5e] mb-2">
+              <h3 className="font-[family-name:var(--font-fredoka)] text-3xl text-[#2a1a5e] mb-2">
                 No tienes clases reservadas
               </h3>
               <p className="text-gray-600">
@@ -298,7 +298,7 @@ export default function MisClasesPage() {
       {/* Próximas clases */}
       {!isLoading && reservasFuturas.length > 0 && (
         <div>
-          <h2 className="font-lilita text-3xl text-dark mb-6 flex items-center gap-3">
+          <h2 className="font-[family-name:var(--font-fredoka)] text-3xl text-dark mb-6 flex items-center gap-3">
             <span>🔮</span>
             Próximas clases
             <Badge className="bg-primary text-white px-3 py-1 text-lg">
@@ -316,7 +316,7 @@ export default function MisClasesPage() {
       {/* Clases completadas */}
       {!isLoading && reservasPasadas.length > 0 && (
         <div>
-          <h2 className="font-lilita text-3xl text-dark mb-6 flex items-center gap-3">
+          <h2 className="font-[family-name:var(--font-fredoka)] text-3xl text-dark mb-6 flex items-center gap-3">
             <span>✅</span>
             Clases completadas
             <Badge className="bg-gray-300 text-gray-700 px-3 py-1 text-lg">

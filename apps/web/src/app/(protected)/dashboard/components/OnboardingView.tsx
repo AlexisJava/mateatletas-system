@@ -1,5 +1,8 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/auth.store';
 import Link from 'next/link';
 import {
   Users,
@@ -9,6 +12,8 @@ import {
   Plus,
   Star,
   CreditCard,
+  LogOut,
+  ChevronDown,
 } from 'lucide-react';
 
 interface OnboardingViewProps {
@@ -16,6 +21,14 @@ interface OnboardingViewProps {
 }
 
 export default function OnboardingView({ user }: OnboardingViewProps) {
+  const router = useRouter();
+  const { logout } = useAuthStore();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
   const testimonials = [
     {
       name: 'María González',
@@ -52,11 +65,52 @@ export default function OnboardingView({ user }: OnboardingViewProps) {
                 <p className="text-xs text-gray-500">Entrena tu mente como un atleta</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">{user?.nombre} {user?.apellido}</span>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md">
-                {user?.nombre?.[0]?.toUpperCase() || 'T'}
-              </div>
+            <div className="flex items-center gap-3 relative">
+              <span className="text-sm text-gray-600 hidden sm:block">{user?.nombre} {user?.apellido}</span>
+
+              {/* User Menu Button */}
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md">
+                  {user?.nombre?.[0]?.toUpperCase() || 'T'}
+                </div>
+                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {showUserMenu && (
+                <>
+                  {/* Backdrop para cerrar el menú */}
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowUserMenu(false)}
+                  />
+
+                  {/* Menu */}
+                  <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border-2 border-gray-200 z-20 overflow-hidden">
+                    {/* User Info */}
+                    <div className="p-4 border-b-2 border-gray-200 bg-gradient-to-br from-indigo-50 to-blue-50">
+                      <p className="text-sm font-bold text-gray-900">
+                        {user?.nombre} {user?.apellido}
+                      </p>
+                      <p className="text-xs text-gray-600">{user?.email}</p>
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="p-2">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        <span className="font-semibold">Cerrar Sesión</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

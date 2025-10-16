@@ -97,8 +97,8 @@ export default function DocenteCalendarioPage() {
         {/* Header */}
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Calendario de Clases</h1>
-            <p className="text-gray-600 mt-1">
+            <h1 className="text-3xl font-bold text-indigo-900 dark:text-white">Calendario de Clases</h1>
+            <p className="text-purple-600 dark:text-purple-300 mt-1">
               {clases?.length || 0} clases programadas
             </p>
           </div>
@@ -109,8 +109,8 @@ export default function DocenteCalendarioPage() {
               onClick={() => setVistaActual('calendario')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
                 vistaActual === 'calendario'
-                  ? 'bg-[#ff6b35] text-white shadow-md'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-purple-500/40'
+                  : 'glass-card text-indigo-900 dark:text-white hover:bg-white/60 dark:hover:bg-indigo-900/60'
               }`}
             >
               📅 Calendario
@@ -119,8 +119,8 @@ export default function DocenteCalendarioPage() {
               onClick={() => setVistaActual('lista')}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
                 vistaActual === 'lista'
-                  ? 'bg-[#ff6b35] text-white shadow-md'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-purple-500/40'
+                  : 'glass-card text-indigo-900 dark:text-white hover:bg-white/60 dark:hover:bg-indigo-900/60'
               }`}
             >
               📋 Lista
@@ -131,15 +131,15 @@ export default function DocenteCalendarioPage() {
         {vistaActual === 'calendario' ? (
           <>
             {/* Controles de navegación */}
-            <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div className="glass-card-strong p-4 mb-6">
               <div className="flex justify-between items-center">
                 <button
                   onClick={mesAnterior}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-purple-100/60 dark:hover:bg-purple-900/40 rounded-lg transition-colors"
                   aria-label="Mes anterior"
                 >
                   <svg
-                    className="w-6 h-6 text-gray-700"
+                    className="w-6 h-6 text-indigo-900 dark:text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -154,12 +154,12 @@ export default function DocenteCalendarioPage() {
                 </button>
 
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold text-gray-900 capitalize">
+                  <h2 className="text-2xl font-bold text-indigo-900 dark:text-white capitalize">
                     {format(currentMonth, 'MMMM yyyy', { locale: es })}
                   </h2>
                   <button
                     onClick={irHoy}
-                    className="text-sm text-[#ff6b35] hover:underline mt-1"
+                    className="text-sm text-purple-600 dark:text-purple-300 hover:underline mt-1 font-medium"
                   >
                     Ir a hoy
                   </button>
@@ -167,11 +167,11 @@ export default function DocenteCalendarioPage() {
 
                 <button
                   onClick={mesSiguiente}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-purple-100/60 dark:hover:bg-purple-900/40 rounded-lg transition-colors"
                   aria-label="Mes siguiente"
                 >
                   <svg
-                    className="w-6 h-6 text-gray-700"
+                    className="w-6 h-6 text-indigo-900 dark:text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

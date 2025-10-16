@@ -290,6 +290,60 @@ export class EstudiantesService {
   }
 
   /**
+   * Obtiene TODOS los estudiantes (solo para admin)
+   * @returns Lista completa de estudiantes con tutor y equipo
+   */
+  async findAll() {
+    const estudiantes = await this.prisma.estudiante.findMany({
+      include: {
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+        equipo: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return estudiantes;
+  }
+
+  /**
+   * Actualiza el avatar de un estudiante
+   * @param id - ID del estudiante
+   * @param avatarStyle - Estilo de avatar de Dicebear API
+   * @returns El estudiante actualizado
+   */
+  async updateAvatar(id: string, avatarStyle: string) {
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException('Estudiante no encontrado');
+    }
+
+    return await this.prisma.estudiante.update({
+      where: { id },
+      data: {
+        avatar_url: avatarStyle,
+      },
+      select: {
+        id: true,
+        nombre: true,
+        apellido: true,
+        avatar_url: true,
+      },
+    });
+  }
+
+  /**
    * Calcula la edad en años desde una fecha de nacimiento
    * @param fechaNacimiento - Fecha de nacimiento
    * @returns Edad en años

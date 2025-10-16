@@ -59,18 +59,25 @@ export function Modal({
 
       {/* Modal */}
       <div
-        className={`relative bg-white rounded-2xl shadow-[12px_12px_0px_rgba(0,0,0,1)] border-4 border-black w-full ${sizes[size]} animate-scale-in ${contentClassName}`}
+        className={`relative bg-white rounded-xl shadow-2xl border-2 border-gray-300 w-full ${sizes[size]} animate-scale-in ${contentClassName}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b-4 border-black bg-gradient-to-r from-[#ff6b35] to-[#f7b801]">
+        <div
+          className="flex items-center justify-between p-6 border-b-2 border-gray-200"
+          style={{
+            background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
+          }}
+        >
           {title !== undefined ? (
-            <h2 className="text-2xl font-bold text-white">{title}</h2>
+            <h2 className="text-2xl font-bold text-white font-[family-name:var(--font-fredoka)]">
+              {title}
+            </h2>
           ) : (
             <span className="text-2xl font-bold text-white sr-only">Modal</span>
           )}
           <button
             onClick={onClose}
-            className="text-white hover:text-black transition-colors"
+            className="text-white hover:text-indigo-100 transition-colors"
             aria-label="Cerrar modal"
           >
             <X className="w-6 h-6" />

@@ -451,7 +451,7 @@ export class PagosService {
     const membresia = await this.prisma.membresia.findFirst({
       where: {
         tutor_id: tutorId,
-        estado: { in: ['Activa', 'Pendiente'] },
+        estado: { in: ['Activa', 'Pendiente', 'Atrasada'] },
       },
       include: {
         producto: {
@@ -567,6 +567,21 @@ export class PagosService {
     return {
       message: 'Membresía activada exitosamente (modo mock)',
       membresia: membresiaActualizada,
+    };
+  }
+
+  /**
+   * Obtiene TODOS los pagos (solo para admin)
+   * @returns Lista completa de pagos con relaciones
+   *
+   * NOTA: El modelo Pago aún no está implementado en el schema de Prisma.
+   * Esta funcionalidad estará disponible cuando se implemente el Slice de Pagos completo.
+   */
+  async findAllPagos() {
+    // TODO: Implementar cuando se agregue el modelo Pago al schema
+    return {
+      message: 'El modelo Pago aún no está implementado en el schema. Funcionalidad pendiente.',
+      pagos: [],
     };
   }
 }

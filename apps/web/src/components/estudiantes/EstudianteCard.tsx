@@ -32,18 +32,30 @@ export function EstudianteCard({
     return edad;
   };
 
+  const initials = `${estudiante.nombre.charAt(0)}${estudiante.apellido.charAt(0)}`.toUpperCase();
+
   return (
-    <div className="bg-white rounded-2xl border-4 border-black shadow-[5px_5px_0px_rgba(0,0,0,1)] p-6 hover:shadow-[8px_8px_0px_rgba(0,0,0,1)] hover:translate-x-[-3px] hover:translate-y-[-3px] transition-all duration-200">
+    <div className="bg-white rounded-xl border-2 border-gray-300 shadow-lg p-6 hover:shadow-xl transition-all duration-200">
       {/* Avatar y nombre */}
       <div className="flex items-center gap-4 mb-4">
-        <Avatar
-          src={estudiante.foto_url}
-          alt={`${estudiante.nombre} ${estudiante.apellido}`}
-          size="lg"
-          fallback={`${estudiante.nombre.charAt(0)}${estudiante.apellido.charAt(0)}`}
-        />
+        {estudiante.foto_url ? (
+          <img
+            src={estudiante.foto_url}
+            alt={`${estudiante.nombre} ${estudiante.apellido}`}
+            className="w-16 h-16 rounded-lg object-cover shadow-md"
+          />
+        ) : (
+          <div
+            className="w-16 h-16 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md"
+            style={{
+              background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
+            }}
+          >
+            {initials}
+          </div>
+        )}
         <div className="flex-1">
-          <h3 className="text-xl font-bold text-[#2a1a5e]">
+          <h3 className="text-xl font-bold text-gray-900 font-[family-name:var(--font-fredoka)]">
             {estudiante.nombre} {estudiante.apellido}
           </h3>
           <p className="text-sm text-gray-600">{calcularEdad()} años</p>
@@ -54,34 +66,36 @@ export function EstudianteCard({
       <div className="space-y-2 mb-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Nivel:</span>
-          <Badge variant="info">{estudiante.nivel_escolar}</Badge>
+          <span className="px-3 py-1 rounded-lg bg-indigo-100 text-indigo-700 text-sm font-semibold">
+            {estudiante.nivel_escolar}
+          </span>
         </div>
 
         {estudiante.equipo && (
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Equipo:</span>
-            <Badge
-              variant="default"
+            <span
+              className="px-3 py-1 rounded-lg text-sm font-semibold"
+              style={{
+                backgroundColor: `${estudiante.equipo.color_primario}20`,
+                color: estudiante.equipo.color_primario,
+              }}
             >
-              <span
-                style={{
-                  color: estudiante.equipo.color_primario,
-                }}
-              >
-                {estudiante.equipo.nombre}
-              </span>
-            </Badge>
+              {estudiante.equipo.nombre}
+            </span>
           </div>
         )}
 
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Nivel:</span>
-          <Badge variant="warning">Nivel {estudiante.nivel_actual}</Badge>
+          <span className="px-3 py-1 rounded-lg bg-amber-100 text-amber-700 text-sm font-semibold">
+            Nivel {estudiante.nivel_actual}
+          </span>
         </div>
 
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Puntos:</span>
-          <span className="font-bold text-[#f7b801]">
+          <span className="font-bold text-amber-600">
             {estudiante.puntos_totales} pts
           </span>
         </div>
@@ -89,32 +103,29 @@ export function EstudianteCard({
 
       {/* Acciones */}
       <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex-1"
+        <button
           onClick={() => onView(estudiante.id)}
+          className="flex-1 px-4 py-2 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-all flex items-center justify-center gap-1"
         >
-          <Eye className="w-4 h-4 mr-1" />
+          <Eye className="w-4 h-4" />
           Ver
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="flex-1"
+        </button>
+        <button
           onClick={() => onEdit(estudiante)}
+          className="flex-1 px-4 py-2 rounded-lg text-white font-semibold text-sm hover:shadow-lg transition-all flex items-center justify-center gap-1"
+          style={{
+            background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
+          }}
         >
-          <Edit className="w-4 h-4 mr-1" />
+          <Edit className="w-4 h-4" />
           Editar
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
+        </button>
+        <button
           onClick={() => onDelete(estudiante.id)}
-          className="text-red-600 hover:bg-red-100"
+          className="px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-all"
         >
           <Trash2 className="w-4 h-4" />
-        </Button>
+        </button>
       </div>
     </div>
   );

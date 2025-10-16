@@ -48,7 +48,7 @@ export function PaymentSuccess({
       </div>
 
       {/* Título */}
-      <h1 className="font-lilita text-4xl text-dark">{titulo}</h1>
+      <h1 className="font-[family-name:var(--font-fredoka)] text-4xl text-dark">{titulo}</h1>
 
       {/* Mensaje */}
       <p className="text-lg text-gray-700 px-6">{mensaje}</p>

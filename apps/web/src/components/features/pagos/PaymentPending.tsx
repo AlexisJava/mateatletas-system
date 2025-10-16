@@ -42,7 +42,7 @@ export function PaymentPending({
       </div>
 
       {/* Título */}
-      <h1 className="font-lilita text-4xl text-dark">
+      <h1 className="font-[family-name:var(--font-fredoka)] text-4xl text-dark">
         Pago en proceso
       </h1>
 

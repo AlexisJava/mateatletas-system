@@ -1,18 +1,11 @@
 import type { Metadata } from 'next';
-import { Fredoka, Lilita_One } from 'next/font/google';
+import { Nunito } from 'next/font/google';
 import './globals.css';
 
-// Fredoka: Fuente principal redondeada y amigable (estilo Crash Bandicoot)
-const fredoka = Fredoka({
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-fredoka',
-  subsets: ['latin'],
-});
-
-// Lilita One: Fuente para títulos (mantiene el estilo chunky)
-const lilitaOne = Lilita_One({
-  weight: '400',
-  variable: '--font-lilita',
+// Nunito: Fuente oficial de Mateatletas Club
+const nunito = Nunito({
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-nunito',
   subsets: ['latin'],
 });
 
@@ -30,9 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body
-        className={`${fredoka.variable} ${lilitaOne.variable} antialiased`}
-      >
+      <body className={`${nunito.variable} antialiased`}>
         {children}
       </body>
     </html>

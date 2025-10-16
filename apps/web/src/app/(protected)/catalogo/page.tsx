@@ -75,7 +75,7 @@ export default function CatalogoPage() {
         <div className="flex items-center gap-3">
           <span className="text-5xl">🎓</span>
           <div>
-            <h1 className="font-lilita text-5xl text-[#2a1a5e]">
+            <h1 className="font-[family-name:var(--font-fredoka)] text-5xl text-[#2a1a5e]">
               Catálogo de Productos
             </h1>
             <p className="text-gray-600 mt-1">
@@ -132,7 +132,7 @@ export default function CatalogoPage() {
           <div className="text-center space-y-4">
             <div className="text-7xl">🔍</div>
             <div>
-              <h3 className="font-lilita text-3xl text-[#2a1a5e] mb-2">
+              <h3 className="font-[family-name:var(--font-fredoka)] text-3xl text-[#2a1a5e] mb-2">
                 No hay productos disponibles
               </h3>
               <p className="text-gray-600">

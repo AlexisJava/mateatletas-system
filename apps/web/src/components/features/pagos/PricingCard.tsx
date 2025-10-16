@@ -84,7 +84,7 @@ export function PricingCard({
           <div className="text-6xl">💎</div>
 
           {/* Nombre del plan */}
-          <h3 className="font-lilita text-3xl text-dark">
+          <h3 className="font-[family-name:var(--font-fredoka)] text-3xl text-dark">
             {producto.nombre}
           </h3>
 
@@ -104,7 +104,7 @@ export function PricingCard({
 
             {/* Precio actual */}
             <div className="flex items-baseline justify-center gap-1">
-              <span className="font-lilita text-5xl text-primary">
+              <span className="font-[family-name:var(--font-fredoka)] text-5xl text-primary">
                 ${producto.precio}
               </span>
               {producto.duracion_dias && (

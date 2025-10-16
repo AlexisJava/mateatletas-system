@@ -87,7 +87,7 @@ export function ProductCard({ producto, onClick }: ProductCardProps) {
         </Badge>
 
         {/* Título */}
-        <h3 className="font-lilita text-2xl text-dark leading-tight line-clamp-2 min-h-[3.5rem]">
+        <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark leading-tight line-clamp-2 min-h-[3.5rem]">
           {producto.nombre}
         </h3>
 
@@ -99,7 +99,7 @@ export function ProductCard({ producto, onClick }: ProductCardProps) {
         {/* Precio y duración */}
         <div className="pt-2 border-t-2 border-gray-200">
           <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-3xl font-bold text-primary font-lilita">
+            <span className="text-3xl font-bold text-primary font-[family-name:var(--font-fredoka)]">
               ${producto.precio}
             </span>
             {producto.duracion_dias && (

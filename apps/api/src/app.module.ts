@@ -14,6 +14,8 @@ import { AsistenciaModule } from './asistencia/asistencia.module';
 import { AdminModule } from './admin/admin.module';
 import { GamificacionModule } from './gamificacion/gamificacion.module';
 import { CursosModule } from './cursos/cursos.module';
+import { NotificacionesModule } from './notificaciones/notificaciones.module';
+import { EventosModule } from './eventos/eventos.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { CursosModule } from './cursos/cursos.module';
     AdminModule,
     GamificacionModule,
     CursosModule, // SLICE #16: Estructura de cursos y lecciones
+    NotificacionesModule, // Sistema de notificaciones para docentes
+    EventosModule, // Sistema de calendario y eventos para docentes
   ],
   controllers: [AppController],
   providers: [AppService],

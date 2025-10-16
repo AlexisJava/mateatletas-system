@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/auth.store';
 import {
   Users,
   Calendar,
@@ -17,6 +19,8 @@ import {
   UserCheck,
   Zap,
   Download,
+  LogOut,
+  ChevronDown,
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -34,7 +38,15 @@ export default function DashboardView({
   clases,
   membresia,
 }: DashboardViewProps) {
+  const router = useRouter();
+  const { logout } = useAuthStore();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+  };
 
   const tabs = [
     { id: 'dashboard', label: 'Resumen', icon: Home },
@@ -116,21 +128,65 @@ export default function DashboardView({
                 <p className="text-xs text-gray-500">Panel de Padres</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 relative">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-semibold text-gray-900">{user?.nombre} {user?.apellido}</p>
                 <p className="text-xs text-gray-500">
                   {membresia?.producto?.nombre || 'Sin membresía'}
                 </p>
               </div>
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-md"
-                style={{
-                  background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
-                }}
+
+              {/* User Menu Button */}
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
-                {user?.nombre?.[0]?.toUpperCase() || 'T'}
-              </div>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-md"
+                  style={{
+                    background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
+                  }}
+                >
+                  {user?.nombre?.[0]?.toUpperCase() || 'T'}
+                </div>
+                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {showUserMenu && (
+                <>
+                  {/* Backdrop para cerrar el menú */}
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowUserMenu(false)}
+                  />
+
+                  {/* Menu */}
+                  <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border-2 border-gray-200 z-20 overflow-hidden">
+                    {/* User Info */}
+                    <div className="p-4 border-b-2 border-gray-200 bg-gradient-to-br from-indigo-50 to-blue-50">
+                      <p className="text-sm font-bold text-gray-900">
+                        {user?.nombre} {user?.apellido}
+                      </p>
+                      <p className="text-xs text-gray-600">{user?.email}</p>
+                      <p className="text-xs text-indigo-600 font-semibold mt-1">
+                        {membresia?.producto?.nombre || 'Sin membresía'}
+                      </p>
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="p-2">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        <span className="font-semibold">Cerrar Sesión</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

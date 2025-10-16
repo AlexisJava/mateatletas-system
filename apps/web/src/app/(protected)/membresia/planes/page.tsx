@@ -68,7 +68,7 @@ export default function PlanesPage() {
         <div className="flex items-center justify-center gap-3">
           <span className="text-6xl">💳</span>
         </div>
-        <h1 className="font-lilita text-5xl text-[#2a1a5e]">
+        <h1 className="font-[family-name:var(--font-fredoka)] text-5xl text-[#2a1a5e]">
           Planes de Membresía
         </h1>
         <p className="text-gray-600 text-lg max-w-2xl mx-auto">
@@ -149,7 +149,7 @@ export default function PlanesPage() {
           <div className="text-center space-y-4">
             <div className="text-7xl">💳</div>
             <div>
-              <h3 className="font-lilita text-3xl text-[#2a1a5e] mb-2">
+              <h3 className="font-[family-name:var(--font-fredoka)] text-3xl text-[#2a1a5e] mb-2">
                 No hay planes disponibles
               </h3>
               <p className="text-gray-600">
@@ -179,7 +179,7 @@ export default function PlanesPage() {
 
           {/* FAQ o info adicional */}
           <Card>
-            <h3 className="font-lilita text-2xl text-dark mb-4">
+            <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark mb-4">
               ❓ Preguntas frecuentes
             </h3>
             <div className="space-y-4">
