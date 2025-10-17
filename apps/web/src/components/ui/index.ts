@@ -25,3 +25,9 @@ export { Select } from './Select';
 export { Breadcrumbs } from './Breadcrumbs';
 
 export { ToastProvider, toast } from './Toast';
+
+// Landing Page Components
+export { AnimatedCounter } from './AnimatedCounter';
+export { TypingCode } from './TypingCode';
+export { MagneticButton } from './MagneticButton';
+export { FloatingCard } from './FloatingCard';

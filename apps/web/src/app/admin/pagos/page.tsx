@@ -50,7 +50,6 @@ export default function AdminPagosPage() {
       const response = await apiClient.get('/pagos/admin/all');
       setPagos((response || []) as unknown as Pago[]);
     } catch (err: unknown) {
-      console.error('Error cargando pagos:', err);
       setError(getErrorMessage(err, 'Error al cargar pagos'));
     } finally {
       setIsLoading(false);

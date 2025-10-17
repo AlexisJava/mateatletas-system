@@ -56,7 +56,6 @@ export default function ProtectedLayout({
         // Token válido, continuar
         setIsValidating(false);
       } catch (error: unknown) {
-        console.error('Error validando autenticación:', error);
         // Token inválido o error de red, redirigir a login
         router.push('/login');
       }

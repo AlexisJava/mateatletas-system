@@ -7,56 +7,32 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../core/database/prisma.service';
 import { ProductosService } from '../catalogo/productos.service';
-import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
+import { MercadoPagoService } from './mercadopago.service';
+import { MockPagosService } from './mock-pagos.service';
 import { TipoProducto } from '@prisma/client';
 
 /**
- * Servicio para gestionar pagos a través de MercadoPago
- * Maneja la creación de preferencias de pago y procesamiento de webhooks
+ * Servicio principal para gestionar pagos y membresías
+ * Orquesta las operaciones entre MercadoPago, Mock y la base de datos
+ * Maneja la lógica de negocio de suscripciones y cursos
  */
 @Injectable()
 export class PagosService {
   private readonly logger = new Logger(PagosService.name);
-  private mercadopagoClient: MercadoPagoConfig | null = null;
-  private preferenceClient: Preference | null = null;
-  private paymentClient: Payment | null = null;
   private readonly frontendUrl: string;
   private readonly backendUrl: string;
-  private readonly mockMode: boolean;
 
   constructor(
     private prisma: PrismaService,
     private productosService: ProductosService,
     private configService: ConfigService,
+    private mercadoPagoService: MercadoPagoService,
+    private mockPagosService: MockPagosService,
   ) {
-    const accessToken = this.configService.get<string>(
-      'MERCADOPAGO_ACCESS_TOKEN',
-    );
-
     this.frontendUrl =
       this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
     this.backendUrl =
       this.configService.get<string>('BACKEND_URL') || 'http://localhost:3001';
-
-    // Verificar si MercadoPago está configurado
-    if (!accessToken || accessToken.includes('XXXXXXXX')) {
-      this.logger.warn(
-        '⚠️  MercadoPago en MODO MOCK - Configure MERCADOPAGO_ACCESS_TOKEN para usar MercadoPago real',
-      );
-      this.mockMode = true;
-    } else {
-      // Inicializar clientes de MercadoPago solo si hay credenciales
-      this.mockMode = false;
-      this.mercadopagoClient = new MercadoPagoConfig({
-        accessToken,
-        options: { timeout: 5000 },
-      });
-
-      this.preferenceClient = new Preference(this.mercadopagoClient);
-      this.paymentClient = new Payment(this.mercadopagoClient);
-
-      this.logger.log('✅ MercadoPago SDK initialized successfully');
-    }
   }
 
   /**
@@ -114,47 +90,26 @@ export class PagosService {
 
     // 2. Crear preferencia en MercadoPago (o mock si no está configurado)
     let preference;
-    if (this.mockMode) {
+    if (this.mercadoPagoService.isMockMode()) {
       // Modo MOCK - simular respuesta de MercadoPago para desarrollo
-      const mockPreferenceId = `MOCK-PREF-${Date.now()}`;
-      const mockInitPoint = `${this.frontendUrl}/mock-checkout?membresiaId=${membresia.id}&tipo=suscripcion`;
-
-      this.logger.warn(`🧪 MOCK MODE: Simulando preferencia de pago para membresía ${membresia.id}`);
-
-      preference = {
-        id: mockPreferenceId,
-        init_point: mockInitPoint,
-      };
+      preference = this.mockPagosService.createMockMembershipPreference(
+        membresia.id,
+      );
     } else {
       // Modo REAL - crear preferencia en MercadoPago
-      preference = await this.preferenceClient!.create({
-        body: {
-          items: [
-            {
-              id: producto.id,
-              title: producto.nombre,
-              description: producto.descripcion || undefined,
-              quantity: 1,
-              unit_price: Number(producto.precio),
-              currency_id: 'ARS',
-            },
-          ],
-          payer: {
-            email: tutor.email,
-            name: tutor.nombre,
-            surname: tutor.apellido,
-          },
-          external_reference: `membresia-${membresia.id}-tutor-${tutorId}-producto-${producto.id}`,
-          notification_url: `${this.backendUrl}/api/pagos/webhook`,
-          back_urls: {
-            success: `${this.frontendUrl}/suscripcion/exito?membresiaId=${membresia.id}`,
-            failure: `${this.frontendUrl}/suscripcion/error?membresiaId=${membresia.id}`,
-            pending: `${this.frontendUrl}/suscripcion/pendiente?membresiaId=${membresia.id}`,
-          },
-          auto_return: 'approved',
-          statement_descriptor: 'Mateatletas',
-        },
-      });
+      const preferenceData =
+        this.mercadoPagoService.buildMembershipPreferenceData(
+          producto,
+          tutor,
+          membresia.id,
+          tutorId,
+          this.backendUrl,
+          this.frontendUrl,
+        );
+
+      preference = await this.mercadoPagoService.createPreference(
+        preferenceData,
+      );
     }
 
     // 3. Guardar preferencia ID en la membresía
@@ -215,7 +170,9 @@ export class PagosService {
     });
 
     if (inscripcionExistente) {
-      throw new BadRequestException('El estudiante ya está inscrito en este curso');
+      throw new BadRequestException(
+        'El estudiante ya está inscrito en este curso',
+      );
     }
 
     // Obtener tutor info
@@ -233,51 +190,33 @@ export class PagosService {
       },
     });
 
-    this.logger.log(`Inscripción creada en estado PreInscrito: ${inscripcion.id}`);
+    this.logger.log(
+      `Inscripción creada en estado PreInscrito: ${inscripcion.id}`,
+    );
 
     // 2. Crear preferencia en MercadoPago (o mock si no está configurado)
     let preference;
-    if (this.mockMode) {
+    if (this.mercadoPagoService.isMockMode()) {
       // Modo MOCK - simular respuesta de MercadoPago para desarrollo
-      const mockPreferenceId = `MOCK-PREF-${Date.now()}`;
-      const mockInitPoint = `${this.frontendUrl}/mock-checkout?inscripcionId=${inscripcion.id}&tipo=curso`;
-
-      this.logger.warn(`🧪 MOCK MODE: Simulando preferencia de pago para inscripción ${inscripcion.id}`);
-
-      preference = {
-        id: mockPreferenceId,
-        init_point: mockInitPoint,
-      };
+      preference = this.mockPagosService.createMockCoursePreference(
+        inscripcion.id,
+      );
     } else {
       // Modo REAL - crear preferencia en MercadoPago
-      preference = await this.preferenceClient!.create({
-        body: {
-          items: [
-            {
-              id: producto.id,
-              title: `${producto.nombre} - ${estudiante.nombre} ${estudiante.apellido}`,
-              description: producto.descripcion || undefined,
-              quantity: 1,
-              unit_price: Number(producto.precio),
-              currency_id: 'ARS',
-            },
-          ],
-          payer: {
-            email: tutor!.email,
-            name: tutor!.nombre,
-            surname: tutor!.apellido,
-          },
-          external_reference: `inscripcion-${inscripcion.id}-estudiante-${estudianteId}-producto-${productoId}`,
-          notification_url: `${this.backendUrl}/api/pagos/webhook`,
-          back_urls: {
-            success: `${this.frontendUrl}/cursos/exito?inscripcionId=${inscripcion.id}`,
-            failure: `${this.frontendUrl}/cursos/error?inscripcionId=${inscripcion.id}`,
-            pending: `${this.frontendUrl}/cursos/pendiente?inscripcionId=${inscripcion.id}`,
-          },
-          auto_return: 'approved',
-          statement_descriptor: 'Mateatletas',
-        },
-      });
+      const preferenceData =
+        this.mercadoPagoService.buildCoursePreferenceData(
+          producto,
+          estudiante,
+          tutor!,
+          inscripcion.id,
+          estudianteId,
+          this.backendUrl,
+          this.frontendUrl,
+        );
+
+      preference = await this.mercadoPagoService.createPreference(
+        preferenceData,
+      );
     }
 
     // 3. Guardar preferencia ID
@@ -314,8 +253,11 @@ export class PagosService {
     this.logger.debug(`Webhook sanitizado: ${JSON.stringify(sanitizedLog)}`);
 
     // En modo mock, ignorar webhooks
-    if (this.mockMode) {
-      this.logger.warn('🧪 MOCK MODE: Webhook ignorado (use endpoints manuales para testing)');
+    if (
+      this.mockPagosService.shouldIgnoreWebhook(
+        this.mercadoPagoService.isMockMode(),
+      )
+    ) {
       return { message: 'Mock mode - webhook ignored' };
     }
 
@@ -335,7 +277,7 @@ export class PagosService {
 
     try {
       // Obtener detalles del pago desde MercadoPago
-      const payment = await this.paymentClient!.get({ id: paymentId });
+      const payment = await this.mercadoPagoService.getPayment(paymentId);
 
       this.logger.log(
         `Pago ${paymentId} - Estado: ${payment.status} - External Ref: ${payment.external_reference}`,
@@ -394,17 +336,24 @@ export class PagosService {
       });
 
       this.logger.log(`✅ Membresía ${membresiaId} activada`);
-    } else if (payment.status === 'rejected' || payment.status === 'cancelled') {
+    } else if (
+      payment.status === 'rejected' ||
+      payment.status === 'cancelled'
+    ) {
       // Pago rechazado - Cancelar membresía
       await this.prisma.membresia.update({
         where: { id: membresiaId },
         data: { estado: 'Cancelada' },
       });
 
-      this.logger.log(`❌ Membresía ${membresiaId} cancelada por pago rechazado`);
+      this.logger.log(
+        `❌ Membresía ${membresiaId} cancelada por pago rechazado`,
+      );
     } else {
       // Pago pendiente u otro estado - mantener Pendiente
-      this.logger.log(`⏳ Membresía ${membresiaId} permanece en Pendiente (estado: ${payment.status})`);
+      this.logger.log(
+        `⏳ Membresía ${membresiaId} permanece en Pendiente (estado: ${payment.status})`,
+      );
     }
   }
 
@@ -432,15 +381,22 @@ export class PagosService {
       });
 
       this.logger.log(`✅ Inscripción ${inscripcionId} activada`);
-    } else if (payment.status === 'rejected' || payment.status === 'cancelled') {
+    } else if (
+      payment.status === 'rejected' ||
+      payment.status === 'cancelled'
+    ) {
       // Pago rechazado - Eliminar inscripción
       await this.prisma.inscripcionCurso.delete({
         where: { id: inscripcionId },
       });
 
-      this.logger.log(`❌ Inscripción ${inscripcionId} eliminada por pago rechazado`);
+      this.logger.log(
+        `❌ Inscripción ${inscripcionId} eliminada por pago rechazado`,
+      );
     } else {
-      this.logger.log(`⏳ Inscripción ${inscripcionId} permanece en PreInscrito (estado: ${payment.status})`);
+      this.logger.log(
+        `⏳ Inscripción ${inscripcionId} permanece en PreInscrito (estado: ${payment.status})`,
+      );
     }
   }
 
@@ -531,9 +487,6 @@ export class PagosService {
    * Obtiene el historial COMPLETO de pagos de un tutor
    * Para el portal de tutores - pestaña "Pagos"
    * Incluye: todos los pagos (membresías y cursos), con detalles de producto, estudiante y estado
-   * @param tutorId - ID del tutor
-   * @returns Historial de pagos ordenado por fecha descendente con resumen
-   * FIXED: Ahora usa Membresia e InscripcionCurso en lugar del modelo Pago inexistente
    */
   async obtenerHistorialPagosTutor(tutorId: string) {
     // 1. Verificar que el tutor existe
@@ -616,12 +569,20 @@ export class PagosService {
 
     // 5. Calcular resumen
     const totalPagos = historial.length;
-    const membresiasPagadas = membresias.filter((m) => m.estado === 'Activa').length;
-    const cursosPagados = inscripcionesCursos.filter((i) => i.estado === 'Activo').length;
+    const membresiasPagadas = membresias.filter(
+      (m) => m.estado === 'Activa',
+    ).length;
+    const cursosPagados = inscripcionesCursos.filter(
+      (i) => i.estado === 'Activo',
+    ).length;
 
     const totalGastado =
-      membresias.filter(m => m.estado === 'Activa').reduce((sum, m) => sum + Number(m.producto.precio), 0) +
-      inscripcionesCursos.filter(i => i.estado === 'Activo').reduce((sum, i) => sum + Number(i.producto.precio), 0);
+      membresias
+        .filter((m) => m.estado === 'Activa')
+        .reduce((sum, m) => sum + Number(m.producto.precio), 0) +
+      inscripcionesCursos
+        .filter((i) => i.estado === 'Activo')
+        .reduce((sum, i) => sum + Number(i.producto.precio), 0);
 
     // 6. Obtener membresía activa actual
     const membresiaActual = await this.obtenerMembresiaTutor(tutorId);
@@ -650,56 +611,21 @@ export class PagosService {
    * Activa una membresía manualmente (SOLO PARA TESTING EN MODO MOCK)
    */
   async activarMembresiaMock(membresiaId: string) {
-    if (!this.mockMode) {
-      throw new BadRequestException(
-        'Este endpoint solo está disponible en modo mock',
-      );
-    }
-
-    const membresia = await this.prisma.membresia.findUnique({
-      where: { id: membresiaId },
-      include: { producto: true },
-    });
-
-    if (!membresia) {
-      throw new NotFoundException('Membresía no encontrada');
-    }
-
-    const now = new Date();
-    const duracionMeses = membresia.producto.duracion_meses || 1;
-    const fechaFin = new Date(now);
-    fechaFin.setMonth(fechaFin.getMonth() + duracionMeses);
-
-    const membresiaActualizada = await this.prisma.membresia.update({
-      where: { id: membresiaId },
-      data: {
-        estado: 'Activa',
-        fecha_inicio: now,
-        fecha_proximo_pago: fechaFin,
-      },
-    });
-
-    this.logger.log(
-      `🧪 MOCK: Membresía ${membresiaId} activada manualmente`,
+    return this.mockPagosService.activarMembresiaMock(
+      membresiaId,
+      this.mercadoPagoService.isMockMode(),
     );
-
-    return {
-      message: 'Membresía activada exitosamente (modo mock)',
-      membresia: membresiaActualizada,
-    };
   }
 
   /**
    * Obtiene TODOS los pagos (solo para admin)
-   * @returns Lista completa de pagos con relaciones
-   *
    * NOTA: El modelo Pago aún no está implementado en el schema de Prisma.
-   * Esta funcionalidad estará disponible cuando se implemente el Slice de Pagos completo.
    */
   async findAllPagos() {
     // TODO: Implementar cuando se agregue el modelo Pago al schema
     return {
-      message: 'El modelo Pago aún no está implementado en el schema. Funcionalidad pendiente.',
+      message:
+        'El modelo Pago aún no está implementado en el schema. Funcionalidad pendiente.',
       pagos: [],
     };
   }

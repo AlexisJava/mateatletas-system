@@ -41,7 +41,7 @@ export default function DocenteObservacionesPage() {
       });
       setObservaciones(data);
     } catch (error: any) {
-      console.error("Error:", error as any);
+      // Error loading observations
     } finally {
       setIsLoading(false);
     }

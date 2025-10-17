@@ -73,10 +73,9 @@ export default function CalendarioTab() {
           anio: anioSeleccionado,
         },
       });
-      console.log('📅 Calendario del tutor:', response);
       setCalendarioData(response as unknown as CalendarioData);
     } catch (error: unknown) {
-      console.error('❌ Error cargando calendario:', error);
+      // Error loading calendar
     } finally {
       setLoading(false);
     }

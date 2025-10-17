@@ -36,7 +36,7 @@ export const pagosKeys = {
  * const { data: membresia } = useMembresiaActual();
  */
 export function useMembresiaActual() {
-  return useQuery<Membresia, Error>({
+  return useQuery<Membresia | null, Error>({
     queryKey: pagosKeys.membresia(),
     queryFn: pagosApi.getMembresiaActual,
     staleTime: 1000 * 60 * 5, // 5 minutos
@@ -106,7 +106,7 @@ export function useCrearPreferenciaCurso() {
 export function useActivarMembresiaManual() {
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, string>({
+  return useMutation<Membresia, Error, string>({
     mutationFn: (membresiaId: string) =>
       pagosApi.activarMembresiaManual(membresiaId),
 

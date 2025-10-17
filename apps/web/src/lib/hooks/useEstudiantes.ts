@@ -267,7 +267,7 @@ export function useEliminarEstudiante() {
     previousLists?: EstudiantesResponse[];
   };
 
-  return useMutation<void, Error, string, Context>({
+  return useMutation<{ message: string }, Error, string, Context>({
     mutationFn: (id) => estudiantesApi.delete(id),
 
     onMutate: async (id) => {

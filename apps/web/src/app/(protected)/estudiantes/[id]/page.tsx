@@ -42,7 +42,7 @@ export default function EstudianteProfilePage() {
         await deleteEstudiante(id);
         router.push('/estudiantes');
       } catch (error: unknown) {
-        console.error('Error:', error);
+        // Error deleting student
       }
     }
   };

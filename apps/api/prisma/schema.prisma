@@ -658,6 +658,9 @@ model Asistencia {
 
   /// Índice para búsquedas por estado
   @@index([estado])
+
+  /// Índice compuesto para búsquedas comunes (asistencia de estudiante en clase específica)
+  @@index([clase_id, estudiante_id, estado])
 }
 
 // ============================================================================

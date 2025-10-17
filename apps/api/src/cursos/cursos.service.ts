@@ -1,5 +1,7 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
+import { ModulosService } from './modulos.service';
+import { ProgresoService } from './progreso.service';
 import { CreateModuloDto } from './dto/create-modulo.dto';
 import { UpdateModuloDto } from './dto/update-modulo.dto';
 import { CreateLeccionDto } from './dto/create-leccion.dto';
@@ -7,633 +9,154 @@ import { UpdateLeccionDto } from './dto/update-leccion.dto';
 import { CompletarLeccionDto } from './dto/completar-leccion.dto';
 
 /**
- * Service para gestionar cursos, módulos y lecciones
- * Implementa mejores prácticas de Ed-Tech:
- * - Progressive Disclosure (desbloqueo secuencial)
- * - Learning Analytics (tracking detallado)
- * - Gamificación integrada
- * - Microlearning (lecciones cortas)
+ * Main service for managing courses
+ *
+ * This service acts as a facade that delegates to specialized services:
+ * - ModulosService: Handles modules and lessons management
+ * - ProgresoService: Handles student progress tracking
+ *
+ * Implements Ed-Tech best practices:
+ * - Progressive Disclosure (sequential unlocking)
+ * - Learning Analytics (detailed tracking)
+ * - Gamification (points and achievements)
+ * - Microlearning (short lessons)
  */
 @Injectable()
 export class CursosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private modulosService: ModulosService,
+    private progresoService: ProgresoService,
+  ) {}
 
   // ============================================================================
-  // MÓDULOS
+  // MÓDULOS - Delegated to ModulosService
   // ============================================================================
 
   /**
-   * Crear un nuevo módulo dentro de un curso
+   * Create a new module within a course
    */
   async createModulo(productoId: string, createModuloDto: CreateModuloDto) {
-    // Verificar que el producto existe y es tipo Curso
-    const producto = await this.prisma.producto.findUnique({
-      where: { id: productoId },
-    });
-
-    if (!producto) {
-      throw new NotFoundException(`Producto con ID ${productoId} no encontrado`);
-    }
-
-    if (producto.tipo !== 'Curso') {
-      throw new BadRequestException('El producto debe ser de tipo Curso');
-    }
-
-    // Crear el módulo
-    return this.prisma.modulo.create({
-      data: {
-        producto_id: productoId,
-        ...createModuloDto,
-      },
-      include: {
-        lecciones: {
-          orderBy: { orden: 'asc' },
-        },
-      },
-    });
+    return this.modulosService.createModulo(productoId, createModuloDto);
   }
 
   /**
-   * Obtener todos los módulos de un curso
+   * Get all modules of a course
    */
   async findModulosByProducto(productoId: string) {
-    return this.prisma.modulo.findMany({
-      where: { producto_id: productoId },
-      orderBy: { orden: 'asc' },
-      include: {
-        lecciones: {
-          where: { activo: true },
-          orderBy: { orden: 'asc' },
-          select: {
-            id: true,
-            titulo: true,
-            descripcion: true,
-            tipo_contenido: true,
-            orden: true,
-            puntos_por_completar: true,
-            duracion_estimada_minutos: true,
-            leccion_prerequisito_id: true,
-          },
-        },
-      },
-    });
+    return this.modulosService.findModulosByProducto(productoId);
   }
 
   /**
-   * Obtener un módulo específico con sus lecciones
+   * Get a specific module with its lessons
    */
   async findOneModulo(id: string) {
-    const modulo = await this.prisma.modulo.findUnique({
-      where: { id },
-      include: {
-        lecciones: {
-          where: { activo: true },
-          orderBy: { orden: 'asc' },
-        },
-        producto: {
-          select: {
-            id: true,
-            nombre: true,
-            tipo: true,
-          },
-        },
-      },
-    });
-
-    if (!modulo) {
-      throw new NotFoundException(`Módulo con ID ${id} no encontrado`);
-    }
-
-    return modulo;
+    return this.modulosService.findOneModulo(id);
   }
 
   /**
-   * Actualizar un módulo
+   * Update a module
    */
   async updateModulo(id: string, updateModuloDto: UpdateModuloDto) {
-    // Verificar que existe
-    await this.findOneModulo(id);
-
-    return this.prisma.modulo.update({
-      where: { id },
-      data: updateModuloDto,
-      include: {
-        lecciones: {
-          orderBy: { orden: 'asc' },
-        },
-      },
-    });
+    return this.modulosService.updateModulo(id, updateModuloDto);
   }
 
   /**
-   * Eliminar un módulo (y sus lecciones por cascade)
+   * Delete a module (and its lessons by cascade)
    */
   async removeModulo(id: string) {
-    // Verificar que existe
-    await this.findOneModulo(id);
-
-    return this.prisma.modulo.delete({
-      where: { id },
-    });
+    return this.modulosService.removeModulo(id);
   }
 
   /**
-   * Reordenar módulos de un curso
+   * Reorder modules of a course
    */
   async reordenarModulos(productoId: string, ordenIds: string[]) {
-    const updates = ordenIds.map((id, index) =>
-      this.prisma.modulo.update({
-        where: { id },
-        data: { orden: index + 1 },
-      })
-    );
-
-    await this.prisma.$transaction(updates);
-
-    return { message: 'Módulos reordenados exitosamente' };
+    return this.modulosService.reordenarModulos(productoId, ordenIds);
   }
 
   // ============================================================================
-  // LECCIONES
+  // LECCIONES - Delegated to ModulosService
   // ============================================================================
 
   /**
-   * Crear una nueva lección dentro de un módulo
+   * Create a new lesson within a module
    */
   async createLeccion(moduloId: string, createLeccionDto: CreateLeccionDto) {
-    // Verificar que el módulo existe
-    const modulo = await this.prisma.modulo.findUnique({
-      where: { id: moduloId },
-    });
-
-    if (!modulo) {
-      throw new NotFoundException(`Módulo con ID ${moduloId} no encontrado`);
-    }
-
-    // Si hay prerequisito, verificar que existe
-    if (createLeccionDto.leccion_prerequisito_id) {
-      const prerequisito = await this.prisma.leccion.findUnique({
-        where: { id: createLeccionDto.leccion_prerequisito_id },
-      });
-
-      if (!prerequisito) {
-        throw new NotFoundException('Lección prerequisito no encontrada');
-      }
-    }
-
-    // Crear la lección
-    const leccion = await this.prisma.leccion.create({
-      data: {
-        modulo_id: moduloId,
-        ...createLeccionDto,
-      },
-      include: {
-        modulo: {
-          select: {
-            id: true,
-            titulo: true,
-            producto_id: true,
-          },
-        },
-        logro: true,
-        leccionPrerequisito: {
-          select: {
-            id: true,
-            titulo: true,
-          },
-        },
-      },
-    });
-
-    // Actualizar puntos totales del módulo
-    await this.recalcularPuntosModulo(moduloId);
-
-    return leccion;
+    return this.modulosService.createLeccion(moduloId, createLeccionDto);
   }
 
   /**
-   * Obtener todas las lecciones de un módulo
+   * Get all lessons of a module
    */
   async findLeccionesByModulo(moduloId: string) {
-    return this.prisma.leccion.findMany({
-      where: {
-        modulo_id: moduloId,
-        activo: true,
-      },
-      orderBy: { orden: 'asc' },
-      include: {
-        logro: {
-          select: {
-            id: true,
-            nombre: true,
-            icono: true,
-            puntos: true,
-          },
-        },
-        leccionPrerequisito: {
-          select: {
-            id: true,
-            titulo: true,
-          },
-        },
-      },
-    });
+    return this.modulosService.findLeccionesByModulo(moduloId);
   }
 
   /**
-   * Obtener una lección específica con todo su contenido
+   * Get a specific lesson with all its content
    */
   async findOneLeccion(id: string) {
-    const leccion = await this.prisma.leccion.findUnique({
-      where: { id },
-      include: {
-        modulo: {
-          include: {
-            producto: {
-              select: {
-                id: true,
-                nombre: true,
-              },
-            },
-          },
-        },
-        logro: true,
-        leccionPrerequisito: {
-          select: {
-            id: true,
-            titulo: true,
-          },
-        },
-      },
-    });
-
-    if (!leccion) {
-      throw new NotFoundException(`Lección con ID ${id} no encontrada`);
-    }
-
-    return leccion;
+    return this.modulosService.findOneLeccion(id);
   }
 
   /**
-   * Actualizar una lección
+   * Update a lesson
    */
   async updateLeccion(id: string, updateLeccionDto: UpdateLeccionDto) {
-    // Verificar que existe
-    await this.findOneLeccion(id);
-
-    const leccion = await this.prisma.leccion.update({
-      where: { id },
-      data: updateLeccionDto,
-      include: {
-        modulo: true,
-        logro: true,
-      },
-    });
-
-    // Recalcular puntos del módulo si cambió puntos_por_completar
-    if (updateLeccionDto.puntos_por_completar !== undefined) {
-      await this.recalcularPuntosModulo(leccion.modulo_id);
-    }
-
-    return leccion;
+    return this.modulosService.updateLeccion(id, updateLeccionDto);
   }
 
   /**
-   * Eliminar una lección
+   * Delete a lesson
    */
   async removeLeccion(id: string) {
-    const leccion = await this.findOneLeccion(id);
-
-    await this.prisma.leccion.delete({
-      where: { id },
-    });
-
-    // Recalcular puntos del módulo
-    await this.recalcularPuntosModulo(leccion.modulo_id);
-
-    return { message: 'Lección eliminada exitosamente' };
+    return this.modulosService.removeLeccion(id);
   }
 
   /**
-   * Reordenar lecciones de un módulo
+   * Reorder lessons of a module
    */
   async reordenarLecciones(moduloId: string, ordenIds: string[]) {
-    const updates = ordenIds.map((id, index) =>
-      this.prisma.leccion.update({
-        where: { id },
-        data: { orden: index + 1 },
-      })
-    );
-
-    await this.prisma.$transaction(updates);
-
-    return { message: 'Lecciones reordenadas exitosamente' };
+    return this.modulosService.reordenarLecciones(moduloId, ordenIds);
   }
 
   // ============================================================================
-  // PROGRESO DEL ESTUDIANTE
+  // PROGRESO DEL ESTUDIANTE - Delegated to ProgresoService
   // ============================================================================
 
   /**
-   * Completar una lección (acción del estudiante)
-   * Implementa:
+   * Complete a lesson (student action)
+   * Implements:
    * - Immediate Feedback
-   * - Gamificación (otorgar puntos)
-   * - Learning Analytics (guardar tiempo, calificación)
-   * - Desbloquear logros
+   * - Gamification (award points)
+   * - Learning Analytics (save time, score)
+   * - Unlock achievements
    */
   async completarLeccion(
     leccionId: string,
     estudianteId: string,
     completarDto: CompletarLeccionDto,
   ) {
-    // Obtener la lección
-    const leccion = await this.findOneLeccion(leccionId);
-
-    // Verificar que el estudiante está inscrito al curso
-    const inscripcion = await this.prisma.inscripcionCurso.findFirst({
-      where: {
-        estudiante_id: estudianteId,
-        producto_id: leccion.modulo.producto_id,
-        estado: 'Activo',
-      },
-    });
-
-    if (!inscripcion) {
-      throw new ForbiddenException('No estás inscrito en este curso');
-    }
-
-    // Verificar prerequisito (Progressive Disclosure)
-    if (leccion.leccion_prerequisito_id) {
-      const prerequisitoCompletado = await this.prisma.progresoLeccion.findFirst({
-        where: {
-          estudiante_id: estudianteId,
-          leccion_id: leccion.leccion_prerequisito_id,
-          completada: true,
-        },
-      });
-
-      if (!prerequisitoCompletado) {
-        throw new BadRequestException(
-          'Debes completar la lección prerequisito primero'
-        );
-      }
-    }
-
-    // Crear o actualizar progreso
-    const progreso = await this.prisma.progresoLeccion.upsert({
-      where: {
-        estudiante_id_leccion_id: {
-          estudiante_id: estudianteId,
-          leccion_id: leccionId,
-        },
-      },
-      update: {
-        completada: true,
-        progreso: 100,
-        fecha_completada: new Date(),
-        calificacion: completarDto.calificacion,
-        tiempo_invertido_minutos: completarDto.tiempo_invertido_minutos,
-        notas_estudiante: completarDto.notas_estudiante,
-        ultima_respuesta: completarDto.ultima_respuesta,
-        intentos: {
-          increment: 1,
-        },
-      },
-      create: {
-        estudiante_id: estudianteId,
-        leccion_id: leccionId,
-        completada: true,
-        progreso: 100,
-        fecha_completada: new Date(),
-        calificacion: completarDto.calificacion,
-        tiempo_invertido_minutos: completarDto.tiempo_invertido_minutos,
-        notas_estudiante: completarDto.notas_estudiante,
-        ultima_respuesta: completarDto.ultima_respuesta,
-        intentos: 1,
-      },
-      include: {
-        leccion: {
-          include: {
-            logro: true,
-          },
-        },
-      },
-    });
-
-    // Otorgar puntos automáticamente (Gamificación)
-    const puntosGanados = leccion.puntos_por_completar;
-    let logroDesbloqueado = null;
-
-    // Actualizar puntos totales del estudiante
-    // TODO: Integrar con GamificacionService para crear registros de PuntoObtenido
-    //       Una vez que se defina cómo manejar puntos del sistema (sin docente)
-    if (puntosGanados > 0) {
-      await this.prisma.estudiante.update({
-        where: { id: estudianteId },
-        data: {
-          puntos_totales: {
-            increment: puntosGanados,
-          },
-        },
-      });
-    }
-
-    // Desbloquear logro si existe
-    if (leccion.logro_desbloqueable_id) {
-      const yaDesbloqueado = await this.prisma.logroDesbloqueado.findFirst({
-        where: {
-          estudiante_id: estudianteId,
-          logro_id: leccion.logro_desbloqueable_id,
-        },
-      });
-
-      if (!yaDesbloqueado) {
-        logroDesbloqueado = await this.prisma.logroDesbloqueado.create({
-          data: {
-            estudiante_id: estudianteId,
-            logro_id: leccion.logro_desbloqueable_id,
-            contexto: `Completó lección: ${leccion.titulo}`,
-          },
-          include: {
-            logro: true,
-          },
-        });
-
-        // Otorgar puntos del logro
-        // TODO: Integrar con GamificacionService
-        if (leccion.logro && leccion.logro.puntos > 0) {
-          await this.prisma.estudiante.update({
-            where: { id: estudianteId },
-            data: {
-              puntos_totales: {
-                increment: leccion.logro.puntos,
-              },
-            },
-          });
-        }
-      }
-    }
-
-    return {
-      progreso,
-      puntos_ganados: puntosGanados,
-      logro_desbloqueado: logroDesbloqueado,
-      mensaje: logroDesbloqueado
-        ? `¡Felicidades! Ganaste ${puntosGanados} puntos y desbloqueaste el logro "${logroDesbloqueado.logro.nombre}"! 🎉`
-        : `¡Excelente! Ganaste ${puntosGanados} puntos`,
-    };
+    return this.progresoService.completarLeccion(
+      leccionId,
+      estudianteId,
+      completarDto,
+    );
   }
 
   /**
-   * Obtener progreso del estudiante en un curso completo
+   * Get student progress in a complete course
    */
   async getProgresoCurso(productoId: string, estudianteId: string) {
-    // Obtener todos los módulos y lecciones del curso
-    const modulos = await this.findModulosByProducto(productoId);
-
-    // Obtener progreso del estudiante
-    const leccionIds = modulos.flatMap((m) => m.lecciones.map((l) => l.id));
-
-    const progresos = await this.prisma.progresoLeccion.findMany({
-      where: {
-        estudiante_id: estudianteId,
-        leccion_id: { in: leccionIds },
-      },
-    });
-
-    // Calcular estadísticas
-    const totalLecciones = leccionIds.length;
-    const leccionesCompletadas = progresos.filter((p) => p.completada).length;
-    const porcentajeCompletado = Math.round(
-      (leccionesCompletadas / totalLecciones) * 100
-    );
-
-    // Progreso por módulo
-    const progresoModulos = modulos.map((modulo) => {
-      const leccionesModulo = modulo.lecciones.length;
-      const completadasModulo = modulo.lecciones.filter((leccion) =>
-        progresos.some((p) => p.leccion_id === leccion.id && p.completada)
-      ).length;
-
-      return {
-        modulo_id: modulo.id,
-        modulo_titulo: modulo.titulo,
-        total_lecciones: leccionesModulo,
-        lecciones_completadas: completadasModulo,
-        porcentaje: Math.round((completadasModulo / leccionesModulo) * 100),
-      };
-    });
-
-    return {
-      producto_id: productoId,
-      estudiante_id: estudianteId,
-      total_modulos: modulos.length,
-      total_lecciones: totalLecciones,
-      lecciones_completadas: leccionesCompletadas,
-      porcentaje_completado: porcentajeCompletado,
-      progreso_modulos: progresoModulos,
-    };
+    return this.progresoService.getProgresoCurso(productoId, estudianteId);
   }
 
   /**
-   * Obtiene la siguiente lección disponible para un estudiante
-   * Implementa Progressive Disclosure (una lección a la vez)
-   *
-   * OPTIMIZADO: Elimina N+1 queries cargando todo el progreso en una sola consulta.
-   * Antes: N queries (una por cada lección)
-   * Ahora: 2 queries (módulos + progreso completo)
+   * Get the next available lesson for a student
+   * Implements Progressive Disclosure (one lesson at a time)
    */
   async getSiguienteLeccion(productoId: string, estudianteId: string) {
-    // 1. Obtener módulos con lecciones del producto
-    const modulos = await this.findModulosByProducto(productoId);
-
-    // 2. Extraer todos los IDs de lecciones del curso
-    const leccionIds = modulos.flatMap((modulo) =>
-      modulo.lecciones.map((leccion) => leccion.id)
-    );
-
-    if (leccionIds.length === 0) {
-      return null; // Curso sin lecciones
-    }
-
-    // 3. OPTIMIZACIÓN: Cargar TODO el progreso del estudiante en UNA SOLA query
-    const progresos = await this.prisma.progresoLeccion.findMany({
-      where: {
-        estudiante_id: estudianteId,
-        leccion_id: { in: leccionIds },
-      },
-      select: {
-        leccion_id: true,
-        completada: true,
-      },
-    });
-
-    // 4. Crear un Map para acceso O(1) en lugar de queries repetidas
-    const progresoMap = new Map<string, boolean>();
-    progresos.forEach((p) => {
-      progresoMap.set(p.leccion_id, p.completada);
-    });
-
-    // 5. Iterar sobre módulos y lecciones con progreso ya cargado en memoria
-    for (const modulo of modulos) {
-      for (const leccion of modulo.lecciones) {
-        // Verificar si ya está completada (O(1) lookup)
-        const completada = progresoMap.get(leccion.id) ?? false;
-        if (completada) continue;
-
-        // Verificar prerequisito (O(1) lookup si existe)
-        if (leccion.leccion_prerequisito_id) {
-          const prerequisitoCompletado = progresoMap.get(leccion.leccion_prerequisito_id) ?? false;
-          if (!prerequisitoCompletado) continue;
-        }
-
-        // Esta es la siguiente lección disponible
-        return {
-          leccion_id: leccion.id,
-          leccion,
-          modulo: {
-            id: modulo.id,
-            titulo: modulo.titulo,
-          },
-        };
-      }
-    }
-
-    return null; // Curso completado
-  }
-
-  // ============================================================================
-  // UTILIDADES
-  // ============================================================================
-
-  /**
-   * Recalcular puntos totales y duración de un módulo
-   */
-  private async recalcularPuntosModulo(moduloId: string) {
-    const lecciones = await this.prisma.leccion.findMany({
-      where: {
-        modulo_id: moduloId,
-        activo: true,
-      },
-    });
-
-    const puntosTotales = lecciones.reduce(
-      (sum, l) => sum + (l.puntos_por_completar || 0),
-      0
-    );
-
-    const duracionTotal = lecciones.reduce(
-      (sum, l) => sum + (l.duracion_estimada_minutos || 0),
-      0
-    );
-
-    await this.prisma.modulo.update({
-      where: { id: moduloId },
-      data: {
-        puntos_totales: puntosTotales,
-        duracion_estimada_minutos: duracionTotal,
-      },
-    });
+    return this.progresoService.getSiguienteLeccion(productoId, estudianteId);
   }
 }

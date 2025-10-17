@@ -62,7 +62,6 @@ export default function CatalogoPage() {
 
   // Handler para comprar (placeholder)
   const handleComprar = (producto: Producto) => {
-    console.log('Comprar producto:', producto);
     // TODO: Implementar navegación a proceso de pago
     alert(`Redirigiendo al proceso de pago para: ${producto.nombre}`);
     handleCloseModal();

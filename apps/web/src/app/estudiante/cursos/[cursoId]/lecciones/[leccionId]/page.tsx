@@ -219,7 +219,7 @@ export default function LeccionPlayerPage() {
       setLeccion(data);
       setTiempoInicio(Date.now());
     } catch (error: unknown) {
-      console.error('Error al cargar lección:', error);
+      // Error loading lesson
     } finally {
       setIsLoading(false);
     }
@@ -228,7 +228,6 @@ export default function LeccionPlayerPage() {
   const handleCompletarLeccion = async () => {
     if (!leccion) return;
 
-    console.log('✅ [LECCION] Completando lección:', leccionId);
     setCompletando(true);
     const tiempoInvertido = Math.round((Date.now() - tiempoInicio) / 1000 / 60); // minutos
 
@@ -238,8 +237,6 @@ export default function LeccionPlayerPage() {
         tiempo_invertido_minutos: tiempoInvertido,
       });
 
-      console.log('✅ [LECCION] Resultado completarLeccion:', result);
-
       if (result.success) {
         setpuntosGanados(result.puntos || 0);
         setShowSuccess(true);
@@ -247,11 +244,9 @@ export default function LeccionPlayerPage() {
           router.push(`/estudiante/cursos/${cursoId}`);
         }, 3000);
       } else {
-        console.error('❌ [LECCION] completarLeccion failed:', result);
         alert('Error al completar la lección. Por favor intenta de nuevo.');
       }
     } catch (error: unknown) {
-      console.error('❌ [LECCION] Error completando lección:', error);
       alert(`Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
       setCompletando(false);
@@ -261,14 +256,11 @@ export default function LeccionPlayerPage() {
   const renderContenido = () => {
     if (!leccion) return null;
 
-    console.log('🎯 [LECCION] renderContenido - tipo:', leccion.tipo_contenido, 'contenido:', leccion.contenido);
-
     try {
       switch (leccion.tipo_contenido) {
         case 'Video':
           const videoUrl = (leccion.contenido as any)?.url || (leccion.contenido as any)?.videoUrl || '';
           if (!videoUrl || typeof videoUrl !== 'string') {
-            console.error('❌ [LECCION] Video URL not found in contenido:', leccion.contenido);
             return (
               <ChunkyCard gradient="linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)">
                 <div className="p-8 text-center">
@@ -318,7 +310,6 @@ export default function LeccionPlayerPage() {
           );
       }
     } catch (error: unknown) {
-      console.error('❌ [LECCION] Error rendering contenido:', error);
       return (
         <ChunkyCard gradient="linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%)">
           <div className="p-8 text-center">

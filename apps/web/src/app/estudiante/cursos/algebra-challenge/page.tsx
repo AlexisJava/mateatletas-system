@@ -178,7 +178,6 @@ export default function AlgebraChallengePage() {
     }
 
     // TODO: Registrar puntos en el backend cuando exista la acción en la base de datos
-    console.log(`✅ Juego completado: ${puntosGanados} puntos ganados`);
   };
 
   // Manejar Enter

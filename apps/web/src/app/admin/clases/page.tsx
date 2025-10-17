@@ -46,7 +46,7 @@ export default function AdminClasesPage() {
       setRutas(rutasData as unknown as unknown[]);
       setDocentes(docentesData as unknown as unknown[]);
     } catch (err: unknown) {
-      console.error('Error loading form data:', err);
+      // Error loading form data
     }
   };
 

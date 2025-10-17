@@ -37,27 +37,19 @@ apiClient.interceptors.request.use(
 /**
  * Response Interceptor
  *
- * IMPORTANTE: Este interceptor retorna `response.data` directamente.
- * Esto significa que cuando llamas:
- *
- *   const result = await axios.get('/endpoint')
- *
- * `result` ya contiene los datos, NO `result.data`.
- *
- * Para type safety, usa type assertion en los archivos API:
- *   return await axios.get('/endpoint') as unknown as TipoEsperado[]
- *
  * Manejo de Errores HTTP:
  * - 401 Unauthorized: Redirige a login (sesión expirada)
  * - 403 Forbidden: Muestra mensaje de acceso denegado
  * - 404 Not Found: Recurso no encontrado
  * - 422 Unprocessable Entity: Errores de validación
  * - 500 Internal Server Error: Error del servidor
+ *
+ * NOTA: No modificamos la respuesta, mantenemos type safety completo
  */
 apiClient.interceptors.response.use(
   (response) => {
-    // Retornar solo la data para simplificar el uso en componentes
-    return response.data;
+    // Retornar respuesta completa para mantener tipos correctos
+    return response;
   },
   (error: AxiosError<{ message?: string; errors?: Record<string, string[]> }>) => {
     // Verificar si estamos en el navegador

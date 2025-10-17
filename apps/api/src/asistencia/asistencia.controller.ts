@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AsistenciaService } from './asistencia.service';
+import { AsistenciaReportesService } from './asistencia-reportes.service';
 import { MarcarAsistenciaDto } from './dto/marcar-asistencia.dto';
 import { FiltrarAsistenciaDto } from './dto/filtrar-asistencia.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -18,7 +19,10 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
 @Controller('asistencia')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AsistenciaController {
-  constructor(private readonly asistenciaService: AsistenciaService) {}
+  constructor(
+    private readonly asistenciaService: AsistenciaService,
+    private readonly reportesService: AsistenciaReportesService,
+  ) {}
 
   /**
    * Marcar asistencia de un estudiante en una clase
@@ -65,7 +69,7 @@ export class AsistenciaController {
   @Get('clases/:claseId/estadisticas')
   @Roles(Role.Docente, Role.Admin)
   async obtenerEstadisticasClase(@Param('claseId') claseId: string) {
-    return this.asistenciaService.obtenerEstadisticasClase(claseId);
+    return this.reportesService.obtenerEstadisticasClase(claseId);
   }
 
   /**
@@ -79,7 +83,7 @@ export class AsistenciaController {
     @Param('estudianteId') estudianteId: string,
     @Query() filtros: FiltrarAsistenciaDto,
   ) {
-    return this.asistenciaService.obtenerHistorialEstudiante(
+    return this.reportesService.obtenerHistorialEstudiante(
       estudianteId,
       filtros,
     );
@@ -93,7 +97,7 @@ export class AsistenciaController {
   @Get('docente/resumen')
   @Roles(Role.Docente)
   async obtenerResumenDocente(@GetUser() user: any) {
-    return this.asistenciaService.obtenerResumenDocente(user.id);
+    return this.reportesService.obtenerResumenDocente(user.id);
   }
 
   /**
@@ -110,7 +114,7 @@ export class AsistenciaController {
     @Query('fechaHasta') fechaHasta?: string,
     @Query('limit') limit?: string,
   ) {
-    return this.asistenciaService.obtenerObservacionesDocente(user.id, {
+    return this.reportesService.obtenerObservacionesDocente(user.id, {
       estudianteId,
       fechaDesde,
       fechaHasta,
@@ -126,7 +130,7 @@ export class AsistenciaController {
   @Get('docente/reportes')
   @Roles(Role.Docente)
   async obtenerReportesDocente(@GetUser() user: any) {
-    return this.asistenciaService.obtenerReportesDocente(user.id);
+    return this.reportesService.obtenerReportesDocente(user.id);
   }
 
   /**

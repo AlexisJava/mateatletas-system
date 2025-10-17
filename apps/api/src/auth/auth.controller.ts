@@ -134,7 +134,7 @@ export class AuthController {
     res.cookie('auth-token', result.access_token, {
       httpOnly: true, // No accesible desde JavaScript
       secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
-      sameSite: 'lax', // Protección CSRF
+      sameSite: 'strict', // Máxima protección CSRF
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
       path: '/',
     });
@@ -181,7 +181,7 @@ export class AuthController {
     res.cookie('auth-token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
       path: '/',
     });
@@ -269,7 +269,7 @@ export class AuthController {
     res.clearCookie('auth-token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       path: '/',
     });
 

@@ -53,7 +53,7 @@ export default function SalaClasePage() {
         const response = await apiClient.get(`/clases/${claseId}`);
         setClase(response.data);
       } catch (error: unknown) {
-        console.error('Error cargando clase:', error);
+        // Error loading class
       } finally {
         setIsLoading(false);
       }
@@ -139,18 +139,16 @@ export default function SalaClasePage() {
 
       // Event listeners
       api.addEventListener('videoConferenceJoined', () => {
-        console.log('Usuario unido a la videollamada');
         // Registrar asistencia automáticamente
         registrarAsistencia();
       });
 
       api.addEventListener('participantJoined', (...args: unknown[]) => {
         const participant = args[0] as JitsiParticipant;
-        console.log('Participante unido:', participant);
+        // Participant joined
       });
 
       api.addEventListener('videoConferenceLeft', async () => {
-        console.log('Usuario salió de la videollamada');
 
         // Si es estudiante, mostrar resumen post-clase
         if (user.role === 'estudiante') {
@@ -184,7 +182,6 @@ export default function SalaClasePage() {
             setResumenData(resumen);
             setShowResumen(true);
           } catch (error: unknown) {
-            console.error('Error obteniendo resumen:', error);
             // Redirigir directamente si hay error
             router.push('/estudiante/dashboard');
           }
@@ -201,9 +198,8 @@ export default function SalaClasePage() {
         claseId: claseId,
         presente: true,
       });
-      console.log('Asistencia registrada automáticamente');
     } catch (error: unknown) {
-      console.error('Error registrando asistencia:', error);
+      // Error registering attendance
     }
   };
 

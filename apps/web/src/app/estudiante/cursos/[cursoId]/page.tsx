@@ -80,7 +80,6 @@ export default function CursoViewerPage() {
       const leccionesData = await getLeccionesByModulo(modulo.id);
       setLecciones(leccionesData);
     } catch (error: unknown) {
-      console.error('Error al cargar lecciones:', error);
       setLecciones([]);
     } finally {
       setLoadingLecciones(false);
