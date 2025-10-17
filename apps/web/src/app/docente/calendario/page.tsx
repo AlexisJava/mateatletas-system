@@ -325,7 +325,6 @@ function GrupoEventos({ titulo, subtitulo, eventos, onEventoClick, colorAccent =
       <div className="space-y-3">
         {eventos.map((evento) => (
           <EventoCard
-// @ts-ignore - incomplete component
             key={evento.id}
             evento={evento}
             onClick={() => onEventoClick(evento)}
@@ -372,7 +371,6 @@ function EventoCard({ evento, onClick, colorAccent = 'border-l-gray-400' }: Even
   }
 
   return (
-// @ts-ignore - incomplete component
     <motion.div
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.99 }}

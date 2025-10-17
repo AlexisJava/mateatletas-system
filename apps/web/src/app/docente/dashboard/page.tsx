@@ -138,7 +138,6 @@ export default function DocenteDashboardNew() {
       setAlertas(mockAlertas);
       setStats(mockStats);
     } catch (error: any) {
-      console.error("Error:", error as any);
       toast.error('Error al cargar el dashboard');
     } finally {
       setIsLoading(false);

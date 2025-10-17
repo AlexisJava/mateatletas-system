@@ -191,17 +191,17 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // 4. Comparar contraseña con bcrypt
+    // 5. Comparar contraseña con bcrypt
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // 5. Generar token JWT con el rol correspondiente
+    // 6. Generar token JWT con el rol correspondiente
     const accessToken = this.generateJwtToken(user.id, user.email, role);
 
-    // 6. Retornar token y datos del usuario (estructura diferente según rol)
+    // 7. Retornar token y datos del usuario (estructura diferente según rol)
     if (role === 'tutor') {
       return {
         access_token: accessToken,

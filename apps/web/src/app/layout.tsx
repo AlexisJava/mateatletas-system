@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Nunito } from 'next/font/google';
 import './globals.css';
 import { QueryProvider } from '@/lib/providers/QueryProvider';
+import { Toaster } from 'sonner';
 
 // Nunito: Fuente oficial de Mateatletas Club
 const nunito = Nunito({
@@ -28,6 +29,7 @@ export default function RootLayout({
         <QueryProvider>
           {children}
         </QueryProvider>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

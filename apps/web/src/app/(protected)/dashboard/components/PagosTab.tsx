@@ -71,11 +71,10 @@ export default function PagosTab() {
     try {
       setLoading(true);
       const response = await apiClient.get('/pagos/historial');
-      console.log('💳 Historial de pagos:', response);
       setHistorialData(response as unknown as HistorialData);
     } catch (error: unknown) {
-      console.error('❌ Error cargando historial de pagos:', error);
-    } finally {
+      // Error loading payment history
+    } finally{
       setLoading(false);
     }
   };

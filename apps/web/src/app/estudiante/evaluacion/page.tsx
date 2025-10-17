@@ -307,7 +307,7 @@ export default function EvaluacionDiagnosticaPage() {
             await fetchDashboard(user.id);
           }
         } catch (error: unknown) {
-          console.error('Error registrando puntos:', error);
+          // Error registering points
         }
 
         setEvaluacionCompletada(true);

@@ -89,6 +89,12 @@ docs/
 ├── 💾 database/                               # Documentación de base de datos
 │   └── PRISMA_MIGRATIONS_STRATEGY.md         # Estrategia de migraciones
 │
+├── 🎨 frontend/                               # 🆕 Design System & Frontend (4 archivos)
+│   ├── README.md                             # 📘 Índice de frontend docs
+│   ├── DESIGN_SYSTEM_EVOLVED.md              # 🎨 Design System v2.0 completo
+│   ├── design-system.css                     # 🎨 CSS variables y utility classes
+│   └── QUICK_REFERENCE.md                    # ⚡ Referencia rápida copy-paste
+│
 ├── 📝 slices/                                 # Summaries de slices específicos (5 archivos)
 │   ├── SLICE_6_PAGOS_SUMMARY.md
 │   ├── SLICE_11_AUTH_ESTUDIANTES_COMPLETO.md
@@ -154,6 +160,31 @@ docs/
    - Issues priorizados por impacto
    - Estimaciones de tiempo
    - Good first issues marcados
+
+### Para Frontend Developers 🎨
+
+1. **Design System Completo:** [frontend/DESIGN_SYSTEM_EVOLVED.md](frontend/DESIGN_SYSTEM_EVOLVED.md)
+   - Paleta Emerald/Orange (95/5 ratio estricto)
+   - Componentes reutilizables: MagneticButton, FloatingParticle, AnimatedCounter
+   - Patrones de layout: Split-screen, Glassmorphism, Backgrounds
+   - Animaciones con Framer Motion
+   - Guía completa de tipografía
+
+2. **Quick Reference:** [frontend/QUICK_REFERENCE.md](frontend/QUICK_REFERENCE.md)
+   - Componentes copy-paste listos
+   - Template base para páginas nuevas
+   - Checklist pre-deploy
+   - Código de botones, inputs, cards, badges
+
+3. **CSS Utilities:** [frontend/design-system.css](frontend/design-system.css)
+   - Variables CSS con todos los colores
+   - Utility classes (.glass-card, .btn-cta-primary, etc.)
+   - Animaciones CSS (@keyframes)
+   - Responsive helpers
+
+4. **Ejemplos de Referencia:**
+   - Landing page: `/apps/web/src/app/page.tsx`
+   - Login page: `/apps/web/src/app/login/page.tsx`
 
 ### Para Product Managers
 

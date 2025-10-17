@@ -40,7 +40,6 @@ export default function AdminEstudiantesPage() {
       const response = await apiClient.get('/estudiantes/admin/all');
       setEstudiantes((response || []) as unknown as Estudiante[]);
     } catch (err: unknown) {
-      console.error('Error cargando estudiantes:', err);
       setError(getErrorMessage(err, 'Error al cargar estudiantes'));
     } finally {
       setIsLoading(false);

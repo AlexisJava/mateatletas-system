@@ -1,17 +1,27 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { EstadoAsistencia } from '@prisma/client';
+import { PuntosService } from './puntos.service';
+import { LogrosService } from './logros.service';
+import { RankingService } from './ranking.service';
 
 /**
- * Servicio de Gamificación
- * Lógica de negocio para logros, puntos y ranking
+ * Servicio de Gamificación (Coordinador)
+ * Orquesta los servicios de puntos, logros y ranking
+ * Gestiona el dashboard, niveles y progreso del estudiante
  */
 @Injectable()
 export class GamificacionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private puntosService: PuntosService,
+    private logrosService: LogrosService,
+    private rankingService: RankingService,
+  ) {}
 
   /**
    * Dashboard completo del estudiante
+   * Orquesta información de múltiples servicios
    */
   async getDashboardEstudiante(estudianteId: string) {
     const estudiante = await this.prisma.estudiante.findUnique({
@@ -80,9 +90,9 @@ export class GamificacionService {
       take: 5,
     });
 
-    // Ranking del equipo (solo si tiene equipo)
+    // Ranking del equipo (solo si tiene equipo) - delegado al RankingService
     const equipoRanking = estudiante.equipo_id
-      ? await this.getEquipoRanking(estudiante.equipo_id)
+      ? await this.rankingService.getEquipoRanking(estudiante.equipo_id)
       : [];
 
     return {
@@ -100,7 +110,7 @@ export class GamificacionService {
           (a) => a.estado === EstadoAsistencia.Presente,
         ).length,
         clasesTotales: estudiante.inscripciones_clase.length,
-        racha: await this.calcularRacha(estudianteId),
+        racha: await this.logrosService.calcularRacha(estudianteId),
       },
       nivel: nivelInfo,
       proximasClases,
@@ -188,182 +198,6 @@ export class GamificacionService {
   }
 
   /**
-   * Obtener logros del estudiante
-   */
-  async getLogrosEstudiante(estudianteId: string) {
-    // Logros predefinidos
-    const logrosDefinidos = [
-      {
-        id: 'primera-clase',
-        nombre: 'Primera Clase',
-        descripcion: 'Asististe a tu primera clase',
-        icono: '🎓',
-        puntos: 50,
-        categoria: 'inicio',
-      },
-      {
-        id: 'asistencia-perfecta',
-        nombre: 'Asistencia Perfecta',
-        descripcion: 'Asististe a todas las clases de la semana',
-        icono: '⭐',
-        puntos: 100,
-        categoria: 'asistencia',
-      },
-      {
-        id: '10-clases',
-        nombre: '10 Clases Completadas',
-        descripcion: 'Completaste 10 clases',
-        icono: '🔥',
-        puntos: 150,
-        categoria: 'progreso',
-      },
-      {
-        id: 'maestro-algebra',
-        nombre: 'Maestro del Álgebra',
-        descripcion: 'Completaste el 100% de Álgebra',
-        icono: '📐',
-        puntos: 200,
-        categoria: 'maestria',
-      },
-      {
-        id: 'ayudante',
-        nombre: 'Compañero Solidario',
-        descripcion: 'Ayudaste a 5 compañeros',
-        icono: '🤝',
-        puntos: 120,
-        categoria: 'social',
-      },
-      {
-        id: 'racha-7',
-        nombre: 'Racha de 7 Días',
-        descripcion: 'Asististe 7 días consecutivos',
-        icono: '🔥',
-        puntos: 180,
-        categoria: 'racha',
-      },
-      {
-        id: 'racha-30',
-        nombre: 'Racha de 30 Días',
-        descripcion: 'Asististe 30 días consecutivos',
-        icono: '🔥🔥',
-        puntos: 500,
-        categoria: 'racha',
-      },
-      {
-        id: 'mvp-mes',
-        nombre: 'MVP del Mes',
-        descripcion: 'Fuiste el estudiante con más puntos del mes',
-        icono: '👑',
-        puntos: 300,
-        categoria: 'elite',
-      },
-    ];
-
-    // Verificar cuáles están desbloqueados
-    const asistencias = await this.prisma.asistencia.findMany({
-      where: {
-        estudiante_id: estudianteId,
-        estado: EstadoAsistencia.Presente,
-      },
-    });
-
-    const logrosDesbloqueados: string[] = [];
-
-    // Primera clase
-    if (asistencias.length >= 1) logrosDesbloqueados.push('primera-clase');
-
-    // 10 clases
-    if (asistencias.length >= 10) logrosDesbloqueados.push('10-clases');
-
-    // Racha de 7 días
-    const racha = await this.calcularRacha(estudianteId);
-    if (racha >= 7) logrosDesbloqueados.push('racha-7');
-    if (racha >= 30) logrosDesbloqueados.push('racha-30');
-
-    return logrosDefinidos.map((logro) => ({
-      ...logro,
-      desbloqueado: logrosDesbloqueados.includes(logro.id),
-      fecha_desbloqueo: logrosDesbloqueados.includes(logro.id)
-        ? new Date()
-        : null,
-    }));
-  }
-
-  /**
-   * Obtener puntos del estudiante
-   */
-  async getPuntosEstudiante(estudianteId: string) {
-    const asistencias = await this.prisma.asistencia.findMany({
-      where: { estudiante_id: estudianteId },
-      include: {
-        clase: {
-          include: { rutaCurricular: true },
-        },
-      },
-    });
-
-    const puntosAsistencia = asistencias.filter(
-      (a) => a.estado === EstadoAsistencia.Presente,
-    ).length * 10;
-
-    // Puntos por ruta
-    const puntosPorRuta: Record<string, number> = {};
-    asistencias
-      .filter((a) => a.estado === EstadoAsistencia.Presente)
-      .forEach((a) => {
-        const rutaNombre = a.clase.rutaCurricular?.nombre || 'General';
-        puntosPorRuta[rutaNombre] = (puntosPorRuta[rutaNombre] || 0) + 10;
-      });
-
-    const estudiante = await this.prisma.estudiante.findUnique({
-      where: { id: estudianteId },
-      select: { puntos_totales: true },
-    });
-
-    return {
-      total: estudiante?.puntos_totales || 0,
-      asistencia: puntosAsistencia,
-      extras: (estudiante?.puntos_totales || 0) - puntosAsistencia,
-      porRuta: puntosPorRuta,
-    };
-  }
-
-  /**
-   * Obtener ranking del estudiante
-   */
-  async getRankingEstudiante(estudianteId: string) {
-    const estudiante = await this.prisma.estudiante.findUnique({
-      where: { id: estudianteId },
-      include: { equipo: true },
-    });
-
-    if (!estudiante) {
-      throw new NotFoundException('Estudiante no encontrado');
-    }
-
-    // Ranking del equipo (solo si tiene equipo)
-    const rankingEquipo = estudiante.equipo_id
-      ? await this.getEquipoRanking(estudiante.equipo_id)
-      : [];
-
-    // Ranking global
-    const rankingGlobal = await this.getRankingGlobal();
-
-    const posicionEquipo =
-      rankingEquipo.findIndex((e) => e.id === estudianteId) + 1;
-    const posicionGlobal =
-      rankingGlobal.findIndex((e) => e.id === estudianteId) + 1;
-
-    return {
-      equipoActual: estudiante.equipo,
-      posicionEquipo,
-      posicionGlobal,
-      rankingEquipo: rankingEquipo.slice(0, 10),
-      rankingGlobal: rankingGlobal.slice(0, 20),
-    };
-  }
-
-  /**
    * Obtener progreso por ruta curricular
    */
   async getProgresoEstudiante(estudianteId: string) {
@@ -401,46 +235,52 @@ export class GamificacionService {
     return progresoPorRuta;
   }
 
+  // === DELEGATION METHODS ===
+  // Métodos que delegan a servicios especializados
+
   /**
-   * Obtener acciones puntuables disponibles
-   * Para mostrar en el UI del docente
+   * Obtener logros del estudiante
+   * @delegated LogrosService
    */
-  async getAccionesPuntuables() {
-    return this.prisma.accionPuntuable.findMany({
-      where: { activo: true },
-      orderBy: { puntos: 'desc' },
-    });
+  async getLogrosEstudiante(estudianteId: string) {
+    return this.logrosService.getLogrosEstudiante(estudianteId);
   }
 
   /**
-   * Obtener historial de puntos otorgados a un estudiante
+   * Desbloquear logro
+   * @delegated LogrosService
+   */
+  async desbloquearLogro(estudianteId: string, logroId: string) {
+    return this.logrosService.desbloquearLogro(estudianteId, logroId);
+  }
+
+  /**
+   * Obtener puntos del estudiante
+   * @delegated PuntosService
+   */
+  async getPuntosEstudiante(estudianteId: string) {
+    return this.puntosService.getPuntosEstudiante(estudianteId);
+  }
+
+  /**
+   * Obtener acciones puntuables
+   * @delegated PuntosService
+   */
+  async getAccionesPuntuables() {
+    return this.puntosService.getAccionesPuntuables();
+  }
+
+  /**
+   * Obtener historial de puntos
+   * @delegated PuntosService
    */
   async getHistorialPuntos(estudianteId: string) {
-    return this.prisma.puntoObtenido.findMany({
-      where: { estudiante_id: estudianteId },
-      include: {
-        accion: true,
-        docente: {
-          select: { nombre: true, apellido: true },
-        },
-        clase: {
-          select: {
-            id: true,
-            fecha_hora_inicio: true,
-            rutaCurricular: {
-              select: { nombre: true, color: true },
-            },
-          },
-        },
-      },
-      orderBy: { fecha_otorgado: 'desc' },
-      take: 50,
-    });
+    return this.puntosService.getHistorialPuntos(estudianteId);
   }
 
   /**
    * Otorgar puntos a un estudiante
-   * Llamado por docentes para premiar acciones destacadas
+   * @delegated PuntosService
    */
   async otorgarPuntos(
     docenteId: string,
@@ -449,195 +289,20 @@ export class GamificacionService {
     claseId?: string,
     contexto?: string,
   ) {
-    // 1. Validar que la acción existe y está activa
-    const accion = await this.prisma.accionPuntuable.findUnique({
-      where: { id: accionId },
-    });
-
-    if (!accion || !accion.activo) {
-      throw new NotFoundException('Acción puntuable no encontrada o inactiva');
-    }
-
-    // 2. Validar que el estudiante existe
-    const estudiante = await this.prisma.estudiante.findUnique({
-      where: { id: estudianteId },
-    });
-
-    if (!estudiante) {
-      throw new NotFoundException('Estudiante no encontrado');
-    }
-
-    // 3. Validar que el docente existe
-    const docente = await this.prisma.docente.findUnique({
-      where: { id: docenteId },
-    });
-
-    if (!docente) {
-      throw new NotFoundException('Docente no encontrado');
-    }
-
-    // 4. Si se especifica clase_id, validar que existe y que el estudiante está inscrito
-    if (claseId) {
-      const clase = await this.prisma.clase.findUnique({
-        where: { id: claseId },
-        include: {
-          inscripciones: {
-            where: { estudiante_id: estudianteId },
-          },
-        },
-      });
-
-      if (!clase) {
-        throw new NotFoundException('Clase no encontrada');
-      }
-
-      if (clase.inscripciones.length === 0) {
-        throw new BadRequestException('El estudiante no está inscrito en esta clase');
-      }
-    }
-
-    // 5. Crear registro de punto obtenido
-    const puntoObtenido = await this.prisma.puntoObtenido.create({
-      data: {
-        estudiante_id: estudianteId,
-        docente_id: docenteId,
-        accion_id: accionId,
-        clase_id: claseId,
-        puntos: accion.puntos,
-        contexto: contexto,
-      },
-      include: {
-        accion: true,
-        estudiante: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            puntos_totales: true,
-          },
-        },
-        docente: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-          },
-        },
-      },
-    });
-
-    // 6. Actualizar puntos_totales del estudiante
-    await this.prisma.estudiante.update({
-      where: { id: estudianteId },
-      data: {
-        puntos_totales: {
-          increment: accion.puntos,
-        },
-      },
-    });
-
-    return {
-      success: true,
-      puntoObtenido,
-      mensaje: `Se otorgaron ${accion.puntos} puntos a ${estudiante.nombre} ${estudiante.apellido}`,
-    };
+    return this.puntosService.otorgarPuntos(
+      docenteId,
+      estudianteId,
+      accionId,
+      claseId,
+      contexto,
+    );
   }
 
   /**
-   * Desbloquear logro
+   * Obtener ranking del estudiante
+   * @delegated RankingService
    */
-  async desbloquearLogro(estudianteId: string, logroId: string) {
-    // Por ahora solo simulado
-    // En producción, guardar en tabla LogrosEstudiante
-    return {
-      success: true,
-      logro: logroId,
-      estudiante: estudianteId,
-    };
-  }
-
-  // === HELPERS ===
-
-  /**
-   * Calcular racha de asistencia
-   */
-  private async calcularRacha(estudianteId: string): Promise<number> {
-    const asistencias = await this.prisma.asistencia.findMany({
-      where: {
-        estudiante_id: estudianteId,
-        estado: EstadoAsistencia.Presente,
-      },
-      orderBy: { createdAt: 'desc' },
-      select: { createdAt: true },
-    });
-
-    if (asistencias.length === 0) return 0;
-
-    let racha = 1;
-    for (let i = 1; i < asistencias.length; i++) {
-      const diff =
-        asistencias[i - 1].createdAt.getTime() -
-        asistencias[i].createdAt.getTime();
-      const days = diff / (1000 * 60 * 60 * 24);
-
-      if (days <= 1.5) {
-        // Tolerancia de 1.5 días
-        racha++;
-      } else {
-        break;
-      }
-    }
-
-    return racha;
-  }
-
-  /**
-   * Ranking del equipo
-   */
-  private async getEquipoRanking(equipoId: string) {
-    const estudiantes = await this.prisma.estudiante.findMany({
-      where: { equipo_id: equipoId },
-      select: {
-        id: true,
-        nombre: true,
-        apellido: true,
-        foto_url: true,
-        puntos_totales: true,
-      },
-      orderBy: {
-        puntos_totales: 'desc',
-      },
-    });
-
-    return estudiantes.map((e) => ({
-      id: e.id,
-      nombre: e.nombre,
-      apellido: e.apellido,
-      avatar: e.foto_url,
-      puntos: e.puntos_totales,
-    }));
-  }
-
-  /**
-   * Ranking global
-   */
-  private async getRankingGlobal() {
-    const estudiantes = await this.prisma.estudiante.findMany({
-      include: {
-        equipo: true,
-      },
-      orderBy: {
-        puntos_totales: 'desc',
-      },
-    });
-
-    return estudiantes.map((e) => ({
-      id: e.id,
-      nombre: e.nombre,
-      apellido: e.apellido,
-      avatar: e.foto_url,
-      equipo: e.equipo,
-      puntos: e.puntos_totales,
-    }));
+  async getRankingEstudiante(estudianteId: string) {
+    return this.rankingService.getRankingEstudiante(estudianteId);
   }
 }

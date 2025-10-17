@@ -119,7 +119,7 @@ export default function SalaClaseDocentePage() {
         };
         setClase(mockClase);
       } catch (error: any) {
-        console.error("Error:", error as any);
+        // Error loading class
       } finally {
         setIsLoading(false);
       }
@@ -211,12 +211,11 @@ export default function SalaClaseDocentePage() {
 
       // Event listeners
       api.addEventListener('videoConferenceJoined', () => {
-        console.log('Docente unido a la videollamada');
+        // Teacher joined video call
       });
 
       api.addEventListener('participantJoined', (...args: unknown[]) => {
         const participant = args[0] as JitsiParticipant;
-        console.log('Participante unido:', participant);
         setParticipantesConectados((prev) => [
           ...prev,
           {
@@ -228,14 +227,12 @@ export default function SalaClaseDocentePage() {
 
       api.addEventListener('participantLeft', (...args: unknown[]) => {
         const participant = args[0] as JitsiParticipant;
-        console.log('Participante salió:', participant);
         setParticipantesConectados((prev) =>
           prev.filter((p) => p.id !== participant.participantId)
         );
       });
 
       api.addEventListener('videoConferenceLeft', () => {
-        console.log('Docente salió de la videollamada');
         router.push('/docente/dashboard');
       });
     }
@@ -516,7 +513,7 @@ export default function SalaClaseDocentePage() {
           claseId={claseId}
           onClose={() => setShowInsigniaModal(false)}
           onInsigniaAsignada={() => {
-            console.log('Insignia asignada exitosamente');
+            // Badge assigned successfully
           }}
         />
       )}

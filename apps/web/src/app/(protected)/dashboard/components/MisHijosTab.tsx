@@ -93,10 +93,9 @@ export default function MisHijosTab({ estudiantes }: Props) {
     try {
       setLoading(true);
       const response = await apiClient.get(`/estudiantes/${estudiante_id}/detalle-completo`);
-      console.log('📊 Detalle del estudiante:', response);
       setStudentDetail(response as unknown as EstudianteDetalle);
     } catch (error: unknown) {
-      console.error('❌ Error cargando detalle del estudiante:', error);
+      // Error loading student detail
     } finally {
       setLoading(false);
     }

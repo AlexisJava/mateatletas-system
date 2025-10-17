@@ -90,18 +90,15 @@ export default function DashboardPage() {
         apiClient.get('/pagos/membresia'),
       ]);
 
-      console.log('📊 Datos del backend:', { estudiantesRes, clasesRes, membresiaRes });
-
       // El endpoint /estudiantes devuelve { data: [...], metadata: {...} }
       // Axios interceptor ya extrajo response.data, entonces estudiantesRes ES {data: [...], metadata: {...}}
       const estudiantesArray = estudiantesRes?.data || [];
-      console.log('👥 Estudiantes parseados:', estudiantesArray, 'length:', estudiantesArray.length);
 
       setEstudiantes(estudiantesArray as unknown as Estudiante[]);
       setClases((clasesRes || []) as unknown as Clase[]);
       setMembresia(((membresiaRes as any)?.membresia || null) as Membresia | null);
     } catch (error: unknown) {
-      console.error('❌ Error cargando datos del dashboard:', error);
+      // Error loading dashboard data
     } finally {
       setLoading(false);
     }
@@ -121,13 +118,6 @@ export default function DashboardPage() {
 
   // Determinar si tiene hijos o no
   const hasChildren = estudiantes.length > 0;
-
-  console.log('🔍 Estado del dashboard:', {
-    estudiantes,
-    estudiantesLength: estudiantes.length,
-    hasChildren,
-    showingView: hasChildren ? 'DashboardView' : 'OnboardingView'
-  });
 
   // Si NO tiene hijos → Mostrar Onboarding
   if (!hasChildren || !user) {

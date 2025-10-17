@@ -163,7 +163,7 @@ export function useProgreso(
 export function useDesbloquearLogro(estudianteId: string) {
   const queryClient = useQueryClient();
 
-  return useMutation<Logro, Error, string>({
+  return useMutation<unknown, Error, string>({
     mutationFn: (logroId: string) =>
       gamificacionApi.desbloquearLogro(logroId),
 
