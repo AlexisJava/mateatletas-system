@@ -134,11 +134,28 @@ export class DocentesService {
   /**
    * Busca un docente por ID
    * @param id - ID del docente
-   * @returns Docente sin password
+   * @returns Docente sin password, incluye sectores
    */
   async findById(id: string) {
     const docente = await this.prisma.docente.findUnique({
       where: { id },
+      include: {
+        docenteRutas: {
+          include: {
+            rutaEspecialidad: {
+              include: {
+                sector: {
+                  select: {
+                    nombre: true,
+                    icono: true,
+                    color: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!docente) {
@@ -146,7 +163,21 @@ export class DocentesService {
     }
 
     const { password_hash: _password_hash, ...docenteSinPassword } = docente;
-    return docenteSinPassword;
+
+    // Extraer sectores únicos
+    const sectoresMap = new Map();
+    docente.docenteRutas?.forEach((dr) => {
+      const sector = dr.rutaEspecialidad?.sector;
+      if (sector) {
+        sectoresMap.set(sector.nombre, sector);
+      }
+    });
+    const sectores = Array.from(sectoresMap.values());
+
+    return {
+      ...docenteSinPassword,
+      sectores,
+    };
   }
 
   /**
