@@ -50,6 +50,7 @@ export class PuntosService {
   /**
    * Otorgar puntos a un estudiante
    * Llamado por docentes para premiar acciones destacadas
+   * ⚠️ SECURITY: Usa transacción para garantizar atomicidad
    */
   async otorgarPuntos(
     docenteId: string,
@@ -58,7 +59,7 @@ export class PuntosService {
     claseId?: string,
     contexto?: string,
   ) {
-    // 1. Validar que la acción existe y está activa
+    // 1. Validar que la acción existe y está activa (fuera de transacción para performance)
     const accion = await this.prisma.accionPuntuable.findUnique({
       where: { id: accionId },
     });
@@ -67,7 +68,7 @@ export class PuntosService {
       throw new NotFoundException('Acción puntuable no encontrada o inactiva');
     }
 
-    // 2. Validar que el estudiante existe
+    // 2. Validar que el estudiante existe (fuera de transacción para performance)
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
     });
@@ -76,7 +77,7 @@ export class PuntosService {
       throw new NotFoundException('Estudiante no encontrado');
     }
 
-    // 3. Validar que el docente existe
+    // 3. Validar que el docente existe (fuera de transacción para performance)
     const docente = await this.prisma.docente.findUnique({
       where: { id: docenteId },
     });
@@ -105,44 +106,50 @@ export class PuntosService {
       }
     }
 
-    // 5. Crear registro de punto obtenido
-    const puntoObtenido = await this.prisma.puntoObtenido.create({
-      data: {
-        estudiante_id: estudianteId,
-        docente_id: docenteId,
-        accion_id: accionId,
-        clase_id: claseId,
-        puntos: accion.puntos,
-        contexto: contexto,
-      },
-      include: {
-        accion: true,
-        estudiante: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            puntos_totales: true,
+    // ✅ SECURITY FIX: Envolver creación de punto y actualización de totales en transacción
+    // Garantiza atomicidad: o ambas operaciones se completan, o ninguna
+    const puntoObtenido = await this.prisma.$transaction(async (tx) => {
+      // 5. Crear registro de punto obtenido
+      const nuevoPunto = await tx.puntoObtenido.create({
+        data: {
+          estudiante_id: estudianteId,
+          docente_id: docenteId,
+          accion_id: accionId,
+          clase_id: claseId,
+          puntos: accion.puntos,
+          contexto: contexto,
+        },
+        include: {
+          accion: true,
+          estudiante: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+              puntos_totales: true,
+            },
+          },
+          docente: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+            },
           },
         },
-        docente: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-          },
-        },
-      },
-    });
+      });
 
-    // 6. Actualizar puntos_totales del estudiante
-    await this.prisma.estudiante.update({
-      where: { id: estudianteId },
-      data: {
-        puntos_totales: {
-          increment: accion.puntos,
+      // 6. Actualizar puntos_totales del estudiante (dentro de la misma transacción)
+      await tx.estudiante.update({
+        where: { id: estudianteId },
+        data: {
+          puntos_totales: {
+            increment: accion.puntos,
+          },
         },
-      },
+      });
+
+      return nuevoPunto;
     });
 
     return {
