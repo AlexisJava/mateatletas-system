@@ -43,12 +43,9 @@ export class EstudiantesService {
       }
     }
 
-    // Calcular edad desde fecha_nacimiento
-    const fechaNac = new Date(createDto.fecha_nacimiento);
-    const edad = this.calcularEdad(fechaNac);
-
-    if (edad < 5 || edad > 25) {
-      throw new BadRequestException('La edad debe estar entre 5 y 25 años');
+    // Validar edad
+    if (createDto.edad < 3 || createDto.edad > 99) {
+      throw new BadRequestException('La edad debe estar entre 3 y 99 años');
     }
 
     // Crear estudiante
@@ -56,7 +53,6 @@ export class EstudiantesService {
       data: {
         ...createDto,
         tutor_id: tutorId,
-        fecha_nacimiento: new Date(createDto.fecha_nacimiento),
       },
       include: {
         equipo: true,
@@ -172,13 +168,10 @@ export class EstudiantesService {
       }
     }
 
-    // Validar fecha_nacimiento si se actualiza
-    if (updateDto.fecha_nacimiento) {
-      const fechaNac = new Date(updateDto.fecha_nacimiento);
-      const edad = this.calcularEdad(fechaNac);
-
-      if (edad < 5 || edad > 25) {
-        throw new BadRequestException('La edad debe estar entre 5 y 25 años');
+    // Validar edad si se actualiza
+    if (updateDto.edad !== undefined) {
+      if (updateDto.edad < 3 || updateDto.edad > 99) {
+        throw new BadRequestException('La edad debe estar entre 3 y 99 años');
       }
     }
 
@@ -198,12 +191,7 @@ export class EstudiantesService {
     // Actualizar estudiante
     const estudiante = await this.prisma.estudiante.update({
       where: { id },
-      data: {
-        ...updateDto,
-        fecha_nacimiento: updateDto.fecha_nacimiento
-          ? new Date(updateDto.fecha_nacimiento)
-          : undefined,
-      },
+      data: updateDto,
       include: {
         equipo: true,
       },
@@ -440,7 +428,6 @@ export class EstudiantesService {
 
     return {
       ...estudiante,
-      edad: this.calcularEdad(estudiante.fecha_nacimiento),
       estadisticas: {
         total_clases: totalClases,
         clases_presente: clasesPresente,
@@ -450,20 +437,5 @@ export class EstudiantesService {
         logros: estudiante.logrosDesbloqueados?.length || 0,
       },
     };
-  }
-
-  /**
-   * Calcula la edad en años desde una fecha de nacimiento
-   * @param fechaNacimiento - Fecha de nacimiento
-   * @returns Edad en años
-   */
-  private calcularEdad(fechaNacimiento: Date): number {
-    const hoy = new Date();
-    let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-    const m = hoy.getMonth() - fechaNacimiento.getMonth();
-    if (m < 0 || (m === 0 && hoy.getDate() < fechaNacimiento.getDate())) {
-      edad--;
-    }
-    return edad;
   }
 }

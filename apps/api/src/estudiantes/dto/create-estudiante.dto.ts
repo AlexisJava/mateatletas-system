@@ -1,7 +1,9 @@
 import {
   IsString,
   IsNotEmpty,
-  IsDateString,
+  IsInt,
+  Min,
+  Max,
   IsIn,
   IsOptional,
   IsUrl,
@@ -9,10 +11,10 @@ import {
   IsUUID,
   Matches,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Trim } from '../../common/decorators/trim.decorator';
 import { Capitalize } from '../../common/decorators/capitalize.decorator';
-import { IsValidAge } from '../../common/validators/is-valid-age.validator';
 
 /**
  * DTO para crear un nuevo estudiante
@@ -61,18 +63,21 @@ export class CreateEstudianteDto {
   apellido!: string;
 
   /**
-   * Fecha de nacimiento del estudiante
-   * Debe tener entre 4 y 18 años
+   * Edad del estudiante en años
+   * Debe ser un número entero entre 3 y 99 años
    */
   @ApiProperty({
-    description: 'Fecha de nacimiento en formato ISO (estudiante debe tener entre 4 y 18 años)',
-    example: '2015-06-15',
-    type: String,
-    format: 'date',
+    description: 'Edad del estudiante en años (entre 3 y 99)',
+    example: 10,
+    type: Number,
+    minimum: 3,
+    maximum: 99,
   })
-  @IsDateString({}, { message: 'La fecha de nacimiento debe ser una fecha válida' })
-  @IsValidAge(4, 18, { message: 'El estudiante debe tener entre 4 y 18 años' })
-  fecha_nacimiento!: string;
+  @Type(() => Number)
+  @IsInt({ message: 'La edad debe ser un número entero' })
+  @Min(3, { message: 'La edad mínima es 3 años' })
+  @Max(99, { message: 'La edad máxima es 99 años' })
+  edad!: number;
 
   /**
    * Nivel escolar del estudiante

@@ -114,6 +114,22 @@ export class ClasesService {
     return this.managementService.listarRutasCurriculares();
   }
 
+  /**
+   * Asignar estudiantes a una clase (solo Admin)
+   * DELEGACIÓN: ClasesManagementService
+   */
+  async asignarEstudiantesAClase(claseId: string, estudianteIds: string[]) {
+    return this.managementService.asignarEstudiantesAClase(claseId, estudianteIds);
+  }
+
+  /**
+   * Obtener estudiantes inscritos en una clase
+   * DELEGACIÓN: ClasesManagementService
+   */
+  async obtenerEstudiantesDeClase(claseId: string) {
+    return this.managementService.obtenerEstudiantesDeClase(claseId);
+  }
+
   // ============================================================================
   // RESERVAS (delegación a ClasesReservasService)
   // ============================================================================

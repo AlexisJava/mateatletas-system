@@ -1,36 +1,70 @@
 'use client';
-import { Button } from '@/components/ui';
 
 import { useEffect, useState } from 'react';
 import { useAdminStore } from '@/store/admin.store';
 import { AdminUser } from '@/types/admin.types';
+import { docentesApi, CreateDocenteData, Docente } from '@/lib/api/docentes.api';
+import { createAdmin, CreateAdminData } from '@/lib/api/admin.api';
+import { asignarRutasDocente, crearRutaEspecialidad, listarRutasEspecialidad } from '@/lib/api/sectores.api';
+
+interface SelectedRuta {
+  sectorId: string;
+  sectorNombre: string;
+  sectorIcono: string;
+  sectorColor: string;
+  rutaNombre: string;
+}
 import {
   exportToExcel,
   exportToCSV,
   exportToPDF,
   formatUsersForExport
 } from '@/lib/utils/export.utils';
+import { Button } from '@/components/ui';
+import { Users, GraduationCap, Crown, Plus, Download, Eye, Trash2, UserCog, X } from 'lucide-react';
+import CreateDocenteForm from '@/components/admin/CreateDocenteForm';
+import ViewEditDocenteModal from '@/components/admin/ViewEditDocenteModal';
+import MultiRoleModal from '@/components/admin/MultiRoleModal';
 
-type ModalType = 'delete' | 'role' | 'view' | null;
+type TabType = 'tutores' | 'estudiantes' | 'personal';
+type ModalType = 'delete' | 'roles' | 'view' | 'viewDocente' | 'createDocente' | 'createAdmin' | null;
 
 export default function UsuariosPage() {
   const { users, fetchUsers, deleteUser, changeUserRole, isLoading, error } = useAdminStore();
-  const [filter, setFilter] = useState<'all' | 'tutor' | 'docente' | 'admin'>('all');
+  const [activeTab, setActiveTab] = useState<TabType>('tutores');
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [selectedRole, setSelectedRole] = useState<'tutor' | 'docente' | 'admin'>('tutor');
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [selectedDocente, setSelectedDocente] = useState<Docente | null>(null);
+
+  // Form states para crear Admin
+  const [adminForm, setAdminForm] = useState<CreateAdminData>({
+    email: '',
+    password: '',
+    nombre: '',
+    apellido: '',
+    dni: '',
+    telefono: '',
+  });
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  const filteredUsers = filter === 'all' ? users : users.filter(u => u.role === filter);
+  // Filtrar usuarios según el tab activo
+  const tutores = users.filter(u => u.role === 'tutor');
+  const estudiantes: any[] = []; // TODO: Agregar endpoint para estudiantes
+  const personal = users.filter(u => u.role === 'docente' || u.role === 'admin');
+
+  const displayedUsers = activeTab === 'tutores' ? tutores : activeTab === 'estudiantes' ? estudiantes : personal;
 
   const roleColors: Record<string, string> = {
-    admin: 'bg-red-100 text-red-800',
-    docente: 'bg-purple-100 text-purple-800',
-    tutor: 'bg-blue-100 text-blue-800',
+    admin: 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white',
+    docente: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white',
+    tutor: 'bg-gradient-to-r from-emerald-400 to-teal-400 text-white',
   };
 
   const roleLabels: Record<string, string> = {
@@ -57,32 +91,139 @@ export default function UsuariosPage() {
     }
   };
 
-  const openModal = (type: ModalType, user: AdminUser) => {
-    setSelectedUser(user);
-    if (type === 'role') {
-      setSelectedRole(user.role);
+  const handleCreateDocente = async (data: CreateDocenteData, rutas?: SelectedRuta[]) => {
+    setFormLoading(true);
+    setFormError(null);
+
+    try {
+      // Crear el docente
+      const newDocente = await docentesApi.create(data);
+
+      // Si hay rutas seleccionadas, crearlas y asignarlas
+      if (rutas && rutas.length > 0 && newDocente?.id) {
+        const rutaIds: string[] = [];
+
+        // Obtener todas las rutas existentes para verificar cuáles ya existen
+        const rutasExistentes = await listarRutasEspecialidad();
+
+        for (const ruta of rutas) {
+          // Buscar si la ruta ya existe (mismo nombre y sector)
+          const rutaExistente = rutasExistentes.find(
+            (r) => r.nombre.toLowerCase() === ruta.rutaNombre.toLowerCase() && r.sectorId === ruta.sectorId
+          );
+
+          if (rutaExistente) {
+            // La ruta ya existe, usar su ID
+            rutaIds.push(rutaExistente.id);
+          } else {
+            // La ruta no existe, crearla
+            const nuevaRuta = await crearRutaEspecialidad({
+              nombre: ruta.rutaNombre,
+              sectorId: ruta.sectorId,
+              descripcion: `Creada automáticamente al asignar docente`,
+            });
+            rutaIds.push(nuevaRuta.id);
+          }
+        }
+
+        // Asignar todas las rutas al docente
+        await asignarRutasDocente(newDocente.id, { rutaIds });
+      }
+
+      await fetchUsers();
+      setModalType(null);
+    } catch (error: any) {
+      setFormError(error?.message || 'Error al crear el docente');
+      throw error;
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleViewDocente = async (userId: string) => {
+    setFormLoading(true);
+    try {
+      const docente = await docentesApi.getById(userId);
+      setSelectedDocente(docente);
+      setModalType('viewDocente');
+    } catch (error: any) {
+      console.error('Error fetching docente:', error);
+      setFormError(error?.message || 'Error al cargar el docente');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleUpdateDocente = async (id: string, data: Partial<Docente>) => {
+    setFormLoading(true);
+    try {
+      await docentesApi.update(id, data);
+      await fetchUsers();
+      setModalType(null);
+      setSelectedDocente(null);
+    } catch (error: any) {
+      console.error('Error updating docente:', error);
+      throw error;
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleCreateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormLoading(true);
+    setFormError(null);
+
+    try {
+      await createAdmin(adminForm);
+      await fetchUsers();
+      setModalType(null);
+      setAdminForm({
+        email: '',
+        password: '',
+        nombre: '',
+        apellido: '',
+        dni: '',
+        telefono: '',
+      });
+    } catch (error: any) {
+      setFormError(error?.message || 'Error al crear el administrador');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const openModal = (type: ModalType, user?: AdminUser) => {
+    if (user) {
+      setSelectedUser(user);
+      if (type === 'role') {
+        setSelectedRole(user.role);
+      }
     }
     setModalType(type);
+    setFormError(null);
   };
 
   const closeModal = () => {
     setModalType(null);
     setSelectedUser(null);
+    setFormError(null);
   };
 
   const handleExport = (format: 'excel' | 'csv' | 'pdf') => {
-    const formattedData = formatUsersForExport(filteredUsers);
+    const formattedData = formatUsersForExport(displayedUsers);
     const timestamp = new Date().getTime();
+    const tabName = activeTab === 'tutores' ? 'tutores' : activeTab === 'estudiantes' ? 'estudiantes' : 'personal';
 
     if (format === 'excel') {
-      exportToExcel(formattedData as any, `usuarios-${timestamp}`, 'Usuarios');
+      exportToExcel(formattedData as any, `${tabName}-${timestamp}`, 'Usuarios');
     } else if (format === 'csv') {
-      exportToCSV(formattedData as any, `usuarios-${timestamp}`);
+      exportToCSV(formattedData as any, `${tabName}-${timestamp}`);
     } else {
       exportToPDF(
         formattedData,
-        `usuarios-${timestamp}`,
-        'Listado de Usuarios',
+        `${tabName}-${timestamp}`,
+        `Listado de ${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`,
         [
           { header: 'Nombre', dataKey: 'Nombre' },
           { header: 'Email', dataKey: 'Email' },
@@ -98,57 +239,57 @@ export default function UsuariosPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-[#2a1a5e]">Gestión de Usuarios</h1>
-          <p className="text-gray-600 mt-1">Administrá usuarios, roles y permisos</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-900 via-purple-800 to-indigo-900 dark:from-purple-200 dark:via-indigo-300 dark:to-purple-200 bg-clip-text text-transparent">
+            Gestión de Usuarios
+          </h1>
+          <p className="text-white/60 mt-2">Administrá usuarios, roles y permisos del sistema</p>
         </div>
+
         <div className="flex gap-3 items-center">
-          <div className="flex gap-2">
-            {(['all', 'tutor', 'docente', 'admin'] as const).map((f) => (
+          {/* Crear Nuevo (solo en Personal del Club) */}
+          {activeTab === 'personal' && (
+            <div className="relative">
               <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                  filter === f
-                    ? 'bg-[#ff6b35] text-white shadow-md'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+                onClick={() => setModalType('createDocente')}
+                className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:from-violet-600 hover:to-purple-700 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2"
               >
-                {f === 'all' ? 'Todos' : roleLabels[f]}
+                <Plus className="w-4 h-4" />
+                Crear Nuevo
               </button>
-            ))}
-          </div>
+            </div>
+          )}
 
           {/* Export Button */}
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all flex items-center gap-2"
+              className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-700 transition-all shadow-lg shadow-emerald-500/30 flex items-center gap-2"
             >
-              📊 Exportar
-              <span className="text-xs">▼</span>
+              <Download className="w-4 h-4" />
+              Exportar
             </button>
 
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-10">
+              <div className="absolute right-0 mt-2 w-48 bg-emerald-500/[0.08] rounded-xl shadow-2xl border border-emerald-500/20 py-2 z-10">
                 <button
                   onClick={() => handleExport('excel')}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 text-sm"
+                  className="w-full px-4 py-2.5 text-left hover:bg-emerald-500/10 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors"
                 >
-                  📊 Exportar a Excel
+                  Exportar a Excel
                 </button>
                 <button
                   onClick={() => handleExport('csv')}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 text-sm"
+                  className="w-full px-4 py-2.5 text-left hover:bg-emerald-500/10 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors"
                 >
-                  📄 Exportar a CSV
+                  Exportar a CSV
                 </button>
                 <button
                   onClick={() => handleExport('pdf')}
-                  className="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-2 text-sm"
+                  className="w-full px-4 py-2.5 text-left hover:bg-emerald-500/10 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors"
                 >
-                  📕 Exportar a PDF
+                  Exportar a PDF
                 </button>
               </div>
             )}
@@ -156,121 +297,168 @@ export default function UsuariosPage() {
         </div>
       </div>
 
-      {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-          <div className="text-sm font-medium text-blue-700">Total Usuarios</div>
-          <div className="text-2xl font-bold text-blue-900">{users.length}</div>
-        </div>
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-          <div className="text-sm font-medium text-purple-700">Docentes</div>
-          <div className="text-2xl font-bold text-purple-900">
-            {users.filter(u => u.role === 'docente').length}
-          </div>
-        </div>
-        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-          <div className="text-sm font-medium text-green-700">Tutores</div>
-          <div className="text-2xl font-bold text-green-900">
-            {users.filter(u => u.role === 'tutor').length}
-          </div>
-        </div>
-        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
-          <div className="text-sm font-medium text-red-700">Admins</div>
-          <div className="text-2xl font-bold text-red-900">
-            {users.filter(u => u.role === 'admin').length}
-          </div>
-        </div>
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-emerald-500/20">
+        <button
+          onClick={() => setActiveTab('tutores')}
+          className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm transition-all rounded-t-xl ${
+            activeTab === 'tutores'
+              ? 'bg-gradient-to-r from-emerald-400 to-teal-400 text-white shadow-lg shadow-emerald-500/20'
+              : 'text-white/60 hover:bg-emerald-500/10'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          Tutores
+          <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+            activeTab === 'tutores' ? 'bg-white/20' : 'bg-emerald-500/10 text-white/70'
+          }`}>
+            {tutores.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('estudiantes')}
+          className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm transition-all rounded-t-xl ${
+            activeTab === 'estudiantes'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30'
+              : 'text-white/60 hover:bg-emerald-500/10'
+          }`}
+        >
+          <GraduationCap className="w-4 h-4" />
+          Estudiantes
+          <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+            activeTab === 'estudiantes' ? 'bg-white/20' : 'bg-emerald-500/10 text-white/70'
+          }`}>
+            {estudiantes.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('personal')}
+          className={`flex items-center gap-2 px-6 py-3 font-semibold text-sm transition-all rounded-t-xl ${
+            activeTab === 'personal'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20'
+              : 'text-white/60 hover:bg-emerald-500/10'
+          }`}
+        >
+          <Crown className="w-4 h-4" />
+          Personal del Club
+          <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+            activeTab === 'personal' ? 'bg-white/20' : 'bg-emerald-500/10 text-white/70'
+          }`}>
+            {personal.length}
+          </span>
+        </button>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+        <div className="backdrop-blur-xl bg-red-100/80 dark:bg-red-950/60 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl">
           {error}
         </div>
       )}
 
       {/* Users Table */}
       {isLoading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-[#ff6b35]"></div>
-          <p className="mt-4 text-gray-600">Cargando usuarios...</p>
+        <div className="text-center py-16">
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-emerald-500/20 border-t-emerald-400"></div>
+          <p className="mt-4 text-white/60 font-medium">Cargando usuarios...</p>
         </div>
-      ) : filteredUsers.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-md p-12 text-center">
-          <p className="text-gray-500 text-lg">No hay usuarios con el filtro seleccionado</p>
+      ) : displayedUsers.length === 0 ? (
+        <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-2xl shadow-xl shadow-emerald-500/10 border border-emerald-500/20 p-16 text-center">
+          <p className="text-white/50 text-lg font-medium">
+            {activeTab === 'estudiantes' ? 'No hay estudiantes registrados' : 'No hay usuarios en esta categoría'}
+          </p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-2xl shadow-xl shadow-emerald-500/10 border border-emerald-500/20 overflow-hidden">
+          <table className="min-w-full">
+            <thead className="bg-gradient-to-r from-emerald-500/5 to-teal-500/5 border-b border-emerald-500/20">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
                   Usuario
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
                   Rol
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
                   Registrado
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-right text-xs font-bold text-emerald-100 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+            <tbody className="divide-y divide-purple-200/20 dark:divide-purple-700/20">
+              {displayedUsers.map((user) => (
+                <tr key={user.id} className="hover:bg-purple-50/40 dark:hover:bg-purple-900/20 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-[#ff6b35] to-[#f7b801] rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-shrink-0 h-11 w-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-emerald-500/30">
                         {user.nombre?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
-                      <div className="ml-4">
-                        <div className="font-medium text-gray-900">
+                      <div>
+                        <div className="font-semibold text-white">
                           {user.nombre} {user.apellido}
                         </div>
-                        <div className="text-sm text-gray-500">ID: {user.id.slice(0, 8)}...</div>
+                        <div className="text-xs text-white/50 font-mono">
+                          {user.id.slice(0, 8)}...
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.email}</div>
+                    <div className="text-sm text-white/70">{user.email}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${roleColors[user.role]}`}>
-                      {roleLabels[user.role]}
-                    </span>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-wrap gap-2">
+                      {(user.roles && user.roles.length > 0 ? user.roles : [user.role]).map((role) => (
+                        <span key={role} className={`px-3 py-1.5 text-xs font-bold rounded-lg shadow-md ${roleColors[role]}`}>
+                          {roleLabels[role]}
+                        </span>
+                      ))}
+                    </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white/60 font-medium">
                     {new Date(user.createdAt).toLocaleDateString('es-ES', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric'
                     })}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
-                    <button
-                      onClick={() => openModal('view', user)}
-                      className="text-[#2a1a5e] hover:text-[#ff6b35] transition-colors"
-                    >
-                      Ver
-                    </button>
-                    <button
-                      onClick={() => openModal('role', user)}
-                      className="text-blue-600 hover:text-blue-900 transition-colors"
-                    >
-                      Cambiar Rol
-                    </button>
-                    <button
-                      onClick={() => openModal('delete', user)}
-                      className="text-red-600 hover:text-red-900 transition-colors"
-                    >
-                      Eliminar
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => {
+                          if (user.role === 'docente') {
+                            handleViewDocente(user.id);
+                          } else {
+                            openModal('view', user);
+                          }
+                        }}
+                        className="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-black/60 rounded-lg transition-all"
+                        title="Ver detalles"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => openModal('roles', user)}
+                        className="p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-all"
+                        title="Gestionar roles"
+                      >
+                        <UserCog className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => openModal('delete', user)}
+                        className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-all"
+                        title="Eliminar"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -281,100 +469,85 @@ export default function UsuariosPage() {
 
       {/* Delete Modal */}
       {modalType === 'delete' && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-            <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">¿Eliminar usuario?</h3>
-            <p className="text-gray-600 mb-2">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="backdrop-blur-xl bg-emerald-500/[0.08] rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-emerald-500/20 border border-emerald-500/20">
+            <h3 className="text-xl font-bold text-white mb-4">¿Eliminar usuario?</h3>
+            <p className="text-white/70 mb-2">
               Estás por eliminar a <strong>{selectedUser.nombre} {selectedUser.apellido}</strong>
             </p>
-            <p className="text-sm text-red-600 mb-6">Esta acción no se puede deshacer.</p>
+            <p className="text-sm text-red-600 dark:text-red-400 mb-6 font-medium">Esta acción no se puede deshacer.</p>
             <div className="flex gap-3">
-              <Button variant="outline" onClick={closeModal} className="flex-1">
+              <button
+                onClick={closeModal}
+                className="flex-1 px-4 py-2.5 border-2 border-emerald-500/30 text-emerald-100 rounded-xl font-semibold hover:bg-emerald-500/10 transition-all"
+              >
                 Cancelar
-              </Button>
-              <Button
-                variant="primary"
+              </button>
+              <button
                 onClick={handleDeleteUser}
-                className="flex-1 bg-red-500 hover:bg-red-600"
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl font-semibold hover:from-red-600 hover:to-rose-700 transition-all shadow-lg shadow-red-500/40"
               >
                 Eliminar
-              </Button>
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Change Role Modal */}
-      {modalType === 'role' && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-            <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">Cambiar Rol</h3>
-            <p className="text-gray-600 mb-4">
-              Usuario: <strong>{selectedUser.nombre} {selectedUser.apellido}</strong>
-            </p>
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Seleccioná el nuevo rol:
-              </label>
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value as any)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
-              >
-                <option value="tutor">Tutor</option>
-                <option value="docente">Docente</option>
-                <option value="admin">Administrador</option>
-              </select>
-            </div>
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={closeModal} className="flex-1">
-                Cancelar
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleChangeRole}
-                className="flex-1"
-              >
-                Cambiar Rol
-              </Button>
-            </div>
-          </div>
-        </div>
+      {/* Multi-Role Management Modal */}
+      {modalType === 'roles' && selectedUser && (
+        <MultiRoleModal
+          user={selectedUser}
+          onClose={closeModal}
+          onSave={async (userId, roles) => {
+            const success = await useAdminStore.getState().updateUserRoles(userId, roles);
+            return success;
+          }}
+          isLoading={isLoading}
+        />
       )}
 
       {/* View User Modal */}
       {modalType === 'view' && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full shadow-xl">
-            <h3 className="text-2xl font-bold text-[#2a1a5e] mb-6">Detalles del Usuario</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="backdrop-blur-xl bg-emerald-500/[0.08] rounded-2xl p-6 max-w-lg w-full shadow-2xl shadow-emerald-500/20 border border-emerald-500/20">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-white">Detalles del Usuario</h3>
+              <button
+                onClick={closeModal}
+                className="p-2 hover:bg-emerald-500/10 rounded-xl transition-colors"
+              >
+                <X className="w-5 h-5 text-white/50" />
+              </button>
+            </div>
 
             <div className="space-y-4 mb-6">
-              <div className="flex items-center gap-4 pb-4 border-b">
-                <div className="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-[#ff6b35] to-[#f7b801] rounded-full flex items-center justify-center text-white font-bold text-2xl">
+              <div className="flex items-center gap-4 pb-4 border-b border-emerald-500/20">
+                <div className="flex-shrink-0 h-16 w-16 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-emerald-500/30">
                   {selectedUser.nombre?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                 <div>
-                  <div className="text-xl font-bold text-gray-900">
+                  <div className="text-xl font-bold text-white">
                     {selectedUser.nombre} {selectedUser.apellido}
                   </div>
-                  <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${roleColors[selectedUser.role]} mt-1`}>
+                  <span className={`inline-block px-3 py-1 text-xs font-bold rounded-lg shadow-md ${roleColors[selectedUser.role]} mt-1`}>
                     {roleLabels[selectedUser.role]}
                   </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-sm font-medium text-gray-500">Email</div>
-                  <div className="text-sm text-gray-900 mt-1">{selectedUser.email}</div>
+                <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl p-3 border border-emerald-500/20">
+                  <div className="text-xs font-semibold text-white/50 mb-1">Email</div>
+                  <div className="text-sm font-medium text-white break-all">{selectedUser.email}</div>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">ID de Usuario</div>
-                  <div className="text-sm text-gray-900 mt-1 font-mono">{selectedUser.id}</div>
+                <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl p-3 border border-emerald-500/20">
+                  <div className="text-xs font-semibold text-white/50 mb-1">ID de Usuario</div>
+                  <div className="text-sm font-medium text-white font-mono">{selectedUser.id}</div>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">Fecha de Registro</div>
-                  <div className="text-sm text-gray-900 mt-1">
+                <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl p-3 border border-emerald-500/20">
+                  <div className="text-xs font-semibold text-white/50 mb-1">Fecha de Registro</div>
+                  <div className="text-sm font-medium text-white">
                     {new Date(selectedUser.createdAt).toLocaleDateString('es-ES', {
                       year: 'numeric',
                       month: 'long',
@@ -382,25 +555,184 @@ export default function UsuariosPage() {
                     })}
                   </div>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">Rol Actual</div>
-                  <div className="text-sm text-gray-900 mt-1">{roleLabels[selectedUser.role]}</div>
+                <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl p-3 border border-emerald-500/20">
+                  <div className="text-xs font-semibold text-white/50 mb-1">Rol Actual</div>
+                  <div className="text-sm font-medium text-white">{roleLabels[selectedUser.role]}</div>
                 </div>
               </div>
             </div>
 
             <div className="flex gap-3">
-              <Button variant="outline" onClick={closeModal} className="flex-1">
+              <button
+                onClick={closeModal}
+                className="flex-1 px-4 py-2.5 border-2 border-emerald-500/30 text-emerald-100 rounded-xl font-semibold hover:bg-emerald-500/10 transition-all"
+              >
                 Cerrar
-              </Button>
-              <Button
-                variant="primary"
+              </button>
+              <button
                 onClick={() => setModalType('role')}
-                className="flex-1"
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:from-violet-600 hover:to-purple-700 transition-all shadow-lg shadow-emerald-500/30"
               >
                 Cambiar Rol
-              </Button>
+              </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Docente Modal - NEW COMPONENT */}
+      {modalType === 'createDocente' && (
+        <CreateDocenteForm
+          onSubmit={handleCreateDocente}
+          onCancel={closeModal}
+          onSwitchToAdmin={() => setModalType('createAdmin')}
+          isLoading={formLoading}
+          error={formError}
+        />
+      )}
+
+      {/* View/Edit Docente Modal - NEW COMPONENT */}
+      {modalType === 'viewDocente' && selectedDocente && (
+        <ViewEditDocenteModal
+          docente={selectedDocente}
+          onClose={() => {
+            setModalType(null);
+            setSelectedDocente(null);
+          }}
+          onUpdate={handleUpdateDocente}
+          isLoading={formLoading}
+        />
+      )}
+
+      {/* Create Admin Modal */}
+      {modalType === 'createAdmin' && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="backdrop-blur-xl bg-emerald-500/[0.08] rounded-2xl p-6 max-w-lg w-full shadow-2xl shadow-emerald-500/20 border border-emerald-500/20 my-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-white">Crear Nuevo Administrador</h3>
+              <button
+                onClick={closeModal}
+                className="p-2 hover:bg-emerald-500/10 rounded-xl transition-colors"
+              >
+                <X className="w-5 h-5 text-white/50" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateAdmin} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-white/70 mb-2">
+                    Nombre *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={adminForm.nombre}
+                    onChange={(e) => setAdminForm({ ...adminForm, nombre: e.target.value })}
+                    className="w-full px-4 py-2.5 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white/70 mb-2">
+                    Apellido *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={adminForm.apellido}
+                    onChange={(e) => setAdminForm({ ...adminForm, apellido: e.target.value })}
+                    className="w-full px-4 py-2.5 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-white/70 mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={adminForm.email}
+                  onChange={(e) => setAdminForm({ ...adminForm, email: e.target.value })}
+                  className="w-full px-4 py-2.5 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-white/70 mb-2">
+                  Contraseña *
+                </label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={adminForm.password}
+                  onChange={(e) => setAdminForm({ ...adminForm, password: e.target.value })}
+                  className="w-full px-4 py-2.5 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all"
+                  placeholder="Mínimo 6 caracteres"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-white/70 mb-2">
+                    DNI (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={adminForm.dni}
+                    onChange={(e) => setAdminForm({ ...adminForm, dni: e.target.value })}
+                    className="w-full px-4 py-2.5 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-white/70 mb-2">
+                    Teléfono (opcional)
+                  </label>
+                  <input
+                    type="tel"
+                    value={adminForm.telefono}
+                    onChange={(e) => setAdminForm({ ...adminForm, telefono: e.target.value })}
+                    className="w-full px-4 py-2.5 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              {formError && (
+                <div className="backdrop-blur-xl bg-red-100/80 dark:bg-red-950/60 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm font-medium">
+                  {formError}
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  disabled={formLoading}
+                  className="flex-1 px-4 py-2.5 border-2 border-emerald-500/30 text-emerald-100 rounded-xl font-semibold hover:bg-emerald-500/10 transition-all disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={formLoading}
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl font-semibold hover:from-red-600 hover:to-rose-700 transition-all shadow-lg shadow-red-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {formLoading ? 'Creando...' : 'Crear Administrador'}
+                </button>
+              </div>
+
+              <div className="flex justify-center pt-2">
+                <button
+                  type="button"
+                  onClick={() => setModalType('createDocente')}
+                  className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold transition-colors"
+                >
+                  ¿Querés crear un Docente en su lugar?
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

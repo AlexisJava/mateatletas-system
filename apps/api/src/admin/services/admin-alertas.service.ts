@@ -54,8 +54,8 @@ export class AdminAlertasService {
         id: alerta.clase.id,
         fecha_hora_inicio: alerta.clase.fecha_hora_inicio,
         duracion_minutos: alerta.clase.duracion_minutos,
-        rutaCurricular: alerta.clase.rutaCurricular.nombre,
-        color: alerta.clase.rutaCurricular.color,
+        rutaCurricular: alerta.clase.rutaCurricular?.nombre ?? 'Sin ruta',
+        color: alerta.clase.rutaCurricular?.color ?? '#6B7280',
       },
       createdAt: alerta.createdAt,
     }));

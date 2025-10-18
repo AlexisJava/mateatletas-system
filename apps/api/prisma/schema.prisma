@@ -52,6 +52,10 @@ model Tutor {
   /// Se usa para redirigir a nuevos tutores al flujo de configuración
   ha_completado_onboarding Boolean @default(false)
 
+  /// Roles asignados al tutor (normalmente solo ["tutor"])
+  /// Ejemplo: ["tutor"]
+  roles Json @default("[\"tutor\"]")
+
   /// Relación con estudiantes (un tutor puede tener muchos estudiantes)
   estudiantes Estudiante[]
 
@@ -91,8 +95,8 @@ model Estudiante {
   /// Apellido del estudiante
   apellido String
 
-  /// Fecha de nacimiento del estudiante (para calcular edad)
-  fecha_nacimiento DateTime
+  /// Edad del estudiante en años
+  edad Int
 
   /// Nivel escolar del estudiante: Primaria, Secundaria, Universidad
   nivel_escolar String
@@ -110,6 +114,12 @@ model Estudiante {
   /// Relación con el tutor (muchos estudiantes pertenecen a un tutor)
   tutor Tutor @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
 
+  /// ID del sector al que pertenece el estudiante (Matemática o Programación)
+  sector_id String?
+
+  /// Relación con el sector (muchos estudiantes pueden pertenecer a un sector)
+  sector Sector? @relation(fields: [sector_id], references: [id], onDelete: SetNull)
+
   /// ID del equipo al que pertenece el estudiante (opcional, para gamificación)
   equipo_id String?
 
@@ -121,6 +131,10 @@ model Estudiante {
 
   /// Nivel actual del estudiante en el sistema de gamificación
   nivel_actual Int @default(1)
+
+  /// Roles asignados al estudiante (normalmente solo ["estudiante"])
+  /// Ejemplo: ["estudiante"]
+  roles Json @default("[\"estudiante\"]")
 
   /// Relación con inscripciones a cursos (un estudiante puede inscribirse a múltiples cursos)
   inscripciones_curso InscripcionCurso[]
@@ -205,11 +219,36 @@ model Docente {
   /// Apellido del docente
   apellido String
 
-  /// Título profesional (ej: "Profesor de Matemática")
+  /// Título profesional (ej: "Profesor de Matemática", "Licenciado en Física")
   titulo String?
 
   /// Biografía o descripción del docente
   bio String?
+
+  /// Teléfono de contacto (opcional)
+  telefono String?
+
+  /// Especialidades del docente (ej: ["Álgebra", "Geometría", "Trigonometría"])
+  /// Se almacena como JSON array de strings
+  especialidades Json?
+
+  /// Años de experiencia docente
+  experiencia_anos Int?
+
+  /// Disponibilidad horaria del docente (ej: {"lunes": ["09:00-12:00", "14:00-18:00"], "martes": ["10:00-13:00"]})
+  /// Se almacena como JSON object con días de la semana como keys
+  disponibilidad_horaria Json?
+
+  /// Nivel educativo que el docente puede impartir (ej: ["Primaria", "Secundaria", "Universidad"])
+  /// Se almacena como JSON array de strings
+  nivel_educativo Json?
+
+  /// Estado del docente (activo, inactivo, vacaciones)
+  estado String @default("activo")
+
+  /// Roles asignados al docente (puede ser docente y admin simultáneamente)
+  /// Ejemplo: ["docente", "admin"]
+  roles Json @default("[\"docente\"]")
 
   /// Relación con clases (un docente puede dictar muchas clases)
   clases Clase[]
@@ -225,6 +264,9 @@ model Docente {
 
   /// Relación con eventos (un docente puede tener muchos eventos)
   eventos Evento[]
+
+  /// Relación con rutas de especialidad (un docente puede trabajar en múltiples rutas)
+  rutasEspecialidad DocenteRuta[]
 
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
@@ -254,8 +296,18 @@ model Admin {
   /// Apellido del admin
   apellido String
 
+  /// DNI del admin (opcional)
+  dni String?
+
+  /// Teléfono del admin (opcional)
+  telefono String?
+
   /// Fecha en que el admin fue creado
   fecha_registro DateTime @default(now())
+
+  /// Roles asignados al admin (puede ser admin y docente simultáneamente)
+  /// Ejemplo: ["admin", "docente"]
+  roles Json @default("[\"admin\"]")
 
   /// Timestamp de creación del registro
   createdAt DateTime @default(now())
@@ -491,11 +543,14 @@ model Clase {
   /// Identificador único de la clase
   id String @id @default(cuid())
 
-  /// ID de la ruta curricular (tema de la clase)
-  ruta_curricular_id String
+  /// Nombre o tema de la clase (ej: "Godot", "Scratch", "Preparación Olimpiadas")
+  nombre String
 
-  /// Relación con la ruta curricular
-  rutaCurricular RutaCurricular @relation(fields: [ruta_curricular_id], references: [id])
+  /// ID de la ruta curricular (tema de la clase) - OPCIONAL
+  ruta_curricular_id String?
+
+  /// Relación con la ruta curricular - OPCIONAL
+  rutaCurricular RutaCurricular? @relation(fields: [ruta_curricular_id], references: [id])
 
   /// ID del docente asignado a la clase
   docente_id String
@@ -503,11 +558,20 @@ model Clase {
   /// Relación con el docente
   docente Docente @relation(fields: [docente_id], references: [id])
 
+  /// ID del sector (Matemática o Programación) - OPCIONAL
+  sector_id String?
+
+  /// Relación con el sector - OPCIONAL
+  sector Sector? @relation(fields: [sector_id], references: [id], onDelete: SetNull)
+
   /// Fecha y hora de inicio de la clase
   fecha_hora_inicio DateTime
 
   /// Duración de la clase en minutos
   duracion_minutos Int
+
+  /// Descripción o grupo de la clase (ej: "Niños 6-7 años", "Grupo A", "Preparación olimpiadas")
+  descripcion String?
 
   /// Estado de la clase (Programada, Cancelada)
   estado EstadoClase @default(Programada)
@@ -1438,4 +1502,134 @@ model NivelConfig {
 
   /// Mapeo al nombre de tabla en la base de datos
   @@map("niveles_config")
+}
+
+// ============================================================================
+// SISTEMA DE SECTORES Y RUTAS DE ESPECIALIDAD
+// ============================================================================
+
+/// Modelo para sectores de trabajo (Matemática, Programación, etc.)
+/// Permite organizar las especialidades en categorías principales
+model Sector {
+  /// Identificador único del sector
+  id String @id @default(cuid())
+
+  /// Nombre del sector (ej: "Matemática", "Programación")
+  nombre String @unique
+
+  /// Descripción del sector
+  descripcion String?
+
+  /// Color hex para UI (ej: "#FF5733")
+  color String @default("#6366F1")
+
+  /// Icono o emoji para UI (ej: "📐", "💻")
+  icono String @default("📚")
+
+  /// Indica si el sector está activo
+  activo Boolean @default(true)
+
+  /// Rutas de especialidad dentro de este sector
+  rutas RutaEspecialidad[]
+
+  /// Docentes asignados a este sector
+  docentes DocenteRuta[]
+
+  /// Estudiantes asignados a este sector
+  estudiantes Estudiante[]
+
+  /// Clases asignadas a este sector
+  clases Clase[]
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("sectores")
+}
+
+/// Modelo para rutas de especialidad personalizadas dentro de cada sector
+/// Ejemplos: "Roblox", "Scratch" (Programación), "Base-Progresivo", "Lógico-Desafiante" (Matemática)
+model RutaEspecialidad {
+  /// Identificador único de la ruta
+  id String @id @default(cuid())
+
+  /// Nombre de la ruta (ej: "Roblox", "Base-Progresivo")
+  nombre String
+
+  /// Descripción de la ruta
+  descripcion String?
+
+  /// ID del sector al que pertenece
+  sectorId String
+
+  /// Relación con el sector
+  sector Sector @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+
+  /// Indica si la ruta está activa
+  activo Boolean @default(true)
+
+  /// Docentes asignados a esta ruta
+  docentes DocenteRuta[]
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("rutas_especialidad")
+
+  /// Índice para búsquedas por sector
+  @@index([sectorId])
+
+  /// Índice compuesto para evitar duplicados de nombre dentro del mismo sector
+  @@unique([sectorId, nombre])
+}
+
+/// Modelo de relación muchos-a-muchos entre Docentes y Rutas de Especialidad
+/// Un docente puede trabajar en múltiples rutas y sectores
+model DocenteRuta {
+  /// Identificador único de la relación
+  id String @id @default(cuid())
+
+  /// ID del docente
+  docenteId String
+
+  /// Relación con el docente
+  docente Docente @relation(fields: [docenteId], references: [id], onDelete: Cascade)
+
+  /// ID de la ruta de especialidad
+  rutaId String
+
+  /// Relación con la ruta
+  ruta RutaEspecialidad @relation(fields: [rutaId], references: [id], onDelete: Cascade)
+
+  /// ID del sector (desnormalizado para queries más rápidas)
+  sectorId String
+
+  /// Relación con el sector
+  sector Sector @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+
+  /// Fecha de asignación
+  asignadoEn DateTime @default(now())
+
+  /// Mapeo al nombre de tabla en la base de datos
+  @@map("docentes_rutas")
+
+  /// Un docente no puede estar asignado dos veces a la misma ruta
+  @@unique([docenteId, rutaId])
+
+  /// Índice para búsquedas por docente
+  @@index([docenteId])
+
+  /// Índice para búsquedas por ruta
+  @@index([rutaId])
+
+  /// Índice para búsquedas por sector
+  @@index([sectorId])
 }

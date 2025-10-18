@@ -18,32 +18,55 @@ import { IsBusinessHours } from '../../common/validators/is-business-hours.valid
  */
 export class CrearClaseDto {
   /**
-   * ID de la ruta curricular (Álgebra, Geometría, etc.)
+   * Nombre o tema de la clase (ej: "Godot", "Scratch", "Preparación Olimpiadas")
    */
   @ApiProperty({
-    description: 'UUID de la ruta curricular (Álgebra, Geometría, Lógica, etc.)',
+    description: 'Nombre o tema de la clase (ej: "Godot", "Scratch", "Preparación Olimpiadas")',
+    example: 'Godot - Introducción a Videojuegos',
+    type: String,
+  })
+  @IsString({ message: 'El nombre de la clase debe ser un texto' })
+  @Trim()
+  nombre!: string;
+
+  /**
+   * ID de la ruta curricular (Álgebra, Geometría, etc.) - OPCIONAL
+   */
+  @ApiPropertyOptional({
+    description: 'ID de la ruta curricular (opcional)',
     example: '550e8400-e29b-41d4-a716-446655440000',
     type: String,
-    format: 'uuid',
   })
+  @IsOptional()
   @IsString({ message: 'El ID de la ruta curricular debe ser un texto' })
-  @IsUUID('4', { message: 'El ID de la ruta curricular debe ser un UUID válido' })
   @Trim()
-  rutaCurricularId!: string;
+  rutaCurricularId?: string;
 
   /**
    * ID del docente que impartirá la clase
    */
   @ApiProperty({
-    description: 'UUID del docente que impartirá la clase',
+    description: 'ID del docente que impartirá la clase',
     example: '123e4567-e89b-12d3-a456-426614174000',
     type: String,
-    format: 'uuid',
   })
   @IsString({ message: 'El ID del docente debe ser un texto' })
-  @IsUUID('4', { message: 'El ID del docente debe ser un UUID válido' })
   @Trim()
   docenteId!: string;
+
+  /**
+   * ID del sector (Matemática o Programación) - OPCIONAL
+   */
+  @ApiPropertyOptional({
+    description: 'ID del sector al que pertenece la clase (Matemática o Programación)',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    type: String,
+  })
+  @IsOptional()
+  @IsString({ message: 'El ID del sector debe ser un texto' })
+  @IsUUID('4', { message: 'El ID del sector debe ser un UUID válido' })
+  @Trim()
+  sectorId?: string;
 
   /**
    * Fecha y hora de inicio de la clase
@@ -94,19 +117,31 @@ export class CrearClaseDto {
   cuposMaximo!: number;
 
   /**
+   * Descripción o grupo de la clase (opcional)
+   * Ejemplo: "Niños 6-7 años", "Grupo A", "Preparación olimpiadas"
+   */
+  @ApiPropertyOptional({
+    description: 'Descripción o grupo de la clase (ej: "Niños 6-7 años", "Grupo A")',
+    example: 'Niños 6-7 años',
+    type: String,
+  })
+  @IsOptional()
+  @IsString({ message: 'La descripción debe ser un texto' })
+  @Trim()
+  descripcion?: string;
+
+  /**
    * ID del producto/curso asociado (opcional)
    * Si se especifica, es una clase de curso específico
    * Si es null, es una clase de suscripción general
    */
   @ApiPropertyOptional({
-    description: 'UUID del producto/curso asociado (si no se especifica, es clase de suscripción general)',
+    description: 'ID del producto/curso asociado (si no se especifica, es clase de suscripción general)',
     example: '789e0123-e89b-12d3-a456-426614174000',
     type: String,
-    format: 'uuid',
   })
   @IsOptional()
   @IsString({ message: 'El ID del producto debe ser un texto' })
-  @IsUUID('4', { message: 'El ID del producto debe ser un UUID válido' })
   @Trim()
   productoId?: string;
 }

@@ -32,8 +32,15 @@ export class UserThrottlerGuard extends ThrottlerGuard {
 
     // Si NO está autenticado, limitar por IP
     // Obtener IP real considerando proxies (X-Forwarded-For, X-Real-IP)
+    // Fix: Null-safety para evitar crash con headers malformados
+    const forwardedFor = request.headers['x-forwarded-for'];
+    const forwardedParts = typeof forwardedFor === 'string'
+      ? forwardedFor.split(',')
+      : [];
+    const forwardedIp = forwardedParts[0]?.trim();
+
     const ip =
-      (request.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
+      forwardedIp ||
       (request.headers['x-real-ip'] as string) ||
       request.ip ||
       'unknown';

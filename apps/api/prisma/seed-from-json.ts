@@ -219,10 +219,6 @@ async function loadFromJSON() {
       for (const estudiante of data.estudiantes) {
         const passwordHash = await bcrypt.hash(estudiante.password, 10);
 
-        // Calcular fecha de nacimiento basada en edad
-        const fechaNacimiento = new Date();
-        fechaNacimiento.setFullYear(fechaNacimiento.getFullYear() - estudiante.edad);
-
         // Determinar nivel escolar
         let nivelEscolar = 'Primaria';
         if (estudiante.edad >= 13 && estudiante.edad <= 17) {
@@ -237,7 +233,7 @@ async function loadFromJSON() {
             password_hash: passwordHash,
             nombre: estudiante.nombre.split(' ')[0],
             apellido: estudiante.nombre.split(' ').slice(1).join(' '),
-            fecha_nacimiento: fechaNacimiento,
+            edad: estudiante.edad,
             nivel_escolar: nivelEscolar,
             tutor_id: idMaps.tutores.get(estudiante.tutor_id)!,
             equipo_id: idMaps.equipos.get(estudiante.equipo_id) || null,
@@ -314,6 +310,7 @@ async function loadFromJSON() {
 
         const claseCreada = await prisma.clase.create({
           data: {
+            nombre: `Clase ${clase.ruta_curricular} - ${clase.fecha}`,
             ruta_curricular_id: rutaId,
             docente_id: idMaps.docentes.get(clase.docente_id)!,
             fecha_hora_inicio: fechaClase,

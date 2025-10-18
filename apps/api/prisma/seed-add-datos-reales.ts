@@ -92,7 +92,7 @@ async function main() {
       password_hash: hashedPassword,
       nombre: 'Dante',
       apellido: 'Migani',
-      fecha_nacimiento: new Date('2019-05-10'),
+      edad: 6,
       nivel_escolar: '2do Primaria',
       tutor_id: laura.id,
     }
@@ -108,7 +108,7 @@ async function main() {
       password_hash: hashedPassword,
       nombre: 'Nicolas',
       apellido: 'Schenone',
-      fecha_nacimiento: new Date('2019-10-15'),
+      edad: 6,
       nivel_escolar: '3ro Primaria',
       tutor_id: adriana.id,
     }
@@ -124,7 +124,7 @@ async function main() {
       password_hash: hashedPassword,
       nombre: 'Isabella',
       apellido: 'Schenone',
-      fecha_nacimiento: new Date('2020-05-10'),
+      edad: 5,
       nivel_escolar: '2do Primaria',
       tutor_id: adriana.id,
     }
@@ -140,7 +140,7 @@ async function main() {
       password_hash: hashedPassword,
       nombre: 'Giuliana',
       apellido: 'Schenone',
-      fecha_nacimiento: new Date('2017-10-01'),
+      edad: 8,
       nivel_escolar: '4to Primaria',
       tutor_id: adriana.id,
     }
@@ -156,7 +156,7 @@ async function main() {
       password_hash: hashedPassword,
       nombre: 'Theo',
       apellido: 'Ghesla',
-      fecha_nacimiento: new Date('2019-07-18'),
+      edad: 6,
       nivel_escolar: '3ro Primaria',
       tutor_id: adriana.id,
     }

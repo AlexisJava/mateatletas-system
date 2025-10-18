@@ -74,7 +74,23 @@ function MagneticButton({
 }
 
 // Floating Particle Component
-function FloatingParticle({ delay = 0 }: { delay?: number }) {
+function FloatingParticle({ delay = 0, left = 50 }: { delay?: number; left?: number }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    // En SSR, renderizar una partícula invisible en posición fija
+    return (
+      <div
+        className="absolute w-1 h-1 bg-emerald-400 rounded-full blur-[1px] opacity-0"
+        style={{ left: `${left}%`, bottom: 0 }}
+      />
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 0 }}
@@ -91,7 +107,7 @@ function FloatingParticle({ delay = 0 }: { delay?: number }) {
       }}
       className="absolute w-1 h-1 bg-emerald-400 rounded-full blur-[1px]"
       style={{
-        left: `${Math.random() * 100}%`,
+        left: `${left}%`,
         bottom: 0,
       }}
     />
@@ -131,17 +147,40 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Cleanup al desmontar
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   /**
    * Maneja el submit del formulario de login
+   * Previene doble submit y race conditions
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevenir doble submit
+    if (isSubmitting) {
+      console.warn('Login already in progress');
+      return;
+    }
+
     setError('');
+    setIsSubmitting(true);
+
+    // Cancelar request anterior si existe
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
 
     // Validación básica
     if (!email || !password) {
       setError('Por favor completa todos los campos');
+      setIsSubmitting(false);
       return;
     }
 
@@ -155,6 +194,10 @@ export default function LoginPage() {
       // El useEffect manejará la redirección
       setIsRedirecting(true);
     } catch (err: unknown) {
+      // Ignorar errores de abort
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       // Determinar mensaje de error según el tipo
       let errorMessage = 'Error de conexión, intenta nuevamente';
 
@@ -173,6 +216,8 @@ export default function LoginPage() {
       }
 
       setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -245,7 +290,7 @@ export default function LoginPage() {
 
         {/* Floating Particles */}
         {[...Array(15)].map((_, i) => (
-          <FloatingParticle key={i} delay={i * 0.3} />
+          <FloatingParticle key={i} delay={i * 0.3} left={5 + i * 6} />
         ))}
       </div>
 
@@ -524,10 +569,10 @@ export default function LoginPage() {
                     {/* Submit Button - EVOLVED */}
                     <MagneticButton
                       type="submit"
-                      disabled={isLoading}
+                      disabled={isLoading || isSubmitting}
                       className="w-full group px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-base font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all inline-flex items-center justify-center gap-2 shadow-xl shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isLoading ? (
+                      {isLoading || isSubmitting ? (
                         <>
                           <motion.div
                             animate={{ rotate: 360 }}

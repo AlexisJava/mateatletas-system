@@ -3,7 +3,7 @@
  */
 
 import axios from '@/lib/axios';
-import { DashboardData, AdminUser, ChangeRoleDto, SystemStats } from '@/types/admin.types';
+import { DashboardData, AdminUser, ChangeRoleDto, UpdateRolesDto, SystemStats } from '@/types/admin.types';
 
 export const getDashboard = async (): Promise<DashboardData> => {
   return axios.get('/admin/dashboard') as Promise<DashboardData>;
@@ -19,6 +19,10 @@ export const getAllUsers = async (): Promise<AdminUser[]> => {
 
 export const changeUserRole = async (userId: string, data: ChangeRoleDto): Promise<AdminUser> => {
   return axios.post(`/admin/usuarios/${userId}/role`, data) as Promise<AdminUser>;
+};
+
+export const updateUserRoles = async (userId: string, data: UpdateRolesDto): Promise<{ message: string; userId: string; roles: string[] }> => {
+  return axios.put(`/admin/usuarios/${userId}/roles`, data) as Promise<{ message: string; userId: string; roles: string[] }>;
 };
 
 export const deleteUser = async (userId: string): Promise<void> => {
@@ -52,6 +56,10 @@ export const getDocentes = async () => {
   return axios.get('/docentes');
 };
 
+export const getSectores = async () => {
+  return axios.get('/admin/sectores');
+};
+
 // Products Management
 export const getAllProducts = async (includeInactive = true) => {
   return axios.get(`/productos?soloActivos=${!includeInactive}`);
@@ -71,4 +79,24 @@ export const updateProduct = async (id: string, data: Record<string, unknown>) =
 
 export const deleteProduct = async (id: string, hardDelete = false) => {
   return axios.delete(`/productos/${id}?hardDelete=${hardDelete}`);
+};
+
+// User Management
+export interface CreateAdminData {
+  email: string;
+  password: string;
+  nombre: string;
+  apellido: string;
+  dni?: string;
+  telefono?: string;
+}
+
+export const createAdmin = async (data: CreateAdminData): Promise<AdminUser> => {
+  // Primero registramos como tutor
+  const newUser = await axios.post('/auth/register', data) as any;
+
+  // Luego cambiamos el rol a admin
+  const adminUser = await changeUserRole(newUser.user.id, { role: 'admin' });
+
+  return adminUser;
 };

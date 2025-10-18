@@ -49,7 +49,8 @@ export interface AdminUser {
   email: string;
   nombre: string;
   apellido: string;
-  role: 'tutor' | 'docente' | 'admin';
+  role: 'tutor' | 'docente' | 'admin'; // Rol principal (primer rol)
+  roles?: ('tutor' | 'docente' | 'admin' | 'estudiante')[]; // Múltiples roles
   activo: boolean;
   createdAt: string;
   updatedAt: string;
@@ -62,4 +63,8 @@ export interface AdminUser {
 
 export interface ChangeRoleDto {
   role: 'tutor' | 'docente' | 'admin';
+}
+
+export interface UpdateRolesDto {
+  roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[];
 }
