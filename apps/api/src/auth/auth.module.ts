@@ -12,6 +12,8 @@ import {
   EstudianteHandler,
 } from './strategies/role-handlers';
 import { DatabaseModule } from '../core/database/database.module';
+import { TokenBlacklistService } from './token-blacklist.service';
+import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
 
 /**
  * Módulo de autenticación
@@ -69,7 +71,10 @@ import { DatabaseModule } from '../core/database/database.module';
     DocenteHandler,
     AdminHandler,
     EstudianteHandler,
+    // Token Blacklist (Fix #6: P3 - Security Improvement)
+    TokenBlacklistService,
+    TokenBlacklistGuard,
   ],
-  exports: [JwtStrategy, PassportModule],
+  exports: [JwtStrategy, PassportModule, TokenBlacklistService, TokenBlacklistGuard],
 })
 export class AuthModule {}
