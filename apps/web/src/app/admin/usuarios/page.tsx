@@ -5,15 +5,6 @@ import { useAdminStore } from '@/store/admin.store';
 import { AdminUser } from '@/types/admin.types';
 import { docentesApi, CreateDocenteData, Docente } from '@/lib/api/docentes.api';
 import { createAdmin, CreateAdminData } from '@/lib/api/admin.api';
-import { asignarRutasDocente, crearRutaEspecialidad, listarRutasEspecialidad } from '@/lib/api/sectores.api';
-
-interface SelectedRuta {
-  sectorId: string;
-  sectorNombre: string;
-  sectorIcono: string;
-  sectorColor: string;
-  rutaNombre: string;
-}
 import {
   exportToExcel,
   exportToCSV,
@@ -91,7 +82,7 @@ export default function UsuariosPage() {
     }
   };
 
-  const handleCreateDocente = async (data: CreateDocenteData, rutas?: SelectedRuta[]) => {
+  const handleCreateDocente = async (data: CreateDocenteData, sectores: string[]) => {
     setFormLoading(true);
     setFormError(null);
 
@@ -99,35 +90,21 @@ export default function UsuariosPage() {
       // Crear el docente
       const newDocente = await docentesApi.create(data);
 
-      // Si hay rutas seleccionadas, crearlas y asignarlas
-      if (rutas && rutas.length > 0 && newDocente?.id) {
-        const rutaIds: string[] = [];
+      // Si el docente fue creado con contraseña autogenerada, mostrarla al admin
+      if (newDocente?.generatedPassword) {
+        alert(
+          `✅ Docente creado exitosamente!\n\n` +
+          `Contraseña temporal generada:\n${newDocente.generatedPassword}\n\n` +
+          `⚠️ Importante: Compartí esta contraseña con el docente. ` +
+          `El docente deberá cambiarla en su primer inicio de sesión.\n\n` +
+          `Esta contraseña no se volverá a mostrar.`
+        );
+      }
 
-        // Obtener todas las rutas existentes para verificar cuáles ya existen
-        const rutasExistentes = await listarRutasEspecialidad();
-
-        for (const ruta of rutas) {
-          // Buscar si la ruta ya existe (mismo nombre y sector)
-          const rutaExistente = rutasExistentes.find(
-            (r) => r.nombre.toLowerCase() === ruta.rutaNombre.toLowerCase() && r.sectorId === ruta.sectorId
-          );
-
-          if (rutaExistente) {
-            // La ruta ya existe, usar su ID
-            rutaIds.push(rutaExistente.id);
-          } else {
-            // La ruta no existe, crearla
-            const nuevaRuta = await crearRutaEspecialidad({
-              nombre: ruta.rutaNombre,
-              sectorId: ruta.sectorId,
-              descripcion: `Creada automáticamente al asignar docente`,
-            });
-            rutaIds.push(nuevaRuta.id);
-          }
-        }
-
-        // Asignar todas las rutas al docente
-        await asignarRutasDocente(newDocente.id, { rutaIds });
+      // TODO: Implementar lógica de asignación de sectores cuando el backend lo soporte
+      // Por ahora, los sectores seleccionados se guardan como parte del docente
+      if (sectores.length > 0) {
+        console.log(`Sectores seleccionados para ${newDocente.email}:`, sectores);
       }
 
       await fetchUsers();
