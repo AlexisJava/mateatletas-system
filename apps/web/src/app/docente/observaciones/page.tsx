@@ -40,7 +40,7 @@ export default function DocenteObservacionesPage() {
         fechaHasta: filtros.fechaHasta || undefined,
       });
       setObservaciones(data);
-    } catch (error: any) {
+    } catch (error) {
       // Error loading observations
     } finally {
       setIsLoading(false);
@@ -231,7 +231,7 @@ export default function DocenteObservacionesPage() {
                       {/* Observación */}
                       <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
                         <p className="text-sm text-gray-700 italic">
-                          "{obs.observaciones}"
+                          &quot;{obs.observaciones}&quot;
                         </p>
                       </div>
                     </div>

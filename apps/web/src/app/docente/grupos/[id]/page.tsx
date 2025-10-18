@@ -70,7 +70,7 @@ export default function GrupoDetalladoPage() {
       try {
         const response = await apiClient.get(`/grupos/${grupoId}`);
         setGrupo(response.data);
-      } catch (error: any) {
+      } catch (error) {
         // Mock data
         const mockGrupo: Grupo = {
           id: grupoId,

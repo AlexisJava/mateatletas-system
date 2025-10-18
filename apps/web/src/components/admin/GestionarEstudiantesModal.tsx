@@ -87,7 +87,7 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
 
       setClaseData(claseData);
       setTodosEstudiantes(estudiantesData || []);
-    } catch (err: any) {
+    } catch (err) {
       setError(err?.response?.data?.message || 'Error al cargar datos');
       setTodosEstudiantes([]); // Ensure we always have an array even on error
     } finally {
@@ -109,7 +109,7 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
       await fetchData();
       setSelectedEstudiantes([]);
       onSuccess();
-    } catch (err: any) {
+    } catch (err) {
       setError(err?.response?.data?.message || 'Error al asignar estudiantes');
     } finally {
       setSubmitting(false);
@@ -165,7 +165,7 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
       });
 
       setShowCreateForm(false);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error al crear estudiante:', err);
       setError(err?.response?.data?.message || err?.message || 'Error al crear el estudiante');
     } finally {
@@ -326,7 +326,7 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
                       <select
                         required
                         value={createForm.nivel_escolar}
-                        onChange={(e) => setCreateForm({...createForm, nivel_escolar: e.target.value as any})}
+                        onChange={(e) => setCreateForm({...createForm, nivel_escolar: e.target.value as Record<string, unknown>})}
                         className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
                       >
                         <option value="Primaria">Primaria</option>

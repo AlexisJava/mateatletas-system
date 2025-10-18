@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ClasesManagementService } from './clases-management.service';
 import { PrismaService } from '../../core/database/prisma.service';
 
@@ -28,6 +29,7 @@ describe('ClasesManagementService', () => {
 
   const mockClase = {
     id: 'clase-1',
+    nombre: 'Clase de Álgebra',
     ruta_curricular_id: 'ruta-1',
     docente_id: 'doc-1',
     fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
@@ -71,6 +73,15 @@ describe('ClasesManagementService', () => {
             },
           },
         },
+        {
+          provide: CACHE_MANAGER,
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+            reset: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -84,6 +95,7 @@ describe('ClasesManagementService', () => {
 
   describe('programarClase', () => {
     const validDto = {
+      nombre: 'Clase de Álgebra',
       rutaCurricularId: 'ruta-1',
       docenteId: 'doc-1',
       fechaHoraInicio: new Date('2025-12-01T10:00:00Z'),

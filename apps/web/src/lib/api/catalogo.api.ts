@@ -4,6 +4,11 @@
 
 import axios from '../axios';
 import { Producto, TipoProducto } from '@/types/catalogo.types';
+import {
+  productoSchema,
+  productosListSchema,
+  type TipoProducto as TipoProductoContract,
+} from '@mateatletas/contracts';
 
 // Re-export types for convenience
 export type { Producto } from '@/types/catalogo.types';
@@ -30,32 +35,32 @@ export interface CrearProductoDto {
  * Obtener todos los productos
  */
 export const getProductos = async (): Promise<Producto[]> => {
-  // El interceptor ya retorna response.data
-  return await axios.get<Producto[]>('/productos') as unknown as Producto[];
+  const response = await axios.get<Producto[]>('/productos');
+  return productosListSchema.parse(response);
 };
 
 /**
  * Obtener producto por ID
  */
 export const getProductoPorId = async (id: string): Promise<Producto> => {
-  // El interceptor ya retorna response.data
-  return await axios.get<Producto>(`/productos/${id}`) as unknown as Producto;
+  const response = await axios.get<Producto>(`/productos/${id}`);
+  return productoSchema.parse(response);
 };
 
 /**
  * Obtener solo cursos
  */
 export const getCursos = async (): Promise<Producto[]> => {
-  // El interceptor ya retorna response.data
-  return await axios.get<Producto[]>('/productos/cursos') as unknown as Producto[];
+  const response = await axios.get<Producto[]>('/productos/cursos');
+  return productosListSchema.parse(response);
 };
 
 /**
  * Obtener solo suscripciones
  */
 export const getSuscripciones = async (): Promise<Producto[]> => {
-  // El interceptor ya retorna response.data
-  return await axios.get<Producto[]>('/productos/suscripciones') as unknown as Producto[];
+  const response = await axios.get<Producto[]>('/productos/suscripciones');
+  return productosListSchema.parse(response);
 };
 
 /**

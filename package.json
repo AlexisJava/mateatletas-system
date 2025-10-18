@@ -8,7 +8,10 @@
     "packages/*"
   ],
   "scripts": {
+    "predev": "bash scripts/verify-dev-environment.sh",
     "dev": "turbo run dev --parallel",
+    "dev:verify": "npm run dev & sleep 15 && bash scripts/test-health.sh",
+    "dev:recover": "bash scripts/auto-recover.sh",
     "dev:web": "cd apps/web && npm run dev",
     "dev:api": "cd apps/api && npm run start:dev",
     "build": "turbo run build",

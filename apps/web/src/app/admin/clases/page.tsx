@@ -36,11 +36,11 @@ export default function AdminClasesPage() {
 
   // Estado de UI
   const [modalType, setModalType] = useState<ModalType>(null);
-  const [selectedClass, setSelectedClass] = useState<any>(null);
+  const [selectedClass, setSelectedClass] = useState<Record<string, unknown>>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Handlers
-  const openModal = (type: ModalType, clase?: any) => {
+  const openModal = (type: ModalType, clase?: Record<string, unknown>) => {
     setModalType(type);
     setSelectedClass(clase || null);
   };
@@ -203,7 +203,7 @@ export default function AdminClasesPage() {
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-4">Cancelar Clase</h2>
             <p className="text-gray-700 mb-6">
-              ¿Estás seguro de que deseas cancelar la clase "{selectedClass.nombre}"?
+              ¿Estás seguro de que deseas cancelar la clase &quot;{selectedClass.nombre}&quot;?
             </p>
             <div className="flex gap-3">
               <button

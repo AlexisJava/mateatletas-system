@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { ThemeProvider, useTheme } from '@/lib/theme/ThemeContext';
@@ -50,9 +50,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, logout, checkAuth } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const hasValidatedRef = useRef(false);
 
   useEffect(() => {
+    // Evitar múltiples validaciones usando ref
+    if (hasValidatedRef.current) {
+      return;
+    }
+
     const validateAuth = async () => {
+      hasValidatedRef.current = true;
+
       // Si ya tenemos un usuario admin, validar y terminar
       if (user && user.role === 'admin') {
         setIsValidating(false);
@@ -61,13 +69,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       // Si el usuario tiene otro rol, redirigir al dashboard apropiado
       if (user && user.role !== 'admin') {
-        if (user.role === 'docente') {
-          router.push('/docente/dashboard');
-        } else if (user.role === 'estudiante') {
-          router.push('/estudiante/dashboard');
-        } else {
-          router.push('/dashboard');
-        }
+        const redirectPath =
+          user.role === 'docente' ? '/docente/dashboard' :
+          user.role === 'estudiante' ? '/estudiante/dashboard' :
+          '/dashboard';
+        router.replace(redirectPath);
         return;
       }
 
@@ -79,32 +85,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           // Después de checkAuth, validar el rol
           if (!currentUser) {
-            router.push('/login');
+            router.replace('/login');
             return;
           }
 
           if (currentUser.role !== 'admin') {
-            if (currentUser.role === 'docente') {
-              router.push('/docente/dashboard');
-            } else if (currentUser.role === 'estudiante') {
-              router.push('/estudiante/dashboard');
-            } else {
-              router.push('/dashboard');
-            }
+            const redirectPath =
+              currentUser.role === 'docente' ? '/docente/dashboard' :
+              currentUser.role === 'estudiante' ? '/estudiante/dashboard' :
+              '/dashboard';
+            router.replace(redirectPath);
             return;
           }
 
           // Usuario es admin, validación exitosa
           setIsValidating(false);
-        } catch (error: any) {
+        } catch (error) {
           // Error al verificar auth, redirigir a login
-          router.push('/login');
+          router.replace('/login');
         }
       }
     };
 
     validateAuth();
-  }, [user, router, checkAuth]);
+    // Solo ejecutar una vez al montar
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogout = () => {
     logout();

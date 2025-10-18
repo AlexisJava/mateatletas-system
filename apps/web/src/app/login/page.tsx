@@ -126,21 +126,22 @@ export default function LoginPage() {
 
   // Redirigir si ya está autenticado
   useEffect(() => {
-    if (isAuthenticated && user && !hasRedirectedRef.current) {
+    // Solo redirigir si está en la página de login y está autenticado
+    if (isAuthenticated && user && !hasRedirectedRef.current && !isLoading) {
       hasRedirectedRef.current = true;
       setIsRedirecting(true);
-      // Redirigir según el rol del usuario
-      if (user.role === 'admin') {
-        router.push('/admin/dashboard');
-      } else if (user.role === 'docente') {
-        router.push('/docente/dashboard');
-      } else if (user.role === 'estudiante') {
-        router.push('/estudiante/dashboard');
-      } else {
-        router.push('/dashboard');
-      }
+
+      // Redirigir según el rol del usuario usando replace para evitar bucles
+      const redirectPath =
+        user.role === 'admin' ? '/admin/dashboard' :
+        user.role === 'docente' ? '/docente/dashboard' :
+        user.role === 'estudiante' ? '/estudiante/dashboard' :
+        '/dashboard';
+
+      // Usar replace en lugar de push para evitar agregar entrada al historial
+      router.replace(redirectPath);
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, isLoading]);
 
   const [userType, setUserType] = useState<'tutor' | 'estudiante'>('tutor');
   const [email, setEmail] = useState('');

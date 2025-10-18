@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { AlertCircle, RefreshCcw, Home } from 'lucide-react';
 
 /**
@@ -66,13 +67,13 @@ export default function GlobalError({
                 <RefreshCcw className="w-4 h-4" />
                 Intentar de nuevo
               </button>
-              <a
+              <Link
                 href="/"
                 className="flex-1 bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 border border-white/30"
               >
                 <Home className="w-4 h-4" />
                 Ir al inicio
-              </a>
+              </Link>
             </div>
           </div>
         </div>

@@ -96,7 +96,7 @@ export default function DashboardPage() {
 
       setEstudiantes(estudiantesArray as unknown as Estudiante[]);
       setClases((clasesRes || []) as unknown as Clase[]);
-      setMembresia(((membresiaRes as any)?.membresia || null) as Membresia | null);
+      setMembresia(((membresiaRes as Record<string, unknown>)?.membresia || null) as Membresia | null);
     } catch (error: unknown) {
       // Error loading dashboard data
     } finally {
@@ -128,9 +128,9 @@ export default function DashboardPage() {
   return (
     <DashboardView
       user={user!}
-      estudiantes={estudiantes as any}
-      clases={clases as any}
-      membresia={membresia as any}
+      estudiantes={estudiantes}
+      clases={clases}
+      membresia={membresia}
     />
   );
 }

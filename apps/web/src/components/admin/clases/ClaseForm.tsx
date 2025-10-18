@@ -8,9 +8,9 @@ interface ClaseFormProps {
     cupo_maximo: number;
     descripcion: string;
   };
-  docentes: any[];
-  sectores: any[];
-  onFieldChange: (field: string, value: any) => void;
+  docentes: Record<string, unknown>[];
+  sectores: Record<string, unknown>[];
+  onFieldChange: (field: string, value: string | number) => void;
   onSubmit: () => void;
   onCancel: () => void;
   isLoading?: boolean;

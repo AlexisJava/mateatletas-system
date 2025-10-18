@@ -73,7 +73,7 @@ export default function SalaClaseDocentePage() {
   const [showPanel, setShowPanel] = useState(true);
   const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
-  const jitsiApiRef = useRef<any>(null);
+  const jitsiApiRef = useRef<Record<string, unknown> | null>(null);
   const inicioClaseRef = useRef<number>(Date.now());
 
   const claseId = params.id as string;
@@ -118,7 +118,7 @@ export default function SalaClaseDocentePage() {
           duracion_minutos: 60
         };
         setClase(mockClase);
-      } catch (error: any) {
+      } catch (error) {
         // Error loading class
       } finally {
         setIsLoading(false);

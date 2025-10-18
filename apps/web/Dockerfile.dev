@@ -1,0 +1,34 @@
+# =============================================================================
+# Next.js Frontend - Development Dockerfile
+# =============================================================================
+# Imagen liviana con hot-reload y Turbopack para desarrollo
+# =============================================================================
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apk add --no-cache \
+    bash \
+    curl
+
+# Copiar package files
+COPY package*.json ./
+COPY apps/web/package*.json ./apps/web/
+
+# Instalar dependencias
+RUN npm install
+
+# Copiar código fuente
+COPY apps/web ./apps/web
+
+# Exponer puerto
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:3000 || exit 1
+
+# Comando de inicio con Turbopack hot-reload
+CMD ["npm", "run", "dev:web"]

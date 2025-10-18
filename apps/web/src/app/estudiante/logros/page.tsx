@@ -11,7 +11,7 @@ export default function LogrosPage() {
   const { logros, fetchLogros, logroRecienDesbloqueado } = useGamificacionStore();
   const { user } = useAuthStore();
   const [showConfetti, setShowConfetti] = useState(false);
-  const [selectedLogro, setSelectedLogro] = useState<any>(null);
+  const [selectedLogro, setSelectedLogro] = useState<Record<string, unknown>>(null);
   const [filtroCategoria, setFiltroCategoria] = useState('todos');
   const [paginaActual, setPaginaActual] = useState(0);
 

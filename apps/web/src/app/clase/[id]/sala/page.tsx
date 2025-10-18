@@ -41,9 +41,9 @@ export default function SalaClasePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isJitsiLoaded, setIsJitsiLoaded] = useState(false);
   const [showResumen, setShowResumen] = useState(false);
-  const [resumenData, setResumenData] = useState<any>(null);
+  const [resumenData, setResumenData] = useState<Record<string, unknown>>(null);
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
-  const jitsiApiRef = useRef<any>(null);
+  const jitsiApiRef = useRef<Record<string, unknown> | null>(null);
 
   const claseId = params.id as string;
 

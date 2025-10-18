@@ -259,7 +259,7 @@ export default function LeccionPlayerPage() {
     try {
       switch (leccion.tipo_contenido) {
         case 'Video':
-          const videoUrl = (leccion.contenido as any)?.url || (leccion.contenido as any)?.videoUrl || '';
+          const videoUrl = (leccion.contenido as Record<string, unknown>)?.url || (leccion.contenido as Record<string, unknown>)?.videoUrl || '';
           if (!videoUrl || typeof videoUrl !== 'string') {
             return (
               <ChunkyCard gradient="linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)">
@@ -275,10 +275,10 @@ export default function LeccionPlayerPage() {
 
         case 'Texto':
         case 'Lectura':
-          return <TextoContent texto={(leccion.contenido as any).texto || (leccion.contenido as any).contenido || ''} />;
+          return <TextoContent texto={(leccion.contenido as Record<string, unknown>).texto || (leccion.contenido as Record<string, unknown>).contenido || ''} />;
 
         case 'Quiz':
-          return <QuizContent preguntas={(leccion.contenido as any).preguntas || []} />;
+          return <QuizContent preguntas={(leccion.contenido as Record<string, unknown>).preguntas || []} />;
 
         case 'Tarea':
           return (
@@ -286,11 +286,11 @@ export default function LeccionPlayerPage() {
               <div className="p-8">
                 <h3 className="text-2xl font-black text-gray-900 mb-4">📋 Tarea</h3>
                 <div className="prose">
-                  <p className="text-gray-700">{(leccion.contenido as any).descripcion}</p>
-                  {(leccion.contenido as any).instrucciones && (
+                  <p className="text-gray-700">{(leccion.contenido as Record<string, unknown>).descripcion}</p>
+                  {(leccion.contenido as Record<string, unknown>).instrucciones && (
                     <div className="mt-4">
                       <h4 className="font-bold">Instrucciones:</h4>
-                      <p>{(leccion.contenido as any).instrucciones}</p>
+                      <p>{(leccion.contenido as Record<string, unknown>).instrucciones}</p>
                     </div>
                   )}
                 </div>

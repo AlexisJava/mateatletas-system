@@ -1,0 +1,1 @@
+Linux mateatletas 6.15.4-arch2-1 #1 SMP PREEMPT_DYNAMIC Fri, 27 Jun 2025 16:35:07 +0000 x86_64 GNU/Linux

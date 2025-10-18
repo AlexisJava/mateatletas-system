@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminStatsService } from './admin-stats.service';
 import { PrismaService } from '../../core/database/prisma.service';
+import { EstadoMembresia } from '@prisma/client';
 
 describe('AdminStatsService', () => {
   let service: AdminStatsService;
@@ -165,9 +166,9 @@ describe('AdminStatsService', () => {
         .mockResolvedValueOnce(30); // Clases activas
       jest.spyOn(prisma.producto, 'count').mockResolvedValue(10);
       jest.spyOn(prisma.membresia, 'groupBy').mockResolvedValue([
-        { estado: 'Activa', _count: 20 },
-        { estado: 'Vencida', _count: 5 },
-      ]);
+        { estado: EstadoMembresia.Activa, _count: 20 },
+        { estado: EstadoMembresia.Atrasada, _count: 5 },
+      ] as any);
 
       // Act
       const result = await service.getSystemStats();
@@ -190,7 +191,7 @@ describe('AdminStatsService', () => {
       expect(result).toHaveProperty('membresias');
       expect(result.membresias).toEqual({
         Activa: 20,
-        Vencida: 5,
+        Atrasada: 5,
       });
       expect(result).toHaveProperty('fecha');
     });
@@ -205,10 +206,10 @@ describe('AdminStatsService', () => {
       jest.spyOn(prisma.producto, 'count').mockResolvedValue(0);
 
       const groupBySpy = jest.spyOn(prisma.membresia, 'groupBy').mockResolvedValue([
-        { estado: 'Activa', _count: 15 },
-        { estado: 'Vencida', _count: 3 },
-        { estado: 'Cancelada', _count: 2 },
-      ]);
+        { estado: EstadoMembresia.Activa, _count: 15 },
+        { estado: EstadoMembresia.Atrasada, _count: 3 },
+        { estado: EstadoMembresia.Cancelada, _count: 2 },
+      ] as any);
 
       // Act
       const result = await service.getSystemStats();
@@ -220,7 +221,7 @@ describe('AdminStatsService', () => {
       });
       expect(result.membresias).toEqual({
         Activa: 15,
-        Vencida: 3,
+        Atrasada: 3,
         Cancelada: 2,
       });
     });

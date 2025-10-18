@@ -56,7 +56,7 @@ export default function UsuariosPage() {
 
   // Filtrar usuarios según el tab activo
   const tutores = users.filter(u => u.role === 'tutor');
-  const estudiantes: any[] = []; // TODO: Agregar endpoint para estudiantes
+  const estudiantes: Record<string, unknown>[] = []; // TODO: Agregar endpoint para estudiantes
   const personal = users.filter(u => u.role === 'docente' || u.role === 'admin');
 
   const displayedUsers = activeTab === 'tutores' ? tutores : activeTab === 'estudiantes' ? estudiantes : personal;
@@ -132,7 +132,7 @@ export default function UsuariosPage() {
 
       await fetchUsers();
       setModalType(null);
-    } catch (error: any) {
+    } catch (error) {
       setFormError(error?.message || 'Error al crear el docente');
       throw error;
     } finally {
@@ -146,7 +146,7 @@ export default function UsuariosPage() {
       const docente = await docentesApi.getById(userId);
       setSelectedDocente(docente);
       setModalType('viewDocente');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching docente:', error);
       setFormError(error?.message || 'Error al cargar el docente');
     } finally {
@@ -161,7 +161,7 @@ export default function UsuariosPage() {
       await fetchUsers();
       setModalType(null);
       setSelectedDocente(null);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating docente:', error);
       throw error;
     } finally {
@@ -186,7 +186,7 @@ export default function UsuariosPage() {
         dni: '',
         telefono: '',
       });
-    } catch (error: any) {
+    } catch (error) {
       setFormError(error?.message || 'Error al crear el administrador');
     } finally {
       setFormLoading(false);
@@ -216,9 +216,9 @@ export default function UsuariosPage() {
     const tabName = activeTab === 'tutores' ? 'tutores' : activeTab === 'estudiantes' ? 'estudiantes' : 'personal';
 
     if (format === 'excel') {
-      exportToExcel(formattedData as any, `${tabName}-${timestamp}`, 'Usuarios');
+      exportToExcel(formattedData as Record<string, unknown>, `${tabName}-${timestamp}`, 'Usuarios');
     } else if (format === 'csv') {
-      exportToCSV(formattedData as any, `${tabName}-${timestamp}`);
+      exportToCSV(formattedData as Record<string, unknown>, `${tabName}-${timestamp}`);
     } else {
       exportToPDF(
         formattedData,

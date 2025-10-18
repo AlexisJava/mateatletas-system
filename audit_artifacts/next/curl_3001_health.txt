@@ -1,0 +1,11 @@
+*   Trying 127.0.0.1:3001...
+* Established connection to 127.0.0.1 (127.0.0.1 port 3001) from 127.0.0.1 port 45698 
+* using HTTP/1.x
+> GET /api/health HTTP/1.1
+> Host: 127.0.0.1:3001
+> User-Agent: curl/8.16.0
+> Accept: application/json
+> 
+* Request completely sent off
+* Operation timed out after 5001 milliseconds with 0 bytes received
+* closing connection #0

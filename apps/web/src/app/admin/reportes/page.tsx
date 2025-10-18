@@ -51,14 +51,14 @@ export default function AdminReportesPage() {
   }, [exportStatus]);
 
   const handleExportUsers = async (format: 'excel' | 'csv' | 'pdf') => {
-    const formattedData = formatUsersForExport(users as any);
+    const formattedData = formatUsersForExport(users as Record<string, unknown>);
     const timestamp = new Date().getTime();
     let result;
 
     if (format === 'excel') {
-      result = exportToExcel(formattedData as any, `usuarios-${timestamp}`, 'Usuarios');
+      result = exportToExcel(formattedData as Record<string, unknown>, `usuarios-${timestamp}`, 'Usuarios');
     } else if (format === 'csv') {
-      result = exportToCSV(formattedData as any, `usuarios-${timestamp}`);
+      result = exportToCSV(formattedData as Record<string, unknown>, `usuarios-${timestamp}`);
     } else {
       result = exportToPDF(
         formattedData,
@@ -107,10 +107,10 @@ export default function AdminReportesPage() {
 
   const handleGenerateFullReport = async () => {
     const result = generateSystemReport({
-      users: users as any,
-      classes: classes as any,
+      users: users as Record<string, unknown>,
+      classes: classes as Record<string, unknown>,
       products: [], // Will be added when products page is complete
-      stats: stats as any
+      stats: stats as Record<string, unknown>
     });
 
     setExportStatus(result);
@@ -313,7 +313,7 @@ export default function AdminReportesPage() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={(props: any) => `${props.name}: ${(props.percent * 100).toFixed(0)}%`}
+                label={(props: { name: string; percent: number }) => `${props.name}: ${(props.percent * 100).toFixed(0)}%`}
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
@@ -353,7 +353,7 @@ export default function AdminReportesPage() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={(props: any) => `${props.name}: ${(props.percent * 100).toFixed(0)}%`}
+                label={(props: { name: string; percent: number }) => `${props.name}: ${(props.percent * 100).toFixed(0)}%`}
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"

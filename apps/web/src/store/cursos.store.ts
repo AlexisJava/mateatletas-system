@@ -111,7 +111,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
       return {
         success: true,
         puntos: result.puntos_ganados,
-        logro: result.logro_desbloqueado as any
+        logro: result.logro_desbloqueado
       };
     } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error al completar lección') });

@@ -42,7 +42,7 @@ export const useCatalogoStore = create<CatalogoStore>((set, get) => ({
 
       // El axios interceptor ya retorna response.data directamente
       // Pero el backend puede estar retornando { data: productos }
-      const productos = Array.isArray(response) ? response : ((response as any)?.data || []);
+      const productos = Array.isArray(response) ? response : ((response as Record<string, unknown>)?.data || []);
 
       console.log('🟡 [CATALOGO STORE] fetchProductos - SUCCESS:', productos.length, 'productos');
       set({ productos, isLoading: false });

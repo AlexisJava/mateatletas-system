@@ -88,28 +88,23 @@ export class AdminStatsService {
       }),
     ]);
 
-    // Convertir membresías agrupadas a objeto clave-valor
-    const membresiasPorEstado: Record<string, number> = {};
-    membresias.forEach((m) => {
-      membresiasPorEstado[m.estado] = m._count;
-    });
+    // Calcular total de usuarios (tutores + docentes + admins)
+    // Nota: Algunos usuarios pueden tener múltiples roles
+    const totalUsuarios = totalTutores + totalDocentes + totalAdmins;
 
+    // Calcular ingresos total (simplificado, puedes mejorarlo según tu lógica de negocio)
+    const ingresosTotal = 0; // TODO: Implementar cálculo real de ingresos
+
+    // Formato compatible con el frontend (SystemStats interface)
     return {
-      usuarios: {
-        tutores: totalTutores,
-        docentes: totalDocentes,
-        admins: totalAdmins,
-        estudiantes: totalEstudiantes,
-      },
-      clases: {
-        total: totalClases,
-        activas: clasesActivas,
-      },
-      productos: {
-        total: totalProductos,
-      },
-      membresias: membresiasPorEstado,
-      fecha: new Date(),
+      totalUsuarios,
+      totalTutores,
+      totalDocentes,
+      totalEstudiantes,
+      totalClases,
+      clasesActivas,
+      totalProductos,
+      ingresosTotal,
     };
   }
 }

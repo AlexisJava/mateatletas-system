@@ -1,0 +1,2 @@
+.env:DATABASE_URL="postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas?schema=public"
+apps/api/.env:DATABASE_URL="postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas?schema=public"

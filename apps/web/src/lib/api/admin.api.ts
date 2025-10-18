@@ -93,7 +93,7 @@ export interface CreateAdminData {
 
 export const createAdmin = async (data: CreateAdminData): Promise<AdminUser> => {
   // Primero registramos como tutor
-  const newUser = await axios.post('/auth/register', data) as any;
+  const newUser = await axios.post('/auth/register', data);
 
   // Luego cambiamos el rol a admin
   const adminUser = await changeUserRole(newUser.user.id, { role: 'admin' });
