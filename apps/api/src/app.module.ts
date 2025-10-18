@@ -22,7 +22,7 @@ import { HealthModule } from './health/health.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { UserThrottlerGuard } from './common/guards';
+import { UserThrottlerGuard, CsrfProtectionGuard } from './common/guards';
 
 @Module({
   imports: [
@@ -58,6 +58,13 @@ import { UserThrottlerGuard } from './common/guards';
   controllers: [AppController],
   providers: [
     AppService,
+    // Aplicar CSRF protection globalmente
+    // Valida que requests POST/PUT/PATCH/DELETE vengan de origins permitidos
+    // Previene ataques CSRF (Cross-Site Request Forgery)
+    {
+      provide: APP_GUARD,
+      useClass: CsrfProtectionGuard,
+    },
     // Aplicar rate limiting globalmente con UserThrottlerGuard
     // Limita por user.id (autenticados) o IP (anónimos)
     {
