@@ -8,6 +8,7 @@ import { CreateDocenteDto } from './dto/create-docente.dto';
 import { UpdateDocenteDto } from './dto/update-docente.dto';
 import * as bcrypt from 'bcrypt';
 import { BCRYPT_ROUNDS } from '../common/constants/security.constants';
+import { generateSecurePassword } from '../common/utils/password.utils';
 
 /**
  * Service para gestionar operaciones CRUD de docentes
@@ -20,7 +21,7 @@ export class DocentesService {
   /**
    * Crea un nuevo docente en el sistema
    * @param createDto - Datos del docente a crear
-   * @returns El docente creado (sin password)
+   * @returns El docente creado (sin password) + generatedPassword si se auto-generó
    */
   async create(createDto: CreateDocenteDto) {
     // Verificar que el email no esté en uso
@@ -32,8 +33,21 @@ export class DocentesService {
       throw new ConflictException('El email ya está registrado');
     }
 
+    // Determinar si se debe generar contraseña
+    let passwordToUse: string;
+    let wasPasswordGenerated = false;
+
+    if (!createDto.password) {
+      // Auto-generar contraseña segura
+      passwordToUse = generateSecurePassword();
+      wasPasswordGenerated = true;
+    } else {
+      // Usar la contraseña proporcionada
+      passwordToUse = createDto.password;
+    }
+
     // Hash de la contraseña
-    const hashedPassword = await bcrypt.hash(createDto.password, BCRYPT_ROUNDS);
+    const hashedPassword = await bcrypt.hash(passwordToUse, BCRYPT_ROUNDS);
 
     // Crear docente
     const docente = await this.prisma.docente.create({
@@ -50,11 +64,22 @@ export class DocentesService {
         disponibilidad_horaria: createDto.disponibilidad_horaria || {},
         nivel_educativo: createDto.nivel_educativo || [],
         estado: createDto.estado || 'activo',
+        // Si se generó la contraseña = debe cambiarla
+        // Si el admin la proporcionó = no necesita cambiarla
+        debe_cambiar_password: wasPasswordGenerated,
       },
     });
 
     // Excluir password_hash de la respuesta
     const { password_hash: _password_hash, ...docenteSinPassword } = docente;
+
+    // Si se generó la contraseña, retornarla para que el admin pueda compartirla
+    if (wasPasswordGenerated) {
+      return {
+        ...docenteSinPassword,
+        generatedPassword: passwordToUse,
+      };
+    }
 
     return docenteSinPassword;
   }
