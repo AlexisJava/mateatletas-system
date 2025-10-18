@@ -102,14 +102,27 @@ export default function CreateDocenteForm({
     if (!horaInicio || !horaFin) return;
 
     const rangoHorario = `${horaInicio}-${horaFin}`;
-    const disponibilidad = { ...(form.disponibilidad_horaria || {}) };
+    const disponibilidadActual = form.disponibilidad_horaria || {};
+
+    // Verificar si ya están todos los días laborables con este horario
+    const yaExisten = DIAS_LABORABLES.every(dia =>
+      disponibilidadActual[dia]?.includes(rangoHorario)
+    );
+
+    if (yaExisten) {
+      // Ya existen todos, no hacer nada
+      return;
+    }
+
+    const disponibilidad = { ...disponibilidadActual };
 
     DIAS_LABORABLES.forEach(dia => {
       if (!disponibilidad[dia]) {
         disponibilidad[dia] = [];
       }
+      // Solo agregar si no existe ya
       if (!disponibilidad[dia].includes(rangoHorario)) {
-        disponibilidad[dia] = [...disponibilidad[dia], rangoHorario];
+        disponibilidad[dia].push(rangoHorario);
       }
     });
 
@@ -120,14 +133,27 @@ export default function CreateDocenteForm({
     if (!horaInicio || !horaFin) return;
 
     const rangoHorario = `${horaInicio}-${horaFin}`;
-    const disponibilidad = { ...(form.disponibilidad_horaria || {}) };
+    const disponibilidadActual = form.disponibilidad_horaria || {};
+
+    // Verificar si ya están todos los días con este horario
+    const yaExisten = DIAS_SEMANA.every(dia =>
+      disponibilidadActual[dia]?.includes(rangoHorario)
+    );
+
+    if (yaExisten) {
+      // Ya existen todos, no hacer nada
+      return;
+    }
+
+    const disponibilidad = { ...disponibilidadActual };
 
     DIAS_SEMANA.forEach(dia => {
       if (!disponibilidad[dia]) {
         disponibilidad[dia] = [];
       }
+      // Solo agregar si no existe ya
       if (!disponibilidad[dia].includes(rangoHorario)) {
-        disponibilidad[dia] = [...disponibilidad[dia], rangoHorario];
+        disponibilidad[dia].push(rangoHorario);
       }
     });
 

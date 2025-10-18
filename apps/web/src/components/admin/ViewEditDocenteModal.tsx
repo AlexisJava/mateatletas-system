@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Edit2, Save, Calendar, Clock, MapPin, Award, BookOpen, GraduationCap, Briefcase, User, Mail, Phone, FileText, Trash2, Plus } from 'lucide-react';
+import { X, Edit2, Save, Calendar, Clock, MapPin, Award, BookOpen, GraduationCap, User, Mail, Phone, Trash2, Plus } from 'lucide-react';
 
 interface Docente {
   id: string;
@@ -10,9 +10,8 @@ interface Docente {
   email: string;
   telefono?: string;
   titulo?: string;
-  bio?: string;
+  sectores?: Array<{ nombre: string; icono: string; color: string }>;
   especialidades?: string[];
-  experiencia_anos?: number;
   disponibilidad_horaria?: Record<string, string[]>;
   nivel_educativo?: string[];
   estado?: string;
@@ -53,9 +52,7 @@ export default function ViewEditDocenteModal({
     apellido: docente.apellido || '',
     telefono: docente.telefono || '',
     titulo: docente.titulo || '',
-    bio: docente.bio || '',
     especialidades: docente.especialidades || [],
-    experiencia_anos: docente.experiencia_anos,
     disponibilidad_horaria: docente.disponibilidad_horaria || {},
     nivel_educativo: docente.nivel_educativo || [],
     estado: docente.estado || 'activo',
@@ -291,7 +288,7 @@ export default function ViewEditDocenteModal({
             {/* Sección 2: Información Profesional */}
             <div className="backdrop-blur-xl bg-purple-50/60 dark:bg-purple-950/40 rounded-xl p-3 border border-emerald-500/20">
               <h4 className="text-base font-bold text-white mb-3 flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-violet-500" />
+                <Award className="w-4 h-4 text-violet-500" />
                 Información Profesional
               </h4>
 
@@ -310,33 +307,6 @@ export default function ViewEditDocenteModal({
                         placeholder="Ej: Licenciado en Matemática"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                        Años de Experiencia
-                      </label>
-                      <input
-                        type="number"
-                        min={0}
-                        max={50}
-                        value={form.experiencia_anos || ''}
-                        onChange={(e) => setForm({ ...form, experiencia_anos: parseInt(e.target.value) || undefined })}
-                        className="w-full px-3 py-2 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all text-sm"
-                        placeholder="0"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                      Biografía
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={form.bio}
-                      onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                      className="w-full px-3 py-2 border-2 border-emerald-500/20 bg-emerald-500/[0.08]/60 text-white rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition-all resize-none text-sm"
-                      placeholder="Breve descripción sobre el docente..."
-                    />
                   </div>
 
                   {/* Niveles Educativos */}
@@ -420,22 +390,26 @@ export default function ViewEditDocenteModal({
                         {docente.titulo || 'No especificado'}
                       </div>
                     </div>
-                    <div className="backdrop-blur-xl bg-emerald-500/[0.05]/60 dark:bg-black/60 rounded-lg p-2.5 border border-emerald-500/20">
-                      <div className="text-xs font-semibold text-white/50 mb-1 flex items-center gap-1">
-                        <Briefcase className="w-3 h-3" /> Experiencia
-                      </div>
-                      <div className="text-sm font-medium text-white">
-                        {docente.experiencia_anos ? `${docente.experiencia_anos} años` : 'No especificado'}
-                      </div>
-                    </div>
                   </div>
 
-                  {docente.bio && (
-                    <div className="backdrop-blur-xl bg-emerald-500/[0.05]/60 dark:bg-black/60 rounded-lg p-2.5 border border-emerald-500/20">
-                      <div className="text-xs font-semibold text-white/50 mb-1 flex items-center gap-1">
-                        <FileText className="w-3 h-3" /> Biografía
+                  {/* Sectores */}
+                  {docente.sectores && docente.sectores.length > 0 && (
+                    <div>
+                      <div className="text-xs font-semibold text-white/50 mb-2 flex items-center gap-1">
+                        <Award className="w-3 h-3" /> Sectores
                       </div>
-                      <div className="text-sm text-gray-700 dark:text-gray-300">{docente.bio}</div>
+                      <div className="flex flex-wrap gap-2">
+                        {docente.sectores.map((sector) => (
+                          <span
+                            key={sector.nombre}
+                            className="px-3 py-1.5 text-white rounded-lg shadow-md text-sm font-medium flex items-center gap-2"
+                            style={{ backgroundColor: sector.color }}
+                          >
+                            <span>{sector.icono}</span>
+                            <span>{sector.nombre}</span>
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
 
