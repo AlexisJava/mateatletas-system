@@ -2,19 +2,10 @@
 
 import React, { useState } from 'react';
 import { CreateDocenteData } from '@/lib/api/docentes.api';
-import { X, Plus, Trash2, Clock, Calendar } from 'lucide-react';
-import RutasSelector from './RutasSelector';
-
-interface SelectedRuta {
-  sectorId: string;
-  sectorNombre: string;
-  sectorIcono: string;
-  sectorColor: string;
-  rutaNombre: string;
-}
+import { X, Clock, Calendar, RefreshCw } from 'lucide-react';
 
 interface CreateDocenteFormProps {
-  onSubmit: (data: CreateDocenteData, rutas?: SelectedRuta[]) => Promise<void>;
+  onSubmit: (data: CreateDocenteData, sectores: string[]) => Promise<void>;
   onCancel: () => void;
   onSwitchToAdmin: () => void;
   isLoading: boolean;
@@ -22,17 +13,7 @@ interface CreateDocenteFormProps {
 }
 
 const DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
-const NIVELES_EDUCATIVOS = ['Primaria', 'Secundaria', 'Universidad'];
-const ESPECIALIDADES_MATE = [
-  'Álgebra',
-  'Geometría',
-  'Trigonometría',
-  'Cálculo',
-  'Estadística',
-  'Matemática Aplicada',
-  'Lógica Matemática',
-  'Matemática Financiera',
-];
+const DIAS_LABORABLES = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'];
 
 export default function CreateDocenteForm({
   onSubmit,
@@ -47,45 +28,63 @@ export default function CreateDocenteForm({
     nombre: '',
     apellido: '',
     titulo: '',
-    bio: '',
     telefono: '',
-    especialidades: [],
-    experiencia_anos: undefined,
     disponibilidad_horaria: {},
-    nivel_educativo: [],
     estado: 'activo',
   });
 
-  const [especialidadInput, setEspecialidadInput] = useState('');
   const [selectedDia, setSelectedDia] = useState('lunes');
   const [horaInicio, setHoraInicio] = useState('09:00');
   const [horaFin, setHoraFin] = useState('17:00');
-  const [selectedRutas, setSelectedRutas] = useState<SelectedRuta[]>([]);
+  const [sectores, setSectores] = useState<string[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Pasar tanto los datos del docente como las rutas seleccionadas
-    await onSubmit(form, selectedRutas);
-  };
-
-  const agregarEspecialidad = (especialidad: string) => {
-    if (especialidad && !form.especialidades?.includes(especialidad)) {
-      setForm({
-        ...form,
-        especialidades: [...(form.especialidades || []), especialidad],
-      });
-    }
-    setEspecialidadInput('');
-  };
-
-  const eliminarEspecialidad = (especialidad: string) => {
-    setForm({
+    // Si password está vacío, enviar undefined para que backend lo genere
+    const dataToSubmit = {
       ...form,
-      especialidades: form.especialidades?.filter((e) => e !== especialidad) || [],
-    });
+      password: form.password || undefined,
+    };
+    await onSubmit(dataToSubmit as CreateDocenteData, sectores);
+  };
+
+  const generatePassword = () => {
+    const uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const lowercase = 'abcdefghjkmnpqrstuvwxyz';
+    const numbers = '23456789';
+    const symbols = '!@#$%&*+-=?';
+
+    let password = '';
+    const allChars = uppercase + lowercase + numbers + symbols;
+
+    // Asegurar al menos uno de cada tipo
+    password += uppercase[Math.floor(Math.random() * uppercase.length)];
+    password += lowercase[Math.floor(Math.random() * lowercase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+    password += symbols[Math.floor(Math.random() * symbols.length)];
+
+    // Completar hasta 12 caracteres
+    for (let i = password.length; i < 12; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+
+    // Mezclar
+    password = password.split('').sort(() => Math.random() - 0.5).join('');
+
+    setForm({ ...form, password });
+  };
+
+  const toggleSector = (sector: string) => {
+    if (sectores.includes(sector)) {
+      setSectores(sectores.filter(s => s !== sector));
+    } else {
+      setSectores([...sectores, sector]);
+    }
   };
 
   const agregarHorario = () => {
+    if (!horaInicio || !horaFin) return;
+
     const rangoHorario = `${horaInicio}-${horaFin}`;
     const disponibilidad = { ...(form.disponibilidad_horaria || {}) };
 
@@ -99,6 +98,42 @@ export default function CreateDocenteForm({
     }
   };
 
+  const agregarLunesAViernes = () => {
+    if (!horaInicio || !horaFin) return;
+
+    const rangoHorario = `${horaInicio}-${horaFin}`;
+    const disponibilidad = { ...(form.disponibilidad_horaria || {}) };
+
+    DIAS_LABORABLES.forEach(dia => {
+      if (!disponibilidad[dia]) {
+        disponibilidad[dia] = [];
+      }
+      if (!disponibilidad[dia].includes(rangoHorario)) {
+        disponibilidad[dia] = [...disponibilidad[dia], rangoHorario];
+      }
+    });
+
+    setForm({ ...form, disponibilidad_horaria: disponibilidad });
+  };
+
+  const seleccionarTodos = () => {
+    if (!horaInicio || !horaFin) return;
+
+    const rangoHorario = `${horaInicio}-${horaFin}`;
+    const disponibilidad = { ...(form.disponibilidad_horaria || {}) };
+
+    DIAS_SEMANA.forEach(dia => {
+      if (!disponibilidad[dia]) {
+        disponibilidad[dia] = [];
+      }
+      if (!disponibilidad[dia].includes(rangoHorario)) {
+        disponibilidad[dia] = [...disponibilidad[dia], rangoHorario];
+      }
+    });
+
+    setForm({ ...form, disponibilidad_horaria: disponibilidad });
+  };
+
   const eliminarHorario = (dia: string, horario: string) => {
     const disponibilidad = { ...(form.disponibilidad_horaria || {}) };
     if (disponibilidad[dia]) {
@@ -110,20 +145,7 @@ export default function CreateDocenteForm({
     }
   };
 
-  const toggleNivelEducativo = (nivel: string) => {
-    const niveles = form.nivel_educativo || [];
-    if (niveles.includes(nivel)) {
-      setForm({
-        ...form,
-        nivel_educativo: niveles.filter((n) => n !== nivel),
-      });
-    } else {
-      setForm({
-        ...form,
-        nivel_educativo: [...niveles, nivel],
-      });
-    }
-  };
+  const hasTimeConfigured = horaInicio && horaFin;
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -202,106 +224,73 @@ export default function CreateDocenteForm({
               </div>
               <div className="col-span-2">
                 <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
-                  Contraseña *
+                  Contraseña
+                  <span className="text-white/50 font-normal ml-2">
+                    (Opcional - se generará automáticamente si se omite)
+                  </span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    minLength={6}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="flex-1 px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
+                    placeholder="Dejar vacío para auto-generar"
+                  />
+                  <button
+                    type="button"
+                    onClick={generatePassword}
+                    className="px-3 py-2 bg-emerald-500/20 text-emerald-300 rounded-lg hover:bg-emerald-500/30 transition-all flex items-center gap-2"
+                    title="Generar contraseña"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Generar
+                  </button>
+                </div>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
+                  Título Profesional
                 </label>
                 <input
-                  type="password"
-                  required
-                  minLength={6}
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  type="text"
+                  value={form.titulo}
+                  onChange={(e) => setForm({ ...form, titulo: e.target.value })}
                   className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Ej: Licenciado en Matemática"
                 />
               </div>
             </div>
           </div>
 
-          {/* Sección 2: Información Profesional */}
+          {/* Sección 2: Sectores */}
           <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl p-4 border border-emerald-500/20">
             <h4 className="text-base font-bold text-white mb-3 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-              Información Profesional
+              Sectores
             </h4>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
-                    Título Profesional
-                  </label>
-                  <input
-                    type="text"
-                    value={form.titulo}
-                    onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-                    className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
-                    placeholder="Ej: Licenciado en Matemática"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
-                    Años de Experiencia
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={50}
-                    value={form.experiencia_anos || ''}
-                    onChange={(e) => setForm({ ...form, experiencia_anos: parseInt(e.target.value) || undefined })}
-                    className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
-                  Biografía
-                </label>
-                <textarea
-                  rows={2}
-                  value={form.bio}
-                  onChange={(e) => setForm({ ...form, bio: e.target.value })}
-                  className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all resize-none text-sm"
-                  placeholder="Breve descripción sobre el docente..."
+            <div className="space-y-2">
+              <label className="flex items-center gap-3 p-3 bg-black/20 rounded-lg hover:bg-black/30 transition-all cursor-pointer border border-emerald-500/20">
+                <input
+                  type="checkbox"
+                  checked={sectores.includes('Matemática')}
+                  onChange={() => toggleSector('Matemática')}
+                  className="w-5 h-5 rounded border-emerald-500/50 text-emerald-500 focus:ring-emerald-400 focus:ring-offset-gray-900"
                 />
-              </div>
-
-              {/* Niveles Educativos */}
-              <div>
-                <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
-                  Niveles Educativos que puede impartir
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {NIVELES_EDUCATIVOS.map((nivel) => (
-                    <button
-                      key={nivel}
-                      type="button"
-                      onClick={() => toggleNivelEducativo(nivel)}
-                      className={`px-3 py-1.5 rounded-lg font-semibold transition-all text-sm ${
-                        form.nivel_educativo?.includes(nivel)
-                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30'
-                          : 'bg-black/40 text-white/70 border border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-300'
-                      }`}
-                    >
-                      {nivel}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Sectores y Rutas de Especialidad */}
-              <div>
-                <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
-                  Sectores y Rutas de Especialidad
-                </label>
-                <p className="text-xs text-white/60 mb-3">
-                  Selecciona el sector y escribe el nombre de la ruta (ej: Godot, Arduino, Olimpiadas). Si la ruta no existe, se creará automáticamente.
-                </p>
-                <RutasSelector
-                  selectedRutas={selectedRutas}
-                  onChange={setSelectedRutas}
+                <span className="text-2xl">📐</span>
+                <span className="text-white font-semibold">Matemática</span>
+              </label>
+              <label className="flex items-center gap-3 p-3 bg-black/20 rounded-lg hover:bg-black/30 transition-all cursor-pointer border border-emerald-500/20">
+                <input
+                  type="checkbox"
+                  checked={sectores.includes('Programación')}
+                  onChange={() => toggleSector('Programación')}
+                  className="w-5 h-5 rounded border-emerald-500/50 text-emerald-500 focus:ring-emerald-400 focus:ring-offset-gray-900"
                 />
-              </div>
+                <span className="text-2xl">💻</span>
+                <span className="text-white font-semibold">Programación</span>
+              </label>
             </div>
           </div>
 
@@ -312,7 +301,7 @@ export default function CreateDocenteForm({
               Disponibilidad Horaria
             </h4>
             <div className="space-y-3">
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-5 gap-2">
                 <div>
                   <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
                     Día
@@ -355,13 +344,33 @@ export default function CreateDocenteForm({
                   <button
                     type="button"
                     onClick={agregarHorario}
-                    className="w-full px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 text-sm"
+                    disabled={!hasTimeConfigured}
+                    className="w-full px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Clock className="w-4 h-4" />
                     Agregar
                   </button>
                 </div>
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={agregarLunesAViernes}
+                    disabled={!hasTimeConfigured}
+                    className="w-full px-2 py-2 bg-blue-500/20 text-blue-300 rounded-lg font-semibold hover:bg-blue-500/30 transition-all text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Lun-Vie
+                  </button>
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={seleccionarTodos}
+                disabled={!hasTimeConfigured}
+                className="w-full px-3 py-2 bg-purple-500/20 text-purple-300 rounded-lg font-semibold hover:bg-purple-500/30 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Seleccionar todos los días
+              </button>
 
               <div className="space-y-2">
                 {Object.entries(form.disponibilidad_horaria || {}).map(([dia, horarios]) => (
@@ -382,7 +391,7 @@ export default function CreateDocenteForm({
                             onClick={() => eliminarHorario(dia, horario)}
                             className="hover:bg-white/20 rounded p-0.5 transition-colors"
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <X className="w-3 h-3" />
                           </button>
                         </div>
                       ))}

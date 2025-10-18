@@ -36,18 +36,21 @@ export interface UpdateDocenteData {
 
 export interface CreateDocenteData {
   email: string;
-  password: string;
+  password?: string; // Opcional: se autogenera si se omite
   nombre: string;
   apellido: string;
   titulo?: string;
-  bio?: string;
-  biografia?: string;
   telefono?: string;
-  especialidades?: string[];
-  experiencia_anos?: number;
   disponibilidad_horaria?: Record<string, string[]>;
-  nivel_educativo?: string[];
   estado?: string;
+}
+
+/**
+ * Respuesta al crear un docente
+ * Incluye generatedPassword solo cuando el backend autogeneró la contraseña
+ */
+export interface CreateDocenteResponse extends Docente {
+  generatedPassword?: string; // Solo presente cuando password no fue provista
 }
 
 export const docentesApi = {
@@ -81,8 +84,10 @@ export const docentesApi = {
 
   /**
    * Crear un nuevo docente (admin only)
+   * Si password se omite, el backend autogenera una contraseña segura
+   * y la retorna en generatedPassword para que el admin la comparta con el docente
    */
-  create: async (data: CreateDocenteData): Promise<Docente> => {
+  create: async (data: CreateDocenteData): Promise<CreateDocenteResponse> => {
     return await apiClient.post('/docentes', data);
   },
 
