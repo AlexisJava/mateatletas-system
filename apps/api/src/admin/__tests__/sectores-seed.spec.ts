@@ -111,9 +111,9 @@ describe('Sectores - Seed Data (TDD)', () => {
 
       // Assert
       expect(mate).toBeDefined();
-      expect(mate.icono).toBe('📐');
-      expect(mate.color).toMatch(/^#[0-9A-F]{6}$/i); // Hexadecimal válido
-      expect(mate.color.toLowerCase()).toContain('3b82f6'); // Azul
+      expect(mate!.icono).toBe('📐');
+      expect(mate!.color).toMatch(/^#[0-9A-F]{6}$/i); // Hexadecimal válido
+      expect(mate!.color.toLowerCase()).toContain('3b82f6'); // Azul
     });
 
     it('sector Programación debe tener icono 💻 y color morado', async () => {
@@ -135,9 +135,9 @@ describe('Sectores - Seed Data (TDD)', () => {
 
       // Assert
       expect(prog).toBeDefined();
-      expect(prog.icono).toBe('💻');
-      expect(prog.color).toMatch(/^#[0-9A-F]{6}$/i);
-      expect(prog.color.toLowerCase()).toContain('8b5cf6'); // Morado
+      expect(prog!.icono).toBe('💻');
+      expect(prog!.color).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(prog!.color.toLowerCase()).toContain('8b5cf6'); // Morado
     });
 
     it('ambos sectores deben estar activos', async () => {
