@@ -171,6 +171,10 @@ model Docente {
   roles                  Json                @default("[\"docente\"]")
   /// Teléfono de contacto (opcional)
   telefono               String?
+  /// Indica si el docente debe cambiar su contraseña en el próximo login
+  /// true = contraseña temporal (generada por admin)
+  /// false = contraseña elegida por el docente
+  debe_cambiar_password  Boolean             @default(true)
   clases                 Clase[]
   rutasEspecialidad      DocenteRuta[]
   eventos                Evento[]
