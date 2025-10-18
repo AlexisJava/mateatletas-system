@@ -11,7 +11,7 @@ import {
   exportToPDF,
   formatUsersForExport
 } from '@/lib/utils/export.utils';
-import { Button } from '@/components/ui';
+import { getErrorMessage } from '@/lib/utils/error.utils';
 import { Users, GraduationCap, Crown, Plus, Download, Eye, Trash2, UserCog, X } from 'lucide-react';
 import CreateDocenteForm from '@/components/admin/CreateDocenteForm';
 import ViewEditDocenteModal from '@/components/admin/ViewEditDocenteModal';
@@ -110,7 +110,7 @@ export default function UsuariosPage() {
       await fetchUsers();
       setModalType(null);
     } catch (error) {
-      setFormError(error?.message || 'Error al crear el docente');
+      setFormError(getErrorMessage(error));
       throw error;
     } finally {
       setFormLoading(false);
@@ -125,7 +125,7 @@ export default function UsuariosPage() {
       setModalType('viewDocente');
     } catch (error) {
       console.error('Error fetching docente:', error);
-      setFormError(error?.message || 'Error al cargar el docente');
+      setFormError(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }
@@ -164,7 +164,7 @@ export default function UsuariosPage() {
         telefono: '',
       });
     } catch (error) {
-      setFormError(error?.message || 'Error al crear el administrador');
+      setFormError(getErrorMessage(error));
     } finally {
       setFormLoading(false);
     }
