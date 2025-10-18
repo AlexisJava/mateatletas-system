@@ -7,11 +7,14 @@ import type { CrearProductoDto } from '@/lib/api/catalogo.api';
 import { getErrorMessage } from '@/lib/utils/error-handler';
 
 interface CrearClaseDto {
-  rutaCurricularId: string;
+  nombre: string;
+  rutaCurricularId?: string;
   docenteId: string;
+  sectorId?: string;
   fechaHoraInicio: string;
   duracionMinutos: number;
   cuposMaximo: number;
+  descripcion?: string;
   productoId?: string;
 }
 
@@ -35,6 +38,7 @@ interface AdminStore {
   updateProduct: (id: string, data: Partial<CrearProductoDto>) => Promise<boolean>;
   deleteProduct: (id: string, hardDelete?: boolean) => Promise<boolean>;
   changeUserRole: (userId: string, role: 'tutor' | 'docente' | 'admin') => Promise<boolean>;
+  updateUserRoles: (userId: string, roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[]) => Promise<boolean>;
   deleteUser: (userId: string) => Promise<boolean>;
   clearError: () => void;
   reset: () => void;
@@ -90,6 +94,17 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
     }
   },
 
+  updateUserRoles: async (userId: string, roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[]): Promise<boolean> => {
+    try {
+      await adminApi.updateUserRoles(userId, { roles });
+      await get().fetchUsers();
+      return true;
+    } catch (error: unknown) {
+      set({ error: getErrorMessage(error, 'Error updating roles') });
+      return false;
+    }
+  },
+
   deleteUser: async (userId: string): Promise<boolean> => {
     try {
       await adminApi.deleteUser(userId);
@@ -104,10 +119,12 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   fetchClasses: async () => {
     set({ isLoading: true, error: null });
     try {
-      const classes = await adminApi.getAllClasses() as unknown as Clase[];
+      const response = await adminApi.getAllClasses() as unknown as { data: Clase[]; meta?: unknown } | Clase[];
+      // La API puede devolver { data: [...], meta: {...} } o directamente el array
+      const classes = Array.isArray(response) ? response : (response?.data || []);
       set({ classes, isLoading: false });
     } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error loading classes'), isLoading: false });
+      set({ error: getErrorMessage(error, 'Error loading classes'), classes: [], isLoading: false });
     }
   },
 

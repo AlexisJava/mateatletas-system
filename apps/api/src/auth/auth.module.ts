@@ -5,9 +5,18 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import {
+  TutorHandler,
+  DocenteHandler,
+  AdminHandler,
+  EstudianteHandler,
+} from './strategies/role-handlers';
+import { DatabaseModule } from '../core/database/database.module';
 
 /**
  * Módulo de autenticación
+ *
+ * ETAPA 2: Implementación de Strategy Pattern para roles
  *
  * Este módulo configura:
  * - PassportModule para estrategias de autenticación
@@ -15,9 +24,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
  * - JwtStrategy para validar tokens JWT
  * - AuthService para lógica de negocio
  * - AuthController para endpoints públicos
+ * - Role Handlers (Strategy Pattern) para cada tipo de usuario
  */
 @Module({
   imports: [
+    DatabaseModule, // Para PrismaService en handlers
     // Configuración de Passport
     PassportModule.register({
       defaultStrategy: 'jwt',
@@ -33,7 +44,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
             'JWT_SECRET no está configurado en las variables de entorno',
           );
         }
-        const expiresIn = config.get<string>('JWT_EXPIRATION') || '7d';
+
+        // En desarrollo: tokens de larga duración (7d) para evitar re-login constante
+        // En producción: tokens de corta duración (1h) para mayor seguridad
+        const nodeEnv = config.get<string>('NODE_ENV') || 'development';
+        const defaultExpiration = nodeEnv === 'production' ? '1h' : '7d';
+        const expiresIn = config.get<string>('JWT_EXPIRATION') || defaultExpiration;
+
         return {
           secret,
           signOptions: {
@@ -44,7 +61,15 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    // Strategy Pattern handlers
+    TutorHandler,
+    DocenteHandler,
+    AdminHandler,
+    EstudianteHandler,
+  ],
   exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}

@@ -1,11 +1,14 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Role } from '../../auth/decorators/roles.decorator';
+import { parseUserRoles } from '../../common/utils/role.utils';
 
 /**
- * Servicio especializado para gestión de usuarios administrativos
- * Extraído de AdminService para separar responsabilidades
- * Maneja listado, cambio de roles y eliminación de usuarios
+ * Servicio simplificado para gestión de usuarios
+ * Responsabilidad única: Listar y eliminar usuarios del sistema
+ *
+ * NOTA: Para gestión de roles usar AdminRolesService
+ * NOTA: Para gestión de estudiantes usar AdminEstudiantesService
  */
 @Injectable()
 export class AdminUsuariosService {
@@ -25,6 +28,9 @@ export class AdminUsuariosService {
             },
           },
         },
+        orderBy: {
+          apellido: 'asc',
+        },
       }),
       this.prisma.docente.findMany({
         include: {
@@ -34,16 +40,44 @@ export class AdminUsuariosService {
             },
           },
         },
+        orderBy: {
+          apellido: 'asc',
+        },
       }),
-      this.prisma.admin.findMany(),
+      this.prisma.admin.findMany({
+        orderBy: {
+          apellido: 'asc',
+        },
+      }),
     ]);
 
-    const tutorUsers = tutores.map((tutor) => ({
+    // Mapear tutores
+    const tutorUsers = tutores.map((tutor) => this.mapTutorToUser(tutor));
+
+    // Mapear docentes
+    const docenteUsers = docentes.map((docente) => this.mapDocenteToUser(docente));
+
+    // Mapear admins
+    const adminUsers = admins.map((admin) => this.mapAdminToUser(admin));
+
+    // Combinar y retornar
+    return [...tutorUsers, ...docenteUsers, ...adminUsers];
+  }
+
+  /**
+   * Mapear tutor a formato de usuario
+   */
+  private mapTutorToUser(tutor: any) {
+    const userRoles = parseUserRoles(tutor.roles);
+    const finalRoles = userRoles.length > 0 ? userRoles : [Role.Tutor];
+
+    return {
       id: tutor.id,
       email: tutor.email,
       nombre: tutor.nombre,
       apellido: tutor.apellido,
-      role: Role.Tutor,
+      role: finalRoles[0] as any, // First role for backward compatibility
+      roles: finalRoles,
       activo: true,
       createdAt: tutor.createdAt,
       updatedAt: tutor.updatedAt,
@@ -52,14 +86,23 @@ export class AdminUsuariosService {
         equipos: 0,
         clases: 0,
       },
-    }));
+    };
+  }
 
-    const docenteUsers = docentes.map((docente) => ({
+  /**
+   * Mapear docente a formato de usuario
+   */
+  private mapDocenteToUser(docente: any) {
+    const userRoles = parseUserRoles(docente.roles);
+    const finalRoles = userRoles.length > 0 ? userRoles : [Role.Docente];
+
+    return {
       id: docente.id,
       email: docente.email,
       nombre: docente.nombre,
       apellido: docente.apellido,
-      role: Role.Docente,
+      role: finalRoles[0] as any,
+      roles: finalRoles,
       activo: true,
       createdAt: docente.createdAt,
       updatedAt: docente.updatedAt,
@@ -68,14 +111,23 @@ export class AdminUsuariosService {
         equipos: 0,
         clases: docente._count.clases,
       },
-    }));
+    };
+  }
 
-    const adminUsers = admins.map((admin) => ({
+  /**
+   * Mapear admin a formato de usuario
+   */
+  private mapAdminToUser(admin: any) {
+    const userRoles = parseUserRoles(admin.roles);
+    const finalRoles = userRoles.length > 0 ? userRoles : [Role.Admin];
+
+    return {
       id: admin.id,
       email: admin.email,
       nombre: admin.nombre,
       apellido: admin.apellido,
-      role: Role.Admin,
+      role: finalRoles[0] as any,
+      roles: finalRoles,
       activo: true,
       createdAt: admin.createdAt,
       updatedAt: admin.updatedAt,
@@ -84,104 +136,97 @@ export class AdminUsuariosService {
         equipos: 0,
         clases: 0,
       },
-    }));
-
-    return [...tutorUsers, ...docenteUsers, ...adminUsers];
-  }
-
-  /**
-   * Cambiar el rol de un usuario
-   * NOTA: Esta es una versión simplificada para MVP
-   * Una implementación completa requeriría validaciones adicionales
-   * y migración de datos relacionados
-   */
-  async changeUserRole(id: string, newRole: Role) {
-    // Buscar el usuario en todas las tablas
-    const tutor = await this.prisma.tutor.findUnique({ where: { id } });
-    const docente = await this.prisma.docente.findUnique({ where: { id } });
-    const admin = await this.prisma.admin.findUnique({ where: { id } });
-
-    if (!tutor && !docente && !admin) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    // Por ahora, solo retornar mensaje informativo
-    // Una implementación real requeriría transacciones complejas
-    return {
-      message: 'Cambio de rol pendiente de implementación completa',
-      userId: id,
-      requestedRole: newRole,
-      note: 'Por seguridad, el cambio de rol requiere validaciones adicionales y migración de datos',
     };
   }
 
   /**
    * Eliminar un usuario del sistema
-   * Intenta eliminar de cada tabla hasta encontrarlo
+   * @param id - ID del usuario a eliminar
    */
   async deleteUser(id: string) {
-    // Intentar eliminar como tutor
-    try {
-      const deletedTutor = await this.prisma.tutor.delete({
-        where: { id },
-      });
+    // Intentar encontrar y eliminar el usuario en cada tabla
+    const [tutorResult, docenteResult, adminResult] = await Promise.allSettled([
+      this.prisma.tutor.delete({ where: { id } }),
+      this.prisma.docente.delete({ where: { id } }),
+      this.prisma.admin.delete({ where: { id } }),
+    ]);
 
-      return {
-        message: 'Tutor eliminado correctamente',
-        id: deletedTutor.id,
-        role: Role.Tutor,
-      };
-    } catch (error: any) {
-      if (error?.code === 'P2003') {
-        throw new ConflictException(
-          'El tutor tiene estudiantes o membresías asociadas y no puede eliminarse'
-        );
-      }
-      if (error?.code !== 'P2025') {
-        throw error;
-      }
+    // Verificar si alguna eliminación fue exitosa
+    const successfulDeletion =
+      tutorResult.status === 'fulfilled' ||
+      docenteResult.status === 'fulfilled' ||
+      adminResult.status === 'fulfilled';
+
+    if (!successfulDeletion) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
 
-    // Intentar eliminar como docente
-    try {
-      const deletedDocente = await this.prisma.docente.delete({
+    return {
+      success: true,
+      message: 'Usuario eliminado exitosamente',
+    };
+  }
+
+  /**
+   * Obtener detalles de un usuario específico
+   * @param id - ID del usuario
+   */
+  async obtenerUsuario(id: string) {
+    const [tutor, docente, admin] = await Promise.all([
+      this.prisma.tutor.findUnique({
         where: { id },
-      });
+        include: {
+          _count: {
+            select: {
+              estudiantes: true,
+            },
+          },
+        },
+      }),
+      this.prisma.docente.findUnique({
+        where: { id },
+        include: {
+          _count: {
+            select: {
+              clases: true,
+            },
+          },
+        },
+      }),
+      this.prisma.admin.findUnique({ where: { id } }),
+    ]);
 
-      return {
-        message: 'Docente eliminado correctamente',
-        id: deletedDocente.id,
-        role: Role.Docente,
-      };
-    } catch (error: any) {
-      if (error?.code === 'P2003') {
-        throw new ConflictException(
-          'El docente tiene clases asociadas y no puede eliminarse'
-        );
-      }
-
-      if (error?.code !== 'P2025') {
-        throw error;
-      }
+    const usuario = tutor || docente || admin;
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
 
-    // Intentar eliminar como admin
-    try {
-      const deletedAdmin = await this.prisma.admin.delete({
-        where: { id },
-      });
+    // Mapear según el tipo
+    if (tutor) return this.mapTutorToUser(tutor);
+    if (docente) return this.mapDocenteToUser(docente);
+    return this.mapAdminToUser(admin);
+  }
 
-      return {
-        message: 'Admin eliminado correctamente',
-        id: deletedAdmin.id,
-        role: Role.Admin,
-      };
-    } catch (error: any) {
-      if (error?.code === 'P2025') {
-        throw new NotFoundException('Usuario no encontrado');
-      }
+  /**
+   * Obtener estadísticas generales de usuarios
+   */
+  async obtenerEstadisticas() {
+    const [totalTutores, totalDocentes, totalAdmins, totalEstudiantes] =
+      await Promise.all([
+        this.prisma.tutor.count(),
+        this.prisma.docente.count(),
+        this.prisma.admin.count(),
+        this.prisma.estudiante.count(),
+      ]);
 
-      throw error;
-    }
+    return {
+      total_usuarios: totalTutores + totalDocentes + totalAdmins,
+      por_rol: {
+        tutores: totalTutores,
+        docentes: totalDocentes,
+        admins: totalAdmins,
+      },
+      estudiantes: totalEstudiantes,
+    };
   }
 }

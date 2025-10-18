@@ -1,0 +1,440 @@
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { PrismaService } from '../../core/database/prisma.service';
+import { Role } from '../../auth/decorators/roles.decorator';
+import { parseUserRoles } from '../../common/utils/role.utils';
+import { BCRYPT_ROUNDS } from '../../common/constants/security.constants';
+import * as bcrypt from 'bcrypt';
+
+/**
+ * Servicio especializado para gestión de usuarios administrativos
+ * Extraído de AdminService para separar responsabilidades
+ * Maneja listado, cambio de roles y eliminación de usuarios
+ */
+@Injectable()
+export class AdminUsuariosService {
+  constructor(private prisma: PrismaService) {}
+
+  /**
+   * Listar todos los usuarios del sistema agrupados por rol
+   * Incluye contadores de relaciones (estudiantes, clases, etc.)
+   */
+  async listarUsuarios() {
+    const [tutores, docentes, admins] = await Promise.all([
+      this.prisma.tutor.findMany({
+        include: {
+          _count: {
+            select: {
+              estudiantes: true,
+            },
+          },
+        },
+      }),
+      this.prisma.docente.findMany({
+        include: {
+          _count: {
+            select: {
+              clases: true,
+            },
+          },
+        },
+      }),
+      this.prisma.admin.findMany(),
+    ]);
+
+    const tutorUsers = tutores.map((tutor) => {
+      // Parse roles from database (JSON field) - usando utility segura
+      const userRoles = parseUserRoles(tutor.roles);
+      const finalRoles = userRoles.length > 0 ? userRoles : [Role.Tutor];
+
+      return {
+        id: tutor.id,
+        email: tutor.email,
+        nombre: tutor.nombre,
+        apellido: tutor.apellido,
+        role: finalRoles[0] as any, // First role for backward compatibility
+        roles: finalRoles, // Full array of roles
+        activo: true,
+        createdAt: tutor.createdAt,
+        updatedAt: tutor.updatedAt,
+        _count: {
+          estudiantes: tutor._count.estudiantes,
+          equipos: 0,
+          clases: 0,
+        },
+      };
+    });
+
+    const docenteUsers = docentes.map((docente) => {
+      // Parse roles from database (JSON field) - usando utility segura
+      const userRoles = parseUserRoles(docente.roles);
+      const finalRoles = userRoles.length > 0 ? userRoles : [Role.Docente];
+
+      return {
+        id: docente.id,
+        email: docente.email,
+        nombre: docente.nombre,
+        apellido: docente.apellido,
+        role: finalRoles[0] as any, // First role for backward compatibility
+        roles: finalRoles, // Full array of roles
+        activo: true,
+        createdAt: docente.createdAt,
+        updatedAt: docente.updatedAt,
+        _count: {
+          estudiantes: 0,
+          equipos: 0,
+          clases: docente._count.clases,
+        },
+      };
+    });
+
+    const adminUsers = admins.map((admin) => {
+      // Parse roles from database (JSON field) - usando utility segura
+      const userRoles = parseUserRoles(admin.roles);
+      const finalRoles = userRoles.length > 0 ? userRoles : [Role.Admin];
+
+      return {
+        id: admin.id,
+        email: admin.email,
+        nombre: admin.nombre,
+        apellido: admin.apellido,
+        role: finalRoles[0] as any, // First role for backward compatibility
+        roles: finalRoles, // Full array of roles
+        activo: true,
+        createdAt: admin.createdAt,
+        updatedAt: admin.updatedAt,
+        _count: {
+          estudiantes: 0,
+          equipos: 0,
+          clases: 0,
+        },
+      };
+    });
+
+    return [...tutorUsers, ...docenteUsers, ...adminUsers];
+  }
+
+  /**
+   * Cambiar/actualizar roles de un usuario (multi-rol)
+   * Permite agregar o quitar roles de un usuario
+   */
+  async changeUserRole(id: string, newRole: Role) {
+    // Buscar el usuario en todas las tablas
+    const tutor = await this.prisma.tutor.findUnique({ where: { id } });
+    const docente = await this.prisma.docente.findUnique({ where: { id } });
+    const admin = await this.prisma.admin.findUnique({ where: { id } });
+
+    let userEntity = null;
+    let userTable: 'tutor' | 'docente' | 'admin' | null = null;
+
+    if (tutor) {
+      userEntity = tutor;
+      userTable = 'tutor';
+    } else if (docente) {
+      userEntity = docente;
+      userTable = 'docente';
+    } else if (admin) {
+      userEntity = admin;
+      userTable = 'admin';
+    }
+
+    if (!userEntity || !userTable) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    // Obtener roles actuales
+    let currentRoles: string[] = [];
+    if (userEntity.roles) {
+      currentRoles = Array.isArray(userEntity.roles)
+        ? userEntity.roles
+        : JSON.parse(userEntity.roles as string);
+    }
+
+    // Agregar el nuevo rol si no existe
+    if (!currentRoles.includes(newRole)) {
+      currentRoles.push(newRole);
+    }
+
+    // Actualizar roles en la tabla correspondiente
+    if (userTable === 'tutor') {
+      await this.prisma.tutor.update({
+        where: { id },
+        data: { roles: currentRoles },
+      });
+    } else if (userTable === 'docente') {
+      await this.prisma.docente.update({
+        where: { id },
+        data: { roles: currentRoles },
+      });
+    } else if (userTable === 'admin') {
+      await this.prisma.admin.update({
+        where: { id },
+        data: { roles: currentRoles },
+      });
+    }
+
+    return {
+      message: 'Roles actualizados correctamente',
+      userId: id,
+      roles: currentRoles,
+    };
+  }
+
+  /**
+   * Actualizar roles completos de un usuario (sobrescribir)
+   * Permite asignar múltiples roles a un usuario
+   */
+  async updateUserRoles(id: string, roles: Role[]) {
+    // Buscar el usuario en todas las tablas
+    const tutor = await this.prisma.tutor.findUnique({ where: { id } });
+    const docente = await this.prisma.docente.findUnique({ where: { id } });
+    const admin = await this.prisma.admin.findUnique({ where: { id } });
+
+    let userTable: 'tutor' | 'docente' | 'admin' | null = null;
+
+    if (tutor) {
+      userTable = 'tutor';
+    } else if (docente) {
+      userTable = 'docente';
+    } else if (admin) {
+      userTable = 'admin';
+    }
+
+    if (!userTable) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    // Actualizar roles en la tabla correspondiente
+    if (userTable === 'tutor') {
+      await this.prisma.tutor.update({
+        where: { id },
+        data: { roles: roles },
+      });
+    } else if (userTable === 'docente') {
+      await this.prisma.docente.update({
+        where: { id },
+        data: { roles: roles },
+      });
+    } else if (userTable === 'admin') {
+      await this.prisma.admin.update({
+        where: { id },
+        data: { roles: roles },
+      });
+    }
+
+    return {
+      message: 'Roles actualizados correctamente',
+      userId: id,
+      roles: roles,
+    };
+  }
+
+  /**
+   * Eliminar un usuario del sistema
+   * Intenta eliminar de cada tabla hasta encontrarlo
+   */
+  async deleteUser(id: string) {
+    // Intentar eliminar como tutor
+    try {
+      const deletedTutor = await this.prisma.tutor.delete({
+        where: { id },
+      });
+
+      return {
+        message: 'Tutor eliminado correctamente',
+        id: deletedTutor.id,
+        role: Role.Tutor,
+      };
+    } catch (error: any) {
+      if (error?.code === 'P2003') {
+        throw new ConflictException(
+          'El tutor tiene estudiantes o membresías asociadas y no puede eliminarse'
+        );
+      }
+      if (error?.code !== 'P2025') {
+        throw error;
+      }
+    }
+
+    // Intentar eliminar como docente
+    try {
+      const deletedDocente = await this.prisma.docente.delete({
+        where: { id },
+      });
+
+      return {
+        message: 'Docente eliminado correctamente',
+        id: deletedDocente.id,
+        role: Role.Docente,
+      };
+    } catch (error: any) {
+      if (error?.code === 'P2003') {
+        throw new ConflictException(
+          'El docente tiene clases asociadas y no puede eliminarse'
+        );
+      }
+
+      if (error?.code !== 'P2025') {
+        throw error;
+      }
+    }
+
+    // Intentar eliminar como admin
+    try {
+      const deletedAdmin = await this.prisma.admin.delete({
+        where: { id },
+      });
+
+      return {
+        message: 'Admin eliminado correctamente',
+        id: deletedAdmin.id,
+        role: Role.Admin,
+      };
+    } catch (error: any) {
+      if (error?.code === 'P2025') {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+
+      throw error;
+    }
+  }
+
+  /**
+   * Listar todos los estudiantes del sistema
+   * Incluye información del tutor asociado, gamificación y equipo
+   * Útil para asignar estudiantes a clases y vista general del dashboard
+   */
+  async listarEstudiantes() {
+    const estudiantes = await this.prisma.estudiante.findMany({
+      include: {
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+        equipo: {
+          select: {
+            nombre: true,
+            color_primario: true,
+            color_secundario: true,
+          },
+        },
+        sector: {
+          select: {
+            id: true,
+            nombre: true,
+            color: true,
+            icono: true,
+          },
+        },
+      },
+      orderBy: [
+        { nombre: 'asc' },
+        { apellido: 'asc' },
+      ],
+    });
+
+    return estudiantes.map((estudiante) => ({
+      id: estudiante.id,
+      nombre: estudiante.nombre,
+      apellido: estudiante.apellido,
+      email: estudiante.email,
+      edad: estudiante.edad,
+      nivelEscolar: estudiante.nivel_escolar,
+      avatarUrl: estudiante.avatar_url,
+      nivel_actual: estudiante.nivel_actual,
+      puntos_totales: estudiante.puntos_totales,
+      tutor: estudiante.tutor,
+      equipo: estudiante.equipo,
+      sector: estudiante.sector,
+      createdAt: estudiante.createdAt,
+    }));
+  }
+
+  /**
+   * Crear estudiante rápido con tutor automático
+   * Si no se proporcionan datos del tutor, se crea un tutor genérico "Admin"
+   * Útil para carga manual de estudiantes desde el modal de clases
+   */
+  async crearEstudianteRapido(data: {
+    nombre: string;
+    apellido: string;
+    edad: number;
+    nivel_escolar: string;
+    tutor_nombre?: string;
+    tutor_apellido?: string;
+    tutor_email?: string;
+    tutor_telefono?: string;
+  }) {
+    // Buscar o crear tutor
+    let tutor;
+
+    if (data.tutor_email) {
+      // Buscar tutor existente por email
+      tutor = await this.prisma.tutor.findUnique({
+        where: { email: data.tutor_email },
+      });
+    }
+
+    // Si no existe el tutor, crearlo
+    if (!tutor) {
+      const tutorEmail =
+        data.tutor_email ||
+        `tutor.${data.nombre.toLowerCase()}.${data.apellido.toLowerCase()}@temp.com`;
+      const tutorNombre = data.tutor_nombre || 'Tutor';
+      const tutorApellido = data.tutor_apellido || 'Genérico';
+
+      // Generar password temporal
+      const tempPassword = Math.random().toString(36).slice(-8);
+      const passwordHash = await bcrypt.hash(tempPassword, BCRYPT_ROUNDS);
+
+      tutor = await this.prisma.tutor.create({
+        data: {
+          email: tutorEmail,
+          password_hash: passwordHash,
+          nombre: tutorNombre,
+          apellido: tutorApellido,
+          telefono: data.tutor_telefono || null,
+          roles: ['tutor'],
+        },
+      });
+    }
+
+    // Crear estudiante
+    const estudiante = await this.prisma.estudiante.create({
+      data: {
+        nombre: data.nombre,
+        apellido: data.apellido,
+        edad: data.edad,
+        nivel_escolar: data.nivel_escolar,
+        tutor_id: tutor.id,
+        avatar_url: 'avataaars',
+        roles: ['estudiante'],
+      },
+      include: {
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return {
+      id: estudiante.id,
+      nombre: estudiante.nombre,
+      apellido: estudiante.apellido,
+      email: estudiante.email,
+      edad: estudiante.edad,
+      nivelEscolar: estudiante.nivel_escolar,
+      avatarUrl: estudiante.avatar_url,
+      tutor: estudiante.tutor,
+      createdAt: estudiante.createdAt,
+    };
+  }
+}

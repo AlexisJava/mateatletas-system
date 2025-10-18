@@ -40,7 +40,7 @@ async function createTestStudent() {
       password_hash: passwordHash,
       nombre: 'Ana',
       apellido: 'García',
-      fecha_nacimiento: new Date('2010-05-15'),
+      edad: 15, // Calculado desde 2010-05-15
       nivel_escolar: 'Secundaria',
       tutor_id: tutor.id,
       equipo_id: equipo.id,

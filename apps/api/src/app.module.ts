@@ -18,6 +18,7 @@ import { GamificacionModule } from './gamificacion/gamificacion.module';
 import { CursosModule } from './cursos/cursos.module';
 import { NotificacionesModule } from './notificaciones/notificaciones.module';
 import { EventosModule } from './eventos/eventos.module';
+import { HealthModule } from './health/health.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -26,12 +27,13 @@ import { UserThrottlerGuard } from './common/guards';
 @Module({
   imports: [
     // Rate Limiting: Protege contra brute force, DDoS y abuso de API
-    // - 100 requests por minuto para usuarios autenticados (por user.id)
-    // - 100 requests por minuto para usuarios anónimos (por IP)
+    // - Desarrollo: 1000 requests por minuto (más permisivo)
+    // - Producción: 100 requests por minuto
+    // TODO: Usar variable de entorno para ajustar límites por entorno
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 60 segundos (1 minuto)
-        limit: 100, // 100 requests máximo
+        limit: process.env.NODE_ENV === 'production' ? 100 : 1000, // 1000 en dev, 100 en prod
       },
     ]),
     AppConfigModule,
@@ -51,6 +53,7 @@ import { UserThrottlerGuard } from './common/guards';
     CursosModule, // SLICE #16: Estructura de cursos y lecciones
     NotificacionesModule, // Sistema de notificaciones para docentes
     EventosModule, // Sistema de calendario y eventos para docentes
+    HealthModule, // Health checks para monitoreo del sistema
   ],
   controllers: [AppController],
   providers: [

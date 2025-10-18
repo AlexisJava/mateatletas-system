@@ -5,11 +5,19 @@ import { RutasCurricularesService } from './rutas-curriculares.service';
 import { AdminStatsService } from './services/admin-stats.service';
 import { AdminAlertasService } from './services/admin-alertas.service';
 import { AdminUsuariosService } from './services/admin-usuarios.service';
+import { AdminRolesService } from './services/admin-roles.service';
+import { AdminEstudiantesService } from './services/admin-estudiantes.service';
+import { SectoresRutasService } from './services/sectores-rutas.service';
 import { DatabaseModule } from '../core/database/database.module';
 
 /**
  * Módulo administrativo con servicios especializados
- * Refactorizado para separar responsabilidades en subdominios
+ * Refactorizado para separar responsabilidades (SOLID)
+ *
+ * ETAPA 2: División de servicios grandes en servicios específicos
+ * - AdminUsuariosService: Solo listar y eliminar usuarios
+ * - AdminRolesService: Solo gestión de roles
+ * - AdminEstudiantesService: Solo gestión de estudiantes
  */
 @Module({
   imports: [DatabaseModule],
@@ -21,6 +29,9 @@ import { DatabaseModule } from '../core/database/database.module';
     AdminStatsService,
     AdminAlertasService,
     AdminUsuariosService,
+    AdminRolesService, // ✅ NUEVO: Gestión de roles separada
+    AdminEstudiantesService, // ✅ NUEVO: Gestión de estudiantes separada
+    SectoresRutasService,
   ],
   exports: [
     AdminService,
@@ -28,6 +39,9 @@ import { DatabaseModule } from '../core/database/database.module';
     AdminStatsService,
     AdminAlertasService,
     AdminUsuariosService,
+    AdminRolesService, // ✅ Exportar para uso en otros módulos
+    AdminEstudiantesService, // ✅ Exportar para uso en otros módulos
+    SectoresRutasService,
   ],
 })
 export class AdminModule {}

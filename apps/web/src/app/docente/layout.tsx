@@ -51,41 +51,58 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     const validateAuth = async () => {
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('auth-token');
-        if (!token) {
-          router.push('/login');
-          return;
-        }
-      }
-
+      // Si ya tenemos un usuario docente, validar y terminar
       if (user && user.role === 'docente') {
         setIsValidating(false);
         return;
       }
 
+      // Si el usuario tiene otro rol, redirigir al dashboard apropiado
       if (user && user.role !== 'docente') {
-        router.push('/dashboard');
+        if (user.role === 'admin') {
+          router.push('/admin/dashboard');
+        } else if (user.role === 'estudiante') {
+          router.push('/estudiante/dashboard');
+        } else {
+          router.push('/dashboard');
+        }
         return;
       }
 
+      // Si no hay usuario, intentar verificar autenticación con el backend
       if (!user) {
         try {
           await checkAuth();
           const currentUser = useAuthStore.getState().user;
-          if (currentUser && currentUser.role !== 'docente') {
-            router.push('/dashboard');
+
+          // Después de checkAuth, validar el rol
+          if (!currentUser) {
+            router.push('/login');
             return;
           }
+
+          if (currentUser.role !== 'docente') {
+            if (currentUser.role === 'admin') {
+              router.push('/admin/dashboard');
+            } else if (currentUser.role === 'estudiante') {
+              router.push('/estudiante/dashboard');
+            } else {
+              router.push('/dashboard');
+            }
+            return;
+          }
+
+          // Usuario es docente, validación exitosa
           setIsValidating(false);
         } catch (error: any) {
+          // Error al verificar auth, redirigir a login
           router.push('/login');
         }
       }
     };
 
     validateAuth();
-  }, []);
+  }, [user, router, checkAuth]);
 
   const handleLogout = () => {
     logout();

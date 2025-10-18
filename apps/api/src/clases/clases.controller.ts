@@ -15,6 +15,7 @@ import { ClasesService } from './clases.service';
 import { CrearClaseDto } from './dto/crear-clase.dto';
 import { ReservarClaseDto } from './dto/reservar-clase.dto';
 import { RegistrarAsistenciaDto } from './dto/registrar-asistencia.dto';
+import { AsignarEstudiantesDto } from './dto/asignar-estudiantes.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role, Roles } from '../auth/decorators/roles.decorator';
@@ -79,6 +80,19 @@ export class ClasesController {
     const userId = req.user.id;
     const userRole = req.user.role;
     return this.clasesService.cancelarClase(id, userId, userRole);
+  }
+
+  /**
+   * Asignar estudiantes a una clase (Solo Admin)
+   * POST /api/clases/:id/asignar-estudiantes
+   */
+  @Post(':id/asignar-estudiantes')
+  @Roles(Role.Admin)
+  async asignarEstudiantes(
+    @Param('id') claseId: string,
+    @Body() dto: AsignarEstudiantesDto,
+  ) {
+    return this.clasesService.asignarEstudiantesAClase(claseId, dto.estudianteIds);
   }
 
   // ==================== ENDPOINTS PARA TUTORES ====================
@@ -180,6 +194,17 @@ export class ClasesController {
   }
 
   // ==================== ENDPOINTS COMUNES ====================
+
+  /**
+   * Obtener estudiantes inscritos en una clase (Admin)
+   * GET /api/clases/:id/estudiantes
+   * IMPORTANTE: Debe estar ANTES de GET /api/clases/:id
+   */
+  @Get(':id/estudiantes')
+  @Roles(Role.Admin)
+  async obtenerEstudiantes(@Param('id') claseId: string) {
+    return this.clasesService.obtenerEstudiantesDeClase(claseId);
+  }
 
   /**
    * Obtener detalles de una clase

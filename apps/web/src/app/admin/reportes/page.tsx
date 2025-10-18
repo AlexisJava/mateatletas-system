@@ -191,7 +191,7 @@ export default function AdminReportesPage() {
   const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string }>; label?: string }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+        <div className="bg-emerald-500/[0.05] p-3 rounded-lg shadow-lg border border-gray-200">
           <p className="text-sm font-semibold text-[#2a1a5e]">{label || payload[0].name}</p>
           <p className="text-sm text-gray-600">
             {payload[0].name}: <span className="font-bold">{payload[0].value}</span>
@@ -220,7 +220,7 @@ export default function AdminReportesPage() {
 
       {/* Date Range Filters */}
       {showFilters && (
-        <div className="bg-white rounded-lg shadow-md p-6 border-2 border-[#ff6b35]">
+        <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6 border-2 border-[#ff6b35]">
           <h3 className="text-lg font-bold text-[#2a1a5e] mb-4">Rango de Fechas</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <div>
@@ -304,7 +304,7 @@ export default function AdminReportesPage() {
       {/* Advanced Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Users Distribution - Pie Chart */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">Distribución de Usuarios por Rol</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -344,7 +344,7 @@ export default function AdminReportesPage() {
         </div>
 
         {/* Classes Status - Pie Chart */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">Estado de Clases</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -381,7 +381,7 @@ export default function AdminReportesPage() {
       </div>
 
       {/* User Growth Trend - Line Chart */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
         <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">Crecimiento de Usuarios (Últimos 6 Meses)</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={userGrowthData}>
@@ -417,7 +417,7 @@ export default function AdminReportesPage() {
 
       {/* Classes by Curriculum Route - Bar Chart */}
       {routeData.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
           <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">Clases por Ruta Curricular</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={routeData}>
@@ -452,7 +452,7 @@ export default function AdminReportesPage() {
       )}
 
       {/* Quick Stats Grid */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
         <h3 className="text-xl font-bold text-[#2a1a5e] mb-6">Resumen Ejecutivo (Rango Seleccionado)</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="text-center p-4 bg-gray-50 rounded-lg">
@@ -488,26 +488,26 @@ export default function AdminReportesPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Exportar Usuarios */}
-          <div className="bg-white/10 rounded-lg p-4">
+          <div className="bg-emerald-500/[0.05]/10 rounded-lg p-4">
             <h4 className="font-bold mb-3 flex items-center gap-2">
               <span>👥</span> Usuarios
             </h4>
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => handleExportUsers('excel')}
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all text-sm"
+                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
               >
                 📊 Excel
               </button>
               <button
                 onClick={() => handleExportUsers('csv')}
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all text-sm"
+                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
               >
                 📄 CSV
               </button>
               <button
                 onClick={() => handleExportUsers('pdf')}
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all text-sm"
+                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
               >
                 📕 PDF
               </button>
@@ -515,26 +515,26 @@ export default function AdminReportesPage() {
           </div>
 
           {/* Exportar Clases */}
-          <div className="bg-white/10 rounded-lg p-4">
+          <div className="bg-emerald-500/[0.05]/10 rounded-lg p-4">
             <h4 className="font-bold mb-3 flex items-center gap-2">
               <span>📚</span> Clases
             </h4>
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => handleExportClasses('excel')}
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all text-sm"
+                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
               >
                 📊 Excel
               </button>
               <button
                 onClick={() => handleExportClasses('csv')}
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all text-sm"
+                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
               >
                 📄 CSV
               </button>
               <button
                 onClick={() => handleExportClasses('pdf')}
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all text-sm"
+                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
               >
                 📕 PDF
               </button>
@@ -542,7 +542,7 @@ export default function AdminReportesPage() {
           </div>
 
           {/* Reporte Completo */}
-          <div className="bg-white/10 rounded-lg p-4">
+          <div className="bg-emerald-500/[0.05]/10 rounded-lg p-4">
             <h4 className="font-bold mb-3 flex items-center gap-2">
               <span>📈</span> Reporte Completo
             </h4>

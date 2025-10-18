@@ -40,13 +40,16 @@ export class RolesGuard implements CanActivate {
     }
 
     // Verificar si el usuario tiene alguno de los roles requeridos
-    // El campo 'role' viene del payload JWT y se agrega al user object
-    const userRole = user.role;
+    // El campo 'roles' viene del payload JWT como array de roles
+    const userRoles = user.roles || (user.role ? [user.role] : []);
 
-    if (!userRole) {
+    if (!userRoles || userRoles.length === 0) {
       return false;
     }
 
-    return requiredRoles.some((role) => role === userRole);
+    // El usuario tiene acceso si tiene AL MENOS UNO de los roles requeridos
+    return requiredRoles.some((requiredRole) =>
+      userRoles.some((userRole: string) => userRole === requiredRole)
+    );
   }
 }

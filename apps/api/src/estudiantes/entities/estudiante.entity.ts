@@ -6,7 +6,7 @@ export interface Estudiante {
   id: string;
   nombre: string;
   apellido: string;
-  fecha_nacimiento: Date;
+  edad: number;
   nivel_escolar: string;
   foto_url?: string;
   tutor_id: string;

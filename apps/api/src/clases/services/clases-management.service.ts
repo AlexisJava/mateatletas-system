@@ -28,15 +28,17 @@ export class ClasesManagementService {
    * Programar una nueva clase (solo Admin)
    */
   async programarClase(dto: CrearClaseDto) {
-    // 1. Validar que la ruta curricular existe
-    const ruta = await this.prisma.rutaCurricular.findUnique({
-      where: { id: dto.rutaCurricularId },
-    });
+    // 1. Validar que la ruta curricular existe (si se proporcionó)
+    if (dto.rutaCurricularId) {
+      const ruta = await this.prisma.rutaCurricular.findUnique({
+        where: { id: dto.rutaCurricularId },
+      });
 
-    if (!ruta) {
-      throw new NotFoundException(
-        `Ruta curricular con ID ${dto.rutaCurricularId} no encontrada`,
-      );
+      if (!ruta) {
+        throw new NotFoundException(
+          `Ruta curricular con ID ${dto.rutaCurricularId} no encontrada`,
+        );
+      }
     }
 
     // 2. Validar que el docente existe
@@ -48,6 +50,19 @@ export class ClasesManagementService {
       throw new NotFoundException(
         `Docente con ID ${dto.docenteId} no encontrado`,
       );
+    }
+
+    // 2b. Validar que el sector existe (si se proporcionó)
+    if (dto.sectorId) {
+      const sector = await this.prisma.sector.findUnique({
+        where: { id: dto.sectorId },
+      });
+
+      if (!sector) {
+        throw new NotFoundException(
+          `Sector con ID ${dto.sectorId} no encontrado`,
+        );
+      }
     }
 
     // 3. Si hay productoId, validar que sea un curso
@@ -80,14 +95,17 @@ export class ClasesManagementService {
     // 5. Crear la clase
     const clase = await this.prisma.clase.create({
       data: {
-        ruta_curricular_id: dto.rutaCurricularId,
+        nombre: dto.nombre,
+        ruta_curricular_id: dto.rutaCurricularId || null,
         docente_id: dto.docenteId,
+        sector_id: dto.sectorId || null,
         fecha_hora_inicio: fechaInicio,
         duracion_minutos: dto.duracionMinutos,
         cupos_maximo: dto.cuposMaximo,
         cupos_ocupados: 0,
+        descripcion: dto.descripcion ?? null,
         estado: 'Programada',
-        producto_id: dto.productoId || null,
+        producto_id: dto.productoId ?? null,
       },
       include: {
         rutaCurricular: { select: { nombre: true, color: true } },
@@ -487,5 +505,201 @@ export class ClasesManagementService {
     this.logger.debug('Rutas curriculares guardadas en cache (10 min)');
 
     return rutas;
+  }
+
+  /**
+   * Asignar estudiantes a una clase (solo Admin)
+   * POST /api/clases/:id/asignar-estudiantes
+   *
+   * Este endpoint permite al admin inscribir estudiantes directamente a una clase
+   * sin necesidad de que el tutor haga la reserva.
+   *
+   * @param claseId - ID de la clase
+   * @param estudianteIds - Array de IDs de estudiantes a asignar
+   * @returns Clase actualizada con inscripciones
+   */
+  async asignarEstudiantesAClase(
+    claseId: string,
+    estudianteIds: string[],
+  ) {
+    // 1. Verificar que la clase existe y está activa
+    const clase = await this.prisma.clase.findUnique({
+      where: { id: claseId },
+      include: {
+        inscripciones: true,
+      },
+    });
+
+    if (!clase) {
+      throw new NotFoundException(`Clase con ID ${claseId} no encontrada`);
+    }
+
+    if (clase.estado === 'Cancelada') {
+      throw new BadRequestException('No se pueden asignar estudiantes a una clase cancelada');
+    }
+
+    // 2. Verificar que hay cupos disponibles
+    const cuposDisponibles = clase.cupos_maximo - clase.cupos_ocupados;
+    const nuevasInscripciones = estudianteIds.length;
+
+    if (nuevasInscripciones > cuposDisponibles) {
+      throw new BadRequestException(
+        `No hay suficientes cupos disponibles. Cupos disponibles: ${cuposDisponibles}, intentando asignar: ${nuevasInscripciones}`,
+      );
+    }
+
+    // 3. Verificar que todos los estudiantes existen
+    const estudiantes = await this.prisma.estudiante.findMany({
+      where: {
+        id: { in: estudianteIds },
+      },
+      include: {
+        tutor: true,
+      },
+    });
+
+    if (estudiantes.length !== estudianteIds.length) {
+      throw new BadRequestException('Uno o más estudiantes no fueron encontrados');
+    }
+
+    // 4. Verificar que los estudiantes no estén ya inscritos
+    const estudiantesYaInscritos = clase.inscripciones
+      .map((i) => i.estudiante_id)
+      .filter((id) => estudianteIds.includes(id));
+
+    if (estudiantesYaInscritos.length > 0) {
+      throw new BadRequestException(
+        `Los siguientes estudiantes ya están inscritos: ${estudiantesYaInscritos.join(', ')}`,
+      );
+    }
+
+    // 5. Crear las inscripciones en una transacción
+    const inscripcionesCreadas = await this.prisma.$transaction(
+      async (prisma) => {
+        // Crear todas las inscripciones
+        const inscripciones = await Promise.all(
+          estudiantes.map((estudiante) =>
+            prisma.inscripcionClase.create({
+              data: {
+                clase_id: claseId,
+                estudiante_id: estudiante.id,
+                tutor_id: estudiante.tutor_id,
+                observaciones: 'Asignado por administrador',
+              },
+              include: {
+                estudiante: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                  },
+                },
+              },
+            }),
+          ),
+        );
+
+        // Actualizar cupos ocupados
+        await prisma.clase.update({
+          where: { id: claseId },
+          data: {
+            cupos_ocupados: clase.cupos_ocupados + nuevasInscripciones,
+          },
+        });
+
+        return inscripciones;
+      },
+    );
+
+    this.logger.log(
+      `Admin asignó ${nuevasInscripciones} estudiantes a clase ${claseId}`,
+    );
+
+    return {
+      message: `${nuevasInscripciones} estudiante(s) asignado(s) exitosamente`,
+      inscripciones: inscripcionesCreadas,
+    };
+  }
+
+  /**
+   * Obtener estudiantes inscritos en una clase
+   * GET /api/clases/:id/estudiantes
+   *
+   * @param claseId - ID de la clase
+   * @returns Lista de estudiantes inscritos
+   */
+  async obtenerEstudiantesDeClase(claseId: string) {
+    const clase = await this.prisma.clase.findUnique({
+      where: { id: claseId },
+      include: {
+        sector: {
+          select: {
+            id: true,
+            nombre: true,
+            color: true,
+            icono: true,
+          },
+        },
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        inscripciones: {
+          include: {
+            estudiante: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                nivel_escolar: true,
+                avatar_url: true,
+                tutor: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: {
+            fecha_inscripcion: 'asc',
+          },
+        },
+      },
+    });
+
+    if (!clase) {
+      throw new NotFoundException(`Clase con ID ${claseId} no encontrada`);
+    }
+
+    return {
+      claseId: clase.id,
+      nombre: clase.nombre,
+      cuposMaximo: clase.cupos_maximo,
+      cuposOcupados: clase.cupos_ocupados,
+      cuposDisponibles: clase.cupos_maximo - clase.cupos_ocupados,
+      docente: {
+        id: clase.docente.id,
+        nombre: clase.docente.nombre,
+        apellido: clase.docente.apellido,
+        sector: clase.sector, // Ahora usa el sector de la clase directamente
+      },
+      estudiantes: clase.inscripciones.map((inscripcion) => ({
+        inscripcionId: inscripcion.id,
+        estudianteId: inscripcion.estudiante.id,
+        nombre: inscripcion.estudiante.nombre,
+        apellido: inscripcion.estudiante.apellido,
+        nivelEscolar: inscripcion.estudiante.nivel_escolar,
+        avatarUrl: inscripcion.estudiante.avatar_url,
+        fechaInscripcion: inscripcion.fecha_inscripcion,
+        tutor: inscripcion.estudiante.tutor,
+      })),
+    };
   }
 }

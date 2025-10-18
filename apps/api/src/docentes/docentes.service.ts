@@ -7,6 +7,7 @@ import { PrismaService } from '../core/database/prisma.service';
 import { CreateDocenteDto } from './dto/create-docente.dto';
 import { UpdateDocenteDto } from './dto/update-docente.dto';
 import * as bcrypt from 'bcrypt';
+import { BCRYPT_ROUNDS } from '../common/constants/security.constants';
 
 /**
  * Service para gestionar operaciones CRUD de docentes
@@ -32,7 +33,7 @@ export class DocentesService {
     }
 
     // Hash de la contraseña
-    const hashedPassword = await bcrypt.hash(createDto.password, 10);
+    const hashedPassword = await bcrypt.hash(createDto.password, BCRYPT_ROUNDS);
 
     // Crear docente
     const docente = await this.prisma.docente.create({
@@ -42,7 +43,13 @@ export class DocentesService {
         nombre: createDto.nombre,
         apellido: createDto.apellido,
         titulo: createDto.titulo,
-        bio: createDto.bio,
+        bio: createDto.bio || createDto.biografia,
+        telefono: createDto.telefono,
+        especialidades: createDto.especialidades || [],
+        experiencia_anos: createDto.experiencia_anos,
+        disponibilidad_horaria: createDto.disponibilidad_horaria || {},
+        nivel_educativo: createDto.nivel_educativo || [],
+        estado: createDto.estado || 'activo',
       },
     });
 
@@ -150,12 +157,18 @@ export class DocentesService {
       apellido: updateDto.apellido,
       email: updateDto.email,
       titulo: updateDto.titulo,
-      bio: updateDto.bio,
+      bio: updateDto.bio || updateDto.biografia,
+      telefono: updateDto.telefono,
+      especialidades: updateDto.especialidades,
+      experiencia_anos: updateDto.experiencia_anos,
+      disponibilidad_horaria: updateDto.disponibilidad_horaria,
+      nivel_educativo: updateDto.nivel_educativo,
+      estado: updateDto.estado,
     };
 
     // Si se incluye password, hashearla
     if (updateDto.password) {
-      dataToUpdate.password_hash = await bcrypt.hash(updateDto.password, 10);
+      dataToUpdate.password_hash = await bcrypt.hash(updateDto.password, BCRYPT_ROUNDS);
     }
 
     // Actualizar docente

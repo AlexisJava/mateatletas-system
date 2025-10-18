@@ -10,6 +10,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from './decorators/roles.decorator';
+import { parseUserRoles } from '../common/utils/role.utils';
 
 /**
  * Servicio de autenticación para tutores
@@ -127,11 +128,15 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // 4. Generar token JWT
+    // 4. Obtener roles del estudiante desde la BD - usando utility segura
+    const estudianteRoles = parseUserRoles(estudiante.roles);
+    const finalRoles = estudianteRoles.length > 0 ? estudianteRoles : ['estudiante'];
+
+    // 5. Generar token JWT
     const accessToken = this.generateJwtToken(
       estudiante.id,
       estudiante.email,
-      'estudiante',
+      finalRoles,
     );
 
     // 5. Retornar token y datos del estudiante
@@ -142,7 +147,7 @@ export class AuthService {
         email: estudiante.email,
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
-        fecha_nacimiento: estudiante.fecha_nacimiento,
+        edad: estudiante.edad,
         nivel_escolar: estudiante.nivel_escolar,
         foto_url: estudiante.foto_url,
         puntos_totales: estudiante.puntos_totales,
@@ -198,8 +203,12 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // 6. Generar token JWT con el rol correspondiente
-    const accessToken = this.generateJwtToken(user.id, user.email, role);
+    // 6. Obtener roles del usuario desde la BD (puede tener múltiples roles) - usando utility segura
+    const userRoles = parseUserRoles(user.roles);
+    const finalUserRoles = userRoles.length > 0 ? userRoles : [role];
+
+    // 7. Generar token JWT con todos los roles del usuario
+    const accessToken = this.generateJwtToken(user.id, user.email, finalUserRoles);
 
     // 7. Retornar token y datos del usuario (estructura diferente según rol)
     if (role === 'tutor') {
@@ -346,7 +355,7 @@ export class AuthService {
           email: true,
           nombre: true,
           apellido: true,
-          fecha_nacimiento: true,
+          edad: true,
           nivel_escolar: true,
           foto_url: true,
           puntos_totales: true,
@@ -400,19 +409,23 @@ export class AuthService {
    * Genera un token JWT para un usuario
    * @param userId - ID del usuario
    * @param email - Email del usuario
-   * @param role - Rol del usuario ('tutor' o 'docente')
+   * @param roles - Array de roles del usuario (por ejemplo: ['admin', 'docente'])
    * @returns Token JWT firmado
    * @private
    */
   private generateJwtToken(
     userId: string,
     email: string,
-    role: string = 'tutor',
+    roles: string[] | string = ['tutor'],
   ): string {
+    // Normalizar roles a array si viene como string (backward compatibility)
+    const rolesArray = Array.isArray(roles) ? roles : [roles];
+
     const payload = {
       sub: userId, // Subject (ID del usuario)
       email: email,
-      role: role, // Rol del usuario
+      role: rolesArray[0], // Rol principal (primer rol del array) - para backward compatibility
+      roles: rolesArray, // Array completo de roles - soporte multi-rol
     };
 
     return this.jwtService.sign(payload);

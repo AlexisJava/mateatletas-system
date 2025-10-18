@@ -129,17 +129,17 @@ export default function AdminPagosPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg p-6">
+        <div className="bg-emerald-500/[0.05] rounded-xl border-2 border-gray-200 shadow-lg p-6">
           <p className="text-sm text-gray-600 mb-1">Total de Pagos</p>
           <p className="text-3xl font-bold text-gray-900">{pagosArray.length}</p>
         </div>
-        <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg p-6">
+        <div className="bg-emerald-500/[0.05] rounded-xl border-2 border-gray-200 shadow-lg p-6">
           <p className="text-sm text-gray-600 mb-1">Pagos Aprobados</p>
           <p className="text-3xl font-bold text-green-600">
             {pagosArray.filter((p) => p.estado === 'Aprobado').length}
           </p>
         </div>
-        <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg p-6">
+        <div className="bg-emerald-500/[0.05] rounded-xl border-2 border-gray-200 shadow-lg p-6">
           <p className="text-sm text-gray-600 mb-1">Total Recaudado</p>
           <p className="text-3xl font-bold text-indigo-600">
             {formatMonto(totalRecaudado)}
@@ -149,7 +149,7 @@ export default function AdminPagosPage() {
 
       {/* Lista de pagos */}
       {pagosArray.length === 0 ? (
-        <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg p-12 text-center">
+        <div className="bg-emerald-500/[0.05] rounded-xl border-2 border-gray-200 shadow-lg p-12 text-center">
           <span className="text-6xl mb-4 block">💳</span>
           <h3 className="text-2xl font-bold text-gray-900 mb-2">No hay pagos</h3>
           <p className="text-gray-600">
@@ -157,7 +157,7 @@ export default function AdminPagosPage() {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border-2 border-gray-200 shadow-lg overflow-hidden">
+        <div className="bg-emerald-500/[0.05] rounded-xl border-2 border-gray-200 shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y-2 divide-gray-200">
               <thead className="bg-gray-50">
@@ -185,7 +185,7 @@ export default function AdminPagosPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-emerald-500/[0.05] divide-y divide-gray-200">
                 {pagosArray.map((pago) => (
                   <tr key={pago.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
