@@ -140,17 +140,13 @@ export class DocentesService {
     const docente = await this.prisma.docente.findUnique({
       where: { id },
       include: {
-        docenteRutas: {
+        rutasEspecialidad: {
           include: {
-            rutaEspecialidad: {
-              include: {
-                sector: {
-                  select: {
-                    nombre: true,
-                    icono: true,
-                    color: true,
-                  },
-                },
+            sector: {
+              select: {
+                nombre: true,
+                icono: true,
+                color: true,
               },
             },
           },
@@ -166,8 +162,8 @@ export class DocentesService {
 
     // Extraer sectores únicos
     const sectoresMap = new Map();
-    docente.docenteRutas?.forEach((dr) => {
-      const sector = dr.rutaEspecialidad?.sector;
+    docente.rutasEspecialidad?.forEach((dr) => {
+      const sector = dr.sector;
       if (sector) {
         sectoresMap.set(sector.nombre, sector);
       }
