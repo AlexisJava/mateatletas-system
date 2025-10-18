@@ -27,9 +27,9 @@ export function useClases() {
  * (Rutas, Docentes, Sectores)
  */
 export function useClasesFormData() {
-  const [rutas, setRutas] = useState<any[]>([]);
-  const [docentes, setDocentes] = useState<any[]>([]);
-  const [sectores, setSectores] = useState<any[]>([]);
+  const [rutas, setRutas] = useState<Record<string, unknown>[]>([]);
+  const [docentes, setDocentes] = useState<Record<string, unknown>[]>([]);
+  const [sectores, setSectores] = useState<Record<string, unknown>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,13 +46,13 @@ export function useClasesFormData() {
 
       const rutasData = Array.isArray(rutasResponse)
         ? rutasResponse
-        : (rutasResponse as any)?.data || [];
+        : (rutasResponse as Record<string, unknown>)?.data || [];
       const docentesData = Array.isArray(docentesResponse)
         ? docentesResponse
-        : (docentesResponse as any)?.data || [];
+        : (docentesResponse as Record<string, unknown>)?.data || [];
       const sectoresData = Array.isArray(sectoresResponse)
         ? sectoresResponse
-        : (sectoresResponse as any)?.data || [];
+        : (sectoresResponse as Record<string, unknown>)?.data || [];
 
       setRutas(rutasData);
       setDocentes(docentesData);
@@ -85,7 +85,7 @@ export function useClasesFormData() {
 /**
  * Hook para filtrado de clases
  */
-export function useClasesFilter(clases: any[]) {
+export function useClasesFilter(clases: Record<string, unknown>[]) {
   const [filter, setFilter] = useState<'all' | 'Programada' | 'Cancelada'>('all');
 
   const filteredClases = filter === 'all'
@@ -113,7 +113,7 @@ export function useClaseForm() {
     descripcion: '',
   });
 
-  const updateField = useCallback((field: string, value: any) => {
+  const updateField = useCallback((field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }, []);
 

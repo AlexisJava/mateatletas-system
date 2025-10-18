@@ -1,0 +1,147 @@
+# ARCHIVOS OBSOLETOS A BORRAR
+# Fecha: 2025-10-18
+# Razón: Documentos de auditoría contradictorios reemplazados por ESTADO_REAL_VERIFICADO.md
+
+# IMPORTANTE: Ejecutar con cuidado. Revisar cada archivo antes de borrar.
+# Comando sugerido: cat <archivo> && rm <archivo>
+
+# ============================================================
+# DOCUMENTOS DE AUDITORÍA OBSOLETOS (10 archivos)
+# ============================================================
+
+# 1. AUDIT_FIX_ACTION_PLAN.md
+# Razón: Reemplazado por PLAN_ACCION_UNICO.md
+# Problema: Contenía tareas ya completadas y bugs fantasma
+AUDIT_FIX_ACTION_PLAN.md
+
+# 2. AUDIT_ONE_PAGE_SUMMARY.md
+# Razón: Información contradictoria vs código real
+# Problema: Métricas no verificadas
+AUDIT_ONE_PAGE_SUMMARY.md
+
+# 3. AUDIT_SUMMARY_DASHBOARD.md
+# Razón: Dashboard no refleja estado real
+# Problema: Contradicciones con código verificado
+AUDIT_SUMMARY_DASHBOARD.md
+
+# 4. FORENSIC_AUDIT_EXECUTIVE_REPORT.md
+# Razón: Report basado en documentos contradictorios
+# Problema: No verificado contra código fuente
+FORENSIC_AUDIT_EXECUTIVE_REPORT.md
+
+# 5. FRONTEND_DATABASE_AUDIT_REPORT.md
+# Razón: Información sobre DB no coincide con .env real
+# Problema: Puerto incorrecto (5433 vs 5432 real)
+FRONTEND_DATABASE_AUDIT_REPORT.md
+
+# 6. INFRASTRUCTURE_AUDIT_REPORT.md
+# Razón: Estado de infraestructura contradictorio
+# Problema: Dice "backend no corriendo" cuando sí está configurado
+INFRASTRUCTURE_AUDIT_REPORT.md
+
+# 7. INFRASTRUCTURE_REMEDIATION_REPORT.md
+# Razón: Remediaciones para problemas ya resueltos
+# Problema: UserThrottlerGuard y parseUserRoles ya implementados
+INFRASTRUCTURE_REMEDIATION_REPORT.md
+
+# 8. README_AUDIT.md
+# Razón: README de auditoría no refleja trabajo real
+# Problema: Contradicciones múltiples
+README_AUDIT.md
+
+# 9. BUG_REPORT_COMPREHENSIVE.md
+# Razón: Bugs reportados ya están arreglados
+# Problema: AdminService ya refactorizado, UserThrottlerGuard ya fixed
+BUG_REPORT_COMPREHENSIVE.md
+
+# 10. AUDITORIA_FRONTEND_COMPLETA.md
+# Razón: Auditoría frontend con métricas no verificadas
+# Problema: Type casts reportados (40+) vs real (17)
+AUDITORIA_FRONTEND_COMPLETA.md
+
+# ============================================================
+# ARCHIVOS TÉCNICOS POSIBLEMENTE OBSOLETOS (2 archivos)
+# ============================================================
+
+# 11. AUDIT_VERIFICATION_QUERIES.sql
+# Razón: Queries SQL sin contexto claro
+# Acción: REVISAR ANTES DE BORRAR - Puede contener queries útiles
+# Comando: cat AUDIT_VERIFICATION_QUERIES.sql
+AUDIT_VERIFICATION_QUERIES.sql
+
+# 12. audit_artifacts/
+# Razón: Directorio de artefactos de auditoría
+# Acción: REVISAR CONTENIDO ANTES DE BORRAR
+# Comando: ls -la audit_artifacts/
+audit_artifacts/
+
+# ============================================================
+# TOTAL: 10 archivos markdown + 2 a revisar = 12 archivos
+# ============================================================
+
+# COMANDO PARA BORRAR (USAR CON PRECAUCIÓN):
+# ============================================================
+
+# Opción 1: Borrar uno por uno (RECOMENDADO)
+# for file in $(cat archivos_a_borrar.txt | grep "^[A-Z]" | grep "\.md$"); do
+#   echo "Borrando: $file"
+#   rm "$file"
+# done
+
+# Opción 2: Mover a carpeta de backup (MÁS SEGURO)
+# mkdir -p audit_backup_$(date +%Y%m%d)
+# for file in $(cat archivos_a_borrar.txt | grep "^[A-Z]" | grep "\.md$"); do
+#   mv "$file" audit_backup_$(date +%Y%m%d)/
+# done
+
+# Opción 3: Revisar contenido antes de borrar
+# for file in $(cat archivos_a_borrar.txt | grep "^[A-Z]" | grep "\.md$"); do
+#   echo "=== $file ==="
+#   head -20 "$file"
+#   read -p "¿Borrar este archivo? (y/n) " confirm
+#   if [ "$confirm" = "y" ]; then
+#     rm "$file"
+#     echo "✅ Borrado: $file"
+#   else
+#     echo "⏭️  Omitido: $file"
+#   fi
+# done
+
+# ============================================================
+# ARCHIVOS A MANTENER (NO BORRAR)
+# ============================================================
+
+# ✅ ESTADO_REAL_VERIFICADO.md - Documento maestro verificado
+# ✅ PLAN_ACCION_UNICO.md - Plan de acción basado en código real
+# ✅ archivos_a_borrar.txt - Esta lista
+# ✅ dev-clean-restart.sh - Script verificado como funcional
+# ✅ dev-stop.sh - Script de parada
+# ✅ README.md - README principal del proyecto
+# ✅ Todos los archivos de código fuente (.ts, .tsx, .js, etc.)
+
+# ============================================================
+# VERIFICACIÓN POST-BORRADO
+# ============================================================
+
+# Después de borrar, verificar que solo quedan los documentos maestros:
+# ls -1 *.md | grep -E "(AUDIT|REPORT|INFRA|FRONT)"
+# Resultado esperado: 0 archivos (todos borrados)
+
+# ls -1 *.md
+# Resultado esperado: ESTADO_REAL_VERIFICADO.md, PLAN_ACCION_UNICO.md, README.md
+
+# ============================================================
+# NOTAS ADICIONALES
+# ============================================================
+
+# 1. Los 10 archivos markdown obsoletos contienen ~5000-15000 líneas de
+#    documentación contradictoria que generan confusión.
+
+# 2. ESTADO_REAL_VERIFICADO.md es la ÚNICA fuente de verdad verificada
+#    contra el código fuente real.
+
+# 3. Si necesitas recuperar algún archivo borrado, usar:
+#    git checkout HEAD -- <archivo>
+#    (si está en git history)
+
+# 4. Recomendación: Mover a backup en lugar de borrar directamente.

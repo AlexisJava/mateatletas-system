@@ -145,8 +145,8 @@ export const exportChartToPNG = (chartElement: HTMLElement, filename: string) =>
 /**
  * Formatea datos de usuarios para exportación
  */
-export const formatUsersForExport = (users: any[]) => {
-  return users.map((user: any) => ({
+export const formatUsersForExport = (users: Record<string, unknown>[]) => {
+  return users.map((user) => ({
     'ID': user.id,
     'Nombre': `${user.nombre} ${user.apellido}`,
     'Email': user.email,
@@ -159,8 +159,8 @@ export const formatUsersForExport = (users: any[]) => {
 /**
  * Formatea datos de clases para exportación
  */
-export const formatClassesForExport = (classes: any[]) => {
-  return classes.map((clase: any) => ({
+export const formatClassesForExport = (classes: Record<string, unknown>[]) => {
+  return classes.map((clase) => ({
     'ID': clase.id,
     'Ruta Curricular': clase.ruta_curricular?.nombre || '-',
     'Docente': `${clase.docente?.user?.nombre || ''} ${clase.docente?.user?.apellido || ''}`.trim() || '-',

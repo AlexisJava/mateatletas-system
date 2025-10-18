@@ -210,11 +210,18 @@ export const useAuthStore = create<AuthState>()(
       // Configuración de persistencia
       name: 'auth-storage', // Nombre del key en localStorage
       partialize: (state) => ({
-        // Persistir user, token e isAuthenticated
+        // Solo persistir user y token
+        // NO persistir isAuthenticated para evitar bucles de redirección
         user: state.user,
         token: state.token,
-        isAuthenticated: state.isAuthenticated,
       }),
+      // Callback después de rehidratar: calcular isAuthenticated basado en user
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Si hay user, marcamos como autenticado
+          state.isAuthenticated = !!state.user;
+        }
+      },
     },
   ),
 );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { ThemeProvider } from '@/lib/theme/ThemeContext';
@@ -37,9 +37,17 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
   const { user, logout, checkAuth } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const hasValidatedRef = useRef(false);
 
   useEffect(() => {
+    // Evitar múltiples validaciones usando ref
+    if (hasValidatedRef.current) {
+      return;
+    }
+
     const validateAuth = async () => {
+      hasValidatedRef.current = true;
+
       // Si ya tenemos un usuario estudiante, validar y terminar
       if (user && user.role === 'estudiante') {
         setIsValidating(false);
@@ -48,13 +56,11 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 
       // Si el usuario tiene otro rol, redirigir al dashboard apropiado
       if (user && user.role !== 'estudiante') {
-        if (user.role === 'admin') {
-          router.push('/admin/dashboard');
-        } else if (user.role === 'docente') {
-          router.push('/docente/dashboard');
-        } else {
-          router.push('/dashboard');
-        }
+        const redirectPath =
+          user.role === 'admin' ? '/admin/dashboard' :
+          user.role === 'docente' ? '/docente/dashboard' :
+          '/dashboard';
+        router.replace(redirectPath);
         return;
       }
 
@@ -66,18 +72,16 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 
           // Después de checkAuth, validar el rol
           if (!currentUser) {
-            router.push('/login');
+            router.replace('/login');
             return;
           }
 
           if (currentUser.role !== 'estudiante') {
-            if (currentUser.role === 'admin') {
-              router.push('/admin/dashboard');
-            } else if (currentUser.role === 'docente') {
-              router.push('/docente/dashboard');
-            } else {
-              router.push('/dashboard');
-            }
+            const redirectPath =
+              currentUser.role === 'admin' ? '/admin/dashboard' :
+              currentUser.role === 'docente' ? '/docente/dashboard' :
+              '/dashboard';
+            router.replace(redirectPath);
             return;
           }
 
@@ -85,13 +89,15 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
           setIsValidating(false);
         } catch (error: unknown) {
           // Error al verificar auth, redirigir a login
-          router.push('/login');
+          router.replace('/login');
         }
       }
     };
 
     validateAuth();
-  }, [user, router, checkAuth]);
+    // Solo ejecutar una vez al montar
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogout = () => {
     logout();

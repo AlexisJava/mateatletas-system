@@ -4,34 +4,22 @@
  */
 
 import axios from '@/lib/axios';
+import {
+  notificacionSchema,
+  notificacionesListSchema,
+  countResponseSchema,
+  marcarLeidaResponseSchema,
+  eliminarNotificacionResponseSchema,
+  type Notificacion,
+  type TipoNotificacion,
+} from '@mateatletas/contracts';
 
 // ============================================================================
-// TYPES
+// RE-EXPORTS
 // ============================================================================
 
-export enum TipoNotificacion {
-  CLASE_PROGRAMADA = 'CLASE_PROGRAMADA',
-  CLASE_CANCELADA = 'CLASE_CANCELADA',
-  NUEVA_RESERVA = 'NUEVA_RESERVA',
-  CANCELACION_RESERVA = 'CANCELACION_RESERVA',
-  ESTUDIANTE_NUEVO = 'ESTUDIANTE_NUEVO',
-  PAGO_RECIBIDO = 'PAGO_RECIBIDO',
-  MEMBRESIA_PROXIMO_VENCIMIENTO = 'MEMBRESIA_PROXIMO_VENCIMIENTO',
-  MEMBRESIA_VENCIDA = 'MEMBRESIA_VENCIDA',
-  SISTEMA = 'SISTEMA',
-}
-
-export interface Notificacion {
-  id: string;
-  usuario_id: string;
-  tipo: TipoNotificacion;
-  titulo: string;
-  mensaje: string;
-  leida: boolean;
-  metadata: Record<string, unknown> | null;
-  createdAt: string;
-  updatedAt: string;
-}
+// Re-export types from contracts for convenience
+export type { Notificacion, TipoNotificacion };
 
 export interface NotificacionesResponse {
   notificaciones: Notificacion[];
@@ -53,15 +41,17 @@ export interface CountResponse {
  */
 export const getNotificaciones = async (soloNoLeidas?: boolean): Promise<Notificacion[]> => {
   const params = soloNoLeidas ? { soloNoLeidas: 'true' } : {};
-  return await axios.get('/notificaciones', { params }) as unknown as Notificacion[];
+  const response = await axios.get('/notificaciones', { params });
+  return notificacionesListSchema.parse(response);
 };
 
 /**
  * Obtener contador de notificaciones no leídas
  */
 export const getNotificacionesCount = async (): Promise<number> => {
-  const response = await axios.get<CountResponse>('/notificaciones/count') as unknown as CountResponse;
-  return response.count;
+  const response = await axios.get<CountResponse>('/notificaciones/count');
+  const validated = countResponseSchema.parse(response);
+  return validated.count;
 };
 
 /**
@@ -69,14 +59,16 @@ export const getNotificacionesCount = async (): Promise<number> => {
  * @param id - ID de la notificación
  */
 export const marcarNotificacionComoLeida = async (id: string): Promise<Notificacion> => {
-  return await axios.patch(`/notificaciones/${id}/leer`) as unknown as Notificacion;
+  const response = await axios.patch(`/notificaciones/${id}/leer`);
+  return notificacionSchema.parse(response);
 };
 
 /**
  * Marcar todas las notificaciones como leídas
  */
 export const marcarTodasComoLeidas = async (): Promise<{ message: string; count: number }> => {
-  return await axios.patch('/notificaciones/leer-todas') as unknown as { message: string; count: number };
+  const response = await axios.patch('/notificaciones/leer-todas');
+  return marcarLeidaResponseSchema.parse(response);
 };
 
 /**
@@ -84,7 +76,8 @@ export const marcarTodasComoLeidas = async (): Promise<{ message: string; count:
  * @param id - ID de la notificación a eliminar
  */
 export const eliminarNotificacion = async (id: string): Promise<{ message: string }> => {
-  return await axios.delete(`/notificaciones/${id}`) as unknown as { message: string };
+  const response = await axios.delete(`/notificaciones/${id}`);
+  return eliminarNotificacionResponseSchema.parse(response);
 };
 
 // ============================================================================
@@ -96,23 +89,23 @@ export const eliminarNotificacion = async (id: string): Promise<{ message: strin
  */
 export const getNotificacionIcon = (tipo: TipoNotificacion): string => {
   switch (tipo) {
-    case TipoNotificacion.CLASE_PROGRAMADA:
+    case 'CLASE_PROGRAMADA':
       return '📅';
-    case TipoNotificacion.CLASE_CANCELADA:
+    case 'CLASE_CANCELADA':
       return '❌';
-    case TipoNotificacion.NUEVA_RESERVA:
+    case 'NUEVA_RESERVA':
       return '✅';
-    case TipoNotificacion.CANCELACION_RESERVA:
+    case 'CANCELACION_RESERVA':
       return '🔴';
-    case TipoNotificacion.ESTUDIANTE_NUEVO:
+    case 'ESTUDIANTE_NUEVO':
       return '👤';
-    case TipoNotificacion.PAGO_RECIBIDO:
+    case 'PAGO_RECIBIDO':
       return '💰';
-    case TipoNotificacion.MEMBRESIA_PROXIMO_VENCIMIENTO:
+    case 'MEMBRESIA_PROXIMO_VENCIMIENTO':
       return '⚠️';
-    case TipoNotificacion.MEMBRESIA_VENCIDA:
+    case 'MEMBRESIA_VENCIDA':
       return '⏰';
-    case TipoNotificacion.SISTEMA:
+    case 'SISTEMA':
       return '🔔';
     default:
       return '📬';
@@ -124,23 +117,23 @@ export const getNotificacionIcon = (tipo: TipoNotificacion): string => {
  */
 export const getNotificacionColor = (tipo: TipoNotificacion): string => {
   switch (tipo) {
-    case TipoNotificacion.CLASE_PROGRAMADA:
+    case 'CLASE_PROGRAMADA':
       return 'bg-blue-100 border-blue-500 text-blue-900';
-    case TipoNotificacion.CLASE_CANCELADA:
+    case 'CLASE_CANCELADA':
       return 'bg-red-100 border-red-500 text-red-900';
-    case TipoNotificacion.NUEVA_RESERVA:
+    case 'NUEVA_RESERVA':
       return 'bg-green-100 border-green-500 text-green-900';
-    case TipoNotificacion.CANCELACION_RESERVA:
+    case 'CANCELACION_RESERVA':
       return 'bg-orange-100 border-orange-500 text-orange-900';
-    case TipoNotificacion.ESTUDIANTE_NUEVO:
+    case 'ESTUDIANTE_NUEVO':
       return 'bg-purple-100 border-purple-500 text-purple-900';
-    case TipoNotificacion.PAGO_RECIBIDO:
+    case 'PAGO_RECIBIDO':
       return 'bg-emerald-100 border-emerald-500 text-emerald-900';
-    case TipoNotificacion.MEMBRESIA_PROXIMO_VENCIMIENTO:
+    case 'MEMBRESIA_PROXIMO_VENCIMIENTO':
       return 'bg-yellow-100 border-yellow-500 text-yellow-900';
-    case TipoNotificacion.MEMBRESIA_VENCIDA:
+    case 'MEMBRESIA_VENCIDA':
       return 'bg-red-100 border-red-500 text-red-900';
-    case TipoNotificacion.SISTEMA:
+    case 'SISTEMA':
       return 'bg-gray-100 border-gray-500 text-gray-900';
     default:
       return 'bg-gray-100 border-gray-500 text-gray-900';

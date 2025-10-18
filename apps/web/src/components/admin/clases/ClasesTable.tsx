@@ -2,11 +2,11 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface ClasesTableProps {
-  clases: any[];
-  onViewClase: (clase: any) => void;
-  onCancelClase: (clase: any) => void;
-  onEditClase: (clase: any) => void;
-  onManageStudents: (clase: any) => void;
+  clases: Record<string, unknown>[];
+  onViewClase: (clase: Record<string, unknown>) => void;
+  onCancelClase: (clase: Record<string, unknown>) => void;
+  onEditClase: (clase: Record<string, unknown>) => void;
+  onManageStudents: (clase: Record<string, unknown>) => void;
 }
 
 /**

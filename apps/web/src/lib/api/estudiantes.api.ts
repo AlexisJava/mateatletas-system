@@ -8,6 +8,12 @@ import type {
   EstadisticasEstudiantes,
   Equipo,
 } from '@/types/estudiante';
+import {
+  estudianteSchema,
+  estudiantesResponseSchema,
+  estadisticasEstudiantesSchema,
+  equiposListSchema,
+} from '@mateatletas/contracts';
 
 /**
  * API Client para operaciones de estudiantes
@@ -20,9 +26,8 @@ export const estudiantesApi = {
    * @returns Estudiante creado
    */
   create: async (data: CreateEstudianteData): Promise<Estudiante> => {
-    // NOTE: apiClient interceptor ya extrae response.data, así que response ES la data
     const response = await apiClient.post<Estudiante>('/estudiantes', data);
-    return response as unknown as Estudiante;
+    return estudianteSchema.parse(response);
   },
 
   /**
@@ -33,8 +38,8 @@ export const estudiantesApi = {
   getAll: async (
     params?: QueryEstudiantesParams,
   ): Promise<EstudiantesResponse> => {
-    // NOTE: apiClient interceptor ya extrae response.data
-    return apiClient.get('/estudiantes', { params }) as Promise<EstudiantesResponse>;
+    const response = await apiClient.get('/estudiantes', { params });
+    return estudiantesResponseSchema.parse(response);
   },
 
   /**
@@ -43,8 +48,8 @@ export const estudiantesApi = {
    * @returns Estudiante con sus relaciones
    */
   getById: async (id: string): Promise<Estudiante> => {
-    // NOTE: apiClient interceptor ya extrae response.data
-    return apiClient.get(`/estudiantes/${id}`) as Promise<Estudiante>;
+    const response = await apiClient.get(`/estudiantes/${id}`);
+    return estudianteSchema.parse(response);
   },
 
   /**
@@ -57,8 +62,8 @@ export const estudiantesApi = {
     id: string,
     data: UpdateEstudianteData,
   ): Promise<Estudiante> => {
-    // NOTE: apiClient interceptor ya extrae response.data
-    return apiClient.patch(`/estudiantes/${id}`, data) as Promise<Estudiante>;
+    const response = await apiClient.patch(`/estudiantes/${id}`, data);
+    return estudianteSchema.parse(response);
   },
 
   /**
@@ -67,8 +72,8 @@ export const estudiantesApi = {
    * @returns Mensaje de confirmación
    */
   delete: async (id: string): Promise<{ message: string }> => {
-    // NOTE: apiClient interceptor ya extrae response.data
-    return apiClient.delete(`/estudiantes/${id}`) as Promise<{ message: string }>;
+    const response = await apiClient.delete(`/estudiantes/${id}`);
+    return response as { message: string };
   },
 
   /**
@@ -76,8 +81,8 @@ export const estudiantesApi = {
    * @returns Total de estudiantes
    */
   count: async (): Promise<{ count: number }> => {
-    // NOTE: apiClient interceptor ya extrae response.data
-    return apiClient.get('/estudiantes/count') as Promise<{ count: number }>;
+    const response = await apiClient.get('/estudiantes/count');
+    return response as { count: number };
   },
 
   /**
@@ -85,8 +90,8 @@ export const estudiantesApi = {
    * @returns Estadísticas agregadas
    */
   getEstadisticas: async (): Promise<EstadisticasEstudiantes> => {
-    // NOTE: apiClient interceptor ya extrae response.data
-    return apiClient.get('/estudiantes/estadisticas') as Promise<EstadisticasEstudiantes>;
+    const response = await apiClient.get('/estudiantes/estadisticas');
+    return estadisticasEstudiantesSchema.parse(response);
   },
 
   /**
@@ -94,7 +99,7 @@ export const estudiantesApi = {
    * @returns Lista de equipos
    */
   getEquipos: async (): Promise<Equipo[]> => {
-    // NOTE: apiClient interceptor ya extrae response.data
-    return apiClient.get('/equipos') as Promise<Equipo[]>;
+    const response = await apiClient.get('/equipos');
+    return equiposListSchema.parse(response);
   },
 };

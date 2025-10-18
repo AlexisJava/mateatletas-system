@@ -1,0 +1,48 @@
+# Node modules
+node_modules
+**/node_modules
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+.next
+dist
+build
+.turbo
+
+# Environment files
+.env.local
+.env*.local
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+!README.md
+docs/
+audit_artifacts/
+
+# IDE
+.vscode
+.idea
+
+# Tests
+coverage
+.nyc_output
+playwright-report
+
+# Logs
+logs
+*.log
+apps/api/logs
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp
+temp
+*.tmp

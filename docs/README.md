@@ -1,391 +1,343 @@
-# 📚 Documentación Mateatletas Ecosystem
+# DOCUMENTACIÓN - MATEATLETAS ECOSYSTEM
 
-**Última actualización:** 14 de Octubre de 2025
-**Versión del proyecto:** 1.0.0
-**Estado:** Production-Ready MVP
-
-
----
-
-## 🎯 DOCUMENTOS PRINCIPALES
-
-### Estado del Proyecto
-
-1. **[REVISION_COMPLETA_17_SLICES.md](REVISION_COMPLETA_17_SLICES.md)** 📊 **ESTADO ACTUAL**
-   - Revisión detallada de los 16 slices implementados
-   - Estado real verificado con código fuente
-   - Métricas completas: ~23,000 LOC, ~120 endpoints
-   - Testing: ~245 tests E2E automatizados
-   - **Usar como referencia del estado actual**
-
-2. **[ROADMAP_SLICES_COMPLETO.md](ROADMAP_SLICES_COMPLETO.md)** 🗺️ **ROADMAP**
-   - Arquitectura completa planeada (22 slices)
-   - Slices 17-22 detallados con código de ejemplo
-   - Estimaciones: 38-52 horas para completar
-   - Costos IA: ~$345/mes para slices 18-19
-   - **Usar como guía de desarrollo futuro**
-
-3. **[ISSUES_Y_TODOS_CONSOLIDADO.md](ISSUES_Y_TODOS_CONSOLIDADO.md)** 📋 **TAREAS**
-   - Issues consolidados con prioridades
-   - Plan de acción por fases
-   - Tiempo estimado: 58-80 horas pendientes
-   - **Usar para planning y sprints**
+**Estado:** 7.5/10 - Production Ready
+**Última actualización:** 2025-10-18
+**Última limpieza:** 2025-10-18 (11 archivos obsoletos movidos a archive/)
 
 ---
 
-## 📁 ESTRUCTURA DE CARPETAS
+## 🔴 DOCUMENTOS CORE (Los 3 Sagrados)
 
-```
-docs/
-├── README.md                                  # 👈 Este archivo (índice principal)
-│
-├── 🏆 DOCUMENTOS PRINCIPALES (6 archivos clave)
-│   ├── INVESTOR_READINESS_REPORT.md          # Para inversores (22 páginas)
-│   ├── TECHNICAL_DEBT_RESOLUTION.md          # Resolución de deuda técnica
-│   ├── REVISION_COMPLETA_17_SLICES.md        # Estado actual verificado
-│   ├── ROADMAP_SLICES_COMPLETO.md            # Plan completo (22 slices)
-│   ├── ISSUES_Y_TODOS_CONSOLIDADO.md         # TODOs priorizados
-│   └── GO_TO_MARKET_READINESS.md             # Análisis de lanzamiento
-│
-├── 🏗️ architecture/                           # Arquitectura técnica (7 archivos)
-│   ├── ARCHITECTURE_MANUAL.md                # 📘 Manual completo (100+ páginas)
-│   ├── arquitectura-de-software.md
-│   ├── backend-arquitectura.md
-│   ├── database-schema.md
-│   ├── frontend-arquitectura.md
-│   ├── security-architecture.md
-│   └── system-overview.md
-│
-├── 📖 api-specs/                              # Especificaciones de API (11 módulos)
-│   ├── admin-api.md
-│   ├── asistencia-api.md
-│   ├── auth-api.md
-│   ├── catalogo-api.md
-│   ├── clases-api.md
-│   ├── docentes-api.md
-│   ├── equipos-api.md
-│   ├── estudiantes-api.md
-│   ├── gamificacion-api.md
-│   ├── pagos-api.md
-│   └── websockets-api.md
-│
-├── 🛠️ development/                            # Guías de desarrollo (12 archivos)
-│   ├── BACKEND_SETUP.md
-│   ├── FRONTEND_SETUP.md
-│   ├── DATABASE_GUIDE.md
-│   ├── TESTING_GUIDE.md
-│   ├── DEPLOYMENT.md
-│   ├── CONTRIBUTING.md
-│   ├── GIT_WORKFLOW.md
-│   ├── FASE4_HOJA_DE_RUTA.md
-│   ├── FASE4_MOCK_MODE.md
-│   ├── SLICES_FALTANTES.md
-│   ├── troubleshooting.md
-│   └── workflow-guidelines.md
-│
-├── 🔧 refactoring/                            # Documentación de refactoring
-│   └── ADMIN_SERVICE_REFACTORING.md          # Refactoring AdminService (911→400 LOC)
-│
-├── 💾 database/                               # Documentación de base de datos
-│   └── PRISMA_MIGRATIONS_STRATEGY.md         # Estrategia de migraciones
-│
-├── 🎨 frontend/                               # 🆕 Design System & Frontend (4 archivos)
-│   ├── README.md                             # 📘 Índice de frontend docs
-│   ├── DESIGN_SYSTEM_EVOLVED.md              # 🎨 Design System v2.0 completo
-│   ├── design-system.css                     # 🎨 CSS variables y utility classes
-│   └── QUICK_REFERENCE.md                    # ⚡ Referencia rápida copy-paste
-│
-├── 📝 slices/                                 # Summaries de slices específicos (5 archivos)
-│   ├── SLICE_6_PAGOS_SUMMARY.md
-│   ├── SLICE_11_AUTH_ESTUDIANTES_COMPLETO.md
-│   ├── SLICE_14_PORTAL_DOCENTE_SUMMARY.md
-│   ├── SLICE_14_AUDITORIA_FINAL.md
-│   └── SLICE_16_CURSOS_SUMMARY.md
-│
-├── 🧪 testing/                                # Documentación de testing
-│   └── TESTING_SUMMARY.md                    # Resumen completo de testing
-│
-├── 📦 archived/                               # Documentos históricos (30+ archivos)
-│   └── [Documentación pre-octubre 14, 2025]
-│
-└── 🚫 postponed/                              # Features pospuestas
-    └── [Features de baja prioridad]
-```
+Estos 3 documentos son la **única fuente de verdad verificada contra código real**.
+
+### 1. [ESTADO_ACTUAL.md](ESTADO_ACTUAL.md) ⭐
+**LEE ESTE PRIMERO**
+- Estado verificado del sistema contra código fuente
+- Métricas reales: 7.5/10, 16 tests, 30 servicios con Prisma
+- Qué está implementado vs qué falta
+- Verificación de "99 tests" → 16 tests reales
+- Verificación de "9.5/10" → 7.5/10 real
+
+### 2. [PLAN_ACCION.md](PLAN_ACCION.md) ⭐
+**LEE ESTE SEGUNDO**
+- Qué hacer y en qué orden
+- 4 tareas priorizadas con tiempo estimado (11-15h total)
+- Roadmap para pasar de 7.5/10 a 9.0/10
+- Cronograma de 4 días
+
+### 3. [DECISIONES.md](DECISIONES.md) ⭐
+**LEE ESTE PARA CONTEXTO**
+- Por qué se tomaron decisiones (ADRs)
+- Historia de decisiones arquitectónicas
+- ADR-001: Limpieza de documentación
+- ADR-002: Circuit Breakers en AdminService
+- ADR-003: parseUserRoles utility
+- ADR-004: Health check endpoints
+- ADR-005: UserThrottlerGuard null-safety
 
 ---
 
-## 🚀 GUÍA RÁPIDA DE USO
+## 📊 MÉTRICAS REALES DEL SISTEMA
 
-### Para Inversores y C-Level
+*(Verificadas contra código - 2025-10-18)*
 
-1. **Pitch Deck (inicio):** [INVESTOR_READINESS_REPORT.md](INVESTOR_READINESS_REPORT.md)
-   - Resumen ejecutivo en 2 páginas
-   - Métricas clave: 73% completitud, $720K ARR Y1
-   - TAM, Revenue model, Investment ask
-   - Riesgos y mitigación
+### Backend: 7.5/10 Production-Ready
+- **Puerto:** 3001 ✅
+- **Tests:** 16 archivos de test ✅
+- **Circuit Breakers:** 5 implementados ✅
+- **Health Checks:** 3 endpoints (/health, /health/ready, /health/live) ✅
+- **Swagger:** Implementado en /api/docs ✅
+- **PrismaService:** Usado en 30 servicios ✅
+- **JwtAuthGuard:** 47 usos en 17 archivos ✅
+- **AdminService:** 237 líneas, 6 servicios delegados ✅
 
-2. **Due Diligence Técnica:** [architecture/ARCHITECTURE_MANUAL.md](architecture/ARCHITECTURE_MANUAL.md)
-   - Stack tecnológico moderno y escalable
-   - Arquitectura enterprise-grade
-   - Seguridad, deployment, monitoreo
+### Base de Datos: 10/10
+- **PostgreSQL:** Puerto 5432 ✅
+- **Migraciones:** 11 aplicadas ✅
+- **Estado:** Sincronizado ✅
 
-3. **Calidad del Código:** [TECHNICAL_DEBT_RESOLUTION.md](TECHNICAL_DEBT_RESOLUTION.md)
-   - 100% deuda técnica crítica resuelta
-   - Optimizaciones de performance (N+1 queries)
-   - Seguridad hardened (HMAC webhooks)
+### Frontend: 5/10 Mejorable
+- **Type casts inseguros:** 17 ocurrencias ⚠️
+- **Contratos compartidos:** No implementados ❌
 
-4. **Roadmap y Tiempo:** [ROADMAP_SLICES_COMPLETO.md](ROADMAP_SLICES_COMPLETO.md)
-   - 6 slices pendientes (38-52 horas)
-   - Features IA: Chatbot + Alertas predictivas
-   - Time to market: 1-2 semanas para MVP completo
+### Scripts: 9/10
+- **dev-clean-restart.sh:** Robusto con health checks ✅
+- **wait_for_port():** Implementado ✅
+- **wait_for_backend_health():** Implementado ✅
+
+---
+
+## 📖 DOCUMENTACIÓN POR CATEGORÍA
+
+### 📁 API Specifications - [api-specs/](api-specs/)
+**12 archivos** - Documentación de endpoints RESTful
+
+- [admin_copiloto.md](api-specs/admin_copiloto.md) - Endpoints admin
+- [asistencia.md](api-specs/asistencia.md) - Sistema de asistencias
+- [Autenticacion.md](api-specs/Autenticacion.md) - Login, register, JWT
+- [calendario.md](api-specs/calendario.md) - Eventos y calendario
+- [catalogo.md](api-specs/catalogo.md) - Productos y suscripciones
+- [clases.md](api-specs/clases.md) - Gestión de clases
+- [docentes.md](api-specs/docentes.md) - CRUD docentes
+- [estudiantes.md](api-specs/estudiantes.md) - CRUD estudiantes
+- [gamificacion_puntos_logros.md](api-specs/gamificacion_puntos_logros.md) - Sistema de gamificación
+- [pagos.md](api-specs/pagos.md) - Integración MercadoPago
+- [reserva_clase.md](api-specs/reserva_clase.md) - Reservas de clases
+- [tutores.md](api-specs/tutores.md) - CRUD tutores
+
+**Útil para:** Desarrollo de features, integración frontend-backend
+
+---
+
+### 📁 Architecture - [architecture/](architecture/)
+**4 archivos** - Decisiones arquitectónicas
+
+- [context.md](architecture/context.md) - Contexto del sistema
+- [design-system.md](architecture/design-system.md) - Sistema de diseño
+- [documento-tecnico-del-backend.md](architecture/documento-tecnico-del-backend.md) - Arquitectura backend
+- [frontend-arquitectura.md](architecture/frontend-arquitectura.md) - Arquitectura frontend
+
+**Útil para:** Entender estructura del proyecto, decisiones de diseño
+
+---
+
+### 📁 Database - [database/](database/)
+**1 archivo** - Estrategia de base de datos
+
+- [PRISMA_MIGRATIONS_STRATEGY.md](database/PRISMA_MIGRATIONS_STRATEGY.md) - Estrategia de migraciones Prisma
+
+**Útil para:** Cambios de schema, migraciones
+
+---
+
+### 📁 Development - [development/](development/)
+**5 archivos** - Guías de desarrollo
+
+- [CONTRIBUTING.md](development/CONTRIBUTING.md) - Cómo contribuir
+- [DEVELOPMENT.md](development/DEVELOPMENT.md) - Guía de desarrollo
+- [GITHUB_SETUP.md](development/GITHUB_SETUP.md) - Setup de GitHub
+- [prisma-schema-unificado.md](development/prisma-schema-unificado.md) - Schema Prisma
+- [QUICK_START.md](development/QUICK_START.md) - Quick start
+
+**Útil para:** Onboarding de desarrolladores
+
+---
+
+### 📁 Frontend - [frontend/](frontend/)
+**3 archivos** - Documentación de frontend
+
+- [DESIGN_SYSTEM_EVOLVED.md](frontend/DESIGN_SYSTEM_EVOLVED.md) - Sistema de diseño evolucionado
+- [QUICK_REFERENCE.md](frontend/QUICK_REFERENCE.md) - Referencia rápida
+- [README.md](frontend/README.md) - Índice frontend
+
+**Útil para:** Desarrollo frontend, componentes UI
+
+---
+
+### 📁 Planning - [planning/](planning/)
+**6 archivos** - Planificación y roadmaps
+
+- [DATOS_REALES_NECESARIOS.md](planning/DATOS_REALES_NECESARIOS.md) - Datos reales necesarios
+- [FRONTEND_REDESIGN_PLAN.md](planning/FRONTEND_REDESIGN_PLAN.md) - Plan de rediseño frontend
+- [PLAN_DE_SLICES.md](planning/PLAN_DE_SLICES.md) - Plan de slices
+- [ROADMAP_BACKEND_9.5.md](planning/ROADMAP_BACKEND_9.5.md) - Roadmap backend
+- [ROADMAP_FRONTEND_WORLD_CLASS.md](planning/ROADMAP_FRONTEND_WORLD_CLASS.md) - Roadmap frontend
+- [VALIDACION_AVANZADA_PLAN.md](planning/VALIDACION_AVANZADA_PLAN.md) - Plan de validación
+
+**Útil para:** Planning de sprints, roadmap
+
+---
+
+### 📁 Progress - [progress/](progress/)
+**1 archivo** - Estado del proyecto
+
+- [SOURCE_OF_TRUTH.md](progress/SOURCE_OF_TRUTH.md) - Source of truth (⚠️ Actualizar métricas)
+
+**Útil para:** Tracking de progreso
+
+---
+
+### 📁 Technical - [technical/](technical/)
+**4 archivos** - Documentación técnica
+
+- [ARQUITECTURA_POR_INSTANCIAS.md](technical/ARQUITECTURA_POR_INSTANCIAS.md) - Arquitectura por instancias
+- [REACT_QUERY_MIGRATION_SUMMARY.md](technical/REACT_QUERY_MIGRATION_SUMMARY.md) - Migración a React Query
+- [SECURITY_JWT_COOKIES_MIGRATION.md](technical/SECURITY_JWT_COOKIES_MIGRATION.md) - Migración JWT a cookies
+- [SWAGGER_DOCUMENTATION_SUMMARY.md](technical/SWAGGER_DOCUMENTATION_SUMMARY.md) - Implementación Swagger
+
+**Útil para:** Decisiones técnicas, migraciones
+
+---
+
+### 📁 Testing - [testing/](testing/)
+**4 archivos** - Documentación de testing
+
+- [CREDENCIALES_TEST.md](testing/CREDENCIALES_TEST.md) - Credenciales de prueba
+- [PORTAL_ESTUDIANTE_TEST_FINAL.md](testing/PORTAL_ESTUDIANTE_TEST_FINAL.md) - Tests portal estudiante
+- [TESTING_DOCUMENTATION.md](testing/TESTING_DOCUMENTATION.md) - Docs de testing (⚠️ Corregir "99 tests" → "16 tests")
+- [TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md) - Resumen de testing
+
+**Útil para:** Escribir tests, credenciales de prueba
+
+---
+
+### 📁 Archive - [archive/](archive/)
+**16 archivos históricos** - Documentación obsoleta preservada
+
+- [2025-10-18-cleanup/](archive/2025-10-18-cleanup/) (12 archivos) - Docs obsoletos con claims inflados
+- [slices/](archive/slices/) (5 archivos) - Slices históricos completados
+
+**Útil para:** Historia del proyecto, referencia de qué NO hacer
+
+---
+
+## 🚀 QUICK START
 
 ### Para Desarrolladores Nuevos
+```bash
+# 1. Lee los 3 documentos core
+cat docs/ESTADO_ACTUAL.md
+cat docs/PLAN_ACCION.md
+cat docs/DECISIONES.md
 
-1. **Contexto técnico:** [architecture/ARCHITECTURE_MANUAL.md](architecture/ARCHITECTURE_MANUAL.md)
-   - Sección 4: Estructura del monorepo
-   - Sección 5: Backend (NestJS, 13 módulos)
-   - Sección 6: Frontend (Next.js 15, 4 portales)
+# 2. Quick start técnico
+cat docs/development/QUICK_START.md
 
-2. **Setup local:** [development/BACKEND_SETUP.md](development/BACKEND_SETUP.md) + [development/FRONTEND_SETUP.md](development/FRONTEND_SETUP.md)
-   - Instalación de dependencias
-   - Variables de entorno (.env.example en root)
-   - Comandos: `npm run start:dev`, `npm run build`
+# 3. Inicia el proyecto
+./dev-clean-restart.sh
 
-3. **Estado actual:** [REVISION_COMPLETA_17_SLICES.md](REVISION_COMPLETA_17_SLICES.md)
-   - 16 slices implementados y testeados
-   - ~120 endpoints RESTful
-   - 4 portales: Estudiante, Tutor, Docente, Admin
+# 4. Verifica que todo funciona
+curl http://localhost:3001/api/health
+```
 
-4. **Tareas disponibles:** [ISSUES_Y_TODOS_CONSOLIDADO.md](ISSUES_Y_TODOS_CONSOLIDADO.md)
-   - Issues priorizados por impacto
-   - Estimaciones de tiempo
-   - Good first issues marcados
+### Para Desarrollo de Features
+```bash
+# 1. Consulta API specs
+ls docs/api-specs/
 
-### Para Frontend Developers 🎨
+# 2. Lee arquitectura
+cat docs/architecture/documento-tecnico-del-backend.md
 
-1. **Design System Completo:** [frontend/DESIGN_SYSTEM_EVOLVED.md](frontend/DESIGN_SYSTEM_EVOLVED.md)
-   - Paleta Emerald/Orange (95/5 ratio estricto)
-   - Componentes reutilizables: MagneticButton, FloatingParticle, AnimatedCounter
-   - Patrones de layout: Split-screen, Glassmorphism, Backgrounds
-   - Animaciones con Framer Motion
-   - Guía completa de tipografía
+# 3. Desarrolla tu feature
+# ...
 
-2. **Quick Reference:** [frontend/QUICK_REFERENCE.md](frontend/QUICK_REFERENCE.md)
-   - Componentes copy-paste listos
-   - Template base para páginas nuevas
-   - Checklist pre-deploy
-   - Código de botones, inputs, cards, badges
-
-3. **CSS Utilities:** [frontend/design-system.css](frontend/design-system.css)
-   - Variables CSS con todos los colores
-   - Utility classes (.glass-card, .btn-cta-primary, etc.)
-   - Animaciones CSS (@keyframes)
-   - Responsive helpers
-
-4. **Ejemplos de Referencia:**
-   - Landing page: `/apps/web/src/app/page.tsx`
-   - Login page: `/apps/web/src/app/login/page.tsx`
-
-### Para Product Managers
-
-1. **Features implementadas:** [REVISION_COMPLETA_17_SLICES.md](REVISION_COMPLETA_17_SLICES.md)
-   - Auth, Usuarios, Pagos, Clases, Gamificación
-   - Testing: ~245 tests automatizados
-   - Production-ready para soft launch
-
-2. **Roadmap próximo:** [ROADMAP_SLICES_COMPLETO.md](ROADMAP_SLICES_COMPLETO.md)
-   - Slice #17: Jitsi Meet (3-4 horas)
-   - Slice #18: Alertas IA (8-10 horas)
-   - Slice #19: Chatbot IA (10-15 horas)
-   - Costo IA: ~$345/mes (OpenAI + Pinecone)
-
-3. **Go-to-Market:** [GO_TO_MARKET_READINESS.md](GO_TO_MARKET_READINESS.md)
-   - Análisis de preparación (95%)
-   - 3 blockers críticos para lanzamiento
-   - Plan de 48 horas para producción
-
-### Para QA/Testing
-
-1. **Guía completa:** [testing/TESTING_SUMMARY.md](testing/TESTING_SUMMARY.md)
-2. **Scripts E2E:** 18 scripts en `/tests/scripts/`
-   - test-integration-full.sh (flujo completo)
-   - test-docentes.sh, test-catalogo.sh, etc.
-3. **Coverage:** ~245 tests E2E, 7/7 slices con 100% endpoint coverage
+# 4. Actualiza ESTADO_ACTUAL.md si cambias algo importante
+```
 
 ---
 
-## 📊 MÉTRICAS DEL PROYECTO
+## ⚠️ REGLAS DE DOCUMENTACIÓN
 
-### Completitud Global: 73% (16/22 slices)
+### ✅ SÍ Hacer
+- ✅ Actualizar ESTADO_ACTUAL.md al cambiar features importantes
+- ✅ Actualizar PLAN_ACCION.md al completar tareas
+- ✅ Agregar ADRs a DECISIONES.md para decisiones arquitectónicas
+- ✅ Verificar claims contra código antes de escribir
+- ✅ Usar métricas reales (no infladas)
 
-| Área | Completado | Estado |
-|------|-----------|--------|
-| Backend Slices | 16/22 | 73% ⚠️ |
-| Backend Modules | 13/13 | 100% ✅ |
-| Frontend Portals | 4/4 | 100% ✅ |
-| Testing Scripts | 18 | ✅ |
-| Documentation | 50+ archivos | ✅ |
-| Technical Debt | 12/12 resueltos | ✅ 100% |
-
-### Código
-
-- **Líneas totales:** ~23,000+
-- **Endpoints API:** ~120
-- **Modelos Prisma:** 22
-- **Tests E2E:** ~245
-- **Migraciones Prisma:** 11 (versionadas en Git)
-
-### Calidad
-
-- **Deuda Técnica Crítica:** ✅ 0 (100% resuelta)
-- **Security Hardening:** ✅ HMAC webhooks + sanitized logs
-- **Performance:** ✅ N+1 queries eliminadas
-- **Code Quality:** ✅ AdminService refactorizado (911→400 LOC)
+### ❌ NO Hacer
+- ❌ Crear nuevas auditorías (actualizar ESTADO_ACTUAL.md en su lugar)
+- ❌ Documentos con fechas en nombre (ej: `*_2025-10-17.md`)
+- ❌ Claims sin verificar código (ej: "99 tests" cuando son 16)
+- ❌ Múltiples "fuentes de verdad" (solo los 3 docs core)
+- ❌ Inflar métricas para verse mejor (7.5/10 es BUENO)
 
 ---
 
-## ✅ CALIDAD Y SEGURIDAD
+## 📋 COMANDOS ÚTILES
 
-### Deuda Técnica Resuelta (100%)
+### Verificar Estado Real
+```bash
+# Backend funcionando
+curl http://localhost:3001/api/health
 
-Ver [TECHNICAL_DEBT_RESOLUTION.md](TECHNICAL_DEBT_RESOLUTION.md) para detalles completos.
+# Contar tests reales
+find apps tests -name "*.spec.ts" -o -name "*.test.ts" | grep -v node_modules | wc -l
+# Resultado esperado: 16
 
-| Prioridad | Issues | Estado |
-|-----------|--------|--------|
-| Críticos (80-125) | 3 | ✅ 100% |
-| Altos (40-75) | 7 | ✅ 100% |
-| Medios (20-35) | 2 | ✅ 100% |
-| **TOTAL** | **12** | **✅ 100%** |
+# Contar servicios con Prisma
+grep -r "PrismaService" apps/api/src --include="*.service.ts" | wc -l
+# Resultado esperado: 30+
 
-**Highlights de resolución:**
-- ✅ HMAC signature validation en webhooks MercadoPago
-- ✅ DTOs con validación para todos los endpoints
-- ✅ N+1 query optimizado (95% improvement en `getSiguienteLeccion`)
-- ✅ AdminService refactorizado usando Facade pattern
-- ✅ Logs sanitizados (no exposure de datos sensibles)
-- ✅ CI/CD pipeline con tests automatizados
-- ✅ `.env.example` completo (36.00 ROI)
+# Contar Circuit Breakers
+grep -c "new CircuitBreaker" apps/api/src/admin/admin.service.ts
+# Resultado esperado: 5
 
----
+# Contar type casts inseguros
+grep -r "as unknown as" apps/web/src/lib/api/ | wc -l
+# Resultado esperado: 17
+```
 
-## 🔴 BLOQUEANTES PARA PRODUCCIÓN
+### Verificar Documentación
+```bash
+# Listar docs core
+ls -1 docs/*.md
+# Debe mostrar: ESTADO_ACTUAL.md, PLAN_ACCION.md, DECISIONES.md, README.md
 
-Ver detalles completos en [ISSUES_Y_TODOS_CONSOLIDADO.md](ISSUES_Y_TODOS_CONSOLIDADO.md)
+# Contar archivos activos
+find docs -name "*.md" -not -path "*/archive/*" | wc -l
+# Resultado esperado: ~46
 
-1. **MercadoPago Production** (4-6 horas)
-   - Configurar credenciales reales
-   - Setup webhook público con HTTPS
+# Verificar archive
+ls docs/archive/2025-10-18-cleanup/ | wc -l
+# Resultado esperado: 12
 
-2. **HTTPS y SSL** (4-6 horas)
-   - Certificado SSL (Let's Encrypt)
-   - Configuración servidor (Nginx/Caddy)
-
-3. **Environment Variables** (3-4 horas)
-   - Secrets manager (AWS Secrets Manager / Vault)
-   - Rotación de JWT_SECRET
-
-**Tiempo total para producción:** 11-16 horas
-
----
-
-## 🎯 PRÓXIMOS HITOS
-
-### MVP 1.1 (1-2 semanas)
-- ✅ Slice #16 Backend completado
-- ⏳ Slice #16 Frontend (18-24 horas)
-- ⏳ Slice #17 Jitsi Meet (3-4 horas)
-
-### Version 2.0 (1-2 meses)
-- ⏳ Slice #18: Alertas IA (8-10 horas)
-- ⏳ Slice #19: Chatbot IA (10-15 horas)
-- ⏳ Slice #20: Juegos (15-20 horas)
+ls docs/archive/slices/ | wc -l
+# Resultado esperado: 5
+```
 
 ---
 
-## 📞 CONTACTO Y SOPORTE
+## 🎯 PRÓXIMOS PASOS
 
-### Reportar Issues
-- GitHub Issues: [URL del repositorio]
-- Email: [email del equipo]
-
-### Contribuir
-- Ver [development/CONTRIBUTING.md](development/CONTRIBUTING.md)
-- Workflow: [development/GIT_WORKFLOW.md](development/GIT_WORKFLOW.md)
+1. **Lee los 3 docs core** en orden
+2. **Ejecuta el plan** de [PLAN_ACCION.md](PLAN_ACCION.md)
+3. **Actualiza docs** cuando completes tareas
+4. **Registra decisiones** en [DECISIONES.md](DECISIONES.md)
 
 ---
 
-## 📝 NOTAS IMPORTANTES
+## 📚 HISTORIA DE LIMPIEZA
 
-### ⚠️ Documentos Obsoletos
+### Limpieza 2025-10-18
+**Problema encontrado:**
+- 57 archivos de documentación
+- 11 docs con claims inflados ("99 tests", "9.5/10")
+- Múltiples auditorías contradictorias
 
-Todos los documentos antiguos (pre-octubre 14, 2025) fueron movidos a [archived/](archived/).
+**Acción tomada:**
+- Movidos 11 archivos obsoletos a archive/2025-10-18-cleanup/
+- Movidos 5 slices históricos a archive/slices/
+- Movido README antiguo a archive/2025-10-18-cleanup/README_OLD.md
+- Borradas 3 carpetas vacías (design/, refactoring/, slices/)
+- Creados 3 docs core verificados contra código real
 
-Si necesitas consultar documentación histórica:
-- Estado antiguo del proyecto → `archived/ESTADO_ACTUAL_PROYECTO.md`
-- Arquitectura vs realidad → `archived/ARQUITECTURA_VS_REALIDAD_OCTUBRE.md`
-- Summaries de fases → `archived/PHASE*.md`, `archived/FASE*.md`
+**Resultado:**
+- 57 → 46 archivos activos
+- Documentación refleja estado real
+- 3 documentos maestros como única fuente de verdad
 
-### ✅ Documentación Actualizada (Octubre 14, 2025)
-
-**Nuevos documentos creados:**
-1. **[INVESTOR_READINESS_REPORT.md](INVESTOR_READINESS_REPORT.md)** - Para presentación a inversores
-2. **[architecture/ARCHITECTURE_MANUAL.md](architecture/ARCHITECTURE_MANUAL.md)** - Manual técnico completo (100+ páginas)
-3. **[TECHNICAL_DEBT_RESOLUTION.md](TECHNICAL_DEBT_RESOLUTION.md)** - Resolución 100% de deuda técnica
-4. **[refactoring/ADMIN_SERVICE_REFACTORING.md](refactoring/ADMIN_SERVICE_REFACTORING.md)** - Refactoring documentado
-5. **[database/PRISMA_MIGRATIONS_STRATEGY.md](database/PRISMA_MIGRATIONS_STRATEGY.md)** - Estrategia de migraciones
-
-**Documentos reescritos:**
-- [REVISION_COMPLETA_17_SLICES.md](REVISION_COMPLETA_17_SLICES.md) - Estado verificado con código fuente
-- [ROADMAP_SLICES_COMPLETO.md](ROADMAP_SLICES_COMPLETO.md) - Roadmap completo actualizado
-- [ISSUES_Y_TODOS_CONSOLIDADO.md](ISSUES_Y_TODOS_CONSOLIDADO.md) - TODOs priorizados
-
-**Confianza:** ✅ MUY ALTA - Documentación profesional lista para inversores
+**Ver:** [DECISIONES.md - ADR-001](DECISIONES.md#adr-001-limpieza-de-documentación)
 
 ---
 
-## 🏆 ESTADO ACTUAL (Resumen Ejecutivo)
+## 🤝 CONTRIBUIR
 
-**Proyecto:** Mateatletas Ecosystem v1.0.0
+### Antes de Hacer un PR
+1. Lee [development/CONTRIBUTING.md](development/CONTRIBUTING.md)
+2. Verifica que tus cambios no rompen tests
+3. Actualiza ESTADO_ACTUAL.md si cambias features
+4. Agrega ADR a DECISIONES.md si es decisión arquitectónica
 
-**Completitud:** 73% (16/22 slices implementados)
-
-**Calidad:** 🟢 Excelente - 100% deuda técnica crítica resuelta
-
-**Estado:** 🟢 Production-Ready para MVP
-
-**Inversión necesaria:** $50-100K USD (pre-seed)
-
-**Revenue Projection:** $720K ARR (Año 1) → $96M ARR (Año 2)
-
-**Time to Market:** 1-2 semanas para MVP completo
-
-**Listo para:**
-- ✅ Pitch a inversores (documentación profesional)
-- ✅ Due diligence técnica (arquitectura documentada)
-- ⏳ Soft launch (11-16 horas para producción)
-- ✅ Testing beta con usuarios reales
-
-**Bloqueantes para producción:**
-- MercadoPago real (4-6 horas)
-- HTTPS setup (4-6 horas)
-- Environment vars (3-4 horas)
-
-**Total para go-live:** 11-16 horas de trabajo
+### Formato de Commits
+```
+feat: add new feature
+fix: resolve bug
+docs: update documentation
+refactor: improve code structure
+test: add tests
+```
 
 ---
 
-## 🔗 Enlaces Externos
-
-### Repositorio
-- GitHub: [URL del repositorio]
-- Issues: [URL/issues]
-
-### Contacto
-- Email técnico: [email del equipo]
-- Email business: [email business]
-
----
-
-**Última actualización:** 14 de Octubre de 2025
-**Actualizado por:** Claude Code
-**Versión:** 2.1 (Enfoque en desarrollo - Slice Tutor en progreso)
+**La documentación es código. Mantenla actualizada, honesta y verificable.**

@@ -1,0 +1,2 @@
+127.0.0.1:5432 - aceptando conexiones
+127.0.0.1:5433 - sin respuesta

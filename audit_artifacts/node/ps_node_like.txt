@@ -1,0 +1,15 @@
+  18762   18722 /usr/lib/electron35/electro  0.7 20.7
+  18919   18725 /usr/lib/electron35/electro  1.8 11.5
+  99353   18725 /usr/lib/electron35/electro  0.5  0.7
+  18824   18725 /usr/lib/electron35/electro  1.3  0.4
+  18719    1260 /usr/lib/electron35/electro  0.6  0.2
+  41841    1260 node /home/alexis/Documento  0.6  0.1
+  99330   18838 /usr/lib/electron35/electro  0.2  0.1
+  91562   91547 next-server (v15.5.4)        0.7  0.1
+  91547    1260 node /home/alexis/Documento  0.5  0.0
+  18949   18838 /usr/lib/electron35/electro  0.3  0.0
+  18970   18838 /usr/lib/electron35/electro  0.2  0.0
+  18723   18719 /usr/lib/electron35/electro  0.1  0.0
+  18722   18719 /usr/lib/electron35/electro  0.1  0.0
+  18725   18723 /usr/lib/electron35/electro  0.0  0.0
+  18744    1260 /usr/lib/electron35/chrome_  0.0  0.0

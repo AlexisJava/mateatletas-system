@@ -8,6 +8,12 @@ import type {
   EquiposEstadisticas,
   DeleteEquipoResponse,
 } from '@/types/equipo.types';
+import {
+  equipoSchema,
+  equiposResponseSchema,
+  equiposEstadisticasSchema,
+  deleteEquipoResponseSchema,
+} from '@mateatletas/contracts';
 
 /**
  * Cliente API para operaciones CRUD de Equipos
@@ -23,7 +29,7 @@ import type {
  */
 async function create(data: CreateEquipoDto): Promise<Equipo> {
   const response = await apiClient.post<Equipo>('/equipos', data);
-  return response as unknown as Equipo;
+  return equipoSchema.parse(response);
 }
 
 /**
@@ -32,7 +38,7 @@ async function create(data: CreateEquipoDto): Promise<Equipo> {
  */
 async function getAll(params?: QueryEquiposDto): Promise<EquiposResponse> {
   const response = await apiClient.get<EquiposResponse>('/equipos', { params });
-  return response as unknown as EquiposResponse;
+  return equiposResponseSchema.parse(response);
 }
 
 /**
@@ -41,7 +47,7 @@ async function getAll(params?: QueryEquiposDto): Promise<EquiposResponse> {
  */
 async function getById(id: string): Promise<Equipo> {
   const response = await apiClient.get<Equipo>(`/equipos/${id}`);
-  return response as unknown as Equipo;
+  return equipoSchema.parse(response);
 }
 
 /**
@@ -53,7 +59,7 @@ async function update(
   data: UpdateEquipoDto,
 ): Promise<Equipo> {
   const response = await apiClient.patch<Equipo>(`/equipos/${id}`, data);
-  return response as unknown as Equipo;
+  return equipoSchema.parse(response);
 }
 
 /**
@@ -65,7 +71,7 @@ async function update(
  */
 async function deleteEquipo(id: string): Promise<DeleteEquipoResponse> {
   const response = await apiClient.delete<DeleteEquipoResponse>(`/equipos/${id}`);
-  return response as unknown as DeleteEquipoResponse;
+  return deleteEquipoResponseSchema.parse(response);
 }
 
 /**
@@ -80,7 +86,7 @@ async function deleteEquipo(id: string): Promise<DeleteEquipoResponse> {
  */
 async function getEstadisticas(): Promise<EquiposEstadisticas> {
   const response = await apiClient.get<EquiposEstadisticas>('/equipos/estadisticas');
-  return response as unknown as EquiposEstadisticas;
+  return equiposEstadisticasSchema.parse(response);
 }
 
 /**
@@ -92,7 +98,7 @@ async function getEstadisticas(): Promise<EquiposEstadisticas> {
  */
 async function recalcularPuntos(id: string): Promise<Equipo> {
   const response = await apiClient.post<Equipo>(`/equipos/${id}/recalcular-puntos`);
-  return response as unknown as Equipo;
+  return equipoSchema.parse(response);
 }
 
 // Exportar como objeto con métodos

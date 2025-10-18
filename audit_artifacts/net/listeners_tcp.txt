@@ -1,0 +1,9 @@
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                                     
+LISTEN 0      511        127.0.0.1:27433      0.0.0.0:*    users:(("electron",pid=18838,fd=54))       
+LISTEN 0      200        127.0.0.1:5432       0.0.0.0:*                                               
+LISTEN 0      4096       127.0.0.1:38381      0.0.0.0:*                                               
+LISTEN 0      4096       127.0.0.1:631        0.0.0.0:*                                               
+LISTEN 0      50                 *:1716             *:*    users:(("kdeconnectd",pid=1752,fd=20))     
+LISTEN 0      511                *:3001             *:*    users:(("next-server (v1",pid=91562,fd=22))
+LISTEN 0      200            [::1]:5432          [::]:*                                               
+LISTEN 0      4096           [::1]:631           [::]:*                                               
