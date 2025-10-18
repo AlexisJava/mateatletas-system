@@ -23,6 +23,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { UserThrottlerGuard, CsrfProtectionGuard } from './common/guards';
+import { TokenBlacklistGuard } from './auth/guards/token-blacklist.guard';
 
 @Module({
   imports: [
@@ -64,6 +65,13 @@ import { UserThrottlerGuard, CsrfProtectionGuard } from './common/guards';
     {
       provide: APP_GUARD,
       useClass: CsrfProtectionGuard,
+    },
+    // Aplicar Token Blacklist guard globalmente
+    // Verifica que tokens no estén invalidados (logout, cambio contraseña, etc.)
+    // Fix #6: Token Blacklist (P3 - Security Improvement)
+    {
+      provide: APP_GUARD,
+      useClass: TokenBlacklistGuard,
     },
     // Aplicar rate limiting globalmente con UserThrottlerGuard
     // Limita por user.id (autenticados) o IP (anónimos)
