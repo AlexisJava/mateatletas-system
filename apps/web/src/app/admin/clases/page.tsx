@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui';
 import GestionarEstudiantesModal from '@/components/admin/GestionarEstudiantesModal';
 import { ClasesTable, ClasesFilters, ClaseForm } from '@/components/admin/clases';
@@ -38,6 +38,12 @@ export default function AdminClasesPage() {
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedClass, setSelectedClass] = useState<Record<string, unknown>>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
+
+  // Cargar clases al montar el componente
+  useEffect(() => {
+    fetchClases();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo cargar al montar
 
   // Handlers
   const openModal = (type: ModalType, clase?: Record<string, unknown>) => {
