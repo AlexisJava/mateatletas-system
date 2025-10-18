@@ -121,9 +121,13 @@ export class ClasesManagementService {
   }
 
   /**
-   * Cancelar una clase (Admin o Docente de la clase)
+   * Cancelar una clase programada
+   * ⚠️ SECURITY: Requiere autenticación y autorización estricta
+   * - Admin: Puede cancelar cualquier clase
+   * - Docente: Solo puede cancelar SUS clases
+   * - Tutor/Estudiante: NO pueden cancelar clases
    */
-  async cancelarClase(id: string, userId?: string, userRole?: string) {
+  async cancelarClase(id: string, userId: string, userRole: string) {
     const clase = await this.prisma.clase.findUnique({
       where: { id },
       include: {
@@ -139,10 +143,20 @@ export class ClasesManagementService {
       throw new BadRequestException('La clase ya está cancelada');
     }
 
-    // Verificar permisos: Admin puede cancelar cualquier, Docente solo las suyas
-    if (userRole === 'docente' && clase.docente_id !== userId) {
+    // ✅ SECURITY FIX: Validación explícita de roles
+    if (userRole === 'admin') {
+      // Admin puede cancelar cualquier clase
+    } else if (userRole === 'docente') {
+      // Docente solo puede cancelar SUS clases
+      if (clase.docente_id !== userId) {
+        throw new ForbiddenException(
+          'No tienes permiso para cancelar esta clase',
+        );
+      }
+    } else {
+      // Cualquier otro rol (tutor, estudiante) NO puede cancelar
       throw new ForbiddenException(
-        'No tienes permiso para cancelar esta clase',
+        'Solo admin y docentes pueden cancelar clases',
       );
     }
 
