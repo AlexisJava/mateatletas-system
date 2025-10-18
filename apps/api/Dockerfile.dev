@@ -1,0 +1,41 @@
+# =============================================================================
+# NestJS Backend - Development Dockerfile
+# =============================================================================
+# Imagen liviana con hot-reload para desarrollo
+# =============================================================================
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apk add --no-cache \
+    bash \
+    curl \
+    postgresql-client
+
+# Copiar package files
+COPY package*.json ./
+COPY apps/api/package*.json ./apps/api/
+
+# Instalar dependencias
+RUN npm install
+
+# Copiar prisma schema para generación
+COPY apps/api/prisma ./apps/api/prisma
+
+# Generar Prisma Client
+RUN cd apps/api && npx prisma generate
+
+# Copiar código fuente
+COPY apps/api ./apps/api
+
+# Exponer puerto
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:3001/api/health || exit 1
+
+# Comando de inicio con hot-reload
+CMD ["npm", "run", "dev:api"]
