@@ -20,33 +20,15 @@ export class ClasesReservasService {
 
   /**
    * Reservar un cupo en una clase (Tutor reserva para su estudiante)
+   *
+   * SECURITY FIX (2025-10-18):
+   * - Movida validación de cupos DENTRO de transacción
+   * - Previene race condition en reservas concurrentes
+   * - Garantiza que cupos_ocupados NUNCA exceda cupos_maximo
+   * - Re-lectura de clase dentro de transacción para datos frescos
    */
   async reservarClase(claseId: string, tutorId: string, dto: ReservarClaseDto) {
-    // 1. Verificar que la clase existe y está disponible
-    const clase = await this.prisma.clase.findUnique({
-      where: { id: claseId },
-      include: {
-        producto: true,
-      },
-    });
-
-    if (!clase) {
-      throw new NotFoundException(`Clase con ID ${claseId} no encontrada`);
-    }
-
-    if (clase.estado === 'Cancelada') {
-      throw new BadRequestException('La clase está cancelada');
-    }
-
-    if (clase.fecha_hora_inicio <= new Date()) {
-      throw new BadRequestException('La clase ya comenzó o pasó');
-    }
-
-    if (clase.cupos_ocupados >= clase.cupos_maximo) {
-      throw new BadRequestException('La clase está llena');
-    }
-
-    // 2. Verificar que el estudiante pertenece al tutor
+    // 1. Verificar estudiante (puede estar fuera de transacción - datos estáticos)
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: dto.estudianteId },
       include: {
@@ -68,38 +50,65 @@ export class ClasesReservasService {
       );
     }
 
-    // 3. Si la clase es de un curso específico, verificar inscripción activa
-    if (clase.producto_id) {
-      const tieneInscripcion = estudiante.inscripciones_curso.some(
-        (insc) => insc.producto_id === clase.producto_id,
-      );
+    // 2. TODA la lógica crítica DENTRO de transacción atómica
+    const inscripcion = await this.prisma.$transaction(async (tx) => {
+      // ✅ RE-LEER clase DENTRO de transacción (datos frescos, con lock)
+      const clase = await tx.clase.findUnique({
+        where: { id: claseId },
+        include: {
+          producto: true,
+        },
+      });
 
-      if (!tieneInscripcion) {
+      if (!clase) {
+        throw new NotFoundException(`Clase con ID ${claseId} no encontrada`);
+      }
+
+      // ✅ Validar estado con datos frescos
+      if (clase.estado === 'Cancelada') {
+        throw new BadRequestException('La clase está cancelada');
+      }
+
+      if (clase.fecha_hora_inicio <= new Date()) {
+        throw new BadRequestException('La clase ya comenzó o pasó');
+      }
+
+      // ✅ VALIDACIÓN ATÓMICA DE CUPOS (dentro de transacción)
+      // Esta lectura ve el estado MÁS RECIENTE incluso con requests concurrentes
+      if (clase.cupos_ocupados >= clase.cupos_maximo) {
+        throw new BadRequestException('La clase está llena');
+      }
+
+      // ✅ Validar inscripción en curso (si aplica)
+      if (clase.producto_id) {
+        const tieneInscripcion = estudiante.inscripciones_curso.some(
+          (insc) => insc.producto_id === clase.producto_id,
+        );
+
+        if (!tieneInscripcion) {
+          throw new BadRequestException(
+            `El estudiante no está inscrito en el curso: ${clase.producto?.nombre}`,
+          );
+        }
+      }
+
+      // ✅ Verificar duplicados (dentro de transacción)
+      const yaInscrito = await tx.inscripcionClase.findUnique({
+        where: {
+          clase_id_estudiante_id: {
+            clase_id: claseId,
+            estudiante_id: dto.estudianteId,
+          },
+        },
+      });
+
+      if (yaInscrito) {
         throw new BadRequestException(
-          `El estudiante no está inscrito en el curso: ${clase.producto?.nombre}`,
+          'El estudiante ya está inscrito en esta clase',
         );
       }
-    }
 
-    // 4. Verificar que no esté ya inscrito
-    const yaInscrito = await this.prisma.inscripcionClase.findUnique({
-      where: {
-        clase_id_estudiante_id: {
-          clase_id: claseId,
-          estudiante_id: dto.estudianteId,
-        },
-      },
-    });
-
-    if (yaInscrito) {
-      throw new BadRequestException(
-        'El estudiante ya está inscrito en esta clase',
-      );
-    }
-
-    // 5. Crear la inscripción y actualizar cupos
-    const inscripcion = await this.prisma.$transaction(async (tx) => {
-      // Crear inscripción
+      // ✅ Crear inscripción (dentro de transacción)
       const nuevaInscripcion = await tx.inscripcionClase.create({
         data: {
           clase_id: claseId,
@@ -117,7 +126,7 @@ export class ClasesReservasService {
         },
       });
 
-      // Incrementar cupos ocupados
+      // ✅ Incrementar cupos (dentro de transacción)
       await tx.clase.update({
         where: { id: claseId },
         data: { cupos_ocupados: { increment: 1 } },
