@@ -5,9 +5,10 @@ import { ClasesManagementService } from './services/clases-management.service';
 import { ClasesReservasService } from './services/clases-reservas.service';
 import { ClasesAsistenciaService } from './services/clases-asistencia.service';
 import { DatabaseModule } from '../core/database/database.module';
+import { NotificacionesModule } from '../notificaciones/notificaciones.module';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, NotificacionesModule],
   controllers: [ClasesController],
   providers: [
     ClasesService,

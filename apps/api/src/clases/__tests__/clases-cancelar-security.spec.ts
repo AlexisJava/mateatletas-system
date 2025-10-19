@@ -3,6 +3,7 @@ import { ForbiddenException, BadRequestException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ClasesManagementService } from '../services/clases-management.service';
 import { PrismaService } from '../../core/database/prisma.service';
+import { NotificacionesService } from '../../notificaciones/notificaciones.service';
 
 describe('ClasesManagementService - Cancelar Clase Security', () => {
   let service: ClasesManagementService;
@@ -13,6 +14,10 @@ describe('ClasesManagementService - Cancelar Clase Security', () => {
     nombre: 'Matemáticas Avanzadas',
     estado: 'Programada',
     docente_id: 'docente-123',
+    fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+    rutaCurricular: {
+      nombre: 'Matemáticas',
+    },
     inscripciones: [
       { id: 'insc-1', estudiante_id: 'est-1' },
       { id: 'insc-2', estudiante_id: 'est-2' },
@@ -30,6 +35,13 @@ describe('ClasesManagementService - Cancelar Clase Security', () => {
               findUnique: jest.fn(),
               update: jest.fn(),
             },
+          },
+        },
+        {
+          provide: NotificacionesService,
+          useValue: {
+            notificarClaseCancelada: jest.fn().mockResolvedValue({}),
+            create: jest.fn(),
           },
         },
         {
