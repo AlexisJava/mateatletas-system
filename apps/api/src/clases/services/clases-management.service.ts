@@ -10,10 +10,16 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { PrismaService } from '../../core/database/prisma.service';
 import { CrearClaseDto } from '../dto/crear-clase.dto';
+import { NotificacionesService } from '../../notificaciones/notificaciones.service';
 
 /**
  * Servicio especializado para gestión CRUD de clases
  * Extraído de ClasesService para separar responsabilidades
+ *
+ * RESILIENCIA:
+ * - cancelarClase(): Usa Promise.allSettled para notificaciones
+ *   * Operación principal (cancelar) SIEMPRE funciona
+ *   * Notificaciones son best-effort (si fallan, no rompen la cancelación)
  */
 @Injectable()
 export class ClasesManagementService {
@@ -22,6 +28,7 @@ export class ClasesManagementService {
   constructor(
     private prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private notificacionesService: NotificacionesService,
   ) {}
 
   /**
@@ -132,6 +139,9 @@ export class ClasesManagementService {
       where: { id },
       include: {
         inscripciones: true,
+        rutaCurricular: {
+          select: { nombre: true },
+        },
       },
     });
 
@@ -160,18 +170,51 @@ export class ClasesManagementService {
       );
     }
 
-    // Actualizar estado de la clase
-    const claseActualizada = await this.prisma.clase.update({
-      where: { id },
-      data: {
-        estado: 'Cancelada',
-        cupos_ocupados: 0, // Liberar todos los cupos
-      },
-      include: {
-        rutaCurricular: { select: { nombre: true } },
-        docente: { select: { nombre: true, apellido: true } },
-      },
-    });
+    // RESILIENCIA: Usar Promise.allSettled para operaciones críticas + secundarias
+    // Operación 1 (CRÍTICA): Cancelar clase - DEBE siempre funcionar
+    // Operación 2 (SECUNDARIA): Notificar docente - Best effort, si falla no rompe la cancelación
+    const [cancelResult, notificacionResult] = await Promise.allSettled([
+      // Operación principal: Cancelar clase
+      this.prisma.clase.update({
+        where: { id },
+        data: {
+          estado: 'Cancelada',
+          cupos_ocupados: 0, // Liberar todos los cupos
+        },
+        include: {
+          rutaCurricular: { select: { nombre: true } },
+          docente: { select: { nombre: true, apellido: true } },
+        },
+      }),
+
+      // Operación secundaria: Notificar al docente
+      this.notificacionesService.notificarClaseCancelada(
+        clase.docente_id,
+        id,
+        `${clase.rutaCurricular?.nombre || 'Clase'} - ${clase.fecha_hora_inicio.toLocaleDateString()}`,
+      ),
+    ]);
+
+    // Verificar resultado de operación principal
+    if (cancelResult.status === 'rejected') {
+      this.logger.error(
+        `Error al cancelar clase ${id}:`,
+        cancelResult.reason,
+      );
+      throw cancelResult.reason;
+    }
+
+    const claseActualizada = cancelResult.value;
+
+    // Log de notificación (no crítico si falla)
+    if (notificacionResult.status === 'rejected') {
+      this.logger.warn(
+        `⚠️ Clase ${id} cancelada exitosamente, pero falló notificación al docente:`,
+        notificacionResult.reason.message,
+      );
+    } else {
+      this.logger.log(`✅ Notificación enviada al docente sobre cancelación de clase ${id}`);
+    }
 
     this.logger.warn(
       `Clase ${id} cancelada. ${clase.inscripciones.length} inscripciones afectadas`,

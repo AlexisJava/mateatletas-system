@@ -3,6 +3,7 @@ import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ClasesManagementService } from './clases-management.service';
 import { PrismaService } from '../../core/database/prisma.service';
+import { NotificacionesService } from '../../notificaciones/notificaciones.service';
 
 describe('ClasesManagementService', () => {
   let service: ClasesManagementService;
@@ -71,6 +72,13 @@ describe('ClasesManagementService', () => {
               update: jest.fn(),
               count: jest.fn(),
             },
+          },
+        },
+        {
+          provide: NotificacionesService,
+          useValue: {
+            notificarClaseCancelada: jest.fn(),
+            create: jest.fn(),
           },
         },
         {
