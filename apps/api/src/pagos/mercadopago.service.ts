@@ -1,10 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
+import { CircuitBreaker } from '../common/circuit-breaker/circuit-breaker';
 
 /**
  * Servicio dedicado a la integración con MercadoPago SDK
  * Maneja la creación de preferencias de pago y consultas de pagos
+ *
+ * CIRCUIT BREAKER PROTECTION:
+ * - createPreference: Protegido con circuit breaker (5 fallos → abre circuito)
+ * - getPayment: Protegido con circuit breaker (5 fallos → abre circuito)
+ * - Timeout: 5 segundos por request
+ * - Reset timeout: 60 segundos antes de reintentar
+ * - Fallback: Retorna error detallado cuando circuito está abierto
  */
 @Injectable()
 export class MercadoPagoService {
@@ -14,10 +22,37 @@ export class MercadoPagoService {
   private paymentClient: Payment | null = null;
   private readonly mockMode: boolean;
 
+  // Circuit Breakers for external API calls
+  private readonly preferenceCircuitBreaker: CircuitBreaker;
+  private readonly paymentCircuitBreaker: CircuitBreaker;
+
   constructor(private configService: ConfigService) {
     const accessToken = this.configService.get<string>(
       'MERCADOPAGO_ACCESS_TOKEN',
     );
+
+    // Inicializar Circuit Breakers
+    this.preferenceCircuitBreaker = new CircuitBreaker({
+      name: 'MercadoPago-CreatePreference',
+      failureThreshold: 3, // 3 fallos consecutivos abren el circuito
+      resetTimeout: 60000, // 60 segundos antes de reintentar
+      fallback: () => {
+        throw new Error(
+          'MercadoPago API is temporarily unavailable (circuit breaker OPEN). Please try again later.',
+        );
+      },
+    });
+
+    this.paymentCircuitBreaker = new CircuitBreaker({
+      name: 'MercadoPago-GetPayment',
+      failureThreshold: 3, // 3 fallos consecutivos abren el circuito
+      resetTimeout: 60000, // 60 segundos antes de reintentar
+      fallback: () => {
+        throw new Error(
+          'MercadoPago Payment API is temporarily unavailable (circuit breaker OPEN). Please try again later.',
+        );
+      },
+    });
 
     // Verificar si MercadoPago está configurado
     if (!accessToken || accessToken.includes('XXXXXXXX')) {
@@ -30,13 +65,13 @@ export class MercadoPagoService {
       this.mockMode = false;
       this.mercadopagoClient = new MercadoPagoConfig({
         accessToken,
-        options: { timeout: 5000 },
+        options: { timeout: 5000 }, // 5 segundos timeout
       });
 
       this.preferenceClient = new Preference(this.mercadopagoClient);
       this.paymentClient = new Payment(this.mercadopagoClient);
 
-      this.logger.log('✅ MercadoPago SDK initialized successfully');
+      this.logger.log('✅ MercadoPago SDK initialized successfully with Circuit Breaker protection');
     }
   }
 
@@ -49,6 +84,13 @@ export class MercadoPagoService {
 
   /**
    * Crea una preferencia de pago en MercadoPago
+   *
+   * CIRCUIT BREAKER PROTECTION:
+   * - Protegido contra fallos repetidos de la API de MercadoPago
+   * - 3 fallos consecutivos → circuito abre (rechaza requests por 60s)
+   * - Timeout: 5 segundos por request
+   * - Fallback: Error claro indicando que API no disponible
+   *
    * @param preferenceData - Datos de la preferencia según el formato de MercadoPago
    * @returns Preferencia creada con id e init_point
    */
@@ -63,17 +105,30 @@ export class MercadoPagoService {
       throw new Error('MercadoPago client not initialized');
     }
 
-    this.logger.log('Creando preferencia en MercadoPago');
-    const preference = await this.preferenceClient.create({
-      body: preferenceData,
-    });
+    this.logger.log('Creando preferencia en MercadoPago (con Circuit Breaker)');
 
-    this.logger.log(`Preferencia creada: ${preference.id}`);
+    // Ejecutar con circuit breaker protection
+    const preference = await this.preferenceCircuitBreaker.execute(
+      async () => {
+        return await this.preferenceClient!.create({
+          body: preferenceData,
+        });
+      },
+    );
+
+    this.logger.log(`Preferencia creada exitosamente: ${preference.id}`);
     return preference;
   }
 
   /**
    * Obtiene los detalles de un pago desde MercadoPago
+   *
+   * CIRCUIT BREAKER PROTECTION:
+   * - Protegido contra fallos repetidos de la API de MercadoPago
+   * - 3 fallos consecutivos → circuito abre (rechaza requests por 60s)
+   * - Timeout: 5 segundos por request
+   * - Fallback: Error claro indicando que API no disponible
+   *
    * @param paymentId - ID del pago en MercadoPago
    * @returns Datos del pago
    */
@@ -88,14 +143,30 @@ export class MercadoPagoService {
       throw new Error('MercadoPago client not initialized');
     }
 
-    this.logger.log(`Consultando pago ${paymentId} en MercadoPago`);
-    const payment = await this.paymentClient.get({ id: paymentId });
+    this.logger.log(`Consultando pago ${paymentId} en MercadoPago (con Circuit Breaker)`);
+
+    // Ejecutar con circuit breaker protection
+    const payment = await this.paymentCircuitBreaker.execute(
+      async () => {
+        return await this.paymentClient!.get({ id: paymentId });
+      },
+    );
 
     this.logger.log(
-      `Pago ${paymentId} - Estado: ${payment.status} - External Ref: ${payment.external_reference}`,
+      `Pago ${paymentId} consultado exitosamente - Estado: ${payment.status} - External Ref: ${payment.external_reference}`,
     );
 
     return payment;
+  }
+
+  /**
+   * Obtiene métricas de los circuit breakers (para monitoring)
+   */
+  getCircuitBreakerMetrics() {
+    return {
+      createPreference: this.preferenceCircuitBreaker.getMetrics(),
+      getPayment: this.paymentCircuitBreaker.getMetrics(),
+    };
   }
 
   /**
