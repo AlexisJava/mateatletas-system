@@ -103,7 +103,8 @@ export class TokenBlacklistService {
         `Token blacklisted - User: ${decoded.sub || decoded.id}, Reason: ${reason}, TTL: ${expiresIn}s`,
       );
     } catch (error) {
-      this.logger.error(`Error al agregar token a blacklist: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Error al agregar token a blacklist: ${err.message}`, err.stack);
       // No lanzar error - mejor dejar pasar que romper el flujo
     }
   }
@@ -132,7 +133,8 @@ export class TokenBlacklistService {
 
       return false;
     } catch (error) {
-      this.logger.error(`Error al verificar blacklist: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Error al verificar blacklist: ${err.message}`, err.stack);
       // En caso de error de Redis, ser permisivo (no bloquear acceso legítimo)
       return false;
     }
@@ -175,7 +177,8 @@ export class TokenBlacklistService {
         `TODOS los tokens del usuario ${userId} fueron invalidados - Reason: ${reason}`,
       );
     } catch (error) {
-      this.logger.error(`Error al blacklist masivo de usuario: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Error al blacklist masivo de usuario: ${err.message}`, err.stack);
     }
   }
 
@@ -199,7 +202,8 @@ export class TokenBlacklistService {
 
       return false;
     } catch (error) {
-      this.logger.error(`Error al verificar user blacklist: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Error al verificar user blacklist: ${err.message}`, err.stack);
       return false;
     }
   }
@@ -216,7 +220,8 @@ export class TokenBlacklistService {
       await this.cacheManager.del(blacklistKey);
       this.logger.log(`Token removido de blacklist: ${blacklistKey}`);
     } catch (error) {
-      this.logger.error(`Error al remover token de blacklist: ${error.message}`, error.stack);
+      const err = error as Error;
+      this.logger.error(`Error al remover token de blacklist: ${err.message}`, err.stack);
     }
   }
 }
