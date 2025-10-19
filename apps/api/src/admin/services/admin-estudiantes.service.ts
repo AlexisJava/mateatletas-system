@@ -327,7 +327,6 @@ export class AdminEstudiantesService {
                 nombre: true,
                 estado: true,
                 fecha_hora_inicio: true,
-                fecha_hora_fin: true,
               },
             },
           },
@@ -353,10 +352,10 @@ export class AdminEstudiantesService {
       estadisticas: {
         clases_inscritas: estudiante.inscripciones_clase.length,
         clases_completadas: estudiante.inscripciones_clase.filter(
-          (insc) => insc.clase.estado === 'Programada' && new Date(insc.clase.fecha_hora_inicio) < new Date()
+          (insc: any) => insc.clase.estado === 'Programada' && new Date(insc.clase.fecha_hora_inicio) < new Date()
         ).length,
         clases_pendientes: estudiante.inscripciones_clase.filter(
-          (insc) => insc.clase.estado === 'Programada' && new Date(insc.clase.fecha_hora_inicio) >= new Date()
+          (insc: any) => insc.clase.estado === 'Programada' && new Date(insc.clase.fecha_hora_inicio) >= new Date()
         ).length,
       },
     };

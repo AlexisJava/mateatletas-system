@@ -60,7 +60,6 @@ export class GamificacionService {
                 id: true,
                 nombre: true,
                 fecha_hora_inicio: true,
-                fecha_hora_fin: true,
                 estado: true,
                 rutaCurricular: {
                   select: {
@@ -112,7 +111,7 @@ export class GamificacionService {
 
     // Calcular puntos totales basados en asistencias
     const puntosAsistencia = estudiante.asistencias.filter(
-      (a) => a.estado === EstadoAsistencia.Presente,
+      (a: any) => a.estado === EstadoAsistencia.Presente,
     ).length * 10;
 
     // Calcular próximas clases (select optimizado)
@@ -131,7 +130,6 @@ export class GamificacionService {
         nombre: true,
         descripcion: true,
         fecha_hora_inicio: true,
-        fecha_hora_fin: true,
         estado: true,
         rutaCurricular: {
           select: {
@@ -168,7 +166,7 @@ export class GamificacionService {
       stats: {
         puntosTotales: estudiante.puntos_totales,
         clasesAsistidas: estudiante.asistencias.filter(
-          (a) => a.estado === EstadoAsistencia.Presente,
+          (a: any) => a.estado === EstadoAsistencia.Presente,
         ).length,
         clasesTotales: estudiante.inscripciones_clase.length,
         racha: await this.logrosService.calcularRacha(estudianteId),
