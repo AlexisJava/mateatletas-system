@@ -22,6 +22,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
+import { TokenBlacklistService } from './token-blacklist.service';
 
 /**
  * Controlador de autenticación
@@ -38,7 +39,10 @@ import { GetUser } from './decorators/get-user.decorator';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly tokenBlacklistService: TokenBlacklistService,
+  ) {}
 
   /**
    * POST /api/auth/register
@@ -236,15 +240,16 @@ export class AuthController {
   /**
    * POST /api/auth/logout
    * Cierra la sesión del usuario eliminando la cookie httpOnly
-   * Requiere token JWT válido en cookie
+   * ✅ SECURITY FIX #6: Agrega el token a blacklist para invalidarlo inmediatamente
    *
+   * @param req - Request object para extraer el token
    * @param res - Response object para limpiar cookies
    * @returns 200 OK - { message: 'Logout exitoso' }
    * @throws 401 Unauthorized - Token JWT inválido o no proporcionado
    */
   @ApiOperation({
     summary: 'Cerrar sesión',
-    description: 'Cierra la sesión del usuario eliminando la cookie httpOnly',
+    description: 'Cierra la sesión del usuario eliminando la cookie httpOnly y agregando el token a blacklist',
   })
   @ApiResponse({
     status: 200,
@@ -252,7 +257,7 @@ export class AuthController {
     schema: {
       example: {
         message: 'Logout exitoso',
-        description: 'La cookie de autenticación ha sido eliminada',
+        description: 'La sesión ha sido cerrada y el token invalidado',
       },
     },
   })
@@ -264,8 +269,20 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async logout(@Res({ passthrough: true }) res: Response) {
-    // Limpiar cookie de autenticación
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // 1. Extraer el token del header Authorization
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7); // Remover "Bearer "
+
+      // 2. Agregar token a blacklist para invalidarlo
+      await this.tokenBlacklistService.addToBlacklist(token, 'user_logout');
+    }
+
+    // 3. Limpiar cookie de autenticación (comportamiento original)
     res.clearCookie('auth-token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -275,7 +292,7 @@ export class AuthController {
 
     return {
       message: 'Logout exitoso',
-      description: 'La cookie de autenticación ha sido eliminada',
+      description: 'La sesión ha sido cerrada y el token invalidado',
     };
   }
 }

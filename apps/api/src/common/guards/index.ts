@@ -4,3 +4,4 @@
  */
 
 export { UserThrottlerGuard } from './user-throttler.guard';
+export { CsrfProtectionGuard } from './csrf-protection.guard';

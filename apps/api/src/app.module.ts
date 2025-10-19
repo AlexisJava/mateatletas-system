@@ -22,7 +22,8 @@ import { HealthModule } from './health/health.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { UserThrottlerGuard } from './common/guards';
+import { UserThrottlerGuard, CsrfProtectionGuard } from './common/guards';
+import { TokenBlacklistGuard } from './auth/guards/token-blacklist.guard';
 
 @Module({
   imports: [
@@ -58,6 +59,20 @@ import { UserThrottlerGuard } from './common/guards';
   controllers: [AppController],
   providers: [
     AppService,
+    // Aplicar CSRF protection globalmente
+    // Valida que requests POST/PUT/PATCH/DELETE vengan de origins permitidos
+    // Previene ataques CSRF (Cross-Site Request Forgery)
+    {
+      provide: APP_GUARD,
+      useClass: CsrfProtectionGuard,
+    },
+    // Aplicar Token Blacklist guard globalmente
+    // Verifica que tokens no estén invalidados (logout, cambio contraseña, etc.)
+    // Fix #6: Token Blacklist (P3 - Security Improvement)
+    {
+      provide: APP_GUARD,
+      useClass: TokenBlacklistGuard,
+    },
     // Aplicar rate limiting globalmente con UserThrottlerGuard
     // Limita por user.id (autenticados) o IP (anónimos)
     {
