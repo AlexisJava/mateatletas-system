@@ -53,8 +53,11 @@ describe('ClasesAsistenciaService', () => {
               findUnique: jest.fn(),
             },
             asistencia: {
-              upsert: jest.fn(),
+              findMany: jest.fn(),
+              update: jest.fn(),
+              create: jest.fn(),
             },
+            $transaction: jest.fn(),
           },
         },
       ],
@@ -89,7 +92,11 @@ describe('ClasesAsistenciaService', () => {
     it('should register attendance successfully', async () => {
       // Arrange
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
-      jest.spyOn(prisma.asistencia, 'upsert')
+      jest.spyOn(prisma.asistencia, 'findMany').mockResolvedValue([]); // No existing
+
+      (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
+
+      jest.spyOn(prisma.asistencia, 'create')
         .mockResolvedValueOnce(mockAsistencias[0] as any)
         .mockResolvedValueOnce(mockAsistencias[1] as any);
 
@@ -156,11 +163,15 @@ describe('ClasesAsistenciaService', () => {
       ).rejects.toThrow('El estudiante est-999 no está inscrito en esta clase');
     });
 
-    it('should use upsert to allow updates', async () => {
+    it('should use transaction with update when asistencia exists', async () => {
       // Arrange
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
-      const upsertSpy = jest
-        .spyOn(prisma.asistencia, 'upsert')
+      jest.spyOn(prisma.asistencia, 'findMany').mockResolvedValue([{ estudiante_id: 'est-1' }] as any);
+
+      (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
+
+      const updateSpy = jest
+        .spyOn(prisma.asistencia, 'update')
         .mockResolvedValue(mockAsistencias[0] as any);
 
       const singleAttendance = {
@@ -171,31 +182,30 @@ describe('ClasesAsistenciaService', () => {
       await service.registrarAsistencia('clase-1', 'doc-1', singleAttendance);
 
       // Assert
-      expect(upsertSpy).toHaveBeenCalledWith({
+      expect(updateSpy).toHaveBeenCalledWith({
         where: {
           clase_id_estudiante_id: {
             clase_id: 'clase-1',
             estudiante_id: 'est-1',
           },
         },
-        update: expect.objectContaining({
+        data: expect.objectContaining({
           estado: 'Presente',
           observaciones: 'Excelente participación',
           puntos_otorgados: 10,
-        }),
-        create: expect.objectContaining({
-          clase_id: 'clase-1',
-          estudiante_id: 'est-1',
-          estado: 'Presente',
         }),
         include: expect.any(Object),
       });
     });
 
-    it('should process multiple students in parallel', async () => {
+    it('should process multiple students efficiently with batch operations', async () => {
       // Arrange
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
-      const upsertSpy = jest.spyOn(prisma.asistencia, 'upsert')
+      jest.spyOn(prisma.asistencia, 'findMany').mockResolvedValue([]);
+
+      (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
+
+      const createSpy = jest.spyOn(prisma.asistencia, 'create')
         .mockResolvedValueOnce(mockAsistencias[0] as any)
         .mockResolvedValueOnce(mockAsistencias[1] as any);
 
@@ -205,16 +215,21 @@ describe('ClasesAsistenciaService', () => {
       const duration = Date.now() - start;
 
       // Assert
-      expect(upsertSpy).toHaveBeenCalledTimes(2);
-      // Promise.all ejecuta en paralelo, debería ser rápido
+      expect(createSpy).toHaveBeenCalledTimes(2);
+      expect(prisma.$transaction).toHaveBeenCalled();
+      // Transaction ejecuta en batch, debería ser rápido
       expect(duration).toBeLessThan(100);
     });
 
     it('should set fecha_registro on update', async () => {
       // Arrange
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
-      const upsertSpy = jest
-        .spyOn(prisma.asistencia, 'upsert')
+      jest.spyOn(prisma.asistencia, 'findMany').mockResolvedValue([{ estudiante_id: 'est-1' }] as any);
+
+      (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
+
+      const updateSpy = jest
+        .spyOn(prisma.asistencia, 'update')
         .mockResolvedValue(mockAsistencias[0] as any);
 
       const singleAttendance = {
@@ -225,9 +240,9 @@ describe('ClasesAsistenciaService', () => {
       await service.registrarAsistencia('clase-1', 'doc-1', singleAttendance);
 
       // Assert
-      expect(upsertSpy).toHaveBeenCalledWith(
+      expect(updateSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          update: expect.objectContaining({
+          data: expect.objectContaining({
             fecha_registro: expect.any(Date),
           }),
         }),
@@ -237,8 +252,12 @@ describe('ClasesAsistenciaService', () => {
     it('should handle observaciones as null', async () => {
       // Arrange
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
-      const upsertSpy = jest
-        .spyOn(prisma.asistencia, 'upsert')
+      jest.spyOn(prisma.asistencia, 'findMany').mockResolvedValue([]);
+
+      (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
+
+      const createSpy = jest
+        .spyOn(prisma.asistencia, 'create')
         .mockResolvedValue(mockAsistencias[1] as any);
 
       const attendanceWithoutObservations = {
@@ -256,12 +275,9 @@ describe('ClasesAsistenciaService', () => {
       await service.registrarAsistencia('clase-1', 'doc-1', attendanceWithoutObservations);
 
       // Assert
-      expect(upsertSpy).toHaveBeenCalledWith(
+      expect(createSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          update: expect.objectContaining({
-            observaciones: null,
-          }),
-          create: expect.objectContaining({
+          data: expect.objectContaining({
             observaciones: null,
           }),
         }),
@@ -271,8 +287,12 @@ describe('ClasesAsistenciaService', () => {
     it('should default puntos_otorgados to 0 if not provided', async () => {
       // Arrange
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
-      const upsertSpy = jest
-        .spyOn(prisma.asistencia, 'upsert')
+      jest.spyOn(prisma.asistencia, 'findMany').mockResolvedValue([]);
+
+      (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
+
+      const createSpy = jest
+        .spyOn(prisma.asistencia, 'create')
         .mockResolvedValue(mockAsistencias[0] as any);
 
       const attendanceWithoutPoints = {
@@ -290,12 +310,9 @@ describe('ClasesAsistenciaService', () => {
       await service.registrarAsistencia('clase-1', 'doc-1', attendanceWithoutPoints);
 
       // Assert
-      expect(upsertSpy).toHaveBeenCalledWith(
+      expect(createSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          update: expect.objectContaining({
-            puntos_otorgados: 0,
-          }),
-          create: expect.objectContaining({
+          data: expect.objectContaining({
             puntos_otorgados: 0,
           }),
         }),
@@ -305,7 +322,11 @@ describe('ClasesAsistenciaService', () => {
     it('should include estudiante details in response', async () => {
       // Arrange
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
-      jest.spyOn(prisma.asistencia, 'upsert')
+      jest.spyOn(prisma.asistencia, 'findMany').mockResolvedValue([]);
+
+      (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
+
+      jest.spyOn(prisma.asistencia, 'create')
         .mockResolvedValueOnce(mockAsistencias[0] as any)
         .mockResolvedValueOnce(mockAsistencias[1] as any);
 
