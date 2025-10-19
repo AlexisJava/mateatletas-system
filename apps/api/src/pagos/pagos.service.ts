@@ -3,8 +3,11 @@ import {
   NotFoundException,
   BadRequestException,
   Logger,
+  Inject,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { PrismaService } from '../core/database/prisma.service';
 import { ProductosService } from '../catalogo/productos.service';
 import { MercadoPagoService } from './mercadopago.service';
@@ -28,6 +31,7 @@ export class PagosService {
     private configService: ConfigService,
     private mercadoPagoService: MercadoPagoService,
     private mockPagosService: MockPagosService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.frontendUrl =
       this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
@@ -238,6 +242,13 @@ export class PagosService {
 
   /**
    * Procesa una notificación de webhook de MercadoPago
+   *
+   * ROBUSTEZ IMPLEMENTADA:
+   * 1. Idempotencia: Usa Redis cache para detectar webhooks duplicados
+   * 2. Transacciones atómicas: Prisma $transaction para consistencia de datos
+   * 3. Validación estricta: Verifica estructura de datos antes de procesar
+   * 4. Rollback automático: Si falla algo, la transacción hace rollback
+   * 5. Logging detallado: Trazabilidad completa para debugging
    */
   async procesarWebhookMercadoPago(body: any) {
     this.logger.log('📩 Webhook recibido de MercadoPago');
@@ -275,6 +286,30 @@ export class PagosService {
       return { message: 'No payment ID' };
     }
 
+    // ====================================================================
+    // IDEMPOTENCIA: Verificar si el webhook ya fue procesado
+    // ====================================================================
+    const webhookKey = `webhook:processed:${paymentId}`;
+
+    try {
+      const alreadyProcessed = await this.cacheManager.get(webhookKey);
+      if (alreadyProcessed) {
+        this.logger.log(
+          `✅ Webhook ${paymentId} ya fue procesado anteriormente (idempotencia)`,
+        );
+        return {
+          message: 'Webhook already processed (idempotent)',
+          paymentId,
+          previouslyProcessedAt: (alreadyProcessed as any).processedAt,
+        };
+      }
+    } catch (cacheError) {
+      // Si Redis falla, logear pero continuar (no queremos bloquear webhooks legítimos)
+      this.logger.warn(
+        `⚠️ Error al verificar cache de idempotencia: ${(cacheError as Error).message}`,
+      );
+    }
+
     try {
       // Obtener detalles del pago desde MercadoPago
       const payment = await this.mercadoPagoService.getPayment(paymentId);
@@ -283,121 +318,264 @@ export class PagosService {
         `Pago ${paymentId} - Estado: ${payment.status} - External Ref: ${payment.external_reference}`,
       );
 
-      // Extraer información del external_reference
-      const externalRef = payment.external_reference || '';
-      const refParts = externalRef.split('-');
-
-      // Determinar si es membresía o inscripción
-      if (refParts[0] === 'membresia') {
-        await this.procesarPagoMembresia(payment, refParts);
-      } else if (refParts[0] === 'inscripcion') {
-        await this.procesarPagoInscripcion(payment, refParts);
-      } else {
-        this.logger.warn(`External reference format unknown: ${externalRef}`);
+      // Validar que external_reference existe
+      if (!payment.external_reference) {
+        this.logger.error(`❌ Pago ${paymentId} sin external_reference`);
+        return { message: 'Payment without external_reference' };
       }
 
-      return { message: 'Webhook processed successfully' };
+      // Extraer información del external_reference
+      const externalRef = payment.external_reference;
+      const refParts = externalRef.split('-');
+
+      // ====================================================================
+      // PROCESAMIENTO CON TRANSACCIÓN ATÓMICA
+      // ====================================================================
+      let resultado: any;
+
+      if (refParts[0] === 'membresia') {
+        resultado = await this.procesarPagoMembresia(payment, refParts);
+      } else if (refParts[0] === 'inscripcion') {
+        resultado = await this.procesarPagoInscripcion(payment, refParts);
+      } else {
+        this.logger.warn(`External reference format unknown: ${externalRef}`);
+        return { message: 'Unknown external reference format' };
+      }
+
+      // ====================================================================
+      // MARCAR WEBHOOK COMO PROCESADO (Idempotencia)
+      // TTL = 7 días (suficiente para evitar duplicados, expira automáticamente)
+      // ====================================================================
+      try {
+        await this.cacheManager.set(
+          webhookKey,
+          {
+            processedAt: new Date().toISOString(),
+            paymentStatus: payment.status,
+            externalRef: payment.external_reference,
+          },
+          7 * 24 * 60 * 60 * 1000, // 7 días en milisegundos
+        );
+        this.logger.log(`✅ Webhook ${paymentId} marcado como procesado`);
+      } catch (cacheError) {
+        // Si falla el cacheo, logear pero NO fallar el webhook
+        this.logger.warn(
+          `⚠️ Error al marcar webhook como procesado en cache: ${(cacheError as Error).message}`,
+        );
+      }
+
+      return {
+        message: 'Webhook processed successfully',
+        paymentId,
+        resultado,
+      };
     } catch (error) {
-      this.logger.error(`Error procesando webhook: ${error}`);
+      const errorMessage = (error as Error).message || 'Unknown error';
+      const errorStack = (error as Error).stack || '';
+
+      this.logger.error(
+        `❌ Error procesando webhook ${paymentId}: ${errorMessage}`,
+        errorStack,
+      );
+
       throw error;
     }
   }
 
   /**
    * Procesa pago de membresía según el estado
+   *
+   * ROBUSTEZ IMPLEMENTADA:
+   * 1. Transacción atómica: Todo o nada - evita estados inconsistentes
+   * 2. Validaciones estrictas: Verifica que la membresía existe y es válida
+   * 3. Rollback automático: Si falla cualquier operación, se hace rollback completo
+   * 4. Logging detallado: Trazabilidad completa de cada cambio de estado
    */
   private async procesarPagoMembresia(payment: any, refParts: string[]) {
     const membresiaId = refParts[1];
 
-    const membresia = await this.prisma.membresia.findUnique({
-      where: { id: membresiaId },
-      include: { producto: true },
-    });
-
-    if (!membresia) {
-      this.logger.error(`Membresía ${membresiaId} no encontrada`);
-      return;
-    }
-
-    if (payment.status === 'approved') {
-      // Pago aprobado - Activar membresía
-      const fechaInicio = new Date();
-      const duracionMeses = membresia.producto.duracion_meses || 1;
-      const fechaProximoPago = new Date(fechaInicio);
-      fechaProximoPago.setMonth(fechaProximoPago.getMonth() + duracionMeses);
-
-      await this.prisma.membresia.update({
+    // ====================================================================
+    // TRANSACCIÓN ATÓMICA: Todo ocurre o nada ocurre
+    // ====================================================================
+    return await this.prisma.$transaction(async (tx) => {
+      // 1. Buscar membresía DENTRO de la transacción
+      const membresia = await tx.membresia.findUnique({
         where: { id: membresiaId },
-        data: {
+        include: { producto: true },
+      });
+
+      if (!membresia) {
+        this.logger.error(`❌ Membresía ${membresiaId} no encontrada`);
+        throw new NotFoundException(`Membresía ${membresiaId} no encontrada`);
+      }
+
+      // 2. Validar que el producto existe y tiene duracion_meses
+      if (!membresia.producto) {
+        this.logger.error(
+          `❌ Membresía ${membresiaId} sin producto asociado`,
+        );
+        throw new BadRequestException('Membresía sin producto asociado');
+      }
+
+      // 3. Procesar según estado del pago
+      if (payment.status === 'approved') {
+        // Pago aprobado - Activar membresía
+        const fechaInicio = new Date();
+        const duracionMeses = membresia.producto.duracion_meses || 1;
+        const fechaProximoPago = new Date(fechaInicio);
+        fechaProximoPago.setMonth(
+          fechaProximoPago.getMonth() + duracionMeses,
+        );
+
+        const membresiaActualizada = await tx.membresia.update({
+          where: { id: membresiaId },
+          data: {
+            estado: 'Activa',
+            fecha_inicio: fechaInicio,
+            fecha_proximo_pago: fechaProximoPago,
+          },
+        });
+
+        this.logger.log(
+          `✅ Membresía ${membresiaId} activada - Pago: ${payment.id} - Válida hasta: ${fechaProximoPago.toISOString()}`,
+        );
+
+        return {
+          action: 'activated',
+          membresiaId,
           estado: 'Activa',
-          fecha_inicio: fechaInicio,
-          fecha_proximo_pago: fechaProximoPago,
-        },
-      });
+          fechaInicio,
+          fechaProximoPago,
+        };
+      } else if (
+        payment.status === 'rejected' ||
+        payment.status === 'cancelled'
+      ) {
+        // Pago rechazado - Cancelar membresía
+        await tx.membresia.update({
+          where: { id: membresiaId },
+          data: { estado: 'Cancelada' },
+        });
 
-      this.logger.log(`✅ Membresía ${membresiaId} activada`);
-    } else if (
-      payment.status === 'rejected' ||
-      payment.status === 'cancelled'
-    ) {
-      // Pago rechazado - Cancelar membresía
-      await this.prisma.membresia.update({
-        where: { id: membresiaId },
-        data: { estado: 'Cancelada' },
-      });
+        this.logger.log(
+          `❌ Membresía ${membresiaId} cancelada - Pago ${payment.id} ${payment.status}`,
+        );
 
-      this.logger.log(
-        `❌ Membresía ${membresiaId} cancelada por pago rechazado`,
-      );
-    } else {
-      // Pago pendiente u otro estado - mantener Pendiente
-      this.logger.log(
-        `⏳ Membresía ${membresiaId} permanece en Pendiente (estado: ${payment.status})`,
-      );
-    }
+        return {
+          action: 'cancelled',
+          membresiaId,
+          estado: 'Cancelada',
+          reason: payment.status,
+        };
+      } else {
+        // Pago pendiente u otro estado - mantener Pendiente
+        this.logger.log(
+          `⏳ Membresía ${membresiaId} permanece en Pendiente - Pago ${payment.id} estado: ${payment.status}`,
+        );
+
+        return {
+          action: 'pending',
+          membresiaId,
+          estado: membresia.estado,
+          paymentStatus: payment.status,
+        };
+      }
+    });
   }
 
   /**
    * Procesa pago de inscripción a curso según el estado
+   *
+   * ROBUSTEZ IMPLEMENTADA:
+   * 1. Transacción atómica: DELETE e UPDATE son atómicos
+   * 2. Validaciones estrictas: Verifica que la inscripción existe antes de modificar
+   * 3. Rollback automático: Si falla, la transacción se revierte completamente
+   * 4. Logging detallado: Cada acción queda registrada con contexto completo
    */
   private async procesarPagoInscripcion(payment: any, refParts: string[]) {
     const inscripcionId = refParts[1];
 
-    const inscripcion = await this.prisma.inscripcionCurso.findUnique({
-      where: { id: inscripcionId },
-      include: { producto: true },
+    // ====================================================================
+    // TRANSACCIÓN ATÓMICA: Garantiza consistencia de datos
+    // ====================================================================
+    return await this.prisma.$transaction(async (tx) => {
+      // 1. Buscar inscripción DENTRO de la transacción
+      const inscripcion = await tx.inscripcionCurso.findUnique({
+        where: { id: inscripcionId },
+        include: {
+          producto: { select: { id: true, nombre: true } },
+          estudiante: { select: { id: true, nombre: true, apellido: true } },
+        },
+      });
+
+      if (!inscripcion) {
+        this.logger.error(`❌ Inscripción ${inscripcionId} no encontrada`);
+        throw new NotFoundException(
+          `Inscripción ${inscripcionId} no encontrada`,
+        );
+      }
+
+      // 2. Validar que el producto existe
+      if (!inscripcion.producto) {
+        this.logger.error(
+          `❌ Inscripción ${inscripcionId} sin producto asociado`,
+        );
+        throw new BadRequestException('Inscripción sin producto asociado');
+      }
+
+      // 3. Procesar según estado del pago
+      if (payment.status === 'approved') {
+        // Pago aprobado - Activar inscripción
+        const inscripcionActualizada = await tx.inscripcionCurso.update({
+          where: { id: inscripcionId },
+          data: { estado: 'Activo' },
+        });
+
+        this.logger.log(
+          `✅ Inscripción ${inscripcionId} activada - Estudiante: ${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido} - Curso: ${inscripcion.producto.nombre} - Pago: ${payment.id}`,
+        );
+
+        return {
+          action: 'activated',
+          inscripcionId,
+          estado: 'Activo',
+          estudianteId: inscripcion.estudiante.id,
+          productoId: inscripcion.producto.id,
+        };
+      } else if (
+        payment.status === 'rejected' ||
+        payment.status === 'cancelled'
+      ) {
+        // Pago rechazado - Eliminar inscripción
+        await tx.inscripcionCurso.delete({
+          where: { id: inscripcionId },
+        });
+
+        this.logger.log(
+          `❌ Inscripción ${inscripcionId} eliminada - Estudiante: ${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido} - Pago ${payment.id} ${payment.status}`,
+        );
+
+        return {
+          action: 'deleted',
+          inscripcionId,
+          estudianteId: inscripcion.estudiante.id,
+          productoId: inscripcion.producto.id,
+          reason: payment.status,
+        };
+      } else {
+        // Pago pendiente u otro estado - mantener PreInscrito
+        this.logger.log(
+          `⏳ Inscripción ${inscripcionId} permanece en PreInscrito - Pago ${payment.id} estado: ${payment.status}`,
+        );
+
+        return {
+          action: 'pending',
+          inscripcionId,
+          estado: inscripcion.estado,
+          paymentStatus: payment.status,
+        };
+      }
     });
-
-    if (!inscripcion) {
-      this.logger.error(`Inscripción ${inscripcionId} no encontrada`);
-      return;
-    }
-
-    if (payment.status === 'approved') {
-      // Pago aprobado - Activar inscripción
-      await this.prisma.inscripcionCurso.update({
-        where: { id: inscripcionId },
-        data: { estado: 'Activo' },
-      });
-
-      this.logger.log(`✅ Inscripción ${inscripcionId} activada`);
-    } else if (
-      payment.status === 'rejected' ||
-      payment.status === 'cancelled'
-    ) {
-      // Pago rechazado - Eliminar inscripción
-      await this.prisma.inscripcionCurso.delete({
-        where: { id: inscripcionId },
-      });
-
-      this.logger.log(
-        `❌ Inscripción ${inscripcionId} eliminada por pago rechazado`,
-      );
-    } else {
-      this.logger.log(
-        `⏳ Inscripción ${inscripcionId} permanece en PreInscrito (estado: ${payment.status})`,
-      );
-    }
   }
 
   /**
