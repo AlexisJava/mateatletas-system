@@ -45,7 +45,7 @@ export class ClasesService {
    * Cancelar una clase (Admin o Docente de la clase)
    * DELEGACIÓN: ClasesManagementService
    */
-  async cancelarClase(id: string, userId?: string, userRole?: string) {
+  async cancelarClase(id: string, userId: string, userRole: string) {
     return this.managementService.cancelarClase(id, userId, userRole);
   }
 

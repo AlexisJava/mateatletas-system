@@ -130,15 +130,28 @@ export class EstudiantesController {
 
   /**
    * PATCH /estudiantes/:id/avatar - Actualizar avatar del estudiante
+   *
+   * SECURITY FIX (2025-10-18):
+   * - Agregado EstudianteOwnershipGuard para prevenir modificación no autorizada
+   * - Solo el tutor dueño del estudiante puede actualizar el avatar
+   * - Previene CVE-INTERNAL-001: Unauthorized avatar modification
+   *
    * @param id - ID del estudiante
    * @param body - { avatar_url: string }
+   * @param user - Usuario autenticado (inyectado por JwtAuthGuard, usado por EstudianteOwnershipGuard)
    * @returns Estudiante actualizado con nuevo avatar
+   * @throws {ForbiddenException} Si el tutor no es dueño del estudiante
+   * @throws {NotFoundException} Si el estudiante no existe
    */
   @Patch(':id/avatar')
+  @UseGuards(EstudianteOwnershipGuard)
   async updateAvatar(
     @Param('id') id: string,
     @Body() body: { avatar_url: string },
+    @GetUser() user: any,
   ) {
+    // Nota: No necesitamos usar 'user' aquí porque el guard ya validó ownership
+    // El guard se ejecuta ANTES de este método y rechaza requests no autorizados
     return this.estudiantesService.updateAvatar(id, body.avatar_url);
   }
 

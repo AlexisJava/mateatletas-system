@@ -227,7 +227,7 @@ describe('ClasesManagementService', () => {
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.cancelarClase('non-existent')).rejects.toThrow(
+      await expect(service.cancelarClase('non-existent', 'admin-1', 'admin')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -241,10 +241,10 @@ describe('ClasesManagementService', () => {
       } as any);
 
       // Act & Assert
-      await expect(service.cancelarClase('clase-1')).rejects.toThrow(
+      await expect(service.cancelarClase('clase-1', 'admin-1', 'admin')).rejects.toThrow(
         BadRequestException,
       );
-      await expect(service.cancelarClase('clase-1')).rejects.toThrow(
+      await expect(service.cancelarClase('clase-1', 'admin-1', 'admin')).rejects.toThrow(
         'La clase ya está cancelada',
       );
     });
