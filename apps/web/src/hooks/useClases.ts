@@ -1,13 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAdminStore } from '@/store/admin.store';
 import * as adminApi from '@/lib/api/admin.api';
-import type { Clase } from '@/types/clases.types';
-import type { ClaseFromSchema } from '@/lib/schemas/clase.schema';
-import type { Docente } from '@/lib/api/docentes.api';
-import type { DocenteFromSchema } from '@/lib/schemas/docente.schema';
-import type { RutaEspecialidad, Sector } from '@/types/sectores.types';
-import type { RutaEspecialidadFromSchema } from '@/lib/schemas/ruta.schema';
-import type { SectorFromSchema } from '@/lib/schemas/sector.schema';
+import type { ClaseListado } from '@/types/admin-clases.types';
 
 /**
  * Hook personalizado para gestión de clases
@@ -92,7 +86,7 @@ export function useClasesFormData() {
 /**
  * Hook para filtrado de clases
  */
-export function useClasesFilter(clases: Clase[] | ClaseFromSchema[]) {
+export function useClasesFilter(clases: ClaseListado[]) {
   const [filter, setFilter] = useState<'all' | 'Programada' | 'Cancelada'>('all');
 
   const filteredClases = filter === 'all'
