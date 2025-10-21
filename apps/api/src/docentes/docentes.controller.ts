@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role, Roles } from '../auth/decorators/roles.decorator';
+import { AuthUser } from '../auth/types';
 
 /**
  * Controller para endpoints de docentes
@@ -54,7 +55,7 @@ export class DocentesController {
    */
   @Get('me')
   @Roles(Role.Docente)
-  async getProfile(@GetUser() user: any) {
+  async getProfile(@GetUser() user: AuthUser) {
     return this.docentesService.findById(user.id);
   }
 
@@ -67,7 +68,7 @@ export class DocentesController {
   @Patch('me')
   @Roles(Role.Docente)
   async updateProfile(
-    @GetUser() user: any,
+    @GetUser() user: AuthUser,
     @Body() updateDto: UpdateDocenteDto,
   ) {
     return this.docentesService.update(user.id, updateDto);

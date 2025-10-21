@@ -13,6 +13,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { GetUser } from '../auth/decorators/get-user.decorator';
+import { AuthUser } from '../auth/types';
 import { IniciarSuscripcionDto } from './dto/iniciar-suscripcion.dto';
 import { IniciarCompraCursoDto } from './dto/iniciar-compra-curso.dto';
 import { MercadoPagoWebhookDto } from './dto/mercadopago-webhook.dto';
@@ -35,7 +36,7 @@ export class PagosController {
   @Post('suscripcion')
   @UseGuards(JwtAuthGuard)
   async iniciarSuscripcion(
-    @GetUser() user: any,
+    @GetUser() user: AuthUser,
     @Body() dto: IniciarSuscripcionDto,
   ) {
     return this.pagosService.generarPreferenciaSuscripcion(
@@ -52,7 +53,7 @@ export class PagosController {
   @Post('curso')
   @UseGuards(JwtAuthGuard)
   async iniciarCompraCurso(
-    @GetUser() user: any,
+    @GetUser() user: AuthUser,
     @Body() dto: IniciarCompraCursoDto,
   ) {
     return this.pagosService.generarPreferenciaCurso(
@@ -83,7 +84,7 @@ export class PagosController {
    */
   @Get('membresia')
   @UseGuards(JwtAuthGuard)
-  async obtenerMembresia(@GetUser() user: any) {
+  async obtenerMembresia(@GetUser() user: AuthUser) {
     const membresia = await this.pagosService.obtenerMembresiaTutor(user.id);
 
     if (!membresia) {
@@ -105,7 +106,7 @@ export class PagosController {
    */
   @Get('historial')
   @UseGuards(JwtAuthGuard)
-  async obtenerHistorialPagos(@GetUser() user: any) {
+  async obtenerHistorialPagos(@GetUser() user: AuthUser) {
     return this.pagosService.obtenerHistorialPagosTutor(user.id);
   }
 
@@ -118,7 +119,7 @@ export class PagosController {
   @UseGuards(JwtAuthGuard)
   async obtenerEstadoMembresia(
     @Param('id') membresiaId: string,
-    @GetUser() user: any,
+    @GetUser() user: AuthUser,
   ) {
     return this.pagosService.obtenerEstadoMembresia(membresiaId, user.id);
   }
@@ -131,7 +132,7 @@ export class PagosController {
   @UseGuards(JwtAuthGuard)
   async obtenerInscripciones(
     @Query('estudianteId') estudianteId: string,
-    @GetUser() user: any,
+    @GetUser() user: AuthUser,
   ) {
     if (!estudianteId) {
       return { error: 'estudianteId is required' };

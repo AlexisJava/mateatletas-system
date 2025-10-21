@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { GetUser } from '../auth/decorators/get-user.decorator';
+import { AuthUser } from '../auth/types';
 
 @Controller('asistencia')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -35,7 +36,7 @@ export class AsistenciaController {
     @Param('claseId') claseId: string,
     @Param('estudianteId') estudianteId: string,
     @Body() dto: MarcarAsistenciaDto,
-    @GetUser() user: any,
+    @GetUser() user: AuthUser,
   ) {
     return this.asistenciaService.marcarAsistencia(
       claseId,
@@ -54,7 +55,7 @@ export class AsistenciaController {
   @Roles(Role.Docente, Role.Admin)
   async obtenerAsistenciaClase(
     @Param('claseId') claseId: string,
-    @GetUser() user: any,
+    @GetUser() user: AuthUser,
   ) {
     // Si es docente, verificar que es el titular
     const docenteId = user.role === Role.Docente ? user.id : undefined;
@@ -96,7 +97,7 @@ export class AsistenciaController {
    */
   @Get('docente/resumen')
   @Roles(Role.Docente)
-  async obtenerResumenDocente(@GetUser() user: any) {
+  async obtenerResumenDocente(@GetUser() user: AuthUser) {
     return this.reportesService.obtenerResumenDocente(user.id);
   }
 
@@ -108,7 +109,7 @@ export class AsistenciaController {
   @Get('docente/observaciones')
   @Roles(Role.Docente)
   async obtenerObservacionesDocente(
-    @GetUser() user: any,
+    @GetUser() user: AuthUser,
     @Query('estudianteId') estudianteId?: string,
     @Query('fechaDesde') fechaDesde?: string,
     @Query('fechaHasta') fechaHasta?: string,
@@ -129,7 +130,7 @@ export class AsistenciaController {
    */
   @Get('docente/reportes')
   @Roles(Role.Docente)
-  async obtenerReportesDocente(@GetUser() user: any) {
+  async obtenerReportesDocente(@GetUser() user: AuthUser) {
     return this.reportesService.obtenerReportesDocente(user.id);
   }
 
@@ -143,10 +144,10 @@ export class AsistenciaController {
   @Roles(Role.Estudiante)
   async autoRegistrarAsistencia(
     @Body() dto: { claseId: string; presente: boolean },
-    @GetUser() user: any,
+    @GetUser() user: AuthUser,
   ) {
     // El estudianteId se obtiene del usuario autenticado
-    const estudianteId = user.estudiante?.id || user.id;
+    const estudianteId = user.role === 'estudiante' ? user.id : user.id;
 
     return this.asistenciaService.marcarAsistencia(
       dto.claseId,
