@@ -1,19 +1,21 @@
 import { AuthUser } from '../interfaces';
+import { Role } from '../decorators/roles.decorator';
 
 /**
  * Tipos detallados de usuario autenticado
  * Extienden la información mínima garantizada por AuthUser con metadatos específicos
  */
 
-export interface DetailedAuthUserBase extends AuthUser {
+export interface DetailedAuthUserBase extends Omit<AuthUser, 'role'> {
   nombre: string;
   apellido: string;
   createdAt: Date;
   updatedAt: Date;
+  role: Role;
 }
 
 export interface AuthEstudiante extends DetailedAuthUserBase {
-  role: 'estudiante';
+  role: Role.Estudiante;
   edad: number;
   nivel_escolar: 'Primaria' | 'Secundaria' | 'Universidad';
   foto_url: string | null;
@@ -32,13 +34,13 @@ export interface AuthEstudiante extends DetailedAuthUserBase {
 }
 
 export interface AuthDocente extends DetailedAuthUserBase {
-  role: 'docente';
+  role: Role.Docente;
   titulo: string | null;
   bio: string | null;
 }
 
 export interface AuthTutor extends DetailedAuthUserBase {
-  role: 'tutor';
+  role: Role.Tutor;
   dni: string;
   telefono: string | null;
   fecha_registro: Date;
@@ -46,7 +48,7 @@ export interface AuthTutor extends DetailedAuthUserBase {
 }
 
 export interface AuthAdmin extends DetailedAuthUserBase {
-  role: 'admin';
+  role: Role.Admin;
   fecha_registro: Date;
 }
 
