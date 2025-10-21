@@ -19,6 +19,40 @@ export enum TipoContenido {
   Practica = 'Practica',
 }
 
+// Tipos específicos de contenido por tipo de lección
+export interface ContenidoVideo {
+  url?: string;
+  videoUrl?: string;
+  duracion?: number;
+}
+
+export interface ContenidoTexto {
+  texto?: string;
+  contenido?: string;
+}
+
+export interface ContenidoQuiz {
+  preguntas: Array<{
+    id: string;
+    pregunta: string;
+    opciones: string[];
+    respuesta_correcta: number;
+  }>;
+}
+
+export interface ContenidoTarea {
+  descripcion: string;
+  instrucciones?: string;
+}
+
+// Union type para contenido tipado (usar cuando se conoce el tipo)
+export type ContenidoLeccion =
+  | ContenidoVideo
+  | ContenidoTexto
+  | ContenidoQuiz
+  | ContenidoTarea
+  | Record<string, unknown>; // Fallback para tipos no mapeados
+
 export interface Modulo {
   id: string;
   producto_id: string;

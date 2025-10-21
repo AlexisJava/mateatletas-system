@@ -76,7 +76,7 @@ export function ClasesTable({
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                  {clase.docente?.nombre} {clase.docente?.apellido}
+                  {clase.docente?.user?.nombre} {clase.docente?.user?.apellido}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

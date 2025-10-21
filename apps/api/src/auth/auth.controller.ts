@@ -23,6 +23,7 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { TokenBlacklistService } from './token-blacklist.service';
+import { AuthUser } from './types';
 
 /**
  * Controlador de autenticación
@@ -233,7 +234,7 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async getProfile(@GetUser() user: any) {
+  async getProfile(@GetUser() user: AuthUser) {
     return this.authService.getProfile(user.id, user.role);
   }
 

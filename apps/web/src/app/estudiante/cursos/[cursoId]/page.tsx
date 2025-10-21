@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCursosStore } from '@/store/cursos.store';
-import { getLeccionesByModulo, type Leccion } from '@/lib/api/cursos.api';
+import { getLeccionesByModulo, type Leccion, type Modulo } from '@/lib/api/cursos.api';
 
 // Iconos para tipos de contenido
 const getTipoIcon = (tipo: string) => {
@@ -58,7 +58,7 @@ export default function CursoViewerPage() {
   const cursoId = params?.cursoId as string;
 
   const { modulos, progreso, fetchModulosByCurso, fetchProgresoCurso, isLoading } = useCursosStore();
-  const [selectedModulo, setSelectedModulo] = useState<Record<string, unknown>>(null);
+  const [selectedModulo, setSelectedModulo] = useState<Modulo | null>(null);
   const [lecciones, setLecciones] = useState<Leccion[]>([]);
   const [loadingLecciones, setLoadingLecciones] = useState(false);
 
@@ -278,7 +278,7 @@ export default function CursoViewerPage() {
             ) : (
               <>
                 <h2 className="text-2xl font-black text-gray-900 mb-4">
-                  Lecciones: {selectedModulo.titulo}
+                  Lecciones: {String(selectedModulo?.titulo || '')}
                 </h2>
 
                 {loadingLecciones ? (

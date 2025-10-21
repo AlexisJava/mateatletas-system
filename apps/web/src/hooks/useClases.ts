@@ -8,13 +8,13 @@ import type { ClaseListado } from '@/types/admin-clases.types';
  * Encapsula lógica de estado y operaciones CRUD
  */
 export function useClases() {
-  const { classes, fetchClasses, createClass, cancelClass, isLoading, error } = useAdminStore();
+  const { classes, createClass, cancelClass, fetchClasses, isLoading, error } = useAdminStore();
 
   // Asegurar que classes siempre sea un array
   const safeClasses = Array.isArray(classes) ? classes : [];
 
   return {
-    clases: safeClasses,
+    clases: safeClasses as Clase[],
     isLoading,
     error,
     fetchClases: fetchClasses,
@@ -28,9 +28,9 @@ export function useClases() {
  * (Rutas, Docentes, Sectores)
  */
 export function useClasesFormData() {
-  const [rutas, setRutas] = useState<Record<string, unknown>[]>([]);
-  const [docentes, setDocentes] = useState<Record<string, unknown>[]>([]);
-  const [sectores, setSectores] = useState<Record<string, unknown>[]>([]);
+  const [rutas, setRutas] = useState<RutaEspecialidad[] | RutaEspecialidadFromSchema[]>([]);
+  const [docentes, setDocentes] = useState<Docente[] | DocenteFromSchema[]>([]);
+  const [sectores, setSectores] = useState<Sector[] | SectorFromSchema[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,7 +91,7 @@ export function useClasesFilter(clases: ClaseListado[]) {
 
   const filteredClases = filter === 'all'
     ? clases
-    : clases.filter((c) => c.estado === filter);
+    : clases.filter((c) => c.estado === filter || c.estado === filter);
 
   return {
     filter,

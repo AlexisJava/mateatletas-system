@@ -31,7 +31,7 @@ type ModalType = 'create' | 'cancel' | 'view' | 'edit' | 'estudiantes' | null;
 export default function AdminClasesPage() {
   // Hooks de estado y lógica
   const { clases, isLoading, error, fetchClases, createClase, cancelClase } = useClases();
-  const { rutas, docentes, sectores } = useClasesFormData();
+  const { docentes, sectores } = useClasesFormData();
   const { filter, setFilter, filteredClases } = useClasesFilter(clases);
   const { formData, updateField, resetForm } = useClaseForm();
 
@@ -77,7 +77,7 @@ export default function AdminClasesPage() {
 
   const handleCancelClass = async () => {
     if (!selectedClass) return;
-    const success = await cancelClase(selectedClass.id);
+    const success = await cancelClase(selectedClass.id as string);
     if (success) {
       closeModal();
     }
@@ -95,7 +95,14 @@ export default function AdminClasesPage() {
         exportToCSV(formattedData, 'clases');
         break;
       case 'pdf':
-        exportToPDF(formattedData, 'Clases', ['Nombre', 'Fecha', 'Docente', 'Cupos', 'Estado']);
+        exportToPDF(formattedData, 'clases', 'Listado de Clases', [
+          { header: 'ID', dataKey: 'ID' },
+          { header: 'Ruta', dataKey: 'Ruta Curricular' },
+          { header: 'Docente', dataKey: 'Docente' },
+          { header: 'Fecha', dataKey: 'Fecha' },
+          { header: 'Hora', dataKey: 'Hora' },
+          { header: 'Estado', dataKey: 'Estado' }
+        ]);
         break;
     }
 
@@ -193,8 +200,8 @@ export default function AdminClasesPage() {
             </h2>
             <ClaseForm
               formData={formData}
-              docentes={docentes}
-              sectores={sectores}
+              docentes={docentes as { id: string; nombre: string; apellido: string }[]}
+              sectores={sectores as { id: string; nombre: string }[]}
               onFieldChange={updateField}
               onSubmit={handleCreateClass}
               onCancel={closeModal}
@@ -210,7 +217,7 @@ export default function AdminClasesPage() {
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-4">Cancelar Clase</h2>
             <p className="text-gray-700 mb-6">
-              ¿Estás seguro de que deseas cancelar la clase &quot;{selectedClass.nombre}&quot;?
+              ¿Estás seguro de que deseas cancelar esta clase?
             </p>
             <div className="flex gap-3">
               <button
@@ -233,7 +240,8 @@ export default function AdminClasesPage() {
       {/* Modal Gestionar Estudiantes */}
       {modalType === 'estudiantes' && selectedClass && (
         <GestionarEstudiantesModal
-          clase={selectedClass}
+          claseId={selectedClass.id as string}
+          claseNombre={String(selectedClass.nombre ?? selectedClass.titulo ?? 'Clase')}
           onClose={closeModal}
           onSuccess={fetchClases}
         />

@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request,
 } from '@nestjs/common';
 import { CursosService } from './cursos.service';
 import { CreateModuloDto } from './dto/create-modulo.dto';
@@ -19,6 +18,8 @@ import { ReordenarModulosDto, ReordenarLeccionesDto } from './dto/reordenar.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
+import { GetUser } from '../auth/decorators/get-user.decorator';
+import { AuthUser } from '../auth/types';
 
 /**
  * Controller para gestionar cursos, módulos y lecciones
@@ -209,13 +210,12 @@ export class CursosController {
   @UseGuards(JwtAuthGuard)
   completarLeccion(
     @Param('id') leccionId: string,
-    @Request() req: any,
+    @GetUser() user: AuthUser,
     @Body() completarDto: CompletarLeccionDto,
   ) {
-    const estudianteId = req.user.id;
     return this.cursosService.completarLeccion(
       leccionId,
-      estudianteId,
+      user.id,
       completarDto,
     );
   }
@@ -229,10 +229,9 @@ export class CursosController {
   @UseGuards(JwtAuthGuard)
   getProgresoCurso(
     @Param('productoId') productoId: string,
-    @Request() req: any,
+    @GetUser() user: AuthUser,
   ) {
-    const estudianteId = req.user.id;
-    return this.cursosService.getProgresoCurso(productoId, estudianteId);
+    return this.cursosService.getProgresoCurso(productoId, user.id);
   }
 
   /**
@@ -244,9 +243,8 @@ export class CursosController {
   @UseGuards(JwtAuthGuard)
   getSiguienteLeccion(
     @Param('productoId') productoId: string,
-    @Request() req: any,
+    @GetUser() user: AuthUser,
   ) {
-    const estudianteId = req.user.id;
-    return this.cursosService.getSiguienteLeccion(productoId, estudianteId);
+    return this.cursosService.getSiguienteLeccion(productoId, user.id);
   }
 }

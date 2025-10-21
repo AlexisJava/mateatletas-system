@@ -21,11 +21,10 @@ type TabType = 'tutores' | 'estudiantes' | 'personal';
 type ModalType = 'delete' | 'roles' | 'view' | 'viewDocente' | 'createDocente' | 'createAdmin' | null;
 
 export default function UsuariosPage() {
-  const { users, fetchUsers, deleteUser, changeUserRole, isLoading, error } = useAdminStore();
+  const { users, fetchUsers, deleteUser, isLoading, error } = useAdminStore();
   const [activeTab, setActiveTab] = useState<TabType>('tutores');
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [selectedRole, setSelectedRole] = useState<'tutor' | 'docente' | 'admin'>('tutor');
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -47,7 +46,7 @@ export default function UsuariosPage() {
 
   // Filtrar usuarios según el tab activo
   const tutores = users.filter(u => u.role === 'tutor');
-  const estudiantes: Record<string, unknown>[] = []; // TODO: Agregar endpoint para estudiantes
+  const estudiantes: AdminUser[] = []; // TODO: Agregar endpoint para estudiantes
   const personal = users.filter(u => u.role === 'docente' || u.role === 'admin');
 
   const displayedUsers = activeTab === 'tutores' ? tutores : activeTab === 'estudiantes' ? estudiantes : personal;
@@ -67,15 +66,6 @@ export default function UsuariosPage() {
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
     const success = await deleteUser(selectedUser.id);
-    if (success) {
-      setModalType(null);
-      setSelectedUser(null);
-    }
-  };
-
-  const handleChangeRole = async () => {
-    if (!selectedUser) return;
-    const success = await changeUserRole(selectedUser.id, selectedRole);
     if (success) {
       setModalType(null);
       setSelectedUser(null);
@@ -173,9 +163,6 @@ export default function UsuariosPage() {
   const openModal = (type: ModalType, user?: AdminUser) => {
     if (user) {
       setSelectedUser(user);
-      if (type === 'role') {
-        setSelectedRole(user.role);
-      }
     }
     setModalType(type);
     setFormError(null);
@@ -193,9 +180,9 @@ export default function UsuariosPage() {
     const tabName = activeTab === 'tutores' ? 'tutores' : activeTab === 'estudiantes' ? 'estudiantes' : 'personal';
 
     if (format === 'excel') {
-      exportToExcel(formattedData as Record<string, unknown>, `${tabName}-${timestamp}`, 'Usuarios');
+      exportToExcel(formattedData, `${tabName}-${timestamp}`, 'Usuarios');
     } else if (format === 'csv') {
-      exportToCSV(formattedData as Record<string, unknown>, `${tabName}-${timestamp}`);
+      exportToCSV(formattedData, `${tabName}-${timestamp}`);
     } else {
       exportToPDF(
         formattedData,
@@ -547,10 +534,10 @@ export default function UsuariosPage() {
                 Cerrar
               </button>
               <button
-                onClick={() => setModalType('role')}
+                onClick={() => setModalType('roles')}
                 className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:from-violet-600 hover:to-purple-700 transition-all shadow-lg shadow-emerald-500/30"
               >
-                Cambiar Rol
+                Cambiar Roles
               </button>
             </div>
           </div>

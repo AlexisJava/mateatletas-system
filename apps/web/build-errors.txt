@@ -1,0 +1,199 @@
+
+> web@0.1.0 build
+> next build --turbopack
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /home/alexis/pnpm-lock.yaml as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /home/alexis/Documentos/Mateatletas-Ecosystem/package-lock.json
+
+   ▲ Next.js 15.5.4 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Finished writing to disk in 38ms
+ ✓ Compiled successfully in 12.0s
+   Linting and checking validity of types ...
+
+./src/app/(protected)/dashboard/components/CalendarioTab.tsx
+65:6  Warning: React Hook useEffect has a missing dependency: 'loadCalendario'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+77:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(protected)/dashboard/components/MisHijosTab.tsx
+97:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(protected)/dashboard/components/PagosTab.tsx
+75:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(protected)/dashboard/page.tsx
+65:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(protected)/equipos/page.tsx
+49:6  Warning: React Hook useEffect has a missing dependency: 'handleFetchEquipos'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/(protected)/estudiantes/[id]/page.tsx
+44:16  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(protected)/estudiantes/page.tsx
+41:16  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(protected)/layout.tsx
+58:16  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/admin/cursos/[cursoId]/modulos/[moduloId]/page.tsx
+57:6  Warning: React Hook useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/admin/cursos/page.tsx
+38:6  Warning: React Hook useEffect has a missing dependency: 'fetchProducts'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/admin/dashboard/page.tsx
+11:6  Warning: React Hook useEffect has a missing dependency: 'fetchStats'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/admin/layout.tsx
+103:18  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/admin/reportes/page.tsx
+43:6  Warning: React Hook useEffect has missing dependencies: 'fetchClasses', 'fetchDashboard', 'fetchStats', and 'fetchUsers'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/admin/sectores-rutas/page.tsx
+52:6  Warning: React Hook useEffect has missing dependencies: 'fetchRutas' and 'fetchSectores'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/admin/usuarios/page.tsx
+45:6  Warning: React Hook useEffect has a missing dependency: 'fetchUsers'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/docente/calendario/page.tsx
+52:6  Warning: React Hook useEffect has missing dependencies: 'cargarEstadisticas' and 'cargarVistaAgenda'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/docente/clases/[id]/asistencia/page.tsx
+47:6  Warning: React Hook useEffect has missing dependencies: 'fetchClaseDetalle' and 'fetchListaAsistencia'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/docente/dashboard/page.tsx
+140:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/docente/grupos/[id]/page.tsx
+73:16  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+438:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/app/docente/layout.tsx
+101:18  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/docente/mis-clases/hooks/useMisClases.ts
+117:37  Warning: '_claseId' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/docente/observaciones/page.tsx
+31:6  Warning: React Hook useEffect has a missing dependency: 'fetchObservaciones'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+43:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+193:27  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+284:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/app/docente/planificador/hooks/usePlanificador.ts
+43:16  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+56:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/docente/reportes/page.tsx
+386:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/app/estudiante/cursos/[cursoId]/lecciones/[leccionId]/page.tsx
+213:6  Warning: React Hook useEffect has a missing dependency: 'loadLeccion'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+221:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/estudiante/cursos/[cursoId]/page.tsx
+69:6  Warning: React Hook useEffect has a missing dependency: 'loadCursoData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+82:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/estudiante/cursos/algebra-challenge/page.tsx
+108:6  Warning: React Hook useEffect has a missing dependency: 'terminarJuego'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/estudiante/cursos/calculo-mental/page.tsx
+120:6  Warning: React Hook useEffect has a missing dependency: 'terminarJuego'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/estudiante/cursos/page.tsx
+41:6  Warning: React Hook useEffect has missing dependencies: 'fetchDashboard' and 'user?.role'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/estudiante/dashboard/page.tsx
+36:6  Warning: React Hook useEffect has missing dependencies: 'dashboard?.nivel', 'fetchDashboard', and 'user?.role'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+45:6  Warning: React Hook useEffect has a missing dependency: 'previousLevel'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+179:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/app/estudiante/evaluacion/page.tsx
+309:18  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/estudiante/layout.tsx
+90:18  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/estudiante/logros/page.tsx
+22:6  Warning: React Hook useEffect has missing dependencies: 'fetchLogros' and 'user?.role'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/estudiante/ranking/page.tsx
+34:6  Warning: React Hook useEffect has missing dependencies: 'fetchRanking' and 'user?.role'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+211:31  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/admin/GestionarEstudiantesModal.tsx
+4:23  Warning: 'Trash2' is defined but never used.  @typescript-eslint/no-unused-vars
+76:6  Warning: React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/admin/RutasSelector.tsx
+5:16  Warning: 'X' is defined but never used.  @typescript-eslint/no-unused-vars
+32:6  Warning: React Hook useEffect has a missing dependency: 'fetchSectores'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/admin/ViewEditDocenteModal.tsx
+3:20  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+120:22  Warning: 'removed' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/admin/__tests__/CreateDocenteForm.improvements.spec.tsx
+16:10  Warning: 'CreateDocenteData' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/docente/AttendanceList.tsx
+310:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/docente/ModalAsignarInsignia.tsx
+240:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+272:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/equipos/EquipoCard.tsx
+71:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/estudiantes/AvatarSelector.tsx
+170:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/estudiantes/EstudianteCard.tsx
+41:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/components/estudiantes/ModalResumenClase.tsx
+57:24  Warning: '_setShowConfetti' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/features/clases/ClassCard.tsx
+152:15  Warning: Expected an assignment or function call and instead saw an expression.  @typescript-eslint/no-unused-expressions
+
+./src/components/ui/Avatar.tsx
+30:9  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/hooks/useClases.ts
+17:20  Warning: 'fetchClasses' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/api/catalogo.api.ts
+10:24  Warning: 'TipoProductoContract' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+Failed to compile.
+
+./src/app/estudiante/cursos/[cursoId]/lecciones/[leccionId]/page.tsx:289:48
+Type error: Type 'unknown' is not assignable to type 'ReactNode'.
+
+[0m [90m 287 |[39m                 [33m<[39m[33mh3[39m className[33m=[39m[32m"text-2xl font-black text-gray-900 mb-4"[39m[33m>[39m📋 [33mTarea[39m[33m<[39m[33m/[39m[33mh3[39m[33m>[39m
+ [90m 288 |[39m                 [33m<[39m[33mdiv[39m className[33m=[39m[32m"prose"[39m[33m>[39m
+[31m[1m>[22m[39m[90m 289 |[39m                   [33m<[39m[33mp[39m className[33m=[39m[32m"text-gray-700"[39m[33m>[39m{(leccion[33m.[39mcontenido [36mas[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m unknown[33m>[39m)[33m.[39mdescripcion}[33m<[39m[33m/[39m[33mp[39m[33m>[39m
+ [90m     |[39m                                                [31m[1m^[22m[39m
+ [90m 290 |[39m                   {(leccion[33m.[39mcontenido [36mas[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m unknown[33m>[39m)[33m.[39minstrucciones [33m&&[39m (
+ [90m 291 |[39m                     [33m<[39m[33mdiv[39m className[33m=[39m[32m"mt-4"[39m[33m>[39m
+ [90m 292 |[39m                       [33m<[39m[33mh4[39m className[33m=[39m[32m"font-bold"[39m[33m>[39m[33mInstrucciones[39m[33m:[39m[33m<[39m[33m/[39m[33mh4[39m[33m>[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path /home/alexis/Documentos/Mateatletas-Ecosystem/apps/web
+npm error workspace web@0.1.0
+npm error location /home/alexis/Documentos/Mateatletas-Ecosystem/apps/web
+npm error command failed
+npm error command sh -c next build --turbopack
