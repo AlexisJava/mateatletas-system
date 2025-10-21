@@ -5,14 +5,17 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Request } from 'express';
 
+import { Role } from '../decorators/roles.decorator';
+
 /**
  * Payload del JWT token
  * Contiene la información mínima necesaria para identificar al usuario
  */
 export interface JwtPayload {
-  sub: string; // ID del tutor
-  email: string; // Email del tutor
-  role: string; // Rol del usuario (ej: 'tutor')
+  sub: string; // ID del usuario
+  email: string; // Email del usuario
+  role: Role | string; // Rol principal del usuario (legacy support)
+  roles?: Role[]; // Array completo de roles del usuario
 }
 
 /**
@@ -64,7 +67,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @returns Usuario completo desde la base de datos
    */
   async validate(payload: JwtPayload) {
-    const { sub: userId, role } = payload;
+    const { sub: userId, role, roles } = payload;
+
+    const normalizedRoles =
+      Array.isArray(roles) && roles.length > 0
+        ? roles
+        : role
+          ? [role as Role]
+          : [];
 
     let user;
 
@@ -152,6 +162,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     // El objeto user se inyectará en request.user
-    return { ...user, role };
+    return { ...user, role, roles: normalizedRoles };
   }
 }
