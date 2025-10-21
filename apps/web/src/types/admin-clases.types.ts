@@ -5,10 +5,7 @@ export interface ClaseListado extends ClaseContrato {
     id?: string;
     nombre?: string;
     apellido?: string;
-    user?: {
-      nombre?: string;
-      apellido?: string;
-    };
+    titulo?: string;
   };
   ruta_curricular?: {
     id?: string;

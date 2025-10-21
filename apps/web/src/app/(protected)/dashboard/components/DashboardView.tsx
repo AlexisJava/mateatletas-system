@@ -375,7 +375,7 @@ export default function DashboardView({
                                 <div className="flex-1">
                                   <h3 className="font-bold text-gray-900">{clase.ruta_curricular?.nombre || 'Clase sin ruta asignada'}</h3>
                                   <p className="text-sm text-gray-600">
-                                    {estudianteInscrito?.nombre} • Prof. {clase.docente?.user?.nombre || 'Docente'}
+                                    {estudianteInscrito?.nombre} • Prof. {clase.docente?.nombre || 'Docente'}
                                   </p>
                                 </div>
                               </div>
