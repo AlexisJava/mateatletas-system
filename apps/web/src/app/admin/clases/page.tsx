@@ -36,7 +36,7 @@ export default function AdminClasesPage() {
 
   // Estado de UI
   const [modalType, setModalType] = useState<ModalType>(null);
-  const [selectedClass, setSelectedClass] = useState<Record<string, unknown> | null>(null);
+  const [selectedClass, setSelectedClass] = useState<{ id: string; nombre?: string; titulo?: string } | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Cargar clases al montar el componente
@@ -46,7 +46,7 @@ export default function AdminClasesPage() {
   }, []); // Solo cargar al montar
 
   // Handlers
-  const openModal = (type: ModalType, clase?: Record<string, unknown>) => {
+  const openModal = (type: ModalType, clase?: { id: string; nombre?: string; titulo?: string }) => {
     setModalType(type);
     setSelectedClass(clase || null);
   };
@@ -199,8 +199,8 @@ export default function AdminClasesPage() {
             </h2>
             <ClaseForm
               formData={formData}
-              docentes={docentes as Record<string, unknown>[]}
-              sectores={sectores as Record<string, unknown>[]}
+              docentes={docentes as { id: string; nombre: string; apellido: string }[]}
+              sectores={sectores as { id: string; nombre: string }[]}
               onFieldChange={updateField}
               onSubmit={handleCreateClass}
               onCancel={closeModal}

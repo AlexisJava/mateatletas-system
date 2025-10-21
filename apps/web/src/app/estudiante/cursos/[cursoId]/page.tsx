@@ -58,7 +58,7 @@ export default function CursoViewerPage() {
   const cursoId = params?.cursoId as string;
 
   const { modulos, progreso, fetchModulosByCurso, fetchProgresoCurso, isLoading } = useCursosStore();
-  const [selectedModulo, setSelectedModulo] = useState<Record<string, unknown>>(null);
+  const [selectedModulo, setSelectedModulo] = useState<Record<string, unknown> | null>(null);
   const [lecciones, setLecciones] = useState<Leccion[]>([]);
   const [loadingLecciones, setLoadingLecciones] = useState(false);
 
@@ -278,7 +278,7 @@ export default function CursoViewerPage() {
             ) : (
               <>
                 <h2 className="text-2xl font-black text-gray-900 mb-4">
-                  Lecciones: {selectedModulo.titulo}
+                  Lecciones: {String(selectedModulo?.titulo || '')}
                 </h2>
 
                 {loadingLecciones ? (
