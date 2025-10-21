@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSectoresStore } from '@/store/sectores.store';
-import { Plus, X, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
 interface SelectedRuta {
   sectorId: string;

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useCursosStore } from '@/store/cursos.store';
-import { getLeccion, type Leccion } from '@/lib/api/cursos.api';
+import { getLeccion, type Leccion, type ContenidoVideo, type ContenidoTexto, type ContenidoQuiz, type ContenidoTarea } from '@/lib/api/cursos.api';
 
 // Componente de Card Chunky
 const ChunkyCard = ({
@@ -259,7 +259,8 @@ export default function LeccionPlayerPage() {
     try {
       switch (leccion.tipo_contenido) {
         case 'Video':
-          const videoUrl = (leccion.contenido as Record<string, unknown>)?.url || (leccion.contenido as Record<string, unknown>)?.videoUrl || '';
+          const videoContenido = leccion.contenido as unknown as ContenidoVideo;
+          const videoUrl = videoContenido.url || videoContenido.videoUrl || '';
           if (!videoUrl || typeof videoUrl !== 'string') {
             return (
               <ChunkyCard gradient="linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)">
@@ -275,22 +276,25 @@ export default function LeccionPlayerPage() {
 
         case 'Texto':
         case 'Lectura':
-          return <TextoContent texto={String((leccion.contenido as Record<string, unknown>).texto || (leccion.contenido as Record<string, unknown>).contenido || '')} />;
+          const textoContenido = leccion.contenido as unknown as ContenidoTexto;
+          return <TextoContent texto={textoContenido.texto || textoContenido.contenido || ''} />;
 
         case 'Quiz':
-          return <QuizContent preguntas={((leccion.contenido as Record<string, unknown>).preguntas || []) as { id: string; pregunta: string; opciones: string[]; respuesta_correcta: number; }[]} />;
+          const quizContenido = leccion.contenido as unknown as ContenidoQuiz;
+          return <QuizContent preguntas={quizContenido.preguntas || []} />;
 
         case 'Tarea':
+          const tareaContenido = leccion.contenido as unknown as ContenidoTarea;
           return (
             <ChunkyCard gradient="linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)">
               <div className="p-8">
                 <h3 className="text-2xl font-black text-gray-900 mb-4">📋 Tarea</h3>
                 <div className="prose">
-                  <p className="text-gray-700">{(leccion.contenido as Record<string, unknown>).descripcion}</p>
-                  {(leccion.contenido as Record<string, unknown>).instrucciones && (
+                  <p className="text-gray-700">{tareaContenido.descripcion}</p>
+                  {tareaContenido.instrucciones && (
                     <div className="mt-4">
                       <h4 className="font-bold">Instrucciones:</h4>
-                      <p>{(leccion.contenido as Record<string, unknown>).instrucciones}</p>
+                      <p>{tareaContenido.instrucciones}</p>
                     </div>
                   )}
                 </div>

@@ -1,3 +1,14 @@
+interface DocenteOption {
+  id: string;
+  nombre: string;
+  apellido: string;
+}
+
+interface SectorOption {
+  id: string;
+  nombre: string;
+}
+
 interface ClaseFormProps {
   formData: {
     nombre: string;
@@ -8,8 +19,8 @@ interface ClaseFormProps {
     cupo_maximo: number;
     descripcion: string;
   };
-  docentes: Record<string, unknown>[];
-  sectores: Record<string, unknown>[];
+  docentes: DocenteOption[];
+  sectores: SectorOption[];
   onFieldChange: (field: string, value: string | number) => void;
   onSubmit: () => void;
   onCancel: () => void;

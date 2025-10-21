@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, UserPlus, Trash2, Users, Search } from 'lucide-react';
+import { X, UserPlus, Users, Search } from 'lucide-react';
 import axios from '@/lib/axios';
 
 interface Estudiante {
@@ -79,16 +79,15 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
     setLoading(true);
     setError(null);
     try {
-      // IMPORTANTE: El interceptor de axios ya devuelve response.data directamente
-      const [claseData, estudiantesData] = await Promise.all([
-        axios.get(`/clases/${claseId}/estudiantes`),
-        axios.get('/admin/estudiantes'),
+      const [claseResponse, estudiantesResponse] = await Promise.all([
+        axios.get<ClaseEstudiantes>(`/clases/${claseId}/estudiantes`),
+        axios.get<Estudiante[]>('/admin/estudiantes'),
       ]);
 
-      setClaseData(claseData);
-      setTodosEstudiantes(estudiantesData || []);
-    } catch (err) {
-      setError(err?.response?.data?.message || 'Error al cargar datos');
+      setClaseData(claseResponse.data);
+      setTodosEstudiantes(estudiantesResponse.data || []);
+    } catch {
+      setError('Error al cargar datos');
       setTodosEstudiantes([]); // Ensure we always have an array even on error
     } finally {
       setLoading(false);
@@ -109,8 +108,8 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
       await fetchData();
       setSelectedEstudiantes([]);
       onSuccess();
-    } catch (err) {
-      setError(err?.response?.data?.message || 'Error al asignar estudiantes');
+    } catch {
+      setError('Error al asignar estudiantes');
     } finally {
       setSubmitting(false);
     }
@@ -136,9 +135,8 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
         sector_id: claseData?.docente?.sector?.id || undefined,
       };
 
-      // IMPORTANTE: El interceptor de axios ya devuelve response.data directamente
-      // Por eso NO necesitamos hacer .data aquí
-      const nuevoEstudiante = await axios.post('/admin/estudiantes', dataToSend);
+      const response = await axios.post<Estudiante>('/admin/estudiantes', dataToSend);
+      const nuevoEstudiante = response.data;
 
       // Validar que la respuesta tenga el estudiante
       if (!nuevoEstudiante || !nuevoEstudiante.id) {
@@ -165,9 +163,9 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
       });
 
       setShowCreateForm(false);
-    } catch (err) {
-      console.error('Error al crear estudiante:', err);
-      setError(err?.response?.data?.message || err?.message || 'Error al crear el estudiante');
+    } catch (error) {
+      console.error('Error al crear estudiante:', error);
+      setError('Error al crear el estudiante');
     } finally {
       setSubmitting(false);
     }
@@ -326,7 +324,7 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
                       <select
                         required
                         value={createForm.nivel_escolar}
-                        onChange={(e) => setCreateForm({...createForm, nivel_escolar: e.target.value as Record<string, unknown>})}
+                        onChange={(e) => setCreateForm({...createForm, nivel_escolar: e.target.value as 'Primaria' | 'Secundaria' | 'Universidad'})}
                         className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
                       >
                         <option value="Primaria">Primaria</option>

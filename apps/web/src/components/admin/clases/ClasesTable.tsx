@@ -1,12 +1,26 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+interface ClaseTableData {
+  id: string;
+  nombre?: string;
+  titulo?: string;
+  fecha_hora_inicio: string;
+  duracion_minutos: number;
+  estado: string;
+  cupo_maximo: number;
+  cupo_disponible: number;
+  docente?: { user?: { nombre: string; apellido: string } };
+  ruta_curricular?: { nombre: string };
+  _count?: { inscripciones: number };
+}
+
 interface ClasesTableProps {
-  clases: Record<string, unknown>[];
-  onViewClase: (clase: Record<string, unknown>) => void;
-  onCancelClase: (clase: Record<string, unknown>) => void;
-  onEditClase: (clase: Record<string, unknown>) => void;
-  onManageStudents: (clase: Record<string, unknown>) => void;
+  clases: ClaseTableData[];
+  onViewClase: (clase: ClaseTableData) => void;
+  onCancelClase: (clase: ClaseTableData) => void;
+  onEditClase: (clase: ClaseTableData) => void;
+  onManageStudents: (clase: ClaseTableData) => void;
 }
 
 /**
@@ -74,7 +88,7 @@ export function ClasesTable({
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                  {clase.docente?.nombre} {clase.docente?.apellido}
+                  {clase.docente?.user?.nombre} {clase.docente?.user?.apellido}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
