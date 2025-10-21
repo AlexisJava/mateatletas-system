@@ -1,12 +1,14 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+import type { ClaseListado } from '@/types/admin-clases.types';
+
 interface ClasesTableProps {
-  clases: Record<string, unknown>[];
-  onViewClase: (clase: Record<string, unknown>) => void;
-  onCancelClase: (clase: Record<string, unknown>) => void;
-  onEditClase: (clase: Record<string, unknown>) => void;
-  onManageStudents: (clase: Record<string, unknown>) => void;
+  clases: ClaseListado[];
+  onViewClase: (clase: ClaseListado) => void;
+  onCancelClase: (clase: ClaseListado) => void;
+  onEditClase: (clase: ClaseListado) => void;
+  onManageStudents: (clase: ClaseListado) => void;
 }
 
 /**
