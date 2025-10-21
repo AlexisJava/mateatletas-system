@@ -3,6 +3,7 @@ import { ConflictException, UnauthorizedException, NotFoundException } from '@ne
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../auth.service';
 import { PrismaService } from '../../core/database/prisma.service';
+import { Role } from '../decorators/roles.decorator';
 
 /**
  * AuthService - COMPREHENSIVE TESTS
@@ -178,7 +179,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       expect(result.message).toBe('Tutor registrado exitosamente');
       expect(result.user.email).toBe(registerDto.email);
       expect(result.user.nombre).toBe(registerDto.nombre);
-      expect(result.user.role).toBe('tutor');
+      expect(result.user.role).toBe(Role.Tutor);
       expect(prisma.tutor.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -294,7 +295,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockEstudiante.email);
       expect(result.user.nombre).toBe(mockEstudiante.nombre);
-      expect(result.user.role).toBe('estudiante');
+      expect(result.user.role).toBe(Role.Estudiante);
       expect(result.user.equipo).toEqual(mockEstudiante.equipo);
       expect(result.user.tutor).toEqual(mockEstudiante.tutor);
     });
@@ -368,7 +369,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         expect.objectContaining({
           sub: mockEstudiante.id,
           email: mockEstudiante.email,
-          roles: ['estudiante'],
+          roles: [Role.Estudiante],
         }),
       );
     });
@@ -391,7 +392,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       // Assert
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockTutor.email);
-      expect(result.user.role).toBe('tutor');
+      expect(result.user.role).toBe(Role.Tutor);
       expect(result.user.dni).toBe(mockTutor.dni);
     });
 
@@ -412,7 +413,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       // Assert
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockDocente.email);
-      expect(result.user.role).toBe('docente');
+      expect(result.user.role).toBe(Role.Docente);
       expect(result.user.titulo).toBe(mockDocente.titulo);
     });
 
@@ -434,7 +435,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       // Assert
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockAdmin.email);
-      expect(result.user.role).toBe('admin');
+      expect(result.user.role).toBe(Role.Admin);
     });
 
     it('should throw UnauthorizedException when user does not exist', async () => {
@@ -491,7 +492,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         expect.objectContaining({
           sub: mockAdmin.id,
           email: mockAdmin.email,
-          roles: ['admin', 'docente'],
+          roles: [Role.Admin, Role.Docente],
         }),
       );
     });
@@ -559,11 +560,11 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(tutorSinPassword as any);
 
       // Act
-      const result = await service.getProfile('tutor-123', 'tutor');
+      const result = await service.getProfile('tutor-123', Role.Tutor);
 
       // Assert
       expect(result.email).toBe(mockTutor.email);
-      expect(result.role).toBe('tutor');
+      expect(result.role).toBe(Role.Tutor);
       expect(result).not.toHaveProperty('password_hash'); // Security
     });
 
@@ -572,11 +573,11 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
 
       // Act
-      const result = await service.getProfile('docente-123', 'docente');
+      const result = await service.getProfile('docente-123', Role.Docente);
 
       // Assert
       expect(result.email).toBe(mockDocente.email);
-      expect(result.role).toBe('docente');
+      expect(result.role).toBe(Role.Docente);
       expect(result.titulo).toBe(mockDocente.titulo);
     });
 
@@ -585,11 +586,11 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.admin, 'findUnique').mockResolvedValue(mockAdmin as any);
 
       // Act
-      const result = await service.getProfile('admin-123', 'admin');
+      const result = await service.getProfile('admin-123', Role.Admin);
 
       // Assert
       expect(result.email).toBe(mockAdmin.email);
-      expect(result.role).toBe('admin');
+      expect(result.role).toBe(Role.Admin);
     });
 
     it('should return estudiante profile', async () => {
@@ -597,11 +598,11 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
 
       // Act
-      const result = await service.getProfile('est-123', 'estudiante');
+      const result = await service.getProfile('est-123', Role.Estudiante);
 
       // Assert
       expect(result.email).toBe(mockEstudiante.email);
-      expect(result.role).toBe('estudiante');
+      expect(result.role).toBe(Role.Estudiante);
       expect(result.puntos_totales).toBe(150);
     });
 
@@ -610,8 +611,12 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.getProfile('nonexistent-id', 'tutor')).rejects.toThrow(NotFoundException);
-      await expect(service.getProfile('nonexistent-id', 'tutor')).rejects.toThrow('Tutor no encontrado');
+      await expect(
+        service.getProfile('nonexistent-id', Role.Tutor),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getProfile('nonexistent-id', Role.Tutor),
+      ).rejects.toThrow('Tutor no encontrado');
     });
 
     it('should throw NotFoundException when docente not found', async () => {
@@ -619,7 +624,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.getProfile('nonexistent-id', 'docente')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getProfile('nonexistent-id', Role.Docente),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException when admin not found', async () => {
@@ -627,7 +634,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.admin, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.getProfile('nonexistent-id', 'admin')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getProfile('nonexistent-id', Role.Admin),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException when estudiante not found', async () => {
@@ -635,7 +644,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.getProfile('nonexistent-id', 'estudiante')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getProfile('nonexistent-id', Role.Estudiante),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
