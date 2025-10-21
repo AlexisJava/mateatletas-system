@@ -11,6 +11,7 @@ import {
   exportToPDF,
   formatClassesForExport
 } from '@/lib/utils/export.utils';
+import type { ClaseListado } from '@/types/admin-clases.types';
 
 type ModalType = 'create' | 'cancel' | 'view' | 'edit' | 'estudiantes' | null;
 
@@ -36,7 +37,7 @@ export default function AdminClasesPage() {
 
   // Estado de UI
   const [modalType, setModalType] = useState<ModalType>(null);
-  const [selectedClass, setSelectedClass] = useState<{ id: string; nombre?: string; titulo?: string } | null>(null);
+  const [selectedClass, setSelectedClass] = useState<ClaseListado | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   // Cargar clases al montar el componente
@@ -46,7 +47,7 @@ export default function AdminClasesPage() {
   }, []); // Solo cargar al montar
 
   // Handlers
-  const openModal = (type: ModalType, clase?: { id: string; nombre?: string; titulo?: string }) => {
+  const openModal = (type: ModalType, clase?: ClaseListado) => {
     setModalType(type);
     setSelectedClass(clase || null);
   };

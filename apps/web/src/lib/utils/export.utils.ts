@@ -6,6 +6,7 @@
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import type { ClaseListado } from '@/types/admin-clases.types';
 
 /**
  * Type for exportable data records
@@ -167,24 +168,15 @@ export const formatUsersForExport = (users: {
 /**
  * Formatea datos de clases para exportación
  */
-export const formatClassesForExport = (classes: {
-  id: string;
-  fecha_hora_inicio: string;
-  duracion_minutos: number;
-  cupo_maximo: number;
-  cupo_disponible: number;
-  estado: string;
-  ruta_curricular?: { nombre: string };
-  docente?: { user?: { nombre: string; apellido: string } };
-}[]): ExportableData[] => {
+export const formatClassesForExport = (classes: ClaseListado[]) => {
   return classes.map((clase) => ({
     'ID': clase.id,
-    'Ruta Curricular': clase.ruta_curricular?.nombre ?? '-',
-    'Docente': clase.docente?.user ? `${clase.docente.user.nombre} ${clase.docente.user.apellido}`.trim() : '-',
+    'Ruta Curricular': clase.ruta_curricular?.nombre || '-',
+    'Docente': `${clase.docente?.user?.nombre || clase.docente?.nombre || ''} ${clase.docente?.user?.apellido || clase.docente?.apellido || ''}`.trim() || '-',
     'Fecha': new Date(clase.fecha_hora_inicio).toLocaleDateString('es-ES'),
     'Hora': new Date(clase.fecha_hora_inicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
     'Duración (min)': clase.duracion_minutos,
-    'Cupos Ocupados': clase.cupo_maximo - clase.cupo_disponible,
+    'Cupos Ocupados': clase.cupo_maximo - (clase.cupo_disponible ?? 0),
     'Cupos Máximos': clase.cupo_maximo,
     'Estado': clase.estado
   }));
