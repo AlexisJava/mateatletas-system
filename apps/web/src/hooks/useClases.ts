@@ -1,6 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAdminStore } from '@/store/admin.store';
 import * as adminApi from '@/lib/api/admin.api';
+import type { Clase } from '@/types/clases.types';
+import type { ClaseFromSchema } from '@/lib/schemas/clase.schema';
+import type { Docente } from '@/lib/api/docentes.api';
+import type { DocenteFromSchema } from '@/lib/schemas/docente.schema';
+import type { RutaEspecialidad, Sector } from '@/types/sectores.types';
+import type { RutaEspecialidadFromSchema } from '@/lib/schemas/ruta.schema';
+import type { SectorFromSchema } from '@/lib/schemas/sector.schema';
 
 /**
  * Hook personalizado para gestión de clases
@@ -13,10 +20,10 @@ export function useClases() {
   const safeClasses = Array.isArray(classes) ? classes : [];
 
   return {
-    clases: safeClasses,
+    clases: safeClasses as Clase[],
     isLoading,
     error,
-    fetchClases: fetchClasses,
+    fetchClases: fetchClases,
     createClase: createClass,
     cancelClase: cancelClass,
   };
@@ -27,9 +34,9 @@ export function useClases() {
  * (Rutas, Docentes, Sectores)
  */
 export function useClasesFormData() {
-  const [rutas, setRutas] = useState<Record<string, unknown>[]>([]);
-  const [docentes, setDocentes] = useState<Record<string, unknown>[]>([]);
-  const [sectores, setSectores] = useState<Record<string, unknown>[]>([]);
+  const [rutas, setRutas] = useState<RutaEspecialidad[] | RutaEspecialidadFromSchema[]>([]);
+  const [docentes, setDocentes] = useState<Docente[] | DocenteFromSchema[]>([]);
+  const [sectores, setSectores] = useState<Sector[] | SectorFromSchema[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,12 +92,12 @@ export function useClasesFormData() {
 /**
  * Hook para filtrado de clases
  */
-export function useClasesFilter(clases: Record<string, unknown>[]) {
+export function useClasesFilter(clases: Clase[] | ClaseFromSchema[]) {
   const [filter, setFilter] = useState<'all' | 'Programada' | 'Cancelada'>('all');
 
   const filteredClases = filter === 'all'
     ? clases
-    : clases.filter((c) => c.estado === filter);
+    : clases.filter((c) => c.estado === filter || c.estado === filter);
 
   return {
     filter,

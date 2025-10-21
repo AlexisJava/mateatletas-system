@@ -5,6 +5,12 @@
 import axios from '@/lib/axios';
 import { DashboardData, AdminUser, ChangeRoleDto, UpdateRolesDto, SystemStats } from '@/types/admin.types';
 
+// Schemas Zod para validación runtime
+import { clasesListSchema } from '@/lib/schemas/clase.schema';
+import { docentesListSchema } from '@/lib/schemas/docente.schema';
+import { rutasListSchema } from '@/lib/schemas/ruta.schema';
+import { sectoresListSchema } from '@/lib/schemas/sector.schema';
+
 export const getDashboard = async (): Promise<DashboardData> => {
   return axios.get('/admin/dashboard') as Promise<DashboardData>;
 };
@@ -30,7 +36,9 @@ export const deleteUser = async (userId: string): Promise<void> => {
 };
 
 export const getAllClasses = async () => {
-  return axios.get('/clases/admin/todas');
+  const response = await axios.get('/clases/admin/todas');
+  // ✅ Validar con schema Zod
+  return clasesListSchema.parse(response);
 };
 
 export const createClass = async (data: {
@@ -49,15 +57,21 @@ export const cancelClass = async (claseId: string) => {
 };
 
 export const getRutasCurriculares = async () => {
-  return axios.get('/clases/metadata/rutas-curriculares');
+  const response = await axios.get('/clases/metadata/rutas-curriculares');
+  // ✅ Validar con schema Zod
+  return rutasListSchema.parse(response);
 };
 
 export const getDocentes = async () => {
-  return axios.get('/docentes');
+  const response = await axios.get('/docentes');
+  // ✅ Validar con schema Zod
+  return docentesListSchema.parse(response);
 };
 
 export const getSectores = async () => {
-  return axios.get('/admin/sectores');
+  const response = await axios.get('/admin/sectores');
+  // ✅ Validar con schema Zod
+  return sectoresListSchema.parse(response);
 };
 
 // Products Management
