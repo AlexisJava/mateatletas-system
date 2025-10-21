@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, Edit2, Save, Calendar, Clock, MapPin, Award, BookOpen, GraduationCap, User, Mail, Phone, Trash2, Plus } from 'lucide-react';
 
 interface Docente {

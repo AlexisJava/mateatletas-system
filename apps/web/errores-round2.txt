@@ -1,0 +1,26 @@
+
+> web@0.1.0 build
+> next build --turbopack
+
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /home/alexis/pnpm-lock.yaml as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /home/alexis/Documentos/Mateatletas-Ecosystem/package-lock.json
+
+   ▲ Next.js 15.5.4 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Finished writing to disk in 53ms
+
+> Build error occurred
+[Error: ENOENT: no such file or directory, open '/home/alexis/Documentos/Mateatletas-Ecosystem/apps/web/.next/static/D73isb-XWO3os9Q0b05tp/_buildManifest.js.tmp.1mqdgkz7rgl']
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path /home/alexis/Documentos/Mateatletas-Ecosystem/apps/web
+npm error workspace web@0.1.0
+npm error location /home/alexis/Documentos/Mateatletas-Ecosystem/apps/web
+npm error command failed
+npm error command sh -c next build --turbopack

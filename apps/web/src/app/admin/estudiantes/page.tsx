@@ -46,7 +46,8 @@ export default function AdminEstudiantesPage() {
       setError(null);
       // Endpoint para admin que trae TODOS los estudiantes
       const response = await apiClient.get('/admin/estudiantes');
-      setEstudiantes((response || []) as unknown as Estudiante[]);
+      const estudiantes = Array.isArray(response) ? response : [];
+      setEstudiantes(estudiantes as Estudiante[]);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al cargar estudiantes'));
     } finally {
@@ -77,7 +78,7 @@ export default function AdminEstudiantesPage() {
   const estudiantesMatematica = estudiantes.filter(est => est.sector?.nombre === 'Matemática');
   const estudiantesSinSector = estudiantes.filter(est => !est.sector);
 
-  const renderTablaEstudiantes = (listaEstudiantes: Estudiante[], titulo: string, icono: string, color: string) => {
+  const renderTablaEstudiantes = (listaEstudiantes: Estudiante[], titulo: string, icono: string) => {
     if (listaEstudiantes.length === 0) {
       return (
         <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl border border-emerald-500/20 shadow-2xl shadow-emerald-500/10 p-8 text-center">
@@ -188,10 +189,6 @@ export default function AdminEstudiantesPage() {
     sectorActivo === 'Programación' ? '💻' :
     sectorActivo === 'Matemática' ? '🧮' : '📝';
 
-  const colorActivo =
-    sectorActivo === 'Programación' ? '#8b5cf6' :
-    sectorActivo === 'Matemática' ? '#3b82f6' : '#10b981';
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -259,7 +256,7 @@ export default function AdminEstudiantesPage() {
 
       {/* Tabla de estudiantes del sector activo */}
       <div>
-        {renderTablaEstudiantes(estudiantesActivos, sectorActivo, iconoActivo, colorActivo)}
+        {renderTablaEstudiantes(estudiantesActivos, sectorActivo, iconoActivo)}
       </div>
     </div>
   );

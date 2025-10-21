@@ -18,7 +18,7 @@ import { Producto } from '@/types/catalogo.types';
 export default function AdminCursosPage() {
   const router = useRouter();
   const { products, fetchProducts, isLoading } = useAdminStore();
-  const [selectedCurso, setSelectedCurso] = useState<Record<string, unknown> | null>(null);
+  const [selectedCurso, setSelectedCurso] = useState<Producto | null>(null);
   const [modulos, setModulos] = useState<Modulo[]>([]);
   const [loadingModulos, setLoadingModulos] = useState(false);
   const [showModuloModal, setShowModuloModal] = useState(false);
@@ -55,7 +55,7 @@ export default function AdminCursosPage() {
   };
 
   const handleSelectCurso = async (curso: Producto) => {
-    setSelectedCurso(curso);
+    setSelectedCurso(curso as unknown as Record<string, unknown>);
     await loadModulos(curso.id);
   };
 
@@ -64,8 +64,8 @@ export default function AdminCursosPage() {
 
     try {
       setError(null);
-      await createModulo(selectedCurso.id, formData);
-      await loadModulos(selectedCurso.id);
+      await createModulo(selectedCurso.id as string, formData);
+      await loadModulos(selectedCurso.id as string);
       closeModuloModal();
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al crear módulo'));
@@ -78,7 +78,7 @@ export default function AdminCursosPage() {
     try {
       setError(null);
       await updateModulo(editingModulo.id, formData);
-      await loadModulos(selectedCurso.id);
+      await loadModulos(selectedCurso!.id as string);
       closeModuloModal();
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al actualizar módulo'));
@@ -91,7 +91,7 @@ export default function AdminCursosPage() {
     try {
       setError(null);
       await deleteModulo(moduloId);
-      await loadModulos(selectedCurso.id);
+      await loadModulos(selectedCurso!.id as string);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al eliminar módulo'));
     }
@@ -126,6 +126,7 @@ export default function AdminCursosPage() {
   };
 
   const goToModulo = (moduloId: string) => {
+    if (!selectedCurso) return;
     router.push(`/admin/cursos/${selectedCurso.id}/modulos/${moduloId}`);
   };
 
@@ -211,8 +212,8 @@ export default function AdminCursosPage() {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">{selectedCurso.nombre}</h2>
-                    <p className="text-gray-600 mt-1">{selectedCurso.descripcion}</p>
+                    <h2 className="text-2xl font-bold text-gray-900">{String(selectedCurso.nombre ?? '')}</h2>
+                    <p className="text-gray-600 mt-1">{String(selectedCurso.descripcion ?? '')}</p>
                   </div>
                   <Button onClick={openCreateModal}>
                     + Nuevo Módulo

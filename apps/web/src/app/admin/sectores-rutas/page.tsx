@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useSectoresStore } from '@/store/sectores.store';
 import { Button } from '@/components/ui';
-import { Plus, Edit, Trash2, BookOpen, Code, X, Save } from 'lucide-react';
-import type { Sector, RutaEspecialidad, CreateSectorDto, UpdateSectorDto, CreateRutaEspecialidadDto, UpdateRutaEspecialidadDto } from '@/types/sectores.types';
+import { Plus, Edit, Trash2, X, Save } from 'lucide-react';
+import type { Sector, RutaEspecialidad, CreateSectorDto, CreateRutaEspecialidadDto } from '@/types/sectores.types';
 
 type TabType = 'sectores' | 'rutas';
 type ModalType = 'createSector' | 'editSector' | 'createRuta' | 'editRuta' | null;
