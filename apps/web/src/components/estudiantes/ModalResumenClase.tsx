@@ -25,7 +25,7 @@ import {
  * - Animación de celebración
  */
 
-interface ResumenClase {
+export interface ResumenClase {
   claseNombre: string;
   duracionMinutos: number;
   puntosGanados: number;
