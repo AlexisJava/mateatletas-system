@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
+import { AuthUser } from '../../auth/interfaces';
 
 /**
  * Guard que verifica que un estudiante pertenece al tutor autenticado
@@ -16,7 +17,9 @@ export class EstudianteOwnershipGuard implements CanActivate {
   constructor(private prisma: PrismaService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<{ user?: AuthUser; params: { id?: string } }>();
     const tutorId = request.user?.id; // Del JWT Strategy (user.id, NO user.sub)
     const estudianteId = request.params.id; // De la URL
 
