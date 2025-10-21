@@ -23,7 +23,7 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { TokenBlacklistService } from './token-blacklist.service';
-import { AuthUser } from './types';
+import { AuthUser } from './interfaces';
 
 /**
  * Controlador de autenticación

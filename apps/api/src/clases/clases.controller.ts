@@ -10,7 +10,6 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { ClasesService } from './clases.service';
 import { CrearClaseDto } from './dto/crear-clase.dto';
 import { ReservarClaseDto } from './dto/reservar-clase.dto';
@@ -19,14 +18,7 @@ import { AsignarEstudiantesDto } from './dto/asignar-estudiantes.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role, Roles } from '../auth/decorators/roles.decorator';
-
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;
-    email: string;
-    role: Role;
-  };
-}
+import { RequestWithAuthUser } from '../auth/interfaces';
 
 @Controller('clases')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -75,7 +67,7 @@ export class ClasesController {
   @Roles(Role.Admin, Role.Docente)
   async cancelarClase(
     @Param('id') id: string,
-    @Req() req: AuthenticatedRequest,
+    @Req() req: RequestWithAuthUser,
   ) {
     const userId = req.user.id;
     const userRole = req.user.role;
@@ -103,7 +95,7 @@ export class ClasesController {
    */
   @Get()
   @Roles(Role.Tutor)
-  async listarClasesParaTutor(@Req() req: AuthenticatedRequest) {
+  async listarClasesParaTutor(@Req() req: RequestWithAuthUser) {
     const tutorId = req.user.id;
     return this.clasesService.listarClasesParaTutor(tutorId);
   }
@@ -120,7 +112,7 @@ export class ClasesController {
   @Get('calendario')
   @Roles(Role.Tutor)
   async obtenerCalendarioTutor(
-    @Req() req: AuthenticatedRequest,
+    @Req() req: RequestWithAuthUser,
     @Query('mes') mes?: string,
     @Query('anio') anio?: string,
   ) {
@@ -139,7 +131,7 @@ export class ClasesController {
   async reservarClase(
     @Param('id') claseId: string,
     @Body() dto: ReservarClaseDto,
-    @Req() req: AuthenticatedRequest,
+    @Req() req: RequestWithAuthUser,
   ) {
     const tutorId = req.user.id;
     return this.clasesService.reservarClase(claseId, tutorId, dto);
@@ -153,7 +145,7 @@ export class ClasesController {
   @Roles(Role.Tutor)
   async cancelarReserva(
     @Param('id') inscripcionId: string,
-    @Req() req: AuthenticatedRequest,
+    @Req() req: RequestWithAuthUser,
   ) {
     const tutorId = req.user.id;
     return this.clasesService.cancelarReserva(inscripcionId, tutorId);
@@ -168,7 +160,7 @@ export class ClasesController {
   @Get('docente/mis-clases')
   @Roles(Role.Docente)
   async listarClasesDeDocente(
-    @Req() req: AuthenticatedRequest,
+    @Req() req: RequestWithAuthUser,
     @Query('incluirPasadas') incluirPasadas?: string,
   ) {
     const docenteId = req.user.id;
@@ -187,7 +179,7 @@ export class ClasesController {
   async registrarAsistencia(
     @Param('id') claseId: string,
     @Body() dto: RegistrarAsistenciaDto,
-    @Req() req: AuthenticatedRequest,
+    @Req() req: RequestWithAuthUser,
   ) {
     const docenteId = req.user.id;
     return this.clasesService.registrarAsistencia(claseId, docenteId, dto);

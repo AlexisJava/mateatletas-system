@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { EstudianteOwnershipGuard } from '../estudiante-ownership.guard';
 import { PrismaService } from '../../../core/database/prisma.service';
+import { AuthUser } from '../../../auth/interfaces';
+import { Role } from '../../../auth/decorators/roles.decorator';
 
 /**
  * EstudianteOwnershipGuard - COMPREHENSIVE TESTS
@@ -47,19 +49,22 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
   });
 
   // Helper function to create mock ExecutionContext
-  const createMockContext = (user: any, params: any): ExecutionContext => ({
+  const createMockContext = (
+    user: (Partial<AuthUser> & { role?: Role }) | null,
+    params: Record<string, string | undefined>,
+  ): ExecutionContext => ({
     switchToHttp: () => ({
-      getRequest: () => ({ user, params }),
+      getRequest: () => ({ user: user as AuthUser | null, params }),
     }),
     getHandler: jest.fn(),
     getClass: jest.fn(),
-  } as any);
+  } as unknown as ExecutionContext);
 
   describe('Happy Path - Ownership Validated', () => {
     it('should allow access when estudiante belongs to authenticated tutor', async () => {
       // Arrange
       const mockContext = createMockContext(
-        { id: 'tutor-123', role: 'tutor' }, // Authenticated tutor
+        { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] }, // Authenticated tutor
         { id: 'est-456' } // Estudiante ID from URL params
       );
 
@@ -82,7 +87,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
     it('should allow access when no estudiante ID in params (e.g., GET /estudiantes)', async () => {
       // Arrange
       const mockContext = createMockContext(
-        { id: 'tutor-123', role: 'tutor' },
+        { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
         {} // No ID in params
       );
 
@@ -99,7 +104,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
     it('should throw ForbiddenException when estudiante belongs to different tutor', async () => {
       // Arrange
       const mockContext = createMockContext(
-        { id: 'tutor-123', role: 'tutor' }, // Tutor trying to access
+        { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] }, // Tutor trying to access
         { id: 'est-456' }
       );
 
@@ -131,7 +136,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
     it('should throw ForbiddenException when user.id is missing', async () => {
       // Arrange
       const mockContext = createMockContext(
-        { role: 'tutor' }, // User without ID
+        { role: Role.Tutor, roles: [Role.Tutor] }, // User without ID
         { id: 'est-456' }
       );
 
@@ -145,7 +150,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
     it('should throw NotFoundException when estudiante does not exist', async () => {
       // Arrange
       const mockContext = createMockContext(
-        { id: 'tutor-123', role: 'tutor' },
+        { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
         { id: 'nonexistent-est-id' }
       );
 
@@ -161,7 +166,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
     it('should handle estudiante with null tutor_id', async () => {
       // Arrange
       const mockContext = createMockContext(
-        { id: 'tutor-123', role: 'tutor' },
+        { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
         { id: 'est-456' }
       );
 
@@ -177,7 +182,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
     it('should perform strict equality check (not type coercion)', async () => {
       // Arrange
       const mockContext = createMockContext(
-        { id: 'tutor-123', role: 'tutor' },
+        { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
         { id: 'est-456' }
       );
 
@@ -193,7 +198,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
     it('should handle database errors gracefully', async () => {
       // Arrange
       const mockContext = createMockContext(
-        { id: 'tutor-123', role: 'tutor' },
+        { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
         { id: 'est-456' }
       );
 
@@ -211,7 +216,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
     it('should prevent PATCH /estudiantes/:id/avatar from unauthorized tutors', async () => {
       // Arrange
       const maliciousTutorContext = createMockContext(
-        { id: 'malicious-tutor-789', role: 'tutor' },
+        { id: 'malicious-tutor-789', role: Role.Tutor, roles: [Role.Tutor] },
         { id: 'victim-est-456' }
       );
 
@@ -230,7 +235,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
     it('should allow PATCH /estudiantes/:id/avatar from legitimate owner', async () => {
       // Arrange
       const legitimateTutorContext = createMockContext(
-        { id: 'legit-tutor-123', role: 'tutor' },
+        { id: 'legit-tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
         { id: 'est-456' }
       );
 
@@ -249,7 +254,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
     it('should validate ownership for DELETE /estudiantes/:id', async () => {
       // Arrange
       const deleteContext = createMockContext(
-        { id: 'tutor-123', role: 'tutor' },
+        { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
         { id: 'est-456' }
       );
 
