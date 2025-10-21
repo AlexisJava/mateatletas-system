@@ -1,5 +1,7 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
+import { AuthUser } from '../interfaces';
+
 /**
  * Decorator personalizado para extraer el usuario autenticado del request
  *
@@ -16,8 +18,8 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
  * }
  */
 export const GetUser = createParamDecorator(
-  (data: string | undefined, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
+  (data: keyof AuthUser | undefined, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest<{ user?: AuthUser }>();
     const user = request.user;
 
     // Si se especifica un campo, devolver solo ese campo
