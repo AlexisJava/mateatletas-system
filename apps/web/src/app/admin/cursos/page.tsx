@@ -18,7 +18,7 @@ import { Producto } from '@/types/catalogo.types';
 export default function AdminCursosPage() {
   const router = useRouter();
   const { products, fetchProducts, isLoading } = useAdminStore();
-  const [selectedCurso, setSelectedCurso] = useState<Record<string, unknown> | null>(null);
+  const [selectedCurso, setSelectedCurso] = useState<Producto | null>(null);
   const [modulos, setModulos] = useState<Modulo[]>([]);
   const [loadingModulos, setLoadingModulos] = useState(false);
   const [showModuloModal, setShowModuloModal] = useState(false);
