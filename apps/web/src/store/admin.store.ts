@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { DashboardData, AdminUser, SystemStats } from '@/types/admin.types';
 import * as adminApi from '@/lib/api/admin.api';
-import type { Clase } from '@/types/clases.types';
+import type { ClaseListado } from '@/types/admin-clases.types';
 import type { Producto } from '@/types/catalogo.types';
 import type { CrearProductoDto } from '@/lib/api/catalogo.api';
 import { getErrorMessage } from '@/lib/utils/error-handler';
@@ -22,7 +22,7 @@ interface AdminStore {
   dashboard: DashboardData | null;
   stats: SystemStats | null;
   users: AdminUser[];
-  classes: Clase[];
+  classes: ClaseListado[];
   products: Producto[];
   isLoading: boolean;
   error: string | null;
@@ -119,7 +119,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   fetchClasses: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await adminApi.getAllClasses() as unknown as { data: Clase[]; meta?: unknown } | Clase[];
+      const response = await adminApi.getAllClasses() as unknown as { data: ClaseListado[]; meta?: unknown } | ClaseListado[];
       // La API puede devolver { data: [...], meta: {...} } o directamente el array
       const classes = Array.isArray(response) ? response : (response?.data || []);
       set({ classes, isLoading: false });

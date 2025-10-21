@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAdminStore } from '@/store/admin.store';
 import * as adminApi from '@/lib/api/admin.api';
+import type { ClaseListado } from '@/types/admin-clases.types';
 
 /**
  * Hook personalizado para gestión de clases
@@ -85,7 +86,7 @@ export function useClasesFormData() {
 /**
  * Hook para filtrado de clases
  */
-export function useClasesFilter(clases: Record<string, unknown>[]) {
+export function useClasesFilter(clases: ClaseListado[]) {
   const [filter, setFilter] = useState<'all' | 'Programada' | 'Cancelada'>('all');
 
   const filteredClases = filter === 'all'

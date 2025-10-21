@@ -6,12 +6,13 @@ import Confetti from 'react-confetti';
 import { useGamificacionStore } from '@/store/gamificacion.store';
 import { useAuthStore } from '@/store/auth.store';
 import { Lock, Star, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
+import type { Logro } from '@/lib/api/gamificacion.api';
 
 export default function LogrosPage() {
   const { logros, fetchLogros, logroRecienDesbloqueado } = useGamificacionStore();
   const { user } = useAuthStore();
   const [showConfetti, setShowConfetti] = useState(false);
-  const [selectedLogro, setSelectedLogro] = useState<Record<string, unknown>>(null);
+  const [selectedLogro, setSelectedLogro] = useState<Logro | null>(null);
   const [filtroCategoria, setFiltroCategoria] = useState('todos');
   const [paginaActual, setPaginaActual] = useState(0);
 
