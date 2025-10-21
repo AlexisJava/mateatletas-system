@@ -1,18 +1,18 @@
+import { AuthUser } from '../interfaces';
+
 /**
- * Tipos de usuario autenticado
- * Representa el objeto user que se inyecta en request.user después de la autenticación JWT
+ * Tipos detallados de usuario autenticado
+ * Extienden la información mínima garantizada por AuthUser con metadatos específicos
  */
 
-export interface BaseAuthUser {
-  id: string;
-  email: string;
+export interface DetailedAuthUserBase extends AuthUser {
   nombre: string;
   apellido: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface AuthEstudiante extends BaseAuthUser {
+export interface AuthEstudiante extends DetailedAuthUserBase {
   role: 'estudiante';
   edad: number;
   nivel_escolar: 'Primaria' | 'Secundaria' | 'Universidad';
@@ -31,13 +31,13 @@ export interface AuthEstudiante extends BaseAuthUser {
   } | null;
 }
 
-export interface AuthDocente extends BaseAuthUser {
+export interface AuthDocente extends DetailedAuthUserBase {
   role: 'docente';
   titulo: string | null;
   bio: string | null;
 }
 
-export interface AuthTutor extends BaseAuthUser {
+export interface AuthTutor extends DetailedAuthUserBase {
   role: 'tutor';
   dni: string;
   telefono: string | null;
@@ -45,7 +45,7 @@ export interface AuthTutor extends BaseAuthUser {
   ha_completado_onboarding: boolean;
 }
 
-export interface AuthAdmin extends BaseAuthUser {
+export interface AuthAdmin extends DetailedAuthUserBase {
   role: 'admin';
   fecha_registro: Date;
 }
@@ -54,23 +54,27 @@ export interface AuthAdmin extends BaseAuthUser {
  * Union type para todos los tipos de usuario autenticado
  * Usar este tipo en @GetUser() decorators
  */
-export type AuthUser = AuthEstudiante | AuthDocente | AuthTutor | AuthAdmin;
+export type DetailedAuthUser =
+  | AuthEstudiante
+  | AuthDocente
+  | AuthTutor
+  | AuthAdmin;
 
 /**
  * Type guards para verificar el rol del usuario
  */
-export function isEstudiante(user: AuthUser): user is AuthEstudiante {
+export function isEstudiante(user: DetailedAuthUser): user is AuthEstudiante {
   return user.role === 'estudiante';
 }
 
-export function isDocente(user: AuthUser): user is AuthDocente {
+export function isDocente(user: DetailedAuthUser): user is AuthDocente {
   return user.role === 'docente';
 }
 
-export function isTutor(user: AuthUser): user is AuthTutor {
+export function isTutor(user: DetailedAuthUser): user is AuthTutor {
   return user.role === 'tutor';
 }
 
-export function isAdmin(user: AuthUser): user is AuthAdmin {
+export function isAdmin(user: DetailedAuthUser): user is AuthAdmin {
   return user.role === 'admin';
 }

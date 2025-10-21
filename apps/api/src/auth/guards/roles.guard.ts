@@ -1,6 +1,7 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role, ROLES_KEY } from '../decorators/roles.decorator';
+import { AuthUser } from '../interfaces';
 
 /**
  * Guard para verificar que el usuario tenga los roles requeridos
@@ -33,7 +34,9 @@ export class RolesGuard implements CanActivate {
     }
 
     // Obtener el usuario del request (ya validado por JwtAuthGuard)
-    const { user } = context.switchToHttp().getRequest();
+    const { user } = context
+      .switchToHttp()
+      .getRequest<{ user?: AuthUser }>();
 
     if (!user) {
       return false;

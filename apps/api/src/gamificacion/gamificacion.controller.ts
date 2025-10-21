@@ -3,6 +3,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { GamificacionService } from './gamificacion.service';
+import { RequestWithAuthUser } from '../auth/interfaces';
 
 /**
  * DTOs para las peticiones
@@ -93,7 +94,10 @@ export class GamificacionController {
    */
   @Post('puntos')
   @Roles(Role.Docente, Role.Admin)
-  async otorgarPuntos(@Body() dto: OtorgarPuntosDto, @Request() req: any) {
+  async otorgarPuntos(
+    @Body() dto: OtorgarPuntosDto,
+    @Request() req: RequestWithAuthUser,
+  ) {
     return this.gamificacionService.otorgarPuntos(
       req.user.id,
       dto.estudianteId,
@@ -110,7 +114,7 @@ export class GamificacionController {
   @Post('logros/:logroId/desbloquear')
   async desbloquearLogro(
     @Param('logroId') logroId: string,
-    @Request() req: any,
+    @Request() req: RequestWithAuthUser,
   ) {
     return this.gamificacionService.desbloquearLogro(req.user.id, logroId);
   }
