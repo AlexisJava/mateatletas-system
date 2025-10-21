@@ -18,6 +18,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { EstudianteOwnershipGuard } from './guards/estudiante-ownership.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
+import { AuthUser } from '../auth/types';
 
 /**
  * Controller para endpoints de estudiantes
@@ -36,7 +37,7 @@ export class EstudiantesController {
    * @returns Estudiante creado
    */
   @Post()
-  async create(@Body() createDto: CreateEstudianteDto, @GetUser() user: any) {
+  async create(@Body() createDto: CreateEstudianteDto, @GetUser() user: AuthUser) {
     return this.estudiantesService.create(user.id, createDto);
   }
 
@@ -58,7 +59,7 @@ export class EstudiantesController {
    * @returns Lista de estudiantes con metadata
    */
   @Get()
-  async findAll(@Query() query: QueryEstudiantesDto, @GetUser() user: any) {
+  async findAll(@Query() query: QueryEstudiantesDto, @GetUser() user: AuthUser) {
     return this.estudiantesService.findAllByTutor(user.id, query);
   }
 
@@ -68,7 +69,7 @@ export class EstudiantesController {
    * @returns Total de estudiantes
    */
   @Get('count')
-  async count(@GetUser() user: any) {
+  async count(@GetUser() user: AuthUser) {
     const count = await this.estudiantesService.countByTutor(user.id);
     return { count };
   }
@@ -79,7 +80,7 @@ export class EstudiantesController {
    * @returns Estadísticas agregadas
    */
   @Get('estadisticas')
-  async getEstadisticas(@GetUser() user: any) {
+  async getEstadisticas(@GetUser() user: AuthUser) {
     return this.estudiantesService.getEstadisticas(user.id);
   }
 
@@ -93,7 +94,7 @@ export class EstudiantesController {
    */
   @Get(':id/detalle-completo')
   @UseGuards(EstudianteOwnershipGuard)
-  async getDetalleCompleto(@Param('id') id: string, @GetUser() user: any) {
+  async getDetalleCompleto(@Param('id') id: string, @GetUser() user: AuthUser) {
     return this.estudiantesService.getDetalleCompleto(id, user.id);
   }
 
@@ -106,7 +107,7 @@ export class EstudiantesController {
    */
   @Get(':id')
   @UseGuards(EstudianteOwnershipGuard)
-  async findOne(@Param('id') id: string, @GetUser() user: any) {
+  async findOne(@Param('id') id: string, @GetUser() user: AuthUser) {
     return this.estudiantesService.findOne(id, user.id);
   }
 
@@ -123,7 +124,7 @@ export class EstudiantesController {
   async update(
     @Param('id') id: string,
     @Body() updateDto: UpdateEstudianteDto,
-    @GetUser() user: any,
+    @GetUser() user: AuthUser,
   ) {
     return this.estudiantesService.update(id, user.id, updateDto);
   }
@@ -148,7 +149,7 @@ export class EstudiantesController {
   async updateAvatar(
     @Param('id') id: string,
     @Body() body: { avatar_url: string },
-    @GetUser() user: any,
+    @GetUser() user: AuthUser,
   ) {
     // Nota: No necesitamos usar 'user' aquí porque el guard ya validó ownership
     // El guard se ejecuta ANTES de este método y rechaza requests no autorizados
@@ -164,7 +165,7 @@ export class EstudiantesController {
    */
   @Delete(':id')
   @UseGuards(EstudianteOwnershipGuard)
-  async remove(@Param('id') id: string, @GetUser() user: any) {
+  async remove(@Param('id') id: string, @GetUser() user: AuthUser) {
     await this.estudiantesService.remove(id, user.id);
     return {
       message: 'Estudiante eliminado exitosamente',
