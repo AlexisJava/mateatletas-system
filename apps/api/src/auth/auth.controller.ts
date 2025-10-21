@@ -235,7 +235,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async getProfile(@GetUser() user: AuthUser) {
-    return this.authService.getProfile(user.id, user.role);
+    // Usar roles[0] como fallback si role está undefined (multi-role scenario)
+    const role = user.role || user.roles[0];
+    return this.authService.getProfile(user.id, role);
   }
 
   /**

@@ -70,7 +70,7 @@ export class ClasesController {
     @Req() req: RequestWithAuthUser,
   ) {
     const userId = req.user.id;
-    const userRole = req.user.role;
+    const userRole = req.user.role || req.user.roles[0];
     return this.clasesService.cancelarClase(id, userId, userRole);
   }
 
