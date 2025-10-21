@@ -275,10 +275,10 @@ export default function LeccionPlayerPage() {
 
         case 'Texto':
         case 'Lectura':
-          return <TextoContent texto={(leccion.contenido as Record<string, unknown>).texto || (leccion.contenido as Record<string, unknown>).contenido || ''} />;
+          return <TextoContent texto={String((leccion.contenido as Record<string, unknown>).texto || (leccion.contenido as Record<string, unknown>).contenido || '')} />;
 
         case 'Quiz':
-          return <QuizContent preguntas={(leccion.contenido as Record<string, unknown>).preguntas || []} />;
+          return <QuizContent preguntas={((leccion.contenido as Record<string, unknown>).preguntas || []) as { id: string; pregunta: string; opciones: string[]; respuesta_correcta: number; }[]} />;
 
         case 'Tarea':
           return (

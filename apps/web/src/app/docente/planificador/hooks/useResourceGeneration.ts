@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { ResourceType } from './usePlanificador';
+import { type ResourceType } from './usePlanificador';
+
+export type { ResourceType };
 
 export interface ResourceTemplate {
   id: ResourceType;

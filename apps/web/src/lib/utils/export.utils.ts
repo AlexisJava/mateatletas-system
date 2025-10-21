@@ -145,10 +145,18 @@ export const exportChartToPNG = (chartElement: HTMLElement, filename: string) =>
 /**
  * Formatea datos de usuarios para exportación
  */
-export const formatUsersForExport = (users: Record<string, unknown>[]) => {
+export const formatUsersForExport = (users: {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  activo: boolean;
+}[]): ExportableData[] => {
   return users.map((user) => ({
     'ID': user.id,
-    'Nombre': `${user.nombre} ${user.apellido}`,
+    'Nombre': `${user.nombre} ${user.apellido}`.trim(),
     'Email': user.email,
     'Rol': user.role,
     'Fecha de Registro': new Date(user.createdAt).toLocaleDateString('es-ES'),
@@ -159,11 +167,20 @@ export const formatUsersForExport = (users: Record<string, unknown>[]) => {
 /**
  * Formatea datos de clases para exportación
  */
-export const formatClassesForExport = (classes: Record<string, unknown>[]) => {
+export const formatClassesForExport = (classes: {
+  id: string;
+  fecha_hora_inicio: string;
+  duracion_minutos: number;
+  cupo_maximo: number;
+  cupo_disponible: number;
+  estado: string;
+  ruta_curricular?: { nombre: string };
+  docente?: { user?: { nombre: string; apellido: string } };
+}[]): ExportableData[] => {
   return classes.map((clase) => ({
     'ID': clase.id,
-    'Ruta Curricular': clase.ruta_curricular?.nombre || '-',
-    'Docente': `${clase.docente?.user?.nombre || ''} ${clase.docente?.user?.apellido || ''}`.trim() || '-',
+    'Ruta Curricular': clase.ruta_curricular?.nombre ?? '-',
+    'Docente': clase.docente?.user ? `${clase.docente.user.nombre} ${clase.docente.user.apellido}`.trim() : '-',
     'Fecha': new Date(clase.fecha_hora_inicio).toLocaleDateString('es-ES'),
     'Hora': new Date(clase.fecha_hora_inicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
     'Duración (min)': clase.duracion_minutos,
@@ -191,13 +208,6 @@ export const formatProductsForExport = (products: ExportableData[]) => {
   }));
 };
 
-interface SystemReportStats {
-  totalUsers?: number;
-  totalClasses?: number;
-  totalProducts?: number;
-  [key: string]: string | number | undefined;
-}
-
 /**
  * Genera reporte completo del sistema en PDF
  */
@@ -205,7 +215,16 @@ export const generateSystemReport = (data: {
   users: ExportableData[];
   classes: ExportableData[];
   products: ExportableData[];
-  stats: SystemReportStats;
+  stats: {
+    totalUsuarios?: number;
+    totalTutores?: number;
+    totalDocentes?: number;
+    totalEstudiantes?: number;
+    totalClases?: number;
+    clasesActivas?: number;
+    totalProductos?: number;
+    ingresosTotal?: number;
+  };
 }) => {
   try {
     const doc = new jsPDF();
