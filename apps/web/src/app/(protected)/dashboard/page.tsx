@@ -6,6 +6,9 @@ import { useAuthStore } from '@/store/auth.store';
 import apiClient from '@/lib/axios';
 import OnboardingView from './components/OnboardingView';
 import DashboardView from './components/DashboardView';
+import type { Estudiante } from '@/types/estudiante';
+import type { Clase } from '@/types/clases.types';
+import type { Membresia } from '@/types/pago.types';
 
 /**
  * Dashboard del Tutor - Página principal después del login
@@ -15,42 +18,6 @@ import DashboardView from './components/DashboardView';
  * 1. OnboardingView: Cuando NO tiene hijos registrados
  * 2. DashboardView: Cuando SÍ tiene hijos (tabs, stats, etc.)
  */
-
-interface Estudiante {
-  id: string;
-  nombre: string;
-  apellido: string;
-  fecha_nacimiento: Date;
-  grado_escolar?: string;
-}
-
-interface Clase {
-  id: string;
-  fecha_hora_inicio: Date;
-  ruta_curricular: {
-    nombre: string;
-  };
-  docente: {
-    user: {
-      nombre: string;
-      apellido: string;
-    };
-  };
-  inscripciones: Array<{
-    estudiante: Estudiante;
-  }>;
-}
-
-interface Membresia {
-  id: string;
-  estado: string;
-  fecha_inicio: Date;
-  fecha_fin: Date;
-  producto: {
-    nombre: string;
-    precio: number;
-  };
-}
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -92,11 +59,9 @@ export default function DashboardPage() {
 
       // El endpoint /estudiantes devuelve { data: [...], metadata: {...} }
       // Axios interceptor ya extrajo response.data, entonces estudiantesRes ES {data: [...], metadata: {...}}
-      const estudiantesArray = estudiantesRes?.data || [];
-
-      setEstudiantes(estudiantesArray as unknown as Estudiante[]);
-      setClases((clasesRes || []) as unknown as Clase[]);
-      setMembresia(((membresiaRes as Record<string, unknown>)?.membresia || null) as Membresia | null);
+      setEstudiantes(estudiantesRes?.data || []);
+      setClases(clasesRes?.data || []);
+      setMembresia((membresiaRes?.data?.membresia || null) as Membresia | null);
     } catch (error: unknown) {
       // Error loading dashboard data
     } finally {

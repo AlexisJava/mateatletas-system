@@ -10,7 +10,7 @@ import autoTable from 'jspdf-autotable';
 /**
  * Type for exportable data records
  */
-type ExportableData = Record<string, string | number | boolean | null | undefined>;
+export type ExportableData = Record<string, string | number | boolean | null | undefined>;
 
 /**
  * Exporta datos a archivo Excel (.xlsx)

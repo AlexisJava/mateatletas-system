@@ -30,7 +30,7 @@ type ModalType = 'create' | 'cancel' | 'view' | 'edit' | 'estudiantes' | null;
 export default function AdminClasesPage() {
   // Hooks de estado y lógica
   const { clases, isLoading, error, fetchClases, createClase, cancelClase } = useClases();
-  const { rutas, docentes, sectores } = useClasesFormData();
+  const { docentes, sectores } = useClasesFormData();
   const { filter, setFilter, filteredClases } = useClasesFilter(clases);
   const { formData, updateField, resetForm } = useClaseForm();
 
