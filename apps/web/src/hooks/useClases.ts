@@ -14,7 +14,7 @@ import type { SectorFromSchema } from '@/lib/schemas/sector.schema';
  * Encapsula lógica de estado y operaciones CRUD
  */
 export function useClases() {
-  const { classes, createClass, cancelClass, isLoading, error } = useAdminStore();
+  const { classes, createClass, cancelClass, fetchClasses, isLoading, error } = useAdminStore();
 
   // Asegurar que classes siempre sea un array
   const safeClasses = Array.isArray(classes) ? classes : [];
@@ -23,7 +23,7 @@ export function useClases() {
     clases: safeClasses as Clase[],
     isLoading,
     error,
-    fetchClases: fetchClases,
+    fetchClases: fetchClasses,
     createClase: createClass,
     cancelClase: cancelClass,
   };

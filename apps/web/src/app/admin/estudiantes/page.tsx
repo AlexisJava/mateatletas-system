@@ -46,7 +46,8 @@ export default function AdminEstudiantesPage() {
       setError(null);
       // Endpoint para admin que trae TODOS los estudiantes
       const response = await apiClient.get('/admin/estudiantes');
-      setEstudiantes((response || []) as unknown as Estudiante[]);
+      const estudiantes = Array.isArray(response) ? response : [];
+      setEstudiantes(estudiantes as Estudiante[]);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al cargar estudiantes'));
     } finally {

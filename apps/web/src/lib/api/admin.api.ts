@@ -42,11 +42,14 @@ export const getAllClasses = async () => {
 };
 
 export const createClass = async (data: {
-  rutaCurricularId: string;
+  nombre: string;
+  rutaCurricularId?: string;
   docenteId: string;
+  sectorId?: string;
   fechaHoraInicio: string;
   duracionMinutos: number;
   cuposMaximo: number;
+  descripcion?: string;
   productoId?: string;
 }) => {
   return axios.post('/clases', data);
