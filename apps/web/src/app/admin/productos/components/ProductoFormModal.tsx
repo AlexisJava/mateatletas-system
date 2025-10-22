@@ -89,7 +89,7 @@ export const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
               >
                 <option value={TipoProducto.Suscripcion}>Suscripción</option>
                 <option value={TipoProducto.Curso}>Curso</option>
-                <option value={TipoProducto.Recurso}>Recurso Digital</option>
+                <option value={TipoProducto.RecursoDigital}>Recurso Digital</option>
               </select>
             </div>
           </div>

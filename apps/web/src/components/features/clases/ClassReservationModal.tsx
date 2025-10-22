@@ -141,7 +141,7 @@ export function ClassReservationModal({
                 <div>
                   <p className="text-xs text-gray-500">Docente</p>
                   <p className="font-bold text-dark">
-                    {clase.docente?.user?.nombre} {clase.docente?.user?.apellido}
+                    {clase.docente?.nombre} {clase.docente?.apellido}
                   </p>
                 </div>
               </div>

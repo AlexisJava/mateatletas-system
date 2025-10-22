@@ -7,29 +7,17 @@ import { Producto, TipoProducto } from '@/types/catalogo.types';
 import {
   productoSchema,
   productosListSchema,
-  type TipoProducto as TipoProductoContract,
+  createProductoSchema,
+  updateProductoSchema,
+  type CreateProductoDto,
+  type UpdateProductoDto,
 } from '@mateatletas/contracts';
 
 // Re-export types for convenience
 export type { Producto } from '@/types/catalogo.types';
 export { TipoProducto } from '@/types/catalogo.types';
-
-/**
- * DTO para crear/actualizar producto
- */
-export interface CrearProductoDto {
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  tipo: TipoProducto | string;
-  activo: boolean;
-  // Campos específicos por tipo
-  fecha_inicio?: string;
-  fecha_fin?: string;
-  cupo_maximo?: number;
-  duracion_meses?: number;
-  duracion_dias?: number;
-}
+export type CrearProductoDto = CreateProductoDto;
+export type ActualizarProductoDto = UpdateProductoDto;
 
 /**
  * Obtener todos los productos

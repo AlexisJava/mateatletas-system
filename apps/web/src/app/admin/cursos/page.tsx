@@ -13,7 +13,7 @@ import {
   type Modulo,
   type CreateModuloDto
 } from '@/lib/api/cursos.api';
-import { Producto } from '@/types/catalogo.types';
+import { Producto, TipoProducto } from '@/types/catalogo.types';
 
 export default function AdminCursosPage() {
   const router = useRouter();
@@ -38,7 +38,7 @@ export default function AdminCursosPage() {
   }, []);
 
   // Filtrar solo cursos
-  const cursos = products.filter((p) => p.tipo === 'Curso' && p.activo);
+  const cursos = products.filter((p) => p.tipo === TipoProducto.Curso && p.activo);
 
   const loadModulos = async (productoId: string) => {
     setLoadingModulos(true);

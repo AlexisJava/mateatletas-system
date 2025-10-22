@@ -25,6 +25,7 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+import type { ReporteAdmin } from '@/types/reportes.types';
 
 export default function AdminReportesPage() {
   const { stats, users, classes, fetchDashboard, fetchStats, fetchUsers, fetchClasses, isLoading } = useAdminStore();
@@ -106,11 +107,20 @@ export default function AdminReportesPage() {
   };
 
   const handleGenerateFullReport = async () => {
+    const reporte: ReporteAdmin = {
+      stats,
+      usuarios: users,
+      clases,
+      productos: [],
+      fechaInicio: dateRange.start,
+      fechaFin: dateRange.end,
+    };
+
     const result = generateSystemReport({
-      users: formatUsersForExport(users),
-      classes: formatClassesForExport(classes),
+      users: formatUsersForExport(reporte.usuarios),
+      classes: formatClassesForExport(reporte.clases),
       products: [], // Will be added when products page is complete
-      stats: stats || {}
+      stats: reporte.stats || {},
     });
 
     setExportStatus(result);

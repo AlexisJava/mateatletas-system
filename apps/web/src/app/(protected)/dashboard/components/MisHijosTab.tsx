@@ -207,7 +207,7 @@ export default function MisHijosTab({ estudiantes }: Props) {
                                 • {fechaClase.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                               </p>
                               <p className="text-xs text-gray-500">
-                                Prof. {clase.docente?.user?.nombre} {clase.docente?.user?.apellido}
+                                Prof. {clase.docente?.nombre} {clase.docente?.apellido}
                               </p>
                             </div>
                           </div>

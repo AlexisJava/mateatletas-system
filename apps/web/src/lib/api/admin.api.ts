@@ -4,6 +4,9 @@
 
 import axios from '@/lib/axios';
 import { DashboardData, AdminUser, ChangeRoleDto, UpdateRolesDto, SystemStats } from '@/types/admin.types';
+import type { ClaseListado } from '@/types/admin-clases.types';
+import type { Producto } from '@/types/catalogo.types';
+import { z } from 'zod';
 
 // Schemas Zod para validación runtime
 import {
