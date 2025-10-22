@@ -405,7 +405,11 @@ export class LoggerService implements NestLoggerService {
   /**
    * Log de errores de validación
    */
-  logValidationError(field: string, value: unknown, constraints: Record<string, string>) {
+  logValidationError(
+    field: string,
+    value: unknown,
+    constraints: Record<string, string>,
+  ) {
     this.logger.warn('Validation Error', {
       context: this.context,
       eventType: 'validation',

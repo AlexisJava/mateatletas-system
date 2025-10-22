@@ -13,8 +13,14 @@ import { ProductosService } from '../catalogo/productos.service';
 import { MercadoPagoService } from './mercadopago.service';
 import { MockPagosService } from './mock-pagos.service';
 import { TipoProducto } from '@prisma/client';
-import { MercadoPagoWebhookDto } from './dto/mercadopago-webhook.dto';
-import { LoggerMetadata } from '../common/logger';
+import type {
+  MercadoPagoPayment,
+  ProcesarPagoInscripcionResult,
+  ProcesarPagoMembresiaResult,
+  ProcesarWebhookResult,
+  ProcessedWebhookCache,
+} from './dto/mercadopago.types';
+import type { MercadoPagoWebhookDto } from './dto/mercadopago-webhook.dto';
 
 /**
  * Servicio principal para gestionar pagos y membresías
@@ -51,17 +57,21 @@ export class PagosService {
     );
 
     // Si no se especifica producto, buscar el primer producto de suscripción activo
-    let producto;
+    type ProductoEntity = Awaited<
+      ReturnType<ProductosService['findById']>
+    >;
+    let producto: ProductoEntity;
     if (productoId) {
       producto = await this.productosService.findById(productoId);
     } else {
       const suscripciones = await this.productosService.findSuscripciones();
-      if (suscripciones.length === 0) {
+      const primeraSuscripcion = suscripciones[0];
+      if (!primeraSuscripcion) {
         throw new NotFoundException(
           'No hay productos de suscripción disponibles',
         );
       }
-      producto = suscripciones[0]; // Tomar el primero (más económico)
+      producto = primeraSuscripcion; // Tomar el primero (más económico)
     }
 
     // Validar que sea producto de suscripción
@@ -252,19 +262,10 @@ export class PagosService {
    * 4. Rollback automático: Si falla algo, la transacción hace rollback
    * 5. Logging detallado: Trazabilidad completa para debugging
    */
-  private buildWebhookLogMetadata(
-    payload: MercadoPagoWebhookDto,
-  ): LoggerMetadata {
-    const liveModeValue = payload.live_mode;
-    let liveMode: boolean | string | undefined = liveModeValue;
-
-    if (typeof liveModeValue === 'string') {
-      if (liveModeValue.toLowerCase() === 'true') {
-        liveMode = true;
-      } else if (liveModeValue.toLowerCase() === 'false') {
-        liveMode = false;
-      }
-    }
+  async procesarWebhookMercadoPago(
+    body: MercadoPagoWebhookDto,
+  ): Promise<ProcesarWebhookResult> {
+    this.logger.log('📩 Webhook recibido de MercadoPago');
 
     return {
       type: payload.type,
@@ -311,7 +312,9 @@ export class PagosService {
     const webhookKey = `webhook:processed:${paymentId}`;
 
     try {
-      const alreadyProcessed = await this.cacheManager.get(webhookKey);
+      const alreadyProcessed = await this.cacheManager.get<
+        ProcessedWebhookCache | undefined
+      >(webhookKey);
       if (alreadyProcessed) {
         this.logger.log(
           `✅ Webhook ${paymentId} ya fue procesado anteriormente (idempotencia)`,
@@ -319,7 +322,7 @@ export class PagosService {
         return {
           message: 'Webhook already processed (idempotent)',
           paymentId,
-          previouslyProcessedAt: (alreadyProcessed as any).processedAt,
+          previouslyProcessedAt: alreadyProcessed.processedAt,
         };
       }
     } catch (cacheError) {
@@ -350,7 +353,9 @@ export class PagosService {
       // ====================================================================
       // PROCESAMIENTO CON TRANSACCIÓN ATÓMICA
       // ====================================================================
-      let resultado: any;
+      let resultado:
+        | ProcesarPagoMembresiaResult
+        | ProcesarPagoInscripcionResult;
 
       if (refParts[0] === 'membresia') {
         resultado = await this.procesarPagoMembresia(payment, refParts);
@@ -366,7 +371,7 @@ export class PagosService {
       // TTL = 7 días (suficiente para evitar duplicados, expira automáticamente)
       // ====================================================================
       try {
-        await this.cacheManager.set(
+        await this.cacheManager.set<ProcessedWebhookCache>(
           webhookKey,
           {
             processedAt: new Date().toISOString(),
@@ -410,7 +415,10 @@ export class PagosService {
    * 3. Rollback automático: Si falla cualquier operación, se hace rollback completo
    * 4. Logging detallado: Trazabilidad completa de cada cambio de estado
    */
-  private async procesarPagoMembresia(payment: any, refParts: string[]) {
+  private async procesarPagoMembresia(
+    payment: MercadoPagoPayment,
+    refParts: string[],
+  ): Promise<ProcesarPagoMembresiaResult> {
     const membresiaId = refParts[1];
 
     // ====================================================================
@@ -511,7 +519,10 @@ export class PagosService {
    * 3. Rollback automático: Si falla, la transacción se revierte completamente
    * 4. Logging detallado: Cada acción queda registrada con contexto completo
    */
-  private async procesarPagoInscripcion(payment: any, refParts: string[]) {
+  private async procesarPagoInscripcion(
+    payment: MercadoPagoPayment,
+    refParts: string[],
+  ): Promise<ProcesarPagoInscripcionResult> {
     const inscripcionId = refParts[1];
 
     // ====================================================================

@@ -1,7 +1,28 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Role } from '../../auth/decorators/roles.decorator';
 import { parseUserRoles } from '../../common/utils/role.utils';
+
+type TutorWithCount = Prisma.TutorGetPayload<{
+  include: {
+    _count: {
+      select: {
+        estudiantes: true;
+      };
+    };
+  };
+}>;
+
+type DocenteWithCount = Prisma.DocenteGetPayload<{
+  include: {
+    _count: {
+      select: {
+        clases: true;
+      };
+    };
+  };
+}>;
 
 /**
  * Servicio simplificado para gestión de usuarios
@@ -67,16 +88,17 @@ export class AdminUsuariosService {
   /**
    * Mapear tutor a formato de usuario
    */
-  private mapTutorToUser(tutor: any) {
+  private mapTutorToUser(tutor: TutorWithCount) {
     const userRoles = parseUserRoles(tutor.roles);
     const finalRoles = userRoles.length > 0 ? userRoles : [Role.Tutor];
+    const primaryRole = finalRoles[0] ?? Role.Tutor;
 
     return {
       id: tutor.id,
       email: tutor.email,
       nombre: tutor.nombre,
       apellido: tutor.apellido,
-      role: finalRoles[0] as any, // First role for backward compatibility
+      role: primaryRole,
       roles: finalRoles,
       activo: true,
       createdAt: tutor.createdAt,
@@ -92,16 +114,17 @@ export class AdminUsuariosService {
   /**
    * Mapear docente a formato de usuario
    */
-  private mapDocenteToUser(docente: any) {
+  private mapDocenteToUser(docente: DocenteWithCount) {
     const userRoles = parseUserRoles(docente.roles);
     const finalRoles = userRoles.length > 0 ? userRoles : [Role.Docente];
+    const primaryRole = finalRoles[0] ?? Role.Docente;
 
     return {
       id: docente.id,
       email: docente.email,
       nombre: docente.nombre,
       apellido: docente.apellido,
-      role: finalRoles[0] as any,
+      role: primaryRole,
       roles: finalRoles,
       activo: true,
       createdAt: docente.createdAt,
@@ -117,16 +140,17 @@ export class AdminUsuariosService {
   /**
    * Mapear admin a formato de usuario
    */
-  private mapAdminToUser(admin: any) {
+  private mapAdminToUser(admin: Prisma.Admin) {
     const userRoles = parseUserRoles(admin.roles);
     const finalRoles = userRoles.length > 0 ? userRoles : [Role.Admin];
+    const primaryRole = finalRoles[0] ?? Role.Admin;
 
     return {
       id: admin.id,
       email: admin.email,
       nombre: admin.nombre,
       apellido: admin.apellido,
-      role: finalRoles[0] as any,
+      role: primaryRole,
       roles: finalRoles,
       activo: true,
       createdAt: admin.createdAt,

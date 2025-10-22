@@ -23,10 +23,10 @@ export function IsValidAge(
       constraints: [minAge, maxAge],
       options: validationOptions,
       validator: {
-        validate(value: any, args: ValidationArguments) {
+        validate(value: unknown, args: ValidationArguments) {
           if (!value) return false;
 
-          const birthDate = new Date(value);
+          const birthDate = new Date(value as string | number | Date);
           const today = new Date();
 
           // Calcular edad
