@@ -78,10 +78,10 @@ apiClient.interceptors.response.use(
           console.error('🚫 Acceso denegado:', error.response?.data?.message);
 
           // Opcional: Mostrar un toast o notificación
-          if (typeof window !== 'undefined' && (window as unknown as { showToast?: (msg: string, type: string) => void }).showToast) {
-            (window as unknown as { showToast: (msg: string, type: string) => void }).showToast(
+          if (typeof window !== 'undefined' && window.showToast) {
+            window.showToast(
               error.response?.data?.message || 'No tienes permisos para realizar esta acción',
-              'error'
+              'error',
             );
           }
           break;
@@ -105,10 +105,10 @@ apiClient.interceptors.response.use(
           console.error('💥 Error del servidor:', error.response?.data?.message);
 
           // Opcional: Mostrar un toast o notificación
-          if (typeof window !== 'undefined' && (window as unknown as { showToast?: (msg: string, type: string) => void }).showToast) {
-            (window as unknown as { showToast: (msg: string, type: string) => void }).showToast(
+          if (typeof window !== 'undefined' && window.showToast) {
+            window.showToast(
               'Ocurrió un error en el servidor. Por favor, intenta de nuevo.',
-              'error'
+              'error',
             );
           }
           break;

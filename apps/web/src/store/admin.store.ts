@@ -119,10 +119,8 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   fetchClasses: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await adminApi.getAllClasses() as unknown as { data: ClaseListado[]; meta?: unknown } | ClaseListado[];
-      // La API puede devolver { data: [...], meta: {...} } o directamente el array
-      const classes = Array.isArray(response) ? response : (response?.data || []);
-      set({ classes, isLoading: false });
+      const { data } = await adminApi.getAllClasses();
+      set({ classes: data, isLoading: false });
     } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error loading classes'), classes: [], isLoading: false });
     }
@@ -153,7 +151,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   fetchProducts: async (includeInactive = true) => {
     set({ isLoading: true, error: null });
     try {
-      const products = await adminApi.getAllProducts(includeInactive) as unknown as Producto[];
+      const products = await adminApi.getAllProducts(includeInactive);
       set({ products, isLoading: false });
     } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error loading products'), isLoading: false });
@@ -162,7 +160,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
 
   createProduct: async (data: CrearProductoDto): Promise<boolean> => {
     try {
-      await adminApi.createProduct(data as unknown as Record<string, unknown>);
+      await adminApi.createProduct(data);
       await get().fetchProducts();
       return true;
     } catch (error: unknown) {

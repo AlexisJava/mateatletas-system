@@ -55,7 +55,7 @@ export default function AdminCursosPage() {
   };
 
   const handleSelectCurso = async (curso: Producto) => {
-    setSelectedCurso(curso as unknown as Record<string, unknown>);
+    setSelectedCurso(curso);
     await loadModulos(curso.id);
   };
 
@@ -64,8 +64,8 @@ export default function AdminCursosPage() {
 
     try {
       setError(null);
-      await createModulo(selectedCurso.id as string, formData);
-      await loadModulos(selectedCurso.id as string);
+      await createModulo(selectedCurso.id, formData);
+      await loadModulos(selectedCurso.id);
       closeModuloModal();
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al crear módulo'));
@@ -78,7 +78,7 @@ export default function AdminCursosPage() {
     try {
       setError(null);
       await updateModulo(editingModulo.id, formData);
-      await loadModulos(selectedCurso!.id as string);
+      await loadModulos(selectedCurso!.id);
       closeModuloModal();
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al actualizar módulo'));
@@ -91,7 +91,7 @@ export default function AdminCursosPage() {
     try {
       setError(null);
       await deleteModulo(moduloId);
-      await loadModulos(selectedCurso!.id as string);
+      await loadModulos(selectedCurso!.id);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al eliminar módulo'));
     }
