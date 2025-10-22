@@ -260,11 +260,27 @@ export class ClasesManagementService {
         where,
         include: {
           rutaCurricular: { select: { nombre: true, color: true } },
-          docente: { select: { nombre: true, apellido: true } },
+          docente: {
+            select: {
+              nombre: true,
+              apellido: true
+            }
+          },
+          sector: {
+            select: {
+              id: true,
+              nombre: true,
+              icono: true,
+              color: true
+            }
+          },
           producto: { select: { nombre: true, tipo: true } },
           inscripciones: {
             select: { id: true, estudiante_id: true },
           },
+          _count: {
+            select: { inscripciones: true }
+          }
         },
         orderBy: { fecha_hora_inicio: 'asc' },
         skip,

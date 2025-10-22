@@ -234,16 +234,32 @@ export class DocentesService {
   }
 
   /**
-   * Elimina un docente (soft delete o hard delete según necesidad)
+   * Elimina un docente
    * @param id - ID del docente
+   * @throws ConflictException si el docente tiene clases asignadas
    */
   async remove(id: string) {
     const docente = await this.prisma.docente.findUnique({
       where: { id },
+      include: {
+        _count: {
+          select: {
+            clases: true,
+          },
+        },
+      },
     });
 
     if (!docente) {
       throw new NotFoundException('Docente no encontrado');
+    }
+
+    // Validar que no tenga clases asignadas
+    if (docente._count.clases > 0) {
+      throw new ConflictException(
+        `No se puede eliminar el docente porque tiene ${docente._count.clases} clase(s) asignada(s). ` +
+        `Debe reasignar las clases a otro docente antes de eliminar.`,
+      );
     }
 
     await this.prisma.docente.delete({
@@ -251,5 +267,53 @@ export class DocentesService {
     });
 
     return { message: 'Docente eliminado correctamente' };
+  }
+
+  /**
+   * Reasigna todas las clases de un docente a otro
+   * @param fromDocenteId - ID del docente actual
+   * @param toDocenteId - ID del nuevo docente
+   * @returns Cantidad de clases reasignadas
+   */
+  async reasignarClases(fromDocenteId: string, toDocenteId: string) {
+    // Verificar que ambos docentes existen
+    const [fromDocente, toDocente] = await Promise.all([
+      this.prisma.docente.findUnique({
+        where: { id: fromDocenteId },
+        include: {
+          _count: {
+            select: { clases: true },
+          },
+        },
+      }),
+      this.prisma.docente.findUnique({
+        where: { id: toDocenteId },
+      }),
+    ]);
+
+    if (!fromDocente) {
+      throw new NotFoundException('Docente origen no encontrado');
+    }
+
+    if (!toDocente) {
+      throw new NotFoundException('Docente destino no encontrado');
+    }
+
+    if (fromDocenteId === toDocenteId) {
+      throw new ConflictException('No se puede reasignar clases al mismo docente');
+    }
+
+    // Reasignar todas las clases
+    const result = await this.prisma.clase.updateMany({
+      where: { docente_id: fromDocenteId },
+      data: { docente_id: toDocenteId },
+    });
+
+    return {
+      message: `${result.count} clase(s) reasignada(s) correctamente`,
+      clasesReasignadas: result.count,
+      desde: `${fromDocente.nombre} ${fromDocente.apellido}`,
+      hacia: `${toDocente.nombre} ${toDocente.apellido}`,
+    };
   }
 }
