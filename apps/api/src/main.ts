@@ -65,7 +65,6 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000', // Frontend development
-      'http://localhost:3002', // Frontend alternative port
       process.env.FRONTEND_URL || 'http://localhost:3000',
     ].filter(Boolean), // Remove undefined values
     credentials: true,
