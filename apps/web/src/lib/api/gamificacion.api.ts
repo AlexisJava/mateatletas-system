@@ -1,4 +1,5 @@
 import apiClient from '../axios';
+import { rankingResponseSchema, type RankingResponse } from '@/lib/schemas/ranking.schema';
 
 export interface ProximaClase {
   id: string;
@@ -74,13 +75,7 @@ export interface Puntos {
   porRuta: Record<string, number>;
 }
 
-export interface Ranking {
-  equipoActual: Record<string, unknown> | null;
-  posicionEquipo: number;
-  posicionGlobal: number;
-  rankingEquipo: Array<Record<string, unknown>>;
-  rankingGlobal: Array<Record<string, unknown>>;
-}
+export type Ranking = RankingResponse;
 
 export interface Progreso {
   ruta: string;
@@ -151,7 +146,8 @@ export const gamificacionApi = {
    * Obtener ranking del estudiante
    */
   getRanking: async (estudianteId: string): Promise<Ranking> => {
-    return await apiClient.get(`/gamificacion/ranking/${estudianteId}`);
+    const response = await apiClient.get(`/gamificacion/ranking/${estudianteId}`);
+    return rankingResponseSchema.parse(response);
   },
 
   /**

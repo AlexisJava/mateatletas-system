@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import {
   CreateTareaDto,
@@ -39,6 +43,14 @@ export class EventosService {
    * Crear una Tarea completa
    */
   async createTarea(docenteId: string, dto: CreateTareaDto) {
+    const subtareasJson = this.serializeArray(dto.subtareas);
+    const archivosJson = this.serializeArray(dto.archivos);
+    const recordatoriosJson = this.serializeArray(dto.recordatorios);
+    const recurrenciaJson =
+      dto.recurrencia !== undefined
+        ? this.serializeObject(dto.recurrencia)
+        : undefined;
+
     return this.prisma.evento.create({
       data: {
         titulo: dto.titulo,
@@ -56,14 +68,14 @@ export class EventosService {
             porcentaje_completado: dto.porcentaje_completado ?? 0,
             categoria: dto.categoria,
             etiquetas: dto.etiquetas ?? [],
-            subtareas: (dto.subtareas ?? []) as unknown as Prisma.InputJsonValue,
-            archivos: (dto.archivos ?? []) as unknown as Prisma.InputJsonValue,
+            subtareas: subtareasJson,
+            archivos: archivosJson,
             clase_relacionada_id: dto.clase_relacionada_id,
             estudiante_relacionado_id: dto.estudiante_relacionado_id,
             tiempo_estimado_minutos: dto.tiempo_estimado_minutos,
             tiempo_real_minutos: dto.tiempo_real_minutos,
-            recurrencia: dto.recurrencia as unknown as Prisma.InputJsonValue,
-            recordatorios: (dto.recordatorios ?? []) as unknown as Prisma.InputJsonValue,
+            recurrencia: recurrenciaJson,
+            recordatorios: recordatoriosJson,
           },
         },
       },
@@ -323,9 +335,9 @@ export class EventosService {
     if (dto.categoria !== undefined) tareaUpdate.categoria = dto.categoria;
     if (dto.etiquetas !== undefined) tareaUpdate.etiquetas = dto.etiquetas;
     if (dto.subtareas !== undefined)
-      tareaUpdate.subtareas = dto.subtareas as unknown as Prisma.InputJsonValue;
+      tareaUpdate.subtareas = this.serializeArray(dto.subtareas);
     if (dto.archivos !== undefined)
-      tareaUpdate.archivos = dto.archivos as unknown as Prisma.InputJsonValue;
+      tareaUpdate.archivos = this.serializeArray(dto.archivos);
     if (dto.clase_relacionada_id !== undefined)
       tareaUpdate.clase_relacionada_id = dto.clase_relacionada_id;
     if (dto.estudiante_relacionado_id !== undefined)
@@ -335,9 +347,9 @@ export class EventosService {
     if (dto.tiempo_real_minutos !== undefined)
       tareaUpdate.tiempo_real_minutos = dto.tiempo_real_minutos;
     if (dto.recurrencia !== undefined)
-      tareaUpdate.recurrencia = dto.recurrencia as unknown as Prisma.InputJsonValue;
+      tareaUpdate.recurrencia = this.serializeObject(dto.recurrencia);
     if (dto.recordatorios !== undefined)
-      tareaUpdate.recordatorios = dto.recordatorios as unknown as Prisma.InputJsonValue;
+      tareaUpdate.recordatorios = this.serializeArray(dto.recordatorios);
 
     // Marcar como completada si porcentaje es 100
     if (dto.porcentaje_completado === 100) {
@@ -495,30 +507,35 @@ export class EventosService {
    * Obtener estadísticas del calendario
    */
   async getEstadisticas(docenteId: string) {
-    const [totalTareas, totalRecordatorios, totalNotas, tareasPendientes, tareasCompletadas] =
-      await Promise.all([
-        this.prisma.evento.count({
-          where: { docente_id: docenteId, tipo: TipoEvento.TAREA },
-        }),
-        this.prisma.evento.count({
-          where: { docente_id: docenteId, tipo: TipoEvento.RECORDATORIO },
-        }),
-        this.prisma.evento.count({
-          where: { docente_id: docenteId, tipo: TipoEvento.NOTA },
-        }),
-        this.prisma.tarea.count({
-          where: {
-            evento: { docente_id: docenteId },
-            estado: 'PENDIENTE',
-          },
-        }),
-        this.prisma.tarea.count({
-          where: {
-            evento: { docente_id: docenteId },
-            estado: 'COMPLETADA',
-          },
-        }),
-      ]);
+    const [
+      totalTareas,
+      totalRecordatorios,
+      totalNotas,
+      tareasPendientes,
+      tareasCompletadas,
+    ] = await Promise.all([
+      this.prisma.evento.count({
+        where: { docente_id: docenteId, tipo: TipoEvento.TAREA },
+      }),
+      this.prisma.evento.count({
+        where: { docente_id: docenteId, tipo: TipoEvento.RECORDATORIO },
+      }),
+      this.prisma.evento.count({
+        where: { docente_id: docenteId, tipo: TipoEvento.NOTA },
+      }),
+      this.prisma.tarea.count({
+        where: {
+          evento: { docente_id: docenteId },
+          estado: 'PENDIENTE',
+        },
+      }),
+      this.prisma.tarea.count({
+        where: {
+          evento: { docente_id: docenteId },
+          estado: 'COMPLETADA',
+        },
+      }),
+    ]);
 
     return {
       totalTareas,
@@ -528,5 +545,13 @@ export class EventosService {
       tareasCompletadas,
       total: totalTareas + totalRecordatorios + totalNotas,
     };
+  }
+
+  private serializeArray<T>(items: T[] | undefined): Prisma.InputJsonValue {
+    return JSON.parse(JSON.stringify(items ?? []));
+  }
+
+  private serializeObject<T>(item: T): Prisma.InputJsonValue {
+    return JSON.parse(JSON.stringify(item));
   }
 }
