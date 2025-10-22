@@ -32,10 +32,11 @@ export const rutaEspecialidadSchema = z.object({
   id: z.string(),
   nombre: z.string(),
   descripcion: z.string().optional(),
-  sectorId: z.string(),
-  activo: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  sectorId: z.string().optional(), // Opcional: puede no venir en algunos endpoints
+  activo: z.boolean().optional(), // Opcional: puede no venir en algunos endpoints
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+  color: z.string().optional(), // Color de la ruta (puede venir del backend)
 
   // Relaciones opcionales
   sector: sectorSchema.optional(),
