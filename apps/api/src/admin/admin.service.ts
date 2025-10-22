@@ -8,6 +8,44 @@ import { AdminRolesService } from './services/admin-roles.service';
 import { AdminEstudiantesService } from './services/admin-estudiantes.service';
 import { CircuitBreaker } from '../common/circuit-breaker';
 
+type CrearEstudianteRapidoData = Parameters<
+  AdminEstudiantesService['crearEstudianteRapido']
+>[0];
+
+type DashboardStatsResult = Awaited<
+  ReturnType<AdminStatsService['getDashboardStats']>
+>;
+type SystemStatsResult = Awaited<
+  ReturnType<AdminStatsService['getSystemStats']>
+>;
+type AlertListResult = Awaited<
+  ReturnType<AdminAlertasService['listarAlertas']>
+>;
+type ResolverAlertaResult = Awaited<
+  ReturnType<AdminAlertasService['resolverAlerta']>
+>;
+type SugerirSolucionResult = Awaited<
+  ReturnType<AdminAlertasService['sugerirSolucion']>
+>;
+type CrearAlertaResult = Awaited<
+  ReturnType<AdminAlertasService['crearAlerta']>
+>;
+type UsuariosListResult = Awaited<
+  ReturnType<AdminUsuariosService['listarUsuarios']>
+>;
+type DeleteUserResult = Awaited<
+  ReturnType<AdminUsuariosService['deleteUser']>
+>;
+type EstudiantesListResult = Awaited<
+  ReturnType<AdminEstudiantesService['listarEstudiantes']>
+>;
+type CrearEstudianteResult = Awaited<
+  ReturnType<AdminEstudiantesService['crearEstudianteRapido']>
+>;
+type RoleMutationResult = Awaited<
+  ReturnType<AdminRolesService['changeUserRole']>
+>;
+
 /**
  * Servicio principal de administración
  * REFACTORIZADO (ETAPA 2): Delega operaciones específicas a servicios especializados
@@ -35,45 +73,133 @@ import { CircuitBreaker } from '../common/circuit-breaker';
 export class AdminService {
   private readonly logger = new Logger(AdminService.name);
 
-  // Circuit Breakers para cada servicio delegado
-  private readonly statsCircuit = new CircuitBreaker({
-    name: 'AdminStatsService',
+  // Circuit Breakers para cada operación delegada
+  private readonly dashboardStatsCircuit = new CircuitBreaker<
+    [],
+    DashboardStatsResult
+  >({
+    name: 'AdminStatsService.getDashboardStats',
     failureThreshold: 5,
-    resetTimeout: 60000, // 60 segundos
+    resetTimeout: 60000,
     fallback: () => ({
+      activeMemberships: 0,
+      upcomingClasses: 0,
+      openAlerts: 0,
       totalEstudiantes: 0,
       totalDocentes: 0,
-      totalClases: 0,
-      clasesHoy: 0,
+      totalTutores: 0,
+      fecha: new Date(),
     }),
   });
 
-  private readonly alertasCircuit = new CircuitBreaker({
-    name: 'AdminAlertasService',
+  private readonly systemStatsCircuit = new CircuitBreaker<
+    [],
+    SystemStatsResult
+  >({
+    name: 'AdminStatsService.getSystemStats',
+    failureThreshold: 5,
+    resetTimeout: 60000,
+    fallback: () => ({
+      totalUsuarios: 0,
+      totalTutores: 0,
+      totalDocentes: 0,
+      totalEstudiantes: 0,
+      totalClases: 0,
+      clasesActivas: 0,
+      totalProductos: 0,
+      ingresosTotal: 0,
+    }),
+  });
+
+  private readonly listarAlertasCircuit = new CircuitBreaker<
+    [],
+    AlertListResult
+  >({
+    name: 'AdminAlertasService.listarAlertas',
     failureThreshold: 5,
     resetTimeout: 60000,
     fallback: () => [],
   });
 
-  private readonly usuariosCircuit = new CircuitBreaker({
-    name: 'AdminUsuariosService',
+  private readonly resolverAlertaCircuit = new CircuitBreaker<
+    [],
+    ResolverAlertaResult
+  >({
+    name: 'AdminAlertasService.resolverAlerta',
+    failureThreshold: 5,
+    resetTimeout: 60000,
+  });
+
+  private readonly sugerirSolucionCircuit = new CircuitBreaker<
+    [],
+    SugerirSolucionResult
+  >({
+    name: 'AdminAlertasService.sugerirSolucion',
+    failureThreshold: 5,
+    resetTimeout: 60000,
+  });
+
+  private readonly crearAlertaCircuit = new CircuitBreaker<
+    [],
+    CrearAlertaResult
+  >({
+    name: 'AdminAlertasService.crearAlerta',
+    failureThreshold: 5,
+    resetTimeout: 60000,
+  });
+
+  private readonly listarUsuariosCircuit = new CircuitBreaker<
+    [],
+    UsuariosListResult
+  >({
+    name: 'AdminUsuariosService.listarUsuarios',
     failureThreshold: 5,
     resetTimeout: 60000,
     fallback: () => [],
   });
 
-  private readonly estudiantesCircuit = new CircuitBreaker({
-    name: 'AdminEstudiantesService',
+  private readonly deleteUsuarioCircuit = new CircuitBreaker<
+    [],
+    DeleteUserResult
+  >({
+    name: 'AdminUsuariosService.deleteUser',
     failureThreshold: 5,
     resetTimeout: 60000,
-    fallback: () => [],
   });
 
-  private readonly rolesCircuit = new CircuitBreaker({
+  private readonly listarEstudiantesCircuit = new CircuitBreaker<
+    [],
+    EstudiantesListResult
+  >({
+    name: 'AdminEstudiantesService.listarEstudiantes',
+    failureThreshold: 5,
+    resetTimeout: 60000,
+    fallback: () => ({
+      data: [],
+      metadata: {
+        total: 0,
+        page: 1,
+        limit: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    }),
+  });
+
+  private readonly crearEstudianteCircuit = new CircuitBreaker<
+    [],
+    CrearEstudianteResult
+  >({
+    name: 'AdminEstudiantesService.crearEstudianteRapido',
+    failureThreshold: 5,
+    resetTimeout: 60000,
+  });
+
+  private readonly rolesCircuit = new CircuitBreaker<[], RoleMutationResult>({
     name: 'AdminRolesService',
     failureThreshold: 5,
     resetTimeout: 60000,
-    // No fallback para roles - Si falla, debe lanzar error (operaciones críticas)
   });
 
   constructor(
@@ -93,8 +219,8 @@ export class AdminService {
    * PROTECCIÓN: Circuit Breaker con fallback (stats en 0)
    */
   async getDashboardStats() {
-    return this.statsCircuit.execute(
-      () => this.statsService.getDashboardStats(),
+    return this.dashboardStatsCircuit.execute(() =>
+      this.statsService.getDashboardStats(),
     );
   }
 
@@ -104,7 +230,9 @@ export class AdminService {
    * PROTECCIÓN: Circuit Breaker con fallback (stats en 0)
    */
   async getSystemStats() {
-    return this.statsCircuit.execute(() => this.statsService.getSystemStats());
+    return this.systemStatsCircuit.execute(() =>
+      this.statsService.getSystemStats(),
+    );
   }
 
   /**
@@ -113,7 +241,7 @@ export class AdminService {
    * PROTECCIÓN: Circuit Breaker con fallback (array vacío)
    */
   async listarAlertas() {
-    return this.alertasCircuit.execute(() =>
+    return this.listarAlertasCircuit.execute(() =>
       this.alertasService.listarAlertas(),
     );
   }
@@ -124,7 +252,7 @@ export class AdminService {
    * PROTECCIÓN: Circuit Breaker (sin fallback - debe fallar si servicio cae)
    */
   async resolverAlerta(id: string) {
-    return this.alertasCircuit.execute(() =>
+    return this.resolverAlertaCircuit.execute(() =>
       this.alertasService.resolverAlerta(id),
     );
   }
@@ -135,7 +263,7 @@ export class AdminService {
    * PROTECCIÓN: Circuit Breaker (sin fallback - debe fallar si servicio cae)
    */
   async sugerirSolucion(alertaId: string) {
-    return this.alertasCircuit.execute(() =>
+    return this.sugerirSolucionCircuit.execute(() =>
       this.alertasService.sugerirSolucion(alertaId),
     );
   }
@@ -146,7 +274,7 @@ export class AdminService {
    * PROTECCIÓN: Circuit Breaker con fallback (array vacío)
    */
   async listarUsuarios() {
-    return this.usuariosCircuit.execute(() =>
+    return this.listarUsuariosCircuit.execute(() =>
       this.usuariosService.listarUsuarios(),
     );
   }
@@ -157,7 +285,7 @@ export class AdminService {
    * PROTECCIÓN: Circuit Breaker con fallback (array vacío)
    */
   async listarEstudiantes() {
-    return this.estudiantesCircuit.execute(() =>
+    return this.listarEstudiantesCircuit.execute(() =>
       this.estudiantesService.listarEstudiantes(),
     );
   }
@@ -167,8 +295,8 @@ export class AdminService {
    * DELEGACIÓN: AdminEstudiantesService
    * PROTECCIÓN: Circuit Breaker (sin fallback - debe fallar si servicio cae)
    */
-  async crearEstudianteRapido(data: any) {
-    return this.estudiantesCircuit.execute(() =>
+  async crearEstudianteRapido(data: CrearEstudianteRapidoData) {
+    return this.crearEstudianteCircuit.execute(() =>
       this.estudiantesService.crearEstudianteRapido(data),
     );
   }
@@ -201,7 +329,7 @@ export class AdminService {
    * PROTECCIÓN: Circuit Breaker (sin fallback - operación crítica)
    */
   async deleteUser(id: string) {
-    return this.usuariosCircuit.execute(() =>
+    return this.deleteUsuarioCircuit.execute(() =>
       this.usuariosService.deleteUser(id),
     );
   }
@@ -216,7 +344,7 @@ export class AdminService {
     claseId: string,
     descripcion: string,
   ) {
-    return this.alertasCircuit.execute(() =>
+    return this.crearAlertaCircuit.execute(() =>
       this.alertasService.crearAlerta(estudianteId, claseId, descripcion),
     );
   }
@@ -227,10 +355,16 @@ export class AdminService {
    */
   getCircuitMetrics() {
     return {
-      stats: this.statsCircuit.getMetrics(),
-      alertas: this.alertasCircuit.getMetrics(),
-      usuarios: this.usuariosCircuit.getMetrics(),
-      estudiantes: this.estudiantesCircuit.getMetrics(),
+      dashboardStats: this.dashboardStatsCircuit.getMetrics(),
+      systemStats: this.systemStatsCircuit.getMetrics(),
+      listarAlertas: this.listarAlertasCircuit.getMetrics(),
+      resolverAlerta: this.resolverAlertaCircuit.getMetrics(),
+      sugerirSolucion: this.sugerirSolucionCircuit.getMetrics(),
+      crearAlerta: this.crearAlertaCircuit.getMetrics(),
+      listarUsuarios: this.listarUsuariosCircuit.getMetrics(),
+      deleteUsuario: this.deleteUsuarioCircuit.getMetrics(),
+      listarEstudiantes: this.listarEstudiantesCircuit.getMetrics(),
+      crearEstudiante: this.crearEstudianteCircuit.getMetrics(),
       roles: this.rolesCircuit.getMetrics(),
     };
   }
