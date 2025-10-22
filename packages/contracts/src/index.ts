@@ -21,5 +21,11 @@ export * from './schemas/producto.schema';
 // Clase
 export * from './schemas/clase.schema';
 
+// Cursos (Módulos y Lecciones)
+export * from './schemas/curso.schema';
+
+// Gamificación
+export * from './schemas/gamificacion.schema';
+
 // Admin
 export * from './schemas/admin.schema';

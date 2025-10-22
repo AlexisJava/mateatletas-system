@@ -4,12 +4,23 @@
 
 import axios from '@/lib/axios';
 import { DashboardData, AdminUser, ChangeRoleDto, UpdateRolesDto, SystemStats } from '@/types/admin.types';
+import type { ClaseListado } from '@/types/admin-clases.types';
+import type { Producto } from '@/types/catalogo.types';
+import { z } from 'zod';
 
 // Schemas Zod para validación runtime
-import { clasesListSchema } from '@/lib/schemas/clase.schema';
+import { clasesListSchema, clasesResponseSchema } from '@/lib/schemas/clase.schema';
 import { docentesListSchema } from '@/lib/schemas/docente.schema';
 import { rutasListSchema } from '@/lib/schemas/ruta.schema';
 import { sectoresListSchema } from '@/lib/schemas/sector.schema';
+import {
+  productosListSchema,
+  productoSchema,
+  createProductoSchema,
+  updateProductoSchema,
+  type CreateProductoDto,
+  type UpdateProductoDto,
+} from '@mateatletas/contracts';
 
 export const getDashboard = async (): Promise<DashboardData> => {
   return axios.get('/admin/dashboard') as Promise<DashboardData>;
@@ -35,10 +46,12 @@ export const deleteUser = async (userId: string): Promise<void> => {
   await axios.delete(`/admin/usuarios/${userId}`);
 };
 
-export const getAllClasses = async () => {
+const clasesListOrResponseSchema = z.union([clasesListSchema, clasesResponseSchema]);
+
+export const getAllClasses = async (): Promise<ClaseListado[]> => {
   const response = await axios.get('/clases/admin/todas');
-  // ✅ Validar con schema Zod
-  return clasesListSchema.parse(response);
+  const parsed = clasesListOrResponseSchema.parse(response);
+  return (Array.isArray(parsed) ? parsed : parsed.data) as ClaseListado[];
 };
 
 export const createClass = async (data: {
@@ -78,20 +91,26 @@ export const getSectores = async () => {
 };
 
 // Products Management
-export const getAllProducts = async (includeInactive = true) => {
-  return axios.get(`/productos?soloActivos=${!includeInactive}`);
+export const getAllProducts = async (includeInactive = true): Promise<Producto[]> => {
+  const response = await axios.get(`/productos?soloActivos=${!includeInactive}`);
+  return productosListSchema.parse(response) as Producto[];
 };
 
-export const getProductById = async (id: string) => {
-  return axios.get(`/productos/${id}`);
+export const getProductById = async (id: string): Promise<Producto> => {
+  const response = await axios.get(`/productos/${id}`);
+  return productoSchema.parse(response) as Producto;
 };
 
-export const createProduct = async (data: Record<string, unknown>) => {
-  return axios.post('/productos', data);
+export const createProduct = async (data: CreateProductoDto): Promise<Producto> => {
+  const payload = createProductoSchema.parse(data);
+  const response = await axios.post('/productos', payload);
+  return productoSchema.parse(response) as Producto;
 };
 
-export const updateProduct = async (id: string, data: Record<string, unknown>) => {
-  return axios.patch(`/productos/${id}`, data);
+export const updateProduct = async (id: string, data: UpdateProductoDto): Promise<Producto> => {
+  const payload = updateProductoSchema.parse(data);
+  const response = await axios.patch(`/productos/${id}`, payload);
+  return productoSchema.parse(response) as Producto;
 };
 
 export const deleteProduct = async (id: string, hardDelete = false) => {

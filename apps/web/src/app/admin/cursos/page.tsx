@@ -13,7 +13,7 @@ import {
   type Modulo,
   type CreateModuloDto
 } from '@/lib/api/cursos.api';
-import { Producto } from '@/types/catalogo.types';
+import { Producto, TipoProducto } from '@/types/catalogo.types';
 
 export default function AdminCursosPage() {
   const router = useRouter();
@@ -38,7 +38,7 @@ export default function AdminCursosPage() {
   }, []);
 
   // Filtrar solo cursos
-  const cursos = products.filter((p) => p.tipo === 'Curso' && p.activo);
+  const cursos = products.filter((p) => p.tipo === TipoProducto.Curso && p.activo);
 
   const loadModulos = async (productoId: string) => {
     setLoadingModulos(true);
@@ -64,8 +64,8 @@ export default function AdminCursosPage() {
 
     try {
       setError(null);
-      await createModulo(selectedCurso.id as string, formData);
-      await loadModulos(selectedCurso.id as string);
+      await createModulo(selectedCurso.id, formData);
+      await loadModulos(selectedCurso.id);
       closeModuloModal();
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al crear módulo'));
@@ -78,7 +78,7 @@ export default function AdminCursosPage() {
     try {
       setError(null);
       await updateModulo(editingModulo.id, formData);
-      await loadModulos(selectedCurso!.id as string);
+      await loadModulos(selectedCurso!.id);
       closeModuloModal();
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al actualizar módulo'));
@@ -91,7 +91,7 @@ export default function AdminCursosPage() {
     try {
       setError(null);
       await deleteModulo(moduloId);
-      await loadModulos(selectedCurso!.id as string);
+      await loadModulos(selectedCurso!.id);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al eliminar módulo'));
     }

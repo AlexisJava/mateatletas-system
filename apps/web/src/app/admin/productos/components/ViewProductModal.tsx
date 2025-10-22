@@ -12,13 +12,13 @@ interface ViewProductModalProps {
 const tipoColors: Record<TipoProducto, string> = {
   [TipoProducto.Suscripcion]: 'bg-blue-100 text-blue-800',
   [TipoProducto.Curso]: 'bg-purple-100 text-purple-800',
-  [TipoProducto.Recurso]: 'bg-green-100 text-green-800',
+  [TipoProducto.RecursoDigital]: 'bg-green-100 text-green-800',
 };
 
 const tipoIcons: Record<TipoProducto, string> = {
   [TipoProducto.Suscripcion]: '📅',
   [TipoProducto.Curso]: '📚',
-  [TipoProducto.Recurso]: '📄',
+  [TipoProducto.RecursoDigital]: '📄',
 };
 
 export const ViewProductModal: React.FC<ViewProductModalProps> = ({
@@ -70,7 +70,7 @@ export const ViewProductModal: React.FC<ViewProductModalProps> = ({
             </div>
           </div>
 
-          {product.tipo === 'Curso' && (
+          {product.tipo === TipoProducto.Curso && (
             <div className="grid grid-cols-2 gap-4 pt-4 border-t">
               <div>
                 <div className="text-sm font-medium text-gray-500">Fecha de Inicio</div>
@@ -101,7 +101,7 @@ export const ViewProductModal: React.FC<ViewProductModalProps> = ({
             </div>
           )}
 
-          {product.tipo === 'Suscripcion' && (
+          {product.tipo === TipoProducto.Suscripcion && (
             <div className="pt-4 border-t">
               <div className="text-sm font-medium text-gray-500">Duración</div>
               <div className="text-sm text-gray-900 mt-1">

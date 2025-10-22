@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAdminStore } from '@/store/admin.store';
-import { Producto, CrearProductoDto } from '@/lib/api/catalogo.api';
+import { Producto, CrearProductoDto, ActualizarProductoDto } from '@/lib/api/catalogo.api';
 import { TipoProducto } from '@/types/catalogo.types';
 
 export type ModalType = 'create' | 'edit' | 'delete' | 'view' | null;
@@ -76,7 +76,7 @@ export const useProductos = () => {
   const handleCreateProduct = async () => {
     if (!validateForm()) return;
 
-    const productData: Partial<CrearProductoDto> = {
+    const productData: CrearProductoDto = {
       nombre: formData.nombre,
       descripcion: formData.descripcion,
       precio: formData.precio,
@@ -92,7 +92,7 @@ export const useProductos = () => {
       productData.duracion_meses = formData.duracion_meses;
     }
 
-    const success = await createProduct(productData as CrearProductoDto);
+    const success = await createProduct(productData);
     if (success) {
       closeModal();
       resetForm();
@@ -102,7 +102,7 @@ export const useProductos = () => {
   const handleUpdateProduct = async () => {
     if (!validateForm() || !selectedProduct) return;
 
-    const productData: Partial<CrearProductoDto> = {
+    const productData: ActualizarProductoDto = {
       nombre: formData.nombre,
       descripcion: formData.descripcion,
       precio: formData.precio,

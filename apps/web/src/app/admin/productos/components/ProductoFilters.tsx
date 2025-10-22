@@ -12,7 +12,7 @@ const filterOptions = [
   { value: 'all' as const, label: 'Todos' },
   { value: TipoProducto.Suscripcion, label: 'Suscripcion' },
   { value: TipoProducto.Curso, label: 'Curso' },
-  { value: TipoProducto.Recurso, label: 'Recurso' },
+  { value: TipoProducto.RecursoDigital, label: 'Recurso' },
   { value: 'inactive' as const, label: 'Inactivos' },
 ];
 

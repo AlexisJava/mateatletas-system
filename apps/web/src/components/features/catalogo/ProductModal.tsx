@@ -59,7 +59,7 @@ export function ProductModal({
         'Soporte del instructor',
       ],
     },
-    [TipoProducto.Recurso]: {
+    [TipoProducto.RecursoDigital]: {
       bg: 'bg-gradient-to-br from-[#f7b801]/20 to-[#f7b801]/5',
       badgeBg: 'bg-[#f7b801]',
       badgeText: 'text-[#2a1a5e]',
