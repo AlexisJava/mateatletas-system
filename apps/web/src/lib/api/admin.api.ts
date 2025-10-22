@@ -47,13 +47,15 @@ export const deleteUser = async (userId: string): Promise<void> => {
 
 export const getAllClasses = async (): Promise<ClasesResponse> => {
   const response = await axios.get('/clases/admin/todas');
+  // Backend retorna { data: [...], meta: {...} }, validar con schema completo
   const parsed = clasesResponseSchema.safeParse(response);
 
   if (parsed.success) {
     return parsed.data;
   }
 
-  const list = clasesListSchema.parse(response);
+  // Fallback: si no tiene meta, extraer solo el array y envolver
+  const list = clasesListSchema.parse(response.data);
   return { data: list };
 };
 
@@ -77,19 +79,19 @@ export const cancelClass = async (claseId: string) => {
 
 export const getRutasCurriculares = async () => {
   const response = await axios.get('/clases/metadata/rutas-curriculares');
-  // ✅ Validar con schema Zod
+  // ✅ Validar con schema Zod (interceptor ya extrajo .data)
   return rutasListSchema.parse(response);
 };
 
 export const getDocentes = async () => {
   const response = await axios.get('/docentes');
-  // ✅ Validar con schema Zod
-  return docentesListSchema.parse(response);
+  // ✅ Backend retorna { data: [...], meta: {...} }, extraer solo array
+  return docentesListSchema.parse(response.data);
 };
 
 export const getSectores = async () => {
   const response = await axios.get('/admin/sectores');
-  // ✅ Validar con schema Zod
+  // ✅ Validar con schema Zod (interceptor ya extrajo .data)
   return sectoresListSchema.parse(response);
 };
 
@@ -99,7 +101,7 @@ export const getAllProducts = async (includeInactive = true): Promise<Producto[]
   return productosListSchema.parse(response);
 };
 
-export const getProductById = async (id: string): Promise<Producto> => {
+export const getProductById = async (id: string): Promise<Produto> => {
   const response = await axios.get(`/productos/${id}`);
   return productoSchema.parse(response);
 };

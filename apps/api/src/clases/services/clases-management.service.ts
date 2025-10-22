@@ -273,8 +273,19 @@ export class ClasesManagementService {
       this.prisma.clase.count({ where }),
     ]);
 
+    // Mapear campos de Prisma a formato esperado por frontend
+    const clasesFormateadas = clases.map((clase) => ({
+      ...clase,
+      // Mapear campos con nombres diferentes
+      cupo_maximo: clase.cupos_maximo,
+      cupo_disponible: clase.cupos_maximo - clase.cupos_ocupados,
+      titulo: clase.nombre,
+      // Asegurar que ruta_curricular esté presente (alias)
+      ruta_curricular: clase.rutaCurricular,
+    }));
+
     return {
-      data: clases,
+      data: clasesFormateadas,
       meta: {
         total,
         page,
