@@ -12,13 +12,13 @@ interface ProductosTableProps {
 const tipoColors: Record<TipoProducto, string> = {
   [TipoProducto.Suscripcion]: 'bg-blue-100 text-blue-800',
   [TipoProducto.Curso]: 'bg-purple-100 text-purple-800',
-  [TipoProducto.Recurso]: 'bg-green-100 text-green-800',
+  [TipoProducto.RecursoDigital]: 'bg-green-100 text-green-800',
 };
 
 const tipoIcons: Record<TipoProducto, string> = {
   [TipoProducto.Suscripcion]: '📅',
   [TipoProducto.Curso]: '📚',
-  [TipoProducto.Recurso]: '📄',
+  [TipoProducto.RecursoDigital]: '📄',
 };
 
 export const ProductosTable: React.FC<ProductosTableProps> = ({

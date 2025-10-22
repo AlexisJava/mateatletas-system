@@ -1,5 +1,7 @@
 // Tipos TypeScript para el Sistema de Calendario
 
+import type { ClaseListado } from '@/types/admin-clases.types';
+
 export enum TipoEvento {
   CLASE = 'CLASE',
   TAREA = 'TAREA',
@@ -67,7 +69,7 @@ export interface Evento {
   tarea?: Tarea;
   recordatorio?: Recordatorio;
   nota?: Nota;
-  clase?: Record<string, unknown>; // Tipo Clase del sistema
+  clase?: ClaseListado; // Tipo Clase del sistema
 }
 
 // Tarea completa
