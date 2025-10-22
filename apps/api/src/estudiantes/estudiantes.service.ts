@@ -3,7 +3,6 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
@@ -75,7 +74,7 @@ export class EstudiantesService {
     const skip = (page - 1) * limit;
 
     // Construir filtros
-    const where: Prisma.EstudianteWhereInput = {
+    const where: any = {
       tutor_id: tutorId,
     };
 

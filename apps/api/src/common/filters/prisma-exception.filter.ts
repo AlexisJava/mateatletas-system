@@ -132,7 +132,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     }
 
     // Construir respuesta
-    const errorResponse: Record<string, unknown> = {
+    const errorResponse: any = {
       statusCode: status,
       message,
       error: this.getErrorName(status),

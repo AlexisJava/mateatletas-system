@@ -11,7 +11,6 @@ import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from './decorators/roles.decorator';
 import { parseUserRoles } from '../common/utils/role.utils';
-import type { Admin as AdminModel, Docente, Tutor } from '@prisma/client';
 
 type AuthenticatedUser = Tutor | Docente | AdminModel;
 
