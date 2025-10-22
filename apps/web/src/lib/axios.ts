@@ -115,8 +115,8 @@ apiClient.interceptors.response.use(
         }
 
         default: {
-          // Otros errores
-          if (error.response) {
+          // Otros errores - no loggear 409 porque se maneja en el componente
+          if (error.response && status !== 409) {
             console.error(`❓ Error HTTP ${status}:`, error.response.data);
           } else if (error.request) {
             console.error('🌐 Sin respuesta del servidor. Verifica tu conexión.');

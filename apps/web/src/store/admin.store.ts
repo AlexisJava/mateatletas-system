@@ -112,7 +112,8 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       return true;
     } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error deleting user') });
-      return false;
+      // Propagar el error para que el componente pueda manejarlo
+      throw error;
     }
   },
 

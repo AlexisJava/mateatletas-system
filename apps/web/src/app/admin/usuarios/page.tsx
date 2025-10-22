@@ -80,23 +80,35 @@ export default function UsuariosPage() {
       }
     } catch (error: any) {
       // Detectar error de clases asignadas
+      console.log('🔍 Error capturado:', error);
+      console.log('🔍 Error response:', error?.response);
+      console.log('🔍 Error data:', error?.response?.data);
+
       const errorMsg = error?.response?.data?.errorMessage || error?.response?.data?.message || error?.message || 'Error al eliminar usuario';
+      console.log('🔍 Mensaje de error extraído:', errorMsg);
 
       if (errorMsg.includes('clase(s) asignada(s)')) {
+        console.log('✅ Detectado error de clases asignadas');
         // Extraer número de clases del mensaje
         const match = errorMsg.match(/(\d+) clase\(s\)/);
         const numClases = match ? parseInt(match[1]) : 0;
+        console.log('📊 Número de clases:', numClases);
         setClasesCount(numClases);
         setDeleteError(errorMsg);
 
         // Cargar docentes disponibles para reasignación
         try {
-          const docentes = await docentesApi.getAll();
+          const response = await docentesApi.getAll();
+          console.log('👥 Docentes response:', response);
+          // El backend puede devolver { data: [...] } o directamente [...]
+          const docentes = Array.isArray(response) ? response : (response as any).data || [];
+          console.log('👥 Docentes array:', docentes);
           setDocentesDisponibles(docentes.filter((d: Docente) => d.id !== selectedUser.id));
         } catch (err) {
-          console.error('Error loading docentes:', err);
+          console.error('❌ Error loading docentes:', err);
         }
       } else {
+        console.log('⚠️ Error genérico, no es de clases asignadas');
         setDeleteError(errorMsg);
       }
     } finally {
@@ -106,6 +118,10 @@ export default function UsuariosPage() {
 
   const handleReassignClasses = async () => {
     if (!selectedUser || !targetDocenteId) return;
+    console.log('🔄 Reasignando clases...');
+    console.log('🔄 De docente (selectedUser.id):', selectedUser.id);
+    console.log('🔄 A docente (targetDocenteId):', targetDocenteId);
+    console.log('🔄 Tipo de targetDocenteId:', typeof targetDocenteId);
     setFormLoading(true);
     setDeleteError(null);
 
