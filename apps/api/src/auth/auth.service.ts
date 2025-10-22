@@ -12,6 +12,17 @@ import * as bcrypt from 'bcrypt';
 import { Role } from './decorators/roles.decorator';
 import { parseUserRoles } from '../common/utils/role.utils';
 
+type AuthenticatedUser = Tutor | Docente | AdminModel;
+
+const isTutorUser = (user: AuthenticatedUser): user is Tutor =>
+  'ha_completado_onboarding' in user;
+
+const isDocenteUser = (user: AuthenticatedUser): user is Docente =>
+  'debe_cambiar_password' in user;
+
+const isAdminUser = (user: AuthenticatedUser): user is AdminModel =>
+  !isTutorUser(user) && !isDocenteUser(user);
+
 /**
  * Servicio de autenticación para tutores
  * Maneja registro, login, validación y generación de tokens JWT
@@ -170,26 +181,20 @@ export class AuthService {
     const { email, password } = loginDto;
 
     // 1. Intentar buscar como tutor primero
-    let user: any = await this.prisma.tutor.findUnique({
+    let user: AuthenticatedUser | null = await this.prisma.tutor.findUnique({
       where: { email },
     });
 
-    let role: Role = Role.Tutor;
-
-    // 2. Si no es tutor, buscar como docente
     if (!user) {
       user = await this.prisma.docente.findUnique({
         where: { email },
       });
-      role = Role.Docente;
     }
 
-    // 3. Si no es docente, buscar como admin
     if (!user) {
       user = await this.prisma.admin.findUnique({
         where: { email },
       });
-      role = Role.Admin;
     }
 
     // 4. Verificar que el usuario exista
@@ -206,13 +211,26 @@ export class AuthService {
 
     // 6. Obtener roles del usuario desde la BD (puede tener múltiples roles) - usando utility segura
     const userRoles = parseUserRoles(user.roles);
-    const finalUserRoles = userRoles.length > 0 ? userRoles : [role];
+    const detectedRole = isTutorUser(user)
+      ? Role.Tutor
+      : isDocenteUser(user)
+        ? Role.Docente
+        : Role.Admin;
+    const finalUserRoles = userRoles.length > 0 ? userRoles : [detectedRole];
+
+    if (!user.email) {
+      throw new UnauthorizedException('El usuario no tiene email configurado');
+    }
 
     // 7. Generar token JWT con todos los roles del usuario
-    const accessToken = this.generateJwtToken(user.id, user.email, finalUserRoles);
+    const accessToken = this.generateJwtToken(
+      user.id,
+      user.email,
+      finalUserRoles,
+    );
 
     // 7. Retornar token y datos del usuario (estructura diferente según rol)
-    if (role === 'tutor') {
+    if (isTutorUser(user)) {
       return {
         access_token: accessToken,
         user: {
@@ -220,39 +238,43 @@ export class AuthService {
           email: user.email,
           nombre: user.nombre,
           apellido: user.apellido,
-          dni: user.dni,
-          telefono: user.telefono,
+          dni: user.dni ?? null,
+          telefono: user.telefono ?? null,
           fecha_registro: user.fecha_registro,
           ha_completado_onboarding: user.ha_completado_onboarding,
-        role: Role.Tutor,
-        },
-      };
-    } else if (role === 'docente') {
-      return {
-        access_token: accessToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          nombre: user.nombre,
-          apellido: user.apellido,
-          titulo: user.titulo,
-          bio: user.bio,
-          role: 'docente',
-        },
-      };
-    } else {
-      return {
-        access_token: accessToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          nombre: user.nombre,
-          apellido: user.apellido,
-          fecha_registro: user.fecha_registro,
-          role: 'admin',
+          role: 'tutor',
         },
       };
     }
+
+    if (isDocenteUser(user)) {
+      return {
+        access_token: accessToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          titulo: user.titulo ?? null,
+          bio: user.bio ?? null,
+          role: 'docente',
+        },
+      };
+    }
+
+    return {
+      access_token: accessToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        fecha_registro: user.fecha_registro,
+        dni: isAdminUser(user) ? user.dni ?? null : null,
+        telefono: isAdminUser(user) ? user.telefono ?? null : null,
+        role: 'admin',
+      },
+    };
   }
 
   /**

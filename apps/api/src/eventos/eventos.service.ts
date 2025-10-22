@@ -324,7 +324,11 @@ export class EventosService {
       updateData.fecha_fin = new Date(dto.fecha_fin);
     if (dto.es_todo_el_dia !== undefined)
       updateData.es_todo_el_dia = dto.es_todo_el_dia;
-    if (dto.clase_id !== undefined) updateData.clase_id = dto.clase_id;
+    if (dto.clase_id !== undefined) {
+      updateData.clase = dto.clase_id
+        ? { connect: { id: dto.clase_id } }
+        : { disconnect: true };
+    }
 
     // Actualizar campos de la tarea
     const tareaUpdate: any = {};
@@ -397,7 +401,11 @@ export class EventosService {
       updateData.fecha_fin = new Date(dto.fecha_fin);
     if (dto.es_todo_el_dia !== undefined)
       updateData.es_todo_el_dia = dto.es_todo_el_dia;
-    if (dto.clase_id !== undefined) updateData.clase_id = dto.clase_id;
+    if (dto.clase_id !== undefined) {
+      updateData.clase = dto.clase_id
+        ? { connect: { id: dto.clase_id } }
+        : { disconnect: true };
+    }
 
     const recordatorioUpdate: any = {};
     if (dto.completado !== undefined)
@@ -440,7 +448,11 @@ export class EventosService {
       updateData.fecha_fin = new Date(dto.fecha_fin);
     if (dto.es_todo_el_dia !== undefined)
       updateData.es_todo_el_dia = dto.es_todo_el_dia;
-    if (dto.clase_id !== undefined) updateData.clase_id = dto.clase_id;
+    if (dto.clase_id !== undefined) {
+      updateData.clase = dto.clase_id
+        ? { connect: { id: dto.clase_id } }
+        : { disconnect: true };
+    }
 
     const notaUpdate: any = {};
     if (dto.contenido !== undefined) notaUpdate.contenido = dto.contenido;
