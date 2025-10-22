@@ -11,6 +11,7 @@ import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from './decorators/roles.decorator';
 import { parseUserRoles } from '../common/utils/role.utils';
+import type { Admin as AdminModel, Docente, Tutor } from '@prisma/client';
 
 /**
  * Servicio de autenticación para tutores
@@ -169,9 +170,10 @@ export class AuthService {
     const { email, password } = loginDto;
 
     // 1. Intentar buscar como tutor primero
-    let user: any = await this.prisma.tutor.findUnique({
-      where: { email },
-    });
+    let user: Tutor | Docente | AdminModel | null =
+      await this.prisma.tutor.findUnique({
+        where: { email },
+      });
 
     let role = 'tutor';
 

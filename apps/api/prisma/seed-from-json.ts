@@ -1,4 +1,4 @@
-import { PrismaClient, TipoProducto, EstadoMembresia, EstadoInscripcionCurso, EstadoClase, EstadoAsistencia, TipoNotificacion, TipoEvento } from '@prisma/client';
+import { Prisma, PrismaClient, TipoProducto, EstadoMembresia, EstadoInscripcionCurso, EstadoClase, EstadoAsistencia, TipoNotificacion, TipoEvento } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -10,22 +10,24 @@ const prisma = new PrismaClient();
  * Lee el archivo test-data.json y carga todos los datos en orden
  */
 
+type EntityRecord = Record<string, unknown>;
+
 interface TestData {
-  admin?: any;
-  docentes?: any[];
-  tutores?: any[];
-  equipos?: any[];
+  admin?: EntityRecord;
+  docentes?: EntityRecord[];
+  tutores?: EntityRecord[];
+  equipos?: EntityRecord[];
   rutasCurriculares?: string[];
-  productos?: any[];
-  estudiantes?: any[];
-  membresias?: any[];
-  inscripciones_cursos?: any[];
-  clases?: any[];
-  inscripciones_clases?: any[];
-  asistencias?: any[];
-  pagos?: any[];
-  notificaciones?: any[];
-  eventos?: any[];
+  productos?: EntityRecord[];
+  estudiantes?: EntityRecord[];
+  membresias?: EntityRecord[];
+  inscripciones_cursos?: EntityRecord[];
+  clases?: EntityRecord[];
+  inscripciones_clases?: EntityRecord[];
+  asistencias?: EntityRecord[];
+  pagos?: EntityRecord[];
+  notificaciones?: EntityRecord[];
+  eventos?: EntityRecord[];
 }
 
 // Mapas para IDs temporales -> IDs reales
@@ -120,7 +122,7 @@ async function loadFromJSON() {
           'recurso': TipoProducto.RecursoDigital,
         };
 
-        const productoData: any = {
+        const productoData: Prisma.ProductoCreateInput = {
           nombre: producto.nombre,
           descripcion: producto.nombre,
           precio: producto.precio,
