@@ -3,39 +3,13 @@
 import { useEffect, useState } from 'react';
 import { getErrorMessage } from '@/lib/utils/error-handler';
 import apiClient from '@/lib/axios';
-
-interface Pago {
-  id: string;
-  monto: number;
-  estado: string;
-  mercadopago_payment_id: string | null;
-  fecha_pago: string;
-  tutor: {
-    nombre: string;
-    apellido: string;
-    email: string;
-  };
-  producto: {
-    nombre: string;
-    tipo: string;
-  };
-  membresia?: {
-    estado: string;
-    estudiantes: Array<{
-      nombre: string;
-      apellido: string;
-    }>;
-  };
-  inscripcion?: {
-    estudiante: {
-      nombre: string;
-      apellido: string;
-    };
-  };
-}
+import {
+  adminPagosResponseSchema,
+  type AdminPago,
+} from '@/lib/schemas/pago.schema';
 
 export default function AdminPagosPage() {
-  const [pagos, setPagos] = useState<Pago[]>([]);
+  const [pagos, setPagos] = useState<AdminPago[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +22,9 @@ export default function AdminPagosPage() {
       setIsLoading(true);
       setError(null);
       const response = await apiClient.get('/pagos/admin/all');
-      setPagos((response || []) as unknown as Pago[]);
+      const parsed = adminPagosResponseSchema.parse(response);
+      const pagosData = Array.isArray(parsed) ? parsed : parsed.pagos;
+      setPagos(pagosData);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al cargar pagos'));
     } finally {

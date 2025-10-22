@@ -34,7 +34,7 @@ export function ProductCard({ producto, onClick }: ProductCardProps) {
       text: 'text-white',
       emoji: '📚',
     },
-    [TipoProducto.Recurso]: {
+    [TipoProducto.RecursoDigital]: {
       bg: 'bg-[#f7b801]', // amarillo
       text: 'text-[#2a1a5e]',
       emoji: '🎁',

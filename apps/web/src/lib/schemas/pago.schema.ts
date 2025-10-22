@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { membresiaSchema } from './membresia.schema';
 
 /**
  * Schema de estado de inscripción a curso
@@ -106,6 +107,117 @@ export const createPagoSchema = pagoSchema.omit({
  */
 export const updatePagoSchema = pagoSchema.partial().required({ id: true });
 
+const pagoTutorSchema = z.object({
+  nombre: z.string(),
+  apellido: z.string(),
+  email: z.string(),
+});
+
+const pagoProductoBasicoSchema = z.object({
+  id: z.string().optional(),
+  nombre: z.string(),
+  descripcion: z.string().nullable().optional(),
+  precio: z.number().optional(),
+  tipo: z.string(),
+});
+
+const pagoEstudianteSchema = z.object({
+  nombre: z.string(),
+  apellido: z.string(),
+});
+
+export const adminPagoSchema = z.object({
+  id: z.string(),
+  monto: z.number(),
+  estado: z.string(),
+  mercadopago_payment_id: z.string().nullable().optional(),
+  fecha_pago: z.string(),
+  tutor: pagoTutorSchema,
+  producto: pagoProductoBasicoSchema.pick({ nombre: true, tipo: true }),
+  membresia: z
+    .object({
+      estado: z.string(),
+      estudiantes: z.array(pagoEstudianteSchema),
+    })
+    .optional(),
+  inscripcion: z
+    .object({
+      estudiante: pagoEstudianteSchema,
+    })
+    .optional(),
+});
+
+export const adminPagosResponseSchema = z.union([
+  z.array(adminPagoSchema),
+  z.object({
+    message: z.string().optional(),
+    pagos: z.array(adminPagoSchema),
+  }),
+]);
+
+const historialProductoSchema = pagoProductoBasicoSchema.extend({
+  precio: z.number(),
+});
+
+const historialEstudianteSchema = z
+  .object({
+    id: z.string(),
+    nombre: z.string(),
+    apellido: z.string(),
+  })
+  .nullable();
+
+const historialEntrySchema = z.object({
+  id: z.string(),
+  tipo: z.enum(['membresia', 'curso']),
+  producto: historialProductoSchema,
+  estado: z.string(),
+  fecha: z
+    .union([z.string(), z.date()])
+    .transform((value) => (value instanceof Date ? value.toISOString() : value)),
+  monto: z.number(),
+  estudiante: historialEstudianteSchema,
+});
+
+const inscripcionActivaSchema = z
+  .object({
+    id: z.string(),
+    estudiante_id: z.string(),
+    producto_id: z.string(),
+    estado: z.string(),
+    fecha_inscripcion: z.string().nullable().optional(),
+    pago_id: z.string().optional(),
+    createdAt: z
+      .union([z.string(), z.date()])
+      .transform((value) => (value instanceof Date ? value.toISOString() : value)),
+    updatedAt: z
+      .union([z.string(), z.date()])
+      .optional()
+      .transform((value) => (value instanceof Date ? value.toISOString() : value)),
+    producto: historialProductoSchema.optional(),
+    estudiante: historialEstudianteSchema,
+  })
+  .passthrough();
+
+export const pagosHistorialSchema = z.object({
+  historial: z.array(historialEntrySchema),
+  resumen: z
+    .object({
+      total_pagos: z.number(),
+      total_gastado: z.number(),
+      membresias_activas: z.number(),
+      cursos_activos: z.number(),
+      pagos_pendientes: z.number().optional(),
+      pagos_aprobados: z.number().optional(),
+      pagos_rechazados: z.number().optional(),
+    })
+    .passthrough(),
+  activos: z.object({
+    membresia_actual: membresiaSchema.nullable().optional(),
+    inscripciones_cursos_activas: z.array(inscripcionActivaSchema),
+  }),
+});
+
 // ============================================
 // TIPOS DERIVADOS
 // ============================================
@@ -118,3 +230,5 @@ export type CrearPreferenciaSuscripcionInput = z.infer<typeof crearPreferenciaSu
 export type CrearPreferenciaCursoInput = z.infer<typeof crearPreferenciaCursoSchema>;
 export type CreatePagoInput = z.infer<typeof createPagoSchema>;
 export type UpdatePagoInput = z.infer<typeof updatePagoSchema>;
+export type AdminPago = z.infer<typeof adminPagoSchema>;
+export type PagosHistorial = z.infer<typeof pagosHistorialSchema>;

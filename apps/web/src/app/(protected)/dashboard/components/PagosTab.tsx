@@ -1,66 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import apiClient from '@/lib/axios';
-import { Membresia, InscripcionCurso } from '@/types/pago.types';
-import { Producto } from '@/types/catalogo.types';
 import { CreditCard, DollarSign, CheckCircle, Calendar, Clock, Award, XCircle } from 'lucide-react';
-
-interface Pago {
-  id: string;
-  monto: number;
-  estado: string;
-  createdAt: Date;
-  producto: {
-    nombre: string;
-    tipo: string;
-    descripcion?: string;
-    precio?: number;
-  };
-  membresia?: {
-    estado: string;
-    fecha_inicio?: Date;
-    fecha_fin?: Date;
-  };
-  inscripcion_curso?: {
-    estado: string;
-    estudiante: {
-      nombre: string;
-      apellido: string;
-    };
-  };
-}
-
-interface MembresiaActual extends Membresia {
-  producto: Producto;
-}
-
-interface InscripcionCursoActiva extends InscripcionCurso {
-  producto: Producto;
-  estudiante: {
-    id: string;
-    nombre: string;
-    apellido: string;
-  };
-}
-
-interface HistorialData {
-  historial: Pago[];
-  resumen: {
-    total_pagos: number;
-    total_gastado: number;
-    pagos_pendientes: number;
-    pagos_aprobados: number;
-    pagos_rechazados: number;
-  };
-  activos: {
-    membresia_actual: MembresiaActual | null;
-    inscripciones_cursos_activas: InscripcionCursoActiva[];
-  };
-}
+import { pagosHistorialSchema, type PagosHistorial } from '@/lib/schemas/pago.schema';
 
 export default function PagosTab() {
-  const [historialData, setHistorialData] = useState<HistorialData | null>(null);
+  const [historialData, setHistorialData] = useState<PagosHistorial | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -71,13 +17,37 @@ export default function PagosTab() {
     try {
       setLoading(true);
       const response = await apiClient.get('/pagos/historial');
-      setHistorialData(response as unknown as HistorialData);
+      const parsed = pagosHistorialSchema.parse(response);
+      setHistorialData(parsed);
     } catch (error: unknown) {
       // Error loading payment history
     } finally{
       setLoading(false);
     }
   };
+
+  const resumen = useMemo(() => {
+    if (!historialData) {
+      return null;
+    }
+
+    const pagosPendientes = historialData.historial.filter((pago) =>
+      ['Pendiente', 'Atrasada'].includes(pago.estado),
+    ).length;
+    const pagosAprobados = historialData.historial.filter((pago) =>
+      ['Activa', 'Activo', 'Pagado', 'Aprobado'].includes(pago.estado),
+    ).length;
+    const pagosRechazados = historialData.historial.filter((pago) =>
+      ['Cancelada', 'Cancelado', 'Rechazado'].includes(pago.estado),
+    ).length;
+
+    return {
+      ...historialData.resumen,
+      pagos_pendientes: pagosPendientes,
+      pagos_aprobados: pagosAprobados,
+      pagos_rechazados: pagosRechazados,
+    };
+  }, [historialData]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
@@ -151,19 +121,19 @@ export default function PagosTab() {
 
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white shadow-lg">
           <CheckCircle className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-2xl font-bold">{historialData.resumen.pagos_aprobados}</p>
+          <p className="text-2xl font-bold">{resumen?.pagos_aprobados ?? 0}</p>
           <p className="text-sm opacity-90">Pagos Aprobados</p>
         </div>
 
         <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl p-4 text-white shadow-lg">
           <Clock className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-2xl font-bold">{historialData.resumen.pagos_pendientes}</p>
+          <p className="text-2xl font-bold">{resumen?.pagos_pendientes ?? 0}</p>
           <p className="text-sm opacity-90">Pagos Pendientes</p>
         </div>
 
         <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 text-white shadow-lg">
           <XCircle className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-2xl font-bold">{historialData.resumen.pagos_rechazados}</p>
+          <p className="text-2xl font-bold">{resumen?.pagos_rechazados ?? 0}</p>
           <p className="text-sm opacity-90">Pagos Rechazados</p>
         </div>
       </div>
@@ -235,7 +205,7 @@ export default function PagosTab() {
         <div className="flex-1 overflow-y-auto space-y-2">
           {historialData.historial.length > 0 ? (
             historialData.historial.map((pago) => {
-              const fecha = new Date(pago.createdAt);
+              const fecha = new Date(pago.fecha);
               return (
                 <div
                   key={pago.id}
@@ -255,12 +225,14 @@ export default function PagosTab() {
                         )}
 
                         {/* Info adicional según tipo */}
-                        {pago.inscripcion_curso && (
+                        {pago.estudiante && (
                           <p className="text-sm text-indigo-600 mt-1">
-                            Para: {pago.inscripcion_curso.estudiante.nombre}{' '}
-                            {pago.inscripcion_curso.estudiante.apellido}
+                            Para: {pago.estudiante.nombre} {pago.estudiante.apellido}
                           </p>
                         )}
+                        <p className="text-xs uppercase tracking-wide text-gray-500 mt-1 font-semibold">
+                          {pago.tipo === 'membresia' ? 'Membresía' : 'Curso'}
+                        </p>
 
                         <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
                           <Clock className="w-4 h-4" />

@@ -15,7 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Role, Roles } from '../auth/decorators/roles.decorator';
-import { AuthUser } from '../auth/types';
+import { AuthUser } from '../auth/interfaces';
 
 /**
  * Controller para endpoints de docentes

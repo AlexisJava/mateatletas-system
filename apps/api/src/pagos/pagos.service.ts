@@ -267,15 +267,21 @@ export class PagosService {
   ): Promise<ProcesarWebhookResult> {
     this.logger.log('📩 Webhook recibido de MercadoPago');
 
-    // Log sanitizado - NO exponer payload completo que puede contener datos sensibles
-    const sanitizedLog = {
-      type: body.type,
-      action: body.action,
-      dataId: body.data?.id,
-      liveMode: body.live_mode,
+    return {
+      type: payload.type,
+      action: payload.action,
+      dataId: payload.data?.id,
+      liveMode,
       timestamp: new Date().toISOString(),
     };
-    this.logger.debug(`Webhook sanitizado: ${JSON.stringify(sanitizedLog)}`);
+  }
+
+  async procesarWebhookMercadoPago(body: MercadoPagoWebhookDto) {
+    this.logger.log('📩 Webhook recibido de MercadoPago');
+
+    // Log sanitizado - NO exponer payload completo que puede contener datos sensibles
+    const sanitizedLog = this.buildWebhookLogMetadata(body);
+    this.logger.debug('Webhook sanitizado', sanitizedLog);
 
     // En modo mock, ignorar webhooks
     if (

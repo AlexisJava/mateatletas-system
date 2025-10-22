@@ -4,20 +4,20 @@
  */
 
 import axios from '@/lib/axios';
+import {
+  leccionSchema,
+  leccionesListSchema,
+  tipoContenidoEnum,
+  type TipoContenido as TipoContenidoSchema,
+  type LeccionFromSchema,
+} from '@/lib/schemas/leccion.schema';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-export enum TipoContenido {
-  Video = 'Video',
-  Texto = 'Texto',
-  Quiz = 'Quiz',
-  Tarea = 'Tarea',
-  JuegoInteractivo = 'JuegoInteractivo',
-  Lectura = 'Lectura',
-  Practica = 'Practica',
-}
+export const TipoContenido = tipoContenidoEnum.enum;
+export type TipoContenido = TipoContenidoSchema;
 
 // Tipos específicos de contenido por tipo de lección
 export interface ContenidoVideo {
@@ -67,22 +67,7 @@ export interface Modulo {
   updatedAt: string;
 }
 
-export interface Leccion {
-  id: string;
-  modulo_id: string;
-  titulo: string;
-  descripcion: string | null;
-  tipo_contenido: TipoContenido;
-  contenido: Record<string, unknown>; // JSON con contenido específico por tipo
-  orden: number;
-  duracion_estimada_minutos: number;
-  puntos: number;
-  publicado: boolean;
-  leccion_prerequisito_id: string | null;
-  logro_desbloqueado_id: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type Leccion = LeccionFromSchema;
 
 export interface ProgresoLeccion {
   id: string;
@@ -170,7 +155,9 @@ export interface CompletarLeccionDto {
  * Requiere: Admin
  */
 export const createModulo = async (productoId: string, data: CreateModuloDto): Promise<Modulo> => {
-  return axios.post(`/cursos/productos/${productoId}/modulos`, data);
+  const payload = createModuloSchema.parse(data);
+  const response = await axios.post(`/cursos/productos/${productoId}/modulos`, payload);
+  return moduloSchema.parse(response);
 };
 
 /**
@@ -179,7 +166,8 @@ export const createModulo = async (productoId: string, data: CreateModuloDto): P
  * Público
  */
 export const getModulosByProducto = async (productoId: string): Promise<Modulo[]> => {
-  return axios.get(`/cursos/productos/${productoId}/modulos`);
+  const response = await axios.get(`/cursos/productos/${productoId}/modulos`);
+  return parseModulosResponse(response);
 };
 
 /**
@@ -187,7 +175,8 @@ export const getModulosByProducto = async (productoId: string): Promise<Modulo[]
  * GET /cursos/modulos/:id
  */
 export const getModulo = async (id: string): Promise<Modulo> => {
-  return axios.get(`/cursos/modulos/${id}`);
+  const response = await axios.get(`/cursos/modulos/${id}`);
+  return moduloSchema.parse(response);
 };
 
 /**
@@ -196,7 +185,9 @@ export const getModulo = async (id: string): Promise<Modulo> => {
  * Requiere: Admin
  */
 export const updateModulo = async (id: string, data: UpdateModuloDto): Promise<Modulo> => {
-  return axios.patch(`/cursos/modulos/${id}`, data);
+  const payload = updateModuloSchema.parse(data);
+  const response = await axios.patch(`/cursos/modulos/${id}`, payload);
+  return moduloSchema.parse(response);
 };
 
 /**
@@ -228,7 +219,8 @@ export const reordenarModulos = async (productoId: string, ordenIds: string[]): 
  * Requiere: Admin
  */
 export const createLeccion = async (moduloId: string, data: CreateLeccionDto): Promise<Leccion> => {
-  return axios.post(`/cursos/modulos/${moduloId}/lecciones`, data);
+  const response = await axios.post(`/cursos/modulos/${moduloId}/lecciones`, data);
+  return leccionSchema.parse(response);
 };
 
 /**
@@ -237,7 +229,8 @@ export const createLeccion = async (moduloId: string, data: CreateLeccionDto): P
  * Público
  */
 export const getLeccionesByModulo = async (moduloId: string): Promise<Leccion[]> => {
-  return axios.get(`/cursos/modulos/${moduloId}/lecciones`);
+  const response = await axios.get(`/cursos/modulos/${moduloId}/lecciones`);
+  return leccionesListSchema.parse(response);
 };
 
 /**
@@ -246,7 +239,8 @@ export const getLeccionesByModulo = async (moduloId: string): Promise<Leccion[]>
  * Requiere: Autenticación (estudiante inscrito)
  */
 export const getLeccion = async (id: string): Promise<Leccion> => {
-  return axios.get(`/cursos/lecciones/${id}`);
+  const response = await axios.get(`/cursos/lecciones/${id}`);
+  return leccionSchema.parse(response);
 };
 
 /**
@@ -255,7 +249,8 @@ export const getLeccion = async (id: string): Promise<Leccion> => {
  * Requiere: Admin
  */
 export const updateLeccion = async (id: string, data: UpdateLeccionDto): Promise<Leccion> => {
-  return axios.patch(`/cursos/lecciones/${id}`, data);
+  const response = await axios.patch(`/cursos/lecciones/${id}`, data);
+  return leccionSchema.parse(response);
 };
 
 /**
@@ -289,12 +284,10 @@ export const reordenarLecciones = async (moduloId: string, ordenIds: string[]): 
 export const completarLeccion = async (
   leccionId: string,
   data: CompletarLeccionDto = {},
-): Promise<{
-  progreso: ProgresoLeccion;
-  puntos_ganados: number;
-  logro_desbloqueado: Record<string, unknown> | null;
-}> => {
-  return axios.post(`/cursos/lecciones/${leccionId}/completar`, data);
+): Promise<CompletarLeccionResponse> => {
+  const payload = completarLeccionSchema.parse(data);
+  const response = await axios.post(`/cursos/lecciones/${leccionId}/completar`, payload);
+  return completarLeccionResponseSchema.parse(response);
 };
 
 /**
@@ -303,7 +296,8 @@ export const completarLeccion = async (
  * Learning Analytics: porcentajes, lecciones completadas, etc.
  */
 export const getProgresoCurso = async (productoId: string): Promise<ProgresoCurso> => {
-  return axios.get(`/cursos/productos/${productoId}/progreso`);
+  const response = await axios.get(`/cursos/productos/${productoId}/progreso`);
+  return progresoCursoSchema.parse(response);
 };
 
 /**
@@ -312,5 +306,8 @@ export const getProgresoCurso = async (productoId: string): Promise<ProgresoCurs
  * Implementa Progressive Disclosure
  */
 export const getSiguienteLeccion = async (productoId: string): Promise<Leccion | null> => {
-  return axios.get(`/cursos/productos/${productoId}/siguiente-leccion`);
+  const response = await axios.get(`/cursos/productos/${productoId}/siguiente-leccion`);
+  if (response === null) return null;
+  return leccionSchema.parse(response);
 };
+

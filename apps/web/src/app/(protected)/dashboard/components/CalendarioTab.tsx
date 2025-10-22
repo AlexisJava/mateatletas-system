@@ -3,40 +3,10 @@
 import { useState, useEffect } from 'react';
 import apiClient from '@/lib/axios';
 import { Calendar, ChevronLeft, CheckCircle, XCircle, Clock, User, ChevronRight } from 'lucide-react';
-
-interface Clase {
-  id: string;
-  fecha_hora_inicio: Date;
-  duracion_minutos: number;
-  estado: string;
-  ruta_curricular: {
-    nombre: string;
-    color: string;
-  };
-  docente: {
-    nombre: string;
-    apellido: string;
-  };
-  inscripciones: Array<{
-    estudiante: {
-      id: string;
-      nombre: string;
-      apellido: string;
-    };
-  }>;
-  asistencias: Array<{
-    id: string;
-    estudiante_id: string;
-    estado: string;
-  }>;
-}
-
-interface CalendarioData {
-  mes: number;
-  anio: number;
-  clases: Clase[];
-  total: number;
-}
+import {
+  calendarioResponseSchema,
+  type CalendarioResponse,
+} from '@/lib/schemas/clase.schema';
 
 const MESES = [
   'Enero',
@@ -57,7 +27,7 @@ export default function CalendarioTab() {
   const now = new Date();
   const [mesSeleccionado, setMesSeleccionado] = useState(now.getMonth() + 1); // 1-12
   const [anioSeleccionado, setAnioSeleccionado] = useState(now.getFullYear());
-  const [calendarioData, setCalendarioData] = useState<CalendarioData | null>(null);
+  const [calendarioData, setCalendarioData] = useState<CalendarioResponse | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -73,7 +43,8 @@ export default function CalendarioTab() {
           anio: anioSeleccionado,
         },
       });
-      setCalendarioData(response as unknown as CalendarioData);
+      const parsed = calendarioResponseSchema.parse(response);
+      setCalendarioData(parsed);
     } catch (error: unknown) {
       // Error loading calendar
     } finally {
@@ -99,8 +70,8 @@ export default function CalendarioTab() {
     }
   };
 
-  const agruparClasesPorDia = (clases: Clase[]) => {
-    const grupos: { [key: string]: Clase[] } = {};
+  const agruparClasesPorDia = (clases: CalendarioResponse['clases']) => {
+    const grupos: { [key: string]: CalendarioResponse['clases'] } = {};
     clases.forEach((clase) => {
       const fecha = new Date(clase.fecha_hora_inicio);
       const dia = fecha.getDate();

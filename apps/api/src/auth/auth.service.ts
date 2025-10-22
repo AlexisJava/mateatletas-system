@@ -131,7 +131,8 @@ export class AuthService {
 
     // 4. Obtener roles del estudiante desde la BD - usando utility segura
     const estudianteRoles = parseUserRoles(estudiante.roles);
-    const finalRoles = estudianteRoles.length > 0 ? estudianteRoles : ['estudiante'];
+    const finalRoles =
+      estudianteRoles.length > 0 ? estudianteRoles : [Role.Estudiante];
 
     // 5. Generar token JWT
     const accessToken = this.generateJwtToken(
@@ -175,14 +176,14 @@ export class AuthService {
         where: { email },
       });
 
-    let role = 'tutor';
+    let role: Role = Role.Tutor;
 
     // 2. Si no es tutor, buscar como docente
     if (!user) {
       user = await this.prisma.docente.findUnique({
         where: { email },
       });
-      role = 'docente';
+      role = Role.Docente;
     }
 
     // 3. Si no es docente, buscar como admin
@@ -190,7 +191,7 @@ export class AuthService {
       user = await this.prisma.admin.findUnique({
         where: { email },
       });
-      role = 'admin';
+      role = Role.Admin;
     }
 
     // 4. Verificar que el usuario exista
@@ -225,7 +226,7 @@ export class AuthService {
           telefono: user.telefono,
           fecha_registro: user.fecha_registro,
           ha_completado_onboarding: user.ha_completado_onboarding,
-          role: 'tutor',
+        role: Role.Tutor,
         },
       };
     } else if (role === 'docente') {
@@ -321,7 +322,7 @@ export class AuthService {
 
       return {
         ...docente,
-        role: 'docente',
+        role: Role.Docente,
       };
     }
 
@@ -345,7 +346,7 @@ export class AuthService {
 
       return {
         ...admin,
-        role: 'admin',
+        role: Role.Admin,
       };
     }
 
@@ -418,16 +419,18 @@ export class AuthService {
   private generateJwtToken(
     userId: string,
     email: string,
-    roles: string[] | string = ['tutor'],
+    roles: Role[] | Role = [Role.Tutor],
   ): string {
-    // Normalizar roles a array si viene como string (backward compatibility)
+    // Normalizar roles a array si viene como un único rol (retrocompatibilidad)
     const rolesArray = Array.isArray(roles) ? roles : [roles];
+    const normalizedRoles =
+      rolesArray.length > 0 ? rolesArray : [Role.Tutor];
 
     const payload = {
       sub: userId, // Subject (ID del usuario)
-      email: email,
-      role: rolesArray[0], // Rol principal (primer rol del array) - para backward compatibility
-      roles: rolesArray, // Array completo de roles - soporte multi-rol
+      email,
+      role: normalizedRoles[0], // Rol principal (primer rol del array) - para backward compatibility
+      roles: normalizedRoles, // Array completo de roles - soporte multi-rol
     };
 
     return this.jwtService.sign(payload);
