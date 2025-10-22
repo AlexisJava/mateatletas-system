@@ -172,7 +172,7 @@ export const formatClassesForExport = (classes: ClaseListado[]) => {
   return classes.map((clase) => ({
     'ID': clase.id,
     'Ruta Curricular': clase.ruta_curricular?.nombre || '-',
-    'Docente': `${clase.docente?.user?.nombre || clase.docente?.nombre || ''} ${clase.docente?.user?.apellido || clase.docente?.apellido || ''}`.trim() || '-',
+    'Docente': `${clase.docente?.nombre || ''} ${clase.docente?.apellido || ''}`.trim() || '-',
     'Fecha': new Date(clase.fecha_hora_inicio).toLocaleDateString('es-ES'),
     'Hora': new Date(clase.fecha_hora_inicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
     'Duración (min)': clase.duracion_minutos,

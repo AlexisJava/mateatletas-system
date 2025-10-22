@@ -123,7 +123,7 @@ export function ClassCard({
             <div className="flex items-center gap-2 text-sm">
               <span className="text-xl">👨‍🏫</span>
               <p className="text-gray-700">
-                {clase.docente?.user?.nombre} {clase.docente?.user?.apellido}
+                {clase.docente?.nombre} {clase.docente?.apellido}
               </p>
             </div>
           )}

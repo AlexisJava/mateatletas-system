@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useCursosStore } from '@/store/cursos.store';
-import { getLeccion, type Leccion, type ContenidoVideo, type ContenidoTexto, type ContenidoQuiz, type ContenidoTarea } from '@/lib/api/cursos.api';
+import { getLeccion, type Leccion } from '@/lib/api/cursos.api';
+import {
+  contenidoVideoSchema,
+  contenidoTextoSchema,
+  contenidoQuizSchema,
+  contenidoTareaSchema,
+} from '@/lib/schemas/leccion.schema';
 
 // Componente de Card Chunky
 const ChunkyCard = ({
@@ -258,8 +264,20 @@ export default function LeccionPlayerPage() {
 
     try {
       switch (leccion.tipo_contenido) {
-        case 'Video':
-          const videoContenido = leccion.contenido as unknown as ContenidoVideo;
+        case 'Video': {
+          const videoParse = contenidoVideoSchema.safeParse(leccion.contenido);
+          if (!videoParse.success) {
+            return (
+              <ChunkyCard gradient="linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)">
+                <div className="p-8 text-center">
+                  <div className="text-6xl mb-4">⚠️</div>
+                  <h3 className="text-2xl font-black text-gray-900 mb-4">Contenido de video inválido</h3>
+                  <pre className="mt-4 text-left text-sm overflow-auto">{JSON.stringify(leccion.contenido, null, 2)}</pre>
+                </div>
+              </ChunkyCard>
+            );
+          }
+          const videoContenido = videoParse.data;
           const videoUrl = videoContenido.url || videoContenido.videoUrl || '';
           if (!videoUrl || typeof videoUrl !== 'string') {
             return (
@@ -273,18 +291,57 @@ export default function LeccionPlayerPage() {
             );
           }
           return <VideoPlayer url={videoUrl} />;
+        }
 
         case 'Texto':
-        case 'Lectura':
-          const textoContenido = leccion.contenido as unknown as ContenidoTexto;
+        case 'Lectura': {
+          const textoParse = contenidoTextoSchema.safeParse(leccion.contenido);
+          if (!textoParse.success) {
+            return (
+              <ChunkyCard gradient="linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)">
+                <div className="p-8 text-center">
+                  <div className="text-6xl mb-4">⚠️</div>
+                  <h3 className="text-2xl font-black text-gray-900 mb-4">Contenido de texto inválido</h3>
+                  <pre className="mt-4 text-left text-sm overflow-auto">{JSON.stringify(leccion.contenido, null, 2)}</pre>
+                </div>
+              </ChunkyCard>
+            );
+          }
+          const textoContenido = textoParse.data;
           return <TextoContent texto={textoContenido.texto || textoContenido.contenido || ''} />;
+        }
 
-        case 'Quiz':
-          const quizContenido = leccion.contenido as unknown as ContenidoQuiz;
-          return <QuizContent preguntas={quizContenido.preguntas || []} />;
+        case 'Quiz': {
+          const quizParse = contenidoQuizSchema.safeParse(leccion.contenido);
+          if (!quizParse.success) {
+            return (
+              <ChunkyCard gradient="linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)">
+                <div className="p-8 text-center">
+                  <div className="text-6xl mb-4">⚠️</div>
+                  <h3 className="text-2xl font-black text-gray-900 mb-4">Contenido de quiz inválido</h3>
+                  <pre className="mt-4 text-left text-sm overflow-auto">{JSON.stringify(leccion.contenido, null, 2)}</pre>
+                </div>
+              </ChunkyCard>
+            );
+          }
+          const quizContenido = quizParse.data;
+          return <QuizContent preguntas={quizContenido.preguntas} />;
+        }
 
-        case 'Tarea':
-          const tareaContenido = leccion.contenido as unknown as ContenidoTarea;
+        case 'Tarea': {
+          const tareaParse = contenidoTareaSchema.safeParse(leccion.contenido);
+          if (!tareaParse.success) {
+            return (
+              <ChunkyCard gradient="linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)">
+                <div className="p-8 text-center">
+                  <div className="text-6xl mb-4">⚠️</div>
+                  <h3 className="text-2xl font-black text-gray-900 mb-4">Contenido de tarea inválido</h3>
+                  <pre className="mt-4 text-left text-sm overflow-auto">{JSON.stringify(leccion.contenido, null, 2)}</pre>
+                </div>
+              </ChunkyCard>
+            );
+          }
+          const tareaContenido = tareaParse.data;
           return (
             <ChunkyCard gradient="linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)">
               <div className="p-8">
@@ -301,6 +358,7 @@ export default function LeccionPlayerPage() {
               </div>
             </ChunkyCard>
           );
+        }
 
         default:
           return (

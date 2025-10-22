@@ -38,7 +38,7 @@ export default function AdminProductosPage() {
   const stats = {
     suscripciones: products.filter((p) => p.tipo === TipoProducto.Suscripcion).length,
     cursos: products.filter((p) => p.tipo === TipoProducto.Curso).length,
-    recursos: products.filter((p) => p.tipo === TipoProducto.Recurso).length,
+    recursos: products.filter((p) => p.tipo === TipoProducto.RecursoDigital).length,
     activos: products.filter((p) => p.activo).length,
   };
 

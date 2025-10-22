@@ -2,6 +2,9 @@ import { useState, useCallback, useEffect } from 'react';
 import { useAdminStore } from '@/store/admin.store';
 import * as adminApi from '@/lib/api/admin.api';
 import type { ClaseListado } from '@/types/admin-clases.types';
+import type { RutaEspecialidadFromSchema } from '@/lib/schemas/ruta.schema';
+import type { DocenteFromSchema } from '@/lib/schemas/docente.schema';
+import type { SectorFromSchema } from '@/lib/schemas/sector.schema';
 
 /**
  * Hook personalizado para gestión de clases
@@ -10,11 +13,10 @@ import type { ClaseListado } from '@/types/admin-clases.types';
 export function useClases() {
   const { classes, createClass, cancelClass, fetchClasses, isLoading, error } = useAdminStore();
 
-  // Asegurar que classes siempre sea un array
-  const safeClasses = Array.isArray(classes) ? classes : [];
+  const safeClasses: ClaseListado[] = Array.isArray(classes) ? classes : [];
 
   return {
-    clases: safeClasses as Clase[],
+    clases: safeClasses,
     isLoading,
     error,
     fetchClases: fetchClasses,
@@ -28,9 +30,9 @@ export function useClases() {
  * (Rutas, Docentes, Sectores)
  */
 export function useClasesFormData() {
-  const [rutas, setRutas] = useState<RutaEspecialidad[] | RutaEspecialidadFromSchema[]>([]);
-  const [docentes, setDocentes] = useState<Docente[] | DocenteFromSchema[]>([]);
-  const [sectores, setSectores] = useState<Sector[] | SectorFromSchema[]>([]);
+  const [rutas, setRutas] = useState<RutaEspecialidadFromSchema[]>([]);
+  const [docentes, setDocentes] = useState<DocenteFromSchema[]>([]);
+  const [sectores, setSectores] = useState<SectorFromSchema[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,19 +47,9 @@ export function useClasesFormData() {
         adminApi.getSectores(),
       ]);
 
-      const rutasData = Array.isArray(rutasResponse)
-        ? rutasResponse
-        : (rutasResponse as Record<string, unknown>)?.data || [];
-      const docentesData = Array.isArray(docentesResponse)
-        ? docentesResponse
-        : (docentesResponse as Record<string, unknown>)?.data || [];
-      const sectoresData = Array.isArray(sectoresResponse)
-        ? sectoresResponse
-        : (sectoresResponse as Record<string, unknown>)?.data || [];
-
-      setRutas(rutasData);
-      setDocentes(docentesData);
-      setSectores(sectoresData);
+      setRutas(rutasResponse);
+      setDocentes(docentesResponse);
+      setSectores(sectoresResponse);
     } catch (err: unknown) {
       console.error('Error loading form data:', err);
       setError('Error cargando datos del formulario');
