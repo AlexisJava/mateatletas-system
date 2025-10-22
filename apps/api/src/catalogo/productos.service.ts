@@ -10,7 +10,7 @@ import { Cache } from 'cache-manager';
 import { PrismaService } from '../core/database/prisma.service';
 import { CrearProductoDto } from './dto/crear-producto.dto';
 import { ActualizarProductoDto } from './dto/actualizar-producto.dto';
-import { TipoProducto } from '@prisma/client';
+import { Prisma, TipoProducto } from '@prisma/client';
 
 /**
  * Service para gestionar operaciones CRUD de productos del catálogo
@@ -36,7 +36,7 @@ export class ProductosService {
     this.validateProductoFields(createDto);
 
     // Construir los datos para crear el producto
-    const data: any = {
+    const data: Prisma.ProductoCreateInput = {
       nombre: createDto.nombre,
       descripcion: createDto.descripcion,
       precio: createDto.precio,
@@ -84,7 +84,7 @@ export class ProductosService {
     }
 
     // Si no está en cache, consultar la BD
-    const where: any = {};
+    const where: Prisma.ProductoWhereInput = {};
 
     if (tipo) {
       where.tipo = tipo;
@@ -179,7 +179,7 @@ export class ProductosService {
     }
 
     // Construir los datos para actualizar
-    const data: any = {};
+    const data: Prisma.ProductoUpdateInput = {};
 
     if (updateDto.nombre !== undefined) data.nombre = updateDto.nombre;
     if (updateDto.descripcion !== undefined)
