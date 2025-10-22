@@ -3,67 +3,11 @@
 import { useState, useEffect } from 'react';
 import apiClient from '@/lib/axios';
 import { Estudiante } from '@/types/estudiante';
+import {
+  estudianteDetalleSchema,
+  type EstudianteDetalleFromSchema,
+} from '@/lib/schemas/estudiante.schema';
 import { Users, Calendar, CheckCircle, Award, TrendingUp } from 'lucide-react';
-
-interface InsigniaEstudiante {
-  id: string;
-  nombre: string;
-  descripcion?: string;
-  icono_url?: string;
-}
-
-interface Asistencia {
-  id: string;
-  presente: boolean;
-  fecha: string;
-}
-
-interface InscripcionClaseDetalle {
-  id: string;
-  estudiante_id: string;
-  clase_id: string;
-  estado: string;
-  createdAt: string;
-  clase: {
-    id: string;
-    fecha_hora_inicio: string;
-    ruta_curricular?: {
-      nombre: string;
-      color: string;
-    } | null;
-    docente?: {
-      id: string;
-      nombre?: string;
-      apellido?: string;
-      titulo?: string;
-    };
-  };
-}
-
-interface EstudianteDetalle {
-  id: string;
-  nombre: string;
-  apellido: string;
-  fecha_nacimiento: Date;
-  nivel_escolar?: string;
-  avatar_url?: string;
-  edad: number;
-  perfil_gamificacion: {
-    nivel: number;
-    puntos_totales: number;
-    insignias_estudiante: InsigniaEstudiante[];
-  } | null;
-  inscripciones_clase: InscripcionClaseDetalle[];
-  asistencias: Asistencia[];
-  estadisticas: {
-    total_clases: number;
-    clases_presente: number;
-    tasa_asistencia: number;
-    nivel: number;
-    puntos: number;
-    insignias: number;
-  };
-}
 
 interface Props {
   estudiantes: Estudiante[];
@@ -71,7 +15,7 @@ interface Props {
 
 export default function MisHijosTab({ estudiantes }: Props) {
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
-  const [studentDetail, setStudentDetail] = useState<EstudianteDetalle | null>(null);
+  const [studentDetail, setStudentDetail] = useState<EstudianteDetalleFromSchema | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Auto-seleccionar el primer estudiante
@@ -92,7 +36,8 @@ export default function MisHijosTab({ estudiantes }: Props) {
     try {
       setLoading(true);
       const response = await apiClient.get(`/estudiantes/${estudiante_id}/detalle-completo`);
-      setStudentDetail(response as unknown as EstudianteDetalle);
+      const parsed = estudianteDetalleSchema.parse(response);
+      setStudentDetail(parsed);
     } catch (error: unknown) {
       // Error loading student detail
     } finally {
@@ -184,13 +129,13 @@ export default function MisHijosTab({ estudiantes }: Props) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 text-white shadow-lg">
                   <TrendingUp className="w-8 h-8 mb-2 opacity-80" />
-                  <p className="text-2xl font-bold">{studentDetail.estadisticas.nivel}</p>
+                  <p className="text-2xl font-bold">{studentDetail.estadisticas.nivel ?? 0}</p>
                   <p className="text-sm opacity-90">Nivel</p>
                 </div>
 
                 <div className="bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl p-4 text-white shadow-lg">
                   <Award className="w-8 h-8 mb-2 opacity-80" />
-                  <p className="text-2xl font-bold">{studentDetail.estadisticas.puntos}</p>
+                  <p className="text-2xl font-bold">{studentDetail.estadisticas.puntos ?? 0}</p>
                   <p className="text-sm opacity-90">Puntos XP</p>
                 </div>
 
@@ -202,7 +147,7 @@ export default function MisHijosTab({ estudiantes }: Props) {
 
                 <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white shadow-lg">
                   <Award className="w-8 h-8 mb-2 opacity-80" />
-                  <p className="text-2xl font-bold">{studentDetail.estadisticas.insignias}</p>
+                  <p className="text-2xl font-bold">{studentDetail.estadisticas.insignias ?? 0}</p>
                   <p className="text-sm opacity-90">Insignias</p>
                 </div>
               </div>
