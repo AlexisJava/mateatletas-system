@@ -43,9 +43,9 @@ export default function CatalogoPage() {
   // Contador de productos por tipo
   const productCount = {
     todos: productos.length,
-    Suscripcion: productos.filter((p) => p.tipo === 'Suscripcion').length,
-    Curso: productos.filter((p) => p.tipo === 'Curso').length,
-    Recurso: productos.filter((p) => p.tipo === 'Recurso').length,
+    Suscripcion: productos.filter((p) => p.tipo === TipoProducto.Suscripcion).length,
+    Curso: productos.filter((p) => p.tipo === TipoProducto.Curso).length,
+    RecursoDigital: productos.filter((p) => p.tipo === TipoProducto.RecursoDigital).length,
   };
 
   // Handler para abrir modal
