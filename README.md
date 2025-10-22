@@ -282,6 +282,35 @@ Mateatletas-Ecosystem/
 
 **Total:** ~245 tests E2E automatizados ✅
 
+### ⚡ Tests Unitarios - Estado Actual
+
+**Tests Críticos:** ✅ 65 tests pasando (Auth: 30, Pagos: 35)
+**Tests Legacy:** ⚠️ ~70 tests en migración
+
+```bash
+# Ejecutar tests críticos
+cd apps/api
+npm test -- auth.service.spec.ts    # 30 tests ✅
+npm test -- pagos.service.spec.ts   # 35 tests ✅
+```
+
+### 📋 Política TDD para Nuevas Features
+
+**TODA nueva feature DEBE incluir tests antes de merge a `main`.**
+
+Ver documentación completa: **[TESTING_POLICY.md](./TESTING_POLICY.md)**
+
+**Incluye:**
+- ✅ Proceso TDD obligatorio (Red → Green → Refactor)
+- ✅ Checklist de PR con tests
+- ✅ Standards de coverage (80% nuevas features, 90% críticas)
+- ✅ Plan de migración para tests legacy
+- ✅ CI/CD automático que bloquea PRs sin tests
+
+**Git Hooks configurados:**
+- Pre-commit: lint-staged (ESLint + Prettier auto-fix)
+- CI ejecuta tests críticos en cada PR
+
 ---
 
 ## 📦 Slices Backend
