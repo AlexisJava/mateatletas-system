@@ -26,16 +26,20 @@ const TipoProductoEnum = (TipoProducto || {
 const createWebhookPayload = (
   override: Partial<MercadoPagoWebhookDto> = {},
 ): MercadoPagoWebhookDto => {
-  const hasCustomId =
-    override.data !== undefined &&
-    Object.prototype.hasOwnProperty.call(override.data, 'id');
+  // Si override.data tiene id explícitamente definido (incluso como undefined), usar ese valor
+  // Si no, usar 'payment-123' por defecto
+  let paymentData: { id?: string };
+
+  if (override.data && 'id' in override.data) {
+    paymentData = { id: (override.data as { id?: string }).id };
+  } else {
+    paymentData = { id: 'payment-123' };
+  }
 
   return {
     action: override.action ?? 'payment.updated',
     type: override.type ?? 'payment',
-    data: {
-      id: hasCustomId ? (override.data as { id?: string }).id : 'payment-123',
-    },
+    data: paymentData,
     live_mode: override.live_mode,
     date_created: override.date_created,
     user_id: override.user_id,
