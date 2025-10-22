@@ -21,7 +21,7 @@ export function IsPhoneNumberAR(validationOptions?: ValidationOptions) {
       propertyName: propertyName,
       options: validationOptions,
       validator: {
-        validate(value: unknown) {
+        validate(value: any) {
           if (!value) return true; // Si es opcional, permitir vacío
 
           const phone = String(value).replace(/[\s\-\(\)]/g, ''); // Eliminar espacios, guiones, paréntesis

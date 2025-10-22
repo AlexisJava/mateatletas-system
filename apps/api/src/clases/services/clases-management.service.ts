@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service';
 import { CrearClaseDto } from '../dto/crear-clase.dto';
 import { NotificacionesService } from '../../notificaciones/notificaciones.service';
@@ -241,13 +240,12 @@ export class ClasesManagementService {
     page: number = 1,
     limit: number = 50,
   ) {
-    const where: Prisma.ClaseWhereInput = {};
+    const where: any = {};
 
     if (filtros?.fechaDesde || filtros?.fechaHasta) {
-      where.fecha_hora_inicio = {
-        ...(filtros.fechaDesde ? { gte: filtros.fechaDesde } : {}),
-        ...(filtros.fechaHasta ? { lte: filtros.fechaHasta } : {}),
-      };
+      where.fecha_hora_inicio = {};
+      if (filtros.fechaDesde) where.fecha_hora_inicio.gte = filtros.fechaDesde;
+      if (filtros.fechaHasta) where.fecha_hora_inicio.lte = filtros.fechaHasta;
     }
 
     if (filtros?.estado) where.estado = filtros.estado;
@@ -468,7 +466,7 @@ export class ClasesManagementService {
    * Listar clases de un docente
    */
   async listarClasesDeDocente(docenteId: string, incluirPasadas = false) {
-    const where: Prisma.ClaseWhereInput = {
+    const where: any = {
       docente_id: docenteId,
     };
 
