@@ -1,38 +1,20 @@
-/**
- * Types para el módulo de Catálogo de Productos
- */
+import {
+  productoSchema,
+  productosResponseSchema,
+  tipoProductoEnum,
+} from '@mateatletas/contracts';
+import type { z } from 'zod';
 
 /**
  * Tipos de producto disponibles
  */
-export enum TipoProducto {
-  Suscripcion = 'Suscripcion',
-  Curso = 'Curso',
-  Recurso = 'Recurso',
-}
+export const TipoProducto = tipoProductoEnum.enum;
+export type TipoProducto = (typeof TipoProducto)[keyof typeof TipoProducto];
 
 /**
  * Producto del catálogo
  */
-export interface Producto {
-  id: string;
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  tipo: TipoProducto;
-  duracion_dias: number | null;
-  activo: boolean;
-  createdAt: string;
-  updatedAt: string;
-
-  // Campos específicos para tipo Curso
-  fecha_inicio?: string | null;
-  fecha_fin?: string | null;
-  cupo_maximo?: number | null;
-
-  // Campos específicos para tipo Suscripcion
-  duracion_meses?: number | null;
-}
+export type Producto = z.infer<typeof productoSchema>;
 
 /**
  * Filtros para productos
@@ -42,7 +24,4 @@ export type FiltroProducto = 'todos' | TipoProducto;
 /**
  * Response del API para lista de productos
  */
-export interface ProductosResponse {
-  productos: Producto[];
-  total: number;
-}
+export type ProductosResponse = z.infer<typeof productosResponseSchema>;
