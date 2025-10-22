@@ -3,7 +3,7 @@ import { DashboardData, AdminUser, SystemStats } from '@/types/admin.types';
 import * as adminApi from '@/lib/api/admin.api';
 import type { ClaseListado } from '@/types/admin-clases.types';
 import type { Producto } from '@/types/catalogo.types';
-import type { CrearProductoDto } from '@/lib/api/catalogo.api';
+import type { CrearProductoDto, ActualizarProductoDto } from '@/lib/api/catalogo.api';
 import { getErrorMessage } from '@/lib/utils/error-handler';
 
 interface CrearClaseDto {
@@ -35,7 +35,7 @@ interface AdminStore {
   createClass: (data: CrearClaseDto) => Promise<boolean>;
   cancelClass: (claseId: string) => Promise<boolean>;
   createProduct: (data: CrearProductoDto) => Promise<boolean>;
-  updateProduct: (id: string, data: Partial<CrearProductoDto>) => Promise<boolean>;
+  updateProduct: (id: string, data: ActualizarProductoDto) => Promise<boolean>;
   deleteProduct: (id: string, hardDelete?: boolean) => Promise<boolean>;
   changeUserRole: (userId: string, role: 'tutor' | 'docente' | 'admin') => Promise<boolean>;
   updateUserRoles: (userId: string, roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[]) => Promise<boolean>;
@@ -119,9 +119,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   fetchClasses: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await adminApi.getAllClasses() as unknown as { data: ClaseListado[]; meta?: unknown } | ClaseListado[];
-      // La API puede devolver { data: [...], meta: {...} } o directamente el array
-      const classes = Array.isArray(response) ? response : (response?.data || []);
+      const classes = await adminApi.getAllClasses();
       set({ classes, isLoading: false });
     } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error loading classes'), classes: [], isLoading: false });
@@ -153,7 +151,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   fetchProducts: async (includeInactive = true) => {
     set({ isLoading: true, error: null });
     try {
-      const products = await adminApi.getAllProducts(includeInactive) as unknown as Producto[];
+      const products = await adminApi.getAllProducts(includeInactive);
       set({ products, isLoading: false });
     } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error loading products'), isLoading: false });
@@ -162,7 +160,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
 
   createProduct: async (data: CrearProductoDto): Promise<boolean> => {
     try {
-      await adminApi.createProduct(data as unknown as Record<string, unknown>);
+      await adminApi.createProduct(data);
       await get().fetchProducts();
       return true;
     } catch (error: unknown) {
@@ -171,7 +169,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
     }
   },
 
-  updateProduct: async (id: string, data: Partial<CrearProductoDto>): Promise<boolean> => {
+  updateProduct: async (id: string, data: ActualizarProductoDto): Promise<boolean> => {
     try {
       await adminApi.updateProduct(id, data);
       await get().fetchProducts();
