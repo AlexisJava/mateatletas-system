@@ -119,8 +119,8 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   fetchClasses: async () => {
     set({ isLoading: true, error: null });
     try {
-      const classes = await adminApi.getAllClasses();
-      set({ classes, isLoading: false });
+      const { data } = await adminApi.getAllClasses();
+      set({ classes: data, isLoading: false });
     } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error loading classes'), classes: [], isLoading: false });
     }

@@ -1,36 +1,124 @@
 import apiClient from '../axios';
-import {
-  dashboardGamificacionSchema,
-  logrosListSchema,
-  puntosSchema,
-  rankingSchema,
-  progresoRutaListSchema,
-  accionesPuntuablesListSchema,
-  puntosObtenidosListSchema,
-  otorgarPuntosSchema,
-  type DashboardGamificacion,
-  type Logro,
-  type Puntos,
-  type Ranking,
-  type ProgresoRuta,
-  type AccionPuntuable,
-  type PuntoObtenido,
-  type OtorgarPuntosInput,
-  type ProximaClase,
-} from '@mateatletas/contracts';
+import { rankingResponseSchema, type RankingResponse } from '@/lib/schemas/ranking.schema';
 
-export type {
-  ProximaClase,
-  Logro,
-  Puntos,
-  Ranking,
-  AccionPuntuable,
-  PuntoObtenido,
-};
+export interface ProximaClase {
+  id: string;
+  fecha_hora_inicio: string;
+  duracion_minutos: number;
+  ruta_curricular: {
+    nombre: string;
+    color: string;
+  };
+  docente: {
+    nombre: string;
+    apellido: string;
+  };
+}
 
-export type DashboardData = DashboardGamificacion;
-export type Progreso = ProgresoRuta;
-export type OtorgarPuntosData = OtorgarPuntosInput;
+export interface DashboardData {
+  estudiante: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    avatar_url?: string;
+    foto_url?: string;
+    equipo: {
+      id: string;
+      nombre: string;
+      color: string;
+    };
+  };
+  stats: {
+    puntosToales: number;
+    clasesAsistidas: number;
+    clasesTotales: number;
+    racha: number;
+  };
+  nivel: {
+    nivelActual: number;
+    nombre: string;
+    descripcion: string;
+    puntosActuales: number;
+    puntosMinimos: number;
+    puntosMaximos: number;
+    puntosParaSiguienteNivel: number;
+    porcentajeProgreso: number;
+    color: string;
+    icono: string;
+    siguienteNivel: {
+      nivel: number;
+      nombre: string;
+      puntosRequeridos: number;
+    } | null;
+  };
+  proximasClases: ProximaClase[];
+  equipoRanking: Array<Record<string, unknown>>;
+  ultimasAsistencias: Array<Record<string, unknown>>;
+}
+
+export interface Logro {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  icono: string;
+  puntos: number;
+  categoria: string;
+  rareza?: string;
+  desbloqueado: boolean;
+  fecha_desbloqueo?: Date;
+}
+
+export interface Puntos {
+  total: number;
+  asistencia: number;
+  extras: number;
+  porRuta: Record<string, number>;
+}
+
+export type Ranking = RankingResponse;
+
+export interface Progreso {
+  ruta: string;
+  color: string;
+  clasesAsistidas: number;
+  clasesTotales: number;
+  porcentaje: number;
+}
+
+export interface AccionPuntuable {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  puntos: number;
+  activo: boolean;
+}
+
+export interface PuntoObtenido {
+  id: string;
+  puntos: number;
+  contexto?: string;
+  fecha_otorgado: string;
+  accion: AccionPuntuable;
+  docente: {
+    nombre: string;
+    apellido: string;
+  };
+  clase?: {
+    id: string;
+    fecha_hora_inicio: string;
+    rutaCurricular: {
+      nombre: string;
+      color: string;
+    };
+  };
+}
+
+export interface OtorgarPuntosData {
+  estudianteId: string;
+  accionId: string;
+  claseId?: string;
+  contexto?: string;
+}
 
 export const gamificacionApi = {
   /**
@@ -62,7 +150,7 @@ export const gamificacionApi = {
    */
   getRanking: async (estudianteId: string): Promise<Ranking> => {
     const response = await apiClient.get(`/gamificacion/ranking/${estudianteId}`);
-    return rankingSchema.parse(response);
+    return rankingResponseSchema.parse(response);
   },
 
   /**

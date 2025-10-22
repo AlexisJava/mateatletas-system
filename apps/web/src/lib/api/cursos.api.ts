@@ -4,102 +4,146 @@
  */
 
 import axios from '@/lib/axios';
-import { z } from 'zod';
 import {
-  modulosListSchema,
-  leccionesListSchema,
-  moduloSchema,
   leccionSchema,
-  progresoCursoSchema,
-  progresoLeccionSchema,
-  createModuloSchema,
-  updateModuloSchema,
-  createLeccionSchema,
-  updateLeccionSchema,
-  completarLeccionSchema,
+  leccionesListSchema,
   tipoContenidoEnum,
-  type Modulo,
-  type Leccion,
-  type ProgresoCurso,
-  type ProgresoLeccion,
-  type CreateModuloInput,
-  type UpdateModuloInput,
-  type CreateLeccionInput,
-  type UpdateLeccionInput,
-  type CompletarLeccionInput,
-  type ContenidoLeccion,
-  type ContenidoVideo,
-  type ContenidoTexto,
-  type ContenidoQuiz,
-  type ContenidoTarea,
-  type CursoDetalle,
-} from '@mateatletas/contracts';
+  type TipoContenido as TipoContenidoSchema,
+  type LeccionFromSchema,
+} from '@/lib/schemas/leccion.schema';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
 export const TipoContenido = tipoContenidoEnum.enum;
-export type TipoContenido = (typeof TipoContenido)[keyof typeof TipoContenido];
+export type TipoContenido = TipoContenidoSchema;
 
-export type {
-  ContenidoVideo,
-  ContenidoTexto,
-  ContenidoQuiz,
-  ContenidoTarea,
-  ContenidoLeccion,
-  Modulo,
-  Leccion,
-  ProgresoCurso,
-  ProgresoLeccion,
-  CursoDetalle,
-};
+// Tipos específicos de contenido por tipo de lección
+export interface ContenidoVideo {
+  url?: string;
+  videoUrl?: string;
+  duracion?: number;
+}
 
-export type CreateModuloDto = CreateModuloInput;
-export type UpdateModuloDto = UpdateModuloInput;
-export type CreateLeccionDto = CreateLeccionInput;
-export type UpdateLeccionDto = UpdateLeccionInput;
-export type CompletarLeccionDto = CompletarLeccionInput;
+export interface ContenidoTexto {
+  texto?: string;
+  contenido?: string;
+}
 
-const modulosResponseSchema = z
-  .object({
-    data: modulosListSchema,
-  })
-  .passthrough();
+export interface ContenidoQuiz {
+  preguntas: Array<{
+    id: string;
+    pregunta: string;
+    opciones: string[];
+    respuesta_correcta: number;
+  }>;
+}
 
-const leccionesResponseSchema = z
-  .object({
-    data: leccionesListSchema,
-  })
-  .passthrough();
+export interface ContenidoTarea {
+  descripcion: string;
+  instrucciones?: string;
+}
 
-const completarLeccionResponseSchema = z.object({
-  progreso: progresoLeccionSchema,
-  puntos_ganados: z.number().int().nonnegative(),
-  logro_desbloqueado: z.unknown().nullable(),
-});
+// Union type para contenido tipado (usar cuando se conoce el tipo)
+export type ContenidoLeccion =
+  | ContenidoVideo
+  | ContenidoTexto
+  | ContenidoQuiz
+  | ContenidoTarea
+  | Record<string, unknown>; // Fallback para tipos no mapeados
 
-export type CompletarLeccionResponse = z.infer<typeof completarLeccionResponseSchema>;
+export interface Modulo {
+  id: string;
+  producto_id: string;
+  titulo: string;
+  descripcion: string | null;
+  orden: number;
+  duracion_estimada_minutos: number;
+  puntos_totales: number;
+  publicado: boolean;
+  lecciones?: Leccion[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-const parseModulosResponse = (response: unknown): Modulo[] => {
-  const direct = modulosListSchema.safeParse(response);
-  if (direct.success) return direct.data;
+export type Leccion = LeccionFromSchema;
 
-  const wrapped = modulosResponseSchema.safeParse(response);
-  if (wrapped.success) return wrapped.data.data;
+export interface ProgresoLeccion {
+  id: string;
+  estudiante_id: string;
+  leccion_id: string;
+  progreso_porcentaje: number;
+  tiempo_invertido_minutos: number;
+  completado: boolean;
+  calificacion: number | null;
+  intentos: number;
+  notas_estudiante: string | null;
+  ultima_respuesta: Record<string, unknown> | null;
+  fecha_completado: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
-  throw new Error('Respuesta de módulos inválida');
-};
+export interface ProgresoCurso {
+  producto_id: string;
+  total_modulos: number;
+  total_lecciones: number;
+  lecciones_completadas: number;
+  porcentaje_completado: number;
+  puntos_ganados: number;
+  tiempo_total_minutos: number;
+  siguiente_leccion: Leccion | null;
+}
 
-const parseLeccionesResponse = (response: unknown): Leccion[] => {
-  const direct = leccionesListSchema.safeParse(response);
-  if (direct.success) return direct.data;
+// DTOs
+export interface CreateModuloDto {
+  titulo: string;
+  descripcion?: string;
+  orden?: number;
+  publicado?: boolean;
+}
 
-  const wrapped = leccionesResponseSchema.safeParse(response);
-  if (wrapped.success) return wrapped.data.data;
+export interface UpdateModuloDto {
+  titulo?: string;
+  descripcion?: string;
+  orden?: number;
+  publicado?: boolean;
+}
 
-  throw new Error('Respuesta de lecciones inválida');
-};
+export interface CreateLeccionDto {
+  titulo: string;
+  descripcion?: string;
+  tipo_contenido: TipoContenido;
+  contenido: Record<string, unknown>;
+  orden?: number;
+  duracion_estimada_minutos: number;
+  puntos?: number;
+  publicado?: boolean;
+  leccion_prerequisito_id?: string;
+  logro_desbloqueado_id?: string;
+}
+
+export interface UpdateLeccionDto {
+  titulo?: string;
+  descripcion?: string;
+  tipo_contenido?: TipoContenido;
+  contenido?: Record<string, unknown>;
+  orden?: number;
+  duracion_estimada_minutos?: number;
+  puntos?: number;
+  publicado?: boolean;
+  leccion_prerequisito_id?: string;
+  logro_desbloqueado_id?: string;
+}
+
+export interface CompletarLeccionDto {
+  progreso_porcentaje?: number;
+  tiempo_invertido_minutos?: number;
+  calificacion?: number;
+  notas_estudiante?: string;
+  ultima_respuesta?: Record<string, unknown>;
+}
 
 // ============================================================================
 // MÓDULOS - Admin
@@ -175,8 +219,7 @@ export const reordenarModulos = async (productoId: string, ordenIds: string[]): 
  * Requiere: Admin
  */
 export const createLeccion = async (moduloId: string, data: CreateLeccionDto): Promise<Leccion> => {
-  const payload = createLeccionSchema.parse(data);
-  const response = await axios.post(`/cursos/modulos/${moduloId}/lecciones`, payload);
+  const response = await axios.post(`/cursos/modulos/${moduloId}/lecciones`, data);
   return leccionSchema.parse(response);
 };
 
@@ -187,7 +230,7 @@ export const createLeccion = async (moduloId: string, data: CreateLeccionDto): P
  */
 export const getLeccionesByModulo = async (moduloId: string): Promise<Leccion[]> => {
   const response = await axios.get(`/cursos/modulos/${moduloId}/lecciones`);
-  return parseLeccionesResponse(response);
+  return leccionesListSchema.parse(response);
 };
 
 /**
@@ -206,8 +249,7 @@ export const getLeccion = async (id: string): Promise<Leccion> => {
  * Requiere: Admin
  */
 export const updateLeccion = async (id: string, data: UpdateLeccionDto): Promise<Leccion> => {
-  const payload = updateLeccionSchema.parse(data);
-  const response = await axios.patch(`/cursos/lecciones/${id}`, payload);
+  const response = await axios.patch(`/cursos/lecciones/${id}`, data);
   return leccionSchema.parse(response);
 };
 
