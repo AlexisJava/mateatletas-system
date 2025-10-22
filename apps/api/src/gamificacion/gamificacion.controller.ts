@@ -1,9 +1,19 @@
-import { Controller, Get, Post, Param, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { GamificacionService } from './gamificacion.service';
-import { RequestWithAuthUser } from '../auth/interfaces';
+import type { Request as ExpressRequest } from 'express';
+
+type RequestWithUser = ExpressRequest & { user: { id: string } };
 
 /**
  * DTOs para las peticiones
@@ -96,7 +106,7 @@ export class GamificacionController {
   @Roles(Role.Docente, Role.Admin)
   async otorgarPuntos(
     @Body() dto: OtorgarPuntosDto,
-    @Request() req: RequestWithAuthUser,
+    @Request() req: RequestWithUser,
   ) {
     return this.gamificacionService.otorgarPuntos(
       req.user.id,
@@ -114,7 +124,7 @@ export class GamificacionController {
   @Post('logros/:logroId/desbloquear')
   async desbloquearLogro(
     @Param('logroId') logroId: string,
-    @Request() req: RequestWithAuthUser,
+    @Request() req: RequestWithUser,
   ) {
     return this.gamificacionService.desbloquearLogro(req.user.id, logroId);
   }

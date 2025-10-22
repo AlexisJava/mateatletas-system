@@ -129,7 +129,9 @@ export class EventosController {
     @Query('tipo') tipo?: TipoEvento,
     @Query('busqueda') busqueda?: string,
   ) {
-    const options: any = {};
+    const options: NonNullable<
+      Parameters<EventosService['findAll']>[1]
+    > = {};
 
     if (fechaInicio) options.fechaInicio = new Date(fechaInicio);
     if (fechaFin) options.fechaFin = new Date(fechaFin);
