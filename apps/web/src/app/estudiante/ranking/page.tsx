@@ -5,23 +5,7 @@ import { motion } from 'framer-motion';
 import { useGamificacionStore } from '@/store/gamificacion.store';
 import { useAuthStore } from '@/store/auth.store';
 import { Crown, Users, TrendingUp, Trophy } from 'lucide-react';
-
-interface EstudianteRanking {
-  id: string;
-  nombre: string;
-  apellido: string;
-  puntos: number;
-  avatar_url?: string | null;
-  equipo?: { nombre: string; color: string };
-}
-
-interface RankingData {
-  equipoActual: { nombre: string; color: string } | null;
-  posicionEquipo: number;
-  posicionGlobal: number;
-  rankingEquipo: EstudianteRanking[];
-  rankingGlobal: EstudianteRanking[];
-}
+import type { Ranking } from '@/lib/api/gamificacion.api';
 
 export default function RankingPage() {
   const { ranking, fetchRanking, isLoading } = useGamificacionStore();
@@ -34,8 +18,8 @@ export default function RankingPage() {
   }, [user?.id]);
 
   // Mock data
-  const mockRanking: RankingData = {
-    equipoActual: { nombre: 'Fénix', color: '#F59E0B' },
+  const mockRanking: Ranking = {
+    equipoActual: { id: 'equipo-fenix', nombre: 'Fénix', color: '#F59E0B' },
     posicionEquipo: 2,
     posicionGlobal: 15,
     rankingEquipo: [
@@ -44,35 +28,35 @@ export default function RankingPage() {
         nombre: 'María',
         apellido: 'López',
         puntos: 1890,
-        avatar_url: 'avataaars',
+        avatar: 'avataaars',
       },
       {
         id: '2',
         nombre: 'Ana',
         apellido: 'García',
         puntos: 1250,
-        avatar_url: 'avataaars',
+        avatar: 'avataaars',
       },
       {
         id: '3',
         nombre: 'Carlos',
         apellido: 'Martínez',
         puntos: 1100,
-        avatar_url: null,
+        avatar: null,
       },
       {
         id: '4',
         nombre: 'Juan',
         apellido: 'Ruiz',
         puntos: 980,
-        avatar_url: null,
+        avatar: null,
       },
       {
         id: '5',
         nombre: 'Sofía',
         apellido: 'González',
         puntos: 850,
-        avatar_url: null,
+        avatar: null,
       },
     ],
     rankingGlobal: [
@@ -81,26 +65,26 @@ export default function RankingPage() {
         nombre: 'Lucía',
         apellido: 'Fernández',
         puntos: 2450,
-        equipo: { nombre: 'Cometas', color: '#3B82F6' },
+        equipo: { id: 'equipo-cometas', nombre: 'Cometas', color: '#3B82F6' },
       },
       {
         id: '2',
         nombre: 'Diego',
         apellido: 'Ramírez',
         puntos: 2100,
-        equipo: { nombre: 'Meteoros', color: '#EF4444' },
+        equipo: { id: 'equipo-meteoros', nombre: 'Meteoros', color: '#EF4444' },
       },
       {
         id: '3',
         nombre: 'María',
         apellido: 'López',
         puntos: 1890,
-        equipo: { nombre: 'Fénix', color: '#F59E0B' },
+        equipo: { id: 'equipo-fenix', nombre: 'Fénix', color: '#F59E0B' },
       },
     ],
   };
 
-  const data: RankingData = (ranking as unknown as RankingData) || mockRanking;
+  const data: Ranking = ranking ?? mockRanking;
 
   if (isLoading) {
     return (
@@ -141,7 +125,10 @@ export default function RankingPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-black/20 rounded-xl p-4 border border-white/20">
               <p className="text-white/80 text-sm mb-1 font-semibold">Tu Equipo</p>
-              <p className="text-2xl font-black text-white" style={{ color: data.equipoActual?.color ?? '#3B82F6' }}>
+              <p
+                className="text-2xl font-black text-white"
+                style={{ color: data.equipoActual?.color ?? data.equipoActual?.color_primario ?? '#3B82F6' }}
+              >
                 {data.equipoActual?.nombre ?? 'Sin equipo'}
               </p>
             </div>
