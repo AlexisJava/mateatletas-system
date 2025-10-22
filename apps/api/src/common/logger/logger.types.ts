@@ -1,0 +1,32 @@
+export interface LoggerMetadata extends Record<string, unknown> {
+  context?: string;
+  trace?: string;
+  eventType?: string;
+  operation?: string;
+  durationMs?: number;
+  query?: string | Record<string, unknown>;
+  action?: string;
+  userId?: string;
+  userRole?: string;
+  method?: string;
+  url?: string;
+  statusCode?: number;
+  field?: string;
+  value?: unknown;
+  constraints?: Record<string, string>;
+  errorId?: string;
+  ip?: string;
+  userAgent?: string;
+  body?: unknown;
+  params?: unknown;
+  alert?: boolean;
+  severity?: string;
+  type?: string;
+  dataId?: string;
+  liveMode?: boolean | string;
+  timestamp?: string;
+  errorMessage?: string;
+  errorName?: string;
+  stack?: string;
+  detail?: unknown;
+}

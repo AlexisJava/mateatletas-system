@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LoggerService } from '../logger/logger.service';
+import { LoggerMetadata } from '../logger';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -122,7 +123,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const { method, url, headers, body, query, params } = request;
     const user = (request as any).user;
 
-    const metadata = {
+    const metadata: LoggerMetadata = {
       errorId,
       statusCode: status,
       method,
