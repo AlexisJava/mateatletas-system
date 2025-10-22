@@ -458,12 +458,12 @@ export class AsistenciaReportesService {
     > = {};
 
     todasAsistencias.forEach((a) => {
-      const rutaNombre = a.clase.rutaCurricular.nombre;
+      const rutaNombre = a.clase.rutaCurricular?.nombre ?? 'Sin ruta';
       if (!porRuta[rutaNombre]) {
         porRuta[rutaNombre] = {
           presentes: 0,
           total: 0,
-          color: a.clase.rutaCurricular.color || '#6B7280', // Default color if null
+          color: a.clase.rutaCurricular?.color || '#6B7280', // Default color if null
         };
       }
 
