@@ -33,10 +33,9 @@ interface InscripcionClaseDetalle {
     } | null;
     docente?: {
       id: string;
-      user?: {
-        nombre: string;
-        apellido: string;
-      };
+      nombre?: string;
+      apellido?: string;
+      titulo?: string;
     };
   };
 }

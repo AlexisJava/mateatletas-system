@@ -55,7 +55,7 @@ export default function AdminCursosPage() {
   };
 
   const handleSelectCurso = async (curso: Producto) => {
-    setSelectedCurso(curso as unknown as Record<string, unknown>);
+    setSelectedCurso(curso);
     await loadModulos(curso.id);
   };
 
