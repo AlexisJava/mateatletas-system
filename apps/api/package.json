@@ -83,11 +83,6 @@
     ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/dist/",
-      "<rootDir>/../dist/"
-    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
