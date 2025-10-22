@@ -7,10 +7,10 @@ import { z } from 'zod';
 export const productoSchema = z.object({
   id: z.string(),
   nombre: z.string(),
-  descripcion: z.string(),
+  descripcion: z.string().nullable(), // Opcional en Prisma
   precio: z.number(),
   tipo: z.enum(['Suscripcion', 'Curso', 'RecursoDigital']), // Coincidir con TipoProducto enum
-  duracion_dias: z.number().nullable(),
+  duracion_dias: z.number().nullable().optional(), // Campo legacy, puede no existir
   activo: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -18,7 +18,7 @@ export const productoSchema = z.object({
   fecha_inicio: z.string().nullable().optional(),
   fecha_fin: z.string().nullable().optional(),
   cupo_maximo: z.number().nullable().optional(),
-  duracion_meses: z.number().nullable().optional(),
+  duracion_meses: z.number().nullable().optional(), // Campo real de Prisma
 });
 
 /**

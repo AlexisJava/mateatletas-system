@@ -22,20 +22,22 @@ const rutaCurricularEnClaseSchema = z.object({
  * Schema de Docente simplificado (para relación en Clase)
  */
 const docenteEnClaseSchema = z.object({
-  id: z.string(),
+  id: z.string().optional(),
+  nombre: z.string().nullish(),
+  apellido: z.string().nullish(),
   user: z.object({
     nombre: z.string(),
     apellido: z.string(),
-  }).optional(),
-});
+  }).nullish(),
+}).nullish();
 
 /**
  * Schema de Estudiante simplificado (para inscripciones)
  */
 const estudianteEnInscripcionSchema = z.object({
   id: z.string(),
-  nombre: z.string(),
-  apellido: z.string(),
+  nombre: z.string().nullish(),
+  apellido: z.string().nullish(),
 });
 
 /**
@@ -43,10 +45,10 @@ const estudianteEnInscripcionSchema = z.object({
  */
 export const inscripcionClaseSchema = z.object({
   id: z.string(),
-  clase_id: z.string(),
-  estudiante_id: z.string(),
-  tutor_id: z.string(),
-  createdAt: z.string(),
+  clase_id: z.string().nullish(),
+  estudiante_id: z.string().nullish(),
+  tutor_id: z.string().nullish(),
+  createdAt: z.string().nullish(),
 
   // Relaciones opcionales
   estudiante: estudianteEnInscripcionSchema.optional(),
@@ -58,33 +60,37 @@ export const inscripcionClaseSchema = z.object({
  */
 export const claseSchema = z.object({
   id: z.string(),
-  docente_id: z.string(),
-  ruta_curricular_id: z.string(),
+  docente_id: z.string().nullish(),
+  ruta_curricular_id: z.string().nullish(),
 
   // Fecha y hora
   fecha_hora_inicio: z.string(), // ISO 8601 DateTime
   duracion_minutos: z.number().int().positive(),
 
   // Capacidad
-  cupo_maximo: z.number().int().positive(),
-  cupo_disponible: z.number().int().nonnegative(),
+  cupo_maximo: z.number().int().positive().nullish(),
+  cupo_disponible: z.number().int().nonnegative().nullish(),
 
   // Estado
-  estado: estadoClaseSchema,
+  estado: estadoClaseSchema.nullish(),
 
   // Información adicional
-  titulo: z.string().optional(),
-  descripcion: z.string().optional(),
+  titulo: z.string().nullish(),
+  descripcion: z.string().nullish(),
 
   // Metadata
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.string().nullish(),
+  updatedAt: z.string().nullish(),
 
   // Relaciones opcionales (cuando se incluyen en el response)
-  docente: docenteEnClaseSchema.optional(),
-  ruta_curricular: rutaCurricularEnClaseSchema.optional(),
-  rutaCurricular: rutaCurricularEnClaseSchema.optional().nullable(),
-  inscripciones: z.array(inscripcionClaseSchema).optional(),
+  docente: docenteEnClaseSchema,
+  ruta_curricular: rutaCurricularEnClaseSchema.nullish(),
+  rutaCurricular: rutaCurricularEnClaseSchema.nullish(),
+  inscripciones: z.array(inscripcionClaseSchema).nullish(),
+  producto: z.object({
+    nombre: z.string(),
+    tipo: z.string(),
+  }).nullish(),
 });
 
 /**
