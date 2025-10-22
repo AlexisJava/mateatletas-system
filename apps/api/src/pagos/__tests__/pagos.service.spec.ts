@@ -1,3 +1,11 @@
+jest.mock('@prisma/client', () => ({
+  PrismaClient: class {},
+  TipoProducto: {
+    Suscripcion: 'Suscripcion',
+    Curso: 'Curso',
+  },
+}));
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -8,6 +16,32 @@ import { ProductosService } from '../../catalogo/productos.service';
 import { MercadoPagoService } from '../mercadopago.service';
 import { MockPagosService } from '../mock-pagos.service';
 import { TipoProducto } from '@prisma/client';
+import { MercadoPagoWebhookDto } from '../dto/mercadopago-webhook.dto';
+
+const TipoProductoEnum = (TipoProducto || {
+  Suscripcion: 'Suscripcion',
+  Curso: 'Curso',
+}) as typeof TipoProducto;
+
+const createWebhookPayload = (
+  override: Partial<MercadoPagoWebhookDto> = {},
+): MercadoPagoWebhookDto => {
+  const hasCustomId =
+    override.data !== undefined &&
+    Object.prototype.hasOwnProperty.call(override.data, 'id');
+
+  return {
+    action: override.action ?? 'payment.updated',
+    type: override.type ?? 'payment',
+    data: {
+      id: hasCustomId ? (override.data as { id?: string }).id : 'payment-123',
+    },
+    live_mode: override.live_mode,
+    date_created: override.date_created,
+    user_id: override.user_id,
+    api_version: override.api_version,
+  };
+};
 
 /**
  * TESTS COMPREHENSIVOS PARA PAGOS SERVICE
@@ -64,7 +98,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
     id: 'prod-subs-1',
     nombre: 'Membresía Premium',
     descripcion: 'Acceso completo',
-    tipo: TipoProducto.Suscripcion,
+    tipo: TipoProductoEnum.Suscripcion,
     precio: 5000,
     duracion_meses: 1,
   };
@@ -73,7 +107,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
     id: 'prod-curso-1',
     nombre: 'Matemática Avanzada',
     descripcion: 'Curso completo',
-    tipo: TipoProducto.Curso,
+    tipo: TipoProductoEnum.Curso,
     precio: 3500,
   };
 
@@ -450,10 +484,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'update').mockResolvedValue({} as any);
 
       // Act
-      const result = await service.procesarWebhookMercadoPago({
-        type: 'payment',
-        data: { id: 'payment-123' },
-      });
+      const result = await service.procesarWebhookMercadoPago(
+        createWebhookPayload({ data: { id: 'payment-123' } }),
+      );
 
       // Assert
       expect(result).toMatchObject({
@@ -494,10 +527,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'update').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago({
-        type: 'payment',
-        data: { id: 'payment-456' },
-      });
+      await service.procesarWebhookMercadoPago(
+        createWebhookPayload({ data: { id: 'payment-456' } }),
+      );
 
       // Assert
       const updateCall = (prisma.membresia.update as jest.Mock).mock.calls[0][0];
@@ -521,10 +553,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'update').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago({
-        type: 'payment',
-        data: { id: 'payment-789' },
-      });
+      await service.procesarWebhookMercadoPago(
+        createWebhookPayload({ data: { id: 'payment-789' } }),
+      );
 
       // Assert
       const updateCall = (prisma.membresia.update as jest.Mock).mock.calls[0][0];
@@ -548,10 +579,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'update').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago({
-        type: 'payment',
-        data: { id: 'payment-pending' },
-      });
+      await service.procesarWebhookMercadoPago(
+        createWebhookPayload({ data: { id: 'payment-pending' } }),
+      );
 
       // Assert - No update should be called for pending status
       expect(prisma.membresia.update).not.toHaveBeenCalled();
@@ -570,10 +600,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert - Con transacciones, ahora tira NotFoundException
       await expect(
-        service.procesarWebhookMercadoPago({
-          type: 'payment',
-          data: { id: 'payment-123' },
-        }),
+        service.procesarWebhookMercadoPago(
+          createWebhookPayload({ data: { id: 'payment-123' } }),
+        ),
       ).rejects.toThrow(NotFoundException);
 
       expect(prisma.membresia.update).not.toHaveBeenCalled();
@@ -598,10 +627,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.inscripcionCurso, 'update').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago({
-        type: 'payment',
-        data: { id: 'payment-curso-123' },
-      });
+      await service.procesarWebhookMercadoPago(
+        createWebhookPayload({ data: { id: 'payment-curso-123' } }),
+      );
 
       // Assert
       const updateCall = (prisma.inscripcionCurso.update as jest.Mock).mock.calls[0][0];
@@ -626,10 +654,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.inscripcionCurso, 'delete').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago({
-        type: 'payment',
-        data: { id: 'payment-curso-rejected' },
-      });
+      await service.procesarWebhookMercadoPago(
+        createWebhookPayload({ data: { id: 'payment-curso-rejected' } }),
+      );
 
       // Assert
       const deleteCall = (prisma.inscripcionCurso.delete as jest.Mock).mock.calls[0][0];
@@ -653,10 +680,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.inscripcionCurso, 'delete').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago({
-        type: 'payment',
-        data: { id: 'payment-curso-cancelled' },
-      });
+      await service.procesarWebhookMercadoPago(
+        createWebhookPayload({ data: { id: 'payment-curso-cancelled' } }),
+      );
 
       // Assert
       const deleteCall = (prisma.inscripcionCurso.delete as jest.Mock).mock.calls[0][0];
@@ -676,10 +702,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert - Con transacciones, ahora tira NotFoundException
       await expect(
-        service.procesarWebhookMercadoPago({
-          type: 'payment',
-          data: { id: 'payment-curso-123' },
-        }),
+        service.procesarWebhookMercadoPago(
+          createWebhookPayload({ data: { id: 'payment-curso-123' } }),
+        ),
       ).rejects.toThrow(NotFoundException);
 
       expect(prisma.inscripcionCurso.update).not.toHaveBeenCalled();
@@ -692,10 +717,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(mockPagosService, 'shouldIgnoreWebhook').mockReturnValue(true);
 
       // Act
-      const result = await service.procesarWebhookMercadoPago({
-        type: 'payment',
-        data: { id: '123' },
-      });
+      const result = await service.procesarWebhookMercadoPago(
+        createWebhookPayload({ data: { id: '123' } }),
+      );
 
       // Assert
       expect(result).toEqual({ message: 'Mock mode - webhook ignored' });
@@ -704,10 +728,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
     it('should ignore non-payment webhooks', async () => {
       // Act
-      const result = await service.procesarWebhookMercadoPago({
-        type: 'merchant_order',
-        data: { id: '123' },
-      });
+      const result = await service.procesarWebhookMercadoPago(
+        createWebhookPayload({ type: 'merchant_order', data: { id: '123' } }),
+      );
 
       // Assert
       expect(result).toEqual({ message: 'Webhook type not handled' });
@@ -716,10 +739,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
     it('should handle missing payment ID', async () => {
       // Act
-      const result = await service.procesarWebhookMercadoPago({
-        type: 'payment',
-        data: {},
-      });
+      const result = await service.procesarWebhookMercadoPago(
+        createWebhookPayload({ data: { id: undefined } }),
+      );
 
       // Assert
       expect(result).toEqual({ message: 'No payment ID' });
@@ -737,10 +759,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
 
       // Act
-      const result = await service.procesarWebhookMercadoPago({
-        type: 'payment',
-        data: { id: 'payment-unknown' },
-      });
+      const result = await service.procesarWebhookMercadoPago(
+        createWebhookPayload({ data: { id: 'payment-unknown' } }),
+      );
 
       // Assert
       expect(result).toEqual({ message: 'Unknown external reference format' });
@@ -754,10 +775,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.procesarWebhookMercadoPago({
-          type: 'payment',
-          data: { id: 'payment-fail' },
-        }),
+        service.procesarWebhookMercadoPago(
+          createWebhookPayload({ data: { id: 'payment-fail' } }),
+        ),
       ).rejects.toThrow('MercadoPago API error');
     });
   });
