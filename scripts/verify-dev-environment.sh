@@ -125,14 +125,15 @@ echo ""
 # =============================================================================
 echo "5️⃣  Verificando procesos Node.js activos..."
 
-NODE_COUNT=$(ps aux | grep -E "node|nest|next" | grep -v "grep" | grep -v "VSCode" | grep -v "Electron" | wc -l)
+# Filtrar mejor: excluir electron, code, typescript, esbuild, etc.
+NODE_COUNT=$(ps aux | grep -E "node|nest|next" | grep -v "grep" | grep -v "electron" | grep -v "/usr/lib/code" | grep -v "typescript" | grep -v "esbuild" | grep -v "fusermount" | wc -l)
 
-if [ "$NODE_COUNT" -gt 3 ]; then
+if [ "$NODE_COUNT" -gt 10 ]; then
     echo "   ⚠️  WARNING: Detectados $NODE_COUNT procesos Node/Nest/Next"
-    echo "   💡 Considerar ejecutar: killall -9 node"
-    ps aux | grep -E "node|nest|next" | grep -v "grep" | grep -v "VSCode" | grep -v "Electron" | awk '{print "      PID " $2 ": " $11 " " $12 " " $13}'
+    echo "   💡 Considerar ejecutar: killall -9 node (si hay errores de puerto)"
+    echo "   💡 O ejecutar: lsof -ti:3000,3001 | xargs kill -9"
 else
-    echo "   ✅ Sin procesos zombie detectados ($NODE_COUNT procesos normales)"
+    echo "   ✅ Procesos Node.js bajo control ($NODE_COUNT procesos)"
 fi
 
 echo ""

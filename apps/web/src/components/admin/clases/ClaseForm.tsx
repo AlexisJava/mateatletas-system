@@ -29,7 +29,6 @@ interface ClaseFormProps {
 
 /**
  * Componente de formulario para crear/editar clases
- * Responsabilidad: Solo renderizar formulario
  */
 export function ClaseForm({
   formData,
@@ -56,99 +55,110 @@ export function ClaseForm({
           type="text"
           value={formData.nombre}
           onChange={(e) => onFieldChange('nombre', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+          placeholder="Ej: Álgebra Avanzada - Lunes 18:30"
           required
           disabled={isLoading}
         />
       </div>
 
-      {/* Docente */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Docente *
-        </label>
-        <select
-          value={formData.docente_id}
-          onChange={(e) => onFieldChange('docente_id', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          required
-          disabled={isLoading}
-        >
-          <option value="">Seleccionar docente...</option>
-          {docentes.map((docente) => (
-            <option key={docente.id} value={docente.id}>
-              {docente.nombre} {docente.apellido}
-            </option>
-          ))}
-        </select>
+      {/* Docente y Sector */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Docente */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Docente *
+          </label>
+          <select
+            value={formData.docente_id}
+            onChange={(e) => onFieldChange('docente_id', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            required
+            disabled={isLoading}
+          >
+            <option value="">Seleccionar docente...</option>
+            {docentes.map((docente) => (
+              <option key={docente.id} value={docente.id}>
+                {docente.nombre} {docente.apellido}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Sector */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Sector (Opcional)
+          </label>
+          <select
+            value={formData.sector_id}
+            onChange={(e) => onFieldChange('sector_id', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            disabled={isLoading}
+          >
+            <option value="">Sin sector</option>
+            {sectores.map((sector) => (
+              <option key={sector.id} value={sector.id}>
+                {sector.nombre === 'Matemática' && '📐'}
+                {sector.nombre === 'Programación' && '💻'}
+                {sector.nombre === 'Ciencias' && '🔬'}
+                {' '}{sector.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* Sector */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Sector (Opcional)
-        </label>
-        <select
-          value={formData.sector_id}
-          onChange={(e) => onFieldChange('sector_id', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          disabled={isLoading}
-        >
-          <option value="">Sin sector</option>
-          {sectores.map((sector) => (
-            <option key={sector.id} value={sector.id}>
-              {sector.nombre}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Fecha, Duración y Cupo */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Fecha y Hora */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Fecha y Hora *
+          </label>
+          <input
+            type="datetime-local"
+            value={formData.fecha_hora_inicio}
+            onChange={(e) => onFieldChange('fecha_hora_inicio', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            required
+            disabled={isLoading}
+          />
+        </div>
 
-      {/* Fecha y Hora */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Fecha y Hora de Inicio *
-        </label>
-        <input
-          type="datetime-local"
-          value={formData.fecha_hora_inicio}
-          onChange={(e) => onFieldChange('fecha_hora_inicio', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          required
-          disabled={isLoading}
-        />
-      </div>
+        {/* Duración */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Duración (min) *
+          </label>
+          <input
+            type="number"
+            value={formData.duracion_minutos}
+            onChange={(e) => onFieldChange('duracion_minutos', parseInt(e.target.value))}
+            min="15"
+            step="15"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            required
+            disabled={isLoading}
+          />
+        </div>
 
-      {/* Duración */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Duración (minutos) *
-        </label>
-        <input
-          type="number"
-          value={formData.duracion_minutos}
-          onChange={(e) => onFieldChange('duracion_minutos', parseInt(e.target.value))}
-          min="15"
-          step="15"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          required
-          disabled={isLoading}
-        />
-      </div>
-
-      {/* Cupo */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Cupo Máximo *
-        </label>
-        <input
-          type="number"
-          value={formData.cupo_maximo}
-          onChange={(e) => onFieldChange('cupo_maximo', parseInt(e.target.value))}
-          min="1"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          required
-          disabled={isLoading}
-        />
+        {/* Cupo */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Cupo Máximo *
+          </label>
+          <input
+            type="number"
+            value={formData.cupo_maximo}
+            onChange={(e) => onFieldChange('cupo_maximo', parseInt(e.target.value))}
+            min="1"
+            max="50"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            required
+            disabled={isLoading}
+          />
+        </div>
       </div>
 
       {/* Descripción */}
@@ -160,7 +170,8 @@ export function ClaseForm({
           value={formData.descripcion}
           onChange={(e) => onFieldChange('descripcion', e.target.value)}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+          placeholder="Agrega detalles adicionales sobre la clase..."
           disabled={isLoading}
         />
       </div>
@@ -170,7 +181,7 @@ export function ClaseForm({
         <button
           type="submit"
           disabled={isLoading}
-          className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white py-2 px-4 rounded-lg font-semibold transition-all disabled:cursor-not-allowed"
         >
           {isLoading ? 'Guardando...' : 'Guardar Clase'}
         </button>
@@ -178,7 +189,7 @@ export function ClaseForm({
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+          className="flex-1 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Cancelar
         </button>
