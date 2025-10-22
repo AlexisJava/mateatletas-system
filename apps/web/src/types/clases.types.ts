@@ -44,10 +44,9 @@ export interface Clase {
   // Relaciones opcionales
   docente?: {
     id: string;
-    user?: {
-      nombre: string;
-      apellido: string;
-    };
+    nombre?: string;
+    apellido?: string;
+    titulo?: string;
   };
   ruta_curricular?: RutaCurricular;
   inscripciones?: InscripcionClase[];
