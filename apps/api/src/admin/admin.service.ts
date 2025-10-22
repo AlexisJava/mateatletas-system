@@ -74,10 +74,7 @@ export class AdminService {
   private readonly logger = new Logger(AdminService.name);
 
   // Circuit Breakers para cada operación delegada
-  private readonly dashboardStatsCircuit = new CircuitBreaker<
-    [],
-    DashboardStatsResult
-  >({
+  private readonly dashboardStatsCircuit = new CircuitBreaker({
     name: 'AdminStatsService.getDashboardStats',
     failureThreshold: 5,
     resetTimeout: 60000,
@@ -92,10 +89,7 @@ export class AdminService {
     }),
   });
 
-  private readonly systemStatsCircuit = new CircuitBreaker<
-    [],
-    SystemStatsResult
-  >({
+  private readonly systemStatsCircuit = new CircuitBreaker({
     name: 'AdminStatsService.getSystemStats',
     failureThreshold: 5,
     resetTimeout: 60000,
@@ -111,66 +105,45 @@ export class AdminService {
     }),
   });
 
-  private readonly listarAlertasCircuit = new CircuitBreaker<
-    [],
-    AlertListResult
-  >({
+  private readonly listarAlertasCircuit = new CircuitBreaker({
     name: 'AdminAlertasService.listarAlertas',
     failureThreshold: 5,
     resetTimeout: 60000,
     fallback: () => [],
   });
 
-  private readonly resolverAlertaCircuit = new CircuitBreaker<
-    [],
-    ResolverAlertaResult
-  >({
+  private readonly resolverAlertaCircuit = new CircuitBreaker({
     name: 'AdminAlertasService.resolverAlerta',
     failureThreshold: 5,
     resetTimeout: 60000,
   });
 
-  private readonly sugerirSolucionCircuit = new CircuitBreaker<
-    [],
-    SugerirSolucionResult
-  >({
+  private readonly sugerirSolucionCircuit = new CircuitBreaker({
     name: 'AdminAlertasService.sugerirSolucion',
     failureThreshold: 5,
     resetTimeout: 60000,
   });
 
-  private readonly crearAlertaCircuit = new CircuitBreaker<
-    [],
-    CrearAlertaResult
-  >({
+  private readonly crearAlertaCircuit = new CircuitBreaker({
     name: 'AdminAlertasService.crearAlerta',
     failureThreshold: 5,
     resetTimeout: 60000,
   });
 
-  private readonly listarUsuariosCircuit = new CircuitBreaker<
-    [],
-    UsuariosListResult
-  >({
+  private readonly listarUsuariosCircuit = new CircuitBreaker({
     name: 'AdminUsuariosService.listarUsuarios',
     failureThreshold: 5,
     resetTimeout: 60000,
     fallback: () => [],
   });
 
-  private readonly deleteUsuarioCircuit = new CircuitBreaker<
-    [],
-    DeleteUserResult
-  >({
+  private readonly deleteUsuarioCircuit = new CircuitBreaker({
     name: 'AdminUsuariosService.deleteUser',
     failureThreshold: 5,
     resetTimeout: 60000,
   });
 
-  private readonly listarEstudiantesCircuit = new CircuitBreaker<
-    [],
-    EstudiantesListResult
-  >({
+  private readonly listarEstudiantesCircuit = new CircuitBreaker({
     name: 'AdminEstudiantesService.listarEstudiantes',
     failureThreshold: 5,
     resetTimeout: 60000,
@@ -187,16 +160,13 @@ export class AdminService {
     }),
   });
 
-  private readonly crearEstudianteCircuit = new CircuitBreaker<
-    [],
-    CrearEstudianteResult
-  >({
+  private readonly crearEstudianteCircuit = new CircuitBreaker({
     name: 'AdminEstudiantesService.crearEstudianteRapido',
     failureThreshold: 5,
     resetTimeout: 60000,
   });
 
-  private readonly rolesCircuit = new CircuitBreaker<[], RoleMutationResult>({
+  private readonly rolesCircuit = new CircuitBreaker({
     name: 'AdminRolesService',
     failureThreshold: 5,
     resetTimeout: 60000,
