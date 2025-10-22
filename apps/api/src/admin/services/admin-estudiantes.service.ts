@@ -2,6 +2,12 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../../core/database/prisma.service';
 import { BCRYPT_ROUNDS } from '../../common/constants/security.constants';
 import * as bcrypt from 'bcrypt';
+import {
+  generateEstudianteUsername,
+  generateEstudiantePin,
+  generateTutorUsername,
+  generateTutorPassword,
+} from '../../common/utils/credential-generator';
 
 /**
  * Servicio especializado para gestión de estudiantes desde admin
@@ -359,5 +365,231 @@ export class AdminEstudiantesService {
         ).length,
       },
     };
+  }
+
+  /**
+   * Crear estudiante con generación automática de credenciales
+   */
+  async crearEstudianteConCredenciales(dto: {
+    nombreEstudiante: string;
+    apellidoEstudiante: string;
+    edadEstudiante: number;
+    nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
+    sectorId: string;
+    equipoId?: string;
+    puntosIniciales?: number;
+    nivelInicial?: number;
+    nombreTutor: string;
+    apellidoTutor: string;
+    emailTutor?: string;
+    telefonoTutor?: string;
+    dniTutor?: string;
+  }) {
+    // Validar sector
+    const sector = await this.prisma.sector.findUnique({
+      where: { id: dto.sectorId },
+    });
+    if (!sector) {
+      throw new NotFoundException(`Sector con ID ${dto.sectorId} no encontrado`);
+    }
+
+    // Validar equipo si se proporciona
+    if (dto.equipoId) {
+      const equipo = await this.prisma.equipo.findUnique({
+        where: { id: dto.equipoId },
+      });
+      if (!equipo) {
+        throw new NotFoundException(`Equipo con ID ${dto.equipoId} no encontrado`);
+      }
+    }
+
+    // Verificar si tutor existe (por DNI, email, o username)
+    let tutorExistente = null;
+    if (dto.dniTutor) {
+      tutorExistente = await this.prisma.tutor.findFirst({
+        where: { dni: dto.dniTutor },
+      });
+    } else if (dto.emailTutor) {
+      tutorExistente = await this.prisma.tutor.findFirst({
+        where: { email: dto.emailTutor },
+      });
+    } else {
+      // Si no hay DNI ni email, buscar por nombre y apellido
+      tutorExistente = await this.prisma.tutor.findFirst({
+        where: {
+          nombre: dto.nombreTutor,
+          apellido: dto.apellidoTutor,
+        },
+      });
+    }
+
+    // Generar credenciales
+    const estudianteUsername = generateEstudianteUsername(
+      dto.nombreEstudiante,
+      dto.apellidoEstudiante
+    );
+    const estudiantePin = generateEstudiantePin();
+    const estudiantePinHash = await bcrypt.hash(estudiantePin, BCRYPT_ROUNDS);
+
+    let tutorCredenciales: { username: string; passwordTemporal: string } | null = null;
+    let tutorCreado = false;
+
+    // Transacción
+    const resultado = await this.prisma.$transaction(async (tx) => {
+      let tutor = tutorExistente;
+
+      if (!tutor) {
+        const tutorUsername = generateTutorUsername(dto.nombreTutor, dto.apellidoTutor);
+        const tutorPassword = generateTutorPassword();
+        const tutorPasswordHash = await bcrypt.hash(tutorPassword, BCRYPT_ROUNDS);
+
+        tutor = await tx.tutor.create({
+          data: {
+            nombre: dto.nombreTutor,
+            apellido: dto.apellidoTutor,
+            username: tutorUsername,
+            email: dto.emailTutor,
+            telefono: dto.telefonoTutor,
+            dni: dto.dniTutor,
+            password_hash: tutorPasswordHash,
+            password_temporal: tutorPassword,
+            debe_cambiar_password: true,
+            debe_completar_perfil: false,
+            roles: ['tutor'],
+          },
+        });
+
+        tutorCredenciales = {
+          username: tutorUsername,
+          passwordTemporal: tutorPassword,
+        };
+        tutorCreado = true;
+      }
+
+      const estudiante = await tx.estudiante.create({
+        data: {
+          nombre: dto.nombreEstudiante,
+          apellido: dto.apellidoEstudiante,
+          username: estudianteUsername,
+          edad: dto.edadEstudiante,
+          nivel_escolar: dto.nivelEscolar,
+          tutor_id: tutor.id,
+          password_hash: estudiantePinHash,
+          password_temporal: estudiantePin,
+          debe_cambiar_password: true,
+          sector_id: dto.sectorId,
+          equipo_id: dto.equipoId || null,
+          puntos_totales: dto.puntosIniciales ?? 0,
+          nivel_actual: dto.nivelInicial ?? 1,
+          avatar_url: null,
+          foto_url: null,
+        },
+      });
+
+      return { tutor, estudiante };
+    });
+
+    return {
+      estudiante: resultado.estudiante,
+      tutor: resultado.tutor,
+      tutorCreado,
+      credencialesTutor: tutorCredenciales,
+      credencialesEstudiante: {
+        username: estudianteUsername,
+        pin: estudiantePin,
+      },
+    };
+  }
+
+  /**
+   * Obtener listado de credenciales temporales de estudiantes y tutores
+   * que aún no han cambiado su contraseña
+   */
+  async obtenerCredencialesTemporales() {
+    // Obtener estudiantes con password temporal
+    const estudiantes = await this.prisma.estudiante.findMany({
+      where: {
+        debe_cambiar_password: true,
+        password_temporal: {
+          not: null,
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+        password_temporal: true,
+        nombre: true,
+        apellido: true,
+        createdAt: true,
+        sector: {
+          select: {
+            nombre: true,
+          },
+        },
+        tutor: {
+          select: {
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Obtener tutores con password temporal
+    const tutores = await this.prisma.tutor.findMany({
+      where: {
+        debe_cambiar_password: true,
+        password_temporal: {
+          not: null,
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+        password_temporal: true,
+        nombre: true,
+        apellido: true,
+        email: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Formatear estudiantes
+    const estudiantesMapped = estudiantes.map((est) => ({
+      id: est.id,
+      username: est.username || '',
+      passwordTemporal: est.password_temporal || '',
+      nombreCompleto: `${est.nombre} ${est.apellido}`,
+      sector: est.sector?.nombre || 'Sin sector',
+      rol: 'ESTUDIANTE',
+      tutorNombre: `${est.tutor.nombre} ${est.tutor.apellido}`,
+      tutorEmail: est.tutor.email,
+      createdAt: est.createdAt,
+    }));
+
+    // Formatear tutores
+    const tutoresMapped = tutores.map((tutor) => ({
+      id: tutor.id,
+      username: tutor.username || '',
+      passwordTemporal: tutor.password_temporal || '',
+      nombreCompleto: `${tutor.nombre} ${tutor.apellido}`,
+      sector: 'N/A',
+      rol: 'TUTOR',
+      tutorNombre: 'N/A',
+      tutorEmail: tutor.email,
+      createdAt: tutor.createdAt,
+    }));
+
+    // Combinar y ordenar por fecha
+    return [...estudiantesMapped, ...tutoresMapped].sort((a, b) => {
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
   }
 }

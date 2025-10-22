@@ -430,6 +430,185 @@ export class AuthService {
   }
 
   /**
+   * Cambia la contraseña de un usuario (estudiante o tutor)
+   * @param userId - ID del usuario
+   * @param passwordActual - Contraseña actual del usuario
+   * @param nuevaPassword - Nueva contraseña a establecer
+   * @throws UnauthorizedException si la contraseña actual es incorrecta
+   */
+  async cambiarPassword(
+    userId: string,
+    passwordActual: string,
+    nuevaPassword: string,
+  ) {
+    // 1. Buscar el usuario (puede ser estudiante o tutor)
+    let estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        password_hash: true,
+        password_temporal: true,
+        debe_cambiar_password: true,
+      },
+    });
+
+    let tutor = null;
+    let esEstudiante = true;
+
+    if (!estudiante) {
+      tutor = await this.prisma.tutor.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          password_hash: true,
+          password_temporal: true,
+          debe_cambiar_password: true,
+        },
+      });
+      esEstudiante = false;
+
+      if (!tutor) {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+    }
+
+    const usuario = esEstudiante ? estudiante : tutor;
+
+    // 2. Verificar que la contraseña actual sea correcta
+    const passwordValida = await bcrypt.compare(
+      passwordActual,
+      usuario!.password_hash!,
+    );
+
+    if (!passwordValida) {
+      throw new UnauthorizedException('Contraseña actual incorrecta');
+    }
+
+    // 3. Hashear la nueva contraseña
+    const nuevoHash = await bcrypt.hash(nuevaPassword, this.BCRYPT_ROUNDS);
+
+    // 4. Actualizar el usuario
+    const updateData = {
+      password_hash: nuevoHash,
+      password_temporal: null,
+      debe_cambiar_password: false,
+      fecha_ultimo_cambio: new Date(),
+    };
+
+    if (esEstudiante) {
+      await this.prisma.estudiante.update({
+        where: { id: userId },
+        data: updateData,
+      });
+    } else {
+      await this.prisma.tutor.update({
+        where: { id: userId },
+        data: updateData,
+      });
+    }
+
+    return {
+      success: true,
+      message: 'Contraseña actualizada exitosamente',
+    };
+  }
+
+  /**
+   * Login con username para estudiantes y tutores
+   * @param username - Username del usuario
+   * @param password - Contraseña o PIN del usuario
+   * @returns Token JWT y datos del usuario
+   */
+  async loginWithUsername(username: string, password: string) {
+    // 1. Buscar primero como estudiante
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { username },
+      include: {
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        equipo: {
+          select: {
+            id: true,
+            nombre: true,
+            color_primario: true,
+            color_secundario: true,
+          },
+        },
+      },
+    });
+
+    if (estudiante) {
+      // Verificar contraseña
+      const passwordValida = await bcrypt.compare(
+        password,
+        estudiante.password_hash || '',
+      );
+
+      if (!passwordValida) {
+        throw new UnauthorizedException('Credenciales inválidas');
+      }
+
+      const roles = parseUserRoles(estudiante.roles);
+      const token = this.generateJwtToken(estudiante.id, estudiante.email || '', roles);
+
+      return {
+        access_token: token,
+        user: {
+          id: estudiante.id,
+          username: estudiante.username,
+          nombre: estudiante.nombre,
+          apellido: estudiante.apellido,
+          edad: estudiante.edad,
+          nivel_escolar: estudiante.nivel_escolar,
+          avatar_url: estudiante.avatar_url,
+          puntos_totales: estudiante.puntos_totales,
+          equipo: estudiante.equipo,
+          tutor: estudiante.tutor,
+          debe_cambiar_password: estudiante.debe_cambiar_password,
+          roles,
+        },
+      };
+    }
+
+    // 2. Si no es estudiante, buscar como tutor
+    const tutor = await this.prisma.tutor.findUnique({
+      where: { username },
+    });
+
+    if (!tutor) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    // Verificar contraseña
+    const passwordValida = await bcrypt.compare(password, tutor.password_hash);
+
+    if (!passwordValida) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    const roles = parseUserRoles(tutor.roles);
+    const token = this.generateJwtToken(tutor.id, tutor.email || '', roles);
+
+    return {
+      access_token: token,
+      user: {
+        id: tutor.id,
+        username: tutor.username,
+        email: tutor.email,
+        nombre: tutor.nombre,
+        apellido: tutor.apellido,
+        debe_cambiar_password: tutor.debe_cambiar_password,
+        roles,
+      },
+    };
+  }
+
+  /**
    * Genera un token JWT para un usuario
    * @param userId - ID del usuario
    * @param email - Email del usuario

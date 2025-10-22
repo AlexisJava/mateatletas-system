@@ -20,12 +20,23 @@ model TestModel {
 model Tutor {
   /// Identificador único del tutor (CUID para mejor distribución)
   id                       String             @id @default(cuid())
+  /// Username único del tutor - usado para autenticación alternativa
+  username                 String?            @unique
   /// Email único del tutor - usado para autenticación
   /// IMPORTANTE: Debe estar indexado para búsquedas rápidas en login
-  email                    String             @unique
+  email                    String?            @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   /// Se maneja solo en backend para seguridad
   password_hash            String
+  /// Password temporal en texto plano - se muestra al admin al crear el tutor
+  /// Se borra después del primer cambio de contraseña
+  password_temporal        String?
+  /// Indica si el tutor debe cambiar su contraseña en el próximo login
+  debe_cambiar_password    Boolean            @default(true)
+  /// Indica si el tutor debe completar su perfil (datos personales adicionales)
+  debe_completar_perfil    Boolean            @default(false)
+  /// Fecha del último cambio de contraseña
+  fecha_ultimo_cambio      DateTime?
   /// Nombre del tutor
   nombre                   String
   /// Apellido del tutor
@@ -58,6 +69,8 @@ model Tutor {
 model Estudiante {
   /// Identificador único del estudiante
   id                  String              @id @default(cuid())
+  /// Username único del estudiante - usado para autenticación
+  username            String?             @unique
   /// Nombre del estudiante
   nombre              String
   /// Apellido del estudiante
@@ -89,6 +102,13 @@ model Estudiante {
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   /// Permite que el estudiante acceda al portal con sus propias credenciales
   password_hash       String?
+  /// PIN temporal en texto plano - se muestra al tutor/admin al crear el estudiante
+  /// Se borra después del primer cambio de contraseña
+  password_temporal   String?
+  /// Indica si el estudiante debe cambiar su PIN en el próximo login
+  debe_cambiar_password Boolean           @default(true)
+  /// Fecha del último cambio de contraseña
+  fecha_ultimo_cambio DateTime?
   /// Roles asignados al estudiante (normalmente solo ["estudiante"])
   /// Ejemplo: ["estudiante"]
   roles               Json                @default("[\"estudiante\"]")
