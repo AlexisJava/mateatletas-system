@@ -126,18 +126,16 @@ export class AdminRolesService {
     }
 
     const roles = parseUserRoles(userEntity.roles);
-    if (roles.length > 0) {
-      return roles;
-    }
+    return roles.length > 0 ? roles : [this.getDefaultRole(userEntity)];
+  }
 
-    if (tutor) {
-      return [Role.Tutor];
-    }
-
-    if (docente) {
-      return [Role.Docente];
-    }
-
-    return [Role.Admin];
+  /**
+   * Obtener el rol por defecto según el tipo de usuario
+   */
+  private getDefaultRole(user: any): Role {
+    // Determinar rol por defecto según la estructura del objeto
+    if ('estudiantes' in user) return Role.Tutor;
+    if ('clases' in user) return Role.Docente;
+    return Role.Admin;
   }
 }

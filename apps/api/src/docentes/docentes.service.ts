@@ -3,7 +3,6 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
 import { CreateDocenteDto } from './dto/create-docente.dto';
 import { UpdateDocenteDto } from './dto/update-docente.dto';
@@ -205,7 +204,7 @@ export class DocentesService {
     }
 
     // Preparar datos para actualización
-    const dataToUpdate: Prisma.DocenteUpdateInput = {
+    const dataToUpdate: any = {
       nombre: updateDto.nombre,
       apellido: updateDto.apellido,
       email: updateDto.email,
@@ -221,10 +220,7 @@ export class DocentesService {
 
     // Si se incluye password, hashearla
     if (updateDto.password) {
-      dataToUpdate.password_hash = await bcrypt.hash(
-        updateDto.password,
-        BCRYPT_ROUNDS,
-      );
+      dataToUpdate.password_hash = await bcrypt.hash(updateDto.password, BCRYPT_ROUNDS);
     }
 
     // Actualizar docente

@@ -23,10 +23,7 @@ export enum CircuitState {
   HALF_OPEN = 'HALF_OPEN',
 }
 
-export interface CircuitBreakerOptions<
-  TArgs extends unknown[] = unknown[],
-  TResult = unknown,
-> {
+export interface CircuitBreakerOptions {
   /**
    * Número de fallos consecutivos antes de abrir el circuito
    * Default: 5
@@ -48,7 +45,7 @@ export interface CircuitBreakerOptions<
    * Función fallback a ejecutar cuando el circuito está OPEN
    * Si no se provee, lanza CircuitBreakerOpenError
    */
-  fallback?: (...args: TArgs) => TResult | Promise<TResult>;
+  fallback?: (...args: any[]) => any;
 }
 
 export class CircuitBreakerOpenError extends Error {
@@ -58,10 +55,7 @@ export class CircuitBreakerOpenError extends Error {
   }
 }
 
-export class CircuitBreaker<
-  TArgs extends unknown[] = unknown[],
-  TResult = unknown,
-> {
+export class CircuitBreaker {
   private state: CircuitState = CircuitState.CLOSED;
   private failureCount = 0;
   private nextAttempt: number = Date.now();
@@ -69,11 +63,9 @@ export class CircuitBreaker<
   private readonly failureThreshold: number;
   private readonly resetTimeout: number;
   private readonly name: string;
-  private readonly fallback?: (
-    ...args: TArgs
-  ) => TResult | Promise<TResult>;
+  private readonly fallback?: (...args: any[]) => any;
 
-  constructor(options: CircuitBreakerOptions<TArgs, TResult> = {}) {
+  constructor(options: CircuitBreakerOptions = {}) {
     this.failureThreshold = options.failureThreshold ?? 5;
     this.resetTimeout = options.resetTimeout ?? 60000; // 60 segundos
     this.name = options.name ?? 'UnnamedCircuit';
@@ -87,10 +79,7 @@ export class CircuitBreaker<
    * @param args - Argumentos para la función
    * @returns Resultado de la función o fallback
    */
-  async execute(
-    fn: (...args: TArgs) => Promise<TResult>,
-    ...args: TArgs
-  ): Promise<TResult> {
+  async execute<T>(fn: (...args: any[]) => Promise<T>, ...args: any[]): Promise<T> {
     // Si el circuito está OPEN, verificar si es momento de intentar recovery
     if (this.state === CircuitState.OPEN) {
       if (Date.now() < this.nextAttempt) {
@@ -98,7 +87,7 @@ export class CircuitBreaker<
         console.warn(
           `[CircuitBreaker:${this.name}] Circuit is OPEN, using fallback`,
         );
-        return await this.executeFallback(args);
+        return this.executeFallback(args);
       }
       // Es momento de intentar recovery
       this.state = CircuitState.HALF_OPEN;
@@ -138,12 +127,12 @@ export class CircuitBreaker<
   /**
    * Maneja fallo de una operación
    */
-  private onFailure(error: unknown): void {
+  private onFailure(error: any): void {
     this.failureCount++;
 
     console.error(
       `[CircuitBreaker:${this.name}] Failure ${this.failureCount}/${this.failureThreshold}`,
-      error instanceof Error ? error.message : String(error),
+      error.message || error,
     );
 
     if (
@@ -163,10 +152,10 @@ export class CircuitBreaker<
   /**
    * Ejecuta la función fallback
    */
-  private async executeFallback(args: TArgs): Promise<TResult> {
+  private executeFallback(args: any[]): any {
     if (this.fallback) {
       console.log(`[CircuitBreaker:${this.name}] Executing fallback`);
-      return await this.fallback(...args);
+      return this.fallback(...args);
     }
 
     throw new CircuitBreakerOpenError(this.name);

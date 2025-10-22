@@ -9,7 +9,7 @@ import { Role } from '../../auth/decorators/roles.decorator';
  * @param roles - Puede ser string (JSON), array o undefined
  * @returns Array de roles como Role enum
  */
-export function parseUserRoles(roles: unknown): Role[] {
+export function parseUserRoles(roles: any): Role[] {
   // Si ya es un array, retornarlo directamente
   if (Array.isArray(roles)) {
     return roles;

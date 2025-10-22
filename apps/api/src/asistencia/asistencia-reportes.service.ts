@@ -3,28 +3,9 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
-import { Prisma, EstadoAsistencia } from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
 import { FiltrarAsistenciaDto } from './dto/filtrar-asistencia.dto';
-
-type AsistenciaConDetalle = Prisma.AsistenciaGetPayload<{
-  include: {
-    estudiante: {
-      select: {
-        id: true;
-        nombre: true;
-        apellido: true;
-        foto_url: true;
-      };
-    };
-    clase: {
-      select: {
-        fecha_hora_inicio: true;
-        rutaCurricular: { select: { nombre: true; color: true } };
-      };
-    };
-  };
-}>;
+import { EstadoAsistencia } from '@prisma/client';
 
 /**
  * Service responsible for attendance reports, statistics, and analytics
@@ -110,7 +91,7 @@ export class AsistenciaReportesService {
     }
 
     // Build filters for inscriptions
-    const whereInscripcion: Prisma.InscripcionClaseWhereInput = {
+    const whereInscripcion: any = {
       estudiante_id: estudianteId,
     };
 
@@ -119,7 +100,7 @@ export class AsistenciaReportesService {
     }
 
     // Optimized: Execute queries in parallel
-    const whereAsistencia: Prisma.AsistenciaWhereInput = {
+    const whereAsistencia: any = {
       estudiante_id: estudianteId,
     };
 
@@ -307,7 +288,7 @@ export class AsistenciaReportesService {
       limit?: number;
     },
   ) {
-    const where: Prisma.AsistenciaWhereInput = {
+    const where: any = {
       clase: {
         docente_id: docenteId, // Filter by teacher through class relationship
       },
@@ -321,14 +302,13 @@ export class AsistenciaReportesService {
 
     // Filter by date range
     if (filtros.fechaDesde || filtros.fechaHasta) {
-      where.createdAt = {
-        ...(filtros.fechaDesde
-          ? { gte: new Date(filtros.fechaDesde) }
-          : {}),
-        ...(filtros.fechaHasta
-          ? { lte: new Date(filtros.fechaHasta) }
-          : {}),
-      };
+      where.createdAt = {};
+      if (filtros.fechaDesde) {
+        where.createdAt.gte = new Date(filtros.fechaDesde);
+      }
+      if (filtros.fechaHasta) {
+        where.createdAt.lte = new Date(filtros.fechaHasta);
+      }
     }
 
     const observaciones = await this.prisma.asistencia.findMany({
@@ -369,13 +349,12 @@ export class AsistenciaReportesService {
    */
   async obtenerReportesDocente(docenteId: string) {
     // 1. Get all teacher's attendance records
-    const todasAsistencias: AsistenciaConDetalle[] =
-      await this.prisma.asistencia.findMany({
-        where: {
-          clase: {
-            docente_id: docenteId, // Filter by teacher through class relationship
-          },
+    const todasAsistencias = await this.prisma.asistencia.findMany({
+      where: {
+        clase: {
+          docente_id: docenteId, // Filter by teacher through class relationship
         },
+      },
       include: {
         estudiante: {
           select: {
@@ -395,7 +374,7 @@ export class AsistenciaReportesService {
         },
       },
       orderBy: { createdAt: 'desc' },
-      });
+    });
 
     // 2. Weekly attendance (last 8 weeks)
     const hoy = new Date();
@@ -433,7 +412,7 @@ export class AsistenciaReportesService {
       { nombre: string; foto_url: string | null; asistencias: number }
     > = {};
 
-    todasAsistencias.forEach((a) => {
+    todasAsistencias.forEach((a: any) => {
       if (a.estado === EstadoAsistencia.Presente) {
         const key = a.estudiante_id;
         if (!porEstudiante[key]) {
@@ -457,7 +436,7 @@ export class AsistenciaReportesService {
       { presentes: number; total: number; color: string }
     > = {};
 
-    todasAsistencias.forEach((a) => {
+    todasAsistencias.forEach((a: any) => {
       const rutaNombre = a.clase.rutaCurricular.nombre;
       if (!porRuta[rutaNombre]) {
         porRuta[rutaNombre] = {
