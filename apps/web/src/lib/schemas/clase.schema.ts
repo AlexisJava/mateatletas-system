@@ -32,6 +32,16 @@ const docenteEnClaseSchema = z.object({
 }).nullish();
 
 /**
+ * Schema de Sector simplificado (para relación en Clase)
+ */
+const sectorEnClaseSchema = z.object({
+  id: z.string(),
+  nombre: z.string(),
+  icono: z.string(),
+  color: z.string(),
+}).nullish();
+
+/**
  * Schema de Estudiante simplificado (para inscripciones)
  */
 const estudianteEnInscripcionSchema = z.object({
@@ -75,6 +85,7 @@ export const claseSchema = z.object({
   estado: estadoClaseSchema.nullish(),
 
   // Información adicional
+  nombre: z.string().nullish(),
   titulo: z.string().nullish(),
   descripcion: z.string().nullish(),
 
@@ -86,10 +97,14 @@ export const claseSchema = z.object({
   docente: docenteEnClaseSchema,
   ruta_curricular: rutaCurricularEnClaseSchema.nullish(),
   rutaCurricular: rutaCurricularEnClaseSchema.nullish(),
+  sector: sectorEnClaseSchema,
   inscripciones: z.array(inscripcionClaseSchema).nullish(),
   producto: z.object({
     nombre: z.string(),
     tipo: z.string(),
+  }).nullish(),
+  _count: z.object({
+    inscripciones: z.number(),
   }).nullish(),
 });
 

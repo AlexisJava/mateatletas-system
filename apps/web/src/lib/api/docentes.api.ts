@@ -104,4 +104,16 @@ export const docentesApi = {
   delete: async (id: string): Promise<void> => {
     return await apiClient.delete(`/docentes/${id}`);
   },
+
+  /**
+   * Reasignar todas las clases de un docente a otro (admin only)
+   */
+  reassignClasses: async (
+    fromDocenteId: string,
+    toDocenteId: string
+  ): Promise<{ clasesReasignadas: number }> => {
+    return await apiClient.post(`/docentes/${fromDocenteId}/reasignar-clases`, {
+      toDocenteId,
+    });
+  },
 };

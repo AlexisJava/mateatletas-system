@@ -470,7 +470,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden relative">
+    <div className="flex flex-col relative">
       {/* Partículas flotantes de fondo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-20 w-2 h-2 bg-violet-400 rounded-full animate-ping opacity-20" />
@@ -516,7 +516,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Contenedor principal */}
-      <div className="flex-1 overflow-hidden flex flex-col gap-6 relative z-10">
+      <div className="flex flex-col gap-6 relative z-10">
 
         {/* Stats Grid - SUPER COLORIDAS CON ORGANIZACIÓN PERFECTA */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -574,10 +574,10 @@ export default function AdminDashboard() {
         </div>
 
         {/* Grid asimétrico: Cursos (2/3) y Provincias (1/3) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 flex-1 min-h-0">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
           {/* Cursos Más Elegidos - Gráfico de Barras CON CHART.JS (2/3 del espacio) */}
-          <div className="lg:col-span-2 relative overflow-hidden rounded-2xl flex flex-col">
+          <div className="lg:col-span-2 relative overflow-hidden rounded-2xl flex flex-col min-h-[400px]">
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-2xl" />
             <div className="absolute inset-0 rounded-2xl border-2 border-white/20" />
 
@@ -601,7 +601,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Distribución por Provincias - Gráfico de Dona CON CHART.JS (1/3 del espacio) */}
-          <div className="relative overflow-hidden rounded-2xl flex flex-col">
+          <div className="relative overflow-hidden rounded-2xl flex flex-col min-h-[400px]">
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-2xl" />
             <div className="absolute inset-0 rounded-2xl border-2 border-white/20" />
 
@@ -649,7 +649,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Grid de 2 columnas: Próximos Inicios y Novedades Docentes */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 flex-shrink-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
           {/* Próximos Inicios de Cursos */}
           <div className="relative overflow-hidden rounded-2xl">
