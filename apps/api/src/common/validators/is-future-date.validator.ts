@@ -21,10 +21,10 @@ export function IsFutureDate(
       constraints: [minMinutesInFuture],
       options: validationOptions,
       validator: {
-        validate(value: unknown, args: ValidationArguments) {
+        validate(value: any, args: ValidationArguments) {
           if (!value) return false;
 
-          const date = new Date(value as string | number | Date);
+          const date = new Date(value);
           const now = new Date();
           const minFutureDate = new Date(now.getTime() + args.constraints[0] * 60000);
 

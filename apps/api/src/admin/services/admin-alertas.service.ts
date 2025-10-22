@@ -1,23 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service';
-
-type AlertaConContexto = Prisma.AlertaGetPayload<{
-  include: {
-    estudiante: {
-      select: {
-        nivel_escolar: true;
-      };
-    };
-    clase: {
-      select: {
-        rutaCurricular: {
-          select: { nombre: true };
-        };
-      };
-    };
-  };
-}>;
 
 /**
  * Servicio especializado para gestión de alertas administrativas
@@ -186,7 +168,7 @@ export class AdminAlertasService {
    * Genera una sugerencia estática basada en el contexto de la alerta
    * Será reemplazado por integración con OpenAI en el futuro
    */
-  private generarSugerenciaEstatica(alerta: AlertaConContexto): string {
+  private generarSugerenciaEstatica(alerta: any): string {
     const nivel = alerta.estudiante.nivel_escolar;
     const ruta = alerta.clase.rutaCurricular.nombre;
 

@@ -5,17 +5,8 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service';
 import { RegistrarAsistenciaDto } from '../dto/registrar-asistencia.dto';
-
-type AsistenciaConEstudiante = Prisma.AsistenciaGetPayload<{
-  include: {
-    estudiante: {
-      select: { nombre: true; apellido: true };
-    };
-  };
-}>;
 
 /**
  * Servicio especializado para gestión de asistencia de clases
@@ -39,7 +30,7 @@ export class ClasesAsistenciaService {
     claseId: string,
     docenteId: string,
     dto: RegistrarAsistenciaDto,
-  ): Promise<AsistenciaConEstudiante[]> {
+  ) {
     // 1. Verificar que la clase existe y pertenece al docente
     const clase = await this.prisma.clase.findUnique({
       where: { id: claseId },
@@ -100,10 +91,10 @@ export class ClasesAsistenciaService {
     );
 
     // 4. BATCH UPSERT en transacción
-      const resultados = await this.prisma.$transaction(async (tx) => {
-        const ahora = new Date();
-        const updated: AsistenciaConEstudiante[] = [];
-        const created: AsistenciaConEstudiante[] = [];
+    const resultados = await this.prisma.$transaction(async (tx) => {
+      const ahora = new Date();
+      const updated: any[] = [];
+      const created: any[] = [];
 
       // Batch updates (individual updates porque cada estudiante tiene datos diferentes)
       if (paraActualizar.length > 0) {

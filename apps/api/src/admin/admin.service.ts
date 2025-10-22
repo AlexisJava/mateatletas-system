@@ -8,10 +8,6 @@ import { AdminRolesService } from './services/admin-roles.service';
 import { AdminEstudiantesService } from './services/admin-estudiantes.service';
 import { CircuitBreaker } from '../common/circuit-breaker';
 
-type CrearEstudianteRapidoData = Parameters<
-  AdminEstudiantesService['crearEstudianteRapido']
->[0];
-
 /**
  * Servicio principal de administración
  * REFACTORIZADO (ETAPA 2): Delega operaciones específicas a servicios especializados
@@ -171,7 +167,7 @@ export class AdminService {
    * DELEGACIÓN: AdminEstudiantesService
    * PROTECCIÓN: Circuit Breaker (sin fallback - debe fallar si servicio cae)
    */
-  async crearEstudianteRapido(data: CrearEstudianteRapidoData) {
+  async crearEstudianteRapido(data: any) {
     return this.estudiantesCircuit.execute(() =>
       this.estudiantesService.crearEstudianteRapido(data),
     );

@@ -2,15 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { CircuitBreaker } from '../common/circuit-breaker/circuit-breaker';
-import type {
-  CourseProductData,
-  CourseStudentInfo,
-  MercadoPagoPayment,
-  MercadoPagoPreferenceData,
-  MercadoPagoPreferenceResponse,
-  MembershipProductData,
-  TutorBasicInfo,
-} from './dto/mercadopago.types';
 
 /**
  * Servicio dedicado a la integración con MercadoPago SDK
@@ -32,8 +23,8 @@ export class MercadoPagoService {
   private readonly mockMode: boolean;
 
   // Circuit Breakers for external API calls
-  private readonly preferenceCircuitBreaker: CircuitBreaker<[], MercadoPagoPreferenceResponse>;
-  private readonly paymentCircuitBreaker: CircuitBreaker<[], MercadoPagoPayment>;
+  private readonly preferenceCircuitBreaker: CircuitBreaker;
+  private readonly paymentCircuitBreaker: CircuitBreaker;
 
   constructor(private configService: ConfigService) {
     const accessToken = this.configService.get<string>(
@@ -41,7 +32,7 @@ export class MercadoPagoService {
     );
 
     // Inicializar Circuit Breakers
-    this.preferenceCircuitBreaker = new CircuitBreaker<[], MercadoPagoPreferenceResponse>({
+    this.preferenceCircuitBreaker = new CircuitBreaker({
       name: 'MercadoPago-CreatePreference',
       failureThreshold: 3, // 3 fallos consecutivos abren el circuito
       resetTimeout: 60000, // 60 segundos antes de reintentar
@@ -52,7 +43,7 @@ export class MercadoPagoService {
       },
     });
 
-    this.paymentCircuitBreaker = new CircuitBreaker<[], MercadoPagoPayment>({
+    this.paymentCircuitBreaker = new CircuitBreaker({
       name: 'MercadoPago-GetPayment',
       failureThreshold: 3, // 3 fallos consecutivos abren el circuito
       resetTimeout: 60000, // 60 segundos antes de reintentar
@@ -103,9 +94,7 @@ export class MercadoPagoService {
    * @param preferenceData - Datos de la preferencia según el formato de MercadoPago
    * @returns Preferencia creada con id e init_point
    */
-  async createPreference(
-    preferenceData: MercadoPagoPreferenceData,
-  ): Promise<MercadoPagoPreferenceResponse> {
+  async createPreference(preferenceData: any) {
     if (this.mockMode) {
       throw new Error(
         'MercadoPago está en modo mock. Use MockPagosService para crear preferencias mock.',
@@ -119,11 +108,13 @@ export class MercadoPagoService {
     this.logger.log('Creando preferencia en MercadoPago (con Circuit Breaker)');
 
     // Ejecutar con circuit breaker protection
-    const preference = await this.preferenceCircuitBreaker.execute(async () => {
-      return await this.preferenceClient!.create({
-        body: preferenceData,
-      });
-    });
+    const preference = await this.preferenceCircuitBreaker.execute(
+      async () => {
+        return await this.preferenceClient!.create({
+          body: preferenceData,
+        });
+      },
+    );
 
     this.logger.log(`Preferencia creada exitosamente: ${preference.id}`);
     return preference;
@@ -141,7 +132,7 @@ export class MercadoPagoService {
    * @param paymentId - ID del pago en MercadoPago
    * @returns Datos del pago
    */
-  async getPayment(paymentId: string): Promise<MercadoPagoPayment> {
+  async getPayment(paymentId: string) {
     if (this.mockMode) {
       throw new Error(
         'MercadoPago está en modo mock. No se pueden consultar pagos reales.',
@@ -155,9 +146,11 @@ export class MercadoPagoService {
     this.logger.log(`Consultando pago ${paymentId} en MercadoPago (con Circuit Breaker)`);
 
     // Ejecutar con circuit breaker protection
-    const payment = await this.paymentCircuitBreaker.execute(async () => {
-      return await this.paymentClient!.get({ id: paymentId });
-    });
+    const payment = await this.paymentCircuitBreaker.execute(
+      async () => {
+        return await this.paymentClient!.get({ id: paymentId });
+      },
+    );
 
     this.logger.log(
       `Pago ${paymentId} consultado exitosamente - Estado: ${payment.status} - External Ref: ${payment.external_reference}`,
@@ -180,13 +173,13 @@ export class MercadoPagoService {
    * Construye los datos de una preferencia para membresía
    */
   buildMembershipPreferenceData(
-    producto: MembershipProductData,
-    tutor: TutorBasicInfo,
+    producto: any,
+    tutor: any,
     membresiaId: string,
     tutorId: string,
     backendUrl: string,
     frontendUrl: string,
-  ): MercadoPagoPreferenceData {
+  ) {
     return {
       items: [
         {
@@ -199,9 +192,9 @@ export class MercadoPagoService {
         },
       ],
       payer: {
-        email: tutor.email ?? undefined,
-        name: tutor.nombre ?? undefined,
-        surname: tutor.apellido ?? undefined,
+        email: tutor.email,
+        name: tutor.nombre,
+        surname: tutor.apellido,
       },
       external_reference: `membresia-${membresiaId}-tutor-${tutorId}-producto-${producto.id}`,
       notification_url: `${backendUrl}/api/pagos/webhook`,
@@ -219,14 +212,14 @@ export class MercadoPagoService {
    * Construye los datos de una preferencia para curso
    */
   buildCoursePreferenceData(
-    producto: CourseProductData,
-    estudiante: CourseStudentInfo,
-    tutor: TutorBasicInfo,
+    producto: any,
+    estudiante: any,
+    tutor: any,
     inscripcionId: string,
     estudianteId: string,
     backendUrl: string,
     frontendUrl: string,
-  ): MercadoPagoPreferenceData {
+  ) {
     return {
       items: [
         {
@@ -239,9 +232,9 @@ export class MercadoPagoService {
         },
       ],
       payer: {
-        email: tutor.email ?? undefined,
-        name: tutor.nombre ?? undefined,
-        surname: tutor.apellido ?? undefined,
+        email: tutor.email,
+        name: tutor.nombre,
+        surname: tutor.apellido,
       },
       external_reference: `inscripcion-${inscripcionId}-estudiante-${estudianteId}-producto-${producto.id}`,
       notification_url: `${backendUrl}/api/pagos/webhook`,

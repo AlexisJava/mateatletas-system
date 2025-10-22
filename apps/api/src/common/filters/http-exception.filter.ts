@@ -78,12 +78,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     request: Request,
     status: number,
     errorId: string,
-    errorResponse: unknown,
+    errorResponse: any,
   ) {
     const { method, url, headers, body, query, params } = request;
-    const user = (request as Request & {
-      user?: { id?: string; role?: string };
-    }).user;
+    const user = (request as any).user;
 
     // Determinar nivel de log según el status code
     const logLevel = this.getLogLevel(status);
