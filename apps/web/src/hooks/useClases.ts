@@ -79,15 +79,25 @@ export function useClasesFormData() {
  * Hook para filtrado de clases
  */
 export function useClasesFilter(clases: ClaseListado[]) {
-  const [filter, setFilter] = useState<'all' | 'Programada' | 'Cancelada'>('all');
+  const [filter, setFilter] = useState<'all' | 'Programada' | 'Cancelada' | 'Activa'>('all');
+  const [sectorFilter, setSectorFilter] = useState<'all' | 'Matemática' | 'Programación' | 'Ciencias'>('all');
 
-  const filteredClases = filter === 'all'
-    ? clases
-    : clases.filter((c) => c.estado === filter || c.estado === filter);
+  const filteredClases = clases.filter((clase) => {
+    // Filtro por estado
+    const matchesEstado = filter === 'all' || clase.estado === filter;
+
+    // Filtro por sector
+    const sectorNombre = clase.docente?.sector?.nombre;
+    const matchesSector = sectorFilter === 'all' || sectorNombre === sectorFilter;
+
+    return matchesEstado && matchesSector;
+  });
 
   return {
     filter,
+    sectorFilter,
     setFilter,
+    setSectorFilter,
     filteredClases,
   };
 }

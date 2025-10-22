@@ -174,19 +174,26 @@ export default function CreateDocenteForm({
   const hasTimeConfigured = horaInicio && horaFin;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="backdrop-blur-xl bg-emerald-500/[0.08] rounded-2xl max-w-4xl w-full shadow-2xl shadow-emerald-500/20 border border-emerald-500/20 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+      <div className="backdrop-blur-2xl bg-slate-900/90 rounded-3xl max-w-4xl w-full shadow-2xl border border-blue-500/30 max-h-[90vh] flex flex-col">
         {/* Header fijo */}
-        <div className="flex items-center justify-between p-6 border-b border-emerald-500/20">
-          <div>
-            <h3 className="text-2xl font-bold text-white">Crear Nuevo Docente</h3>
-            <p className="text-sm text-white/60 mt-1">Complete la información del docente</p>
+        <div className="flex items-center justify-between p-8 border-b border-white/10">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-600 shadow-2xl shadow-blue-500/50">
+              <span className="text-3xl">👨‍🏫</span>
+            </div>
+            <div>
+              <h3 className="text-3xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                Crear Nuevo Docente
+              </h3>
+              <p className="text-base text-white/60 mt-1 font-medium">Complete la información del docente</p>
+            </div>
           </div>
           <button
             onClick={onCancel}
-            className="p-2 hover:bg-emerald-500/10 rounded-xl transition-colors"
+            className="p-3 hover:bg-white/10 rounded-2xl transition-all"
           >
-            <X className="w-5 h-5 text-white/50" />
+            <X className="w-6 h-6 text-white/70" />
           </button>
         </div>
 
@@ -194,14 +201,14 @@ export default function CreateDocenteForm({
         <div className="overflow-y-auto px-6 py-4 flex-1">
           <form onSubmit={handleSubmit} className="space-y-4">
           {/* Sección 1: Datos Básicos */}
-          <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl p-4 border border-emerald-500/20">
-            <h4 className="text-base font-bold text-white mb-3 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+          <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-6 border border-white/10">
+            <h4 className="text-lg font-black text-white mb-4 flex items-center gap-3">
+              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"></div>
               Datos Básicos
             </h4>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
+                <label className="block text-sm font-black text-white/70 uppercase tracking-wider mb-2">
                   Nombre *
                 </label>
                 <input
@@ -209,11 +216,11 @@ export default function CreateDocenteForm({
                   required
                   value={form.nombre}
                   onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                  className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
+                  className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 text-white placeholder-white/30 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
+                <label className="block text-sm font-black text-white/70 uppercase tracking-wider mb-2">
                   Apellido *
                 </label>
                 <input
@@ -221,11 +228,11 @@ export default function CreateDocenteForm({
                   required
                   value={form.apellido}
                   onChange={(e) => setForm({ ...form, apellido: e.target.value })}
-                  className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
+                  className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 text-white placeholder-white/30 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
+                <label className="block text-sm font-black text-white/70 uppercase tracking-wider mb-2">
                   Email *
                 </label>
                 <input
@@ -233,25 +240,25 @@ export default function CreateDocenteForm({
                   required
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
+                  className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 text-white placeholder-white/30 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
+                <label className="block text-sm font-black text-white/70 uppercase tracking-wider mb-2">
                   Teléfono
                 </label>
                 <input
                   type="tel"
                   value={form.telefono}
                   onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-                  className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
+                  className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 text-white placeholder-white/30 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold"
                   placeholder="+54 9 11 1234-5678"
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
+                <label className="block text-sm font-black text-white/70 uppercase tracking-wider mb-2">
                   Contraseña
-                  <span className="text-white/50 font-normal ml-2">
+                  <span className="text-white/50 font-normal normal-case ml-2">
                     (Opcional - se generará automáticamente si se omite)
                   </span>
                 </label>
@@ -261,29 +268,29 @@ export default function CreateDocenteForm({
                     minLength={6}
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="flex-1 px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
+                    className="flex-1 px-4 py-3 bg-white/5 border-2 border-white/10 text-white placeholder-white/30 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold"
                     placeholder="Dejar vacío para auto-generar"
                   />
                   <button
                     type="button"
                     onClick={generatePassword}
-                    className="px-3 py-2 bg-emerald-500/20 text-emerald-300 rounded-lg hover:bg-emerald-500/30 transition-all flex items-center gap-2"
+                    className="px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl hover:shadow-2xl hover:shadow-blue-500/50 transition-all flex items-center gap-2 font-bold"
                     title="Generar contraseña"
                   >
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCw className="w-5 h-5" />
                     Generar
                   </button>
                 </div>
               </div>
               <div className="col-span-2">
-                <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
+                <label className="block text-sm font-black text-white/70 uppercase tracking-wider mb-2">
                   Título Profesional
                 </label>
                 <input
                   type="text"
                   value={form.titulo}
                   onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-                  className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
+                  className="w-full px-4 py-3 bg-white/5 border-2 border-white/10 text-white placeholder-white/30 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-bold"
                   placeholder="Ej: Licenciado en Matemática"
                 />
               </div>
@@ -291,39 +298,39 @@ export default function CreateDocenteForm({
           </div>
 
           {/* Sección 2: Sectores */}
-          <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl p-4 border border-emerald-500/20">
-            <h4 className="text-base font-bold text-white mb-3 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+          <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-6 border border-white/10">
+            <h4 className="text-lg font-black text-white mb-4 flex items-center gap-3">
+              <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-500 to-emerald-500"></div>
               Sectores
             </h4>
-            <div className="space-y-2">
-              <label className="flex items-center gap-3 p-3 bg-black/20 rounded-lg hover:bg-black/30 transition-all cursor-pointer border border-emerald-500/20">
+            <div className="space-y-3">
+              <label className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all cursor-pointer border-2 border-white/10 hover:border-green-500/50">
                 <input
                   type="checkbox"
                   checked={sectores.includes('Matemática')}
                   onChange={() => toggleSector('Matemática')}
-                  className="w-5 h-5 rounded border-emerald-500/50 text-emerald-500 focus:ring-emerald-400 focus:ring-offset-gray-900"
+                  className="w-6 h-6 rounded-xl border-white/30 text-green-500 focus:ring-green-400"
                 />
-                <span className="text-2xl">📐</span>
-                <span className="text-white font-semibold">Matemática</span>
+                <span className="text-3xl">📐</span>
+                <span className="text-white font-bold text-lg">Matemática</span>
               </label>
-              <label className="flex items-center gap-3 p-3 bg-black/20 rounded-lg hover:bg-black/30 transition-all cursor-pointer border border-emerald-500/20">
+              <label className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all cursor-pointer border-2 border-white/10 hover:border-blue-500/50">
                 <input
                   type="checkbox"
                   checked={sectores.includes('Programación')}
                   onChange={() => toggleSector('Programación')}
-                  className="w-5 h-5 rounded border-emerald-500/50 text-emerald-500 focus:ring-emerald-400 focus:ring-offset-gray-900"
+                  className="w-6 h-6 rounded-xl border-white/30 text-blue-500 focus:ring-blue-400"
                 />
-                <span className="text-2xl">💻</span>
-                <span className="text-white font-semibold">Programación</span>
+                <span className="text-3xl">💻</span>
+                <span className="text-white font-bold text-lg">Programación</span>
               </label>
             </div>
           </div>
 
           {/* Sección 3: Disponibilidad Horaria */}
-          <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl p-4 border border-emerald-500/20">
-            <h4 className="text-base font-bold text-white mb-3 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-emerald-400" />
+          <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-6 border border-white/10">
+            <h4 className="text-lg font-black text-white mb-4 flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-purple-400" />
               Disponibilidad Horaria
             </h4>
             <div className="space-y-3">
@@ -432,19 +439,19 @@ export default function CreateDocenteForm({
         </div>
 
         {/* Footer fijo con botones */}
-        <div className="border-t border-emerald-500/20 p-6 backdrop-blur-xl bg-emerald-500/[0.05]">
+        <div className="border-t border-white/10 p-8 backdrop-blur-xl bg-white/5">
           {error && (
-            <div className="backdrop-blur-xl bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 rounded-xl text-sm font-medium mb-4">
+            <div className="bg-red-500/10 border-2 border-red-500/30 text-red-400 px-5 py-4 rounded-2xl text-sm font-bold mb-6">
               {error}
             </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             <button
               type="button"
               onClick={onCancel}
               disabled={isLoading}
-              className="flex-1 px-4 py-2.5 border-2 border-emerald-500/30 text-emerald-100 rounded-xl font-semibold hover:bg-emerald-500/10 transition-all disabled:opacity-50"
+              className="flex-1 px-6 py-4 border-2 border-white/20 text-white rounded-2xl font-bold hover:bg-white/10 transition-all disabled:opacity-50"
             >
               Cancelar
             </button>
@@ -452,17 +459,17 @@ export default function CreateDocenteForm({
               type="submit"
               disabled={isLoading}
               onClick={handleSubmit}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Creando...' : 'Crear Docente'}
             </button>
           </div>
 
-          <div className="flex justify-center pt-3">
+          <div className="flex justify-center pt-4">
             <button
               type="button"
               onClick={onSwitchToAdmin}
-              className="text-sm text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
+              className="text-sm text-purple-400 hover:text-purple-300 font-bold transition-colors"
             >
               ¿Querés crear un Administrador en su lugar?
             </button>
