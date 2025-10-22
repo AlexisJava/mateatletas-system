@@ -3,7 +3,7 @@ import { DashboardData, AdminUser, SystemStats } from '@/types/admin.types';
 import * as adminApi from '@/lib/api/admin.api';
 import type { ClaseListado } from '@/types/admin-clases.types';
 import type { Producto } from '@/types/catalogo.types';
-import type { CrearProductoDto } from '@/lib/api/catalogo.api';
+import type { CrearProductoDto, ActualizarProductoDto } from '@/lib/api/catalogo.api';
 import { getErrorMessage } from '@/lib/utils/error-handler';
 
 interface CrearClaseDto {
@@ -35,7 +35,7 @@ interface AdminStore {
   createClass: (data: CrearClaseDto) => Promise<boolean>;
   cancelClass: (claseId: string) => Promise<boolean>;
   createProduct: (data: CrearProductoDto) => Promise<boolean>;
-  updateProduct: (id: string, data: Partial<CrearProductoDto>) => Promise<boolean>;
+  updateProduct: (id: string, data: ActualizarProductoDto) => Promise<boolean>;
   deleteProduct: (id: string, hardDelete?: boolean) => Promise<boolean>;
   changeUserRole: (userId: string, role: 'tutor' | 'docente' | 'admin') => Promise<boolean>;
   updateUserRoles: (userId: string, roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[]) => Promise<boolean>;
@@ -169,7 +169,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
     }
   },
 
-  updateProduct: async (id: string, data: Partial<CrearProductoDto>): Promise<boolean> => {
+  updateProduct: async (id: string, data: ActualizarProductoDto): Promise<boolean> => {
     try {
       await adminApi.updateProduct(id, data);
       await get().fetchProducts();

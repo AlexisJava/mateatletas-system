@@ -125,21 +125,24 @@ export const gamificacionApi = {
    * Obtener dashboard completo del estudiante
    */
   getDashboard: async (estudianteId: string): Promise<DashboardData> => {
-    return await apiClient.get(`/gamificacion/dashboard/${estudianteId}`);
+    const response = await apiClient.get(`/gamificacion/dashboard/${estudianteId}`);
+    return dashboardGamificacionSchema.parse(response);
   },
 
   /**
    * Obtener logros del estudiante
    */
   getLogros: async (estudianteId: string): Promise<Logro[]> => {
-    return await apiClient.get(`/gamificacion/logros/${estudianteId}`);
+    const response = await apiClient.get(`/gamificacion/logros/${estudianteId}`);
+    return logrosListSchema.parse(response);
   },
 
   /**
    * Obtener puntos del estudiante
    */
   getPuntos: async (estudianteId: string): Promise<Puntos> => {
-    return await apiClient.get(`/gamificacion/puntos/${estudianteId}`);
+    const response = await apiClient.get(`/gamificacion/puntos/${estudianteId}`);
+    return puntosSchema.parse(response);
   },
 
   /**
@@ -154,7 +157,8 @@ export const gamificacionApi = {
    * Obtener progreso por rutas
    */
   getProgreso: async (estudianteId: string): Promise<Progreso[]> => {
-    return await apiClient.get(`/gamificacion/progreso/${estudianteId}`);
+    const response = await apiClient.get(`/gamificacion/progreso/${estudianteId}`);
+    return progresoRutaListSchema.parse(response);
   },
 
   /**
@@ -168,20 +172,24 @@ export const gamificacionApi = {
    * Obtener acciones puntuables disponibles (docentes)
    */
   getAcciones: async (): Promise<AccionPuntuable[]> => {
-    return await apiClient.get('/gamificacion/acciones');
+    const response = await apiClient.get('/gamificacion/acciones');
+    return accionesPuntuablesListSchema.parse(response);
   },
 
   /**
    * Obtener historial de puntos de un estudiante
    */
   getHistorial: async (estudianteId: string): Promise<PuntoObtenido[]> => {
-    return await apiClient.get(`/gamificacion/historial/${estudianteId}`);
+    const response = await apiClient.get(`/gamificacion/historial/${estudianteId}`);
+    return puntosObtenidosListSchema.parse(response);
   },
 
   /**
    * Otorgar puntos a un estudiante (docentes)
    */
   otorgarPuntos: async (data: OtorgarPuntosData): Promise<unknown> => {
-    return await apiClient.post('/gamificacion/puntos', data);
+    const payload = otorgarPuntosSchema.parse(data);
+    return await apiClient.post('/gamificacion/puntos', payload);
   },
 };
+

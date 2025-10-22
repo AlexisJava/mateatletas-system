@@ -241,7 +241,7 @@ export default function AdminClasesPage() {
       {modalType === 'estudiantes' && selectedClass && (
         <GestionarEstudiantesModal
           claseId={selectedClass.id as string}
-          claseNombre={String(selectedClass.nombre ?? selectedClass.titulo ?? 'Clase')}
+          claseNombre={String(selectedClass.nombre ?? 'Clase')}
           onClose={closeModal}
           onSuccess={fetchClases}
         />

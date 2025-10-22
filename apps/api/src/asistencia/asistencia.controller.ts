@@ -15,7 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { GetUser } from '../auth/decorators/get-user.decorator';
-import { AuthUser } from '../auth/types';
+import { AuthUser } from '../auth/interfaces';
 
 @Controller('asistencia')
 @UseGuards(JwtAuthGuard, RolesGuard)

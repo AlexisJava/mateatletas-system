@@ -9,7 +9,7 @@ export const productoSchema = z.object({
   nombre: z.string(),
   descripcion: z.string(),
   precio: z.number(),
-  tipo: z.enum(['Suscripcion', 'Curso', 'Recurso']), // Coincidir con TipoProducto enum
+  tipo: z.enum(['Suscripcion', 'Curso', 'RecursoDigital']), // Coincidir con TipoProducto enum
   duracion_dias: z.number().nullable(),
   activo: z.boolean(),
   createdAt: z.string(),

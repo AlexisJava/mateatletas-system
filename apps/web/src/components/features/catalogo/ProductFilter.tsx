@@ -51,7 +51,7 @@ export function ProductFilter({
       color: 'hover:bg-[#ff6b35]/10 active:bg-[#ff6b35]',
     },
     {
-      value: TipoProducto.Recurso,
+      value: TipoProducto.RecursoDigital,
       label: 'Recursos',
       emoji: '🎁',
       color: 'hover:bg-[#f7b801]/10 active:bg-[#f7b801]',
