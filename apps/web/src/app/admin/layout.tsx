@@ -359,9 +359,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
               </header>
 
-              {/* Page Content - SIN SCROLL */}
-              <main className="flex-1 overflow-hidden relative">
-                <div className="h-full max-w-[1800px] mx-auto p-6 overflow-hidden">
+              {/* Page Content - CON SCROLL */}
+              <main className="flex-1 overflow-y-auto relative">
+                <div className="min-h-full max-w-[1800px] mx-auto p-6">
                   {children}
                 </div>
 
