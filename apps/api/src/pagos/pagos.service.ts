@@ -13,6 +13,8 @@ import { ProductosService } from '../catalogo/productos.service';
 import { MercadoPagoService } from './mercadopago.service';
 import { MockPagosService } from './mock-pagos.service';
 import { TipoProducto } from '@prisma/client';
+import { MercadoPagoWebhookDto } from './dto/mercadopago-webhook.dto';
+import { LoggerMetadata } from '../common/logger';
 
 /**
  * Servicio principal para gestionar pagos y membresías
@@ -250,18 +252,35 @@ export class PagosService {
    * 4. Rollback automático: Si falla algo, la transacción hace rollback
    * 5. Logging detallado: Trazabilidad completa para debugging
    */
-  async procesarWebhookMercadoPago(body: any) {
+  private buildWebhookLogMetadata(
+    payload: MercadoPagoWebhookDto,
+  ): LoggerMetadata {
+    const liveModeValue = payload.live_mode;
+    let liveMode: boolean | string | undefined = liveModeValue;
+
+    if (typeof liveModeValue === 'string') {
+      if (liveModeValue.toLowerCase() === 'true') {
+        liveMode = true;
+      } else if (liveModeValue.toLowerCase() === 'false') {
+        liveMode = false;
+      }
+    }
+
+    return {
+      type: payload.type,
+      action: payload.action,
+      dataId: payload.data?.id,
+      liveMode,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async procesarWebhookMercadoPago(body: MercadoPagoWebhookDto) {
     this.logger.log('📩 Webhook recibido de MercadoPago');
 
     // Log sanitizado - NO exponer payload completo que puede contener datos sensibles
-    const sanitizedLog = {
-      type: body.type,
-      action: body.action,
-      dataId: body.data?.id,
-      liveMode: body.live_mode,
-      timestamp: new Date().toISOString(),
-    };
-    this.logger.debug(`Webhook sanitizado: ${JSON.stringify(sanitizedLog)}`);
+    const sanitizedLog = this.buildWebhookLogMetadata(body);
+    this.logger.debug('Webhook sanitizado', sanitizedLog);
 
     // En modo mock, ignorar webhooks
     if (
