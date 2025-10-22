@@ -59,6 +59,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
     apellido: 'González',
     titulo: 'Profesora de Matemáticas',
     bio: 'Especialista en álgebra',
+    debe_cambiar_password: false,
     createdAt: new Date(),
     updatedAt: new Date(),
     roles: null,
@@ -578,7 +579,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       // Assert
       expect(result.email).toBe(mockDocente.email);
       expect(result.role).toBe(Role.Docente);
-      expect(result.titulo).toBe(mockDocente.titulo);
+      expect((result as any).titulo).toBe(mockDocente.titulo);
     });
 
     it('should return admin profile', async () => {
@@ -603,7 +604,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       // Assert
       expect(result.email).toBe(mockEstudiante.email);
       expect(result.role).toBe(Role.Estudiante);
-      expect(result.puntos_totales).toBe(150);
+      expect((result as any).puntos_totales).toBe(150);
     });
 
     it('should throw NotFoundException when tutor not found', async () => {
