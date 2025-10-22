@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LoggerService } from '../logger/logger.service';
+import { LoggerMetadata } from '../logger';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -85,7 +86,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // Determinar nivel de log según el status code
     const logLevel = this.getLogLevel(status);
 
-    const metadata = {
+    const metadata: LoggerMetadata = {
       errorId,
       statusCode: status,
       method,
