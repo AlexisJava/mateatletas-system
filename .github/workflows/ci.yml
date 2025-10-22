@@ -68,23 +68,20 @@ jobs:
         env:
           DATABASE_URL: 'postgresql://test:test@localhost:5432/test?schema=public'
 
-      - name: Run critical tests (Auth + Pagos only)
+      - name: Run all passing tests (458 tests)
         run: |
           cd apps/api
-          npm test -- auth.service.spec.ts
-          npm test -- pagos.service.spec.ts
+          npm test -- --testPathIgnorePatterns="auth-cambiar-password|admin-estudiantes"
         env:
           DATABASE_URL: 'postgresql://test:test@localhost:5432/test?schema=public'
           JWT_SECRET: 'test-secret-for-ci'
           MERCADOPAGO_ACCESS_TOKEN: 'TEST-MOCK-TOKEN'
 
-      # TODO: Reactivar cuando se arreglen todos los tests
-      # - name: Run all unit tests
-      #   run: npm run test
-      #   env:
-      #     DATABASE_URL: 'postgresql://test:test@localhost:5432/test?schema=public'
-      #     JWT_SECRET: 'test-secret-for-ci'
-      #     MERCADOPAGO_ACCESS_TOKEN: 'TEST-MOCK-TOKEN'
+      # Tests excluidos temporalmente (10 tests):
+      # - auth/__tests__/auth-cambiar-password.service.spec.ts (5 tests) - TDD RED, método no implementado aún
+      # - admin/services/__tests__/admin-estudiantes.service.spec.ts (3 tests) - Falta módulo credential-generator
+      # - admin/services/__tests__/admin-estudiantes-password-temporal.service.spec.ts (2 tests) - Relacionado con password temporal
+      # TODO: Implementar estos features y reactivar tests
 
   build:
     runs-on: ubuntu-latest
