@@ -25,7 +25,7 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { checkAuth } = useAuthStore();
+  const { checkAuth, token, isAuthenticated } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const hasValidatedRef = useRef(false);
 
@@ -39,15 +39,11 @@ export default function ProtectedLayout({
     const validateAuth = async () => {
       hasValidatedRef.current = true;
 
-      // Verificar si hay token en localStorage
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('auth-token');
-
-        if (!token) {
-          // No hay token, redirigir a login
-          router.push('/login');
-          return;
-        }
+      // Verificar si hay token en el store de Zustand (persisted)
+      if (!token) {
+        // No hay token, redirigir a login
+        router.push('/login');
+        return;
       }
 
       try {
@@ -62,7 +58,7 @@ export default function ProtectedLayout({
     };
 
     validateAuth();
-  }, [checkAuth, router]);
+  }, [checkAuth, router, token]);
 
   /**
    * Maneja el logout del usuario
