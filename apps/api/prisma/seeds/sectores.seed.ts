@@ -28,4 +28,17 @@ export async function seedSectores(prisma: PrismaClient) {
     },
   });
   console.log(`  ✅ Sector Programación: ${sectorProg.id}`);
+
+  const sectorCiencias = await prisma.sector.upsert({
+    where: { nombre: 'Ciencias' },
+    update: {},
+    create: {
+      nombre: 'Ciencias',
+      descripcion: 'Sector de ciencias naturales y exactas',
+      color: '#10B981',
+      icono: '🔬',
+      activo: true,
+    },
+  });
+  console.log(`  ✅ Sector Ciencias: ${sectorCiencias.id}`);
 }
