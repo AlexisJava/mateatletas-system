@@ -18,7 +18,7 @@ import ViewEditDocenteModal from '@/components/admin/ViewEditDocenteModal';
 import MultiRoleModal from '@/components/admin/MultiRoleModal';
 
 type TabType = 'tutores' | 'estudiantes' | 'personal';
-type ModalType = 'delete' | 'roles' | 'view' | 'viewDocente' | 'createDocente' | 'createAdmin' | null;
+type ModalType = 'delete' | 'roles' | 'view' | 'viewDocente' | 'createDocente' | 'createAdmin' | 'reassignClasses' | null;
 
 export default function UsuariosPage() {
   const { users, fetchUsers, deleteUser, isLoading, error } = useAdminStore();
@@ -29,6 +29,10 @@ export default function UsuariosPage() {
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [selectedDocente, setSelectedDocente] = useState<Docente | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [clasesCount, setClasesCount] = useState<number>(0);
+  const [docentesDisponibles, setDocentesDisponibles] = useState<Docente[]>([]);
+  const [targetDocenteId, setTargetDocenteId] = useState<string>('');
 
   // Form states para crear Admin
   const [adminForm, setAdminForm] = useState<CreateAdminData>({
@@ -65,10 +69,75 @@ export default function UsuariosPage() {
 
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
-    const success = await deleteUser(selectedUser.id);
-    if (success) {
-      setModalType(null);
-      setSelectedUser(null);
+    setDeleteError(null);
+    setFormLoading(true);
+
+    try {
+      const success = await deleteUser(selectedUser.id);
+      if (success) {
+        setModalType(null);
+        setSelectedUser(null);
+      }
+    } catch (error: any) {
+      // Detectar error de clases asignadas
+      console.log('🔍 Error capturado:', error);
+      console.log('🔍 Error response:', error?.response);
+      console.log('🔍 Error data:', error?.response?.data);
+
+      const errorMsg = error?.response?.data?.errorMessage || error?.response?.data?.message || error?.message || 'Error al eliminar usuario';
+      console.log('🔍 Mensaje de error extraído:', errorMsg);
+
+      if (errorMsg.includes('clase(s) asignada(s)')) {
+        console.log('✅ Detectado error de clases asignadas');
+        // Extraer número de clases del mensaje
+        const match = errorMsg.match(/(\d+) clase\(s\)/);
+        const numClases = match ? parseInt(match[1]) : 0;
+        console.log('📊 Número de clases:', numClases);
+        setClasesCount(numClases);
+        setDeleteError(errorMsg);
+
+        // Cargar docentes disponibles para reasignación
+        try {
+          const response = await docentesApi.getAll();
+          console.log('👥 Docentes response:', response);
+          // El backend puede devolver { data: [...] } o directamente [...]
+          const docentes = Array.isArray(response) ? response : (response as any).data || [];
+          console.log('👥 Docentes array:', docentes);
+          setDocentesDisponibles(docentes.filter((d: Docente) => d.id !== selectedUser.id));
+        } catch (err) {
+          console.error('❌ Error loading docentes:', err);
+        }
+      } else {
+        console.log('⚠️ Error genérico, no es de clases asignadas');
+        setDeleteError(errorMsg);
+      }
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleReassignClasses = async () => {
+    if (!selectedUser || !targetDocenteId) return;
+    console.log('🔄 Reasignando clases...');
+    console.log('🔄 De docente (selectedUser.id):', selectedUser.id);
+    console.log('🔄 A docente (targetDocenteId):', targetDocenteId);
+    console.log('🔄 Tipo de targetDocenteId:', typeof targetDocenteId);
+    setFormLoading(true);
+    setDeleteError(null);
+
+    try {
+      await docentesApi.reassignClasses(selectedUser.id, targetDocenteId);
+      // Ahora sí intentar eliminar
+      const success = await deleteUser(selectedUser.id);
+      if (success) {
+        setModalType(null);
+        setSelectedUser(null);
+        setTargetDocenteId('');
+      }
+    } catch (error: any) {
+      setDeleteError(getErrorMessage(error));
+    } finally {
+      setFormLoading(false);
     }
   };
 
@@ -172,6 +241,10 @@ export default function UsuariosPage() {
     setModalType(null);
     setSelectedUser(null);
     setFormError(null);
+    setDeleteError(null);
+    setClasesCount(0);
+    setDocentesDisponibles([]);
+    setTargetDocenteId('');
   };
 
   const handleExport = (format: 'excel' | 'csv' | 'pdf') => {
@@ -459,22 +532,67 @@ export default function UsuariosPage() {
                 Estás por eliminar a <span className="font-bold text-white">{selectedUser.nombre} {selectedUser.apellido}</span>
               </p>
             </div>
-            <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 mb-6">
-              <p className="text-sm text-red-400 font-bold text-center">⚠️ Esta acción no se puede deshacer</p>
-            </div>
+
+            {/* Error Display con opción de reasignación */}
+            {deleteError ? (
+              <div className="space-y-4 mb-6">
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4">
+                  <p className="text-sm text-amber-300 font-bold text-center">⚠️ {deleteError}</p>
+                </div>
+
+                {/* Si hay clases, mostrar selector de docente */}
+                {clasesCount > 0 && docentesDisponibles.length > 0 && (
+                  <div className="space-y-3">
+                    <label className="block text-sm font-bold text-white">
+                      Reasignar {clasesCount} clase{clasesCount > 1 ? 's' : ''} a:
+                    </label>
+                    <select
+                      value={targetDocenteId}
+                      onChange={(e) => setTargetDocenteId(e.target.value)}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                      disabled={formLoading}
+                    >
+                      <option value="">Seleccionar docente...</option>
+                      {docentesDisponibles.map((docente) => (
+                        <option key={docente.id} value={docente.id} className="bg-slate-800">
+                          {docente.nombre} {docente.apellido}
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      onClick={handleReassignClasses}
+                      disabled={!targetDocenteId || formLoading}
+                      className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    >
+                      {formLoading ? 'Reasignando...' : 'Reasignar y Eliminar'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 mb-6">
+                <p className="text-sm text-red-400 font-bold text-center">⚠️ Esta acción no se puede deshacer</p>
+              </div>
+            )}
+
             <div className="flex gap-3">
               <button
                 onClick={closeModal}
-                className="flex-1 px-6 py-3 border-2 border-white/20 text-white rounded-2xl font-bold hover:bg-white/10 transition-all"
+                disabled={formLoading}
+                className="flex-1 px-6 py-3 border-2 border-white/20 text-white rounded-2xl font-bold hover:bg-white/10 transition-all disabled:opacity-50"
               >
                 Cancelar
               </button>
-              <button
-                onClick={handleDeleteUser}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-red-500/50 hover:scale-105 transition-all"
-              >
-                Eliminar
-              </button>
+              {!deleteError && (
+                <button
+                  onClick={handleDeleteUser}
+                  disabled={formLoading}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-red-500/50 hover:scale-105 transition-all disabled:opacity-50"
+                >
+                  {formLoading ? 'Eliminando...' : 'Eliminar'}
+                </button>
+              )}
             </div>
           </div>
         </div>

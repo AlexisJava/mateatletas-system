@@ -103,9 +103,9 @@ export function ClasesCards({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
       {clases.map((clase) => {
-        const sectorNombre = clase.docente?.sector?.nombre as keyof typeof SECTOR_COLORS || 'Matemática';
+        const sectorNombre = (clase.sector?.nombre || 'Matemática') as keyof typeof SECTOR_COLORS;
         const sectorConfig = SECTOR_COLORS[sectorNombre] || SECTOR_COLORS['Matemática'];
         const inscripciones = clase._count?.inscripciones || 0;
         const cupoMaximo = clase.cupo_maximo;
@@ -113,34 +113,28 @@ export function ClasesCards({
         return (
           <div
             key={clase.id}
-            className={`bg-white rounded-2xl border-2 ${sectorConfig.border} shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden`}
+            className={`bg-white rounded-xl border-2 ${sectorConfig.border} shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col`}
           >
-            {/* Header con gradiente del sector */}
-            <div className={`bg-gradient-to-r ${sectorConfig.gradient} p-6 relative overflow-hidden`}>
-              <div className="absolute top-0 right-0 text-8xl opacity-10 select-none">
+            {/* Header con gradiente del sector - MÁS COMPACTO */}
+            <div className={`bg-gradient-to-r ${sectorConfig.gradient} p-4 relative overflow-hidden`}>
+              <div className="absolute top-0 right-0 text-6xl opacity-10 select-none">
                 {sectorConfig.icon}
               </div>
               <div className="relative z-10">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-xl flex items-center justify-center text-3xl shadow-lg">
-                      {sectorConfig.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-black text-white line-clamp-1">
-                        {clase.nombre}
-                      </h3>
-                      <p className="text-white/90 text-sm font-semibold">
-                        {sectorNombre}
-                      </p>
-                    </div>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-11 h-11 rounded-lg bg-white/20 backdrop-blur-xl flex items-center justify-center text-2xl shadow-lg flex-shrink-0">
+                    {sectorConfig.icon}
                   </div>
-                </div>
-
-                {/* Estado */}
-                <div className="flex items-center gap-2 mt-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-black text-white line-clamp-1">
+                      {clase.nombre}
+                    </h3>
+                    <p className="text-white/90 text-xs font-semibold">
+                      {sectorNombre}
+                    </p>
+                  </div>
                   <span
-                    className={`px-4 py-1.5 rounded-lg text-sm font-bold shadow-md ${
+                    className={`px-3 py-1 rounded-lg text-xs font-bold shadow-md flex-shrink-0 ${
                       clase.estado === 'Programada'
                         ? 'bg-green-500 text-white'
                         : clase.estado === 'Cancelada'
@@ -154,89 +148,88 @@ export function ClasesCards({
               </div>
             </div>
 
-            {/* Contenido de la card */}
-            <div className="p-6 space-y-4">
+            {/* Contenido de la card - MÁS COMPACTO */}
+            <div className="p-4 space-y-3 flex-1 flex flex-col">
               {/* Docente */}
-              <div className={`flex items-center gap-3 ${sectorConfig.bg} rounded-xl p-4 border ${sectorConfig.border}`}>
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${sectorConfig.gradient} flex items-center justify-center shadow-sm`}>
-                  <User className="w-6 h-6 text-white" />
+              <div className={`flex items-center gap-2.5 ${sectorConfig.bg} rounded-lg p-3 border ${sectorConfig.border}`}>
+                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${sectorConfig.gradient} flex items-center justify-center shadow-sm flex-shrink-0`}>
+                  <User className="w-5 h-5 text-white" />
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Docente</p>
-                  <p className={`${sectorConfig.text} font-bold`}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-500 font-medium">Docente</p>
+                  <p className={`${sectorConfig.text} font-bold text-sm truncate`}>
                     {clase.docente?.nombre} {clase.docente?.apellido}
                   </p>
                 </div>
               </div>
 
-              {/* Fecha y Hora */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className={`w-4 h-4 ${sectorConfig.text}`} />
-                    <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Fecha</p>
+              {/* Fecha, Hora y Duración en una sola línea compacta */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Calendar className={`w-3.5 h-3.5 ${sectorConfig.text}`} />
+                    <p className="text-xs text-gray-500 font-medium">Fecha</p>
                   </div>
-                  <p className="text-gray-900 font-bold text-sm">
+                  <p className="text-gray-900 font-bold text-xs">
                     {format(new Date(clase.fecha_hora_inicio), 'dd/MM/yyyy', { locale: es })}
                   </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className={`w-4 h-4 ${sectorConfig.text}`} />
-                    <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Hora</p>
+                <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Clock className={`w-3.5 h-3.5 ${sectorConfig.text}`} />
+                    <p className="text-xs text-gray-500 font-medium">Hora</p>
                   </div>
-                  <p className="text-gray-900 font-bold text-sm">
+                  <p className="text-gray-900 font-bold text-xs">
                     {format(new Date(clase.fecha_hora_inicio), 'HH:mm', { locale: es })} hs
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-200">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Clock className={`w-3.5 h-3.5 ${sectorConfig.text}`} />
+                    <p className="text-xs text-gray-500 font-medium">Duración</p>
+                  </div>
+                  <p className="text-gray-900 font-bold text-xs">
+                    {clase.duracion_minutos} min
                   </p>
                 </div>
               </div>
 
-              {/* Duración */}
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className={`w-4 h-4 ${sectorConfig.text}`} />
-                  <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Duración</p>
-                </div>
-                <p className="text-gray-900 font-bold">
-                  {clase.duracion_minutos} minutos
-                </p>
-              </div>
-
               {/* Barra de capacidad */}
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
                 <CapacityBar current={inscripciones} max={cupoMaximo} />
               </div>
 
-              {/* Acciones */}
-              <div className="grid grid-cols-2 gap-2 pt-2">
+              {/* Acciones - MÁS COMPACTO */}
+              <div className="grid grid-cols-2 gap-2 mt-auto">
                 <button
                   onClick={() => onViewClase(clase)}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl font-semibold transition-all"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-white border-2 border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-semibold text-sm transition-all"
                 >
                   <Eye className="w-4 h-4" />
                   Ver
                 </button>
                 <button
                   onClick={() => onManageStudents(clase)}
-                  className={`flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r ${sectorConfig.gradient} text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md`}
+                  className={`flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r ${sectorConfig.gradient} text-white rounded-lg font-semibold text-sm transition-all shadow-sm hover:shadow-md`}
                 >
                   <UserPlus className="w-4 h-4" />
-                  Estudiantes
+                  Alumnos
                 </button>
 
                 {clase.estado === 'Programada' && (
                   <>
                     <button
                       onClick={() => onEditClase(clase)}
-                      className="flex items-center justify-center gap-2 px-4 py-3 bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 text-amber-700 rounded-xl font-semibold transition-all"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-50 border-2 border-amber-300 hover:bg-amber-100 text-amber-700 rounded-lg font-semibold text-sm transition-all"
                     >
                       <Edit className="w-4 h-4" />
                       Editar
                     </button>
                     <button
                       onClick={() => onCancelClase(clase)}
-                      className="flex items-center justify-center gap-2 px-4 py-3 bg-red-50 border-2 border-red-300 hover:bg-red-100 text-red-700 rounded-xl font-semibold transition-all"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 border-2 border-red-300 hover:bg-red-100 text-red-700 rounded-lg font-semibold text-sm transition-all"
                     >
                       <Ban className="w-4 h-4" />
                       Cancelar

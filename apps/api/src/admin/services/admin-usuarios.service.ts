@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Role } from '../../auth/decorators/roles.decorator';
 import { parseUserRoles } from '../../common/utils/role.utils';
@@ -142,9 +142,52 @@ export class AdminUsuariosService {
   /**
    * Eliminar un usuario del sistema
    * @param id - ID del usuario a eliminar
+   *
+   * VALIDACIONES:
+   * - Si es docente con clases asignadas → Error (debe reasignar primero)
+   * - Si es tutor con estudiantes → Error (debe reasignar/eliminar estudiantes)
+   * - Solo permite eliminar usuarios sin dependencias
    */
   async deleteUser(id: string) {
-    // Intentar encontrar y eliminar el usuario en cada tabla
+    // 1. Verificar si es docente con clases
+    const docente = await this.prisma.docente.findUnique({
+      where: { id },
+      include: {
+        clases: {
+          where: {
+            estado: {
+              not: 'Cancelada' // Solo contar clases activas
+            }
+          }
+        }
+      }
+    });
+
+    if (docente && docente.clases.length > 0) {
+      throw new ConflictException(
+        `No se puede eliminar el docente porque tiene ${docente.clases.length} clase(s) asignada(s). ` +
+        `Debe reasignar las clases a otro docente antes de eliminar.`
+      );
+    }
+
+    // 2. Verificar si es tutor con estudiantes
+    const tutor = await this.prisma.tutor.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: { estudiantes: true }
+        }
+      }
+    });
+
+    if (tutor && tutor._count.estudiantes > 0) {
+      throw new ConflictException(
+        `No se puede eliminar el tutor porque tiene ${tutor._count.estudiantes} estudiante(s) a cargo. ` +
+        `Debe reasignar o eliminar los estudiantes primero.`
+      );
+    }
+
+    // 3. Intentar eliminar el usuario (ya validado sin dependencias)
     const [tutorResult, docenteResult, adminResult] = await Promise.allSettled([
       this.prisma.tutor.delete({ where: { id } }),
       this.prisma.docente.delete({ where: { id } }),

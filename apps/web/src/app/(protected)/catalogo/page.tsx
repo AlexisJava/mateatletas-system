@@ -8,7 +8,7 @@ import {
   ProductModal,
 } from '@/components/features/catalogo';
 import { Card } from '@/components/ui';
-import { Producto } from '@/types/catalogo.types';
+import { Producto, TipoProducto } from '@/types/catalogo.types';
 
 /**
  * Página de Catálogo de Productos

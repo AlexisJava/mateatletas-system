@@ -11,6 +11,7 @@ import {
 import { DocentesService } from './docentes.service';
 import { CreateDocenteDto } from './dto/create-docente.dto';
 import { UpdateDocenteDto } from './dto/update-docente.dto';
+import { ReasignarClasesDto } from './dto/reasignar-clases.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -98,7 +99,23 @@ export class DocentesController {
   }
 
   /**
+   * POST /docentes/:id/reasignar-clases - Reasignar clases a otro docente (Admin only)
+   * @param id - ID del docente actual (desde)
+   * @param dto - { toDocenteId: string } - ID del nuevo docente (hacia)
+   * @returns Cantidad de clases reasignadas
+   */
+  @Post(':id/reasignar-clases')
+  @Roles(Role.Admin)
+  async reasignarClases(
+    @Param('id') fromDocenteId: string,
+    @Body() dto: ReasignarClasesDto,
+  ) {
+    return this.docentesService.reasignarClases(fromDocenteId, dto.toDocenteId);
+  }
+
+  /**
    * DELETE /docentes/:id - Eliminar un docente (Admin only)
+   * Solo permite eliminar si no tiene clases asignadas
    * @param id - ID del docente
    * @returns Mensaje de confirmación
    */
