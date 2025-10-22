@@ -83,6 +83,7 @@ export const claseSchema = z.object({
   // Relaciones opcionales (cuando se incluyen en el response)
   docente: docenteEnClaseSchema.optional(),
   ruta_curricular: rutaCurricularEnClaseSchema.optional(),
+  rutaCurricular: rutaCurricularEnClaseSchema.optional().nullable(),
   inscripciones: z.array(inscripcionClaseSchema).optional(),
 });
 
@@ -94,15 +95,43 @@ export const clasesListSchema = z.array(claseSchema);
 /**
  * Schema para respuesta paginada de clases
  */
-export const clasesResponseSchema = z.object({
-  data: z.array(claseSchema),
-  metadata: z.object({
-    total: z.number(),
-    page: z.number(),
-    limit: z.number(),
-    totalPages: z.number(),
-  }).optional(),
+const paginationSchema = z.object({
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
 });
+
+export const clasesResponseSchema = z
+  .object({
+    data: z.array(claseSchema),
+    meta: paginationSchema.optional(),
+    metadata: paginationSchema.optional(),
+  })
+  .transform((payload) => ({
+    data: payload.data.map((clase) => ({
+      ...clase,
+      ruta_curricular: clase.ruta_curricular ?? clase.rutaCurricular ?? undefined,
+    })),
+    meta: payload.meta ?? payload.metadata,
+  }));
+
+export const calendarioResponseSchema = z
+  .object({
+    mes: z.number().int(),
+    anio: z.number().int(),
+    clases: z.array(claseSchema),
+    total: z.number().int(),
+  })
+  .transform((payload) => ({
+    mes: payload.mes,
+    anio: payload.anio,
+    total: payload.total,
+    clases: payload.clases.map((clase) => ({
+      ...clase,
+      ruta_curricular: clase.ruta_curricular ?? clase.rutaCurricular ?? undefined,
+    })),
+  }));
 
 /**
  * Schema para crear una clase (sin id, sin timestamps)
@@ -152,3 +181,4 @@ export type FiltroClasesInput = z.infer<typeof filtroClasesSchema>;
 export type CrearReservaInput = z.infer<typeof crearReservaSchema>;
 export type ClasesResponse = z.infer<typeof clasesResponseSchema>;
 export type EstadoClase = z.infer<typeof estadoClaseSchema>;
+export type CalendarioResponse = z.infer<typeof calendarioResponseSchema>;
