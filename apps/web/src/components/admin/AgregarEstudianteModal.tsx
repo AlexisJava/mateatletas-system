@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, UserPlus, Users } from 'lucide-react';
 import apiClient from '@/lib/axios';
 import { getErrorMessage } from '@/lib/utils/error-handler';
@@ -21,13 +21,18 @@ interface TutorForm {
   dni?: string;
 }
 
-interface Credencial {
-  username: string;
-  password: string;
+interface Sector {
+  id: string;
+  nombre: string;
 }
 
 interface CreacionExitosa {
-  estudiantes: Array<{ nombre: string; username: string; password: string }>;
+  estudiantes: Array<{
+    id: string;
+    nombre: string;
+    username: string;
+    password: string;
+  }>;
   tutor?: { username: string; password: string };
 }
 
@@ -50,9 +55,29 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
     telefono: '',
     dni: ''
   });
+  const [sectoresAdicionales, setSectoresAdicionales] = useState<string[]>([]);
+  const [sectoresDisponibles, setSectoresDisponibles] = useState<Sector[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [credenciales, setCredenciales] = useState<CreacionExitosa | null>(null);
+
+  // Cargar sectores disponibles (excepto el actual)
+  useEffect(() => {
+    if (isOpen) {
+      loadSectores();
+    }
+  }, [isOpen, sectorId]);
+
+  const loadSectores = async () => {
+    try {
+      const response = await apiClient.get('/admin/sectores');
+      // Filtrar el sector actual
+      const otros = response.filter((s: Sector) => s.id !== sectorId);
+      setSectoresDisponibles(otros);
+    } catch (err) {
+      console.error('Error al cargar sectores:', err);
+    }
+  };
 
   const handleAgregarEstudiante = () => {
     setEstudiantes([...estudiantes, { nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '' }]);
@@ -72,6 +97,14 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
 
   const handleTutorChange = (field: keyof TutorForm, value: string) => {
     setTutor({ ...tutor, [field]: value });
+  };
+
+  const toggleSectorAdicional = (sectorIdToggle: string) => {
+    if (sectoresAdicionales.includes(sectorIdToggle)) {
+      setSectoresAdicionales(sectoresAdicionales.filter(id => id !== sectorIdToggle));
+    } else {
+      setSectoresAdicionales([...sectoresAdicionales, sectorIdToggle]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,6 +129,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
         return;
       }
 
+      // Crear en sector principal
       const response = await apiClient.post('/estudiantes/crear-con-tutor', {
         estudiantes: estudiantesValidos.map(est => ({
           nombre: est.nombre,
@@ -114,6 +148,23 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
         sectorId
       });
 
+      // Copiar a sectores adicionales si fueron seleccionados
+      if (sectoresAdicionales.length > 0) {
+        const estudiantesCreados = response.estudiantes;
+
+        for (const estudiante of estudiantesCreados) {
+          for (const sectorDestino of sectoresAdicionales) {
+            try {
+              await apiClient.patch(`/estudiantes/${estudiante.id}/copiar-a-sector`, {
+                sectorId: sectorDestino
+              });
+            } catch (err) {
+              console.error(`Error al copiar estudiante ${estudiante.id} a sector ${sectorDestino}:`, err);
+            }
+          }
+        }
+      }
+
       // Mostrar credenciales generadas
       setCredenciales(response.credenciales);
     } catch (err) {
@@ -126,6 +177,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
     setCredenciales(null);
     setEstudiantes([{ nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '' }]);
     setTutor({ nombre: '', apellido: '', email: '', telefono: '', dni: '' });
+    setSectoresAdicionales([]);
     setError(null);
     setIsSubmitting(false);
     onSuccess();
@@ -138,9 +190,9 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
   if (credenciales) {
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-2xl border border-emerald-500/30 shadow-2xl shadow-emerald-500/20 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border-b border-emerald-500/30 px-6 py-4">
+        <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-2xl border border-emerald-500/30 shadow-2xl shadow-emerald-500/20 max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+          {/* Header - NO sticky */}
+          <div className="bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border-b border-emerald-500/30 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
@@ -160,8 +212,8 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
             </div>
           </div>
 
-          {/* Credenciales */}
-          <div className="p-6 space-y-6">
+          {/* Contenido con scroll */}
+          <div className="p-6 space-y-6 overflow-y-auto">
             <div className="backdrop-blur-xl bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
               <p className="text-amber-200 text-sm font-semibold">
                 ⚠️ IMPORTANTE: Guarda estas credenciales. No podrás verlas nuevamente.
@@ -235,9 +287,9 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
   // Formulario principal
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-2xl border border-emerald-500/30 shadow-2xl shadow-emerald-500/20 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border-b border-emerald-500/30 px-6 py-4">
+      <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-2xl border border-emerald-500/30 shadow-2xl shadow-emerald-500/20 max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header - NO sticky */}
+        <div className="bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border-b border-emerald-500/30 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
@@ -258,7 +310,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto">
           {/* Error */}
           {error && (
             <div className="backdrop-blur-xl bg-red-500/10 border border-red-500/30 rounded-xl p-4">
@@ -447,6 +499,36 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
               </div>
             </div>
           </div>
+
+          {/* Copiar a otros sectores */}
+          {sectoresDisponibles.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-white">Copiar también a:</h3>
+              <div className="backdrop-blur-xl bg-purple-500/[0.08] border border-purple-500/20 rounded-xl p-6">
+                <div className="space-y-3">
+                  {sectoresDisponibles.map((sector) => (
+                    <label
+                      key={sector.id}
+                      className="flex items-center gap-3 cursor-pointer group"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={sectoresAdicionales.includes(sector.id)}
+                        onChange={() => toggleSectorAdicional(sector.id)}
+                        className="w-5 h-5 rounded border-2 border-purple-500/30 bg-black/30 text-purple-500 focus:ring-2 focus:ring-purple-500/20 cursor-pointer"
+                      />
+                      <span className="text-white/80 font-semibold group-hover:text-white transition-colors">
+                        {sector.nombre}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                <p className="text-white/50 text-xs mt-4">
+                  El estudiante será creado en {sectorNombre} y copiado a los sectores seleccionados
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Botones */}
           <div className="flex gap-4 pt-4 border-t border-emerald-500/20">
