@@ -265,8 +265,8 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
       const mockContext = createMockContext({
         id: 'user-123',
-        role: 'tutor', // Legacy single role
-        roles: ['admin'], // Modern roles array - should take precedence
+        role: Role.Tutor, // Legacy single role
+        roles: [Role.Admin], // Modern roles array - should take precedence
       });
 
       // Act
@@ -285,7 +285,7 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
       ]);
       const mockContext = createMockContext({
         id: 'user-123',
-        roles: ['tutor'], // User only has tutor, which is one of the three required
+        roles: [Role.Tutor], // User only has tutor, which is one of the three required
       });
 
       // Act
@@ -300,7 +300,7 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
     it('should call reflector.getAllAndOverride with correct parameters', () => {
       // Arrange
       const getAllAndOverrideSpy = jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([]);
-      const mockContext = createMockContext({ id: 'user-123', roles: ['tutor'] });
+      const mockContext = createMockContext({ id: 'user-123', roles: [Role.Tutor] });
 
       // Act
       guard.canActivate(mockContext);

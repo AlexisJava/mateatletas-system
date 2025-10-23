@@ -209,22 +209,23 @@ export default function CalendarioTab() {
                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                   <User className="w-4 h-4" />
                                   <span>
-                                    Prof. {clase.docente.nombre} {clase.docente.apellido}
+                                    Prof. {clase.docente?.nombre} {clase.docente?.apellido}
                                   </span>
                                 </div>
 
                                 {/* Estudiantes Inscritos */}
                                 <div className="mt-2 flex flex-wrap gap-2">
-                                  {clase.inscripciones.map((insc) => {
-                                    const asistencia = clase.asistencias.find(
-                                      (a) => a.estudiante_id === insc.estudiante.id
+                                  {clase.inscripciones?.map((insc) => {
+                                    const asistencias = ('asistencias' in clase && Array.isArray(clase.asistencias)) ? clase.asistencias : [];
+                                    const asistencia = asistencias.find(
+                                      (a: { estudiante_id: string }) => a.estudiante_id === insc.estudiante?.id
                                     );
                                     return (
                                       <span
-                                        key={insc.estudiante.id}
+                                        key={insc.estudiante?.id}
                                         className="text-xs font-semibold px-2 py-1 rounded-full bg-white border-2 border-gray-200 flex items-center gap-1"
                                       >
-                                        {insc.estudiante.nombre}
+                                        {insc.estudiante?.nombre}
                                         {asistencia && (
                                           <>
                                             {asistencia.estado === 'Presente' ? (

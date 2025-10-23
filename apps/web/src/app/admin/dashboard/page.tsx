@@ -25,6 +25,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  TooltipItem,
   ArcElement,
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
@@ -375,7 +376,7 @@ export default function AdminDashboard() {
         borderWidth: 1,
         displayColors: true,
         callbacks: {
-          label: function(context: any) {
+          label: function(context: TooltipItem<'bar'>) {
             return `${context.parsed.y} estudiantes`;
           }
         }
@@ -391,7 +392,7 @@ export default function AdminDashboard() {
           color: 'rgba(255, 255, 255, 0.7)',
           font: {
             size: 12,
-            weight: 'bold',
+            weight: 'bold' as const,
           }
         },
       },
@@ -443,7 +444,7 @@ export default function AdminDashboard() {
           padding: 15,
           font: {
             size: 12,
-            weight: 'bold',
+            weight: 'bold' as const,
           },
         },
       },

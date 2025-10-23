@@ -149,7 +149,7 @@ export default function PagosTab() {
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <h4 className="font-bold text-indigo-900">
-                      {historialData.activos.membresia_actual.producto.nombre}
+                      {historialData.activos.membresia_actual.producto?.nombre}
                     </h4>
                     <p className="text-sm text-indigo-600">Membresía Activa</p>
                   </div>
@@ -177,9 +177,9 @@ export default function PagosTab() {
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h4 className="font-bold text-amber-900">{inscripcion.producto.nombre}</h4>
+                    <h4 className="font-bold text-amber-900">{inscripcion.producto?.nombre}</h4>
                     <p className="text-sm text-amber-600">
-                      {inscripcion.estudiante.nombre} {inscripcion.estudiante.apellido}
+                      {inscripcion.estudiante?.nombre} {inscripcion.estudiante?.apellido}
                     </p>
                   </div>
                   <Calendar className="w-6 h-6 text-amber-600" />
@@ -189,7 +189,7 @@ export default function PagosTab() {
                     <strong>Estado:</strong> {inscripcion.estado}
                   </p>
                   <p>
-                    <strong>Precio:</strong> {formatCurrency(inscripcion.producto.precio)}
+                    <strong>Precio:</strong> {formatCurrency(inscripcion.producto?.precio ?? 0)}
                   </p>
                 </div>
               </div>

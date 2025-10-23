@@ -194,9 +194,9 @@ export default function RankingPage() {
                               isCurrentUser ? 'ring-4 ring-purple-500' : ''
                             }`}
                           >
-                            {estudiante.avatar_url ? (
+                            {estudiante.avatar ? (
                               <img
-                                src={`https://api.dicebear.com/7.x/${estudiante.avatar_url}/svg?seed=${estudiante.id}`}
+                                src={`https://api.dicebear.com/7.x/${estudiante.avatar}/svg?seed=${estudiante.id}`}
                                 alt="Avatar"
                                 className="w-full h-full"
                               />
