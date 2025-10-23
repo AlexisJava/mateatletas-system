@@ -54,6 +54,8 @@ export class DocentesService {
       data: {
         email: createDto.email,
         password_hash: hashedPassword,
+        // Guardar contraseña temporal solo si se auto-generó
+        password_temporal: wasPasswordGenerated ? passwordToUse : null,
         nombre: createDto.nombre,
         apellido: createDto.apellido,
         titulo: createDto.titulo,
