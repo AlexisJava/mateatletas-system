@@ -16,7 +16,7 @@ import {
  */
 export const getDashboardResumen = async (): Promise<DashboardResumenResponse> => {
   const response = await axios.get('/tutor/dashboard-resumen');
-  return response.data;
+  return response;
 };
 
 /**
@@ -26,7 +26,7 @@ export const getDashboardResumen = async (): Promise<DashboardResumenResponse> =
  */
 export const getProximasClases = async (limit: number = 5): Promise<ProximasClasesResponse> => {
   const response = await axios.get(`/tutor/proximas-clases?limit=${limit}`);
-  return response.data;
+  return response;
 };
 
 /**
@@ -36,5 +36,5 @@ export const getProximasClases = async (limit: number = 5): Promise<ProximasClas
  */
 export const getAlertas = async (): Promise<AlertasResponse> => {
   const response = await axios.get('/tutor/alertas');
-  return response.data;
+  return response;
 };
