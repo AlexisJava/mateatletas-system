@@ -442,6 +442,6 @@ export class InscripcionMensualRepository implements IInscripcionMensualReposito
     });
 
     // Mapear a domain objects
-    return inscripciones.map((inscripcion) => this.mapearADominio(inscripcion));
+    return inscripciones.map((inscripcion) => this.mapearPrismaADomain(inscripcion));
   }
 }
