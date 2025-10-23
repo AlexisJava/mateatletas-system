@@ -1,137 +1,145 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, Plus } from 'lucide-react';
-import GestionarEstudiantesModal from '@/components/admin/GestionarEstudiantesModal';
-import { ClasesCards, ClasesFilters, ClaseForm } from '@/components/admin/clases';
-import { useClases, useClasesFormData, useClasesFilter, useClaseForm } from '@/hooks/useClases';
-import {
-  exportToExcel,
-  exportToCSV,
-  exportToPDF,
-  formatClassesForExport
-} from '@/lib/utils/export.utils';
-import type { ClaseListado } from '@/types/admin-clases.types';
+import { Plus, Calendar, Users, Clock } from 'lucide-react';
+import { ClaseGrupoForm } from '@/components/admin/clases';
+import { listarClaseGrupos, crearClaseGrupo } from '@/lib/api/clase-grupos.api';
+import axios from '@/lib/axios';
+import type {
+  ClaseGrupo,
+  CrearClaseGrupoDto,
+  TipoClaseGrupo,
+  DiaSemana,
+  DIA_SEMANA_LABELS,
+} from '@/types/clase-grupo';
 
-type ModalType = 'create' | 'cancel' | 'view' | 'edit' | 'estudiantes' | 'delete' | null;
+interface DocenteOption {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+}
+
+interface SectorOption {
+  id: string;
+  nombre: string;
+  color: string;
+}
+
+interface RutaCurricularOption {
+  id: string;
+  nombre: string;
+  color: string;
+}
+
+interface EstudianteOption {
+  id: string;
+  nombre: string;
+  apellido: string;
+  edad: number;
+  email: string;
+}
 
 /**
- * Página de Gestión de Clases - MATEATLETAS OS
- * Rediseñada con sistema de cards y filtros por sector
+ * Página de Gestión de Grupos de Clases Recurrentes
  */
-export default function AdminClasesPage() {
-  // Hooks de estado y lógica
-  const { clases, isLoading, error, fetchClases, createClase, cancelClase } = useClases();
-  const { docentes, sectores } = useClasesFormData();
-  const { filter, sectorFilter, setFilter, setSectorFilter, filteredClases } = useClasesFilter(clases);
-  const { formData, updateField, resetForm } = useClaseForm();
+export default function AdminClaseGruposPage() {
+  const [grupos, setGrupos] = useState<ClaseGrupo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // Estado de UI
-  const [modalType, setModalType] = useState<ModalType>(null);
-  const [selectedClass, setSelectedClass] = useState<ClaseListado | null>(null);
-  const [showExportMenu, setShowExportMenu] = useState(false);
+  // Options para el formulario
+  const [docentes, setDocentes] = useState<DocenteOption[]>([]);
+  const [sectores, setSectores] = useState<SectorOption[]>([]);
+  const [rutasCurriculares, setRutasCurriculares] = useState<RutaCurricularOption[]>([]);
+  const [estudiantes, setEstudiantes] = useState<EstudianteOption[]>([]);
 
-  // Cargar clases al montar el componente
+  // Form data
+  const [formData, setFormData] = useState<Omit<CrearClaseGrupoDto, 'estudiantes_ids'> & { estudiantes_ids: string[] }>({
+    codigo: '',
+    nombre: '',
+    tipo: 'GRUPO_REGULAR' as TipoClaseGrupo,
+    dia_semana: 'LUNES' as DiaSemana,
+    hora_inicio: '19:30',
+    hora_fin: '21:00',
+    fecha_inicio: new Date().toISOString().split('T')[0],
+    anio_lectivo: new Date().getFullYear(),
+    cupo_maximo: 15,
+    docente_id: '',
+    estudiantes_ids: [],
+  });
+
+  // Cargar datos iniciales
   useEffect(() => {
-    fetchClases();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchGrupos();
+    fetchFormOptions();
   }, []);
 
-  // Handlers
-  const openModal = (type: ModalType, clase?: ClaseListado) => {
-    setModalType(type);
-    setSelectedClass(clase || null);
-  };
-
-  const closeModal = () => {
-    setModalType(null);
-    setSelectedClass(null);
-  };
-
-  const handleCreateClass = async () => {
-    const isoDate = new Date(formData.fecha_hora_inicio).toISOString();
-    const success = await createClase({
-      nombre: formData.nombre,
-      docenteId: formData.docente_id,
-      sectorId: formData.sector_id || undefined,
-      fechaHoraInicio: isoDate,
-      duracionMinutos: formData.duracion_minutos,
-      cuposMaximo: formData.cupo_maximo,
-      descripcion: formData.descripcion || undefined,
-    });
-
-    if (success) {
-      closeModal();
-      resetForm();
-    }
-  };
-
-  const handleCancelClass = async () => {
-    if (!selectedClass) return;
-    const success = await cancelClase(selectedClass.id as string);
-    if (success) {
-      closeModal();
-    }
-  };
-
-  const handleDeleteClass = async () => {
-    if (!selectedClass) return;
-
+  const fetchGrupos = async () => {
     try {
       setIsLoading(true);
-      await apiClient.delete(`/clases/${selectedClass.id}`);
-
-      // Reload classes
-      await loadClases();
-
-      closeModal();
-    } catch (err: unknown) {
-      console.error('Error al eliminar clase:', err);
-      alert('Error al eliminar la clase. Por favor intente nuevamente.');
+      const response = await listarClaseGrupos({ anio_lectivo: new Date().getFullYear() });
+      setGrupos(response.data);
+    } catch (err) {
+      console.error('Error al cargar grupos:', err);
+      setError('Error al cargar los grupos de clases');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Export handlers
-  const handleExport = (format: 'excel' | 'csv' | 'pdf') => {
-    const formattedData = formatClassesForExport(filteredClases);
+  const fetchFormOptions = async () => {
+    try {
+      const [docentesRes, sectoresRes, rutasRes, estudiantesRes] = await Promise.all([
+        axios.get<DocenteOption[]>('/docentes'),
+        axios.get<SectorOption[]>('/admin/sectores'),
+        axios.get<RutaCurricularOption[]>('/admin/rutas-curriculares'),
+        axios.get<EstudianteOption[]>('/admin/estudiantes'),
+      ]);
 
-    switch (format) {
-      case 'excel':
-        exportToExcel(formattedData, 'clases');
-        break;
-      case 'csv':
-        exportToCSV(formattedData, 'clases');
-        break;
-      case 'pdf':
-        exportToPDF(formattedData, 'clases', 'Listado de Clases', [
-          { header: 'ID', dataKey: 'ID' },
-          { header: 'Ruta', dataKey: 'Ruta Curricular' },
-          { header: 'Docente', dataKey: 'Docente' },
-          { header: 'Fecha', dataKey: 'Fecha' },
-          { header: 'Hora', dataKey: 'Hora' },
-          { header: 'Estado', dataKey: 'Estado' }
-        ]);
-        break;
+      setDocentes(docentesRes.data);
+      setSectores(sectoresRes.data);
+      setRutasCurriculares(rutasRes.data);
+      setEstudiantes(estudiantesRes.data);
+    } catch (err) {
+      console.error('Error al cargar opciones del formulario:', err);
     }
-
-    setShowExportMenu(false);
   };
 
-  // Calcular contadores para filtros
-  const clasesCount = {
-    all: clases.length,
-    programadas: clases.filter((c) => c.estado === 'Programada').length,
-    canceladas: clases.filter((c) => c.estado === 'Cancelada').length,
-    activas: clases.filter((c) => c.estado === 'Activa').length,
+  const handleFieldChange = (field: string, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const sectoresCount = {
-    all: clases.length,
-    matematica: clases.filter((c) => c.docente?.sector?.nombre === 'Matemática').length,
-    programacion: clases.filter((c) => c.docente?.sector?.nombre === 'Programación').length,
-    ciencias: clases.filter((c) => c.docente?.sector?.nombre === 'Ciencias').length,
+  const handleSubmit = async () => {
+    try {
+      setIsLoading(true);
+      await crearClaseGrupo(formData as CrearClaseGrupoDto);
+      await fetchGrupos();
+      setShowCreateModal(false);
+      resetForm();
+    } catch (err) {
+      console.error('Error al crear grupo:', err);
+      setError('Error al crear el grupo de clases');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      codigo: '',
+      nombre: '',
+      tipo: 'GRUPO_REGULAR' as TipoClaseGrupo,
+      dia_semana: 'LUNES' as DiaSemana,
+      hora_inicio: '19:30',
+      hora_fin: '21:00',
+      fecha_inicio: new Date().toISOString().split('T')[0],
+      anio_lectivo: new Date().getFullYear(),
+      cupo_maximo: 15,
+      docente_id: '',
+      estudiantes_ids: [],
+    });
   };
 
   return (
@@ -139,178 +147,129 @@ export default function AdminClasesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-4xl font-black bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
             Gestión de Clases
           </h1>
-          <p className="text-gray-600 mt-1">
-            Administra las clases del sistema
-          </p>
+          <p className="text-white/60 mt-1">Administra grupos de clases recurrentes</p>
         </div>
 
-        <div className="flex gap-3">
-          <div className="relative">
-            <button
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              className="px-4 py-2 backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/30 hover:bg-emerald-500/20 text-white/90 rounded-xl font-semibold transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Exportar
-            </button>
-            {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-xl shadow-2xl shadow-emerald-500/20 border border-emerald-500/30 overflow-hidden z-20">
-                <button
-                  onClick={() => handleExport('excel')}
-                  className="block w-full text-left px-4 py-2 text-white/90 hover:bg-green-500/20 transition-all text-sm font-medium border-b border-emerald-500/20"
-                >
-                  📊 Excel (.xlsx)
-                </button>
-                <button
-                  onClick={() => handleExport('csv')}
-                  className="block w-full text-left px-4 py-2 text-white/90 hover:bg-blue-500/20 transition-all text-sm font-medium border-b border-emerald-500/20"
-                >
-                  📄 CSV (.csv)
-                </button>
-                <button
-                  onClick={() => handleExport('pdf')}
-                  className="block w-full text-left px-4 py-2 text-white/90 hover:bg-red-500/20 transition-all text-sm font-medium"
-                >
-                  📕 PDF (.pdf)
-                </button>
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={() => openModal('create')}
-            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-purple-500/30 flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Nueva Clase
-          </button>
-        </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/30 flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Nueva Clase
+        </button>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="mb-4 backdrop-blur-xl bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg">
           ⚠️ {error}
         </div>
       )}
 
-      {/* Filtros */}
-      <ClasesFilters
-        filter={filter}
-        sectorFilter={sectorFilter}
-        onFilterChange={setFilter}
-        onSectorFilterChange={setSectorFilter}
-        clasesCount={clasesCount}
-        sectoresCount={sectoresCount}
-      />
-
       {/* Loading */}
-      {isLoading && (
+      {isLoading && !showCreateModal && (
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4" />
-          <p className="text-gray-600">Cargando clases...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4" />
+          <p className="text-white/60">Cargando grupos...</p>
         </div>
       )}
 
-      {/* Cards */}
-      {!isLoading && (
-        <ClasesCards clases={filteredClases} />
+      {/* Grupos Grid */}
+      {!isLoading && grupos && grupos.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {grupos.map((grupo) => (
+            <div
+              key={grupo.id}
+              className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/40 to-teal-900/40 rounded-xl p-6 border border-emerald-500/30 shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all"
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <div className="text-xs font-bold text-emerald-400 mb-1">
+                    {grupo.codigo}
+                  </div>
+                  <h3 className="text-lg font-bold text-white line-clamp-2">{grupo.nombre}</h3>
+                </div>
+                <span
+                  className={`px-2 py-1 rounded-lg text-xs font-semibold ${
+                    grupo.tipo === 'GRUPO_REGULAR'
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : 'bg-blue-500/20 text-blue-400'
+                  }`}
+                >
+                  {grupo.tipo === 'GRUPO_REGULAR' ? 'Regular' : 'Temporal'}
+                </span>
+              </div>
+
+              {/* Horario */}
+              <div className="flex items-center gap-2 text-white/70 text-sm mb-3">
+                <Calendar className="w-4 h-4 text-emerald-400" />
+                <span>{DIA_SEMANA_LABELS[grupo.dia_semana]}</span>
+                <Clock className="w-4 h-4 text-teal-400 ml-2" />
+                <span>
+                  {grupo.hora_inicio} - {grupo.hora_fin}
+                </span>
+              </div>
+
+              {/* Docente */}
+              {grupo.docente && (
+                <div className="text-sm text-white/60 mb-3">
+                  👨‍🏫 {grupo.docente.nombre} {grupo.docente.apellido}
+                </div>
+              )}
+
+              {/* Cupos */}
+              <div className="flex items-center justify-between pt-3 border-t border-emerald-500/20">
+                <div className="flex items-center gap-2 text-sm">
+                  <Users className="w-4 h-4 text-emerald-400" />
+                  <span className="text-white/80">
+                    {grupo.total_inscriptos || 0} / {grupo.cupo_maximo}
+                  </span>
+                </div>
+                <div className="text-xs text-white/50">
+                  {grupo.cupos_disponibles || grupo.cupo_maximo} disponibles
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
-      {/* Modal Crear/Editar */}
-      {(modalType === 'create' || modalType === 'edit') && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-emerald-500/30 shadow-2xl shadow-emerald-500/20">
-            <h2 className="text-2xl font-bold mb-6 text-white">
-              {modalType === 'create' ? 'Nueva Clase' : 'Editar Clase'}
-            </h2>
-            <ClaseForm
+      {/* Empty state */}
+      {!isLoading && (!grupos || grupos.length === 0) && (
+        <div className="text-center py-12">
+          <Calendar className="w-16 h-16 text-white/20 mx-auto mb-4" />
+          <p className="text-white/40 text-lg">No hay grupos creados todavía</p>
+          <p className="text-white/30 text-sm mt-2">
+            Crea tu primer grupo de clases recurrente
+          </p>
+        </div>
+      )}
+
+      {/* Modal Crear Grupo */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden border border-emerald-500/30 shadow-2xl shadow-emerald-500/20">
+            <h2 className="text-2xl font-bold mb-6 text-white">Crear Grupo Recurrente</h2>
+            <ClaseGrupoForm
               formData={formData}
-              docentes={docentes as { id: string; nombre: string; apellido: string }[]}
-              sectores={sectores as { id: string; nombre: string }[]}
-              onFieldChange={updateField}
-              onSubmit={handleCreateClass}
-              onCancel={closeModal}
+              docentes={docentes}
+              sectores={sectores}
+              rutasCurriculares={rutasCurriculares}
+              estudiantes={estudiantes}
+              onFieldChange={handleFieldChange}
+              onSubmit={handleSubmit}
+              onCancel={() => {
+                setShowCreateModal(false);
+                resetForm();
+              }}
               isLoading={isLoading}
             />
           </div>
         </div>
-      )}
-
-      {/* Modal Cancelar */}
-      {modalType === 'cancel' && selectedClass && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-xl p-6 max-w-md w-full border border-emerald-500/30 shadow-2xl shadow-emerald-500/20">
-            <h2 className="text-2xl font-bold mb-4 text-white">Cancelar Clase</h2>
-            <p className="text-white/70 mb-2">
-              ¿Estás seguro de que deseas cancelar esta clase?
-            </p>
-            <p className="text-purple-300 font-bold mb-6">
-              {selectedClass.nombre}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={handleCancelClass}
-                className="flex-1 bg-gradient-to-r from-red-500 to-rose-500 text-white py-2 px-4 rounded-lg hover:from-red-600 hover:to-rose-600 transition-all shadow-lg shadow-red-500/30 font-semibold"
-              >
-                Sí, Cancelar
-              </button>
-              <button
-                onClick={closeModal}
-                className="flex-1 backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/30 text-white/90 py-2 px-4 rounded-lg hover:bg-emerald-500/20 transition-all font-semibold"
-              >
-                No, Volver
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Eliminar */}
-      {modalType === 'delete' && selectedClass && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-xl p-6 max-w-md w-full border border-red-500/50 shadow-2xl shadow-red-500/30">
-            <h2 className="text-2xl font-bold mb-4 text-red-400">Eliminar Clase Permanentemente</h2>
-            <p className="text-white/70 mb-2">
-              ¿Estás seguro de que deseas <span className="text-red-400 font-bold">eliminar permanentemente</span> esta clase?
-            </p>
-            <p className="text-purple-300 font-bold mb-3">
-              {selectedClass.nombre}
-            </p>
-            <p className="text-yellow-300/80 text-sm mb-6 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
-              ⚠️ Esta acción no se puede deshacer. Se eliminarán también todas las inscripciones asociadas.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={handleDeleteClass}
-                disabled={isLoading}
-                className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white py-2 px-4 rounded-lg hover:from-red-700 hover:to-rose-700 transition-all shadow-lg shadow-red-500/40 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Eliminando...' : 'Sí, Eliminar'}
-              </button>
-              <button
-                onClick={closeModal}
-                disabled={isLoading}
-                className="flex-1 backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/30 text-white/90 py-2 px-4 rounded-lg hover:bg-emerald-500/20 transition-all font-semibold disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Gestionar Estudiantes */}
-      {modalType === 'estudiantes' && selectedClass && (
-        <GestionarEstudiantesModal
-          claseId={selectedClass.id as string}
-          claseNombre={String(selectedClass.nombre ?? 'Clase')}
-          onClose={closeModal}
-          onSuccess={fetchClases}
-        />
       )}
     </div>
   );

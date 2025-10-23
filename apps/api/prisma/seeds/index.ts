@@ -10,6 +10,7 @@ import { seedLogros } from './logros.seed';
 import { seedSectores } from './sectores.seed';
 import { seedConfiguracionPrecios } from './configuracion-precios.seed';
 import { seedInscripcionesMensuales } from './inscripciones-mensuales.seed';
+import { seedClaseGrupos } from './clase-grupos.seed';
 
 /**
  * Orchestrator para todos los seeds modulares
@@ -43,6 +44,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedAccionesPuntuables(prisma);
     await seedLogros(prisma);
     await seedInscripcionesMensuales(prisma); // Inscripciones de prueba para el tutor
+    await seedClaseGrupos(prisma); // Grupos de clases recurrentes
   }
 
   console.log(`\n🎉 Seed completado exitosamente (${env})!`);
@@ -61,4 +63,5 @@ export {
   seedAccionesPuntuables,
   seedLogros,
   seedInscripcionesMensuales,
+  seedClaseGrupos,
 };

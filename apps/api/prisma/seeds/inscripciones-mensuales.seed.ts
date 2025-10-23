@@ -3,10 +3,10 @@ import { PrismaClient, EstadoPago, TipoDescuento } from '@prisma/client';
 export async function seedInscripcionesMensuales(prisma: PrismaClient) {
   console.log('\n💳 Creando inscripciones mensuales de prueba...');
 
-  // Buscar el tutor de prueba (María González)
+  // Buscar el tutor de prueba (María García)
   const tutor = await prisma.tutor.findFirst({
     where: {
-      email: 'tutor.test@mateatletas.com',
+      email: 'maria.garcia@tutor.com',
     },
     include: {
       estudiantes: true,
