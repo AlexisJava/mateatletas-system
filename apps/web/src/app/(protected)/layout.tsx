@@ -25,7 +25,7 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { checkAuth, token, isAuthenticated } = useAuthStore();
+  const { checkAuth, isAuthenticated } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const hasValidatedRef = useRef(false);
 
@@ -39,26 +39,33 @@ export default function ProtectedLayout({
     const validateAuth = async () => {
       hasValidatedRef.current = true;
 
-      // Verificar si hay token en el store de Zustand (persisted)
-      if (!token) {
-        // No hay token, redirigir a login
-        router.push('/login');
+      // IMPORTANTE: Ya NO usamos token en localStorage (httpOnly cookies)
+      // Verificar si hay usuario autenticado en el store de Zustand (persisted)
+      if (!isAuthenticated) {
+        // No hay usuario autenticado, intentar validar con el backend
+        try {
+          await checkAuth();
+          // Si checkAuth tiene éxito, el usuario está autenticado
+          setIsValidating(false);
+        } catch (error: unknown) {
+          // No hay sesión válida, redirigir a login
+          router.push('/login');
+        }
         return;
       }
 
+      // Ya hay usuario en el store, solo validar con servidor para refrescar
       try {
-        // Intentar validar el token con el servidor
         await checkAuth();
-        // Token válido, continuar
         setIsValidating(false);
       } catch (error: unknown) {
-        // Token inválido o error de red, redirigir a login
+        // Sesión expirada o inválida, redirigir a login
         router.push('/login');
       }
     };
 
     validateAuth();
-  }, [checkAuth, router, token]);
+  }, [checkAuth, router, isAuthenticated]);
 
   /**
    * Maneja el logout del usuario
