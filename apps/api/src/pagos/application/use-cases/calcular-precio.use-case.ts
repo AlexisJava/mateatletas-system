@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
 import { IConfiguracionPreciosRepository } from '../../domain/repositories/configuracion-precios.repository.interface';
 import { IEstudianteRepository, Estudiante } from '../../domain/repositories/estudiante.repository.interface';
@@ -25,6 +26,7 @@ import { TipoDescuento } from '../../domain/types/pagos.types';
  *
  * NO contiene lógica de negocio (eso está en precio.rules.ts)
  */
+@Injectable()
 export class CalcularPrecioUseCase {
   constructor(
     private readonly configuracionRepo: IConfiguracionPreciosRepository,

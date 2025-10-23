@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../../core/database/prisma.service';
 import {
   IEstudianteRepository,
   Estudiante,
@@ -11,12 +11,12 @@ import {
  *
  * Clean Architecture:
  * - Implementa interface del Domain
- * - Usa Prisma directamente (el módulo de estudiantes ya usa Prisma)
+ * - Usa PrismaService (inyección de dependencias NestJS)
  * - Solo expone los métodos necesarios para pagos
  */
 @Injectable()
 export class EstudianteRepositoryAdapter implements IEstudianteRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async obtenerPorId(id: string): Promise<Estudiante | null> {
     const estudiante = await this.prisma.estudiante.findUnique({

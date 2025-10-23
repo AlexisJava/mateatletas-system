@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../core/database/prisma.service';
 import { Decimal } from 'decimal.js';
 import {
   IConfiguracionPreciosRepository,
@@ -12,7 +13,7 @@ import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
  *
  * Responsabilidades:
  * - Convertir entre tipos de Prisma y tipos del Domain
- * - Manejar persistencia con Prisma Client
+ * - Manejar persistencia con PrismaService
  * - Garantizar consistencia de Decimals
  * - Gestionar auditoría automáticamente
  *
@@ -20,8 +21,9 @@ import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
  * - Prisma devuelve Decimal de prisma, debemos convertir a Decimal de decimal.js
  * - Siempre usar transacciones para operaciones que modifican múltiples tablas
  */
+@Injectable()
 export class ConfiguracionPreciosRepository implements IConfiguracionPreciosRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Obtiene la configuración singleton de precios

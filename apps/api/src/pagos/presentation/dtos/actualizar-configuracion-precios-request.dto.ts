@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsBoolean, IsOptional, Min, Max } from 'class-validator';
+import { IsString, IsNumber, IsBoolean, IsOptional, Min, Max, IsInt } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -6,8 +6,10 @@ import { Type } from 'class-transformer';
  * DTO de Request para actualizar configuración de precios
  * Presentation Layer - Validación HTTP con class-validator
  *
- * IMPORTANTE: Los precios vienen como numbers en JSON
- * Se convertirán a Decimal en el Service antes de llamar al Use Case
+ * IMPORTANTE:
+ * - Los precios en ARS DEBEN ser números enteros (sin centavos) para contabilidad
+ * - Solo los porcentajes pueden tener decimales
+ * - Se convertirán a Decimal en el Service antes de llamar al Use Case
  */
 export class ActualizarConfiguracionPreciosRequestDto {
   @ApiProperty({
@@ -15,59 +17,59 @@ export class ActualizarConfiguracionPreciosRequestDto {
     example: 'clt1abc123',
   })
   @IsString()
-  adminId: string;
+  adminId!: string;
 
   @ApiProperty({
-    description: 'Nuevo precio de Club Matemáticas',
+    description: 'Nuevo precio de Club Matemáticas (debe ser entero, sin centavos)',
     example: 52000,
     required: false,
   })
   @IsOptional()
-  @IsNumber()
+  @IsInt({ message: 'El precio de Club Matemáticas debe ser un número entero (sin centavos)' })
   @Min(0)
   @Type(() => Number)
   precioClubMatematicas?: number;
 
   @ApiProperty({
-    description: 'Nuevo precio de Cursos Especializados',
+    description: 'Nuevo precio de Cursos Especializados (debe ser entero, sin centavos)',
     example: 57000,
     required: false,
   })
   @IsOptional()
-  @IsNumber()
+  @IsInt({ message: 'El precio de Cursos Especializados debe ser un número entero (sin centavos)' })
   @Min(0)
   @Type(() => Number)
   precioCursosEspecializados?: number;
 
   @ApiProperty({
-    description: 'Nuevo precio para múltiples actividades',
+    description: 'Nuevo precio para múltiples actividades (debe ser entero, sin centavos)',
     example: 46000,
     required: false,
   })
   @IsOptional()
-  @IsNumber()
+  @IsInt({ message: 'El precio para múltiples actividades debe ser un número entero (sin centavos)' })
   @Min(0)
   @Type(() => Number)
   precioMultipleActividades?: number;
 
   @ApiProperty({
-    description: 'Nuevo precio hermanos básico',
+    description: 'Nuevo precio hermanos básico (debe ser entero, sin centavos)',
     example: 46000,
     required: false,
   })
   @IsOptional()
-  @IsNumber()
+  @IsInt({ message: 'El precio hermanos básico debe ser un número entero (sin centavos)' })
   @Min(0)
   @Type(() => Number)
   precioHermanosBasico?: number;
 
   @ApiProperty({
-    description: 'Nuevo precio hermanos múltiple',
+    description: 'Nuevo precio hermanos múltiple (debe ser entero, sin centavos)',
     example: 40000,
     required: false,
   })
   @IsOptional()
-  @IsNumber()
+  @IsInt({ message: 'El precio hermanos múltiple debe ser un número entero (sin centavos)' })
   @Min(0)
   @Type(() => Number)
   precioHermanosMultiple?: number;

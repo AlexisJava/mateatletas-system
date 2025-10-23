@@ -11,6 +11,12 @@ import {
   Membresia,
   InscripcionCurso,
   EstadoMembresiaResponse,
+  MetricasDashboardResponse,
+  ConfiguracionPrecios,
+  HistorialCambioPrecios,
+  InscripcionMensualConRelaciones,
+  EstudianteConDescuento,
+  ActualizarConfiguracionRequest,
 } from '@/types/pago.types';
 import {
   membresiaSchema,
@@ -103,4 +109,96 @@ export const activarMembresiaManual = async (
     `/pagos/mock/activar-membresia/${membresiaId}`
   );
   return membresiaSchema.parse(response);
+};
+
+/**
+ * =====================================================
+ * MÉTODOS PARA DASHBOARD DE MÉTRICAS
+ * =====================================================
+ */
+
+/**
+ * Obtener métricas del dashboard de pagos
+ * GET /api/pagos/dashboard/metricas
+ *
+ * @param params - Parámetros opcionales para filtrar las métricas
+ * @param params.anio - Año para consultar (opcional, default: año actual)
+ * @param params.mes - Mes para consultar (opcional, default: mes actual)
+ * @param params.tutorId - ID del tutor para filtrar (opcional, si no se envía muestra todas)
+ * @returns Métricas completas del dashboard
+ */
+export const getMetricasDashboard = async (params?: {
+  anio?: number;
+  mes?: number;
+  tutorId?: string;
+}): Promise<MetricasDashboardResponse> => {
+  // Construir query string
+  const queryParams = new URLSearchParams();
+  if (params?.anio) queryParams.append('anio', params.anio.toString());
+  if (params?.mes) queryParams.append('mes', params.mes.toString());
+  if (params?.tutorId) queryParams.append('tutorId', params.tutorId);
+
+  const queryString = queryParams.toString();
+  const url = `/pagos/dashboard/metricas${queryString ? `?${queryString}` : ''}`;
+
+  const response = await axios.get(url);
+  return response as MetricasDashboardResponse;
+};
+
+/**
+ * Obtener configuración de precios actual
+ * GET /api/pagos/configuracion
+ *
+ * @returns Configuración de precios del sistema
+ */
+export const getConfiguracionPrecios = async (): Promise<ConfiguracionPrecios> => {
+  const response = await axios.get('/pagos/configuracion');
+  return response as ConfiguracionPrecios;
+};
+
+/**
+ * Obtener historial de cambios de precios
+ * GET /api/pagos/historial-cambios
+ *
+ * @returns Lista de cambios históricos en precios (últimos 50)
+ */
+export const getHistorialCambios = async (): Promise<HistorialCambioPrecios[]> => {
+  const response = await axios.get('/pagos/historial-cambios');
+  return response as HistorialCambioPrecios[];
+};
+
+/**
+ * Obtener inscripciones pendientes
+ * GET /api/pagos/inscripciones/pendientes
+ *
+ * @returns Lista de inscripciones con estado Pendiente del período actual
+ */
+export const getInscripcionesPendientes = async (): Promise<InscripcionMensualConRelaciones[]> => {
+  const response = await axios.get('/pagos/inscripciones/pendientes');
+  return response as InscripcionMensualConRelaciones[];
+};
+
+/**
+ * Obtener estudiantes con descuentos aplicados
+ * GET /api/pagos/estudiantes-descuentos
+ *
+ * @returns Lista de estudiantes agrupados con sus descuentos del período actual
+ */
+export const getEstudiantesConDescuentos = async (): Promise<EstudianteConDescuento[]> => {
+  const response = await axios.get('/pagos/estudiantes-descuentos');
+  return response as EstudianteConDescuento[];
+};
+
+/**
+ * Actualizar configuración de precios
+ * POST /api/pagos/configuracion/actualizar
+ *
+ * @param data - Datos de la configuración a actualizar
+ * @returns Configuración actualizada
+ */
+export const updateConfiguracionPrecios = async (
+  data: ActualizarConfiguracionRequest
+): Promise<ConfiguracionPrecios> => {
+  const response = await axios.post('/pagos/configuracion/actualizar', data);
+  return response as ConfiguracionPrecios;
 };

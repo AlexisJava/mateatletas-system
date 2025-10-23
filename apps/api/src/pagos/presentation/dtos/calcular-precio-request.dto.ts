@@ -17,7 +17,7 @@ export class CalcularPrecioRequestDto {
   })
   @IsString()
   @IsNotEmpty()
-  tutorId: string;
+  tutorId!: string;
 
   @ApiProperty({
     description: 'IDs de los estudiantes',
@@ -27,7 +27,7 @@ export class CalcularPrecioRequestDto {
   @IsArray()
   @IsString({ each: true })
   @IsNotEmpty()
-  estudiantesIds: string[];
+  estudiantesIds!: string[];
 
   @ApiProperty({
     description: 'Productos por estudiante (key: estudianteId, value: array de productoIds)',
@@ -38,12 +38,12 @@ export class CalcularPrecioRequestDto {
   })
   @IsObject()
   @IsNotEmpty()
-  productosIdsPorEstudiante: Record<string, string[]>;
+  productosIdsPorEstudiante!: Record<string, string[]>;
 
   @ApiProperty({
     description: 'Indica si el grupo familiar tiene certificado AACREA',
     example: false,
   })
   @IsBoolean()
-  tieneAACREA: boolean;
+  tieneAACREA!: boolean;
 }

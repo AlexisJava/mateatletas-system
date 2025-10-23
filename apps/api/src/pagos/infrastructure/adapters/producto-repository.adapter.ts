@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../../core/database/prisma.service';
 import {
   IProductoRepository,
   Producto,
@@ -12,12 +12,12 @@ import { TipoProducto } from '../../domain/types/pagos.types';
  *
  * Clean Architecture:
  * - Implementa interface del Domain
- * - Usa Prisma directamente (el módulo de catálogo ya usa Prisma)
+ * - Usa PrismaService (inyección de dependencias NestJS)
  * - Solo expone los métodos necesarios para pagos
  */
 @Injectable()
 export class ProductoRepositoryAdapter implements IProductoRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async obtenerPorId(id: string): Promise<Producto | null> {
     const producto = await this.prisma.producto.findUnique({

@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
 import { IConfiguracionPreciosRepository } from '../../domain/repositories/configuracion-precios.repository.interface';
 import {
@@ -22,6 +23,7 @@ import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
  * - El repositorio se encarga de guardar el historial automáticamente
  * - Este use case solo orquesta y valida
  */
+@Injectable()
 export class ActualizarConfiguracionPreciosUseCase {
   constructor(
     private readonly configuracionRepo: IConfiguracionPreciosRepository,
@@ -215,27 +217,54 @@ export class ActualizarConfiguracionPreciosUseCase {
 
   /**
    * Construye el objeto de actualización parcial
+   *
+   * IMPORTANTE: Los precios con descuento se calculan AUTOMÁTICAMENTE
+   * cuando se actualiza el precio base (Club Matemáticas)
+   *
+   * Porcentajes de descuento FIJOS:
+   * - Múltiples Actividades: 12% descuento
+   * - Hermanos Básico: 12% descuento
+   * - Hermanos Múltiple: 24% descuento
+   *
+   * CONTABILIDAD: Los precios en ARS deben ser enteros (sin centavos)
+   * Por eso usamos .toDecimalPlaces(0, Decimal.ROUND_HALF_UP) para redondear
    */
   private construirActualizacion(
     input: ActualizarConfiguracionPreciosInputDTO,
   ): Partial<ConfiguracionPrecios> {
-    const actualizacion: Partial<ConfiguracionPrecios> = {};
+    // Usamos un objeto mutable interno y luego lo retornamos con type assertion
+    const actualizacion: Record<string, Decimal | boolean> = {};
 
+    // Precio base Club Matemáticas
     if (input.precioClubMatematicas) {
       actualizacion.precioClubMatematicas = input.precioClubMatematicas;
+
+      // CALCULAR AUTOMÁTICAMENTE los precios con descuento
+      // Múltiples Actividades = Club Mat - 12% (redondeado a entero)
+      actualizacion.precioMultipleActividades = input.precioClubMatematicas
+        .mul(88)  // 100 - 12 = 88
+        .div(100)
+        .toDecimalPlaces(0, Decimal.ROUND_HALF_UP);
+
+      // Hermanos Básico = Club Mat - 12% (redondeado a entero)
+      actualizacion.precioHermanosBasico = input.precioClubMatematicas
+        .mul(88)
+        .div(100)
+        .toDecimalPlaces(0, Decimal.ROUND_HALF_UP);
+
+      // Hermanos Múltiple = Club Mat - 24% (redondeado a entero)
+      actualizacion.precioHermanosMultiple = input.precioClubMatematicas
+        .mul(76)  // 100 - 24 = 76
+        .div(100)
+        .toDecimalPlaces(0, Decimal.ROUND_HALF_UP);
     }
+
+    // Precio Cursos Especializados (independiente)
     if (input.precioCursosEspecializados) {
       actualizacion.precioCursosEspecializados = input.precioCursosEspecializados;
     }
-    if (input.precioMultipleActividades) {
-      actualizacion.precioMultipleActividades = input.precioMultipleActividades;
-    }
-    if (input.precioHermanosBasico) {
-      actualizacion.precioHermanosBasico = input.precioHermanosBasico;
-    }
-    if (input.precioHermanosMultiple) {
-      actualizacion.precioHermanosMultiple = input.precioHermanosMultiple;
-    }
+
+    // Descuento AACREA
     if (input.descuentoAacreaPorcentaje) {
       actualizacion.descuentoAacreaPorcentaje = input.descuentoAacreaPorcentaje;
     }
@@ -243,7 +272,8 @@ export class ActualizarConfiguracionPreciosUseCase {
       actualizacion.descuentoAacreaActivo = input.descuentoAacreaActivo;
     }
 
-    return actualizacion;
+    // Type assertion segura porque sabemos que los valores son correctos
+    return actualizacion as Partial<ConfiguracionPrecios>;
   }
 
   /**
