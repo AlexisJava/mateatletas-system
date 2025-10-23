@@ -1,109 +1,189 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import apiClient from '@/lib/axios';
-import { CreditCard, DollarSign, CheckCircle, Calendar, Clock, Award, XCircle } from 'lucide-react';
-import { pagosHistorialSchema, type PagosHistorial } from '@/lib/schemas/pago.schema';
+import { useState, useEffect } from 'react';
+import { getMisInscripciones } from '@/lib/api/tutor.api';
+import type {
+  MisInscripcionesResponse,
+  InscripcionMensual,
+  EstadoPago
+} from '@/types/tutor-dashboard.types';
+import {
+  CreditCard,
+  DollarSign,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Filter,
+  Calendar,
+  User,
+  TrendingUp,
+  AlertCircle,
+  ChevronDown,
+  Info,
+} from 'lucide-react';
 
+/**
+ * PagosTab - Tab de Pagos del Dashboard del Tutor
+ *
+ * Muestra las inscripciones mensuales (pagos mensuales) del tutor
+ * con filtros por periodo y estado, y resumen financiero.
+ */
 export default function PagosTab() {
-  const [historialData, setHistorialData] = useState<PagosHistorial | null>(null);
+  const [data, setData] = useState<MisInscripcionesResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Filtros
+  const [selectedPeriodo, setSelectedPeriodo] = useState<string>('');
+  const [selectedEstado, setSelectedEstado] = useState<EstadoPago | ''>('');
+
+  // Modal de detalle
+  const [selectedInscripcion, setSelectedInscripcion] = useState<InscripcionMensual | null>(null);
 
   useEffect(() => {
-    loadHistorialPagos();
-  }, []);
+    loadInscripciones();
+  }, [selectedPeriodo, selectedEstado]);
 
-  const loadHistorialPagos = async () => {
+  const loadInscripciones = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/pagos/historial');
-      const parsed = pagosHistorialSchema.parse(response);
-      setHistorialData(parsed);
-    } catch (error: unknown) {
-      // Error loading payment history
-    } finally{
+      setError(null);
+
+      const params: { periodo?: string; estadoPago?: EstadoPago } = {};
+
+      if (selectedPeriodo) {
+        params.periodo = selectedPeriodo;
+      }
+
+      if (selectedEstado) {
+        params.estadoPago = selectedEstado;
+      }
+
+      const response = await getMisInscripciones(params);
+      setData(response);
+    } catch (err) {
+      console.error('Error loading inscripciones:', err);
+      setError('Error al cargar los pagos. Por favor, intentá de nuevo.');
+    } finally {
       setLoading(false);
     }
   };
 
-  const resumen = useMemo(() => {
-    if (!historialData) {
-      return null;
-    }
-
-    const pagosPendientes = historialData.historial.filter((pago) =>
-      ['Pendiente', 'Atrasada'].includes(pago.estado),
-    ).length;
-    const pagosAprobados = historialData.historial.filter((pago) =>
-      ['Activa', 'Activo', 'Pagado', 'Aprobado'].includes(pago.estado),
-    ).length;
-    const pagosRechazados = historialData.historial.filter((pago) =>
-      ['Cancelada', 'Cancelado', 'Rechazado'].includes(pago.estado),
-    ).length;
-
-    return {
-      ...historialData.resumen,
-      pagos_pendientes: pagosPendientes,
-      pagos_aprobados: pagosAprobados,
-      pagos_rechazados: pagosRechazados,
-    };
-  }, [historialData]);
-
-  const formatCurrency = (amount: number) => {
+  /**
+   * Formatea un número como moneda argentina
+   */
+  const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
       currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
-  const getEstadoBadge = (estado: string) => {
-    switch (estado) {
-      case 'Aprobado':
-        return (
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700 flex items-center gap-1">
-            <CheckCircle className="w-3 h-3" />
-            Aprobado
-          </span>
-        );
-      case 'Pendiente':
-        return (
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            Pendiente
-          </span>
-        );
-      case 'Rechazado':
-        return (
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-red-100 text-red-700 flex items-center gap-1">
-            <XCircle className="w-3 h-3" />
-            Rechazado
-          </span>
-        );
-      default:
-        return (
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-700">{estado}</span>
-        );
-    }
+  /**
+   * Formatea el periodo YYYY-MM a formato legible
+   */
+  const formatPeriodo = (periodo: string): string => {
+    const [year, month] = periodo.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1, 1);
+    return date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
   };
 
+  /**
+   * Genera las opciones de periodo (últimos 6 meses)
+   */
+  const getPeriodosOptions = (): string[] => {
+    const options: string[] = [];
+    const today = new Date();
+
+    for (let i = 0; i < 6; i++) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const periodo = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      options.push(periodo);
+    }
+
+    return options;
+  };
+
+  /**
+   * Renderiza el badge de estado con color
+   */
+  const renderEstadoBadge = (estado: EstadoPago) => {
+    const config = {
+      Pagado: {
+        bg: 'bg-green-100',
+        text: 'text-green-700',
+        icon: CheckCircle,
+        label: 'Pagado',
+      },
+      Pendiente: {
+        bg: 'bg-yellow-100',
+        text: 'text-yellow-700',
+        icon: Clock,
+        label: 'Pendiente',
+      },
+      Vencido: {
+        bg: 'bg-red-100',
+        text: 'text-red-700',
+        icon: XCircle,
+        label: 'Vencido',
+      },
+    };
+
+    const { bg, text, icon: Icon, label } = config[estado];
+
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${bg} ${text}`}>
+        <Icon className="w-3.5 h-3.5" />
+        {label}
+      </span>
+    );
+  };
+
+  // Loading state
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg font-semibold text-gray-700">Cargando historial de pagos...</p>
+          <p className="text-lg font-semibold text-gray-700">Cargando pagos...</p>
         </div>
       </div>
     );
   }
 
-  if (!historialData) {
+  // Error state
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-500" />
+          <p className="text-xl font-bold text-gray-900 mb-2">Error</p>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={loadInscripciones}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (!data || data.inscripciones.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center">
           <CreditCard className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <p className="text-xl font-bold text-gray-900 mb-2">Error al cargar pagos</p>
-          <p className="text-gray-600">No se pudo obtener el historial de pagos</p>
+          <p className="text-xl font-bold text-gray-900 mb-2">Sin pagos registrados</p>
+          <p className="text-gray-600">
+            {selectedPeriodo || selectedEstado
+              ? 'No hay pagos con los filtros seleccionados. Intentá cambiar los filtros.'
+              : 'Todavía no hay inscripciones mensuales registradas.'}
+          </p>
         </div>
       </div>
     );
@@ -111,161 +191,277 @@ export default function PagosTab() {
 
   return (
     <div className="h-full flex flex-col gap-4 overflow-hidden">
-      {/* Resumen de Pagos - Cards */}
+      {/* Resumen Financiero - Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 text-white shadow-lg">
+        <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 text-white shadow-lg">
           <DollarSign className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-2xl font-bold">{formatCurrency(historialData.resumen.total_gastado)}</p>
-          <p className="text-sm opacity-90">Total Gastado</p>
+          <p className="text-2xl font-bold">{formatCurrency(data.resumen.totalPendiente)}</p>
+          <p className="text-sm opacity-90">Total Pendiente</p>
         </div>
 
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white shadow-lg">
           <CheckCircle className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-2xl font-bold">{resumen?.pagos_aprobados ?? 0}</p>
-          <p className="text-sm opacity-90">Pagos Aprobados</p>
+          <p className="text-2xl font-bold">{formatCurrency(data.resumen.totalPagado)}</p>
+          <p className="text-sm opacity-90">Total Pagado</p>
         </div>
 
-        <div className="bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl p-4 text-white shadow-lg">
-          <Clock className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-2xl font-bold">{resumen?.pagos_pendientes ?? 0}</p>
-          <p className="text-sm opacity-90">Pagos Pendientes</p>
+        <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 text-white shadow-lg">
+          <Calendar className="w-8 h-8 mb-2 opacity-80" />
+          <p className="text-2xl font-bold">{data.resumen.cantidadInscripciones}</p>
+          <p className="text-sm opacity-90">Inscripciones</p>
         </div>
 
-        <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-4 text-white shadow-lg">
-          <XCircle className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-2xl font-bold">{resumen?.pagos_rechazados ?? 0}</p>
-          <p className="text-sm opacity-90">Pagos Rechazados</p>
+        <div className="bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl p-4 text-white shadow-lg">
+          <User className="w-8 h-8 mb-2 opacity-80" />
+          <p className="text-2xl font-bold">{data.resumen.estudiantesUnicos}</p>
+          <p className="text-sm opacity-90">Estudiantes</p>
         </div>
       </div>
 
-      {/* Servicios Activos */}
-      {(historialData.activos.membresia_actual || historialData.activos.inscripciones_cursos_activas.length > 0) && (
-        <div className="bg-white rounded-xl shadow-lg border-2 border-gray-300 p-4">
-          <h3 className="text-lg font-bold text-gray-900 mb-3">Servicios Activos</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {/* Membresía Activa */}
-            {historialData.activos.membresia_actual && (
-              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-4 border-2 border-indigo-200">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h4 className="font-bold text-indigo-900">
-                      {historialData.activos.membresia_actual.producto?.nombre}
-                    </h4>
-                    <p className="text-sm text-indigo-600">Membresía Activa</p>
+      {/* Filtros */}
+      <div className="bg-white rounded-xl shadow-lg border-2 border-gray-300 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Filter className="w-5 h-5 text-gray-600" />
+          <h3 className="text-lg font-bold text-gray-900">Filtros</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Filtro por Periodo */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Periodo
+            </label>
+            <select
+              value={selectedPeriodo}
+              onChange={(e) => setSelectedPeriodo(e.target.value)}
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors"
+            >
+              <option value="">Todos los periodos</option>
+              {getPeriodosOptions().map((periodo) => (
+                <option key={periodo} value={periodo}>
+                  {formatPeriodo(periodo)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtro por Estado */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Estado
+            </label>
+            <select
+              value={selectedEstado}
+              onChange={(e) => setSelectedEstado(e.target.value as EstadoPago | '')}
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors"
+            >
+              <option value="">Todos los estados</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Pagado">Pagado</option>
+              <option value="Vencido">Vencido</option>
+            </select>
+          </div>
+
+          {/* Botón Limpiar Filtros */}
+          <div className="flex items-end">
+            <button
+              onClick={() => {
+                setSelectedPeriodo('');
+                setSelectedEstado('');
+              }}
+              disabled={!selectedPeriodo && !selectedEstado}
+              className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+            >
+              Limpiar Filtros
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Lista de Inscripciones - Scrollable */}
+      <div className="flex-1 bg-white rounded-xl shadow-lg border-2 border-gray-300 p-4 overflow-hidden flex flex-col">
+        <h3 className="text-lg font-bold text-gray-900 mb-3">
+          Inscripciones Mensuales ({data.inscripciones.length})
+        </h3>
+
+        <div className="flex-1 overflow-y-auto space-y-3">
+          {data.inscripciones.map((inscripcion) => (
+            <div
+              key={inscripcion.id}
+              className="bg-gray-50 rounded-xl p-4 border-2 border-gray-200 hover:border-indigo-300 transition-all"
+            >
+              <div className="flex items-start justify-between gap-4">
+                {/* Info de la Inscripción */}
+                <div className="flex-1">
+                  <div className="flex items-start gap-3 mb-2">
+                    <div className="bg-indigo-100 rounded-lg p-2 flex-shrink-0">
+                      <CreditCard className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-gray-900">{inscripcion.productoNombre}</h4>
+                      <p className="text-sm text-indigo-600 flex items-center gap-1.5 mt-1">
+                        <User className="w-4 h-4" />
+                        {inscripcion.estudianteNombre}
+                      </p>
+                      <p className="text-sm text-gray-600 flex items-center gap-1.5 mt-1">
+                        <Calendar className="w-4 h-4" />
+                        {formatPeriodo(inscripcion.periodo)}
+                      </p>
+                    </div>
                   </div>
-                  <Award className="w-6 h-6 text-indigo-600" />
+
+                  {/* Descuentos Aplicados */}
+                  {inscripcion.descuentosAplicados && inscripcion.descuentosAplicados.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {inscripcion.descuentosAplicados.map((descuento, idx) => (
+                        <span
+                          key={idx}
+                          className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium flex items-center gap-1"
+                        >
+                          <TrendingUp className="w-3 h-3" />
+                          {descuento.tipo} -{descuento.porcentaje}%
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Botón Ver Detalle */}
+                  <button
+                    onClick={() => setSelectedInscripcion(inscripcion)}
+                    className="mt-2 text-indigo-600 hover:text-indigo-700 text-sm font-semibold flex items-center gap-1"
+                  >
+                    <Info className="w-4 h-4" />
+                    Ver detalle completo
+                  </button>
                 </div>
-                <div className="text-sm text-gray-700">
-                  <p>
-                    <strong>Estado:</strong> {historialData.activos.membresia_actual.estado}
-                  </p>
-                  {historialData.activos.membresia_actual.fecha_inicio && (
-                    <p>
-                      <strong>Inicio:</strong>{' '}
-                      {new Date(historialData.activos.membresia_actual.fecha_inicio).toLocaleDateString('es-AR')}
+
+                {/* Precio y Estado */}
+                <div className="text-right flex-shrink-0">
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(inscripcion.precioFinal)}</p>
+                  <div className="mt-2">{renderEstadoBadge(inscripcion.estadoPago)}</div>
+                  {inscripcion.fechaPago && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Pagado el {new Date(inscripcion.fechaPago).toLocaleDateString('es-AR')}
                     </p>
                   )}
                 </div>
               </div>
-            )}
-
-            {/* Cursos Activos */}
-            {historialData.activos.inscripciones_cursos_activas.map((inscripcion) => (
-              <div
-                key={inscripcion.id}
-                className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border-2 border-amber-200"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h4 className="font-bold text-amber-900">{inscripcion.producto?.nombre}</h4>
-                    <p className="text-sm text-amber-600">
-                      {inscripcion.estudiante?.nombre} {inscripcion.estudiante?.apellido}
-                    </p>
-                  </div>
-                  <Calendar className="w-6 h-6 text-amber-600" />
-                </div>
-                <div className="text-sm text-gray-700">
-                  <p>
-                    <strong>Estado:</strong> {inscripcion.estado}
-                  </p>
-                  <p>
-                    <strong>Precio:</strong> {formatCurrency(inscripcion.producto?.precio ?? 0)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Historial de Pagos - Scrollable List */}
-      <div className="flex-1 bg-white rounded-xl shadow-lg border-2 border-gray-300 p-4 overflow-hidden flex flex-col">
-        <h3 className="text-lg font-bold text-gray-900 mb-3">Historial de Pagos ({historialData.historial.length})</h3>
-
-        <div className="flex-1 overflow-y-auto space-y-2">
-          {historialData.historial.length > 0 ? (
-            historialData.historial.map((pago) => {
-              const fecha = new Date(pago.fecha);
-              return (
-                <div
-                  key={pago.id}
-                  className="bg-gray-50 rounded-xl p-4 border-2 border-gray-200 hover:border-indigo-300 transition-all"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    {/* Info del Pago */}
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="bg-indigo-100 rounded-lg p-2 flex-shrink-0">
-                        <CreditCard className="w-5 h-5 text-indigo-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-gray-900">{pago.producto.nombre}</h4>
-                        <p className="text-sm text-gray-600">{pago.producto.tipo}</p>
-                        {pago.producto.descripcion && (
-                          <p className="text-xs text-gray-500 mt-1">{pago.producto.descripcion}</p>
-                        )}
-
-                        {/* Info adicional según tipo */}
-                        {pago.estudiante && (
-                          <p className="text-sm text-indigo-600 mt-1">
-                            Para: {pago.estudiante.nombre} {pago.estudiante.apellido}
-                          </p>
-                        )}
-                        <p className="text-xs uppercase tracking-wide text-gray-500 mt-1 font-semibold">
-                          {pago.tipo === 'membresia' ? 'Membresía' : 'Curso'}
-                        </p>
-
-                        <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
-                          <Clock className="w-4 h-4" />
-                          <span>
-                            {fecha.toLocaleDateString('es-AR', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Monto y Estado */}
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-2xl font-bold text-gray-900">{formatCurrency(pago.monto)}</p>
-                      <div className="mt-2">{getEstadoBadge(pago.estado)}</div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center py-8">
-                <CreditCard className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                <p className="text-gray-600">No hay pagos registrados</p>
-              </div>
             </div>
-          )}
+          ))}
         </div>
       </div>
+
+      {/* Modal de Detalle */}
+      {selectedInscripcion && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 z-50"
+            onClick={() => setSelectedInscripcion(null)}
+          />
+
+          {/* Modal */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white p-6 rounded-t-2xl">
+                <h2 className="text-2xl font-bold">Detalle de Inscripción</h2>
+                <p className="text-indigo-100 text-sm mt-1">
+                  {formatPeriodo(selectedInscripcion.periodo)}
+                </p>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-4">
+                {/* Info General */}
+                <div className="space-y-3">
+                  <div className="flex justify-between py-2 border-b border-gray-200">
+                    <span className="font-semibold text-gray-700">Producto:</span>
+                    <span className="text-gray-900">{selectedInscripcion.productoNombre}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-gray-200">
+                    <span className="font-semibold text-gray-700">Estudiante:</span>
+                    <span className="text-gray-900">{selectedInscripcion.estudianteNombre}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-gray-200">
+                    <span className="font-semibold text-gray-700">Periodo:</span>
+                    <span className="text-gray-900">{formatPeriodo(selectedInscripcion.periodo)}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-gray-200">
+                    <span className="font-semibold text-gray-700">Estado:</span>
+                    {renderEstadoBadge(selectedInscripcion.estadoPago)}
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-gray-200">
+                    <span className="font-semibold text-gray-700">Precio Final:</span>
+                    <span className="text-2xl font-bold text-indigo-600">
+                      {formatCurrency(selectedInscripcion.precioFinal)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Descuentos Aplicados */}
+                {selectedInscripcion.descuentosAplicados && selectedInscripcion.descuentosAplicados.length > 0 && (
+                  <div className="bg-green-50 rounded-xl p-4 border-2 border-green-200">
+                    <h3 className="font-bold text-green-900 mb-3 flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5" />
+                      Descuentos Aplicados
+                    </h3>
+                    <div className="space-y-2">
+                      {selectedInscripcion.descuentosAplicados.map((descuento, idx) => (
+                        <div key={idx} className="flex justify-between items-center">
+                          <span className="text-sm text-gray-700">{descuento.tipo}:</span>
+                          <span className="font-semibold text-green-700">
+                            -{descuento.porcentaje}% ({formatCurrency(descuento.monto)})
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Fechas */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <h3 className="font-bold text-gray-900 mb-3">Fechas</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Creada:</span>
+                      <span className="text-gray-900">
+                        {new Date(selectedInscripcion.createdAt).toLocaleDateString('es-AR')}
+                      </span>
+                    </div>
+                    {selectedInscripcion.fechaVencimiento && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Vencimiento:</span>
+                        <span className="text-gray-900">
+                          {new Date(selectedInscripcion.fechaVencimiento).toLocaleDateString('es-AR')}
+                        </span>
+                      </div>
+                    )}
+                    {selectedInscripcion.fechaPago && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Pagada:</span>
+                        <span className="text-green-700 font-semibold">
+                          {new Date(selectedInscripcion.fechaPago).toLocaleDateString('es-AR')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 bg-gray-50 rounded-b-2xl">
+                <button
+                  onClick={() => setSelectedInscripcion(null)}
+                  className="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
