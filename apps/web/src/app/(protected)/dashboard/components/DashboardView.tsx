@@ -6,23 +6,21 @@ import { useAuthStore } from '@/store/auth.store';
 import { AuthUser } from '@/lib/api/auth.api';
 import { Estudiante } from '@/types/estudiante';
 import { Clase } from '@/types/clases.types';
-import { Membresia } from '@/types/pago.types';
 import { DashboardResumenResponse } from '@/types/tutor-dashboard.types';
 import {
   Users,
   Calendar,
-  Clock,
   Home,
   DollarSign,
   HelpCircle,
   LogOut,
   ChevronDown,
   AlertTriangle,
-  CheckCircle2,
-  PlayCircle,
-  CreditCard,
   TrendingUp,
+  Clock,
+  CheckCircle2,
   Bell,
+  ChevronRight,
 } from 'lucide-react';
 import MisHijosTab from './MisHijosTab';
 import CalendarioTab from './CalendarioTab';
@@ -33,17 +31,25 @@ interface DashboardViewProps {
   user: AuthUser;
   estudiantes: Estudiante[];
   clases: Clase[];
-  membresia: Membresia | null;
   dashboardData: DashboardResumenResponse | null;
 }
 
 type TabType = 'dashboard' | 'hijos' | 'calendario' | 'pagos' | 'ayuda';
 
+/**
+ * DashboardView - Vista principal del dashboard del tutor
+ *
+ * Muestra 5 tabs:
+ * 1. Dashboard (resumen)
+ * 2. Mis Hijos
+ * 3. Calendario
+ * 4. Pagos
+ * 5. Ayuda
+ */
 export default function DashboardView({
   user,
   estudiantes,
   clases,
-  membresia,
   dashboardData,
 }: DashboardViewProps) {
   const router = useRouter();
@@ -57,97 +63,93 @@ export default function DashboardView({
   };
 
   const tabs = [
-    { id: 'dashboard', label: 'Inicio', icon: Home },
+    { id: 'dashboard', label: 'Resumen', icon: Home },
     { id: 'hijos', label: 'Mis Hijos', icon: Users },
     { id: 'calendario', label: 'Calendario', icon: Calendar },
     { id: 'pagos', label: 'Pagos', icon: DollarSign },
     { id: 'ayuda', label: 'Ayuda', icon: HelpCircle },
   ];
 
-  // Calcular edad para cada hijo
-  const calcularEdad = (fechaNacimiento: Date) => {
-    const hoy = new Date();
-    const nacimiento = new Date(fechaNacimiento);
-    let edad = hoy.getFullYear() - nacimiento.getFullYear();
-    const mes = hoy.getMonth() - nacimiento.getMonth();
-    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-      edad--;
-    }
-    return edad;
+  /**
+   * Formatea un número como moneda argentina
+   */
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
-  // Obtener fecha formateada
-  const fechaHoy = new Date().toLocaleDateString('es-AR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-
-  // Alertas críticas (solo alta prioridad)
-  const alertasCriticas = dashboardData?.alertas.filter(a => a.prioridad === 'alta') || [];
-
   return (
-    <div className="h-screen flex flex-col bg-gray-950 overflow-hidden">
-      {/* Header oscuro premium */}
-      <header className="bg-gray-900 border-b border-gray-800 shadow-2xl flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <div className="h-screen flex flex-col bg-slate-100 overflow-hidden">
+      {/* Header */}
+      <header className="bg-white border-b-2 border-gray-300 shadow-md flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
-            {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-md"
+                style={{
+                  background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
+                }}
+              >
                 🎓
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">Mateatletas</h1>
-                <p className="text-xs text-gray-400">Portal de Padres</p>
+                <h1 className="text-xl font-bold text-gray-900">Mateatletas</h1>
+                <p className="text-xs text-gray-500">Panel de Padres</p>
               </div>
             </div>
+            <div className="flex items-center gap-3 relative">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-semibold text-gray-900">
+                  {user?.nombre} {user?.apellido}
+                </p>
+                <p className="text-xs text-gray-500">Tutor</p>
+              </div>
 
-            {/* User Menu */}
-            <div className="flex items-center gap-4 relative">
-              {/* Notificaciones */}
-              {alertasCriticas.length > 0 && (
-                <div className="relative">
-                  <Bell className="w-6 h-6 text-gray-400" />
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                    {alertasCriticas.length}
-                  </span>
-                </div>
-              )}
-
+              {/* User Menu Button */}
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-3 bg-gray-800 hover:bg-gray-750 rounded-xl px-4 py-2 transition-colors"
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
               >
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-semibold text-white">{user?.nombre} {user?.apellido}</p>
-                  <p className="text-xs text-gray-400">Padre/Madre</p>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-md">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-md"
+                  style={{
+                    background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
+                  }}
+                >
                   {user?.nombre?.[0]?.toUpperCase() || 'T'}
                 </div>
-                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`}
+                />
               </button>
 
               {/* Dropdown Menu */}
               {showUserMenu && (
                 <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setShowUserMenu(false)}
-                  />
-                  <div className="absolute top-full right-0 mt-2 w-64 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 z-20 overflow-hidden">
-                    <div className="p-4 border-b border-gray-700 bg-gray-850">
-                      <p className="text-sm font-bold text-white">
+                  {/* Backdrop */}
+                  <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
+
+                  {/* Menu */}
+                  <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border-2 border-gray-200 z-20 overflow-hidden">
+                    {/* User Info */}
+                    <div className="p-4 border-b-2 border-gray-200 bg-gradient-to-br from-indigo-50 to-blue-50">
+                      <p className="text-sm font-bold text-gray-900">
                         {user?.nombre} {user?.apellido}
                       </p>
-                      <p className="text-xs text-gray-400">{user?.email}</p>
+                      <p className="text-xs text-gray-600">{user?.email}</p>
+                      <p className="text-xs text-indigo-600 font-semibold mt-1">Tutor</p>
                     </div>
+
+                    {/* Menu Items */}
                     <div className="p-2">
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-red-400 hover:bg-gray-750 rounded-lg transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <LogOut className="w-5 h-5" />
                         <span className="font-semibold">Cerrar Sesión</span>
@@ -160,17 +162,17 @@ export default function DashboardView({
           </div>
 
           {/* Navigation Tabs */}
-          <nav className="flex gap-2 -mb-px overflow-x-auto">
+          <nav className="flex gap-1 -mb-px overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as TabType)}
-                  className={`flex items-center gap-2 px-5 py-2.5 font-semibold text-sm border-b-2 transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-4 py-3 font-semibold text-sm border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'border-indigo-500 text-white bg-gray-850'
-                      : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-850'
+                      ? 'border-indigo-600 text-indigo-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -183,246 +185,252 @@ export default function DashboardView({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-hidden min-h-0">
-        <div className="h-full max-w-7xl mx-auto px-6 lg:px-8 py-6">
+      <main className="flex-1 overflow-hidden">
+        <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {/* TAB: Dashboard (Resumen) */}
           {activeTab === 'dashboard' && (
-            <div className="h-full grid grid-rows-[auto_1fr] gap-4">
+            <div className="h-full flex flex-col gap-4 overflow-hidden">
               {/* Greeting */}
-              <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl p-6 shadow-xl">
-                <h2 className="text-3xl font-bold text-white">
-                  ¡Hola, {user?.nombre}! 👋
-                </h2>
-                <p className="text-indigo-100 text-base capitalize">{fechaHoy}</p>
+              <div
+                className="rounded-xl p-4 shadow-lg border-2 border-indigo-200"
+                style={{
+                  background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
+                }}
+              >
+                <h2 className="text-2xl font-bold text-white">¡Hola, {user?.nombre}! 👋</h2>
+                <p className="text-indigo-100">Bienvenido de vuelta. Aquí está el resumen de hoy.</p>
               </div>
 
-              {/* Grid principal: 2 columnas */}
-              <div className="grid grid-cols-3 gap-4 min-h-0">
-                {/* Columna izquierda: 2/3 del ancho */}
-                <div className="col-span-2 grid grid-rows-2 gap-4 min-h-0">
-                  {/* Alertas CRÍTICAS O Clases HOY */}
-                  {alertasCriticas.length > 0 ? (
-                    <div className="bg-red-900/20 border-2 border-red-500/50 rounded-xl p-5 shadow-xl">
-                      <div className="flex items-start gap-4">
-                        <AlertTriangle className="w-8 h-8 text-red-400 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-xl font-bold text-red-300 mb-3">
-                            ⚠️ Atención Urgente
-                          </h3>
-                          <div className="space-y-3">
-                            {alertasCriticas.slice(0, 2).map((alerta) => (
-                              <div
-                                key={alerta.id}
-                                className="bg-gray-900/50 rounded-lg p-4 border border-red-500/30 flex items-center justify-between gap-4"
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-bold text-white text-lg mb-1">{alerta.titulo}</p>
-                                  <p className="text-gray-300">{alerta.mensaje}</p>
-                                </div>
-                                {alerta.accion && (
-                                  <button
-                                    onClick={() => {
-                                      if (alerta.accion?.url.startsWith('/dashboard?tab=')) {
-                                        const tab = alerta.accion.url.split('tab=')[1].split('&')[0];
-                                        setActiveTab(tab as TabType);
-                                      }
-                                    }}
-                                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors whitespace-nowrap shadow-lg"
-                                  >
-                                    {alerta.accion.label}
-                                  </button>
-                                )}
-                              </div>
-                            ))}
+              {/* Métricas Principales */}
+              {dashboardData && (
+                <div className="bg-white rounded-xl p-4 shadow-lg border-2 border-gray-300">
+                  <h2 className="text-base font-bold text-gray-900 mb-3">Métricas del Mes</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {/* Total Hijos */}
+                    <div
+                      className="rounded-xl p-5 shadow-md border-2 border-indigo-200"
+                      style={{
+                        background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
+                      }}
+                    >
+                      <div className="flex items-center justify-between text-white">
+                        <div>
+                          <p className="text-sm font-medium opacity-90">Mis Hijos</p>
+                          <p className="text-3xl font-bold">{dashboardData.metricas.totalHijos}</p>
+                        </div>
+                        <Users className="w-10 h-10 opacity-80" />
+                      </div>
+                    </div>
+
+                    {/* Clases del Mes */}
+                    <div className="bg-white rounded-xl p-5 shadow-md border-2 border-gray-200 border-l-4 border-l-green-500">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Clases del Mes</p>
+                          <p className="text-3xl font-bold text-gray-900">
+                            {dashboardData.metricas.clasesDelMes}
+                          </p>
+                        </div>
+                        <Calendar className="w-10 h-10 text-gray-300" />
+                      </div>
+                    </div>
+
+                    {/* Total Pagado Año */}
+                    <div className="bg-white rounded-xl p-5 shadow-md border-2 border-gray-200 border-l-4 border-l-amber-500">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Pagado (año)</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {formatCurrency(dashboardData.metricas.totalPagadoAnio)}
+                          </p>
+                        </div>
+                        <DollarSign className="w-10 h-10 text-gray-300" />
+                      </div>
+                    </div>
+
+                    {/* Asistencia Promedio */}
+                    <div
+                      className="rounded-xl p-5 shadow-md border-2 border-green-200"
+                      style={{
+                        background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                      }}
+                    >
+                      <div className="flex items-center justify-between text-white">
+                        <div>
+                          <p className="text-sm font-medium opacity-90">Asistencia</p>
+                          <p className="text-3xl font-bold">
+                            {dashboardData.metricas.asistenciaPromedio}%
+                          </p>
+                        </div>
+                        <TrendingUp className="w-10 h-10 opacity-80" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Alertas */}
+              {dashboardData && dashboardData.alertas.length > 0 && (
+                <div className="bg-white rounded-xl p-4 shadow-lg border-2 border-gray-300">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Bell className="w-5 h-5 text-amber-600" />
+                    <h2 className="text-lg font-bold text-gray-900">Alertas</h2>
+                  </div>
+                  <div className="space-y-2">
+                    {dashboardData.alertas.slice(0, 3).map((alerta) => {
+                      const prioridadStyles = {
+                        alta: 'bg-red-50 border-red-300 text-red-900',
+                        media: 'bg-yellow-50 border-yellow-300 text-yellow-900',
+                        baja: 'bg-blue-50 border-blue-300 text-blue-900',
+                      };
+
+                      const iconConfig = {
+                        alta: AlertTriangle,
+                        media: Clock,
+                        baja: Bell,
+                      };
+
+                      const Icon = iconConfig[alerta.prioridad];
+
+                      return (
+                        <div
+                          key={alerta.id}
+                          className={`p-3 rounded-lg border-2 ${prioridadStyles[alerta.prioridad]}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                              <p className="font-semibold">{alerta.titulo}</p>
+                              <p className="text-sm opacity-90">{alerta.mensaje}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  ) : dashboardData && dashboardData.clasesHoy.length > 0 ? (
-                    <div className="bg-gray-900 rounded-xl p-5 shadow-xl border border-gray-800">
-                      <div className="flex items-center gap-3 mb-4">
-                        <Calendar className="w-6 h-6 text-indigo-400" />
-                        <h3 className="text-xl font-bold text-white">
-                          📅 Clases de Hoy
-                        </h3>
-                      </div>
-                      <div className="space-y-3">
-                        {dashboardData.clasesHoy.slice(0, 2).map((clase) => (
-                          <div
-                            key={clase.id}
-                            className="bg-gray-850 rounded-lg p-4 border border-gray-700 flex items-center justify-between gap-4"
-                          >
-                            <div className="flex items-center gap-4 flex-1 min-w-0">
-                              <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg p-4 flex flex-col items-center justify-center min-w-[70px] shadow-lg">
-                                <Clock className="w-5 h-5 text-white mb-1" />
-                                <span className="font-bold text-white text-base">{clase.hora}</span>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-bold text-white text-lg mb-1 truncate">{clase.nombreRuta}</h4>
-                                <p className="text-gray-400 truncate">
-                                  👤 {clase.estudianteNombre}
-                                </p>
-                              </div>
-                            </div>
-                            <button
-                              disabled={!clase.puedeUnirse}
-                              className={`flex items-center gap-2 font-bold py-3 px-6 rounded-lg shadow-lg transition-all text-base ${
-                                clase.puedeUnirse
-                                  ? 'bg-green-600 hover:bg-green-700 text-white'
-                                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                              }`}
-                            >
-                              <PlayCircle className="w-5 h-5" />
-                              {clase.puedeUnirse ? 'UNIRSE' : 'Pronto'}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-gray-900 rounded-xl p-8 shadow-xl border border-gray-800 flex items-center justify-center">
-                      <div className="text-center">
-                        <CheckCircle2 className="w-14 h-14 text-green-400 mx-auto mb-3" />
-                        <h3 className="text-2xl font-bold text-white mb-2">✅ Todo al día</h3>
-                        <p className="text-gray-400 text-lg">Sin acciones pendientes</p>
-                      </div>
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
-                  {/* Pagos Pendientes O Hijos */}
-                  {dashboardData && dashboardData.pagosPendientes.length > 0 ? (
-                    <div className="bg-gray-900 rounded-xl p-5 shadow-xl border border-gray-800 overflow-hidden">
-                      <div className="flex items-center gap-3 mb-4">
-                        <CreditCard className="w-6 h-6 text-amber-400" />
-                        <h3 className="text-xl font-bold text-white">
-                          💰 Pagos Pendientes
-                        </h3>
-                      </div>
-                      <div className="space-y-3 max-h-[calc(100%-3rem)] overflow-y-auto pr-2">
-                        {dashboardData.pagosPendientes.slice(0, 4).map((pago) => (
-                          <div
-                            key={pago.id}
-                            className={`rounded-lg p-4 border-2 flex items-center justify-between gap-4 ${
-                              pago.estaVencido
-                                ? 'bg-red-900/20 border-red-500/50'
-                                : 'bg-gray-850 border-gray-700'
-                            }`}
-                          >
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                {pago.estaVencido ? (
-                                  <AlertTriangle className="w-6 h-6 text-red-400" />
-                                ) : (
-                                  <Clock className="w-6 h-6 text-amber-400" />
-                                )}
-                                <h4 className="font-bold text-white text-xl">
-                                  ${pago.monto.toLocaleString('es-AR')}
-                                </h4>
-                              </div>
-                              <p className="text-gray-400 mb-0.5 truncate">{pago.concepto}</p>
-                              <p className={`text-sm font-semibold ${
-                                pago.estaVencido ? 'text-red-400' : 'text-amber-400'
-                              }`}>
-                                {pago.estaVencido
-                                  ? `⚠️ Vencido hace ${Math.abs(pago.diasParaVencer)} días`
-                                  : `Vence en ${pago.diasParaVencer} ${pago.diasParaVencer === 1 ? 'día' : 'días'}`
-                                }
+              {/* Layout de 2 columnas - Clases de Hoy y Pagos Pendientes */}
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-hidden">
+                {/* Clases de Hoy */}
+                <div className="bg-white rounded-xl p-4 shadow-lg border-2 border-gray-300 overflow-y-auto">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg font-bold text-gray-900">Clases de Hoy</h2>
+                    <button
+                      onClick={() => setActiveTab('calendario')}
+                      className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm flex items-center gap-1"
+                    >
+                      Ver calendario
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {dashboardData && dashboardData.clasesHoy.length > 0 ? (
+                    <div className="space-y-3">
+                      {dashboardData.clasesHoy.map((clase) => (
+                        <div
+                          key={clase.id}
+                          className="bg-gray-50 rounded-xl p-4 shadow-md hover:shadow-lg transition-all border-2 border-gray-200"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-14 h-14 rounded-lg flex flex-col items-center justify-center text-white shadow-md flex-shrink-0"
+                              style={{
+                                background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
+                              }}
+                            >
+                              <Clock className="w-4 h-4 mb-1" />
+                              <span className="font-bold text-sm">{clase.hora}</span>
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-gray-900">{clase.nombreRuta}</h3>
+                              <p className="text-sm text-gray-600">
+                                {clase.estudianteNombre} • {clase.docenteNombre}
                               </p>
                             </div>
-                            <button
-                              onClick={() => setActiveTab('pagos')}
-                              className={`font-bold py-3 px-6 rounded-lg shadow-lg transition-colors whitespace-nowrap ${
-                                pago.estaVencido
-                                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                                  : 'bg-amber-600 hover:bg-amber-700 text-white'
-                              }`}
-                            >
-                              PAGAR
-                            </button>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
                   ) : (
-                    <div className="bg-gray-900 rounded-xl p-5 shadow-xl border border-gray-800 overflow-hidden">
-                      <div className="flex items-center gap-3 mb-4">
-                        <Users className="w-6 h-6 text-purple-400" />
-                        <h3 className="text-xl font-bold text-white">
-                          👨‍👩‍👧 Mis Hijos ({estudiantes.length})
-                        </h3>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3 max-h-[calc(100%-3rem)] overflow-y-auto pr-2">
-                        {estudiantes.map((hijo) => {
-                          const edad = calcularEdad(new Date(hijo.fecha_nacimiento));
-                          const initials = `${hijo.nombre.charAt(0)}${hijo.apellido.charAt(0)}`.toUpperCase();
-                          return (
-                            <div
-                              key={hijo.id}
-                              className="bg-gray-850 rounded-lg p-4 border border-gray-700 hover:border-purple-500/50 transition-colors"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-xl shadow-lg flex-shrink-0">
-                                  {initials}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-bold text-white truncate">
-                                    {hijo.nombre}
-                                  </h4>
-                                  <p className="text-gray-400 text-sm">{edad} años</p>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+                    <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                      <Calendar className="w-12 h-12 mb-2 text-gray-300" />
+                      <p>No hay clases programadas para hoy</p>
                     </div>
                   )}
                 </div>
 
-                {/* Columna derecha: Estadísticas */}
-                <div className="grid grid-rows-3 gap-4 min-h-0">
-                  <div className="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl p-6 shadow-xl flex flex-col justify-between">
-                    <div>
-                      <p className="text-blue-100 font-medium mb-2">Clases este mes</p>
-                      <p className="text-white text-5xl font-bold">
-                        {dashboardData?.metricas.clasesDelMes || 0}
-                      </p>
-                    </div>
-                    <Calendar className="w-12 h-12 text-white/80 self-end" />
+                {/* Pagos Pendientes */}
+                <div className="bg-white rounded-xl p-4 shadow-lg border-2 border-gray-300 overflow-y-auto">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg font-bold text-gray-900">Pagos Pendientes</h2>
+                    <button
+                      onClick={() => setActiveTab('pagos')}
+                      className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm flex items-center gap-1"
+                    >
+                      Ver todos
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
                   </div>
 
-                  <div className="bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl p-6 shadow-xl flex flex-col justify-between">
-                    <div>
-                      <p className="text-green-100 font-medium mb-2">Pagado {new Date().getFullYear()}</p>
-                      <p className="text-white text-3xl font-bold">
-                        ${(dashboardData?.metricas.totalPagadoAnio || 0).toLocaleString('es-AR', {notation: 'compact'})}
-                      </p>
+                  {dashboardData && dashboardData.pagosPendientes.length > 0 ? (
+                    <div className="space-y-3">
+                      {dashboardData.pagosPendientes.slice(0, 5).map((pago) => (
+                        <div
+                          key={pago.id}
+                          className={`bg-gray-50 rounded-xl p-4 shadow-md border-2 ${
+                            pago.estaVencido
+                              ? 'border-red-300 bg-red-50'
+                              : 'border-gray-200'
+                          } hover:shadow-lg transition-all`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                              <h3 className="font-bold text-gray-900">{pago.concepto}</h3>
+                              <p className="text-sm text-indigo-600">{pago.estudianteNombre}</p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {pago.estaVencido
+                                  ? `Vencido hace ${Math.abs(pago.diasParaVencer)} ${Math.abs(pago.diasParaVencer) === 1 ? 'día' : 'días'}`
+                                  : `Vence en ${pago.diasParaVencer} ${pago.diasParaVencer === 1 ? 'día' : 'días'}`}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-gray-900">
+                                {formatCurrency(pago.monto)}
+                              </p>
+                              {pago.estaVencido && (
+                                <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-semibold">
+                                  Vencido
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <DollarSign className="w-12 h-12 text-white/80 self-end" />
-                  </div>
-
-                  <div className="bg-gradient-to-br from-amber-600 to-orange-600 rounded-xl p-6 shadow-xl flex flex-col justify-between">
-                    <div>
-                      <p className="text-amber-100 font-medium mb-2">Asistencia</p>
-                      <div className="flex items-end gap-2">
-                        <p className="text-white text-5xl font-bold">
-                          {dashboardData?.metricas.asistenciaPromedio || 0}%
-                        </p>
-                        {(dashboardData?.metricas.asistenciaPromedio || 0) >= 80 && (
-                          <CheckCircle2 className="w-8 h-8 text-white mb-2" />
-                        )}
-                      </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                      <CheckCircle2 className="w-12 h-12 mb-2 text-green-400" />
+                      <p className="font-semibold text-green-600">¡Todo al día!</p>
+                      <p className="text-sm">No hay pagos pendientes</p>
                     </div>
-                    <TrendingUp className="w-12 h-12 text-white/80 self-end" />
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
 
-          {/* Otros Tabs */}
+          {/* TAB: Mis Hijos */}
           {activeTab === 'hijos' && <MisHijosTab estudiantes={estudiantes} />}
+
+          {/* TAB: Calendario */}
           {activeTab === 'calendario' && <CalendarioTab />}
+
+          {/* TAB: Pagos */}
           {activeTab === 'pagos' && <PagosTab />}
+
+          {/* TAB: Ayuda */}
           {activeTab === 'ayuda' && <AyudaTab />}
         </div>
       </main>
