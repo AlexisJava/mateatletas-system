@@ -61,17 +61,34 @@ async function bootstrap() {
   // Global prefix for all routes
   app.setGlobalPrefix('api');
 
-  // Enable CORS with secure configuration
+  // Enable CORS with environment-aware configuration
+  const isProduction = process.env.NODE_ENV === 'production';
+  const allowedOrigins = isProduction
+    ? [process.env.FRONTEND_URL].filter(Boolean) // Solo dominios específicos en producción
+    : [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        process.env.FRONTEND_URL,
+      ].filter(Boolean);
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000', // Frontend development
-      process.env.FRONTEND_URL || 'http://localhost:3000',
-    ].filter(Boolean), // Remove undefined values
+    origin: (origin, callback) => {
+      // Permitir requests sin origin (mobile apps, Postman, curl)
+      if (!origin) return callback(null, true);
+
+      // Validar que el origin esté en la lista permitida
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`⚠️  CORS blocked request from origin: ${origin}`);
+        callback(new Error('CORS policy: Origin not allowed'), false);
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     exposedHeaders: ['Content-Disposition'], // Para descargas de archivos
-    maxAge: 3600, // Cache preflight requests por 1 hora
+    maxAge: isProduction ? 86400 : 3600, // 24 horas en prod, 1 hora en dev
   });
 
   // Global validation pipe with advanced options

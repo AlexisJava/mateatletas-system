@@ -76,8 +76,7 @@ export class ProductosController {
   /**
    * POST /productos
    * Crea un nuevo producto en el catálogo
-   * Requiere autenticación (solo Admin en futuro)
-   * TODO: Agregar guard de rol Admin
+   * Requiere autenticación y rol Admin
    */
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -89,8 +88,7 @@ export class ProductosController {
   /**
    * PATCH /productos/:id
    * Actualiza un producto existente
-   * Requiere autenticación (solo Admin en futuro)
-   * TODO: Agregar guard de rol Admin
+   * Requiere autenticación y rol Admin
    */
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -106,8 +104,7 @@ export class ProductosController {
    * DELETE /productos/:id
    * Elimina o desactiva un producto
    * Por defecto solo lo marca como inactivo
-   * Requiere autenticación (solo Admin en futuro)
-   * TODO: Agregar guard de rol Admin
+   * Requiere autenticación y rol Admin
    *
    * Query params:
    * - hardDelete: 'true' para eliminación permanente
