@@ -2,7 +2,7 @@ import { AuthUser } from '../interfaces';
 import { Role } from '../decorators/roles.decorator';
 
 // Re-export AuthUser para que esté disponible desde este módulo
-export { AuthUser } from '../interfaces';
+export type { AuthUser } from '../interfaces';
 
 /**
  * Tipos detallados de usuario autenticado
