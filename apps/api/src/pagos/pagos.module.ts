@@ -6,6 +6,7 @@ import { PagosService } from './presentation/services/pagos.service';
 // Use Cases
 import { CalcularPrecioUseCase } from './application/use-cases/calcular-precio.use-case';
 import { ActualizarConfiguracionPreciosUseCase } from './application/use-cases/actualizar-configuracion-precios.use-case';
+import { CrearInscripcionMensualUseCase } from './application/use-cases/crear-inscripcion-mensual.use-case';
 
 // Repositories
 import { ConfiguracionPreciosRepository } from './infrastructure/repositories/configuracion-precios.repository';
@@ -46,6 +47,7 @@ import { ProductoRepositoryAdapter } from './infrastructure/adapters/producto-re
     // Application Layer - Use Cases
     CalcularPrecioUseCase,
     ActualizarConfiguracionPreciosUseCase,
+    CrearInscripcionMensualUseCase,
 
     // Infrastructure Layer - Repositories propios del módulo
     ConfiguracionPreciosRepository,
