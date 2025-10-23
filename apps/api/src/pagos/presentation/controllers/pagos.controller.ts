@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PagosService } from '../services/pagos.service';
 import { CalcularPrecioRequestDto } from '../dtos/calcular-precio-request.dto';
 import { ActualizarConfiguracionPreciosRequestDto } from '../dtos/actualizar-configuracion-precios-request.dto';
+import { CrearInscripcionMensualRequestDto } from '../dtos/crear-inscripcion-mensual-request.dto';
 
 /**
  * PagosController - Presentation Layer
@@ -88,5 +89,43 @@ export class PagosController {
     @Body() dto: ActualizarConfiguracionPreciosRequestDto,
   ) {
     return await this.pagosService.actualizarConfiguracionPrecios(dto);
+  }
+
+  /**
+   * POST /pagos/inscripciones/crear
+   * Crea inscripciones mensuales para estudiantes
+   */
+  @Post('inscripciones/crear')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Crear inscripciones mensuales',
+    description: `
+      Crea inscripciones mensuales para estudiantes con cálculo automático de precios.
+
+      Proceso:
+      1. Calcula precios con descuentos aplicables
+      2. Valida que no existan inscripciones duplicadas
+      3. Crea inscripciones en estado Pendiente
+      4. Retorna resumen completo
+
+      Todas las inscripciones inician con estado "Pendiente".
+    `,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Inscripciones creadas exitosamente',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos o inscripción duplicada',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Estudiante, tutor o producto no encontrado',
+  })
+  async crearInscripciones(
+    @Body() dto: CrearInscripcionMensualRequestDto,
+  ) {
+    return await this.pagosService.crearInscripcionMensual(dto);
   }
 }
