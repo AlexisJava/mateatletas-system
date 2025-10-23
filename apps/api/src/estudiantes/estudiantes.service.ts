@@ -2,11 +2,14 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { QueryEstudiantesDto } from './dto/query-estudiantes.dto';
+import { CrearEstudiantesConTutorDto, CredencialesGeneradas } from './dto/crear-estudiantes-con-tutor.dto';
+import { generarUsername, generarPasswordTemporal, hashPassword } from './utils/credenciales.utils';
 
 /**
  * Service para gestionar operaciones CRUD de estudiantes
@@ -437,5 +440,379 @@ export class EstudiantesService {
         logros: estudiante.logrosDesbloqueados?.length || 0,
       },
     };
+  }
+
+  /**
+   * TDD: Crear uno o múltiples estudiantes con tutor en un sector
+   * @param dto - Datos de estudiantes y tutor
+   * @returns Estudiantes creados con credenciales generadas
+   */
+  async crearEstudiantesConTutor(dto: CrearEstudiantesConTutorDto) {
+    // Validar que el sector existe
+    const sector = await this.prisma.sector.findUnique({
+      where: { id: dto.sectorId },
+    });
+
+    if (!sector) {
+      throw new BadRequestException('El sector especificado no existe');
+    }
+
+    // Buscar si el tutor ya existe por email
+    const tutorExistente = await this.prisma.tutor.findFirst({
+      where: {
+        email: dto.tutor.email,
+      },
+    });
+
+    const credenciales: CredencialesGeneradas = {
+      estudiantes: [],
+    };
+
+    let tutor = tutorExistente;
+
+    // Si el tutor no existe, crear uno nuevo
+    if (!tutorExistente) {
+      const usernameTutor = await generarUsername(
+        dto.tutor.nombre,
+        dto.tutor.apellido,
+        this.prisma,
+      );
+      const passwordTutor = generarPasswordTemporal();
+      const passwordHash = await hashPassword(passwordTutor);
+
+      tutor = await this.prisma.tutor.create({
+        data: {
+          nombre: dto.tutor.nombre,
+          apellido: dto.tutor.apellido,
+          dni: dto.tutor.dni,
+          telefono: dto.tutor.telefono,
+          username: usernameTutor,
+          email: dto.tutor.email,
+          password_hash: passwordHash,
+          password_temporal: passwordTutor,
+          debe_cambiar_password: true,
+        },
+      });
+
+      credenciales.tutor = {
+        username: usernameTutor,
+        password: passwordTutor,
+      };
+    }
+
+    // Crear estudiantes en transacción
+    const estudiantesCreados = await this.prisma.$transaction(
+      async (prisma) => {
+        const estudiantesPromises = dto.estudiantes.map(async (estDto) => {
+          const usernameEstudiante = await generarUsername(
+            estDto.nombre,
+            estDto.apellido,
+            this.prisma,
+          );
+          const passwordEstudiante = generarPasswordTemporal();
+          const passwordHash = await hashPassword(passwordEstudiante);
+
+          const estudiante = await prisma.estudiante.create({
+            data: {
+              nombre: estDto.nombre,
+              apellido: estDto.apellido,
+              edad: estDto.edad,
+              nivel_escolar: estDto.nivel_escolar,
+              email: estDto.email,
+              username: usernameEstudiante,
+              password_hash: passwordHash,
+              password_temporal: passwordEstudiante,
+              debe_cambiar_password: true,
+              tutor_id: tutor!.id,
+              sector_id: dto.sectorId,
+            },
+            include: {
+              sector: true,
+              tutor: true,
+            },
+          });
+
+          credenciales.estudiantes.push({
+            nombre: `${estDto.nombre} ${estDto.apellido}`,
+            username: usernameEstudiante,
+            password: passwordEstudiante,
+          });
+
+          return estudiante;
+        });
+
+        return await Promise.all(estudiantesPromises);
+      },
+    );
+
+    return {
+      estudiantes: estudiantesCreados,
+      tutor,
+      credenciales,
+    };
+  }
+
+  /**
+   * TDD: Copiar estudiante existente a otro sector
+   * @param estudianteId - ID del estudiante
+   * @param nuevoSectorId - ID del sector destino
+   * @returns Estudiante con sector actualizado
+   */
+  async copiarEstudianteASector(estudianteId: string, nuevoSectorId: string) {
+    // Validar que el estudiante existe
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: estudianteId },
+      include: {
+        tutor: true,
+      },
+    });
+
+    if (!estudiante) {
+      throw new BadRequestException('El estudiante no existe');
+    }
+
+    // Validar que el sector destino existe
+    const sector = await this.prisma.sector.findUnique({
+      where: { id: nuevoSectorId },
+    });
+
+    if (!sector) {
+      throw new BadRequestException('El sector destino no existe');
+    }
+
+    // Validar que no esté ya en ese sector
+    if (estudiante.sector_id === nuevoSectorId) {
+      throw new ConflictException('El estudiante ya está asignado a este sector');
+    }
+
+    // Actualizar sector
+    const estudianteActualizado = await this.prisma.estudiante.update({
+      where: { id: estudianteId },
+      data: {
+        sector_id: nuevoSectorId,
+      },
+      include: {
+        sector: true,
+        tutor: true,
+      },
+    });
+
+    return estudianteActualizado;
+  }
+
+  /**
+   * TDD: Buscar estudiante por DNI y copiarlo a otro sector
+   * @param dni - DNI del estudiante
+   * @param nuevoSectorId - ID del sector destino
+   * @returns Estudiante con sector actualizado
+   */
+  async copiarEstudiantePorDNIASector(email: string, nuevoSectorId: string) {
+    // Buscar estudiante por email
+    const estudiante = await this.prisma.estudiante.findFirst({
+      where: { email },
+      include: {
+        sector: true,
+        tutor: true,
+      },
+    });
+
+    if (!estudiante) {
+      throw new BadRequestException(`No se encontró un estudiante con email ${email}`);
+    }
+
+    // Usar el método de copiar por ID
+    return await this.copiarEstudianteASector(estudiante.id, nuevoSectorId);
+  }
+
+  /**
+   * TDD: Asignar una clase a un estudiante
+   * @param estudianteId - ID del estudiante
+   * @param claseId - ID de la clase
+   * @returns Inscripción creada
+   */
+  async asignarClaseAEstudiante(estudianteId: string, claseId: string) {
+    // Validar que el estudiante existe
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: estudianteId },
+    });
+
+    if (!estudiante) {
+      throw new BadRequestException('El estudiante no existe');
+    }
+
+    // Validar que la clase existe
+    const clase = await this.prisma.clase.findUnique({
+      where: { id: claseId },
+    });
+
+    if (!clase) {
+      throw new BadRequestException('La clase no existe');
+    }
+
+    // Validar que la clase pertenece al sector del estudiante
+    if (clase.sector_id !== estudiante.sector_id) {
+      throw new BadRequestException('La clase no pertenece al sector del estudiante');
+    }
+
+    // Validar cupos disponibles
+    if (clase.cupos_ocupados >= clase.cupos_maximo) {
+      throw new ConflictException('La clase no tiene cupos disponibles');
+    }
+
+    // Validar que no esté ya inscrito
+    const inscripcionExistente = await this.prisma.inscripcionClase.findFirst({
+      where: {
+        estudiante_id: estudianteId,
+        clase_id: claseId,
+      },
+    });
+
+    if (inscripcionExistente) {
+      throw new ConflictException('El estudiante ya está inscrito en esta clase');
+    }
+
+    // Crear inscripción e incrementar cupos
+    const inscripcion = await this.prisma.inscripcionClase.create({
+      data: {
+        estudiante_id: estudianteId,
+        clase_id: claseId,
+        tutor_id: estudiante.tutor_id,
+      },
+    });
+
+    // Incrementar cupos ocupados
+    await this.prisma.clase.update({
+      where: { id: claseId },
+      data: {
+        cupos_ocupados: {
+          increment: 1,
+        },
+      },
+    });
+
+    return inscripcion;
+  }
+
+  /**
+   * TDD: Asignar múltiples clases a un estudiante
+   * @param estudianteId - ID del estudiante
+   * @param clasesIds - Array de IDs de clases
+   * @returns Array de inscripciones creadas
+   */
+  async asignarClasesAEstudiante(estudianteId: string, clasesIds: string[]) {
+    // Validar estudiante
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: estudianteId },
+    });
+
+    if (!estudiante) {
+      throw new BadRequestException('El estudiante no existe');
+    }
+
+    // Validar clases
+    const clases = await this.prisma.clase.findMany({
+      where: {
+        id: {
+          in: clasesIds,
+        },
+      },
+    });
+
+    if (clases.length !== clasesIds.length) {
+      throw new BadRequestException('Una o más clases no existen');
+    }
+
+    // Validar que todas las clases pertenecen al sector
+    for (const clase of clases) {
+      if (clase.sector_id !== estudiante.sector_id) {
+        throw new BadRequestException(
+          `La clase ${clase.nombre} no pertenece al sector del estudiante`,
+        );
+      }
+
+      if (clase.cupos_ocupados >= clase.cupos_maximo) {
+        throw new ConflictException(`La clase ${clase.nombre} no tiene cupos disponibles`);
+      }
+    }
+
+    // Crear inscripciones en transacción
+    const inscripciones = await this.prisma.$transaction(
+      async (prisma) => {
+        const inscripcionesPromises = clasesIds.map(async (claseId) => {
+          // Verificar inscripción duplicada
+          const existente = await prisma.inscripcionClase.findFirst({
+            where: {
+              estudiante_id: estudianteId,
+              clase_id: claseId,
+            },
+          });
+
+          if (existente) {
+            throw new ConflictException('El estudiante ya está inscrito en una de las clases');
+          }
+
+          // Crear inscripción
+          const inscripcion = await prisma.inscripcionClase.create({
+            data: {
+              estudiante_id: estudianteId,
+              clase_id: claseId,
+              tutor_id: estudiante.tutor_id,
+            },
+          });
+
+          // Incrementar cupos
+          await prisma.clase.update({
+            where: { id: claseId },
+            data: {
+              cupos_ocupados: {
+                increment: 1,
+              },
+            },
+          });
+
+          return inscripcion;
+        });
+
+        return await Promise.all(inscripcionesPromises);
+      },
+    );
+
+    return inscripciones;
+  }
+
+  /**
+   * TDD: Obtener clases disponibles para un estudiante
+   * @param estudianteId - ID del estudiante
+   * @returns Array de clases del sector con cupos disponibles
+   */
+  async obtenerClasesDisponiblesParaEstudiante(estudianteId: string) {
+    // Validar estudiante
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: estudianteId },
+    });
+
+    if (!estudiante) {
+      throw new BadRequestException('El estudiante no existe');
+    }
+
+    // Obtener clases del sector con cupos disponibles
+    const clases = await this.prisma.clase.findMany({
+      where: {
+        sector_id: estudiante.sector_id,
+      },
+      include: {
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        sector: true,
+      },
+    });
+
+    // Filtrar las que tienen cupos disponibles
+    return clases.filter(clase => clase.cupos_ocupados < clase.cupos_maximo);
   }
 }

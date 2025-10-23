@@ -13,6 +13,8 @@ import { EstudiantesService } from './estudiantes.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { QueryEstudiantesDto } from './dto/query-estudiantes.dto';
+import { CrearEstudiantesConTutorDto } from './dto/crear-estudiantes-con-tutor.dto';
+import { AsignarClasesDto, CopiarEstudianteDto, BuscarEstudiantePorEmailDto } from './dto/asignar-clases.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
@@ -170,5 +172,70 @@ export class EstudiantesController {
     return {
       message: 'Estudiante eliminado exitosamente',
     };
+  }
+
+  /**
+   * POST /estudiantes/crear-con-tutor - Crear estudiantes con tutor en un sector (Admin)
+   * @param dto - Datos de estudiantes y tutor
+   * @returns Estudiantes creados con credenciales generadas
+   */
+  @Post('crear-con-tutor')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
+  async crearConTutor(@Body() dto: CrearEstudiantesConTutorDto) {
+    return this.estudiantesService.crearEstudiantesConTutor(dto);
+  }
+
+  /**
+   * PATCH /estudiantes/:id/copiar-a-sector - Copiar estudiante a otro sector (Admin)
+   * @param id - ID del estudiante
+   * @param dto - ID del sector destino
+   * @returns Estudiante con sector actualizado
+   */
+  @Patch(':id/copiar-a-sector')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
+  async copiarASector(@Param('id') id: string, @Body() dto: CopiarEstudianteDto) {
+    return this.estudiantesService.copiarEstudianteASector(id, dto.sectorId);
+  }
+
+  /**
+   * POST /estudiantes/copiar-por-email - Buscar estudiante por email y copiarlo a sector (Admin)
+   * @param body - Email del estudiante y sector destino
+   * @returns Estudiante con sector actualizado
+   */
+  @Post('copiar-por-email')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
+  async copiarPorEmail(@Body() body: BuscarEstudiantePorEmailDto & { sectorId: string }) {
+    return this.estudiantesService.copiarEstudiantePorDNIASector(body.email, body.sectorId);
+  }
+
+  /**
+   * POST /estudiantes/:id/asignar-clases - Asignar clases a estudiante (Admin)
+   * @param id - ID del estudiante
+   * @param dto - IDs de las clases
+   * @returns Inscripciones creadas
+   */
+  @Post(':id/asignar-clases')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
+  async asignarClases(@Param('id') id: string, @Body() dto: AsignarClasesDto) {
+    if (dto.clasesIds.length === 1) {
+      return [await this.estudiantesService.asignarClaseAEstudiante(id, dto.clasesIds[0])];
+    }
+    return this.estudiantesService.asignarClasesAEstudiante(id, dto.clasesIds);
+  }
+
+  /**
+   * GET /estudiantes/:id/clases-disponibles - Obtener clases disponibles para estudiante (Admin)
+   * @param id - ID del estudiante
+   * @returns Clases del sector con cupos disponibles
+   */
+  @Get(':id/clases-disponibles')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Admin)
+  async obtenerClasesDisponibles(@Param('id') id: string) {
+    return this.estudiantesService.obtenerClasesDisponiblesParaEstudiante(id);
   }
 }
