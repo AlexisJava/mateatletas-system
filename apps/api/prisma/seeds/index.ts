@@ -8,6 +8,7 @@ import { seedProductos } from './productos.seed';
 import { seedAccionesPuntuables } from './acciones-puntuables.seed';
 import { seedLogros } from './logros.seed';
 import { seedSectores } from './sectores.seed';
+import { seedConfiguracionPrecios } from './configuracion-precios.seed';
 
 /**
  * Orchestrator para todos los seeds modulares
@@ -21,6 +22,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     // PRODUCTION: Solo datos esenciales
     console.log('🏭 Modo PRODUCCIÓN: Creando solo datos esenciales\n');
     await seedAdmin(prisma);
+    await seedConfiguracionPrecios(prisma); // ESENCIAL: Configuración de precios
     await seedSectores(prisma); // Sectores base (Matemática y Programación)
     await seedRutasCurriculares(prisma); // Las rutas son necesarias para el sistema
     await seedProductos(prisma); // Productos del catálogo (pueden ser reales)
@@ -30,6 +32,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     // DEVELOPMENT/TEST: Datos completos de prueba
     console.log('🧪 Modo DESARROLLO: Creando datos de prueba completos\n');
     await seedAdmin(prisma);
+    await seedConfiguracionPrecios(prisma); // ESENCIAL: Configuración de precios
     await seedSectores(prisma); // Sectores base (Matemática y Programación)
     await seedDocente(prisma);
     await seedTutor(prisma);
@@ -46,6 +49,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
 // Re-export individual seeds for flexibility
 export {
   seedAdmin,
+  seedConfiguracionPrecios,
   seedSectores,
   seedDocente,
   seedTutor,

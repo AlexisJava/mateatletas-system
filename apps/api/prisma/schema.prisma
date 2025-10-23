@@ -60,6 +60,7 @@ model Tutor {
   estudiantes              Estudiante[]
   inscripciones_clase      InscripcionClase[]
   membresias               Membresia[]
+  inscripciones_mensuales  InscripcionMensual[]
 
   @@map("tutores")
 }
@@ -124,6 +125,8 @@ model Estudiante {
   logrosDesbloqueados LogroDesbloqueado[]
   progresoLecciones   ProgresoLeccion[]
   puntosObtenidos     PuntoObtenido[]
+  inscripciones_mensuales InscripcionMensual[]
+  becas               Beca[]
 
   @@map("estudiantes")
 }
@@ -269,6 +272,7 @@ model Producto {
   inscripciones_curso InscripcionCurso[]
   membresias          Membresia[]
   modulos             Modulo[]
+  inscripciones_mensuales InscripcionMensual[]
 
   @@map("productos")
 }
@@ -1087,4 +1091,186 @@ enum PrioridadTarea {
   URGENTE
 
   @@map("prioridad_tarea")
+}
+
+// ============================================================================
+// SISTEMA DE PAGOS Y CONTABILIDAD
+// ============================================================================
+
+/// Configuración global de precios (Tabla singleton)
+/// Solo existe UN registro con id="singleton"
+model ConfiguracionPrecios {
+  /// ID fijo "singleton" para garantizar un solo registro
+  id String @id @default("singleton")
+
+  /// Precios base por tipo de producto
+  precio_club_matematicas      Decimal @default(50000) @db.Decimal(10, 2)
+  precio_cursos_especializados Decimal @default(55000) @db.Decimal(10, 2)
+
+  /// Precios con descuentos configurables
+  precio_multiple_actividades Decimal @default(44000) @db.Decimal(10, 2)
+  precio_hermanos_basico      Decimal @default(44000) @db.Decimal(10, 2)
+  precio_hermanos_multiple    Decimal @default(38000) @db.Decimal(10, 2)
+
+  /// Descuento AACREA (Asociación Altas Capacidades)
+  descuento_aacrea_porcentaje Decimal @default(20) @db.Decimal(5, 2)
+  descuento_aacrea_activo     Boolean @default(true)
+
+  /// Configuración de notificaciones
+  dia_vencimiento           Int     @default(15)
+  dias_antes_recordatorio   Int     @default(5)
+  notificaciones_activas    Boolean @default(true)
+
+  /// Metadata
+  actualizado_por_admin_id String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  /// Relaciones
+  historial HistorialCambioPrecios[]
+
+  @@map("configuracion_precios")
+}
+
+/// Historial de cambios en la configuración de precios
+/// Auditoría completa de modificaciones
+model HistorialCambioPrecios {
+  /// Identificador único del cambio
+  id String @id @default(cuid())
+
+  /// Referencia a la configuración
+  configuracion_id String
+
+  /// Valores antes y después del cambio (JSON flexible)
+  valores_anteriores Json
+  valores_nuevos     Json
+
+  /// Metadata del cambio
+  motivo_cambio String?
+  admin_id      String
+  fecha_cambio  DateTime @default(now())
+
+  /// Relaciones
+  configuracion ConfiguracionPrecios @relation(fields: [configuracion_id], references: [id])
+
+  @@index([configuracion_id])
+  @@index([fecha_cambio])
+  @@map("historial_cambio_precios")
+}
+
+/// Inscripción mensual de un estudiante a un producto
+/// Reemplaza el concepto de "reserva" por facturación mensual
+model InscripcionMensual {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// Relaciones principales
+  estudiante_id String
+  producto_id   String
+  tutor_id      String
+
+  /// Período de facturación
+  anio    Int
+  mes     Int // 1-12
+  periodo String // "2025-01" para facilitar queries
+
+  /// Cálculo de precios (guardado para historial)
+  precio_base        Decimal @db.Decimal(10, 2)
+  descuento_aplicado Decimal @default(0) @db.Decimal(10, 2)
+  precio_final       Decimal @db.Decimal(10, 2)
+
+  /// Metadata del cálculo
+  tipo_descuento  TipoDescuento
+  detalle_calculo String // Explicación del cálculo aplicado
+
+  /// Estado de pago
+  estado_pago     EstadoPago @default(Pendiente)
+  fecha_pago      DateTime?
+  metodo_pago     String? // "Efectivo", "Transferencia", "MercadoPago"
+  comprobante_url String? // URL del comprobante subido
+  observaciones   String?
+
+  /// Auditoría
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  producto   Producto   @relation(fields: [producto_id], references: [id])
+  tutor      Tutor      @relation(fields: [tutor_id], references: [id])
+
+  @@unique([estudiante_id, producto_id, periodo])
+  @@index([tutor_id, periodo])
+  @@index([estado_pago])
+  @@index([periodo])
+  @@map("inscripciones_mensuales")
+}
+
+/// Gestión de becas y descuentos especiales
+model Beca {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// Estudiante beneficiado
+  estudiante_id String
+
+  /// Tipo y configuración de la beca
+  tipo_beca         String // "Mérito Académico", "Social", "Deportiva", etc
+  descuento_tipo    DescuentoBecaTipo
+  descuento_valor   Decimal           @db.Decimal(10, 2) // Porcentaje o monto fijo
+  productos_aplica  Json // Array de IDs de productos donde aplica
+
+  /// Vigencia
+  fecha_inicio DateTime
+  fecha_fin    DateTime
+  activa       Boolean  @default(true)
+
+  /// Metadata
+  motivo_beca String?
+  aprobada_por_admin_id String?
+  observaciones String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  /// Relaciones
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  @@index([estudiante_id])
+  @@index([activa])
+  @@map("becas")
+}
+
+// ============================================================================
+// ENUMS DEL SISTEMA DE PAGOS
+// ============================================================================
+
+/// Tipos de descuento aplicables
+enum TipoDescuento {
+  NINGUNO
+  MULTIPLE_ACTIVIDADES
+  HERMANOS_BASICO
+  HERMANOS_MULTIPLE
+  AACREA
+  BECA
+
+  @@map("tipo_descuento")
+}
+
+/// Estados del pago
+enum EstadoPago {
+  Pendiente
+  Pagado
+  Vencido
+  Parcial
+  Becado
+
+  @@map("estado_pago")
+}
+
+/// Tipo de descuento en becas
+enum DescuentoBecaTipo {
+  PORCENTAJE
+  MONTO_FIJO
+
+  @@map("descuento_beca_tipo")
 }
