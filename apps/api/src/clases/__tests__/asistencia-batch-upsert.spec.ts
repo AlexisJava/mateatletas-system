@@ -101,9 +101,9 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
-          { estudianteId: 'est-2', estado: 'Ausente' as const, observaciones: null, puntosOtorgados: 0 },
-          { estudianteId: 'est-3', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
+          { estudianteId: 'est-2', estado: 'Ausente' as const, observaciones: undefined, puntosOtorgados: 0 },
+          { estudianteId: 'est-3', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
           { estudianteId: 'est-4', estado: 'Tardanza' as const, observaciones: 'Llegó 10 min tarde', puntosOtorgados: 5 },
         ],
       };
@@ -141,8 +141,8 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
-          { estudianteId: 'est-2', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
+          { estudianteId: 'est-2', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -171,8 +171,8 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
-          { estudianteId: 'est-2', estado: 'Ausente' as const, observaciones: null, puntosOtorgados: 0 },
+          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
+          { estudianteId: 'est-2', estado: 'Ausente' as const, observaciones: undefined, puntosOtorgados: 0 },
         ],
       };
 
@@ -198,7 +198,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -219,7 +219,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -250,7 +250,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
         asistencias: Array.from({ length: 30 }, (_, i) => ({
           estudianteId: `est-${i + 1}`,
           estado: 'Presente' as const,
-          observaciones: null,
+          observaciones: undefined,
           puntosOtorgados: 10,
         })),
       };
@@ -297,7 +297,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
         asistencias: Array.from({ length: 20 }, (_, i) => ({
           estudianteId: `est-${i + 1}`,
           estado: 'Presente' as const,
-          observaciones: null,
+          observaciones: undefined,
           puntosOtorgados: 10,
         })),
       };
@@ -330,7 +330,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -368,7 +368,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -424,7 +424,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -443,7 +443,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -459,7 +459,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-999', estado: 'Presente' as const, observaciones: null, puntosOtorgados: 10 },
+          { estudianteId: 'est-999', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
