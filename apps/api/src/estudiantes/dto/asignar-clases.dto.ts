@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsString, Matches, ArrayMinSize } from 'class-validator';
+import { IsArray, IsEmail, IsNotEmpty, IsString, Matches, ArrayMinSize } from 'class-validator';
 
 /**
  * DTO para asignar una o múltiples clases a un estudiante
