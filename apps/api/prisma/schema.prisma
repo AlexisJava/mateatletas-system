@@ -19,48 +19,49 @@ model TestModel {
 /// Representa a los usuarios educadores que crean y gestionan contenido educativo
 model Tutor {
   /// Identificador único del tutor (CUID para mejor distribución)
-  id                       String             @id @default(cuid())
+  id                        String                  @id @default(cuid())
   /// Username único del tutor - usado para autenticación alternativa
-  username                 String?            @unique
+  username                  String?                 @unique
   /// Email único del tutor - usado para autenticación
   /// IMPORTANTE: Debe estar indexado para búsquedas rápidas en login
-  email                    String?            @unique
+  email                     String?                 @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   /// Se maneja solo en backend para seguridad
-  password_hash            String
+  password_hash             String
   /// Password temporal en texto plano - se muestra al admin al crear el tutor
   /// Se borra después del primer cambio de contraseña
-  password_temporal        String?
+  password_temporal         String?
   /// Indica si el tutor debe cambiar su contraseña en el próximo login
-  debe_cambiar_password    Boolean            @default(true)
+  debe_cambiar_password     Boolean                 @default(true)
   /// Indica si el tutor debe completar su perfil (datos personales adicionales)
-  debe_completar_perfil    Boolean            @default(false)
+  debe_completar_perfil     Boolean                 @default(false)
   /// Fecha del último cambio de contraseña
-  fecha_ultimo_cambio      DateTime?
+  fecha_ultimo_cambio       DateTime?
   /// Nombre del tutor
-  nombre                   String
+  nombre                    String
   /// Apellido del tutor
-  apellido                 String
+  apellido                  String
   /// Documento Nacional de Identidad (opcional)
-  dni                      String?
+  dni                       String?
   /// Teléfono de contacto (opcional)
-  telefono                 String?
+  telefono                  String?
   /// Fecha en que el tutor se registró en la plataforma
-  fecha_registro           DateTime           @default(now())
+  fecha_registro            DateTime                @default(now())
   /// Indica si el tutor completó el proceso de onboarding inicial
   /// Se usa para redirigir a nuevos tutores al flujo de configuración
-  ha_completado_onboarding Boolean            @default(false)
+  ha_completado_onboarding  Boolean                 @default(false)
   /// Timestamp de creación del registro
-  createdAt                DateTime           @default(now())
+  createdAt                 DateTime                @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt                DateTime           @updatedAt
+  updatedAt                 DateTime                @updatedAt
   /// Roles asignados al tutor (normalmente solo ["tutor"])
   /// Ejemplo: ["tutor"]
-  roles                    Json               @default("[\"tutor\"]")
-  estudiantes              Estudiante[]
-  inscripciones_clase      InscripcionClase[]
-  membresias               Membresia[]
-  inscripciones_mensuales  InscripcionMensual[]
+  roles                     Json                    @default("[\"tutor\"]")
+  estudiantes               Estudiante[]
+  inscripciones_clase       InscripcionClase[]
+  inscripciones_clase_grupo InscripcionClaseGrupo[]
+  membresias                Membresia[]
+  inscripciones_mensuales   InscripcionMensual[]
 
   @@map("tutores")
 }
@@ -69,64 +70,66 @@ model Tutor {
 /// Representa a los alumnos que utilizarán la plataforma
 model Estudiante {
   /// Identificador único del estudiante
-  id                  String              @id @default(cuid())
+  id                        String                  @id @default(cuid())
   /// Username único del estudiante - usado para autenticación
-  username            String?             @unique
+  username                  String?                 @unique
   /// Nombre del estudiante
-  nombre              String
+  nombre                    String
   /// Apellido del estudiante
-  apellido            String
+  apellido                  String
   /// Nivel escolar del estudiante: Primaria, Secundaria, Universidad
-  nivel_escolar       String
+  nivel_escolar             String
   /// URL de la foto de perfil del estudiante (opcional)
-  foto_url            String?
+  foto_url                  String?
   /// ID del tutor que gestiona este estudiante
-  tutor_id            String
+  tutor_id                  String
   /// ID del equipo al que pertenece el estudiante (opcional, para gamificación)
-  equipo_id           String?
+  equipo_id                 String?
   /// Puntos totales acumulados por el estudiante (gamificación)
-  puntos_totales      Int                 @default(0)
+  puntos_totales            Int                     @default(0)
   /// Nivel actual del estudiante en el sistema de gamificación
-  nivel_actual        Int                 @default(1)
+  nivel_actual              Int                     @default(1)
   /// Timestamp de creación del registro
-  createdAt           DateTime            @default(now())
+  createdAt                 DateTime                @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt           DateTime            @updatedAt
+  updatedAt                 DateTime                @updatedAt
   /// URL o identificador del avatar personalizable del estudiante
   /// Puede ser una URL de Dicebear API o un identificador de avatar predefinido
-  avatar_url          String?             @default("avataaars")
+  avatar_url                String?                 @default("avataaars")
   /// Edad del estudiante en años
-  edad                Int
+  edad                      Int
   /// Email único del estudiante - usado para autenticación propia
   /// IMPORTANTE: Debe estar indexado para búsquedas rápidas en login
-  email               String?             @unique
+  email                     String?                 @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   /// Permite que el estudiante acceda al portal con sus propias credenciales
-  password_hash       String?
+  password_hash             String?
   /// PIN temporal en texto plano - se muestra al tutor/admin al crear el estudiante
   /// Se borra después del primer cambio de contraseña
-  password_temporal   String?
+  password_temporal         String?
   /// Indica si el estudiante debe cambiar su PIN en el próximo login
-  debe_cambiar_password Boolean           @default(true)
+  debe_cambiar_password     Boolean                 @default(true)
   /// Fecha del último cambio de contraseña
-  fecha_ultimo_cambio DateTime?
+  fecha_ultimo_cambio       DateTime?
   /// Roles asignados al estudiante (normalmente solo ["estudiante"])
   /// Ejemplo: ["estudiante"]
-  roles               Json                @default("[\"estudiante\"]")
+  roles                     Json                    @default("[\"estudiante\"]")
   /// ID del sector al que pertenece el estudiante (Matemática o Programación)
-  sector_id           String?
-  alertas             Alerta[]
-  asistencias         Asistencia[]
-  equipo              Equipo?             @relation(fields: [equipo_id], references: [id])
-  sector              Sector?             @relation(fields: [sector_id], references: [id])
-  tutor               Tutor               @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
-  inscripciones_clase InscripcionClase[]
-  inscripciones_curso InscripcionCurso[]
-  logrosDesbloqueados LogroDesbloqueado[]
-  progresoLecciones   ProgresoLeccion[]
-  puntosObtenidos     PuntoObtenido[]
-  inscripciones_mensuales InscripcionMensual[]
-  becas               Beca[]
+  sector_id                 String?
+  alertas                   Alerta[]
+  asistencias               Asistencia[]
+  equipo                    Equipo?                 @relation(fields: [equipo_id], references: [id])
+  sector                    Sector?                 @relation(fields: [sector_id], references: [id])
+  tutor                     Tutor                   @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  inscripciones_clase       InscripcionClase[]
+  inscripciones_clase_grupo InscripcionClaseGrupo[]
+  asistencias_clase_grupo   AsistenciaClaseGrupo[]
+  inscripciones_curso       InscripcionCurso[]
+  logrosDesbloqueados       LogroDesbloqueado[]
+  progresoLecciones         ProgresoLeccion[]
+  puntosObtenidos           PuntoObtenido[]
+  inscripciones_mensuales   InscripcionMensual[]
+  becas                     Beca[]
 
   @@map("estudiantes")
 }
@@ -202,6 +205,7 @@ model Docente {
   /// false = contraseña elegida por el docente
   debe_cambiar_password  Boolean             @default(true)
   clases                 Clase[]
+  claseGrupos            ClaseGrupo[]
   rutasEspecialidad      DocenteRuta[]
   eventos                Evento[]
   logrosAprobados        LogroDesbloqueado[] @relation("LogrosAprobados")
@@ -245,33 +249,33 @@ model Admin {
 /// Representa los productos que se pueden comprar: suscripciones, cursos, recursos
 model Producto {
   /// Identificador único del producto
-  id                  String             @id @default(cuid())
+  id                      String               @id @default(cuid())
   /// Nombre del producto (ej: "Suscripción Mensual", "Curso de Álgebra")
-  nombre              String
+  nombre                  String
   /// Descripción detallada del producto
-  descripcion         String?
+  descripcion             String?
   /// Precio del producto en pesos (formato decimal para precisión)
-  precio              Decimal            @db.Decimal(10, 2)
+  precio                  Decimal              @db.Decimal(10, 2)
   /// Tipo de producto (Suscripcion, Curso, RecursoDigital)
-  tipo                TipoProducto
+  tipo                    TipoProducto
   /// Indica si el producto está activo y disponible para compra
-  activo              Boolean            @default(true)
+  activo                  Boolean              @default(true)
   /// Fecha de inicio del curso (solo para tipo Curso)
-  fecha_inicio        DateTime?
+  fecha_inicio            DateTime?
   /// Fecha de finalización del curso (solo para tipo Curso)
-  fecha_fin           DateTime?
+  fecha_fin               DateTime?
   /// Cupo máximo de estudiantes (solo para tipo Curso)
-  cupo_maximo         Int?
+  cupo_maximo             Int?
   /// Duración en meses de la suscripción (1=mensual, 12=anual, etc.)
-  duracion_meses      Int?               @default(1)
+  duracion_meses          Int?                 @default(1)
   /// Timestamp de creación del registro
-  createdAt           DateTime           @default(now())
+  createdAt               DateTime             @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt           DateTime           @updatedAt
-  clases              Clase[]
-  inscripciones_curso InscripcionCurso[]
-  membresias          Membresia[]
-  modulos             Modulo[]
+  updatedAt               DateTime             @updatedAt
+  clases                  Clase[]
+  inscripciones_curso     InscripcionCurso[]
+  membresias              Membresia[]
+  modulos                 Modulo[]
   inscripciones_mensuales InscripcionMensual[]
 
   @@map("productos")
@@ -338,18 +342,19 @@ model InscripcionCurso {
 /// Representa los temas o áreas de conocimiento de las clases
 model RutaCurricular {
   /// Identificador único de la ruta
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   /// Nombre de la ruta (ej: "Lógica", "Álgebra", "Geometría")
-  nombre      String   @unique
+  nombre      String       @unique
   /// Color hexadecimal para identificación visual (opcional)
   color       String?
   /// Descripción de la ruta curricular
   descripcion String?
   /// Timestamp de creación del registro
-  createdAt   DateTime @default(now())
+  createdAt   DateTime     @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime     @updatedAt
   clases      Clase[]
+  claseGrupos ClaseGrupo[]
 
   @@map("rutas_curriculares")
 }
@@ -401,6 +406,168 @@ model Clase {
   @@index([estado])
   @@index([producto_id])
   @@map("clases")
+}
+
+/// Modelo para grupos de clases recurrentes
+/// Representa un grupo estable de estudiantes que se reúne semanalmente
+/// Ejemplo: "GRUPO B1 - Matemática - Lunes 19:30"
+model ClaseGrupo {
+  /// Identificador único del grupo
+  id String @id @default(cuid())
+
+  /// Código del grupo (ej: "B1", "B2", "OLIMP-2025")
+  codigo String @unique
+
+  /// Nombre descriptivo del grupo
+  nombre String
+
+  /// Tipo de clase grupo
+  tipo TipoClaseGrupo @default(GRUPO_REGULAR)
+
+  /// Día de la semana en que se reúne
+  dia_semana DiaSemana
+
+  /// Hora de inicio en formato HH:MM (ej: "19:30")
+  hora_inicio String
+
+  /// Hora de fin en formato HH:MM (ej: "21:00")
+  hora_fin String
+
+  /// Fecha de inicio de vigencia del grupo
+  fecha_inicio DateTime
+
+  /// Fecha de fin de vigencia del grupo
+  /// Para GRUPO_REGULAR: siempre 15 de diciembre del año
+  /// Para CURSO_TEMPORAL: fecha específica definida por admin
+  fecha_fin DateTime
+
+  /// Año lectivo al que pertenece (ej: 2025)
+  anio_lectivo Int
+
+  /// Cupo máximo de estudiantes
+  cupo_maximo Int @default(15)
+
+  /// ID del docente asignado
+  docente_id String
+
+  /// ID de la ruta curricular (tema)
+  ruta_curricular_id String?
+
+  /// ID del sector (Matemática o Programación)
+  sector_id String?
+
+  /// Nivel o descripción (ej: "6 y 7 años", "Preparación olimpiadas")
+  nivel String?
+
+  /// Indica si el grupo está activo
+  activo Boolean @default(true)
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  docente        Docente         @relation(fields: [docente_id], references: [id])
+  rutaCurricular RutaCurricular? @relation(fields: [ruta_curricular_id], references: [id])
+  sector         Sector?         @relation(fields: [sector_id], references: [id])
+
+  /// Estudiantes inscritos en el grupo
+  inscripciones InscripcionClaseGrupo[]
+
+  /// Registros de asistencia del grupo
+  asistencias AsistenciaClaseGrupo[]
+
+  @@index([docente_id])
+  @@index([dia_semana])
+  @@index([fecha_inicio, fecha_fin])
+  @@index([anio_lectivo])
+  @@index([activo])
+  @@map("clase_grupos")
+}
+
+/// Inscripción de un estudiante a un ClaseGrupo
+/// Relación muchos-a-muchos entre Estudiante y ClaseGrupo
+model InscripcionClaseGrupo {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID del grupo de clase
+  clase_grupo_id String
+
+  /// ID del estudiante inscrito
+  estudiante_id String
+
+  /// ID del tutor del estudiante
+  tutor_id String
+
+  /// Fecha de inscripción al grupo
+  fecha_inscripcion DateTime @default(now())
+
+  /// Fecha de baja del grupo (si se retira antes del fin)
+  fecha_baja DateTime?
+
+  /// Observaciones
+  observaciones String?
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  claseGrupo ClaseGrupo @relation(fields: [clase_grupo_id], references: [id], onDelete: Cascade)
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  tutor      Tutor      @relation(fields: [tutor_id], references: [id])
+
+  @@unique([clase_grupo_id, estudiante_id])
+  @@index([estudiante_id])
+  @@index([tutor_id])
+  @@index([clase_grupo_id])
+  @@map("inscripciones_clase_grupo")
+}
+
+/// Registro de asistencia a una sesión específica de un ClaseGrupo
+/// Se crea cuando el docente marca asistencia un día específico
+model AsistenciaClaseGrupo {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID del grupo de clase
+  clase_grupo_id String
+
+  /// ID del estudiante
+  estudiante_id String
+
+  /// Fecha específica de la clase (ej: "2025-10-21" para el lunes 21/10)
+  fecha DateTime
+
+  /// Estado de asistencia
+  estado EstadoAsistencia
+
+  /// Observaciones del docente sobre el estudiante en esta clase
+  observaciones String?
+
+  /// Calificación o feedback cualitativo (opcional)
+  feedback String?
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  claseGrupo ClaseGrupo @relation(fields: [clase_grupo_id], references: [id], onDelete: Cascade)
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+
+  @@unique([clase_grupo_id, estudiante_id, fecha])
+  @@index([clase_grupo_id])
+  @@index([estudiante_id])
+  @@index([fecha])
+  @@map("asistencias_clase_grupo")
 }
 
 /// Modelo para inscripciones a clases (reservas)
@@ -947,6 +1114,7 @@ model Sector {
   /// Timestamp de última actualización del registro
   updatedAt   DateTime           @updatedAt
   clases      Clase[]
+  claseGrupos ClaseGrupo[]
   docentes    DocenteRuta[]
   estudiantes Estudiante[]
   rutas       RutaEspecialidad[]
@@ -1117,9 +1285,9 @@ model ConfiguracionPrecios {
   descuento_aacrea_activo     Boolean @default(true)
 
   /// Configuración de notificaciones
-  dia_vencimiento           Int     @default(15)
-  dias_antes_recordatorio   Int     @default(5)
-  notificaciones_activas    Boolean @default(true)
+  dia_vencimiento         Int     @default(15)
+  dias_antes_recordatorio Int     @default(5)
+  notificaciones_activas  Boolean @default(true)
 
   /// Metadata
   actualizado_por_admin_id String?
@@ -1215,10 +1383,10 @@ model Beca {
   estudiante_id String
 
   /// Tipo y configuración de la beca
-  tipo_beca         String // "Mérito Académico", "Social", "Deportiva", etc
-  descuento_tipo    DescuentoBecaTipo
-  descuento_valor   Decimal           @db.Decimal(10, 2) // Porcentaje o monto fijo
-  productos_aplica  Json // Array de IDs de productos donde aplica
+  tipo_beca        String // "Mérito Académico", "Social", "Deportiva", etc
+  descuento_tipo   DescuentoBecaTipo
+  descuento_valor  Decimal           @db.Decimal(10, 2) // Porcentaje o monto fijo
+  productos_aplica Json // Array de IDs de productos donde aplica
 
   /// Vigencia
   fecha_inicio DateTime
@@ -1226,11 +1394,11 @@ model Beca {
   activa       Boolean  @default(true)
 
   /// Metadata
-  motivo_beca String?
+  motivo_beca           String?
   aprobada_por_admin_id String?
-  observaciones String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  observaciones         String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   /// Relaciones
   estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
@@ -1273,4 +1441,25 @@ enum DescuentoBecaTipo {
   MONTO_FIJO
 
   @@map("descuento_beca_tipo")
+}
+
+/// Tipo de clase grupo
+enum TipoClaseGrupo {
+  GRUPO_REGULAR // Clase permanente del año lectivo (finaliza 15/dic)
+  CURSO_TEMPORAL // Curso con fecha de fin específica
+
+  @@map("tipo_clase_grupo")
+}
+
+/// Día de la semana para clases recurrentes
+enum DiaSemana {
+  LUNES
+  MARTES
+  MIERCOLES
+  JUEVES
+  VIERNES
+  SABADO
+  DOMINGO
+
+  @@map("dia_semana")
 }
