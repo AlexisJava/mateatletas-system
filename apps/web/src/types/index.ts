@@ -24,6 +24,20 @@ export type { Producto, TipoProducto, CrearProductoDto } from '@/lib/api/catalog
 // Pagos types - import from types files
 export type { Membresia, InscripcionCurso } from './pago.types';
 
+// Tutor Dashboard types - import from types files
+export type {
+  TipoAlerta,
+  PrioridadAlerta,
+  AlertaDashboard,
+  MetricasDashboard,
+  PagoPendiente,
+  ClaseHoy,
+  DashboardResumenResponse,
+  ClaseProxima,
+  ProximasClasesResponse,
+  AlertasResponse,
+} from './tutor-dashboard.types';
+
 // Equipos types - import from types files
 export type { Equipo } from './estudiante';
 
