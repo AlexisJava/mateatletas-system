@@ -441,7 +441,7 @@ export class AuthService {
     passwordActual: string,
     nuevaPassword: string,
   ) {
-    // 1. Buscar el usuario (puede ser estudiante o tutor)
+    // 1. Buscar el usuario (puede ser estudiante, tutor o docente)
     let estudiante = await this.prisma.estudiante.findUnique({
       where: { id: userId },
       select: {
@@ -453,7 +453,8 @@ export class AuthService {
     });
 
     let tutor = null;
-    let esEstudiante = true;
+    let docente = null;
+    let tipoUsuario: 'estudiante' | 'tutor' | 'docente' = 'estudiante';
 
     if (!estudiante) {
       tutor = await this.prisma.tutor.findUnique({
@@ -465,14 +466,27 @@ export class AuthService {
           debe_cambiar_password: true,
         },
       });
-      esEstudiante = false;
+      tipoUsuario = 'tutor';
 
       if (!tutor) {
-        throw new NotFoundException('Usuario no encontrado');
+        docente = await this.prisma.docente.findUnique({
+          where: { id: userId },
+          select: {
+            id: true,
+            password_hash: true,
+            password_temporal: true,
+            debe_cambiar_password: true,
+          },
+        });
+        tipoUsuario = 'docente';
+
+        if (!docente) {
+          throw new NotFoundException('Usuario no encontrado');
+        }
       }
     }
 
-    const usuario = esEstudiante ? estudiante : tutor;
+    const usuario = estudiante || tutor || docente;
 
     // 2. Verificar que la contraseña actual sea correcta
     const passwordValida = await bcrypt.compare(
@@ -495,13 +509,19 @@ export class AuthService {
       fecha_ultimo_cambio: new Date(),
     };
 
-    if (esEstudiante) {
+    if (tipoUsuario === 'estudiante') {
       await this.prisma.estudiante.update({
         where: { id: userId },
         data: updateData,
       });
-    } else {
+    } else if (tipoUsuario === 'tutor') {
       await this.prisma.tutor.update({
+        where: { id: userId },
+        data: updateData,
+      });
+    } else {
+      // docente
+      await this.prisma.docente.update({
         where: { id: userId },
         data: updateData,
       });

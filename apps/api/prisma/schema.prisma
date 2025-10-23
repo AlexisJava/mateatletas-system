@@ -161,6 +161,9 @@ model Docente {
   email                  String              @unique
   /// Hash bcrypt de la contraseña
   password_hash          String
+  /// Password temporal en texto plano - se muestra al admin al crear el docente
+  /// Se borra después del primer cambio de contraseña
+  password_temporal      String?
   /// Nombre del docente
   nombre                 String
   /// Apellido del docente
