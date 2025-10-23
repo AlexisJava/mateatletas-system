@@ -11,6 +11,7 @@ interface EstudianteForm {
   edad: number | '';
   nivel_escolar: string;
   email?: string;
+  sectoresAdicionales: string[]; // Sectores adicionales para este estudiante específico
 }
 
 interface TutorForm {
@@ -46,7 +47,7 @@ interface Props {
 
 export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sectorId, sectorNombre }: Props) {
   const [estudiantes, setEstudiantes] = useState<EstudianteForm[]>([
-    { nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '' }
+    { nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '', sectoresAdicionales: [] }
   ]);
   const [tutor, setTutor] = useState<TutorForm>({
     nombre: '',
@@ -55,7 +56,6 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
     telefono: '',
     dni: ''
   });
-  const [sectoresAdicionales, setSectoresAdicionales] = useState<string[]>([]);
   const [sectoresDisponibles, setSectoresDisponibles] = useState<Sector[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +80,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
   };
 
   const handleAgregarEstudiante = () => {
-    setEstudiantes([...estudiantes, { nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '' }]);
+    setEstudiantes([...estudiantes, { nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '', sectoresAdicionales: [] }]);
   };
 
   const handleEliminarEstudiante = (index: number) => {
@@ -89,22 +89,28 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
     }
   };
 
-  const handleEstudianteChange = (index: number, field: keyof EstudianteForm, value: string | number) => {
+  const handleEstudianteChange = (index: number, field: keyof EstudianteForm, value: string | number | string[]) => {
     const nuevosEstudiantes = [...estudiantes];
     nuevosEstudiantes[index] = { ...nuevosEstudiantes[index], [field]: value };
     setEstudiantes(nuevosEstudiantes);
   };
 
-  const handleTutorChange = (field: keyof TutorForm, value: string) => {
-    setTutor({ ...tutor, [field]: value });
+  const toggleSectorAdicionalEstudiante = (estudianteIndex: number, sectorIdToggle: string) => {
+    const estudiante = estudiantes[estudianteIndex];
+    const sectoresActuales = estudiante.sectoresAdicionales;
+
+    let nuevosSectores: string[];
+    if (sectoresActuales.includes(sectorIdToggle)) {
+      nuevosSectores = sectoresActuales.filter(id => id !== sectorIdToggle);
+    } else {
+      nuevosSectores = [...sectoresActuales, sectorIdToggle];
+    }
+
+    handleEstudianteChange(estudianteIndex, 'sectoresAdicionales', nuevosSectores);
   };
 
-  const toggleSectorAdicional = (sectorIdToggle: string) => {
-    if (sectoresAdicionales.includes(sectorIdToggle)) {
-      setSectoresAdicionales(sectoresAdicionales.filter(id => id !== sectorIdToggle));
-    } else {
-      setSectoresAdicionales([...sectoresAdicionales, sectorIdToggle]);
-    }
+  const handleTutorChange = (field: keyof TutorForm, value: string) => {
+    setTutor({ ...tutor, [field]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,12 +154,15 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
         sectorId
       });
 
-      // Copiar a sectores adicionales si fueron seleccionados
-      if (sectoresAdicionales.length > 0) {
-        const estudiantesCreados = response.estudiantes;
+      // Copiar cada estudiante a sus sectores adicionales específicos
+      const estudiantesCreados = response.estudiantes;
 
-        for (const estudiante of estudiantesCreados) {
-          for (const sectorDestino of sectoresAdicionales) {
+      for (let i = 0; i < estudiantesCreados.length; i++) {
+        const estudiante = estudiantesCreados[i];
+        const sectoresAdicionalesEstudiante = estudiantesValidos[i].sectoresAdicionales;
+
+        if (sectoresAdicionalesEstudiante.length > 0) {
+          for (const sectorDestino of sectoresAdicionalesEstudiante) {
             try {
               await apiClient.patch(`/estudiantes/${estudiante.id}/copiar-a-sector`, {
                 sectorId: sectorDestino
@@ -175,9 +184,8 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
 
   const handleFinalizar = () => {
     setCredenciales(null);
-    setEstudiantes([{ nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '' }]);
+    setEstudiantes([{ nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '', sectoresAdicionales: [] }]);
     setTutor({ nombre: '', apellido: '', email: '', telefono: '', dni: '' });
-    setSectoresAdicionales([]);
     setError(null);
     setIsSubmitting(false);
     onSuccess();
@@ -191,7 +199,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
     return (
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-2xl border border-emerald-500/30 shadow-2xl shadow-emerald-500/20 max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-          {/* Header - NO sticky */}
+          {/* Header */}
           <div className="bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border-b border-emerald-500/30 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -288,7 +296,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-2xl border border-emerald-500/30 shadow-2xl shadow-emerald-500/20 max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header - NO sticky */}
+        {/* Header */}
         <div className="bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border-b border-emerald-500/30 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -419,6 +427,31 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
                     />
                   </div>
                 </div>
+
+                {/* Sectores adicionales para ESTE estudiante */}
+                {sectoresDisponibles.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-blue-500/20">
+                    <h5 className="text-sm font-bold text-blue-200 mb-3">Copiar también a:</h5>
+                    <div className="space-y-2">
+                      {sectoresDisponibles.map((sector) => (
+                        <label
+                          key={sector.id}
+                          className="flex items-center gap-3 cursor-pointer group"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={estudiante.sectoresAdicionales.includes(sector.id)}
+                            onChange={() => toggleSectorAdicionalEstudiante(index, sector.id)}
+                            className="w-4 h-4 rounded border-2 border-blue-500/30 bg-black/30 text-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                          />
+                          <span className="text-white/70 text-sm font-medium group-hover:text-white transition-colors">
+                            {sector.nombre}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -499,36 +532,6 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
               </div>
             </div>
           </div>
-
-          {/* Copiar a otros sectores */}
-          {sectoresDisponibles.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-white">Copiar también a:</h3>
-              <div className="backdrop-blur-xl bg-purple-500/[0.08] border border-purple-500/20 rounded-xl p-6">
-                <div className="space-y-3">
-                  {sectoresDisponibles.map((sector) => (
-                    <label
-                      key={sector.id}
-                      className="flex items-center gap-3 cursor-pointer group"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={sectoresAdicionales.includes(sector.id)}
-                        onChange={() => toggleSectorAdicional(sector.id)}
-                        className="w-5 h-5 rounded border-2 border-purple-500/30 bg-black/30 text-purple-500 focus:ring-2 focus:ring-purple-500/20 cursor-pointer"
-                      />
-                      <span className="text-white/80 font-semibold group-hover:text-white transition-colors">
-                        {sector.nombre}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-                <p className="text-white/50 text-xs mt-4">
-                  El estudiante será creado en {sectorNombre} y copiado a los sectores seleccionados
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* Botones */}
           <div className="flex gap-4 pt-4 border-t border-emerald-500/20">
