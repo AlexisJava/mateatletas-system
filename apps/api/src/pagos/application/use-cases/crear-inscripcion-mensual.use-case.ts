@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
 import { CalcularPrecioUseCase } from './calcular-precio.use-case';
 import { IInscripcionMensualRepository } from '../../domain/repositories/inscripcion-mensual.repository.interface';
@@ -25,6 +26,7 @@ import { EstadoPago } from '../../domain/types/pagos.types';
  * 4. Crear inscripciones en batch
  * 5. Retornar resumen con todas las inscripciones
  */
+@Injectable()
 export class CrearInscripcionMensualUseCase {
   constructor(
     private readonly calcularPrecioUseCase: CalcularPrecioUseCase,
@@ -137,7 +139,7 @@ export class CrearInscripcionMensualUseCase {
    * Verifica que no existan inscripciones duplicadas
    */
   private async verificarDuplicados(
-    calculos: any[],
+    calculos: readonly { estudianteId: string; productoId: string }[],
     periodo: string,
   ): Promise<void> {
     for (const calculo of calculos) {

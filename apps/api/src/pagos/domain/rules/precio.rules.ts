@@ -22,6 +22,15 @@ import {
   TotalMensualOutput,
 } from '../types/pagos.types';
 
+// Re-exportar tipos para uso externo
+export type {
+  TipoDescuento,
+  ConfiguracionPrecios,
+  CalculoPrecioInput,
+  CalculoPrecioOutput,
+  TotalMensualOutput,
+};
+
 // ============================================================================
 // FUNCIÓN PRINCIPAL: Calcular Precio de Actividad
 // ============================================================================

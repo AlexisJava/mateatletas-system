@@ -72,6 +72,32 @@ export interface IInscripcionMensualRepository {
     productoId: string,
     periodo: string,
   ): Promise<boolean>;
+
+  /**
+   * Obtiene métricas agregadas para el dashboard
+   * Por período y opcionalmente por tutor
+   */
+  obtenerMetricasPorPeriodo(
+    periodo: string,
+    tutorId?: string,
+  ): Promise<MetricasPeriodo>;
+
+  /**
+   * Obtiene todas las inscripciones de un período
+   * Incluye información del estudiante y producto
+   */
+  obtenerInscripcionesPorPeriodo(
+    periodo: string,
+    tutorId?: string,
+  ): Promise<InscripcionMensualConRelaciones[]>;
+
+  /**
+   * Obtiene inscripciones agrupadas por estudiante con descuentos
+   */
+  obtenerEstudiantesConDescuentos(
+    periodo: string,
+    tutorId?: string,
+  ): Promise<EstudianteConDescuento[]>;
 }
 
 /**
@@ -138,4 +164,47 @@ export interface TotalMensual {
   readonly totalPagado: Decimal;
   readonly totalGeneral: Decimal;
   readonly cantidadInscripciones: number;
+}
+
+/**
+ * Métricas agregadas de un período
+ */
+export interface MetricasPeriodo {
+  readonly periodo: string;
+  readonly totalIngresos: Decimal; // Suma de inscripciones con estado Pagado
+  readonly totalPendientes: Decimal; // Suma de inscripciones con estado Pendiente
+  readonly totalVencidos: Decimal; // Suma de inscripciones con estado Vencido
+  readonly cantidadInscripciones: number;
+  readonly cantidadPagadas: number;
+  readonly cantidadPendientes: number;
+  readonly cantidadVencidas: number;
+}
+
+/**
+ * Inscripción con relaciones cargadas
+ */
+export interface InscripcionMensualConRelaciones extends InscripcionMensual {
+  readonly estudiante: {
+    readonly id: string;
+    readonly nombre: string;
+    readonly apellido: string;
+  };
+  readonly producto: {
+    readonly id: string;
+    readonly nombre: string;
+  };
+}
+
+/**
+ * Estudiante con descuentos aplicados
+ */
+export interface EstudianteConDescuento {
+  readonly estudianteId: string;
+  readonly estudianteNombre: string;
+  readonly tutorId: string;
+  readonly tipoDescuento: TipoDescuento;
+  readonly totalDescuento: Decimal;
+  readonly cantidadInscripciones: number;
+  readonly precioOriginal: Decimal;
+  readonly precioFinal: Decimal;
 }

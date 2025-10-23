@@ -100,3 +100,138 @@ export interface EstadoMembresiaResponse {
   tiene_membresia: boolean;
   membresia: Membresia | null;
 }
+
+/**
+ * =====================================================
+ * TIPOS PARA DASHBOARD DE MÉTRICAS
+ * =====================================================
+ */
+
+/**
+ * Métricas generales del dashboard
+ */
+export interface MetricasGenerales {
+  ingresosMesActual: string; // Decimal en formato string
+  pagosPendientes: string; // Decimal en formato string
+  inscripcionesActivas: number;
+  tasaCobroActual: string; // Decimal en formato string (porcentaje 0-100)
+  comparacionMesAnterior: {
+    ingresosCambio: string; // Decimal en formato string (porcentaje)
+    pendientesCambio: string; // Decimal en formato string (porcentaje)
+    inscripcionesCambio: number; // Cambio en cantidad
+    tasaCobroCambio: string; // Decimal en formato string (diferencia de porcentaje)
+  };
+}
+
+/**
+ * Evolución mensual para gráficos
+ */
+export interface EvolucionMensual {
+  periodo: string; // "YYYY-MM"
+  ingresos: string; // Decimal en formato string
+  pendientes: string; // Decimal en formato string
+  totalEsperado: string; // Decimal en formato string
+}
+
+/**
+ * Distribución por estado de pago para gráfico doughnut
+ */
+export interface DistribucionEstadoPago {
+  estado: string; // "Pagado", "Pendiente", "Vencido"
+  cantidad: number;
+  monto: string; // Decimal en formato string
+  porcentaje: string; // Decimal en formato string (0-100)
+}
+
+/**
+ * Response completa de métricas del dashboard
+ */
+export interface MetricasDashboardResponse {
+  periodo: string; // "YYYY-MM"
+  metricas: MetricasGenerales;
+  evolucionMensual: EvolucionMensual[]; // Últimos 6 meses
+  distribucionEstados: DistribucionEstadoPago[];
+}
+
+/**
+ * Configuración de precios
+ */
+export interface ConfiguracionPrecios {
+  precioClubMatematicas: string;
+  precioCursosEspecializados: string;
+  precioMultipleActividades: string;
+  precioHermanosBasico: string;
+  precioHermanosMultiple: string;
+  descuentoAacreaPorcentaje: string;
+  descuentoAacreaActivo: boolean;
+}
+
+/**
+ * Historial de cambio de precios
+ */
+export interface HistorialCambioPrecios {
+  id: string;
+  valoresAnteriores: Record<string, string>;
+  valoresNuevos: Record<string, string>;
+  adminId: string;
+  motivoCambio: string | null;
+  fechaCambio: string;
+}
+
+/**
+ * Inscripción mensual con relaciones
+ */
+export interface InscripcionMensualConRelaciones {
+  id: string;
+  estudianteId: string;
+  productoId: string;
+  tutorId: string;
+  periodo: string;
+  precioBase: string;
+  descuentoAplicado: string;
+  precioFinal: string;
+  tipoDescuento: string;
+  estadoPago: string;
+  fechaPago: string | null;
+  estudiante: {
+    id: string;
+    nombre: string;
+    apellido: string;
+  };
+  producto: {
+    id: string;
+    nombre: string;
+  };
+}
+
+/**
+ * Estudiante con descuentos
+ */
+export interface EstudianteConDescuento {
+  estudianteId: string;
+  estudianteNombre: string;
+  tutorId: string;
+  tipoDescuento: string;
+  totalDescuento: string;
+  cantidadInscripciones: number;
+  precioOriginal: string;
+  precioFinal: string;
+}
+
+/**
+ * Request para actualizar configuración de precios
+ */
+export interface ActualizarConfiguracionRequest {
+  adminId: string;
+  precioClubMatematicas?: number;
+  precioCursosEspecializados?: number;
+  precioMultipleActividades?: number;
+  precioHermanosBasico?: number;
+  precioHermanosMultiple?: number;
+  descuentoAacreaPorcentaje?: number;
+  descuentoAacreaActivo?: boolean;
+  diaVencimiento?: number;
+  diasAntesRecordatorio?: number;
+  notificacionesActivas?: boolean;
+  motivoCambio?: string;
+}

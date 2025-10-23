@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../../core/database/prisma.service';
 import { Decimal } from 'decimal.js';
 import {
   IInscripcionMensualRepository,
@@ -6,8 +7,11 @@ import {
   ActualizarPagoDTO,
   InscripcionMensual,
   TotalMensual,
+  MetricasPeriodo,
+  InscripcionMensualConRelaciones,
+  EstudianteConDescuento,
 } from '../../domain/repositories/inscripcion-mensual.repository.interface';
-import { EstadoPago } from '../../domain/types/pagos.types';
+import { EstadoPago, TipoDescuento } from '../../domain/types/pagos.types';
 
 /**
  * Implementación del repositorio de Inscripciones Mensuales
@@ -20,8 +24,9 @@ import { EstadoPago } from '../../domain/types/pagos.types';
  * - Cálculo de totales mensuales
  * - Garantizar consistencia de Decimals
  */
+@Injectable()
 export class InscripcionMensualRepository implements IInscripcionMensualRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Crea una nueva inscripción mensual
@@ -183,9 +188,184 @@ export class InscripcionMensualRepository implements IInscripcionMensualReposito
     return count > 0;
   }
 
+  /**
+   * Obtiene métricas agregadas para el dashboard
+   */
+  async obtenerMetricasPorPeriodo(
+    periodo: string,
+    tutorId?: string,
+  ): Promise<MetricasPeriodo> {
+    const where: any = { periodo };
+    if (tutorId) {
+      where.tutor_id = tutorId;
+    }
+
+    const inscripciones = await this.prisma.inscripcionMensual.findMany({
+      where,
+    });
+
+    // Calcular métricas
+    let totalIngresos = new Decimal(0);
+    let totalPendientes = new Decimal(0);
+    let totalVencidos = new Decimal(0);
+    let cantidadPagadas = 0;
+    let cantidadPendientes = 0;
+    let cantidadVencidas = 0;
+
+    for (const inscripcion of inscripciones) {
+      const precioFinal = new Decimal(inscripcion.precio_final.toString());
+
+      if (inscripcion.estado_pago === EstadoPago.Pagado) {
+        totalIngresos = totalIngresos.plus(precioFinal);
+        cantidadPagadas++;
+      } else if (inscripcion.estado_pago === EstadoPago.Pendiente) {
+        totalPendientes = totalPendientes.plus(precioFinal);
+        cantidadPendientes++;
+      } else if (inscripcion.estado_pago === EstadoPago.Vencido) {
+        totalVencidos = totalVencidos.plus(precioFinal);
+        cantidadVencidas++;
+      }
+    }
+
+    return {
+      periodo,
+      totalIngresos,
+      totalPendientes,
+      totalVencidos,
+      cantidadInscripciones: inscripciones.length,
+      cantidadPagadas,
+      cantidadPendientes,
+      cantidadVencidas,
+    };
+  }
+
+  /**
+   * Obtiene todas las inscripciones de un período con relaciones
+   */
+  async obtenerInscripcionesPorPeriodo(
+    periodo: string,
+    tutorId?: string,
+  ): Promise<InscripcionMensualConRelaciones[]> {
+    const where: any = { periodo };
+    if (tutorId) {
+      where.tutor_id = tutorId;
+    }
+
+    const inscripciones = await this.prisma.inscripcionMensual.findMany({
+      where,
+      include: {
+        estudiante: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        producto: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return inscripciones.map((i) => ({
+      ...this.mapearPrismaADomain(i),
+      estudiante: {
+        id: i.estudiante.id,
+        nombre: i.estudiante.nombre,
+        apellido: i.estudiante.apellido,
+      },
+      producto: {
+        id: i.producto.id,
+        nombre: i.producto.nombre,
+      },
+    }));
+  }
+
+  /**
+   * Obtiene estudiantes con descuentos aplicados
+   */
+  async obtenerEstudiantesConDescuentos(
+    periodo: string,
+    tutorId?: string,
+  ): Promise<EstudianteConDescuento[]> {
+    const where: any = { periodo };
+    if (tutorId) {
+      where.tutor_id = tutorId;
+    }
+
+    const inscripciones = await this.prisma.inscripcionMensual.findMany({
+      where: {
+        ...where,
+        tipo_descuento: {
+          not: 'NINGUNO',
+        },
+      },
+      include: {
+        estudiante: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+      },
+    });
+
+    // Agrupar por estudiante
+    const estudiantesMap = new Map<string, EstudianteConDescuento>();
+
+    for (const inscripcion of inscripciones) {
+      const estudianteId = inscripcion.estudiante_id;
+      const precioBase = new Decimal(inscripcion.precio_base.toString());
+      const descuento = new Decimal(inscripcion.descuento_aplicado.toString());
+      const precioFinal = new Decimal(inscripcion.precio_final.toString());
+
+      if (estudiantesMap.has(estudianteId)) {
+        const existing = estudiantesMap.get(estudianteId)!;
+        estudiantesMap.set(estudianteId, {
+          ...existing,
+          totalDescuento: existing.totalDescuento.plus(descuento),
+          cantidadInscripciones: existing.cantidadInscripciones + 1,
+          precioOriginal: existing.precioOriginal.plus(precioBase),
+          precioFinal: existing.precioFinal.plus(precioFinal),
+        });
+      } else {
+        estudiantesMap.set(estudianteId, {
+          estudianteId,
+          estudianteNombre: `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`,
+          tutorId: inscripcion.tutor_id,
+          tipoDescuento: this.mapearTipoDescuento(inscripcion.tipo_descuento),
+          totalDescuento: descuento,
+          cantidadInscripciones: 1,
+          precioOriginal: precioBase,
+          precioFinal,
+        });
+      }
+    }
+
+    return Array.from(estudiantesMap.values());
+  }
+
   // ============================================================================
   // MÉTODOS PRIVADOS - MAPEO Y CONVERSIÓN
   // ============================================================================
+
+  /**
+   * Mapea el enum TipoDescuento de Prisma al enum del Domain
+   * Valida que el valor sea correcto
+   */
+  private mapearTipoDescuento(tipoDescuento: string): TipoDescuento {
+    // Validar que el valor sea uno de los valores válidos
+    const valoresValidos: string[] = Object.values(TipoDescuento);
+    if (!valoresValidos.includes(tipoDescuento)) {
+      throw new Error(`Tipo de descuento inválido: ${tipoDescuento}`);
+    }
+    return tipoDescuento as TipoDescuento;
+  }
 
   /**
    * Convierte de tipos de Prisma a tipos del Domain

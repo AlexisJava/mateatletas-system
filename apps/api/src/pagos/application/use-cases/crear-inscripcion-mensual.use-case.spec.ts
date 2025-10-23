@@ -35,6 +35,9 @@ describe('CrearInscripcionMensualUseCase - Application Layer', () => {
       actualizarEstadoPago: jest.fn(),
       calcularTotalMensualTutor: jest.fn(),
       existe: jest.fn(),
+      obtenerMetricasPorPeriodo: jest.fn(),
+      obtenerInscripcionesPorPeriodo: jest.fn(),
+      obtenerEstudiantesConDescuentos: jest.fn(),
     };
 
     useCase = new CrearInscripcionMensualUseCase(

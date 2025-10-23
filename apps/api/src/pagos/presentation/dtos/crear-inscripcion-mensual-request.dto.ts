@@ -13,7 +13,7 @@ export class CrearInscripcionMensualRequestDto {
   })
   @IsString()
   @IsNotEmpty()
-  tutorId: string;
+  tutorId!: string;
 
   @ApiProperty({
     description: 'IDs de los estudiantes a inscribir',
@@ -23,7 +23,7 @@ export class CrearInscripcionMensualRequestDto {
   @IsArray()
   @IsString({ each: true })
   @IsNotEmpty()
-  estudiantesIds: string[];
+  estudiantesIds!: string[];
 
   @ApiProperty({
     description: 'Productos por estudiante',
@@ -34,7 +34,7 @@ export class CrearInscripcionMensualRequestDto {
   })
   @IsObject()
   @IsNotEmpty()
-  productosIdsPorEstudiante: Record<string, string[]>;
+  productosIdsPorEstudiante!: Record<string, string[]>;
 
   @ApiProperty({
     description: 'Año de facturación',
@@ -44,7 +44,7 @@ export class CrearInscripcionMensualRequestDto {
   @Min(2024)
   @Max(2100)
   @Type(() => Number)
-  anio: number;
+  anio!: number;
 
   @ApiProperty({
     description: 'Mes de facturación (1-12)',
@@ -54,12 +54,12 @@ export class CrearInscripcionMensualRequestDto {
   @Min(1)
   @Max(12)
   @Type(() => Number)
-  mes: number;
+  mes!: number;
 
   @ApiProperty({
     description: 'Indica si el grupo tiene AACREA',
     example: false,
   })
   @IsBoolean()
-  tieneAACREA: boolean;
+  tieneAACREA!: boolean;
 }
