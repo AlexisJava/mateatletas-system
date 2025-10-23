@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TutorController } from './tutor.controller';
 import { TutorService } from './tutor.service';
 import { PagosModule } from '../pagos/pagos.module';
+import { PrismaService } from '../core/database/prisma.service';
 
 /**
  * TutorModule
@@ -17,7 +18,7 @@ import { PagosModule } from '../pagos/pagos.module';
 @Module({
   imports: [PagosModule],
   controllers: [TutorController],
-  providers: [TutorService],
+  providers: [TutorService, PrismaService],
   exports: [TutorService],
 })
 export class TutorModule {}
