@@ -98,6 +98,20 @@ export interface IInscripcionMensualRepository {
     periodo: string,
     tutorId?: string,
   ): Promise<EstudianteConDescuento[]>;
+
+  /**
+   * Obtiene todas las inscripciones de un tutor con filtros opcionales
+   * Método flexible para el dashboard de tutores
+   * @param tutorId - ID del tutor
+   * @param periodo - Período opcional en formato "YYYY-MM"
+   * @param estadoPago - Estado opcional (Pendiente, Pagado, Vencido)
+   * @returns Array de inscripciones con relaciones
+   */
+  obtenerPorTutor(
+    tutorId: string,
+    periodo?: string,
+    estadoPago?: EstadoPago,
+  ): Promise<InscripcionMensual[]>;
 }
 
 /**

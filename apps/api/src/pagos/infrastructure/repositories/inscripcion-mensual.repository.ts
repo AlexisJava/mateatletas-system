@@ -394,4 +394,54 @@ export class InscripcionMensualRepository implements IInscripcionMensualReposito
       updatedAt: inscripcion.updatedAt,
     };
   }
+
+  /**
+   * Obtiene todas las inscripciones de un tutor con filtros opcionales
+   * Método flexible para el dashboard de tutores
+   */
+  async obtenerPorTutor(
+    tutorId: string,
+    periodo?: string,
+    estadoPago?: EstadoPago,
+  ): Promise<InscripcionMensual[]> {
+    // Construir filtros dinámicamente
+    const where: any = {
+      tutor_id: tutorId,
+    };
+
+    if (periodo) {
+      where.periodo = periodo;
+    }
+
+    if (estadoPago) {
+      where.estado_pago = estadoPago;
+    }
+
+    // Ejecutar query con filtros
+    const inscripciones = await this.prisma.inscripcionMensual.findMany({
+      where,
+      include: {
+        estudiante: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        producto: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
+      },
+      orderBy: [
+        { periodo: 'desc' }, // Más recientes primero
+        { createdAt: 'desc' },
+      ],
+    });
+
+    // Mapear a domain objects
+    return inscripciones.map((inscripcion) => this.mapearADominio(inscripcion));
+  }
 }
