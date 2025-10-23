@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import apiClient from '@/lib/axios';
-import OnboardingView from './components/OnboardingView';
+import { getDashboardResumen } from '@/lib/api/tutor.api';
 import DashboardView from './components/DashboardView';
 import type { Estudiante } from '@/types/estudiante';
 import type { Clase } from '@/types/clases.types';
 import type { Membresia } from '@/types/pago.types';
+import type { DashboardResumenResponse } from '@/types/tutor-dashboard.types';
 
 /**
  * Dashboard del Tutor - Página principal después del login
@@ -27,6 +28,7 @@ export default function DashboardPage() {
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [clases, setClases] = useState<Clase[]>([]);
   const [membresia, setMembresia] = useState<Membresia | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardResumenResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Protección de ruta: solo tutores autenticados
@@ -50,20 +52,22 @@ export default function DashboardPage() {
     try {
       setLoading(true);
 
-      // Cargar estudiantes, clases y membresía en paralelo
-      const [estudiantesRes, clasesRes, membresiaRes] = await Promise.all([
+      // Cargar estudiantes, clases y dashboard resumen en paralelo
+      const [estudiantesRes, clasesRes, dashboardRes] = await Promise.all([
         apiClient.get('/estudiantes'),
         apiClient.get('/clases'),
-        apiClient.get('/pagos/membresia'),
+        getDashboardResumen(),
       ]);
 
       // El endpoint /estudiantes devuelve { data: [...], metadata: {...} }
       // Axios interceptor ya extrajo response.data, entonces estudiantesRes ES {data: [...], metadata: {...}}
       setEstudiantes(estudiantesRes?.data || []);
       setClases(clasesRes?.data || []);
-      setMembresia((membresiaRes?.data?.membresia || null) as Membresia | null);
+      setDashboardData(dashboardRes);
+      setMembresia(null); // Sin membresía por ahora
     } catch (error: unknown) {
       // Error loading dashboard data
+      console.error('Error loading dashboard:', error);
     } finally {
       setLoading(false);
     }
@@ -81,21 +85,14 @@ export default function DashboardPage() {
     );
   }
 
-  // Determinar si tiene hijos o no
-  const hasChildren = estudiantes.length > 0;
-
-  // Si NO tiene hijos → Mostrar Onboarding
-  if (!hasChildren || !user) {
-    return <OnboardingView user={user!} />;
-  }
-
-  // Si SÍ tiene hijos → Mostrar Dashboard completo
+  // Siempre mostrar el Dashboard completo (sin onboarding)
   return (
     <DashboardView
       user={user!}
       estudiantes={estudiantes}
       clases={clases}
       membresia={membresia}
+      dashboardData={dashboardData}
     />
   );
 }

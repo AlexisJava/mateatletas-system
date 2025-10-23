@@ -7,19 +7,19 @@ import { AuthUser } from '@/lib/api/auth.api';
 import { Estudiante } from '@/types/estudiante';
 import { Clase } from '@/types/clases.types';
 import { Membresia } from '@/types/pago.types';
+import { DashboardResumenResponse } from '@/types/tutor-dashboard.types';
 import {
   Users,
   Calendar,
-  Star,
   Clock,
-  CreditCard,
-  CheckCircle,
   ChevronRight,
   Home,
   DollarSign,
   UserCheck,
   LogOut,
   ChevronDown,
+  AlertCircle,
+  TrendingUp,
 } from 'lucide-react';
 import MisHijosTab from './MisHijosTab';
 import CalendarioTab from './CalendarioTab';
@@ -31,6 +31,7 @@ interface DashboardViewProps {
   estudiantes: Estudiante[];
   clases: Clase[];
   membresia: Membresia | null;
+  dashboardData: DashboardResumenResponse | null;
 }
 
 type TabType = 'dashboard' | 'hijos' | 'calendario' | 'pagos' | 'ayuda';
@@ -40,6 +41,7 @@ export default function DashboardView({
   estudiantes,
   clases,
   membresia,
+  dashboardData,
 }: DashboardViewProps) {
   const router = useRouter();
   const { logout } = useAuthStore();
@@ -70,17 +72,6 @@ export default function DashboardView({
     }
     return edad;
   };
-
-  // Clases de hoy
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  const manana = new Date(hoy);
-  manana.setDate(manana.getDate() + 1);
-
-  const clasesHoy = clases.filter((clase) => {
-    const fechaClase = new Date(clase.fecha_hora_inicio);
-    return fechaClase >= hoy && fechaClase < manana;
-  });
 
   // Transformar estudiantes a formato UI
   const hijosData = estudiantes.map((est) => {
@@ -234,8 +225,22 @@ export default function DashboardView({
 
               {/* Stats Cards */}
               <div className="bg-white rounded-xl p-4 shadow-lg border-2 border-gray-300">
-                <h2 className="text-base font-bold text-gray-900 mb-3">Resumen de Hoy</h2>
+                <h2 className="text-base font-bold text-gray-900 mb-3">Métricas Principales</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {/* Total Hijos */}
+                  <div className="bg-white rounded-xl p-5 shadow-md border-2 border-gray-200 border-l-4 border-l-indigo-500">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Hijos</p>
+                        <p className="text-3xl font-bold text-gray-900">
+                          {dashboardData?.metricas.totalHijos || 0}
+                        </p>
+                      </div>
+                      <Users className="w-10 h-10 text-gray-300" />
+                    </div>
+                  </div>
+
+                  {/* Clases del Mes */}
                   <div
                     className="rounded-xl p-5 shadow-md border-2 border-indigo-200"
                     style={{
@@ -244,36 +249,34 @@ export default function DashboardView({
                   >
                     <div className="flex items-center justify-between text-white">
                       <div>
-                        <p className="text-sm font-medium opacity-90">Clases Hoy</p>
-                        <p className="text-3xl font-bold">{clasesHoy.length}</p>
+                        <p className="text-sm font-medium opacity-90">Clases del Mes</p>
+                        <p className="text-3xl font-bold">
+                          {dashboardData?.metricas.clasesDelMes || 0}
+                        </p>
                       </div>
                       <Calendar className="w-10 h-10 opacity-80" />
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-xl p-5 shadow-md border-2 border-gray-200 border-l-4 border-l-green-500">
-                    <div className="flex items-center justify-between">
+                  {/* Total Pagado Este Año */}
+                  <div
+                    className="rounded-xl p-5 shadow-md border-2 border-green-200"
+                    style={{
+                      background: 'linear-gradient(135deg, #34D399 0%, #10B981 100%)',
+                    }}
+                  >
+                    <div className="flex items-center justify-between text-white">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">Estado Pago</p>
-                        <p className="text-lg font-bold text-green-600 flex items-center gap-2">
-                          <CheckCircle className="w-5 h-5" />
-                          {membresia?.estado === 'Activa' ? 'Al día' : 'Inactiva'}
+                        <p className="text-sm font-medium opacity-90">Pagado en {new Date().getFullYear()}</p>
+                        <p className="text-2xl font-bold">
+                          ${dashboardData?.metricas.totalPagadoAnio.toLocaleString('es-AR') || 0}
                         </p>
                       </div>
-                      <CreditCard className="w-10 h-10 text-gray-300" />
+                      <DollarSign className="w-10 h-10 opacity-80" />
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-xl p-5 shadow-md border-2 border-gray-200 border-l-4 border-l-amber-500">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Hijos</p>
-                        <p className="text-3xl font-bold text-gray-900">{estudiantes.length}</p>
-                      </div>
-                      <Users className="w-10 h-10 text-gray-300" />
-                    </div>
-                  </div>
-
+                  {/* Asistencia Promedio */}
                   <div
                     className="rounded-xl p-5 shadow-md border-2 border-amber-200"
                     style={{
@@ -282,14 +285,63 @@ export default function DashboardView({
                   >
                     <div className="flex items-center justify-between text-white">
                       <div>
-                        <p className="text-sm font-medium opacity-90">Clases Totales</p>
-                        <p className="text-3xl font-bold">{clases.length}</p>
+                        <p className="text-sm font-medium opacity-90">Asistencia</p>
+                        <p className="text-3xl font-bold">
+                          {dashboardData?.metricas.asistenciaPromedio || 0}%
+                        </p>
                       </div>
-                      <Star className="w-10 h-10 opacity-80" />
+                      <TrendingUp className="w-10 h-10 opacity-80" />
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Alertas */}
+              {dashboardData && dashboardData.alertas.length > 0 && (
+                <div className="bg-white rounded-xl p-4 shadow-lg border-2 border-red-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <AlertCircle className="w-5 h-5 text-red-600" />
+                    <h2 className="text-base font-bold text-gray-900">
+                      Alertas Importantes ({dashboardData.alertas.length})
+                    </h2>
+                  </div>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {dashboardData.alertas.slice(0, 5).map((alerta) => (
+                      <div
+                        key={alerta.id}
+                        className={`p-3 rounded-lg border-l-4 ${
+                          alerta.prioridad === 'alta'
+                            ? 'bg-red-50 border-red-500'
+                            : alerta.prioridad === 'media'
+                            ? 'bg-amber-50 border-amber-500'
+                            : 'bg-blue-50 border-blue-500'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1">
+                            <p className="font-semibold text-sm text-gray-900">{alerta.titulo}</p>
+                            <p className="text-sm text-gray-600">{alerta.mensaje}</p>
+                          </div>
+                          {alerta.accion && (
+                            <button
+                              onClick={() => {
+                                // Manejar navegación con router si es necesario
+                                if (alerta.accion.url.startsWith('/dashboard?tab=')) {
+                                  const tab = alerta.accion.url.split('tab=')[1].split('&')[0];
+                                  setActiveTab(tab as TabType);
+                                }
+                              }}
+                              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 whitespace-nowrap"
+                            >
+                              {alerta.accion.label}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* 2 Column Layout */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-hidden">
@@ -338,7 +390,9 @@ export default function DashboardView({
                 {/* Clases de Hoy */}
                 <div className="bg-white rounded-xl p-4 shadow-lg border-2 border-gray-300 overflow-y-auto">
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-bold text-gray-900">Clases de Hoy</h2>
+                    <h2 className="text-lg font-bold text-gray-900">
+                      Clases de Hoy ({dashboardData?.clasesHoy.length || 0})
+                    </h2>
                     <button
                       onClick={() => setActiveTab('calendario')}
                       className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm flex items-center gap-1"
@@ -347,50 +401,51 @@ export default function DashboardView({
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
-                  {clasesHoy.length > 0 ? (
+                  {dashboardData && dashboardData.clasesHoy.length > 0 ? (
                     <div className="space-y-3">
-                      {clasesHoy.map((clase) => {
-                        const estudianteInscrito = clase.inscripciones?.[0]?.estudiante;
-                        return (
-                          <div
-                            key={clase.id}
-                            className="bg-gray-50 rounded-xl p-5 shadow-md hover:shadow-xl transition-all border-2 border-gray-200"
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4 flex-1">
-                                <div
-                                  className="w-16 h-16 rounded-lg flex flex-col items-center justify-center text-white shadow-md"
-                                  style={{
-                                    background: 'linear-gradient(135deg, #6366F1 0%, #6366F1dd 100%)',
-                                  }}
-                                >
-                                  <Clock className="w-5 h-5 mb-1" />
-                                  <span className="font-bold text-sm">
-                                    {new Date(clase.fecha_hora_inicio).toLocaleTimeString('es-AR', {
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}
-                                  </span>
-                                </div>
-                                <div className="flex-1">
-                                  <h3 className="font-bold text-gray-900">{clase.ruta_curricular?.nombre || 'Clase sin ruta asignada'}</h3>
-                                  <p className="text-sm text-gray-600">
-                                    {estudianteInscrito?.nombre} • Prof. {clase.docente?.nombre || 'Docente'}
-                                  </p>
-                                </div>
-                              </div>
-                              <button
-                                className="font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all text-sm text-white"
+                      {dashboardData.clasesHoy.map((clase) => (
+                        <div
+                          key={clase.id}
+                          className="bg-gray-50 rounded-xl p-5 shadow-md hover:shadow-xl transition-all border-2 border-gray-200"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4 flex-1">
+                              <div
+                                className="w-16 h-16 rounded-lg flex flex-col items-center justify-center text-white shadow-md"
                                 style={{
-                                  background: 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)',
+                                  background: clase.colorRuta
+                                    ? `linear-gradient(135deg, ${clase.colorRuta} 0%, ${clase.colorRuta}dd 100%)`
+                                    : 'linear-gradient(135deg, #6366F1 0%, #6366F1dd 100%)',
                                 }}
                               >
-                                Unirse
-                              </button>
+                                <Clock className="w-5 h-5 mb-1" />
+                                <span className="font-bold text-sm">{clase.hora}</span>
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-bold text-gray-900">{clase.nombreRuta}</h3>
+                                <p className="text-sm text-gray-600">
+                                  {clase.estudianteNombre} • Prof. {clase.docenteNombre}
+                                </p>
+                              </div>
                             </div>
+                            <button
+                              disabled={!clase.puedeUnirse}
+                              className={`font-semibold py-2 px-4 rounded-lg shadow-md transition-all text-sm text-white ${
+                                clase.puedeUnirse
+                                  ? 'hover:shadow-lg'
+                                  : 'opacity-50 cursor-not-allowed'
+                              }`}
+                              style={{
+                                background: clase.puedeUnirse
+                                  ? 'linear-gradient(135deg, #34D399 0%, #10B981 100%)'
+                                  : 'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)',
+                              }}
+                            >
+                              {clase.puedeUnirse ? 'Unirse' : 'Próximamente'}
+                            </button>
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
