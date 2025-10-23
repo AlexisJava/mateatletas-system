@@ -112,20 +112,20 @@ export default function PagosTab() {
   const renderEstadoBadge = (estado: EstadoPago) => {
     const config = {
       Pagado: {
-        bg: 'bg-green-100',
-        text: 'text-green-700',
+        bg: 'bg-green-600',
+        text: 'text-white',
         icon: CheckCircle,
         label: 'Pagado',
       },
       Pendiente: {
-        bg: 'bg-yellow-100',
-        text: 'text-yellow-700',
+        bg: 'bg-yellow-600',
+        text: 'text-white',
         icon: Clock,
         label: 'Pendiente',
       },
       Vencido: {
-        bg: 'bg-red-100',
-        text: 'text-red-700',
+        bg: 'bg-red-600',
+        text: 'text-white',
         icon: XCircle,
         label: 'Vencido',
       },
@@ -147,7 +147,7 @@ export default function PagosTab() {
       <div className="h-full flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg font-semibold text-gray-700">Cargando pagos...</p>
+          <p className="text-lg font-semibold text-white">Cargando pagos...</p>
         </div>
       </div>
     );
@@ -158,9 +158,9 @@ export default function PagosTab() {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center">
-          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-500" />
-          <p className="text-xl font-bold text-gray-900 mb-2">Error</p>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
+          <p className="text-xl font-bold text-white mb-2">Error</p>
+          <p className="text-gray-300 mb-4">{error}</p>
           <button
             onClick={loadInscripciones}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
@@ -177,9 +177,9 @@ export default function PagosTab() {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center">
-          <CreditCard className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <p className="text-xl font-bold text-gray-900 mb-2">Sin pagos registrados</p>
-          <p className="text-gray-600">
+          <CreditCard className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+          <p className="text-xl font-bold text-white mb-2">Sin pagos registrados</p>
+          <p className="text-gray-400">
             {selectedPeriodo || selectedEstado
               ? 'No hay pagos con los filtros seleccionados. Intentá cambiar los filtros.'
               : 'Todavía no hay inscripciones mensuales registradas.'}
@@ -219,22 +219,22 @@ export default function PagosTab() {
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-xl shadow-lg border-2 border-gray-300 p-4">
+      <div className="bg-gray-900 rounded-xl shadow-2xl border-2 border-gray-700 p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Filter className="w-5 h-5 text-gray-600" />
-          <h3 className="text-lg font-bold text-gray-900">Filtros</h3>
+          <Filter className="w-5 h-5 text-indigo-400" />
+          <h3 className="text-lg font-bold text-white">Filtros</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Filtro por Periodo */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-300 mb-1">
               Periodo
             </label>
             <select
               value={selectedPeriodo}
               onChange={(e) => setSelectedPeriodo(e.target.value)}
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full px-3 py-2 bg-gray-800 border-2 border-gray-700 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors text-white"
             >
               <option value="">Todos los periodos</option>
               {getPeriodosOptions().map((periodo) => (
@@ -247,13 +247,13 @@ export default function PagosTab() {
 
           {/* Filtro por Estado */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-semibold text-gray-300 mb-1">
               Estado
             </label>
             <select
               value={selectedEstado}
               onChange={(e) => setSelectedEstado(e.target.value as EstadoPago | '')}
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full px-3 py-2 bg-gray-800 border-2 border-gray-700 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors text-white"
             >
               <option value="">Todos los estados</option>
               <option value="Pendiente">Pendiente</option>
@@ -270,7 +270,7 @@ export default function PagosTab() {
                 setSelectedEstado('');
               }}
               disabled={!selectedPeriodo && !selectedEstado}
-              className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
             >
               Limpiar Filtros
             </button>
@@ -279,8 +279,8 @@ export default function PagosTab() {
       </div>
 
       {/* Lista de Inscripciones - Scrollable */}
-      <div className="flex-1 bg-white rounded-xl shadow-lg border-2 border-gray-300 p-4 overflow-hidden flex flex-col">
-        <h3 className="text-lg font-bold text-gray-900 mb-3">
+      <div className="flex-1 bg-gray-900 rounded-xl shadow-2xl border-2 border-gray-700 p-4 overflow-hidden flex flex-col">
+        <h3 className="text-lg font-bold text-white mb-3">
           Inscripciones Mensuales ({data.inscripciones.length})
         </h3>
 
@@ -288,22 +288,22 @@ export default function PagosTab() {
           {data.inscripciones.map((inscripcion) => (
             <div
               key={inscripcion.id}
-              className="bg-gray-50 rounded-xl p-4 border-2 border-gray-200 hover:border-indigo-300 transition-all"
+              className="bg-gray-800 rounded-xl p-4 border-2 border-gray-700 hover:border-indigo-500 transition-all"
             >
               <div className="flex items-start justify-between gap-4">
                 {/* Info de la Inscripción */}
                 <div className="flex-1">
                   <div className="flex items-start gap-3 mb-2">
-                    <div className="bg-indigo-100 rounded-lg p-2 flex-shrink-0">
-                      <CreditCard className="w-5 h-5 text-indigo-600" />
+                    <div className="bg-indigo-600 rounded-lg p-2 flex-shrink-0">
+                      <CreditCard className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-gray-900">{inscripcion.productoNombre}</h4>
-                      <p className="text-sm text-indigo-600 flex items-center gap-1.5 mt-1">
+                      <h4 className="font-bold text-white">{inscripcion.productoNombre}</h4>
+                      <p className="text-sm text-indigo-400 flex items-center gap-1.5 mt-1">
                         <User className="w-4 h-4" />
                         {inscripcion.estudianteNombre}
                       </p>
-                      <p className="text-sm text-gray-600 flex items-center gap-1.5 mt-1">
+                      <p className="text-sm text-gray-400 flex items-center gap-1.5 mt-1">
                         <Calendar className="w-4 h-4" />
                         {formatPeriodo(inscripcion.periodo)}
                       </p>
@@ -316,7 +316,7 @@ export default function PagosTab() {
                       {inscripcion.descuentosAplicados.map((descuento, idx) => (
                         <span
                           key={idx}
-                          className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium flex items-center gap-1"
+                          className="text-xs bg-green-600 text-white px-2 py-1 rounded-full font-medium flex items-center gap-1"
                         >
                           <TrendingUp className="w-3 h-3" />
                           {descuento.tipo} -{descuento.porcentaje}%
@@ -328,7 +328,7 @@ export default function PagosTab() {
                   {/* Botón Ver Detalle */}
                   <button
                     onClick={() => setSelectedInscripcion(inscripcion)}
-                    className="mt-2 text-indigo-600 hover:text-indigo-700 text-sm font-semibold flex items-center gap-1"
+                    className="mt-2 text-indigo-400 hover:text-indigo-300 text-sm font-semibold flex items-center gap-1"
                   >
                     <Info className="w-4 h-4" />
                     Ver detalle completo
@@ -337,10 +337,10 @@ export default function PagosTab() {
 
                 {/* Precio y Estado */}
                 <div className="text-right flex-shrink-0">
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(inscripcion.precioFinal)}</p>
+                  <p className="text-2xl font-bold text-white">{formatCurrency(inscripcion.precioFinal)}</p>
                   <div className="mt-2">{renderEstadoBadge(inscripcion.estadoPago)}</div>
                   {inscripcion.fechaPago && (
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-xs text-gray-400 mt-2">
                       Pagado el {new Date(inscripcion.fechaPago).toLocaleDateString('es-AR')}
                     </p>
                   )}
@@ -362,7 +362,7 @@ export default function PagosTab() {
 
           {/* Modal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-gray-900 border-2 border-gray-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               {/* Header */}
               <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white p-6 rounded-t-2xl">
                 <h2 className="text-2xl font-bold">Detalle de Inscripción</h2>
@@ -375,25 +375,25 @@ export default function PagosTab() {
               <div className="p-6 space-y-4">
                 {/* Info General */}
                 <div className="space-y-3">
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="font-semibold text-gray-700">Producto:</span>
-                    <span className="text-gray-900">{selectedInscripcion.productoNombre}</span>
+                  <div className="flex justify-between py-2 border-b border-gray-700">
+                    <span className="font-semibold text-gray-300">Producto:</span>
+                    <span className="text-white">{selectedInscripcion.productoNombre}</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="font-semibold text-gray-700">Estudiante:</span>
-                    <span className="text-gray-900">{selectedInscripcion.estudianteNombre}</span>
+                  <div className="flex justify-between py-2 border-b border-gray-700">
+                    <span className="font-semibold text-gray-300">Estudiante:</span>
+                    <span className="text-white">{selectedInscripcion.estudianteNombre}</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="font-semibold text-gray-700">Periodo:</span>
-                    <span className="text-gray-900">{formatPeriodo(selectedInscripcion.periodo)}</span>
+                  <div className="flex justify-between py-2 border-b border-gray-700">
+                    <span className="font-semibold text-gray-300">Periodo:</span>
+                    <span className="text-white">{formatPeriodo(selectedInscripcion.periodo)}</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="font-semibold text-gray-700">Estado:</span>
+                  <div className="flex justify-between py-2 border-b border-gray-700">
+                    <span className="font-semibold text-gray-300">Estado:</span>
                     {renderEstadoBadge(selectedInscripcion.estadoPago)}
                   </div>
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="font-semibold text-gray-700">Precio Final:</span>
-                    <span className="text-2xl font-bold text-indigo-600">
+                  <div className="flex justify-between py-2 border-b border-gray-700">
+                    <span className="font-semibold text-gray-300">Precio Final:</span>
+                    <span className="text-2xl font-bold text-indigo-400">
                       {formatCurrency(selectedInscripcion.precioFinal)}
                     </span>
                   </div>
@@ -401,16 +401,16 @@ export default function PagosTab() {
 
                 {/* Descuentos Aplicados */}
                 {selectedInscripcion.descuentosAplicados && selectedInscripcion.descuentosAplicados.length > 0 && (
-                  <div className="bg-green-50 rounded-xl p-4 border-2 border-green-200">
-                    <h3 className="font-bold text-green-900 mb-3 flex items-center gap-2">
+                  <div className="bg-green-900/20 rounded-xl p-4 border-2 border-green-600">
+                    <h3 className="font-bold text-green-400 mb-3 flex items-center gap-2">
                       <TrendingUp className="w-5 h-5" />
                       Descuentos Aplicados
                     </h3>
                     <div className="space-y-2">
                       {selectedInscripcion.descuentosAplicados.map((descuento, idx) => (
                         <div key={idx} className="flex justify-between items-center">
-                          <span className="text-sm text-gray-700">{descuento.tipo}:</span>
-                          <span className="font-semibold text-green-700">
+                          <span className="text-sm text-gray-300">{descuento.tipo}:</span>
+                          <span className="font-semibold text-green-400">
                             -{descuento.porcentaje}% ({formatCurrency(descuento.monto)})
                           </span>
                         </div>
@@ -420,27 +420,27 @@ export default function PagosTab() {
                 )}
 
                 {/* Fechas */}
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <h3 className="font-bold text-gray-900 mb-3">Fechas</h3>
+                <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+                  <h3 className="font-bold text-white mb-3">Fechas</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Creada:</span>
-                      <span className="text-gray-900">
+                      <span className="text-gray-400">Creada:</span>
+                      <span className="text-white">
                         {new Date(selectedInscripcion.createdAt).toLocaleDateString('es-AR')}
                       </span>
                     </div>
                     {selectedInscripcion.fechaVencimiento && (
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Vencimiento:</span>
-                        <span className="text-gray-900">
+                        <span className="text-gray-400">Vencimiento:</span>
+                        <span className="text-white">
                           {new Date(selectedInscripcion.fechaVencimiento).toLocaleDateString('es-AR')}
                         </span>
                       </div>
                     )}
                     {selectedInscripcion.fechaPago && (
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Pagada:</span>
-                        <span className="text-green-700 font-semibold">
+                        <span className="text-gray-400">Pagada:</span>
+                        <span className="text-green-400 font-semibold">
                           {new Date(selectedInscripcion.fechaPago).toLocaleDateString('es-AR')}
                         </span>
                       </div>
@@ -450,7 +450,7 @@ export default function PagosTab() {
               </div>
 
               {/* Footer */}
-              <div className="p-6 bg-gray-50 rounded-b-2xl">
+              <div className="p-6 bg-gray-800 rounded-b-2xl border-t border-gray-700">
                 <button
                   onClick={() => setSelectedInscripcion(null)}
                   className="w-full px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold"
