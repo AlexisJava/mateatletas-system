@@ -9,6 +9,7 @@ import { seedAccionesPuntuables } from './acciones-puntuables.seed';
 import { seedLogros } from './logros.seed';
 import { seedSectores } from './sectores.seed';
 import { seedConfiguracionPrecios } from './configuracion-precios.seed';
+import { seedInscripcionesMensuales } from './inscripciones-mensuales.seed';
 
 /**
  * Orchestrator para todos los seeds modulares
@@ -41,6 +42,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedProductos(prisma);
     await seedAccionesPuntuables(prisma);
     await seedLogros(prisma);
+    await seedInscripcionesMensuales(prisma); // Inscripciones de prueba para el tutor
   }
 
   console.log(`\n🎉 Seed completado exitosamente (${env})!`);
@@ -58,4 +60,5 @@ export {
   seedProductos,
   seedAccionesPuntuables,
   seedLogros,
+  seedInscripcionesMensuales,
 };
