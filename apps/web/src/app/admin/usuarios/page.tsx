@@ -78,37 +78,29 @@ export default function UsuariosPage() {
         setModalType(null);
         setSelectedUser(null);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Detectar error de clases asignadas
-      console.log('🔍 Error capturado:', error);
-      console.log('🔍 Error response:', error?.response);
-      console.log('🔍 Error data:', error?.response?.data);
+      const axiosError = error as { response?: { data?: { errorMessage?: string; message?: string } }; message?: string };
 
-      const errorMsg = error?.response?.data?.errorMessage || error?.response?.data?.message || error?.message || 'Error al eliminar usuario';
-      console.log('🔍 Mensaje de error extraído:', errorMsg);
+      const errorMsg = axiosError?.response?.data?.errorMessage || axiosError?.response?.data?.message || axiosError?.message || 'Error al eliminar usuario';
 
       if (errorMsg.includes('clase(s) asignada(s)')) {
-        console.log('✅ Detectado error de clases asignadas');
         // Extraer número de clases del mensaje
         const match = errorMsg.match(/(\d+) clase\(s\)/);
         const numClases = match ? parseInt(match[1]) : 0;
-        console.log('📊 Número de clases:', numClases);
         setClasesCount(numClases);
         setDeleteError(errorMsg);
 
         // Cargar docentes disponibles para reasignación
         try {
           const response = await docentesApi.getAll();
-          console.log('👥 Docentes response:', response);
           // El backend puede devolver { data: [...] } o directamente [...]
-          const docentes = Array.isArray(response) ? response : (response as any).data || [];
-          console.log('👥 Docentes array:', docentes);
+          const docentes = Array.isArray(response) ? response : (response as { data?: Docente[] }).data || [];
           setDocentesDisponibles(docentes.filter((d: Docente) => d.id !== selectedUser.id));
         } catch (err) {
-          console.error('❌ Error loading docentes:', err);
+          console.error('Error loading docentes:', err);
         }
       } else {
-        console.log('⚠️ Error genérico, no es de clases asignadas');
         setDeleteError(errorMsg);
       }
     } finally {
@@ -134,8 +126,8 @@ export default function UsuariosPage() {
         setSelectedUser(null);
         setTargetDocenteId('');
       }
-    } catch (error: any) {
-      setDeleteError(getErrorMessage(error));
+    } catch (error: unknown) {
+      setDeleteError(getErrorMessage(error as Error));
     } finally {
       setFormLoading(false);
     }
