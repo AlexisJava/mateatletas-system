@@ -152,9 +152,11 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
         dni,
         nombre: 'Juan',
         sector_id: 'sector-matematica-id',
+        tutor: { id: 'tutor-id', nombre: 'María' },
       };
 
       jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(estudiante as any);
+      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudiante as any);
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue({ id: nuevoSectorId } as any);
       jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
         ...estudiante,
