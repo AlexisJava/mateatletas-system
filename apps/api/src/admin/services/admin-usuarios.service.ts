@@ -145,8 +145,7 @@ export class AdminUsuariosService {
    *
    * VALIDACIONES:
    * - Si es docente con clases asignadas → Error (debe reasignar primero)
-   * - Si es tutor con estudiantes → Error (debe reasignar/eliminar estudiantes)
-   * - Solo permite eliminar usuarios sin dependencias
+   * - Si es tutor con estudiantes → Eliminación en cascada (elimina tutor + estudiantes)
    */
   async deleteUser(id: string) {
     // 1. Verificar si es docente con clases
@@ -170,33 +169,39 @@ export class AdminUsuariosService {
       );
     }
 
-    // 2. Verificar si es tutor con estudiantes
+    // 2. Si es tutor, eliminar en cascada (tutor + estudiantes)
     const tutor = await this.prisma.tutor.findUnique({
       where: { id },
       include: {
-        _count: {
-          select: { estudiantes: true }
-        }
+        estudiantes: true
       }
     });
 
-    if (tutor && tutor._count.estudiantes > 0) {
-      throw new ConflictException(
-        `No se puede eliminar el tutor porque tiene ${tutor._count.estudiantes} estudiante(s) a cargo. ` +
-        `Debe reasignar o eliminar los estudiantes primero.`
-      );
+    if (tutor) {
+      // Eliminar todos los estudiantes del tutor primero
+      if (tutor.estudiantes.length > 0) {
+        await this.prisma.estudiante.deleteMany({
+          where: { tutor_id: id }
+        });
+      }
+
+      // Luego eliminar el tutor
+      await this.prisma.tutor.delete({ where: { id } });
+
+      return {
+        success: true,
+        message: `Tutor y ${tutor.estudiantes.length} estudiante(s) eliminados exitosamente`,
+      };
     }
 
-    // 3. Intentar eliminar el usuario (ya validado sin dependencias)
-    const [tutorResult, docenteResult, adminResult] = await Promise.allSettled([
-      this.prisma.tutor.delete({ where: { id } }),
+    // 3. Intentar eliminar docente o admin (sin dependencias)
+    const [docenteResult, adminResult] = await Promise.allSettled([
       this.prisma.docente.delete({ where: { id } }),
       this.prisma.admin.delete({ where: { id } }),
     ]);
 
     // Verificar si alguna eliminación fue exitosa
     const successfulDeletion =
-      tutorResult.status === 'fulfilled' ||
       docenteResult.status === 'fulfilled' ||
       adminResult.status === 'fulfilled';
 

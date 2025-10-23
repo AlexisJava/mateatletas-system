@@ -77,6 +77,18 @@ export const cancelClass = async (claseId: string) => {
   return axios.patch(`/clases/${claseId}/cancelar`);
 };
 
+export const cancelarClase = async (claseId: string) => {
+  return axios.patch(`/clases/${claseId}/cancelar`);
+};
+
+export const eliminarClase = async (claseId: string) => {
+  return axios.delete(`/clases/${claseId}`);
+};
+
+export const obtenerClase = async (claseId: string) => {
+  return axios.get(`/clases/${claseId}`);
+};
+
 export const getRutasCurriculares = async () => {
   const response = await axios.get('/clases/metadata/rutas-curriculares');
   // ✅ Validar con schema Zod (interceptor ya extrajo .data)

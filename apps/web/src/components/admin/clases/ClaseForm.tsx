@@ -48,14 +48,14 @@ export function ClaseForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Nombre */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-white/90 mb-1">
           Nombre de la Clase *
         </label>
         <input
           type="text"
           value={formData.nombre}
           onChange={(e) => onFieldChange('nombre', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+          className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white placeholder:text-white/40"
           placeholder="Ej: Álgebra Avanzada - Lunes 18:30"
           required
           disabled={isLoading}
@@ -66,19 +66,19 @@ export function ClaseForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Docente */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-white/90 mb-1">
             Docente *
           </label>
           <select
             value={formData.docente_id}
             onChange={(e) => onFieldChange('docente_id', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             required
             disabled={isLoading}
           >
-            <option value="">Seleccionar docente...</option>
+            <option value="" className="bg-gray-900">Seleccionar docente...</option>
             {docentes.map((docente) => (
-              <option key={docente.id} value={docente.id}>
+              <option key={docente.id} value={docente.id} className="bg-gray-900">
                 {docente.nombre} {docente.apellido}
               </option>
             ))}
@@ -87,19 +87,19 @@ export function ClaseForm({
 
         {/* Sector */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-white/90 mb-1">
             Sector (Opcional)
           </label>
           <select
             value={formData.sector_id}
             onChange={(e) => onFieldChange('sector_id', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             disabled={isLoading}
           >
-            <option value="">Sin sector</option>
+            <option value="" className="bg-gray-900">Sin sector</option>
             {sectores.map((sector) => (
-              <option key={sector.id} value={sector.id}>
-                {sector.nombre === 'Matemática' && '📐'}
+              <option key={sector.id} value={sector.id} className="bg-gray-900">
+                {sector.nombre === 'Matemática' && '🧮'}
                 {sector.nombre === 'Programación' && '💻'}
                 {sector.nombre === 'Ciencias' && '🔬'}
                 {' '}{sector.nombre}
@@ -113,14 +113,14 @@ export function ClaseForm({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Fecha y Hora */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-white/90 mb-1">
             Fecha y Hora *
           </label>
           <input
             type="datetime-local"
             value={formData.fecha_hora_inicio}
             onChange={(e) => onFieldChange('fecha_hora_inicio', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             required
             disabled={isLoading}
           />
@@ -128,7 +128,7 @@ export function ClaseForm({
 
         {/* Duración */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-white/90 mb-1">
             Duración (min) *
           </label>
           <input
@@ -137,7 +137,7 @@ export function ClaseForm({
             onChange={(e) => onFieldChange('duracion_minutos', parseInt(e.target.value))}
             min="15"
             step="15"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             required
             disabled={isLoading}
           />
@@ -145,7 +145,7 @@ export function ClaseForm({
 
         {/* Cupo */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-white/90 mb-1">
             Cupo Máximo *
           </label>
           <input
@@ -154,7 +154,7 @@ export function ClaseForm({
             onChange={(e) => onFieldChange('cupo_maximo', parseInt(e.target.value))}
             min="1"
             max="50"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             required
             disabled={isLoading}
           />
@@ -163,14 +163,14 @@ export function ClaseForm({
 
       {/* Descripción */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-white/90 mb-1">
           Descripción (Opcional)
         </label>
         <textarea
           value={formData.descripcion}
           onChange={(e) => onFieldChange('descripcion', e.target.value)}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+          className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white placeholder:text-white/40 resize-none"
           placeholder="Agrega detalles adicionales sobre la clase..."
           disabled={isLoading}
         />
@@ -181,7 +181,7 @@ export function ClaseForm({
         <button
           type="submit"
           disabled={isLoading}
-          className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white py-2 px-4 rounded-lg font-semibold transition-all disabled:cursor-not-allowed"
+          className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-gray-500 disabled:to-gray-600 text-white py-2 px-4 rounded-lg font-semibold transition-all shadow-lg shadow-emerald-500/30 disabled:cursor-not-allowed disabled:shadow-none"
         >
           {isLoading ? 'Guardando...' : 'Guardar Clase'}
         </button>
@@ -189,7 +189,7 @@ export function ClaseForm({
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="flex-1 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/30 hover:bg-emerald-500/20 disabled:bg-black/20 text-white/90 py-2 px-4 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Cancelar
         </button>

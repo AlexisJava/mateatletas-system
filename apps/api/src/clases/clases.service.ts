@@ -50,6 +50,14 @@ export class ClasesService {
   }
 
   /**
+   * Eliminar una clase permanentemente (Admin)
+   * DELEGACIÓN: ClasesManagementService
+   */
+  async eliminarClase(id: string) {
+    return this.managementService.eliminarClase(id);
+  }
+
+  /**
    * Listar todas las clases (Admin) con paginación
    * DELEGACIÓN: ClasesManagementService
    */
