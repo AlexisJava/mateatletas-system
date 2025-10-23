@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { getErrorMessage } from '@/lib/utils/error-handler';
 import apiClient from '@/lib/axios';
+import AgregarEstudianteModal from '@/components/admin/AgregarEstudianteModal';
+import { UserPlus } from 'lucide-react';
 
 interface Estudiante {
   id: string;
@@ -30,14 +32,25 @@ interface Estudiante {
   };
 }
 
+interface Sector {
+  id: string;
+  nombre: string;
+  color: string;
+  icono: string;
+}
+
 export default function AdminEstudiantesPage() {
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
+  const [sectores, setSectores] = useState<Sector[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sectorActivo, setSectorActivo] = useState<'Programación' | 'Matemática' | 'Preinscriptos'>('Matemática');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sectorIdParaModal, setSectorIdParaModal] = useState<string>('');
 
   useEffect(() => {
     loadEstudiantes();
+    loadSectores();
   }, []);
 
   const loadEstudiantes = async () => {
@@ -52,6 +65,23 @@ export default function AdminEstudiantesPage() {
       setError(getErrorMessage(err, 'Error al cargar estudiantes'));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadSectores = async () => {
+    try {
+      const response = await apiClient.get('/admin/sectores');
+      setSectores(response);
+    } catch (err: unknown) {
+      console.error('Error al cargar sectores:', err);
+    }
+  };
+
+  const handleAbrirModal = (nombreSector: string) => {
+    const sector = sectores.find(s => s.nombre === nombreSector);
+    if (sector) {
+      setSectorIdParaModal(sector.id);
+      setIsModalOpen(true);
     }
   };
 
@@ -254,10 +284,35 @@ export default function AdminEstudiantesPage() {
         </button>
       </div>
 
+      {/* Botón Añadir Estudiante */}
+      {sectorActivo !== 'Preinscriptos' && (
+        <div className="flex justify-end">
+          <button
+            onClick={() => handleAbrirModal(sectorActivo)}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/30"
+          >
+            <UserPlus className="w-5 h-5" />
+            Añadir Estudiante
+          </button>
+        </div>
+      )}
+
       {/* Tabla de estudiantes del sector activo */}
       <div>
         {renderTablaEstudiantes(estudiantesActivos, sectorActivo, iconoActivo)}
       </div>
+
+      {/* Modal Agregar Estudiante */}
+      <AgregarEstudianteModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => {
+          loadEstudiantes();
+          setIsModalOpen(false);
+        }}
+        sectorId={sectorIdParaModal}
+        sectorNombre={sectorActivo}
+      />
     </div>
   );
 }
