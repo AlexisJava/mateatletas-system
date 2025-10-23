@@ -8,7 +8,6 @@ import { getDashboardResumen } from '@/lib/api/tutor.api';
 import DashboardView from './components/DashboardView';
 import type { Estudiante } from '@/types/estudiante';
 import type { Clase } from '@/types/clases.types';
-import type { Membresia } from '@/types/pago.types';
 import type { DashboardResumenResponse } from '@/types/tutor-dashboard.types';
 
 /**
@@ -27,7 +26,6 @@ export default function DashboardPage() {
   // Estado para datos del backend
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [clases, setClases] = useState<Clase[]>([]);
-  const [membresia, setMembresia] = useState<Membresia | null>(null);
   const [dashboardData, setDashboardData] = useState<DashboardResumenResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -64,7 +62,6 @@ export default function DashboardPage() {
       setEstudiantes(estudiantesRes?.data || []);
       setClases(clasesRes?.data || []);
       setDashboardData(dashboardRes);
-      setMembresia(null); // Sin membresía por ahora
     } catch (error: unknown) {
       // Error loading dashboard data
       console.error('Error loading dashboard:', error);
@@ -91,7 +88,6 @@ export default function DashboardPage() {
       user={user!}
       estudiantes={estudiantes}
       clases={clases}
-      membresia={membresia}
       dashboardData={dashboardData}
     />
   );

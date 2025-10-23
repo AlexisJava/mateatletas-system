@@ -134,3 +134,51 @@ export interface AlertasResponse {
   total: number;
   hayAlertas: boolean;
 }
+
+/**
+ * Estado de pago de una inscripción mensual
+ */
+export type EstadoPago = 'Pendiente' | 'Pagado' | 'Vencido';
+
+/**
+ * Inscripción mensual (pago mensual de un estudiante)
+ */
+export interface InscripcionMensual {
+  id: string;
+  tutorId: string;
+  estudianteId: string;
+  estudianteNombre: string;
+  productoId: string;
+  productoNombre: string;
+  periodo: string; // Formato: YYYY-MM
+  precioFinal: number;
+  estadoPago: EstadoPago;
+  fechaVencimiento: Date;
+  fechaPago?: Date;
+  metodoPago?: string;
+  descuentosAplicados: Array<{
+    tipo: string;
+    porcentaje: number;
+    monto: number;
+  }>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Resumen financiero de inscripciones
+ */
+export interface ResumenInscripciones {
+  totalPendiente: number;
+  totalPagado: number;
+  cantidadInscripciones: number;
+  estudiantesUnicos: number;
+}
+
+/**
+ * Response para getMisInscripciones
+ */
+export interface MisInscripcionesResponse {
+  inscripciones: InscripcionMensual[];
+  resumen: ResumenInscripciones;
+}

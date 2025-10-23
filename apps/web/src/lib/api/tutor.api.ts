@@ -7,6 +7,8 @@ import {
   DashboardResumenResponse,
   ProximasClasesResponse,
   AlertasResponse,
+  MisInscripcionesResponse,
+  EstadoPago,
 } from '@/types/tutor-dashboard.types';
 
 /**
@@ -36,5 +38,41 @@ export const getProximasClases = async (limit: number = 5): Promise<ProximasClas
  */
 export const getAlertas = async (): Promise<AlertasResponse> => {
   const response = await axios.get('/tutor/alertas');
+  return response;
+};
+
+/**
+ * Filtros para obtener inscripciones mensuales
+ */
+export interface GetMisInscripcionesParams {
+  periodo?: string; // Formato YYYY-MM (ej: "2025-01")
+  estadoPago?: EstadoPago; // Filtrar por estado
+}
+
+/**
+ * Obtener mis inscripciones mensuales (pagos mensuales)
+ *
+ * El tutorId se obtiene automáticamente del JWT (seguro)
+ *
+ * @param params - Filtros opcionales (periodo, estadoPago)
+ * @returns Inscripciones y resumen financiero
+ */
+export const getMisInscripciones = async (
+  params?: GetMisInscripcionesParams
+): Promise<MisInscripcionesResponse> => {
+  const queryParams = new URLSearchParams();
+
+  if (params?.periodo) {
+    queryParams.append('periodo', params.periodo);
+  }
+
+  if (params?.estadoPago) {
+    queryParams.append('estadoPago', params.estadoPago);
+  }
+
+  const queryString = queryParams.toString();
+  const url = queryString ? `/tutor/mis-inscripciones?${queryString}` : '/tutor/mis-inscripciones';
+
+  const response = await axios.get(url);
   return response;
 };
