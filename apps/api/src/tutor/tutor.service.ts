@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InscripcionMensualRepository } from '../pagos/infrastructure/repositories/inscripcion-mensual.repository';
-import { EstadoPago, InscripcionMensual } from '../pagos/domain/types/pagos.types';
+import { EstadoPago } from '../pagos/domain/types/pagos.types';
+import { InscripcionMensual } from '../pagos/domain/repositories/inscripcion-mensual.repository.interface';
 import { EstadoPagoFilter } from './dto/get-mis-inscripciones.dto';
 
 /**
