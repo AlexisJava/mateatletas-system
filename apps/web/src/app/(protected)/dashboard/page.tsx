@@ -50,6 +50,8 @@ export default function DashboardPage() {
     try {
       setLoading(true);
 
+      console.log('🔍 Cargando datos del dashboard...');
+
       // Cargar estudiantes, clases y dashboard resumen en paralelo
       const [estudiantesRes, clasesRes, dashboardRes] = await Promise.all([
         apiClient.get('/estudiantes'),
@@ -57,14 +59,24 @@ export default function DashboardPage() {
         getDashboardResumen(),
       ]);
 
+      console.log('✅ Estudiantes:', estudiantesRes);
+      console.log('✅ Clases:', clasesRes);
+      console.log('✅ Dashboard Resumen:', dashboardRes);
+      console.log('📊 Métricas:', dashboardRes?.metricas);
+      console.log('🔔 Alertas:', dashboardRes?.alertas);
+      console.log('💰 Pagos Pendientes:', dashboardRes?.pagosPendientes);
+      console.log('📅 Clases Hoy:', dashboardRes?.clasesHoy);
+
       // El endpoint /estudiantes devuelve { data: [...], metadata: {...} }
       // Axios interceptor ya extrajo response.data, entonces estudiantesRes ES {data: [...], metadata: {...}}
       setEstudiantes(estudiantesRes?.data || []);
       setClases(clasesRes?.data || []);
       setDashboardData(dashboardRes);
+
+      console.log('💾 Estado seteado - dashboardData:', dashboardRes);
     } catch (error: unknown) {
       // Error loading dashboard data
-      console.error('Error loading dashboard:', error);
+      console.error('❌ Error loading dashboard:', error);
     } finally {
       setLoading(false);
     }

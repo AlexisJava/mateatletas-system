@@ -90,15 +90,15 @@ export default function CalendarioTab() {
   return (
     <div className="h-full flex flex-col overflow-hidden gap-4">
       {/* Header con selector de mes/año */}
-      <div className="bg-white rounded-xl shadow-lg border-2 border-gray-300 p-4">
+      <div className="bg-gray-900 rounded-xl shadow-2xl border-2 border-gray-700 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-indigo-100 rounded-lg p-2">
-              <Calendar className="w-6 h-6 text-indigo-600" />
+            <div className="bg-indigo-600 rounded-lg p-2">
+              <Calendar className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Calendario de Clases</h2>
-              <p className="text-sm text-gray-600">
+              <h2 className="text-xl font-bold text-white">Calendario de Clases</h2>
+              <p className="text-sm text-gray-300">
                 {calendarioData?.total || 0} clases en {MESES[mesSeleccionado - 1]} {anioSeleccionado}
               </p>
             </div>
@@ -108,31 +108,31 @@ export default function CalendarioTab() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleMesAnterior}
-              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors border border-gray-700"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-700" />
+              <ChevronLeft className="w-5 h-5 text-gray-300" />
             </button>
             <div className="text-center min-w-[140px]">
-              <p className="font-bold text-gray-900">{MESES[mesSeleccionado - 1]}</p>
-              <p className="text-sm text-gray-600">{anioSeleccionado}</p>
+              <p className="font-bold text-white">{MESES[mesSeleccionado - 1]}</p>
+              <p className="text-sm text-gray-400">{anioSeleccionado}</p>
             </div>
             <button
               onClick={handleMesSiguiente}
-              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors border border-gray-700"
             >
-              <ChevronRight className="w-5 h-5 text-gray-700" />
+              <ChevronRight className="w-5 h-5 text-gray-300" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Lista de Clases por Día */}
-      <div className="flex-1 bg-white rounded-xl shadow-lg border-2 border-gray-300 p-4 overflow-y-auto">
+      <div className="flex-1 bg-gray-900 rounded-xl shadow-2xl border-2 border-gray-700 p-4 overflow-y-auto">
         {loading ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-lg font-semibold text-gray-700">Cargando calendario...</p>
+              <p className="text-lg font-semibold text-white">Cargando calendario...</p>
             </div>
           </div>
         ) : dias.length > 0 ? (
@@ -150,14 +150,14 @@ export default function CalendarioTab() {
                   {/* Header del Día */}
                   <div
                     className={`flex items-center gap-3 mb-3 pb-2 border-b-2 ${
-                      esHoy ? 'border-indigo-500' : 'border-gray-200'
+                      esHoy ? 'border-indigo-500' : 'border-gray-700'
                     }`}
                   >
                     <div
                       className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center font-bold shadow-md ${
                         esHoy
                           ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white'
-                          : 'bg-gray-100 text-gray-700'
+                          : 'bg-gray-800 text-gray-300'
                       }`}
                     >
                       <span className="text-2xl">{dia}</span>
@@ -166,14 +166,14 @@ export default function CalendarioTab() {
                       </span>
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">
+                      <h3 className="text-lg font-bold text-white">
                         {fecha.toLocaleDateString('es-AR', {
                           weekday: 'long',
                           day: 'numeric',
                           month: 'long',
                         })}
                       </h3>
-                      <p className="text-sm text-gray-600">{clasesDelDia.length} clases programadas</p>
+                      <p className="text-sm text-gray-400">{clasesDelDia.length} clases programadas</p>
                     </div>
                   </div>
 
@@ -186,27 +186,27 @@ export default function CalendarioTab() {
                       return (
                         <div
                           key={clase.id}
-                          className="bg-gray-50 rounded-xl p-4 border-2 border-gray-200 hover:border-indigo-300 transition-all"
+                          className="bg-gray-800 rounded-xl p-4 border-2 border-gray-700 hover:border-indigo-500 transition-all"
                         >
                           <div className="flex items-start justify-between gap-4">
                             {/* Info de la Clase */}
                             <div className="flex items-start gap-3 flex-1">
-                              <div className="bg-indigo-100 rounded-lg p-2 flex-shrink-0">
-                                <Clock className="w-5 h-5 text-indigo-600" />
+                              <div className="bg-indigo-600 rounded-lg p-2 flex-shrink-0">
+                                <Clock className="w-5 h-5 text-white" />
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="font-bold text-gray-900">{clase.ruta_curricular?.nombre || 'Sin ruta'}</h4>
+                                  <h4 className="font-bold text-white">{clase.ruta_curricular?.nombre || 'Sin ruta'}</h4>
                                   <span
                                     className="w-3 h-3 rounded-full"
                                     style={{ backgroundColor: clase.ruta_curricular?.color || '#6366F1' }}
                                   ></span>
                                 </div>
-                                <p className="text-sm text-gray-600 mb-2">
+                                <p className="text-sm text-gray-300 mb-2">
                                   {fechaClase.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} •{' '}
                                   {clase.duracion_minutos} min
                                 </p>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                <div className="flex items-center gap-2 text-sm text-gray-400">
                                   <User className="w-4 h-4" />
                                   <span>
                                     Prof. {clase.docente?.nombre} {clase.docente?.apellido}
@@ -223,15 +223,15 @@ export default function CalendarioTab() {
                                     return (
                                       <span
                                         key={insc.estudiante?.id}
-                                        className="text-xs font-semibold px-2 py-1 rounded-full bg-white border-2 border-gray-200 flex items-center gap-1"
+                                        className="text-xs font-semibold px-2 py-1 rounded-full bg-gray-700 border-2 border-gray-600 text-gray-200 flex items-center gap-1"
                                       >
                                         {insc.estudiante?.nombre}
                                         {asistencia && (
                                           <>
                                             {asistencia.estado === 'Presente' ? (
-                                              <CheckCircle className="w-3 h-3 text-green-600" />
+                                              <CheckCircle className="w-3 h-3 text-green-400" />
                                             ) : (
-                                              <XCircle className="w-3 h-3 text-red-600" />
+                                              <XCircle className="w-3 h-3 text-red-400" />
                                             )}
                                           </>
                                         )}
@@ -245,11 +245,11 @@ export default function CalendarioTab() {
                             {/* Estado */}
                             <div>
                               {esFutura ? (
-                                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-700">
+                                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-600 text-white">
                                   Programada
                                 </span>
                               ) : (
-                                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-200 text-gray-700">
+                                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-700 text-gray-300">
                                   Finalizada
                                 </span>
                               )}
@@ -266,9 +266,9 @@ export default function CalendarioTab() {
         ) : (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
-              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-xl font-bold text-gray-900 mb-2">No hay clases programadas</p>
-              <p className="text-gray-600">
+              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+              <p className="text-xl font-bold text-white mb-2">No hay clases programadas</p>
+              <p className="text-gray-400">
                 No tienes clases en {MESES[mesSeleccionado - 1]} {anioSeleccionado}
               </p>
             </div>
