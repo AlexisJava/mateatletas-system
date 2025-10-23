@@ -11,6 +11,7 @@ import { EquiposModule } from './equipos/equipos.module';
 import { DocentesModule } from './docentes/docentes.module';
 import { CatalogoModule } from './catalogo/catalogo.module';
 import { PagosModule } from './pagos/pagos.module';
+import { TutorModule } from './tutor/tutor.module';
 import { ClasesModule } from './clases/clases.module';
 import { AsistenciaModule } from './asistencia/asistencia.module';
 import { AdminModule } from './admin/admin.module';
@@ -47,6 +48,7 @@ import { TokenBlacklistGuard } from './auth/guards/token-blacklist.guard';
     DocentesModule,
     CatalogoModule,
     PagosModule,
+    TutorModule,
     ClasesModule,
     AsistenciaModule,
     AdminModule,
