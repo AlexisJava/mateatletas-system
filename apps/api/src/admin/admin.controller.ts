@@ -106,6 +106,17 @@ export class AdminController {
   }
 
   /**
+   * Obtener credenciales de todos los usuarios
+   * GET /api/admin/credenciales
+   * Rol: Admin
+   * Retorna todos los usuarios con sus credenciales temporales
+   */
+  @Get('credenciales')
+  async obtenerCredenciales() {
+    return this.adminService.obtenerTodasLasCredenciales();
+  }
+
+  /**
    * Crear estudiante rápido con tutor automático
    * POST /api/admin/estudiantes
    * Rol: Admin

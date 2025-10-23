@@ -23,6 +23,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
+  Key,
 } from 'lucide-react';
 
 /**
@@ -38,6 +39,7 @@ import {
 const navItems = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, color: 'from-violet-500 to-purple-500', badge: null },
   { href: '/admin/usuarios', label: 'Usuarios', icon: Users, color: 'from-blue-500 to-cyan-500', badge: null },
+  { href: '/admin/credenciales', label: 'Credenciales', icon: Key, color: 'from-amber-500 to-orange-500', badge: null },
   { href: '/admin/clases', label: 'Clases', icon: BookOpen, color: 'from-emerald-500 to-green-500', badge: '3' },
   { href: '/admin/estudiantes', label: 'Estudiantes', icon: GraduationCap, color: 'from-teal-500 to-cyan-500', badge: null },
   { href: '/admin/productos', label: 'Productos', icon: ShoppingCart, color: 'from-amber-500 to-yellow-500', badge: null },

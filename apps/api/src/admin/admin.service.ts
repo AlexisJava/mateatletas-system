@@ -320,6 +320,96 @@ export class AdminService {
   }
 
   /**
+   * Obtener todas las credenciales de usuarios
+   * Retorna todos los usuarios (tutores, estudiantes, docentes, admins) con sus credenciales temporales
+   * Para la planilla administrativa de primer ingreso
+   */
+  async obtenerTodasLasCredenciales() {
+    // Obtener todos los tutores con password_temporal
+    const tutores = await this.prisma.tutor.findMany({
+      select: {
+        id: true,
+        nombre: true,
+        apellido: true,
+        email: true,
+        password_temporal: true,
+        debe_cambiar_password: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Obtener todos los estudiantes con password_temporal
+    const estudiantes = await this.prisma.estudiante.findMany({
+      select: {
+        id: true,
+        nombre: true,
+        apellido: true,
+        username: true,
+        password_temporal: true,
+        debe_cambiar_password: true,
+        createdAt: true,
+        tutor: {
+          select: {
+            nombre: true,
+            apellido: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Obtener todos los docentes con password_temporal
+    const docentes = await this.prisma.docente.findMany({
+      select: {
+        id: true,
+        nombre: true,
+        apellido: true,
+        email: true,
+        password_temporal: true,
+        debe_cambiar_password: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Formatear los datos para la planilla
+    return {
+      tutores: tutores.map((t) => ({
+        id: t.id,
+        rol: 'Tutor',
+        nombre: t.nombre,
+        apellido: t.apellido,
+        usuario: t.email,
+        password_temporal: t.password_temporal,
+        estado: t.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
+        fecha_creacion: t.createdAt,
+      })),
+      estudiantes: estudiantes.map((e) => ({
+        id: e.id,
+        rol: 'Estudiante',
+        nombre: e.nombre,
+        apellido: e.apellido,
+        usuario: e.username,
+        password_temporal: e.password_temporal,
+        estado: e.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
+        tutor: `${e.tutor.nombre} ${e.tutor.apellido}`,
+        fecha_creacion: e.createdAt,
+      })),
+      docentes: docentes.map((d) => ({
+        id: d.id,
+        rol: 'Docente',
+        nombre: d.nombre,
+        apellido: d.apellido,
+        usuario: d.email,
+        password_temporal: d.password_temporal,
+        estado: d.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
+        fecha_creacion: d.createdAt,
+      })),
+    };
+  }
+
+  /**
    * Obtener métricas de los circuit breakers (para monitoring)
    * Útil para dashboards de observabilidad
    */
