@@ -12,14 +12,17 @@ import {
   Users,
   Calendar,
   Clock,
-  ChevronRight,
   Home,
   DollarSign,
-  UserCheck,
+  HelpCircle,
   LogOut,
   ChevronDown,
-  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  PlayCircle,
+  CreditCard,
   TrendingUp,
+  Bell,
 } from 'lucide-react';
 import MisHijosTab from './MisHijosTab';
 import CalendarioTab from './CalendarioTab';
@@ -54,14 +57,14 @@ export default function DashboardView({
   };
 
   const tabs = [
-    { id: 'dashboard', label: 'Resumen', icon: Home },
+    { id: 'dashboard', label: 'Inicio', icon: Home },
     { id: 'hijos', label: 'Mis Hijos', icon: Users },
     { id: 'calendario', label: 'Calendario', icon: Calendar },
     { id: 'pagos', label: 'Pagos', icon: DollarSign },
-    { id: 'ayuda', label: 'Ayuda', icon: UserCheck },
+    { id: 'ayuda', label: 'Ayuda', icon: HelpCircle },
   ];
 
-  // Calcular estadísticas
+  // Calcular edad para cada hijo
   const calcularEdad = (fechaNacimiento: Date) => {
     const hoy = new Date();
     const nacimiento = new Date(fechaNacimiento);
@@ -73,106 +76,78 @@ export default function DashboardView({
     return edad;
   };
 
-  // Transformar estudiantes a formato UI
-  const hijosData = estudiantes.map((est) => {
-    const edad = calcularEdad(new Date(est.fecha_nacimiento));
-    const initials = `${est.nombre.charAt(0)}${est.apellido.charAt(0)}`.toUpperCase();
-
-    const proximasClases = clases
-      .filter((clase) => clase.inscripciones?.some((insc) => insc.estudiante?.id === est.id))
-      .filter((clase) => new Date(clase.fecha_hora_inicio) > new Date())
-      .sort((a, b) => new Date(a.fecha_hora_inicio).getTime() - new Date(b.fecha_hora_inicio).getTime());
-
-    const proximaClase = proximasClases[0];
-
-    return {
-      id: est.id,
-      name: `${est.nombre} ${est.apellido}`,
-      age: edad,
-      initial: initials,
-      xp: 0, // TODO: gamificación
-      streak: 0, // TODO: gamificación
-      nextClass: proximaClase
-        ? new Date(proximaClase.fecha_hora_inicio).toLocaleString('es-AR', {
-            weekday: 'short',
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : null,
-    };
+  // Obtener fecha formateada
+  const fechaHoy = new Date().toLocaleDateString('es-AR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
   });
 
+  // Alertas críticas (solo alta prioridad)
+  const alertasCriticas = dashboardData?.alertas.filter(a => a.prioridad === 'alta') || [];
+
   return (
-    <div className="h-screen flex flex-col bg-slate-100 overflow-hidden">
-      {/* Header */}
-      <header className="bg-white border-b-2 border-gray-300 shadow-md flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
+    <div className="min-h-screen flex flex-col bg-gray-950">
+      {/* Header oscuro premium */}
+      <header className="bg-gray-900 border-b border-gray-800 shadow-2xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex items-center justify-between py-5">
+            {/* Logo */}
             <div className="flex items-center gap-3">
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-md"
-                style={{
-                  background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
-                }}
-              >
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg">
                 🎓
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Mateatletas</h1>
-                <p className="text-xs text-gray-500">Panel de Padres</p>
+                <h1 className="text-xl font-bold text-white">Mateatletas</h1>
+                <p className="text-xs text-gray-400">Portal de Padres</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 relative">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-gray-900">{user?.nombre} {user?.apellido}</p>
-                <p className="text-xs text-gray-500">
-                  {membresia?.producto?.nombre || 'Sin membresía'}
-                </p>
-              </div>
 
-              {/* User Menu Button */}
+            {/* User Menu */}
+            <div className="flex items-center gap-4 relative">
+              {/* Notificaciones */}
+              {alertasCriticas.length > 0 && (
+                <div className="relative">
+                  <Bell className="w-6 h-6 text-gray-400" />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {alertasCriticas.length}
+                  </span>
+                </div>
+              )}
+
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                className="flex items-center gap-3 bg-gray-800 hover:bg-gray-750 rounded-xl px-4 py-2 transition-colors"
               >
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-md"
-                  style={{
-                    background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
-                  }}
-                >
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-semibold text-white">{user?.nombre} {user?.apellido}</p>
+                  <p className="text-xs text-gray-400">Padre/Madre</p>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-md">
                   {user?.nombre?.[0]?.toUpperCase() || 'T'}
                 </div>
-                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Dropdown Menu */}
               {showUserMenu && (
                 <>
-                  {/* Backdrop para cerrar el menú */}
                   <div
                     className="fixed inset-0 z-10"
                     onClick={() => setShowUserMenu(false)}
                   />
-
-                  {/* Menu */}
-                  <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border-2 border-gray-200 z-20 overflow-hidden">
-                    {/* User Info */}
-                    <div className="p-4 border-b-2 border-gray-200 bg-gradient-to-br from-indigo-50 to-blue-50">
-                      <p className="text-sm font-bold text-gray-900">
+                  <div className="absolute top-full right-0 mt-2 w-64 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 z-20 overflow-hidden">
+                    <div className="p-4 border-b border-gray-700 bg-gray-850">
+                      <p className="text-sm font-bold text-white">
                         {user?.nombre} {user?.apellido}
                       </p>
-                      <p className="text-xs text-gray-600">{user?.email}</p>
-                      <p className="text-xs text-indigo-600 font-semibold mt-1">
-                        {membresia?.producto?.nombre || 'Sin membresía'}
-                      </p>
+                      <p className="text-xs text-gray-400">{user?.email}</p>
                     </div>
-
-                    {/* Menu Items */}
                     <div className="p-2">
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-red-400 hover:bg-gray-750 rounded-lg transition-colors"
                       >
                         <LogOut className="w-5 h-5" />
                         <span className="font-semibold">Cerrar Sesión</span>
@@ -185,17 +160,17 @@ export default function DashboardView({
           </div>
 
           {/* Navigation Tabs */}
-          <nav className="flex gap-1 -mb-px overflow-x-auto">
+          <nav className="flex gap-2 -mb-px overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as TabType)}
-                  className={`flex items-center gap-2 px-4 py-3 font-semibold text-sm border-b-2 transition-colors whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-5 py-3 font-semibold text-sm border-b-2 transition-all whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'border-indigo-600 text-indigo-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-indigo-500 text-white bg-gray-850'
+                      : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-gray-850'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -208,134 +183,102 @@ export default function DashboardView({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-hidden">
-        <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 overflow-auto">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
           {activeTab === 'dashboard' && (
-            <div className="h-full grid grid-rows-[auto_auto_1fr] gap-4">
+            <div className="space-y-6">
               {/* Greeting */}
-              <div
-                className="rounded-xl p-4 shadow-lg border-2 border-indigo-200"
-                style={{
-                  background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
-                }}
-              >
-                <h2 className="text-2xl font-bold text-white">¡Hola, {user?.nombre}! 👋</h2>
-                <p className="text-indigo-100">Bienvenido de vuelta. Aquí está el resumen de hoy.</p>
+              <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-8 shadow-2xl">
+                <h2 className="text-3xl font-bold text-white mb-2">
+                  ¡Hola, {user?.nombre}! 👋
+                </h2>
+                <p className="text-indigo-100 text-lg capitalize">{fechaHoy}</p>
               </div>
 
-              {/* Stats Cards */}
-              <div className="bg-white rounded-xl p-4 shadow-lg border-2 border-gray-300">
-                <h2 className="text-base font-bold text-gray-900 mb-3">Métricas Principales</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {/* Total Hijos */}
-                  <div className="bg-white rounded-xl p-5 shadow-md border-2 border-gray-200 border-l-4 border-l-indigo-500">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Total Hijos</p>
-                        <p className="text-3xl font-bold text-gray-900">
-                          {dashboardData?.metricas.totalHijos || 0}
-                        </p>
+              {/* Alertas Críticas */}
+              {alertasCriticas.length > 0 && (
+                <div className="bg-red-900/20 border-2 border-red-500/50 rounded-2xl p-6 shadow-xl">
+                  <div className="flex items-start gap-4">
+                    <AlertTriangle className="w-8 h-8 text-red-400 flex-shrink-0 mt-1" />
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-red-300 mb-4">
+                        ⚠️ Atención - Requiere acción inmediata
+                      </h3>
+                      <div className="space-y-3">
+                        {alertasCriticas.map((alerta) => (
+                          <div
+                            key={alerta.id}
+                            className="bg-gray-900/50 rounded-xl p-4 border border-red-500/30"
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1">
+                                <p className="font-bold text-white text-lg mb-1">{alerta.titulo}</p>
+                                <p className="text-gray-300 text-base">{alerta.mensaje}</p>
+                              </div>
+                              {alerta.accion && (
+                                <button
+                                  onClick={() => {
+                                    if (alerta.accion?.url.startsWith('/dashboard?tab=')) {
+                                      const tab = alerta.accion.url.split('tab=')[1].split('&')[0];
+                                      setActiveTab(tab as TabType);
+                                    }
+                                  }}
+                                  className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors whitespace-nowrap shadow-lg"
+                                >
+                                  {alerta.accion.label}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <Users className="w-10 h-10 text-gray-300" />
-                    </div>
-                  </div>
-
-                  {/* Clases del Mes */}
-                  <div
-                    className="rounded-xl p-5 shadow-md border-2 border-indigo-200"
-                    style={{
-                      background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
-                    }}
-                  >
-                    <div className="flex items-center justify-between text-white">
-                      <div>
-                        <p className="text-sm font-medium opacity-90">Clases del Mes</p>
-                        <p className="text-3xl font-bold">
-                          {dashboardData?.metricas.clasesDelMes || 0}
-                        </p>
-                      </div>
-                      <Calendar className="w-10 h-10 opacity-80" />
-                    </div>
-                  </div>
-
-                  {/* Total Pagado Este Año */}
-                  <div
-                    className="rounded-xl p-5 shadow-md border-2 border-green-200"
-                    style={{
-                      background: 'linear-gradient(135deg, #34D399 0%, #10B981 100%)',
-                    }}
-                  >
-                    <div className="flex items-center justify-between text-white">
-                      <div>
-                        <p className="text-sm font-medium opacity-90">Pagado en {new Date().getFullYear()}</p>
-                        <p className="text-2xl font-bold">
-                          ${dashboardData?.metricas.totalPagadoAnio.toLocaleString('es-AR') || 0}
-                        </p>
-                      </div>
-                      <DollarSign className="w-10 h-10 opacity-80" />
-                    </div>
-                  </div>
-
-                  {/* Asistencia Promedio */}
-                  <div
-                    className="rounded-xl p-5 shadow-md border-2 border-amber-200"
-                    style={{
-                      background: 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)',
-                    }}
-                  >
-                    <div className="flex items-center justify-between text-white">
-                      <div>
-                        <p className="text-sm font-medium opacity-90">Asistencia</p>
-                        <p className="text-3xl font-bold">
-                          {dashboardData?.metricas.asistenciaPromedio || 0}%
-                        </p>
-                      </div>
-                      <TrendingUp className="w-10 h-10 opacity-80" />
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Alertas */}
-              {dashboardData && dashboardData.alertas.length > 0 && (
-                <div className="bg-white rounded-xl p-4 shadow-lg border-2 border-red-200">
-                  <div className="flex items-center gap-2 mb-3">
-                    <AlertCircle className="w-5 h-5 text-red-600" />
-                    <h2 className="text-base font-bold text-gray-900">
-                      Alertas Importantes ({dashboardData.alertas.length})
-                    </h2>
+              {/* Clases de HOY */}
+              {dashboardData && dashboardData.clasesHoy.length > 0 && (
+                <div className="bg-gray-900 rounded-2xl p-6 shadow-xl border border-gray-800">
+                  <div className="flex items-center gap-3 mb-5">
+                    <Calendar className="w-6 h-6 text-indigo-400" />
+                    <h3 className="text-2xl font-bold text-white">
+                      📅 Clases de Hoy ({dashboardData.clasesHoy.length})
+                    </h3>
                   </div>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {dashboardData.alertas.slice(0, 5).map((alerta) => (
+                  <div className="space-y-4">
+                    {dashboardData.clasesHoy.map((clase) => (
                       <div
-                        key={alerta.id}
-                        className={`p-3 rounded-lg border-l-4 ${
-                          alerta.prioridad === 'alta'
-                            ? 'bg-red-50 border-red-500'
-                            : alerta.prioridad === 'media'
-                            ? 'bg-amber-50 border-amber-500'
-                            : 'bg-blue-50 border-blue-500'
-                        }`}
+                        key={clase.id}
+                        className="bg-gray-850 rounded-xl p-6 border border-gray-700 hover:border-indigo-500/50 transition-colors"
                       >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1">
-                            <p className="font-semibold text-sm text-gray-900">{alerta.titulo}</p>
-                            <p className="text-sm text-gray-600">{alerta.mensaje}</p>
+                        <div className="flex items-center justify-between gap-6">
+                          <div className="flex items-center gap-5 flex-1">
+                            {/* Hora */}
+                            <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl p-4 flex flex-col items-center justify-center min-w-[80px] shadow-lg">
+                              <Clock className="w-6 h-6 text-white mb-1" />
+                              <span className="font-bold text-white text-xl">{clase.hora}</span>
+                            </div>
+                            {/* Info */}
+                            <div className="flex-1">
+                              <h4 className="font-bold text-white text-xl mb-1">{clase.nombreRuta}</h4>
+                              <p className="text-gray-400 text-base">
+                                👤 {clase.estudianteNombre} • 👨‍🏫 Prof. {clase.docenteNombre}
+                              </p>
+                            </div>
                           </div>
-                          {alerta.accion && (
-                            <button
-                              onClick={() => {
-                                // Manejar navegación con router si es necesario
-                                if (alerta.accion.url.startsWith('/dashboard?tab=')) {
-                                  const tab = alerta.accion.url.split('tab=')[1].split('&')[0];
-                                  setActiveTab(tab as TabType);
-                                }
-                              }}
-                              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 whitespace-nowrap"
-                            >
-                              {alerta.accion.label}
-                            </button>
-                          )}
+                          {/* Botón */}
+                          <button
+                            disabled={!clase.puedeUnirse}
+                            className={`flex items-center gap-2 font-bold py-4 px-8 rounded-xl shadow-lg transition-all text-lg ${
+                              clase.puedeUnirse
+                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            <PlayCircle className="w-6 h-6" />
+                            {clase.puedeUnirse ? 'UNIRSE' : 'Muy pronto'}
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -343,131 +286,180 @@ export default function DashboardView({
                 </div>
               )}
 
-              {/* 2 Column Layout */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-hidden">
-                {/* Mis Hijos */}
-                <div className="bg-white rounded-xl p-4 shadow-lg border-2 border-gray-300 overflow-y-auto">
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-bold text-gray-900">Mis Hijos</h2>
-                    <button
-                      onClick={() => setActiveTab('hijos')}
-                      className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm flex items-center gap-1"
-                    >
-                      Ver detalles
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+              {/* Pagos Pendientes */}
+              {dashboardData && dashboardData.pagosPendientes.length > 0 && (
+                <div className="bg-gray-900 rounded-2xl p-6 shadow-xl border border-gray-800">
+                  <div className="flex items-center gap-3 mb-5">
+                    <CreditCard className="w-6 h-6 text-amber-400" />
+                    <h3 className="text-2xl font-bold text-white">
+                      💰 Pagos Pendientes ({dashboardData.pagosPendientes.length})
+                    </h3>
                   </div>
-                  <div className="space-y-3">
-                    {hijosData.map((hijo) => (
+                  <div className="space-y-4">
+                    {dashboardData.pagosPendientes.slice(0, 3).map((pago) => (
                       <div
-                        key={hijo.id}
-                        className="bg-gray-50 rounded-xl p-5 shadow-md hover:shadow-xl transition-all border-2 border-gray-200"
+                        key={pago.id}
+                        className={`rounded-xl p-6 border-2 ${
+                          pago.estaVencido
+                            ? 'bg-red-900/20 border-red-500/50'
+                            : 'bg-gray-850 border-gray-700'
+                        }`}
                       >
-                        <div className="flex items-center gap-3 mb-3">
-                          <div
-                            className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-md"
-                            style={{
-                              background: 'linear-gradient(135deg, #818CF8 0%, #6366F1 100%)',
-                            }}
-                          >
-                            {hijo.initial}
-                          </div>
+                        <div className="flex items-center justify-between gap-6">
                           <div className="flex-1">
-                            <h3 className="font-bold text-gray-900">{hijo.name}</h3>
-                            <p className="text-sm text-gray-500">{hijo.age} años</p>
+                            <div className="flex items-center gap-3 mb-2">
+                              {pago.estaVencido ? (
+                                <AlertTriangle className="w-6 h-6 text-red-400" />
+                              ) : (
+                                <Clock className="w-6 h-6 text-amber-400" />
+                              )}
+                              <h4 className="font-bold text-white text-xl">
+                                ${pago.monto.toLocaleString('es-AR')}
+                              </h4>
+                            </div>
+                            <p className="text-gray-400 text-base mb-1">{pago.concepto}</p>
+                            <p className="text-gray-500 text-sm">👤 {pago.estudianteNombre}</p>
+                            <p className={`text-sm font-semibold mt-2 ${
+                              pago.estaVencido ? 'text-red-400' : 'text-amber-400'
+                            }`}>
+                              {pago.estaVencido
+                                ? `⚠️ Vencido hace ${Math.abs(pago.diasParaVencer)} días`
+                                : `Vence en ${pago.diasParaVencer} ${pago.diasParaVencer === 1 ? 'día' : 'días'}`
+                              }
+                            </p>
                           </div>
+                          <button
+                            onClick={() => setActiveTab('pagos')}
+                            className={`font-bold py-4 px-8 rounded-xl shadow-lg transition-colors text-lg ${
+                              pago.estaVencido
+                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                : 'bg-amber-600 hover:bg-amber-700 text-white'
+                            }`}
+                          >
+                            PAGAR AHORA
+                          </button>
                         </div>
-                        {hijo.nextClass && (
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600">📅 {hijo.nextClass}</span>
-                          </div>
-                        )}
                       </div>
                     ))}
+                    {dashboardData.pagosPendientes.length > 3 && (
+                      <button
+                        onClick={() => setActiveTab('pagos')}
+                        className="w-full py-3 text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                      >
+                        Ver todos los pagos pendientes →
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Mis Hijos */}
+              <div className="bg-gray-900 rounded-2xl p-6 shadow-xl border border-gray-800">
+                <div className="flex items-center gap-3 mb-5">
+                  <Users className="w-6 h-6 text-purple-400" />
+                  <h3 className="text-2xl font-bold text-white">
+                    👨‍👩‍👧 Mis Hijos ({dashboardData?.metricas.totalHijos || 0})
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {estudiantes.map((hijo) => {
+                    const edad = calcularEdad(new Date(hijo.fecha_nacimiento));
+                    const initials = `${hijo.nombre.charAt(0)}${hijo.apellido.charAt(0)}`.toUpperCase();
+
+                    return (
+                      <div
+                        key={hijo.id}
+                        className="bg-gray-850 rounded-xl p-6 border border-gray-700 hover:border-purple-500/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                            {initials}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-white text-xl mb-1">
+                              {hijo.nombre} {hijo.apellido}
+                            </h4>
+                            <p className="text-gray-400 text-base">{edad} años</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button
+                  onClick={() => setActiveTab('hijos')}
+                  className="w-full mt-4 py-3 text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+                >
+                  Ver detalles completos →
+                </button>
+              </div>
+
+              {/* Resumen de Estadísticas */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Clases del Mes */}
+                <div className="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl p-6 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-blue-100 text-sm font-medium mb-1">Clases este mes</p>
+                      <p className="text-white text-4xl font-bold">
+                        {dashboardData?.metricas.clasesDelMes || 0}
+                      </p>
+                    </div>
+                    <Calendar className="w-12 h-12 text-white/80" />
                   </div>
                 </div>
 
-                {/* Clases de Hoy */}
-                <div className="bg-white rounded-xl p-4 shadow-lg border-2 border-gray-300 overflow-y-auto">
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-bold text-gray-900">
-                      Clases de Hoy ({dashboardData?.clasesHoy.length || 0})
-                    </h2>
-                    <button
-                      onClick={() => setActiveTab('calendario')}
-                      className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm flex items-center gap-1"
-                    >
-                      Ver calendario
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                {/* Total Pagado */}
+                <div className="bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl p-6 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-green-100 text-sm font-medium mb-1">Pagado en {new Date().getFullYear()}</p>
+                      <p className="text-white text-3xl font-bold">
+                        ${dashboardData?.metricas.totalPagadoAnio.toLocaleString('es-AR') || 0}
+                      </p>
+                    </div>
+                    <DollarSign className="w-12 h-12 text-white/80" />
                   </div>
-                  {dashboardData && dashboardData.clasesHoy.length > 0 ? (
-                    <div className="space-y-3">
-                      {dashboardData.clasesHoy.map((clase) => (
-                        <div
-                          key={clase.id}
-                          className="bg-gray-50 rounded-xl p-5 shadow-md hover:shadow-xl transition-all border-2 border-gray-200"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4 flex-1">
-                              <div
-                                className="w-16 h-16 rounded-lg flex flex-col items-center justify-center text-white shadow-md"
-                                style={{
-                                  background: clase.colorRuta
-                                    ? `linear-gradient(135deg, ${clase.colorRuta} 0%, ${clase.colorRuta}dd 100%)`
-                                    : 'linear-gradient(135deg, #6366F1 0%, #6366F1dd 100%)',
-                                }}
-                              >
-                                <Clock className="w-5 h-5 mb-1" />
-                                <span className="font-bold text-sm">{clase.hora}</span>
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-bold text-gray-900">{clase.nombreRuta}</h3>
-                                <p className="text-sm text-gray-600">
-                                  {clase.estudianteNombre} • Prof. {clase.docenteNombre}
-                                </p>
-                              </div>
-                            </div>
-                            <button
-                              disabled={!clase.puedeUnirse}
-                              className={`font-semibold py-2 px-4 rounded-lg shadow-md transition-all text-sm text-white ${
-                                clase.puedeUnirse
-                                  ? 'hover:shadow-lg'
-                                  : 'opacity-50 cursor-not-allowed'
-                              }`}
-                              style={{
-                                background: clase.puedeUnirse
-                                  ? 'linear-gradient(135deg, #34D399 0%, #10B981 100%)'
-                                  : 'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)',
-                              }}
-                            >
-                              {clase.puedeUnirse ? 'Unirse' : 'Próximamente'}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                </div>
+
+                {/* Asistencia */}
+                <div className="bg-gradient-to-br from-amber-600 to-orange-600 rounded-2xl p-6 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-amber-100 text-sm font-medium mb-1">Asistencia promedio</p>
+                      <div className="flex items-end gap-2">
+                        <p className="text-white text-4xl font-bold">
+                          {dashboardData?.metricas.asistenciaPromedio || 0}%
+                        </p>
+                        {(dashboardData?.metricas.asistenciaPromedio || 0) >= 80 && (
+                          <CheckCircle2 className="w-8 h-8 text-white mb-1" />
+                        )}
+                      </div>
                     </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Calendar className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                      <p>No hay clases programadas para hoy</p>
-                    </div>
-                  )}
+                    <TrendingUp className="w-12 h-12 text-white/80" />
+                  </div>
                 </div>
               </div>
+
+              {/* Sin alertas ni clases - Estado vacío */}
+              {(!dashboardData || (dashboardData.alertas.length === 0 && dashboardData.clasesHoy.length === 0 && dashboardData.pagosPendientes.length === 0)) && (
+                <div className="bg-gray-900 rounded-2xl p-12 shadow-xl border border-gray-800 text-center">
+                  <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    ✅ Todo al día
+                  </h3>
+                  <p className="text-gray-400 text-lg">
+                    No hay acciones pendientes por el momento. ¡Excelente!
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Mis Hijos Tab */}
+          {/* Otros Tabs */}
           {activeTab === 'hijos' && <MisHijosTab estudiantes={estudiantes} />}
-
-          {/* Calendario Tab */}
           {activeTab === 'calendario' && <CalendarioTab />}
-
-          {/* Pagos Tab */}
           {activeTab === 'pagos' && <PagosTab />}
-
-          {/* Ayuda Tab */}
           {activeTab === 'ayuda' && <AyudaTab />}
         </div>
       </main>
