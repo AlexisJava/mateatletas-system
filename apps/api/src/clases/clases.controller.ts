@@ -75,6 +75,16 @@ export class ClasesController {
   }
 
   /**
+   * Eliminar una clase permanentemente (Solo Admin)
+   * DELETE /api/clases/:id
+   */
+  @Delete(':id')
+  @Roles(Role.Admin)
+  async eliminarClase(@Param('id') id: string) {
+    return this.clasesService.eliminarClase(id);
+  }
+
+  /**
    * Asignar estudiantes a una clase (Solo Admin)
    * POST /api/clases/:id/asignar-estudiantes
    */

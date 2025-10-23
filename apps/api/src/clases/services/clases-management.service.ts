@@ -224,6 +224,43 @@ export class ClasesManagementService {
   }
 
   /**
+   * Eliminar una clase permanentemente (Solo Admin)
+   * @param id - ID de la clase a eliminar
+   * @returns Mensaje de confirmación
+   */
+  async eliminarClase(id: string) {
+    // Verificar que la clase existe
+    const clase = await this.prisma.clase.findUnique({
+      where: { id },
+      include: {
+        inscripciones: true,
+        _count: {
+          select: { inscripciones: true },
+        },
+      },
+    });
+
+    if (!clase) {
+      throw new NotFoundException(`Clase con ID ${id} no encontrada`);
+    }
+
+    // Eliminar la clase (las inscripciones se eliminarán en cascada si está configurado en Prisma)
+    await this.prisma.clase.delete({
+      where: { id },
+    });
+
+    this.logger.log(
+      `Clase ${id} eliminada permanentemente. ${clase._count.inscripciones} inscripciones eliminadas`,
+    );
+
+    return {
+      message: 'Clase eliminada exitosamente',
+      claseId: id,
+      inscripcionesEliminadas: clase._count.inscripciones,
+    };
+  }
+
+  /**
    * Listar todas las clases (Admin) con paginación
    * @param filtros - Filtros opcionales para búsqueda
    * @param page - Número de página (default: 1)

@@ -13,7 +13,7 @@ import {
 } from '@/lib/utils/export.utils';
 import type { ClaseListado } from '@/types/admin-clases.types';
 
-type ModalType = 'create' | 'cancel' | 'view' | 'edit' | 'estudiantes' | null;
+type ModalType = 'create' | 'cancel' | 'view' | 'edit' | 'estudiantes' | 'delete' | null;
 
 /**
  * Página de Gestión de Clases - MATEATLETAS OS
@@ -71,6 +71,25 @@ export default function AdminClasesPage() {
     const success = await cancelClase(selectedClass.id as string);
     if (success) {
       closeModal();
+    }
+  };
+
+  const handleDeleteClass = async () => {
+    if (!selectedClass) return;
+
+    try {
+      setIsLoading(true);
+      await apiClient.delete(`/clases/${selectedClass.id}`);
+
+      // Reload classes
+      await loadClases();
+
+      closeModal();
+    } catch (err: unknown) {
+      console.error('Error al eliminar clase:', err);
+      alert('Error al eliminar la clase. Por favor intente nuevamente.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -132,28 +151,28 @@ export default function AdminClasesPage() {
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl font-semibold transition-all shadow-sm flex items-center gap-2"
+              className="px-4 py-2 backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/30 hover:bg-emerald-500/20 text-white/90 rounded-xl font-semibold transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               Exportar
             </button>
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-20">
+              <div className="absolute right-0 mt-2 w-48 backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-xl shadow-2xl shadow-emerald-500/20 border border-emerald-500/30 overflow-hidden z-20">
                 <button
                   onClick={() => handleExport('excel')}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-green-50 transition-all text-sm font-medium border-b border-gray-100"
+                  className="block w-full text-left px-4 py-2 text-white/90 hover:bg-green-500/20 transition-all text-sm font-medium border-b border-emerald-500/20"
                 >
                   📊 Excel (.xlsx)
                 </button>
                 <button
                   onClick={() => handleExport('csv')}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-50 transition-all text-sm font-medium border-b border-gray-100"
+                  className="block w-full text-left px-4 py-2 text-white/90 hover:bg-blue-500/20 transition-all text-sm font-medium border-b border-emerald-500/20"
                 >
                   📄 CSV (.csv)
                 </button>
                 <button
                   onClick={() => handleExport('pdf')}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-red-50 transition-all text-sm font-medium"
+                  className="block w-full text-left px-4 py-2 text-white/90 hover:bg-red-500/20 transition-all text-sm font-medium"
                 >
                   📕 PDF (.pdf)
                 </button>
@@ -198,20 +217,14 @@ export default function AdminClasesPage() {
 
       {/* Cards */}
       {!isLoading && (
-        <ClasesCards
-          clases={filteredClases}
-          onViewClase={(clase) => openModal('view', clase)}
-          onCancelClase={(clase) => openModal('cancel', clase)}
-          onEditClase={(clase) => openModal('edit', clase)}
-          onManageStudents={(clase) => openModal('estudiantes', clase)}
-        />
+        <ClasesCards clases={filteredClases} />
       )}
 
       {/* Modal Crear/Editar */}
       {(modalType === 'create' || modalType === 'edit') && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-xl p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-emerald-500/30 shadow-2xl shadow-emerald-500/20">
+            <h2 className="text-2xl font-bold mb-6 text-white">
               {modalType === 'create' ? 'Nueva Clase' : 'Editar Clase'}
             </h2>
             <ClaseForm
@@ -229,27 +242,61 @@ export default function AdminClasesPage() {
 
       {/* Modal Cancelar */}
       {modalType === 'cancel' && selectedClass && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Cancelar Clase</h2>
-            <p className="text-gray-700 mb-2">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-xl p-6 max-w-md w-full border border-emerald-500/30 shadow-2xl shadow-emerald-500/20">
+            <h2 className="text-2xl font-bold mb-4 text-white">Cancelar Clase</h2>
+            <p className="text-white/70 mb-2">
               ¿Estás seguro de que deseas cancelar esta clase?
             </p>
-            <p className="text-purple-600 font-bold mb-6">
+            <p className="text-purple-300 font-bold mb-6">
               {selectedClass.nombre}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={handleCancelClass}
-                className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all"
+                className="flex-1 bg-gradient-to-r from-red-500 to-rose-500 text-white py-2 px-4 rounded-lg hover:from-red-600 hover:to-rose-600 transition-all shadow-lg shadow-red-500/30 font-semibold"
               >
                 Sí, Cancelar
               </button>
               <button
                 onClick={closeModal}
-                className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-all"
+                className="flex-1 backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/30 text-white/90 py-2 px-4 rounded-lg hover:bg-emerald-500/20 transition-all font-semibold"
               >
                 No, Volver
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Eliminar */}
+      {modalType === 'delete' && selectedClass && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-xl p-6 max-w-md w-full border border-red-500/50 shadow-2xl shadow-red-500/30">
+            <h2 className="text-2xl font-bold mb-4 text-red-400">Eliminar Clase Permanentemente</h2>
+            <p className="text-white/70 mb-2">
+              ¿Estás seguro de que deseas <span className="text-red-400 font-bold">eliminar permanentemente</span> esta clase?
+            </p>
+            <p className="text-purple-300 font-bold mb-3">
+              {selectedClass.nombre}
+            </p>
+            <p className="text-yellow-300/80 text-sm mb-6 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+              ⚠️ Esta acción no se puede deshacer. Se eliminarán también todas las inscripciones asociadas.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteClass}
+                disabled={isLoading}
+                className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white py-2 px-4 rounded-lg hover:from-red-700 hover:to-rose-700 transition-all shadow-lg shadow-red-500/40 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Eliminando...' : 'Sí, Eliminar'}
+              </button>
+              <button
+                onClick={closeModal}
+                disabled={isLoading}
+                className="flex-1 backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/30 text-white/90 py-2 px-4 rounded-lg hover:bg-emerald-500/20 transition-all font-semibold disabled:opacity-50"
+              >
+                Cancelar
               </button>
             </div>
           </div>

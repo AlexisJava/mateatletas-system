@@ -33,6 +33,7 @@ export default function UsuariosPage() {
   const [clasesCount, setClasesCount] = useState<number>(0);
   const [docentesDisponibles, setDocentesDisponibles] = useState<Docente[]>([]);
   const [targetDocenteId, setTargetDocenteId] = useState<string>('');
+  const [needsReassignment, setNeedsReassignment] = useState<boolean>(false);
 
   // Form states para crear Admin
   const [adminForm, setAdminForm] = useState<CreateAdminData>({
@@ -70,6 +71,7 @@ export default function UsuariosPage() {
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
     setDeleteError(null);
+    setNeedsReassignment(false);
     setFormLoading(true);
 
     try {
@@ -79,29 +81,38 @@ export default function UsuariosPage() {
         setSelectedUser(null);
       }
     } catch (error: unknown) {
-      // Detectar error de clases asignadas
-      const axiosError = error as { response?: { data?: { errorMessage?: string; message?: string } }; message?: string };
+      // Solo detectar error de clases asignadas si es DOCENTE
+      if (selectedUser.role === 'docente') {
+        const axiosError = error as { response?: { data?: { errorMessage?: string; message?: string } }; message?: string };
 
-      const errorMsg = axiosError?.response?.data?.errorMessage || axiosError?.response?.data?.message || axiosError?.message || 'Error al eliminar usuario';
+        const errorMsg = axiosError?.response?.data?.errorMessage || axiosError?.response?.data?.message || axiosError?.message || 'Error al eliminar usuario';
 
-      if (errorMsg.includes('clase(s) asignada(s)')) {
-        // Extraer número de clases del mensaje
-        const match = errorMsg.match(/(\d+) clase\(s\)/);
-        const numClases = match ? parseInt(match[1]) : 0;
-        setClasesCount(numClases);
-        setDeleteError(errorMsg);
+        if (errorMsg.includes('clase(s) asignada(s)')) {
+          // Extraer número de clases del mensaje
+          const match = errorMsg.match(/(\d+) clase\(s\)/);
+          const numClases = match ? parseInt(match[1]) : 0;
+          setClasesCount(numClases);
+          setDeleteError(errorMsg);
+          setNeedsReassignment(true); // Marcar que necesita reasignación
 
-        // Cargar docentes disponibles para reasignación
-        try {
-          const response = await docentesApi.getAll();
-          // El backend puede devolver { data: [...] } o directamente [...]
-          const docentes = Array.isArray(response) ? response : (response as { data?: Docente[] }).data || [];
-          setDocentesDisponibles(docentes.filter((d: Docente) => d.id !== selectedUser.id));
-        } catch (err) {
-          console.error('Error loading docentes:', err);
+          // Cargar docentes disponibles para reasignación
+          try {
+            const response = await docentesApi.getAll();
+            // El backend puede devolver { data: [...] } o directamente [...]
+            const docentes = Array.isArray(response) ? response : (response as { data?: Docente[] }).data || [];
+            setDocentesDisponibles(docentes.filter((d: Docente) => d.id !== selectedUser.id));
+          } catch (err) {
+            console.error('Error loading docentes:', err);
+          }
+        } else {
+          setDeleteError(errorMsg);
         }
       } else {
+        // Para tutores u otros roles, mostrar error directamente pero NO bloquear
+        const axiosError = error as { response?: { data?: { errorMessage?: string; message?: string } }; message?: string };
+        const errorMsg = axiosError?.response?.data?.errorMessage || axiosError?.response?.data?.message || axiosError?.message || 'Error al eliminar usuario';
         setDeleteError(errorMsg);
+        setNeedsReassignment(false); // NO necesita reasignación
       }
     } finally {
       setFormLoading(false);
@@ -237,6 +248,7 @@ export default function UsuariosPage() {
     setClasesCount(0);
     setDocentesDisponibles([]);
     setTargetDocenteId('');
+    setNeedsReassignment(false);
   };
 
   const handleExport = (format: 'excel' | 'csv' | 'pdf') => {
@@ -526,7 +538,7 @@ export default function UsuariosPage() {
             </div>
 
             {/* Error Display con opción de reasignación */}
-            {deleteError ? (
+            {deleteError && needsReassignment ? (
               <div className="space-y-4 mb-6">
                 <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4">
                   <p className="text-sm text-amber-300 font-bold text-center">⚠️ {deleteError}</p>
@@ -562,6 +574,10 @@ export default function UsuariosPage() {
                   </div>
                 )}
               </div>
+            ) : deleteError ? (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 mb-6">
+                <p className="text-sm text-red-400 font-bold text-center">⚠️ {deleteError}</p>
+              </div>
             ) : (
               <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 mb-6">
                 <p className="text-sm text-red-400 font-bold text-center">⚠️ Esta acción no se puede deshacer</p>
@@ -576,7 +592,7 @@ export default function UsuariosPage() {
               >
                 Cancelar
               </button>
-              {!deleteError && (
+              {!needsReassignment && (
                 <button
                   onClick={handleDeleteUser}
                   disabled={formLoading}
