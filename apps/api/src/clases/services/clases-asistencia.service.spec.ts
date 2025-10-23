@@ -36,7 +36,7 @@ describe('ClasesAsistenciaService', () => {
       clase_id: 'clase-1',
       estudiante_id: 'est-2',
       estado: 'Ausente',
-      observaciones: null,
+      observaciones: undefined,
       puntos_otorgados: 0,
       estudiante: { nombre: 'María', apellido: 'González' },
     },
@@ -83,7 +83,7 @@ describe('ClasesAsistenciaService', () => {
         {
           estudianteId: 'est-2',
           estado: 'Ausente' as const,
-          observaciones: null,
+          observaciones: undefined,
           puntosOtorgados: 0,
         },
       ],
@@ -148,7 +148,7 @@ describe('ClasesAsistenciaService', () => {
           {
             estudianteId: 'est-999', // No está inscrito
             estado: 'Presente' as const,
-            observaciones: null,
+            observaciones: undefined,
             puntosOtorgados: 0,
           },
         ],
@@ -265,7 +265,7 @@ describe('ClasesAsistenciaService', () => {
           {
             estudianteId: 'est-2',
             estado: 'Ausente' as const,
-            observaciones: null,
+            observaciones: undefined,
             puntosOtorgados: 0,
           },
         ],
@@ -278,7 +278,7 @@ describe('ClasesAsistenciaService', () => {
       expect(createSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            observaciones: null,
+            observaciones: undefined,
           }),
         }),
       );
@@ -300,7 +300,7 @@ describe('ClasesAsistenciaService', () => {
           {
             estudianteId: 'est-1',
             estado: 'Presente' as const,
-            observaciones: null,
+            observaciones: undefined,
             puntosOtorgados: undefined, // Sin puntos
           },
         ],
