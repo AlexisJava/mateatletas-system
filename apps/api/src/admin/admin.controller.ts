@@ -4,6 +4,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseEnumPipe,
   Patch,
@@ -15,6 +17,8 @@ import {
 import { AdminService } from './admin.service';
 import { RutasCurricularesService } from './rutas-curriculares.service';
 import { SectoresRutasService } from './services/sectores-rutas.service';
+import { ClaseGruposService } from './clase-grupos.service';
+import { ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
@@ -33,6 +37,7 @@ export class AdminController {
     private readonly adminService: AdminService,
     private readonly rutasService: RutasCurricularesService,
     private readonly sectoresRutasService: SectoresRutasService,
+    private readonly claseGruposService: ClaseGruposService,
   ) {}
 
   /**
@@ -407,5 +412,78 @@ export class AdminController {
   @Get('circuit-metrics')
   async getCircuitMetrics() {
     return this.adminService.getCircuitMetrics();
+  }
+
+  /**
+   * Crear un nuevo ClaseGrupo (grupo recurrente de clases)
+   * POST /api/admin/clase-grupos
+   * Rol: Admin
+   *
+   * Permite crear un grupo estable de estudiantes que se reúne semanalmente
+   * Ejemplo: "GRUPO B1 - Matemática - Lunes 19:30"
+   */
+  @Post('clase-grupos')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Crear grupo de clases recurrente',
+    description: `
+      Crea un ClaseGrupo con horario recurrente semanal.
+
+      Tipos:
+      - GRUPO_REGULAR: Finaliza automáticamente el 15/dic del año lectivo
+      - CURSO_TEMPORAL: Fecha de fin específica
+
+      El sistema:
+      1. Crea el ClaseGrupo
+      2. Inscribe a los estudiantes especificados
+      3. NO crea instancias duplicadas (1 registro para todo el año)
+    `,
+  })
+  async crearClaseGrupo(@Body() dto: any) {
+    return this.claseGruposService.crearClaseGrupo(dto);
+  }
+
+  /**
+   * Listar todos los ClaseGrupos
+   * GET /api/admin/clase-grupos
+   * Rol: Admin
+   *
+   * Permite filtrar por año lectivo, estado activo, docente o tipo
+   */
+  @Get('clase-grupos')
+  @ApiOperation({
+    summary: 'Listar grupos de clases',
+    description: 'Obtiene todos los ClaseGrupos con filtros opcionales',
+  })
+  async listarClaseGrupos(
+    @Query('anio_lectivo') anioLectivo?: string,
+    @Query('activo') activo?: string,
+    @Query('docente_id') docenteId?: string,
+    @Query('tipo') tipo?: string,
+  ) {
+    const params: any = {};
+    if (anioLectivo) params.anio_lectivo = parseInt(anioLectivo);
+    if (activo !== undefined) params.activo = activo === 'true';
+    if (docenteId) params.docente_id = docenteId;
+    if (tipo) params.tipo = tipo;
+
+    return this.claseGruposService.listarClaseGrupos(params);
+  }
+
+  /**
+   * Obtener un ClaseGrupo por ID
+   * GET /api/admin/clase-grupos/:id
+   * Rol: Admin
+   *
+   * Retorna todos los detalles del grupo incluyendo estudiantes inscritos
+   */
+  @Get('clase-grupos/:id')
+  @ApiOperation({
+    summary: 'Obtener detalle de un grupo',
+    description:
+      'Obtiene un ClaseGrupo con todos sus detalles e inscripciones',
+  })
+  async obtenerClaseGrupo(@Param('id') id: string) {
+    return this.claseGruposService.obtenerClaseGrupo(id);
   }
 }

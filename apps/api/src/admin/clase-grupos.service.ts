@@ -1,0 +1,323 @@
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../core/database/prisma.service';
+import { CrearClaseGrupoDto } from './dto/crear-clase-grupo.dto';
+import { TipoClaseGrupo, Prisma } from '@prisma/client';
+
+@Injectable()
+export class ClaseGruposService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Crear un nuevo ClaseGrupo con estudiantes inscritos
+   */
+  async crearClaseGrupo(dto: CrearClaseGrupoDto) {
+    // Validar que el código no exista
+    const existente = await this.prisma.claseGrupo.findUnique({
+      where: { codigo: dto.codigo },
+    });
+
+    if (existente) {
+      throw new BadRequestException(
+        `Ya existe un grupo con el código "${dto.codigo}"`,
+      );
+    }
+
+    // Validar que el docente exista
+    const docente = await this.prisma.docente.findUnique({
+      where: { id: dto.docente_id },
+    });
+
+    if (!docente) {
+      throw new NotFoundException(
+        `No se encontró el docente con ID ${dto.docente_id}`,
+      );
+    }
+
+    // Validar que los estudiantes existan
+    const estudiantes = await this.prisma.estudiante.findMany({
+      where: { id: { in: dto.estudiantes_ids } },
+      include: { tutor: true },
+    });
+
+    if (estudiantes.length !== dto.estudiantes_ids.length) {
+      throw new NotFoundException(
+        'Uno o más estudiantes no fueron encontrados',
+      );
+    }
+
+    // Calcular fecha_fin automática para GRUPO_REGULAR
+    let fechaFin: Date;
+    if (dto.tipo === TipoClaseGrupo.GRUPO_REGULAR && !dto.fecha_fin) {
+      // Siempre 15 de diciembre del año lectivo
+      fechaFin = new Date(dto.anio_lectivo, 11, 15); // Mes 11 = diciembre (0-indexed)
+    } else {
+      fechaFin = new Date(dto.fecha_fin!);
+    }
+
+    const fechaInicio = new Date(dto.fecha_inicio);
+
+    // Validar que fecha_fin sea posterior a fecha_inicio
+    if (fechaFin <= fechaInicio) {
+      throw new BadRequestException(
+        'La fecha de fin debe ser posterior a la fecha de inicio',
+      );
+    }
+
+    // Crear el ClaseGrupo con las inscripciones en una transacción
+    const claseGrupo = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      // Crear el grupo
+      const grupo = await tx.claseGrupo.create({
+        data: {
+          codigo: dto.codigo,
+          nombre: dto.nombre,
+          tipo: dto.tipo,
+          dia_semana: dto.dia_semana,
+          hora_inicio: dto.hora_inicio,
+          hora_fin: dto.hora_fin,
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin,
+          anio_lectivo: dto.anio_lectivo,
+          cupo_maximo: dto.cupo_maximo,
+          docente_id: dto.docente_id,
+          ruta_curricular_id: dto.ruta_curricular_id,
+          sector_id: dto.sector_id,
+          nivel: dto.nivel,
+          activo: true,
+        },
+        include: {
+          docente: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+              email: true,
+            },
+          },
+          rutaCurricular: {
+            select: {
+              id: true,
+              nombre: true,
+              color: true,
+            },
+          },
+          sector: {
+            select: {
+              id: true,
+              nombre: true,
+              color: true,
+            },
+          },
+        },
+      });
+
+      // Crear las inscripciones de los estudiantes
+      const inscripciones = await Promise.all(
+        estudiantes.map((estudiante: any) =>
+          tx.inscripcionClaseGrupo.create({
+            data: {
+              clase_grupo_id: grupo.id,
+              estudiante_id: estudiante.id,
+              tutor_id: estudiante.tutor_id,
+              fecha_inscripcion: new Date(),
+            },
+            include: {
+              estudiante: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  apellido: true,
+                  edad: true,
+                },
+              },
+              tutor: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  apellido: true,
+                  email: true,
+                },
+              },
+            },
+          }),
+        ),
+      );
+
+      return {
+        ...grupo,
+        inscripciones,
+        total_inscriptos: inscripciones.length,
+      };
+    });
+
+    return {
+      success: true,
+      data: claseGrupo,
+      message: `Grupo ${dto.codigo} creado exitosamente con ${claseGrupo.total_inscriptos} estudiantes`,
+    };
+  }
+
+  /**
+   * Listar todos los ClaseGrupos con filtros opcionales
+   */
+  async listarClaseGrupos(params?: {
+    anio_lectivo?: number;
+    activo?: boolean;
+    docente_id?: string;
+    tipo?: TipoClaseGrupo;
+  }) {
+    const where: any = {};
+
+    if (params?.anio_lectivo) {
+      where.anio_lectivo = params.anio_lectivo;
+    }
+
+    if (params?.activo !== undefined) {
+      where.activo = params.activo;
+    }
+
+    if (params?.docente_id) {
+      where.docente_id = params.docente_id;
+    }
+
+    if (params?.tipo) {
+      where.tipo = params.tipo;
+    }
+
+    const grupos = await this.prisma.claseGrupo.findMany({
+      where,
+      include: {
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        rutaCurricular: {
+          select: {
+            id: true,
+            nombre: true,
+            color: true,
+          },
+        },
+        sector: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
+        inscripciones: {
+          include: {
+            estudiante: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            inscripciones: true,
+            asistencias: true,
+          },
+        },
+      },
+      orderBy: [{ dia_semana: 'asc' }, { hora_inicio: 'asc' }],
+    });
+
+    return {
+      success: true,
+      data: grupos.map((grupo: any) => ({
+        ...grupo,
+        total_inscriptos: grupo._count.inscripciones,
+        total_asistencias: grupo._count.asistencias,
+        cupos_disponibles: grupo.cupo_maximo - grupo._count.inscripciones,
+      })),
+      total: grupos.length,
+    };
+  }
+
+  /**
+   * Obtener un ClaseGrupo por ID con todos sus detalles
+   */
+  async obtenerClaseGrupo(id: string) {
+    const grupo = await this.prisma.claseGrupo.findUnique({
+      where: { id },
+      include: {
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+            telefono: true,
+          },
+        },
+        rutaCurricular: {
+          select: {
+            id: true,
+            nombre: true,
+            color: true,
+            descripcion: true,
+          },
+        },
+        sector: {
+          select: {
+            id: true,
+            nombre: true,
+            color: true,
+          },
+        },
+        inscripciones: {
+          include: {
+            estudiante: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                edad: true,
+                nivel_escolar: true,
+              },
+            },
+            tutor: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                email: true,
+                telefono: true,
+              },
+            },
+          },
+          orderBy: {
+            estudiante: {
+              apellido: 'asc',
+            },
+          },
+        },
+        _count: {
+          select: {
+            inscripciones: true,
+            asistencias: true,
+          },
+        },
+      },
+    });
+
+    if (!grupo) {
+      throw new NotFoundException(`No se encontró el grupo con ID ${id}`);
+    }
+
+    return {
+      success: true,
+      data: {
+        ...grupo,
+        total_inscriptos: grupo._count.inscripciones,
+        total_asistencias: grupo._count.asistencias,
+        cupos_disponibles: grupo.cupo_maximo - grupo._count.inscripciones,
+      },
+    };
+  }
+}
