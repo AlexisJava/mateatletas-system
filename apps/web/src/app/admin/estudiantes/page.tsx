@@ -44,7 +44,7 @@ export default function AdminEstudiantesPage() {
   const [sectores, setSectores] = useState<Sector[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sectorActivo, setSectorActivo] = useState<'Programación' | 'Matemática' | 'Preinscriptos'>('Matemática');
+  const [sectorActivo, setSectorActivo] = useState<'Programación' | 'Matemática' | 'Ciencias' | 'Preinscriptos'>('Matemática');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sectorIdParaModal, setSectorIdParaModal] = useState<string>('');
 
@@ -106,6 +106,7 @@ export default function AdminEstudiantesPage() {
   // Separar estudiantes por sector
   const estudiantesProgramacion = estudiantes.filter(est => est.sector?.nombre === 'Programación');
   const estudiantesMatematica = estudiantes.filter(est => est.sector?.nombre === 'Matemática');
+  const estudiantesCiencias = estudiantes.filter(est => est.sector?.nombre === 'Ciencias');
   const estudiantesSinSector = estudiantes.filter(est => !est.sector);
 
   const renderTablaEstudiantes = (listaEstudiantes: Estudiante[], titulo: string, icono: string) => {
@@ -213,11 +214,13 @@ export default function AdminEstudiantesPage() {
   const estudiantesActivos =
     sectorActivo === 'Programación' ? estudiantesProgramacion :
     sectorActivo === 'Matemática' ? estudiantesMatematica :
+    sectorActivo === 'Ciencias' ? estudiantesCiencias :
     estudiantesSinSector;
 
   const iconoActivo =
     sectorActivo === 'Programación' ? '💻' :
-    sectorActivo === 'Matemática' ? '🧮' : '📝';
+    sectorActivo === 'Matemática' ? '🧮' :
+    sectorActivo === 'Ciencias' ? '🔬' : '📝';
 
   return (
     <div className="space-y-6">
@@ -269,10 +272,25 @@ export default function AdminEstudiantesPage() {
         </button>
 
         <button
+          onClick={() => setSectorActivo('Ciencias')}
+          className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all ${
+            sectorActivo === 'Ciencias'
+              ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/30'
+              : 'backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/20 text-white/70 hover:bg-emerald-500/20'
+          }`}
+        >
+          <span className="text-2xl">🔬</span>
+          <div className="text-left">
+            <div className="text-sm font-bold">Ciencias</div>
+            <div className="text-xs opacity-80">{estudiantesCiencias.length} estudiantes</div>
+          </div>
+        </button>
+
+        <button
           onClick={() => setSectorActivo('Preinscriptos')}
           className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all ${
             sectorActivo === 'Preinscriptos'
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30'
+              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30'
               : 'backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/20 text-white/70 hover:bg-emerald-500/20'
           }`}
         >
