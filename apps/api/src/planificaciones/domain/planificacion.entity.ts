@@ -35,9 +35,7 @@ export class PlanificacionEntity {
       throw new Error('El año debe ser 2024 o posterior');
     }
 
-    if (this.objetivosAprendizaje.length === 0) {
-      throw new Error('Debe tener al menos un objetivo de aprendizaje');
-    }
+    // objetivosAprendizaje es opcional, no validamos si está vacío
 
     if (!this.titulo.trim()) {
       throw new Error('El título no puede estar vacío');
