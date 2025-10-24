@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../core/database/database.module';
 
 // Infrastructure
-import { PlanificacionesControllerV2 } from './infrastructure/planificaciones.controller.v2';
+import { PlanificacionesV2Controller } from './infrastructure/planificaciones-v2.controller';
 import { PrismaPlanificacionRepository } from './infrastructure/prisma-planificacion.repository';
 
 // Application (Use Cases)
 import { GetPlanificacionesUseCase } from './application/use-cases/get-planificaciones.use-case';
+import { CreatePlanificacionUseCase } from './application/use-cases/create-planificacion.use-case';
 
 // Legacy (to be deprecated)
 import { PlanificacionesController } from './planificaciones.controller';
@@ -25,7 +26,7 @@ import { PlanificacionesService } from './planificaciones.service';
 @Module({
   imports: [DatabaseModule],
   controllers: [
-    PlanificacionesControllerV2, // New clean architecture controller
+    PlanificacionesV2Controller, // New clean architecture controller
     PlanificacionesController, // Legacy (will be removed)
   ],
   providers: [
@@ -38,6 +39,7 @@ import { PlanificacionesService } from './planificaciones.service';
 
     // Use Cases
     GetPlanificacionesUseCase,
+    CreatePlanificacionUseCase, // NEW for SLICE 2
 
     // Legacy service (will be removed)
     PlanificacionesService,
@@ -45,6 +47,7 @@ import { PlanificacionesService } from './planificaciones.service';
   exports: [
     'IPlanificacionRepository',
     GetPlanificacionesUseCase,
+    CreatePlanificacionUseCase,
     PlanificacionesService, // Legacy export
   ],
 })
