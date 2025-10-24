@@ -20,6 +20,7 @@ import {
   Loader2,
   X,
   Save,
+  Info,
 } from 'lucide-react';
 import {
   Chart as ChartJS,
