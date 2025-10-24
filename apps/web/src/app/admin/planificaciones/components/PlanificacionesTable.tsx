@@ -48,7 +48,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
   }
 
   // Empty state
-  if (planificaciones.length === 0) {
+  if (!planificaciones || planificaciones.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-md p-12 text-center">
         <div className="text-6xl mb-4">📅</div>
@@ -91,7 +91,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {planificaciones.map((planificacion) => (
+            {planificaciones?.map((planificacion) => (
               <tr key={planificacion.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
@@ -145,7 +145,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
 
       {/* Mobile Cards */}
       <div className="md:hidden divide-y divide-gray-200">
-        {planificaciones.map((planificacion) => (
+        {planificaciones?.map((planificacion) => (
           <div key={planificacion.id} className="p-4 hover:bg-gray-50 transition-colors">
             <div className="flex justify-between items-start mb-3">
               <span className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
