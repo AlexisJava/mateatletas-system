@@ -1,0 +1,56 @@
+{
+  "id": "2025-11-nivel-3",
+  "codigo": "2025-11-nivel-3",
+  "titulo": "COMPLETAR: Título de la planificación",
+  "descripcion": "COMPLETAR: Descripción breve de la experiencia inmersiva",
+  "nivel": 3,
+  "edades": "10-12 años",
+  "mes": 11,
+  "anio": 2025,
+  "grupos_objetivo": ["B4", "L1", "L2"],
+  "tematica_principal": "COMPLETAR: Ej. Fracciones, decimales y geometría",
+  "narrativa": "COMPLETAR: Ej. La Misión de los Científicos del Futuro",
+  "duracion_semanas": 4,
+  "duracion_minutos_por_sesion": 120,
+  "objetivos_aprendizaje": [
+    "COMPLETAR: Objetivo 1",
+    "COMPLETAR: Objetivo 2",
+    "COMPLETAR: Objetivo 3",
+    "COMPLETAR: Objetivo 4"
+  ],
+  "semanas": [
+    {
+      "numero": 1,
+      "titulo": "COMPLETAR: Título Semana 1",
+      "objetivo": "COMPLETAR: Objetivo específico",
+      "duracion_minutos": 120
+    },
+    {
+      "numero": 2,
+      "titulo": "COMPLETAR: Título Semana 2",
+      "objetivo": "COMPLETAR: Objetivo específico",
+      "duracion_minutos": 120
+    },
+    {
+      "numero": 3,
+      "titulo": "COMPLETAR: Título Semana 3",
+      "objetivo": "COMPLETAR: Objetivo específico",
+      "duracion_minutos": 120
+    },
+    {
+      "numero": 4,
+      "titulo": "COMPLETAR: Título Semana 4",
+      "objetivo": "COMPLETAR: Objetivo específico",
+      "duracion_minutos": 120
+    }
+  ],
+  "recursos_necesarios": [
+    "Tablet o computadora por estudiante",
+    "Auriculares (opcional)",
+    "Conexión a internet estable"
+  ],
+  "notas_docentes": "COMPLETAR: Sugerencias pedagógicas para el docente. Este nivel requiere mayor desafío cognitivo.",
+  "creado_por": "Admin Mateatletas",
+  "fecha_creacion": "2025-11-01",
+  "version": "1.0.0"
+}

@@ -1,0 +1,56 @@
+{
+  "id": "2025-11-nivel-1",
+  "codigo": "2025-11-nivel-1",
+  "titulo": "COMPLETAR: Título de la planificación",
+  "descripcion": "COMPLETAR: Descripción breve de la experiencia inmersiva",
+  "nivel": 1,
+  "edades": "6-7 años",
+  "mes": 11,
+  "anio": 2025,
+  "grupos_objetivo": ["B1"],
+  "tematica_principal": "COMPLETAR: Ej. Suma y resta sin reagrupamiento",
+  "narrativa": "COMPLETAR: Ej. El Reino de los Números Mágicos",
+  "duracion_semanas": 4,
+  "duracion_minutos_por_sesion": 75,
+  "objetivos_aprendizaje": [
+    "COMPLETAR: Objetivo 1",
+    "COMPLETAR: Objetivo 2",
+    "COMPLETAR: Objetivo 3",
+    "COMPLETAR: Objetivo 4"
+  ],
+  "semanas": [
+    {
+      "numero": 1,
+      "titulo": "COMPLETAR: Título Semana 1",
+      "objetivo": "COMPLETAR: Objetivo específico",
+      "duracion_minutos": 75
+    },
+    {
+      "numero": 2,
+      "titulo": "COMPLETAR: Título Semana 2",
+      "objetivo": "COMPLETAR: Objetivo específico",
+      "duracion_minutos": 75
+    },
+    {
+      "numero": 3,
+      "titulo": "COMPLETAR: Título Semana 3",
+      "objetivo": "COMPLETAR: Objetivo específico",
+      "duracion_minutos": 75
+    },
+    {
+      "numero": 4,
+      "titulo": "COMPLETAR: Título Semana 4",
+      "objetivo": "COMPLETAR: Objetivo específico",
+      "duracion_minutos": 75
+    }
+  ],
+  "recursos_necesarios": [
+    "Tablet o computadora por estudiante",
+    "Auriculares (opcional)",
+    "Conexión a internet estable"
+  ],
+  "notas_docentes": "COMPLETAR: Sugerencias pedagógicas para el docente",
+  "creado_por": "Admin Mateatletas",
+  "fecha_creacion": "2025-11-01",
+  "version": "1.0.0"
+}
