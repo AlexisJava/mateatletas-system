@@ -410,7 +410,53 @@ model Clase {
   @@map("clases")
 }
 
-/// Modelo para grupos de clases recurrentes
+/// Modelo para Grupos Pedagógicos
+/// Representa los niveles educativos o categorías pedagógicas (B1, B2, B3, A1, etc.)
+/// Los grupos son conceptos estables que agrupan contenido pedagógico del mismo nivel
+model Grupo {
+  /// Identificador único del grupo
+  id String @id @default(cuid())
+
+  /// Código del grupo (ej: "B1", "B2", "B3", "A1", "OLIMP")
+  codigo String @unique
+
+  /// Nombre descriptivo del grupo
+  nombre String  // "Básico 1", "Básico 2", "Avanzado 1"
+
+  /// Descripción del grupo y nivel educativo
+  descripcion String?
+
+  /// Rango de edad sugerido
+  edad_minima Int?
+  edad_maxima Int?
+
+  /// Sector al que pertenece (Matemática o Programación)
+  sector_id String?
+
+  /// Indica si el grupo está activo
+  activo Boolean @default(true)
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  sector Sector? @relation(fields: [sector_id], references: [id])
+
+  /// Comisiones (instancias operativas) de este grupo
+  comisiones ClaseGrupo[]
+
+  /// Planificaciones mensuales dirigidas a este grupo
+  planificaciones PlanificacionMensual[]
+
+  @@index([codigo])
+  @@index([activo])
+  @@map("grupos")
+}
+
+/// Modelo para grupos de clases recurrentes (ahora llamado Comision conceptualmente)
 /// Representa un grupo estable de estudiantes que se reúne semanalmente
 /// Ejemplo: "GRUPO B1 - Matemática - Lunes 19:30"
 model ClaseGrupo {
@@ -449,6 +495,9 @@ model ClaseGrupo {
   /// Cupo máximo de estudiantes
   cupo_maximo Int @default(15)
 
+  /// ID del grupo pedagógico al que pertenece (B1, B2, B3, etc.)
+  grupo_id String
+
   /// ID del docente asignado
   docente_id String
 
@@ -471,6 +520,7 @@ model ClaseGrupo {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
+  grupo          Grupo           @relation(fields: [grupo_id], references: [id])
   docente        Docente         @relation(fields: [docente_id], references: [id])
   rutaCurricular RutaCurricular? @relation(fields: [ruta_curricular_id], references: [id])
   sector         Sector?         @relation(fields: [sector_id], references: [id])
@@ -1123,6 +1173,7 @@ model Sector {
   updatedAt   DateTime           @updatedAt
   clases      Clase[]
   claseGrupos ClaseGrupo[]
+  grupos      Grupo[]
   docentes    DocenteRuta[]
   estudiantes Estudiante[]
   rutas       RutaEspecialidad[]
@@ -1483,8 +1534,8 @@ model PlanificacionMensual {
   id String @id @default(cuid())
 
   // ===== TARGETING: A QUÉ GRUPO VA DIRIGIDA =====
-  /// Código de grupo al que aplica (B1, B2, B3, A1, etc.)
-  codigo_grupo String
+  /// ID del grupo pedagógico al que aplica (B1, B2, B3, A1, etc.)
+  grupo_id String
 
   /// Mes (1-12)
   mes Int
@@ -1516,6 +1567,9 @@ model PlanificacionMensual {
   notas_docentes String?
 
   // ===== RELACIONES =====
+  /// Grupo pedagógico al que pertenece
+  grupo Grupo @relation(fields: [grupo_id], references: [id])
+
   /// Actividades semanales de esta planificación
   actividades ActividadSemanal[]
 
@@ -1527,9 +1581,9 @@ model PlanificacionMensual {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  /// Solo UNA planificación por código de grupo por mes
-  @@unique([codigo_grupo, mes, anio])
-  @@index([codigo_grupo, mes, anio])
+  /// Solo UNA planificación por grupo por mes
+  @@unique([grupo_id, mes, anio])
+  @@index([grupo_id, mes, anio])
   @@index([estado])
   @@map("planificaciones_mensuales")
 }

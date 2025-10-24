@@ -20,13 +20,13 @@ export class CreatePlanificacionUseCase {
     private readonly planificacionRepository: IPlanificacionRepository,
   ) {}
 
-  async execute(dto: CreatePlanificacionDto): Promise<any> {
+  async execute(dto: CreatePlanificacionDto, userId: string): Promise<any> {
     // 1. Verificar que no existe planificación para este grupo/mes/año
     await this.validateUniquePlanificacion(dto);
 
     // 2. Crear planificación con estado BORRADOR
     const entity = await this.planificacionRepository.create({
-      codigoGrupo: dto.codigo_grupo,
+      grupoId: dto.grupo_id,
       mes: dto.mes,
       anio: dto.anio,
       titulo: dto.titulo,
@@ -35,7 +35,7 @@ export class CreatePlanificacionUseCase {
       objetivosAprendizaje: dto.objetivos_aprendizaje ?? [],
       notasDocentes: dto.notas_docentes ?? null,
       estado: EstadoPlanificacion.BORRADOR,
-      createdByAdminId: 'system', // TODO: Get from auth context
+      createdByAdminId: userId,
     });
 
     // 3. Convertir entity a objeto plano para respuesta
@@ -49,7 +49,7 @@ export class CreatePlanificacionUseCase {
     dto: CreatePlanificacionDto,
   ): Promise<void> {
     const existente = await this.planificacionRepository.findByPeriod(
-      dto.codigo_grupo,
+      dto.grupo_id,
       dto.mes,
       dto.anio,
     );
@@ -73,7 +73,7 @@ export class CreatePlanificacionUseCase {
       const nombreMes = meses[dto.mes];
 
       throw new ConflictException(
-        `Ya existe una planificación para el grupo ${dto.codigo_grupo} en ${nombreMes} ${dto.anio}`,
+        `Ya existe una planificación para este grupo en ${nombreMes} ${dto.anio}`,
       );
     }
   }

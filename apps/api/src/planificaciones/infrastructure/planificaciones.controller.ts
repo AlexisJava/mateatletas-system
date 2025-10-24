@@ -12,6 +12,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagg
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles, Role } from '../../auth/decorators/roles.decorator';
+import { GetUser } from '../../auth/decorators/get-user.decorator';
 import { CreatePlanificacionUseCase } from '../application/use-cases/create-planificacion.use-case';
 import { GetPlanificacionesUseCase } from '../application/use-cases/get-planificaciones.use-case';
 import { CreatePlanificacionDto } from '../application/dto/create-planificacion.dto';
@@ -26,9 +27,8 @@ import { GetPlanificacionesQueryDto } from '../application/dto/get-planificacion
  */
 @ApiTags('Planificaciones')
 @Controller('planificaciones')
-// Guards deshabilitados temporalmente para permitir E2E testing
-// @UseGuards(JwtAuthGuard, RolesGuard)
-// @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
 export class PlanificacionesController {
   constructor(
     private readonly createPlanificacionUseCase: CreatePlanificacionUseCase,
@@ -55,8 +55,11 @@ export class PlanificacionesController {
     status: HttpStatus.CONFLICT,
     description: 'Ya existe una planificación para este grupo/mes/año',
   })
-  async createPlanificacion(@Body() dto: CreatePlanificacionDto) {
-    return this.createPlanificacionUseCase.execute(dto);
+  async createPlanificacion(
+    @Body() dto: CreatePlanificacionDto,
+    @GetUser('id') userId: string,
+  ) {
+    return this.createPlanificacionUseCase.execute(dto, userId);
   }
 
   /**

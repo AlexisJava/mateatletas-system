@@ -5,7 +5,7 @@ import { PlanificacionEntity } from './planificacion.entity';
  * Filter options for querying planifications
  */
 export interface PlanificacionFilters {
-  codigoGrupo?: string;
+  grupoId?: string;
   mes?: number;
   anio?: number;
   estado?: EstadoPlanificacion;
@@ -36,7 +36,7 @@ export interface PaginatedResult<T> {
  */
 export interface PlanificacionWithCounts {
   id: string;
-  codigoGrupo: string;
+  grupoId: string;
   mes: number;
   anio: number;
   titulo: string;
@@ -62,7 +62,7 @@ export interface PlanificacionWithCounts {
  * Data for creating a new planification
  */
 export interface CreatePlanificacionData {
-  codigoGrupo: string;
+  grupoId: string;
   mes: number;
   anio: number;
   titulo: string;
@@ -104,9 +104,9 @@ export interface IPlanificacionRepository {
   ): Promise<PaginatedResult<PlanificacionWithCounts>>;
 
   /**
-   * Find a planification by unique constraint (codigo_grupo, mes, anio)
+   * Find a planification by unique constraint (grupo_id, mes, anio)
    */
-  findByPeriod(codigoGrupo: string, mes: number, anio: number): Promise<PlanificacionEntity | null>;
+  findByPeriod(grupoId: string, mes: number, anio: number): Promise<PlanificacionEntity | null>;
 
   /**
    * Create a new planification

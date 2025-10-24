@@ -68,6 +68,7 @@ export class ClaseGruposService {
       // Crear el grupo
       const grupo = await tx.claseGrupo.create({
         data: {
+          grupo_id: dto.grupo_id,
           codigo: dto.codigo,
           nombre: dto.nombre,
           tipo: dto.tipo,

@@ -9,7 +9,11 @@ import {
   PlanificacionFilters as Filters,
   PaginationOptions,
 } from '@/types/planificacion.types';
-import { PlanificacionFilters, PlanificacionesTable } from './components';
+import {
+  PlanificacionFilters,
+  PlanificacionesTable,
+  CreatePlanificacionModal,
+} from './components';
 import { Button } from '@/components/ui';
 import { Plus, Calendar, TrendingUp, Activity } from 'lucide-react';
 
@@ -20,6 +24,7 @@ export default function AdminPlanificacionesPage() {
   const [planificaciones, setPlanificaciones] = useState<PlanificacionListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Filters & Pagination
   const [filters, setFilters] = useState<Filters>({});
@@ -77,8 +82,15 @@ export default function AdminPlanificacionesPage() {
   };
 
   const handleCreatePlanificacion = () => {
-    // TODO: Implementar en SLICE 2
-    alert('Funcionalidad "Crear Planificación" será implementada en SLICE 2');
+    setIsCreateModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsCreateModalOpen(false);
+  };
+
+  const handleModalSuccess = () => {
+    loadPlanificaciones(); // Reload list after successful creation
   };
 
   return (
@@ -104,7 +116,6 @@ export default function AdminPlanificacionesPage() {
         {/* Botón estilo OS */}
         <button
           onClick={handleCreatePlanificacion}
-          title="Disponible en SLICE 2"
           className="group relative px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500/20 via-rose-500/20 to-purple-500/20 backdrop-blur-xl border border-pink-400/50 hover:border-pink-400 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/50"
         >
           <div className="flex items-center gap-2">
@@ -213,6 +224,13 @@ export default function AdminPlanificacionesPage() {
           onViewDetails={handleViewDetails}
         />
       </div>
+
+      {/* Create Modal */}
+      <CreatePlanificacionModal
+        isOpen={isCreateModalOpen}
+        onClose={handleModalClose}
+        onSuccess={handleModalSuccess}
+      />
     </div>
   );
 }
