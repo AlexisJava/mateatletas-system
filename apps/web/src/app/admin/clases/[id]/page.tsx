@@ -97,7 +97,7 @@ export default function ClaseAulaPage() {
     try {
       setIsLoading(true);
       const data = await adminApi.obtenerClase(claseId);
-      setClase(data as ClaseDetalle);
+      setClase(data.data as ClaseDetalle);
     } catch (error) {
       console.error('Error cargando clase:', error);
       router.push('/admin/clases');

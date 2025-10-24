@@ -18,7 +18,6 @@ import {
   User,
   TrendingUp,
   AlertCircle,
-  ChevronDown,
   Info,
 } from 'lucide-react';
 
