@@ -52,6 +52,9 @@ export default function AdminPlanificacionesPage() {
     } catch (err: unknown) {
       const errorMessage = getErrorMessage(err, 'Error al cargar planificaciones');
       setError(errorMessage);
+      setPlanificaciones([]); // Ensure planificaciones is always an array
+      setTotal(0);
+      setTotalPages(1);
       console.error('Error loading planificaciones:', err);
     } finally {
       setIsLoading(false);
@@ -119,7 +122,7 @@ export default function AdminPlanificacionesPage() {
                 <div>
                   <span className="text-gray-600">Mostrando:</span>
                   <span className="ml-2 font-semibold text-[#2a1a5e]">
-                    {planificaciones.length}
+                    {planificaciones?.length ?? 0}
                   </span>
                   <span className="ml-1 text-gray-500">
                     en esta página
