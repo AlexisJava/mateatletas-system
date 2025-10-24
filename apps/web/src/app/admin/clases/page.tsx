@@ -10,8 +10,8 @@ import type {
   CrearClaseGrupoDto,
   TipoClaseGrupo,
   DiaSemana,
-  DIA_SEMANA_LABELS,
 } from '@/types/clase-grupo';
+import { DIA_SEMANA_LABELS } from '@/types/clase-grupo';
 
 interface DocenteOption {
   id: string;
