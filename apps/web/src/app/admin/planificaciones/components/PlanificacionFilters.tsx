@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui';
 import { PlanificacionFilters as Filters, CodigoGrupo, EstadoPlanificacion } from '@/types/planificacion.types';
 
 interface PlanificacionFiltersProps {
@@ -69,138 +68,150 @@ export const PlanificacionFilters: React.FC<PlanificacionFiltersProps> = ({
     filters.anio !== currentYear;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h3 className="text-lg font-semibold text-[#2a1a5e] mb-4">Filtros</h3>
+    <div className="relative rounded-2xl overflow-hidden">
+      {/* Fondo glassmorphism */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/40 via-slate-700/40 to-slate-800/40 backdrop-blur-xl" />
+      <div className="absolute inset-0 border-2 border-white/10 rounded-2xl" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        {/* Filtro: Grupo */}
-        <div>
-          <label htmlFor="filter-grupo" className="block text-sm font-medium text-gray-700 mb-1">
-            Grupo
-          </label>
-          <select
-            id="filter-grupo"
-            value={filters.codigo_grupo || ''}
-            onChange={(e) => handleFilterChange('codigo_grupo', e.target.value as CodigoGrupo)}
-            disabled={isLoading}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b35] disabled:bg-gray-100 disabled:cursor-not-allowed"
-          >
-            <option value="">Todos los grupos</option>
-            {GRUPOS.map((grupo) => (
-              <option key={grupo} value={grupo}>
-                Grupo {grupo}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="relative p-6">
+        <div className="flex flex-col gap-4">
+          {/* Title */}
+          <h3 className="text-sm font-black uppercase tracking-wide bg-gradient-to-r from-pink-300 to-purple-300 bg-clip-text text-transparent">
+            Filtros de Búsqueda
+          </h3>
 
-        {/* Filtro: Mes */}
-        <div>
-          <label htmlFor="filter-mes" className="block text-sm font-medium text-gray-700 mb-1">
-            Mes
-          </label>
-          <select
-            id="filter-mes"
-            value={filters.mes || ''}
-            onChange={(e) => handleFilterChange('mes', e.target.value ? parseInt(e.target.value) : undefined)}
-            disabled={isLoading}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b35] disabled:bg-gray-100 disabled:cursor-not-allowed"
-          >
-            <option value="">Todos los meses</option>
-            {MESES.map((mes) => (
-              <option key={mes.value} value={mes.value}>
-                {mes.label}
-              </option>
-            ))}
-          </select>
-        </div>
+          {/* Filters Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Grupo */}
+            <div>
+              <label htmlFor="filter-grupo" className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2">
+                Grupo
+              </label>
+              <select
+                id="filter-grupo"
+                value={filters.codigo_grupo || ''}
+                onChange={(e) => handleFilterChange('codigo_grupo', e.target.value as CodigoGrupo)}
+                disabled={isLoading}
+                className="w-full px-3 py-2.5 bg-white/5 border border-white/20 rounded-xl text-white font-medium focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 disabled:opacity-50 transition-all"
+              >
+                <option value="">Todos los grupos</option>
+                {GRUPOS.map((grupo) => (
+                  <option key={grupo} value={grupo}>
+                    Grupo {grupo}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {/* Filtro: Año */}
-        <div>
-          <label htmlFor="filter-anio" className="block text-sm font-medium text-gray-700 mb-1">
-            Año
-          </label>
-          <input
-            id="filter-anio"
-            type="number"
-            value={filters.anio || currentYear}
-            onChange={(e) => handleFilterChange('anio', e.target.value ? parseInt(e.target.value) : currentYear)}
-            disabled={isLoading}
-            min={2020}
-            max={2030}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b35] disabled:bg-gray-100 disabled:cursor-not-allowed"
-          />
-        </div>
+            {/* Mes */}
+            <div>
+              <label htmlFor="filter-mes" className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2">
+                Mes
+              </label>
+              <select
+                id="filter-mes"
+                value={filters.mes || ''}
+                onChange={(e) => handleFilterChange('mes', e.target.value ? parseInt(e.target.value) : undefined)}
+                disabled={isLoading}
+                className="w-full px-3 py-2.5 bg-white/5 border border-white/20 rounded-xl text-white font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:opacity-50 transition-all"
+              >
+                <option value="">Todos los meses</option>
+                {MESES.map((mes) => (
+                  <option key={mes.value} value={mes.value}>
+                    {mes.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {/* Filtro: Estado */}
-        <div>
-          <label htmlFor="filter-estado" className="block text-sm font-medium text-gray-700 mb-1">
-            Estado
-          </label>
-          <select
-            id="filter-estado"
-            value={filters.estado || ''}
-            onChange={(e) => handleFilterChange('estado', e.target.value as EstadoPlanificacion)}
-            disabled={isLoading}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ff6b35] disabled:bg-gray-100 disabled:cursor-not-allowed"
-          >
-            <option value="">Todos los estados</option>
-            {ESTADOS.map((estado) => (
-              <option key={estado} value={estado}>
-                {estado.charAt(0).toUpperCase() + estado.slice(1)}
-              </option>
-            ))}
-          </select>
+            {/* Año */}
+            <div>
+              <label htmlFor="filter-anio" className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2">
+                Año
+              </label>
+              <input
+                id="filter-anio"
+                type="number"
+                value={filters.anio || currentYear}
+                onChange={(e) => handleFilterChange('anio', e.target.value ? parseInt(e.target.value) : currentYear)}
+                disabled={isLoading}
+                min={2020}
+                max={2030}
+                className="w-full px-3 py-2.5 bg-white/5 border border-white/20 rounded-xl text-white font-medium placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:opacity-50 transition-all"
+              />
+            </div>
+
+            {/* Estado */}
+            <div>
+              <label htmlFor="filter-estado" className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2">
+                Estado
+              </label>
+              <select
+                id="filter-estado"
+                value={filters.estado || ''}
+                onChange={(e) => handleFilterChange('estado', e.target.value as EstadoPlanificacion)}
+                disabled={isLoading}
+                className="w-full px-3 py-2.5 bg-white/5 border border-white/20 rounded-xl text-white font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:opacity-50 transition-all"
+              >
+                <option value="">Todos los estados</option>
+                {ESTADOS.map((estado) => (
+                  <option key={estado} value={estado}>
+                    {estado.charAt(0).toUpperCase() + estado.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={handleApplyFilters}
+              disabled={isLoading}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500/30 to-rose-500/30 border border-pink-400/50 text-white font-bold hover:shadow-lg hover:shadow-pink-500/50 disabled:opacity-50 transition-all duration-300"
+            >
+              {isLoading ? 'Aplicando...' : 'Aplicar Filtros'}
+            </button>
+
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                disabled={isLoading}
+                className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/20 text-white font-bold hover:bg-white/10 disabled:opacity-50 transition-all duration-300"
+              >
+                Limpiar Filtros
+              </button>
+            )}
+
+            {/* Active Filters Indicators */}
+            {hasActiveFilters && (
+              <div className="flex flex-wrap items-center gap-2 ml-auto">
+                <span className="text-xs text-white/40 font-bold uppercase">Activos:</span>
+                {filters.codigo_grupo && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                    {filters.codigo_grupo}
+                  </span>
+                )}
+                {filters.mes && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-300 border border-green-400/30">
+                    {MESES.find(m => m.value === filters.mes)?.label}
+                  </span>
+                )}
+                {filters.anio && filters.anio !== currentYear && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-400/30">
+                    {filters.anio}
+                  </span>
+                )}
+                {filters.estado && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-300 border border-yellow-400/30">
+                    {filters.estado}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-
-      {/* Botones de acción */}
-      <div className="flex gap-3">
-        <Button
-          variant="primary"
-          onClick={handleApplyFilters}
-          disabled={isLoading}
-          className="flex-1"
-        >
-          {isLoading ? 'Aplicando...' : 'Aplicar Filtros'}
-        </Button>
-
-        <Button
-          variant="secondary"
-          onClick={handleClearFilters}
-          disabled={isLoading || !hasActiveFilters}
-          className="flex-1"
-        >
-          Limpiar Filtros
-        </Button>
-      </div>
-
-      {/* Indicador de filtros activos */}
-      {hasActiveFilters && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          <span className="text-sm text-gray-600">Filtros activos:</span>
-          {filters.codigo_grupo && (
-            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-              Grupo: {filters.codigo_grupo}
-            </span>
-          )}
-          {filters.mes && (
-            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-              Mes: {MESES.find(m => m.value === filters.mes)?.label}
-            </span>
-          )}
-          {filters.anio && filters.anio !== currentYear && (
-            <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
-              Año: {filters.anio}
-            </span>
-          )}
-          {filters.estado && (
-            <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
-              Estado: {filters.estado.charAt(0).toUpperCase() + filters.estado.slice(1)}
-            </span>
-          )}
-        </div>
-      )}
     </div>
   );
 };
