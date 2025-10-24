@@ -72,7 +72,7 @@ async function bootstrap() {
       ].filter(Boolean);
 
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
       // Permitir requests sin origin (mobile apps, Postman, curl)
       if (!origin) return callback(null, true);
 
