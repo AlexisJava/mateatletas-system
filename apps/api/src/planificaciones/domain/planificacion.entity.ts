@@ -9,7 +9,7 @@ import { EstadoPlanificacion } from '@prisma/client';
 export class PlanificacionEntity {
   constructor(
     public readonly id: string,
-    public readonly codigoGrupo: string,
+    public readonly grupoId: string,
     public readonly mes: number,
     public readonly anio: number,
     public readonly titulo: string,
@@ -60,7 +60,7 @@ export class PlanificacionEntity {
    * Business logic: Get planning period identifier
    */
   public getPeriodIdentifier(): string {
-    return `${this.codigoGrupo}-${this.mes}/${this.anio}`;
+    return `${this.grupoId}-${this.mes}/${this.anio}`;
   }
 
   /**
@@ -68,7 +68,7 @@ export class PlanificacionEntity {
    */
   public static fromPersistence(data: {
     id: string;
-    codigo_grupo: string;
+    grupo_id: string;
     mes: number;
     anio: number;
     titulo: string;
@@ -84,7 +84,7 @@ export class PlanificacionEntity {
   }): PlanificacionEntity {
     return new PlanificacionEntity(
       data.id,
-      data.codigo_grupo,
+      data.grupo_id,
       data.mes,
       data.anio,
       data.titulo,
@@ -105,7 +105,7 @@ export class PlanificacionEntity {
    */
   public toPersistence(): {
     id: string;
-    codigo_grupo: string;
+    grupo_id: string;
     mes: number;
     anio: number;
     titulo: string;
@@ -119,7 +119,7 @@ export class PlanificacionEntity {
   } {
     return {
       id: this.id,
-      codigo_grupo: this.codigoGrupo,
+      grupo_id: this.grupoId,
       mes: this.mes,
       anio: this.anio,
       titulo: this.titulo,

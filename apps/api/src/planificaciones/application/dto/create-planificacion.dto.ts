@@ -1,5 +1,4 @@
 import {
-  IsIn,
   IsInt,
   IsString,
   IsNotEmpty,
@@ -8,13 +7,14 @@ import {
   Min,
   Max,
   MinLength,
+  IsUUID,
 } from 'class-validator';
 
 /**
  * DTO para crear una nueva Planificación Mensual
  *
  * Validaciones:
- * - codigo_grupo: B1, B2, B3
+ * - grupo_id: UUID del grupo pedagógico
  * - mes: 1-12
  * - anio: >= 2020
  * - titulo: string no vacío
@@ -24,12 +24,10 @@ import {
  * - notas_docentes: opcional
  */
 export class CreatePlanificacionDto {
-  @IsString({ message: 'codigo_grupo debe ser un texto' })
-  @IsIn(['B1', 'B2', 'B3'], {
-    message: 'codigo_grupo debe ser uno de los valores válidos: B1, B2, B3',
-  })
-  @IsNotEmpty({ message: 'codigo_grupo es requerido' })
-  codigo_grupo!: string;
+  @IsString({ message: 'grupo_id debe ser un texto' })
+  @IsUUID('4', { message: 'grupo_id debe ser un UUID válido' })
+  @IsNotEmpty({ message: 'grupo_id es requerido' })
+  grupo_id!: string;
 
   @IsInt({ message: 'mes debe ser un número entero' })
   @Min(1, { message: 'mes debe estar entre 1 y 12' })

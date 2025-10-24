@@ -56,8 +56,8 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
     // Build where clause
     const where: Prisma.PlanificacionMensualWhereInput = {};
 
-    if (filters.codigoGrupo) {
-      where.codigo_grupo = filters.codigoGrupo;
+    if (filters.grupoId) {
+      where.grupo_id = filters.grupoId;
     }
 
     if (filters.mes !== undefined) {
@@ -113,14 +113,14 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
   }
 
   async findByPeriod(
-    codigoGrupo: string,
+    grupoId: string,
     mes: number,
     anio: number,
   ): Promise<PlanificacionEntity | null> {
     const planificacion = await this.prisma.planificacionMensual.findUnique({
       where: {
-        codigo_grupo_mes_anio: {
-          codigo_grupo: codigoGrupo,
+        grupo_id_mes_anio: {
+          grupo_id: grupoId,
           mes,
           anio,
         },
@@ -137,7 +137,7 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
   async create(data: CreatePlanificacionData): Promise<PlanificacionEntity> {
     const planificacion = await this.prisma.planificacionMensual.create({
       data: {
-        codigo_grupo: data.codigoGrupo,
+        grupo_id: data.grupoId,
         mes: data.mes,
         anio: data.anio,
         titulo: data.titulo,
@@ -202,8 +202,8 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
   async count(filters: PlanificacionFilters = {}): Promise<number> {
     const where: Prisma.PlanificacionMensualWhereInput = {};
 
-    if (filters.codigoGrupo) {
-      where.codigo_grupo = filters.codigoGrupo;
+    if (filters.grupoId) {
+      where.grupo_id = filters.grupoId;
     }
 
     if (filters.mes !== undefined) {

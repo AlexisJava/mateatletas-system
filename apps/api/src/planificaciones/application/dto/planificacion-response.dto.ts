@@ -11,8 +11,8 @@ export class PlanificacionListItemDto {
   @ApiProperty({ example: 'cm123abc456' })
   id!: string;
 
-  @ApiProperty({ example: 'B1' })
-  codigo_grupo!: string;
+  @ApiProperty({ example: 'b5ac168d-1b44-4357-8e73-4339db2fa77c' })
+  grupo_id!: string;
 
   @ApiProperty({ example: 11, minimum: 1, maximum: 12 })
   mes!: number;
@@ -50,7 +50,7 @@ export class PlanificacionListItemDto {
   static fromEntity(entity: PlanificacionWithCounts): PlanificacionListItemDto {
     const dto = new PlanificacionListItemDto();
     dto.id = entity.id;
-    dto.codigo_grupo = entity.codigoGrupo;
+    dto.grupo_id = entity.grupoId;
     dto.mes = entity.mes;
     dto.anio = entity.anio;
     dto.titulo = entity.titulo;
