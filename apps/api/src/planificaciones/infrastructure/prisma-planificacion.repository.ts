@@ -80,6 +80,13 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
         take: limit,
         orderBy: [{ anio: 'desc' }, { mes: 'desc' }],
         include: {
+          grupo: {
+            select: {
+              id: true,
+              codigo: true,
+              nombre: true,
+            },
+          },
           _count: {
             select: {
               actividades: true,
@@ -96,6 +103,7 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
       const entity = PlanificacionEntity.fromPersistence(p);
       return {
         ...entity,
+        grupo: p.grupo, // Include grupo info
         activityCount: p._count.actividades,
         assignmentCount: p._count.asignaciones,
       } as PlanificacionWithCounts;

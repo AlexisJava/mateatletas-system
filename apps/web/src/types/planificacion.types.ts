@@ -36,6 +36,11 @@ export interface PaginationOptions {
 export interface PlanificacionListItem {
   id: string;
   grupoId: string; // UUID o CUID del grupo
+  grupo: {
+    id: string;
+    codigo: string;
+    nombre: string;
+  };
   mes: number;
   anio: number;
   titulo: string;
