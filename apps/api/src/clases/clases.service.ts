@@ -84,6 +84,14 @@ export class ClasesService {
   }
 
   /**
+   * Listar reservas activas del tutor autenticado
+   * DELEGACIÓN: ClasesReservasService
+   */
+  async listarReservasDeTutor(tutorId: string) {
+    return this.reservasService.listarReservasDeTutor(tutorId);
+  }
+
+  /**
    * Obtener calendario de clases para un tutor (filtrado por mes/año)
    * DELEGACIÓN: ClasesManagementService
    */
@@ -120,6 +128,14 @@ export class ClasesService {
    */
   async listarRutasCurriculares() {
     return this.managementService.listarRutasCurriculares();
+  }
+
+  /**
+   * Obtener detalles de una ruta curricular específica
+   * DELEGACIÓN: ClasesManagementService
+   */
+  async obtenerRutaCurricularPorId(id: string) {
+    return this.managementService.obtenerRutaCurricularPorId(id);
   }
 
   /**
