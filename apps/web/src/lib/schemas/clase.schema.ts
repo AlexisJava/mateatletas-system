@@ -187,7 +187,8 @@ export const filtroClasesSchema = z.object({
  * Schema para crear una reserva
  */
 export const crearReservaSchema = z.object({
-  estudiante_id: z.string(),
+  estudianteId: z.string(),
+  observaciones: z.string().optional(),
 });
 
 // ============================================

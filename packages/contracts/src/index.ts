@@ -29,3 +29,9 @@ export * from './schemas/gamificacion.schema';
 
 // Admin
 export * from './schemas/admin.schema';
+
+// Planificaciones
+export * from './schemas/planificacion.schema';
+
+// Pagos
+export * from './schemas/pago.schema';

@@ -12,28 +12,10 @@ interface PlanificacionesTableProps {
   onViewDetails: (id: string) => void;
 }
 
-const ESTADO_COLORS: Record<EstadoPlanificacion, { bg: string; text: string; border: string; icon: string; label: string }> = {
-  BORRADOR: {
-    bg: 'bg-yellow-500/20',
-    text: 'text-yellow-300',
-    border: 'border-yellow-400/30',
-    icon: '📝',
-    label: 'Borrador',
-  },
-  PUBLICADA: {
-    bg: 'bg-green-500/20',
-    text: 'text-green-300',
-    border: 'border-green-400/30',
-    icon: '✅',
-    label: 'Publicada',
-  },
-  ARCHIVADA: {
-    bg: 'bg-gray-500/20',
-    text: 'text-gray-300',
-    border: 'border-gray-400/30',
-    icon: '📦',
-    label: 'Archivada',
-  },
+const ESTADO_COLORS: Record<EstadoPlanificacion, { bg: string; text: string; border: string; icon: string }> = {
+  BORRADOR: { bg: 'bg-yellow-500/20', text: 'text-yellow-300', border: 'border-yellow-400/30', icon: '📝' },
+  PUBLICADA: { bg: 'bg-green-500/20', text: 'text-green-300', border: 'border-green-400/30', icon: '✅' },
+  ARCHIVADA: { bg: 'bg-gray-500/20', text: 'text-gray-300', border: 'border-gray-400/30', icon: '📦' },
 };
 
 const GRUPO_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -124,9 +106,10 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
             <tbody>
               {planificaciones?.map((planificacion, index) => {
                 // Obtener color del grupo basado en el código
-                const grupoColor =
-                  GRUPO_COLORS[planificacion.grupo?.codigo || planificacion.codigo_grupo] || GRUPO_COLORS.B1;
+                const grupoCodigo = planificacion.grupo?.codigo ?? planificacion.codigo_grupo ?? 'B1';
+                const grupoColor = GRUPO_COLORS[grupoCodigo] || GRUPO_COLORS.B1;
                 const estadoColor = ESTADO_COLORS[planificacion.estado] || ESTADO_COLORS.BORRADOR;
+                const estadoLabel = planificacion.estado.toLowerCase();
 
                 return (
                   <tr
@@ -136,7 +119,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-3 py-1.5 text-sm font-black rounded-full ${grupoColor.bg} ${grupoColor.text} border ${grupoColor.border}`}>
-                        {planificacion.grupo?.codigo || planificacion.codigo_grupo || 'N/A'}
+                        {grupoCodigo || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -155,7 +138,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full ${estadoColor.bg} ${estadoColor.text} border ${estadoColor.border}`}>
                         <span>{estadoColor.icon}</span>
-                        <span>{estadoColor.label}</span>
+                        <span>{estadoLabel.charAt(0).toUpperCase() + estadoLabel.slice(1)}</span>
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -187,9 +170,10 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
         {/* Mobile Cards */}
         <div className="md:hidden divide-y divide-white/5">
           {planificaciones?.map((planificacion, index) => {
-            const grupoColor =
-              GRUPO_COLORS[planificacion.grupo?.codigo || planificacion.codigo_grupo] || GRUPO_COLORS.B1;
+            const grupoCodigo = planificacion.grupo?.codigo ?? planificacion.codigo_grupo ?? 'B1';
+            const grupoColor = GRUPO_COLORS[grupoCodigo] || GRUPO_COLORS.B1;
             const estadoColor = ESTADO_COLORS[planificacion.estado] || ESTADO_COLORS.BORRADOR;
+            const estadoLabel = planificacion.estado.toLowerCase();
 
             return (
               <div
@@ -199,11 +183,11 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
               >
                 <div className="flex justify-between items-start mb-3">
                   <span className={`inline-flex items-center px-3 py-1.5 text-xs font-black rounded-full ${grupoColor.bg} ${grupoColor.text} border ${grupoColor.border}`}>
-                    {planificacion.grupo?.codigo || planificacion.codigo_grupo || 'N/A'}
+                    {grupoCodigo || 'N/A'}
                   </span>
                   <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full ${estadoColor.bg} ${estadoColor.text} border ${estadoColor.border}`}>
                     <span>{estadoColor.icon}</span>
-                    <span>{estadoColor.label}</span>
+                    <span>{estadoLabel.charAt(0).toUpperCase() + estadoLabel.slice(1)}</span>
                   </span>
                 </div>
 
