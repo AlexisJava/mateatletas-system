@@ -46,7 +46,7 @@ export async function seedClaseGrupos(prisma: PrismaClient) {
 
   // Grupo B1 - Lunes 19:30
   const grupoB1 = await prisma.claseGrupo.upsert({
-    where: { codigo: 'B1' },
+    where: { nombre: 'GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO (6 y 7 años)' },
     update: {},
     create: {
       codigo: 'B1',
@@ -102,7 +102,7 @@ export async function seedClaseGrupos(prisma: PrismaClient) {
 
   // Grupo B2 - Miércoles 18:00 (ejemplo de curso temporal)
   const grupoB2 = await prisma.claseGrupo.upsert({
-    where: { codigo: 'B2' },
+    where: { nombre: 'CURSO TEMPORAL - Álgebra Intensiva' },
     update: {},
     create: {
       codigo: 'B2',
