@@ -20,7 +20,10 @@ export class CreatePlanificacionUseCase {
     private readonly planificacionRepository: IPlanificacionRepository,
   ) {}
 
-  async execute(dto: CreatePlanificacionDto, userId: string): Promise<any> {
+  async execute(
+    dto: CreatePlanificacionDto,
+    userId: string,
+  ): Promise<PlanificacionEntity> {
     // 1. Verificar que no existe planificación para este grupo/mes/año
     await this.validateUniquePlanificacion(dto);
 
@@ -39,7 +42,7 @@ export class CreatePlanificacionUseCase {
     });
 
     // 3. Convertir entity a objeto plano para respuesta
-    return entity.toPersistence();
+    return entity;
   }
 
   /**

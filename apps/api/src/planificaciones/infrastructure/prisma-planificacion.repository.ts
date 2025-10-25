@@ -6,9 +6,14 @@ import {
   PaginationOptions,
   PaginatedResult,
   PlanificacionWithCounts,
+  PlanificacionDetail,
   CreatePlanificacionData,
+  UpdatePlanificacionData,
+  CreateActividadData,
+  UpdateActividadData,
 } from '../domain/planificacion.repository.interface';
 import { PlanificacionEntity } from '../domain/planificacion.entity';
+import { ActividadEntity } from '../domain/actividad.entity';
 import { Prisma } from '@prisma/client';
 
 /**
@@ -31,6 +36,53 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
     }
 
     return PlanificacionEntity.fromPersistence(planificacion);
+  }
+
+  async findDetailById(id: string): Promise<PlanificacionDetail> {
+    const planificacion = await this.prisma.planificacionMensual.findUnique({
+      where: { id },
+      include: {
+        grupo: {
+          select: {
+            id: true,
+            codigo: true,
+            nombre: true,
+          },
+        },
+        actividades: {
+          orderBy: [
+            { semana_numero: 'asc' },
+            { orden: 'asc' },
+            { created_at: 'asc' },
+          ],
+        },
+        _count: {
+          select: {
+            actividades: true,
+            asignaciones: true,
+          },
+        },
+      },
+    });
+
+    if (!planificacion) {
+      throw new NotFoundException(`Planificación con ID ${id} no encontrada`);
+    }
+
+    const entity = PlanificacionEntity.fromPersistence(planificacion);
+    const actividades = planificacion.actividades.map((actividad) =>
+      ActividadEntity.fromPersistence(actividad),
+    );
+
+    return {
+      ...entity,
+      codigoGrupo:
+        (planificacion as any).codigo_grupo ?? planificacion.grupo?.codigo ?? undefined,
+      grupo: planificacion.grupo ?? undefined,
+      actividades,
+      activityCount: planificacion._count.actividades,
+      assignmentCount: planificacion._count.asignaciones,
+    } as PlanificacionDetail;
   }
 
   async findByIdOptional(id: string): Promise<PlanificacionEntity | null> {
@@ -58,6 +110,12 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
 
     if (filters.grupoId) {
       where.grupo_id = filters.grupoId;
+    }
+
+    if (filters.codigoGrupo) {
+      where.grupo = {
+        codigo: filters.codigoGrupo,
+      } as Prisma.GrupoWhereInput;
     }
 
     if (filters.mes !== undefined) {
@@ -103,6 +161,7 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
       const entity = PlanificacionEntity.fromPersistence(p);
       return {
         ...entity,
+        codigoGrupo: (p as any).codigo_grupo ?? p.grupo?.codigo ?? undefined,
         grupo: p.grupo, // Include grupo info
         activityCount: p._count.actividades,
         assignmentCount: p._count.asignaciones,
@@ -161,7 +220,10 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
     return PlanificacionEntity.fromPersistence(planificacion);
   }
 
-  async update(id: string, data: Partial<PlanificacionEntity>): Promise<PlanificacionEntity> {
+  async update(
+    id: string,
+    data: UpdatePlanificacionData,
+  ): Promise<PlanificacionEntity> {
     // Build update data with only defined fields
     const updateData: Prisma.PlanificacionMensualUpdateInput = {};
 
@@ -203,6 +265,123 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
 
   async delete(id: string): Promise<void> {
     await this.prisma.planificacionMensual.delete({
+      where: { id },
+    });
+  }
+
+  async findActividades(planificacionId: string): Promise<ActividadEntity[]> {
+    const actividades = await this.prisma.actividadSemanal.findMany({
+      where: { planificacion_id: planificacionId },
+      orderBy: [
+        { semana_numero: 'asc' },
+        { orden: 'asc' },
+        { created_at: 'asc' },
+      ],
+    });
+
+    return actividades.map((actividad) =>
+      ActividadEntity.fromPersistence(actividad),
+    );
+  }
+
+  async findActividadById(id: string): Promise<ActividadEntity> {
+    const actividad = await this.prisma.actividadSemanal.findUnique({
+      where: { id },
+    });
+
+    if (!actividad) {
+      throw new NotFoundException(`Actividad con ID ${id} no encontrada`);
+    }
+
+    return ActividadEntity.fromPersistence(actividad);
+  }
+
+  async createActividad(data: CreateActividadData): Promise<ActividadEntity> {
+    const actividad = await this.prisma.actividadSemanal.create({
+      data: {
+        planificacion_id: data.planificacionId,
+        semana_numero: data.semanaNumero,
+        titulo: data.titulo,
+        descripcion: data.descripcion,
+        componente_nombre: data.componenteNombre,
+        componente_props: data.componenteProps,
+        nivel_dificultad: data.nivelDificultad,
+        tiempo_estimado_minutos: data.tiempoEstimadoMinutos,
+        puntos_gamificacion: data.puntosGamificacion,
+        instrucciones_docente: data.instruccionesDocente,
+        instrucciones_estudiante: data.instruccionesEstudiante,
+        recursos_url: data.recursosUrl ?? null,
+        orden: data.orden,
+      },
+    });
+
+    return ActividadEntity.fromPersistence(actividad);
+  }
+
+  async updateActividad(
+    id: string,
+    data: UpdateActividadData,
+  ): Promise<ActividadEntity> {
+    const updateData: Prisma.ActividadSemanalUpdateInput = {};
+
+    if (data.semanaNumero !== undefined) {
+      updateData.semana_numero = data.semanaNumero;
+    }
+
+    if (data.titulo !== undefined) {
+      updateData.titulo = data.titulo;
+    }
+
+    if (data.descripcion !== undefined) {
+      updateData.descripcion = data.descripcion;
+    }
+
+    if (data.componenteNombre !== undefined) {
+      updateData.componente_nombre = data.componenteNombre;
+    }
+
+    if (data.componenteProps !== undefined) {
+      updateData.componente_props = data.componenteProps;
+    }
+
+    if (data.nivelDificultad !== undefined) {
+      updateData.nivel_dificultad = data.nivelDificultad;
+    }
+
+    if (data.tiempoEstimadoMinutos !== undefined) {
+      updateData.tiempo_estimado_minutos = data.tiempoEstimadoMinutos;
+    }
+
+    if (data.puntosGamificacion !== undefined) {
+      updateData.puntos_gamificacion = data.puntosGamificacion;
+    }
+
+    if (data.instruccionesDocente !== undefined) {
+      updateData.instrucciones_docente = data.instruccionesDocente;
+    }
+
+    if (data.instruccionesEstudiante !== undefined) {
+      updateData.instrucciones_estudiante = data.instruccionesEstudiante;
+    }
+
+    if (data.recursosUrl !== undefined) {
+      updateData.recursos_url = data.recursosUrl;
+    }
+
+    if (data.orden !== undefined) {
+      updateData.orden = data.orden;
+    }
+
+    const actividad = await this.prisma.actividadSemanal.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return ActividadEntity.fromPersistence(actividad);
+  }
+
+  async deleteActividad(id: string): Promise<void> {
+    await this.prisma.actividadSemanal.delete({
       where: { id },
     });
   }

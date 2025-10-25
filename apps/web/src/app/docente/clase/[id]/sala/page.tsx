@@ -53,13 +53,13 @@ export default function SalaClaseDocentePage() {
     const fetchClase = async () => {
       try {
         const response = await apiClient.get(`/clases/${claseId}`);
-        setClase(response.data);
+        setClase(response);
 
         // Cargar estudiantes inscritos
         const estudiantesResponse = await apiClient.get(
           `/clases/${claseId}/estudiantes`,
         );
-        setEstudiantes(estudiantesResponse.data);
+        setEstudiantes(estudiantesResponse);
       } catch {
         // Error loading class
       } finally {
