@@ -24,3 +24,14 @@ export type {
   AchievementData,
   AchievementPopupProps,
 } from './types';
+
+// ============================================================================
+// NUEVO SISTEMA SIMPLIFICADO (Convention over Configuration)
+// ============================================================================
+export { PlanificacionWrapper, usePlanificacion } from './PlanificacionWrapper';
+export { usePlanificacionProgress } from './usePlanificacionProgress';
+export type {
+  PlanificacionConfig,
+  InfoSemanasActivas,
+  UsePlanificacionProgressReturn,
+} from './types';
