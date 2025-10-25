@@ -71,7 +71,11 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
 
     const entity = PlanificacionEntity.fromPersistence(planificacion);
     const actividades = planificacion.actividades.map((actividad) =>
-      ActividadEntity.fromPersistence(actividad),
+      ActividadEntity.fromPersistence({
+        ...actividad,
+        componente_props: (actividad.componente_props as Record<string, unknown>) ?? {},
+        recursos_url: actividad.recursos_url ? (actividad.recursos_url as Record<string, unknown>) : null,
+      }),
     );
 
     return {
@@ -280,7 +284,11 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
     });
 
     return actividades.map((actividad) =>
-      ActividadEntity.fromPersistence(actividad),
+      ActividadEntity.fromPersistence({
+        ...actividad,
+        componente_props: (actividad.componente_props as Record<string, unknown>) ?? {},
+        recursos_url: actividad.recursos_url ? (actividad.recursos_url as Record<string, unknown>) : null,
+      }),
     );
   }
 
@@ -293,7 +301,11 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
       throw new NotFoundException(`Actividad con ID ${id} no encontrada`);
     }
 
-    return ActividadEntity.fromPersistence(actividad);
+    return ActividadEntity.fromPersistence({
+      ...actividad,
+      componente_props: (actividad.componente_props as Record<string, unknown>) ?? {},
+      recursos_url: actividad.recursos_url ? (actividad.recursos_url as Record<string, unknown>) : null,
+    });
   }
 
   async createActividad(data: CreateActividadData): Promise<ActividadEntity> {
@@ -304,18 +316,22 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
         titulo: data.titulo,
         descripcion: data.descripcion,
         componente_nombre: data.componenteNombre,
-        componente_props: data.componenteProps,
+        componente_props: data.componenteProps as any,
         nivel_dificultad: data.nivelDificultad,
         tiempo_estimado_minutos: data.tiempoEstimadoMinutos,
         puntos_gamificacion: data.puntosGamificacion,
         instrucciones_docente: data.instruccionesDocente,
         instrucciones_estudiante: data.instruccionesEstudiante,
-        recursos_url: data.recursosUrl ?? null,
+        recursos_url: data.recursosUrl ? (data.recursosUrl as any) : null,
         orden: data.orden,
       },
     });
 
-    return ActividadEntity.fromPersistence(actividad);
+    return ActividadEntity.fromPersistence({
+      ...actividad,
+      componente_props: (actividad.componente_props as Record<string, unknown>) ?? {},
+      recursos_url: actividad.recursos_url ? (actividad.recursos_url as Record<string, unknown>) : null,
+    });
   }
 
   async updateActividad(
@@ -341,7 +357,7 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
     }
 
     if (data.componenteProps !== undefined) {
-      updateData.componente_props = data.componenteProps;
+      updateData.componente_props = data.componenteProps as any;
     }
 
     if (data.nivelDificultad !== undefined) {
@@ -365,7 +381,7 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
     }
 
     if (data.recursosUrl !== undefined) {
-      updateData.recursos_url = data.recursosUrl;
+      updateData.recursos_url = data.recursosUrl ? (data.recursosUrl as any) : null;
     }
 
     if (data.orden !== undefined) {
@@ -377,7 +393,11 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
       data: updateData,
     });
 
-    return ActividadEntity.fromPersistence(actividad);
+    return ActividadEntity.fromPersistence({
+      ...actividad,
+      componente_props: (actividad.componente_props as Record<string, unknown>) ?? {},
+      recursos_url: actividad.recursos_url ? (actividad.recursos_url as Record<string, unknown>) : null,
+    });
   }
 
   async deleteActividad(id: string): Promise<void> {
