@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAdminStore } from '@/store/admin.store';
+import { useProducts, useProductsLoading, useProductsError, useFetchProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/features/admin/products';
 import { Producto, CrearProductoDto, ActualizarProductoDto } from '@/lib/api/catalogo.api';
 import { TipoProducto } from '@/types/catalogo.types';
 
@@ -29,7 +29,13 @@ export const emptyForm: ProductForm = {
 };
 
 export const useProductos = () => {
-  const { products, fetchProducts, createProduct, updateProduct, deleteProduct, isLoading, error } = useAdminStore();
+  const products = useProducts();
+  const fetchProducts = useFetchProducts();
+  const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
+  const deleteProduct = useDeleteProduct();
+  const isLoading = useProductsLoading();
+  const error = useProductsError();
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null);
   const [filter, setFilter] = useState<FilterType>('all');
