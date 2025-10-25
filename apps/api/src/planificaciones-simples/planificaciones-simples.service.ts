@@ -1,0 +1,284 @@
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+
+/**
+ * Servicio para gestionar planificaciones simples
+ *
+ * Responsabilidades:
+ * - Obtener progreso de estudiante
+ * - Guardar estado del juego
+ * - Avanzar semanas
+ * - Completar semanas con puntos
+ * - Registrar tiempo jugado
+ */
+@Injectable()
+export class PlanificacionesSimplesService {
+  constructor(private prisma: PrismaService) {}
+
+  /**
+   * Obtener progreso de un estudiante en una planificación
+   */
+  async obtenerProgreso(estudianteId: string, codigoPlanificacion: string) {
+    // 1. Buscar la planificación
+    const planificacion = await this.prisma.planificacionSimple.findUnique({
+      where: { codigo: codigoPlanificacion },
+    });
+
+    if (!planificacion) {
+      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+    }
+
+    // 2. Buscar o crear progreso del estudiante
+    let progreso = await this.prisma.progresoEstudiantePlanificacion.findUnique({
+      where: {
+        estudiante_id_planificacion_id: {
+          estudiante_id: estudianteId,
+          planificacion_id: planificacion.id,
+        },
+      },
+    });
+
+    if (!progreso) {
+      // Crear progreso inicial
+      progreso = await this.prisma.progresoEstudiantePlanificacion.create({
+        data: {
+          estudiante_id: estudianteId,
+          planificacion_id: planificacion.id,
+          semana_actual: 1,
+          tiempo_total_minutos: 0,
+          puntos_totales: 0,
+        },
+      });
+    }
+
+    // 3. Obtener semanas activas para este estudiante
+    // Buscar asignación de planificación al grupo del estudiante
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: estudianteId },
+      include: {
+        inscripciones_clase_grupo: {
+          include: {
+            claseGrupo: {
+              include: {
+                asignacionesPlanificacionesSimples: {
+                  where: {
+                    planificacion_id: planificacion.id,
+                    activa: true,
+                  },
+                  include: {
+                    semanas_activas: {
+                      where: { activa: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Extraer semanas activas
+    const semanasActivas: number[] = [];
+    if (estudiante?.inscripciones_clase_grupo) {
+      for (const inscripcion of estudiante.inscripciones_clase_grupo) {
+        const asignaciones = inscripcion.claseGrupo.asignacionesPlanificacionesSimples;
+        for (const asignacion of asignaciones) {
+          semanasActivas.push(...asignacion.semanas_activas.map((s) => s.numero_semana));
+        }
+      }
+    }
+
+    // Remover duplicados y ordenar
+    const semanasUnicas = [...new Set(semanasActivas)].sort((a, b) => a - b);
+
+    return {
+      semana_actual: progreso.semana_actual,
+      ultima_actividad: progreso.ultima_actividad,
+      estado_guardado: progreso.estado_guardado,
+      tiempo_total_minutos: progreso.tiempo_total_minutos,
+      puntos_totales: progreso.puntos_totales,
+      semanas_activas: semanasUnicas.length > 0 ? semanasUnicas : [1], // Por defecto semana 1
+    };
+  }
+
+  /**
+   * Guardar estado del juego
+   */
+  async guardarEstado(
+    estudianteId: string,
+    codigoPlanificacion: string,
+    estadoGuardado: any,
+  ) {
+    const planificacion = await this.prisma.planificacionSimple.findUnique({
+      where: { codigo: codigoPlanificacion },
+    });
+
+    if (!planificacion) {
+      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+    }
+
+    const progreso = await this.prisma.progresoEstudiantePlanificacion.upsert({
+      where: {
+        estudiante_id_planificacion_id: {
+          estudiante_id: estudianteId,
+          planificacion_id: planificacion.id,
+        },
+      },
+      update: {
+        estado_guardado: estadoGuardado,
+        ultima_actividad: new Date(),
+      },
+      create: {
+        estudiante_id: estudianteId,
+        planificacion_id: planificacion.id,
+        semana_actual: 1,
+        estado_guardado: estadoGuardado,
+      },
+    });
+
+    return { success: true, progreso };
+  }
+
+  /**
+   * Avanzar a la siguiente semana
+   */
+  async avanzarSemana(estudianteId: string, codigoPlanificacion: string) {
+    const planificacion = await this.prisma.planificacionSimple.findUnique({
+      where: { codigo: codigoPlanificacion },
+    });
+
+    if (!planificacion) {
+      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+    }
+
+    const progreso = await this.prisma.progresoEstudiantePlanificacion.findUnique({
+      where: {
+        estudiante_id_planificacion_id: {
+          estudiante_id: estudianteId,
+          planificacion_id: planificacion.id,
+        },
+      },
+    });
+
+    if (!progreso) {
+      throw new NotFoundException('Progreso no encontrado');
+    }
+
+    // Validar que no exceda el total de semanas
+    if (progreso.semana_actual >= planificacion.semanas_total) {
+      throw new ForbiddenException('Ya estás en la última semana');
+    }
+
+    const nuevoProgreso = await this.prisma.progresoEstudiantePlanificacion.update({
+      where: {
+        estudiante_id_planificacion_id: {
+          estudiante_id: estudianteId,
+          planificacion_id: planificacion.id,
+        },
+      },
+      data: {
+        semana_actual: progreso.semana_actual + 1,
+        ultima_actividad: new Date(),
+      },
+    });
+
+    return { success: true, semana_actual: nuevoProgreso.semana_actual };
+  }
+
+  /**
+   * Completar semana y asignar puntos
+   */
+  async completarSemana(
+    estudianteId: string,
+    codigoPlanificacion: string,
+    semana: number,
+    puntos: number,
+  ) {
+    const planificacion = await this.prisma.planificacionSimple.findUnique({
+      where: { codigo: codigoPlanificacion },
+    });
+
+    if (!planificacion) {
+      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+    }
+
+    const progreso = await this.prisma.progresoEstudiantePlanificacion.findUnique({
+      where: {
+        estudiante_id_planificacion_id: {
+          estudiante_id: estudianteId,
+          planificacion_id: planificacion.id,
+        },
+      },
+    });
+
+    if (!progreso) {
+      throw new NotFoundException('Progreso no encontrado');
+    }
+
+    // Actualizar puntos
+    const nuevoProgreso = await this.prisma.progresoEstudiantePlanificacion.update({
+      where: {
+        estudiante_id_planificacion_id: {
+          estudiante_id: estudianteId,
+          planificacion_id: planificacion.id,
+        },
+      },
+      data: {
+        puntos_totales: { increment: puntos },
+        ultima_actividad: new Date(),
+      },
+    });
+
+    // Actualizar también los puntos totales del estudiante en su perfil
+    await this.prisma.estudiante.update({
+      where: { id: estudianteId },
+      data: {
+        puntos_totales: { increment: puntos },
+      },
+    });
+
+    return {
+      success: true,
+      puntos_totales: nuevoProgreso.puntos_totales,
+    };
+  }
+
+  /**
+   * Registrar tiempo jugado
+   */
+  async registrarTiempo(
+    estudianteId: string,
+    codigoPlanificacion: string,
+    minutos: number,
+  ) {
+    const planificacion = await this.prisma.planificacionSimple.findUnique({
+      where: { codigo: codigoPlanificacion },
+    });
+
+    if (!planificacion) {
+      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+    }
+
+    const progreso = await this.prisma.progresoEstudiantePlanificacion.upsert({
+      where: {
+        estudiante_id_planificacion_id: {
+          estudiante_id: estudianteId,
+          planificacion_id: planificacion.id,
+        },
+      },
+      update: {
+        tiempo_total_minutos: { increment: minutos },
+        ultima_actividad: new Date(),
+      },
+      create: {
+        estudiante_id: estudianteId,
+        planificacion_id: planificacion.id,
+        semana_actual: 1,
+        tiempo_total_minutos: minutos,
+      },
+    });
+
+    return { success: true, tiempo_total: progreso.tiempo_total_minutos };
+  }
+}
