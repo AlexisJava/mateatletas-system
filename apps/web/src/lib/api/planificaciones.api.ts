@@ -20,7 +20,98 @@ import {
   UpdatePlanificacionRequest,
   CreateActividadRequest,
   Actividad,
+  PlanificacionListItem,
+  CodigoGrupo,
+  EstadoPlanificacion,
 } from '@/types/planificacion.types';
+
+type PlanificacionListItemApi = {
+  id: string;
+  grupo_id: string;
+  codigo_grupo: CodigoGrupo;
+  mes: number;
+  anio: number;
+  titulo: string;
+  descripcion: string | null;
+  tematica_principal: string;
+  objetivos_aprendizaje: string[] | null;
+  estado: EstadoPlanificacion;
+  notas_docentes: string | null;
+  fecha_publicacion: string | null;
+  created_at: string;
+  updated_at: string;
+  total_actividades: number;
+  total_asignaciones: number;
+};
+
+type PlanificacionListResponseApi = {
+  data: PlanificacionListItemApi[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+};
+
+type ActividadApi = {
+  id: string;
+  planificacion_id: string;
+  semana: number;
+  componente: Actividad['componente'];
+  descripcion: string;
+  props: Record<string, unknown> | null;
+  orden: number;
+  created_at: string;
+  updated_at: string;
+};
+
+type PlanificacionDetalleApi = PlanificacionListItemApi & {
+  actividades: ActividadApi[];
+};
+
+const mapPlanificacionListItem = (
+  planificacion: PlanificacionListItemApi,
+): PlanificacionListItem => ({
+  id: planificacion.id,
+  grupo_id: planificacion.grupo_id,
+  codigo_grupo: planificacion.codigo_grupo,
+  grupo: {
+    id: planificacion.grupo_id,
+    codigo: planificacion.codigo_grupo,
+    nombre: `Grupo ${planificacion.codigo_grupo}`,
+  },
+  mes: planificacion.mes,
+  anio: planificacion.anio,
+  titulo: planificacion.titulo,
+  descripcion: planificacion.descripcion,
+  tematica_principal: planificacion.tematica_principal,
+  objetivos_aprendizaje: planificacion.objetivos_aprendizaje ?? [],
+  estado: planificacion.estado,
+  notas_docentes: planificacion.notas_docentes,
+  fecha_publicacion: planificacion.fecha_publicacion,
+  created_at: planificacion.created_at,
+  updated_at: planificacion.updated_at,
+  total_actividades: planificacion.total_actividades ?? 0,
+  total_asignaciones: planificacion.total_asignaciones ?? 0,
+});
+
+const mapActividad = (actividad: ActividadApi): Actividad => ({
+  id: actividad.id,
+  planificacion_id: actividad.planificacion_id,
+  semana: actividad.semana,
+  componente: actividad.componente,
+  descripcion: actividad.descripcion,
+  props: actividad.props ?? {},
+  orden: actividad.orden,
+  created_at: actividad.created_at,
+  updated_at: actividad.updated_at,
+});
+
+const mapPlanificacionDetalle = (
+  data: PlanificacionDetalleApi,
+): PlanificacionDetalle => ({
+  ...mapPlanificacionListItem(data),
+  actividades: data.actividades?.map(mapActividad) ?? [],
+});
 
 /**
  * Obtener lista de planificaciones con filtros y paginación
@@ -28,7 +119,7 @@ import {
  */
 export const getPlanificaciones = async (
   filters: PlanificacionFilters = {},
-  pagination: PaginationOptions = { page: 1, limit: 10 }
+  pagination: PaginationOptions = { page: 1, limit: 10 },
 ): Promise<PlanificacionListResponse> => {
   const params = new URLSearchParams();
 
@@ -42,20 +133,30 @@ export const getPlanificaciones = async (
   if (pagination.page) params.append('page', pagination.page.toString());
   if (pagination.limit) params.append('limit', pagination.limit.toString());
 
-  const payload = await axios.get<PlanificacionListResponse>(
-    `/planificaciones?${params.toString()}`
+  const response = await axios.get<PlanificacionListResponseApi>(
+    `/planificaciones?${params.toString()}`,
   );
 
-  return payload;
+  return {
+    data: response.data.map(mapPlanificacionListItem),
+    total: response.total,
+    page: response.page,
+    limit: response.limit,
+    totalPages: response.total_pages,
+  };
 };
 
 /**
  * Obtener una planificación por ID con sus actividades
  * GET /api/planificaciones/:id
  */
-export const getPlanificacionById = async (id: string): Promise<PlanificacionDetalle> => {
-  const payload = await axios.get<PlanificacionDetalle>(`/planificaciones/${id}`);
-  return payload;
+export const getPlanificacionById = async (
+  id: string,
+): Promise<PlanificacionDetalle> => {
+  const response = await axios.get<PlanificacionDetalleApi>(
+    `/planificaciones/${id}`,
+  );
+  return mapPlanificacionDetalle(response);
 };
 
 /**
@@ -63,10 +164,13 @@ export const getPlanificacionById = async (id: string): Promise<PlanificacionDet
  * POST /api/planificaciones
  */
 export const createPlanificacion = async (
-  data: CreatePlanificacionRequest
+  data: CreatePlanificacionRequest,
 ): Promise<PlanificacionDetalle> => {
-  const payload = await axios.post<PlanificacionDetalle>('/planificaciones', data);
-  return payload;
+  const response = await axios.post<PlanificacionDetalleApi>(
+    '/planificaciones',
+    data,
+  );
+  return mapPlanificacionDetalle(response);
 };
 
 /**
@@ -75,10 +179,13 @@ export const createPlanificacion = async (
  */
 export const updatePlanificacion = async (
   id: string,
-  data: UpdatePlanificacionRequest
+  data: UpdatePlanificacionRequest,
 ): Promise<PlanificacionDetalle> => {
-  const payload = await axios.patch<PlanificacionDetalle>(`/planificaciones/${id}`, data);
-  return payload;
+  const response = await axios.patch<PlanificacionDetalleApi>(
+    `/planificaciones/${id}`,
+    data,
+  );
+  return mapPlanificacionDetalle(response);
 };
 
 /**
@@ -95,13 +202,13 @@ export const deletePlanificacion = async (id: string): Promise<void> => {
  */
 export const addActividadToPlanificacion = async (
   planificacionId: string,
-  data: CreateActividadRequest
+  data: CreateActividadRequest,
 ): Promise<Actividad> => {
-  const payload = await axios.post<Actividad>(
+  const response = await axios.post<ActividadApi>(
     `/planificaciones/${planificacionId}/actividades`,
-    data
+    data,
   );
-  return payload;
+  return mapActividad(response);
 };
 
 /**
@@ -111,13 +218,13 @@ export const addActividadToPlanificacion = async (
 export const updateActividad = async (
   planificacionId: string,
   actividadId: string,
-  data: Partial<CreateActividadRequest>
+  data: Partial<CreateActividadRequest>,
 ): Promise<Actividad> => {
-  const payload = await axios.patch<Actividad>(
+  const response = await axios.patch<ActividadApi>(
     `/planificaciones/${planificacionId}/actividades/${actividadId}`,
-    data
+    data,
   );
-  return payload;
+  return mapActividad(response);
 };
 
 /**
@@ -135,14 +242,18 @@ export const deleteActividad = async (
  * Publicar una planificación (cambiar estado a "publicada")
  * PATCH /api/planificaciones/:id
  */
-export const publicarPlanificacion = async (id: string): Promise<PlanificacionDetalle> => {
-  return updatePlanificacion(id, { estado: 'publicada' });
+export const publicarPlanificacion = async (
+  id: string,
+): Promise<PlanificacionDetalle> => {
+  return updatePlanificacion(id, { estado: 'PUBLICADA' });
 };
 
 /**
  * Archivar una planificación (cambiar estado a "archivada")
  * PATCH /api/planificaciones/:id
  */
-export const archivarPlanificacion = async (id: string): Promise<PlanificacionDetalle> => {
-  return updatePlanificacion(id, { estado: 'archivada' });
+export const archivarPlanificacion = async (
+  id: string,
+): Promise<PlanificacionDetalle> => {
+  return updatePlanificacion(id, { estado: 'ARCHIVADA' });
 };
