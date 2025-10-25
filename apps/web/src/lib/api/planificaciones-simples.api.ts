@@ -208,3 +208,62 @@ export async function registrarTiempo(
   );
   return response.data;
 }
+
+// ============================================================================
+// MÉTODOS DOCENTE
+// ============================================================================
+
+/**
+ * Listar asignaciones del docente autenticado (Docente)
+ */
+export async function misAsignaciones(): Promise<
+  Array<{
+    id: string;
+    planificacion: PlanificacionSimple;
+    claseGrupo: { id: string; nombre: string };
+    semanas_activas: SemanaActiva[];
+  }>
+> {
+  const response = await apiClient.get('/planificaciones/mis-asignaciones');
+  return response.data;
+}
+
+/**
+ * Activar una semana específica (Docente)
+ */
+export async function activarSemana(
+  asignacionId: string,
+  semanaNumero: number,
+): Promise<SemanaActiva> {
+  const response = await apiClient.post<SemanaActiva>(
+    `/planificaciones/asignacion/${asignacionId}/semana/${semanaNumero}/activar`,
+  );
+  return response.data;
+}
+
+/**
+ * Desactivar una semana específica (Docente)
+ */
+export async function desactivarSemana(
+  asignacionId: string,
+  semanaNumero: number,
+): Promise<{ success: boolean; message: string }> {
+  const response = await apiClient.post<{ success: boolean; message: string }>(
+    `/planificaciones/asignacion/${asignacionId}/semana/${semanaNumero}/desactivar`,
+  );
+  return response.data;
+}
+
+/**
+ * Ver progreso de estudiantes en una asignación (Docente)
+ */
+export async function verProgresoEstudiantes(asignacionId: string): Promise<{
+  asignacion: { id: string; grupo: { id: string; nombre: string } };
+  planificacion: { codigo: string; titulo: string; semanas_total: number };
+  progresos: ProgresoEstudiante[];
+}> {
+  const response = await apiClient.get(
+    `/planificaciones/asignacion/${asignacionId}/progreso`,
+  );
+  return response.data;
+}
