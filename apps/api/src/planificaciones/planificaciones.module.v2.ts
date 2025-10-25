@@ -3,6 +3,7 @@ import { DatabaseModule } from '../core/database/database.module';
 
 // Infrastructure
 import { PlanificacionesController } from './infrastructure/planificaciones.controller';
+import { GruposController } from './infrastructure/grupos.controller';
 import { PrismaPlanificacionRepository } from './infrastructure/prisma-planificacion.repository';
 
 // Application (Use Cases)
@@ -24,6 +25,7 @@ import { CreatePlanificacionUseCase } from './application/use-cases/create-plani
   imports: [DatabaseModule],
   controllers: [
     PlanificacionesController, // Clean Architecture controller
+    GruposController, // Grupos pedagógicos endpoint
   ],
   providers: [
     // Repository implementation

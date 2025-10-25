@@ -1,17 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Calendar, AlertCircle } from 'lucide-react';
 import { createPlanificacion } from '@/lib/api/planificaciones.api';
-import type { CodigoGrupo } from '@/types/planificacion.types';
+
+interface Grupo {
+  id: string;
+  codigo: string;
+  nombre: string;
+  descripcion: string | null;
+  edad_minima: number | null;
+  edad_maxima: number | null;
+}
 
 interface CreatePlanificacionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
-
-const GRUPOS: CodigoGrupo[] = ['B1', 'B2', 'B3'];
 const MESES = [
   { value: 1, label: 'Enero' },
   { value: 2, label: 'Febrero' },
@@ -34,8 +40,10 @@ export const CreatePlanificacionModal: React.FC<CreatePlanificacionModalProps> =
 }) => {
   const currentYear = new Date().getFullYear();
 
+  const [grupos, setGrupos] = useState<Grupo[]>([]);
+  const [loadingGrupos, setLoadingGrupos] = useState(false);
   const [formData, setFormData] = useState({
-    codigo_grupo: '' as CodigoGrupo | '',
+    grupo_id: '',
     mes: new Date().getMonth() + 1,
     anio: currentYear,
     titulo: '',
@@ -47,6 +55,26 @@ export const CreatePlanificacionModal: React.FC<CreatePlanificacionModalProps> =
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch grupos al abrir modal
+  useEffect(() => {
+    if (isOpen && grupos.length === 0) {
+      const fetchGrupos = async () => {
+        setLoadingGrupos(true);
+        try {
+          const response = await fetch('http://localhost:3001/api/grupos');
+          const data = await response.json();
+          setGrupos(data);
+        } catch (err) {
+          console.error('Error al cargar grupos:', err);
+          setError('Error al cargar los grupos disponibles');
+        } finally {
+          setLoadingGrupos(false);
+        }
+      };
+      fetchGrupos();
+    }
+  }, [isOpen, grupos.length]);
 
   const handleChange = (field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -78,7 +106,7 @@ export const CreatePlanificacionModal: React.FC<CreatePlanificacionModalProps> =
     setError(null);
 
     // Validaciones
-    if (!formData.codigo_grupo) {
+    if (!formData.grupo_id) {
       setError('Debe seleccionar un grupo');
       return;
     }
@@ -95,7 +123,7 @@ export const CreatePlanificacionModal: React.FC<CreatePlanificacionModalProps> =
 
     try {
       const payload = {
-        codigo_grupo: formData.codigo_grupo as CodigoGrupo,
+        grupo_id: formData.grupo_id,
         mes: formData.mes,
         anio: formData.anio,
         titulo: formData.titulo.trim(),
@@ -111,7 +139,7 @@ export const CreatePlanificacionModal: React.FC<CreatePlanificacionModalProps> =
 
       // Reset form
       setFormData({
-        codigo_grupo: '',
+        grupo_id: '',
         mes: new Date().getMonth() + 1,
         anio: currentYear,
         titulo: '',
@@ -180,15 +208,17 @@ export const CreatePlanificacionModal: React.FC<CreatePlanificacionModalProps> =
                   Grupo *
                 </label>
                 <select
-                  value={formData.codigo_grupo}
-                  onChange={(e) => handleChange('codigo_grupo', e.target.value)}
+                  value={formData.grupo_id}
+                  onChange={(e) => handleChange('grupo_id', e.target.value)}
                   className="w-full px-3 py-2.5 bg-white/5 border border-white/20 rounded-xl text-white font-medium focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                   required
+                  disabled={loadingGrupos}
                 >
-                  <option value="">Seleccionar</option>
-                  {GRUPOS.map((grupo) => (
-                    <option key={grupo} value={grupo}>
-                      {grupo}
+                  <option value="">{loadingGrupos ? 'Cargando...' : 'Seleccionar'}</option>
+                  {grupos.map((grupo) => (
+                    <option key={grupo.id} value={grupo.id}>
+                      {grupo.codigo} - {grupo.nombre}
+                      {grupo.edad_minima && grupo.edad_maxima && ` (${grupo.edad_minima}-${grupo.edad_maxima} años)`}
                     </option>
                   ))}
                 </select>
