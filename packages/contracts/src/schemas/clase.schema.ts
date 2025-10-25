@@ -87,3 +87,37 @@ export type Asistencia = z.infer<typeof asistenciaSchema>;
 export const clasesListSchema = z.array(claseSchema);
 
 export type ClasesList = z.infer<typeof clasesListSchema>;
+
+/**
+ * Schema para inscripción/reserva de clase
+ */
+export const inscripcionClaseSchema = z.object({
+  id: z.string(),
+  clase_id: z.string(),
+  estudiante_id: z.string(),
+  tutor_id: z.string(),
+  observaciones: z.string().nullable().optional(),
+  fecha_inscripcion: z.union([z.string().datetime(), z.date()]),
+  createdAt: z.union([z.string().datetime(), z.date()]),
+  updatedAt: z.union([z.string().datetime(), z.date()]),
+  clase: claseSchema.optional(),
+  estudiante: z
+    .object({
+      id: z.string(),
+      nombre: z.string(),
+      apellido: z.string(),
+    })
+    .optional(),
+});
+
+export type InscripcionClase = z.infer<typeof inscripcionClaseSchema>;
+
+/**
+ * DTO para reservar una clase
+ */
+export const reservarClaseSchema = z.object({
+  estudianteId: z.string(),
+  observaciones: z.string().optional(),
+});
+
+export type ReservarClaseInput = z.infer<typeof reservarClaseSchema>;

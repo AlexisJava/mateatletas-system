@@ -17,6 +17,7 @@ import { CreatePlanificacionUseCase } from '../application/use-cases/create-plan
 import { GetPlanificacionesUseCase } from '../application/use-cases/get-planificaciones.use-case';
 import { CreatePlanificacionDto } from '../application/dto/create-planificacion.dto';
 import { GetPlanificacionesQueryDto } from '../application/dto/get-planificaciones-query.dto';
+import { planificacionListResponseSchema } from '@mateatletas/contracts';
 
 /**
  * Controller para Planificaciones (Clean Architecture)
@@ -75,6 +76,52 @@ export class PlanificacionesController {
     description: 'Lista de planificaciones con paginación',
   })
   async getPlanificaciones(@Query() query: GetPlanificacionesQueryDto) {
-    return this.getPlanificacionesUseCase.execute(query);
+    const result = await this.getPlanificacionesUseCase.execute(
+      {
+        grupoId: undefined,
+        mes: query.mes,
+        anio: query.anio,
+        estado: query.estado,
+      },
+      {
+        page: query.page,
+        limit: query.limit,
+      },
+    );
+
+    const filteredData = query.codigo_grupo
+      ? result.data.filter((item) => item.grupo?.codigo === query.codigo_grupo)
+      : result.data;
+
+    const response = {
+      data: filteredData.map((item) => ({
+        id: item.id,
+        grupo_id: item.grupoId,
+        codigo_grupo: item.grupo?.codigo,
+        grupo: item.grupo,
+        mes: item.mes,
+        anio: item.anio,
+        titulo: item.titulo,
+        descripcion: item.descripcion,
+        tematica_principal: item.tematicaPrincipal,
+        objetivos_aprendizaje: item.objetivosAprendizaje,
+        estado: item.estado,
+        created_by_admin_id: item.createdByAdminId,
+        notas_docentes: item.notasDocentes,
+        fecha_publicacion: item.fechaPublicacion,
+        created_at: item.createdAt,
+        updated_at: item.updatedAt,
+        total_actividades: item.activityCount,
+        total_asignaciones: item.assignmentCount,
+      })),
+      total: query.codigo_grupo ? filteredData.length : result.total,
+      page: result.page,
+      limit: result.limit,
+      total_pages: query.codigo_grupo
+        ? Math.max(1, Math.ceil(filteredData.length / (result.limit || 1)))
+        : result.totalPages,
+    };
+
+    return planificacionListResponseSchema.parse(response);
   }
 }

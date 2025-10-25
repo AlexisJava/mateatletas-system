@@ -119,3 +119,40 @@ export interface PaginatedResponse<T> {
   limit: number;
   totalPages: number;
 }
+
+// ---------------------------------------------------------------------------
+// Re-export shared contracts (Zod schemas + types) to centralize imports
+// ---------------------------------------------------------------------------
+
+export * from '@mateatletas/contracts';
+
+export type {
+  EstadoPlanificacion,
+  PlanificacionListItem,
+  PlanificacionListResponse,
+  PlanificacionActividad,
+  PlanificacionDetalle,
+  CreatePlanificacionInput,
+  UpdatePlanificacionInput,
+  CreateActividadInput,
+  EstadoClase,
+  Asistencia,
+  Clase,
+  ClasesList,
+  InscripcionClase,
+  ReservarClaseInput,
+  EstadoMembresia,
+  EstadoInscripcion,
+  Membresia,
+  InscripcionCurso,
+  PreferenciaPago,
+  CrearPreferenciaSuscripcionRequest,
+  CrearPreferenciaCursoRequest,
+  EstadoMembresiaResponse,
+  MetricasDashboardResponse,
+  ConfiguracionPrecios,
+  HistorialCambioPrecios,
+  InscripcionMensualConRelaciones,
+  EstudianteConDescuento,
+  ActualizarConfiguracionPreciosInput,
+} from '@mateatletas/contracts';
