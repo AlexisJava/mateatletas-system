@@ -7,14 +7,29 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
+  Delete,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+  ApiParam,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles, Role } from '../../auth/decorators/roles.decorator';
 import { GetUser } from '../../auth/decorators/get-user.decorator';
 import { CreatePlanificacionUseCase } from '../application/use-cases/create-planificacion.use-case';
 import { GetPlanificacionesUseCase } from '../application/use-cases/get-planificaciones.use-case';
+import { GetPlanificacionByIdUseCase } from '../application/use-cases/get-planificacion-by-id.use-case';
+import { UpdatePlanificacionUseCase } from '../application/use-cases/update-planificacion.use-case';
+import { DeletePlanificacionUseCase } from '../application/use-cases/delete-planificacion.use-case';
+import { AddActividadToPlanificacionUseCase } from '../application/use-cases/add-actividad-to-planificacion.use-case';
+import { UpdateActividadUseCase } from '../application/use-cases/update-actividad.use-case';
+import { DeleteActividadUseCase } from '../application/use-cases/delete-actividad.use-case';
 import { CreatePlanificacionDto } from '../application/dto/create-planificacion.dto';
 import { GetPlanificacionesQueryDto } from '../application/dto/get-planificaciones-query.dto';
 import { planificacionListResponseSchema } from '@mateatletas/contracts';
@@ -25,15 +40,27 @@ import { planificacionListResponseSchema } from '@mateatletas/contracts';
  * Endpoints:
  * - POST   /planificaciones       - Crear planificación (Admin)
  * - GET    /planificaciones       - Listar planificaciones con filtros
+ * - GET    /planificaciones/:id   - Obtener detalle de planificación
+ * - PATCH  /planificaciones/:id   - Actualizar planificación
+ * - DELETE /planificaciones/:id   - Eliminar planificación
+ * - POST   /planificaciones/:id/actividades - Crear actividad
+ * - PATCH  /planificaciones/:id/actividades/:actividadId - Actualizar actividad
+ * - DELETE /planificaciones/:id/actividades/:actividadId - Eliminar actividad
  */
 @ApiTags('Planificaciones')
 @Controller('planificaciones')
-// @UseGuards(JwtAuthGuard, RolesGuard) // Temporalmente deshabilitado para E2E tests
-// @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiBearerAuth()
 export class PlanificacionesController {
   constructor(
     private readonly createPlanificacionUseCase: CreatePlanificacionUseCase,
     private readonly getPlanificacionesUseCase: GetPlanificacionesUseCase,
+    private readonly getPlanificacionByIdUseCase: GetPlanificacionByIdUseCase,
+    private readonly updatePlanificacionUseCase: UpdatePlanificacionUseCase,
+    private readonly deletePlanificacionUseCase: DeletePlanificacionUseCase,
+    private readonly addActividadToPlanificacionUseCase: AddActividadToPlanificacionUseCase,
+    private readonly updateActividadUseCase: UpdateActividadUseCase,
+    private readonly deleteActividadUseCase: DeleteActividadUseCase,
   ) {}
 
   /**
@@ -58,10 +85,11 @@ export class PlanificacionesController {
   })
   async createPlanificacion(
     @Body() dto: CreatePlanificacionDto,
-    // @GetUser('id') userId: string, // Temporalmente deshabilitado para E2E tests
-  ) {
-    const userId = 'test-admin-id'; // Mock ID para tests
-    return this.createPlanificacionUseCase.execute(dto, userId);
+    @GetUser('id') userId: string,
+  ): Promise<PlanificacionDetailResponseDto> {
+    const created = await this.createPlanificacionUseCase.execute(dto, userId);
+    const detail = await this.getPlanificacionByIdUseCase.execute(created.id as string);
+    return PlanificacionDetailResponseDto.fromDetail(detail);
   }
 
   /**

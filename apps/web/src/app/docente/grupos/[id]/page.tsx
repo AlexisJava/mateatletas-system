@@ -69,7 +69,7 @@ export default function GrupoDetalladoPage() {
     const fetchGrupo = async () => {
       try {
         const response = await apiClient.get(`/grupos/${grupoId}`);
-        setGrupo(response.data);
+        setGrupo(response);
       } catch (error) {
         // Mock data
         const mockGrupo: Grupo = {

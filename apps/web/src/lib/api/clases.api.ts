@@ -30,16 +30,14 @@ export const getClases = async (filtros?: FiltroClases): Promise<Clase[]> => {
     params.append('soloDisponibles', String(filtros.soloDisponibles));
   }
 
-  const response = await axios.get(`/clases?${params.toString()}`);
-  return response.data;
+  return axios.get<Clase[]>(`/clases?${params.toString()}`);
 };
 
 /**
  * Obtener una clase por ID
  */
 export const getClaseById = async (claseId: string): Promise<Clase> => {
-  const response = await axios.get(`/clases/${claseId}`);
-  return response.data;
+  return axios.get<Clase>(`/clases/${claseId}`);
 };
 
 /**
@@ -49,8 +47,7 @@ export const reservarClase = async (
   claseId: string,
   data: CrearReservaDto
 ): Promise<InscripcionClase> => {
-  const response = await axios.post(`/clases/${claseId}/reservar`, data);
-  return response.data;
+  return axios.post<InscripcionClase>(`/clases/${claseId}/reservar`, data);
 };
 
 /**
@@ -66,16 +63,14 @@ export const cancelarReserva = async (
  * Obtener mis reservas (como tutor)
  */
 export const getMisReservas = async (): Promise<InscripcionClase[]> => {
-  const response = await axios.get('/clases/mis-reservas');
-  return response.data;
+  return axios.get<InscripcionClase[]>('/clases/mis-reservas');
 };
 
 /**
  * Obtener todas las rutas curriculares
  */
 export const getRutasCurriculares = async (): Promise<RutaCurricular[]> => {
-  const response = await axios.get('/clases/metadata/rutas-curriculares');
-  return response.data;
+  return axios.get<RutaCurricular[]>('/clases/metadata/rutas-curriculares');
 };
 
 /**
@@ -84,8 +79,7 @@ export const getRutasCurriculares = async (): Promise<RutaCurricular[]> => {
 export const getRutaCurricularById = async (
   rutaId: string
 ): Promise<RutaCurricular> => {
-  const response = await axios.get(`/clases/metadata/rutas-curriculares/${rutaId}`);
-  return response.data;
+  return axios.get<RutaCurricular>(`/clases/metadata/rutas-curriculares/${rutaId}`);
 };
 
 // ==================== ENDPOINTS DOCENTE ====================
@@ -102,8 +96,7 @@ export const getMisClasesDocente = async (
     params.append('incluirPasadas', 'true');
   }
 
-  const response = await axios.get(`/clases/docente/mis-clases?${params.toString()}`);
-  return response.data;
+  return axios.get<Clase[]>(`/clases/docente/mis-clases?${params.toString()}`);
 };
 
 /**
@@ -111,5 +104,5 @@ export const getMisClasesDocente = async (
  * @param claseId ID de la clase
  */
 export const cancelarClase = async (claseId: string): Promise<void> => {
-  await axios.delete(`/clases/${claseId}`);
+  await axios.patch(`/clases/${claseId}/cancelar`, {});
 };

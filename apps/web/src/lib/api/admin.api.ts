@@ -54,7 +54,7 @@ export const getAllClasses = async (): Promise<ClasesResponse> => {
   }
 
   // Fallback: si no tiene meta, extraer solo el array y envolver
-  const list = clasesListSchema.parse(response.data);
+  const list = clasesListSchema.parse(response);
   return { data: list };
 };
 
@@ -93,7 +93,7 @@ export const getRutasCurriculares = async () => {
 export const getDocentes = async () => {
   const response = await axios.get('/docentes');
   // ✅ Backend retorna { data: [...], meta: {...} }, extraer solo array
-  return docentesListSchema.parse(response.data);
+  return docentesListSchema.parse(response);
 };
 
 export const getSectores = async () => {

@@ -629,6 +629,33 @@ export class ClasesManagementService {
   }
 
   /**
+   * Obtener una ruta curricular por su ID
+   *
+   * CACHE: reutiliza los mismos 10 minutos del listado general para evitar
+   * consultas repetitivas en formularios que cargan detalles puntuales.
+   */
+  async obtenerRutaCurricularPorId(id: string) {
+    const cacheKey = `ruta_curricular_${id}`;
+
+    const cached = await this.cacheManager.get(cacheKey);
+    if (cached) {
+      this.logger.debug(`Ruta curricular ${id} obtenida del cache`);
+      return cached;
+    }
+
+    const ruta = await this.prisma.rutaCurricular.findUnique({
+      where: { id },
+    });
+
+    if (!ruta) {
+      throw new NotFoundException(`Ruta curricular con ID ${id} no encontrada`);
+    }
+
+    await this.cacheManager.set(cacheKey, ruta, 600000);
+    return ruta;
+  }
+
+  /**
    * Asignar estudiantes a una clase (solo Admin)
    * POST /api/clases/:id/asignar-estudiantes
    *

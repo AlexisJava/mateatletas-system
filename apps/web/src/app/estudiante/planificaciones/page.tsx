@@ -33,7 +33,7 @@ export default function EstudiantePlanificacionesPage() {
       // Obtener planificaciones disponibles (esto debería ser un endpoint específico)
       // Por ahora simulamos con las asignaciones del grupo del estudiante
       const response = await apiClient.get('/planificaciones');
-      setPlanificaciones(response.data || []);
+      setPlanificaciones(response || []);
     } catch (err: unknown) {
       const errorMessage = getErrorMessage(err, 'Error al cargar planificaciones');
       setError(errorMessage);
