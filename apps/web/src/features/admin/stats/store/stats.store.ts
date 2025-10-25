@@ -1,12 +1,13 @@
 import { create } from 'zustand';
-import { SystemStats } from '@/types/admin.types';
+import { z } from 'zod';
 import * as adminApi from '@/lib/api/admin.api';
-import { getErrorMessage } from '@/lib/utils/error-handler';
+import { SystemStats, parseSystemStats } from '../types/stats.schema';
+import { ErrorFactory, AppError } from '../../shared/types/errors.types';
 
 interface StatsStore {
   stats: SystemStats | null;
   isLoading: boolean;
-  error: string | null;
+  error: AppError | null;
 
   fetchStats: () => Promise<void>;
   clearError: () => void;
@@ -21,10 +22,23 @@ export const useStatsStore = create<StatsStore>((set) => ({
   fetchStats: async () => {
     set({ isLoading: true, error: null });
     try {
-      const stats = await adminApi.getSystemStats();
+      const rawStats = await adminApi.getSystemStats();
+
+      // Validar con Zod
+      const stats = parseSystemStats(rawStats);
+
       set({ stats, isLoading: false });
     } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error loading stats'), isLoading: false });
+      // Convertir error a AppError
+      let appError: AppError;
+
+      if (error instanceof z.ZodError) {
+        appError = ErrorFactory.fromZodError(error);
+      } else {
+        appError = ErrorFactory.fromAxiosError(error);
+      }
+
+      set({ error: appError, isLoading: false });
     }
   },
 
