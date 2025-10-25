@@ -4,7 +4,7 @@ import { getErrorMessage } from '@/lib/utils/error-handler';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAdminStore } from '@/store/admin.store';
+import { useProducts, useProductsLoading, useFetchProducts } from '@/features/admin/products';
 import {
   getModulosByProducto,
   createModulo,
@@ -17,7 +17,9 @@ import { Producto, TipoProducto } from '@/types/catalogo.types';
 
 export default function AdminCursosPage() {
   const router = useRouter();
-  const { products, fetchProducts, isLoading } = useAdminStore();
+  const products = useProducts();
+  const fetchProducts = useFetchProducts();
+  const isLoading = useProductsLoading();
   const [selectedCurso, setSelectedCurso] = useState<Producto | null>(null);
   const [modulos, setModulos] = useState<Modulo[]>([]);
   const [loadingModulos, setLoadingModulos] = useState(false);

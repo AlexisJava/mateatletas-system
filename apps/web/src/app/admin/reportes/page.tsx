@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAdminStore } from '@/store/admin.store';
+import { useStats, useFetchStats, useStatsLoading } from '@/features/admin/stats';
+import { useUsers, useFetchUsers } from '@/features/admin/users';
+import { useClasses, useFetchClasses } from '@/features/admin/classes';
+import { useDashboard, useFetchDashboard } from '@/features/admin/dashboard';
 import {
   exportToExcel,
   exportToCSV,
@@ -28,7 +31,14 @@ import {
 import type { ReporteAdmin } from '@/types/reportes.types';
 
 export default function AdminReportesPage() {
-  const { stats, users, classes, fetchDashboard, fetchStats, fetchUsers, fetchClasses, isLoading } = useAdminStore();
+  const stats = useStats();
+  const users = useUsers();
+  const classes = useClasses();
+  const fetchDashboard = useFetchDashboard();
+  const fetchStats = useFetchStats();
+  const fetchUsers = useFetchUsers();
+  const fetchClasses = useFetchClasses();
+  const isLoading = useStatsLoading();
   const [exportStatus, setExportStatus] = useState<{ success: boolean; message: string } | null>(null);
   const [dateRange, setDateRange] = useState<{ start: string; end: string }>({
     start: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAdminStore } from '@/store/admin.store';
+import { useUsers, useUsersLoading, useUsersError, useFetchUsers, useDeleteUser, useUpdateUserRoles, useUsersStore } from '@/features/admin/users';
 import { AdminUser } from '@/types/admin.types';
 import { docentesApi, CreateDocenteData, Docente } from '@/lib/api/docentes.api';
 import { createAdmin, CreateAdminData } from '@/lib/api/admin.api';
@@ -21,7 +21,11 @@ type TabType = 'tutores' | 'estudiantes' | 'personal';
 type ModalType = 'delete' | 'roles' | 'view' | 'viewDocente' | 'createDocente' | 'createAdmin' | 'reassignClasses' | null;
 
 export default function UsuariosPage() {
-  const { users, fetchUsers, deleteUser, isLoading, error } = useAdminStore();
+  const users = useUsers();
+  const fetchUsers = useFetchUsers();
+  const deleteUser = useDeleteUser();
+  const isLoading = useUsersLoading();
+  const error = useUsersError();
   const [activeTab, setActiveTab] = useState<TabType>('tutores');
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
@@ -612,7 +616,7 @@ export default function UsuariosPage() {
           user={selectedUser}
           onClose={closeModal}
           onSave={async (userId, roles) => {
-            const success = await useAdminStore.getState().updateUserRoles(userId, roles);
+            const success = await useUsersStore.getState().updateUserRoles(userId, roles);
             return success;
           }}
           isLoading={isLoading}

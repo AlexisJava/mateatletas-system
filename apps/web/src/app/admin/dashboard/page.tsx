@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAdminStore } from '@/store/admin.store';
+import { useStats, useStatsLoading, useFetchStats } from '@/features/admin/stats';
 import {
   GraduationCap,
   BookOpen,
@@ -50,7 +50,9 @@ ChartJS.register(
  * - Animaciones suaves
  */
 export default function AdminDashboard() {
-  const { stats, fetchStats, isLoading } = useAdminStore();
+  const stats = useStats();
+  const isLoading = useStatsLoading();
+  const fetchStats = useFetchStats();
   const [greeting, setGreeting] = useState('Bienvenido');
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());

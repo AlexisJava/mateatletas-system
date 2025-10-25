@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useAdminStore } from '@/store/admin.store';
+import { useClasses as useAdminClasses, useClassesLoading, useClassesError, useFetchClasses, useCreateClass, useCancelClass } from '@/features/admin/classes';
 import * as adminApi from '@/lib/api/admin.api';
 import type { ClaseListado } from '@/types/admin-clases.types';
 import type { RutaEspecialidadFromSchema } from '@/lib/schemas/ruta.schema';
@@ -11,7 +11,12 @@ import type { SectorFromSchema } from '@/lib/schemas/sector.schema';
  * Encapsula lógica de estado y operaciones CRUD
  */
 export function useClases() {
-  const { classes, createClass, cancelClass, fetchClasses, isLoading, error } = useAdminStore();
+  const classes = useAdminClasses();
+  const createClass = useCreateClass();
+  const cancelClass = useCancelClass();
+  const fetchClasses = useFetchClasses();
+  const isLoading = useClassesLoading();
+  const error = useClassesError();
 
   const safeClasses: ClaseListado[] = Array.isArray(classes) ? classes : [];
 
