@@ -440,7 +440,7 @@ export class PlanificacionesSimplesService {
                 nombre: true,
               },
             },
-            semanasActivas: true,
+            semanas_activas: true,
           },
         },
         progresosEstudiantes: {
