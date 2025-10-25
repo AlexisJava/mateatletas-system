@@ -131,6 +131,7 @@ model Estudiante {
   inscripciones_mensuales   InscripcionMensual[]
   becas                     Beca[]
   progresosActividades      ProgresoEstudianteActividad[]
+  progresosPlanificaciones  ProgresoEstudiantePlanificacion[]
 
   @@map("estudiantes")
 }
@@ -213,6 +214,7 @@ model Docente {
   notificaciones         Notificacion[]
   puntosOtorgados        PuntoObtenido[]     @relation("PuntosOtorgados")
   asignacionesPlanificaciones AsignacionDocente[]
+  asignacionesPlanificacionesSimples AsignacionPlanificacion[]
 
   @@map("docentes")
 }
@@ -537,6 +539,9 @@ model ClaseGrupo {
 
   /// Asignaciones de actividades semanales
   asignacionesActividades AsignacionActividadEstudiante[]
+
+  /// Asignaciones de planificaciones simples
+  asignacionesPlanificacionesSimples AsignacionPlanificacion[]
 
   @@index([docente_id])
   @@index([dia_semana])
@@ -1841,4 +1846,182 @@ model ProgresoEstudianteActividad {
   @@index([actividad_id])
   @@index([asignacion_id])
   @@map("progreso_estudiante_actividad")
+}
+
+// ============================================================================
+// SISTEMA DE PLANIFICACIONES SIMPLIFICADO (Convention over Configuration)
+// ============================================================================
+//
+// FILOSOFÍA:
+// - Una planificación = UN archivo React con PLANIFICACION_CONFIG exportado
+// - El sistema auto-detecta en build time
+// - Solo guardamos lo mínimo: código, título, grupo, estado
+// - Las semanas son solo números (1-4 o 1-12)
+// - La docente controla qué semana está activa
+// - El estudiante ve solo las semanas activas
+//
+// FLUJO:
+// 1. Programás: /planificaciones/2025-03-multiplicaciones-b1.tsx
+// 2. Build detecta el PLANIFICACION_CONFIG
+// 3. Se registra automáticamente en BD
+// 4. Admin asigna a docente
+// 5. Docente activa semanas
+// 6. Estudiante accede y juega
+// ============================================================================
+
+/// Catálogo de planificaciones (auto-detectadas desde código React)
+model PlanificacionSimple {
+  /// ID único
+  id String @id @default(cuid())
+
+  /// Código único (debe coincidir con el nombre del archivo)
+  /// Ej: "2025-03-multiplicaciones-b1"
+  codigo String @unique
+
+  /// Título descriptivo
+  titulo String
+
+  /// Grupo específico (B1, B2, B3, A1, etc.)
+  grupo_codigo String
+
+  /// Mes (1-12, null para cursos anuales)
+  mes Int?
+
+  /// Año
+  anio Int
+
+  /// Total de semanas (4 para mensuales, 8-12 para cursos)
+  semanas_total Int
+
+  /// Ruta del archivo React
+  /// Ej: "planificaciones/2025-03-multiplicaciones-b1.tsx"
+  archivo_path String
+
+  /// Estado
+  estado EstadoPlanificacionSimple @default(DETECTADA)
+
+  /// Auto-detectado en build time
+  auto_detectada Boolean @default(true)
+  fecha_deteccion DateTime @default(now())
+  ultima_actualizacion DateTime @updatedAt
+
+  /// Relaciones
+  asignaciones AsignacionPlanificacion[]
+  progresosEstudiantes ProgresoEstudiantePlanificacion[]
+
+  @@index([codigo])
+  @@index([grupo_codigo])
+  @@index([estado])
+  @@map("planificaciones_simples")
+}
+
+/// Estados simples de una planificación
+enum EstadoPlanificacionSimple {
+  DETECTADA    // Auto-detectada, no asignada aún
+  ASIGNADA     // Asignada a al menos una docente
+  ARCHIVADA    // Desactivada
+
+  @@map("estado_planificacion_simple")
+}
+
+/// Asignación de planificación a docente y grupo
+model AsignacionPlanificacion {
+  /// ID único
+  id String @id @default(cuid())
+
+  /// Planificación asignada
+  planificacion_id String
+
+  /// Docente responsable
+  docente_id String
+
+  /// Grupo específico (comisión)
+  clase_grupo_id String
+
+  /// Fecha de asignación
+  fecha_asignacion DateTime @default(now())
+
+  /// Activa o no
+  activa Boolean @default(true)
+
+  /// Relaciones
+  planificacion PlanificacionSimple @relation(fields: [planificacion_id], references: [id], onDelete: Cascade)
+  docente Docente @relation(fields: [docente_id], references: [id])
+  claseGrupo ClaseGrupo @relation(fields: [clase_grupo_id], references: [id])
+
+  /// Control de semanas
+  semanas_activas SemanaActiva[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([planificacion_id, clase_grupo_id])
+  @@index([docente_id])
+  @@map("asignaciones_planificacion")
+}
+
+/// Control de qué semanas están activas
+model SemanaActiva {
+  /// ID único
+  id String @id @default(cuid())
+
+  /// Asignación padre
+  asignacion_id String
+
+  /// Número de semana (1-12)
+  numero_semana Int
+
+  /// Activa para estudiantes
+  activa Boolean @default(false)
+
+  /// Fecha de activación
+  fecha_activacion DateTime?
+
+  /// Relación
+  asignacion AsignacionPlanificacion @relation(fields: [asignacion_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([asignacion_id, numero_semana])
+  @@index([asignacion_id])
+  @@index([activa])
+  @@map("semanas_activas")
+}
+
+/// Progreso de estudiante en una planificación (global)
+model ProgresoEstudiantePlanificacion {
+  /// ID único
+  id String @id @default(cuid())
+
+  /// Estudiante
+  estudiante_id String
+
+  /// Planificación
+  planificacion_id String
+
+  /// Semana actual (1-12)
+  semana_actual Int @default(1)
+
+  /// Última actividad
+  ultima_actividad DateTime @default(now())
+
+  /// Estado guardado (JSON flexible)
+  /// Tu componente React guarda lo que necesite aquí
+  estado_guardado Json?
+
+  /// Métricas globales
+  tiempo_total_minutos Int @default(0)
+  puntos_totales Int @default(0)
+
+  /// Relaciones
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  planificacion PlanificacionSimple @relation(fields: [planificacion_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([estudiante_id, planificacion_id])
+  @@index([estudiante_id])
+  @@map("progreso_estudiante_planificacion")
 }

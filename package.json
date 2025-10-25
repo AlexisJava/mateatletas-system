@@ -17,6 +17,7 @@
     "dev:all": "turbo run dev --parallel",
     "stop": "lsof -ti:3000,3001 2>/dev/null | xargs -r kill -9 || true",
     "stop:all": "pkill -9 -f 'next-server' 2>/dev/null || true && pkill -9 -f 'nest start' 2>/dev/null || true && pkill -9 -f 'next dev' 2>/dev/null || true && lsof -ti:3000,3001 2>/dev/null | xargs -r kill -9 || true",
+    "prebuild": "cd apps/api && npm run detect-planificaciones",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
@@ -28,6 +29,7 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
     "clean": "turbo run clean",
+    "detect-planificaciones": "cd apps/api && npm run detect-planificaciones",
     "prepare": "husky"
   },
   "devDependencies": {
