@@ -74,12 +74,14 @@ export default function AdminPlanificacionesSimplesPage() {
   const asignadas = planificaciones.filter((p) => p.estado === 'ASIGNADA').length;
 
   // Grupos únicos
-  const gruposUnicos = Array.from(new Set(planificaciones.map((p) => p.grupo_codigo))).sort();
+  const gruposUnicos = Array.from(
+    new Set(planificaciones.map((p) => p.grupo_codigo).filter(Boolean)),
+  ).sort();
 
   // Años únicos
-  const aniosUnicos = Array.from(new Set(planificaciones.map((p) => p.anio))).sort(
-    (a, b) => b - a,
-  );
+  const aniosUnicos = Array.from(
+    new Set(planificaciones.map((p) => p.anio).filter(Boolean)),
+  ).sort((a, b) => b - a);
 
   return (
     <div className="flex flex-col relative">
@@ -227,8 +229,8 @@ export default function AdminPlanificacionesSimplesPage() {
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-900/50 border-2 border-slate-700 text-white font-medium focus:border-cyan-400 focus:outline-none transition-colors"
               >
                 <option value="TODOS">Todos</option>
-                {gruposUnicos.map((grupo) => (
-                  <option key={grupo} value={grupo}>
+                {gruposUnicos.map((grupo, index) => (
+                  <option key={`grupo-${grupo}-${index}`} value={grupo}>
                     {grupo}
                   </option>
                 ))}
@@ -246,8 +248,8 @@ export default function AdminPlanificacionesSimplesPage() {
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-900/50 border-2 border-slate-700 text-white font-medium focus:border-cyan-400 focus:outline-none transition-colors"
               >
                 <option value="TODOS">Todos</option>
-                {aniosUnicos.map((anio) => (
-                  <option key={anio} value={anio}>
+                {aniosUnicos.map((anio, index) => (
+                  <option key={`anio-${anio}-${index}`} value={anio}>
                     {anio}
                   </option>
                 ))}
