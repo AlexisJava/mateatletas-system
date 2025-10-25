@@ -1,10 +1,12 @@
-import { EstadoPlanificacion } from '@prisma/client';
+import { EstadoPlanificacion, NivelDificultad } from '@prisma/client';
 import { PlanificacionEntity } from './planificacion.entity';
+import { ActividadEntity } from './actividad.entity';
 
 /**
  * Filter options for querying planifications
  */
 export interface PlanificacionFilters {
+  codigoGrupo?: string;
   grupoId?: string;
   mes?: number;
   anio?: number;
@@ -36,6 +38,7 @@ export interface PaginatedResult<T> {
  */
 export interface PlanificacionWithCounts {
   id: string;
+  codigoGrupo?: string;
   grupoId: string;
   grupo?: {
     id: string;
@@ -63,6 +66,10 @@ export interface PlanificacionWithCounts {
   toPersistence(): Record<string, unknown>;
 }
 
+export interface PlanificacionDetail extends PlanificacionWithCounts {
+  actividades: ActividadEntity[];
+}
+
 /**
  * Data for creating a new planification
  */
@@ -79,6 +86,47 @@ export interface CreatePlanificacionData {
   notasDocentes: string | null;
 }
 
+export interface UpdatePlanificacionData {
+  titulo?: string;
+  descripcion?: string;
+  tematicaPrincipal?: string;
+  objetivosAprendizaje?: string[];
+  estado?: EstadoPlanificacion;
+  notasDocentes?: string | null;
+  fechaPublicacion?: Date | null;
+}
+
+export interface CreateActividadData {
+  planificacionId: string;
+  semanaNumero: number;
+  titulo: string;
+  descripcion: string;
+  componenteNombre: string;
+  componenteProps: Record<string, unknown>;
+  nivelDificultad: NivelDificultad;
+  tiempoEstimadoMinutos: number;
+  puntosGamificacion: number;
+  instruccionesDocente: string;
+  instruccionesEstudiante: string;
+  recursosUrl?: Record<string, unknown> | null;
+  orden: number;
+}
+
+export interface UpdateActividadData {
+  semanaNumero?: number;
+  titulo?: string;
+  descripcion?: string;
+  componenteNombre?: string;
+  componenteProps?: Record<string, unknown>;
+  nivelDificultad?: NivelDificultad;
+  tiempoEstimadoMinutos?: number;
+  puntosGamificacion?: number;
+  instruccionesDocente?: string;
+  instruccionesEstudiante?: string;
+  recursosUrl?: Record<string, unknown> | null;
+  orden?: number;
+}
+
 /**
  * Repository interface for Planificacion aggregate
  *
@@ -93,6 +141,12 @@ export interface IPlanificacionRepository {
    * @throws NotFoundException if not found
    */
   findById(id: string): Promise<PlanificacionEntity>;
+
+  /**
+   * Find a planification with activities and counts
+   * @throws NotFoundException if not found
+   */
+  findDetailById(id: string): Promise<PlanificacionDetail>;
 
   /**
    * Find a planification by ID (optional)
@@ -121,12 +175,38 @@ export interface IPlanificacionRepository {
   /**
    * Update a planification
    */
-  update(id: string, data: Partial<PlanificacionEntity>): Promise<PlanificacionEntity>;
+  update(id: string, data: UpdatePlanificacionData): Promise<PlanificacionEntity>;
 
   /**
    * Delete a planification
    */
   delete(id: string): Promise<void>;
+
+  /**
+   * List activities for a planification
+   */
+  findActividades(planificacionId: string): Promise<ActividadEntity[]>;
+
+  /**
+   * Find activity by ID
+   * @throws NotFoundException if not found
+   */
+  findActividadById(id: string): Promise<ActividadEntity>;
+
+  /**
+   * Create an activity in a planification
+   */
+  createActividad(data: CreateActividadData): Promise<ActividadEntity>;
+
+  /**
+   * Update an activity
+   */
+  updateActividad(id: string, data: UpdateActividadData): Promise<ActividadEntity>;
+
+  /**
+   * Delete an activity
+   */
+  deleteActividad(id: string): Promise<void>;
 
   /**
    * Count total planifications matching filters
