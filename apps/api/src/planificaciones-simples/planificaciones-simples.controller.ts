@@ -136,6 +136,65 @@ export class PlanificacionesSimplesController {
   }
 
   // ============================================================================
+  // ENDPOINTS DOCENTE
+  // ============================================================================
+
+  /**
+   * GET /api/planificaciones/mis-asignaciones
+   * Listar asignaciones del docente autenticado
+   */
+  @Get('mis-asignaciones')
+  @Roles(Role.Docente)
+  async misAsignaciones(@Request() req: any) {
+    const docenteId = req.user.sub;
+    return this.service.listarAsignacionesDocente(docenteId);
+  }
+
+  /**
+   * POST /api/planificaciones/asignacion/:asignacionId/semana/:semana/activar
+   * Activar una semana específica
+   */
+  @Post('asignacion/:asignacionId/semana/:semana/activar')
+  @Roles(Role.Docente)
+  async activarSemana(
+    @Param('asignacionId') asignacionId: string,
+    @Param('semana') semana: string,
+    @Request() req: any,
+  ) {
+    const docenteId = req.user.sub;
+    return this.service.activarSemana(asignacionId, docenteId, parseInt(semana));
+  }
+
+  /**
+   * POST /api/planificaciones/asignacion/:asignacionId/semana/:semana/desactivar
+   * Desactivar una semana específica
+   */
+  @Post('asignacion/:asignacionId/semana/:semana/desactivar')
+  @Roles(Role.Docente)
+  async desactivarSemana(
+    @Param('asignacionId') asignacionId: string,
+    @Param('semana') semana: string,
+    @Request() req: any,
+  ) {
+    const docenteId = req.user.sub;
+    return this.service.desactivarSemana(asignacionId, docenteId, parseInt(semana));
+  }
+
+  /**
+   * GET /api/planificaciones/asignacion/:asignacionId/progreso
+   * Ver progreso de estudiantes en una asignación
+   */
+  @Get('asignacion/:asignacionId/progreso')
+  @Roles(Role.Docente)
+  async verProgresoEstudiantes(
+    @Param('asignacionId') asignacionId: string,
+    @Request() req: any,
+  ) {
+    const docenteId = req.user.sub;
+    return this.service.verProgresoEstudiantes(asignacionId, docenteId);
+  }
+
+  // ============================================================================
   // ENDPOINTS ADMIN ESPECÍFICOS (van al final)
   // ============================================================================
 
