@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../core/database/database.module';
+import { CatalogoModule } from '../catalogo/catalogo.module';
 import { PagosController } from './presentation/controllers/pagos.controller';
 import { PagosService } from './presentation/services/pagos.service';
+import { PagosTutorService } from './presentation/services/pagos-tutor.service';
 
 // Use Cases
 import { CalcularPrecioUseCase } from './application/use-cases/calcular-precio.use-case';
@@ -16,6 +18,7 @@ import { InscripcionMensualRepository } from './infrastructure/repositories/insc
 // Adapters para repositorios externos
 import { EstudianteRepositoryAdapter } from './infrastructure/adapters/estudiante-repository.adapter';
 import { ProductoRepositoryAdapter } from './infrastructure/adapters/producto-repository.adapter';
+import { MercadoPagoService } from './mercadopago.service';
 
 /**
  * PagosModule - Módulo completo del sistema de pagos
@@ -39,11 +42,13 @@ import { ProductoRepositoryAdapter } from './infrastructure/adapters/producto-re
  *  - Interfaces: Contratos para repositorios
  */
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, CatalogoModule],
   controllers: [PagosController],
   providers: [
     // Presentation Layer
     PagosService,
+    PagosTutorService,
+    MercadoPagoService,
 
     // Infrastructure Layer - Repositories propios del módulo
     ConfiguracionPreciosRepository,
@@ -96,6 +101,7 @@ import { ProductoRepositoryAdapter } from './infrastructure/adapters/producto-re
   ],
   exports: [
     PagosService,
+    PagosTutorService,
     ConfiguracionPreciosRepository,
     InscripcionMensualRepository,
   ],

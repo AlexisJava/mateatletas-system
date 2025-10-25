@@ -8,6 +8,8 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
   let repository: PrismaPlanificacionRepository;
   let prisma: PrismaService;
   let testAdminId: string;
+  let testGrupoId: string;
+  let testGrupoCodigo: string;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -27,6 +29,17 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
       },
     });
     testAdminId = admin.id;
+
+    // Create test group
+    const grupo = await prisma.grupo.create({
+      data: {
+        codigo: `TEST-GRP-${Date.now()}`,
+        nombre: 'Grupo Test Planificaciones',
+        descripcion: 'Grupo temporal para pruebas de planificaciones',
+      },
+    });
+    testGrupoId = grupo.id;
+    testGrupoCodigo = grupo.codigo;
   });
 
   afterAll(async () => {
@@ -36,6 +49,10 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
         where: { created_by_admin_id: testAdminId },
       });
       await prisma.admin.delete({ where: { id: testAdminId } });
+    }
+
+    if (testGrupoId) {
+      await prisma.grupo.delete({ where: { id: testGrupoId } });
     }
     await prisma.$disconnect();
   });
@@ -51,7 +68,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
     it('should create a new planification', async () => {
       // Arrange
       const data = {
-        codigoGrupo: 'B1',
+        grupoId: testGrupoId,
         mes: 11,
         anio: 2025,
         titulo: 'Test Planificación',
@@ -69,7 +86,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result.id).toBeDefined();
-      expect(result.codigoGrupo).toBe('B1');
+      expect(result.grupoId).toBe(testGrupoId);
       expect(result.mes).toBe(11);
       expect(result.anio).toBe(2025);
       expect(result.estado).toBe(EstadoPlanificacion.BORRADOR);
@@ -79,7 +96,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
     it('should fail when creating duplicate (codigo_grupo, mes, anio)', async () => {
       // Arrange
       const data = {
-        codigoGrupo: 'B1',
+        grupoId: testGrupoId,
         mes: 11,
         anio: 2025,
         titulo: 'Test 1',
@@ -104,7 +121,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
     it('should find a planification by ID', async () => {
       // Arrange
       const created = await repository.create({
-        codigoGrupo: 'B2',
+        grupoId: testGrupoId,
         mes: 12,
         anio: 2025,
         titulo: 'Test Find By ID',
@@ -143,7 +160,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
     it('should return entity when found', async () => {
       // Arrange
       const created = await repository.create({
-        codigoGrupo: 'B3',
+        grupoId: testGrupoId,
         mes: 10,
         anio: 2025,
         titulo: 'Test Optional',
@@ -168,7 +185,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
     it('should find planification by codigo_grupo, mes, anio', async () => {
       // Arrange
       await repository.create({
-        codigoGrupo: 'L1',
+        grupoId: testGrupoId,
         mes: 9,
         anio: 2025,
         titulo: 'Test Period',
@@ -181,11 +198,11 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
       });
 
       // Act
-      const result = await repository.findByPeriod('L1', 9, 2025);
+      const result = await repository.findByPeriod(testGrupoId, 9, 2025);
 
       // Assert
       expect(result).not.toBeNull();
-      expect(result?.codigoGrupo).toBe('L1');
+      expect(result?.grupoId).toBe(testGrupoId);
       expect(result?.mes).toBe(9);
       expect(result?.anio).toBe(2025);
     });
@@ -203,7 +220,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
     beforeEach(async () => {
       // Create test data
       await repository.create({
-        codigoGrupo: 'B1',
+        grupoId: testGrupoId,
         mes: 11,
         anio: 2025,
         titulo: 'Plan 1',
@@ -216,7 +233,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
       });
 
       await repository.create({
-        codigoGrupo: 'B2',
+        grupoId: testGrupoId,
         mes: 11,
         anio: 2025,
         titulo: 'Plan 2',
@@ -229,7 +246,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
       });
 
       await repository.create({
-        codigoGrupo: 'B1',
+        grupoId: testGrupoId,
         mes: 12,
         anio: 2025,
         titulo: 'Plan 3',
@@ -255,11 +272,14 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
 
     it('should filter by codigo_grupo', async () => {
       // Act
-      const result = await repository.findAll({ codigoGrupo: 'B1' }, { page: 1, limit: 10 });
+      const result = await repository.findAll(
+        { codigoGrupo: testGrupoCodigo },
+        { page: 1, limit: 10 },
+      );
 
       // Assert
       expect(result.data.length).toBe(2);
-      expect(result.data.every((p) => p.codigoGrupo === 'B1')).toBe(true);
+      expect(result.data.every((p) => p.codigoGrupo === testGrupoCodigo)).toBe(true);
     });
 
     it('should filter by estado', async () => {
@@ -289,7 +309,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
     it('should update a planification', async () => {
       // Arrange
       const created = await repository.create({
-        codigoGrupo: 'B1',
+        grupoId: testGrupoId,
         mes: 11,
         anio: 2025,
         titulo: 'Original Title',
@@ -317,7 +337,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
     it('should delete a planification', async () => {
       // Arrange
       const created = await repository.create({
-        codigoGrupo: 'B1',
+        grupoId: testGrupoId,
         mes: 11,
         anio: 2025,
         titulo: 'To Delete',
@@ -342,7 +362,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
     it('should count planifications matching filters', async () => {
       // Arrange
       await repository.create({
-        codigoGrupo: 'COUNT1',
+        grupoId: testGrupoId,
         mes: 1,
         anio: 2025,
         titulo: 'Count 1',
@@ -355,7 +375,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
       });
 
       await repository.create({
-        codigoGrupo: 'COUNT1',
+        grupoId: testGrupoId,
         mes: 2,
         anio: 2025,
         titulo: 'Count 2',
@@ -368,7 +388,7 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
       });
 
       // Act
-      const count = await repository.count({ codigoGrupo: 'COUNT1' });
+      const count = await repository.count({ grupoId: testGrupoId });
 
       // Assert
       expect(count).toBe(2);

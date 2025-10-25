@@ -13,8 +13,8 @@ import type {
  * Crear un nuevo ClaseGrupo
  */
 export async function crearClaseGrupo(data: CrearClaseGrupoDto): Promise<ClaseGrupo> {
-  const response = await axios.post<ClaseGrupo>('/admin/clase-grupos', data);
-  return response.data;
+  const payload = await axios.post<ClaseGrupo>('/admin/clase-grupos', data);
+  return payload;
 }
 
 /**
@@ -45,13 +45,13 @@ export async function listarClaseGrupos(
   const queryString = queryParams.toString();
   const url = `/admin/clase-grupos${queryString ? `?${queryString}` : ''}`;
 
-  const response = await axios.get<{
+  const payload = await axios.get<{
     success: boolean;
     data: ClaseGrupo[];
     total: number;
   }>(url);
 
-  return response.data;
+  return payload;
 }
 
 /**
@@ -61,10 +61,10 @@ export async function obtenerClaseGrupo(id: string): Promise<{
   success: boolean;
   data: ClaseGrupo;
 }> {
-  const response = await axios.get<{
+  const payload = await axios.get<{
     success: boolean;
     data: ClaseGrupo;
   }>(`/admin/clase-grupos/${id}`);
 
-  return response.data;
+  return payload;
 }

@@ -9,7 +9,7 @@ interface PlanificacionFiltersProps {
 }
 
 const GRUPOS: CodigoGrupo[] = ['B1', 'B2', 'B3'];
-const ESTADOS: EstadoPlanificacion[] = ['borrador', 'publicada', 'archivada'];
+const ESTADOS: EstadoPlanificacion[] = ['BORRADOR', 'PUBLICADA', 'ARCHIVADA'];
 const MESES = [
   { value: 1, label: 'Enero' },
   { value: 2, label: 'Febrero' },
@@ -156,7 +156,7 @@ export const PlanificacionFilters: React.FC<PlanificacionFiltersProps> = ({
                 <option value="">Todos los estados</option>
                 {ESTADOS.map((estado) => (
                   <option key={estado} value={estado}>
-                    {estado.charAt(0).toUpperCase() + estado.slice(1)}
+                    {estado.charAt(0) + estado.slice(1).toLowerCase()}
                   </option>
                 ))}
               </select>
@@ -204,7 +204,7 @@ export const PlanificacionFilters: React.FC<PlanificacionFiltersProps> = ({
                 )}
                 {filters.estado && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-300 border border-yellow-400/30">
-                    {filters.estado}
+                    {filters.estado.charAt(0) + filters.estado.slice(1).toLowerCase()}
                   </span>
                 )}
               </div>
