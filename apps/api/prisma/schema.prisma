@@ -1901,6 +1901,7 @@ model PlanificacionSimple {
   estado EstadoPlanificacionSimple @default(DETECTADA)
 
   /// Auto-detectado en build time
+  auto_detectada Boolean @default(true)
   fecha_deteccion DateTime @default(now())
   ultima_actualizacion DateTime @updatedAt
 

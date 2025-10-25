@@ -25,7 +25,8 @@
     "db:seed": "npx prisma db seed",
     "db:seed:prod": "NODE_ENV=production npx prisma db seed",
     "db:reset": "npx prisma migrate reset --force",
-    "db:studio": "npx prisma studio"
+    "db:studio": "npx prisma studio",
+    "detect-planificaciones": "ts-node src/planificaciones-simples/scripts/auto-detect-planificaciones.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
