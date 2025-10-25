@@ -21,11 +21,11 @@ export const marcarAsistencia = async (
   estudianteId: string,
   data: MarcarAsistenciaDto
 ): Promise<Asistencia> => {
-  const response = await axios.post(
+  const payload = await axios.post(
     `/asistencia/clases/${claseId}/estudiantes/${estudianteId}`,
     data
   );
-  return response.data;
+  return payload;
 };
 
 /**
@@ -35,8 +35,8 @@ export const marcarAsistencia = async (
 export const getAsistenciaClase = async (
   claseId: string
 ): Promise<ListaAsistencia> => {
-  const response = await axios.get(`/asistencia/clases/${claseId}`);
-  return response.data;
+  const payload = await axios.get(`/asistencia/clases/${claseId}`);
+  return payload;
 };
 
 /**
@@ -46,8 +46,8 @@ export const getAsistenciaClase = async (
 export const getEstadisticasClase = async (
   claseId: string
 ): Promise<EstadisticasClase> => {
-  const response = await axios.get(`/asistencia/clases/${claseId}/estadisticas`);
-  return response.data;
+  const payload = await axios.get(`/asistencia/clases/${claseId}/estadisticas`);
+  return payload;
 };
 
 /**
@@ -74,10 +74,10 @@ export const getHistorialEstudiante = async (
     params.append('rutaCurricularId', filtros.rutaCurricularId);
   }
 
-  const response = await axios.get(
+  const payload = await axios.get(
     `/asistencia/estudiantes/${estudianteId}?${params.toString()}`
   );
-  return response.data;
+  return payload;
 };
 
 /**
@@ -85,8 +85,8 @@ export const getHistorialEstudiante = async (
  * GET /api/asistencia/docente/resumen
  */
 export const getResumenDocente = async (): Promise<ResumenDocenteAsistencia> => {
-  const response = await axios.get('/asistencia/docente/resumen');
-  return response.data;
+  const payload = await axios.get('/asistencia/docente/resumen');
+  return payload;
 };
 
 /**
@@ -137,10 +137,10 @@ export const getObservacionesDocente = async (filtros?: {
     params.append('limit', filtros.limit.toString());
   }
 
-  const response = await axios.get(
+  const payload = await axios.get(
     `/asistencia/docente/observaciones?${params.toString()}`
   );
-  return response.data;
+  return payload;
 };
 
 /**
@@ -171,6 +171,6 @@ export interface ReportesDocente {
 }
 
 export const getReportesDocente = async (): Promise<ReportesDocente> => {
-  const response = await axios.get("/asistencia/docente/reportes");
-  return response.data;
+  const payload = await axios.get("/asistencia/docente/reportes");
+  return payload;
 };
