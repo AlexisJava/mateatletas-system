@@ -168,5 +168,17 @@ describe('TokenBlacklistService', () => {
 
       expect(result).toBe(false);
     });
+
+    it('should return false and log when cache manager throws during user blacklist check', async () => {
+      cacheManager.get.mockRejectedValue(new Error('redis down'));
+      const loggerSpy = jest.spyOn(service['logger'], 'error');
+
+      await expect(service.isUserBlacklisted('user-123')).resolves.toBe(false);
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error al verificar user blacklist'),
+        expect.any(String),
+      );
+    });
   });
 });
