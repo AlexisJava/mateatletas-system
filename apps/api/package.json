@@ -29,6 +29,7 @@
     "detect-planificaciones": "ts-node src/planificaciones-simples/scripts/auto-detect-planificaciones.ts"
   },
   "dependencies": {
+    "@mateatletas/contracts": "1.0.0",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",

@@ -94,7 +94,7 @@ export function useRutasCurriculares() {
  *
  * @example
  * const reservar = useReservarClase();
- * reservar.mutate({ claseId: '123', data: { estudiante_id: 'abc' } });
+ * reservar.mutate({ claseId: '123', data: { estudianteId: 'abc' } });
  */
 export function useReservarClase() {
   const queryClient = useQueryClient();

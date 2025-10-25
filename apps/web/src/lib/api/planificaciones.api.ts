@@ -136,7 +136,7 @@ export const deleteActividad = async (
  * PATCH /api/planificaciones/:id
  */
 export const publicarPlanificacion = async (id: string): Promise<PlanificacionDetalle> => {
-  return updatePlanificacion(id, { estado: 'publicada' });
+  return updatePlanificacion(id, { estado: 'PUBLICADA' });
 };
 
 /**
@@ -144,5 +144,5 @@ export const publicarPlanificacion = async (id: string): Promise<PlanificacionDe
  * PATCH /api/planificaciones/:id
  */
 export const archivarPlanificacion = async (id: string): Promise<PlanificacionDetalle> => {
-  return updatePlanificacion(id, { estado: 'archivada' });
+  return updatePlanificacion(id, { estado: 'ARCHIVADA' });
 };

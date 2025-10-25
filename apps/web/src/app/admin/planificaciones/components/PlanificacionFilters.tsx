@@ -9,7 +9,7 @@ interface PlanificacionFiltersProps {
 }
 
 const GRUPOS: CodigoGrupo[] = ['B1', 'B2', 'B3'];
-const ESTADOS: EstadoPlanificacion[] = ['borrador', 'publicada', 'archivada'];
+const ESTADOS: EstadoPlanificacion[] = ['BORRADOR', 'PUBLICADA', 'ARCHIVADA'];
 const MESES = [
   { value: 1, label: 'Enero' },
   { value: 2, label: 'Febrero' },
@@ -154,11 +154,14 @@ export const PlanificacionFilters: React.FC<PlanificacionFiltersProps> = ({
                 className="w-full px-3 py-2.5 bg-white/5 border border-white/20 rounded-xl text-white font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:opacity-50 transition-all"
               >
                 <option value="">Todos los estados</option>
-                {ESTADOS.map((estado) => (
-                  <option key={estado} value={estado}>
-                    {estado.charAt(0).toUpperCase() + estado.slice(1)}
-                  </option>
-                ))}
+                {ESTADOS.map((estado) => {
+                  const label = estado.toLowerCase().replace(/^\w/, (char) => char.toUpperCase());
+                  return (
+                    <option key={estado} value={estado}>
+                      {label}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>
@@ -204,7 +207,7 @@ export const PlanificacionFilters: React.FC<PlanificacionFiltersProps> = ({
                 )}
                 {filters.estado && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-300 border border-yellow-400/30">
-                    {filters.estado}
+                    {filters.estado.toLowerCase().replace(/^\w/, (char) => char.toUpperCase())}
                   </span>
                 )}
               </div>
