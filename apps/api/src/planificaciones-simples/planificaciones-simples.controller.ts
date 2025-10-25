@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { PlanificacionesSimplesService } from './planificaciones-simples.service';
 
 /**
@@ -43,7 +43,7 @@ export class PlanificacionesSimplesController {
    * Listar todas las planificaciones (Admin)
    */
   @Get()
-  @Roles('admin')
+  @Roles(Role.Admin)
   async listarPlanificaciones(
     @Query('estado') estado?: string,
     @Query('grupo_codigo') grupo_codigo?: string,
@@ -68,7 +68,7 @@ export class PlanificacionesSimplesController {
    * Obtener progreso del estudiante en una planificación
    */
   @Get(':codigo/progreso')
-  @Roles('estudiante')
+  @Roles(Role.Estudiante)
   async obtenerProgreso(@Param('codigo') codigo: string, @Request() req: any) {
     const estudianteId = req.user.sub;
     return this.service.obtenerProgreso(estudianteId, codigo);
@@ -79,7 +79,7 @@ export class PlanificacionesSimplesController {
    * Guardar estado del juego
    */
   @Put(':codigo/progreso')
-  @Roles('estudiante')
+  @Roles(Role.Estudiante)
   async guardarEstado(
     @Param('codigo') codigo: string,
     @Request() req: any,
@@ -94,7 +94,7 @@ export class PlanificacionesSimplesController {
    * Avanzar a la siguiente semana
    */
   @Post(':codigo/progreso/avanzar')
-  @Roles('estudiante')
+  @Roles(Role.Estudiante)
   async avanzarSemana(@Param('codigo') codigo: string, @Request() req: any) {
     const estudianteId = req.user.sub;
     return this.service.avanzarSemana(estudianteId, codigo);
@@ -105,7 +105,7 @@ export class PlanificacionesSimplesController {
    * Completar semana con puntos
    */
   @Post(':codigo/progreso/completar-semana')
-  @Roles('estudiante')
+  @Roles(Role.Estudiante)
   async completarSemana(
     @Param('codigo') codigo: string,
     @Request() req: any,
@@ -125,7 +125,7 @@ export class PlanificacionesSimplesController {
    * Registrar tiempo jugado
    */
   @Post(':codigo/progreso/tiempo')
-  @Roles('estudiante')
+  @Roles(Role.Estudiante)
   async registrarTiempo(
     @Param('codigo') codigo: string,
     @Request() req: any,
@@ -144,7 +144,7 @@ export class PlanificacionesSimplesController {
    * Obtener detalle completo de planificación (Admin)
    */
   @Get(':codigo/detalle')
-  @Roles('admin')
+  @Roles(Role.Admin)
   async obtenerDetalle(@Param('codigo') codigo: string) {
     return this.service.obtenerDetallePlanificacion(codigo);
   }
@@ -154,7 +154,7 @@ export class PlanificacionesSimplesController {
    * Asignar planificación a docente (Admin)
    */
   @Post(':codigo/asignar')
-  @Roles('admin')
+  @Roles(Role.Admin)
   async asignarPlanificacion(
     @Param('codigo') codigo: string,
     @Body() body: { docente_id: string; clase_grupo_id: string },

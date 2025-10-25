@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../core/database/prisma.service';
 
 /**
  * Servicio para gestionar planificaciones simples
@@ -84,7 +84,7 @@ export class PlanificacionesSimplesService {
       for (const inscripcion of estudiante.inscripciones_clase_grupo) {
         const asignaciones = inscripcion.claseGrupo.asignacionesPlanificacionesSimples;
         for (const asignacion of asignaciones) {
-          semanasActivas.push(...asignacion.semanas_activas.map((s) => s.numero_semana));
+          semanasActivas.push(...asignacion.semanas_activas.map((s: any) => s.numero_semana));
         }
       }
     }
