@@ -37,6 +37,11 @@ export interface PaginatedResult<T> {
 export interface PlanificacionWithCounts {
   id: string;
   grupoId: string;
+  grupo?: {
+    id: string;
+    codigo: string;
+    nombre: string;
+  };
   mes: number;
   anio: number;
   titulo: string;
