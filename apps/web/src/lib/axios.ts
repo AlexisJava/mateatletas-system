@@ -115,14 +115,16 @@ apiClient.interceptors.response.use(
         }
 
         default: {
-          // Otros errores - no loggear 409 porque se maneja en el componente
-          if (error.response && status !== 409) {
+          // 304 Not Modified es una respuesta de caché válida, no es un error
+          // Solo loguear errores reales (4xx y 5xx), no códigos de éxito (2xx, 3xx)
+          if (error.response && status >= 400 && status !== 409) {
             console.error(`❓ Error HTTP ${status}:`, error.response.data);
-          } else if (error.request) {
+          } else if (error.request && !error.response) {
             console.error('🌐 Sin respuesta del servidor. Verifica tu conexión.');
-          } else {
+          } else if (!error.request && !error.response) {
             console.error('⚙️ Error en la configuración de la petición:', error.message);
           }
+          // Si es 304 o cualquier 2xx/3xx (excepto los manejados arriba), no loguear nada
         }
       }
     }

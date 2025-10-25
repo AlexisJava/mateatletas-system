@@ -7,7 +7,6 @@ import {
   Min,
   Max,
   MinLength,
-  IsUUID,
 } from 'class-validator';
 
 /**
@@ -25,7 +24,6 @@ import {
  */
 export class CreatePlanificacionDto {
   @IsString({ message: 'grupo_id debe ser un texto' })
-  @IsUUID('4', { message: 'grupo_id debe ser un UUID válido' })
   @IsNotEmpty({ message: 'grupo_id es requerido' })
   grupo_id!: string;
 

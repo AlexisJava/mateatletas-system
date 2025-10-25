@@ -261,4 +261,59 @@ export class GruposController {
       grupo,
     };
   }
+
+  /**
+   * GET /api/grupos/:id/planificaciones
+   * Obtener todas las planificaciones de un grupo pedagógico
+   */
+  @Get(':id/planificaciones')
+  @ApiOperation({ summary: 'Obtener planificaciones de un grupo' })
+  @ApiParam({ name: 'id', description: 'ID del grupo pedagógico' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Planificaciones obtenidas exitosamente' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Grupo no encontrado' })
+  async getPlanificacionesByGrupo(
+    @Param('id') id: string,
+    @Query('anio') anio?: string,
+  ) {
+    // Verificar que el grupo existe
+    const grupo = await this.prisma.grupo.findUnique({
+      where: { id },
+    });
+
+    if (!grupo) {
+      throw new Error(`Grupo con ID "${id}" no encontrado`);
+    }
+
+    const where: { grupo_id: string; anio?: number } = {
+      grupo_id: id,
+    };
+
+    if (anio) {
+      where.anio = parseInt(anio, 10);
+    }
+
+    const planificaciones = await this.prisma.planificacionMensual.findMany({
+      where,
+      include: {
+        grupo: {
+          select: {
+            id: true,
+            codigo: true,
+            nombre: true,
+          },
+        },
+        _count: {
+          select: {
+            actividades: true,
+          },
+        },
+      },
+      orderBy: [
+        { anio: 'desc' },
+        { mes: 'asc' },
+      ],
+    });
+
+    return planificaciones;
+  }
 }
