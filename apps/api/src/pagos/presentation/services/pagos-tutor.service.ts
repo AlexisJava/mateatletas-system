@@ -338,6 +338,10 @@ export class PagosTutorService {
       buildData(),
     );
 
+    if (!preference.id || !preference.init_point) {
+      throw new Error('MercadoPago preference created without required fields');
+    }
+
     return {
       id: preference.id,
       init_point: preference.init_point,

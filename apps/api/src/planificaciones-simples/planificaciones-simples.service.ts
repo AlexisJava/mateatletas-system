@@ -488,7 +488,7 @@ export class PlanificacionesSimplesService {
         },
         semanas_activas: {
           orderBy: {
-            semana_numero: 'asc',
+            numero_semana: 'asc',
           },
         },
       },
@@ -530,9 +530,9 @@ export class PlanificacionesSimplesService {
     // Verificar si ya existe
     const existente = await this.prisma.semanaActiva.findUnique({
       where: {
-        asignacion_id_semana_numero: {
+        asignacion_id_numero_semana: {
           asignacion_id: asignacionId,
-          semana_numero: semanaNumero,
+          numero_semana: semanaNumero,
         },
       },
     });
@@ -549,7 +549,7 @@ export class PlanificacionesSimplesService {
     return await this.prisma.semanaActiva.create({
       data: {
         asignacion_id: asignacionId,
-        semana_numero: semanaNumero,
+        numero_semana: semanaNumero,
         activa: true,
       },
     });
@@ -575,9 +575,9 @@ export class PlanificacionesSimplesService {
     // Buscar la semana activa
     const semanaActiva = await this.prisma.semanaActiva.findUnique({
       where: {
-        asignacion_id_semana_numero: {
+        asignacion_id_numero_semana: {
           asignacion_id: asignacionId,
-          semana_numero: semanaNumero,
+          numero_semana: semanaNumero,
         },
       },
     });
