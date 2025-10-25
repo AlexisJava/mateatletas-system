@@ -105,8 +105,10 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
             </thead>
             <tbody>
               {planificaciones?.map((planificacion, index) => {
-                const grupoColor = GRUPO_COLORS[planificacion.codigo_grupo] || GRUPO_COLORS.B1;
-                const estadoColor = ESTADO_COLORS[planificacion.estado];
+                // Mapear grupoId a codigo_grupo temporal para colores
+                const grupoKey = 'B1'; // TODO: obtener codigo desde el grupo
+                const grupoColor = GRUPO_COLORS[grupoKey] || GRUPO_COLORS.B1;
+                const estadoColor = ESTADO_COLORS[planificacion.estado.toLowerCase() as EstadoPlanificacion] || ESTADO_COLORS.borrador;
 
                 return (
                   <tr
@@ -116,7 +118,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-3 py-1.5 text-sm font-black rounded-full ${grupoColor.bg} ${grupoColor.text} border ${grupoColor.border}`}>
-                        {planificacion.codigo_grupo}
+                        ID: {planificacion.grupoId.slice(0, 8)}...
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -141,10 +143,10 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl font-black text-white">
-                          {planificacion.total_actividades}
+                          {planificacion.activityCount}
                         </span>
                         <span className="text-xs text-white/40 font-medium">
-                          {planificacion.total_actividades === 1 ? 'actividad' : 'actividades'}
+                          {planificacion.activityCount === 1 ? 'actividad' : 'actividades'}
                         </span>
                       </div>
                     </td>
@@ -167,8 +169,9 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
         {/* Mobile Cards */}
         <div className="md:hidden divide-y divide-white/5">
           {planificaciones?.map((planificacion, index) => {
-            const grupoColor = GRUPO_COLORS[planificacion.codigo_grupo] || GRUPO_COLORS.B1;
-            const estadoColor = ESTADO_COLORS[planificacion.estado];
+            const grupoKey = 'B1'; // TODO: obtener codigo desde el grupo
+            const grupoColor = GRUPO_COLORS[grupoKey] || GRUPO_COLORS.B1;
+            const estadoColor = ESTADO_COLORS[planificacion.estado.toLowerCase() as EstadoPlanificacion] || ESTADO_COLORS.borrador;
 
             return (
               <div
@@ -178,7 +181,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
               >
                 <div className="flex justify-between items-start mb-3">
                   <span className={`inline-flex items-center px-3 py-1.5 text-xs font-black rounded-full ${grupoColor.bg} ${grupoColor.text} border ${grupoColor.border}`}>
-                    {planificacion.codigo_grupo}
+                    ID: {planificacion.grupoId.slice(0, 8)}...
                   </span>
                   <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full ${estadoColor.bg} ${estadoColor.text} border ${estadoColor.border}`}>
                     <span>{estadoColor.icon}</span>
@@ -200,7 +203,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
                   <div className="flex justify-between text-sm">
                     <span className="text-white/60 font-medium">Actividades:</span>
                     <span className="text-white font-bold">
-                      {planificacion.total_actividades}
+                      {planificacion.activityCount}
                     </span>
                   </div>
                 </div>

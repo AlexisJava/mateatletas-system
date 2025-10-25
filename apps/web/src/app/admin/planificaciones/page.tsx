@@ -53,7 +53,7 @@ export default function AdminPlanificacionesPage() {
 
       setPlanificaciones(response.data);
       setTotal(response.total);
-      setTotalPages(response.total_pages);
+      setTotalPages(response.totalPages);
     } catch (err: unknown) {
       const errorMessage = getErrorMessage(err, 'Error al cargar planificaciones');
       setError(errorMessage);
