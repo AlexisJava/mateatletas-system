@@ -17,6 +17,7 @@ describe('GetPlanificacionesUseCase', () => {
   const mockPlanificacion: PlanificacionWithCounts = Object.assign(
     new (class {
       id = 'plan-123';
+      grupoId = 'grupo-123';
       codigoGrupo = 'B1';
       mes = 11;
       anio = 2025;
@@ -45,12 +46,18 @@ describe('GetPlanificacionesUseCase', () => {
     // Create mock repository
     const mockRepository: jest.Mocked<IPlanificacionRepository> = {
       findById: jest.fn(),
+      findDetailById: jest.fn(),
       findByIdOptional: jest.fn(),
       findAll: jest.fn(),
       findByPeriod: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      findActividades: jest.fn(),
+      findActividadById: jest.fn(),
+      createActividad: jest.fn(),
+      updateActividad: jest.fn(),
+      deleteActividad: jest.fn(),
       count: jest.fn(),
       getActivityCount: jest.fn(),
     };
