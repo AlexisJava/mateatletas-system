@@ -464,4 +464,192 @@ export class PlanificacionesSimplesService {
 
     return planificacion;
   }
+
+  // ============================================================================
+  // MÉTODOS DOCENTE
+  // ============================================================================
+
+  /**
+   * Listar asignaciones del docente autenticado
+   */
+  async listarAsignacionesDocente(docenteId: string) {
+    const asignaciones = await this.prisma.asignacionPlanificacion.findMany({
+      where: {
+        docente_id: docenteId,
+        activa: true,
+      },
+      include: {
+        planificacion: true,
+        claseGrupo: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
+        semanas_activas: {
+          orderBy: {
+            semana_numero: 'asc',
+          },
+        },
+      },
+      orderBy: {
+        fecha_asignacion: 'desc',
+      },
+    });
+
+    return asignaciones;
+  }
+
+  /**
+   * Activar una semana específica (Docente)
+   */
+  async activarSemana(asignacionId: string, docenteId: string, semanaNumero: number) {
+    // Verificar que la asignación pertenece al docente
+    const asignacion = await this.prisma.asignacionPlanificacion.findUnique({
+      where: { id: asignacionId },
+      include: {
+        planificacion: true,
+      },
+    });
+
+    if (!asignacion) {
+      throw new NotFoundException('Asignación no encontrada');
+    }
+
+    if (asignacion.docente_id !== docenteId) {
+      throw new ForbiddenException('No tienes permiso para modificar esta asignación');
+    }
+
+    // Validar que el número de semana es válido
+    if (semanaNumero < 1 || semanaNumero > asignacion.planificacion.semanas_total) {
+      throw new ForbiddenException(
+        `Semana ${semanaNumero} inválida. La planificación tiene ${asignacion.planificacion.semanas_total} semanas`,
+      );
+    }
+
+    // Verificar si ya existe
+    const existente = await this.prisma.semanaActiva.findUnique({
+      where: {
+        asignacion_id_semana_numero: {
+          asignacion_id: asignacionId,
+          semana_numero: semanaNumero,
+        },
+      },
+    });
+
+    if (existente) {
+      // Activar si estaba inactiva
+      return await this.prisma.semanaActiva.update({
+        where: { id: existente.id },
+        data: { activa: true },
+      });
+    }
+
+    // Crear nueva
+    return await this.prisma.semanaActiva.create({
+      data: {
+        asignacion_id: asignacionId,
+        semana_numero: semanaNumero,
+        activa: true,
+      },
+    });
+  }
+
+  /**
+   * Desactivar una semana específica (Docente)
+   */
+  async desactivarSemana(asignacionId: string, docenteId: string, semanaNumero: number) {
+    // Verificar que la asignación pertenece al docente
+    const asignacion = await this.prisma.asignacionPlanificacion.findUnique({
+      where: { id: asignacionId },
+    });
+
+    if (!asignacion) {
+      throw new NotFoundException('Asignación no encontrada');
+    }
+
+    if (asignacion.docente_id !== docenteId) {
+      throw new ForbiddenException('No tienes permiso para modificar esta asignación');
+    }
+
+    // Buscar la semana activa
+    const semanaActiva = await this.prisma.semanaActiva.findUnique({
+      where: {
+        asignacion_id_semana_numero: {
+          asignacion_id: asignacionId,
+          semana_numero: semanaNumero,
+        },
+      },
+    });
+
+    if (!semanaActiva) {
+      return { success: true, message: 'Semana ya estaba inactiva' };
+    }
+
+    // Desactivar
+    await this.prisma.semanaActiva.update({
+      where: { id: semanaActiva.id },
+      data: { activa: false },
+    });
+
+    return { success: true, message: 'Semana desactivada' };
+  }
+
+  /**
+   * Ver progreso de estudiantes en una asignación (Docente)
+   */
+  async verProgresoEstudiantes(asignacionId: string, docenteId: string) {
+    // Verificar que la asignación pertenece al docente
+    const asignacion = await this.prisma.asignacionPlanificacion.findUnique({
+      where: { id: asignacionId },
+      include: {
+        planificacion: {
+          include: {
+            progresosEstudiantes: {
+              include: {
+                estudiante: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                  },
+                },
+              },
+              orderBy: {
+                ultima_actividad: 'desc',
+              },
+            },
+          },
+        },
+        claseGrupo: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
+      },
+    });
+
+    if (!asignacion) {
+      throw new NotFoundException('Asignación no encontrada');
+    }
+
+    if (asignacion.docente_id !== docenteId) {
+      throw new ForbiddenException('No tienes permiso para ver esta información');
+    }
+
+    return {
+      asignacion: {
+        id: asignacion.id,
+        grupo: asignacion.claseGrupo,
+      },
+      planificacion: {
+        codigo: asignacion.planificacion.codigo,
+        titulo: asignacion.planificacion.titulo,
+        semanas_total: asignacion.planificacion.semanas_total,
+      },
+      progresos: asignacion.planificacion.progresosEstudiantes,
+    };
+  }
 }
