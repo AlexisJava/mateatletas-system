@@ -43,6 +43,25 @@ npm run test:cov
 npm run lint
 ```
 
+## Flujos cubiertos por las pruebas E2E
+
+Las pruebas end-to-end (`apps/api/test/**/*.e2e-spec.ts`) ejercitan los flujos críticos de la API con datos seedados. Los módulos cubiertos actualmente son:
+
+- **Planificaciones** (`test/planificaciones-flujo-completo.e2e-spec.ts`)
+  - Login de admin, docente y estudiante utilizando cookies JWT emitidas por `/auth/login` y `/auth/estudiante/login`.
+  - Auto-detección y detalle de planificaciones (`GET /planificaciones` y `/planificaciones/:codigo/detalle`).
+  - Asignación a grupos pedagógicos y gestión del calendario semanal.
+  - Registro de progreso del estudiante y monitoreo docente.
+- **Clases** (`test/clases-flujo.e2e-spec.ts`)
+  - Programación y cancelación de clases (`POST /clases`, `PATCH /clases/:id/cancelar`).
+  - Listados administrativos, agenda docente y calendario de tutores.
+- **Pagos** (`test/pagos-endpoints.e2e-spec.ts`)
+  - Lectura de configuración e historial de precios (`GET /pagos/configuracion`, `/pagos/historial-cambios`).
+  - Métricas financieras, inscripciones pendientes y descuentos activos.
+  - Cálculo de precios por tutor y actualización auditada de tarifas.
+
+> ⚠️ **Requisitos**: las pruebas e2e esperan una base de datos PostgreSQL en ejecución con los seeds de `apps/api/prisma/seeds/` y variables de entorno mínimas (`JWT_SECRET`, `FRONTEND_URL`). El archivo `test/test-env.ts` define valores seguros por defecto para ejecutar la suite en entornos locales.
+
 ## Configuración
 
 La API usa variables de entorno definidas en el archivo `.env` en la raíz del monorepo:

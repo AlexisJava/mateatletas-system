@@ -8,12 +8,19 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import {
+  loginEstudiante,
+  loginUser,
+  type AuthSession,
+  withAuthHeaders,
+  withOriginHeader,
+} from './utils/auth.helpers';
 
 describe('Planificaciones - Flujo Completo E2E (API)', () => {
   let app: INestApplication;
-  let adminToken: string;
-  let docenteToken: string;
-  let estudianteToken: string;
+  let adminAuth: AuthSession;
+  let docenteAuth: AuthSession;
+  let estudianteAuth: AuthSession;
   let docenteId: string;
   let claseGrupoId: string;
   let asignacionId: string;
@@ -27,33 +34,22 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
     await app.init();
 
     // Obtener tokens
-    const adminLogin = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'admin.test@mateatletas.com',
-        password: 'Admin123!',
-      });
+    adminAuth = await loginUser(app, {
+      email: 'admin.test@mateatletas.com',
+      password: 'Admin123!',
+    });
 
-    adminToken = adminLogin.body.access_token;
+    docenteAuth = await loginUser(app, {
+      email: 'docente.test@mateatletas.com',
+      password: 'Docente123!',
+    });
+    docenteId = docenteAuth.user?.id;
 
-    const docenteLogin = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'docente.test@mateatletas.com',
-        password: 'Docente123!',
-      });
-
-    docenteToken = docenteLogin.body.access_token;
-    docenteId = docenteLogin.body.id;
-
-    const estudianteLogin = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'estudiante.test@mateatletas.com',
-        password: 'Estudiante123!',
-      });
-
-    estudianteToken = estudianteLogin.body.access_token;
+    const estudianteLogin = await loginEstudiante(app, {
+      email: 'estudiante.test@mateatletas.com',
+      password: 'Estudiante123!',
+    });
+    estudianteAuth = estudianteLogin;
   });
 
   afterAll(async () => {
@@ -62,10 +58,10 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
 
   describe('1. Auto-detección', () => {
     it('debe listar planificaciones detectadas', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/planificaciones')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+      const response = await withAuthHeaders(
+        request(app.getHttpServer()).get('/planificaciones'),
+        adminAuth,
+      ).expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
 
@@ -75,10 +71,12 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
     });
 
     it('debe obtener detalle de planificación específica', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/planificaciones/ejemplo-minimo/detalle')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+      const response = await withAuthHeaders(
+        request(app.getHttpServer()).get(
+          '/planificaciones/ejemplo-minimo/detalle',
+        ),
+        adminAuth,
+      ).expect(200);
 
       expect(response.body.codigo).toBe('ejemplo-minimo');
       expect(response.body.semanas_total).toBe(2);
@@ -88,10 +86,10 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
   describe('2. Asignación (Admin)', () => {
     it('debe permitir a admin asignar planificación a docente', async () => {
       // Primero obtener un clase_grupo_id válido
-      const grupos = await request(app.getHttpServer())
-        .get('/clase-grupos')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+      const grupos = await withAuthHeaders(
+        request(app.getHttpServer()).get('/clase-grupos'),
+        adminAuth,
+      ).expect(200);
 
       claseGrupoId = grupos.body.data[0]?.id;
 
@@ -100,9 +98,14 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
         return;
       }
 
-      const response = await request(app.getHttpServer())
-        .post('/planificaciones/ejemplo-minimo/asignar')
-        .set('Authorization', `Bearer ${adminToken}`)
+      const response = await withOriginHeader(
+        withAuthHeaders(
+          request(app.getHttpServer()).post(
+            '/planificaciones/ejemplo-minimo/asignar',
+          ),
+          adminAuth,
+        ),
+      )
         .send({
           docente_id: docenteId,
           clase_grupo_id: claseGrupoId,
@@ -118,10 +121,10 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
 
   describe('3. Gestión de Semanas (Docente)', () => {
     it('debe permitir al docente listar sus asignaciones', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/planificaciones/mis-asignaciones')
-        .set('Authorization', `Bearer ${docenteToken}`)
-        .expect(200);
+      const response = await withAuthHeaders(
+        request(app.getHttpServer()).get('/planificaciones/mis-asignaciones'),
+        docenteAuth,
+      ).expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThan(0);
@@ -136,10 +139,14 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
         return;
       }
 
-      const response = await request(app.getHttpServer())
-        .post(`/planificaciones/asignacion/${asignacionId}/semana/1/activar`)
-        .set('Authorization', `Bearer ${docenteToken}`)
-        .expect(201);
+      const response = await withOriginHeader(
+        withAuthHeaders(
+          request(app.getHttpServer()).post(
+            `/planificaciones/asignacion/${asignacionId}/semana/1/activar`,
+          ),
+          docenteAuth,
+        ),
+      ).expect(201);
 
       expect(response.body.semana_numero).toBe(1);
       expect(response.body.activa).toBe(true);
@@ -151,10 +158,14 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
         return;
       }
 
-      const response = await request(app.getHttpServer())
-        .post(`/planificaciones/asignacion/${asignacionId}/semana/2/activar`)
-        .set('Authorization', `Bearer ${docenteToken}`)
-        .expect(201);
+      const response = await withOriginHeader(
+        withAuthHeaders(
+          request(app.getHttpServer()).post(
+            `/planificaciones/asignacion/${asignacionId}/semana/2/activar`,
+          ),
+          docenteAuth,
+        ),
+      ).expect(201);
 
       expect(response.body.semana_numero).toBe(2);
       expect(response.body.activa).toBe(true);
@@ -166,10 +177,14 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
         return;
       }
 
-      const response = await request(app.getHttpServer())
-        .post(`/planificaciones/asignacion/${asignacionId}/semana/2/desactivar`)
-        .set('Authorization', `Bearer ${docenteToken}`)
-        .expect(201);
+      const response = await withOriginHeader(
+        withAuthHeaders(
+          request(app.getHttpServer()).post(
+            `/planificaciones/asignacion/${asignacionId}/semana/2/desactivar`,
+          ),
+          docenteAuth,
+        ),
+      ).expect(201);
 
       expect(response.body.success).toBe(true);
     });
@@ -177,10 +192,12 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
 
   describe('4. Progreso del Estudiante', () => {
     it('debe permitir al estudiante obtener su progreso', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/planificaciones/ejemplo-minimo/progreso')
-        .set('Authorization', `Bearer ${estudianteToken}`)
-        .expect(200);
+      const response = await withAuthHeaders(
+        request(app.getHttpServer()).get(
+          '/planificaciones/ejemplo-minimo/progreso',
+        ),
+        estudianteAuth,
+      ).expect(200);
 
       expect(response.body.progreso).toBeDefined();
       expect(response.body.semanasActivas).toBeDefined();
@@ -194,9 +211,14 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
         itemsDesbloqueados: ['item1', 'item2'],
       };
 
-      const response = await request(app.getHttpServer())
-        .put('/planificaciones/ejemplo-minimo/progreso')
-        .set('Authorization', `Bearer ${estudianteToken}`)
+      const response = await withOriginHeader(
+        withAuthHeaders(
+          request(app.getHttpServer()).put(
+            '/planificaciones/ejemplo-minimo/progreso',
+          ),
+          estudianteAuth,
+        ),
+      )
         .send({ estado_guardado: estadoGuardado })
         .expect(200);
 
@@ -204,9 +226,14 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
     });
 
     it('debe permitir al estudiante completar semana', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/planificaciones/ejemplo-minimo/progreso/completar-semana')
-        .set('Authorization', `Bearer ${estudianteToken}`)
+      const response = await withOriginHeader(
+        withAuthHeaders(
+          request(app.getHttpServer()).post(
+            '/planificaciones/ejemplo-minimo/progreso/completar-semana',
+          ),
+          estudianteAuth,
+        ),
+      )
         .send({
           semana: 1,
           puntos: 100,
@@ -217,9 +244,14 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
     });
 
     it('debe permitir al estudiante registrar tiempo', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/planificaciones/ejemplo-minimo/progreso/tiempo')
-        .set('Authorization', `Bearer ${estudianteToken}`)
+      const response = await withOriginHeader(
+        withAuthHeaders(
+          request(app.getHttpServer()).post(
+            '/planificaciones/ejemplo-minimo/progreso/tiempo',
+          ),
+          estudianteAuth,
+        ),
+      )
         .send({
           minutos: 30,
         })
@@ -237,10 +269,12 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
         return;
       }
 
-      const response = await request(app.getHttpServer())
-        .get(`/planificaciones/asignacion/${asignacionId}/progreso`)
-        .set('Authorization', `Bearer ${docenteToken}`)
-        .expect(200);
+      const response = await withAuthHeaders(
+        request(app.getHttpServer()).get(
+          `/planificaciones/asignacion/${asignacionId}/progreso`,
+        ),
+        docenteAuth,
+      ).expect(200);
 
       expect(response.body.asignacion).toBeDefined();
       expect(response.body.planificacion).toBeDefined();
