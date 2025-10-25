@@ -137,12 +137,15 @@ export const getPlanificaciones = async (
     `/planificaciones?${params.toString()}`,
   );
 
+  // El interceptor ya retorna response.data automáticamente
+  const data = response as unknown as PlanificacionListResponseApi;
+
   return {
-    data: response.data.map(mapPlanificacionListItem),
-    total: response.total,
-    page: response.page,
-    limit: response.limit,
-    totalPages: response.total_pages,
+    data: data.data.map(mapPlanificacionListItem),
+    total: data.total,
+    page: data.page,
+    limit: data.limit,
+    totalPages: data.total_pages,
   };
 };
 

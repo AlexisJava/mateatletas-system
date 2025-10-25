@@ -31,7 +31,12 @@ import { AddActividadToPlanificacionUseCase } from '../application/use-cases/add
 import { UpdateActividadUseCase } from '../application/use-cases/update-actividad.use-case';
 import { DeleteActividadUseCase } from '../application/use-cases/delete-actividad.use-case';
 import { CreatePlanificacionDto } from '../application/dto/create-planificacion.dto';
+import { UpdatePlanificacionDto } from '../application/dto/update-planificacion.dto';
+import { CreateActividadDto } from '../application/dto/create-actividad.dto';
+import { UpdateActividadDto } from '../application/dto/update-actividad.dto';
 import { GetPlanificacionesQueryDto } from '../application/dto/get-planificaciones-query.dto';
+import { PlanificacionDetailResponseDto } from './dtos/planificacion.response.dto';
+import { ActividadResponseDto } from './dtos/actividad.response.dto';
 import { planificacionListResponseSchema } from '@mateatletas/contracts';
 
 /**
@@ -151,5 +156,160 @@ export class PlanificacionesController {
     };
 
     return planificacionListResponseSchema.parse(response);
+  }
+
+  /**
+   * GET /api/planificaciones/:id
+   * Obtener detalle de una planificación específica
+   */
+  @Get(':id')
+  @Roles(Role.Admin, Role.Docente)
+  @ApiOperation({ summary: 'Obtener detalle de planificación' })
+  @ApiParam({ name: 'id', description: 'ID de la planificación' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Detalle de la planificación con actividades',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Planificación no encontrada',
+  })
+  async getPlanificacionById(@Param('id') id: string): Promise<PlanificacionDetailResponseDto> {
+    const detail = await this.getPlanificacionByIdUseCase.execute(id);
+    return PlanificacionDetailResponseDto.fromDetail(detail);
+  }
+
+  /**
+   * PATCH /api/planificaciones/:id
+   * Actualizar una planificación existente
+   */
+  @Patch(':id')
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Actualizar planificación (Admin only)' })
+  @ApiParam({ name: 'id', description: 'ID de la planificación' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Planificación actualizada exitosamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Planificación no encontrada',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Datos de entrada inválidos',
+  })
+  async updatePlanificacion(
+    @Param('id') id: string,
+    @Body() dto: UpdatePlanificacionDto,
+  ): Promise<PlanificacionDetailResponseDto> {
+    await this.updatePlanificacionUseCase.execute(id, dto);
+    const updated = await this.getPlanificacionByIdUseCase.execute(id);
+    return PlanificacionDetailResponseDto.fromDetail(updated);
+  }
+
+  /**
+   * DELETE /api/planificaciones/:id
+   * Eliminar una planificación permanentemente
+   */
+  @Delete(':id')
+  @Roles(Role.Admin)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Eliminar planificación (Admin only)' })
+  @ApiParam({ name: 'id', description: 'ID de la planificación' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Planificación eliminada exitosamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Planificación no encontrada',
+  })
+  async deletePlanificacion(@Param('id') id: string): Promise<void> {
+    await this.deletePlanificacionUseCase.execute(id);
+  }
+
+  /**
+   * POST /api/planificaciones/:id/actividades
+   * Agregar una nueva actividad a una planificación
+   */
+  @Post(':id/actividades')
+  @Roles(Role.Admin)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Agregar actividad a planificación (Admin only)' })
+  @ApiParam({ name: 'id', description: 'ID de la planificación' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Actividad creada exitosamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Planificación no encontrada',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Datos de entrada inválidos',
+  })
+  async addActividad(
+    @Param('id') planificacionId: string,
+    @Body() dto: CreateActividadDto,
+  ): Promise<ActividadResponseDto> {
+    const actividad = await this.addActividadToPlanificacionUseCase.execute(planificacionId, dto);
+    return ActividadResponseDto.fromEntity(actividad);
+  }
+
+  /**
+   * PATCH /api/planificaciones/:id/actividades/:actividadId
+   * Actualizar una actividad existente
+   */
+  @Patch(':id/actividades/:actividadId')
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Actualizar actividad (Admin only)' })
+  @ApiParam({ name: 'id', description: 'ID de la planificación' })
+  @ApiParam({ name: 'actividadId', description: 'ID de la actividad' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Actividad actualizada exitosamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Planificación o actividad no encontrada',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Datos de entrada inválidos',
+  })
+  async updateActividad(
+    @Param('id') planificacionId: string,
+    @Param('actividadId') actividadId: string,
+    @Body() dto: UpdateActividadDto,
+  ): Promise<ActividadResponseDto> {
+    const actividad = await this.updateActividadUseCase.execute(planificacionId, actividadId, dto);
+    return ActividadResponseDto.fromEntity(actividad);
+  }
+
+  /**
+   * DELETE /api/planificaciones/:id/actividades/:actividadId
+   * Eliminar una actividad
+   */
+  @Delete(':id/actividades/:actividadId')
+  @Roles(Role.Admin)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Eliminar actividad (Admin only)' })
+  @ApiParam({ name: 'id', description: 'ID de la planificación' })
+  @ApiParam({ name: 'actividadId', description: 'ID de la actividad' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Actividad eliminada exitosamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Planificación o actividad no encontrada',
+  })
+  async deleteActividad(
+    @Param('id') planificacionId: string,
+    @Param('actividadId') actividadId: string,
+  ): Promise<void> {
+    await this.deleteActividadUseCase.execute(planificacionId, actividadId);
   }
 }
