@@ -8,6 +8,7 @@ import { NotificacionesService } from '../../notificaciones/notificaciones.servi
 describe('ClasesManagementService', () => {
   let service: ClasesManagementService;
   let prisma: PrismaService;
+  let cacheManager: any;
 
   const mockRuta = {
     id: 'ruta-1',
@@ -95,6 +96,7 @@ describe('ClasesManagementService', () => {
 
     service = module.get<ClasesManagementService>(ClasesManagementService);
     prisma = module.get<PrismaService>(PrismaService);
+    cacheManager = module.get(CACHE_MANAGER);
   });
 
   it('should be defined', () => {
@@ -403,6 +405,52 @@ describe('ClasesManagementService', () => {
 
       // Assert
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('obtenerRutaCurricularPorId', () => {
+    it('should return ruta curricular and cache it when not cached', async () => {
+      jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(null);
+      jest
+        .spyOn(prisma.rutaCurricular, 'findUnique')
+        .mockResolvedValue(mockRuta as any);
+
+      const setSpy = jest
+        .spyOn(cacheManager, 'set')
+        .mockResolvedValueOnce(undefined);
+
+      const result = await service.obtenerRutaCurricularPorId('ruta-1');
+
+      expect(result).toEqual(mockRuta);
+      expect(prisma.rutaCurricular.findUnique).toHaveBeenCalledWith({
+        where: { id: 'ruta-1' },
+      });
+      expect(setSpy).toHaveBeenCalledWith(
+        'ruta_curricular_ruta-1',
+        mockRuta,
+        600000,
+      );
+    });
+
+    it('should return cached ruta curricular when available', async () => {
+      jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(mockRuta);
+
+      const result = await service.obtenerRutaCurricularPorId('ruta-1');
+
+      expect(result).toEqual(mockRuta);
+      expect(prisma.rutaCurricular.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when ruta does not exist', async () => {
+      jest.spyOn(cacheManager, 'get').mockResolvedValueOnce(null);
+      jest.spyOn(prisma.rutaCurricular, 'findUnique').mockResolvedValue(null);
+
+      const promise = service.obtenerRutaCurricularPorId('desconocida');
+
+      await expect(promise).rejects.toThrow(NotFoundException);
+      await expect(promise).rejects.toThrow(
+        'Ruta curricular con ID desconocida no encontrada',
+      );
     });
   });
 

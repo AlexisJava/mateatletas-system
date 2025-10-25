@@ -69,6 +69,8 @@ export class ClasesController {
     @Param('id') id: string,
     @Req() req: RequestWithAuthUser,
   ) {
+    // 📌 Decisión 2025-01: mantenemos PATCH /clases/:id/cancelar como endpoint oficial
+    // para que admin y docentes puedan cancelar sin eliminar el registro.
     const userId = req.user.id;
     const userRole = req.user.role || req.user.roles[0];
     return this.clasesService.cancelarClase(id, userId, userRole);
@@ -108,6 +110,17 @@ export class ClasesController {
   async listarClasesParaTutor(@Req() req: RequestWithAuthUser) {
     const tutorId = req.user.id;
     return this.clasesService.listarClasesParaTutor(tutorId);
+  }
+
+  /**
+   * Listar reservas del tutor autenticado
+   * GET /api/clases/mis-reservas
+   */
+  @Get('mis-reservas')
+  @Roles(Role.Tutor)
+  async listarReservasDelTutor(@Req() req: RequestWithAuthUser) {
+    const tutorId = req.user.id;
+    return this.clasesService.listarReservasDeTutor(tutorId);
   }
 
   /**
@@ -226,5 +239,15 @@ export class ClasesController {
   @Roles(Role.Admin, Role.Docente, Role.Tutor)
   async listarRutasCurriculares() {
     return this.clasesService.listarRutasCurriculares();
+  }
+
+  /**
+   * Obtener una ruta curricular por ID
+   * GET /api/clases/metadata/rutas-curriculares/:id
+   */
+  @Get('metadata/rutas-curriculares/:id')
+  @Roles(Role.Admin, Role.Docente, Role.Tutor)
+  async obtenerRutaCurricular(@Param('id') id: string) {
+    return this.clasesService.obtenerRutaCurricularPorId(id);
   }
 }
