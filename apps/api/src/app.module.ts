@@ -21,6 +21,7 @@ import { NotificacionesModule } from './notificaciones/notificaciones.module';
 import { EventosModule } from './eventos/eventos.module';
 import { HealthModule } from './health/health.module';
 import { PlanificacionesModuleV2 } from './planificaciones/planificaciones.module.v2';
+import { PlanificacionesSimplesModule } from './planificaciones-simples/planificaciones-simples.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -58,6 +59,7 @@ import { TokenBlacklistGuard } from './auth/guards/token-blacklist.guard';
     NotificacionesModule, // Sistema de notificaciones para docentes
     EventosModule, // Sistema de calendario y eventos para docentes
     PlanificacionesModuleV2, // Sistema de planificaciones mensuales inmersivas (Clean Architecture)
+    PlanificacionesSimplesModule, // Sistema de planificaciones simplificado (Convention over Configuration)
     HealthModule, // Health checks para monitoreo del sistema
   ],
   controllers: [AppController],
