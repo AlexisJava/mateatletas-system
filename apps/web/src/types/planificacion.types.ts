@@ -35,14 +35,21 @@ export interface PaginationOptions {
  */
 export interface PlanificacionListItem {
   id: string;
-  titulo: string;
-  codigo_grupo: CodigoGrupo;
+  grupoId: string; // UUID o CUID del grupo
   mes: number;
   anio: number;
-  estado: EstadoPlanificacion;
-  total_actividades: number;
+  titulo: string;
+  descripcion: string;
+  tematicaPrincipal: string;
+  objetivosAprendizaje: string[];
+  estado: string; // 'BORRADOR' | 'PUBLICADA' | 'ARCHIVADA'
+  createdByAdminId: string;
+  notasDocentes: string | null;
+  fechaPublicacion: string | null;
   createdAt: string; // ISO string
   updatedAt: string; // ISO string
+  activityCount: number;
+  assignmentCount: number;
 }
 
 /**
@@ -53,7 +60,7 @@ export interface PlanificacionListResponse {
   total: number;
   page: number;
   limit: number;
-  total_pages: number;
+  totalPages: number; // camelCase como devuelve el backend
 }
 
 /**
