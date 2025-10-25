@@ -12,10 +12,28 @@ interface PlanificacionesTableProps {
   onViewDetails: (id: string) => void;
 }
 
-const ESTADO_COLORS: Record<EstadoPlanificacion, { bg: string; text: string; border: string; icon: string }> = {
-  borrador: { bg: 'bg-yellow-500/20', text: 'text-yellow-300', border: 'border-yellow-400/30', icon: '📝' },
-  publicada: { bg: 'bg-green-500/20', text: 'text-green-300', border: 'border-green-400/30', icon: '✅' },
-  archivada: { bg: 'bg-gray-500/20', text: 'text-gray-300', border: 'border-gray-400/30', icon: '📦' },
+const ESTADO_COLORS: Record<EstadoPlanificacion, { bg: string; text: string; border: string; icon: string; label: string }> = {
+  BORRADOR: {
+    bg: 'bg-yellow-500/20',
+    text: 'text-yellow-300',
+    border: 'border-yellow-400/30',
+    icon: '📝',
+    label: 'Borrador',
+  },
+  PUBLICADA: {
+    bg: 'bg-green-500/20',
+    text: 'text-green-300',
+    border: 'border-green-400/30',
+    icon: '✅',
+    label: 'Publicada',
+  },
+  ARCHIVADA: {
+    bg: 'bg-gray-500/20',
+    text: 'text-gray-300',
+    border: 'border-gray-400/30',
+    icon: '📦',
+    label: 'Archivada',
+  },
 };
 
 const GRUPO_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -106,8 +124,9 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
             <tbody>
               {planificaciones?.map((planificacion, index) => {
                 // Obtener color del grupo basado en el código
-                const grupoColor = GRUPO_COLORS[planificacion.grupo?.codigo] || GRUPO_COLORS.B1;
-                const estadoColor = ESTADO_COLORS[planificacion.estado.toLowerCase() as EstadoPlanificacion] || ESTADO_COLORS.borrador;
+                const grupoColor =
+                  GRUPO_COLORS[planificacion.grupo?.codigo || planificacion.codigo_grupo] || GRUPO_COLORS.B1;
+                const estadoColor = ESTADO_COLORS[planificacion.estado] || ESTADO_COLORS.BORRADOR;
 
                 return (
                   <tr
@@ -117,7 +136,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-3 py-1.5 text-sm font-black rounded-full ${grupoColor.bg} ${grupoColor.text} border ${grupoColor.border}`}>
-                        {planificacion.grupo?.codigo || 'N/A'}
+                        {planificacion.grupo?.codigo || planificacion.codigo_grupo || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -136,16 +155,16 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full ${estadoColor.bg} ${estadoColor.text} border ${estadoColor.border}`}>
                         <span>{estadoColor.icon}</span>
-                        <span>{planificacion.estado.charAt(0).toUpperCase() + planificacion.estado.slice(1)}</span>
+                        <span>{estadoColor.label}</span>
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl font-black text-white">
-                          {planificacion.activityCount}
+                          {planificacion.total_actividades}
                         </span>
                         <span className="text-xs text-white/40 font-medium">
-                          {planificacion.activityCount === 1 ? 'actividad' : 'actividades'}
+                          {planificacion.total_actividades === 1 ? 'actividad' : 'actividades'}
                         </span>
                       </div>
                     </td>
@@ -168,8 +187,9 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
         {/* Mobile Cards */}
         <div className="md:hidden divide-y divide-white/5">
           {planificaciones?.map((planificacion, index) => {
-            const grupoColor = GRUPO_COLORS[planificacion.grupo?.codigo] || GRUPO_COLORS.B1;
-            const estadoColor = ESTADO_COLORS[planificacion.estado.toLowerCase() as EstadoPlanificacion] || ESTADO_COLORS.borrador;
+            const grupoColor =
+              GRUPO_COLORS[planificacion.grupo?.codigo || planificacion.codigo_grupo] || GRUPO_COLORS.B1;
+            const estadoColor = ESTADO_COLORS[planificacion.estado] || ESTADO_COLORS.BORRADOR;
 
             return (
               <div
@@ -179,11 +199,11 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
               >
                 <div className="flex justify-between items-start mb-3">
                   <span className={`inline-flex items-center px-3 py-1.5 text-xs font-black rounded-full ${grupoColor.bg} ${grupoColor.text} border ${grupoColor.border}`}>
-                    {planificacion.grupo?.codigo || 'N/A'}
+                    {planificacion.grupo?.codigo || planificacion.codigo_grupo || 'N/A'}
                   </span>
                   <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full ${estadoColor.bg} ${estadoColor.text} border ${estadoColor.border}`}>
                     <span>{estadoColor.icon}</span>
-                    <span>{planificacion.estado.charAt(0).toUpperCase() + planificacion.estado.slice(1)}</span>
+                    <span>{estadoColor.label}</span>
                   </span>
                 </div>
 
@@ -201,7 +221,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
                   <div className="flex justify-between text-sm">
                     <span className="text-white/60 font-medium">Actividades:</span>
                     <span className="text-white font-bold">
-                      {planificacion.activityCount}
+                      {planificacion.total_actividades}
                     </span>
                   </div>
                 </div>

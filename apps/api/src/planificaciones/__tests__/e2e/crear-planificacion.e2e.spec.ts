@@ -15,8 +15,11 @@ import request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { PrismaService } from '../../../core/database/prisma.service';
-import { PlanificacionesModuleV2 } from '../../planificaciones.module.v2';
+import { PlanificacionesModule } from '../../planificaciones.module';
 import { EstadoPlanificacion } from '@prisma/client';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../auth/guards/roles.guard';
+import { Role } from '../../../auth/decorators/roles.decorator';
 
 describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
   let app: INestApplication;
@@ -27,8 +30,23 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [PlanificacionesModuleV2],
-    }).compile();
+      imports: [PlanificacionesModule],
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: (context: any) => {
+          const req = context.switchToHttp().getRequest();
+          req.user = {
+            id: 'test-admin-user',
+            email: 'admin@test.com',
+            roles: [Role.Admin],
+          };
+          return true;
+        },
+      })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     app = moduleFixture.createNestApplication();
 
@@ -109,15 +127,16 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
 
       // Verificar estructura de respuesta
       expect(response.body).toHaveProperty('id');
-      expect(response.body.grupo_id).toBe(grupoB1Id);
+      expect(response.body.grupoId).toBe(grupoB1Id);
       expect(response.body.mes).toBe(12);
       expect(response.body.anio).toBe(2025);
       expect(response.body.titulo).toBe('TEST - Multiplicaciones Diciembre 2025');
       expect(response.body.estado).toBe(EstadoPlanificacion.BORRADOR);
-      expect(response.body.objetivos_aprendizaje).toEqual([
+      expect(response.body.objetivosAprendizaje).toEqual([
         'Dominar tablas del 1 al 10',
         'Resolver problemas de multiplicación',
       ]);
+      expect(response.body.actividades).toEqual([]);
 
       // Verificar en BD
       const planificacionEnBD = await prisma.planificacionMensual.findUnique({
@@ -143,10 +162,10 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
         .send(payload)
         .expect(201);
 
-      expect(response.body.grupo_id).toBe(grupoB2Id);
+      expect(response.body.grupoId).toBe(grupoB2Id);
       expect(response.body.descripcion).toBe('');
-      expect(response.body.notas_docentes).toBeNull();
-      expect(response.body.objetivos_aprendizaje).toEqual([]);
+      expect(response.body.notasDocentes).toBeNull();
+      expect(response.body.objetivosAprendizaje).toEqual([]);
     });
   });
 

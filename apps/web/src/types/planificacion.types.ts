@@ -3,9 +3,9 @@
  */
 
 /**
- * Estado de una planificación
+ * Estado de una planificación según enums del backend
  */
-export type EstadoPlanificacion = 'borrador' | 'publicada' | 'archivada';
+export type EstadoPlanificacion = 'BORRADOR' | 'PUBLICADA' | 'ARCHIVADA';
 
 /**
  * Código de grupo válido
@@ -31,30 +31,30 @@ export interface PaginationOptions {
 }
 
 /**
- * Item de planificación en la lista
+ * Item de planificación en la lista (estructura normalizada para el frontend)
  */
 export interface PlanificacionListItem {
   id: string;
-  grupoId: string; // UUID o CUID del grupo
-  grupo: {
+  grupo_id: string; // UUID o CUID del grupo
+  codigo_grupo: CodigoGrupo;
+  grupo?: {
     id: string;
     codigo: string;
     nombre: string;
-  };
+  } | null;
   mes: number;
   anio: number;
   titulo: string;
-  descripcion: string;
-  tematicaPrincipal: string;
-  objetivosAprendizaje: string[];
-  estado: string; // 'BORRADOR' | 'PUBLICADA' | 'ARCHIVADA'
-  createdByAdminId: string;
-  notasDocentes: string | null;
-  fechaPublicacion: string | null;
-  createdAt: string; // ISO string
-  updatedAt: string; // ISO string
-  activityCount: number;
-  assignmentCount: number;
+  descripcion: string | null;
+  tematica_principal: string;
+  objetivos_aprendizaje: string[];
+  estado: EstadoPlanificacion;
+  notas_docentes: string | null;
+  fecha_publicacion: string | null;
+  created_at: string; // ISO string
+  updated_at: string; // ISO string
+  total_actividades: number;
+  total_asignaciones: number;
 }
 
 /**
@@ -65,18 +65,21 @@ export interface PlanificacionListResponse {
   total: number;
   page: number;
   limit: number;
-  totalPages: number; // camelCase como devuelve el backend
+  totalPages: number; // camelCase para consumo en UI
 }
 
 /**
  * Request para crear una planificación
  */
 export interface CreatePlanificacionRequest {
-  titulo?: string; // Opcional, se genera auto si no se provee
-  codigo_grupo: CodigoGrupo;
+  grupo_id: string;
   mes: number; // 1-12
   anio: number;
+  titulo: string;
   descripcion?: string;
+  tematica_principal: string;
+  objetivos_aprendizaje?: string[];
+  notas_docentes?: string;
 }
 
 /**
@@ -85,7 +88,11 @@ export interface CreatePlanificacionRequest {
 export interface UpdatePlanificacionRequest {
   titulo?: string;
   descripcion?: string;
+  tematica_principal?: string;
+  objetivos_aprendizaje?: string[];
+  notas_docentes?: string;
   estado?: EstadoPlanificacion;
+  fecha_publicacion?: string | null;
 }
 
 /**
@@ -104,8 +111,8 @@ export interface Actividad {
   descripcion: string;
   props: Record<string, unknown>; // JSON con props específicas del componente
   orden: number;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 /**
@@ -123,6 +130,5 @@ export interface CreateActividadRequest {
  * Planificación completa con actividades
  */
 export interface PlanificacionDetalle extends PlanificacionListItem {
-  descripcion?: string;
   actividades: Actividad[];
 }
