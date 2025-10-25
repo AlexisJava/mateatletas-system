@@ -7,7 +7,7 @@ import { z } from 'zod';
 export const estadoMembresiaSchema = z.enum([
   'Pendiente',
   'Activa',
-  'Vencida',
+  'Atrasada',
   'Cancelada',
 ]);
 
@@ -32,8 +32,8 @@ export const membresiaSchema = z.object({
   producto_id: z.string(),
   estado: estadoMembresiaSchema,
   fecha_inicio: z.string().nullable(),
-  fecha_vencimiento: z.string().nullable(),
-  pago_id: z.string(),
+  fecha_proximo_pago: z.string().nullable(),
+  preferencia_id: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 

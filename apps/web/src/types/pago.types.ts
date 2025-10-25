@@ -10,7 +10,7 @@ import { Producto } from './catalogo.types';
 export enum EstadoMembresia {
   Pendiente = 'Pendiente',
   Activa = 'Activa',
-  Vencida = 'Vencida',
+  Atrasada = 'Atrasada',
   Cancelada = 'Cancelada',
 }
 
@@ -19,8 +19,8 @@ export enum EstadoMembresia {
  */
 export enum EstadoInscripcion {
   PreInscrito = 'PreInscrito',
-  Inscrito = 'Inscrito',
-  Cancelado = 'Cancelado',
+  Activo = 'Activo',
+  Finalizado = 'Finalizado',
 }
 
 /**
@@ -32,8 +32,8 @@ export interface Membresia {
   producto_id: string;
   estado: EstadoMembresia;
   fecha_inicio: string | null;
-  fecha_vencimiento: string | null;
-  pago_id: string;
+  fecha_proximo_pago: string | null;
+  preferencia_id: string | null;
   createdAt: string;
   updatedAt: string;
   producto?: Producto;
@@ -48,7 +48,7 @@ export interface InscripcionCurso {
   producto_id: string;
   estado: EstadoInscripcion;
   fecha_inscripcion: string | null;
-  pago_id: string;
+  preferencia_id: string | null;
   createdAt: string;
   updatedAt: string;
   producto?: Producto;
