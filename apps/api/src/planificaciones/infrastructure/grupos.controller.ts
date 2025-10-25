@@ -1,4 +1,18 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpStatus, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  HttpStatus,
+  HttpCode,
+  ConflictException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
 import { PrismaService } from '../../core/database/prisma.service';
 import { IsString, IsOptional, IsInt, IsBoolean, Min, Max } from 'class-validator';
@@ -155,13 +169,21 @@ export class GruposController {
     description: 'Ya existe un grupo con ese código',
   })
   async createGrupo(@Body() dto: CreateGrupoDto) {
+    if (
+      dto.edad_minima !== undefined &&
+      dto.edad_maxima !== undefined &&
+      dto.edad_minima > dto.edad_maxima
+    ) {
+      throw new BadRequestException('La edad mínima no puede ser mayor que la edad máxima');
+    }
+
     // Verificar si ya existe un grupo con el mismo código
     const existente = await this.prisma.grupo.findUnique({
       where: { codigo: dto.codigo },
     });
 
     if (existente) {
-      throw new Error(`Ya existe un grupo con el código "${dto.codigo}"`);
+      throw new ConflictException(`Ya existe un grupo con el código "${dto.codigo}"`);
     }
 
     const grupo = await this.prisma.grupo.create({
@@ -202,7 +224,7 @@ export class GruposController {
     });
 
     if (!existente) {
-      throw new Error(`Grupo con ID "${id}" no encontrado`);
+      throw new NotFoundException(`Grupo con ID "${id}" no encontrado`);
     }
 
     // Si se está cambiando el código, verificar que no exista otro grupo con ese código
@@ -212,8 +234,15 @@ export class GruposController {
       });
 
       if (otroGrupo) {
-        throw new Error(`Ya existe otro grupo con el código "${dto.codigo}"`);
+        throw new ConflictException(`Ya existe otro grupo con el código "${dto.codigo}"`);
       }
+    }
+
+    const edadMinima = dto.edad_minima ?? existente.edad_minima ?? undefined;
+    const edadMaxima = dto.edad_maxima ?? existente.edad_maxima ?? undefined;
+
+    if (edadMinima !== undefined && edadMaxima !== undefined && edadMinima > edadMaxima) {
+      throw new BadRequestException('La edad mínima no puede ser mayor que la edad máxima');
     }
 
     const grupo = await this.prisma.grupo.update({
@@ -247,7 +276,7 @@ export class GruposController {
     });
 
     if (!existente) {
-      throw new Error(`Grupo con ID "${id}" no encontrado`);
+      throw new NotFoundException(`Grupo con ID "${id}" no encontrado`);
     }
 
     // Soft delete: marcar como inactivo en vez de eliminar
@@ -281,7 +310,7 @@ export class GruposController {
     });
 
     if (!grupo) {
-      throw new Error(`Grupo con ID "${id}" no encontrado`);
+      throw new NotFoundException(`Grupo con ID "${id}" no encontrado`);
     }
 
     const where: { grupo_id: string; anio?: number } = {
@@ -289,7 +318,13 @@ export class GruposController {
     };
 
     if (anio) {
-      where.anio = parseInt(anio, 10);
+      const parsedYear = parseInt(anio, 10);
+
+      if (Number.isNaN(parsedYear)) {
+        throw new BadRequestException('El parámetro "anio" debe ser un número válido');
+      }
+
+      where.anio = parsedYear;
     }
 
     const planificaciones = await this.prisma.planificacionMensual.findMany({
