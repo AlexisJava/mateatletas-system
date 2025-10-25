@@ -281,4 +281,187 @@ export class PlanificacionesSimplesService {
 
     return { success: true, tiempo_total: progreso.tiempo_total_minutos };
   }
+
+  // ============================================================================
+  // MÉTODOS ADMIN
+  // ============================================================================
+
+  /**
+   * Obtener todas las planificaciones detectadas (Admin)
+   */
+  async listarPlanificaciones(filtros?: {
+    estado?: string;
+    grupo_codigo?: string;
+    mes?: number;
+    anio?: number;
+  }) {
+    const where: any = {};
+
+    if (filtros?.estado) {
+      where.estado = filtros.estado;
+    }
+    if (filtros?.grupo_codigo) {
+      where.grupo_codigo = filtros.grupo_codigo;
+    }
+    if (filtros?.mes) {
+      where.mes = filtros.mes;
+    }
+    if (filtros?.anio) {
+      where.anio = filtros.anio;
+    }
+
+    const planificaciones = await this.prisma.planificacionSimple.findMany({
+      where,
+      include: {
+        asignaciones: {
+          include: {
+            docente: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                email: true,
+              },
+            },
+            claseGrupo: {
+              select: {
+                id: true,
+                nombre: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            progresosEstudiantes: true,
+          },
+        },
+      },
+      orderBy: [
+        { anio: 'desc' },
+        { mes: 'desc' },
+        { grupo_codigo: 'asc' },
+      ],
+    });
+
+    return planificaciones;
+  }
+
+  /**
+   * Asignar planificación a docente y grupo (Admin)
+   */
+  async asignarPlanificacion(
+    codigoPlanificacion: string,
+    docenteId: string,
+    claseGrupoId: string,
+  ) {
+    // 1. Verificar que existe la planificación
+    const planificacion = await this.prisma.planificacionSimple.findUnique({
+      where: { codigo: codigoPlanificacion },
+    });
+
+    if (!planificacion) {
+      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+    }
+
+    // 2. Verificar que existe el docente
+    const docente = await this.prisma.docente.findUnique({
+      where: { id: docenteId },
+    });
+
+    if (!docente) {
+      throw new NotFoundException(`Docente ${docenteId} no encontrado`);
+    }
+
+    // 3. Verificar que existe el claseGrupo
+    const claseGrupo = await this.prisma.claseGrupo.findUnique({
+      where: { id: claseGrupoId },
+    });
+
+    if (!claseGrupo) {
+      throw new NotFoundException(`Clase grupo ${claseGrupoId} no encontrado`);
+    }
+
+    // 4. Crear asignación
+    const asignacion = await this.prisma.asignacionPlanificacion.create({
+      data: {
+        planificacion_id: planificacion.id,
+        docente_id: docenteId,
+        clase_grupo_id: claseGrupoId,
+        activa: true,
+      },
+      include: {
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+        claseGrupo: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
+      },
+    });
+
+    // 5. Actualizar estado de la planificación a ASIGNADA
+    await this.prisma.planificacionSimple.update({
+      where: { id: planificacion.id },
+      data: { estado: 'ASIGNADA' },
+    });
+
+    return asignacion;
+  }
+
+  /**
+   * Obtener detalles de una planificación (Admin)
+   */
+  async obtenerDetallePlanificacion(codigoPlanificacion: string) {
+    const planificacion = await this.prisma.planificacionSimple.findUnique({
+      where: { codigo: codigoPlanificacion },
+      include: {
+        asignaciones: {
+          include: {
+            docente: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                email: true,
+              },
+            },
+            claseGrupo: {
+              select: {
+                id: true,
+                nombre: true,
+              },
+            },
+            semanasActivas: true,
+          },
+        },
+        progresosEstudiantes: {
+          include: {
+            estudiante: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!planificacion) {
+      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+    }
+
+    return planificacion;
+  }
 }
