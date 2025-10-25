@@ -6,6 +6,7 @@ import axios from '@/lib/axios';
 import { DashboardData, AdminUser, ChangeRoleDto, UpdateRolesDto, SystemStats } from '@/types/admin.types';
 import type { ClaseListado } from '@/types/admin-clases.types';
 import type { Producto } from '@/types/catalogo.types';
+import type { CrearProductoDto } from './catalogo.api';
 import { z } from 'zod';
 
 // Schemas Zod para validación runtime
@@ -18,27 +19,25 @@ import { docentesListSchema } from '@/lib/schemas/docente.schema';
 import { rutasListSchema } from '@/lib/schemas/ruta.schema';
 import { sectoresListSchema } from '@/lib/schemas/sector.schema';
 import { productoSchema, productosListSchema } from '@/lib/schemas/producto.schema';
-import type { Producto } from '@/types/catalogo.types';
-import type { CrearProductoDto } from './catalogo.api';
 
 export const getDashboard = async (): Promise<DashboardData> => {
-  return axios.get('/admin/dashboard') as Promise<DashboardData>;
+  return axios.get<DashboardData>('/admin/dashboard');
 };
 
 export const getSystemStats = async (): Promise<SystemStats> => {
-  return axios.get('/admin/estadisticas') as Promise<SystemStats>;
+  return axios.get<SystemStats>('/admin/estadisticas');
 };
 
 export const getAllUsers = async (): Promise<AdminUser[]> => {
-  return axios.get('/admin/usuarios') as Promise<AdminUser[]>;
+  return axios.get<AdminUser[]>('/admin/usuarios');
 };
 
 export const changeUserRole = async (userId: string, data: ChangeRoleDto): Promise<AdminUser> => {
-  return axios.post(`/admin/usuarios/${userId}/role`, data) as Promise<AdminUser>;
+  return axios.post<AdminUser>(`/admin/usuarios/${userId}/role`, data);
 };
 
 export const updateUserRoles = async (userId: string, data: UpdateRolesDto): Promise<{ message: string; userId: string; roles: string[] }> => {
-  return axios.put(`/admin/usuarios/${userId}/roles`, data) as Promise<{ message: string; userId: string; roles: string[] }>;
+  return axios.put<{ message: string; userId: string; roles: string[] }>(`/admin/usuarios/${userId}/roles`, data);
 };
 
 export const deleteUser = async (userId: string): Promise<void> => {
@@ -71,10 +70,6 @@ export const createClass = async (data: {
   productoId?: string;
 }) => {
   return axios.post('/clases', data);
-};
-
-export const cancelClass = async (claseId: string) => {
-  return axios.patch(`/clases/${claseId}/cancelar`);
 };
 
 export const cancelarClase = async (claseId: string) => {
@@ -113,7 +108,7 @@ export const getAllProducts = async (includeInactive = true): Promise<Producto[]
   return productosListSchema.parse(response);
 };
 
-export const getProductById = async (id: string): Promise<Produto> => {
+export const getProductById = async (id: string): Promise<Producto> => {
   const response = await axios.get(`/productos/${id}`);
   return productoSchema.parse(response);
 };
