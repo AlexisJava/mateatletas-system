@@ -21,6 +21,9 @@ import { EstadoPlanificacion } from '@prisma/client';
 describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let grupoB1Id: string;
+  let grupoB2Id: string;
+  let grupoB3Id: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -44,6 +47,19 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
     await app.init();
 
     prisma = moduleFixture.get<PrismaService>(PrismaService);
+
+    // Obtener IDs de grupos pedagógicos
+    const grupoB1 = await prisma.grupo.findUnique({ where: { codigo: 'B1' } });
+    const grupoB2 = await prisma.grupo.findUnique({ where: { codigo: 'B2' } });
+    const grupoB3 = await prisma.grupo.findUnique({ where: { codigo: 'B3' } });
+
+    if (!grupoB1 || !grupoB2 || !grupoB3) {
+      throw new Error('Grupos B1, B2, B3 no encontrados. Ejecutar migración primero.');
+    }
+
+    grupoB1Id = grupoB1.id;
+    grupoB2Id = grupoB2.id;
+    grupoB3Id = grupoB3.id;
   });
 
   afterAll(async () => {
@@ -73,7 +89,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
   describe('✅ Casos exitosos', () => {
     it('debe crear una planificación con datos válidos', async () => {
       const payload = {
-        codigo_grupo: 'B1',
+        grupo_id: grupoB1Id,
         mes: 12,
         anio: 2025,
         titulo: 'TEST - Multiplicaciones Diciembre 2025',
@@ -93,7 +109,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
 
       // Verificar estructura de respuesta
       expect(response.body).toHaveProperty('id');
-      expect(response.body.codigo_grupo).toBe('B1');
+      expect(response.body.grupo_id).toBe(grupoB1Id);
       expect(response.body.mes).toBe(12);
       expect(response.body.anio).toBe(2025);
       expect(response.body.titulo).toBe('TEST - Multiplicaciones Diciembre 2025');
@@ -109,13 +125,13 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
       });
 
       expect(planificacionEnBD).toBeDefined();
-      expect(planificacionEnBD?.codigo_grupo).toBe('B1');
+      expect(planificacionEnBD?.grupo_id).toBe(grupoB1Id);
       expect(planificacionEnBD?.estado).toBe(EstadoPlanificacion.BORRADOR);
     });
 
     it('debe crear planificación sin campos opcionales', async () => {
       const payload = {
-        codigo_grupo: 'B2',
+        grupo_id: grupoB2Id,
         mes: 3,
         anio: 2025,
         titulo: 'TEST - Marzo 2025 B2',
@@ -127,7 +143,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
         .send(payload)
         .expect(201);
 
-      expect(response.body.codigo_grupo).toBe('B2');
+      expect(response.body.grupo_id).toBe(grupoB2Id);
       expect(response.body.descripcion).toBe('');
       expect(response.body.notas_docentes).toBeNull();
       expect(response.body.objetivos_aprendizaje).toEqual([]);
@@ -138,7 +154,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
     it('debe rechazar planificación duplicada (mismo grupo+mes+año)', async () => {
       // Crear primera planificación
       const payload = {
-        codigo_grupo: 'B1',
+        grupo_id: grupoB1Id,
         mes: 6,
         anio: 2025,
         titulo: 'TEST - Junio 2025 B1',
@@ -157,7 +173,6 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
         .expect(409);
 
       expect(response.body.message).toContain('Ya existe una planificación');
-      expect(response.body.message).toContain('B1');
       expect(response.body.message).toContain('Junio');
       expect(response.body.message).toContain('2025');
     });
@@ -173,19 +188,19 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
       // Crear para B1
       await request(app.getHttpServer())
         .post('/api/planificaciones')
-        .send({ ...basePayload, codigo_grupo: 'B1' })
+        .send({ ...basePayload, grupo_id: grupoB1Id })
         .expect(201);
 
       // Crear para B2 (debe ser exitoso)
       await request(app.getHttpServer())
         .post('/api/planificaciones')
-        .send({ ...basePayload, codigo_grupo: 'B2' })
+        .send({ ...basePayload, grupo_id: grupoB2Id })
         .expect(201);
 
       // Crear para B3 (debe ser exitoso)
       await request(app.getHttpServer())
         .post('/api/planificaciones')
-        .send({ ...basePayload, codigo_grupo: 'B3' })
+        .send({ ...basePayload, grupo_id: grupoB3Id })
         .expect(201);
     });
   });
@@ -193,7 +208,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
   describe('❌ Validaciones de entrada', () => {
     it('debe rechazar mes inválido (menor a 1)', async () => {
       const payload = {
-        codigo_grupo: 'B1',
+        grupo_id: grupoB1Id,
         mes: 0,
         anio: 2025,
         titulo: 'TEST - Mes inválido',
@@ -216,7 +231,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
 
     it('debe rechazar mes inválido (mayor a 12)', async () => {
       const payload = {
-        codigo_grupo: 'B1',
+        grupo_id: grupoB1Id,
         mes: 13,
         anio: 2025,
         titulo: 'TEST - Mes inválido',
@@ -237,7 +252,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
 
     it('debe rechazar año inválido (muy antiguo)', async () => {
       const payload = {
-        codigo_grupo: 'B1',
+        grupo_id: grupoB1Id,
         mes: 5,
         anio: 2019,
         titulo: 'TEST - Año inválido',
@@ -257,9 +272,9 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
       );
     });
 
-    it('debe rechazar código de grupo inválido', async () => {
+    it('debe rechazar grupo_id inválido (no es UUID)', async () => {
       const payload = {
-        codigo_grupo: 'INVALID',
+        grupo_id: 'INVALID-NOT-UUID',
         mes: 5,
         anio: 2025,
         titulo: 'TEST - Grupo inválido',
@@ -273,14 +288,15 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
 
       expect(response.body.message).toEqual(
         expect.arrayContaining([
-          expect.stringContaining('codigo_grupo'),
+          expect.stringContaining('grupo_id'),
+          expect.stringContaining('UUID'),
         ]),
       );
     });
 
     it('debe rechazar título vacío', async () => {
       const payload = {
-        codigo_grupo: 'B1',
+        grupo_id: grupoB1Id,
         mes: 5,
         anio: 2025,
         titulo: '',
@@ -301,7 +317,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
 
     it('debe rechazar temática principal vacía', async () => {
       const payload = {
-        codigo_grupo: 'B1',
+        grupo_id: grupoB1Id,
         mes: 5,
         anio: 2025,
         titulo: 'TEST - Sin temática',
@@ -324,7 +340,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
       const payload = {
         mes: 5,
         anio: 2025,
-        // Falta: codigo_grupo, titulo, tematica_principal
+        // Falta: grupo_id, titulo, tematica_principal
       };
 
       const response = await request(app.getHttpServer())
@@ -334,7 +350,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
 
       expect(response.body.message).toEqual(
         expect.arrayContaining([
-          expect.stringContaining('codigo_grupo'),
+          expect.stringContaining('grupo_id'),
           expect.stringContaining('titulo'),
           expect.stringContaining('tematica_principal'),
         ]),
