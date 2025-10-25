@@ -4,7 +4,7 @@
  * Sistema de planificaciones auto-detectables con Convention over Configuration
  */
 
-import { apiClient } from './client';
+import apiClient from '../axios';
 
 // ============================================================================
 // TYPES
