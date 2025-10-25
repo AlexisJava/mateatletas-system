@@ -165,9 +165,9 @@ export default function ClaseAulaPage() {
 
   const loadPlanificaciones = async (grupoId: string, anioLectivo: number) => {
     try {
-      const response: any = await axios.get('/admin/planificaciones', {
+      // Buscar planificaciones por grupo_id usando el endpoint de grupos
+      const response: any = await axios.get(`/grupos/${grupoId}/planificaciones`, {
         params: {
-          grupo_id: grupoId,
           anio: anioLectivo,
         }
       });
@@ -176,7 +176,8 @@ export default function ClaseAulaPage() {
       setPlanificaciones(planes);
     } catch (error) {
       console.error('Error cargando planificaciones:', error);
-      // No hacer nada si falla, simplemente no mostrar planificaciones
+      // Si el endpoint no existe aún, simplemente no mostrar plan ificaciones
+      setPlanificaciones([]);
     }
   };
 

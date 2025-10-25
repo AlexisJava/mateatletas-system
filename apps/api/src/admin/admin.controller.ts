@@ -573,7 +573,7 @@ export class AdminController {
   })
   async registrarAsistencias(
     @Param('id') id: string,
-    @Body() body: { fecha: string; asistencias: Array<{ estudiante_id: string; estado: string; observaciones?: string; feedback?: string }> },
+    @Body() body: { fecha: string; asistencias: Array<{ estudiante_id: string; estado: any; observaciones?: string; feedback?: string }> },
   ) {
     return this.asistenciasService.registrarAsistencias(id, body);
   }
@@ -630,7 +630,7 @@ export class AdminController {
   })
   async actualizarAsistencia(
     @Param('id') id: string,
-    @Body() body: { estado?: string; observaciones?: string; feedback?: string },
+    @Body() body: { estado?: any; observaciones?: string; feedback?: string },
   ) {
     return this.asistenciasService.actualizarAsistencia(id, body);
   }
