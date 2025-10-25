@@ -17,18 +17,18 @@ import type {
 // ==================== CREAR EVENTOS ====================
 
 export const crearTarea = async (data: CreateTareaDto): Promise<Evento> => {
-  const response = await apiClient.post('/eventos/tareas', data);
-  return response.data;
+  const payload = await apiClient.post('/eventos/tareas', data);
+  return payload;
 };
 
 export const crearRecordatorio = async (data: CreateRecordatorioDto): Promise<Evento> => {
-  const response = await apiClient.post('/eventos/recordatorios', data);
-  return response.data;
+  const payload = await apiClient.post('/eventos/recordatorios', data);
+  return payload;
 };
 
 export const crearNota = async (data: CreateNotaDto): Promise<Evento> => {
-  const response = await apiClient.post('/eventos/notas', data);
-  return response.data;
+  const payload = await apiClient.post('/eventos/notas', data);
+  return payload;
 };
 
 // ==================== LEER EVENTOS ====================
@@ -41,29 +41,29 @@ export const obtenerEventos = async (filtros?: FiltrosCalendario): Promise<Event
   if (filtros?.tipo) params.append('tipo', filtros.tipo);
   if (filtros?.busqueda) params.append('busqueda', filtros.busqueda);
   
-  const response = await apiClient.get(`/eventos?${params.toString()}`);
-  return response.data;
+  const payload = await apiClient.get(`/eventos?${params.toString()}`);
+  return payload;
 };
 
 export const obtenerEvento = async (id: string): Promise<Evento> => {
-  const response = await apiClient.get(`/eventos/${id}`);
-  return response.data;
+  const payload = await apiClient.get(`/eventos/${id}`);
+  return payload;
 };
 
 export const obtenerVistaAgenda = async (): Promise<VistaAgendaData> => {
-  const response = await apiClient.get('/eventos/vista-agenda');
-  return response.data || response;
+  const payload = await apiClient.get('/eventos/vista-agenda');
+  return payload;
 };
 
 export const obtenerVistaSemana = async (fecha?: string): Promise<Evento[]> => {
   const params = fecha ? `?fecha=${fecha}` : '';
-  const response = await apiClient.get(`/eventos/vista-semana${params}`);
-  return response.data;
+  const payload = await apiClient.get(`/eventos/vista-semana${params}`);
+  return payload;
 };
 
 export const obtenerEstadisticas = async (): Promise<EstadisticasCalendario> => {
-  const response = await apiClient.get('/eventos/estadisticas');
-  return response.data;
+  const payload = await apiClient.get('/eventos/estadisticas');
+  return payload;
 };
 
 // ==================== ACTUALIZAR EVENTOS ====================
@@ -72,24 +72,24 @@ export const actualizarTarea = async (
   id: string,
   data: Partial<CreateTareaDto>
 ): Promise<Evento> => {
-  const response = await apiClient.patch(`/eventos/tareas/${id}`, data);
-  return response.data;
+  const payload = await apiClient.patch(`/eventos/tareas/${id}`, data);
+  return payload;
 };
 
 export const actualizarRecordatorio = async (
   id: string,
   data: Partial<CreateRecordatorioDto>
 ): Promise<Evento> => {
-  const response = await apiClient.patch(`/eventos/recordatorios/${id}`, data);
-  return response.data;
+  const payload = await apiClient.patch(`/eventos/recordatorios/${id}`, data);
+  return payload;
 };
 
 export const actualizarNota = async (
   id: string,
   data: Partial<CreateNotaDto>
 ): Promise<Evento> => {
-  const response = await apiClient.patch(`/eventos/notas/${id}`, data);
-  return response.data;
+  const payload = await apiClient.patch(`/eventos/notas/${id}`, data);
+  return payload;
 };
 
 export const actualizarFechasEvento = async (
@@ -97,11 +97,11 @@ export const actualizarFechasEvento = async (
   fecha_inicio: string,
   fecha_fin: string
 ): Promise<Evento> => {
-  const response = await apiClient.patch(`/eventos/${id}/fechas`, {
+  const payload = await apiClient.patch(`/eventos/${id}/fechas`, {
     fecha_inicio,
     fecha_fin,
   });
-  return response.data;
+  return payload;
 };
 
 // ==================== ELIMINAR EVENTOS ====================

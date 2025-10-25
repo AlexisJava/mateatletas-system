@@ -42,11 +42,11 @@ export const getPlanificaciones = async (
   if (pagination.page) params.append('page', pagination.page.toString());
   if (pagination.limit) params.append('limit', pagination.limit.toString());
 
-  const response = await axios.get<PlanificacionListResponse>(
+  const payload = await axios.get<PlanificacionListResponse>(
     `/planificaciones?${params.toString()}`
   );
 
-  return response.data;
+  return payload;
 };
 
 /**
@@ -54,8 +54,8 @@ export const getPlanificaciones = async (
  * GET /api/planificaciones/:id
  */
 export const getPlanificacionById = async (id: string): Promise<PlanificacionDetalle> => {
-  const response = await axios.get<PlanificacionDetalle>(`/planificaciones/${id}`);
-  return response.data;
+  const payload = await axios.get<PlanificacionDetalle>(`/planificaciones/${id}`);
+  return payload;
 };
 
 /**
@@ -65,8 +65,8 @@ export const getPlanificacionById = async (id: string): Promise<PlanificacionDet
 export const createPlanificacion = async (
   data: CreatePlanificacionRequest
 ): Promise<PlanificacionDetalle> => {
-  const response = await axios.post<PlanificacionDetalle>('/planificaciones', data);
-  return response.data;
+  const payload = await axios.post<PlanificacionDetalle>('/planificaciones', data);
+  return payload;
 };
 
 /**
@@ -77,8 +77,8 @@ export const updatePlanificacion = async (
   id: string,
   data: UpdatePlanificacionRequest
 ): Promise<PlanificacionDetalle> => {
-  const response = await axios.patch<PlanificacionDetalle>(`/planificaciones/${id}`, data);
-  return response.data;
+  const payload = await axios.patch<PlanificacionDetalle>(`/planificaciones/${id}`, data);
+  return payload;
 };
 
 /**
@@ -97,11 +97,11 @@ export const addActividadToPlanificacion = async (
   planificacionId: string,
   data: CreateActividadRequest
 ): Promise<Actividad> => {
-  const response = await axios.post<Actividad>(
+  const payload = await axios.post<Actividad>(
     `/planificaciones/${planificacionId}/actividades`,
     data
   );
-  return response.data;
+  return payload;
 };
 
 /**
@@ -113,11 +113,11 @@ export const updateActividad = async (
   actividadId: string,
   data: Partial<CreateActividadRequest>
 ): Promise<Actividad> => {
-  const response = await axios.patch<Actividad>(
+  const payload = await axios.patch<Actividad>(
     `/planificaciones/${planificacionId}/actividades/${actividadId}`,
     data
   );
-  return response.data;
+  return payload;
 };
 
 /**

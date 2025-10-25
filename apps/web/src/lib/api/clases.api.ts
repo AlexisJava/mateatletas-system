@@ -30,16 +30,16 @@ export const getClases = async (filtros?: FiltroClases): Promise<Clase[]> => {
     params.append('soloDisponibles', String(filtros.soloDisponibles));
   }
 
-  const response = await axios.get(`/clases?${params.toString()}`);
-  return response.data;
+  const payload = await axios.get(`/clases?${params.toString()}`);
+  return payload;
 };
 
 /**
  * Obtener una clase por ID
  */
 export const getClaseById = async (claseId: string): Promise<Clase> => {
-  const response = await axios.get(`/clases/${claseId}`);
-  return response.data;
+  const payload = await axios.get(`/clases/${claseId}`);
+  return payload;
 };
 
 /**
@@ -49,8 +49,8 @@ export const reservarClase = async (
   claseId: string,
   data: CrearReservaDto
 ): Promise<InscripcionClase> => {
-  const response = await axios.post(`/clases/${claseId}/reservar`, data);
-  return response.data;
+  const payload = await axios.post(`/clases/${claseId}/reservar`, data);
+  return payload;
 };
 
 /**
@@ -66,16 +66,16 @@ export const cancelarReserva = async (
  * Obtener mis reservas (como tutor)
  */
 export const getMisReservas = async (): Promise<InscripcionClase[]> => {
-  const response = await axios.get('/clases/mis-reservas');
-  return response.data;
+  const payload = await axios.get('/clases/mis-reservas');
+  return payload;
 };
 
 /**
  * Obtener todas las rutas curriculares
  */
 export const getRutasCurriculares = async (): Promise<RutaCurricular[]> => {
-  const response = await axios.get('/clases/metadata/rutas-curriculares');
-  return response.data;
+  const payload = await axios.get('/clases/metadata/rutas-curriculares');
+  return payload;
 };
 
 /**
@@ -84,8 +84,8 @@ export const getRutasCurriculares = async (): Promise<RutaCurricular[]> => {
 export const getRutaCurricularById = async (
   rutaId: string
 ): Promise<RutaCurricular> => {
-  const response = await axios.get(`/clases/metadata/rutas-curriculares/${rutaId}`);
-  return response.data;
+  const payload = await axios.get(`/clases/metadata/rutas-curriculares/${rutaId}`);
+  return payload;
 };
 
 // ==================== ENDPOINTS DOCENTE ====================
@@ -102,8 +102,8 @@ export const getMisClasesDocente = async (
     params.append('incluirPasadas', 'true');
   }
 
-  const response = await axios.get(`/clases/docente/mis-clases?${params.toString()}`);
-  return response.data;
+  const payload = await axios.get(`/clases/docente/mis-clases?${params.toString()}`);
+  return payload;
 };
 
 /**
