@@ -606,10 +606,10 @@ export class EstudiantesService {
    * @param nuevoSectorId - ID del sector destino
    * @returns Estudiante con sector actualizado
    */
-  async copiarEstudiantePorDNIASector(dni: string, nuevoSectorId: string) {
-    // Buscar estudiante por DNI
+  async copiarEstudiantePorDNIASector(email: string, nuevoSectorId: string) {
+    // Buscar estudiante por email
     const estudiante = await this.prisma.estudiante.findFirst({
-      where: { dni },
+      where: { email },
       include: {
         sector: true,
         tutor: true,
@@ -617,7 +617,7 @@ export class EstudiantesService {
     });
 
     if (!estudiante) {
-      throw new BadRequestException(`No se encontró un estudiante con DNI ${dni}`);
+      throw new BadRequestException(`No se encontró un estudiante con email ${email}`);
     }
 
     // Usar el método de copiar por ID
