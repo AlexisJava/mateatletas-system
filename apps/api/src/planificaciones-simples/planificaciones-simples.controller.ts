@@ -5,6 +5,7 @@ import {
   Post,
   Param,
   Body,
+  Query,
   UseGuards,
   Request,
 } from '@nestjs/common';
@@ -16,7 +17,12 @@ import { PlanificacionesSimplesService } from './planificaciones-simples.service
 /**
  * Controlador para endpoints de planificaciones simples
  *
- * Rutas:
+ * Rutas Admin:
+ * GET    /api/planificaciones - Listar planificaciones
+ * GET    /api/planificaciones/:codigo - Detalle planificación
+ * POST   /api/planificaciones/:codigo/asignar - Asignar a docente
+ *
+ * Rutas Estudiante:
  * GET    /api/planificaciones/:codigo/progreso - Obtener progreso
  * PUT    /api/planificaciones/:codigo/progreso - Guardar estado
  * POST   /api/planificaciones/:codigo/progreso/avanzar - Avanzar semana
@@ -27,6 +33,35 @@ import { PlanificacionesSimplesService } from './planificaciones-simples.service
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class PlanificacionesSimplesController {
   constructor(private readonly service: PlanificacionesSimplesService) {}
+
+  // ============================================================================
+  // ENDPOINTS ADMIN
+  // ============================================================================
+
+  /**
+   * GET /api/planificaciones
+   * Listar todas las planificaciones (Admin)
+   */
+  @Get()
+  @Roles('admin')
+  async listarPlanificaciones(
+    @Query('estado') estado?: string,
+    @Query('grupo_codigo') grupo_codigo?: string,
+    @Query('mes') mes?: string,
+    @Query('anio') anio?: string,
+  ) {
+    const filtros: any = {};
+    if (estado) filtros.estado = estado;
+    if (grupo_codigo) filtros.grupo_codigo = grupo_codigo;
+    if (mes) filtros.mes = parseInt(mes);
+    if (anio) filtros.anio = parseInt(anio);
+
+    return this.service.listarPlanificaciones(filtros);
+  }
+
+  // ============================================================================
+  // ENDPOINTS ESTUDIANTE (van primero para evitar conflictos de routing)
+  // ============================================================================
 
   /**
    * GET /api/planificaciones/:codigo/progreso
@@ -98,5 +133,36 @@ export class PlanificacionesSimplesController {
   ) {
     const estudianteId = req.user.sub;
     return this.service.registrarTiempo(estudianteId, codigo, body.minutos);
+  }
+
+  // ============================================================================
+  // ENDPOINTS ADMIN ESPECÍFICOS (van al final)
+  // ============================================================================
+
+  /**
+   * GET /api/planificaciones/:codigo/detalle
+   * Obtener detalle completo de planificación (Admin)
+   */
+  @Get(':codigo/detalle')
+  @Roles('admin')
+  async obtenerDetalle(@Param('codigo') codigo: string) {
+    return this.service.obtenerDetallePlanificacion(codigo);
+  }
+
+  /**
+   * POST /api/planificaciones/:codigo/asignar
+   * Asignar planificación a docente (Admin)
+   */
+  @Post(':codigo/asignar')
+  @Roles('admin')
+  async asignarPlanificacion(
+    @Param('codigo') codigo: string,
+    @Body() body: { docente_id: string; clase_grupo_id: string },
+  ) {
+    return this.service.asignarPlanificacion(
+      codigo,
+      body.docente_id,
+      body.clase_grupo_id,
+    );
   }
 }
