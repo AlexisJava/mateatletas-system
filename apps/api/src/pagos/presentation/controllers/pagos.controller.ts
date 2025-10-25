@@ -1,10 +1,29 @@
-import { Controller, Post, Get, Body, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Query,
+  Param,
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PagosService } from '../services/pagos.service';
+import { PagosTutorService } from '../services/pagos-tutor.service';
 import { CalcularPrecioRequestDto } from '../dtos/calcular-precio-request.dto';
 import { ActualizarConfiguracionPreciosRequestDto } from '../dtos/actualizar-configuracion-precios-request.dto';
 import { CrearInscripcionMensualRequestDto } from '../dtos/crear-inscripcion-mensual-request.dto';
 import { ObtenerMetricasDashboardRequestDto } from '../dtos/obtener-metricas-dashboard-request.dto';
+import { CrearPreferenciaSuscripcionRequestDto } from '../dtos/crear-preferencia-suscripcion-request.dto';
+import { CrearPreferenciaCursoRequestDto } from '../dtos/crear-preferencia-curso-request.dto';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../../auth/guards/roles.guard';
+import { Roles, Role } from '../../../auth/decorators/roles.decorator';
+import { GetUser } from '../../../auth/decorators/get-user.decorator';
+import { AuthUser } from '../../../auth/interfaces';
 
 /**
  * PagosController - Presentation Layer
@@ -21,7 +40,109 @@ import { ObtenerMetricasDashboardRequestDto } from '../dtos/obtener-metricas-das
 @ApiTags('Pagos')
 @Controller('pagos')
 export class PagosController {
-  constructor(private readonly pagosService: PagosService) {}
+  constructor(
+    private readonly pagosService: PagosService,
+    private readonly pagosTutorService: PagosTutorService,
+  ) {}
+
+  /**
+   * POST /pagos/suscripcion
+   * Genera preferencia de pago para una membresía del tutor autenticado
+   */
+  @Post('suscripcion')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Tutor)
+  async crearPreferenciaSuscripcion(
+    @Body() body: CrearPreferenciaSuscripcionRequestDto,
+    @GetUser() user: AuthUser,
+  ) {
+    return await this.pagosTutorService.crearPreferenciaSuscripcion(
+      user.id,
+      body.producto_id,
+    );
+  }
+
+  /**
+   * POST /pagos/curso
+   * Genera preferencia de pago para inscripción a curso
+   */
+  @Post('curso')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Tutor)
+  async crearPreferenciaCurso(
+    @Body() body: CrearPreferenciaCursoRequestDto,
+    @GetUser() user: AuthUser,
+  ) {
+    return await this.pagosTutorService.crearPreferenciaCurso(
+      user.id,
+      body.estudiante_id,
+      body.producto_id,
+    );
+  }
+
+  /**
+   * GET /pagos/membresia
+   * Obtiene la membresía actual del tutor autenticado
+   */
+  @Get('membresia')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Tutor)
+  async obtenerMembresiaActual(@GetUser() user: AuthUser) {
+    const membresia = await this.pagosTutorService.obtenerMembresiaActual(
+      user.id,
+    );
+
+    if (!membresia) {
+      throw new NotFoundException('Membresía no encontrada');
+    }
+
+    return membresia;
+  }
+
+  /**
+   * GET /pagos/membresia/:id/estado
+   * Detalle del estado de una membresía específica
+   */
+  @Get('membresia/:id/estado')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Tutor)
+  async obtenerEstadoMembresia(
+    @Param('id') membresiaId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    return await this.pagosTutorService.obtenerEstadoMembresia(
+      user.id,
+      membresiaId,
+    );
+  }
+
+  /**
+   * POST /pagos/mock/activar-membresia/:id
+   * Permite activar manualmente una membresía en entornos de prueba
+   */
+  @Post('mock/activar-membresia/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Tutor, Role.Admin)
+  async activarMembresiaManual(
+    @Param('id') membresiaId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    return await this.pagosTutorService.activarMembresiaManual(
+      user.id,
+      membresiaId,
+    );
+  }
+
+  /**
+   * GET /pagos/inscripciones
+   * Listado de inscripciones a cursos para el tutor autenticado
+   */
+  @Get('inscripciones')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Tutor)
+  async obtenerInscripciones(@GetUser() user: AuthUser) {
+    return await this.pagosTutorService.obtenerInscripcionesTutor(user.id);
+  }
 
   /**
    * POST /pagos/calcular-precio

@@ -7,8 +7,8 @@ import { membresiaSchema } from './membresia.schema';
  */
 export const estadoInscripcionSchema = z.enum([
   'PreInscrito',
-  'Inscrito',
-  'Cancelado',
+  'Activo',
+  'Finalizado',
 ]);
 
 /**
@@ -48,7 +48,7 @@ export const inscripcionCursoSchema = z.object({
   producto_id: z.string(),
   estado: estadoInscripcionSchema,
   fecha_inscripcion: z.string().nullable(),
-  pago_id: z.string(),
+  preferencia_id: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
 

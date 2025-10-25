@@ -18,31 +18,21 @@ import {
   EstudianteConDescuento,
   ActualizarConfiguracionRequest,
 } from '@/types/pago.types';
-import {
-  membresiaSchema,
-  estadoMembresiaResponseSchema,
-  type MembresiaFromSchema,
-  type EstadoMembresiaResponse as EstadoMembresiaResponseFromSchema,
-} from '@/lib/schemas/membresia.schema';
-import {
-  preferenciaPagoSchema,
-  inscripcionesCursoListSchema,
-  type PreferenciaPago as PreferenciaPagoFromSchema,
-  type InscripcionCursoFromSchema,
-} from '@/lib/schemas/pago.schema';
+import { membresiaSchema, estadoMembresiaResponseSchema } from '@/lib/schemas/membresia.schema';
+import { preferenciaPagoSchema, inscripcionesCursoListSchema } from '@/lib/schemas/pago.schema';
 
 /**
  * Crear preferencia de pago para suscripción
  * POST /api/pagos/suscripcion
  */
 export const crearPreferenciaSuscripcion = async (
-  productoId: string
-): Promise<PreferenciaPago | PreferenciaPagoFromSchema> => {
+  productoId: string,
+): Promise<PreferenciaPago> => {
   const response = await axios.post(
     '/pagos/suscripcion',
-    { producto_id: productoId } as CrearPreferenciaSuscripcionRequest
+    { producto_id: productoId } as CrearPreferenciaSuscripcionRequest,
   );
-  return preferenciaPagoSchema.parse(response);
+  return preferenciaPagoSchema.parse(response) as PreferenciaPago;
 };
 
 /**
@@ -51,23 +41,23 @@ export const crearPreferenciaSuscripcion = async (
  */
 export const crearPreferenciaCurso = async (
   productoId: string,
-  estudianteId: string
-): Promise<PreferenciaPago | PreferenciaPagoFromSchema> => {
+  estudianteId: string,
+): Promise<PreferenciaPago> => {
   const response = await axios.post('/pagos/curso', {
     producto_id: productoId,
     estudiante_id: estudianteId,
   } as CrearPreferenciaCursoRequest);
-  return preferenciaPagoSchema.parse(response);
+  return preferenciaPagoSchema.parse(response) as PreferenciaPago;
 };
 
 /**
  * Obtener membresía activa del tutor
  * GET /api/pagos/membresia
  */
-export const getMembresiaActual = async (): Promise<Membresia | MembresiaFromSchema | null> => {
+export const getMembresiaActual = async (): Promise<Membresia | null> => {
   try {
     const response = await axios.get('/pagos/membresia');
-    return membresiaSchema.parse(response);
+    return membresiaSchema.parse(response) as Membresia;
   } catch (error: unknown) {
     if (isAxiosError(error) && error.response?.status === 404) {
       return null; // No tiene membresía
@@ -81,21 +71,23 @@ export const getMembresiaActual = async (): Promise<Membresia | MembresiaFromSch
  * GET /api/pagos/membresia/:id/estado
  */
 export const getEstadoMembresia = async (
-  membresiaId: string
-): Promise<EstadoMembresiaResponse | EstadoMembresiaResponseFromSchema> => {
+  membresiaId: string,
+): Promise<EstadoMembresiaResponse> => {
   const response = await axios.get(
-    `/pagos/membresia/${membresiaId}/estado`
+    `/pagos/membresia/${membresiaId}/estado`,
   );
-  return estadoMembresiaResponseSchema.parse(response);
+  return estadoMembresiaResponseSchema.parse(
+    response,
+  ) as EstadoMembresiaResponse;
 };
 
 /**
  * Obtener inscripciones a cursos del tutor
  * GET /api/pagos/inscripciones
  */
-export const getInscripciones = async (): Promise<InscripcionCurso[] | InscripcionCursoFromSchema[]> => {
+export const getInscripciones = async (): Promise<InscripcionCurso[]> => {
   const response = await axios.get('/pagos/inscripciones');
-  return inscripcionesCursoListSchema.parse(response);
+  return inscripcionesCursoListSchema.parse(response) as InscripcionCurso[];
 };
 
 /**
@@ -103,12 +95,12 @@ export const getInscripciones = async (): Promise<InscripcionCurso[] | Inscripci
  * POST /api/pagos/mock/activar-membresia/:id
  */
 export const activarMembresiaManual = async (
-  membresiaId: string
-): Promise<Membresia | MembresiaFromSchema> => {
+  membresiaId: string,
+): Promise<Membresia> => {
   const response = await axios.post(
-    `/pagos/mock/activar-membresia/${membresiaId}`
+    `/pagos/mock/activar-membresia/${membresiaId}`,
   );
-  return membresiaSchema.parse(response);
+  return membresiaSchema.parse(response) as Membresia;
 };
 
 /**
