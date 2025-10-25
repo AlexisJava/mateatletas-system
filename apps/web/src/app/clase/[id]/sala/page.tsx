@@ -46,7 +46,7 @@ export default function SalaClasePage() {
     const fetchClase = async () => {
       try {
         const response = await apiClient.get(`/clases/${claseId}`);
-        setClase(response.data);
+        setClase(response);
       } catch {
         // Error loading class
       } finally {
