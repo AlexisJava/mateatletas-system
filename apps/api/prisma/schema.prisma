@@ -463,11 +463,12 @@ model ClaseGrupo {
   /// Identificador único del grupo
   id String @id @default(cuid())
 
-  /// Código del grupo (ej: "B1", "B2", "OLIMP-2025")
-  codigo String @unique
+  /// Código del grupo pedagógico (puede repetirse, ej: "B2" para varios horarios)
+  /// Se usa principalmente para identificación visual, no es unique
+  codigo String
 
-  /// Nombre descriptivo del grupo
-  nombre String
+  /// Nombre descriptivo del grupo (este sí es único por instancia)
+  nombre String @unique
 
   /// Tipo de clase grupo
   tipo TipoClaseGrupo @default(GRUPO_REGULAR)
