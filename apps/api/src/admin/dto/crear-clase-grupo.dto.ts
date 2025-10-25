@@ -15,6 +15,14 @@ import { TipoClaseGrupo, DiaSemana } from '@prisma/client';
 
 export class CrearClaseGrupoDto {
   @ApiProperty({
+    description: 'ID del grupo pedagógico (B1, B2, B3, etc.)',
+    example: 'b5ac168d-1b44-4357-8e73-4339db2fa77c',
+  })
+  @IsString()
+  @IsNotEmpty()
+  grupo_id!: string;
+
+  @ApiProperty({
     description: 'Código único del grupo (ej: B1, B2, OLIMP-2025)',
     example: 'B1',
   })

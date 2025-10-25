@@ -18,6 +18,7 @@ import { AdminService } from './admin.service';
 import { RutasCurricularesService } from './rutas-curriculares.service';
 import { SectoresRutasService } from './services/sectores-rutas.service';
 import { ClaseGruposService } from './clase-grupos.service';
+import { AsistenciasService } from './asistencias.service';
 import { ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -28,6 +29,8 @@ import { CrearAlertaDto } from './dto/crear-alerta.dto';
 import { CreateSectorDto, UpdateSectorDto } from './dto/sector.dto';
 import { CreateRutaEspecialidadDto, UpdateRutaEspecialidadDto, AsignarRutasDocenteDto } from './dto/ruta-especialidad.dto';
 import { CrearEstudianteRapidoDto } from './dto/crear-estudiante-rapido.dto';
+import { CrearClaseGrupoDto } from './dto/crear-clase-grupo.dto';
+import { ActualizarClaseGrupoDto } from './dto/actualizar-clase-grupo.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -38,6 +41,7 @@ export class AdminController {
     private readonly rutasService: RutasCurricularesService,
     private readonly sectoresRutasService: SectoresRutasService,
     private readonly claseGruposService: ClaseGruposService,
+    private readonly asistenciasService: AsistenciasService,
   ) {}
 
   /**
@@ -439,7 +443,7 @@ export class AdminController {
       3. NO crea instancias duplicadas (1 registro para todo el año)
     `,
   })
-  async crearClaseGrupo(@Body() dto: any) {
+  async crearClaseGrupo(@Body() dto: CrearClaseGrupoDto) {
     return this.claseGruposService.crearClaseGrupo(dto);
   }
 
@@ -460,12 +464,14 @@ export class AdminController {
     @Query('activo') activo?: string,
     @Query('docente_id') docenteId?: string,
     @Query('tipo') tipo?: string,
+    @Query('grupo_id') grupoId?: string,
   ) {
     const params: any = {};
     if (anioLectivo) params.anio_lectivo = parseInt(anioLectivo);
     if (activo !== undefined) params.activo = activo === 'true';
     if (docenteId) params.docente_id = docenteId;
     if (tipo) params.tipo = tipo;
+    if (grupoId) params.grupo_id = grupoId;
 
     return this.claseGruposService.listarClaseGrupos(params);
   }
@@ -485,5 +491,164 @@ export class AdminController {
   })
   async obtenerClaseGrupo(@Param('id') id: string) {
     return this.claseGruposService.obtenerClaseGrupo(id);
+  }
+
+  /**
+   * Actualizar un grupo de clases
+   * PUT /api/admin/clase-grupos/:id
+   * Rol: Admin
+   */
+  @Put('clase-grupos/:id')
+  @ApiOperation({
+    summary: 'Actualizar un grupo de clases',
+    description: 'Actualiza los datos de un ClaseGrupo existente',
+  })
+  async actualizarClaseGrupo(
+    @Param('id') id: string,
+    @Body() dto: ActualizarClaseGrupoDto,
+  ) {
+    return this.claseGruposService.actualizarClaseGrupo(id, dto);
+  }
+
+  /**
+   * Agregar estudiantes a un grupo de clases
+   * POST /api/admin/clase-grupos/:id/estudiantes
+   * Rol: Admin
+   */
+  @Post('clase-grupos/:id/estudiantes')
+  @ApiOperation({
+    summary: 'Agregar estudiantes a un grupo',
+    description: 'Inscribe uno o más estudiantes en un ClaseGrupo existente',
+  })
+  async agregarEstudiantesAGrupo(
+    @Param('id') id: string,
+    @Body() body: { estudiantes_ids: string[] },
+  ) {
+    return this.claseGruposService.agregarEstudiantes(
+      id,
+      body.estudiantes_ids,
+    );
+  }
+
+  /**
+   * Remover un estudiante de un grupo de clases
+   * DELETE /api/admin/clase-grupos/:id/estudiantes/:estudianteId
+   * Rol: Admin
+   */
+  @Delete('clase-grupos/:id/estudiantes/:estudianteId')
+  @ApiOperation({
+    summary: 'Remover estudiante de un grupo',
+    description: 'Elimina la inscripción de un estudiante en un ClaseGrupo',
+  })
+  async removerEstudianteDeGrupo(
+    @Param('id') id: string,
+    @Param('estudianteId') estudianteId: string,
+  ) {
+    return this.claseGruposService.removerEstudiante(id, estudianteId);
+  }
+
+  /**
+   * Eliminar un grupo de clases (soft delete)
+   * DELETE /api/admin/clase-grupos/:id
+   * Rol: Admin
+   */
+  @Delete('clase-grupos/:id')
+  @ApiOperation({
+    summary: 'Eliminar un grupo de clases',
+    description: 'Desactiva un ClaseGrupo (soft delete)',
+  })
+  async eliminarClaseGrupo(@Param('id') id: string) {
+    return this.claseGruposService.eliminarClaseGrupo(id);
+  }
+
+  /**
+   * Registrar asistencias para una fecha específica
+   * POST /api/admin/clase-grupos/:id/asistencias
+   * Rol: Admin
+   */
+  @Post('clase-grupos/:id/asistencias')
+  @ApiOperation({
+    summary: 'Registrar asistencias',
+    description: 'Registra la asistencia de estudiantes para una fecha específica',
+  })
+  async registrarAsistencias(
+    @Param('id') id: string,
+    @Body() body: { fecha: string; asistencias: Array<{ estudiante_id: string; estado: string; observaciones?: string; feedback?: string }> },
+  ) {
+    return this.asistenciasService.registrarAsistencias(id, body);
+  }
+
+  /**
+   * Obtener asistencias por fecha
+   * GET /api/admin/clase-grupos/:id/asistencias
+   * Rol: Admin
+   */
+  @Get('clase-grupos/:id/asistencias')
+  @ApiOperation({
+    summary: 'Obtener asistencias por fecha',
+    description: 'Lista las asistencias de un ClaseGrupo para una fecha específica',
+  })
+  async obtenerAsistenciasPorFecha(
+    @Param('id') id: string,
+    @Query('fecha') fecha: string,
+  ) {
+    return this.asistenciasService.obtenerAsistenciasPorFecha(id, fecha);
+  }
+
+  /**
+   * Obtener historial de asistencias
+   * GET /api/admin/clase-grupos/:id/asistencias/historial
+   * Rol: Admin
+   */
+  @Get('clase-grupos/:id/asistencias/historial')
+  @ApiOperation({
+    summary: 'Obtener historial de asistencias',
+    description: 'Lista el historial completo de asistencias de un ClaseGrupo',
+  })
+  async obtenerHistorialAsistencias(
+    @Param('id') id: string,
+    @Query('fecha_desde') fechaDesde?: string,
+    @Query('fecha_hasta') fechaHasta?: string,
+    @Query('estudiante_id') estudianteId?: string,
+  ) {
+    return this.asistenciasService.obtenerHistorialAsistencias(id, {
+      fecha_desde: fechaDesde,
+      fecha_hasta: fechaHasta,
+      estudiante_id: estudianteId,
+    });
+  }
+
+  /**
+   * Actualizar una asistencia individual
+   * PATCH /api/admin/asistencias/:id
+   * Rol: Admin
+   */
+  @Patch('asistencias/:id')
+  @ApiOperation({
+    summary: 'Actualizar asistencia',
+    description: 'Actualiza el estado u observaciones de una asistencia',
+  })
+  async actualizarAsistencia(
+    @Param('id') id: string,
+    @Body() body: { estado?: string; observaciones?: string; feedback?: string },
+  ) {
+    return this.asistenciasService.actualizarAsistencia(id, body);
+  }
+
+  /**
+   * Obtener estadísticas de asistencia de un estudiante
+   * GET /api/admin/clase-grupos/:id/estudiantes/:estudianteId/estadisticas
+   * Rol: Admin
+   */
+  @Get('clase-grupos/:id/estudiantes/:estudianteId/estadisticas')
+  @ApiOperation({
+    summary: 'Estadísticas de asistencia de estudiante',
+    description: 'Obtiene las estadísticas de asistencia de un estudiante en un ClaseGrupo',
+  })
+  async obtenerEstadisticasEstudiante(
+    @Param('id') id: string,
+    @Param('estudianteId') estudianteId: string,
+  ) {
+    return this.asistenciasService.obtenerEstadisticasEstudiante(id, estudianteId);
   }
 }
