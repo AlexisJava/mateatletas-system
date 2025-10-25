@@ -146,10 +146,12 @@ export default function ClaseAulaPage() {
     try {
       setIsLoading(true);
       // Usar el endpoint correcto para ClaseGrupo
-      const response: any = await axios.get(`/admin/clase-grupos/${claseId}`);
-      // Extraer datos (puede tener doble wrapping)
-      const data = response.data || response;
-      setClase(data as ClaseDetalle);
+      const payload: any = await axios.get(`/admin/clase-grupos/${claseId}`);
+      const data =
+        payload && typeof payload === 'object' && 'data' in payload
+          ? (payload as { data: ClaseDetalle }).data
+          : (payload as ClaseDetalle);
+      setClase(data);
 
       // Cargar planificaciones del grupo pedagógico
       if (data.grupo_id) {
@@ -166,13 +168,18 @@ export default function ClaseAulaPage() {
   const loadPlanificaciones = async (grupoId: string, anioLectivo: number) => {
     try {
       // Buscar planificaciones por grupo_id usando el endpoint de grupos
-      const response: any = await axios.get(`/grupos/${grupoId}/planificaciones`, {
+      const payload: any = await axios.get(`/grupos/${grupoId}/planificaciones`, {
         params: {
           anio: anioLectivo,
         }
       });
-      const data = response.data || response;
-      const planes = Array.isArray(data) ? data : (data.data || []);
+      const data =
+        payload && typeof payload === 'object' && 'data' in payload
+          ? (payload as { data: unknown }).data
+          : payload;
+      const planes = Array.isArray(data)
+        ? data
+        : (data as { data?: typeof planificaciones }).data ?? [];
       setPlanificaciones(planes);
     } catch (error) {
       console.error('Error cargando planificaciones:', error);
@@ -184,9 +191,11 @@ export default function ClaseAulaPage() {
   const loadEstudiantesDisponibles = async () => {
     try {
       setIsLoadingEstudiantes(true);
-      const response: any = await axios.get('/estudiantes');
-      // Extraer datos (puede tener doble wrapping)
-      const data = response.data || response;
+      const payload: any = await axios.get('/estudiantes');
+      const data =
+        payload && typeof payload === 'object' && 'data' in payload
+          ? (payload as { data: Estudiante[] }).data
+          : payload;
       const estudiantes = Array.isArray(data) ? data : [];
 
       // Filtrar estudiantes que ya están inscritos
@@ -248,11 +257,18 @@ export default function ClaseAulaPage() {
 
   const handleVerObservaciones = async (estudianteId: string) => {
     try {
-      const response: any = await axios.get(`/admin/clase-grupos/${claseId}/asistencias/historial`, {
+      const payload: any = await axios.get(`/admin/clase-grupos/${claseId}/asistencias/historial`, {
         params: { estudiante_id: estudianteId }
       });
-      const data = response.data || response;
-      const asistenciasData = Array.isArray(data) ? data : (data.data?.asistencias || []);
+      const data =
+        payload && typeof payload === 'object' && 'data' in payload
+          ? (payload as { data: { asistencias?: unknown[] } }).data
+          : payload;
+      const asistenciasData = Array.isArray(data)
+        ? data
+        : ((data as { asistencias?: unknown[]; data?: { asistencias?: unknown[] } }).asistencias ??
+           (data as { data?: { asistencias?: unknown[] } }).data?.asistencias ??
+           []);
 
       setObservacionesEstudiante(asistenciasData.map((a: { fecha: string; observaciones?: string; feedback?: string; estado: string }) => ({
         fecha: a.fecha,
