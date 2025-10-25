@@ -1,6 +1,16 @@
-/**
- * Tipos para el módulo de Clases y Reservas
- */
+import {
+  claseSchema,
+  inscripcionClaseSchema,
+  reservarClaseSchema,
+  estadoClaseEnum,
+  estadoAsistenciaEnum,
+  type Clase as SharedClase,
+  type ClasesList,
+  type InscripcionClase as SharedInscripcionClase,
+  type ReservarClaseInput,
+  type EstadoClase as SharedEstadoClase,
+} from '@mateatletas/shared';
+import { z } from 'zod';
 
 /**
  * Ruta Curricular (Ej: Álgebra, Geometría, Lógica...)
@@ -14,66 +24,15 @@ export interface RutaCurricular {
   updatedAt: string;
 }
 
-/**
- * Estado de una clase
- */
-export enum EstadoClase {
-  Programada = 'Programada',
-  EnCurso = 'EnCurso',
-  Finalizada = 'Finalizada',
-  Cancelada = 'Cancelada',
-}
+export type EstadoClase = SharedEstadoClase;
+export const estadoClaseSchema = estadoClaseEnum;
+export const estadoAsistenciaSchema = estadoAsistenciaEnum;
 
-/**
- * Clase programada
- */
-export interface Clase {
-  id: string;
-  docente_id: string;
-  ruta_curricular_id: string;
-  fecha_hora_inicio: string; // ISO 8601 DateTime
-  duracion_minutos: number;
-  cupo_maximo: number;
-  cupo_disponible: number;
-  estado: EstadoClase | 'Programada' | 'EnCurso' | 'Finalizada' | 'Cancelada';
-  titulo?: string;
-  descripcion?: string;
-  createdAt: string;
-  updatedAt: string;
+export type Clase = SharedClase;
+export type InscripcionClase = SharedInscripcionClase;
+export type CrearReservaDto = ReservarClaseInput;
+export type ClasesListResponse = ClasesList;
 
-  // Relaciones opcionales
-  docente?: {
-    id: string;
-    nombre?: string;
-    apellido?: string;
-    titulo?: string;
-  };
-  ruta_curricular?: RutaCurricular;
-  inscripciones?: InscripcionClase[];
-}
-
-/**
- * Inscripción a una clase (Reserva)
- */
-export interface InscripcionClase {
-  id: string;
-  clase_id: string;
-  estudiante_id: string;
-  tutor_id: string;
-  createdAt: string;
-
-  // Relaciones opcionales
-  clase?: Clase;
-  estudiante?: {
-    id: string;
-    nombre: string;
-    apellido: string;
-  };
-}
-
-/**
- * Filtro para clases
- */
 export interface FiltroClases {
   ruta_curricular_id?: string;
   fechaDesde?: string;
@@ -81,9 +40,7 @@ export interface FiltroClases {
   soloDisponibles?: boolean;
 }
 
-/**
- * Datos para crear una reserva
- */
-export interface CrearReservaDto {
-  estudiante_id: string;
-}
+export const claseSchemaClient = claseSchema;
+export const inscripcionClaseSchemaClient = inscripcionClaseSchema;
+export const reservarClaseSchemaClient = reservarClaseSchema;
+export const clasesResponseSchema = z.array(claseSchemaClient);

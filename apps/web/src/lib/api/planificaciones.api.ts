@@ -242,9 +242,7 @@ export const deleteActividad = async (
  * Publicar una planificación (cambiar estado a "publicada")
  * PATCH /api/planificaciones/:id
  */
-export const publicarPlanificacion = async (
-  id: string,
-): Promise<PlanificacionDetalle> => {
+export const publicarPlanificacion = async (id: string): Promise<PlanificacionDetalle> => {
   return updatePlanificacion(id, { estado: 'PUBLICADA' });
 };
 
@@ -252,8 +250,6 @@ export const publicarPlanificacion = async (
  * Archivar una planificación (cambiar estado a "archivada")
  * PATCH /api/planificaciones/:id
  */
-export const archivarPlanificacion = async (
-  id: string,
-): Promise<PlanificacionDetalle> => {
+export const archivarPlanificacion = async (id: string): Promise<PlanificacionDetalle> => {
   return updatePlanificacion(id, { estado: 'ARCHIVADA' });
 };

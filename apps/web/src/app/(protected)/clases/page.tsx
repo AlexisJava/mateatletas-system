@@ -74,10 +74,10 @@ export default function ClasesPage() {
   // Handler para confirmar reserva
   const handleConfirmReserva = async (
     claseId: string,
-    estudiante_id: string
+    estudianteId: string
   ) => {
     setIsReserving(true);
-    const success = await reservarClase(claseId, { estudiante_id: estudiante_id });
+    const success = await reservarClase(claseId, { estudianteId });
 
     if (success) {
       setModalOpen(false);
