@@ -60,6 +60,7 @@ describe('ClasesReservasService', () => {
               findUnique: jest.fn(),
               create: jest.fn(),
               delete: jest.fn(),
+              findMany: jest.fn(),
             },
             $transaction: jest.fn(),
           },
@@ -304,6 +305,59 @@ describe('ClasesReservasService', () => {
         where: { id: 'clase-1' },
         data: { cupos_ocupados: { increment: 1 } },
       });
+    });
+  });
+
+  describe('listarReservasDeTutor', () => {
+    it('should return reservas with formatted clase info', async () => {
+      const mockReservas = [
+        {
+          id: 'insc-1',
+          clase_id: 'clase-1',
+          tutor_id: 'tutor-1',
+          estudiante_id: 'est-1',
+          clase: {
+            id: 'clase-1',
+            cupos_maximo: 10,
+            cupos_ocupados: 4,
+            fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+            rutaCurricular: { id: 'ruta-1', nombre: 'Álgebra', color: '#ff0000' },
+            docente: { id: 'doc-1', nombre: 'María', apellido: 'González' },
+            sector: { id: 'sec-1', nombre: 'Secundaria', color: '#00ff00', icono: '📐' },
+          },
+          estudiante: { id: 'est-1', nombre: 'Juan', apellido: 'Pérez' },
+        },
+      ];
+
+      jest
+        .spyOn(prisma.inscripcionClase, 'findMany')
+        .mockResolvedValue(mockReservas as any);
+
+      const result = await service.listarReservasDeTutor('tutor-1');
+
+      expect(prisma.inscripcionClase.findMany).toHaveBeenCalledWith({
+        where: { tutor_id: 'tutor-1' },
+        include: expect.objectContaining({
+          clase: expect.any(Object),
+          estudiante: expect.any(Object),
+        }),
+        orderBy: { clase: { fecha_hora_inicio: 'asc' } },
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].clase?.cupo_disponible).toBe(6);
+      expect(result[0].clase?.cupo_maximo).toBe(10);
+      expect(result[0].clase?.ruta_curricular).toEqual(
+        mockReservas[0].clase.rutaCurricular,
+      );
+    });
+
+    it('should return empty array when tutor has no reservas', async () => {
+      jest.spyOn(prisma.inscripcionClase, 'findMany').mockResolvedValue([]);
+
+      const result = await service.listarReservasDeTutor('tutor-1');
+
+      expect(result).toEqual([]);
     });
   });
 

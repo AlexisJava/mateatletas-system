@@ -143,6 +143,49 @@ export class ClasesReservasService {
   }
 
   /**
+   * Listar las reservas creadas por un tutor
+   */
+  async listarReservasDeTutor(tutorId: string) {
+    const reservas = await this.prisma.inscripcionClase.findMany({
+      where: { tutor_id: tutorId },
+      include: {
+        clase: {
+          include: {
+            rutaCurricular: { select: { id: true, nombre: true, color: true } },
+            docente: { select: { id: true, nombre: true, apellido: true } },
+            sector: {
+              select: { id: true, nombre: true, color: true, icono: true },
+            },
+          },
+        },
+        estudiante: { select: { id: true, nombre: true, apellido: true } },
+      },
+      orderBy: {
+        clase: { fecha_hora_inicio: 'asc' },
+      },
+    });
+
+    return reservas.map((reserva) => {
+      if (!reserva.clase) {
+        return reserva;
+      }
+
+      const cupoDisponible =
+        reserva.clase.cupos_maximo - reserva.clase.cupos_ocupados;
+
+      return {
+        ...reserva,
+        clase: {
+          ...reserva.clase,
+          cupo_maximo: reserva.clase.cupos_maximo,
+          cupo_disponible: cupoDisponible,
+          ruta_curricular: reserva.clase.rutaCurricular,
+        },
+      };
+    });
+  }
+
+  /**
    * Cancelar una reserva (Tutor cancela inscripción de su estudiante)
    */
   async cancelarReserva(inscripcionId: string, tutorId: string) {
