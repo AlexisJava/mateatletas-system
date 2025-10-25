@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpStatus, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpStatus, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
 import { PrismaService } from '../../core/database/prisma.service';
 import { IsString, IsOptional, IsInt, IsBoolean, Min, Max } from 'class-validator';
@@ -8,10 +8,10 @@ import { IsString, IsOptional, IsInt, IsBoolean, Min, Max } from 'class-validato
  */
 export class CreateGrupoDto {
   @IsString()
-  codigo: string;
+  codigo!: string;
 
   @IsString()
-  nombre: string;
+  nombre!: string;
 
   @IsOptional()
   @IsString()
@@ -83,13 +83,15 @@ export class GruposController {
 
   /**
    * GET /api/grupos
-   * Obtener lista de grupos pedagógicos activos
+   * Obtener lista de grupos pedagógicos
+   *
+   * @param activo - Filtrar por estado: 'true', 'false', o undefined (todos)
    */
   @Get()
-  @ApiOperation({ summary: 'Listar grupos pedagógicos activos' })
+  @ApiOperation({ summary: 'Listar grupos pedagógicos' })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Lista de grupos activos',
+    description: 'Lista de grupos',
     schema: {
       example: [
         {
@@ -99,13 +101,26 @@ export class GruposController {
           descripcion: 'Grupo básico nivel 1 - Fundamentos matemáticos iniciales',
           edad_minima: 6,
           edad_maxima: 7,
+          activo: true,
         },
       ],
     },
   })
-  async getGrupos() {
+  async getGrupos(@Query('activo') activo?: string) {
+    // Construir el where dinámicamente
+    const where: any = {};
+
+    // Si activo es 'true' o 'false', filtrar por ese estado
+    // Si no se pasa o es cualquier otra cosa, traer todos
+    if (activo === 'true') {
+      where.activo = true;
+    } else if (activo === 'false') {
+      where.activo = false;
+    }
+    // Si activo es undefined o cualquier otro valor, no agregamos filtro (traemos todos)
+
     const grupos = await this.prisma.grupo.findMany({
-      where: { activo: true },
+      where,
       select: {
         id: true,
         codigo: true,
