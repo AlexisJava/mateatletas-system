@@ -21,6 +21,7 @@ import {
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { toast } from '@/components/ui/Toast';
 import { LoadingSpinner } from '@/components/effects';
+import { useAuthStore } from '@/store/auth.store';
 
 /**
  * Dashboard Docente 10/10 - Ultra Intuitivo
@@ -66,10 +67,20 @@ interface StatsResumen {
 
 export default function DocenteDashboardNew() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
   const [claseInminente, setClaseInminente] = useState<ClaseInminente | null>(null);
   const [alertas, setAlertas] = useState<Alerta[]>([]);
   const [stats, setStats] = useState<StatsResumen | null>(null);
+  const [greeting, setGreeting] = useState('Bienvenido');
+
+  // Set greeting based on time of day
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting('Buenos días');
+    else if (hour < 20) setGreeting('Buenas tardes');
+    else setGreeting('Buenas noches');
+  }, []);
 
   // Update clock every minute
   useEffect(() => {
@@ -194,7 +205,7 @@ export default function DocenteDashboardNew() {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="text-3xl font-black text-indigo-900 dark:text-white mb-2">
-            ¡Bienvenido de vuelta! 👋
+            {greeting}, {user?.nombre || 'Docente'}! 👋
           </h1>
           <p className="text-purple-600 dark:text-purple-300 font-semibold">
             {new Date().toLocaleDateString('es-ES', {
