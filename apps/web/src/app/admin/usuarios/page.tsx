@@ -12,12 +12,12 @@ import {
   formatUsersForExport
 } from '@/lib/utils/export.utils';
 import { getErrorMessage } from '@/lib/utils/error.utils';
-import { Users, GraduationCap, Crown, Plus, Download, Eye, Trash2, UserCog, X } from 'lucide-react';
+import { Users, Crown, Plus, Download, Eye, Trash2, UserCog, X } from 'lucide-react';
 import CreateDocenteForm from '@/components/admin/CreateDocenteForm';
 import ViewEditDocenteModal from '@/components/admin/ViewEditDocenteModal';
 import MultiRoleModal from '@/components/admin/MultiRoleModal';
 
-type TabType = 'tutores' | 'estudiantes' | 'personal';
+type TabType = 'tutores' | 'personal';
 type ModalType = 'delete' | 'roles' | 'view' | 'viewDocente' | 'createDocente' | 'createAdmin' | 'reassignClasses' | null;
 
 export default function UsuariosPage() {
@@ -55,10 +55,9 @@ export default function UsuariosPage() {
 
   // Filtrar usuarios según el tab activo
   const tutores = users.filter(u => u.role === 'tutor');
-  const estudiantes: AdminUser[] = []; // TODO: Agregar endpoint para estudiantes
   const personal = users.filter(u => u.role === 'docente' || u.role === 'admin');
 
-  const displayedUsers = activeTab === 'tutores' ? tutores : activeTab === 'estudiantes' ? estudiantes : personal;
+  const displayedUsers = activeTab === 'tutores' ? tutores : personal;
 
   const roleColors: Record<string, string> = {
     admin: 'bg-gradient-to-r from-purple-600 to-violet-600 text-white',
@@ -258,7 +257,7 @@ export default function UsuariosPage() {
   const handleExport = (format: 'excel' | 'csv' | 'pdf') => {
     const formattedData = formatUsersForExport(displayedUsers);
     const timestamp = new Date().getTime();
-    const tabName = activeTab === 'tutores' ? 'tutores' : activeTab === 'estudiantes' ? 'estudiantes' : 'personal';
+    const tabName = activeTab === 'tutores' ? 'tutores' : 'personal';
 
     if (format === 'excel') {
       exportToExcel(formattedData, `${tabName}-${timestamp}`, 'Usuarios');
@@ -368,26 +367,6 @@ export default function UsuariosPage() {
         </button>
 
         <button
-          onClick={() => setActiveTab('estudiantes')}
-          className={`group relative flex items-center gap-3 px-8 py-4 font-bold text-base transition-all rounded-2xl overflow-hidden ${
-            activeTab === 'estudiantes'
-              ? 'bg-gradient-to-br from-green-600 to-emerald-700 text-white shadow-2xl shadow-green-500/40 scale-105'
-              : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 border border-white/10'
-          }`}
-        >
-          {activeTab === 'estudiantes' && (
-            <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-transparent animate-pulse"></div>
-          )}
-          <GraduationCap className={`${activeTab === 'estudiantes' ? 'w-6 h-6' : 'w-5 h-5'} relative z-10 transition-all`} />
-          <span className="relative z-10">Estudiantes</span>
-          <span className={`relative z-10 px-3 py-1 rounded-xl text-sm font-black ${
-            activeTab === 'estudiantes' ? 'bg-white/25' : 'bg-white/10'
-          }`}>
-            {estudiantes.length}
-          </span>
-        </button>
-
-        <button
           onClick={() => setActiveTab('personal')}
           className={`group relative flex items-center gap-3 px-8 py-4 font-bold text-base transition-all rounded-2xl overflow-hidden ${
             activeTab === 'personal'
@@ -425,7 +404,7 @@ export default function UsuariosPage() {
         <div className="backdrop-blur-xl bg-white/5 rounded-3xl shadow-2xl border border-white/10 p-20 text-center">
           <div className="text-6xl mb-4">👥</div>
           <p className="text-white/60 text-xl font-bold">
-            {activeTab === 'estudiantes' ? 'No hay estudiantes registrados' : 'No hay usuarios en esta categoría'}
+            No hay usuarios en esta categoría
           </p>
         </div>
       ) : (
