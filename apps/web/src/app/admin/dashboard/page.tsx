@@ -107,11 +107,9 @@ export default function AdminDashboard() {
 
   // Calcular valores reales desde el backend
   const totalEstudiantes = stats?.totalEstudiantes || 0;
-  const totalUsuarios = stats?.totalUsuarios || 0;
   const ingresosActuales = stats?.ingresosTotal || 0;
   const pagosPendientes = stats?.pagosPendientes || 0;
   const inscripcionesActivas = stats?.inscripcionesActivas || 0;
-  const ingresosEstimados = (ingresosActuales + pagosPendientes) * 1.15; // Estimado basado en total esperado
 
   // Stats con COLORES VIBRANTES únicos para cada uno - NUEVA ORGANIZACIÓN
   const mainStats = [
