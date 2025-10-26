@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../../core/database/prisma.service';
 import { Decimal } from 'decimal.js';
 import { ConfiguracionPreciosRepository } from './configuracion-precios.repository';
 import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
@@ -18,18 +19,20 @@ import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
  * - Maneja la persistencia con Decimal correctamente
  */
 describe('ConfiguracionPreciosRepository - Infrastructure Layer', () => {
-  let prisma: PrismaClient;
+  let prismaClient: PrismaClient;
+  let prisma: PrismaService;
   let repository: ConfiguracionPreciosRepository;
 
   beforeAll(async () => {
     // Inicializar Prisma con base de datos de test
-    prisma = new PrismaClient();
+    prismaClient = new PrismaClient();
+    prisma = prismaClient as unknown as PrismaService;
     repository = new ConfiguracionPreciosRepository(prisma);
   });
 
   afterAll(async () => {
     // Limpiar y cerrar conexión
-    await prisma.$disconnect();
+    await prismaClient.$disconnect();
   });
 
   beforeEach(async () => {

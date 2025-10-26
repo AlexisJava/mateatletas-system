@@ -157,7 +157,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
       // Arrange
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector);
       jest.spyOn(prisma.equipo, 'findUnique').mockResolvedValue(mockEquipo);
-      jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(mockTutor);
+      jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(mockTutor as any);
 
       jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
         return callback({
@@ -188,7 +188,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
 
       jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
         return callback({
-          tutor: { create: jest.fn().mockResolvedValue(mockTutor) },
+          tutor: { create: jest.fn().mockResolvedValue(mockTutor as any) },
           estudiante: { create: jest.fn().mockResolvedValue(mockEstudiante) },
         });
       });
@@ -221,7 +221,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
 
       jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
         return callback({
-          tutor: { create: jest.fn().mockResolvedValue(mockTutor) },
+          tutor: { create: jest.fn().mockResolvedValue(mockTutor as any) },
           estudiante: { create: mockEstudianteCreate },
         });
       });
@@ -259,7 +259,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
 
       jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
         return callback({
-          tutor: { create: jest.fn().mockResolvedValue(mockTutor) },
+          tutor: { create: jest.fn().mockResolvedValue(mockTutor as any) },
           estudiante: { create: mockEstudianteCreate },
         });
       });
@@ -282,7 +282,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
       // Arrange
       const dtoSinEquipo = { ...validDto, equipoId: undefined };
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector);
-      jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(mockTutor);
+      jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(mockTutor as any);
 
       const mockEstudianteCreate = jest.fn().mockResolvedValue(mockEstudiante);
 

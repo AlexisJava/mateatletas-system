@@ -58,7 +58,16 @@ describe('AuthController', () => {
   describe('login', () => {
     it('should set httpOnly cookie with JWT and return user payload', async () => {
       const dto: LoginDto = { email: 'demo@test.com', password: 'Secret123!' };
-      const mockUser = { id: 'user-1', email: dto.email, nombre: 'Demo', role: 'Tutor' };
+      const mockUser = {
+        id: 'user-1',
+        email: dto.email,
+        nombre: 'Demo',
+        apellido: 'Usuario',
+        fecha_registro: new Date('2024-01-01T00:00:00Z'),
+        dni: null,
+        telefono: null,
+        role: 'Tutor',
+      };
       authService.login.mockResolvedValue({ access_token: 'token-123', user: mockUser });
       const { response, cookie } = createMockResponse();
 
@@ -83,7 +92,20 @@ describe('AuthController', () => {
   describe('loginEstudiante', () => {
     it('should mirror tutor login behavior for estudiantes', async () => {
       const dto: LoginDto = { email: 'student@test.com', password: 'Secret123!' };
-      const mockUser = { id: 'student-1', email: dto.email, nombre: 'Ana', role: 'Estudiante' };
+      const mockUser = {
+        id: 'student-1',
+        email: dto.email,
+        nombre: 'Ana',
+        apellido: 'García',
+        edad: 12,
+        nivel_escolar: 'Secundaria',
+        foto_url: null,
+        puntos_totales: 0,
+        nivel_actual: 1,
+        equipo: null,
+        tutor: { id: 'tutor-1', nombre: 'Tutor', apellido: 'Test', email: 'tutor@test.com' },
+        role: 'Estudiante',
+      };
       authService.loginEstudiante.mockResolvedValue({
         access_token: 'student-token',
         user: mockUser,
