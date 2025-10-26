@@ -100,7 +100,7 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
 
       let nuevoHashGuardado: string | undefined;
-      jest.spyOn(prisma.estudiante, 'update').mockImplementation(async (params: any) => {
+      (prisma.estudiante.update as jest.Mock).mockImplementation(async (params: any) => {
         nuevoHashGuardado = params.data.password_hash;
         return {
           ...mockEstudiante,

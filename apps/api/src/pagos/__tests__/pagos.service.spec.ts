@@ -10,13 +10,21 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { PagosService } from '../pagos.service';
+import { PagosService } from '../presentation/services/pagos.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { ProductosService } from '../../catalogo/productos.service';
 import { MercadoPagoService } from '../mercadopago.service';
-import { MockPagosService } from '../mock-pagos.service';
 import { TipoProducto } from '@prisma/client';
 import { MercadoPagoWebhookDto } from '../dto/mercadopago-webhook.dto';
+
+class MockPagosService {
+  public generarPreferenciaSuscripcion = jest.fn();
+  public generarPreferenciaCurso = jest.fn();
+  public createMockMembershipPreference = jest.fn();
+  public createMockCoursePreference = jest.fn();
+  public shouldIgnoreWebhook = jest.fn().mockReturnValue(false);
+  public activarMembresiaMock = jest.fn();
+}
 
 const TipoProductoEnum = (TipoProducto || {
   Suscripcion: 'Suscripcion',
@@ -39,12 +47,12 @@ const createWebhookPayload = (
   return {
     action: override.action ?? 'payment.updated',
     type: override.type ?? 'payment',
-    data: paymentData,
+    data: paymentData as unknown as { id: string },
     live_mode: override.live_mode,
     date_created: override.date_created,
     user_id: override.user_id,
     api_version: override.api_version,
-  };
+  } as MercadoPagoWebhookDto;
 };
 
 /**
@@ -84,6 +92,7 @@ const createWebhookPayload = (
 
 describe('PagosService - COMPREHENSIVE TESTS', () => {
   let service: PagosService;
+  let pagosService: any;
   let prisma: PrismaService;
   let productosService: ProductosService;
   let mercadoPagoService: MercadoPagoService;
@@ -187,7 +196,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
               findUnique: jest.fn(),
               findMany: jest.fn(),
             },
-            $transaction: jest.fn((callback) => callback(prisma)),
+            $transaction: jest.fn(),
           },
         },
         {
@@ -220,21 +229,20 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
         },
         {
           provide: MockPagosService,
-          useValue: {
-            createMockMembershipPreference: jest.fn(),
-            createMockCoursePreference: jest.fn(),
-            shouldIgnoreWebhook: jest.fn().mockReturnValue(false),
-            activarMembresiaMock: jest.fn(),
-          },
+          useClass: MockPagosService,
         },
       ],
     }).compile();
 
     service = module.get<PagosService>(PagosService);
+    pagosService = service as any;
     prisma = module.get<PrismaService>(PrismaService);
     productosService = module.get<ProductosService>(ProductosService);
     mercadoPagoService = module.get<MercadoPagoService>(MercadoPagoService);
     mockPagosService = module.get<MockPagosService>(MockPagosService);
+    (prisma.$transaction as jest.Mock).mockImplementation(async (fn: any) =>
+      fn(prisma),
+    );
     cacheManager = module.get(CACHE_MANAGER);
 
     jest.clearAllMocks();
@@ -255,7 +263,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockPreferenceResponse as any);
 
       // Act
-      const result = await service.generarPreferenciaSuscripcion('tutor-123', 'prod-subs-1');
+      const result = await pagosService.generarPreferenciaSuscripcion('tutor-123', 'prod-subs-1');
 
       // Assert
       expect(result).toEqual({
@@ -296,7 +304,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(mockPagosService, 'createMockMembershipPreference').mockReturnValue(mockPreferenceResponse as any);
 
       // Act
-      const result = await service.generarPreferenciaSuscripcion('tutor-123');
+      const result = await pagosService.generarPreferenciaSuscripcion('tutor-123');
 
       // Assert
       expect(productosService.findSuscripciones).toHaveBeenCalled();
@@ -313,7 +321,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(mockPagosService, 'createMockMembershipPreference').mockReturnValue(mockPreferenceResponse as any);
 
       // Act
-      await service.generarPreferenciaSuscripcion('tutor-123', 'prod-subs-1');
+      await pagosService.generarPreferenciaSuscripcion('tutor-123', 'prod-subs-1');
 
       // Assert
       expect(mockPagosService.createMockMembershipPreference).toHaveBeenCalledWith(mockMembresia.id);
@@ -328,10 +336,10 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.generarPreferenciaSuscripcion('tutor-123'),
+        pagosService.generarPreferenciaSuscripcion('tutor-123'),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        service.generarPreferenciaSuscripcion('tutor-123'),
+        pagosService.generarPreferenciaSuscripcion('tutor-123'),
       ).rejects.toThrow('No hay productos de suscripción disponibles');
     });
 
@@ -341,10 +349,10 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.generarPreferenciaSuscripcion('tutor-123', 'prod-curso-1'),
+        pagosService.generarPreferenciaSuscripcion('tutor-123', 'prod-curso-1'),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        service.generarPreferenciaSuscripcion('tutor-123', 'prod-curso-1'),
+        pagosService.generarPreferenciaSuscripcion('tutor-123', 'prod-curso-1'),
       ).rejects.toThrow('El producto especificado no es una suscripción');
     });
 
@@ -355,10 +363,10 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.generarPreferenciaSuscripcion('invalid-tutor', 'prod-subs-1'),
+        pagosService.generarPreferenciaSuscripcion('invalid-tutor', 'prod-subs-1'),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        service.generarPreferenciaSuscripcion('invalid-tutor', 'prod-subs-1'),
+        pagosService.generarPreferenciaSuscripcion('invalid-tutor', 'prod-subs-1'),
       ).rejects.toThrow('Tutor no encontrado');
     });
   });
@@ -377,7 +385,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockPreferenceResponse as any);
 
       // Act
-      const result = await service.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1');
+      const result = await pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1');
 
       // Assert
       expect(result).toEqual({
@@ -408,7 +416,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(mockPagosService, 'createMockCoursePreference').mockReturnValue(mockPreferenceResponse as any);
 
       // Act
-      await service.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1');
+      await pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1');
 
       // Assert
       expect(mockPagosService.createMockCoursePreference).toHaveBeenCalledWith(mockInscripcion.id);
@@ -423,10 +431,10 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-subs-1'),
+        pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-subs-1'),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        service.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-subs-1'),
+        pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-subs-1'),
       ).rejects.toThrow('El producto especificado no es un curso');
     });
 
@@ -437,10 +445,10 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.generarPreferenciaCurso('tutor-123', 'invalid-student', 'prod-curso-1'),
+        pagosService.generarPreferenciaCurso('tutor-123', 'invalid-student', 'prod-curso-1'),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        service.generarPreferenciaCurso('tutor-123', 'invalid-student', 'prod-curso-1'),
+        pagosService.generarPreferenciaCurso('tutor-123', 'invalid-student', 'prod-curso-1'),
       ).rejects.toThrow('Estudiante no encontrado o no pertenece al tutor');
     });
 
@@ -451,7 +459,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.generarPreferenciaCurso('wrong-tutor', 'est-456', 'prod-curso-1'),
+        pagosService.generarPreferenciaCurso('wrong-tutor', 'est-456', 'prod-curso-1'),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -463,10 +471,10 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1'),
+        pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1'),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        service.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1'),
+        pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1'),
       ).rejects.toThrow('El estudiante ya está inscrito en este curso');
     });
   });
@@ -488,7 +496,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'update').mockResolvedValue({} as any);
 
       // Act
-      const result = await service.procesarWebhookMercadoPago(
+      const result = await pagosService.procesarWebhookMercadoPago(
         createWebhookPayload({ data: { id: 'payment-123' } }),
       );
 
@@ -531,7 +539,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'update').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago(
+      await pagosService.procesarWebhookMercadoPago(
         createWebhookPayload({ data: { id: 'payment-456' } }),
       );
 
@@ -557,7 +565,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'update').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago(
+      await pagosService.procesarWebhookMercadoPago(
         createWebhookPayload({ data: { id: 'payment-789' } }),
       );
 
@@ -583,7 +591,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'update').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago(
+      await pagosService.procesarWebhookMercadoPago(
         createWebhookPayload({ data: { id: 'payment-pending' } }),
       );
 
@@ -604,7 +612,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert - Con transacciones, ahora tira NotFoundException
       await expect(
-        service.procesarWebhookMercadoPago(
+        pagosService.procesarWebhookMercadoPago(
           createWebhookPayload({ data: { id: 'payment-123' } }),
         ),
       ).rejects.toThrow(NotFoundException);
@@ -631,7 +639,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.inscripcionCurso, 'update').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago(
+      await pagosService.procesarWebhookMercadoPago(
         createWebhookPayload({ data: { id: 'payment-curso-123' } }),
       );
 
@@ -658,7 +666,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.inscripcionCurso, 'delete').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago(
+      await pagosService.procesarWebhookMercadoPago(
         createWebhookPayload({ data: { id: 'payment-curso-rejected' } }),
       );
 
@@ -684,7 +692,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.inscripcionCurso, 'delete').mockResolvedValue({} as any);
 
       // Act
-      await service.procesarWebhookMercadoPago(
+      await pagosService.procesarWebhookMercadoPago(
         createWebhookPayload({ data: { id: 'payment-curso-cancelled' } }),
       );
 
@@ -706,7 +714,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert - Con transacciones, ahora tira NotFoundException
       await expect(
-        service.procesarWebhookMercadoPago(
+        pagosService.procesarWebhookMercadoPago(
           createWebhookPayload({ data: { id: 'payment-curso-123' } }),
         ),
       ).rejects.toThrow(NotFoundException);
@@ -721,7 +729,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(mockPagosService, 'shouldIgnoreWebhook').mockReturnValue(true);
 
       // Act
-      const result = await service.procesarWebhookMercadoPago(
+      const result = await pagosService.procesarWebhookMercadoPago(
         createWebhookPayload({ data: { id: '123' } }),
       );
 
@@ -732,7 +740,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
     it('should ignore non-payment webhooks', async () => {
       // Act
-      const result = await service.procesarWebhookMercadoPago(
+      const result = await pagosService.procesarWebhookMercadoPago(
         createWebhookPayload({ type: 'merchant_order', data: { id: '123' } }),
       );
 
@@ -743,8 +751,8 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
     it('should handle missing payment ID', async () => {
       // Act
-      const result = await service.procesarWebhookMercadoPago(
-        createWebhookPayload({ data: { id: undefined } }),
+      const result = await pagosService.procesarWebhookMercadoPago(
+        createWebhookPayload({ data: { id: undefined } } as any),
       );
 
       // Assert
@@ -763,7 +771,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
 
       // Act
-      const result = await service.procesarWebhookMercadoPago(
+      const result = await pagosService.procesarWebhookMercadoPago(
         createWebhookPayload({ data: { id: 'payment-unknown' } }),
       );
 
@@ -779,7 +787,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.procesarWebhookMercadoPago(
+        pagosService.procesarWebhookMercadoPago(
           createWebhookPayload({ data: { id: 'payment-fail' } }),
         ),
       ).rejects.toThrow('MercadoPago API error');
@@ -798,7 +806,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'findFirst').mockResolvedValue(mockMembresiaConProducto as any);
 
       // Act
-      const result = await service.obtenerMembresiaTutor('tutor-123');
+      const result = await pagosService.obtenerMembresiaTutor('tutor-123');
 
       // Assert
       expect(result).toEqual(mockMembresiaConProducto);
@@ -827,7 +835,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'findFirst').mockResolvedValue(null);
 
       // Act
-      const result = await service.obtenerMembresiaTutor('tutor-no-memb');
+      const result = await pagosService.obtenerMembresiaTutor('tutor-no-memb');
 
       // Assert
       expect(result).toBeNull();
@@ -848,7 +856,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'findFirst').mockResolvedValue(mockEstadoMembresia as any);
 
       // Act
-      const result = await service.obtenerEstadoMembresia('memb-789', 'tutor-123');
+      const result = await pagosService.obtenerEstadoMembresia('memb-789', 'tutor-123');
 
       // Assert
       expect(result).toEqual(mockEstadoMembresia);
@@ -870,10 +878,10 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.obtenerEstadoMembresia('invalid-memb', 'tutor-123'),
+        pagosService.obtenerEstadoMembresia('invalid-memb', 'tutor-123'),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        service.obtenerEstadoMembresia('invalid-memb', 'tutor-123'),
+        pagosService.obtenerEstadoMembresia('invalid-memb', 'tutor-123'),
       ).rejects.toThrow('Membresía no encontrada');
     });
   });
@@ -892,7 +900,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.inscripcionCurso, 'findMany').mockResolvedValue(mockInscripciones as any);
 
       // Act
-      const result = await service.obtenerInscripcionesEstudiante('est-456', 'tutor-123');
+      const result = await pagosService.obtenerInscripcionesEstudiante('est-456', 'tutor-123');
 
       // Assert
       expect(result).toEqual(mockInscripciones);
@@ -907,7 +915,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.obtenerInscripcionesEstudiante('invalid-est', 'tutor-123'),
+        pagosService.obtenerInscripcionesEstudiante('invalid-est', 'tutor-123'),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -930,7 +938,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.membresia, 'findFirst').mockResolvedValue(mockMembresias[0] as any);
 
       // Act
-      const result = await service.obtenerHistorialPagosTutor('tutor-123');
+      const result = await pagosService.obtenerHistorialPagosTutor('tutor-123');
 
       // Assert
       expect(result).toHaveProperty('historial');
@@ -948,7 +956,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.obtenerHistorialPagosTutor('invalid-tutor'),
+        pagosService.obtenerHistorialPagosTutor('invalid-tutor'),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -959,7 +967,7 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(mockPagosService, 'activarMembresiaMock').mockResolvedValue({ success: true } as any);
 
       // Act
-      const result = await service.activarMembresiaMock('memb-123');
+      const result = await pagosService.activarMembresiaMock('memb-123');
 
       // Assert
       expect(mockPagosService.activarMembresiaMock).toHaveBeenCalledWith('memb-123', false);

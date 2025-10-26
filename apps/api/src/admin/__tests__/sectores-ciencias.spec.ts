@@ -302,7 +302,7 @@ describe('Sector Ciencias - TDD', () => {
   describe('Integración con clases', () => {
     it('una clase puede ser creada con sector Ciencias', async () => {
       // Arrange
-      const claseData = {
+      const claseData: any = {
         nombre: 'Física I',
         docenteId: 'doc-1',
         sectorId: 'sector-ciencias',
@@ -322,7 +322,7 @@ describe('Sector Ciencias - TDD', () => {
       });
 
       // Act
-      const result = await prisma.clase.create({ data: claseData });
+      const result = (await prisma.clase.create({ data: claseData as any })) as any;
 
       // Assert
       expect(result).toBeDefined();
@@ -333,7 +333,7 @@ describe('Sector Ciencias - TDD', () => {
     it('debe poder filtrar clases por sector Ciencias', async () => {
       // Arrange
       mockPrismaService.clase.findMany.mockImplementation(({ where }: any) => {
-        if (where?.sectorId === 'sector-ciencias') {
+        if (where?.sector_id === 'sector-ciencias') {
           return Promise.resolve([
             {
               id: 'clase-1',
@@ -353,10 +353,10 @@ describe('Sector Ciencias - TDD', () => {
       });
 
       // Act
-      const clases = await prisma.clase.findMany({
-        where: { sectorId: 'sector-ciencias' },
+      const clases = (await prisma.clase.findMany({
+        where: { sector_id: 'sector-ciencias' },
         include: { sector: true },
-      });
+      })) as any;
 
       // Assert
       expect(clases).toHaveLength(2);

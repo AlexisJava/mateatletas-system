@@ -1,4 +1,10 @@
-import type { ApiResponse, CursoDetalle } from '@mateatletas/shared';
+type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+  message?: string;
+};
+
+type CursoDetalle = Record<string, any>;
 
 /**
  * Factory helper para crear respuestas de curso detallado en tests

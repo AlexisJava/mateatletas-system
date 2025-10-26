@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { EstadoAsistencia } from '@prisma/client';
 import {
   NotFoundException,
   BadRequestException,
@@ -28,7 +29,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
   const mockClase = {
     id: 'clase-1',
     docente_id: 'doc-1',
-    fecha_hora_inicio: new Date('2025-10-15T10:00:00Z'),
+    fecha_hora_inicio: new Date('2025-10-15T10:00:00Z').toISOString(),
     inscripciones: [
       { estudiante_id: 'est-1' },
       { estudiante_id: 'est-2' },
@@ -77,34 +78,63 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
         { estudiante_id: 'est-2' },
       ] as any);
 
-      const mockTransactionCallback = jest.fn(async (tx) => {
-        // Simulate updates for est-1, est-2
-        // Simulate creates for est-3, est-4
-        return [
-          { id: 'asist-1', estudiante_id: 'est-1', estado: 'Presente', estudiante: { nombre: 'Est1', apellido: 'Apellido1' } },
-          { id: 'asist-2', estudiante_id: 'est-2', estado: 'Ausente', estudiante: { nombre: 'Est2', apellido: 'Apellido2' } },
-          { id: 'asist-3', estudiante_id: 'est-3', estado: 'Presente', estudiante: { nombre: 'Est3', apellido: 'Apellido3' } },
-          { id: 'asist-4', estudiante_id: 'est-4', estado: 'Tardanza', estudiante: { nombre: 'Est4', apellido: 'Apellido4' } },
-        ];
-      });
-
       (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
 
       // Mock transaction operations
-      jest.spyOn(prisma.asistencia, 'update')
-        .mockResolvedValueOnce({ id: 'asist-1', estudiante_id: 'est-1', estado: 'Presente', estudiante: { nombre: 'Est1', apellido: 'Apellido1' } } as any)
-        .mockResolvedValueOnce({ id: 'asist-2', estudiante_id: 'est-2', estado: 'Ausente', estudiante: { nombre: 'Est2', apellido: 'Apellido2' } } as any);
+      (prisma.asistencia.update as jest.Mock)
+        .mockResolvedValueOnce({
+          id: 'asist-1',
+          estudiante_id: 'est-1',
+          estado: 'Presente',
+          estudiante: { nombre: 'Est1', apellido: 'Apellido1' },
+        } as any)
+        .mockResolvedValueOnce({
+          id: 'asist-2',
+          estudiante_id: 'est-2',
+          estado: 'Ausente',
+          estudiante: { nombre: 'Est2', apellido: 'Apellido2' },
+        } as any);
 
-      jest.spyOn(prisma.asistencia, 'create')
-        .mockResolvedValueOnce({ id: 'asist-3', estudiante_id: 'est-3', estado: 'Presente', estudiante: { nombre: 'Est3', apellido: 'Apellido3' } } as any)
-        .mockResolvedValueOnce({ id: 'asist-4', estudiante_id: 'est-4', estado: 'Tardanza', estudiante: { nombre: 'Est4', apellido: 'Apellido4' } } as any);
+      (prisma.asistencia.create as jest.Mock)
+        .mockResolvedValueOnce({
+          id: 'asist-3',
+          estudiante_id: 'est-3',
+          estado: 'Presente',
+          estudiante: { nombre: 'Est3', apellido: 'Apellido3' },
+        } as any)
+        .mockResolvedValueOnce({
+          id: 'asist-4',
+          estudiante_id: 'est-4',
+          estado: 'Tardanza',
+          estudiante: { nombre: 'Est4', apellido: 'Apellido4' },
+        } as any);
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
-          { estudianteId: 'est-2', estado: 'Ausente' as const, observaciones: undefined, puntosOtorgados: 0 },
-          { estudianteId: 'est-3', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
-          { estudianteId: 'est-4', estado: 'Tardanza' as const, observaciones: 'Llegó 10 min tarde', puntosOtorgados: 5 },
+          {
+            estudianteId: 'est-1',
+            estado: EstadoAsistencia.Presente,
+            observaciones: undefined,
+            puntosOtorgados: 10,
+          },
+          {
+            estudianteId: 'est-2',
+            estado: EstadoAsistencia.Ausente,
+            observaciones: undefined,
+            puntosOtorgados: 0,
+          },
+          {
+            estudianteId: 'est-3',
+            estado: EstadoAsistencia.Presente,
+            observaciones: undefined,
+            puntosOtorgados: 10,
+          },
+          {
+            estudianteId: 'est-4',
+            estado: EstadoAsistencia.Justificado,
+            observaciones: 'Llegó 10 min tarde',
+            puntosOtorgados: 5,
+          },
         ],
       };
 
@@ -135,14 +165,32 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
 
-      jest.spyOn(prisma.asistencia, 'create')
-        .mockResolvedValueOnce({ id: 'asist-1', estudiante_id: 'est-1', estudiante: { nombre: 'Est1', apellido: 'A' } } as any)
-        .mockResolvedValueOnce({ id: 'asist-2', estudiante_id: 'est-2', estudiante: { nombre: 'Est2', apellido: 'B' } } as any);
+      (prisma.asistencia.create as jest.Mock)
+        .mockResolvedValueOnce({
+          id: 'asist-1',
+          estudiante_id: 'est-1',
+          estudiante: { nombre: 'Est1', apellido: 'A' },
+        } as any)
+        .mockResolvedValueOnce({
+          id: 'asist-2',
+          estudiante_id: 'est-2',
+          estudiante: { nombre: 'Est2', apellido: 'B' },
+        } as any);
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
-          { estudianteId: 'est-2', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
+          {
+            estudianteId: 'est-1',
+            estado: EstadoAsistencia.Presente,
+            observaciones: undefined,
+            puntosOtorgados: 10,
+          },
+          {
+            estudianteId: 'est-2',
+            estado: EstadoAsistencia.Presente,
+            observaciones: undefined,
+            puntosOtorgados: 10,
+          },
         ],
       };
 
@@ -165,14 +213,32 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
 
-      jest.spyOn(prisma.asistencia, 'update')
-        .mockResolvedValueOnce({ id: 'asist-1', estudiante_id: 'est-1', estudiante: { nombre: 'Est1', apellido: 'A' } } as any)
-        .mockResolvedValueOnce({ id: 'asist-2', estudiante_id: 'est-2', estudiante: { nombre: 'Est2', apellido: 'B' } } as any);
+      (prisma.asistencia.update as jest.Mock)
+        .mockResolvedValueOnce({
+          id: 'asist-1',
+          estudiante_id: 'est-1',
+          estudiante: { nombre: 'Est1', apellido: 'A' },
+        } as any)
+        .mockResolvedValueOnce({
+          id: 'asist-2',
+          estudiante_id: 'est-2',
+          estudiante: { nombre: 'Est2', apellido: 'B' },
+        } as any);
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
-          { estudianteId: 'est-2', estado: 'Ausente' as const, observaciones: undefined, puntosOtorgados: 0 },
+          {
+            estudianteId: 'est-1',
+            estado: EstadoAsistencia.Presente,
+            observaciones: undefined,
+            puntosOtorgados: 10,
+          },
+          {
+            estudianteId: 'est-2',
+            estado: EstadoAsistencia.Ausente,
+            observaciones: undefined,
+            puntosOtorgados: 0,
+          },
         ],
       };
 
@@ -194,11 +260,19 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
 
-      jest.spyOn(prisma.asistencia, 'create').mockResolvedValue({ id: 'asist-1', estudiante: { nombre: 'Test', apellido: 'Student' } } as any);
+      (prisma.asistencia.create as jest.Mock).mockResolvedValue({
+        id: 'asist-1',
+        estudiante: { nombre: 'Test', apellido: 'Student' },
+      } as any);
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
+          {
+            estudianteId: 'est-1',
+            estado: EstadoAsistencia.Presente,
+            observaciones: undefined,
+            puntosOtorgados: 10,
+          },
         ],
       };
 
@@ -219,7 +293,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: EstadoAsistencia.Presente, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -242,14 +316,18 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
 
-      const createSpy = jest.spyOn(prisma.asistencia, 'create').mockImplementation(
-        async (args: any) => ({ id: 'mock', estudiante_id: args.data.estudiante_id, estudiante: { nombre: 'Test', apellido: 'Student' } } as any),
+      const createSpy = (prisma.asistencia.create as jest.Mock).mockImplementation(
+        async (args: any) => ({
+          id: 'mock',
+          estudiante_id: args.data.estudiante_id,
+          estudiante: { nombre: 'Test', apellido: 'Student' },
+        } as any),
       );
 
       const dto = {
         asistencias: Array.from({ length: 30 }, (_, i) => ({
           estudianteId: `est-${i + 1}`,
-          estado: 'Presente' as const,
+          estado: EstadoAsistencia.Presente,
           observaciones: undefined,
           puntosOtorgados: 10,
         })),
@@ -285,18 +363,24 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       (prisma.$transaction as jest.Mock).mockImplementation((callback) => callback(prisma));
 
-      jest.spyOn(prisma.asistencia, 'update').mockImplementation(
-        async (args: any) => ({ id: 'mock-update', estudiante: { nombre: 'Test', apellido: 'Student' } } as any),
+      (prisma.asistencia.update as jest.Mock).mockImplementation(
+        async (args: any) => ({
+          id: 'mock-update',
+          estudiante: { nombre: 'Test', apellido: 'Student' },
+        } as any),
       );
 
-      jest.spyOn(prisma.asistencia, 'create').mockImplementation(
-        async (args: any) => ({ id: 'mock-create', estudiante: { nombre: 'Test', apellido: 'Student' } } as any),
+      (prisma.asistencia.create as jest.Mock).mockImplementation(
+        async (args: any) => ({
+          id: 'mock-create',
+          estudiante: { nombre: 'Test', apellido: 'Student' },
+        } as any),
       );
 
       const dto = {
         asistencias: Array.from({ length: 20 }, (_, i) => ({
           estudianteId: `est-${i + 1}`,
-          estado: 'Presente' as const,
+          estado: EstadoAsistencia.Presente,
           observaciones: undefined,
           puntosOtorgados: 10,
         })),
@@ -330,7 +414,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: EstadoAsistencia.Presente, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -368,7 +452,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: EstadoAsistencia.Presente, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -396,7 +480,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
         asistencias: [
           {
             estudianteId: 'est-1',
-            estado: 'Presente' as const,
+            estado: EstadoAsistencia.Presente,
             observaciones: 'Excelente participación',
             puntosOtorgados: 15,
           },
@@ -424,7 +508,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: EstadoAsistencia.Presente, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -443,7 +527,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-1', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
+          { estudianteId: 'est-1', estado: EstadoAsistencia.Presente, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 
@@ -459,7 +543,7 @@ describe('ClasesAsistenciaService - Batch Upsert Optimization', () => {
 
       const dto = {
         asistencias: [
-          { estudianteId: 'est-999', estado: 'Presente' as const, observaciones: undefined, puntosOtorgados: 10 },
+          { estudianteId: 'est-999', estado: EstadoAsistencia.Presente, observaciones: undefined, puntosOtorgados: 10 },
         ],
       };
 

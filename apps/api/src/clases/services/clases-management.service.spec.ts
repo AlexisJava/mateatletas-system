@@ -34,7 +34,7 @@ describe('ClasesManagementService', () => {
     nombre: 'Clase de Álgebra',
     ruta_curricular_id: 'ruta-1',
     docente_id: 'doc-1',
-    fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+    fecha_hora_inicio: new Date('2025-12-01T10:00:00Z').toISOString(),
     duracion_minutos: 60,
     cupos_maximo: 20,
     cupos_ocupados: 5,
@@ -108,7 +108,7 @@ describe('ClasesManagementService', () => {
       nombre: 'Clase de Álgebra',
       rutaCurricularId: 'ruta-1',
       docenteId: 'doc-1',
-      fechaHoraInicio: new Date('2025-12-01T10:00:00Z'),
+      fechaHoraInicio: new Date('2025-12-01T10:00:00Z').toISOString(),
       duracionMinutos: 60,
       cuposMaximo: 20,
       productoId: undefined,
@@ -182,7 +182,7 @@ describe('ClasesManagementService', () => {
       // Arrange
       const dtoWithPastDate = {
         ...validDto,
-        fechaHoraInicio: new Date('2020-01-01T10:00:00Z'), // Fecha pasada
+        fechaHoraInicio: new Date('2020-01-01T10:00:00Z').toISOString(), // Fecha pasada
       };
       jest.spyOn(prisma.rutaCurricular, 'findUnique').mockResolvedValue(mockRuta as any);
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
@@ -473,14 +473,14 @@ describe('ClasesManagementService', () => {
       {
         id: 'clase-1',
         estado: 'Programada',
-        fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+        fecha_hora_inicio: new Date('2025-12-01T10:00:00Z').toISOString(),
         producto_id: null,
         inscripciones: [],
       },
       {
         id: 'clase-2',
         estado: 'Programada',
-        fecha_hora_inicio: new Date('2025-12-02T10:00:00Z'),
+        fecha_hora_inicio: new Date('2025-12-02T10:00:00Z').toISOString(),
         producto_id: 'curso-1',
         inscripciones: [{ id: 'insc-1', estudiante_id: 'est-1' }],
       },
@@ -562,12 +562,12 @@ describe('ClasesManagementService', () => {
     const mockClases = [
       {
         id: 'clase-1',
-        fecha_hora_inicio: new Date('2025-12-15T10:00:00Z'),
+        fecha_hora_inicio: new Date('2025-12-15T10:00:00Z').toISOString(),
         inscripciones: [{ estudiante_id: 'est-1' }],
       },
       {
         id: 'clase-2',
-        fecha_hora_inicio: new Date('2025-12-20T14:00:00Z'),
+        fecha_hora_inicio: new Date('2025-12-20T14:00:00Z').toISOString(),
         inscripciones: [{ estudiante_id: 'est-2' }],
       },
     ];
@@ -667,12 +667,12 @@ describe('ClasesManagementService', () => {
       {
         id: 'clase-1',
         docente_id: 'doc-1',
-        fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+        fecha_hora_inicio: new Date('2025-12-01T10:00:00Z').toISOString(),
       },
       {
         id: 'clase-2',
         docente_id: 'doc-1',
-        fecha_hora_inicio: new Date('2024-01-01T10:00:00Z'),
+        fecha_hora_inicio: new Date('2024-01-01T10:00:00Z').toISOString(),
       },
     ];
 
