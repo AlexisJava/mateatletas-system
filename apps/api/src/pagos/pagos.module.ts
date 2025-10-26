@@ -4,6 +4,7 @@ import { CatalogoModule } from '../catalogo/catalogo.module';
 import { PagosController } from './presentation/controllers/pagos.controller';
 import { PagosService } from './presentation/services/pagos.service';
 import { PagosTutorService } from './presentation/services/pagos-tutor.service';
+import { VerificacionMorosidadService } from './services/verificacion-morosidad.service';
 
 // Use Cases
 import { CalcularPrecioUseCase } from './application/use-cases/calcular-precio.use-case';
@@ -49,6 +50,7 @@ import { MercadoPagoService } from './mercadopago.service';
     PagosService,
     PagosTutorService,
     MercadoPagoService,
+    VerificacionMorosidadService,
 
     // Infrastructure Layer - Repositories propios del módulo
     ConfiguracionPreciosRepository,
@@ -104,6 +106,7 @@ import { MercadoPagoService } from './mercadopago.service';
     PagosTutorService,
     ConfiguracionPreciosRepository,
     InscripcionMensualRepository,
+    VerificacionMorosidadService,
   ],
 })
 export class PagosModule {}

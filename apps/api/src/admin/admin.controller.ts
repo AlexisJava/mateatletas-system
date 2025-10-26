@@ -108,10 +108,19 @@ export class AdminController {
    * Listar estudiantes del sistema
    * GET /api/admin/estudiantes
    * Rol: Admin
+   * Query params: page, limit, search
    */
   @Get('estudiantes')
-  async listarEstudiantes() {
-    return this.adminService.listarEstudiantes();
+  async listarEstudiantes(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.listarEstudiantes({
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+      search,
+    });
   }
 
   /**

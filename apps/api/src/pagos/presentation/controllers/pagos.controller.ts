@@ -14,6 +14,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PagosService } from '../services/pagos.service';
 import { PagosTutorService } from '../services/pagos-tutor.service';
+import { VerificacionMorosidadService } from '../../services/verificacion-morosidad.service';
 import { CalcularPrecioRequestDto } from '../dtos/calcular-precio-request.dto';
 import { ActualizarConfiguracionPreciosRequestDto } from '../dtos/actualizar-configuracion-precios-request.dto';
 import { CrearInscripcionMensualRequestDto } from '../dtos/crear-inscripcion-mensual-request.dto';
@@ -46,6 +47,7 @@ export class PagosController {
   constructor(
     private readonly pagosService: PagosService,
     private readonly pagosTutorService: PagosTutorService,
+    private readonly verificacionMorosidadService: VerificacionMorosidadService,
   ) {}
 
   /**
@@ -413,5 +415,60 @@ export class PagosController {
     @Headers('x-request-id') requestId: string,
   ) {
     return await this.pagosService.procesarWebhookMercadoPago(webhookData);
+  }
+
+  /**
+   * GET /pagos/morosidad/tutor/:tutorId
+   * Verifica el estado de morosidad de un tutor
+   */
+  @Get('morosidad/tutor/:tutorId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Tutor)
+  @ApiOperation({ summary: 'Verificar morosidad de un tutor' })
+  @ApiResponse({ status: 200, description: 'Estado de morosidad obtenido' })
+  async verificarMorosidadTutor(
+    @Param('tutorId') tutorId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    // Si es tutor, solo puede ver su propia información
+    if (user.role === 'tutor' && user.id !== tutorId) {
+      throw new NotFoundException('No tienes permiso para ver esta información');
+    }
+
+    return await this.verificacionMorosidadService.verificarMorosidadTutor(
+      tutorId,
+    );
+  }
+
+  /**
+   * GET /pagos/morosidad/estudiantes
+   * Obtiene todos los estudiantes morosos (solo admin)
+   */
+  @Get('morosidad/estudiantes')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Obtener lista de estudiantes morosos' })
+  @ApiResponse({ status: 200, description: 'Lista de estudiantes morosos' })
+  async obtenerEstudiantesMorosos() {
+    return await this.verificacionMorosidadService.obtenerEstudiantesMorosos();
+  }
+
+  /**
+   * GET /pagos/morosidad/estudiante/:estudianteId
+   * Verifica si un estudiante puede acceder a la plataforma
+   */
+  @Get('morosidad/estudiante/:estudianteId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Tutor)
+  @ApiOperation({
+    summary: 'Verificar acceso de estudiante según estado de pagos',
+  })
+  @ApiResponse({ status: 200, description: 'Estado de acceso del estudiante' })
+  async verificarAccesoEstudiante(
+    @Param('estudianteId') estudianteId: string,
+  ) {
+    return await this.verificacionMorosidadService.verificarAccesoEstudiante(
+      estudianteId,
+    );
   }
 }

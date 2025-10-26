@@ -36,11 +36,6 @@ export class AdminEstudiantesService {
     limit?: number;
     search?: string;
   }) {
-    // Normalizar parámetros
-    const page = Math.max(1, options?.page || 1);
-    const limit = Math.min(Math.max(1, options?.limit || 50), 200); // Max 200 por página
-    const skip = (page - 1) * limit;
-
     // Construir filtro de búsqueda
     const searchFilter = options?.search
       ? {
@@ -51,11 +46,9 @@ export class AdminEstudiantesService {
         }
       : {};
 
-    // Query con paginación
+    // Query SIN paginación - traer TODOS los estudiantes
     const [estudiantes, total] = await Promise.all([
       this.prisma.estudiante.findMany({
-        skip,
-        take: limit,
         where: searchFilter,
         include: {
           tutor: {
@@ -93,6 +86,34 @@ export class AdminEstudiantesService {
               es_principal: true,
             },
           },
+          inscripciones_clase_grupo: {
+            where: {
+              fecha_baja: null, // Solo inscripciones activas
+            },
+            select: {
+              id: true,
+              fecha_inscripcion: true,
+              claseGrupo: {
+                select: {
+                  id: true,
+                  codigo: true,
+                  nombre: true,
+                  dia_semana: true,
+                  hora_inicio: true,
+                  hora_fin: true,
+                  activo: true,
+                  grupo: {
+                    select: {
+                      id: true,
+                      codigo: true,
+                      nombre: true,
+                      descripcion: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
         orderBy: {
           apellido: 'asc',
@@ -118,6 +139,21 @@ export class AdminEstudiantesService {
         ...es.sector,
         es_principal: es.es_principal,
       })),
+      // GRUPOS: Inscripciones activas en grupos
+      inscripciones_grupos: est.inscripciones_clase_grupo.map(insc => ({
+        id: insc.id,
+        fecha_inscripcion: insc.fecha_inscripcion,
+        clase_grupo: {
+          id: insc.claseGrupo.id,
+          codigo: insc.claseGrupo.codigo,
+          nombre: insc.claseGrupo.nombre,
+          dia_semana: insc.claseGrupo.dia_semana,
+          hora_inicio: insc.claseGrupo.hora_inicio,
+          hora_fin: insc.claseGrupo.hora_fin,
+          activo: insc.claseGrupo.activo,
+        },
+        grupo: insc.claseGrupo.grupo,
+      })),
       createdAt: est.createdAt,
       updatedAt: est.updatedAt,
     }));
@@ -126,11 +162,6 @@ export class AdminEstudiantesService {
       data: mappedEstudiantes,
       metadata: {
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-        hasNextPage: page < Math.ceil(total / limit),
-        hasPreviousPage: page > 1,
       },
     };
   }

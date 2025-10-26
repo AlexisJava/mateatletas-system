@@ -112,8 +112,13 @@ export default function PagosDashboard() {
         setError(null);
 
         // Ejecutar todas las llamadas en paralelo
+        // Usar mes actual automáticamente
+        const now = new Date();
+        const mesActual = now.getMonth() + 1; // 1-12
+        const anioActual = now.getFullYear();
+
         const [metricas, config, historial, pendientes, descuentos] = await Promise.all([
-          getMetricasDashboard(),
+          getMetricasDashboard({ anio: anioActual, mes: mesActual }),
           getConfiguracionPrecios(),
           getHistorialCambios(),
           getInscripcionesPendientes(),

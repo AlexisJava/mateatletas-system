@@ -47,11 +47,13 @@ export interface SystemHealth {
 export interface AdminUser {
   id: string;
   email: string;
+  username?: string; // Username generado automáticamente (nombre.apellido)
   nombre: string;
   apellido: string;
   role: 'tutor' | 'docente' | 'admin'; // Rol principal (primer rol)
   roles?: ('tutor' | 'docente' | 'admin' | 'estudiante')[]; // Múltiples roles
   activo: boolean;
+  password_temporal?: string; // Contraseña temporal mostrada al admin
   createdAt: string;
   updatedAt: string;
   _count?: {
