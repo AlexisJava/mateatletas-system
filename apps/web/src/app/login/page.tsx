@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { useAuthStore } from '@/store/auth.store';
+import ForcePasswordChangeOverlay from '@/components/auth/ForcePasswordChangeOverlay';
 import {
   Terminal,
   Eye,
@@ -123,25 +124,36 @@ export default function LoginPage() {
   const { login, loginEstudiante, isLoading, isAuthenticated, user } = useAuthStore();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const hasRedirectedRef = useRef(false);
+  const mustChangePassword = useMemo(
+    () => Boolean(user?.debe_cambiar_password),
+    [user?.debe_cambiar_password],
+  );
 
   // Redirigir si ya está autenticado
   useEffect(() => {
-    // Solo redirigir si está en la página de login y está autenticado
-    if (isAuthenticated && user && !hasRedirectedRef.current && !isLoading) {
+    if (!isAuthenticated || !user || isLoading) {
+      return;
+    }
+
+    if (mustChangePassword) {
+      setIsRedirecting(false);
+      hasRedirectedRef.current = false;
+      return;
+    }
+
+    if (!hasRedirectedRef.current) {
       hasRedirectedRef.current = true;
       setIsRedirecting(true);
 
-      // Redirigir según el rol del usuario usando replace para evitar bucles
       const redirectPath =
         user.role === 'admin' ? '/admin/dashboard' :
         user.role === 'docente' ? '/docente/dashboard' :
         user.role === 'estudiante' ? '/estudiante/dashboard' :
         '/dashboard';
 
-      // Usar replace en lugar de push para evitar agregar entrada al historial
       router.replace(redirectPath);
     }
-  }, [isAuthenticated, user, router, isLoading]);
+  }, [isAuthenticated, user, router, isLoading, mustChangePassword]);
 
   const [userType, setUserType] = useState<'tutor' | 'estudiante'>('tutor');
   const [email, setEmail] = useState('');
@@ -192,8 +204,6 @@ export default function LoginPage() {
       } else {
         await login(email, password);
       }
-      // El useEffect manejará la redirección
-      setIsRedirecting(true);
     } catch (err: unknown) {
       // Ignorar errores de abort
       if (err instanceof Error && err.name === 'AbortError') {
@@ -631,6 +641,12 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      <ForcePasswordChangeOverlay
+        onSuccess={() => {
+          hasRedirectedRef.current = false;
+        }}
+      />
     </div>
   );
 }

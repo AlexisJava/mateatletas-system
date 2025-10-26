@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
+import ForcePasswordChangeOverlay from '@/components/auth/ForcePasswordChangeOverlay';
 
 /**
  * Protected Layout - Envuelve todas las rutas que requieren autenticación
@@ -92,5 +93,10 @@ export default function ProtectedLayout({
    * Si llegamos aquí, el usuario está autenticado
    * Los componentes hijos (como DashboardView) manejan su propio layout
    */
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <ForcePasswordChangeOverlay />
+    </>
+  );
 }
