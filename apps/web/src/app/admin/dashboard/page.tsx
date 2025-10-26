@@ -115,8 +115,8 @@ export default function AdminDashboard() {
   const mainStats = [
     {
       label: 'Nuevos Estudiantes',
-      displayValue: formatLargeNumber(totalUsuarios),
-      fullValue: totalUsuarios,
+      displayValue: formatLargeNumber(totalEstudiantes),
+      fullValue: totalEstudiantes,
       icon: UserPlus,
       trend: null, // TODO: Calcular desde backend comparando con mes anterior
       trendUp: true,

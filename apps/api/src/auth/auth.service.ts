@@ -168,6 +168,7 @@ export class AuthService {
         equipo: estudiante.equipo,
         tutor: estudiante.tutor,
         role: 'estudiante',
+        debe_cambiar_password: estudiante.debe_cambiar_password,
       },
     };
   }
@@ -181,48 +182,43 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    // 1. Buscar en TODAS las tablas para detectar multi-rol
-    const [adminUser, docenteUser, tutorUser] = await Promise.all([
-      this.prisma.admin.findUnique({ where: { email } }),
-      this.prisma.docente.findUnique({ where: { email } }),
-      this.prisma.tutor.findUnique({ where: { email } }),
-    ]);
+    // 1. Intentar buscar como tutor primero
+    let user: AuthenticatedUser | null = await this.prisma.tutor.findUnique({
+      where: { email },
+    });
 
-    // 2. Construir array de roles disponibles
-    const availableRoles: Role[] = [];
-    if (adminUser) availableRoles.push(Role.Admin);
-    if (docenteUser) availableRoles.push(Role.Docente);
-    if (tutorUser) availableRoles.push(Role.Tutor);
+    if (!user) {
+      user = await this.prisma.docente.findUnique({
+        where: { email },
+      });
+    }
 
-    if (availableRoles.length === 0) {
+    if (!user) {
+      user = await this.prisma.admin.findUnique({
+        where: { email },
+      });
+    }
+
+    // 4. Verificar que el usuario exista
+    if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // 3. Priorizar: Admin > Docente > Tutor
-    let user: AuthenticatedUser;
-    let userType: 'admin' | 'docente' | 'tutor';
-
-    if (adminUser) {
-      user = adminUser;
-      userType = 'admin';
-    } else if (docenteUser) {
-      user = docenteUser;
-      userType = 'docente';
-    } else {
-      user = tutorUser!;
-      userType = 'tutor';
-    }
-
-    // 4. Comparar contraseña con bcrypt
+    // 5. Comparar contraseña con bcrypt
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // 5. Obtener roles del usuario desde la BD o usar los detectados
+    // 6. Obtener roles del usuario desde la BD (puede tener múltiples roles) - usando utility segura
     const userRoles = parseUserRoles(user.roles);
-    const finalUserRoles = userRoles.length > 0 ? userRoles : availableRoles;
+    const detectedRole = isTutorUser(user)
+      ? Role.Tutor
+      : isDocenteUser(user)
+        ? Role.Docente
+        : Role.Admin;
+    const finalUserRoles = userRoles.length > 0 ? userRoles : [detectedRole];
 
     if (!user.email) {
       throw new UnauthorizedException('El usuario no tiene email configurado');
@@ -235,60 +231,53 @@ export class AuthService {
       finalUserRoles,
     );
 
-    // 7. Retornar token y datos del usuario (estructura diferente según tipo)
-    if (userType === 'tutor') {
-      const tutorUser = user as Tutor;
+    // 7. Retornar token y datos del usuario (estructura diferente según rol)
+    if (isTutorUser(user)) {
       return {
         access_token: accessToken,
         user: {
-          id: tutorUser.id,
-          email: tutorUser.email!,
-          nombre: tutorUser.nombre,
-          apellido: tutorUser.apellido,
-          dni: tutorUser.dni ?? null,
-          telefono: tutorUser.telefono ?? null,
-          fecha_registro: tutorUser.fecha_registro,
-          ha_completado_onboarding: tutorUser.ha_completado_onboarding,
-          debe_cambiar_password: tutorUser.debe_cambiar_password ?? false,
+          id: user.id,
+          email: user.email,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          dni: user.dni ?? null,
+          telefono: user.telefono ?? null,
+          fecha_registro: user.fecha_registro,
+          ha_completado_onboarding: user.ha_completado_onboarding,
           role: 'tutor',
-          roles: finalUserRoles,
+          debe_cambiar_password: user.debe_cambiar_password,
         },
       };
     }
 
-    if (userType === 'docente') {
-      const docenteUser = user as Docente;
+    if (isDocenteUser(user)) {
       return {
         access_token: accessToken,
         user: {
-          id: docenteUser.id,
-          email: docenteUser.email,
-          nombre: docenteUser.nombre,
-          apellido: docenteUser.apellido,
-          titulo: docenteUser.titulo ?? null,
-          bio: docenteUser.bio ?? null,
-          debe_cambiar_password: docenteUser.debe_cambiar_password ?? false,
+          id: user.id,
+          email: user.email,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          titulo: user.titulo ?? null,
+          bio: user.bio ?? null,
           role: 'docente',
-          roles: finalUserRoles,
+          debe_cambiar_password: user.debe_cambiar_password,
         },
       };
     }
 
-    // userType === 'admin'
-    const adminUserFinal = user as AdminModel;
     return {
       access_token: accessToken,
       user: {
-        id: adminUserFinal.id,
-        email: adminUserFinal.email,
-        nombre: adminUserFinal.nombre,
-        apellido: adminUserFinal.apellido,
-        fecha_registro: adminUserFinal.fecha_registro,
-        dni: adminUserFinal.dni ?? null,
-        telefono: adminUserFinal.telefono ?? null,
-        debe_cambiar_password: (adminUserFinal as any).debe_cambiar_password ?? false,
+        id: user.id,
+        email: user.email,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        fecha_registro: user.fecha_registro,
+        dni: isAdminUser(user) ? user.dni ?? null : null,
+        telefono: isAdminUser(user) ? user.telefono ?? null : null,
         role: 'admin',
-        roles: finalUserRoles,
+        debe_cambiar_password: false,
       },
     };
   }
@@ -349,6 +338,7 @@ export class AuthService {
           bio: true,
           createdAt: true,
           updatedAt: true,
+          debe_cambiar_password: true,
         },
       });
 
@@ -403,6 +393,7 @@ export class AuthService {
           tutor_id: true,
           createdAt: true,
           updatedAt: true,
+          debe_cambiar_password: true,
         },
       });
 
@@ -430,6 +421,7 @@ export class AuthService {
         ha_completado_onboarding: true,
         createdAt: true,
         updatedAt: true,
+        debe_cambiar_password: true,
         // IMPORTANTE: NO seleccionar password_hash
       },
     });

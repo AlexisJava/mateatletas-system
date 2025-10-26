@@ -30,8 +30,6 @@ export interface AuthUser {
   nombre: string;
   apellido: string;
   role: AuthRole;
-  roles?: AuthRole[]; // Array de roles para multi-rol
-  debe_cambiar_password?: boolean; // Flag para forzar cambio de contraseña
   dni?: string | null;
   telefono?: string | null;
   fecha_registro?: string;
@@ -43,6 +41,7 @@ export interface AuthUser {
   foto_url?: string | null;
   puntos_totales?: number;
   nivel_actual?: number;
+  debe_cambiar_password?: boolean;
   equipo?: {
     id: string;
     nombre: string;
@@ -71,6 +70,16 @@ export interface LoginResponse {
 export interface LogoutResponse {
   message: string;
   description: string;
+}
+
+export interface ChangePasswordPayload {
+  passwordActual: string;
+  nuevaPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  success: boolean;
+  message: string;
 }
 
 /**
@@ -127,17 +136,12 @@ export const authApi = {
 
   /**
    * Cambia la contraseña del usuario autenticado
-   * @param passwordActual - Contraseña actual del usuario
-   * @param nuevaPassword - Nueva contraseña
-   * @returns Promise con resultado del cambio
+   * @param data - Contraseñas actual y nueva
+   * @returns Mensaje de confirmación
    */
-  cambiarPassword: (
-    passwordActual: string,
-    nuevaPassword: string,
-  ): Promise<{ success: boolean; message: string }> => {
-    return apiClient.post('/auth/cambiar-password', {
-      passwordActual,
-      nuevaPassword,
-    });
+  changePassword: (
+    data: ChangePasswordPayload,
+  ): Promise<ChangePasswordResponse> => {
+    return apiClient.post('/auth/change-password', data);
   },
 };
