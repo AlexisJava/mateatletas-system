@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useStats, useStatsLoading, useFetchStats } from '@/features/admin/stats';
+import { useAuthStore } from '@/store/auth.store';
 import {
   GraduationCap,
   BookOpen,
@@ -53,6 +54,7 @@ export default function AdminDashboard() {
   const stats = useStats();
   const isLoading = useStatsLoading();
   const fetchStats = useFetchStats();
+  const { user } = useAuthStore();
   const [greeting, setGreeting] = useState('Bienvenido');
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -485,7 +487,7 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-between mb-6 relative z-10 max-w-full">
         <div className="flex-shrink-0">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-violet-200 to-blue-200 bg-clip-text text-transparent drop-shadow-lg mb-1">
-            {greeting}, Admin
+            {greeting}, {user?.nombre || 'Admin'}
           </h1>
           <p className="text-sm text-slate-300 font-medium">
             Tu centro de comando de Mateatletas Club

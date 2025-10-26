@@ -13,6 +13,8 @@ export interface User {
   nombre: string;
   apellido: string;
   role: UserRole;
+  roles?: UserRole[]; // Array de roles para multi-rol
+  debe_cambiar_password?: boolean; // Flag para forzar cambio de contraseña
   dni?: string | null;
   telefono?: string | null;
   fecha_registro?: string;
@@ -34,6 +36,7 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  selectedRole: UserRole | null; // Rol activo cuando el usuario tiene múltiples roles
 
   // Acciones
   login: (email: string, password: string) => Promise<void>;
@@ -42,6 +45,11 @@ interface AuthState {
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   setUser: (user: User) => void;
+  setSelectedRole: (role: UserRole) => void;
+  cambiarPassword: (
+    passwordActual: string,
+    nuevaPassword: string,
+  ) => Promise<void>;
 }
 
 /**
@@ -61,6 +69,7 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       isLoading: false,
+      selectedRole: null,
 
       /**
        * Login: Autentica al usuario
@@ -70,24 +79,21 @@ export const useAuthStore = create<AuthState>()(
        * @throws Error si las credenciales son inválidas
        */
       login: async (email: string, password: string) => {
-        set({ isLoading: true });
+        set({ isLoading: true, selectedRole: null });
 
         try {
           const response = await authApi.login({ email, password });
 
-          // Ya NO guardamos token en localStorage (se usa httpOnly cookie)
-          // El backend configura la cookie automáticamente
-
-          // Actualizar estado (sin token)
           set({
             user: response.user as User,
-            token: null, // Ya no guardamos el token aquí
+            token: null,
             isAuthenticated: true,
             isLoading: false,
+            selectedRole: null,
           });
         } catch (error: unknown) {
           set({ isLoading: false });
-          throw error; // Propagar error para manejo en componente
+          throw error;
         }
       },
 
@@ -161,6 +167,7 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             isAuthenticated: false,
             isLoading: false,
+            selectedRole: null, // Reset selectedRole en logout
           });
         }
       },
@@ -205,6 +212,48 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user: User) => {
         set({ user });
       },
+
+      /**
+       * SetSelectedRole: Establece el rol activo cuando el usuario tiene múltiples roles
+       * @param role - Rol seleccionado por el usuario
+       */
+      setSelectedRole: (role: UserRole) => {
+        set({ selectedRole: role });
+      },
+
+      /**
+       * CambiarPassword: Cambia la contraseña del usuario autenticado
+       * @param passwordActual - Contraseña actual
+       * @param nuevaPassword - Nueva contraseña
+       * @throws Error si la contraseña actual es incorrecta
+       */
+      cambiarPassword: async (
+        passwordActual: string,
+        nuevaPassword: string,
+      ) => {
+        set({ isLoading: true });
+
+        try {
+          await authApi.cambiarPassword(passwordActual, nuevaPassword);
+
+          // Actualizar flag debe_cambiar_password a false
+          const currentUser = get().user;
+          if (currentUser) {
+            set({
+              user: {
+                ...currentUser,
+                debe_cambiar_password: false,
+              },
+              isLoading: false,
+            });
+          } else {
+            set({ isLoading: false });
+          }
+        } catch (error: unknown) {
+          set({ isLoading: false });
+          throw error;
+        }
+      },
     }),
     {
       // Configuración de persistencia
@@ -220,6 +269,10 @@ export const useAuthStore = create<AuthState>()(
         if (state) {
           // Si hay user, marcamos como autenticado
           state.isAuthenticated = !!state.user;
+
+          // IMPORTANTE: Siempre resetear selectedRole al rehidratar
+          // El usuario debe elegir el rol cada vez que carga la app
+          state.selectedRole = null;
         }
       },
     },
