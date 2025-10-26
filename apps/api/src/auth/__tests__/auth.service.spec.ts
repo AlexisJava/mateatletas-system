@@ -49,6 +49,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     roles: null,
+    debe_cambiar_password: false,
   };
 
   const mockDocente = {
@@ -104,6 +105,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     roles: null,
+    debe_cambiar_password: true,
   };
 
   beforeEach(async () => {

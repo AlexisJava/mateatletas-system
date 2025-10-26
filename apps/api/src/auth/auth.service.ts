@@ -168,6 +168,7 @@ export class AuthService {
         equipo: estudiante.equipo,
         tutor: estudiante.tutor,
         role: 'estudiante',
+        debe_cambiar_password: estudiante.debe_cambiar_password,
       },
     };
   }
@@ -244,6 +245,7 @@ export class AuthService {
           fecha_registro: user.fecha_registro,
           ha_completado_onboarding: user.ha_completado_onboarding,
           role: 'tutor',
+          debe_cambiar_password: user.debe_cambiar_password,
         },
       };
     }
@@ -259,6 +261,7 @@ export class AuthService {
           titulo: user.titulo ?? null,
           bio: user.bio ?? null,
           role: 'docente',
+          debe_cambiar_password: user.debe_cambiar_password,
         },
       };
     }
@@ -274,6 +277,7 @@ export class AuthService {
         dni: isAdminUser(user) ? user.dni ?? null : null,
         telefono: isAdminUser(user) ? user.telefono ?? null : null,
         role: 'admin',
+        debe_cambiar_password: false,
       },
     };
   }
@@ -334,6 +338,7 @@ export class AuthService {
           bio: true,
           createdAt: true,
           updatedAt: true,
+          debe_cambiar_password: true,
         },
       });
 
@@ -388,6 +393,7 @@ export class AuthService {
           tutor_id: true,
           createdAt: true,
           updatedAt: true,
+          debe_cambiar_password: true,
         },
       });
 
@@ -415,6 +421,7 @@ export class AuthService {
         ha_completado_onboarding: true,
         createdAt: true,
         updatedAt: true,
+        debe_cambiar_password: true,
         // IMPORTANTE: NO seleccionar password_hash
       },
     });
