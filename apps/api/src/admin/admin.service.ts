@@ -410,6 +410,135 @@ export class AdminService {
   }
 
   /**
+   * Resetear contraseña de un usuario específico
+   * Genera nueva contraseña temporal y marca debe_cambiar_password = true
+   */
+  async resetearPasswordUsuario(
+    usuarioId: string,
+    tipoUsuario: 'tutor' | 'estudiante' | 'docente',
+  ) {
+    const bcrypt = require('bcrypt');
+    const {
+      generateTutorPassword,
+      generateEstudiantePin,
+      generateDocentePassword,
+    } = require('../common/utils/credential-generator');
+    const { BCRYPT_ROUNDS } = require('../common/constants/security.constants');
+
+    let nuevaPassword: string;
+    let hashedPassword: string;
+    let usuario: any;
+
+    switch (tipoUsuario) {
+      case 'tutor':
+        nuevaPassword = generateTutorPassword();
+        hashedPassword = await bcrypt.hash(nuevaPassword, BCRYPT_ROUNDS);
+
+        usuario = await this.prisma.tutor.update({
+          where: { id: usuarioId },
+          data: {
+            password: hashedPassword,
+            password_temporal: nuevaPassword,
+            debe_cambiar_password: true,
+          },
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        });
+        break;
+
+      case 'estudiante':
+        nuevaPassword = generateEstudiantePin();
+        hashedPassword = await bcrypt.hash(nuevaPassword, BCRYPT_ROUNDS);
+
+        usuario = await this.prisma.estudiante.update({
+          where: { id: usuarioId },
+          data: {
+            password: hashedPassword,
+            password_temporal: nuevaPassword,
+            debe_cambiar_password: true,
+          },
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            username: true,
+          },
+        });
+        break;
+
+      case 'docente':
+        nuevaPassword = generateDocentePassword();
+        hashedPassword = await bcrypt.hash(nuevaPassword, BCRYPT_ROUNDS);
+
+        usuario = await this.prisma.docente.update({
+          where: { id: usuarioId },
+          data: {
+            password: hashedPassword,
+            password_temporal: nuevaPassword,
+            debe_cambiar_password: true,
+          },
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        });
+        break;
+    }
+
+    return {
+      message: 'Contraseña reseteada exitosamente',
+      usuario,
+      password_temporal: nuevaPassword,
+    };
+  }
+
+  /**
+   * Resetear contraseñas masivamente
+   * Procesa múltiples usuarios en paralelo
+   */
+  async resetearPasswordsMasivo(
+    usuarios: Array<{ id: string; tipoUsuario: 'tutor' | 'estudiante' | 'docente' }>,
+  ) {
+    const resultados = await Promise.all(
+      usuarios.map(async (u) => {
+        try {
+          const resultado = await this.resetearPasswordUsuario(u.id, u.tipoUsuario);
+          return {
+            success: true,
+            usuarioId: u.id,
+            tipoUsuario: u.tipoUsuario,
+            usuario: resultado.usuario,
+            password_temporal: resultado.password_temporal,
+          };
+        } catch (error) {
+          return {
+            success: false,
+            usuarioId: u.id,
+            tipoUsuario: u.tipoUsuario,
+            error: error.message,
+          };
+        }
+      }),
+    );
+
+    const exitosos = resultados.filter((r) => r.success);
+    const fallidos = resultados.filter((r) => !r.success);
+
+    return {
+      message: `${exitosos.length} contraseñas reseteadas, ${fallidos.length} fallidas`,
+      exitosos,
+      fallidos,
+      total: usuarios.length,
+    };
+  }
+
+  /**
    * Obtener métricas de los circuit breakers (para monitoring)
    * Útil para dashboards de observabilidad
    */
