@@ -30,6 +30,25 @@ interface Estudiante {
     color: string;
     icono: string;
   };
+  inscripciones_grupos?: Array<{
+    id: string;
+    fecha_inscripcion: string;
+    clase_grupo: {
+      id: string;
+      codigo: string;
+      nombre: string;
+      dia_semana: string;
+      hora_inicio: string;
+      hora_fin: string;
+      activo: boolean;
+    };
+    grupo: {
+      id: string;
+      codigo: string;
+      nombre: string;
+      descripcion: string;
+    };
+  }>;
 }
 
 interface Sector {
@@ -57,12 +76,15 @@ export default function AdminEstudiantesPage() {
     try {
       setIsLoading(true);
       setError(null);
-      // Endpoint para admin que trae TODOS los estudiantes
+      // Endpoint para admin que trae TODOS los estudiantes SIN límite
       const response = await apiClient.get('/admin/estudiantes');
+      console.log('📊 Respuesta del servidor:', response);
       // El backend devuelve { data: [], metadata: {} }
       const estudiantes = response?.data ? response.data : (Array.isArray(response) ? response : []);
+      console.log('👥 Estudiantes procesados:', estudiantes.length);
       setEstudiantes(estudiantes as Estudiante[]);
     } catch (err: unknown) {
+      console.error('❌ Error al cargar estudiantes:', err);
       setError(getErrorMessage(err, 'Error al cargar estudiantes'));
     } finally {
       setIsLoading(false);
@@ -79,14 +101,16 @@ export default function AdminEstudiantesPage() {
   };
 
   const handleAbrirModal = (nombreSector: string) => {
-    const sector = sectores.find(s => s.nombre === nombreSector);
+    // Mapear nombre de botón a nombre real del sector
+    const nombreSectorReal = nombreSector === 'Ciencias' ? 'Divulgación Científica' : nombreSector;
+    const sector = sectores.find(s => s.nombre === nombreSectorReal);
     if (sector) {
-      console.log(`[DEBUG] Abriendo modal para sector: ${nombreSector} con ID: ${sector.id}`);
+      console.log(`[DEBUG] Abriendo modal para sector: ${nombreSectorReal} con ID: ${sector.id}`);
       setSectorIdParaModal(sector.id);
       setIsModalOpen(true);
     } else {
-      console.error(`[ERROR] No se encontró el sector: ${nombreSector}. Sectores disponibles:`, sectores);
-      setError(`No se pudo abrir el modal: sector "${nombreSector}" no encontrado`);
+      console.error(`[ERROR] No se encontró el sector: ${nombreSectorReal}. Sectores disponibles:`, sectores);
+      setError(`No se pudo abrir el modal: sector "${nombreSectorReal}" no encontrado`);
     }
   };
 
@@ -111,7 +135,7 @@ export default function AdminEstudiantesPage() {
   // Separar estudiantes por sector
   const estudiantesProgramacion = estudiantes.filter(est => est.sector?.nombre === 'Programación');
   const estudiantesMatematica = estudiantes.filter(est => est.sector?.nombre === 'Matemática');
-  const estudiantesCiencias = estudiantes.filter(est => est.sector?.nombre === 'Ciencias');
+  const estudiantesCiencias = estudiantes.filter(est => est.sector?.nombre === 'Divulgación Científica' || est.sector?.nombre === 'Ciencias');
   const estudiantesSinSector = estudiantes.filter(est => !est.sector);
 
   const renderTablaEstudiantes = (listaEstudiantes: Estudiante[], titulo: string, icono: string) => {
@@ -137,19 +161,16 @@ export default function AdminEstudiantesPage() {
                   Edad
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
-                  Nivel Escolar
+                  Grupos
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
-                  Nivel Actual
+                  Horario
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
                   Puntos
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
                   Tutor
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
-                  Equipo
                 </th>
               </tr>
             </thead>
@@ -173,37 +194,40 @@ export default function AdminEstudiantesPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
                       {estudiante.edad} años
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-3 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-sm font-semibold">
-                        {estudiante.nivelEscolar}
-                      </span>
+                    <td className="px-6 py-4">
+                      {estudiante.inscripciones_grupos && estudiante.inscripciones_grupos.length > 0 ? (
+                        <div className="flex flex-col gap-1">
+                          {estudiante.inscripciones_grupos.map((insc) => (
+                            <span
+                              key={insc.id}
+                              className="px-2 py-1 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-semibold"
+                            >
+                              {insc.grupo.codigo} - {insc.grupo.nombre}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-white/40 text-xs">Sin grupo</span>
+                      )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-3 py-1 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 text-sm font-semibold">
-                        Nivel {estudiante.nivel_actual}
-                      </span>
+                    <td className="px-6 py-4">
+                      {estudiante.inscripciones_grupos && estudiante.inscripciones_grupos.length > 0 ? (
+                        <div className="flex flex-col gap-1">
+                          {estudiante.inscripciones_grupos.map((insc) => (
+                            <span key={insc.id} className="text-xs text-white/60">
+                              {insc.clase_grupo.dia_semana} {insc.clase_grupo.hora_inicio}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-white/40 text-xs">-</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-amber-400">
                       {estudiante.puntos_totales} pts
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
                       {estudiante.tutor.nombre} {estudiante.tutor.apellido}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {estudiante.equipo ? (
-                        <span
-                          className="px-3 py-1 rounded-lg text-sm font-semibold border"
-                          style={{
-                            backgroundColor: `${estudiante.equipo.color_primario}20`,
-                            borderColor: `${estudiante.equipo.color_primario}50`,
-                            color: estudiante.equipo.color_primario,
-                          }}
-                        >
-                          {estudiante.equipo.nombre}
-                        </span>
-                      ) : (
-                        <span className="text-white/40 text-sm">Sin equipo</span>
-                      )}
                     </td>
                   </tr>
                 );
@@ -236,11 +260,11 @@ export default function AdminEstudiantesPage() {
             Todos los Estudiantes
           </h1>
           <p className="text-white/60 mt-1 text-sm">
-            Gestión completa de estudiantes de la plataforma
+            Gestión completa de estudiantes de la plataforma ({estudiantes.length} total)
           </p>
         </div>
         <div className="px-6 py-3 rounded-xl backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/20 text-emerald-100 font-bold shadow-lg shadow-emerald-500/10">
-          {estudiantes.length} Estudiantes
+          {estudiantesActivos.length} Mostrando
         </div>
       </div>
 

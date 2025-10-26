@@ -417,8 +417,16 @@ export default function UsuariosPage() {
                     Usuario
                   </th>
                   <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
+                    Username
+                  </th>
+                  <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
                     Email
                   </th>
+                  {activeTab === 'tutores' && (
+                    <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
+                      Credencial
+                    </th>
+                  )}
                   <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
                     Rol
                   </th>
@@ -449,8 +457,26 @@ export default function UsuariosPage() {
                       </div>
                     </td>
                     <td className="px-8 py-5 whitespace-nowrap">
+                      <div className="text-sm text-cyan-400 font-mono font-bold">
+                        {user.username || `${user.nombre.toLowerCase()}.${user.apellido.toLowerCase()}`}
+                      </div>
+                    </td>
+                    <td className="px-8 py-5 whitespace-nowrap">
                       <div className="text-sm text-white/70 font-medium">{user.email}</div>
                     </td>
+                    {activeTab === 'tutores' && (
+                      <td className="px-8 py-5 whitespace-nowrap">
+                        {user.password_temporal ? (
+                          <div className="flex items-center gap-2">
+                            <span className="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 text-xs font-mono font-bold rounded-lg">
+                              {user.password_temporal}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-white/30 text-xs italic">Ya cambió contraseña</span>
+                        )}
+                      </td>
+                    )}
                     <td className="px-8 py-5">
                       <div className="flex flex-wrap gap-2">
                         {(user.roles && user.roles.length > 0 ? user.roles : [user.role]).map((role) => (

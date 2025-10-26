@@ -254,9 +254,13 @@ export class AdminService {
    * DELEGACIÓN: AdminEstudiantesService
    * PROTECCIÓN: Circuit Breaker con fallback (array vacío)
    */
-  async listarEstudiantes() {
+  async listarEstudiantes(options?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) {
     return this.listarEstudiantesCircuit.execute(() =>
-      this.estudiantesService.listarEstudiantes(),
+      this.estudiantesService.listarEstudiantes(options),
     );
   }
 
@@ -332,6 +336,7 @@ export class AdminService {
         nombre: true,
         apellido: true,
         email: true,
+        username: true,
         password_temporal: true,
         debe_cambiar_password: true,
         createdAt: true,
@@ -380,7 +385,7 @@ export class AdminService {
         rol: 'Tutor',
         nombre: t.nombre,
         apellido: t.apellido,
-        usuario: t.email,
+        usuario: t.username || `${t.nombre.toLowerCase()}.${t.apellido.toLowerCase()}`,
         password_temporal: t.password_temporal,
         estado: t.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
         fecha_creacion: t.createdAt,
@@ -401,7 +406,7 @@ export class AdminService {
         rol: 'Docente',
         nombre: d.nombre,
         apellido: d.apellido,
-        usuario: d.email,
+        usuario: `${d.nombre.toLowerCase()}.${d.apellido.toLowerCase()}`,
         password_temporal: d.password_temporal,
         estado: d.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
         fecha_creacion: d.createdAt,
