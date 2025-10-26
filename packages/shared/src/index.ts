@@ -131,6 +131,7 @@ export { ESTADO_CLASE, ESTADO_ASISTENCIA } from '@mateatletas/contracts';
 
 export type {
   EstadoPlanificacion,
+  ComponenteActividad,
   PlanificacionListItem,
   PlanificacionListResponse,
   PlanificacionActividad,
