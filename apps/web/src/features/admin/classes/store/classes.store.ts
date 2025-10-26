@@ -55,7 +55,7 @@ export const useClassesStore = create<ClassesStore>((set, get) => ({
 
   cancelClass: async (claseId: string): Promise<boolean> => {
     try {
-      await adminApi.cancelClass(claseId);
+      await adminApi.cancelarClase(claseId);
       await get().fetchClasses();
       return true;
     } catch (error: unknown) {
