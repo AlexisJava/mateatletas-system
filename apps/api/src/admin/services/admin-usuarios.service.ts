@@ -71,14 +71,19 @@ export class AdminUsuariosService {
     const userRoles = parseUserRoles(tutor.roles);
     const finalRoles = userRoles.length > 0 ? userRoles : [Role.Tutor];
 
+    // Generar username: nombre.apellido (sin espacios, minúsculas)
+    const username = tutor.username || `${tutor.nombre.toLowerCase()}.${tutor.apellido.toLowerCase()}`;
+
     return {
       id: tutor.id,
       email: tutor.email,
+      username,
       nombre: tutor.nombre,
       apellido: tutor.apellido,
       role: finalRoles[0] as any, // First role for backward compatibility
       roles: finalRoles,
       activo: true,
+      password_temporal: tutor.password_temporal || undefined, // Mostrar solo si existe
       createdAt: tutor.createdAt,
       updatedAt: tutor.updatedAt,
       _count: {
@@ -96,14 +101,19 @@ export class AdminUsuariosService {
     const userRoles = parseUserRoles(docente.roles);
     const finalRoles = userRoles.length > 0 ? userRoles : [Role.Docente];
 
+    // Generar username: nombre.apellido (sin espacios, minúsculas)
+    const username = docente.username || `${docente.nombre.toLowerCase()}.${docente.apellido.toLowerCase()}`;
+
     return {
       id: docente.id,
       email: docente.email,
+      username,
       nombre: docente.nombre,
       apellido: docente.apellido,
       role: finalRoles[0] as any,
       roles: finalRoles,
       activo: true,
+      password_temporal: docente.password_temporal || undefined,
       createdAt: docente.createdAt,
       updatedAt: docente.updatedAt,
       _count: {
@@ -121,14 +131,19 @@ export class AdminUsuariosService {
     const userRoles = parseUserRoles(admin.roles);
     const finalRoles = userRoles.length > 0 ? userRoles : [Role.Admin];
 
+    // Generar username: nombre.apellido (sin espacios, minúsculas)
+    const username = admin.username || `${admin.nombre.toLowerCase()}.${admin.apellido.toLowerCase()}`;
+
     return {
       id: admin.id,
       email: admin.email,
+      username,
       nombre: admin.nombre,
       apellido: admin.apellido,
       role: finalRoles[0] as any,
       roles: finalRoles,
       activo: true,
+      password_temporal: admin.password_temporal || undefined,
       createdAt: admin.createdAt,
       updatedAt: admin.updatedAt,
       _count: {
