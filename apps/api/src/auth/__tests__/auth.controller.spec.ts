@@ -35,6 +35,7 @@ describe('AuthController', () => {
       validateUser: jest.fn(),
       getProfile: jest.fn(),
       generateJwtToken: jest.fn(),
+      cambiarPassword: jest.fn(),
     } as unknown as jest.Mocked<AuthService>;
 
     tokenBlacklistService = {
@@ -45,6 +46,34 @@ describe('AuthController', () => {
     } as unknown as jest.Mocked<TokenBlacklistService>;
 
     controller = new AuthController(authService, tokenBlacklistService);
+  });
+
+  describe('changePassword', () => {
+    it('should call service to change password and blacklist user tokens', async () => {
+      const user = { id: 'user-123', email: 'test@example.com', roles: [], role: undefined };
+      const dto = { passwordActual: 'Temp123!', nuevaPassword: 'NuevaPassword123!' };
+
+      authService.cambiarPassword.mockResolvedValue({
+        success: true,
+        message: 'Contraseña actualizada exitosamente',
+      });
+
+      const result = await controller.changePassword(user as any, dto);
+
+      expect(authService.cambiarPassword).toHaveBeenCalledWith(
+        user.id,
+        dto.passwordActual,
+        dto.nuevaPassword,
+      );
+      expect(tokenBlacklistService.blacklistAllUserTokens).toHaveBeenCalledWith(
+        user.id,
+        'password_change',
+      );
+      expect(result).toEqual({
+        success: true,
+        message: 'Contraseña actualizada exitosamente',
+      });
+    });
   });
 
   afterEach(() => {

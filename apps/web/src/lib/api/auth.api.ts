@@ -41,6 +41,7 @@ export interface AuthUser {
   foto_url?: string | null;
   puntos_totales?: number;
   nivel_actual?: number;
+  debe_cambiar_password?: boolean;
   equipo?: {
     id: string;
     nombre: string;
@@ -69,6 +70,16 @@ export interface LoginResponse {
 export interface LogoutResponse {
   message: string;
   description: string;
+}
+
+export interface ChangePasswordPayload {
+  passwordActual: string;
+  nuevaPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  success: boolean;
+  message: string;
 }
 
 /**
@@ -121,5 +132,16 @@ export const authApi = {
    */
   logout: (): Promise<LogoutResponse> => {
     return apiClient.post('/auth/logout');
+  },
+
+  /**
+   * Cambia la contraseña del usuario autenticado
+   * @param data - Contraseñas actual y nueva
+   * @returns Mensaje de confirmación
+   */
+  changePassword: (
+    data: ChangePasswordPayload,
+  ): Promise<ChangePasswordResponse> => {
+    return apiClient.post('/auth/change-password', data);
   },
 };
