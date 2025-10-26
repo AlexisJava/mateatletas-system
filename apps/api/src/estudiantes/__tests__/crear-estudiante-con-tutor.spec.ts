@@ -51,6 +51,34 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
 
     service = module.get<EstudiantesService>(EstudiantesService);
     prisma = module.get<PrismaService>(PrismaService);
+
+    jest.clearAllMocks();
+
+    (prisma.$transaction as jest.Mock).mockImplementation(async (fn: any) =>
+      fn(prisma),
+    );
+
+    (prisma.estudiante.create as jest.Mock).mockImplementation(async (args: any) => ({
+      id: 'estudiante-id',
+      nombre: args.data.nombre,
+      apellido: args.data.apellido,
+      edad: args.data.edad,
+      nivel_escolar: args.data.nivel_escolar,
+      tutor: { id: args.data.tutor_id },
+      sector: { id: args.data.sector_id },
+    }));
+
+    (prisma.tutor.create as jest.Mock).mockImplementation(async (args: any) => ({
+      id: 'tutor-id',
+      nombre: args.data.nombre,
+      apellido: args.data.apellido,
+      email: args.data.email,
+      username: args.data.username,
+      telefono: args.data.telefono,
+    }));
+
+    (prisma.tutor.findUnique as jest.Mock).mockResolvedValue(null);
+    (prisma.estudiante.findUnique as jest.Mock).mockResolvedValue(null);
   });
 
   describe('RED - Test 1: Crear un estudiante con tutor nuevo en un sector', () => {
@@ -65,6 +93,8 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
             dni: '12345678',
             fechaNacimiento: '2010-05-15',
             telefono: '1234567890',
+            edad: 10,
+            nivel_escolar: 'Primaria',
           },
         ],
         tutor: {
@@ -78,34 +108,18 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
       };
 
       const mockSector = { id: sectorId, nombre: 'Matemática' };
-      const mockTutorUser = {
-        id: 'tutor-user-id',
-        username: 'maria.perez',
-        email: 'maria.perez@example.com',
-      };
       const mockTutor = {
         id: 'tutor-id',
         nombre: 'María',
         apellido: 'Pérez',
-        user: mockTutorUser,
+        user: {
+          id: 'tutor-user-id',
+          username: 'maria.perez',
+          email: 'maria.perez@example.com',
+        },
       };
-      const mockEstudianteUser = {
-        id: 'estudiante-user-id',
-        username: 'juan.perez',
-        email: null,
-      };
-      const mockEstudiante = {
-        id: 'estudiante-id',
-        nombre: 'Juan',
-        apellido: 'Pérez',
-        tutor: mockTutor,
-        sector: mockSector,
-        user: mockEstudianteUser,
-      };
-
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector as any);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null); // Tutor no existe
-      jest.spyOn(prisma.$transaction, 'mockImplementation').mockResolvedValue([mockEstudiante]);
 
       // Act
       const result = await service.crearEstudiantesConTutor(dto);
@@ -113,8 +127,10 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result.estudiantes).toHaveLength(1);
-      expect(result.estudiantes[0].nombre).toBe('Juan');
-      expect(result.tutor.nombre).toBe('María');
+      expect(result.estudiantes[0]).toBeDefined();
+      expect(result.estudiantes[0]?.nombre).toBe('Juan');
+      expect(result.tutor).toBeDefined();
+      expect(result.tutor?.nombre).toBe('María');
       expect(result.credenciales).toBeDefined();
       expect(result.credenciales.tutor).toEqual({
         username: 'maria.perez',
@@ -139,12 +155,16 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
             apellido: 'Pérez',
             dni: '12345678',
             fechaNacimiento: '2010-05-15',
+            edad: 12,
+            nivel_escolar: 'Primaria',
           },
           {
             nombre: 'Ana',
             apellido: 'Pérez',
             dni: '12345679',
             fechaNacimiento: '2012-08-20',
+            edad: 10,
+            nivel_escolar: 'Primaria',
           },
         ],
         tutor: {
@@ -158,18 +178,15 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
 
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue({ id: 'sector-id' } as any);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null);
-      jest.spyOn(prisma.$transaction, 'mockImplementation').mockResolvedValue([
-        { id: '1', nombre: 'Juan' },
-        { id: '2', nombre: 'Ana' },
-      ] as any);
+
 
       // Act
       const result = await service.crearEstudiantesConTutor(dto);
 
       // Assert
       expect(result.estudiantes).toHaveLength(2);
-      expect(result.estudiantes[0].nombre).toBe('Juan');
-      expect(result.estudiantes[1].nombre).toBe('Ana');
+      expect(result.estudiantes[0]?.nombre).toBe('Juan');
+      expect(result.estudiantes[1]?.nombre).toBe('Ana');
       expect(result.credenciales.estudiantes).toHaveLength(2);
     });
   });
@@ -184,6 +201,8 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
             apellido: 'Pérez',
             dni: '12345680',
             fechaNacimiento: '2011-03-10',
+            edad: 11,
+            nivel_escolar: 'Primaria',
           },
         ],
         tutor: {
@@ -204,17 +223,14 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
 
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue({ id: 'sector-id' } as any);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(tutorExistente as any);
-      jest.spyOn(prisma.$transaction, 'mockImplementation').mockResolvedValue([
-        { id: 'nuevo-estudiante-id', nombre: 'Carlos', tutor: tutorExistente },
-      ] as any);
 
       // Act
       const result = await service.crearEstudiantesConTutor(dto);
 
       // Assert
-      expect(result.tutor.id).toBe('tutor-existente-id');
+      expect(result.tutor?.id).toBe('tutor-existente-id');
       expect(result.credenciales.tutor).toBeUndefined(); // No se generan nuevas credenciales
-      expect(result.estudiantes[0].tutor.id).toBe('tutor-existente-id');
+      expect(result.estudiantes[0]?.tutor?.id).toBe('tutor-existente-id');
     });
   });
 
@@ -222,8 +238,22 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
     it('debería lanzar BadRequestException si el sector no existe', async () => {
       // Arrange
       const dto = {
-        estudiantes: [{ nombre: 'Juan', apellido: 'Pérez', dni: '12345678', fechaNacimiento: '2010-05-15' }],
-        tutor: { nombre: 'María', apellido: 'Pérez', dni: '87654321', email: 'maria@example.com' },
+        estudiantes: [
+          {
+            nombre: 'Juan',
+            apellido: 'Pérez',
+            dni: '12345678',
+            fechaNacimiento: '2010-05-15',
+            edad: 10,
+            nivel_escolar: 'Primaria',
+          },
+        ],
+        tutor: {
+          nombre: 'María',
+          apellido: 'Pérez',
+          dni: '87654321',
+          email: 'maria@example.com',
+        },
         sectorId: 'sector-inexistente',
       };
 
@@ -239,8 +269,22 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
     it('debería lanzar ConflictException si un estudiante con ese DNI ya existe', async () => {
       // Arrange
       const dto = {
-        estudiantes: [{ nombre: 'Juan', apellido: 'Pérez', dni: '12345678', fechaNacimiento: '2010-05-15' }],
-        tutor: { nombre: 'María', apellido: 'Pérez', dni: '87654321', email: 'maria@example.com' },
+        estudiantes: [
+          {
+            nombre: 'Juan',
+            apellido: 'Pérez',
+            dni: '12345678',
+            fechaNacimiento: '2010-05-15',
+            edad: 10,
+            nivel_escolar: 'Primaria',
+          },
+        ],
+        tutor: {
+          nombre: 'María',
+          apellido: 'Pérez',
+          dni: '87654321',
+          email: 'maria@example.com',
+        },
         sectorId: 'sector-id',
       };
 
@@ -258,15 +302,27 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
       // Arrange
       const dto = {
         estudiantes: [
-          { nombre: 'Juan Pablo', apellido: 'Pérez García', dni: '12345678', fechaNacimiento: '2010-05-15' },
+          {
+            nombre: 'Juan Pablo',
+            apellido: 'Pérez García',
+            dni: '12345678',
+            fechaNacimiento: '2010-05-15',
+            edad: 12,
+            nivel_escolar: 'Secundaria',
+          },
         ],
-        tutor: { nombre: 'María Elena', apellido: 'Pérez García', dni: '87654321', email: 'maria@example.com' },
+        tutor: {
+          nombre: 'María Elena',
+          apellido: 'Pérez García',
+          dni: '87654321',
+          email: 'maria@example.com',
+        },
         sectorId: 'sector-id',
       };
 
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue({ id: 'sector-id' } as any);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null);
-      jest.spyOn(prisma.user, 'findUnique')
+      jest.spyOn((prisma as any).user, 'findUnique')
         .mockResolvedValueOnce({ id: 'existing-user' } as any) // juan.perez ya existe
         .mockResolvedValueOnce(null); // juan.perez2 disponible
 
@@ -274,8 +330,10 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
       const result = await service.crearEstudiantesConTutor(dto);
 
       // Assert
-      expect(result.credenciales.estudiantes[0].username).toMatch(/^[a-z]+\.[a-z]+\d*$/);
-      expect(result.credenciales.tutor.username).toMatch(/^[a-z]+\.[a-z]+\d*$/);
+      expect(result.credenciales.estudiantes[0]).toBeDefined();
+      expect(result.credenciales.estudiantes[0]?.username).toMatch(/^[a-z]+\.[a-z]+\d*$/);
+      expect(result.credenciales.tutor).toBeDefined();
+      expect(result.credenciales.tutor?.username).toMatch(/^[a-z]+\.[a-z]+\d*$/);
     });
   });
 
@@ -283,8 +341,22 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
     it('debería generar contraseña temporal de 8 caracteres alfanuméricos', async () => {
       // Arrange
       const dto = {
-        estudiantes: [{ nombre: 'Juan', apellido: 'Pérez', dni: '12345678', fechaNacimiento: '2010-05-15' }],
-        tutor: { nombre: 'María', apellido: 'Pérez', dni: '87654321', email: 'maria@example.com' },
+        estudiantes: [
+          {
+            nombre: 'Juan',
+            apellido: 'Pérez',
+            dni: '12345678',
+            fechaNacimiento: '2010-05-15',
+            edad: 10,
+            nivel_escolar: 'Primaria',
+          },
+        ],
+        tutor: {
+          nombre: 'María',
+          apellido: 'Pérez',
+          dni: '87654321',
+          email: 'maria@example.com',
+        },
         sectorId: 'sector-id',
       };
 
@@ -295,10 +367,12 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
       const result = await service.crearEstudiantesConTutor(dto);
 
       // Assert
-      expect(result.credenciales.estudiantes[0].password).toHaveLength(8);
-      expect(result.credenciales.estudiantes[0].password).toMatch(/^[A-Za-z0-9]{8}$/);
-      expect(result.credenciales.tutor.password).toHaveLength(8);
-      expect(result.credenciales.tutor.password).toMatch(/^[A-Za-z0-9]{8}$/);
+      expect(result.credenciales.estudiantes[0]).toBeDefined();
+      expect(result.credenciales.estudiantes[0]?.password).toHaveLength(8);
+      expect(result.credenciales.estudiantes[0]?.password).toMatch(/^[A-Za-z0-9]{8}$/);
+      expect(result.credenciales.tutor).toBeDefined();
+      expect(result.credenciales.tutor?.password).toHaveLength(8);
+      expect(result.credenciales.tutor?.password).toMatch(/^[A-Za-z0-9]{8}$/);
     });
   });
 });

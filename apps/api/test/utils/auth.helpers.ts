@@ -11,11 +11,12 @@ export interface AuthSession {
 
 export const FRONTEND_ORIGIN = process.env.FRONTEND_URL ?? 'http://localhost:3000';
 
-function extractAuthCookie(cookies: string[] | undefined) {
-  if (!cookies || cookies.length === 0) {
+function extractAuthCookie(cookies: string[] | string | undefined) {
+  if (!cookies || (Array.isArray(cookies) && cookies.length === 0)) {
     return undefined;
   }
-  return cookies.find((cookie) => cookie.startsWith('auth-token='));
+  const cookieList = Array.isArray(cookies) ? cookies : [cookies];
+  return cookieList.find((cookie) => cookie.startsWith('auth-token='));
 }
 
 function extractTokenFromCookie(cookie: string | undefined) {

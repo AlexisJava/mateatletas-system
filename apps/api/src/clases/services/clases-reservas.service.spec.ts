@@ -14,7 +14,7 @@ describe('ClasesReservasService', () => {
   const mockClase = {
     id: 'clase-1',
     estado: 'Programada',
-    fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+    fecha_hora_inicio: new Date('2025-12-01T10:00:00Z').toISOString(),
     cupos_ocupados: 5,
     cupos_maximo: 20,
     producto_id: null,
@@ -157,7 +157,7 @@ describe('ClasesReservasService', () => {
           clase: {
             findUnique: jest.fn().mockResolvedValue({
               ...mockClase,
-              fecha_hora_inicio: new Date('2020-01-01T10:00:00Z'), // Pasada
+              fecha_hora_inicio: new Date('2020-01-01T10:00:00Z').toISOString(), // Pasada
             }),
           },
         });
@@ -320,7 +320,7 @@ describe('ClasesReservasService', () => {
             id: 'clase-1',
             cupos_maximo: 10,
             cupos_ocupados: 4,
-            fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+            fecha_hora_inicio: new Date('2025-12-01T10:00:00Z').toISOString(),
             rutaCurricular: { id: 'ruta-1', nombre: 'Álgebra', color: '#ff0000' },
             docente: { id: 'doc-1', nombre: 'María', apellido: 'González' },
             sector: { id: 'sec-1', nombre: 'Secundaria', color: '#00ff00', icono: '📐' },
@@ -345,9 +345,10 @@ describe('ClasesReservasService', () => {
       });
 
       expect(result).toHaveLength(1);
-      expect(result[0].clase?.cupo_disponible).toBe(6);
-      expect(result[0].clase?.cupo_maximo).toBe(10);
-      expect(result[0].clase?.ruta_curricular).toEqual(
+      const claseResultado = result[0].clase as any;
+      expect(claseResultado?.cupo_disponible).toBe(6);
+      expect(claseResultado?.cupo_maximo).toBe(10);
+      expect(claseResultado?.ruta_curricular).toEqual(
         mockReservas[0].clase.rutaCurricular,
       );
     });
@@ -366,7 +367,7 @@ describe('ClasesReservasService', () => {
       ...mockInscripcion,
       clase: {
         id: 'clase-1',
-        fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
+        fecha_hora_inicio: new Date('2025-12-01T10:00:00Z').toISOString(),
       },
     };
 
@@ -431,7 +432,7 @@ describe('ClasesReservasService', () => {
         ...mockInscripcionCompleta,
         clase: {
           ...mockInscripcionCompleta.clase,
-          fecha_hora_inicio: new Date('2020-01-01T10:00:00Z'), // Pasada
+          fecha_hora_inicio: new Date('2020-01-01T10:00:00Z').toISOString(), // Pasada
         },
       } as any);
 

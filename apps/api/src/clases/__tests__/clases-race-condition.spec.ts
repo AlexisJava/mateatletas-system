@@ -48,7 +48,7 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
         cupos_maximo: 10,
         cupos_ocupados: 9, // Solo 1 cupo disponible
         estado: 'Programada',
-        fecha_hora_inicio: new Date(Date.now() + 24 * 60 * 60 * 1000), // Mañana
+        fecha_hora_inicio: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Mañana
         producto_id: null,
         producto: null,
       };
@@ -71,18 +71,18 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
 
       // Mock: Primera lectura (fuera de transacción) - ambos ven 9 cupos ocupados
       let readCount = 0;
-      jest.spyOn(prisma.clase, 'findUnique').mockImplementation(() => {
+      (prisma.clase.findUnique as jest.Mock).mockImplementation(() => {
         readCount++;
         return Promise.resolve(mockClase as any);
       });
 
       // Mock: Estudiantes existen
-      jest.spyOn(prisma.estudiante, 'findUnique')
+      (prisma.estudiante.findUnique as jest.Mock)
         .mockImplementationOnce(() => Promise.resolve(mockEstudiante1 as any))
         .mockImplementationOnce(() => Promise.resolve(mockEstudiante2 as any));
 
       // Mock: No están inscritos previamente
-      jest.spyOn(prisma.inscripcionClase, 'findUnique').mockResolvedValue(null);
+      (prisma.inscripcionClase.findUnique as jest.Mock).mockResolvedValue(null);
 
       // Mock: Transacción simula ejecución secuencial
       let transactionCount = 0;
@@ -110,7 +110,7 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
           },
         };
 
-        return callback(txMock);
+        return callback(txMock as any);
       });
 
       // Act: Simular 2 requests simultáneos
@@ -146,7 +146,7 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
         cupos_maximo: 10,
         cupos_ocupados: 5, // 5 cupos disponibles
         estado: 'Programada',
-        fecha_hora_inicio: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        fecha_hora_inicio: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         producto_id: null,
         producto: null,
       };
@@ -156,7 +156,7 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
       // Mock: Todos los estudiantes existen
       // ✅ El tutor_id debe coincidir con el tutor que hace la reserva
       // Estudiante est-0 pertenece a tutor-0, est-1 a tutor-1, etc.
-      jest.spyOn(prisma.estudiante, 'findUnique').mockImplementation((args) => {
+      (prisma.estudiante.findUnique as jest.Mock).mockImplementation((args) => {
         const estudianteId = (args as any).where.id;
         // Extraer el índice del estudiante (est-0 → 0, est-1 → 1, etc.)
         const index = estudianteId.split('-')[1];
@@ -214,7 +214,7 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
             },
           };
 
-          return callback(txMock);
+          return callback(txMock as any);
         });
       });
 
@@ -270,9 +270,9 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
         inscripciones_curso: [],
       };
 
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma.inscripcionClase, 'findUnique').mockResolvedValue(null);
+      (prisma.clase.findUnique as jest.Mock).mockResolvedValue(mockClase as any);
+      (prisma.estudiante.findUnique as jest.Mock).mockResolvedValue(mockEstudiante as any);
+      (prisma.inscripcionClase.findUnique as jest.Mock).mockResolvedValue(null);
 
       (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
         const txMock = {

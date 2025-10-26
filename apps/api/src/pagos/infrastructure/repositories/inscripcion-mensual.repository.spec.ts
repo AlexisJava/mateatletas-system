@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../../../core/database/prisma.service';
 import { Decimal } from 'decimal.js';
 import { InscripcionMensualRepository } from './inscripcion-mensual.repository';
 import { TipoDescuento, EstadoPago } from '../../domain/types/pagos.types';
@@ -14,7 +15,8 @@ import { CrearInscripcionMensualDTO } from '../../domain/repositories/inscripcio
  * - Relaciones con estudiantes, tutores, productos
  */
 describe('InscripcionMensualRepository - Infrastructure Layer', () => {
-  let prisma: PrismaClient;
+  let prismaClient: PrismaClient;
+  let prisma: PrismaService;
   let repository: InscripcionMensualRepository;
 
   // IDs de datos de prueba
@@ -23,12 +25,13 @@ describe('InscripcionMensualRepository - Infrastructure Layer', () => {
   let productoId: string;
 
   beforeAll(async () => {
-    prisma = new PrismaClient();
+    prismaClient = new PrismaClient();
+    prisma = prismaClient as unknown as PrismaService;
     repository = new InscripcionMensualRepository(prisma);
   });
 
   afterAll(async () => {
-    await prisma.$disconnect();
+    await prismaClient.$disconnect();
   });
 
   beforeEach(async () => {
