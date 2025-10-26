@@ -5,22 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { EstadoAsistencia } from '@prisma/client';
-
-interface RegistrarAsistenciaDto {
-  fecha: string; // ISO date string
-  asistencias: Array<{
-    estudiante_id: string;
-    estado: EstadoAsistencia;
-    observaciones?: string;
-    feedback?: string;
-  }>;
-}
-
-interface ActualizarAsistenciaDto {
-  estado?: EstadoAsistencia;
-  observaciones?: string;
-  feedback?: string;
-}
+import { RegistrarAsistenciasDto, ActualizarAsistenciaDto, FiltrosHistorialAsistenciasDto } from './dto/asistencias.dto';
 
 @Injectable()
 export class AsistenciasService {
@@ -31,7 +16,7 @@ export class AsistenciasService {
    */
   async registrarAsistencias(
     claseGrupoId: string,
-    dto: RegistrarAsistenciaDto,
+    dto: RegistrarAsistenciasDto,
   ) {
     // Verificar que el grupo existe
     const grupo = await this.prisma.claseGrupo.findUnique({
@@ -167,11 +152,7 @@ export class AsistenciasService {
    */
   async obtenerHistorialAsistencias(
     claseGrupoId: string,
-    params?: {
-      fecha_desde?: string;
-      fecha_hasta?: string;
-      estudiante_id?: string;
-    },
+    filtros?: FiltrosHistorialAsistenciasDto,
   ) {
     const where: {
       clase_grupo_id: string;
@@ -181,18 +162,18 @@ export class AsistenciasService {
       clase_grupo_id: claseGrupoId,
     };
 
-    if (params?.fecha_desde || params?.fecha_hasta) {
+    if (filtros?.fecha_desde || filtros?.fecha_hasta) {
       where.fecha = {};
-      if (params.fecha_desde) {
-        where.fecha.gte = new Date(params.fecha_desde);
+      if (filtros.fecha_desde) {
+        where.fecha.gte = new Date(filtros.fecha_desde);
       }
-      if (params.fecha_hasta) {
-        where.fecha.lte = new Date(params.fecha_hasta);
+      if (filtros.fecha_hasta) {
+        where.fecha.lte = new Date(filtros.fecha_hasta);
       }
     }
 
-    if (params?.estudiante_id) {
-      where.estudiante_id = params.estudiante_id;
+    if (filtros?.estudiante_id) {
+      where.estudiante_id = filtros.estudiante_id;
     }
 
     const asistencias = await this.prisma.asistenciaClaseGrupo.findMany({
