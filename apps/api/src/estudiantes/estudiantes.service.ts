@@ -580,16 +580,35 @@ export class EstudiantesService {
       throw new BadRequestException('El sector destino no existe');
     }
 
-    // Validar que no esté ya en ese sector
-    if (estudiante.sector_id === nuevoSectorId) {
-      throw new ConflictException('El estudiante ya está asignado a este sector');
+    // Verificar si ya existe un estudiante con el mismo tutor y nombre en ese sector
+    const existeDuplicado = await this.prisma.estudiante.findFirst({
+      where: {
+        tutor_id: estudiante.tutor_id,
+        nombre: estudiante.nombre,
+        apellido: estudiante.apellido,
+        sector_id: nuevoSectorId,
+      },
+    });
+
+    if (existeDuplicado) {
+      throw new ConflictException('Este estudiante ya está inscrito en el sector destino');
     }
 
-    // Actualizar sector
-    const estudianteActualizado = await this.prisma.estudiante.update({
-      where: { id: estudianteId },
+    // DUPLICAR estudiante en el nuevo sector (crear un nuevo registro)
+    const estudianteDuplicado = await this.prisma.estudiante.create({
       data: {
+        nombre: estudiante.nombre,
+        apellido: estudiante.apellido,
+        edad: estudiante.edad,
+        nivel_escolar: estudiante.nivel_escolar,
+        email: estudiante.email,
+        tutor_id: estudiante.tutor_id,
         sector_id: nuevoSectorId,
+        // Copiar datos de gamificación
+        nivel_actual: estudiante.nivel_actual,
+        puntos_totales: estudiante.puntos_totales,
+        avatar_url: estudiante.avatar_url,
+        equipo_id: estudiante.equipo_id,
       },
       include: {
         sector: true,
@@ -597,7 +616,7 @@ export class EstudiantesService {
       },
     });
 
-    return estudianteActualizado;
+    return estudianteDuplicado;
   }
 
   /**

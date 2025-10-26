@@ -109,12 +109,14 @@ export default function AdminDashboard() {
   const totalEstudiantes = stats?.totalEstudiantes || 0;
   const totalUsuarios = stats?.totalUsuarios || 0;
   const ingresosActuales = stats?.ingresosTotal || 0;
-  const ingresosEstimados = ingresosActuales * 1.15; // TODO: Calcular desde backend con datos históricos
+  const pagosPendientes = stats?.pagosPendientes || 0;
+  const inscripcionesActivas = stats?.inscripcionesActivas || 0;
+  const ingresosEstimados = (ingresosActuales + pagosPendientes) * 1.15; // Estimado basado en total esperado
 
   // Stats con COLORES VIBRANTES únicos para cada uno - NUEVA ORGANIZACIÓN
   const mainStats = [
     {
-      label: 'Nuevos Estudiantes',
+      label: 'Total Estudiantes',
       displayValue: formatLargeNumber(totalEstudiantes),
       fullValue: totalEstudiantes,
       icon: UserPlus,
@@ -129,9 +131,9 @@ export default function AdminDashboard() {
       iconBg: 'from-violet-400 to-purple-500',
     },
     {
-      label: 'Estudiantes Activos',
-      displayValue: formatLargeNumber(totalEstudiantes),
-      fullValue: totalEstudiantes,
+      label: 'Inscripciones Activas (Mes)',
+      displayValue: formatLargeNumber(inscripcionesActivas),
+      fullValue: inscripcionesActivas,
       icon: GraduationCap,
       trend: null, // TODO: Calcular desde backend comparando con mes anterior
       trendUp: true,
@@ -144,10 +146,25 @@ export default function AdminDashboard() {
       iconBg: 'from-blue-400 to-cyan-500',
     },
     {
-      label: 'Ingresos Estimados Próximo Mes',
-      displayValue: `$${formatLargeNumber(ingresosEstimados)}`,
-      fullValue: ingresosEstimados,
+      label: 'Pagos Pendientes',
+      displayValue: `$${formatLargeNumber(pagosPendientes)}`,
+      fullValue: pagosPendientes,
       icon: TrendingUp,
+      trend: null, // TODO: Calcular desde backend comparando con mes anterior
+      trendUp: false,
+      // NARANJA ALERTA
+      bgGradient: 'from-orange-500 via-red-500 to-pink-500',
+      cardBg: 'from-orange-500/20 via-red-500/20 to-pink-500/20',
+      borderColor: 'border-orange-400/50',
+      shadowColor: 'shadow-orange-500/50',
+      glowColor: 'shadow-red-500/30',
+      iconBg: 'from-orange-400 to-red-500',
+    },
+    {
+      label: 'Ingresos del Mes',
+      displayValue: `$${formatLargeNumber(ingresosActuales)}`,
+      fullValue: ingresosActuales,
+      icon: DollarSign,
       trend: null, // TODO: Calcular desde backend comparando con mes anterior
       trendUp: true,
       // VERDE ESMERALDA
@@ -157,21 +174,6 @@ export default function AdminDashboard() {
       shadowColor: 'shadow-emerald-500/50',
       glowColor: 'shadow-green-500/30',
       iconBg: 'from-emerald-400 to-green-500',
-    },
-    {
-      label: 'Ingresos del Mes Actual',
-      displayValue: `$${formatLargeNumber(ingresosActuales)}`,
-      fullValue: ingresosActuales,
-      icon: DollarSign,
-      trend: null, // TODO: Calcular desde backend comparando con mes anterior
-      trendUp: true,
-      // DORADO/AMARILLO
-      bgGradient: 'from-amber-500 via-yellow-500 to-orange-500',
-      cardBg: 'from-amber-500/20 via-yellow-500/20 to-orange-500/20',
-      borderColor: 'border-amber-400/50',
-      shadowColor: 'shadow-amber-500/50',
-      glowColor: 'shadow-yellow-500/30',
-      iconBg: 'from-amber-400 to-yellow-500',
     },
   ];
 

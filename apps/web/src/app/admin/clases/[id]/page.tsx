@@ -191,7 +191,8 @@ export default function ClaseAulaPage() {
   const loadEstudiantesDisponibles = async () => {
     try {
       setIsLoadingEstudiantes(true);
-      const payload: any = await axios.get('/estudiantes');
+      const payload: any = await axios.get('/admin/estudiantes');
+      // El backend devuelve { data: [...], metadata: {...} }
       const data =
         payload && typeof payload === 'object' && 'data' in payload
           ? (payload as { data: Estudiante[] }).data

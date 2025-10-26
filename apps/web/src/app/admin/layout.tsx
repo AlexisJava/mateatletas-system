@@ -8,8 +8,6 @@ import {
   Users,
   BookOpen,
   GraduationCap,
-  ShoppingCart,
-  BookOpenCheck,
   CreditCard,
   BarChart3,
   LogOut,
@@ -44,8 +42,6 @@ const navItems = [
   { href: '/admin/clases', label: 'Clubes y Cursos', icon: BookOpen, color: 'from-emerald-500 to-teal-500', badge: null },
   { href: '/admin/estudiantes', label: 'Estudiantes', icon: GraduationCap, color: 'from-teal-500 to-cyan-500', badge: null },
   { href: '/admin/planificaciones', label: 'Planificaciones', icon: Calendar, color: 'from-pink-500 to-rose-500', badge: null },
-  { href: '/admin/productos', label: 'Productos', icon: ShoppingCart, color: 'from-amber-500 to-yellow-500', badge: null },
-  { href: '/admin/cursos', label: 'Cursos', icon: BookOpenCheck, color: 'from-indigo-500 to-purple-500', badge: '5' },
   { href: '/admin/pagos', label: 'Pagos', icon: CreditCard, color: 'from-green-500 to-emerald-500', badge: null },
   { href: '/admin/reportes', label: 'Reportes', icon: BarChart3, color: 'from-orange-500 to-red-500', badge: null },
 ];
