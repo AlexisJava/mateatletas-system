@@ -19,15 +19,13 @@ import {
   FileText,
   MessageSquare
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import * as adminApi from '@/lib/api/admin.api';
 import axios from '@/lib/axios';
 
 interface ClaseDetalle {
   id: string;
   codigo: string;
   nombre: string;
+  descripcion?: string | null;
   tipo: string;
   dia_semana: string;
   hora_inicio: string;
