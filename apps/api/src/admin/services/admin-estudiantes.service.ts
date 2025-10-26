@@ -72,6 +72,27 @@ export class AdminEstudiantesService {
               color_primario: true,
             },
           },
+          sector: {
+            select: {
+              id: true,
+              nombre: true,
+              color: true,
+              icono: true,
+            },
+          },
+          sectores: {
+            select: {
+              sector: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  color: true,
+                  icono: true,
+                },
+              },
+              es_principal: true,
+            },
+          },
         },
         orderBy: {
           apellido: 'asc',
@@ -85,11 +106,18 @@ export class AdminEstudiantesService {
       nombre: est.nombre,
       apellido: est.apellido,
       edad: est.edad,
-      nivel_escolar: est.nivel_escolar,
+      nivelEscolar: est.nivel_escolar, // Convertir a camelCase para el frontend
       nivel_actual: est.nivel_actual,
       puntos_totales: est.puntos_totales,
       tutor: est.tutor,
       equipo: est.equipo,
+      // LEGACY: sector único (para compatibilidad con código viejo)
+      sector: est.sector,
+      // NUEVO: array de sectores (relación muchos-a-muchos)
+      sectores: est.sectores.map(es => ({
+        ...es.sector,
+        es_principal: es.es_principal,
+      })),
       createdAt: est.createdAt,
       updatedAt: est.updatedAt,
     }));
