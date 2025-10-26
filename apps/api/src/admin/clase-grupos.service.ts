@@ -113,8 +113,12 @@ export class ClaseGruposService {
       });
 
       // Crear las inscripciones de los estudiantes
+      type EstudianteConTutor = Prisma.EstudianteGetPayload<{
+        include: { tutor: true };
+      }>;
+
       const inscripciones = await Promise.all(
-        estudiantes.map((estudiante: any) =>
+        estudiantes.map((estudiante: EstudianteConTutor) =>
           tx.inscripcionClaseGrupo.create({
             data: {
               clase_grupo_id: grupo.id,
@@ -168,9 +172,9 @@ export class ClaseGruposService {
     tipo?: TipoClaseGrupo;
     grupo_id?: string;
   }) {
-    const where: any = {};
+    const where: Prisma.ClaseGrupoWhereInput = {};
 
-    if (params?.anio_lectivo) {
+    if (params?.anio_lectivo !== undefined) {
       where.anio_lectivo = params.anio_lectivo;
     }
 
@@ -234,9 +238,11 @@ export class ClaseGruposService {
       orderBy: [{ dia_semana: 'asc' }, { hora_inicio: 'asc' }],
     });
 
+    type GrupoConContadores = typeof grupos[number];
+
     return {
       success: true,
-      data: grupos.map((grupo: any) => ({
+      data: grupos.map((grupo: GrupoConContadores) => ({
         ...grupo,
         total_inscriptos: grupo._count.inscripciones,
         total_asistencias: grupo._count.asistencias,
@@ -371,7 +377,7 @@ export class ClaseGruposService {
     }
 
     // Preparar los datos a actualizar
-    const updateData: any = {};
+    const updateData: Prisma.ClaseGrupoUpdateInput = {};
 
     if (dto.nombre) updateData.nombre = dto.nombre;
     if (dto.tipo) updateData.tipo = dto.tipo;
@@ -382,10 +388,19 @@ export class ClaseGruposService {
     if (dto.fecha_fin) updateData.fecha_fin = new Date(dto.fecha_fin);
     if (dto.anio_lectivo) updateData.anio_lectivo = dto.anio_lectivo;
     if (dto.cupo_maximo) updateData.cupo_maximo = dto.cupo_maximo;
-    if (dto.docente_id) updateData.docente_id = dto.docente_id;
-    if (dto.ruta_curricular_id !== undefined)
-      updateData.ruta_curricular_id = dto.ruta_curricular_id;
-    if (dto.sector_id !== undefined) updateData.sector_id = dto.sector_id;
+    if (dto.docente_id) {
+      updateData.docente = { connect: { id: dto.docente_id } };
+    }
+    if (dto.ruta_curricular_id !== undefined) {
+      updateData.rutaCurricular = dto.ruta_curricular_id
+        ? { connect: { id: dto.ruta_curricular_id } }
+        : { disconnect: true };
+    }
+    if (dto.sector_id !== undefined) {
+      updateData.sector = dto.sector_id
+        ? { connect: { id: dto.sector_id } }
+        : { disconnect: true };
+    }
     if (dto.nivel !== undefined) updateData.nivel = dto.nivel;
 
     // Actualizar en transacción
@@ -441,8 +456,12 @@ export class ClaseGruposService {
           });
 
           // Crear las nuevas inscripciones
+          type EstudianteConTutorUpdate = Prisma.EstudianteGetPayload<{
+            include: { tutor: true };
+          }>;
+
           await Promise.all(
-            estudiantes.map((estudiante: any) =>
+            estudiantes.map((estudiante: EstudianteConTutorUpdate) =>
               tx.inscripcionClaseGrupo.create({
                 data: {
                   clase_grupo_id: id,

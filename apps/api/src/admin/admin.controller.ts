@@ -31,6 +31,9 @@ import { CreateRutaEspecialidadDto, UpdateRutaEspecialidadDto, AsignarRutasDocen
 import { CrearEstudianteRapidoDto } from './dto/crear-estudiante-rapido.dto';
 import { CrearClaseGrupoDto } from './dto/crear-clase-grupo.dto';
 import { ActualizarClaseGrupoDto } from './dto/actualizar-clase-grupo.dto';
+import { RegistrarAsistenciasDto, ActualizarAsistenciaDto, FiltrosHistorialAsistenciasDto } from './dto/asistencias.dto';
+import { FiltrosClaseGruposDto } from './dto/filtros-clase-grupos.dto';
+import { ResetPasswordDto, ResetPasswordMasivoDto } from './dto/reset-password.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -150,9 +153,9 @@ export class AdminController {
   @HttpCode(HttpStatus.OK)
   async resetearPassword(
     @Param('usuarioId') usuarioId: string,
-    @Body() body: { tipoUsuario: 'tutor' | 'estudiante' | 'docente' },
+    @Body() dto: ResetPasswordDto,
   ) {
-    return this.adminService.resetearPasswordUsuario(usuarioId, body.tipoUsuario);
+    return this.adminService.resetearPasswordUsuario(usuarioId, dto.tipoUsuario);
   }
 
   /**
@@ -169,13 +172,8 @@ export class AdminController {
     description: 'Resetea contraseñas de múltiples usuarios en una sola operación',
   })
   @HttpCode(HttpStatus.OK)
-  async resetearPasswordMasivo(
-    @Body()
-    body: {
-      usuarios: Array<{ id: string; tipoUsuario: 'tutor' | 'estudiante' | 'docente' }>;
-    },
-  ) {
-    return this.adminService.resetearPasswordsMasivo(body.usuarios);
+  async resetearPasswordMasivo(@Body() dto: ResetPasswordMasivoDto) {
+    return this.adminService.resetearPasswordsMasivo(dto.usuarios);
   }
 
   /**
@@ -512,21 +510,8 @@ export class AdminController {
     summary: 'Listar grupos de clases',
     description: 'Obtiene todos los ClaseGrupos con filtros opcionales',
   })
-  async listarClaseGrupos(
-    @Query('anio_lectivo') anioLectivo?: string,
-    @Query('activo') activo?: string,
-    @Query('docente_id') docenteId?: string,
-    @Query('tipo') tipo?: string,
-    @Query('grupo_id') grupoId?: string,
-  ) {
-    const params: any = {};
-    if (anioLectivo) params.anio_lectivo = parseInt(anioLectivo);
-    if (activo !== undefined) params.activo = activo === 'true';
-    if (docenteId) params.docente_id = docenteId;
-    if (tipo) params.tipo = tipo;
-    if (grupoId) params.grupo_id = grupoId;
-
-    return this.claseGruposService.listarClaseGrupos(params);
+  async listarClaseGrupos(@Query() filtros: FiltrosClaseGruposDto) {
+    return this.claseGruposService.listarClaseGrupos(filtros);
   }
 
   /**
@@ -626,9 +611,9 @@ export class AdminController {
   })
   async registrarAsistencias(
     @Param('id') id: string,
-    @Body() body: { fecha: string; asistencias: Array<{ estudiante_id: string; estado: any; observaciones?: string; feedback?: string }> },
+    @Body() dto: RegistrarAsistenciasDto,
   ) {
-    return this.asistenciasService.registrarAsistencias(id, body);
+    return this.asistenciasService.registrarAsistencias(id, dto);
   }
 
   /**
@@ -660,15 +645,9 @@ export class AdminController {
   })
   async obtenerHistorialAsistencias(
     @Param('id') id: string,
-    @Query('fecha_desde') fechaDesde?: string,
-    @Query('fecha_hasta') fechaHasta?: string,
-    @Query('estudiante_id') estudianteId?: string,
+    @Query() filtros: FiltrosHistorialAsistenciasDto,
   ) {
-    return this.asistenciasService.obtenerHistorialAsistencias(id, {
-      fecha_desde: fechaDesde,
-      fecha_hasta: fechaHasta,
-      estudiante_id: estudianteId,
-    });
+    return this.asistenciasService.obtenerHistorialAsistencias(id, filtros);
   }
 
   /**
@@ -683,9 +662,9 @@ export class AdminController {
   })
   async actualizarAsistencia(
     @Param('id') id: string,
-    @Body() body: { estado?: any; observaciones?: string; feedback?: string },
+    @Body() dto: ActualizarAsistenciaDto,
   ) {
-    return this.asistenciasService.actualizarAsistencia(id, body);
+    return this.asistenciasService.actualizarAsistencia(id, dto);
   }
 
   /**
