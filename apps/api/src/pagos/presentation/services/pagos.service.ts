@@ -7,7 +7,7 @@ import { ObtenerMetricasDashboardUseCase } from '../../application/use-cases/obt
 import { ConfiguracionPreciosRepository } from '../../infrastructure/repositories/configuracion-precios.repository';
 import { InscripcionMensualRepository } from '../../infrastructure/repositories/inscripcion-mensual.repository';
 import { MercadoPagoService } from '../../mercadopago.service';
-import { PrismaService } from '../../../common/database/prisma.service';
+import { PrismaService } from '../../../core/database/prisma.service';
 import {
   CalcularPrecioInputDTO,
   CalcularPrecioOutputDTO,
@@ -246,7 +246,7 @@ export class PagosService {
         this.logger.warn(`⚠️ Formato de external_reference desconocido: ${externalRef}`);
         return { message: 'Unknown external_reference format' };
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`❌ Error procesando webhook: ${error.message}`, error.stack);
       throw error;
     }

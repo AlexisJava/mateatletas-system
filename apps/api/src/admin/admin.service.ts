@@ -437,7 +437,7 @@ export class AdminService {
         usuario = await this.prisma.tutor.update({
           where: { id: usuarioId },
           data: {
-            password: hashedPassword,
+            password_hash: hashedPassword,
             password_temporal: nuevaPassword,
             debe_cambiar_password: true,
           },
@@ -457,7 +457,7 @@ export class AdminService {
         usuario = await this.prisma.estudiante.update({
           where: { id: usuarioId },
           data: {
-            password: hashedPassword,
+            password_hash: hashedPassword,
             password_temporal: nuevaPassword,
             debe_cambiar_password: true,
           },
@@ -477,7 +477,7 @@ export class AdminService {
         usuario = await this.prisma.docente.update({
           where: { id: usuarioId },
           data: {
-            password: hashedPassword,
+            password_hash: hashedPassword,
             password_temporal: nuevaPassword,
             debe_cambiar_password: true,
           },
@@ -516,7 +516,7 @@ export class AdminService {
             usuario: resultado.usuario,
             password_temporal: resultado.password_temporal,
           };
-        } catch (error) {
+        } catch (error: any) {
           return {
             success: false,
             usuarioId: u.id,
