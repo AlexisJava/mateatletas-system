@@ -173,13 +173,13 @@ export default function CalendarioTab() {
                           month: 'long',
                         })}
                       </h3>
-                      <p className="text-sm text-gray-400">{clasesDelDia.length} clases programadas</p>
+                      <p className="text-sm text-gray-400">{clasesDelDia?.length || 0} clases programadas</p>
                     </div>
                   </div>
 
                   {/* Clases del Día */}
                   <div className="space-y-2 pl-6">
-                    {clasesDelDia.map((clase) => {
+                    {clasesDelDia?.map((clase) => {
                       const fechaClase = new Date(clase.fecha_hora_inicio);
                       const esFutura = fechaClase > now;
 

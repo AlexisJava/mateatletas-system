@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDocenteStore } from '@/store/docente.store';
 import { toast } from '@/components/ui';
-import { Clase, EstadoClase } from '@/types/clases.types';
+import { Clase, ESTADO_CLASE, type EstadoClase } from '@/types/clases.types';
 
 export type ViewMode = 'card' | 'list';
 
@@ -138,19 +138,11 @@ export function useMisClases() {
   /**
    * Obtener color del estado
    */
-  const getEstadoColor = (estado: EstadoClase | 'Programada' | 'EnCurso' | 'Finalizada' | 'Cancelada'): string => {
+  const getEstadoColor = (estado: EstadoClase): string => {
     switch (estado) {
-      case EstadoClase.Programada:
-      case 'Programada':
+      case ESTADO_CLASE.Programada:
         return 'bg-[#4caf50] text-white';
-      case EstadoClase.EnCurso:
-      case 'EnCurso':
-        return 'bg-[#f7b801] text-[#2a1a5e]';
-      case EstadoClase.Finalizada:
-      case 'Finalizada':
-        return 'bg-gray-400 text-white';
-      case EstadoClase.Cancelada:
-      case 'Cancelada':
+      case ESTADO_CLASE.Cancelada:
         return 'bg-[#f44336] text-white';
       default:
         return 'bg-gray-300 text-gray-800';
@@ -161,18 +153,15 @@ export function useMisClases() {
    * Determinar si se puede cancelar una clase
    */
   const puedeCancelar = (clase: Clase) => {
-    return clase.estado === EstadoClase.Programada;
+    return clase.estado === ESTADO_CLASE.Programada;
   };
 
   /**
    * Determinar si se puede registrar asistencia
+   * Solo permitir para clases programadas (las canceladas no)
    */
   const puedeRegistrarAsistencia = (clase: Clase) => {
-    return (
-      clase.estado === EstadoClase.Programada ||
-      clase.estado === EstadoClase.EnCurso ||
-      clase.estado === EstadoClase.Finalizada
-    );
+    return clase.estado === ESTADO_CLASE.Programada;
   };
 
   return {

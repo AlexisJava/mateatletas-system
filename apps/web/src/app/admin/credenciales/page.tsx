@@ -53,9 +53,9 @@ export default function CredencialesPage() {
       setIsLoading(true);
       setError(null);
       const response = await apiClient.get('/admin/credenciales');
-      setTutores(response.tutores || []);
-      setEstudiantes(response.estudiantes || []);
-      setDocentes(response.docentes || []);
+      setTutores(response.data?.tutores || []);
+      setEstudiantes(response.data?.estudiantes || []);
+      setDocentes(response.data?.docentes || []);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al cargar credenciales'));
     } finally {
@@ -110,10 +110,12 @@ export default function CredencialesPage() {
       });
 
       // Mostrar nueva contraseña
-      setResetSuccess({ id: usuarioId, password: response.password_temporal });
+      setResetSuccess({ id: usuarioId, password: response.data?.password_temporal || '' });
 
       // Auto-copiar al clipboard
-      navigator.clipboard.writeText(response.password_temporal);
+      if (response.data?.password_temporal) {
+        navigator.clipboard.writeText(response.data.password_temporal);
+      }
 
       // Recargar credenciales
       await loadCredenciales();
