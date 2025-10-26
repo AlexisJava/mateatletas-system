@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuthStore } from '@/store/auth.store';
 import {
   DollarSign,
   TrendingUp,
@@ -75,6 +76,7 @@ ChartJS.register(
  * - Estilo glassmorphism y gradientes vibrantes
  */
 export default function PagosDashboard() {
+  const { user } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('2025-01');
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -170,7 +172,7 @@ export default function PagosDashboard() {
       };
 
       const updateData = {
-        adminId: 'admin-temp-id', // TODO: Obtener del contexto de autenticación
+        adminId: user?.id || '',
         precioClubMatematicas: parsePrice(formData.precioClubMatematicas),
         precioCursosEspecializados: parsePrice(formData.precioCursosEspecializados),
         precioMultipleActividades: parsePrice(formData.precioMultipleActividades),
