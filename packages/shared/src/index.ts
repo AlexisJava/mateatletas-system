@@ -126,6 +126,9 @@ export interface PaginatedResponse<T> {
 
 export * from '@mateatletas/contracts';
 
+// Re-export runtime constants for enum values
+export { ESTADO_CLASE, ESTADO_ASISTENCIA } from '@mateatletas/contracts';
+
 export type {
   EstadoPlanificacion,
   PlanificacionListItem,

@@ -4,6 +4,8 @@ import {
   reservarClaseSchema,
   estadoClaseEnum,
   estadoAsistenciaEnum,
+  ESTADO_CLASE,
+  ESTADO_ASISTENCIA,
   type Clase as SharedClase,
   type ClasesList,
   type InscripcionClase as SharedInscripcionClase,
@@ -24,9 +26,15 @@ export interface RutaCurricular {
   updatedAt: string;
 }
 
-export type EstadoClase = SharedEstadoClase;
+// Re-exportar runtime constants (SINGLE SOURCE OF TRUTH)
+export { ESTADO_CLASE, ESTADO_ASISTENCIA };
+
+// Exportar schemas de Zod
 export const estadoClaseSchema = estadoClaseEnum;
 export const estadoAsistenciaSchema = estadoAsistenciaEnum;
+
+// Exportar tipos TypeScript
+export type EstadoClase = SharedEstadoClase;
 
 export type Clase = SharedClase;
 export type InscripcionClase = SharedInscripcionClase;
