@@ -94,7 +94,7 @@ export default function AdminEstudiantesPage() {
   const loadSectores = async () => {
     try {
       const response = await apiClient.get('/admin/sectores');
-      setSectores(response);
+      setSectores(response.data || []);
     } catch (err: unknown) {
       console.error('Error al cargar sectores:', err);
     }
