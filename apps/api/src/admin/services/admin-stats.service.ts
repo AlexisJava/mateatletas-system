@@ -18,15 +18,15 @@ export class AdminStatsService {
     today.setHours(0, 0, 0, 0);
 
     const [
-      activeMemberships,
+      activeInscriptions,
       upcomingClasses,
       openAlerts,
       totalEstudiantes,
       totalDocentes,
       totalTutores,
     ] = await Promise.all([
-      this.prisma.membresia.count({
-        where: { estado: 'Activa' },
+      this.prisma.inscripcionClaseGrupo.count({
+        where: { fecha_baja: null },
       }),
       this.prisma.clase.count({
         where: {
@@ -43,7 +43,7 @@ export class AdminStatsService {
     ]);
 
     return {
-      activeMemberships,
+      activeMemberships: activeInscriptions, // Renombrado de membresías a inscripciones activas
       upcomingClasses,
       openAlerts,
       totalEstudiantes,
@@ -94,7 +94,7 @@ export class AdminStatsService {
 
     // Calcular ingresos del mes actual desde InscripcionMensual
     const now = new Date();
-    const mesActual = now.getMonth() + 1;
+    const mesActual = now.getMonth() + 1; // 1-12
     const anioActual = now.getFullYear();
     const periodoActual = `${anioActual}-${mesActual.toString().padStart(2, '0')}`;
 

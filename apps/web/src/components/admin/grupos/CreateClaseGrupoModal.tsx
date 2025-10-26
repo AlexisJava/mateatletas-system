@@ -363,7 +363,7 @@ export function CreateClaseGrupoModal({
                 min="1"
                 max="50"
                 value={formData.cupo_maximo}
-                onChange={(e) => handleChange('cupo_maximo', parseInt(e.target.value))}
+                onChange={(e) => handleChange('cupo_maximo', parseInt(e.target.value) || 0)}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-purple-500/50 focus:bg-white/10"
               />
             </div>
@@ -377,7 +377,7 @@ export function CreateClaseGrupoModal({
                 min="2024"
                 max="2100"
                 value={formData.anio_lectivo}
-                onChange={(e) => handleChange('anio_lectivo', parseInt(e.target.value))}
+                onChange={(e) => handleChange('anio_lectivo', parseInt(e.target.value) || new Date().getFullYear())}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-purple-500/50 focus:bg-white/10"
               />
             </div>
