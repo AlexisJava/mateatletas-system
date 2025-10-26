@@ -25,6 +25,7 @@ export interface User {
   equipo_id?: string | null;
   puntos_totales?: number;
   nivel_actual?: number;
+  debe_cambiar_password?: boolean;
 }
 
 /**

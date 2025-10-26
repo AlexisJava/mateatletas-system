@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { useAuthStore } from '@/store/auth.store';
-import ModalCambioPasswordObligatorio from '@/components/auth/ModalCambioPasswordObligatorio';
-import ModalSelectorRol from '@/components/auth/ModalSelectorRol';
-import type { UserRole } from '@/store/auth.store';
+import ForcePasswordChangeOverlay from '@/components/auth/ForcePasswordChangeOverlay';
 import {
   Terminal,
   Eye,
@@ -123,91 +121,47 @@ function FloatingParticle({ delay = 0, left = 50 }: { delay?: number; left?: num
  */
 export default function LoginPage() {
   const router = useRouter();
-  const { login, loginEstudiante, isLoading, isAuthenticated, user, selectedRole, setSelectedRole } = useAuthStore();
-
-  // Declarar TODOS los estados primero
+  const { login, loginEstudiante, isLoading, isAuthenticated, user } = useAuthStore();
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const hasRedirectedRef = useRef(false);
+  const mustChangePassword = useMemo(
+    () => Boolean(user?.debe_cambiar_password),
+    [user?.debe_cambiar_password],
+  );
+
+  // Redirigir si ya está autenticado
+  useEffect(() => {
+    if (!isAuthenticated || !user || isLoading) {
+      return;
+    }
+
+    if (mustChangePassword) {
+      setIsRedirecting(false);
+      hasRedirectedRef.current = false;
+      return;
+    }
+
+    if (!hasRedirectedRef.current) {
+      hasRedirectedRef.current = true;
+      setIsRedirecting(true);
+
+      const redirectPath =
+        user.role === 'admin' ? '/admin/dashboard' :
+        user.role === 'docente' ? '/docente/dashboard' :
+        user.role === 'estudiante' ? '/estudiante/dashboard' :
+        '/dashboard';
+
+      router.replace(redirectPath);
+    }
+  }, [isAuthenticated, user, router, isLoading, mustChangePassword]);
+
   const [userType, setUserType] = useState<'tutor' | 'estudiante'>('tutor');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const hasRedirectedRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
-
-  // RESET: Al montar el componente, limpiar selectedRole Y detectar modal inmediatamente
-  useEffect(() => {
-    if (selectedRole !== null) {
-      setSelectedRole(null);
-    }
-
-    // CRÍTICO: Si ya hay un usuario autenticado multi-rol al montar, mostrar modal INMEDIATAMENTE
-    if (isAuthenticated && user && !user.debe_cambiar_password && user.roles && user.roles.length > 1 && !selectedRole) {
-      setShowRoleSelector(true);
-    }
-  }, []); // Solo ejecutar al montar
-
-  // CONSOLIDADO: Detectar si debe cambiar contraseña O si debe seleccionar rol
-  useEffect(() => {
-    if (!isAuthenticated || !user) {
-      return;
-    }
-
-    // PRIORIDAD 1: Cambio de contraseña obligatorio
-    if (user.debe_cambiar_password && !showPasswordModal) {
-      setShowPasswordModal(true);
-      return;
-    }
-
-    // PRIORIDAD 2: Selección de rol para usuarios multi-rol
-    if (!user.debe_cambiar_password && user.roles && user.roles.length > 1 && !selectedRole && !showRoleSelector) {
-      setShowRoleSelector(true);
-      return;
-    }
-  }, [isAuthenticated, user, selectedRole, showPasswordModal, showRoleSelector]);
-
-  // Función para manejar selección de rol
-  const handleSelectRole = (role: UserRole) => {
-    setSelectedRole(role);
-    setShowRoleSelector(false);
-    hasRedirectedRef.current = false; // Reset para permitir redirección
-  };
-
-  // Redirigir si ya está autenticado, NO debe cambiar password, y tiene rol seleccionado (o solo 1 rol)
-  useEffect(() => {
-    // NO redirigir si se están mostrando modales
-    if (showRoleSelector || showPasswordModal) return;
-
-    // Verificar condiciones básicas
-    if (!isAuthenticated || !user || user.debe_cambiar_password || hasRedirectedRef.current || isLoading) {
-      return;
-    }
-
-    // Si tiene múltiples roles pero no ha seleccionado, esperar
-    if (user.roles && user.roles.length > 1 && !selectedRole) {
-      return;
-    }
-
-    // Todas las condiciones cumplidas - proceder con redirección
-    hasRedirectedRef.current = true;
-    setIsRedirecting(true);
-
-    // Usar selectedRole si existe, sino user.role
-    const activeRole = selectedRole || user.role;
-
-    // Redirigir según el rol activo
-    const redirectPath =
-      activeRole === 'admin' ? '/admin/dashboard' :
-      activeRole === 'docente' ? '/docente/dashboard' :
-      activeRole === 'estudiante' ? '/estudiante/dashboard' :
-      '/dashboard';
-
-    router.replace(redirectPath);
-  }, [isAuthenticated, user, selectedRole, router, isLoading, showRoleSelector, showPasswordModal]);
 
   // Cleanup al desmontar
   useEffect(() => {
@@ -250,9 +204,6 @@ export default function LoginPage() {
       } else {
         await login(email, password);
       }
-
-      // NO setear isRedirecting aquí - el useEffect de redirección lo manejará
-      // Esto permite que el modal se muestre para usuarios multi-rol
     } catch (err: unknown) {
       // Ignorar errores de abort
       if (err instanceof Error && err.name === 'AbortError') {
@@ -691,14 +642,10 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Modal de cambio de contraseña obligatorio */}
-      <ModalCambioPasswordObligatorio isOpen={showPasswordModal} />
-
-      {/* Modal de selector de rol para multi-rol */}
-      <ModalSelectorRol
-        isOpen={showRoleSelector}
-        roles={user?.roles || []}
-        onSelectRole={handleSelectRole}
+      <ForcePasswordChangeOverlay
+        onSuccess={() => {
+          hasRedirectedRef.current = false;
+        }}
       />
     </div>
   );
