@@ -74,7 +74,7 @@ export default function MisClasesPage() {
       hour: '2-digit',
       minute: '2-digit',
     }).format(fecha);
-    const colorRuta = clase.ruta_curricular?.color || '#00d9ff';
+    const colorRuta = '#00d9ff'; // Color por defecto (rutas curriculares deprecated)
     const today = new Date();
     const esHoy =
       fecha.getDate() === today.getDate() &&
@@ -104,7 +104,7 @@ export default function MisClasesPage() {
                 borderColor: colorRuta,
               }}
             >
-              📚 {clase.ruta_curricular?.nombre || 'Sin ruta'}
+              📚 Clase
             </Badge>
 
             {esHoy && esFutura && (
@@ -122,7 +122,7 @@ export default function MisClasesPage() {
 
           {/* Título */}
           <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark">
-            {clase.ruta_curricular?.nombre || 'Clase de Matemáticas'}
+            {clase.nombre || 'Clase de Matemáticas'}
           </h3>
 
           {/* Info grid */}
@@ -154,14 +154,14 @@ export default function MisClasesPage() {
               </div>
             </div>
 
-            {/* Docente */}
-            {clase.docente && (
+            {/* Docente - Información no disponible en este contexto */}
+            {false && (
               <div className="flex items-start gap-2">
                 <span className="text-xl">👨‍🏫</span>
                 <div>
                   <p className="text-xs text-gray-500">Docente</p>
                   <p className="font-bold text-dark">
-                    {clase.docente?.nombre} {clase.docente?.apellido}
+                    Docente
                   </p>
                 </div>
               </div>

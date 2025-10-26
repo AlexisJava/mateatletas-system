@@ -20,7 +20,7 @@ export default function MisHijosTab({ estudiantes }: Props) {
 
   // Auto-seleccionar el primer estudiante
   useEffect(() => {
-    if (estudiantes.length > 0 && !selectedStudent) {
+    if (estudiantes.length > 0 && !selectedStudent && estudiantes[0]?.id) {
       setSelectedStudent(estudiantes[0].id);
     }
   }, [estudiantes, selectedStudent]);

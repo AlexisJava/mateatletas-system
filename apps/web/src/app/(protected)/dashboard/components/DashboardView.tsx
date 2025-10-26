@@ -215,13 +215,13 @@ export default function DashboardView({
                                 <button
                                   onClick={() => {
                                     if (alerta.accion?.url.startsWith('/dashboard?tab=')) {
-                                      const tab = alerta.accion.url.split('tab=')[1].split('&')[0];
-                                      setActiveTab(tab as TabType);
+                                      const tab = alerta.accion.url.split('tab=')[1]?.split('&')[0];
+                                      if (tab) setActiveTab(tab as TabType);
                                     }
                                   }}
                                   className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors whitespace-nowrap shadow-lg"
                                 >
-                                  {alerta.accion.label}
+                                  {alerta.accion?.label}
                                 </button>
                               )}
                             </div>
