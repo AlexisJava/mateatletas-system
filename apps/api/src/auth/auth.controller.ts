@@ -20,6 +20,7 @@ import {
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { TokenBlacklistService } from './token-blacklist.service';
@@ -297,5 +298,55 @@ export class AuthController {
       message: 'Logout exitoso',
       description: 'La sesión ha sido cerrada y el token invalidado',
     };
+  }
+
+  /**
+   * POST /api/auth/change-password
+   * Permite al usuario autenticado actualizar su contraseña
+   *
+   * @param user - Usuario autenticado (extraído del token JWT)
+   * @param changePasswordDto - Contraseñas actual y nueva
+   * @returns 200 OK - Mensaje de éxito
+   * @throws 401 Unauthorized - Contraseña actual incorrecta
+   */
+  @ApiOperation({
+    summary: 'Cambiar contraseña del usuario autenticado',
+    description:
+      'Actualiza la contraseña del usuario autenticado y cierra todas las sesiones activas',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Contraseña actualizada exitosamente',
+    schema: {
+      example: {
+        success: true,
+        message: 'Contraseña actualizada exitosamente',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Contraseña actual incorrecta',
+  })
+  @ApiBearerAuth('JWT-auth')
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async changePassword(
+    @GetUser() user: AuthUser,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    const result = await this.authService.cambiarPassword(
+      user.id,
+      changePasswordDto.passwordActual,
+      changePasswordDto.nuevaPassword,
+    );
+
+    await this.tokenBlacklistService.blacklistAllUserTokens(
+      user.id,
+      'password_change',
+    );
+
+    return result;
   }
 }
