@@ -1465,11 +1465,12 @@ model InscripcionMensual {
   detalle_calculo String // Explicación del cálculo aplicado
 
   /// Estado de pago
-  estado_pago     EstadoPago @default(Pendiente)
-  fecha_pago      DateTime?
-  metodo_pago     String? // "Efectivo", "Transferencia", "MercadoPago"
-  comprobante_url String? // URL del comprobante subido
-  observaciones   String?
+  estado_pago      EstadoPago @default(Pendiente)
+  fecha_vencimiento DateTime? // Fecha límite de pago
+  fecha_pago       DateTime?
+  metodo_pago      String? // "Efectivo", "Transferencia", "MercadoPago"
+  comprobante_url  String? // URL del comprobante subido
+  observaciones    String?
 
   /// Auditoría
   createdAt DateTime @default(now())
