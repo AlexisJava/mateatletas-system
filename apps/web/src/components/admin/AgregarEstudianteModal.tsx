@@ -128,9 +128,9 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
         return;
       }
 
-      // Validar datos del tutor
-      if (!tutor.nombre || !tutor.apellido || !tutor.email || !tutor.telefono) {
-        setError('Todos los campos del tutor son requeridos');
+      // Validar datos del tutor (solo nombre y apellido son requeridos)
+      if (!tutor.nombre || !tutor.apellido) {
+        setError('Nombre y apellido del tutor son requeridos');
         setIsSubmitting(false);
         return;
       }
@@ -147,8 +147,8 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
         tutor: {
           nombre: tutor.nombre,
           apellido: tutor.apellido,
-          email: tutor.email,
-          telefono: tutor.telefono,
+          email: tutor.email || undefined,
+          telefono: tutor.telefono || undefined,
           dni: tutor.dni || undefined
         },
         sectorId
@@ -491,7 +491,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
 
                 <div>
                   <label className="block text-white/80 text-sm font-semibold mb-2">
-                    Email <span className="text-red-400">*</span>
+                    Email (opcional)
                   </label>
                   <input
                     type="email"
@@ -499,13 +499,12 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
                     onChange={(e) => handleTutorChange('email', e.target.value)}
                     className="w-full px-4 py-3 bg-black/30 border border-emerald-500/20 rounded-lg text-white placeholder-white/40 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                     placeholder="maria.perez@ejemplo.com"
-                    required
                   />
                 </div>
 
                 <div>
                   <label className="block text-white/80 text-sm font-semibold mb-2">
-                    Teléfono <span className="text-red-400">*</span>
+                    Teléfono (opcional)
                   </label>
                   <input
                     type="tel"
@@ -513,7 +512,6 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
                     onChange={(e) => handleTutorChange('telefono', e.target.value)}
                     className="w-full px-4 py-3 bg-black/30 border border-emerald-500/20 rounded-lg text-white placeholder-white/40 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                     placeholder="+549 11 1234-5678"
-                    required
                   />
                 </div>
 

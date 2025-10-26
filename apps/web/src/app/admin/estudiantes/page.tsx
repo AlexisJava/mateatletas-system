@@ -59,7 +59,8 @@ export default function AdminEstudiantesPage() {
       setError(null);
       // Endpoint para admin que trae TODOS los estudiantes
       const response = await apiClient.get('/admin/estudiantes');
-      const estudiantes = Array.isArray(response) ? response : [];
+      // El backend devuelve { data: [], metadata: {} }
+      const estudiantes = response?.data ? response.data : (Array.isArray(response) ? response : []);
       setEstudiantes(estudiantes as Estudiante[]);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al cargar estudiantes'));
@@ -80,8 +81,12 @@ export default function AdminEstudiantesPage() {
   const handleAbrirModal = (nombreSector: string) => {
     const sector = sectores.find(s => s.nombre === nombreSector);
     if (sector) {
+      console.log(`[DEBUG] Abriendo modal para sector: ${nombreSector} con ID: ${sector.id}`);
       setSectorIdParaModal(sector.id);
       setIsModalOpen(true);
+    } else {
+      console.error(`[ERROR] No se encontró el sector: ${nombreSector}. Sectores disponibles:`, sectores);
+      setError(`No se pudo abrir el modal: sector "${nombreSector}" no encontrado`);
     }
   };
 

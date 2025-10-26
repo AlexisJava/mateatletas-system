@@ -14,6 +14,8 @@ export const SystemStatsSchema = z.object({
   clasesActivas: NonNegativeNumberSchema,
   totalProductos: NonNegativeNumberSchema,
   ingresosTotal: NonNegativeNumberSchema,
+  pagosPendientes: NonNegativeNumberSchema,
+  inscripcionesActivas: NonNegativeNumberSchema,
 });
 
 export type SystemStats = z.infer<typeof SystemStatsSchema>;

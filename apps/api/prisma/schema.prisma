@@ -114,12 +114,16 @@ model Estudiante {
   /// Roles asignados al estudiante (normalmente solo ["estudiante"])
   /// Ejemplo: ["estudiante"]
   roles                     Json                    @default("[\"estudiante\"]")
-  /// ID del sector al que pertenece el estudiante (Matemática o Programación)
+  /// DEPRECADO: ID del sector al que pertenece el estudiante (usar sectores[] en su lugar)
+  /// Mantener temporalmente para migración gradual
   sector_id                 String?
   alertas                   Alerta[]
   asistencias               Asistencia[]
   equipo                    Equipo?                 @relation(fields: [equipo_id], references: [id])
-  sector                    Sector?                 @relation(fields: [sector_id], references: [id])
+  /// DEPRECADO: Relación uno-a-uno con sector (usar sectores[] en su lugar)
+  sector                    Sector?                 @relation("EstudianteSectorLegacy", fields: [sector_id], references: [id])
+  /// NUEVO: Relación muchos-a-muchos con sectores a través de EstudianteSector
+  sectores                  EstudianteSector[]
   tutor                     Tutor                   @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
   inscripciones_clase       InscripcionClase[]
   inscripciones_clase_grupo InscripcionClaseGrupo[]
@@ -134,6 +138,38 @@ model Estudiante {
   progresosPlanificaciones  ProgresoEstudiantePlanificacion[]
 
   @@map("estudiantes")
+}
+
+/// Tabla intermedia para relación muchos-a-muchos entre Estudiante y Sector
+/// Un estudiante puede estar inscrito en múltiples sectores (ej: Matemática + Programación)
+/// Un sector puede tener múltiples estudiantes
+model EstudianteSector {
+  /// ID único de la relación
+  id            String   @id @default(cuid())
+  /// ID del estudiante
+  estudiante_id String
+  /// ID del sector
+  sector_id     String
+  /// Indica si es el sector principal del estudiante (para compatibilidad con lógica legacy)
+  es_principal  Boolean  @default(false)
+  /// Fecha de inscripción en el sector
+  fecha_inicio  DateTime @default(now())
+  /// Fecha de baja del sector (null si está activo)
+  fecha_fin     DateTime?
+  /// Timestamp de creación del registro
+  createdAt     DateTime @default(now())
+  /// Timestamp de última actualización del registro
+  updatedAt     DateTime @updatedAt
+
+  /// Relaciones
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  sector     Sector     @relation(fields: [sector_id], references: [id], onDelete: Cascade)
+
+  /// Índice único para evitar duplicados (un estudiante no puede estar dos veces en el mismo sector activo)
+  @@unique([estudiante_id, sector_id])
+  @@index([estudiante_id])
+  @@index([sector_id])
+  @@map("estudiante_sectores")
 }
 
 /// Modelo para equipos de gamificación
@@ -1190,7 +1226,10 @@ model Sector {
   claseGrupos ClaseGrupo[]
   grupos      Grupo[]
   docentes    DocenteRuta[]
-  estudiantes Estudiante[]
+  /// DEPRECADO: Relación uno-a-muchos con estudiantes (usar estudianteSectores[] en su lugar)
+  estudiantes Estudiante[]       @relation("EstudianteSectorLegacy")
+  /// NUEVO: Relación muchos-a-muchos con estudiantes a través de EstudianteSector
+  estudianteSectores EstudianteSector[]
   rutas       RutaEspecialidad[]
 
   @@map("sectores")

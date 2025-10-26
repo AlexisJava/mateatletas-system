@@ -149,10 +149,10 @@ export function EditClaseGrupoModal({
 
   const fetchEstudiantes = async () => {
     try {
-      const response: any = await axios.get('/estudiantes');
+      const response: any = await axios.get('/admin/estudiantes');
 
-      // El endpoint puede devolver { data: [...] } o directamente [...]
-      const estudiantes = response.data || response;
+      // El backend devuelve { data: [...], metadata: {...} }
+      const estudiantes = response?.data ? response.data : (Array.isArray(response) ? response : []);
 
       if (Array.isArray(estudiantes)) {
         console.log('✅ Estudiantes cargados:', estudiantes.length);

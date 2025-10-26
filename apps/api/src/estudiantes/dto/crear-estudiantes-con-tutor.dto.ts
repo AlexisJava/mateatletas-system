@@ -37,9 +37,9 @@ export class TutorDto {
   @IsString({ message: 'El apellido debe ser un string' })
   apellido!: string;
 
-  @IsNotEmpty({ message: 'El email del tutor es requerido' })
+  @IsOptional()
   @IsEmail({}, { message: 'El email debe ser válido' })
-  email!: string;
+  email?: string;
 
   @IsOptional()
   @IsString({ message: 'El DNI debe ser un string' })
