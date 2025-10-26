@@ -18,17 +18,10 @@ interface ForcePasswordChangeOverlayProps {
 export function ForcePasswordChangeOverlay({
   onSuccess,
 }: ForcePasswordChangeOverlayProps) {
-  const {
-    user,
-    login,
-    loginEstudiante,
-    setUser,
-  } = useAuthStore((state) => ({
-    user: state.user,
-    login: state.login,
-    loginEstudiante: state.loginEstudiante,
-    setUser: state.setUser,
-  }));
+  const user = useAuthStore((state) => state.user);
+  const login = useAuthStore((state) => state.login);
+  const loginEstudiante = useAuthStore((state) => state.loginEstudiante);
+  const setUser = useAuthStore((state) => state.setUser);
 
   const [passwordActual, setPasswordActual] = useState('');
   const [nuevaPassword, setNuevaPassword] = useState('');
@@ -76,22 +69,18 @@ export function ForcePasswordChangeOverlay({
         nuevaPassword,
       });
 
-      // Refrescar sesión automáticamente
-      if (user.email) {
-        if (user.role === 'estudiante') {
-          await loginEstudiante(user.email, nuevaPassword);
-        } else {
-          await login(user.email, nuevaPassword);
-        }
-      } else {
-        // Si no tenemos email (caso raro), al menos actualizar flag local
-        setUser({ ...user, debe_cambiar_password: false });
-      }
-
+      // FORZAR LOGOUT para que el usuario inicie sesión con la nueva contraseña
+      // Esto garantiza que obtenemos datos frescos del backend
       setPasswordActual('');
       setNuevaPassword('');
       setConfirmPassword('');
-      setSuccessMessage('Contraseña actualizada. Sesión renovada con tu nueva contraseña.');
+      setSuccessMessage('✅ Contraseña actualizada exitosamente. Por favor, iniciá sesión nuevamente con tu nueva contraseña.');
+
+      // Esperar 2 segundos para que el usuario lea el mensaje, luego hacer logout
+      setTimeout(async () => {
+        await useAuthStore.getState().logout();
+        window.location.href = '/login';
+      }, 2000);
 
       if (onSuccess) {
         onSuccess();

@@ -260,10 +260,11 @@ export const useAuthStore = create<AuthState>()(
       // Configuración de persistencia
       name: 'auth-storage', // Nombre del key en localStorage
       partialize: (state) => ({
-        // Solo persistir user y token
+        // Persistir user, token y selectedRole
         // NO persistir isAuthenticated para evitar bucles de redirección
         user: state.user,
         token: state.token,
+        selectedRole: state.selectedRole,
       }),
       // Callback después de rehidratar: calcular isAuthenticated basado en user
       onRehydrateStorage: () => (state) => {
@@ -271,9 +272,8 @@ export const useAuthStore = create<AuthState>()(
           // Si hay user, marcamos como autenticado
           state.isAuthenticated = !!state.user;
 
-          // IMPORTANTE: Siempre resetear selectedRole al rehidratar
-          // El usuario debe elegir el rol cada vez que carga la app
-          state.selectedRole = null;
+          // selectedRole ya se rehidrata automáticamente desde localStorage
+          // NO resetear para mantener la selección del usuario
         }
       },
     },
