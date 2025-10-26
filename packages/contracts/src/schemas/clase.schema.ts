@@ -12,11 +12,29 @@ export const estadoClaseEnum = z.enum(['Programada', 'Cancelada']);
 export type EstadoClase = z.infer<typeof estadoClaseEnum>;
 
 /**
+ * Objeto constante runtime para acceder a valores de EstadoClase
+ * SINGLE SOURCE OF TRUTH para estados de clase
+ */
+export const ESTADO_CLASE = {
+  Programada: 'Programada',
+  Cancelada: 'Cancelada',
+} as const satisfies Record<EstadoClase, EstadoClase>;
+
+/**
  * Enum para estado de asistencia
  */
 export const estadoAsistenciaEnum = z.enum(['Presente', 'Ausente', 'Justificado']);
 
 export type EstadoAsistencia = z.infer<typeof estadoAsistenciaEnum>;
+
+/**
+ * Objeto constante runtime para acceder a valores de EstadoAsistencia
+ */
+export const ESTADO_ASISTENCIA = {
+  Presente: 'Presente',
+  Ausente: 'Ausente',
+  Justificado: 'Justificado',
+} as const satisfies Record<EstadoAsistencia, EstadoAsistencia>;
 
 /**
  * Schema base de Clase

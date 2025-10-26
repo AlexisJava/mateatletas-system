@@ -7,13 +7,13 @@ import {
   Eye,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Clase, EstadoClase } from '@/types/clases.types';
+import { Clase, ESTADO_CLASE, type EstadoClase } from '@/types/clases.types';
 
 interface ClaseRowProps {
   clase: Clase;
   onIniciarClase: (id: string) => void;
   puedeRegistrarAsistencia: (clase: Clase) => boolean;
-  getEstadoColor: (estado: EstadoClase | 'Programada' | 'EnCurso' | 'Finalizada' | 'Cancelada') => string;
+  getEstadoColor: (estado: EstadoClase) => string;
 }
 
 export function ClaseRow({
@@ -38,7 +38,7 @@ export function ClaseRow({
     <motion.div
       whileHover={{ x: 4 }}
       className="glass-card p-4 border-l-4 hover:shadow-lg hover:shadow-purple-200/20 dark:hover:shadow-purple-900/30 transition-all"
-      style={{ borderLeftColor: clase.ruta_curricular?.color || '#8b5cf6' }}
+      style={{ borderLeftColor: '#8b5cf6' }}
     >
       <div className="flex items-center gap-4">
         {/* Hora */}
@@ -59,17 +59,6 @@ export function ClaseRow({
                 {clase.titulo}
               </h3>
               <div className="flex items-center gap-3 mt-1">
-                {clase.ruta_curricular && (
-                  <span
-                    className="px-2 py-0.5 rounded text-xs font-bold"
-                    style={{
-                      backgroundColor: `${clase.ruta_curricular.color}20`,
-                      color: clase.ruta_curricular.color,
-                    }}
-                  >
-                    {clase.ruta_curricular.nombre}
-                  </span>
-                )}
                 <span className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-300 font-medium">
                   <Users className="w-3.5 h-3.5" />
                   {clase.cupo_maximo - clase.cupo_disponible}/{clase.cupo_maximo}
@@ -90,7 +79,7 @@ export function ClaseRow({
 
         {/* Actions */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {esHoy() && clase.estado === EstadoClase.Programada && (
+          {esHoy() && clase.estado === ESTADO_CLASE.Programada && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
