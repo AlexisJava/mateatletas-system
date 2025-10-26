@@ -45,7 +45,7 @@ const navItems = [
 export default function DocenteLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout, checkAuth } = useAuthStore();
+  const { user, logout, checkAuth, selectedRole } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const hasValidatedRef = useRef(false);
@@ -59,17 +59,20 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
     const validateAuth = async () => {
       hasValidatedRef.current = true;
 
-      // Si ya tenemos un usuario docente, validar y terminar
-      if (user && user.role === 'docente') {
+      // Usar selectedRole si existe, sino user.role
+      const activeRole = selectedRole || user?.role;
+
+      // Si ya tenemos un usuario docente (por rol activo o selectedRole), validar y terminar
+      if (user && activeRole === 'docente') {
         setIsValidating(false);
         return;
       }
 
-      // Si el usuario tiene otro rol, redirigir al dashboard apropiado
-      if (user && user.role !== 'docente') {
+      // Si el usuario tiene otro rol ACTIVO, redirigir al dashboard apropiado
+      if (user && activeRole && activeRole !== 'docente') {
         const redirectPath =
-          user.role === 'admin' ? '/admin/dashboard' :
-          user.role === 'estudiante' ? '/estudiante/dashboard' :
+          activeRole === 'admin' ? '/admin/dashboard' :
+          activeRole === 'estudiante' ? '/estudiante/dashboard' :
           '/dashboard';
         router.replace(redirectPath);
         return;
@@ -80,6 +83,7 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
         try {
           await checkAuth();
           const currentUser = useAuthStore.getState().user;
+          const currentSelectedRole = useAuthStore.getState().selectedRole;
 
           // Después de checkAuth, validar el rol
           if (!currentUser) {
@@ -87,16 +91,18 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
             return;
           }
 
-          if (currentUser.role !== 'docente') {
+          const currentActiveRole = currentSelectedRole || currentUser.role;
+
+          if (currentActiveRole !== 'docente') {
             const redirectPath =
-              currentUser.role === 'admin' ? '/admin/dashboard' :
-              currentUser.role === 'estudiante' ? '/estudiante/dashboard' :
+              currentActiveRole === 'admin' ? '/admin/dashboard' :
+              currentActiveRole === 'estudiante' ? '/estudiante/dashboard' :
               '/dashboard';
             router.replace(redirectPath);
             return;
           }
 
-          // Usuario es docente, validación exitosa
+          // Usuario es docente (por rol activo), validación exitosa
           setIsValidating(false);
         } catch (error) {
           // Error al verificar auth, redirigir a login

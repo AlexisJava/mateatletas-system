@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useStats, useStatsLoading, useFetchStats } from '@/features/admin/stats';
+import { useAuthStore } from '@/store/auth.store';
 import {
   GraduationCap,
   BookOpen,
@@ -48,11 +49,27 @@ ChartJS.register(
  * - Efectos visuales de última generación
  * - Glassmorphism moderno
  * - Animaciones suaves
+ *
+ * ⚠️ ENDPOINTS PENDIENTES DE IMPLEMENTAR:
+ * 1. GET /admin/stats/top-courses - Top 5 cursos más elegidos
+ * 2. GET /admin/stats/geographic-distribution?region=argentina|latinoamerica - Distribución geográfica
+ * 3. GET /admin/stats/upcoming-courses - Próximos inicios de cursos
+ * 4. GET /admin/stats/teacher-updates - Novedades de docentes
+ * 5. GET /admin/stats/trends - Cálculo de % de crecimiento vs mes anterior
+ *
+ * 📊 DATOS ACTUALES:
+ * - ✅ Stats principales (totalEstudiantes, totalUsuarios, ingresosTotal) - Conectado
+ * - ❌ Top courses - Arrays vacíos (waiting backend)
+ * - ❌ Distribución geográfica - Arrays vacíos (waiting backend)
+ * - ❌ Próximos inicios - Arrays vacíos (waiting backend)
+ * - ❌ Novedades docentes - Arrays vacíos (waiting backend)
+ * - ❌ Trends (%) - null (waiting backend)
  */
 export default function AdminDashboard() {
   const stats = useStats();
   const isLoading = useStatsLoading();
   const fetchStats = useFetchStats();
+  const { user } = useAuthStore();
   const [greeting, setGreeting] = useState('Bienvenido');
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -88,20 +105,20 @@ export default function AdminDashboard() {
     return num.toString();
   };
 
-  // Calcular valores reales
-  const totalEstudiantes = stats?.totalEstudiantes || 789; // Valor real del backend
-  const precioMensual = 50000;
-  const ingresosActuales = totalEstudiantes * precioMensual; // 789 × 50,000 = 39,450,000
-  const ingresosEstimados = ingresosActuales * 1.15; // Estimamos 15% más para el próximo mes
+  // Calcular valores reales desde el backend
+  const totalEstudiantes = stats?.totalEstudiantes || 0;
+  const totalUsuarios = stats?.totalUsuarios || 0;
+  const ingresosActuales = stats?.ingresosTotal || 0;
+  const ingresosEstimados = ingresosActuales * 1.15; // TODO: Calcular desde backend con datos históricos
 
   // Stats con COLORES VIBRANTES únicos para cada uno - NUEVA ORGANIZACIÓN
   const mainStats = [
     {
       label: 'Nuevos Estudiantes',
-      displayValue: formatLargeNumber(stats?.totalUsuarios || 0),
-      fullValue: stats?.totalUsuarios || 0,
+      displayValue: formatLargeNumber(totalEstudiantes),
+      fullValue: totalEstudiantes,
       icon: UserPlus,
-      trend: '+12%',
+      trend: null, // TODO: Calcular desde backend comparando con mes anterior
       trendUp: true,
       // MORADO VIBRANTE
       bgGradient: 'from-violet-500 via-purple-500 to-fuchsia-500',
@@ -116,7 +133,7 @@ export default function AdminDashboard() {
       displayValue: formatLargeNumber(totalEstudiantes),
       fullValue: totalEstudiantes,
       icon: GraduationCap,
-      trend: '+8%',
+      trend: null, // TODO: Calcular desde backend comparando con mes anterior
       trendUp: true,
       // AZUL BRILLANTE
       bgGradient: 'from-blue-500 via-cyan-500 to-teal-500',
@@ -131,7 +148,7 @@ export default function AdminDashboard() {
       displayValue: `$${formatLargeNumber(ingresosEstimados)}`,
       fullValue: ingresosEstimados,
       icon: TrendingUp,
-      trend: '+15%',
+      trend: null, // TODO: Calcular desde backend comparando con mes anterior
       trendUp: true,
       // VERDE ESMERALDA
       bgGradient: 'from-emerald-500 via-green-500 to-teal-500',
@@ -146,7 +163,7 @@ export default function AdminDashboard() {
       displayValue: `$${formatLargeNumber(ingresosActuales)}`,
       fullValue: ingresosActuales,
       icon: DollarSign,
-      trend: '+12%',
+      trend: null, // TODO: Calcular desde backend comparando con mes anterior
       trendUp: true,
       // DORADO/AMARILLO
       bgGradient: 'from-amber-500 via-yellow-500 to-orange-500',
@@ -158,181 +175,56 @@ export default function AdminDashboard() {
     },
   ];
 
+  // TODO: Obtener desde backend - GET /admin/stats/top-courses
   // Cursos más elegidos - Data para gráfico
-  const topCourses = [
-    {
-      id: 1,
-      name: 'Matemática Avanzada',
-      students: 145,
-      color: 'from-violet-500 to-purple-500',
-      percentage: 100,
-    },
-    {
-      id: 2,
-      name: 'Programación Básica',
-      students: 128,
-      color: 'from-blue-500 to-cyan-500',
-      percentage: 88,
-    },
-    {
-      id: 3,
-      name: 'Física Cuántica',
-      students: 98,
-      color: 'from-emerald-500 to-green-500',
-      percentage: 68,
-    },
-    {
-      id: 4,
-      name: 'Química Orgánica',
-      students: 87,
-      color: 'from-amber-500 to-yellow-500',
-      percentage: 60,
-    },
-    {
-      id: 5,
-      name: 'Inglés Avanzado',
-      students: 76,
-      color: 'from-orange-500 to-red-500',
-      percentage: 52,
-    },
-  ];
+  const topCourses: Array<{
+    id: number;
+    name: string;
+    students: number;
+    color: string;
+    percentage: number;
+  }> = [];
 
-  // Provincias argentinas con concentración de estudiantes
-  const argentineProvinces = [
-    {
-      id: 1,
-      name: 'Buenos Aires',
-      students: 298,
-      color: 'from-violet-500 to-purple-500',
-      percentage: 100,
-    },
-    {
-      id: 2,
-      name: 'Córdoba',
-      students: 186,
-      color: 'from-blue-500 to-cyan-500',
-      percentage: 62,
-    },
-    {
-      id: 3,
-      name: 'Santa Fe',
-      students: 142,
-      color: 'from-emerald-500 to-green-500',
-      percentage: 48,
-    },
-    {
-      id: 4,
-      name: 'Mendoza',
-      students: 98,
-      color: 'from-amber-500 to-yellow-500',
-      percentage: 33,
-    },
-    {
-      id: 5,
-      name: 'Tucumán',
-      students: 65,
-      color: 'from-orange-500 to-red-500',
-      percentage: 22,
-    },
-  ];
+  // TODO: Obtener desde backend - GET /admin/stats/geographic-distribution?region=argentina
+  const argentineProvinces: Array<{
+    id: number;
+    name: string;
+    students: number;
+    color: string;
+    percentage: number;
+  }> = [];
 
-  // Países de Latinoamérica con concentración de estudiantes
-  const latinamericaCountries = [
-    {
-      id: 1,
-      name: 'Argentina',
-      students: 298,
-      color: 'from-violet-500 to-purple-500',
-      percentage: 100,
-    },
-    {
-      id: 2,
-      name: 'Chile',
-      students: 156,
-      color: 'from-blue-500 to-cyan-500',
-      percentage: 52,
-    },
-    {
-      id: 3,
-      name: 'Uruguay',
-      students: 112,
-      color: 'from-emerald-500 to-green-500',
-      percentage: 38,
-    },
-    {
-      id: 4,
-      name: 'Paraguay',
-      students: 87,
-      color: 'from-amber-500 to-yellow-500',
-      percentage: 29,
-    },
-    {
-      id: 5,
-      name: 'Bolivia',
-      students: 56,
-      color: 'from-orange-500 to-red-500',
-      percentage: 19,
-    },
-  ];
+  // TODO: Obtener desde backend - GET /admin/stats/geographic-distribution?region=latinoamerica
+  const latinamericaCountries: Array<{
+    id: number;
+    name: string;
+    students: number;
+    color: string;
+    percentage: number;
+  }> = [];
 
   // Seleccionar datos según el filtro
   const topLocations = regionFilter === 'argentina' ? argentineProvinces : latinamericaCountries;
 
-  // Próximos inicios de cursos
-  const upcomingStarts = [
-    {
-      id: 1,
-      course: 'Matemática Nivel 3',
-      date: '15 Nov',
-      students: 12,
-      icon: BookOpen,
-      gradient: 'from-violet-500 to-purple-500',
-    },
-    {
-      id: 2,
-      course: 'Física Avanzada',
-      date: '18 Nov',
-      students: 8,
-      icon: BookOpen,
-      gradient: 'from-blue-500 to-cyan-500',
-    },
-    {
-      id: 3,
-      course: 'Programación Web',
-      date: '22 Nov',
-      students: 15,
-      icon: BookOpen,
-      gradient: 'from-emerald-500 to-green-500',
-    },
-  ];
+  // TODO: Obtener desde backend - GET /admin/stats/upcoming-courses
+  const upcomingStarts: Array<{
+    id: number;
+    course: string;
+    date: string;
+    students: number;
+    icon: typeof BookOpen;
+    gradient: string;
+  }> = [];
 
-  // Novedades de docentes
-  const teacherUpdates = [
-    {
-      id: 1,
-      title: 'Nuevo docente incorporado',
-      name: 'Prof. María González',
-      specialty: 'Matemática',
-      icon: UserPlus,
-      gradient: 'from-violet-500 to-purple-500',
-    },
-    {
-      id: 2,
-      title: 'Capacitación completada',
-      name: 'Prof. Juan Pérez',
-      specialty: 'Metodologías activas',
-      icon: Award,
-      gradient: 'from-blue-500 to-cyan-500',
-    },
-    {
-      id: 3,
-      title: 'Certificación obtenida',
-      name: 'Prof. Ana Martínez',
-      specialty: 'Programación',
-      icon: Star,
-      gradient: 'from-emerald-500 to-green-500',
-    },
-  ];
+  // TODO: Obtener desde backend - GET /admin/stats/teacher-updates
+  const teacherUpdates: Array<{
+    id: number;
+    title: string;
+    name: string;
+    specialty: string;
+    icon: typeof UserPlus | typeof Award | typeof Star;
+    gradient: string;
+  }> = [];
 
   // Configuración del gráfico de barras - Cursos Más Elegidos
   const coursesChartData = {
@@ -485,7 +377,7 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-between mb-6 relative z-10 max-w-full">
         <div className="flex-shrink-0">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-violet-200 to-blue-200 bg-clip-text text-transparent drop-shadow-lg mb-1">
-            {greeting}, Admin
+            {greeting}, {user?.nombre || 'Admin'}
           </h1>
           <p className="text-sm text-slate-300 font-medium">
             Tu centro de comando de Mateatletas Club

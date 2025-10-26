@@ -48,6 +48,18 @@ export function generateEstudiantePin(): string {
 }
 
 /**
+ * Genera una contraseña temporal segura para docentes
+ * Formato: Docente-P@ss- + 12 caracteres aleatorios
+ * Incluye mayúsculas, minúsculas, números y símbolos
+ * Ejemplo: Docente-P@ss-AbC123XyZ456
+ */
+export function generateDocentePassword(): string {
+  const prefix = 'Docente-P@ss-';
+  const randomPart = generateSecureRandomString(12);
+  return `${prefix}${randomPart}`;
+}
+
+/**
  * Genera un sufijo aleatorio de longitud especificada
  * Usa letras minúsculas y números
  */

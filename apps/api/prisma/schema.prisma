@@ -206,6 +206,8 @@ model Docente {
   /// true = contraseña temporal (generada por admin)
   /// false = contraseña elegida por el docente
   debe_cambiar_password  Boolean             @default(true)
+  /// Fecha del último cambio de contraseña
+  fecha_ultimo_cambio    DateTime?
   clases                 Clase[]
   claseGrupos            ClaseGrupo[]
   rutasEspecialidad      DocenteRuta[]
@@ -223,28 +225,35 @@ model Docente {
 /// Tienen acceso completo al dashboard administrativo
 model Admin {
   /// Identificador único del admin (CUID)
-  id             String   @id @default(cuid())
+  id                    String    @id @default(cuid())
   /// Email único del admin - usado para autenticación
-  email          String   @unique
+  email                 String    @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
-  password_hash  String
+  password_hash         String
+  /// Password temporal en texto plano - se muestra al crear el admin
+  /// Se borra después del primer cambio de contraseña
+  password_temporal     String?
+  /// Indica si el admin debe cambiar su contraseña en el próximo login
+  debe_cambiar_password Boolean   @default(true)
+  /// Fecha del último cambio de contraseña
+  fecha_ultimo_cambio   DateTime?
   /// Nombre del admin
-  nombre         String
+  nombre                String
   /// Apellido del admin
-  apellido       String
+  apellido              String
   /// Fecha en que el admin fue creado
-  fecha_registro DateTime @default(now())
+  fecha_registro        DateTime  @default(now())
   /// Timestamp de creación del registro
-  createdAt      DateTime @default(now())
+  createdAt             DateTime  @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt      DateTime @updatedAt
+  updatedAt             DateTime  @updatedAt
   /// DNI del admin (opcional)
-  dni            String?
+  dni                   String?
   /// Roles asignados al admin (puede ser admin y docente simultáneamente)
   /// Ejemplo: ["admin", "docente"]
-  roles          Json     @default("[\"admin\"]")
+  roles                 Json      @default("[\"admin\"]")
   /// Teléfono del admin (opcional)
-  telefono       String?
+  telefono              String?
 
   @@map("admins")
 }

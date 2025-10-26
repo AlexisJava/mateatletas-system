@@ -9,6 +9,7 @@ import {
   Param,
   UseGuards,
   NotFoundException,
+  Headers,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PagosService } from '../services/pagos.service';
@@ -19,11 +20,13 @@ import { CrearInscripcionMensualRequestDto } from '../dtos/crear-inscripcion-men
 import { ObtenerMetricasDashboardRequestDto } from '../dtos/obtener-metricas-dashboard-request.dto';
 import { CrearPreferenciaSuscripcionRequestDto } from '../dtos/crear-preferencia-suscripcion-request.dto';
 import { CrearPreferenciaCursoRequestDto } from '../dtos/crear-preferencia-curso-request.dto';
+import { MercadoPagoWebhookDto } from '../../dto/mercadopago-webhook.dto';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../auth/guards/roles.guard';
 import { Roles, Role } from '../../../auth/decorators/roles.decorator';
 import { GetUser } from '../../../auth/decorators/get-user.decorator';
 import { AuthUser } from '../../../auth/interfaces';
+import { MercadoPagoWebhookGuard } from '../../guards/mercadopago-webhook.guard';
 
 /**
  * PagosController - Presentation Layer
@@ -355,5 +358,60 @@ export class PagosController {
   })
   async obtenerEstudiantesConDescuentos() {
     return await this.pagosService.obtenerEstudiantesConDescuentos();
+  }
+
+  /**
+   * POST /pagos/webhook
+   * Webhook de MercadoPago para notificaciones de pago
+   *
+   * IMPORTANTE:
+   * - Este endpoint es llamado automáticamente por MercadoPago cuando hay cambios en pagos
+   * - Está protegido con MercadoPagoWebhookGuard que valida la firma HMAC
+   * - Procesa automáticamente membresías y cursos pagados
+   * - NO requiere autenticación JWT (es un webhook externo)
+   */
+  @Post('webhook')
+  @UseGuards(MercadoPagoWebhookGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Webhook de MercadoPago',
+    description: `
+      Recibe notificaciones de MercadoPago sobre cambios en pagos.
+
+      Flujo:
+      1. MercadoPago envía notificación cuando hay un cambio (pago aprobado, rechazado, etc.)
+      2. Guard valida firma HMAC para seguridad
+      3. Service consulta detalles del pago a MercadoPago
+      4. Se actualiza el estado de membresía o inscripción en la DB
+
+      Casos manejados:
+      - payment.created, payment.updated → Procesa pago
+      - Aprobado → Activa membresía/inscripción
+      - Rechazado → Marca como fallido
+      - Pendiente → Marca como pendiente
+
+      Security:
+      - Validación de firma HMAC con secret de MercadoPago
+      - Solo acepta notificaciones auténticas de MercadoPago
+    `,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Webhook procesado exitosamente',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Firma HMAC inválida o webhook no autorizado',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos del webhook inválidos',
+  })
+  async procesarWebhook(
+    @Body() webhookData: MercadoPagoWebhookDto,
+    @Headers('x-signature') signature: string,
+    @Headers('x-request-id') requestId: string,
+  ) {
+    return await this.pagosService.procesarWebhookMercadoPago(webhookData);
   }
 }

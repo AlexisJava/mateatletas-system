@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
 import { CalcularPrecioUseCase } from '../../application/use-cases/calcular-precio.use-case';
 import { ActualizarConfiguracionPreciosUseCase } from '../../application/use-cases/actualizar-configuracion-precios.use-case';
@@ -6,6 +6,8 @@ import { CrearInscripcionMensualUseCase } from '../../application/use-cases/crea
 import { ObtenerMetricasDashboardUseCase } from '../../application/use-cases/obtener-metricas-dashboard.use-case';
 import { ConfiguracionPreciosRepository } from '../../infrastructure/repositories/configuracion-precios.repository';
 import { InscripcionMensualRepository } from '../../infrastructure/repositories/inscripcion-mensual.repository';
+import { MercadoPagoService } from '../../mercadopago.service';
+import { PrismaService } from '../../../core/database/prisma.service';
 import {
   CalcularPrecioInputDTO,
   CalcularPrecioOutputDTO,
@@ -26,6 +28,7 @@ import { CalcularPrecioRequestDto } from '../dtos/calcular-precio-request.dto';
 import { ActualizarConfiguracionPreciosRequestDto } from '../dtos/actualizar-configuracion-precios-request.dto';
 import { CrearInscripcionMensualRequestDto } from '../dtos/crear-inscripcion-mensual-request.dto';
 import { ObtenerMetricasDashboardRequestDto } from '../dtos/obtener-metricas-dashboard-request.dto';
+import { MercadoPagoWebhookDto } from '../../dto/mercadopago-webhook.dto';
 
 /**
  * PagosService - Presentation Layer
@@ -40,6 +43,8 @@ import { ObtenerMetricasDashboardRequestDto } from '../dtos/obtener-metricas-das
  */
 @Injectable()
 export class PagosService {
+  private readonly logger = new Logger(PagosService.name);
+
   constructor(
     private readonly calcularPrecioUseCase: CalcularPrecioUseCase,
     private readonly actualizarConfiguracionUseCase: ActualizarConfiguracionPreciosUseCase,
@@ -47,6 +52,8 @@ export class PagosService {
     private readonly obtenerMetricasUseCase: ObtenerMetricasDashboardUseCase,
     private readonly configuracionRepo: ConfiguracionPreciosRepository,
     private readonly inscripcionRepo: InscripcionMensualRepository,
+    private readonly mercadoPagoService: MercadoPagoService,
+    private readonly prisma: PrismaService,
   ) {}
 
   /**
@@ -182,5 +189,170 @@ export class PagosService {
     const now = new Date();
     const periodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     return await this.inscripcionRepo.obtenerEstudiantesConDescuentos(periodo);
+  }
+
+  /**
+   * Procesa webhooks de MercadoPago
+   *
+   * Flujo:
+   * 1. Valida que sea notificación de tipo "payment"
+   * 2. Consulta detalles del pago a MercadoPago API
+   * 3. Parsea external_reference para identificar el tipo (membresía o inscripción)
+   * 4. Actualiza estado en DB según resultado del pago
+   *
+   * External Reference Formats:
+   * - Membresía: "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
+   * - Inscripción: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
+   *
+   * Estados de pago MercadoPago → Estados del sistema:
+   * - approved → Activa/Pagado
+   * - rejected, cancelled → Mantiene Pendiente (para reintentar)
+   * - pending, in_process, in_mediation → Mantiene Pendiente
+   */
+  async procesarWebhookMercadoPago(webhookData: MercadoPagoWebhookDto) {
+    this.logger.log(`📨 Webhook recibido: ${webhookData.type} - ${webhookData.action}`);
+
+    // Solo procesar notificaciones de tipo "payment"
+    if (webhookData.type !== 'payment') {
+      this.logger.log(`⏭️ Ignorando webhook de tipo: ${webhookData.type}`);
+      return { message: 'Webhook type not handled' };
+    }
+
+    const paymentId = webhookData.data.id;
+    this.logger.log(`💳 Procesando pago ID: ${paymentId}`);
+
+    try {
+      // Consultar detalles del pago a MercadoPago
+      const payment = await this.mercadoPagoService.getPayment(paymentId);
+
+      this.logger.log(
+        `💰 Pago consultado - Estado: ${payment.status} - Ref Externa: ${payment.external_reference}`,
+      );
+
+      // Parsear external_reference para identificar el tipo
+      const externalRef = payment.external_reference;
+
+      if (!externalRef) {
+        this.logger.warn('⚠️ Pago sin external_reference - Ignorando');
+        return { message: 'Payment without external_reference' };
+      }
+
+      // Determinar tipo de pago (membresía o inscripción)
+      if (externalRef.startsWith('membresia-')) {
+        return await this.procesarPagoMembresia(payment);
+      } else if (externalRef.startsWith('inscripcion-')) {
+        return await this.procesarPagoInscripcion(payment);
+      } else {
+        this.logger.warn(`⚠️ Formato de external_reference desconocido: ${externalRef}`);
+        return { message: 'Unknown external_reference format' };
+      }
+    } catch (error: any) {
+      this.logger.error(`❌ Error procesando webhook: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Procesa pago de membresía
+   * external_reference format: "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
+   */
+  private async procesarPagoMembresia(payment: any) {
+    const externalRef = payment.external_reference;
+    const parts = externalRef.split('-');
+    const membresiaId = parts[1]; // "membresia-{ID}-tutor-..."
+
+    this.logger.log(`🎫 Procesando pago de membresía ID: ${membresiaId}`);
+
+    // Mapear estado de MercadoPago a estado de membresía
+    let nuevoEstado: 'Activa' | 'Pendiente' | 'Cancelada' = 'Pendiente';
+
+    switch (payment.status) {
+      case 'approved':
+        nuevoEstado = 'Activa';
+        break;
+      case 'rejected':
+      case 'cancelled':
+        nuevoEstado = 'Pendiente'; // Permitir reintentar
+        break;
+      case 'pending':
+      case 'in_process':
+      case 'in_mediation':
+      default:
+        nuevoEstado = 'Pendiente';
+        break;
+    }
+
+    // Actualizar membresía en DB
+    const now = new Date();
+    const proximoPago = new Date(now);
+    proximoPago.setMonth(proximoPago.getMonth() + 1); // Mensual
+
+    await this.prisma.membresia.update({
+      where: { id: membresiaId },
+      data: {
+        estado: nuevoEstado,
+        fecha_inicio: nuevoEstado === 'Activa' ? now : undefined,
+        fecha_proximo_pago: nuevoEstado === 'Activa' ? proximoPago : undefined,
+      },
+    });
+
+    this.logger.log(`✅ Membresía ${membresiaId} actualizada a estado: ${nuevoEstado}`);
+
+    return {
+      message: 'Webhook processed successfully',
+      type: 'membresia',
+      membresiaId,
+      nuevoEstado,
+      paymentStatus: payment.status,
+    };
+  }
+
+  /**
+   * Procesa pago de inscripción a curso
+   * external_reference format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
+   */
+  private async procesarPagoInscripcion(payment: any) {
+    const externalRef = payment.external_reference;
+    const parts = externalRef.split('-');
+    const inscripcionId = parts[1]; // "inscripcion-{ID}-estudiante-..."
+
+    this.logger.log(`📚 Procesando pago de inscripción ID: ${inscripcionId}`);
+
+    // Mapear estado de MercadoPago a estado de pago
+    let nuevoEstado: 'Pagado' | 'Pendiente' = 'Pendiente';
+
+    switch (payment.status) {
+      case 'approved':
+        nuevoEstado = 'Pagado';
+        break;
+      case 'rejected':
+      case 'cancelled':
+        nuevoEstado = 'Pendiente'; // Permitir reintentar
+        break;
+      case 'pending':
+      case 'in_process':
+      case 'in_mediation':
+      default:
+        nuevoEstado = 'Pendiente';
+        break;
+    }
+
+    // Actualizar inscripción mensual en DB
+    await this.prisma.inscripcionMensual.update({
+      where: { id: inscripcionId },
+      data: {
+        estado_pago: nuevoEstado,
+      },
+    });
+
+    this.logger.log(`✅ Inscripción ${inscripcionId} actualizada a estado: ${nuevoEstado}`);
+
+    return {
+      message: 'Webhook processed successfully',
+      type: 'inscripcion',
+      inscripcionId,
+      nuevoEstado,
+      paymentStatus: payment.status,
+    };
   }
 }
