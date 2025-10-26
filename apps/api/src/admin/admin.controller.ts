@@ -126,6 +126,50 @@ export class AdminController {
   }
 
   /**
+   * Resetear contraseña de un usuario específico
+   * POST /api/admin/credenciales/:usuarioId/reset
+   * Rol: Admin
+   *
+   * Genera una nueva contraseña temporal y marca debe_cambiar_password = true
+   * Funciona para Tutores, Estudiantes y Docentes
+   */
+  @Post('credenciales/:usuarioId/reset')
+  @ApiOperation({
+    summary: 'Resetear contraseña de usuario',
+    description: 'Genera nueva contraseña temporal y obliga al usuario a cambiarla en el próximo login',
+  })
+  @HttpCode(HttpStatus.OK)
+  async resetearPassword(
+    @Param('usuarioId') usuarioId: string,
+    @Body() body: { tipoUsuario: 'tutor' | 'estudiante' | 'docente' },
+  ) {
+    return this.adminService.resetearPasswordUsuario(usuarioId, body.tipoUsuario);
+  }
+
+  /**
+   * Resetear contraseñas masivamente
+   * POST /api/admin/credenciales/reset-masivo
+   * Rol: Admin
+   *
+   * Resetea contraseñas de múltiples usuarios a la vez
+   * Body: { usuarios: Array<{ id: string, tipoUsuario: 'tutor' | 'estudiante' | 'docente' }> }
+   */
+  @Post('credenciales/reset-masivo')
+  @ApiOperation({
+    summary: 'Resetear contraseñas masivamente',
+    description: 'Resetea contraseñas de múltiples usuarios en una sola operación',
+  })
+  @HttpCode(HttpStatus.OK)
+  async resetearPasswordMasivo(
+    @Body()
+    body: {
+      usuarios: Array<{ id: string; tipoUsuario: 'tutor' | 'estudiante' | 'docente' }>;
+    },
+  ) {
+    return this.adminService.resetearPasswordsMasivo(body.usuarios);
+  }
+
+  /**
    * Crear estudiante rápido con tutor automático
    * POST /api/admin/estudiantes
    * Rol: Admin
