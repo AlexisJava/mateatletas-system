@@ -6,6 +6,7 @@ import { AdminAlertasService } from './services/admin-alertas.service';
 import { AdminUsuariosService } from './services/admin-usuarios.service';
 import { AdminRolesService } from './services/admin-roles.service';
 import { AdminEstudiantesService } from './services/admin-estudiantes.service';
+import { AdminCredencialesService } from './services/admin-credenciales.service';
 import { CircuitBreaker } from '../common/circuit-breaker';
 
 type CrearEstudianteRapidoData = Parameters<
@@ -179,6 +180,7 @@ export class AdminService {
     private usuariosService: AdminUsuariosService,
     private rolesService: AdminRolesService,
     private estudiantesService: AdminEstudiantesService,
+    private credencialesService: AdminCredencialesService,
   ) {
     this.logger.log('AdminService initialized with circuit breakers');
   }
@@ -325,222 +327,31 @@ export class AdminService {
 
   /**
    * Obtener todas las credenciales de usuarios
-   * Retorna todos los usuarios (tutores, estudiantes, docentes, admins) con sus credenciales temporales
-   * Para la planilla administrativa de primer ingreso
+   * DELEGACIÓN: AdminCredencialesService
    */
   async obtenerTodasLasCredenciales() {
-    // Obtener todos los tutores con password_temporal
-    const tutores = await this.prisma.tutor.findMany({
-      select: {
-        id: true,
-        nombre: true,
-        apellido: true,
-        email: true,
-        username: true,
-        password_temporal: true,
-        debe_cambiar_password: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    // Obtener todos los estudiantes con password_temporal
-    const estudiantes = await this.prisma.estudiante.findMany({
-      select: {
-        id: true,
-        nombre: true,
-        apellido: true,
-        username: true,
-        password_temporal: true,
-        debe_cambiar_password: true,
-        createdAt: true,
-        tutor: {
-          select: {
-            nombre: true,
-            apellido: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    // Obtener todos los docentes con password_temporal
-    const docentes = await this.prisma.docente.findMany({
-      select: {
-        id: true,
-        nombre: true,
-        apellido: true,
-        email: true,
-        password_temporal: true,
-        debe_cambiar_password: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    // Formatear los datos para la planilla
-    return {
-      tutores: tutores.map((t) => ({
-        id: t.id,
-        rol: 'Tutor',
-        nombre: t.nombre,
-        apellido: t.apellido,
-        usuario: t.username || `${t.nombre.toLowerCase()}.${t.apellido.toLowerCase()}`,
-        password_temporal: t.password_temporal,
-        estado: t.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
-        fecha_creacion: t.createdAt,
-      })),
-      estudiantes: estudiantes.map((e) => ({
-        id: e.id,
-        rol: 'Estudiante',
-        nombre: e.nombre,
-        apellido: e.apellido,
-        usuario: e.username,
-        password_temporal: e.password_temporal,
-        estado: e.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
-        tutor: `${e.tutor.nombre} ${e.tutor.apellido}`,
-        fecha_creacion: e.createdAt,
-      })),
-      docentes: docentes.map((d) => ({
-        id: d.id,
-        rol: 'Docente',
-        nombre: d.nombre,
-        apellido: d.apellido,
-        usuario: `${d.nombre.toLowerCase()}.${d.apellido.toLowerCase()}`,
-        password_temporal: d.password_temporal,
-        estado: d.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
-        fecha_creacion: d.createdAt,
-      })),
-    };
+    return this.credencialesService.obtenerTodasLasCredenciales();
   }
 
   /**
    * Resetear contraseña de un usuario específico
-   * Genera nueva contraseña temporal y marca debe_cambiar_password = true
+   * DELEGACIÓN: AdminCredencialesService
    */
   async resetearPasswordUsuario(
     usuarioId: string,
     tipoUsuario: 'tutor' | 'estudiante' | 'docente',
   ) {
-    const bcrypt = require('bcrypt');
-    const {
-      generateTutorPassword,
-      generateEstudiantePin,
-      generateDocentePassword,
-    } = require('../common/utils/credential-generator');
-    const { BCRYPT_ROUNDS } = require('../common/constants/security.constants');
-
-    let nuevaPassword: string;
-    let hashedPassword: string;
-    let usuario: any;
-
-    switch (tipoUsuario) {
-      case 'tutor':
-        nuevaPassword = generateTutorPassword();
-        hashedPassword = await bcrypt.hash(nuevaPassword, BCRYPT_ROUNDS);
-
-        usuario = await this.prisma.tutor.update({
-          where: { id: usuarioId },
-          data: {
-            password_hash: hashedPassword,
-            password_temporal: nuevaPassword,
-            debe_cambiar_password: true,
-          },
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
-          },
-        });
-        break;
-
-      case 'estudiante':
-        nuevaPassword = generateEstudiantePin();
-        hashedPassword = await bcrypt.hash(nuevaPassword, BCRYPT_ROUNDS);
-
-        usuario = await this.prisma.estudiante.update({
-          where: { id: usuarioId },
-          data: {
-            password_hash: hashedPassword,
-            password_temporal: nuevaPassword,
-            debe_cambiar_password: true,
-          },
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            username: true,
-          },
-        });
-        break;
-
-      case 'docente':
-        nuevaPassword = generateDocentePassword();
-        hashedPassword = await bcrypt.hash(nuevaPassword, BCRYPT_ROUNDS);
-
-        usuario = await this.prisma.docente.update({
-          where: { id: usuarioId },
-          data: {
-            password_hash: hashedPassword,
-            password_temporal: nuevaPassword,
-            debe_cambiar_password: true,
-          },
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
-          },
-        });
-        break;
-    }
-
-    return {
-      message: 'Contraseña reseteada exitosamente',
-      usuario,
-      password_temporal: nuevaPassword,
-    };
+    return this.credencialesService.resetearPassword(usuarioId, tipoUsuario);
   }
 
   /**
    * Resetear contraseñas masivamente
-   * Procesa múltiples usuarios en paralelo
+   * DELEGACIÓN: AdminCredencialesService
    */
   async resetearPasswordsMasivo(
     usuarios: Array<{ id: string; tipoUsuario: 'tutor' | 'estudiante' | 'docente' }>,
   ) {
-    const resultados = await Promise.all(
-      usuarios.map(async (u) => {
-        try {
-          const resultado = await this.resetearPasswordUsuario(u.id, u.tipoUsuario);
-          return {
-            success: true,
-            usuarioId: u.id,
-            tipoUsuario: u.tipoUsuario,
-            usuario: resultado.usuario,
-            password_temporal: resultado.password_temporal,
-          };
-        } catch (error: any) {
-          return {
-            success: false,
-            usuarioId: u.id,
-            tipoUsuario: u.tipoUsuario,
-            error: error.message,
-          };
-        }
-      }),
-    );
-
-    const exitosos = resultados.filter((r) => r.success);
-    const fallidos = resultados.filter((r) => !r.success);
-
-    return {
-      message: `${exitosos.length} contraseñas reseteadas, ${fallidos.length} fallidas`,
-      exitosos,
-      fallidos,
-      total: usuarios.length,
-    };
+    return this.credencialesService.resetearPasswordsMasivo(usuarios);
   }
 
   /**

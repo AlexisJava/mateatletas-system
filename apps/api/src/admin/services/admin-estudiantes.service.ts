@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { BCRYPT_ROUNDS } from '../../common/constants/security.constants';
 import * as bcrypt from 'bcrypt';
@@ -8,6 +8,7 @@ import {
   generateTutorUsername,
   generateTutorPassword,
 } from '../../common/utils/credential-generator';
+import { Prisma } from '@prisma/client';
 
 /**
  * Servicio especializado para gestión de estudiantes desde admin
@@ -15,6 +16,8 @@ import {
  */
 @Injectable()
 export class AdminEstudiantesService {
+  private readonly logger = new Logger(AdminEstudiantesService.name);
+
   constructor(private prisma: PrismaService) {}
 
   /**
@@ -225,8 +228,8 @@ export class AdminEstudiantesService {
         },
       });
 
-      console.info(
-        `Tutor creado automáticamente: ${tutorEmail} | Password temporal: ${tempPassword}`
+      this.logger.log(
+        `Tutor creado automáticamente: ${tutorEmail} | Password temporal: ${tempPassword}`,
       );
     }
 
@@ -417,10 +420,10 @@ export class AdminEstudiantesService {
       estadisticas: {
         clases_inscritas: estudiante.inscripciones_clase.length,
         clases_completadas: estudiante.inscripciones_clase.filter(
-          (insc: any) => insc.clase.estado === 'Programada' && new Date(insc.clase.fecha_hora_inicio) < new Date()
+          (insc) => insc.clase.estado === 'Programada' && new Date(insc.clase.fecha_hora_inicio) < new Date()
         ).length,
         clases_pendientes: estudiante.inscripciones_clase.filter(
-          (insc: any) => insc.clase.estado === 'Programada' && new Date(insc.clase.fecha_hora_inicio) >= new Date()
+          (insc) => insc.clase.estado === 'Programada' && new Date(insc.clase.fecha_hora_inicio) >= new Date()
         ).length,
       },
     };
