@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { PrismaService } from '../../core/database/prisma.service';
 import { Role } from '../../auth/decorators/roles.decorator';
 import { parseUserRoles } from '../../common/utils/role.utils';
+import { Prisma } from '@prisma/client';
 
 /**
  * Servicio simplificado para gestión de usuarios
@@ -67,7 +68,15 @@ export class AdminUsuariosService {
   /**
    * Mapear tutor a formato de usuario
    */
-  private mapTutorToUser(tutor: any) {
+  private mapTutorToUser(
+    tutor: Prisma.TutorGetPayload<{
+      include: {
+        _count: {
+          select: { estudiantes: true };
+        };
+      };
+    }>,
+  ) {
     const userRoles = parseUserRoles(tutor.roles);
     const finalRoles = userRoles.length > 0 ? userRoles : [Role.Tutor];
 
@@ -80,7 +89,7 @@ export class AdminUsuariosService {
       username,
       nombre: tutor.nombre,
       apellido: tutor.apellido,
-      role: finalRoles[0] as any, // First role for backward compatibility
+      role: finalRoles[0] as Role, // First role for backward compatibility
       roles: finalRoles,
       activo: true,
       password_temporal: tutor.password_temporal || undefined, // Mostrar solo si existe
@@ -97,12 +106,20 @@ export class AdminUsuariosService {
   /**
    * Mapear docente a formato de usuario
    */
-  private mapDocenteToUser(docente: any) {
+  private mapDocenteToUser(
+    docente: Prisma.DocenteGetPayload<{
+      include: {
+        _count: {
+          select: { clases: true };
+        };
+      };
+    }>,
+  ) {
     const userRoles = parseUserRoles(docente.roles);
     const finalRoles = userRoles.length > 0 ? userRoles : [Role.Docente];
 
     // Generar username: nombre.apellido (sin espacios, minúsculas)
-    const username = docente.username || `${docente.nombre.toLowerCase()}.${docente.apellido.toLowerCase()}`;
+    const username = `${docente.nombre.toLowerCase()}.${docente.apellido.toLowerCase()}`;
 
     return {
       id: docente.id,
@@ -110,7 +127,7 @@ export class AdminUsuariosService {
       username,
       nombre: docente.nombre,
       apellido: docente.apellido,
-      role: finalRoles[0] as any,
+      role: finalRoles[0] as Role,
       roles: finalRoles,
       activo: true,
       password_temporal: docente.password_temporal || undefined,
@@ -127,12 +144,12 @@ export class AdminUsuariosService {
   /**
    * Mapear admin a formato de usuario
    */
-  private mapAdminToUser(admin: any) {
+  private mapAdminToUser(admin: Prisma.AdminGetPayload<Record<string, never>>) {
     const userRoles = parseUserRoles(admin.roles);
     const finalRoles = userRoles.length > 0 ? userRoles : [Role.Admin];
 
     // Generar username: nombre.apellido (sin espacios, minúsculas)
-    const username = admin.username || `${admin.nombre.toLowerCase()}.${admin.apellido.toLowerCase()}`;
+    const username = `${admin.nombre.toLowerCase()}.${admin.apellido.toLowerCase()}`;
 
     return {
       id: admin.id,
@@ -140,7 +157,7 @@ export class AdminUsuariosService {
       username,
       nombre: admin.nombre,
       apellido: admin.apellido,
-      role: finalRoles[0] as any,
+      role: finalRoles[0] as Role,
       roles: finalRoles,
       activo: true,
       password_temporal: admin.password_temporal || undefined,
@@ -259,15 +276,12 @@ export class AdminUsuariosService {
       this.prisma.admin.findUnique({ where: { id } }),
     ]);
 
-    const usuario = tutor || docente || admin;
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-    }
-
     // Mapear según el tipo
     if (tutor) return this.mapTutorToUser(tutor);
     if (docente) return this.mapDocenteToUser(docente);
-    return this.mapAdminToUser(admin);
+    if (admin) return this.mapAdminToUser(admin);
+
+    throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
   }
 
   /**
