@@ -92,8 +92,32 @@ export class AdminStatsService {
     // Nota: Algunos usuarios pueden tener múltiples roles
     const totalUsuarios = totalTutores + totalDocentes + totalAdmins;
 
-    // Calcular ingresos total (simplificado, puedes mejorarlo según tu lógica de negocio)
-    const ingresosTotal = 0; // TODO: Implementar cálculo real de ingresos
+    // Calcular ingresos del mes actual desde InscripcionMensual
+    const now = new Date();
+    const mesActual = now.getMonth() + 1;
+    const anioActual = now.getFullYear();
+    const periodoActual = `${anioActual}-${mesActual.toString().padStart(2, '0')}`;
+
+    const inscripcionesDelMes = await this.prisma.inscripcionMensual.findMany({
+      where: {
+        periodo: periodoActual,
+      },
+    });
+
+    // Calcular ingresos y pagos pendientes por estado
+    let ingresosTotal = 0;
+    let pagosPendientes = 0;
+
+    inscripcionesDelMes.forEach((ins) => {
+      const monto = ins.precio_final.toNumber();
+      if (ins.estado_pago === 'Pagado') {
+        ingresosTotal += monto;
+      } else if (ins.estado_pago === 'Pendiente' || ins.estado_pago === 'Vencido') {
+        pagosPendientes += monto;
+      }
+    });
+
+    const inscripcionesActivas = inscripcionesDelMes.length;
 
     // Formato compatible con el frontend (SystemStats interface)
     return {
@@ -105,6 +129,8 @@ export class AdminStatsService {
       clasesActivas,
       totalProductos,
       ingresosTotal,
+      pagosPendientes,
+      inscripcionesActivas,
     };
   }
 }

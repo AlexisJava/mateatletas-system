@@ -81,11 +81,15 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
     try {
       const [claseResponse, estudiantesResponse] = await Promise.all([
         axios.get<ClaseEstudiantes>(`/clases/${claseId}/estudiantes`),
-        axios.get<Estudiante[]>('/admin/estudiantes'),
+        axios.get('/admin/estudiantes'),
       ]);
 
-      setClaseData(claseResponse.data);
-      setTodosEstudiantes(estudiantesResponse.data || []);
+      setClaseData(claseResponse.data || claseResponse);
+      // El backend devuelve { data: [], metadata: {} }
+      const estudiantes = estudiantesResponse?.data
+        ? estudiantesResponse.data
+        : (Array.isArray(estudiantesResponse) ? estudiantesResponse : []);
+      setTodosEstudiantes(estudiantes as Estudiante[]);
     } catch {
       setError('Error al cargar datos');
       setTodosEstudiantes([]); // Ensure we always have an array even on error
