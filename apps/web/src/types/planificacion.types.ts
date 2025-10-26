@@ -1,6 +1,7 @@
 import {
   estadoPlanificacionEnum,
   type EstadoPlanificacion as SharedEstadoPlanificacion,
+  type ComponenteActividad as SharedComponenteActividad,
   type PlanificacionListItem as SharedPlanificacionListItem,
   type PlanificacionListResponse as SharedPlanificacionListResponse,
   type PlanificacionDetalle as SharedPlanificacionDetalle,
@@ -12,6 +13,7 @@ import {
 
 export { estadoPlanificacionEnum };
 export type EstadoPlanificacion = SharedEstadoPlanificacion;
+export type ComponenteActividad = SharedComponenteActividad;
 export type PlanificacionActividad = SharedPlanificacionActividad;
 export type Actividad = SharedPlanificacionActividad;
 export type PlanificacionDetalle = SharedPlanificacionDetalle;

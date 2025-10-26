@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Sparkles, LayoutGrid, List } from 'lucide-react';
-import { EstadoClase } from '@/types/clases.types';
+import { ESTADO_CLASE, type EstadoClase } from '@/types/clases.types';
 import { ViewMode } from '../hooks/useMisClases';
 
 interface ClasesFiltersProps {
@@ -82,10 +82,8 @@ export function ClasesFilters({
               className="px-4 py-2 bg-white/60 dark:bg-indigo-900/60 border border-purple-200/50 dark:border-purple-700/50 rounded-xl text-sm font-semibold text-indigo-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
             >
               <option value="Todas">Todas las clases</option>
-              <option value={EstadoClase.Programada}>Programadas</option>
-              <option value={EstadoClase.EnCurso}>En Curso</option>
-              <option value={EstadoClase.Finalizada}>Finalizadas</option>
-              <option value={EstadoClase.Cancelada}>Canceladas</option>
+              <option value={ESTADO_CLASE.Programada}>Programadas</option>
+              <option value={ESTADO_CLASE.Cancelada}>Canceladas</option>
             </select>
           </div>
 

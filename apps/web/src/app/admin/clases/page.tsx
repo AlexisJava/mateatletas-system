@@ -27,6 +27,9 @@ interface ClaseGrupo {
   dia_semana: string;
   hora_inicio: string;
   hora_fin: string;
+  fecha_inicio?: string;
+  fecha_fin?: string | null;
+  anio_lectivo?: number;
   docente: {
     nombre: string;
     apellido: string;
@@ -617,7 +620,7 @@ export default function AdminGruposClasesPage() {
           isOpen={true}
           onClose={() => setHorarioParaEditar(null)}
           onSuccess={fetchGrupos}
-          claseGrupo={horarioParaEditar}
+          claseGrupo={horarioParaEditar as any}
         />
       )}
 

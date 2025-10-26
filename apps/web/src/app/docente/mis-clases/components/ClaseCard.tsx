@@ -10,7 +10,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Clase, EstadoClase } from '@/types/clases.types';
+import { Clase, ESTADO_CLASE, type EstadoClase } from '@/types/clases.types';
 
 interface ClaseCardProps {
   clase: Clase;
@@ -18,7 +18,7 @@ interface ClaseCardProps {
   onCancelar: (id: string) => void;
   puedeCancelar: (clase: Clase) => boolean;
   puedeRegistrarAsistencia: (clase: Clase) => boolean;
-  getEstadoColor: (estado: EstadoClase | 'Programada' | 'EnCurso' | 'Finalizada' | 'Cancelada') => string;
+  getEstadoColor: (estado: EstadoClase) => string;
 }
 
 export function ClaseCard({
@@ -49,7 +49,7 @@ export function ClaseCard({
     <motion.div
       whileHover={{ y: -4 }}
       className="glass-card p-5 border-l-4 hover:shadow-2xl hover:shadow-purple-200/30 dark:hover:shadow-purple-900/40 transition-all cursor-pointer group"
-      style={{ borderLeftColor: clase.ruta_curricular?.color || '#8b5cf6' }}
+      style={{ borderLeftColor: '#8b5cf6' }}
       onClick={() => router.push(`/docente/grupos/${clase.id}`)}
     >
       {/* Header */}
@@ -58,17 +58,6 @@ export function ClaseCard({
           <h3 className="text-lg font-bold text-indigo-900 dark:text-white truncate group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">
             {clase.titulo}
           </h3>
-          {clase.ruta_curricular && (
-            <span
-              className="inline-block px-2 py-0.5 rounded-md text-xs font-bold mt-1"
-              style={{
-                backgroundColor: `${clase.ruta_curricular.color}20`,
-                color: clase.ruta_curricular.color,
-              }}
-            >
-              {clase.ruta_curricular.nombre}
-            </span>
-          )}
         </div>
         <span className={`px-2 py-1 rounded-lg text-xs font-bold ${getEstadoColor(clase.estado)}`}>
           {clase.estado}
@@ -105,7 +94,7 @@ export function ClaseCard({
 
       {/* Quick Actions */}
       <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-        {esHoy() && clase.estado === EstadoClase.Programada && (
+        {esHoy() && clase.estado === ESTADO_CLASE.Programada && (
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

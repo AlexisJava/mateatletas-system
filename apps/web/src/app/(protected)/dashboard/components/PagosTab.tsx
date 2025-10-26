@@ -85,6 +85,7 @@ export default function PagosTab() {
    */
   const formatPeriodo = (periodo: string): string => {
     const [year, month] = periodo.split('-');
+    if (!year || !month) return periodo;
     const date = new Date(parseInt(year), parseInt(month) - 1, 1);
     return date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
   };

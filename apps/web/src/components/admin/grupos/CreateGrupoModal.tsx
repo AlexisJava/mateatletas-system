@@ -145,7 +145,7 @@ export function CreateGrupoModal({ isOpen, onClose, onSuccess }: CreateGrupoModa
               maxLength={20}
             />
             <p className="text-xs text-white/40 mt-1">
-              Identificador corto único (ej: "B2" para Básico 2, "ROBLOX" para curso de Roblox)
+              Identificador corto único (ej: &quot;B2&quot; para Básico 2, &quot;ROBLOX&quot; para curso de Roblox)
             </p>
           </div>
 
