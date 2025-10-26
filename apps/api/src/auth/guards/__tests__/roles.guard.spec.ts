@@ -234,7 +234,9 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
     it('should deny access when user is undefined', () => {
       // Arrange
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Tutor]);
-      const mockContext = createMockContext(undefined);
+      const mockContext = createMockContext(
+        undefined as unknown as Partial<AuthUser>,
+      );
 
       // Act
       const result = guard.canActivate(mockContext);
@@ -250,7 +252,7 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
       const mockContext = createMockContext({
         id: 'user-123',
-        roles: ['Admin'], // Uppercase 'A' - should NOT match 'admin'
+        roles: ['Admin' as unknown as Role], // Uppercase 'A' - should NOT match 'admin'
       });
 
       // Act

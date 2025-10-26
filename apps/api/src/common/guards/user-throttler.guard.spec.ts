@@ -1,6 +1,5 @@
 import { ExecutionContext } from '@nestjs/common';
 import { UserThrottlerGuard } from './user-throttler.guard';
-import { Request } from 'express';
 
 describe('UserThrottlerGuard', () => {
   let guard: UserThrottlerGuard;
@@ -8,7 +7,6 @@ describe('UserThrottlerGuard', () => {
   beforeEach(() => {
     guard = new UserThrottlerGuard(
       { ttl: 60, limit: 10 } as any,
-      {} as any,
       {} as any,
       {} as any,
     );

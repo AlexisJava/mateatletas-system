@@ -141,8 +141,7 @@ describe('DocentesService', () => {
 
     it('should auto-generate password when not provided and return generatedPassword', async () => {
       // Arrange
-      const dtoWithoutPassword = { ...createDto };
-      delete dtoWithoutPassword.password;
+      const { password: _password, ...dtoWithoutPassword } = createDto;
 
       const generatedPassword = 'AutoGen-P@ssw0rd-12345';
       (generateSecurePassword as jest.Mock).mockReturnValue(generatedPassword);
@@ -209,11 +208,11 @@ describe('DocentesService', () => {
 
     it('should use biografia field if bio is not provided', async () => {
       // Arrange
-      const dtoWithBiografia = {
+      const { bio: _bio, ...rest } = {
         ...createDto,
         biografia: 'Biografía del docente',
-      };
-      delete dtoWithBiografia.bio;
+      } as typeof createDto & { biografia: string };
+      const dtoWithBiografia = rest;
 
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
       jest.spyOn(prisma.docente, 'create').mockResolvedValue(mockDocente as any);
@@ -368,8 +367,8 @@ describe('DocentesService', () => {
       // Assert
       expect(result).not.toHaveProperty('password_hash'); // Security check
       expect(result.sectores).toHaveLength(2); // Should deduplicate (Matemática appears twice)
-      expect(result.sectores[0]).toEqual(mockSector);
-      expect(result.sectores[1].nombre).toBe('Ciencias');
+      expect(result.sectores?.[0]).toEqual(mockSector);
+      expect(result.sectores?.[1]?.nombre).toBe('Ciencias');
     });
 
     it('should throw NotFoundException if docente does not exist', async () => {

@@ -32,7 +32,7 @@ describe('EstudiantesService - Asignar Clases', () => {
               findUnique: jest.fn(),
               update: jest.fn(),
             },
-            inscripcion: {
+            inscripcionClase: {
               create: jest.fn(),
               findFirst: jest.fn(),
               createMany: jest.fn(),
@@ -45,6 +45,15 @@ describe('EstudiantesService - Asignar Clases', () => {
 
     service = module.get<EstudiantesService>(EstudiantesService);
     prisma = module.get<PrismaService>(PrismaService);
+
+    jest.clearAllMocks();
+
+    (prisma.$transaction as jest.Mock).mockImplementation(async (fn: any) =>
+      fn({
+        inscripcionClase: prisma.inscripcionClase,
+        clase: prisma.clase,
+      }),
+    );
   });
 
   describe('RED - Test 13: Asignar una clase a un estudiante', () => {
@@ -76,8 +85,8 @@ describe('EstudiantesService - Asignar Clases', () => {
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudiante as any);
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(clase as any);
-      jest.spyOn(prisma.inscripcion, 'findFirst').mockResolvedValue(null); // No existe inscripción previa
-      jest.spyOn(prisma.inscripcion, 'create').mockResolvedValue(inscripcion as any);
+      jest.spyOn(prisma.inscripcionClase, 'findFirst').mockResolvedValue(null); // No existe inscripción previa
+      jest.spyOn(prisma.inscripcionClase, 'create').mockResolvedValue(inscripcion as any);
       jest.spyOn(prisma.clase, 'update').mockResolvedValue({ ...clase, cupos_ocupados: 6 } as any);
 
       // Act
@@ -115,13 +124,27 @@ describe('EstudiantesService - Asignar Clases', () => {
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudiante as any);
       jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(clases as any);
-      jest.spyOn(prisma.$transaction, 'mockImplementation').mockResolvedValue(
-        clasesIds.map((claseId) => ({
-          id: `inscripcion-${claseId}`,
+      (prisma.inscripcionClase.create as jest.Mock)
+        .mockResolvedValueOnce({
+          id: 'inscripcion-clase-1',
           estudiante_id: estudianteId,
-          clase_id: claseId,
-        })),
-      );
+          clase_id: 'clase-1',
+        } as any)
+        .mockResolvedValueOnce({
+          id: 'inscripcion-clase-2',
+          estudiante_id: estudianteId,
+          clase_id: 'clase-2',
+        } as any)
+        .mockResolvedValueOnce({
+          id: 'inscripcion-clase-3',
+          estudiante_id: estudianteId,
+          clase_id: 'clase-3',
+        } as any);
+
+      (prisma.clase.update as jest.Mock).mockResolvedValue({
+        ...clases[0],
+        cupos_ocupados: 6,
+      } as any);
 
       // Act
       const result = await service.asignarClasesAEstudiante(estudianteId, clasesIds);
@@ -218,7 +241,7 @@ describe('EstudiantesService - Asignar Clases', () => {
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudiante as any);
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(clase as any);
-      jest.spyOn(prisma.inscripcion, 'findFirst').mockResolvedValue(inscripcionExistente as any);
+      jest.spyOn(prisma.inscripcionClase, 'findFirst').mockResolvedValue(inscripcionExistente as any);
 
       // Act & Assert
       await expect(service.asignarClaseAEstudiante(estudianteId, claseId)).rejects.toThrow(ConflictException);
