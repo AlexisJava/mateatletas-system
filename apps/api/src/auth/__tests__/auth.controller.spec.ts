@@ -3,6 +3,7 @@ import { AuthService } from '../auth.service';
 import { TokenBlacklistService } from '../token-blacklist.service';
 import { LoginDto } from '../dto/login.dto';
 import { Request, Response } from 'express';
+import { Role } from '../decorators/roles.decorator';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -96,6 +97,8 @@ describe('AuthController', () => {
         dni: null,
         telefono: null,
         role: 'Tutor',
+        roles: [Role.Tutor] as Role[],
+        debe_cambiar_password: false,
       };
       authService.login.mockResolvedValue({ access_token: 'token-123', user: mockUser });
       const { response, cookie } = createMockResponse();
@@ -134,6 +137,8 @@ describe('AuthController', () => {
         equipo: null,
         tutor: { id: 'tutor-1', nombre: 'Tutor', apellido: 'Test', email: 'tutor@test.com' },
         role: 'Estudiante',
+        roles: [Role.Estudiante] as Role[],
+        debe_cambiar_password: false,
       };
       authService.loginEstudiante.mockResolvedValue({
         access_token: 'student-token',

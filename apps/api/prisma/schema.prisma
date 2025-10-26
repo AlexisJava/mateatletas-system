@@ -206,6 +206,8 @@ model Docente {
   /// true = contraseña temporal (generada por admin)
   /// false = contraseña elegida por el docente
   debe_cambiar_password  Boolean             @default(true)
+  /// Fecha del último cambio de contraseña
+  fecha_ultimo_cambio    DateTime?
   clases                 Clase[]
   claseGrupos            ClaseGrupo[]
   rutasEspecialidad      DocenteRuta[]

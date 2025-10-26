@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { useAuthStore } from '@/store/auth.store';
 import ForcePasswordChangeOverlay from '@/components/auth/ForcePasswordChangeOverlay';
+import { RoleSelectorModal } from '@/components/auth/RoleSelectorModal';
 import {
   Terminal,
   Eye,
@@ -121,39 +122,58 @@ function FloatingParticle({ delay = 0, left = 50 }: { delay?: number; left?: num
  */
 export default function LoginPage() {
   const router = useRouter();
-  const { login, loginEstudiante, isLoading, isAuthenticated, user } = useAuthStore();
+  const { login, loginEstudiante, isLoading, isAuthenticated, user, logout, setSelectedRole, selectedRole } = useAuthStore();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const [hasJustLoggedIn, setHasJustLoggedIn] = useState(false);
   const hasRedirectedRef = useRef(false);
-  const mustChangePassword = useMemo(
-    () => Boolean(user?.debe_cambiar_password),
-    [user?.debe_cambiar_password],
+
+  const hasMultipleRoles = useMemo(
+    () => user?.roles && user.roles.length > 1,
+    [user?.roles],
   );
 
-  // Redirigir si ya está autenticado
+  const mustChangePassword = useMemo(
+    () => Boolean(user?.debe_cambiar_password && hasJustLoggedIn),
+    [user?.debe_cambiar_password, hasJustLoggedIn],
+  );
+
+  // Redirigir si ya está autenticado y tiene rol seleccionado
   useEffect(() => {
     if (!isAuthenticated || !user || isLoading) {
       return;
     }
 
+    // Si tiene múltiples roles y NO ha seleccionado uno, mostrar selector
+    if (hasMultipleRoles && !selectedRole && hasJustLoggedIn) {
+      setShowRoleSelector(true);
+      setIsRedirecting(false);
+      hasRedirectedRef.current = false;
+      return;
+    }
+
+    // Si debe cambiar password, mostrar modal
     if (mustChangePassword) {
       setIsRedirecting(false);
       hasRedirectedRef.current = false;
       return;
     }
 
-    if (!hasRedirectedRef.current) {
+    // Si ya seleccionó rol (o tiene un solo rol), redirigir
+    if (!hasRedirectedRef.current && (selectedRole || !hasMultipleRoles)) {
       hasRedirectedRef.current = true;
       setIsRedirecting(true);
 
+      const activeRole = selectedRole || user.role;
       const redirectPath =
-        user.role === 'admin' ? '/admin/dashboard' :
-        user.role === 'docente' ? '/docente/dashboard' :
-        user.role === 'estudiante' ? '/estudiante/dashboard' :
+        activeRole === 'admin' ? '/admin/dashboard' :
+        activeRole === 'docente' ? '/docente/dashboard' :
+        activeRole === 'estudiante' ? '/estudiante/dashboard' :
         '/dashboard';
 
       router.replace(redirectPath);
     }
-  }, [isAuthenticated, user, router, isLoading, mustChangePassword]);
+  }, [isAuthenticated, user, router, isLoading, mustChangePassword, hasMultipleRoles, selectedRole]);
 
   const [userType, setUserType] = useState<'tutor' | 'estudiante'>('tutor');
   const [email, setEmail] = useState('');
@@ -198,6 +218,10 @@ export default function LoginPage() {
     }
 
     try {
+      // IMPORTANTE: Marcar que el usuario está haciendo login ANTES del await
+      // para que cuando el login termine y el useEffect se ejecute, ya tenga el flag en true
+      setHasJustLoggedIn(true);
+
       // Usar método de login según el tipo de usuario seleccionado
       if (userType === 'estudiante') {
         await loginEstudiante(email, password);
@@ -205,6 +229,9 @@ export default function LoginPage() {
         await login(email, password);
       }
     } catch (err: unknown) {
+      // Si hay error, resetear el flag
+      setHasJustLoggedIn(false);
+
       // Ignorar errores de abort
       if (err instanceof Error && err.name === 'AbortError') {
         return;
@@ -230,6 +257,15 @@ export default function LoginPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  /**
+   * Maneja la selección de rol cuando el usuario tiene múltiples roles
+   */
+  const handleRoleSelect = (role: 'admin' | 'docente') => {
+    setSelectedRole(role);
+    setShowRoleSelector(false);
+    // No resetear hasJustLoggedIn aquí, el useEffect se encarga de la redirección
   };
 
   /**
@@ -642,9 +678,20 @@ export default function LoginPage() {
         </div>
       </div>
 
+      {/* Modal de selección de rol */}
+      {showRoleSelector && user && user.roles && (
+        <RoleSelectorModal
+          roles={user.roles}
+          onSelectRole={handleRoleSelect}
+          userName={`${user.nombre} ${user.apellido}`}
+        />
+      )}
+
+      {/* Modal de cambio de contraseña */}
       <ForcePasswordChangeOverlay
         onSuccess={() => {
           hasRedirectedRef.current = false;
+          setHasJustLoggedIn(false);
         }}
       />
     </div>
