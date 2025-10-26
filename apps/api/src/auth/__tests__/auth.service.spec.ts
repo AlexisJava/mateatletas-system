@@ -396,7 +396,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockTutor.email);
       expect(result.user.role).toBe(Role.Tutor);
-      expect(result.user.dni).toBe(mockTutor.dni);
+      expect('dni' in result.user && result.user.dni).toBe(mockTutor.dni);
     });
 
     it('should login docente successfully', async () => {
@@ -417,7 +417,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockDocente.email);
       expect(result.user.role).toBe(Role.Docente);
-      expect(result.user.titulo).toBe(mockDocente.titulo);
+      expect('titulo' in result.user && result.user.titulo).toBe(mockDocente.titulo);
     });
 
     it('should login admin successfully', async () => {

@@ -53,7 +53,7 @@ const navItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout, checkAuth } = useAuthStore();
+  const { user, logout, checkAuth, selectedRole } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -69,17 +69,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const validateAuth = async () => {
       hasValidatedRef.current = true;
 
-      // Si ya tenemos un usuario admin, validar y terminar
-      if (user && user.role === 'admin') {
+      // Usar selectedRole si existe, sino user.role
+      const activeRole = selectedRole || user?.role;
+
+      // Si ya tenemos un usuario admin (por rol activo o selectedRole), validar y terminar
+      if (user && activeRole === 'admin') {
         setIsValidating(false);
         return;
       }
 
-      // Si el usuario tiene otro rol, redirigir al dashboard apropiado
-      if (user && user.role !== 'admin') {
+      // Si el usuario tiene otro rol ACTIVO, redirigir al dashboard apropiado
+      if (user && activeRole && activeRole !== 'admin') {
         const redirectPath =
-          user.role === 'docente' ? '/docente/dashboard' :
-          user.role === 'estudiante' ? '/estudiante/dashboard' :
+          activeRole === 'docente' ? '/docente/dashboard' :
+          activeRole === 'estudiante' ? '/estudiante/dashboard' :
           '/dashboard';
         router.replace(redirectPath);
         return;
@@ -90,6 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         try {
           await checkAuth();
           const currentUser = useAuthStore.getState().user;
+          const currentSelectedRole = useAuthStore.getState().selectedRole;
 
           // Después de checkAuth, validar el rol
           if (!currentUser) {
@@ -97,16 +101,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             return;
           }
 
-          if (currentUser.role !== 'admin') {
+          const currentActiveRole = currentSelectedRole || currentUser.role;
+
+          if (currentActiveRole !== 'admin') {
             const redirectPath =
-              currentUser.role === 'docente' ? '/docente/dashboard' :
-              currentUser.role === 'estudiante' ? '/estudiante/dashboard' :
+              currentActiveRole === 'docente' ? '/docente/dashboard' :
+              currentActiveRole === 'estudiante' ? '/estudiante/dashboard' :
               '/dashboard';
             router.replace(redirectPath);
             return;
           }
 
-          // Usuario es admin, validación exitosa
+          // Usuario es admin (por rol activo), validación exitosa
           setIsValidating(false);
         } catch (error) {
           // Error al verificar auth, redirigir a login

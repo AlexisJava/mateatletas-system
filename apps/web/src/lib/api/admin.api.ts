@@ -32,6 +32,58 @@ export const getAllUsers = async (): Promise<AdminUser[]> => {
   return axios.get<AdminUser[]>('/admin/usuarios');
 };
 
+/**
+ * Obtener todos los estudiantes del sistema con paginación
+ * GET /api/admin/estudiantes
+ */
+export interface EstudianteAdmin {
+  id: string;
+  nombre: string;
+  apellido: string;
+  edad: number;
+  nivel_escolar: string;
+  nivel_actual: string | null;
+  puntos_totales: number;
+  tutor: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+  } | null;
+  equipo: {
+    nombre: string;
+    color_primario: string;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EstudiantesResponse {
+  data: EstudianteAdmin[];
+  metadata: {
+    total: number;
+    totalPages: number;
+    currentPage: number;
+    perPage: number;
+  };
+}
+
+export const getAllEstudiantes = async (options?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}): Promise<EstudiantesResponse> => {
+  const params = new URLSearchParams();
+  if (options?.page) params.append('page', options.page.toString());
+  if (options?.limit) params.append('limit', options.limit.toString());
+  if (options?.search) params.append('search', options.search);
+
+  const queryString = params.toString();
+  const url = `/admin/estudiantes${queryString ? `?${queryString}` : ''}`;
+
+  return axios.get<EstudiantesResponse>(url);
+};
+
 export const changeUserRole = async (userId: string, data: ChangeRoleDto): Promise<AdminUser> => {
   return axios.post<AdminUser>(`/admin/usuarios/${userId}/role`, data);
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Download, Search, Key, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import { Download, Search, Key, Eye, EyeOff, Copy, Check, RefreshCw, Loader2 } from 'lucide-react';
 import apiClient from '@/lib/axios';
 import { getErrorMessage } from '@/lib/utils/error-handler';
 import {
@@ -41,6 +41,8 @@ export default function CredencialesPage() {
   const [showPasswords, setShowPasswords] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [resettingId, setResettingId] = useState<string | null>(null);
+  const [resetSuccess, setResetSuccess] = useState<{ id: string; password: string } | null>(null);
 
   useEffect(() => {
     loadCredenciales();
@@ -92,6 +94,37 @@ export default function CredencialesPage() {
     navigator.clipboard.writeText(password);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleResetPassword = async (usuarioId: string, rol: string) => {
+    if (!confirm('¿Estás seguro de resetear la contraseña de este usuario? Se generará una nueva contraseña temporal.')) {
+      return;
+    }
+
+    try {
+      setResettingId(usuarioId);
+      const tipoUsuario = rol.toLowerCase() as 'tutor' | 'estudiante' | 'docente';
+
+      const response = await apiClient.post(`/admin/credenciales/${usuarioId}/reset`, {
+        tipoUsuario,
+      });
+
+      // Mostrar nueva contraseña
+      setResetSuccess({ id: usuarioId, password: response.password_temporal });
+
+      // Auto-copiar al clipboard
+      navigator.clipboard.writeText(response.password_temporal);
+
+      // Recargar credenciales
+      await loadCredenciales();
+
+      // Limpiar después de 10 segundos
+      setTimeout(() => setResetSuccess(null), 10000);
+    } catch (err: unknown) {
+      alert(getErrorMessage(err, 'Error al resetear contraseña'));
+    } finally {
+      setResettingId(null);
+    }
   };
 
   const handleExport = (format: 'excel' | 'csv' | 'pdf') => {
@@ -337,12 +370,15 @@ export default function CredencialesPage() {
                   <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
                     Fecha Creación
                   </th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-emerald-100 uppercase tracking-wider">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-emerald-500/10">
                 {usuariosFiltrados.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center">
+                    <td colSpan={7} className="px-6 py-12 text-center">
                       <p className="text-white/40">No se encontraron usuarios con los filtros seleccionados</p>
                     </td>
                   </tr>
@@ -411,11 +447,52 @@ export default function CredencialesPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
                         {new Date(usuario.fecha_creacion).toLocaleDateString('es-AR')}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <button
+                          onClick={() => handleResetPassword(usuario.id, usuario.rol)}
+                          disabled={resettingId === usuario.id}
+                          className="px-3 py-1.5 bg-amber-500/20 border border-amber-500/30 hover:bg-amber-500/30 text-amber-300 rounded-lg font-semibold transition-all text-sm flex items-center gap-2 ml-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Resetear contraseña"
+                        >
+                          {resettingId === usuario.id ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Reseteando...
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw className="w-4 h-4" />
+                              Resetear
+                            </>
+                          )}
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Alert de Reseteo Exitoso */}
+      {resetSuccess && (
+        <div className="fixed bottom-6 right-6 backdrop-blur-xl bg-green-500/20 border border-green-500/30 rounded-xl p-6 shadow-2xl shadow-green-500/20 z-50 max-w-md">
+          <div className="flex items-start gap-3">
+            <Check className="w-6 h-6 text-green-400 flex-shrink-0 mt-1" />
+            <div className="flex-1">
+              <h4 className="text-green-300 font-bold mb-2">¡Contraseña Reseteada!</h4>
+              <p className="text-green-200/80 text-sm mb-3">
+                Nueva contraseña temporal generada y copiada al portapapeles:
+              </p>
+              <code className="block px-3 py-2 bg-black/30 rounded-lg border border-green-500/20 text-green-300 font-mono text-sm font-semibold break-all">
+                {resetSuccess.password}
+              </code>
+              <p className="text-green-200/60 text-xs mt-2">
+                El usuario deberá cambiar esta contraseña en su próximo login
+              </p>
+            </div>
           </div>
         </div>
       )}

@@ -15,11 +15,15 @@ import { Tutor, Docente, Admin as AdminModel } from '@prisma/client';
 
 type AuthenticatedUser = Tutor | Docente | AdminModel;
 
+// Type guards usando campos ÚNICOS de cada modelo
+// - Tutor: solo él tiene 'ha_completado_onboarding'
+// - Docente: solo él tiene 'titulo'
+// - Admin: detectado por eliminación
 const isTutorUser = (user: AuthenticatedUser): user is Tutor =>
   'ha_completado_onboarding' in user;
 
 const isDocenteUser = (user: AuthenticatedUser): user is Docente =>
-  'debe_cambiar_password' in user;
+  'titulo' in user;
 
 const isAdminUser = (user: AuthenticatedUser): user is AdminModel =>
   !isTutorUser(user) && !isDocenteUser(user);
@@ -245,6 +249,7 @@ export class AuthService {
           fecha_registro: user.fecha_registro,
           ha_completado_onboarding: user.ha_completado_onboarding,
           role: 'tutor',
+          roles: finalUserRoles, // Array de todos los roles del usuario
           debe_cambiar_password: user.debe_cambiar_password,
         },
       };
@@ -261,11 +266,13 @@ export class AuthService {
           titulo: user.titulo ?? null,
           bio: user.bio ?? null,
           role: 'docente',
+          roles: finalUserRoles, // Array de todos los roles del usuario
           debe_cambiar_password: user.debe_cambiar_password,
         },
       };
     }
 
+    // Si llegamos acá, es Admin
     return {
       access_token: accessToken,
       user: {
@@ -277,7 +284,8 @@ export class AuthService {
         dni: isAdminUser(user) ? user.dni ?? null : null,
         telefono: isAdminUser(user) ? user.telefono ?? null : null,
         role: 'admin',
-        debe_cambiar_password: false,
+        roles: finalUserRoles, // Array de todos los roles del usuario
+        debe_cambiar_password: isAdminUser(user) ? user.debe_cambiar_password : false,
       },
     };
   }
@@ -461,7 +469,8 @@ export class AuthService {
 
     let tutor = null;
     let docente = null;
-    let tipoUsuario: 'estudiante' | 'tutor' | 'docente' = 'estudiante';
+    let admin = null;
+    let tipoUsuario: 'estudiante' | 'tutor' | 'docente' | 'admin' = 'estudiante';
 
     if (!estudiante) {
       tutor = await this.prisma.tutor.findUnique({
@@ -488,12 +497,25 @@ export class AuthService {
         tipoUsuario = 'docente';
 
         if (!docente) {
-          throw new NotFoundException('Usuario no encontrado');
+          admin = await this.prisma.admin.findUnique({
+            where: { id: userId },
+            select: {
+              id: true,
+              password_hash: true,
+              password_temporal: true,
+              debe_cambiar_password: true,
+            },
+          });
+          tipoUsuario = 'admin';
+
+          if (!admin) {
+            throw new NotFoundException('Usuario no encontrado');
+          }
         }
       }
     }
 
-    const usuario = estudiante || tutor || docente;
+    const usuario = estudiante || tutor || docente || admin;
 
     // 2. Verificar que la contraseña actual sea correcta
     const passwordValida = await bcrypt.compare(
@@ -526,9 +548,14 @@ export class AuthService {
         where: { id: userId },
         data: updateData,
       });
-    } else {
-      // docente
+    } else if (tipoUsuario === 'docente') {
       await this.prisma.docente.update({
+        where: { id: userId },
+        data: updateData,
+      });
+    } else {
+      // admin
+      await this.prisma.admin.update({
         where: { id: userId },
         data: updateData,
       });
