@@ -17,6 +17,7 @@ import { MercadoPagoService } from '../mercadopago.service';
 
 describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
   let service: MercadoPagoService;
+  let configService: ConfigService;
 
   // Mocks para el SDK de MercadoPago
   const mockPreferenceClient = {

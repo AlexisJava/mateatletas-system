@@ -3,16 +3,18 @@
  */
 
 import { Role } from '../../auth/decorators/roles.decorator';
+import { JsonValue } from '@prisma/client/runtime/library';
 
 /**
  * Parsea roles de usuario de forma segura, manejando diferentes formatos
- * @param roles - Puede ser string (JSON), array o undefined
+ * @param roles - Puede ser string (JSON), array, JsonValue o undefined
  * @returns Array de roles como Role enum
  */
-export function parseUserRoles(roles: string | Role[] | null | undefined): Role[] {
+export function parseUserRoles(roles: string | Role[] | JsonValue | null | undefined): Role[] {
   // Si ya es un array, retornarlo directamente
   if (Array.isArray(roles)) {
-    return roles;
+    // Filtrar solo elementos válidos como Role (strings)
+    return roles.filter((r): r is Role => typeof r === 'string') as Role[];
   }
 
   // Si es un string, intentar parsearlo como JSON

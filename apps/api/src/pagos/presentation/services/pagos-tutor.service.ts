@@ -10,6 +10,7 @@ import {
   Producto,
   TipoProducto,
 } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 import { randomUUID } from 'crypto';
 
 import { PrismaService } from '../../../core/database/prisma.service';
@@ -32,7 +33,7 @@ interface MembresiaWithProducto {
   preferencia_id: string | null;
   createdAt: Date;
   updatedAt: Date;
-  producto?: Producto & { precio: number };
+  producto?: Producto & { precio: Decimal };
 }
 
 interface InscripcionCursoWithProducto {
@@ -44,7 +45,7 @@ interface InscripcionCursoWithProducto {
   preferencia_id: string | null;
   createdAt: Date;
   updatedAt: Date;
-  producto?: Producto & { precio: any };
+  producto?: Producto & { precio: Decimal };
 }
 
 /**
@@ -384,7 +385,7 @@ export class PagosTutorService {
     return result;
   }
 
-  private mapearProducto(producto?: Producto & { precio: any }) {
+  private mapearProducto(producto?: Producto & { precio: Decimal }) {
     if (!producto) {
       return undefined;
     }
