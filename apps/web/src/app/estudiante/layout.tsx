@@ -199,8 +199,8 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Page Content - Sin header, sin padding, el dashboard maneja su propio layout */}
-              <main className="flex-1 overflow-y-auto">
+              {/* Page Content */}
+              <main className="flex-1 overflow-y-auto p-6">
                 {children}
               </main>
             </div>
