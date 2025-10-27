@@ -40,7 +40,9 @@ export type Equipo = z.infer<typeof equipoSchema>;
 export const createEquipoSchema = z.object({
   nombre: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   color_primario: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color primario debe ser un hex válido'),
-  color_secundario: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color secundario debe ser un hex válido'),
+  color_secundario: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, 'Color secundario debe ser un hex válido'),
   icono_url: z.string().optional(),
 });
 
