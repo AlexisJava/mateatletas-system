@@ -196,7 +196,9 @@ export default function MisHijosTab({ estudiantes }: Props) {
                               <Calendar className="w-5 h-5 text-white" />
                             </div>
                             <div className="flex-1">
-                              <h4 className="font-bold text-white">{clase.ruta_curricular?.nombre || 'Clase'}</h4>
+                              <h4 className="font-bold text-white">
+                                {(clase.ruta_curricular ?? clase.rutaCurricular)?.nombre ?? 'Clase'}
+                              </h4>
                               <p className="text-sm text-gray-300">
                                 {fechaClase.toLocaleDateString('es-AR', {
                                   weekday: 'long',

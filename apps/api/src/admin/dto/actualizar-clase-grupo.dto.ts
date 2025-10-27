@@ -130,7 +130,8 @@ export class ActualizarClaseGrupoDto {
   nivel?: string;
 
   @ApiPropertyOptional({
-    description: 'IDs de los estudiantes inscritos (reemplaza la lista completa)',
+    description:
+      'IDs de los estudiantes inscritos (reemplaza la lista completa)',
     example: ['clt4abc111', 'clt4abc222'],
     type: [String],
   })

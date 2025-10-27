@@ -9,7 +9,8 @@ export interface AuthSession {
   user?: any;
 }
 
-export const FRONTEND_ORIGIN = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+export const FRONTEND_ORIGIN =
+  process.env.FRONTEND_URL ?? 'http://localhost:3000';
 
 function extractAuthCookie(cookies: string[] | string | undefined) {
   if (!cookies || (Array.isArray(cookies) && cookies.length === 0)) {
@@ -67,8 +68,13 @@ export async function loginEstudiante(
   return performLogin(app, '/auth/estudiante/login', credentials);
 }
 
-export function withAuthHeaders<T extends Test>(requestBuilder: T, auth: AuthSession): T {
-  return requestBuilder.set('Authorization', `Bearer ${auth.token}`).set('Cookie', auth.cookie);
+export function withAuthHeaders<T extends Test>(
+  requestBuilder: T,
+  auth: AuthSession,
+): T {
+  return requestBuilder
+    .set('Authorization', `Bearer ${auth.token}`)
+    .set('Cookie', auth.cookie);
 }
 
 export function withOriginHeader<T extends Test>(requestBuilder: T): T {

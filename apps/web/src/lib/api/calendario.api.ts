@@ -17,53 +17,108 @@ import type {
 // ==================== CREAR EVENTOS ====================
 
 export const crearTarea = async (data: CreateTareaDto): Promise<Evento> => {
-  const payload = await apiClient.post('/eventos/tareas', data);
-  return payload;
+  try {
+    const response = await apiClient.post<Evento>('/eventos/tareas', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al crear tarea en el calendario:', error);
+    throw error;
+  }
 };
 
-export const crearRecordatorio = async (data: CreateRecordatorioDto): Promise<Evento> => {
-  const payload = await apiClient.post('/eventos/recordatorios', data);
-  return payload;
+export const crearRecordatorio = async (
+  data: CreateRecordatorioDto
+): Promise<Evento> => {
+  try {
+    const response = await apiClient.post<Evento>(
+      '/eventos/recordatorios',
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al crear recordatorio en el calendario:', error);
+    throw error;
+  }
 };
 
 export const crearNota = async (data: CreateNotaDto): Promise<Evento> => {
-  const payload = await apiClient.post('/eventos/notas', data);
-  return payload;
+  try {
+    const response = await apiClient.post<Evento>('/eventos/notas', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al crear nota en el calendario:', error);
+    throw error;
+  }
 };
 
 // ==================== LEER EVENTOS ====================
 
-export const obtenerEventos = async (filtros?: FiltrosCalendario): Promise<Evento[]> => {
+export const obtenerEventos = async (
+  filtros?: FiltrosCalendario
+): Promise<Evento[]> => {
   const params = new URLSearchParams();
-  
+
   if (filtros?.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
   if (filtros?.fechaFin) params.append('fechaFin', filtros.fechaFin);
   if (filtros?.tipo) params.append('tipo', filtros.tipo);
   if (filtros?.busqueda) params.append('busqueda', filtros.busqueda);
-  
-  const payload = await apiClient.get(`/eventos?${params.toString()}`);
-  return payload;
+
+  try {
+    const response = await apiClient.get<Evento[]>(
+      `/eventos?${params.toString()}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener eventos del calendario:', error);
+    throw error;
+  }
 };
 
 export const obtenerEvento = async (id: string): Promise<Evento> => {
-  const payload = await apiClient.get(`/eventos/${id}`);
-  return payload;
+  try {
+    const response = await apiClient.get<Evento>(`/eventos/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener el evento del calendario:', error);
+    throw error;
+  }
 };
 
 export const obtenerVistaAgenda = async (): Promise<VistaAgendaData> => {
-  const payload = await apiClient.get('/eventos/vista-agenda');
-  return payload;
+  try {
+    const response = await apiClient.get<VistaAgendaData>(
+      '/eventos/vista-agenda'
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener la vista de agenda del calendario:', error);
+    throw error;
+  }
 };
 
 export const obtenerVistaSemana = async (fecha?: string): Promise<Evento[]> => {
   const params = fecha ? `?fecha=${fecha}` : '';
-  const payload = await apiClient.get(`/eventos/vista-semana${params}`);
-  return payload;
+  try {
+    const response = await apiClient.get<Evento[]>(
+      `/eventos/vista-semana${params}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener la vista semanal del calendario:', error);
+    throw error;
+  }
 };
 
 export const obtenerEstadisticas = async (): Promise<EstadisticasCalendario> => {
-  const payload = await apiClient.get('/eventos/estadisticas');
-  return payload;
+  try {
+    const response = await apiClient.get<EstadisticasCalendario>(
+      '/eventos/estadisticas'
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener las estadísticas del calendario:', error);
+    throw error;
+  }
 };
 
 // ==================== ACTUALIZAR EVENTOS ====================
@@ -72,24 +127,48 @@ export const actualizarTarea = async (
   id: string,
   data: Partial<CreateTareaDto>
 ): Promise<Evento> => {
-  const payload = await apiClient.patch(`/eventos/tareas/${id}`, data);
-  return payload;
+  try {
+    const response = await apiClient.patch<Evento>(
+      `/eventos/tareas/${id}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar la tarea del calendario:', error);
+    throw error;
+  }
 };
 
 export const actualizarRecordatorio = async (
   id: string,
   data: Partial<CreateRecordatorioDto>
 ): Promise<Evento> => {
-  const payload = await apiClient.patch(`/eventos/recordatorios/${id}`, data);
-  return payload;
+  try {
+    const response = await apiClient.patch<Evento>(
+      `/eventos/recordatorios/${id}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar el recordatorio del calendario:', error);
+    throw error;
+  }
 };
 
 export const actualizarNota = async (
   id: string,
   data: Partial<CreateNotaDto>
 ): Promise<Evento> => {
-  const payload = await apiClient.patch(`/eventos/notas/${id}`, data);
-  return payload;
+  try {
+    const response = await apiClient.patch<Evento>(
+      `/eventos/notas/${id}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar la nota del calendario:', error);
+    throw error;
+  }
 };
 
 export const actualizarFechasEvento = async (
@@ -97,17 +176,27 @@ export const actualizarFechasEvento = async (
   fecha_inicio: string,
   fecha_fin: string
 ): Promise<Evento> => {
-  const payload = await apiClient.patch(`/eventos/${id}/fechas`, {
-    fecha_inicio,
-    fecha_fin,
-  });
-  return payload;
+  try {
+    const response = await apiClient.patch<Evento>(`/eventos/${id}/fechas`, {
+      fecha_inicio,
+      fecha_fin,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar las fechas del evento:', error);
+    throw error;
+  }
 };
 
 // ==================== ELIMINAR EVENTOS ====================
 
 export const eliminarEvento = async (id: string): Promise<void> => {
-  await apiClient.delete(`/eventos/${id}`);
+  try {
+    await apiClient.delete(`/eventos/${id}`);
+  } catch (error) {
+    console.error('Error al eliminar el evento del calendario:', error);
+    throw error;
+  }
 };
 
 // ==================== UTILIDADES ====================

@@ -83,14 +83,23 @@ describe('EstudiantesService - Asignar Clases', () => {
         estado: 'Activa',
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudiante as any);
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(clase as any);
       jest.spyOn(prisma.inscripcionClase, 'findFirst').mockResolvedValue(null); // No existe inscripción previa
-      jest.spyOn(prisma.inscripcionClase, 'create').mockResolvedValue(inscripcion as any);
-      jest.spyOn(prisma.clase, 'update').mockResolvedValue({ ...clase, cupos_ocupados: 6 } as any);
+      jest
+        .spyOn(prisma.inscripcionClase, 'create')
+        .mockResolvedValue(inscripcion as any);
+      jest
+        .spyOn(prisma.clase, 'update')
+        .mockResolvedValue({ ...clase, cupos_ocupados: 6 } as any);
 
       // Act
-      const result = await service.asignarClaseAEstudiante(estudianteId, claseId);
+      const result = await service.asignarClaseAEstudiante(
+        estudianteId,
+        claseId,
+      );
 
       // Assert
       expect(result).toBeDefined();
@@ -122,7 +131,9 @@ describe('EstudiantesService - Asignar Clases', () => {
         cupos_ocupados: 5,
       }));
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudiante as any);
       jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(clases as any);
       (prisma.inscripcionClase.create as jest.Mock)
         .mockResolvedValueOnce({
@@ -147,7 +158,10 @@ describe('EstudiantesService - Asignar Clases', () => {
       } as any);
 
       // Act
-      const result = await service.asignarClasesAEstudiante(estudianteId, clasesIds);
+      const result = await service.asignarClasesAEstudiante(
+        estudianteId,
+        clasesIds,
+      );
 
       // Assert
       expect(result).toHaveLength(3);
@@ -174,14 +188,18 @@ describe('EstudiantesService - Asignar Clases', () => {
         sector_id: 'sector-programacion-id', // Sector diferente
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudiante as any);
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(clase as any);
 
       // Act & Assert
-      await expect(service.asignarClaseAEstudiante(estudianteId, claseId)).rejects.toThrow(BadRequestException);
-      await expect(service.asignarClaseAEstudiante(estudianteId, claseId)).rejects.toThrow(
-        'La clase no pertenece al sector del estudiante',
-      );
+      await expect(
+        service.asignarClaseAEstudiante(estudianteId, claseId),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.asignarClaseAEstudiante(estudianteId, claseId),
+      ).rejects.toThrow('La clase no pertenece al sector del estudiante');
     });
   });
 
@@ -204,14 +222,20 @@ describe('EstudiantesService - Asignar Clases', () => {
         cupos_ocupados: 10, // Clase llena
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudiante as any);
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(claseCompleta as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudiante as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(claseCompleta as any);
 
       // Act & Assert
-      await expect(service.asignarClaseAEstudiante(estudianteId, claseId)).rejects.toThrow(ConflictException);
-      await expect(service.asignarClaseAEstudiante(estudianteId, claseId)).rejects.toThrow(
-        'La clase no tiene cupos disponibles',
-      );
+      await expect(
+        service.asignarClaseAEstudiante(estudianteId, claseId),
+      ).rejects.toThrow(ConflictException);
+      await expect(
+        service.asignarClaseAEstudiante(estudianteId, claseId),
+      ).rejects.toThrow('La clase no tiene cupos disponibles');
     });
   });
 
@@ -239,15 +263,21 @@ describe('EstudiantesService - Asignar Clases', () => {
         clase_id: claseId,
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudiante as any);
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(clase as any);
-      jest.spyOn(prisma.inscripcionClase, 'findFirst').mockResolvedValue(inscripcionExistente as any);
+      jest
+        .spyOn(prisma.inscripcionClase, 'findFirst')
+        .mockResolvedValue(inscripcionExistente as any);
 
       // Act & Assert
-      await expect(service.asignarClaseAEstudiante(estudianteId, claseId)).rejects.toThrow(ConflictException);
-      await expect(service.asignarClaseAEstudiante(estudianteId, claseId)).rejects.toThrow(
-        'El estudiante ya está inscrito en esta clase',
-      );
+      await expect(
+        service.asignarClaseAEstudiante(estudianteId, claseId),
+      ).rejects.toThrow(ConflictException);
+      await expect(
+        service.asignarClaseAEstudiante(estudianteId, claseId),
+      ).rejects.toThrow('El estudiante ya está inscrito en esta clase');
     });
   });
 
@@ -279,11 +309,16 @@ describe('EstudiantesService - Asignar Clases', () => {
         },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudiante as any);
-      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(clasesDisponibles as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudiante as any);
+      jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue(clasesDisponibles as any);
 
       // Act
-      const result = await service.obtenerClasesDisponiblesParaEstudiante(estudianteId);
+      const result =
+        await service.obtenerClasesDisponiblesParaEstudiante(estudianteId);
 
       // Assert
       expect(result).toHaveLength(2);

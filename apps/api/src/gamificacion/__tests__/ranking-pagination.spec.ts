@@ -59,7 +59,9 @@ describe('RankingService - Pagination', () => {
     it('should return first page with default limit (20)', async () => {
       // Arrange
       const mockEstudiantes = createMockEstudiantes(20);
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(100);
 
       // Act
@@ -84,7 +86,9 @@ describe('RankingService - Pagination', () => {
     it('should return second page correctly', async () => {
       // Arrange
       const mockEstudiantes = createMockEstudiantes(20);
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(100);
 
       // Act
@@ -117,7 +121,9 @@ describe('RankingService - Pagination', () => {
     it('should handle last page with partial results', async () => {
       // Arrange
       const mockEstudiantes = createMockEstudiantes(7); // Solo 7 en última página
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(47);
 
       // Act
@@ -138,7 +144,9 @@ describe('RankingService - Pagination', () => {
     it('should use custom limit', async () => {
       // Arrange
       const mockEstudiantes = createMockEstudiantes(50);
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(200);
 
       // Act
@@ -184,7 +192,9 @@ describe('RankingService - Pagination', () => {
     it('should enforce max limit of 100', async () => {
       // Arrange
       const mockEstudiantes = createMockEstudiantes(100);
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(500);
 
       // Act
@@ -236,7 +246,9 @@ describe('RankingService - Pagination', () => {
     it('should handle single page of results', async () => {
       // Arrange
       const mockEstudiantes = createMockEstudiantes(5);
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(5);
 
       // Act
@@ -279,7 +291,9 @@ describe('RankingService - Pagination', () => {
     it('should include all required fields', async () => {
       // Arrange
       const mockEstudiantes = createMockEstudiantes(1);
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(1);
 
       // Act

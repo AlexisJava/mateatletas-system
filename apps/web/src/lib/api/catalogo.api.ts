@@ -23,32 +23,54 @@ export type ActualizarProductoDto = UpdateProductoDto;
  * Obtener todos los productos
  */
 export const getProductos = async (): Promise<Producto[]> => {
-  const response = await axios.get<Producto[]>('/productos');
-  return productosListSchema.parse(response);
+  try {
+    const response = await axios.get<Producto[]>('/productos');
+    return productosListSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener los productos del catálogo:', error);
+    throw error;
+  }
 };
 
 /**
  * Obtener producto por ID
  */
 export const getProductoPorId = async (id: string): Promise<Producto> => {
-  const response = await axios.get<Producto>(`/productos/${id}`);
-  return productoSchema.parse(response);
+  try {
+    const response = await axios.get<Producto>(`/productos/${id}`);
+    return productoSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener el producto del catálogo por ID:', error);
+    throw error;
+  }
 };
 
 /**
  * Obtener solo cursos
  */
 export const getCursos = async (): Promise<Producto[]> => {
-  const response = await axios.get<Producto[]>('/productos/cursos');
-  return productosListSchema.parse(response);
+  try {
+    const response = await axios.get<Producto[]>('/productos/cursos');
+    return productosListSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener los cursos del catálogo:', error);
+    throw error;
+  }
 };
 
 /**
  * Obtener solo suscripciones
  */
 export const getSuscripciones = async (): Promise<Producto[]> => {
-  const response = await axios.get<Producto[]>('/productos/suscripciones');
-  return productosListSchema.parse(response);
+  try {
+    const response = await axios.get<Producto[]>(
+      '/productos/suscripciones'
+    );
+    return productosListSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener las suscripciones del catálogo:', error);
+    throw error;
+  }
 };
 
 /**

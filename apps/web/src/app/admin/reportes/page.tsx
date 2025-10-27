@@ -197,7 +197,10 @@ export default function AdminReportesPage() {
 
   // Classes by curriculum route (filtered)
   const classesByRoute = filteredClasses.reduce((acc, clase) => {
-    const route = clase.ruta_curricular?.nombre || clase.ruta_curricular?.nombre || 'Sin Ruta';
+    const route =
+      clase.ruta_curricular?.nombre ??
+      clase.rutaCurricular?.nombre ??
+      'Sin Ruta';
     acc[route] = (acc[route] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);

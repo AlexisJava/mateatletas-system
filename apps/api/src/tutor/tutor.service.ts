@@ -59,7 +59,9 @@ export class TutorService {
     estadoPago?: EstadoPagoFilter,
   ): Promise<MisInscripcionesResponse> {
     // Mapear EstadoPagoFilter a EstadoPago del dominio
-    const estadoDominio: EstadoPago | undefined = estadoPago as EstadoPago | undefined;
+    const estadoDominio: EstadoPago | undefined = estadoPago as
+      | EstadoPago
+      | undefined;
 
     // Obtener inscripciones del repositorio
     const inscripciones = await this.inscripcionRepo.obtenerPorTutor(
@@ -95,7 +97,10 @@ export class TutorService {
 
     for (const inscripcion of inscripciones) {
       // Sumar totales según estado
-      if (inscripcion.estadoPago === 'Pendiente' || inscripcion.estadoPago === 'Vencido') {
+      if (
+        inscripcion.estadoPago === 'Pendiente' ||
+        inscripcion.estadoPago === 'Vencido'
+      ) {
         totalPendiente += Number(inscripcion.precioFinal);
       } else if (inscripcion.estadoPago === 'Pagado') {
         totalPagado += Number(inscripcion.precioFinal);
@@ -119,7 +124,9 @@ export class TutorService {
    * @param tutorId - ID del tutor autenticado
    * @returns Dashboard con métricas, alertas, pagos pendientes y clases de hoy
    */
-  async getDashboardResumen(tutorId: string): Promise<DashboardResumenResponse> {
+  async getDashboardResumen(
+    tutorId: string,
+  ): Promise<DashboardResumenResponse> {
     // Ejecutar queries en paralelo para optimizar performance
     const [metricas, pagosPendientes, clasesHoy, alertas] = await Promise.all([
       this.calcularMetricasDashboard(tutorId),
@@ -139,10 +146,19 @@ export class TutorService {
   /**
    * Calcula las métricas principales del dashboard
    */
-  private async calcularMetricasDashboard(tutorId: string): Promise<MetricasDashboard> {
+  private async calcularMetricasDashboard(
+    tutorId: string,
+  ): Promise<MetricasDashboard> {
     const ahora = new Date();
     const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
-    const finMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0, 23, 59, 59);
+    const finMes = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+    );
     const inicioAnio = new Date(ahora.getFullYear(), 0, 1);
 
     // 1. Total de hijos
@@ -156,7 +172,7 @@ export class TutorService {
       select: { id: true },
     });
 
-    const estudiantesIdsArray = estudiantesIds.map(e => e.id);
+    const estudiantesIdsArray = estudiantesIds.map((e) => e.id);
 
     const clasesDelMes = await this.prisma.inscripcionClase.count({
       where: {
@@ -172,16 +188,18 @@ export class TutorService {
     });
 
     // 3. Total pagado este año (inscripciones mensuales pagadas)
-    const inscripcionesPagadas = await this.prisma.inscripcionMensual.aggregate({
-      where: {
-        tutor_id: tutorId,
-        estado_pago: 'Pagado',
-        createdAt: { gte: inicioAnio },
+    const inscripcionesPagadas = await this.prisma.inscripcionMensual.aggregate(
+      {
+        where: {
+          tutor_id: tutorId,
+          estado_pago: 'Pagado',
+          createdAt: { gte: inicioAnio },
+        },
+        _sum: {
+          precio_final: true,
+        },
       },
-      _sum: {
-        precio_final: true,
-      },
-    });
+    );
 
     const totalPagadoAnio = inscripcionesPagadas._sum.precio_final
       ? Math.round(Number(inscripcionesPagadas._sum.precio_final))
@@ -208,9 +226,10 @@ export class TutorService {
       }
     }
 
-    const asistenciaPromedio = totalAsistencias > 0
-      ? Math.round((asistenciasPresente / totalAsistencias) * 100)
-      : 0;
+    const asistenciaPromedio =
+      totalAsistencias > 0
+        ? Math.round((asistenciasPresente / totalAsistencias) * 100)
+        : 0;
 
     return {
       totalHijos,
@@ -223,33 +242,34 @@ export class TutorService {
   /**
    * Obtiene los pagos pendientes ordenados por fecha de vencimiento
    */
-  private async obtenerPagosPendientes(tutorId: string): Promise<PagoPendiente[]> {
+  private async obtenerPagosPendientes(
+    tutorId: string,
+  ): Promise<PagoPendiente[]> {
     // Obtener inscripciones mensuales pendientes o vencidas
-    const inscripcionesPendientes = await this.prisma.inscripcionMensual.findMany({
-      where: {
-        tutor_id: tutorId,
-        estado_pago: { in: ['Pendiente', 'Vencido'] },
-      },
-      include: {
-        estudiante: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
+    const inscripcionesPendientes =
+      await this.prisma.inscripcionMensual.findMany({
+        where: {
+          tutor_id: tutorId,
+          estado_pago: { in: ['Pendiente', 'Vencido'] },
+        },
+        include: {
+          estudiante: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+            },
+          },
+          producto: {
+            select: {
+              nombre: true,
+            },
           },
         },
-        producto: {
-          select: {
-            nombre: true,
-          },
-        },
-      },
-      orderBy: [
-        { periodo: 'asc' },
-      ],
-    });
+        orderBy: [{ periodo: 'asc' }],
+      });
 
-    return inscripcionesPendientes.map(inscripcion => {
+    return inscripcionesPendientes.map((inscripcion) => {
       // Calcular fecha de vencimiento (último día del mes del período)
       const [anio, mes] = inscripcion.periodo.split('-').map(Number);
       const fechaVencimiento = new Date(anio, mes, 0); // Último día del mes
@@ -288,7 +308,7 @@ export class TutorService {
       select: { id: true },
     });
 
-    const estudiantesIdsArray = estudiantesIds.map(e => e.id);
+    const estudiantesIdsArray = estudiantesIds.map((e) => e.id);
 
     // Obtener clases de hoy
     const clasesHoy = await this.prisma.clase.findMany({
@@ -339,13 +359,15 @@ export class TutorService {
 
     const ahora = new Date();
 
-    return clasesHoy.map(clase => {
+    return clasesHoy.map((clase) => {
       const inscripcion = clase.inscripciones[0];
       const fechaHoraInicio = new Date(clase.fecha_hora_inicio);
 
       // Puede unirse si faltan menos de 10 minutos
-      const diffMinutos = (fechaHoraInicio.getTime() - ahora.getTime()) / (1000 * 60);
-      const puedeUnirse = diffMinutos <= 10 && diffMinutos >= -clase.duracion_minutos;
+      const diffMinutos =
+        (fechaHoraInicio.getTime() - ahora.getTime()) / (1000 * 60);
+      const puedeUnirse =
+        diffMinutos <= 10 && diffMinutos >= -clase.duracion_minutos;
 
       return {
         id: clase.id,
@@ -373,7 +395,10 @@ export class TutorService {
    * @param limit - Cantidad máxima de clases a retornar (default: 5)
    * @returns Lista de próximas clases ordenadas por fecha
    */
-  async getProximasClases(tutorId: string, limit: number = 5): Promise<ProximasClasesResponse> {
+  async getProximasClases(
+    tutorId: string,
+    limit: number = 5,
+  ): Promise<ProximasClasesResponse> {
     const ahora = new Date();
 
     // Obtener estudiantes del tutor
@@ -382,7 +407,7 @@ export class TutorService {
       select: { id: true },
     });
 
-    const estudiantesIdsArray = estudiantesIds.map(e => e.id);
+    const estudiantesIdsArray = estudiantesIds.map((e) => e.id);
 
     // Obtener próximas clases
     const clases = await this.prisma.clase.findMany({
@@ -438,10 +463,12 @@ export class TutorService {
     const pasadoManana = new Date(manana);
     pasadoManana.setDate(pasadoManana.getDate() + 1);
 
-    const clasesProximas: ClaseProxima[] = clases.map(clase => {
+    const clasesProximas: ClaseProxima[] = clases.map((clase) => {
       const inscripcion = clase.inscripciones[0];
       const fechaHoraInicio = new Date(clase.fecha_hora_inicio);
-      const fechaHoraFin = new Date(fechaHoraInicio.getTime() + clase.duracion_minutos * 60 * 1000);
+      const fechaHoraFin = new Date(
+        fechaHoraInicio.getTime() + clase.duracion_minutos * 60 * 1000,
+      );
 
       // Determinar si es hoy, mañana, o mostrar fecha
       const fechaClase = new Date(fechaHoraInicio);
@@ -456,16 +483,20 @@ export class TutorService {
       } else if (esManana) {
         labelFecha = 'MAÑANA';
       } else {
-        labelFecha = fechaHoraInicio.toLocaleDateString('es-AR', {
-          weekday: 'short',
-          day: '2-digit',
-          month: '2-digit',
-        }).toUpperCase();
+        labelFecha = fechaHoraInicio
+          .toLocaleDateString('es-AR', {
+            weekday: 'short',
+            day: '2-digit',
+            month: '2-digit',
+          })
+          .toUpperCase();
       }
 
       // Puede unirse si faltan menos de 10 minutos
-      const diffMinutos = (fechaHoraInicio.getTime() - ahora.getTime()) / (1000 * 60);
-      const puedeUnirse = diffMinutos <= 10 && diffMinutos >= -clase.duracion_minutos;
+      const diffMinutos =
+        (fechaHoraInicio.getTime() - ahora.getTime()) / (1000 * 60);
+      const puedeUnirse =
+        diffMinutos <= 10 && diffMinutos >= -clase.duracion_minutos;
 
       return {
         id: clase.id,
@@ -598,8 +629,11 @@ export class TutorService {
         }
       }
 
-      if (totalAsistencias >= 5) { // Solo alertar si tiene al menos 5 clases
-        const porcentajeAsistencia = Math.round((asistenciasPresente / totalAsistencias) * 100);
+      if (totalAsistencias >= 5) {
+        // Solo alertar si tiene al menos 5 clases
+        const porcentajeAsistencia = Math.round(
+          (asistenciasPresente / totalAsistencias) * 100,
+        );
 
         if (porcentajeAsistencia < 70) {
           alertas.push({
@@ -629,7 +663,9 @@ export class TutorService {
       baja: 3,
     };
 
-    alertas.sort((a, b) => prioridadOrden[a.prioridad] - prioridadOrden[b.prioridad]);
+    alertas.sort(
+      (a, b) => prioridadOrden[a.prioridad] - prioridadOrden[b.prioridad],
+    );
 
     return {
       alertas,

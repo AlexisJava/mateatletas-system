@@ -1,123 +1,14 @@
 // Shared types and utilities for Mateatletas
 
 /**
- * User roles in the system
- */
-export enum UserRole {
-  ATHLETE = 'athlete',
-  COACH = 'coach',
-  ADMIN = 'admin',
-}
-
-/**
- * User entity
- */
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-/**
- * API Response wrapper
+ * API response wrapper used across the platform when a REST endpoint
+ * returns a success or failure payload.
  */
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   error?: string;
   message?: string;
-}
-
-/**
- * Detalle completo de un curso con su estructura y progreso
- */
-export interface CursoDetalle {
-  id: string;
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  tipo: 'Curso';
-  activo: boolean;
-  fecha_inicio: string | Date | null;
-  fecha_fin: string | Date | null;
-  cupo_maximo: number | null;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-  modulos: CursoModuloDetalle[];
-  progreso?: CursoProgresoDetalle;
-}
-
-/**
- * Información de un módulo dentro de un curso
- */
-export interface CursoModuloDetalle {
-  id: string;
-  producto_id: string;
-  titulo: string;
-  descripcion: string | null;
-  orden: number;
-  duracion_estimada_minutos: number;
-  puntos_totales: number;
-  publicado: boolean;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-  lecciones: CursoLeccionDetalle[];
-}
-
-/**
- * Información detallada de una lección
- */
-export interface CursoLeccionDetalle {
-  id: string;
-  modulo_id: string;
-  titulo: string;
-  descripcion: string | null;
-  tipo_contenido: string;
-  contenido: Record<string, unknown> | null;
-  orden: number;
-  duracion_estimada_minutos: number | null;
-  puntos_por_completar: number;
-  activo: boolean;
-  leccion_prerequisito_id: string | null;
-  logro_desbloqueable_id: string | null;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-}
-
-/**
- * Información de progreso agregada para un curso
- */
-export interface CursoProgresoDetalle {
-  producto_id: string;
-  total_modulos: number;
-  total_lecciones: number;
-  lecciones_completadas: number;
-  porcentaje_completado: number;
-  puntos_ganados: number;
-  tiempo_total_minutos: number;
-  siguiente_leccion: CursoLeccionDetalle | null;
-}
-
-/**
- * Pagination parameters
- */
-export interface PaginationParams {
-  page: number;
-  limit: number;
-}
-
-/**
- * Paginated response
- */
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -129,6 +20,11 @@ export * from '@mateatletas/contracts';
 // Re-export runtime constants for enum values
 export { ESTADO_CLASE, ESTADO_ASISTENCIA } from '@mateatletas/contracts';
 
+/**
+ * Curated list of contract types frequently used by front-end and testing
+ * packages. Re-exporting them here keeps imports stable even if the
+ * underlying contract package is reorganized.
+ */
 export type {
   EstadoPlanificacion,
   ComponenteActividad,
@@ -139,6 +35,7 @@ export type {
   CreatePlanificacionInput,
   UpdatePlanificacionInput,
   CreateActividadInput,
+  PlanificacionGrupo,
   EstadoClase,
   Asistencia,
   Clase,
@@ -159,4 +56,9 @@ export type {
   InscripcionMensualConRelaciones,
   EstudianteConDescuento,
   ActualizarConfiguracionPreciosInput,
+  CursoDetalle,
+  Modulo,
+  Leccion,
+  ProgresoCurso,
+  Producto,
 } from '@mateatletas/contracts';

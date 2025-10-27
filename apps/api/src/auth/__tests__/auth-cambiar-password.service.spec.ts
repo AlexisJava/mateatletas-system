@@ -62,16 +62,24 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         debe_cambiar_password: true,
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
 
-      const updateSpy = jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
-        ...mockEstudiante,
-        password_temporal: null,
-        debe_cambiar_password: false,
-      } as any);
+      const updateSpy = jest
+        .spyOn(prisma.estudiante, 'update')
+        .mockResolvedValue({
+          ...mockEstudiante,
+          password_temporal: null,
+          debe_cambiar_password: false,
+        } as any);
 
       // Act
-      await service.cambiarPassword('est123', passwordActualTexto, 'NuevaPassword123');
+      await service.cambiarPassword(
+        'est123',
+        passwordActualTexto,
+        'NuevaPassword123',
+      );
 
       // Assert
       expect(updateSpy).toHaveBeenCalledWith({
@@ -97,30 +105,43 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         debe_cambiar_password: true,
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
 
       let nuevoHashGuardado: string | undefined;
-      (prisma.estudiante.update as jest.Mock).mockImplementation(async (params: any) => {
-        nuevoHashGuardado = params.data.password_hash;
-        return {
-          ...mockEstudiante,
-          password_hash: nuevoHashGuardado,
-          password_temporal: null,
-          debe_cambiar_password: false,
-        } as any;
-      });
+      (prisma.estudiante.update as jest.Mock).mockImplementation(
+        async (params: any) => {
+          nuevoHashGuardado = params.data.password_hash;
+          return {
+            ...mockEstudiante,
+            password_hash: nuevoHashGuardado,
+            password_temporal: null,
+            debe_cambiar_password: false,
+          } as any;
+        },
+      );
 
       // Act
       // Este test va a FALLAR porque el método no existe
       try {
-        await (service as any).cambiarPassword('est123', passwordActualTexto, nuevaPassword);
+        await (service as any).cambiarPassword(
+          'est123',
+          passwordActualTexto,
+          nuevaPassword,
+        );
 
         // Assert (solo si no falla antes)
         expect(nuevoHashGuardado).toBeDefined();
         if (nuevoHashGuardado) {
-          const esValido = await bcrypt.compare(nuevaPassword, nuevoHashGuardado);
+          const esValido = await bcrypt.compare(
+            nuevaPassword,
+            nuevoHashGuardado,
+          );
           expect(esValido).toBe(true);
-          expect(await bcrypt.compare(passwordActualTexto, nuevoHashGuardado)).toBe(false);
+          expect(
+            await bcrypt.compare(passwordActualTexto, nuevoHashGuardado),
+          ).toBe(false);
         }
       } catch (error) {
         // Esperamos que falle porque el método no existe
@@ -137,12 +158,18 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         password_temporal: '1234',
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
 
       // Act & Assert
       // Este test va a FALLAR porque el método no existe
       await expect(async () => {
-        await (service as any).cambiarPassword('est123', 'incorrecta', 'NuevaPassword123');
+        await (service as any).cambiarPassword(
+          'est123',
+          'incorrecta',
+          'NuevaPassword123',
+        );
       }).rejects.toThrow();
     });
 
@@ -154,13 +181,21 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         password_temporal: '1234',
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
 
-      const updateSpy = jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({} as any);
+      const updateSpy = jest
+        .spyOn(prisma.estudiante, 'update')
+        .mockResolvedValue({} as any);
 
       // Act
       try {
-        await (service as any).cambiarPassword('est123', '1234', 'NuevaPassword123');
+        await (service as any).cambiarPassword(
+          'est123',
+          '1234',
+          'NuevaPassword123',
+        );
 
         // Assert (solo si no falla antes)
         // expect(updateSpy).toHaveBeenCalledWith({
@@ -186,7 +221,9 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       };
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
 
       const updateSpy = jest.spyOn(prisma.tutor, 'update').mockResolvedValue({
         ...mockTutor,
@@ -197,7 +234,11 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
       // Act & Assert
       // Este test va a FALLAR porque el método no existe
       try {
-        await (service as any).cambiarPassword('tutor123', 'TempPass123', 'NuevaPassword456');
+        await (service as any).cambiarPassword(
+          'tutor123',
+          'TempPass123',
+          'NuevaPassword456',
+        );
         // Si llegamos aquí, verificar que se llamó al update del tutor
         // expect(updateSpy).toHaveBeenCalled();
       } catch (error) {
@@ -226,7 +267,9 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         tutor: { id: 'tutor1', nombre: 'Padre', apellido: 'Pérez' },
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
 
       // Act
       const resultado = await service.loginWithUsername('juan.perez', '1234');
@@ -256,10 +299,15 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         tutor: { id: 'tutor1', nombre: 'Padre', apellido: 'Pérez' },
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
 
       // Act
-      const resultado = await service.loginWithUsername('juan.perez', 'Password123');
+      const resultado = await service.loginWithUsername(
+        'juan.perez',
+        'Password123',
+      );
 
       // Assert
       expect(resultado).toBeDefined();

@@ -73,7 +73,8 @@ export class TokenBlacklistGuard implements CanActivate {
     }
 
     // 3. Verificar si el token específico está en blacklist
-    const isTokenBlacklisted = await this.tokenBlacklistService.isBlacklisted(token);
+    const isTokenBlacklisted =
+      await this.tokenBlacklistService.isBlacklisted(token);
 
     if (isTokenBlacklisted) {
       this.logger.warn(
@@ -88,7 +89,8 @@ export class TokenBlacklistGuard implements CanActivate {
     // (por ejemplo, después de cambio de contraseña)
     const user = (request as any).user;
     if (user && user.id) {
-      const isUserBlacklisted = await this.tokenBlacklistService.isUserBlacklisted(user.id);
+      const isUserBlacklisted =
+        await this.tokenBlacklistService.isUserBlacklisted(user.id);
 
       if (isUserBlacklisted) {
         this.logger.warn(

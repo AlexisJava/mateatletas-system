@@ -19,11 +19,12 @@ export class ChangePasswordDto {
     example: 'NuevaClaveSegura123!',
   })
   @IsString({ message: 'La nueva contraseña es requerida' })
-  @MinLength(8, { message: 'La nueva contraseña debe tener al menos 8 caracteres' })
+  @MinLength(8, {
+    message: 'La nueva contraseña debe tener al menos 8 caracteres',
+  })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/, {
     message:
       'La nueva contraseña debe incluir mayúscula, minúscula, número y un caracter especial',
   })
   nuevaPassword!: string;
 }
-

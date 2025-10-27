@@ -42,27 +42,40 @@ export class ObtenerMetricasDashboardUseCase {
     const periodoActual = this.generarPeriodo(anio, mes);
 
     // 2. Obtener métricas del período actual
-    const metricasActuales = await this.inscripcionRepo.obtenerMetricasPorPeriodo(
-      periodoActual,
-      input.tutorId,
-    );
+    const metricasActuales =
+      await this.inscripcionRepo.obtenerMetricasPorPeriodo(
+        periodoActual,
+        input.tutorId,
+      );
 
     // 3. Obtener métricas del período anterior
-    const { anio: anioAnterior, mes: mesAnterior } = this.obtenerMesAnterior(anio, mes);
+    const { anio: anioAnterior, mes: mesAnterior } = this.obtenerMesAnterior(
+      anio,
+      mes,
+    );
     const periodoAnterior = this.generarPeriodo(anioAnterior, mesAnterior);
-    const metricasAnteriores = await this.inscripcionRepo.obtenerMetricasPorPeriodo(
-      periodoAnterior,
+    const metricasAnteriores =
+      await this.inscripcionRepo.obtenerMetricasPorPeriodo(
+        periodoAnterior,
+        input.tutorId,
+      );
+
+    // 4. Calcular métricas generales con comparaciones
+    const metricas = this.calcularMetricasGenerales(
+      metricasActuales,
+      metricasAnteriores,
+    );
+
+    // 5. Obtener evolución mensual (últimos 6 meses)
+    const evolucionMensual = await this.obtenerEvolucionMensual(
+      anio,
+      mes,
       input.tutorId,
     );
 
-    // 4. Calcular métricas generales con comparaciones
-    const metricas = this.calcularMetricasGenerales(metricasActuales, metricasAnteriores);
-
-    // 5. Obtener evolución mensual (últimos 6 meses)
-    const evolucionMensual = await this.obtenerEvolucionMensual(anio, mes, input.tutorId);
-
     // 6. Calcular distribución por estados
-    const distribucionEstados = this.calcularDistribucionEstados(metricasActuales);
+    const distribucionEstados =
+      this.calcularDistribucionEstados(metricasActuales);
 
     return {
       periodo: periodoActual,
@@ -97,7 +110,10 @@ export class ObtenerMetricasDashboardUseCase {
   /**
    * Obtiene el mes anterior
    */
-  private obtenerMesAnterior(anio: number, mes: number): { anio: number; mes: number } {
+  private obtenerMesAnterior(
+    anio: number,
+    mes: number,
+  ): { anio: number; mes: number } {
     if (mes === 1) {
       return { anio: anio - 1, mes: 12 };
     }
@@ -116,20 +132,20 @@ export class ObtenerMetricasDashboardUseCase {
       .plus(metricasActuales.totalPendientes)
       .plus(metricasActuales.totalVencidos);
 
-    const tasaCobroActual =
-      totalEsperado.isZero()
-        ? new Decimal(0)
-        : metricasActuales.totalIngresos.dividedBy(totalEsperado).times(100);
+    const tasaCobroActual = totalEsperado.isZero()
+      ? new Decimal(0)
+      : metricasActuales.totalIngresos.dividedBy(totalEsperado).times(100);
 
     // Calcular tasa de cobro anterior
     const totalEsperadoAnterior = metricasAnteriores.totalIngresos
       .plus(metricasAnteriores.totalPendientes)
       .plus(metricasAnteriores.totalVencidos);
 
-    const tasaCobroAnterior =
-      totalEsperadoAnterior.isZero()
-        ? new Decimal(0)
-        : metricasAnteriores.totalIngresos.dividedBy(totalEsperadoAnterior).times(100);
+    const tasaCobroAnterior = totalEsperadoAnterior.isZero()
+      ? new Decimal(0)
+      : metricasAnteriores.totalIngresos
+          .dividedBy(totalEsperadoAnterior)
+          .times(100);
 
     // Calcular cambios porcentuales
     const ingresosCambio = this.calcularCambioPorcentual(
@@ -143,7 +159,8 @@ export class ObtenerMetricasDashboardUseCase {
     );
 
     const inscripcionesCambio =
-      metricasActuales.cantidadInscripciones - metricasAnteriores.cantidadInscripciones;
+      metricasActuales.cantidadInscripciones -
+      metricasAnteriores.cantidadInscripciones;
 
     const tasaCobroCambio = tasaCobroActual.minus(tasaCobroAnterior);
 
@@ -164,7 +181,10 @@ export class ObtenerMetricasDashboardUseCase {
   /**
    * Calcula cambio porcentual entre dos valores
    */
-  private calcularCambioPorcentual(actual: Decimal, anterior: Decimal): Decimal {
+  private calcularCambioPorcentual(
+    actual: Decimal,
+    anterior: Decimal,
+  ): Decimal {
     if (anterior.isZero()) {
       return actual.isZero() ? new Decimal(0) : new Decimal(100);
     }
@@ -188,7 +208,10 @@ export class ObtenerMetricasDashboardUseCase {
 
     for (let i = 0; i < 6; i++) {
       const periodo = this.generarPeriodo(anio, mes);
-      const metricas = await this.inscripcionRepo.obtenerMetricasPorPeriodo(periodo, tutorId);
+      const metricas = await this.inscripcionRepo.obtenerMetricasPorPeriodo(
+        periodo,
+        tutorId,
+      );
 
       const totalEsperado = metricas.totalIngresos
         .plus(metricas.totalPendientes)
@@ -213,13 +236,17 @@ export class ObtenerMetricasDashboardUseCase {
   /**
    * Calcula distribución por estados de pago
    */
-  private calcularDistribucionEstados(metricas: any): DistribucionEstadoPagoDTO[] {
+  private calcularDistribucionEstados(
+    metricas: any,
+  ): DistribucionEstadoPagoDTO[] {
     const total = metricas.totalIngresos
       .plus(metricas.totalPendientes)
       .plus(metricas.totalVencidos);
 
     const calcularPorcentaje = (monto: Decimal): Decimal => {
-      return total.isZero() ? new Decimal(0) : monto.dividedBy(total).times(100);
+      return total.isZero()
+        ? new Decimal(0)
+        : monto.dividedBy(total).times(100);
     };
 
     return [

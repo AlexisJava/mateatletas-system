@@ -1,5 +1,10 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles, Role } from '../../auth/decorators/roles.decorator';
@@ -24,11 +29,15 @@ import {
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class PlanificacionesControllerV2 {
-  constructor(private readonly getPlanificacionesUseCase: GetPlanificacionesUseCase) {}
+  constructor(
+    private readonly getPlanificacionesUseCase: GetPlanificacionesUseCase,
+  ) {}
 
   @Get()
   @Roles(Role.Admin, Role.Tutor, Role.Docente)
-  @ApiOperation({ summary: 'Obtener todas las planificaciones con filtros y paginación' })
+  @ApiOperation({
+    summary: 'Obtener todas las planificaciones con filtros y paginación',
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista paginada de planificaciones',
@@ -52,11 +61,16 @@ export class PlanificacionesControllerV2 {
     };
 
     // Execute use case
-    const result = await this.getPlanificacionesUseCase.execute(filters, pagination);
+    const result = await this.getPlanificacionesUseCase.execute(
+      filters,
+      pagination,
+    );
 
     // Map to response DTO
     const response: PlanificacionListResponseDto = {
-      data: result.data.map((item) => PlanificacionListItemDto.fromEntity(item)),
+      data: result.data.map((item) =>
+        PlanificacionListItemDto.fromEntity(item),
+      ),
       total: result.total,
       page: result.page,
       limit: result.limit,
