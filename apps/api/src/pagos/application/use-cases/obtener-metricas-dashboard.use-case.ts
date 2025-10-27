@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
-import { IInscripcionMensualRepository } from '../../domain/repositories/inscripcion-mensual.repository.interface';
+import { IInscripcionMensualRepository, MetricasPeriodo } from '../../domain/repositories/inscripcion-mensual.repository.interface';
 import {
   ObtenerMetricasDashboardInputDTO,
   ObtenerMetricasDashboardOutputDTO,
@@ -124,8 +124,8 @@ export class ObtenerMetricasDashboardUseCase {
    * Calcula métricas generales con comparaciones
    */
   private calcularMetricasGenerales(
-    metricasActuales: any,
-    metricasAnteriores: any,
+    metricasActuales: MetricasPeriodo,
+    metricasAnteriores: MetricasPeriodo,
   ): MetricasGeneralesDTO {
     // Calcular tasa de cobro actual
     const totalEsperado = metricasActuales.totalIngresos

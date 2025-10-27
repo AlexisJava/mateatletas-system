@@ -19,7 +19,7 @@ import {
   calcularPrecioActividad,
   CalculoPrecioInput,
 } from '../../domain/rules/precio.rules';
-import { TipoDescuento } from '../../domain/types/pagos.types';
+import { TipoDescuento, ConfiguracionPrecios } from '../../domain/types/pagos.types';
 
 /**
  * Use Case: Calcular Precio de Actividades
@@ -167,7 +167,7 @@ export class CalcularPrecioUseCase {
     estudiantes: Map<string, Estudiante>,
     productos: Map<string, Producto>,
     input: CalcularPrecioInputDTO,
-    configuracion: any,
+    configuracion: ConfiguracionPrecios,
   ): CalculoIndividualDTO[] {
     const calculos: CalculoIndividualDTO[] = [];
 

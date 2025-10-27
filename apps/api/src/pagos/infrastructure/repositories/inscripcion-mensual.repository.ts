@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { Decimal } from 'decimal.js';
 import {
@@ -96,7 +97,7 @@ export class InscripcionMensualRepository
     estado: EstadoPago,
     periodo?: string,
   ): Promise<InscripcionMensual[]> {
-    const where: any = { estado_pago: estado };
+    const where: Prisma.InscripcionMensualWhereInput = { estado_pago: estado };
 
     if (periodo) {
       where.periodo = periodo;

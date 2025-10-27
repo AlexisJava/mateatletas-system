@@ -96,7 +96,7 @@ export class MercadoPagoService {
    * @param preferenceData - Datos de la preferencia según el formato de MercadoPago
    * @returns Preferencia creada con id e init_point
    */
-  async createPreference(preferenceData: any) {
+  async createPreference(preferenceData: Parameters<Preference['create']>[0]['body']) {
     if (this.mockMode) {
       throw new Error(
         'MercadoPago está en modo mock. Use MockPagosService para crear preferencias mock.',

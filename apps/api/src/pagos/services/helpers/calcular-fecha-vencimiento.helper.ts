@@ -12,7 +12,12 @@ export function calcularFechaVencimiento(periodo: string): Date {
   const anio = Number(anioStr);
   const mes = Number(mesStr);
 
-  if (!Number.isInteger(anio) || !Number.isInteger(mes) || mes < 1 || mes > 12) {
+  if (
+    !Number.isInteger(anio) ||
+    !Number.isInteger(mes) ||
+    mes < 1 ||
+    mes > 12
+  ) {
     throw new BadRequestException(
       `Período inválido recibido para calcular fecha de vencimiento: "${periodo}"`,
     );

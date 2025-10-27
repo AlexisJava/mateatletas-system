@@ -32,7 +32,7 @@ interface MembresiaWithProducto {
   preferencia_id: string | null;
   createdAt: Date;
   updatedAt: Date;
-  producto?: Producto & { precio: any };
+  producto?: Producto & { precio: number };
 }
 
 interface InscripcionCursoWithProducto {

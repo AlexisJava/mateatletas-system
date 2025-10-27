@@ -1,9 +1,6 @@
 import { Decimal } from 'decimal.js';
 import { ActualizarConfiguracionPreciosUseCase } from './actualizar-configuracion-precios.use-case';
-import {
-  IConfiguracionPreciosRepository,
-  HistorialCambio,
-} from '../../domain/repositories/configuracion-precios.repository.interface';
+import { IConfiguracionPreciosRepository } from '../../domain/repositories/configuracion-precios.repository.interface';
 import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
 import { ActualizarConfiguracionPreciosInputDTO } from '../dtos/actualizar-configuracion-precios.dto';
 
