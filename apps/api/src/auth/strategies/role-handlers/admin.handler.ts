@@ -28,6 +28,9 @@ export class AdminHandler implements RoleHandler {
   }
 
   async validateCredentials(user: UserWithPassword, password: string): Promise<boolean> {
+    if (!user.password_hash) {
+      return false; // Usuario sin password no puede autenticarse
+    }
     return bcrypt.compare(password, user.password_hash);
   }
 

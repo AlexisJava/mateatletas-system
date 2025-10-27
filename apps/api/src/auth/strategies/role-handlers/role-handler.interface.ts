@@ -1,23 +1,23 @@
 /**
- * Tipo base para usuarios con password
+ * Tipo base para usuarios con password - Acepta cualquier estructura de Prisma
  */
-export interface UserWithPassword {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type UserWithPassword = Record<string, any> & {
   id: string;
   email: string | null;
-  password_hash: string;
-  [key: string]: string | number | boolean | Date | null | undefined;
-}
+  password_hash: string | null;
+};
 
 /**
- * Tipo para perfil de usuario (sin password)
+ * Tipo para perfil de usuario (sin password) - Acepta cualquier estructura de Prisma
  */
-export interface UserProfile {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type UserProfile = Record<string, any> & {
   id: string;
   nombre: string;
   apellido: string;
   email: string | null;
-  [key: string]: string | number | boolean | Date | null | undefined | object;
-}
+};
 
 /**
  * Interfaz para handlers de roles
@@ -49,9 +49,9 @@ export interface RoleHandler {
   /**
    * Obtener perfil completo del usuario
    * @param userId - ID del usuario
-   * @returns Perfil del usuario con relaciones
+   * @returns Perfil del usuario con relaciones o null si no existe
    */
-  getProfile(userId: string): Promise<UserProfile>;
+  getProfile(userId: string): Promise<UserProfile | null>;
 
   /**
    * Nombre del rol que maneja este handler

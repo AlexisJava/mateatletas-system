@@ -171,10 +171,10 @@ export class AdminAlertasService {
   private generarSugerenciaEstatica(alerta: {
     descripcion: string;
     estudiante: { nivel_escolar: string };
-    clase: { rutaCurricular: { nombre: string } };
+    clase: { rutaCurricular: { nombre: string } | null };
   }): string {
     const nivel = alerta.estudiante.nivel_escolar;
-    const ruta = alerta.clase.rutaCurricular.nombre;
+    const ruta = alerta.clase.rutaCurricular?.nombre || 'General';
 
     // Sugerencias basadas en patrones comunes
     if (alerta.descripcion.toLowerCase().includes('ausente')) {
