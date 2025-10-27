@@ -9,6 +9,9 @@ import type {
   ListarClaseGruposParams,
 } from '@/types/clase-grupo';
 
+// Re-exportar tipos para uso en otros módulos
+export type { ClaseGrupo, CrearClaseGrupoDto, ListarClaseGruposParams };
+
 /**
  * Crear un nuevo ClaseGrupo
  */
