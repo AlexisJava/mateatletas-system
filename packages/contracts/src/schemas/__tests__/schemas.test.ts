@@ -137,7 +137,7 @@ describe('Contracts Schemas', () => {
         id: 'prod123',
         nombre: 'Curso de Álgebra',
         descripcion: 'Curso completo de álgebra',
-        precio: 1500.50,
+        precio: 1500.5,
         tipo: 'Curso',
         activo: true,
         fecha_inicio: new Date().toISOString(),
