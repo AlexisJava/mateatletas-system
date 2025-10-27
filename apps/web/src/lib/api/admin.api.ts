@@ -27,8 +27,9 @@ import { productoSchema, productosListSchema } from '@/lib/schemas/producto.sche
 
 export const getDashboard = async (): Promise<DashboardData> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get<DashboardData>('/admin/dashboard');
-    return response.data;
+    return response as DashboardData;
   } catch (error) {
     console.error('Error al obtener el dashboard de administración:', error);
     throw error;
@@ -37,8 +38,9 @@ export const getDashboard = async (): Promise<DashboardData> => {
 
 export const getSystemStats = async (): Promise<SystemStats> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get<SystemStats>('/admin/estadisticas');
-    return response.data;
+    return response as SystemStats;
   } catch (error) {
     console.error('Error al obtener las estadísticas del sistema:', error);
     throw error;
@@ -47,8 +49,9 @@ export const getSystemStats = async (): Promise<SystemStats> => {
 
 export const getAllUsers = async (): Promise<AdminUser[]> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get<AdminUser[]>('/admin/usuarios');
-    return response.data;
+    return response as AdminUser[];
   } catch (error) {
     console.error('Error al obtener los usuarios administradores:', error);
     throw error;
@@ -105,8 +108,9 @@ export const getAllEstudiantes = async (options?: {
   const url = `/admin/estudiantes${queryString ? `?${queryString}` : ''}`;
 
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get<EstudiantesResponse>(url);
-    return response.data;
+    return response as EstudiantesResponse;
   } catch (error) {
     console.error('Error al obtener el listado de estudiantes:', error);
     throw error;
@@ -115,11 +119,12 @@ export const getAllEstudiantes = async (options?: {
 
 export const changeUserRole = async (userId: string, data: ChangeRoleDto): Promise<AdminUser> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.post<AdminUser>(
       `/admin/usuarios/${userId}/role`,
       data
     );
-    return response.data;
+    return response as AdminUser;
   } catch (error) {
     console.error('Error al cambiar el rol del usuario:', error);
     throw error;
@@ -128,11 +133,12 @@ export const changeUserRole = async (userId: string, data: ChangeRoleDto): Promi
 
 export const updateUserRoles = async (userId: string, data: UpdateRolesDto): Promise<{ message: string; userId: string; roles: string[] }> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.put<{ message: string; userId: string; roles: string[] }>(
       `/admin/usuarios/${userId}/roles`,
       data
     );
-    return response.data;
+    return response as { message: string; userId: string; roles: string[] };
   } catch (error) {
     console.error('Error al actualizar los roles del usuario:', error);
     throw error;
@@ -150,16 +156,17 @@ export const deleteUser = async (userId: string): Promise<void> => {
 
 export const getAllClasses = async (): Promise<ClasesResponse> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get('/clases/admin/todas');
     // Backend retorna { data: [...], meta: {...} }, validar con schema completo
-    const parsed = clasesResponseSchema.safeParse(response.data);
+    const parsed = clasesResponseSchema.safeParse(response);
 
     if (parsed.success) {
       return parsed.data;
     }
 
     // Fallback: si no tiene meta, extraer solo el array y envolver
-    const list = clasesListSchema.parse(response.data);
+    const list = clasesListSchema.parse(response);
     return { data: list };
   } catch (error) {
     console.error('Error al obtener todas las clases para administración:', error);
@@ -179,8 +186,9 @@ export const createClass = async (data: {
   productoId?: string;
 }) => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.post('/clases', data);
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al crear una clase desde administración:', error);
     throw error;
@@ -189,8 +197,9 @@ export const createClass = async (data: {
 
 export const cancelarClase = async (claseId: string) => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.patch(`/clases/${claseId}/cancelar`);
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al cancelar la clase desde administración:', error);
     throw error;
@@ -199,8 +208,9 @@ export const cancelarClase = async (claseId: string) => {
 
 export const eliminarClase = async (claseId: string) => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.delete(`/clases/${claseId}`);
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al eliminar la clase desde administración:', error);
     throw error;
@@ -209,8 +219,9 @@ export const eliminarClase = async (claseId: string) => {
 
 export const obtenerClase = async (claseId: string) => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get(`/clases/${claseId}`);
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener la clase desde administración:', error);
     throw error;
@@ -219,9 +230,9 @@ export const obtenerClase = async (claseId: string) => {
 
 export const getRutasCurriculares = async () => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get('/clases/metadata/rutas-curriculares');
-    // ✅ Validar con schema Zod (interceptor ya extrajo .data)
-    return rutasListSchema.parse(response.data);
+    return rutasListSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener las rutas curriculares (admin):', error);
     throw error;
@@ -230,9 +241,9 @@ export const getRutasCurriculares = async () => {
 
 export const getDocentes = async () => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get('/docentes');
-    // ✅ Backend retorna { data: [...], meta: {...} }, extraer solo array
-    return docentesListSchema.parse(response.data);
+    return docentesListSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener los docentes (admin):', error);
     throw error;
@@ -241,9 +252,9 @@ export const getDocentes = async () => {
 
 export const getSectores = async () => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get('/admin/sectores');
-    // ✅ Validar con schema Zod (interceptor ya extrajo .data)
-    return sectoresListSchema.parse(response.data);
+    return sectoresListSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener los sectores (admin):', error);
     throw error;
@@ -253,8 +264,9 @@ export const getSectores = async () => {
 // Products Management
 export const getAllProducts = async (includeInactive = true): Promise<Producto[]> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get(`/productos?soloActivos=${!includeInactive}`);
-    return productosListSchema.parse(response.data);
+    return productosListSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener los productos (admin):', error);
     throw error;
@@ -263,8 +275,9 @@ export const getAllProducts = async (includeInactive = true): Promise<Producto[]
 
 export const getProductById = async (id: string): Promise<Producto> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get(`/productos/${id}`);
-    return productoSchema.parse(response.data);
+    return productoSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener el producto por ID:', error);
     throw error;
@@ -273,8 +286,9 @@ export const getProductById = async (id: string): Promise<Producto> => {
 
 export const createProduct = async (data: CrearProductoDto): Promise<Producto> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.post('/productos', data);
-    return productoSchema.parse(response.data);
+    return productoSchema.parse(response);
   } catch (error) {
     console.error('Error al crear el producto:', error);
     throw error;
@@ -286,8 +300,9 @@ export const updateProduct = async (
   data: Partial<CrearProductoDto>,
 ): Promise<Producto> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.patch(`/productos/${id}`, data);
-    return productoSchema.parse(response.data);
+    return productoSchema.parse(response);
   } catch (error) {
     console.error('Error al actualizar el producto:', error);
     throw error;
@@ -296,8 +311,9 @@ export const updateProduct = async (
 
 export const deleteProduct = async (id: string, hardDelete = false) => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.delete(`/productos/${id}?hardDelete=${hardDelete}`);
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al eliminar el producto:', error);
     throw error;
@@ -316,11 +332,11 @@ export interface CreateAdminData {
 
 export const createAdmin = async (data: CreateAdminData): Promise<AdminUser> => {
   try {
-    // Primero registramos como tutor
-    const response = await axios.post<RegisterResponse>('/auth/register', data);
+    // El interceptor ya retorna response.data directamente
+    const response = await axios.post<RegisterResponse>('/auth/register', data) as RegisterResponse;
 
     // Luego cambiamos el rol a admin
-    const adminUser = await changeUserRole(response.data.user.id, {
+    const adminUser = await changeUserRole(response.user.id, {
       role: 'admin',
     });
 

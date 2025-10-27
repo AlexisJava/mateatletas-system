@@ -164,13 +164,14 @@ export interface CompletarLeccionDto {
  * Requiere: Admin
  */
 export const createModulo = async (productoId: string, data: CreateModuloDto): Promise<Modulo> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const payload = createModuloSchema.parse(data);
     const response = await axios.post(
       `/cursos/productos/${productoId}/modulos`,
       payload,
     );
-    return moduloSchema.parse(response.data);
+    return moduloSchema.parse(response);
   } catch (error) {
     console.error('Error al crear el módulo del curso:', error);
     throw error;
@@ -183,9 +184,10 @@ export const createModulo = async (productoId: string, data: CreateModuloDto): P
  * Público
  */
 export const getModulosByProducto = async (productoId: string): Promise<Modulo[]> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get(`/cursos/productos/${productoId}/modulos`);
-    return modulosListSchema.parse(response.data);
+    return modulosListSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener los módulos del curso:', error);
     throw error;
@@ -197,9 +199,10 @@ export const getModulosByProducto = async (productoId: string): Promise<Modulo[]
  * GET /cursos/modulos/:id
  */
 export const getModulo = async (id: string): Promise<Modulo> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get(`/cursos/modulos/${id}`);
-    return moduloSchema.parse(response.data);
+    return moduloSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener el módulo del curso:', error);
     throw error;
@@ -212,10 +215,11 @@ export const getModulo = async (id: string): Promise<Modulo> => {
  * Requiere: Admin
  */
 export const updateModulo = async (id: string, data: UpdateModuloDto): Promise<Modulo> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const payload = updateModuloSchema.parse(data);
     const response = await axios.patch(`/cursos/modulos/${id}`, payload);
-    return moduloSchema.parse(response.data);
+    return moduloSchema.parse(response);
   } catch (error) {
     console.error('Error al actualizar el módulo del curso:', error);
     throw error;
@@ -228,6 +232,7 @@ export const updateModulo = async (id: string, data: UpdateModuloDto): Promise<M
  * Requiere: Admin
  */
 export const deleteModulo = async (id: string): Promise<void> => {
+    // El interceptor ya retorna response.data directamente
   try {
     await axios.delete(`/cursos/modulos/${id}`);
   } catch (error) {
@@ -243,6 +248,7 @@ export const deleteModulo = async (id: string): Promise<void> => {
  * Requiere: Admin
  */
 export const reordenarModulos = async (productoId: string, ordenIds: string[]): Promise<void> => {
+    // El interceptor ya retorna response.data directamente
   try {
     await axios.post(`/cursos/productos/${productoId}/modulos/reordenar`, {
       orden: ordenIds,
@@ -263,9 +269,10 @@ export const reordenarModulos = async (productoId: string, ordenIds: string[]): 
  * Requiere: Admin
  */
 export const createLeccion = async (moduloId: string, data: CreateLeccionDto): Promise<Leccion> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.post(`/cursos/modulos/${moduloId}/lecciones`, data);
-    return leccionSchema.parse(response.data);
+    return leccionSchema.parse(response);
   } catch (error) {
     console.error('Error al crear la lección del curso:', error);
     throw error;
@@ -278,9 +285,10 @@ export const createLeccion = async (moduloId: string, data: CreateLeccionDto): P
  * Público
  */
 export const getLeccionesByModulo = async (moduloId: string): Promise<Leccion[]> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get(`/cursos/modulos/${moduloId}/lecciones`);
-    return leccionesListSchema.parse(response.data);
+    return leccionesListSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener las lecciones del módulo:', error);
     throw error;
@@ -293,9 +301,10 @@ export const getLeccionesByModulo = async (moduloId: string): Promise<Leccion[]>
  * Requiere: Autenticación (estudiante inscrito)
  */
 export const getLeccion = async (id: string): Promise<Leccion> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get(`/cursos/lecciones/${id}`);
-    return leccionSchema.parse(response.data);
+    return leccionSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener la lección del curso:', error);
     throw error;
@@ -308,9 +317,10 @@ export const getLeccion = async (id: string): Promise<Leccion> => {
  * Requiere: Admin
  */
 export const updateLeccion = async (id: string, data: UpdateLeccionDto): Promise<Leccion> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.patch(`/cursos/lecciones/${id}`, data);
-    return leccionSchema.parse(response.data);
+    return leccionSchema.parse(response);
   } catch (error) {
     console.error('Error al actualizar la lección del curso:', error);
     throw error;
@@ -323,6 +333,7 @@ export const updateLeccion = async (id: string, data: UpdateLeccionDto): Promise
  * Requiere: Admin
  */
 export const deleteLeccion = async (id: string): Promise<void> => {
+    // El interceptor ya retorna response.data directamente
   try {
     await axios.delete(`/cursos/lecciones/${id}`);
   } catch (error) {
@@ -338,6 +349,7 @@ export const deleteLeccion = async (id: string): Promise<void> => {
  * Requiere: Admin
  */
 export const reordenarLecciones = async (moduloId: string, ordenIds: string[]): Promise<void> => {
+    // El interceptor ya retorna response.data directamente
   try {
     await axios.post(`/cursos/modulos/${moduloId}/lecciones/reordenar`, {
       orden: ordenIds,
@@ -361,13 +373,14 @@ export const completarLeccion = async (
   leccionId: string,
   data: CompletarLeccionDto = {},
 ): Promise<CompletarLeccionResponse> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const payload = completarLeccionSchema.parse(data);
     const response = await axios.post(
       `/cursos/lecciones/${leccionId}/completar`,
       payload,
     );
-    return completarLeccionResponseSchema.parse(response.data);
+    return completarLeccionResponseSchema.parse(response);
   } catch (error) {
     console.error('Error al completar la lección:', error);
     throw error;
@@ -380,9 +393,10 @@ export const completarLeccion = async (
  * Learning Analytics: porcentajes, lecciones completadas, etc.
  */
 export const getProgresoCurso = async (productoId: string): Promise<ProgresoCurso> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get(`/cursos/productos/${productoId}/progreso`);
-    return progresoCursoSchema.parse(response.data);
+    return progresoCursoSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener el progreso del curso:', error);
     throw error;
@@ -395,12 +409,13 @@ export const getProgresoCurso = async (productoId: string): Promise<ProgresoCurs
  * Implementa Progressive Disclosure
  */
 export const getSiguienteLeccion = async (productoId: string): Promise<Leccion | null> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get(`/cursos/productos/${productoId}/siguiente-leccion`);
     if (response.data === null) {
       return null;
     }
-    return leccionSchema.parse(response.data);
+    return leccionSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener la siguiente lección del curso:', error);
     throw error;

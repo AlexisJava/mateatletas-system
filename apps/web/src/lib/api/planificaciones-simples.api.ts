@@ -107,8 +107,9 @@ export async function listarPlanificaciones(
   const url = `/planificaciones${query ? `?${query}` : ''}`;
 
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.get<PlanificacionSimple[]>(url);
-    return response.data;
+    return response as PlanificacionSimple[];
   } catch (error) {
     console.error('Error al listar las planificaciones simples:', error);
     throw error;
@@ -122,10 +123,11 @@ export async function obtenerDetallePlanificacion(
   codigo: string,
 ): Promise<DetallePlanificacion> {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.get<DetallePlanificacion>(
       `/planificaciones/${codigo}/detalle`,
     );
-    return response.data;
+    return response as DetallePlanificacion;
   } catch (error) {
     console.error('Error al obtener el detalle de la planificación simple:', error);
     throw error;
@@ -141,6 +143,7 @@ export async function asignarPlanificacion(
   claseGrupoId: string,
 ): Promise<AsignacionPlanificacion> {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.post<AsignacionPlanificacion>(
       `/planificaciones/${codigo}/asignar`,
       {
@@ -148,7 +151,7 @@ export async function asignarPlanificacion(
         clase_grupo_id: claseGrupoId,
       },
     );
-    return response.data;
+    return response as AsignacionPlanificacion;
   } catch (error) {
     console.error('Error al asignar la planificación simple:', error);
     throw error;
@@ -163,11 +166,12 @@ export async function obtenerProgreso(codigo: string): Promise<{
   semanasActivas: number[];
 }> {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.get<{
       progreso: ProgresoEstudiante | null;
       semanasActivas: number[];
     }>(`/planificaciones/${codigo}/progreso`);
-    return response.data;
+    return response as { progreso: ProgresoEstudiante | null; semanasActivas: number[] };
   } catch (error) {
     console.error('Error al obtener el progreso de la planificación simple:', error);
     throw error;
@@ -182,11 +186,12 @@ export async function guardarEstado(
   estadoGuardado: any,
 ): Promise<{ success: boolean }> {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.put<{ success: boolean }>(
       `/planificaciones/${codigo}/progreso`,
       { estado_guardado: estadoGuardado },
     );
-    return response.data;
+    return response as { success: boolean };
   } catch (error) {
     console.error('Error al guardar el estado de la planificación simple:', error);
     throw error;
@@ -200,10 +205,11 @@ export async function avanzarSemana(
   codigo: string,
 ): Promise<{ success: boolean; nueva_semana: number }> {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.post<{ success: boolean; nueva_semana: number }>(
       `/planificaciones/${codigo}/progreso/avanzar`,
     );
-    return response.data;
+    return response as { success: boolean; nueva_semana: number };
   } catch (error) {
     console.error('Error al avanzar la semana en la planificación simple:', error);
     throw error;
@@ -219,11 +225,12 @@ export async function completarSemana(
   puntos: number,
 ): Promise<{ success: boolean }> {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.post<{ success: boolean }>(
       `/planificaciones/${codigo}/progreso/completar-semana`,
       { semana, puntos },
     );
-    return response.data;
+    return response as { success: boolean };
   } catch (error) {
     console.error('Error al completar la semana en la planificación simple:', error);
     throw error;
@@ -238,11 +245,12 @@ export async function registrarTiempo(
   minutos: number,
 ): Promise<{ success: boolean; tiempo_total: number }> {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.post<{ success: boolean; tiempo_total: number }>(
       `/planificaciones/${codigo}/progreso/tiempo`,
       { minutos },
     );
-    return response.data;
+    return response as { success: boolean; tiempo_total: number };
   } catch (error) {
     console.error('Error al registrar el tiempo en la planificación simple:', error);
     throw error;
@@ -265,8 +273,14 @@ export async function misAsignaciones(): Promise<
   }>
 > {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.get('/planificaciones/mis-asignaciones');
-    return response.data;
+    return response as Array<{
+      id: string;
+      planificacion: PlanificacionSimple;
+      claseGrupo: { id: string; nombre: string };
+      semanas_activas: SemanaActiva[];
+    }>;
   } catch (error) {
     console.error('Error al obtener las asignaciones del docente:', error);
     throw error;
@@ -281,10 +295,11 @@ export async function activarSemana(
   semanaNumero: number,
 ): Promise<SemanaActiva> {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.post<SemanaActiva>(
       `/planificaciones/asignacion/${asignacionId}/semana/${semanaNumero}/activar`,
     );
-    return response.data;
+    return response as SemanaActiva;
   } catch (error) {
     console.error('Error al activar la semana en la planificación simple:', error);
     throw error;
@@ -299,10 +314,11 @@ export async function desactivarSemana(
   semanaNumero: number,
 ): Promise<{ success: boolean; message: string }> {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.post<{ success: boolean; message: string }>(
       `/planificaciones/asignacion/${asignacionId}/semana/${semanaNumero}/desactivar`,
     );
-    return response.data;
+    return response as { success: boolean; message: string };
   } catch (error) {
     console.error('Error al desactivar la semana en la planificación simple:', error);
     throw error;
@@ -318,10 +334,15 @@ export async function verProgresoEstudiantes(asignacionId: string): Promise<{
   progresos: ProgresoEstudiante[];
 }> {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await apiClient.get(
       `/planificaciones/asignacion/${asignacionId}/progreso`,
     );
-    return response.data;
+    return response as {
+      asignacion: { id: string; grupo: { id: string; nombre: string } };
+      planificacion: { codigo: string; titulo: string; semanas_total: number };
+      progresos: ProgresoEstudiante[];
+    };
   } catch (error) {
     console.error('Error al ver el progreso de estudiantes en la planificación simple:', error);
     throw error;

@@ -29,11 +29,12 @@ export const crearPreferenciaSuscripcion = async (
   productoId: string,
 ): Promise<PreferenciaPago> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.post(
       '/pagos/suscripcion',
       { producto_id: productoId } as CrearPreferenciaSuscripcionRequest,
     );
-    return preferenciaPagoSchema.parse(response.data) as PreferenciaPago;
+    return preferenciaPagoSchema.parse(response) as PreferenciaPago;
   } catch (error) {
     console.error('Error al crear la preferencia de suscripción:', error);
     throw error;
@@ -49,11 +50,12 @@ export const crearPreferenciaCurso = async (
   estudianteId: string,
 ): Promise<PreferenciaPago> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.post('/pagos/curso', {
       producto_id: productoId,
       estudiante_id: estudianteId,
     } as CrearPreferenciaCursoRequest);
-    return preferenciaPagoSchema.parse(response.data) as PreferenciaPago;
+    return preferenciaPagoSchema.parse(response) as PreferenciaPago;
   } catch (error) {
     console.error('Error al crear la preferencia de curso:', error);
     throw error;
@@ -66,8 +68,9 @@ export const crearPreferenciaCurso = async (
  */
 export const getMembresiaActual = async (): Promise<Membresia | null> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get('/pagos/membresia');
-    return membresiaSchema.parse(response.data) as Membresia;
+    return membresiaSchema.parse(response) as Membresia;
   } catch (error: unknown) {
     if (isAxiosError(error) && error.response?.status === 404) {
       return null; // No tiene membresía
@@ -84,11 +87,12 @@ export const getEstadoMembresia = async (
   membresiaId: string,
 ): Promise<EstadoMembresiaResponse> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get(
       `/pagos/membresia/${membresiaId}/estado`,
     );
     return estadoMembresiaResponseSchema.parse(
-      response.data,
+      response,
     ) as EstadoMembresiaResponse;
   } catch (error) {
     console.error('Error al obtener el estado de la membresía:', error);
@@ -102,8 +106,9 @@ export const getEstadoMembresia = async (
  */
 export const getInscripciones = async (): Promise<InscripcionCurso[]> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get('/pagos/inscripciones');
-    return inscripcionesCursoListSchema.parse(response.data) as InscripcionCurso[];
+    return inscripcionesCursoListSchema.parse(response) as InscripcionCurso[];
   } catch (error) {
     console.error('Error al obtener las inscripciones a cursos:', error);
     throw error;
@@ -118,10 +123,11 @@ export const activarMembresiaManual = async (
   membresiaId: string,
 ): Promise<Membresia> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.post(
       `/pagos/mock/activar-membresia/${membresiaId}`,
     );
-    return membresiaSchema.parse(response.data) as Membresia;
+    return membresiaSchema.parse(response) as Membresia;
   } catch (error) {
     console.error('Error al activar manualmente la membresía:', error);
     throw error;
@@ -159,8 +165,9 @@ export const getMetricasDashboard = async (params?: {
   const url = `/pagos/dashboard/metricas${queryString ? `?${queryString}` : ''}`;
 
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get(url);
-    return response.data as MetricasDashboardResponse;
+    return response as MetricasDashboardResponse;
   } catch (error) {
     console.error('Error al obtener las métricas del dashboard de pagos:', error);
     throw error;
@@ -175,8 +182,9 @@ export const getMetricasDashboard = async (params?: {
  */
 export const getConfiguracionPrecios = async (): Promise<ConfiguracionPrecios> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get('/pagos/configuracion');
-    return response.data as ConfiguracionPrecios;
+    return response as ConfiguracionPrecios;
   } catch (error) {
     console.error('Error al obtener la configuración de precios:', error);
     throw error;
@@ -191,8 +199,9 @@ export const getConfiguracionPrecios = async (): Promise<ConfiguracionPrecios> =
  */
 export const getHistorialCambios = async (): Promise<HistorialCambioPrecios[]> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get('/pagos/historial-cambios');
-    return response.data as HistorialCambioPrecios[];
+    return response as HistorialCambioPrecios[];
   } catch (error) {
     console.error('Error al obtener el historial de cambios de precios:', error);
     throw error;
@@ -207,8 +216,9 @@ export const getHistorialCambios = async (): Promise<HistorialCambioPrecios[]> =
  */
 export const getInscripcionesPendientes = async (): Promise<InscripcionMensualConRelaciones[]> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get('/pagos/inscripciones/pendientes');
-    return response.data as InscripcionMensualConRelaciones[];
+    return response as InscripcionMensualConRelaciones[];
   } catch (error) {
     console.error('Error al obtener las inscripciones pendientes:', error);
     throw error;
@@ -223,8 +233,9 @@ export const getInscripcionesPendientes = async (): Promise<InscripcionMensualCo
  */
 export const getEstudiantesConDescuentos = async (): Promise<EstudianteConDescuento[]> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get('/pagos/estudiantes-descuentos');
-    return response.data as EstudianteConDescuento[];
+    return response as EstudianteConDescuento[];
   } catch (error) {
     console.error('Error al obtener los estudiantes con descuentos:', error);
     throw error;
@@ -242,8 +253,9 @@ export const updateConfiguracionPrecios = async (
   data: ActualizarConfiguracionRequest
 ): Promise<ConfiguracionPrecios> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.post('/pagos/configuracion/actualizar', data);
-    return response.data as ConfiguracionPrecios;
+    return response as ConfiguracionPrecios;
   } catch (error) {
     console.error('Error al actualizar la configuración de precios:', error);
     throw error;

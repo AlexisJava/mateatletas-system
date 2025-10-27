@@ -52,10 +52,15 @@ export default function CredencialesPage() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await apiClient.get('/admin/credenciales');
-      setTutores(response.data?.tutores || []);
-      setEstudiantes(response.data?.estudiantes || []);
-      setDocentes(response.data?.docentes || []);
+      // El interceptor ya retorna response.data directamente
+      const data = await apiClient.get<{
+        tutores: TutorCredencial[];
+        estudiantes: EstudianteCredencial[];
+        docentes: DocenteCredencial[];
+      }>('/admin/credenciales');
+      setTutores(data.tutores || []);
+      setEstudiantes(data.estudiantes || []);
+      setDocentes(data.docentes || []);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Error al cargar credenciales'));
     } finally {

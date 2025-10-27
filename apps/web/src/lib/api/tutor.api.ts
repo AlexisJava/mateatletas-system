@@ -17,11 +17,12 @@ import {
  * Incluye: métricas, alertas, pagos pendientes y clases de hoy
  */
 export const getDashboardResumen = async (): Promise<DashboardResumenResponse> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<DashboardResumenResponse>(
       '/tutor/dashboard-resumen'
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener el resumen del dashboard del tutor:', error);
     throw error;
@@ -34,11 +35,12 @@ export const getDashboardResumen = async (): Promise<DashboardResumenResponse> =
  * @param limit - Cantidad máxima de clases (default: 5, máximo: 50)
  */
 export const getProximasClases = async (limit: number = 5): Promise<ProximasClasesResponse> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<ProximasClasesResponse>(
       `/tutor/proximas-clases?limit=${limit}`
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener las próximas clases del tutor:', error);
     throw error;
@@ -51,9 +53,10 @@ export const getProximasClases = async (limit: number = 5): Promise<ProximasClas
  * Incluye: pagos vencidos, pagos por vencer, clases hoy, asistencias bajas
  */
 export const getAlertas = async (): Promise<AlertasResponse> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<AlertasResponse>('/tutor/alertas');
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener las alertas del tutor:', error);
     throw error;
@@ -92,9 +95,10 @@ export const getMisInscripciones = async (
   const queryString = queryParams.toString();
   const url = queryString ? `/tutor/mis-inscripciones?${queryString}` : '/tutor/mis-inscripciones';
 
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<MisInscripcionesResponse>(url);
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener las inscripciones del tutor:', error);
     throw error;

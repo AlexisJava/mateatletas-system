@@ -31,7 +31,7 @@ export const estudiantesApi = {
         '/estudiantes',
         data,
       );
-      return estudianteSchema.parse(response.data);
+      return estudianteSchema.parse(response);
     } catch (error) {
       console.error('Error al crear el estudiante:', error);
       throw error;
@@ -48,7 +48,7 @@ export const estudiantesApi = {
   ): Promise<EstudiantesResponse> => {
     try {
       const response = await apiClient.get('/estudiantes', { params });
-      return estudiantesResponseSchema.parse(response.data);
+      return estudiantesResponseSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener los estudiantes:', error);
       throw error;
@@ -63,7 +63,7 @@ export const estudiantesApi = {
   getById: async (id: string): Promise<Estudiante> => {
     try {
       const response = await apiClient.get(`/estudiantes/${id}`);
-      return estudianteSchema.parse(response.data);
+      return estudianteSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener el estudiante:', error);
       throw error;
@@ -82,7 +82,7 @@ export const estudiantesApi = {
   ): Promise<Estudiante> => {
     try {
       const response = await apiClient.patch(`/estudiantes/${id}`, data);
-      return estudianteSchema.parse(response.data);
+      return estudianteSchema.parse(response);
     } catch (error) {
       console.error('Error al actualizar el estudiante:', error);
       throw error;
@@ -97,7 +97,7 @@ export const estudiantesApi = {
   delete: async (id: string): Promise<{ message: string }> => {
     try {
       const response = await apiClient.delete(`/estudiantes/${id}`);
-      return response.data as { message: string };
+      return response as { message: string };
     } catch (error) {
       console.error('Error al eliminar el estudiante:', error);
       throw error;
@@ -111,7 +111,7 @@ export const estudiantesApi = {
   count: async (): Promise<{ count: number }> => {
     try {
       const response = await apiClient.get('/estudiantes/count');
-      return response.data as { count: number };
+      return response as { count: number };
     } catch (error) {
       console.error('Error al contar los estudiantes:', error);
       throw error;
@@ -125,7 +125,7 @@ export const estudiantesApi = {
   getEstadisticas: async (): Promise<EstadisticasEstudiantes> => {
     try {
       const response = await apiClient.get('/estudiantes/estadisticas');
-      return estadisticasEstudiantesSchema.parse(response.data);
+      return estadisticasEstudiantesSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener las estadísticas de estudiantes:', error);
       throw error;
@@ -139,7 +139,7 @@ export const estudiantesApi = {
   getEquipos: async (): Promise<Equipo[]> => {
     try {
       const response = await apiClient.get('/equipos');
-      return equiposListSchema.parse(response.data);
+      return equiposListSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener los equipos de estudiantes:', error);
       throw error;
