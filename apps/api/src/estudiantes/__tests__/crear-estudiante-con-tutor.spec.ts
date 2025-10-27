@@ -58,24 +58,28 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
       fn(prisma),
     );
 
-    (prisma.estudiante.create as jest.Mock).mockImplementation(async (args: any) => ({
-      id: 'estudiante-id',
-      nombre: args.data.nombre,
-      apellido: args.data.apellido,
-      edad: args.data.edad,
-      nivel_escolar: args.data.nivel_escolar,
-      tutor: { id: args.data.tutor_id },
-      sector: { id: args.data.sector_id },
-    }));
+    (prisma.estudiante.create as jest.Mock).mockImplementation(
+      async (args: any) => ({
+        id: 'estudiante-id',
+        nombre: args.data.nombre,
+        apellido: args.data.apellido,
+        edad: args.data.edad,
+        nivel_escolar: args.data.nivel_escolar,
+        tutor: { id: args.data.tutor_id },
+        sector: { id: args.data.sector_id },
+      }),
+    );
 
-    (prisma.tutor.create as jest.Mock).mockImplementation(async (args: any) => ({
-      id: 'tutor-id',
-      nombre: args.data.nombre,
-      apellido: args.data.apellido,
-      email: args.data.email,
-      username: args.data.username,
-      telefono: args.data.telefono,
-    }));
+    (prisma.tutor.create as jest.Mock).mockImplementation(
+      async (args: any) => ({
+        id: 'tutor-id',
+        nombre: args.data.nombre,
+        apellido: args.data.apellido,
+        email: args.data.email,
+        username: args.data.username,
+        telefono: args.data.telefono,
+      }),
+    );
 
     (prisma.tutor.findUnique as jest.Mock).mockResolvedValue(null);
     (prisma.estudiante.findUnique as jest.Mock).mockResolvedValue(null);
@@ -118,7 +122,9 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
           email: 'maria.perez@example.com',
         },
       };
-      jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector as any);
+      jest
+        .spyOn(prisma.sector, 'findUnique')
+        .mockResolvedValue(mockSector as any);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null); // Tutor no existe
 
       // Act
@@ -176,9 +182,10 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
         sectorId: 'sector-id',
       };
 
-      jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue({ id: 'sector-id' } as any);
+      jest
+        .spyOn(prisma.sector, 'findUnique')
+        .mockResolvedValue({ id: 'sector-id' } as any);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null);
-
 
       // Act
       const result = await service.crearEstudiantesConTutor(dto);
@@ -221,8 +228,12 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
         user: { id: 'user-id', email: 'maria.perez@example.com' },
       };
 
-      jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue({ id: 'sector-id' } as any);
-      jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(tutorExistente as any);
+      jest
+        .spyOn(prisma.sector, 'findUnique')
+        .mockResolvedValue({ id: 'sector-id' } as any);
+      jest
+        .spyOn(prisma.tutor, 'findFirst')
+        .mockResolvedValue(tutorExistente as any);
 
       // Act
       const result = await service.crearEstudiantesConTutor(dto);
@@ -260,8 +271,12 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow(BadRequestException);
-      await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow('El sector especificado no existe');
+      await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow(
+        'El sector especificado no existe',
+      );
     });
   });
 
@@ -288,12 +303,20 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
         sectorId: 'sector-id',
       };
 
-      jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue({ id: 'sector-id' } as any);
-      jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue({ id: 'existing-id', dni: '12345678' } as any);
+      jest
+        .spyOn(prisma.sector, 'findUnique')
+        .mockResolvedValue({ id: 'sector-id' } as any);
+      jest
+        .spyOn(prisma.estudiante, 'findFirst')
+        .mockResolvedValue({ id: 'existing-id', dni: '12345678' } as any);
 
       // Act & Assert
-      await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow(ConflictException);
-      await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow('Ya existe un estudiante con el DNI 12345678');
+      await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow(
+        'Ya existe un estudiante con el DNI 12345678',
+      );
     });
   });
 
@@ -320,9 +343,12 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
         sectorId: 'sector-id',
       };
 
-      jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue({ id: 'sector-id' } as any);
+      jest
+        .spyOn(prisma.sector, 'findUnique')
+        .mockResolvedValue({ id: 'sector-id' } as any);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null);
-      jest.spyOn((prisma as any).user, 'findUnique')
+      jest
+        .spyOn((prisma as any).user, 'findUnique')
         .mockResolvedValueOnce({ id: 'existing-user' } as any) // juan.perez ya existe
         .mockResolvedValueOnce(null); // juan.perez2 disponible
 
@@ -331,9 +357,13 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
 
       // Assert
       expect(result.credenciales.estudiantes[0]).toBeDefined();
-      expect(result.credenciales.estudiantes[0]?.username).toMatch(/^[a-z]+\.[a-z]+\d*$/);
+      expect(result.credenciales.estudiantes[0]?.username).toMatch(
+        /^[a-z]+\.[a-z]+\d*$/,
+      );
       expect(result.credenciales.tutor).toBeDefined();
-      expect(result.credenciales.tutor?.username).toMatch(/^[a-z]+\.[a-z]+\d*$/);
+      expect(result.credenciales.tutor?.username).toMatch(
+        /^[a-z]+\.[a-z]+\d*$/,
+      );
     });
   });
 
@@ -360,7 +390,9 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
         sectorId: 'sector-id',
       };
 
-      jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue({ id: 'sector-id' } as any);
+      jest
+        .spyOn(prisma.sector, 'findUnique')
+        .mockResolvedValue({ id: 'sector-id' } as any);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null);
 
       // Act
@@ -369,7 +401,9 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
       // Assert
       expect(result.credenciales.estudiantes[0]).toBeDefined();
       expect(result.credenciales.estudiantes[0]?.password).toHaveLength(8);
-      expect(result.credenciales.estudiantes[0]?.password).toMatch(/^[A-Za-z0-9]{8}$/);
+      expect(result.credenciales.estudiantes[0]?.password).toMatch(
+        /^[A-Za-z0-9]{8}$/,
+      );
       expect(result.credenciales.tutor).toBeDefined();
       expect(result.credenciales.tutor?.password).toHaveLength(8);
       expect(result.credenciales.tutor?.password).toMatch(/^[A-Za-z0-9]{8}$/);

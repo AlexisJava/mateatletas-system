@@ -106,8 +106,13 @@ export async function listarPlanificaciones(
   const query = params.toString();
   const url = `/planificaciones${query ? `?${query}` : ''}`;
 
-  const payload = await apiClient.get<PlanificacionSimple[]>(url);
-  return payload;
+  try {
+    const response = await apiClient.get<PlanificacionSimple[]>(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error al listar las planificaciones simples:', error);
+    throw error;
+  }
 }
 
 /**
@@ -116,10 +121,15 @@ export async function listarPlanificaciones(
 export async function obtenerDetallePlanificacion(
   codigo: string,
 ): Promise<DetallePlanificacion> {
-  const payload = await apiClient.get<DetallePlanificacion>(
-    `/planificaciones/${codigo}/detalle`,
-  );
-  return payload;
+  try {
+    const response = await apiClient.get<DetallePlanificacion>(
+      `/planificaciones/${codigo}/detalle`,
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener el detalle de la planificación simple:', error);
+    throw error;
+  }
 }
 
 /**
@@ -130,14 +140,19 @@ export async function asignarPlanificacion(
   docenteId: string,
   claseGrupoId: string,
 ): Promise<AsignacionPlanificacion> {
-  const payload = await apiClient.post<AsignacionPlanificacion>(
-    `/planificaciones/${codigo}/asignar`,
-    {
-      docente_id: docenteId,
-      clase_grupo_id: claseGrupoId,
-    },
-  );
-  return payload;
+  try {
+    const response = await apiClient.post<AsignacionPlanificacion>(
+      `/planificaciones/${codigo}/asignar`,
+      {
+        docente_id: docenteId,
+        clase_grupo_id: claseGrupoId,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al asignar la planificación simple:', error);
+    throw error;
+  }
 }
 
 /**
@@ -147,11 +162,16 @@ export async function obtenerProgreso(codigo: string): Promise<{
   progreso: ProgresoEstudiante | null;
   semanasActivas: number[];
 }> {
-  const payload = await apiClient.get<{
-    progreso: ProgresoEstudiante | null;
-    semanasActivas: number[];
-  }>(`/planificaciones/${codigo}/progreso`);
-  return payload;
+  try {
+    const response = await apiClient.get<{
+      progreso: ProgresoEstudiante | null;
+      semanasActivas: number[];
+    }>(`/planificaciones/${codigo}/progreso`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener el progreso de la planificación simple:', error);
+    throw error;
+  }
 }
 
 /**
@@ -161,11 +181,16 @@ export async function guardarEstado(
   codigo: string,
   estadoGuardado: any,
 ): Promise<{ success: boolean }> {
-  const payload = await apiClient.put<{ success: boolean }>(
-    `/planificaciones/${codigo}/progreso`,
-    { estado_guardado: estadoGuardado },
-  );
-  return payload;
+  try {
+    const response = await apiClient.put<{ success: boolean }>(
+      `/planificaciones/${codigo}/progreso`,
+      { estado_guardado: estadoGuardado },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al guardar el estado de la planificación simple:', error);
+    throw error;
+  }
 }
 
 /**
@@ -174,10 +199,15 @@ export async function guardarEstado(
 export async function avanzarSemana(
   codigo: string,
 ): Promise<{ success: boolean; nueva_semana: number }> {
-  const payload = await apiClient.post<{ success: boolean; nueva_semana: number }>(
-    `/planificaciones/${codigo}/progreso/avanzar`,
-  );
-  return payload;
+  try {
+    const response = await apiClient.post<{ success: boolean; nueva_semana: number }>(
+      `/planificaciones/${codigo}/progreso/avanzar`,
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al avanzar la semana en la planificación simple:', error);
+    throw error;
+  }
 }
 
 /**
@@ -188,11 +218,16 @@ export async function completarSemana(
   semana: number,
   puntos: number,
 ): Promise<{ success: boolean }> {
-  const payload = await apiClient.post<{ success: boolean }>(
-    `/planificaciones/${codigo}/progreso/completar-semana`,
-    { semana, puntos },
-  );
-  return payload;
+  try {
+    const response = await apiClient.post<{ success: boolean }>(
+      `/planificaciones/${codigo}/progreso/completar-semana`,
+      { semana, puntos },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al completar la semana en la planificación simple:', error);
+    throw error;
+  }
 }
 
 /**
@@ -202,11 +237,16 @@ export async function registrarTiempo(
   codigo: string,
   minutos: number,
 ): Promise<{ success: boolean; tiempo_total: number }> {
-  const payload = await apiClient.post<{ success: boolean; tiempo_total: number }>(
-    `/planificaciones/${codigo}/progreso/tiempo`,
-    { minutos },
-  );
-  return payload;
+  try {
+    const response = await apiClient.post<{ success: boolean; tiempo_total: number }>(
+      `/planificaciones/${codigo}/progreso/tiempo`,
+      { minutos },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al registrar el tiempo en la planificación simple:', error);
+    throw error;
+  }
 }
 
 // ============================================================================
@@ -224,8 +264,13 @@ export async function misAsignaciones(): Promise<
     semanas_activas: SemanaActiva[];
   }>
 > {
-  const payload = await apiClient.get('/planificaciones/mis-asignaciones');
-  return payload;
+  try {
+    const response = await apiClient.get('/planificaciones/mis-asignaciones');
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener las asignaciones del docente:', error);
+    throw error;
+  }
 }
 
 /**
@@ -235,10 +280,15 @@ export async function activarSemana(
   asignacionId: string,
   semanaNumero: number,
 ): Promise<SemanaActiva> {
-  const payload = await apiClient.post<SemanaActiva>(
-    `/planificaciones/asignacion/${asignacionId}/semana/${semanaNumero}/activar`,
-  );
-  return payload;
+  try {
+    const response = await apiClient.post<SemanaActiva>(
+      `/planificaciones/asignacion/${asignacionId}/semana/${semanaNumero}/activar`,
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al activar la semana en la planificación simple:', error);
+    throw error;
+  }
 }
 
 /**
@@ -248,10 +298,15 @@ export async function desactivarSemana(
   asignacionId: string,
   semanaNumero: number,
 ): Promise<{ success: boolean; message: string }> {
-  const payload = await apiClient.post<{ success: boolean; message: string }>(
-    `/planificaciones/asignacion/${asignacionId}/semana/${semanaNumero}/desactivar`,
-  );
-  return payload;
+  try {
+    const response = await apiClient.post<{ success: boolean; message: string }>(
+      `/planificaciones/asignacion/${asignacionId}/semana/${semanaNumero}/desactivar`,
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al desactivar la semana en la planificación simple:', error);
+    throw error;
+  }
 }
 
 /**
@@ -262,8 +317,13 @@ export async function verProgresoEstudiantes(asignacionId: string): Promise<{
   planificacion: { codigo: string; titulo: string; semanas_total: number };
   progresos: ProgresoEstudiante[];
 }> {
-  const payload = await apiClient.get(
-    `/planificaciones/asignacion/${asignacionId}/progreso`,
-  );
-  return payload;
+  try {
+    const response = await apiClient.get(
+      `/planificaciones/asignacion/${asignacionId}/progreso`,
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al ver el progreso de estudiantes en la planificación simple:', error);
+    throw error;
+  }
 }

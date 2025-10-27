@@ -16,6 +16,18 @@ const equipoSchema = z.object({
   color: z.string(),
 });
 
+const equipoResumenSchema = z
+  .object({
+    id: z.string(),
+    nombre: z.string(),
+    color: z.string().optional(),
+    color_primario: z.string().optional(),
+    color_secundario: z.string().optional(),
+  })
+  .passthrough();
+
+export type EquipoResumen = z.infer<typeof equipoResumenSchema>;
+
 export const proximaClaseSchema = z.object({
   id: z.string(),
   fecha_hora_inicio: z.string(),
@@ -65,8 +77,8 @@ export const dashboardGamificacionSchema = z.object({
     siguienteNivel: siguienteNivelSchema.nullable(),
   }),
   proximasClases: z.array(proximaClaseSchema),
-  equipoRanking: z.array(z.unknown()),
-  ultimasAsistencias: z.array(z.unknown()),
+  equipoRanking: z.array(z.record(z.string(), z.unknown())),
+  ultimasAsistencias: z.array(z.record(z.string(), z.unknown())),
 });
 
 export type DashboardGamificacion = z.infer<typeof dashboardGamificacionSchema>;
@@ -94,21 +106,30 @@ export const puntosSchema = z.object({
 
 export type Puntos = z.infer<typeof puntosSchema>;
 
-const rankingEntrySchema = z
-  .object({
-    id: z.string(),
-    nombre: z.string(),
+const rankingIntegranteSchema = personaBaseSchema
+  .extend({
+    avatar: z.string().nullable().optional(),
     puntos: z.number().int().nonnegative(),
-    posicion: z.number().int().nonnegative(),
   })
   .passthrough();
 
+export type RankingIntegrante = z.infer<typeof rankingIntegranteSchema>;
+
+const rankingGlobalItemSchema = rankingIntegranteSchema
+  .extend({
+    equipo: equipoResumenSchema.nullable().optional(),
+    posicion: z.number().int().nonnegative().optional(),
+  })
+  .passthrough();
+
+export type RankingGlobalItem = z.infer<typeof rankingGlobalItemSchema>;
+
 export const rankingSchema = z.object({
-  equipoActual: rankingEntrySchema.nullable(),
+  equipoActual: equipoResumenSchema.nullable(),
   posicionEquipo: z.number().int().nonnegative(),
   posicionGlobal: z.number().int().nonnegative(),
-  rankingEquipo: z.array(rankingEntrySchema),
-  rankingGlobal: z.array(rankingEntrySchema),
+  rankingEquipo: z.array(rankingIntegranteSchema),
+  rankingGlobal: z.array(rankingGlobalItemSchema),
 });
 
 export type Ranking = z.infer<typeof rankingSchema>;
@@ -170,3 +191,7 @@ export const puntosObtenidosListSchema = z.array(puntoObtenidoSchema);
 export const progresoRutaListSchema = z.array(progresoRutaSchema);
 export const accionesPuntuablesListSchema = z.array(accionPuntuableSchema);
 
+export type LogrosList = z.infer<typeof logrosListSchema>;
+export type PuntosObtenidosList = z.infer<typeof puntosObtenidosListSchema>;
+export type ProgresoRutaList = z.infer<typeof progresoRutaListSchema>;
+export type AccionesPuntuablesList = z.infer<typeof accionesPuntuablesListSchema>;

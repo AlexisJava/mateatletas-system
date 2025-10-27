@@ -84,7 +84,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (typeof exception === 'object' && exception !== null) {
       const error = exception as any;
       return {
-        status: error.statusCode || error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        status:
+          error.statusCode || error.status || HttpStatus.INTERNAL_SERVER_ERROR,
         message: error.message || 'Unknown error',
         stack: error.stack,
       };
@@ -147,15 +148,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // Si es error 5xx, también enviar alerta
     if (status >= 500) {
-      this.logger.error(
-        '🚨 CRITICAL: Server error occurred',
-        stack,
-        {
-          ...metadata,
-          alert: true,
-          severity: 'critical',
-        },
-      );
+      this.logger.error('🚨 CRITICAL: Server error occurred', stack, {
+        ...metadata,
+        alert: true,
+        severity: 'critical',
+      });
     }
   }
 }

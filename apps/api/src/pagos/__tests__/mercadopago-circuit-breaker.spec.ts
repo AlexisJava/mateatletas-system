@@ -56,7 +56,15 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
       };
 
       const preferenceData = {
-        items: [{ id: '1', title: 'Test', quantity: 1, unit_price: 100, currency_id: 'ARS' }],
+        items: [
+          {
+            id: '1',
+            title: 'Test',
+            quantity: 1,
+            unit_price: 100,
+            currency_id: 'ARS',
+          },
+        ],
       };
 
       // Act
@@ -74,27 +82,45 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
 
     it('should open circuit after 3 consecutive failures', async () => {
       // Arrange
-      const mockCreate = jest.fn().mockRejectedValue(new Error('MercadoPago API timeout'));
+      const mockCreate = jest
+        .fn()
+        .mockRejectedValue(new Error('MercadoPago API timeout'));
       (service as any).preferenceClient = {
         create: mockCreate,
       };
 
-      const preferenceData = { items: [{ id: '1', title: 'Test', quantity: 1, unit_price: 100, currency_id: 'ARS' }] };
+      const preferenceData = {
+        items: [
+          {
+            id: '1',
+            title: 'Test',
+            quantity: 1,
+            unit_price: 100,
+            currency_id: 'ARS',
+          },
+        ],
+      };
 
       // Act & Assert - Failure 1
-      await expect(service.createPreference(preferenceData)).rejects.toThrow('MercadoPago API timeout');
+      await expect(service.createPreference(preferenceData)).rejects.toThrow(
+        'MercadoPago API timeout',
+      );
       let metrics = service.getCircuitBreakerMetrics();
       expect(metrics.createPreference.state).toBe('CLOSED'); // Still closed
       expect(metrics.createPreference.failureCount).toBe(1);
 
       // Act & Assert - Failure 2
-      await expect(service.createPreference(preferenceData)).rejects.toThrow('MercadoPago API timeout');
+      await expect(service.createPreference(preferenceData)).rejects.toThrow(
+        'MercadoPago API timeout',
+      );
       metrics = service.getCircuitBreakerMetrics();
       expect(metrics.createPreference.state).toBe('CLOSED'); // Still closed
       expect(metrics.createPreference.failureCount).toBe(2);
 
       // Act & Assert - Failure 3 (OPENS circuit)
-      await expect(service.createPreference(preferenceData)).rejects.toThrow('MercadoPago API timeout');
+      await expect(service.createPreference(preferenceData)).rejects.toThrow(
+        'MercadoPago API timeout',
+      );
       metrics = service.getCircuitBreakerMetrics();
       expect(metrics.createPreference.state).toBe('OPEN'); // Now OPEN
       expect(metrics.createPreference.failureCount).toBe(3);
@@ -102,12 +128,24 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
 
     it('should reject requests immediately when circuit is OPEN', async () => {
       // Arrange - Fail 3 times to open circuit
-      const mockCreate = jest.fn().mockRejectedValue(new Error('MercadoPago API timeout'));
+      const mockCreate = jest
+        .fn()
+        .mockRejectedValue(new Error('MercadoPago API timeout'));
       (service as any).preferenceClient = {
         create: mockCreate,
       };
 
-      const preferenceData = { items: [{ id: '1', title: 'Test', quantity: 1, unit_price: 100, currency_id: 'ARS' }] };
+      const preferenceData = {
+        items: [
+          {
+            id: '1',
+            title: 'Test',
+            quantity: 1,
+            unit_price: 100,
+            currency_id: 'ARS',
+          },
+        ],
+      };
 
       // Open circuit (3 failures)
       await expect(service.createPreference(preferenceData)).rejects.toThrow();
@@ -119,7 +157,7 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
 
       // Act - Try again (circuit is OPEN, should use fallback without calling API)
       await expect(service.createPreference(preferenceData)).rejects.toThrow(
-        'MercadoPago API is temporarily unavailable (circuit breaker OPEN). Please try again later.'
+        'MercadoPago API is temporarily unavailable (circuit breaker OPEN). Please try again later.',
       );
 
       // Assert - API should NOT have been called (circuit breaker blocked it)
@@ -133,7 +171,17 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
         create: mockCreate,
       };
 
-      const preferenceData = { items: [{ id: '1', title: 'Test', quantity: 1, unit_price: 100, currency_id: 'ARS' }] };
+      const preferenceData = {
+        items: [
+          {
+            id: '1',
+            title: 'Test',
+            quantity: 1,
+            unit_price: 100,
+            currency_id: 'ARS',
+          },
+        ],
+      };
 
       // Open circuit
       await expect(service.createPreference(preferenceData)).rejects.toThrow();
@@ -142,13 +190,14 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
 
       // Act & Assert - Fallback message
       await expect(service.createPreference(preferenceData)).rejects.toThrow(
-        'MercadoPago API is temporarily unavailable (circuit breaker OPEN). Please try again later.'
+        'MercadoPago API is temporarily unavailable (circuit breaker OPEN). Please try again later.',
       );
     });
 
     it('should reset failure count on successful request', async () => {
       // Arrange
-      const mockCreate = jest.fn()
+      const mockCreate = jest
+        .fn()
         .mockRejectedValueOnce(new Error('API Error')) // Failure 1
         .mockRejectedValueOnce(new Error('API Error')) // Failure 2
         .mockResolvedValueOnce({ id: 'pref-123' }); // Success
@@ -157,7 +206,17 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
         create: mockCreate,
       };
 
-      const preferenceData = { items: [{ id: '1', title: 'Test', quantity: 1, unit_price: 100, currency_id: 'ARS' }] };
+      const preferenceData = {
+        items: [
+          {
+            id: '1',
+            title: 'Test',
+            quantity: 1,
+            unit_price: 100,
+            currency_id: 'ARS',
+          },
+        ],
+      };
 
       // Act - 2 failures
       await expect(service.createPreference(preferenceData)).rejects.toThrow();
@@ -205,15 +264,23 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
 
     it('should open circuit after 3 consecutive failures', async () => {
       // Arrange
-      const mockGet = jest.fn().mockRejectedValue(new Error('MercadoPago API timeout'));
+      const mockGet = jest
+        .fn()
+        .mockRejectedValue(new Error('MercadoPago API timeout'));
       (service as any).paymentClient = {
         get: mockGet,
       };
 
       // Act & Assert - 3 failures to open circuit
-      await expect(service.getPayment('pay-123')).rejects.toThrow('MercadoPago API timeout');
-      await expect(service.getPayment('pay-123')).rejects.toThrow('MercadoPago API timeout');
-      await expect(service.getPayment('pay-123')).rejects.toThrow('MercadoPago API timeout');
+      await expect(service.getPayment('pay-123')).rejects.toThrow(
+        'MercadoPago API timeout',
+      );
+      await expect(service.getPayment('pay-123')).rejects.toThrow(
+        'MercadoPago API timeout',
+      );
+      await expect(service.getPayment('pay-123')).rejects.toThrow(
+        'MercadoPago API timeout',
+      );
 
       // Assert - Circuit is OPEN
       const metrics = service.getCircuitBreakerMetrics();
@@ -237,7 +304,7 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
 
       // Act - Try again (circuit is OPEN, should use fallback)
       await expect(service.getPayment('pay-123')).rejects.toThrow(
-        'MercadoPago Payment API is temporarily unavailable (circuit breaker OPEN). Please try again later.'
+        'MercadoPago Payment API is temporarily unavailable (circuit breaker OPEN). Please try again later.',
       );
 
       // Assert - API should NOT have been called
@@ -288,7 +355,17 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
         create: mockCreate,
       };
 
-      const preferenceData = { items: [{ id: '1', title: 'Test', quantity: 1, unit_price: 100, currency_id: 'ARS' }] };
+      const preferenceData = {
+        items: [
+          {
+            id: '1',
+            title: 'Test',
+            quantity: 1,
+            unit_price: 100,
+            currency_id: 'ARS',
+          },
+        ],
+      };
 
       // Open circuit
       await expect(service.createPreference(preferenceData)).rejects.toThrow();
@@ -308,12 +385,24 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
   describe('Independent Circuit Breakers', () => {
     it('should have independent circuit breakers for createPreference and getPayment', async () => {
       // Arrange - Fail createPreference 3 times
-      const mockCreate = jest.fn().mockRejectedValue(new Error('Preference API Error'));
+      const mockCreate = jest
+        .fn()
+        .mockRejectedValue(new Error('Preference API Error'));
       (service as any).preferenceClient = {
         create: mockCreate,
       };
 
-      const preferenceData = { items: [{ id: '1', title: 'Test', quantity: 1, unit_price: 100, currency_id: 'ARS' }] };
+      const preferenceData = {
+        items: [
+          {
+            id: '1',
+            title: 'Test',
+            quantity: 1,
+            unit_price: 100,
+            currency_id: 'ARS',
+          },
+        ],
+      };
 
       // Fail createPreference to open its circuit
       await expect(service.createPreference(preferenceData)).rejects.toThrow();
@@ -321,7 +410,9 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
       await expect(service.createPreference(preferenceData)).rejects.toThrow();
 
       // Arrange - getPayment should still work
-      const mockGet = jest.fn().mockResolvedValue({ id: 'pay-123', status: 'approved' });
+      const mockGet = jest
+        .fn()
+        .mockResolvedValue({ id: 'pay-123', status: 'approved' });
       (service as any).paymentClient = {
         get: mockGet,
       };
@@ -361,15 +452,26 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
         ],
       }).compile();
 
-      const mockService = mockModule.get<MercadoPagoService>(MercadoPagoService);
+      const mockService =
+        mockModule.get<MercadoPagoService>(MercadoPagoService);
 
       // Act & Assert
       expect(mockService.isMockMode()).toBe(true);
 
-      const preferenceData = { items: [{ id: '1', title: 'Test', quantity: 1, unit_price: 100, currency_id: 'ARS' }] };
-      await expect(mockService.createPreference(preferenceData)).rejects.toThrow(
-        'MercadoPago está en modo mock'
-      );
+      const preferenceData = {
+        items: [
+          {
+            id: '1',
+            title: 'Test',
+            quantity: 1,
+            unit_price: 100,
+            currency_id: 'ARS',
+          },
+        ],
+      };
+      await expect(
+        mockService.createPreference(preferenceData),
+      ).rejects.toThrow('MercadoPago está en modo mock');
     });
   });
 });

@@ -482,7 +482,9 @@ describe('Planificaciones E2E', () => {
 
       expect(response.body.id).toBe(planificacion.id);
       expect(response.body.actividades).toHaveLength(1);
-      expect(response.body.actividades[0].planificacionId).toBe(planificacion.id);
+      expect(response.body.actividades[0].planificacionId).toBe(
+        planificacion.id,
+      );
     });
 
     it('should update a planification', async () => {

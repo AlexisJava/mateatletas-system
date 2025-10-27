@@ -49,7 +49,9 @@ export class CreatePlanificacionDto {
 
   @IsString({ message: 'tematica_principal debe ser un texto' })
   @IsNotEmpty({ message: 'tematica_principal es requerida' })
-  @MinLength(3, { message: 'tematica_principal debe tener al menos 3 caracteres' })
+  @MinLength(3, {
+    message: 'tematica_principal debe tener al menos 3 caracteres',
+  })
   tematica_principal!: string;
 
   @IsArray({ message: 'objetivos_aprendizaje debe ser un array' })

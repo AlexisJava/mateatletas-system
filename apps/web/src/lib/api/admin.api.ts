@@ -3,11 +3,16 @@
  */
 
 import axios from '@/lib/axios';
-import { DashboardData, AdminUser, ChangeRoleDto, UpdateRolesDto, SystemStats } from '@/types/admin.types';
-import type { ClaseListado } from '@/types/admin-clases.types';
+import {
+  DashboardData,
+  AdminUser,
+  ChangeRoleDto,
+  UpdateRolesDto,
+  SystemStats,
+} from '@/types/admin.types';
 import type { Producto } from '@/types/catalogo.types';
 import type { CrearProductoDto } from './catalogo.api';
-import { z } from 'zod';
+import type { RegisterResponse } from './auth.api';
 
 // Schemas Zod para validación runtime
 import {
@@ -21,15 +26,33 @@ import { sectoresListSchema } from '@/lib/schemas/sector.schema';
 import { productoSchema, productosListSchema } from '@/lib/schemas/producto.schema';
 
 export const getDashboard = async (): Promise<DashboardData> => {
-  return axios.get<DashboardData>('/admin/dashboard');
+  try {
+    const response = await axios.get<DashboardData>('/admin/dashboard');
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener el dashboard de administración:', error);
+    throw error;
+  }
 };
 
 export const getSystemStats = async (): Promise<SystemStats> => {
-  return axios.get<SystemStats>('/admin/estadisticas');
+  try {
+    const response = await axios.get<SystemStats>('/admin/estadisticas');
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener las estadísticas del sistema:', error);
+    throw error;
+  }
 };
 
 export const getAllUsers = async (): Promise<AdminUser[]> => {
-  return axios.get<AdminUser[]>('/admin/usuarios');
+  try {
+    const response = await axios.get<AdminUser[]>('/admin/usuarios');
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener los usuarios administradores:', error);
+    throw error;
+  }
 };
 
 /**
@@ -81,33 +104,67 @@ export const getAllEstudiantes = async (options?: {
   const queryString = params.toString();
   const url = `/admin/estudiantes${queryString ? `?${queryString}` : ''}`;
 
-  return axios.get<EstudiantesResponse>(url);
+  try {
+    const response = await axios.get<EstudiantesResponse>(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener el listado de estudiantes:', error);
+    throw error;
+  }
 };
 
 export const changeUserRole = async (userId: string, data: ChangeRoleDto): Promise<AdminUser> => {
-  return axios.post<AdminUser>(`/admin/usuarios/${userId}/role`, data);
+  try {
+    const response = await axios.post<AdminUser>(
+      `/admin/usuarios/${userId}/role`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al cambiar el rol del usuario:', error);
+    throw error;
+  }
 };
 
 export const updateUserRoles = async (userId: string, data: UpdateRolesDto): Promise<{ message: string; userId: string; roles: string[] }> => {
-  return axios.put<{ message: string; userId: string; roles: string[] }>(`/admin/usuarios/${userId}/roles`, data);
+  try {
+    const response = await axios.put<{ message: string; userId: string; roles: string[] }>(
+      `/admin/usuarios/${userId}/roles`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al actualizar los roles del usuario:', error);
+    throw error;
+  }
 };
 
 export const deleteUser = async (userId: string): Promise<void> => {
-  await axios.delete(`/admin/usuarios/${userId}`);
+  try {
+    await axios.delete(`/admin/usuarios/${userId}`);
+  } catch (error) {
+    console.error('Error al eliminar el usuario administrador:', error);
+    throw error;
+  }
 };
 
 export const getAllClasses = async (): Promise<ClasesResponse> => {
-  const response = await axios.get('/clases/admin/todas');
-  // Backend retorna { data: [...], meta: {...} }, validar con schema completo
-  const parsed = clasesResponseSchema.safeParse(response);
+  try {
+    const response = await axios.get('/clases/admin/todas');
+    // Backend retorna { data: [...], meta: {...} }, validar con schema completo
+    const parsed = clasesResponseSchema.safeParse(response.data);
 
-  if (parsed.success) {
-    return parsed.data;
+    if (parsed.success) {
+      return parsed.data;
+    }
+
+    // Fallback: si no tiene meta, extraer solo el array y envolver
+    const list = clasesListSchema.parse(response.data);
+    return { data: list };
+  } catch (error) {
+    console.error('Error al obtener todas las clases para administración:', error);
+    throw error;
   }
-
-  // Fallback: si no tiene meta, extraer solo el array y envolver
-  const list = clasesListSchema.parse(response);
-  return { data: list };
 };
 
 export const createClass = async (data: {
@@ -121,65 +178,130 @@ export const createClass = async (data: {
   descripcion?: string;
   productoId?: string;
 }) => {
-  return axios.post('/clases', data);
+  try {
+    const response = await axios.post('/clases', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al crear una clase desde administración:', error);
+    throw error;
+  }
 };
 
 export const cancelarClase = async (claseId: string) => {
-  return axios.patch(`/clases/${claseId}/cancelar`);
+  try {
+    const response = await axios.patch(`/clases/${claseId}/cancelar`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al cancelar la clase desde administración:', error);
+    throw error;
+  }
 };
 
 export const eliminarClase = async (claseId: string) => {
-  return axios.delete(`/clases/${claseId}`);
+  try {
+    const response = await axios.delete(`/clases/${claseId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar la clase desde administración:', error);
+    throw error;
+  }
 };
 
 export const obtenerClase = async (claseId: string) => {
-  return axios.get(`/clases/${claseId}`);
+  try {
+    const response = await axios.get(`/clases/${claseId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener la clase desde administración:', error);
+    throw error;
+  }
 };
 
 export const getRutasCurriculares = async () => {
-  const response = await axios.get('/clases/metadata/rutas-curriculares');
-  // ✅ Validar con schema Zod (interceptor ya extrajo .data)
-  return rutasListSchema.parse(response);
+  try {
+    const response = await axios.get('/clases/metadata/rutas-curriculares');
+    // ✅ Validar con schema Zod (interceptor ya extrajo .data)
+    return rutasListSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener las rutas curriculares (admin):', error);
+    throw error;
+  }
 };
 
 export const getDocentes = async () => {
-  const response = await axios.get('/docentes');
-  // ✅ Backend retorna { data: [...], meta: {...} }, extraer solo array
-  return docentesListSchema.parse(response);
+  try {
+    const response = await axios.get('/docentes');
+    // ✅ Backend retorna { data: [...], meta: {...} }, extraer solo array
+    return docentesListSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener los docentes (admin):', error);
+    throw error;
+  }
 };
 
 export const getSectores = async () => {
-  const response = await axios.get('/admin/sectores');
-  // ✅ Validar con schema Zod (interceptor ya extrajo .data)
-  return sectoresListSchema.parse(response);
+  try {
+    const response = await axios.get('/admin/sectores');
+    // ✅ Validar con schema Zod (interceptor ya extrajo .data)
+    return sectoresListSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener los sectores (admin):', error);
+    throw error;
+  }
 };
 
 // Products Management
 export const getAllProducts = async (includeInactive = true): Promise<Producto[]> => {
-  const response = await axios.get(`/productos?soloActivos=${!includeInactive}`);
-  return productosListSchema.parse(response);
+  try {
+    const response = await axios.get(`/productos?soloActivos=${!includeInactive}`);
+    return productosListSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener los productos (admin):', error);
+    throw error;
+  }
 };
 
 export const getProductById = async (id: string): Promise<Producto> => {
-  const response = await axios.get(`/productos/${id}`);
-  return productoSchema.parse(response);
+  try {
+    const response = await axios.get(`/productos/${id}`);
+    return productoSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener el producto por ID:', error);
+    throw error;
+  }
 };
 
 export const createProduct = async (data: CrearProductoDto): Promise<Producto> => {
-  const response = await axios.post('/productos', data);
-  return productoSchema.parse(response);
+  try {
+    const response = await axios.post('/productos', data);
+    return productoSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al crear el producto:', error);
+    throw error;
+  }
 };
 
 export const updateProduct = async (
   id: string,
   data: Partial<CrearProductoDto>,
 ): Promise<Producto> => {
-  const response = await axios.patch(`/productos/${id}`, data);
-  return productoSchema.parse(response);
+  try {
+    const response = await axios.patch(`/productos/${id}`, data);
+    return productoSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al actualizar el producto:', error);
+    throw error;
+  }
 };
 
 export const deleteProduct = async (id: string, hardDelete = false) => {
-  return axios.delete(`/productos/${id}?hardDelete=${hardDelete}`);
+  try {
+    const response = await axios.delete(`/productos/${id}?hardDelete=${hardDelete}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al eliminar el producto:', error);
+    throw error;
+  }
 };
 
 // User Management
@@ -193,11 +315,18 @@ export interface CreateAdminData {
 }
 
 export const createAdmin = async (data: CreateAdminData): Promise<AdminUser> => {
-  // Primero registramos como tutor
-  const newUser = await axios.post('/auth/register', data);
+  try {
+    // Primero registramos como tutor
+    const response = await axios.post<RegisterResponse>('/auth/register', data);
 
-  // Luego cambiamos el rol a admin
-  const adminUser = await changeUserRole(newUser.user.id, { role: 'admin' });
+    // Luego cambiamos el rol a admin
+    const adminUser = await changeUserRole(response.data.user.id, {
+      role: 'admin',
+    });
 
-  return adminUser;
+    return adminUser;
+  } catch (error) {
+    console.error('Error al crear un administrador:', error);
+    throw error;
+  }
 };

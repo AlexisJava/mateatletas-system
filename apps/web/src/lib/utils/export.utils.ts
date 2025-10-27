@@ -171,12 +171,18 @@ export const formatUsersForExport = (users: {
 export const formatClassesForExport = (classes: ClaseListado[]) => {
   return classes.map((clase) => ({
     'ID': clase.id,
-    'Ruta Curricular': clase.ruta_curricular?.nombre || '-',
+    'Ruta Curricular':
+      clase.ruta_curricular?.nombre ?? clase.rutaCurricular?.nombre ?? '-',
     'Docente': `${clase.docente?.nombre || ''} ${clase.docente?.apellido || ''}`.trim() || '-',
     'Fecha': new Date(clase.fecha_hora_inicio).toLocaleDateString('es-ES'),
     'Hora': new Date(clase.fecha_hora_inicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
     'Duración (min)': clase.duracion_minutos,
-    'Cupos Ocupados': clase.cupo_maximo - (clase.cupo_disponible ?? 0),
+    'Cupos Ocupados':
+      clase.cupos_ocupados ??
+      Math.max(
+        (clase.cupo_maximo ?? 0) - (clase.cupo_disponible ?? 0),
+        0,
+      ),
     'Cupos Máximos': clase.cupo_maximo,
     'Estado': clase.estado
   }));

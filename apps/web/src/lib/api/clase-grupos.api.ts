@@ -16,8 +16,13 @@ export type { ClaseGrupo, CrearClaseGrupoDto, ListarClaseGruposParams };
  * Crear un nuevo ClaseGrupo
  */
 export async function crearClaseGrupo(data: CrearClaseGrupoDto): Promise<ClaseGrupo> {
-  const payload = await axios.post<ClaseGrupo>('/admin/clase-grupos', data);
-  return payload;
+  try {
+    const response = await axios.post<ClaseGrupo>('/admin/clase-grupos', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error al crear el grupo de clases:', error);
+    throw error;
+  }
 }
 
 /**
@@ -48,13 +53,18 @@ export async function listarClaseGrupos(
   const queryString = queryParams.toString();
   const url = `/admin/clase-grupos${queryString ? `?${queryString}` : ''}`;
 
-  const payload = await axios.get<{
-    success: boolean;
-    data: ClaseGrupo[];
-    total: number;
-  }>(url);
+  try {
+    const response = await axios.get<{
+      success: boolean;
+      data: ClaseGrupo[];
+      total: number;
+    }>(url);
 
-  return payload;
+    return response.data;
+  } catch (error) {
+    console.error('Error al listar los grupos de clases:', error);
+    throw error;
+  }
 }
 
 /**
@@ -64,10 +74,15 @@ export async function obtenerClaseGrupo(id: string): Promise<{
   success: boolean;
   data: ClaseGrupo;
 }> {
-  const payload = await axios.get<{
-    success: boolean;
-    data: ClaseGrupo;
-  }>(`/admin/clase-grupos/${id}`);
+  try {
+    const response = await axios.get<{
+      success: boolean;
+      data: ClaseGrupo;
+    }>(`/admin/clase-grupos/${id}`);
 
-  return payload;
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener el grupo de clases:', error);
+    throw error;
+  }
 }

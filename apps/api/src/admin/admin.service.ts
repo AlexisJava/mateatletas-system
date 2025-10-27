@@ -34,9 +34,7 @@ type CrearAlertaResult = Awaited<
 type UsuariosListResult = Awaited<
   ReturnType<AdminUsuariosService['listarUsuarios']>
 >;
-type DeleteUserResult = Awaited<
-  ReturnType<AdminUsuariosService['deleteUser']>
->;
+type DeleteUserResult = Awaited<ReturnType<AdminUsuariosService['deleteUser']>>;
 type EstudiantesListResult = Awaited<
   ReturnType<AdminEstudiantesService['listarEstudiantes']>
 >;
@@ -349,7 +347,10 @@ export class AdminService {
    * DELEGACIÓN: AdminCredencialesService
    */
   async resetearPasswordsMasivo(
-    usuarios: Array<{ id: string; tipoUsuario: 'tutor' | 'estudiante' | 'docente' }>,
+    usuarios: Array<{
+      id: string;
+      tipoUsuario: 'tutor' | 'estudiante' | 'docente';
+    }>,
   ) {
     return this.credencialesService.resetearPasswordsMasivo(usuarios);
   }

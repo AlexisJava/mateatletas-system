@@ -70,9 +70,9 @@ model Tutor {
 /// Representa a los alumnos que utilizarán la plataforma
 model Estudiante {
   /// Identificador único del estudiante
-  id                        String                  @id @default(cuid())
+  id                        String                            @id @default(cuid())
   /// Username único del estudiante - usado para autenticación
-  username                  String?                 @unique
+  username                  String?                           @unique
   /// Nombre del estudiante
   nombre                    String
   /// Apellido del estudiante
@@ -86,21 +86,21 @@ model Estudiante {
   /// ID del equipo al que pertenece el estudiante (opcional, para gamificación)
   equipo_id                 String?
   /// Puntos totales acumulados por el estudiante (gamificación)
-  puntos_totales            Int                     @default(0)
+  puntos_totales            Int                               @default(0)
   /// Nivel actual del estudiante en el sistema de gamificación
-  nivel_actual              Int                     @default(1)
+  nivel_actual              Int                               @default(1)
   /// Timestamp de creación del registro
-  createdAt                 DateTime                @default(now())
+  createdAt                 DateTime                          @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt                 DateTime                @updatedAt
+  updatedAt                 DateTime                          @updatedAt
   /// URL o identificador del avatar personalizable del estudiante
   /// Puede ser una URL de Dicebear API o un identificador de avatar predefinido
-  avatar_url                String?                 @default("avataaars")
+  avatar_url                String?                           @default("avataaars")
   /// Edad del estudiante en años
   edad                      Int
   /// Email único del estudiante - usado para autenticación propia
   /// IMPORTANTE: Debe estar indexado para búsquedas rápidas en login
-  email                     String?                 @unique
+  email                     String?                           @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   /// Permite que el estudiante acceda al portal con sus propias credenciales
   password_hash             String?
@@ -108,23 +108,23 @@ model Estudiante {
   /// Se borra después del primer cambio de contraseña
   password_temporal         String?
   /// Indica si el estudiante debe cambiar su PIN en el próximo login
-  debe_cambiar_password     Boolean                 @default(true)
+  debe_cambiar_password     Boolean                           @default(true)
   /// Fecha del último cambio de contraseña
   fecha_ultimo_cambio       DateTime?
   /// Roles asignados al estudiante (normalmente solo ["estudiante"])
   /// Ejemplo: ["estudiante"]
-  roles                     Json                    @default("[\"estudiante\"]")
+  roles                     Json                              @default("[\"estudiante\"]")
   /// DEPRECADO: ID del sector al que pertenece el estudiante (usar sectores[] en su lugar)
   /// Mantener temporalmente para migración gradual
   sector_id                 String?
   alertas                   Alerta[]
   asistencias               Asistencia[]
-  equipo                    Equipo?                 @relation(fields: [equipo_id], references: [id])
+  equipo                    Equipo?                           @relation(fields: [equipo_id], references: [id])
   /// DEPRECADO: Relación uno-a-uno con sector (usar sectores[] en su lugar)
-  sector                    Sector?                 @relation("EstudianteSectorLegacy", fields: [sector_id], references: [id])
+  sector                    Sector?                           @relation("EstudianteSectorLegacy", fields: [sector_id], references: [id])
   /// NUEVO: Relación muchos-a-muchos con sectores a través de EstudianteSector
   sectores                  EstudianteSector[]
-  tutor                     Tutor                   @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  tutor                     Tutor                             @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
   inscripciones_clase       InscripcionClase[]
   inscripciones_clase_grupo InscripcionClaseGrupo[]
   asistencias_clase_grupo   AsistenciaClaseGrupo[]
@@ -145,21 +145,21 @@ model Estudiante {
 /// Un sector puede tener múltiples estudiantes
 model EstudianteSector {
   /// ID único de la relación
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   /// ID del estudiante
   estudiante_id String
   /// ID del sector
   sector_id     String
   /// Indica si es el sector principal del estudiante (para compatibilidad con lógica legacy)
-  es_principal  Boolean  @default(false)
+  es_principal  Boolean   @default(false)
   /// Fecha de inscripción en el sector
-  fecha_inicio  DateTime @default(now())
+  fecha_inicio  DateTime  @default(now())
   /// Fecha de baja del sector (null si está activo)
   fecha_fin     DateTime?
   /// Timestamp de creación del registro
-  createdAt     DateTime @default(now())
+  createdAt     DateTime  @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt     DateTime @updatedAt
+  updatedAt     DateTime  @updatedAt
 
   /// Relaciones
   estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
@@ -200,58 +200,58 @@ model Equipo {
 /// Representa a los usuarios educadores que dictan clases
 model Docente {
   /// Identificador único del docente
-  id                     String              @id @default(cuid())
+  id                                 String                    @id @default(cuid())
   /// Email único del docente - usado para autenticación
-  email                  String              @unique
+  email                              String                    @unique
   /// Hash bcrypt de la contraseña
-  password_hash          String
+  password_hash                      String
   /// Password temporal en texto plano - se muestra al admin al crear el docente
   /// Se borra después del primer cambio de contraseña
-  password_temporal      String?
+  password_temporal                  String?
   /// Nombre del docente
-  nombre                 String
+  nombre                             String
   /// Apellido del docente
-  apellido               String
+  apellido                           String
   /// Título profesional (ej: "Profesor de Matemática", "Licenciado en Física")
-  titulo                 String?
+  titulo                             String?
   /// Biografía o descripción del docente
-  bio                    String?
+  bio                                String?
   /// Timestamp de creación del registro
-  createdAt              DateTime            @default(now())
+  createdAt                          DateTime                  @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt              DateTime            @updatedAt
+  updatedAt                          DateTime                  @updatedAt
   /// Disponibilidad horaria del docente (ej: {"lunes": ["09:00-12:00", "14:00-18:00"], "martes": ["10:00-13:00"]})
   /// Se almacena como JSON object con días de la semana como keys
-  disponibilidad_horaria Json?
+  disponibilidad_horaria             Json?
   /// Especialidades del docente (ej: ["Álgebra", "Geometría", "Trigonometría"])
   /// Se almacena como JSON array de strings
-  especialidades         Json?
+  especialidades                     Json?
   /// Estado del docente (activo, inactivo, vacaciones)
-  estado                 String              @default("activo")
+  estado                             String                    @default("activo")
   /// Años de experiencia docente
-  experiencia_anos       Int?
+  experiencia_anos                   Int?
   /// Nivel educativo que el docente puede impartir (ej: ["Primaria", "Secundaria", "Universidad"])
   /// Se almacena como JSON array de strings
-  nivel_educativo        Json?
+  nivel_educativo                    Json?
   /// Roles asignados al docente (puede ser docente y admin simultáneamente)
   /// Ejemplo: ["docente", "admin"]
-  roles                  Json                @default("[\"docente\"]")
+  roles                              Json                      @default("[\"docente\"]")
   /// Teléfono de contacto (opcional)
-  telefono               String?
+  telefono                           String?
   /// Indica si el docente debe cambiar su contraseña en el próximo login
   /// true = contraseña temporal (generada por admin)
   /// false = contraseña elegida por el docente
-  debe_cambiar_password  Boolean             @default(true)
+  debe_cambiar_password              Boolean                   @default(true)
   /// Fecha del último cambio de contraseña
-  fecha_ultimo_cambio    DateTime?
-  clases                 Clase[]
-  claseGrupos            ClaseGrupo[]
-  rutasEspecialidad      DocenteRuta[]
-  eventos                Evento[]
-  logrosAprobados        LogroDesbloqueado[] @relation("LogrosAprobados")
-  notificaciones         Notificacion[]
-  puntosOtorgados        PuntoObtenido[]     @relation("PuntosOtorgados")
-  asignacionesPlanificaciones AsignacionDocente[]
+  fecha_ultimo_cambio                DateTime?
+  clases                             Clase[]
+  claseGrupos                        ClaseGrupo[]
+  rutasEspecialidad                  DocenteRuta[]
+  eventos                            Evento[]
+  logrosAprobados                    LogroDesbloqueado[]       @relation("LogrosAprobados")
+  notificaciones                     Notificacion[]
+  puntosOtorgados                    PuntoObtenido[]           @relation("PuntosOtorgados")
+  asignacionesPlanificaciones        AsignacionDocente[]
   asignacionesPlanificacionesSimples AsignacionPlanificacion[]
 
   @@map("docentes")
@@ -468,7 +468,7 @@ model Grupo {
   codigo String @unique
 
   /// Nombre descriptivo del grupo
-  nombre String  // "Básico 1", "Básico 2", "Avanzado 1"
+  nombre String // "Básico 1", "Básico 2", "Avanzado 1"
 
   /// Descripción del grupo y nivel educativo
   descripcion String?
@@ -1207,30 +1207,30 @@ model NivelConfig {
 /// Permite organizar las especialidades en categorías principales
 model Sector {
   /// Identificador único del sector
-  id          String             @id @default(cuid())
+  id                 String             @id @default(cuid())
   /// Nombre del sector (ej: "Matemática", "Programación")
-  nombre      String             @unique
+  nombre             String             @unique
   /// Descripción del sector
-  descripcion String?
+  descripcion        String?
   /// Color hex para UI (ej: "#FF5733")
-  color       String             @default("#6366F1")
+  color              String             @default("#6366F1")
   /// Icono o emoji para UI (ej: "📐", "💻")
-  icono       String             @default("📚")
+  icono              String             @default("📚")
   /// Indica si el sector está activo
-  activo      Boolean            @default(true)
+  activo             Boolean            @default(true)
   /// Timestamp de creación del registro
-  createdAt   DateTime           @default(now())
+  createdAt          DateTime           @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt   DateTime           @updatedAt
-  clases      Clase[]
-  claseGrupos ClaseGrupo[]
-  grupos      Grupo[]
-  docentes    DocenteRuta[]
+  updatedAt          DateTime           @updatedAt
+  clases             Clase[]
+  claseGrupos        ClaseGrupo[]
+  grupos             Grupo[]
+  docentes           DocenteRuta[]
   /// DEPRECADO: Relación uno-a-muchos con estudiantes (usar estudianteSectores[] en su lugar)
-  estudiantes Estudiante[]       @relation("EstudianteSectorLegacy")
+  estudiantes        Estudiante[]       @relation("EstudianteSectorLegacy")
   /// NUEVO: Relación muchos-a-muchos con estudiantes a través de EstudianteSector
   estudianteSectores EstudianteSector[]
-  rutas       RutaEspecialidad[]
+  rutas              RutaEspecialidad[]
 
   @@map("sectores")
 }
@@ -1465,12 +1465,12 @@ model InscripcionMensual {
   detalle_calculo String // Explicación del cálculo aplicado
 
   /// Estado de pago
-  estado_pago      EstadoPago @default(Pendiente)
+  estado_pago       EstadoPago @default(Pendiente)
   fecha_vencimiento DateTime? // Fecha límite de pago
-  fecha_pago       DateTime?
-  metodo_pago      String? // "Efectivo", "Transferencia", "MercadoPago"
-  comprobante_url  String? // URL del comprobante subido
-  observaciones    String?
+  fecha_pago        DateTime?
+  metodo_pago       String? // "Efectivo", "Transferencia", "MercadoPago"
+  comprobante_url   String? // URL del comprobante subido
+  observaciones     String?
 
   /// Auditoría
   createdAt DateTime @default(now())
@@ -1600,13 +1600,13 @@ model PlanificacionMensual {
 
   // ===== CONTENIDO =====
   /// Título de la planificación
-  titulo String  // "Multiplicaciones - Marzo 2025"
+  titulo String // "Multiplicaciones - Marzo 2025"
 
   /// Descripción general del mes
   descripcion String
 
   /// Temática principal del mes
-  tematica_principal String  // "Multiplicaciones", "Fracciones", "Geometría"
+  tematica_principal String // "Multiplicaciones", "Fracciones", "Geometría"
 
   /// Objetivos de aprendizaje del mes
   objetivos_aprendizaje String[]
@@ -1633,8 +1633,8 @@ model PlanificacionMensual {
 
   // ===== AUDITORÍA =====
   created_by_admin_id String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
 
   /// Solo UNA planificación por grupo por mes
   @@unique([grupo_id, mes, anio])
@@ -1645,9 +1645,9 @@ model PlanificacionMensual {
 
 /// Estados posibles de una planificación
 enum EstadoPlanificacion {
-  BORRADOR        // Admin está armándola, no visible para docentes
-  PUBLICADA       // Visible para docentes, pueden asignar
-  ARCHIVADA       // Mes pasado, solo lectura
+  BORRADOR // Admin está armándola, no visible para docentes
+  PUBLICADA // Visible para docentes, pueden asignar
+  ARCHIVADA // Mes pasado, solo lectura
 
   @@map("estado_planificacion")
 }
@@ -1676,17 +1676,17 @@ model ActividadSemanal {
   semana_numero Int
 
   /// Título de la semana
-  titulo String  // "Semana 1: Tablas del 1 al 3"
+  titulo String // "Semana 1: Tablas del 1 al 3"
 
   /// Descripción de la actividad
   descripcion String
 
   // ===== COMPONENTE REACT =====
   /// Nombre del componente React que se va a renderizar
-  componente_nombre String  // "JuegoTablasMultiplicar"
+  componente_nombre String // "JuegoTablasMultiplicar"
 
   /// Props que recibe el componente (JSON flexible)
-  componente_props Json  // { "tablas": [1,2,3], "nivel": "basico" }
+  componente_props Json // { "tablas": [1,2,3], "nivel": "basico" }
 
   // ===== CONFIGURACIÓN PEDAGÓGICA =====
   /// Nivel de dificultad
@@ -1707,7 +1707,7 @@ model ActividadSemanal {
 
   // ===== RECURSOS ADICIONALES =====
   /// URLs de recursos (PDFs, videos, links)
-  recursos_url Json?  // [{ "tipo": "pdf", "titulo": "Guía", "url": "..." }]
+  recursos_url Json? // [{ "tipo": "pdf", "titulo": "Guía", "url": "..." }]
 
   /// Orden dentro de la planificación (para futuras expansiones)
   orden Int @default(1)
@@ -1758,8 +1758,8 @@ model AsignacionDocente {
 
   // ===== RELACIONES =====
   planificacion PlanificacionMensual @relation(fields: [planificacion_id], references: [id])
-  claseGrupo ClaseGrupo @relation(fields: [clase_grupo_id], references: [id])
-  docente Docente @relation(fields: [docente_id], references: [id])
+  claseGrupo    ClaseGrupo           @relation(fields: [clase_grupo_id], references: [id])
+  docente       Docente              @relation(fields: [docente_id], references: [id])
 
   /// Asignaciones de actividades individuales
   asignacionesActividades AsignacionActividadEstudiante[]
@@ -1804,17 +1804,17 @@ model AsignacionActividadEstudiante {
 
   // ===== NOTIFICACIONES =====
   /// Si se notificó a estudiantes
-  notificado_estudiantes Boolean @default(false)
+  notificado_estudiantes         Boolean   @default(false)
   fecha_notificacion_estudiantes DateTime?
 
   /// Si se notificó a tutores
-  notificado_tutores Boolean @default(false)
+  notificado_tutores         Boolean   @default(false)
   fecha_notificacion_tutores DateTime?
 
   // ===== RELACIONES =====
   asignacionDocente AsignacionDocente @relation(fields: [asignacion_docente_id], references: [id], onDelete: Cascade)
-  actividad ActividadSemanal @relation(fields: [actividad_id], references: [id])
-  claseGrupo ClaseGrupo @relation(fields: [clase_grupo_id], references: [id])
+  actividad         ActividadSemanal  @relation(fields: [actividad_id], references: [id])
+  claseGrupo        ClaseGrupo        @relation(fields: [clase_grupo_id], references: [id])
 
   /// Progreso de cada estudiante
   progresosEstudiantes ProgresoEstudianteActividad[]
@@ -1829,10 +1829,10 @@ model AsignacionActividadEstudiante {
 
 /// Estados de una asignación
 enum EstadoAsignacion {
-  ACTIVA          // Disponible para los estudiantes
-  PAUSADA         // Docente la pausó temporalmente
-  FINALIZADA      // Ya pasó la fecha límite
-  CANCELADA       // Docente la canceló
+  ACTIVA // Disponible para los estudiantes
+  PAUSADA // Docente la pausó temporalmente
+  FINALIZADA // Ya pasó la fecha límite
+  CANCELADA // Docente la canceló
 
   @@map("estado_asignacion")
 }
@@ -1853,11 +1853,11 @@ model ProgresoEstudianteActividad {
 
   // ===== ESTADO DE PROGRESO =====
   /// Si el estudiante inició la actividad
-  iniciado Boolean @default(false)
+  iniciado     Boolean   @default(false)
   fecha_inicio DateTime?
 
   /// Si completó la actividad
-  completado Boolean @default(false)
+  completado       Boolean   @default(false)
   fecha_completado DateTime?
 
   // ===== MÉTRICAS =====
@@ -1876,14 +1876,14 @@ model ProgresoEstudianteActividad {
   // ===== ESTADO DEL JUEGO =====
   /// Estado actual del juego (para poder continuar después)
   /// Estructura flexible según el juego
-  estado_juego Json?  // { "nivel": 5, "vidas": 2, "items_desbloqueados": [...] }
+  estado_juego Json? // { "nivel": 5, "vidas": 2, "items_desbloqueados": [...] }
 
   /// Respuestas detalladas (para análisis del docente)
-  respuestas_detalle Json?  // [{ "pregunta": 1, "correcta": true, "tiempo_segundos": 5 }]
+  respuestas_detalle Json? // [{ "pregunta": 1, "correcta": true, "tiempo_segundos": 5 }]
 
   // ===== RELACIONES =====
-  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  actividad ActividadSemanal @relation(fields: [actividad_id], references: [id])
+  estudiante Estudiante                    @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  actividad  ActividadSemanal              @relation(fields: [actividad_id], references: [id])
   asignacion AsignacionActividadEstudiante @relation(fields: [asignacion_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
@@ -1950,12 +1950,12 @@ model PlanificacionSimple {
   estado EstadoPlanificacionSimple @default(DETECTADA)
 
   /// Auto-detectado en build time
-  auto_detectada Boolean @default(true)
-  fecha_deteccion DateTime @default(now())
+  auto_detectada       Boolean  @default(true)
+  fecha_deteccion      DateTime @default(now())
   ultima_actualizacion DateTime @updatedAt
 
   /// Relaciones
-  asignaciones AsignacionPlanificacion[]
+  asignaciones         AsignacionPlanificacion[]
   progresosEstudiantes ProgresoEstudiantePlanificacion[]
 
   @@index([codigo])
@@ -1966,9 +1966,9 @@ model PlanificacionSimple {
 
 /// Estados simples de una planificación
 enum EstadoPlanificacionSimple {
-  DETECTADA    // Auto-detectada, no asignada aún
-  ASIGNADA     // Asignada a al menos una docente
-  ARCHIVADA    // Desactivada
+  DETECTADA // Auto-detectada, no asignada aún
+  ASIGNADA // Asignada a al menos una docente
+  ARCHIVADA // Desactivada
 
   @@map("estado_planificacion_simple")
 }
@@ -1995,8 +1995,8 @@ model AsignacionPlanificacion {
 
   /// Relaciones
   planificacion PlanificacionSimple @relation(fields: [planificacion_id], references: [id], onDelete: Cascade)
-  docente Docente @relation(fields: [docente_id], references: [id])
-  claseGrupo ClaseGrupo @relation(fields: [clase_grupo_id], references: [id])
+  docente       Docente             @relation(fields: [docente_id], references: [id])
+  claseGrupo    ClaseGrupo          @relation(fields: [clase_grupo_id], references: [id])
 
   /// Control de semanas
   semanas_activas SemanaActiva[]
@@ -2061,10 +2061,10 @@ model ProgresoEstudiantePlanificacion {
 
   /// Métricas globales
   tiempo_total_minutos Int @default(0)
-  puntos_totales Int @default(0)
+  puntos_totales       Int @default(0)
 
   /// Relaciones
-  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  estudiante    Estudiante          @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
   planificacion PlanificacionSimple @relation(fields: [planificacion_id], references: [id])
 
   created_at DateTime @default(now())

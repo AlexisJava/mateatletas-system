@@ -1,7 +1,15 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { CreateSectorDto, UpdateSectorDto } from '../dto/sector.dto';
-import { CreateRutaEspecialidadDto, UpdateRutaEspecialidadDto, AsignarRutasDocenteDto } from '../dto/ruta-especialidad.dto';
+import {
+  CreateRutaEspecialidadDto,
+  UpdateRutaEspecialidadDto,
+  AsignarRutasDocenteDto,
+} from '../dto/ruta-especialidad.dto';
 
 /**
  * Servicio para gestionar sectores y rutas de especialidad
@@ -73,7 +81,9 @@ export class SectoresRutasService {
     });
 
     if (existing) {
-      throw new ConflictException(`Ya existe un sector con el nombre "${data.nombre}"`);
+      throw new ConflictException(
+        `Ya existe un sector con el nombre "${data.nombre}"`,
+      );
     }
 
     return this.prisma.sector.create({
@@ -106,7 +116,9 @@ export class SectoresRutasService {
         where: { nombre: data.nombre },
       });
       if (existing) {
-        throw new ConflictException(`Ya existe un sector con el nombre "${data.nombre}"`);
+        throw new ConflictException(
+          `Ya existe un sector con el nombre "${data.nombre}"`,
+        );
       }
     }
 
@@ -212,7 +224,7 @@ export class SectoresRutasService {
 
     if (existing) {
       throw new ConflictException(
-        `Ya existe una ruta con el nombre "${data.nombre}" en el sector "${sector.nombre}"`
+        `Ya existe una ruta con el nombre "${data.nombre}" en el sector "${sector.nombre}"`,
       );
     }
 
@@ -257,7 +269,7 @@ export class SectoresRutasService {
 
       if (existing && existing.id !== id) {
         throw new ConflictException(
-          `Ya existe una ruta con el nombre "${newNombre}" en este sector`
+          `Ya existe una ruta con el nombre "${newNombre}" en este sector`,
         );
       }
     }
@@ -275,7 +287,9 @@ export class SectoresRutasService {
    * Eliminar una ruta (soft delete - marcarlo como inactivo)
    */
   async eliminarRuta(id: string) {
-    const ruta = await this.prisma.rutaEspecialidad.findUnique({ where: { id } });
+    const ruta = await this.prisma.rutaEspecialidad.findUnique({
+      where: { id },
+    });
     if (!ruta) {
       throw new NotFoundException('Ruta no encontrada');
     }

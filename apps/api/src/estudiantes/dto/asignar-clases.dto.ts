@@ -1,4 +1,11 @@
-import { IsArray, IsEmail, IsNotEmpty, IsString, Matches, ArrayMinSize } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  Matches,
+  ArrayMinSize,
+} from 'class-validator';
 
 /**
  * DTO para asignar una o múltiples clases a un estudiante
@@ -20,7 +27,9 @@ export class AsignarClasesDto {
 export class CopiarEstudianteDto {
   @IsNotEmpty({ message: 'El ID del sector destino es requerido' })
   @IsString({ message: 'El sectorId debe ser un string' })
-  @Matches(/^c[a-z0-9]{24}$/, { message: 'El sectorId debe ser un CUID válido' })
+  @Matches(/^c[a-z0-9]{24}$/, {
+    message: 'El sectorId debe ser un CUID válido',
+  })
   sectorId!: string;
 }
 

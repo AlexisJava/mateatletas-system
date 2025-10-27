@@ -1,4 +1,16 @@
-import { IsString, IsNotEmpty, IsEnum, IsDateString, IsBoolean, IsOptional, IsInt, IsArray, ValidateNested, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsDateString,
+  IsBoolean,
+  IsOptional,
+  IsInt,
+  IsArray,
+  ValidateNested,
+  Min,
+  Max,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { TipoEvento, EstadoTarea, PrioridadTarea } from '@prisma/client';
 
@@ -218,4 +230,7 @@ export class CreateNotaDto extends CreateEventoBaseDto {
 /**
  * DTO unificado que acepta cualquier tipo de evento
  */
-export type CreateEventoDto = CreateTareaDto | CreateRecordatorioDto | CreateNotaDto;
+export type CreateEventoDto =
+  | CreateTareaDto
+  | CreateRecordatorioDto
+  | CreateNotaDto;

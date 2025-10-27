@@ -34,7 +34,7 @@ describe('GetPlanificacionesUseCase', () => {
       canBePublished = () => false;
       isActive = () => true;
       getPeriodIdentifier = () => 'B1-11/2025';
-      toPersistence = () => ({} as never);
+      toPersistence = () => ({}) as never;
     })(),
     {
       activityCount: 5,
@@ -97,7 +97,10 @@ describe('GetPlanificacionesUseCase', () => {
       const result = await useCase.execute({});
 
       // Assert
-      expect(repository.findAll).toHaveBeenCalledWith({}, { page: 1, limit: 10 });
+      expect(repository.findAll).toHaveBeenCalledWith(
+        {},
+        { page: 1, limit: 10 },
+      );
       expect(result).toEqual(expectedResult);
       expect(result.data).toHaveLength(1);
       expect(result.data[0].codigoGrupo).toBe('B1');
@@ -126,7 +129,10 @@ describe('GetPlanificacionesUseCase', () => {
       const result = await useCase.execute(filters);
 
       // Assert
-      expect(repository.findAll).toHaveBeenCalledWith(filters, { page: 1, limit: 10 });
+      expect(repository.findAll).toHaveBeenCalledWith(filters, {
+        page: 1,
+        limit: 10,
+      });
       expect(result.data).toHaveLength(1);
       expect(result.data[0].estado).toBe(EstadoPlanificacion.PUBLICADA);
     });
@@ -194,7 +200,10 @@ describe('GetPlanificacionesUseCase', () => {
       await useCase.execute({});
 
       // Assert
-      expect(repository.findAll).toHaveBeenCalledWith({}, { page: 1, limit: 10 });
+      expect(repository.findAll).toHaveBeenCalledWith(
+        {},
+        { page: 1, limit: 10 },
+      );
     });
 
     it('should filter by estado only', async () => {
@@ -217,15 +226,22 @@ describe('GetPlanificacionesUseCase', () => {
       await useCase.execute(filters);
 
       // Assert
-      expect(repository.findAll).toHaveBeenCalledWith(filters, { page: 1, limit: 10 });
+      expect(repository.findAll).toHaveBeenCalledWith(filters, {
+        page: 1,
+        limit: 10,
+      });
     });
 
     it('should handle repository errors gracefully', async () => {
       // Arrange
-      repository.findAll.mockRejectedValue(new Error('Database connection failed'));
+      repository.findAll.mockRejectedValue(
+        new Error('Database connection failed'),
+      );
 
       // Act & Assert
-      await expect(useCase.execute({})).rejects.toThrow('Database connection failed');
+      await expect(useCase.execute({})).rejects.toThrow(
+        'Database connection failed',
+      );
     });
   });
 });

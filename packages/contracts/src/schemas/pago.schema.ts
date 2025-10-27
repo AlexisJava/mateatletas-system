@@ -3,23 +3,14 @@ import { z } from 'zod';
 /**
  * Estados de membresía disponibles para los tutores.
  */
-export const estadoMembresiaEnum = z.enum([
-  'Pendiente',
-  'Activa',
-  'Vencida',
-  'Cancelada',
-]);
+export const estadoMembresiaEnum = z.enum(['Pendiente', 'Activa', 'Vencida', 'Cancelada']);
 
 export type EstadoMembresia = z.infer<typeof estadoMembresiaEnum>;
 
 /**
  * Estados de inscripción a cursos individuales.
  */
-export const estadoInscripcionEnum = z.enum([
-  'PreInscrito',
-  'Inscrito',
-  'Cancelado',
-]);
+export const estadoInscripcionEnum = z.enum(['PreInscrito', 'Inscrito', 'Cancelado']);
 
 export type EstadoInscripcion = z.infer<typeof estadoInscripcionEnum>;
 
@@ -86,9 +77,7 @@ export const crearPreferenciaSuscripcionSchema = z.object({
   producto_id: z.string(),
 });
 
-export type CrearPreferenciaSuscripcionRequest = z.infer<
-  typeof crearPreferenciaSuscripcionSchema
->;
+export type CrearPreferenciaSuscripcionRequest = z.infer<typeof crearPreferenciaSuscripcionSchema>;
 
 /**
  * Request para crear preferencia de pago por curso.
@@ -98,9 +87,7 @@ export const crearPreferenciaCursoSchema = z.object({
   estudiante_id: z.string(),
 });
 
-export type CrearPreferenciaCursoRequest = z.infer<
-  typeof crearPreferenciaCursoSchema
->;
+export type CrearPreferenciaCursoRequest = z.infer<typeof crearPreferenciaCursoSchema>;
 
 /**
  * Estado actual de la membresía de un tutor.
@@ -149,9 +136,7 @@ export const metricasDashboardResponseSchema = z.object({
   distribucionEstados: z.array(distribucionEstadoPagoSchema),
 });
 
-export type MetricasDashboardResponse = z.infer<
-  typeof metricasDashboardResponseSchema
->;
+export type MetricasDashboardResponse = z.infer<typeof metricasDashboardResponseSchema>;
 
 /**
  * Configuración de precios editable por administradores.
@@ -180,9 +165,7 @@ export const historialCambioPreciosSchema = z.object({
   fechaCambio: isoDate,
 });
 
-export type HistorialCambioPrecios = z.infer<
-  typeof historialCambioPreciosSchema
->;
+export type HistorialCambioPrecios = z.infer<typeof historialCambioPreciosSchema>;
 
 /**
  * Inscripción mensual con relaciones (vista administrativa).
@@ -207,9 +190,7 @@ export const inscripcionMensualSchema = z.object({
   producto: productoPagoSchema,
 });
 
-export type InscripcionMensualConRelaciones = z.infer<
-  typeof inscripcionMensualSchema
->;
+export type InscripcionMensualConRelaciones = z.infer<typeof inscripcionMensualSchema>;
 
 /**
  * Resumen de estudiantes con descuentos aplicados.
@@ -225,9 +206,7 @@ export const estudianteConDescuentoSchema = z.object({
   precioFinal: z.string(),
 });
 
-export type EstudianteConDescuento = z.infer<
-  typeof estudianteConDescuentoSchema
->;
+export type EstudianteConDescuento = z.infer<typeof estudianteConDescuentoSchema>;
 
 /**
  * Request para actualizar configuración de precios.

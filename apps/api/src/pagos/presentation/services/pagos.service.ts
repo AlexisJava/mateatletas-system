@@ -176,7 +176,8 @@ export class PagosService {
   async obtenerInscripcionesPendientes() {
     const now = new Date();
     const periodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const inscripciones = await this.inscripcionRepo.obtenerInscripcionesPorPeriodo(periodo);
+    const inscripciones =
+      await this.inscripcionRepo.obtenerInscripcionesPorPeriodo(periodo);
 
     // Filtrar solo pendientes
     return inscripciones.filter((i) => i.estadoPago === 'Pendiente');
@@ -210,7 +211,9 @@ export class PagosService {
    * - pending, in_process, in_mediation → Mantiene Pendiente
    */
   async procesarWebhookMercadoPago(webhookData: MercadoPagoWebhookDto) {
-    this.logger.log(`📨 Webhook recibido: ${webhookData.type} - ${webhookData.action}`);
+    this.logger.log(
+      `📨 Webhook recibido: ${webhookData.type} - ${webhookData.action}`,
+    );
 
     // Solo procesar notificaciones de tipo "payment"
     if (webhookData.type !== 'payment') {
@@ -243,11 +246,16 @@ export class PagosService {
       } else if (externalRef.startsWith('inscripcion-')) {
         return await this.procesarPagoInscripcion(payment);
       } else {
-        this.logger.warn(`⚠️ Formato de external_reference desconocido: ${externalRef}`);
+        this.logger.warn(
+          `⚠️ Formato de external_reference desconocido: ${externalRef}`,
+        );
         return { message: 'Unknown external_reference format' };
       }
     } catch (error: any) {
-      this.logger.error(`❌ Error procesando webhook: ${error.message}`, error.stack);
+      this.logger.error(
+        `❌ Error procesando webhook: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -296,7 +304,9 @@ export class PagosService {
       },
     });
 
-    this.logger.log(`✅ Membresía ${membresiaId} actualizada a estado: ${nuevoEstado}`);
+    this.logger.log(
+      `✅ Membresía ${membresiaId} actualizada a estado: ${nuevoEstado}`,
+    );
 
     return {
       message: 'Webhook processed successfully',
@@ -345,7 +355,9 @@ export class PagosService {
       },
     });
 
-    this.logger.log(`✅ Inscripción ${inscripcionId} actualizada a estado: ${nuevoEstado}`);
+    this.logger.log(
+      `✅ Inscripción ${inscripcionId} actualizada a estado: ${nuevoEstado}`,
+    );
 
     return {
       message: 'Webhook processed successfully',

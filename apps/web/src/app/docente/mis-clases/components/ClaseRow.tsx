@@ -24,6 +24,10 @@ export function ClaseRow({
 }: ClaseRowProps) {
   const router = useRouter();
 
+  const cupoMaximo = clase.cupo_maximo ?? 0;
+  const cuposOcupados = clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0;
+  const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);
+
   const esHoy = () => {
     const hoy = new Date();
     const fechaClase = new Date(clase.fecha_hora_inicio);
@@ -61,7 +65,7 @@ export function ClaseRow({
               <div className="flex items-center gap-3 mt-1">
                 <span className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-300 font-medium">
                   <Users className="w-3.5 h-3.5" />
-                  {clase.cupo_maximo - clase.cupo_disponible}/{clase.cupo_maximo}
+                  {cuposOcupados}/{cupoMaximo} ({cuposDisponibles} disp.)
                 </span>
                 <span className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-300 font-medium">
                   <Clock className="w-3.5 h-3.5" />

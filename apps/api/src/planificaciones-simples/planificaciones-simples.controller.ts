@@ -86,7 +86,11 @@ export class PlanificacionesSimplesController {
     @Body() body: { estado_guardado: any },
   ) {
     const estudianteId = req.user.sub;
-    return this.service.guardarEstado(estudianteId, codigo, body.estado_guardado);
+    return this.service.guardarEstado(
+      estudianteId,
+      codigo,
+      body.estado_guardado,
+    );
   }
 
   /**
@@ -162,7 +166,11 @@ export class PlanificacionesSimplesController {
     @Request() req: any,
   ) {
     const docenteId = req.user.sub;
-    return this.service.activarSemana(asignacionId, docenteId, parseInt(semana));
+    return this.service.activarSemana(
+      asignacionId,
+      docenteId,
+      parseInt(semana),
+    );
   }
 
   /**
@@ -177,7 +185,11 @@ export class PlanificacionesSimplesController {
     @Request() req: any,
   ) {
     const docenteId = req.user.sub;
-    return this.service.desactivarSemana(asignacionId, docenteId, parseInt(semana));
+    return this.service.desactivarSemana(
+      asignacionId,
+      docenteId,
+      parseInt(semana),
+    );
   }
 
   /**
