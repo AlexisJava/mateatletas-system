@@ -62,7 +62,9 @@ describe('AdminAlertasService', () => {
     it('should return list of pending alerts', async () => {
       // Arrange
       const mockAlertas = [mockAlerta, { ...mockAlerta, id: 'alerta-2' }];
-      jest.spyOn(prisma.alerta, 'findMany').mockResolvedValue(mockAlertas as any);
+      jest
+        .spyOn(prisma.alerta, 'findMany')
+        .mockResolvedValue(mockAlertas as any);
 
       // Act
       const result = await service.listarAlertas();
@@ -76,7 +78,9 @@ describe('AdminAlertasService', () => {
 
     it('should filter only unresolved alerts', async () => {
       // Arrange
-      const findManySpy = jest.spyOn(prisma.alerta, 'findMany').mockResolvedValue([]);
+      const findManySpy = jest
+        .spyOn(prisma.alerta, 'findMany')
+        .mockResolvedValue([]);
 
       // Act
       await service.listarAlertas();
@@ -91,7 +95,9 @@ describe('AdminAlertasService', () => {
 
     it('should order alerts by date descending', async () => {
       // Arrange
-      const findManySpy = jest.spyOn(prisma.alerta, 'findMany').mockResolvedValue([]);
+      const findManySpy = jest
+        .spyOn(prisma.alerta, 'findMany')
+        .mockResolvedValue([]);
 
       // Act
       await service.listarAlertas();
@@ -117,7 +123,9 @@ describe('AdminAlertasService', () => {
 
     it('should map response with correct structure', async () => {
       // Arrange
-      jest.spyOn(prisma.alerta, 'findMany').mockResolvedValue([mockAlerta] as any);
+      jest
+        .spyOn(prisma.alerta, 'findMany')
+        .mockResolvedValue([mockAlerta] as any);
 
       // Act
       const result = await service.listarAlertas();
@@ -144,7 +152,9 @@ describe('AdminAlertasService', () => {
   describe('resolverAlerta', () => {
     it('should mark alert as resolved', async () => {
       // Arrange
-      jest.spyOn(prisma.alerta, 'findUnique').mockResolvedValue(mockAlerta as any);
+      jest
+        .spyOn(prisma.alerta, 'findUnique')
+        .mockResolvedValue(mockAlerta as any);
       const updateSpy = jest.spyOn(prisma.alerta, 'update').mockResolvedValue({
         ...mockAlerta,
         resuelta: true,
@@ -179,7 +189,9 @@ describe('AdminAlertasService', () => {
   describe('sugerirSolucion', () => {
     it('should return suggestion for valid alert', async () => {
       // Arrange
-      jest.spyOn(prisma.alerta, 'findUnique').mockResolvedValue(mockAlerta as any);
+      jest
+        .spyOn(prisma.alerta, 'findUnique')
+        .mockResolvedValue(mockAlerta as any);
 
       // Act
       const result = await service.sugerirSolucion('alerta-1');
@@ -208,7 +220,9 @@ describe('AdminAlertasService', () => {
         ...mockAlerta,
         descripcion: 'Estudiante muy distraído y sin concentración',
       };
-      jest.spyOn(prisma.alerta, 'findUnique').mockResolvedValue(alertaAtencion as any);
+      jest
+        .spyOn(prisma.alerta, 'findUnique')
+        .mockResolvedValue(alertaAtencion as any);
 
       // Act
       const result = await service.sugerirSolucion('alerta-1');
@@ -224,7 +238,9 @@ describe('AdminAlertasService', () => {
         ...mockAlerta,
         descripcion: 'Estudiante con dificultad para entender los conceptos',
       };
-      jest.spyOn(prisma.alerta, 'findUnique').mockResolvedValue(alertaDificultad as any);
+      jest
+        .spyOn(prisma.alerta, 'findUnique')
+        .mockResolvedValue(alertaDificultad as any);
 
       // Act
       const result = await service.sugerirSolucion('alerta-1');
@@ -240,7 +256,9 @@ describe('AdminAlertasService', () => {
         ...mockAlerta,
         descripcion: 'Problemas de comportamiento en clase',
       };
-      jest.spyOn(prisma.alerta, 'findUnique').mockResolvedValue(alertaConducta as any);
+      jest
+        .spyOn(prisma.alerta, 'findUnique')
+        .mockResolvedValue(alertaConducta as any);
 
       // Act
       const result = await service.sugerirSolucion('alerta-1');
@@ -256,7 +274,9 @@ describe('AdminAlertasService', () => {
         ...mockAlerta,
         descripcion: 'Situación particular del estudiante',
       };
-      jest.spyOn(prisma.alerta, 'findUnique').mockResolvedValue(alertaGenerica as any);
+      jest
+        .spyOn(prisma.alerta, 'findUnique')
+        .mockResolvedValue(alertaGenerica as any);
 
       // Act
       const result = await service.sugerirSolucion('alerta-1');

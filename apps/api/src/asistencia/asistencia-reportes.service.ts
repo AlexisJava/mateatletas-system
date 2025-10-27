@@ -39,9 +39,7 @@ export class AsistenciaReportesService {
     ]);
 
     // Create map of attendance by student_id
-    const asistenciaMap = new Map(
-      asistencias.map((a) => [a.estudiante_id, a]),
-    );
+    const asistenciaMap = new Map(asistencias.map((a) => [a.estudiante_id, a]));
 
     let presentes = 0;
     let ausentes = 0;

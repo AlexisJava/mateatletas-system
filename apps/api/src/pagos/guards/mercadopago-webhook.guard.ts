@@ -32,20 +32,22 @@ export class MercadoPagoWebhookGuard implements CanActivate {
   private readonly strictMode: boolean;
 
   constructor(private configService: ConfigService) {
-    this.webhookSecret = this.configService.get<string>('MERCADOPAGO_WEBHOOK_SECRET') || null;
+    this.webhookSecret =
+      this.configService.get<string>('MERCADOPAGO_WEBHOOK_SECRET') || null;
 
     // En modo estricto, rechazar si no hay secret configurado
     // En modo permisivo (desarrollo), permitir webhooks sin validación
-    this.strictMode = this.configService.get<string>('NODE_ENV') === 'production';
+    this.strictMode =
+      this.configService.get<string>('NODE_ENV') === 'production';
 
     if (!this.webhookSecret) {
       if (this.strictMode) {
         this.logger.error(
-          '🚨 PRODUCCIÓN SIN WEBHOOK SECRET: Configure MERCADOPAGO_WEBHOOK_SECRET'
+          '🚨 PRODUCCIÓN SIN WEBHOOK SECRET: Configure MERCADOPAGO_WEBHOOK_SECRET',
         );
       } else {
         this.logger.warn(
-          '⚠️  DESARROLLO: Webhooks sin validación de firma (configure MERCADOPAGO_WEBHOOK_SECRET)'
+          '⚠️  DESARROLLO: Webhooks sin validación de firma (configure MERCADOPAGO_WEBHOOK_SECRET)',
         );
       }
     } else {
@@ -74,7 +76,9 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       const requestId = request.headers['x-request-id'] as string;
 
       if (!signature || !requestId) {
-        this.logger.error('Headers de validación faltantes (x-signature, x-request-id)');
+        this.logger.error(
+          'Headers de validación faltantes (x-signature, x-request-id)',
+        );
         throw new UnauthorizedException('Invalid webhook headers');
       }
 
@@ -97,24 +101,26 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       // Comparación segura (timing-safe)
       const isValid = crypto.timingSafeEqual(
         Buffer.from(signature),
-        Buffer.from(expectedSignature)
+        Buffer.from(expectedSignature),
       );
 
       if (!isValid) {
         this.logger.error(
-          `Firma inválida: esperada=${expectedSignature.substring(0, 10)}..., recibida=${signature.substring(0, 10)}...`
+          `Firma inválida: esperada=${expectedSignature.substring(0, 10)}..., recibida=${signature.substring(0, 10)}...`,
         );
         throw new UnauthorizedException('Invalid webhook signature');
       }
 
-      this.logger.log(`✅ Webhook validado: data_id=${dataId}, request_id=${requestId}`);
+      this.logger.log(
+        `✅ Webhook validado: data_id=${dataId}, request_id=${requestId}`,
+      );
       return true;
-
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Error validando webhook: ${errorMessage}`);
       throw new UnauthorizedException('Webhook validation failed');
     }

@@ -1,5 +1,10 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { TutorService } from './tutor.service';
 import { GetMisInscripcionesDto } from './dto/get-mis-inscripciones.dto';
 import { GetDashboardResumenDto } from './dto/get-dashboard-resumen.dto';

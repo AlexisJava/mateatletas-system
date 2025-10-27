@@ -21,7 +21,8 @@ export class CrearClaseDto {
    * Nombre o tema de la clase (ej: "Godot", "Scratch", "Preparación Olimpiadas")
    */
   @ApiProperty({
-    description: 'Nombre o tema de la clase (ej: "Godot", "Scratch", "Preparación Olimpiadas")',
+    description:
+      'Nombre o tema de la clase (ej: "Godot", "Scratch", "Preparación Olimpiadas")',
     example: 'Godot - Introducción a Videojuegos',
     type: String,
   })
@@ -58,7 +59,8 @@ export class CrearClaseDto {
    * ID del sector (Matemática o Programación) - OPCIONAL
    */
   @ApiPropertyOptional({
-    description: 'ID del sector al que pertenece la clase (Matemática o Programación)',
+    description:
+      'ID del sector al que pertenece la clase (Matemática o Programación)',
     example: '550e8400-e29b-41d4-a716-446655440000',
     type: String,
   })
@@ -74,14 +76,25 @@ export class CrearClaseDto {
    * Debe estar en horario laboral (8:00 - 20:00)
    */
   @ApiProperty({
-    description: 'Fecha y hora de inicio en formato ISO 8601 (min 30 min adelante, horario 8:00-20:00)',
+    description:
+      'Fecha y hora de inicio en formato ISO 8601 (min 30 min adelante, horario 8:00-20:00)',
     example: '2025-10-20T14:00:00Z',
     type: String,
     format: 'date-time',
   })
-  @IsDateString({}, { message: 'La fecha y hora de inicio debe ser una fecha válida (ISO 8601)' })
-  @IsFutureDate(30, { message: 'La clase debe programarse con al menos 30 minutos de anticipación' })
-  @IsBusinessHours(8, 20, { message: 'Las clases deben programarse entre las 8:00 y las 20:00 horas' })
+  @IsDateString(
+    {},
+    {
+      message: 'La fecha y hora de inicio debe ser una fecha válida (ISO 8601)',
+    },
+  )
+  @IsFutureDate(30, {
+    message:
+      'La clase debe programarse con al menos 30 minutos de anticipación',
+  })
+  @IsBusinessHours(8, 20, {
+    message: 'Las clases deben programarse entre las 8:00 y las 20:00 horas',
+  })
   fechaHoraInicio!: string; // ISO 8601 format
 
   /**
@@ -121,7 +134,8 @@ export class CrearClaseDto {
    * Ejemplo: "Niños 6-7 años", "Grupo A", "Preparación olimpiadas"
    */
   @ApiPropertyOptional({
-    description: 'Descripción o grupo de la clase (ej: "Niños 6-7 años", "Grupo A")',
+    description:
+      'Descripción o grupo de la clase (ej: "Niños 6-7 años", "Grupo A")',
     example: 'Niños 6-7 años',
     type: String,
   })
@@ -136,7 +150,8 @@ export class CrearClaseDto {
    * Si es null, es una clase de suscripción general
    */
   @ApiPropertyOptional({
-    description: 'ID del producto/curso asociado (si no se especifica, es clase de suscripción general)',
+    description:
+      'ID del producto/curso asociado (si no se especifica, es clase de suscripción general)',
     example: '789e0123-e89b-12d3-a456-426614174000',
     type: String,
   })

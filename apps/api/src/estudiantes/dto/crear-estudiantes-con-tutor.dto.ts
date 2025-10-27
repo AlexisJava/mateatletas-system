@@ -1,4 +1,13 @@
-import { IsArray, IsString, IsNotEmpty, ValidateNested, IsEmail, IsOptional, Matches, ArrayMinSize } from 'class-validator';
+import {
+  IsArray,
+  IsString,
+  IsNotEmpty,
+  ValidateNested,
+  IsEmail,
+  IsOptional,
+  Matches,
+  ArrayMinSize,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -67,7 +76,9 @@ export class CrearEstudiantesConTutorDto {
 
   @IsNotEmpty({ message: 'El ID del sector es requerido' })
   @IsString({ message: 'El sectorId debe ser un string' })
-  @Matches(/^c[a-z0-9]{24}$/, { message: 'El sectorId debe ser un CUID válido' })
+  @Matches(/^c[a-z0-9]{24}$/, {
+    message: 'El sectorId debe ser un CUID válido',
+  })
   sectorId!: string;
 }
 

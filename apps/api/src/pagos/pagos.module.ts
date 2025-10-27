@@ -74,7 +74,11 @@ import { MercadoPagoService } from './mercadopago.service';
           productoAdapter,
         );
       },
-      inject: [ConfiguracionPreciosRepository, EstudianteRepositoryAdapter, ProductoRepositoryAdapter],
+      inject: [
+        ConfiguracionPreciosRepository,
+        EstudianteRepositoryAdapter,
+        ProductoRepositoryAdapter,
+      ],
     },
     {
       provide: ActualizarConfiguracionPreciosUseCase,
@@ -89,7 +93,10 @@ import { MercadoPagoService } from './mercadopago.service';
         calcularPrecioUseCase: CalcularPrecioUseCase,
         inscripcionRepo: InscripcionMensualRepository,
       ) => {
-        return new CrearInscripcionMensualUseCase(calcularPrecioUseCase, inscripcionRepo);
+        return new CrearInscripcionMensualUseCase(
+          calcularPrecioUseCase,
+          inscripcionRepo,
+        );
       },
       inject: [CalcularPrecioUseCase, InscripcionMensualRepository],
     },

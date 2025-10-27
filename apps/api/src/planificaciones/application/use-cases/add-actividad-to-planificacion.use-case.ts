@@ -20,7 +20,8 @@ export class AddActividadToPlanificacionUseCase {
   ): Promise<ActividadEntity> {
     await this.planificacionRepository.findById(planificacionId);
 
-    const existingActividades = await this.planificacionRepository.findActividades(planificacionId);
+    const existingActividades =
+      await this.planificacionRepository.findActividades(planificacionId);
 
     const createData: CreateActividadData = {
       planificacionId,
@@ -33,9 +34,11 @@ export class AddActividadToPlanificacionUseCase {
       tiempoEstimadoMinutos: dto.tiempo_estimado_minutos ?? 30,
       puntosGamificacion: dto.puntos_gamificacion ?? 10,
       instruccionesDocente:
-        dto.instrucciones_docente ?? 'Instrucciones para el docente pendientes de completar.',
+        dto.instrucciones_docente ??
+        'Instrucciones para el docente pendientes de completar.',
       instruccionesEstudiante:
-        dto.instrucciones_estudiante ?? 'Instrucciones para el estudiante pendientes de completar.',
+        dto.instrucciones_estudiante ??
+        'Instrucciones para el estudiante pendientes de completar.',
       recursosUrl: dto.recursos_url ?? null,
       orden: dto.orden ?? existingActividades.length + 1,
     };

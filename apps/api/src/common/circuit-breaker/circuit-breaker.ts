@@ -79,7 +79,10 @@ export class CircuitBreaker {
    * @param args - Argumentos para la función
    * @returns Resultado de la función o fallback
    */
-  async execute<T>(fn: (...args: any[]) => Promise<T>, ...args: any[]): Promise<T> {
+  async execute<T>(
+    fn: (...args: any[]) => Promise<T>,
+    ...args: any[]
+  ): Promise<T> {
     // Si el circuito está OPEN, verificar si es momento de intentar recovery
     if (this.state === CircuitState.OPEN) {
       if (Date.now() < this.nextAttempt) {

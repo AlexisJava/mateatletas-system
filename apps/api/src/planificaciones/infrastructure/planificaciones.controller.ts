@@ -93,7 +93,7 @@ export class PlanificacionesController {
     @GetUser('id') userId: string,
   ): Promise<PlanificacionDetailResponseDto> {
     const created = await this.createPlanificacionUseCase.execute(dto, userId);
-    const detail = await this.getPlanificacionByIdUseCase.execute(created.id as string);
+    const detail = await this.getPlanificacionByIdUseCase.execute(created.id);
     return PlanificacionDetailResponseDto.fromDetail(detail);
   }
 
@@ -174,7 +174,9 @@ export class PlanificacionesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Planificación no encontrada',
   })
-  async getPlanificacionById(@Param('id') id: string): Promise<PlanificacionDetailResponseDto> {
+  async getPlanificacionById(
+    @Param('id') id: string,
+  ): Promise<PlanificacionDetailResponseDto> {
     const detail = await this.getPlanificacionByIdUseCase.execute(id);
     return PlanificacionDetailResponseDto.fromDetail(detail);
   }
@@ -254,7 +256,10 @@ export class PlanificacionesController {
     @Param('id') planificacionId: string,
     @Body() dto: CreateActividadDto,
   ): Promise<ActividadResponseDto> {
-    const actividad = await this.addActividadToPlanificacionUseCase.execute(planificacionId, dto);
+    const actividad = await this.addActividadToPlanificacionUseCase.execute(
+      planificacionId,
+      dto,
+    );
     return ActividadResponseDto.fromEntity(actividad);
   }
 
@@ -284,7 +289,11 @@ export class PlanificacionesController {
     @Param('actividadId') actividadId: string,
     @Body() dto: UpdateActividadDto,
   ): Promise<ActividadResponseDto> {
-    const actividad = await this.updateActividadUseCase.execute(planificacionId, actividadId, dto);
+    const actividad = await this.updateActividadUseCase.execute(
+      planificacionId,
+      actividadId,
+      dto,
+    );
     return ActividadResponseDto.fromEntity(actividad);
   }
 

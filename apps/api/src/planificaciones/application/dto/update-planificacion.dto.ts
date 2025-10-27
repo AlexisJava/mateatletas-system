@@ -19,7 +19,9 @@ export class UpdatePlanificacionDto {
 
   @IsOptional()
   @IsString({ message: 'tematica_principal debe ser un texto' })
-  @MinLength(3, { message: 'tematica_principal debe tener al menos 3 caracteres' })
+  @MinLength(3, {
+    message: 'tematica_principal debe tener al menos 3 caracteres',
+  })
   tematica_principal?: string;
 
   @IsOptional()
