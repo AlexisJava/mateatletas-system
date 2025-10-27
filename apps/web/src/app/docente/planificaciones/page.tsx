@@ -11,7 +11,7 @@ import {
   type ProgresoEstudiante,
 } from '@/lib/api/planificaciones-simples.api';
 import { getErrorMessage } from '@/lib/utils/error-handler';
-import { Calendar, Users, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { Calendar, CheckCircle, XCircle, Eye } from 'lucide-react';
 
 interface Asignacion {
   id: string;
@@ -25,7 +25,7 @@ export default function DocentePlanificacionesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showProgressModal, setShowProgressModal] = useState(false);
-  const [selectedAsignacion, setSelectedAsignacion] = useState<string | null>(null);
+  // const [selectedAsignacion, setSelectedAsignacion] = useState<string | null>(null);
   const [progresos, setProgresos] = useState<ProgresoEstudiante[]>([]);
 
   useEffect(() => {
