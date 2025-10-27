@@ -64,6 +64,17 @@ export class PlanificacionesSimplesController {
   // ============================================================================
 
   /**
+   * GET /api/planificaciones/mis-planificaciones
+   * Obtener todas las planificaciones del estudiante autenticado
+   */
+  @Get('mis-planificaciones')
+  @Roles(Role.Estudiante)
+  async misPlanificaciones(@Request() req: any) {
+    const estudianteId = req.user.sub;
+    return this.service.obtenerPlanificacionesEstudiante(estudianteId);
+  }
+
+  /**
    * GET /api/planificaciones/:codigo/progreso
    * Obtener progreso del estudiante en una planificación
    */
