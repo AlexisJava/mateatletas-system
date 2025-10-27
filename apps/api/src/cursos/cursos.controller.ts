@@ -14,7 +14,10 @@ import { UpdateModuloDto } from './dto/update-modulo.dto';
 import { CreateLeccionDto } from './dto/create-leccion.dto';
 import { UpdateLeccionDto } from './dto/update-leccion.dto';
 import { CompletarLeccionDto } from './dto/completar-leccion.dto';
-import { ReordenarModulosDto, ReordenarLeccionesDto } from './dto/reordenar.dto';
+import {
+  ReordenarModulosDto,
+  ReordenarLeccionesDto,
+} from './dto/reordenar.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';

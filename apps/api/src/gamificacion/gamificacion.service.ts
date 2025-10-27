@@ -110,9 +110,10 @@ export class GamificacionService {
     const nivelInfo = await this.getNivelInfo(estudiante.puntos_totales);
 
     // Calcular puntos totales basados en asistencias
-    const puntosAsistencia = estudiante.asistencias.filter(
-      (a: any) => a.estado === EstadoAsistencia.Presente,
-    ).length * 10;
+    const puntosAsistencia =
+      estudiante.asistencias.filter(
+        (a: any) => a.estado === EstadoAsistencia.Presente,
+      ).length * 10;
 
     // Calcular próximas clases (select optimizado)
     const proximasClases = await this.prisma.clase.findMany({
@@ -324,9 +325,11 @@ export class GamificacionService {
     // Mapear resultados (procesamiento en memoria, sin queries adicionales)
     const progresoPorRuta = rutas.map((ruta) => {
       const clasesTotales =
-        clasesTotalesPorRuta.find((c) => c.ruta_curricular_id === ruta.id)?._count.id || 0;
+        clasesTotalesPorRuta.find((c) => c.ruta_curricular_id === ruta.id)
+          ?._count.id || 0;
       const clasesAsistidas = asistenciasPorRutaMap.get(ruta.id) || 0;
-      const porcentaje = clasesTotales > 0 ? (clasesAsistidas / clasesTotales) * 100 : 0;
+      const porcentaje =
+        clasesTotales > 0 ? (clasesAsistidas / clasesTotales) * 100 : 0;
 
       return {
         ruta: ruta.nombre,

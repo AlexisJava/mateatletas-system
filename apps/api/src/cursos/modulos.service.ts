@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { CreateModuloDto } from './dto/create-modulo.dto';
 import { UpdateModuloDto } from './dto/update-modulo.dto';
@@ -33,7 +37,9 @@ export class ModulosService {
     });
 
     if (!producto) {
-      throw new NotFoundException(`Producto con ID ${productoId} no encontrado`);
+      throw new NotFoundException(
+        `Producto con ID ${productoId} no encontrado`,
+      );
     }
 
     if (producto.tipo !== 'Curso') {
@@ -146,7 +152,7 @@ export class ModulosService {
       this.prisma.modulo.update({
         where: { id },
         data: { orden: index + 1 },
-      })
+      }),
     );
 
     await this.prisma.$transaction(updates);
@@ -323,7 +329,7 @@ export class ModulosService {
       this.prisma.leccion.update({
         where: { id },
         data: { orden: index + 1 },
-      })
+      }),
     );
 
     await this.prisma.$transaction(updates);
@@ -348,12 +354,12 @@ export class ModulosService {
 
     const puntosTotales = lecciones.reduce(
       (sum, l) => sum + (l.puntos_por_completar || 0),
-      0
+      0,
     );
 
     const duracionTotal = lecciones.reduce(
       (sum, l) => sum + (l.duracion_estimada_minutos || 0),
-      0
+      0,
     );
 
     await this.prisma.modulo.update({

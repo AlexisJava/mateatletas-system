@@ -87,9 +87,15 @@ describe('AdminUsuariosService', () => {
   describe('listarUsuarios', () => {
     it('should return list of all users grouped by role', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findMany').mockResolvedValue([mockTutor] as any);
-      jest.spyOn(prisma.docente, 'findMany').mockResolvedValue([mockDocente] as any);
-      jest.spyOn(prisma.admin, 'findMany').mockResolvedValue([mockAdmin] as any);
+      jest
+        .spyOn(prisma.tutor, 'findMany')
+        .mockResolvedValue([mockTutor] as any);
+      jest
+        .spyOn(prisma.docente, 'findMany')
+        .mockResolvedValue([mockDocente] as any);
+      jest
+        .spyOn(prisma.admin, 'findMany')
+        .mockResolvedValue([mockAdmin] as any);
 
       // Act
       const result = await service.listarUsuarios();
@@ -103,7 +109,9 @@ describe('AdminUsuariosService', () => {
 
     it('should include _count for tutores', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findMany').mockResolvedValue([mockTutor] as any);
+      jest
+        .spyOn(prisma.tutor, 'findMany')
+        .mockResolvedValue([mockTutor] as any);
       jest.spyOn(prisma.docente, 'findMany').mockResolvedValue([]);
       jest.spyOn(prisma.admin, 'findMany').mockResolvedValue([]);
 
@@ -119,7 +127,9 @@ describe('AdminUsuariosService', () => {
     it('should include _count for docentes', async () => {
       // Arrange
       jest.spyOn(prisma.tutor, 'findMany').mockResolvedValue([]);
-      jest.spyOn(prisma.docente, 'findMany').mockResolvedValue([mockDocente] as any);
+      jest
+        .spyOn(prisma.docente, 'findMany')
+        .mockResolvedValue([mockDocente] as any);
       jest.spyOn(prisma.admin, 'findMany').mockResolvedValue([]);
 
       // Act
@@ -146,9 +156,15 @@ describe('AdminUsuariosService', () => {
 
     it('should execute queries in parallel', async () => {
       // Arrange
-      const tutorSpy = jest.spyOn(prisma.tutor, 'findMany').mockResolvedValue([]);
-      const docenteSpy = jest.spyOn(prisma.docente, 'findMany').mockResolvedValue([]);
-      const adminSpy = jest.spyOn(prisma.admin, 'findMany').mockResolvedValue([]);
+      const tutorSpy = jest
+        .spyOn(prisma.tutor, 'findMany')
+        .mockResolvedValue([]);
+      const docenteSpy = jest
+        .spyOn(prisma.docente, 'findMany')
+        .mockResolvedValue([]);
+      const adminSpy = jest
+        .spyOn(prisma.admin, 'findMany')
+        .mockResolvedValue([]);
 
       // Act
       await service.listarUsuarios();
@@ -169,20 +185,28 @@ describe('AdminUsuariosService', () => {
       const result = await service.deleteUser('tutor-1');
 
       // Assert
-      expect(result).toHaveProperty('message', 'Usuario eliminado exitosamente');
+      expect(result).toHaveProperty(
+        'message',
+        'Usuario eliminado exitosamente',
+      );
       expect(result).toHaveProperty('success', true);
     });
 
     it('should delete docente successfully', async () => {
       // Arrange
       jest.spyOn(prisma.tutor, 'delete').mockRejectedValue({ code: 'P2025' });
-      jest.spyOn(prisma.docente, 'delete').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'delete')
+        .mockResolvedValue(mockDocente as any);
 
       // Act
       const result = await service.deleteUser('doc-1');
 
       // Assert
-      expect(result).toHaveProperty('message', 'Usuario eliminado exitosamente');
+      expect(result).toHaveProperty(
+        'message',
+        'Usuario eliminado exitosamente',
+      );
       expect(result).toHaveProperty('success', true);
     });
 
@@ -196,7 +220,10 @@ describe('AdminUsuariosService', () => {
       const result = await service.deleteUser('admin-1');
 
       // Assert
-      expect(result).toHaveProperty('message', 'Usuario eliminado exitosamente');
+      expect(result).toHaveProperty(
+        'message',
+        'Usuario eliminado exitosamente',
+      );
       expect(result).toHaveProperty('success', true);
     });
 
@@ -223,7 +250,9 @@ describe('AdminUsuariosService', () => {
       // Act & Assert
       // Note: The service uses Promise.allSettled, so it catches FK errors and treats them as failures
       // If all deletions fail, it throws NotFoundException
-      await expect(service.deleteUser('doc-1')).rejects.toThrow(NotFoundException);
+      await expect(service.deleteUser('doc-1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should try deleting from all tables sequentially', async () => {
@@ -234,7 +263,9 @@ describe('AdminUsuariosService', () => {
       const docenteSpy = jest
         .spyOn(prisma.docente, 'delete')
         .mockRejectedValue({ code: 'P2025' });
-      const adminSpy = jest.spyOn(prisma.admin, 'delete').mockResolvedValue(mockAdmin as any);
+      const adminSpy = jest
+        .spyOn(prisma.admin, 'delete')
+        .mockResolvedValue(mockAdmin as any);
 
       // Act
       await service.deleteUser('admin-1');

@@ -47,17 +47,14 @@ export type {
  * @returns Resultado del cálculo con precio final y metadata
  */
 export function calcularPrecioActividad(
-  input: CalculoPrecioInput
+  input: CalculoPrecioInput,
 ): CalculoPrecioOutput {
   // Validar y normalizar inputs
   const cantidadHermanos = Math.max(1, input.cantidadHermanos);
   const actividadesPorEstudiante = Math.max(1, input.actividadesPorEstudiante);
 
   // Obtener precio base según tipo de producto
-  const precioBase = obtenerPrecioBase(
-    input.tipoProducto,
-    input.configuracion
-  );
+  const precioBase = obtenerPrecioBase(input.tipoProducto, input.configuracion);
 
   // Aplicar reglas de descuento en orden de prioridad
   const resultado = aplicarReglasDescuento({
@@ -80,7 +77,7 @@ export function calcularPrecioActividad(
  */
 function obtenerPrecioBase(
   tipoProducto: 'CLUB_MATEMATICAS' | 'CURSO_ESPECIALIZADO',
-  configuracion: ConfiguracionPrecios
+  configuracion: ConfiguracionPrecios,
 ): Decimal {
   return tipoProducto === 'CLUB_MATEMATICAS'
     ? configuracion.precioClubMatematicas
@@ -118,7 +115,7 @@ function aplicarReglasDescuento(params: {
       precioBase,
       configuracion.precioHermanosMultiple,
       TipoDescuento.HERMANOS_MULTIPLE,
-      `${cantidadHermanos} hermanos, ${actividadesPorEstudiante} actividades c/u`
+      `${cantidadHermanos} hermanos, ${actividadesPorEstudiante} actividades c/u`,
     );
   }
 
@@ -128,7 +125,7 @@ function aplicarReglasDescuento(params: {
       precioBase,
       configuracion.precioHermanosBasico,
       TipoDescuento.HERMANOS_BASICO,
-      `${cantidadHermanos} hermanos, 1 actividad c/u`
+      `${cantidadHermanos} hermanos, 1 actividad c/u`,
     );
   }
 
@@ -138,7 +135,7 @@ function aplicarReglasDescuento(params: {
       precioBase,
       configuracion.precioMultipleActividades,
       TipoDescuento.MULTIPLE_ACTIVIDADES,
-      `1 estudiante, ${actividadesPorEstudiante} actividades`
+      `1 estudiante, ${actividadesPorEstudiante} actividades`,
     );
   }
 
@@ -151,7 +148,7 @@ function aplicarReglasDescuento(params: {
   ) {
     return aplicarDescuentoAacrea(
       precioBase,
-      configuracion.descuentoAacreaPorcentaje
+      configuracion.descuentoAacreaPorcentaje,
     );
   }
 
@@ -160,7 +157,7 @@ function aplicarReglasDescuento(params: {
     precioBase,
     precioBase,
     TipoDescuento.NINGUNO,
-    'Precio base sin descuentos'
+    'Precio base sin descuentos',
   );
 }
 
@@ -169,7 +166,7 @@ function aplicarReglasDescuento(params: {
  */
 function aplicarDescuentoAacrea(
   precioBase: Decimal,
-  porcentaje: Decimal
+  porcentaje: Decimal,
 ): CalculoPrecioOutput {
   const descuento = precioBase.mul(porcentaje).div(100);
   const precioFinal = precioBase.sub(descuento);
@@ -191,7 +188,7 @@ function crearResultado(
   precioBase: Decimal,
   precioFinal: Decimal,
   tipoDescuento: TipoDescuento,
-  detalle: string
+  detalle: string,
 ): CalculoPrecioOutput {
   return {
     precioBase,
@@ -213,7 +210,7 @@ function crearResultado(
  * @returns Total, subtotal y descuento total
  */
 export function calcularTotalMensual(
-  inscripciones: ReadonlyArray<CalculoPrecioOutput>
+  inscripciones: ReadonlyArray<CalculoPrecioOutput>,
 ): TotalMensualOutput {
   // Usar reduce para sumar todos los valores
   const resultado = inscripciones.reduce(
@@ -226,7 +223,7 @@ export function calcularTotalMensual(
       total: new Decimal(0),
       subtotal: new Decimal(0),
       descuentoTotal: new Decimal(0),
-    }
+    },
   );
 
   return resultado;
@@ -263,7 +260,9 @@ export function validarPrecioPositivo(precio: Decimal): boolean {
  * Valida que un porcentaje esté entre 0 y 100
  */
 export function validarPorcentaje(porcentaje: Decimal): boolean {
-  return porcentaje.greaterThanOrEqualTo(0) && porcentaje.lessThanOrEqualTo(100);
+  return (
+    porcentaje.greaterThanOrEqualTo(0) && porcentaje.lessThanOrEqualTo(100)
+  );
 }
 
 /**
@@ -288,7 +287,7 @@ export function formatearPrecio(precio: Decimal): string {
  */
 export function calcularPorcentajeDescuento(
   precioBase: Decimal,
-  precioFinal: Decimal
+  precioFinal: Decimal,
 ): Decimal {
   if (precioBase.isZero()) {
     return new Decimal(0);
@@ -302,10 +301,10 @@ export function calcularPorcentajeDescuento(
  * Calcula el ahorro total en pesos
  */
 export function calcularAhorroTotal(
-  inscripciones: ReadonlyArray<CalculoPrecioOutput>
+  inscripciones: ReadonlyArray<CalculoPrecioOutput>,
 ): Decimal {
   return inscripciones.reduce(
     (acc, ins) => acc.add(ins.descuentoAplicado),
-    new Decimal(0)
+    new Decimal(0),
   );
 }

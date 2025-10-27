@@ -75,7 +75,9 @@ describe('TokenBlacklistService', () => {
     it('should handle invalid token', async () => {
       jest.spyOn(jwtService, 'decode').mockReturnValue(null);
 
-      await expect(service.addToBlacklist('invalid', 'test')).resolves.not.toThrow();
+      await expect(
+        service.addToBlacklist('invalid', 'test'),
+      ).resolves.not.toThrow();
     });
 
     it('should log and continue when cache manager set rejects', async () => {
@@ -87,7 +89,9 @@ describe('TokenBlacklistService', () => {
       cacheManager.set.mockRejectedValue(new Error('redis down'));
       const loggerSpy = jest.spyOn(service['logger'], 'error');
 
-      await expect(service.addToBlacklist(mockToken, 'user_logout')).resolves.toBeUndefined();
+      await expect(
+        service.addToBlacklist(mockToken, 'user_logout'),
+      ).resolves.toBeUndefined();
 
       expect(loggerSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error al agregar token a blacklist'),
@@ -98,7 +102,9 @@ describe('TokenBlacklistService', () => {
 
   describe('isBlacklisted', () => {
     it('should return true for blacklisted token', async () => {
-      jest.spyOn(cacheManager, 'get').mockResolvedValue({ reason: 'user_logout' });
+      jest
+        .spyOn(cacheManager, 'get')
+        .mockResolvedValue({ reason: 'user_logout' });
 
       const result = await service.isBlacklisted(mockToken);
 

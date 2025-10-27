@@ -1,8 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
 import { IConfiguracionPreciosRepository } from '../../domain/repositories/configuracion-precios.repository.interface';
-import { IEstudianteRepository, Estudiante } from '../../domain/repositories/estudiante.repository.interface';
-import { IProductoRepository, Producto } from '../../domain/repositories/producto.repository.interface';
+import {
+  IEstudianteRepository,
+  Estudiante,
+} from '../../domain/repositories/estudiante.repository.interface';
+import {
+  IProductoRepository,
+  Producto,
+} from '../../domain/repositories/producto.repository.interface';
 import {
   CalcularPrecioInputDTO,
   CalcularPrecioOutputDTO,
@@ -34,7 +40,9 @@ export class CalcularPrecioUseCase {
     private readonly productoRepo: IProductoRepository,
   ) {}
 
-  async execute(input: CalcularPrecioInputDTO): Promise<CalcularPrecioOutputDTO> {
+  async execute(
+    input: CalcularPrecioInputDTO,
+  ): Promise<CalcularPrecioOutputDTO> {
     // 1. Validaciones de entrada
     this.validarInput(input);
 
@@ -75,7 +83,10 @@ export class CalcularPrecioUseCase {
       throw new Error('Debe proporcionar al menos un estudiante');
     }
 
-    if (!input.productosIdsPorEstudiante || Object.keys(input.productosIdsPorEstudiante).length === 0) {
+    if (
+      !input.productosIdsPorEstudiante ||
+      Object.keys(input.productosIdsPorEstudiante).length === 0
+    ) {
       throw new Error('Debe proporcionar al menos un producto por estudiante');
     }
 
@@ -83,7 +94,9 @@ export class CalcularPrecioUseCase {
     for (const estudianteId of input.estudiantesIds) {
       const productos = input.productosIdsPorEstudiante[estudianteId];
       if (!productos || productos.length === 0) {
-        throw new Error(`El estudiante ${estudianteId} no tiene productos asignados`);
+        throw new Error(
+          `El estudiante ${estudianteId} no tiene productos asignados`,
+        );
       }
     }
   }

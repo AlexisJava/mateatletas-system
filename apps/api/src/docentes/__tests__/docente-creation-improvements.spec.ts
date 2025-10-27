@@ -197,7 +197,9 @@ describe('DocentesService - Mejoras en Creación (TDD)', () => {
       // La contraseña generada debe venir en el resultado para que el admin pueda compartirla
       expect(result).toHaveProperty('generatedPassword');
       expect(typeof (result as any).generatedPassword).toBe('string');
-      expect((result as any).generatedPassword.length).toBeGreaterThanOrEqual(12);
+      expect((result as any).generatedPassword.length).toBeGreaterThanOrEqual(
+        12,
+      );
     });
 
     it('NO debe retornar contraseña cuando el admin la proporciona manualmente', async () => {

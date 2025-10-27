@@ -115,14 +115,17 @@ describe('InscripcionMensualRepository - Infrastructure Layer', () => {
         descuentoAplicado: new Decimal(6000),
         precioFinal: new Decimal(44000),
         tipoDescuento: TipoDescuento.MULTIPLE_ACTIVIDADES,
-        detalleCalculo: '1 estudiante, 2 actividades - Descuento múltiples actividades',
+        detalleCalculo:
+          '1 estudiante, 2 actividades - Descuento múltiples actividades',
       };
 
       const inscripcion = await repository.crear(dto);
 
       expect(inscripcion.descuentoAplicado.toNumber()).toBe(6000);
       expect(inscripcion.precioFinal.toNumber()).toBe(44000);
-      expect(inscripcion.tipoDescuento).toBe(TipoDescuento.MULTIPLE_ACTIVIDADES);
+      expect(inscripcion.tipoDescuento).toBe(
+        TipoDescuento.MULTIPLE_ACTIVIDADES,
+      );
     });
 
     it('debe mantener precisión decimal completa', async () => {
@@ -310,7 +313,9 @@ describe('InscripcionMensualRepository - Infrastructure Layer', () => {
         observaciones: 'Pago verificado',
       });
 
-      expect(actualizada.comprobanteUrl).toBe('https://example.com/comprobante.pdf');
+      expect(actualizada.comprobanteUrl).toBe(
+        'https://example.com/comprobante.pdf',
+      );
       expect(actualizada.observaciones).toBe('Pago verificado');
     });
   });
@@ -366,7 +371,10 @@ describe('InscripcionMensualRepository - Infrastructure Layer', () => {
     });
 
     it('debe calcular totales correctamente', async () => {
-      const total = await repository.calcularTotalMensualTutor(tutorId, '2025-01');
+      const total = await repository.calcularTotalMensualTutor(
+        tutorId,
+        '2025-01',
+      );
 
       expect(total.tutorId).toBe(tutorId);
       expect(total.periodo).toBe('2025-01');
@@ -395,12 +403,20 @@ describe('InscripcionMensualRepository - Infrastructure Layer', () => {
     });
 
     it('debe retornar true si existe la inscripción', async () => {
-      const existe = await repository.existe(estudianteId, productoId, '2025-01');
+      const existe = await repository.existe(
+        estudianteId,
+        productoId,
+        '2025-01',
+      );
       expect(existe).toBe(true);
     });
 
     it('debe retornar false si no existe la inscripción', async () => {
-      const existe = await repository.existe(estudianteId, productoId, '2025-12');
+      const existe = await repository.existe(
+        estudianteId,
+        productoId,
+        '2025-12',
+      );
       expect(existe).toBe(false);
     });
   });

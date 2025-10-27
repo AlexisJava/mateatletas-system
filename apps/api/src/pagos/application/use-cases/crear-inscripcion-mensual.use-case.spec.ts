@@ -260,7 +260,7 @@ describe('CrearInscripcionMensualUseCase - Application Layer', () => {
       mockInscripcionRepo.existe.mockResolvedValue(true);
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'Ya existe una inscripción para el estudiante est-1 y el producto prod-1 en el período 2025-01'
+        'Ya existe una inscripción para el estudiante est-1 y el producto prod-1 en el período 2025-01',
       );
     });
 
@@ -277,7 +277,7 @@ describe('CrearInscripcionMensualUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'El mes debe estar entre 1 y 12'
+        'El mes debe estar entre 1 y 12',
       );
     });
 
@@ -294,7 +294,7 @@ describe('CrearInscripcionMensualUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'El año debe ser mayor o igual a 2024'
+        'El año debe ser mayor o igual a 2024',
       );
     });
   });

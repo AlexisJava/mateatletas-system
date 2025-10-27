@@ -25,7 +25,9 @@ import { EstadoPago, TipoDescuento } from '../../domain/types/pagos.types';
  * - Garantizar consistencia de Decimals
  */
 @Injectable()
-export class InscripcionMensualRepository implements IInscripcionMensualRepository {
+export class InscripcionMensualRepository
+  implements IInscripcionMensualRepository
+{
   constructor(private readonly prisma: PrismaService) {}
 
   /**
@@ -442,6 +444,8 @@ export class InscripcionMensualRepository implements IInscripcionMensualReposito
     });
 
     // Mapear a domain objects
-    return inscripciones.map((inscripcion) => this.mapearPrismaADomain(inscripcion));
+    return inscripciones.map((inscripcion) =>
+      this.mapearPrismaADomain(inscripcion),
+    );
   }
 }

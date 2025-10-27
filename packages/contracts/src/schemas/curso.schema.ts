@@ -195,3 +195,5 @@ export type CompletarLeccionInput = z.infer<typeof completarLeccionSchema>;
 export const modulosListSchema = z.array(moduloSchema);
 export const leccionesListSchema = z.array(leccionSchema);
 
+export type ModulosList = z.infer<typeof modulosListSchema>;
+export type LeccionesList = z.infer<typeof leccionesListSchema>;

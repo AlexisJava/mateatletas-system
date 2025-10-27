@@ -350,7 +350,10 @@ describe('Sectores - Seed Data (TDD)', () => {
       const call = mockPrismaService.sector.findMany.mock.calls[0][0];
       expect(call.orderBy).toEqual({ nombre: 'asc' });
       expect(sectores).toHaveLength(2);
-      expect(sectores.map((s: any) => s.nombre)).toEqual(['Matemática', 'Programación']);
+      expect(sectores.map((s: any) => s.nombre)).toEqual([
+        'Matemática',
+        'Programación',
+      ]);
     });
 
     it('debe poder buscar sector por nombre exacto', async () => {

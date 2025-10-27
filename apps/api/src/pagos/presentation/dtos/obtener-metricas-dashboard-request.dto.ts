@@ -8,7 +8,8 @@ import { Type } from 'class-transformer';
  */
 export class ObtenerMetricasDashboardRequestDto {
   @ApiProperty({
-    description: 'Año para consultar métricas (opcional, por defecto año actual)',
+    description:
+      'Año para consultar métricas (opcional, por defecto año actual)',
     example: 2025,
     required: false,
   })
@@ -20,7 +21,8 @@ export class ObtenerMetricasDashboardRequestDto {
   anio?: number;
 
   @ApiProperty({
-    description: 'Mes para consultar métricas (opcional, por defecto mes actual)',
+    description:
+      'Mes para consultar métricas (opcional, por defecto mes actual)',
     example: 1,
     minimum: 1,
     maximum: 12,
@@ -34,7 +36,8 @@ export class ObtenerMetricasDashboardRequestDto {
   mes?: number;
 
   @ApiProperty({
-    description: 'ID del tutor para filtrar métricas (opcional, si no se envía muestra todas)',
+    description:
+      'ID del tutor para filtrar métricas (opcional, si no se envía muestra todas)',
     example: 'tutor-uuid-123',
     required: false,
   })

@@ -73,15 +73,20 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
     const actividades = planificacion.actividades.map((actividad) =>
       ActividadEntity.fromPersistence({
         ...actividad,
-        componente_props: (actividad.componente_props as Record<string, unknown>) ?? {},
-        recursos_url: actividad.recursos_url ? (actividad.recursos_url as Record<string, unknown>) : null,
+        componente_props:
+          (actividad.componente_props as Record<string, unknown>) ?? {},
+        recursos_url: actividad.recursos_url
+          ? (actividad.recursos_url as Record<string, unknown>)
+          : null,
       }),
     );
 
     return {
       ...entity,
       codigoGrupo:
-        (planificacion as any).codigo_grupo ?? planificacion.grupo?.codigo ?? undefined,
+        (planificacion as any).codigo_grupo ??
+        planificacion.grupo?.codigo ??
+        undefined,
       grupo: planificacion.grupo ?? undefined,
       actividades,
       activityCount: planificacion._count.actividades,
@@ -286,8 +291,11 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
     return actividades.map((actividad) =>
       ActividadEntity.fromPersistence({
         ...actividad,
-        componente_props: (actividad.componente_props as Record<string, unknown>) ?? {},
-        recursos_url: actividad.recursos_url ? (actividad.recursos_url as Record<string, unknown>) : null,
+        componente_props:
+          (actividad.componente_props as Record<string, unknown>) ?? {},
+        recursos_url: actividad.recursos_url
+          ? (actividad.recursos_url as Record<string, unknown>)
+          : null,
       }),
     );
   }
@@ -303,8 +311,11 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
 
     return ActividadEntity.fromPersistence({
       ...actividad,
-      componente_props: (actividad.componente_props as Record<string, unknown>) ?? {},
-      recursos_url: actividad.recursos_url ? (actividad.recursos_url as Record<string, unknown>) : null,
+      componente_props:
+        (actividad.componente_props as Record<string, unknown>) ?? {},
+      recursos_url: actividad.recursos_url
+        ? (actividad.recursos_url as Record<string, unknown>)
+        : null,
     });
   }
 
@@ -329,8 +340,11 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
 
     return ActividadEntity.fromPersistence({
       ...actividad,
-      componente_props: (actividad.componente_props as Record<string, unknown>) ?? {},
-      recursos_url: actividad.recursos_url ? (actividad.recursos_url as Record<string, unknown>) : null,
+      componente_props:
+        (actividad.componente_props as Record<string, unknown>) ?? {},
+      recursos_url: actividad.recursos_url
+        ? (actividad.recursos_url as Record<string, unknown>)
+        : null,
     });
   }
 
@@ -381,7 +395,9 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
     }
 
     if (data.recursosUrl !== undefined) {
-      updateData.recursos_url = data.recursosUrl ? (data.recursosUrl as any) : null;
+      updateData.recursos_url = data.recursosUrl
+        ? (data.recursosUrl as any)
+        : null;
     }
 
     if (data.orden !== undefined) {
@@ -395,8 +411,11 @@ export class PrismaPlanificacionRepository implements IPlanificacionRepository {
 
     return ActividadEntity.fromPersistence({
       ...actividad,
-      componente_props: (actividad.componente_props as Record<string, unknown>) ?? {},
-      recursos_url: actividad.recursos_url ? (actividad.recursos_url as Record<string, unknown>) : null,
+      componente_props:
+        (actividad.componente_props as Record<string, unknown>) ?? {},
+      recursos_url: actividad.recursos_url
+        ? (actividad.recursos_url as Record<string, unknown>)
+        : null,
     });
   }
 

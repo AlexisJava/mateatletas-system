@@ -1,124 +1,36 @@
 import apiClient from '../axios';
-import { rankingResponseSchema, type RankingResponse } from '@/lib/schemas/ranking.schema';
+import {
+  accionesPuntuablesListSchema,
+  dashboardGamificacionSchema,
+  logrosListSchema,
+  otorgarPuntosSchema,
+  puntosObtenidosListSchema,
+  puntosSchema,
+  progresoRutaListSchema,
+  rankingSchema,
+  type AccionPuntuable as ContractsAccionPuntuable,
+  type DashboardGamificacion,
+  type Logro as ContractsLogro,
+  type OtorgarPuntosInput,
+  type PuntoObtenido as ContractsPuntoObtenido,
+  type Puntos as ContractsPuntos,
+  type Ranking as ContractsRanking,
+  type RankingGlobalItem,
+  type RankingIntegrante,
+  type ProgresoRuta,
+} from '@mateatletas/contracts';
 
-export interface ProximaClase {
-  id: string;
-  fecha_hora_inicio: string;
-  duracion_minutos: number;
-  ruta_curricular: {
-    nombre: string;
-    color: string;
-  };
-  docente: {
-    nombre: string;
-    apellido: string;
-  };
-}
-
-export interface DashboardData {
-  estudiante: {
-    id: string;
-    nombre: string;
-    apellido: string;
-    avatar_url?: string;
-    foto_url?: string;
-    equipo: {
-      id: string;
-      nombre: string;
-      color: string;
-    };
-  };
-  stats: {
-    puntosToales: number;
-    clasesAsistidas: number;
-    clasesTotales: number;
-    racha: number;
-  };
-  nivel: {
-    nivelActual: number;
-    nombre: string;
-    descripcion: string;
-    puntosActuales: number;
-    puntosMinimos: number;
-    puntosMaximos: number;
-    puntosParaSiguienteNivel: number;
-    porcentajeProgreso: number;
-    color: string;
-    icono: string;
-    siguienteNivel: {
-      nivel: number;
-      nombre: string;
-      puntosRequeridos: number;
-    } | null;
-  };
-  proximasClases: ProximaClase[];
-  equipoRanking: Array<Record<string, unknown>>;
-  ultimasAsistencias: Array<Record<string, unknown>>;
-}
-
-export interface Logro {
-  id: string;
-  nombre: string;
-  descripcion: string;
-  icono: string;
-  puntos: number;
-  categoria: string;
-  rareza?: string;
-  desbloqueado: boolean;
-  fecha_desbloqueo?: Date;
-}
-
-export interface Puntos {
-  total: number;
-  asistencia: number;
-  extras: number;
-  porRuta: Record<string, number>;
-}
-
-export type Ranking = RankingResponse;
-
-export interface Progreso {
-  ruta: string;
-  color: string;
-  clasesAsistidas: number;
-  clasesTotales: number;
-  porcentaje: number;
-}
-
-export interface AccionPuntuable {
-  id: string;
-  nombre: string;
-  descripcion: string;
-  puntos: number;
-  activo: boolean;
-}
-
-export interface PuntoObtenido {
-  id: string;
-  puntos: number;
-  contexto?: string;
-  fecha_otorgado: string;
-  accion: AccionPuntuable;
-  docente: {
-    nombre: string;
-    apellido: string;
-  };
-  clase?: {
-    id: string;
-    fecha_hora_inicio: string;
-    rutaCurricular: {
-      nombre: string;
-      color: string;
-    };
-  };
-}
-
-export interface OtorgarPuntosData {
-  estudianteId: string;
-  accionId: string;
-  claseId?: string;
-  contexto?: string;
-}
+export type DashboardData = DashboardGamificacion;
+export type ProximaClase = DashboardData['proximasClases'][number];
+export type Logro = ContractsLogro;
+export type Puntos = ContractsPuntos;
+export type Ranking = ContractsRanking;
+export type Progreso = ProgresoRuta;
+export type AccionPuntuable = ContractsAccionPuntuable;
+export type PuntoObtenido = ContractsPuntoObtenido;
+export type OtorgarPuntosData = OtorgarPuntosInput;
+export type RankingEquipoEntry = RankingIntegrante;
+export type RankingGlobalEntry = RankingGlobalItem;
 
 export const gamificacionApi = {
   /**
@@ -150,7 +62,7 @@ export const gamificacionApi = {
    */
   getRanking: async (estudianteId: string): Promise<Ranking> => {
     const response = await apiClient.get(`/gamificacion/ranking/${estudianteId}`);
-    return rankingResponseSchema.parse(response);
+    return rankingSchema.parse(response);
   },
 
   /**
@@ -192,4 +104,3 @@ export const gamificacionApi = {
     return await apiClient.post('/gamificacion/puntos', payload);
   },
 };
-

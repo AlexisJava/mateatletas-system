@@ -57,7 +57,8 @@ export class AuthController {
    */
   @ApiOperation({
     summary: 'Registrar nuevo tutor',
-    description: 'Registra un nuevo tutor en la plataforma con validación de campos',
+    description:
+      'Registra un nuevo tutor en la plataforma con validación de campos',
   })
   @ApiResponse({
     status: 201,
@@ -101,8 +102,7 @@ export class AuthController {
    */
   @ApiOperation({
     summary: 'Autenticación de tutor',
-    description:
-      'Autentica un tutor y retorna un token JWT en httpOnly cookie',
+    description: 'Autentica un tutor y retorna un token JWT en httpOnly cookie',
   })
   @ApiResponse({
     status: 200,
@@ -205,10 +205,11 @@ export class AuthController {
    * @returns 200 OK - Datos completos del tutor (sin password_hash)
    * @throws 401 Unauthorized - Token JWT inválido o no proporcionado
    * @throws 404 Not Found - Tutor no encontrado en la base de datos
-  */
+   */
   @ApiOperation({
     summary: 'Obtener perfil del usuario autenticado',
-    description: 'Retorna los datos del usuario (tutor/docente/estudiante) que está autenticado',
+    description:
+      'Retorna los datos del usuario (tutor/docente/estudiante) que está autenticado',
   })
   @ApiResponse({
     status: 200,
@@ -253,7 +254,8 @@ export class AuthController {
    */
   @ApiOperation({
     summary: 'Cerrar sesión',
-    description: 'Cierra la sesión del usuario eliminando la cookie httpOnly y agregando el token a blacklist',
+    description:
+      'Cierra la sesión del usuario eliminando la cookie httpOnly y agregando el token a blacklist',
   })
   @ApiResponse({
     status: 200,
@@ -273,10 +275,7 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async logout(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     // 1. Extraer el token del header Authorization
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {

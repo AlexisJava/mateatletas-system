@@ -54,7 +54,9 @@ export class CreateEstudianteDto {
   })
   @IsString({ message: 'El apellido debe ser un texto' })
   @IsNotEmpty({ message: 'El apellido es requerido' })
-  @MaxLength(100, { message: 'El apellido no puede superar los 100 caracteres' })
+  @MaxLength(100, {
+    message: 'El apellido no puede superar los 100 caracteres',
+  })
   @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
     message: 'El apellido solo puede contener letras y espacios',
   })
@@ -106,9 +108,12 @@ export class CreateEstudianteDto {
   })
   @IsOptional()
   @IsString({ message: 'La URL de la foto debe ser un texto' })
-  @IsUrl({ require_protocol: true, protocols: ['https'] }, {
-    message: 'La foto debe ser una URL HTTPS válida',
-  })
+  @IsUrl(
+    { require_protocol: true, protocols: ['https'] },
+    {
+      message: 'La foto debe ser una URL HTTPS válida',
+    },
+  )
   @Trim()
   foto_url?: string;
 

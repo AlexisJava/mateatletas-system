@@ -26,7 +26,9 @@ export function IsFutureDate(
 
           const date = new Date(value);
           const now = new Date();
-          const minFutureDate = new Date(now.getTime() + args.constraints[0] * 60000);
+          const minFutureDate = new Date(
+            now.getTime() + args.constraints[0] * 60000,
+          );
 
           return date >= minFutureDate;
         },

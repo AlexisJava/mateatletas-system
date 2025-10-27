@@ -65,7 +65,9 @@ describe('ClasesManagementService - Cancelar Clase Security', () => {
       // TypeScript ya previene llamadas sin todos los parámetros
       // Este test verifica que la implementación funcione correctamente con parámetros válidos
 
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClaseProgramada as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClaseProgramada as any);
       jest.spyOn(prisma.clase, 'update').mockResolvedValue({
         ...mockClaseProgramada,
         estado: 'Cancelada',
@@ -73,26 +75,34 @@ describe('ClasesManagementService - Cancelar Clase Security', () => {
       } as any);
 
       // Verificar que funciona con los 3 parámetros obligatorios
-      const result = await service.cancelarClase('clase-123', 'admin-1', 'admin');
+      const result = await service.cancelarClase(
+        'clase-123',
+        'admin-1',
+        'admin',
+      );
       expect(result).toBeDefined();
     });
 
     it('should reject cancellation from non-owner docente', async () => {
       // ✅ TEST: Docente solo puede cancelar SUS clases
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClaseProgramada as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClaseProgramada as any);
 
       await expect(
-        service.cancelarClase('clase-123', 'docente-OTHER', 'docente')
+        service.cancelarClase('clase-123', 'docente-OTHER', 'docente'),
       ).rejects.toThrow(ForbiddenException);
 
       await expect(
-        service.cancelarClase('clase-123', 'docente-OTHER', 'docente')
+        service.cancelarClase('clase-123', 'docente-OTHER', 'docente'),
       ).rejects.toThrow('No tienes permiso para cancelar esta clase');
     });
 
     it('should allow admin to cancel any class', async () => {
       // ✅ TEST: Admin puede cancelar cualquier clase
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClaseProgramada as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClaseProgramada as any);
       jest.spyOn(prisma.clase, 'update').mockResolvedValue({
         ...mockClaseProgramada,
         estado: 'Cancelada',
@@ -101,7 +111,11 @@ describe('ClasesManagementService - Cancelar Clase Security', () => {
         docente: { nombre: 'Juan', apellido: 'Perez' },
       } as any);
 
-      const result = await service.cancelarClase('clase-123', 'admin-456', 'admin');
+      const result = await service.cancelarClase(
+        'clase-123',
+        'admin-456',
+        'admin',
+      );
 
       expect(result.estado).toBe('Cancelada');
       expect(prisma.clase.update).toHaveBeenCalledWith({
@@ -119,7 +133,9 @@ describe('ClasesManagementService - Cancelar Clase Security', () => {
 
     it('should allow owner docente to cancel their class', async () => {
       // ✅ TEST: Docente puede cancelar SU clase
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClaseProgramada as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClaseProgramada as any);
       jest.spyOn(prisma.clase, 'update').mockResolvedValue({
         ...mockClaseProgramada,
         estado: 'Cancelada',
@@ -128,30 +144,38 @@ describe('ClasesManagementService - Cancelar Clase Security', () => {
         docente: { nombre: 'Juan', apellido: 'Perez' },
       } as any);
 
-      const result = await service.cancelarClase('clase-123', 'docente-123', 'docente');
+      const result = await service.cancelarClase(
+        'clase-123',
+        'docente-123',
+        'docente',
+      );
 
       expect(result.estado).toBe('Cancelada');
     });
 
     it('should reject cancellation from tutor role', async () => {
       // ✅ TEST: Tutores NO pueden cancelar clases
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClaseProgramada as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClaseProgramada as any);
 
       await expect(
-        service.cancelarClase('clase-123', 'tutor-123', 'tutor')
+        service.cancelarClase('clase-123', 'tutor-123', 'tutor'),
       ).rejects.toThrow(ForbiddenException);
 
       await expect(
-        service.cancelarClase('clase-123', 'tutor-123', 'tutor')
+        service.cancelarClase('clase-123', 'tutor-123', 'tutor'),
       ).rejects.toThrow('Solo admin y docentes pueden cancelar clases');
     });
 
     it('should reject cancellation from estudiante role', async () => {
       // ✅ TEST: Estudiantes NO pueden cancelar clases
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClaseProgramada as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClaseProgramada as any);
 
       await expect(
-        service.cancelarClase('clase-123', 'est-123', 'estudiante')
+        service.cancelarClase('clase-123', 'est-123', 'estudiante'),
       ).rejects.toThrow(ForbiddenException);
     });
   });
@@ -165,11 +189,11 @@ describe('ClasesManagementService - Cancelar Clase Security', () => {
       } as any);
 
       await expect(
-        service.cancelarClase('clase-123', 'admin-123', 'admin')
+        service.cancelarClase('clase-123', 'admin-123', 'admin'),
       ).rejects.toThrow(BadRequestException);
 
       await expect(
-        service.cancelarClase('clase-123', 'admin-123', 'admin')
+        service.cancelarClase('clase-123', 'admin-123', 'admin'),
       ).rejects.toThrow('La clase ya está cancelada');
     });
 
@@ -188,7 +212,11 @@ describe('ClasesManagementService - Cancelar Clase Security', () => {
         docente: { nombre: 'Juan', apellido: 'Perez' },
       } as any);
 
-      const result = await service.cancelarClase('clase-123', 'admin-123', 'admin');
+      const result = await service.cancelarClase(
+        'clase-123',
+        'admin-123',
+        'admin',
+      );
 
       expect(result.cupos_ocupados).toBe(0);
       expect(result.estado).toBe('Cancelada');

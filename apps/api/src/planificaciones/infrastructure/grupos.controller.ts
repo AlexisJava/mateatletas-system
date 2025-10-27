@@ -13,9 +13,22 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+} from '@nestjs/swagger';
 import { PrismaService } from '../../core/database/prisma.service';
-import { IsString, IsOptional, IsInt, IsBoolean, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  IsBoolean,
+  Min,
+  Max,
+} from 'class-validator';
 
 /**
  * DTO para crear un nuevo grupo pedagógico
@@ -112,7 +125,8 @@ export class GruposController {
           id: 'b5ac168d-1b44-4357-8e73-4339db2fa77c',
           codigo: 'B1',
           nombre: 'Básico 1',
-          descripcion: 'Grupo básico nivel 1 - Fundamentos matemáticos iniciales',
+          descripcion:
+            'Grupo básico nivel 1 - Fundamentos matemáticos iniciales',
           edad_minima: 6,
           edad_maxima: 7,
           activo: true,
@@ -174,7 +188,9 @@ export class GruposController {
       dto.edad_maxima !== undefined &&
       dto.edad_minima > dto.edad_maxima
     ) {
-      throw new BadRequestException('La edad mínima no puede ser mayor que la edad máxima');
+      throw new BadRequestException(
+        'La edad mínima no puede ser mayor que la edad máxima',
+      );
     }
 
     // Verificar si ya existe un grupo con el mismo código
@@ -183,7 +199,9 @@ export class GruposController {
     });
 
     if (existente) {
-      throw new ConflictException(`Ya existe un grupo con el código "${dto.codigo}"`);
+      throw new ConflictException(
+        `Ya existe un grupo con el código "${dto.codigo}"`,
+      );
     }
 
     const grupo = await this.prisma.grupo.create({
@@ -234,15 +252,23 @@ export class GruposController {
       });
 
       if (otroGrupo) {
-        throw new ConflictException(`Ya existe otro grupo con el código "${dto.codigo}"`);
+        throw new ConflictException(
+          `Ya existe otro grupo con el código "${dto.codigo}"`,
+        );
       }
     }
 
     const edadMinima = dto.edad_minima ?? existente.edad_minima ?? undefined;
     const edadMaxima = dto.edad_maxima ?? existente.edad_maxima ?? undefined;
 
-    if (edadMinima !== undefined && edadMaxima !== undefined && edadMinima > edadMaxima) {
-      throw new BadRequestException('La edad mínima no puede ser mayor que la edad máxima');
+    if (
+      edadMinima !== undefined &&
+      edadMaxima !== undefined &&
+      edadMinima > edadMaxima
+    ) {
+      throw new BadRequestException(
+        'La edad mínima no puede ser mayor que la edad máxima',
+      );
     }
 
     const grupo = await this.prisma.grupo.update({
@@ -298,8 +324,14 @@ export class GruposController {
   @Get(':id/planificaciones')
   @ApiOperation({ summary: 'Obtener planificaciones de un grupo' })
   @ApiParam({ name: 'id', description: 'ID del grupo pedagógico' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Planificaciones obtenidas exitosamente' })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Grupo no encontrado' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Planificaciones obtenidas exitosamente',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Grupo no encontrado',
+  })
   async getPlanificacionesByGrupo(
     @Param('id') id: string,
     @Query('anio') anio?: string,
@@ -321,7 +353,9 @@ export class GruposController {
       const parsedYear = parseInt(anio, 10);
 
       if (Number.isNaN(parsedYear)) {
-        throw new BadRequestException('El parámetro "anio" debe ser un número válido');
+        throw new BadRequestException(
+          'El parámetro "anio" debe ser un número válido',
+        );
       }
 
       where.anio = parsedYear;
@@ -343,10 +377,7 @@ export class GruposController {
           },
         },
       },
-      orderBy: [
-        { anio: 'desc' },
-        { mes: 'asc' },
-      ],
+      orderBy: [{ anio: 'desc' }, { mes: 'asc' }],
     });
 
     return planificaciones;
