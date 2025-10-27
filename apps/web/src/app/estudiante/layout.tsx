@@ -9,6 +9,7 @@ import {
   BookOpen,
   Trophy,
   BarChart3,
+  Calendar,
   LogOut,
   X,
   Rocket,
@@ -26,6 +27,7 @@ import {
 
 const navItems = [
   { href: '/estudiante/dashboard', label: 'Inicio', icon: LayoutDashboard },
+  { href: '/estudiante/planificaciones', label: 'Planificación', icon: Calendar },
   { href: '/estudiante/cursos', label: 'Estudiar', icon: BookOpen },
   { href: '/estudiante/logros', label: 'Logros', icon: Trophy },
   { href: '/estudiante/ranking', label: 'Ranking', icon: BarChart3 },
