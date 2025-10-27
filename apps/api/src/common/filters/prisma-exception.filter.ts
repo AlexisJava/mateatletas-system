@@ -43,7 +43,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       meta: exception.meta,
       path: request.url,
       method: request.method,
-      userId: (request as any).user?.id,
+      userId: (request as Request & { user?: { id: string } }).user?.id,
     });
 
     // Mapear códigos de error de Prisma a respuestas HTTP

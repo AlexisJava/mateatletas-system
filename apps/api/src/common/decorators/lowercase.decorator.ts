@@ -5,7 +5,7 @@ import { Transform } from 'class-transformer';
  * Útil para emails y usernames para evitar duplicados por case sensitivity
  */
 export function Lowercase() {
-  return Transform(({ value }) => {
+  return Transform(({ value }: { value: string }) => {
     if (typeof value === 'string') {
       return value.toLowerCase();
     }
