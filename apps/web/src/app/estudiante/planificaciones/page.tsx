@@ -180,7 +180,7 @@ export default function EstudiantePlanificacionesPage() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-black text-white uppercase tracking-wide flex items-center gap-2">
-            <div className="w-1.5 h-6 bg-purple-500 rounded-full" />
+            <div className="w-1.5 h-6 bg-cyan-500 rounded-full" />
             MISIONES DISPONIBLES
           </h3>
           <span className="text-sm text-slate-400 font-medium">
@@ -203,7 +203,7 @@ export default function EstudiantePlanificacionesPage() {
               {/* Card */}
               <div className={`relative rounded-2xl overflow-hidden border-4 transition-all ${
                 selectedActivity === actividad.id
-                  ? 'border-white shadow-2xl shadow-purple-500/50'
+                  ? 'border-cyan-500 shadow-2xl shadow-cyan-500/20'
                   : 'border-slate-700/50 shadow-xl'
               }`}>
 
@@ -264,7 +264,7 @@ export default function EstudiantePlanificacionesPage() {
 
               {/* Indicador de selección */}
               {selectedActivity === actividad.id && (
-                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-white text-slate-900 text-xs font-black uppercase shadow-lg animate-pulse">
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-cyan-500 text-white text-xs font-black uppercase shadow-lg shadow-cyan-500/30">
                   SELECCIONADO
                 </div>
               )}
