@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUsers, useUsersLoading, useUsersError, useFetchUsers, useDeleteUser, useUpdateUserRoles, useUsersStore } from '@/features/admin/users';
+import { useUsers, useUsersLoading, useUsersError, useFetchUsers, useDeleteUser, useUsersStore } from '@/features/admin/users';
 import { AdminUser } from '@/types/admin.types';
 import { docentesApi, CreateDocenteData, Docente } from '@/lib/api/docentes.api';
 import { createAdmin, CreateAdminData } from '@/lib/api/admin.api';

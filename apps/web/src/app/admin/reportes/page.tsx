@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useStats, useFetchStats, useStatsLoading } from '@/features/admin/stats';
 import { useUsers, useFetchUsers } from '@/features/admin/users';
 import { useClasses, useFetchClasses } from '@/features/admin/classes';
-import { useDashboard, useFetchDashboard } from '@/features/admin/dashboard';
+import { useFetchDashboard } from '@/features/admin/dashboard';
 import {
   exportToExcel,
   exportToCSV,
