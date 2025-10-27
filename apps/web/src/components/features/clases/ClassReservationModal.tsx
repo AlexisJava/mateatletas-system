@@ -61,8 +61,12 @@ export function ClassReservationModal({
     minute: '2-digit',
   }).format(fecha);
 
-  // Color de la ruta
-  const colorRuta = clase.ruta_curricular?.color || '#00d9ff';
+  const rutaCurricular = clase.ruta_curricular ?? clase.rutaCurricular;
+  const colorRuta = rutaCurricular?.color ?? '#00d9ff';
+  const nombreRuta = rutaCurricular?.nombre ?? 'Sin ruta';
+  const cupoMaximo = clase.cupo_maximo ?? 0;
+  const cuposOcupados = clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0;
+  const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);
 
   // Handler de confirmación
   const handleConfirm = async () => {
@@ -117,9 +121,7 @@ export function ClassReservationModal({
               <span className="text-xl">📚</span>
               <div>
                 <p className="text-xs text-gray-500">Ruta</p>
-                <p className="font-bold text-dark">
-                  {clase.ruta_curricular?.nombre || 'Sin ruta'}
-                </p>
+                <p className="font-bold text-dark">{nombreRuta}</p>
               </div>
             </div>
 
@@ -153,7 +155,7 @@ export function ClassReservationModal({
               <div>
                 <p className="text-xs text-gray-500">Cupos disponibles</p>
                 <p className="font-bold text-dark">
-                  {clase.cupo_disponible} de {clase.cupo_maximo}
+                  {cuposDisponibles} de {cupoMaximo}
                 </p>
               </div>
             </div>

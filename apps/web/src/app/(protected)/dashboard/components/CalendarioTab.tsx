@@ -43,7 +43,7 @@ export default function CalendarioTab() {
           anio: anioSeleccionado,
         },
       });
-      const parsed = calendarioResponseSchema.parse(response);
+      const parsed = calendarioResponseSchema.parse(response.data);
       setCalendarioData(parsed);
     } catch (error: unknown) {
       // Error loading calendar
@@ -196,10 +196,15 @@ export default function CalendarioTab() {
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="font-bold text-white">{clase.ruta_curricular?.nombre || 'Sin ruta'}</h4>
+                                  <h4 className="font-bold text-white">
+                                    {(clase.ruta_curricular ?? clase.rutaCurricular)?.nombre ?? 'Sin asignar'}
+                                  </h4>
                                   <span
                                     className="w-3 h-3 rounded-full"
-                                    style={{ backgroundColor: clase.ruta_curricular?.color || '#6366F1' }}
+                                    style={{
+                                      backgroundColor:
+                                        (clase.ruta_curricular ?? clase.rutaCurricular)?.color || '#6366F1',
+                                    }}
                                   ></span>
                                 </div>
                                 <p className="text-sm text-gray-300 mb-2">
