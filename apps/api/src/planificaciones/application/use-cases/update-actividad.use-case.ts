@@ -18,10 +18,13 @@ export class UpdateActividadUseCase {
     actividadId: string,
     dto: UpdateActividadDto,
   ): Promise<ActividadEntity> {
-    const actividad = await this.planificacionRepository.findActividadById(actividadId);
+    const actividad =
+      await this.planificacionRepository.findActividadById(actividadId);
 
     if (actividad.planificacionId !== planificacionId) {
-      throw new NotFoundException('La actividad no pertenece a la planificación solicitada');
+      throw new NotFoundException(
+        'La actividad no pertenece a la planificación solicitada',
+      );
     }
 
     const updateData: UpdateActividadData = {
@@ -39,6 +42,9 @@ export class UpdateActividadUseCase {
       orden: dto.orden,
     };
 
-    return this.planificacionRepository.updateActividad(actividadId, updateData);
+    return this.planificacionRepository.updateActividad(
+      actividadId,
+      updateData,
+    );
   }
 }

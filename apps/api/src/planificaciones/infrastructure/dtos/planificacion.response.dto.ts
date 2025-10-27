@@ -17,7 +17,11 @@ class PlanificacionGrupoDto {
   @ApiProperty({ example: 'Básico 1' })
   nombre!: string;
 
-  static fromEntity(entity: { id: string; codigo: string; nombre: string }): PlanificacionGrupoDto {
+  static fromEntity(entity: {
+    id: string;
+    codigo: string;
+    nombre: string;
+  }): PlanificacionGrupoDto {
     const dto = new PlanificacionGrupoDto();
     dto.id = entity.id;
     dto.codigo = entity.codigo;
@@ -54,10 +58,16 @@ export class PlanificacionListItemResponseDto {
   @ApiProperty({ example: 'Multiplicaciones' })
   tematicaPrincipal!: string;
 
-  @ApiProperty({ type: [String], example: ['Resolver multiplicaciones hasta 10x10'] })
+  @ApiProperty({
+    type: [String],
+    example: ['Resolver multiplicaciones hasta 10x10'],
+  })
   objetivosAprendizaje!: string[];
 
-  @ApiProperty({ enum: EstadoPlanificacion, example: EstadoPlanificacion.BORRADOR })
+  @ApiProperty({
+    enum: EstadoPlanificacion,
+    example: EstadoPlanificacion.BORRADOR,
+  })
   estado!: EstadoPlanificacion;
 
   @ApiProperty({ example: 'admin_123' })
@@ -81,12 +91,16 @@ export class PlanificacionListItemResponseDto {
   @ApiProperty({ example: 2 })
   assignmentCount!: number;
 
-  static fromEntity(entity: PlanificacionWithCounts): PlanificacionListItemResponseDto {
+  static fromEntity(
+    entity: PlanificacionWithCounts,
+  ): PlanificacionListItemResponseDto {
     const dto = new PlanificacionListItemResponseDto();
     dto.id = entity.id;
     dto.grupoId = entity.grupoId;
     dto.codigoGrupo = entity.codigoGrupo;
-    dto.grupo = entity.grupo ? PlanificacionGrupoDto.fromEntity(entity.grupo) : undefined;
+    dto.grupo = entity.grupo
+      ? PlanificacionGrupoDto.fromEntity(entity.grupo)
+      : undefined;
     dto.mes = entity.mes;
     dto.anio = entity.anio;
     dto.titulo = entity.titulo;
@@ -138,7 +152,9 @@ export class PlanificacionDetailResponseDto extends PlanificacionListItemRespons
   @ApiProperty({ type: [ActividadResponseDto] })
   actividades!: ActividadResponseDto[];
 
-  static fromDetail(detail: PlanificacionDetail): PlanificacionDetailResponseDto {
+  static fromDetail(
+    detail: PlanificacionDetail,
+  ): PlanificacionDetailResponseDto {
     const dto = new PlanificacionDetailResponseDto();
     Object.assign(dto, PlanificacionListItemResponseDto.fromEntity(detail));
     dto.actividades = detail.actividades.map(ActividadResponseDto.fromEntity);

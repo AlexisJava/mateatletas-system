@@ -29,14 +29,16 @@ export const estudianteSchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   // Relaciones opcionales
-  equipo: z.object({
-    id: z.string(),
-    nombre: z.string(),
-    color_primario: z.string(),
-    color_secundario: z.string(),
-    icono_url: z.string().nullable().optional(),
-    puntos_totales: z.number(),
-  }).optional(),
+  equipo: z
+    .object({
+      id: z.string(),
+      nombre: z.string(),
+      color_primario: z.string(),
+      color_secundario: z.string(),
+      icono_url: z.string().nullable().optional(),
+      puntos_totales: z.number(),
+    })
+    .optional(),
 });
 
 export type Estudiante = z.infer<typeof estudianteSchema>;

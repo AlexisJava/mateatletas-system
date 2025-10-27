@@ -3,7 +3,7 @@ import {
   CreateEventoBaseDto,
   CreateTareaDto,
   CreateRecordatorioDto,
-  CreateNotaDto
+  CreateNotaDto,
 } from './create-evento.dto';
 
 /**
@@ -29,4 +29,7 @@ export class UpdateNotaDto extends PartialType(CreateNotaDto) {}
 /**
  * DTO unificado para actualizaciones
  */
-export type UpdateEventoDto = UpdateTareaDto | UpdateRecordatorioDto | UpdateNotaDto;
+export type UpdateEventoDto =
+  | UpdateTareaDto
+  | UpdateRecordatorioDto
+  | UpdateNotaDto;

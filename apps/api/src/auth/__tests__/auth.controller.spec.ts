@@ -51,8 +51,16 @@ describe('AuthController', () => {
 
   describe('changePassword', () => {
     it('should call service to change password and blacklist user tokens', async () => {
-      const user = { id: 'user-123', email: 'test@example.com', roles: [], role: undefined };
-      const dto = { passwordActual: 'Temp123!', nuevaPassword: 'NuevaPassword123!' };
+      const user = {
+        id: 'user-123',
+        email: 'test@example.com',
+        roles: [],
+        role: undefined,
+      };
+      const dto = {
+        passwordActual: 'Temp123!',
+        nuevaPassword: 'NuevaPassword123!',
+      };
 
       authService.cambiarPassword.mockResolvedValue({
         success: true,
@@ -100,7 +108,10 @@ describe('AuthController', () => {
         roles: [Role.Tutor] as Role[],
         debe_cambiar_password: false,
       };
-      authService.login.mockResolvedValue({ access_token: 'token-123', user: mockUser });
+      authService.login.mockResolvedValue({
+        access_token: 'token-123',
+        user: mockUser,
+      });
       const { response, cookie } = createMockResponse();
 
       const result = await controller.login(dto, response);
@@ -123,7 +134,10 @@ describe('AuthController', () => {
 
   describe('loginEstudiante', () => {
     it('should mirror tutor login behavior for estudiantes', async () => {
-      const dto: LoginDto = { email: 'student@test.com', password: 'Secret123!' };
+      const dto: LoginDto = {
+        email: 'student@test.com',
+        password: 'Secret123!',
+      };
       const mockUser = {
         id: 'student-1',
         email: dto.email,
@@ -135,7 +149,12 @@ describe('AuthController', () => {
         puntos_totales: 0,
         nivel_actual: 1,
         equipo: null,
-        tutor: { id: 'tutor-1', nombre: 'Tutor', apellido: 'Test', email: 'tutor@test.com' },
+        tutor: {
+          id: 'tutor-1',
+          nombre: 'Tutor',
+          apellido: 'Test',
+          email: 'tutor@test.com',
+        },
         role: 'Estudiante',
         roles: [Role.Estudiante] as Role[],
         debe_cambiar_password: false,
@@ -166,7 +185,9 @@ describe('AuthController', () => {
 
   describe('logout', () => {
     it('should blacklist the token and clear the cookie when Authorization header exists', async () => {
-      const req = { headers: { authorization: 'Bearer jwt-token' } } as unknown as Request;
+      const req = {
+        headers: { authorization: 'Bearer jwt-token' },
+      } as unknown as Request;
       const { response, clearCookie } = createMockResponse();
 
       const result = await controller.logout(req, response);
@@ -200,4 +221,3 @@ describe('AuthController', () => {
     });
   });
 });
-

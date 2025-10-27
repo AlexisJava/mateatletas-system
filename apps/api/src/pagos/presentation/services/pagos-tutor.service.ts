@@ -120,9 +120,7 @@ export class PagosTutorService {
     const producto = await this.productosService.findById(productoId);
 
     if (producto.tipo !== TipoProducto.Curso) {
-      throw new BadRequestException(
-        'El producto especificado no es un curso',
-      );
+      throw new BadRequestException('El producto especificado no es un curso');
     }
 
     const estudiante = await this.prisma.estudiante.findFirst({
@@ -334,9 +332,8 @@ export class PagosTutorService {
       return this.buildMockPreference(tipo, entidadId);
     }
 
-    const preference = await this.mercadoPagoService.createPreference(
-      buildData(),
-    );
+    const preference =
+      await this.mercadoPagoService.createPreference(buildData());
 
     if (!preference.id || !preference.init_point) {
       throw new Error('MercadoPago preference created without required fields');

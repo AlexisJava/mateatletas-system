@@ -14,8 +14,16 @@ describe('AdminStatsService', () => {
   ];
 
   const mockClases = [
-    { id: '1', estado: 'Programada', fecha_hora_inicio: new Date('2025-12-01') },
-    { id: '2', estado: 'Programada', fecha_hora_inicio: new Date('2025-12-02') },
+    {
+      id: '1',
+      estado: 'Programada',
+      fecha_hora_inicio: new Date('2025-12-01'),
+    },
+    {
+      id: '2',
+      estado: 'Programada',
+      fecha_hora_inicio: new Date('2025-12-02'),
+    },
   ];
 
   beforeEach(async () => {
@@ -92,7 +100,9 @@ describe('AdminStatsService', () => {
 
     it('should call Prisma with correct filters for active memberships', async () => {
       // Arrange
-      const countSpy = jest.spyOn(prisma.membresia, 'count').mockResolvedValue(5);
+      const countSpy = jest
+        .spyOn(prisma.membresia, 'count')
+        .mockResolvedValue(5);
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.alerta, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(0);
@@ -161,7 +171,8 @@ describe('AdminStatsService', () => {
       jest.spyOn(prisma.docente, 'count').mockResolvedValue(8);
       jest.spyOn(prisma.admin, 'count').mockResolvedValue(2);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(50);
-      jest.spyOn(prisma.clase, 'count')
+      jest
+        .spyOn(prisma.clase, 'count')
         .mockResolvedValueOnce(100) // Total clases
         .mockResolvedValueOnce(30); // Clases activas
       jest.spyOn(prisma.producto, 'count').mockResolvedValue(10);
@@ -193,11 +204,13 @@ describe('AdminStatsService', () => {
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.producto, 'count').mockResolvedValue(0);
 
-      const groupBySpy = jest.spyOn(prisma.membresia, 'groupBy').mockResolvedValue([
-        { estado: EstadoMembresia.Activa, _count: 15 },
-        { estado: EstadoMembresia.Atrasada, _count: 3 },
-        { estado: EstadoMembresia.Cancelada, _count: 2 },
-      ] as any);
+      const groupBySpy = jest
+        .spyOn(prisma.membresia, 'groupBy')
+        .mockResolvedValue([
+          { estado: EstadoMembresia.Activa, _count: 15 },
+          { estado: EstadoMembresia.Atrasada, _count: 3 },
+          { estado: EstadoMembresia.Cancelada, _count: 2 },
+        ] as any);
 
       // Act
       const result = await service.getSystemStats();
@@ -246,7 +259,9 @@ describe('AdminStatsService', () => {
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.membresia, 'groupBy').mockResolvedValue([]);
 
-      const productoSpy = jest.spyOn(prisma.producto, 'count').mockResolvedValue(5);
+      const productoSpy = jest
+        .spyOn(prisma.producto, 'count')
+        .mockResolvedValue(5);
 
       // Act
       await service.getSystemStats();

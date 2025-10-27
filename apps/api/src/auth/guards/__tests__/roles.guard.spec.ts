@@ -47,13 +47,14 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
   // Helper function to create mock ExecutionContext
   const createMockContext = (
     user: (Partial<AuthUser> & { role?: Role }) | null,
-  ): ExecutionContext => ({
-    switchToHttp: () => ({
-      getRequest: () => ({ user: user as AuthUser | null }),
-    }),
-    getHandler: jest.fn(),
-    getClass: jest.fn(),
-  } as unknown as ExecutionContext);
+  ): ExecutionContext =>
+    ({
+      switchToHttp: () => ({
+        getRequest: () => ({ user: user as AuthUser | null }),
+      }),
+      getHandler: jest.fn(),
+      getClass: jest.fn(),
+    }) as unknown as ExecutionContext;
 
   describe('No Required Roles', () => {
     it('should allow access when no roles are required', () => {
@@ -108,7 +109,9 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
 
     it('should allow access when user has one of multiple required roles', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin, Role.Docente]);
+      jest
+        .spyOn(reflector, 'getAllAndOverride')
+        .mockReturnValue([Role.Admin, Role.Docente]);
       const mockContext = createMockContext({
         id: 'user-123',
         role: Role.Docente,
@@ -280,11 +283,9 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
 
     it('should correctly validate against multiple required roles', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([
-        Role.Admin,
-        Role.Docente,
-        Role.Tutor,
-      ]);
+      jest
+        .spyOn(reflector, 'getAllAndOverride')
+        .mockReturnValue([Role.Admin, Role.Docente, Role.Tutor]);
       const mockContext = createMockContext({
         id: 'user-123',
         roles: [Role.Tutor], // User only has tutor, which is one of the three required
@@ -301,8 +302,13 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
   describe('Reflector Integration', () => {
     it('should call reflector.getAllAndOverride with correct parameters', () => {
       // Arrange
-      const getAllAndOverrideSpy = jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([]);
-      const mockContext = createMockContext({ id: 'user-123', roles: [Role.Tutor] });
+      const getAllAndOverrideSpy = jest
+        .spyOn(reflector, 'getAllAndOverride')
+        .mockReturnValue([]);
+      const mockContext = createMockContext({
+        id: 'user-123',
+        roles: [Role.Tutor],
+      });
 
       // Act
       guard.canActivate(mockContext);

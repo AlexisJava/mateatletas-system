@@ -4,11 +4,7 @@ import { z } from 'zod';
  * Estado de una planificación mensual.
  * Mantiene sincronía con el enum `EstadoPlanificacion` del backend (Prisma/Nest).
  */
-export const estadoPlanificacionEnum = z.enum([
-  'BORRADOR',
-  'PUBLICADA',
-  'ARCHIVADA',
-]);
+export const estadoPlanificacionEnum = z.enum(['BORRADOR', 'PUBLICADA', 'ARCHIVADA']);
 
 export type EstadoPlanificacion = z.infer<typeof estadoPlanificacionEnum>;
 
@@ -22,6 +18,8 @@ export const planificacionGrupoSchema = z.object({
   codigo: z.string(),
   nombre: z.string(),
 });
+
+export type PlanificacionGrupo = z.infer<typeof planificacionGrupoSchema>;
 
 /**
  * Schema base para un item de planificación en listados.
@@ -65,12 +63,7 @@ export type PlanificacionListResponse = z.infer<typeof planificacionListResponse
 /**
  * Componentes soportados por las actividades semanales.
  */
-export const componenteActividadEnum = z.enum([
-  'juego',
-  'video',
-  'pdf',
-  'ejercicio',
-]);
+export const componenteActividadEnum = z.enum(['juego', 'video', 'pdf', 'ejercicio']);
 
 export type ComponenteActividad = z.infer<typeof componenteActividadEnum>;
 

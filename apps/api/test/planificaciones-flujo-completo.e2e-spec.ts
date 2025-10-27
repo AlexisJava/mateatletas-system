@@ -65,9 +65,13 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
 
       expect(Array.isArray(response.body)).toBe(true);
 
-      const ejemploMinimo = response.body.find((p: any) => p.codigo === 'ejemplo-minimo');
+      const ejemploMinimo = response.body.find(
+        (p: any) => p.codigo === 'ejemplo-minimo',
+      );
       expect(ejemploMinimo).toBeDefined();
-      expect(ejemploMinimo.titulo).toBe('Ejemplo Mínimo - Planificación de Prueba');
+      expect(ejemploMinimo.titulo).toBe(
+        'Ejemplo Mínimo - Planificación de Prueba',
+      );
     });
 
     it('debe obtener detalle de planificación específica', async () => {
@@ -129,7 +133,9 @@ describe('Planificaciones - Flujo Completo E2E (API)', () => {
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBeGreaterThan(0);
 
-      const asignacion = response.body.find((a: any) => a.planificacion.codigo === 'ejemplo-minimo');
+      const asignacion = response.body.find(
+        (a: any) => a.planificacion.codigo === 'ejemplo-minimo',
+      );
       expect(asignacion).toBeDefined();
     });
 

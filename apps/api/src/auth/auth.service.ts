@@ -281,11 +281,13 @@ export class AuthService {
         nombre: user.nombre,
         apellido: user.apellido,
         fecha_registro: user.fecha_registro,
-        dni: isAdminUser(user) ? user.dni ?? null : null,
-        telefono: isAdminUser(user) ? user.telefono ?? null : null,
+        dni: isAdminUser(user) ? (user.dni ?? null) : null,
+        telefono: isAdminUser(user) ? (user.telefono ?? null) : null,
         role: 'admin',
         roles: finalUserRoles, // Array de todos los roles del usuario
-        debe_cambiar_password: isAdminUser(user) ? user.debe_cambiar_password : false,
+        debe_cambiar_password: isAdminUser(user)
+          ? user.debe_cambiar_password
+          : false,
       },
     };
   }
@@ -457,7 +459,7 @@ export class AuthService {
     nuevaPassword: string,
   ) {
     // 1. Buscar el usuario (puede ser estudiante, tutor o docente)
-    let estudiante = await this.prisma.estudiante.findUnique({
+    const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -470,7 +472,8 @@ export class AuthService {
     let tutor = null;
     let docente = null;
     let admin = null;
-    let tipoUsuario: 'estudiante' | 'tutor' | 'docente' | 'admin' = 'estudiante';
+    let tipoUsuario: 'estudiante' | 'tutor' | 'docente' | 'admin' =
+      'estudiante';
 
     if (!estudiante) {
       tutor = await this.prisma.tutor.findUnique({
@@ -608,7 +611,11 @@ export class AuthService {
       }
 
       const roles = parseUserRoles(estudiante.roles);
-      const token = this.generateJwtToken(estudiante.id, estudiante.email || '', roles);
+      const token = this.generateJwtToken(
+        estudiante.id,
+        estudiante.email || '',
+        roles,
+      );
 
       return {
         access_token: token,
@@ -677,8 +684,7 @@ export class AuthService {
   ): string {
     // Normalizar roles a array si viene como un único rol (retrocompatibilidad)
     const rolesArray = Array.isArray(roles) ? roles : [roles];
-    const normalizedRoles =
-      rolesArray.length > 0 ? rolesArray : [Role.Tutor];
+    const normalizedRoles = rolesArray.length > 0 ? rolesArray : [Role.Tutor];
 
     const payload = {
       sub: userId, // Subject (ID del usuario)

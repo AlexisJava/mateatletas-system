@@ -103,8 +103,12 @@ describe('EstudiantesService', () => {
 
     it('should create a student successfully', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      jest.spyOn(prisma.equipo, 'findUnique').mockResolvedValue(mockEquipo as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.equipo, 'findUnique')
+        .mockResolvedValue(mockEquipo as any);
       jest.spyOn(prisma.estudiante, 'create').mockResolvedValue({
         ...mockEstudiante,
         equipo: mockEquipo,
@@ -143,7 +147,9 @@ describe('EstudiantesService', () => {
 
     it('should throw NotFoundException if equipo does not exist', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
       jest.spyOn(prisma.equipo, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
@@ -157,8 +163,12 @@ describe('EstudiantesService', () => {
 
     it('should validate age is between 3 and 99', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      jest.spyOn(prisma.equipo, 'findUnique').mockResolvedValue(mockEquipo as any); // Mock equipo to pass equipo validation first
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.equipo, 'findUnique')
+        .mockResolvedValue(mockEquipo as any); // Mock equipo to pass equipo validation first
 
       const invalidDtoYoung = { ...createDto, edad: 2 };
       const invalidDtoOld = { ...createDto, edad: 100 };
@@ -186,8 +196,12 @@ describe('EstudiantesService', () => {
         nivel_escolar: 'Primaria',
       };
 
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      jest.spyOn(prisma.estudiante, 'create').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.estudiante, 'create')
+        .mockResolvedValue(mockEstudiante as any);
 
       // Act
       const result = await service.create('tutor-1', dtoWithoutEquipo);
@@ -206,11 +220,16 @@ describe('EstudiantesService', () => {
         { ...mockEstudiante, id: 'est-2', equipo: mockEquipo },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(2);
 
       // Act
-      const result = await service.findAllByTutor('tutor-1', { page: 1, limit: 10 });
+      const result = await service.findAllByTutor('tutor-1', {
+        page: 1,
+        limit: 10,
+      });
 
       // Assert
       expect(result.data).toHaveLength(2);
@@ -222,7 +241,9 @@ describe('EstudiantesService', () => {
 
     it('should filter by equipo_id', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue([mockEstudiante] as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue([mockEstudiante] as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(1);
 
       // Act
@@ -241,7 +262,9 @@ describe('EstudiantesService', () => {
 
     it('should filter by nivel_escolar', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue([mockEstudiante] as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue([mockEstudiante] as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(1);
 
       // Act
@@ -260,11 +283,16 @@ describe('EstudiantesService', () => {
 
     it('should handle pagination correctly', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue([mockEstudiante] as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue([mockEstudiante] as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(25);
 
       // Act
-      const result = await service.findAllByTutor('tutor-1', { page: 2, limit: 10 });
+      const result = await service.findAllByTutor('tutor-1', {
+        page: 2,
+        limit: 10,
+      });
 
       // Assert
       expect(prisma.estudiante.findMany).toHaveBeenCalledWith(
@@ -278,7 +306,9 @@ describe('EstudiantesService', () => {
 
     it('should use default pagination when not provided', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue([mockEstudiante] as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue([mockEstudiante] as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(1);
 
       // Act
@@ -372,9 +402,9 @@ describe('EstudiantesService', () => {
       } as any);
 
       // Act & Assert
-      await expect(service.update('est-1', 'tutor-2', updateDto)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.update('est-1', 'tutor-2', updateDto),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should validate edad when updating', async () => {
@@ -387,17 +417,18 @@ describe('EstudiantesService', () => {
       const invalidDto = { edad: 2 };
 
       // Act & Assert
-      await expect(service.update('est-1', 'tutor-1', invalidDto)).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.update('est-1', 'tutor-1', invalidDto)).rejects.toThrow(
-        'La edad debe estar entre 3 y 99 años',
-      );
+      await expect(
+        service.update('est-1', 'tutor-1', invalidDto),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.update('est-1', 'tutor-1', invalidDto),
+      ).rejects.toThrow('La edad debe estar entre 3 y 99 años');
     });
 
     it('should validate equipo exists when updating equipo_id', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique')
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
         .mockResolvedValueOnce({
           ...mockEstudiante,
           tutor: mockTutor,
@@ -409,9 +440,9 @@ describe('EstudiantesService', () => {
       const dtoWithEquipo = { equipo_id: 'non-existent-equipo' };
 
       // Act & Assert
-      await expect(service.update('est-1', 'tutor-1', dtoWithEquipo)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.update('est-1', 'tutor-1', dtoWithEquipo),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -422,7 +453,9 @@ describe('EstudiantesService', () => {
         ...mockEstudiante,
         tutor: mockTutor,
       } as any);
-      jest.spyOn(prisma.estudiante, 'delete').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'delete')
+        .mockResolvedValue(mockEstudiante as any);
 
       // Act
       const result = await service.remove('est-1', 'tutor-1');
@@ -469,12 +502,32 @@ describe('EstudiantesService', () => {
     it('should return statistics with distributions', async () => {
       // Arrange
       const estudiantes = [
-        { ...mockEstudiante, id: 'est-1', nivel_escolar: 'Primaria', puntos_totales: 100, equipo: { nombre: 'Equipo Rojo' } },
-        { ...mockEstudiante, id: 'est-2', nivel_escolar: 'Primaria', puntos_totales: 150, equipo: { nombre: 'Equipo Azul' } },
-        { ...mockEstudiante, id: 'est-3', nivel_escolar: 'Secundaria', puntos_totales: 200, equipo: null },
+        {
+          ...mockEstudiante,
+          id: 'est-1',
+          nivel_escolar: 'Primaria',
+          puntos_totales: 100,
+          equipo: { nombre: 'Equipo Rojo' },
+        },
+        {
+          ...mockEstudiante,
+          id: 'est-2',
+          nivel_escolar: 'Primaria',
+          puntos_totales: 150,
+          equipo: { nombre: 'Equipo Azul' },
+        },
+        {
+          ...mockEstudiante,
+          id: 'est-3',
+          nivel_escolar: 'Secundaria',
+          puntos_totales: 200,
+          equipo: null,
+        },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(estudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(estudiantes as any);
 
       // Act
       const result = await service.getEstadisticas('tutor-1');
@@ -482,8 +535,8 @@ describe('EstudiantesService', () => {
       // Assert
       expect(result.total).toBe(3);
       expect(result.por_nivel).toEqual({
-        'Primaria': 2,
-        'Secundaria': 1,
+        Primaria: 2,
+        Secundaria: 1,
       });
       expect(result.por_equipo).toEqual({
         'Equipo Rojo': 1,
@@ -498,11 +551,23 @@ describe('EstudiantesService', () => {
     it('should return all students with pagination', async () => {
       // Arrange
       const mockEstudiantes = [
-        { ...mockEstudiante, id: 'est-1', tutor: mockTutor, equipo: mockEquipo },
-        { ...mockEstudiante, id: 'est-2', tutor: mockTutor, equipo: mockEquipo },
+        {
+          ...mockEstudiante,
+          id: 'est-1',
+          tutor: mockTutor,
+          equipo: mockEquipo,
+        },
+        {
+          ...mockEstudiante,
+          id: 'est-2',
+          tutor: mockTutor,
+          equipo: mockEquipo,
+        },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(100);
 
       // Act
@@ -520,7 +585,9 @@ describe('EstudiantesService', () => {
   describe('updateAvatar', () => {
     it('should update avatar successfully', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
         id: 'est-1',
         nombre: 'María',
@@ -550,9 +617,9 @@ describe('EstudiantesService', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.updateAvatar('non-existent', 'avatar')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.updateAvatar('non-existent', 'avatar'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -563,7 +630,11 @@ describe('EstudiantesService', () => {
         ...mockEstudiante,
         equipo: mockEquipo,
         logrosDesbloqueados: [
-          { id: 'logro-1', logro: { nombre: 'Logro 1' }, fecha_obtenido: new Date() },
+          {
+            id: 'logro-1',
+            logro: { nombre: 'Logro 1' },
+            fecha_obtenido: new Date(),
+          },
         ],
         inscripciones_clase: [
           {
@@ -572,17 +643,32 @@ describe('EstudiantesService', () => {
               id: 'clase-1',
               nombre: 'Matemáticas',
               rutaCurricular: { nombre: 'Álgebra' },
-              docente: { id: 'doc-1', nombre: 'Juan', apellido: 'Pérez', email: 'juan@example.com' },
+              docente: {
+                id: 'doc-1',
+                nombre: 'Juan',
+                apellido: 'Pérez',
+                email: 'juan@example.com',
+              },
             },
           },
         ],
         asistencias: [
-          { id: 'asist-1', estado: 'Presente', clase: { rutaCurricular: { nombre: 'Álgebra' } } },
-          { id: 'asist-2', estado: 'Ausente', clase: { rutaCurricular: { nombre: 'Geometría' } } },
+          {
+            id: 'asist-1',
+            estado: 'Presente',
+            clase: { rutaCurricular: { nombre: 'Álgebra' } },
+          },
+          {
+            id: 'asist-2',
+            estado: 'Ausente',
+            clase: { rutaCurricular: { nombre: 'Geometría' } },
+          },
         ],
       };
 
-      jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(mockDetalleCompleto as any);
+      jest
+        .spyOn(prisma.estudiante, 'findFirst')
+        .mockResolvedValue(mockDetalleCompleto as any);
 
       // Act
       const result = await service.getDetalleCompleto('est-1', 'tutor-1');
@@ -600,12 +686,12 @@ describe('EstudiantesService', () => {
       jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.getDetalleCompleto('est-1', 'wrong-tutor')).rejects.toThrow(
-        NotFoundException,
-      );
-      await expect(service.getDetalleCompleto('est-1', 'wrong-tutor')).rejects.toThrow(
-        'Estudiante no encontrado o no pertenece a este tutor',
-      );
+      await expect(
+        service.getDetalleCompleto('est-1', 'wrong-tutor'),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getDetalleCompleto('est-1', 'wrong-tutor'),
+      ).rejects.toThrow('Estudiante no encontrado o no pertenece a este tutor');
     });
 
     it('should calculate 0% attendance when no classes', async () => {
@@ -617,7 +703,9 @@ describe('EstudiantesService', () => {
         inscripciones_clase: [],
       };
 
-      jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(mockWithoutAsistencias as any);
+      jest
+        .spyOn(prisma.estudiante, 'findFirst')
+        .mockResolvedValue(mockWithoutAsistencias as any);
 
       // Act
       const result = await service.getDetalleCompleto('est-1', 'tutor-1');

@@ -1,4 +1,11 @@
-import { IsString, IsInt, IsBoolean, IsOptional, Min, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsBoolean,
+  IsOptional,
+  Min,
+  MaxLength,
+} from 'class-validator';
 
 /**
  * DTO para crear un nuevo módulo dentro de un curso
@@ -11,7 +18,9 @@ export class CreateModuloDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(2000, { message: 'La descripción no puede exceder 2000 caracteres' })
+  @MaxLength(2000, {
+    message: 'La descripción no puede exceder 2000 caracteres',
+  })
   descripcion?: string;
 
   @IsInt()

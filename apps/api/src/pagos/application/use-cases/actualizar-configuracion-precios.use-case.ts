@@ -36,7 +36,8 @@ export class ActualizarConfiguracionPreciosUseCase {
     this.validarInput(input);
 
     // 2. Obtener configuración actual
-    const configuracionActual = await this.configuracionRepo.obtenerConfiguracion();
+    const configuracionActual =
+      await this.configuracionRepo.obtenerConfiguracion();
     if (!configuracionActual) {
       throw new Error('No se encontró la configuración de precios');
     }
@@ -55,11 +56,12 @@ export class ActualizarConfiguracionPreciosUseCase {
     const actualizacion = this.construirActualizacion(input);
 
     // 6. Actualizar en el repositorio (automáticamente guarda historial)
-    const configuracionActualizada = await this.configuracionRepo.actualizarConfiguracion(
-      actualizacion,
-      input.adminId,
-      input.motivoCambio,
-    );
+    const configuracionActualizada =
+      await this.configuracionRepo.actualizarConfiguracion(
+        actualizacion,
+        input.adminId,
+        input.motivoCambio,
+      );
 
     // 7. Retornar resultado
     return {
@@ -115,7 +117,9 @@ export class ActualizarConfiguracionPreciosUseCase {
     // Validar días antes de recordatorio
     if (input.diasAntesRecordatorio !== undefined) {
       if (input.diasAntesRecordatorio < 0 || input.diasAntesRecordatorio > 30) {
-        throw new Error('Los días antes de recordatorio deben estar entre 0 y 30');
+        throw new Error(
+          'Los días antes de recordatorio deben estar entre 0 y 30',
+        );
       }
     }
   }
@@ -130,7 +134,10 @@ export class ActualizarConfiguracionPreciosUseCase {
     const cambios: CambioRealizadoDTO[] = [];
 
     // Comparar precios
-    if (propuesto.precioClubMatematicas && !propuesto.precioClubMatematicas.equals(actual.precioClubMatematicas)) {
+    if (
+      propuesto.precioClubMatematicas &&
+      !propuesto.precioClubMatematicas.equals(actual.precioClubMatematicas)
+    ) {
       cambios.push({
         campo: 'precioClubMatematicas',
         valorAnterior: actual.precioClubMatematicas,
@@ -138,7 +145,12 @@ export class ActualizarConfiguracionPreciosUseCase {
       });
     }
 
-    if (propuesto.precioCursosEspecializados && !propuesto.precioCursosEspecializados.equals(actual.precioCursosEspecializados)) {
+    if (
+      propuesto.precioCursosEspecializados &&
+      !propuesto.precioCursosEspecializados.equals(
+        actual.precioCursosEspecializados,
+      )
+    ) {
       cambios.push({
         campo: 'precioCursosEspecializados',
         valorAnterior: actual.precioCursosEspecializados,
@@ -146,7 +158,12 @@ export class ActualizarConfiguracionPreciosUseCase {
       });
     }
 
-    if (propuesto.precioMultipleActividades && !propuesto.precioMultipleActividades.equals(actual.precioMultipleActividades)) {
+    if (
+      propuesto.precioMultipleActividades &&
+      !propuesto.precioMultipleActividades.equals(
+        actual.precioMultipleActividades,
+      )
+    ) {
       cambios.push({
         campo: 'precioMultipleActividades',
         valorAnterior: actual.precioMultipleActividades,
@@ -154,7 +171,10 @@ export class ActualizarConfiguracionPreciosUseCase {
       });
     }
 
-    if (propuesto.precioHermanosBasico && !propuesto.precioHermanosBasico.equals(actual.precioHermanosBasico)) {
+    if (
+      propuesto.precioHermanosBasico &&
+      !propuesto.precioHermanosBasico.equals(actual.precioHermanosBasico)
+    ) {
       cambios.push({
         campo: 'precioHermanosBasico',
         valorAnterior: actual.precioHermanosBasico,
@@ -162,7 +182,10 @@ export class ActualizarConfiguracionPreciosUseCase {
       });
     }
 
-    if (propuesto.precioHermanosMultiple && !propuesto.precioHermanosMultiple.equals(actual.precioHermanosMultiple)) {
+    if (
+      propuesto.precioHermanosMultiple &&
+      !propuesto.precioHermanosMultiple.equals(actual.precioHermanosMultiple)
+    ) {
       cambios.push({
         campo: 'precioHermanosMultiple',
         valorAnterior: actual.precioHermanosMultiple,
@@ -171,7 +194,12 @@ export class ActualizarConfiguracionPreciosUseCase {
     }
 
     // Comparar descuento AACREA
-    if (propuesto.descuentoAacreaPorcentaje && !propuesto.descuentoAacreaPorcentaje.equals(actual.descuentoAacreaPorcentaje)) {
+    if (
+      propuesto.descuentoAacreaPorcentaje &&
+      !propuesto.descuentoAacreaPorcentaje.equals(
+        actual.descuentoAacreaPorcentaje,
+      )
+    ) {
       cambios.push({
         campo: 'descuentoAacreaPorcentaje',
         valorAnterior: actual.descuentoAacreaPorcentaje,
@@ -179,7 +207,10 @@ export class ActualizarConfiguracionPreciosUseCase {
       });
     }
 
-    if (propuesto.descuentoAacreaActivo !== undefined && propuesto.descuentoAacreaActivo !== actual.descuentoAacreaActivo) {
+    if (
+      propuesto.descuentoAacreaActivo !== undefined &&
+      propuesto.descuentoAacreaActivo !== actual.descuentoAacreaActivo
+    ) {
       cambios.push({
         campo: 'descuentoAacreaActivo',
         valorAnterior: actual.descuentoAacreaActivo,
@@ -242,7 +273,7 @@ export class ActualizarConfiguracionPreciosUseCase {
       // CALCULAR AUTOMÁTICAMENTE los precios con descuento
       // Múltiples Actividades = Club Mat - 12% (redondeado a entero)
       actualizacion.precioMultipleActividades = input.precioClubMatematicas
-        .mul(88)  // 100 - 12 = 88
+        .mul(88) // 100 - 12 = 88
         .div(100)
         .toDecimalPlaces(0, Decimal.ROUND_HALF_UP);
 
@@ -254,14 +285,15 @@ export class ActualizarConfiguracionPreciosUseCase {
 
       // Hermanos Múltiple = Club Mat - 24% (redondeado a entero)
       actualizacion.precioHermanosMultiple = input.precioClubMatematicas
-        .mul(76)  // 100 - 24 = 76
+        .mul(76) // 100 - 24 = 76
         .div(100)
         .toDecimalPlaces(0, Decimal.ROUND_HALF_UP);
     }
 
     // Precio Cursos Especializados (independiente)
     if (input.precioCursosEspecializados) {
-      actualizacion.precioCursosEspecializados = input.precioCursosEspecializados;
+      actualizacion.precioCursosEspecializados =
+        input.precioCursosEspecializados;
     }
 
     // Descuento AACREA
@@ -279,7 +311,9 @@ export class ActualizarConfiguracionPreciosUseCase {
   /**
    * Mapea ConfiguracionPrecios del domain al DTO
    */
-  private mapearConfiguracionADTO(config: ConfiguracionPrecios): ConfiguracionPreciosDTO {
+  private mapearConfiguracionADTO(
+    config: ConfiguracionPrecios,
+  ): ConfiguracionPreciosDTO {
     return {
       precioClubMatematicas: config.precioClubMatematicas,
       precioCursosEspecializados: config.precioCursosEspecializados,
