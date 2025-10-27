@@ -8,7 +8,7 @@ describe('AdminStatsService', () => {
   let prisma: PrismaService;
 
   // Mock data
-  const mockMembresias = [
+  const _mockMembresias = [
     { id: '1', estado: 'Activa', producto: { precio: 100 } },
     { id: '2', estado: 'Activa', producto: { precio: 200 } },
   ];

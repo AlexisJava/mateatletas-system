@@ -66,7 +66,7 @@ export class AdminStatsService {
       totalClases,
       clasesActivas,
       totalProductos,
-      membresias,
+      _membresias,
     ] = await Promise.all([
       this.prisma.tutor.count(),
       this.prisma.docente.count(),

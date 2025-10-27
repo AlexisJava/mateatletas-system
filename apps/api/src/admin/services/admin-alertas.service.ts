@@ -168,7 +168,11 @@ export class AdminAlertasService {
    * Genera una sugerencia estática basada en el contexto de la alerta
    * Será reemplazado por integración con OpenAI en el futuro
    */
-  private generarSugerenciaEstatica(alerta: any): string {
+  private generarSugerenciaEstatica(alerta: {
+    descripcion: string;
+    estudiante: { nivel_escolar: string };
+    clase: { rutaCurricular: { nombre: string } };
+  }): string {
     const nivel = alerta.estudiante.nivel_escolar;
     const ruta = alerta.clase.rutaCurricular.nombre;
 
