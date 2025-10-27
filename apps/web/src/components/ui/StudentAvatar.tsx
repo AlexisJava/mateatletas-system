@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface StudentAvatarProps {
   nombre: string;
-  apellido: string;
+  apellido?: string;
   avatar_url?: string | null;
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
@@ -32,7 +32,8 @@ export function StudentAvatar({
   size = 'md',
   className = '',
 }: StudentAvatarProps) {
-  const initials = `${nombre[0] || ''}${apellido[0] || ''}`.toUpperCase();
+  const [imageError, setImageError] = useState(false);
+  const initials = `${nombre?.[0] || ''}${apellido?.[0] || ''}`.toUpperCase();
 
   // Generate consistent color based on name
   const getColorFromName = (name: string) => {
@@ -54,32 +55,27 @@ export function StudentAvatar({
     return colors[Math.abs(hash) % colors.length];
   };
 
-  const colorClass = getColorFromName(nombre + apellido);
+  const colorClass = getColorFromName(nombre + (apellido || ''));
+
+  const showFallback = !avatar_url || imageError;
 
   return (
     <div
       className={`${sizeClasses[size]} rounded-full overflow-hidden flex-shrink-0 ${className}`}
     >
-      {avatar_url ? (
-        <img
-          src={avatar_url}
-          alt={`${nombre} ${apellido}`}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            // Fallback to initials if image fails to load
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            if (target.nextElementSibling) {
-              (target.nextElementSibling as HTMLElement).style.display = 'flex';
-            }
-          }}
-        />
-      ) : (
+      {showFallback ? (
         <div
           className={`w-full h-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-black`}
         >
           {initials}
         </div>
+      ) : (
+        <img
+          src={avatar_url}
+          alt={`${nombre} ${apellido || ''}`}
+          className="w-full h-full object-cover"
+          onError={() => setImageError(true)}
+        />
       )}
     </div>
   );

@@ -142,6 +142,53 @@ export interface DashboardDocenteResponse {
   stats: StatsResumen;
 }
 
+/**
+ * Estadísticas completas para la página de Observaciones
+ */
+export interface EstudianteTopPuntos {
+  id: string;
+  nombre: string;
+  apellido: string;
+  foto_url: string | null;
+  puntos_totales: number;
+  porcentaje_asistencia: number;
+}
+
+export interface EstudianteAsistenciaPerfecta {
+  estudiante_id: string;
+  nombre: string;
+  apellido: string;
+  foto_url: string | null;
+  total_asistencias: number;
+  presentes: number;
+  porcentaje_asistencia: number;
+  grupos: { id: string; nombre: string; codigo: string }[];
+}
+
+export interface EstudianteSinTareas {
+  id: string;
+  nombre: string;
+  apellido: string;
+  foto_url: string | null;
+}
+
+export interface GrupoRanking {
+  grupo_id: string;
+  nombre: string;
+  codigo: string;
+  estudiantes_activos: number;
+  cupo_maximo: number;
+  puntos_totales: number;
+  asistencia_promedio: number;
+}
+
+export interface EstadisticasCompletasResponse {
+  topEstudiantesPorPuntos: EstudianteTopPuntos[];
+  estudiantesAsistenciaPerfecta: EstudianteAsistenciaPerfecta[];
+  estudiantesSinTareas: EstudianteSinTareas[];
+  rankingGruposPorPuntos: GrupoRanking[];
+}
+
 export const docentesApi = {
   /**
    * Obtener dashboard del docente autenticado
@@ -153,6 +200,20 @@ export const docentesApi = {
       return response;
     } catch (error) {
       console.error('Error al obtener el dashboard del docente:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener estadísticas completas para la página de Observaciones
+   * Incluye: top estudiantes por puntos, asistencia perfecta, sin tareas, ranking de grupos
+   */
+  getEstadisticasCompletas: async (): Promise<EstadisticasCompletasResponse> => {
+    try {
+      const response = await apiClient.get<EstadisticasCompletasResponse>('/docentes/me/estadisticas-completas');
+      return response;
+    } catch (error) {
+      console.error('Error al obtener las estadísticas completas:', error);
       throw error;
     }
   },

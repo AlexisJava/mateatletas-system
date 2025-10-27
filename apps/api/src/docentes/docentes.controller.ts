@@ -61,6 +61,18 @@ export class DocentesController {
     return this.docentesService.getDashboard(user.id);
   }
 
+  /**
+   * GET /docentes/me/estadisticas-completas - Obtener estadísticas detalladas
+   * Para la página de Observaciones del portal docente
+   * Incluye: top estudiantes por puntos, asistencia perfecta, faltas, ranking de grupos, etc.
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Estadísticas completas y detalladas
+   */
+  @Get('me/estadisticas-completas')
+  @Roles(Role.Docente)
+  async getEstadisticasCompletas(@GetUser() user: AuthUser) {
+    return this.docentesService.getEstadisticasCompletas(user.id);
+  }
 
   /**
    * GET /docentes/me - Obtener perfil del docente autenticado

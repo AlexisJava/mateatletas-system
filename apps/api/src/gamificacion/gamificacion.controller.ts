@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { IsString, IsOptional, IsNotEmpty } from 'class-validator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
@@ -17,9 +18,20 @@ import { RequestWithAuthUser } from '../auth/interfaces';
  * DTOs para las peticiones
  */
 export class OtorgarPuntosDto {
+  @IsString()
+  @IsNotEmpty()
   estudianteId!: string;
+
+  @IsString()
+  @IsNotEmpty()
   accionId!: string;
+
+  @IsString()
+  @IsOptional()
   claseId?: string;
+
+  @IsString()
+  @IsOptional()
   contexto?: string;
 }
 
