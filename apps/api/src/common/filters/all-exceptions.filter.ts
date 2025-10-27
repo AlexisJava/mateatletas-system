@@ -48,7 +48,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
 
     // Log del error crítico
-    this.logCriticalError(exception, request, status, errorId, stack);
+    this.logCriticalError(exception, request, status, errorId, message, stack);
 
     // Enviar respuesta
     response.status(status).json(errorResponse);
@@ -82,7 +82,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // Si es un objeto con código de error
     if (typeof exception === 'object' && exception !== null) {
-      const error = exception as { statusCode?: number; status?: number; message?: string; stack?: string };
+      const error = exception as {
+        statusCode?: number;
+        status?: number;
+        message?: string;
+        stack?: string;
+      };
       return {
         status:
           error.statusCode || error.status || HttpStatus.INTERNAL_SERVER_ERROR,
@@ -119,10 +124,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
     request: Request,
     status: number,
     errorId: string,
+    message: string,
     stack?: string,
   ) {
-    const { method, url, headers, body, query, params } = request;
-    const user = (request as any).user;
+    const method = request.method;
+    const url = request.url;
+    const headers = request.headers;
+    const body: unknown = request.body;
+    const query = request.query as Record<string, unknown>;
+    const params = request.params as Record<string, unknown>;
+    const { user } = request as Request & {
+      user?: { id?: string; role?: string };
+    };
 
     const metadata: LoggerMetadata = {
       errorId,
@@ -136,12 +149,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
       body,
       query,
       params,
-      exceptionType: exception?.constructor?.name,
+      exceptionType: exception instanceof Error ? exception.name : undefined,
     };
 
     // Errores no manejados son CRÍTICOS
     this.logger.error(
-      `UNHANDLED EXCEPTION: ${this.extractErrorInfo(exception).message}`,
+      `UNHANDLED EXCEPTION: ${message}`,
       stack || 'No stack trace available',
       metadata,
     );
