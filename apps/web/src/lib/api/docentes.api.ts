@@ -53,7 +53,171 @@ export interface CreateDocenteResponse extends Docente {
   generatedPassword?: string; // Solo presente cuando password no fue provista
 }
 
+/**
+ * DTOs para Dashboard Docente - INFORMACIÓN BRUTAL Y CONCRETA
+ */
+export interface ClaseInminente {
+  id: string;
+  titulo: string;
+  grupoNombre: string;
+  grupoId: string;
+  fecha_hora: string;
+  duracion: number;
+  estudiantesInscritos: number;
+  cupo_maximo: number;
+  minutosParaEmpezar: number;
+}
+
+export interface EstudianteInscrito {
+  id: string;
+  nombre: string;
+  apellido: string;
+  avatar_url: string | null;
+}
+
+export interface ClaseDelDia {
+  id: string;
+  nombre: string;
+  codigo: string;
+  dia_semana: string;
+  hora_inicio: string;
+  hora_fin: string;
+  estudiantes: EstudianteInscrito[];
+  cupo_maximo: number;
+  grupo_id: string;
+}
+
+export interface GrupoResumen {
+  id: string;
+  nombre: string;
+  codigo: string;
+  dia_semana: string;
+  hora_inicio: string;
+  hora_fin: string;
+  estudiantesActivos: number;
+  cupo_maximo: number;
+  nivel: string | null;
+}
+
+export interface EstudianteConFalta {
+  id: string;
+  nombre: string;
+  apellido: string;
+  faltas_consecutivas: number;
+  ultimo_grupo: string;
+  tutor_email: string | null;
+}
+
+export type TipoAlerta = 'warning' | 'info' | 'urgent';
+
+export interface AccionAlerta {
+  label: string;
+  href: string;
+}
+
+export interface Alerta {
+  id: string;
+  tipo: TipoAlerta;
+  mensaje: string;
+  accion?: AccionAlerta;
+}
+
+export type TendenciaAsistencia = 'up' | 'down' | 'stable';
+
+export interface StatsResumen {
+  clasesHoy: number;
+  clasesEstaSemana: number;
+  asistenciaPromedio: number;
+  tendenciaAsistencia: TendenciaAsistencia;
+  observacionesPendientes: number;
+  estudiantesTotal: number;
+}
+
+export interface DashboardDocenteResponse {
+  claseInminente: ClaseInminente | null;
+  clasesHoy: ClaseDelDia[];
+  misGrupos: GrupoResumen[];
+  estudiantesConFaltas: EstudianteConFalta[];
+  alertas: Alerta[];
+  stats: StatsResumen;
+}
+
+/**
+ * Estadísticas completas para la página de Observaciones
+ */
+export interface EstudianteTopPuntos {
+  id: string;
+  nombre: string;
+  apellido: string;
+  foto_url: string | null;
+  puntos_totales: number;
+  porcentaje_asistencia: number;
+}
+
+export interface EstudianteAsistenciaPerfecta {
+  estudiante_id: string;
+  nombre: string;
+  apellido: string;
+  foto_url: string | null;
+  total_asistencias: number;
+  presentes: number;
+  porcentaje_asistencia: number;
+  grupos: { id: string; nombre: string; codigo: string }[];
+}
+
+export interface EstudianteSinTareas {
+  id: string;
+  nombre: string;
+  apellido: string;
+  foto_url: string | null;
+}
+
+export interface GrupoRanking {
+  grupo_id: string;
+  nombre: string;
+  codigo: string;
+  estudiantes_activos: number;
+  cupo_maximo: number;
+  puntos_totales: number;
+  asistencia_promedio: number;
+}
+
+export interface EstadisticasCompletasResponse {
+  topEstudiantesPorPuntos: EstudianteTopPuntos[];
+  estudiantesAsistenciaPerfecta: EstudianteAsistenciaPerfecta[];
+  estudiantesSinTareas: EstudianteSinTareas[];
+  rankingGruposPorPuntos: GrupoRanking[];
+}
+
 export const docentesApi = {
+  /**
+   * Obtener dashboard del docente autenticado
+   * Incluye clase inminente, alertas y estadísticas resumen
+   */
+  getDashboard: async (): Promise<DashboardDocenteResponse> => {
+    try {
+      const response = await apiClient.get<DashboardDocenteResponse>('/docentes/me/dashboard');
+      return response;
+    } catch (error) {
+      console.error('Error al obtener el dashboard del docente:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener estadísticas completas para la página de Observaciones
+   * Incluye: top estudiantes por puntos, asistencia perfecta, sin tareas, ranking de grupos
+   */
+  getEstadisticasCompletas: async (): Promise<EstadisticasCompletasResponse> => {
+    try {
+      const response = await apiClient.get<EstadisticasCompletasResponse>('/docentes/me/estadisticas-completas');
+      return response;
+    } catch (error) {
+      console.error('Error al obtener las estadísticas completas:', error);
+      throw error;
+    }
+  },
+
   /**
    * Obtener perfil del docente autenticado
    */
@@ -173,3 +337,6 @@ export const docentesApi = {
     }
   },
 };
+
+// Exportar getDashboard como función standalone para facilitar imports
+export const getDashboardDocente = docentesApi.getDashboard;

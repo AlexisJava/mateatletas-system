@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../core/database/prisma.service';
-import { RoleHandler, UserWithPassword } from './role-handler.interface';
+import {
+  RoleHandler,
+  UserProfile,
+  UserWithPassword,
+} from './role-handler.interface';
 import * as bcrypt from 'bcrypt';
 
 /**
@@ -15,27 +19,32 @@ export class TutorHandler implements RoleHandler {
     return 'tutor';
   }
 
-  async findUserByEmail(email: string) {
-    return this.prisma.tutor.findUnique({
+  async findUserByEmail(email: string): Promise<UserWithPassword | null> {
+    const tutor = await this.prisma.tutor.findUnique({
       where: { email },
     });
+    return tutor ?? null;
   }
 
-  async findUserById(id: string) {
-    return this.prisma.tutor.findUnique({
+  async findUserById(id: string): Promise<UserWithPassword | null> {
+    const tutor = await this.prisma.tutor.findUnique({
       where: { id },
     });
+    return tutor ?? null;
   }
 
-  async validateCredentials(user: UserWithPassword, password: string): Promise<boolean> {
+  async validateCredentials(
+    user: UserWithPassword,
+    password: string,
+  ): Promise<boolean> {
     if (!user.password_hash) {
       return false; // Usuario sin password no puede autenticarse
     }
     return bcrypt.compare(password, user.password_hash);
   }
 
-  async getProfile(userId: string) {
-    return this.prisma.tutor.findUnique({
+  async getProfile(userId: string): Promise<UserProfile | null> {
+    const tutor = await this.prisma.tutor.findUnique({
       where: { id: userId },
       include: {
         estudiantes: {
@@ -50,5 +59,6 @@ export class TutorHandler implements RoleHandler {
         },
       },
     });
+    return tutor ?? null;
   }
 }

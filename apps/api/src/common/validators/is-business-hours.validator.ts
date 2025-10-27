@@ -29,14 +29,40 @@ export function IsBusinessHours(
           const date = new Date(value);
           const hour = date.getHours();
 
-          const [start, end] = args.constraints as [number, number];
+          const [start, end] = resolveConstraintBounds(
+            args.constraints,
+            startHour,
+            endHour,
+          );
           return hour >= start && hour < end;
         },
         defaultMessage(args: ValidationArguments) {
-          const [start, end] = args.constraints;
+          const [start, end] = resolveConstraintBounds(
+            args.constraints,
+            startHour,
+            endHour,
+          );
           return `${args.property} debe estar entre las ${start}:00 y las ${end}:00 horas`;
         },
       },
     });
   };
+}
+
+function resolveConstraintBounds(
+  constraints: ValidationArguments['constraints'],
+  defaultStart: number,
+  defaultEnd: number,
+): [number, number] {
+  if (!Array.isArray(constraints)) {
+    return [defaultStart, defaultEnd];
+  }
+
+  const start = Number(constraints[0]);
+  const end = Number(constraints[1]);
+
+  const isValidStart = Number.isFinite(start);
+  const isValidEnd = Number.isFinite(end);
+
+  return [isValidStart ? start : defaultStart, isValidEnd ? end : defaultEnd];
 }

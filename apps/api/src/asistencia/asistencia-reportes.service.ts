@@ -1,11 +1,7 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma, EstadoAsistencia } from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
 import { FiltrarAsistenciaDto } from './dto/filtrar-asistencia.dto';
-import { EstadoAsistencia } from '@prisma/client';
 
 /**
  * Service responsible for attendance reports, statistics, and analytics
@@ -39,7 +35,9 @@ export class AsistenciaReportesService {
     ]);
 
     // Create map of attendance by student_id
-    const asistenciaMap = new Map(asistencias.map((a) => [a.estudiante_id, a]));
+    const asistenciaMap = new Map<string, (typeof asistencias)[number]>(
+      asistencias.map((asistencia) => [asistencia.estudiante_id, asistencia]),
+    );
 
     let presentes = 0;
     let ausentes = 0;
@@ -51,9 +49,9 @@ export class AsistenciaReportesService {
       if (!asistencia) {
         pendientes++;
       } else {
-        if (asistencia.estado === 'Presente') presentes++;
-        if (asistencia.estado === 'Ausente') ausentes++;
-        if (asistencia.estado === 'Justificado') justificados++;
+        if (asistencia.estado === EstadoAsistencia.Presente) presentes++;
+        if (asistencia.estado === EstadoAsistencia.Ausente) ausentes++;
+        if (asistencia.estado === EstadoAsistencia.Justificado) justificados++;
       }
     });
 
@@ -89,7 +87,7 @@ export class AsistenciaReportesService {
     }
 
     // Build filters for inscriptions
-    const whereInscripcion: any = {
+    const whereInscripcion: Prisma.InscripcionClaseWhereInput = {
       estudiante_id: estudianteId,
     };
 
@@ -98,7 +96,7 @@ export class AsistenciaReportesService {
     }
 
     // Optimized: Execute queries in parallel
-    const whereAsistencia: any = {
+    const whereAsistencia: Prisma.AsistenciaWhereInput = {
       estudiante_id: estudianteId,
     };
 
@@ -129,10 +127,12 @@ export class AsistenciaReportesService {
     ]);
 
     // Create map of attendance by class_id
-    const asistenciaMap = new Map(asistencias.map((a) => [a.clase_id, a]));
+    const asistenciaMapPorClase = new Map<string, (typeof asistencias)[number]>(
+      asistencias.map((asistencia) => [asistencia.clase_id, asistencia]),
+    );
 
     const historial = inscripciones.map((insc) => {
-      const asistencia = asistenciaMap.get(insc.clase_id);
+      const asistencia = asistenciaMapPorClase.get(insc.clase_id);
 
       return {
         clase_id: insc.clase.id,
@@ -148,13 +148,13 @@ export class AsistenciaReportesService {
 
     // Calculate statistics
     const presentes = historial.filter(
-      (h) => h.estado_asistencia === 'Presente',
+      (h) => h.estado_asistencia === EstadoAsistencia.Presente,
     ).length;
     const ausentes = historial.filter(
-      (h) => h.estado_asistencia === 'Ausente',
+      (h) => h.estado_asistencia === EstadoAsistencia.Ausente,
     ).length;
     const justificados = historial.filter(
-      (h) => h.estado_asistencia === 'Justificado',
+      (h) => h.estado_asistencia === EstadoAsistencia.Justificado,
     ).length;
     const total = historial.length;
     const porcentajeAsistencia =
@@ -198,12 +198,17 @@ export class AsistenciaReportesService {
     const asistencias = clases.flatMap((clase) => clase.asistencias);
 
     // Create map of attendance by class_id and student_id
-    const asistenciaMap = new Map<string, Map<string, any>>();
-    asistencias.forEach((a) => {
-      if (!asistenciaMap.has(a.clase_id)) {
-        asistenciaMap.set(a.clase_id, new Map());
+    const asistenciaMap = new Map<
+      string,
+      Map<string, (typeof asistencias)[number]>
+    >();
+    asistencias.forEach((asistencia) => {
+      if (!asistenciaMap.has(asistencia.clase_id)) {
+        asistenciaMap.set(asistencia.clase_id, new Map());
       }
-      asistenciaMap.get(a.clase_id)?.set(a.estudiante_id, a);
+      asistenciaMap
+        .get(asistencia.clase_id)
+        ?.set(asistencia.estudiante_id, asistencia);
     });
 
     const resumen = clases.map((clase) => {
@@ -219,9 +224,10 @@ export class AsistenciaReportesService {
         if (!asistencia) {
           pendientes++;
         } else {
-          if (asistencia.estado === 'Presente') presentes++;
-          if (asistencia.estado === 'Ausente') ausentes++;
-          if (asistencia.estado === 'Justificado') justificados++;
+          if (asistencia.estado === EstadoAsistencia.Presente) presentes++;
+          if (asistencia.estado === EstadoAsistencia.Ausente) ausentes++;
+          if (asistencia.estado === EstadoAsistencia.Justificado)
+            justificados++;
         }
       });
 
@@ -286,7 +292,7 @@ export class AsistenciaReportesService {
       limit?: number;
     },
   ) {
-    const where: any = {
+    const where: Prisma.AsistenciaWhereInput = {
       clase: {
         docente_id: docenteId, // Filter by teacher through class relationship
       },
@@ -300,12 +306,15 @@ export class AsistenciaReportesService {
 
     // Filter by date range
     if (filtros.fechaDesde || filtros.fechaHasta) {
-      where.createdAt = {};
+      const createdAtFilter: Prisma.DateTimeFilter = {};
       if (filtros.fechaDesde) {
-        where.createdAt.gte = new Date(filtros.fechaDesde);
+        createdAtFilter.gte = new Date(filtros.fechaDesde);
       }
       if (filtros.fechaHasta) {
-        where.createdAt.lte = new Date(filtros.fechaHasta);
+        createdAtFilter.lte = new Date(filtros.fechaHasta);
+      }
+      if (Object.keys(createdAtFilter).length > 0) {
+        where.createdAt = createdAtFilter;
       }
     }
 
@@ -410,13 +419,13 @@ export class AsistenciaReportesService {
       { nombre: string; foto_url: string | null; asistencias: number }
     > = {};
 
-    todasAsistencias.forEach((a: any) => {
-      if (a.estado === EstadoAsistencia.Presente) {
-        const key = a.estudiante_id;
+    todasAsistencias.forEach((asistencia) => {
+      if (asistencia.estado === EstadoAsistencia.Presente) {
+        const key = asistencia.estudiante_id;
         if (!porEstudiante[key]) {
           porEstudiante[key] = {
-            nombre: `${a.estudiante.nombre} ${a.estudiante.apellido}`,
-            foto_url: a.estudiante.foto_url || null,
+            nombre: `${asistencia.estudiante.nombre} ${asistencia.estudiante.apellido}`,
+            foto_url: asistencia.estudiante.foto_url || null,
             asistencias: 0,
           };
         }

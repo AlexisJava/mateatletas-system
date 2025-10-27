@@ -50,6 +50,31 @@ export class DocentesController {
   }
 
   /**
+   * GET /docentes/me/dashboard - Obtener dashboard del docente autenticado
+   * DEBE ir ANTES de GET /docentes/me para evitar conflictos de rutas
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Dashboard con clase inminente, alertas y stats
+   */
+  @Get('me/dashboard')
+  @Roles(Role.Docente)
+  async getDashboard(@GetUser() user: AuthUser) {
+    return this.docentesService.getDashboard(user.id);
+  }
+
+  /**
+   * GET /docentes/me/estadisticas-completas - Obtener estadísticas detalladas
+   * Para la página de Observaciones del portal docente
+   * Incluye: top estudiantes por puntos, asistencia perfecta, faltas, ranking de grupos, etc.
+   * @param user - Usuario autenticado (del JWT)
+   * @returns Estadísticas completas y detalladas
+   */
+  @Get('me/estadisticas-completas')
+  @Roles(Role.Docente)
+  async getEstadisticasCompletas(@GetUser() user: AuthUser) {
+    return this.docentesService.getEstadisticasCompletas(user.id);
+  }
+
+  /**
    * GET /docentes/me - Obtener perfil del docente autenticado
    * @param user - Usuario autenticado (del JWT)
    * @returns Perfil del docente
