@@ -28,8 +28,13 @@ import {
  * POST /api/equipos
  */
 async function create(data: CreateEquipoDto): Promise<Equipo> {
-  const response = await apiClient.post<Equipo>('/equipos', data);
-  return equipoSchema.parse(response);
+  try {
+    const response = await apiClient.post<Equipo>('/equipos', data);
+    return equipoSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al crear el equipo:', error);
+    throw error;
+  }
 }
 
 /**
@@ -37,8 +42,13 @@ async function create(data: CreateEquipoDto): Promise<Equipo> {
  * GET /api/equipos?page=1&limit=10&search=...&sortBy=...&order=...
  */
 async function getAll(params?: QueryEquiposDto): Promise<EquiposResponse> {
-  const response = await apiClient.get<EquiposResponse>('/equipos', { params });
-  return equiposResponseSchema.parse(response);
+  try {
+    const response = await apiClient.get<EquiposResponse>('/equipos', { params });
+    return equiposResponseSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener los equipos:', error);
+    throw error;
+  }
 }
 
 /**
@@ -46,8 +56,13 @@ async function getAll(params?: QueryEquiposDto): Promise<EquiposResponse> {
  * GET /api/equipos/:id
  */
 async function getById(id: string): Promise<Equipo> {
-  const response = await apiClient.get<Equipo>(`/equipos/${id}`);
-  return equipoSchema.parse(response);
+  try {
+    const response = await apiClient.get<Equipo>(`/equipos/${id}`);
+    return equipoSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener el equipo por ID:', error);
+    throw error;
+  }
 }
 
 /**
@@ -58,8 +73,13 @@ async function update(
   id: string,
   data: UpdateEquipoDto,
 ): Promise<Equipo> {
-  const response = await apiClient.patch<Equipo>(`/equipos/${id}`, data);
-  return equipoSchema.parse(response);
+  try {
+    const response = await apiClient.patch<Equipo>(`/equipos/${id}`, data);
+    return equipoSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al actualizar el equipo:', error);
+    throw error;
+  }
 }
 
 /**
@@ -70,8 +90,15 @@ async function update(
  * solo se desvinculan (equipo_id = NULL)
  */
 async function deleteEquipo(id: string): Promise<DeleteEquipoResponse> {
-  const response = await apiClient.delete<DeleteEquipoResponse>(`/equipos/${id}`);
-  return deleteEquipoResponseSchema.parse(response);
+  try {
+    const response = await apiClient.delete<DeleteEquipoResponse>(
+      `/equipos/${id}`,
+    );
+    return deleteEquipoResponseSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al eliminar el equipo:', error);
+    throw error;
+  }
 }
 
 /**
@@ -85,8 +112,15 @@ async function deleteEquipo(id: string): Promise<DeleteEquipoResponse> {
  * - Ranking de equipos por puntos
  */
 async function getEstadisticas(): Promise<EquiposEstadisticas> {
-  const response = await apiClient.get<EquiposEstadisticas>('/equipos/estadisticas');
-  return equiposEstadisticasSchema.parse(response);
+  try {
+    const response = await apiClient.get<EquiposEstadisticas>(
+      '/equipos/estadisticas',
+    );
+    return equiposEstadisticasSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al obtener las estadísticas de equipos:', error);
+    throw error;
+  }
 }
 
 /**
@@ -97,8 +131,15 @@ async function getEstadisticas(): Promise<EquiposEstadisticas> {
  * y actualiza el campo puntos_totales
  */
 async function recalcularPuntos(id: string): Promise<Equipo> {
-  const response = await apiClient.post<Equipo>(`/equipos/${id}/recalcular-puntos`);
-  return equipoSchema.parse(response);
+  try {
+    const response = await apiClient.post<Equipo>(
+      `/equipos/${id}/recalcular-puntos`,
+    );
+    return equipoSchema.parse(response.data);
+  } catch (error) {
+    console.error('Error al recalcular los puntos del equipo:', error);
+    throw error;
+  }
 }
 
 // Exportar como objeto con métodos

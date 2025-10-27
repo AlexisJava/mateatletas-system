@@ -42,10 +42,14 @@ interface Estudiante {
 interface Grupo {
   id: string;
   nombre: string;
-  ruta_curricular: {
+  ruta_curricular?: {
     nombre: string;
     color: string;
-  };
+  } | null;
+  rutaCurricular?: {
+    nombre: string;
+    color: string;
+  } | null;
   cupo_maximo: number;
   estudiantes: Estudiante[];
   estadisticasGrupo: {
@@ -69,7 +73,7 @@ export default function GrupoDetalladoPage() {
     const fetchGrupo = async () => {
       try {
         const response = await apiClient.get(`/grupos/${grupoId}`);
-        setGrupo(response);
+        setGrupo(response.data);
       } catch (error) {
         // Mock data
         const mockGrupo: Grupo = {
@@ -271,7 +275,7 @@ export default function GrupoDetalladoPage() {
               >
                 <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></div>
                 <p className="text-sm text-purple-600 dark:text-purple-300 font-bold">
-                  {grupo.ruta_curricular.nombre}
+                  {(grupo.ruta_curricular ?? grupo.rutaCurricular)?.nombre ?? 'Sin ruta'}
                 </p>
               </motion.div>
             </div>

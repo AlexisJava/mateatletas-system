@@ -125,13 +125,24 @@ export function useReservarClase() {
         clasesKeys.reservas()
       );
 
-      // Optimistic update: decrementar cupo disponible
+      // Optimistic update: incrementar cupos ocupados
       queryClient.setQueriesData<Clase[]>(
         { queryKey: clasesKeys.lists() },
         (old) =>
           old?.map((clase) =>
             clase.id === claseId
-              ? { ...clase, cupo_disponible: clase.cupo_disponible - 1 }
+              ? {
+                  ...clase,
+                  cupos_ocupados:
+                    (clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0) + 1,
+                  _count: clase._count
+                    ? {
+                        ...clase._count,
+                        inscripciones:
+                          (clase._count.inscripciones ?? 0) + 1,
+                      }
+                    : clase._count,
+                }
               : clase
           ) ?? []
       );
@@ -212,14 +223,29 @@ export function useCancelarReserva() {
         (old) => old?.filter((r) => r.id !== inscripcionId) ?? []
       );
 
-      // Optimistic update: incrementar cupo disponible
+      // Optimistic update: reducir cupos ocupados
       if (reservaCancelada) {
         queryClient.setQueriesData<Clase[]>(
           { queryKey: clasesKeys.lists() },
           (old) =>
             old?.map((clase) =>
               clase.id === reservaCancelada.clase_id
-                ? { ...clase, cupo_disponible: clase.cupo_disponible + 1 }
+                ? {
+                    ...clase,
+                    cupos_ocupados: Math.max(
+                      (clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0) - 1,
+                      0,
+                    ),
+                    _count: clase._count
+                      ? {
+                          ...clase._count,
+                          inscripciones: Math.max(
+                            (clase._count.inscripciones ?? 0) - 1,
+                            0,
+                          ),
+                        }
+                      : clase._count,
+                  }
                 : clase
             ) ?? []
         );

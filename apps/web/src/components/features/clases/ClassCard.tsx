@@ -39,12 +39,17 @@ export function ClassCard({
     minute: '2-digit',
   }).format(fecha);
 
-  // Determinar color de la ruta curricular
-  const colorRuta = clase.ruta_curricular?.color || '#00d9ff';
+  const rutaCurricular = clase.ruta_curricular ?? clase.rutaCurricular;
+  const colorRuta = rutaCurricular?.color ?? '#00d9ff';
+  const nombreRuta = rutaCurricular?.nombre ?? 'Sin ruta';
+
+  const cupoMaximo = clase.cupo_maximo ?? 0;
+  const cuposOcupados = clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0;
+  const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);
 
   // Determinar si hay cupos disponibles
-  const sinCupos = clase.cupo_disponible === 0;
-  const pocoCupo = clase.cupo_disponible <= 3 && clase.cupo_disponible > 0;
+  const sinCupos = cuposDisponibles === 0;
+  const pocoCupo = cuposDisponibles <= 3 && cuposDisponibles > 0;
 
   // Badge de cupo
   const cupoColor = sinCupos
@@ -83,7 +88,7 @@ export function ClassCard({
               borderColor: colorRuta,
             }}
           >
-            📚 {clase.ruta_curricular?.nombre || 'Sin ruta'}
+            📚 {nombreRuta}
           </Badge>
 
           {sinCupos && (
@@ -139,7 +144,7 @@ export function ClassCard({
             >
               {sinCupos
                 ? 'Sin cupos'
-                : `${clase.cupo_disponible}/${clase.cupo_maximo} disponibles`}
+                : `${cuposDisponibles}/${cupoMaximo} disponibles`}
             </div>
           </div>
         </div>
