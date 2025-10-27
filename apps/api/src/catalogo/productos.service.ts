@@ -241,7 +241,9 @@ export class ProductosService {
    * @throws BadRequestException si faltan campos requeridos o hay validaciones inválidas
    * @private
    */
-  private validateProductoFields(dto: CrearProductoDto | ActualizarProductoDto) {
+  private validateProductoFields(
+    dto: CrearProductoDto | ActualizarProductoDto,
+  ) {
     if (dto.tipo === 'Curso') {
       // Validar que tenga los campos de curso
       if (!dto.fecha_inicio || !dto.fecha_fin || !dto.cupo_maximo) {

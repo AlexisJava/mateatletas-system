@@ -38,9 +38,7 @@ import { redisStore } from 'cache-manager-redis-yet';
                     // Reconectar con backoff exponencial
                     if (retries > 10) {
                       // Después de 10 intentos, no reconectar
-                      console.error(
-                        '❌ Redis: Máximo de reintentos alcanzado',
-                      );
+                      console.error('❌ Redis: Máximo de reintentos alcanzado');
                       return new Error('Demasiados reintentos de Redis');
                     }
                     // Esperar 2^retries * 100ms (máx 3 segundos)

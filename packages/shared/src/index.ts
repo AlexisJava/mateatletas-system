@@ -35,6 +35,7 @@ export type {
   CreatePlanificacionInput,
   UpdatePlanificacionInput,
   CreateActividadInput,
+  PlanificacionGrupo,
   EstadoClase,
   Asistencia,
   Clase,

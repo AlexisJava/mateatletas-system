@@ -14,7 +14,10 @@ export class UpdatePlanificacionUseCase {
     private readonly planificacionRepository: IPlanificacionRepository,
   ) {}
 
-  async execute(id: string, dto: UpdatePlanificacionDto): Promise<PlanificacionDetail> {
+  async execute(
+    id: string,
+    dto: UpdatePlanificacionDto,
+  ): Promise<PlanificacionDetail> {
     const existing = await this.planificacionRepository.findById(id);
 
     const updateData: UpdatePlanificacionData = {
@@ -26,10 +29,7 @@ export class UpdatePlanificacionUseCase {
       notasDocentes: dto.notas_docentes,
     };
 
-    if (
-      dto.estado !== undefined &&
-      dto.estado !== existing.estado
-    ) {
+    if (dto.estado !== undefined && dto.estado !== existing.estado) {
       updateData.fechaPublicacion =
         dto.estado === EstadoPlanificacion.PUBLICADA ? new Date() : null;
     }

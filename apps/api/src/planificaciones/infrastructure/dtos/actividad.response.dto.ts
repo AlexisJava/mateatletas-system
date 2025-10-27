@@ -39,7 +39,10 @@ export class ActividadResponseDto {
   @ApiProperty({ example: 'Completar el juego 2 veces' })
   instruccionesEstudiante!: string;
 
-  @ApiPropertyOptional({ type: Object, example: [{ tipo: 'pdf', titulo: 'Guía', url: 'https://...' }] })
+  @ApiPropertyOptional({
+    type: Object,
+    example: [{ tipo: 'pdf', titulo: 'Guía', url: 'https://...' }],
+  })
   recursosUrl!: Record<string, unknown> | null;
 
   @ApiProperty({ example: 1 })

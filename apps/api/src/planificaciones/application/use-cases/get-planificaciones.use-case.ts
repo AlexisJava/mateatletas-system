@@ -38,6 +38,9 @@ export class GetPlanificacionesUseCase {
     };
 
     // Delegate to repository
-    return await this.planificacionRepository.findAll(filters, paginationOptions);
+    return await this.planificacionRepository.findAll(
+      filters,
+      paginationOptions,
+    );
   }
 }

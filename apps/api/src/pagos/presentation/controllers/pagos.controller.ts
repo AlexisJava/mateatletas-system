@@ -202,7 +202,8 @@ export class PagosController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Datos de entrada inválidos (precios negativos, porcentajes fuera de rango, etc)',
+    description:
+      'Datos de entrada inválidos (precios negativos, porcentajes fuera de rango, etc)',
   })
   @ApiResponse({
     status: 404,
@@ -250,9 +251,7 @@ export class PagosController {
     status: 404,
     description: 'Estudiante, tutor o producto no encontrado',
   })
-  async crearInscripciones(
-    @Body() dto: CrearInscripcionMensualRequestDto,
-  ) {
+  async crearInscripciones(@Body() dto: CrearInscripcionMensualRequestDto) {
     return await this.pagosService.crearInscripcionMensual(dto);
   }
 
@@ -316,7 +315,8 @@ export class PagosController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener historial de cambios de precios',
-    description: 'Retorna los últimos cambios en la configuración de precios para auditoría',
+    description:
+      'Retorna los últimos cambios en la configuración de precios para auditoría',
   })
   @ApiResponse({
     status: 200,
@@ -334,7 +334,8 @@ export class PagosController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Obtener inscripciones pendientes',
-    description: 'Retorna inscripciones con estado Pendiente incluyendo datos del estudiante y producto',
+    description:
+      'Retorna inscripciones con estado Pendiente incluyendo datos del estudiante y producto',
   })
   @ApiResponse({
     status: 200,
@@ -432,7 +433,9 @@ export class PagosController {
   ) {
     // Si es tutor, solo puede ver su propia información
     if (user.role === 'tutor' && user.id !== tutorId) {
-      throw new NotFoundException('No tienes permiso para ver esta información');
+      throw new NotFoundException(
+        'No tienes permiso para ver esta información',
+      );
     }
 
     return await this.verificacionMorosidadService.verificarMorosidadTutor(
@@ -464,9 +467,7 @@ export class PagosController {
     summary: 'Verificar acceso de estudiante según estado de pagos',
   })
   @ApiResponse({ status: 200, description: 'Estado de acceso del estudiante' })
-  async verificarAccesoEstudiante(
-    @Param('estudianteId') estudianteId: string,
-  ) {
+  async verificarAccesoEstudiante(@Param('estudianteId') estudianteId: string) {
     return await this.verificacionMorosidadService.verificarAccesoEstudiante(
       estudianteId,
     );

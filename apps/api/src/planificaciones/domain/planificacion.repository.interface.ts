@@ -165,7 +165,11 @@ export interface IPlanificacionRepository {
   /**
    * Find a planification by unique constraint (grupo_id, mes, anio)
    */
-  findByPeriod(grupoId: string, mes: number, anio: number): Promise<PlanificacionEntity | null>;
+  findByPeriod(
+    grupoId: string,
+    mes: number,
+    anio: number,
+  ): Promise<PlanificacionEntity | null>;
 
   /**
    * Create a new planification
@@ -175,7 +179,10 @@ export interface IPlanificacionRepository {
   /**
    * Update a planification
    */
-  update(id: string, data: UpdatePlanificacionData): Promise<PlanificacionEntity>;
+  update(
+    id: string,
+    data: UpdatePlanificacionData,
+  ): Promise<PlanificacionEntity>;
 
   /**
    * Delete a planification
@@ -201,7 +208,10 @@ export interface IPlanificacionRepository {
   /**
    * Update an activity
    */
-  updateActividad(id: string, data: UpdateActividadData): Promise<ActividadEntity>;
+  updateActividad(
+    id: string,
+    data: UpdateActividadData,
+  ): Promise<ActividadEntity>;
 
   /**
    * Delete an activity

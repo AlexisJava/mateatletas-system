@@ -98,7 +98,9 @@ describe('Pagos - Endpoints principales (API)', () => {
 
   it('permitir a tutores calcular precios de forma transparente', async () => {
     if (!tutorId || estudianteIds.length === 0) {
-      console.warn('⚠️  No hay estudiantes asociados al tutor de pruebas, se omite el test de cálculo de precio.');
+      console.warn(
+        '⚠️  No hay estudiantes asociados al tutor de pruebas, se omite el test de cálculo de precio.',
+      );
       return;
     }
 
