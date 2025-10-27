@@ -692,4 +692,35 @@ export class PlanificacionesSimplesService {
       progresos: asignacion.planificacion.progresosEstudiantes,
     };
   }
+
+  /**
+   * Obtener todas las planificaciones del estudiante con su progreso
+   */
+  async obtenerPlanificacionesEstudiante(estudianteId: string) {
+    // Obtener todos los progresos del estudiante
+    const progresos = await this.prisma.progresoEstudiantePlanificacion.findMany({
+      where: { estudiante_id: estudianteId },
+      include: {
+        planificacion: true,
+      },
+      orderBy: {
+        ultima_actividad: 'desc',
+      },
+    });
+
+    return progresos.map((progreso: any) => ({
+      codigo: progreso.planificacion.codigo,
+      titulo: progreso.planificacion.titulo,
+      grupo_codigo: progreso.planificacion.grupo_codigo,
+      mes: progreso.planificacion.mes,
+      anio: progreso.planificacion.anio,
+      semanas_total: progreso.planificacion.semanas_total,
+      progreso: {
+        semana_actual: progreso.semana_actual,
+        puntos_totales: progreso.puntos_totales,
+        tiempo_total_minutos: progreso.tiempo_total_minutos,
+        ultima_actividad: progreso.ultima_actividad,
+      },
+    }));
+  }
 }

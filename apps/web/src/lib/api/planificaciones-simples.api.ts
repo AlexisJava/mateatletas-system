@@ -159,6 +159,46 @@ export async function asignarPlanificacion(
 }
 
 /**
+ * Obtener todas las planificaciones del estudiante (Estudiante)
+ */
+export async function misPlanificaciones(): Promise<Array<{
+  codigo: string;
+  titulo: string;
+  grupo_codigo: string;
+  mes: number | null;
+  anio: number;
+  semanas_total: number;
+  progreso: {
+    semana_actual: number;
+    puntos_totales: number;
+    tiempo_total_minutos: number;
+    ultima_actividad: string;
+  };
+}>> {
+  try {
+    // El interceptor ya retorna response.data directamente
+    const response = await apiClient.get('/planificaciones/mis-planificaciones');
+    return response as Array<{
+      codigo: string;
+      titulo: string;
+      grupo_codigo: string;
+      mes: number | null;
+      anio: number;
+      semanas_total: number;
+      progreso: {
+        semana_actual: number;
+        puntos_totales: number;
+        tiempo_total_minutos: number;
+        ultima_actividad: string;
+      };
+    }>;
+  } catch (error) {
+    console.error('Error al obtener planificaciones del estudiante:', error);
+    throw error;
+  }
+}
+
+/**
  * Obtener progreso del estudiante (Estudiante)
  */
 export async function obtenerProgreso(codigo: string): Promise<{
