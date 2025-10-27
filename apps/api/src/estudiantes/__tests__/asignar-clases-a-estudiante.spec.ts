@@ -48,11 +48,12 @@ describe('EstudiantesService - Asignar Clases', () => {
 
     jest.clearAllMocks();
 
-    (prisma.$transaction as jest.Mock).mockImplementation(async (fn: any) =>
-      fn({
-        inscripcionClase: prisma.inscripcionClase,
-        clase: prisma.clase,
-      }),
+    (prisma.$transaction as jest.Mock).mockImplementation(
+      async (fn: (tx: typeof prisma) => Promise<void>) =>
+        fn({
+          inscripcionClase: prisma.inscripcionClase,
+          clase: prisma.clase,
+        } as typeof prisma),
     );
   });
 

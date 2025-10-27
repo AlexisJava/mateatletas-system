@@ -54,8 +54,8 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
 
     jest.clearAllMocks();
 
-    (prisma.$transaction as jest.Mock).mockImplementation(async (fn: any) =>
-      fn(prisma),
+    (prisma.$transaction as jest.Mock).mockImplementation(
+      async (fn: (tx: typeof prisma) => Promise<void>) => fn(prisma),
     );
 
     (prisma.estudiante.create as jest.Mock).mockImplementation(
