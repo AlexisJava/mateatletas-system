@@ -48,87 +48,112 @@ export class PrismaExceptionFilter implements ExceptionFilter {
 
     // Mapear códigos de error de Prisma a respuestas HTTP
     switch (exception.code) {
-      case 'P2000':
+      case 'P2000': {
         status = HttpStatus.BAD_REQUEST;
         message = 'El valor proporcionado es demasiado largo para el campo';
-        details = exception.meta?.column_name as string;
+        details = this.getMetaValue<string>(exception.meta, 'column_name');
         break;
+      }
 
-      case 'P2001':
+      case 'P2001': {
         status = HttpStatus.NOT_FOUND;
         message = 'Registro no encontrado';
-        details = exception.meta?.cause as string;
+        details = this.getMetaValue<string>(exception.meta, 'cause');
         break;
+      }
 
-      case 'P2002':
+      case 'P2002': {
         status = HttpStatus.CONFLICT;
-        const target = exception.meta?.target as string[];
-        const field = target?.[0] || 'campo';
+        const target = this.getMetaValue<string[]>(exception.meta, 'target');
+        const field = target?.[0] ?? 'campo';
         message = `Ya existe un registro con ese ${field}`;
-        details = `Violación de restricción única en: ${target?.join(', ')}`;
+        details = target
+          ? `Violación de restricción única en: ${target.join(', ')}`
+          : undefined;
         break;
+      }
 
-      case 'P2003':
+      case 'P2003': {
         status = HttpStatus.BAD_REQUEST;
-        const fieldName = exception.meta?.field_name as string;
+        const fieldName = this.getMetaValue<string>(
+          exception.meta,
+          'field_name',
+        );
         message = 'Referencia inválida - el registro relacionado no existe';
         details = fieldName
           ? `El campo ${fieldName} hace referencia a un registro que no existe`
           : 'Error de clave foránea';
         break;
+      }
 
-      case 'P2004':
+      case 'P2004': {
         status = HttpStatus.BAD_REQUEST;
         message = 'Fallo en restricción de la base de datos';
-        details = exception.meta?.database_error as string;
+        details = this.getMetaValue<string>(exception.meta, 'database_error');
         break;
+      }
 
-      case 'P2011':
+      case 'P2011': {
         status = HttpStatus.BAD_REQUEST;
-        const constraint = exception.meta?.constraint as string;
+        const constraint = this.getMetaValue<string>(
+          exception.meta,
+          'constraint',
+        );
         message = 'Violación de restricción de nulabilidad';
-        details = `El campo ${constraint} no puede ser nulo`;
+        details = constraint
+          ? `El campo ${constraint} no puede ser nulo`
+          : undefined;
         break;
+      }
 
-      case 'P2014':
+      case 'P2014': {
         status = HttpStatus.BAD_REQUEST;
-        const relation = exception.meta?.relation_name as string;
+        const relation = this.getMetaValue<string>(
+          exception.meta,
+          'relation_name',
+        );
         message = 'La operación viola una relación requerida';
-        details = `Relación requerida: ${relation}`;
+        details = relation ? `Relación requerida: ${relation}` : undefined;
         break;
+      }
 
-      case 'P2015':
+      case 'P2015': {
         status = HttpStatus.NOT_FOUND;
         message = 'No se encontró el registro relacionado';
-        details = exception.meta?.cause as string;
+        details = this.getMetaValue<string>(exception.meta, 'cause');
         break;
+      }
 
-      case 'P2018':
+      case 'P2018': {
         status = HttpStatus.BAD_REQUEST;
         message = 'No se encontraron los registros conectados requeridos';
-        details = exception.meta?.cause as string;
+        details = this.getMetaValue<string>(exception.meta, 'cause');
         break;
+      }
 
-      case 'P2019':
+      case 'P2019': {
         status = HttpStatus.BAD_REQUEST;
         message = 'Error de entrada de datos';
-        details = exception.meta?.cause as string;
+        details = this.getMetaValue<string>(exception.meta, 'cause');
         break;
+      }
 
-      case 'P2025':
+      case 'P2025': {
         status = HttpStatus.NOT_FOUND;
         message = 'Registro no encontrado para actualizar o eliminar';
-        details = exception.meta?.cause as string;
+        details = this.getMetaValue<string>(exception.meta, 'cause');
         break;
+      }
 
-      default:
+      default: {
         status = HttpStatus.INTERNAL_SERVER_ERROR;
         message = 'Error inesperado en la base de datos';
         details = `Código de error: ${exception.code}`;
+      }
     }
 
     // Construir respuesta
-    const errorResponse: any = {
+    const errorResponse: PrismaErrorResponse = {
       statusCode: status,
       message,
       error: this.getErrorName(status),
@@ -148,7 +173,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       errorResponse.prismaCode = exception.code;
       errorResponse.prismaMessage = exception.message;
       if (exception.meta) {
-        errorResponse.meta = exception.meta;
+        errorResponse.meta = this.normalizeMeta(exception.meta);
       }
     }
 
@@ -165,4 +190,43 @@ export class PrismaExceptionFilter implements ExceptionFilter {
 
     return errorNames[status] || 'Unknown Error';
   }
+
+  private getMetaValue<T>(
+    meta: Prisma.PrismaClientKnownRequestError['meta'],
+    key: string,
+  ): T | undefined {
+    if (this.isMetaRecord(meta) && key in meta) {
+      return meta[key] as T;
+    }
+    return undefined;
+  }
+
+  private normalizeMeta(
+    meta: Prisma.PrismaClientKnownRequestError['meta'],
+  ): Record<string, unknown> | undefined {
+    if (!this.isMetaRecord(meta)) {
+      return undefined;
+    }
+    return { ...meta };
+  }
+
+  private isMetaRecord(
+    meta: Prisma.PrismaClientKnownRequestError['meta'],
+  ): meta is Record<string, unknown> {
+    return Boolean(meta && typeof meta === 'object' && !Array.isArray(meta));
+  }
+}
+
+interface PrismaErrorResponse {
+  statusCode: number;
+  message: string;
+  error: string;
+  timestamp: string;
+  path: string;
+  method: string;
+  errorId: string;
+  details?: string;
+  prismaCode?: string;
+  prismaMessage?: string;
+  meta?: Record<string, unknown>;
 }

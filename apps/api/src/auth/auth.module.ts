@@ -50,16 +50,16 @@ import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
         // En desarrollo: tokens de larga duración (7d) para evitar re-login constante
         // En producción: tokens de corta duración (1h) para mayor seguridad
         const nodeEnv = config.get<string>('NODE_ENV') || 'development';
-        const defaultExpiration = nodeEnv === 'production' ? '1h' : '7d';
-        const expiresIn =
+        const defaultExpiration: string = nodeEnv === 'production' ? '1h' : '7d';
+        const expiresIn: string =
           config.get<string>('JWT_EXPIRATION') || defaultExpiration;
 
         return {
           secret,
           signOptions: {
-            expiresIn: expiresIn as string | number,
+            expiresIn,
           },
-        };
+        } as JwtModuleOptions;
       },
     }),
   ],

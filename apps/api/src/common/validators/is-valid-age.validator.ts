@@ -40,14 +40,36 @@ export function IsValidAge(
             age--;
           }
 
-          const [min, max] = args.constraints;
+          const [min, max] = resolveAgeBounds(args.constraints, minAge, maxAge);
           return age >= min && age <= max;
         },
         defaultMessage(args: ValidationArguments) {
-          const [minAge, maxAge] = args.constraints;
-          return `La edad debe estar entre ${minAge} y ${maxAge} años`;
+          const [minAllowed, maxAllowed] = resolveAgeBounds(
+            args.constraints,
+            minAge,
+            maxAge,
+          );
+          return `La edad debe estar entre ${minAllowed} y ${maxAllowed} años`;
         },
       },
     });
   };
+}
+
+function resolveAgeBounds(
+  constraints: ValidationArguments['constraints'],
+  fallbackMin: number,
+  fallbackMax: number,
+): [number, number] {
+  if (!Array.isArray(constraints)) {
+    return [fallbackMin, fallbackMax];
+  }
+
+  const min = Number(constraints[0]);
+  const max = Number(constraints[1]);
+
+  const minBound = Number.isFinite(min) ? min : fallbackMin;
+  const maxBound = Number.isFinite(max) ? max : fallbackMax;
+
+  return [minBound, maxBound];
 }

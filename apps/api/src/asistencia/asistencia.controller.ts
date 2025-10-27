@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { EstadoAsistencia } from '@prisma/client';
 import { AsistenciaService } from './asistencia.service';
 import { AsistenciaReportesService } from './asistencia-reportes.service';
 import { MarcarAsistenciaDto } from './dto/marcar-asistencia.dto';
@@ -147,12 +148,20 @@ export class AsistenciaController {
     @GetUser() user: AuthUser,
   ) {
     // El estudianteId se obtiene del usuario autenticado
-    const estudianteId = user.role === 'estudiante' ? user.id : user.id;
+    const estudianteId = user.id;
+
+    const estado = dto.presente
+      ? EstadoAsistencia.Presente
+      : EstadoAsistencia.Ausente;
+
+    const asistenciaDto: MarcarAsistenciaDto = {
+      estado,
+    };
 
     return this.asistenciaService.marcarAsistencia(
       dto.claseId,
       estudianteId,
-      { estado: dto.presente ? 'PRESENTE' : 'AUSENTE' } as any,
+      asistenciaDto,
       null, // No es marcado por un docente, es auto-registro
     );
   }
