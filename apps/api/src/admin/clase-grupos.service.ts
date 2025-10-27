@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { CrearClaseGrupoDto } from './dto/crear-clase-grupo.dto';
 import { ActualizarClaseGrupoDto } from './dto/actualizar-clase-grupo.dto';
@@ -65,95 +69,97 @@ export class ClaseGruposService {
     }
 
     // Crear el ClaseGrupo con las inscripciones en una transacción
-    const claseGrupo = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      // Crear el grupo
-      const grupo = await tx.claseGrupo.create({
-        data: {
-          grupo_id: dto.grupo_id,
-          codigo: dto.codigo,
-          nombre: dto.nombre,
-          tipo: dto.tipo,
-          dia_semana: dto.dia_semana,
-          hora_inicio: dto.hora_inicio,
-          hora_fin: dto.hora_fin,
-          fecha_inicio: fechaInicio,
-          fecha_fin: fechaFin,
-          anio_lectivo: dto.anio_lectivo,
-          cupo_maximo: dto.cupo_maximo,
-          docente_id: dto.docente_id,
-          ruta_curricular_id: dto.ruta_curricular_id,
-          sector_id: dto.sector_id,
-          nivel: dto.nivel,
-          activo: true,
-        },
-        include: {
-          docente: {
-            select: {
-              id: true,
-              nombre: true,
-              apellido: true,
-              email: true,
-            },
+    const claseGrupo = await this.prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        // Crear el grupo
+        const grupo = await tx.claseGrupo.create({
+          data: {
+            grupo_id: dto.grupo_id,
+            codigo: dto.codigo,
+            nombre: dto.nombre,
+            tipo: dto.tipo,
+            dia_semana: dto.dia_semana,
+            hora_inicio: dto.hora_inicio,
+            hora_fin: dto.hora_fin,
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin,
+            anio_lectivo: dto.anio_lectivo,
+            cupo_maximo: dto.cupo_maximo,
+            docente_id: dto.docente_id,
+            ruta_curricular_id: dto.ruta_curricular_id,
+            sector_id: dto.sector_id,
+            nivel: dto.nivel,
+            activo: true,
           },
-          rutaCurricular: {
-            select: {
-              id: true,
-              nombre: true,
-              color: true,
-            },
-          },
-          sector: {
-            select: {
-              id: true,
-              nombre: true,
-              color: true,
-            },
-          },
-        },
-      });
-
-      // Crear las inscripciones de los estudiantes
-      type EstudianteConTutor = Prisma.EstudianteGetPayload<{
-        include: { tutor: true };
-      }>;
-
-      const inscripciones = await Promise.all(
-        estudiantes.map((estudiante: EstudianteConTutor) =>
-          tx.inscripcionClaseGrupo.create({
-            data: {
-              clase_grupo_id: grupo.id,
-              estudiante_id: estudiante.id,
-              tutor_id: estudiante.tutor_id,
-              fecha_inscripcion: new Date(),
-            },
-            include: {
-              estudiante: {
-                select: {
-                  id: true,
-                  nombre: true,
-                  apellido: true,
-                  edad: true,
-                },
-              },
-              tutor: {
-                select: {
-                  id: true,
-                  nombre: true,
-                  apellido: true,
-                  email: true,
-                },
+          include: {
+            docente: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+                email: true,
               },
             },
-          }),
-        ),
-      );
+            rutaCurricular: {
+              select: {
+                id: true,
+                nombre: true,
+                color: true,
+              },
+            },
+            sector: {
+              select: {
+                id: true,
+                nombre: true,
+                color: true,
+              },
+            },
+          },
+        });
 
-      return {
-        ...grupo,
-        inscripciones,
-        total_inscriptos: inscripciones.length,
-      };
-    });
+        // Crear las inscripciones de los estudiantes
+        type EstudianteConTutor = Prisma.EstudianteGetPayload<{
+          include: { tutor: true };
+        }>;
+
+        const inscripciones = await Promise.all(
+          estudiantes.map((estudiante: EstudianteConTutor) =>
+            tx.inscripcionClaseGrupo.create({
+              data: {
+                clase_grupo_id: grupo.id,
+                estudiante_id: estudiante.id,
+                tutor_id: estudiante.tutor_id,
+                fecha_inscripcion: new Date(),
+              },
+              include: {
+                estudiante: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    edad: true,
+                  },
+                },
+                tutor: {
+                  select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                  },
+                },
+              },
+            }),
+          ),
+        );
+
+        return {
+          ...grupo,
+          inscripciones,
+          total_inscriptos: inscripciones.length,
+        };
+      },
+    );
 
     return {
       success: true,
@@ -238,7 +244,7 @@ export class ClaseGruposService {
       orderBy: [{ dia_semana: 'asc' }, { hora_inicio: 'asc' }],
     });
 
-    type GrupoConContadores = typeof grupos[number];
+    type GrupoConContadores = (typeof grupos)[number];
 
     return {
       success: true,

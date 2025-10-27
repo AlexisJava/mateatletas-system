@@ -49,9 +49,9 @@ export class CsrfProtectionGuard implements CanActivate {
 
   // Lista de orígenes permitidos (tu frontend)
   private readonly allowedOrigins = [
-    'http://localhost:3000',      // Frontend dev
-    'http://localhost:3002',      // Frontend alternativo
-    process.env.FRONTEND_URL,     // Frontend producción
+    'http://localhost:3000', // Frontend dev
+    'http://localhost:3002', // Frontend alternativo
+    process.env.FRONTEND_URL, // Frontend producción
   ].filter(Boolean) as string[];
 
   constructor(private reflector: Reflector) {}

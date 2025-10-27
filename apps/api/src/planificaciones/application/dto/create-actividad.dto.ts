@@ -37,7 +37,8 @@ export class CreateActividadDto {
 
   @IsOptional()
   @IsEnum(NivelDificultad, {
-    message: 'nivel_dificultad debe ser BASICO, INTERMEDIO, AVANZADO u OLIMPICO',
+    message:
+      'nivel_dificultad debe ser BASICO, INTERMEDIO, AVANZADO u OLIMPICO',
   })
   nivel_dificultad?: NivelDificultad;
 

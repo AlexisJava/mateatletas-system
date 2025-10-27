@@ -14,7 +14,11 @@ import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { QueryEstudiantesDto } from './dto/query-estudiantes.dto';
 import { CrearEstudiantesConTutorDto } from './dto/crear-estudiantes-con-tutor.dto';
-import { AsignarClasesDto, CopiarEstudianteDto, BuscarEstudiantePorEmailDto } from './dto/asignar-clases.dto';
+import {
+  AsignarClasesDto,
+  CopiarEstudianteDto,
+  BuscarEstudiantePorEmailDto,
+} from './dto/asignar-clases.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
@@ -39,7 +43,10 @@ export class EstudiantesController {
    * @returns Estudiante creado
    */
   @Post()
-  async create(@Body() createDto: CreateEstudianteDto, @GetUser() user: AuthUser) {
+  async create(
+    @Body() createDto: CreateEstudianteDto,
+    @GetUser() user: AuthUser,
+  ) {
     return this.estudiantesService.create(user.id, createDto);
   }
 
@@ -61,7 +68,10 @@ export class EstudiantesController {
    * @returns Lista de estudiantes con metadata
    */
   @Get()
-  async findAll(@Query() query: QueryEstudiantesDto, @GetUser() user: AuthUser) {
+  async findAll(
+    @Query() query: QueryEstudiantesDto,
+    @GetUser() user: AuthUser,
+  ) {
     return this.estudiantesService.findAllByTutor(user.id, query);
   }
 
@@ -195,7 +205,10 @@ export class EstudiantesController {
   @Patch(':id/copiar-a-sector')
   @UseGuards(RolesGuard)
   @Roles(Role.Admin)
-  async copiarASector(@Param('id') id: string, @Body() dto: CopiarEstudianteDto) {
+  async copiarASector(
+    @Param('id') id: string,
+    @Body() dto: CopiarEstudianteDto,
+  ) {
     return this.estudiantesService.copiarEstudianteASector(id, dto.sectorId);
   }
 
@@ -207,8 +220,13 @@ export class EstudiantesController {
   @Post('copiar-por-email')
   @UseGuards(RolesGuard)
   @Roles(Role.Admin)
-  async copiarPorEmail(@Body() body: BuscarEstudiantePorEmailDto & { sectorId: string }) {
-    return this.estudiantesService.copiarEstudiantePorDNIASector(body.email, body.sectorId);
+  async copiarPorEmail(
+    @Body() body: BuscarEstudiantePorEmailDto & { sectorId: string },
+  ) {
+    return this.estudiantesService.copiarEstudiantePorDNIASector(
+      body.email,
+      body.sectorId,
+    );
   }
 
   /**
@@ -222,7 +240,12 @@ export class EstudiantesController {
   @Roles(Role.Admin)
   async asignarClases(@Param('id') id: string, @Body() dto: AsignarClasesDto) {
     if (dto.clasesIds.length === 1) {
-      return [await this.estudiantesService.asignarClaseAEstudiante(id, dto.clasesIds[0])];
+      return [
+        await this.estudiantesService.asignarClaseAEstudiante(
+          id,
+          dto.clasesIds[0],
+        ),
+      ];
     }
     return this.estudiantesService.asignarClasesAEstudiante(id, dto.clasesIds);
   }

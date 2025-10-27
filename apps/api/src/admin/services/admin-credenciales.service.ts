@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Logger, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -85,7 +90,9 @@ export class AdminCredencialesService {
           error: error instanceof Error ? error.message : 'Unknown error',
           tipoUsuario,
         });
-        throw new InternalServerErrorException('Error al generar la contraseña');
+        throw new InternalServerErrorException(
+          'Error al generar la contraseña',
+        );
       }
 
       // Actualizar según el tipo de usuario
@@ -158,10 +165,14 @@ export class AdminCredencialesService {
           usuarioId,
           tipoUsuario,
         });
-        throw new InternalServerErrorException('Error al resetear la contraseña');
+        throw new InternalServerErrorException(
+          'Error al resetear la contraseña',
+        );
       }
 
-      this.logger.log(`Password reseteado exitosamente para ${tipoUsuario} ${usuario.nombre} ${usuario.apellido}`);
+      this.logger.log(
+        `Password reseteado exitosamente para ${tipoUsuario} ${usuario.nombre} ${usuario.apellido}`,
+      );
 
       return {
         message: 'Contraseña reseteada exitosamente',
@@ -182,7 +193,9 @@ export class AdminCredencialesService {
         usuarioId,
         tipoUsuario,
       });
-      throw new InternalServerErrorException('Error inesperado al resetear contraseña');
+      throw new InternalServerErrorException(
+        'Error inesperado al resetear contraseña',
+      );
     }
   }
 
@@ -228,7 +241,9 @@ export class AdminCredencialesService {
     const exitosos = resultados.filter((r) => r.success);
     const fallidos = resultados.filter((r) => !r.success);
 
-    this.logger.log(`Reset masivo completado: ${exitosos.length} exitosos, ${fallidos.length} fallidos`);
+    this.logger.log(
+      `Reset masivo completado: ${exitosos.length} exitosos, ${fallidos.length} fallidos`,
+    );
 
     return {
       message: `${exitosos.length} contraseñas reseteadas, ${fallidos.length} fallidas`,
@@ -298,7 +313,9 @@ export class AdminCredencialesService {
           rol: 'Tutor',
           nombre: t.nombre,
           apellido: t.apellido,
-          usuario: t.username || `${t.nombre.toLowerCase()}.${t.apellido.toLowerCase()}`,
+          usuario:
+            t.username ||
+            `${t.nombre.toLowerCase()}.${t.apellido.toLowerCase()}`,
           password_temporal: t.password_temporal,
           estado: t.debe_cambiar_password ? 'Pendiente' : 'Contraseña Cambiada',
           fecha_creacion: t.createdAt,
@@ -329,7 +346,9 @@ export class AdminCredencialesService {
       this.logger.error('Failed to fetch credentials', {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
-      throw new InternalServerErrorException('Error al obtener las credenciales');
+      throw new InternalServerErrorException(
+        'Error al obtener las credenciales',
+      );
     }
   }
 }

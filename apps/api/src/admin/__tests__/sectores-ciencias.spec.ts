@@ -234,7 +234,9 @@ describe('Sector Ciencias - TDD', () => {
         apellido: 'Pérez',
       });
 
-      mockPrismaService.rutaEspecialidad.findUnique.mockResolvedValue(rutaCiencias);
+      mockPrismaService.rutaEspecialidad.findUnique.mockResolvedValue(
+        rutaCiencias,
+      );
       mockPrismaService.docenteRuta.findUnique.mockResolvedValue(null);
       mockPrismaService.docenteRuta.create.mockResolvedValue({
         id: 'asignacion-ciencias',
@@ -322,7 +324,9 @@ describe('Sector Ciencias - TDD', () => {
       });
 
       // Act
-      const result = (await prisma.clase.create({ data: claseData as any })) as any;
+      const result = (await prisma.clase.create({
+        data: claseData,
+      })) as any;
 
       // Assert
       expect(result).toBeDefined();

@@ -90,10 +90,18 @@ describe('GamificacionService - getProgresoEstudiante OPTIMIZED', () => {
         { id: 'clase-3', ruta_curricular_id: 'ruta-2' },
       ];
 
-      jest.spyOn(prisma.rutaCurricular, 'findMany').mockResolvedValue(mockRutas as any);
-      jest.spyOn(prisma.clase, 'groupBy').mockResolvedValue(mockClasesTotales as any);
-      jest.spyOn(prisma.asistencia, 'groupBy').mockResolvedValue(mockAsistencias as any);
-      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockClasesConRuta as any);
+      jest
+        .spyOn(prisma.rutaCurricular, 'findMany')
+        .mockResolvedValue(mockRutas as any);
+      jest
+        .spyOn(prisma.clase, 'groupBy')
+        .mockResolvedValue(mockClasesTotales as any);
+      jest
+        .spyOn(prisma.asistencia, 'groupBy')
+        .mockResolvedValue(mockAsistencias as any);
+      jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue(mockClasesConRuta as any);
 
       // Act
       const result = await service.getProgresoEstudiante('est-123');
@@ -152,10 +160,18 @@ describe('GamificacionService - getProgresoEstudiante OPTIMIZED', () => {
         { id: 'clase-7', ruta_curricular_id: 'ruta-2' },
       ];
 
-      jest.spyOn(prisma.rutaCurricular, 'findMany').mockResolvedValue(mockRutas as any);
-      jest.spyOn(prisma.clase, 'groupBy').mockResolvedValue(mockClasesTotales as any);
-      jest.spyOn(prisma.asistencia, 'groupBy').mockResolvedValue(mockAsistencias as any);
-      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockClasesConRuta as any);
+      jest
+        .spyOn(prisma.rutaCurricular, 'findMany')
+        .mockResolvedValue(mockRutas as any);
+      jest
+        .spyOn(prisma.clase, 'groupBy')
+        .mockResolvedValue(mockClasesTotales as any);
+      jest
+        .spyOn(prisma.asistencia, 'groupBy')
+        .mockResolvedValue(mockAsistencias as any);
+      jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue(mockClasesConRuta as any);
 
       // Act
       const result = await service.getProgresoEstudiante('est-123');
@@ -180,18 +196,24 @@ describe('GamificacionService - getProgresoEstudiante OPTIMIZED', () => {
         // ruta-2 no está en mockClasesTotales (sin clases)
       ];
 
-      const mockAsistencias = [
-        { clase_id: 'clase-1', _count: { id: 1 } },
-      ];
+      const mockAsistencias = [{ clase_id: 'clase-1', _count: { id: 1 } }];
 
       const mockClasesConRuta = [
         { id: 'clase-1', ruta_curricular_id: 'ruta-1' },
       ];
 
-      jest.spyOn(prisma.rutaCurricular, 'findMany').mockResolvedValue(mockRutas as any);
-      jest.spyOn(prisma.clase, 'groupBy').mockResolvedValue(mockClasesTotales as any);
-      jest.spyOn(prisma.asistencia, 'groupBy').mockResolvedValue(mockAsistencias as any);
-      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockClasesConRuta as any);
+      jest
+        .spyOn(prisma.rutaCurricular, 'findMany')
+        .mockResolvedValue(mockRutas as any);
+      jest
+        .spyOn(prisma.clase, 'groupBy')
+        .mockResolvedValue(mockClasesTotales as any);
+      jest
+        .spyOn(prisma.asistencia, 'groupBy')
+        .mockResolvedValue(mockAsistencias as any);
+      jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue(mockClasesConRuta as any);
 
       // Act
       const result = await service.getProgresoEstudiante('est-123');
@@ -208,16 +230,18 @@ describe('GamificacionService - getProgresoEstudiante OPTIMIZED', () => {
 
     it('should handle student with no asistencias', async () => {
       // Arrange
-      const mockRutas = [
-        { id: 'ruta-1', nombre: 'Álgebra', color: '#FF5722' },
-      ];
+      const mockRutas = [{ id: 'ruta-1', nombre: 'Álgebra', color: '#FF5722' }];
 
       const mockClasesTotales = [
         { ruta_curricular_id: 'ruta-1', _count: { id: 10 } },
       ];
 
-      jest.spyOn(prisma.rutaCurricular, 'findMany').mockResolvedValue(mockRutas as any);
-      jest.spyOn(prisma.clase, 'groupBy').mockResolvedValue(mockClasesTotales as any);
+      jest
+        .spyOn(prisma.rutaCurricular, 'findMany')
+        .mockResolvedValue(mockRutas as any);
+      jest
+        .spyOn(prisma.clase, 'groupBy')
+        .mockResolvedValue(mockClasesTotales as any);
       jest.spyOn(prisma.asistencia, 'groupBy').mockResolvedValue([] as any); // No asistencias
       jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([] as any);
 
@@ -250,9 +274,7 @@ describe('GamificacionService - getProgresoEstudiante OPTIMIZED', () => {
 
     it('should handle multiple asistencias per clase (aggregated correctly)', async () => {
       // Arrange
-      const mockRutas = [
-        { id: 'ruta-1', nombre: 'Álgebra', color: '#FF5722' },
-      ];
+      const mockRutas = [{ id: 'ruta-1', nombre: 'Álgebra', color: '#FF5722' }];
 
       const mockClasesTotales = [
         { ruta_curricular_id: 'ruta-1', _count: { id: 5 } },
@@ -267,10 +289,18 @@ describe('GamificacionService - getProgresoEstudiante OPTIMIZED', () => {
         { id: 'clase-1', ruta_curricular_id: 'ruta-1' },
       ];
 
-      jest.spyOn(prisma.rutaCurricular, 'findMany').mockResolvedValue(mockRutas as any);
-      jest.spyOn(prisma.clase, 'groupBy').mockResolvedValue(mockClasesTotales as any);
-      jest.spyOn(prisma.asistencia, 'groupBy').mockResolvedValue(mockAsistencias as any);
-      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockClasesConRuta as any);
+      jest
+        .spyOn(prisma.rutaCurricular, 'findMany')
+        .mockResolvedValue(mockRutas as any);
+      jest
+        .spyOn(prisma.clase, 'groupBy')
+        .mockResolvedValue(mockClasesTotales as any);
+      jest
+        .spyOn(prisma.asistencia, 'groupBy')
+        .mockResolvedValue(mockAsistencias as any);
+      jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue(mockClasesConRuta as any);
 
       // Act
       const result = await service.getProgresoEstudiante('est-123');
@@ -292,7 +322,9 @@ describe('GamificacionService - getProgresoEstudiante OPTIMIZED', () => {
         // 5 rutas, but only 4 queries should be made
       ];
 
-      jest.spyOn(prisma.rutaCurricular, 'findMany').mockResolvedValue(mockRutas as any);
+      jest
+        .spyOn(prisma.rutaCurricular, 'findMany')
+        .mockResolvedValue(mockRutas as any);
       jest.spyOn(prisma.clase, 'groupBy').mockResolvedValue([]);
       jest.spyOn(prisma.asistencia, 'groupBy').mockResolvedValue([]);
       jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);

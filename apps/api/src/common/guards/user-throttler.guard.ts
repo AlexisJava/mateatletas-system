@@ -34,9 +34,8 @@ export class UserThrottlerGuard extends ThrottlerGuard {
     // Obtener IP real considerando proxies (X-Forwarded-For, X-Real-IP)
     // Fix: Null-safety para evitar crash con headers malformados
     const forwardedFor = request.headers['x-forwarded-for'];
-    const forwardedParts = typeof forwardedFor === 'string'
-      ? forwardedFor.split(',')
-      : [];
+    const forwardedParts =
+      typeof forwardedFor === 'string' ? forwardedFor.split(',') : [];
     const forwardedIp = forwardedParts[0]?.trim();
 
     const ip =

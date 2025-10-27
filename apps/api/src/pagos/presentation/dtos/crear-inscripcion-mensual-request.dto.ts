@@ -1,4 +1,13 @@
-import { IsString, IsArray, IsNumber, IsBoolean, IsNotEmpty, IsObject, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  IsNumber,
+  IsBoolean,
+  IsNotEmpty,
+  IsObject,
+  Min,
+  Max,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -28,8 +37,8 @@ export class CrearInscripcionMensualRequestDto {
   @ApiProperty({
     description: 'Productos por estudiante',
     example: {
-      'clt2abc123': ['clt3abc123', 'clt3abc456'],
-      'clt2abc456': ['clt3abc123'],
+      clt2abc123: ['clt3abc123', 'clt3abc456'],
+      clt2abc456: ['clt3abc123'],
     },
   })
   @IsObject()

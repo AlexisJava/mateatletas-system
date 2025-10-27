@@ -7,9 +7,18 @@
  * Formato: nombre.apellido + sufijo aleatorio de 4 caracteres
  * Ejemplo: carlos.perez.abc1
  */
-export function generateTutorUsername(nombre: string, apellido: string): string {
-  const normalizedNombre = nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const normalizedApellido = apellido.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+export function generateTutorUsername(
+  nombre: string,
+  apellido: string,
+): string {
+  const normalizedNombre = nombre
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  const normalizedApellido = apellido
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
   const suffix = generateRandomSuffix(4);
   return `${normalizedNombre}.${normalizedApellido}.${suffix}`;
 }
@@ -19,9 +28,18 @@ export function generateTutorUsername(nombre: string, apellido: string): string 
  * Formato: nombre.apellido + sufijo aleatorio de 4 caracteres
  * Ejemplo: juan.perez.xyz2
  */
-export function generateEstudianteUsername(nombre: string, apellido: string): string {
-  const normalizedNombre = nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const normalizedApellido = apellido.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+export function generateEstudianteUsername(
+  nombre: string,
+  apellido: string,
+): string {
+  const normalizedNombre = nombre
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  const normalizedApellido = apellido
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
   const suffix = generateRandomSuffix(4);
   return `${normalizedNombre}.${normalizedApellido}.${suffix}`;
 }
@@ -97,5 +115,8 @@ function generateSecureRandomString(length: number): string {
   }
 
   // Mezclar para que los caracteres garantizados no estén siempre al inicio
-  return result.split('').sort(() => Math.random() - 0.5).join('');
+  return result
+    .split('')
+    .sort(() => Math.random() - 0.5)
+    .join('');
 }

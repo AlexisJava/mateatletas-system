@@ -30,7 +30,7 @@ export class ClasesController {
   /**
    * Programar una nueva clase (Solo Admin)
    * POST /api/clases
-  */
+   */
   @Post()
   @Roles(Role.Admin)
   async programarClase(@Body() dto: CrearClaseDto) {
@@ -96,7 +96,10 @@ export class ClasesController {
     @Param('id') claseId: string,
     @Body() dto: AsignarEstudiantesDto,
   ) {
-    return this.clasesService.asignarEstudiantesAClase(claseId, dto.estudianteIds);
+    return this.clasesService.asignarEstudiantesAClase(
+      claseId,
+      dto.estudianteIds,
+    );
   }
 
   // ==================== ENDPOINTS PARA TUTORES ====================

@@ -37,18 +37,14 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       exception.message,
     );
 
-    this.logger.error(
-      `Database error: ${exception.code}`,
-      exception.stack,
-      {
-        errorId,
-        code: exception.code,
-        meta: exception.meta,
-        path: request.url,
-        method: request.method,
-        userId: (request as any).user?.id,
-      },
-    );
+    this.logger.error(`Database error: ${exception.code}`, exception.stack, {
+      errorId,
+      code: exception.code,
+      meta: exception.meta,
+      path: request.url,
+      method: request.method,
+      userId: (request as any).user?.id,
+    });
 
     // Mapear códigos de error de Prisma a respuestas HTTP
     switch (exception.code) {

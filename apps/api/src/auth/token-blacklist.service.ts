@@ -63,10 +63,13 @@ export class TokenBlacklistService {
    * Ejemplo:
    *   await blacklistService.addToBlacklist(token, 'user_logout')
    */
-  async addToBlacklist(token: string, reason: string = 'logout'): Promise<void> {
+  async addToBlacklist(
+    token: string,
+    reason: string = 'logout',
+  ): Promise<void> {
     try {
       // 1. Decodificar el token para obtener metadata
-      const decoded = this.jwtService.decode(token) as any;
+      const decoded = this.jwtService.decode(token);
 
       if (!decoded || !decoded.exp) {
         this.logger.warn(`Intento de blacklist de token inválido: ${reason}`);
@@ -79,7 +82,9 @@ export class TokenBlacklistService {
 
       if (expiresIn <= 0) {
         // Token ya expiró, no necesita blacklist
-        this.logger.debug(`Token ya expirado, no se agrega a blacklist: ${reason}`);
+        this.logger.debug(
+          `Token ya expirado, no se agrega a blacklist: ${reason}`,
+        );
         return;
       }
 
@@ -104,7 +109,10 @@ export class TokenBlacklistService {
       );
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`Error al agregar token a blacklist: ${err.message}`, err.stack);
+      this.logger.error(
+        `Error al agregar token a blacklist: ${err.message}`,
+        err.stack,
+      );
       // No lanzar error - mejor dejar pasar que romper el flujo
     }
   }
@@ -127,14 +135,19 @@ export class TokenBlacklistService {
       const blacklistedData = await this.cacheManager.get(blacklistKey);
 
       if (blacklistedData) {
-        this.logger.warn(`Token blacklisted detectado - Data: ${JSON.stringify(blacklistedData)}`);
+        this.logger.warn(
+          `Token blacklisted detectado - Data: ${JSON.stringify(blacklistedData)}`,
+        );
         return true;
       }
 
       return false;
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`Error al verificar blacklist: ${err.message}`, err.stack);
+      this.logger.error(
+        `Error al verificar blacklist: ${err.message}`,
+        err.stack,
+      );
       // En caso de error de Redis, ser permisivo (no bloquear acceso legítimo)
       return false;
     }
@@ -178,7 +191,10 @@ export class TokenBlacklistService {
       );
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`Error al blacklist masivo de usuario: ${err.message}`, err.stack);
+      this.logger.error(
+        `Error al blacklist masivo de usuario: ${err.message}`,
+        err.stack,
+      );
     }
   }
 
@@ -203,7 +219,10 @@ export class TokenBlacklistService {
       return false;
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`Error al verificar user blacklist: ${err.message}`, err.stack);
+      this.logger.error(
+        `Error al verificar user blacklist: ${err.message}`,
+        err.stack,
+      );
       return false;
     }
   }
@@ -221,7 +240,10 @@ export class TokenBlacklistService {
       this.logger.log(`Token removido de blacklist: ${blacklistKey}`);
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`Error al remover token de blacklist: ${err.message}`, err.stack);
+      this.logger.error(
+        `Error al remover token de blacklist: ${err.message}`,
+        err.stack,
+      );
     }
   }
 }

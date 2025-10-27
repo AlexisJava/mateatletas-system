@@ -56,21 +56,29 @@ export class VerificacionMorosidadService {
   async verificarMorosidadTutor(tutorId: string) {
     const hoy = new Date();
 
-    const inscripcionesPendientes = await this.prisma.inscripcionMensual.findMany({
-      where: {
-        tutor_id: tutorId,
-        estado_pago: { in: ['Pendiente', 'Vencido'] },
-      },
-      include: {
-        estudiante: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
+    const inscripcionesVencidas = await this.prisma.inscripcionMensual.findMany(
+      {
+        where: {
+          tutor_id: tutorId,
+          estado_pago: 'Pendiente',
+          fecha_vencimiento: {
+            lt: hoy,
           },
         },
+        include: {
+          estudiante: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+            },
+          },
+        },
+        orderBy: {
+          fecha_vencimiento: 'asc',
+        },
       },
-    });
+    );
 
     const inscripcionesVencidas = inscripcionesPendientes
       .map((inscripcion) => {
@@ -110,7 +118,7 @@ export class VerificacionMorosidadService {
         monto: Number(inscripcion.precio_final),
         fechaVencimiento: inscripcion.fechaVencimiento,
         diasVencido: Math.floor(
-          (hoy.getTime() - inscripcion.fechaVencimiento.getTime()) /
+          (hoy.getTime() - insc.fecha_vencimiento!.getTime()) /
             (1000 * 60 * 60 * 24),
         ),
       })),

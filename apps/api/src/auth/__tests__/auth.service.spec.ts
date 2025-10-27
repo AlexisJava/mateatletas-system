@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../auth.service';
 import { PrismaService } from '../../core/database/prisma.service';
@@ -232,11 +236,17 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         apellido: 'Usuario',
       };
 
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
 
       // Act & Assert
-      await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
-      await expect(service.register(registerDto)).rejects.toThrow('El email ya está registrado');
+      await expect(service.register(registerDto)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.register(registerDto)).rejects.toThrow(
+        'El email ya está registrado',
+      );
       expect(prisma.tutor.create).not.toHaveBeenCalled();
     });
 
@@ -288,7 +298,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         password: 'EstudiantePass123!',
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
@@ -313,8 +325,12 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.loginEstudiante(loginDto)).rejects.toThrow(UnauthorizedException);
-      await expect(service.loginEstudiante(loginDto)).rejects.toThrow('Credenciales inválidas');
+      await expect(service.loginEstudiante(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(service.loginEstudiante(loginDto)).rejects.toThrow(
+        'Credenciales inválidas',
+      );
     });
 
     it('should throw UnauthorizedException when estudiante has no password configured', async () => {
@@ -329,10 +345,14 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         password_hash: null, // No password configured
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudianteSinPassword as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudianteSinPassword as any);
 
       // Act & Assert
-      await expect(service.loginEstudiante(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.loginEstudiante(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw UnauthorizedException when password is incorrect', async () => {
@@ -342,11 +362,15 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         password: 'WrongPassword123!',
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       // Act & Assert
-      await expect(service.loginEstudiante(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.loginEstudiante(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should use default role "estudiante" when roles array is empty', async () => {
@@ -361,7 +385,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         roles: '[]', // Empty roles array
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudianteConRolesVacios as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudianteConRolesVacios as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
@@ -386,7 +412,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         password: 'TutorPass123!',
       };
 
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
@@ -407,7 +435,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       };
 
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
@@ -417,7 +447,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockDocente.email);
       expect(result.user.role).toBe(Role.Docente);
-      expect('titulo' in result.user && result.user.titulo).toBe(mockDocente.titulo);
+      expect('titulo' in result.user && result.user.titulo).toBe(
+        mockDocente.titulo,
+      );
     });
 
     it('should login admin successfully', async () => {
@@ -429,7 +461,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.admin, 'findUnique').mockResolvedValue(mockAdmin as any);
+      jest
+        .spyOn(prisma.admin, 'findUnique')
+        .mockResolvedValue(mockAdmin as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
@@ -453,7 +487,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.admin, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw UnauthorizedException when password is incorrect', async () => {
@@ -463,11 +499,15 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         password: 'WrongPassword123!',
       };
 
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       // Act & Assert
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should generate JWT with multi-role support', async () => {
@@ -484,7 +524,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.admin, 'findUnique').mockResolvedValue(adminConMultiplesRoles as any);
+      jest
+        .spyOn(prisma.admin, 'findUnique')
+        .mockResolvedValue(adminConMultiplesRoles as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
@@ -504,11 +546,16 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
   describe('validateUser - Validación Auxiliar', () => {
     it('should return tutor data (without password) when credentials are valid', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
-      const result = await service.validateUser('tutor@test.com', 'CorrectPassword123!');
+      const result = await service.validateUser(
+        'tutor@test.com',
+        'CorrectPassword123!',
+      );
 
       // Assert
       expect(result).toBeDefined();
@@ -521,7 +568,10 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
 
       // Act
-      const result = await service.validateUser('nonexistent@test.com', 'Password123!');
+      const result = await service.validateUser(
+        'nonexistent@test.com',
+        'Password123!',
+      );
 
       // Assert
       expect(result).toBeNull();
@@ -529,11 +579,16 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
     it('should return null when password is incorrect', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       // Act
-      const result = await service.validateUser('tutor@test.com', 'WrongPassword123!');
+      const result = await service.validateUser(
+        'tutor@test.com',
+        'WrongPassword123!',
+      );
 
       // Assert
       expect(result).toBeNull();
@@ -541,15 +596,23 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
     it('should return null and log error when database error occurs', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findUnique').mockRejectedValue(new Error('Database connection failed'));
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockRejectedValue(new Error('Database connection failed'));
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       // Act
-      const result = await service.validateUser('tutor@test.com', 'Password123!');
+      const result = await service.validateUser(
+        'tutor@test.com',
+        'Password123!',
+      );
 
       // Assert
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error en validateUser:', expect.any(Error));
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error en validateUser:',
+        expect.any(Error),
+      );
 
       consoleErrorSpy.mockRestore();
     });
@@ -560,7 +623,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       // Arrange
       // Mock debe excluir password_hash (el servicio usa select en Prisma)
       const { password_hash, ...tutorSinPassword } = mockTutor;
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(tutorSinPassword as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(tutorSinPassword as any);
 
       // Act
       const result = await service.getProfile('tutor-123', Role.Tutor);
@@ -573,7 +638,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
     it('should return docente profile', async () => {
       // Arrange
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
 
       // Act
       const result = await service.getProfile('docente-123', Role.Docente);
@@ -586,7 +653,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
     it('should return admin profile', async () => {
       // Arrange
-      jest.spyOn(prisma.admin, 'findUnique').mockResolvedValue(mockAdmin as any);
+      jest
+        .spyOn(prisma.admin, 'findUnique')
+        .mockResolvedValue(mockAdmin as any);
 
       // Act
       const result = await service.getProfile('admin-123', Role.Admin);
@@ -598,7 +667,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
     it('should return estudiante profile', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
 
       // Act
       const result = await service.getProfile('est-123', Role.Estudiante);
@@ -691,7 +762,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         password: 'TutorPass123!',
       };
 
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
@@ -709,14 +782,19 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         password: 'TutorPass123!',
       };
 
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
       await service.login(loginDto);
 
       // Assert
-      expect(bcrypt.compare).toHaveBeenCalledWith('TutorPass123!', mockTutor.password_hash);
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        'TutorPass123!',
+        mockTutor.password_hash,
+      );
     });
   });
 });

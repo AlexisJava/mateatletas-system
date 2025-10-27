@@ -116,8 +116,12 @@ describe('ClasesManagementService', () => {
 
     it('should create a new class successfully', async () => {
       // Arrange
-      jest.spyOn(prisma.rutaCurricular, 'findUnique').mockResolvedValue(mockRuta as any);
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.rutaCurricular, 'findUnique')
+        .mockResolvedValue(mockRuta as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
       jest.spyOn(prisma.clase, 'create').mockResolvedValue(mockClase as any);
 
       // Act
@@ -141,7 +145,9 @@ describe('ClasesManagementService', () => {
       jest.spyOn(prisma.rutaCurricular, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.programarClase(validDto)).rejects.toThrow(NotFoundException);
+      await expect(service.programarClase(validDto)).rejects.toThrow(
+        NotFoundException,
+      );
       await expect(service.programarClase(validDto)).rejects.toThrow(
         'Ruta curricular con ID ruta-1 no encontrada',
       );
@@ -149,11 +155,15 @@ describe('ClasesManagementService', () => {
 
     it('should throw NotFoundException if docente does not exist', async () => {
       // Arrange
-      jest.spyOn(prisma.rutaCurricular, 'findUnique').mockResolvedValue(mockRuta as any);
+      jest
+        .spyOn(prisma.rutaCurricular, 'findUnique')
+        .mockResolvedValue(mockRuta as any);
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.programarClase(validDto)).rejects.toThrow(NotFoundException);
+      await expect(service.programarClase(validDto)).rejects.toThrow(
+        NotFoundException,
+      );
       await expect(service.programarClase(validDto)).rejects.toThrow(
         'Docente con ID doc-1 no encontrado',
       );
@@ -162,8 +172,12 @@ describe('ClasesManagementService', () => {
     it('should validate producto is type Curso when productoId provided', async () => {
       // Arrange
       const dtoWithProducto = { ...validDto, productoId: 'prod-1' };
-      jest.spyOn(prisma.rutaCurricular, 'findUnique').mockResolvedValue(mockRuta as any);
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.rutaCurricular, 'findUnique')
+        .mockResolvedValue(mockRuta as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
       jest.spyOn(prisma.producto, 'findUnique').mockResolvedValue({
         ...mockProducto,
         tipo: 'Suscripcion', // Wrong type
@@ -184,8 +198,12 @@ describe('ClasesManagementService', () => {
         ...validDto,
         fechaHoraInicio: new Date('2020-01-01T10:00:00Z').toISOString(), // Fecha pasada
       };
-      jest.spyOn(prisma.rutaCurricular, 'findUnique').mockResolvedValue(mockRuta as any);
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.rutaCurricular, 'findUnique')
+        .mockResolvedValue(mockRuta as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
 
       // Act & Assert
       await expect(service.programarClase(dtoWithPastDate)).rejects.toThrow(
@@ -237,9 +255,9 @@ describe('ClasesManagementService', () => {
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.cancelarClase('non-existent', 'admin-1', 'admin')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.cancelarClase('non-existent', 'admin-1', 'admin'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException if class already cancelled', async () => {
@@ -251,12 +269,12 @@ describe('ClasesManagementService', () => {
       } as any);
 
       // Act & Assert
-      await expect(service.cancelarClase('clase-1', 'admin-1', 'admin')).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.cancelarClase('clase-1', 'admin-1', 'admin')).rejects.toThrow(
-        'La clase ya está cancelada',
-      );
+      await expect(
+        service.cancelarClase('clase-1', 'admin-1', 'admin'),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.cancelarClase('clase-1', 'admin-1', 'admin'),
+      ).rejects.toThrow('La clase ya está cancelada');
     });
   });
 
@@ -286,7 +304,9 @@ describe('ClasesManagementService', () => {
         fechaDesde: new Date('2025-12-01'),
         fechaHasta: new Date('2025-12-31'),
       };
-      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
+      const findManySpy = jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue([]);
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(0);
 
       // Act
@@ -308,7 +328,9 @@ describe('ClasesManagementService', () => {
     it('should filter by estado', async () => {
       // Arrange
       const filtros = { estado: 'Programada' as const };
-      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
+      const findManySpy = jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue([]);
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(0);
 
       // Act
@@ -326,7 +348,9 @@ describe('ClasesManagementService', () => {
 
     it('should apply pagination correctly', async () => {
       // Arrange
-      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
+      const findManySpy = jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue([]);
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(0);
 
       // Act
@@ -350,7 +374,9 @@ describe('ClasesManagementService', () => {
         inscripciones: [{ id: 'insc-1', estudiante: { nombre: 'Juan' } }],
         asistencias: [{ id: 'asist-1', estado: 'Presente' }],
       };
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClaseCompleta as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClaseCompleta as any);
 
       // Act
       const result = await service.obtenerClase('clase-1');
@@ -488,8 +514,12 @@ describe('ClasesManagementService', () => {
 
     it('should return available classes for tutor', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockClasesDisponibles as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue(mockClasesDisponibles as any);
 
       // Act
       const result = await service.listarClasesParaTutor('tutor-1');
@@ -504,18 +534,22 @@ describe('ClasesManagementService', () => {
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.listarClasesParaTutor('non-existent')).rejects.toThrow(
-        NotFoundException,
-      );
-      await expect(service.listarClasesParaTutor('non-existent')).rejects.toThrow(
-        'Tutor no encontrado',
-      );
+      await expect(
+        service.listarClasesParaTutor('non-existent'),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.listarClasesParaTutor('non-existent'),
+      ).rejects.toThrow('Tutor no encontrado');
     });
 
     it('should filter classes based on active course enrollments', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      const findManySpy = jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue([]);
 
       // Act
       await service.listarClasesParaTutor('tutor-1');
@@ -535,8 +569,12 @@ describe('ClasesManagementService', () => {
 
     it('should only return programmed and future classes', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      const findManySpy = jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue([]);
 
       // Act
       await service.listarClasesParaTutor('tutor-1');
@@ -574,7 +612,9 @@ describe('ClasesManagementService', () => {
 
     it('should return calendar for specified month and year', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
       jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockClases as any);
 
       // Act
@@ -594,7 +634,9 @@ describe('ClasesManagementService', () => {
       const currentMonth = now.getMonth() + 1;
       const currentYear = now.getFullYear();
 
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
       jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
 
       // Act
@@ -607,12 +649,12 @@ describe('ClasesManagementService', () => {
 
     it('should throw BadRequestException for invalid month', async () => {
       // Act & Assert
-      await expect(service.obtenerCalendarioTutor('tutor-1', 13, 2025)).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.obtenerCalendarioTutor('tutor-1', 0, 2025)).rejects.toThrow(
-        'El mes debe estar entre 1 y 12',
-      );
+      await expect(
+        service.obtenerCalendarioTutor('tutor-1', 13, 2025),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.obtenerCalendarioTutor('tutor-1', 0, 2025),
+      ).rejects.toThrow('El mes debe estar entre 1 y 12');
     });
 
     it('should throw NotFoundException if tutor not found', async () => {
@@ -620,9 +662,9 @@ describe('ClasesManagementService', () => {
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.obtenerCalendarioTutor('non-existent', 12, 2025)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.obtenerCalendarioTutor('non-existent', 12, 2025),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should return empty array if tutor has no students', async () => {
@@ -642,8 +684,12 @@ describe('ClasesManagementService', () => {
 
     it('should filter classes by date range correctly', async () => {
       // Arrange
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      const findManySpy = jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue([]);
 
       // Act
       await service.obtenerCalendarioTutor('tutor-1', 12, 2025);
@@ -678,7 +724,9 @@ describe('ClasesManagementService', () => {
 
     it('should return future classes by default', async () => {
       // Arrange
-      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([mockClases[0]] as any);
+      const findManySpy = jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue([mockClases[0]] as any);
 
       // Act
       const result = await service.listarClasesDeDocente('doc-1');
@@ -697,7 +745,9 @@ describe('ClasesManagementService', () => {
 
     it('should include past classes when incluirPasadas is true', async () => {
       // Arrange
-      const findManySpy = jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockClases as any);
+      const findManySpy = jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue(mockClases as any);
 
       // Act
       const result = await service.listarClasesDeDocente('doc-1', true);

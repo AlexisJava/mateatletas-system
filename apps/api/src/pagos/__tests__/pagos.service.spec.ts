@@ -26,10 +26,10 @@ class MockPagosService {
   public activarMembresiaMock = jest.fn();
 }
 
-const TipoProductoEnum = (TipoProducto || {
+const TipoProductoEnum = TipoProducto || {
   Suscripcion: 'Suscripcion',
   Curso: 'Curso',
-}) as typeof TipoProducto;
+};
 
 const createWebhookPayload = (
   override: Partial<MercadoPagoWebhookDto> = {},
@@ -153,7 +153,8 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
   const mockPreferenceResponse = {
     id: 'pref-abc-123',
-    init_point: 'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=pref-abc-123',
+    init_point:
+      'https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=pref-abc-123',
   };
 
   beforeEach(async () => {
@@ -251,19 +252,32 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
   describe('generarPreferenciaSuscripcion - Happy Path', () => {
     it('should generate preference for subscription successfully (REAL MODE)', async () => {
       // Arrange
-      jest.spyOn(productosService, 'findById').mockResolvedValue(mockProductoSuscripcion as any);
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      jest.spyOn(prisma.membresia, 'create').mockResolvedValue(mockMembresia as any);
+      jest
+        .spyOn(productosService, 'findById')
+        .mockResolvedValue(mockProductoSuscripcion as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.membresia, 'create')
+        .mockResolvedValue(mockMembresia as any);
       jest.spyOn(prisma.membresia, 'update').mockResolvedValue({
         ...mockMembresia,
         preferencia_id: 'pref-abc-123',
       } as any);
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildMembershipPreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockPreferenceResponse as any);
+      jest
+        .spyOn(mercadoPagoService, 'buildMembershipPreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockPreferenceResponse as any);
 
       // Act
-      const result = await pagosService.generarPreferenciaSuscripcion('tutor-123', 'prod-subs-1');
+      const result = await pagosService.generarPreferenciaSuscripcion(
+        'tutor-123',
+        'prod-subs-1',
+      );
 
       // Assert
       expect(result).toEqual({
@@ -296,15 +310,26 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
     it('should use first available subscription when no productoId specified', async () => {
       // Arrange
-      jest.spyOn(productosService, 'findSuscripciones').mockResolvedValue([mockProductoSuscripcion] as any);
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      jest.spyOn(prisma.membresia, 'create').mockResolvedValue(mockMembresia as any);
-      jest.spyOn(prisma.membresia, 'update').mockResolvedValue(mockMembresia as any);
+      jest
+        .spyOn(productosService, 'findSuscripciones')
+        .mockResolvedValue([mockProductoSuscripcion] as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.membresia, 'create')
+        .mockResolvedValue(mockMembresia as any);
+      jest
+        .spyOn(prisma.membresia, 'update')
+        .mockResolvedValue(mockMembresia as any);
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(true);
-      jest.spyOn(mockPagosService, 'createMockMembershipPreference').mockReturnValue(mockPreferenceResponse as any);
+      jest
+        .spyOn(mockPagosService, 'createMockMembershipPreference')
+        .mockReturnValue(mockPreferenceResponse as any);
 
       // Act
-      const result = await pagosService.generarPreferenciaSuscripcion('tutor-123');
+      const result =
+        await pagosService.generarPreferenciaSuscripcion('tutor-123');
 
       // Assert
       expect(productosService.findSuscripciones).toHaveBeenCalled();
@@ -313,18 +338,33 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
     it('should use mock preference in MOCK MODE', async () => {
       // Arrange
-      jest.spyOn(productosService, 'findById').mockResolvedValue(mockProductoSuscripcion as any);
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      jest.spyOn(prisma.membresia, 'create').mockResolvedValue(mockMembresia as any);
-      jest.spyOn(prisma.membresia, 'update').mockResolvedValue(mockMembresia as any);
+      jest
+        .spyOn(productosService, 'findById')
+        .mockResolvedValue(mockProductoSuscripcion as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.membresia, 'create')
+        .mockResolvedValue(mockMembresia as any);
+      jest
+        .spyOn(prisma.membresia, 'update')
+        .mockResolvedValue(mockMembresia as any);
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(true);
-      jest.spyOn(mockPagosService, 'createMockMembershipPreference').mockReturnValue(mockPreferenceResponse as any);
+      jest
+        .spyOn(mockPagosService, 'createMockMembershipPreference')
+        .mockReturnValue(mockPreferenceResponse as any);
 
       // Act
-      await pagosService.generarPreferenciaSuscripcion('tutor-123', 'prod-subs-1');
+      await pagosService.generarPreferenciaSuscripcion(
+        'tutor-123',
+        'prod-subs-1',
+      );
 
       // Assert
-      expect(mockPagosService.createMockMembershipPreference).toHaveBeenCalledWith(mockMembresia.id);
+      expect(
+        mockPagosService.createMockMembershipPreference,
+      ).toHaveBeenCalledWith(mockMembresia.id);
       expect(mercadoPagoService.createPreference).not.toHaveBeenCalled();
     });
   });
@@ -345,7 +385,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
     it('should throw BadRequestException when product is not a subscription', async () => {
       // Arrange
-      jest.spyOn(productosService, 'findById').mockResolvedValue(mockProductoCurso as any);
+      jest
+        .spyOn(productosService, 'findById')
+        .mockResolvedValue(mockProductoCurso as any);
 
       // Act & Assert
       await expect(
@@ -358,15 +400,23 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
     it('should throw NotFoundException when tutor not found', async () => {
       // Arrange
-      jest.spyOn(productosService, 'findById').mockResolvedValue(mockProductoSuscripcion as any);
+      jest
+        .spyOn(productosService, 'findById')
+        .mockResolvedValue(mockProductoSuscripcion as any);
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
       await expect(
-        pagosService.generarPreferenciaSuscripcion('invalid-tutor', 'prod-subs-1'),
+        pagosService.generarPreferenciaSuscripcion(
+          'invalid-tutor',
+          'prod-subs-1',
+        ),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        pagosService.generarPreferenciaSuscripcion('invalid-tutor', 'prod-subs-1'),
+        pagosService.generarPreferenciaSuscripcion(
+          'invalid-tutor',
+          'prod-subs-1',
+        ),
       ).rejects.toThrow('Tutor no encontrado');
     });
   });
@@ -374,18 +424,36 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
   describe('generarPreferenciaCurso - Happy Path', () => {
     it('should generate course preference successfully', async () => {
       // Arrange
-      jest.spyOn(productosService, 'findById').mockResolvedValue(mockProductoCurso as any);
-      jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(productosService, 'findById')
+        .mockResolvedValue(mockProductoCurso as any);
+      jest
+        .spyOn(prisma.estudiante, 'findFirst')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.inscripcionCurso, 'findUnique').mockResolvedValue(null); // No existe inscripción
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      jest.spyOn(prisma.inscripcionCurso, 'create').mockResolvedValue(mockInscripcion as any);
-      jest.spyOn(prisma.inscripcionCurso, 'update').mockResolvedValue(mockInscripcion as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.inscripcionCurso, 'create')
+        .mockResolvedValue(mockInscripcion as any);
+      jest
+        .spyOn(prisma.inscripcionCurso, 'update')
+        .mockResolvedValue(mockInscripcion as any);
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildCoursePreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockPreferenceResponse as any);
+      jest
+        .spyOn(mercadoPagoService, 'buildCoursePreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockPreferenceResponse as any);
 
       // Act
-      const result = await pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1');
+      const result = await pagosService.generarPreferenciaCurso(
+        'tutor-123',
+        'est-456',
+        'prod-curso-1',
+      );
 
       // Assert
       expect(result).toEqual({
@@ -406,20 +474,38 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
     it('should use mock preference in MOCK MODE for courses', async () => {
       // Arrange
-      jest.spyOn(productosService, 'findById').mockResolvedValue(mockProductoCurso as any);
-      jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(productosService, 'findById')
+        .mockResolvedValue(mockProductoCurso as any);
+      jest
+        .spyOn(prisma.estudiante, 'findFirst')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.inscripcionCurso, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      jest.spyOn(prisma.inscripcionCurso, 'create').mockResolvedValue(mockInscripcion as any);
-      jest.spyOn(prisma.inscripcionCurso, 'update').mockResolvedValue(mockInscripcion as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.inscripcionCurso, 'create')
+        .mockResolvedValue(mockInscripcion as any);
+      jest
+        .spyOn(prisma.inscripcionCurso, 'update')
+        .mockResolvedValue(mockInscripcion as any);
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(true);
-      jest.spyOn(mockPagosService, 'createMockCoursePreference').mockReturnValue(mockPreferenceResponse as any);
+      jest
+        .spyOn(mockPagosService, 'createMockCoursePreference')
+        .mockReturnValue(mockPreferenceResponse as any);
 
       // Act
-      await pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1');
+      await pagosService.generarPreferenciaCurso(
+        'tutor-123',
+        'est-456',
+        'prod-curso-1',
+      );
 
       // Assert
-      expect(mockPagosService.createMockCoursePreference).toHaveBeenCalledWith(mockInscripcion.id);
+      expect(mockPagosService.createMockCoursePreference).toHaveBeenCalledWith(
+        mockInscripcion.id,
+      );
       expect(mercadoPagoService.createPreference).not.toHaveBeenCalled();
     });
   });
@@ -427,54 +513,94 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
   describe('generarPreferenciaCurso - Error Cases', () => {
     it('should throw BadRequestException when product is not a course', async () => {
       // Arrange
-      jest.spyOn(productosService, 'findById').mockResolvedValue(mockProductoSuscripcion as any);
+      jest
+        .spyOn(productosService, 'findById')
+        .mockResolvedValue(mockProductoSuscripcion as any);
 
       // Act & Assert
       await expect(
-        pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-subs-1'),
+        pagosService.generarPreferenciaCurso(
+          'tutor-123',
+          'est-456',
+          'prod-subs-1',
+        ),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-subs-1'),
+        pagosService.generarPreferenciaCurso(
+          'tutor-123',
+          'est-456',
+          'prod-subs-1',
+        ),
       ).rejects.toThrow('El producto especificado no es un curso');
     });
 
     it('should throw NotFoundException when student not found', async () => {
       // Arrange
-      jest.spyOn(productosService, 'findById').mockResolvedValue(mockProductoCurso as any);
+      jest
+        .spyOn(productosService, 'findById')
+        .mockResolvedValue(mockProductoCurso as any);
       jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(null);
 
       // Act & Assert
       await expect(
-        pagosService.generarPreferenciaCurso('tutor-123', 'invalid-student', 'prod-curso-1'),
+        pagosService.generarPreferenciaCurso(
+          'tutor-123',
+          'invalid-student',
+          'prod-curso-1',
+        ),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        pagosService.generarPreferenciaCurso('tutor-123', 'invalid-student', 'prod-curso-1'),
+        pagosService.generarPreferenciaCurso(
+          'tutor-123',
+          'invalid-student',
+          'prod-curso-1',
+        ),
       ).rejects.toThrow('Estudiante no encontrado o no pertenece al tutor');
     });
 
     it('should throw NotFoundException when student belongs to different tutor', async () => {
       // Arrange
-      jest.spyOn(productosService, 'findById').mockResolvedValue(mockProductoCurso as any);
+      jest
+        .spyOn(productosService, 'findById')
+        .mockResolvedValue(mockProductoCurso as any);
       jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(null); // findFirst with tutor_id filter returns null
 
       // Act & Assert
       await expect(
-        pagosService.generarPreferenciaCurso('wrong-tutor', 'est-456', 'prod-curso-1'),
+        pagosService.generarPreferenciaCurso(
+          'wrong-tutor',
+          'est-456',
+          'prod-curso-1',
+        ),
       ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException when student already inscribed', async () => {
       // Arrange
-      jest.spyOn(productosService, 'findById').mockResolvedValue(mockProductoCurso as any);
-      jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma.inscripcionCurso, 'findUnique').mockResolvedValue(mockInscripcion as any); // Ya existe
+      jest
+        .spyOn(productosService, 'findById')
+        .mockResolvedValue(mockProductoCurso as any);
+      jest
+        .spyOn(prisma.estudiante, 'findFirst')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.inscripcionCurso, 'findUnique')
+        .mockResolvedValue(mockInscripcion as any); // Ya existe
 
       // Act & Assert
       await expect(
-        pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1'),
+        pagosService.generarPreferenciaCurso(
+          'tutor-123',
+          'est-456',
+          'prod-curso-1',
+        ),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        pagosService.generarPreferenciaCurso('tutor-123', 'est-456', 'prod-curso-1'),
+        pagosService.generarPreferenciaCurso(
+          'tutor-123',
+          'est-456',
+          'prod-curso-1',
+        ),
       ).rejects.toThrow('El estudiante ya está inscrito en este curso');
     });
   });
@@ -485,10 +611,13 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       const mockPayment = {
         id: 'payment-123',
         status: 'approved',
-        external_reference: 'membresia-memb-789-tutor-tutor-123-producto-prod-subs-1',
+        external_reference:
+          'membresia-memb-789-tutor-tutor-123-producto-prod-subs-1',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPayment as any);
       jest.spyOn(prisma.membresia, 'findUnique').mockResolvedValue({
         ...mockMembresia,
         producto: mockProductoSuscripcion,
@@ -516,7 +645,8 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       expect(result.resultado.fechaProximoPago).toBeInstanceOf(Date);
 
       // Verify update was called (dates are dynamic, so we just check estructura)
-      const updateCall = (prisma.membresia.update as jest.Mock).mock.calls[0][0];
+      const updateCall = (prisma.membresia.update as jest.Mock).mock
+        .calls[0][0];
       expect(updateCall.where.id).toBe('memb');
       expect(updateCall.data.estado).toBe('Activa');
       expect(updateCall.data.fecha_inicio).toBeInstanceOf(Date);
@@ -528,10 +658,13 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       const mockPayment = {
         id: 'payment-456',
         status: 'rejected',
-        external_reference: 'membresia-memb-789-tutor-tutor-123-producto-prod-subs-1',
+        external_reference:
+          'membresia-memb-789-tutor-tutor-123-producto-prod-subs-1',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPayment as any);
       jest.spyOn(prisma.membresia, 'findUnique').mockResolvedValue({
         ...mockMembresia,
         producto: mockProductoSuscripcion,
@@ -544,7 +677,8 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       );
 
       // Assert
-      const updateCall = (prisma.membresia.update as jest.Mock).mock.calls[0][0];
+      const updateCall = (prisma.membresia.update as jest.Mock).mock
+        .calls[0][0];
       expect(updateCall.where.id).toBe('memb');
       expect(updateCall.data.estado).toBe('Cancelada');
     });
@@ -554,10 +688,13 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       const mockPayment = {
         id: 'payment-789',
         status: 'cancelled',
-        external_reference: 'membresia-memb-789-tutor-tutor-123-producto-prod-subs-1',
+        external_reference:
+          'membresia-memb-789-tutor-tutor-123-producto-prod-subs-1',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPayment as any);
       jest.spyOn(prisma.membresia, 'findUnique').mockResolvedValue({
         ...mockMembresia,
         producto: mockProductoSuscripcion,
@@ -570,7 +707,8 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       );
 
       // Assert
-      const updateCall = (prisma.membresia.update as jest.Mock).mock.calls[0][0];
+      const updateCall = (prisma.membresia.update as jest.Mock).mock
+        .calls[0][0];
       expect(updateCall.where.id).toBe('memb');
       expect(updateCall.data.estado).toBe('Cancelada');
     });
@@ -580,10 +718,13 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       const mockPayment = {
         id: 'payment-pending',
         status: 'pending',
-        external_reference: 'membresia-memb-789-tutor-tutor-123-producto-prod-subs-1',
+        external_reference:
+          'membresia-memb-789-tutor-tutor-123-producto-prod-subs-1',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPayment as any);
       jest.spyOn(prisma.membresia, 'findUnique').mockResolvedValue({
         ...mockMembresia,
         producto: mockProductoSuscripcion,
@@ -604,10 +745,13 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       const mockPayment = {
         id: 'payment-123',
         status: 'approved',
-        external_reference: 'membresia-NONEXISTENT-tutor-tutor-123-producto-prod-subs-1',
+        external_reference:
+          'membresia-NONEXISTENT-tutor-tutor-123-producto-prod-subs-1',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPayment as any);
       jest.spyOn(prisma.membresia, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert - Con transacciones, ahora tira NotFoundException
@@ -627,16 +771,21 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       const mockPayment = {
         id: 'payment-curso-123',
         status: 'approved',
-        external_reference: 'inscripcion-insc-999-estudiante-est-456-producto-prod-curso-1',
+        external_reference:
+          'inscripcion-insc-999-estudiante-est-456-producto-prod-curso-1',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPayment as any);
       jest.spyOn(prisma.inscripcionCurso, 'findUnique').mockResolvedValue({
         ...mockInscripcion,
         producto: mockProductoCurso,
         estudiante: mockEstudiante,
       } as any);
-      jest.spyOn(prisma.inscripcionCurso, 'update').mockResolvedValue({} as any);
+      jest
+        .spyOn(prisma.inscripcionCurso, 'update')
+        .mockResolvedValue({} as any);
 
       // Act
       await pagosService.procesarWebhookMercadoPago(
@@ -644,7 +793,8 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       );
 
       // Assert
-      const updateCall = (prisma.inscripcionCurso.update as jest.Mock).mock.calls[0][0];
+      const updateCall = (prisma.inscripcionCurso.update as jest.Mock).mock
+        .calls[0][0];
       expect(updateCall.where.id).toBe('insc');
       expect(updateCall.data.estado).toBe('Activo');
     });
@@ -654,16 +804,21 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       const mockPayment = {
         id: 'payment-curso-rejected',
         status: 'rejected',
-        external_reference: 'inscripcion-insc-999-estudiante-est-456-producto-prod-curso-1',
+        external_reference:
+          'inscripcion-insc-999-estudiante-est-456-producto-prod-curso-1',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPayment as any);
       jest.spyOn(prisma.inscripcionCurso, 'findUnique').mockResolvedValue({
         ...mockInscripcion,
         producto: mockProductoCurso,
         estudiante: mockEstudiante,
       } as any);
-      jest.spyOn(prisma.inscripcionCurso, 'delete').mockResolvedValue({} as any);
+      jest
+        .spyOn(prisma.inscripcionCurso, 'delete')
+        .mockResolvedValue({} as any);
 
       // Act
       await pagosService.procesarWebhookMercadoPago(
@@ -671,7 +826,8 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       );
 
       // Assert
-      const deleteCall = (prisma.inscripcionCurso.delete as jest.Mock).mock.calls[0][0];
+      const deleteCall = (prisma.inscripcionCurso.delete as jest.Mock).mock
+        .calls[0][0];
       expect(deleteCall.where.id).toBe('insc');
     });
 
@@ -680,16 +836,21 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       const mockPayment = {
         id: 'payment-curso-cancelled',
         status: 'cancelled',
-        external_reference: 'inscripcion-insc-999-estudiante-est-456-producto-prod-curso-1',
+        external_reference:
+          'inscripcion-insc-999-estudiante-est-456-producto-prod-curso-1',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPayment as any);
       jest.spyOn(prisma.inscripcionCurso, 'findUnique').mockResolvedValue({
         ...mockInscripcion,
         producto: mockProductoCurso,
         estudiante: mockEstudiante,
       } as any);
-      jest.spyOn(prisma.inscripcionCurso, 'delete').mockResolvedValue({} as any);
+      jest
+        .spyOn(prisma.inscripcionCurso, 'delete')
+        .mockResolvedValue({} as any);
 
       // Act
       await pagosService.procesarWebhookMercadoPago(
@@ -697,7 +858,8 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       );
 
       // Assert
-      const deleteCall = (prisma.inscripcionCurso.delete as jest.Mock).mock.calls[0][0];
+      const deleteCall = (prisma.inscripcionCurso.delete as jest.Mock).mock
+        .calls[0][0];
       expect(deleteCall.where.id).toBe('insc');
     });
 
@@ -706,10 +868,13 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
       const mockPayment = {
         id: 'payment-curso-123',
         status: 'approved',
-        external_reference: 'inscripcion-NONEXISTENT-estudiante-est-456-producto-prod-curso-1',
+        external_reference:
+          'inscripcion-NONEXISTENT-estudiante-est-456-producto-prod-curso-1',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPayment as any);
       jest.spyOn(prisma.inscripcionCurso, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert - Con transacciones, ahora tira NotFoundException
@@ -768,7 +933,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
         external_reference: 'unknown-format-12345',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPayment as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPayment as any);
 
       // Act
       const result = await pagosService.procesarWebhookMercadoPago(
@@ -783,7 +950,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
 
     it('should throw error when getPayment fails', async () => {
       // Arrange
-      jest.spyOn(mercadoPagoService, 'getPayment').mockRejectedValue(new Error('MercadoPago API error'));
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockRejectedValue(new Error('MercadoPago API error'));
 
       // Act & Assert
       await expect(
@@ -803,7 +972,9 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
         producto: mockProductoSuscripcion,
       };
 
-      jest.spyOn(prisma.membresia, 'findFirst').mockResolvedValue(mockMembresiaConProducto as any);
+      jest
+        .spyOn(prisma.membresia, 'findFirst')
+        .mockResolvedValue(mockMembresiaConProducto as any);
 
       // Act
       const result = await pagosService.obtenerMembresiaTutor('tutor-123');
@@ -853,10 +1024,15 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
         createdAt: new Date(),
       };
 
-      jest.spyOn(prisma.membresia, 'findFirst').mockResolvedValue(mockEstadoMembresia as any);
+      jest
+        .spyOn(prisma.membresia, 'findFirst')
+        .mockResolvedValue(mockEstadoMembresia as any);
 
       // Act
-      const result = await pagosService.obtenerEstadoMembresia('memb-789', 'tutor-123');
+      const result = await pagosService.obtenerEstadoMembresia(
+        'memb-789',
+        'tutor-123',
+      );
 
       // Assert
       expect(result).toEqual(mockEstadoMembresia);
@@ -896,11 +1072,18 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
         },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma.inscripcionCurso, 'findMany').mockResolvedValue(mockInscripciones as any);
+      jest
+        .spyOn(prisma.estudiante, 'findFirst')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.inscripcionCurso, 'findMany')
+        .mockResolvedValue(mockInscripciones as any);
 
       // Act
-      const result = await pagosService.obtenerInscripcionesEstudiante('est-456', 'tutor-123');
+      const result = await pagosService.obtenerInscripcionesEstudiante(
+        'est-456',
+        'tutor-123',
+      );
 
       // Assert
       expect(result).toEqual(mockInscripciones);
@@ -924,18 +1107,37 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
     it('should return complete payment history for tutor', async () => {
       // Arrange
       const mockMembresias = [
-        { ...mockMembresia, estado: 'Activa', producto: mockProductoSuscripcion },
+        {
+          ...mockMembresia,
+          estado: 'Activa',
+          producto: mockProductoSuscripcion,
+        },
       ];
 
       const mockInscripciones = [
-        { ...mockInscripcion, estado: 'Activo', producto: mockProductoCurso, estudiante: mockEstudiante },
+        {
+          ...mockInscripcion,
+          estado: 'Activo',
+          producto: mockProductoCurso,
+          estudiante: mockEstudiante,
+        },
       ];
 
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as any);
-      jest.spyOn(prisma.membresia, 'findMany').mockResolvedValue(mockMembresias as any);
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue([mockEstudiante] as any);
-      jest.spyOn(prisma.inscripcionCurso, 'findMany').mockResolvedValue(mockInscripciones as any);
-      jest.spyOn(prisma.membresia, 'findFirst').mockResolvedValue(mockMembresias[0] as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.membresia, 'findMany')
+        .mockResolvedValue(mockMembresias as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue([mockEstudiante] as any);
+      jest
+        .spyOn(prisma.inscripcionCurso, 'findMany')
+        .mockResolvedValue(mockInscripciones as any);
+      jest
+        .spyOn(prisma.membresia, 'findFirst')
+        .mockResolvedValue(mockMembresias[0] as any);
 
       // Act
       const result = await pagosService.obtenerHistorialPagosTutor('tutor-123');
@@ -964,13 +1166,18 @@ describe('PagosService - COMPREHENSIVE TESTS', () => {
   describe('activarMembresiaMock', () => {
     it('should delegate to mockPagosService', async () => {
       // Arrange
-      jest.spyOn(mockPagosService, 'activarMembresiaMock').mockResolvedValue({ success: true } as any);
+      jest
+        .spyOn(mockPagosService, 'activarMembresiaMock')
+        .mockResolvedValue({ success: true } as any);
 
       // Act
       const result = await pagosService.activarMembresiaMock('memb-123');
 
       // Assert
-      expect(mockPagosService.activarMembresiaMock).toHaveBeenCalledWith('memb-123', false);
+      expect(mockPagosService.activarMembresiaMock).toHaveBeenCalledWith(
+        'memb-123',
+        false,
+      );
       expect(result).toEqual({ success: true });
     });
   });
