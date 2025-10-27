@@ -115,10 +115,20 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
       // Actualizar estado local
       const { clases, misReservas } = get();
 
-      // Decrementar cupo disponible en la clase
+      // Actualizar cupos ocupados en la clase
       const clasesActualizadas = clases.map((clase) =>
         clase.id === claseId
-          ? { ...clase, cupo_disponible: clase.cupo_disponible - 1 }
+          ? {
+              ...clase,
+              cupos_ocupados:
+                (clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0) + 1,
+              _count: clase._count
+                ? {
+                    ...clase._count,
+                    inscripciones: (clase._count.inscripciones ?? 0) + 1,
+                  }
+                : clase._count,
+            }
           : clase
       );
 
@@ -155,10 +165,25 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
         (r) => r.id !== inscripcionId
       );
 
-      // Incrementar cupo disponible en la clase
+      // Actualizar cupos ocupados en la clase
       const clasesActualizadas = clases.map((clase) =>
         clase.id === reservaCancelada?.clase_id
-          ? { ...clase, cupo_disponible: clase.cupo_disponible + 1 }
+          ? {
+              ...clase,
+              cupos_ocupados: Math.max(
+                (clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0) - 1,
+                0,
+              ),
+              _count: clase._count
+                ? {
+                    ...clase._count,
+                    inscripciones: Math.max(
+                      (clase._count.inscripciones ?? 0) - 1,
+                      0,
+                    ),
+                  }
+                : clase._count,
+            }
           : clase
       );
 

@@ -22,10 +22,14 @@ import {
 
 interface ClaseData {
   id: string;
-  ruta_curricular: {
+  ruta_curricular?: {
     nombre: string;
     color: string;
-  };
+  } | null;
+  rutaCurricular?: {
+    nombre: string;
+    color: string;
+  } | null;
   fecha_hora_inicio: string;
   duracion_minutos: number;
   cupos_ocupados: number;
@@ -53,13 +57,13 @@ export default function SalaClaseDocentePage() {
     const fetchClase = async () => {
       try {
         const response = await apiClient.get(`/clases/${claseId}`);
-        setClase(response);
+        setClase(response.data);
 
         // Cargar estudiantes inscritos
         const estudiantesResponse = await apiClient.get(
           `/clases/${claseId}/estudiantes`,
         );
-        setEstudiantes(estudiantesResponse);
+        setEstudiantes(estudiantesResponse.data);
       } catch {
         // Error loading class
       } finally {
@@ -102,6 +106,10 @@ export default function SalaClaseDocentePage() {
     );
   }
 
+  const rutaCurricular = clase.ruta_curricular ?? clase.rutaCurricular;
+  const rutaNombre = rutaCurricular?.nombre ?? 'Sin ruta';
+  const cuposDisponibles = Math.max(clase.cupos_maximo - clase.cupos_ocupados, 0);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -125,6 +133,7 @@ export default function SalaClaseDocentePage() {
                 <Users className="w-5 h-5 mr-2" />
                 <span>
                   {clase.cupos_ocupados}/{clase.cupos_maximo} estudiantes
+                  {` (${cuposDisponibles} disponibles)`}
                 </span>
               </div>
             </div>
@@ -158,7 +167,7 @@ export default function SalaClaseDocentePage() {
                   <div className="text-left space-y-2 text-sm">
                     <p>
                       <span className="font-medium">Curso:</span>{' '}
-                      {clase.ruta_curricular.nombre}
+                      {rutaNombre}
                     </p>
                     <p>
                       <span className="font-medium">Duración:</span>{' '}

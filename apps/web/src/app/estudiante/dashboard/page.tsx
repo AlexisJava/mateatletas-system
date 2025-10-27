@@ -292,9 +292,15 @@ export default function EstudianteDashboard() {
                         <div className="flex items-center gap-2 mb-2">
                           <div
                             className="w-2 h-2 rounded-full animate-pulse"
-                            style={{ backgroundColor: proximasClases[0].ruta_curricular.color }}
+                            style={{
+                              backgroundColor:
+                                (proximasClases[0].ruta_curricular ?? proximasClases[0].rutaCurricular)?.color ||
+                                '#6366F1',
+                            }}
                           />
-                          <h4 className="font-bold text-white text-base truncate">{proximasClases[0].ruta_curricular.nombre}</h4>
+                          <h4 className="font-bold text-white text-base truncate">
+                            {(proximasClases[0].ruta_curricular ?? proximasClases[0].rutaCurricular)?.nombre ?? 'Sin ruta'}
+                          </h4>
                         </div>
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2 text-xs text-gray-300 truncate">

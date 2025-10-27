@@ -21,11 +21,16 @@ export const marcarAsistencia = async (
   estudianteId: string,
   data: MarcarAsistenciaDto
 ): Promise<Asistencia> => {
-  const payload = await axios.post(
-    `/asistencia/clases/${claseId}/estudiantes/${estudianteId}`,
-    data
-  );
-  return payload;
+  try {
+    const response = await axios.post<Asistencia>(
+      `/asistencia/clases/${claseId}/estudiantes/${estudianteId}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al marcar asistencia:', error);
+    throw error;
+  }
 };
 
 /**
@@ -35,8 +40,15 @@ export const marcarAsistencia = async (
 export const getAsistenciaClase = async (
   claseId: string
 ): Promise<ListaAsistencia> => {
-  const payload = await axios.get(`/asistencia/clases/${claseId}`);
-  return payload;
+  try {
+    const response = await axios.get<ListaAsistencia>(
+      `/asistencia/clases/${claseId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener la asistencia de la clase:', error);
+    throw error;
+  }
 };
 
 /**
@@ -46,8 +58,15 @@ export const getAsistenciaClase = async (
 export const getEstadisticasClase = async (
   claseId: string
 ): Promise<EstadisticasClase> => {
-  const payload = await axios.get(`/asistencia/clases/${claseId}/estadisticas`);
-  return payload;
+  try {
+    const response = await axios.get<EstadisticasClase>(
+      `/asistencia/clases/${claseId}/estadisticas`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener las estadísticas de la clase:', error);
+    throw error;
+  }
 };
 
 /**
@@ -74,10 +93,15 @@ export const getHistorialEstudiante = async (
     params.append('rutaCurricularId', filtros.rutaCurricularId);
   }
 
-  const payload = await axios.get(
-    `/asistencia/estudiantes/${estudianteId}?${params.toString()}`
-  );
-  return payload;
+  try {
+    const response = await axios.get<HistorialAsistencia>(
+      `/asistencia/estudiantes/${estudianteId}?${params.toString()}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener el historial de asistencia del estudiante:', error);
+    throw error;
+  }
 };
 
 /**
@@ -85,8 +109,15 @@ export const getHistorialEstudiante = async (
  * GET /api/asistencia/docente/resumen
  */
 export const getResumenDocente = async (): Promise<ResumenDocenteAsistencia> => {
-  const payload = await axios.get('/asistencia/docente/resumen');
-  return payload;
+  try {
+    const response = await axios.get<ResumenDocenteAsistencia>(
+      '/asistencia/docente/resumen'
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener el resumen de asistencia del docente:', error);
+    throw error;
+  }
 };
 
 /**
@@ -137,10 +168,15 @@ export const getObservacionesDocente = async (filtros?: {
     params.append('limit', filtros.limit.toString());
   }
 
-  const payload = await axios.get(
-    `/asistencia/docente/observaciones?${params.toString()}`
-  );
-  return payload;
+  try {
+    const response = await axios.get<Observacion[]>(
+      `/asistencia/docente/observaciones?${params.toString()}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener las observaciones del docente:', error);
+    throw error;
+  }
 };
 
 /**
@@ -171,6 +207,13 @@ export interface ReportesDocente {
 }
 
 export const getReportesDocente = async (): Promise<ReportesDocente> => {
-  const payload = await axios.get("/asistencia/docente/reportes");
-  return payload;
+  try {
+    const response = await axios.get<ReportesDocente>(
+      '/asistencia/docente/reportes'
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener los reportes de asistencia del docente:', error);
+    throw error;
+  }
 };

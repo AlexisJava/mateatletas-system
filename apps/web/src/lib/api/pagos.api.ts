@@ -28,11 +28,16 @@ import { preferenciaPagoSchema, inscripcionesCursoListSchema } from '@/lib/schem
 export const crearPreferenciaSuscripcion = async (
   productoId: string,
 ): Promise<PreferenciaPago> => {
-  const response = await axios.post(
-    '/pagos/suscripcion',
-    { producto_id: productoId } as CrearPreferenciaSuscripcionRequest,
-  );
-  return preferenciaPagoSchema.parse(response) as PreferenciaPago;
+  try {
+    const response = await axios.post(
+      '/pagos/suscripcion',
+      { producto_id: productoId } as CrearPreferenciaSuscripcionRequest,
+    );
+    return preferenciaPagoSchema.parse(response.data) as PreferenciaPago;
+  } catch (error) {
+    console.error('Error al crear la preferencia de suscripción:', error);
+    throw error;
+  }
 };
 
 /**
@@ -43,11 +48,16 @@ export const crearPreferenciaCurso = async (
   productoId: string,
   estudianteId: string,
 ): Promise<PreferenciaPago> => {
-  const response = await axios.post('/pagos/curso', {
-    producto_id: productoId,
-    estudiante_id: estudianteId,
-  } as CrearPreferenciaCursoRequest);
-  return preferenciaPagoSchema.parse(response) as PreferenciaPago;
+  try {
+    const response = await axios.post('/pagos/curso', {
+      producto_id: productoId,
+      estudiante_id: estudianteId,
+    } as CrearPreferenciaCursoRequest);
+    return preferenciaPagoSchema.parse(response.data) as PreferenciaPago;
+  } catch (error) {
+    console.error('Error al crear la preferencia de curso:', error);
+    throw error;
+  }
 };
 
 /**
@@ -57,7 +67,7 @@ export const crearPreferenciaCurso = async (
 export const getMembresiaActual = async (): Promise<Membresia | null> => {
   try {
     const response = await axios.get('/pagos/membresia');
-    return membresiaSchema.parse(response) as Membresia;
+    return membresiaSchema.parse(response.data) as Membresia;
   } catch (error: unknown) {
     if (isAxiosError(error) && error.response?.status === 404) {
       return null; // No tiene membresía
@@ -73,12 +83,17 @@ export const getMembresiaActual = async (): Promise<Membresia | null> => {
 export const getEstadoMembresia = async (
   membresiaId: string,
 ): Promise<EstadoMembresiaResponse> => {
-  const response = await axios.get(
-    `/pagos/membresia/${membresiaId}/estado`,
-  );
-  return estadoMembresiaResponseSchema.parse(
-    response,
-  ) as EstadoMembresiaResponse;
+  try {
+    const response = await axios.get(
+      `/pagos/membresia/${membresiaId}/estado`,
+    );
+    return estadoMembresiaResponseSchema.parse(
+      response.data,
+    ) as EstadoMembresiaResponse;
+  } catch (error) {
+    console.error('Error al obtener el estado de la membresía:', error);
+    throw error;
+  }
 };
 
 /**
@@ -86,8 +101,13 @@ export const getEstadoMembresia = async (
  * GET /api/pagos/inscripciones
  */
 export const getInscripciones = async (): Promise<InscripcionCurso[]> => {
-  const response = await axios.get('/pagos/inscripciones');
-  return inscripcionesCursoListSchema.parse(response) as InscripcionCurso[];
+  try {
+    const response = await axios.get('/pagos/inscripciones');
+    return inscripcionesCursoListSchema.parse(response.data) as InscripcionCurso[];
+  } catch (error) {
+    console.error('Error al obtener las inscripciones a cursos:', error);
+    throw error;
+  }
 };
 
 /**
@@ -97,10 +117,15 @@ export const getInscripciones = async (): Promise<InscripcionCurso[]> => {
 export const activarMembresiaManual = async (
   membresiaId: string,
 ): Promise<Membresia> => {
-  const response = await axios.post(
-    `/pagos/mock/activar-membresia/${membresiaId}`,
-  );
-  return membresiaSchema.parse(response) as Membresia;
+  try {
+    const response = await axios.post(
+      `/pagos/mock/activar-membresia/${membresiaId}`,
+    );
+    return membresiaSchema.parse(response.data) as Membresia;
+  } catch (error) {
+    console.error('Error al activar manualmente la membresía:', error);
+    throw error;
+  }
 };
 
 /**
@@ -133,8 +158,13 @@ export const getMetricasDashboard = async (params?: {
   const queryString = queryParams.toString();
   const url = `/pagos/dashboard/metricas${queryString ? `?${queryString}` : ''}`;
 
-  const response = await axios.get(url);
-  return response as MetricasDashboardResponse;
+  try {
+    const response = await axios.get(url);
+    return response.data as MetricasDashboardResponse;
+  } catch (error) {
+    console.error('Error al obtener las métricas del dashboard de pagos:', error);
+    throw error;
+  }
 };
 
 /**
@@ -144,8 +174,13 @@ export const getMetricasDashboard = async (params?: {
  * @returns Configuración de precios del sistema
  */
 export const getConfiguracionPrecios = async (): Promise<ConfiguracionPrecios> => {
-  const response = await axios.get('/pagos/configuracion');
-  return response as ConfiguracionPrecios;
+  try {
+    const response = await axios.get('/pagos/configuracion');
+    return response.data as ConfiguracionPrecios;
+  } catch (error) {
+    console.error('Error al obtener la configuración de precios:', error);
+    throw error;
+  }
 };
 
 /**
@@ -155,8 +190,13 @@ export const getConfiguracionPrecios = async (): Promise<ConfiguracionPrecios> =
  * @returns Lista de cambios históricos en precios (últimos 50)
  */
 export const getHistorialCambios = async (): Promise<HistorialCambioPrecios[]> => {
-  const response = await axios.get('/pagos/historial-cambios');
-  return response as HistorialCambioPrecios[];
+  try {
+    const response = await axios.get('/pagos/historial-cambios');
+    return response.data as HistorialCambioPrecios[];
+  } catch (error) {
+    console.error('Error al obtener el historial de cambios de precios:', error);
+    throw error;
+  }
 };
 
 /**
@@ -166,8 +206,13 @@ export const getHistorialCambios = async (): Promise<HistorialCambioPrecios[]> =
  * @returns Lista de inscripciones con estado Pendiente del período actual
  */
 export const getInscripcionesPendientes = async (): Promise<InscripcionMensualConRelaciones[]> => {
-  const response = await axios.get('/pagos/inscripciones/pendientes');
-  return response as InscripcionMensualConRelaciones[];
+  try {
+    const response = await axios.get('/pagos/inscripciones/pendientes');
+    return response.data as InscripcionMensualConRelaciones[];
+  } catch (error) {
+    console.error('Error al obtener las inscripciones pendientes:', error);
+    throw error;
+  }
 };
 
 /**
@@ -177,8 +222,13 @@ export const getInscripcionesPendientes = async (): Promise<InscripcionMensualCo
  * @returns Lista de estudiantes agrupados con sus descuentos del período actual
  */
 export const getEstudiantesConDescuentos = async (): Promise<EstudianteConDescuento[]> => {
-  const response = await axios.get('/pagos/estudiantes-descuentos');
-  return response as EstudianteConDescuento[];
+  try {
+    const response = await axios.get('/pagos/estudiantes-descuentos');
+    return response.data as EstudianteConDescuento[];
+  } catch (error) {
+    console.error('Error al obtener los estudiantes con descuentos:', error);
+    throw error;
+  }
 };
 
 /**
@@ -191,6 +241,11 @@ export const getEstudiantesConDescuentos = async (): Promise<EstudianteConDescue
 export const updateConfiguracionPrecios = async (
   data: ActualizarConfiguracionRequest
 ): Promise<ConfiguracionPrecios> => {
-  const response = await axios.post('/pagos/configuracion/actualizar', data);
-  return response as ConfiguracionPrecios;
+  try {
+    const response = await axios.post('/pagos/configuracion/actualizar', data);
+    return response.data as ConfiguracionPrecios;
+  } catch (error) {
+    console.error('Error al actualizar la configuración de precios:', error);
+    throw error;
+  }
 };

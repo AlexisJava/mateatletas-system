@@ -31,6 +31,10 @@ export function ClaseCard({
 }: ClaseCardProps) {
   const router = useRouter();
 
+  const cupoMaximo = clase.cupo_maximo ?? 0;
+  const cuposOcupados = clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0;
+  const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);
+
   const esHoy = () => {
     const hoy = new Date();
     const fechaClase = new Date(clase.fecha_hora_inicio);
@@ -81,7 +85,7 @@ export function ClaseCard({
         <div className="flex items-center gap-2 text-sm">
           <Users className="w-4 h-4 text-purple-500 dark:text-purple-400" />
           <span className="text-purple-600 dark:text-purple-300 font-medium">
-            {clase.cupo_maximo - clase.cupo_disponible}/{clase.cupo_maximo}
+            {cuposOcupados}/{cupoMaximo} ({cuposDisponibles} disp.)
           </span>
         </div>
         <div className="flex items-center gap-2 text-sm">

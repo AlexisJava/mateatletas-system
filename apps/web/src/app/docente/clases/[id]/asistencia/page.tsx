@@ -101,10 +101,19 @@ export default function AsistenciaPage() {
           <p className="text-gray-600 mt-4">Cargando información...</p>
         </div>
       ) : claseActual ? (
+        (() => {
+          const rutaCurricular =
+            claseActual.ruta_curricular ?? claseActual.rutaCurricular ?? undefined;
+          const cupoMaximo = claseActual.cupo_maximo ?? 0;
+          const cuposOcupados =
+            claseActual.cupos_ocupados ?? claseActual._count?.inscripciones ?? 0;
+          const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);
+
+          return (
         <div
           className="bg-white rounded-lg shadow-md p-6 border-l-4"
           style={{
-            borderLeftColor: claseActual.ruta_curricular?.color || '#ff6b35',
+            borderLeftColor: rutaCurricular?.color || '#ff6b35',
           }}
         >
           <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
@@ -126,18 +135,18 @@ export default function AsistenciaPage() {
                 </span>
                 <span className="flex items-center gap-2">
                   <span>👥</span>
-                  {claseActual.cupo_maximo - claseActual.cupo_disponible}/
-                  {claseActual.cupo_maximo} inscritos
+                  {cuposOcupados}/{cupoMaximo} inscritos
+                  {` (${cuposDisponibles} disponibles)`}
                 </span>
-                {claseActual.ruta_curricular && (
+                {rutaCurricular && (
                   <span
                     className="px-3 py-1 rounded-full text-xs font-semibold"
                     style={{
-                      backgroundColor: `${claseActual.ruta_curricular.color}20`,
-                      color: claseActual.ruta_curricular.color,
+                      backgroundColor: `${rutaCurricular.color}20`,
+                      color: rutaCurricular.color,
                     }}
                   >
-                    {claseActual.ruta_curricular.nombre}
+                    {rutaCurricular.nombre}
                   </span>
                 )}
               </div>
@@ -152,6 +161,8 @@ export default function AsistenciaPage() {
             </Button>
           </div>
         </div>
+          );
+        })()
       ) : null}
 
       {/* Mensaje de éxito */}

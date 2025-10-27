@@ -24,10 +24,18 @@ export const estudiantesApi = {
    * Crear un nuevo estudiante
    * @param data - Datos del estudiante
    * @returns Estudiante creado
-   */
+  */
   create: async (data: CreateEstudianteData): Promise<Estudiante> => {
-    const response = await apiClient.post<Estudiante>('/estudiantes', data);
-    return estudianteSchema.parse(response);
+    try {
+      const response = await apiClient.post<Estudiante>(
+        '/estudiantes',
+        data,
+      );
+      return estudianteSchema.parse(response.data);
+    } catch (error) {
+      console.error('Error al crear el estudiante:', error);
+      throw error;
+    }
   },
 
   /**
@@ -38,8 +46,13 @@ export const estudiantesApi = {
   getAll: async (
     params?: QueryEstudiantesParams,
   ): Promise<EstudiantesResponse> => {
-    const response = await apiClient.get('/estudiantes', { params });
-    return estudiantesResponseSchema.parse(response);
+    try {
+      const response = await apiClient.get('/estudiantes', { params });
+      return estudiantesResponseSchema.parse(response.data);
+    } catch (error) {
+      console.error('Error al obtener los estudiantes:', error);
+      throw error;
+    }
   },
 
   /**
@@ -48,8 +61,13 @@ export const estudiantesApi = {
    * @returns Estudiante con sus relaciones
    */
   getById: async (id: string): Promise<Estudiante> => {
-    const response = await apiClient.get(`/estudiantes/${id}`);
-    return estudianteSchema.parse(response);
+    try {
+      const response = await apiClient.get(`/estudiantes/${id}`);
+      return estudianteSchema.parse(response.data);
+    } catch (error) {
+      console.error('Error al obtener el estudiante:', error);
+      throw error;
+    }
   },
 
   /**
@@ -62,8 +80,13 @@ export const estudiantesApi = {
     id: string,
     data: UpdateEstudianteData,
   ): Promise<Estudiante> => {
-    const response = await apiClient.patch(`/estudiantes/${id}`, data);
-    return estudianteSchema.parse(response);
+    try {
+      const response = await apiClient.patch(`/estudiantes/${id}`, data);
+      return estudianteSchema.parse(response.data);
+    } catch (error) {
+      console.error('Error al actualizar el estudiante:', error);
+      throw error;
+    }
   },
 
   /**
@@ -72,8 +95,13 @@ export const estudiantesApi = {
    * @returns Mensaje de confirmación
    */
   delete: async (id: string): Promise<{ message: string }> => {
-    const response = await apiClient.delete(`/estudiantes/${id}`);
-    return response as { message: string };
+    try {
+      const response = await apiClient.delete(`/estudiantes/${id}`);
+      return response.data as { message: string };
+    } catch (error) {
+      console.error('Error al eliminar el estudiante:', error);
+      throw error;
+    }
   },
 
   /**
@@ -81,8 +109,13 @@ export const estudiantesApi = {
    * @returns Total de estudiantes
    */
   count: async (): Promise<{ count: number }> => {
-    const response = await apiClient.get('/estudiantes/count');
-    return response as { count: number };
+    try {
+      const response = await apiClient.get('/estudiantes/count');
+      return response.data as { count: number };
+    } catch (error) {
+      console.error('Error al contar los estudiantes:', error);
+      throw error;
+    }
   },
 
   /**
@@ -90,8 +123,13 @@ export const estudiantesApi = {
    * @returns Estadísticas agregadas
    */
   getEstadisticas: async (): Promise<EstadisticasEstudiantes> => {
-    const response = await apiClient.get('/estudiantes/estadisticas');
-    return estadisticasEstudiantesSchema.parse(response);
+    try {
+      const response = await apiClient.get('/estudiantes/estadisticas');
+      return estadisticasEstudiantesSchema.parse(response.data);
+    } catch (error) {
+      console.error('Error al obtener las estadísticas de estudiantes:', error);
+      throw error;
+    }
   },
 
   /**
@@ -99,7 +137,12 @@ export const estudiantesApi = {
    * @returns Lista de equipos
    */
   getEquipos: async (): Promise<Equipo[]> => {
-    const response = await apiClient.get('/equipos');
-    return equiposListSchema.parse(response);
+    try {
+      const response = await apiClient.get('/equipos');
+      return equiposListSchema.parse(response.data);
+    } catch (error) {
+      console.error('Error al obtener los equipos de estudiantes:', error);
+      throw error;
+    }
   },
 };

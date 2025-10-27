@@ -46,7 +46,7 @@ export default function SalaClasePage() {
     const fetchClase = async () => {
       try {
         const response = await apiClient.get(`/clases/${claseId}`);
-        setClase(response);
+        setClase(response.data);
       } catch {
         // Error loading class
       } finally {
@@ -80,7 +80,8 @@ export default function SalaClasePage() {
   const handleSalir = async () => {
     // Simular finalización de clase con datos de ejemplo
     const resumen: ResumenClase = {
-      claseNombre: clase?.ruta_curricular.nombre || 'Clase',
+      claseNombre:
+        (clase?.ruta_curricular ?? clase?.rutaCurricular)?.nombre || 'Clase',
       duracionMinutos: clase?.duracion_minutos || 60,
       puntosGanados: 10,
       insigniasDesbloqueadas: [],
