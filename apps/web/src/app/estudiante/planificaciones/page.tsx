@@ -84,14 +84,24 @@ export default function EstudiantePlanificacionesPage() {
   return (
     <div className="space-y-6">
 
-      {/* Header con Stats */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-black text-white uppercase tracking-tight">MES MATEMÁTICO</h1>
-          <p className="text-sm text-slate-400 font-medium mt-1">Nivel {stats.nivel} · 0/100 XP</p>
-        </div>
+      {/* Header con Stats - Con fondo grid */}
+      <div className="relative rounded-2xl overflow-hidden border-2 border-slate-700/50 bg-slate-900/50">
+        {/* Grid Pattern Background */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `
+            linear-gradient(rgba(100, 116, 139, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(100, 116, 139, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '32px 32px'
+        }} />
 
-        <div className="flex gap-3">
+        <div className="relative flex items-start justify-between p-6">
+          <div>
+            <h1 className="text-3xl font-black text-white uppercase tracking-tight">MES DE LA CIENCIA</h1>
+            <p className="text-sm text-slate-400 font-medium mt-1">Nivel {stats.nivel} · 0/100 XP</p>
+          </div>
+
+          <div className="flex gap-3">
           <div className="px-4 py-2 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30">
             <div className="flex items-center gap-2 mb-0.5">
               <Star className="w-5 h-5 text-yellow-400" fill="currentColor" />
@@ -113,6 +123,7 @@ export default function EstudiantePlanificacionesPage() {
             </div>
             <p className="text-[10px] font-bold text-purple-400/60 uppercase text-center">Nivel</p>
           </div>
+        </div>
         </div>
       </div>
 
@@ -235,26 +246,35 @@ export default function EstudiantePlanificacionesPage() {
                   </div>
                 </div>
 
-                {/* Body */}
-                <div className="bg-slate-800 p-4">
+                {/* Body con grid pattern */}
+                <div className="relative bg-slate-800 p-4">
+                  {/* Grid Pattern Sutil */}
+                  <div className="absolute inset-0 opacity-20" style={{
+                    backgroundImage: `
+                      linear-gradient(rgba(100, 116, 139, 0.15) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(100, 116, 139, 0.15) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '24px 24px'
+                  }} />
+
                   {/* Descripción */}
-                  <p className="text-sm text-slate-300 mb-4 leading-relaxed">
+                  <p className="relative text-sm text-slate-300 mb-4 leading-relaxed">
                     {actividad.descripcion}
                   </p>
 
                   {/* Botón */}
                   {actividad.completada ? (
-                    <div className="flex items-center justify-center gap-2 py-3 rounded-xl bg-green-500/20 border-2 border-green-500/50 text-green-400 font-black uppercase text-sm">
+                    <div className="relative flex items-center justify-center gap-2 py-3 rounded-xl bg-green-500/20 border-2 border-green-500/50 text-green-400 font-black uppercase text-sm">
                       <Star className="w-5 h-5" fill="currentColor" />
                       COMPLETADO
                     </div>
                   ) : actividad.bloqueada ? (
-                    <div className="flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-700/50 border-2 border-slate-600 text-slate-400 font-black uppercase text-sm">
+                    <div className="relative flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-700/50 border-2 border-slate-600 text-slate-400 font-black uppercase text-sm">
                       <Lock className="w-5 h-5" />
                       BLOQUEADO
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center gap-2 py-3 rounded-xl bg-white hover:bg-white/90 text-slate-900 font-black uppercase text-sm transition-all group-hover:shadow-lg">
+                    <div className="relative flex items-center justify-center gap-2 py-3 rounded-xl bg-white hover:bg-white/90 text-slate-900 font-black uppercase text-sm transition-all group-hover:shadow-lg">
                       <Play className="w-5 h-5" fill="currentColor" />
                       JUGAR
                     </div>
@@ -286,23 +306,32 @@ export default function EstudiantePlanificacionesPage() {
           {proximosMundos.map((mundo) => (
             <div
               key={mundo.nivel}
-              className="relative rounded-2xl bg-slate-800/30 backdrop-blur-sm border-2 border-slate-700/50 p-6 opacity-60"
+              className="relative rounded-2xl bg-slate-800/30 backdrop-blur-sm border-2 border-slate-700/50 p-6 opacity-60 overflow-hidden"
             >
+              {/* Grid Pattern Background */}
+              <div className="absolute inset-0 opacity-30" style={{
+                backgroundImage: `
+                  linear-gradient(rgba(100, 116, 139, 0.2) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(100, 116, 139, 0.2) 1px, transparent 1px)
+                `,
+                backgroundSize: '32px 32px'
+              }} />
+
               {/* Emoji grayscale */}
-              <div className="text-6xl mb-4 grayscale opacity-40">
+              <div className="relative text-6xl mb-4 grayscale opacity-40">
                 {mundo.icono}
               </div>
 
               {/* Info */}
-              <div className="text-xs font-black text-slate-500 uppercase mb-1 tracking-wide">
+              <div className="relative text-xs font-black text-slate-500 uppercase mb-1 tracking-wide">
                 NIVEL {mundo.nivel}
               </div>
-              <div className="text-lg font-black text-slate-400 uppercase tracking-tight">
+              <div className="relative text-lg font-black text-slate-400 uppercase tracking-tight">
                 {mundo.nombre}
               </div>
 
               {/* Candado */}
-              <div className="absolute top-4 right-4">
+              <div className="absolute top-4 right-4 z-10">
                 <div className="w-10 h-10 rounded-xl bg-slate-900/50 flex items-center justify-center border-2 border-slate-700">
                   <Lock className="w-5 h-5 text-slate-600" />
                 </div>
