@@ -7,7 +7,7 @@ import {
   type FiltrosPlanificaciones,
 } from '@/lib/api/planificaciones-simples.api';
 import { getErrorMessage } from '@/lib/utils/error-handler';
-import { Calendar, Users, TrendingUp, Sparkles, Filter } from 'lucide-react';
+import { Calendar, TrendingUp, Sparkles, Filter } from 'lucide-react';
 
 export default function AdminPlanificacionesSimplesPage() {
   // State
