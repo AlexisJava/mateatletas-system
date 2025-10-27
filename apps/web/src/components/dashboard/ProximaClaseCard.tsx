@@ -19,10 +19,14 @@ import { es } from 'date-fns/locale';
 interface ProximaClaseCardProps {
   clase?: {
     id: string;
-    ruta_curricular: {
+    ruta_curricular?: {
       nombre: string;
       color: string;
-    };
+    } | null;
+    rutaCurricular?: {
+      nombre: string;
+      color: string;
+    } | null;
     docente: {
       nombre: string;
       apellido: string;
@@ -30,6 +34,11 @@ interface ProximaClaseCardProps {
     fecha_hora_inicio: Date | string;
     modalidad?: 'presencial' | 'virtual';
     cupos_disponibles?: number;
+    cupo_maximo?: number | null;
+    cupos_ocupados?: number | null;
+    _count?: {
+      inscripciones?: number;
+    } | null;
   };
   onIrAClase?: () => void;
   delay?: number;
@@ -60,6 +69,15 @@ export function ProximaClaseCard({ clase, onIrAClase, delay = 0 }: ProximaClaseC
   }
 
   const fechaClase = new Date(clase.fecha_hora_inicio);
+  const ruta = clase.ruta_curricular ?? clase.rutaCurricular;
+  const rutaColor = ruta?.color ?? '#6366f1';
+  const rutaNombre = ruta?.nombre ?? 'Sin ruta';
+  const cuposDisponibles =
+    clase.cupos_disponibles ??
+    Math.max(
+      (clase.cupo_maximo ?? 0) - (clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0),
+      0,
+    );
   const esHoy = format(fechaClase, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
   const esMañana =
     format(fechaClase, 'yyyy-MM-dd') ===
@@ -96,9 +114,9 @@ export function ProximaClaseCard({ clase, onIrAClase, delay = 0 }: ProximaClaseC
         <div className="flex items-center gap-2 mb-2">
           <div
             className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: clase.ruta_curricular.color }}
+            style={{ backgroundColor: rutaColor }}
           />
-          <h4 className="font-bold text-gray-800 text-lg">{clase.ruta_curricular.nombre}</h4>
+          <h4 className="font-bold text-gray-800 text-lg">{rutaNombre}</h4>
         </div>
 
         <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
@@ -121,15 +139,15 @@ export function ProximaClaseCard({ clase, onIrAClase, delay = 0 }: ProximaClaseC
         )}
       </div>
 
-      {clase.cupos_disponibles !== undefined && clase.cupos_disponibles > 0 && (
+      {cuposDisponibles > 0 && (
         <div
           className={`text-center py-2 rounded-lg mb-4 ${
-            clase.cupos_disponibles <= 3 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+            cuposDisponibles <= 3 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
           }`}
         >
           <p className="text-sm font-semibold">
-            {clase.cupos_disponibles} {clase.cupos_disponibles === 1 ? 'cupo' : 'cupos'}{' '}
-            {clase.cupos_disponibles <= 3 ? '¡Últimos!' : 'disponibles'}
+            {cuposDisponibles} {cuposDisponibles === 1 ? 'cupo' : 'cupos'}{' '}
+            {cuposDisponibles <= 3 ? '¡Últimos!' : 'disponibles'}
           </p>
         </div>
       )}

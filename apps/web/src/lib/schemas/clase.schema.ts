@@ -80,6 +80,7 @@ export const claseSchema = z.object({
   // Capacidad
   cupo_maximo: z.number().int().positive().nullish(),
   cupo_disponible: z.number().int().nonnegative().nullish(),
+  cupos_ocupados: z.number().int().nonnegative().nullish(),
 
   // Estado
   estado: estadoClaseSchema.nullish(),

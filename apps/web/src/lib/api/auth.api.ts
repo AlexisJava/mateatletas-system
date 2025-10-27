@@ -92,8 +92,17 @@ export const authApi = {
    * @param data - Datos del tutor a registrar
    * @returns Promise con el tutor creado
    */
-  register: (data: RegisterData): Promise<RegisterResponse> => {
-    return apiClient.post('/auth/register', data);
+  register: async (data: RegisterData): Promise<RegisterResponse> => {
+    try {
+      const response = await apiClient.post<RegisterResponse>(
+        '/auth/register',
+        data,
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error en el registro de usuario:', error);
+      throw error;
+    }
   },
 
   /**
@@ -102,8 +111,17 @@ export const authApi = {
    * @param data - Credenciales del tutor (email, password)
    * @returns Promise con los datos del usuario (sin token)
    */
-  login: (data: LoginData): Promise<LoginResponse> => {
-    return apiClient.post('/auth/login', data);
+  login: async (data: LoginData): Promise<LoginResponse> => {
+    try {
+      const response = await apiClient.post<LoginResponse>(
+        '/auth/login',
+        data,
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error en el inicio de sesión:', error);
+      throw error;
+    }
   },
 
   /**
@@ -111,8 +129,14 @@ export const authApi = {
    * El token se envía automáticamente como httpOnly cookie
    * @returns Promise con los datos del tutor
    */
-  getProfile: (): Promise<AuthUser> => {
-    return apiClient.get('/auth/profile');
+  getProfile: async (): Promise<AuthUser> => {
+    try {
+      const response = await apiClient.get<AuthUser>('/auth/profile');
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener el perfil de autenticación:', error);
+      throw error;
+    }
   },
 
   /**
@@ -121,8 +145,17 @@ export const authApi = {
    * @param data - Credenciales del estudiante (email, password)
    * @returns Promise con los datos del estudiante (sin token)
    */
-  loginEstudiante: (data: LoginData): Promise<LoginResponse> => {
-    return apiClient.post('/auth/estudiante/login', data);
+  loginEstudiante: async (data: LoginData): Promise<LoginResponse> => {
+    try {
+      const response = await apiClient.post<LoginResponse>(
+        '/auth/estudiante/login',
+        data,
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error en el inicio de sesión del estudiante:', error);
+      throw error;
+    }
   },
 
   /**
@@ -130,8 +163,14 @@ export const authApi = {
    * El backend elimina la httpOnly cookie automáticamente
    * @returns Promise con mensaje de confirmación
    */
-  logout: (): Promise<LogoutResponse> => {
-    return apiClient.post('/auth/logout');
+  logout: async (): Promise<LogoutResponse> => {
+    try {
+      const response = await apiClient.post<LogoutResponse>('/auth/logout');
+      return response.data;
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      throw error;
+    }
   },
 
   /**
@@ -139,9 +178,18 @@ export const authApi = {
    * @param data - Contraseñas actual y nueva
    * @returns Mensaje de confirmación
    */
-  changePassword: (
+  changePassword: async (
     data: ChangePasswordPayload,
   ): Promise<ChangePasswordResponse> => {
-    return apiClient.post('/auth/change-password', data);
+    try {
+      const response = await apiClient.post<ChangePasswordResponse>(
+        '/auth/change-password',
+        data,
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error al cambiar la contraseña:', error);
+      throw error;
+    }
   },
 };

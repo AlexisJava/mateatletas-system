@@ -58,28 +58,52 @@ export const docentesApi = {
    * Obtener perfil del docente autenticado
    */
   getMe: async (): Promise<Docente> => {
-    return await apiClient.get('/docentes/me');
+    try {
+      const response = await apiClient.get<Docente>('/docentes/me');
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener el perfil del docente:', error);
+      throw error;
+    }
   },
 
   /**
    * Actualizar perfil del docente autenticado
    */
   updateMe: async (data: UpdateDocenteData): Promise<Docente> => {
-    return await apiClient.patch('/docentes/me', data);
+    try {
+      const response = await apiClient.patch<Docente>('/docentes/me', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error al actualizar el perfil del docente:', error);
+      throw error;
+    }
   },
 
   /**
    * Obtener todos los docentes (admin only)
    */
   getAll: async (): Promise<Docente[]> => {
-    return await apiClient.get('/docentes');
+    try {
+      const response = await apiClient.get<Docente[]>('/docentes');
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener la lista de docentes:', error);
+      throw error;
+    }
   },
 
   /**
    * Obtener un docente por ID (admin only)
    */
   getById: async (id: string): Promise<Docente> => {
-    return await apiClient.get(`/docentes/${id}`);
+    try {
+      const response = await apiClient.get<Docente>(`/docentes/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener el docente por ID:', error);
+      throw error;
+    }
   },
 
   /**
@@ -88,21 +112,44 @@ export const docentesApi = {
    * y la retorna en generatedPassword para que el admin la comparta con el docente
    */
   create: async (data: CreateDocenteData): Promise<CreateDocenteResponse> => {
-    return await apiClient.post('/docentes', data);
+    try {
+      const response = await apiClient.post<CreateDocenteResponse>(
+        '/docentes',
+        data
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error al crear el docente:', error);
+      throw error;
+    }
   },
 
   /**
    * Actualizar un docente por ID (admin only)
    */
   update: async (id: string, data: UpdateDocenteData): Promise<Docente> => {
-    return await apiClient.patch(`/docentes/${id}`, data);
+    try {
+      const response = await apiClient.patch<Docente>(
+        `/docentes/${id}`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error al actualizar el docente:', error);
+      throw error;
+    }
   },
 
   /**
    * Eliminar un docente por ID (admin only)
    */
   delete: async (id: string): Promise<void> => {
-    return await apiClient.delete(`/docentes/${id}`);
+    try {
+      await apiClient.delete(`/docentes/${id}`);
+    } catch (error) {
+      console.error('Error al eliminar el docente:', error);
+      throw error;
+    }
   },
 
   /**
@@ -112,8 +159,17 @@ export const docentesApi = {
     fromDocenteId: string,
     toDocenteId: string
   ): Promise<{ clasesReasignadas: number }> => {
-    return await apiClient.post(`/docentes/${fromDocenteId}/reasignar-clases`, {
-      toDocenteId,
-    });
+    try {
+      const response = await apiClient.post<{ clasesReasignadas: number }>(
+        `/docentes/${fromDocenteId}/reasignar-clases`,
+        {
+          toDocenteId,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error al reasignar las clases del docente:', error);
+      throw error;
+    }
   },
 };
