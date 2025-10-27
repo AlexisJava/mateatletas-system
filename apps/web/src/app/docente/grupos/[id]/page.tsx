@@ -72,8 +72,9 @@ export default function GrupoDetalladoPage() {
   useEffect(() => {
     const fetchGrupo = async () => {
       try {
-        const response = await apiClient.get(`/grupos/${grupoId}`);
-        setGrupo(response.data);
+        // El interceptor ya retorna response.data directamente
+        const grupoData = await apiClient.get<Grupo>(`/grupos/${grupoId}`);
+        setGrupo(grupoData);
       } catch (error) {
         // Mock data
         const mockGrupo: Grupo = {
