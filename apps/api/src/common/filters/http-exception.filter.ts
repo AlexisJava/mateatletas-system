@@ -38,7 +38,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     );
 
     // Log del error con contexto completo
-    this.logError(exception, request, status, errorId, errorResponse);
+    this.logError(exception, request, status, errorId);
 
     // Enviar respuesta al cliente
     response.status(status).json(errorResponse);
@@ -52,11 +52,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
     exceptionResponse: string | object,
     request: Request,
     errorId: string,
-  ) {
+  ): Record<string, unknown> & {
+    statusCode: number;
+    timestamp: string;
+    path: string;
+    method: string;
+    errorId: string;
+  } {
     // Si la respuesta ya es un objeto, usarla como base
-    const baseResponse =
-      typeof exceptionResponse === 'object'
-        ? exceptionResponse
+    const baseResponse: Record<string, unknown> =
+      typeof exceptionResponse === 'object' && exceptionResponse !== null
+        ? (exceptionResponse as Record<string, unknown>)
         : { message: exceptionResponse };
 
     return {
@@ -77,15 +83,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
     request: Request,
     status: number,
     errorId: string,
-    errorResponse: any,
   ) {
-    const { method, url, headers, body, query, params } = request;
-    const user = (request as any).user;
+    const method = request.method;
+    const url = request.url;
+    const headers = request.headers;
+    const body: unknown = request.body;
+    const query = request.query as Record<string, unknown>;
+    const params = request.params as Record<string, unknown>;
+    const { user } = request as Request & {
+      user?: { id?: string; role?: string };
+    };
 
     // Determinar nivel de log según el status code
     const logLevel = this.getLogLevel(status);
 
-    const metadata: LoggerMetadata = {
+    const baseMetadata: LoggerMetadata = {
       errorId,
       statusCode: status,
       method,
@@ -94,9 +106,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
       userRole: user?.role,
       ip: request.ip,
       userAgent: headers['user-agent'],
-      // Solo incluir body en errores 5xx (no exponer datos sensibles en 4xx)
-      ...(status >= 500 && { body, query, params }),
     };
+    const metadata: LoggerMetadata =
+      status >= 500
+        ? {
+            ...baseMetadata,
+            body,
+            query,
+            params,
+          }
+        : baseMetadata;
 
     // Log según nivel
     if (logLevel === 'error') {

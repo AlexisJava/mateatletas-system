@@ -10,20 +10,31 @@ import { JsonValue } from '@prisma/client/runtime/library';
  * @param roles - Puede ser string (JSON), array, JsonValue o undefined
  * @returns Array de roles como Role enum
  */
-export function parseUserRoles(roles: string | Role[] | JsonValue | null | undefined): Role[] {
+export function parseUserRoles(
+  roles: string | Role[] | JsonValue | null | undefined,
+): Role[] {
+  const validRoles = new Set<Role>([
+    Role.Admin,
+    Role.Docente,
+    Role.Estudiante,
+    Role.Tutor,
+  ]);
+  const isRole = (value: unknown): value is Role =>
+    typeof value === 'string' && validRoles.has(value as Role);
+
   // Si ya es un array, retornarlo directamente
   if (Array.isArray(roles)) {
     // Filtrar solo elementos válidos como Role (strings)
-    return roles.filter((r): r is Role => typeof r === 'string') as Role[];
+    return roles.filter(isRole) as Role[];
   }
 
   // Si es un string, intentar parsearlo como JSON
   if (typeof roles === 'string') {
     try {
-      const parsed = JSON.parse(roles);
+      const parsed = JSON.parse(roles) as unknown;
       // Verificar que el resultado sea un array
       if (Array.isArray(parsed)) {
-        return parsed;
+        return parsed.filter(isRole);
       }
       console.warn('Roles parseados no son un array:', parsed);
       return [];
