@@ -57,8 +57,7 @@ import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
         return {
           secret,
           signOptions: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            expiresIn: expiresIn as any, // string is compatible with StringValue from jsonwebtoken
+            expiresIn: expiresIn as string | number,
           },
         };
       },

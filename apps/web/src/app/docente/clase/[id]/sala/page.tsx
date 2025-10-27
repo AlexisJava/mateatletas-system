@@ -56,14 +56,15 @@ export default function SalaClaseDocentePage() {
   useEffect(() => {
     const fetchClase = async () => {
       try {
-        const response = await apiClient.get(`/clases/${claseId}`);
-        setClase(response.data);
+        // El interceptor ya retorna response.data directamente
+        const claseData = await apiClient.get<ClaseData>(`/clases/${claseId}`);
+        setClase(claseData);
 
         // Cargar estudiantes inscritos
-        const estudiantesResponse = await apiClient.get(
+        const estudiantesData = await apiClient.get<Estudiante[]>(
           `/clases/${claseId}/estudiantes`,
         );
-        setEstudiantes(estudiantesResponse.data);
+        setEstudiantes(estudiantesData);
       } catch {
         // Error loading class
       } finally {
