@@ -84,18 +84,18 @@ else
     BROWSER=""
 fi
 
-# Abrir las 3 pestañas de planificaciones
+# Abrir las 3 pestañas de planificaciones DEMO (sin login)
 if [ -n "$BROWSER" ]; then
-    echo -e "${GREEN}📖 Abriendo: Portal Admin - Planificaciones${NC}"
-    $BROWSER "http://localhost:3000/admin/planificaciones" > /dev/null 2>&1 &
+    echo -e "${GREEN}📖 Abriendo: Portal Admin - Planificaciones DEMO${NC}"
+    $BROWSER "http://localhost:3000/admin/planificaciones/demo" > /dev/null 2>&1 &
     sleep 1
 
-    echo -e "${GREEN}📖 Abriendo: Portal Docente - Planificaciones${NC}"
-    $BROWSER "http://localhost:3000/docente/planificaciones" > /dev/null 2>&1 &
+    echo -e "${GREEN}📖 Abriendo: Portal Docente - Planificaciones DEMO${NC}"
+    $BROWSER "http://localhost:3000/docente/planificaciones/demo" > /dev/null 2>&1 &
     sleep 1
 
-    echo -e "${GREEN}📖 Abriendo: Portal Estudiante - Planificaciones${NC}"
-    $BROWSER "http://localhost:3000/estudiante/planificaciones" > /dev/null 2>&1 &
+    echo -e "${GREEN}📖 Abriendo: Portal Estudiante - Planificaciones DEMO${NC}"
+    $BROWSER "http://localhost:3000/estudiante/planificaciones/demo" > /dev/null 2>&1 &
 fi
 
 echo ""
@@ -105,14 +105,14 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 echo ""
 echo -e "${BLUE}📍 URLs disponibles:${NC}"
 echo ""
-echo "  🔧 Admin - Crear Planificación:"
-echo "     http://localhost:3000/admin/planificaciones"
+echo "  🔧 Admin - Planificaciones DEMO:"
+echo "     http://localhost:3000/admin/planificaciones/demo"
 echo ""
-echo "  👨‍🏫 Docente - Gestionar Planificaciones:"
-echo "     http://localhost:3000/docente/planificaciones"
+echo "  👨‍🏫 Docente - Planificaciones DEMO:"
+echo "     http://localhost:3000/docente/planificaciones/demo"
 echo ""
-echo "  🎓 Estudiante - Mis Planificaciones:"
-echo "     http://localhost:3000/estudiante/planificaciones"
+echo "  🎓 Estudiante - Planificaciones DEMO:"
+echo "     http://localhost:3000/estudiante/planificaciones/demo"
 echo ""
 echo "  🔌 API Backend:"
 echo "     http://localhost:3001/api"
