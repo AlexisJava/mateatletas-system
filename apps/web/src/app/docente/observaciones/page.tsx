@@ -1,212 +1,273 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { getObservacionesDocente, Observacion } from '@/lib/api/asistencia.api';
+import { getDashboardDocente, EstudianteConFalta } from '@/lib/api/docentes.api';
 import { LoadingSpinner } from '@/components/effects';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-
-const fadeIn = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.3 },
-};
+import {
+  AlertTriangle,
+  Mail,
+  Search,
+  Calendar as CalendarIcon,
+  User,
+  MessageSquare,
+} from 'lucide-react';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export default function DocenteObservacionesPage() {
   const [observaciones, setObservaciones] = useState<Observacion[]>([]);
+  const [estudiantesConFaltas, setEstudiantesConFaltas] = useState<EstudianteConFalta[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filtros, setFiltros] = useState({
-    estudianteId: '',
-    fechaDesde: '',
-    fechaHasta: '',
-    limit: 50,
-  });
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedObservacion, setSelectedObservacion] = useState<Observacion | null>(null);
+  const [filtroFechaDesde, setFiltroFechaDesde] = useState('');
+  const [filtroFechaHasta, setFiltroFechaHasta] = useState('');
 
-  // Fetch observaciones
   useEffect(() => {
-    fetchObservaciones();
-  }, [filtros]);
+    fetchData();
+  }, []);
 
-  const fetchObservaciones = async () => {
+  const fetchData = async () => {
     try {
       setIsLoading(true);
-      const data = await getObservacionesDocente({
-        ...filtros,
-        estudianteId: filtros.estudianteId || undefined,
-        fechaDesde: filtros.fechaDesde || undefined,
-        fechaHasta: filtros.fechaHasta || undefined,
-      });
-      setObservaciones(data);
+      const [obsData, dashboardData] = await Promise.all([
+        getObservacionesDocente({ limit: 100 }),
+        getDashboardDocente(),
+      ]);
+      setObservaciones(obsData);
+      setEstudiantesConFaltas(dashboardData.estudiantesConFaltas);
     } catch (error) {
-      // Error loading observations
+      console.error('Error loading data:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Filtrar observaciones por término de búsqueda
-  const observacionesFiltradas = observaciones?.filter((obs) => {
+  // Filtrar observaciones
+  const observacionesFiltradas = observaciones.filter((obs) => {
     const nombreCompleto = `${obs.estudiante.nombre} ${obs.estudiante.apellido}`.toLowerCase();
     const observacion = obs.observaciones?.toLowerCase() || '';
     const rutaNombre = obs.clase.rutaCurricular.nombre.toLowerCase();
     const search = searchTerm.toLowerCase();
 
-    return (
-      nombreCompleto.includes(search) ||
-      observacion.includes(search) ||
-      rutaNombre.includes(search)
-    );
-  }) || [];
+    const matchSearch =
+      nombreCompleto.includes(search) || observacion.includes(search) || rutaNombre.includes(search);
 
-  // Limpiar filtros
-  const limpiarFiltros = () => {
-    setFiltros({
-      estudianteId: '',
-      fechaDesde: '',
-      fechaHasta: '',
-      limit: 50,
-    });
-    setSearchTerm('');
-  };
+    const fechaClase = parseISO(obs.clase.fecha_hora_inicio);
+    const matchFechaDesde = filtroFechaDesde
+      ? fechaClase >= parseISO(filtroFechaDesde)
+      : true;
+    const matchFechaHasta = filtroFechaHasta
+      ? fechaClase <= parseISO(filtroFechaHasta)
+      : true;
+
+    return matchSearch && matchFechaDesde && matchFechaHasta;
+  });
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center h-full">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <motion.div {...fadeIn}>
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-indigo-900 dark:text-white">Mis Observaciones</h1>
-          <p className="text-purple-600 dark:text-purple-300 mt-1">
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="w-full h-full flex flex-col gap-6 overflow-y-auto">
+        {/* Breadcrumbs */}
+        <Breadcrumbs items={[{ label: 'Observaciones' }]} />
+
+        {/* Header BRUTAL */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-2"
+        >
+          <h1 className="text-5xl font-black text-white mb-2 flex items-center gap-3">
+            <MessageSquare className="w-12 h-12 text-yellow-400" />
+            OBSERVACIONES
+          </h1>
+          <p className="text-purple-300 text-xl font-bold">
             {observacionesFiltradas.length} observaciones registradas
           </p>
-        </div>
+        </motion.div>
 
-        {/* Filtros y búsqueda */}
-        <div className="glass-card-strong p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* ALERTA: ESTUDIANTES CON FALTAS - BRUTAL */}
+        {estudiantesConFaltas.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <h2 className="text-2xl font-black text-white mb-4 flex items-center gap-2">
+              <AlertTriangle className="w-7 h-7 text-red-400" />
+              ESTUDIANTES CON FALTAS - REQUIEREN ATENCIÓN
+            </h2>
+
+            <div className="bg-red-900/20 backdrop-blur-md rounded-xl border border-red-400/50 overflow-hidden shadow-lg">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-red-900/50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-white font-black">ESTUDIANTE</th>
+                      <th className="px-4 py-3 text-left text-white font-black">GRUPO</th>
+                      <th className="px-4 py-3 text-left text-white font-black">FALTAS</th>
+                      <th className="px-4 py-3 text-left text-white font-black">TUTOR</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {estudiantesConFaltas.map((est) => (
+                      <tr
+                        key={est.id}
+                        className="border-t border-red-400/30 hover:bg-red-900/40 transition-colors"
+                      >
+                        <td className="px-4 py-3 text-white font-semibold">
+                          {est.nombre} {est.apellido}
+                        </td>
+                        <td className="px-4 py-3 text-purple-300">{est.ultimo_grupo}</td>
+                        <td className="px-4 py-3">
+                          <span className="bg-red-500 text-white px-3 py-1 rounded-full font-black text-sm">
+                            {est.faltas_consecutivas} faltas
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          {est.tutor_email ? (
+                            <button
+                              onClick={() => window.open(`mailto:${est.tutor_email}`)}
+                              className="flex items-center gap-2 text-blue-300 hover:text-blue-200 font-semibold transition-colors"
+                            >
+                              <Mail className="w-4 h-4" />
+                              Contactar
+                            </button>
+                          ) : (
+                            <span className="text-gray-400">Sin tutor</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* FILTROS BRUTALES */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Búsqueda */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-indigo-900 dark:text-white mb-2">
-                Buscar
+            <div>
+              <label className="block text-white font-bold mb-2 flex items-center gap-2">
+                <Search className="w-5 h-5 text-yellow-400" />
+                BUSCAR
               </label>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Nombre del estudiante, observación, ruta..."
-                className="w-full px-4 py-2 bg-white/40 dark:bg-indigo-900/40 border border-purple-200/50 dark:border-purple-700/50 rounded-lg text-indigo-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Estudiante, observación, ruta..."
+                className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white placeholder-purple-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent font-semibold"
               />
             </div>
 
             {/* Fecha desde */}
             <div>
-              <label className="block text-sm font-medium text-indigo-900 dark:text-white mb-2">
-                Desde
+              <label className="block text-white font-bold mb-2 flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5 text-green-400" />
+                DESDE
               </label>
               <input
                 type="date"
-                value={filtros.fechaDesde}
-                onChange={(e) => setFiltros({ ...filtros, fechaDesde: e.target.value })}
-                className="w-full px-4 py-2 bg-white/40 dark:bg-indigo-900/40 border border-purple-200/50 dark:border-purple-700/50 rounded-lg text-indigo-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                value={filtroFechaDesde}
+                onChange={(e) => setFiltroFechaDesde(e.target.value)}
+                className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent font-semibold"
               />
             </div>
 
             {/* Fecha hasta */}
             <div>
-              <label className="block text-sm font-medium text-indigo-900 dark:text-white mb-2">
-                Hasta
+              <label className="block text-white font-bold mb-2 flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5 text-blue-400" />
+                HASTA
               </label>
               <input
                 type="date"
-                value={filtros.fechaHasta}
-                onChange={(e) => setFiltros({ ...filtros, fechaHasta: e.target.value })}
-                className="w-full px-4 py-2 bg-white/40 dark:bg-indigo-900/40 border border-purple-200/50 dark:border-purple-700/50 rounded-lg text-indigo-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                value={filtroFechaHasta}
+                onChange={(e) => setFiltroFechaHasta(e.target.value)}
+                className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent font-semibold"
               />
             </div>
           </div>
 
-          {/* Botones de acción */}
+          {/* Botones */}
           <div className="mt-4 flex gap-3">
             <button
-              onClick={limpiarFiltros}
-              className="px-4 py-2 glass-card text-indigo-900 dark:text-white hover:bg-purple-100/60 dark:hover:bg-purple-900/40 rounded-lg transition-colors"
+              onClick={() => {
+                setSearchTerm('');
+                setFiltroFechaDesde('');
+                setFiltroFechaHasta('');
+              }}
+              className="px-6 py-3 bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 rounded-lg transition-all font-bold border border-white/10"
             >
-              Limpiar filtros
-            </button>
-            <button
-              onClick={fetchObservaciones}
-              className="px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg shadow-lg shadow-purple-500/40 hover:shadow-xl hover:shadow-purple-500/50 transition-all"
-            >
-              Aplicar filtros
+              LIMPIAR FILTROS
             </button>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Lista de observaciones */}
-        <div className="glass-card-strong overflow-hidden">
+        {/* LISTA DE OBSERVACIONES - BRUTAL */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
           {observacionesFiltradas.length === 0 ? (
-            <div className="p-12 text-center">
-              <svg
-                className="w-16 h-16 mx-auto text-purple-300 dark:text-purple-700 mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <p className="text-indigo-900 dark:text-white text-lg font-semibold">No hay observaciones registradas</p>
-              <p className="text-purple-600 dark:text-purple-300 text-sm mt-1">
+            <div className="bg-white/5 backdrop-blur-md rounded-xl p-12 text-center border border-white/10">
+              <MessageSquare className="w-16 h-16 mx-auto text-purple-400 mb-4" />
+              <p className="text-white text-xl font-black">NO HAY OBSERVACIONES</p>
+              <p className="text-purple-300 font-semibold mt-2">
                 Las observaciones aparecerán aquí cuando las registres en las clases
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-purple-200/20 dark:divide-purple-700/20">
+            <div className="space-y-4">
               {observacionesFiltradas.map((obs) => (
                 <motion.div
                   key={obs.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="p-6 hover:bg-purple-50/30 dark:hover:bg-purple-900/20 transition-colors cursor-pointer"
-                  onClick={() => setSelectedObservacion(obs)}
+                  className="bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:bg-white/10 hover:border-purple-400/50 transition-all"
                 >
                   <div className="flex justify-between items-start">
-                    {/* Izquierda: Info del estudiante y observación */}
+                    {/* Izquierda: Info del estudiante */}
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        {/* Avatar */}
+                      <div className="flex items-center gap-4 mb-4">
+                        {/* Avatar BRUTAL */}
                         {obs.estudiante.foto_url ? (
                           <img
                             src={obs.estudiante.foto_url}
                             alt={obs.estudiante.nombre}
-                            className="w-12 h-12 rounded-full object-cover"
+                            className="w-16 h-16 rounded-full object-cover border-2 border-yellow-400"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#ff6b35] to-[#f7b801] flex items-center justify-center text-white font-bold text-lg">
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center text-white font-black text-2xl border-2 border-yellow-400">
                             {obs.estudiante.nombre.charAt(0)}
                           </div>
                         )}
 
                         {/* Nombre y fecha */}
                         <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-indigo-900 dark:text-white">
+                          <h3 className="text-2xl font-black text-white">
                             {obs.estudiante.nombre} {obs.estudiante.apellido}
                           </h3>
-                          <div className="flex items-center gap-3 text-sm text-purple-600 dark:text-purple-300">
+                          <div className="flex items-center gap-3 text-sm text-purple-300 font-semibold mt-1">
                             <span>
                               📅{' '}
                               {format(parseISO(obs.clase.fecha_hora_inicio), 'dd MMM yyyy', {
@@ -214,10 +275,7 @@ export default function DocenteObservacionesPage() {
                               })}
                             </span>
                             <span>•</span>
-                            <span
-                              className="inline-flex items-center gap-1"
-                              style={{ color: obs.clase.rutaCurricular.color }}
-                            >
+                            <span className="flex items-center gap-1">
                               <span
                                 className="w-2 h-2 rounded-full"
                                 style={{ backgroundColor: obs.clase.rutaCurricular.color }}
@@ -228,25 +286,25 @@ export default function DocenteObservacionesPage() {
                         </div>
                       </div>
 
-                      {/* Observación */}
-                      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
-                        <p className="text-sm text-gray-700 italic">
+                      {/* Observación BRUTAL */}
+                      <div className="bg-yellow-500/20 border-l-4 border-yellow-400 p-4 rounded backdrop-blur-sm">
+                        <p className="text-white font-semibold italic text-lg">
                           &quot;{obs.observaciones}&quot;
                         </p>
                       </div>
                     </div>
 
                     {/* Derecha: Estado */}
-                    <div className="ml-4">
+                    <div className="ml-6">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        className={`px-4 py-2 rounded-full text-sm font-black ${
                           obs.estado === 'Presente'
-                            ? 'bg-green-100 text-green-800'
+                            ? 'bg-green-500 text-white'
                             : obs.estado === 'Ausente'
-                            ? 'bg-red-100 text-red-800'
+                            ? 'bg-red-500 text-white'
                             : obs.estado === 'Justificado'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-yellow-500 text-black'
                         }`}
                       >
                         {obs.estado}
@@ -257,159 +315,8 @@ export default function DocenteObservacionesPage() {
               ))}
             </div>
           )}
-        </div>
-
-        {/* Modal de observación seleccionada */}
-        <AnimatePresence>
-          {selectedObservacion && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-              onClick={() => setSelectedObservacion(null)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-lg shadow-xl max-w-2xl w-full"
-              >
-                <div className="p-6">
-                  {/* Header del modal */}
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="flex items-center gap-3">
-                      {selectedObservacion.estudiante.foto_url ? (
-                        <img
-                          src={selectedObservacion.estudiante.foto_url}
-                          alt={selectedObservacion.estudiante.nombre}
-                          className="w-16 h-16 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#ff6b35] to-[#f7b801] flex items-center justify-center text-white font-bold text-2xl">
-                          {selectedObservacion.estudiante.nombre.charAt(0)}
-                        </div>
-                      )}
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-900">
-                          {selectedObservacion.estudiante.nombre}{' '}
-                          {selectedObservacion.estudiante.apellido}
-                        </h2>
-                        <p className="text-gray-600">
-                          {format(
-                            parseISO(selectedObservacion.clase.fecha_hora_inicio),
-                            "EEEE d 'de' MMMM, yyyy",
-                            { locale: es }
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setSelectedObservacion(null)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <svg
-                        className="w-6 h-6"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {/* Contenido */}
-                  <div className="space-y-4">
-                    {/* Ruta curricular */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Ruta Curricular
-                      </label>
-                      <div
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg"
-                        style={{
-                          backgroundColor: selectedObservacion.clase.rutaCurricular.color + '20',
-                        }}
-                      >
-                        <span
-                          className="w-3 h-3 rounded-full"
-                          style={{
-                            backgroundColor: selectedObservacion.clase.rutaCurricular.color,
-                          }}
-                        />
-                        <span className="font-medium">
-                          {selectedObservacion.clase.rutaCurricular.nombre}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Estado de asistencia */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Estado de Asistencia
-                      </label>
-                      <span
-                        className={`inline-block px-4 py-2 rounded-lg font-medium ${
-                          selectedObservacion.estado === 'Presente'
-                            ? 'bg-green-100 text-green-800'
-                            : selectedObservacion.estado === 'Ausente'
-                            ? 'bg-red-100 text-red-800'
-                            : selectedObservacion.estado === 'Justificado'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}
-                      >
-                        {selectedObservacion.estado}
-                      </span>
-                    </div>
-
-                    {/* Observación */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Observación
-                      </label>
-                      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                        <p className="text-gray-700">{selectedObservacion.observaciones}</p>
-                      </div>
-                    </div>
-
-                    {/* Fecha de registro */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Registrada el
-                      </label>
-                      <p className="text-gray-600">
-                        {format(
-                          parseISO(selectedObservacion.createdAt),
-                          "dd 'de' MMMM 'de' yyyy 'a las' HH:mm",
-                          { locale: es }
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Acciones */}
-                  <div className="mt-6 flex justify-end gap-3">
-                    <a
-                      href={`/docente/clases/${selectedObservacion.clase_id}/asistencia`}
-                      className="px-4 py-2 bg-[#ff6b35] text-white rounded-lg hover:bg-[#ff5722] transition-colors"
-                    >
-                      Ver clase completa
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }
