@@ -99,55 +99,16 @@ export default function DocenteDashboardNew() {
     try {
       setIsLoading(true);
 
-      // TODO: Conectar con backend real
-      // const response = await apiClient.get('/docentes/dashboard');
+      // TODO: Implementar endpoints en backend
+      // const response = await apiClient.get('/api/docentes/me/dashboard');
+      // setClaseInminente(response.claseInminente);
+      // setAlertas(response.alertas);
+      // setStats(response.stats);
 
-      // MOCK DATA - Reemplazar con backend
-      await new Promise(resolve => setTimeout(resolve, 800));
-
-      // Clase inminente
-      const mockClase: ClaseInminente = {
-        id: 'clase-1',
-        titulo: 'Álgebra Básica',
-        grupoNombre: 'Grupo Alfa',
-        grupoId: 'grupo-alfa',
-        fecha_hora: new Date(Date.now() + 15 * 60000).toISOString(), // En 15 minutos
-        duracion: 60,
-        estudiantesInscritos: 12,
-        cupo_maximo: 15,
-        estado: 'PRÓXIMA',
-        minutosParaEmpezar: 15,
-      };
-
-      // Alertas
-      const mockAlertas: Alerta[] = [
-        {
-          id: '1',
-          tipo: 'warning',
-          mensaje: '3 estudiantes con 2+ faltas consecutivas',
-          accion: { label: 'Ver estudiantes', href: '/docente/mis-clases' },
-        },
-        {
-          id: '2',
-          tipo: 'info',
-          mensaje: '5 observaciones sin leer por tutores',
-          accion: { label: 'Ver observaciones', href: '/docente/observaciones' },
-        },
-      ];
-
-      // Stats
-      const mockStats: StatsResumen = {
-        clasesHoy: 3,
-        clasesEstaSemana: 12,
-        asistenciaPromedio: 87,
-        tendenciaAsistencia: 'up',
-        observacionesPendientes: 5,
-        estudiantesTotal: 45,
-      };
-
-      setClaseInminente(mockClase);
-      setAlertas(mockAlertas);
-      setStats(mockStats);
+      // Temporalmente vacío hasta implementar backend
+      setClaseInminente(null);
+      setAlertas([]);
+      setStats(null);
     } catch (error) {
       toast.error('Error al cargar el dashboard');
     } finally {
