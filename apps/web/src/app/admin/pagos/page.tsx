@@ -35,7 +35,7 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
-import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import { Bar, Doughnut } from 'react-chartjs-2';
 import {
   getMetricasDashboard,
   getConfiguracionPrecios,
@@ -78,7 +78,6 @@ ChartJS.register(
 export default function PagosDashboard() {
   const { user } = useAuthStore();
   const [mounted, setMounted] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState('2025-01');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [metricsData, setMetricsData] = useState<MetricasDashboardResponse | null>(null);
   const [configuracion, setConfiguracion] = useState<ConfiguracionPrecios | null>(null);
@@ -92,6 +91,9 @@ export default function PagosDashboard() {
   const [formData, setFormData] = useState({
     precioClubMatematicas: '',
     precioCursosEspecializados: '',
+    precioMultipleActividades: '',
+    precioHermanosBasico: '',
+    precioHermanosMultiple: '',
     descuentoAacreaPorcentaje: '',
     descuentoAacreaActivo: false,
     motivoCambio: '',
@@ -149,6 +151,9 @@ export default function PagosDashboard() {
       setFormData({
         precioClubMatematicas: String(configuracion.precioClubMatematicas || ''),
         precioCursosEspecializados: String(configuracion.precioCursosEspecializados || ''),
+        precioMultipleActividades: String(configuracion.precioMultipleActividades || ''),
+        precioHermanosBasico: String(configuracion.precioHermanosBasico || ''),
+        precioHermanosMultiple: String(configuracion.precioHermanosMultiple || ''),
         descuentoAacreaPorcentaje: String(configuracion.descuentoAacreaPorcentaje || ''),
         descuentoAacreaActivo: configuracion.descuentoAacreaActivo,
         motivoCambio: '',
@@ -217,16 +222,6 @@ export default function PagosDashboard() {
   if (!mounted) {
     return null;
   }
-
-  // Formatear números grandes
-  const formatLargeNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(1)}M`;
-    } else if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}K`;
-    }
-    return num.toString();
-  };
 
   // Formatear moneda argentina
   const formatCurrency = (amount: string | number): string => {
@@ -330,7 +325,7 @@ export default function PagosDashboard() {
   const evolucionChartData = {
     labels: evolucionMensual.map((item) => {
       const [year, month] = item.periodo.split('-');
-      return `${month}/${year.slice(2)}`;
+      return `${month}/${year?.slice(2) || ''}`;
     }),
     datasets: [
       {

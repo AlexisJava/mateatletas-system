@@ -18,7 +18,6 @@ import {
   Clock,
   CheckCircle,
   Plus,
-  Trash2,
   User,
 } from 'lucide-react';
 

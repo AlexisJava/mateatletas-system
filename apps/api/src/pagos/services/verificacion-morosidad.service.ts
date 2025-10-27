@@ -1,9 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
+import type { Prisma } from '@prisma/client';
 
 @Injectable()
 export class VerificacionMorosidadService {
   constructor(private prisma: PrismaService) {}
+
+  /**
+   * Calcula la fecha de vencimiento para un periodo dado
+   * El vencimiento es el último día del mes especificado en el periodo
+   * @param periodo Formato "YYYY-MM"
+   * @returns Fecha de vencimiento (último día del mes)
+   */
+  private calcularFechaVencimiento(periodo: string): Date {
+    const [anio, mes] = periodo.split('-').map(Number);
+    // Día 0 del mes siguiente = último día del mes actual
+    return new Date(anio, mes, 0);
+  }
 
   /**
    * Verifica si un estudiante tiene pagos pendientes vencidos
@@ -13,15 +26,21 @@ export class VerificacionMorosidadService {
   async esEstudianteMoroso(estudianteId: string): Promise<boolean> {
     const hoy = new Date();
 
-    const pagosPendientesVencidos = await this.prisma.inscripcionMensual.count({
+    // Obtener todas las inscripciones pendientes
+    const candidatas = await this.prisma.inscripcionMensual.findMany({
       where: {
         estudiante_id: estudianteId,
         estado_pago: 'Pendiente',
-        fecha_vencimiento: {
-          lt: hoy, // menor que hoy = vencido
-        },
+      },
+      select: {
+        periodo: true,
       },
     });
+
+    // Filtrar en memoria las que están vencidas
+    const pagosPendientesVencidos = candidatas.filter(
+      (insc) => this.calcularFechaVencimiento(insc.periodo) < hoy,
+    ).length;
 
     return pagosPendientesVencidos > 0;
   }
@@ -34,15 +53,16 @@ export class VerificacionMorosidadService {
   async verificarMorosidadTutor(tutorId: string) {
     const hoy = new Date();
 
-    const inscripcionesVencidas = await this.prisma.inscripcionMensual.findMany({
+    // Obtener todas las inscripciones pendientes del tutor
+    const inscripcionesPendientes = await this.prisma.inscripcionMensual.findMany({
       where: {
         tutor_id: tutorId,
         estado_pago: 'Pendiente',
-        fecha_vencimiento: {
-          lt: hoy,
-        },
       },
-      include: {
+      select: {
+        periodo: true,
+        precio_final: true,
+        estudiante_id: true,
         estudiante: {
           select: {
             id: true,
@@ -51,10 +71,15 @@ export class VerificacionMorosidadService {
           },
         },
       },
-      orderBy: {
-        fecha_vencimiento: 'asc',
-      },
     });
+
+    // Filtrar y ordenar en memoria por fecha de vencimiento
+    const inscripcionesVencidas = inscripcionesPendientes
+      .filter((insc) => this.calcularFechaVencimiento(insc.periodo) < hoy)
+      .sort((a, b) =>
+        this.calcularFechaVencimiento(a.periodo).getTime() -
+        this.calcularFechaVencimiento(b.periodo).getTime()
+      );
 
     const totalAdeudado = inscripcionesVencidas.reduce(
       (sum, insc) => sum + Number(insc.precio_final),
@@ -70,16 +95,19 @@ export class VerificacionMorosidadService {
       cantidadCuotasVencidas: inscripcionesVencidas.length,
       totalAdeudado,
       estudiantesAfectados: estudiantesConDeuda.length,
-      detalleEstudiantes: inscripcionesVencidas.map((insc) => ({
-        estudianteId: insc.estudiante.id,
-        estudianteNombre: `${insc.estudiante.nombre} ${insc.estudiante.apellido}`,
-        periodo: insc.periodo,
-        monto: Number(insc.precio_final),
-        fechaVencimiento: insc.fecha_vencimiento,
-        diasVencido: Math.floor(
-          (hoy.getTime() - insc.fecha_vencimiento!.getTime()) / (1000 * 60 * 60 * 24),
-        ),
-      })),
+      detalleEstudiantes: inscripcionesVencidas.map((insc) => {
+        const fechaVencimiento = this.calcularFechaVencimiento(insc.periodo);
+        return {
+          estudianteId: insc.estudiante.id,
+          estudianteNombre: `${insc.estudiante.nombre} ${insc.estudiante.apellido}`,
+          periodo: insc.periodo,
+          monto: Number(insc.precio_final),
+          fechaVencimiento,
+          diasVencido: Math.floor(
+            (hoy.getTime() - fechaVencimiento.getTime()) / (1000 * 60 * 60 * 24),
+          ),
+        };
+      }),
     };
   }
 
@@ -90,18 +118,20 @@ export class VerificacionMorosidadService {
   async obtenerEstudiantesMorosos() {
     const hoy = new Date();
 
-    const estudiantesConDeuda = await this.prisma.estudiante.findMany({
+    // Obtener estudiantes con inscripciones pendientes
+    const estudiantesConInscripcionesPendientes = await this.prisma.estudiante.findMany({
       where: {
         inscripciones_mensuales: {
           some: {
             estado_pago: 'Pendiente',
-            fecha_vencimiento: {
-              lt: hoy,
-            },
           },
         },
       },
-      include: {
+      select: {
+        id: true,
+        nombre: true,
+        apellido: true,
+        edad: true,
         tutor: {
           select: {
             id: true,
@@ -114,42 +144,62 @@ export class VerificacionMorosidadService {
         inscripciones_mensuales: {
           where: {
             estado_pago: 'Pendiente',
-            fecha_vencimiento: {
-              lt: hoy,
-            },
           },
-          orderBy: {
-            fecha_vencimiento: 'asc',
+          select: {
+            periodo: true,
+            precio_final: true,
           },
         },
       },
     });
 
-    return estudiantesConDeuda.map((est) => ({
-      id: est.id,
-      nombre: `${est.nombre} ${est.apellido}`,
-      edad: est.edad,
-      tutor: {
-        id: est.tutor.id,
-        nombre: `${est.tutor.nombre} ${est.tutor.apellido}`,
-        email: est.tutor.email,
-        telefono: est.tutor.telefono,
-      },
-      cuotasVencidas: est.inscripciones_mensuales.length,
-      totalAdeudado: est.inscripciones_mensuales.reduce(
-        (sum, insc) => sum + Number(insc.precio_final),
-        0,
-      ),
-      detalleDeuda: est.inscripciones_mensuales.map((insc) => ({
-        periodo: insc.periodo,
-        monto: Number(insc.precio_final),
-        fechaVencimiento: insc.fecha_vencimiento,
-        diasVencido: Math.floor(
-          (hoy.getTime() - insc.fecha_vencimiento!.getTime()) /
-            (1000 * 60 * 60 * 24),
-        ),
-      })),
-    }));
+    // Filtrar estudiantes que tienen deudas VENCIDAS
+    return estudiantesConInscripcionesPendientes
+      .map((est) => {
+        // Filtrar inscripciones vencidas
+        const inscripcionesVencidas = est.inscripciones_mensuales
+          .filter((insc) => this.calcularFechaVencimiento(insc.periodo) < hoy)
+          .sort((a, b) =>
+            this.calcularFechaVencimiento(a.periodo).getTime() -
+            this.calcularFechaVencimiento(b.periodo).getTime()
+          );
+
+        if (inscripcionesVencidas.length === 0) {
+          return null; // No tiene deudas vencidas
+        }
+
+        return {
+          id: est.id,
+          nombre: `${est.nombre} ${est.apellido}`,
+          edad: est.edad,
+          tutor: {
+            id: est.tutor.id,
+            nombre: `${est.tutor.nombre} ${est.tutor.apellido}`,
+            email: est.tutor.email,
+            telefono: est.tutor.telefono,
+          },
+          cuotasVencidas: inscripcionesVencidas.length,
+          totalAdeudado: inscripcionesVencidas.reduce(
+            (sum: number, insc: { precio_final: Prisma.Decimal }) =>
+              sum + Number(insc.precio_final),
+            0,
+          ),
+          detalleDeuda: inscripcionesVencidas.map(
+            (insc: { periodo: string; precio_final: Prisma.Decimal }) => {
+              const fechaVencimiento = this.calcularFechaVencimiento(insc.periodo);
+              return {
+                periodo: insc.periodo,
+                monto: Number(insc.precio_final),
+                fechaVencimiento,
+                diasVencido: Math.floor(
+                  (hoy.getTime() - fechaVencimiento.getTime()) / (1000 * 60 * 60 * 24),
+                ),
+              };
+            }
+          ),
+        };
+      })
+      .filter((est) => est !== null); // Eliminar estudiantes sin deudas vencidas
   }
 
   /**
@@ -168,18 +218,26 @@ export class VerificacionMorosidadService {
     }
 
     const hoy = new Date();
-    const deudas = await this.prisma.inscripcionMensual.findMany({
+
+    // Obtener deudas pendientes
+    const deudasPendientes = await this.prisma.inscripcionMensual.findMany({
       where: {
         estudiante_id: estudianteId,
         estado_pago: 'Pendiente',
-        fecha_vencimiento: {
-          lt: hoy,
-        },
       },
-      orderBy: {
-        fecha_vencimiento: 'asc',
+      select: {
+        periodo: true,
+        precio_final: true,
       },
     });
+
+    // Filtrar y ordenar las vencidas
+    const deudas = deudasPendientes
+      .filter((d) => this.calcularFechaVencimiento(d.periodo) < hoy)
+      .sort((a, b) =>
+        this.calcularFechaVencimiento(a.periodo).getTime() -
+        this.calcularFechaVencimiento(b.periodo).getTime()
+      );
 
     const totalAdeudado = deudas.reduce(
       (sum, d) => sum + Number(d.precio_final),
@@ -194,7 +252,7 @@ export class VerificacionMorosidadService {
         totalAdeudado,
         periodos: deudas.map((d) => d.periodo),
         primeraDeuda: deudas[0].periodo,
-        fechaVencimientoMasAntigua: deudas[0].fecha_vencimiento,
+        fechaVencimientoMasAntigua: this.calcularFechaVencimiento(deudas[0].periodo),
       },
     };
   }
