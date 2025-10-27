@@ -484,7 +484,7 @@ export class AdminController {
    * Útil para monitoring y debugging de resiliencia
    */
   @Get('circuit-metrics')
-  async getCircuitMetrics() {
+  getCircuitMetrics() {
     return this.adminService.getCircuitMetrics();
   }
 

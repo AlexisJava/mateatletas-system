@@ -13,7 +13,6 @@ import {
   generateTutorUsername,
   generateTutorPassword,
 } from '../../common/utils/credential-generator';
-import { Prisma } from '@prisma/client';
 
 /**
  * Servicio especializado para gestión de estudiantes desde admin

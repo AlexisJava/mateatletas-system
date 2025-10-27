@@ -138,7 +138,7 @@ export class AdminRolesService {
   /**
    * Obtener el rol por defecto según el tipo de usuario
    */
-  private getDefaultRole(user: any): Role {
+  private getDefaultRole(user: { estudiantes?: string[]; clases?: string[] }): Role {
     // Determinar rol por defecto según la estructura del objeto
     if ('estudiantes' in user) return Role.Tutor;
     if ('clases' in user) return Role.Docente;

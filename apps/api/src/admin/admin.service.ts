@@ -13,37 +13,6 @@ type CrearEstudianteRapidoData = Parameters<
   AdminEstudiantesService['crearEstudianteRapido']
 >[0];
 
-type DashboardStatsResult = Awaited<
-  ReturnType<AdminStatsService['getDashboardStats']>
->;
-type SystemStatsResult = Awaited<
-  ReturnType<AdminStatsService['getSystemStats']>
->;
-type AlertListResult = Awaited<
-  ReturnType<AdminAlertasService['listarAlertas']>
->;
-type ResolverAlertaResult = Awaited<
-  ReturnType<AdminAlertasService['resolverAlerta']>
->;
-type SugerirSolucionResult = Awaited<
-  ReturnType<AdminAlertasService['sugerirSolucion']>
->;
-type CrearAlertaResult = Awaited<
-  ReturnType<AdminAlertasService['crearAlerta']>
->;
-type UsuariosListResult = Awaited<
-  ReturnType<AdminUsuariosService['listarUsuarios']>
->;
-type DeleteUserResult = Awaited<ReturnType<AdminUsuariosService['deleteUser']>>;
-type EstudiantesListResult = Awaited<
-  ReturnType<AdminEstudiantesService['listarEstudiantes']>
->;
-type CrearEstudianteResult = Awaited<
-  ReturnType<AdminEstudiantesService['crearEstudianteRapido']>
->;
-type RoleMutationResult = Awaited<
-  ReturnType<AdminRolesService['changeUserRole']>
->;
 
 /**
  * Servicio principal de administración

@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AdminEstudiantesService } from '../admin-estudiantes.service';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { NotFoundException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 
 // Mock de las funciones de generación de credenciales
 jest.mock('../../../common/utils/credential-generator', () => ({
