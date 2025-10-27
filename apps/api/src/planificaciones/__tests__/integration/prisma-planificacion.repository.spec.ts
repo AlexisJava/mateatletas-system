@@ -16,7 +16,9 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
       providers: [PrismaPlanificacionRepository, PrismaService],
     }).compile();
 
-    repository = module.get<PrismaPlanificacionRepository>(PrismaPlanificacionRepository);
+    repository = module.get<PrismaPlanificacionRepository>(
+      PrismaPlanificacionRepository,
+    );
     prisma = module.get<PrismaService>(PrismaService);
 
     // Create test admin user
@@ -144,7 +146,9 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
 
     it('should throw NotFoundException when ID not found', async () => {
       // Act & Assert
-      await expect(repository.findById('non-existent-id')).rejects.toThrow(NotFoundException);
+      await expect(repository.findById('non-existent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -279,7 +283,9 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
 
       // Assert
       expect(result.data.length).toBe(2);
-      expect(result.data.every((p) => p.codigoGrupo === testGrupoCodigo)).toBe(true);
+      expect(result.data.every((p) => p.codigoGrupo === testGrupoCodigo)).toBe(
+        true,
+      );
     });
 
     it('should filter by estado', async () => {
@@ -291,7 +297,9 @@ describe('PrismaPlanificacionRepository (Integration)', () => {
 
       // Assert
       expect(result.data.length).toBeGreaterThanOrEqual(2);
-      expect(result.data.every((p) => p.estado === EstadoPlanificacion.PUBLICADA)).toBe(true);
+      expect(
+        result.data.every((p) => p.estado === EstadoPlanificacion.PUBLICADA),
+      ).toBe(true);
     });
 
     it('should apply pagination correctly', async () => {

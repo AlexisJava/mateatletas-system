@@ -43,7 +43,8 @@ export class RegisterDto {
    * - Un carácter especial (@$!%*?&)
    */
   @ApiProperty({
-    description: 'Contraseña segura (min 8 caracteres, debe incluir mayúscula, minúscula, número y carácter especial)',
+    description:
+      'Contraseña segura (min 8 caracteres, debe incluir mayúscula, minúscula, número y carácter especial)',
     example: 'MiPassword123!',
     minLength: 8,
     maxLength: 128,
@@ -51,7 +52,9 @@ export class RegisterDto {
   })
   @IsString()
   @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
-  @MaxLength(128, { message: 'La contraseña no puede superar los 128 caracteres' })
+  @MaxLength(128, {
+    message: 'La contraseña no puede superar los 128 caracteres',
+  })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
     message:
       'La contraseña debe contener al menos una mayúscula, una minúscula, un número y un carácter especial (@$!%*?&)',
@@ -92,7 +95,9 @@ export class RegisterDto {
   })
   @IsString({ message: 'El apellido debe ser un texto' })
   @MinLength(2, { message: 'El apellido debe tener al menos 2 caracteres' })
-  @MaxLength(100, { message: 'El apellido no puede superar los 100 caracteres' })
+  @MaxLength(100, {
+    message: 'El apellido no puede superar los 100 caracteres',
+  })
   @Matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, {
     message: 'El apellido solo puede contener letras y espacios',
   })
@@ -129,7 +134,9 @@ export class RegisterDto {
   })
   @IsOptional()
   @IsString({ message: 'El teléfono debe ser un texto' })
-  @IsPhoneNumberAR({ message: 'Debe proporcionar un número de teléfono válido para Argentina' })
+  @IsPhoneNumberAR({
+    message: 'Debe proporcionar un número de teléfono válido para Argentina',
+  })
   @Trim()
   telefono?: string;
 }

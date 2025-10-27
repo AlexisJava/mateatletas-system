@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 
 /**
@@ -25,18 +29,22 @@ export class PlanificacionesSimplesService {
     });
 
     if (!planificacion) {
-      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+      throw new NotFoundException(
+        `Planificación ${codigoPlanificacion} no encontrada`,
+      );
     }
 
     // 2. Buscar o crear progreso del estudiante
-    let progreso = await this.prisma.progresoEstudiantePlanificacion.findUnique({
-      where: {
-        estudiante_id_planificacion_id: {
-          estudiante_id: estudianteId,
-          planificacion_id: planificacion.id,
+    let progreso = await this.prisma.progresoEstudiantePlanificacion.findUnique(
+      {
+        where: {
+          estudiante_id_planificacion_id: {
+            estudiante_id: estudianteId,
+            planificacion_id: planificacion.id,
+          },
         },
       },
-    });
+    );
 
     if (!progreso) {
       // Crear progreso inicial
@@ -82,9 +90,12 @@ export class PlanificacionesSimplesService {
     const semanasActivas: number[] = [];
     if (estudiante?.inscripciones_clase_grupo) {
       for (const inscripcion of estudiante.inscripciones_clase_grupo) {
-        const asignaciones = inscripcion.claseGrupo.asignacionesPlanificacionesSimples;
+        const asignaciones =
+          inscripcion.claseGrupo.asignacionesPlanificacionesSimples;
         for (const asignacion of asignaciones) {
-          semanasActivas.push(...asignacion.semanas_activas.map((s: any) => s.numero_semana));
+          semanasActivas.push(
+            ...asignacion.semanas_activas.map((s: any) => s.numero_semana),
+          );
         }
       }
     }
@@ -115,7 +126,9 @@ export class PlanificacionesSimplesService {
     });
 
     if (!planificacion) {
-      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+      throw new NotFoundException(
+        `Planificación ${codigoPlanificacion} no encontrada`,
+      );
     }
 
     const progreso = await this.prisma.progresoEstudiantePlanificacion.upsert({
@@ -149,17 +162,20 @@ export class PlanificacionesSimplesService {
     });
 
     if (!planificacion) {
-      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+      throw new NotFoundException(
+        `Planificación ${codigoPlanificacion} no encontrada`,
+      );
     }
 
-    const progreso = await this.prisma.progresoEstudiantePlanificacion.findUnique({
-      where: {
-        estudiante_id_planificacion_id: {
-          estudiante_id: estudianteId,
-          planificacion_id: planificacion.id,
+    const progreso =
+      await this.prisma.progresoEstudiantePlanificacion.findUnique({
+        where: {
+          estudiante_id_planificacion_id: {
+            estudiante_id: estudianteId,
+            planificacion_id: planificacion.id,
+          },
         },
-      },
-    });
+      });
 
     if (!progreso) {
       throw new NotFoundException('Progreso no encontrado');
@@ -170,18 +186,19 @@ export class PlanificacionesSimplesService {
       throw new ForbiddenException('Ya estás en la última semana');
     }
 
-    const nuevoProgreso = await this.prisma.progresoEstudiantePlanificacion.update({
-      where: {
-        estudiante_id_planificacion_id: {
-          estudiante_id: estudianteId,
-          planificacion_id: planificacion.id,
+    const nuevoProgreso =
+      await this.prisma.progresoEstudiantePlanificacion.update({
+        where: {
+          estudiante_id_planificacion_id: {
+            estudiante_id: estudianteId,
+            planificacion_id: planificacion.id,
+          },
         },
-      },
-      data: {
-        semana_actual: progreso.semana_actual + 1,
-        ultima_actividad: new Date(),
-      },
-    });
+        data: {
+          semana_actual: progreso.semana_actual + 1,
+          ultima_actividad: new Date(),
+        },
+      });
 
     return { success: true, semana_actual: nuevoProgreso.semana_actual };
   }
@@ -200,35 +217,39 @@ export class PlanificacionesSimplesService {
     });
 
     if (!planificacion) {
-      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+      throw new NotFoundException(
+        `Planificación ${codigoPlanificacion} no encontrada`,
+      );
     }
 
-    const progreso = await this.prisma.progresoEstudiantePlanificacion.findUnique({
-      where: {
-        estudiante_id_planificacion_id: {
-          estudiante_id: estudianteId,
-          planificacion_id: planificacion.id,
+    const progreso =
+      await this.prisma.progresoEstudiantePlanificacion.findUnique({
+        where: {
+          estudiante_id_planificacion_id: {
+            estudiante_id: estudianteId,
+            planificacion_id: planificacion.id,
+          },
         },
-      },
-    });
+      });
 
     if (!progreso) {
       throw new NotFoundException('Progreso no encontrado');
     }
 
     // Actualizar puntos
-    const nuevoProgreso = await this.prisma.progresoEstudiantePlanificacion.update({
-      where: {
-        estudiante_id_planificacion_id: {
-          estudiante_id: estudianteId,
-          planificacion_id: planificacion.id,
+    const nuevoProgreso =
+      await this.prisma.progresoEstudiantePlanificacion.update({
+        where: {
+          estudiante_id_planificacion_id: {
+            estudiante_id: estudianteId,
+            planificacion_id: planificacion.id,
+          },
         },
-      },
-      data: {
-        puntos_totales: { increment: puntos },
-        ultima_actividad: new Date(),
-      },
-    });
+        data: {
+          puntos_totales: { increment: puntos },
+          ultima_actividad: new Date(),
+        },
+      });
 
     // Actualizar también los puntos totales del estudiante en su perfil
     await this.prisma.estudiante.update({
@@ -257,7 +278,9 @@ export class PlanificacionesSimplesService {
     });
 
     if (!planificacion) {
-      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+      throw new NotFoundException(
+        `Planificación ${codigoPlanificacion} no encontrada`,
+      );
     }
 
     const progreso = await this.prisma.progresoEstudiantePlanificacion.upsert({
@@ -337,11 +360,7 @@ export class PlanificacionesSimplesService {
           },
         },
       },
-      orderBy: [
-        { anio: 'desc' },
-        { mes: 'desc' },
-        { grupo_codigo: 'asc' },
-      ],
+      orderBy: [{ anio: 'desc' }, { mes: 'desc' }, { grupo_codigo: 'asc' }],
     });
 
     return planificaciones;
@@ -361,7 +380,9 @@ export class PlanificacionesSimplesService {
     });
 
     if (!planificacion) {
-      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+      throw new NotFoundException(
+        `Planificación ${codigoPlanificacion} no encontrada`,
+      );
     }
 
     // 2. Verificar que existe el docente
@@ -459,7 +480,9 @@ export class PlanificacionesSimplesService {
     });
 
     if (!planificacion) {
-      throw new NotFoundException(`Planificación ${codigoPlanificacion} no encontrada`);
+      throw new NotFoundException(
+        `Planificación ${codigoPlanificacion} no encontrada`,
+      );
     }
 
     return planificacion;
@@ -503,7 +526,11 @@ export class PlanificacionesSimplesService {
   /**
    * Activar una semana específica (Docente)
    */
-  async activarSemana(asignacionId: string, docenteId: string, semanaNumero: number) {
+  async activarSemana(
+    asignacionId: string,
+    docenteId: string,
+    semanaNumero: number,
+  ) {
     // Verificar que la asignación pertenece al docente
     const asignacion = await this.prisma.asignacionPlanificacion.findUnique({
       where: { id: asignacionId },
@@ -517,11 +544,16 @@ export class PlanificacionesSimplesService {
     }
 
     if (asignacion.docente_id !== docenteId) {
-      throw new ForbiddenException('No tienes permiso para modificar esta asignación');
+      throw new ForbiddenException(
+        'No tienes permiso para modificar esta asignación',
+      );
     }
 
     // Validar que el número de semana es válido
-    if (semanaNumero < 1 || semanaNumero > asignacion.planificacion.semanas_total) {
+    if (
+      semanaNumero < 1 ||
+      semanaNumero > asignacion.planificacion.semanas_total
+    ) {
       throw new ForbiddenException(
         `Semana ${semanaNumero} inválida. La planificación tiene ${asignacion.planificacion.semanas_total} semanas`,
       );
@@ -558,7 +590,11 @@ export class PlanificacionesSimplesService {
   /**
    * Desactivar una semana específica (Docente)
    */
-  async desactivarSemana(asignacionId: string, docenteId: string, semanaNumero: number) {
+  async desactivarSemana(
+    asignacionId: string,
+    docenteId: string,
+    semanaNumero: number,
+  ) {
     // Verificar que la asignación pertenece al docente
     const asignacion = await this.prisma.asignacionPlanificacion.findUnique({
       where: { id: asignacionId },
@@ -569,7 +605,9 @@ export class PlanificacionesSimplesService {
     }
 
     if (asignacion.docente_id !== docenteId) {
-      throw new ForbiddenException('No tienes permiso para modificar esta asignación');
+      throw new ForbiddenException(
+        'No tienes permiso para modificar esta asignación',
+      );
     }
 
     // Buscar la semana activa
@@ -636,7 +674,9 @@ export class PlanificacionesSimplesService {
     }
 
     if (asignacion.docente_id !== docenteId) {
-      throw new ForbiddenException('No tienes permiso para ver esta información');
+      throw new ForbiddenException(
+        'No tienes permiso para ver esta información',
+      );
     }
 
     return {

@@ -72,7 +72,9 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
     const grupoB3 = await prisma.grupo.findUnique({ where: { codigo: 'B3' } });
 
     if (!grupoB1 || !grupoB2 || !grupoB3) {
-      throw new Error('Grupos B1, B2, B3 no encontrados. Ejecutar migración primero.');
+      throw new Error(
+        'Grupos B1, B2, B3 no encontrados. Ejecutar migración primero.',
+      );
     }
 
     grupoB1Id = grupoB1.id;
@@ -130,7 +132,9 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
       expect(response.body.grupoId).toBe(grupoB1Id);
       expect(response.body.mes).toBe(12);
       expect(response.body.anio).toBe(2025);
-      expect(response.body.titulo).toBe('TEST - Multiplicaciones Diciembre 2025');
+      expect(response.body.titulo).toBe(
+        'TEST - Multiplicaciones Diciembre 2025',
+      );
       expect(response.body.estado).toBe(EstadoPlanificacion.BORRADOR);
       expect(response.body.objetivosAprendizaje).toEqual([
         'Dominar tablas del 1 al 10',
@@ -263,9 +267,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
         .expect(400);
 
       expect(response.body.message).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('mes'),
-        ]),
+        expect.arrayContaining([expect.stringContaining('mes')]),
       );
     });
 
@@ -328,9 +330,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
         .expect(400);
 
       expect(response.body.message).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('titulo'),
-        ]),
+        expect.arrayContaining([expect.stringContaining('titulo')]),
       );
     });
 
@@ -349,9 +349,7 @@ describe('POST /api/planificaciones - Crear Planificación (E2E)', () => {
         .expect(400);
 
       expect(response.body.message).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('tematica_principal'),
-        ]),
+        expect.arrayContaining([expect.stringContaining('tematica_principal')]),
       );
     });
 

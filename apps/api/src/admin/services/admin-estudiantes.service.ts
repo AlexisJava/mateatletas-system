@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { BCRYPT_ROUNDS } from '../../common/constants/security.constants';
 import * as bcrypt from 'bcrypt';
@@ -43,8 +48,18 @@ export class AdminEstudiantesService {
     const searchFilter = options?.search
       ? {
           OR: [
-            { nombre: { contains: options.search, mode: 'insensitive' as const } },
-            { apellido: { contains: options.search, mode: 'insensitive' as const } },
+            {
+              nombre: {
+                contains: options.search,
+                mode: 'insensitive' as const,
+              },
+            },
+            {
+              apellido: {
+                contains: options.search,
+                mode: 'insensitive' as const,
+              },
+            },
           ],
         }
       : {};
@@ -138,12 +153,12 @@ export class AdminEstudiantesService {
       // LEGACY: sector único (para compatibilidad con código viejo)
       sector: est.sector,
       // NUEVO: array de sectores (relación muchos-a-muchos)
-      sectores: est.sectores.map(es => ({
+      sectores: est.sectores.map((es) => ({
         ...es.sector,
         es_principal: es.es_principal,
       })),
       // GRUPOS: Inscripciones activas en grupos
-      inscripciones_grupos: est.inscripciones_clase_grupo.map(insc => ({
+      inscripciones_grupos: est.inscripciones_clase_grupo.map((insc) => ({
         id: insc.id,
         fecha_inscripcion: insc.fecha_inscripcion,
         clase_grupo: {
@@ -186,7 +201,9 @@ export class AdminEstudiantesService {
   }) {
     // Validar datos del estudiante
     if (!data.nombre || !data.apellido) {
-      throw new BadRequestException('Nombre y apellido del estudiante son requeridos');
+      throw new BadRequestException(
+        'Nombre y apellido del estudiante son requeridos',
+      );
     }
 
     if (data.edad < 3 || data.edad > 99) {
@@ -203,7 +220,9 @@ export class AdminEstudiantesService {
       });
 
       if (!tutor) {
-        throw new NotFoundException(`Tutor con ID ${data.tutor_id} no encontrado`);
+        throw new NotFoundException(
+          `Tutor con ID ${data.tutor_id} no encontrado`,
+        );
       }
     } else {
       // Crear tutor nuevo si no existe
@@ -275,7 +294,7 @@ export class AdminEstudiantesService {
       edad?: number;
       nivel_escolar?: 'Primaria' | 'Secundaria' | 'Universidad';
       tutor_id?: string;
-    }
+    },
   ) {
     // Verificar que el estudiante existe
     const estudianteExistente = await this.prisma.estudiante.findUnique({
@@ -293,7 +312,9 @@ export class AdminEstudiantesService {
       });
 
       if (!tutorExiste) {
-        throw new NotFoundException(`Tutor con ID ${data.tutor_id} no encontrado`);
+        throw new NotFoundException(
+          `Tutor con ID ${data.tutor_id} no encontrado`,
+        );
       }
     }
 
@@ -420,10 +441,14 @@ export class AdminEstudiantesService {
       estadisticas: {
         clases_inscritas: estudiante.inscripciones_clase.length,
         clases_completadas: estudiante.inscripciones_clase.filter(
-          (insc) => insc.clase.estado === 'Programada' && new Date(insc.clase.fecha_hora_inicio) < new Date()
+          (insc) =>
+            insc.clase.estado === 'Programada' &&
+            new Date(insc.clase.fecha_hora_inicio) < new Date(),
         ).length,
         clases_pendientes: estudiante.inscripciones_clase.filter(
-          (insc) => insc.clase.estado === 'Programada' && new Date(insc.clase.fecha_hora_inicio) >= new Date()
+          (insc) =>
+            insc.clase.estado === 'Programada' &&
+            new Date(insc.clase.fecha_hora_inicio) >= new Date(),
         ).length,
       },
     };
@@ -452,7 +477,9 @@ export class AdminEstudiantesService {
       where: { id: dto.sectorId },
     });
     if (!sector) {
-      throw new NotFoundException(`Sector con ID ${dto.sectorId} no encontrado`);
+      throw new NotFoundException(
+        `Sector con ID ${dto.sectorId} no encontrado`,
+      );
     }
 
     // Validar equipo si se proporciona
@@ -461,7 +488,9 @@ export class AdminEstudiantesService {
         where: { id: dto.equipoId },
       });
       if (!equipo) {
-        throw new NotFoundException(`Equipo con ID ${dto.equipoId} no encontrado`);
+        throw new NotFoundException(
+          `Equipo con ID ${dto.equipoId} no encontrado`,
+        );
       }
     }
 
@@ -488,12 +517,15 @@ export class AdminEstudiantesService {
     // Generar credenciales
     const estudianteUsername = generateEstudianteUsername(
       dto.nombreEstudiante,
-      dto.apellidoEstudiante
+      dto.apellidoEstudiante,
     );
     const estudiantePin = generateEstudiantePin();
     const estudiantePinHash = await bcrypt.hash(estudiantePin, BCRYPT_ROUNDS);
 
-    let tutorCredenciales: { username: string; passwordTemporal: string } | null = null;
+    let tutorCredenciales: {
+      username: string;
+      passwordTemporal: string;
+    } | null = null;
     let tutorCreado = false;
 
     // Transacción
@@ -501,9 +533,15 @@ export class AdminEstudiantesService {
       let tutor = tutorExistente;
 
       if (!tutor) {
-        const tutorUsername = generateTutorUsername(dto.nombreTutor, dto.apellidoTutor);
+        const tutorUsername = generateTutorUsername(
+          dto.nombreTutor,
+          dto.apellidoTutor,
+        );
         const tutorPassword = generateTutorPassword();
-        const tutorPasswordHash = await bcrypt.hash(tutorPassword, BCRYPT_ROUNDS);
+        const tutorPasswordHash = await bcrypt.hash(
+          tutorPassword,
+          BCRYPT_ROUNDS,
+        );
 
         tutor = await tx.tutor.create({
           data: {

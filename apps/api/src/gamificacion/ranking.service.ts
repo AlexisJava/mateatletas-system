@@ -31,13 +31,14 @@ export class RankingService {
     const rankingGlobal = await this.getRankingGlobal(1, 20);
 
     // Calcular posición global del estudiante
-    const posicionGlobal = await this.prisma.estudiante.count({
-      where: {
-        puntos_totales: {
-          gt: estudiante.puntos_totales,
+    const posicionGlobal =
+      (await this.prisma.estudiante.count({
+        where: {
+          puntos_totales: {
+            gt: estudiante.puntos_totales,
+          },
         },
-      },
-    }) + 1;
+      })) + 1;
 
     const posicionEquipo =
       rankingEquipo.findIndex((e) => e.id === estudianteId) + 1;

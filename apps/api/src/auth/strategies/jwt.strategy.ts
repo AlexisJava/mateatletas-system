@@ -49,8 +49,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           if (token) return token;
 
           // Prioridad 2: Fallback a Bearer header (para Swagger y tests)
-          const bearerToken =
-            ExtractJwt.fromAuthHeaderAsBearerToken()(request);
+          const bearerToken = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
           return bearerToken;
         },
       ]),

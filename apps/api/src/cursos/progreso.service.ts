@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { CompletarLeccionDto } from './dto/completar-leccion.dto';
 import { ModulosService } from './modulos.service';
@@ -62,17 +67,18 @@ export class ProgresoService {
 
     // Verify prerequisite (Progressive Disclosure)
     if (leccion.leccion_prerequisito_id) {
-      const prerequisitoCompletado = await this.prisma.progresoLeccion.findFirst({
-        where: {
-          estudiante_id: estudianteId,
-          leccion_id: leccion.leccion_prerequisito_id,
-          completada: true,
-        },
-      });
+      const prerequisitoCompletado =
+        await this.prisma.progresoLeccion.findFirst({
+          where: {
+            estudiante_id: estudianteId,
+            leccion_id: leccion.leccion_prerequisito_id,
+            completada: true,
+          },
+        });
 
       if (!prerequisitoCompletado) {
         throw new BadRequestException(
-          'Debes completar la lección prerequisito primero'
+          'Debes completar la lección prerequisito primero',
         );
       }
     }
@@ -203,14 +209,14 @@ export class ProgresoService {
     const totalLecciones = leccionIds.length;
     const leccionesCompletadas = progresos.filter((p) => p.completada).length;
     const porcentajeCompletado = Math.round(
-      (leccionesCompletadas / totalLecciones) * 100
+      (leccionesCompletadas / totalLecciones) * 100,
     );
 
     // Progress by module
     const progresoModulos = modulos.map((modulo) => {
       const leccionesModulo = modulo.lecciones.length;
       const completadasModulo = modulo.lecciones.filter((leccion) =>
-        progresos.some((p) => p.leccion_id === leccion.id && p.completada)
+        progresos.some((p) => p.leccion_id === leccion.id && p.completada),
       ).length;
 
       return {
@@ -247,7 +253,7 @@ export class ProgresoService {
 
     // 2. Extract all lesson IDs from the course
     const leccionIds = modulos.flatMap((modulo) =>
-      modulo.lecciones.map((leccion) => leccion.id)
+      modulo.lecciones.map((leccion) => leccion.id),
     );
 
     if (leccionIds.length === 0) {
@@ -281,7 +287,8 @@ export class ProgresoService {
 
         // Check prerequisite (O(1) lookup if exists)
         if (leccion.leccion_prerequisito_id) {
-          const prerequisitoCompletado = progresoMap.get(leccion.leccion_prerequisito_id) ?? false;
+          const prerequisitoCompletado =
+            progresoMap.get(leccion.leccion_prerequisito_id) ?? false;
           if (!prerequisitoCompletado) continue;
         }
 

@@ -66,7 +66,10 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
   describe('SECURITY: Avatar Update Authorization', () => {
     it('should have EstudianteOwnershipGuard applied to updateAvatar', () => {
       // ✅ TEST: Verificar que el guard está aplicado
-      const metadata = Reflect.getMetadata('__guards__', controller.updateAvatar);
+      const metadata = Reflect.getMetadata(
+        '__guards__',
+        controller.updateAvatar,
+      );
 
       // Este test FALLARÁ hasta que agreguemos el guard
       expect(metadata).toBeDefined();
@@ -81,14 +84,16 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
 
       // Act & Assert - Simular que el guard rechazó
       // El guard verifica ownership, el service solo actualiza
-      await expect(
-        service.findOne('est-123', 'tutor-other')
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('est-123', 'tutor-other')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should allow avatar update from owner tutor', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
         ...mockEstudiante,
         avatar_url: 'new-avatar.jpg',
@@ -116,13 +121,18 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
   describe('REGRESSION: Existing Functionality Must Not Break', () => {
     it('should still update avatar successfully for valid requests', async () => {
       // ✅ Test de regresión: funcionalidad existente debe seguir funcionando
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
         ...mockEstudiante,
         avatar_url: 'valid-new-avatar.jpg',
       } as any);
 
-      const result = await service.updateAvatar('est-123', 'valid-new-avatar.jpg');
+      const result = await service.updateAvatar(
+        'est-123',
+        'valid-new-avatar.jpg',
+      );
 
       expect(result).toHaveProperty('avatar_url', 'valid-new-avatar.jpg');
       expect(result).toHaveProperty('nombre', 'Juan');
@@ -134,7 +144,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
       await expect(
-        service.updateAvatar('non-existent', 'new-avatar.jpg')
+        service.updateAvatar('non-existent', 'new-avatar.jpg'),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -145,7 +155,9 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         password_hash: 'should-not-be-returned',
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudianteWithSensitiveData as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudianteWithSensitiveData as any);
       jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
         id: 'est-123',
         nombre: 'Juan',
@@ -164,7 +176,9 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
 
   describe('EDGE CASES: Handle Invalid Inputs', () => {
     it('should handle empty avatar_url', async () => {
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
         ...mockEstudiante,
         avatar_url: '',
@@ -177,7 +191,9 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
     it('should handle very long avatar URLs', async () => {
       const longUrl = 'https://example.com/' + 'a'.repeat(500);
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
         ...mockEstudiante,
         avatar_url: longUrl,

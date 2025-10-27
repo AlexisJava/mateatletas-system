@@ -89,7 +89,8 @@ export class CrearEstudianteDto {
   sectorId!: string;
 
   @ApiPropertyOptional({
-    description: 'Puntos iniciales para el estudiante (para migración de datos existentes)',
+    description:
+      'Puntos iniciales para el estudiante (para migración de datos existentes)',
     example: 350,
     default: 0,
     minimum: 0,
@@ -100,7 +101,8 @@ export class CrearEstudianteDto {
   puntosIniciales?: number;
 
   @ApiPropertyOptional({
-    description: 'Nivel inicial del estudiante (para migración de datos existentes)',
+    description:
+      'Nivel inicial del estudiante (para migración de datos existentes)',
     example: 3,
     default: 1,
     minimum: 1,
@@ -128,8 +130,12 @@ export class CrearEstudianteDto {
   })
   @IsString()
   @IsNotEmpty()
-  @MinLength(2, { message: 'El nombre del tutor debe tener al menos 2 caracteres' })
-  @MaxLength(50, { message: 'El nombre del tutor no puede exceder 50 caracteres' })
+  @MinLength(2, {
+    message: 'El nombre del tutor debe tener al menos 2 caracteres',
+  })
+  @MaxLength(50, {
+    message: 'El nombre del tutor no puede exceder 50 caracteres',
+  })
   nombreTutor!: string;
 
   @ApiProperty({
@@ -140,12 +146,17 @@ export class CrearEstudianteDto {
   })
   @IsString()
   @IsNotEmpty()
-  @MinLength(2, { message: 'El apellido del tutor debe tener al menos 2 caracteres' })
-  @MaxLength(50, { message: 'El apellido del tutor no puede exceder 50 caracteres' })
+  @MinLength(2, {
+    message: 'El apellido del tutor debe tener al menos 2 caracteres',
+  })
+  @MaxLength(50, {
+    message: 'El apellido del tutor no puede exceder 50 caracteres',
+  })
   apellidoTutor!: string;
 
   @ApiPropertyOptional({
-    description: 'Email del tutor (opcional, puede completarlo en primer login)',
+    description:
+      'Email del tutor (opcional, puede completarlo en primer login)',
     example: 'carlos.perez@email.com',
   })
   @IsOptional()

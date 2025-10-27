@@ -222,7 +222,10 @@ export class DocentesService {
 
     // Si se incluye password, hashearla
     if (updateDto.password) {
-      dataToUpdate.password_hash = await bcrypt.hash(updateDto.password, BCRYPT_ROUNDS);
+      dataToUpdate.password_hash = await bcrypt.hash(
+        updateDto.password,
+        BCRYPT_ROUNDS,
+      );
     }
 
     // Actualizar docente
@@ -231,7 +234,8 @@ export class DocentesService {
       data: dataToUpdate,
     });
 
-    const { password_hash: _password_hash, ...docenteSinPassword } = updatedDocente;
+    const { password_hash: _password_hash, ...docenteSinPassword } =
+      updatedDocente;
     return docenteSinPassword;
   }
 
@@ -260,7 +264,7 @@ export class DocentesService {
     if (docente._count.clases > 0) {
       throw new ConflictException(
         `No se puede eliminar el docente porque tiene ${docente._count.clases} clase(s) asignada(s). ` +
-        `Debe reasignar las clases a otro docente antes de eliminar.`,
+          `Debe reasignar las clases a otro docente antes de eliminar.`,
       );
     }
 
@@ -302,7 +306,9 @@ export class DocentesService {
     }
 
     if (fromDocenteId === toDocenteId) {
-      throw new ConflictException('No se puede reasignar clases al mismo docente');
+      throw new ConflictException(
+        'No se puede reasignar clases al mismo docente',
+      );
     }
 
     // Reasignar todas las clases

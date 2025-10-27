@@ -97,6 +97,21 @@ interface InscripcionConFechaVencimiento<T> {
 export class VerificacionMorosidadService {
   constructor(private prisma: PrismaService) {}
 
+  private calcularFechaVencimiento(periodo: string): Date {
+    const [anioStr, mesStr] = periodo.split('-');
+    const anio = Number(anioStr);
+    const mes = Number(mesStr);
+
+    if (!anio || !mes || Number.isNaN(anio) || Number.isNaN(mes)) {
+      throw new Error(`Periodo inválido para calcular vencimiento: ${periodo}`);
+    }
+
+    const fecha = new Date(anio, mes, 0);
+    fecha.setHours(23, 59, 59, 999);
+
+    return fecha;
+  }
+
   /**
    * Verifica si un estudiante tiene pagos pendientes vencidos
    * @param estudianteId ID del estudiante
@@ -130,7 +145,7 @@ export class VerificacionMorosidadService {
    * Verifica si un tutor tiene estudiantes con pagos pendientes vencidos
    * @param tutorId ID del tutor
    * @returns información sobre morosidad del tutor
-   */
+  */
   async verificarMorosidadTutor(tutorId: string) {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);

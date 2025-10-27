@@ -231,13 +231,20 @@ describe('GamificacionService', () => {
   describe('getDashboardEstudiante', () => {
     it('should return complete dashboard with all data orchestrated', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockProximasClases as any);
-      jest.spyOn(prisma.nivelConfig, 'findFirst')
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue(mockProximasClases as any);
+      jest
+        .spyOn(prisma.nivelConfig, 'findFirst')
         .mockResolvedValueOnce(mockNivelActual as any) // nivelActual
         .mockResolvedValueOnce(mockSiguienteNivel as any); // siguienteNivel
       jest.spyOn(logrosService, 'calcularRacha').mockResolvedValue(mockRacha);
-      jest.spyOn(rankingService, 'getEquipoRanking').mockResolvedValue(mockEquipoRanking as any);
+      jest
+        .spyOn(rankingService, 'getEquipoRanking')
+        .mockResolvedValue(mockEquipoRanking as any);
 
       // Act
       const result = await service.getDashboardEstudiante('estudiante-123');
@@ -282,12 +289,12 @@ describe('GamificacionService', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.getDashboardEstudiante('nonexistent-id')).rejects.toThrow(
-        NotFoundException,
-      );
-      await expect(service.getDashboardEstudiante('nonexistent-id')).rejects.toThrow(
-        'Estudiante no encontrado',
-      );
+      await expect(
+        service.getDashboardEstudiante('nonexistent-id'),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.getDashboardEstudiante('nonexistent-id'),
+      ).rejects.toThrow('Estudiante no encontrado');
     });
 
     it('should handle estudiante without equipo (equipo_id = null)', async () => {
@@ -298,9 +305,14 @@ describe('GamificacionService', () => {
         equipo: null,
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudianteSinEquipo as any);
-      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockProximasClases as any);
-      jest.spyOn(prisma.nivelConfig, 'findFirst')
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudianteSinEquipo as any);
+      jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue(mockProximasClases as any);
+      jest
+        .spyOn(prisma.nivelConfig, 'findFirst')
         .mockResolvedValueOnce(mockNivelActual as any)
         .mockResolvedValueOnce(mockSiguienteNivel as any);
       jest.spyOn(logrosService, 'calcularRacha').mockResolvedValue(mockRacha);
@@ -315,9 +327,12 @@ describe('GamificacionService', () => {
 
     it('should calculate clasesAsistidas correctly (only Presente status)', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
-      jest.spyOn(prisma.nivelConfig, 'findFirst')
+      jest
+        .spyOn(prisma.nivelConfig, 'findFirst')
         .mockResolvedValueOnce(mockNivelActual as any)
         .mockResolvedValueOnce(mockSiguienteNivel as any);
       jest.spyOn(logrosService, 'calcularRacha').mockResolvedValue(0);
@@ -332,9 +347,14 @@ describe('GamificacionService', () => {
 
     it('should limit proximasClases to 5 and only include future Programada classes', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockProximasClases as any);
-      jest.spyOn(prisma.nivelConfig, 'findFirst')
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue(mockProximasClases as any);
+      jest
+        .spyOn(prisma.nivelConfig, 'findFirst')
         .mockResolvedValueOnce(mockNivelActual as any)
         .mockResolvedValueOnce(mockSiguienteNivel as any);
       jest.spyOn(logrosService, 'calcularRacha').mockResolvedValue(0);
@@ -366,9 +386,12 @@ describe('GamificacionService', () => {
         ],
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudianteConMuchasAsistencias as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudianteConMuchasAsistencias as any);
       jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([]);
-      jest.spyOn(prisma.nivelConfig, 'findFirst')
+      jest
+        .spyOn(prisma.nivelConfig, 'findFirst')
         .mockResolvedValueOnce(mockNivelActual as any)
         .mockResolvedValueOnce(mockSiguienteNivel as any);
       jest.spyOn(logrosService, 'calcularRacha').mockResolvedValue(0);
@@ -390,7 +413,8 @@ describe('GamificacionService', () => {
   describe('getNivelInfo', () => {
     it('should return nivel info with correct calculations', async () => {
       // Arrange
-      jest.spyOn(prisma.nivelConfig, 'findFirst')
+      jest
+        .spyOn(prisma.nivelConfig, 'findFirst')
         .mockResolvedValueOnce(mockNivelActual as any) // nivelActual
         .mockResolvedValueOnce(mockSiguienteNivel as any); // siguienteNivel
 
@@ -444,7 +468,8 @@ describe('GamificacionService', () => {
 
     it('should return null for siguienteNivel if no next level exists', async () => {
       // Arrange
-      jest.spyOn(prisma.nivelConfig, 'findFirst')
+      jest
+        .spyOn(prisma.nivelConfig, 'findFirst')
         .mockResolvedValueOnce(mockNivelActual as any) // nivelActual
         .mockResolvedValueOnce(null); // No siguienteNivel
 
@@ -464,7 +489,8 @@ describe('GamificacionService', () => {
         puntos_maximos: 200,
       };
 
-      jest.spyOn(prisma.nivelConfig, 'findFirst')
+      jest
+        .spyOn(prisma.nivelConfig, 'findFirst')
         .mockResolvedValueOnce(nivelMaxPuntos as any)
         .mockResolvedValueOnce(mockSiguienteNivel as any);
 
@@ -491,7 +517,9 @@ describe('GamificacionService', () => {
         { nivel: 3, nombre: 'Maestro de Números', puntos_minimos: 1000 },
       ];
 
-      jest.spyOn(prisma.nivelConfig, 'findMany').mockResolvedValue(mockNiveles as any);
+      jest
+        .spyOn(prisma.nivelConfig, 'findMany')
+        .mockResolvedValue(mockNiveles as any);
 
       // Act
       const result = await service.getAllNiveles();
@@ -527,46 +555,66 @@ describe('GamificacionService', () => {
     it('should delegate getLogrosEstudiante to LogrosService', async () => {
       // Arrange
       const mockLogros = [{ id: 'logro-1', nombre: 'Primer Logro' }];
-      jest.spyOn(logrosService, 'getLogrosEstudiante').mockResolvedValue(mockLogros as any);
+      jest
+        .spyOn(logrosService, 'getLogrosEstudiante')
+        .mockResolvedValue(mockLogros as any);
 
       // Act
       const result = await service.getLogrosEstudiante('estudiante-123');
 
       // Assert
       expect(result).toEqual(mockLogros);
-      expect(logrosService.getLogrosEstudiante).toHaveBeenCalledWith('estudiante-123');
+      expect(logrosService.getLogrosEstudiante).toHaveBeenCalledWith(
+        'estudiante-123',
+      );
     });
 
     it('should delegate desbloquearLogro to LogrosService', async () => {
       // Arrange
       const mockLogro = { id: 'logro-1', nombre: 'Logro Desbloqueado' };
-      jest.spyOn(logrosService, 'desbloquearLogro').mockResolvedValue(mockLogro as any);
+      jest
+        .spyOn(logrosService, 'desbloquearLogro')
+        .mockResolvedValue(mockLogro as any);
 
       // Act
-      const result = await service.desbloquearLogro('estudiante-123', 'logro-1');
+      const result = await service.desbloquearLogro(
+        'estudiante-123',
+        'logro-1',
+      );
 
       // Assert
       expect(result).toEqual(mockLogro);
-      expect(logrosService.desbloquearLogro).toHaveBeenCalledWith('estudiante-123', 'logro-1');
+      expect(logrosService.desbloquearLogro).toHaveBeenCalledWith(
+        'estudiante-123',
+        'logro-1',
+      );
     });
 
     it('should delegate getPuntosEstudiante to PuntosService', async () => {
       // Arrange
       const mockPuntos = { total: 350, historico: [] };
-      jest.spyOn(puntosService, 'getPuntosEstudiante').mockResolvedValue(mockPuntos as any);
+      jest
+        .spyOn(puntosService, 'getPuntosEstudiante')
+        .mockResolvedValue(mockPuntos as any);
 
       // Act
       const result = await service.getPuntosEstudiante('estudiante-123');
 
       // Assert
       expect(result).toEqual(mockPuntos);
-      expect(puntosService.getPuntosEstudiante).toHaveBeenCalledWith('estudiante-123');
+      expect(puntosService.getPuntosEstudiante).toHaveBeenCalledWith(
+        'estudiante-123',
+      );
     });
 
     it('should delegate getAccionesPuntuables to PuntosService', async () => {
       // Arrange
-      const mockAcciones = [{ id: 'accion-1', nombre: 'Asistencia', puntos: 10 }];
-      jest.spyOn(puntosService, 'getAccionesPuntuables').mockResolvedValue(mockAcciones as any);
+      const mockAcciones = [
+        { id: 'accion-1', nombre: 'Asistencia', puntos: 10 },
+      ];
+      jest
+        .spyOn(puntosService, 'getAccionesPuntuables')
+        .mockResolvedValue(mockAcciones as any);
 
       // Act
       const result = await service.getAccionesPuntuables();
@@ -578,21 +626,33 @@ describe('GamificacionService', () => {
 
     it('should delegate getHistorialPuntos to PuntosService', async () => {
       // Arrange
-      const mockHistorial = [{ id: 'punto-1', accion: 'Asistencia', puntos: 10 }];
-      jest.spyOn(puntosService, 'getHistorialPuntos').mockResolvedValue(mockHistorial as any);
+      const mockHistorial = [
+        { id: 'punto-1', accion: 'Asistencia', puntos: 10 },
+      ];
+      jest
+        .spyOn(puntosService, 'getHistorialPuntos')
+        .mockResolvedValue(mockHistorial as any);
 
       // Act
       const result = await service.getHistorialPuntos('estudiante-123');
 
       // Assert
       expect(result).toEqual(mockHistorial);
-      expect(puntosService.getHistorialPuntos).toHaveBeenCalledWith('estudiante-123');
+      expect(puntosService.getHistorialPuntos).toHaveBeenCalledWith(
+        'estudiante-123',
+      );
     });
 
     it('should delegate otorgarPuntos to PuntosService', async () => {
       // Arrange
-      const mockPunto = { id: 'punto-1', puntos: 10, estudiante_id: 'estudiante-123' };
-      jest.spyOn(puntosService, 'otorgarPuntos').mockResolvedValue(mockPunto as any);
+      const mockPunto = {
+        id: 'punto-1',
+        puntos: 10,
+        estudiante_id: 'estudiante-123',
+      };
+      jest
+        .spyOn(puntosService, 'otorgarPuntos')
+        .mockResolvedValue(mockPunto as any);
 
       // Act
       const result = await service.otorgarPuntos(
@@ -617,14 +677,18 @@ describe('GamificacionService', () => {
     it('should delegate getRankingEstudiante to RankingService', async () => {
       // Arrange
       const mockRanking = { posicion: 1, puntos: 350, total: 100 };
-      jest.spyOn(rankingService, 'getRankingEstudiante').mockResolvedValue(mockRanking as any);
+      jest
+        .spyOn(rankingService, 'getRankingEstudiante')
+        .mockResolvedValue(mockRanking as any);
 
       // Act
       const result = await service.getRankingEstudiante('estudiante-123');
 
       // Assert
       expect(result).toEqual(mockRanking);
-      expect(rankingService.getRankingEstudiante).toHaveBeenCalledWith('estudiante-123');
+      expect(rankingService.getRankingEstudiante).toHaveBeenCalledWith(
+        'estudiante-123',
+      );
     });
   });
 });

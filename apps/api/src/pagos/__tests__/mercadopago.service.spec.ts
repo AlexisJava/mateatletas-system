@@ -64,9 +64,9 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
     });
 
     it('should throw error when trying to create preference in mock mode', async () => {
-      await expect(
-        service.createPreference({ items: [] }),
-      ).rejects.toThrow('MercadoPago está en modo mock');
+      await expect(service.createPreference({ items: [] })).rejects.toThrow(
+        'MercadoPago está en modo mock',
+      );
     });
 
     it('should throw error when trying to get payment in mock mode', async () => {
@@ -170,12 +170,16 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
           name: 'Juan',
           surname: 'Pérez',
         },
-        external_reference: 'membresia-memb-456-tutor-tutor-789-producto-prod-123',
+        external_reference:
+          'membresia-memb-456-tutor-tutor-789-producto-prod-123',
         notification_url: 'http://localhost:3001/api/pagos/webhook',
         back_urls: {
-          success: 'http://localhost:3000/suscripcion/exito?membresiaId=memb-456',
-          failure: 'http://localhost:3000/suscripcion/error?membresiaId=memb-456',
-          pending: 'http://localhost:3000/suscripcion/pendiente?membresiaId=memb-456',
+          success:
+            'http://localhost:3000/suscripcion/exito?membresiaId=memb-456',
+          failure:
+            'http://localhost:3000/suscripcion/error?membresiaId=memb-456',
+          pending:
+            'http://localhost:3000/suscripcion/pendiente?membresiaId=memb-456',
         },
         auto_return: 'approved',
         statement_descriptor: 'Mateatletas',
@@ -271,7 +275,9 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         'http://localhost:3000',
       );
 
-      expect(result.external_reference).toBe('membresia-M123-tutor-T456-producto-P1');
+      expect(result.external_reference).toBe(
+        'membresia-M123-tutor-T456-producto-P1',
+      );
     });
 
     it('should build correct notification_url', () => {
@@ -284,7 +290,9 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         'https://app.mateatletas.com',
       );
 
-      expect(result.notification_url).toBe('https://api.mateatletas.com/api/pagos/webhook');
+      expect(result.notification_url).toBe(
+        'https://api.mateatletas.com/api/pagos/webhook',
+      );
     });
   });
 
@@ -352,12 +360,14 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
           name: 'Carlos',
           surname: 'López',
         },
-        external_reference: 'inscripcion-insc-789-estudiante-est-456-producto-curso-123',
+        external_reference:
+          'inscripcion-insc-789-estudiante-est-456-producto-curso-123',
         notification_url: 'http://localhost:3001/api/pagos/webhook',
         back_urls: {
           success: 'http://localhost:3000/cursos/exito?inscripcionId=insc-789',
           failure: 'http://localhost:3000/cursos/error?inscripcionId=insc-789',
-          pending: 'http://localhost:3000/cursos/pendiente?inscripcionId=insc-789',
+          pending:
+            'http://localhost:3000/cursos/pendiente?inscripcionId=insc-789',
         },
         auto_return: 'approved',
         statement_descriptor: 'Mateatletas',
@@ -389,7 +399,9 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         'http://localhost:3000',
       );
 
-      expect(result.external_reference).toBe('inscripcion-I123-estudiante-E456-producto-C1');
+      expect(result.external_reference).toBe(
+        'inscripcion-I123-estudiante-E456-producto-C1',
+      );
     });
   });
 
@@ -455,14 +467,20 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
       const result = service.buildCoursePreferenceData(
         { id: 'C1', nombre: 'Física & Química', precio: 100 },
         { nombre: 'José María', apellido: "O'Connor" },
-        { email: 'test@test.com', nombre: 'María José', apellido: 'Pérez-García' },
+        {
+          email: 'test@test.com',
+          nombre: 'María José',
+          apellido: 'Pérez-García',
+        },
         'I1',
         'E1',
         'http://localhost:3001',
         'http://localhost:3000',
       );
 
-      expect(result.items[0].title).toBe("Física & Química - José María O'Connor");
+      expect(result.items[0].title).toBe(
+        "Física & Química - José María O'Connor",
+      );
       expect(result.payer.name).toBe('María José');
       expect(result.payer.surname).toBe('Pérez-García');
     });

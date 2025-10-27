@@ -94,9 +94,7 @@ export class ClasesManagementService {
     // 4. Validar que la fecha sea futura
     const fechaInicio = new Date(dto.fechaHoraInicio);
     if (fechaInicio <= new Date()) {
-      throw new BadRequestException(
-        'La fecha de inicio debe ser en el futuro',
-      );
+      throw new BadRequestException('La fecha de inicio debe ser en el futuro');
     }
 
     // 5. Crear la clase
@@ -197,10 +195,7 @@ export class ClasesManagementService {
 
     // Verificar resultado de operación principal
     if (cancelResult.status === 'rejected') {
-      this.logger.error(
-        `Error al cancelar clase ${id}:`,
-        cancelResult.reason,
-      );
+      this.logger.error(`Error al cancelar clase ${id}:`, cancelResult.reason);
       throw cancelResult.reason;
     }
 
@@ -213,7 +208,9 @@ export class ClasesManagementService {
         notificacionResult.reason.message,
       );
     } else {
-      this.logger.log(`✅ Notificación enviada al docente sobre cancelación de clase ${id}`);
+      this.logger.log(
+        `✅ Notificación enviada al docente sobre cancelación de clase ${id}`,
+      );
     }
 
     this.logger.warn(
@@ -300,24 +297,24 @@ export class ClasesManagementService {
           docente: {
             select: {
               nombre: true,
-              apellido: true
-            }
+              apellido: true,
+            },
           },
           sector: {
             select: {
               id: true,
               nombre: true,
               icono: true,
-              color: true
-            }
+              color: true,
+            },
           },
           producto: { select: { nombre: true, tipo: true } },
           inscripciones: {
             select: { id: true, estudiante_id: true },
           },
           _count: {
-            select: { inscripciones: true }
-          }
+            select: { inscripciones: true },
+          },
         },
         orderBy: { fecha_hora_inicio: 'asc' },
         skip,
@@ -420,11 +417,7 @@ export class ClasesManagementService {
    * Para el portal de tutores - pestaña "Calendario"
    * Muestra TODAS las clases donde sus estudiantes están inscritos
    */
-  async obtenerCalendarioTutor(
-    tutorId: string,
-    mes?: number,
-    anio?: number,
-  ) {
+  async obtenerCalendarioTutor(tutorId: string, mes?: number, anio?: number) {
     // 1. Si no se proporciona mes/año, usar fecha actual
     const ahora = new Date();
     const mesSeleccionado = mes ?? ahora.getMonth() + 1; // getMonth() retorna 0-11
@@ -666,10 +659,7 @@ export class ClasesManagementService {
    * @param estudianteIds - Array de IDs de estudiantes a asignar
    * @returns Clase actualizada con inscripciones
    */
-  async asignarEstudiantesAClase(
-    claseId: string,
-    estudianteIds: string[],
-  ) {
+  async asignarEstudiantesAClase(claseId: string, estudianteIds: string[]) {
     // 1. Verificar que la clase existe y está activa
     const clase = await this.prisma.clase.findUnique({
       where: { id: claseId },
@@ -683,7 +673,9 @@ export class ClasesManagementService {
     }
 
     if (clase.estado === 'Cancelada') {
-      throw new BadRequestException('No se pueden asignar estudiantes a una clase cancelada');
+      throw new BadRequestException(
+        'No se pueden asignar estudiantes a una clase cancelada',
+      );
     }
 
     // 2. Verificar que hay cupos disponibles
@@ -707,7 +699,9 @@ export class ClasesManagementService {
     });
 
     if (estudiantes.length !== estudianteIds.length) {
-      throw new BadRequestException('Uno o más estudiantes no fueron encontrados');
+      throw new BadRequestException(
+        'Uno o más estudiantes no fueron encontrados',
+      );
     }
 
     // 4. Verificar que los estudiantes no estén ya inscritos

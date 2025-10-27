@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { EstudianteOwnershipGuard } from '../estudiante-ownership.guard';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { AuthUser } from '../../../auth/interfaces';
@@ -52,20 +56,21 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
   const createMockContext = (
     user: (Partial<AuthUser> & { role?: Role }) | null,
     params: Record<string, string | undefined>,
-  ): ExecutionContext => ({
-    switchToHttp: () => ({
-      getRequest: () => ({ user: user as AuthUser | null, params }),
-    }),
-    getHandler: jest.fn(),
-    getClass: jest.fn(),
-  } as unknown as ExecutionContext);
+  ): ExecutionContext =>
+    ({
+      switchToHttp: () => ({
+        getRequest: () => ({ user: user as AuthUser | null, params }),
+      }),
+      getHandler: jest.fn(),
+      getClass: jest.fn(),
+    }) as unknown as ExecutionContext;
 
   describe('Happy Path - Ownership Validated', () => {
     it('should allow access when estudiante belongs to authenticated tutor', async () => {
       // Arrange
       const mockContext = createMockContext(
         { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] }, // Authenticated tutor
-        { id: 'est-456' } // Estudiante ID from URL params
+        { id: 'est-456' }, // Estudiante ID from URL params
       );
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
@@ -88,7 +93,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       // Arrange
       const mockContext = createMockContext(
         { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
-        {} // No ID in params
+        {}, // No ID in params
       );
 
       // Act
@@ -105,7 +110,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       // Arrange
       const mockContext = createMockContext(
         { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] }, // Tutor trying to access
-        { id: 'est-456' }
+        { id: 'est-456' },
       );
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
@@ -114,9 +119,11 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       } as any);
 
       // Act & Assert
-      await expect(guard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
       await expect(guard.canActivate(mockContext)).rejects.toThrow(
-        'No tienes permiso para acceder a este estudiante'
+        ForbiddenException,
+      );
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(
+        'No tienes permiso para acceder a este estudiante',
       );
     });
 
@@ -124,12 +131,16 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       // Arrange
       const mockContext = createMockContext(
         null, // No user (unauthenticated)
-        { id: 'est-456' }
+        { id: 'est-456' },
       );
 
       // Act & Assert
-      await expect(guard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
-      await expect(guard.canActivate(mockContext)).rejects.toThrow('Usuario no autenticado');
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(
+        ForbiddenException,
+      );
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(
+        'Usuario no autenticado',
+      );
       expect(prisma.estudiante.findUnique).not.toHaveBeenCalled(); // No DB call if unauthenticated
     });
 
@@ -137,12 +148,16 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       // Arrange
       const mockContext = createMockContext(
         { role: Role.Tutor, roles: [Role.Tutor] }, // User without ID
-        { id: 'est-456' }
+        { id: 'est-456' },
       );
 
       // Act & Assert
-      await expect(guard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
-      await expect(guard.canActivate(mockContext)).rejects.toThrow('Usuario no autenticado');
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(
+        ForbiddenException,
+      );
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(
+        'Usuario no autenticado',
+      );
     });
   });
 
@@ -151,14 +166,18 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       // Arrange
       const mockContext = createMockContext(
         { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
-        { id: 'nonexistent-est-id' }
+        { id: 'nonexistent-est-id' },
       );
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(guard.canActivate(mockContext)).rejects.toThrow(NotFoundException);
-      await expect(guard.canActivate(mockContext)).rejects.toThrow('Estudiante no encontrado');
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(
+        'Estudiante no encontrado',
+      );
     });
   });
 
@@ -167,7 +186,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       // Arrange
       const mockContext = createMockContext(
         { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
-        { id: 'est-456' }
+        { id: 'est-456' },
       );
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
@@ -176,14 +195,16 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       } as any);
 
       // Act & Assert
-      await expect(guard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should perform strict equality check (not type coercion)', async () => {
       // Arrange
       const mockContext = createMockContext(
         { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
-        { id: 'est-456' }
+        { id: 'est-456' },
       );
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
@@ -192,23 +213,27 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       } as any);
 
       // Act & Assert
-      await expect(guard.canActivate(mockContext)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should handle database errors gracefully', async () => {
       // Arrange
       const mockContext = createMockContext(
         { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
-        { id: 'est-456' }
+        { id: 'est-456' },
       );
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockRejectedValue(
-        new Error('Database connection failed')
-      );
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockRejectedValue(new Error('Database connection failed'));
 
       // Act & Assert
       await expect(guard.canActivate(mockContext)).rejects.toThrow(Error);
-      await expect(guard.canActivate(mockContext)).rejects.toThrow('Database connection failed');
+      await expect(guard.canActivate(mockContext)).rejects.toThrow(
+        'Database connection failed',
+      );
     });
   });
 
@@ -217,7 +242,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       // Arrange
       const maliciousTutorContext = createMockContext(
         { id: 'malicious-tutor-789', role: Role.Tutor, roles: [Role.Tutor] },
-        { id: 'victim-est-456' }
+        { id: 'victim-est-456' },
       );
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
@@ -226,9 +251,11 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       } as any);
 
       // Act & Assert
-      await expect(guard.canActivate(maliciousTutorContext)).rejects.toThrow(ForbiddenException);
       await expect(guard.canActivate(maliciousTutorContext)).rejects.toThrow(
-        'No tienes permiso para acceder a este estudiante'
+        ForbiddenException,
+      );
+      await expect(guard.canActivate(maliciousTutorContext)).rejects.toThrow(
+        'No tienes permiso para acceder a este estudiante',
       );
     });
 
@@ -236,7 +263,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       // Arrange
       const legitimateTutorContext = createMockContext(
         { id: 'legit-tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
-        { id: 'est-456' }
+        { id: 'est-456' },
       );
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
@@ -255,7 +282,7 @@ describe('EstudianteOwnershipGuard - COMPREHENSIVE TESTS', () => {
       // Arrange
       const deleteContext = createMockContext(
         { id: 'tutor-123', role: Role.Tutor, roles: [Role.Tutor] },
-        { id: 'est-456' }
+        { id: 'est-456' },
       );
 
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({

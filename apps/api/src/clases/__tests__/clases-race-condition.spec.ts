@@ -48,7 +48,9 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
         cupos_maximo: 10,
         cupos_ocupados: 9, // Solo 1 cupo disponible
         estado: 'Programada',
-        fecha_hora_inicio: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Mañana
+        fecha_hora_inicio: new Date(
+          Date.now() + 24 * 60 * 60 * 1000,
+        ).toISOString(), // Mañana
         producto_id: null,
         producto: null,
       };
@@ -86,32 +88,34 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
 
       // Mock: Transacción simula ejecución secuencial
       let transactionCount = 0;
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        transactionCount++;
-        const txMock = {
-          clase: {
-            findUnique: jest.fn().mockResolvedValue({
-              ...mockClase,
-              cupos_ocupados: transactionCount === 1 ? 9 : 10, // Segunda transacción ve 10
-            }),
-            update: jest.fn().mockResolvedValue({
-              ...mockClase,
-              cupos_ocupados: transactionCount === 1 ? 10 : 11,
-            }),
-          },
-          inscripcionClase: {
-            findUnique: jest.fn().mockResolvedValue(null),
-            create: jest.fn().mockResolvedValue({
-              id: `inscripcion-${transactionCount}`,
-              clase_id: 'clase-123',
-              estudiante_id: transactionCount === 1 ? 'est-1' : 'est-2',
-              tutor_id: transactionCount === 1 ? 'tutor-1' : 'tutor-2',
-            }),
-          },
-        };
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        async (callback) => {
+          transactionCount++;
+          const txMock = {
+            clase: {
+              findUnique: jest.fn().mockResolvedValue({
+                ...mockClase,
+                cupos_ocupados: transactionCount === 1 ? 9 : 10, // Segunda transacción ve 10
+              }),
+              update: jest.fn().mockResolvedValue({
+                ...mockClase,
+                cupos_ocupados: transactionCount === 1 ? 10 : 11,
+              }),
+            },
+            inscripcionClase: {
+              findUnique: jest.fn().mockResolvedValue(null),
+              create: jest.fn().mockResolvedValue({
+                id: `inscripcion-${transactionCount}`,
+                clase_id: 'clase-123',
+                estudiante_id: transactionCount === 1 ? 'est-1' : 'est-2',
+                tutor_id: transactionCount === 1 ? 'tutor-1' : 'tutor-2',
+              }),
+            },
+          };
 
-        return callback(txMock as any);
-      });
+          return callback(txMock as any);
+        },
+      );
 
       // Act: Simular 2 requests simultáneos
       const reserva1Promise = service.reservarClase('clase-123', 'tutor-1', {
@@ -122,7 +126,10 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
         estudianteId: 'est-2',
       });
 
-      const results = await Promise.allSettled([reserva1Promise, reserva2Promise]);
+      const results = await Promise.allSettled([
+        reserva1Promise,
+        reserva2Promise,
+      ]);
 
       // Assert: UNO debe tener éxito, el OTRO debe fallar
       const successes = results.filter((r) => r.status === 'fulfilled');
@@ -133,7 +140,7 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
       expect(failures.length).toBe(1);
 
       // El que falló debe ser por "clase llena"
-      const failedResult = failures[0] as PromiseRejectedResult;
+      const failedResult = failures[0];
       expect(failedResult.reason).toBeInstanceOf(BadRequestException);
       expect(failedResult.reason.message).toContain('llena');
     });
@@ -146,7 +153,9 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
         cupos_maximo: 10,
         cupos_ocupados: 5, // 5 cupos disponibles
         estado: 'Programada',
-        fecha_hora_inicio: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        fecha_hora_inicio: new Date(
+          Date.now() + 24 * 60 * 60 * 1000,
+        ).toISOString(),
         producto_id: null,
         producto: null,
       };
@@ -157,7 +166,7 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
       // ✅ El tutor_id debe coincidir con el tutor que hace la reserva
       // Estudiante est-0 pertenece a tutor-0, est-1 a tutor-1, etc.
       (prisma.estudiante.findUnique as jest.Mock).mockImplementation((args) => {
-        const estudianteId = (args as any).where.id;
+        const estudianteId = args.where.id;
         // Extraer el índice del estudiante (est-0 → 0, est-1 → 1, etc.)
         const index = estudianteId.split('-')[1];
         return Promise.resolve({
@@ -174,55 +183,57 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
       // Usamos una cola de promesas para simular este comportamiento
       let transactionQueue = Promise.resolve();
 
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        // ✅ Serializar transacciones: cada una espera a que la anterior termine
-        return transactionQueue = transactionQueue.then(async () => {
-          // Leer cupos AL MOMENTO de ejecutar esta transacción (después de esperar)
-          const cuposAtTransactionStart = currentCupos;
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        async (callback) => {
+          // ✅ Serializar transacciones: cada una espera a que la anterior termine
+          return (transactionQueue = transactionQueue.then(async () => {
+            // Leer cupos AL MOMENTO de ejecutar esta transacción (después de esperar)
+            const cuposAtTransactionStart = currentCupos;
 
-          const txMock = {
-            clase: {
-              // ✅ findUnique retorna el estado MÁS RECIENTE (después de esperar en la cola)
-              findUnique: jest.fn().mockResolvedValue({
-                ...mockClase,
-                cupos_ocupados: cuposAtTransactionStart,
-              }),
-              update: jest.fn().mockImplementation(() => {
-                // Solo se llama si la validación pasó
-                currentCupos++;
-                return Promise.resolve({
+            const txMock = {
+              clase: {
+                // ✅ findUnique retorna el estado MÁS RECIENTE (después de esperar en la cola)
+                findUnique: jest.fn().mockResolvedValue({
                   ...mockClase,
-                  cupos_ocupados: currentCupos,
-                });
-              }),
-            },
-            inscripcionClase: {
-              findUnique: jest.fn().mockResolvedValue(null),
-              create: jest.fn().mockImplementation((data) => {
-                return Promise.resolve({
-                  id: `inscripcion-${data.data.estudiante_id}`,
-                  clase_id: 'clase-456',
-                  estudiante_id: data.data.estudiante_id,
-                  tutor_id: data.data.tutor_id,
-                  estudiante: { nombre: 'Test', apellido: 'Student' },
-                  clase: {
+                  cupos_ocupados: cuposAtTransactionStart,
+                }),
+                update: jest.fn().mockImplementation(() => {
+                  // Solo se llama si la validación pasó
+                  currentCupos++;
+                  return Promise.resolve({
                     ...mockClase,
-                    rutaCurricular: { nombre: 'Programación' },
-                  },
-                });
-              }),
-            },
-          };
+                    cupos_ocupados: currentCupos,
+                  });
+                }),
+              },
+              inscripcionClase: {
+                findUnique: jest.fn().mockResolvedValue(null),
+                create: jest.fn().mockImplementation((data) => {
+                  return Promise.resolve({
+                    id: `inscripcion-${data.data.estudiante_id}`,
+                    clase_id: 'clase-456',
+                    estudiante_id: data.data.estudiante_id,
+                    tutor_id: data.data.tutor_id,
+                    estudiante: { nombre: 'Test', apellido: 'Student' },
+                    clase: {
+                      ...mockClase,
+                      rutaCurricular: { nombre: 'Programación' },
+                    },
+                  });
+                }),
+              },
+            };
 
-          return callback(txMock as any);
-        });
-      });
+            return callback(txMock as any);
+          }));
+        },
+      );
 
       // Act: 10 reservas simultáneas (solo 5 deben tener éxito)
       const reservations = Array.from({ length: 10 }, (_, i) =>
         service.reservarClase('clase-456', `tutor-${i}`, {
           estudianteId: `est-${i}`,
-        })
+        }),
       );
 
       const results = await Promise.allSettled(reservations);
@@ -270,37 +281,43 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
         inscripciones_curso: [],
       };
 
-      (prisma.clase.findUnique as jest.Mock).mockResolvedValue(mockClase as any);
-      (prisma.estudiante.findUnique as jest.Mock).mockResolvedValue(mockEstudiante as any);
+      (prisma.clase.findUnique as jest.Mock).mockResolvedValue(
+        mockClase as any,
+      );
+      (prisma.estudiante.findUnique as jest.Mock).mockResolvedValue(
+        mockEstudiante as any,
+      );
       (prisma.inscripcionClase.findUnique as jest.Mock).mockResolvedValue(null);
 
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
-        const txMock = {
-          clase: {
-            findUnique: jest.fn().mockResolvedValue(mockClase),
-            update: jest.fn().mockResolvedValue({
-              ...mockClase,
-              cupos_ocupados: 6,
-            }),
-          },
-          inscripcionClase: {
-            findUnique: jest.fn().mockResolvedValue(null),
-            create: jest.fn().mockResolvedValue({
-              id: 'inscripcion-123',
-              clase_id: 'clase-789',
-              estudiante_id: 'est-123',
-              tutor_id: 'tutor-123',
-              estudiante: mockEstudiante,
-              clase: {
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        async (callback) => {
+          const txMock = {
+            clase: {
+              findUnique: jest.fn().mockResolvedValue(mockClase),
+              update: jest.fn().mockResolvedValue({
                 ...mockClase,
-                rutaCurricular: { nombre: 'Ciencias' },
-              },
-            }),
-          },
-        };
+                cupos_ocupados: 6,
+              }),
+            },
+            inscripcionClase: {
+              findUnique: jest.fn().mockResolvedValue(null),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                clase_id: 'clase-789',
+                estudiante_id: 'est-123',
+                tutor_id: 'tutor-123',
+                estudiante: mockEstudiante,
+                clase: {
+                  ...mockClase,
+                  rutaCurricular: { nombre: 'Ciencias' },
+                },
+              }),
+            },
+          };
 
-        return callback(txMock);
-      });
+          return callback(txMock);
+        },
+      );
 
       // Act
       const result = await service.reservarClase('clase-789', 'tutor-123', {

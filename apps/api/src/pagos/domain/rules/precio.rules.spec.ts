@@ -15,12 +15,11 @@ import {
   calcularPrecioActividad,
   calcularTotalMensual,
   CalculoPrecioInput,
-  ConfiguracionPrecios
+  ConfiguracionPrecios,
 } from './precio.rules';
 import { TipoDescuento } from '../types/pagos.types';
 
 describe('Reglas de Cálculo de Precios - TDD', () => {
-
   // Configuración de precios por defecto para todos los tests
   const configuracionDefault: ConfiguracionPrecios = {
     precioClubMatematicas: new Decimal(50000),
