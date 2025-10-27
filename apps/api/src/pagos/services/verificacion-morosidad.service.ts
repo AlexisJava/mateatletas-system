@@ -64,7 +64,8 @@ type EstudianteConDeuda = Prisma.EstudianteGetPayload<{
   };
 }>;
 
-type InscripcionMensualDeEstudiante = EstudianteConDeuda['inscripciones_mensuales'][number];
+type InscripcionMensualDeEstudiante =
+  EstudianteConDeuda['inscripciones_mensuales'][number];
 
 interface DetalleDeuda {
   periodo: string;
@@ -73,7 +74,7 @@ interface DetalleDeuda {
   diasVencido: number;
 }
 
-interface EstudianteMorosoDetalle {
+export interface EstudianteMorosoDetalle {
   id: string;
   nombre: string;
   edad: number;
@@ -121,21 +122,23 @@ export class VerificacionMorosidadService {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    const inscripcionesPendientes = await this.prisma.inscripcionMensual.findMany({
-      where: {
-        estudiante_id: estudianteId,
-        estado_pago: 'Pendiente',
-      },
-      select: {
-        periodo: true,
-      },
-      orderBy: {
-        periodo: 'asc',
-      },
-    });
+    const inscripcionesPendientes =
+      await this.prisma.inscripcionMensual.findMany({
+        where: {
+          estudiante_id: estudianteId,
+          estado_pago: 'Pendiente',
+        },
+        select: {
+          periodo: true,
+        },
+        orderBy: {
+          periodo: 'asc',
+        },
+      });
 
     const pagosPendientesVencidos = inscripcionesPendientes.filter(
-      ({ periodo }: { periodo: string }) => calcularFechaVencimiento(periodo) < hoy,
+      ({ periodo }: { periodo: string }) =>
+        calcularFechaVencimiento(periodo) < hoy,
     );
 
     return pagosPendientesVencidos.length > 0;
@@ -145,44 +148,45 @@ export class VerificacionMorosidadService {
    * Verifica si un tutor tiene estudiantes con pagos pendientes vencidos
    * @param tutorId ID del tutor
    * @returns información sobre morosidad del tutor
-  */
+   */
   async verificarMorosidadTutor(tutorId: string) {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    const inscripcionesPendientes = (await this.prisma.inscripcionMensual.findMany({
-      where: {
-        tutor_id: tutorId,
-        estado_pago: 'Pendiente',
-      },
-      select: {
-        id: true,
-        periodo: true,
-        precio_final: true,
-        estado_pago: true,
-        estudiante_id: true,
-        tutor_id: true,
-        estudiante: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
+    const inscripcionesPendientes =
+      (await this.prisma.inscripcionMensual.findMany({
+        where: {
+          tutor_id: tutorId,
+          estado_pago: 'Pendiente',
+        },
+        select: {
+          id: true,
+          periodo: true,
+          precio_final: true,
+          estado_pago: true,
+          estudiante_id: true,
+          tutor_id: true,
+          estudiante: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+            },
+          },
+          tutor: {
+            select: {
+              id: true,
+              nombre: true,
+              apellido: true,
+              email: true,
+              telefono: true,
+            },
           },
         },
-        tutor: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
-            telefono: true,
-          },
+        orderBy: {
+          periodo: 'asc',
         },
-      },
-      orderBy: {
-        periodo: 'asc',
-      },
-    })) as InscripcionMensualConRelaciones[];
+      })) as InscripcionMensualConRelaciones[];
 
     const inscripcionesConFecha: InscripcionConFechaVencimiento<InscripcionMensualConRelaciones>[] =
       inscripcionesPendientes.map(
@@ -193,20 +197,28 @@ export class VerificacionMorosidadService {
       );
 
     const inscripcionesVencidas = inscripcionesConFecha.filter(
-      ({ fechaVencimiento }: InscripcionConFechaVencimiento<InscripcionMensualConRelaciones>) =>
+      ({
+        fechaVencimiento,
+      }: InscripcionConFechaVencimiento<InscripcionMensualConRelaciones>) =>
         fechaVencimiento < hoy,
     );
 
     const totalAdeudado = inscripcionesVencidas.reduce<number>(
-      (sum: number, { registro }: InscripcionConFechaVencimiento<InscripcionMensualConRelaciones>) =>
-        sum + Number(registro.precio_final),
+      (
+        sum: number,
+        {
+          registro,
+        }: InscripcionConFechaVencimiento<InscripcionMensualConRelaciones>,
+      ) => sum + Number(registro.precio_final),
       0,
     );
 
     const estudiantesConDeuda = Array.from(
       new Set(
         inscripcionesVencidas.map(
-          ({ registro }: InscripcionConFechaVencimiento<InscripcionMensualConRelaciones>) =>
+          ({
+            registro,
+          }: InscripcionConFechaVencimiento<InscripcionMensualConRelaciones>) =>
             registro.estudiante_id,
         ),
       ),
@@ -218,9 +230,13 @@ export class VerificacionMorosidadService {
       totalAdeudado,
       estudiantesAfectados: estudiantesConDeuda.length,
       detalleEstudiantes: inscripcionesVencidas.map(
-        ({ registro, fechaVencimiento }: InscripcionConFechaVencimiento<InscripcionMensualConRelaciones>) => {
+        ({
+          registro,
+          fechaVencimiento,
+        }: InscripcionConFechaVencimiento<InscripcionMensualConRelaciones>) => {
           const diasVencido = Math.floor(
-            (hoy.getTime() - fechaVencimiento.getTime()) / (1000 * 60 * 60 * 24),
+            (hoy.getTime() - fechaVencimiento.getTime()) /
+              (1000 * 60 * 60 * 24),
           );
 
           return {
@@ -302,7 +318,9 @@ export class VerificacionMorosidadService {
           );
 
         const inscripcionesVencidas = inscripcionesConFecha.filter(
-          ({ fechaVencimiento }: InscripcionConFechaVencimiento<InscripcionMensualDeEstudiante>) =>
+          ({
+            fechaVencimiento,
+          }: InscripcionConFechaVencimiento<InscripcionMensualDeEstudiante>) =>
             fechaVencimiento < hoy,
         );
 
@@ -313,15 +331,21 @@ export class VerificacionMorosidadService {
         const totalAdeudado = inscripcionesVencidas.reduce<number>(
           (
             sum: number,
-            { registro }: InscripcionConFechaVencimiento<InscripcionMensualDeEstudiante>,
+            {
+              registro,
+            }: InscripcionConFechaVencimiento<InscripcionMensualDeEstudiante>,
           ) => sum + Number(registro.precio_final),
           0,
         );
 
         const detalleDeuda: DetalleDeuda[] = inscripcionesVencidas.map(
-          ({ registro, fechaVencimiento }: InscripcionConFechaVencimiento<InscripcionMensualDeEstudiante>) => {
+          ({
+            registro,
+            fechaVencimiento,
+          }: InscripcionConFechaVencimiento<InscripcionMensualDeEstudiante>) => {
             const diasVencido = Math.floor(
-              (hoy.getTime() - fechaVencimiento.getTime()) / (1000 * 60 * 60 * 24),
+              (hoy.getTime() - fechaVencimiento.getTime()) /
+                (1000 * 60 * 60 * 24),
             );
 
             return {
@@ -348,8 +372,10 @@ export class VerificacionMorosidadService {
           detalleDeuda,
         };
       })
-      .filter((estudiante: EstudianteMorosoDetalle | null): estudiante is EstudianteMorosoDetalle =>
-        estudiante !== null,
+      .filter(
+        (
+          estudiante: EstudianteMorosoDetalle | null,
+        ): estudiante is EstudianteMorosoDetalle => estudiante !== null,
       );
 
     return estudiantesMorosos;
@@ -374,34 +400,35 @@ export class VerificacionMorosidadService {
     hoy.setHours(0, 0, 0, 0);
     const periodoActual = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`;
 
-    const inscripcionesPendientes = (await this.prisma.inscripcionMensual.findMany({
-      where: {
-        estudiante_id: estudianteId,
-        estado_pago: 'Pendiente',
-        periodo: {
-          lte: periodoActual,
+    const inscripcionesPendientes =
+      (await this.prisma.inscripcionMensual.findMany({
+        where: {
+          estudiante_id: estudianteId,
+          estado_pago: 'Pendiente',
+          periodo: {
+            lte: periodoActual,
+          },
         },
-      },
-      select: {
-        id: true,
-        periodo: true,
-        precio_final: true,
-      },
-      orderBy: {
-        periodo: 'asc',
-      },
-    })) as InscripcionMensualBasica[];
+        select: {
+          id: true,
+          periodo: true,
+          precio_final: true,
+        },
+        orderBy: {
+          periodo: 'asc',
+        },
+      })) as InscripcionMensualBasica[];
 
     const deudasConFecha: InscripcionConFechaVencimiento<InscripcionMensualBasica>[] =
-      inscripcionesPendientes.map(
-        (inscripcion: InscripcionMensualBasica) => ({
-          registro: inscripcion,
-          fechaVencimiento: calcularFechaVencimiento(inscripcion.periodo),
-        }),
-      );
+      inscripcionesPendientes.map((inscripcion: InscripcionMensualBasica) => ({
+        registro: inscripcion,
+        fechaVencimiento: calcularFechaVencimiento(inscripcion.periodo),
+      }));
 
     const deudasVencidas = deudasConFecha.filter(
-      ({ fechaVencimiento }: InscripcionConFechaVencimiento<InscripcionMensualBasica>) =>
+      ({
+        fechaVencimiento,
+      }: InscripcionConFechaVencimiento<InscripcionMensualBasica>) =>
         fechaVencimiento < hoy,
     );
 
@@ -413,13 +440,17 @@ export class VerificacionMorosidadService {
     }
 
     const totalAdeudado = deudasVencidas.reduce<number>(
-      (sum: number, { registro }: InscripcionConFechaVencimiento<InscripcionMensualBasica>) =>
-        sum + Number(registro.precio_final),
+      (
+        sum: number,
+        { registro }: InscripcionConFechaVencimiento<InscripcionMensualBasica>,
+      ) => sum + Number(registro.precio_final),
       0,
     );
 
     const periodos = deudasVencidas.map(
-      ({ registro }: InscripcionConFechaVencimiento<InscripcionMensualBasica>) =>
+      ({
+        registro,
+      }: InscripcionConFechaVencimiento<InscripcionMensualBasica>) =>
         registro.periodo,
     );
 

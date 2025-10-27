@@ -63,7 +63,7 @@ export class ProductoRepositoryAdapter implements IProductoRepository {
    * Mapea tipos de Prisma a tipos del Domain
    * Prisma usa TipoProducto enum, nosotros también
    */
-  private mapearTipoProducto(tipo: string): TipoProducto {
+  private mapearTipoProducto(_tipo: string): TipoProducto {
     // Por simplicidad, asumimos que todos los productos son Club Matemáticas
     // TODO: Expandir cuando tengamos más tipos de productos definidos
     return 'CLUB_MATEMATICAS' as TipoProducto;

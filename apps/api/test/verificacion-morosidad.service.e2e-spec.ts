@@ -33,7 +33,9 @@ describe('VerificacionMorosidadService - cálculo de vencimientos', () => {
       },
     };
 
-    service = new VerificacionMorosidadService(prisma as unknown as PrismaService);
+    service = new VerificacionMorosidadService(
+      prisma as unknown as PrismaService,
+    );
   });
 
   it('marca como moroso un periodo vencido sin fecha explícita', async () => {
@@ -78,9 +80,7 @@ describe('VerificacionMorosidadService - cálculo de vencimientos', () => {
 
   it('detalle de acceso usa el helper para detectar cuotas vencidas', async () => {
     prisma.inscripcionMensual.findMany
-      .mockResolvedValueOnce([
-        { periodo: '2024-03', fecha_vencimiento: null },
-      ])
+      .mockResolvedValueOnce([{ periodo: '2024-03', fecha_vencimiento: null }])
       .mockResolvedValueOnce([
         { periodo: '2024-03', fecha_vencimiento: null, precio_final: 100 },
         { periodo: '2024-05', fecha_vencimiento: null, precio_final: 200 },

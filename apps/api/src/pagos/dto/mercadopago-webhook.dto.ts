@@ -47,5 +47,8 @@ export class WebhookSimpleDto {
 
   @IsObject()
   @IsNotEmpty()
-  data!: Record<string, any>;
+  data!: {
+    id: string;
+    [key: string]: string | number | boolean | null;
+  };
 }

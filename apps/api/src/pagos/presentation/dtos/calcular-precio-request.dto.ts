@@ -3,7 +3,6 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
-  ValidateNested,
   IsObject,
 } from 'class-validator';
 import { Type } from 'class-transformer';

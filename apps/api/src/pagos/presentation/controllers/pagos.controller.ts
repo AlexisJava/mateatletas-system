@@ -412,7 +412,7 @@ export class PagosController {
   })
   async procesarWebhook(
     @Body() webhookData: MercadoPagoWebhookDto,
-    @Headers('x-signature') signature: string,
+    @Headers('x-signature') _signature: string,
     @Headers('x-request-id') requestId: string,
   ) {
     return await this.pagosService.procesarWebhookMercadoPago(webhookData);

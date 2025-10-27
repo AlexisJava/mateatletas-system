@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { Decimal } from 'decimal.js';
 import {
@@ -123,7 +124,7 @@ export class ConfiguracionPreciosRepository
    * Convierte de tipos de Prisma a tipos del Domain
    * IMPORTANTE: Convierte Prisma.Decimal a Decimal de decimal.js
    */
-  private mapearPrismaADomain(config: any): ConfiguracionPrecios {
+  private mapearPrismaADomain(config: Prisma.ConfiguracionPreciosGetPayload<object>): ConfiguracionPrecios {
     return {
       precioClubMatematicas: new Decimal(
         config.precio_club_matematicas.toString(),
