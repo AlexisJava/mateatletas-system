@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../core/database/prisma.service';
-import { RoleHandler } from './role-handler.interface';
+import { RoleHandler, UserWithPassword } from './role-handler.interface';
 import * as bcrypt from 'bcrypt';
 
 /**
@@ -27,7 +27,7 @@ export class EstudianteHandler implements RoleHandler {
     });
   }
 
-  async validateCredentials(user: any, password: string): Promise<boolean> {
+  async validateCredentials(user: UserWithPassword, password: string): Promise<boolean> {
     return bcrypt.compare(password, user.password_hash);
   }
 

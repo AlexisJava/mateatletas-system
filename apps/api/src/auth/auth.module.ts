@@ -57,7 +57,7 @@ import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
         return {
           secret,
           signOptions: {
-            expiresIn: expiresIn as any, // StringValue es un tipo de jsonwebtoken
+            expiresIn: expiresIn as string | number, // StringValue de jsonwebtoken
           },
         };
       },

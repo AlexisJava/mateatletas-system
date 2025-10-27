@@ -43,7 +43,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       // Extraer token desde cookie 'auth-token' o fallback a Bearer header
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: Request) => {
+        (request: Request & { cookies?: { 'auth-token'?: string } }) => {
           // Prioridad 1: Intentar desde cookie
           const token = request?.cookies?.['auth-token'];
           if (token) return token;
