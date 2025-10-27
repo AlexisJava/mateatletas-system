@@ -8,7 +8,7 @@ import { useState } from 'react';
 interface ColorPickerProps {
   label: string;
   value: string;
-  onChange: (color: string) => void;
+  onChange: (_color: string) => void;
   error?: string;
   required?: boolean;
 }

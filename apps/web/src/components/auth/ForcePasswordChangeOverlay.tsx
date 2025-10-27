@@ -19,9 +19,6 @@ export function ForcePasswordChangeOverlay({
   onSuccess,
 }: ForcePasswordChangeOverlayProps) {
   const user = useAuthStore((state) => state.user);
-  const login = useAuthStore((state) => state.login);
-  const loginEstudiante = useAuthStore((state) => state.loginEstudiante);
-  const setUser = useAuthStore((state) => state.setUser);
 
   const [passwordActual, setPasswordActual] = useState('');
   const [nuevaPassword, setNuevaPassword] = useState('');
@@ -186,4 +183,3 @@ export function ForcePasswordChangeOverlay({
 }
 
 export default ForcePasswordChangeOverlay;
-

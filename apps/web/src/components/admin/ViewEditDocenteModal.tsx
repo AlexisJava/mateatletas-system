@@ -22,7 +22,7 @@ interface Docente {
 interface ViewEditDocenteModalProps {
   docente: Docente;
   onClose: () => void;
-  onUpdate: (id: string, data: Partial<Docente>) => Promise<void>;
+  onUpdate: (_docenteId: string, _data: Partial<Docente>) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -117,8 +117,9 @@ export default function ViewEditDocenteModal({
     const nuevosHorarios = horarios.filter((h) => h !== horario);
 
     if (nuevosHorarios.length === 0) {
-      const { [dia]: removed, ...rest } = form.disponibilidad_horaria || {};
-      setForm({ ...form, disponibilidad_horaria: rest });
+      const updatedDisponibilidad = { ...(form.disponibilidad_horaria || {}) };
+      delete updatedDisponibilidad[dia];
+      setForm({ ...form, disponibilidad_horaria: updatedDisponibilidad });
     } else {
       setForm({
         ...form,

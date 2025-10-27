@@ -5,10 +5,10 @@ import type { ClaseListado } from '@/types/admin-clases.types';
 
 interface ClasesTableProps {
   clases: ClaseListado[];
-  onViewClase: (clase: ClaseListado) => void;
-  onCancelClase: (clase: ClaseListado) => void;
-  onEditClase: (clase: ClaseListado) => void;
-  onManageStudents: (clase: ClaseListado) => void;
+  onViewClase: (_clase: ClaseListado) => void;
+  onCancelClase: (_clase: ClaseListado) => void;
+  onEditClase: (_clase: ClaseListado) => void;
+  onManageStudents: (_clase: ClaseListado) => void;
 }
 
 /**

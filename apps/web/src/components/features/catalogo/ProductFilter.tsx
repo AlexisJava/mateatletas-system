@@ -17,7 +17,7 @@ import { FiltroProducto, TipoProducto } from '@/types/catalogo.types';
 
 interface ProductFilterProps {
   filtroActivo: FiltroProducto;
-  onFiltroChange: (filtro: FiltroProducto) => void;
+  onFiltroChange: (_filtro: FiltroProducto) => void;
   productCount?: Record<string, number>;
 }
 

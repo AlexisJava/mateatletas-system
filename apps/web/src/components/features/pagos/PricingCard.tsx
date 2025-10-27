@@ -20,7 +20,7 @@ import { Producto } from '@/types/catalogo.types';
 interface PricingCardProps {
   producto: Producto;
   destacado?: boolean;
-  onComprar: (productoId: string) => void;
+  onComprar: (_productoId: string) => void;
   isLoading?: boolean;
 }
 

@@ -23,8 +23,22 @@ const eslintConfig = [
   {
     rules: {
       // Convertir errores de variables/imports no usados a warnings
-      "@typescript-eslint/no-unused-vars": "warn",
-      "no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
+      "no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
 
       // Mantener errores críticos como errores
       "@typescript-eslint/no-explicit-any": "warn",

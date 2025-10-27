@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import type { Equipo } from '@/types/equipo.types';
 import { Card, Button } from '../ui';
 
@@ -9,9 +10,9 @@ import { Card, Button } from '../ui';
  */
 interface EquipoCardProps {
   equipo: Equipo;
-  onEdit: (equipo: Equipo) => void;
-  onDelete: (equipo: Equipo) => void;
-  onRecalcularPuntos?: (equipo: Equipo) => void;
+  onEdit: (_equipo: Equipo) => void;
+  onDelete: (_equipo: Equipo) => void;
+  onRecalcularPuntos?: (_equipo: Equipo) => void;
 }
 
 /**
@@ -68,10 +69,13 @@ export default function EquipoCard({
 
         {/* Ícono si existe */}
         {equipo.icono_url && (
-          <img
+          <Image
             src={equipo.icono_url}
             alt={`Ícono de ${equipo.nombre}`}
+            width={64}
+            height={64}
             className="absolute right-4 top-1/2 -translate-y-1/2 w-16 h-16 object-contain opacity-40"
+            sizes="64px"
           />
         )}
       </div>

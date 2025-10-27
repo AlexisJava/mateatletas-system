@@ -14,7 +14,7 @@ interface SelectedRuta {
 
 interface RutasSelectorProps {
   selectedRutas: SelectedRuta[];
-  onChange: (rutas: SelectedRuta[]) => void;
+  onChange: React.Dispatch<React.SetStateAction<SelectedRuta[]>>;
   className?: string;
 }
 
@@ -28,8 +28,8 @@ export default function RutasSelector({ selectedRutas, onChange, className = '' 
   const [rutaNombre, setRutaNombre] = useState<string>('');
 
   useEffect(() => {
-    fetchSectores();
-  }, []);
+    void fetchSectores();
+  }, [fetchSectores]);
 
   const handleAddRuta = () => {
     if (!selectedSectorId || !rutaNombre.trim()) return;
@@ -55,12 +55,12 @@ export default function RutasSelector({ selectedRutas, onChange, className = '' 
       rutaNombre: rutaNombre.trim(),
     };
 
-    onChange([...selectedRutas, newRuta]);
+    onChange((prev) => [...prev, newRuta]);
     setRutaNombre('');
   };
 
   const handleRemoveRuta = (index: number) => {
-    onChange(selectedRutas.filter((_, i) => i !== index));
+    onChange((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

@@ -7,7 +7,7 @@ import type { UserRole } from '@/store/auth.store';
 interface ModalSelectorRolProps {
   isOpen: boolean;
   roles: UserRole[];
-  onSelectRole: (role: UserRole) => void;
+  onSelectRole: (_role: UserRole) => void;
 }
 
 const ROLE_CONFIG = {

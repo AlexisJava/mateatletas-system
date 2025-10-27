@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Calendar, Clock, Users, BookOpen } from 'lucide-react';
+import { X, Calendar, Clock, Users } from 'lucide-react';
 import axios from '@/lib/axios';
 
 interface ClaseGrupo {
@@ -128,20 +128,15 @@ export function EditClaseGrupoModal({
 
   const fetchDocentes = async () => {
     try {
-      const response: any = await axios.get('/docentes');
+      const response = await axios.get<Docente[] | { data: Docente[] }>('/docentes');
+      const docentes = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.data)
+          ? response.data
+          : [];
 
-      // El endpoint devuelve { data: [...], meta: {...} }
-      // El interceptor de axios ya extrajo el primer .data
-      const docentes = response.data || response;
-
-      if (Array.isArray(docentes)) {
-        console.log('✅ Docentes cargados:', docentes.length);
-        setDocentesDisponibles(docentes);
-      } else {
-        console.error('❌ Formato inesperado de docentes:', response);
-        setDocentesDisponibles([]);
-      }
-    } catch (err: any) {
+      setDocentesDisponibles(docentes);
+    } catch (err: unknown) {
       console.error('❌ Error al cargar docentes:', err);
       setDocentesDisponibles([]);
     }
@@ -149,25 +144,21 @@ export function EditClaseGrupoModal({
 
   const fetchEstudiantes = async () => {
     try {
-      const response: any = await axios.get('/admin/estudiantes');
+      const response = await axios.get<Estudiante[] | { data: Estudiante[] }>('/admin/estudiantes');
+      const estudiantes = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.data)
+          ? response.data
+          : [];
 
-      // El backend devuelve { data: [...], metadata: {...} }
-      const estudiantes = response?.data ? response.data : (Array.isArray(response) ? response : []);
-
-      if (Array.isArray(estudiantes)) {
-        console.log('✅ Estudiantes cargados:', estudiantes.length);
-        setEstudiantesDisponibles(estudiantes);
-      } else {
-        console.error('❌ Formato inesperado de estudiantes:', response);
-        setEstudiantesDisponibles([]);
-      }
-    } catch (err) {
+      setEstudiantesDisponibles(estudiantes);
+    } catch (err: unknown) {
       console.error('❌ Error al cargar estudiantes:', err);
       setEstudiantesDisponibles([]);
     }
   };
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: string | number) => {
     setFormData({ ...formData, [field]: value });
     setError(null);
   };
@@ -230,10 +221,19 @@ export function EditClaseGrupoModal({
       console.log('🔄 Refrescando lista de grupos...');
       await onSuccess();
       console.log('✅ Lista refrescada');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ Error al actualizar horario:', err);
-      console.error('Response data:', err.response?.data);
-      setError(err.response?.data?.message || 'Error al actualizar el horario');
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message ===
+          'string'
+      ) {
+        setError((err as { response?: { data?: { message?: string } } }).response?.data?.message);
+      } else {
+        setError('Error al actualizar el horario');
+      }
     } finally {
       setIsSubmitting(false);
     }

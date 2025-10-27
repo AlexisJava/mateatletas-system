@@ -4,6 +4,13 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Bell, Calendar, Clock, Check, Palette } from 'lucide-react';
 import { useCalendarioStore } from '@/store/calendario.store';
+import {
+  getDateInputValue,
+  getDatePartFromISO,
+  getTimePartFromISO,
+  buildISODateTime,
+  buildEndOfDayISO,
+} from './helpers';
 import type {
   CreateRecordatorioDto,
   UpdateRecordatorioDto,
@@ -52,13 +59,11 @@ export function ModalRecordatorio({
       setTitulo(recordatorioExistente.titulo);
       setDescripcion(recordatorioExistente.descripcion || '');
 
-      const fechaInicioDate = new Date(recordatorioExistente.fecha_inicio);
-      setFechaInicio(fechaInicioDate.toISOString().split('T')[0]);
-      setHoraInicio(fechaInicioDate.toTimeString().slice(0, 5));
+      setFechaInicio(getDatePartFromISO(recordatorioExistente.fecha_inicio));
+      setHoraInicio(getTimePartFromISO(recordatorioExistente.fecha_inicio, '09:00'));
 
-      const fechaFinDate = new Date(recordatorioExistente.fecha_fin);
-      setFechaFin(fechaFinDate.toISOString().split('T')[0]);
-      setHoraFin(fechaFinDate.toTimeString().slice(0, 5));
+      setFechaFin(getDatePartFromISO(recordatorioExistente.fecha_fin));
+      setHoraFin(getTimePartFromISO(recordatorioExistente.fecha_fin, '09:00'));
 
       setEsTodoElDia(recordatorioExistente.es_todo_el_dia);
 
@@ -67,10 +72,10 @@ export function ModalRecordatorio({
         setCompletado(recordatorioExistente.recordatorio.completado);
       }
     } else {
-      const ahora = new Date();
-      setFechaInicio(ahora.toISOString().split('T')[0]);
+      const hoy = getDateInputValue(new Date());
+      setFechaInicio(hoy);
       setHoraInicio('09:00');
-      setFechaFin(ahora.toISOString().split('T')[0]);
+      setFechaFin(hoy);
       setHoraFin('09:00');
     }
   }, [recordatorioExistente, isOpen]);
@@ -79,12 +84,12 @@ export function ModalRecordatorio({
     e.preventDefault();
 
     const fechaInicioISO = esTodoElDia
-      ? `${fechaInicio}T00:00:00.000Z`
-      : `${fechaInicio}T${horaInicio}:00.000Z`;
+      ? buildISODateTime(fechaInicio, '00:00')
+      : buildISODateTime(fechaInicio, horaInicio);
 
     const fechaFinISO = esTodoElDia
-      ? `${fechaFin}T23:59:59.999Z`
-      : `${fechaFin}T${horaFin}:00.000Z`;
+      ? buildEndOfDayISO(fechaFin || fechaInicio)
+      : buildISODateTime(fechaFin, horaFin);
 
     const recordatorioData: CreateRecordatorioDto | UpdateRecordatorioDto = {
       titulo,
@@ -116,10 +121,10 @@ export function ModalRecordatorio({
   const resetForm = () => {
     setTitulo('');
     setDescripcion('');
-    const ahora = new Date();
-    setFechaInicio(ahora.toISOString().split('T')[0]);
+    const hoy = getDateInputValue(new Date());
+    setFechaInicio(hoy);
     setHoraInicio('09:00');
-    setFechaFin(ahora.toISOString().split('T')[0]);
+    setFechaFin(hoy);
     setHoraFin('09:00');
     setEsTodoElDia(false);
     setColor('#6366f1');

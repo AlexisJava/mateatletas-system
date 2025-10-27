@@ -13,7 +13,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateDocenteForm from '../CreateDocenteForm';
-import { CreateDocenteData } from '@/lib/api/docentes.api';
 
 describe('CreateDocenteForm - Mejoras (TDD)', () => {
   const mockOnSubmit = jest.fn();

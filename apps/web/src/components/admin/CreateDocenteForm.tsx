@@ -3,14 +3,7 @@
 import React, { useState } from 'react';
 import { CreateDocenteData } from '@/lib/api/docentes.api';
 import { X, Clock, Calendar, RefreshCw } from 'lucide-react';
-
-interface CreateDocenteFormProps {
-  onSubmit: (data: CreateDocenteData, sectores: string[]) => Promise<void>;
-  onCancel: () => void;
-  onSwitchToAdmin: () => void;
-  isLoading: boolean;
-  error: string | null;
-}
+import type { CreateDocenteFormSubmitHandler } from './CreateDocenteForm.types';
 
 const DIAS_SEMANA = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 const DIAS_LABORABLES = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes'];
@@ -21,7 +14,13 @@ export default function CreateDocenteForm({
   onSwitchToAdmin,
   isLoading,
   error,
-}: CreateDocenteFormProps) {
+}: {
+  onSubmit: CreateDocenteFormSubmitHandler;
+  onCancel: () => void;
+  onSwitchToAdmin: () => void;
+  isLoading: boolean;
+  error: string | null;
+}) {
   const [form, setForm] = useState<CreateDocenteData>({
     email: '',
     password: '',

@@ -3,7 +3,7 @@ interface SelectProps {
   error?: string;
   options: { value: string; label: string }[];
   value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange?: (_event: React.ChangeEvent<HTMLSelectElement>) => void;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;

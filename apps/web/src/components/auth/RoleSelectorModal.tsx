@@ -6,7 +6,7 @@ import { UserRole } from '@/store/auth.store';
 
 interface RoleSelectorModalProps {
   roles: UserRole[];
-  onSelectRole: (role: UserRole) => void;
+  onSelectRole: (_role: UserRole) => void;
   userName: string;
 }
 

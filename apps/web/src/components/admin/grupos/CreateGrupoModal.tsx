@@ -60,7 +60,7 @@ export function CreateGrupoModal({ isOpen, onClose, onSuccess }: CreateGrupoModa
     try {
       setIsSubmitting(true);
 
-      const payload: any = {
+      const payload = {
         codigo: formData.codigo.trim(),
         nombre: formData.nombre.trim(),
         descripcion: formData.descripcion.trim() || undefined,
@@ -84,9 +84,13 @@ export function CreateGrupoModal({ isOpen, onClose, onSuccess }: CreateGrupoModa
       // Success
       onSuccess();
       handleClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error al crear grupo:', err);
-      setError(err.message || 'Error al crear el grupo');
+      if (err instanceof Error) {
+        setError(err.message || 'Error al crear el grupo');
+      } else {
+        setError('Error al crear el grupo');
+      }
     } finally {
       setIsSubmitting(false);
     }

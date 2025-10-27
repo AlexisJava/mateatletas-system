@@ -7,7 +7,10 @@ import { AdminUser } from '@/types/admin.types';
 interface MultiRoleModalProps {
   user: AdminUser;
   onClose: () => void;
-  onSave: (userId: string, roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[]) => Promise<boolean>;
+  onSave: (
+    _userId: string,
+    _roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[],
+  ) => Promise<boolean>;
   isLoading?: boolean;
 }
 

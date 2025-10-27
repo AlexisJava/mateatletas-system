@@ -4,6 +4,13 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, FileText, Calendar, Clock, Tag, Palette, Check } from 'lucide-react';
 import { useCalendarioStore } from '@/store/calendario.store';
+import {
+  getDateInputValue,
+  getDatePartFromISO,
+  getTimePartFromISO,
+  buildISODateTime,
+  buildEndOfDayISO,
+} from './helpers';
 import type {
   CreateNotaDto,
   UpdateNotaDto,
@@ -53,9 +60,8 @@ export function ModalNota({ isOpen, onClose, notaExistente }: ModalNotaProps) {
       setTitulo(notaExistente.titulo);
       setDescripcion(notaExistente.descripcion || '');
 
-      const fechaInicioDate = new Date(notaExistente.fecha_inicio);
-      setFechaInicio(fechaInicioDate.toISOString().split('T')[0]);
-      setHoraInicio(fechaInicioDate.toTimeString().slice(0, 5));
+      setFechaInicio(getDatePartFromISO(notaExistente.fecha_inicio));
+      setHoraInicio(getTimePartFromISO(notaExistente.fecha_inicio));
 
       setContenido(notaExistente.nota.contenido);
       setCategoria(notaExistente.nota.categoria || '');
@@ -70,7 +76,7 @@ export function ModalNota({ isOpen, onClose, notaExistente }: ModalNotaProps) {
     setDescripcion('');
     setContenido('');
     const ahora = new Date();
-    setFechaInicio(ahora.toISOString().split('T')[0]);
+    setFechaInicio(getDateInputValue(ahora));
     setHoraInicio('00:00');
     setCategoria('');
     setColor('#8b5cf6');
@@ -79,10 +85,8 @@ export function ModalNota({ isOpen, onClose, notaExistente }: ModalNotaProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const fechaInicioISO = `${fechaInicio}T${horaInicio}:00.000Z`;
-    const fechaFinDate = new Date(fechaInicioISO);
-    fechaFinDate.setHours(23, 59, 59, 999);
-    const fechaFinISO = fechaFinDate.toISOString();
+    const fechaInicioISO = buildISODateTime(fechaInicio, horaInicio);
+    const fechaFinISO = buildEndOfDayISO(fechaInicio);
 
     const notaData: CreateNotaDto | UpdateNotaDto = {
       titulo,

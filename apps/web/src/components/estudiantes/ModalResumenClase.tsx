@@ -2,7 +2,6 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-confetti';
-import { useState } from 'react';
 import {
   Trophy,
   Star,
@@ -54,7 +53,7 @@ interface ModalResumenClaseProps {
 }
 
 export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) {
-  const [showConfetti, _setShowConfetti] = useState(resumen.puntosGanados > 50);
+  const showConfetti = resumen.puntosGanados > 50;
 
   const participacionColor =
     resumen.estadisticas.participacion >= 80

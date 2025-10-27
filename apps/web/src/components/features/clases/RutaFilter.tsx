@@ -20,7 +20,7 @@ import { RutaCurricular } from '@/types/clases.types';
 interface RutaFilterProps {
   rutasCurriculares: RutaCurricular[];
   rutaActiva: string | undefined;
-  onRutaChange: (rutaId: string | undefined) => void;
+  onRutaChange: (_rutaId: string | undefined) => void;
   claseCounts?: Record<string, number>;
 }
 

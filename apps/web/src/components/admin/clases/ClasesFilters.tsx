@@ -6,8 +6,8 @@ type FilterSector = 'all' | 'Matemática' | 'Programación' | 'Ciencias';
 interface ClasesFiltersProps {
   filter: FilterEstado;
   sectorFilter: FilterSector;
-  onFilterChange: (filter: FilterEstado) => void;
-  onSectorFilterChange: (sector: FilterSector) => void;
+  onFilterChange: (_filter: FilterEstado) => void;
+  onSectorFilterChange: (_sector: FilterSector) => void;
   clasesCount: {
     all: number;
     programadas: number;

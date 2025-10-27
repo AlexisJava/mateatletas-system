@@ -15,6 +15,12 @@ import {
   Zap,
 } from 'lucide-react';
 import { useCalendarioStore } from '@/store/calendario.store';
+import {
+  getDateInputValue,
+  getDatePartFromISO,
+  getTimePartFromISO,
+  buildISODateTime,
+} from './helpers';
 import type {
   CreateTareaDto,
   UpdateTareaDto,
@@ -57,20 +63,18 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
       setTitulo(tareaExistente.titulo);
       setDescripcion(tareaExistente.descripcion || '');
 
-      const fechaInicioDate = new Date(tareaExistente.fecha_inicio);
-      setFechaInicio(fechaInicioDate.toISOString().split('T')[0]);
-      setHoraInicio(fechaInicioDate.toTimeString().slice(0, 5));
+      setFechaInicio(getDatePartFromISO(tareaExistente.fecha_inicio));
+      setHoraInicio(getTimePartFromISO(tareaExistente.fecha_inicio, '09:00'));
 
-      const fechaFinDate = new Date(tareaExistente.fecha_fin);
-      setFechaFin(fechaFinDate.toISOString().split('T')[0]);
-      setHoraFin(fechaFinDate.toTimeString().slice(0, 5));
+      setFechaFin(getDatePartFromISO(tareaExistente.fecha_fin));
+      setHoraFin(getTimePartFromISO(tareaExistente.fecha_fin, '10:00'));
 
       setEstado(tareaExistente.tarea.estado);
       setPrioridad(tareaExistente.tarea.prioridad);
       setPorcentajeCompletado(tareaExistente.tarea.porcentaje_completado);
       setCategoria(tareaExistente.tarea.categoria || '');
       setEtiquetas(tareaExistente.tarea.etiquetas);
-      setSubtareas(tareaExistente.tarea.subtareas as Subtarea[]);
+      setSubtareas(tareaExistente.tarea.subtareas || []);
       setTiempoEstimado(tareaExistente.tarea.tiempo_estimado_minutos || undefined);
     } else {
       resetForm();
@@ -81,9 +85,10 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
     setTitulo('');
     setDescripcion('');
     const ahora = new Date();
-    setFechaInicio(ahora.toISOString().split('T')[0]);
+    const hoy = getDateInputValue(ahora);
+    setFechaInicio(hoy);
     setHoraInicio('09:00');
-    setFechaFin(ahora.toISOString().split('T')[0]);
+    setFechaFin(hoy);
     setHoraFin('10:00');
     setEstado(EstadoTarea.PENDIENTE);
     setPrioridad(PrioridadTarea.MEDIA);
@@ -99,8 +104,8 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const fechaInicioISO = `${fechaInicio}T${horaInicio}:00.000Z`;
-    const fechaFinISO = `${fechaFin}T${horaFin}:00.000Z`;
+    const fechaInicioISO = buildISODateTime(fechaInicio, horaInicio);
+    const fechaFinISO = buildISODateTime(fechaFin, horaFin);
 
     const tareaData: CreateTareaDto | UpdateTareaDto = {
       titulo,
