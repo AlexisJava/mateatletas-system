@@ -1,4 +1,25 @@
 /**
+ * Tipo base para usuarios con password
+ */
+export interface UserWithPassword {
+  id: string;
+  email: string | null;
+  password_hash: string;
+  [key: string]: string | number | boolean | Date | null | undefined;
+}
+
+/**
+ * Tipo para perfil de usuario (sin password)
+ */
+export interface UserProfile {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string | null;
+  [key: string]: string | number | boolean | Date | null | undefined | object;
+}
+
+/**
  * Interfaz para handlers de roles
  * Strategy Pattern: Cada rol tiene su propia estrategia de autenticación
  */
@@ -8,14 +29,14 @@ export interface RoleHandler {
    * @param email - Email del usuario
    * @returns Usuario encontrado o null
    */
-  findUserByEmail(email: string): Promise<any | null>;
+  findUserByEmail(email: string): Promise<UserWithPassword | null>;
 
   /**
    * Buscar usuario por ID
    * @param id - ID del usuario
    * @returns Usuario encontrado o null
    */
-  findUserById(id: string): Promise<any | null>;
+  findUserById(id: string): Promise<UserWithPassword | null>;
 
   /**
    * Validar credenciales del usuario
@@ -23,14 +44,14 @@ export interface RoleHandler {
    * @param password - Password en texto plano
    * @returns True si las credenciales son válidas
    */
-  validateCredentials(user: any, password: string): Promise<boolean>;
+  validateCredentials(user: UserWithPassword, password: string): Promise<boolean>;
 
   /**
    * Obtener perfil completo del usuario
    * @param userId - ID del usuario
    * @returns Perfil del usuario con relaciones
    */
-  getProfile(userId: string): Promise<any>;
+  getProfile(userId: string): Promise<UserProfile>;
 
   /**
    * Nombre del rol que maneja este handler

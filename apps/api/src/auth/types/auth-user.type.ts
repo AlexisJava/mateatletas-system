@@ -69,17 +69,17 @@ export type DetailedAuthUser =
  * Type guards para verificar el rol del usuario
  */
 export function isEstudiante(user: DetailedAuthUser): user is AuthEstudiante {
-  return user.role === 'estudiante';
+  return user.role === Role.Estudiante;
 }
 
 export function isDocente(user: DetailedAuthUser): user is AuthDocente {
-  return user.role === 'docente';
+  return user.role === Role.Docente;
 }
 
 export function isTutor(user: DetailedAuthUser): user is AuthTutor {
-  return user.role === 'tutor';
+  return user.role === Role.Tutor;
 }
 
 export function isAdmin(user: DetailedAuthUser): user is AuthAdmin {
-  return user.role === 'admin';
+  return user.role === Role.Admin;
 }

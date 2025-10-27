@@ -49,8 +49,8 @@ export class RolesGuard implements CanActivate {
     }
 
     // El usuario tiene acceso si tiene AL MENOS UNO de los roles requeridos
-    return requiredRoles.some((requiredRole) =>
-      userRoles.some((userRole: string) => userRole === requiredRole),
+    return requiredRoles.some((requiredRole: Role) =>
+      userRoles.some((userRole: Role) => userRole === requiredRole),
     );
   }
 }

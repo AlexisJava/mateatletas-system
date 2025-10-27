@@ -69,7 +69,7 @@ export class TokenBlacklistService {
   ): Promise<void> {
     try {
       // 1. Decodificar el token para obtener metadata
-      const decoded = this.jwtService.decode(token);
+      const decoded = this.jwtService.decode(token) as { exp?: number; sub?: string } | null;
 
       if (!decoded || !decoded.exp) {
         this.logger.warn(`Intento de blacklist de token inválido: ${reason}`);

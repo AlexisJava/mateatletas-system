@@ -319,7 +319,7 @@ export class AuthService {
       }
 
       // Retornar tutor sin password_hash
-      const { password_hash, ...result } = tutor;
+      const { password_hash: _password_hash, ...result } = tutor;
       return result;
     } catch (error) {
       // Log del error sin exponer detalles al cliente

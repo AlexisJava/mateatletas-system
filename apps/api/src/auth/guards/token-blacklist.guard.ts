@@ -87,7 +87,7 @@ export class TokenBlacklistGuard implements CanActivate {
 
     // 4. Verificar si TODOS los tokens del usuario están blacklisted
     // (por ejemplo, después de cambio de contraseña)
-    const user = (request as any).user;
+    const user = (request as Request & { user?: { id: string } }).user;
     if (user && user.id) {
       const isUserBlacklisted =
         await this.tokenBlacklistService.isUserBlacklisted(user.id);
