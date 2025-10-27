@@ -1,13 +1,14 @@
 'use client';
 
 import { Edit, Trash2, Eye } from 'lucide-react';
+import Image from 'next/image';
 import type { Estudiante } from '@/types/estudiante';
 
 interface EstudianteCardProps {
   estudiante: Estudiante;
-  onEdit: (estudiante: Estudiante) => void;
-  onDelete: (id: string) => void;
-  onView: (id: string) => void;
+  onEdit: (_estudiante: Estudiante) => void;
+  onDelete: (_id: string) => void;
+  onView: (_id: string) => void;
 }
 
 /**
@@ -38,10 +39,13 @@ export function EstudianteCard({
       {/* Avatar y nombre */}
       <div className="flex items-center gap-4 mb-4">
         {estudiante.foto_url ? (
-          <img
+          <Image
             src={estudiante.foto_url}
             alt={`${estudiante.nombre} ${estudiante.apellido}`}
+            width={64}
+            height={64}
             className="w-16 h-16 rounded-lg object-cover shadow-md"
+            sizes="64px"
           />
         ) : (
           <div

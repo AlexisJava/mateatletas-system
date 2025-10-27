@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, UserPlus, Users } from 'lucide-react';
 import apiClient from '@/lib/axios';
 import { getErrorMessage } from '@/lib/utils/error-handler';
@@ -61,14 +61,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
   const [error, setError] = useState<string | null>(null);
   const [credenciales, setCredenciales] = useState<CreacionExitosa | null>(null);
 
-  // Cargar sectores disponibles (excepto el actual)
-  useEffect(() => {
-    if (isOpen) {
-      loadSectores();
-    }
-  }, [isOpen, sectorId]);
-
-  const loadSectores = async () => {
+  const loadSectores = useCallback(async () => {
     try {
       const response = await apiClient.get('/admin/sectores');
       // Filtrar el sector actual
@@ -77,7 +70,14 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
     } catch (err) {
       console.error('Error al cargar sectores:', err);
     }
-  };
+  }, [sectorId]);
+
+  // Cargar sectores disponibles (excepto el actual)
+  useEffect(() => {
+    if (isOpen) {
+      void loadSectores();
+    }
+  }, [isOpen, loadSectores]);
 
   const handleAgregarEstudiante = () => {
     setEstudiantes([...estudiantes, { nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '', sectoresAdicionales: [] }]);
@@ -178,6 +178,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
       setCredenciales(response.credenciales);
     } catch (err) {
       setError(getErrorMessage(err, 'Error al crear estudiante(s)'));
+    } finally {
       setIsSubmitting(false);
     }
   };

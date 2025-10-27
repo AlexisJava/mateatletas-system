@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { InscripcionConAsistencia, EstadoAsistencia, MarcarAsistenciaDto } from '@/types/asistencia.types';
 import AttendanceStatusButton from './AttendanceStatusButton';
 
@@ -9,8 +10,8 @@ interface AttendanceListProps {
   inscripciones: InscripcionConAsistencia[];
   /** Callback para marcar asistencia */
   onMarcarAsistencia: (
-    estudianteId: string,
-    data: MarcarAsistenciaDto
+    _estudianteId: string,
+    _data: MarcarAsistenciaDto
   ) => Promise<boolean>;
   /** Si está guardando */
   isLoading?: boolean;
@@ -307,10 +308,13 @@ export default function AttendanceList({
 
                   {/* Foto del estudiante */}
                   {estudiante.avatar ? (
-                    <img
+                    <Image
                       src={estudiante.avatar}
                       alt={estudiante.nombre}
+                      width={48}
+                      height={48}
                       className="w-12 h-12 rounded-full object-cover border-2 border-[#ff6b35] flex-shrink-0"
+                      sizes="48px"
                     />
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg flex-shrink-0">

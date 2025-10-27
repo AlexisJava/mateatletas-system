@@ -11,7 +11,7 @@ import ColorPicker from './ColorPicker';
 interface EquipoFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateEquipoDto) => Promise<void>;
+  onSubmit: (_data: CreateEquipoDto) => Promise<void>;
   equipoToEdit?: Equipo | null;
 }
 

@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 interface AvatarProps {
   src?: string;
   alt: string;
@@ -17,6 +19,13 @@ export function Avatar({ src, alt, size = 'md', fallback }: AvatarProps) {
     xl: 'w-24 h-24 text-2xl',
   };
 
+  const pixelSizes: Record<NonNullable<AvatarProps['size']>, number> = {
+    sm: 32,
+    md: 48,
+    lg: 64,
+    xl: 96,
+  };
+
   const getFallbackText = () => {
     if (fallback) return fallback;
     return alt.charAt(0).toUpperCase();
@@ -27,7 +36,14 @@ export function Avatar({ src, alt, size = 'md', fallback }: AvatarProps) {
       className={`${sizes[size]} rounded-full border-4 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] overflow-hidden flex items-center justify-center bg-gradient-to-br from-[#ff6b35] to-[#f7b801] text-white font-bold`}
     >
       {src ? (
-        <img src={src} alt={alt} className="w-full h-full object-cover" />
+        <Image
+          src={src}
+          alt={alt}
+          width={pixelSizes[size]}
+          height={pixelSizes[size]}
+          className="w-full h-full object-cover"
+          sizes={`${pixelSizes[size]}px`}
+        />
       ) : (
         <span>{getFallbackText()}</span>
       )}

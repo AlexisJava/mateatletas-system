@@ -6,7 +6,7 @@ interface AttendanceStatusButtonProps {
   /** Estado actual de la asistencia */
   currentStatus: EstadoAsistencia | null;
   /** Callback cuando se selecciona un estado */
-  onStatusChange: (status: EstadoAsistencia) => void;
+  onStatusChange: (_status: EstadoAsistencia) => void;
   /** Si el componente está deshabilitado */
   disabled?: boolean;
 }

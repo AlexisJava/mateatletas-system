@@ -18,7 +18,7 @@ import { Card, Badge } from '@/components/ui';
 
 interface ClassCardProps {
   clase: Clase;
-  onClick?: (clase: Clase) => void;
+  onClick?: (_clase: Clase) => void;
   showReserveButton?: boolean;
 }
 
@@ -69,7 +69,11 @@ export function ClassCard({
         ${onClick && !sinCupos ? 'cursor-pointer' : ''}
         ${sinCupos ? 'opacity-60' : ''}
       `}
-      onClick={() => !sinCupos && onClick && onClick(clase)}
+      onClick={() => {
+        if (!sinCupos) {
+          onClick?.(clase);
+        }
+      }}
     >
       {/* Header con ruta curricular */}
       <div
@@ -154,7 +158,7 @@ export function ClassCard({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onClick && onClick(clase);
+              onClick?.(clase);
             }}
             className="
               w-full

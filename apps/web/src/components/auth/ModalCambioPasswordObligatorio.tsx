@@ -51,8 +51,17 @@ export default function ModalCambioPasswordObligatorio({
     try {
       await cambiarPassword(passwordActual, nuevaPassword);
       // El modal se cerrará automáticamente cuando debe_cambiar_password sea false
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al cambiar la contraseña');
+    } catch (error: unknown) {
+      const apiMessage =
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        typeof (error as { response?: { data?: { message?: string } } }).response?.data?.message ===
+          'string'
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null;
+
+      setError(apiMessage || 'Error al cambiar la contraseña');
     }
   };
 

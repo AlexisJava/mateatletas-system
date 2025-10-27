@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Award, Trophy, CheckCircle, Users } from 'lucide-react';
 import apiClient from '@/lib/axios';
@@ -237,10 +238,13 @@ export function ModalAsignarInsignia({
                       className="bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-4 border-2 border-slate-600 hover:border-purple-500 transition-all text-left flex items-center gap-4"
                     >
                       <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-purple-500/50">
-                        <img
+                        <Image
                           src={`https://api.dicebear.com/7.x/${estudiante.avatar_url}/svg?seed=${estudiante.id}`}
                           alt={estudiante.nombre}
+                          width={56}
+                          height={56}
                           className="w-full h-full object-cover"
+                          sizes="56px"
                         />
                       </div>
                       <div className="flex-1">
@@ -269,10 +273,13 @@ export function ModalAsignarInsignia({
                 <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-4 border-2 border-purple-500/50 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-purple-500">
-                      <img
+                      <Image
                         src={`https://api.dicebear.com/7.x/${estudianteSeleccionado!.avatar_url}/svg?seed=${estudianteSeleccionado!.id}`}
                         alt={estudianteSeleccionado!.nombre}
+                        width={64}
+                        height={64}
                         className="w-full h-full object-cover"
+                        sizes="64px"
                       />
                     </div>
                     <div>

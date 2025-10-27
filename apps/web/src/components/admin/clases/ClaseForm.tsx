@@ -21,7 +21,7 @@ interface ClaseFormProps {
   };
   docentes: DocenteOption[];
   sectores: SectorOption[];
-  onFieldChange: (field: string, value: string | number) => void;
+  onFieldChange: (_field: string, _value: string | number) => void;
   onSubmit: () => void;
   onCancel: () => void;
   isLoading?: boolean;

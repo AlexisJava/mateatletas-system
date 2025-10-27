@@ -50,8 +50,8 @@ export default function UsuariosPage() {
   });
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    void fetchUsers();
+  }, [fetchUsers]);
 
   // Filtrar usuarios según el tab activo
   const tutores = users.filter(u => u.role === 'tutor');
@@ -196,10 +196,10 @@ export default function UsuariosPage() {
     }
   };
 
-  const handleUpdateDocente = async (id: string, data: Partial<Docente>) => {
+  const handleUpdateDocente = async (docenteId: string, data: Partial<Docente>) => {
     setFormLoading(true);
     try {
-      await docentesApi.update(id, data);
+      await docentesApi.update(docenteId, data);
       await fetchUsers();
       setModalType(null);
       setSelectedDocente(null);

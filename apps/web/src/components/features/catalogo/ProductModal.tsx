@@ -22,7 +22,7 @@ interface ProductModalProps {
   producto: Producto | null;
   isOpen: boolean;
   onClose: () => void;
-  onComprar?: (producto: Producto) => void;
+  onComprar?: (_producto: Producto) => void;
 }
 
 export function ProductModal({

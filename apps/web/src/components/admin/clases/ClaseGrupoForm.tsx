@@ -38,7 +38,10 @@ interface ClaseGrupoFormProps {
   sectores: SectorOption[];
   rutasCurriculares: RutaCurricularOption[];
   estudiantes: EstudianteOption[];
-  onFieldChange: (field: string, value: any) => void;
+  onFieldChange: (
+    _field: keyof (Omit<CrearClaseGrupoDto, 'estudiantes_ids'> & { estudiantes_ids: string[] }),
+    _value: string | number | string[] | TipoClaseGrupo | DiaSemana | undefined,
+  ) => void;
   onSubmit: () => void;
   onCancel: () => void;
   isLoading?: boolean;

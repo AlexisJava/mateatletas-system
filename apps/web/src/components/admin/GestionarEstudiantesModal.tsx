@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, UserPlus, Users, Search } from 'lucide-react';
 import axios from '@/lib/axios';
 
@@ -71,11 +71,7 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
     tutor_telefono: '',
   });
 
-  useEffect(() => {
-    fetchData();
-  }, [claseId]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -84,11 +80,12 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
         axios.get('/admin/estudiantes'),
       ]);
 
-      setClaseData(claseResponse.data || claseResponse);
+      const clase = (claseResponse as ClaseEstudiantes) ?? null;
+      setClaseData(clase);
       // El backend devuelve { data: [], metadata: {} }
-      const estudiantes = estudiantesResponse?.data
-        ? estudiantesResponse.data
-        : (Array.isArray(estudiantesResponse) ? estudiantesResponse : []);
+      const estudiantes = (Array.isArray(estudiantesResponse)
+        ? estudiantesResponse
+        : (estudiantesResponse as { data?: Estudiante[] })?.data) ?? [];
       setTodosEstudiantes(estudiantes as Estudiante[]);
     } catch {
       setError('Error al cargar datos');
@@ -96,7 +93,11 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
     } finally {
       setLoading(false);
     }
-  };
+  }, [claseId]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
   const handleAsignarEstudiantes = async () => {
     if (selectedEstudiantes.length === 0) return;
@@ -139,8 +140,7 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
         sector_id: claseData?.docente?.sector?.id || undefined,
       };
 
-      const response = await axios.post<Estudiante>('/admin/estudiantes', dataToSend);
-      const nuevoEstudiante = response.data;
+      const nuevoEstudiante = await axios.post<Estudiante>('/admin/estudiantes', dataToSend);
 
       // Validar que la respuesta tenga el estudiante
       if (!nuevoEstudiante || !nuevoEstudiante.id) {

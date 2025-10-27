@@ -33,7 +33,7 @@ interface ClassReservationModalProps {
   estudiantes: Estudiante[];
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (claseId: string, estudianteId: string) => Promise<void>;
+  onConfirm: (_claseId: string, _estudianteId: string) => Promise<void>;
   isLoading?: boolean;
 }
 

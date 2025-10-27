@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check } from 'lucide-react';
 
@@ -22,7 +23,7 @@ interface AvatarSelectorProps {
   isOpen: boolean;
   onClose: () => void;
   currentAvatar: string;
-  onSelect: (avatarStyle: string) => Promise<void>;
+  onSelect: (_avatarStyle: string) => Promise<void>;
   studentId: string;
 }
 
@@ -161,16 +162,18 @@ export function AvatarSelector({
                         {/* Avatar Preview */}
                         <div className="p-4">
                           <div
-                            className="w-full aspect-square rounded-xl overflow-hidden mb-3"
+                            className="relative w-full aspect-square rounded-xl overflow-hidden mb-3"
                             style={{
                               border: '3px solid #000',
                               background: '#f0f0f0',
                             }}
                           >
-                            <img
+                            <Image
                               src={`https://api.dicebear.com/7.x/${style.id}/svg?seed=${studentId}`}
                               alt={style.name}
-                              className="w-full h-full object-cover"
+                              fill
+                              sizes="(max-width: 768px) 50vw, 25vw"
+                              className="object-cover"
                             />
                           </div>
 
