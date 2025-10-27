@@ -120,7 +120,7 @@ export default function AdminReportesPage() {
     const reporte: ReporteAdmin = {
       stats,
       usuarios: users,
-      clases,
+      classes,
       productos: [],
       fechaInicio: dateRange.start,
       fechaFin: dateRange.end,
