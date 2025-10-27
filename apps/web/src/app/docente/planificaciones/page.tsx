@@ -25,7 +25,7 @@ export default function DocentePlanificacionesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showProgressModal, setShowProgressModal] = useState(false);
-  // const [selectedAsignacion, setSelectedAsignacion] = useState<string | null>(null);
+  const [selectedAsignacion, setSelectedAsignacion] = useState<string | null>(null);
   const [progresos, setProgresos] = useState<ProgresoEstudiante[]>([]);
 
   useEffect(() => {

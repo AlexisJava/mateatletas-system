@@ -69,15 +69,21 @@ export class TokenBlacklistService {
   ): Promise<void> {
     try {
       // 1. Decodificar el token para obtener metadata
-      const decoded = this.jwtService.decode(token) as { exp?: number; sub?: string; id?: string } | null;
-
-      if (!decoded || !decoded.exp) {
+      const decodedRaw: unknown = this.jwtService.decode(token);
+      if (!isDecodedToken(decodedRaw) || !decodedRaw.exp) {
         this.logger.warn(`Intento de blacklist de token inválido: ${reason}`);
         return;
       }
+      const decoded: DecodedToken = decodedRaw;
 
       // 2. Calcular cuánto tiempo falta para que expire el token
       const now = Math.floor(Date.now() / 1000); // Tiempo actual en segundos
+
+      if (!decoded.exp) {
+        this.logger.warn('Token sin campo exp, no se puede blacklist');
+        return;
+      }
+
       const expiresIn = decoded.exp - now; // Segundos hasta expiración
 
       if (expiresIn <= 0) {
@@ -132,7 +138,9 @@ export class TokenBlacklistService {
   async isBlacklisted(token: string): Promise<boolean> {
     try {
       const blacklistKey = `blacklist:token:${token}`;
-      const blacklistedData = await this.cacheManager.get(blacklistKey);
+      const blacklistedData = await this.cacheManager.get<
+        TokenBlacklistEntry | undefined
+      >(blacklistKey);
 
       if (blacklistedData) {
         this.logger.warn(
@@ -247,3 +255,28 @@ export class TokenBlacklistService {
     }
   }
 }
+
+interface DecodedToken {
+  exp?: number;
+  sub?: string;
+  id?: string;
+}
+
+interface TokenBlacklistEntry {
+  reason: string;
+  blacklistedAt: string;
+  userId?: string;
+  expiresAt: string;
+}
+
+const isDecodedToken = (value: unknown): value is DecodedToken => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return (
+    (record.exp === undefined || typeof record.exp === 'number') &&
+    (record.sub === undefined || typeof record.sub === 'string') &&
+    (record.id === undefined || typeof record.id === 'string')
+  );
+};

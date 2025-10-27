@@ -5,6 +5,7 @@ import { DatabaseModule } from '../core/database/database.module';
 import { PlanificacionesController } from './infrastructure/planificaciones.controller';
 import { GruposController } from './infrastructure/grupos.controller';
 import { PrismaPlanificacionRepository } from './infrastructure/prisma-planificacion.repository';
+import { GruposService } from './infrastructure/grupos.service';
 
 // Application (Use Cases)
 import { GetPlanificacionesUseCase } from './application/use-cases/get-planificaciones.use-case';
@@ -41,6 +42,9 @@ import { DeleteActividadUseCase } from './application/use-cases/delete-actividad
       useExisting: PrismaPlanificacionRepository,
     },
 
+    // Services
+    GruposService, // Servicio para grupos pedagógicos
+
     // Use Cases
     GetPlanificacionesUseCase, // SLICE 1
     CreatePlanificacionUseCase, // SLICE 2
@@ -53,6 +57,7 @@ import { DeleteActividadUseCase } from './application/use-cases/delete-actividad
   ],
   exports: [
     'IPlanificacionRepository',
+    GruposService, // Exportar para uso en ClasesModule
     GetPlanificacionesUseCase,
     CreatePlanificacionUseCase,
     GetPlanificacionByIdUseCase,

@@ -1,7 +1,4 @@
-import {
-  registerDecorator,
-  ValidationOptions,
-} from 'class-validator';
+import { registerDecorator, ValidationOptions } from 'class-validator';
 
 /**
  * Validador custom: verifica que un teléfono sea válido para Argentina
@@ -20,10 +17,16 @@ export function IsPhoneNumberAR(validationOptions?: ValidationOptions) {
       propertyName: propertyName,
       options: validationOptions,
       validator: {
-        validate(value: any) {
-          if (!value) return true; // Si es opcional, permitir vacío
+        validate(value: unknown) {
+          if (value === null || value === undefined || value === '') {
+            return true; // Si es opcional, permitir vacío
+          }
 
-          const phone = String(value).replace(/[\s\-\(\)]/g, ''); // Eliminar espacios, guiones, paréntesis
+          if (typeof value !== 'string' && typeof value !== 'number') {
+            return false;
+          }
+
+          const phone = String(value).replace(/[\s-()]/g, ''); // Eliminar espacios, guiones, paréntesis
 
           // Patrones aceptados:
           // +549111234567 (11 dígitos con +549)

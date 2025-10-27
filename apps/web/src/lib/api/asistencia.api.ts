@@ -224,3 +224,56 @@ export const getReportesDocente = async (): Promise<ReportesDocente> => {
     throw error;
   }
 };
+
+/**
+ * =============================================================================
+ * ASISTENCIA BATCH - Para tomar asistencia de múltiples estudiantes
+ * =============================================================================
+ */
+
+export type EstadoAsistencia = 'Presente' | 'Ausente' | 'Justificado';
+
+export interface AsistenciaEstudianteItem {
+  estudiante_id: string;
+  estado: EstadoAsistencia;
+  observaciones?: string;
+}
+
+export interface TomarAsistenciaBatchDto {
+  clase_grupo_id: string;
+  fecha: string; // YYYY-MM-DD
+  asistencias: AsistenciaEstudianteItem[];
+}
+
+export interface AsistenciaBatchResponse {
+  success: boolean;
+  registrosCreados: number;
+  registrosActualizados: number;
+  estudiantes: Array<{
+    estudiante_id: string;
+    nombre: string;
+    apellido: string;
+    estado: EstadoAsistencia;
+    observaciones: string | null;
+  }>;
+  mensaje: string;
+}
+
+/**
+ * Tomar asistencia de múltiples estudiantes en un solo request
+ * POST /api/asistencia/clase-grupo/batch
+ */
+export const tomarAsistenciaBatch = async (
+  data: TomarAsistenciaBatchDto
+): Promise<AsistenciaBatchResponse> => {
+  try {
+    const response = await axios.post<AsistenciaBatchResponse>(
+      '/asistencia/clase-grupo/batch',
+      data
+    );
+    return response;
+  } catch (error) {
+    console.error('Error al tomar asistencia batch:', error);
+    throw error;
+  }
+};

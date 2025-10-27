@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { EstadoAsistencia } from '@prisma/client';
 import { AsistenciaService } from './asistencia.service';
 import { AsistenciaReportesService } from './asistencia-reportes.service';
 import { MarcarAsistenciaDto } from './dto/marcar-asistencia.dto';
@@ -147,13 +148,43 @@ export class AsistenciaController {
     @GetUser() user: AuthUser,
   ) {
     // El estudianteId se obtiene del usuario autenticado
-    const estudianteId = user.role === 'estudiante' ? user.id : user.id;
+    const estudianteId = user.id;
+
+    const estado = dto.presente
+      ? EstadoAsistencia.Presente
+      : EstadoAsistencia.Ausente;
+
+    const asistenciaDto: MarcarAsistenciaDto = {
+      estado,
+    };
 
     return this.asistenciaService.marcarAsistencia(
       dto.claseId,
       estudianteId,
-      { estado: dto.presente ? 'PRESENTE' : 'AUSENTE' } as any,
+      asistenciaDto,
       null, // No es marcado por un docente, es auto-registro
+    );
+  }
+
+  /**
+   * Tomar asistencia de múltiples estudiantes en ClaseGrupo (batch)
+   * POST /api/asistencia/clase-grupo/batch
+   * Rol: Docente
+   *
+   * Usado en el modo "Clase en Vivo" del portal docente
+   * Permite tomar asistencia de todos los estudiantes en una sola request
+   */
+  @Post('clase-grupo/batch')
+  @Roles(Role.Docente)
+  async tomarAsistenciaBatch(
+    @Body() dto: import('./dto/tomar-asistencia-batch.dto').TomarAsistenciaBatchDto,
+    @GetUser() user: AuthUser,
+  ) {
+    return this.asistenciaService.tomarAsistenciaClaseGrupoBatch(
+      dto.clase_grupo_id,
+      dto.fecha,
+      dto.asistencias,
+      user.id,
     );
   }
 }

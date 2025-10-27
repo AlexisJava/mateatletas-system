@@ -7,18 +7,14 @@ import { ThemeProvider, useTheme } from '@/lib/theme/ThemeContext';
 import { ToastProvider } from '@/components/ui/Toast';
 import {
   LayoutDashboard,
-  BookOpen,
   Calendar,
   FileText,
-  BarChart3,
-
   LogOut,
   Sun,
   Moon,
   Bell,
   Menu,
   X,
-  Sparkles,
 } from 'lucide-react';
 
 /**
@@ -35,11 +31,8 @@ import {
 
 const navItems = [
   { href: '/docente/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/docente/mis-clases', label: 'Mis Clases', icon: BookOpen },
   { href: '/docente/calendario', label: 'Calendario', icon: Calendar },
   { href: '/docente/observaciones', label: 'Observaciones', icon: FileText },
-  { href: '/docente/reportes', label: 'Reportes', icon: BarChart3 },
-  { href: '/docente/planificador', label: 'Planificador AI', icon: Sparkles },
 ];
 
 export default function DocenteLayout({ children }: { children: React.ReactNode }) {
@@ -230,14 +223,42 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
                     <ThemeToggle />
-                    <NotificationButton count={3} />
+                    <NotificationButton count={0} />
                   </div>
                 </div>
               </header>
 
               {/* Page Content */}
-              <main className="flex-1 overflow-y-auto">
-                <div className="max-w-7xl mx-auto p-6">
+              <main className="flex-1 relative overflow-hidden">
+                {/* BLOBS ANIMADOS DE FONDO - MEGA BRUTAL */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <div
+                    className="absolute top-0 -left-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-blob"
+                    style={{
+                      animation: 'blob 20s infinite ease-in-out',
+                    }}
+                  />
+                  <div
+                    className="absolute top-40 right-0 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-3xl animate-blob"
+                    style={{
+                      animation: 'blob 25s infinite ease-in-out 5s',
+                    }}
+                  />
+                  <div
+                    className="absolute bottom-20 left-1/3 w-[400px] h-[400px] bg-pink-500/15 rounded-full blur-3xl animate-blob"
+                    style={{
+                      animation: 'blob 18s infinite ease-in-out 2s',
+                    }}
+                  />
+                  <div
+                    className="absolute -bottom-40 -right-20 w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-3xl animate-blob"
+                    style={{
+                      animation: 'blob 22s infinite ease-in-out 7s',
+                    }}
+                  />
+                </div>
+
+                <div className="h-full w-full px-8 py-6 relative z-10 overflow-y-auto">
                   {children}
                 </div>
               </main>
