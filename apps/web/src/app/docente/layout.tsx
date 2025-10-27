@@ -230,7 +230,7 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
                   {/* Actions */}
                   <div className="flex items-center gap-2">
                     <ThemeToggle />
-                    <NotificationButton count={3} />
+                    <NotificationButton count={0} />
                   </div>
                 </div>
               </header>
