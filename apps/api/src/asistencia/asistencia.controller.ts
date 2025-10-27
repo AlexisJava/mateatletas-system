@@ -165,4 +165,26 @@ export class AsistenciaController {
       null, // No es marcado por un docente, es auto-registro
     );
   }
+
+  /**
+   * Tomar asistencia de múltiples estudiantes en ClaseGrupo (batch)
+   * POST /api/asistencia/clase-grupo/batch
+   * Rol: Docente
+   *
+   * Usado en el modo "Clase en Vivo" del portal docente
+   * Permite tomar asistencia de todos los estudiantes en una sola request
+   */
+  @Post('clase-grupo/batch')
+  @Roles(Role.Docente)
+  async tomarAsistenciaBatch(
+    @Body() dto: import('./dto/tomar-asistencia-batch.dto').TomarAsistenciaBatchDto,
+    @GetUser() user: AuthUser,
+  ) {
+    return this.asistenciaService.tomarAsistenciaClaseGrupoBatch(
+      dto.clase_grupo_id,
+      dto.fecha,
+      dto.asistencias,
+      user.id,
+    );
+  }
 }

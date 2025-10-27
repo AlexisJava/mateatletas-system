@@ -25,7 +25,9 @@ export function parseUserRoles(
   // Si ya es un array, retornarlo directamente
   if (Array.isArray(roles)) {
     // Filtrar solo elementos válidos como Role (strings)
-    return roles.filter(isRole) as Role[];
+    // TypeScript no puede inferir correctamente el type guard en arrays de JsonValue
+    // Usamos as para hacer un type assertion seguro después de validar con el type guard
+    return roles.filter((item): item is Role => isRole(item)) as Role[];
   }
 
   // Si es un string, intentar parsearlo como JSON

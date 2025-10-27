@@ -194,4 +194,147 @@ export class AsistenciaService {
       lista,
     };
   }
+
+  /**
+   * Tomar asistencia de múltiples estudiantes en un ClaseGrupo (batch)
+   * Usado en el modo "Clase en Vivo" del portal docente
+   * Crea o actualiza registros de asistencia usando transacción
+   */
+  async tomarAsistenciaClaseGrupoBatch(
+    clase_grupo_id: string,
+    fecha: string,
+    asistencias: Array<{
+      estudiante_id: string;
+      estado: import('@prisma/client').EstadoAsistencia;
+      observaciones?: string;
+    }>,
+    docente_id: string,
+  ): Promise<{
+    success: boolean;
+    registrosCreados: number;
+    registrosActualizados: number;
+    estudiantes: Array<{
+      estudiante_id: string;
+      nombre: string;
+      apellido: string;
+      estado: import('@prisma/client').EstadoAsistencia;
+      observaciones: string | null;
+    }>;
+    mensaje: string;
+  }> {
+    // 1. Verificar que el ClaseGrupo existe y el docente es el titular
+    const claseGrupo = await this.prisma.claseGrupo.findUnique({
+      where: { id: clase_grupo_id },
+    });
+
+    if (!claseGrupo) {
+      throw new NotFoundException('Grupo de clase no encontrado');
+    }
+
+    if (claseGrupo.docente_id !== docente_id) {
+      throw new ForbiddenException(
+        'Solo el docente titular puede tomar asistencia de este grupo',
+      );
+    }
+
+    // 2. Verificar que todos los estudiantes están inscritos en el grupo
+    const estudiantesIds = asistencias.map((a) => a.estudiante_id);
+    const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
+      where: {
+        clase_grupo_id,
+        estudiante_id: { in: estudiantesIds },
+        fecha_baja: null, // Solo inscritos activos
+      },
+      include: {
+        estudiante: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+      },
+    });
+
+    if (inscripciones.length !== estudiantesIds.length) {
+      const inscritosIds = inscripciones.map((i) => i.estudiante_id);
+      const noInscritos = estudiantesIds.filter(
+        (id) => !inscritosIds.includes(id),
+      );
+      throw new BadRequestException(
+        `Los siguientes estudiantes no están inscritos en el grupo: ${noInscritos.join(', ')}`,
+      );
+    }
+
+    // 3. Usar transacción para crear/actualizar registros de asistencia
+    let registrosCreados = 0;
+    let registrosActualizados = 0;
+
+    const fechaISO = new Date(fecha);
+
+    const resultados = await this.prisma.$transaction(
+      asistencias.map((asistencia) => {
+        return this.prisma.asistenciaClaseGrupo.upsert({
+          where: {
+            clase_grupo_id_estudiante_id_fecha: {
+              clase_grupo_id,
+              estudiante_id: asistencia.estudiante_id,
+              fecha: fechaISO,
+            },
+          },
+          create: {
+            clase_grupo_id,
+            estudiante_id: asistencia.estudiante_id,
+            fecha: fechaISO,
+            estado: asistencia.estado,
+            observaciones: asistencia.observaciones || null,
+          },
+          update: {
+            estado: asistencia.estado,
+            observaciones: asistencia.observaciones || null,
+          },
+          include: {
+            estudiante: {
+              select: {
+                id: true,
+                nombre: true,
+                apellido: true,
+              },
+            },
+          },
+        });
+      }),
+    );
+
+    // Contar cuántos fueron creados vs actualizados
+    // (Prisma no nos dice directamente, así que revisamos si existían antes)
+    const existentes = await this.prisma.asistenciaClaseGrupo.findMany({
+      where: {
+        clase_grupo_id,
+        estudiante_id: { in: estudiantesIds },
+        fecha: fechaISO,
+        createdAt: { lt: new Date(Date.now() - 1000) }, // Creados hace más de 1 segundo
+      },
+    });
+
+    registrosActualizados = existentes.length;
+    registrosCreados = asistencias.length - registrosActualizados;
+
+    // 4. Formatear response
+    const estudiantesResponse = resultados.map((r) => ({
+      estudiante_id: r.estudiante.id,
+      nombre: r.estudiante.nombre,
+      apellido: r.estudiante.apellido,
+      estado: r.estado,
+      observaciones: r.observaciones,
+    }));
+
+    return {
+      success: true,
+      registrosCreados,
+      registrosActualizados,
+      estudiantes: estudiantesResponse,
+      mensaje: `Asistencia guardada exitosamente para ${asistencias.length} estudiantes`,
+    };
+  }
 }
