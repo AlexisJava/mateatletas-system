@@ -161,9 +161,9 @@ export class EstudiantesController {
   async updateAvatar(
     @Param('id') id: string,
     @Body() body: { avatar_url: string },
-    @GetUser() user: AuthUser,
+    @GetUser() _user: AuthUser,
   ) {
-    // Nota: No necesitamos usar 'user' aquí porque el guard ya validó ownership
+    // Nota: No necesitamos usar '_user' aquí porque el guard ya validó ownership
     // El guard se ejecuta ANTES de este método y rechaza requests no autorizados
     return this.estudiantesService.updateAvatar(id, body.avatar_url);
   }
