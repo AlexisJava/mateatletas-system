@@ -95,11 +95,7 @@ export class ClasesService {
    * Obtener calendario de clases para un tutor (filtrado por mes/año)
    * DELEGACIÓN: ClasesManagementService
    */
-  async obtenerCalendarioTutor(
-    tutorId: string,
-    mes?: number,
-    anio?: number,
-  ) {
+  async obtenerCalendarioTutor(tutorId: string, mes?: number, anio?: number) {
     return this.managementService.obtenerCalendarioTutor(tutorId, mes, anio);
   }
 
@@ -143,7 +139,10 @@ export class ClasesService {
    * DELEGACIÓN: ClasesManagementService
    */
   async asignarEstudiantesAClase(claseId: string, estudianteIds: string[]) {
-    return this.managementService.asignarEstudiantesAClase(claseId, estudianteIds);
+    return this.managementService.asignarEstudiantesAClase(
+      claseId,
+      estudianteIds,
+    );
   }
 
   /**

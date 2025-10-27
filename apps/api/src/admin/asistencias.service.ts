@@ -5,7 +5,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { EstadoAsistencia } from '@prisma/client';
-import { RegistrarAsistenciasDto, ActualizarAsistenciaDto, FiltrosHistorialAsistenciasDto } from './dto/asistencias.dto';
+import {
+  RegistrarAsistenciasDto,
+  ActualizarAsistenciaDto,
+  FiltrosHistorialAsistenciasDto,
+} from './dto/asistencias.dto';
 
 @Injectable()
 export class AsistenciasService {

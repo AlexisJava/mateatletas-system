@@ -1,4 +1,11 @@
-import { IsString, IsArray, IsBoolean, IsNotEmpty, ValidateNested, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  IsBoolean,
+  IsNotEmpty,
+  ValidateNested,
+  IsObject,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -30,10 +37,11 @@ export class CalcularPrecioRequestDto {
   estudiantesIds!: string[];
 
   @ApiProperty({
-    description: 'Productos por estudiante (key: estudianteId, value: array de productoIds)',
+    description:
+      'Productos por estudiante (key: estudianteId, value: array de productoIds)',
     example: {
-      'clt2abc123': ['clt3abc123', 'clt3abc456'],
-      'clt2abc456': ['clt3abc123'],
+      clt2abc123: ['clt3abc123', 'clt3abc456'],
+      clt2abc456: ['clt3abc123'],
     },
   })
   @IsObject()

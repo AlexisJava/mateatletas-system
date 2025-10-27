@@ -8,8 +8,15 @@ import { PrismaService } from '../core/database/prisma.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { QueryEstudiantesDto } from './dto/query-estudiantes.dto';
-import { CrearEstudiantesConTutorDto, CredencialesGeneradas } from './dto/crear-estudiantes-con-tutor.dto';
-import { generarUsername, generarPasswordTemporal, hashPassword } from './utils/credenciales.utils';
+import {
+  CrearEstudiantesConTutorDto,
+  CredencialesGeneradas,
+} from './dto/crear-estudiantes-con-tutor.dto';
+import {
+  generarUsername,
+  generarPasswordTemporal,
+  hashPassword,
+} from './utils/credenciales.utils';
 
 /**
  * Service para gestionar operaciones CRUD de estudiantes
@@ -591,7 +598,9 @@ export class EstudiantesService {
     });
 
     if (existeDuplicado) {
-      throw new ConflictException('Este estudiante ya está inscrito en el sector destino');
+      throw new ConflictException(
+        'Este estudiante ya está inscrito en el sector destino',
+      );
     }
 
     // DUPLICAR estudiante en el nuevo sector (crear un nuevo registro)
@@ -636,7 +645,9 @@ export class EstudiantesService {
     });
 
     if (!estudiante) {
-      throw new BadRequestException(`No se encontró un estudiante con email ${email}`);
+      throw new BadRequestException(
+        `No se encontró un estudiante con email ${email}`,
+      );
     }
 
     // Usar el método de copiar por ID
@@ -670,7 +681,9 @@ export class EstudiantesService {
 
     // Validar que la clase pertenece al sector del estudiante
     if (clase.sector_id !== estudiante.sector_id) {
-      throw new BadRequestException('La clase no pertenece al sector del estudiante');
+      throw new BadRequestException(
+        'La clase no pertenece al sector del estudiante',
+      );
     }
 
     // Validar cupos disponibles
@@ -687,7 +700,9 @@ export class EstudiantesService {
     });
 
     if (inscripcionExistente) {
-      throw new ConflictException('El estudiante ya está inscrito en esta clase');
+      throw new ConflictException(
+        'El estudiante ya está inscrito en esta clase',
+      );
     }
 
     // Crear inscripción e incrementar cupos
@@ -750,51 +765,53 @@ export class EstudiantesService {
       }
 
       if (clase.cupos_ocupados >= clase.cupos_maximo) {
-        throw new ConflictException(`La clase ${clase.nombre} no tiene cupos disponibles`);
+        throw new ConflictException(
+          `La clase ${clase.nombre} no tiene cupos disponibles`,
+        );
       }
     }
 
     // Crear inscripciones en transacción
-    const inscripciones = await this.prisma.$transaction(
-      async (prisma) => {
-        const inscripcionesPromises = clasesIds.map(async (claseId) => {
-          // Verificar inscripción duplicada
-          const existente = await prisma.inscripcionClase.findFirst({
-            where: {
-              estudiante_id: estudianteId,
-              clase_id: claseId,
-            },
-          });
-
-          if (existente) {
-            throw new ConflictException('El estudiante ya está inscrito en una de las clases');
-          }
-
-          // Crear inscripción
-          const inscripcion = await prisma.inscripcionClase.create({
-            data: {
-              estudiante_id: estudianteId,
-              clase_id: claseId,
-              tutor_id: estudiante.tutor_id,
-            },
-          });
-
-          // Incrementar cupos
-          await prisma.clase.update({
-            where: { id: claseId },
-            data: {
-              cupos_ocupados: {
-                increment: 1,
-              },
-            },
-          });
-
-          return inscripcion;
+    const inscripciones = await this.prisma.$transaction(async (prisma) => {
+      const inscripcionesPromises = clasesIds.map(async (claseId) => {
+        // Verificar inscripción duplicada
+        const existente = await prisma.inscripcionClase.findFirst({
+          where: {
+            estudiante_id: estudianteId,
+            clase_id: claseId,
+          },
         });
 
-        return await Promise.all(inscripcionesPromises);
-      },
-    );
+        if (existente) {
+          throw new ConflictException(
+            'El estudiante ya está inscrito en una de las clases',
+          );
+        }
+
+        // Crear inscripción
+        const inscripcion = await prisma.inscripcionClase.create({
+          data: {
+            estudiante_id: estudianteId,
+            clase_id: claseId,
+            tutor_id: estudiante.tutor_id,
+          },
+        });
+
+        // Incrementar cupos
+        await prisma.clase.update({
+          where: { id: claseId },
+          data: {
+            cupos_ocupados: {
+              increment: 1,
+            },
+          },
+        });
+
+        return inscripcion;
+      });
+
+      return await Promise.all(inscripcionesPromises);
+    });
 
     return inscripciones;
   }
@@ -832,6 +849,6 @@ export class EstudiantesService {
     });
 
     // Filtrar las que tienen cupos disponibles
-    return clases.filter(clase => clase.cupos_ocupados < clase.cupos_maximo);
+    return clases.filter((clase) => clase.cupos_ocupados < clase.cupos_maximo);
   }
 }

@@ -157,9 +157,7 @@ export class AsistenciaService {
     ]);
 
     // Create a map of attendance by student_id
-    const asistenciaMap = new Map(
-      asistencias.map((a) => [a.estudiante_id, a]),
-    );
+    const asistenciaMap = new Map(asistencias.map((a) => [a.estudiante_id, a]));
 
     // Count states
     let totalPresentes = 0;

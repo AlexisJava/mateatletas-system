@@ -51,7 +51,8 @@ import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
         // En producción: tokens de corta duración (1h) para mayor seguridad
         const nodeEnv = config.get<string>('NODE_ENV') || 'development';
         const defaultExpiration = nodeEnv === 'production' ? '1h' : '7d';
-        const expiresIn = config.get<string>('JWT_EXPIRATION') || defaultExpiration;
+        const expiresIn =
+          config.get<string>('JWT_EXPIRATION') || defaultExpiration;
 
         return {
           secret,
@@ -75,6 +76,11 @@ import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
     TokenBlacklistService,
     TokenBlacklistGuard,
   ],
-  exports: [JwtStrategy, PassportModule, TokenBlacklistService, TokenBlacklistGuard],
+  exports: [
+    JwtStrategy,
+    PassportModule,
+    TokenBlacklistService,
+    TokenBlacklistGuard,
+  ],
 })
 export class AuthModule {}

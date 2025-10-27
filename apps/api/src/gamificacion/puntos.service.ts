@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { EstadoAsistencia } from '@prisma/client';
 
@@ -102,7 +106,9 @@ export class PuntosService {
       }
 
       if (clase.inscripciones.length === 0) {
-        throw new BadRequestException('El estudiante no está inscrito en esta clase');
+        throw new BadRequestException(
+          'El estudiante no está inscrito en esta clase',
+        );
       }
     }
 
@@ -172,9 +178,9 @@ export class PuntosService {
       },
     });
 
-    const puntosAsistencia = asistencias.filter(
-      (a) => a.estado === EstadoAsistencia.Presente,
-    ).length * 10;
+    const puntosAsistencia =
+      asistencias.filter((a) => a.estado === EstadoAsistencia.Presente).length *
+      10;
 
     // Puntos por ruta
     const puntosPorRuta: Record<string, number> = {};

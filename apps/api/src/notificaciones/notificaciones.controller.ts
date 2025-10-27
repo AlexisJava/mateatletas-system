@@ -62,9 +62,8 @@ export class NotificacionesController {
    */
   @Patch('leer-todas')
   async marcarTodasComoLeidas(@GetUser('id') docenteId: string) {
-    const result = await this.notificacionesService.marcarTodasComoLeidas(
-      docenteId,
-    );
+    const result =
+      await this.notificacionesService.marcarTodasComoLeidas(docenteId);
     return {
       message: 'Todas las notificaciones marcadas como leídas',
       count: result.count,

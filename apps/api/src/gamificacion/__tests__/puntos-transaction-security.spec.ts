@@ -83,27 +83,43 @@ describe('PuntosService - Transaction Security', () => {
   describe('SECURITY: Atomicity of otorgarPuntos', () => {
     it('should use transaction to ensure punto creation and estudiante update are atomic', async () => {
       // ✅ TEST: Verificar que se usa $transaction
-      jest.spyOn(prisma.accionPuntuable, 'findUnique').mockResolvedValue(mockAccion as any);
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
+      jest
+        .spyOn(prisma.accionPuntuable, 'findUnique')
+        .mockResolvedValue(mockAccion as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClase as any);
 
       // Mock transaction
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          puntoObtenido: {
-            create: jest.fn().mockResolvedValue(mockPuntoObtenido),
-          },
-          estudiante: {
-            update: jest.fn().mockResolvedValue({
-              ...mockEstudiante,
-              puntos_totales: 150,
-            }),
-          },
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            puntoObtenido: {
+              create: jest.fn().mockResolvedValue(mockPuntoObtenido),
+            },
+            estudiante: {
+              update: jest.fn().mockResolvedValue({
+                ...mockEstudiante,
+                puntos_totales: 150,
+              }),
+            },
+          });
         });
-      });
 
-      await service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test');
+      await service.otorgarPuntos(
+        'doc-1',
+        'est-1',
+        'accion-1',
+        'clase-1',
+        'Test',
+      );
 
       // Verificar que $transaction fue llamado
       expect(prisma.$transaction).toHaveBeenCalled();
@@ -111,27 +127,37 @@ describe('PuntosService - Transaction Security', () => {
 
     it('should rollback both operations if punto creation fails inside transaction', async () => {
       // ✅ TEST: Si falla la creación del punto, no se actualiza el estudiante
-      jest.spyOn(prisma.accionPuntuable, 'findUnique').mockResolvedValue(mockAccion as any);
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
+      jest
+        .spyOn(prisma.accionPuntuable, 'findUnique')
+        .mockResolvedValue(mockAccion as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClase as any);
 
       // Mock transaction que falla en la creación del punto
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        const txMock = {
-          puntoObtenido: {
-            create: jest.fn().mockRejectedValue(new Error('Database error')),
-          },
-          estudiante: {
-            update: jest.fn(),
-          },
-        };
-        return callback(txMock);
-      });
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          const txMock = {
+            puntoObtenido: {
+              create: jest.fn().mockRejectedValue(new Error('Database error')),
+            },
+            estudiante: {
+              update: jest.fn(),
+            },
+          };
+          return callback(txMock);
+        });
 
       // Debe lanzar error y NO actualizar estudiante
       await expect(
-        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test')
+        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test'),
       ).rejects.toThrow('Database error');
 
       // Verificar que la transacción fue llamada pero falló
@@ -140,27 +166,37 @@ describe('PuntosService - Transaction Security', () => {
 
     it('should rollback both operations if estudiante update fails inside transaction', async () => {
       // ✅ TEST: Si falla la actualización del estudiante, se revierte el punto creado
-      jest.spyOn(prisma.accionPuntuable, 'findUnique').mockResolvedValue(mockAccion as any);
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
+      jest
+        .spyOn(prisma.accionPuntuable, 'findUnique')
+        .mockResolvedValue(mockAccion as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClase as any);
 
       // Mock transaction que falla en la actualización del estudiante
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        const txMock = {
-          puntoObtenido: {
-            create: jest.fn().mockResolvedValue(mockPuntoObtenido),
-          },
-          estudiante: {
-            update: jest.fn().mockRejectedValue(new Error('Update failed')),
-          },
-        };
-        return callback(txMock);
-      });
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          const txMock = {
+            puntoObtenido: {
+              create: jest.fn().mockResolvedValue(mockPuntoObtenido),
+            },
+            estudiante: {
+              update: jest.fn().mockRejectedValue(new Error('Update failed')),
+            },
+          };
+          return callback(txMock);
+        });
 
       // Debe lanzar error y NO dejar punto huérfano
       await expect(
-        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test')
+        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test'),
       ).rejects.toThrow('Update failed');
 
       // Verificar que la transacción fue llamada pero falló
@@ -173,7 +209,13 @@ describe('PuntosService - Transaction Security', () => {
 
       // No debe llamar $transaction si falla validación previa
       await expect(
-        service.otorgarPuntos('doc-1', 'est-1', 'accion-invalid', 'clase-1', 'Test')
+        service.otorgarPuntos(
+          'doc-1',
+          'est-1',
+          'accion-invalid',
+          'clase-1',
+          'Test',
+        ),
       ).rejects.toThrow(NotFoundException);
 
       expect(prisma.$transaction).not.toHaveBeenCalled();
@@ -189,66 +231,102 @@ describe('PuntosService - Transaction Security', () => {
       } as any);
 
       await expect(
-        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test')
+        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test'),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test')
+        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test'),
       ).rejects.toThrow('Acción puntuable no encontrada o inactiva');
     });
 
     it('should still validate estudiante exists', async () => {
       // ✅ Test de regresión
-      jest.spyOn(prisma.accionPuntuable, 'findUnique').mockResolvedValue(mockAccion as any);
+      jest
+        .spyOn(prisma.accionPuntuable, 'findUnique')
+        .mockResolvedValue(mockAccion as any);
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
       await expect(
-        service.otorgarPuntos('doc-1', 'est-123', 'accion-1', 'clase-1', 'Test')
+        service.otorgarPuntos(
+          'doc-1',
+          'est-123',
+          'accion-1',
+          'clase-1',
+          'Test',
+        ),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        service.otorgarPuntos('doc-1', 'est-123', 'accion-1', 'clase-1', 'Test')
+        service.otorgarPuntos(
+          'doc-1',
+          'est-123',
+          'accion-1',
+          'clase-1',
+          'Test',
+        ),
       ).rejects.toThrow('Estudiante no encontrado');
     });
 
     it('should still validate estudiante is enrolled in clase when claseId provided', async () => {
       // ✅ Test de regresión
-      jest.spyOn(prisma.accionPuntuable, 'findUnique').mockResolvedValue(mockAccion as any);
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.accionPuntuable, 'findUnique')
+        .mockResolvedValue(mockAccion as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
       jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue({
         id: 'clase-1',
         inscripciones: [], // Estudiante NO inscrito
       } as any);
 
       await expect(
-        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test')
+        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test'),
       ).rejects.toThrow(BadRequestException);
       await expect(
-        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test')
+        service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test'),
       ).rejects.toThrow('El estudiante no está inscrito en esta clase');
     });
 
     it('should successfully award points and return success message', async () => {
       // ✅ Test de regresión: flujo normal debe funcionar
-      jest.spyOn(prisma.accionPuntuable, 'findUnique').mockResolvedValue(mockAccion as any);
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
+      jest
+        .spyOn(prisma.accionPuntuable, 'findUnique')
+        .mockResolvedValue(mockAccion as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClase as any);
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          puntoObtenido: {
-            create: jest.fn().mockResolvedValue(mockPuntoObtenido),
-          },
-          estudiante: {
-            update: jest.fn().mockResolvedValue({
-              ...mockEstudiante,
-              puntos_totales: 150,
-            }),
-          },
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            puntoObtenido: {
+              create: jest.fn().mockResolvedValue(mockPuntoObtenido),
+            },
+            estudiante: {
+              update: jest.fn().mockResolvedValue({
+                ...mockEstudiante,
+                puntos_totales: 150,
+              }),
+            },
+          });
         });
-      });
 
-      const result = await service.otorgarPuntos('doc-1', 'est-1', 'accion-1', 'clase-1', 'Test');
+      const result = await service.otorgarPuntos(
+        'doc-1',
+        'est-1',
+        'accion-1',
+        'clase-1',
+        'Test',
+      );
 
       expect(result.success).toBe(true);
       expect(result.mensaje).toContain('50 puntos');

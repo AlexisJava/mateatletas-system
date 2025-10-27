@@ -22,7 +22,9 @@ import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
  * - Siempre usar transacciones para operaciones que modifican múltiples tablas
  */
 @Injectable()
-export class ConfiguracionPreciosRepository implements IConfiguracionPreciosRepository {
+export class ConfiguracionPreciosRepository
+  implements IConfiguracionPreciosRepository
+{
   constructor(private readonly prisma: PrismaService) {}
 
   /**
@@ -55,7 +57,9 @@ export class ConfiguracionPreciosRepository implements IConfiguracionPreciosRepo
     });
 
     if (!configActual) {
-      throw new Error('No se encontró la configuración de precios para actualizar');
+      throw new Error(
+        'No se encontró la configuración de precios para actualizar',
+      );
     }
 
     // Preparar datos para actualización
@@ -92,7 +96,9 @@ export class ConfiguracionPreciosRepository implements IConfiguracionPreciosRepo
   /**
    * Obtiene el historial de cambios de precios
    */
-  async obtenerHistorialCambios(limit: number = 50): Promise<HistorialCambio[]> {
+  async obtenerHistorialCambios(
+    limit: number = 50,
+  ): Promise<HistorialCambio[]> {
     const historial = await this.prisma.historialCambioPrecios.findMany({
       where: { configuracion_id: 'singleton' },
       orderBy: { fecha_cambio: 'desc' },
@@ -119,12 +125,24 @@ export class ConfiguracionPreciosRepository implements IConfiguracionPreciosRepo
    */
   private mapearPrismaADomain(config: any): ConfiguracionPrecios {
     return {
-      precioClubMatematicas: new Decimal(config.precio_club_matematicas.toString()),
-      precioCursosEspecializados: new Decimal(config.precio_cursos_especializados.toString()),
-      precioMultipleActividades: new Decimal(config.precio_multiple_actividades.toString()),
-      precioHermanosBasico: new Decimal(config.precio_hermanos_basico.toString()),
-      precioHermanosMultiple: new Decimal(config.precio_hermanos_multiple.toString()),
-      descuentoAacreaPorcentaje: new Decimal(config.descuento_aacrea_porcentaje.toString()),
+      precioClubMatematicas: new Decimal(
+        config.precio_club_matematicas.toString(),
+      ),
+      precioCursosEspecializados: new Decimal(
+        config.precio_cursos_especializados.toString(),
+      ),
+      precioMultipleActividades: new Decimal(
+        config.precio_multiple_actividades.toString(),
+      ),
+      precioHermanosBasico: new Decimal(
+        config.precio_hermanos_basico.toString(),
+      ),
+      precioHermanosMultiple: new Decimal(
+        config.precio_hermanos_multiple.toString(),
+      ),
+      descuentoAacreaPorcentaje: new Decimal(
+        config.descuento_aacrea_porcentaje.toString(),
+      ),
       descuentoAacreaActivo: config.descuento_aacrea_activo,
     };
   }
@@ -133,14 +151,17 @@ export class ConfiguracionPreciosRepository implements IConfiguracionPreciosRepo
    * Convierte de tipos del Domain a tipos de Prisma
    * Prepara objeto para update/create de Prisma
    */
-  private mapearDomainAPrisma(config: Partial<ConfiguracionPrecios>): Record<string, any> {
+  private mapearDomainAPrisma(
+    config: Partial<ConfiguracionPrecios>,
+  ): Record<string, any> {
     const resultado: Record<string, any> = {};
 
     if (config.precioClubMatematicas !== undefined) {
       resultado.precio_club_matematicas = config.precioClubMatematicas;
     }
     if (config.precioCursosEspecializados !== undefined) {
-      resultado.precio_cursos_especializados = config.precioCursosEspecializados;
+      resultado.precio_cursos_especializados =
+        config.precioCursosEspecializados;
     }
     if (config.precioMultipleActividades !== undefined) {
       resultado.precio_multiple_actividades = config.precioMultipleActividades;
@@ -165,14 +186,19 @@ export class ConfiguracionPreciosRepository implements IConfiguracionPreciosRepo
    * Extrae valores para guardar en el historial
    * Convierte Decimals a strings para almacenamiento en JSON
    */
-  private extraerValoresParaHistorial(config: any): Record<string, string | boolean> {
+  private extraerValoresParaHistorial(
+    config: any,
+  ): Record<string, string | boolean> {
     return {
       precio_club_matematicas: config.precio_club_matematicas.toString(),
-      precio_cursos_especializados: config.precio_cursos_especializados.toString(),
-      precio_multiple_actividades: config.precio_multiple_actividades.toString(),
+      precio_cursos_especializados:
+        config.precio_cursos_especializados.toString(),
+      precio_multiple_actividades:
+        config.precio_multiple_actividades.toString(),
       precio_hermanos_basico: config.precio_hermanos_basico.toString(),
       precio_hermanos_multiple: config.precio_hermanos_multiple.toString(),
-      descuento_aacrea_porcentaje: config.descuento_aacrea_porcentaje.toString(),
+      descuento_aacrea_porcentaje:
+        config.descuento_aacrea_porcentaje.toString(),
       descuento_aacrea_activo: config.descuento_aacrea_activo,
     };
   }

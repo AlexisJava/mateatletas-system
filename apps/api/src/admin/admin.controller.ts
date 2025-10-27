@@ -27,13 +27,24 @@ import { CrearRutaDto } from './dto/crear-ruta.dto';
 import { ActualizarRutaDto } from './dto/actualizar-ruta.dto';
 import { CrearAlertaDto } from './dto/crear-alerta.dto';
 import { CreateSectorDto, UpdateSectorDto } from './dto/sector.dto';
-import { CreateRutaEspecialidadDto, UpdateRutaEspecialidadDto, AsignarRutasDocenteDto } from './dto/ruta-especialidad.dto';
+import {
+  CreateRutaEspecialidadDto,
+  UpdateRutaEspecialidadDto,
+  AsignarRutasDocenteDto,
+} from './dto/ruta-especialidad.dto';
 import { CrearEstudianteRapidoDto } from './dto/crear-estudiante-rapido.dto';
 import { CrearClaseGrupoDto } from './dto/crear-clase-grupo.dto';
 import { ActualizarClaseGrupoDto } from './dto/actualizar-clase-grupo.dto';
-import { RegistrarAsistenciasDto, ActualizarAsistenciaDto, FiltrosHistorialAsistenciasDto } from './dto/asistencias.dto';
+import {
+  RegistrarAsistenciasDto,
+  ActualizarAsistenciaDto,
+  FiltrosHistorialAsistenciasDto,
+} from './dto/asistencias.dto';
 import { FiltrosClaseGruposDto } from './dto/filtros-clase-grupos.dto';
-import { ResetPasswordDto, ResetPasswordMasivoDto } from './dto/reset-password.dto';
+import {
+  ResetPasswordDto,
+  ResetPasswordMasivoDto,
+} from './dto/reset-password.dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -148,14 +159,18 @@ export class AdminController {
   @Post('credenciales/:usuarioId/reset')
   @ApiOperation({
     summary: 'Resetear contraseña de usuario',
-    description: 'Genera nueva contraseña temporal y obliga al usuario a cambiarla en el próximo login',
+    description:
+      'Genera nueva contraseña temporal y obliga al usuario a cambiarla en el próximo login',
   })
   @HttpCode(HttpStatus.OK)
   async resetearPassword(
     @Param('usuarioId') usuarioId: string,
     @Body() dto: ResetPasswordDto,
   ) {
-    return this.adminService.resetearPasswordUsuario(usuarioId, dto.tipoUsuario);
+    return this.adminService.resetearPasswordUsuario(
+      usuarioId,
+      dto.tipoUsuario,
+    );
   }
 
   /**
@@ -169,7 +184,8 @@ export class AdminController {
   @Post('credenciales/reset-masivo')
   @ApiOperation({
     summary: 'Resetear contraseñas masivamente',
-    description: 'Resetea contraseñas de múltiples usuarios en una sola operación',
+    description:
+      'Resetea contraseñas de múltiples usuarios en una sola operación',
   })
   @HttpCode(HttpStatus.OK)
   async resetearPasswordMasivo(@Body() dto: ResetPasswordMasivoDto) {
@@ -340,7 +356,10 @@ export class AdminController {
    * Rol: Admin
    */
   @Put('sectores/:id')
-  async actualizarSector(@Param('id') id: string, @Body() data: UpdateSectorDto) {
+  async actualizarSector(
+    @Param('id') id: string,
+    @Body() data: UpdateSectorDto,
+  ) {
     return this.sectoresRutasService.actualizarSector(id, data);
   }
 
@@ -524,8 +543,7 @@ export class AdminController {
   @Get('clase-grupos/:id')
   @ApiOperation({
     summary: 'Obtener detalle de un grupo',
-    description:
-      'Obtiene un ClaseGrupo con todos sus detalles e inscripciones',
+    description: 'Obtiene un ClaseGrupo con todos sus detalles e inscripciones',
   })
   async obtenerClaseGrupo(@Param('id') id: string) {
     return this.claseGruposService.obtenerClaseGrupo(id);
@@ -562,10 +580,7 @@ export class AdminController {
     @Param('id') id: string,
     @Body() body: { estudiantes_ids: string[] },
   ) {
-    return this.claseGruposService.agregarEstudiantes(
-      id,
-      body.estudiantes_ids,
-    );
+    return this.claseGruposService.agregarEstudiantes(id, body.estudiantes_ids);
   }
 
   /**
@@ -607,7 +622,8 @@ export class AdminController {
   @Post('clase-grupos/:id/asistencias')
   @ApiOperation({
     summary: 'Registrar asistencias',
-    description: 'Registra la asistencia de estudiantes para una fecha específica',
+    description:
+      'Registra la asistencia de estudiantes para una fecha específica',
   })
   async registrarAsistencias(
     @Param('id') id: string,
@@ -624,7 +640,8 @@ export class AdminController {
   @Get('clase-grupos/:id/asistencias')
   @ApiOperation({
     summary: 'Obtener asistencias por fecha',
-    description: 'Lista las asistencias de un ClaseGrupo para una fecha específica',
+    description:
+      'Lista las asistencias de un ClaseGrupo para una fecha específica',
   })
   async obtenerAsistenciasPorFecha(
     @Param('id') id: string,
@@ -675,12 +692,16 @@ export class AdminController {
   @Get('clase-grupos/:id/estudiantes/:estudianteId/estadisticas')
   @ApiOperation({
     summary: 'Estadísticas de asistencia de estudiante',
-    description: 'Obtiene las estadísticas de asistencia de un estudiante en un ClaseGrupo',
+    description:
+      'Obtiene las estadísticas de asistencia de un estudiante en un ClaseGrupo',
   })
   async obtenerEstadisticasEstudiante(
     @Param('id') id: string,
     @Param('estudianteId') estudianteId: string,
   ) {
-    return this.asistenciasService.obtenerEstadisticasEstudiante(id, estudianteId);
+    return this.asistenciasService.obtenerEstadisticasEstudiante(
+      id,
+      estudianteId,
+    );
   }
 }

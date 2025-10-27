@@ -159,12 +159,14 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
       jest.spyOn(prisma.equipo, 'findUnique').mockResolvedValue(mockEquipo);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(mockTutor as any);
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          tutor: { create: jest.fn() },
-          estudiante: { create: jest.fn().mockResolvedValue(mockEstudiante) },
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            tutor: { create: jest.fn() },
+            estudiante: { create: jest.fn().mockResolvedValue(mockEstudiante) },
+          });
         });
-      });
 
       // Act
       const result = await service.crearEstudianteConCredenciales(validDto);
@@ -186,12 +188,14 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
       jest.spyOn(prisma.equipo, 'findUnique').mockResolvedValue(mockEquipo);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null); // Tutor NO existe
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          tutor: { create: jest.fn().mockResolvedValue(mockTutor as any) },
-          estudiante: { create: jest.fn().mockResolvedValue(mockEstudiante) },
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            tutor: { create: jest.fn().mockResolvedValue(mockTutor as any) },
+            estudiante: { create: jest.fn().mockResolvedValue(mockEstudiante) },
+          });
         });
-      });
 
       // Act
       const result = await service.crearEstudianteConCredenciales(validDto);
@@ -219,12 +223,14 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
         equipo_id: null,
       });
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          tutor: { create: jest.fn().mockResolvedValue(mockTutor as any) },
-          estudiante: { create: mockEstudianteCreate },
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            tutor: { create: jest.fn().mockResolvedValue(mockTutor as any) },
+            estudiante: { create: mockEstudianteCreate },
+          });
         });
-      });
 
       // Act
       const result = await service.crearEstudianteConCredenciales(dtoSinEquipo);
@@ -257,12 +263,14 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
 
       const mockEstudianteCreate = jest.fn().mockResolvedValue(mockEstudiante);
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          tutor: { create: jest.fn().mockResolvedValue(mockTutor as any) },
-          estudiante: { create: mockEstudianteCreate },
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            tutor: { create: jest.fn().mockResolvedValue(mockTutor as any) },
+            estudiante: { create: mockEstudianteCreate },
+          });
         });
-      });
 
       // Act
       await service.crearEstudianteConCredenciales(dtoSinOpcionales);
@@ -272,7 +280,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             puntos_totales: 0, // Default
-            nivel_actual: 1,   // Default
+            nivel_actual: 1, // Default
           }),
         }),
       );
@@ -286,12 +294,14 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
 
       const mockEstudianteCreate = jest.fn().mockResolvedValue(mockEstudiante);
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          tutor: { create: jest.fn() },
-          estudiante: { create: mockEstudianteCreate },
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            tutor: { create: jest.fn() },
+            estudiante: { create: mockEstudianteCreate },
+          });
         });
-      });
 
       // Act
       await service.crearEstudianteConCredenciales(dtoSinEquipo);

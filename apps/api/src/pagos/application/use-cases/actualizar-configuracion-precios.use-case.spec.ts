@@ -1,6 +1,9 @@
 import { Decimal } from 'decimal.js';
 import { ActualizarConfiguracionPreciosUseCase } from './actualizar-configuracion-precios.use-case';
-import { IConfiguracionPreciosRepository, HistorialCambio } from '../../domain/repositories/configuracion-precios.repository.interface';
+import {
+  IConfiguracionPreciosRepository,
+  HistorialCambio,
+} from '../../domain/repositories/configuracion-precios.repository.interface';
 import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
 import { ActualizarConfiguracionPreciosInputDTO } from '../dtos/actualizar-configuracion-precios.dto';
 
@@ -58,9 +61,15 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
         'Ajuste inflacionario 4%',
       );
       expect(resultado.cambiosRealizados).toHaveLength(1);
-      expect(resultado.cambiosRealizados[0].campo).toBe('precioClubMatematicas');
-      expect(resultado.cambiosRealizados[0].valorAnterior).toEqual(new Decimal(50000));
-      expect(resultado.cambiosRealizados[0].valorNuevo).toEqual(new Decimal(52000));
+      expect(resultado.cambiosRealizados[0].campo).toBe(
+        'precioClubMatematicas',
+      );
+      expect(resultado.cambiosRealizados[0].valorAnterior).toEqual(
+        new Decimal(50000),
+      );
+      expect(resultado.cambiosRealizados[0].valorNuevo).toEqual(
+        new Decimal(52000),
+      );
     });
 
     it('debe actualizar múltiples precios a la vez', async () => {
@@ -75,7 +84,7 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
       const resultado = await useCase.execute(input);
 
       expect(resultado.cambiosRealizados).toHaveLength(3);
-      expect(resultado.cambiosRealizados.map(c => c.campo)).toEqual(
+      expect(resultado.cambiosRealizados.map((c) => c.campo)).toEqual(
         expect.arrayContaining([
           'precioClubMatematicas',
           'precioCursosEspecializados',
@@ -96,8 +105,12 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
       const resultado = await useCase.execute(input);
 
       expect(resultado.cambiosRealizados).toHaveLength(1);
-      expect(resultado.cambiosRealizados[0].campo).toBe('descuentoAacreaPorcentaje');
-      expect(resultado.cambiosRealizados[0].valorNuevo).toEqual(new Decimal(25));
+      expect(resultado.cambiosRealizados[0].campo).toBe(
+        'descuentoAacreaPorcentaje',
+      );
+      expect(resultado.cambiosRealizados[0].valorNuevo).toEqual(
+        new Decimal(25),
+      );
     });
 
     it('debe poder desactivar descuento AACREA', async () => {
@@ -110,7 +123,9 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
       const resultado = await useCase.execute(input);
 
       expect(resultado.cambiosRealizados).toHaveLength(1);
-      expect(resultado.cambiosRealizados[0].campo).toBe('descuentoAacreaActivo');
+      expect(resultado.cambiosRealizados[0].campo).toBe(
+        'descuentoAacreaActivo',
+      );
       expect(resultado.cambiosRealizados[0].valorAnterior).toBe(true);
       expect(resultado.cambiosRealizados[0].valorNuevo).toBe(false);
     });
@@ -127,7 +142,9 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
       const resultado = await useCase.execute(input);
 
       expect(mockConfigRepo.actualizarConfiguracion).toHaveBeenCalled();
-      expect(resultado.cambiosRealizados.some(c => c.campo === 'diaVencimiento')).toBe(true);
+      expect(
+        resultado.cambiosRealizados.some((c) => c.campo === 'diaVencimiento'),
+      ).toBe(true);
     });
   });
 
@@ -141,7 +158,7 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'No se encontró la configuración de precios'
+        'No se encontró la configuración de precios',
       );
     });
 
@@ -151,7 +168,7 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
       } as ActualizarConfiguracionPreciosInputDTO;
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'adminId es requerido'
+        'adminId es requerido',
       );
     });
 
@@ -161,7 +178,7 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'No se proporcionaron cambios para actualizar'
+        'No se proporcionaron cambios para actualizar',
       );
     });
 
@@ -172,7 +189,7 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'Los precios no pueden ser negativos'
+        'Los precios no pueden ser negativos',
       );
     });
 
@@ -183,7 +200,7 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'El porcentaje de descuento debe estar entre 0 y 100'
+        'El porcentaje de descuento debe estar entre 0 y 100',
       );
     });
 
@@ -194,7 +211,7 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'El día de vencimiento debe estar entre 1 y 31'
+        'El día de vencimiento debe estar entre 1 y 31',
       );
     });
   });
@@ -242,7 +259,9 @@ describe('ActualizarConfiguracionPreciosUseCase - Application Layer', () => {
       const resultado = await useCase.execute(input);
 
       expect(resultado.configuracion).toBeDefined();
-      expect(resultado.configuracion.precioClubMatematicas).toEqual(new Decimal(52000));
+      expect(resultado.configuracion.precioClubMatematicas).toEqual(
+        new Decimal(52000),
+      );
       expect(resultado.mensaje).toContain('actualizada exitosamente');
       expect(resultado.cambiosRealizados).toHaveLength(1);
     });

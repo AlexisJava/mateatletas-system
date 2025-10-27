@@ -41,7 +41,7 @@ interface PlanificacionDetectada {
 
 const PLANIFICACIONES_DIR = path.join(
   __dirname,
-  '../../../../web/src/planificaciones'
+  '../../../../web/src/planificaciones',
 );
 
 const COLORS = {
@@ -137,7 +137,7 @@ function extraerConfig(filePath: string): PlanificacionConfig | null {
     if (!codigo || !titulo || !grupo || !anio || !semanas) {
       log(
         `⚠️  Archivo ${path.basename(filePath)}: PLANIFICACION_CONFIG incompleto`,
-        COLORS.yellow
+        COLORS.yellow,
       );
       return null;
     }
@@ -151,10 +151,7 @@ function extraerConfig(filePath: string): PlanificacionConfig | null {
       semanas,
     };
   } catch (error) {
-    log(
-      `❌ Error leyendo ${path.basename(filePath)}: ${error}`,
-      COLORS.red
-    );
+    log(`❌ Error leyendo ${path.basename(filePath)}: ${error}`, COLORS.red);
     return null;
   }
 }
@@ -166,10 +163,7 @@ function detectarPlanificaciones(): PlanificacionDetectada[] {
   log('\n🔍 Escaneando planificaciones...', COLORS.blue + COLORS.bright);
 
   if (!fs.existsSync(PLANIFICACIONES_DIR)) {
-    log(
-      `⚠️  Directorio no encontrado: ${PLANIFICACIONES_DIR}`,
-      COLORS.yellow
-    );
+    log(`⚠️  Directorio no encontrado: ${PLANIFICACIONES_DIR}`, COLORS.yellow);
     return [];
   }
 
@@ -202,7 +196,7 @@ function detectarPlanificaciones(): PlanificacionDetectada[] {
  * Registrar o actualizar planificación en BD
  */
 async function registrarPlanificacion(
-  planificacion: PlanificacionDetectada
+  planificacion: PlanificacionDetectada,
 ): Promise<void> {
   const { config, relativePath } = planificacion;
 
@@ -229,7 +223,7 @@ async function registrarPlanificacion(
 
       log(
         `   🔄 Actualizado: ${config.codigo} - ${config.titulo}`,
-        COLORS.yellow
+        COLORS.yellow,
       );
     } else {
       // Crear nuevo
@@ -248,14 +242,11 @@ async function registrarPlanificacion(
 
       log(
         `   ✨ Nuevo: ${config.codigo} - ${config.titulo}`,
-        COLORS.green + COLORS.bright
+        COLORS.green + COLORS.bright,
       );
     }
   } catch (error) {
-    log(
-      `   ❌ Error registrando ${config.codigo}: ${error}`,
-      COLORS.red
-    );
+    log(`   ❌ Error registrando ${config.codigo}: ${error}`, COLORS.red);
   }
 }
 
@@ -263,7 +254,7 @@ async function registrarPlanificacion(
  * Limpiar planificaciones que ya no existen en el código
  */
 async function limpiarPlanificacionesHuerfanas(
-  codigosActuales: string[]
+  codigosActuales: string[],
 ): Promise<void> {
   try {
     // Obtener todas las planificaciones de la BD
@@ -277,7 +268,7 @@ async function limpiarPlanificacionesHuerfanas(
     if (huerfanas.length > 0) {
       log(
         `\n🧹 Limpiando ${huerfanas.length} planificaciones huérfanas...`,
-        COLORS.yellow
+        COLORS.yellow,
       );
 
       for (const codigo of huerfanas) {
@@ -301,15 +292,15 @@ async function limpiarPlanificacionesHuerfanas(
 async function main() {
   log(
     '\n╔═══════════════════════════════════════════════════════════╗',
-    COLORS.blue + COLORS.bright
+    COLORS.blue + COLORS.bright,
   );
   log(
     '║  AUTO-DETECCIÓN DE PLANIFICACIONES                       ║',
-    COLORS.blue + COLORS.bright
+    COLORS.blue + COLORS.bright,
   );
   log(
     '╚═══════════════════════════════════════════════════════════╝',
-    COLORS.blue + COLORS.bright
+    COLORS.blue + COLORS.bright,
   );
 
   try {
@@ -323,7 +314,7 @@ async function main() {
 
     log(
       `\n📦 Total detectadas: ${planificaciones.length}`,
-      COLORS.blue + COLORS.bright
+      COLORS.blue + COLORS.bright,
     );
 
     // 2. Registrar en BD
@@ -340,15 +331,15 @@ async function main() {
     // 4. Resumen
     log(
       '\n╔═══════════════════════════════════════════════════════════╗',
-      COLORS.green + COLORS.bright
+      COLORS.green + COLORS.bright,
     );
     log(
       '║  ✅ AUTO-DETECCIÓN COMPLETADA                            ║',
-      COLORS.green + COLORS.bright
+      COLORS.green + COLORS.bright,
     );
     log(
       '╚═══════════════════════════════════════════════════════════╝',
-      COLORS.green + COLORS.bright
+      COLORS.green + COLORS.bright,
     );
 
     log(`\n📊 Resumen:`);
@@ -359,15 +350,15 @@ async function main() {
   } catch (error) {
     log(
       '\n╔═══════════════════════════════════════════════════════════╗',
-      COLORS.red + COLORS.bright
+      COLORS.red + COLORS.bright,
     );
     log(
       '║  ❌ ERROR EN AUTO-DETECCIÓN                              ║',
-      COLORS.red + COLORS.bright
+      COLORS.red + COLORS.bright,
     );
     log(
       '╚═══════════════════════════════════════════════════════════╝',
-      COLORS.red + COLORS.bright
+      COLORS.red + COLORS.bright,
     );
     log(`\n${error}\n`, COLORS.red);
     process.exit(1);

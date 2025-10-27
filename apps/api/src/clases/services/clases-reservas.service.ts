@@ -45,9 +45,7 @@ export class ClasesReservasService {
     }
 
     if (estudiante.tutor_id !== tutorId) {
-      throw new ForbiddenException(
-        'El estudiante no pertenece a este tutor',
-      );
+      throw new ForbiddenException('El estudiante no pertenece a este tutor');
     }
 
     // 2. TODA la lógica crítica DENTRO de transacción atómica
@@ -227,7 +225,9 @@ export class ClasesReservasService {
       });
     });
 
-    this.logger.log(`Inscripción ${inscripcionId} cancelada por tutor ${tutorId}`);
+    this.logger.log(
+      `Inscripción ${inscripcionId} cancelada por tutor ${tutorId}`,
+    );
 
     return { message: 'Inscripción cancelada exitosamente' };
   }
