@@ -13,7 +13,6 @@ type CrearEstudianteRapidoData = Parameters<
   AdminEstudiantesService['crearEstudianteRapido']
 >[0];
 
-
 /**
  * Servicio principal de administración
  * REFACTORIZADO (ETAPA 2): Delega operaciones específicas a servicios especializados

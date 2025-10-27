@@ -168,16 +168,22 @@ export class LoggerService implements NestLoggerService {
     const consoleFormat = winston.format.combine(
       winston.format.colorize({ all: true }),
       winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-      winston.format.printf((info) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { timestamp, level, message, context, ...metadata } = info as any;
-        let msg = `${timestamp} [${level}]`;
+      winston.format.printf((info: winston.Logform.TransformableInfo) => {
+        const { timestamp, level, message, context, ...rest } = info;
+        const metadata = rest as Record<string, unknown>;
+        const safeTimestamp =
+          typeof timestamp === 'string' ? timestamp : new Date().toISOString();
+        const levelLabel = String(level);
+        let msg = `${safeTimestamp} [${levelLabel}]`;
 
-        if (context) {
+        if (typeof context === 'string') {
           msg += ` [${context}]`;
         }
 
-        msg += `: ${message}`;
+        const messageText =
+          typeof message === 'string' ? message : JSON.stringify(message);
+
+        msg += `: ${messageText}`;
 
         // Agregar metadata si existe
         const metadataString =

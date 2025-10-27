@@ -22,17 +22,21 @@ export class UserThrottlerGuard extends ThrottlerGuard {
    * @param context - Contexto de ejecución de NestJS
    * @returns Identificador único (user.id o IP)
    */
-  protected async getTracker(req: Record<string, any>): Promise<string> {
-    const request = req as Request & { user?: { id: string } };
+  protected async getTracker(req: Record<string, unknown>): Promise<string> {
+    const request = req as unknown as Request & { user?: { id: string } };
 
-    // Si el usuario está autenticado, limitar por user.id
+    const identifier = this.resolveIdentifier(request);
+
+    return await Promise.resolve(identifier);
+  }
+
+  private resolveIdentifier(
+    request: Request & { user?: { id: string } },
+  ): string {
     if (request.user?.id) {
       return `user:${request.user.id}`;
     }
 
-    // Si NO está autenticado, limitar por IP
-    // Obtener IP real considerando proxies (X-Forwarded-For, X-Real-IP)
-    // Fix: Null-safety para evitar crash con headers malformados
     const forwardedFor = request.headers['x-forwarded-for'];
     const forwardedParts =
       typeof forwardedFor === 'string' ? forwardedFor.split(',') : [];
@@ -40,7 +44,9 @@ export class UserThrottlerGuard extends ThrottlerGuard {
 
     const ip =
       forwardedIp ||
-      (request.headers['x-real-ip'] as string) ||
+      (typeof request.headers['x-real-ip'] === 'string'
+        ? request.headers['x-real-ip']
+        : undefined) ||
       request.ip ||
       'unknown';
 

@@ -26,14 +26,19 @@ export function IsFutureDate(
 
           const date = new Date(value);
           const now = new Date();
-          const minFutureDate = new Date(
-            now.getTime() + (args.constraints[0] as number) * 60000,
+          const minMinutes = resolveMinMinutes(
+            args.constraints,
+            minMinutesInFuture,
           );
+          const minFutureDate = new Date(now.getTime() + minMinutes * 60000);
 
           return date >= minFutureDate;
         },
         defaultMessage(args: ValidationArguments) {
-          const minMinutes = args.constraints[0];
+          const minMinutes = resolveMinMinutes(
+            args.constraints,
+            minMinutesInFuture,
+          );
           if (minMinutes === 0) {
             return `${args.property} debe ser una fecha futura`;
           }
@@ -42,4 +47,16 @@ export function IsFutureDate(
       },
     });
   };
+}
+
+function resolveMinMinutes(
+  constraints: ValidationArguments['constraints'],
+  defaultMinutes: number,
+): number {
+  if (!Array.isArray(constraints)) {
+    return defaultMinutes;
+  }
+
+  const minutes = Number(constraints[0]);
+  return Number.isFinite(minutes) ? minutes : defaultMinutes;
 }
