@@ -8,7 +8,7 @@ import { NotificacionesService } from '../../notificaciones/notificaciones.servi
 describe('ClasesManagementService', () => {
   let service: ClasesManagementService;
   let prisma: PrismaService;
-  let cacheManager: any;
+  let cacheManager: { get: jest.Mock; set: jest.Mock; del: jest.Mock };
 
   const mockRuta = {
     id: 'ruta-1',

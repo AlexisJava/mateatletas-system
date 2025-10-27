@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
+import { Asistencia } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service';
 import { RegistrarAsistenciaDto } from '../dto/registrar-asistencia.dto';
 
@@ -93,8 +94,8 @@ export class ClasesAsistenciaService {
     // 4. BATCH UPSERT en transacción
     const resultados = await this.prisma.$transaction(async (tx) => {
       const ahora = new Date();
-      const updated: any[] = [];
-      const created: any[] = [];
+      const updated: Asistencia[] = [];
+      const created: Asistencia[] = [];
 
       // Batch updates (individual updates porque cada estudiante tiene datos diferentes)
       if (paraActualizar.length > 0) {

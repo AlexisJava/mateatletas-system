@@ -203,9 +203,10 @@ export class ClasesManagementService {
 
     // Log de notificación (no crítico si falla)
     if (notificacionResult.status === 'rejected') {
+      const reason = notificacionResult.reason as Error;
       this.logger.warn(
         `⚠️ Clase ${id} cancelada exitosamente, pero falló notificación al docente:`,
-        notificacionResult.reason.message,
+        reason.message,
       );
     } else {
       this.logger.log(

@@ -72,9 +72,9 @@ describe('ClasesReservasService - Race Condition Prevention', () => {
       };
 
       // Mock: Primera lectura (fuera de transacción) - ambos ven 9 cupos ocupados
-      let readCount = 0;
+      let _readCount = 0;
       (prisma.clase.findUnique as jest.Mock).mockImplementation(() => {
-        readCount++;
+        _readCount++;
         return Promise.resolve(mockClase as any);
       });
 
