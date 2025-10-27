@@ -45,7 +45,7 @@ export interface CircuitBreakerOptions {
    * Función fallback a ejecutar cuando el circuito está OPEN
    * Si no se provee, lanza CircuitBreakerOpenError
    */
-  fallback?: (...args: any[]) => any;
+  fallback?: (...args: unknown[]) => unknown;
 }
 
 export class CircuitBreakerOpenError extends Error {

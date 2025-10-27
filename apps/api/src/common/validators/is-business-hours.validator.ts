@@ -23,13 +23,13 @@ export function IsBusinessHours(
       constraints: [startHour, endHour],
       options: validationOptions,
       validator: {
-        validate(value: any, args: ValidationArguments) {
+        validate(value: Date | string, args: ValidationArguments) {
           if (!value) return false;
 
           const date = new Date(value);
           const hour = date.getHours();
 
-          const [start, end] = args.constraints;
+          const [start, end] = args.constraints as [number, number];
           return hour >= start && hour < end;
         },
         defaultMessage(args: ValidationArguments) {

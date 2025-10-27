@@ -5,7 +5,7 @@ import { Transform } from 'class-transformer';
  * Elimina tags HTML peligrosos y scripts
  */
 export function SanitizeHTML() {
-  return Transform(({ value }) => {
+  return Transform(({ value }: { value: string }) => {
     if (typeof value === 'string') {
       // Eliminar tags HTML peligrosos
       return value

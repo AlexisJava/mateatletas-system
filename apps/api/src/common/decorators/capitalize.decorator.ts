@@ -5,7 +5,7 @@ import { Transform } from 'class-transformer';
  * Ejemplo: "juan pérez" → "Juan Pérez"
  */
 export function Capitalize() {
-  return Transform(({ value }) => {
+  return Transform(({ value }: { value: string }) => {
     if (typeof value === 'string') {
       return value
         .toLowerCase()

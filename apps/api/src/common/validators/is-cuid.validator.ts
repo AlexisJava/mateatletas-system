@@ -25,7 +25,7 @@ export function IsCuid(validationOptions?: ValidationOptions) {
       propertyName: propertyName,
       options: validationOptions,
       validator: {
-        validate(value: any, args: ValidationArguments) {
+        validate(value: string) {
           if (typeof value !== 'string') {
             return false;
           }

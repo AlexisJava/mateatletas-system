@@ -169,7 +169,7 @@ export class LoggerService implements NestLoggerService {
       winston.format.colorize({ all: true }),
       winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
       winston.format.printf(
-        ({ timestamp, level, message, context, ...metadata }) => {
+        ({ timestamp, level, message, context, ...metadata }: { timestamp: string; level: string; message: string; context?: string; [key: string]: unknown }) => {
           let msg = `${timestamp} [${level}]`;
 
           if (context) {

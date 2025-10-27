@@ -1,4 +1,3 @@
-import { ExecutionContext } from '@nestjs/common';
 import { UserThrottlerGuard } from './user-throttler.guard';
 
 describe('UserThrottlerGuard', () => {

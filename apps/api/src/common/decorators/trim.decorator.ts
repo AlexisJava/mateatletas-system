@@ -5,7 +5,7 @@ import { Transform } from 'class-transformer';
  * Se aplica automáticamente durante la transformación del DTO
  */
 export function Trim() {
-  return Transform(({ value }) => {
+  return Transform(({ value }: { value: string }) => {
     if (typeof value === 'string') {
       return value.trim();
     }

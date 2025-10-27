@@ -82,7 +82,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // Si es un objeto con código de error
     if (typeof exception === 'object' && exception !== null) {
-      const error = exception as any;
+      const error = exception as { statusCode?: number; status?: number; message?: string; stack?: string };
       return {
         status:
           error.statusCode || error.status || HttpStatus.INTERNAL_SERVER_ERROR,
