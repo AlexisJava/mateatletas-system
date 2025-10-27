@@ -60,7 +60,7 @@ export const docentesApi = {
   getMe: async (): Promise<Docente> => {
     try {
       const response = await apiClient.get<Docente>('/docentes/me');
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error al obtener el perfil del docente:', error);
       throw error;
@@ -73,7 +73,7 @@ export const docentesApi = {
   updateMe: async (data: UpdateDocenteData): Promise<Docente> => {
     try {
       const response = await apiClient.patch<Docente>('/docentes/me', data);
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error al actualizar el perfil del docente:', error);
       throw error;
@@ -86,7 +86,7 @@ export const docentesApi = {
   getAll: async (): Promise<Docente[]> => {
     try {
       const response = await apiClient.get<Docente[]>('/docentes');
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error al obtener la lista de docentes:', error);
       throw error;
@@ -99,7 +99,7 @@ export const docentesApi = {
   getById: async (id: string): Promise<Docente> => {
     try {
       const response = await apiClient.get<Docente>(`/docentes/${id}`);
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error al obtener el docente por ID:', error);
       throw error;
@@ -117,7 +117,7 @@ export const docentesApi = {
         '/docentes',
         data
       );
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error al crear el docente:', error);
       throw error;
@@ -133,7 +133,7 @@ export const docentesApi = {
         `/docentes/${id}`,
         data
       );
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error al actualizar el docente:', error);
       throw error;
@@ -166,7 +166,7 @@ export const docentesApi = {
           toDocenteId,
         }
       );
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error al reasignar las clases del docente:', error);
       throw error;

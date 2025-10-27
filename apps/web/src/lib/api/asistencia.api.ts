@@ -21,12 +21,13 @@ export const marcarAsistencia = async (
   estudianteId: string,
   data: MarcarAsistenciaDto
 ): Promise<Asistencia> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.post<Asistencia>(
       `/asistencia/clases/${claseId}/estudiantes/${estudianteId}`,
       data
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al marcar asistencia:', error);
     throw error;
@@ -40,11 +41,12 @@ export const marcarAsistencia = async (
 export const getAsistenciaClase = async (
   claseId: string
 ): Promise<ListaAsistencia> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<ListaAsistencia>(
       `/asistencia/clases/${claseId}`
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener la asistencia de la clase:', error);
     throw error;
@@ -58,11 +60,12 @@ export const getAsistenciaClase = async (
 export const getEstadisticasClase = async (
   claseId: string
 ): Promise<EstadisticasClase> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<EstadisticasClase>(
       `/asistencia/clases/${claseId}/estadisticas`
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener las estadísticas de la clase:', error);
     throw error;
@@ -93,11 +96,12 @@ export const getHistorialEstudiante = async (
     params.append('rutaCurricularId', filtros.rutaCurricularId);
   }
 
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<HistorialAsistencia>(
       `/asistencia/estudiantes/${estudianteId}?${params.toString()}`
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener el historial de asistencia del estudiante:', error);
     throw error;
@@ -109,11 +113,12 @@ export const getHistorialEstudiante = async (
  * GET /api/asistencia/docente/resumen
  */
 export const getResumenDocente = async (): Promise<ResumenDocenteAsistencia> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<ResumenDocenteAsistencia>(
       '/asistencia/docente/resumen'
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener el resumen de asistencia del docente:', error);
     throw error;
@@ -168,11 +173,12 @@ export const getObservacionesDocente = async (filtros?: {
     params.append('limit', filtros.limit.toString());
   }
 
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<Observacion[]>(
       `/asistencia/docente/observaciones?${params.toString()}`
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener las observaciones del docente:', error);
     throw error;
@@ -207,11 +213,12 @@ export interface ReportesDocente {
 }
 
 export const getReportesDocente = async (): Promise<ReportesDocente> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<ReportesDocente>(
       '/asistencia/docente/reportes'
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener los reportes de asistencia del docente:', error);
     throw error;

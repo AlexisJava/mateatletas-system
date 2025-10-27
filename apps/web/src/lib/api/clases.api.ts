@@ -30,9 +30,10 @@ export const getClases = async (filtros?: FiltroClases): Promise<Clase[]> => {
     params.append('soloDisponibles', String(filtros.soloDisponibles));
   }
 
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<Clase[]>(`/clases?${params.toString()}`);
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener la lista de clases:', error);
     throw error;
@@ -43,9 +44,10 @@ export const getClases = async (filtros?: FiltroClases): Promise<Clase[]> => {
  * Obtener una clase por ID
  */
 export const getClaseById = async (claseId: string): Promise<Clase> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<Clase>(`/clases/${claseId}`);
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener la clase por ID:', error);
     throw error;
@@ -59,12 +61,13 @@ export const reservarClase = async (
   claseId: string,
   data: CrearReservaDto
 ): Promise<InscripcionClase> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.post<InscripcionClase>(
       `/clases/${claseId}/reservar`,
       data
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al reservar la clase:', error);
     throw error;
@@ -77,6 +80,7 @@ export const reservarClase = async (
 export const cancelarReserva = async (
   inscripcionId: string
 ): Promise<void> => {
+    // El interceptor ya retorna response.data directamente
   try {
     await axios.delete(`/clases/reservas/${inscripcionId}`);
   } catch (error) {
@@ -89,11 +93,12 @@ export const cancelarReserva = async (
  * Obtener mis reservas (como tutor)
  */
 export const getMisReservas = async (): Promise<InscripcionClase[]> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<InscripcionClase[]>(
       '/clases/mis-reservas'
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener las reservas del tutor:', error);
     throw error;
@@ -104,11 +109,12 @@ export const getMisReservas = async (): Promise<InscripcionClase[]> => {
  * Obtener todas las rutas curriculares
  */
 export const getRutasCurriculares = async (): Promise<RutaCurricular[]> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<RutaCurricular[]>(
       '/clases/metadata/rutas-curriculares'
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener las rutas curriculares:', error);
     throw error;
@@ -121,11 +127,12 @@ export const getRutasCurriculares = async (): Promise<RutaCurricular[]> => {
 export const getRutaCurricularById = async (
   rutaId: string
 ): Promise<RutaCurricular> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<RutaCurricular>(
       `/clases/metadata/rutas-curriculares/${rutaId}`
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener la ruta curricular por ID:', error);
     throw error;
@@ -146,11 +153,12 @@ export const getMisClasesDocente = async (
     params.append('incluirPasadas', 'true');
   }
 
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<Clase[]>(
       `/clases/docente/mis-clases?${params.toString()}`
     );
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error al obtener las clases del docente:', error);
     throw error;
@@ -162,6 +170,7 @@ export const getMisClasesDocente = async (
  * @param claseId ID de la clase
  */
 export const cancelarClase = async (claseId: string): Promise<void> => {
+    // El interceptor ya retorna response.data directamente
   try {
     await axios.patch(`/clases/${claseId}/cancelar`, {});
   } catch (error) {

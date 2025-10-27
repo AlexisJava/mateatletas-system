@@ -134,11 +134,12 @@ export const getPlanificaciones = async (
   if (pagination.limit) params.append('limit', pagination.limit.toString());
 
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get<PlanificacionListResponseApi>(
       `/planificaciones?${params.toString()}`,
     );
 
-    const data = response.data;
+    const data = response as PlanificacionListResponseApi;
 
     return {
       data: data.data.map(mapPlanificacionListItem),
@@ -161,10 +162,11 @@ export const getPlanificacionById = async (
   id: string,
 ): Promise<PlanificacionDetalle> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.get<PlanificacionDetalleApi>(
       `/planificaciones/${id}`,
     );
-    return mapPlanificacionDetalle(response.data);
+    return mapPlanificacionDetalle(response as PlanificacionDetalleApi);
   } catch (error) {
     console.error('Error al obtener la planificación por ID:', error);
     throw error;
@@ -179,11 +181,12 @@ export const createPlanificacion = async (
   data: CreatePlanificacionRequest,
 ): Promise<PlanificacionDetalle> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.post<PlanificacionDetalleApi>(
       '/planificaciones',
       data,
     );
-    return mapPlanificacionDetalle(response.data);
+    return mapPlanificacionDetalle(response as PlanificacionDetalleApi);
   } catch (error) {
     console.error('Error al crear la planificación:', error);
     throw error;
@@ -199,11 +202,12 @@ export const updatePlanificacion = async (
   data: UpdatePlanificacionRequest,
 ): Promise<PlanificacionDetalle> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.patch<PlanificacionDetalleApi>(
       `/planificaciones/${id}`,
       data,
     );
-    return mapPlanificacionDetalle(response.data);
+    return mapPlanificacionDetalle(response as PlanificacionDetalleApi);
   } catch (error) {
     console.error('Error al actualizar la planificación:', error);
     throw error;
@@ -232,11 +236,12 @@ export const addActividadToPlanificacion = async (
   data: CreateActividadRequest,
 ): Promise<Actividad> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.post<ActividadApi>(
       `/planificaciones/${planificacionId}/actividades`,
       data,
     );
-    return mapActividad(response.data);
+    return mapActividad(response as ActividadApi);
   } catch (error) {
     console.error('Error al agregar la actividad a la planificación:', error);
     throw error;
@@ -253,11 +258,12 @@ export const updateActividad = async (
   data: Partial<CreateActividadRequest>,
 ): Promise<Actividad> => {
   try {
+    // El interceptor ya retorna response.data directamente
     const response = await axios.patch<ActividadApi>(
       `/planificaciones/${planificacionId}/actividades/${actividadId}`,
       data,
     );
-    return mapActividad(response.data);
+    return mapActividad(response as ActividadApi);
   } catch (error) {
     console.error('Error al actualizar la actividad de la planificación:', error);
     throw error;

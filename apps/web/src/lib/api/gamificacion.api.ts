@@ -39,7 +39,7 @@ export const gamificacionApi = {
   getDashboard: async (estudianteId: string): Promise<DashboardData> => {
     try {
       const response = await apiClient.get(`/gamificacion/dashboard/${estudianteId}`);
-      return dashboardGamificacionSchema.parse(response.data);
+      return dashboardGamificacionSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener el dashboard de gamificación:', error);
       throw error;
@@ -52,7 +52,7 @@ export const gamificacionApi = {
   getLogros: async (estudianteId: string): Promise<Logro[]> => {
     try {
       const response = await apiClient.get(`/gamificacion/logros/${estudianteId}`);
-      return logrosListSchema.parse(response.data);
+      return logrosListSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener los logros de gamificación:', error);
       throw error;
@@ -65,7 +65,7 @@ export const gamificacionApi = {
   getPuntos: async (estudianteId: string): Promise<Puntos> => {
     try {
       const response = await apiClient.get(`/gamificacion/puntos/${estudianteId}`);
-      return puntosSchema.parse(response.data);
+      return puntosSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener los puntos del estudiante:', error);
       throw error;
@@ -78,7 +78,7 @@ export const gamificacionApi = {
   getRanking: async (estudianteId: string): Promise<Ranking> => {
     try {
       const response = await apiClient.get(`/gamificacion/ranking/${estudianteId}`);
-      return rankingSchema.parse(response.data);
+      return rankingSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener el ranking de gamificación:', error);
       throw error;
@@ -91,7 +91,7 @@ export const gamificacionApi = {
   getProgreso: async (estudianteId: string): Promise<Progreso[]> => {
     try {
       const response = await apiClient.get(`/gamificacion/progreso/${estudianteId}`);
-      return progresoRutaListSchema.parse(response.data);
+      return progresoRutaListSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener el progreso de gamificación:', error);
       throw error;
@@ -106,7 +106,7 @@ export const gamificacionApi = {
       const response = await apiClient.post(
         `/gamificacion/logros/${logroId}/desbloquear`
       );
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error al desbloquear el logro:', error);
       throw error;
@@ -119,7 +119,7 @@ export const gamificacionApi = {
   getAcciones: async (): Promise<AccionPuntuable[]> => {
     try {
       const response = await apiClient.get('/gamificacion/acciones');
-      return accionesPuntuablesListSchema.parse(response.data);
+      return accionesPuntuablesListSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener las acciones puntuables:', error);
       throw error;
@@ -132,7 +132,7 @@ export const gamificacionApi = {
   getHistorial: async (estudianteId: string): Promise<PuntoObtenido[]> => {
     try {
       const response = await apiClient.get(`/gamificacion/historial/${estudianteId}`);
-      return puntosObtenidosListSchema.parse(response.data);
+      return puntosObtenidosListSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener el historial de puntos:', error);
       throw error;
@@ -146,7 +146,7 @@ export const gamificacionApi = {
     try {
       const payload = otorgarPuntosSchema.parse(data);
       const response = await apiClient.post('/gamificacion/puntos', payload);
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Error al otorgar puntos de gamificación:', error);
       throw error;

@@ -41,9 +41,10 @@ export interface CountResponse {
  */
 export const getNotificaciones = async (soloNoLeidas?: boolean): Promise<Notificacion[]> => {
   const params = soloNoLeidas ? { soloNoLeidas: 'true' } : {};
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get('/notificaciones', { params });
-    return notificacionesListSchema.parse(response.data);
+    return notificacionesListSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener las notificaciones:', error);
     throw error;
@@ -54,9 +55,10 @@ export const getNotificaciones = async (soloNoLeidas?: boolean): Promise<Notific
  * Obtener contador de notificaciones no leídas
  */
 export const getNotificacionesCount = async (): Promise<number> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<CountResponse>('/notificaciones/count');
-    const validated = countResponseSchema.parse(response.data);
+    const validated = countResponseSchema.parse(response);
     return validated.count;
   } catch (error) {
     console.error('Error al obtener el conteo de notificaciones:', error);
@@ -69,9 +71,10 @@ export const getNotificacionesCount = async (): Promise<number> => {
  * @param id - ID de la notificación
  */
 export const marcarNotificacionComoLeida = async (id: string): Promise<Notificacion> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.patch(`/notificaciones/${id}/leer`);
-    return notificacionSchema.parse(response.data);
+    return notificacionSchema.parse(response);
   } catch (error) {
     console.error('Error al marcar la notificación como leída:', error);
     throw error;
@@ -82,9 +85,10 @@ export const marcarNotificacionComoLeida = async (id: string): Promise<Notificac
  * Marcar todas las notificaciones como leídas
  */
 export const marcarTodasComoLeidas = async (): Promise<{ message: string; count: number }> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.patch('/notificaciones/leer-todas');
-    return marcarLeidaResponseSchema.parse(response.data);
+    return marcarLeidaResponseSchema.parse(response);
   } catch (error) {
     console.error('Error al marcar todas las notificaciones como leídas:', error);
     throw error;
@@ -96,9 +100,10 @@ export const marcarTodasComoLeidas = async (): Promise<{ message: string; count:
  * @param id - ID de la notificación a eliminar
  */
 export const eliminarNotificacion = async (id: string): Promise<{ message: string }> => {
+    // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.delete(`/notificaciones/${id}`);
-    return eliminarNotificacionResponseSchema.parse(response.data);
+    return eliminarNotificacionResponseSchema.parse(response);
   } catch (error) {
     console.error('Error al eliminar la notificación:', error);
     throw error;

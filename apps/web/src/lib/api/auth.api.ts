@@ -94,11 +94,12 @@ export const authApi = {
    */
   register: async (data: RegisterData): Promise<RegisterResponse> => {
     try {
+      // El interceptor ya retorna response.data directamente
       const response = await apiClient.post<RegisterResponse>(
         '/auth/register',
         data,
       );
-      return response.data;
+      return response as RegisterResponse;
     } catch (error) {
       console.error('Error en el registro de usuario:', error);
       throw error;
@@ -113,11 +114,12 @@ export const authApi = {
    */
   login: async (data: LoginData): Promise<LoginResponse> => {
     try {
+      // El interceptor ya retorna response.data directamente
       const response = await apiClient.post<LoginResponse>(
         '/auth/login',
         data,
       );
-      return response.data;
+      return response as LoginResponse;
     } catch (error) {
       console.error('Error en el inicio de sesión:', error);
       throw error;
@@ -131,8 +133,9 @@ export const authApi = {
    */
   getProfile: async (): Promise<AuthUser> => {
     try {
+      // El interceptor ya retorna response.data directamente
       const response = await apiClient.get<AuthUser>('/auth/profile');
-      return response.data;
+      return response as AuthUser;
     } catch (error) {
       console.error('Error al obtener el perfil de autenticación:', error);
       throw error;
@@ -147,11 +150,12 @@ export const authApi = {
    */
   loginEstudiante: async (data: LoginData): Promise<LoginResponse> => {
     try {
+      // El interceptor ya retorna response.data directamente
       const response = await apiClient.post<LoginResponse>(
         '/auth/estudiante/login',
         data,
       );
-      return response.data;
+      return response as LoginResponse;
     } catch (error) {
       console.error('Error en el inicio de sesión del estudiante:', error);
       throw error;
@@ -165,8 +169,9 @@ export const authApi = {
    */
   logout: async (): Promise<LogoutResponse> => {
     try {
+      // El interceptor ya retorna response.data directamente
       const response = await apiClient.post<LogoutResponse>('/auth/logout');
-      return response.data;
+      return response as LogoutResponse;
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
       throw error;
@@ -182,14 +187,25 @@ export const authApi = {
     data: ChangePasswordPayload,
   ): Promise<ChangePasswordResponse> => {
     try {
+      // El interceptor ya retorna response.data directamente
       const response = await apiClient.post<ChangePasswordResponse>(
         '/auth/change-password',
         data,
       );
-      return response.data;
+      return response as ChangePasswordResponse;
     } catch (error) {
       console.error('Error al cambiar la contraseña:', error);
       throw error;
     }
+  },
+
+  /**
+   * Alias para cambiarPassword (usado en el store)
+   */
+  cambiarPassword: async (
+    passwordActual: string,
+    nuevaPassword: string,
+  ): Promise<ChangePasswordResponse> => {
+    return authApi.changePassword({ passwordActual, nuevaPassword });
   },
 };
