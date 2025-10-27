@@ -104,10 +104,10 @@ export default function DocenteDashboardBrutal() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-4xl font-black text-white mb-2">
+          <h1 className="text-3xl font-black text-white mb-2">
             {greeting}, {user?.nombre || 'Docente'}! 👋
           </h1>
-          <p className="text-purple-300 font-semibold text-lg">
+          <p className="text-purple-300 font-semibold text-base">
             {new Date().toLocaleDateString('es-ES', {
               weekday: 'long',
               year: 'numeric',
@@ -124,26 +124,26 @@ export default function DocenteDashboardBrutal() {
             animate={{ opacity: 1, scale: 1 }}
             className="relative"
           >
-            <h2 className="text-2xl font-black text-white mb-4 flex items-center gap-2">
-              <Clock className="w-7 h-7 text-yellow-400" />
+            <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2">
+              <Clock className="w-6 h-6 text-yellow-400" />
               TU CLASE DE HOY
             </h2>
 
             {clasesHoy.map((clase) => (
               <div
                 key={clase.id}
-                className="bg-gradient-to-br from-purple-600/80 to-indigo-700/80 backdrop-blur-md rounded-2xl p-6 shadow-2xl border border-purple-400/50"
+                className="bg-white/5 backdrop-blur-xl rounded-xl p-5 shadow-lg border border-white/10 hover:bg-white/10 transition-all"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-3xl font-black text-white mb-2">{clase.nombre}</h3>
-                    <p className="text-purple-200 font-bold text-lg">
+                    <h3 className="text-2xl font-black text-white mb-2">{clase.nombre}</h3>
+                    <p className="text-purple-200 font-bold text-base">
                       {clase.hora_inicio} - {clase.hora_fin}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-5xl font-black text-yellow-300">{clase.estudiantes.length}</p>
-                    <p className="text-purple-200 font-bold">estudiantes</p>
+                    <p className="text-3xl font-black text-yellow-300">{clase.estudiantes.length}</p>
+                    <p className="text-purple-200 font-bold text-sm">estudiantes</p>
                   </div>
                 </div>
 
@@ -182,8 +182,8 @@ export default function DocenteDashboardBrutal() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <h2 className="text-2xl font-black text-white mb-4 flex items-center gap-2">
-              <GraduationCap className="w-7 h-7 text-green-400" />
+            <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2">
+              <GraduationCap className="w-6 h-6 text-green-400" />
               TUS {misGrupos.length} GRUPOS
             </h2>
 
@@ -192,10 +192,10 @@ export default function DocenteDashboardBrutal() {
                 <motion.div
                   key={grupo.id}
                   whileHover={{ scale: 1.03, y: -4 }}
-                  className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:border-green-400/70 hover:bg-white/10 transition-all cursor-pointer shadow-lg hover:shadow-2xl"
+                  className="bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10 hover:border-green-400/70 hover:bg-white/10 transition-all cursor-pointer shadow-lg hover:shadow-xl"
                   onClick={() => router.push(`/docente/grupos/${grupo.id}`)}
                 >
-                  <h3 className="text-white font-bold text-lg mb-2">{grupo.nombre}</h3>
+                  <h3 className="text-white font-bold text-base mb-2">{grupo.nombre}</h3>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-purple-300 font-semibold">
                       {getDiaSemanaLabel(grupo.dia_semana)} {grupo.hora_inicio}
@@ -220,28 +220,28 @@ export default function DocenteDashboardBrutal() {
             transition={{ delay: 0.3 }}
             className="grid grid-cols-2 md:grid-cols-4 gap-4"
           >
-            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
-              <Calendar className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-              <p className="text-4xl font-black text-white">{stats.clasesEstaSemana}</p>
-              <p className="text-purple-300 font-bold">Clases Esta Semana</p>
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
+              <Calendar className="w-7 h-7 text-purple-400 mx-auto mb-2" />
+              <p className="text-3xl font-black text-white">{stats.clasesEstaSemana}</p>
+              <p className="text-purple-300 font-bold text-sm">Clases Esta Semana</p>
             </div>
 
-            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
-              <Users className="w-8 h-8 text-green-400 mx-auto mb-2" />
-              <p className="text-4xl font-black text-white">{stats.estudiantesTotal}</p>
-              <p className="text-purple-300 font-bold">Total Estudiantes</p>
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
+              <Users className="w-7 h-7 text-green-400 mx-auto mb-2" />
+              <p className="text-3xl font-black text-white">{stats.estudiantesTotal}</p>
+              <p className="text-purple-300 font-bold text-sm">Total Estudiantes</p>
             </div>
 
-            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
-              <TrendingUp className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-              <p className="text-4xl font-black text-white">{stats.asistenciaPromedio}%</p>
-              <p className="text-purple-300 font-bold">Asistencia Promedio</p>
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
+              <TrendingUp className="w-7 h-7 text-blue-400 mx-auto mb-2" />
+              <p className="text-3xl font-black text-white">{stats.asistenciaPromedio}%</p>
+              <p className="text-purple-300 font-bold text-sm">Asistencia Promedio</p>
             </div>
 
-            <div className="bg-white/5 backdrop-blur-md rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
-              <BookOpen className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-              <p className="text-4xl font-black text-white">{stats.observacionesPendientes}</p>
-              <p className="text-purple-300 font-bold">Observaciones Pendientes</p>
+            <div className="bg-white/5 backdrop-blur-xl rounded-xl p-4 text-center border border-white/10 shadow-lg hover:bg-white/10 transition-all">
+              <BookOpen className="w-7 h-7 text-yellow-400 mx-auto mb-2" />
+              <p className="text-3xl font-black text-white">{stats.observacionesPendientes}</p>
+              <p className="text-purple-300 font-bold text-sm">Observaciones Pendientes</p>
             </div>
           </motion.div>
         )}

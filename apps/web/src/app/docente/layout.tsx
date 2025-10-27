@@ -7,18 +7,14 @@ import { ThemeProvider, useTheme } from '@/lib/theme/ThemeContext';
 import { ToastProvider } from '@/components/ui/Toast';
 import {
   LayoutDashboard,
-  BookOpen,
   Calendar,
   FileText,
-  BarChart3,
-
   LogOut,
   Sun,
   Moon,
   Bell,
   Menu,
   X,
-  Sparkles,
 } from 'lucide-react';
 
 /**
@@ -35,11 +31,8 @@ import {
 
 const navItems = [
   { href: '/docente/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/docente/mis-clases', label: 'Mis Clases', icon: BookOpen },
   { href: '/docente/calendario', label: 'Calendario', icon: Calendar },
   { href: '/docente/observaciones', label: 'Observaciones', icon: FileText },
-  { href: '/docente/reportes', label: 'Reportes', icon: BarChart3 },
-  { href: '/docente/planificador', label: 'Planificador AI', icon: Sparkles },
 ];
 
 export default function DocenteLayout({ children }: { children: React.ReactNode }) {
