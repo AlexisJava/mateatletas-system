@@ -128,7 +128,12 @@ export class NotificacionesService {
   /**
    * Crear notificación de clase próxima (24h antes)
    */
-  async notificarClaseProxima(docenteId: string, claseId: string, claseTitulo: string, fechaHora: Date) {
+  async notificarClaseProxima(
+    docenteId: string,
+    claseId: string,
+    claseTitulo: string,
+    fechaHora: Date,
+  ) {
     return this.create({
       tipo: TipoNotificacion.ClaseProxima,
       titulo: 'Clase próxima',
@@ -141,7 +146,11 @@ export class NotificacionesService {
   /**
    * Crear notificación de asistencia pendiente
    */
-  async notificarAsistenciaPendiente(docenteId: string, claseId: string, claseTitulo: string) {
+  async notificarAsistenciaPendiente(
+    docenteId: string,
+    claseId: string,
+    claseTitulo: string,
+  ) {
     return this.create({
       tipo: TipoNotificacion.AsistenciaPendiente,
       titulo: 'Asistencia pendiente',
@@ -172,7 +181,12 @@ export class NotificacionesService {
   /**
    * Crear notificación de clase cancelada
    */
-  async notificarClaseCancelada(docenteId: string, claseId: string, claseTitulo: string, motivo?: string) {
+  async notificarClaseCancelada(
+    docenteId: string,
+    claseId: string,
+    claseTitulo: string,
+    motivo?: string,
+  ) {
     return this.create({
       tipo: TipoNotificacion.ClaseCancelada,
       titulo: 'Clase cancelada',

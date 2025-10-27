@@ -159,7 +159,10 @@ describe('PagosTutorService', () => {
         preferencia_id: 'pref-1',
         createdAt: fecha,
         updatedAt: fecha,
-        producto: { ...productoSuscripcion, precio: productoSuscripcion.precio },
+        producto: {
+          ...productoSuscripcion,
+          precio: productoSuscripcion.precio,
+        },
       });
 
       const result = await service.activarMembresiaManual('tutor-1', 'memb-1');

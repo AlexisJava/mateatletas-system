@@ -96,7 +96,7 @@ export class LoggerService implements NestLoggerService {
 
       if (key === 'query') {
         if (typeof value === 'string' || this.isRecord(value)) {
-          sanitized.query = value as string | Record<string, unknown>;
+          sanitized.query = value;
         }
         continue;
       }
@@ -142,9 +142,7 @@ export class LoggerService implements NestLoggerService {
     return sanitized;
   }
 
-  private mergeMetadata(
-    metadata?: LoggerMetadata,
-  ): LoggerMetadata | undefined {
+  private mergeMetadata(metadata?: LoggerMetadata): LoggerMetadata | undefined {
     if (!metadata) {
       return undefined;
     }
@@ -170,22 +168,25 @@ export class LoggerService implements NestLoggerService {
     const consoleFormat = winston.format.combine(
       winston.format.colorize({ all: true }),
       winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-      winston.format.printf(({ timestamp, level, message, context, ...metadata }) => {
-        let msg = `${timestamp} [${level}]`;
+      winston.format.printf(
+        ({ timestamp, level, message, context, ...metadata }) => {
+          let msg = `${timestamp} [${level}]`;
 
-        if (context) {
-          msg += ` [${context}]`;
-        }
+          if (context) {
+            msg += ` [${context}]`;
+          }
 
-        msg += `: ${message}`;
+          msg += `: ${message}`;
 
-        // Agregar metadata si existe
-        const metadataString = Object.keys(metadata).length > 0
-          ? `\n${JSON.stringify(metadata, null, 2)}`
-          : '';
+          // Agregar metadata si existe
+          const metadataString =
+            Object.keys(metadata).length > 0
+              ? `\n${JSON.stringify(metadata, null, 2)}`
+              : '';
 
-        return msg + metadataString;
-      }),
+          return msg + metadataString;
+        },
+      ),
     );
 
     // Transports
@@ -293,7 +294,9 @@ export class LoggerService implements NestLoggerService {
     } else if (this.isRecord(traceOrMetadata)) {
       metadataCandidate = traceOrMetadata;
       trace =
-        typeof metadataOrUndefined === 'string' ? metadataOrUndefined : undefined;
+        typeof metadataOrUndefined === 'string'
+          ? metadataOrUndefined
+          : undefined;
     } else if (traceOrMetadata !== undefined) {
       trace = String(traceOrMetadata);
       metadataCandidate = metadataOrUndefined;
@@ -387,7 +390,8 @@ export class LoggerService implements NestLoggerService {
     durationMs: number,
     metadata?: unknown,
   ) {
-    const level = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
+    const level =
+      statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
 
     const sanitized = this.mergeMetadata(this.sanitizeMetadata(metadata));
 
@@ -405,7 +409,11 @@ export class LoggerService implements NestLoggerService {
   /**
    * Log de errores de validación
    */
-  logValidationError(field: string, value: unknown, constraints: Record<string, string>) {
+  logValidationError(
+    field: string,
+    value: unknown,
+    constraints: Record<string, string>,
+  ) {
     this.logger.warn('Validation Error', {
       context: this.context,
       eventType: 'validation',

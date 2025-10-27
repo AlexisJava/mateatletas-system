@@ -34,9 +34,7 @@ export class RolesGuard implements CanActivate {
     }
 
     // Obtener el usuario del request (ya validado por JwtAuthGuard)
-    const { user } = context
-      .switchToHttp()
-      .getRequest<{ user?: AuthUser }>();
+    const { user } = context.switchToHttp().getRequest<{ user?: AuthUser }>();
 
     if (!user) {
       return false;
@@ -52,7 +50,7 @@ export class RolesGuard implements CanActivate {
 
     // El usuario tiene acceso si tiene AL MENOS UNO de los roles requeridos
     return requiredRoles.some((requiredRole) =>
-      userRoles.some((userRole: string) => userRole === requiredRole)
+      userRoles.some((userRole: string) => userRole === requiredRole),
     );
   }
 }

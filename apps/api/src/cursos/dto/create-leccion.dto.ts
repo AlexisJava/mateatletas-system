@@ -1,4 +1,14 @@
-import { IsString, IsInt, IsEnum, IsBoolean, IsOptional, Min, Max, MaxLength, IsJSON } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsEnum,
+  IsBoolean,
+  IsOptional,
+  Min,
+  Max,
+  MaxLength,
+  IsJSON,
+} from 'class-validator';
 import { TipoContenido } from '@prisma/client';
 
 /**
@@ -15,7 +25,9 @@ export class CreateLeccionDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(2000, { message: 'La descripción no puede exceder 2000 caracteres' })
+  @MaxLength(2000, {
+    message: 'La descripción no puede exceder 2000 caracteres',
+  })
   descripcion?: string;
 
   @IsEnum(TipoContenido, { message: 'Tipo de contenido inválido' })
@@ -42,7 +54,7 @@ export class CreateLeccionDto {
   @IsInt()
   @Min(1)
   @Max(30, {
-    message: 'La duración debe estar entre 1 y 30 minutos (Microlearning)'
+    message: 'La duración debe estar entre 1 y 30 minutos (Microlearning)',
   })
   duracion_estimada_minutos?: number;
 

@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, MinLength, MaxLength, IsUUID } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  MinLength,
+  MaxLength,
+  IsUUID,
+} from 'class-validator';
 
 /**
  * DTO para crear una alerta manualmente
@@ -15,7 +21,9 @@ export class CrearAlertaDto {
 
   @IsString({ message: 'La descripción debe ser un texto' })
   @IsNotEmpty({ message: 'La descripción es requerida' })
-  @MinLength(10, { message: 'La descripción debe tener al menos 10 caracteres' })
+  @MinLength(10, {
+    message: 'La descripción debe tener al menos 10 caracteres',
+  })
   @MaxLength(500, { message: 'La descripción no puede exceder 500 caracteres' })
   descripcion!: string;
 }

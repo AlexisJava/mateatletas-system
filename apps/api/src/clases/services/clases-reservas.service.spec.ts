@@ -84,22 +84,30 @@ describe('ClasesReservasService', () => {
 
     it('should reserve class successfully', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          clase: {
-            findUnique: jest.fn().mockResolvedValue(mockClase), // ✅ Agregado para el fix
-            update: jest.fn().mockResolvedValue(mockClase),
-          },
-          inscripcionClase: {
-            findUnique: jest.fn().mockResolvedValue(null), // ✅ Agregado para el fix
-            create: jest.fn().mockResolvedValue(mockInscripcion),
-          },
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            clase: {
+              findUnique: jest.fn().mockResolvedValue(mockClase), // ✅ Agregado para el fix
+              update: jest.fn().mockResolvedValue(mockClase),
+            },
+            inscripcionClase: {
+              findUnique: jest.fn().mockResolvedValue(null), // ✅ Agregado para el fix
+              create: jest.fn().mockResolvedValue(mockInscripcion),
+            },
+          });
         });
-      });
 
       // Act
-      const result = await service.reservarClase('clase-1', 'tutor-1', validDto);
+      const result = await service.reservarClase(
+        'clase-1',
+        'tutor-1',
+        validDto,
+      );
 
       // Assert
       expect(result).toBeDefined();
@@ -108,14 +116,18 @@ describe('ClasesReservasService', () => {
 
     it('should throw NotFoundException if class does not exist', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          clase: {
-            findUnique: jest.fn().mockResolvedValue(null), // ✅ Clase no existe
-          },
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            clase: {
+              findUnique: jest.fn().mockResolvedValue(null), // ✅ Clase no existe
+            },
+          });
         });
-      });
 
       // Act & Assert
       await expect(
@@ -128,17 +140,21 @@ describe('ClasesReservasService', () => {
 
     it('should throw BadRequestException if class is cancelled', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          clase: {
-            findUnique: jest.fn().mockResolvedValue({
-              ...mockClase,
-              estado: 'Cancelada',
-            }),
-          },
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            clase: {
+              findUnique: jest.fn().mockResolvedValue({
+                ...mockClase,
+                estado: 'Cancelada',
+              }),
+            },
+          });
         });
-      });
 
       // Act & Assert
       await expect(
@@ -151,17 +167,23 @@ describe('ClasesReservasService', () => {
 
     it('should throw BadRequestException if class already started', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          clase: {
-            findUnique: jest.fn().mockResolvedValue({
-              ...mockClase,
-              fecha_hora_inicio: new Date('2020-01-01T10:00:00Z').toISOString(), // Pasada
-            }),
-          },
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            clase: {
+              findUnique: jest.fn().mockResolvedValue({
+                ...mockClase,
+                fecha_hora_inicio: new Date(
+                  '2020-01-01T10:00:00Z',
+                ).toISOString(), // Pasada
+              }),
+            },
+          });
         });
-      });
 
       // Act & Assert
       await expect(
@@ -174,18 +196,22 @@ describe('ClasesReservasService', () => {
 
     it('should throw BadRequestException if class is full', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          clase: {
-            findUnique: jest.fn().mockResolvedValue({
-              ...mockClase,
-              cupos_ocupados: 20,
-              cupos_maximo: 20,
-            }),
-          },
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            clase: {
+              findUnique: jest.fn().mockResolvedValue({
+                ...mockClase,
+                cupos_ocupados: 20,
+                cupos_maximo: 20,
+              }),
+            },
+          });
         });
-      });
 
       // Act & Assert
       await expect(
@@ -198,7 +224,9 @@ describe('ClasesReservasService', () => {
 
     it('should throw NotFoundException if student does not exist', async () => {
       // Arrange
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClase as any);
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
@@ -212,7 +240,9 @@ describe('ClasesReservasService', () => {
 
     it('should throw ForbiddenException if student does not belong to tutor', async () => {
       // Arrange
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClase as any);
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue({
         ...mockEstudiante,
         tutor_id: 'other-tutor', // Diferente tutor
@@ -238,13 +268,15 @@ describe('ClasesReservasService', () => {
         ...mockEstudiante,
         inscripciones_curso: [], // Sin inscripciones
       } as any);
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          clase: {
-            findUnique: jest.fn().mockResolvedValue(claseConCurso),
-          },
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            clase: {
+              findUnique: jest.fn().mockResolvedValue(claseConCurso),
+            },
+          });
         });
-      });
 
       // Act & Assert
       await expect(
@@ -257,17 +289,21 @@ describe('ClasesReservasService', () => {
 
     it('should throw BadRequestException if student already enrolled', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback({
-          clase: {
-            findUnique: jest.fn().mockResolvedValue(mockClase),
-          },
-          inscripcionClase: {
-            findUnique: jest.fn().mockResolvedValue(mockInscripcion), // Ya inscrito
-          },
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback({
+            clase: {
+              findUnique: jest.fn().mockResolvedValue(mockClase),
+            },
+            inscripcionClase: {
+              findUnique: jest.fn().mockResolvedValue(mockInscripcion), // Ya inscrito
+            },
+          });
         });
-      });
 
       // Act & Assert
       await expect(
@@ -280,7 +316,9 @@ describe('ClasesReservasService', () => {
 
     it('should increment cupos_ocupados on successful reservation', async () => {
       // Arrange
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
 
       const mockTx = {
         clase: {
@@ -293,9 +331,11 @@ describe('ClasesReservasService', () => {
         },
       };
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback(mockTx);
-      });
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback(mockTx);
+        });
 
       // Act
       await service.reservarClase('clase-1', 'tutor-1', validDto);
@@ -321,9 +361,18 @@ describe('ClasesReservasService', () => {
             cupos_maximo: 10,
             cupos_ocupados: 4,
             fecha_hora_inicio: new Date('2025-12-01T10:00:00Z').toISOString(),
-            rutaCurricular: { id: 'ruta-1', nombre: 'Álgebra', color: '#ff0000' },
+            rutaCurricular: {
+              id: 'ruta-1',
+              nombre: 'Álgebra',
+              color: '#ff0000',
+            },
             docente: { id: 'doc-1', nombre: 'María', apellido: 'González' },
-            sector: { id: 'sec-1', nombre: 'Secundaria', color: '#00ff00', icono: '📐' },
+            sector: {
+              id: 'sec-1',
+              nombre: 'Secundaria',
+              color: '#00ff00',
+              icono: '📐',
+            },
           },
           estudiante: { id: 'est-1', nombre: 'Juan', apellido: 'Pérez' },
         },
@@ -386,15 +435,20 @@ describe('ClasesReservasService', () => {
         },
       };
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback(mockTx);
-      });
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback(mockTx);
+        });
 
       // Act
       const result = await service.cancelarReserva('insc-1', 'tutor-1');
 
       // Assert
-      expect(result).toHaveProperty('message', 'Inscripción cancelada exitosamente');
+      expect(result).toHaveProperty(
+        'message',
+        'Inscripción cancelada exitosamente',
+      );
     });
 
     it('should throw NotFoundException if inscription does not exist', async () => {
@@ -402,12 +456,12 @@ describe('ClasesReservasService', () => {
       jest.spyOn(prisma.inscripcionClase, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.cancelarReserva('non-existent', 'tutor-1')).rejects.toThrow(
-        NotFoundException,
-      );
-      await expect(service.cancelarReserva('non-existent', 'tutor-1')).rejects.toThrow(
-        'Inscripción con ID non-existent no encontrada',
-      );
+      await expect(
+        service.cancelarReserva('non-existent', 'tutor-1'),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.cancelarReserva('non-existent', 'tutor-1'),
+      ).rejects.toThrow('Inscripción con ID non-existent no encontrada');
     });
 
     it('should throw ForbiddenException if inscription does not belong to tutor', async () => {
@@ -418,12 +472,12 @@ describe('ClasesReservasService', () => {
       } as any);
 
       // Act & Assert
-      await expect(service.cancelarReserva('insc-1', 'tutor-1')).rejects.toThrow(
-        ForbiddenException,
-      );
-      await expect(service.cancelarReserva('insc-1', 'tutor-1')).rejects.toThrow(
-        'No tienes permiso para cancelar esta inscripción',
-      );
+      await expect(
+        service.cancelarReserva('insc-1', 'tutor-1'),
+      ).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.cancelarReserva('insc-1', 'tutor-1'),
+      ).rejects.toThrow('No tienes permiso para cancelar esta inscripción');
     });
 
     it('should throw BadRequestException if class already started', async () => {
@@ -437,10 +491,12 @@ describe('ClasesReservasService', () => {
       } as any);
 
       // Act & Assert
-      await expect(service.cancelarReserva('insc-1', 'tutor-1')).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.cancelarReserva('insc-1', 'tutor-1')).rejects.toThrow(
+      await expect(
+        service.cancelarReserva('insc-1', 'tutor-1'),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.cancelarReserva('insc-1', 'tutor-1'),
+      ).rejects.toThrow(
         'No se puede cancelar una inscripción de una clase que ya comenzó',
       );
     });
@@ -460,9 +516,11 @@ describe('ClasesReservasService', () => {
         },
       };
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback(mockTx);
-      });
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback(mockTx);
+        });
 
       // Act
       await service.cancelarReserva('insc-1', 'tutor-1');
@@ -489,9 +547,11 @@ describe('ClasesReservasService', () => {
         },
       };
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback: any) => {
-        return callback(mockTx);
-      });
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          return callback(mockTx);
+        });
 
       // Act
       await service.cancelarReserva('insc-1', 'tutor-1');

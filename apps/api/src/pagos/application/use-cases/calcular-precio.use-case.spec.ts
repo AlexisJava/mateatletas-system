@@ -1,7 +1,11 @@
 import { Decimal } from 'decimal.js';
 import { CalcularPrecioUseCase } from './calcular-precio.use-case';
 import { IConfiguracionPreciosRepository } from '../../domain/repositories/configuracion-precios.repository.interface';
-import { ConfiguracionPrecios, TipoDescuento, TipoProducto } from '../../domain/types/pagos.types';
+import {
+  ConfiguracionPrecios,
+  TipoDescuento,
+  TipoProducto,
+} from '../../domain/types/pagos.types';
 import { CalcularPrecioInputDTO } from '../dtos/calcular-precio.dto';
 
 /**
@@ -42,8 +46,18 @@ describe('CalcularPrecioUseCase - Application Layer', () => {
     mockEstudianteRepo = {
       obtenerPorId: jest.fn((id: string) => {
         const estudiantes: Record<string, EstudianteMock> = {
-          'est-1': { id: 'est-1', nombre: 'Juan', apellido: 'Pérez', tutorId: 'tutor-1' },
-          'est-2': { id: 'est-2', nombre: 'María', apellido: 'Pérez', tutorId: 'tutor-1' },
+          'est-1': {
+            id: 'est-1',
+            nombre: 'Juan',
+            apellido: 'Pérez',
+            tutorId: 'tutor-1',
+          },
+          'est-2': {
+            id: 'est-2',
+            nombre: 'María',
+            apellido: 'Pérez',
+            tutorId: 'tutor-1',
+          },
         };
         return Promise.resolve(estudiantes[id] || null);
       }),
@@ -54,8 +68,16 @@ describe('CalcularPrecioUseCase - Application Layer', () => {
     mockProductoRepo = {
       obtenerPorId: jest.fn((id: string) => {
         const productos: Record<string, ProductoMock> = {
-          'prod-club': { id: 'prod-club', nombre: 'Club Matemáticas', tipo: 'CLUB_MATEMATICAS' as TipoProducto },
-          'prod-curso': { id: 'prod-curso', nombre: 'Curso Álgebra', tipo: 'CURSO_ESPECIALIZADO' as TipoProducto },
+          'prod-club': {
+            id: 'prod-club',
+            nombre: 'Club Matemáticas',
+            tipo: 'CLUB_MATEMATICAS' as TipoProducto,
+          },
+          'prod-curso': {
+            id: 'prod-curso',
+            nombre: 'Curso Álgebra',
+            tipo: 'CURSO_ESPECIALIZADO' as TipoProducto,
+          },
         };
         return Promise.resolve(productos[id] || null);
       }),
@@ -212,7 +234,7 @@ describe('CalcularPrecioUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'No se encontró la configuración de precios'
+        'No se encontró la configuración de precios',
       );
     });
 
@@ -225,7 +247,7 @@ describe('CalcularPrecioUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'Debe proporcionar al menos un estudiante'
+        'Debe proporcionar al menos un estudiante',
       );
     });
 
@@ -240,7 +262,7 @@ describe('CalcularPrecioUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'Estudiante con ID est-inexistente no encontrado'
+        'Estudiante con ID est-inexistente no encontrado',
       );
     });
 
@@ -260,7 +282,7 @@ describe('CalcularPrecioUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'El estudiante est-1 no pertenece al tutor tutor-1'
+        'El estudiante est-1 no pertenece al tutor tutor-1',
       );
     });
 
@@ -275,7 +297,7 @@ describe('CalcularPrecioUseCase - Application Layer', () => {
       };
 
       await expect(useCase.execute(input)).rejects.toThrow(
-        'Producto con ID prod-inexistente no encontrado'
+        'Producto con ID prod-inexistente no encontrado',
       );
     });
   });
@@ -300,7 +322,9 @@ describe('CalcularPrecioUseCase - Application Layer', () => {
       expect(resultado.resumen.subtotal.toNumber()).toBeGreaterThan(0);
       expect(resultado.resumen.totalDescuentos.toNumber()).toBeGreaterThan(0);
       expect(resultado.resumen.totalFinal.toNumber()).toBe(
-        resultado.resumen.subtotal.minus(resultado.resumen.totalDescuentos).toNumber()
+        resultado.resumen.subtotal
+          .minus(resultado.resumen.totalDescuentos)
+          .toNumber(),
       );
     });
   });

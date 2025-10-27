@@ -37,7 +37,11 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
   describe('crearEstudianteConCredenciales - Password Temporal', () => {
     it('debería guardar el PIN temporal en texto plano para el estudiante', async () => {
       // Arrange
-      const mockSector = { id: 'sector123', nombre: 'Matemática', activo: true };
+      const mockSector = {
+        id: 'sector123',
+        nombre: 'Matemática',
+        activo: true,
+      };
       const mockTutorExistente = {
         id: 'tutor123',
         nombre: 'Padre',
@@ -60,18 +64,24 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
         sector_id: 'sector123',
       };
 
-      jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector as any);
-      jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(mockTutorExistente as any);
+      jest
+        .spyOn(prisma.sector, 'findUnique')
+        .mockResolvedValue(mockSector as any);
+      jest
+        .spyOn(prisma.tutor, 'findFirst')
+        .mockResolvedValue(mockTutorExistente as any);
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback) => {
-        const tx = {
-          ...prisma,
-          estudiante: {
-            create: jest.fn().mockResolvedValue(mockEstudianteCreado),
-          },
-        };
-        return callback(tx as any);
-      });
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback) => {
+          const tx = {
+            ...prisma,
+            estudiante: {
+              create: jest.fn().mockResolvedValue(mockEstudianteCreado),
+            },
+          };
+          return callback(tx as any);
+        });
 
       // Act
       const resultado = await service.crearEstudianteConCredenciales({
@@ -88,7 +98,8 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
       expect(resultado.estudiante).toBeDefined();
 
       // Verificar que el mock fue llamado con password_temporal
-      const transactionCallback = (prisma.$transaction as jest.Mock).mock.calls[0][0];
+      const transactionCallback = (prisma.$transaction as jest.Mock).mock
+        .calls[0][0];
       expect(transactionCallback).toBeDefined();
 
       // Este test va a FALLAR porque password_temporal no existe en el schema
@@ -97,9 +108,15 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
 
     it('debería guardar la password temporal en texto plano para el tutor', async () => {
       // Arrange
-      const mockSector = { id: 'sector123', nombre: 'Matemática', activo: true };
+      const mockSector = {
+        id: 'sector123',
+        nombre: 'Matemática',
+        activo: true,
+      };
 
-      jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector as any);
+      jest
+        .spyOn(prisma.sector, 'findUnique')
+        .mockResolvedValue(mockSector as any);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null); // Tutor NO existe
 
       const mockTutorCreado = {
@@ -122,18 +139,20 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
         debe_cambiar_password: true,
       };
 
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback) => {
-        const tx = {
-          ...prisma,
-          tutor: {
-            create: jest.fn().mockResolvedValue(mockTutorCreado),
-          },
-          estudiante: {
-            create: jest.fn().mockResolvedValue(mockEstudianteCreado),
-          },
-        };
-        return callback(tx as any);
-      });
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback) => {
+          const tx = {
+            ...prisma,
+            tutor: {
+              create: jest.fn().mockResolvedValue(mockTutorCreado),
+            },
+            estudiante: {
+              create: jest.fn().mockResolvedValue(mockEstudianteCreado),
+            },
+          };
+          return callback(tx as any);
+        });
 
       // Act
       const resultado = await service.crearEstudianteConCredenciales({
@@ -156,32 +175,40 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
 
     it('debería hashear la password incluso cuando se guarda la temporal', async () => {
       // Arrange
-      const mockSector = { id: 'sector123', nombre: 'Matemática', activo: true };
+      const mockSector = {
+        id: 'sector123',
+        nombre: 'Matemática',
+        activo: true,
+      };
       const mockTutor = {
         id: 'tutor123',
         nombre: 'Padre',
         apellido: 'Pérez',
       };
 
-      jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector as any);
+      jest
+        .spyOn(prisma.sector, 'findUnique')
+        .mockResolvedValue(mockSector as any);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(mockTutor as any);
 
       let estudianteCreateData: any;
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback) => {
-        const tx = {
-          ...prisma,
-          estudiante: {
-            create: jest.fn().mockImplementation((params) => {
-              estudianteCreateData = params.data;
-              return Promise.resolve({
-                id: 'est123',
-                ...params.data,
-              });
-            }),
-          },
-        };
-        return callback(tx as any);
-      });
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback) => {
+          const tx = {
+            ...prisma,
+            estudiante: {
+              create: jest.fn().mockImplementation((params) => {
+                estudianteCreateData = params.data;
+                return Promise.resolve({
+                  id: 'est123',
+                  ...params.data,
+                });
+              }),
+            },
+          };
+          return callback(tx as any);
+        });
 
       // Act
       await service.crearEstudianteConCredenciales({
@@ -197,11 +224,16 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
       // Assert
       expect(estudianteCreateData.password_hash).toBeDefined();
       expect(estudianteCreateData.password_temporal).toBeDefined();
-      expect(estudianteCreateData.password_hash).not.toBe(estudianteCreateData.password_temporal);
+      expect(estudianteCreateData.password_hash).not.toBe(
+        estudianteCreateData.password_temporal,
+      );
 
       // Verificar que es un hash bcrypt válido
       const pinTemporal = estudianteCreateData.password_temporal;
-      const esHashValido = await bcrypt.compare(pinTemporal, estudianteCreateData.password_hash);
+      const esHashValido = await bcrypt.compare(
+        pinTemporal,
+        estudianteCreateData.password_hash,
+      );
 
       // Este test debería PASAR una vez implementemos la lógica
       expect(esHashValido).toBe(true);
@@ -209,32 +241,40 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
 
     it('debería marcar debe_cambiar_password como true por defecto', async () => {
       // Arrange
-      const mockSector = { id: 'sector123', nombre: 'Matemática', activo: true };
+      const mockSector = {
+        id: 'sector123',
+        nombre: 'Matemática',
+        activo: true,
+      };
       const mockTutor = {
         id: 'tutor123',
         nombre: 'Padre',
         apellido: 'Pérez',
       };
 
-      jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector as any);
+      jest
+        .spyOn(prisma.sector, 'findUnique')
+        .mockResolvedValue(mockSector as any);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(mockTutor as any);
 
       let estudianteCreateData: any;
-      jest.spyOn(prisma, '$transaction').mockImplementation(async (callback) => {
-        const tx = {
-          ...prisma,
-          estudiante: {
-            create: jest.fn().mockImplementation((params) => {
-              estudianteCreateData = params.data;
-              return Promise.resolve({
-                id: 'est123',
-                ...params.data,
-              });
-            }),
-          },
-        };
-        return callback(tx as any);
-      });
+      jest
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback) => {
+          const tx = {
+            ...prisma,
+            estudiante: {
+              create: jest.fn().mockImplementation((params) => {
+                estudianteCreateData = params.data;
+                return Promise.resolve({
+                  id: 'est123',
+                  ...params.data,
+                });
+              }),
+            },
+          };
+          return callback(tx as any);
+        });
 
       // Act
       await service.crearEstudianteConCredenciales({
@@ -274,7 +314,9 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
         },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
 
       // Act & Assert
       // Este test va a FALLAR porque el método no existe
@@ -294,12 +336,18 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
           nombre: 'Juan',
           apellido: 'Pérez',
           sector: { nombre: 'Matemática' },
-          tutor: { nombre: 'Padre', apellido: 'Pérez', email: 'padre@mail.com' },
+          tutor: {
+            nombre: 'Padre',
+            apellido: 'Pérez',
+            email: 'padre@mail.com',
+          },
           createdAt: new Date(),
         },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
       jest.spyOn(prisma.tutor, 'findMany').mockResolvedValue([]);
 
       // Act

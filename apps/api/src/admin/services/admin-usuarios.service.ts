@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Role } from '../../auth/decorators/roles.decorator';
 import { parseUserRoles } from '../../common/utils/role.utils';
@@ -56,7 +60,9 @@ export class AdminUsuariosService {
     const tutorUsers = tutores.map((tutor) => this.mapTutorToUser(tutor));
 
     // Mapear docentes
-    const docenteUsers = docentes.map((docente) => this.mapDocenteToUser(docente));
+    const docenteUsers = docentes.map((docente) =>
+      this.mapDocenteToUser(docente),
+    );
 
     // Mapear admins
     const adminUsers = admins.map((admin) => this.mapAdminToUser(admin));
@@ -81,7 +87,9 @@ export class AdminUsuariosService {
     const finalRoles = userRoles.length > 0 ? userRoles : [Role.Tutor];
 
     // Generar username: nombre.apellido (sin espacios, minúsculas)
-    const username = tutor.username || `${tutor.nombre.toLowerCase()}.${tutor.apellido.toLowerCase()}`;
+    const username =
+      tutor.username ||
+      `${tutor.nombre.toLowerCase()}.${tutor.apellido.toLowerCase()}`;
 
     return {
       id: tutor.id,
@@ -89,7 +97,7 @@ export class AdminUsuariosService {
       username,
       nombre: tutor.nombre,
       apellido: tutor.apellido,
-      role: finalRoles[0] as Role, // First role for backward compatibility
+      role: finalRoles[0], // First role for backward compatibility
       roles: finalRoles,
       activo: true,
       password_temporal: tutor.password_temporal || undefined, // Mostrar solo si existe
@@ -127,7 +135,7 @@ export class AdminUsuariosService {
       username,
       nombre: docente.nombre,
       apellido: docente.apellido,
-      role: finalRoles[0] as Role,
+      role: finalRoles[0],
       roles: finalRoles,
       activo: true,
       password_temporal: docente.password_temporal || undefined,
@@ -157,7 +165,7 @@ export class AdminUsuariosService {
       username,
       nombre: admin.nombre,
       apellido: admin.apellido,
-      role: finalRoles[0] as Role,
+      role: finalRoles[0],
       roles: finalRoles,
       activo: true,
       password_temporal: admin.password_temporal || undefined,
@@ -187,17 +195,17 @@ export class AdminUsuariosService {
         clases: {
           where: {
             estado: {
-              not: 'Cancelada' // Solo contar clases activas
-            }
-          }
-        }
-      }
+              not: 'Cancelada', // Solo contar clases activas
+            },
+          },
+        },
+      },
     });
 
     if (docente && docente.clases.length > 0) {
       throw new ConflictException(
         `No se puede eliminar el docente porque tiene ${docente.clases.length} clase(s) asignada(s). ` +
-        `Debe reasignar las clases a otro docente antes de eliminar.`
+          `Debe reasignar las clases a otro docente antes de eliminar.`,
       );
     }
 
@@ -205,15 +213,15 @@ export class AdminUsuariosService {
     const tutor = await this.prisma.tutor.findUnique({
       where: { id },
       include: {
-        estudiantes: true
-      }
+        estudiantes: true,
+      },
     });
 
     if (tutor) {
       // Eliminar todos los estudiantes del tutor primero
       if (tutor.estudiantes.length > 0) {
         await this.prisma.estudiante.deleteMany({
-          where: { tutor_id: id }
+          where: { tutor_id: id },
         });
       }
 

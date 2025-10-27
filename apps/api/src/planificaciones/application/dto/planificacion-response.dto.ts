@@ -26,13 +26,22 @@ export class PlanificacionListItemDto {
   @ApiProperty({ example: 'Suma y resta con reagrupamiento' })
   tematica_principal!: string;
 
-  @ApiProperty({ enum: EstadoPlanificacion, example: EstadoPlanificacion.PUBLICADA })
+  @ApiProperty({
+    enum: EstadoPlanificacion,
+    example: EstadoPlanificacion.PUBLICADA,
+  })
   estado!: EstadoPlanificacion;
 
-  @ApiProperty({ example: 12, description: 'Total de actividades en la planificación' })
+  @ApiProperty({
+    example: 12,
+    description: 'Total de actividades en la planificación',
+  })
   total_actividades!: number;
 
-  @ApiProperty({ example: 3, description: 'Total de asignaciones a docentes/grupos' })
+  @ApiProperty({
+    example: 3,
+    description: 'Total de asignaciones a docentes/grupos',
+  })
   total_asignaciones!: number;
 
   @ApiPropertyOptional({ example: '2025-11-01T00:00:00.000Z' })

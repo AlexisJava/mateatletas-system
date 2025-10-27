@@ -112,7 +112,10 @@ export class AdminStatsService {
       const monto = ins.precio_final.toNumber();
       if (ins.estado_pago === 'Pagado') {
         ingresosTotal += monto;
-      } else if (ins.estado_pago === 'Pendiente' || ins.estado_pago === 'Vencido') {
+      } else if (
+        ins.estado_pago === 'Pendiente' ||
+        ins.estado_pago === 'Vencido'
+      ) {
         pagosPendientes += monto;
       }
     });

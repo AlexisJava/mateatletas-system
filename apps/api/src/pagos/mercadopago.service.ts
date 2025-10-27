@@ -71,7 +71,9 @@ export class MercadoPagoService {
       this.preferenceClient = new Preference(this.mercadopagoClient);
       this.paymentClient = new Payment(this.mercadopagoClient);
 
-      this.logger.log('✅ MercadoPago SDK initialized successfully with Circuit Breaker protection');
+      this.logger.log(
+        '✅ MercadoPago SDK initialized successfully with Circuit Breaker protection',
+      );
     }
   }
 
@@ -108,13 +110,11 @@ export class MercadoPagoService {
     this.logger.log('Creando preferencia en MercadoPago (con Circuit Breaker)');
 
     // Ejecutar con circuit breaker protection
-    const preference = await this.preferenceCircuitBreaker.execute(
-      async () => {
-        return await this.preferenceClient!.create({
-          body: preferenceData,
-        });
-      },
-    );
+    const preference = await this.preferenceCircuitBreaker.execute(async () => {
+      return await this.preferenceClient!.create({
+        body: preferenceData,
+      });
+    });
 
     this.logger.log(`Preferencia creada exitosamente: ${preference.id}`);
     return preference;
@@ -143,14 +143,14 @@ export class MercadoPagoService {
       throw new Error('MercadoPago client not initialized');
     }
 
-    this.logger.log(`Consultando pago ${paymentId} en MercadoPago (con Circuit Breaker)`);
+    this.logger.log(
+      `Consultando pago ${paymentId} en MercadoPago (con Circuit Breaker)`,
+    );
 
     // Ejecutar con circuit breaker protection
-    const payment = await this.paymentCircuitBreaker.execute(
-      async () => {
-        return await this.paymentClient!.get({ id: paymentId });
-      },
-    );
+    const payment = await this.paymentCircuitBreaker.execute(async () => {
+      return await this.paymentClient!.get({ id: paymentId });
+    });
 
     this.logger.log(
       `Pago ${paymentId} consultado exitosamente - Estado: ${payment.status} - External Ref: ${payment.external_reference}`,

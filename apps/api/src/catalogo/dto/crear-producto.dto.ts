@@ -79,10 +79,7 @@ export class CrearProductoDto {
     format: 'date',
   })
   @ValidateIf((o) => o.tipo === 'Curso')
-  @IsDateString(
-    {},
-    { message: 'La fecha de inicio debe ser una fecha válida' },
-  )
+  @IsDateString({}, { message: 'La fecha de inicio debe ser una fecha válida' })
   @IsNotEmpty({ message: 'La fecha de inicio es requerida para cursos' })
   fecha_inicio?: string;
 
@@ -93,10 +90,7 @@ export class CrearProductoDto {
     format: 'date',
   })
   @ValidateIf((o) => o.tipo === 'Curso')
-  @IsDateString(
-    {},
-    { message: 'La fecha de inicio debe ser una fecha válida' },
-  )
+  @IsDateString({}, { message: 'La fecha de inicio debe ser una fecha válida' })
   @IsOptional()
   fechaInicio?: string; // Alias camelCase
 

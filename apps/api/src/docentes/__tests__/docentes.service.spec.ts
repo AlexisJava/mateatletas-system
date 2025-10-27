@@ -120,7 +120,9 @@ describe('DocentesService', () => {
     it('should create a docente with provided password', async () => {
       // Arrange
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null); // Email not exists
-      jest.spyOn(prisma.docente, 'create').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'create')
+        .mockResolvedValue(mockDocente as any);
 
       // Act
       const result = await service.create(createDto);
@@ -169,11 +171,17 @@ describe('DocentesService', () => {
 
     it('should throw ConflictException if email already exists', async () => {
       // Arrange
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any); // Email exists
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any); // Email exists
 
       // Act & Assert
-      await expect(service.create(createDto)).rejects.toThrow(ConflictException);
-      await expect(service.create(createDto)).rejects.toThrow('El email ya está registrado');
+      await expect(service.create(createDto)).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.create(createDto)).rejects.toThrow(
+        'El email ya está registrado',
+      );
       expect(prisma.docente.create).not.toHaveBeenCalled(); // Should not create
     });
 
@@ -187,7 +195,9 @@ describe('DocentesService', () => {
       };
 
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.docente, 'create').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'create')
+        .mockResolvedValue(mockDocente as any);
       (generateSecurePassword as jest.Mock).mockReturnValue('AutoPass123!');
 
       // Act
@@ -215,7 +225,9 @@ describe('DocentesService', () => {
       const dtoWithBiografia = rest;
 
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.docente, 'create').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'create')
+        .mockResolvedValue(mockDocente as any);
 
       // Act
       await service.create(dtoWithBiografia);
@@ -238,7 +250,9 @@ describe('DocentesService', () => {
     it('should return paginated list of docentes without passwords', async () => {
       // Arrange
       const mockDocentes = [mockDocente, { ...mockDocente, id: 'docente-456' }];
-      jest.spyOn(prisma.docente, 'findMany').mockResolvedValue(mockDocentes as any);
+      jest
+        .spyOn(prisma.docente, 'findMany')
+        .mockResolvedValue(mockDocentes as any);
       jest.spyOn(prisma.docente, 'count').mockResolvedValue(2);
 
       // Act
@@ -257,7 +271,9 @@ describe('DocentesService', () => {
 
     it('should handle pagination correctly', async () => {
       // Arrange
-      jest.spyOn(prisma.docente, 'findMany').mockResolvedValue([mockDocente] as any);
+      jest
+        .spyOn(prisma.docente, 'findMany')
+        .mockResolvedValue([mockDocente] as any);
       jest.spyOn(prisma.docente, 'count').mockResolvedValue(25);
 
       // Act
@@ -275,7 +291,9 @@ describe('DocentesService', () => {
 
     it('should use default pagination when not provided', async () => {
       // Arrange
-      jest.spyOn(prisma.docente, 'findMany').mockResolvedValue([mockDocente] as any);
+      jest
+        .spyOn(prisma.docente, 'findMany')
+        .mockResolvedValue([mockDocente] as any);
       jest.spyOn(prisma.docente, 'count').mockResolvedValue(1);
 
       // Act
@@ -294,7 +312,9 @@ describe('DocentesService', () => {
 
     it('should order docentes by createdAt desc', async () => {
       // Arrange
-      jest.spyOn(prisma.docente, 'findMany').mockResolvedValue([mockDocente] as any);
+      jest
+        .spyOn(prisma.docente, 'findMany')
+        .mockResolvedValue([mockDocente] as any);
       jest.spyOn(prisma.docente, 'count').mockResolvedValue(1);
 
       // Act
@@ -317,7 +337,9 @@ describe('DocentesService', () => {
   describe('findByEmail', () => {
     it('should return docente WITH password_hash (for authentication)', async () => {
       // Arrange
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
 
       // Act
       const result = await service.findByEmail('docente@test.com');
@@ -355,11 +377,19 @@ describe('DocentesService', () => {
         rutasEspecialidad: [
           mockDocenteRuta,
           mockDocenteRuta, // Duplicate sector (should be deduplicated)
-          { sector: { nombre: 'Ciencias', icono: 'science-icon', color: '#00FF00' } },
+          {
+            sector: {
+              nombre: 'Ciencias',
+              icono: 'science-icon',
+              color: '#00FF00',
+            },
+          },
         ],
       };
 
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(docenteWithRutas as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(docenteWithRutas as any);
 
       // Act
       const result = await service.findById('docente-123');
@@ -376,8 +406,12 @@ describe('DocentesService', () => {
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.findById('nonexistent-id')).rejects.toThrow(NotFoundException);
-      await expect(service.findById('nonexistent-id')).rejects.toThrow('Docente no encontrado');
+      await expect(service.findById('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.findById('nonexistent-id')).rejects.toThrow(
+        'Docente no encontrado',
+      );
     });
 
     it('should handle docente with no rutas/sectores', async () => {
@@ -387,7 +421,9 @@ describe('DocentesService', () => {
         rutasEspecialidad: [],
       };
 
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(docenteWithoutRutas as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(docenteWithoutRutas as any);
 
       // Act
       const result = await service.findById('docente-123');
@@ -411,7 +447,9 @@ describe('DocentesService', () => {
 
     it('should update docente successfully', async () => {
       // Arrange
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
       jest.spyOn(prisma.docente, 'update').mockResolvedValue({
         ...mockDocente,
         nombre: 'Juan Actualizado',
@@ -438,7 +476,9 @@ describe('DocentesService', () => {
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.update('nonexistent-id', updateDto)).rejects.toThrow(NotFoundException);
+      await expect(service.update('nonexistent-id', updateDto)).rejects.toThrow(
+        NotFoundException,
+      );
       await expect(service.update('nonexistent-id', updateDto)).rejects.toThrow(
         'Docente no encontrado',
       );
@@ -470,7 +510,11 @@ describe('DocentesService', () => {
     it('should throw ConflictException if new email is already in use', async () => {
       // Arrange
       const updateDtoWithEmail = { ...updateDto, email: 'taken@test.com' };
-      const otherDocente = { ...mockDocente, id: 'other-docente', email: 'taken@test.com' };
+      const otherDocente = {
+        ...mockDocente,
+        id: 'other-docente',
+        email: 'taken@test.com',
+      };
 
       jest
         .spyOn(prisma.docente, 'findUnique')
@@ -478,9 +522,9 @@ describe('DocentesService', () => {
         .mockResolvedValueOnce(otherDocente as any); // Second call: new email already exists
 
       // Act & Assert
-      await expect(service.update('docente-123', updateDtoWithEmail)).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        service.update('docente-123', updateDtoWithEmail),
+      ).rejects.toThrow(ConflictException);
       // Don't call twice - first assertion is enough
       expect(prisma.docente.update).not.toHaveBeenCalled();
     });
@@ -489,8 +533,12 @@ describe('DocentesService', () => {
       // Arrange
       const updateDtoSameEmail = { ...updateDto, email: 'docente@test.com' }; // Same email
 
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
-      jest.spyOn(prisma.docente, 'update').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'update')
+        .mockResolvedValue(mockDocente as any);
 
       // Act
       await service.update('docente-123', updateDtoSameEmail);
@@ -501,10 +549,17 @@ describe('DocentesService', () => {
 
     it('should hash password when updating password', async () => {
       // Arrange
-      const updateDtoWithPassword = { ...updateDto, password: 'NewSecurePass456!' };
+      const updateDtoWithPassword = {
+        ...updateDto,
+        password: 'NewSecurePass456!',
+      };
 
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
-      jest.spyOn(prisma.docente, 'update').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'update')
+        .mockResolvedValue(mockDocente as any);
 
       // Act
       await service.update('docente-123', updateDtoWithPassword);
@@ -526,8 +581,12 @@ describe('DocentesService', () => {
         biografia: 'Biografía actualizada',
       };
 
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
-      jest.spyOn(prisma.docente, 'update').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'update')
+        .mockResolvedValue(mockDocente as any);
 
       // Act
       await service.update('docente-123', updateDtoWithBiografia);
@@ -550,8 +609,12 @@ describe('DocentesService', () => {
   describe('remove', () => {
     it('should delete docente successfully', async () => {
       // Arrange
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as any);
-      jest.spyOn(prisma.docente, 'delete').mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as any);
+      jest
+        .spyOn(prisma.docente, 'delete')
+        .mockResolvedValue(mockDocente as any);
 
       // Act
       const result = await service.remove('docente-123');
@@ -568,8 +631,12 @@ describe('DocentesService', () => {
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.remove('nonexistent-id')).rejects.toThrow(NotFoundException);
-      await expect(service.remove('nonexistent-id')).rejects.toThrow('Docente no encontrado');
+      await expect(service.remove('nonexistent-id')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.remove('nonexistent-id')).rejects.toThrow(
+        'Docente no encontrado',
+      );
       expect(prisma.docente.delete).not.toHaveBeenCalled(); // Should not delete
     });
   });

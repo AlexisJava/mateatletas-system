@@ -9,10 +9,13 @@ export class DeleteActividadUseCase {
   ) {}
 
   async execute(planificacionId: string, actividadId: string): Promise<void> {
-    const actividad = await this.planificacionRepository.findActividadById(actividadId);
+    const actividad =
+      await this.planificacionRepository.findActividadById(actividadId);
 
     if (actividad.planificacionId !== planificacionId) {
-      throw new NotFoundException('La actividad no pertenece a la planificación solicitada');
+      throw new NotFoundException(
+        'La actividad no pertenece a la planificación solicitada',
+      );
     }
 
     await this.planificacionRepository.deleteActividad(actividadId);

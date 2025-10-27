@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Role } from '../../auth/decorators/roles.decorator';
 import { parseUserRoles } from '../../common/utils/role.utils';
@@ -41,7 +45,9 @@ export class AdminRolesService {
     return {
       success: true,
       message: `Rol ${newRole} asignado correctamente`,
-      roles: currentRoles.includes(newRole) ? currentRoles : [...currentRoles, newRole],
+      roles: currentRoles.includes(newRole)
+        ? currentRoles
+        : [...currentRoles, newRole],
     };
   }
 
@@ -60,7 +66,7 @@ export class AdminRolesService {
     const invalidRoles = roles.filter((role) => !validRoles.includes(role));
     if (invalidRoles.length > 0) {
       throw new BadRequestException(
-        `Roles inválidos: ${invalidRoles.join(', ')}`
+        `Roles inválidos: ${invalidRoles.join(', ')}`,
       );
     }
 
