@@ -125,7 +125,7 @@ export default function EstudianteDashboard() {
 
   if (isDashboardLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-950">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-sky-400 via-blue-300 to-cyan-300">
         <LoadingSpinner size="lg" text="Cargando tu dashboard..." />
       </div>
     );
@@ -133,15 +133,15 @@ export default function EstudianteDashboard() {
 
   if (error || !dashboard) {
     return (
-      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-slate-950 p-6 text-center">
+      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-gradient-to-br from-sky-400 via-blue-300 to-cyan-300 p-6 text-center">
         <div className="text-6xl">😵‍💫</div>
-        <h2 className="text-2xl font-bold text-white">No pudimos cargar tu información</h2>
-        <p className="text-slate-300 max-w-md">
+        <h2 className="text-2xl font-bold text-white drop-shadow-lg">No pudimos cargar tu información</h2>
+        <p className="text-white/90 max-w-md drop-shadow">
           {error ?? 'Reintenta nuevamente o avísanos si el problema persiste.'}
         </p>
         <button
           onClick={handleRetry}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold shadow-lg hover:shadow-cyan-500/40 transition-all"
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold shadow-lg hover:shadow-orange-500/50 transition-all"
         >
           Intentar otra vez
         </button>
@@ -160,14 +160,17 @@ export default function EstudianteDashboard() {
   const logrosTop3 = logrosRecientes?.slice(0, 3) || [];
 
   return (
-    <div className="h-screen overflow-hidden bg-slate-950 p-4">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-sky-400 via-blue-300 to-cyan-300 p-4">
       <div className="h-full max-w-7xl mx-auto flex flex-col gap-4">
 
-        {/* Header - Saludo Grande */}
+        {/* Header - Saludo Grande CRASH STYLE */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-cyan-600 via-blue-600 to-cyan-600 rounded-2xl shadow-2xl overflow-hidden border border-cyan-400/30 flex-shrink-0"
+          className="bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-500 rounded-3xl shadow-2xl overflow-hidden border-4 border-yellow-400 flex-shrink-0"
+          style={{
+            boxShadow: '0 10px 40px rgba(249, 115, 22, 0.4), inset 0 -4px 0 rgba(0,0,0,0.2)'
+          }}
         >
           <div className="p-4 relative overflow-hidden">
             {/* Patrón de fondo */}
@@ -205,12 +208,12 @@ export default function EstudianteDashboard() {
                 </p>
               </div>
 
-              {/* Badge de Nivel */}
+              {/* Badge de Nivel - WUMPA STYLE */}
               {nivel && (
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 border border-white/30">
+                <div className="bg-white rounded-2xl p-3 border-4 border-yellow-300 shadow-lg">
                   <div className="text-center">
-                    <div className="text-xs text-white/90 font-semibold">NIVEL {nivel.nivelActual}</div>
-                    <div className="text-lg font-bold text-white">{nivel.nombre}</div>
+                    <div className="text-xs text-orange-600 font-black">NIVEL {nivel.nivelActual}</div>
+                    <div className="text-lg font-black text-orange-600">{nivel.nombre}</div>
                   </div>
                 </div>
               )}
@@ -229,41 +232,44 @@ export default function EstudianteDashboard() {
                     </span>
                   )}
                 </div>
-                <div className="relative w-full h-3 bg-black/30 rounded-full overflow-hidden backdrop-blur-sm border border-white/20">
+                <div className="relative w-full h-4 bg-orange-900/40 rounded-full overflow-hidden border-2 border-yellow-400/50">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${nivel.porcentajeProgreso}%` }}
                     transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400 rounded-full"
+                    className="h-full bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 rounded-full shadow-lg"
+                    style={{
+                      boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.5), 0 2px 8px rgba(234, 179, 8, 0.6)'
+                    }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
                   </motion.div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-4 divide-x divide-white/10 bg-black/20 backdrop-blur-sm">
-            <div className="p-3 text-center hover:bg-white/5 transition-colors">
-              <div className="text-2xl mb-0.5">💎</div>
-              <div className="text-2xl font-black text-cyan-300">{stats.puntosToales}</div>
-              <div className="text-[10px] text-gray-300 font-semibold">Puntos</div>
+          {/* Stats Grid - CRASH POWER-UPS */}
+          <div className="grid grid-cols-4 divide-x divide-orange-600/30 bg-gradient-to-r from-orange-600/20 via-yellow-600/20 to-orange-600/20 backdrop-blur-sm border-t-4 border-orange-600/30">
+            <div className="p-3 text-center hover:bg-white/10 transition-colors">
+              <div className="text-3xl mb-0.5">💎</div>
+              <div className="text-2xl font-black text-white drop-shadow-lg">{stats.puntosToales}</div>
+              <div className="text-[10px] text-white/90 font-black">PUNTOS</div>
             </div>
-            <div className="p-3 text-center hover:bg-white/5 transition-colors">
-              <div className="text-2xl mb-0.5">📚</div>
-              <div className="text-2xl font-black text-blue-300">{stats.clasesAsistidas}</div>
-              <div className="text-[10px] text-gray-300 font-semibold">Clases</div>
+            <div className="p-3 text-center hover:bg-white/10 transition-colors">
+              <div className="text-3xl mb-0.5">📚</div>
+              <div className="text-2xl font-black text-white drop-shadow-lg">{stats.clasesAsistidas}</div>
+              <div className="text-[10px] text-white/90 font-black">CLASES</div>
             </div>
-            <div className="p-3 text-center hover:bg-white/5 transition-colors">
-              <div className="text-2xl mb-0.5">🔥</div>
-              <div className="text-2xl font-black text-cyan-300">{stats.racha}</div>
-              <div className="text-[10px] text-gray-300 font-semibold">Racha</div>
+            <div className="p-3 text-center hover:bg-white/10 transition-colors">
+              <div className="text-3xl mb-0.5">🔥</div>
+              <div className="text-2xl font-black text-white drop-shadow-lg">{stats.racha}</div>
+              <div className="text-[10px] text-white/90 font-black">RACHA</div>
             </div>
-            <div className="p-3 text-center hover:bg-white/5 transition-colors">
-              <div className="text-2xl mb-0.5">⭐</div>
-              <div className="text-2xl font-black text-blue-300">{nivel?.nivelActual || 1}</div>
-              <div className="text-[10px] text-gray-300 font-semibold">Nivel</div>
+            <div className="p-3 text-center hover:bg-white/10 transition-colors">
+              <div className="text-3xl mb-0.5">⭐</div>
+              <div className="text-2xl font-black text-white drop-shadow-lg">{nivel?.nivelActual || 1}</div>
+              <div className="text-[10px] text-white/90 font-black">NIVEL</div>
             </div>
           </div>
         </motion.div>
@@ -271,16 +277,19 @@ export default function EstudianteDashboard() {
         {/* Grid 2x2 - Paleta Consistente Tipo Consola */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto md:overflow-hidden min-h-0">
 
-          {/* CARD 1: Próxima Clase - CYAN */}
+          {/* CARD 1: Próxima Clase - NARANJA CRASH */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-slate-900 rounded-2xl shadow-xl border border-cyan-500/30 p-4 hover:border-cyan-500/50 transition-all h-full flex flex-col overflow-hidden"
+            className="bg-white rounded-2xl shadow-2xl border-4 border-orange-500 p-4 hover:border-orange-600 transition-all h-full flex flex-col overflow-hidden"
+            style={{
+              boxShadow: '0 8px 32px rgba(249, 115, 22, 0.3), inset 0 -3px 0 rgba(249, 115, 22, 0.2)'
+            }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-bold text-white">Tu Próxima Clase</h3>
-              <Calendar className="w-6 h-6 text-cyan-400" />
+              <h3 className="text-xl font-black text-orange-600">Tu Próxima Clase</h3>
+              <Calendar className="w-6 h-6 text-orange-500" />
             </div>
 
             {proximasClases && proximasClases.length > 0 ? (
@@ -300,22 +309,22 @@ export default function EstudianteDashboard() {
 
                 return (
                   <div className="flex-1 flex flex-col min-h-0">
-                    <div className="bg-cyan-500/10 rounded-xl p-4 mb-3 border border-cyan-500/20 flex-1 overflow-hidden">
-                      <h4 className="font-bold text-white text-lg mb-3">
+                    <div className="bg-gradient-to-br from-orange-100 to-yellow-50 rounded-2xl p-4 mb-3 border-2 border-orange-300 flex-1 overflow-hidden shadow-inner">
+                      <h4 className="font-black text-orange-700 text-xl mb-3">
                         Con {primeraClase.docente.nombre}
                       </h4>
-                      <div className="flex items-center gap-2 text-cyan-300 mb-2">
-                        <Clock className="w-5 h-5 flex-shrink-0" />
-                        <span className="text-base font-semibold">
+                      <div className="flex items-center gap-2 text-orange-600 mb-2">
+                        <Clock className="w-6 h-6 flex-shrink-0" />
+                        <span className="text-2xl font-black">
                           {format(new Date(primeraClase.fecha_hora_inicio), "HH:mm", { locale: es })}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-sm text-orange-600/80 font-semibold">
                         {format(new Date(primeraClase.fecha_hora_inicio), "EEEE d 'de' MMMM", { locale: es })}
                       </p>
                     </div>
 
-                    {/* Botón Dinámico */}
+                    {/* Botón CRASH STYLE */}
                     <button
                       disabled={!isActiva && !isProximamente}
                       onClick={() => {
@@ -325,12 +334,17 @@ export default function EstudianteDashboard() {
                         }
                       }}
                       className={`
-                        w-full font-bold py-3 text-base rounded-xl transition-all relative overflow-hidden
-                        ${isActiva || isProximamente ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/50 hover:shadow-cyan-500/70' : 'bg-slate-800 text-gray-500 cursor-not-allowed'}
+                        w-full font-black py-4 text-lg rounded-2xl transition-all relative overflow-hidden border-4
+                        ${isActiva || isProximamente
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-green-600 shadow-xl hover:scale-105'
+                          : 'bg-gray-300 text-gray-500 border-gray-400 cursor-not-allowed'}
                       `}
+                      style={isActiva || isProximamente ? {
+                        boxShadow: '0 8px 24px rgba(34, 197, 94, 0.4), inset 0 -4px 0 rgba(0, 0, 0, 0.2)'
+                      } : {}}
                     >
-                      {isActiva && <span className="absolute inset-0 bg-white/20 animate-pulse" />}
-                      <span className="relative z-10">
+                      {isActiva && <span className="absolute inset-0 bg-white/30 animate-ping" />}
+                      <span className="relative z-10 drop-shadow-lg">
                         {isActiva && '🔴 '}{claseStatus.texto}
                       </span>
                     </button>
@@ -345,16 +359,19 @@ export default function EstudianteDashboard() {
             )}
           </motion.div>
 
-          {/* CARD 2: Mis Logros - BLUE */}
+          {/* CARD 2: Mis Logros - AMARILLO DORADO */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-slate-900 rounded-2xl shadow-xl border border-blue-500/30 p-4 hover:border-blue-500/50 transition-all h-full flex flex-col overflow-hidden"
+            className="bg-white rounded-2xl shadow-2xl border-4 border-yellow-500 p-4 hover:border-yellow-600 transition-all h-full flex flex-col overflow-hidden"
+            style={{
+              boxShadow: '0 8px 32px rgba(234, 179, 8, 0.3), inset 0 -3px 0 rgba(234, 179, 8, 0.2)'
+            }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-bold text-white">Mis Logros</h3>
-              <Trophy className="w-6 h-6 text-blue-400" />
+              <h3 className="text-xl font-black text-yellow-700">Mis Logros</h3>
+              <Trophy className="w-6 h-6 text-yellow-600" />
             </div>
 
             {logrosTop3.length > 0 ? (
@@ -362,13 +379,13 @@ export default function EstudianteDashboard() {
                 {logrosTop3.map((logro, index) => (
                   <div
                     key={logro.id || index}
-                    className="bg-blue-500/10 rounded-xl p-3 border border-blue-500/20 hover:bg-blue-500/15 transition-all"
+                    className="bg-gradient-to-r from-yellow-100 to-orange-50 rounded-xl p-3 border-2 border-yellow-400 hover:scale-105 transition-all shadow-md"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="text-3xl">{logro.icono || '🏆'}</div>
+                      <div className="text-4xl">{logro.icono || '🏆'}</div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-bold text-white truncate">{logro.nombre}</h4>
-                        <p className="text-xs text-blue-300">+{logro.puntos} puntos</p>
+                        <h4 className="text-sm font-black text-yellow-800 truncate">{logro.nombre}</h4>
+                        <p className="text-xs text-orange-600 font-bold">+{logro.puntos} puntos</p>
                       </div>
                     </div>
                   </div>
