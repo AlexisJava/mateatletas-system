@@ -56,8 +56,8 @@ export default function AlgebraChallengePage() {
     const operador: '+' | '-' = Math.random() > 0.5 ? '+' : '-';
     const solucion = Math.floor(Math.random() * 10) + 1; // 1 a 10
 
-    let constante1: number;
-    let resultado: number;
+    let constante1 = 0;
+    let resultado = 0;
 
     if (operador === '+') {
       constante1 = Math.floor(Math.random() * 15) + 1; // 1 a 15

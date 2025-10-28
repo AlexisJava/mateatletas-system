@@ -11,7 +11,7 @@ import {
   ObservacionRecienteDto,
   TipoObservacion,
   ProximaClaseDto,
-} from './dto/grupo-detalle-completo.dto';
+} from '../dto/grupo-detalle-completo.dto';
 import { EstadoAsistencia, DiaSemana } from '@prisma/client';
 
 /**
