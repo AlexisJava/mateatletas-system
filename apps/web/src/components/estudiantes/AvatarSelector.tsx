@@ -3,20 +3,13 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check } from 'lucide-react';
+import { X, Sparkles, User, Bot, Gamepad2, Palette } from 'lucide-react';
 
 /**
- * Avatar Selector Component
+ * Avatar Selector Component - Apple-inspired UX
  *
- * Permite al estudiante elegir su avatar de entre varios estilos de Dicebear API.
- * Estilos disponibles: avataaars, adventurer, personas, lorelei, bottts, micah
- *
- * Props:
- * - isOpen: boolean - Controla si el modal está abierto
- * - onClose: () => void - Callback al cerrar el modal
- * - currentAvatar: string - Avatar actual del estudiante
- * - onSelect: (avatarStyle: string) => void - Callback al seleccionar un avatar
- * - studentId: string - ID del estudiante para generar el seed único
+ * Elegante, minimalista y con microinteracciones sutiles.
+ * Cada animación tiene un propósito claro.
  */
 
 interface AvatarSelectorProps {
@@ -27,15 +20,46 @@ interface AvatarSelectorProps {
   studentId: string;
 }
 
-const avatarStyles = [
-  { id: 'avataaars', name: 'Avataaars', description: 'Estilo cartoon clásico' },
-  { id: 'adventurer', name: 'Aventurero', description: 'Personajes aventureros' },
-  { id: 'personas', name: 'Personas', description: 'Estilo moderno y limpio' },
-  { id: 'lorelei', name: 'Lorelei', description: 'Ilustración artística' },
-  { id: 'bottts', name: 'Robots', description: 'Robots futuristas' },
-  { id: 'micah', name: 'Micah', description: 'Estilo minimalista' },
-  { id: 'pixel-art', name: 'Pixel Art', description: '8-bit retro' },
-  { id: 'initials', name: 'Iniciales', description: 'Tus iniciales' },
+// Categorías organizadas con iconos
+const categories = [
+  {
+    id: 'personas',
+    name: 'Personas',
+    icon: User,
+    styles: [
+      { id: 'avataaars', name: 'Avataaars', description: 'Clásico' },
+      { id: 'adventurer', name: 'Aventurero', description: 'Moderno' },
+      { id: 'personas', name: 'Personas', description: 'Elegante' },
+      { id: 'micah', name: 'Micah', description: 'Minimal' },
+    ],
+  },
+  {
+    id: 'robots',
+    name: 'Robots',
+    icon: Bot,
+    styles: [
+      { id: 'bottts', name: 'Bottts', description: 'Futurista' },
+      { id: 'bottts-neutral', name: 'Neutral', description: 'Limpio' },
+    ],
+  },
+  {
+    id: 'gaming',
+    name: 'Gaming',
+    icon: Gamepad2,
+    styles: [
+      { id: 'pixel-art', name: 'Pixel Art', description: '8-bit' },
+      { id: 'pixel-art-neutral', name: 'Retro', description: 'Arcade' },
+    ],
+  },
+  {
+    id: 'artistico',
+    name: 'Artístico',
+    icon: Palette,
+    styles: [
+      { id: 'lorelei', name: 'Lorelei', description: 'Ilustrado' },
+      { id: 'initials', name: 'Iniciales', description: 'Minimalista' },
+    ],
+  },
 ];
 
 export function AvatarSelector({
@@ -45,16 +69,28 @@ export function AvatarSelector({
   onSelect,
   studentId,
 }: AvatarSelectorProps) {
+  const [selectedCategory, setSelectedCategory] = useState('personas');
   const [selectedStyle, setSelectedStyle] = useState(currentAvatar || 'avataaars');
+  const [previewStyle, setPreviewStyle] = useState(currentAvatar || 'avataaars');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setSelectedStyle(currentAvatar || 'avataaars');
+      setPreviewStyle(currentAvatar || 'avataaars');
+      // Detectar categoría inicial
+      for (const cat of categories) {
+        if (cat.styles.some((s) => s.id === currentAvatar)) {
+          setSelectedCategory(cat.id);
+          break;
+        }
+      }
     }
   }, [isOpen, currentAvatar]);
 
   const handleSelect = async () => {
+    if (selectedStyle === currentAvatar) return;
+
     setIsLoading(true);
     try {
       await onSelect(selectedStyle);
@@ -66,169 +102,218 @@ export function AvatarSelector({
     }
   };
 
+  const handleRandomize = () => {
+    const allStyles = categories.flatMap((cat) => cat.styles);
+    const randomStyle = allStyles[Math.floor(Math.random() * allStyles.length)];
+    setSelectedStyle(randomStyle.id);
+    setPreviewStyle(randomStyle.id);
+
+    // Encontrar y cambiar a la categoría correcta
+    for (const cat of categories) {
+      if (cat.styles.some((s) => s.id === randomStyle.id)) {
+        setSelectedCategory(cat.id);
+        break;
+      }
+    }
+  };
+
+  const currentCategory = categories.find((cat) => cat.id === selectedCategory);
+  const hasChanged = selectedStyle !== currentAvatar;
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Overlay */}
+          {/* Overlay - Sutil y elegante */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
           />
 
-          {/* Modal */}
+          {/* Modal - Minimalista, tipo Apple */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', duration: 0.5 }}
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }} // Ease out expo
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="w-full max-w-4xl max-h-[80vh] overflow-y-auto"
-              style={{
-                background: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
-                borderRadius: '24px',
-                border: '6px solid #000',
-                boxShadow: '12px 12px 0 0 rgba(0, 0, 0, 1)',
-              }}
-            >
+            <div className="w-full max-w-5xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+
               {/* Header */}
-              <div className="sticky top-0 z-10 px-8 py-6 border-b-4 border-black bg-gradient-to-r from-cyan-500 to-blue-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2
-                      className="text-3xl font-bold text-white"
-                      style={{ textShadow: '3px 3px 0 #000' }}
-                    >
-                      ELEGÍ TU AVATAR
-                    </h2>
-                    <p
-                      className="text-white/90 font-semibold mt-1"
-                      style={{ textShadow: '1px 1px 0 #000' }}
-                    >
-                      Personalizá tu perfil con un avatar único
-                    </p>
-                  </div>
-                  <button
-                    onClick={onClose}
-                    className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-                    style={{
-                      border: '3px solid #000',
-                      boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 1)',
-                    }}
-                  >
-                    <X className="w-6 h-6 text-white" />
-                  </button>
+              <div className="px-6 sm:px-8 py-5 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-semibold text-gray-900">
+                    Elegí tu avatar
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    Personalizá tu perfil
+                  </p>
                 </div>
+                <button
+                  onClick={onClose}
+                  className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
               </div>
 
-              {/* Content */}
-              <div className="p-8">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {avatarStyles.map((style) => {
-                    const isSelected = selectedStyle === style.id;
+              {/* Content Area */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 p-6 sm:p-8">
 
-                    return (
-                      <motion.button
-                        key={style.id}
-                        onClick={() => setSelectedStyle(style.id)}
-                        whileHover={{ scale: 1.05, y: -4 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="relative"
-                        style={{
-                          background: isSelected ? '#FFD700' : '#fff',
-                          borderRadius: '16px',
-                          border: '4px solid #000',
-                          boxShadow: isSelected
-                            ? '6px 6px 0 0 rgba(0, 0, 0, 1)'
-                            : '4px 4px 0 0 rgba(0, 0, 0, 1)',
-                          transition: 'all 0.2s ease',
-                        }}
+                  {/* Left Panel - Preview grande */}
+                  <div className="lg:col-span-2 space-y-4">
+                    {/* Preview Card */}
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-200">
+                      <motion.div
+                        key={previewStyle}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative w-full aspect-square rounded-2xl overflow-hidden bg-white shadow-lg"
                       >
-                        {/* Check Badge */}
-                        {isSelected && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute -top-2 -right-2 z-10 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center"
-                            style={{
-                              border: '3px solid #000',
-                              boxShadow: '2px 2px 0 0 rgba(0, 0, 0, 1)',
-                            }}
-                          >
-                            <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                          </motion.div>
-                        )}
+                        <Image
+                          src={`https://api.dicebear.com/7.x/${previewStyle}/svg?seed=${studentId}`}
+                          alt="Preview"
+                          fill
+                          sizes="(max-width: 1024px) 100vw, 40vw"
+                          className="object-cover"
+                          priority
+                        />
+                      </motion.div>
+                    </div>
 
-                        {/* Avatar Preview */}
-                        <div className="p-4">
-                          <div
-                            className="relative w-full aspect-square rounded-xl overflow-hidden mb-3"
-                            style={{
-                              border: '3px solid #000',
-                              background: '#f0f0f0',
-                            }}
-                          >
-                            <Image
-                              src={`https://api.dicebear.com/7.x/${style.id}/svg?seed=${studentId}`}
-                              alt={style.name}
-                              fill
-                              sizes="(max-width: 768px) 50vw, 25vw"
-                              className="object-cover"
-                            />
-                          </div>
+                    {/* Botón Sorpréndeme */}
+                    <button
+                      onClick={handleRandomize}
+                      className="w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Sorpréndeme
+                    </button>
+                  </div>
 
-                          {/* Style Name */}
-                          <h3
-                            className="text-base font-bold text-black mb-1"
-                            style={{ textShadow: isSelected ? '1px 1px 0 rgba(0,0,0,0.1)' : 'none' }}
+                  {/* Right Panel - Categorías y Grid */}
+                  <div className="lg:col-span-3 space-y-6">
+
+                    {/* Tabs de Categorías */}
+                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                      {categories.map((category) => {
+                        const Icon = category.icon;
+                        const isActive = selectedCategory === category.id;
+
+                        return (
+                          <button
+                            key={category.id}
+                            onClick={() => setSelectedCategory(category.id)}
+                            className={`
+                              relative flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm whitespace-nowrap transition-all
+                              ${isActive
+                                ? 'bg-blue-500 text-white shadow-sm'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }
+                            `}
                           >
-                            {style.name}
-                          </h3>
-                          <p className="text-xs text-black/70 font-semibold">
-                            {style.description}
-                          </p>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
+                            <Icon className="w-4 h-4" />
+                            {category.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Grid de Avatares */}
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={selectedCategory}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+                      >
+                        {currentCategory?.styles.map((style) => {
+                          const isSelected = selectedStyle === style.id;
+                          const isCurrent = currentAvatar === style.id;
+
+                          return (
+                            <motion.button
+                              key={style.id}
+                              onClick={() => {
+                                setSelectedStyle(style.id);
+                                setPreviewStyle(style.id);
+                              }}
+                              onHoverStart={() => setPreviewStyle(style.id)}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              className={`
+                                relative p-4 rounded-xl border-2 transition-all
+                                ${isSelected
+                                  ? 'border-blue-500 bg-blue-50 shadow-sm'
+                                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                                }
+                              `}
+                            >
+                              {/* Badge "Actual" */}
+                              {isCurrent && (
+                                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow-sm">
+                                  Actual
+                                </div>
+                              )}
+
+                              {/* Avatar Thumbnail */}
+                              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-50 mb-2">
+                                <Image
+                                  src={`https://api.dicebear.com/7.x/${style.id}/svg?seed=${studentId}`}
+                                  alt={style.name}
+                                  fill
+                                  sizes="(max-width: 640px) 50vw, 20vw"
+                                  className="object-cover"
+                                />
+                              </div>
+
+                              {/* Info */}
+                              <h3 className="text-sm font-semibold text-gray-900 mb-0.5">
+                                {style.name}
+                              </h3>
+                              <p className="text-xs text-gray-500">
+                                {style.description}
+                              </p>
+                            </motion.button>
+                          );
+                        })}
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="sticky bottom-0 px-8 py-6 border-t-4 border-black bg-gradient-to-r from-cyan-500 to-blue-500">
-                <div className="flex gap-4">
-                  <button
-                    onClick={onClose}
-                    className="flex-1 py-4 px-6 text-lg font-bold text-white rounded-xl transition-all"
-                    style={{
-                      background: 'rgba(0,0,0,0.2)',
-                      border: '4px solid #000',
-                      boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 1)',
-                      textShadow: '2px 2px 0 #000',
-                    }}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleSelect}
-                    disabled={isLoading || selectedStyle === currentAvatar}
-                    className="flex-1 py-4 px-6 text-lg font-bold text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      border: '4px solid #000',
-                      boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 1)',
-                      textShadow: '2px 2px 0 #000',
-                    }}
-                  >
-                    {isLoading ? 'GUARDANDO...' : '¡CONFIRMAR!'}
-                  </button>
-                </div>
+              <div className="px-6 sm:px-8 py-5 border-t border-gray-100 flex gap-3">
+                <button
+                  onClick={onClose}
+                  className="px-6 py-2.5 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSelect}
+                  disabled={isLoading || !hasChanged}
+                  className={`
+                    flex-1 py-2.5 px-6 font-semibold rounded-xl transition-all
+                    ${hasChanged && !isLoading
+                      ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    }
+                  `}
+                >
+                  {isLoading ? 'Guardando...' : hasChanged ? 'Guardar cambios' : 'Sin cambios'}
+                </button>
               </div>
             </div>
           </motion.div>
