@@ -87,8 +87,15 @@ export class PagosTutorService {
         membresia.id,
         () =>
           this.mercadoPagoService.buildMembershipPreferenceData(
-            producto,
-            tutor,
+            {
+              ...producto,
+              descripcion: producto.descripcion ?? undefined,
+              precio: Number(producto.precio),
+            },
+            {
+              ...tutor,
+              email: tutor.email || '',
+            },
             membresia.id,
             tutorId,
             this.getBackendUrl(),
@@ -173,9 +180,16 @@ export class PagosTutorService {
         inscripcion.id,
         () =>
           this.mercadoPagoService.buildCoursePreferenceData(
-            producto,
+            {
+              ...producto,
+              descripcion: producto.descripcion ?? undefined,
+              precio: Number(producto.precio),
+            },
             estudiante,
-            tutor,
+            {
+              ...tutor,
+              email: tutor.email || '',
+            },
             inscripcion.id,
             estudianteId,
             this.getBackendUrl(),

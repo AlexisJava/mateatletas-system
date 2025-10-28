@@ -56,7 +56,7 @@ export class PlanificacionesSimplesController {
     @Query('mes') mes?: string,
     @Query('anio') anio?: string,
   ) {
-    const filtros: Prisma.PlanificacionWhereInput = {};
+    const filtros: Record<string, string | number> = {};
     if (estado) filtros.estado = estado;
     if (grupo_codigo) filtros.grupo_codigo = grupo_codigo;
     if (mes) filtros.mes = parseInt(mes);
