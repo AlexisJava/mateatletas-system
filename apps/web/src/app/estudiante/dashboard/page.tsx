@@ -401,59 +401,65 @@ export default function EstudianteDashboard() {
 
             <button
               onClick={() => window.location.href = '/estudiante/logros'}
-              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2.5 text-sm rounded-xl hover:shadow-lg hover:shadow-blue-500/50 transition-all mt-3"
+              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-black py-3 text-base rounded-2xl border-4 border-yellow-600 hover:scale-105 transition-all mt-3 shadow-lg"
+              style={{
+                boxShadow: '0 6px 20px rgba(234, 179, 8, 0.4), inset 0 -3px 0 rgba(0,0,0,0.2)'
+              }}
             >
               Ver Todos los Logros
             </button>
           </motion.div>
 
-          {/* CARD 3: Juegos - CYAN */}
+          {/* CARD 3: Juegos - VERDE JUNGLE */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-slate-900 rounded-2xl shadow-xl border border-cyan-500/30 p-4 hover:border-cyan-500/50 transition-all h-full flex flex-col overflow-hidden"
+            className="bg-white rounded-2xl shadow-2xl border-4 border-green-500 p-4 hover:border-green-600 transition-all h-full flex flex-col overflow-hidden"
+            style={{
+              boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3), inset 0 -3px 0 rgba(34, 197, 94, 0.2)'
+            }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-bold text-white">Juegos</h3>
-              <Gamepad2 className="w-6 h-6 text-cyan-400" />
+              <h3 className="text-xl font-black text-green-700">Juegos</h3>
+              <Gamepad2 className="w-6 h-6 text-green-600" />
             </div>
 
             <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
               <button
                 onClick={() => window.location.href = '/estudiante/cursos/calculo-mental'}
-                className="w-full bg-cyan-500/10 rounded-xl p-3 border border-cyan-500/20 text-left hover:bg-cyan-500/15 transition-all"
+                className="w-full bg-gradient-to-r from-green-100 to-emerald-50 rounded-xl p-3 border-2 border-green-400 text-left hover:scale-105 transition-all shadow-md"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">🧮</span>
+                  <span className="text-4xl">🧮</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white truncate">Cálculo Mental</p>
-                    <p className="text-xs text-cyan-400">+10 pts</p>
+                    <p className="text-sm font-black text-green-800 truncate">Cálculo Mental</p>
+                    <p className="text-xs text-green-600 font-bold">+10 pts</p>
                   </div>
                 </div>
               </button>
 
               <button
                 onClick={() => window.location.href = '/estudiante/cursos/algebra-challenge'}
-                className="w-full bg-blue-500/10 rounded-xl p-3 border border-blue-500/20 text-left hover:bg-blue-500/15 transition-all"
+                className="w-full bg-gradient-to-r from-emerald-100 to-green-50 rounded-xl p-3 border-2 border-emerald-400 text-left hover:scale-105 transition-all shadow-md"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">🎯</span>
+                  <span className="text-4xl">🎯</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white truncate">Álgebra Challenge</p>
-                    <p className="text-xs text-blue-400">+20 pts</p>
+                    <p className="text-sm font-black text-emerald-800 truncate">Álgebra Challenge</p>
+                    <p className="text-xs text-emerald-600 font-bold">+20 pts</p>
                   </div>
                 </div>
               </button>
 
               <button
-                className="w-full bg-cyan-500/10 rounded-xl p-3 border border-cyan-500/20 text-left hover:bg-cyan-500/15 transition-all"
+                className="w-full bg-gradient-to-r from-green-100 to-emerald-50 rounded-xl p-3 border-2 border-green-400 text-left hover:scale-105 transition-all shadow-md"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">📐</span>
+                  <span className="text-4xl">📐</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-white truncate">Geometría Quiz</p>
-                    <p className="text-xs text-cyan-400">+15 pts</p>
+                    <p className="text-sm font-black text-green-800 truncate">Geometría Quiz</p>
+                    <p className="text-xs text-green-600 font-bold">+15 pts</p>
                   </div>
                 </div>
               </button>
@@ -461,31 +467,37 @@ export default function EstudianteDashboard() {
 
             <button
               onClick={() => window.location.href = '/estudiante/cursos'}
-              className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-2.5 text-sm rounded-xl hover:shadow-lg hover:shadow-cyan-500/50 transition-all mt-3"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-black py-3 text-base rounded-2xl border-4 border-green-600 hover:scale-105 transition-all mt-3 shadow-lg"
+              style={{
+                boxShadow: '0 6px 20px rgba(34, 197, 94, 0.4), inset 0 -3px 0 rgba(0,0,0,0.2)'
+              }}
             >
               Ver Todos 🎮
             </button>
           </motion.div>
 
-          {/* CARD 4: Mi Equipo - BLUE */}
+          {/* CARD 4: Mi Equipo - PURPLE MAGIC */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-slate-900 rounded-2xl shadow-xl border border-blue-500/30 p-4 hover:border-blue-500/50 transition-all h-full flex flex-col overflow-hidden"
+            className="bg-white rounded-2xl shadow-2xl border-4 border-purple-500 p-4 hover:border-purple-600 transition-all h-full flex flex-col overflow-hidden"
+            style={{
+              boxShadow: '0 8px 32px rgba(147, 51, 234, 0.3), inset 0 -3px 0 rgba(147, 51, 234, 0.2)'
+            }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-bold text-white">Mi Equipo</h3>
-              <Users className="w-6 h-6 text-blue-400" />
+              <h3 className="text-xl font-black text-purple-700">Mi Equipo</h3>
+              <Users className="w-6 h-6 text-purple-500" />
             </div>
 
             {estudiante.equipo ? (
               <div className="flex-1 flex flex-col min-h-0">
-                <div className="bg-blue-500/10 rounded-xl p-3 mb-3 border border-blue-500/20">
-                  <h4 className="font-bold text-white text-lg mb-1">
+                <div className="bg-gradient-to-r from-purple-100 to-pink-50 rounded-2xl p-4 mb-3 border-2 border-purple-400 shadow-md">
+                  <h4 className="font-black text-purple-800 text-xl mb-1">
                     {estudiante.equipo.nombre}
                   </h4>
-                  <p className="text-sm text-blue-300">Top 3 del equipo</p>
+                  <p className="text-sm text-purple-600 font-bold">Top 3 del equipo</p>
                 </div>
 
                 {equipoRanking && equipoRanking.length > 0 ? (
@@ -493,33 +505,33 @@ export default function EstudianteDashboard() {
                     {equipoRanking.slice(0, 3).map((miembro, index) => (
                       <div
                         key={miembro.id}
-                        className={`flex items-center gap-3 p-2 rounded-lg ${
+                        className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-transform hover:scale-105 ${
                           miembro.id === estudiante.id
-                            ? 'bg-blue-500/20 border border-blue-500/40'
-                            : 'bg-blue-500/5'
+                            ? 'bg-gradient-to-r from-purple-200 to-pink-100 border-purple-500 shadow-lg'
+                            : 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-300'
                         }`}
                       >
-                        <div className="text-lg font-bold text-blue-300 w-6">
+                        <div className="text-2xl font-bold w-8">
                           {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-white truncate">
+                          <p className="text-sm font-black text-purple-900 truncate">
                             {miembro.nombre}
                           </p>
-                          <p className="text-xs text-blue-400">{miembro.puntos} pts</p>
+                          <p className="text-xs text-purple-600 font-bold">{miembro.puntos} pts</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="flex-1 flex items-center justify-center text-center">
-                    <p className="text-gray-500 text-sm">Tu equipo está vacío</p>
+                    <p className="text-purple-500 text-sm font-bold">Tu equipo está vacío</p>
                   </div>
                 )}
 
                 <button
                   onClick={() => window.location.href = '/estudiante/ranking'}
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2.5 text-sm rounded-xl hover:shadow-lg hover:shadow-blue-500/50 transition-all mt-3"
+                  className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white font-black py-4 text-base rounded-2xl hover:shadow-lg hover:shadow-purple-500/50 transition-all mt-3 border-4 border-purple-600 hover:scale-105"
                 >
                   Ver Ranking Completo
                 </button>
@@ -527,7 +539,7 @@ export default function EstudianteDashboard() {
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center">
                 <div className="text-6xl mb-3">👥</div>
-                <p className="text-gray-400 text-sm">No estás en un equipo</p>
+                <p className="text-purple-500 text-sm font-bold">No estás en un equipo</p>
               </div>
             )}
           </motion.div>
