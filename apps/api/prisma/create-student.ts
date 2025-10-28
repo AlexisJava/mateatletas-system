@@ -44,7 +44,7 @@ async function createTestStudent() {
       nivel_escolar: 'Secundaria',
       tutor_id: tutor.id,
       equipo_id: equipo.id,
-      avatar_url: 'avataaars',
+      avatar_gradient: 0,
       puntos_totales: 250, // Para que tenga un nivel inicial
     },
   });

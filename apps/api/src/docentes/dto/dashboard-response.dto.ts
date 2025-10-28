@@ -39,7 +39,7 @@ export interface EstudianteInscrito {
   id: string;
   nombre: string;
   apellido: string;
-  avatar_url: string | null;
+  avatar_gradient: number;
 }
 
 /**

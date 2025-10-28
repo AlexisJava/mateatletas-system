@@ -96,23 +96,23 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
         ...mockEstudiante,
-        avatar_url: 'new-avatar.jpg',
+        avatar_gradient: 5,
       } as any);
 
       // Act
-      const result = await service.updateAvatar('est-123', 'new-avatar.jpg');
+      const result = await service.updateAvatar('est-123', 5);
 
       // Assert
       expect(result).toHaveProperty('id', 'est-123');
-      expect(result).toHaveProperty('avatar_url', 'new-avatar.jpg');
+      expect(result).toHaveProperty('avatar_gradient', 5);
       expect(prisma.estudiante.update).toHaveBeenCalledWith({
         where: { id: 'est-123' },
-        data: { avatar_url: 'new-avatar.jpg' },
+        data: { avatar_gradient: 5 },
         select: {
           id: true,
           nombre: true,
           apellido: true,
-          avatar_url: true,
+          avatar_gradient: true,
         },
       });
     });
@@ -126,15 +126,15 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
         ...mockEstudiante,
-        avatar_url: 'valid-new-avatar.jpg',
+        avatar_gradient: 3,
       } as any);
 
       const result = await service.updateAvatar(
         'est-123',
-        'valid-new-avatar.jpg',
+        3,
       );
 
-      expect(result).toHaveProperty('avatar_url', 'valid-new-avatar.jpg');
+      expect(result).toHaveProperty('avatar_gradient', 3);
       expect(result).toHaveProperty('nombre', 'Juan');
       expect(result).toHaveProperty('apellido', 'Perez');
     });
@@ -144,7 +144,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
       await expect(
-        service.updateAvatar('non-existent', 'new-avatar.jpg'),
+        service.updateAvatar('non-existent', 5),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -162,45 +162,43 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         id: 'est-123',
         nombre: 'Juan',
         apellido: 'Perez',
-        avatar_url: 'new-avatar.jpg',
+        avatar_gradient: 2,
       } as any);
 
-      const result = await service.updateAvatar('est-123', 'new-avatar.jpg');
+      const result = await service.updateAvatar('est-123', 2);
 
       // No debe retornar password_hash
       expect(result).not.toHaveProperty('password_hash');
       expect(result).toHaveProperty('id');
-      expect(result).toHaveProperty('avatar_url');
+      expect(result).toHaveProperty('avatar_gradient');
     });
   });
 
   describe('EDGE CASES: Handle Invalid Inputs', () => {
-    it('should handle empty avatar_url', async () => {
+    it('should handle gradient value 0', async () => {
       jest
         .spyOn(prisma.estudiante, 'findUnique')
         .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
         ...mockEstudiante,
-        avatar_url: '',
+        avatar_gradient: 0,
       } as any);
 
-      const result = await service.updateAvatar('est-123', '');
-      expect(result.avatar_url).toBe('');
+      const result = await service.updateAvatar('est-123', 0);
+      expect(result.avatar_gradient).toBe(0);
     });
 
-    it('should handle very long avatar URLs', async () => {
-      const longUrl = 'https://example.com/' + 'a'.repeat(500);
-
+    it('should handle maximum gradient value 9', async () => {
       jest
         .spyOn(prisma.estudiante, 'findUnique')
         .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
         ...mockEstudiante,
-        avatar_url: longUrl,
+        avatar_gradient: 9,
       } as any);
 
-      const result = await service.updateAvatar('est-123', longUrl);
-      expect(result.avatar_url).toBe(longUrl);
+      const result = await service.updateAvatar('est-123', 9);
+      expect(result.avatar_gradient).toBe(9);
     });
   });
 });
