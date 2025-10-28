@@ -219,34 +219,30 @@ export default function EstudianteDashboard() {
               )}
             </div>
 
-            {/* Barra de Progreso */}
-            {nivel && (
-              <div className="relative z-10 mt-3">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs text-white/90 font-bold">
-                    💎 {stats.puntosToales} pts
-                  </span>
-                  {nivel.siguienteNivel && (
-                    <span className="text-xs text-white/90 font-bold">
-                      {nivel.puntosParaSiguienteNivel} pts para nivel {nivel.siguienteNivel.nivel}
-                    </span>
-                  )}
-                </div>
-                <div className="relative w-full h-4 bg-orange-900/40 rounded-full overflow-hidden border-2 border-yellow-400/50">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${nivel.porcentajeProgreso}%` }}
-                    transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
-                    className="h-full bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 rounded-full shadow-lg"
-                    style={{
-                      boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.5), 0 2px 8px rgba(234, 179, 8, 0.6)'
-                    }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
-                  </motion.div>
+            {/* Estrellas ganadas HOY - Visual inmediato */}
+            <div className="relative z-10 mt-3">
+              <div className="flex justify-center items-center gap-2">
+                <span className="text-2xl font-black text-white drop-shadow-lg">
+                  Hoy ganaste:
+                </span>
+                <div className="flex gap-1">
+                  {[...Array(Math.min(stats.racha || 0, 5))].map((_, i) => (
+                    <motion.span
+                      key={i}
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.1 * i, type: "spring", stiffness: 200 }}
+                      className="text-4xl drop-shadow-lg"
+                    >
+                      ⭐
+                    </motion.span>
+                  ))}
+                  {[...Array(Math.max(0, 5 - (stats.racha || 0)))].map((_, i) => (
+                    <span key={`empty-${i}`} className="text-4xl opacity-30">⭐</span>
+                  ))}
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Stats Grid - CRASH POWER-UPS */}
@@ -274,274 +270,176 @@ export default function EstudianteDashboard() {
           </div>
         </motion.div>
 
-        {/* Grid 2x2 - Paleta Consistente Tipo Consola */}
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto md:overflow-hidden min-h-0">
+        {/* Grid 2 CARDS GIGANTES - SIMETRÍA PERFECTA */}
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto md:overflow-hidden min-h-0">
 
-          {/* CARD 1: Próxima Clase - NARANJA CRASH */}
+          {/* CARD 1: JUGAR - NARANJA - 50% ANCHO */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl shadow-2xl border-4 border-orange-500 p-4 hover:border-orange-600 transition-all h-full flex flex-col overflow-hidden"
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1, type: "spring", stiffness: 100 }}
+            className="bg-white rounded-3xl shadow-2xl border-8 border-orange-500 p-8 hover:border-orange-600 transition-all h-full flex flex-col overflow-hidden"
             style={{
-              boxShadow: '0 8px 32px rgba(249, 115, 22, 0.3), inset 0 -3px 0 rgba(249, 115, 22, 0.2)'
+              boxShadow: '0 12px 48px rgba(249, 115, 22, 0.4), inset 0 -6px 0 rgba(249, 115, 22, 0.3)'
             }}
           >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-black text-orange-600">Tu Próxima Clase</h3>
-              <Calendar className="w-6 h-6 text-orange-500" />
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-4xl font-black text-orange-600 drop-shadow-lg">🎮 JUGAR</h3>
+              <Gamepad2 className="w-12 h-12 text-orange-500" />
             </div>
 
-            {proximasClases && proximasClases.length > 0 ? (
-              (() => {
-                const primeraClase = proximasClases[0];
-                if (!primeraClase) {
-                  return (
-                    <div className="flex-1 flex items-center justify-center">
-                      <p className="text-gray-500 text-sm text-center">No hay clases programadas</p>
-                    </div>
-                  );
-                }
-
-                const claseStatus = getClaseStatus(primeraClase);
-                const isActiva = claseStatus.tipo === 'activa';
-                const isProximamente = claseStatus.tipo === 'proximamente';
-
-                return (
-                  <div className="flex-1 flex flex-col min-h-0">
-                    <div className="bg-gradient-to-br from-orange-100 to-yellow-50 rounded-2xl p-4 mb-3 border-2 border-orange-300 flex-1 overflow-hidden shadow-inner">
-                      <h4 className="font-black text-orange-700 text-xl mb-3">
-                        Con {primeraClase.docente.nombre}
-                      </h4>
-                      <div className="flex items-center gap-2 text-orange-600 mb-2">
-                        <Clock className="w-6 h-6 flex-shrink-0" />
-                        <span className="text-2xl font-black">
-                          {format(new Date(primeraClase.fecha_hora_inicio), "HH:mm", { locale: es })}
-                        </span>
-                      </div>
-                      <p className="text-sm text-orange-600/80 font-semibold">
-                        {format(new Date(primeraClase.fecha_hora_inicio), "EEEE d 'de' MMMM", { locale: es })}
-                      </p>
-                    </div>
-
-                    {/* Botón CRASH STYLE */}
-                    <button
-                      disabled={!isActiva && !isProximamente}
-                      onClick={() => {
-                        if (isActiva || isProximamente) {
-                          // Redirección externa a Google Meet/Zoom
-                          window.open(`https://meet.google.com/clase-${primeraClase.id}`, '_blank');
-                        }
-                      }}
-                      className={`
-                        w-full font-black py-4 text-lg rounded-2xl transition-all relative overflow-hidden border-4
-                        ${isActiva || isProximamente
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-green-600 shadow-xl hover:scale-105'
-                          : 'bg-gray-300 text-gray-500 border-gray-400 cursor-not-allowed'}
-                      `}
-                      style={isActiva || isProximamente ? {
-                        boxShadow: '0 8px 24px rgba(34, 197, 94, 0.4), inset 0 -4px 0 rgba(0, 0, 0, 0.2)'
-                      } : {}}
-                    >
-                      {isActiva && <span className="absolute inset-0 bg-white/30 animate-ping" />}
-                      <span className="relative z-10 drop-shadow-lg">
-                        {isActiva && '🔴 '}{claseStatus.texto}
-                      </span>
-                    </button>
-                  </div>
-                );
-              })()
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center">
-                <div className="text-6xl mb-3">📅</div>
-                <p className="text-gray-400 text-sm">No hay clases programadas</p>
-              </div>
-            )}
-          </motion.div>
-
-          {/* CARD 2: Mis Logros - AMARILLO DORADO */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl shadow-2xl border-4 border-yellow-500 p-4 hover:border-yellow-600 transition-all h-full flex flex-col overflow-hidden"
-            style={{
-              boxShadow: '0 8px 32px rgba(234, 179, 8, 0.3), inset 0 -3px 0 rgba(234, 179, 8, 0.2)'
-            }}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-black text-yellow-700">Mis Logros</h3>
-              <Trophy className="w-6 h-6 text-yellow-600" />
-            </div>
-
-            {logrosTop3.length > 0 ? (
-              <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
-                {logrosTop3.map((logro, index) => (
-                  <div
-                    key={logro.id || index}
-                    className="bg-gradient-to-r from-yellow-100 to-orange-50 rounded-xl p-3 border-2 border-yellow-400 hover:scale-105 transition-all shadow-md"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="text-4xl">{logro.icono || '🏆'}</div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-black text-yellow-800 truncate">{logro.nombre}</h4>
-                        <p className="text-xs text-orange-600 font-bold">+{logro.puntos} puntos</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center">
-                <div className="text-6xl mb-3">🏆</div>
-                <p className="text-gray-400 text-sm">Aún no tienes logros</p>
-                <p className="text-gray-500 text-xs">¡Asiste a clases para desbloquearlos!</p>
-              </div>
-            )}
-
-            <button
-              onClick={() => window.location.href = '/estudiante/logros'}
-              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-black py-3 text-base rounded-2xl border-4 border-yellow-600 hover:scale-105 transition-all mt-3 shadow-lg"
-              style={{
-                boxShadow: '0 6px 20px rgba(234, 179, 8, 0.4), inset 0 -3px 0 rgba(0,0,0,0.2)'
-              }}
-            >
-              Ver Todos los Logros
-            </button>
-          </motion.div>
-
-          {/* CARD 3: Juegos - VERDE JUNGLE */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl shadow-2xl border-4 border-green-500 p-4 hover:border-green-600 transition-all h-full flex flex-col overflow-hidden"
-            style={{
-              boxShadow: '0 8px 32px rgba(34, 197, 94, 0.3), inset 0 -3px 0 rgba(34, 197, 94, 0.2)'
-            }}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-black text-green-700">Juegos</h3>
-              <Gamepad2 className="w-6 h-6 text-green-600" />
-            </div>
-
-            <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
-              <button
+            {/* 3 JUEGOS GRANDES */}
+            <div className="flex-1 space-y-4 overflow-y-auto min-h-0">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => window.location.href = '/estudiante/cursos/calculo-mental'}
-                className="w-full bg-gradient-to-r from-green-100 to-emerald-50 rounded-xl p-3 border-2 border-green-400 text-left hover:scale-105 transition-all shadow-md"
+                className="w-full bg-gradient-to-br from-orange-100 to-yellow-50 rounded-3xl p-6 border-4 border-orange-400 text-left shadow-xl"
+                style={{
+                  boxShadow: '0 8px 24px rgba(249, 115, 22, 0.2), inset 0 -4px 0 rgba(249, 115, 22, 0.1)'
+                }}
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-4xl">🧮</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-green-800 truncate">Cálculo Mental</p>
-                    <p className="text-xs text-green-600 font-bold">+10 pts</p>
+                <div className="flex items-center gap-4">
+                  <span className="text-6xl">🧮</span>
+                  <div className="flex-1">
+                    <p className="text-2xl font-black text-orange-800">Cálculo Mental</p>
+                    <p className="text-lg text-orange-600 font-bold">+10 pts</p>
                   </div>
                 </div>
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => window.location.href = '/estudiante/cursos/algebra-challenge'}
-                className="w-full bg-gradient-to-r from-emerald-100 to-green-50 rounded-xl p-3 border-2 border-emerald-400 text-left hover:scale-105 transition-all shadow-md"
+                className="w-full bg-gradient-to-br from-yellow-100 to-orange-50 rounded-3xl p-6 border-4 border-yellow-400 text-left shadow-xl"
+                style={{
+                  boxShadow: '0 8px 24px rgba(234, 179, 8, 0.2), inset 0 -4px 0 rgba(234, 179, 8, 0.1)'
+                }}
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-4xl">🎯</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-emerald-800 truncate">Álgebra Challenge</p>
-                    <p className="text-xs text-emerald-600 font-bold">+20 pts</p>
+                <div className="flex items-center gap-4">
+                  <span className="text-6xl">🎯</span>
+                  <div className="flex-1">
+                    <p className="text-2xl font-black text-orange-800">Álgebra Challenge</p>
+                    <p className="text-lg text-orange-600 font-bold">+20 pts</p>
                   </div>
                 </div>
-              </button>
+              </motion.button>
 
-              <button
-                className="w-full bg-gradient-to-r from-green-100 to-emerald-50 rounded-xl p-3 border-2 border-green-400 text-left hover:scale-105 transition-all shadow-md"
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-full bg-gradient-to-br from-orange-100 to-yellow-50 rounded-3xl p-6 border-4 border-orange-400 text-left shadow-xl"
+                style={{
+                  boxShadow: '0 8px 24px rgba(249, 115, 22, 0.2), inset 0 -4px 0 rgba(249, 115, 22, 0.1)'
+                }}
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-4xl">📐</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-green-800 truncate">Geometría Quiz</p>
-                    <p className="text-xs text-green-600 font-bold">+15 pts</p>
+                <div className="flex items-center gap-4">
+                  <span className="text-6xl">📐</span>
+                  <div className="flex-1">
+                    <p className="text-2xl font-black text-orange-800">Geometría Quiz</p>
+                    <p className="text-lg text-orange-600 font-bold">+15 pts</p>
                   </div>
                 </div>
-              </button>
+              </motion.button>
             </div>
 
-            <button
+            {/* BOTÓN GIGANTE */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => window.location.href = '/estudiante/cursos'}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-black py-3 text-base rounded-2xl border-4 border-green-600 hover:scale-105 transition-all mt-3 shadow-lg"
+              className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-black py-6 text-2xl rounded-3xl border-8 border-orange-600 shadow-2xl mt-6"
               style={{
-                boxShadow: '0 6px 20px rgba(34, 197, 94, 0.4), inset 0 -3px 0 rgba(0,0,0,0.2)'
+                boxShadow: '0 12px 32px rgba(249, 115, 22, 0.5), inset 0 -6px 0 rgba(0,0,0,0.3)'
               }}
             >
-              Ver Todos 🎮
-            </button>
+              VER TODOS LOS JUEGOS 🚀
+            </motion.button>
           </motion.div>
 
-          {/* CARD 4: Mi Equipo - PURPLE MAGIC */}
+          {/* CARD 2: CRECER - CYAN - 50% ANCHO */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white rounded-2xl shadow-2xl border-4 border-purple-500 p-4 hover:border-purple-600 transition-all h-full flex flex-col overflow-hidden"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+            className="bg-white rounded-3xl shadow-2xl border-8 border-cyan-500 p-8 hover:border-cyan-600 transition-all h-full flex flex-col overflow-hidden"
             style={{
-              boxShadow: '0 8px 32px rgba(147, 51, 234, 0.3), inset 0 -3px 0 rgba(147, 51, 234, 0.2)'
+              boxShadow: '0 12px 48px rgba(6, 182, 212, 0.4), inset 0 -6px 0 rgba(6, 182, 212, 0.3)'
             }}
           >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-black text-purple-700">Mi Equipo</h3>
-              <Users className="w-6 h-6 text-purple-500" />
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-4xl font-black text-cyan-600 drop-shadow-lg">✨ CRECER</h3>
+              <Trophy className="w-12 h-12 text-cyan-500" />
             </div>
 
-            {estudiante.equipo ? (
-              <div className="flex-1 flex flex-col min-h-0">
-                <div className="bg-gradient-to-r from-purple-100 to-pink-50 rounded-2xl p-4 mb-3 border-2 border-purple-400 shadow-md">
-                  <h4 className="font-black text-purple-800 text-xl mb-1">
-                    {estudiante.equipo.nombre}
-                  </h4>
-                  <p className="text-sm text-purple-600 font-bold">Top 3 del equipo</p>
-                </div>
-
-                {equipoRanking && equipoRanking.length > 0 ? (
-                  <div className="flex-1 space-y-2 overflow-y-auto min-h-0">
-                    {equipoRanking.slice(0, 3).map((miembro, index) => (
-                      <div
-                        key={miembro.id}
-                        className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-transform hover:scale-105 ${
-                          miembro.id === estudiante.id
-                            ? 'bg-gradient-to-r from-purple-200 to-pink-100 border-purple-500 shadow-lg'
-                            : 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-300'
-                        }`}
-                      >
-                        <div className="text-2xl font-bold w-8">
-                          {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-black text-purple-900 truncate">
-                            {miembro.nombre}
-                          </p>
-                          <p className="text-xs text-purple-600 font-bold">{miembro.puntos} pts</p>
+            {/* MIS LOGROS - Visual Grande */}
+            <div className="mb-6">
+              <h4 className="text-xl font-black text-cyan-700 mb-3">Mis Logros</h4>
+              {logrosTop3.length > 0 ? (
+                <div className="space-y-3">
+                  {logrosTop3.map((logro, index) => (
+                    <motion.div
+                      key={logro.id || index}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.3 + index * 0.1, type: "spring" }}
+                      className="bg-gradient-to-br from-cyan-100 to-blue-50 rounded-3xl p-4 border-4 border-cyan-400 shadow-lg"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="text-5xl">{logro.icono || '🏆'}</div>
+                        <div className="flex-1">
+                          <h5 className="text-lg font-black text-cyan-800">{logro.nombre}</h5>
+                          <p className="text-base text-cyan-600 font-bold">+{logro.puntos} puntos</p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center text-center">
-                    <p className="text-purple-500 text-sm font-bold">Tu equipo está vacío</p>
-                  </div>
-                )}
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-3xl p-6 border-4 border-cyan-300 text-center">
+                  <div className="text-5xl mb-2">🏆</div>
+                  <p className="text-cyan-600 text-sm font-bold">¡Juega para ganar logros!</p>
+                </div>
+              )}
+            </div>
 
-                <button
-                  onClick={() => window.location.href = '/estudiante/ranking'}
-                  className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white font-black py-4 text-base rounded-2xl hover:shadow-lg hover:shadow-purple-500/50 transition-all mt-3 border-4 border-purple-600 hover:scale-105"
-                >
-                  Ver Ranking Completo
-                </button>
+            {/* PROGRESO - Barra Visual */}
+            <div className="mb-6">
+              <h4 className="text-xl font-black text-cyan-700 mb-3">Mi Progreso</h4>
+              <div className="bg-gradient-to-br from-cyan-100 to-blue-50 rounded-3xl p-6 border-4 border-cyan-400 shadow-lg">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-4xl mb-1">💎</div>
+                    <div className="text-3xl font-black text-cyan-700">{stats.puntosToales}</div>
+                    <div className="text-xs text-cyan-600 font-bold">PUNTOS</div>
+                  </div>
+                  <div>
+                    <div className="text-4xl mb-1">📚</div>
+                    <div className="text-3xl font-black text-cyan-700">{stats.clasesTotales}</div>
+                    <div className="text-xs text-cyan-600 font-bold">CLASES</div>
+                  </div>
+                  <div>
+                    <div className="text-4xl mb-1">🔥</div>
+                    <div className="text-3xl font-black text-cyan-700">{stats.racha}</div>
+                    <div className="text-xs text-cyan-600 font-bold">RACHA</div>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center">
-                <div className="text-6xl mb-3">👥</div>
-                <p className="text-purple-500 text-sm font-bold">No estás en un equipo</p>
-              </div>
-            )}
+            </div>
+
+            {/* BOTÓN GIGANTE */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.location.href = '/estudiante/logros'}
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-black py-6 text-2xl rounded-3xl border-8 border-cyan-600 shadow-2xl mt-auto"
+              style={{
+                boxShadow: '0 12px 32px rgba(6, 182, 212, 0.5), inset 0 -6px 0 rgba(0,0,0,0.3)'
+              }}
+            >
+              VER TODOS LOS LOGROS 🏆
+            </motion.button>
           </motion.div>
 
         </div>
