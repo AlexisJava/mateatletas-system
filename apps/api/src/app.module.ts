@@ -31,13 +31,16 @@ import { TokenBlacklistGuard } from './auth/guards/token-blacklist.guard';
 @Module({
   imports: [
     // Rate Limiting: Protege contra brute force, DDoS y abuso de API
-    // - Desarrollo: 1000 requests por minuto (más permisivo)
-    // - Producción: 100 requests por minuto
-    // TODO: Usar variable de entorno para ajustar límites por entorno
+    // - Configurable via variables de entorno RATE_LIMIT_TTL y RATE_LIMIT_MAX
+    // - Default: 100 req/min en producción, 1000 req/min en desarrollo
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 60 segundos (1 minuto)
-        limit: process.env.NODE_ENV === 'production' ? 100 : 1000, // 1000 en dev, 100 en prod
+        ttl: parseInt(process.env.RATE_LIMIT_TTL || '60000', 10), // Default: 60 segundos
+        limit: parseInt(
+          process.env.RATE_LIMIT_MAX ||
+            (process.env.NODE_ENV === 'production' ? '100' : '1000'),
+          10,
+        ),
       },
     ]),
     AppConfigModule,

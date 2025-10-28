@@ -51,10 +51,24 @@ export class CsrfProtectionGuard implements CanActivate {
   private readonly allowedOrigins = [
     'http://localhost:3000', // Frontend dev
     'http://localhost:3002', // Frontend alternativo
-    process.env.FRONTEND_URL, // Frontend producción
+    process.env.FRONTEND_URL || 'https://mateatletas.com', // Frontend producción (con fallback)
   ].filter(Boolean) as string[];
 
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) {
+    // CRÍTICO: Validar que FRONTEND_URL esté configurado en producción
+    if (!process.env.FRONTEND_URL && process.env.NODE_ENV === 'production') {
+      this.logger.error(
+        '⚠️  FRONTEND_URL no configurado en producción - CSRF usará fallback a https://mateatletas.com',
+      );
+      this.logger.error(
+        '⚠️  Configurar FRONTEND_URL en .env.production para evitar bloqueos',
+      );
+    } else if (process.env.FRONTEND_URL) {
+      this.logger.log(
+        `CSRF Protection habilitado para origins: ${this.allowedOrigins.join(', ')}`,
+      );
+    }
+  }
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
