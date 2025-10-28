@@ -190,7 +190,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
       const mockProducto = {
         id: 'prod-123',
         nombre: 'Membresía Básica',
-        descripcion: null,
+        descripcion: undefined,
         precio: 3000,
       };
 
@@ -217,7 +217,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         id: 'prod-123',
         nombre: 'Membresía Premium',
         descripcion: 'Test',
-        precio: '7500', // String price
+        precio: 7500, // Number price
       };
 
       const mockTutor = {
@@ -244,7 +244,7 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         id: 'prod-123',
         nombre: 'Test',
         descripcion: 'Test',
-        precio: 'invalid-price',
+        precio: NaN,
       };
 
       const mockTutor = {

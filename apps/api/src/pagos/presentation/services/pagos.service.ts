@@ -242,9 +242,25 @@ export class PagosService {
 
       // Determinar tipo de pago (membresía o inscripción)
       if (externalRef.startsWith('membresia-')) {
-        return await this.procesarPagoMembresia(payment);
+        if (!payment.id || !payment.status) {
+          this.logger.warn('⚠️ Pago sin id o status - Ignorando');
+          return { message: 'Payment without id or status' };
+        }
+        return await this.procesarPagoMembresia({
+          external_reference: externalRef,
+          id: payment.id,
+          status: payment.status,
+        });
       } else if (externalRef.startsWith('inscripcion-')) {
-        return await this.procesarPagoInscripcion(payment);
+        if (!payment.id || !payment.status) {
+          this.logger.warn('⚠️ Pago sin id o status - Ignorando');
+          return { message: 'Payment without id or status' };
+        }
+        return await this.procesarPagoInscripcion({
+          external_reference: externalRef,
+          id: payment.id,
+          status: payment.status,
+        });
       } else {
         this.logger.warn(
           `⚠️ Formato de external_reference desconocido: ${externalRef}`,

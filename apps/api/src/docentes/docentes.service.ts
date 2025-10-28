@@ -3,7 +3,7 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, EstadoClase, DiaSemana } from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
 import { CreateDocenteDto } from './dto/create-docente.dto';
 import { UpdateDocenteDto } from './dto/update-docente.dto';
@@ -18,7 +18,6 @@ import {
   StatsResumen,
   TendenciaAsistencia
 } from './dto/dashboard-response.dto';
-import { EstadoClase, Prisma, DiaSemana } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { BCRYPT_ROUNDS } from '../common/constants/security.constants';
 import { generateSecurePassword } from '../common/utils/password.utils';
