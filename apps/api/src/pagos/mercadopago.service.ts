@@ -173,8 +173,8 @@ export class MercadoPagoService {
    * Construye los datos de una preferencia para membresía
    */
   buildMembershipPreferenceData(
-    producto: any,
-    tutor: any,
+    producto: { id: string; nombre: string; descripcion?: string; precio: number },
+    tutor: { email: string; nombre?: string; apellido?: string },
     membresiaId: string,
     tutorId: string,
     backendUrl: string,
@@ -212,9 +212,9 @@ export class MercadoPagoService {
    * Construye los datos de una preferencia para curso
    */
   buildCoursePreferenceData(
-    producto: any,
-    estudiante: any,
-    tutor: any,
+    producto: { id: string; nombre: string; descripcion?: string; precio: number },
+    estudiante: { nombre: string; apellido?: string },
+    tutor: { email: string; nombre?: string; apellido?: string },
     inscripcionId: string,
     estudianteId: string,
     backendUrl: string,
