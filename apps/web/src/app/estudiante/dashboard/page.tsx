@@ -60,7 +60,11 @@ export default function EstudianteDashboard() {
   }, []);
 
   // Calculate class status
-  const getClaseStatus = (clase: Clase | ProximaClase) => {
+  const getClaseStatus = (clase: Clase | ProximaClase | undefined) => {
+    if (!clase) {
+      return { tipo: 'sin_clase', texto: 'Sin clases programadas', color: 'gray' };
+    }
+
     const now = currentTime.getTime();
     const inicio = new Date(clase.fecha_hora_inicio).getTime();
     const fin = inicio + (clase.duracion_minutos * 60 * 1000);
@@ -87,14 +91,31 @@ export default function EstudianteDashboard() {
   };
 
   const handleAvatarSelect = async (avatarStyle: string) => {
-    if (!dashboard?.estudiante?.id) return;
+    if (!dashboard?.estudiante?.id) {
+      console.log('[Dashboard] ❌ No estudiante ID found');
+      return;
+    }
 
-    await apiClient.patch(`/estudiantes/${dashboard.estudiante.id}/avatar`, {
-      avatar_url: avatarStyle,
+    console.log('[Dashboard] 🎨 Actualizando avatar:', {
+      estudianteId: dashboard.estudiante.id,
+      avatarStyle,
+      userId: user?.id,
+      userRole: user?.role,
     });
 
-    if (user?.id) {
-      await fetchDashboard(user.id);
+    try {
+      await apiClient.patch(`/estudiantes/${dashboard.estudiante.id}/avatar`, {
+        avatar_url: avatarStyle,
+      });
+
+      console.log('[Dashboard] ✅ Avatar actualizado exitosamente');
+
+      if (user?.id) {
+        await fetchDashboard(user.id);
+      }
+    } catch (error) {
+      console.error('[Dashboard] ❌ Error al actualizar avatar:', error);
+      throw error;
     }
   };
 
@@ -313,10 +334,24 @@ export default function EstudianteDashboard() {
 
               {proximasClases && proximasClases.length > 0 ? (
                 (() => {
-                  const claseStatus = getClaseStatus(proximasClases[0]);
+                  const primeraClase = proximasClases[0];
+                  if (!primeraClase) {
+                    return (
+                      <div className="flex-1 flex items-center justify-center">
+                        <p className="text-gray-400 text-sm text-center">No hay clases programadas</p>
+                      </div>
+                    );
+                  }
+
+                  const claseStatus = getClaseStatus(primeraClase);
                   const isActiva = claseStatus.tipo === 'activa';
                   const isProximamente = claseStatus.tipo === 'proximamente';
                   const isPendiente = claseStatus.tipo === 'pendiente';
+
+                  // Obtener ruta curricular (compatible con ambos formatos)
+                  const rutaCurricular = 'ruta_curricular' in primeraClase
+                    ? primeraClase.ruta_curricular
+                    : ('rutaCurricular' in primeraClase ? (primeraClase as any).rutaCurricular : null);
 
                   return (
                     <div className="flex-1 flex flex-col min-h-0">
@@ -325,24 +360,22 @@ export default function EstudianteDashboard() {
                           <div
                             className="w-2 h-2 rounded-full animate-pulse"
                             style={{
-                              backgroundColor:
-                                (proximasClases[0].ruta_curricular ?? proximasClases[0].rutaCurricular)?.color ||
-                                '#6366F1',
+                              backgroundColor: rutaCurricular?.color || '#6366F1',
                             }}
                           />
                           <h4 className="font-bold text-white text-base truncate">
-                            {(proximasClases[0].ruta_curricular ?? proximasClases[0].rutaCurricular)?.nombre ?? 'Sin ruta'}
+                            {rutaCurricular?.nombre || 'Sin ruta'}
                           </h4>
                         </div>
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2 text-xs text-gray-300 truncate">
                             <User className="w-4 h-4 flex-shrink-0" />
-                            <span className="truncate">Prof. {proximasClases[0].docente.nombre}</span>
+                            <span className="truncate">Prof. {primeraClase.docente.nombre}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm font-semibold text-cyan-400">
                             <Clock className="w-4 h-4 flex-shrink-0" />
                             <span className="truncate">
-                              {format(new Date(proximasClases[0].fecha_hora_inicio), "d 'de' MMMM 'a las' HH:mm", { locale: es })}
+                              {format(new Date(primeraClase.fecha_hora_inicio), "d 'de' MMMM 'a las' HH:mm", { locale: es })}
                             </span>
                           </div>
                         </div>
@@ -354,7 +387,7 @@ export default function EstudianteDashboard() {
                         onClick={() => {
                           if (isActiva || isProximamente) {
                             // TODO: Abrir sala de videollamada
-                            window.open(`/clase/${proximasClases[0].id}/sala`, '_blank');
+                            window.open(`/clase/${primeraClase.id}/sala`, '_blank');
                           }
                         }}
                         className={`
