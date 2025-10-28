@@ -1,85 +1,111 @@
 'use client';
 
-import { useState } from 'react';
-import { Play, Lock, Star, Zap, Trophy } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Play, Lock, Star, Zap, Trophy, ChevronRight } from 'lucide-react';
+import { misPlanificaciones } from '@/lib/api/planificaciones-simples.api';
 
-interface Actividad {
-  id: string;
-  numero: number;
-  tipo: 'QUIZ' | 'EJERCICIOS' | 'PROYECTO';
+interface PlanificacionEstudiante {
+  codigo: string;
   titulo: string;
-  descripcion: string;
-  duracion: string;
-  puntos: number;
-  completada: boolean;
-  bloqueada: boolean;
-  colorHeader: string;
-  colorBg: string;
+  grupo_codigo: string;
+  mes: number | null;
+  anio: number;
+  semanas_total: number;
+  progreso: {
+    semana_actual: number;
+    puntos_totales: number;
+    tiempo_total_minutos: number;
+    ultima_actividad: string;
+  };
 }
 
 export default function EstudiantePlanificacionesPage() {
-  const [selectedActivity, setSelectedActivity] = useState<string>('quiz-proporciones');
+  const router = useRouter();
+  const [planificaciones, setPlanificaciones] = useState<PlanificacionEstudiante[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
-  const mundo = {
-    nombre: 'LABORATORIO QUÍMICO',
-    numeroMundo: 1,
-    icono: '🧪',
-    progreso: 0,
+  useEffect(() => {
+    cargarPlanificaciones();
+  }, []);
+
+  const cargarPlanificaciones = async () => {
+    try {
+      setLoading(true);
+      const data = await misPlanificaciones();
+      setPlanificaciones(data);
+      if (data.length > 0) {
+        setSelectedPlan(data[0].codigo);
+      }
+    } catch (err) {
+      console.error('Error al cargar planificaciones:', err);
+      setError('No se pudieron cargar las planificaciones');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const stats = {
-    estrellas: 0,
-    racha: 0,
-    nivel: 1,
+  const handleJugar = (codigo: string) => {
+    router.push(`/estudiante/planificaciones/${codigo}`);
   };
 
-  const actividades: Actividad[] = [
-    {
-      id: 'quiz-proporciones',
-      numero: 1,
-      tipo: 'QUIZ',
-      titulo: 'PROPORCIONES QUÍMICAS',
-      descripcion: 'Mezcla los elementos correctos',
-      duracion: '5 MIN',
-      puntos: 20,
-      completada: false,
-      bloqueada: false,
-      colorHeader: 'bg-blue-600',
-      colorBg: 'from-blue-600 to-blue-700',
-    },
-    {
-      id: 'ejercicios-mezclas',
-      numero: 2,
-      tipo: 'EJERCICIOS',
-      titulo: 'CÁLCULO DE MEZCLAS',
-      descripcion: 'Resuelve las ecuaciones',
-      duracion: '10 MIN',
-      puntos: 30,
-      completada: false,
-      bloqueada: false,
-      colorHeader: 'bg-purple-600',
-      colorBg: 'from-purple-600 to-purple-700',
-    },
-    {
-      id: 'proyecto-experimento',
-      numero: 3,
-      tipo: 'PROYECTO',
-      titulo: 'EXPERIMENTO FINAL',
-      descripcion: 'Crea tu fórmula maestra',
-      duracion: '15 MIN',
-      puntos: 50,
-      completada: false,
-      bloqueada: false,
-      colorHeader: 'bg-orange-600',
-      colorBg: 'from-orange-600 to-orange-700',
-    },
-  ];
+  // Calcular stats globales
+  const statsGlobales = {
+    estrellas: planificaciones.reduce((acc, p) => acc + Math.floor(p.progreso.puntos_totales / 100), 0),
+    racha: 0, // TODO: implementar cálculo de racha
+    nivel: 1 + Math.floor(planificaciones.reduce((acc, p) => acc + p.progreso.puntos_totales, 0) / 1000),
+  };
 
-  const proximosMundos = [
-    { nivel: 2, nombre: 'ASTRONOMÍA', icono: '🪐' },
-    { nivel: 3, nombre: 'FÍSICA', icono: '⚡' },
-    { nivel: 4, nombre: 'COMPUTACIÓN', icono: '💻' },
-  ];
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-slate-700 border-t-cyan-500 rounded-full animate-spin mx-auto mb-6" />
+          <p className="text-white font-bold">Cargando planificaciones...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-6xl mb-4">❌</div>
+          <h2 className="text-2xl font-bold text-white mb-4">Error</h2>
+          <p className="text-slate-400 mb-6">{error}</p>
+          <button
+            onClick={cargarPlanificaciones}
+            className="px-6 py-3 rounded-xl bg-cyan-600 text-white font-bold hover:bg-cyan-700 transition-all"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (planificaciones.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-6xl mb-4">📚</div>
+          <h2 className="text-2xl font-bold text-white mb-4">No hay planificaciones disponibles</h2>
+          <p className="text-slate-400 mb-6">
+            Contacta a tu docente para que te asigne una planificación
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Planificación seleccionada (la primera o la que el usuario seleccionó)
+  const planActual = planificaciones.find(p => p.codigo === selectedPlan) || planificaciones[0];
+  const progresoPercent = planActual.semanas_total > 0
+    ? Math.min(100, Math.round((planActual.progreso.semana_actual / planActual.semanas_total) * 100))
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -97,37 +123,39 @@ export default function EstudiantePlanificacionesPage() {
 
         <div className="relative flex items-start justify-between p-6">
           <div>
-            <h1 className="text-3xl font-black text-white uppercase tracking-tight">MES DE LA CIENCIA</h1>
-            <p className="text-sm text-slate-400 font-medium mt-1">Nivel {stats.nivel} · 0/100 XP</p>
+            <h1 className="text-3xl font-black text-white uppercase tracking-tight">MIS PLANIFICACIONES</h1>
+            <p className="text-sm text-slate-400 font-medium mt-1">
+              Nivel {statsGlobales.nivel} · {planificaciones.length} {planificaciones.length === 1 ? 'planificación' : 'planificaciones'}
+            </p>
           </div>
 
           <div className="flex gap-3">
-          <div className="px-4 py-2 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30">
-            <div className="flex items-center gap-2 mb-0.5">
-              <Star className="w-5 h-5 text-yellow-400" fill="currentColor" />
-              <span className="text-2xl font-black text-yellow-400">{stats.estrellas}</span>
+            <div className="px-4 py-2 rounded-xl bg-yellow-500/10 border-2 border-yellow-500/30">
+              <div className="flex items-center gap-2 mb-0.5">
+                <Star className="w-5 h-5 text-yellow-400" fill="currentColor" />
+                <span className="text-2xl font-black text-yellow-400">{statsGlobales.estrellas}</span>
+              </div>
+              <p className="text-[10px] font-bold text-yellow-400/60 uppercase text-center">Estrellas</p>
             </div>
-            <p className="text-[10px] font-bold text-yellow-400/60 uppercase text-center">Estrellas</p>
-          </div>
-          <div className="px-4 py-2 rounded-xl bg-orange-500/10 border-2 border-orange-500/30">
-            <div className="flex items-center gap-2 mb-0.5">
-              <Zap className="w-5 h-5 text-orange-400" fill="currentColor" />
-              <span className="text-2xl font-black text-orange-400">{stats.racha}</span>
+            <div className="px-4 py-2 rounded-xl bg-orange-500/10 border-2 border-orange-500/30">
+              <div className="flex items-center gap-2 mb-0.5">
+                <Zap className="w-5 h-5 text-orange-400" fill="currentColor" />
+                <span className="text-2xl font-black text-orange-400">{statsGlobales.racha}</span>
+              </div>
+              <p className="text-[10px] font-bold text-orange-400/60 uppercase text-center">Racha</p>
             </div>
-            <p className="text-[10px] font-bold text-orange-400/60 uppercase text-center">Racha</p>
-          </div>
-          <div className="px-4 py-2 rounded-xl bg-purple-500/10 border-2 border-purple-500/30">
-            <div className="flex items-center gap-2 mb-0.5">
-              <Trophy className="w-5 h-5 text-purple-400" fill="currentColor" />
-              <span className="text-2xl font-black text-purple-400">{stats.nivel}</span>
+            <div className="px-4 py-2 rounded-xl bg-purple-500/10 border-2 border-purple-500/30">
+              <div className="flex items-center gap-2 mb-0.5">
+                <Trophy className="w-5 h-5 text-purple-400" fill="currentColor" />
+                <span className="text-2xl font-black text-purple-400">{statsGlobales.nivel}</span>
+              </div>
+              <p className="text-[10px] font-bold text-purple-400/60 uppercase text-center">Nivel</p>
             </div>
-            <p className="text-[10px] font-bold text-purple-400/60 uppercase text-center">Nivel</p>
           </div>
-        </div>
         </div>
       </div>
 
-      {/* Hero - Mundo Actual */}
+      {/* Hero - Planificación Actual */}
       <div className="relative rounded-3xl overflow-hidden border-4 border-slate-700/50 shadow-2xl">
         {/* Background con gradiente */}
         <div className="absolute inset-0 bg-gradient-to-br from-teal-600/20 via-green-600/20 to-emerald-600/20" />
@@ -147,197 +175,165 @@ export default function EstudiantePlanificacionesPage() {
         <div className="relative p-8">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              {/* Badge mundo */}
+              {/* Badge */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/20 border border-green-400/40 backdrop-blur-sm mb-4">
-                <span className="text-xs font-black text-green-300 uppercase tracking-wide">Mundo {mundo.numeroMundo}</span>
+                <span className="text-xs font-black text-green-300 uppercase tracking-wide">
+                  Semana {planActual.progreso.semana_actual} de {planActual.semanas_total}
+                </span>
               </div>
 
               {/* Título */}
               <h2 className="text-5xl font-black text-white uppercase mb-3 drop-shadow-lg">
-                {mundo.nombre}
+                {planActual.titulo}
               </h2>
 
               {/* Descripción */}
               <p className="text-lg text-white/90 mb-6 max-w-2xl font-medium leading-relaxed">
-                ¡Ayuda al Dr. Números a resolver el misterio del líquido químico!
+                {planActual.progreso.puntos_totales} puntos acumulados • {planActual.progreso.tiempo_total_minutos} minutos jugados
               </p>
 
               {/* Barra de progreso */}
               <div className="bg-slate-900/60 backdrop-blur-sm rounded-2xl p-4 border border-white/10 max-w-md">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-black text-white uppercase tracking-wide">PROGRESO</span>
-                  <span className="text-sm font-black text-white">{mundo.progreso}%</span>
+                  <span className="text-sm font-black text-white">{progresoPercent}%</span>
                 </div>
                 <div className="relative h-3 bg-slate-800 rounded-full overflow-hidden">
                   <div
                     className="absolute inset-y-0 left-0 bg-gradient-to-r from-green-500 via-emerald-500 to-green-400 rounded-full transition-all duration-500"
-                    style={{ width: `${mundo.progreso}%` }}
+                    style={{ width: `${progresoPercent}%` }}
                   />
                   {/* Brillo animado */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
                 </div>
               </div>
+
+              {/* Botón JUGAR */}
+              <button
+                onClick={() => handleJugar(planActual.codigo)}
+                className="mt-6 px-8 py-4 rounded-xl bg-white hover:bg-white/90 text-slate-900 font-black uppercase text-lg transition-all flex items-center gap-2 shadow-lg hover:shadow-2xl group"
+              >
+                <Play className="w-6 h-6" fill="currentColor" />
+                CONTINUAR
+                <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
 
             {/* Emoji gigante */}
             <div className="text-9xl drop-shadow-2xl ml-8">
-              {mundo.icono}
+              🎯
             </div>
           </div>
         </div>
       </div>
 
-      {/* Misiones Disponibles */}
+      {/* Lista de todas las planificaciones */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-black text-white uppercase tracking-wide flex items-center gap-2">
             <div className="w-1.5 h-6 bg-cyan-500 rounded-full" />
-            MISIONES DISPONIBLES
-          </h3>
-          <span className="text-sm text-slate-400 font-medium">
-            {actividades.filter(a => !a.completada).length} pendientes
-          </span>
-        </div>
-
-        {/* Grid horizontal 3 columnas */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {actividades.map((actividad) => (
-            <button
-              key={actividad.id}
-              onClick={() => setSelectedActivity(actividad.id)}
-              className={`group relative text-left transition-all duration-200 ${
-                selectedActivity === actividad.id
-                  ? 'scale-105'
-                  : 'hover:scale-102 opacity-90 hover:opacity-100'
-              }`}
-            >
-              {/* Card */}
-              <div className={`relative rounded-2xl overflow-hidden border-4 transition-all ${
-                selectedActivity === actividad.id
-                  ? 'border-cyan-500 shadow-2xl shadow-cyan-500/20'
-                  : 'border-slate-700/50 shadow-xl'
-              }`}>
-
-                {/* Header colorido */}
-                <div className={`${actividad.colorHeader} p-4`}>
-                  <div className="flex items-start justify-between mb-3">
-                    {/* Número */}
-                    <div className="w-12 h-12 rounded-xl bg-black/40 backdrop-blur-sm flex items-center justify-center border-2 border-white/20">
-                      <span className="text-3xl font-black text-white">{actividad.numero}</span>
-                    </div>
-
-                    {/* XP */}
-                    <div className="text-right">
-                      <div className="text-3xl font-black text-white leading-none">+{actividad.puntos}</div>
-                      <div className="text-xs font-bold text-white/80 uppercase tracking-wide">XP</div>
-                    </div>
-                  </div>
-
-                  {/* Título */}
-                  <h4 className="text-xl font-black text-white uppercase mb-1 leading-tight">
-                    {actividad.titulo}
-                  </h4>
-
-                  {/* Metadatos */}
-                  <div className="flex items-center gap-2 text-white/90">
-                    <span className="text-xs font-bold uppercase tracking-wide">{actividad.tipo}</span>
-                    <span className="text-white/60">•</span>
-                    <span className="text-xs font-bold">{actividad.duracion}</span>
-                  </div>
-                </div>
-
-                {/* Body con grid pattern */}
-                <div className="relative bg-slate-800 p-4">
-                  {/* Grid Pattern Sutil */}
-                  <div className="absolute inset-0 opacity-20" style={{
-                    backgroundImage: `
-                      linear-gradient(rgba(100, 116, 139, 0.15) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(100, 116, 139, 0.15) 1px, transparent 1px)
-                    `,
-                    backgroundSize: '24px 24px'
-                  }} />
-
-                  {/* Descripción */}
-                  <p className="relative text-sm text-slate-300 mb-4 leading-relaxed">
-                    {actividad.descripcion}
-                  </p>
-
-                  {/* Botón */}
-                  {actividad.completada ? (
-                    <div className="relative flex items-center justify-center gap-2 py-3 rounded-xl bg-green-500/20 border-2 border-green-500/50 text-green-400 font-black uppercase text-sm">
-                      <Star className="w-5 h-5" fill="currentColor" />
-                      COMPLETADO
-                    </div>
-                  ) : actividad.bloqueada ? (
-                    <div className="relative flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-700/50 border-2 border-slate-600 text-slate-400 font-black uppercase text-sm">
-                      <Lock className="w-5 h-5" />
-                      BLOQUEADO
-                    </div>
-                  ) : (
-                    <div className="relative flex items-center justify-center gap-2 py-3 rounded-xl bg-white hover:bg-white/90 text-slate-900 font-black uppercase text-sm transition-all group-hover:shadow-lg">
-                      <Play className="w-5 h-5" fill="currentColor" />
-                      JUGAR
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Indicador de selección */}
-              {selectedActivity === actividad.id && (
-                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-cyan-500 text-white text-xs font-black uppercase shadow-lg shadow-cyan-500/30">
-                  SELECCIONADO
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Próximos Mundos */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-black text-white uppercase tracking-wide flex items-center gap-2">
-            <div className="w-1.5 h-6 bg-slate-600 rounded-full" />
-            PRÓXIMOS MUNDOS
+            TODAS MIS PLANIFICACIONES
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {proximosMundos.map((mundo) => (
-            <div
-              key={mundo.nivel}
-              className="relative rounded-2xl bg-slate-800/30 backdrop-blur-sm border-2 border-slate-700/50 p-6 opacity-60 overflow-hidden"
-            >
-              {/* Grid Pattern Background */}
-              <div className="absolute inset-0 opacity-30" style={{
-                backgroundImage: `
-                  linear-gradient(rgba(100, 116, 139, 0.2) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(100, 116, 139, 0.2) 1px, transparent 1px)
-                `,
-                backgroundSize: '32px 32px'
-              }} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {planificaciones.map((plan) => {
+            const semanasTotales = plan.semanas_total || 0;
+            const progresoPorcentaje = semanasTotales > 0
+              ? Math.round((plan.progreso.semana_actual / semanasTotales) * 100)
+              : 0;
+            const barraPorcentaje = Math.max(0, Math.min(100, progresoPorcentaje));
 
-              {/* Emoji grayscale */}
-              <div className="relative text-6xl mb-4 grayscale opacity-40">
-                {mundo.icono}
-              </div>
+            return (
+              <button
+                key={plan.codigo}
+                onClick={() => setSelectedPlan(plan.codigo)}
+                className={`group relative text-left transition-all ${
+                  selectedPlan === plan.codigo
+                    ? 'scale-[1.02]'
+                    : 'hover:scale-[1.02] opacity-90 hover:opacity-100'
+                }`}
+              >
+                {/* Card */}
+                <div className={`relative rounded-2xl overflow-hidden border-4 transition-all ${
+                  selectedPlan === plan.codigo
+                    ? 'border-cyan-500 shadow-2xl shadow-cyan-500/20'
+                    : 'border-slate-700/50 shadow-xl'
+                }`}>
 
-              {/* Info */}
-              <div className="relative text-xs font-black text-slate-500 uppercase mb-1 tracking-wide">
-                NIVEL {mundo.nivel}
-              </div>
-              <div className="relative text-lg font-black text-slate-400 uppercase tracking-tight">
-                {mundo.nombre}
-              </div>
+                  {/* Header */}
+                  <div className="bg-gradient-to-r from-cyan-600 to-blue-600 p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="text-lg font-black text-white uppercase leading-tight flex-1">
+                        {plan.titulo}
+                      </h4>
+                      <div className="text-right ml-3">
+                        <div className="text-2xl font-black text-white leading-none">{plan.progreso.puntos_totales}</div>
+                        <div className="text-[10px] font-bold text-white/80 uppercase tracking-wide">PUNTOS</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/90 text-xs font-bold">
+                      <span>{plan.mes ? `Mes ${plan.mes}` : 'Curso anual'}</span>
+                      <span>•</span>
+                      <span>{plan.semanas_total} semanas</span>
+                    </div>
+                  </div>
 
-              {/* Candado */}
-              <div className="absolute top-4 right-4 z-10">
-                <div className="w-10 h-10 rounded-xl bg-slate-900/50 flex items-center justify-center border-2 border-slate-700">
-                  <Lock className="w-5 h-5 text-slate-600" />
+                  {/* Body con grid pattern */}
+                  <div className="relative bg-slate-800 p-4">
+                    {/* Grid Pattern Sutil */}
+                    <div
+                      className="absolute inset-0 opacity-20"
+                      style={{
+                        backgroundImage: `
+                          linear-gradient(rgba(100, 116, 139, 0.15) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(100, 116, 139, 0.15) 1px, transparent 1px)
+                        `,
+                        backgroundSize: '24px 24px',
+                      }}
+                    />
+
+                    {/* Info progreso */}
+                    <div className="relative flex items-center justify-between mb-3">
+                      <span className="text-sm text-slate-300">
+                        Semana {plan.progreso.semana_actual} de {plan.semanas_total}
+                      </span>
+                      <span className="text-sm font-bold text-cyan-400">
+                        {barraPorcentaje}%
+                      </span>
+                    </div>
+
+                    {/* Barra progreso */}
+                    <div className="relative h-2 bg-slate-700 rounded-full overflow-hidden mb-3">
+                      <div
+                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
+                        style={{ width: `${barraPorcentaje}%` }}
+                      />
+                    </div>
+
+                    {/* Botón */}
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJugar(plan.codigo);
+                      }}
+                      className="relative flex items-center justify-center gap-2 py-2 rounded-xl bg-white hover:bg-white/90 text-slate-900 font-black uppercase text-sm transition-all cursor-pointer"
+                    >
+                      <Play className="w-4 h-4" fill="currentColor" />
+                      {plan.progreso.semana_actual === 1 && plan.progreso.puntos_totales === 0 ? 'COMENZAR' : 'CONTINUAR'}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+
+                {/* Indicador de selección */}
+                {selectedPlan === plan.codigo && (
+                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-cyan-500 text-white text-xs font-black uppercase shadow-lg shadow-cyan-500/30">
+                    SELECCIONADA
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 

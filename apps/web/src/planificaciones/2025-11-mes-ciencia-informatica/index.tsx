@@ -1,22 +1,22 @@
 /**
- * MES DE MATEMÁTICA APLICADA - SEMANA 1: MATEMÁTICAS Y QUÍMICA
- * "El Laboratorio de Mezclas Mágicas"
+ * MES DE MATEMÁTICA APLICADA - SEMANA 4: MATEMÁTICAS E INFORMÁTICA
+ * "El Centro de Ciberseguridad"
  *
  * NARRATIVA:
- * Los estudiantes son aprendices de un laboratorio secreto. Deben aprender a crear compuestos
- * siguiendo recetas exactas, balanceando proporciones y gestionando inventarios para salvar a la
- * ciudad de una crisis química.
+ * Los estudiantes son analistas de datos y programadores junior en un centro de ciberseguridad.
+ * Deben descifrar códigos, analizar patrones, optimizar algoritmos y proteger sistemas digitales
+ * usando lógica matemática y pensamiento computacional.
  *
  * ACTIVIDADES ASINCRÓNICAS:
- * 1. Desafío de acertijos matemáticos con temática química (historia interactiva)
- * 2. Simulador de concentraciones (8-10 niveles de dificultad creciente)
- * 3. Olimpiada de problemas (15-20 ejercicios progresivos)
- * 4. Proyecto final: Simulador de reacción en cadena (balancear múltiples variables)
+ * 1. Desafío de Códigos Secretos (criptografía básica y patrones)
+ * 2. Simulador de Algoritmos (ordenamiento, búsqueda, optimización)
+ * 3. Olimpiada Computacional (15-20 problemas progresivos de lógica)
+ * 4. Proyecto final: Sistema de Seguridad Digital (combinar todos los conceptos)
  *
  * DIFERENCIACIÓN POR GRUPOS:
- * - Grupo 1 (6-7): Sumas/restas hasta 1,000, multiplicación básica, proporciones simples (2:3)
- * - Grupo 2 (8-9): Operaciones hasta 10,000, proporciones más complejas, fracciones básicas, regla de 3 simple
- * - Grupo 3 (10-12): Ecuaciones simples, porcentajes, balanceo de ecuaciones, optimización
+ * - Grupo 1 (6-7): Patrones simples, secuencias, conteo, códigos César básicos
+ * - Grupo 2 (8-9): Algoritmos de búsqueda, ordenamiento burbuja, complejidad simple
+ * - Grupo 3 (10-12): Optimización, complejidad O(n), grafos básicos, recursión simple
  */
 
 'use client';
@@ -24,15 +24,15 @@
 import { PlanificacionWrapper, usePlanificacion } from '@/planificaciones/shared';
 import type { PlanificacionConfig } from '@/planificaciones/shared';
 import { useState } from 'react';
-import { Beaker, Sparkles, Trophy, Star, ChevronRight, Lock } from 'lucide-react';
+import { Code, Sparkles, Trophy, Star, ChevronRight, Lock, Cpu } from 'lucide-react';
 
 // ============================================================================
 // CONFIGURACIÓN
 // ============================================================================
 export const PLANIFICACION_CONFIG: PlanificacionConfig = {
-  codigo: '2025-11-mes-ciencia-quimica',
-  titulo: 'Mes de la Ciencia - Semana 1: Laboratorio Químico',
-  grupo: 'TODOS', // Se aplica a todos los grupos con diferente dificultad
+  codigo: '2025-11-mes-ciencia-informatica',
+  titulo: 'Mes de la Ciencia - Semana 4: Ciberseguridad',
+  grupo: 'TODOS',
   mes: 11,
   anio: 2025,
   semanas: 4, // 4 actividades asincrónicas
@@ -41,12 +41,12 @@ export const PLANIFICACION_CONFIG: PlanificacionConfig = {
 // ============================================================================
 // TIPOS
 // ============================================================================
-interface EstadoQuimica {
+interface EstadoInformatica {
   actividadActual: number;
   puntosActividad: number[];
   estrellasActividad: number[];
   tiempoActividad: number[];
-  compuestosCreados: string[];
+  codigosDescifrados: string[];
   mejorRacha: number;
 }
 
@@ -63,7 +63,7 @@ interface ActividadConfig {
 // ============================================================================
 // COMPONENTE PRINCIPAL
 // ============================================================================
-export default function MesMatematicaQuimica() {
+export default function MesMatematicaInformatica() {
   return (
     <PlanificacionWrapper config={PLANIFICACION_CONFIG}>
       <ContenidoPlanificacion />
@@ -78,32 +78,30 @@ function ContenidoPlanificacion() {
   const {
     progreso,
     guardarEstado,
-    avanzarSemana,
-    completarSemana,
   } = usePlanificacion();
 
   // Estado local del juego
-  const [estadoLocal, setEstadoLocal] = useState<EstadoQuimica>(() => {
-    const estadoGuardado = progreso?.estadoGuardado as EstadoQuimica | null;
+  const [estadoLocal, setEstadoLocal] = useState<EstadoInformatica>(() => {
+    const estadoGuardado = progreso?.estadoGuardado as EstadoInformatica | null;
     return estadoGuardado || {
       actividadActual: 1,
       puntosActividad: [0, 0, 0, 0],
       estrellasActividad: [0, 0, 0, 0],
       tiempoActividad: [0, 0, 0, 0],
-      compuestosCreados: [],
+      codigosDescifrados: [],
       mejorRacha: 0,
     };
   });
 
-  // Semana actual (actividad actual)
+  // Actividad actual
   const actividadActual = estadoLocal.actividadActual;
 
   // Configuración de actividades
   const actividades: ActividadConfig[] = [
     {
       numero: 1,
-      titulo: 'ACERTIJOS QUÍMICOS',
-      descripcion: 'Historia interactiva con problemas matemáticos en contexto químico',
+      titulo: 'CÓDIGOS SECRETOS',
+      descripcion: 'Descifra mensajes usando criptografía y patrones',
       icono: <Sparkles className="w-6 h-6" />,
       duracion: '20 MIN',
       puntos: 100,
@@ -111,17 +109,17 @@ function ContenidoPlanificacion() {
     },
     {
       numero: 2,
-      titulo: 'SIMULADOR DE CONCENTRACIONES',
-      descripcion: 'Mezcla reactivos siguiendo proporciones exactas',
-      icono: <Beaker className="w-6 h-6" />,
+      titulo: 'SIMULADOR DE ALGORITMOS',
+      descripcion: 'Ordena, busca y optimiza secuencias de datos',
+      icono: <Code className="w-6 h-6" />,
       duracion: '20 MIN',
       puntos: 150,
       bloqueada: actividadActual < 2,
     },
     {
       numero: 3,
-      titulo: 'OLIMPIADA MATEMÁTICA',
-      descripcion: '15-20 problemas progresivos con temática química',
+      titulo: 'OLIMPIADA COMPUTACIONAL',
+      descripcion: '15-20 problemas de lógica y pensamiento computacional',
       icono: <Trophy className="w-6 h-6" />,
       duracion: '25 MIN',
       puntos: 200,
@@ -129,8 +127,8 @@ function ContenidoPlanificacion() {
     },
     {
       numero: 4,
-      titulo: 'PROYECTO: REACCIÓN EN CADENA',
-      descripcion: 'Balancea múltiples variables en una reacción compleja',
+      titulo: 'PROYECTO: SISTEMA DE SEGURIDAD',
+      descripcion: 'Diseña un sistema completo de protección digital',
       icono: <Star className="w-6 h-6" fill="currentColor" />,
       duracion: '30 MIN',
       puntos: 250,
@@ -176,15 +174,15 @@ function ContenidoPlanificacion() {
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-green-600 flex items-center justify-center shadow-lg">
-                    <Beaker className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
+                    <Cpu className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h1 className="text-3xl font-black text-white uppercase tracking-tight">
-                      LABORATORIO QUÍMICO
+                      CENTRO DE CIBERSEGURIDAD
                     </h1>
                     <p className="text-sm text-slate-400 font-medium">
-                      Semana 1 • Mes de la Ciencia
+                      Semana 4 • Mes de la Ciencia
                     </p>
                   </div>
                 </div>
@@ -210,11 +208,11 @@ function ContenidoPlanificacion() {
             </div>
 
             {/* Narrativa */}
-            <div className="mt-4 p-4 rounded-xl bg-teal-500/10 border border-teal-500/30">
-              <p className="text-sm text-teal-100 leading-relaxed">
-                🧪 <strong>MISIÓN:</strong> Eres aprendiz de un laboratorio secreto. Debes aprender a crear compuestos
-                siguiendo recetas exactas, balanceando proporciones y gestionando inventarios para salvar a la
-                ciudad de una crisis química.
+            <div className="mt-4 p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
+              <p className="text-sm text-cyan-100 leading-relaxed">
+                💻 <strong>MISIÓN:</strong> Eres analista de datos y programador junior. Debes descifrar códigos,
+                analizar patrones, optimizar algoritmos y proteger sistemas digitales usando lógica matemática
+                y pensamiento computacional.
               </p>
             </div>
           </div>
@@ -256,10 +254,10 @@ function ContenidoPlanificacion() {
 
                   {/* Header colorido */}
                   <div className={`${
-                    actividad.numero === 1 ? 'bg-blue-600' :
-                    actividad.numero === 2 ? 'bg-purple-600' :
-                    actividad.numero === 3 ? 'bg-orange-600' :
-                    'bg-emerald-600'
+                    actividad.numero === 1 ? 'bg-cyan-600' :
+                    actividad.numero === 2 ? 'bg-blue-600' :
+                    actividad.numero === 3 ? 'bg-sky-600' :
+                    'bg-teal-600'
                   } p-4`}>
                     <div className="flex items-start justify-between mb-3">
                       {/* Número */}
@@ -363,19 +361,19 @@ function ContenidoPlanificacion() {
 // ============================================================================
 interface ActividadContentProps {
   numero: number;
-  estado: EstadoQuimica;
-  onEstadoChange: (estado: EstadoQuimica) => void;
+  estado: EstadoInformatica;
+  onEstadoChange: (estado: EstadoInformatica) => void;
   onGuardar: () => void;
 }
 
-function ActividadContent({ numero, estado, onEstadoChange, onGuardar }: ActividadContentProps) {
+function ActividadContent({ numero }: ActividadContentProps) {
   // TODO: Implementar contenido de cada actividad
   // Por ahora mostramos placeholder
 
   return (
     <div className="text-center py-12">
       <div className="w-24 h-24 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-6">
-        <Beaker className="w-12 h-12 text-cyan-500" />
+        <Cpu className="w-12 h-12 text-cyan-500" />
       </div>
       <h3 className="text-2xl font-black text-white mb-2">
         ACTIVIDAD {numero}
@@ -385,7 +383,7 @@ function ActividadContent({ numero, estado, onEstadoChange, onGuardar }: Activid
       </p>
       <div className="inline-block px-6 py-3 rounded-xl bg-slate-800 border border-slate-700">
         <p className="text-sm text-slate-400">
-          Próximamente: Simulador interactivo
+          Próximamente: Simulador interactivo de informática
         </p>
       </div>
     </div>

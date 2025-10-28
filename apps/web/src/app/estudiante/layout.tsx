@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { ThemeProvider } from '@/lib/theme/ThemeContext';
@@ -148,7 +149,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                     const isActive = isActiveRoute(item.href);
 
                     return (
-                      <a
+                      <Link
                         key={item.href}
                         href={item.href}
                         className={`
@@ -163,7 +164,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                       >
                         <Icon className="w-6 h-6" />
                         {item.label}
-                      </a>
+                      </Link>
                     );
                   })}
                 </nav>
@@ -246,7 +247,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                       const isActive = isActiveRoute(item.href);
 
                       return (
-                        <a
+                        <Link
                           key={item.href}
                           href={item.href}
                           onClick={() => setSidebarOpen(false)}
@@ -262,7 +263,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                         >
                           <Icon className="w-6 h-6" />
                           {item.label}
-                        </a>
+                        </Link>
                       );
                     })}
                   </nav>
@@ -286,4 +287,3 @@ function LoadingScreen() {
     </div>
   );
 }
-
