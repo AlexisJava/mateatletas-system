@@ -11,7 +11,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { RequestWithAuthUser } from '../auth/interfaces';
-import { GruposService } from '../planificaciones/infrastructure/grupos.service';
+import { GruposService } from './services/grupos.service';
 
 /**
  * Controller para ClaseGrupo - Grupos de clases con docentes

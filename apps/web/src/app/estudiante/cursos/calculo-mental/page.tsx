@@ -54,7 +54,9 @@ export default function CalculoMentalPage() {
     const operadores: Array<'+' | '-' | '×' | '÷'> = ['+', '-', '×', '÷'];
     const operador = operadores[Math.floor(Math.random() * operadores.length)];
 
-    let operando1: number, operando2: number, respuestaCorrecta: number;
+    let operando1 = 0;
+    let operando2 = 0;
+    let respuestaCorrecta = 0;
 
     switch (operador) {
       case '+':

@@ -93,9 +93,9 @@ model Estudiante {
   createdAt                 DateTime                          @default(now())
   /// Timestamp de última actualización del registro
   updatedAt                 DateTime                          @updatedAt
-  /// URL o identificador del avatar personalizable del estudiante
-  /// Puede ser una URL de Dicebear API o un identificador de avatar predefinido
-  avatar_url                String?                           @default("avataaars")
+  /// ID del gradiente del avatar (0-9)
+  /// Corresponde a uno de los 10 gradientes predefinidos del sistema
+  avatar_gradient           Int                               @default(0)
   /// Edad del estudiante en años
   edad                      Int
   /// Email único del estudiante - usado para autenticación propia

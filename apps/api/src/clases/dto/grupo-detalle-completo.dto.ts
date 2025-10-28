@@ -33,7 +33,7 @@ export interface EstudianteConStatsDto {
   id: string;
   nombre: string;
   apellido: string;
-  avatar_url: string | null;
+  avatar_gradient: number;
   equipo: EquipoDto | null;
   stats: EstadisticasEstudianteDto;
 }

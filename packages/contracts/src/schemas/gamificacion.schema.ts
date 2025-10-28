@@ -53,7 +53,7 @@ const siguienteNivelSchema = z
 
 export const dashboardGamificacionSchema = z.object({
   estudiante: personaBaseSchema.extend({
-    avatar_url: z.string().url().optional(),
+    avatar_gradient: z.number().int().min(0).max(9).default(0),
     foto_url: z.string().url().optional(),
     equipo: equipoSchema,
   }),

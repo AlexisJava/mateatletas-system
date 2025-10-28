@@ -580,7 +580,7 @@ export class AdminEstudiantesService {
           equipo_id: dto.equipoId || null,
           puntos_totales: dto.puntosIniciales ?? 0,
           nivel_actual: dto.nivelInicial ?? 1,
-          avatar_url: null,
+          avatar_gradient: 0,
           foto_url: null,
         },
       });
