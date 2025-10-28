@@ -119,29 +119,29 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-slate-950">
+      <div className="min-h-screen bg-gradient-to-br from-sky-400 via-blue-300 to-cyan-300">
         {isValidating ? (
           <LoadingScreen />
         ) : (
           <div className="flex h-screen overflow-hidden">
-            {/* Sidebar Desktop - DARK SLATE - COLAPSABLE */}
+            {/* Sidebar Desktop - CRASH BANDICOOT THEME - COLAPSABLE */}
             <aside className="hidden md:flex md:flex-shrink-0">
-              <div className={`flex flex-col ${sidebarCollapsed ? 'w-20' : 'w-64'} bg-slate-900 border-r border-slate-700/50 shadow-2xl transition-all duration-300`}>
+              <div className={`flex flex-col ${sidebarCollapsed ? 'w-20' : 'w-64'} bg-gradient-to-b from-orange-500 via-yellow-500 to-orange-500 border-r-4 border-yellow-400 shadow-2xl transition-all duration-300`}>
                 {/* Logo + Toggle Button */}
-                <div className="flex items-center justify-between h-16 px-4 border-b border-slate-700/50">
+                <div className="flex items-center justify-between h-16 px-4 border-b-4 border-yellow-400">
                   {!sidebarCollapsed && (
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="absolute inset-0 bg-cyan-500 rounded-xl blur-lg opacity-30" />
-                        <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
-                          <Rocket className="w-5 h-5 text-white" />
+                        <div className="absolute inset-0 bg-white rounded-xl blur-md opacity-40" />
+                        <div className="relative w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border-2 border-orange-600">
+                          <Rocket className="w-5 h-5 text-orange-600" />
                         </div>
                       </div>
                       <div>
-                        <h1 className="text-sm font-bold text-white">
+                        <h1 className="text-sm font-black text-white drop-shadow-lg">
                           Portal Estudiante
                         </h1>
-                        <p className="text-xs text-slate-400 font-medium">
+                        <p className="text-xs text-orange-100 font-bold drop-shadow">
                           Mateatletas
                         </p>
                       </div>
@@ -149,7 +149,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                   )}
                   <button
                     onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                    className={`p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all ${sidebarCollapsed ? 'mx-auto' : ''}`}
+                    className={`p-2 rounded-xl hover:bg-white/20 text-white hover:text-white transition-all border-2 border-transparent hover:border-white/50 ${sidebarCollapsed ? 'mx-auto' : ''}`}
                     title={sidebarCollapsed ? 'Expandir menú' : 'Contraer menú'}
                   >
                     {sidebarCollapsed ? (
@@ -161,7 +161,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
                   {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = isActiveRoute(item.href);
@@ -171,12 +171,12 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                         key={item.href}
                         href={item.href}
                         className={`
-                          group flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3.5 text-base font-semibold rounded-xl
-                          transition-all duration-200
+                          group flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'} px-4 py-3.5 text-base font-black rounded-2xl
+                          transition-all duration-200 border-2
                           ${
                             isActive
-                              ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/30'
-                              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                              ? 'bg-white text-orange-600 shadow-lg border-orange-600'
+                              : 'text-white hover:bg-white/20 border-transparent hover:border-white/50 hover:scale-105'
                           }
                         `}
                         title={sidebarCollapsed ? item.label : undefined}
@@ -189,20 +189,20 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                 </nav>
 
                 {/* User Section */}
-                <div className="border-t border-slate-700/50 p-4">
+                <div className="border-t-4 border-yellow-400 p-4">
                   {!sidebarCollapsed && (
-                    <div className="flex items-center gap-3 mb-3 p-3 rounded-xl bg-slate-800 border border-slate-700/50">
+                    <div className="flex items-center gap-3 mb-3 p-3 rounded-2xl bg-white border-2 border-orange-600 shadow-lg">
                       <div className="relative">
-                        <div className="absolute inset-0 bg-cyan-500 rounded-xl blur-md opacity-20" />
-                        <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                        <div className="absolute inset-0 bg-orange-500 rounded-xl blur-md opacity-20" />
+                        <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center text-white font-black text-sm shadow-lg border-2 border-white">
                           {user?.nombre?.charAt(0).toUpperCase() || 'E'}
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-white truncate">
+                        <p className="text-sm font-black text-orange-700 truncate">
                           {user?.nombre} {user?.apellido}
                         </p>
-                        <p className="text-xs text-slate-400 font-medium">
+                        <p className="text-xs text-orange-600 font-bold">
                           Estudiante
                         </p>
                       </div>
@@ -210,7 +210,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                   )}
                   <button
                     onClick={handleLogout}
-                    className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-center gap-2'} px-4 py-3.5 text-base font-semibold text-slate-300 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all duration-200 border border-transparent hover:border-red-500/30`}
+                    className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-center gap-2'} px-4 py-3.5 text-base font-black text-white hover:bg-red-500 rounded-2xl transition-all duration-200 border-2 border-white hover:border-red-300 hover:scale-105`}
                     title={sidebarCollapsed ? 'Cerrar sesión' : undefined}
                   >
                     <LogOut className="w-6 h-6" />
@@ -235,35 +235,35 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                   className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
                   onClick={() => setSidebarOpen(false)}
                 />
-                <div className="fixed inset-y-0 left-0 w-64 bg-slate-900 z-50 md:hidden border-r border-slate-700/50 shadow-2xl">
+                <div className="fixed inset-y-0 left-0 w-64 bg-gradient-to-b from-orange-500 via-yellow-500 to-orange-500 z-50 md:hidden border-r-4 border-yellow-400 shadow-2xl">
                   {/* Mobile Logo */}
-                  <div className="flex items-center justify-between h-16 px-6 border-b border-slate-700/50">
+                  <div className="flex items-center justify-between h-16 px-6 border-b-4 border-yellow-400">
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="absolute inset-0 bg-cyan-500 rounded-xl blur-lg opacity-30" />
-                        <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
-                          <Rocket className="w-5 h-5 text-white" />
+                        <div className="absolute inset-0 bg-white rounded-xl blur-md opacity-40" />
+                        <div className="relative w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border-2 border-orange-600">
+                          <Rocket className="w-5 h-5 text-orange-600" />
                         </div>
                       </div>
                       <div>
-                        <h1 className="text-sm font-bold text-white">
+                        <h1 className="text-sm font-black text-white drop-shadow-lg">
                           Portal Estudiante
                         </h1>
-                        <p className="text-xs text-slate-400 font-medium">
+                        <p className="text-xs text-orange-100 font-bold drop-shadow">
                           Mateatletas
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => setSidebarOpen(false)}
-                      className="p-2 rounded-xl hover:bg-slate-800"
+                      className="p-2 rounded-xl hover:bg-white/20 border-2 border-transparent hover:border-white/50"
                     >
-                      <X className="w-5 h-5 text-slate-300" />
+                      <X className="w-5 h-5 text-white" />
                     </button>
                   </div>
 
                   {/* Mobile Navigation */}
-                  <nav className="px-3 py-4 space-y-1">
+                  <nav className="px-3 py-4 space-y-2">
                     {navItems.map((item) => {
                       const Icon = item.icon;
                       const isActive = isActiveRoute(item.href);
@@ -274,12 +274,12 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                           href={item.href}
                           onClick={() => setSidebarOpen(false)}
                           className={`
-                            flex items-center gap-3 px-4 py-3.5 text-base font-semibold rounded-xl
-                            transition-all duration-200
+                            flex items-center gap-3 px-4 py-3.5 text-base font-black rounded-2xl
+                            transition-all duration-200 border-2
                             ${
                               isActive
-                                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/30'
-                                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                                ? 'bg-white text-orange-600 shadow-lg border-orange-600'
+                                : 'text-white hover:bg-white/20 border-transparent hover:border-white/50 hover:scale-105'
                             }
                           `}
                         >
@@ -301,10 +301,10 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950">
-      <div className="text-center bg-slate-900 p-12 rounded-3xl shadow-2xl border border-slate-700/50">
-        <div className="w-16 h-16 border-4 border-slate-700 border-t-cyan-500 rounded-full animate-spin mx-auto mb-6" />
-        <p className="text-sm font-semibold text-white">Cargando Portal Estudiante...</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-400 via-blue-300 to-cyan-300">
+      <div className="text-center bg-white p-12 rounded-3xl shadow-2xl border-4 border-orange-500">
+        <div className="w-16 h-16 border-4 border-yellow-400 border-t-orange-500 rounded-full animate-spin mx-auto mb-6" />
+        <p className="text-sm font-black text-orange-600">Cargando Portal Estudiante...</p>
       </div>
     </div>
   );
