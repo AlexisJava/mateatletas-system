@@ -97,11 +97,57 @@ export default function LogrosPage() {
     { id: 'progreso', nombre: 'Progreso', icono: '📈' },
   ];
 
-  const rarezaColors = {
-    común: { bg: 'from-gray-500 to-gray-600', border: 'gray-500' },
-    raro: { bg: 'from-blue-500 to-cyan-500', border: 'blue-500' },
-    épico: { bg: 'from-purple-500 to-pink-500', border: 'purple-500' },
-    legendario: { bg: 'from-yellow-500 to-orange-500', border: 'yellow-500' },
+  const normalizeRareza = (value?: string | null) =>
+    value
+      ? value
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+      : 'comun';
+
+  const rarezaStyles: Record<
+    string,
+    {
+      glowGradient: string;
+      cardBorder: string;
+      cardHoverBorder: string;
+      badgeGradient: string;
+      modalBorder: string;
+      label: string;
+    }
+  > = {
+    comun: {
+      glowGradient: 'bg-gradient-to-r from-gray-500 to-gray-600',
+      cardBorder: 'border-gray-500/50',
+      cardHoverBorder: 'hover:border-gray-500',
+      badgeGradient: 'bg-gradient-to-r from-gray-500 to-gray-600',
+      modalBorder: 'border-gray-500/50',
+      label: 'COMÚN',
+    },
+    raro: {
+      glowGradient: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+      cardBorder: 'border-blue-500/50',
+      cardHoverBorder: 'hover:border-blue-500',
+      badgeGradient: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+      modalBorder: 'border-blue-500/50',
+      label: 'RARO',
+    },
+    epico: {
+      glowGradient: 'bg-gradient-to-r from-purple-500 to-pink-500',
+      cardBorder: 'border-purple-500/50',
+      cardHoverBorder: 'hover:border-purple-500',
+      badgeGradient: 'bg-gradient-to-r from-purple-500 to-pink-500',
+      modalBorder: 'border-purple-500/50',
+      label: 'ÉPICO',
+    },
+    legendario: {
+      glowGradient: 'bg-gradient-to-r from-yellow-500 to-orange-500',
+      cardBorder: 'border-yellow-500/50',
+      cardHoverBorder: 'hover:border-yellow-500',
+      badgeGradient: 'bg-gradient-to-r from-yellow-500 to-orange-500',
+      modalBorder: 'border-yellow-500/50',
+      label: 'LEGENDARIO',
+    },
   };
 
   useEffect(() => {
@@ -187,7 +233,8 @@ export default function LogrosPage() {
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto lg:overflow-hidden">
             {logrosEnPagina.map((logro, index) => {
-              const rareza = rarezaColors[(logro.rareza || 'común') as keyof typeof rarezaColors];
+              const rarezaKey = normalizeRareza(logro.rareza);
+              const rareza = rarezaStyles[rarezaKey] ?? rarezaStyles.comun;
 
               return (
                 <motion.div
@@ -202,7 +249,7 @@ export default function LogrosPage() {
                   {/* Glow Effect */}
                   {logro.desbloqueado && (
                     <div
-                      className={`absolute inset-0 bg-gradient-to-r ${rareza.bg} rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 transition-opacity`}
+                      className={`absolute inset-0 ${rareza.glowGradient} rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 transition-opacity`}
                     />
                   )}
 
@@ -210,7 +257,7 @@ export default function LogrosPage() {
                   <div
                     className={`relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl shadow-2xl border-2 p-8 h-full flex flex-col items-center justify-center ${
                       logro.desbloqueado
-                        ? `border-${rareza.border}/50 hover:border-${rareza.border} transition-all`
+                        ? `${rareza.cardBorder} ${rareza.cardHoverBorder} transition-all`
                         : 'border-gray-700 opacity-50'
                     }`}
                   >
@@ -234,9 +281,9 @@ export default function LogrosPage() {
                       {/* Rareza Badge */}
                       {logro.desbloqueado && (
                         <div
-                          className={`inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-3 bg-gradient-to-r ${rareza.bg} border border-white/20`}
+                          className={`inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-3 ${rareza.badgeGradient} border border-white/20`}
                         >
-                          {logro.rareza?.toUpperCase()}
+                          {rareza.label}
                         </div>
                       )}
 
@@ -300,8 +347,8 @@ export default function LogrosPage() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.8, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className={`bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 max-w-md w-full border-2 shadow-2xl border-${
-                rarezaColors[(selectedLogro.rareza || 'común') as keyof typeof rarezaColors].border
+              className={`bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 max-w-md w-full border-2 shadow-2xl ${
+                (rarezaStyles[normalizeRareza(selectedLogro.rareza)] ?? rarezaStyles.comun).modalBorder
               }`}
             >
               <div className="text-center">
@@ -314,11 +361,11 @@ export default function LogrosPage() {
                 </motion.div>
 
                 <div
-                  className={`inline-block px-4 py-2 rounded-full text-sm font-bold text-white mb-4 bg-gradient-to-r ${
-                    rarezaColors[(selectedLogro.rareza || 'común') as keyof typeof rarezaColors].bg
+                  className={`inline-block px-4 py-2 rounded-full text-sm font-bold text-white mb-4 ${
+                    (rarezaStyles[normalizeRareza(selectedLogro.rareza)] ?? rarezaStyles.comun).badgeGradient
                   }`}
                 >
-                  {selectedLogro.rareza?.toUpperCase()}
+                  {(rarezaStyles[normalizeRareza(selectedLogro.rareza)] ?? rarezaStyles.comun).label}
                 </div>
 
                 <h2 className="text-3xl font-bold text-white mb-2">{selectedLogro.nombre}</h2>

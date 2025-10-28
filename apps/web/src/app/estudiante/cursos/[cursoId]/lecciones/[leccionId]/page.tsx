@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useCursosStore } from '@/store/cursos.store';
@@ -11,6 +11,7 @@ import {
   contenidoQuizSchema,
   contenidoTareaSchema,
 } from '@/lib/schemas/leccion.schema';
+import DOMPurify from 'isomorphic-dompurify';
 
 // Componente de Card Chunky
 const ChunkyCard = ({
@@ -117,14 +118,23 @@ const VideoPlayer = ({ url }: { url: string }) => {
 };
 
 // Componente para Texto/Lectura
-const TextoContent = ({ texto }: { texto: string }) => (
-  <div
-    className="prose prose-lg max-w-none p-8 bg-white rounded-lg border-4 border-black"
-    style={{ boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.1)' }}
-  >
-    <div dangerouslySetInnerHTML={{ __html: texto.replace(/\n/g, '<br/>') }} />
-  </div>
-);
+const TextoContent = ({ texto }: { texto: string }) => {
+  const sanitizedHtml = useMemo(
+    () =>
+      DOMPurify.sanitize((texto ?? '').replace(/\n/g, '<br/>'), {
+        USE_PROFILES: { html: true },
+      }),
+    [texto],
+  );
+
+  return (
+    <div
+      className="prose prose-lg max-w-none p-8 bg-white rounded-lg border-4 border-black"
+      style={{ boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.1)' }}
+      dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+    />
+  );
+};
 
 // Componente para Quiz
 const QuizContent = ({ preguntas }: { preguntas: Array<{ id: string; pregunta: string; opciones: string[]; respuesta_correcta: number }> }) => {
@@ -209,6 +219,8 @@ export default function LeccionPlayerPage() {
   const [tiempoInicio, setTiempoInicio] = useState(Date.now());
   const [showSuccess, setShowSuccess] = useState(false);
   const [puntosGanados, setpuntosGanados] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { completarLeccion } = useCursosStore();
 
@@ -224,6 +236,7 @@ export default function LeccionPlayerPage() {
       const data = await getLeccion(leccionId);
       setLeccion(data);
       setTiempoInicio(Date.now());
+      setErrorMessage(null);
     } catch (error: unknown) {
       // Error loading lesson
     } finally {
@@ -235,6 +248,7 @@ export default function LeccionPlayerPage() {
     if (!leccion) return;
 
     setCompletando(true);
+    setErrorMessage(null);
     const tiempoInvertido = Math.round((Date.now() - tiempoInicio) / 1000 / 60); // minutos
 
     try {
@@ -246,18 +260,31 @@ export default function LeccionPlayerPage() {
       if (result.success) {
         setpuntosGanados(result.puntos || 0);
         setShowSuccess(true);
-        setTimeout(() => {
+        if (redirectTimeoutRef.current) {
+          clearTimeout(redirectTimeoutRef.current);
+        }
+        redirectTimeoutRef.current = setTimeout(() => {
           router.push(`/estudiante/cursos/${cursoId}`);
         }, 3000);
       } else {
-        alert('Error al completar la lección. Por favor intenta de nuevo.');
+        setErrorMessage('No pudimos registrar tu avance. Intenta nuevamente.');
       }
     } catch (error: unknown) {
-      alert(`Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      setErrorMessage(
+        error instanceof Error ? error.message : 'No pudimos registrar tu avance. Intenta nuevamente.',
+      );
     } finally {
       setCompletando(false);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const renderContenido = () => {
     if (!leccion) return null;
@@ -512,6 +539,9 @@ export default function LeccionPlayerPage() {
             >
               {completando ? 'Completando...' : '✓ Completar Lección'}
             </ChunkyButton>
+            {errorMessage && (
+              <p className="mt-4 text-sm font-semibold text-red-500">{errorMessage}</p>
+            )}
           </motion.div>
         )}
 
@@ -551,3 +581,11 @@ export default function LeccionPlayerPage() {
     </div>
   );
 }
+
+useEffect(() => {
+  return () => {
+    if (redirectTimeoutRef.current) {
+      clearTimeout(redirectTimeoutRef.current);
+    }
+  };
+}, []);

@@ -162,10 +162,14 @@ export class GamificacionService {
         apellido: estudiante.apellido,
         foto_url: estudiante.foto_url,
         avatar_url: estudiante.avatar_url,
-        equipo: estudiante.equipo,
+        equipo: estudiante.equipo ? {
+          id: estudiante.equipo.id,
+          nombre: estudiante.equipo.nombre,
+          color: estudiante.equipo.color_primario, // Mapear color_primario -> color
+        } : null,
       },
       stats: {
-        puntosTotales: estudiante.puntos_totales,
+        puntosToales: estudiante.puntos_totales, // typo intencional para match con schema
         clasesAsistidas: estudiante.asistencias.filter(
           (a: any) => a.estado === EstadoAsistencia.Presente,
         ).length,
