@@ -98,11 +98,13 @@ export default function CursoViewerPage() {
     const alreadySelected = selectedModulo && modulos.some((modulo) => modulo.id === selectedModulo.id);
     if (!alreadySelected) {
       const firstModulo = modulos[0];
-      handleModuloClick({
-        id: firstModulo.id,
-        titulo: firstModulo.titulo,
-        descripcion: firstModulo.descripcion ?? undefined,
-      });
+      if (firstModulo) {
+        handleModuloClick({
+          id: firstModulo.id,
+          titulo: firstModulo.titulo,
+          descripcion: firstModulo.descripcion ?? undefined,
+        });
+      }
     }
   }, [modulos, selectedModulo, handleModuloClick]);
 
