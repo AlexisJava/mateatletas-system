@@ -135,7 +135,7 @@ export class GruposService {
         id: estudiante.id,
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
-        avatar_url: estudiante.avatar_url,
+        avatar_gradient: estudiante.avatar_gradient,
         equipo: estudiante.equipo
           ? {
               nombre: estudiante.equipo.nombre,

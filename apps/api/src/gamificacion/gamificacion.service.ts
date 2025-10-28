@@ -36,7 +36,7 @@ export class GamificacionService {
         nombre: true,
         apellido: true,
         foto_url: true,
-        avatar_url: true,
+        avatar_gradient: true,
         puntos_totales: true,
         equipo_id: true,
         equipo: {
@@ -161,7 +161,7 @@ export class GamificacionService {
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
         foto_url: estudiante.foto_url,
-        avatar_url: estudiante.avatar_url,
+        avatar_gradient: estudiante.avatar_gradient,
         equipo: estudiante.equipo ? {
           id: estudiante.equipo.id,
           nombre: estudiante.equipo.nombre,

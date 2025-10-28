@@ -5,7 +5,8 @@ import { motion } from 'framer-motion';
 import { useGamificacionStore } from '@/store/gamificacion.store';
 import { useAuthStore } from '@/store/auth.store';
 import { LoadingSpinner } from '@/components/effects';
-import { AvatarSelector } from '@/components/estudiantes/AvatarSelector';
+import AvatarSelector from '@/components/estudiantes/AvatarSelector';
+import AvatarWithInitials from '@/components/estudiantes/AvatarWithInitials';
 import { WelcomeAnimation } from '@/components/animations/WelcomeAnimation';
 import { LevelUpAnimation } from '@/components/animations/LevelUpAnimation';
 import apiClient from '@/lib/axios';
@@ -90,31 +91,21 @@ export default function EstudianteDashboard() {
     }
   };
 
-  const handleAvatarSelect = async (avatarStyle: string) => {
+  const handleAvatarSelect = async (gradientId: number) => {
     if (!dashboard?.estudiante?.id) {
-      console.log('[Dashboard] ❌ No estudiante ID found');
       return;
     }
 
-    console.log('[Dashboard] 🎨 Actualizando avatar:', {
-      estudianteId: dashboard.estudiante.id,
-      avatarStyle,
-      userId: user?.id,
-      userRole: user?.role,
-    });
-
     try {
       await apiClient.patch(`/estudiantes/${dashboard.estudiante.id}/avatar`, {
-        avatar_url: avatarStyle,
+        avatar_gradient: gradientId,
       });
-
-      console.log('[Dashboard] ✅ Avatar actualizado exitosamente');
 
       if (user?.id) {
         await fetchDashboard(user.id);
       }
     } catch (error) {
-      console.error('[Dashboard] ❌ Error al actualizar avatar:', error);
+      console.error('Error al actualizar avatar:', error);
       throw error;
     }
   };
@@ -227,18 +218,13 @@ export default function EstudianteDashboard() {
                 className="relative group"
               >
                 <div className="absolute inset-0 bg-white rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity" />
-                <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-xl">
-                  {estudiante.avatar_url ? (
-                    <img
-                      src={`https://api.dicebear.com/7.x/${estudiante.avatar_url}/svg?seed=${estudiante.id}`}
-                      alt={estudiante.nombre}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-2xl font-bold">
-                      {estudiante.nombre.charAt(0)}
-                    </div>
-                  )}
+                <div className="relative border-4 border-white shadow-xl rounded-full">
+                  <AvatarWithInitials
+                    nombre={estudiante.nombre}
+                    apellido={estudiante.apellido}
+                    gradientId={estudiante.avatar_gradient ?? 0}
+                    size="lg"
+                  />
                 </div>
               </button>
 
@@ -598,8 +584,9 @@ export default function EstudianteDashboard() {
       {avatarSelectorOpen && (
         <AvatarSelector
           isOpen={avatarSelectorOpen}
-          studentId={estudiante.id}
-          currentAvatar={estudiante.avatar_url || ''}
+          currentGradientId={estudiante.avatar_gradient ?? 0}
+          nombre={estudiante.nombre}
+          apellido={estudiante.apellido}
           onSelect={handleAvatarSelect}
           onClose={() => setAvatarSelectorOpen(false)}
         />

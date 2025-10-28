@@ -629,7 +629,7 @@ export class AuthService {
           apellido: estudiante.apellido,
           edad: estudiante.edad,
           nivel_escolar: estudiante.nivel_escolar,
-          avatar_url: estudiante.avatar_url,
+          avatar_gradient: estudiante.avatar_gradient,
           puntos_totales: estudiante.puntos_totales,
           equipo: estudiante.equipo,
           tutor: estudiante.tutor,
