@@ -9,10 +9,16 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { Request as ExpressRequest } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { PlanificacionesSimplesService } from './planificaciones-simples.service';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { sub: string; email: string; role: string };
+}
 
 /**
  * Controlador para endpoints de planificaciones simples
@@ -50,7 +56,7 @@ export class PlanificacionesSimplesController {
     @Query('mes') mes?: string,
     @Query('anio') anio?: string,
   ) {
-    const filtros: any = {};
+    const filtros: Prisma.PlanificacionWhereInput = {};
     if (estado) filtros.estado = estado;
     if (grupo_codigo) filtros.grupo_codigo = grupo_codigo;
     if (mes) filtros.mes = parseInt(mes);
@@ -69,7 +75,7 @@ export class PlanificacionesSimplesController {
    */
   @Get('mis-planificaciones')
   @Roles(Role.Estudiante)
-  async misPlanificaciones(@Request() req: any) {
+  async misPlanificaciones(@Request() req: AuthenticatedRequest) {
     const estudianteId = req.user.sub;
     return this.service.obtenerPlanificacionesEstudiante(estudianteId);
   }
@@ -80,7 +86,7 @@ export class PlanificacionesSimplesController {
    */
   @Get(':codigo/progreso')
   @Roles(Role.Estudiante)
-  async obtenerProgreso(@Param('codigo') codigo: string, @Request() req: any) {
+  async obtenerProgreso(@Param('codigo') codigo: string, @Request() req: AuthenticatedRequest) {
     const estudianteId = req.user.sub;
     return this.service.obtenerProgreso(estudianteId, codigo);
   }
@@ -93,8 +99,8 @@ export class PlanificacionesSimplesController {
   @Roles(Role.Estudiante)
   async guardarEstado(
     @Param('codigo') codigo: string,
-    @Request() req: any,
-    @Body() body: { estado_guardado: any },
+    @Request() req: AuthenticatedRequest,
+    @Body() body: { estado_guardado: Record<string, unknown> },
   ) {
     const estudianteId = req.user.sub;
     return this.service.guardarEstado(
@@ -110,7 +116,7 @@ export class PlanificacionesSimplesController {
    */
   @Post(':codigo/progreso/avanzar')
   @Roles(Role.Estudiante)
-  async avanzarSemana(@Param('codigo') codigo: string, @Request() req: any) {
+  async avanzarSemana(@Param('codigo') codigo: string, @Request() req: AuthenticatedRequest) {
     const estudianteId = req.user.sub;
     return this.service.avanzarSemana(estudianteId, codigo);
   }
@@ -123,7 +129,7 @@ export class PlanificacionesSimplesController {
   @Roles(Role.Estudiante)
   async completarSemana(
     @Param('codigo') codigo: string,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Body() body: { semana: number; puntos: number },
   ) {
     const estudianteId = req.user.sub;
@@ -143,7 +149,7 @@ export class PlanificacionesSimplesController {
   @Roles(Role.Estudiante)
   async registrarTiempo(
     @Param('codigo') codigo: string,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Body() body: { minutos: number },
   ) {
     const estudianteId = req.user.sub;
@@ -160,7 +166,7 @@ export class PlanificacionesSimplesController {
    */
   @Get('mis-asignaciones')
   @Roles(Role.Docente)
-  async misAsignaciones(@Request() req: any) {
+  async misAsignaciones(@Request() req: AuthenticatedRequest) {
     const docenteId = req.user.sub;
     return this.service.listarAsignacionesDocente(docenteId);
   }
@@ -174,7 +180,7 @@ export class PlanificacionesSimplesController {
   async activarSemana(
     @Param('asignacionId') asignacionId: string,
     @Param('semana') semana: string,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const docenteId = req.user.sub;
     return this.service.activarSemana(
@@ -193,7 +199,7 @@ export class PlanificacionesSimplesController {
   async desactivarSemana(
     @Param('asignacionId') asignacionId: string,
     @Param('semana') semana: string,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const docenteId = req.user.sub;
     return this.service.desactivarSemana(
@@ -211,7 +217,7 @@ export class PlanificacionesSimplesController {
   @Roles(Role.Docente)
   async verProgresoEstudiantes(
     @Param('asignacionId') asignacionId: string,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const docenteId = req.user.sub;
     return this.service.verProgresoEstudiantes(asignacionId, docenteId);
