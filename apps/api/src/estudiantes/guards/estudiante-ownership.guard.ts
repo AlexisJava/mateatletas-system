@@ -22,18 +22,25 @@ export class EstudianteOwnershipGuard implements CanActivate {
     const user = request.user as AuthUser | undefined;
     const estudianteId = request.params?.id as string | undefined;
 
+    console.log('[Guard] userId:', user?.id, 'role:', user?.role, 'estudianteId:', estudianteId);
+
     if (!user) {
+      console.log('[Guard] ❌ No user');
       throw new ForbiddenException('Usuario no autenticado');
     }
 
     if (!estudianteId) {
+      console.log('[Guard] ✅ No estudianteId - allowing');
       return true;
     }
 
     // CASO 1: El estudiante accede a su propio perfil
     if (user.role === 'estudiante' && user.id === estudianteId) {
+      console.log('[Guard] ✅ CASO 1: Self-access OK');
       return true;
     }
+
+    console.log('[Guard] Checking other cases...');
 
     // CASO 2: El tutor accede al perfil de su estudiante
     if (user.role === 'tutor') {
