@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 /**
  * Circuit Breaker Implementation
  *
@@ -56,6 +57,7 @@ export class CircuitBreakerOpenError extends Error {
 }
 
 export class CircuitBreaker {
+  private readonly logger = new Logger('CircuitBreaker');
   private state: CircuitState = CircuitState.CLOSED;
   private failureCount = 0;
   private nextAttempt: number = Date.now();
@@ -87,14 +89,14 @@ export class CircuitBreaker {
     if (this.state === CircuitState.OPEN) {
       if (Date.now() < this.nextAttempt) {
         // Todavía no es momento de reintentar
-        console.warn(
+        this.logger.warn(
           `[CircuitBreaker:${this.name}] Circuit is OPEN, using fallback`,
         );
         return this.executeFallback<T, TArgs>(args);
       }
       // Es momento de intentar recovery
       this.state = CircuitState.HALF_OPEN;
-      console.log(
+      this.logger.log(
         `[CircuitBreaker:${this.name}] Circuit moving to HALF_OPEN, attempting recovery`,
       );
     }
@@ -120,7 +122,7 @@ export class CircuitBreaker {
     this.failureCount = 0;
 
     if (this.state === CircuitState.HALF_OPEN) {
-      console.log(
+      this.logger.log(
         `[CircuitBreaker:${this.name}] Recovery successful, circuit CLOSED`,
       );
       this.state = CircuitState.CLOSED;
@@ -135,7 +137,7 @@ export class CircuitBreaker {
 
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    console.error(
+    this.logger.error(
       `[CircuitBreaker:${this.name}] Failure ${this.failureCount}/${this.failureThreshold}`,
       errorMessage,
     );
@@ -148,7 +150,7 @@ export class CircuitBreaker {
       this.state = CircuitState.OPEN;
       this.nextAttempt = Date.now() + this.resetTimeout;
 
-      console.error(
+      this.logger.error(
         `[CircuitBreaker:${this.name}] Circuit OPEN, will retry at ${new Date(this.nextAttempt).toISOString()}`,
       );
     }
@@ -161,7 +163,7 @@ export class CircuitBreaker {
     args: TArgs,
   ): Promise<T> {
     if (this.fallback) {
-      console.log(`[CircuitBreaker:${this.name}] Executing fallback`);
+      this.logger.log(`[CircuitBreaker:${this.name}] Executing fallback`);
       const result = this.fallback(...args) as T | Promise<T>;
       return await Promise.resolve(result);
     }
@@ -198,7 +200,7 @@ export class CircuitBreaker {
     this.state = CircuitState.CLOSED;
     this.failureCount = 0;
     this.nextAttempt = Date.now();
-    console.log(`[CircuitBreaker:${this.name}] Circuit manually reset`);
+    this.logger.log(`[CircuitBreaker:${this.name}] Circuit manually reset`);
   }
 }
 
