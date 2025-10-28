@@ -125,7 +125,7 @@ export default function EstudianteDashboard() {
 
   if (isDashboardLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="flex items-center justify-center min-h-screen bg-slate-950">
         <LoadingSpinner size="lg" text="Cargando tu dashboard..." />
       </div>
     );
@@ -133,7 +133,7 @@ export default function EstudianteDashboard() {
 
   if (error || !dashboard) {
     return (
-      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6 text-center">
+      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-slate-950 p-6 text-center">
         <div className="text-6xl">😵‍💫</div>
         <h2 className="text-2xl font-bold text-white">No pudimos cargar tu información</h2>
         <p className="text-slate-300 max-w-md">
@@ -193,7 +193,7 @@ export default function EstudianteDashboard() {
   ];
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+    <div className="h-screen overflow-hidden bg-slate-950 p-4">
       <div className="h-full max-w-7xl mx-auto flex flex-col gap-4">
 
         {/* Header - TAMAÑOS ORIGINALES */}
