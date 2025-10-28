@@ -229,12 +229,36 @@ const PREGUNTAS_MOCK: Pregunta[] = [
   },
 ];
 
-const AREA_COLORS = {
-  calculo: { bg: 'from-blue-500 to-cyan-500', border: 'blue-500', text: 'Cálculo' },
-  logica: { bg: 'from-purple-500 to-pink-500', border: 'purple-500', text: 'Lógica' },
-  geometria: { bg: 'from-green-500 to-emerald-500', border: 'green-500', text: 'Geometría' },
-  algebra: { bg: 'from-orange-500 to-red-500', border: 'orange-500', text: 'Álgebra' },
-};
+const AREA_STYLES = {
+  calculo: {
+    gradient: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+    borderClass: 'border-blue-500/50',
+    solidBorderClass: 'border-blue-500',
+    iconClass: 'text-blue-400',
+    label: 'Cálculo',
+  },
+  logica: {
+    gradient: 'bg-gradient-to-r from-purple-500 to-pink-500',
+    borderClass: 'border-purple-500/50',
+    solidBorderClass: 'border-purple-500',
+    iconClass: 'text-purple-400',
+    label: 'Lógica',
+  },
+  geometria: {
+    gradient: 'bg-gradient-to-r from-green-500 to-emerald-500',
+    borderClass: 'border-green-500/50',
+    solidBorderClass: 'border-green-500',
+    iconClass: 'text-green-400',
+    label: 'Geometría',
+  },
+  algebra: {
+    gradient: 'bg-gradient-to-r from-orange-500 to-red-500',
+    borderClass: 'border-orange-500/50',
+    solidBorderClass: 'border-orange-500',
+    iconClass: 'text-orange-400',
+    label: 'Álgebra',
+  },
+} as const;
 
 export default function EvaluacionDiagnosticaPage() {
   const router = useRouter();
@@ -261,7 +285,7 @@ export default function EvaluacionDiagnosticaPage() {
   }, [tiempoInicio]);
 
   const pregunta = PREGUNTAS_MOCK[preguntaActual];
-  const areaInfo = AREA_COLORS[pregunta.area];
+  const areaInfo = AREA_STYLES[pregunta.area as keyof typeof AREA_STYLES];
   const progreso = ((preguntaActual + 1) / PREGUNTAS_MOCK.length) * 100;
 
   const handleSeleccionarOpcion = (index: number) => {
@@ -272,10 +296,12 @@ export default function EvaluacionDiagnosticaPage() {
   const handleConfirmarRespuesta = async () => {
     if (opcionSeleccionada === null) return;
 
+    const nuevasRespuestas = [...respuestas, opcionSeleccionada];
+    setRespuestas(nuevasRespuestas);
+
     const correcta = opcionSeleccionada === pregunta.respuestaCorrecta;
     setEsCorrecta(correcta);
     setMostrarFeedback(true);
-    setRespuestas([...respuestas, opcionSeleccionada]);
 
     // Auto-avanzar después de 2 segundos
     setTimeout(async () => {
@@ -285,7 +311,7 @@ export default function EvaluacionDiagnosticaPage() {
         setMostrarFeedback(false);
       } else {
         // Evalución completada: registrar puntos en backend
-        const { aciertos, porcentaje } = calcularResultadosTemp();
+        const { aciertos, porcentaje } = calcularResultadosTemp(nuevasRespuestas);
         const puntos = Math.floor(aciertos * 10); // 10 puntos por respuesta correcta
         setPuntosGanados(puntos);
 
@@ -318,10 +344,10 @@ export default function EvaluacionDiagnosticaPage() {
   };
 
   // Función helper para calcular resultados sin actualizar el estado
-  const calcularResultadosTemp = () => {
+  const calcularResultadosTemp = (respuestasEvaluar = respuestas) => {
     let aciertos = 0;
     PREGUNTAS_MOCK.forEach((p, index) => {
-      if (respuestas[index] === p.respuestaCorrecta) aciertos++;
+      if (respuestasEvaluar[index] === p.respuestaCorrecta) aciertos++;
     });
     const porcentaje = (aciertos / PREGUNTAS_MOCK.length) * 100;
     return { aciertos, porcentaje };
@@ -409,7 +435,8 @@ export default function EvaluacionDiagnosticaPage() {
           {/* Desglose por Área */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(resultadosPorArea).map(([area, datos]) => {
-              const areaInfo = AREA_COLORS[area as keyof typeof AREA_COLORS];
+              const areaInfo =
+                AREA_STYLES[area as keyof typeof AREA_STYLES] ?? AREA_STYLES.calculo;
               const porcentajeArea = (datos.correctas / datos.total) * 100;
 
               return (
@@ -420,8 +447,8 @@ export default function EvaluacionDiagnosticaPage() {
                   className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border-2 border-slate-700 shadow-xl"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold text-white">{areaInfo.text}</h3>
-                    <Target className={`w-6 h-6 text-${areaInfo.border}`} />
+                    <h3 className="text-xl font-bold text-white">{areaInfo.label}</h3>
+                    <Target className={`w-6 h-6 ${areaInfo.iconClass}`} />
                   </div>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
@@ -435,7 +462,7 @@ export default function EvaluacionDiagnosticaPage() {
                         initial={{ width: 0 }}
                         animate={{ width: `${porcentajeArea}%` }}
                         transition={{ duration: 1, delay: 0.3 }}
-                        className={`h-full bg-gradient-to-r ${areaInfo.bg} rounded-full`}
+                        className={`h-full ${areaInfo.gradient} rounded-full`}
                       />
                     </div>
                     <div className="text-center">
@@ -494,7 +521,7 @@ export default function EvaluacionDiagnosticaPage() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`bg-gradient-to-r ${areaInfo.bg} rounded-3xl shadow-2xl p-6 border-2 border-${areaInfo.border}/50`}
+            className={`${areaInfo.gradient} rounded-3xl shadow-2xl p-6 border-2 ${areaInfo.borderClass}`}
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -504,7 +531,7 @@ export default function EvaluacionDiagnosticaPage() {
                     Evaluación Diagnóstica
                   </h1>
                   <p className="text-white/90 text-sm font-semibold">
-                    {areaInfo.text} • Pregunta {preguntaActual + 1} de {PREGUNTAS_MOCK.length}
+                    {areaInfo.label} • Pregunta {preguntaActual + 1} de {PREGUNTAS_MOCK.length}
                   </p>
                 </div>
               </div>
@@ -556,8 +583,8 @@ export default function EvaluacionDiagnosticaPage() {
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
                 {pregunta.pregunta}
               </h2>
-              <div className={`inline-block px-4 py-2 rounded-full text-sm font-bold text-white bg-gradient-to-r ${areaInfo.bg} border border-white/20`}>
-                Nivel {pregunta.nivel} • {areaInfo.text}
+              <div className={`inline-block px-4 py-2 rounded-full text-sm font-bold text-white ${areaInfo.gradient} border border-white/20`}>
+                Nivel {pregunta.nivel} • {areaInfo.label}
               </div>
             </div>
 
@@ -579,7 +606,7 @@ export default function EvaluacionDiagnosticaPage() {
                       relative p-6 rounded-2xl font-bold text-lg transition-all border-2
                       ${esRespuestaCorrecta ? 'bg-green-500 text-white border-green-400 shadow-lg shadow-green-500/50' : ''}
                       ${esRespuestaIncorrecta ? 'bg-red-500 text-white border-red-400 shadow-lg shadow-red-500/50' : ''}
-                      ${!mostrarFeedback && esSeleccionada ? `bg-gradient-to-r ${areaInfo.bg} text-white border-${areaInfo.border} shadow-lg` : ''}
+                      ${!mostrarFeedback && esSeleccionada ? `${areaInfo.gradient} text-white ${areaInfo.solidBorderClass} shadow-lg` : ''}
                       ${!mostrarFeedback && !esSeleccionada ? 'bg-slate-700 text-white border-slate-600 hover:bg-slate-600' : ''}
                       ${mostrarFeedback && !esRespuestaCorrecta && !esRespuestaIncorrecta ? 'opacity-50' : ''}
                     `}
@@ -639,7 +666,7 @@ export default function EvaluacionDiagnosticaPage() {
                 className={`
                   w-full font-bold py-4 text-lg rounded-xl transition-all
                   ${opcionSeleccionada !== null
-                    ? `bg-gradient-to-r ${areaInfo.bg} text-white shadow-lg hover:shadow-xl`
+                    ? `${areaInfo.gradient} text-white shadow-lg hover:shadow-xl`
                     : 'bg-gray-700 text-gray-400 cursor-not-allowed'
                   }
                 `}

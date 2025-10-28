@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { ThemeProvider } from '@/lib/theme/ThemeContext';
@@ -9,6 +10,7 @@ import {
   BookOpen,
   Trophy,
   BarChart3,
+  Calendar,
   LogOut,
   X,
   Rocket,
@@ -26,6 +28,7 @@ import {
 
 const navItems = [
   { href: '/estudiante/dashboard', label: 'Inicio', icon: LayoutDashboard },
+  { href: '/estudiante/planificaciones', label: 'Planificación', icon: Calendar },
   { href: '/estudiante/cursos', label: 'Estudiar', icon: BookOpen },
   { href: '/estudiante/logros', label: 'Logros', icon: Trophy },
   { href: '/estudiante/ranking', label: 'Ranking', icon: BarChart3 },
@@ -113,19 +116,19 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen bg-slate-950">
         {isValidating ? (
           <LoadingScreen />
         ) : (
           <div className="flex h-screen overflow-hidden">
-            {/* Sidebar Desktop - DARK PURPLE */}
+            {/* Sidebar Desktop - DARK SLATE */}
             <aside className="hidden md:flex md:flex-shrink-0">
-              <div className="flex flex-col w-64 bg-gradient-to-b from-slate-800 to-slate-900 border-r border-purple-500/20 shadow-2xl">
+              <div className="flex flex-col w-64 bg-slate-900 border-r border-slate-700/50 shadow-2xl">
                 {/* Logo */}
-                <div className="flex items-center gap-3 h-16 px-6 border-b border-purple-500/20">
+                <div className="flex items-center gap-3 h-16 px-6 border-b border-slate-700/50">
                   <div className="relative">
-                    <div className="absolute inset-0 bg-purple-500 rounded-xl blur-lg opacity-50" />
-                    <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+                    <div className="absolute inset-0 bg-cyan-500 rounded-xl blur-lg opacity-30" />
+                    <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
                       <Rocket className="w-5 h-5 text-white" />
                     </div>
                   </div>
@@ -133,7 +136,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                     <h1 className="text-sm font-bold text-white">
                       Portal Estudiante
                     </h1>
-                    <p className="text-xs text-purple-300 font-medium">
+                    <p className="text-xs text-slate-400 font-medium">
                       Mateatletas
                     </p>
                   </div>
@@ -146,7 +149,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                     const isActive = isActiveRoute(item.href);
 
                     return (
-                      <a
+                      <Link
                         key={item.href}
                         href={item.href}
                         className={`
@@ -154,24 +157,24 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                           transition-all duration-200
                           ${
                             isActive
-                              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/50'
-                              : 'text-gray-300 hover:bg-purple-500/10 hover:text-white'
+                              ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/30'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                           }
                         `}
                       >
                         <Icon className="w-6 h-6" />
                         {item.label}
-                      </a>
+                      </Link>
                     );
                   })}
                 </nav>
 
                 {/* User Section */}
-                <div className="border-t border-purple-500/20 p-4">
-                  <div className="flex items-center gap-3 mb-3 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                <div className="border-t border-slate-700/50 p-4">
+                  <div className="flex items-center gap-3 mb-3 p-3 rounded-xl bg-slate-800 border border-slate-700/50">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-purple-500 rounded-xl blur-md opacity-40" />
-                      <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                      <div className="absolute inset-0 bg-cyan-500 rounded-xl blur-md opacity-20" />
+                      <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
                         {user?.nombre?.charAt(0).toUpperCase() || 'E'}
                       </div>
                     </div>
@@ -179,14 +182,14 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                       <p className="text-sm font-bold text-white truncate">
                         {user?.nombre} {user?.apellido}
                       </p>
-                      <p className="text-xs text-purple-300 font-medium">
+                      <p className="text-xs text-slate-400 font-medium">
                         Estudiante
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3.5 text-base font-semibold text-gray-300 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all duration-200 border border-transparent hover:border-red-500/30"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3.5 text-base font-semibold text-slate-300 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all duration-200 border border-transparent hover:border-red-500/30"
                   >
                     <LogOut className="w-6 h-6" />
                     Cerrar sesión
@@ -197,8 +200,8 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Page Content - Sin header, sin padding, el dashboard maneja su propio layout */}
-              <main className="flex-1 overflow-y-auto">
+              {/* Page Content */}
+              <main className="flex-1 overflow-y-auto p-6">
                 {children}
               </main>
             </div>
@@ -210,13 +213,13 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                   className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
                   onClick={() => setSidebarOpen(false)}
                 />
-                <div className="fixed inset-y-0 left-0 w-64 bg-gradient-to-b from-slate-800 to-slate-900 z-50 md:hidden border-r border-purple-500/20 shadow-2xl">
+                <div className="fixed inset-y-0 left-0 w-64 bg-slate-900 z-50 md:hidden border-r border-slate-700/50 shadow-2xl">
                   {/* Mobile Logo */}
-                  <div className="flex items-center justify-between h-16 px-6 border-b border-purple-500/20">
+                  <div className="flex items-center justify-between h-16 px-6 border-b border-slate-700/50">
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="absolute inset-0 bg-purple-500 rounded-xl blur-lg opacity-50" />
-                        <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+                        <div className="absolute inset-0 bg-cyan-500 rounded-xl blur-lg opacity-30" />
+                        <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
                           <Rocket className="w-5 h-5 text-white" />
                         </div>
                       </div>
@@ -224,16 +227,16 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                         <h1 className="text-sm font-bold text-white">
                           Portal Estudiante
                         </h1>
-                        <p className="text-xs text-purple-300 font-medium">
+                        <p className="text-xs text-slate-400 font-medium">
                           Mateatletas
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => setSidebarOpen(false)}
-                      className="p-2 rounded-xl hover:bg-purple-500/10"
+                      className="p-2 rounded-xl hover:bg-slate-800"
                     >
-                      <X className="w-5 h-5 text-gray-300" />
+                      <X className="w-5 h-5 text-slate-300" />
                     </button>
                   </div>
 
@@ -244,7 +247,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                       const isActive = isActiveRoute(item.href);
 
                       return (
-                        <a
+                        <Link
                           key={item.href}
                           href={item.href}
                           onClick={() => setSidebarOpen(false)}
@@ -253,14 +256,14 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
                             transition-all duration-200
                             ${
                               isActive
-                                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/50'
-                                : 'text-gray-300 hover:bg-purple-500/10 hover:text-white'
+                                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/30'
+                                : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                             }
                           `}
                         >
                           <Icon className="w-6 h-6" />
                           {item.label}
-                        </a>
+                        </Link>
                       );
                     })}
                   </nav>
@@ -276,12 +279,11 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="text-center bg-gradient-to-br from-slate-800 to-slate-900 p-12 rounded-3xl shadow-2xl border border-purple-500/20">
-        <div className="w-16 h-16 border-4 border-slate-700 border-t-purple-500 rounded-full animate-spin mx-auto mb-6" />
+    <div className="min-h-screen flex items-center justify-center bg-slate-950">
+      <div className="text-center bg-slate-900 p-12 rounded-3xl shadow-2xl border border-slate-700/50">
+        <div className="w-16 h-16 border-4 border-slate-700 border-t-cyan-500 rounded-full animate-spin mx-auto mb-6" />
         <p className="text-sm font-semibold text-white">Cargando Portal Estudiante...</p>
       </div>
     </div>
   );
 }
-

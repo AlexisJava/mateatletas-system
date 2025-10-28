@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/auth.store';
-import {} from '@/store/gamificacion.store';
 import {
   Brain,
   Clock,
@@ -37,7 +35,6 @@ interface Pregunta {
 
 export default function CalculoMentalPage() {
   const router = useRouter();
-  const {} = useAuthStore();
 
   // Estado del juego
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'finished'>('idle');
