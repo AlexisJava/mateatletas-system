@@ -63,7 +63,7 @@ export async function seedTutorMock() {
       debe_cambiar_password: false,
       nivel_actual: 3,
       puntos_totales: 250,
-      avatar_url: 'avataaars',
+      avatar_gradient: 0,
       roles: ['estudiante'],
     },
   });
@@ -81,7 +81,7 @@ export async function seedTutorMock() {
       debe_cambiar_password: false,
       nivel_actual: 1,
       puntos_totales: 150,
-      avatar_url: 'avataaars',
+      avatar_gradient: 1,
       roles: ['estudiante'],
     },
   });

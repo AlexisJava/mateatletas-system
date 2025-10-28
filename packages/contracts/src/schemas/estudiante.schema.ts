@@ -20,7 +20,7 @@ export const estudianteSchema = z.object({
   edad: z.number().int().positive('La edad debe ser un número positivo'),
   nivel_escolar: nivelEscolarEnum,
   foto_url: z.string().nullable().optional(),
-  avatar_url: z.string().default('avataaars'),
+  avatar_gradient: z.number().int().min(0).max(9).default(0),
   tutor_id: z.string(),
   sector_id: z.string().nullable().optional(),
   equipo_id: z.string().nullable().optional(),

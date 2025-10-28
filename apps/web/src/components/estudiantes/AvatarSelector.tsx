@@ -1,239 +1,212 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
+import { AVATAR_GRADIENTS, getInitials } from '@/lib/avatar-gradients';
 
 /**
- * Avatar Selector Component
+ * Avatar Selector Component - Sistema de Gradientes
  *
- * Permite al estudiante elegir su avatar de entre varios estilos de Dicebear API.
- * Estilos disponibles: avataaars, adventurer, personas, lorelei, bottts, micah
- *
- * Props:
- * - isOpen: boolean - Controla si el modal está abierto
- * - onClose: () => void - Callback al cerrar el modal
- * - currentAvatar: string - Avatar actual del estudiante
- * - onSelect: (avatarStyle: string) => void - Callback al seleccionar un avatar
- * - studentId: string - ID del estudiante para generar el seed único
+ * Elegante y minimalista con gradientes modernos tipo Linear/Vercel.
  */
 
 interface AvatarSelectorProps {
   isOpen: boolean;
   onClose: () => void;
-  currentAvatar: string;
-  onSelect: (_avatarStyle: string) => Promise<void>;
-  studentId: string;
+  currentGradientId: number;
+  onSelect: (gradientId: number) => Promise<void>;
+  nombre: string;
+  apellido: string;
 }
 
-const avatarStyles = [
-  { id: 'avataaars', name: 'Avataaars', description: 'Estilo cartoon clásico' },
-  { id: 'adventurer', name: 'Aventurero', description: 'Personajes aventureros' },
-  { id: 'personas', name: 'Personas', description: 'Estilo moderno y limpio' },
-  { id: 'lorelei', name: 'Lorelei', description: 'Ilustración artística' },
-  { id: 'bottts', name: 'Robots', description: 'Robots futuristas' },
-  { id: 'micah', name: 'Micah', description: 'Estilo minimalista' },
-  { id: 'pixel-art', name: 'Pixel Art', description: '8-bit retro' },
-  { id: 'initials', name: 'Iniciales', description: 'Tus iniciales' },
-];
-
-export function AvatarSelector({
+export default function AvatarSelector({
   isOpen,
   onClose,
-  currentAvatar,
+  currentGradientId,
   onSelect,
-  studentId,
+  nombre,
+  apellido,
 }: AvatarSelectorProps) {
-  const [selectedStyle, setSelectedStyle] = useState(currentAvatar || 'avataaars');
-  const [isLoading, setIsLoading] = useState(false);
+  const [previewGradientId, setPreviewGradientId] = useState(currentGradientId);
+  const [isSelecting, setIsSelecting] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      setSelectedStyle(currentAvatar || 'avataaars');
-    }
-  }, [isOpen, currentAvatar]);
+  const initials = getInitials(nombre, apellido);
+  const previewGradient = AVATAR_GRADIENTS.find(g => g.id === previewGradientId) || AVATAR_GRADIENTS[0];
 
-  const handleSelect = async () => {
-    setIsLoading(true);
+  const handleSelect = async (gradientId: number) => {
+    setIsSelecting(true);
     try {
-      await onSelect(selectedStyle);
+      await onSelect(gradientId);
       onClose();
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error al seleccionar avatar:', error);
     } finally {
-      setIsLoading(false);
+      setIsSelecting(false);
     }
   };
 
+  const handleSurprise = () => {
+    const randomId = Math.floor(Math.random() * AVATAR_GRADIENTS.length);
+    setPreviewGradientId(randomId);
+  };
+
+  if (!isOpen) return null;
+
   return (
     <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-          />
-
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', duration: 0.5 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              className="w-full max-w-4xl max-h-[80vh] overflow-y-auto"
-              style={{
-                background: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
-                borderRadius: '24px',
-                border: '6px solid #000',
-                boxShadow: '12px 12px 0 0 rgba(0, 0, 0, 1)',
-              }}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="px-6 sm:px-8 py-5 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900">
+                Elegí tu avatar
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Seleccioná un color que te represente
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
             >
-              {/* Header */}
-              <div className="sticky top-0 z-10 px-8 py-6 border-b-4 border-black bg-gradient-to-r from-cyan-500 to-blue-500">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2
-                      className="text-3xl font-bold text-white"
-                      style={{ textShadow: '3px 3px 0 #000' }}
-                    >
-                      ELEGÍ TU AVATAR
-                    </h2>
-                    <p
-                      className="text-white/90 font-semibold mt-1"
-                      style={{ textShadow: '1px 1px 0 #000' }}
-                    >
-                      Personalizá tu perfil con un avatar único
-                    </p>
-                  </div>
-                  <button
-                    onClick={onClose}
-                    className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
+
+          {/* Content Area */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 p-6 sm:p-8">
+
+              {/* Left Panel - Preview grande */}
+              <div className="lg:col-span-2 space-y-4">
+                {/* Preview Card */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-200">
+                  <motion.div
+                    key={previewGradientId}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="relative w-full aspect-square rounded-2xl overflow-hidden shadow-lg flex items-center justify-center"
                     style={{
-                      border: '3px solid #000',
-                      boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 1)',
+                      background: previewGradient.gradient,
+                      color: previewGradient.textColor,
                     }}
                   >
-                    <X className="w-6 h-6 text-white" />
-                  </button>
+                    <div className="text-6xl font-bold">
+                      {initials}
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Botón Sorpréndeme */}
+                <motion.button
+                  onClick={handleSurprise}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-shadow"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Sorpréndeme
+                </motion.button>
+
+                {/* Nombre del gradiente */}
+                <div className="text-center">
+                  <p className="text-sm text-gray-500">Estilo actual</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {previewGradient.name}
+                  </p>
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="p-8">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {avatarStyles.map((style) => {
-                    const isSelected = selectedStyle === style.id;
+              {/* Right Panel - Grid de gradientes */}
+              <div className="lg:col-span-3">
+                <div className="grid grid-cols-3 gap-3">
+                  {AVATAR_GRADIENTS.map((gradient) => {
+                    const isSelected = gradient.id === previewGradientId;
+                    const isCurrent = gradient.id === currentGradientId;
 
                     return (
                       <motion.button
-                        key={style.id}
-                        onClick={() => setSelectedStyle(style.id)}
-                        whileHover={{ scale: 1.05, y: -4 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="relative"
-                        style={{
-                          background: isSelected ? '#FFD700' : '#fff',
-                          borderRadius: '16px',
-                          border: '4px solid #000',
-                          boxShadow: isSelected
-                            ? '6px 6px 0 0 rgba(0, 0, 0, 1)'
-                            : '4px 4px 0 0 rgba(0, 0, 0, 1)',
-                          transition: 'all 0.2s ease',
-                        }}
+                        key={gradient.id}
+                        onClick={() => setPreviewGradientId(gradient.id)}
+                        onHoverStart={() => setPreviewGradientId(gradient.id)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                        className={`
+                          relative p-3 rounded-xl border-2 transition-all
+                          ${isSelected
+                            ? 'border-blue-500 shadow-md'
+                            : 'border-gray-200 hover:border-gray-300'
+                          }
+                        `}
                       >
-                        {/* Check Badge */}
-                        {isSelected && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute -top-2 -right-2 z-10 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center"
-                            style={{
-                              border: '3px solid #000',
-                              boxShadow: '2px 2px 0 0 rgba(0, 0, 0, 1)',
-                            }}
-                          >
-                            <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                          </motion.div>
+                        {/* Badge "Actual" */}
+                        {isCurrent && (
+                          <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow-sm">
+                            Actual
+                          </div>
                         )}
 
                         {/* Avatar Preview */}
-                        <div className="p-4">
-                          <div
-                            className="relative w-full aspect-square rounded-xl overflow-hidden mb-3"
-                            style={{
-                              border: '3px solid #000',
-                              background: '#f0f0f0',
-                            }}
-                          >
-                            <Image
-                              src={`https://api.dicebear.com/7.x/${style.id}/svg?seed=${studentId}`}
-                              alt={style.name}
-                              fill
-                              sizes="(max-width: 768px) 50vw, 25vw"
-                              className="object-cover"
-                            />
-                          </div>
-
-                          {/* Style Name */}
-                          <h3
-                            className="text-base font-bold text-black mb-1"
-                            style={{ textShadow: isSelected ? '1px 1px 0 rgba(0,0,0,0.1)' : 'none' }}
-                          >
-                            {style.name}
-                          </h3>
-                          <p className="text-xs text-black/70 font-semibold">
-                            {style.description}
-                          </p>
+                        <div
+                          className="w-full aspect-square rounded-lg shadow-sm flex items-center justify-center font-bold text-xl mb-2"
+                          style={{
+                            background: gradient.gradient,
+                            color: gradient.textColor,
+                          }}
+                        >
+                          {initials}
                         </div>
+
+                        {/* Nombre */}
+                        <p className="text-xs font-medium text-gray-700 text-center">
+                          {gradient.name}
+                        </p>
                       </motion.button>
                     );
                   })}
                 </div>
               </div>
-
-              {/* Footer */}
-              <div className="sticky bottom-0 px-8 py-6 border-t-4 border-black bg-gradient-to-r from-cyan-500 to-blue-500">
-                <div className="flex gap-4">
-                  <button
-                    onClick={onClose}
-                    className="flex-1 py-4 px-6 text-lg font-bold text-white rounded-xl transition-all"
-                    style={{
-                      background: 'rgba(0,0,0,0.2)',
-                      border: '4px solid #000',
-                      boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 1)',
-                      textShadow: '2px 2px 0 #000',
-                    }}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleSelect}
-                    disabled={isLoading || selectedStyle === currentAvatar}
-                    className="flex-1 py-4 px-6 text-lg font-bold text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      border: '4px solid #000',
-                      boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 1)',
-                      textShadow: '2px 2px 0 #000',
-                    }}
-                  >
-                    {isLoading ? 'GUARDANDO...' : '¡CONFIRMAR!'}
-                  </button>
-                </div>
-              </div>
             </div>
-          </motion.div>
-        </>
-      )}
+          </div>
+
+          {/* Footer - Botones de acción */}
+          <div className="px-6 sm:px-8 py-4 border-t border-gray-100 flex justify-end gap-3">
+            <button
+              onClick={onClose}
+              disabled={isSelecting}
+              className="px-5 py-2.5 rounded-xl font-medium text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <motion.button
+              onClick={() => handleSelect(previewGradientId)}
+              disabled={isSelecting || previewGradientId === currentGradientId}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-5 py-2.5 rounded-xl font-medium bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSelecting ? 'Guardando...' : 'Guardar'}
+            </motion.button>
+          </div>
+        </motion.div>
+      </motion.div>
     </AnimatePresence>
   );
 }

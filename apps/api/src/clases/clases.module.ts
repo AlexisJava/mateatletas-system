@@ -5,18 +5,19 @@ import { ClasesService } from './clases.service';
 import { ClasesManagementService } from './services/clases-management.service';
 import { ClasesReservasService } from './services/clases-reservas.service';
 import { ClasesAsistenciaService } from './services/clases-asistencia.service';
+import { GruposService } from './services/grupos.service';
 import { DatabaseModule } from '../core/database/database.module';
 import { NotificacionesModule } from '../notificaciones/notificaciones.module';
-import { PlanificacionesModule } from '../planificaciones/planificaciones.module';
 
 @Module({
-  imports: [DatabaseModule, NotificacionesModule, PlanificacionesModule],
+  imports: [DatabaseModule, NotificacionesModule],
   controllers: [ClasesController, ClaseGrupoController],
   providers: [
     ClasesService,
     ClasesManagementService,
     ClasesReservasService,
     ClasesAsistenciaService,
+    GruposService,
   ],
   exports: [ClasesService],
 })

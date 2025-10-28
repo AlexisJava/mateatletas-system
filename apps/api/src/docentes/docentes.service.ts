@@ -563,7 +563,7 @@ export class DocentesService {
               id: true,
               nombre: true,
               apellido: true,
-              avatar_url: true,
+              avatar_gradient: true,
             },
           },
         },
@@ -580,7 +580,7 @@ export class DocentesService {
           id: insc.estudiante.id,
           nombre: insc.estudiante.nombre,
           apellido: insc.estudiante.apellido,
-          avatar_url: insc.estudiante.avatar_url,
+          avatar_gradient: insc.estudiante.avatar_gradient,
         })),
         cupo_maximo: claseGrupo.cupo_maximo,
         grupo_id: claseGrupo.id, // FIXED: Use ClaseGrupo ID, not Grupo Pedagógico ID

@@ -20,7 +20,6 @@ import { CursosModule } from './cursos/cursos.module';
 import { NotificacionesModule } from './notificaciones/notificaciones.module';
 import { EventosModule } from './eventos/eventos.module';
 import { HealthModule } from './health/health.module';
-import { PlanificacionesModule } from './planificaciones/planificaciones.module';
 import { PlanificacionesSimplesModule } from './planificaciones-simples/planificaciones-simples.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
@@ -61,8 +60,7 @@ import { TokenBlacklistGuard } from './auth/guards/token-blacklist.guard';
     CursosModule, // SLICE #16: Estructura de cursos y lecciones
     NotificacionesModule, // Sistema de notificaciones para docentes
     EventosModule, // Sistema de calendario y eventos para docentes
-    PlanificacionesModule, // Sistema de planificaciones mensuales inmersivas (Clean Architecture)
-    PlanificacionesSimplesModule, // Sistema de planificaciones simplificado (Convention over Configuration)
+    PlanificacionesSimplesModule, // Sistema de planificaciones auto-detectable (Convention over Configuration)
     HealthModule, // Health checks para monitoreo del sistema
   ],
   controllers: [AppController],

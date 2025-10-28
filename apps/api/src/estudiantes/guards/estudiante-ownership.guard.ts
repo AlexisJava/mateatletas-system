@@ -10,6 +10,7 @@ import { AuthUser } from '../../auth/interfaces';
 
 /**
  * Guard que verifica que un estudiante pertenece al tutor autenticado
+ * O que el estudiante está accediendo a su propio perfil
  * Se aplica a rutas con parámetro :id para validar ownership
  */
 @Injectable()
@@ -17,37 +18,58 @@ export class EstudianteOwnershipGuard implements CanActivate {
   constructor(private prisma: PrismaService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context
-      .switchToHttp()
-      .getRequest<{ user?: AuthUser; params: { id?: string } }>();
-    const tutorId = request.user?.id; // Del JWT Strategy (user.id, NO user.sub)
-    const estudianteId = request.params.id; // De la URL
+    const request = context.switchToHttp().getRequest();
+    const user = request.user as AuthUser | undefined;
+    const estudianteId = request.params?.id as string | undefined;
 
-    if (!tutorId) {
+    console.log('[Guard] userId:', user?.id, 'role:', user?.role, 'estudianteId:', estudianteId);
+
+    if (!user) {
+      console.log('[Guard] ❌ No user');
       throw new ForbiddenException('Usuario no autenticado');
     }
 
     if (!estudianteId) {
-      // Si no hay ID en la ruta, permitir (ej: GET /estudiantes)
+      console.log('[Guard] ✅ No estudianteId - allowing');
       return true;
     }
 
-    // Verificar que el estudiante existe y pertenece al tutor
-    const estudiante = await this.prisma.estudiante.findUnique({
-      where: { id: estudianteId },
-      select: { tutor_id: true },
-    });
-
-    if (!estudiante) {
-      throw new NotFoundException('Estudiante no encontrado');
+    // CASO 1: El estudiante accede a su propio perfil
+    if (user.role === 'estudiante' && user.id === estudianteId) {
+      console.log('[Guard] ✅ CASO 1: Self-access OK');
+      return true;
     }
 
-    if (estudiante.tutor_id !== tutorId) {
-      throw new ForbiddenException(
-        'No tienes permiso para acceder a este estudiante',
-      );
+    console.log('[Guard] Checking other cases...');
+
+    // CASO 2: El tutor accede al perfil de su estudiante
+    if (user.role === 'tutor') {
+      const estudiante = await this.prisma.estudiante.findUnique({
+        where: { id: estudianteId },
+        select: { tutor_id: true },
+      });
+
+      if (!estudiante) {
+        throw new NotFoundException('Estudiante no encontrado');
+      }
+
+      if (estudiante.tutor_id !== user.id) {
+        throw new ForbiddenException(
+          'No tienes permiso para acceder a este estudiante',
+        );
+      }
+
+      return true;
     }
 
-    return true;
+    // CASO 3: Admin o docente (pueden acceder a cualquier estudiante)
+    if (user.role === 'admin' || user.role === 'docente') {
+      return true;
+    }
+
+    // Otros casos: denegar
+    throw new ForbiddenException(
+      'No tienes permiso para acceder a este estudiante',
+    );
   }
 }

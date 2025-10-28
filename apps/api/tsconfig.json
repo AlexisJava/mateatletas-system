@@ -24,5 +24,6 @@
     "strictBindCallApply": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true
-  }
+  },
+  "exclude": ["**/__tests__/**", "**/*.spec.ts", "**/*.e2e-spec.ts", "**/seeds/**", "prisma/**/*.ts", "scripts/**/*.ts", "test/**", "dist/**", "check-*.ts"]
 }

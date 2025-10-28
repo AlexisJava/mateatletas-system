@@ -49,7 +49,21 @@ export class GamificacionController {
    * Dashboard completo del estudiante con stats
    */
   @Get('dashboard/:estudianteId')
-  async getDashboard(@Param('estudianteId') estudianteId: string) {
+  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  async getDashboard(
+    @Param('estudianteId') estudianteId: string,
+    @Request() req: RequestWithAuthUser,
+  ) {
+    // Validar que el estudiante solo pueda ver su propio dashboard
+    // o que sea un tutor/docente/admin
+    const user = req.user;
+    if (
+      user.role === Role.Estudiante &&
+      user.id !== estudianteId
+    ) {
+      throw new Error('No tienes permisos para ver este dashboard');
+    }
+
     return this.gamificacionService.getDashboardEstudiante(estudianteId);
   }
 
@@ -58,6 +72,7 @@ export class GamificacionController {
    * Todos los logros (desbloqueados y bloqueados)
    */
   @Get('logros/:estudianteId')
+  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
   async getLogros(@Param('estudianteId') estudianteId: string) {
     return this.gamificacionService.getLogrosEstudiante(estudianteId);
   }
@@ -67,6 +82,7 @@ export class GamificacionController {
    * Puntos totales y por ruta curricular
    */
   @Get('puntos/:estudianteId')
+  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
   async getPuntos(@Param('estudianteId') estudianteId: string) {
     return this.gamificacionService.getPuntosEstudiante(estudianteId);
   }
@@ -76,6 +92,7 @@ export class GamificacionController {
    * Ranking del estudiante (equipo y global)
    */
   @Get('ranking/:estudianteId')
+  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
   async getRanking(@Param('estudianteId') estudianteId: string) {
     return this.gamificacionService.getRankingEstudiante(estudianteId);
   }

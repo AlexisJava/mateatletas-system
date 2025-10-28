@@ -334,7 +334,7 @@ export class EstudiantesService {
    * @param avatarStyle - Estilo de avatar de Dicebear API
    * @returns El estudiante actualizado
    */
-  async updateAvatar(id: string, avatarStyle: string) {
+  async updateAvatar(id: string, gradientId: number) {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id },
     });
@@ -346,13 +346,13 @@ export class EstudiantesService {
     return await this.prisma.estudiante.update({
       where: { id },
       data: {
-        avatar_url: avatarStyle,
+        avatar_gradient: gradientId,
       },
       select: {
         id: true,
         nombre: true,
         apellido: true,
-        avatar_url: true,
+        avatar_gradient: true,
       },
     });
   }
@@ -617,7 +617,7 @@ export class EstudiantesService {
         // Copiar datos de gamificación
         nivel_actual: estudiante.nivel_actual,
         puntos_totales: estudiante.puntos_totales,
-        avatar_url: estudiante.avatar_url,
+        avatar_gradient: estudiante.avatar_gradient,
         equipo_id: estudiante.equipo_id,
       },
       include: {
