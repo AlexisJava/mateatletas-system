@@ -273,172 +273,173 @@ export default function EstudianteDashboard() {
         {/* Grid 2 CARDS GIGANTES - SIMETRÍA PERFECTA */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto md:overflow-hidden min-h-0">
 
-          {/* CARD 1: JUGAR - NARANJA - 50% ANCHO */}
+          {/* CARD 1: JUGAR - CRASH STYLE IGUAL QUE HEADER */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1, type: "spring", stiffness: 100 }}
-            className="bg-white rounded-3xl shadow-2xl border-8 border-orange-500 p-8 hover:border-orange-600 transition-all h-full flex flex-col overflow-hidden"
+            className="bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-500 rounded-3xl shadow-2xl border-4 border-yellow-400 p-6 transition-all h-full flex flex-col overflow-hidden"
             style={{
-              boxShadow: '0 12px 48px rgba(249, 115, 22, 0.4), inset 0 -6px 0 rgba(249, 115, 22, 0.3)'
+              boxShadow: '0 10px 40px rgba(249, 115, 22, 0.4), inset 0 -4px 0 rgba(0,0,0,0.2)'
             }}
           >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-4xl font-black text-orange-600 drop-shadow-lg">🎮 JUGAR</h3>
-              <Gamepad2 className="w-12 h-12 text-orange-500" />
+            {/* Patrón de fondo igual que header */}
+            <div className="absolute inset-0 opacity-10 rounded-3xl overflow-hidden">
+              <div className="absolute inset-0" style={{
+                backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                backgroundSize: '20px 20px'
+              }} />
             </div>
 
-            {/* 3 JUEGOS GRANDES */}
-            <div className="flex-1 space-y-4 overflow-y-auto min-h-0">
+            <div className="relative z-10 flex items-center justify-between mb-4">
+              <h3 className="text-3xl font-black text-white drop-shadow-lg">Jugar</h3>
+              <Gamepad2 className="w-8 h-8 text-white" />
+            </div>
+
+            {/* 3 JUEGOS - Badges blancos igual que nivel */}
+            <div className="relative z-10 flex-1 space-y-3 overflow-y-auto min-h-0">
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => window.location.href = '/estudiante/cursos/calculo-mental'}
-                className="w-full bg-gradient-to-br from-orange-100 to-yellow-50 rounded-3xl p-6 border-4 border-orange-400 text-left shadow-xl"
-                style={{
-                  boxShadow: '0 8px 24px rgba(249, 115, 22, 0.2), inset 0 -4px 0 rgba(249, 115, 22, 0.1)'
-                }}
+                className="w-full bg-white rounded-2xl p-4 border-4 border-yellow-300 shadow-lg text-left transition-all"
               >
                 <div className="flex items-center gap-4">
-                  <span className="text-6xl">🧮</span>
-                  <div className="flex-1">
-                    <p className="text-2xl font-black text-orange-800">Cálculo Mental</p>
-                    <p className="text-lg text-orange-600 font-bold">+10 pts</p>
+                  <BookOpen className="w-10 h-10 text-orange-600 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xl font-black text-orange-800">Cálculo Mental</p>
+                    <p className="text-sm text-orange-600 font-bold">+10 pts</p>
                   </div>
                 </div>
               </motion.button>
 
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => window.location.href = '/estudiante/cursos/algebra-challenge'}
-                className="w-full bg-gradient-to-br from-yellow-100 to-orange-50 rounded-3xl p-6 border-4 border-yellow-400 text-left shadow-xl"
-                style={{
-                  boxShadow: '0 8px 24px rgba(234, 179, 8, 0.2), inset 0 -4px 0 rgba(234, 179, 8, 0.1)'
-                }}
+                className="w-full bg-white rounded-2xl p-4 border-4 border-yellow-300 shadow-lg text-left transition-all"
               >
                 <div className="flex items-center gap-4">
-                  <span className="text-6xl">🎯</span>
-                  <div className="flex-1">
-                    <p className="text-2xl font-black text-orange-800">Álgebra Challenge</p>
-                    <p className="text-lg text-orange-600 font-bold">+20 pts</p>
+                  <Trophy className="w-10 h-10 text-orange-600 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xl font-black text-orange-800">Álgebra Challenge</p>
+                    <p className="text-sm text-orange-600 font-bold">+20 pts</p>
                   </div>
                 </div>
               </motion.button>
 
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full bg-gradient-to-br from-orange-100 to-yellow-50 rounded-3xl p-6 border-4 border-orange-400 text-left shadow-xl"
-                style={{
-                  boxShadow: '0 8px 24px rgba(249, 115, 22, 0.2), inset 0 -4px 0 rgba(249, 115, 22, 0.1)'
-                }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full bg-white rounded-2xl p-4 border-4 border-yellow-300 shadow-lg text-left transition-all"
               >
                 <div className="flex items-center gap-4">
-                  <span className="text-6xl">📐</span>
-                  <div className="flex-1">
-                    <p className="text-2xl font-black text-orange-800">Geometría Quiz</p>
-                    <p className="text-lg text-orange-600 font-bold">+15 pts</p>
+                  <Gamepad2 className="w-10 h-10 text-orange-600 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xl font-black text-orange-800">Geometría Quiz</p>
+                    <p className="text-sm text-orange-600 font-bold">+15 pts</p>
                   </div>
                 </div>
               </motion.button>
             </div>
 
-            {/* BOTÓN GIGANTE */}
+            {/* BOTÓN - Badge blanco igual que los juegos */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => window.location.href = '/estudiante/cursos'}
-              className="w-full bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-black py-6 text-2xl rounded-3xl border-8 border-orange-600 shadow-2xl mt-6"
-              style={{
-                boxShadow: '0 12px 32px rgba(249, 115, 22, 0.5), inset 0 -6px 0 rgba(0,0,0,0.3)'
-              }}
+              className="relative z-10 w-full bg-white rounded-2xl py-4 px-6 border-4 border-yellow-300 shadow-lg mt-4 transition-all"
             >
-              VER TODOS LOS JUEGOS 🚀
+              <span className="text-xl font-black text-orange-600">Ver todos los juegos</span>
             </motion.button>
           </motion.div>
 
-          {/* CARD 2: CRECER - CYAN - 50% ANCHO */}
+          {/* CARD 2: CRECER - CRASH STYLE IGUAL QUE HEADER */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-            className="bg-white rounded-3xl shadow-2xl border-8 border-cyan-500 p-8 hover:border-cyan-600 transition-all h-full flex flex-col overflow-hidden"
+            className="bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-500 rounded-3xl shadow-2xl border-4 border-yellow-400 p-6 transition-all h-full flex flex-col overflow-hidden"
             style={{
-              boxShadow: '0 12px 48px rgba(6, 182, 212, 0.4), inset 0 -6px 0 rgba(6, 182, 212, 0.3)'
+              boxShadow: '0 10px 40px rgba(249, 115, 22, 0.4), inset 0 -4px 0 rgba(0,0,0,0.2)'
             }}
           >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-4xl font-black text-cyan-600 drop-shadow-lg">✨ CRECER</h3>
-              <Trophy className="w-12 h-12 text-cyan-500" />
+            {/* Patrón de fondo igual que header */}
+            <div className="absolute inset-0 opacity-10 rounded-3xl overflow-hidden">
+              <div className="absolute inset-0" style={{
+                backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                backgroundSize: '20px 20px'
+              }} />
             </div>
 
-            {/* MIS LOGROS - Visual Grande */}
-            <div className="mb-6">
-              <h4 className="text-xl font-black text-cyan-700 mb-3">Mis Logros</h4>
+            <div className="relative z-10 flex items-center justify-between mb-4">
+              <h3 className="text-3xl font-black text-white drop-shadow-lg">Crecer</h3>
+              <Trophy className="w-8 h-8 text-white" />
+            </div>
+
+            {/* MIS LOGROS - Badges blancos */}
+            <div className="relative z-10 mb-4">
+              <h4 className="text-lg font-bold text-white/90 mb-2">Mis Logros</h4>
               {logrosTop3.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {logrosTop3.map((logro, index) => (
                     <motion.div
                       key={logro.id || index}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 0.3 + index * 0.1, type: "spring" }}
-                      className="bg-gradient-to-br from-cyan-100 to-blue-50 rounded-3xl p-4 border-4 border-cyan-400 shadow-lg"
+                      className="bg-white rounded-2xl p-3 border-4 border-yellow-300 shadow-lg"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="text-5xl">{logro.icono || '🏆'}</div>
-                        <div className="flex-1">
-                          <h5 className="text-lg font-black text-cyan-800">{logro.nombre}</h5>
-                          <p className="text-base text-cyan-600 font-bold">+{logro.puntos} puntos</p>
+                      <div className="flex items-center gap-3">
+                        <Trophy className="w-8 h-8 text-orange-600 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <h5 className="text-base font-black text-orange-800 truncate">{logro.nombre}</h5>
+                          <p className="text-xs text-orange-600 font-bold">+{logro.puntos} puntos</p>
                         </div>
                       </div>
                     </motion.div>
                   ))}
                 </div>
               ) : (
-                <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-3xl p-6 border-4 border-cyan-300 text-center">
-                  <div className="text-5xl mb-2">🏆</div>
-                  <p className="text-cyan-600 text-sm font-bold">¡Juega para ganar logros!</p>
+                <div className="bg-white rounded-2xl p-4 border-4 border-yellow-300 shadow-lg text-center">
+                  <Trophy className="w-12 h-12 text-orange-600 mx-auto mb-1" />
+                  <p className="text-orange-600 text-sm font-bold">Juega para ganar logros</p>
                 </div>
               )}
             </div>
 
-            {/* PROGRESO - Barra Visual */}
-            <div className="mb-6">
-              <h4 className="text-xl font-black text-cyan-700 mb-3">Mi Progreso</h4>
-              <div className="bg-gradient-to-br from-cyan-100 to-blue-50 rounded-3xl p-6 border-4 border-cyan-400 shadow-lg">
-                <div className="grid grid-cols-3 gap-4 text-center">
+            {/* PROGRESO - Badge blanco */}
+            <div className="relative z-10 mb-4">
+              <h4 className="text-lg font-bold text-white/90 mb-2">Mi Progreso</h4>
+              <div className="bg-white rounded-2xl p-4 border-4 border-yellow-300 shadow-lg">
+                <div className="grid grid-cols-3 gap-3 text-center">
                   <div>
-                    <div className="text-4xl mb-1">💎</div>
-                    <div className="text-3xl font-black text-cyan-700">{stats.puntosToales}</div>
-                    <div className="text-xs text-cyan-600 font-bold">PUNTOS</div>
+                    <Calendar className="w-6 h-6 text-orange-600 mx-auto mb-1" />
+                    <div className="text-2xl font-black text-orange-700">{stats.puntosToales}</div>
+                    <div className="text-xs text-orange-600 font-bold">Puntos</div>
                   </div>
                   <div>
-                    <div className="text-4xl mb-1">📚</div>
-                    <div className="text-3xl font-black text-cyan-700">{stats.clasesTotales}</div>
-                    <div className="text-xs text-cyan-600 font-bold">CLASES</div>
+                    <BookOpen className="w-6 h-6 text-orange-600 mx-auto mb-1" />
+                    <div className="text-2xl font-black text-orange-700">{stats.clasesTotales}</div>
+                    <div className="text-xs text-orange-600 font-bold">Clases</div>
                   </div>
                   <div>
-                    <div className="text-4xl mb-1">🔥</div>
-                    <div className="text-3xl font-black text-cyan-700">{stats.racha}</div>
-                    <div className="text-xs text-cyan-600 font-bold">RACHA</div>
+                    <Trophy className="w-6 h-6 text-orange-600 mx-auto mb-1" />
+                    <div className="text-2xl font-black text-orange-700">{stats.racha}</div>
+                    <div className="text-xs text-orange-600 font-bold">Racha</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* BOTÓN GIGANTE */}
+            {/* BOTÓN - Badge blanco */}
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => window.location.href = '/estudiante/logros'}
-              className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-black py-6 text-2xl rounded-3xl border-8 border-cyan-600 shadow-2xl mt-auto"
-              style={{
-                boxShadow: '0 12px 32px rgba(6, 182, 212, 0.5), inset 0 -6px 0 rgba(0,0,0,0.3)'
-              }}
+              className="relative z-10 w-full bg-white rounded-2xl py-4 px-6 border-4 border-yellow-300 shadow-lg mt-auto transition-all"
             >
-              VER TODOS LOS LOGROS 🏆
+              <span className="text-xl font-black text-orange-600">Ver todos los logros</span>
             </motion.button>
           </motion.div>
 
