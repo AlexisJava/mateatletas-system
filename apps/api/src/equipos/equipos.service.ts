@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
 import { CreateEquipoDto } from './dto/create-equipo.dto';
 import { UpdateEquipoDto } from './dto/update-equipo.dto';
@@ -73,7 +74,7 @@ export class EquiposService {
     const order = query.order || 'asc';
 
     // Construir filtros
-    const where: any = {};
+    const where: Prisma.EquipoWhereInput = {};
 
     if (query.search) {
       where.nombre = {

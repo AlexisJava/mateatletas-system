@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
 import { CreateDocenteDto } from './dto/create-docente.dto';
 import { UpdateDocenteDto } from './dto/update-docente.dto';
@@ -218,7 +219,7 @@ export class DocentesService {
     }
 
     // Preparar datos para actualización
-    const dataToUpdate: any = {
+    const dataToUpdate: Prisma.DocenteUpdateInput = {
       nombre: updateDto.nombre,
       apellido: updateDto.apellido,
       email: updateDto.email,
