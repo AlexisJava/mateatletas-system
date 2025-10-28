@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCursosStore } from '@/store/cursos.store';
@@ -73,7 +73,7 @@ export default function CursoViewerPage() {
     await fetchProgresoCurso(cursoId);
   };
 
-  const handleModuloClick = async (modulo: { id: string; titulo: string; descripcion?: string }) => {
+  const handleModuloClick = useCallback(async (modulo: { id: string; titulo: string; descripcion?: string }) => {
     setSelectedModulo(modulo);
     setLoadingLecciones(true);
     try {
@@ -84,11 +84,27 @@ export default function CursoViewerPage() {
     } finally {
       setLoadingLecciones(false);
     }
-  };
+  }, []);
 
   const handleLeccionClick = (leccion: Leccion) => {
     router.push(`/estudiante/cursos/${cursoId}/lecciones/${leccion.id}`);
   };
+
+  useEffect(() => {
+    if (modulos.length === 0) {
+      return;
+    }
+
+    const alreadySelected = selectedModulo && modulos.some((modulo) => modulo.id === selectedModulo.id);
+    if (!alreadySelected) {
+      const firstModulo = modulos[0];
+      handleModuloClick({
+        id: firstModulo.id,
+        titulo: firstModulo.titulo,
+        descripcion: firstModulo.descripcion ?? undefined,
+      });
+    }
+  }, [modulos, selectedModulo, handleModuloClick]);
 
   const getModuloGradient = (index: number) => {
     const gradients = [

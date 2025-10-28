@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/auth.store';
-import { useGamificacionStore } from '@/store/gamificacion.store';
 import {
   Brain,
   Target,
@@ -30,15 +28,7 @@ import {
 
 export default function EstudiarPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
-  const { fetchDashboard, isLoading } = useGamificacionStore();
   const [filtroCategoria, setFiltroCategoria] = useState('todos');
-
-  useEffect(() => {
-    if (user?.id && user?.role === 'estudiante') {
-      fetchDashboard(user.id);
-    }
-  }, [user?.id]);
 
   // Estadísticas de juegos (mock - later connect to backend)
   const stats = {
@@ -61,7 +51,11 @@ export default function EstudiarPage() {
       desbloqueado: true,
       partidasJugadas: 23,
       mejorPuntaje: 450,
-      color: { bg: 'from-blue-500 to-cyan-500', border: 'blue-500' },
+      color: {
+        gradient: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+        border: 'border-blue-500/50',
+        hoverBorder: 'hover:border-blue-500',
+      },
     },
     {
       id: 'algebra-challenge',
@@ -75,7 +69,11 @@ export default function EstudiarPage() {
       desbloqueado: true,
       partidasJugadas: 18,
       mejorPuntaje: 620,
-      color: { bg: 'from-purple-500 to-pink-500', border: 'purple-500' },
+      color: {
+        gradient: 'bg-gradient-to-r from-purple-500 to-pink-500',
+        border: 'border-purple-500/50',
+        hoverBorder: 'hover:border-purple-500',
+      },
     },
     {
       id: 'geometria-quiz',
@@ -89,7 +87,11 @@ export default function EstudiarPage() {
       desbloqueado: true,
       partidasJugadas: 15,
       mejorPuntaje: 380,
-      color: { bg: 'from-green-500 to-emerald-500', border: 'green-500' },
+      color: {
+        gradient: 'bg-gradient-to-r from-green-500 to-emerald-500',
+        border: 'border-green-500/50',
+        hoverBorder: 'hover:border-green-500',
+      },
     },
     {
       id: 'fracciones-master',
@@ -103,7 +105,11 @@ export default function EstudiarPage() {
       desbloqueado: true,
       partidasJugadas: 12,
       mejorPuntaje: 510,
-      color: { bg: 'from-orange-500 to-amber-500', border: 'orange-500' },
+      color: {
+        gradient: 'bg-gradient-to-r from-orange-500 to-amber-500',
+        border: 'border-orange-500/50',
+        hoverBorder: 'hover:border-orange-500',
+      },
     },
     {
       id: 'logica-matematica',
@@ -116,7 +122,11 @@ export default function EstudiarPage() {
       categoria: 'logica',
       desbloqueado: false,
       requisito: 'Nivel 3',
-      color: { bg: 'from-indigo-500 to-purple-500', border: 'indigo-500' },
+      color: {
+        gradient: 'bg-gradient-to-r from-indigo-500 to-purple-500',
+        border: 'border-indigo-500/50',
+        hoverBorder: 'hover:border-indigo-500',
+      },
     },
     {
       id: 'ecuaciones-cuadraticas',
@@ -129,7 +139,11 @@ export default function EstudiarPage() {
       categoria: 'algebra',
       desbloqueado: false,
       requisito: 'Nivel 4',
-      color: { bg: 'from-red-500 to-rose-500', border: 'red-500' },
+      color: {
+        gradient: 'bg-gradient-to-r from-red-500 to-rose-500',
+        border: 'border-red-500/50',
+        hoverBorder: 'hover:border-red-500',
+      },
     },
   ];
 
@@ -159,18 +173,6 @@ export default function EstudiarPage() {
     // Navegar al juego específico
     router.push(`/estudiante/cursos/${juego.id}`);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full"
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 md:p-6">
@@ -263,7 +265,7 @@ export default function EstudiarPage() {
                 {/* Glow Effect */}
                 {juego.desbloqueado && (
                   <div
-                    className={`absolute inset-0 bg-gradient-to-r ${juego.color.bg} rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity`}
+                    className={`absolute inset-0 ${juego.color.gradient} rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity`}
                   />
                 )}
 
@@ -271,7 +273,7 @@ export default function EstudiarPage() {
                 <div
                   className={`relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-2xl border-2 p-4 h-full flex flex-col ${
                     juego.desbloqueado
-                      ? `border-${juego.color.border}/50 hover:border-${juego.color.border} transition-all`
+                      ? `${juego.color.border} ${juego.color.hoverBorder} transition-all`
                       : 'border-gray-700 opacity-60'
                   }`}
                 >
@@ -337,7 +339,7 @@ export default function EstudiarPage() {
 
                         {/* Botón de Jugar */}
                         <button
-                          className={`w-full py-2.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r ${juego.color.bg} hover:shadow-lg transition-all`}
+                          className={`w-full py-2.5 rounded-xl font-bold text-sm text-white ${juego.color.gradient} hover:shadow-lg transition-all`}
                         >
                           ¡Jugar! 🎮
                         </button>

@@ -18,6 +18,12 @@ interface GamificacionState {
   progreso: Progreso[];
 
   // UI State
+  loading: {
+    dashboard: boolean;
+    logros: boolean;
+    ranking: boolean;
+    progreso: boolean;
+  };
   isLoading: boolean;
   error: string | null;
   logroRecienDesbloqueado: Logro | null;
@@ -39,6 +45,12 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
   puntos: null,
   ranking: null,
   progreso: [],
+  loading: {
+    dashboard: false,
+    logros: false,
+    ranking: false,
+    progreso: false,
+  },
   isLoading: false,
   error: null,
   logroRecienDesbloqueado: null,
@@ -47,14 +59,32 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
    * Fetch dashboard completo
    */
   fetchDashboard: async (estudianteId: string) => {
-    set({ isLoading: true, error: null });
+    set((state) => {
+      const nextLoading = { ...state.loading, dashboard: true };
+      return {
+        loading: nextLoading,
+        isLoading: Object.values(nextLoading).some(Boolean),
+        error: null,
+      };
+    });
     try {
       const data = await gamificacionApi.getDashboard(estudianteId);
-      set({ dashboard: data, isLoading: false });
+      set((state) => {
+        const nextLoading = { ...state.loading, dashboard: false };
+        return {
+          dashboard: data,
+          loading: nextLoading,
+          isLoading: Object.values(nextLoading).some(Boolean),
+        };
+      });
     } catch (error: unknown) {
-      set({
-        error: getErrorMessage(error, 'Error al cargar dashboard'),
-        isLoading: false,
+      set((state) => {
+        const nextLoading = { ...state.loading, dashboard: false };
+        return {
+          error: getErrorMessage(error, 'Error al cargar dashboard'),
+          loading: nextLoading,
+          isLoading: Object.values(nextLoading).some(Boolean),
+        };
       });
     }
   },
@@ -63,14 +93,32 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
    * Fetch logros
    */
   fetchLogros: async (estudianteId: string) => {
-    set({ isLoading: true, error: null });
+    set((state) => {
+      const nextLoading = { ...state.loading, logros: true };
+      return {
+        loading: nextLoading,
+        isLoading: Object.values(nextLoading).some(Boolean),
+        error: null,
+      };
+    });
     try {
       const logros = await gamificacionApi.getLogros(estudianteId);
-      set({ logros, isLoading: false });
+      set((state) => {
+        const nextLoading = { ...state.loading, logros: false };
+        return {
+          logros,
+          loading: nextLoading,
+          isLoading: Object.values(nextLoading).some(Boolean),
+        };
+      });
     } catch (error: unknown) {
-      set({
-        error: getErrorMessage(error, 'Error al cargar logros'),
-        isLoading: false,
+      set((state) => {
+        const nextLoading = { ...state.loading, logros: false };
+        return {
+          error: getErrorMessage(error, 'Error al cargar logros'),
+          loading: nextLoading,
+          isLoading: Object.values(nextLoading).some(Boolean),
+        };
       });
     }
   },
@@ -91,14 +139,32 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
    * Fetch ranking
    */
   fetchRanking: async (estudianteId: string) => {
-    set({ isLoading: true, error: null });
+    set((state) => {
+      const nextLoading = { ...state.loading, ranking: true };
+      return {
+        loading: nextLoading,
+        isLoading: Object.values(nextLoading).some(Boolean),
+        error: null,
+      };
+    });
     try {
       const ranking = await gamificacionApi.getRanking(estudianteId);
-      set({ ranking, isLoading: false });
+      set((state) => {
+        const nextLoading = { ...state.loading, ranking: false };
+        return {
+          ranking,
+          loading: nextLoading,
+          isLoading: Object.values(nextLoading).some(Boolean),
+        };
+      });
     } catch (error: unknown) {
-      set({
-        error: getErrorMessage(error, 'Error al cargar ranking'),
-        isLoading: false,
+      set((state) => {
+        const nextLoading = { ...state.loading, ranking: false };
+        return {
+          error: getErrorMessage(error, 'Error al cargar ranking'),
+          loading: nextLoading,
+          isLoading: Object.values(nextLoading).some(Boolean),
+        };
       });
     }
   },
@@ -108,9 +174,30 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
    */
   fetchProgreso: async (estudianteId: string) => {
     try {
+      set((state) => {
+        const nextLoading = { ...state.loading, progreso: true };
+        return {
+          loading: nextLoading,
+          isLoading: Object.values(nextLoading).some(Boolean),
+        };
+      });
       const progreso = await gamificacionApi.getProgreso(estudianteId);
-      set({ progreso });
+      set((state) => {
+        const nextLoading = { ...state.loading, progreso: false };
+        return {
+          progreso,
+          loading: nextLoading,
+          isLoading: Object.values(nextLoading).some(Boolean),
+        };
+      });
     } catch (error: unknown) {
+      set((state) => {
+        const nextLoading = { ...state.loading, progreso: false };
+        return {
+          loading: nextLoading,
+          isLoading: Object.values(nextLoading).some(Boolean),
+        };
+      });
       console.error('Error al cargar progreso:', error);
     }
   },

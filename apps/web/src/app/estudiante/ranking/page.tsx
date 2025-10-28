@@ -8,7 +8,7 @@ import { Crown, Users, TrendingUp, Trophy } from 'lucide-react';
 import type { Ranking } from '@/lib/api/gamificacion.api';
 
 export default function RankingPage() {
-  const { ranking, fetchRanking, isLoading } = useGamificacionStore();
+  const { ranking, fetchRanking, loading } = useGamificacionStore();
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -86,7 +86,9 @@ export default function RankingPage() {
 
   const data: Ranking = ranking ?? mockRanking;
 
-  if (isLoading) {
+  const isRankingLoading = loading.ranking;
+
+  if (isRankingLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <motion.div
@@ -99,10 +101,19 @@ export default function RankingPage() {
   }
 
   const medals = ['🥇', '🥈', '🥉'];
-  const podiumColors = [
-    { bg: 'from-yellow-500 to-orange-500', border: 'yellow-500' },
-    { bg: 'from-gray-400 to-gray-500', border: 'gray-400' },
-    { bg: 'from-orange-600 to-yellow-700', border: 'orange-600' },
+  const podiumStyles = [
+    {
+      glow: 'bg-gradient-to-r from-yellow-500 to-orange-500',
+      border: 'border-yellow-500/50',
+    },
+    {
+      glow: 'bg-gradient-to-r from-gray-400 to-gray-500',
+      border: 'border-gray-400/50',
+    },
+    {
+      glow: 'bg-gradient-to-r from-orange-600 to-yellow-700',
+      border: 'border-orange-600/50',
+    },
   ];
 
   return (
@@ -249,7 +260,7 @@ export default function RankingPage() {
                 {data.rankingGlobal.slice(0, 3).map((estudiante, index) => {
                   const heights = ['h-full', 'h-5/6', 'h-4/6'];
                   const orders = [1, 0, 2]; // Para el efecto de podio (2do, 1ro, 3ro)
-                  const podium = podiumColors[index];
+                  const podium = podiumStyles[index];
 
                   return (
                     <motion.div
@@ -261,11 +272,11 @@ export default function RankingPage() {
                       className="relative group h-full flex items-end"
                     >
                       {/* Glow effect */}
-                      <div className={`absolute inset-0 bg-gradient-to-r ${podium.bg} rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity`} />
+                      <div className={`absolute inset-0 ${podium.glow} rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity`} />
 
                       {/* Card */}
                       <div
-                        className={`relative w-full ${heights[index]} bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border-2 border-${podium.border}/50 shadow-2xl flex flex-col items-center justify-end`}
+                        className={`relative w-full ${heights[index]} bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border-2 ${podium.border} shadow-2xl flex flex-col items-center justify-end`}
                       >
                         {/* Medal floating */}
                         <motion.div

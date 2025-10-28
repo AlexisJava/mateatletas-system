@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 export default function EstudianteDashboard() {
-  const { dashboard, fetchDashboard, isLoading } = useGamificacionStore();
+  const { dashboard, fetchDashboard, loading, error } = useGamificacionStore();
   const { user } = useAuthStore();
   const [avatarSelectorOpen, setAvatarSelectorOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -28,12 +28,18 @@ export default function EstudianteDashboard() {
     if (user?.id && user?.role === 'estudiante') {
       fetchDashboard(user.id);
     }
+  }, [user?.id, user?.role, fetchDashboard]);
+
+  useEffect(() => {
+    if (!dashboard?.nivel) {
+      return;
+    }
 
     const welcomeShown = sessionStorage.getItem('welcomeShown');
-    if (!welcomeShown && dashboard?.nivel) {
+    if (!welcomeShown) {
       setShowWelcome(true);
     }
-  }, [user?.id]);
+  }, [dashboard?.nivel]);
 
   useEffect(() => {
     if (dashboard?.nivel?.nivelActual) {
@@ -97,10 +103,36 @@ export default function EstudianteDashboard() {
     setShowWelcome(false);
   };
 
-  if (isLoading || !dashboard) {
+  const handleRetry = () => {
+    if (user?.id && user?.role === 'estudiante') {
+      fetchDashboard(user.id);
+    }
+  };
+
+  const isDashboardLoading = loading.dashboard;
+
+  if (isDashboardLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <LoadingSpinner size="lg" text="Cargando tu dashboard..." />
+      </div>
+    );
+  }
+
+  if (error || !dashboard) {
+    return (
+      <div className="flex flex-col gap-4 items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6 text-center">
+        <div className="text-6xl">😵‍💫</div>
+        <h2 className="text-2xl font-bold text-white">No pudimos cargar tu información</h2>
+        <p className="text-slate-300 max-w-md">
+          {error ?? 'Reintenta nuevamente o avísanos si el problema persiste.'}
+        </p>
+        <button
+          onClick={handleRetry}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold shadow-lg hover:shadow-purple-500/40 transition-all"
+        >
+          Intentar otra vez
+        </button>
       </div>
     );
   }

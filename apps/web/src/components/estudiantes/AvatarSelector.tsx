@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check } from 'lucide-react';
@@ -47,6 +47,12 @@ export function AvatarSelector({
 }: AvatarSelectorProps) {
   const [selectedStyle, setSelectedStyle] = useState(currentAvatar || 'avataaars');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedStyle(currentAvatar || 'avataaars');
+    }
+  }, [isOpen, currentAvatar]);
 
   const handleSelect = async () => {
     setIsLoading(true);
