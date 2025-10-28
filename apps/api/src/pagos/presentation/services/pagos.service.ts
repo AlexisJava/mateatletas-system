@@ -251,10 +251,12 @@ export class PagosService {
         );
         return { message: 'Unknown external_reference format' };
       }
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
-        `❌ Error procesando webhook: ${error.message}`,
-        error.stack,
+        `❌ Error procesando webhook: ${errorMessage}`,
+        errorStack,
       );
       throw error;
     }
@@ -264,7 +266,7 @@ export class PagosService {
    * Procesa pago de membresía
    * external_reference format: "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
    */
-  private async procesarPagoMembresia(payment: any) {
+  private async procesarPagoMembresia(payment: { external_reference: string; id: number; status: string }) {
     const externalRef = payment.external_reference;
     const parts = externalRef.split('-');
     const membresiaId = parts[1]; // "membresia-{ID}-tutor-..."
@@ -321,7 +323,7 @@ export class PagosService {
    * Procesa pago de inscripción a curso
    * external_reference format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
    */
-  private async procesarPagoInscripcion(payment: any) {
+  private async procesarPagoInscripcion(payment: { external_reference: string; id: number; status: string }) {
     const externalRef = payment.external_reference;
     const parts = externalRef.split('-');
     const inscripcionId = parts[1]; // "inscripcion-{ID}-estudiante-..."

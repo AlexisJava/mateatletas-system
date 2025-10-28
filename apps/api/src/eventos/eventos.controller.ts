@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
+import { TipoEvento } from '@prisma/client';
 import { EventosService } from './eventos.service';
 import {
   CreateTareaDto,
@@ -129,7 +130,12 @@ export class EventosController {
     @Query('tipo') tipo?: TipoEvento,
     @Query('busqueda') busqueda?: string,
   ) {
-    const options: any = {};
+    const options: {
+      fechaInicio?: Date;
+      fechaFin?: Date;
+      tipo?: TipoEvento;
+      busqueda?: string;
+    } = {};
 
     if (fechaInicio) options.fechaInicio = new Date(fechaInicio);
     if (fechaFin) options.fechaFin = new Date(fechaFin);

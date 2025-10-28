@@ -40,7 +40,6 @@ export default function EstudiantePlanificacionesPage() {
         setSelectedPlan(data[0].codigo);
       }
     } catch (err) {
-      console.error('Error al cargar planificaciones:', err);
       setError('No se pudieron cargar las planificaciones');
     } finally {
       setLoading(false);

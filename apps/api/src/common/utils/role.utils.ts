@@ -1,3 +1,5 @@
+import { Logger } from '@nestjs/common';
+const logger = new Logger('RoleUtils');
 /**
  * Utilidades para manejo seguro de roles de usuario
  */
@@ -38,10 +40,10 @@ export function parseUserRoles(
       if (Array.isArray(parsed)) {
         return parsed.filter(isRole);
       }
-      console.warn('Roles parseados no son un array:', parsed);
+      logger.warn('Roles parseados no son un array:', parsed);
       return [];
     } catch (error) {
-      console.error('Error al parsear roles JSON:', error);
+      logger.error('Error al parsear roles JSON:', error);
       return [];
     }
   }
