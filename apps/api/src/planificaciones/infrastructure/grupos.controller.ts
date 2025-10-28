@@ -13,6 +13,7 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import {
   ApiTags,
   ApiOperation,
@@ -136,7 +137,7 @@ export class GruposController {
   })
   async getGrupos(@Query('activo') activo?: string) {
     // Construir el where dinámicamente
-    const where: any = {};
+    const where: Prisma.GrupoWhereInput = {};
 
     // Si activo es 'true' o 'false', filtrar por ese estado
     // Si no se pasa o es cualquier otra cosa, traer todos

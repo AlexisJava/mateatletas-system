@@ -1,3 +1,5 @@
+import { Logger } from '@nestjs/common';
+const logger = new Logger('CacheModule');
 import { Module, Global } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
@@ -38,7 +40,7 @@ import { redisStore } from 'cache-manager-redis-yet';
                     // Reconectar con backoff exponencial
                     if (retries > 10) {
                       // Después de 10 intentos, no reconectar
-                      console.error('❌ Redis: Máximo de reintentos alcanzado');
+                      logger.error('❌ Redis: Máximo de reintentos alcanzado');
                       return new Error('Demasiados reintentos de Redis');
                     }
                     // Esperar 2^retries * 100ms (máx 3 segundos)
@@ -50,14 +52,14 @@ import { redisStore } from 'cache-manager-redis-yet';
               isGlobal: true,
             };
           } catch (error) {
-            console.warn('⚠️  Redis no disponible, usando cache en memoria');
-            console.error(error);
+            logger.warn('⚠️  Redis no disponible, usando cache en memoria');
+            logger.error(error);
             // Fallback a memoria
           }
         }
 
         // Fallback: Cache en memoria (desarrollo o si Redis falla)
-        console.log(
+        logger.log(
           `🗄️  Cache en memoria (${isProduction ? 'Redis no configurado' : 'modo desarrollo'})`,
         );
         return {

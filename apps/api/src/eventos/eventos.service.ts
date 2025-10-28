@@ -313,7 +313,7 @@ export class EventosService {
       throw new BadRequestException('El evento no es una tarea');
     }
 
-    const updateData: any = {};
+    const updateData: Prisma.EventoUpdateInput = {};
 
     // Actualizar campos del evento base
     if (dto.titulo !== undefined) updateData.titulo = dto.titulo;
@@ -331,7 +331,7 @@ export class EventosService {
     }
 
     // Actualizar campos de la tarea
-    const tareaUpdate: any = {};
+    const tareaUpdate: Prisma.TareaUpdateInput = {};
     if (dto.estado !== undefined) tareaUpdate.estado = dto.estado;
     if (dto.prioridad !== undefined) tareaUpdate.prioridad = dto.prioridad;
     if (dto.porcentaje_completado !== undefined)
@@ -391,7 +391,7 @@ export class EventosService {
       throw new BadRequestException('El evento no es un recordatorio');
     }
 
-    const updateData: any = {};
+    const updateData: Prisma.EventoUpdateInput = {};
 
     if (dto.titulo !== undefined) updateData.titulo = dto.titulo;
     if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;
@@ -407,7 +407,7 @@ export class EventosService {
         : { disconnect: true };
     }
 
-    const recordatorioUpdate: any = {};
+    const recordatorioUpdate: Prisma.RecordatorioUpdateInput = {};
     if (dto.completado !== undefined)
       recordatorioUpdate.completado = dto.completado;
     if (dto.color !== undefined) recordatorioUpdate.color = dto.color;
@@ -438,7 +438,7 @@ export class EventosService {
       throw new BadRequestException('El evento no es una nota');
     }
 
-    const updateData: any = {};
+    const updateData: Prisma.EventoUpdateInput = {};
 
     if (dto.titulo !== undefined) updateData.titulo = dto.titulo;
     if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;
@@ -454,7 +454,7 @@ export class EventosService {
         : { disconnect: true };
     }
 
-    const notaUpdate: any = {};
+    const notaUpdate: Prisma.NotaUpdateInput = {};
     if (dto.contenido !== undefined) notaUpdate.contenido = dto.contenido;
     if (dto.categoria !== undefined) notaUpdate.categoria = dto.categoria;
     if (dto.color !== undefined) notaUpdate.color = dto.color;

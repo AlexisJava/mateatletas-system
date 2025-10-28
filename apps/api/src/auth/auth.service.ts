@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../core/database/prisma.service';
@@ -34,6 +35,7 @@ const isAdminUser = (user: AuthenticatedUser): user is AdminModel =>
  */
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly BCRYPT_ROUNDS = 10;
 
   constructor(
@@ -324,7 +326,7 @@ export class AuthService {
       return result;
     } catch (error) {
       // Log del error sin exponer detalles al cliente
-      console.error('Error en validateUser:', error);
+      this.logger.error('Error en validateUser', error instanceof Error ? error.stack : error);
       return null;
     }
   }

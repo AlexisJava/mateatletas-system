@@ -198,7 +198,7 @@ export class InscripcionMensualRepository
     periodo: string,
     tutorId?: string,
   ): Promise<MetricasPeriodo> {
-    const where: any = { periodo };
+    const where: Prisma.InscripcionMensualWhereInput = { periodo };
     if (tutorId) {
       where.tutor_id = tutorId;
     }
@@ -249,7 +249,7 @@ export class InscripcionMensualRepository
     periodo: string,
     tutorId?: string,
   ): Promise<InscripcionMensualConRelaciones[]> {
-    const where: any = { periodo };
+    const where: Prisma.InscripcionMensualWhereInput = { periodo };
     if (tutorId) {
       where.tutor_id = tutorId;
     }
@@ -295,7 +295,7 @@ export class InscripcionMensualRepository
     periodo: string,
     tutorId?: string,
   ): Promise<EstudianteConDescuento[]> {
-    const where: any = { periodo };
+    const where: Prisma.InscripcionMensualWhereInput = { periodo };
     if (tutorId) {
       where.tutor_id = tutorId;
     }
@@ -408,7 +408,7 @@ export class InscripcionMensualRepository
     estadoPago?: EstadoPago,
   ): Promise<InscripcionMensual[]> {
     // Construir filtros dinámicamente
-    const where: any = {
+    const where: Prisma.InscripcionMensualWhereInput = {
       tutor_id: tutorId,
     };
 
