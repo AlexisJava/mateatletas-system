@@ -592,22 +592,22 @@ describe('EstudiantesService', () => {
         id: 'est-1',
         nombre: 'María',
         apellido: 'González',
-        avatar_url: 'new-avatar-style',
+        avatar_gradient: 4,
       } as any);
 
       // Act
-      const result = await service.updateAvatar('est-1', 'new-avatar-style');
+      const result = await service.updateAvatar('est-1', 4);
 
       // Assert
-      expect(result.avatar_url).toBe('new-avatar-style');
+      expect(result.avatar_gradient).toBe(4);
       expect(prisma.estudiante.update).toHaveBeenCalledWith({
         where: { id: 'est-1' },
-        data: { avatar_url: 'new-avatar-style' },
+        data: { avatar_gradient: 4 },
         select: expect.objectContaining({
           id: true,
           nombre: true,
           apellido: true,
-          avatar_url: true,
+          avatar_gradient: true,
         }),
       });
     });
@@ -618,7 +618,7 @@ describe('EstudiantesService', () => {
 
       // Act & Assert
       await expect(
-        service.updateAvatar('non-existent', 'avatar'),
+        service.updateAvatar('non-existent', 7),
       ).rejects.toThrow(NotFoundException);
     });
   });
