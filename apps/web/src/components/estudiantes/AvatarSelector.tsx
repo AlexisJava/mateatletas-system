@@ -62,6 +62,20 @@ const categories = [
   },
 ];
 
+// Helper: Extraer el estilo del avatar desde URL o usar directamente
+const extractAvatarStyle = (avatar: string): string => {
+  if (!avatar) return 'avataaars';
+
+  // Si es una URL completa, extraer el estilo
+  if (avatar.includes('dicebear.com')) {
+    const match = avatar.match(/\/7\.x\/([^/]+)\//);
+    return match ? match[1] : 'avataaars';
+  }
+
+  // Si ya es solo el estilo, devolverlo
+  return avatar;
+};
+
 export function AvatarSelector({
   isOpen,
   onClose,
@@ -69,18 +83,20 @@ export function AvatarSelector({
   onSelect,
   studentId,
 }: AvatarSelectorProps) {
+  const initialStyle = extractAvatarStyle(currentAvatar);
   const [selectedCategory, setSelectedCategory] = useState('personas');
-  const [selectedStyle, setSelectedStyle] = useState(currentAvatar || 'avataaars');
-  const [previewStyle, setPreviewStyle] = useState(currentAvatar || 'avataaars');
+  const [selectedStyle, setSelectedStyle] = useState(initialStyle);
+  const [previewStyle, setPreviewStyle] = useState(initialStyle);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      setSelectedStyle(currentAvatar || 'avataaars');
-      setPreviewStyle(currentAvatar || 'avataaars');
+      const style = extractAvatarStyle(currentAvatar);
+      setSelectedStyle(style);
+      setPreviewStyle(style);
       // Detectar categoría inicial
       for (const cat of categories) {
-        if (cat.styles.some((s) => s.id === currentAvatar)) {
+        if (cat.styles.some((s) => s.id === style)) {
           setSelectedCategory(cat.id);
           break;
         }
@@ -118,7 +134,7 @@ export function AvatarSelector({
   };
 
   const currentCategory = categories.find((cat) => cat.id === selectedCategory);
-  const hasChanged = selectedStyle !== currentAvatar;
+  const hasChanged = selectedStyle !== extractAvatarStyle(currentAvatar);
 
   return (
     <AnimatePresence>
