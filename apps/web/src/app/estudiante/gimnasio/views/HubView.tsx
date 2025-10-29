@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useOverlay, type OverlayType } from '../contexts/OverlayProvider';
 import {
   Home,
   Gamepad2,
@@ -34,6 +35,7 @@ interface HubViewProps {
 
 interface NavButton {
   id: string;
+  overlayId: OverlayType;
   label: string;
   description: string;
   icon: React.ReactNode;
@@ -46,6 +48,7 @@ interface NavButton {
 const NAV_LEFT: NavButton[] = [
   {
     id: 'hub',
+    overlayId: null,
     label: 'HUB',
     description: 'Tu espacio personal',
     icon: <Home className="w-7 h-7" />,
@@ -55,6 +58,7 @@ const NAV_LEFT: NavButton[] = [
   },
   {
     id: 'entrenamientos',
+    overlayId: 'entrenamientos',
     label: 'ENTRENAMIENTOS',
     description: 'Práctica y ejercicios',
     icon: <Gamepad2 className="w-7 h-7" />,
@@ -65,6 +69,7 @@ const NAV_LEFT: NavButton[] = [
   },
   {
     id: 'mis-cursos',
+    overlayId: 'mis-cursos',
     label: 'MIS CURSOS',
     description: 'Tus rutas de aprendizaje',
     icon: <BookOpen className="w-7 h-7" />,
@@ -74,6 +79,7 @@ const NAV_LEFT: NavButton[] = [
   },
   {
     id: 'mis-logros',
+    overlayId: 'mis-logros',
     label: 'MIS LOGROS',
     description: 'Tus logros personales',
     icon: <Trophy className="w-7 h-7" />,
@@ -84,6 +90,7 @@ const NAV_LEFT: NavButton[] = [
   },
   {
     id: 'tienda',
+    overlayId: 'tienda',
     label: 'TIENDA',
     description: 'Mejoras y avatares',
     icon: <ShoppingBag className="w-7 h-7" />,
@@ -96,6 +103,7 @@ const NAV_LEFT: NavButton[] = [
 const NAV_RIGHT: NavButton[] = [
   {
     id: 'mi-grupo',
+    overlayId: 'mi-grupo',
     label: 'MI GRUPO',
     description: 'Tu comunidad de estudio',
     icon: <Users className="w-7 h-7" />,
@@ -105,6 +113,7 @@ const NAV_RIGHT: NavButton[] = [
   },
   {
     id: 'mi-progreso',
+    overlayId: 'mi-progreso',
     label: 'MI PROGRESO',
     description: 'Tu evolución personal',
     icon: <BarChart3 className="w-7 h-7" />,
@@ -114,6 +123,7 @@ const NAV_RIGHT: NavButton[] = [
   },
   {
     id: 'notificaciones',
+    overlayId: 'notificaciones',
     label: 'NOTIFICACIONES',
     description: 'Novedades y alertas',
     icon: <Bell className="w-7 h-7" />,
@@ -124,6 +134,7 @@ const NAV_RIGHT: NavButton[] = [
   },
   {
     id: 'ajustes',
+    overlayId: 'ajustes',
     label: 'AJUSTES',
     description: 'Configuración',
     icon: <Settings className="w-7 h-7" />,
@@ -137,6 +148,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [activeView, setActiveView] = useState('hub');
   const [isMounted, setIsMounted] = useState(false);
   const modelRef = useRef<any>(null);
+  const { openOverlay } = useOverlay();
 
   useEffect(() => {
     setIsMounted(true);
@@ -266,8 +278,11 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               item={item}
               isActive={activeView === item.id}
               onClick={() => {
-                setActiveView(item.id);
-                onNavigate(item.id);
+                if (item.overlayId) {
+                  openOverlay(item.overlayId);
+                } else {
+                  setActiveView(item.id);
+                }
               }}
               side="left"
             />
@@ -288,8 +303,11 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               item={item}
               isActive={activeView === item.id}
               onClick={() => {
-                setActiveView(item.id);
-                onNavigate(item.id);
+                if (item.overlayId) {
+                  openOverlay(item.overlayId);
+                } else {
+                  setActiveView(item.id);
+                }
               }}
               side="right"
             />

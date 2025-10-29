@@ -16,7 +16,7 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
   const horasPorSemana = [1.5, 2.0, 1.8, 2.5];
 
   return (
-    <div className="w-full h-screen bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600 overflow-y-auto">
+    <div className="w-full min-h-full">
       <div className="p-8 space-y-8 max-w-6xl mx-auto">
 
         {/* Header */}
