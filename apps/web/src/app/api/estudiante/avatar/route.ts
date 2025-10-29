@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
-        'Origin': process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+        'Origin': 'http://localhost:3000', // Frontend origin para CORS
         'Referer': request.headers.get('referer') || 'http://localhost:3000'
       },
       body: JSON.stringify({ avatar_url })

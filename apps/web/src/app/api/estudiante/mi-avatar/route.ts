@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/estudiantes/mi-avatar`, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Origin': process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+        'Origin': 'http://localhost:3000', // Frontend origin para CORS
         'Referer': request.headers.get('referer') || 'http://localhost:3000'
       }
     })
