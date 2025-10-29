@@ -492,10 +492,19 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
       return;
     }
 
-    push({
-      type: 'actividad',
-      semanaId: semanaId,
-    });
+    // Si es Laboratorio Mágico (química), ir al ecosistema LearnDash
+    if (semanaId === 'quimica') {
+      push({
+        type: 'laboratorio-ecosistema',
+        semanaId: semanaId,
+      });
+    } else {
+      // Para los demás, grid 2×2 de actividades
+      push({
+        type: 'actividad',
+        semanaId: semanaId,
+      });
+    }
   };
 
   // Backgrounds dinámicos según el tema hovereado - MUY SUTILES
