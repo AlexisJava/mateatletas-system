@@ -19,6 +19,7 @@ import {
   Zap,
   Target
 } from 'lucide-react';
+import { MathBackground } from '../components/MathBackground';
 
 interface HubViewProps {
   onNavigate: (vista: string) => void;
@@ -167,8 +168,11 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600 flex flex-col">
+      {/* Partículas matemáticas flotantes */}
+      <MathBackground racha={racha_dias} />
+
       {/* Textura de fondo estilo Brawl Stars */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
+      <div className="absolute inset-0 opacity-10 pointer-events-none z-[1]">
         <div
           className="w-full h-full"
           style={{
@@ -178,9 +182,6 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
           }}
         />
       </div>
-
-      {/* Partículas flotantes */}
-      <FloatingParticles count={15} />
 
       {/* ========== NAVEGACIÓN LATERAL IZQUIERDA - ULTRA GAMIFICADA ========== */}
       <nav className="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-50">
@@ -257,7 +258,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
           transition={{ delay: 0.1 }}
           className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
         >
-          <div className="text-white font-black text-3xl md:text-4xl uppercase tracking-wider drop-shadow-2xl text-center">
+          <div className="text-white font-black text-3xl md:text-4xl uppercase tracking-wider drop-shadow-2xl text-center font-[family-name:var(--font-lilita)]">
             Mateatletas Club{' '}
             <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
               STEAM
@@ -707,29 +708,3 @@ function StatCard3D({
   );
 }
 
-function FloatingParticles({ count }: { count: number }) {
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {Array.from({ length: count }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-2 h-2 bg-yellow-400 rounded-full"
-          initial={{
-            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920),
-            y: typeof window !== 'undefined' ? window.innerHeight : 1080,
-          }}
-          animate={{
-            y: -100,
-            x: `+=${Math.random() * 100 - 50}px`,
-            opacity: [0, 1, 0],
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            repeat: Infinity,
-            delay: Math.random() * 3,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
