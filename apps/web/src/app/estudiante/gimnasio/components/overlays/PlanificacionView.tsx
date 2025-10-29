@@ -543,25 +543,26 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
       transition={{ duration: 0.5, ease: 'easeOut' }}
       className="fixed inset-0 z-50 flex flex-col overflow-hidden"
     >
-      {/* Background animado que cambia con hover */}
+      {/* Background animado que cambia con hover - CON INITIAL PARA TRANSICIÓN SUAVE */}
       <motion.div
         className="absolute inset-0 -z-10"
+        initial={{
+          background: backgroundsByTheme.default,
+        }}
         animate={{
           background: currentBackground,
         }}
-        transition={{ duration: 0.6, ease: 'easeInOut' }}
+        transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
       />
-      {/* Ambient lighting grid */}
+      {/* Ambient lighting grid - SOLO GRID, SIN CÍRCULOS DE COLOR */}
       <div
-        className="absolute inset-0 opacity-10"
+        className="absolute inset-0 opacity-5"
         style={{
           backgroundImage: `
-            radial-gradient(circle at 25% 25%, rgba(6, 182, 212, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 75% 75%, rgba(168, 85, 247, 0.3) 0%, transparent 50%),
             linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
             linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
           `,
-          backgroundSize: '100% 100%, 100% 100%, 80px 80px, 80px 80px',
+          backgroundSize: '80px 80px, 80px 80px',
         }}
       />
 
@@ -625,8 +626,8 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
         </div>
       </div>
 
-      {/* Footer con Dr. Ciencia */}
-      <motion.div
+      {/* Footer con Dr. Ciencia - OCULTO TEMPORALMENTE */}
+      {/* <motion.div
         className="pb-10 px-10 flex justify-center"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -667,7 +668,7 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
             </p>
           </div>
         </div>
-      </motion.div>
+      </motion.div> */}
     </motion.div>
   );
 }
