@@ -443,32 +443,7 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
               </div>
             </div>
 
-            {/* Stats: Estrellas + Puntos */}
-            <div className="flex items-center justify-center gap-8 mb-auto">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>⭐</span>
-                <span
-                  className="text-white font-bold text-xl"
-                  style={{
-                    textShadow: '0 2px 6px rgba(0, 0, 0, 0.6)',
-                  }}
-                >
-                  {semana.estrellas}/{semana.totalEstrellas}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {/* Medalla blanca/plateada en vez de trofeo dorado */}
-                <span className="text-2xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>🥈</span>
-                <span
-                  className="text-white font-bold text-xl"
-                  style={{
-                    textShadow: '0 2px 6px rgba(0, 0, 0, 0.6)',
-                  }}
-                >
-                  {semana.puntos}
-                </span>
-              </div>
-            </div>
+            {/* Stats eliminados - se tapaban con otras cards */}
 
             {/* Badge de estado premium */}
             <div className="mt-auto">
