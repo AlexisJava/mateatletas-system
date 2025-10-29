@@ -19,7 +19,6 @@ import {
   Zap,
   Target
 } from 'lucide-react';
-import { MathBackground } from '../components/MathBackground';
 
 interface HubViewProps {
   onNavigate: (vista: string) => void;
@@ -168,8 +167,15 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600 flex flex-col">
-      {/* Partículas matemáticas flotantes */}
-      <MathBackground racha={racha_dias} />
+      {/* Gradiente animado de fondo */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-pink-500/20 animate-pulse"
+             style={{ animationDuration: '4s' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-tl from-yellow-500/10 via-transparent to-cyan-500/10 animate-pulse"
+             style={{ animationDuration: '6s', animationDelay: '1s' }}
+        />
+      </div>
 
       {/* Textura de fondo estilo Brawl Stars */}
       <div className="absolute inset-0 opacity-10 pointer-events-none z-[1]">
@@ -181,6 +187,46 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
             backgroundSize: '60px 60px',
           }}
         />
+      </div>
+
+      {/* Brillos sutiles flotantes */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-32 h-32 rounded-full"
+            style={{
+              background: `radial-gradient(circle, ${
+                ['rgba(255,255,255,0.15)', 'rgba(255,255,0,0.1)', 'rgba(0,255,255,0.1)', 'rgba(255,0,255,0.1)'][i % 4]
+              }, transparent)`,
+              filter: 'blur(40px)',
+            }}
+            initial={{
+              x: Math.random() * window.innerWidth,
+              y: Math.random() * window.innerHeight,
+            }}
+            animate={{
+              x: [
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerWidth,
+              ],
+              y: [
+                Math.random() * window.innerHeight,
+                Math.random() * window.innerHeight,
+                Math.random() * window.innerHeight,
+              ],
+              scale: [1, 1.5, 1],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 15 + Math.random() * 10,
+              repeat: Infinity,
+              delay: Math.random() * 5,
+              ease: 'easeInOut',
+            }}
+          />
+        ))}
       </div>
 
       {/* ========== NAVEGACIÓN LATERAL IZQUIERDA - ULTRA GAMIFICADA ========== */}
