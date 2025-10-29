@@ -133,10 +133,9 @@ export class EstudiantesController {
   @Roles(Role.Estudiante)
   async obtenerMiAvatar(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
-    const estudiante = await this.estudiantesService.findOne(
-      estudianteId,
-      estudianteId,
-    );
+
+    // Buscar directamente sin ownership check (el estudiante accede a sus propios datos)
+    const estudiante = await this.estudiantesService.findOneById(estudianteId);
 
     return {
       avatar_url: estudiante.avatar_url,

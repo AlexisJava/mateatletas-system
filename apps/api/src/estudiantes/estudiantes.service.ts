@@ -130,6 +130,36 @@ export class EstudiantesService {
    * @param tutorId - ID del tutor (para verificar ownership)
    * @returns El estudiante con sus relaciones
    */
+  /**
+   * Busca un estudiante por ID sin validación de ownership
+   * Útil para que el estudiante acceda a sus propios datos
+   * @param id - ID del estudiante
+   * @returns Estudiante encontrado
+   * @throws NotFoundException si no existe
+   */
+  async findOneById(id: string) {
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id },
+      include: {
+        equipo: true,
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException('Estudiante no encontrado');
+    }
+
+    return estudiante;
+  }
+
   async findOne(id: string, tutorId: string) {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id },
