@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { BrawlBackground } from './components/BrawlBackground'
 import { BrawlHeader } from './components/BrawlHeader'
+import { HubView } from './views/HubView'
 import { useAuthStore } from '@/store/auth.store'
 
 // Tipos de vistas disponibles
@@ -44,6 +45,10 @@ export default function GimnasioPage() {
     loadAvatar()
   }, [])
 
+  const handleNavigate = (vista: string) => {
+    setVistaActual(vista as Vista)
+  }
+
   return (
     <BrawlBackground>
       {/* Header siempre visible */}
@@ -59,64 +64,17 @@ export default function GimnasioPage() {
 
       {/* Sistema de vistas con transiciones */}
       <AnimatePresence mode="wait">
-        {vistaActual === 'hub' && (
-          <div key="hub" className="min-h-screen pt-32 px-8 flex flex-col items-center justify-center">
-            {/* Avatar 3D Grande - TU PERSONAJE ANIMADO */}
-            {avatarUrl ? (
-              <div className="mb-8">
-                <h2 className="text-center text-white text-2xl font-bold mb-4" style={{ fontFamily: '"Lilita One", cursive' }}>
-                  ¡Tu Atleta Mental!
-                </h2>
-                <div className="w-96 h-[32rem] rounded-3xl bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 p-2 shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 transition-all">
-                  <div className="w-full h-full rounded-2xl bg-black/20 backdrop-blur-sm overflow-hidden border-4 border-white/20">
-                    <iframe
-                      src={`https://models.readyplayer.me/${avatarUrl.split('/').pop()}?scene=fullbody-portrait-v1-transparent&meshLod=1`}
-                      className="w-full h-full border-none scale-110"
-                      title="Tu Avatar 3D"
-                      allow="camera; microphone"
-                      sandbox="allow-scripts allow-same-origin"
-                      loading="lazy"
-                      style={{
-                        background: 'transparent',
-                        pointerEvents: 'none'
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="mt-4 flex gap-2 justify-center">
-                  <button
-                    onClick={() => {
-                      // TODO: Cambiar animación
-                    }}
-                    className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-bold text-sm transition-all"
-                  >
-                    Saludar 👋
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-sm transition-all"
-                  >
-                    Celebrar 🎉
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="mb-8">
-                <div className="w-80 h-96 rounded-3xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <div className="text-6xl mb-4">👤</div>
-                    <p className="font-bold">Cargando avatar...</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <h1 className="text-white text-4xl font-bold text-center mb-4" style={{ fontFamily: '"Lilita One", cursive', textShadow: '3px 3px 0 rgba(0,0,0,0.5)' }}>
-              Gimnasio Mental
-            </h1>
-            <p className="text-white/80 text-xl text-center max-w-2xl">
-              Seleccioná una actividad para entrenar tu mente y ganar trofeos
-            </p>
-          </div>
+        {vistaActual === 'hub' && user && (
+          <HubView
+            onNavigate={handleNavigate}
+            estudiante={{
+              nombre: user.nombre || 'Estudiante',
+              apellido: user.apellido || '',
+              nivel_actual: user.nivel_actual || 1,
+              puntos_totales: user.puntos_totales || 0,
+              avatar_url: avatarUrl
+            }}
+          />
         )}
 
         {vistaActual === 'entrenamientos' && (
