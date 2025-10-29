@@ -1,8 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 import { BookOpen, Gamepad2, TrendingUp, Trophy, Users, Settings } from 'lucide-react'
-import { RPM_CONFIG } from '@/lib/ready-player-me.config'
 
 interface HubViewProps {
   onNavigate: (vista: string) => void
@@ -15,7 +15,42 @@ interface HubViewProps {
   }
 }
 
+// Avatar de ejemplo para fallback
+const AVATAR_EJEMPLO = 'https://models.readyplayer.me/64bfa16f0e72c63d7c3934a6.glb'
+
+// Helper: Extraer URL .glb del avatar de cualquier formato
+const getAvatarGlbUrl = (url: string | undefined): string | null => {
+  if (!url) return null
+
+  // Si ya es .glb directo
+  if (url.includes('.glb')) {
+    return url
+  }
+
+  // Si tiene formato: https://readyplayer.me/api/avatars/[ID]
+  const match = url.match(/\/avatars\/([a-zA-Z0-9]+)/i)
+  if (match) {
+    return `https://models.readyplayer.me/${match[1]}.glb`
+  }
+
+  // Si solo es el ID
+  if (url.length > 10 && !url.includes('/')) {
+    return `https://models.readyplayer.me/${url}.glb`
+  }
+
+  return url
+}
+
 export function HubView({ onNavigate, estudiante }: HubViewProps) {
+  // Debug: Ver qué URL tiene el estudiante
+  useEffect(() => {
+    console.log('🎮 [HubView] Avatar URL del estudiante:', estudiante.avatar_url)
+    console.log('🎮 [HubView] Tiene avatar?', !!estudiante.avatar_url)
+    const glbUrl = getAvatarGlbUrl(estudiante.avatar_url)
+    console.log('🎮 [HubView] GLB URL procesada:', glbUrl)
+  }, [estudiante.avatar_url])
+
+  const avatarGlbUrl = getAvatarGlbUrl(estudiante.avatar_url)
   return (
     <motion.div
       key="hub"
@@ -60,28 +95,32 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
           {/* Avatar 3D GIGANTE */}
           <div className="flex-1 flex items-center justify-center w-full max-w-2xl">
-            {estudiante.avatar_url ? (
+            {(avatarGlbUrl || AVATAR_EJEMPLO) ? (
               <div className="relative w-full h-full flex items-center justify-center">
                 {/* Sombra proyectada */}
-                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 h-12 bg-black/30 rounded-full blur-xl" />
+                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-64 h-16 bg-black/30 rounded-full blur-2xl" />
 
-                {/* Avatar 3D con subdomain correcto */}
-                <iframe
-                  key={estudiante.avatar_url}
-                  src={RPM_CONFIG.getViewerUrl(estudiante.avatar_url)}
-                  className="w-full h-full"
-                  allow="camera; microphone"
-                  style={{
-                    border: 'none',
-                    pointerEvents: 'none',
-                    minHeight: '500px'
-                  }}
-                  loading="lazy"
-                />
+                {/* Avatar 3D renderizado (SOLO VISUALIZACIÓN) */}
+                <div className="w-full h-full flex items-center justify-center">
+                  <iframe
+                    key={avatarGlbUrl || AVATAR_EJEMPLO}
+                    src={`${avatarGlbUrl || AVATAR_EJEMPLO}?morphTargets=ARKit&textureAtlas=1024&scene=fullbody-portrait-v1-transparent&cameraTarget=0,0.9,0&cameraInitialDistance=2.5`}
+                    className="w-full h-full"
+                    allow="camera; microphone"
+                    sandbox="allow-scripts allow-same-origin"
+                    style={{
+                      border: 'none',
+                      pointerEvents: 'none',
+                      minHeight: '600px'
+                    }}
+                    loading="eager"
+                    title="Avatar 3D"
+                  />
+                </div>
               </div>
             ) : (
               <div className="text-center">
-                <div className="text-9xl mb-4">🧠</div>
+                <div className="text-9xl mb-4 animate-bounce">🧠</div>
                 <p className="text-white/60 font-bold text-2xl">Cargando atleta...</p>
               </div>
             )}
