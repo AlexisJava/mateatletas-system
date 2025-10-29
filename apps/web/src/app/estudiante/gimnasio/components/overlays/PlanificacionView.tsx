@@ -13,6 +13,12 @@ import { SEMANAS_MES_CIENCIA } from '../../data/semanas-mes-ciencia';
 import type { OverlayConfig } from '../../types/overlay.types';
 import type { Semana } from '../../data/semanas-mes-ciencia';
 import { useState } from 'react';
+import {
+  ChemistryIllustration,
+  AstronomyIllustration,
+  PhysicsIllustration,
+  InformaticsIllustration,
+} from './IllustrationsScience';
 
 export interface PlanificacionViewProps {
   config?: OverlayConfig;
@@ -284,9 +290,9 @@ function PS5Card({ semana, onClick, index }: PS5CardProps) {
               </div>
             )}
 
-            {/* Emoji con iluminación */}
+            {/* Ilustración SVG animada */}
             <motion.div
-              className="relative z-10 text-9xl"
+              className="relative z-10"
               animate={
                 !esBloqueada && isHovered
                   ? {
@@ -306,7 +312,34 @@ function PS5Card({ semana, onClick, index }: PS5CardProps) {
                   : `drop-shadow(0 10px 25px ${style.glow}) drop-shadow(0 0 40px ${style.glow})`,
               }}
             >
-              {semana.emoji}
+              {semana.tema === 'quimica' && (
+                <ChemistryIllustration
+                  isActive={!esBloqueada}
+                  primaryColor={style.accent}
+                  accentColor={style.accent}
+                />
+              )}
+              {semana.tema === 'astronomia' && (
+                <AstronomyIllustration
+                  isActive={!esBloqueada}
+                  primaryColor={style.accent}
+                  accentColor={style.accent}
+                />
+              )}
+              {semana.tema === 'fisica' && (
+                <PhysicsIllustration
+                  isActive={!esBloqueada}
+                  primaryColor={style.accent}
+                  accentColor={style.accent}
+                />
+              )}
+              {semana.tema === 'informatica' && (
+                <InformaticsIllustration
+                  isActive={!esBloqueada}
+                  primaryColor={style.accent}
+                  accentColor={style.accent}
+                />
+              )}
             </motion.div>
 
             {/* Rim light desde abajo del emoji */}
