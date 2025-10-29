@@ -82,9 +82,10 @@ interface PS5CardProps {
   semana: Semana;
   onClick: () => void;
   index: number;
+  onHoverChange: (theme: 'quimica' | 'astronomia' | 'fisica' | 'informatica' | null) => void;
 }
 
-function PS5Card({ semana, onClick, index }: PS5CardProps) {
+function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -109,6 +110,14 @@ function PS5Card({ semana, onClick, index }: PS5CardProps) {
     mouseX.set(0);
     mouseY.set(0);
     setIsHovered(false);
+    onHoverChange(null);
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    if (!esBloqueada) {
+      onHoverChange(semana.tema);
+    }
   };
 
   // Colores premium con depth
@@ -158,7 +167,7 @@ function PS5Card({ semana, onClick, index }: PS5CardProps) {
     >
       <motion.div
         onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovered(true)}
+        onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={!esBloqueada ? onClick : undefined}
         className={`
@@ -498,6 +507,7 @@ function PS5Card({ semana, onClick, index }: PS5CardProps) {
 
 export function PlanificacionView({ config, estudiante }: PlanificacionViewProps) {
   const { pop, push } = useOverlayStack();
+  const [hoveredTheme, setHoveredTheme] = useState<'quimica' | 'astronomia' | 'fisica' | 'informatica' | null>(null);
 
   const handleSemanaClick = (semanaId: string) => {
     const semana = SEMANAS_MES_CIENCIA.find((s) => s.id === semanaId);
@@ -512,17 +522,35 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
     });
   };
 
+  // Backgrounds dinámicos según el tema hovereado
+  const backgroundsByTheme = {
+    quimica: 'linear-gradient(135deg, #064e3b 0%, #065f46 30%, #047857 60%, #064e3b 100%)',
+    astronomia: 'linear-gradient(135deg, #581c87 0%, #6b21a8 30%, #7e22ce 60%, #581c87 100%)',
+    fisica: 'linear-gradient(135deg, #9a3412 0%, #c2410c 30%, #ea580c 60%, #9a3412 100%)',
+    informatica: 'linear-gradient(135deg, #164e63 0%, #0e7490 30%, #0891b2 60%, #164e63 100%)',
+    default: 'linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #0f172a 100%)',
+  };
+
+  const currentBackground = hoveredTheme ? backgroundsByTheme[hoveredTheme] : backgroundsByTheme.default;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      animate={{
+        opacity: 1,
+      }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
       className="fixed inset-0 z-50 flex flex-col overflow-hidden"
-      style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #0f172a 100%)',
-      }}
     >
+      {/* Background animado que cambia con hover */}
+      <motion.div
+        className="absolute inset-0 -z-10"
+        animate={{
+          background: currentBackground,
+        }}
+        transition={{ duration: 0.6, ease: 'easeInOut' }}
+      />
       {/* Ambient lighting grid */}
       <div
         className="absolute inset-0 opacity-10"
@@ -586,7 +614,13 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
       <div className="flex-1 flex items-center justify-center px-8 py-10">
         <div className="flex gap-7 items-center justify-center max-w-[1400px]">
           {SEMANAS_MES_CIENCIA.map((semana, index) => (
-            <PS5Card key={semana.id} semana={semana} onClick={() => handleSemanaClick(semana.id)} index={index} />
+            <PS5Card
+              key={semana.id}
+              semana={semana}
+              onClick={() => handleSemanaClick(semana.id)}
+              index={index}
+              onHoverChange={setHoveredTheme}
+            />
           ))}
         </div>
       </div>
