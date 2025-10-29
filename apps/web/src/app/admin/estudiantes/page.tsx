@@ -200,18 +200,22 @@ export default function AdminEstudiantesPage() {
                         <div className="relative group">
                           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg overflow-hidden">
                             <iframe
-                              src={`${estudiante.avatar_url}?scene=halfbody-portrait-v1`}
+                              src={`https://models.readyplayer.me/${estudiante.avatar_url.split('/').pop()}?scene=halfbody-portrait-v1&meshLod=1`}
                               className="w-full h-full border-none scale-125"
                               title={`Avatar de ${estudiante.nombre}`}
+                              sandbox="allow-scripts allow-same-origin"
+                              loading="lazy"
                             />
                           </div>
                           {/* Tooltip hover */}
                           <div className="absolute left-0 top-full mt-2 z-50 hidden group-hover:block">
                             <div className="w-40 h-40 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 shadow-2xl overflow-hidden border-2 border-white/20">
                               <iframe
-                                src={`${estudiante.avatar_url}?scene=fullbody-portrait-v1`}
+                                src={`https://models.readyplayer.me/${estudiante.avatar_url.split('/').pop()}?scene=fullbody-portrait-v1-transparent&meshLod=1`}
                                 className="w-full h-full border-none"
                                 title={`Avatar de ${estudiante.nombre}`}
+                                sandbox="allow-scripts allow-same-origin"
+                                loading="lazy"
                               />
                             </div>
                           </div>

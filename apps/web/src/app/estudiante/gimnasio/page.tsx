@@ -70,10 +70,12 @@ export default function GimnasioPage() {
                 <div className="w-96 h-[32rem] rounded-3xl bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 p-2 shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 transition-all">
                   <div className="w-full h-full rounded-2xl bg-black/20 backdrop-blur-sm overflow-hidden border-4 border-white/20">
                     <iframe
-                      src={`${avatarUrl}?scene=fullbody-portrait-v1-transparent&animation=idle-2`}
+                      src={`https://models.readyplayer.me/${avatarUrl.split('/').pop()}?scene=fullbody-portrait-v1-transparent&meshLod=1`}
                       className="w-full h-full border-none scale-110"
                       title="Tu Avatar 3D"
                       allow="camera; microphone"
+                      sandbox="allow-scripts allow-same-origin"
+                      loading="lazy"
                       style={{
                         background: 'transparent',
                         pointerEvents: 'none'

@@ -213,9 +213,11 @@ export default function CrearAvatarPage() {
                 className="w-full max-w-md h-80 sm:h-96 md:h-[28rem] mx-auto mb-8 rounded-3xl bg-gradient-to-br from-purple-500/20 via-blue-500/20 to-orange-500/20 border-4 border-yellow-400 shadow-[0_0_50px_rgba(255,215,0,0.5)] overflow-hidden relative"
               >
                 <iframe
-                  src={`${avatarUrl}?scene=fullbody-portrait-v1&animation=https://models.readyplayer.me/animations/dancing.glb`}
+                  src={`https://models.readyplayer.me/${avatarUrl.split('/').pop()}?scene=fullbody-portrait-v1-transparent&meshLod=1`}
                   className="w-full h-full"
                   allow="camera; microphone"
+                  sandbox="allow-scripts allow-same-origin"
+                  loading="lazy"
                   style={{ border: 'none' }}
                 />
               </motion.div>

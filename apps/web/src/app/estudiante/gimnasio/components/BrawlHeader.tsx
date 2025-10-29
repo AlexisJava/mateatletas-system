@@ -25,9 +25,11 @@ export function BrawlHeader({ nombre, nivel, trofeos, monedas, gemas, racha, ava
           >
             {avatarUrl ? (
               <iframe
-                src={`${avatarUrl}?scene=halfbody-portrait-v1`}
+                src={`https://models.readyplayer.me/${avatarUrl.split('/').pop()}?scene=halfbody-portrait-v1&meshLod=1`}
                 className="w-full h-full border-none scale-150"
                 title={`Avatar de ${nombre}`}
+                sandbox="allow-scripts allow-same-origin"
+                loading="lazy"
               />
             ) : (
               <span className="text-2xl font-black text-white">
