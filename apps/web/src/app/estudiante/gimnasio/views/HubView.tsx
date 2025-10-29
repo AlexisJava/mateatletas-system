@@ -16,29 +16,46 @@ interface HubViewProps {
 }
 
 // Avatar de ejemplo para fallback
-const AVATAR_EJEMPLO = 'https://models.readyplayer.me/64bfa16f0e72c63d7c3934a6.glb'
+const AVATAR_EJEMPLO = 'https://demo.readyplayer.me/avatar?frameApi&clearCache&url=https://models.readyplayer.me/64bfa16f0e72c63d7c3934a6.glb'
 
-// Helper: Extraer URL .glb del avatar de cualquier formato
-const getAvatarGlbUrl = (url: string | undefined): string | null => {
+// Helper: Generar URL del viewer público
+const getAvatarViewerUrl = (url: string | undefined): string | null => {
   if (!url) return null
 
-  // Si ya es .glb directo
+  console.log('🔧 [HubView] Avatar URL original:', url)
+
+  // Extraer el ID del avatar
+  let avatarId = ''
+
+  // Caso 1: URL completa con .glb
   if (url.includes('.glb')) {
-    return url
+    const match = url.match(/([a-zA-Z0-9]{24,})\.glb/i)
+    if (match) {
+      avatarId = match[1]
+    }
+  }
+  // Caso 2: URL sin .glb pero con ID
+  else {
+    const match = url.match(/([a-zA-Z0-9]{24,})/i)
+    if (match) {
+      avatarId = match[1]
+    }
   }
 
-  // Si tiene formato: https://readyplayer.me/api/avatars/[ID]
-  const match = url.match(/\/avatars\/([a-zA-Z0-9]+)/i)
-  if (match) {
-    return `https://models.readyplayer.me/${match[1]}.glb`
+  if (!avatarId) {
+    console.error('❌ [HubView] No se pudo extraer ID del avatar de:', url)
+    return null
   }
 
-  // Si solo es el ID
-  if (url.length > 10 && !url.includes('/')) {
-    return `https://models.readyplayer.me/${url}.glb`
-  }
+  console.log('✅ [HubView] Avatar ID extraído:', avatarId)
 
-  return url
+  // Usar el viewer público de Ready Player Me con subdomain
+  const subdomain = process.env.NEXT_PUBLIC_RPM_SUBDOMAIN || 'demo'
+  const viewerUrl = `https://${subdomain}.readyplayer.me/avatar?frameApi&clearCache&url=https://models.readyplayer.me/${avatarId}.glb`
+
+  console.log('✅ [HubView] Viewer URL generada:', viewerUrl)
+
+  return viewerUrl
 }
 
 export function HubView({ onNavigate, estudiante }: HubViewProps) {
@@ -46,11 +63,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   useEffect(() => {
     console.log('🎮 [HubView] Avatar URL del estudiante:', estudiante.avatar_url)
     console.log('🎮 [HubView] Tiene avatar?', !!estudiante.avatar_url)
-    const glbUrl = getAvatarGlbUrl(estudiante.avatar_url)
-    console.log('🎮 [HubView] GLB URL procesada:', glbUrl)
+
+    const viewerUrl = getAvatarViewerUrl(estudiante.avatar_url)
+    console.log('🎮 [HubView] Viewer URL procesada:', viewerUrl)
   }, [estudiante.avatar_url])
 
-  const avatarGlbUrl = getAvatarGlbUrl(estudiante.avatar_url)
+  const avatarViewerUrl = getAvatarViewerUrl(estudiante.avatar_url)
   return (
     <motion.div
       key="hub"
@@ -95,7 +113,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
           {/* Avatar 3D GIGANTE */}
           <div className="flex-1 flex items-center justify-center w-full max-w-2xl">
-            {(avatarGlbUrl || AVATAR_EJEMPLO) ? (
+            {(avatarViewerUrl || AVATAR_EJEMPLO) ? (
               <div className="relative w-full h-full flex items-center justify-center">
                 {/* Sombra proyectada */}
                 <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-64 h-16 bg-black/30 rounded-full blur-2xl" />
@@ -103,11 +121,10 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 {/* Avatar 3D renderizado (SOLO VISUALIZACIÓN) */}
                 <div className="w-full h-full flex items-center justify-center">
                   <iframe
-                    key={avatarGlbUrl || AVATAR_EJEMPLO}
-                    src={`${avatarGlbUrl || AVATAR_EJEMPLO}?morphTargets=ARKit&textureAtlas=1024&scene=fullbody-portrait-v1-transparent&cameraTarget=0,0.9,0&cameraInitialDistance=2.5`}
+                    key={estudiante.avatar_url}
+                    src={avatarViewerUrl || AVATAR_EJEMPLO}
                     className="w-full h-full"
                     allow="camera; microphone"
-                    sandbox="allow-scripts allow-same-origin"
                     style={{
                       border: 'none',
                       pointerEvents: 'none',
