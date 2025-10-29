@@ -128,7 +128,6 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
 
   const selectedData = STATS_DATA.find(s => s.id === selectedCard);
 
-  // Ocultar hint cuando seleccionen una card
   const handleCardClick = (cardId: string) => {
     setSelectedCard(cardId);
     setShowHint(false);
@@ -175,49 +174,23 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
         </AnimatePresence>
       </div>
 
-      {/* Layout dinámico */}
-      <div className="flex-1 flex gap-6">
+      {/* Layout con CSS Grid puro - SIN Framer Motion layout */}
+      <div className="flex-1 flex gap-6 overflow-hidden">
 
-        {/* COLUMNA IZQUIERDA - Cards */}
-        <motion.div
-          layout
-          transition={{
-            layout: {
-              duration: 0.2,
-              ease: [0.25, 0.1, 0.25, 1],
-              type: "tween"
-            }
-          }}
-          style={{ willChange: 'transform' }}
+        {/* COLUMNA CARDS - CSS Grid nativo */}
+        <div
           className={`
-            grid gap-4 transition-all duration-200
+            grid gap-4
+            transition-all duration-300 ease-out
             ${selectedCard
-              ? 'grid-cols-2 w-[30%]' // Modo compacto
-              : 'grid-cols-3 grid-rows-2 flex-1' // Modo normal
+              ? 'grid-cols-2 w-[30%]'
+              : 'grid-cols-3 grid-rows-2 flex-1'
             }
           `}
         >
-          {STATS_DATA.map((stat, i) => (
-            <motion.button
+          {STATS_DATA.map((stat) => (
+            <button
               key={stat.id}
-              layout
-              layoutId={stat.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-              }}
-              transition={{
-                layout: {
-                  duration: 0.2,
-                  ease: [0.25, 0.1, 0.25, 1],
-                  type: "tween"
-                },
-                delay: i * 0.05
-              }}
-              style={{ willChange: 'transform' }}
-              whileHover={{ scale: selectedCard ? 1.05 : 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => handleCardClick(stat.id)}
               className={`
                 bg-gradient-to-br ${stat.gradient}
@@ -225,75 +198,51 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
                 flex flex-col items-center justify-center
                 shadow-xl
                 border-4
+                transition-all duration-300 ease-out
+                hover:scale-105 active:scale-95
                 ${selectedCard === stat.id
                   ? 'border-white ring-4 ring-white/50'
                   : 'border-white/20'
                 }
-                transition-all duration-200
               `}
             >
               {/* Emoji */}
-              <motion.div
-                layout
-                transition={{
-                  duration: 0.2,
-                  ease: [0.25, 0.1, 0.25, 1],
-                  type: "tween"
-                }}
-                style={{ willChange: 'transform' }}
-                className={`transition-all duration-200 ${selectedCard ? 'text-4xl' : 'text-6xl'}`}
-              >
+              <div className={`
+                transition-all duration-300 ease-out
+                ${selectedCard ? 'text-4xl' : 'text-6xl'}
+              `}>
                 {stat.emoji}
-              </motion.div>
+              </div>
 
               {/* Valor */}
-              <motion.div
-                layout
-                transition={{
-                  duration: 0.2,
-                  ease: [0.25, 0.1, 0.25, 1],
-                  type: "tween"
-                }}
-                style={{ willChange: 'transform' }}
-                className={`
-                  font-black text-white transition-all duration-200
-                  ${selectedCard ? 'text-3xl mt-2' : 'text-5xl mt-4'}
-                `}
-              >
+              <div className={`
+                font-black text-white
+                transition-all duration-300 ease-out
+                ${selectedCard ? 'text-3xl mt-2' : 'text-5xl mt-4'}
+              `}>
                 {stat.value}
-              </motion.div>
+              </div>
 
               {/* Label */}
-              <motion.div
-                layout
-                transition={{
-                  duration: 0.2,
-                  ease: [0.25, 0.1, 0.25, 1],
-                  type: "tween"
-                }}
-                style={{ willChange: 'transform' }}
-                className={`
-                  font-bold text-white/80 uppercase text-center transition-all duration-200
-                  ${selectedCard ? 'text-xs mt-1' : 'text-lg mt-2'}
-                `}
-              >
+              <div className={`
+                font-bold text-white/80 uppercase text-center
+                transition-all duration-300 ease-out
+                ${selectedCard ? 'text-xs mt-1' : 'text-lg mt-2'}
+              `}>
                 {stat.label}
-              </motion.div>
-            </motion.button>
+              </div>
+            </button>
           ))}
-        </motion.div>
+        </div>
 
         {/* COLUMNA DERECHA - Panel de detalle */}
         <AnimatePresence mode="wait">
           {selectedCard && selectedData && (
             <motion.div
-              initial={{ x: '100%', opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: '100%', opacity: 0 }}
-              transition={{
-                duration: 0.2,
-                ease: [0.25, 0.1, 0.25, 1]
-              }}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
               className="flex-1 bg-white/10 backdrop-blur-xl
                          rounded-3xl p-8 border-2 border-white/20
                          flex flex-col"
@@ -320,16 +269,14 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
                 </div>
 
                 {/* Botón cerrar panel */}
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
+                <button
                   onClick={() => setSelectedCard(null)}
                   className="w-12 h-12 rounded-xl bg-white/10
                              hover:bg-white/20 flex items-center justify-center
-                             transition-colors"
+                             transition-all hover:scale-110 active:scale-90"
                 >
                   <ChevronLeft className="w-6 h-6 text-white" />
-                </motion.button>
+                </button>
               </div>
 
               {/* Lista de detalles */}
@@ -337,9 +284,9 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
                 {selectedData.detalles.items.map((item, i) => (
                   <motion.div
                     key={i}
-                    initial={{ x: 50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 + i * 0.05, duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.2 }}
                     className="bg-white/5 backdrop-blur-sm rounded-2xl p-6
                                border border-white/10"
                   >
