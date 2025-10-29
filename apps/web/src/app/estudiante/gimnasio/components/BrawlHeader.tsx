@@ -9,22 +9,31 @@ interface BrawlHeaderProps {
   monedas: number
   gemas: number
   racha: number
+  avatarUrl?: string | null
 }
 
-export function BrawlHeader({ nombre, nivel, trofeos, monedas, gemas, racha }: BrawlHeaderProps) {
+export function BrawlHeader({ nombre, nivel, trofeos, monedas, gemas, racha, avatarUrl }: BrawlHeaderProps) {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 p-4">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
 
         {/* Lado izquierdo: Avatar + nombre */}
         <div className="flex items-center gap-3">
-          {/* Avatar placeholder */}
+          {/* Avatar 3D o placeholder */}
           <div
-            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 border-2 border-black flex items-center justify-center shadow-[2px_3px_0_rgba(0,0,0,0.4),4px_6px_12px_rgba(0,0,0,0.2)]"
+            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 border-2 border-black flex items-center justify-center shadow-[2px_3px_0_rgba(0,0,0,0.4),4px_6px_12px_rgba(0,0,0,0.2)] overflow-hidden"
           >
-            <span className="text-2xl font-black text-white">
-              {nombre.charAt(0).toUpperCase()}
-            </span>
+            {avatarUrl ? (
+              <iframe
+                src={`${avatarUrl}?scene=halfbody-portrait-v1`}
+                className="w-full h-full border-none scale-150"
+                title={`Avatar de ${nombre}`}
+              />
+            ) : (
+              <span className="text-2xl font-black text-white">
+                {nombre.charAt(0).toUpperCase()}
+              </span>
+            )}
           </div>
 
           {/* Info del jugador */}
