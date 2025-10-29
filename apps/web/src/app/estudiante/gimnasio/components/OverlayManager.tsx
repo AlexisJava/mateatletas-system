@@ -7,6 +7,8 @@ import { X } from 'lucide-react';
 // Importar vistas de overlays
 import { MiGrupoView } from '../views/MiGrupoView';
 import { MiProgresoView } from '../views/MiProgresoView';
+import { NotificacionesView } from '../views/NotificacionesView';
+import { AjustesView } from '../views/AjustesView';
 
 export function OverlayManager() {
   const { activeOverlay, closeOverlay } = useOverlay();
@@ -56,14 +58,14 @@ export function OverlayManager() {
       icon: '🛒',
     },
     'notificaciones': {
-      component: () => <PlaceholderView title="NOTIFICACIONES" emoji="🔔" />,
+      component: NotificacionesView,
       title: 'NOTIFICACIONES',
       gradient: 'from-red-600 via-orange-600 to-amber-700',
       glowColor: 'rgba(239, 68, 68, 0.8)',
       icon: '🔔',
     },
     'ajustes': {
-      component: () => <PlaceholderView title="AJUSTES" emoji="⚙️" />,
+      component: AjustesView,
       title: 'AJUSTES',
       gradient: 'from-slate-700 via-gray-700 to-zinc-800',
       glowColor: 'rgba(100, 116, 139, 0.8)',
