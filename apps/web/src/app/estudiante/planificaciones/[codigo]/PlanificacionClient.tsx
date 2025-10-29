@@ -1,6 +1,6 @@
 /**
  * Cliente Component para renderizar planificación
- * Separado del page.tsx para permitir Server Component en la página principal
+ * Funciona tanto en router standalone como en overlay stack
  */
 
 'use client';
@@ -9,15 +9,27 @@ import { useAuthStore } from '@/store/auth.store';
 import { usePlanificacionLoader } from '../hooks/usePlanificacionLoader';
 import { adaptarPorNivel } from '../utils/nivel.utils';
 import { puedeAccederPorNivel } from '../utils/validacion.utils';
-import { BackButton, LoadingPlanificacion, ErrorPlanificacion } from '../components';
+import { LoadingPlanificacion, ErrorPlanificacion } from '../components';
+import type { OverlayConfig } from '@/app/estudiante/gimnasio/types/overlay.types';
 
 export interface PlanificacionClientProps {
-  codigo: string;
+  codigo?: string; // Opcional cuando viene desde overlay
+  config?: OverlayConfig; // Cuando se usa en overlay stack
+  estudiante?: {
+    nombre: string;
+    apellido?: string;
+    nivel_actual?: number;
+    id?: string;
+  };
 }
 
-export function PlanificacionClient({ codigo }: PlanificacionClientProps) {
-  // Obtener usuario del store
+export function PlanificacionClient({ codigo: codigoProp, config, estudiante: estudianteProp }: PlanificacionClientProps) {
+  // Determinar código: desde prop o desde config
+  const codigo = codigoProp || (config?.type === 'planificacion' ? config.codigo : '');
+
+  // Obtener usuario del store (fallback si no viene desde overlay)
   const { user } = useAuthStore();
+  const estudiante = estudianteProp || user;
 
   // Cargar planificación dinámicamente
   const { isLoading, error, component: PlanificacionComponent } = usePlanificacionLoader(codigo);
@@ -38,7 +50,7 @@ export function PlanificacionClient({ codigo }: PlanificacionClientProps) {
   }
 
   // Validar autenticación
-  if (!user) {
+  if (!estudiante) {
     return (
       <ErrorPlanificacion
         error={new Error('Debes iniciar sesión para acceder a esta planificación')}
@@ -48,7 +60,7 @@ export function PlanificacionClient({ codigo }: PlanificacionClientProps) {
   }
 
   // Adaptar por nivel del estudiante
-  const adaptacion = adaptarPorNivel(user.nivel_actual || 1);
+  const adaptacion = adaptarPorNivel(estudiante.nivel_actual || 1);
 
   // Verificar acceso por nivel (por si acaso hay restricciones futuras)
   const tieneAcceso = puedeAccederPorNivel(adaptacion.nivelActual, codigo as any);
@@ -65,24 +77,20 @@ export function PlanificacionClient({ codigo }: PlanificacionClientProps) {
   }
 
   // Renderizar la planificación
+  // Nota: El wrapper con gradient y BackButton ya no es necesario cuando se usa en overlay
+  // El OverlayRenderer maneja esos aspectos
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
-      {/* Botón volver */}
-      <BackButton />
+    <div className="w-full h-full">{/* Sin gradient aquí - lo maneja OverlayRenderer */}
 
-      {/* Badge de nivel (esquina superior derecha) */}
-      <div className="fixed top-6 right-6 z-50 bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl px-4 py-2">
-        <div className="text-white text-sm font-bold">
-          {adaptacion.descripcionNivel}
-        </div>
-        <div className="text-white/70 text-xs">
-          Dificultad: {adaptacion.dificultadRecomendada}
-        </div>
+      {/* Badge de nivel */}
+      <div className="absolute top-6 right-20 z-10 bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl px-4 py-2">
+        <div className="text-white text-sm font-bold">{adaptacion.descripcionNivel}</div>
+        <div className="text-white/70 text-xs">Dificultad: {adaptacion.dificultadRecomendada}</div>
       </div>
 
       {/* Renderizar componente de planificación */}
       <PlanificacionComponent
-        estudianteId={user.sub || user.id || ''}
+        estudianteId={estudiante.id || estudiante.sub || ''}
         nivelEstudiante={adaptacion.nivelActual}
       />
     </div>

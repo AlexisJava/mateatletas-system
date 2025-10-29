@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { HubView } from './views/HubView'
 import { useAuthStore } from '@/store/auth.store'
-import { OverlayProvider } from './contexts/OverlayProvider'
-import { OverlayManager } from './components/OverlayManager'
+import { OverlayStackProvider } from './contexts/OverlayStackProvider'
+import { OverlayStackManager } from './components/OverlayStackManager'
 
 export default function GimnasioPage() {
   const { user } = useAuthStore()
@@ -59,7 +59,7 @@ export default function GimnasioPage() {
   }
 
   return (
-    <OverlayProvider>
+    <OverlayStackProvider>
       {/* Dashboard principal - siempre visible */}
       <div className="h-screen overflow-hidden">
         {user && (
@@ -70,14 +70,15 @@ export default function GimnasioPage() {
               apellido: user.apellido || '',
               nivel_actual: user.nivel_actual || 1,
               puntos_totales: user.puntos_totales || 0,
-              avatar_url: avatarUrl
+              avatar_url: avatarUrl,
+              id: user.sub || user.id || ''
             }}
           />
         )}
       </div>
 
-      {/* Sistema de overlays */}
-      <OverlayManager />
-    </OverlayProvider>
+      {/* Sistema de overlay stack */}
+      <OverlayStackManager />
+    </OverlayStackProvider>
   )
 }
