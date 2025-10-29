@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useOverlayStack } from '../../contexts/OverlayStackProvider';
@@ -16,7 +16,10 @@ import { MultipleChoiceQuestion } from '../ejercicios/MultipleChoiceQuestion';
 import { FillBlankQuestion } from '../ejercicios/FillBlankQuestion';
 import { VerdaderoFalsoQuestion } from '../ejercicios/VerdaderoFalsoQuestion';
 import { VideoPlayer } from '../ejercicios/VideoPlayer';
+import { ResultsView } from '../results/ResultsView';
+import { calcularResultado } from '../../utils/results-calculator';
 import type { OverlayConfig, Pregunta, ContenidoEjercicio, ContenidoVideo } from '../../types/actividad.types';
+import type { RespuestaRegistrada, ResultadoCalculado } from '../../utils/results-calculator';
 
 export interface EjecutarActividadViewProps {
   config?: OverlayConfig & { type: 'ejecutar-actividad'; actividadId: string; semanaId: string };
@@ -49,9 +52,11 @@ export function EjecutarActividadView({ config, estudiante }: EjecutarActividadV
   }
 
   const [preguntaActual, setPreguntaActual] = useState(0);
-  const [respuestas, setRespuestas] = useState<
-    Array<{ pregunta: number; esCorrecta: boolean; respuesta: string | boolean }>
-  >([]);
+  const [respuestas, setRespuestas] = useState<RespuestaRegistrada[]>([]);
+  const [mostrarResultados, setMostrarResultados] = useState(false);
+  const [resultado, setResultado] = useState<ResultadoCalculado | null>(null);
+
+  const tiempoInicioRef = useRef<number>(Date.now());
 
   const tipoColors = TIPO_ACTIVIDAD_COLORS[actividad.tipo];
 
@@ -66,18 +71,34 @@ export function EjecutarActividadView({ config, estudiante }: EjecutarActividadV
   const progresoEjercicio = totalPreguntas > 0 ? (preguntasRespondidas / totalPreguntas) * 100 : 0;
 
   const handleRespuesta = (esCorrecta: boolean, respuesta: string | boolean) => {
-    setRespuestas([...respuestas, { pregunta: preguntaActual, esCorrecta, respuesta }]);
+    const nuevasRespuestas = [...respuestas, { pregunta: preguntaActual, esCorrecta, respuesta }];
+    setRespuestas(nuevasRespuestas);
 
     // Avanzar a la siguiente pregunta después de 2 segundos
     setTimeout(() => {
       if (preguntaActual < totalPreguntas - 1) {
         setPreguntaActual(preguntaActual + 1);
       } else {
-        // Todas las preguntas respondidas
-        console.log('🎉 Ejercicio completado!', respuestas);
-        // TODO: Mostrar pantalla de resultados y recompensas
+        // Todas las preguntas respondidas - calcular resultados
+        const tiempoEmpleado = Math.floor((Date.now() - tiempoInicioRef.current) / 1000);
+        const resultadoCalculado = calcularResultado(actividad, nuevasRespuestas, tiempoEmpleado);
+
+        setResultado(resultadoCalculado);
+        setMostrarResultados(true);
       }
     }, 2000);
+  };
+
+  const handleReintentar = () => {
+    setPreguntaActual(0);
+    setRespuestas([]);
+    setMostrarResultados(false);
+    setResultado(null);
+    tiempoInicioRef.current = Date.now();
+  };
+
+  const handleVolver = () => {
+    pop();
   };
 
   const renderContenido = () => {
@@ -303,6 +324,15 @@ export function EjecutarActividadView({ config, estudiante }: EjecutarActividadV
       <div className="flex-1 h-[calc(100vh-6rem)] flex items-center justify-center p-8 overflow-y-auto">
         {renderContenido()}
       </div>
+
+      {/* Pantalla de Resultados (overlay) */}
+      {mostrarResultados && resultado && (
+        <ResultsView
+          resultado={resultado}
+          onVolver={handleVolver}
+          onReintentar={handleReintentar}
+        />
+      )}
     </motion.div>
   );
 }
