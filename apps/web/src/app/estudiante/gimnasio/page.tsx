@@ -3,15 +3,21 @@
 import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { HubView } from './views/HubView'
+import { MiProgresoView } from './views/MiProgresoView'
+import { MiGrupoView } from './views/MiGrupoView'
 import { useAuthStore } from '@/store/auth.store'
 
 // Tipos de vistas disponibles
 type Vista =
   | 'hub'
   | 'entrenamientos'
-  | 'juegos'
-  | 'cursos'
-  | 'progreso'
+  | 'mis-cursos'
+  | 'mis-logros'
+  | 'tienda'
+  | 'mi-grupo'
+  | 'mi-progreso'
+  | 'notificaciones'
+  | 'ajustes'
 
 export default function GimnasioPage() {
   const [vistaActual, setVistaActual] = useState<Vista>('hub')
@@ -87,6 +93,25 @@ export default function GimnasioPage() {
           />
         )}
 
+        {vistaActual === 'mi-progreso' && user && (
+          <MiProgresoView
+            key="mi-progreso"
+            estudiante={{
+              nombre: user.nombre || 'Estudiante',
+              puntos_totales: user.puntos_totales || 0,
+            }}
+          />
+        )}
+
+        {vistaActual === 'mi-grupo' && user && (
+          <MiGrupoView
+            key="mi-grupo"
+            estudiante={{
+              nombre: user.nombre || 'Estudiante',
+            }}
+          />
+        )}
+
         {vistaActual === 'entrenamientos' && (
           <div key="entrenamientos" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
             <h1 className="text-white text-4xl font-bold text-center">
@@ -95,26 +120,42 @@ export default function GimnasioPage() {
           </div>
         )}
 
-        {vistaActual === 'juegos' && (
-          <div key="juegos" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
+        {vistaActual === 'mis-cursos' && (
+          <div key="mis-cursos" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
             <h1 className="text-white text-4xl font-bold text-center">
-              JUEGOS (proximamente)
+              MIS CURSOS (proximamente)
             </h1>
           </div>
         )}
 
-        {vistaActual === 'cursos' && (
-          <div key="cursos" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
+        {vistaActual === 'mis-logros' && (
+          <div key="mis-logros" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
             <h1 className="text-white text-4xl font-bold text-center">
-              CURSOS (proximamente)
+              MIS LOGROS (proximamente)
             </h1>
           </div>
         )}
 
-        {vistaActual === 'progreso' && (
-          <div key="progreso" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
+        {vistaActual === 'tienda' && (
+          <div key="tienda" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
             <h1 className="text-white text-4xl font-bold text-center">
-              PROGRESO (proximamente)
+              TIENDA (proximamente)
+            </h1>
+          </div>
+        )}
+
+        {vistaActual === 'notificaciones' && (
+          <div key="notificaciones" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
+            <h1 className="text-white text-4xl font-bold text-center">
+              NOTIFICACIONES (proximamente)
+            </h1>
+          </div>
+        )}
+
+        {vistaActual === 'ajustes' && (
+          <div key="ajustes" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
+            <h1 className="text-white text-4xl font-bold text-center">
+              AJUSTES (proximamente)
             </h1>
           </div>
         )}
