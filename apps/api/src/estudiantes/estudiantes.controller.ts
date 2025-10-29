@@ -8,6 +8,8 @@ import {
   Param,
   Query,
   UseGuards,
+  BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { EstudiantesService } from './estudiantes.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
@@ -94,6 +96,52 @@ export class EstudiantesController {
   @Get('estadisticas')
   async getEstadisticas(@GetUser() user: AuthUser) {
     return this.estudiantesService.getEstadisticas(user.id);
+  }
+
+  /**
+   * PATCH /estudiantes/avatar - Actualizar avatar 3D Ready Player Me del estudiante logueado
+   * @param req - Request con usuario autenticado
+   * @param body - { avatar_url: string }
+   * @returns Estudiante actualizado
+   */
+  @Patch('avatar')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Estudiante)
+  async actualizarAvatar3D(
+    @Request() req,
+    @Body() body: { avatar_url: string },
+  ) {
+    const estudianteId = req.user.id;
+
+    // Validar que sea URL válida de Ready Player Me
+    if (!body.avatar_url || !body.avatar_url.includes('readyplayer.me')) {
+      throw new BadRequestException('URL de avatar inválida');
+    }
+
+    return this.estudiantesService.update(estudianteId, estudianteId, {
+      avatar_url: body.avatar_url,
+    });
+  }
+
+  /**
+   * GET /estudiantes/mi-avatar - Obtener avatar del estudiante logueado
+   * @param req - Request con usuario autenticado
+   * @returns { avatar_url: string, tiene_avatar: boolean }
+   */
+  @Get('mi-avatar')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Estudiante)
+  async obtenerMiAvatar(@Request() req) {
+    const estudianteId = req.user.id;
+    const estudiante = await this.estudiantesService.findOne(
+      estudianteId,
+      estudianteId,
+    );
+
+    return {
+      avatar_url: estudiante.avatar_url,
+      tiene_avatar: !!estudiante.avatar_url,
+    };
   }
 
   /**
