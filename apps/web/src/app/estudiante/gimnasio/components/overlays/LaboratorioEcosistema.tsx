@@ -207,10 +207,10 @@ export function LaboratorioEcosistema({ semanaId }: LaboratorioEcosistemaProps) 
   const { pop } = useOverlayStack();
 
   return (
-    <div className="fixed inset-0 flex flex-col overflow-hidden">
+    <div className="fixed inset-0 flex flex-col overflow-hidden bg-slate-950">
       {/* Background verde químico */}
       <div
-        className="absolute inset-0 -z-10"
+        className="absolute inset-0 z-0"
         style={{
           background: 'linear-gradient(135deg, #064e3b 0%, #065f46 25%, #047857 50%, #065f46 75%, #064e3b 100%)',
         }}
