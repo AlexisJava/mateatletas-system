@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
 
     // Obtener token JWT de la cookie
     const cookieStore = await cookies()
-    const token = cookieStore.get('access_token')?.value
+    const token = cookieStore.get('auth-token')?.value // Corregido: buscar 'auth-token' en lugar de 'access_token'
 
     if (!token) {
       return NextResponse.json(

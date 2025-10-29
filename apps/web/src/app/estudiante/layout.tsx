@@ -28,7 +28,10 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
       if (user && user.role === 'estudiante') {
         // Verificar si tiene avatar
         try {
-          const response = await fetch('/api/estudiante/mi-avatar');
+          const response = await fetch('/api/estudiante/mi-avatar', {
+            credentials: 'include', // Importante: incluir cookies
+          });
+
           if (response.ok) {
             const data = await response.json();
 
@@ -43,9 +46,15 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
               router.replace('/estudiante/gimnasio');
               return;
             }
+          } else if (response.status === 401) {
+            // Token inválido o expirado, forzar re-login
+            console.warn('Token inválido o expirado, redirigiendo a login');
+            router.replace('/login');
+            return;
           }
         } catch (error) {
           console.error('Error al verificar avatar:', error);
+          // En caso de error, continuar sin verificar avatar
         }
 
         setIsValidating(false);
