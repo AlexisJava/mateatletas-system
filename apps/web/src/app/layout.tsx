@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Nunito } from 'next/font/google';
+import { Nunito, Lilita_One } from 'next/font/google';
 import './globals.css';
 import { QueryProvider } from '@/lib/providers/QueryProvider';
 import { Toaster } from 'sonner';
@@ -11,6 +11,14 @@ const nunito = Nunito({
   subsets: ['latin'],
   display: 'swap',
   fallback: ['system-ui', 'arial'],
+});
+
+// Lilita One: Fuente para dashboard estilo Brawl Stars
+const lilitaOne = Lilita_One({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-lilita',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -27,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${nunito.variable} antialiased`}>
+      <body className={`${nunito.variable} ${lilitaOne.variable} antialiased`}>
         <QueryProvider>
           {children}
         </QueryProvider>
