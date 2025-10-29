@@ -118,8 +118,8 @@ export class EstudiantesController {
       throw new BadRequestException('URL de avatar inválida');
     }
 
-    // Actualizar avatar sin validación de ownership (el estudiante actualiza su propio avatar)
-    return this.estudiantesService.updateAvatar(estudianteId, body.avatar_url);
+    // Actualizar avatar 3D sin validación de ownership (el estudiante actualiza su propio avatar)
+    return this.estudiantesService.updateAvatar3D(estudianteId, body.avatar_url);
   }
 
   /**
@@ -211,7 +211,7 @@ export class EstudiantesController {
   ) {
     // Nota: No necesitamos usar '_user' aquí porque el guard ya validó ownership
     // El guard se ejecuta ANTES de este método y rechaza requests no autorizados
-    return this.estudiantesService.updateAvatar(id, body.avatar_gradient);
+    return this.estudiantesService.updateAvatarGradient(id, body.avatar_gradient);
   }
 
   /**
