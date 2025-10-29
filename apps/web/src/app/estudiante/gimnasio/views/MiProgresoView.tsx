@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface StatData {
   id: string;
@@ -124,186 +124,140 @@ interface MiProgresoViewProps {
 
 export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
-  const [showHint, setShowHint] = useState(true);
 
   const selectedData = STATS_DATA.find(s => s.id === selectedCard);
-
-  const handleCardClick = (cardId: string) => {
-    setSelectedCard(cardId);
-    setShowHint(false);
-  };
 
   return (
     <div className="w-full h-full p-8 flex flex-col">
 
       {/* Header fijo */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-white/20
-                         flex items-center justify-center text-3xl">
-            📊
-          </div>
-          <h1 className="text-5xl font-black text-white font-[family-name:var(--font-lilita)]">
-            MI PROGRESO
-          </h1>
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-14 h-14 rounded-2xl bg-white/20
+                       flex items-center justify-center text-3xl">
+          📊
         </div>
-
-        {/* Hint inicial */}
-        <AnimatePresence>
-          {showHint && !selectedCard && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className="flex items-center gap-3 bg-white/10 backdrop-blur-sm
-                         px-6 py-3 rounded-2xl border-2 border-white/20"
-            >
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="text-2xl"
-              >
-                👆
-              </motion.div>
-              <p className="text-white text-lg font-bold">
-                ¡Toca una card para ver más!
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <h1 className="text-5xl font-black text-white font-[family-name:var(--font-lilita)]">
+          MI PROGRESO
+        </h1>
       </div>
 
-      {/* Layout con CSS Grid puro - SIN Framer Motion layout */}
-      <div className="flex-1 flex gap-6 overflow-hidden">
+      {/* Grid 3x2 FIJO - sin animaciones */}
+      <div className="flex-1 grid grid-cols-3 grid-rows-2 gap-6">
+        {STATS_DATA.map((stat) => (
+          <button
+            key={stat.id}
+            onClick={() => setSelectedCard(stat.id)}
+            className={`
+              bg-gradient-to-br ${stat.gradient}
+              rounded-3xl p-8
+              flex flex-col items-center justify-center
+              shadow-xl
+              border-4
+              hover:scale-[1.02] active:scale-[0.98]
+              transition-transform duration-150
+              ${selectedCard === stat.id
+                ? 'border-white ring-4 ring-white/50'
+                : 'border-white/20'
+              }
+            `}
+          >
+            {/* Emoji */}
+            <div className="text-6xl mb-4">
+              {stat.emoji}
+            </div>
 
-        {/* COLUMNA CARDS - CSS Grid nativo */}
-        <div
-          className={`
-            grid gap-4
-            transition-all duration-300 ease-out
-            ${selectedCard
-              ? 'grid-cols-2 w-[30%]'
-              : 'grid-cols-3 grid-rows-2 flex-1'
-            }
-          `}
-        >
-          {STATS_DATA.map((stat) => (
-            <button
-              key={stat.id}
-              onClick={() => handleCardClick(stat.id)}
-              className={`
-                bg-gradient-to-br ${stat.gradient}
-                rounded-3xl p-6
-                flex flex-col items-center justify-center
-                shadow-xl
-                border-4
-                transition-all duration-300 ease-out
-                hover:scale-105 active:scale-95
-                ${selectedCard === stat.id
-                  ? 'border-white ring-4 ring-white/50'
-                  : 'border-white/20'
-                }
-              `}
-            >
-              {/* Emoji */}
-              <div className={`
-                transition-all duration-300 ease-out
-                ${selectedCard ? 'text-4xl' : 'text-6xl'}
-              `}>
-                {stat.emoji}
-              </div>
+            {/* Valor */}
+            <div className="text-5xl font-black text-white mb-2">
+              {stat.value}
+            </div>
 
-              {/* Valor */}
-              <div className={`
-                font-black text-white
-                transition-all duration-300 ease-out
-                ${selectedCard ? 'text-3xl mt-2' : 'text-5xl mt-4'}
-              `}>
-                {stat.value}
-              </div>
+            {/* Label */}
+            <div className="text-lg font-bold text-white/80 uppercase text-center">
+              {stat.label}
+            </div>
+          </button>
+        ))}
+      </div>
 
-              {/* Label */}
-              <div className={`
-                font-bold text-white/80 uppercase text-center
-                transition-all duration-300 ease-out
-                ${selectedCard ? 'text-xs mt-1' : 'text-lg mt-2'}
-              `}>
-                {stat.label}
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* COLUMNA DERECHA - Panel de detalle */}
-        <AnimatePresence mode="wait">
-          {selectedCard && selectedData && (
+      {/* Modal overlay ENCIMA - solo fade */}
+      <AnimatePresence>
+        {selectedCard && selectedData && (
+          <>
+            {/* Backdrop */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="flex-1 bg-white/10 backdrop-blur-xl
-                         rounded-3xl p-8 border-2 border-white/20
-                         flex flex-col"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onClick={() => setSelectedCard(null)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            />
+
+            {/* Modal centrado */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="fixed inset-0 flex items-center justify-center z-50 p-8 pointer-events-none"
             >
-              {/* Header del panel */}
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className={`
-                    w-16 h-16 rounded-2xl
-                    bg-gradient-to-br ${selectedData.gradient}
-                    flex items-center justify-center text-4xl
-                    shadow-xl
-                  `}>
-                    {selectedData.emoji}
-                  </div>
-                  <div>
-                    <h2 className="text-4xl font-black text-white">
-                      {selectedData.detalles.titulo}
-                    </h2>
-                    <p className="text-xl text-white/70 font-bold">
-                      {selectedData.label}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Botón cerrar panel */}
-                <button
-                  onClick={() => setSelectedCard(null)}
-                  className="w-12 h-12 rounded-xl bg-white/10
-                             hover:bg-white/20 flex items-center justify-center
-                             transition-all hover:scale-110 active:scale-90"
-                >
-                  <ChevronLeft className="w-6 h-6 text-white" />
-                </button>
-              </div>
-
-              {/* Lista de detalles */}
-              <div className="flex-1 space-y-4 overflow-y-auto">
-                {selectedData.detalles.items.map((item, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05, duration: 0.2 }}
-                    className="bg-white/5 backdrop-blur-sm rounded-2xl p-6
-                               border border-white/10"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-white/50" />
-                      <p className="text-white text-xl font-medium">
-                        {item}
+              <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl
+                           rounded-3xl p-8 border-2 border-white/20
+                           pointer-events-auto">
+                {/* Header del modal */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`
+                      w-16 h-16 rounded-2xl
+                      bg-gradient-to-br ${selectedData.gradient}
+                      flex items-center justify-center text-4xl
+                      shadow-xl
+                    `}>
+                      {selectedData.emoji}
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-black text-white">
+                        {selectedData.detalles.titulo}
+                      </h2>
+                      <p className="text-lg text-white/70 font-bold">
+                        {selectedData.label}
                       </p>
                     </div>
-                  </motion.div>
-                ))}
+                  </div>
+
+                  {/* Botón cerrar */}
+                  <button
+                    onClick={() => setSelectedCard(null)}
+                    className="w-10 h-10 rounded-xl bg-white/10
+                               hover:bg-white/20 flex items-center justify-center
+                               transition-colors"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+
+                {/* Lista de detalles */}
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {selectedData.detalles.items.map((item, i) => (
+                    <div
+                      key={i}
+                      className="bg-white/5 backdrop-blur-sm rounded-2xl p-5
+                                 border border-white/10"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-white/50" />
+                        <p className="text-white text-lg font-medium">
+                          {item}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-
-      </div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
