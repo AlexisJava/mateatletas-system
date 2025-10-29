@@ -57,10 +57,41 @@ export default function GimnasioPage() {
       {/* Sistema de vistas con transiciones */}
       <AnimatePresence mode="wait">
         {vistaActual === 'hub' && (
-          <div key="hub" className="min-h-screen pt-32 px-8">
-            <h1 className="text-white text-4xl font-bold text-center">
-              HUB - Vista principal (proximamente)
+          <div key="hub" className="min-h-screen pt-32 px-8 flex flex-col items-center justify-center">
+            {/* Avatar 3D Grande - TU PERSONAJE */}
+            {avatarUrl ? (
+              <div className="mb-8">
+                <h2 className="text-center text-white text-2xl font-bold mb-4" style={{ fontFamily: '"Lilita One", cursive' }}>
+                  ¡Tu Atleta Mental!
+                </h2>
+                <div className="w-80 h-96 rounded-3xl bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 p-2 shadow-2xl shadow-purple-500/50">
+                  <div className="w-full h-full rounded-2xl bg-black/20 backdrop-blur-sm overflow-hidden border-4 border-white/20">
+                    <iframe
+                      src={`${avatarUrl}?scene=fullbody-portrait-v1&animation=idle`}
+                      className="w-full h-full border-none"
+                      title="Tu Avatar 3D"
+                      allow="camera; microphone"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="mb-8">
+                <div className="w-80 h-96 rounded-3xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <div className="text-6xl mb-4">👤</div>
+                    <p className="font-bold">Cargando avatar...</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <h1 className="text-white text-4xl font-bold text-center mb-4" style={{ fontFamily: '"Lilita One", cursive', textShadow: '3px 3px 0 rgba(0,0,0,0.5)' }}>
+              Gimnasio Mental
             </h1>
+            <p className="text-white/80 text-xl text-center max-w-2xl">
+              Seleccioná una actividad para entrenar tu mente y ganar trofeos
+            </p>
           </div>
         )}
 
