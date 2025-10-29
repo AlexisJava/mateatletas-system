@@ -9,6 +9,7 @@ import { MiGrupoView } from '../views/MiGrupoView';
 import { MiProgresoView } from '../views/MiProgresoView';
 import { NotificacionesView } from '../views/NotificacionesView';
 import { AjustesView } from '../views/AjustesView';
+import { EntrenamientosView } from '../views/EntrenamientosView';
 
 export function OverlayManager() {
   const { activeOverlay, closeOverlay } = useOverlay();
@@ -31,8 +32,8 @@ export function OverlayManager() {
       type: 'modal',
     },
     'entrenamientos': {
-      component: () => <PlaceholderView title="ENTRENAMIENTOS" emoji="🎮" />,
-      gradient: 'from-green-600 via-emerald-600 to-teal-700',
+      component: EntrenamientosView,
+      gradient: 'from-indigo-900 via-purple-900 to-pink-900',
       type: 'modal',
     },
     'mis-cursos': {
