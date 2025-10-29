@@ -17,6 +17,7 @@ import { MiProgresoView } from '../views/MiProgresoView';
 import { NotificacionesView } from '../views/NotificacionesView';
 import { AjustesView } from '../views/AjustesView';
 import { EntrenamientosView } from '../views/EntrenamientosView';
+import { PlanificacionView } from './overlays/PlanificacionView';
 import { PlanificacionClient } from '@/app/estudiante/planificaciones/[codigo]/PlanificacionClient';
 
 /**
@@ -77,7 +78,7 @@ function getOverlayComponent(config: OverlayConfig): React.ComponentType<any> {
     case 'entrenamientos':
       return EntrenamientosView;
     case 'planificacion':
-      return PlanificacionClient;
+      return PlanificacionView; // Mes de la Ciencia con grid 2×2
     case 'actividad':
       return PlaceholderView; // TODO: Implementar
     case 'mis-cursos':
