@@ -150,52 +150,103 @@ export default function CrearAvatarPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black"
+            className="fixed inset-0 z-[100] bg-gradient-to-br from-blue-500 to-purple-600"
           >
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-900 to-blue-900">
-              <div className="text-center max-w-md px-4">
-                <Loader2 className="w-16 h-16 text-white animate-spin mx-auto mb-4" />
-                <p className="text-white text-xl font-bold mb-4">Cargando editor 3D...</p>
+            {/* Header de Mateatletas */}
+            <div className="absolute top-0 left-0 right-0 h-24 bg-black/40 backdrop-blur-md border-b-2 border-white/20 flex items-center justify-between px-8 z-[101]">
 
-                {timeoutWarning && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 space-y-4"
+              {/* Logo + Título */}
+              <div className="flex items-center gap-4">
+                <div className="text-5xl">🧠</div>
+                <div>
+                  <h1
+                    className="text-white text-3xl font-black uppercase leading-tight"
+                    style={{
+                      textShadow: '3px 3px 0px rgba(0,0,0,0.3)',
+                      fontFamily: '"Lilita One", cursive'
+                    }}
                   >
-                    <div className="bg-yellow-500/20 border-2 border-yellow-500 rounded-xl p-4">
-                      <AlertCircle className="w-8 h-8 text-yellow-300 mx-auto mb-2" />
-                      <p className="text-yellow-200 font-semibold mb-2">El editor está tardando mucho...</p>
-                      <p className="text-yellow-100 text-sm">Puede ser un problema de conexión o del servicio Ready Player Me</p>
-                    </div>
+                    Creá tu Atleta Mental
+                  </h1>
+                  <p className="text-white/80 text-sm font-bold">Personalizá tu avatar 3D</p>
+                </div>
+              </div>
 
-                    <button
-                      onClick={handleSaltarPaso}
-                      className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl font-bold transition-all"
-                    >
-                      Saltar este paso y continuar
-                    </button>
+              {/* Botón volver */}
+              <button
+                onClick={handleSaltarPaso}
+                className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-bold text-lg transition-colors border-2 border-black shadow-[0_4px_0_rgba(0,0,0,0.3)]"
+              >
+                ← Cancelar
+              </button>
+            </div>
 
-                    <button
-                      onClick={() => {
-                        console.log('🔄 [CrearAvatar] Recargando página')
-                        window.location.reload()
-                      }}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold transition-all block w-full"
-                    >
-                      Recargar página
-                    </button>
-                  </motion.div>
-                )}
+            {/* Progress bar */}
+            <div className="absolute top-24 left-0 right-0 h-2 bg-white/10 z-[101]">
+              <motion.div
+                initial={{ width: '66%' }}
+                animate={{ width: '66%' }}
+                className="h-full bg-gradient-to-r from-yellow-400 to-orange-500"
+              />
+            </div>
+
+            {/* Iframe CENTRADO (no fullscreen) */}
+            <div className="absolute inset-0 flex items-center justify-center pt-28 pb-32 px-8">
+              <div className="w-full max-w-5xl h-full bg-black/20 backdrop-blur-sm rounded-3xl border-2 border-white/20 shadow-2xl overflow-hidden">
+                <AvatarCreator
+                  subdomain={RPM_CONFIG.subdomain}
+                  config={config}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none'
+                  }}
+                  onAvatarExported={handleAvatarExported}
+                />
               </div>
             </div>
 
-            <AvatarCreator
-              subdomain={RPM_CONFIG.subdomain}
-              config={config}
-              style={{ width: '100%', height: '100%', border: 'none', position: 'absolute', top: 0, left: 0, zIndex: 10 }}
-              onAvatarExported={handleAvatarExported}
-            />
+            {/* Footer con instrucciones */}
+            <div className="absolute bottom-0 left-0 right-0 h-28 bg-black/40 backdrop-blur-md border-t-2 border-white/20 flex items-center justify-center z-[101]">
+              <div className="text-center">
+                <p className="text-white text-2xl font-black mb-2">
+                  🎨 Personalizá tu cara, pelo y ropa
+                </p>
+                <p className="text-yellow-300 text-lg font-bold animate-pulse">
+                  Cuando termines, hacé click en &quot;SIGUIENTE&quot; →
+                </p>
+              </div>
+            </div>
+
+            {/* Warning de timeout si aplica */}
+            {timeoutWarning && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-[102]">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-yellow-500/20 border-2 border-yellow-500 rounded-2xl p-8 max-w-md mx-4"
+                >
+                  <AlertCircle className="w-12 h-12 text-yellow-300 mx-auto mb-4" />
+                  <p className="text-yellow-200 font-bold text-xl mb-2 text-center">El editor está tardando mucho...</p>
+                  <p className="text-yellow-100 text-sm mb-6 text-center">Puede ser un problema de conexión o del servicio Ready Player Me</p>
+
+                  <div className="space-y-3">
+                    <button
+                      onClick={handleSaltarPaso}
+                      className="w-full bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl font-bold transition-all"
+                    >
+                      Saltar este paso y continuar
+                    </button>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold transition-all"
+                    >
+                      Recargar página
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            )}
           </motion.div>
         )}
 
