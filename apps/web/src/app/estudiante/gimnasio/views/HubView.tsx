@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useOverlay, type OverlayType } from '../contexts/OverlayProvider';
+import { useOverlay } from '../contexts/OverlayStackProvider';
+
+// Type compatible con sistema antiguo
+type OverlayType = string | null;
 import {
   Home,
   Gamepad2,
