@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useOverlay } from '../contexts/OverlayStackProvider';
+import { useOverlay, useOverlayStack } from '../contexts/OverlayStackProvider';
 
 // Type compatible con sistema antiguo
 type OverlayType = string | null;
@@ -152,6 +152,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [isMounted, setIsMounted] = useState(false);
   const modelRef = useRef<any>(null);
   const { openOverlay } = useOverlay();
+  const { push } = useOverlayStack();
 
   useEffect(() => {
     setIsMounted(true);
@@ -287,7 +288,14 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               item={item}
               isActive={activeView === item.id}
               onClick={() => {
-                if (item.overlayId) {
+                // ENTRENAMIENTOS abre directamente el Mes de la Ciencia
+                if (item.id === 'entrenamientos') {
+                  push({
+                    type: 'planificacion',
+                    codigo: '2025-11-mes-ciencia',
+                    tema: 'quimica',
+                  });
+                } else if (item.overlayId) {
                   openOverlay(item.overlayId);
                 } else {
                   setActiveView(item.id);
