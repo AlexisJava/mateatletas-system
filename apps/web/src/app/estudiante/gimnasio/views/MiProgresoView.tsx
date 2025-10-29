@@ -150,7 +150,7 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
         <motion.div
           layout
           transition={{
-            layout: { duration: 0.6, ease: [0.32, 0.72, 0, 1] }
+            layout: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
           }}
           className={`
             grid gap-4
@@ -170,7 +170,7 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
                 scale: 1,
               }}
               transition={{
-                layout: { duration: 0.6, ease: [0.32, 0.72, 0, 1] },
+                layout: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] },
                 delay: i * 0.05
               }}
               whileHover={{ scale: selectedCard ? 1.05 : 1.02 }}
@@ -192,7 +192,7 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               {/* Emoji */}
               <motion.div
                 layout
-                transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+                transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                 className={selectedCard ? 'text-4xl' : 'text-6xl'}
               >
                 {stat.emoji}
@@ -201,7 +201,7 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               {/* Valor */}
               <motion.div
                 layout
-                transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+                transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                 className={`
                   font-black text-white
                   ${selectedCard ? 'text-3xl mt-2' : 'text-5xl mt-4'}
@@ -213,7 +213,7 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               {/* Label */}
               <motion.div
                 layout
-                transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+                transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                 className={`
                   font-bold text-white/80 uppercase text-center
                   ${selectedCard ? 'text-xs mt-1' : 'text-lg mt-2'}
@@ -232,7 +232,7 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
-              transition={{ duration: 0.4, ease: 'easeOut' }}
+              transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
               className="flex-1 bg-white/10 backdrop-blur-xl
                          rounded-3xl p-8 border-2 border-white/20
                          flex flex-col"
@@ -278,7 +278,7 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
                     key={i}
                     initial={{ x: 50, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.4 + i * 0.1 }}
+                    transition={{ delay: 0.2 + i * 0.05, duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                     className="bg-white/5 backdrop-blur-sm rounded-2xl p-6
                                border border-white/10"
                   >
