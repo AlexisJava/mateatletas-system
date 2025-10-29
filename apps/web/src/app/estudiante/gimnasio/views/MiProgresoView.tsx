@@ -124,8 +124,15 @@ interface MiProgresoViewProps {
 
 export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const [showHint, setShowHint] = useState(true);
 
   const selectedData = STATS_DATA.find(s => s.id === selectedCard);
+
+  // Ocultar hint cuando seleccionen una card
+  const handleCardClick = (cardId: string) => {
+    setSelectedCard(cardId);
+    setShowHint(false);
+  };
 
   return (
     <div className="w-full h-full p-8 flex flex-col">
@@ -141,6 +148,31 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
             MI PROGRESO
           </h1>
         </div>
+
+        {/* Hint inicial */}
+        <AnimatePresence>
+          {showHint && !selectedCard && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="flex items-center gap-3 bg-white/10 backdrop-blur-sm
+                         px-6 py-3 rounded-2xl border-2 border-white/20"
+            >
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="text-2xl"
+              >
+                👆
+              </motion.div>
+              <p className="text-white text-lg font-bold">
+                ¡Toca una card para ver más!
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Layout dinámico */}
@@ -175,7 +207,7 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               }}
               whileHover={{ scale: selectedCard ? 1.05 : 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedCard(stat.id)}
+              onClick={() => handleCardClick(stat.id)}
               className={`
                 bg-gradient-to-br ${stat.gradient}
                 rounded-3xl p-6
