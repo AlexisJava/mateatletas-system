@@ -3,14 +3,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
-import { ThemeProvider } from '@/lib/theme/ThemeContext';
 
 /**
- * Portal Estudiante - Layout Fullscreen
+ * Portal Estudiante - Layout con Auth Guard
  *
- * Sin sidebar - Diseñado para experiencia de juego
+ * Solo permite acceso a usuarios con rol "estudiante"
+ * Redirige automáticamente según el rol del usuario
  */
-
 export default function EstudianteLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, checkAuth } = useAuthStore();
@@ -18,21 +17,19 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
   const hasValidatedRef = useRef(false);
 
   useEffect(() => {
-    // Evitar múltiples validaciones usando ref
-    if (hasValidatedRef.current) {
-      return;
-    }
+    // Evitar múltiples validaciones
+    if (hasValidatedRef.current) return;
 
     const validateAuth = async () => {
       hasValidatedRef.current = true;
 
-      // Si ya tenemos un usuario estudiante, validar y terminar
+      // Usuario estudiante válido
       if (user && user.role === 'estudiante') {
         setIsValidating(false);
         return;
       }
 
-      // Si el usuario tiene otro rol, redirigir al dashboard apropiado
+      // Usuario con otro rol → redirigir
       if (user && user.role !== 'estudiante') {
         const redirectPath =
           user.role === 'admin' ? '/admin/dashboard' :
@@ -42,13 +39,12 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
         return;
       }
 
-      // Si no hay usuario, intentar verificar autenticación con el backend
+      // Sin usuario → verificar auth
       if (!user) {
         try {
           await checkAuth();
           const currentUser = useAuthStore.getState().user;
 
-          // Después de checkAuth, validar el rol
           if (!currentUser) {
             router.replace('/login');
             return;
@@ -63,37 +59,30 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
             return;
           }
 
-          // Usuario es estudiante, validación exitosa
           setIsValidating(false);
         } catch (error: unknown) {
-          // Error al verificar auth, redirigir a login
           router.replace('/login');
         }
       }
     };
 
     validateAuth();
-    // Solo ejecutar una vez al montar
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <ThemeProvider>
-      {isValidating ? (
-        <LoadingScreen />
-      ) : (
-        children
-      )}
-    </ThemeProvider>
+    <div className="min-h-screen bg-black">
+      {isValidating ? <LoadingScreen /> : children}
+    </div>
   );
 }
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-400 via-blue-300 to-cyan-300">
-      <div className="text-center bg-white p-12 rounded-3xl shadow-2xl border-4 border-orange-500">
-        <div className="w-16 h-16 border-4 border-yellow-400 border-t-orange-500 rounded-full animate-spin mx-auto mb-6" />
-        <p className="text-sm font-black text-orange-600">Cargando Portal Estudiante...</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-white text-lg font-bold">Cargando...</p>
       </div>
     </div>
   );
