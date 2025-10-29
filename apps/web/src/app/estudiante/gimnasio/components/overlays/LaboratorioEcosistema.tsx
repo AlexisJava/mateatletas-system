@@ -6,7 +6,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowLeft, Flask, BookOpen, Trophy, Star, Clock } from 'lucide-react';
+import { ArrowLeft, FlaskRound, BookOpen, Trophy, Star, Clock } from 'lucide-react';
 import { useOverlayStack } from '../../contexts/OverlayStackProvider';
 import { useState } from 'react';
 
@@ -70,7 +70,7 @@ const ACTIVIDADES_QUIMICA: Actividad[] = [
 
 const TIPO_ICONS = {
   leccion: BookOpen,
-  experimento: Flask,
+  experimento: FlaskRound,
   quiz: Star,
   desafio: Trophy,
 };
