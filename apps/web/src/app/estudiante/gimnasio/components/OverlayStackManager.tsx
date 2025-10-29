@@ -152,42 +152,42 @@ export function OverlayStackManager() {
     id: user?.sub || user?.id || '',
   };
 
-  // Limitar renderizado a últimos 3 overlays para performance
-  const visibleStack = stack.slice(-3);
+  // SOLO renderizar la vista actual (top del stack) - UNA SOLA VISTA LIMPIA
+  const currentView = stack.length > 0 ? stack[stack.length - 1] : null;
+
+  if (!currentView) {
+    return null; // No hay vistas abiertas
+  }
+
+  // Obtener metadatos y componente
+  const metadata = OVERLAY_METADATA[currentView.type] || {
+    gradient: 'from-blue-900 via-indigo-900 to-purple-900',
+    renderType: 'modal' as const,
+  };
+  const component = getOverlayComponent(currentView);
+
+  // Key único para AnimatePresence (basado en tipo + params)
+  const key = currentView.type === 'planificacion' && 'codigo' in currentView
+    ? `${currentView.type}-${currentView.codigo}`
+    : currentView.type === 'actividad' && 'semanaId' in currentView
+    ? `${currentView.type}-${currentView.semanaId}`
+    : currentView.type === 'ejecutar-actividad' && 'actividadId' in currentView
+    ? `${currentView.type}-${currentView.actividadId}`
+    : currentView.type;
 
   return (
-    <AnimatePresence mode="sync">
-      {visibleStack.map((config, index) => {
-        // Calcular depth invertido (el último en array es depth 0)
-        const depth = visibleStack.length - 1 - index;
-        const isTop = depth === 0;
-
-        // Obtener metadatos y componente
-        const metadata = OVERLAY_METADATA[config.type] || {
-          gradient: 'from-blue-900 via-indigo-900 to-purple-900',
-          renderType: 'modal' as const,
-        };
-        const component = getOverlayComponent(config);
-
-        // Key único para AnimatePresence
-        const key = `${config.type}-${index}-${
-          config.type === 'planificacion' ? config.codigo : ''
-        }`;
-
-        return (
-          <OverlayRenderer
-            key={key}
-            config={config}
-            depth={depth}
-            isTop={isTop}
-            onBackdropClick={pop}
-            component={component}
-            gradient={metadata.gradient}
-            renderType={metadata.renderType}
-            estudiante={estudiante}
-          />
-        );
-      })}
+    <AnimatePresence mode="wait">
+      <OverlayRenderer
+        key={key}
+        config={currentView}
+        depth={0}
+        isTop={true}
+        onBackdropClick={pop}
+        component={component}
+        gradient={metadata.gradient}
+        renderType={metadata.renderType}
+        estudiante={estudiante}
+      />
     </AnimatePresence>
   );
 }
