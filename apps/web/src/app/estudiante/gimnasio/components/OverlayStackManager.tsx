@@ -20,6 +20,7 @@ import { EntrenamientosView } from '../views/EntrenamientosView';
 import { PlanificacionView } from './overlays/PlanificacionView';
 import { ActividadView } from './overlays/ActividadView';
 import { EjecutarActividadView } from './overlays/EjecutarActividadView';
+import { LaboratorioEcosistema } from './overlays/LaboratorioEcosistema';
 import { PlanificacionClient } from '@/app/estudiante/planificaciones/[codigo]/PlanificacionClient';
 
 /**
@@ -47,6 +48,10 @@ const OVERLAY_METADATA: Record<string, OverlayMetadata> = {
     renderType: 'fullscreen',
   },
   'actividad': {
+    gradient: 'from-emerald-900 via-teal-900 to-cyan-900',
+    renderType: 'fullscreen',
+  },
+  'laboratorio-ecosistema': {
     gradient: 'from-emerald-900 via-teal-900 to-cyan-900',
     renderType: 'fullscreen',
   },
@@ -87,6 +92,8 @@ function getOverlayComponent(config: OverlayConfig): React.ComponentType<any> {
       return PlanificacionView; // Mes de la Ciencia con grid 2×2 semanas
     case 'actividad':
       return ActividadView; // Grid 2×2 de las 4 actividades de una semana
+    case 'laboratorio-ecosistema':
+      return LaboratorioEcosistema; // Ecosistema LearnDash para Laboratorio Mágico
     case 'ejecutar-actividad':
       return EjecutarActividadView; // Vista de ejecución individual (ejercicios, videos, juegos)
     case 'mis-cursos':
