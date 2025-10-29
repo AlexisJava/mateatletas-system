@@ -1,6 +1,7 @@
 'use client'
 
 import { Trophy, Coins, Gem, Flame } from 'lucide-react'
+import { RPM_CONFIG } from '@/lib/ready-player-me.config'
 
 interface BrawlHeaderProps {
   nombre: string
@@ -25,7 +26,7 @@ export function BrawlHeader({ nombre, nivel, trofeos, monedas, gemas, racha, ava
           >
             {avatarUrl ? (
               <iframe
-                src={`https://models.readyplayer.me/${avatarUrl.split('/').pop()}?scene=halfbody-portrait-v1&meshLod=1`}
+                src={RPM_CONFIG.getQuickViewUrl(avatarUrl, 'halfbody')}
                 className="w-full h-full border-none scale-150"
                 title={`Avatar de ${nombre}`}
                 sandbox="allow-scripts allow-same-origin"

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { BookOpen, Gamepad2, TrendingUp, Trophy, Users, Settings } from 'lucide-react'
+import { RPM_CONFIG } from '@/lib/ready-player-me.config'
 
 interface HubViewProps {
   onNavigate: (vista: string) => void
@@ -60,21 +61,20 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
           {/* Avatar 3D GIGANTE */}
           <div className="flex-1 flex items-center justify-center w-full max-w-2xl">
             {estudiante.avatar_url ? (
-              <div className="relative w-full h-full">
+              <div className="relative w-full h-full flex items-center justify-center">
                 {/* Sombra proyectada */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-48 h-12 bg-black/30 rounded-full blur-xl" />
+                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 h-12 bg-black/30 rounded-full blur-xl" />
 
-                {/* Avatar */}
+                {/* Avatar 3D con subdomain correcto */}
                 <iframe
                   key={estudiante.avatar_url}
-                  src={`https://models.readyplayer.me/${estudiante.avatar_url.split('/').pop()?.replace('.glb', '')}?scene=fullbody-portrait-v1-transparent&meshLod=1&cameraInitialDistance=2.5`}
+                  src={RPM_CONFIG.getViewerUrl(estudiante.avatar_url)}
                   className="w-full h-full"
                   allow="camera; microphone"
-                  sandbox="allow-scripts allow-same-origin"
                   style={{
                     border: 'none',
                     pointerEvents: 'none',
-                    transform: 'scale(1.2)' // Más grande
+                    minHeight: '500px'
                   }}
                   loading="lazy"
                 />

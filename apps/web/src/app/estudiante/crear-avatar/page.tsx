@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AvatarCreator, AvatarCreatorConfig, AvatarExportedEvent } from '@readyplayerme/react-avatar-creator'
 import { Sparkles, ArrowRight, Loader2, AlertCircle } from 'lucide-react'
 import { BrawlBackground } from '../gimnasio/components/BrawlBackground'
+import { RPM_CONFIG } from '@/lib/ready-player-me.config'
 
 type Paso = 'bienvenida' | 'creando' | 'preview'
 
@@ -22,7 +23,17 @@ export default function CrearAvatarPage() {
     bodyType: 'fullbody',
     quickStart: false,
     language: 'es',
+    // Configuración de la aplicación
+    headers: {
+      'X-App-Id': RPM_CONFIG.appId,
+    },
   }
+
+  // Log de configuración
+  useEffect(() => {
+    console.log('🔧 RPM Subdomain:', RPM_CONFIG.subdomain)
+    console.log('🔧 RPM App ID:', RPM_CONFIG.appId)
+  }, [])
 
   // Timeout para detectar si el editor no carga
   useEffect(() => {
@@ -180,7 +191,7 @@ export default function CrearAvatarPage() {
             </div>
 
             <AvatarCreator
-              subdomain="demo"
+              subdomain={RPM_CONFIG.subdomain}
               config={config}
               style={{ width: '100%', height: '100%', border: 'none', position: 'absolute', top: 0, left: 0, zIndex: 10 }}
               onAvatarExported={handleAvatarExported}
@@ -213,11 +224,9 @@ export default function CrearAvatarPage() {
                 className="w-full max-w-md h-80 sm:h-96 md:h-[28rem] mx-auto mb-8 rounded-3xl bg-gradient-to-br from-purple-500/20 via-blue-500/20 to-orange-500/20 border-4 border-yellow-400 shadow-[0_0_50px_rgba(255,215,0,0.5)] overflow-hidden relative"
               >
                 <iframe
-                  src={`https://models.readyplayer.me/${avatarUrl.split('/').pop()}?scene=fullbody-portrait-v1-transparent&meshLod=1`}
+                  src={RPM_CONFIG.getViewerUrl(avatarUrl, RPM_CONFIG.animations.dancing)}
                   className="w-full h-full"
                   allow="camera; microphone"
-                  sandbox="allow-scripts allow-same-origin"
-                  loading="lazy"
                   style={{ border: 'none' }}
                 />
               </motion.div>
