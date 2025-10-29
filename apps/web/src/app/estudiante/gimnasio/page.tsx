@@ -1,26 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { AnimatePresence } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
 import { HubView } from './views/HubView'
-import { MiProgresoView } from './views/MiProgresoView'
-import { MiGrupoView } from './views/MiGrupoView'
 import { useAuthStore } from '@/store/auth.store'
-
-// Tipos de vistas disponibles
-type Vista =
-  | 'hub'
-  | 'entrenamientos'
-  | 'mis-cursos'
-  | 'mis-logros'
-  | 'tienda'
-  | 'mi-grupo'
-  | 'mi-progreso'
-  | 'notificaciones'
-  | 'ajustes'
+import { OverlayProvider } from './contexts/OverlayProvider'
+import { OverlayManager } from './components/OverlayManager'
 
 export default function GimnasioPage() {
-  const [vistaActual, setVistaActual] = useState<Vista>('hub')
   const { user } = useAuthStore()
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [isLoadingAvatar, setIsLoadingAvatar] = useState(true)
@@ -59,10 +45,6 @@ export default function GimnasioPage() {
     loadAvatar()
   }, [])
 
-  const handleNavigate = (vista: string) => {
-    setVistaActual(vista as Vista)
-  }
-
   // Loading screen mientras carga avatar
   if (isLoadingAvatar) {
     return (
@@ -77,12 +59,12 @@ export default function GimnasioPage() {
   }
 
   return (
-    <>
-      {/* Sistema de vistas con transiciones */}
-      <AnimatePresence mode="wait">
-        {vistaActual === 'hub' && user && (
+    <OverlayProvider>
+      {/* Dashboard principal - siempre visible */}
+      <div className="h-screen overflow-hidden">
+        {user && (
           <HubView
-            onNavigate={handleNavigate}
+            onNavigate={() => {}} // Ya no se usa, todo es con overlays
             estudiante={{
               nombre: user.nombre || 'Estudiante',
               apellido: user.apellido || '',
@@ -92,74 +74,10 @@ export default function GimnasioPage() {
             }}
           />
         )}
+      </div>
 
-        {vistaActual === 'mi-progreso' && user && (
-          <MiProgresoView
-            key="mi-progreso"
-            estudiante={{
-              nombre: user.nombre || 'Estudiante',
-              puntos_totales: user.puntos_totales || 0,
-            }}
-          />
-        )}
-
-        {vistaActual === 'mi-grupo' && user && (
-          <MiGrupoView
-            key="mi-grupo"
-            estudiante={{
-              nombre: user.nombre || 'Estudiante',
-            }}
-          />
-        )}
-
-        {vistaActual === 'entrenamientos' && (
-          <div key="entrenamientos" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
-            <h1 className="text-white text-4xl font-bold text-center">
-              ENTRENAMIENTOS (proximamente)
-            </h1>
-          </div>
-        )}
-
-        {vistaActual === 'mis-cursos' && (
-          <div key="mis-cursos" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
-            <h1 className="text-white text-4xl font-bold text-center">
-              MIS CURSOS (proximamente)
-            </h1>
-          </div>
-        )}
-
-        {vistaActual === 'mis-logros' && (
-          <div key="mis-logros" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
-            <h1 className="text-white text-4xl font-bold text-center">
-              MIS LOGROS (proximamente)
-            </h1>
-          </div>
-        )}
-
-        {vistaActual === 'tienda' && (
-          <div key="tienda" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
-            <h1 className="text-white text-4xl font-bold text-center">
-              TIENDA (proximamente)
-            </h1>
-          </div>
-        )}
-
-        {vistaActual === 'notificaciones' && (
-          <div key="notificaciones" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
-            <h1 className="text-white text-4xl font-bold text-center">
-              NOTIFICACIONES (proximamente)
-            </h1>
-          </div>
-        )}
-
-        {vistaActual === 'ajustes' && (
-          <div key="ajustes" className="min-h-screen pt-32 px-8 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
-            <h1 className="text-white text-4xl font-bold text-center">
-              AJUSTES (proximamente)
-            </h1>
-          </div>
-        )}
-      </AnimatePresence>
-    </>
+      {/* Sistema de overlays */}
+      <OverlayManager />
+    </OverlayProvider>
   )
 }

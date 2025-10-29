@@ -52,7 +52,7 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
   ];
 
   return (
-    <div className="w-full h-screen bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600 overflow-y-auto">
+    <div className="w-full min-h-full">
       <div className="p-8 space-y-6 max-w-5xl mx-auto">
 
         {/* Header del grupo */}
