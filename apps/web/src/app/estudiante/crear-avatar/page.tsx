@@ -124,7 +124,7 @@ export default function CrearAvatarPage() {
             </div>
 
             <AvatarCreator
-              subdomain="demo"
+              subdomain="mateatletas-club-steam"
               config={config}
               style={{ width: '100%', height: '100%', border: 'none' }}
               onAvatarExported={handleAvatarExported}
