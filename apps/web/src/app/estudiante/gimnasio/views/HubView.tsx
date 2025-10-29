@@ -17,7 +17,8 @@ import {
   Coins,
   Gem,
   Zap,
-  Target
+  Target,
+  BarChart3
 } from 'lucide-react';
 
 interface HubViewProps {
@@ -45,17 +46,17 @@ interface NavButton {
 const NAV_LEFT: NavButton[] = [
   {
     id: 'hub',
-    label: 'INICIO',
-    description: 'Tu gimnasio personal',
+    label: 'HUB',
+    description: 'Tu espacio personal',
     icon: <Home className="w-7 h-7" />,
     gradient: 'from-blue-500 via-cyan-500 to-blue-600',
     glowColor: 'cyan',
     badge: 0,
   },
   {
-    id: 'juegos',
-    label: 'JUEGOS',
-    description: 'Desafíos matemáticos',
+    id: 'entrenamientos',
+    label: 'ENTRENAMIENTOS',
+    description: 'Práctica y ejercicios',
     icon: <Gamepad2 className="w-7 h-7" />,
     gradient: 'from-orange-500 via-amber-500 to-yellow-500',
     glowColor: 'orange',
@@ -63,18 +64,18 @@ const NAV_LEFT: NavButton[] = [
     pulse: true,
   },
   {
-    id: 'cursos',
-    label: 'CURSOS',
-    description: 'Rutas de aprendizaje',
+    id: 'mis-cursos',
+    label: 'MIS CURSOS',
+    description: 'Tus rutas de aprendizaje',
     icon: <BookOpen className="w-7 h-7" />,
     gradient: 'from-purple-500 via-violet-500 to-indigo-600',
     glowColor: 'purple',
     badge: 0,
   },
   {
-    id: 'logros',
-    label: 'LOGROS',
-    description: 'Medallas y trofeos',
+    id: 'mis-logros',
+    label: 'MIS LOGROS',
+    description: 'Tus logros personales',
     icon: <Trophy className="w-7 h-7" />,
     gradient: 'from-yellow-400 via-amber-500 to-orange-600',
     glowColor: 'yellow',
@@ -84,7 +85,7 @@ const NAV_LEFT: NavButton[] = [
   {
     id: 'tienda',
     label: 'TIENDA',
-    description: 'Compra power-ups',
+    description: 'Mejoras y avatares',
     icon: <ShoppingBag className="w-7 h-7" />,
     gradient: 'from-green-500 via-emerald-500 to-teal-600',
     glowColor: 'green',
@@ -94,29 +95,27 @@ const NAV_LEFT: NavButton[] = [
 
 const NAV_RIGHT: NavButton[] = [
   {
-    id: 'amigos',
-    label: 'AMIGOS',
-    description: 'Compite con amigos',
+    id: 'mi-grupo',
+    label: 'MI GRUPO',
+    description: 'Tu comunidad de estudio',
     icon: <Users className="w-7 h-7" />,
     gradient: 'from-cyan-500 via-blue-500 to-indigo-600',
     glowColor: 'cyan',
-    badge: 5,
-    pulse: true,
+    badge: 0,
   },
   {
-    id: 'chat',
-    label: 'CHAT',
-    description: 'Habla con tu equipo',
-    icon: <MessageCircle className="w-7 h-7" />,
-    gradient: 'from-pink-500 via-rose-500 to-red-600',
-    glowColor: 'pink',
-    badge: 12,
-    pulse: true,
+    id: 'mi-progreso',
+    label: 'MI PROGRESO',
+    description: 'Tu evolución personal',
+    icon: <BarChart3 className="w-7 h-7" />,
+    gradient: 'from-green-500 via-emerald-500 to-teal-600',
+    glowColor: 'green',
+    badge: 0,
   },
   {
     id: 'notificaciones',
-    label: 'ALERTAS',
-    description: 'Novedades importantes',
+    label: 'NOTIFICACIONES',
+    description: 'Novedades y alertas',
     icon: <Bell className="w-7 h-7" />,
     gradient: 'from-red-500 via-orange-500 to-amber-600',
     glowColor: 'red',
@@ -124,7 +123,7 @@ const NAV_RIGHT: NavButton[] = [
     pulse: true,
   },
   {
-    id: 'settings',
+    id: 'ajustes',
     label: 'AJUSTES',
     description: 'Configuración',
     icon: <Settings className="w-7 h-7" />,
@@ -315,9 +314,15 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
             <div className="text-white font-bold text-base uppercase tracking-wide">
               {estudiante.nombre.split(' ')[0]}
             </div>
-            <div className="text-xs text-white/70 flex items-center gap-1">
-              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-              Nivel {estudiante.nivel_actual}
+            <div className="flex items-center gap-2 text-xs text-white/70">
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                Nivel {estudiante.nivel_actual}
+              </div>
+              <span>•</span>
+              <div className="flex items-center gap-1">
+                🔥 <span>Grupo Fénix</span>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -500,6 +505,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 icon={<Zap className="w-6 h-6" />}
                 value={`${racha_dias} días`}
                 label="RACHA"
+                subtitle="¡Sigue así!"
                 gradient="from-orange-500 to-red-600"
                 glowColor="orange"
                 onClick={() => triggerAnimation('clapping', 2500)}
@@ -508,14 +514,16 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 icon={<Trophy className="w-6 h-6" />}
                 value="12/50"
                 label="LOGROS"
+                subtitle="Desbloqueados"
                 gradient="from-yellow-500 to-amber-600"
                 glowColor="yellow"
                 onClick={() => triggerAnimation('wave', 2500)}
               />
               <StatCard3D
                 icon={<Target className="w-6 h-6" />}
-                value="#42"
-                label="RANKING"
+                value="85%"
+                label="ÁLGEBRA"
+                subtitle="¡Casi maestro!"
                 gradient="from-purple-500 to-pink-600"
                 glowColor="purple"
                 onClick={() => triggerAnimation('dance', 3000)}
@@ -750,6 +758,7 @@ function StatCard3D({
   icon,
   value,
   label,
+  subtitle,
   gradient,
   glowColor,
   onClick,
@@ -757,6 +766,7 @@ function StatCard3D({
   icon: React.ReactNode;
   value: string;
   label: string;
+  subtitle?: string;
   gradient: string;
   glowColor: string;
   onClick?: () => void;
@@ -794,6 +804,11 @@ function StatCard3D({
         <div className="text-white/80 text-xs font-bold uppercase tracking-wide">
           {label}
         </div>
+        {subtitle && (
+          <div className="text-white/60 text-xs mt-1 font-medium">
+            {subtitle}
+          </div>
+        )}
       </div>
     </motion.div>
   );
