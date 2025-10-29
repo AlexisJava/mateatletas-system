@@ -522,13 +522,13 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
     });
   };
 
-  // Backgrounds dinámicos según el tema hovereado
+  // Backgrounds dinámicos según el tema hovereado - MUY SUTILES
   const backgroundsByTheme = {
-    quimica: 'linear-gradient(135deg, #064e3b 0%, #065f46 30%, #047857 60%, #064e3b 100%)',
-    astronomia: 'linear-gradient(135deg, #581c87 0%, #6b21a8 30%, #7e22ce 60%, #581c87 100%)',
-    fisica: 'linear-gradient(135deg, #9a3412 0%, #c2410c 30%, #ea580c 60%, #9a3412 100%)',
-    informatica: 'linear-gradient(135deg, #164e63 0%, #0e7490 30%, #0891b2 60%, #164e63 100%)',
-    default: 'linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #0f172a 100%)',
+    quimica: 'linear-gradient(135deg, #0f172a 0%, #064e3b 25%, #065f46 50%, #064e3b 75%, #0f172a 100%)',
+    astronomia: 'linear-gradient(135deg, #0f172a 0%, #581c87 25%, #6b21a8 50%, #581c87 75%, #0f172a 100%)',
+    fisica: 'linear-gradient(135deg, #0f172a 0%, #7c2d12 25%, #9a3412 50%, #7c2d12 75%, #0f172a 100%)',
+    informatica: 'linear-gradient(135deg, #0f172a 0%, #164e63 25%, #0e7490 50%, #164e63 75%, #0f172a 100%)',
+    default: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
   };
 
   const currentBackground = hoveredTheme ? backgroundsByTheme[hoveredTheme] : backgroundsByTheme.default;
@@ -543,7 +543,7 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
       transition={{ duration: 0.5, ease: 'easeOut' }}
       className="fixed inset-0 z-50 flex flex-col overflow-hidden"
     >
-      {/* Background animado que cambia con hover - CON INITIAL PARA TRANSICIÓN SUAVE */}
+      {/* Background animado que cambia con hover - TRANSICIÓN ULTRA SUAVE */}
       <motion.div
         className="absolute inset-0 -z-10"
         initial={{
@@ -552,8 +552,35 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
         animate={{
           background: currentBackground,
         }}
-        transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+        transition={{
+          duration: 1.2,
+          ease: [0.25, 0.1, 0.25, 1.0]
+        }}
       />
+
+      {/* Capa de difusión radial para hacer el cambio más orgánico */}
+      <motion.div
+        className="absolute inset-0 -z-10 blur-3xl"
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity: hoveredTheme ? 0.3 : 0,
+        }}
+        transition={{
+          duration: 1.5,
+          ease: [0.25, 0.1, 0.25, 1.0]
+        }}
+        style={{
+          background: hoveredTheme
+            ? `radial-gradient(circle at 50% 50%, ${
+                hoveredTheme === 'quimica' ? '#10b981' :
+                hoveredTheme === 'astronomia' ? '#a855f7' :
+                hoveredTheme === 'fisica' ? '#f97316' :
+                '#06b6d4'
+              } 0%, transparent 60%)`
+            : 'transparent',
+        }}
+      />
+
       {/* Ambient lighting grid - SOLO GRID, SIN CÍRCULOS DE COLOR */}
       <div
         className="absolute inset-0 opacity-5"
