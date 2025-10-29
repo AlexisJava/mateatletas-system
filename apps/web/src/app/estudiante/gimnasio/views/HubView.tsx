@@ -143,6 +143,23 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     setIsMounted(true);
   }, []);
 
+  // Hook para animaciones del avatar - DECLARADO PRIMERO
+  const triggerAnimation = useCallback((animName: string, duration?: number) => {
+    const model = modelRef.current;
+    if (!model) return;
+
+    model.animationName = animName;
+    model.currentTime = 0;
+    model.play({ repetitions: 1 });
+
+    if (duration) {
+      setTimeout(() => {
+        model.animationName = 'idle';
+        model.play();
+      }, duration);
+    }
+  }, []);
+
   // Animaciones aleatorias cada 10-15 segundos para dar vida al avatar
   useEffect(() => {
     if (!isMounted) return;
@@ -167,23 +184,6 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
       clearInterval(interval);
     };
   }, [isMounted, triggerAnimation]);
-
-  // Hook para animaciones del avatar
-  const triggerAnimation = useCallback((animName: string, duration?: number) => {
-    const model = modelRef.current;
-    if (!model) return;
-
-    model.animationName = animName;
-    model.currentTime = 0;
-    model.play({ repetitions: 1 });
-
-    if (duration) {
-      setTimeout(() => {
-        model.animationName = 'idle';
-        model.play();
-      }, duration);
-    }
-  }, []);
 
   // Valores por defecto para recursos
   const monedas = 168;
