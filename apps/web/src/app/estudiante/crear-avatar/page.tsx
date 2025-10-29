@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AvatarCreator, AvatarCreatorConfig, AvatarExportedEvent } from '@readyplayerme/react-avatar-creator'
-import { Sparkles, ArrowRight, Loader2 } from 'lucide-react'
+import { Sparkles, ArrowRight, Loader2, AlertCircle } from 'lucide-react'
 import { BrawlBackground } from '../gimnasio/components/BrawlBackground'
 
 type Paso = 'bienvenida' | 'creando' | 'preview'
@@ -15,6 +15,7 @@ export default function CrearAvatarPage() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState('')
+  const [timeoutWarning, setTimeoutWarning] = useState(false)
 
   const config: AvatarCreatorConfig = {
     clearCache: true,
@@ -23,14 +24,31 @@ export default function CrearAvatarPage() {
     language: 'es',
   }
 
+  // Timeout para detectar si el editor no carga
+  useEffect(() => {
+    if (paso === 'creando') {
+      console.log('⏱️ [CrearAvatar] Iniciando timer de 15s...')
+      const timer = setTimeout(() => {
+        console.warn('⚠️ [CrearAvatar] Timeout - Editor no cargó en 15s')
+        setTimeoutWarning(true)
+      }, 15000)
+
+      return () => {
+        console.log('🧹 [CrearAvatar] Limpiando timer')
+        clearTimeout(timer)
+      }
+    }
+  }, [paso])
+
   const handleAvatarExported = (event: AvatarExportedEvent) => {
     const url = event.data.url
-    console.log('✅ Avatar creado:', url)
+    console.log('✅ [CrearAvatar] Avatar creado:', url)
     setAvatarUrl(url)
     setPaso('preview')
   }
 
   const handleGuardar = async () => {
+    console.log('💾 [CrearAvatar] Guardando avatar:', avatarUrl)
     setGuardando(true)
     setError('')
 
@@ -41,19 +59,26 @@ export default function CrearAvatarPage() {
         body: JSON.stringify({ avatar_url: avatarUrl })
       })
 
+      console.log('📥 [CrearAvatar] Response status:', response.status)
+
       if (!response.ok) {
         const data = await response.json()
         throw new Error(data.error || 'Error al guardar')
       }
 
-      console.log('✅ Avatar guardado en BD')
+      console.log('✅ [CrearAvatar] Avatar guardado en BD, redirigiendo...')
       setTimeout(() => router.push('/estudiante/gimnasio'), 1000)
 
     } catch (err: any) {
-      console.error('❌ Error:', err)
+      console.error('❌ [CrearAvatar] Error:', err)
       setError(err.message || 'Error al guardar avatar')
       setGuardando(false)
     }
+  }
+
+  const handleSaltarPaso = () => {
+    console.log('⏭️ [CrearAvatar] Saltando paso de avatar')
+    router.push('/estudiante/gimnasio')
   }
 
   return (
@@ -117,16 +142,47 @@ export default function CrearAvatarPage() {
             className="fixed inset-0 z-50 bg-black"
           >
             <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-900 to-blue-900">
-              <div className="text-center">
+              <div className="text-center max-w-md px-4">
                 <Loader2 className="w-16 h-16 text-white animate-spin mx-auto mb-4" />
-                <p className="text-white text-xl font-bold">Cargando editor 3D...</p>
+                <p className="text-white text-xl font-bold mb-4">Cargando editor 3D...</p>
+
+                {timeoutWarning && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-6 space-y-4"
+                  >
+                    <div className="bg-yellow-500/20 border-2 border-yellow-500 rounded-xl p-4">
+                      <AlertCircle className="w-8 h-8 text-yellow-300 mx-auto mb-2" />
+                      <p className="text-yellow-200 font-semibold mb-2">El editor está tardando mucho...</p>
+                      <p className="text-yellow-100 text-sm">Puede ser un problema de conexión o del servicio Ready Player Me</p>
+                    </div>
+
+                    <button
+                      onClick={handleSaltarPaso}
+                      className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl font-bold transition-all"
+                    >
+                      Saltar este paso y continuar
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        console.log('🔄 [CrearAvatar] Recargando página')
+                        window.location.reload()
+                      }}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold transition-all block w-full"
+                    >
+                      Recargar página
+                    </button>
+                  </motion.div>
+                )}
               </div>
             </div>
 
             <AvatarCreator
-              subdomain="mateatletas-club-steam"
+              subdomain="demo"
               config={config}
-              style={{ width: '100%', height: '100%', border: 'none' }}
+              style={{ width: '100%', height: '100%', border: 'none', position: 'absolute', top: 0, left: 0, zIndex: 10 }}
               onAvatarExported={handleAvatarExported}
             />
           </motion.div>
