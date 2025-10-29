@@ -182,10 +182,15 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
         <motion.div
           layout
           transition={{
-            layout: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
+            layout: {
+              duration: 0.2,
+              ease: [0.25, 0.1, 0.25, 1],
+              type: "tween"
+            }
           }}
+          style={{ willChange: 'transform' }}
           className={`
-            grid gap-4
+            grid gap-4 transition-all duration-200
             ${selectedCard
               ? 'grid-cols-2 w-[30%]' // Modo compacto
               : 'grid-cols-3 grid-rows-2 flex-1' // Modo normal
@@ -196,15 +201,21 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
             <motion.button
               key={stat.id}
               layout
+              layoutId={stat.id}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{
                 opacity: 1,
                 scale: 1,
               }}
               transition={{
-                layout: { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] },
+                layout: {
+                  duration: 0.2,
+                  ease: [0.25, 0.1, 0.25, 1],
+                  type: "tween"
+                },
                 delay: i * 0.05
               }}
+              style={{ willChange: 'transform' }}
               whileHover={{ scale: selectedCard ? 1.05 : 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleCardClick(stat.id)}
@@ -218,14 +229,19 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
                   ? 'border-white ring-4 ring-white/50'
                   : 'border-white/20'
                 }
-                transition-all
+                transition-all duration-200
               `}
             >
               {/* Emoji */}
               <motion.div
                 layout
-                transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-                className={selectedCard ? 'text-4xl' : 'text-6xl'}
+                transition={{
+                  duration: 0.2,
+                  ease: [0.25, 0.1, 0.25, 1],
+                  type: "tween"
+                }}
+                style={{ willChange: 'transform' }}
+                className={`transition-all duration-200 ${selectedCard ? 'text-4xl' : 'text-6xl'}`}
               >
                 {stat.emoji}
               </motion.div>
@@ -233,9 +249,14 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               {/* Valor */}
               <motion.div
                 layout
-                transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{
+                  duration: 0.2,
+                  ease: [0.25, 0.1, 0.25, 1],
+                  type: "tween"
+                }}
+                style={{ willChange: 'transform' }}
                 className={`
-                  font-black text-white
+                  font-black text-white transition-all duration-200
                   ${selectedCard ? 'text-3xl mt-2' : 'text-5xl mt-4'}
                 `}
               >
@@ -245,9 +266,14 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               {/* Label */}
               <motion.div
                 layout
-                transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                transition={{
+                  duration: 0.2,
+                  ease: [0.25, 0.1, 0.25, 1],
+                  type: "tween"
+                }}
+                style={{ willChange: 'transform' }}
                 className={`
-                  font-bold text-white/80 uppercase text-center
+                  font-bold text-white/80 uppercase text-center transition-all duration-200
                   ${selectedCard ? 'text-xs mt-1' : 'text-lg mt-2'}
                 `}
               >
