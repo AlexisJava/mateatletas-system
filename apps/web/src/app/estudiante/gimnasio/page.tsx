@@ -3,8 +3,43 @@
 import { useEffect, useRef, useState } from 'react'
 import { HubView } from './views/HubView'
 import { useAuthStore } from '@/store/auth.store'
-import { OverlayStackProvider } from './contexts/OverlayStackProvider'
+import { OverlayStackProvider, useOverlayStack } from './contexts/OverlayStackProvider'
 import { OverlayStackManager } from './components/OverlayStackManager'
+
+// Componente interno que usa el hook del overlay stack
+function GimnasioContent({ avatarUrl }: { avatarUrl: string | null }) {
+  const { user } = useAuthStore()
+  const { stack } = useOverlayStack()
+
+  // Ocultar HubView cuando hay overlays abiertos
+  const showHub = stack.length === 0
+
+  return (
+    <>
+      {/* Dashboard principal - SOLO visible cuando NO hay overlays */}
+      {showHub && (
+        <div className="h-screen overflow-hidden">
+          {user && (
+            <HubView
+              onNavigate={() => {}} // Ya no se usa, todo es con overlays
+              estudiante={{
+                nombre: user.nombre || 'Estudiante',
+                apellido: user.apellido || '',
+                nivel_actual: user.nivel_actual || 1,
+                puntos_totales: user.puntos_totales || 0,
+                avatar_url: avatarUrl,
+                id: user.sub || user.id || ''
+              }}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Sistema de overlay stack */}
+      <OverlayStackManager />
+    </>
+  )
+}
 
 export default function GimnasioPage() {
   const { user } = useAuthStore()
@@ -60,25 +95,7 @@ export default function GimnasioPage() {
 
   return (
     <OverlayStackProvider>
-      {/* Dashboard principal - siempre visible */}
-      <div className="h-screen overflow-hidden">
-        {user && (
-          <HubView
-            onNavigate={() => {}} // Ya no se usa, todo es con overlays
-            estudiante={{
-              nombre: user.nombre || 'Estudiante',
-              apellido: user.apellido || '',
-              nivel_actual: user.nivel_actual || 1,
-              puntos_totales: user.puntos_totales || 0,
-              avatar_url: avatarUrl,
-              id: user.sub || user.id || ''
-            }}
-          />
-        )}
-      </div>
-
-      {/* Sistema de overlay stack */}
-      <OverlayStackManager />
+      <GimnasioContent avatarUrl={avatarUrl} />
     </OverlayStackProvider>
   )
 }
