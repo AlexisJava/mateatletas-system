@@ -159,15 +159,21 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     const model = modelRef.current;
     if (!model) return;
 
-    model.animationName = animName;
-    model.currentTime = 0;
-    model.play({ repetitions: 1 });
+    try {
+      // Cambiar animación
+      model.animationName = animName;
 
-    if (duration) {
-      setTimeout(() => {
-        model.animationName = 'idle';
-        model.play();
-      }, duration);
+      // model-viewer no tiene método .play() directo
+      // La animación se activa automáticamente al cambiar animationName
+
+      if (duration) {
+        setTimeout(() => {
+          model.animationName = 'idle';
+        }, duration);
+      }
+    } catch (error) {
+      // Silently fail - avatar animations are non-critical
+      console.debug('Animation error:', error);
     }
   }, []);
 
