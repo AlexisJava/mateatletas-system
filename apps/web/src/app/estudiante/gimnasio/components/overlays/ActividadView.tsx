@@ -56,9 +56,11 @@ export function ActividadView({ config, estudiante }: ActividadViewProps) {
       return;
     }
 
-    // TODO: Implementar vista de ejecución de actividad
-    console.info('Abriendo actividad:', actividadId);
-    // push({ type: 'ejecutar-actividad', actividadId, semanaId });
+    push({
+      type: 'ejecutar-actividad',
+      actividadId,
+      semanaId,
+    });
   };
 
   return (

@@ -19,6 +19,7 @@ import { AjustesView } from '../views/AjustesView';
 import { EntrenamientosView } from '../views/EntrenamientosView';
 import { PlanificacionView } from './overlays/PlanificacionView';
 import { ActividadView } from './overlays/ActividadView';
+import { EjecutarActividadView } from './overlays/EjecutarActividadView';
 import { PlanificacionClient } from '@/app/estudiante/planificaciones/[codigo]/PlanificacionClient';
 
 /**
@@ -87,7 +88,7 @@ function getOverlayComponent(config: OverlayConfig): React.ComponentType<any> {
     case 'actividad':
       return ActividadView; // Grid 2×2 de las 4 actividades de una semana
     case 'ejecutar-actividad':
-      return PlaceholderView; // TODO: Vista de ejecución individual
+      return EjecutarActividadView; // Vista de ejecución individual (ejercicios, videos, juegos)
     case 'mis-cursos':
       return PlaceholderView;
     case 'tienda':
