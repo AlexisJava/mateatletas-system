@@ -18,6 +18,7 @@ import { NotificacionesView } from '../views/NotificacionesView';
 import { AjustesView } from '../views/AjustesView';
 import { EntrenamientosView } from '../views/EntrenamientosView';
 import { PlanificacionView } from './overlays/PlanificacionView';
+import { ActividadView } from './overlays/ActividadView';
 import { PlanificacionClient } from '@/app/estudiante/planificaciones/[codigo]/PlanificacionClient';
 
 /**
@@ -46,7 +47,11 @@ const OVERLAY_METADATA: Record<string, OverlayMetadata> = {
   },
   'actividad': {
     gradient: 'from-emerald-900 via-teal-900 to-cyan-900',
-    renderType: 'modal',
+    renderType: 'fullscreen',
+  },
+  'ejecutar-actividad': {
+    gradient: 'from-emerald-900 via-teal-900 to-cyan-900',
+    renderType: 'fullscreen',
   },
   'mis-cursos': {
     gradient: 'from-purple-600 via-violet-600 to-indigo-700',
@@ -78,9 +83,11 @@ function getOverlayComponent(config: OverlayConfig): React.ComponentType<any> {
     case 'entrenamientos':
       return EntrenamientosView;
     case 'planificacion':
-      return PlanificacionView; // Mes de la Ciencia con grid 2×2
+      return PlanificacionView; // Mes de la Ciencia con grid 2×2 semanas
     case 'actividad':
-      return PlaceholderView; // TODO: Implementar
+      return ActividadView; // Grid 2×2 de las 4 actividades de una semana
+    case 'ejecutar-actividad':
+      return PlaceholderView; // TODO: Vista de ejecución individual
     case 'mis-cursos':
       return PlaceholderView;
     case 'tienda':

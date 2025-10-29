@@ -24,7 +24,8 @@ export type OverlayConfig =
   | { type: 'mis-logros' }
   | { type: 'entrenamientos' }
   | { type: 'planificacion'; codigo: string; tema: PlanificacionTema }
-  | { type: 'actividad'; actividadId: string; planificacionCodigo: string }
+  | { type: 'actividad'; semanaId: string } // Grid 2×2 de las 4 actividades de una semana
+  | { type: 'ejecutar-actividad'; actividadId: string; semanaId: string } // Ejecución individual
   | { type: 'mis-cursos' }
   | { type: 'mi-progreso' }
   | { type: 'tienda' }
