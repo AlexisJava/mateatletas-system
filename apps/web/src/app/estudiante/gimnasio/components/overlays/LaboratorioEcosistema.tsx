@@ -207,13 +207,7 @@ export function LaboratorioEcosistema({ semanaId }: LaboratorioEcosistemaProps) 
   const { pop } = useOverlayStack();
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="fixed inset-0 z-50 flex flex-col overflow-hidden"
-    >
+    <div className="fixed inset-0 flex flex-col overflow-hidden">
       {/* Background verde químico */}
       <div
         className="absolute inset-0 -z-10"
@@ -345,6 +339,6 @@ export function LaboratorioEcosistema({ semanaId }: LaboratorioEcosistemaProps) 
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

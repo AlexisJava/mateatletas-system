@@ -519,15 +519,7 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
   const currentBackground = hoveredTheme ? backgroundsByTheme[hoveredTheme] : backgroundsByTheme.default;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{
-        opacity: 1,
-      }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="fixed inset-0 z-50 flex flex-col overflow-hidden"
-    >
+    <div className="fixed inset-0 flex flex-col overflow-hidden">
       {/* Background animado que cambia con hover - TRANSICIÓN ULTRA SUAVE */}
       <motion.div
         className="absolute inset-0 -z-10"
@@ -681,6 +673,6 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
           </div>
         </div>
       </motion.div> */}
-    </motion.div>
+    </div>
   );
 }
