@@ -537,7 +537,7 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
 
       {/* Capa de difusión radial para hacer el cambio más orgánico */}
       <motion.div
-        className="absolute inset-0 -z-10 blur-3xl"
+        className="absolute inset-0 z-0 blur-3xl pointer-events-none"
         initial={{ opacity: 0 }}
         animate={{
           opacity: hoveredTheme ? 0.3 : 0,
