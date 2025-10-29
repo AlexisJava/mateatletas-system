@@ -42,7 +42,7 @@ const OVERLAY_METADATA: Record<string, OverlayMetadata> = {
   },
   'planificacion': {
     gradient: 'from-indigo-900 via-purple-900 to-pink-900',
-    renderType: 'modal',
+    renderType: 'fullscreen',
   },
   'actividad': {
     gradient: 'from-emerald-900 via-teal-900 to-cyan-900',

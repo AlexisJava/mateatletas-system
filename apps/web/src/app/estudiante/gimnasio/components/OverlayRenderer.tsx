@@ -60,7 +60,7 @@ function calculateDepthTransform(depth: number): DepthTransform {
 export interface OverlayRendererInternalProps extends OverlayRendererProps {
   component: React.ComponentType<any>;
   gradient: string;
-  renderType: 'modal' | 'sidebar';
+  renderType: 'modal' | 'sidebar' | 'fullscreen';
   estudiante: {
     nombre: string;
     apellido?: string;
@@ -83,17 +83,18 @@ export function OverlayRenderer({
 }: OverlayRendererInternalProps) {
   const transform = calculateDepthTransform(depth);
   const isSidebar = renderType === 'sidebar';
+  const isFullscreen = renderType === 'fullscreen';
 
   // Solo el overlay top puede recibir pointer events
   const pointerEvents = isTop ? 'auto' : 'none';
 
-  // Backdrop opacity según depth
-  const backdropOpacity = isTop ? (isSidebar ? 0.3 : 0.4) : 0;
+  // Backdrop opacity según depth (fullscreen NO tiene backdrop)
+  const backdropOpacity = isTop ? (isSidebar ? 0.3 : isFullscreen ? 0 : 0.4) : 0;
 
   return (
     <>
-      {/* Backdrop */}
-      {transform.opacity > 0 && (
+      {/* Backdrop (NO se renderiza para fullscreen) */}
+      {transform.opacity > 0 && !isFullscreen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: backdropOpacity }}
@@ -109,7 +110,10 @@ export function OverlayRenderer({
       )}
 
       {/* Overlay content */}
-      {isSidebar ? (
+      {isFullscreen ? (
+        // FULLSCREEN - 100vw × 100vh, sin modal wrapper
+        <Component estudiante={estudiante} config={config} />
+      ) : isSidebar ? (
         // SIDEBAR - Desde la derecha
         <motion.div
           initial={{ x: '100%', opacity: 0 }}
