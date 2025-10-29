@@ -143,6 +143,31 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     setIsMounted(true);
   }, []);
 
+  // Animaciones aleatorias cada 10-15 segundos para dar vida al avatar
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const idleAnimations = ['wave', 'clapping', 'headShake'];
+
+    const triggerRandomAnimation = () => {
+      const randomAnim = idleAnimations[Math.floor(Math.random() * idleAnimations.length)];
+      triggerAnimation(randomAnim, 2000);
+    };
+
+    // Primera animación después de 5 segundos
+    const initialTimeout = setTimeout(triggerRandomAnimation, 5000);
+
+    // Luego cada 10-15 segundos
+    const interval = setInterval(() => {
+      triggerRandomAnimation();
+    }, 10000 + Math.random() * 5000);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [isMounted, triggerAnimation]);
+
   // Hook para animaciones del avatar
   const triggerAnimation = useCallback((animName: string, duration?: number) => {
     const model = modelRef.current;
@@ -378,8 +403,22 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 </>
               )}
 
-              {/* Avatar 3D */}
-              <div className="relative z-20 w-full h-full">
+              {/* Avatar 3D - CLICKEABLE PARA ANIMAR */}
+              <motion.div
+                className="relative z-20 w-full h-full cursor-pointer"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onHoverStart={() => {
+                  // Saludar cuando el usuario pasa el mouse
+                  triggerAnimation('wave', 1500);
+                }}
+                onClick={() => {
+                  // Animación aleatoria al hacer click en el avatar
+                  const animations = ['clapping', 'dance', 'victory'];
+                  const randomAnim = animations[Math.floor(Math.random() * animations.length)];
+                  triggerAnimation(randomAnim, 3000);
+                }}
+              >
                 {isMounted && estudiante.avatar_url && (
                   <model-viewer
                     ref={modelRef}
@@ -400,7 +439,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                     style={{ backgroundColor: 'transparent' }}
                   />
                 )}
-              </div>
+              </motion.div>
             </motion.div>
           </div>
 
@@ -463,7 +502,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 label="RACHA"
                 gradient="from-orange-500 to-red-600"
                 glowColor="orange"
-                onClick={() => triggerAnimation('victory', 2000)}
+                onClick={() => triggerAnimation('clapping', 2500)}
               />
               <StatCard3D
                 icon={<Trophy className="w-6 h-6" />}
@@ -471,7 +510,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 label="LOGROS"
                 gradient="from-yellow-500 to-amber-600"
                 glowColor="yellow"
-                onClick={() => triggerAnimation('victory', 2000)}
+                onClick={() => triggerAnimation('wave', 2500)}
               />
               <StatCard3D
                 icon={<Target className="w-6 h-6" />}
@@ -479,7 +518,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 label="RANKING"
                 gradient="from-purple-500 to-pink-600"
                 glowColor="purple"
-                onClick={() => triggerAnimation('victory', 2000)}
+                onClick={() => triggerAnimation('dance', 3000)}
               />
             </motion.div>
 
@@ -492,7 +531,13 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               <motion.button
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95, y: 0 }}
-                onClick={() => onNavigate('entrenamientos')}
+                onClick={() => {
+                  // Animación épica antes de navegar
+                  triggerAnimation('victory', 2000);
+                  setTimeout(() => {
+                    onNavigate('entrenamientos');
+                  }, 1800);
+                }}
                 className="
                   w-full h-24
                   bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500
