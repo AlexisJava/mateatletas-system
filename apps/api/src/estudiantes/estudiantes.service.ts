@@ -160,6 +160,42 @@ export class EstudiantesService {
     return estudiante;
   }
 
+  /**
+   * Actualiza el avatar del estudiante sin validación de ownership
+   * Útil para que el estudiante actualice su propio avatar
+   * @param id - ID del estudiante
+   * @param avatar_url - URL del avatar de Ready Player Me
+   * @returns Estudiante actualizado
+   * @throws NotFoundException si no existe
+   */
+  async updateAvatar(id: string, avatar_url: string) {
+    // Verificar que el estudiante existe
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException('Estudiante no encontrado');
+    }
+
+    // Actualizar solo el avatar
+    return this.prisma.estudiante.update({
+      where: { id },
+      data: { avatar_url },
+      include: {
+        equipo: true,
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
   async findOne(id: string, tutorId: string) {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id },

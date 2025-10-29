@@ -118,9 +118,8 @@ export class EstudiantesController {
       throw new BadRequestException('URL de avatar inválida');
     }
 
-    return this.estudiantesService.update(estudianteId, estudianteId, {
-      avatar_url: body.avatar_url,
-    });
+    // Actualizar avatar sin validación de ownership (el estudiante actualiza su propio avatar)
+    return this.estudiantesService.updateAvatar(estudianteId, body.avatar_url);
   }
 
   /**
