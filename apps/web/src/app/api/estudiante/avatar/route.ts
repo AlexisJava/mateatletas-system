@@ -21,7 +21,9 @@ export async function POST(request: NextRequest) {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'Origin': process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+        'Referer': request.headers.get('referer') || 'http://localhost:3000'
       },
       body: JSON.stringify({ avatar_url })
     })
