@@ -457,7 +457,8 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>🏆</span>
+                {/* Medalla blanca/plateada en vez de trofeo dorado */}
+                <span className="text-2xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>🥈</span>
                 <span
                   className="text-white font-bold text-xl"
                   style={{
