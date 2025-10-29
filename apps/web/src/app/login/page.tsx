@@ -168,7 +168,7 @@ export default function LoginPage() {
       const redirectPath =
         activeRole === 'admin' ? '/admin/dashboard' :
         activeRole === 'docente' ? '/docente/dashboard' :
-        activeRole === 'estudiante' ? '/estudiante/dashboard' :
+        activeRole === 'estudiante' ? '/estudiante/gimnasio' :
         '/dashboard';
 
       router.replace(redirectPath);

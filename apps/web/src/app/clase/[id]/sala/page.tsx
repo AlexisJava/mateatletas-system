@@ -99,7 +99,7 @@ export default function SalaClasePage() {
 
   const handleCerrarResumen = () => {
     setShowResumen(false);
-    router.push('/estudiante/dashboard');
+    router.push('/estudiante/gimnasio');
   };
 
   if (isLoading) {
@@ -118,10 +118,10 @@ export default function SalaClasePage() {
             Clase no encontrada
           </h2>
           <button
-            onClick={() => router.push('/estudiante/dashboard')}
+            onClick={() => router.push('/estudiante/gimnasio')}
             className="text-blue-600 hover:text-blue-700"
           >
-            Volver al Dashboard
+            Volver al Gimnasio
           </button>
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function SalaClasePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => router.push('/estudiante/dashboard')}
+              onClick={() => router.push('/estudiante/gimnasio')}
               className="flex items-center text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
