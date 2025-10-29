@@ -2,7 +2,7 @@
 
 import { useOverlay } from '../contexts/OverlayProvider';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, ChevronLeft } from 'lucide-react';
+import { X } from 'lucide-react';
 
 // Importar vistas de overlays
 import { MiGrupoView } from '../views/MiGrupoView';
@@ -11,47 +11,63 @@ import { MiProgresoView } from '../views/MiProgresoView';
 export function OverlayManager() {
   const { activeOverlay, closeOverlay } = useOverlay();
 
-  // Mapear tipo de overlay a componente y configuración
-  const overlayConfig: Record<string, { component: React.ComponentType<any>; title: string; gradient: string }> = {
+  // Configuración de overlays con estética BRUTAL
+  const overlayConfig: Record<string, { component: React.ComponentType<any>; title: string; gradient: string; glowColor: string; icon: string }> = {
     'mi-grupo': {
       component: MiGrupoView,
       title: 'MI GRUPO',
-      gradient: 'from-orange-500 via-red-500 to-pink-600',
+      gradient: 'from-orange-600 via-red-600 to-pink-700',
+      glowColor: 'rgba(249, 115, 22, 0.8)',
+      icon: '🔥',
     },
     'mi-progreso': {
       component: MiProgresoView,
       title: 'MI PROGRESO',
-      gradient: 'from-cyan-500 via-blue-500 to-purple-600',
+      gradient: 'from-cyan-600 via-blue-600 to-purple-700',
+      glowColor: 'rgba(6, 182, 212, 0.8)',
+      icon: '📊',
     },
     'mis-logros': {
       component: () => <PlaceholderView title="MIS LOGROS" emoji="🏆" />,
       title: 'MIS LOGROS',
-      gradient: 'from-yellow-500 via-amber-500 to-orange-600',
+      gradient: 'from-yellow-600 via-amber-600 to-orange-700',
+      glowColor: 'rgba(251, 191, 36, 0.8)',
+      icon: '🏆',
     },
     'entrenamientos': {
       component: () => <PlaceholderView title="ENTRENAMIENTOS" emoji="🎮" />,
       title: 'ENTRENAMIENTOS',
-      gradient: 'from-green-500 via-emerald-500 to-teal-600',
+      gradient: 'from-green-600 via-emerald-600 to-teal-700',
+      glowColor: 'rgba(16, 185, 129, 0.8)',
+      icon: '🎮',
     },
     'mis-cursos': {
       component: () => <PlaceholderView title="MIS CURSOS" emoji="📚" />,
       title: 'MIS CURSOS',
-      gradient: 'from-purple-500 via-violet-500 to-indigo-600',
+      gradient: 'from-purple-600 via-violet-600 to-indigo-700',
+      glowColor: 'rgba(147, 51, 234, 0.8)',
+      icon: '📚',
     },
     'tienda': {
       component: () => <PlaceholderView title="TIENDA" emoji="🛒" />,
       title: 'TIENDA',
-      gradient: 'from-pink-500 via-rose-500 to-red-600',
+      gradient: 'from-pink-600 via-rose-600 to-red-700',
+      glowColor: 'rgba(236, 72, 153, 0.8)',
+      icon: '🛒',
     },
     'notificaciones': {
       component: () => <PlaceholderView title="NOTIFICACIONES" emoji="🔔" />,
       title: 'NOTIFICACIONES',
-      gradient: 'from-red-500 via-orange-500 to-amber-600',
+      gradient: 'from-red-600 via-orange-600 to-amber-700',
+      glowColor: 'rgba(239, 68, 68, 0.8)',
+      icon: '🔔',
     },
     'ajustes': {
       component: () => <PlaceholderView title="AJUSTES" emoji="⚙️" />,
       title: 'AJUSTES',
-      gradient: 'from-slate-600 via-gray-600 to-slate-700',
+      gradient: 'from-slate-700 via-gray-700 to-zinc-800',
+      glowColor: 'rgba(100, 116, 139, 0.8)',
+      icon: '⚙️',
     },
   };
 
@@ -62,93 +78,202 @@ export function OverlayManager() {
     <AnimatePresence>
       {activeOverlay && config && (
         <>
-          {/* Backdrop con blur */}
+          {/* Backdrop BRUTAL con blur intenso */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeOverlay}
-            className="fixed inset-0 bg-black/60 backdrop-blur-md z-40"
+            className="fixed inset-0 bg-black/90 backdrop-blur-xl z-40"
+            style={{
+              backdropFilter: 'blur(20px) saturate(180%)',
+            }}
           />
 
-          {/* Modal Container - Slide desde derecha */}
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className={`fixed right-0 top-0 bottom-0 w-full md:w-4/5 lg:w-3/4
-                       bg-gradient-to-br ${config.gradient}
-                       shadow-2xl z-50 overflow-hidden`}
-          >
-            {/* Header del modal */}
-            <div className="absolute top-0 left-0 right-0 h-16
-                           bg-black/30 backdrop-blur-sm
-                           flex items-center justify-between px-6
-                           border-b border-white/10 z-10">
+          {/* Modal CENTRADO - ESTILO VIDEOJUEGO AAA */}
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4 md:p-8">
+            <motion.div
+              initial={{
+                scale: 0.7,
+                opacity: 0,
+                rotateX: 30,
+                y: 100,
+              }}
+              animate={{
+                scale: 1,
+                opacity: 1,
+                rotateX: 0,
+                y: 0,
+              }}
+              exit={{
+                scale: 0.7,
+                opacity: 0,
+                rotateX: -30,
+                y: -100,
+              }}
+              transition={{
+                type: 'spring',
+                damping: 20,
+                stiffness: 150,
+                duration: 0.5,
+              }}
+              className="w-full max-w-7xl h-[90vh] relative"
+              style={{
+                perspective: '2000px',
+                transformStyle: 'preserve-3d',
+              }}
+            >
+              {/* GLOW EXTERIOR BRUTAL */}
+              <div
+                className="absolute -inset-4 rounded-[3rem] blur-3xl opacity-60 animate-pulse"
+                style={{
+                  background: `radial-gradient(circle, ${config.glowColor}, transparent 70%)`,
+                  animation: 'pulse 3s ease-in-out infinite',
+                }}
+              />
 
-              {/* Botón volver */}
-              <motion.button
-                whileHover={{ scale: 1.05, x: -5 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={closeOverlay}
-                className="flex items-center gap-2 text-white font-bold text-lg
-                           bg-white/10 hover:bg-white/20 rounded-xl px-4 py-2
-                           transition-colors"
-              >
-                <ChevronLeft className="w-6 h-6" />
-                Volver
-              </motion.button>
+              {/* CONTAINER PRINCIPAL */}
+              <div className={`
+                relative w-full h-full
+                bg-gradient-to-br ${config.gradient}
+                rounded-[2.5rem]
+                overflow-hidden
+                border-4 border-white/30
+                shadow-[0_0_80px_rgba(0,0,0,0.9),inset_0_2px_60px_rgba(255,255,255,0.1)]
+              `}>
 
-              {/* Título del overlay */}
-              <h1 className="text-white text-2xl font-black uppercase tracking-wider
-                             drop-shadow-lg">
-                {config.title}
-              </h1>
+                {/* Textura de fondo estilo videojuego */}
+                <div className="absolute inset-0 opacity-10 pointer-events-none"
+                     style={{
+                       backgroundImage: `
+                         linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%),
+                         linear-gradient(-45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%)
+                       `,
+                       backgroundSize: '30px 30px',
+                     }}
+                />
 
-              {/* Botón cerrar (X) */}
-              <motion.button
-                whileHover={{ scale: 1.1, rotate: 90 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={closeOverlay}
-                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20
-                           flex items-center justify-center text-white
-                           transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </motion.button>
-            </div>
+                {/* Líneas de neón decorativas */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-50" />
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white to-transparent opacity-50" />
+                <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-transparent via-white to-transparent opacity-50" />
+                <div className="absolute top-0 bottom-0 right-0 w-1 bg-gradient-to-b from-transparent via-white to-transparent opacity-50" />
 
-            {/* Contenido scrolleable */}
-            <div className="h-full pt-16 overflow-y-auto">
-              {ActiveComponent && <ActiveComponent estudiante={{ nombre: 'Estudiante' }} />}
-            </div>
-          </motion.div>
+                {/* HEADER ÉPICO */}
+                <div className="relative h-24 bg-black/40 backdrop-blur-md border-b-2 border-white/20
+                               flex items-center justify-between px-8">
+
+                  {/* Detalles decorativos esquinas */}
+                  <div className="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-white/40 rounded-tl-3xl" />
+                  <div className="absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 border-white/40 rounded-tr-3xl" />
+
+                  {/* Icono + Título */}
+                  <div className="flex items-center gap-4 z-10">
+                    <motion.div
+                      animate={{
+                        rotate: [0, 10, -10, 0],
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      }}
+                      className="text-6xl drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]"
+                    >
+                      {config.icon}
+                    </motion.div>
+                    <h1 className="text-5xl font-black text-white uppercase tracking-wider
+                                   drop-shadow-[0_0_30px_rgba(0,0,0,0.9)]
+                                   bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80
+                                   font-[family-name:var(--font-lilita)]">
+                      {config.title}
+                    </h1>
+                  </div>
+
+                  {/* Botón CERRAR estilo videojuego */}
+                  <motion.button
+                    whileHover={{
+                      scale: 1.15,
+                      rotate: 180,
+                      boxShadow: '0 0 40px rgba(255,255,255,0.8)',
+                    }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={closeOverlay}
+                    className="w-16 h-16 rounded-2xl
+                               bg-gradient-to-br from-red-500 to-red-700
+                               border-4 border-white/40
+                               shadow-[0_0_30px_rgba(239,68,68,0.6),inset_0_2px_20px_rgba(255,255,255,0.3)]
+                               flex items-center justify-center
+                               relative overflow-hidden
+                               group z-10"
+                  >
+                    {/* Brillo animado */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent"
+                      animate={{ x: ['-100%', '200%'] }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                    />
+                    <X className="w-8 h-8 text-white relative z-10 drop-shadow-lg" />
+                  </motion.button>
+                </div>
+
+                {/* CONTENIDO SCROLLEABLE */}
+                <div className="h-[calc(100%-6rem)] overflow-y-auto overflow-x-hidden
+                               scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/30">
+                  {ActiveComponent && <ActiveComponent estudiante={{ nombre: 'Estudiante' }} />}
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
   );
 }
 
-// Componente placeholder para vistas no implementadas
+// Componente placeholder BRUTAL
 function PlaceholderView({ title, emoji }: { title: string; emoji: string }) {
   return (
     <div className="min-h-full flex items-center justify-center p-8">
       <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.2 }}
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{
+          type: 'spring',
+          damping: 15,
+          stiffness: 100,
+          delay: 0.2,
+        }}
         className="text-center"
       >
-        <div className="text-9xl mb-8 animate-bounce">
+        <motion.div
+          animate={{
+            y: [0, -20, 0],
+            rotate: [0, 10, -10, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          className="text-[12rem] mb-8 drop-shadow-[0_0_60px_rgba(255,255,255,0.8)]"
+        >
           {emoji}
-        </div>
-        <h2 className="text-white text-5xl font-black mb-4">
+        </motion.div>
+        <h2 className="text-white text-7xl font-black mb-6
+                       drop-shadow-[0_0_40px_rgba(0,0,0,1)]
+                       font-[family-name:var(--font-lilita)]">
           {title}
         </h2>
-        <p className="text-white/70 text-2xl">
-          Próximamente
-        </p>
+        <motion.div
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="text-white/80 text-3xl font-bold"
+        >
+          Próximamente...
+        </motion.div>
       </motion.div>
     </div>
   );
