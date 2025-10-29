@@ -5,20 +5,28 @@
 
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Sparkles, TrendingUp, Target } from 'lucide-react';
 import type { EntrenamientosViewProps } from './types/entrenamientos.types';
 import { useEntrenamientos } from './hooks/useEntrenamientos';
 import { CienciaCard } from './components/CienciaCard';
+import { useOverlayStack } from '../contexts/OverlayStackProvider';
+import type { PlanificacionTema } from '../types/overlay.types';
 
 export function EntrenamientosView({ estudiante }: EntrenamientosViewProps) {
-  const router = useRouter();
+  const { push } = useOverlayStack();
   const { ciencias, estadisticas, isLoading, error } = useEntrenamientos(estudiante.id);
 
-  // Manejar click en una ciencia
+  // Manejar click en una ciencia - Push overlay de planificación
   const handleCienciaClick = (codigo: string) => {
-    router.push(`/estudiante/planificaciones/${codigo}`);
+    // Extraer tema del código (ej: "2025-11-mes-ciencia-astronomia" → "astronomia")
+    const tema = codigo.split('-').pop() as PlanificacionTema;
+
+    push({
+      type: 'planificacion',
+      codigo,
+      tema,
+    });
   };
 
   // Loading state
