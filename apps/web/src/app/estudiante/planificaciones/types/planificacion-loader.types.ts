@@ -11,11 +11,12 @@ import type { CodigoCiencia } from '../../gimnasio/views/types/entrenamientos.ty
 export type CodigoPlanificacionValido = CodigoCiencia;
 
 /**
- * Props que debe aceptar cada componente de planificación
+ * Props que puede aceptar cada componente de planificación
+ * Son opcionales para mantener compatibilidad con planificaciones que usan PlanificacionWrapper
  */
 export interface PlanificacionComponentProps {
-  estudianteId: string;
-  nivelEstudiante: number; // 1-10
+  estudianteId?: string;
+  nivelEstudiante?: number; // 1-10
 }
 
 /**
