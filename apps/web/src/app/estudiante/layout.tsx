@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 
 /**
@@ -12,6 +12,7 @@ import { useAuthStore } from '@/store/auth.store';
  */
 export default function EstudianteLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, checkAuth } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const hasValidatedRef = useRef(false);
@@ -25,6 +26,28 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 
       // Usuario estudiante válido
       if (user && user.role === 'estudiante') {
+        // Verificar si tiene avatar
+        try {
+          const response = await fetch('/api/estudiante/mi-avatar');
+          if (response.ok) {
+            const data = await response.json();
+
+            // Si NO tiene avatar Y NO está en /crear-avatar → Redirigir
+            if (!data.tiene_avatar && pathname !== '/estudiante/crear-avatar') {
+              router.replace('/estudiante/crear-avatar');
+              return;
+            }
+
+            // Si tiene avatar Y está en /crear-avatar → Redirigir al gimnasio
+            if (data.tiene_avatar && pathname === '/estudiante/crear-avatar') {
+              router.replace('/estudiante/gimnasio');
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error al verificar avatar:', error);
+        }
+
         setIsValidating(false);
         return;
       }
