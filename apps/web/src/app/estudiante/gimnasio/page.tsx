@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { BrawlBackground } from './components/BrawlBackground'
 import { BrawlHeader } from './components/BrawlHeader'
@@ -18,23 +18,26 @@ export default function GimnasioPage() {
   const [vistaActual, setVistaActual] = useState<Vista>('hub')
   const { user } = useAuthStore()
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const hasLoadedAvatar = useRef(false)
 
-  // Cargar avatar del estudiante
+  // Cargar avatar del estudiante (solo una vez)
   useEffect(() => {
+    if (hasLoadedAvatar.current) return
+
     const loadAvatar = async () => {
+      hasLoadedAvatar.current = true
+
       try {
-        console.log('🎮 [Gimnasio] Cargando avatar del estudiante...')
         const response = await fetch('/api/estudiante/mi-avatar', {
           credentials: 'include',
         })
 
         if (response.ok) {
           const data = await response.json()
-          console.log('📦 [Gimnasio] Avatar data:', data)
           setAvatarUrl(data.avatar_url)
         }
       } catch (error) {
-        console.error('❌ [Gimnasio] Error al cargar avatar:', error)
+        console.error('Error al cargar avatar:', error)
       }
     }
 
