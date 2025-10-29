@@ -1,13 +1,13 @@
 /**
- * MUSEO DE LA CIENCIA - Noviembre 2025
- * ESTILO MATIFIC: Inmersivo, narrativo, interactivo
- * El niño explora un museo con 4 salas temáticas (no cards aburridos)
+ * MES DE LA CIENCIA - Estilo BRAWL STARS
+ * Layout: 4 cards verticales en fila horizontal (como el shop de Brawl)
+ * Cards altas con ilustraciones grandes, colores saturados, borders gruesos
  */
 
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Lock, Sparkles } from 'lucide-react';
 import { useOverlayStack } from '../../contexts/OverlayStackProvider';
 import { SEMANAS_MES_CIENCIA } from '../../data/semanas-mes-ciencia';
 import type { OverlayConfig } from '../../types/overlay.types';
@@ -22,183 +22,227 @@ export interface PlanificacionViewProps {
 }
 
 /**
- * Componente de Puerta Interactiva de Sala
+ * Card vertical estilo Brawl Stars
  */
-interface DoorProps {
+interface BrawlCardProps {
   semana: Semana;
-  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   onClick: () => void;
+  index: number;
 }
 
-function MuseumDoor({ semana, position, onClick }: DoorProps) {
+function BrawlCard({ semana, onClick, index }: BrawlCardProps) {
   const esBloqueada = semana.estado === 'bloqueada';
   const esNueva = semana.estado === 'disponible' && semana.progreso === 0;
 
-  // Colores según tema
-  const doorColors = {
-    quimica: { primary: '#a855f7', secondary: '#ec4899', glow: 'rgba(168, 85, 247, 0.4)' },
-    fisica: { primary: '#3b82f6', secondary: '#06b6d4', glow: 'rgba(59, 130, 246, 0.4)' },
-    biologia: { primary: '#10b981', secondary: '#84cc16', glow: 'rgba(16, 185, 129, 0.4)' },
-    astronomia: { primary: '#8b5cf6', secondary: '#f59e0b', glow: 'rgba(139, 92, 246, 0.4)' },
+  // Colores SATURADOS estilo Brawl Stars
+  const cardStyles = {
+    quimica: {
+      bg: 'linear-gradient(180deg, #10b981 0%, #059669 100%)',
+      border: '#047857',
+      shadow: 'rgba(16, 185, 129, 0.5)',
+    },
+    astronomia: {
+      bg: 'linear-gradient(180deg, #a855f7 0%, #7e22ce 100%)',
+      border: '#6b21a8',
+      shadow: 'rgba(168, 85, 247, 0.5)',
+    },
+    fisica: {
+      bg: 'linear-gradient(180deg, #f97316 0%, #ea580c 100%)',
+      border: '#c2410c',
+      shadow: 'rgba(249, 115, 22, 0.5)',
+    },
+    informatica: {
+      bg: 'linear-gradient(180deg, #06b6d4 0%, #0891b2 100%)',
+      border: '#0e7490',
+      shadow: 'rgba(6, 182, 212, 0.5)',
+    },
   };
 
-  const colors = doorColors[semana.tema];
-
-  // Posiciones isométricas
-  const positions = {
-    'top-left': 'top-[15%] left-[15%]',
-    'top-right': 'top-[15%] right-[15%]',
-    'bottom-left': 'bottom-[15%] left-[15%]',
-    'bottom-right': 'bottom-[15%] right-[15%]',
-  };
+  const style = cardStyles[semana.tema];
 
   return (
     <motion.div
-      className={`absolute ${positions[position]} cursor-pointer group`}
-      whileHover={!esBloqueada ? { scale: 1.05, y: -5 } : undefined}
-      whileTap={!esBloqueada ? { scale: 0.95 } : undefined}
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, type: 'spring', stiffness: 300, damping: 25 }}
+      whileHover={!esBloqueada ? { y: -8, scale: 1.02 } : undefined}
+      whileTap={!esBloqueada ? { scale: 0.98 } : undefined}
       onClick={!esBloqueada ? onClick : undefined}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.2 + (position === 'top-left' ? 0 : position === 'top-right' ? 0.1 : position === 'bottom-left' ? 0.2 : 0.3) }}
+      className={`
+        relative
+        w-72
+        h-[480px]
+        rounded-3xl
+        overflow-hidden
+        ${esBloqueada ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
+        transition-all duration-200
+      `}
+      style={{
+        background: esBloqueada ? 'linear-gradient(180deg, #374151 0%, #1f2937 100%)' : style.bg,
+        border: `4px solid ${esBloqueada ? '#4b5563' : style.border}`,
+        boxShadow: esBloqueada ? 'none' : `0 12px 40px ${style.shadow}`,
+      }}
     >
-      {/* Puerta con glassmorphism */}
-      <div
-        className={`
-          relative
-          w-64 h-80
-          rounded-3xl
-          backdrop-blur-xl
-          border-2
-          transition-all duration-300
-          ${esBloqueada ? 'opacity-40 grayscale' : 'group-hover:shadow-2xl'}
-        `}
-        style={{
-          background: esBloqueada
-            ? 'rgba(255, 255, 255, 0.05)'
-            : `linear-gradient(135deg, ${colors.primary}33 0%, ${colors.secondary}33 100%)`,
-          borderColor: esBloqueada ? 'rgba(255, 255, 255, 0.1)' : `${colors.primary}66`,
-          boxShadow: esBloqueada ? 'none' : `0 8px 32px ${colors.glow}`,
-        }}
-      >
-        {/* Badge "NUEVA" o estado */}
-        {esNueva && !esBloqueada && (
-          <div
-            className="absolute -top-3 -right-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full px-4 py-1.5 flex items-center gap-1 shadow-lg"
+      {/* Badge NUEVA */}
+      {esNueva && !esBloqueada && (
+        <div className="absolute top-3 right-3 z-10">
+          <motion.div
+            className="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full px-4 py-1.5 flex items-center gap-1.5 shadow-lg border-2 border-yellow-600"
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 1, repeat: Infinity }}
           >
             <Sparkles className="w-4 h-4 text-white" />
-            <span className="text-xs font-bold text-white">¡NUEVA!</span>
+            <span className="text-xs font-black text-white uppercase">¡Nueva!</span>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Ilustración grande arriba (emoji gigante por ahora) */}
+      <div
+        className="relative h-64 flex items-center justify-center overflow-hidden"
+        style={{
+          background: esBloqueada
+            ? 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%)'
+            : 'linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.2) 100%)',
+        }}
+      >
+        {/* Lock overlay para bloqueadas */}
+        {esBloqueada && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-10">
+            <Lock className="w-20 h-20 text-white/50" strokeWidth={2} />
           </div>
         )}
 
-        {/* Lock icon para bloqueadas */}
-        {esBloqueada && (
-          <div className="absolute top-4 right-4 text-4xl opacity-50">🔒</div>
-        )}
+        {/* Emoji con animación */}
+        <motion.div
+          className="text-9xl"
+          animate={
+            !esBloqueada
+              ? {
+                  y: [0, -15, 0],
+                  rotate: [0, 5, -5, 0],
+                }
+              : undefined
+          }
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          style={{
+            filter: esBloqueada ? 'grayscale(100%)' : 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))',
+          }}
+        >
+          {semana.emoji}
+        </motion.div>
+      </div>
 
-        {/* Contenido de la puerta */}
-        <div className="flex flex-col items-center justify-center h-full p-6">
-          {/* Emoji gigante */}
-          <motion.div
-            className="text-7xl mb-4"
-            animate={!esBloqueada ? {
-              y: [0, -10, 0],
-              rotate: [0, 5, -5, 0],
-            } : undefined}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          >
-            {semana.emoji}
-          </motion.div>
+      {/* Contenido inferior */}
+      <div className="relative h-[216px] bg-gradient-to-b from-black/20 to-black/40 p-6 flex flex-col">
+        {/* Título */}
+        <h3
+          className="font-[family-name:var(--font-lilita)] text-3xl text-white text-center mb-4 leading-tight"
+          style={{
+            textShadow: '0 3px 8px rgba(0, 0, 0, 0.5)',
+          }}
+        >
+          {semana.titulo}
+        </h3>
 
-          {/* Título de la sala */}
-          <h3
-            className="font-[family-name:var(--font-lilita)] text-2xl text-white text-center mb-3 leading-tight"
-            style={{
-              textShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
-            }}
-          >
-            {semana.titulo}
-          </h3>
-
-          {/* Progress bar circular minimalista */}
-          <div className="relative w-16 h-16 mb-3">
-            <svg className="w-16 h-16 transform -rotate-90">
+        {/* Progress circular */}
+        <div className="flex justify-center mb-4">
+          <div className="relative w-20 h-20">
+            <svg className="w-20 h-20 transform -rotate-90">
               <circle
-                cx="32"
-                cy="32"
-                r="28"
+                cx="40"
+                cy="40"
+                r="35"
                 stroke="rgba(255, 255, 255, 0.2)"
-                strokeWidth="4"
+                strokeWidth="6"
                 fill="none"
               />
               <motion.circle
-                cx="32"
-                cy="32"
-                r="28"
-                stroke={esBloqueada ? 'rgba(255, 255, 255, 0.1)' : colors.primary}
-                strokeWidth="4"
+                cx="40"
+                cy="40"
+                r="35"
+                stroke={esBloqueada ? 'rgba(255, 255, 255, 0.3)' : 'white'}
+                strokeWidth="6"
                 fill="none"
-                strokeDasharray={`${2 * Math.PI * 28}`}
-                initial={{ strokeDashoffset: 2 * Math.PI * 28 }}
-                animate={{ strokeDashoffset: 2 * Math.PI * 28 * (1 - semana.progreso / 100) }}
-                transition={{ duration: 1, delay: 0.5 }}
+                strokeDasharray={`${2 * Math.PI * 35}`}
+                initial={{ strokeDashoffset: 2 * Math.PI * 35 }}
+                animate={{ strokeDashoffset: 2 * Math.PI * 35 * (1 - semana.progreso / 100) }}
+                transition={{ duration: 1.5, delay: 0.3 + index * 0.1 }}
+                strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">{semana.progreso}%</span>
+              <span
+                className="text-white font-black text-xl"
+                style={{
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+                }}
+              >
+                {semana.progreso}%
+              </span>
             </div>
-          </div>
-
-          {/* Stats compactos */}
-          <div className="flex items-center gap-3 text-white/80 text-sm">
-            <div className="flex items-center gap-1">
-              <span>⭐</span>
-              <span className="font-semibold">{semana.estrellas}/{semana.totalEstrellas}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span>🏆</span>
-              <span className="font-semibold">{semana.puntos}</span>
-            </div>
-          </div>
-
-          {/* Badge de estado */}
-          <div className="mt-4">
-            {semana.estado === 'completada' && (
-              <span className="text-xs bg-green-500/20 text-green-300 px-3 py-1 rounded-full border border-green-500/40 font-semibold">
-                ✓ Completada
-              </span>
-            )}
-            {semana.estado === 'en-progreso' && (
-              <span className="text-xs bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full border border-yellow-500/40 font-semibold">
-                ⏸ En progreso
-              </span>
-            )}
-            {semana.estado === 'disponible' && (
-              <span className="text-xs bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-full border border-cyan-500/40 font-semibold">
-                🎯 Disponible
-              </span>
-            )}
-            {semana.estado === 'bloqueada' && (
-              <span className="text-xs bg-gray-500/20 text-gray-400 px-3 py-1 rounded-full border border-gray-500/40 font-semibold">
-                🔒 Bloqueada
-              </span>
-            )}
           </div>
         </div>
 
-        {/* Efecto de brillo hover */}
-        {!esBloqueada && (
-          <div
-            className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-            style={{
-              background: `radial-gradient(circle at center, ${colors.primary}22 0%, transparent 70%)`,
-            }}
-          />
-        )}
+        {/* Stats: Estrellas + Puntos */}
+        <div className="flex items-center justify-center gap-6 mb-auto">
+          <div className="flex items-center gap-1.5">
+            <span className="text-2xl">⭐</span>
+            <span
+              className="text-white font-bold text-lg"
+              style={{
+                textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              {semana.estrellas}/{semana.totalEstrellas}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-2xl">🏆</span>
+            <span
+              className="text-white font-bold text-lg"
+              style={{
+                textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              {semana.puntos}
+            </span>
+          </div>
+        </div>
+
+        {/* Badge de estado */}
+        <div className="mt-auto">
+          {esBloqueada && (
+            <div className="w-full bg-red-600/80 backdrop-blur-sm rounded-2xl py-2.5 border-2 border-red-700 flex items-center justify-center gap-2">
+              <Lock className="w-4 h-4 text-white" />
+              <span className="text-white font-black text-sm uppercase tracking-wide">Bloqueada</span>
+            </div>
+          )}
+          {!esBloqueada && semana.estado === 'disponible' && (
+            <div className="w-full bg-cyan-500/90 backdrop-blur-sm rounded-2xl py-2.5 border-2 border-cyan-600 flex items-center justify-center gap-2">
+              <Sparkles className="w-4 h-4 text-white" />
+              <span className="text-white font-black text-sm uppercase tracking-wide">¡Disponible!</span>
+            </div>
+          )}
+          {semana.estado === 'en-progreso' && (
+            <div className="w-full bg-yellow-500/90 backdrop-blur-sm rounded-2xl py-2.5 border-2 border-yellow-600">
+              <span className="text-white font-black text-sm uppercase tracking-wide text-center block">
+                En Progreso
+              </span>
+            </div>
+          )}
+          {semana.estado === 'completada' && (
+            <div className="w-full bg-green-500/90 backdrop-blur-sm rounded-2xl py-2.5 border-2 border-green-600">
+              <span className="text-white font-black text-sm uppercase tracking-wide text-center block">
+                ✓ Completada
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );
@@ -225,19 +269,14 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.3 }}
       className="fixed inset-0 z-50 flex flex-col overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+        background: 'linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%)',
       }}
     >
-      {/* Header minimalista */}
-      <header
-        className="h-20 backdrop-blur-xl border-b border-white/10 px-8 flex items-center justify-between"
-        style={{
-          background: 'rgba(15, 23, 42, 0.8)',
-        }}
-      >
+      {/* Header estilo Brawl */}
+      <header className="h-20 backdrop-blur-xl border-b border-white/10 px-8 flex items-center justify-between bg-black/20">
         <button
           onClick={pop}
           className="
@@ -245,7 +284,7 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
             bg-white/10
             hover:bg-white/20
             backdrop-blur-xl
-            border border-white/20
+            border-2 border-white/30
             rounded-2xl
             px-6 py-3
             transition-all duration-200
@@ -253,97 +292,49 @@ export function PlanificacionView({ config, estudiante }: PlanificacionViewProps
             active:scale-95
           "
         >
-          <ArrowLeft className="w-5 h-5 text-white" strokeWidth={2} />
-          <span className="font-semibold text-white">Volver</span>
+          <ArrowLeft className="w-5 h-5 text-white" strokeWidth={3} />
+          <span className="font-black text-white uppercase text-sm">Volver</span>
         </button>
 
         <div className="text-center">
           <h1
-            className="font-[family-name:var(--font-lilita)] text-4xl text-white tracking-wide"
+            className="font-[family-name:var(--font-lilita)] text-5xl text-white tracking-wide uppercase"
             style={{
-              textShadow: '0 2px 12px rgba(255, 255, 255, 0.3)',
+              textShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
             }}
           >
-            🏛️ MUSEO DE LA CIENCIA
+            MES DE LA CIENCIA
           </h1>
-          <p className="text-white/60 text-sm mt-1">Noviembre 2025 • Explora las 4 salas</p>
+          <p className="text-yellow-300 text-sm font-bold mt-1 uppercase tracking-wide">Noviembre 2025</p>
         </div>
 
-        <div className="w-32" /> {/* Spacer para centrar título */}
+        <div className="w-32" /> {/* Spacer */}
       </header>
 
-      {/* Museo central con 4 puertas */}
-      <div className="flex-1 relative overflow-hidden">
-        {/* Background con efecto de museo */}
-        <div className="absolute inset-0">
-          {/* Grid sutil de piso */}
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '50px 50px',
-            }}
-          />
-
-          {/* Luz central */}
-          <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-20"
-            style={{
-              background: 'radial-gradient(circle, rgba(56, 189, 248, 0.4) 0%, transparent 70%)',
-            }}
-          />
+      {/* Carrusel horizontal de 4 cards */}
+      <div className="flex-1 flex items-center justify-center p-8 overflow-hidden">
+        <div className="flex gap-6 items-center justify-center max-w-7xl">
+          {SEMANAS_MES_CIENCIA.map((semana, index) => (
+            <BrawlCard key={semana.id} semana={semana} onClick={() => handleSemanaClick(semana.id)} index={index} />
+          ))}
         </div>
-
-        {/* Las 4 puertas del museo */}
-        <div className="relative w-full h-full">
-          <MuseumDoor
-            semana={SEMANAS_MES_CIENCIA[0]}
-            position="top-left"
-            onClick={() => handleSemanaClick(SEMANAS_MES_CIENCIA[0].id)}
-          />
-          <MuseumDoor
-            semana={SEMANAS_MES_CIENCIA[1]}
-            position="top-right"
-            onClick={() => handleSemanaClick(SEMANAS_MES_CIENCIA[1].id)}
-          />
-          <MuseumDoor
-            semana={SEMANAS_MES_CIENCIA[2]}
-            position="bottom-left"
-            onClick={() => handleSemanaClick(SEMANAS_MES_CIENCIA[2].id)}
-          />
-          <MuseumDoor
-            semana={SEMANAS_MES_CIENCIA[3]}
-            position="bottom-right"
-            onClick={() => handleSemanaClick(SEMANAS_MES_CIENCIA[3].id)}
-          />
-        </div>
-
-        {/* Mensaje central del Dr. Ciencia */}
-        <motion.div
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 max-w-2xl"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-        >
-          <div
-            className="backdrop-blur-xl border border-white/20 rounded-3xl px-8 py-4 flex items-center gap-4"
-            style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-            }}
-          >
-            <div className="text-6xl">👨‍🔬</div>
-            <div>
-              <p className="text-white font-semibold text-lg mb-1">Dr. Ciencia te da la bienvenida</p>
-              <p className="text-white/70 text-sm">
-                ¡Explora las 4 salas del museo y descubre los secretos de la ciencia! 🔬✨
-              </p>
-            </div>
-          </div>
-        </motion.div>
       </div>
+
+      {/* Mensaje del Dr. Ciencia */}
+      <motion.div
+        className="pb-8 px-8 flex justify-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <div className="bg-black/30 backdrop-blur-xl border-2 border-white/20 rounded-3xl px-8 py-4 flex items-center gap-4 max-w-2xl">
+          <div className="text-6xl">👨‍🔬</div>
+          <div>
+            <p className="text-white font-bold text-lg mb-1">Dr. Ciencia</p>
+            <p className="text-white/80 text-sm">¡Elige una sala para comenzar tu aventura científica! 🔬✨</p>
+          </div>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }
