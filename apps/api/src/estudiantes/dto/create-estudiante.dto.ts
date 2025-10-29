@@ -118,6 +118,20 @@ export class CreateEstudianteDto {
   foto_url?: string;
 
   /**
+   * URL del avatar 3D de Ready Player Me (opcional)
+   * Reemplaza a foto_url como método principal de avatar
+   */
+  @ApiPropertyOptional({
+    description: 'URL del avatar 3D de Ready Player Me (.glb)',
+    example: 'https://models.readyplayer.me/abc123def456.glb',
+    type: String,
+  })
+  @IsOptional()
+  @IsString({ message: 'La URL del avatar debe ser un texto' })
+  @Trim()
+  avatar_url?: string;
+
+  /**
    * ID del equipo al que pertenece (opcional)
    */
   @ApiPropertyOptional({
