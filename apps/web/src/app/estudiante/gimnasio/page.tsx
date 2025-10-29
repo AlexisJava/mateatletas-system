@@ -58,21 +58,40 @@ export default function GimnasioPage() {
       <AnimatePresence mode="wait">
         {vistaActual === 'hub' && (
           <div key="hub" className="min-h-screen pt-32 px-8 flex flex-col items-center justify-center">
-            {/* Avatar 3D Grande - TU PERSONAJE */}
+            {/* Avatar 3D Grande - TU PERSONAJE ANIMADO */}
             {avatarUrl ? (
               <div className="mb-8">
                 <h2 className="text-center text-white text-2xl font-bold mb-4" style={{ fontFamily: '"Lilita One", cursive' }}>
                   ¡Tu Atleta Mental!
                 </h2>
-                <div className="w-80 h-96 rounded-3xl bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 p-2 shadow-2xl shadow-purple-500/50">
+                <div className="w-96 h-[32rem] rounded-3xl bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 p-2 shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 transition-all">
                   <div className="w-full h-full rounded-2xl bg-black/20 backdrop-blur-sm overflow-hidden border-4 border-white/20">
                     <iframe
-                      src={`${avatarUrl}?scene=fullbody-portrait-v1&animation=idle`}
-                      className="w-full h-full border-none"
+                      src={`${avatarUrl}?scene=fullbody-portrait-v1-transparent&animation=idle-2`}
+                      className="w-full h-full border-none scale-110"
                       title="Tu Avatar 3D"
                       allow="camera; microphone"
+                      style={{
+                        background: 'transparent',
+                        pointerEvents: 'none'
+                      }}
                     />
                   </div>
+                </div>
+                <div className="mt-4 flex gap-2 justify-center">
+                  <button
+                    onClick={() => {
+                      // TODO: Cambiar animación
+                    }}
+                    className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-bold text-sm transition-all"
+                  >
+                    Saludar 👋
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-sm transition-all"
+                  >
+                    Celebrar 🎉
+                  </button>
                 </div>
               </div>
             ) : (
