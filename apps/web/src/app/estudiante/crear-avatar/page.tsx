@@ -52,36 +52,60 @@ export default function CrearAvatarPage() {
   }, [paso])
 
   const handleAvatarExported = (event: AvatarExportedEvent) => {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    console.log('🎨 [CREAR-AVATAR] Avatar exportado de Ready Player Me')
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    console.log('📦 Event completo:', event)
+    console.log('📦 Event.data:', event.data)
+    console.log('🔗 Avatar URL:', event.data.url)
+    console.log('📏 Longitud URL:', event.data.url?.length)
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
+
     const url = event.data.url
-    console.log('✅ [CrearAvatar] Avatar creado:', url)
     setAvatarUrl(url)
     setPaso('preview')
   }
 
   const handleGuardar = async () => {
-    console.log('💾 [CrearAvatar] Guardando avatar:', avatarUrl)
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    console.log('💾 [CREAR-AVATAR] Guardando avatar')
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    console.log('🔗 Avatar URL a guardar:', avatarUrl)
+
     setGuardando(true)
     setError('')
 
     try {
+      console.log('📤 Enviando POST /api/estudiante/avatar...')
       const response = await fetch('/api/estudiante/avatar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ avatar_url: avatarUrl })
       })
 
-      console.log('📥 [CrearAvatar] Response status:', response.status)
+      console.log('📥 Response status:', response.status)
+      console.log('📥 Response ok?', response.ok)
 
       if (!response.ok) {
         const data = await response.json()
+        console.error('❌ Error en respuesta:', data)
         throw new Error(data.error || 'Error al guardar')
       }
 
-      console.log('✅ [CrearAvatar] Avatar guardado en BD, redirigiendo...')
-      setTimeout(() => router.push('/estudiante/gimnasio'), 1000)
+      const data = await response.json()
+      console.log('✅ Avatar guardado exitosamente:', data)
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
+
+      // Redirigir al gimnasio
+      setTimeout(() => {
+        console.log('🔄 Redirigiendo a /estudiante/gimnasio')
+        router.push('/estudiante/gimnasio')
+      }, 1000)
 
     } catch (err: any) {
-      console.error('❌ [CrearAvatar] Error:', err)
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+      console.error('❌ [CREAR-AVATAR] ERROR:', err)
+      console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
       setError(err.message || 'Error al guardar avatar')
       setGuardando(false)
     }

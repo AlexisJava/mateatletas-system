@@ -113,13 +113,28 @@ export class EstudiantesController {
   ) {
     const estudianteId = req.user.id;
 
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🔧 [BACKEND] PATCH /estudiantes/avatar');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('👤 Estudiante ID:', estudianteId);
+    console.log('🔗 Avatar URL recibida:', body.avatar_url);
+    console.log('📏 Longitud URL:', body.avatar_url?.length);
+    console.log('✅ Incluye readyplayer.me?', body.avatar_url?.includes('readyplayer.me'));
+    console.log('✅ Incluye .glb?', body.avatar_url?.includes('.glb'));
+
     // Validar que sea URL válida de Ready Player Me
     if (!body.avatar_url || !body.avatar_url.includes('readyplayer.me')) {
+      console.error('❌ URL de avatar inválida');
       throw new BadRequestException('URL de avatar inválida');
     }
 
     // Actualizar avatar 3D sin validación de ownership (el estudiante actualiza su propio avatar)
-    return this.estudiantesService.updateAvatar3D(estudianteId, body.avatar_url);
+    const resultado = await this.estudiantesService.updateAvatar3D(estudianteId, body.avatar_url);
+
+    console.log('✅ Avatar actualizado en BD:', resultado.avatar_url);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    return resultado;
   }
 
   /**
@@ -133,13 +148,32 @@ export class EstudiantesController {
   async obtenerMiAvatar(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
 
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🔍 [BACKEND] GET /estudiantes/mi-avatar');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('👤 Estudiante ID:', estudianteId);
+
     // Buscar directamente sin ownership check (el estudiante accede a sus propios datos)
     const estudiante = await this.estudiantesService.findOneById(estudianteId);
 
-    return {
+    console.log('📦 Estudiante encontrado:', estudiante.nombre, estudiante.apellido);
+    console.log('🔗 Avatar URL en BD:', estudiante.avatar_url);
+    console.log('✅ Tiene avatar?', !!estudiante.avatar_url);
+
+    if (estudiante.avatar_url) {
+      console.log('📏 Longitud URL:', estudiante.avatar_url.length);
+      console.log('🔍 Formato:', estudiante.avatar_url.substring(0, 50) + '...');
+    }
+
+    const resultado = {
       avatar_url: estudiante.avatar_url,
       tiene_avatar: !!estudiante.avatar_url,
     };
+
+    console.log('📤 Respuesta:', resultado);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    return resultado;
   }
 
   /**
