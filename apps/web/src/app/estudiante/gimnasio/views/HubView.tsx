@@ -61,12 +61,21 @@ const getAvatarViewerUrl = (url: string | undefined): string | null => {
 export function HubView({ onNavigate, estudiante }: HubViewProps) {
   // Debug: Ver qué URL tiene el estudiante
   useEffect(() => {
-    console.log('🎮 [HubView] Avatar URL del estudiante:', estudiante.avatar_url)
-    console.log('🎮 [HubView] Tiene avatar?', !!estudiante.avatar_url)
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    console.log('🏋️ [HUBVIEW] Estado del estudiante')
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
+    console.log('👤 Estudiante:', estudiante.nombre, estudiante.apellido)
+    console.log('🔗 Avatar URL:', estudiante.avatar_url)
+    console.log('📏 Longitud:', estudiante.avatar_url?.length)
+    console.log('✅ Tiene avatar?', !!estudiante.avatar_url)
 
-    const viewerUrl = getAvatarViewerUrl(estudiante.avatar_url)
-    console.log('🎮 [HubView] Viewer URL procesada:', viewerUrl)
-  }, [estudiante.avatar_url])
+    if (estudiante.avatar_url) {
+      console.log('🔍 URL completa:', estudiante.avatar_url)
+      console.log('✅ Incluye .glb?', estudiante.avatar_url.includes('.glb'))
+      console.log('✅ Incluye readyplayer.me?', estudiante.avatar_url.includes('readyplayer.me'))
+    }
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
+  }, [estudiante.avatar_url, estudiante.nombre, estudiante.apellido])
 
   const avatarViewerUrl = getAvatarViewerUrl(estudiante.avatar_url)
   return (
