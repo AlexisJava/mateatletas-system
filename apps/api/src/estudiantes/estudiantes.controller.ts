@@ -26,7 +26,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { EstudianteOwnershipGuard } from './guards/estudiante-ownership.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
-import { AuthUser } from '../auth/interfaces';
+import { AuthUser, RequestWithAuthUser } from '../auth/interfaces';
 
 /**
  * Controller para endpoints de estudiantes
@@ -108,7 +108,7 @@ export class EstudiantesController {
   @UseGuards(RolesGuard)
   @Roles(Role.Estudiante)
   async actualizarAvatar3D(
-    @Request() req,
+    @Request() req: RequestWithAuthUser,
     @Body() body: { avatar_url: string },
   ) {
     const estudianteId = req.user.id;
@@ -131,7 +131,7 @@ export class EstudiantesController {
   @Get('mi-avatar')
   @UseGuards(RolesGuard)
   @Roles(Role.Estudiante)
-  async obtenerMiAvatar(@Request() req) {
+  async obtenerMiAvatar(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     const estudiante = await this.estudiantesService.findOne(
       estudianteId,
