@@ -18,7 +18,8 @@ import { VerdaderoFalsoQuestion } from '../ejercicios/VerdaderoFalsoQuestion';
 import { VideoPlayer } from '../ejercicios/VideoPlayer';
 import { ResultsView } from '../results/ResultsView';
 import { calcularResultado } from '../../utils/results-calculator';
-import { ClaseSincronicaQuimica } from './ClaseSincronicaQuimica';
+// TODO: ClaseSincronicaQuimica será redefinida desde cero
+// import { ClaseSincronicaQuimica } from './ClaseSincronicaQuimica';
 import type { OverlayConfig, Pregunta, ContenidoEjercicio, ContenidoVideo } from '../../types/actividad.types';
 import type { RespuestaRegistrada, ResultadoCalculado } from '../../utils/results-calculator';
 
@@ -156,17 +157,17 @@ export function EjecutarActividadView({ config, estudiante }: EjecutarActividadV
       }
 
       case 'juego': {
-        // Handler específico para clase sincrónica de química
-        if (actividad.contenido.juegoId === 'clase-sincronica-quimica-v1') {
-          return (
-            <ClaseSincronicaQuimica
-              estudiante={estudiante}
-              onFinalizar={handleVolver}
-            />
-          );
-        }
+        // TODO: Clase sincrónica de química será redefinida desde cero
+        // if (actividad.contenido.juegoId === 'clase-sincronica-quimica-v1') {
+        //   return (
+        //     <ClaseSincronicaQuimica
+        //       estudiante={estudiante}
+        //       onFinalizar={handleVolver}
+        //     />
+        //   );
+        // }
 
-        // Placeholder para otros juegos
+        // Placeholder para todos los juegos (incluyendo clase-sincronica-quimica-v1)
         return (
           <div className="text-center">
             <div className="text-9xl mb-6">🎮</div>
