@@ -1,0 +1,7 @@
+# Archivos compilados de TypeScript
+*.js
+*.d.ts
+*.js.map
+
+# Excepciones (si las hay en el futuro)
+# !archivo-especifico.js
