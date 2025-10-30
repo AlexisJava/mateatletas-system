@@ -39,6 +39,40 @@ const ESTADO_CONFIG: Record<string, EstadoConfig> = {
   },
 };
 
+/**
+ * Extrae el tema de una planificación basándose en su código
+ * Códigos esperados: '2025-11-mes-ciencia', '2025-12-nivel-1', etc.
+ */
+function extraerTema(codigo: string): 'astronomia' | 'fisica' | 'quimica' | 'informatica' | 'nivel-1' | 'nivel-2' | 'nivel-3' {
+  const codigoLower = codigo.toLowerCase();
+
+  // Mapear códigos conocidos a temas
+  if (codigoLower.includes('mes-ciencia') || codigoLower.includes('astronomia')) {
+    return 'astronomia';
+  }
+  if (codigoLower.includes('fisica')) {
+    return 'fisica';
+  }
+  if (codigoLower.includes('quimica')) {
+    return 'quimica';
+  }
+  if (codigoLower.includes('informatica')) {
+    return 'informatica';
+  }
+  if (codigoLower.includes('nivel-1')) {
+    return 'nivel-1';
+  }
+  if (codigoLower.includes('nivel-2')) {
+    return 'nivel-2';
+  }
+  if (codigoLower.includes('nivel-3')) {
+    return 'nivel-3';
+  }
+
+  // Default: astronomía (Mes de la Ciencia)
+  return 'astronomia';
+}
+
 export function PlanificacionCardMensual({ planificacion }: PlanificacionCardMensualProps) {
   const { push } = useOverlayStack();
   const config = ESTADO_CONFIG[planificacion.estado];
@@ -54,7 +88,7 @@ export function PlanificacionCardMensual({ planificacion }: PlanificacionCardMen
     push({
       type: 'planificacion',
       codigo: planificacion.codigo,
-      tema: 'astronomia', // TODO: Extraer del código o metadata
+      tema: extraerTema(planificacion.codigo),
     });
   };
 
