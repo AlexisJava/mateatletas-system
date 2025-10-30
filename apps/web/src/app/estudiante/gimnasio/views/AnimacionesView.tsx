@@ -5,9 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Lock, Check, Play, Sparkles } from 'lucide-react'
 import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D'
 import { useStudentAnimations } from '@/hooks/useStudentAnimations'
+import { useOverlayStack } from '../contexts/OverlayStackProvider'
 
 interface AnimacionesViewProps {
-  onClose: () => void
   estudiante: {
     id: string
     nombre: string
@@ -23,7 +23,8 @@ const CATEGORY_LABELS: Record<string, { label: string; emoji: string; color: str
   locomotion: { label: 'Movimiento', emoji: '🏃', color: 'from-orange-500 to-amber-500' },
 }
 
-export function AnimacionesView({ onClose, estudiante }: AnimacionesViewProps) {
+export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
+  const { popOverlay } = useOverlayStack()
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [previewAnimation, setPreviewAnimation] = useState<any>(null)
   const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
@@ -37,6 +38,10 @@ export function AnimacionesView({ onClose, estudiante }: AnimacionesViewProps) {
     studentPoints: estudiante.puntos_totales,
     unlockedAnimationIds: [], // TODO: Obtener del backend
   })
+
+  const handleClose = () => {
+    popOverlay()
+  }
 
   // Filtrar animaciones según categoría seleccionada
   const displayAnimations = selectedCategory === 'all'
@@ -69,7 +74,7 @@ export function AnimacionesView({ onClose, estudiante }: AnimacionesViewProps) {
           </div>
 
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-12 h-12 rounded-xl bg-red-500/20 border-2 border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center"
           >
             <X className="w-6 h-6" />
@@ -165,17 +170,12 @@ export function AnimacionesView({ onClose, estudiante }: AnimacionesViewProps) {
                     )}
                   </div>
 
-                  {/* Preview del avatar (solo para desbloqueadas) */}
-                  {!isLocked && estudiante.avatar_url && (
-                    <div className="absolute inset-0 pointer-events-none opacity-30">
-                      <AnimatedAvatar3D
-                        avatarUrl={estudiante.avatar_url}
-                        animationUrl={animation.url}
-                        width="100%"
-                        height="100%"
-                        scale={0.8}
-                        cameraPosition={[0, 0.5, 2]}
-                      />
+                  {/* Icono central de play para preview */}
+                  {!isLocked && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                        <Play className="w-8 h-8 text-white/80" />
+                      </div>
                     </div>
                   )}
                 </button>
