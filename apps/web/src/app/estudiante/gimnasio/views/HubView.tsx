@@ -182,12 +182,11 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   useEffect(() => {
     setIsMounted(true);
 
-    // Cargar animación idle aleatoria al montar
-    const idleAnim = getRandomAnimation('idle');
-    if (idleAnim) {
-      setCurrentAnimation(idleAnim.url);
-    }
-  }, [getRandomAnimation]);
+    // Usar UNA animación idle variation canchera en loop continuo (sin cortes)
+    // M_Standing_Idle_Variations_005 tiene movimientos dinámicos que invitan a jugar
+    const coolIdleUrl = 'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
+    setCurrentAnimation(coolIdleUrl);
+  }, []);
 
   // Cargar recursos del estudiante
   useEffect(() => {
@@ -204,18 +203,6 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
       cargarRecursos();
     }
   }, [estudiante.id]);
-
-  // Rotar animaciones idle automáticamente cada 8 segundos
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const idleAnim = getRandomAnimation('idle');
-      if (idleAnim) {
-        setCurrentAnimation(idleAnim.url);
-      }
-    }, 8000); // Cambiar cada 8 segundos
-
-    return () => clearInterval(interval);
-  }, [getRandomAnimation]);
 
   // Hook para animaciones del avatar - triggers manuales
   const triggerAnimation = useCallback((category: 'dance' | 'expression' | 'idle' | 'locomotion', duration?: number) => {
