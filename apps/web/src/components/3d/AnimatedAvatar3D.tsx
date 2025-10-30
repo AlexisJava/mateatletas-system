@@ -107,15 +107,15 @@ export function AnimatedAvatar3D({
         />
 
         {/* Luces */}
-        <ambientLight intensity={0.6} />
+        <ambientLight intensity={0.8} />
         <directionalLight
           position={[5, 5, 5]}
-          intensity={0.8}
+          intensity={1.0}
           castShadow
           shadow-mapSize-width={1024}
           shadow-mapSize-height={1024}
         />
-        <pointLight position={[-5, 3, -5]} intensity={0.3} />
+        <pointLight position={[-5, 3, -5]} intensity={0.5} />
 
         {/* Avatar con animación */}
         <Suspense fallback={null}>

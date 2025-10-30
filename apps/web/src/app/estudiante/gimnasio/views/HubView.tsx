@@ -28,7 +28,7 @@ import {
   Zap,
   Target,
   BarChart3,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 
 interface HubViewProps {
@@ -184,7 +184,8 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
     // Usar UNA animación idle variation canchera en loop continuo (sin cortes)
     // M_Standing_Idle_Variations_005 tiene movimientos dinámicos que invitan a jugar
-    const coolIdleUrl = 'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
+    const coolIdleUrl =
+      'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
     setCurrentAnimation(coolIdleUrl);
   }, []);
 
@@ -205,27 +206,30 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   }, [estudiante.id]);
 
   // Hook para animaciones del avatar - triggers manuales
-  const triggerAnimation = useCallback((category: 'dance' | 'expression' | 'idle' | 'locomotion', duration?: number) => {
-    const anim = getRandomAnimation(category);
-    if (!anim) return;
+  const triggerAnimation = useCallback(
+    (category: 'dance' | 'expression' | 'idle' | 'locomotion', duration?: number) => {
+      const anim = getRandomAnimation(category);
+      if (!anim) return;
 
-    try {
-      // Cambiar animación
-      setCurrentAnimation(anim.url);
+      try {
+        // Cambiar animación
+        setCurrentAnimation(anim.url);
 
-      // model-viewer no tiene método .play() directo
-      // La animación se activa automáticamente al cambiar animationName
+        // model-viewer no tiene método .play() directo
+        // La animación se activa automáticamente al cambiar animationName
 
-      if (duration) {
-        setTimeout(() => {
-          model.animationName = 'idle';
-        }, duration);
+        if (duration) {
+          setTimeout(() => {
+            model.animationName = 'idle';
+          }, duration);
+        }
+      } catch (error) {
+        // Silently fail - avatar animations are non-critical
+        console.debug('Animation error:', error);
       }
-    } catch (error) {
-      // Silently fail - avatar animations are non-critical
-      console.debug('Animation error:', error);
-    }
-  }, []);
+    },
+    [],
+  );
 
   // Animaciones aleatorias cada 10-15 segundos para dar vida al avatar
   useEffect(() => {
@@ -242,9 +246,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     const initialTimeout = setTimeout(triggerRandomAnimation, 5000);
 
     // Luego cada 10-15 segundos
-    const interval = setInterval(() => {
-      triggerRandomAnimation();
-    }, 10000 + Math.random() * 5000);
+    const interval = setInterval(
+      () => {
+        triggerRandomAnimation();
+      },
+      10000 + Math.random() * 5000,
+    );
 
     return () => {
       clearTimeout(initialTimeout);
@@ -272,11 +279,13 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600 flex flex-col">
       {/* Gradiente animado de fondo */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-pink-500/20 animate-pulse"
-             style={{ animationDuration: '4s' }}
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-pink-500/20 animate-pulse"
+          style={{ animationDuration: '4s' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-tl from-yellow-500/10 via-transparent to-cyan-500/10 animate-pulse"
-             style={{ animationDuration: '6s', animationDelay: '1s' }}
+        <div
+          className="absolute inset-0 bg-gradient-to-tl from-yellow-500/10 via-transparent to-cyan-500/10 animate-pulse"
+          style={{ animationDuration: '6s', animationDelay: '1s' }}
         />
       </div>
 
@@ -310,7 +319,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               className="absolute w-32 h-32 rounded-full"
               style={{
                 background: `radial-gradient(circle, ${
-                  ['rgba(255,255,255,0.15)', 'rgba(255,255,0,0.1)', 'rgba(0,255,255,0.1)', 'rgba(255,0,255,0.1)'][i % 4]
+                  [
+                    'rgba(255,255,255,0.15)',
+                    'rgba(255,255,0,0.1)',
+                    'rgba(0,255,255,0.1)',
+                    'rgba(255,0,255,0.1)',
+                  ][i % 4]
                 }, transparent)`,
                 filter: 'blur(40px)',
               }}
@@ -325,7 +339,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 opacity: [0.3, 0.6, 0.3],
               }}
               transition={{
-                duration: 15 + (i * 2),
+                duration: 15 + i * 2,
                 repeat: Infinity,
                 delay: i * 0.8,
                 ease: 'easeInOut',
@@ -401,9 +415,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
           className="flex items-center gap-3 bg-black/30 backdrop-blur-sm rounded-2xl px-4 py-2 border-2 border-white/20"
         >
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">
-              {estudiante.nombre.charAt(0)}
-            </span>
+            <span className="text-white font-bold text-lg">{estudiante.nombre.charAt(0)}</span>
           </div>
           <div>
             <div className="text-white font-bold text-base uppercase tracking-wide">
@@ -443,16 +455,30 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
           animate={{ x: 0, opacity: 1 }}
           className="flex items-center gap-2"
         >
-          <ResourcePill icon={<Coins className="w-5 h-5" />} value={monedas} gradient="from-yellow-400 to-amber-500" borderColor="yellow-600" />
-          <ResourcePill icon={<Gem className="w-5 h-5" />} value={gemas} gradient="from-purple-500 to-violet-600" borderColor="purple-700" />
-          <ResourcePill icon={<Flame className="w-5 h-5" />} value={racha_dias} gradient="from-orange-500 to-red-600" borderColor="red-700" />
+          <ResourcePill
+            icon={<Coins className="w-5 h-5" />}
+            value={monedas}
+            gradient="from-yellow-400 to-amber-500"
+            borderColor="yellow-600"
+          />
+          <ResourcePill
+            icon={<Gem className="w-5 h-5" />}
+            value={gemas}
+            gradient="from-purple-500 to-violet-600"
+            borderColor="purple-700"
+          />
+          <ResourcePill
+            icon={<Flame className="w-5 h-5" />}
+            value={racha_dias}
+            gradient="from-orange-500 to-red-600"
+            borderColor="red-700"
+          />
         </motion.div>
       </header>
 
       {/* ========== CENTRO DIVIDIDO: 50% AVATAR | 50% INFO ========== */}
       <div className="flex-1 flex items-center justify-center px-32 py-8">
         <div className="w-full max-w-7xl flex gap-8 h-full">
-
           {/* ========== COLUMNA IZQUIERDA - AVATAR 3D GIGANTE ========== */}
           <div className="w-1/2 relative flex items-center justify-center">
             <motion.div
@@ -481,28 +507,6 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 }}
               />
 
-              {/* Efecto de racha de fuego */}
-              {racha_dias >= 3 && (
-                <>
-                  <motion.div
-                    className="absolute top-8 left-1/2 -translate-x-1/2 z-10"
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      rotate: [0, 5, -5, 0],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    <Flame className="w-16 h-16 text-orange-500 fill-orange-500 drop-shadow-lg" />
-                  </motion.div>
-
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-radial from-orange-500/30 to-transparent rounded-full pointer-events-none"
-                    animate={{ opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  />
-                </>
-              )}
-
               {/* Avatar 3D Animado - CLICKEABLE PARA ANIMAR */}
               <motion.div
                 className="relative z-20 w-full h-full cursor-pointer"
@@ -523,11 +527,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                     animationUrl={currentAnimation}
                     width="100%"
                     height="100%"
-                    cameraPosition={[0, 0.8, 3.5]}
-                    cameraFov={45}
-                    scale={1}
-                    position={[0, -1, 0]}
-                    enableControls={true}
+                    cameraPosition={[0, 0.6, 2.6]}
+                    cameraFov={50}
+                    scale={1.25}
+                    position={[-0.15, -0.52, 0]}
+                    rotation={[0, 0.26, 0]}
+                    enableControls={false}
                   />
                 )}
               </motion.div>
@@ -548,9 +553,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   <div className="text-white/80 text-sm font-bold uppercase tracking-wider">
                     Nivel
                   </div>
-                  <div className="text-white text-6xl font-black">
-                    {estudiante.nivel_actual}
-                  </div>
+                  <div className="text-white text-6xl font-black">{estudiante.nivel_actual}</div>
                 </div>
               </div>
             </motion.div>
@@ -770,21 +773,21 @@ function NavButtonUltra({
             exit={{ opacity: 0, x: side === 'left' ? -10 : 10, scale: 0.9 }}
             className={`absolute ${side === 'left' ? 'left-24' : 'right-24'} top-1/2 -translate-y-1/2 z-50`}
           >
-            <div className="bg-gradient-to-br from-slate-900 to-slate-800
+            <div
+              className="bg-gradient-to-br from-slate-900 to-slate-800
                            backdrop-blur-xl
                            rounded-2xl p-4
                            border-2 border-white/20
                            shadow-2xl
-                           min-w-[200px]">
+                           min-w-[200px]"
+            >
               {/* Label principal */}
               <div className="text-white text-lg font-black uppercase tracking-wide">
                 {item.label}
               </div>
 
               {/* Descripción */}
-              <div className="text-white/70 text-sm font-medium mt-1">
-                {item.description}
-              </div>
+              <div className="text-white/70 text-sm font-medium mt-1">{item.description}</div>
 
               {/* Badge info */}
               {(item.badge ?? 0) > 0 && (
@@ -797,10 +800,14 @@ function NavButtonUltra({
               )}
 
               {/* Flecha hacia el botón */}
-              <div className={`absolute ${side === 'left' ? 'right-full mr-[-8px]' : 'left-full ml-[-8px]'} top-1/2 -translate-y-1/2`}>
-                <div className={`w-4 h-4 bg-slate-900 border-2 border-white/20 rotate-45 ${
-                  side === 'left' ? 'border-r-0 border-t-0' : 'border-l-0 border-b-0'
-                }`} />
+              <div
+                className={`absolute ${side === 'left' ? 'right-full mr-[-8px]' : 'left-full ml-[-8px]'} top-1/2 -translate-y-1/2`}
+              >
+                <div
+                  className={`w-4 h-4 bg-slate-900 border-2 border-white/20 rotate-45 ${
+                    side === 'left' ? 'border-r-0 border-t-0' : 'border-l-0 border-b-0'
+                  }`}
+                />
               </div>
             </div>
           </motion.div>
@@ -833,7 +840,9 @@ function ResourcePill({
   borderColor: string;
 }) {
   return (
-    <div className={`bg-gradient-to-br ${gradient} rounded-xl px-4 py-2 flex items-center gap-2 border-2 border-${borderColor} shadow-lg`}>
+    <div
+      className={`bg-gradient-to-br ${gradient} rounded-xl px-4 py-2 flex items-center gap-2 border-2 border-${borderColor} shadow-lg`}
+    >
       <div className="text-white">{icon}</div>
       <span className="text-white font-bold">{value}</span>
     </div>
@@ -883,20 +892,11 @@ function StatCard3D({
       <div className={`absolute inset-0 bg-${glowColor}-500/50 blur-xl -z-10 rounded-2xl`} />
 
       <div className="text-center">
-        <div className="flex items-center justify-center mb-2 text-white">
-          {icon}
-        </div>
+        <div className="flex items-center justify-center mb-2 text-white">{icon}</div>
         <div className="text-white text-2xl font-black">{value}</div>
-        <div className="text-white/80 text-xs font-bold uppercase tracking-wide">
-          {label}
-        </div>
-        {subtitle && (
-          <div className="text-white/60 text-xs mt-1 font-medium">
-            {subtitle}
-          </div>
-        )}
+        <div className="text-white/80 text-xs font-bold uppercase tracking-wide">{label}</div>
+        {subtitle && <div className="text-white/60 text-xs mt-1 font-medium">{subtitle}</div>}
       </div>
     </motion.div>
   );
 }
-
