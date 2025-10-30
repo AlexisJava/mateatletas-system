@@ -79,7 +79,10 @@ model Estudiante {
   apellido                  String
   /// Nivel escolar del estudiante: Primaria, Secundaria, Universidad
   nivel_escolar             String
-  /// URL de la foto de perfil del estudiante (opcional)
+  /// URL del avatar 3D de Ready Player Me
+  /// Ejemplo: https://models.readyplayer.me/abc123.glb
+  avatar_url                String?                           @db.Text
+  /// DEPRECADO: URL de la foto de perfil del estudiante (mantener por compatibilidad)
   foto_url                  String?
   /// ID del tutor que gestiona este estudiante
   tutor_id                  String
@@ -136,6 +139,8 @@ model Estudiante {
   becas                     Beca[]
   progresosActividades      ProgresoEstudianteActividad[]
   progresosPlanificaciones  ProgresoEstudiantePlanificacion[]
+  recursos                  RecursosEstudiante?
+  itemsObtenidos            ItemObtenido[]
 
   @@map("estudiantes")
 }
@@ -2073,4 +2078,303 @@ model ProgresoEstudiantePlanificacion {
   @@unique([estudiante_id, planificacion_id])
   @@index([estudiante_id])
   @@map("progreso_estudiante_planificacion")
+}
+
+// ============================================================================
+// SISTEMA DE TIENDA Y RECURSOS (XP, MONEDAS, GEMAS)
+// ============================================================================
+
+/// Recursos del estudiante (XP, Monedas, Gemas)
+/// Tabla que centraliza todos los recursos obtenibles por el estudiante
+model RecursosEstudiante {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID del estudiante
+  estudiante_id String @unique
+
+  /// XP total acumulado (Experience Points)
+  /// Se usa para niveles, desafíos, progresión
+  xp_total Int @default(0)
+
+  /// Monedas totales (moneda principal para compras en tienda)
+  /// Se obtienen completando actividades, desafíos, asistencias
+  monedas_total Int @default(0)
+
+  /// Gemas (moneda premium/especial)
+  /// Se obtienen con logros especiales, rachas largas, eventos
+  gemas_total Int @default(0)
+
+  /// Última actualización de recursos
+  ultima_actualizacion DateTime @updatedAt
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  estudiante     Estudiante           @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  transacciones  TransaccionRecurso[]
+  compras        CompraItem[]
+
+  @@index([estudiante_id])
+  @@map("recursos_estudiante")
+}
+
+/// Transacciones de recursos (historial de cambios)
+/// Tabla transaccional que registra cada cambio en XP/Monedas/Gemas
+model TransaccionRecurso {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID del recurso del estudiante
+  recursos_estudiante_id String
+
+  /// Tipo de recurso afectado
+  tipo_recurso TipoRecurso
+
+  /// Cantidad (positivo = ganancia, negativo = gasto)
+  cantidad Int
+
+  /// Razón de la transacción
+  /// Ejemplos: "actividad_completada", "compra_tienda", "logro_desbloqueado", "racha_7_dias"
+  razon String
+
+  /// Metadata adicional (JSON flexible)
+  /// Puede contener: actividad_id, item_id, logro_id, etc.
+  metadata Json?
+
+  /// Fecha de la transacción
+  fecha DateTime @default(now())
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now())
+
+  /// Relaciones
+  recursosEstudiante RecursosEstudiante @relation(fields: [recursos_estudiante_id], references: [id], onDelete: Cascade)
+
+  @@index([recursos_estudiante_id])
+  @@index([tipo_recurso])
+  @@index([fecha])
+  @@map("transacciones_recurso")
+}
+
+/// Categorías de items de la tienda
+/// Organiza los items en secciones (Avatares, Skins, Power-ups, etc.)
+model CategoriaItem {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// Nombre de la categoría
+  /// Ejemplos: "Avatares", "Skins", "Power-ups", "Efectos"
+  nombre String @unique
+
+  /// Descripción de la categoría
+  descripcion String?
+
+  /// Icono/emoji de la categoría
+  icono String
+
+  /// Orden de visualización
+  orden Int @default(0)
+
+  /// Si está activa y visible en tienda
+  activa Boolean @default(true)
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  items ItemTienda[]
+
+  @@map("categorias_item")
+}
+
+/// Items disponibles en la tienda
+/// Define cada item comprable (avatares, skins, power-ups, cosméticos)
+model ItemTienda {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// Nombre del item
+  nombre String
+
+  /// Descripción del item
+  descripcion String?
+
+  /// ID de la categoría
+  categoria_id String
+
+  /// Tipo de item (avatar, skin, powerup, cosmetico, etc.)
+  tipo_item TipoItem
+
+  /// Precio en monedas (0 si se compra solo con gemas)
+  precio_monedas Int @default(0)
+
+  /// Precio en gemas (0 si se compra solo con monedas)
+  precio_gemas Int @default(0)
+
+  /// URL de la imagen/preview del item
+  imagen_url String?
+
+  /// Rareza del item (común, raro, épico, legendario)
+  rareza RarezaItem @default(COMUN)
+
+  /// Si es un item de edición limitada
+  edicion_limitada Boolean @default(false)
+
+  /// Fecha de inicio de disponibilidad (null = siempre disponible)
+  fecha_inicio DateTime?
+
+  /// Fecha de fin de disponibilidad (null = sin fecha límite)
+  fecha_fin DateTime?
+
+  /// Nivel mínimo requerido para comprar
+  nivel_minimo_requerido Int @default(1)
+
+  /// Si está disponible en la tienda
+  disponible Boolean @default(true)
+
+  /// Cantidad de veces que se ha comprado (para estadísticas)
+  veces_comprado Int @default(0)
+
+  /// Metadata adicional del item (JSON flexible)
+  /// Puede contener: stats, efectos, duración, etc.
+  metadata Json?
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  categoria CategoriaItem      @relation(fields: [categoria_id], references: [id])
+  compras   CompraItem[]
+  itemsObtenidos ItemObtenido[]
+
+  @@index([categoria_id])
+  @@index([tipo_item])
+  @@index([rareza])
+  @@index([disponible])
+  @@map("items_tienda")
+}
+
+/// Items obtenidos por el estudiante (inventario)
+/// Registra qué items posee cada estudiante
+model ItemObtenido {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID del estudiante
+  estudiante_id String
+
+  /// ID del item
+  item_id String
+
+  /// Fecha de obtención
+  fecha_obtencion DateTime @default(now())
+
+  /// Si el item está equipado/activo actualmente
+  equipado Boolean @default(false)
+
+  /// Cantidad (para items consumibles/stackeables)
+  cantidad Int @default(1)
+
+  /// Metadata adicional (JSON flexible)
+  /// Puede contener: usos_restantes, fecha_expiracion, etc.
+  metadata Json?
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now())
+
+  /// Timestamp de última actualización
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  estudiante Estudiante  @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  item       ItemTienda  @relation(fields: [item_id], references: [id])
+
+  @@unique([estudiante_id, item_id])
+  @@index([estudiante_id])
+  @@index([item_id])
+  @@index([equipado])
+  @@map("items_obtenidos")
+}
+
+/// Compras realizadas en la tienda (historial transaccional)
+/// Registra cada compra de item por estudiante
+model CompraItem {
+  /// Identificador único
+  id String @id @default(cuid())
+
+  /// ID del recurso del estudiante (para tracking de recursos)
+  recursos_estudiante_id String
+
+  /// ID del item comprado
+  item_id String
+
+  /// Precio pagado en monedas
+  monedas_gastadas Int @default(0)
+
+  /// Precio pagado en gemas
+  gemas_gastadas Int @default(0)
+
+  /// Fecha de la compra
+  fecha_compra DateTime @default(now())
+
+  /// Timestamp de creación
+  createdAt DateTime @default(now())
+
+  /// Relaciones
+  recursosEstudiante RecursosEstudiante @relation(fields: [recursos_estudiante_id], references: [id], onDelete: Cascade)
+  item               ItemTienda         @relation(fields: [item_id], references: [id])
+
+  @@index([recursos_estudiante_id])
+  @@index([item_id])
+  @@index([fecha_compra])
+  @@map("compras_item")
+}
+
+// ============================================================================
+// ENUMS PARA TIENDA Y RECURSOS
+// ============================================================================
+
+/// Tipos de recursos del estudiante
+enum TipoRecurso {
+  XP
+  MONEDAS
+  GEMAS
+
+  @@map("tipo_recurso")
+}
+
+/// Tipos de items de la tienda
+enum TipoItem {
+  AVATAR          // Avatar 3D completo
+  SKIN            // Skin/outfit para avatar
+  ACCESORIO       // Accesorios (sombreros, gafas, etc.)
+  POWERUP         // Power-ups temporales (2x XP, etc.)
+  COSMETICO       // Efectos cosméticos (partículas, auras, etc.)
+  TITULO          // Títulos/badges personalizados
+  EMOJI           // Emojis/stickers personalizados
+  FONDO           // Fondos de perfil
+  MARCO           // Marcos de avatar
+
+  @@map("tipo_item")
+}
+
+/// Rareza de items
+enum RarezaItem {
+  COMUN
+  RARO
+  EPICO
+  LEGENDARIO
+
+  @@map("rareza_item")
 }

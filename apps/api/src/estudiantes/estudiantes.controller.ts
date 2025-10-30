@@ -8,6 +8,8 @@ import {
   Param,
   Query,
   UseGuards,
+  BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { EstudiantesService } from './estudiantes.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
@@ -24,7 +26,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { EstudianteOwnershipGuard } from './guards/estudiante-ownership.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
-import { AuthUser } from '../auth/interfaces';
+import { AuthUser, RequestWithAuthUser } from '../auth/interfaces';
 
 /**
  * Controller para endpoints de estudiantes
@@ -97,6 +99,84 @@ export class EstudiantesController {
   }
 
   /**
+   * PATCH /estudiantes/avatar - Actualizar avatar 3D Ready Player Me del estudiante logueado
+   * @param req - Request con usuario autenticado
+   * @param body - { avatar_url: string }
+   * @returns Estudiante actualizado
+   */
+  @Patch('avatar')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Estudiante)
+  async actualizarAvatar3D(
+    @Request() req: RequestWithAuthUser,
+    @Body() body: { avatar_url: string },
+  ) {
+    const estudianteId = req.user.id;
+
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🔧 [BACKEND] PATCH /estudiantes/avatar');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('👤 Estudiante ID:', estudianteId);
+    console.log('🔗 Avatar URL recibida:', body.avatar_url);
+    console.log('📏 Longitud URL:', body.avatar_url?.length);
+    console.log('✅ Incluye readyplayer.me?', body.avatar_url?.includes('readyplayer.me'));
+    console.log('✅ Incluye .glb?', body.avatar_url?.includes('.glb'));
+
+    // Validar que sea URL válida de Ready Player Me
+    if (!body.avatar_url || !body.avatar_url.includes('readyplayer.me')) {
+      console.error('❌ URL de avatar inválida');
+      throw new BadRequestException('URL de avatar inválida');
+    }
+
+    // Actualizar avatar 3D sin validación de ownership (el estudiante actualiza su propio avatar)
+    const resultado = await this.estudiantesService.updateAvatar3D(estudianteId, body.avatar_url);
+
+    console.log('✅ Avatar actualizado en BD:', resultado.avatar_url);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    return resultado;
+  }
+
+  /**
+   * GET /estudiantes/mi-avatar - Obtener avatar del estudiante logueado
+   * @param req - Request con usuario autenticado
+   * @returns { avatar_url: string, tiene_avatar: boolean }
+   */
+  @Get('mi-avatar')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Estudiante)
+  async obtenerMiAvatar(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🔍 [BACKEND] GET /estudiantes/mi-avatar');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('👤 Estudiante ID:', estudianteId);
+
+    // Buscar directamente sin ownership check (el estudiante accede a sus propios datos)
+    const estudiante = await this.estudiantesService.findOneById(estudianteId);
+
+    console.log('📦 Estudiante encontrado:', estudiante.nombre, estudiante.apellido);
+    console.log('🔗 Avatar URL en BD:', estudiante.avatar_url);
+    console.log('✅ Tiene avatar?', !!estudiante.avatar_url);
+
+    if (estudiante.avatar_url) {
+      console.log('📏 Longitud URL:', estudiante.avatar_url.length);
+      console.log('🔍 Formato:', estudiante.avatar_url.substring(0, 50) + '...');
+    }
+
+    const resultado = {
+      avatar_url: estudiante.avatar_url,
+      tiene_avatar: !!estudiante.avatar_url,
+    };
+
+    console.log('📤 Respuesta:', resultado);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    return resultado;
+  }
+
+  /**
    * GET /estudiantes/:id/detalle-completo - Obtener detalle COMPLETO del estudiante
    * Para el portal de tutores - pestaña "Mis Hijos"
    * Incluye: gamificación, asistencias, inscripciones, estadísticas
@@ -165,7 +245,7 @@ export class EstudiantesController {
   ) {
     // Nota: No necesitamos usar '_user' aquí porque el guard ya validó ownership
     // El guard se ejecuta ANTES de este método y rechaza requests no autorizados
-    return this.estudiantesService.updateAvatar(id, body.avatar_gradient);
+    return this.estudiantesService.updateAvatarGradient(id, body.avatar_gradient);
   }
 
   /**
