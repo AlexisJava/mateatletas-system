@@ -15,7 +15,7 @@ interface CalendarioViewProps {
 }
 
 export function CalendarioView({ estudiante }: CalendarioViewProps) {
-  const { popOverlay } = useOverlayStack();
+  const { pop } = useOverlayStack();
   const [clases, setClases] = useState<Clase[]>([]);
   const [loading, setLoading] = useState(true);
   const [mesActual, setMesActual] = useState(new Date());
@@ -88,7 +88,7 @@ export function CalendarioView({ estudiante }: CalendarioViewProps) {
           </div>
         </div>
         <button
-          onClick={popOverlay}
+          onClick={pop}
           className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
         >
           <X className="w-6 h-6 text-white" />

@@ -36,7 +36,7 @@ export type OverlayConfig =
 /**
  * Tipo de renderizado del overlay
  */
-export type OverlayRenderType = 'modal' | 'sidebar';
+export type OverlayRenderType = 'modal' | 'sidebar' | 'fullscreen';
 
 /**
  * Metadatos de configuración visual para cada tipo de overlay

@@ -17,7 +17,7 @@ interface RankingViewProps {
 type Tab = 'equipo' | 'global';
 
 export function RankingView({ estudiante }: RankingViewProps) {
-  const { popOverlay } = useOverlayStack();
+  const { pop } = useOverlayStack();
   const [tab, setTab] = useState<Tab>('equipo');
   const [ranking, setRanking] = useState<Ranking | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ export function RankingView({ estudiante }: RankingViewProps) {
           </div>
         </div>
         <button
-          onClick={popOverlay}
+          onClick={pop}
           className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
         >
           <X className="w-6 h-6 text-white" />
