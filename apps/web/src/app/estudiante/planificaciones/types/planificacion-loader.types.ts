@@ -60,11 +60,12 @@ export interface PlanificacionLoaderState {
 
 /**
  * Props para la página de planificación
+ * Next.js 15: params es una Promise que debe ser await en Server Components
  */
 export interface PlanificacionPageProps {
-  params: {
+  params: Promise<{
     codigo: string;
-  };
+  }>;
 }
 
 /**

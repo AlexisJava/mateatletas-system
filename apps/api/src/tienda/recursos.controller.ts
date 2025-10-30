@@ -1,6 +1,6 @@
 /**
  * RecursosController
- * Endpoints para manejar XP, Monedas y Gemas
+ * Endpoints para manejar XP y Monedas
  */
 
 import {
@@ -54,29 +54,6 @@ export class RecursosController {
     @Body() data: ActualizarRecursosPorActividad,
   ): Promise<RecursosActualizadosResponse> {
     return await this.recursosService.actualizarRecursosPorActividad(data);
-  }
-
-  /**
-   * POST /recursos/:estudianteId/gemas
-   * Agrega gemas a un estudiante (solo admin/docente)
-   */
-  @Post(':estudianteId/gemas')
-  @Roles(Role.Docente, Role.Admin)
-  async agregarGemas(
-    @Param('estudianteId') estudianteId: string,
-    @Body()
-    body: {
-      cantidad: number;
-      razon: string;
-      metadata?: Record<string, unknown>;
-    },
-  ): Promise<RecursosActualizadosResponse> {
-    return await this.recursosService.agregarGemas(
-      estudianteId,
-      body.cantidad,
-      body.razon,
-      body.metadata,
-    );
   }
 
   /**

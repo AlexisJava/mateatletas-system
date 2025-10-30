@@ -1,0 +1,380 @@
+// ==========================================
+// PRISMA SCHEMA - GAMIFICACIÓN MATEATLETAS
+// ==========================================
+// Versión: 2.0 FINAL
+// Fecha: 30 Octubre 2025
+
+// ==========================================
+// MODELO: Logro (Definiciones)
+// ==========================================
+
+model Logro {
+  id String @id @default(cuid())
+  
+  // Identificación
+  codigo String @unique // "racha_7_dias", "completista", etc
+  nombre String // "Racha de Fuego"
+  descripcion String
+  categoria String // "consistencia", "maestria", "social", etc
+  
+  // Recompensas
+  monedas_recompensa Int
+  xp_recompensa Int
+  
+  // Criterios de desbloqueo
+  criterio_tipo String // "racha_dias", "temas_completados", etc
+  criterio_valor String // JSON con valor(es) necesarios
+  
+  // Metadata
+  icono String
+  rareza String // "comun", "raro", "epico", "legendario"
+  secreto Boolean @default(false)
+  animacion String? // ID de animación desbloqueada
+  titulo String? // Título que otorga
+  badge String? // Badge que otorga
+  mensaje_desbloqueo String? // Mensaje especial al desbloquear
+  extras Json? // Array de extras (["texto1", "texto2"])
+  
+  // Orden y estado
+  orden Int @default(0)
+  activo Boolean @default(true)
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  // Relaciones
+  logros_estudiantes LogroEstudiante[]
+  
+  @@map("logros")
+}
+
+// ==========================================
+// MODELO: LogroEstudiante (Desbloqueados)
+// ==========================================
+
+model LogroEstudiante {
+  id String @id @default(cuid())
+  
+  estudiante_id String
+  logro_id String
+  
+  fecha_desbloqueo DateTime @default(now())
+  visto Boolean @default(false) // Para notificaciones
+  
+  // Relaciones
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  logro Logro @relation(fields: [logro_id], references: [id])
+  
+  @@unique([estudiante_id, logro_id])
+  @@index([estudiante_id])
+  @@index([logro_id])
+  @@index([visto])
+  @@map("logros_estudiantes")
+}
+
+// ==========================================
+// MODELO: RachaEstudiante
+// ==========================================
+
+model RachaEstudiante {
+  id String @id @default(cuid())
+  estudiante_id String @unique
+  
+  // Estado actual
+  racha_actual Int @default(0)
+  racha_maxima Int @default(0)
+  
+  // Fechas
+  ultima_actividad DateTime?
+  inicio_racha_actual DateTime?
+  
+  // Metadata
+  total_dias_activos Int @default(0)
+  
+  updated_at DateTime @updatedAt
+  
+  // Relaciones
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  
+  @@index([estudiante_id])
+  @@index([ultima_actividad])
+  @@map("rachas_estudiantes")
+}
+
+// ==========================================
+// MODELO: RecursosEstudiante (ACTUALIZADO)
+// ==========================================
+
+model RecursosEstudiante {
+  id String @id @default(cuid())
+  estudiante_id String @unique
+  
+  // Recursos (SOLO 2 MONEDAS)
+  monedas_total Int @default(0)
+  xp_total Int @default(0)
+  // gemas_total ELIMINADO - Fase 2
+  
+  // Metadata
+  updated_at DateTime @updatedAt
+  
+  // Relaciones
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  transacciones TransaccionRecurso[]
+  
+  @@index([estudiante_id])
+  @@map("recursos_estudiantes")
+}
+
+// ==========================================
+// MODELO: TransaccionRecurso (ACTUALIZADO)
+// ==========================================
+
+model TransaccionRecurso {
+  id String @id @default(cuid())
+  recursos_estudiante_id String
+  
+  tipo_recurso String // "MONEDAS", "XP" (NO más "GEMAS")
+  cantidad Int // Puede ser negativo para gastos
+  razon String // "completar_ejercicio", "logro_desbloqueado", "canje_curso"
+  
+  metadata Json? // Información adicional contextual
+  fecha DateTime @default(now())
+  
+  recursos_estudiante RecursosEstudiante @relation(fields: [recursos_estudiante_id], references: [id], onDelete: Cascade)
+  
+  @@index([recursos_estudiante_id])
+  @@index([tipo_recurso])
+  @@index([fecha])
+  @@map("transacciones_recursos")
+}
+
+// ==========================================
+// MODELO: CursoCatalogo
+// ==========================================
+
+model CursoCatalogo {
+  id String @id @default(cuid())
+  
+  // Información básica
+  codigo String @unique // "quimica_explosiva"
+  titulo String
+  descripcion String @db.Text
+  categoria String // "ciencia", "programacion", "robotica", "diseno"
+  subcategoria String?
+  
+  // Detalles académicos
+  duracion_clases Int
+  nivel_requerido Int @default(1) // Nivel mínimo estudiante
+  contenido Json? // Syllabus, módulos, etc
+  
+  // Pricing
+  precio_usd Decimal @db.Decimal(10,2)
+  precio_monedas Int // precio_usd * 20
+  
+  // Media
+  imagen_url String?
+  video_preview_url String?
+  
+  // Metadata
+  destacado Boolean @default(false)
+  nuevo Boolean @default(false)
+  activo Boolean @default(true)
+  orden Int @default(0)
+  
+  // Stats
+  total_canjes Int @default(0)
+  rating Decimal @db.Decimal(3,2) @default(0)
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  // Relaciones
+  solicitudes_canje SolicitudCanje[]
+  cursos_estudiantes CursoEstudiante[]
+  
+  @@index([categoria])
+  @@index([destacado])
+  @@index([activo])
+  @@map("cursos_catalogo")
+}
+
+// ==========================================
+// MODELO: SolicitudCanje
+// ==========================================
+
+model SolicitudCanje {
+  id String @id @default(cuid())
+  
+  // Partes involucradas
+  estudiante_id String
+  tutor_id String
+  curso_id String
+  
+  // Detalles del canje
+  monedas_usadas Int
+  estado String // "pendiente", "aprobada", "rechazada", "cancelada"
+  
+  // Decisión del padre
+  fecha_decision DateTime?
+  opcion_pago String? // "padre_paga_todo", "hijo_paga_mitad", "hijo_paga_todo"
+  monto_padre Decimal? @db.Decimal(10,2) // Cuánto pagó el padre
+  mensaje_padre String? @db.Text
+  
+  // Metadata
+  fecha_solicitud DateTime @default(now())
+  fecha_expiracion DateTime? // Opcional: expira en 7 días
+  
+  // Relaciones
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id])
+  tutor Tutor @relation(fields: [tutor_id], references: [id])
+  curso CursoCatalogo @relation(fields: [curso_id], references: [id])
+  
+  @@index([estudiante_id])
+  @@index([tutor_id])
+  @@index([estado])
+  @@index([fecha_solicitud])
+  @@map("solicitudes_canje")
+}
+
+// ==========================================
+// MODELO: CursoEstudiante (Habilitados)
+// ==========================================
+
+model CursoEstudiante {
+  id String @id @default(cuid())
+  
+  estudiante_id String
+  curso_id String
+  
+  // Progreso
+  progreso Int @default(0) // 0-100%
+  completado Boolean @default(false)
+  fecha_inicio DateTime @default(now())
+  fecha_completado DateTime?
+  
+  // Relaciones
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  curso CursoCatalogo @relation(fields: [curso_id], references: [id])
+  
+  @@unique([estudiante_id, curso_id])
+  @@index([estudiante_id])
+  @@index([completado])
+  @@map("cursos_estudiantes")
+}
+
+// ==========================================
+// MODELO: PuntosPadre
+// ==========================================
+
+model PuntosPadre {
+  id String @id @default(cuid())
+  tutor_id String @unique
+  
+  // Recursos
+  puntos_total Int @default(0)
+  xp_total Int @default(0)
+  
+  // Stats
+  pagos_puntuales_consecutivos Int @default(0)
+  total_referidos_activos Int @default(0)
+  
+  updated_at DateTime @updatedAt
+  
+  // Relaciones
+  tutor Tutor @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  transacciones TransaccionPuntosPadre[]
+  canjes CanjePadre[]
+  
+  @@index([tutor_id])
+  @@map("puntos_padres")
+}
+
+// ==========================================
+// MODELO: TransaccionPuntosPadre
+// ==========================================
+
+model TransaccionPuntosPadre {
+  id String @id @default(cuid())
+  puntos_padre_id String
+  
+  tipo_recurso String // "PUNTOS", "XP"
+  cantidad Int
+  razon String // "pago_puntual", "referido", "engagement"
+  
+  metadata Json?
+  fecha DateTime @default(now())
+  
+  puntos_padre PuntosPadre @relation(fields: [puntos_padre_id], references: [id], onDelete: Cascade)
+  
+  @@index([puntos_padre_id])
+  @@index([tipo_recurso])
+  @@index([fecha])
+  @@map("transacciones_puntos_padres")
+}
+
+// ==========================================
+// MODELO: PremioPadre
+// ==========================================
+
+model PremioPadre {
+  id String @id @default(cuid())
+  
+  // Información
+  codigo String @unique
+  titulo String
+  descripcion String @db.Text
+  categoria String // "digital", "acceso", "premium", "epico"
+  
+  // Costo
+  puntos_requeridos Int
+  costo_real_usd Decimal? @db.Decimal(10,2)
+  
+  // Metadata
+  icono String
+  activo Boolean @default(true)
+  orden Int @default(0)
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  canjes CanjePadre[]
+  
+  @@index([categoria])
+  @@index([activo])
+  @@map("premios_padres")
+}
+
+// ==========================================
+// MODELO: CanjePadre
+// ==========================================
+
+model CanjePadre {
+  id String @id @default(cuid())
+  
+  tutor_id String
+  premio_id String
+  puntos_padre_id String
+  
+  puntos_usados Int
+  estado String @default("completado")
+  
+  fecha_canje DateTime @default(now())
+  
+  tutor Tutor @relation(fields: [tutor_id], references: [id])
+  premio PremioPadre @relation(fields: [premio_id], references: [id])
+  puntos_padre PuntosPadre @relation(fields: [puntos_padre_id], references: [id])
+  
+  @@index([tutor_id])
+  @@index([fecha_canje])
+  @@map("canjes_padres")
+}
+
+// ==========================================
+// INDICES ADICIONALES PARA PERFORMANCE
+// ==========================================
+
+// Indices compuestos para queries frecuentes:
+// - Logros no vistos por estudiante
+// - Transacciones recientes
+// - Solicitudes pendientes por tutor
+// - Rachas activas que expiran hoy

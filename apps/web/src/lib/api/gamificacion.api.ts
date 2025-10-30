@@ -35,12 +35,25 @@ export type RankingGlobalEntry = RankingGlobalItem;
 export const gamificacionApi = {
   /**
    * Obtener dashboard completo del estudiante
+   * NOTA: Este endpoint aún no está implementado en el backend
+   * Retorna datos mock por ahora
   */
   getDashboard: async (estudianteId: string): Promise<DashboardData> => {
     try {
       const response = await apiClient.get(`/gamificacion/dashboard/${estudianteId}`);
       return dashboardGamificacionSchema.parse(response);
     } catch (error) {
+      // Si es 404, retornar mock data en lugar de error
+      if ((error as any)?.response?.status === 404) {
+        console.warn('⚠️ Dashboard endpoint no implementado, usando datos mock');
+        return {
+          puntos: { total: 0, semanales: 0, mensuales: 0, anuales: 0 },
+          ranking: { posicion: 0, total: 0, globalRanking: [], equipoRanking: [] },
+          logros: [],
+          proximasClases: [],
+          progreso: [],
+        } as DashboardData;
+      }
       console.error('Error al obtener el dashboard de gamificación:', error);
       throw error;
     }
@@ -51,7 +64,7 @@ export const gamificacionApi = {
    */
   getLogros: async (estudianteId: string): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get(`/gamificacion/logros/${estudianteId}`);
+      const response = await apiClient.get(`/gamificacion/logros/estudiante/${estudianteId}`);
       return logrosListSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener los logros de gamificación:', error);
@@ -149,6 +162,126 @@ export const gamificacionApi = {
       return response;
     } catch (error) {
       console.error('Error al otorgar puntos de gamificación:', error);
+      throw error;
+    }
+  },
+
+  // ==========================================
+  // GAMIFICACIÓN V2 - NUEVOS ENDPOINTS
+  // ==========================================
+
+  /**
+   * Obtener todos los logros disponibles
+   */
+  obtenerTodosLogrosV2: async (): Promise<any[]> => {
+    try {
+      const response = await apiClient.get('/gamificacion/logros');
+      return response;
+    } catch (error) {
+      console.error('Error al obtener logros V2:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener logros del estudiante actual (con autenticación)
+   */
+  obtenerMisLogrosV2: async (estudianteId: string): Promise<any[]> => {
+    try {
+      const response = await apiClient.get(`/gamificacion/logros/estudiante/${estudianteId}`);
+      return response;
+    } catch (error) {
+      console.error('Error al obtener mis logros V2:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener logros no vistos (para notificaciones)
+   */
+  obtenerLogrosNoVistos: async (estudianteId: string): Promise<any[]> => {
+    try {
+      const response = await apiClient.get(`/gamificacion/logros/estudiante/${estudianteId}/no-vistos`);
+      return response;
+    } catch (error) {
+      console.error('Error al obtener logros no vistos:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Marcar logro como visto
+   */
+  marcarLogroVisto: async (estudianteId: string, logroId: string): Promise<void> => {
+    try {
+      await apiClient.patch(`/gamificacion/logros/estudiante/${estudianteId}/${logroId}/visto`);
+    } catch (error) {
+      console.error('Error al marcar logro como visto:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener progreso de logros V2
+   */
+  obtenerProgresoV2: async (estudianteId: string): Promise<any> => {
+    try {
+      const response = await apiClient.get(`/gamificacion/logros/estudiante/${estudianteId}/progreso`);
+      return response;
+    } catch (error) {
+      console.error('Error al obtener progreso V2:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener recursos del estudiante (XP + Monedas + Nivel)
+   */
+  obtenerRecursos: async (estudianteId: string): Promise<any> => {
+    try {
+      const response = await apiClient.get(`/gamificacion/recursos/${estudianteId}`);
+      return response;
+    } catch (error) {
+      console.error('Error al obtener recursos:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener historial de transacciones V2
+   */
+  obtenerHistorialRecursos: async (estudianteId: string): Promise<any[]> => {
+    try {
+      const response = await apiClient.get(`/gamificacion/recursos/${estudianteId}/historial`);
+      return response;
+    } catch (error) {
+      console.error('Error al obtener historial de recursos:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener racha del estudiante
+   */
+  obtenerRacha: async (estudianteId: string): Promise<any> => {
+    try {
+      const response = await apiClient.get(`/gamificacion/recursos/${estudianteId}/racha`);
+      return response;
+    } catch (error) {
+      console.error('Error al obtener racha:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Registrar actividad del día (actualiza racha)
+   */
+  registrarActividad: async (estudianteId: string): Promise<any> => {
+    try {
+      const response = await apiClient.post(`/gamificacion/recursos/${estudianteId}/racha`);
+      return response;
+    } catch (error) {
+      console.error('Error al registrar actividad:', error);
       throw error;
     }
   },
