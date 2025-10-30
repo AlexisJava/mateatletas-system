@@ -11,18 +11,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Clock, Target, ChevronRight, RotateCcw, X } from 'lucide-react';
 import type { ResultadoCalculado } from '../../utils/results-calculator';
 import { getColorPorEstrellas, formatearTiempo } from '../../utils/results-calculator';
+import { recursosApi } from '@/lib/api/tienda.api';
 
 export interface ResultsViewProps {
   resultado: ResultadoCalculado;
   onVolver: () => void;
   onReintentar?: () => void;
   onSiguiente?: () => void;
+  estudianteId?: string;
+  actividadId?: string;
 }
 
-export function ResultsView({ resultado, onVolver, onReintentar, onSiguiente }: ResultsViewProps) {
+export function ResultsView({ resultado, onVolver, onReintentar, onSiguiente, estudianteId, actividadId }: ResultsViewProps) {
   const [mostrarEstrellas, setMostrarEstrellas] = useState(false);
   const [mostrarStats, setMostrarStats] = useState(false);
   const [mostrarRecompensas, setMostrarRecompensas] = useState(false);
+  const [recursosActualizados, setRecursosActualizados] = useState(false);
 
   const colors = getColorPorEstrellas(resultado.estrellas);
 
@@ -38,6 +42,32 @@ export function ResultsView({ resultado, onVolver, onReintentar, onSiguiente }: 
       clearTimeout(timer3);
     };
   }, []);
+
+  // Persistir recursos en backend cuando se otorgan recompensas
+  useEffect(() => {
+    if (mostrarRecompensas && estudianteId && !recursosActualizados) {
+      const persistirRecursos = async () => {
+        try {
+          await recursosApi.actualizarPorActividad({
+            estudiante_id: estudianteId,
+            xp_ganado: resultado.xpGanado,
+            monedas_ganadas: resultado.monedasGanadas,
+            actividad_id: actividadId,
+            metadata: {
+              estrellas: resultado.estrellas,
+              porcentaje: resultado.porcentaje,
+              puntaje: resultado.puntajeObtenido,
+            },
+          });
+          setRecursosActualizados(true);
+        } catch (error) {
+          console.error('Error al actualizar recursos:', error);
+        }
+      };
+
+      persistirRecursos();
+    }
+  }, [mostrarRecompensas, estudianteId, resultado, actividadId, recursosActualizados]);
 
   return (
     <motion.div

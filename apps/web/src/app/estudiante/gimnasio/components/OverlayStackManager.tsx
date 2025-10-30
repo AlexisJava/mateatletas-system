@@ -14,9 +14,12 @@ import type { OverlayConfig, OverlayMetadata } from '../types/overlay.types';
 // Importar vistas de overlays
 import { MiGrupoView } from '../views/MiGrupoView';
 import { MiProgresoView } from '../views/MiProgresoView';
+import { MisLogrosView } from '../views/MisLogrosView';
+import { RankingView } from '../views/RankingView';
 import { NotificacionesView } from '../views/NotificacionesView';
 import { AjustesView } from '../views/AjustesView';
 import { EntrenamientosView } from '../views/EntrenamientosView';
+import { TiendaView } from '../views/TiendaView';
 import { PlanificacionView } from './overlays/PlanificacionView';
 import { ActividadView } from './overlays/ActividadView';
 import { EjecutarActividadView } from './overlays/EjecutarActividadView';
@@ -37,6 +40,10 @@ const OVERLAY_METADATA: Record<string, OverlayMetadata> = {
   },
   'mis-logros': {
     gradient: 'from-yellow-600 via-amber-600 to-orange-700',
+    renderType: 'modal',
+  },
+  'ranking': {
+    gradient: 'from-indigo-600 via-purple-600 to-pink-700',
     renderType: 'modal',
   },
   'entrenamientos': {
@@ -99,13 +106,15 @@ function getOverlayComponent(config: OverlayConfig): React.ComponentType<any> {
     case 'mis-cursos':
       return PlaceholderView;
     case 'tienda':
-      return PlaceholderView;
+      return TiendaView;
     case 'notificaciones':
       return NotificacionesView;
     case 'ajustes':
       return AjustesView;
     case 'mis-logros':
-      return PlaceholderView;
+      return MisLogrosView;
+    case 'ranking':
+      return RankingView;
     default:
       return PlaceholderView;
   }

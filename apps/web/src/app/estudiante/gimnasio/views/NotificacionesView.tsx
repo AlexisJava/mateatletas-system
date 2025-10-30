@@ -89,7 +89,7 @@ export function NotificacionesView() {
       {/* Lista de notificaciones */}
       <div className="space-y-2">
         {notificaciones.map((notif, i) => (
-          <motion.button
+          <motion.div
             key={i}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -100,6 +100,7 @@ export function NotificacionesView() {
               rounded-2xl p-4
               border border-white/10
               transition-all duration-150
+              cursor-pointer
               ${notif.nuevo ? 'border-l-4 border-l-blue-400' : ''}
             `}
           >
@@ -133,12 +134,18 @@ export function NotificacionesView() {
             {/* Acción para clases */}
             {notif.tipo === 'clase' && notif.nuevo && (
               <div className="mt-3 pt-3 border-t border-white/10">
-                <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-bold text-xs transition-colors">
+                <button
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-bold text-xs transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Acción para unirse a la clase
+                  }}
+                >
                   Unirse ahora
                 </button>
               </div>
             )}
-          </motion.button>
+          </motion.div>
         ))}
       </div>
 
