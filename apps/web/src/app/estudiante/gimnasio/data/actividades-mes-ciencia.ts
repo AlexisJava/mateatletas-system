@@ -7,9 +7,45 @@ import type { Actividad } from '../types/actividad.types';
 
 /**
  * SEMANA 1: QUÍMICA 🧪
- * 4 actividades progresivas
+ * 1 clase sincrónica (90 min) + 5 actividades asincrónicas
  */
 const ACTIVIDADES_QUIMICA: readonly Actividad[] = [
+  {
+    id: 'quimica-clase-sincronica',
+    semanaId: 'quimica',
+    numero: 0, // Clase principal
+    titulo: 'Clase Virtual: Laboratorio Mágico',
+    descripcion: 'Experiencia sincrónica de 90 minutos con tu docente. Simulador interactivo, quizzes en vivo y trabajo en equipos.',
+    emoji: '🎬',
+    tipo: 'juego', // Tipo especial para clase sincrónica
+    dificultad: 'medio',
+    duracionEstimada: 90,
+    puntosMaximos: 500,
+    xpRecompensa: 1000,
+    monedasRecompensa: 250,
+    estado: 'disponible',
+    progreso: 0,
+    estrellas: 0,
+    contenido: {
+      tipo: 'juego',
+      juegoId: 'clase-sincronica-quimica-v1',
+      instrucciones: 'Únete a la clase virtual con tu docente y grupo. Necesitarás un link de Google Meet.',
+      objetivo: 'Completar la experiencia de laboratorio químico en 90 minutos',
+      config: {
+        duracion: 90,
+        requiereDocente: true,
+        requiereMeet: true,
+        fases: [
+          'Introducción narrativa (5 min)',
+          'Tutorial interactivo (10 min)',
+          'Simulador colaborativo (30 min)',
+          'Quizzes en vivo (20 min)',
+          'Desafío final en equipos (20 min)',
+          'Cierre y resumen (5 min)',
+        ],
+      },
+    },
+  },
   {
     id: 'quimica-01',
     semanaId: 'quimica',
@@ -232,6 +268,72 @@ const ACTIVIDADES_QUIMICA: readonly Actividad[] = [
       tiempoEmpleado: 890,
       intentos: 1,
       fechaCompletado: new Date('2025-11-06'),
+    },
+  },
+  {
+    id: 'quimica-concentraciones',
+    semanaId: 'quimica',
+    numero: 5,
+    titulo: 'Simulador de Concentraciones',
+    descripcion: 'Mezcla soluto y solvente para lograr la concentración perfecta',
+    emoji: '💧',
+    tipo: 'juego',
+    dificultad: 'medio',
+    duracionEstimada: 15,
+    puntosMaximos: 150,
+    xpRecompensa: 200,
+    monedasRecompensa: 75,
+    estado: 'disponible',
+    progreso: 0,
+    estrellas: 0,
+    contenido: {
+      tipo: 'juego',
+      juegoId: 'concentraciones-v1',
+      instrucciones: 'Ajusta las cantidades de soluto y solvente para alcanzar la concentración objetivo',
+      objetivo: 'Completar 10 niveles de dificultad creciente',
+      config: {
+        nivel: 1,
+        niveles: 10,
+        tolerancia: [10, 8, 6, 5, 4, 3, 2, 2, 1, 1], // % de margen por nivel
+      },
+    },
+  },
+  {
+    id: 'quimica-reacciones-cadena',
+    semanaId: 'quimica',
+    numero: 6,
+    titulo: 'Reacción en Cadena',
+    descripcion: 'Balancea variables químicas para crear la reacción perfecta',
+    emoji: '💥',
+    tipo: 'juego',
+    dificultad: 'dificil',
+    duracionEstimada: 20,
+    puntosMaximos: 200,
+    xpRecompensa: 300,
+    monedasRecompensa: 100,
+    estado: 'disponible',
+    progreso: 0,
+    estrellas: 0,
+    contenido: {
+      tipo: 'juego',
+      juegoId: 'reacciones-cadena-v1',
+      instrucciones: 'Controla temperatura, pH y cantidades de reactivos para lograr la reacción ideal',
+      objetivo: 'Neutralizar ácidos y bases para crear compuestos estables',
+      config: {
+        nivel: 1,
+        experimentos: [
+          {
+            nombre: 'Neutralización Básica',
+            objetivo: { pH: 7, temperatura: 25 },
+            reactivos: ['HCl', 'NaOH', 'H2O'],
+          },
+          {
+            nombre: 'Creación de Sal',
+            objetivo: { pH: 7, temperatura: 20 },
+            reactivos: ['HCl', 'NaOH'],
+          },
+        ],
+      },
     },
   },
 ];
