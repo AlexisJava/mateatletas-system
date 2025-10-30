@@ -32,6 +32,7 @@
     "test:e2e:report": "playwright show-report",
     "clean": "turbo run clean",
     "detect-planificaciones": "cd apps/api && npm run detect-planificaciones",
+    "upload-animations": "node scripts/upload-animations.mjs",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -62,8 +63,10 @@
     "@react-three/fiber": "^9.4.0",
     "@readyplayerme/react-avatar-creator": "^0.5.0",
     "@use-gesture/react": "^10.3.1",
+    "@vercel/blob": "^2.0.0",
     "bcrypt": "^6.0.0",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.3",
     "framer-motion": "^12.23.24",
     "howler": "^2.2.4",
     "katex": "^0.16.25",
