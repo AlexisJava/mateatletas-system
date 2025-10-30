@@ -20,6 +20,7 @@ import { NotificacionesView } from '../views/NotificacionesView';
 import { AjustesView } from '../views/AjustesView';
 import { EntrenamientosView } from '../views/EntrenamientosView';
 import { TiendaView } from '../views/TiendaView';
+import { AnimacionesView } from '../views/AnimacionesView';
 import { PlanificacionView } from './overlays/PlanificacionView';
 import { ActividadView } from './overlays/ActividadView';
 import { EjecutarActividadView } from './overlays/EjecutarActividadView';
@@ -82,6 +83,10 @@ const OVERLAY_METADATA: Record<string, OverlayMetadata> = {
     gradient: 'from-slate-700 via-gray-700 to-zinc-800',
     renderType: 'modal',
   },
+  'animaciones': {
+    gradient: 'from-purple-900 via-indigo-900 to-blue-900',
+    renderType: 'fullscreen',
+  },
 };
 
 /**
@@ -115,6 +120,8 @@ function getOverlayComponent(config: OverlayConfig): React.ComponentType<any> {
       return MisLogrosView;
     case 'ranking':
       return RankingView;
+    case 'animaciones':
+      return AnimacionesView;
     default:
       return PlaceholderView;
   }
