@@ -7,6 +7,7 @@ import { seedRutasCurriculares } from './rutas-curriculares.seed';
 import { seedProductos } from './productos.seed';
 import { seedAccionesPuntuables } from './acciones-puntuables.seed';
 import { seedLogros } from './logros.seed';
+import { seedCursos } from './cursos.seed';
 import { seedSectores } from './sectores.seed';
 import { seedConfiguracionPrecios } from './configuracion-precios.seed';
 import { seedInscripcionesMensuales } from './inscripciones-mensuales.seed';
@@ -30,6 +31,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedProductos(prisma); // Productos del catálogo (pueden ser reales)
     await seedAccionesPuntuables(prisma); // Configuración de gamificación
     await seedLogros(prisma); // Logros del sistema
+    await seedCursos(prisma); // Catálogo de cursos canjeables
   } else {
     // DEVELOPMENT/TEST: Datos completos de prueba
     console.log('🧪 Modo DESARROLLO: Creando datos de prueba completos\n');
@@ -43,6 +45,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedProductos(prisma);
     await seedAccionesPuntuables(prisma);
     await seedLogros(prisma);
+    await seedCursos(prisma); // Catálogo de cursos canjeables
     await seedInscripcionesMensuales(prisma); // Inscripciones de prueba para el tutor
     await seedClaseGrupos(prisma); // Grupos de clases recurrentes
   }
@@ -62,6 +65,7 @@ export {
   seedProductos,
   seedAccionesPuntuables,
   seedLogros,
+  seedCursos,
   seedInscripcionesMensuales,
   seedClaseGrupos,
 };

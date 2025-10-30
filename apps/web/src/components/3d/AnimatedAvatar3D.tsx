@@ -225,6 +225,40 @@ export function AnimatedAvatar3D({
         />
         <pointLight position={[-5, 3, -5]} intensity={0.5} />
 
+        {/* Sombra GRANDE debajo del avatar - ULTRA VISIBLE */}
+        {/* Capa 1 - Centro oscuro */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[position[0], -0.99, position[2]]}>
+          <planeGeometry args={[1.5, 0.6]} />
+          <meshBasicMaterial
+            color="#000000"
+            transparent
+            opacity={0.6}
+            depthWrite={false}
+          />
+        </mesh>
+
+        {/* Capa 2 - Difusión media */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[position[0], -0.985, position[2]]}>
+          <planeGeometry args={[2.0, 0.8]} />
+          <meshBasicMaterial
+            color="#000000"
+            transparent
+            opacity={0.3}
+            depthWrite={false}
+          />
+        </mesh>
+
+        {/* Capa 3 - Difusión exterior suave */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[position[0], -0.98, position[2]]}>
+          <planeGeometry args={[2.5, 1.0]} />
+          <meshBasicMaterial
+            color="#000000"
+            transparent
+            opacity={0.15}
+            depthWrite={false}
+          />
+        </mesh>
+
         {/* Avatar con animación */}
         <Suspense fallback={null}>
           <AvatarModel

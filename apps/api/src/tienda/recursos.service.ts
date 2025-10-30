@@ -1,6 +1,6 @@
 /**
  * RecursosService
- * Maneja XP, Monedas y Gemas del estudiante
+ * Maneja XP y Monedas del estudiante
  */
 
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
@@ -38,7 +38,6 @@ export class RecursosService {
           estudiante_id: estudianteId,
           xp_total: 0,
           monedas_total: 0,
-          gemas_total: 0,
         },
       });
     }
@@ -124,47 +123,6 @@ export class RecursosService {
   }
 
   /**
-   * Agrega gemas al estudiante (por logros especiales, eventos, etc.)
-   */
-  async agregarGemas(
-    estudianteId: string,
-    cantidad: number,
-    razon: string,
-    metadata?: Record<string, unknown>,
-  ): Promise<RecursosActualizadosResponse> {
-    this.logger.log(`Agregando ${cantidad} gemas a estudiante: ${estudianteId}`);
-
-    if (cantidad <= 0) {
-      throw new BadRequestException('La cantidad de gemas debe ser mayor a 0');
-    }
-
-    const recursos = await this.obtenerOCrearRecursos(estudianteId);
-
-    const transaccion = await this.prisma.transaccionRecurso.create({
-      data: {
-        recursos_estudiante_id: recursos.id,
-        tipo_recurso: 'GEMAS',
-        cantidad,
-        razon,
-        metadata: metadata as never,
-      },
-    });
-
-    const recursosActualizados = await this.prisma.recursosEstudiante.update({
-      where: { id: recursos.id },
-      data: {
-        gemas_total: { increment: cantidad },
-      },
-    });
-
-    return {
-      recursos: recursosActualizados as RecursosEstudiante,
-      transacciones: [transaccion as TransaccionRecurso],
-      mensaje: `¡Has ganado ${cantidad} gemas! 💎`,
-    };
-  }
-
-  /**
    * Consume recursos (para compras en tienda)
    * Retorna true si la transacción fue exitosa
    */
@@ -183,15 +141,18 @@ export class RecursosService {
       throw new BadRequestException('La cantidad debe ser mayor a 0');
     }
 
+    // Validar que el tipo de recurso sea válido (solo XP o MONEDAS)
+    if (tipo !== 'XP' && tipo !== 'MONEDAS') {
+      throw new BadRequestException(`Tipo de recurso inválido: ${tipo}. Solo se permite XP o MONEDAS.`);
+    }
+
     const recursos = await this.obtenerOCrearRecursos(estudianteId);
 
     // Verificar si tiene suficientes recursos
     const recursoActual =
       tipo === 'XP'
         ? recursos.xp_total
-        : tipo === 'MONEDAS'
-          ? recursos.monedas_total
-          : recursos.gemas_total;
+        : recursos.monedas_total;
 
     if (recursoActual < cantidad) {
       throw new BadRequestException(
@@ -216,8 +177,6 @@ export class RecursosService {
       updateData.xp_total = { decrement: cantidad };
     } else if (tipo === 'MONEDAS') {
       updateData.monedas_total = { decrement: cantidad };
-    } else if (tipo === 'GEMAS') {
-      updateData.gemas_total = { decrement: cantidad };
     }
 
     await this.prisma.recursosEstudiante.update({
@@ -242,7 +201,7 @@ export class RecursosService {
     const transacciones = await this.prisma.transaccionRecurso.findMany({
       where: {
         recursos_estudiante_id: recursos.id,
-        ...(tipo && { tipo_recurso: tipo }),
+        ...(tipo && tipo !== 'GEMAS' ? { tipo_recurso: tipo } : {}),
       },
       orderBy: { fecha: 'desc' },
       take: limit,
@@ -257,7 +216,6 @@ export class RecursosService {
   async verificarRecursosSuficientes(
     estudianteId: string,
     monedasRequeridas: number,
-    gemasRequeridas: number,
   ): Promise<{ suficientes: boolean; mensaje?: string }> {
     const recursos = await this.obtenerOCrearRecursos(estudianteId);
 
@@ -265,13 +223,6 @@ export class RecursosService {
       return {
         suficientes: false,
         mensaje: `No tienes suficientes monedas. Tienes ${recursos.monedas_total}, necesitas ${monedasRequeridas}`,
-      };
-    }
-
-    if (gemasRequeridas > 0 && recursos.gemas_total < gemasRequeridas) {
-      return {
-        suficientes: false,
-        mensaje: `No tienes suficientes gemas. Tienes ${recursos.gemas_total}, necesitas ${gemasRequeridas}`,
       };
     }
 

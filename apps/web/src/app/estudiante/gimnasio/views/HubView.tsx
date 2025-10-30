@@ -78,14 +78,15 @@ const NAV_LEFT: NavButton[] = [
     pulse: true,
   },
   {
-    id: 'mis-cursos',
-    overlayId: 'mis-cursos',
-    label: 'MIS CURSOS',
-    description: 'Tus rutas de aprendizaje',
+    id: 'tareas-asignadas',
+    overlayId: 'planificacion',
+    label: 'TAREAS ASIGNADAS',
+    description: 'Mes de la Ciencia',
     icon: <BookOpen className="w-7 h-7" />,
     gradient: 'from-purple-500 via-violet-500 to-indigo-600',
     glowColor: 'purple',
-    badge: 0,
+    badge: 4,
+    pulse: true,
   },
   {
     id: 'mis-logros',
@@ -182,11 +183,10 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   useEffect(() => {
     setIsMounted(true);
 
-    // Usar UNA animación idle variation canchera en loop continuo (sin cortes)
-    // M_Standing_Idle_Variations_005 tiene movimientos dinámicos que invitan a jugar
-    const coolIdleUrl =
-      'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
-    setCurrentAnimation(coolIdleUrl);
+    // Usar M_Standing_Idle_001 que tiene loop suave y continuo
+    const smoothIdleUrl =
+      'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb';
+    setCurrentAnimation(smoothIdleUrl);
   }, []);
 
   // Cargar recursos del estudiante
@@ -207,57 +207,27 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
   // Hook para animaciones del avatar - triggers manuales
   const triggerAnimation = useCallback(
-    (category: 'dance' | 'expression' | 'idle' | 'locomotion', duration?: number) => {
-      const anim = getRandomAnimation(category);
-      if (!anim) return;
-
+    (animationUrl: string, returnToIdleAfter?: number) => {
       try {
-        // Cambiar animación
-        setCurrentAnimation(anim.url);
+        setCurrentAnimation(animationUrl);
 
-        // model-viewer no tiene método .play() directo
-        // La animación se activa automáticamente al cambiar animationName
-
-        if (duration) {
+        // Si se especifica duración, volver a idle después
+        if (returnToIdleAfter) {
           setTimeout(() => {
-            model.animationName = 'idle';
-          }, duration);
+            const idleUrl =
+              'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb';
+            setCurrentAnimation(idleUrl);
+          }, returnToIdleAfter);
         }
       } catch (error) {
-        // Silently fail - avatar animations are non-critical
         console.debug('Animation error:', error);
       }
     },
     [],
   );
 
-  // Animaciones aleatorias cada 10-15 segundos para dar vida al avatar
-  useEffect(() => {
-    if (!isMounted) return;
-
-    const idleAnimations = ['wave', 'clapping', 'headShake'];
-
-    const triggerRandomAnimation = () => {
-      const randomAnim = idleAnimations[Math.floor(Math.random() * idleAnimations.length)]!;
-      triggerAnimation(randomAnim, 2000);
-    };
-
-    // Primera animación después de 5 segundos
-    const initialTimeout = setTimeout(triggerRandomAnimation, 5000);
-
-    // Luego cada 10-15 segundos
-    const interval = setInterval(
-      () => {
-        triggerRandomAnimation();
-      },
-      10000 + Math.random() * 5000,
-    );
-
-    return () => {
-      clearTimeout(initialTimeout);
-      clearInterval(interval);
-    };
-  }, [isMounted, triggerAnimation]);
+  // NO rotar animaciones automáticamente - mantener idle continuo
+  // Solo cambiar cuando el usuario interactúa
 
   // Valores de recursos (del backend o fallback si está cargando)
   const monedas = recursos?.monedas_total ?? 0;
@@ -276,154 +246,156 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const porcentajeProgresoNivel = (xpEnNivelActual / xpNecesarioParaSiguienteNivel) * 100;
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600 flex flex-col">
-      {/* Animated Mesh Gradient - Blobs orgánicos */}
+    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex flex-col">
+      {/* Fondo con gradientes animados "Deep Space" + hexágonos visibles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Blob 1 - Purple */}
+        {/* Gradiente base espacial animado - Púrpuras neón, cyans brillantes */}
         <motion.div
-          className="absolute w-[600px] h-[600px] rounded-full bg-purple-500/30 blur-3xl"
+          className="absolute inset-0"
           animate={{
-            x: ['-10%', '10%', '-10%'],
-            y: ['-5%', '5%', '-5%'],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-          style={{ top: '10%', left: '20%' }}
-        />
-
-        {/* Blob 2 - Pink */}
-        <motion.div
-          className="absolute w-[500px] h-[500px] rounded-full bg-pink-500/25 blur-3xl"
-          animate={{
-            x: ['5%', '-5%', '5%'],
-            y: ['10%', '-10%', '10%'],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: 2,
-          }}
-          style={{ bottom: '15%', right: '25%' }}
-        />
-
-        {/* Blob 3 - Yellow */}
-        <motion.div
-          className="absolute w-[450px] h-[450px] rounded-full bg-yellow-400/20 blur-3xl"
-          animate={{
-            x: ['-8%', '8%', '-8%'],
-            y: ['-8%', '8%', '-8%'],
-            scale: [1.1, 1, 1.1],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: 5,
-          }}
-          style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-        />
-
-        {/* Blob 4 - Cyan */}
-        <motion.div
-          className="absolute w-[550px] h-[550px] rounded-full bg-cyan-400/20 blur-3xl"
-          animate={{
-            x: ['10%', '-10%', '10%'],
-            y: ['-10%', '10%', '-10%'],
-            scale: [1, 1.15, 1],
+            background: [
+              'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(168, 85, 247, 0.25) 25%, rgba(99, 102, 241, 0.3) 50%, rgba(79, 70, 229, 0.25) 75%, rgba(67, 56, 202, 0.3) 100%)',
+              'linear-gradient(225deg, rgba(67, 56, 202, 0.3) 0%, rgba(79, 70, 229, 0.25) 25%, rgba(99, 102, 241, 0.3) 50%, rgba(168, 85, 247, 0.25) 75%, rgba(139, 92, 246, 0.3) 100%)',
+              'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(168, 85, 247, 0.25) 25%, rgba(99, 102, 241, 0.3) 50%, rgba(79, 70, 229, 0.25) 75%, rgba(67, 56, 202, 0.3) 100%)',
+            ],
           }}
           transition={{
             duration: 22,
             repeat: Infinity,
             ease: 'easeInOut',
-            delay: 8,
           }}
-          style={{ top: '30%', right: '15%' }}
         />
-      </div>
 
-      {/* Textura de fondo estilo Brawl Stars */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none z-[1]">
-        <div
-          className="w-full h-full"
+        {/* Capa de acentos radiales neón que se mueven - Cyans y magentas */}
+        <motion.div
+          className="absolute inset-0"
+          animate={{
+            background: [
+              'radial-gradient(ellipse at 25% 25%, rgba(6, 182, 212, 0.4) 0%, transparent 40%), radial-gradient(ellipse at 75% 75%, rgba(236, 72, 153, 0.35) 0%, transparent 40%)',
+              'radial-gradient(ellipse at 75% 25%, rgba(236, 72, 153, 0.4) 0%, transparent 40%), radial-gradient(ellipse at 25% 75%, rgba(6, 182, 212, 0.35) 0%, transparent 40%)',
+              'radial-gradient(ellipse at 25% 25%, rgba(6, 182, 212, 0.4) 0%, transparent 40%), radial-gradient(ellipse at 75% 75%, rgba(236, 72, 153, 0.35) 0%, transparent 40%)',
+            ],
+          }}
+          transition={{
+            duration: 26,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: 4,
+          }}
+        />
+
+        {/* Capa extra de destellos azules eléctricos */}
+        <motion.div
+          className="absolute inset-0"
+          animate={{
+            background: [
+              'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.25) 0%, transparent 35%)',
+              'radial-gradient(circle at 60% 40%, rgba(59, 130, 246, 0.3) 0%, transparent 35%)',
+              'radial-gradient(circle at 40% 60%, rgba(59, 130, 246, 0.25) 0%, transparent 35%)',
+              'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.25) 0%, transparent 35%)',
+            ],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: 1,
+          }}
+        />
+
+        {/* Hexágonos flotantes MÁS VISIBLES */}
+        {Array.from({ length: 8 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute"
+            style={{
+              left: `${15 + (i % 4) * 25}%`,
+              top: `${20 + Math.floor(i / 4) * 50}%`,
+              width: '90px',
+              height: '90px',
+              opacity: 0.4, // Opacidad aumentada
+            }}
+            animate={{
+              rotate: [0, 360],
+              y: [0, -35, 0],
+            }}
+            transition={{
+              duration: 20 + i * 3,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: i * 1.2,
+            }}
+          >
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <polygon
+                points="50 1 95 25 95 75 50 99 5 75 5 25"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.6)"
+                strokeWidth="2"
+              />
+            </svg>
+          </motion.div>
+        ))}
+
+        {/* Hexágonos grandes adicionales MÁS VISIBLES */}
+        <motion.div
+          className="absolute"
           style={{
-            backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.2) 2%, transparent 2%),
-                              radial-gradient(circle at 75% 75%, rgba(255,255,255,0.2) 2%, transparent 2%)`,
-            backgroundSize: '60px 60px',
+            left: '10%',
+            top: '60%',
+            width: '130px',
+            height: '130px',
+            opacity: 0.35, // Opacidad aumentada
           }}
-        />
-      </div>
+          animate={{
+            rotate: [0, -360],
+            scale: [1, 1.15, 1],
+          }}
+          transition={{
+            duration: 28,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        >
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <polygon
+              points="50 1 95 25 95 75 50 99 5 75 5 25"
+              fill="none"
+              stroke="rgba(168, 85, 247, 0.65)"
+              strokeWidth="2"
+            />
+          </svg>
+        </motion.div>
 
-      {/* Partículas matemáticas flotantes */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-[2]">
-        {Array.from({ length: 18 }).map((_, i) => {
-          const mathSymbols = [
-            'π',
-            '∑',
-            '∞',
-            '√',
-            '×',
-            '+',
-            '÷',
-            '∫',
-            'α',
-            'β',
-            '²',
-            '³',
-            '∆',
-            '∈',
-            '∀',
-            '≈',
-            '≠',
-            '≤',
-          ];
-          const symbol = mathSymbols[i % mathSymbols.length];
-
-          // Valores deterministas para SSR
-          const seed = i * 137.5;
-          const startX = (seed * 7) % 100;
-          const startY = (seed * 11) % 100;
-          const endX = (seed * 13) % 100;
-          const endY = (seed * 17) % 100;
-          const duration = 20 + ((i * 3) % 15);
-          const delay = (i * 2) % 10;
-          const size = 24 + (i % 3) * 8; // 24px, 32px, o 40px
-
-          return (
-            <motion.div
-              key={i}
-              className="absolute font-bold text-white/15"
-              style={{
-                fontSize: `${size}px`,
-                fontFamily: 'Georgia, serif',
-              }}
-              initial={{
-                x: `${startX}vw`,
-                y: `${startY}vh`,
-                opacity: 0,
-              }}
-              animate={{
-                x: [`${startX}vw`, `${endX}vw`, `${startX}vw`],
-                y: [`${startY}vh`, `${endY}vh`, `${startY}vh`],
-                opacity: [0, 0.2, 0],
-                rotate: [0, 360, 0],
-              }}
-              transition={{
-                duration,
-                repeat: Infinity,
-                delay,
-                ease: 'easeInOut',
-              }}
-            >
-              {symbol}
-            </motion.div>
-          );
-        })}
+        <motion.div
+          className="absolute"
+          style={{
+            right: '12%',
+            top: '15%',
+            width: '110px',
+            height: '110px',
+            opacity: 0.35, // Opacidad aumentada
+          }}
+          animate={{
+            rotate: [0, 360],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 32,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: 4,
+          }}
+        >
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <polygon
+              points="50 1 95 25 95 75 50 99 5 75 5 25"
+              fill="none"
+              stroke="rgba(34, 211, 238, 0.7)"
+              strokeWidth="2"
+            />
+          </svg>
+        </motion.div>
       </div>
 
       {/* ========== NAVEGACIÓN LATERAL IZQUIERDA - ULTRA GAMIFICADA ========== */}
@@ -439,8 +411,8 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               item={item}
               isActive={activeView === item.id}
               onClick={() => {
-                // ENTRENAMIENTOS abre directamente el Mes de la Ciencia
-                if (item.id === 'entrenamientos') {
+                // ENTRENAMIENTOS y TAREAS ASIGNADAS abren directamente el Mes de la Ciencia
+                if (item.id === 'entrenamientos' || item.id === 'tareas-asignadas') {
                   push({
                     type: 'planificacion',
                     codigo: '2025-11-mes-ciencia',
@@ -564,16 +536,55 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="relative w-full h-full flex items-center justify-center"
             >
+              {/* Resplandor/Glow detrás del avatar */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+                style={{
+                  width: '500px',
+                  height: '500px',
+                  background: 'radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, rgba(99, 102, 241, 0.3) 25%, rgba(168, 85, 247, 0.2) 50%, transparent 70%)',
+                  filter: 'blur(40px)',
+                }}
+                animate={{
+                  scale: [1, 1.15, 1],
+                  opacity: [0.6, 0.8, 0.6],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
+
+              {/* Segundo anillo de resplandor - más amplio y sutil */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+                style={{
+                  width: '650px',
+                  height: '650px',
+                  background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(59, 130, 246, 0.15) 40%, transparent 65%)',
+                  filter: 'blur(50px)',
+                }}
+                animate={{
+                  scale: [1, 1.1, 1],
+                  opacity: [0.4, 0.6, 0.4],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: 1,
+                }}
+              />
+
               {/* Avatar 3D Animado - CLICKEABLE PARA ANIMAR */}
               <div
                 className="relative z-20 cursor-pointer w-full h-full"
-                onMouseEnter={() => {
-                  // Expresión cuando el usuario pasa el mouse
-                  triggerAnimation('expression', 2000);
-                }}
                 onClick={() => {
-                  // Baile al hacer click en el avatar
-                  triggerAnimation('dance', 4000);
+                  // Variations_005 (la más dinámica) al hacer click
+                  const clickUrl =
+                    'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
+                  triggerAnimation(clickUrl, 4000);
                 }}
               >
                 {isMounted && estudiante.avatar_url && (
@@ -652,7 +663,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 subtitle="¡Sigue así!"
                 gradient="from-orange-500 to-red-600"
                 glowColor="orange"
-                onClick={() => triggerAnimation('clapping', 2500)}
+                onClick={() =>
+                  triggerAnimation(
+                    'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb',
+                    3000,
+                  )
+                }
               />
               <StatCard3D
                 icon={<Trophy className="w-6 h-6" />}
@@ -661,7 +677,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 subtitle="Desbloqueados"
                 gradient="from-yellow-500 to-amber-600"
                 glowColor="yellow"
-                onClick={() => triggerAnimation('wave', 2500)}
+                onClick={() =>
+                  triggerAnimation(
+                    'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_002.glb',
+                    3000,
+                  )
+                }
               />
               <StatCard3D
                 icon={<Target className="w-6 h-6" />}
@@ -670,7 +691,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 subtitle="¡Casi maestro!"
                 gradient="from-purple-500 to-pink-600"
                 glowColor="purple"
-                onClick={() => triggerAnimation('dance', 3000)}
+                onClick={() =>
+                  triggerAnimation(
+                    'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb',
+                    3500,
+                  )
+                }
               />
             </motion.div>
 
@@ -684,8 +710,10 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95, y: 0 }}
                 onClick={() => {
-                  // Animación épica antes de navegar
-                  triggerAnimation('victory', 2000);
+                  // Animación energética antes de navegar
+                  const energeticUrl =
+                    'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
+                  triggerAnimation(energeticUrl, 2000);
                   setTimeout(() => {
                     onNavigate('entrenamientos');
                   }, 1800);
@@ -710,11 +738,11 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 />
 
                 <div className="relative z-10 text-center">
-                  <div className="text-white text-5xl font-black uppercase tracking-wider drop-shadow-lg">
-                    JUGAR
+                  <div className="text-white text-4xl font-black uppercase tracking-wider drop-shadow-lg">
+                    ¡ENTRENAR MATEMÁTICAS!
                   </div>
                   <div className="text-white/90 text-sm font-bold uppercase tracking-wide">
-                    Comenzar Entrenamiento
+                    Resolvé desafíos y dominá números
                   </div>
                 </div>
               </motion.button>

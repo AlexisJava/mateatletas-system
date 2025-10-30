@@ -376,7 +376,6 @@ export class TiendaService {
     const verificacion = await this.recursosService.verificarRecursosSuficientes(
       estudiante_id,
       item.precio_monedas,
-      item.precio_gemas,
     );
 
     if (!verificacion.suficientes) {
@@ -407,36 +406,16 @@ export class TiendaService {
         });
       }
 
-      // 7b. Consumir gemas
-      if (item.precio_gemas > 0) {
-        // Crear transacción negativa
-        await tx.transaccionRecurso.create({
-          data: {
-            recursos_estudiante_id: recursos.id,
-            tipo_recurso: 'GEMAS',
-            cantidad: -item.precio_gemas,
-            razon: 'compra_tienda',
-            metadata: { item_id, nombre_item: item.nombre } as never,
-          },
-        });
-        // Actualizar total
-        await tx.recursosEstudiante.update({
-          where: { id: recursos.id },
-          data: { gemas_total: { decrement: item.precio_gemas } },
-        });
-      }
-
-      // 7c. Registrar compra
+      // 7b. Registrar compra
       const compra = await tx.compraItem.create({
         data: {
           recursos_estudiante_id: recursos.id,
           item_id,
           monedas_gastadas: item.precio_monedas,
-          gemas_gastadas: item.precio_gemas,
         },
       });
 
-      // 7d. Agregar item al inventario
+      // 7c. Agregar item al inventario
       const itemObtenido = await tx.itemObtenido.create({
         data: {
           estudiante_id,
@@ -447,7 +426,7 @@ export class TiendaService {
         },
       });
 
-      // 7e. Incrementar contador de veces comprado
+      // 7d. Incrementar contador de veces comprado
       await tx.itemTienda.update({
         where: { id: item_id },
         data: { veces_comprado: { increment: 1 } },
