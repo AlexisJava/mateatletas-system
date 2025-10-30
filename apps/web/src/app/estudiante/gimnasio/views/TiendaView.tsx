@@ -73,8 +73,10 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
           recursosApi.obtenerRecursos(estudiante.id),
         ]);
 
-        setItems(itemsData.items);
-        setCategorias(itemsData.categorias);
+        if (itemsData) {
+          setItems(itemsData.items || []);
+          setCategorias(itemsData.categorias || []);
+        }
         setRecursos(recursosData);
       } catch (error) {
         console.error('Error al cargar tienda:', error);
@@ -93,9 +95,13 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
         try {
           setLoadingInventario(true);
           const data = await tiendaApi.obtenerInventario(estudiante.id);
-          setInventario(data.items);
-          // Actualizar recursos también
-          setRecursos(data.recursos);
+          if (data) {
+            setInventario(data.items || []);
+            // Actualizar recursos también
+            if (data.recursos) {
+              setRecursos(data.recursos);
+            }
+          }
         } catch (error) {
           console.error('Error al cargar inventario:', error);
         } finally {

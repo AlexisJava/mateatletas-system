@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import { RecursosService } from '../tienda/recursos.service';
-import { LogrosService } from '../gamificacion/logros.service';
+import { VerificadorLogrosService } from '../gamificacion/services/verificador-logros.service';
 import type {
   IniciarActividad,
   CompletarActividad,
@@ -27,7 +27,7 @@ export class ProgresoActividadService {
   constructor(
     private prisma: PrismaService,
     private recursosService: RecursosService,
-    private logrosService: LogrosService,
+    private verificadorLogrosService: VerificadorLogrosService,
   ) {}
 
   // ============================================================================
@@ -239,16 +239,30 @@ export class ProgresoActividadService {
     });
 
     // 5. Verificar logros desbloqueados
-    const logrosDesbloqueados = await this.logrosService.verificarLogrosActividad(
+    // TODO: Implementar verificación de logros con VerificadorLogrosService
+    const codigosLogros = await this.verificadorLogrosService.verificarLogrosEjercicio(
       estudiante_id,
-      actividad_id,
       {
-        estrellas,
-        porcentaje_aciertos,
-        tiempo_minutos,
-        primer_intento: resultado.intentos === 1,
+        precision: porcentaje_aciertos,
+        tiempo: tiempo_minutos ? tiempo_minutos * 60 : undefined,
       },
     );
+
+    // Mapear códigos a objetos de logro completos
+    const logrosDesbloqueados = [];
+    for (const codigo of codigosLogros) {
+      const logro = await this.prisma.logro.findUnique({
+        where: { codigo },
+      });
+      if (logro) {
+        logrosDesbloqueados.push({
+          id: logro.id,
+          nombre: logro.nombre,
+          descripcion: logro.descripcion,
+          puntos: logro.xp_recompensa,
+        });
+      }
+    }
 
     // 6. Verificar si subió de nivel
     const nivel_anterior = this.calcularNivel(recursosActualizados.recursos.xp_total - xp_ganado);
