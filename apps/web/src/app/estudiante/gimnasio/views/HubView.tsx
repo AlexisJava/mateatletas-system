@@ -1,5 +1,7 @@
 'use client';
 
+/// <reference path="../../../../types/model-viewer.d.ts" />
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOverlay, useOverlayStack } from '../contexts/OverlayStackProvider';
@@ -15,7 +17,6 @@ import {
   Trophy,
   ShoppingBag,
   Users,
-  MessageCircle,
   Settings,
   Bell,
   Flame,
@@ -154,7 +155,6 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [activeView, setActiveView] = useState('hub');
   const [isMounted, setIsMounted] = useState(false);
   const [recursos, setRecursos] = useState<RecursosEstudiante | null>(null);
-  const [loadingRecursos, setLoadingRecursos] = useState(true);
   const modelRef = useRef<any>(null);
   const { openOverlay } = useOverlay();
   const { push } = useOverlayStack();
@@ -167,13 +167,10 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   useEffect(() => {
     const cargarRecursos = async () => {
       try {
-        setLoadingRecursos(true);
         const data = await recursosApi.obtenerRecursos(estudiante.id);
         setRecursos(data);
       } catch (error) {
         console.error('Error cargando recursos:', error);
-      } finally {
-        setLoadingRecursos(false);
       }
     };
 
@@ -212,7 +209,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     const idleAnimations = ['wave', 'clapping', 'headShake'];
 
     const triggerRandomAnimation = () => {
-      const randomAnim = idleAnimations[Math.floor(Math.random() * idleAnimations.length)];
+      const randomAnim = idleAnimations[Math.floor(Math.random() * idleAnimations.length)]!;
       triggerAnimation(randomAnim, 2000);
     };
 
@@ -493,11 +490,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 onClick={() => {
                   // Animación aleatoria al hacer click en el avatar
                   const animations = ['clapping', 'dance', 'victory'];
-                  const randomAnim = animations[Math.floor(Math.random() * animations.length)];
+                  const randomAnim = animations[Math.floor(Math.random() * animations.length)]!;
                   triggerAnimation(randomAnim, 3000);
                 }}
               >
                 {isMounted && estudiante.avatar_url && (
+                  // @ts-expect-error - model-viewer es un web component con tipos definidos en model-viewer.d.ts
                   <model-viewer
                     ref={modelRef}
                     src={estudiante.avatar_url}
@@ -720,7 +718,7 @@ function NavButtonUltra({
         </motion.div>
 
         {/* Badge de notificaciones */}
-        {item.badge > 0 && (
+        {(item.badge ?? 0) > 0 && (
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -732,7 +730,7 @@ function NavButtonUltra({
                        shadow-xl"
           >
             <span className="text-white text-xs font-black">
-              {item.badge > 99 ? '99+' : item.badge}
+              {(item.badge ?? 0) > 99 ? '99+' : item.badge}
             </span>
           </motion.div>
         )}
@@ -774,7 +772,7 @@ function NavButtonUltra({
               </div>
 
               {/* Badge info */}
-              {item.badge > 0 && (
+              {(item.badge ?? 0) > 0 && (
                 <div className="mt-2 flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                   <span className="text-red-400 text-xs font-bold">
