@@ -24,7 +24,7 @@ const CATEGORY_LABELS: Record<string, { label: string; emoji: string; color: str
 }
 
 export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
-  const { popOverlay } = useOverlayStack()
+  const { pop } = useOverlayStack()
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [previewAnimation, setPreviewAnimation] = useState<any>(null)
   const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
@@ -40,7 +40,7 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
   })
 
   const handleClose = () => {
-    popOverlay()
+    pop()
   }
 
   // Filtrar animaciones según categoría seleccionada
