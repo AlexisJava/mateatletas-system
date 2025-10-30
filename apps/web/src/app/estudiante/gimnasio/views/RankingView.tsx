@@ -38,12 +38,12 @@ export function RankingView({ estudiante }: RankingViewProps) {
     cargarRanking();
   }, [estudiante.id]);
 
-  const miPosicionEquipo = ranking?.ranking_equipo?.findIndex(
-    (m) => m.estudiante_id === estudiante.id
+  const miPosicionEquipo = ranking?.rankingEquipo?.findIndex(
+    (m) => (m as RankingEquipoEntry & { estudiante_id?: string }).estudiante_id === estudiante.id
   ) ?? -1;
 
-  const miPosicionGlobal = ranking?.ranking_global?.findIndex(
-    (m) => m.estudiante_id === estudiante.id
+  const miPosicionGlobal = ranking?.rankingGlobal?.findIndex(
+    (m) => (m as RankingGlobalEntry & { estudiante_id?: string }).estudiante_id === estudiante.id
   ) ?? -1;
 
   return (
@@ -109,8 +109,8 @@ export function RankingView({ estudiante }: RankingViewProps) {
               <p className="text-xs text-white/60 uppercase tracking-wide">Tus Puntos</p>
               <p className="text-2xl font-black text-white">
                 {tab === 'equipo'
-                  ? ranking.ranking_equipo?.[miPosicionEquipo]?.puntos_totales || 0
-                  : ranking.ranking_global?.[miPosicionGlobal]?.puntos_totales || 0}
+                  ? ranking.rankingEquipo?.[miPosicionEquipo]?.puntos_totales || 0
+                  : ranking.rankingGlobal?.[miPosicionGlobal]?.puntos_totales || 0}
               </p>
             </div>
           </div>
@@ -125,27 +125,44 @@ export function RankingView({ estudiante }: RankingViewProps) {
           </div>
         ) : (
           <div className="space-y-2 pb-20">
-            {tab === 'equipo' && ranking?.ranking_equipo?.map((entry, index) => (
-              <RankingCard
-                key={entry.estudiante_id}
-                posicion={index + 1}
-                nombre={entry.estudiante_nombre}
-                apellido={entry.estudiante_apellido}
-                puntos={entry.puntos_totales}
-                esYo={entry.estudiante_id === estudiante.id}
-              />
-            ))}
-            {tab === 'global' && ranking?.ranking_global?.map((entry, index) => (
-              <RankingCard
-                key={entry.estudiante_id}
-                posicion={index + 1}
-                nombre={entry.estudiante_nombre}
-                apellido={entry.estudiante_apellido}
-                puntos={entry.puntos_totales}
-                equipo={entry.equipo_nombre}
-                esYo={entry.estudiante_id === estudiante.id}
-              />
-            ))}
+            {tab === 'equipo' && ranking?.rankingEquipo?.map((entry, index: number) => {
+              const entryData = entry as RankingEquipoEntry & {
+                estudiante_id?: string;
+                estudiante_nombre?: string;
+                estudiante_apellido?: string;
+                puntos_totales?: number;
+              };
+              return (
+                <RankingCard
+                  key={entryData.estudiante_id || index}
+                  posicion={index + 1}
+                  nombre={entryData.estudiante_nombre || ''}
+                  apellido={entryData.estudiante_apellido}
+                  puntos={entryData.puntos_totales || 0}
+                  esYo={entryData.estudiante_id === estudiante.id}
+                />
+              );
+            })}
+            {tab === 'global' && ranking?.rankingGlobal?.map((entry, index: number) => {
+              const entryData = entry as RankingGlobalEntry & {
+                estudiante_id?: string;
+                estudiante_nombre?: string;
+                estudiante_apellido?: string;
+                puntos_totales?: number;
+                equipo_nombre?: string;
+              };
+              return (
+                <RankingCard
+                  key={entryData.estudiante_id || index}
+                  posicion={index + 1}
+                  nombre={entryData.estudiante_nombre || ''}
+                  apellido={entryData.estudiante_apellido}
+                  puntos={entryData.puntos_totales || 0}
+                  equipo={entryData.equipo_nombre}
+                  esYo={entryData.estudiante_id === estudiante.id}
+                />
+              );
+            })}
           </div>
         )}
       </div>
