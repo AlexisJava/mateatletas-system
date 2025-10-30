@@ -1,20 +1,30 @@
 import { Module } from '@nestjs/common';
-import { GamificacionController } from './gamificacion.controller';
-import { GamificacionService } from './gamificacion.service';
-import { PuntosService } from './puntos.service';
-import { LogrosService } from './logros.service';
-import { RankingService } from './ranking.service';
+import { LogrosService } from './services/logros.service';
+import { RecursosService } from './services/recursos.service';
+import { RachaService } from './services/racha.service';
+import { VerificadorLogrosService } from './services/verificador-logros.service';
+import { TiendaService } from './services/tienda.service';
+import { LogrosController } from './controllers/logros.controller';
+import { RecursosController } from './controllers/recursos.controller';
+import { TiendaController } from './controllers/tienda.controller';
 import { PrismaService } from '../core/database/prisma.service';
 
 @Module({
-  controllers: [GamificacionController],
+  controllers: [LogrosController, RecursosController, TiendaController],
   providers: [
-    GamificacionService,
-    PuntosService,
     LogrosService,
-    RankingService,
+    RecursosService,
+    RachaService,
+    VerificadorLogrosService,
+    TiendaService,
     PrismaService,
   ],
-  exports: [GamificacionService, PuntosService, LogrosService, RankingService],
+  exports: [
+    LogrosService,
+    RecursosService,
+    RachaService,
+    VerificadorLogrosService,
+    TiendaService,
+  ],
 })
 export class GamificacionModule {}

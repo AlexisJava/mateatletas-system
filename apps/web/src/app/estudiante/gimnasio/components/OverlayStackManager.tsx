@@ -20,6 +20,8 @@ import { NotificacionesView } from '../views/NotificacionesView';
 import { AjustesView } from '../views/AjustesView';
 import { EntrenamientosView } from '../views/EntrenamientosView';
 import { TiendaView } from '../views/TiendaView';
+import { CursosView } from '../views/CursosView';
+import { MisCursosView } from '../views/MisCursosView';
 import { AnimacionesView } from '../views/AnimacionesView';
 import { PlanificacionView } from './overlays/PlanificacionView';
 import { ActividadView } from './overlays/ActividadView';
@@ -109,9 +111,9 @@ function getOverlayComponent(config: OverlayConfig): React.ComponentType<any> {
     case 'ejecutar-actividad':
       return EjecutarActividadView; // Vista de ejecución individual (ejercicios, videos, juegos)
     case 'mis-cursos':
-      return PlaceholderView;
+      return MisCursosView;
     case 'tienda':
-      return TiendaView;
+      return CursosView;
     case 'notificaciones':
       return NotificacionesView;
     case 'ajustes':
