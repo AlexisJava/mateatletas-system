@@ -1,14 +1,55 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { gamificacionApi, type DashboardData } from '@/lib/api/gamificacion.api';
 
 interface MiGrupoViewProps {
   estudiante: {
+    id: string;
     nombre: string;
+    apellido: string;
   };
 }
 
 export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar datos del dashboard (incluye info del equipo)
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        setLoading(true);
+        const data = await gamificacionApi.getDashboard(estudiante.id);
+        setDashboard(data);
+      } catch (error) {
+        console.error('Error al cargar datos del equipo:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (estudiante.id) {
+      cargarDatos();
+    }
+  }, [estudiante.id]);
+
+  // Calcular datos del equipo
+  const nombreEquipo = dashboard?.estudiante.equipo.nombre || 'Equipo Fénix';
+  const colorEquipo = dashboard?.estudiante.equipo.color || '#FF6B00';
+  const misPuntos = dashboard?.stats.puntosToales || 0;
+  const clasesAsistidas = dashboard?.stats.clasesAsistidas || 0;
+  const rachaActual = dashboard?.stats.racha || 0;
+
+  if (loading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-white/60 text-2xl font-bold">Cargando equipo...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-full flex flex-col p-8">
       {/* Header */}
@@ -43,9 +84,9 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
           </div>
 
           <div className="text-center">
-            <h2 className="text-3xl font-black text-white mb-2">EQUIPO FÉNIX</h2>
-            <p className="text-white/70 text-lg font-bold">9,800 puntos</p>
-            <p className="text-white/70 text-lg font-bold">15 atletas</p>
+            <h2 className="text-3xl font-black text-white mb-2">{nombreEquipo.toUpperCase()}</h2>
+            <p className="text-white/70 text-lg font-bold">{clasesAsistidas} clases asistidas</p>
+            <p className="text-white/70 text-lg font-bold">🔥 Racha de {rachaActual} días</p>
           </div>
         </motion.div>
 
@@ -112,7 +153,7 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
         </motion.div>
       </div>
 
-      {/* Banner inferior: Aporte personal */}
+      {/* Banner inferior: Mis puntos */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -120,8 +161,8 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
         className="mt-6 bg-blue-900/60 backdrop-blur-xl rounded-2xl px-8 py-4
                    border-2 border-white/20 flex items-center justify-between"
       >
-        <p className="text-white text-xl font-bold">🏆 Tu aporte esta semana</p>
-        <div className="text-yellow-400 text-3xl font-black">+120 puntos</div>
+        <p className="text-white text-xl font-bold">🏆 Tus puntos totales</p>
+        <div className="text-yellow-400 text-3xl font-black">{misPuntos.toLocaleString()} pts</div>
       </motion.div>
     </div>
   );

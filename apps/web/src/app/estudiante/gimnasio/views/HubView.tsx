@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOverlay, useOverlayStack } from '../contexts/OverlayStackProvider';
+import { recursosApi } from '@/lib/api/tienda.api';
+import type { RecursosEstudiante } from '@mateatletas/contracts';
 
 // Type compatible con sistema antiguo
 type OverlayType = string | null;
@@ -28,6 +30,7 @@ import {
 interface HubViewProps {
   onNavigate: (vista: string) => void;
   estudiante: {
+    id: string;
     nombre: string;
     apellido: string;
     nivel_actual: number;
@@ -150,6 +153,8 @@ const NAV_RIGHT: NavButton[] = [
 export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [activeView, setActiveView] = useState('hub');
   const [isMounted, setIsMounted] = useState(false);
+  const [recursos, setRecursos] = useState<RecursosEstudiante | null>(null);
+  const [loadingRecursos, setLoadingRecursos] = useState(true);
   const modelRef = useRef<any>(null);
   const { openOverlay } = useOverlay();
   const { push } = useOverlayStack();
@@ -157,6 +162,25 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Cargar recursos del estudiante
+  useEffect(() => {
+    const cargarRecursos = async () => {
+      try {
+        setLoadingRecursos(true);
+        const data = await recursosApi.obtenerRecursos(estudiante.id);
+        setRecursos(data);
+      } catch (error) {
+        console.error('Error cargando recursos:', error);
+      } finally {
+        setLoadingRecursos(false);
+      }
+    };
+
+    if (estudiante.id) {
+      cargarRecursos();
+    }
+  }, [estudiante.id]);
 
   // Hook para animaciones del avatar - DECLARADO PRIMERO
   const triggerAnimation = useCallback((animName: string, duration?: number) => {
@@ -206,10 +230,21 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     };
   }, [isMounted, triggerAnimation]);
 
-  // Valores por defecto para recursos
-  const monedas = 168;
-  const gemas = 0;
-  const racha_dias = 3;
+  // Valores de recursos (del backend o fallback si está cargando)
+  const monedas = recursos?.monedas_total ?? 0;
+  const gemas = recursos?.gemas_total ?? 0;
+  const xp_total = recursos?.xp_total ?? 0;
+  const racha_dias = 3; // TODO: Obtener del backend cuando esté implementado
+
+  // Calcular nivel basado en XP (fórmula: nivel = floor(sqrt(XP / 100)) + 1)
+  const nivelCalculado = Math.floor(Math.sqrt(xp_total / 100)) + 1;
+
+  // Calcular XP necesario para el siguiente nivel
+  const xpNivelActual = (nivelCalculado - 1) * (nivelCalculado - 1) * 100;
+  const xpNivelSiguiente = nivelCalculado * nivelCalculado * 100;
+  const xpEnNivelActual = xp_total - xpNivelActual;
+  const xpNecesarioParaSiguienteNivel = xpNivelSiguiente - xpNivelActual;
+  const porcentajeProgresoNivel = (xpEnNivelActual / xpNecesarioParaSiguienteNivel) * 100;
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600 flex flex-col">
@@ -352,7 +387,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
             <div className="flex items-center gap-2 text-xs text-white/70">
               <div className="flex items-center gap-1">
                 <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                Nivel {estudiante.nivel_actual}
+                Nivel {nivelCalculado}
               </div>
               <span>•</span>
               <div className="flex items-center gap-1">
@@ -513,16 +548,16 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-white text-sm font-bold">
-                  Progreso al Nivel {estudiante.nivel_actual + 1}
+                  Progreso al Nivel {nivelCalculado + 1}
                 </span>
                 <span className="text-white/80 text-sm font-bold">
-                  {estudiante.puntos_totales} / 1000 XP
+                  {xpEnNivelActual} / {xpNecesarioParaSiguienteNivel} XP
                 </span>
               </div>
               <div className="w-full h-6 bg-black/40 rounded-full overflow-hidden border-2 border-white/10">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${(estudiante.puntos_totales / 1000) * 100}%` }}
+                  animate={{ width: `${Math.min(porcentajeProgresoNivel, 100)}%` }}
                   transition={{ delay: 0.5, duration: 1, ease: 'easeOut' }}
                   className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full shadow-lg shadow-orange-500/50"
                 />
