@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useOverlay, useOverlayStack } from '../contexts/OverlayStackProvider';
 import { recursosApi } from '@/lib/api/tienda.api';
 import type { RecursosEstudiante } from '@mateatletas/contracts';
+import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D';
+import { useStudentAnimations } from '@/hooks/useStudentAnimations';
 
 // Type compatible con sistema antiguo
 type OverlayType = string | null;
@@ -167,13 +169,25 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [activeView, setActiveView] = useState('hub');
   const [isMounted, setIsMounted] = useState(false);
   const [recursos, setRecursos] = useState<RecursosEstudiante | null>(null);
+  const [currentAnimation, setCurrentAnimation] = useState<string | undefined>(undefined);
   const modelRef = useRef<any>(null);
   const { openOverlay } = useOverlay();
   const { push } = useOverlayStack();
 
+  // Hook de animaciones
+  const { getRandomAnimation, animationsByCategory } = useStudentAnimations({
+    studentPoints: estudiante.puntos_totales,
+  });
+
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+
+    // Cargar animación idle aleatoria al montar
+    const idleAnim = getRandomAnimation('idle');
+    if (idleAnim) {
+      setCurrentAnimation(idleAnim.url);
+    }
+  }, [getRandomAnimation]);
 
   // Cargar recursos del estudiante
   useEffect(() => {
@@ -191,14 +205,26 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     }
   }, [estudiante.id]);
 
-  // Hook para animaciones del avatar - DECLARADO PRIMERO
-  const triggerAnimation = useCallback((animName: string, duration?: number) => {
-    const model = modelRef.current;
-    if (!model) return;
+  // Rotar animaciones idle automáticamente cada 8 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const idleAnim = getRandomAnimation('idle');
+      if (idleAnim) {
+        setCurrentAnimation(idleAnim.url);
+      }
+    }, 8000); // Cambiar cada 8 segundos
+
+    return () => clearInterval(interval);
+  }, [getRandomAnimation]);
+
+  // Hook para animaciones del avatar - triggers manuales
+  const triggerAnimation = useCallback((category: 'dance' | 'expression' | 'idle' | 'locomotion', duration?: number) => {
+    const anim = getRandomAnimation(category);
+    if (!anim) return;
 
     try {
       // Cambiar animación
-      model.animationName = animName;
+      setCurrentAnimation(anim.url);
 
       // model-viewer no tiene método .play() directo
       // La animación se activa automáticamente al cambiar animationName
@@ -490,41 +516,31 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 </>
               )}
 
-              {/* Avatar 3D - CLICKEABLE PARA ANIMAR */}
+              {/* Avatar 3D Animado - CLICKEABLE PARA ANIMAR */}
               <motion.div
                 className="relative z-20 w-full h-full cursor-pointer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onHoverStart={() => {
-                  // Saludar cuando el usuario pasa el mouse
-                  triggerAnimation('wave', 1500);
+                  // Expresión cuando el usuario pasa el mouse
+                  triggerAnimation('expression', 2000);
                 }}
                 onClick={() => {
-                  // Animación aleatoria al hacer click en el avatar
-                  const animations = ['clapping', 'dance', 'victory'];
-                  const randomAnim = animations[Math.floor(Math.random() * animations.length)]!;
-                  triggerAnimation(randomAnim, 3000);
+                  // Baile al hacer click en el avatar
+                  triggerAnimation('dance', 4000);
                 }}
               >
                 {isMounted && estudiante.avatar_url && (
-                  // @ts-expect-error - model-viewer es un web component con tipos definidos en model-viewer.d.ts
-                  <model-viewer
-                    ref={modelRef}
-                    src={estudiante.avatar_url}
-                    alt="Avatar 3D"
-                    camera-controls
-                    camera-orbit="0deg 85deg 3.5m"
-                    min-camera-orbit="auto auto 2m"
-                    max-camera-orbit="auto auto 6m"
-                    field-of-view="45deg"
-                    shadow-intensity="1"
-                    shadow-softness="0.8"
-                    exposure="1"
-                    environment-image="neutral"
-                    autoplay
-                    animation-name="idle"
-                    className="w-full h-full"
-                    style={{ backgroundColor: 'transparent' }}
+                  <AnimatedAvatar3D
+                    avatarUrl={estudiante.avatar_url}
+                    animationUrl={currentAnimation}
+                    width="100%"
+                    height="100%"
+                    cameraPosition={[0, 0.8, 3.5]}
+                    cameraFov={45}
+                    scale={1}
+                    position={[0, -1, 0]}
+                    enableControls={true}
                   />
                 )}
               </motion.div>
