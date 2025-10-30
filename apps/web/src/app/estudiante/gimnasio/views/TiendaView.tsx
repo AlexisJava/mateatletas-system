@@ -14,6 +14,7 @@ import type {
   CategoriaItem,
   RecursosEstudiante,
   RarezaItem,
+  ItemObtenidoConInfo,
 } from '@mateatletas/contracts';
 
 interface TiendaViewProps {
@@ -59,6 +60,8 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
   const [loading, setLoading] = useState(true);
   const [itemSeleccionado, setItemSeleccionado] = useState<ItemTiendaConCategoria | null>(null);
   const [comprando, setComprando] = useState(false);
+  const [inventario, setInventario] = useState<ItemObtenidoConInfo[]>([]);
+  const [loadingInventario, setLoadingInventario] = useState(false);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -82,6 +85,27 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
 
     cargarDatos();
   }, [estudiante]);
+
+  // Cargar inventario cuando se cambia a la pestaña de inventario
+  useEffect(() => {
+    if (tab === 'inventario') {
+      const cargarInventario = async () => {
+        try {
+          setLoadingInventario(true);
+          const data = await tiendaApi.obtenerInventario(estudiante.id);
+          setInventario(data.items);
+          // Actualizar recursos también
+          setRecursos(data.recursos);
+        } catch (error) {
+          console.error('Error al cargar inventario:', error);
+        } finally {
+          setLoadingInventario(false);
+        }
+      };
+
+      cargarInventario();
+    }
+  }, [tab, estudiante.id]);
 
   // Filtrar items por categoría
   const itemsFiltrados = categoriaActiva
@@ -123,6 +147,32 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
       alert(error?.response?.data?.message || 'Error al comprar el item');
     } finally {
       setComprando(false);
+    }
+  };
+
+  // Equipar/desequipar item del inventario
+  const equiparItem = async (itemObtenido: ItemObtenidoConInfo) => {
+    try {
+      await tiendaApi.equiparItem(estudiante.id, itemObtenido.item_id);
+
+      // Actualizar el estado del inventario localmente
+      setInventario((prev) =>
+        prev.map((item) => {
+          if (item.id === itemObtenido.id) {
+            return { ...item, equipado: !item.equipado };
+          }
+          // Si el item es del mismo tipo, desequiparlo (solo un item por tipo puede estar equipado)
+          if (item.item.tipo_item === itemObtenido.item.tipo_item && item.equipado) {
+            return { ...item, equipado: false };
+          }
+          return item;
+        })
+      );
+
+      alert(itemObtenido.equipado ? 'Item desequipado' : '¡Item equipado! ✨');
+    } catch (error: any) {
+      console.error('Error al equipar item:', error);
+      alert(error?.response?.data?.message || 'Error al equipar el item');
     }
   };
 
@@ -272,14 +322,34 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="h-full flex items-center justify-center"
+              className="h-full overflow-y-auto p-6"
             >
-              <div className="text-center">
-                <span className="text-6xl mb-4 block">📦</span>
-                <p className="text-white/60 text-lg font-bold">
-                  Inventario próximamente
-                </p>
-              </div>
+              {loadingInventario ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-white/60 text-xl font-bold">Cargando inventario...</div>
+                </div>
+              ) : inventario.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <span className="text-6xl mb-4">📦</span>
+                  <p className="text-white/60 text-lg font-bold">
+                    Tu inventario está vacío
+                  </p>
+                  <p className="text-white/40 text-sm mt-2">
+                    ¡Compra items en la tienda para empezar tu colección!
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {inventario.map((itemObtenido, i) => (
+                    <InventarioItemCard
+                      key={itemObtenido.id}
+                      itemObtenido={itemObtenido}
+                      delay={i * 0.05}
+                      onEquipar={() => equiparItem(itemObtenido)}
+                    />
+                  ))}
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -304,6 +374,111 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
 // ============================================================================
 // COMPONENTES AUXILIARES
 // ============================================================================
+
+interface InventarioItemCardProps {
+  itemObtenido: ItemObtenidoConInfo;
+  delay: number;
+  onEquipar: () => void;
+}
+
+function InventarioItemCard({ itemObtenido, delay, onEquipar }: InventarioItemCardProps) {
+  const { item } = itemObtenido;
+  const colors = RAREZA_COLORS[item.rareza];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      className={`
+        group relative
+        bg-gradient-to-br ${colors.gradient}
+        border-4 ${colors.border} border-black
+        rounded-3xl
+        p-6
+        ${colors.glow}
+        transition-all duration-200
+        ${itemObtenido.equipado ? 'ring-4 ring-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.5)]' : ''}
+      `}
+    >
+      {/* Badge de equipado */}
+      {itemObtenido.equipado && (
+        <div className="absolute -top-3 -left-3 bg-yellow-500 border-2 border-black rounded-full px-3 py-1 flex items-center gap-1">
+          <Sparkles className="w-3 h-3 text-black" />
+          <span className="text-black text-xs font-black uppercase">Equipado</span>
+        </div>
+      )}
+
+      {/* Badge de rareza */}
+      <div className="absolute -top-3 -right-3 bg-black border-2 border-white rounded-full px-3 py-1">
+        <span className="text-white text-xs font-black uppercase">{item.rareza}</span>
+      </div>
+
+      {/* Icono/Imagen */}
+      <div className="text-6xl mb-3 text-center">
+        {item.imagen_url ? (
+          <img src={item.imagen_url} alt={item.nombre} className="w-20 h-20 mx-auto object-cover rounded-xl" />
+        ) : (
+          <span>🎁</span>
+        )}
+      </div>
+
+      {/* Nombre */}
+      <h3
+        className="text-white font-black text-lg mb-2 text-center"
+        style={{ textShadow: '0 2px 0 rgba(0,0,0,0.5)' }}
+      >
+        {item.nombre}
+      </h3>
+
+      {/* Descripción */}
+      {item.descripcion && (
+        <p className="text-white/80 text-xs mb-3 line-clamp-2 text-center">
+          {item.descripcion}
+        </p>
+      )}
+
+      {/* Cantidad (si aplica) */}
+      {itemObtenido.cantidad > 1 && (
+        <div className="text-center mb-3">
+          <div className="bg-black/40 rounded-lg px-3 py-1 inline-block">
+            <span className="text-white font-black text-sm">x{itemObtenido.cantidad}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Botón equipar */}
+      <button
+        onClick={onEquipar}
+        className={`
+          w-full mt-3
+          py-3 rounded-xl
+          font-black text-sm uppercase
+          border-4 border-black
+          transition-all
+          ${itemObtenido.equipado
+            ? 'bg-gradient-to-b from-gray-400 to-gray-600 hover:from-gray-500 hover:to-gray-700 text-white'
+            : 'bg-gradient-to-b from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white'
+          }
+          shadow-[0_4px_0_rgba(0,0,0,0.6)] hover:shadow-[0_6px_0_rgba(0,0,0,0.6)]
+          active:shadow-[0_2px_0_rgba(0,0,0,0.6)] active:translate-y-1
+        `}
+      >
+        {itemObtenido.equipado ? (
+          <>
+            <X className="w-4 h-4 inline mr-1" />
+            Desequipar
+          </>
+        ) : (
+          <>
+            <Check className="w-4 h-4 inline mr-1" />
+            Equipar
+          </>
+        )}
+      </button>
+    </motion.div>
+  );
+}
 
 interface ItemCardProps {
   item: ItemTiendaConCategoria;

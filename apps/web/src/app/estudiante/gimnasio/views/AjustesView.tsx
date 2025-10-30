@@ -1,8 +1,25 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useAuthStore } from '@/store/auth.store';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export function AjustesView() {
+  const { logout } = useAuthStore();
+  const router = useRouter();
+  const [cerrando, setCerrando] = useState(false);
+
+  const handleCerrarSesion = async () => {
+    try {
+      setCerrando(true);
+      await logout();
+      router.push('/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      setCerrando(false);
+    }
+  };
   return (
     <div className="min-h-full p-8 space-y-12">
 
@@ -201,13 +218,16 @@ export function AjustesView() {
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
+        onClick={handleCerrarSesion}
+        disabled={cerrando}
         className="w-full bg-gradient-to-r from-red-500 to-pink-600
                    text-white py-6 rounded-3xl
                    font-black text-2xl
                    shadow-2xl shadow-red-500/50
-                   border-4 border-white/30"
+                   border-4 border-white/30
+                   disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        🚪 CERRAR SESIÓN
+        {cerrando ? '⏳ CERRANDO...' : '🚪 CERRAR SESIÓN'}
       </motion.button>
 
     </div>
