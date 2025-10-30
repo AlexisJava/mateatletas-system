@@ -35,3 +35,9 @@ export * from './schemas/planificacion.schema';
 
 // Pagos
 export * from './schemas/pago.schema';
+
+// Tienda y Recursos
+export * from './schemas/tienda.schema';
+
+// Progreso de Actividades
+export * from './schemas/progreso-actividad.schema';

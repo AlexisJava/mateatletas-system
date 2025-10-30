@@ -158,4 +158,81 @@ export class LogrosService {
 
     return racha;
   }
+
+  /**
+   * Verificar logros desbloqueados al completar una actividad
+   * Retorna array de logros recién desbloqueados
+   */
+  async verificarLogrosActividad(
+    estudianteId: string,
+    actividadId: string,
+    metricas: {
+      estrellas: number;
+      porcentaje_aciertos: number;
+      tiempo_minutos: number;
+      primer_intento: boolean;
+    },
+  ): Promise<Array<{ id: string; nombre: string; descripcion: string; puntos: number }>> {
+    const logrosDesbloqueados: Array<{ id: string; nombre: string; descripcion: string; puntos: number }> = [];
+
+    // Verificar actividades completadas
+    const actividadesCompletadas = await this.prisma.progresoEstudianteActividad.count({
+      where: {
+        estudiante_id: estudianteId,
+        completado: true,
+      },
+    });
+
+    // Primera actividad completada
+    if (actividadesCompletadas === 1) {
+      logrosDesbloqueados.push({
+        id: 'primera-actividad',
+        nombre: 'Primera Actividad',
+        descripcion: 'Completaste tu primera actividad',
+        puntos: 50,
+      });
+    }
+
+    // 10 actividades completadas
+    if (actividadesCompletadas === 10) {
+      logrosDesbloqueados.push({
+        id: '10-actividades',
+        nombre: '10 Actividades Completadas',
+        descripcion: 'Completaste 10 actividades',
+        puntos: 150,
+      });
+    }
+
+    // Perfeccionista (3 estrellas en primer intento)
+    if (metricas.estrellas === 3 && metricas.primer_intento) {
+      logrosDesbloqueados.push({
+        id: 'perfeccionista',
+        nombre: 'Perfeccionista',
+        descripcion: '3 estrellas en el primer intento',
+        puntos: 100,
+      });
+    }
+
+    // Genio de las Matemáticas (100% de aciertos)
+    if (metricas.porcentaje_aciertos === 100) {
+      logrosDesbloqueados.push({
+        id: 'genio-matematicas',
+        nombre: 'Genio de las Matemáticas',
+        descripcion: '100% de aciertos en una actividad',
+        puntos: 75,
+      });
+    }
+
+    // Velocista (completar en menos de 5 minutos con 3 estrellas)
+    if (metricas.tiempo_minutos < 5 && metricas.estrellas === 3) {
+      logrosDesbloqueados.push({
+        id: 'velocista',
+        nombre: 'Velocista',
+        descripcion: '3 estrellas en menos de 5 minutos',
+        puntos: 120,
+      });
+    }
+
+    return logrosDesbloqueados;
+  }
 }

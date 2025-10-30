@@ -78,7 +78,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       if (user && activeRole && activeRole !== 'admin') {
         const redirectPath =
           activeRole === 'docente' ? '/docente/dashboard' :
-          activeRole === 'estudiante' ? '/estudiante/dashboard' :
+          activeRole === 'estudiante' ? '/estudiante/gimnasio' :
           '/dashboard';
         router.replace(redirectPath);
         return;
@@ -102,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           if (currentActiveRole !== 'admin') {
             const redirectPath =
               currentActiveRole === 'docente' ? '/docente/dashboard' :
-              currentActiveRole === 'estudiante' ? '/estudiante/dashboard' :
+              currentActiveRole === 'estudiante' ? '/estudiante/gimnasio' :
               '/dashboard';
             router.replace(redirectPath);
             return;

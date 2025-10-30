@@ -65,7 +65,7 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
       if (user && activeRole && activeRole !== 'docente') {
         const redirectPath =
           activeRole === 'admin' ? '/admin/dashboard' :
-          activeRole === 'estudiante' ? '/estudiante/dashboard' :
+          activeRole === 'estudiante' ? '/estudiante/gimnasio' :
           '/dashboard';
         router.replace(redirectPath);
         return;
@@ -89,7 +89,7 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
           if (currentActiveRole !== 'docente') {
             const redirectPath =
               currentActiveRole === 'admin' ? '/admin/dashboard' :
-              currentActiveRole === 'estudiante' ? '/estudiante/dashboard' :
+              currentActiveRole === 'estudiante' ? '/estudiante/gimnasio' :
               '/dashboard';
             router.replace(redirectPath);
             return;

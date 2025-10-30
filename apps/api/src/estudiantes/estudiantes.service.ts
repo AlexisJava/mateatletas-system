@@ -130,6 +130,72 @@ export class EstudiantesService {
    * @param tutorId - ID del tutor (para verificar ownership)
    * @returns El estudiante con sus relaciones
    */
+  /**
+   * Busca un estudiante por ID sin validación de ownership
+   * Útil para que el estudiante acceda a sus propios datos
+   * @param id - ID del estudiante
+   * @returns Estudiante encontrado
+   * @throws NotFoundException si no existe
+   */
+  async findOneById(id: string) {
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id },
+      include: {
+        equipo: true,
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException('Estudiante no encontrado');
+    }
+
+    return estudiante;
+  }
+
+  /**
+   * Actualiza el avatar 3D (Ready Player Me) del estudiante sin validación de ownership
+   * Útil para que el estudiante actualice su propio avatar 3D
+   * @param id - ID del estudiante
+   * @param avatar_url - URL del avatar de Ready Player Me
+   * @returns Estudiante actualizado
+   * @throws NotFoundException si no existe
+   */
+  async updateAvatar3D(id: string, avatar_url: string) {
+    // Verificar que el estudiante existe
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException('Estudiante no encontrado');
+    }
+
+    // Actualizar solo el avatar 3D
+    return this.prisma.estudiante.update({
+      where: { id },
+      data: { avatar_url },
+      include: {
+        equipo: true,
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
   async findOne(id: string, tutorId: string) {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id },
@@ -334,7 +400,7 @@ export class EstudiantesService {
    * @param avatarStyle - Estilo de avatar de Dicebear API
    * @returns El estudiante actualizado
    */
-  async updateAvatar(id: string, gradientId: number) {
+  async updateAvatarGradient(id: string, gradientId: number) {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id },
     });
