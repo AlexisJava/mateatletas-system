@@ -25,7 +25,8 @@ import {
   Gem,
   Zap,
   Target,
-  BarChart3
+  BarChart3,
+  Sparkles
 } from 'lucide-react';
 
 interface HubViewProps {
@@ -104,6 +105,17 @@ const NAV_LEFT: NavButton[] = [
     gradient: 'from-green-500 via-emerald-500 to-teal-600',
     glowColor: 'green',
     badge: 0,
+  },
+  {
+    id: 'animaciones',
+    overlayId: 'animaciones',
+    label: 'ANIMACIONES',
+    description: 'Personaliza tu avatar',
+    icon: <Sparkles className="w-7 h-7" />,
+    gradient: 'from-purple-500 via-fuchsia-500 to-pink-500',
+    glowColor: 'purple',
+    badge: 0,
+    pulse: false,
   },
 ];
 

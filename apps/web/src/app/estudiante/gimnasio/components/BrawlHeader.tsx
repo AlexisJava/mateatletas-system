@@ -1,7 +1,8 @@
 'use client'
 
 import { Trophy, Coins, Gem, Flame } from 'lucide-react'
-import { RPM_CONFIG } from '@/lib/ready-player-me.config'
+import { CompactAvatar3D } from '@/components/3d/CompactAvatar3D'
+import { useStudentAnimations } from '@/hooks/useStudentAnimations'
 
 interface BrawlHeaderProps {
   nombre: string
@@ -11,26 +12,28 @@ interface BrawlHeaderProps {
   gemas: number
   racha: number
   avatarUrl?: string | null
+  puntos?: number
 }
 
-export function BrawlHeader({ nombre, nivel, trofeos, monedas, gemas, racha, avatarUrl }: BrawlHeaderProps) {
+export function BrawlHeader({ nombre, nivel, trofeos, monedas, gemas, racha, avatarUrl, puntos = 0 }: BrawlHeaderProps) {
+  // Hook para obtener animación idle por defecto
+  const { getDefaultIdleAnimation } = useStudentAnimations({ studentPoints: puntos })
+  const defaultAnimation = getDefaultIdleAnimation()
+
   return (
     <div className="fixed top-0 left-0 right-0 z-50 p-4">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
 
         {/* Lado izquierdo: Avatar + nombre */}
         <div className="flex items-center gap-3">
-          {/* Avatar 3D o placeholder */}
+          {/* Avatar 3D animado o placeholder */}
           <div
             className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 border-2 border-black flex items-center justify-center shadow-[2px_3px_0_rgba(0,0,0,0.4),4px_6px_12px_rgba(0,0,0,0.2)] overflow-hidden"
           >
             {avatarUrl ? (
-              <iframe
-                src={RPM_CONFIG.getQuickViewUrl(avatarUrl, 'halfbody')}
-                className="w-full h-full border-none scale-150"
-                title={`Avatar de ${nombre}`}
-                sandbox="allow-scripts allow-same-origin"
-                loading="lazy"
+              <CompactAvatar3D
+                avatarUrl={avatarUrl}
+                animationUrl={defaultAnimation?.url}
               />
             ) : (
               <span className="text-2xl font-black text-white">
