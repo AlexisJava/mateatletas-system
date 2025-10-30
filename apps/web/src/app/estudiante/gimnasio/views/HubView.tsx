@@ -272,42 +272,45 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
       {/* Brillos sutiles flotantes */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-32 h-32 rounded-full"
-            style={{
-              background: `radial-gradient(circle, ${
-                ['rgba(255,255,255,0.15)', 'rgba(255,255,0,0.1)', 'rgba(0,255,255,0.1)', 'rgba(255,0,255,0.1)'][i % 4]
-              }, transparent)`,
-              filter: 'blur(40px)',
-            }}
-            initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-            }}
-            animate={{
-              x: [
-                Math.random() * window.innerWidth,
-                Math.random() * window.innerWidth,
-                Math.random() * window.innerWidth,
-              ],
-              y: [
-                Math.random() * window.innerHeight,
-                Math.random() * window.innerHeight,
-                Math.random() * window.innerHeight,
-              ],
-              scale: [1, 1.5, 1],
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 15 + Math.random() * 10,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-              ease: 'easeInOut',
-            }}
-          />
-        ))}
+        {Array.from({ length: 8 }).map((_, i) => {
+          // Valores deterministas (compatibles con SSR) basados en el índice
+          const seed = i * 137.5; // Golden angle para distribución uniforme
+          const x1 = (seed * 7) % 100;
+          const y1 = (seed * 11) % 100;
+          const x2 = (seed * 13) % 100;
+          const y2 = (seed * 17) % 100;
+          const x3 = (seed * 19) % 100;
+          const y3 = (seed * 23) % 100;
+
+          return (
+            <motion.div
+              key={i}
+              className="absolute w-32 h-32 rounded-full"
+              style={{
+                background: `radial-gradient(circle, ${
+                  ['rgba(255,255,255,0.15)', 'rgba(255,255,0,0.1)', 'rgba(0,255,255,0.1)', 'rgba(255,0,255,0.1)'][i % 4]
+                }, transparent)`,
+                filter: 'blur(40px)',
+              }}
+              initial={{
+                x: `${x1}vw`,
+                y: `${y1}vh`,
+              }}
+              animate={{
+                x: [`${x1}vw`, `${x2}vw`, `${x3}vw`],
+                y: [`${y1}vh`, `${y2}vh`, `${y3}vh`],
+                scale: [1, 1.5, 1],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 15 + (i * 2),
+                repeat: Infinity,
+                delay: i * 0.8,
+                ease: 'easeInOut',
+              }}
+            />
+          );
+        })}
       </div>
 
       {/* ========== NAVEGACIÓN LATERAL IZQUIERDA - ULTRA GAMIFICADA ========== */}

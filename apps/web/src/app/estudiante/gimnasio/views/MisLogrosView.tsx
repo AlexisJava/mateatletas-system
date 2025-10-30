@@ -14,7 +14,7 @@ interface MisLogrosViewProps {
 }
 
 export function MisLogrosView({ estudiante }: MisLogrosViewProps) {
-  const { popOverlay } = useOverlayStack();
+  const { pop } = useOverlayStack();
   const [logros, setLogros] = useState<Logro[]>([]);
   const [logroSeleccionado, setLogroSeleccionado] = useState<Logro | null>(null);
   const [filtro, setFiltro] = useState<'todos' | 'desbloqueados' | 'bloqueados'>('todos');
@@ -63,7 +63,7 @@ export function MisLogrosView({ estudiante }: MisLogrosViewProps) {
           </div>
         </div>
         <button
-          onClick={popOverlay}
+          onClick={pop}
           className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
         >
           <X className="w-6 h-6 text-white" />
