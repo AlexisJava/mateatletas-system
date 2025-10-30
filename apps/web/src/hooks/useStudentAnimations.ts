@@ -99,7 +99,7 @@ export function useStudentAnimations({
   // Obtener animación aleatoria de una categoría
   const getRandomAnimation = (category: 'dance' | 'expression' | 'idle' | 'locomotion') => {
     const animations = animationsByCategory[category]
-    if (animations.length === 0) return null
+    if (!animations || animations.length === 0) return null
 
     const randomIndex = Math.floor(Math.random() * animations.length)
     return animations[randomIndex]
