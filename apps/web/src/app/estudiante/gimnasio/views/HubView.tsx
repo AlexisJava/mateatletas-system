@@ -277,15 +277,73 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600 flex flex-col">
-      {/* Gradiente animado de fondo */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-transparent to-pink-500/20 animate-pulse"
-          style={{ animationDuration: '4s' }}
+      {/* Animated Mesh Gradient - Blobs orgánicos */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        {/* Blob 1 - Purple */}
+        <motion.div
+          className="absolute w-[600px] h-[600px] rounded-full bg-purple-500/30 blur-3xl"
+          animate={{
+            x: ['-10%', '10%', '-10%'],
+            y: ['-5%', '5%', '-5%'],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+          style={{ top: '10%', left: '20%' }}
         />
-        <div
-          className="absolute inset-0 bg-gradient-to-tl from-yellow-500/10 via-transparent to-cyan-500/10 animate-pulse"
-          style={{ animationDuration: '6s', animationDelay: '1s' }}
+
+        {/* Blob 2 - Pink */}
+        <motion.div
+          className="absolute w-[500px] h-[500px] rounded-full bg-pink-500/25 blur-3xl"
+          animate={{
+            x: ['5%', '-5%', '5%'],
+            y: ['10%', '-10%', '10%'],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: 2,
+          }}
+          style={{ bottom: '15%', right: '25%' }}
+        />
+
+        {/* Blob 3 - Yellow */}
+        <motion.div
+          className="absolute w-[450px] h-[450px] rounded-full bg-yellow-400/20 blur-3xl"
+          animate={{
+            x: ['-8%', '8%', '-8%'],
+            y: ['-8%', '8%', '-8%'],
+            scale: [1.1, 1, 1.1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: 5,
+          }}
+          style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+        />
+
+        {/* Blob 4 - Cyan */}
+        <motion.div
+          className="absolute w-[550px] h-[550px] rounded-full bg-cyan-400/20 blur-3xl"
+          animate={{
+            x: ['10%', '-10%', '10%'],
+            y: ['-10%', '10%', '-10%'],
+            scale: [1, 1.15, 1],
+          }}
+          transition={{
+            duration: 22,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: 8,
+          }}
+          style={{ top: '30%', right: '15%' }}
         />
       </div>
 
@@ -301,50 +359,69 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
         />
       </div>
 
-      {/* Brillos sutiles flotantes */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {Array.from({ length: 8 }).map((_, i) => {
-          // Valores deterministas (compatibles con SSR) basados en el índice
-          const seed = i * 137.5; // Golden angle para distribución uniforme
-          const x1 = (seed * 7) % 100;
-          const y1 = (seed * 11) % 100;
-          const x2 = (seed * 13) % 100;
-          const y2 = (seed * 17) % 100;
-          const x3 = (seed * 19) % 100;
-          const y3 = (seed * 23) % 100;
+      {/* Partículas matemáticas flotantes */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-[2]">
+        {Array.from({ length: 18 }).map((_, i) => {
+          const mathSymbols = [
+            'π',
+            '∑',
+            '∞',
+            '√',
+            '×',
+            '+',
+            '÷',
+            '∫',
+            'α',
+            'β',
+            '²',
+            '³',
+            '∆',
+            '∈',
+            '∀',
+            '≈',
+            '≠',
+            '≤',
+          ];
+          const symbol = mathSymbols[i % mathSymbols.length];
+
+          // Valores deterministas para SSR
+          const seed = i * 137.5;
+          const startX = (seed * 7) % 100;
+          const startY = (seed * 11) % 100;
+          const endX = (seed * 13) % 100;
+          const endY = (seed * 17) % 100;
+          const duration = 20 + ((i * 3) % 15);
+          const delay = (i * 2) % 10;
+          const size = 24 + (i % 3) * 8; // 24px, 32px, o 40px
 
           return (
             <motion.div
               key={i}
-              className="absolute w-32 h-32 rounded-full"
+              className="absolute font-bold text-white/15"
               style={{
-                background: `radial-gradient(circle, ${
-                  [
-                    'rgba(255,255,255,0.15)',
-                    'rgba(255,255,0,0.1)',
-                    'rgba(0,255,255,0.1)',
-                    'rgba(255,0,255,0.1)',
-                  ][i % 4]
-                }, transparent)`,
-                filter: 'blur(40px)',
+                fontSize: `${size}px`,
+                fontFamily: 'Georgia, serif',
               }}
               initial={{
-                x: `${x1}vw`,
-                y: `${y1}vh`,
+                x: `${startX}vw`,
+                y: `${startY}vh`,
+                opacity: 0,
               }}
               animate={{
-                x: [`${x1}vw`, `${x2}vw`, `${x3}vw`],
-                y: [`${y1}vh`, `${y2}vh`, `${y3}vh`],
-                scale: [1, 1.5, 1],
-                opacity: [0.3, 0.6, 0.3],
+                x: [`${startX}vw`, `${endX}vw`, `${startX}vw`],
+                y: [`${startY}vh`, `${endY}vh`, `${startY}vh`],
+                opacity: [0, 0.2, 0],
+                rotate: [0, 360, 0],
               }}
               transition={{
-                duration: 15 + i * 2,
+                duration,
                 repeat: Infinity,
-                delay: i * 0.8,
+                delay,
                 ease: 'easeInOut',
               }}
-            />
+            >
+              {symbol}
+            </motion.div>
           );
         })}
       </div>
@@ -477,42 +554,20 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
       </header>
 
       {/* ========== CENTRO DIVIDIDO: 50% AVATAR | 50% INFO ========== */}
-      <div className="flex-1 flex items-center justify-center px-32 py-8">
+      <div className="flex-1 flex items-center justify-center px-32 py-8 relative z-10">
         <div className="w-full max-w-7xl flex gap-8 h-full">
           {/* ========== COLUMNA IZQUIERDA - AVATAR 3D GIGANTE ========== */}
           <div className="w-1/2 relative flex items-center justify-center">
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, type: 'spring' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
               className="relative w-full h-full flex items-center justify-center"
             >
-              {/* Plataforma 3D circular */}
-              <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-96 h-16">
-                <div
-                  className="w-full h-full rounded-full bg-gradient-to-br from-purple-500/40 to-pink-500/40 blur-2xl"
-                  style={{
-                    transform: 'perspective(600px) rotateX(75deg)',
-                    animation: 'pulse 2s ease-in-out infinite',
-                  }}
-                />
-              </div>
-
-              {/* Ring giratorio */}
-              <div
-                className="absolute bottom-24 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full border-4 border-cyan-400/30"
-                style={{
-                  animation: 'spin 8s linear infinite',
-                  transform: 'perspective(600px) rotateX(75deg)',
-                }}
-              />
-
               {/* Avatar 3D Animado - CLICKEABLE PARA ANIMAR */}
-              <motion.div
-                className="relative z-20 w-full h-full cursor-pointer"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onHoverStart={() => {
+              <div
+                className="relative z-20 cursor-pointer w-full h-full"
+                onMouseEnter={() => {
                   // Expresión cuando el usuario pasa el mouse
                   triggerAnimation('expression', 2000);
                 }}
@@ -527,15 +582,15 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                     animationUrl={currentAnimation}
                     width="100%"
                     height="100%"
-                    cameraPosition={[0, 0.6, 2.6]}
+                    cameraPosition={[0, 0.6, 2.4]}
                     cameraFov={50}
-                    scale={1.25}
-                    position={[-0.15, -0.52, 0]}
+                    scale={1.15}
+                    position={[-0.3, -0.45, 0]}
                     rotation={[0, 0.26, 0]}
                     enableControls={false}
                   />
                 )}
-              </motion.div>
+              </div>
             </motion.div>
           </div>
 
