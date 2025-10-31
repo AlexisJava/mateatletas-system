@@ -7,8 +7,8 @@ interface Animation {
   id: string
   name: string
   displayName: string
-  category: 'dance' | 'expression' | 'idle' | 'locomotion'
-  gender: 'masculine' | 'feminine'
+  category: string // 'dance' | 'expression' | 'idle' | 'locomotion'
+  gender: string // 'masculine' | 'feminine'
   filename: string
   url: string
   requiredPoints: number
@@ -80,7 +80,9 @@ export function useStudentAnimations({
     }
 
     availableAnimations.forEach(animation => {
-      categories[animation.category].push(animation)
+      if (categories[animation.category]) {
+        categories[animation.category]!.push(animation)
+      }
     })
 
     return categories
@@ -89,7 +91,7 @@ export function useStudentAnimations({
   // Obtener animación idle por defecto
   const getDefaultIdleAnimation = () => {
     const idleAnimations = animationsByCategory.idle
-    if (idleAnimations.length === 0) return null
+    if (!idleAnimations || idleAnimations.length === 0) return null
 
     // Preferir la primera idle que coincida con el género
     const genderMatched = idleAnimations.find(a => a.gender === gender)
