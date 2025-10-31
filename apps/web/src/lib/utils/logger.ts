@@ -3,13 +3,15 @@
  * Reemplaza console.log/error/warn en todo el proyecto
  */
 
+import type { LoggableValue } from '@/types/common';
+
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 export const logger = {
   /**
    * Log normal (info)
    */
-  log: (...args: unknown[]): void => {
+  log: (...args: LoggableValue[]): void => {
     if (isDevelopment) {
       console.log(...args);
     }
@@ -18,7 +20,7 @@ export const logger = {
   /**
    * Log de errores
    */
-  error: (...args: unknown[]): void => {
+  error: (...args: LoggableValue[]): void => {
     if (isDevelopment) {
       console.error(...args);
     }
@@ -29,7 +31,7 @@ export const logger = {
   /**
    * Log de advertencias
    */
-  warn: (...args: unknown[]): void => {
+  warn: (...args: LoggableValue[]): void => {
     if (isDevelopment) {
       console.warn(...args);
     }
@@ -38,7 +40,7 @@ export const logger = {
   /**
    * Log de información
    */
-  info: (...args: unknown[]): void => {
+  info: (...args: LoggableValue[]): void => {
     if (isDevelopment) {
       console.info(...args);
     }
@@ -47,7 +49,7 @@ export const logger = {
   /**
    * Log de debug (solo en desarrollo)
    */
-  debug: (...args: unknown[]): void => {
+  debug: (...args: LoggableValue[]): void => {
     if (isDevelopment) {
       console.debug(...args);
     }
@@ -56,7 +58,7 @@ export const logger = {
   /**
    * Log de tabla (útil para objetos)
    */
-  table: (data: unknown): void => {
+  table: (data: LoggableValue): void => {
     if (isDevelopment) {
       console.table(data);
     }

@@ -52,7 +52,7 @@ Sistema de errores unificado con tipos específicos:
 - ServerError: 500+
 
 // Uso en stores
-catch (error: unknown) {
+catch (error) {
   let appError: AppError;
 
   if (error instanceof z.ZodError) {
@@ -139,7 +139,7 @@ fetchUsers: async () => {
     const rawUsers = await adminApi.getAllUsers();
     const users = parseAdminUsers(rawUsers); // Validado
     set({ users, isLoading: false });
-  } catch (error: unknown) {
+  } catch (error) {
     const appError = error instanceof z.ZodError
       ? ErrorFactory.fromZodError(error)
       : ErrorFactory.fromAxiosError(error);

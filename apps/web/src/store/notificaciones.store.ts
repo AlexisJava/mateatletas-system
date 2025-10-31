@@ -63,7 +63,7 @@ export const useNotificacionesStore = create<NotificacionesState>((set) => ({
         countNoLeidas,
         isLoading: false,
       });
-    } catch (error: unknown) {
+    } catch (error) {
       set({
         error: getErrorMessage(error, 'Error al cargar notificaciones'),
         isLoading: false,
@@ -78,7 +78,7 @@ export const useNotificacionesStore = create<NotificacionesState>((set) => ({
     try {
       const count = await getNotificacionesCount();
       set({ countNoLeidas: count });
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error al obtener contador:', error);
       // No seteamos error para no mostrar mensaje, solo log
     }
@@ -98,7 +98,7 @@ export const useNotificacionesStore = create<NotificacionesState>((set) => ({
         ),
         countNoLeidas: Math.max(0, state.countNoLeidas - 1),
       }));
-    } catch (error: unknown) {
+    } catch (error) {
       set({
         error: getErrorMessage(error, 'Error al marcar notificación como leída'),
       });
@@ -117,7 +117,7 @@ export const useNotificacionesStore = create<NotificacionesState>((set) => ({
         notificaciones: state.notificaciones.map((n) => ({ ...n, leida: true })),
         countNoLeidas: 0,
       }));
-    } catch (error: unknown) {
+    } catch (error) {
       set({
         error: getErrorMessage(error, 'Error al marcar todas como leídas'),
       });
@@ -141,7 +141,7 @@ export const useNotificacionesStore = create<NotificacionesState>((set) => ({
           countNoLeidas: esNoLeida ? Math.max(0, state.countNoLeidas - 1) : state.countNoLeidas,
         };
       });
-    } catch (error: unknown) {
+    } catch (error) {
       set({
         error: getErrorMessage(error, 'Error al eliminar notificación'),
       });

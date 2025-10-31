@@ -9,6 +9,7 @@ import DashboardView from './components/DashboardView';
 import type { Estudiante } from '@/types/estudiante';
 import type { Clase } from '@/types/clases.types';
 import type { DashboardResumenResponse } from '@/types/tutor-dashboard.types';
+import type { JsonValue } from '@/types/common';
 
 /**
  * Dashboard del Tutor - Página principal después del login
@@ -53,9 +54,14 @@ export default function DashboardPage() {
       console.log('🔍 Cargando datos del dashboard...');
 
       // Cargar estudiantes, clases y dashboard resumen en paralelo
+      type ListResponse<T> = {
+        data: T[];
+        metadata?: Record<string, JsonValue> | null;
+      };
+
       const [estudiantesRes, clasesRes, dashboardRes] = await Promise.all([
-        apiClient.get<{ data: Estudiante[]; metadata?: unknown }>('/estudiantes'),
-        apiClient.get<{ data: Clase[]; metadata?: unknown }>('/clases'),
+        apiClient.get<ListResponse<Estudiante>>('/estudiantes'),
+        apiClient.get<ListResponse<Clase>>('/clases'),
         getDashboardResumen(),
       ]);
 
@@ -74,7 +80,7 @@ export default function DashboardPage() {
       setDashboardData(dashboardRes);
 
       console.log('💾 Estado seteado - dashboardData:', dashboardRes);
-    } catch (error: unknown) {
+    } catch (error) {
       // Error loading dashboard data
       console.error('❌ Error loading dashboard:', error);
     } finally {

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, ChevronDown, ChevronUp, Calendar, Users, Clock, Edit, Trash2, BookOpen, Archive, RotateCcw } from 'lucide-react';
 import axios from '@/lib/axios';
+import { isAxiosError } from 'axios';
 import { CreateGrupoModal } from '@/components/admin/grupos/CreateGrupoModal';
 import { CreateClaseGrupoModal } from '@/components/admin/grupos/CreateClaseGrupoModal';
 import { EditClaseGrupoModal } from '@/components/admin/grupos/EditClaseGrupoModal';
@@ -20,7 +21,7 @@ interface Grupo {
   updatedAt: string;
 }
 
-interface ClaseGrupo {
+interface ClaseGrupoLocal {
   id: string;
   codigo: string;
   nombre: string;
@@ -40,7 +41,7 @@ interface ClaseGrupo {
 }
 
 interface GrupoWithClases extends Grupo {
-  clases?: ClaseGrupo[];
+  clases?: ClaseGrupoLocal[];
   planificacionActual?: {
     id: string;
     titulo: string;
@@ -80,12 +81,34 @@ export default function AdminGruposClasesPage() {
   const [grupoToDelete, setGrupoToDelete] = useState<Grupo | null>(null);
   const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>('activos');
   const [grupoParaAgregarHorario, setGrupoParaAgregarHorario] = useState<Grupo | null>(null);
-  const [horarioParaEditar, setHorarioParaEditar] = useState<ClaseGrupo | null>(null);
-  const [horarioParaEliminar, setHorarioParaEliminar] = useState<ClaseGrupo | null>(null);
+  const [horarioParaEditar, setHorarioParaEditar] = useState<ClaseGrupoLocal | null>(null);
+  const [horarioParaEliminar, setHorarioParaEliminar] = useState<ClaseGrupoLocal | null>(null);
 
   useEffect(() => {
     fetchGrupos();
   }, [filtroEstado]);
+
+  const extractEntity = <T,>(payload: T | { data?: T }): T => {
+    if (payload && typeof payload === 'object' && 'data' in payload) {
+      const data = (payload as { data?: T }).data;
+      if (data !== undefined) {
+        return data;
+      }
+    }
+    return payload as T;
+  };
+
+  const extractList = <T,>(payload: T[] | { data?: T[] }): T[] => {
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+
+    if (payload && typeof payload === 'object' && Array.isArray(payload.data)) {
+      return payload.data;
+    }
+
+    return [];
+  };
 
   const fetchGrupos = async () => {
     try {
@@ -93,7 +116,7 @@ export default function AdminGruposClasesPage() {
       setError(null);
 
       // Construir query params según el filtro
-      const params: any = {};
+      const params: Record<string, string> = {};
       if (filtroEstado === 'activos') {
         params.activo = 'true';
       } else if (filtroEstado === 'archivados') {
@@ -121,8 +144,8 @@ export default function AdminGruposClasesPage() {
             // Obtener clases del grupo
             // El endpoint devuelve { success: true, data: [...], total: ... }
             // El interceptor de axios extrae el primer .data, pero necesitamos extraer .data nuevamente
-            const response: any = await axios.get(`/admin/clase-grupos`, {
-              params: { grupo_id: grupo.id }
+            const response = await axios.get<ClaseGrupoLocal[] | { data?: ClaseGrupoLocal[] }>(`/admin/clase-grupos`, {
+              params: { grupo_id: grupo.id },
             });
 
             console.log(`📋 Response RAW para ${grupo.codigo}:`, response);
@@ -130,15 +153,7 @@ export default function AdminGruposClasesPage() {
             console.log(`   Es array?:`, Array.isArray(response));
 
             // Extraer el array de clases
-            let clases: ClaseGrupo[] = [];
-            if (Array.isArray(response)) {
-              // Si ya es un array, usarlo directamente
-              clases = response;
-            } else if (response && typeof response === 'object' && 'data' in response) {
-              // Si tiene la estructura { success, data, total }, extraer .data
-              console.log(`   Extrayendo .data del objeto wrapeado`);
-              clases = Array.isArray(response.data) ? response.data : [];
-            }
+            const clases = extractList(response);
 
             console.log(`✅ Clases finales para ${grupo.codigo}:`, clases.length, 'horarios');
 
@@ -155,7 +170,7 @@ export default function AdminGruposClasesPage() {
               planificacionActual: null,
             };
           }
-        })
+        }),
       );
 
       console.log('✅ Grupos con datos completos:', gruposConDatos);
@@ -188,9 +203,13 @@ export default function AdminGruposClasesPage() {
 
       // Cerrar modal de confirmación
       setGrupoToDelete(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error al archivar grupo:', err);
-      setError(err.response?.data?.message || 'Error al archivar el grupo');
+      if (isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Error al archivar el grupo');
+      } else {
+        setError('Error al archivar el grupo');
+      }
     }
   };
 
@@ -201,13 +220,17 @@ export default function AdminGruposClasesPage() {
 
       // Refrescar la lista
       await fetchGrupos();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error al reactivar grupo:', err);
-      setError(err.response?.data?.message || 'Error al reactivar el grupo');
+      if (isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Error al reactivar el grupo');
+      } else {
+        setError('Error al reactivar el grupo');
+      }
     }
   };
 
-  const handleEliminarHorario = async (horario: ClaseGrupo) => {
+  const handleEliminarHorario = async (horario: ClaseGrupoLocal) => {
     try {
       await axios.delete(`/admin/clase-grupos/${horario.id}`);
 
@@ -216,9 +239,13 @@ export default function AdminGruposClasesPage() {
 
       // Cerrar modal
       setHorarioParaEliminar(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error al eliminar horario:', err);
-      setError(err.response?.data?.message || 'Error al eliminar el horario');
+      if (isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Error al eliminar el horario');
+      } else {
+        setError('Error al eliminar el horario');
+      }
     }
   };
 
@@ -620,7 +647,7 @@ export default function AdminGruposClasesPage() {
           isOpen={true}
           onClose={() => setHorarioParaEditar(null)}
           onSuccess={fetchGrupos}
-          claseGrupo={horarioParaEditar as any}
+          claseGrupo={horarioParaEditar}
         />
       )}
 

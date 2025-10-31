@@ -61,8 +61,8 @@ export default function DetallePlanificacionPage() {
       setPlanificacion(planificacionData);
       setDocentes(docentesData);
       setGrupos(gruposData.data);
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err, 'Error al cargar datos');
+    } catch (err) {
+      const errorMessage = getErrorMessage(err as Error, 'Error al cargar datos');
       setError(errorMessage);
       console.error('Error loading data:', err);
     } finally {
@@ -89,8 +89,8 @@ export default function DetallePlanificacionPage() {
       setShowAsignarModal(false);
 
       alert('Planificación asignada exitosamente');
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err, 'Error al asignar planificación');
+    } catch (err) {
+      const errorMessage = getErrorMessage(err as Error, 'Error al asignar planificación');
       alert(errorMessage);
       console.error('Error assigning planificacion:', err);
     } finally {

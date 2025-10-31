@@ -131,7 +131,7 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
       }
       onClose();
       resetForm();
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error al guardar tarea:', error);
     }
   };

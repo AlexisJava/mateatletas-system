@@ -2,6 +2,8 @@
  * Tipos compartidos para el sistema de planificaciones
  */
 
+import type { JsonValue } from '../types';
+
 export interface PlanificacionMetadata {
   id: string;
   codigo: string;
@@ -44,8 +46,8 @@ export interface ProgresoEstudiante {
   tiempo_total_minutos: number;
   intentos: number;
   mejor_puntaje: number;
-  estado_juego?: Record<string, any>;
-  respuestas_detalle?: Record<string, any>;
+  estado_juego?: Record<string, JsonValue>;
+  respuestas_detalle?: Record<string, JsonValue>;
 }
 
 export interface PlanificacionState {
@@ -55,7 +57,7 @@ export interface PlanificacionState {
   actividades_completadas: string[];
   tiempo_total: number;
   ultimo_guardado: Date;
-  datos_personalizados?: Record<string, any>;
+  datos_personalizados?: Record<string, JsonValue>;
 }
 
 export interface GameScoreProps {

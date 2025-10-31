@@ -203,7 +203,7 @@ export default function RegisterPage() {
 
       // El register del store hace auto-login, así que redirigir
       router.push('/dashboard');
-    } catch (error: unknown) {
+    } catch (error) {
       // Manejar diferentes tipos de errores
       let errorMessage = 'Error al registrarse. Por favor, intenta nuevamente.';
 

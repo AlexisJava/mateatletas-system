@@ -44,8 +44,8 @@ export default function DocentePerfilPage() {
           titulo_profesional: data.titulo_profesional || '',
           biografia: data.biografia || '',
         });
-      } catch (err: unknown) {
-        setError(getErrorMessage(err, 'Error al cargar perfil'));
+      } catch (err) {
+        setError(getErrorMessage(err as Error, 'Error al cargar perfil'));
       } finally {
         setIsLoading(false);
       }
@@ -76,8 +76,8 @@ export default function DocentePerfilPage() {
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Error al actualizar perfil'));
+    } catch (err) {
+      setError(getErrorMessage(err as Error, 'Error al actualizar perfil'));
     } finally {
       setIsSaving(false);
     }

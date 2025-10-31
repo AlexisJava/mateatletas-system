@@ -118,7 +118,7 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 
           console.log('✅ [EstudianteLayout] Estudiante validado después de checkAuth');
           setIsValidating(false);
-        } catch (error: unknown) {
+        } catch (error) {
           console.error('❌ [EstudianteLayout] Error en checkAuth:', error);
           router.replace('/login');
         }

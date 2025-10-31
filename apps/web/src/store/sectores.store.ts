@@ -14,6 +14,7 @@ import type {
   AsignarRutasDocenteDto,
 } from '@/types/sectores.types';
 import * as sectoresApi from '@/lib/api/sectores.api';
+import { handleStoreError } from '@/lib/utils/error-handler';
 
 interface SectoresState {
   // State
@@ -43,12 +44,6 @@ interface SectoresState {
   clearError: () => void;
 }
 
-const getErrorMessage = (error: unknown, fallback: string): string => {
-  if (error instanceof Error) return error.message;
-  if (typeof error === 'string') return error;
-  return fallback;
-};
-
 export const useSectoresStore = create<SectoresState>((set, get) => ({
   // Initial state
   sectores: [],
@@ -65,8 +60,15 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
     try {
       const sectores = await sectoresApi.listarSectores();
       set({ sectores, isLoading: false });
-    } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error fetching sectores'), isLoading: false });
+    } catch (error) {
+      set({
+        error: handleStoreError(
+          'SectoresStore.fetchSectores',
+          error,
+          'Error fetching sectores',
+        ),
+        isLoading: false,
+      });
     }
   },
 
@@ -79,8 +81,15 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
         isLoading: false,
       }));
       return sector;
-    } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error creating sector'), isLoading: false });
+    } catch (error) {
+      set({
+        error: handleStoreError(
+          'SectoresStore.crearSector',
+          error,
+          'Error creating sector',
+        ),
+        isLoading: false,
+      });
       return null;
     }
   },
@@ -94,8 +103,15 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
         isLoading: false,
       }));
       return sector;
-    } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error updating sector'), isLoading: false });
+    } catch (error) {
+      set({
+        error: handleStoreError(
+          'SectoresStore.actualizarSector',
+          error,
+          'Error updating sector',
+        ),
+        isLoading: false,
+      });
       return null;
     }
   },
@@ -109,8 +125,15 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
         isLoading: false,
       }));
       return true;
-    } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error deleting sector'), isLoading: false });
+    } catch (error) {
+      set({
+        error: handleStoreError(
+          'SectoresStore.eliminarSector',
+          error,
+          'Error deleting sector',
+        ),
+        isLoading: false,
+      });
       return false;
     }
   },
@@ -124,8 +147,15 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
     try {
       const rutas = await sectoresApi.listarRutasEspecialidad(sectorId);
       set({ rutas, isLoading: false });
-    } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error fetching rutas'), isLoading: false });
+    } catch (error) {
+      set({
+        error: handleStoreError(
+          'SectoresStore.fetchRutas',
+          error,
+          'Error fetching rutas',
+        ),
+        isLoading: false,
+      });
     }
   },
 
@@ -142,8 +172,15 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       await get().fetchSectores();
 
       return ruta;
-    } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error creating ruta'), isLoading: false });
+    } catch (error) {
+      set({
+        error: handleStoreError(
+          'SectoresStore.crearRuta',
+          error,
+          'Error creating ruta',
+        ),
+        isLoading: false,
+      });
       return null;
     }
   },
@@ -157,8 +194,15 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
         isLoading: false,
       }));
       return ruta;
-    } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error updating ruta'), isLoading: false });
+    } catch (error) {
+      set({
+        error: handleStoreError(
+          'SectoresStore.actualizarRuta',
+          error,
+          'Error updating ruta',
+        ),
+        isLoading: false,
+      });
       return null;
     }
   },
@@ -176,8 +220,15 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       await get().fetchSectores();
 
       return true;
-    } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error deleting ruta'), isLoading: false });
+    } catch (error) {
+      set({
+        error: handleStoreError(
+          'SectoresStore.eliminarRuta',
+          error,
+          'Error deleting ruta',
+        ),
+        isLoading: false,
+      });
       return false;
     }
   },
@@ -192,8 +243,15 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       await sectoresApi.asignarRutasDocente(docenteId, data);
       set({ isLoading: false });
       return true;
-    } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error assigning rutas'), isLoading: false });
+    } catch (error) {
+      set({
+        error: handleStoreError(
+          'SectoresStore.asignarRutasDocente',
+          error,
+          'Error assigning rutas',
+        ),
+        isLoading: false,
+      });
       return false;
     }
   },
@@ -204,8 +262,15 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       const rutas = await sectoresApi.obtenerRutasDocente(docenteId);
       set({ isLoading: false });
       return rutas;
-    } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error fetching docente rutas'), isLoading: false });
+    } catch (error) {
+      set({
+        error: handleStoreError(
+          'SectoresStore.obtenerRutasDocente',
+          error,
+          'Error fetching docente rutas',
+        ),
+        isLoading: false,
+      });
       return [];
     }
   },

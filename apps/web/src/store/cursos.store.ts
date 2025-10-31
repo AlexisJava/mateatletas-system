@@ -64,7 +64,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
       if (!response.ok) throw new Error('Error al cargar cursos');
       const data = await response.json();
       set({ misCursos: data, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({
         error: getErrorMessage(error, 'Error al cargar cursos'),
         isLoading: false
@@ -77,7 +77,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
     try {
       const progreso = await cursosApi.getProgresoCurso(productoId);
       set({ progreso, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({
         error: getErrorMessage(error, 'Error al cargar progreso'),
         isLoading: false,
@@ -90,7 +90,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
     try {
       const leccion = await cursosApi.getSiguienteLeccion(productoId);
       set({ leccionActual: leccion });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error al obtener siguiente lección') });
     }
   },
@@ -113,7 +113,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
         puntos: result.puntos_ganados,
         logro: result.logro_desbloqueado
       };
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error al completar lección') });
       return { success: false };
     }
@@ -128,7 +128,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
     try {
       const modulos = await cursosApi.getModulosByProducto(productoId);
       set({ modulos, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({
         error: getErrorMessage(error, 'Error al cargar módulos'),
         isLoading: false,
@@ -142,7 +142,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
     try {
       const leccion = await cursosApi.getLeccion(leccionId);
       set({ leccionActual: leccion, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({
         error: getErrorMessage(error, 'Error al cargar lección'),
         isLoading: false,

@@ -1,3 +1,5 @@
+import { isAxiosError } from 'axios';
+
 import apiClient from '../axios';
 import {
   accionesPuntuablesListSchema,
@@ -63,6 +65,12 @@ export interface RachaResponse {
   record_personal: number;
 }
 
+export interface DesbloquearLogroResponse {
+  success: boolean;
+  logro: string;
+  estudiante: string;
+}
+
 export const gamificacionApi = {
   /**
    * Obtener dashboard completo del estudiante
@@ -75,7 +83,7 @@ export const gamificacionApi = {
       return dashboardGamificacionSchema.parse(response);
     } catch (error) {
       // Si es 404, retornar mock data en lugar de error
-      if ((error as any)?.response?.status === 404) {
+      if (isAxiosError(error) && error.response?.status === 404) {
         console.warn('⚠️ Dashboard endpoint no implementado, usando datos mock');
         return {
           estudiante: {
@@ -164,10 +172,11 @@ export const gamificacionApi = {
   /**
    * Desbloquear logro
    */
-  desbloquearLogro: async (logroId: string): Promise<unknown> => {
+  desbloquearLogro: async (logroId: string): Promise<DesbloquearLogroResponse> => {
     try {
-      const response = await apiClient.post(`/gamificacion/logros/${logroId}/desbloquear`);
-      return response;
+      return await apiClient.post<DesbloquearLogroResponse>(
+        `/gamificacion/logros/${logroId}/desbloquear`,
+      );
     } catch (error) {
       console.error('Error al desbloquear el logro:', error);
       throw error;
@@ -203,7 +212,7 @@ export const gamificacionApi = {
   /**
    * Otorgar puntos a un estudiante (docentes)
    */
-  otorgarPuntos: async (data: OtorgarPuntosData): Promise<unknown> => {
+  otorgarPuntos: async (data: OtorgarPuntosData): Promise<void> => {
     try {
       const payload = otorgarPuntosSchema.parse(data);
       const response = await apiClient.post('/gamificacion/puntos', payload);

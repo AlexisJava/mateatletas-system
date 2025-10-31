@@ -16,7 +16,7 @@ export const sectorSchema = z.object({
   updatedAt: z.string(),
 
   // Relaciones opcionales
-  rutas: z.array(z.lazy(() => z.any())).optional(), // RutaEspecialidad[] - lazy to avoid circular dependency
+  rutas: z.array(z.lazy(() => z.unknown())).optional(), // RutaEspecialidad[] - lazy to avoid circular dependency
   _count: z.object({
     rutas: z.number(),
     docentes: z.number(),

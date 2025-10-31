@@ -6,6 +6,8 @@
 
 import { AxiosError } from 'axios';
 
+import type { ErrorLike } from '@/types/common';
+
 /**
  * API Error response structure
  */
@@ -25,9 +27,9 @@ export function isAxiosError(error: unknown): error is AxiosError<ApiErrorRespon
 }
 
 /**
- * Extract error message from unknown error
+ * Extract error message from error-like value
  */
-export function getErrorMessage(error: unknown, fallback = 'An error occurred'): string {
+export function getErrorMessage(error: ErrorLike, fallback = 'An error occurred'): string {
   // Axios error with response
   if (isAxiosError(error) && error.response?.data?.message) {
     return error.response.data.message;
@@ -43,6 +45,19 @@ export function getErrorMessage(error: unknown, fallback = 'An error occurred'):
     return error;
   }
 
+  if (typeof error === 'number' || typeof error === 'boolean') {
+    return String(error);
+  }
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message?: string }).message === 'string'
+  ) {
+    return (error as { message?: string }).message ?? fallback;
+  }
+
   // Unknown error
   return fallback;
 }
@@ -50,9 +65,38 @@ export function getErrorMessage(error: unknown, fallback = 'An error occurred'):
 /**
  * Log error with context
  */
-export function logError(context: string, error: unknown): void {
+export function logError(context: string, error: ErrorLike): void {
   const message = getErrorMessage(error);
   console.error(`[${context}]`, message, error);
+}
+
+/**
+ * Normaliza un error desconocido a un ErrorLike
+ */
+export function toErrorLike(error: unknown): ErrorLike {
+  if (
+    error === null ||
+    typeof error === 'undefined' ||
+    typeof error === 'string' ||
+    typeof error === 'number' ||
+    typeof error === 'boolean'
+  ) {
+    return error;
+  }
+
+  if (error instanceof Error) {
+    return error;
+  }
+
+  if (
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof (error as { message?: string }).message === 'string'
+  ) {
+    return error as { message?: string };
+  }
+
+  return { message: 'Error desconocido' };
 }
 
 /**
@@ -60,6 +104,7 @@ export function logError(context: string, error: unknown): void {
  * Returns error message for state
  */
 export function handleStoreError(context: string, error: unknown, fallback?: string): string {
-  logError(context, error);
-  return getErrorMessage(error, fallback);
+  const normalized = toErrorLike(error);
+  logError(context, normalized);
+  return getErrorMessage(normalized, fallback);
 }

@@ -3,11 +3,13 @@
 import { useMemo } from 'react'
 import animationsConfig from '../../public/animations-config.json'
 
-interface Animation {
+export type AnimationCategory = 'dance' | 'expression' | 'idle' | 'locomotion'
+
+export interface StudentAnimation {
   id: string
   name: string
   displayName: string
-  category: string // 'dance' | 'expression' | 'idle' | 'locomotion'
+  category: AnimationCategory
   gender: string // 'masculine' | 'feminine'
   filename: string
   url: string
@@ -30,7 +32,7 @@ export function useStudentAnimations({
 
   // Filtrar animaciones disponibles
   const availableAnimations = useMemo(() => {
-    return animationsConfig.animations.filter((animation: Animation) => {
+    return animationsConfig.animations.filter((animation: StudentAnimation) => {
       // Filtrar por género si se especifica
       if (gender && animation.gender !== gender) {
         return false
@@ -52,12 +54,12 @@ export function useStudentAnimations({
       }
 
       return false
-    }) as Animation[]
+    }) as StudentAnimation[]
   }, [studentPoints, unlockedAnimationIds, gender])
 
   // Obtener animaciones bloqueadas
   const lockedAnimations = useMemo(() => {
-    return animationsConfig.animations.filter((animation: Animation) => {
+    return animationsConfig.animations.filter((animation: StudentAnimation) => {
       if (gender && animation.gender !== gender) {
         return false
       }
@@ -67,12 +69,12 @@ export function useStudentAnimations({
       }
 
       return studentPoints < animation.requiredPoints
-    }) as Animation[]
+    }) as StudentAnimation[]
   }, [studentPoints, unlockedAnimationIds, gender])
 
   // Animaciones por categoría
   const animationsByCategory = useMemo(() => {
-    const categories: Record<string, Animation[]> = {
+    const categories: Record<AnimationCategory, StudentAnimation[]> = {
       dance: [],
       expression: [],
       idle: [],
@@ -99,7 +101,7 @@ export function useStudentAnimations({
   }
 
   // Obtener animación aleatoria de una categoría
-  const getRandomAnimation = (category: 'dance' | 'expression' | 'idle' | 'locomotion') => {
+  const getRandomAnimation = (category: AnimationCategory) => {
     const animations = animationsByCategory[category]
     if (!animations || animations.length === 0) return null
 
@@ -110,13 +112,13 @@ export function useStudentAnimations({
   // Buscar animación por ID
   const getAnimationById = (animationId: string) => {
     return animationsConfig.animations.find(
-      (a: Animation) => a.id === animationId
-    ) as Animation | undefined
+      (a: StudentAnimation) => a.id === animationId
+    ) as StudentAnimation | undefined
   }
 
   return {
     // Listas de animaciones
-    allAnimations: animationsConfig.animations as Animation[],
+    allAnimations: animationsConfig.animations as StudentAnimation[],
     availableAnimations,
     lockedAnimations,
     animationsByCategory,
@@ -131,7 +133,7 @@ export function useStudentAnimations({
       total: animationsConfig.totalAnimations,
       available: availableAnimations.length,
       locked: lockedAnimations.length,
-      categories: animationsConfig.categories,
+      categories: animationsConfig.categories as Record<AnimationCategory, number>,
     }
   }
 }

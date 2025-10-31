@@ -51,7 +51,7 @@ export default function ModalCambioPasswordObligatorio({
     try {
       await cambiarPassword(passwordActual, nuevaPassword);
       // El modal se cerrará automáticamente cuando debe_cambiar_password sea false
-    } catch (error: unknown) {
+    } catch (error) {
       const apiMessage =
         typeof error === 'object' &&
         error !== null &&

@@ -63,7 +63,7 @@ export default function GamificacionPage() {
               </Link>
             </div>
 
-            {logrosRecientes && logrosRecientes.length > 0 ? (
+            {logrosRecientes && Array.isArray(logrosRecientes) && logrosRecientes.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {logrosRecientes.map((logroEstudiante) => (
                   <LogroCard

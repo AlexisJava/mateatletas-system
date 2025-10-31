@@ -40,7 +40,7 @@ export const useCatalogoStore = create<CatalogoStore>((set, get) => ({
       const productos = await catalogoApi.getProductos();
       console.log('🟡 [CATALOGO STORE] fetchProductos - SUCCESS:', productos.length, 'productos');
       set({ productos, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('🔴 [CATALOGO STORE] fetchProductos - ERROR:', error);
       if (isAxiosError(error)) {
         console.error('🔴 [CATALOGO STORE] Error response:', error.response?.data);
@@ -58,7 +58,7 @@ export const useCatalogoStore = create<CatalogoStore>((set, get) => ({
     try {
       const producto = await catalogoApi.getProductoPorId(id);
       set({ productoSeleccionado: producto, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({
         error: getErrorMessage(error, 'Error al cargar producto'),
         isLoading: false,

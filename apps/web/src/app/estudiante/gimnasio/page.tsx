@@ -25,11 +25,11 @@ function GimnasioContent({ avatarUrl }: { avatarUrl: string | null }) {
   useEffect(() => {
     if (!racha || loadingRacha || !user) return
 
-    const hoy = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+    const hoy = new Date().toISOString().split('T')[0] ?? '' // YYYY-MM-DD
     const lastWelcomeDate = localStorage.getItem('lastWelcomeDate')
 
     // Mostrar modal si es un día diferente
-    if (lastWelcomeDate !== hoy) {
+    if (lastWelcomeDate !== hoy && hoy) {
       setShowWelcomeModal(true)
       localStorage.setItem('lastWelcomeDate', hoy)
     }

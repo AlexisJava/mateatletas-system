@@ -14,11 +14,9 @@ function AvatarModel({ avatarUrl, animationUrl }: AvatarModelProps) {
   const group = useRef<THREE.Group>(null)
 
   const { scene } = useGLTF(avatarUrl)
-  const { scene } = useGLTF(avatarUrl)
   const animationData = useGLTF(animationUrl || avatarUrl)
   const animationClips = animationUrl ? animationData.animations : []
 
-  const { actions, mixer } = useAnimations(animationClips, group)
   const { actions, mixer } = useAnimations(animationClips, group)
 
   useEffect(() => {
@@ -26,7 +24,7 @@ function AvatarModel({ avatarUrl, animationUrl }: AvatarModelProps) {
 
     Object.values(actions).forEach(action => action?.stop())
 
-    const firstAction = actions[animationClips[0].name]
+    const firstAction = actions[animationClips[0]?.name ?? '']
     if (firstAction) {
       firstAction.reset().fadeIn(0.3).play()
     }

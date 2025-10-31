@@ -26,7 +26,7 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
     try {
       const users = await adminApi.getAllUsers();
       set({ users, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error loading users'), isLoading: false });
     }
   },
@@ -36,7 +36,7 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
       await adminApi.changeUserRole(userId, { role });
       await get().fetchUsers();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error changing role') });
       return false;
     }
@@ -47,7 +47,7 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
       await adminApi.updateUserRoles(userId, { roles });
       await get().fetchUsers();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error updating roles') });
       return false;
     }
@@ -58,7 +58,7 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
       await adminApi.deleteUser(userId);
       await get().fetchUsers();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error deleting user') });
       throw error;
     }

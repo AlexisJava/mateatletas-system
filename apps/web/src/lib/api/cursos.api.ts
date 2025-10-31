@@ -3,6 +3,8 @@
  * SLICE #16: Estructura de Cursos con Módulos y Lecciones
  */
 
+import { z } from 'zod';
+
 import axios from '@/lib/axios';
 import {
   leccionSchema,
@@ -20,7 +22,7 @@ import {
   progresoCursoSchema,
 } from '@mateatletas/contracts';
 import { completarLeccionResponseSchema } from '@/lib/schemas/logro.schema';
-
+import type { JsonValue } from '@/types/common';
 
 type CompletarLeccionResponse = z.infer<typeof completarLeccionResponseSchema>;
 // ============================================================================
@@ -62,7 +64,7 @@ export type ContenidoLeccion =
   | ContenidoTexto
   | ContenidoQuiz
   | ContenidoTarea
-  | Record<string, unknown>; // Fallback para tipos no mapeados
+  | Record<string, JsonValue>; // Fallback para tipos no mapeados
 
 export interface Modulo {
   id: string;
@@ -90,7 +92,7 @@ export interface ProgresoLeccion {
   calificacion: number | null;
   intentos: number;
   notas_estudiante: string | null;
-  ultima_respuesta: Record<string, unknown> | null;
+  ultima_respuesta: Record<string, JsonValue> | null;
   fecha_completado: string | null;
   createdAt: string;
   updatedAt: string;
@@ -126,7 +128,7 @@ export interface CreateLeccionDto {
   titulo: string;
   descripcion?: string;
   tipo_contenido: TipoContenido;
-  contenido: Record<string, unknown>;
+  contenido: Record<string, JsonValue>;
   orden?: number;
   duracion_estimada_minutos: number;
   puntos?: number;
@@ -139,7 +141,7 @@ export interface UpdateLeccionDto {
   titulo?: string;
   descripcion?: string;
   tipo_contenido?: TipoContenido;
-  contenido?: Record<string, unknown>;
+  contenido?: Record<string, JsonValue>;
   orden?: number;
   duracion_estimada_minutos?: number;
   puntos?: number;
@@ -153,7 +155,7 @@ export interface CompletarLeccionDto {
   tiempo_invertido_minutos?: number;
   calificacion?: number;
   notas_estudiante?: string;
-  ultima_respuesta?: Record<string, unknown>;
+  ultima_respuesta?: Record<string, JsonValue>;
 }
 
 // ============================================================================
@@ -423,4 +425,3 @@ export const getSiguienteLeccion = async (productoId: string): Promise<Leccion |
     throw error;
   }
 };
-

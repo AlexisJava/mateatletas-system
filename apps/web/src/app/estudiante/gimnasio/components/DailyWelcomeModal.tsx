@@ -32,9 +32,10 @@ export function DailyWelcomeModal({
   racha,
   onClose,
 }: DailyWelcomeModalProps) {
-  const [saludoEpico] = useState(() =>
-    SALUDOS_EPICOS[Math.floor(Math.random() * SALUDOS_EPICOS.length)]
-  );
+  const [saludoEpico] = useState<{ texto: string; emoji: string; color: string }>(() => {
+    const index = Math.floor(Math.random() * SALUDOS_EPICOS.length);
+    return SALUDOS_EPICOS[index]!;
+  });
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
 
   const esPrimerDia = racha.dias_consecutivos === 1;

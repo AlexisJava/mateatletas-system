@@ -15,6 +15,7 @@ import {
   Puntos,
   Ranking,
   Progreso,
+  DesbloquearLogroResponse,
 } from '@/lib/api/gamificacion.api';
 
 // ============================================================================
@@ -163,7 +164,7 @@ export function useProgreso(
 export function useDesbloquearLogro(estudianteId: string) {
   const queryClient = useQueryClient();
 
-  return useMutation<unknown, Error, string>({
+  return useMutation<DesbloquearLogroResponse, Error, string>({
     mutationFn: (logroId: string) =>
       gamificacionApi.desbloquearLogro(logroId),
 
@@ -187,7 +188,9 @@ export function useDesbloquearLogro(estudianteId: string) {
         gamificacionKeys.logros(estudianteId),
         (old) =>
           old?.map((logro) =>
-            logro.id === logroDesbloqueado.id ? logroDesbloqueado : logro
+            logro.id === logroDesbloqueado.logro
+              ? { ...logro, desbloqueado: true }
+              : logro
           ) ?? []
       );
     },

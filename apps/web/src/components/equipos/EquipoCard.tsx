@@ -42,7 +42,7 @@ export default function EquipoCard({
     try {
       await onDelete(equipo);
       setShowDeleteConfirm(false);
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error al eliminar:', error);
     } finally {
       setIsDeleting(false);

@@ -152,7 +152,7 @@ export function ModalAsignarInsignia({
         onInsigniaAsignada?.();
         onClose();
       }, 2000);
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error asignando insignia:', error);
       alert('Error al asignar insignia. Intenta nuevamente.');
     } finally {

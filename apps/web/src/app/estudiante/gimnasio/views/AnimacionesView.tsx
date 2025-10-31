@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Lock, Check, Play, Sparkles } from 'lucide-react'
 import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D'
-import { useStudentAnimations } from '@/hooks/useStudentAnimations'
+import { useStudentAnimations, type StudentAnimation, type AnimationCategory } from '@/hooks/useStudentAnimations'
 import { useOverlayStack } from '../contexts/OverlayStackProvider'
 import { toast } from 'sonner'
 import { estudiantesApi } from '@/lib/api/estudiantes.api'
+import { isAxiosError } from 'axios'
 
 interface AnimacionesViewProps {
   estudiante: {
@@ -18,17 +19,17 @@ interface AnimacionesViewProps {
   }
 }
 
-const CATEGORY_LABELS: Record<string, { label: string; emoji: string; color: string }> = {
+const CATEGORY_LABELS: Record<AnimationCategory, { label: string; emoji: string; color: string }> = {
   idle: { label: 'Espera', emoji: '🧍', color: 'from-blue-500 to-cyan-500' },
   dance: { label: 'Bailes', emoji: '💃', color: 'from-pink-500 to-rose-500' },
   expression: { label: 'Expresiones', emoji: '😊', color: 'from-purple-500 to-violet-500' },
   locomotion: { label: 'Movimiento', emoji: '🏃', color: 'from-orange-500 to-amber-500' },
-}
+} as const
 
 export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
   const { pop } = useOverlayStack()
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [previewAnimation, setPreviewAnimation] = useState<any>(null)
+  const [selectedCategory, setSelectedCategory] = useState<'all' | AnimationCategory>('all')
+  const [previewAnimation, setPreviewAnimation] = useState<StudentAnimation | null>(null)
   const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
 
   const {
@@ -45,13 +46,19 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
     pop()
   }
 
+  const categoryEntries = Object.entries(CATEGORY_LABELS) as Array<[
+    AnimationCategory,
+    { label: string; emoji: string; color: string }
+  ]>
+
   // Filtrar animaciones según categoría seleccionada
-  const displayAnimations = selectedCategory === 'all'
-    ? [...availableAnimations, ...lockedAnimations]
-    : [
-        ...(animationsByCategory[selectedCategory] || []),
-        ...lockedAnimations.filter(a => a.category === selectedCategory)
-      ]
+  const displayAnimations: StudentAnimation[] =
+    selectedCategory === 'all'
+      ? [...availableAnimations, ...lockedAnimations]
+      : [
+          ...(animationsByCategory[selectedCategory] ?? []),
+          ...lockedAnimations.filter(a => a.category === selectedCategory),
+        ]
 
   const handleUnlockAnimation = async (animationId: string, cost: number) => {
     // TODO: Implementar llamada al backend para desbloquear animación
@@ -94,14 +101,14 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
             emoji="✨"
             count={stats.total}
           />
-          {Object.entries(CATEGORY_LABELS).map(([key, { label, emoji, color }]) => (
+          {categoryEntries.map(([key, { label, emoji, color }]) => (
             <CategoryTab
               key={key}
               active={selectedCategory === key}
               onClick={() => setSelectedCategory(key)}
               label={label}
               emoji={emoji}
-              count={stats.categories[key as keyof typeof stats.categories]}
+              count={stats.categories[key] ?? 0}
               gradient={color}
             />
           ))}
@@ -298,7 +305,10 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
                       })
                     } catch (error) {
                       console.error('Error al guardar animación:', error)
-                      toast.error('Error al guardar la animación', {
+                      const message = isAxiosError(error)
+                        ? error.response?.data?.message || 'Error al guardar la animación'
+                        : 'Error al guardar la animación'
+                      toast.error(message, {
                         description: 'Intenta nuevamente',
                         duration: 3000,
                       })

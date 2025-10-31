@@ -57,6 +57,11 @@ function log(message: string, color: string = COLORS.reset) {
   console.log(`${color}${message}${COLORS.reset}`);
 }
 
+const shouldSkipAutoDetect = (): boolean => {
+  const flag = process.env.SKIP_PLANIFICACIONES_DETECT?.toLowerCase();
+  return flag === '1' || flag === 'true' || flag === 'yes';
+};
+
 // ============================================================================
 // ESCANEO DE ARCHIVOS
 // ============================================================================
@@ -368,4 +373,12 @@ async function main() {
 }
 
 // Ejecutar
-main();
+if (shouldSkipAutoDetect()) {
+  log(
+    '⏭️  Auto-detección de planificaciones omitida (SKIP_PLANIFICACIONES_DETECT habilitado)',
+    COLORS.yellow + COLORS.bright,
+  );
+  void prisma.$disconnect().finally(() => process.exit(0));
+} else {
+  main();
+}

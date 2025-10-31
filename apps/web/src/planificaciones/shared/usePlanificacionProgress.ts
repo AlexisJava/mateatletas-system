@@ -15,7 +15,17 @@ import type {
   PlanificacionConfig,
   ProgresoEstudiante,
   UsePlanificacionProgressReturn,
+  JsonValue,
 } from './types';
+
+interface ProgresoApiResponse {
+  semana_actual?: number;
+  ultima_actividad?: string;
+  estado_guardado?: JsonValue;
+  tiempo_total_minutos?: number;
+  puntos_totales?: number;
+  semanas_activas?: number[];
+}
 
 export function usePlanificacionProgress(
   config: PlanificacionConfig
@@ -46,12 +56,14 @@ export function usePlanificacionProgress(
           throw new Error('Error al cargar progreso');
         }
 
-        const data = await response.json();
+        const data = (await response.json()) as ProgresoApiResponse;
+
+        const ultimaActividadIso = data.ultima_actividad ?? new Date().toISOString();
 
         setProgreso({
           semanaActual: data.semana_actual || 1,
-          ultimaActividad: new Date(data.ultima_actividad),
-          estadoGuardado: data.estado_guardado,
+          ultimaActividad: new Date(ultimaActividadIso),
+          estadoGuardado: data.estado_guardado ?? null,
           tiempoTotalMinutos: data.tiempo_total_minutos || 0,
           puntosTotales: data.puntos_totales || 0,
         });
@@ -82,7 +94,7 @@ export function usePlanificacionProgress(
   // GUARDAR ESTADO
   // ============================================================================
   const guardarEstado = useCallback(
-    async (estado: any) => {
+    async (estado: JsonValue) => {
       try {
         const response = await fetch(
           `/api/planificaciones/${config.codigo}/progreso`,

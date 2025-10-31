@@ -8,7 +8,7 @@
 import { useAuthStore } from '@/store/auth.store';
 import { usePlanificacionLoader } from '../hooks/usePlanificacionLoader';
 import { adaptarPorNivel } from '../utils/nivel.utils';
-import { puedeAccederPorNivel } from '../utils/validacion.utils';
+import { puedeAccederPorNivel, validarCodigoPlanificacion } from '../utils/validacion.utils';
 import { LoadingPlanificacion, ErrorPlanificacion } from '../components';
 import type { OverlayConfig } from '@/app/estudiante/gimnasio/types/overlay.types';
 
@@ -63,7 +63,20 @@ export function PlanificacionClient({ codigo: codigoProp, config, estudiante: es
   const adaptacion = adaptarPorNivel(estudiante.nivel_actual || 1);
 
   // Verificar acceso por nivel (por si acaso hay restricciones futuras)
-  const tieneAcceso = puedeAccederPorNivel(adaptacion.nivelActual, codigo as any);
+  const validacion = validarCodigoPlanificacion(codigo);
+
+  if (!validacion.valido || !validacion.codigo) {
+    return (
+      <ErrorPlanificacion
+        error={new Error(validacion.error || 'Código de planificación inválido')}
+        codigo={codigo}
+      />
+    );
+  }
+
+  const codigoValidado = validacion.codigo;
+
+  const tieneAcceso = puedeAccederPorNivel(adaptacion.nivelActual, codigoValidado);
 
   if (!tieneAcceso) {
     return (

@@ -38,7 +38,7 @@ export default function EstudiantesPage() {
     if (confirm('¿Estás seguro de eliminar este estudiante?')) {
       try {
         await deleteEstudiante(id);
-      } catch (error: unknown) {
+      } catch (error) {
         // Error deleting student
       }
     }

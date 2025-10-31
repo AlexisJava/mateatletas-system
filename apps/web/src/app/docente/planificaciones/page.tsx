@@ -38,8 +38,8 @@ export default function DocentePlanificacionesPage() {
       setError(null);
       const data = await misAsignaciones();
       setAsignaciones(data);
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err, 'Error al cargar planificaciones');
+    } catch (err) {
+      const errorMessage = getErrorMessage(err as Error, 'Error al cargar planificaciones');
       setError(errorMessage);
       console.error('Error loading asignaciones:', err);
     } finally {
@@ -55,8 +55,8 @@ export default function DocentePlanificacionesPage() {
         await activarSemana(asignacionId, semanaNumero);
       }
       await loadAsignaciones();
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err, 'Error al actualizar semana');
+    } catch (err) {
+      const errorMessage = getErrorMessage(err as Error, 'Error al actualizar semana');
       alert(errorMessage);
     }
   };
@@ -67,8 +67,8 @@ export default function DocentePlanificacionesPage() {
       setProgresos(data.progresos);
       setSelectedAsignacion(asignacionId);
       setShowProgressModal(true);
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err, 'Error al cargar progreso');
+    } catch (err) {
+      const errorMessage = getErrorMessage(err as Error, 'Error al cargar progreso');
       alert(errorMessage);
     }
   };

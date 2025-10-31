@@ -15,6 +15,7 @@ import { toast } from '@/components/ui/Toast';
 import { StudentAvatar } from '@/components/ui/StudentAvatar';
 import { gamificacionApi, type AccionPuntuable } from '@/lib/api/gamificacion.api';
 import type { EstudianteConStatsDto } from '@/lib/api/clase-grupos.api';
+import { isAxiosError } from 'axios';
 
 interface AsignarPuntosModalProps {
   isOpen: boolean;
@@ -96,12 +97,16 @@ export default function AsignarPuntosModal({
 
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error al asignar puntos:', error);
-      toast.error(
-        error?.response?.data?.message ||
-          'Error al asignar puntos. Intenta nuevamente.'
-      );
+      if (isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message ||
+            'Error al asignar puntos. Intenta nuevamente.'
+        );
+      } else {
+        toast.error('Error al asignar puntos. Intenta nuevamente.');
+      }
     } finally {
       setIsSubmitting(false);
     }

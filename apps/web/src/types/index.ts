@@ -71,19 +71,32 @@ export function isApiError(error: unknown): error is ApiError {
 }
 
 /**
- * Helper to extract error message from unknown error
+ * Helper to extract error message from error-like input
  */
 export function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
   if (isApiError(error)) {
     return error.message;
   }
 
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message?: string }).message === 'string'
+  ) {
+    return (error as { message?: string }).message ?? 'An unknown error occurred';
+  }
+
   if (typeof error === 'string') {
     return error;
+  }
+
+  if (typeof error === 'number' || typeof error === 'boolean') {
+    return String(error);
   }
 
   return 'An unknown error occurred';

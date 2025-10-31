@@ -2,6 +2,7 @@
  * API Client para Tienda y Recursos (XP, Monedas, Gemas)
  */
 
+import type { JsonValue } from '@/types/common';
 import apiClient from '../axios';
 import type {
   RecursosEstudiante,
@@ -59,7 +60,7 @@ export const recursosApi = {
     estudianteId: string,
     cantidad: number,
     razon: string,
-    metadata?: Record<string, unknown>,
+    metadata?: Record<string, JsonValue>,
   ): Promise<RecursosActualizadosResponse> => {
     try {
       const response = await apiClient.post(`/recursos/${estudianteId}/gemas`, {

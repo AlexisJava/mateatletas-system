@@ -6,6 +6,7 @@ import { Search, Filter, Sparkles, BookOpen, Clock, Trophy } from 'lucide-react'
 import { cursosTiendaApi, type CursoCatalogo } from '@/lib/api/cursos-tienda.api';
 import { recursosApi } from '@/lib/api/tienda.api';
 import { toast } from 'react-hot-toast';
+import { isAxiosError } from 'axios';
 
 interface CursosViewProps {
   estudiante: {
@@ -90,8 +91,10 @@ export function CursosView({ estudiante }: CursosViewProps) {
       toast.success(`¡Solicitud enviada! Tu tutor recibirá una notificación.`);
       // Actualizar monedas
       cargarDatos();
-    } catch (error: any) {
-      const mensaje = error?.response?.data?.message || 'Error al solicitar el canje';
+    } catch (error) {
+      const mensaje = isAxiosError(error)
+        ? error.response?.data?.message || 'Error al solicitar el canje'
+        : 'Error al solicitar el canje';
       toast.error(mensaje);
     }
   };

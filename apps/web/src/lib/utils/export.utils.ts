@@ -31,7 +31,7 @@ export const exportToExcel = (data: ExportableData[], filename: string, sheetNam
     XLSX.writeFile(wb, `${filename}.xlsx`);
 
     return { success: true, message: 'Archivo Excel generado exitosamente' };
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Error al exportar a Excel:', error);
     return { success: false, message: 'Error al generar archivo Excel' };
   }
@@ -60,7 +60,7 @@ export const exportToCSV = (data: ExportableData[], filename: string) => {
     document.body.removeChild(link);
 
     return { success: true, message: 'Archivo CSV generado exitosamente' };
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Error al exportar a CSV:', error);
     return { success: false, message: 'Error al generar archivo CSV' };
   }
@@ -115,7 +115,7 @@ export const exportToPDF = (
     doc.save(`${filename}.pdf`);
 
     return { success: true, message: 'Archivo PDF generado exitosamente' };
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Error al exportar a PDF:', error);
     return { success: false, message: 'Error al generar archivo PDF' };
   }
@@ -137,7 +137,7 @@ export const exportChartToPNG = (chartElement: HTMLElement, filename: string) =>
     });
 
     return { success: true, message: 'Imagen generada exitosamente' };
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Error al exportar gráfico:', error);
     return { success: false, message: 'Error al generar imagen' };
   }
@@ -310,7 +310,7 @@ export const generateSystemReport = (data: {
     doc.save(`reporte-sistema-${new Date().getTime()}.pdf`);
 
     return { success: true, message: 'Reporte completo generado exitosamente' };
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Error al generar reporte:', error);
     return { success: false, message: 'Error al generar reporte' };
   }

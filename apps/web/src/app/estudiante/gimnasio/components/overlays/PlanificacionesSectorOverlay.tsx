@@ -34,7 +34,7 @@ export function PlanificacionesSectorOverlay({ config }: PlanificacionesSectorPr
 
   // Extraer props del config
   const sectorNombre = config?.type === 'planificaciones-sector' ? config.sectorNombre : '';
-  const sectorColor = config?.type === 'planificaciones-sector' ? config.sectorColor : '';
+  const _sectorColor = config?.type === 'planificaciones-sector' ? config.sectorColor : '';
   const sectorEmoji = config?.type === 'planificaciones-sector' ? config.sectorEmoji : '';
   const [planificaciones, setPlanificaciones] = useState<PlanificacionCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,7 +101,7 @@ export function PlanificacionesSectorOverlay({ config }: PlanificacionesSectorPr
   }, []);
 
   // Convertir color hex a rgba para el glow
-  const hexToRgba = (hex: string, alpha: number = 0.4) => {
+  const _hexToRgba = (hex: string, alpha: number = 0.4) => {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
