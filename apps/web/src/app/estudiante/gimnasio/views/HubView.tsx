@@ -5,13 +5,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOverlay, useOverlayStack } from '../contexts/OverlayStackProvider';
+import type { OverlayConfig } from '../types/overlay.types';
 import { recursosApi } from '@/lib/api/tienda.api';
 import type { RecursosEstudiante } from '@mateatletas/contracts';
 import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D';
 import { useStudentAnimations } from '@/hooks/useStudentAnimations';
 
 // Type compatible con sistema antiguo
-type OverlayType = string | null;
+type OverlayType = OverlayConfig['type'] | null;
 import {
   Home,
   BookOpen,

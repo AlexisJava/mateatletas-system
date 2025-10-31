@@ -1,6 +1,6 @@
 import { getErrorMessage } from '@/lib/utils/error-handler';
 import { create } from 'zustand';
-import { Clase, ClaseConRelaciones } from '@/types/clases.types';
+import { ClaseConRelaciones } from '@/types/clases.types';
 import { getMisClasesDocente, cancelarClase, getClaseById } from '@/lib/api/clases.api';
 
 /**
@@ -15,7 +15,7 @@ interface DocenteStore {
   // ==================== STATE ====================
 
   /** Lista de clases del docente */
-  misClases: Clase[];
+  misClases: ClaseConRelaciones[];
 
   /** Clase actualmente seleccionada */
   claseActual: ClaseConRelaciones | null;

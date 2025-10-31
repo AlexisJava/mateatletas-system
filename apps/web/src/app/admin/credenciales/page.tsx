@@ -53,11 +53,11 @@ export default function CredencialesPage() {
       setIsLoading(true);
       setError(null);
       // El interceptor ya retorna response.data directamente
-      const data = (await apiClient.get<{
+      const data = await apiClient.get<{
         tutores: CredencialUsuario[];
         estudiantes: CredencialUsuario[];
         docentes: CredencialUsuario[];
-      }>('/admin/credenciales')).data;
+      }>('/admin/credenciales');
       setTutores(data.tutores || []);
       setEstudiantes(data.estudiantes || []);
       setDocentes(data.docentes || []);
@@ -110,16 +110,21 @@ export default function CredencialesPage() {
       setResettingId(usuarioId);
       const tipoUsuario = rol.toLowerCase() as 'tutor' | 'estudiante' | 'docente';
 
-      const response = (await apiClient.post(`/admin/credenciales/${usuarioId}/reset`, {
-        tipoUsuario,
-      })).data;
+      const response = await apiClient.post<{ password_temporal?: string }>(
+        `/admin/credenciales/${usuarioId}/reset`,
+        {
+          tipoUsuario,
+        },
+      );
+
+      const nuevaPassword = response.password_temporal ?? '';
 
       // Mostrar nueva contraseña
-      setResetSuccess({ id: usuarioId, password: response.data?.password_temporal || '' });
+      setResetSuccess({ id: usuarioId, password: nuevaPassword });
 
       // Auto-copiar al clipboard
-      if (response.data?.password_temporal) {
-        navigator.clipboard.writeText(response.data.password_temporal);
+      if (response.password_temporal) {
+        navigator.clipboard.writeText(response.password_temporal);
       }
 
       // Recargar credenciales

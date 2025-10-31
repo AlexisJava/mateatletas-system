@@ -37,6 +37,22 @@ export const estadoAsistenciaSchema = estadoAsistenciaEnum;
 export type EstadoClase = SharedEstadoClase;
 
 export type Clase = SharedClase;
+
+export type ClaseConRelaciones = Clase & {
+  docente?: {
+    id: string;
+    nombre: string;
+    apellido?: string | null;
+    avatar_url?: string | null;
+  } | null;
+  ruta_curricular?: RutaCurricular | null;
+  rutaCurricular?: RutaCurricular | null;
+  modalidad?: string | null;
+  ubicacion?: string | null;
+  _count?: {
+    inscripciones?: number;
+  } | null;
+};
 export type InscripcionClase = SharedInscripcionClase;
 export type CrearReservaDto = ReservarClaseInput;
 export type ClasesListResponse = ClasesList;

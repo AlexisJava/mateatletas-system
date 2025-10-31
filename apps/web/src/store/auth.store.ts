@@ -9,6 +9,7 @@ export type UserRole = 'tutor' | 'docente' | 'admin' | 'estudiante';
 
 export interface User {
   id: string;
+  sub?: string;
   email: string;
   nombre: string;
   apellido: string;
@@ -25,7 +26,7 @@ export interface User {
   equipo_id?: string | null;
   puntos_totales?: number;
   nivel_actual?: number;
-  debe_cambiar_password?: boolean;
+  avatar_url?: string | null;
 }
 
 /**

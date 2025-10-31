@@ -12,13 +12,12 @@ import type { ContenidoVideo } from '../../types/actividad.types';
 
 export interface VideoPlayerProps {
   contenido: ContenidoVideo;
-  onCompletado?: () => void;
 }
 
-export function VideoPlayer({ contenido, onCompletado }: VideoPlayerProps) {
+export function VideoPlayer({ contenido }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [progress] = useState(0);
 
   // Por ahora, simulamos funcionalidad básica
   // En producción, usarías un player real como react-player o video.js
