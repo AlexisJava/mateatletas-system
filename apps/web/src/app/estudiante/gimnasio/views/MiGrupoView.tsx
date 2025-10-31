@@ -70,125 +70,102 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
         </h1>
       </div>
 
-      {/* Grid 3 columnas - LAYOUT HORIZONTAL */}
-      <div className="flex-1 grid grid-cols-3 gap-6">
-        {/* COLUMNA 1: Info del equipo */}
+      {/* Grid 2x2 - TODO VISIBLE SIN SCROLL */}
+      <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-6">
+        {/* Card 1: Stats del grupo - TOP LEFT */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-blue-900/60 backdrop-blur-xl rounded-3xl p-6
-                     border-2 border-white/20 flex flex-col items-center justify-center gap-4"
+          className="bg-gradient-to-br from-blue-900/60 to-cyan-900/60
+                     backdrop-blur-xl rounded-3xl p-8
+                     border-2 border-white/20 flex flex-col items-center justify-center gap-6"
         >
-          <div
-            className="w-20 h-20 rounded-2xl
-                         bg-gradient-to-br from-yellow-400 to-orange-500
-                         flex items-center justify-center text-5xl
-                         border-4 border-white/30 shadow-xl"
-          >
-            🔥
-          </div>
-
+          <div className="text-6xl">👥</div>
           <div className="text-center">
-            <h2 className="text-3xl font-black text-white mb-2">{nombreGrupo.toUpperCase()}</h2>
-            <p className="text-white/70 text-lg font-bold">{clasesAsistidas} clases asistidas</p>
-            <p className="text-white/70 text-lg font-bold">🔥 Racha de {rachaActual} días</p>
+            <h2 className="text-4xl font-black text-white mb-2">
+              {companeros.length > 0 ? nombreGrupo.toUpperCase() : 'SIN GRUPO'}
+            </h2>
+            <p className="text-cyan-300 text-xl font-bold">
+              {companeros.length} {companeros.length === 1 ? 'compañero' : 'compañeros'}
+            </p>
           </div>
         </motion.div>
 
-        {/* COLUMNA 2: Ranking del grupo */}
+        {/* Card 2: Puntos totales del grupo - TOP RIGHT */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="bg-gradient-to-br from-purple-900/60 to-pink-900/60
+                     backdrop-blur-xl rounded-3xl p-8
+                     border-2 border-white/20 flex flex-col items-center justify-center gap-6"
+        >
+          <div className="text-6xl">💎</div>
+          <div className="text-center">
+            <h2 className="text-4xl font-black text-white mb-2">
+              {companeros.reduce((sum, c) => sum + c.puntos, 0).toLocaleString()}
+            </h2>
+            <p className="text-purple-300 text-xl font-bold">PUNTOS DEL GRUPO</p>
+            <p className="text-white/60 text-sm mt-2">Entre todos acumularon</p>
+          </div>
+        </motion.div>
+
+        {/* Card 3: Tus puntos - BOTTOM LEFT */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-blue-900/60 backdrop-blur-xl rounded-3xl p-6
-                     border-2 border-white/20 flex flex-col"
+          className="bg-gradient-to-br from-yellow-500/20 to-orange-600/20
+                     backdrop-blur-xl rounded-3xl p-8
+                     border-2 border-yellow-400/40 flex flex-col items-center justify-center gap-6"
         >
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-3xl">🏆</span>
-            <h3 className="text-2xl font-black text-white">RANKING DEL GRUPO</h3>
-          </div>
-
-          <div className="flex-1 space-y-3 overflow-y-auto">
-            {companeros.length > 0 ? (
-              companeros.slice(0, 10).map((companero, index) => (
-                <div
-                  key={companero.id}
-                  className={`bg-white/5 rounded-xl p-3 border flex items-center justify-between ${
-                    companero.id === estudiante.id ? 'border-yellow-400/50 bg-yellow-400/10' : 'border-white/10'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="text-2xl font-black text-white/60">#{index + 1}</div>
-                    <div>
-                      <p className="text-white font-bold">
-                        {companero.nombre} {companero.apellido}
-                        {companero.id === estudiante.id && ' (Tú)'}
-                      </p>
-                      <p className="text-white/70 text-sm">{companero.puntos.toLocaleString()} pts</p>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-white/50 text-center py-8">
-                <p>No estás inscrito en ningún grupo</p>
-                <p className="text-sm mt-2">Habla con tu tutor para inscribirte</p>
-              </div>
-            )}
+          <div className="text-6xl">🎯</div>
+          <div className="text-center">
+            <h2 className="text-4xl font-black text-yellow-400 mb-2">
+              {misPuntos.toLocaleString()}
+            </h2>
+            <p className="text-yellow-300 text-xl font-bold">TUS PUNTOS</p>
+            <p className="text-white/60 text-sm mt-2">Tu aporte al equipo</p>
           </div>
         </motion.div>
 
-        {/* COLUMNA 3: Estadísticas del grupo */}
+        {/* Card 4: Tu racha - BOTTOM RIGHT */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-blue-900/60 backdrop-blur-xl rounded-3xl p-6
-                     border-2 border-white/20 flex flex-col justify-between"
+          transition={{ delay: 0.15 }}
+          className="bg-gradient-to-br from-orange-600/20 to-red-700/20
+                     backdrop-blur-xl rounded-3xl p-8
+                     border-2 border-orange-500/40 flex flex-col items-center justify-center gap-6"
         >
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-3xl">📊</span>
-              <h3 className="text-2xl font-black text-white">ESTADÍSTICAS</h3>
-            </div>
-
-            <div className="space-y-4">
-              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <p className="text-white/70 text-sm mb-1">Puntos totales del grupo</p>
-                <p className="text-white font-black text-2xl">
-                  {companeros.reduce((sum, c) => sum + c.puntos, 0).toLocaleString()}
-                </p>
-              </div>
-
-              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <p className="text-white/70 text-sm mb-1">Compañeros en el grupo</p>
-                <p className="text-white font-black text-2xl">
-                  {companeros.length}
-                </p>
-              </div>
-
-              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <p className="text-white/70 text-sm mb-1">Tu racha actual</p>
-                <p className="text-white font-black text-2xl">
-                  {rachaActual} {rachaActual === 1 ? 'día' : 'días'}
-                </p>
-              </div>
-            </div>
+          <div className="text-6xl">🔥</div>
+          <div className="text-center">
+            <h2 className="text-4xl font-black text-orange-400 mb-2">
+              {rachaActual}
+            </h2>
+            <p className="text-orange-300 text-xl font-bold">
+              {rachaActual === 1 ? 'DÍA DE RACHA' : 'DÍAS DE RACHA'}
+            </p>
+            <p className="text-white/60 text-sm mt-2">
+              {rachaActual > 0 ? '¡Sigue así!' : 'Empieza hoy tu racha'}
+            </p>
           </div>
         </motion.div>
       </div>
 
-      {/* Banner inferior: Mis puntos */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="mt-6 bg-blue-900/60 backdrop-blur-xl rounded-2xl px-8 py-4
-                   border-2 border-white/20 flex items-center justify-between"
-      >
-        <p className="text-white text-xl font-bold">🏆 Tus puntos totales</p>
-        <div className="text-yellow-400 text-3xl font-black">{misPuntos.toLocaleString()} pts</div>
-      </motion.div>
+      {/* Banner: Compañeros si no hay grupo */}
+      {companeros.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mt-6 bg-blue-900/40 backdrop-blur-xl rounded-2xl px-8 py-6
+                     border-2 border-white/20 text-center"
+        >
+          <p className="text-white text-xl font-bold mb-2">📢 No estás inscrito en ningún grupo</p>
+          <p className="text-white/70 text-lg">Habla con tu tutor para unirte a un grupo de estudio</p>
+        </motion.div>
+      )}
     </div>
   );
 }
