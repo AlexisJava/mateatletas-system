@@ -1089,4 +1089,53 @@ export class EstudiantesService {
 
     return null;
   }
+
+  /**
+   * Obtener compañeros de ClaseGrupo del estudiante
+   * Retorna todos los estudiantes inscritos en el mismo ClaseGrupo que el estudiante actual
+   * @param estudianteId - ID del estudiante
+   * @returns Lista de compañeros con sus puntos totales
+   */
+  async obtenerCompanerosDeClase(estudianteId: string) {
+    // Buscar el ClaseGrupo al que pertenece el estudiante
+    const inscripcion = await this.prisma.inscripcionClaseGrupo.findFirst({
+      where: {
+        estudiante_id: estudianteId,
+      },
+      include: {
+        clase_grupo: true,
+      },
+    });
+
+    if (!inscripcion) {
+      return [];
+    }
+
+    // Obtener todos los estudiantes inscritos en el mismo ClaseGrupo
+    const companeros = await this.prisma.estudiante.findMany({
+      where: {
+        inscripciones_clase_grupo: {
+          some: {
+            clase_grupo_id: inscripcion.clase_grupo_id,
+          },
+        },
+      },
+      select: {
+        id: true,
+        nombre: true,
+        apellido: true,
+        puntos_totales: true,
+      },
+      orderBy: {
+        puntos_totales: 'desc',
+      },
+    });
+
+    return companeros.map((c) => ({
+      id: c.id,
+      nombre: c.nombre,
+      apellido: c.apellido,
+      puntos: c.puntos_totales,
+    }));
+  }
 }
