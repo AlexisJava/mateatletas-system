@@ -29,7 +29,7 @@ export const recursosApi = {
    */
   obtenerRecursos: async (estudianteId: string): Promise<RecursosEstudiante> => {
     try {
-      const response = (await apiClient.get(`/recursos/${estudianteId}`)).data;
+      const response = await apiClient.get(`/recursos/${estudianteId}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener recursos del estudiante:', error);
@@ -44,7 +44,7 @@ export const recursosApi = {
     data: ActualizarRecursosPorActividad,
   ): Promise<RecursosActualizadosResponse> => {
     try {
-      const response = (await apiClient.post('/recursos/actualizar-por-actividad', data)).data;
+      const response = await apiClient.post('/recursos/actualizar-por-actividad', data);
       return response.data;
     } catch (error) {
       console.error('Error al actualizar recursos por actividad:', error);
@@ -62,11 +62,11 @@ export const recursosApi = {
     metadata?: Record<string, unknown>,
   ): Promise<RecursosActualizadosResponse> => {
     try {
-      const response = (await apiClient.post(`/recursos/${estudianteId}/gemas`, {
+      const response = await apiClient.post(`/recursos/${estudianteId}/gemas`, {
         cantidad,
         razon,
         metadata,
-      })).data;
+      });
       return response.data;
     } catch (error) {
       console.error('Error al agregar gemas:', error);
@@ -87,9 +87,9 @@ export const recursosApi = {
       if (tipo) params.append('tipo', tipo);
       if (limit) params.append('limit', limit.toString());
 
-      const response = (await apiClient.get(
+      const response = await apiClient.get(
         `/recursos/${estudianteId}/historial?${params.toString()}`,
-      )).data;
+      );
       return response.data;
     } catch (error) {
       console.error('Error al obtener historial de recursos:', error);
@@ -110,7 +110,7 @@ export const tiendaApi = {
    */
   obtenerCategorias: async (): Promise<CategoriaItem[]> => {
     try {
-      const response = (await apiClient.get('/tienda/categorias')).data;
+      const response = await apiClient.get('/tienda/categorias');
       return response.data;
     } catch (error) {
       console.error('Error al obtener categorías de tienda:', error);
@@ -140,7 +140,7 @@ export const tiendaApi = {
         params.append('incluir_edicion_limitada', filtros.incluir_edicion_limitada.toString());
       }
 
-      const response = (await apiClient.get(`/tienda/items?${params.toString()}`)).data;
+      const response = await apiClient.get(`/tienda/items?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener items de tienda:', error);
@@ -153,7 +153,7 @@ export const tiendaApi = {
    */
   obtenerItemPorId: async (itemId: string): Promise<ItemTiendaConCategoria> => {
     try {
-      const response = (await apiClient.get(`/tienda/items/${itemId}`)).data;
+      const response = await apiClient.get(`/tienda/items/${itemId}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener item de tienda:', error);
@@ -168,7 +168,7 @@ export const tiendaApi = {
    */
   obtenerInventario: async (estudianteId: string): Promise<InventarioEstudianteResponse> => {
     try {
-      const response = (await apiClient.get(`/tienda/inventario/${estudianteId}`)).data;
+      const response = await apiClient.get(`/tienda/inventario/${estudianteId}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener inventario:', error);
@@ -181,9 +181,9 @@ export const tiendaApi = {
    */
   equiparItem: async (estudianteId: string, itemId: string): Promise<ItemObtenido> => {
     try {
-      const response = (await apiClient.put(
+      const response = await apiClient.put(
         `/tienda/inventario/${estudianteId}/equipar/${itemId}`,
-      )).data;
+      );
       return response.data;
     } catch (error) {
       console.error('Error al equipar item:', error);
@@ -198,7 +198,7 @@ export const tiendaApi = {
    */
   comprarItem: async (data: RealizarCompra): Promise<CompraResponse> => {
     try {
-      const response = (await apiClient.post('/tienda/comprar', data)).data;
+      const response = await apiClient.post('/tienda/comprar', data);
       return response.data;
     } catch (error) {
       console.error('Error al comprar item:', error);
@@ -211,7 +211,7 @@ export const tiendaApi = {
    */
   obtenerHistorialCompras: async (estudianteId: string): Promise<CompraResponse[]> => {
     try {
-      const response = (await apiClient.get(`/tienda/compras/${estudianteId}`)).data;
+      const response = await apiClient.get(`/tienda/compras/${estudianteId}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener historial de compras:', error);

@@ -52,3 +52,20 @@ export const claseSchemaClient = claseSchema;
 export const inscripcionClaseSchemaClient = inscripcionClaseSchema;
 export const reservarClaseSchemaClient = reservarClaseSchema;
 export const clasesResponseSchema = z.array(claseSchemaClient);
+
+/**
+ * Extensión del tipo Clase que incluye relaciones de Prisma
+ * Usado cuando se hacen queries con include en el backend
+ */
+export interface ClaseConRelaciones extends SharedClase {
+  _count?: {
+    inscripciones?: number;
+    asistencias?: number;
+  };
+  ruta_curricular?: RutaCurricular;
+  docente?: {
+    id: string;
+    nombre: string;
+    apellido: string;
+  };
+}

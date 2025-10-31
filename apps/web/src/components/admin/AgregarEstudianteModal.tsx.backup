@@ -63,7 +63,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
 
   const loadSectores = useCallback(async () => {
     try {
-      const response = (await apiClient.get('/admin/sectores')).data;
+      const response = await apiClient.get('/admin/sectores');
       // Filtrar el sector actual
       const otros = response.filter((s: Sector) => s.id !== sectorId);
       setSectoresDisponibles(otros);
@@ -136,7 +136,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
       }
 
       // Crear en sector principal
-      const response = (await apiClient.post('/estudiantes/crear-con-tutor', {
+      const response = await apiClient.post('/estudiantes/crear-con-tutor', {
         estudiantes: estudiantesValidos.map(est => ({
           nombre: est.nombre,
           apellido: est.apellido,
@@ -152,7 +152,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
           dni: tutor.dni || undefined
         },
         sectorId
-      })).data;
+      });
 
       // Copiar cada estudiante a sus sectores adicionales específicos
       const estudiantesCreados = response.estudiantes;

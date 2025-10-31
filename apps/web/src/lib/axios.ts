@@ -48,9 +48,7 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   (response) => {
-    // Retornar solo data para que coincida con las funciones API
-    // que esperan directamente los datos sin envolver en response
-    return response.data;
+    return response;
   },
   (error: AxiosError<{ message?: string; errors?: Record<string, string[]> }>) => {
     // Verificar si estamos en el navegador
@@ -134,4 +132,5 @@ apiClient.interceptors.response.use(
   },
 );
 
+export { apiClient };
 export default apiClient;

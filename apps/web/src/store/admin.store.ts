@@ -33,7 +33,7 @@ interface AdminStore {
   fetchClasses: () => Promise<void>;
   fetchProducts: (includeInactive?: boolean) => Promise<void>;
   createClass: (data: CrearClaseDto) => Promise<boolean>;
-  cancelClass: (claseId: string) => Promise<boolean>;
+  cancelarClase: (claseId: string) => Promise<boolean>;
   createProduct: (data: CrearProductoDto) => Promise<boolean>;
   updateProduct: (id: string, data: ActualizarProductoDto) => Promise<boolean>;
   deleteProduct: (id: string, hardDelete?: boolean) => Promise<boolean>;
@@ -138,9 +138,9 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
     }
   },
 
-  cancelClass: async (claseId: string): Promise<boolean> => {
+  cancelarClase: async (claseId: string): Promise<boolean> => {
     try {
-      await adminApi.cancelClass(claseId);
+      await adminApi.cancelarClase(claseId);
       await get().fetchClasses();
       return true;
     } catch (error: unknown) {
