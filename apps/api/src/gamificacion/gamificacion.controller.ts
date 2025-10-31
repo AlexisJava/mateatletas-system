@@ -6,6 +6,7 @@ import {
   Body,
   UseGuards,
   Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import { IsString, IsOptional, IsNotEmpty } from 'class-validator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -61,7 +62,7 @@ export class GamificacionController {
       user.role === Role.Estudiante &&
       user.id !== estudianteId
     ) {
-      throw new Error('No tienes permisos para ver este dashboard');
+      throw new ForbiddenException('No tienes permiso para acceder a este estudiante');
     }
 
     return this.gamificacionService.getDashboardEstudiante(estudianteId);

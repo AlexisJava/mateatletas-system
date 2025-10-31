@@ -196,6 +196,34 @@ export class EstudiantesService {
     });
   }
 
+  async updateAnimacionIdle(id: string, animacion_idle_url: string) {
+    // Verificar que el estudiante existe
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException('Estudiante no encontrado');
+    }
+
+    // Actualizar solo la animación idle
+    return this.prisma.estudiante.update({
+      where: { id },
+      data: { animacion_idle_url },
+      include: {
+        equipo: true,
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
   async findOne(id: string, tutorId: string) {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id },
@@ -917,5 +945,197 @@ export class EstudiantesService {
 
     // Filtrar las que tienen cupos disponibles
     return clases.filter((clase) => clase.cupos_ocupados < clase.cupos_maximo);
+  }
+
+  /**
+   * Obtener la próxima clase del estudiante (más cercana en el tiempo)
+   * @param estudianteId - ID del estudiante
+   * @returns La próxima clase programada o null si no hay ninguna
+   */
+  async obtenerProximaClase(estudianteId: string) {
+    const ahora = new Date();
+
+    // Buscar en clases grupales (ClaseGrupo)
+    const proximaClaseGrupo = await this.prisma.claseGrupo.findFirst({
+      where: {
+        inscripciones: {
+          some: {
+            estudiante_id: estudianteId,
+          },
+        },
+        activo: true,
+      },
+      include: {
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        rutaCurricular: {
+          select: {
+            id: true,
+            nombre: true,
+            descripcion: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'asc', // Podemos usar createdAt como referencia temporal
+      },
+    });
+
+    // Si encontramos clase grupal, calcular la próxima fecha según el día de la semana
+    if (proximaClaseGrupo) {
+      // Mapeo de enum DiaSemana de Prisma a índices de JavaScript (0=Domingo, 6=Sábado)
+      const diasSemanaMap: Record<string, number> = {
+        'DOMINGO': 0,
+        'LUNES': 1,
+        'MARTES': 2,
+        'MIERCOLES': 3,
+        'JUEVES': 4,
+        'VIERNES': 5,
+        'SABADO': 6,
+      };
+      const diaActual = ahora.getDay();
+      const diaClase = diasSemanaMap[proximaClaseGrupo.dia_semana] ?? -1;
+
+      // Parsear hora (formato "HH:MM")
+      const [horas, minutos] = proximaClaseGrupo.hora_inicio.split(':').map(Number);
+
+      let diasHasta = diaClase - diaActual;
+
+      // Si es hoy mismo, verificar si la hora ya pasó
+      if (diasHasta === 0) {
+        const horaClase = horas * 60 + minutos;
+        const horaActual = ahora.getHours() * 60 + ahora.getMinutes();
+        if (horaActual >= horaClase) {
+          // La clase de hoy ya pasó, próxima semana
+          diasHasta = 7;
+        }
+      } else if (diasHasta < 0) {
+        // El día ya pasó esta semana, próxima semana
+        diasHasta += 7;
+      }
+
+      const fechaProxima = new Date(ahora);
+      fechaProxima.setDate(ahora.getDate() + diasHasta);
+      fechaProxima.setHours(horas, minutos, 0, 0);
+
+      // Calcular duración en minutos desde hora_inicio y hora_fin
+      const [horaFinH, horaFinM] = proximaClaseGrupo.hora_fin.split(':').map(Number);
+      const duracionMinutos = (horaFinH * 60 + horaFinM) - (horas * 60 + minutos);
+
+      return {
+        tipo: 'grupo' as const,
+        id: proximaClaseGrupo.id,
+        nombre: proximaClaseGrupo.nombre,
+        codigo: proximaClaseGrupo.codigo,
+        fecha_hora_inicio: fechaProxima,
+        duracion_minutos: duracionMinutos,
+        docente: proximaClaseGrupo.docente,
+        ruta_curricular: proximaClaseGrupo.rutaCurricular,
+        dia_semana: proximaClaseGrupo.dia_semana,
+        hora_inicio: proximaClaseGrupo.hora_inicio,
+      };
+    }
+
+    // Si no hay clase grupal, buscar en clases individuales (Clase)
+    const proximaClaseIndividual = await this.prisma.clase.findFirst({
+      where: {
+        inscripciones: {
+          some: {
+            estudiante_id: estudianteId,
+          },
+        },
+        fecha_hora_inicio: {
+          gte: ahora,
+        },
+        estado: 'Programada',
+      },
+      include: {
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        rutaCurricular: {
+          select: {
+            id: true,
+            nombre: true,
+            descripcion: true,
+          },
+        },
+      },
+      orderBy: {
+        fecha_hora_inicio: 'asc',
+      },
+    });
+
+    if (proximaClaseIndividual) {
+      return {
+        tipo: 'individual' as const,
+        id: proximaClaseIndividual.id,
+        fecha_hora_inicio: proximaClaseIndividual.fecha_hora_inicio,
+        duracion_minutos: proximaClaseIndividual.duracion_minutos,
+        docente: proximaClaseIndividual.docente,
+        ruta_curricular: proximaClaseIndividual.rutaCurricular,
+        estado: proximaClaseIndividual.estado,
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Obtener compañeros de ClaseGrupo del estudiante
+   * Retorna todos los estudiantes inscritos en el mismo ClaseGrupo que el estudiante actual
+   * @param estudianteId - ID del estudiante
+   * @returns Lista de compañeros con sus puntos totales
+   */
+  async obtenerCompanerosDeClase(estudianteId: string) {
+    // Buscar el ClaseGrupo al que pertenece el estudiante
+    const inscripcion = await this.prisma.inscripcionClaseGrupo.findFirst({
+      where: {
+        estudiante_id: estudianteId,
+      },
+      include: {
+        claseGrupo: true,
+      },
+    });
+
+    if (!inscripcion) {
+      return [];
+    }
+
+    // Obtener todos los estudiantes inscritos en el mismo ClaseGrupo
+    const companeros = await this.prisma.estudiante.findMany({
+      where: {
+        inscripciones_clase_grupo: {
+          some: {
+            clase_grupo_id: inscripcion.clase_grupo_id,
+          },
+        },
+      },
+      select: {
+        id: true,
+        nombre: true,
+        apellido: true,
+        puntos_totales: true,
+      },
+      orderBy: {
+        puntos_totales: 'desc',
+      },
+    });
+
+    return companeros.map((c) => ({
+      id: c.id,
+      nombre: c.nombre,
+      apellido: c.apellido,
+      puntos: c.puntos_totales,
+    }));
   }
 }

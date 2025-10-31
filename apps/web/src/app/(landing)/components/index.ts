@@ -1,9 +1,0 @@
-export { Navigation } from './Navigation';
-export { HeroSection } from './HeroSection';
-export { FeaturesSection } from './FeaturesSection';
-export { BenefitsSection } from './BenefitsSection';
-export { StatsSection } from './StatsSection';
-export { AdmissionSection } from './AdmissionSection';
-export { CTASection } from './CTASection';
-export { Footer } from './Footer';
-export { CodeTerminal } from './CodeTerminal';

@@ -138,6 +138,47 @@ export class EstudiantesController {
   }
 
   /**
+   * PATCH /estudiantes/animacion - Actualizar animación idle del estudiante logueado
+   * @param req - Request con usuario autenticado
+   * @param body - { animacion_idle_url: string }
+   * @returns Estudiante actualizado
+   */
+  @Patch('animacion')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Estudiante)
+  async actualizarAnimacion(
+    @Request() req: RequestWithAuthUser,
+    @Body() body: { animacion_idle_url: string },
+  ) {
+    const estudianteId = req.user.id;
+
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🎬 [BACKEND] PATCH /estudiantes/animacion');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('👤 Estudiante ID:', estudianteId);
+    console.log('🔗 Animación URL recibida:', body.animacion_idle_url);
+    console.log('📏 Longitud URL:', body.animacion_idle_url?.length);
+    console.log('✅ Incluye .glb?', body.animacion_idle_url?.includes('.glb'));
+
+    // Validar que sea URL válida
+    if (!body.animacion_idle_url || !body.animacion_idle_url.includes('.glb')) {
+      console.error('❌ URL de animación inválida');
+      throw new BadRequestException('URL de animación inválida');
+    }
+
+    // Actualizar animación idle
+    const resultado = await this.estudiantesService.updateAnimacionIdle(
+      estudianteId,
+      body.animacion_idle_url,
+    );
+
+    console.log('✅ Animación actualizada en BD:', resultado.animacion_idle_url);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    return resultado;
+  }
+
+  /**
    * GET /estudiantes/mi-avatar - Obtener avatar del estudiante logueado
    * @param req - Request con usuario autenticado
    * @returns { avatar_url: string, tiene_avatar: boolean }
@@ -174,6 +215,48 @@ export class EstudiantesController {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     return resultado;
+  }
+
+  /**
+   * GET /estudiantes/mi-proxima-clase - Obtener próxima clase del estudiante logueado
+   * @param req - Request con usuario autenticado
+   * @returns Información de la próxima clase o null si no hay ninguna
+   */
+  @Get('mi-proxima-clase')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Estudiante)
+  async obtenerMiProximaClase(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📅 [BACKEND] GET /estudiantes/mi-proxima-clase');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('👤 Estudiante ID:', estudianteId);
+    console.log('🔑 User roles:', req.user.roles);
+    console.log('🔑 User role:', req.user.role);
+
+    const resultado = await this.estudiantesService.obtenerProximaClase(estudianteId);
+
+    console.log('📤 Próxima clase encontrada:', resultado ? 'Sí' : 'No');
+    if (resultado) {
+      console.log('📅 Tipo de clase:', resultado.tipo);
+      console.log('📅 Fecha:', resultado.fecha_hora_inicio);
+    }
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    return resultado;
+  }
+
+  /**
+   * GET /estudiantes/mis-companeros - Obtener compañeros de ClaseGrupo del estudiante logueado
+   * @param req - Request con usuario autenticado
+   * @returns Lista de compañeros con puntos ordenados descendente
+   */
+  @Get('mis-companeros')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Estudiante)
+  async obtenerMisCompaneros(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+    return this.estudiantesService.obtenerCompanerosDeClase(estudianteId);
   }
 
   /**
