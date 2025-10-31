@@ -302,6 +302,22 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     );
   }, [proximaClase]);
 
+  // Helper para formatear tiempo en formato amigable
+  const formatearTiempoRestante = useCallback((minutos: number): string => {
+    if (minutos < 60) {
+      return `${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`;
+    }
+
+    const horas = Math.floor(minutos / 60);
+    const minutosRestantes = minutos % 60;
+
+    if (minutosRestantes === 0) {
+      return `${horas} ${horas === 1 ? 'hora' : 'horas'}`;
+    }
+
+    return `${horas} ${horas === 1 ? 'hora' : 'horas'} y ${minutosRestantes} ${minutosRestantes === 1 ? 'minuto' : 'minutos'}`;
+  }, []);
+
   // Handler para intentar ingresar a la clase
   const handleIngresarClase = useCallback(() => {
     if (!proximaClase || !proximaClase.fecha_hora_inicio) return;
@@ -1028,7 +1044,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 Tu clase aún no comienza.
               </p>
               <p className="text-cyan-300 text-center text-2xl font-black mb-8">
-                Volvé en {minutosRestantes} {minutosRestantes === 1 ? 'minuto' : 'minutos'} ⏰
+                Volvé en {formatearTiempoRestante(minutosRestantes)} ⏰
               </p>
 
               {/* Botón OK */}
