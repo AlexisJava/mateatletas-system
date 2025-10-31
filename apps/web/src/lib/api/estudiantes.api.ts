@@ -164,7 +164,14 @@ export const estudiantesApi = {
    * Obtener la próxima clase del estudiante autenticado
    * @returns Información de la próxima clase o null si no hay ninguna
    */
-  getProximaClase: async (): Promise<any> => {
+  getProximaClase: async (): Promise<{
+    tipo: 'grupo' | 'individual';
+    id: string;
+    fecha_hora_inicio: Date;
+    duracion_minutos: number;
+    docente: { nombre: string; apellido: string };
+    ruta_curricular?: { nombre: string; descripcion?: string };
+  } | null> => {
     try {
       const response = await apiClient.get('/estudiantes/mi-proxima-clase');
       return response;
