@@ -2,7 +2,7 @@
 
 /// <reference path="../../../../types/model-viewer.d.ts" />
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useOverlay, useOverlayStack } from '../contexts/OverlayStackProvider';
@@ -181,6 +181,8 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [currentAnimation, setCurrentAnimation] = useState<string | undefined>(undefined);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showClaseNoComenzModal, setShowClaseNoComenzModal] = useState(false);
+  const [minutosRestantes, setMinutosRestantes] = useState(0);
   // const _modelRef = useRef<any>(null); // TODO: usar para controlar el modelo 3D
   const { openOverlay } = useOverlay();
   const { push } = useOverlayStack();
@@ -284,6 +286,48 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
   // NO rotar animaciones automáticamente - mantener idle continuo
   // Solo cambiar cuando el usuario interactúa
+
+  // Calcular si la próxima clase es HOY
+  const esHoy = useMemo(() => {
+    if (!proximaClase || !proximaClase.fecha_hora_inicio) return false;
+
+    const fechaClase = new Date(proximaClase.fecha_hora_inicio);
+    const hoy = new Date();
+
+    return (
+      fechaClase.getFullYear() === hoy.getFullYear() &&
+      fechaClase.getMonth() === hoy.getMonth() &&
+      fechaClase.getDate() === hoy.getDate()
+    );
+  }, [proximaClase]);
+
+  // Handler para intentar ingresar a la clase
+  const handleIngresarClase = useCallback(() => {
+    if (!proximaClase || !proximaClase.fecha_hora_inicio) return;
+
+    const ahora = new Date();
+    const fechaClase = new Date(proximaClase.fecha_hora_inicio);
+    const minutosRestantes = Math.floor((fechaClase.getTime() - ahora.getTime()) / (1000 * 60));
+
+    // Si faltan más de 5 minutos, mostrar modal
+    if (minutosRestantes > 5) {
+      setMinutosRestantes(minutosRestantes);
+      setShowClaseNoComenzModal(true);
+      return;
+    }
+
+    // Si faltan 5 minutos o menos, o ya empezó (pero no pasó mucho tiempo), permitir acceso
+    // Animación energética antes de navegar
+    const energeticUrl =
+      'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
+    triggerAnimation(energeticUrl, 2000);
+
+    setTimeout(() => {
+      // TODO: Navegar a la vista de clase sincrónica
+      console.log('🎓 Ingresando a clase:', proximaClase);
+      // onNavigate('clase-sincronica'); // Implementar cuando exista la vista
+    }, 1800);
+  }, [proximaClase, triggerAnimation]);
 
   // Valores de recursos (del backend o fallback si está cargando)
   const monedas = recursos?.monedas_total ?? 0;
@@ -773,7 +817,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               </motion.div>
             )}
 
-            {/* Botón CTA GIGANTE */}
+            {/* Botón CTA GIGANTE - Condicional según clase de hoy */}
             <motion.div
               initial={{ y: 20, opacity: 0, scale: 0.9 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -783,25 +827,33 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95, y: 0 }}
                 onClick={() => {
-                  // Animación energética antes de navegar
-                  const energeticUrl =
-                    'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
-                  triggerAnimation(energeticUrl, 2000);
-                  setTimeout(() => {
-                    onNavigate('entrenamientos');
-                  }, 1800);
+                  // Si hay clase hoy, intentar ingresar
+                  if (esHoy && proximaClase) {
+                    handleIngresarClase();
+                  } else {
+                    // Caso default: entrenar matemáticas
+                    const energeticUrl =
+                      'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
+                    triggerAnimation(energeticUrl, 2000);
+                    setTimeout(() => {
+                      onNavigate('entrenamientos');
+                    }, 1800);
+                  }
                 }}
-                className="
+                className={`
                   w-full h-24
-                  bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500
+                  ${esHoy && proximaClase
+                    ? 'bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 border-green-600'
+                    : 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 border-yellow-600'
+                  }
                   rounded-3xl
                   shadow-[0_12px_0_rgba(0,0,0,0.3)]
                   hover:shadow-[0_8px_0_rgba(0,0,0,0.3)]
                   active:shadow-[0_2px_0_rgba(0,0,0,0.3)]
-                  border-4 border-yellow-600
+                  border-4
                   relative overflow-hidden
                   transition-all
-                "
+                `}
               >
                 {/* Brillo animado */}
                 <motion.div
@@ -812,10 +864,13 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
                 <div className="relative z-10 text-center">
                   <div className="text-white text-4xl font-black uppercase tracking-wider drop-shadow-lg">
-                    ¡ENTRENAR MATEMÁTICAS!
+                    {esHoy && proximaClase ? '¡INGRESAR A CLASE!' : '¡ENTRENAR MATEMÁTICAS!'}
                   </div>
                   <div className="text-white/90 text-sm font-bold uppercase tracking-wide">
-                    Resolvé desafíos y dominá números
+                    {esHoy && proximaClase
+                      ? '¡Tu clase comienza pronto, prepárate!'
+                      : 'Resolvé desafíos y dominá números'
+                    }
                   </div>
                 </div>
               </motion.button>
@@ -920,6 +975,82 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               </div>
               <div className="absolute -bottom-6 -left-6 text-8xl opacity-20 pointer-events-none">
                 🚪
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ========== MODAL: CLASE AÚN NO COMIENZA ========== */}
+      <AnimatePresence>
+        {showClaseNoComenzModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowClaseNoComenzModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 50 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900
+                         border-4 border-cyan-400/50 rounded-3xl
+                         p-8 md:p-12 max-w-md w-full mx-4
+                         shadow-2xl shadow-cyan-400/30"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Icono */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
+                className="flex justify-center mb-6"
+              >
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500
+                               flex items-center justify-center
+                               shadow-xl shadow-cyan-400/50">
+                  <Calendar className="w-12 h-12 text-white" strokeWidth={3} />
+                </div>
+              </motion.div>
+
+              {/* Título */}
+              <h2 className="text-4xl font-black text-white text-center mb-4
+                             font-[family-name:var(--font-lilita)]">
+                ¡TODAVÍA NO ES HORA!
+              </h2>
+
+              {/* Mensaje */}
+              <p className="text-white/90 text-center text-lg mb-2 font-medium">
+                Tu clase aún no comienza.
+              </p>
+              <p className="text-cyan-300 text-center text-2xl font-black mb-8">
+                Volvé en {minutosRestantes} {minutosRestantes === 1 ? 'minuto' : 'minutos'} ⏰
+              </p>
+
+              {/* Botón OK */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowClaseNoComenzModal(false)}
+                className="w-full bg-gradient-to-r from-cyan-400 to-blue-500
+                           hover:from-cyan-500 hover:to-blue-600
+                           text-white font-black text-xl py-4 rounded-2xl
+                           shadow-xl shadow-cyan-400/50
+                           border-2 border-cyan-300/50
+                           transition-all"
+              >
+                ✅ ENTENDIDO
+              </motion.button>
+
+              {/* Decoración */}
+              <div className="absolute -top-6 -right-6 text-8xl opacity-20 pointer-events-none">
+                ⏰
+              </div>
+              <div className="absolute -bottom-6 -left-6 text-8xl opacity-20 pointer-events-none">
+                📚
               </div>
             </motion.div>
           </motion.div>
