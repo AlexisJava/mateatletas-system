@@ -992,16 +992,26 @@ export class EstudiantesService {
       const diaActual = ahora.getDay();
       const diaClase = diasSemana.indexOf(proximaClaseGrupo.dia_semana);
 
+      // Parsear hora (formato "HH:MM")
+      const [horas, minutos] = proximaClaseGrupo.hora_inicio.split(':').map(Number);
+
       let diasHasta = diaClase - diaActual;
-      if (diasHasta <= 0) {
-        diasHasta += 7; // Si ya pasó esta semana, calcular para la próxima
+
+      // Si es hoy mismo, verificar si la hora ya pasó
+      if (diasHasta === 0) {
+        const horaClase = horas * 60 + minutos;
+        const horaActual = ahora.getHours() * 60 + ahora.getMinutes();
+        if (horaActual >= horaClase) {
+          // La clase de hoy ya pasó, próxima semana
+          diasHasta = 7;
+        }
+      } else if (diasHasta < 0) {
+        // El día ya pasó esta semana, próxima semana
+        diasHasta += 7;
       }
 
       const fechaProxima = new Date(ahora);
       fechaProxima.setDate(ahora.getDate() + diasHasta);
-
-      // Parsear hora (formato "HH:MM")
-      const [horas, minutos] = proximaClaseGrupo.hora_inicio.split(':').map(Number);
       fechaProxima.setHours(horas, minutos, 0, 0);
 
       // Calcular duración en minutos desde hora_inicio y hora_fin
