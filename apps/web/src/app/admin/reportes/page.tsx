@@ -26,7 +26,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
+  type TooltipProps,
 } from 'recharts';
 import type { ReporteAdmin } from '@/types/reportes.types';
 
@@ -39,10 +40,12 @@ export default function AdminReportesPage() {
   const fetchUsers = useFetchUsers();
   const fetchClasses = useFetchClasses();
   const isLoading = useStatsLoading();
+  const formatDateInput = (date: Date) => date.toISOString().substring(0, 10);
+  const now = new Date();
   const [exportStatus, setExportStatus] = useState<{ success: boolean; message: string } | null>(null);
   const [dateRange, setDateRange] = useState<{ start: string; end: string }>({
-    start: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
-    end: new Date().toISOString().split('T')[0]
+    start: formatDateInput(new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())),
+    end: formatDateInput(now),
   });
   const [showFilters, setShowFilters] = useState(false);
 
@@ -118,9 +121,9 @@ export default function AdminReportesPage() {
 
   const handleGenerateFullReport = async () => {
     const reporte: ReporteAdmin = {
-      stats,
+      stats: stats ?? null,
       usuarios: users,
-      classes,
+      clases: classes,
       productos: [],
       fechaInicio: dateRange.start,
       fechaFin: dateRange.end,
@@ -211,18 +214,26 @@ export default function AdminReportesPage() {
   }));
 
   // Custom tooltip for charts
-  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string }>; label?: string }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-emerald-500/[0.05] p-3 rounded-lg shadow-lg border border-gray-200">
-          <p className="text-sm font-semibold text-[#2a1a5e]">{label || payload[0]?.name}</p>
-          <p className="text-sm text-gray-600">
-            {payload[0]?.name}: <span className="font-bold">{payload[0]?.value}</span>
-          </p>
-        </div>
-      );
+  const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+    if (!active) {
+      return null;
     }
-    return null;
+
+    const item = payload?.[0];
+    if (!item) {
+      return null;
+    }
+
+    const itemLabel = label ?? (item.name ?? '');
+
+    return (
+      <div className="bg-emerald-500/[0.05] p-3 rounded-lg shadow-lg border border-gray-200">
+        <p className="text-sm font-semibold text-[#2a1a5e]">{itemLabel}</p>
+        <p className="text-sm text-gray-600">
+          {item.name}: <span className="font-bold">{item.value}</span>
+        </p>
+      </div>
+    );
   };
 
   return (
@@ -270,19 +281,25 @@ export default function AdminReportesPage() {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => setDateRange({
-                  start: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split('T')[0],
-                  end: new Date().toISOString().split('T')[0]
-                })}
+                onClick={() => {
+                  const startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                  setDateRange({
+                    start: formatDateInput(startDate),
+                    end: formatDateInput(new Date()),
+                  });
+                }}
                 className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-semibold"
               >
                 Último Mes
               </button>
               <button
-                onClick={() => setDateRange({
-                  start: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0],
-                  end: new Date().toISOString().split('T')[0]
-                })}
+                onClick={() => {
+                  const startDate = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+                  setDateRange({
+                    start: formatDateInput(startDate),
+                    end: formatDateInput(new Date()),
+                  });
+                }}
                 className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-semibold"
               >
                 Últimos 6 Meses
