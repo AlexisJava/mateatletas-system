@@ -88,9 +88,9 @@ const NAV_LEFT: NavButton[] = [
   },
   {
     id: 'tareas-asignadas',
-    overlayId: 'planificacion',
+    overlayId: 'tareas-asignadas',
     label: 'TAREAS ASIGNADAS',
-    description: 'Mes de la Ciencia',
+    description: 'Actividades pendientes',
     icon: <BookOpen className="w-7 h-7" />,
     gradient: 'from-purple-500 via-violet-500 to-indigo-600',
     glowColor: 'purple',
@@ -532,14 +532,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               item={item}
               isActive={activeView === item.id}
               onClick={() => {
-                // TAREAS ASIGNADAS abre directamente el Mes de la Ciencia
-                if (item.id === 'tareas-asignadas') {
-                  push({
-                    type: 'planificacion',
-                    codigo: '2025-11-mes-ciencia',
-                    tema: 'quimica',
-                  });
-                } else if (item.overlayId) {
+                if (item.overlayId) {
                   openOverlay(item.overlayId);
                 } else {
                   setActiveView(item.id);
