@@ -90,30 +90,78 @@ export default function GimnasioPage() {
 
   // Loading screen mientras carga avatar
   if (isLoadingAvatar) {
-    return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-black">
-        {/* ═══════════════════════════════════════════════════════ */}
-        {/* CAMPO DE ESTRELLAS - STARFIELD INFINITO */}
-        {/* ═══════════════════════════════════════════════════════ */}
-        <div className="absolute inset-0">
-          {[...Array(200)].map((_, i) => {
-            const size = Math.random() * 3
-            return (
-              <div
-                key={`star-${i}`}
-                className="absolute rounded-full bg-white"
-                style={{
-                  width: `${size}px`,
-                  height: `${size}px`,
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animation: `twinkle ${Math.random() * 3 + 2}s ease-in-out ${Math.random() * 2}s infinite`,
-                  opacity: Math.random() * 0.8 + 0.2,
-                }}
-              />
-            )
-          })}
-        </div>
+    return <GimnasioLoadingScreen />
+  }
+
+  return (
+    <OverlayStackProvider>
+      <GimnasioContent avatarUrl={avatarUrl} />
+    </OverlayStackProvider>
+  )
+}
+
+// Componente separado para el loading screen con manejo de hydration
+function GimnasioLoadingScreen() {
+  // Generate stars and particles only on client-side to prevent hydration mismatch
+  const [stars, setStars] = useState<Array<{
+    size: number
+    left: number
+    top: number
+    duration: number
+    delay: number
+    opacity: number
+  }>>([])
+
+  const [particles, setParticles] = useState<Array<{
+    left: number
+    top: number
+    duration: number
+    delay: number
+  }>>([])
+
+  useEffect(() => {
+    // Generate stars after mount (client-side only)
+    const generatedStars = [...Array(200)].map(() => ({
+      size: Math.random() * 3,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: Math.random() * 3 + 2,
+      delay: Math.random() * 2,
+      opacity: Math.random() * 0.8 + 0.2,
+    }))
+    setStars(generatedStars)
+
+    // Generate particles after mount (client-side only)
+    const generatedParticles = [...Array(50)].map(() => ({
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: Math.random() * 20 + 10,
+      delay: Math.random() * 5,
+    }))
+    setParticles(generatedParticles)
+  }, [])
+
+  return (
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-black">
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* CAMPO DE ESTRELLAS - STARFIELD INFINITO */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      <div className="absolute inset-0">
+        {stars.map((star, i) => (
+          <div
+            key={`star-${i}`}
+            className="absolute rounded-full bg-white"
+            style={{
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              left: `${star.left}%`,
+              top: `${star.top}%`,
+              animation: `twinkle ${star.duration}s ease-in-out ${star.delay}s infinite`,
+              opacity: star.opacity,
+            }}
+          />
+        ))}
+      </div>
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* NEBULOSAS DE FONDO - EFECTO ESPACIAL */}
@@ -149,23 +197,23 @@ export default function GimnasioPage() {
           </div>
         </div>
 
-        {/* ═══════════════════════════════════════════════════════ */}
-        {/* PARTÍCULAS CÓSMICAS - POLVO ESTELAR */}
-        {/* ═══════════════════════════════════════════════════════ */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(50)].map((_, i) => (
-            <div
-              key={`particle-${i}`}
-              className="absolute w-1 h-1 bg-cyan-300/60 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animation: `floatParticle ${Math.random() * 20 + 10}s linear infinite`,
-                animationDelay: `${Math.random() * 5}s`,
-              }}
-            />
-          ))}
-        </div>
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* PARTÍCULAS CÓSMICAS - POLVO ESTELAR */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      <div className="absolute inset-0 overflow-hidden">
+        {particles.map((particle, i) => (
+          <div
+            key={`particle-${i}`}
+            className="absolute w-1 h-1 bg-cyan-300/60 rounded-full"
+            style={{
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
+              animation: `floatParticle ${particle.duration}s linear infinite`,
+              animationDelay: `${particle.delay}s`,
+            }}
+          />
+        ))}
+      </div>
 
         {/* ═══════════════════════════════════════════════════════ */}
         {/* TEXTO PRINCIPAL - EFECTO HOLOGRÁFICO 3D */}
@@ -280,13 +328,6 @@ export default function GimnasioPage() {
             50% { opacity: 0.3; }
           }
         `}</style>
-      </div>
-    )
-  }
-
-  return (
-    <OverlayStackProvider>
-      <GimnasioContent avatarUrl={avatarUrl} />
-    </OverlayStackProvider>
+    </div>
   )
 }
