@@ -6,6 +6,7 @@ import { X, Lock, Check, Play, Sparkles } from 'lucide-react'
 import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D'
 import { useStudentAnimations } from '@/hooks/useStudentAnimations'
 import { useOverlayStack } from '../contexts/OverlayStackProvider'
+import { toast } from 'sonner'
 
 interface AnimacionesViewProps {
   estudiante: {
@@ -277,6 +278,11 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
                   onClick={() => {
                     setSelectedAnimation(previewAnimation.id)
                     setPreviewAnimation(null)
+                    toast.success(`¡Animación "${previewAnimation.displayName}" seleccionada!`, {
+                      description: 'Tu avatar usará esta animación',
+                      duration: 3000,
+                    })
+                    // TODO: Guardar en backend la animación seleccionada del estudiante
                   }}
                   className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-black text-lg hover:from-green-400 hover:to-emerald-400 transition-all flex items-center justify-center gap-2"
                 >
