@@ -1103,7 +1103,7 @@ export class EstudiantesService {
         estudiante_id: estudianteId,
       },
       include: {
-        clase_grupo: true,
+        claseGrupo: true,
       },
     });
 
