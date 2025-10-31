@@ -30,7 +30,14 @@ export function useStudentAnimations({
 
   // Filtrar animaciones disponibles
   const availableAnimations = useMemo(() => {
-    return animationsConfig.animations.filter((animation: Animation) => {
+    console.log('🎬 useStudentAnimations - Calculando disponibles:', {
+      totalAnimaciones: animationsConfig.animations.length,
+      studentPoints,
+      unlockedAnimationIds,
+      gender,
+    })
+
+    const filtered = animationsConfig.animations.filter((animation: Animation) => {
       // Filtrar por género si se especifica
       if (gender && animation.gender !== gender) {
         return false
@@ -38,6 +45,7 @@ export function useStudentAnimations({
 
       // Desbloqueada por defecto (idle)
       if (animation.unlocked) {
+        console.log('✅ Desbloqueada por defecto:', animation.id)
         return true
       }
 
@@ -53,6 +61,13 @@ export function useStudentAnimations({
 
       return false
     }) as Animation[]
+
+    console.log('🎬 Resultado:', {
+      disponibles: filtered.length,
+      ids: filtered.map(a => a.id).slice(0, 5),
+    })
+
+    return filtered
   }, [studentPoints, unlockedAnimationIds, gender])
 
   // Obtener animaciones bloqueadas

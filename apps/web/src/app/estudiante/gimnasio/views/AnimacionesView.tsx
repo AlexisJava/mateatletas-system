@@ -55,6 +55,8 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
   console.log('🎬 AnimacionesView DEBUG:', {
     estudianteNombre: estudiante.nombre,
     puntosEstudiante: estudiante.puntos_totales,
+    avatarUrl: estudiante.avatar_url,
+    avatarExists: !!estudiante.avatar_url,
     availableCount: availableAnimations.length,
     lockedCount: lockedAnimations.length,
     stats,
@@ -218,12 +220,12 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
 
       {/* Modal de preview */}
       <AnimatePresence>
-        {previewAnimation && estudiante.avatar_url && (
+        {previewAnimation && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
             onClick={() => setPreviewAnimation(null)}
           >
             <motion.div
@@ -249,13 +251,37 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
               </div>
 
               <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-blue-900/50 to-purple-900/50">
-                <AnimatedAvatar3D
-                  avatarUrl={estudiante.avatar_url}
-                  animationUrl={previewAnimation.url}
-                  width="100%"
-                  height="100%"
-                  enableControls
-                />
+                {estudiante.avatar_url ? (
+                  <AnimatedAvatar3D
+                    key={`preview-${previewAnimation.id}`}
+                    avatarUrl={estudiante.avatar_url}
+                    animationUrl={previewAnimation.url}
+                    width="100%"
+                    height="100%"
+                    enableControls
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8">
+                    <div className="text-6xl">🎭</div>
+                    <div className="text-center">
+                      <h3 className="text-white font-bold text-xl mb-2">
+                        Crea tu Avatar
+                      </h3>
+                      <p className="text-white/70 text-sm">
+                        Necesitas un avatar para ver las animaciones en 3D
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setPreviewAnimation(null)
+                        // TODO: Navegar a creación de avatar
+                      }}
+                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold hover:from-blue-400 hover:to-cyan-400 transition-all"
+                    >
+                      Ir a Crear Avatar
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 flex gap-4">
