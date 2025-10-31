@@ -10,7 +10,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Clase,
+  ClaseConRelaciones,
   InscripcionClase,
   RutaCurricular,
   FiltroClases,
@@ -47,7 +47,7 @@ export function useClases(
   filtros?: FiltroClases,
   options?: { enabled?: boolean }
 ) {
-  return useQuery<Clase[], Error>({
+  return useQuery<ClaseConRelaciones[], Error>({
     queryKey: clasesKeys.list(filtros),
     queryFn: () => clasesApi.getClases(filtros),
     staleTime: 1000 * 60 * 2, // 2 minutos - clases cambian con frecuencia
@@ -105,7 +105,7 @@ export function useReservarClase() {
   };
 
   type Context = {
-    previousClases?: Clase[];
+    previousClases?: ClaseConRelaciones[];
     previousReservas?: InscripcionClase[];
   };
 
@@ -118,7 +118,7 @@ export function useReservarClase() {
       await queryClient.cancelQueries({ queryKey: clasesKeys.all });
 
       // Snapshot para rollback
-      const previousClases = queryClient.getQueryData<Clase[]>(
+      const previousClases = queryClient.getQueryData<ClaseConRelaciones[]>(
         clasesKeys.lists()
       );
       const previousReservas = queryClient.getQueryData<InscripcionClase[]>(
@@ -126,7 +126,7 @@ export function useReservarClase() {
       );
 
       // Optimistic update: incrementar cupos ocupados
-      queryClient.setQueriesData<Clase[]>(
+      queryClient.setQueriesData<ClaseConRelaciones[]>(
         { queryKey: clasesKeys.lists() },
         (old) =>
           old?.map((clase) =>
@@ -193,7 +193,7 @@ export function useCancelarReserva() {
   const queryClient = useQueryClient();
 
   type Context = {
-    previousClases?: Clase[];
+    previousClases?: ClaseConRelaciones[];
     previousReservas?: InscripcionClase[];
   };
 
@@ -208,7 +208,7 @@ export function useCancelarReserva() {
       const previousReservas = queryClient.getQueryData<InscripcionClase[]>(
         clasesKeys.reservas()
       );
-      const previousClases = queryClient.getQueryData<Clase[]>(
+      const previousClases = queryClient.getQueryData<ClaseConRelaciones[]>(
         clasesKeys.lists()
       );
 
@@ -225,7 +225,7 @@ export function useCancelarReserva() {
 
       // Optimistic update: reducir cupos ocupados
       if (reservaCancelada) {
-        queryClient.setQueriesData<Clase[]>(
+        queryClient.setQueriesData<ClaseConRelaciones[]>(
           { queryKey: clasesKeys.lists() },
           (old) =>
             old?.map((clase) =>

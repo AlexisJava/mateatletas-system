@@ -481,7 +481,7 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
   );
 }
 
-export function PlanificacionView({ config, estudiante }: PlanificacionViewProps) {
+export function PlanificacionView({ config: _config, estudiante: _estudiante }: PlanificacionViewProps) {
   const { pop, push } = useOverlayStack();
   const [hoveredTheme, setHoveredTheme] = useState<'quimica' | 'astronomia' | 'fisica' | 'informatica' | null>(null);
 

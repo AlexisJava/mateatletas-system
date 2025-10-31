@@ -104,7 +104,7 @@ export default function AsistenciaPage() {
         (() => {
           const rutaCurricular =
             claseActual.ruta_curricular ?? claseActual.rutaCurricular ?? undefined;
-          const cupoMaximo = claseActual.cupo_maximo ?? 0;
+          const cupoMaximo = claseActual.cupos_maximo ?? 0;
           const cuposOcupados =
             claseActual.cupos_ocupados ?? claseActual._count?.inscripciones ?? 0;
           const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);
@@ -119,7 +119,7 @@ export default function AsistenciaPage() {
           <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-[#2a1a5e]">
-                {claseActual.titulo}
+                {claseActual.nombre}
               </h1>
               {claseActual.descripcion && (
                 <p className="text-gray-600 mt-2">{claseActual.descripcion}</p>
