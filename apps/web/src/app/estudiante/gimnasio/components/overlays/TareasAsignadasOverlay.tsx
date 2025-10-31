@@ -1,0 +1,315 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { ArrowLeft, Lock, Calendar, Clock, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useOverlayStack } from '../../contexts/OverlayStackProvider';
+import { useState, useEffect } from 'react';
+import { getPlanificaciones } from '@/lib/api/planificaciones.api';
+
+interface TareaCard {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  semana: number;
+  estado: 'bloqueada' | 'disponible' | 'en_progreso' | 'completada';
+  fecha_disponible?: string;
+  tema: 'quimica' | 'astronomia' | 'fisica' | 'informatica' | 'general';
+  total_actividades: number;
+  actividades_completadas: number;
+}
+
+export function TareasAsignadasOverlay() {
+  const { pop } = useOverlayStack();
+  const [tareas, setTareas] = useState<TareaCard[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const cargarTareas = async () => {
+      try {
+        setLoading(true);
+
+        // Cargar planificaciones del mes actual
+        const hoy = new Date();
+        await getPlanificaciones(
+          {
+            mes: hoy.getMonth() + 1,
+            anio: hoy.getFullYear(),
+            estado: 'PUBLICADA'
+          },
+          { page: 1, limit: 20 }
+        );
+
+        // Simular datos de tareas para demo
+        // En producción, esto vendría del endpoint de asignaciones del estudiante
+        const tareasSimuladas: TareaCard[] = [
+          {
+            id: '1',
+            titulo: 'MES DE LA CIENCIA - QUÍMICA',
+            descripcion: 'Experimentos y reacciones químicas básicas',
+            semana: 1,
+            estado: 'disponible',
+            tema: 'quimica',
+            total_actividades: 8,
+            actividades_completadas: 0,
+          },
+          {
+            id: '2',
+            titulo: 'MES DE LA CIENCIA - ASTRONOMÍA',
+            descripcion: 'Sistema solar y constelaciones',
+            semana: 2,
+            estado: 'bloqueada',
+            fecha_disponible: '2025-11-08',
+            tema: 'astronomia',
+            total_actividades: 10,
+            actividades_completadas: 0,
+          },
+          {
+            id: '3',
+            titulo: 'MES DE LA CIENCIA - FÍSICA',
+            descripcion: 'Leyes de Newton y movimiento',
+            semana: 3,
+            estado: 'bloqueada',
+            fecha_disponible: '2025-11-15',
+            tema: 'fisica',
+            total_actividades: 12,
+            actividades_completadas: 0,
+          },
+          {
+            id: '4',
+            titulo: 'MES DE LA CIENCIA - INFORMÁTICA',
+            descripcion: 'Programación básica y algoritmos',
+            semana: 4,
+            estado: 'bloqueada',
+            fecha_disponible: '2025-11-22',
+            tema: 'informatica',
+            total_actividades: 15,
+            actividades_completadas: 0,
+          },
+        ];
+
+        setTareas(tareasSimuladas);
+      } catch (error) {
+        console.error('Error al cargar tareas:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarTareas();
+  }, []);
+
+  // Configuración de colores por tema
+  const temaConfig = {
+    quimica: {
+      gradient: 'from-green-500 to-emerald-600',
+      glow: 'rgba(16, 185, 129, 0.4)',
+      emoji: '🧪',
+      border: 'border-green-500/40',
+    },
+    astronomia: {
+      gradient: 'from-purple-500 to-violet-600',
+      glow: 'rgba(168, 85, 247, 0.4)',
+      emoji: '🌌',
+      border: 'border-purple-500/40',
+    },
+    fisica: {
+      gradient: 'from-orange-500 to-red-600',
+      glow: 'rgba(249, 115, 22, 0.4)',
+      emoji: '⚡',
+      border: 'border-orange-500/40',
+    },
+    informatica: {
+      gradient: 'from-cyan-500 to-blue-600',
+      glow: 'rgba(6, 182, 212, 0.4)',
+      emoji: '💻',
+      border: 'border-cyan-500/40',
+    },
+    general: {
+      gradient: 'from-slate-500 to-gray-600',
+      glow: 'rgba(100, 116, 139, 0.4)',
+      emoji: '📚',
+      border: 'border-slate-500/40',
+    },
+  };
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center z-50">
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        onClick={pop}
+      />
+
+      {/* Panel principal */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="relative w-full max-w-5xl h-[85vh] mx-4 bg-gradient-to-br from-slate-900/95 via-purple-900/95 to-slate-900/95
+                   backdrop-blur-2xl rounded-3xl border-2 border-white/20 shadow-2xl
+                   flex flex-col overflow-hidden"
+      >
+        {/* Header */}
+        <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-white/10">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={pop}
+              className="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20
+                       flex items-center justify-center transition-colors
+                       border border-white/20"
+            >
+              <ArrowLeft className="w-6 h-6 text-white" />
+            </button>
+            <div>
+              <h1 className="text-4xl font-black text-white font-[family-name:var(--font-lilita)]">
+                TAREAS ASIGNADAS
+              </h1>
+              <p className="text-cyan-300 text-sm font-bold mt-1">
+                {tareas.filter(t => t.estado === 'disponible').length} disponibles • {tareas.filter(t => t.estado === 'bloqueada').length} bloqueadas
+              </p>
+            </div>
+          </div>
+          <div className="px-4 py-2 bg-purple-500/20 border border-purple-500/40 rounded-xl">
+            <span className="text-purple-300 text-sm font-bold">Noviembre 2025</span>
+          </div>
+        </div>
+
+        {/* Contenido con scroll */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-white/60 text-xl font-bold">Cargando tareas...</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {tareas.map((tarea, index) => {
+                const config = temaConfig[tarea.tema];
+                const esBloqueada = tarea.estado === 'bloqueada';
+                const esDisponible = tarea.estado === 'disponible';
+                const progreso = Math.round((tarea.actividades_completadas / tarea.total_actividades) * 100);
+
+                return (
+                  <motion.div
+                    key={tarea.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className={`
+                      relative rounded-2xl p-6 border-2
+                      ${esBloqueada
+                        ? 'bg-slate-800/40 border-slate-700/40 cursor-not-allowed'
+                        : `bg-gradient-to-br ${config.gradient} ${config.border} cursor-pointer hover:scale-[1.02]`
+                      }
+                      transition-all duration-200
+                    `}
+                    style={!esBloqueada ? {
+                      boxShadow: `0 0 30px ${config.glow}`,
+                    } : undefined}
+                  >
+                    {/* Badge de estado */}
+                    <div className="absolute top-3 right-3">
+                      {esBloqueada ? (
+                        <div className="flex items-center gap-1 px-2 py-1 bg-slate-900/60 border border-slate-700 rounded-lg">
+                          <Lock className="w-3 h-3 text-slate-400" />
+                          <span className="text-xs font-bold text-slate-400">BLOQUEADA</span>
+                        </div>
+                      ) : esDisponible ? (
+                        <div className="flex items-center gap-1 px-2 py-1 bg-green-500/30 border border-green-400 rounded-lg">
+                          <Sparkles className="w-3 h-3 text-green-400" />
+                          <span className="text-xs font-bold text-green-300">DISPONIBLE</span>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {/* Emoji del tema */}
+                    <div className={`text-6xl mb-3 ${esBloqueada ? 'opacity-40 grayscale' : ''}`}>
+                      {config.emoji}
+                    </div>
+
+                    {/* Título */}
+                    <h3 className={`text-xl font-black mb-2 ${esBloqueada ? 'text-slate-500' : 'text-white'}`}>
+                      {tarea.titulo}
+                    </h3>
+
+                    {/* Descripción */}
+                    <p className={`text-sm mb-4 ${esBloqueada ? 'text-slate-600' : 'text-white/80'}`}>
+                      {tarea.descripcion}
+                    </p>
+
+                    {/* Info adicional */}
+                    <div className="space-y-2">
+                      {/* Semana */}
+                      <div className="flex items-center gap-2">
+                        <Calendar className={`w-4 h-4 ${esBloqueada ? 'text-slate-600' : 'text-white/70'}`} />
+                        <span className={`text-xs font-bold ${esBloqueada ? 'text-slate-600' : 'text-white/90'}`}>
+                          Semana {tarea.semana}
+                        </span>
+                      </div>
+
+                      {/* Fecha disponible (si está bloqueada) */}
+                      {esBloqueada && tarea.fecha_disponible && (
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-slate-600" />
+                          <span className="text-xs font-bold text-slate-600">
+                            Disponible: {new Date(tarea.fecha_disponible).toLocaleDateString('es-AR', {
+                              day: '2-digit',
+                              month: 'long'
+                            })}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Actividades */}
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className={`w-4 h-4 ${esBloqueada ? 'text-slate-600' : 'text-white/70'}`} />
+                        <span className={`text-xs font-bold ${esBloqueada ? 'text-slate-600' : 'text-white/90'}`}>
+                          {tarea.actividades_completadas}/{tarea.total_actividades} actividades
+                        </span>
+                      </div>
+
+                      {/* Barra de progreso (solo si no está bloqueada) */}
+                      {!esBloqueada && (
+                        <div className="mt-3 w-full h-2 bg-white/20 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progreso}%` }}
+                            transition={{ duration: 1, delay: index * 0.1 + 0.3 }}
+                            className="h-full bg-gradient-to-r from-white to-white/80 rounded-full"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Overlay de bloqueo */}
+                    {esBloqueada && (
+                      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] rounded-2xl flex items-center justify-center">
+                        <div className="text-center">
+                          <Lock className="w-12 h-12 text-slate-500 mx-auto mb-2" />
+                          <p className="text-slate-400 text-sm font-bold">Completa las tareas anteriores</p>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Footer con info */}
+        <div className="flex-shrink-0 p-4 border-t border-white/10 bg-black/20">
+          <div className="flex items-center gap-2 text-cyan-300">
+            <AlertCircle className="w-4 h-4" />
+            <p className="text-xs font-bold">
+              Las tareas se desbloquean automáticamente cuando completes las anteriores
+            </p>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

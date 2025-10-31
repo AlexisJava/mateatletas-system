@@ -24,6 +24,7 @@ export type OverlayConfig =
   | { type: 'mis-logros' }
   | { type: 'entrenamientos' }
   | { type: 'planificacion'; codigo?: string; tema?: PlanificacionTema }
+  | { type: 'tareas-asignadas' } // Vista de tareas asignadas con estado bloqueado/desbloqueado
   | { type: 'actividad'; semanaId?: string } // Grid 2×2 de las 4 actividades de una semana
   | { type: 'laboratorio-ecosistema'; semanaId?: string } // Ecosistema LearnDash para Laboratorio Mágico
   | { type: 'ejecutar-actividad'; actividadId?: string; semanaId?: string } // Ejecución individual

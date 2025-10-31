@@ -15,8 +15,6 @@ import {
   Mail,
   Lock,
   Sparkles,
-  Code2,
-  Brain,
   User,
   GraduationCap,
 } from 'lucide-react';
@@ -87,7 +85,7 @@ function FloatingParticle({ delay = 0, left = 50 }: { delay?: number; left?: num
     // En SSR, renderizar una partícula invisible en posición fija
     return (
       <div
-        className="absolute w-1 h-1 bg-emerald-400 rounded-full blur-[1px] opacity-0"
+        className="absolute w-1 h-1 bg-orange-400 rounded-full blur-[1px] opacity-0"
         style={{ left: `${left}%`, bottom: 0 }}
       />
     );
@@ -107,7 +105,7 @@ function FloatingParticle({ delay = 0, left = 50 }: { delay?: number; left?: num
         delay,
         ease: 'easeOut',
       }}
-      className="absolute w-1 h-1 bg-emerald-400 rounded-full blur-[1px]"
+      className="absolute w-1 h-1 bg-orange-400 rounded-full blur-[1px]"
       style={{
         left: `${left}%`,
         bottom: 0,
@@ -286,12 +284,12 @@ export default function LoginPage() {
     return (
       <div className="min-h-screen relative bg-black flex items-center justify-center overflow-hidden">
         {/* Animated background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 via-black to-teal-950/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-950/30 via-black to-yellow-950/20" />
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.04]"
           style={{
-            backgroundImage: `linear-gradient(rgba(16, 185, 129, 0.3) 1.5px, transparent 1.5px),
-                            linear-gradient(90deg, rgba(16, 185, 129, 0.3) 1.5px, transparent 1.5px)`,
+            backgroundImage: `linear-gradient(rgba(249, 115, 22, 0.4) 1.5px, transparent 1.5px),
+                            linear-gradient(90deg, rgba(249, 115, 22, 0.4) 1.5px, transparent 1.5px)`,
             backgroundSize: '64px 64px',
           }}
         />
@@ -301,14 +299,14 @@ export default function LoginPage() {
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-            className="inline-block w-16 h-16 border-4 border-emerald-500/20 border-t-emerald-400 rounded-full mb-6"
+            className="inline-block w-16 h-16 border-4 border-orange-500/20 border-t-orange-400 rounded-full mb-6"
           />
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-white/90 text-lg font-semibold"
+            className="text-white/90 text-lg font-bold uppercase tracking-wide"
           >
-            Redirigiendo al portal...
+            Entrando a la arena...
           </motion.p>
         </div>
       </div>
@@ -317,23 +315,23 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen relative bg-black overflow-hidden">
-      {/* Animated Background */}
+      {/* Animated Background - Brawl Stars Style */}
       <div className="fixed inset-0">
         {/* Base gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 via-black to-teal-950/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-950/30 via-black to-yellow-950/20" />
 
         {/* Grid Pattern */}
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.04]"
           style={{
-            backgroundImage: `linear-gradient(rgba(16, 185, 129, 0.3) 1.5px, transparent 1.5px),
-                            linear-gradient(90deg, rgba(16, 185, 129, 0.3) 1.5px, transparent 1.5px)`,
+            backgroundImage: `linear-gradient(rgba(249, 115, 22, 0.4) 1.5px, transparent 1.5px),
+                            linear-gradient(90deg, rgba(249, 115, 22, 0.4) 1.5px, transparent 1.5px)`,
             backgroundSize: '64px 64px',
           }}
         />
 
         {/* Radial gradient spotlight */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-500/15 rounded-full blur-[120px] animate-pulse" />
 
         {/* Floating Particles */}
         {[...Array(15)].map((_, i) => (
@@ -342,164 +340,142 @@ export default function LoginPage() {
       </div>
 
       {/* Top Navigation */}
-      <nav className="fixed top-0 w-full z-50 border-b border-white/[0.03] bg-black/50 backdrop-blur-2xl">
+      <nav className="fixed top-0 w-full z-50 border-b border-orange-400/10 bg-black/60 backdrop-blur-2xl">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="flex items-center justify-center h-20">
+            <div className="flex items-center gap-4">
               <div className="relative">
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20"
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-orange-500/50"
                 >
-                  <Terminal className="w-4 h-4 text-white" strokeWidth={2.5} />
+                  <Terminal className="w-7 h-7 text-white" strokeWidth={2.5} />
                 </motion.div>
               </div>
               <div>
-                <h1 className="text-base font-bold tracking-tight">Mateatletas</h1>
-                <p className="text-[9px] text-emerald-400/40 font-medium uppercase tracking-wider">
-                  Entrenamiento Mental
+                <h1 className="text-2xl font-black tracking-tight text-white">MATEATLETAS</h1>
+                <p className="text-sm font-black uppercase tracking-widest">
+                  <span className="text-white">CLUB </span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-yellow-300 to-orange-300 drop-shadow-[0_0_10px_rgba(251,146,60,0.6)]">
+                    STEAM
+                  </span>
                 </p>
               </div>
-            </Link>
-
-            <Link
-              href="/"
-              className="text-sm text-white/50 hover:text-emerald-400 transition-colors font-medium"
-            >
-              ← Volver al inicio
-            </Link>
+            </div>
           </div>
         </div>
       </nav>
 
-      {/* Main Content - Split Screen Design */}
-      <div className="relative min-h-screen flex items-center justify-center pt-16">
-        <div className="max-w-6xl w-full mx-auto px-6 lg:px-8 py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Left Side - Branding & Animation */}
+      {/* Main Content - Split 50/50 */}
+      <div className="relative h-screen flex items-center justify-center overflow-hidden pt-20">
+        <div className="max-w-7xl w-full mx-auto px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center max-h-[calc(100vh-10rem)] overflow-y-auto">
+            {/* Epic Message - LEFT SIDE */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="relative hidden lg:block"
+              transition={{ duration: 0.6 }}
+              className="text-center lg:text-left space-y-4"
             >
-              {/* Decorative elements */}
-              <div className="absolute -top-4 -left-4 w-72 h-72 bg-emerald-500/10 rounded-full blur-[100px]" />
-              <div className="absolute -bottom-4 -right-4 w-72 h-72 bg-teal-500/10 rounded-full blur-[100px]" />
+              {/* Badge */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-orange-500/30 to-yellow-500/30 border-2 border-orange-400/60 shadow-lg shadow-orange-500/40"
+              >
+                <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
+                <span className="text-xs font-black text-orange-300 uppercase tracking-widest">
+                  Nueva Era
+                </span>
+                <Sparkles className="w-4 h-4 text-yellow-300 animate-pulse" />
+              </motion.div>
 
-              <div className="relative z-10 space-y-8">
-                {/* Hero text */}
-                <div className="space-y-4">
+              {/* Main Title */}
+              <motion.h1
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
+                className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1]"
+              >
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-yellow-300 to-orange-300 animate-pulse drop-shadow-[0_0_30px_rgba(251,146,60,0.5)]">
+                  ¡COMIENZA
+                </span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-yellow-300 drop-shadow-[0_0_30px_rgba(251,191,36,0.5)]">
+                  UNA NUEVA ERA
+                </span>
+                <span className="block text-white mt-1 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                  EN MATEATLETAS
+                </span>
+              </motion.h1>
+
+              {/* Subtitle */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-lg md:text-xl font-bold text-orange-300/90 uppercase tracking-wide"
+              >
+                Prepárate para la batalla matemática
+              </motion.p>
+
+              {/* Decorative Stars */}
+              <div className="flex items-center justify-center lg:justify-start gap-2 pt-1">
+                {[...Array(5)].map((_, i) => (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+                    key={i}
+                    initial={{ scale: 0, rotate: 0 }}
+                    animate={{ scale: 1, rotate: 360 }}
+                    transition={{ delay: 0.7 + i * 0.1, type: "spring", stiffness: 200 }}
                   >
-                    <Sparkles className="w-4 h-4 text-emerald-400" />
-                    <span className="text-sm text-emerald-400 font-semibold">
-                      Portal de Acceso
-                    </span>
+                    <Sparkles className="w-5 h-5 text-yellow-300" />
                   </motion.div>
-
-                  <h2 className="text-4xl lg:text-5xl font-bold tracking-tight leading-[1.1]">
-                    Bienvenido de vuelta
-                    <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-400">
-                      a tu entrenamiento
-                    </span>
-                  </h2>
-
-                  <p className="text-lg text-white/60 leading-relaxed max-w-md">
-                    Accede a tu portal personalizado para continuar desarrollando tus habilidades
-                    en matemáticas y programación.
-                  </p>
-                </div>
-
-                {/* Feature cards */}
-                <div className="space-y-4 mt-12">
-                  {[
-                    {
-                      icon: Code2,
-                      title: 'Clases en Vivo',
-                      description: 'Máximo 8 estudiantes por sesión',
-                    },
-                    {
-                      icon: Brain,
-                      title: 'Seguimiento Personalizado',
-                      description: 'Monitoreo continuo de progreso',
-                    },
-                    {
-                      icon: Terminal,
-                      title: 'Entorno Real',
-                      description: 'Herramientas profesionales desde día 1',
-                    },
-                  ].map((feature, index) => (
-                    <motion.div
-                      key={feature.title}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 + index * 0.1 }}
-                      className="flex items-start gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-emerald-500/30 transition-all group"
-                    >
-                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
-                        <feature.icon className="w-5 h-5 text-emerald-400" strokeWidth={2} />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-semibold text-white/90">{feature.title}</h4>
-                        <p className="text-xs text-white/50 mt-1">{feature.description}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+                ))}
               </div>
             </motion.div>
 
-            {/* Right Side - Login Form */}
+            {/* Login Form - RIGHT SIDE */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
               className="relative"
             >
               {/* Glow effect behind card */}
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 blur-[60px] opacity-30" />
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/30 to-yellow-500/30 blur-[60px] opacity-40" />
 
               {/* Login Card */}
-              <div className="relative bg-gradient-to-br from-zinc-900/90 via-zinc-900/70 to-zinc-900/90 backdrop-blur-2xl rounded-3xl border border-white/[0.08] shadow-2xl shadow-emerald-500/10 overflow-hidden">
+              <div className="relative bg-gradient-to-br from-zinc-900/95 via-zinc-900/80 to-zinc-900/95 backdrop-blur-2xl rounded-3xl border-2 border-orange-400/40 shadow-2xl shadow-orange-500/40 overflow-hidden">
                 {/* Card header glow */}
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-orange-300/90 to-transparent" />
 
-                <div className="p-8 lg:p-12">
-                  {/* Mobile title */}
-                  <div className="lg:hidden mb-8 space-y-3">
-                    <h2 className="text-3xl font-bold tracking-tight">Iniciar Sesión</h2>
-                    <p className="text-white/60">Accede a tu portal personalizado</p>
+                <div className="p-5 lg:p-6">
+                  {/* Title */}
+                  <div className="mb-4 space-y-1 text-center">
+                    <h2 className="text-xl font-black tracking-tight bg-gradient-to-r from-orange-300 to-yellow-300 text-transparent bg-clip-text drop-shadow-[0_0_20px_rgba(251,146,60,0.4)]">
+                      ENTRAR A LA ARENA
+                    </h2>
+                    <p className="text-white/70 text-xs">Selecciona tu tipo de usuario y accede</p>
                   </div>
 
-                  {/* Desktop title */}
-                  <div className="hidden lg:block mb-8 space-y-3">
-                    <h2 className="text-3xl font-bold tracking-tight">Iniciar Sesión</h2>
-                    <p className="text-white/60">Ingresa tus credenciales para continuar</p>
-                  </div>
-
-                  {/* Toggle Tutor/Estudiante - EVOLVED */}
-                  <div className="mb-8 grid grid-cols-2 gap-3 p-1.5 rounded-2xl bg-black/40 border border-white/[0.08]">
+                  {/* Toggle Tutor/Estudiante - Brawl Style */}
+                  <div className="mb-4 grid grid-cols-2 gap-2 p-1 rounded-2xl bg-black/50 border-2 border-orange-400/30">
                     <button
                       type="button"
                       onClick={() => {
                         setUserType('tutor');
                         setError('');
                       }}
-                      className={`relative py-3 px-4 rounded-xl font-semibold transition-all ${
+                      className={`relative py-2 px-3 rounded-xl font-bold transition-all ${
                         userType === 'tutor'
-                          ? 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400 shadow-lg shadow-emerald-500/20 border border-emerald-500/30'
-                          : 'text-white/40 hover:text-white/60'
+                          ? 'bg-gradient-to-br from-orange-500/40 to-yellow-500/40 text-orange-200 shadow-lg shadow-orange-500/50 border-2 border-orange-400/70'
+                          : 'text-white/50 hover:text-white/70 border-2 border-transparent'
                       }`}
                     >
-                      <div className="flex items-center justify-center gap-2">
-                        <User className="w-4 h-4" strokeWidth={2.5} />
-                        <span>Tutor/Padre</span>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <User className="w-3.5 h-3.5" strokeWidth={2.5} />
+                        <span className="text-xs">Tutor/Padre</span>
                       </div>
                     </button>
                     <button
@@ -508,43 +484,43 @@ export default function LoginPage() {
                         setUserType('estudiante');
                         setError('');
                       }}
-                      className={`relative py-3 px-4 rounded-xl font-semibold transition-all ${
+                      className={`relative py-2 px-3 rounded-xl font-bold transition-all ${
                         userType === 'estudiante'
-                          ? 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400 shadow-lg shadow-emerald-500/20 border border-emerald-500/30'
-                          : 'text-white/40 hover:text-white/60'
+                          ? 'bg-gradient-to-br from-orange-500/40 to-yellow-500/40 text-orange-200 shadow-lg shadow-orange-500/50 border-2 border-orange-400/70'
+                          : 'text-white/50 hover:text-white/70 border-2 border-transparent'
                       }`}
                     >
-                      <div className="flex items-center justify-center gap-2">
-                        <GraduationCap className="w-4 h-4" strokeWidth={2.5} />
-                        <span>Estudiante</span>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <GraduationCap className="w-3.5 h-3.5" strokeWidth={2.5} />
+                        <span className="text-xs">Estudiante</span>
                       </div>
                     </button>
                   </div>
 
-                  {/* Alert de error - EVOLVED */}
+                  {/* Alert de error */}
                   {error && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl backdrop-blur-xl"
+                      className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-xl backdrop-blur-xl"
                     >
-                      <p className="text-red-400 text-sm flex items-center gap-2">
-                        <span className="text-lg">⚠️</span>
+                      <p className="text-red-400 text-xs flex items-center gap-2">
+                        <span className="text-sm">⚠️</span>
                         {error}
                       </p>
                     </motion.div>
                   )}
 
                   {/* Login Form */}
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Email Input - EVOLVED */}
-                    <div className="space-y-2">
-                      <label htmlFor="email" className="block text-sm font-semibold text-white/80">
+                  <form onSubmit={handleSubmit} className="space-y-3">
+                    {/* Email Input - Brawl Style */}
+                    <div className="space-y-1">
+                      <label htmlFor="email" className="block text-xs font-bold text-white/90">
                         Correo electrónico
                       </label>
                       <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <Mail className="w-5 h-5 text-emerald-400/50 group-focus-within:text-emerald-400 transition-colors" />
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Mail className="w-4 h-4 text-orange-300/60 group-focus-within:text-orange-300 transition-colors" />
                         </div>
                         <input
                           id="email"
@@ -555,24 +531,24 @@ export default function LoginPage() {
                           placeholder="tu@email.com"
                           disabled={isLoading}
                           autoComplete="email"
-                          className="w-full pl-12 pr-4 py-3.5 bg-black/40 border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full pl-10 pr-3 py-2.5 text-sm bg-black/50 border-2 border-orange-400/20 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </div>
                     </div>
 
-                    {/* Password Input - EVOLVED */}
-                    <div className="space-y-2">
+                    {/* Password Input - Brawl Style */}
+                    <div className="space-y-1">
                       <div className="flex items-center justify-between">
-                        <label htmlFor="password" className="block text-sm font-semibold text-white/80">
+                        <label htmlFor="password" className="block text-xs font-bold text-white/90">
                           Contraseña
                         </label>
-                        <span className="text-xs text-gray-400">
-                          ¿Olvidaste tu contraseña? Contacta al administrador
+                        <span className="text-[10px] text-gray-400">
+                          ¿Olvidaste tu contraseña?
                         </span>
                       </div>
                       <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <Lock className="w-5 h-5 text-emerald-400/50 group-focus-within:text-emerald-400 transition-colors" />
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Lock className="w-4 h-4 text-orange-300/60 group-focus-within:text-orange-300 transition-colors" />
                         </div>
                         <input
                           id="password"
@@ -583,32 +559,32 @@ export default function LoginPage() {
                           placeholder="••••••••"
                           disabled={isLoading}
                           autoComplete="current-password"
-                          className="w-full pl-12 pr-12 py-3.5 bg-black/40 border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full pl-10 pr-10 py-2.5 text-sm bg-black/50 border-2 border-orange-400/20 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           disabled={isLoading}
-                          className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/40 hover:text-emerald-400 transition-colors disabled:opacity-50"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-white/50 hover:text-orange-300 transition-colors disabled:opacity-50"
                         >
                           {showPassword ? (
-                            <EyeOff className="w-5 h-5" />
+                            <EyeOff className="w-4 h-4" />
                           ) : (
-                            <Eye className="w-5 h-5" />
+                            <Eye className="w-4 h-4" />
                           )}
                         </button>
                       </div>
                     </div>
 
-                    {/* Remember Me - EVOLVED */}
+                    {/* Remember Me - Brawl Style */}
                     <div className="flex items-center">
                       <input
                         id="remember"
                         type="checkbox"
                         disabled={isLoading}
-                        className="w-4 h-4 rounded border-white/[0.08] bg-black/40 text-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:ring-offset-0 disabled:opacity-50"
+                        className="w-3.5 h-3.5 rounded border-orange-400/30 bg-black/50 text-orange-400 focus:ring-2 focus:ring-orange-400/30 focus:ring-offset-0 disabled:opacity-50"
                       />
-                      <label htmlFor="remember" className="ml-3 text-sm text-white/60">
+                      <label htmlFor="remember" className="ml-2 text-xs text-white/70">
                         Mantener sesión iniciada
                       </label>
                     </div>
@@ -641,33 +617,33 @@ export default function LoginPage() {
                   </form>
 
                   {/* Divider */}
-                  <div className="relative my-8">
+                  <div className="relative my-4">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-white/[0.08]" />
+                      <div className="w-full border-t border-orange-400/10" />
                     </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-4 bg-zinc-900/90 text-white/40">¿Primera vez aquí?</span>
+                    <div className="relative flex justify-center text-[10px]">
+                      <span className="px-3 bg-zinc-900/90 text-white/50">¿Primera vez aquí?</span>
                     </div>
                   </div>
 
                   {/* Sign Up Link */}
-                  <div className="text-center space-y-3">
-                    <p className="text-sm text-white/60">
+                  <div className="text-center space-y-1">
+                    <p className="text-xs text-white/70">
                       ¿Aún no tienes cuenta?{' '}
                       <Link
                         href="/register"
-                        className="text-emerald-400 hover:text-emerald-300 transition-colors font-semibold"
+                        className="text-orange-300 hover:text-orange-200 transition-colors font-bold"
                       >
                         Regístrate aquí
                       </Link>
                     </p>
-                    <p className="text-xs text-white/40">
+                    <p className="text-[10px] text-white/50">
                       o{' '}
                       <a
                         href="mailto:info@mateatletas.com?subject=Información sobre el programa"
-                        className="text-emerald-400/80 hover:text-emerald-300 transition-colors font-medium underline"
+                        className="text-orange-300/80 hover:text-orange-200 transition-colors font-medium underline"
                       >
-                        solicita información sobre el programa
+                        solicita información
                       </a>
                     </p>
                   </div>

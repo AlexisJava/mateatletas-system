@@ -26,6 +26,7 @@ import { PlanificacionView } from './overlays/PlanificacionView';
 import { ActividadView } from './overlays/ActividadView';
 import { EjecutarActividadView } from './overlays/EjecutarActividadView';
 import { LaboratorioEcosistema } from './overlays/LaboratorioEcosistema';
+import { TareasAsignadasOverlay } from './overlays/TareasAsignadasOverlay';
 
 /**
  * Configuración de metadatos para cada tipo de overlay
@@ -54,6 +55,10 @@ const OVERLAY_METADATA: Record<OverlayConfig['type'], OverlayMetadata> = {
   'planificacion': {
     gradient: 'from-indigo-900 via-purple-900 to-pink-900',
     renderType: 'fullscreen',
+  },
+  'tareas-asignadas': {
+    gradient: 'from-purple-900 via-violet-900 to-indigo-900',
+    renderType: 'modal',
   },
   'actividad': {
     gradient: 'from-emerald-900 via-teal-900 to-cyan-900',
@@ -102,6 +107,8 @@ function getOverlayComponent(config: OverlayConfig): React.ComponentType<any> {
       return ProximamenteView;
     case 'planificacion':
       return PlanificacionView; // Mes de la Ciencia con grid 2×2 semanas
+    case 'tareas-asignadas':
+      return TareasAsignadasOverlay; // Vista de tareas asignadas con estados bloqueado/desbloqueado
     case 'actividad':
       return ActividadView; // Grid 2×2 de las 4 actividades de una semana
     case 'laboratorio-ecosistema':
