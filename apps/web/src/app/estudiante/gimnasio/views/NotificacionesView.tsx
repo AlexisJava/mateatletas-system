@@ -87,7 +87,7 @@ export function NotificacionesView({ estudiante }: NotificacionesViewProps) {
         // Próximas clases (de dashboard)
         if (dashboard.proximasClases && dashboard.proximasClases.length > 0) {
           dashboard.proximasClases.forEach((clase: ProximaClase) => {
-            const fechaClase = new Date(clase.fecha_hora);
+            const fechaClase = new Date(clase.fecha_hora_inicio);
             const ahora = new Date();
             const diffMs = fechaClase.getTime() - ahora.getTime();
             const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
@@ -114,7 +114,7 @@ export function NotificacionesView({ estudiante }: NotificacionesViewProps) {
               tipo: 'clase',
               emoji: '📚',
               titulo: diffHoras < 2 ? 'Clase en breve' : 'Próxima clase',
-              descripcion: clase.titulo || 'Clase de matemáticas',
+              descripcion: clase.nombre || 'Clase de matemáticas',
               tiempo,
               nuevo,
               fecha: fechaClase,

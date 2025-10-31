@@ -110,9 +110,9 @@ export default function CredencialesPage() {
       setResettingId(usuarioId);
       const tipoUsuario = rol.toLowerCase() as 'tutor' | 'estudiante' | 'docente';
 
-      const response = (await apiClient.post(`/admin/credenciales/${usuarioId}/reset`, {
+      const response = await apiClient.post(`/admin/credenciales/${usuarioId}/reset`, {
         tipoUsuario,
-      })).data;
+      });
 
       // Mostrar nueva contraseña
       setResetSuccess({ id: usuarioId, password: response.data?.password_temporal || '' });

@@ -103,8 +103,8 @@ export default function AsistenciaPage() {
       ) : claseActual ? (
         (() => {
           const rutaCurricular =
-            claseActual.ruta_curricular ?? claseActual.rutaCurricular ?? undefined;
-          const cupoMaximo = claseActual.cupo_maximo ?? 0;
+            claseActual.ruta_curricular ?? claseActual.ruta_curricular ?? undefined;
+          const cupoMaximo = claseActual.cupos_maximo ?? 0;
           const cuposOcupados =
             claseActual.cupos_ocupados ?? claseActual._count?.inscripciones ?? 0;
           const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);

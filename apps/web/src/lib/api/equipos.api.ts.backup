@@ -30,7 +30,7 @@ import {
 async function create(data: CreateEquipoDto): Promise<Equipo> {
     // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.post<Equipo>('/equipos', data)).data;
+    const response = await apiClient.post<Equipo>('/equipos', data);
     return equipoSchema.parse(response);
   } catch (error) {
     console.error('Error al crear el equipo:', error);
@@ -45,7 +45,7 @@ async function create(data: CreateEquipoDto): Promise<Equipo> {
 async function getAll(params?: QueryEquiposDto): Promise<EquiposResponse> {
     // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.get<EquiposResponse>('/equipos', { params })).data;
+    const response = await apiClient.get<EquiposResponse>('/equipos', { params });
     return equiposResponseSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener los equipos:', error);
@@ -60,7 +60,7 @@ async function getAll(params?: QueryEquiposDto): Promise<EquiposResponse> {
 async function getById(id: string): Promise<Equipo> {
     // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.get<Equipo>(`/equipos/${id}`)).data;
+    const response = await apiClient.get<Equipo>(`/equipos/${id}`);
     return equipoSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener el equipo por ID:', error);
@@ -78,7 +78,7 @@ async function update(
 ): Promise<Equipo> {
     // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.patch<Equipo>(`/equipos/${id}`, data)).data;
+    const response = await apiClient.patch<Equipo>(`/equipos/${id}`, data);
     return equipoSchema.parse(response);
   } catch (error) {
     console.error('Error al actualizar el equipo:', error);
@@ -96,9 +96,9 @@ async function update(
 async function deleteEquipo(id: string): Promise<DeleteEquipoResponse> {
     // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.delete<DeleteEquipoResponse>(
+    const response = await apiClient.delete<DeleteEquipoResponse>(
       `/equipos/${id}`,
-    )).data;
+    );
     return deleteEquipoResponseSchema.parse(response);
   } catch (error) {
     console.error('Error al eliminar el equipo:', error);
@@ -119,9 +119,9 @@ async function deleteEquipo(id: string): Promise<DeleteEquipoResponse> {
 async function getEstadisticas(): Promise<EquiposEstadisticas> {
     // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.get<EquiposEstadisticas>(
+    const response = await apiClient.get<EquiposEstadisticas>(
       '/equipos/estadisticas',
-    )).data;
+    );
     return equiposEstadisticasSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener las estadísticas de equipos:', error);
@@ -139,9 +139,9 @@ async function getEstadisticas(): Promise<EquiposEstadisticas> {
 async function recalcularPuntos(id: string): Promise<Equipo> {
     // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.post<Equipo>(
+    const response = await apiClient.post<Equipo>(
       `/equipos/${id}/recalcular-puntos`,
-    )).data;
+    );
     return equipoSchema.parse(response);
   } catch (error) {
     console.error('Error al recalcular los puntos del equipo:', error);

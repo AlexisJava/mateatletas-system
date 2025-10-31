@@ -102,7 +102,7 @@ export default function TomarAsistenciaModal({
       });
 
       toast.success(
-        `✅ ${response.mensaje} (${response.registrosCreados} nuevos, ${response.registrosActualizados} actualizados)`
+        `✅ ${response?.mensaje ?? "Asistencia registrada"} (${response?.registrosCreados ?? 0} nuevos, ${response?.registrosActualizados ?? 0} actualizados)`
       );
 
       onSuccess();

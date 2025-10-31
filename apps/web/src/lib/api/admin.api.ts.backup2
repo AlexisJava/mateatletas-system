@@ -29,7 +29,7 @@ export const getDashboard = async (): Promise<DashboardData> => {
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get<DashboardData>('/admin/dashboard');
-    return response.data;
+    return response as DashboardData;
   } catch (error) {
     console.error('Error al obtener el dashboard de administración:', error);
     throw error;
@@ -40,7 +40,7 @@ export const getSystemStats = async (): Promise<SystemStats> => {
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get<SystemStats>('/admin/estadisticas');
-    return response.data;
+    return response as SystemStats;
   } catch (error) {
     console.error('Error al obtener las estadísticas del sistema:', error);
     throw error;
@@ -51,7 +51,7 @@ export const getAllUsers = async (): Promise<AdminUser[]> => {
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get<AdminUser[]>('/admin/usuarios');
-    return response.data;
+    return response as AdminUser[];
   } catch (error) {
     console.error('Error al obtener los usuarios administradores:', error);
     throw error;
@@ -110,7 +110,7 @@ export const getAllEstudiantes = async (options?: {
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get<EstudiantesResponse>(url);
-    return response.data;
+    return response as EstudiantesResponse;
   } catch (error) {
     console.error('Error al obtener el listado de estudiantes:', error);
     throw error;
@@ -124,7 +124,7 @@ export const changeUserRole = async (userId: string, data: ChangeRoleDto): Promi
       `/admin/usuarios/${userId}/role`,
       data
     );
-    return response.data;
+    return response as AdminUser;
   } catch (error) {
     console.error('Error al cambiar el rol del usuario:', error);
     throw error;
@@ -138,7 +138,7 @@ export const updateUserRoles = async (userId: string, data: UpdateRolesDto): Pro
       `/admin/usuarios/${userId}/roles`,
       data
     );
-    return response.data;
+    return response as { message: string; userId: string; roles: string[] };
   } catch (error) {
     console.error('Error al actualizar los roles del usuario:', error);
     throw error;

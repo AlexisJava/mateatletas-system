@@ -13,12 +13,12 @@
  * ```
  */
 
-import { Clase } from '@/types/clases.types';
+import { ClaseConRelaciones } from '@/types/clases.types';
 import { Card, Badge } from '@/components/ui';
 
 interface ClassCardProps {
-  clase: Clase;
-  onClick?: (_clase: Clase) => void;
+  clase: ClaseConRelacionesConRelaciones;
+  onClick?: (_clase: ClaseConRelacionesConRelaciones) => void;
   showReserveButton?: boolean;
 }
 

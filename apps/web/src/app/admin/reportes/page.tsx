@@ -215,9 +215,9 @@ export default function AdminReportesPage() {
     if (active && payload && payload.length) {
       return (
         <div className="bg-emerald-500/[0.05] p-3 rounded-lg shadow-lg border border-gray-200">
-          <p className="text-sm font-semibold text-[#2a1a5e]">{label || payload[0].name}</p>
+          <p className="text-sm font-semibold text-[#2a1a5e]">{label || payload[0]?.name}</p>
           <p className="text-sm text-gray-600">
-            {payload[0].name}: <span className="font-bold">{payload[0].value}</span>
+            {payload[0]?.name}: <span className="font-bold">{payload[0]?.value}</span>
           </p>
         </div>
       );

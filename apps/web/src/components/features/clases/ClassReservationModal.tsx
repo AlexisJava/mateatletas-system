@@ -17,7 +17,7 @@
  */
 
 import { useState } from 'react';
-import { Clase } from '@/types/clases.types';
+import { ClaseConRelaciones } from '@/types/clases.types';
 import { Modal, Button } from '@/components/ui';
 
 interface Estudiante {
@@ -29,7 +29,7 @@ interface Estudiante {
 }
 
 interface ClassReservationModalProps {
-  clase: Clase | null;
+  clase: ClaseConRelacionesConRelaciones | null;
   estudiantes: Estudiante[];
   isOpen: boolean;
   onClose: () => void;

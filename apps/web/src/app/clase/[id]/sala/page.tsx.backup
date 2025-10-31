@@ -45,7 +45,7 @@ export default function SalaClasePage() {
   useEffect(() => {
     const fetchClase = async () => {
       try {
-        const response = (await apiClient.get(`/clases/${claseId}`)).data;
+        const response = await apiClient.get(`/clases/${claseId}`);
         setClase(response.data);
       } catch {
         // Error loading class
@@ -81,7 +81,7 @@ export default function SalaClasePage() {
     // Simular finalización de clase con datos de ejemplo
     const resumen: ResumenClase = {
       claseNombre:
-        (clase?.ruta_curricular ?? clase?.ruta_curricular)?.nombre || 'Clase',
+        (clase?.ruta_curricular ?? clase?.rutaCurricular)?.nombre || 'Clase',
       duracionMinutos: clase?.duracion_minutos || 60,
       puntosGanados: 10,
       insigniasDesbloqueadas: [],
