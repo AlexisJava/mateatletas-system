@@ -247,6 +247,19 @@ export class EstudiantesController {
   }
 
   /**
+   * GET /estudiantes/mis-companeros - Obtener compañeros de ClaseGrupo del estudiante logueado
+   * @param req - Request con usuario autenticado
+   * @returns Lista de compañeros con puntos ordenados descendente
+   */
+  @Get('mis-companeros')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Estudiante)
+  async obtenerMisCompaneros(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+    return this.estudiantesService.obtenerCompanerosDeClase(estudianteId);
+  }
+
+  /**
    * GET /estudiantes/:id/detalle-completo - Obtener detalle COMPLETO del estudiante
    * Para el portal de tutores - pestaña "Mis Hijos"
    * Incluye: gamificación, asistencias, inscripciones, estadísticas

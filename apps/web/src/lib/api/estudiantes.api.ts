@@ -180,4 +180,23 @@ export const estudiantesApi = {
       throw error;
     }
   },
+
+  /**
+   * Obtener compañeros del ClaseGrupo del estudiante autenticado
+   * @returns Lista de compañeros ordenados por puntos (descendente)
+   */
+  getMisCompaneros: async (): Promise<Array<{
+    id: string;
+    nombre: string;
+    apellido: string;
+    puntos: number;
+  }>> => {
+    try {
+      const response = await apiClient.get('/estudiantes/mis-companeros');
+      return response;
+    } catch (error) {
+      console.error('Error al obtener compañeros:', error);
+      throw error;
+    }
+  },
 };

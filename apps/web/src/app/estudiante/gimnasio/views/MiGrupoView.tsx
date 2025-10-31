@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { gamificacionApi, type DashboardData } from '@/lib/api/gamificacion.api';
+import { estudiantesApi } from '@/lib/api/estudiantes.api';
 
 interface MiGrupoViewProps {
   estudiante: {
@@ -14,17 +15,22 @@ interface MiGrupoViewProps {
 
 export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [companeros, setCompaneros] = useState<Array<{ id: string; nombre: string; apellido: string; puntos: number }>>([]);
   const [loading, setLoading] = useState(true);
 
-  // Cargar datos del dashboard (incluye info del equipo)
+  // Cargar datos del dashboard y compañeros
   useEffect(() => {
     const cargarDatos = async () => {
       try {
         setLoading(true);
-        const data = await gamificacionApi.getDashboard(estudiante.id);
-        setDashboard(data);
+        const [dashboardData, companerosData] = await Promise.all([
+          gamificacionApi.getDashboard(estudiante.id),
+          estudiantesApi.getMisCompaneros(),
+        ]);
+        setDashboard(dashboardData);
+        setCompaneros(companerosData);
       } catch (error) {
-        console.error('Error al cargar datos del equipo:', error);
+        console.error('Error al cargar datos del grupo:', error);
       } finally {
         setLoading(false);
       }
@@ -35,9 +41,8 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
     }
   }, [estudiante.id]);
 
-  // Calcular datos del equipo
-  const nombreEquipo = dashboard?.estudiante.equipo.nombre || 'Equipo Fénix';
-  // const _colorEquipo = dashboard?.estudiante.equipo.color || '#FF6B00'; // TODO: usar para tema del equipo
+  // Calcular datos del grupo
+  const nombreGrupo = companeros.length > 0 ? 'Mi Grupo' : 'Sin Grupo';
   const misPuntos = dashboard?.stats.puntosToales || 0;
   const clasesAsistidas = dashboard?.stats.clasesAsistidas || 0;
   const rachaActual = dashboard?.stats.racha || 0;
@@ -84,13 +89,13 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
           </div>
 
           <div className="text-center">
-            <h2 className="text-3xl font-black text-white mb-2">{nombreEquipo.toUpperCase()}</h2>
+            <h2 className="text-3xl font-black text-white mb-2">{nombreGrupo.toUpperCase()}</h2>
             <p className="text-white/70 text-lg font-bold">{clasesAsistidas} clases asistidas</p>
             <p className="text-white/70 text-lg font-bold">🔥 Racha de {rachaActual} días</p>
           </div>
         </motion.div>
 
-        {/* COLUMNA 2: Ranking del equipo */}
+        {/* COLUMNA 2: Ranking del grupo */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -100,39 +105,40 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
         >
           <div className="flex items-center gap-2 mb-4">
             <span className="text-3xl">🏆</span>
-            <h3 className="text-2xl font-black text-white">RANKING DEL EQUIPO</h3>
+            <h3 className="text-2xl font-black text-white">RANKING DEL GRUPO</h3>
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto">
-            {dashboard?.equipoRanking && dashboard.equipoRanking.length > 0 ? (
-              dashboard.equipoRanking.slice(0, 5).map((miembro: any, index: number) => (
+            {companeros.length > 0 ? (
+              companeros.slice(0, 10).map((companero, index) => (
                 <div
-                  key={miembro.id || index}
+                  key={companero.id}
                   className={`bg-white/5 rounded-xl p-3 border flex items-center justify-between ${
-                    miembro.id === estudiante.id ? 'border-yellow-400/50 bg-yellow-400/10' : 'border-white/10'
+                    companero.id === estudiante.id ? 'border-yellow-400/50 bg-yellow-400/10' : 'border-white/10'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="text-2xl font-black text-white/60">#{index + 1}</div>
                     <div>
                       <p className="text-white font-bold">
-                        {miembro.nombre} {miembro.apellido}
-                        {miembro.id === estudiante.id && ' (Tú)'}
+                        {companero.nombre} {companero.apellido}
+                        {companero.id === estudiante.id && ' (Tú)'}
                       </p>
-                      <p className="text-white/70 text-sm">{miembro.puntos?.toLocaleString() || 0} pts</p>
+                      <p className="text-white/70 text-sm">{companero.puntos.toLocaleString()} pts</p>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
               <div className="text-white/50 text-center py-8">
-                <p>No hay datos del ranking</p>
+                <p>No estás inscrito en ningún grupo</p>
+                <p className="text-sm mt-2">Habla con tu tutor para inscribirte</p>
               </div>
             )}
           </div>
         </motion.div>
 
-        {/* COLUMNA 3: Estadísticas del equipo */}
+        {/* COLUMNA 3: Estadísticas del grupo */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -148,18 +154,16 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
 
             <div className="space-y-4">
               <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <p className="text-white/70 text-sm mb-1">Puntos totales del equipo</p>
+                <p className="text-white/70 text-sm mb-1">Puntos totales del grupo</p>
                 <p className="text-white font-black text-2xl">
-                  {dashboard?.equipoRanking
-                    ?.reduce((sum: number, m: any) => sum + (m.puntos || 0), 0)
-                    .toLocaleString() || 0}
+                  {companeros.reduce((sum, c) => sum + c.puntos, 0).toLocaleString()}
                 </p>
               </div>
 
               <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <p className="text-white/70 text-sm mb-1">Integrantes activos</p>
+                <p className="text-white/70 text-sm mb-1">Compañeros en el grupo</p>
                 <p className="text-white font-black text-2xl">
-                  {dashboard?.equipoRanking?.length || 0}
+                  {companeros.length}
                 </p>
               </div>
 
