@@ -958,12 +958,12 @@ export class EstudiantesService {
     // Buscar en clases grupales (ClaseGrupo)
     const proximaClaseGrupo = await this.prisma.claseGrupo.findFirst({
       where: {
-        inscripciones_clase_grupo: {
+        inscripciones: {
           some: {
             estudiante_id: estudianteId,
           },
         },
-        activa: true,
+        activo: true,
       },
       include: {
         docente: {
@@ -973,7 +973,7 @@ export class EstudiantesService {
             apellido: true,
           },
         },
-        ruta_curricular: {
+        rutaCurricular: {
           select: {
             id: true,
             nombre: true,
@@ -1004,15 +1004,19 @@ export class EstudiantesService {
       const [horas, minutos] = proximaClaseGrupo.hora_inicio.split(':').map(Number);
       fechaProxima.setHours(horas, minutos, 0, 0);
 
+      // Calcular duración en minutos desde hora_inicio y hora_fin
+      const [horaFinH, horaFinM] = proximaClaseGrupo.hora_fin.split(':').map(Number);
+      const duracionMinutos = (horaFinH * 60 + horaFinM) - (horas * 60 + minutos);
+
       return {
         tipo: 'grupo' as const,
         id: proximaClaseGrupo.id,
         nombre: proximaClaseGrupo.nombre,
         codigo: proximaClaseGrupo.codigo,
         fecha_hora_inicio: fechaProxima,
-        duracion_minutos: proximaClaseGrupo.duracion_minutos,
+        duracion_minutos: duracionMinutos,
         docente: proximaClaseGrupo.docente,
-        ruta_curricular: proximaClaseGrupo.ruta_curricular,
+        ruta_curricular: proximaClaseGrupo.rutaCurricular,
         dia_semana: proximaClaseGrupo.dia_semana,
         hora_inicio: proximaClaseGrupo.hora_inicio,
       };
@@ -1039,7 +1043,7 @@ export class EstudiantesService {
             apellido: true,
           },
         },
-        ruta_curricular: {
+        rutaCurricular: {
           select: {
             id: true,
             nombre: true,
@@ -1059,7 +1063,7 @@ export class EstudiantesService {
         fecha_hora_inicio: proximaClaseIndividual.fecha_hora_inicio,
         duracion_minutos: proximaClaseIndividual.duracion_minutos,
         docente: proximaClaseIndividual.docente,
-        ruta_curricular: proximaClaseIndividual.ruta_curricular,
+        ruta_curricular: proximaClaseIndividual.rutaCurricular,
         estado: proximaClaseIndividual.estado,
       };
     }
