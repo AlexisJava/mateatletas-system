@@ -28,7 +28,7 @@ export function PlanificacionApp({
   children,
 }: PlanificacionAppProps) {
   const [tiempoInicio] = useState<Date>(new Date());
-  const [tiempoActual, setTiempoActual] = useState<number>(0);
+  const [, setTiempoActual] = useState<number>(0);
 
   // Hook personalizado para tracking
   const { registrarInicio, registrarProgreso, guardarEstado } = usePlanificacionTracking(codigo);

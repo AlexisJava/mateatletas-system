@@ -15,7 +15,7 @@ interface BrawlHeaderProps {
   puntos?: number
 }
 
-export function BrawlHeader({ nombre, nivel, trofeos, monedas, gemas, racha, avatarUrl, puntos = 0 }: BrawlHeaderProps) {
+export function BrawlHeader({ nombre, trofeos, monedas, gemas, racha, avatarUrl, puntos = 0 }: BrawlHeaderProps) {
   // Hook para obtener animación idle por defecto
   const { getDefaultIdleAnimation } = useStudentAnimations({ studentPoints: puntos })
   const defaultAnimation = getDefaultIdleAnimation()

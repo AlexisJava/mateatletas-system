@@ -10,7 +10,7 @@ import { PlanificacionCardMensual } from '../components/overlays/PlanificacionCa
 import { PLANIFICACIONES_2025 } from '../data/planificaciones';
 import type { EntrenamientosViewProps } from './types/entrenamientos.types';
 
-export function EntrenamientosView({ estudiante }: EntrenamientosViewProps) {
+export function EntrenamientosView({ estudiante: _estudiante }: EntrenamientosViewProps) {
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
       {/* Header */}

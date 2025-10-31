@@ -19,7 +19,7 @@ interface MisCursosViewProps {
  * Muestra los cursos que el estudiante ha canjeado
  * Con progreso y acceso directo
  */
-export function MisCursosView({ estudiante }: MisCursosViewProps) {
+export function MisCursosView({ estudiante: _estudiante }: MisCursosViewProps) {
   const [cursos, setCursos] = useState<CursoEstudiante[]>([]);
   const [loading, setLoading] = useState(true);
 

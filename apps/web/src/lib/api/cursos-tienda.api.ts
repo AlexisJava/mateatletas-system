@@ -81,8 +81,7 @@ export const cursosTiendaApi = {
       const queryString = params.toString();
       const url = `/gamificacion/tienda/catalogo${queryString ? `?${queryString}` : ''}`;
 
-      const response = (await apiClient.get<CursoCatalogo[]>(url)).data;
-      return response; // Interceptor ya retorna response.data
+      return await apiClient.get<CursoCatalogo[]>(url); // Interceptor ya retorna response.data
     } catch (error) {
       console.error('Error al obtener catálogo de cursos:', error);
       throw error;
@@ -94,10 +93,7 @@ export const cursosTiendaApi = {
    */
   obtenerCurso: async (cursoId: string): Promise<CursoCatalogo> => {
     try {
-      const response = (await apiClient.get<CursoCatalogo>(
-        `/gamificacion/tienda/catalogo/${cursoId}`
-      )).data;
-      return response;
+      return await apiClient.get<CursoCatalogo>(`/gamificacion/tienda/catalogo/${cursoId}`);
     } catch (error) {
       console.error('Error al obtener curso:', error);
       throw error;
@@ -109,10 +105,7 @@ export const cursosTiendaApi = {
    */
   solicitarCanje: async (cursoId: string): Promise<SolicitudCanje> => {
     try {
-      const response = (await apiClient.post<SolicitudCanje>('/gamificacion/tienda/canjear', {
-        cursoId,
-      })).data;
-      return response;
+      return await apiClient.post<SolicitudCanje>('/gamificacion/tienda/canjear', { cursoId });
     } catch (error) {
       console.error('Error al solicitar canje:', error);
       throw error;
@@ -124,8 +117,7 @@ export const cursosTiendaApi = {
    */
   obtenerMisCursos: async (): Promise<CursoEstudiante[]> => {
     try {
-      const response = (await apiClient.get<CursoEstudiante[]>('/gamificacion/tienda/mis-cursos')).data;
-      return response;
+      return await apiClient.get<CursoEstudiante[]>('/gamificacion/tienda/mis-cursos');
     } catch (error) {
       console.error('Error al obtener mis cursos:', error);
       throw error;
@@ -137,10 +129,7 @@ export const cursosTiendaApi = {
    */
   obtenerMisSolicitudes: async (): Promise<SolicitudCanje[]> => {
     try {
-      const response = (await apiClient.get<SolicitudCanje[]>(
-        '/gamificacion/tienda/mis-solicitudes'
-      )).data;
-      return response;
+      return await apiClient.get<SolicitudCanje[]>('/gamificacion/tienda/mis-solicitudes');
     } catch (error) {
       console.error('Error al obtener mis solicitudes:', error);
       throw error;
@@ -156,11 +145,10 @@ export const cursosTiendaApi = {
     completado?: boolean
   ): Promise<CursoEstudiante> => {
     try {
-      const response = (await apiClient.patch<CursoEstudiante>(
+      return await apiClient.patch<CursoEstudiante>(
         `/gamificacion/tienda/mis-cursos/${cursoId}/progreso`,
         { progreso, completado }
-      )).data;
-      return response;
+      );
     } catch (error) {
       console.error('Error al actualizar progreso:', error);
       throw error;
@@ -172,10 +160,7 @@ export const cursosTiendaApi = {
    */
   obtenerSolicitudesPendientes: async (): Promise<SolicitudCanje[]> => {
     try {
-      const response = (await apiClient.get<SolicitudCanje[]>(
-        '/gamificacion/tienda/solicitudes-pendientes'
-      )).data;
-      return response;
+      return await apiClient.get<SolicitudCanje[]>('/gamificacion/tienda/solicitudes-pendientes');
     } catch (error) {
       console.error('Error al obtener solicitudes pendientes:', error);
       throw error;
@@ -187,10 +172,7 @@ export const cursosTiendaApi = {
    */
   obtenerHistorialSolicitudes: async (): Promise<SolicitudCanje[]> => {
     try {
-      const response = (await apiClient.get<SolicitudCanje[]>(
-        '/gamificacion/tienda/solicitudes/historial'
-      )).data;
-      return response;
+      return await apiClient.get<SolicitudCanje[]>('/gamificacion/tienda/solicitudes/historial');
     } catch (error) {
       console.error('Error al obtener historial de solicitudes:', error);
       throw error;
@@ -206,11 +188,10 @@ export const cursosTiendaApi = {
     mensajePadre?: string
   ): Promise<SolicitudCanje> => {
     try {
-      const response = (await apiClient.post<SolicitudCanje>(
+      return await apiClient.post<SolicitudCanje>(
         `/gamificacion/tienda/solicitudes/${solicitudId}/aprobar`,
         { opcionPago, mensajePadre }
-      )).data;
-      return response;
+      );
     } catch (error) {
       console.error('Error al aprobar solicitud:', error);
       throw error;
@@ -225,11 +206,10 @@ export const cursosTiendaApi = {
     mensajePadre?: string
   ): Promise<SolicitudCanje> => {
     try {
-      const response = (await apiClient.post<SolicitudCanje>(
+      return await apiClient.post<SolicitudCanje>(
         `/gamificacion/tienda/solicitudes/${solicitudId}/rechazar`,
         { mensajePadre }
-      )).data;
-      return response;
+      );
     } catch (error) {
       console.error('Error al rechazar solicitud:', error);
       throw error;

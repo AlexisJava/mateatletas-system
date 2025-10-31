@@ -35,7 +35,7 @@ export default function MisHijosTab({ estudiantes }: Props) {
   const loadStudentDetail = async (estudiante_id: string) => {
     try {
       setLoading(true);
-      const response = (await apiClient.get(`/estudiantes/${estudiante_id}/detalle-completo`)).data;
+      const response = await apiClient.get<unknown>(`/estudiantes/${estudiante_id}/detalle-completo`);
       const parsed = estudianteDetalleSchema.parse(response);
       setStudentDetail(parsed);
     } catch (error: unknown) {

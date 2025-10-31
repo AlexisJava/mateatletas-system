@@ -7,7 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Sparkles, Crown, Zap, X, Check } from 'lucide-react';
+import { ShoppingCart, Sparkles, X, Check } from 'lucide-react';
 import { tiendaApi, recursosApi } from '@/lib/api/tienda.api';
 import type {
   ItemTiendaConCategoria,

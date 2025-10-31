@@ -35,7 +35,7 @@ export default function DocenteDashboardBrutal() {
   const [isLoading, setIsLoading] = useState(true);
   const [clasesHoy, setClasesHoy] = useState<ClaseDelDia[]>([]);
   const [misGrupos, setMisGrupos] = useState<GrupoResumen[]>([]);
-  const [estudiantesConFaltas, setEstudiantesConFaltas] = useState<EstudianteConFalta[]>([]);
+  const [, setEstudiantesConFaltas] = useState<EstudianteConFalta[]>([]); // TODO: mostrar en sección de alertas
   const [stats, setStats] = useState<StatsResumen | null>(null);
   const [greeting, setGreeting] = useState('Bienvenido');
 

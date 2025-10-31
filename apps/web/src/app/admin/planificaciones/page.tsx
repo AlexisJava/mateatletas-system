@@ -14,7 +14,6 @@ import {
   PlanificacionesTable,
   CreatePlanificacionModal,
 } from './components';
-import { Button } from '@/components/ui';
 import { Plus, Calendar, TrendingUp, Activity } from 'lucide-react';
 
 export default function AdminPlanificacionesPage() {

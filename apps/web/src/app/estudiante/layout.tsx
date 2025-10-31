@@ -14,7 +14,7 @@ import Script from 'next/script';
 export default function EstudianteLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, checkAuth, logout } = useAuthStore();
+  const { user, checkAuth } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const hasValidatedRef = useRef(false);
 

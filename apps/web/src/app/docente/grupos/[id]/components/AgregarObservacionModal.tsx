@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
   MessageSquare,
-  AlertCircle,
   CheckCircle,
   Loader2,
   Smile,

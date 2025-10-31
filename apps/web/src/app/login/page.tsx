@@ -122,7 +122,7 @@ function FloatingParticle({ delay = 0, left = 50 }: { delay?: number; left?: num
  */
 export default function LoginPage() {
   const router = useRouter();
-  const { login, loginEstudiante, isLoading, isAuthenticated, user, logout, setSelectedRole, selectedRole } = useAuthStore();
+  const { login, loginEstudiante, isLoading, isAuthenticated, user, setSelectedRole, selectedRole } = useAuthStore();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const [hasJustLoggedIn, setHasJustLoggedIn] = useState(false);

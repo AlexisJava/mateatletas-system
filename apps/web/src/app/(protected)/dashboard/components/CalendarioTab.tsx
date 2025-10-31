@@ -37,12 +37,12 @@ export default function CalendarioTab() {
   const loadCalendario = async () => {
     try {
       setLoading(true);
-      const response = (await apiClient.get('/clases/calendario', {
+      const response = await apiClient.get<{ data: unknown }>('/clases/calendario', {
         params: {
           mes: mesSeleccionado,
           anio: anioSeleccionado,
         },
-      })).data;
+      });
       const parsed = calendarioResponseSchema.parse(response.data);
       setCalendarioData(parsed);
     } catch (error: unknown) {

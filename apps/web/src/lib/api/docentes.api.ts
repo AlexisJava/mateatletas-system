@@ -196,8 +196,7 @@ export const docentesApi = {
    */
   getDashboard: async (): Promise<DashboardDocenteResponse> => {
     try {
-      const response = (await apiClient.get<DashboardDocenteResponse>('/docentes/me/dashboard')).data;
-      return response;
+      return await apiClient.get<DashboardDocenteResponse>('/docentes/me/dashboard');
     } catch (error) {
       console.error('Error al obtener el dashboard del docente:', error);
       throw error;
@@ -210,8 +209,7 @@ export const docentesApi = {
    */
   getEstadisticasCompletas: async (): Promise<EstadisticasCompletasResponse> => {
     try {
-      const response = (await apiClient.get<EstadisticasCompletasResponse>('/docentes/me/estadisticas-completas')).data;
-      return response;
+      return await apiClient.get<EstadisticasCompletasResponse>('/docentes/me/estadisticas-completas');
     } catch (error) {
       console.error('Error al obtener las estadísticas completas:', error);
       throw error;
@@ -223,8 +221,7 @@ export const docentesApi = {
    */
   getMe: async (): Promise<Docente> => {
     try {
-      const response = (await apiClient.get<Docente>('/docentes/me')).data;
-      return response;
+      return await apiClient.get<Docente>('/docentes/me');
     } catch (error) {
       console.error('Error al obtener el perfil del docente:', error);
       throw error;
@@ -236,8 +233,7 @@ export const docentesApi = {
    */
   updateMe: async (data: UpdateDocenteData): Promise<Docente> => {
     try {
-      const response = (await apiClient.patch<Docente>('/docentes/me', data)).data;
-      return response;
+      return await apiClient.patch<Docente>('/docentes/me', data);
     } catch (error) {
       console.error('Error al actualizar el perfil del docente:', error);
       throw error;
@@ -249,8 +245,7 @@ export const docentesApi = {
    */
   getAll: async (): Promise<Docente[]> => {
     try {
-      const response = (await apiClient.get<Docente[]>('/docentes')).data;
-      return response;
+      return await apiClient.get<Docente[]>('/docentes');
     } catch (error) {
       console.error('Error al obtener la lista de docentes:', error);
       throw error;
@@ -262,8 +257,7 @@ export const docentesApi = {
    */
   getById: async (id: string): Promise<Docente> => {
     try {
-      const response = (await apiClient.get<Docente>(`/docentes/${id}`)).data;
-      return response;
+      return await apiClient.get<Docente>(`/docentes/${id}`);
     } catch (error) {
       console.error('Error al obtener el docente por ID:', error);
       throw error;
@@ -277,11 +271,7 @@ export const docentesApi = {
    */
   create: async (data: CreateDocenteData): Promise<CreateDocenteResponse> => {
     try {
-      const response = (await apiClient.post<CreateDocenteResponse>(
-        '/docentes',
-        data
-      )).data;
-      return response;
+      return await apiClient.post<CreateDocenteResponse>('/docentes', data);
     } catch (error) {
       console.error('Error al crear el docente:', error);
       throw error;
@@ -293,11 +283,7 @@ export const docentesApi = {
    */
   update: async (id: string, data: UpdateDocenteData): Promise<Docente> => {
     try {
-      const response = (await apiClient.patch<Docente>(
-        `/docentes/${id}`,
-        data
-      )).data;
-      return response;
+      return await apiClient.patch<Docente>(`/docentes/${id}`, data);
     } catch (error) {
       console.error('Error al actualizar el docente:', error);
       throw error;
@@ -324,13 +310,10 @@ export const docentesApi = {
     toDocenteId: string
   ): Promise<{ clasesReasignadas: number }> => {
     try {
-      const response = (await apiClient.post<{ clasesReasignadas: number }>(
+      return await apiClient.post<{ clasesReasignadas: number }>(
         `/docentes/${fromDocenteId}/reasignar-clases`,
-        {
-          toDocenteId,
-        }
-      )).data;
-      return response;
+        { toDocenteId }
+      );
     } catch (error) {
       console.error('Error al reasignar las clases del docente:', error);
       throw error;

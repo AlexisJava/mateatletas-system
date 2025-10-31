@@ -37,7 +37,7 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
 
   // Calcular datos del equipo
   const nombreEquipo = dashboard?.estudiante.equipo.nombre || 'Equipo Fénix';
-  const colorEquipo = dashboard?.estudiante.equipo.color || '#FF6B00';
+  // const _colorEquipo = dashboard?.estudiante.equipo.color || '#FF6B00'; // TODO: usar para tema del equipo
   const misPuntos = dashboard?.stats.puntosToales || 0;
   const clasesAsistidas = dashboard?.stats.clasesAsistidas || 0;
   const rachaActual = dashboard?.stats.racha || 0;

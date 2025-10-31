@@ -45,7 +45,7 @@ export default function SalaClasePage() {
   useEffect(() => {
     const fetchClase = async () => {
       try {
-        const response = (await apiClient.get(`/clases/${claseId}`)).data;
+        const response = await apiClient.get<{ data: unknown }>(`/clases/${claseId}`);
         setClase(response.data);
       } catch {
         // Error loading class

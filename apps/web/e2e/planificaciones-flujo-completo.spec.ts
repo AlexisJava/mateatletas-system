@@ -75,7 +75,7 @@ test.describe('Planificaciones - Flujo Completo', () => {
     await expect(page.locator('text=Ejemplo Mínimo')).toBeVisible();
   });
 
-  test('3. Admin asigna planificación a docente', async ({ request, page }) => {
+  test('3. Admin asigna planificación a docente', async ({ page }) => {
     // Login como admin en la página
     await page.goto(`${WEB_URL}/login`);
     await page.fill('input[name="email"]', ADMIN_CREDENTIALS.email);
