@@ -4,12 +4,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { useOverlay, useOverlayStack } from '../contexts/OverlayStackProvider';
 import type { OverlayConfig } from '../types/overlay.types';
 import { recursosApi } from '@/lib/api/tienda.api';
 import type { RecursosEstudiante } from '@mateatletas/contracts';
 import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D';
 import { useStudentAnimations } from '@/hooks/useStudentAnimations';
+import { useAuthStore } from '@/store/auth.store';
 
 // Type compatible con sistema antiguo
 type OverlayType = OverlayConfig['type'] | null;
@@ -29,6 +31,7 @@ import {
   Target,
   BarChart3,
   Sparkles,
+  LogOut,
 } from 'lucide-react';
 
 interface HubViewProps {
@@ -155,13 +158,13 @@ const NAV_RIGHT: NavButton[] = [
     pulse: true,
   },
   {
-    id: 'ajustes',
-    overlayId: 'ajustes',
-    label: 'AJUSTES',
-    description: 'Configuración',
-    icon: <Settings className="w-7 h-7" />,
-    gradient: 'from-slate-600 via-gray-600 to-slate-700',
-    glowColor: 'slate',
+    id: 'cerrar-sesion',
+    overlayId: null, // No abre overlay, abre modal
+    label: 'SALIR',
+    description: 'Cerrar sesión',
+    icon: <LogOut className="w-7 h-7" />,
+    gradient: 'from-red-500 via-pink-500 to-red-600',
+    glowColor: 'red',
     badge: 0,
   },
 ];
@@ -171,9 +174,13 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [recursos, setRecursos] = useState<RecursosEstudiante | null>(null);
   const [currentAnimation, setCurrentAnimation] = useState<string | undefined>(undefined);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   // const _modelRef = useRef<any>(null); // TODO: usar para controlar el modelo 3D
   const { openOverlay } = useOverlay();
   const { push } = useOverlayStack();
+  const { logout } = useAuthStore();
+  const router = useRouter();
 
   // Hook de animaciones
   const { getRandomAnimation, animationsByCategory } = useStudentAnimations({
@@ -443,7 +450,10 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               item={item}
               isActive={activeView === item.id}
               onClick={() => {
-                if (item.overlayId) {
+                if (item.id === 'cerrar-sesion') {
+                  // Abrir modal de confirmación
+                  setShowLogoutModal(true);
+                } else if (item.overlayId) {
                   openOverlay(item.overlayId);
                 } else {
                   setActiveView(item.id);
@@ -750,6 +760,108 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
           </div>
         </div>
       </div>
+
+      {/* ========== MODAL DE CONFIRMACIÓN DE LOGOUT ========== */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            onClick={() => !isLoggingOut && setShowLogoutModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 50 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900
+                         border-4 border-red-500/50 rounded-3xl
+                         p-8 md:p-12 max-w-md w-full mx-4
+                         shadow-2xl shadow-red-500/30"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Icono */}
+              <motion.div
+                initial={{ rotate: 0 }}
+                animate={{ rotate: [0, -10, 10, -10, 0] }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="flex justify-center mb-6"
+              >
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-pink-600
+                               flex items-center justify-center
+                               shadow-xl shadow-red-500/50">
+                  <LogOut className="w-12 h-12 text-white" strokeWidth={3} />
+                </div>
+              </motion.div>
+
+              {/* Título */}
+              <h2 className="text-4xl font-black text-white text-center mb-4
+                             font-[family-name:var(--font-lilita)]">
+                ¿SALIR DEL GIMNASIO?
+              </h2>
+
+              {/* Mensaje */}
+              <p className="text-white/80 text-center text-lg mb-8 font-medium">
+                ¿Estás seguro que querés cerrar sesión?
+                <br />
+                <span className="text-white/60 text-base">Podrás volver cuando quieras 💪</span>
+              </p>
+
+              {/* Botones */}
+              <div className="flex gap-4">
+                {/* Botón Cancelar */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowLogoutModal(false)}
+                  disabled={isLoggingOut}
+                  className="flex-1 bg-white/10 hover:bg-white/20
+                             text-white font-bold text-lg py-4 rounded-2xl
+                             border-2 border-white/30
+                             transition-all disabled:opacity-50"
+                >
+                  ❌ CANCELAR
+                </motion.button>
+
+                {/* Botón Confirmar */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={async () => {
+                    try {
+                      setIsLoggingOut(true);
+                      await logout();
+                      router.push('/login');
+                    } catch (error) {
+                      console.error('Error al cerrar sesión:', error);
+                      setIsLoggingOut(false);
+                    }
+                  }}
+                  disabled={isLoggingOut}
+                  className="flex-1 bg-gradient-to-r from-red-500 to-pink-600
+                             hover:from-red-600 hover:to-pink-700
+                             text-white font-black text-lg py-4 rounded-2xl
+                             shadow-xl shadow-red-500/50
+                             border-2 border-red-400/50
+                             transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoggingOut ? '⏳ SALIENDO...' : '✅ SÍ, SALIR'}
+                </motion.button>
+              </div>
+
+              {/* Decoración */}
+              <div className="absolute -top-6 -right-6 text-8xl opacity-20 pointer-events-none">
+                👋
+              </div>
+              <div className="absolute -bottom-6 -left-6 text-8xl opacity-20 pointer-events-none">
+                🚪
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
