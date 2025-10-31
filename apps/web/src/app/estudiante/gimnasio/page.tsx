@@ -56,6 +56,9 @@ export default function GimnasioPage() {
 
       console.log('🔄 [GimnasioPage] Iniciando carga de avatar...')
 
+      // Delay mínimo de 2 segundos para mostrar el loading épico
+      const startTime = Date.now()
+
       try {
         const response = await fetch('/api/estudiante/mi-avatar', {
           credentials: 'include',
@@ -71,9 +74,14 @@ export default function GimnasioPage() {
       } catch (error) {
         console.error('❌ [GimnasioPage] Error al cargar avatar:', error)
       } finally {
-        // Siempre marcamos como "cargado" aunque haya error
-        setIsLoadingAvatar(false)
-        console.log('✅ [GimnasioPage] Carga finalizada, isLoadingAvatar = false')
+        // Calcular tiempo transcurrido y esperar mínimo 2 segundos
+        const elapsedTime = Date.now() - startTime
+        const remainingTime = Math.max(0, 2000 - elapsedTime)
+
+        setTimeout(() => {
+          setIsLoadingAvatar(false)
+          console.log('✅ [GimnasioPage] Carga finalizada, isLoadingAvatar = false')
+        }, remainingTime)
       }
     }
 
