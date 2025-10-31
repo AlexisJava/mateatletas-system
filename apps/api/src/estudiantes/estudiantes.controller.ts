@@ -218,6 +218,19 @@ export class EstudiantesController {
   }
 
   /**
+   * GET /estudiantes/mi-proxima-clase - Obtener próxima clase del estudiante logueado
+   * @param req - Request con usuario autenticado
+   * @returns Información de la próxima clase o null si no hay ninguna
+   */
+  @Get('mi-proxima-clase')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Estudiante)
+  async obtenerMiProximaClase(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+    return this.estudiantesService.obtenerProximaClase(estudianteId);
+  }
+
+  /**
    * GET /estudiantes/:id/detalle-completo - Obtener detalle COMPLETO del estudiante
    * Para el portal de tutores - pestaña "Mis Hijos"
    * Incluye: gamificación, asistencias, inscripciones, estadísticas

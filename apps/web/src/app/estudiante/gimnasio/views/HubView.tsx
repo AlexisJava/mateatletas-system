@@ -12,6 +12,8 @@ import type { RecursosEstudiante } from '@mateatletas/contracts';
 import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D';
 import { useStudentAnimations } from '@/hooks/useStudentAnimations';
 import { useAuthStore } from '@/store/auth.store';
+import { ProximaClaseCard } from '@/components/dashboard/ProximaClaseCard';
+import { estudiantesApi } from '@/lib/api/estudiantes.api';
 
 // Type compatible con sistema antiguo
 type OverlayType = OverlayConfig['type'] | null;
@@ -175,6 +177,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [activeView, setActiveView] = useState('hub');
   const [isMounted, setIsMounted] = useState(false);
   const [recursos, setRecursos] = useState<RecursosEstudiante | null>(null);
+  const [proximaClase, setProximaClase] = useState<any>(null);
   const [currentAnimation, setCurrentAnimation] = useState<string | undefined>(undefined);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -232,6 +235,22 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
     if (estudiante.id) {
       cargarRecursos();
+    }
+  }, [estudiante.id]);
+
+  // Cargar próxima clase del estudiante
+  useEffect(() => {
+    const cargarProximaClase = async () => {
+      try {
+        const data = await estudiantesApi.getProximaClase();
+        setProximaClase(data);
+      } catch (error) {
+        console.error('Error cargando próxima clase:', error);
+      }
+    };
+
+    if (estudiante.id) {
+      cargarProximaClase();
     }
   }, [estudiante.id]);
 
@@ -732,6 +751,20 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 }
               />
             </motion.div>
+
+            {/* Próxima Clase Card */}
+            {proximaClase && (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.42 }}
+              >
+                <ProximaClaseCard
+                  clase={proximaClase}
+                  delay={0.42}
+                />
+              </motion.div>
+            )}
 
             {/* Botón CTA GIGANTE */}
             <motion.div
