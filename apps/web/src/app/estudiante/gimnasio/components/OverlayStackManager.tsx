@@ -18,7 +18,7 @@ import { MisLogrosView } from '../views/MisLogrosView';
 import { RankingView } from '../views/RankingView';
 import { NotificacionesView } from '../views/NotificacionesView';
 import { AjustesView } from '../views/AjustesView';
-import { EntrenamientosView } from '../views/EntrenamientosView';
+import { ProximamenteView } from '../views/ProximamenteView';
 import { CursosView } from '../views/CursosView';
 import { MisCursosView } from '../views/MisCursosView';
 import { AnimacionesView } from '../views/AnimacionesView';
@@ -99,7 +99,7 @@ function getOverlayComponent(config: OverlayConfig): React.ComponentType<any> {
     case 'mi-progreso':
       return MiProgresoView;
     case 'entrenamientos':
-      return EntrenamientosView;
+      return ProximamenteView;
     case 'planificacion':
       return PlanificacionView; // Mes de la Ciencia con grid 2×2 semanas
     case 'actividad':
