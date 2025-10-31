@@ -14,6 +14,7 @@ import { useStudentAnimations } from '@/hooks/useStudentAnimations';
 import { useAuthStore } from '@/store/auth.store';
 import { ProximaClaseCard } from '@/components/dashboard/ProximaClaseCard';
 import { estudiantesApi } from '@/lib/api/estudiantes.api';
+import { useRachaAutomatica } from '@/hooks/useRachaAutomatica';
 
 // Type compatible con sistema antiguo
 type OverlayType = OverlayConfig['type'] | null;
@@ -194,6 +195,9 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const { getRandomAnimation, animationsByCategory } = useStudentAnimations({
     studentPoints: estudiante.puntos_totales,
   });
+
+  // Hook de racha automática - registra actividad del día al entrar
+  const { racha: rachaData } = useRachaAutomatica(estudiante.id);
 
   useEffect(() => {
     setIsMounted(true);
