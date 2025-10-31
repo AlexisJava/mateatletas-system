@@ -173,7 +173,7 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, user, router, isLoading, mustChangePassword, hasMultipleRoles, selectedRole]);
 
-  const [userType, setUserType] = useState<'tutor' | 'estudiante'>('tutor');
+  const [userType, setUserType] = useState<'tutor' | 'estudiante' | 'docente'>('tutor');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -224,6 +224,7 @@ export default function LoginPage() {
       if (userType === 'estudiante') {
         await loginEstudiante(email, password);
       } else {
+        // Para tutores, docentes y admin usamos el login normal
         await login(email, password);
       }
     } catch (err: unknown) {
@@ -459,15 +460,15 @@ export default function LoginPage() {
                     <p className="text-white/70 text-[10px] sm:text-xs">Selecciona tu tipo de usuario y accede</p>
                   </div>
 
-                  {/* Toggle Tutor/Estudiante - Brawl Style */}
-                  <div className="mb-3 sm:mb-4 grid grid-cols-2 gap-1.5 sm:gap-2 p-1 rounded-xl sm:rounded-2xl bg-black/50 border-2 border-orange-400/30">
+                  {/* Toggle Tutor/Estudiante/Docente - Brawl Style */}
+                  <div className="mb-3 sm:mb-4 grid grid-cols-3 gap-1.5 sm:gap-2 p-1 rounded-xl sm:rounded-2xl bg-black/50 border-2 border-orange-400/30">
                     <button
                       type="button"
                       onClick={() => {
                         setUserType('tutor');
                         setError('');
                       }}
-                      className={`relative py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl font-bold transition-all ${
+                      className={`relative py-1.5 sm:py-2 px-1.5 sm:px-3 rounded-lg sm:rounded-xl font-bold transition-all ${
                         userType === 'tutor'
                           ? 'bg-gradient-to-br from-orange-500/40 to-yellow-500/40 text-orange-200 shadow-lg shadow-orange-500/50 border-2 border-orange-400/70'
                           : 'text-white/50 hover:text-white/70 border-2 border-transparent'
@@ -475,7 +476,7 @@ export default function LoginPage() {
                     >
                       <div className="flex items-center justify-center gap-1 sm:gap-1.5">
                         <User className="w-3 sm:w-3.5 h-3 sm:h-3.5" strokeWidth={2.5} />
-                        <span className="text-[10px] sm:text-xs">Tutor/Padre</span>
+                        <span className="text-[9px] sm:text-xs">Tutor</span>
                       </div>
                     </button>
                     <button
@@ -484,7 +485,7 @@ export default function LoginPage() {
                         setUserType('estudiante');
                         setError('');
                       }}
-                      className={`relative py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl font-bold transition-all ${
+                      className={`relative py-1.5 sm:py-2 px-1.5 sm:px-3 rounded-lg sm:rounded-xl font-bold transition-all ${
                         userType === 'estudiante'
                           ? 'bg-gradient-to-br from-orange-500/40 to-yellow-500/40 text-orange-200 shadow-lg shadow-orange-500/50 border-2 border-orange-400/70'
                           : 'text-white/50 hover:text-white/70 border-2 border-transparent'
@@ -492,7 +493,24 @@ export default function LoginPage() {
                     >
                       <div className="flex items-center justify-center gap-1 sm:gap-1.5">
                         <GraduationCap className="w-3 sm:w-3.5 h-3 sm:h-3.5" strokeWidth={2.5} />
-                        <span className="text-[10px] sm:text-xs">Estudiante</span>
+                        <span className="text-[9px] sm:text-xs">Estudiante</span>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserType('docente');
+                        setError('');
+                      }}
+                      className={`relative py-1.5 sm:py-2 px-1.5 sm:px-3 rounded-lg sm:rounded-xl font-bold transition-all ${
+                        userType === 'docente'
+                          ? 'bg-gradient-to-br from-orange-500/40 to-yellow-500/40 text-orange-200 shadow-lg shadow-orange-500/50 border-2 border-orange-400/70'
+                          : 'text-white/50 hover:text-white/70 border-2 border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-1 sm:gap-1.5">
+                        <Terminal className="w-3 sm:w-3.5 h-3 sm:h-3.5" strokeWidth={2.5} />
+                        <span className="text-[9px] sm:text-xs">Admin</span>
                       </div>
                     </button>
                   </div>

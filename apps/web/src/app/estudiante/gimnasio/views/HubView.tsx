@@ -15,6 +15,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { ProximaClaseCard } from '@/components/dashboard/ProximaClaseCard';
 import { estudiantesApi } from '@/lib/api/estudiantes.api';
 import { useRachaAutomatica } from '@/hooks/useRachaAutomatica';
+import { useDeviceType } from '@/hooks/useDeviceType';
 
 // Type compatible con sistema antiguo
 type OverlayType = OverlayConfig['type'] | null;
@@ -160,8 +161,7 @@ const NAV_RIGHT: NavButton[] = [
     icon: <Bell className="w-7 h-7" />,
     gradient: 'from-red-500 via-orange-500 to-amber-600',
     glowColor: 'red',
-    badge: 7,
-    pulse: true,
+    badge: 0,
   },
   {
     id: 'cerrar-sesion',
@@ -185,11 +185,15 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showClaseNoComenzModal, setShowClaseNoComenzModal] = useState(false);
   const [minutosRestantes, setMinutosRestantes] = useState(0);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   // const _modelRef = useRef<any>(null); // TODO: usar para controlar el modelo 3D
   const { openOverlay } = useOverlay();
   const { push } = useOverlayStack();
   const { logout } = useAuthStore();
   const router = useRouter();
+
+  // Hook de detección de dispositivo
+  const { deviceType } = useDeviceType();
 
   // Hook de animaciones
   const { getRandomAnimation, animationsByCategory } = useStudentAnimations({
@@ -269,25 +273,22 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   }, [estudiante.id]);
 
   // Hook para animaciones del avatar - triggers manuales
-  const triggerAnimation = useCallback(
-    (animationUrl: string, returnToIdleAfter?: number) => {
-      try {
-        setCurrentAnimation(animationUrl);
+  const triggerAnimation = useCallback((animationUrl: string, returnToIdleAfter?: number) => {
+    try {
+      setCurrentAnimation(animationUrl);
 
-        // Si se especifica duración, volver a idle después
-        if (returnToIdleAfter) {
-          setTimeout(() => {
-            const idleUrl =
-              'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb';
-            setCurrentAnimation(idleUrl);
-          }, returnToIdleAfter);
-        }
-      } catch (error) {
-        console.debug('Animation error:', error);
+      // Si se especifica duración, volver a idle después
+      if (returnToIdleAfter) {
+        setTimeout(() => {
+          const idleUrl =
+            'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb';
+          setCurrentAnimation(idleUrl);
+        }, returnToIdleAfter);
       }
-    },
-    [],
-  );
+    } catch (error) {
+      console.debug('Animation error:', error);
+    }
+  }, []);
 
   // NO rotar animaciones automáticamente - mantener idle continuo
   // Solo cambiar cuando el usuario interactúa
@@ -354,7 +355,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const monedas = recursos?.monedas_total ?? 0;
   const gemas = recursos?.gemas_total ?? 0;
   const xp_total = recursos?.xp_total ?? 0;
-  const racha_dias = 3; // TODO: Obtener del backend cuando esté implementado
+  const racha_dias = rachaData?.dias_consecutivos ?? 0;
 
   // Calcular nivel basado en XP (fórmula: nivel = floor(sqrt(XP / 100)) + 1)
   const nivelCalculado = Math.floor(Math.sqrt(xp_total / 100)) + 1;
@@ -519,132 +520,410 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
         </motion.div>
       </div>
 
-      {/* ========== NAVEGACIÓN LATERAL IZQUIERDA - ULTRA GAMIFICADA ========== */}
-      <nav className="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-50">
-        {NAV_LEFT.map((item, index) => (
+      {/* ========== NAVEGACIÓN LATERAL IZQUIERDA - SOLO DESKTOP ========== */}
+      {(deviceType === 'desktop' || deviceType === 'ultrawide') && (
+        <nav className="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-50">
+          {NAV_LEFT.map((item, index) => (
+            <motion.div
+              key={item.id}
+              initial={{ x: -100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <NavButtonUltra
+                item={item}
+                isActive={activeView === item.id}
+                onClick={() => {
+                  if (item.overlayId) {
+                    openOverlay(item.overlayId);
+                  } else {
+                    setActiveView(item.id);
+                  }
+                }}
+                side="left"
+              />
+            </motion.div>
+          ))}
+        </nav>
+      )}
+
+      {/* ========== NAVEGACIÓN LATERAL DERECHA - SOLO DESKTOP ========== */}
+      {(deviceType === 'desktop' || deviceType === 'ultrawide') && (
+        <nav className="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-50">
+          {NAV_RIGHT.map((item, index) => (
+            <motion.div
+              key={item.id}
+              initial={{ x: 100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <NavButtonUltra
+                item={item}
+                isActive={activeView === item.id}
+                onClick={() => {
+                  if (item.id === 'cerrar-sesion') {
+                    // Abrir modal de confirmación
+                    setShowLogoutModal(true);
+                  } else if (item.overlayId) {
+                    openOverlay(item.overlayId);
+                  } else {
+                    setActiveView(item.id);
+                  }
+                }}
+                side="right"
+              />
+            </motion.div>
+          ))}
+        </nav>
+      )}
+
+      {/* ========== HEADER ========== */}
+      <header
+        className={`relative z-30 flex items-center justify-between ${
+          deviceType === 'mobile' ? 'h-[12vh] px-4 pt-3' : 'h-[14vh] px-8 pt-4'
+        }`}
+      >
+        {/* Logo MATEATLETAS CLUB STEAM - IZQUIERDA Desktop */}
+        {(deviceType === 'desktop' || deviceType === 'ultrawide') && (
           <motion.div
-            key={item.id}
             initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: 0.1 }}
           >
-            <NavButtonUltra
-              item={item}
-              isActive={activeView === item.id}
-              onClick={() => {
-                if (item.overlayId) {
-                  openOverlay(item.overlayId);
-                } else {
-                  setActiveView(item.id);
-                }
-              }}
-              side="left"
-            />
+            <div className="text-white font-black text-3xl md:text-4xl uppercase tracking-wider drop-shadow-2xl text-left font-[family-name:var(--font-lilita)]">
+              Mateatletas Club{' '}
+              <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                STEAM
+              </span>
+            </div>
           </motion.div>
-        ))}
-      </nav>
+        )}
 
-      {/* ========== NAVEGACIÓN LATERAL DERECHA - ULTRA GAMIFICADA ========== */}
-      <nav className="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-50">
-        {NAV_RIGHT.map((item, index) => (
+        {/* BARRA DE PROGRESO XP - IZQUIERDA Mobile/Tablet - ULTRA ZARPADA Y OBSESIVA */}
+        {(deviceType === 'mobile' || deviceType === 'tablet') && (
           <motion.div
-            key={item.id}
-            initial={{ x: 100, opacity: 0 }}
+            initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: 0.1 }}
+            className={
+              deviceType === 'mobile' ? 'flex-1 max-w-[200px] mr-2' : 'flex-1 max-w-sm mr-3'
+            }
           >
-            <NavButtonUltra
-              item={item}
-              isActive={activeView === item.id}
-              onClick={() => {
-                if (item.id === 'cerrar-sesion') {
-                  // Abrir modal de confirmación
-                  setShowLogoutModal(true);
-                } else if (item.overlayId) {
-                  openOverlay(item.overlayId);
-                } else {
-                  setActiveView(item.id);
-                }
-              }}
-              side="right"
-            />
+            {/* Wrapper con glow exterior violeta - OBSESIVO */}
+            <div className="relative">
+              {/* Blur violeta exterior - capa 1 */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/40 via-indigo-600/40 to-purple-600/40 rounded-xl blur-md" />
+
+              {/* Blur violeta exterior - capa 2 (más amplio y sutil) */}
+              <motion.div
+                className="absolute -inset-2 bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-purple-500/20 rounded-xl blur-xl"
+                animate={{
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
+
+              {/* Contenedor principal */}
+              <div
+                className={`relative h-[48px] bg-gradient-to-br from-purple-900/70 via-indigo-900/70 to-purple-900/70 backdrop-blur-md rounded-xl border-2 border-purple-400/40 shadow-2xl flex flex-col justify-center overflow-hidden ${
+                  deviceType === 'mobile' ? 'px-3 py-1.5' : 'px-4 py-2'
+                }`}
+              >
+                {/* Brillo sutil interno que recorre */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-300/10 to-transparent"
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ duration: 4, repeat: Infinity, repeatDelay: 3 }}
+                />
+
+                {/* Contenido */}
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1.5">
+                      <motion.div
+                        animate={{
+                          rotate: [0, 15, -15, 0],
+                          scale: [1, 1.1, 1],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatDelay: 3,
+                        }}
+                      >
+                        <Star
+                          className={`fill-yellow-400 text-yellow-400 drop-shadow-[0_0_4px_rgba(250,204,21,0.5)] ${deviceType === 'mobile' ? 'w-3.5 h-3.5' : 'w-4 h-4'}`}
+                        />
+                      </motion.div>
+                      <span
+                        className={`text-white font-black drop-shadow-md ${deviceType === 'mobile' ? 'text-xs' : 'text-sm'}`}
+                      >
+                        NIVEL {nivelCalculado}
+                      </span>
+                    </div>
+                    <span
+                      className={`text-yellow-300/90 font-bold drop-shadow-sm ${deviceType === 'mobile' ? 'text-[9px]' : 'text-[10px]'}`}
+                    >
+                      {xpEnNivelActual}/{xpNecesarioParaSiguienteNivel}
+                    </span>
+                  </div>
+
+                  {/* Barra de progreso con efectos zarpados */}
+                  <div className="relative w-full bg-black/60 rounded-full overflow-hidden border-2 border-purple-500/40 h-2 shadow-inner">
+                    {/* Barra principal con gradiente */}
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(porcentajeProgresoNivel, 100)}%` }}
+                      transition={{ delay: 0.5, duration: 1.2, ease: 'easeOut' }}
+                      className="relative h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full shadow-lg shadow-orange-500/70"
+                    >
+                      {/* Brillo superior en la barra */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent rounded-full" />
+                    </motion.div>
+
+                    {/* Brillo animado que recorre la barra */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                      animate={{ x: ['-100%', '200%'] }}
+                      transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.5 }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
-        ))}
-      </nav>
+        )}
 
-      {/* ========== HEADER - 10vh ========== */}
-      <header className="relative z-30 h-[10vh] px-8 flex items-center justify-between">
-        {/* Avatar pequeño + nombre (izquierda) */}
-        <motion.div
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className="flex items-center gap-3 bg-black/30 backdrop-blur-sm rounded-2xl px-4 py-2 border-2 border-white/20"
-        >
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">{estudiante.nombre.charAt(0)}</span>
-          </div>
-          <div>
-            <div className="text-white font-bold text-base uppercase tracking-wide">
-              {estudiante.nombre.split(' ')[0]}
-            </div>
-            <div className="flex items-center gap-2 text-xs text-white/70">
-              <div className="flex items-center gap-1">
-                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                Nivel {nivelCalculado}
-              </div>
-              <span>•</span>
-              <div className="flex items-center gap-1">
-                🔥 <span>Grupo Fénix</span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Logo/Texto Mateatletas Club STEAM - CENTRO */}
-        <motion.div
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
-        >
-          <div className="text-white font-black text-3xl md:text-4xl uppercase tracking-wider drop-shadow-2xl text-center font-[family-name:var(--font-lilita)]">
-            Mateatletas Club{' '}
-            <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-              STEAM
-            </span>
-          </div>
-        </motion.div>
-
-        {/* Recursos (derecha) */}
+        {/* RECURSOS + BARRA PROGRESO + MENÚ - DERECHA */}
         <motion.div
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="flex items-center gap-2"
+          className={`flex items-center ${deviceType === 'mobile' ? 'gap-3' : 'gap-4'}`}
         >
+          {/* BARRA DE PROGRESO XP - DERECHA Desktop - MEGA PRO */}
+          {(deviceType === 'desktop' || deviceType === 'ultrawide') && (
+            <motion.div
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="w-[420px] mr-2"
+            >
+              {/* Wrapper con glow exterior violeta - OBSESIVO */}
+              <div className="relative">
+                {/* Blur violeta exterior - capa 1 */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/40 via-indigo-600/40 to-purple-600/40 rounded-xl blur-md" />
+
+                {/* Blur violeta exterior - capa 2 (más amplio y sutil) */}
+                <motion.div
+                  className="absolute -inset-2 bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-purple-500/20 rounded-xl blur-xl"
+                  animate={{
+                    opacity: [0.3, 0.6, 0.3],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                />
+
+                {/* Contenedor principal */}
+                <div className="relative h-[64px] bg-gradient-to-br from-purple-900/70 via-indigo-900/70 to-purple-900/70 backdrop-blur-md rounded-2xl border-2 border-purple-400/40 shadow-2xl flex flex-col justify-center overflow-hidden px-6 py-3">
+                  {/* Brillo sutil interno que recorre */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-300/10 to-transparent"
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{ duration: 4, repeat: Infinity, repeatDelay: 3 }}
+                  />
+
+                  {/* Contenido */}
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <motion.div
+                          animate={{
+                            rotate: [0, 15, -15, 0],
+                            scale: [1, 1.1, 1],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatDelay: 3,
+                          }}
+                        >
+                          <Star className="w-5 h-5 fill-yellow-400 text-yellow-400 drop-shadow-[0_0_4px_rgba(250,204,21,0.5)]" />
+                        </motion.div>
+                        <span className="text-white font-black drop-shadow-md text-base">
+                          NIVEL {nivelCalculado}
+                        </span>
+                      </div>
+                      <span className="text-yellow-300/90 font-bold drop-shadow-sm text-xs">
+                        {xpEnNivelActual}/{xpNecesarioParaSiguienteNivel}
+                      </span>
+                    </div>
+
+                    {/* Barra de progreso con efectos zarpados */}
+                    <div className="relative w-full bg-black/60 rounded-full overflow-hidden border-2 border-purple-500/40 h-2.5 shadow-inner">
+                      {/* Barra principal con gradiente */}
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(porcentajeProgresoNivel, 100)}%` }}
+                        transition={{ delay: 0.5, duration: 1.2, ease: 'easeOut' }}
+                        className="relative h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full shadow-lg shadow-orange-500/70"
+                      >
+                        {/* Brillo superior en la barra */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent rounded-full" />
+                      </motion.div>
+
+                      {/* Brillo animado que recorre la barra */}
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                        animate={{ x: ['-100%', '200%'] }}
+                        transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.5 }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           <ResourcePill
-            icon={<Coins className="w-5 h-5" />}
+            icon={<Coins className={deviceType === 'mobile' ? 'w-5 h-5' : 'w-6 h-6'} />}
             value={monedas}
             gradient="from-yellow-400 to-amber-500"
             borderColor="yellow-600"
           />
           <ResourcePill
-            icon={<Gem className="w-5 h-5" />}
-            value={gemas}
-            gradient="from-purple-500 to-violet-600"
-            borderColor="purple-700"
-          />
-          <ResourcePill
-            icon={<Flame className="w-5 h-5" />}
+            icon={<Flame className={deviceType === 'mobile' ? 'w-5 h-5' : 'w-6 h-6'} />}
             value={racha_dias}
             gradient="from-orange-500 to-red-600"
             borderColor="red-700"
           />
+
+          {/* Botón NOTIFICACIONES - Flotante fuera del menú */}
+          {(deviceType === 'mobile' || deviceType === 'tablet') && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => openOverlay('notificaciones')}
+              className={`relative bg-gradient-to-br from-red-500 via-orange-500 to-amber-600 rounded-xl flex items-center justify-center border-2 border-white/30 shadow-lg overflow-hidden ${
+                deviceType === 'mobile' ? 'w-[56px] h-[48px]' : 'w-[64px] h-[48px]'
+              }`}
+            >
+              {/* Blur de fondo */}
+              <div className="absolute inset-0 bg-red-600/40 blur-xl" />
+
+              {/* Glow pulsante FUERTE para llamar atención */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-br from-red-400/40 to-orange-400/40"
+                animate={{
+                  opacity: [0.5, 1, 0.5],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
+
+              {/* Brillo que recorre */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 1.5 }}
+              />
+
+              {/* Icono de campana */}
+              <motion.div
+                className="relative z-10"
+                animate={{
+                  rotate: [0, -15, 15, -10, 10, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 3,
+                }}
+              >
+                <Bell className={`text-white ${deviceType === 'mobile' ? 'w-6 h-6' : 'w-7 h-7'}`} />
+              </motion.div>
+            </motion.button>
+          )}
+
+          {/* Botón MENÚ hamburguesa - ÚLTIMO elemento (para los nenes) - ÉPICO */}
+          {(deviceType === 'mobile' || deviceType === 'tablet') && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowMobileMenu(true)}
+              className={`relative bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center border-2 border-white/30 shadow-lg overflow-hidden ${
+                deviceType === 'mobile' ? 'w-[56px] h-[48px]' : 'w-[64px] h-[48px]'
+              }`}
+            >
+              {/* Blur violeta de fondo - OBSESIVO */}
+              <div className="absolute inset-0 bg-purple-600/40 blur-xl" />
+
+              {/* Glow pulsante */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-br from-purple-400/30 to-pink-400/30"
+                animate={{
+                  opacity: [0.5, 0.8, 0.5],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
+
+              {/* Brillo sutil que recorre */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+              />
+
+              {/* Hamburguesa - Relativo para estar encima */}
+              <div className="relative flex flex-col gap-1 z-10">
+                <div
+                  className={`bg-white rounded-full shadow-sm ${deviceType === 'mobile' ? 'w-6 h-0.5' : 'w-7 h-0.5'}`}
+                />
+                <div
+                  className={`bg-white rounded-full shadow-sm ${deviceType === 'mobile' ? 'w-6 h-0.5' : 'w-7 h-0.5'}`}
+                />
+                <div
+                  className={`bg-white rounded-full shadow-sm ${deviceType === 'mobile' ? 'w-6 h-0.5' : 'w-7 h-0.5'}`}
+                />
+              </div>
+            </motion.button>
+          )}
         </motion.div>
       </header>
 
       {/* ========== CENTRO DIVIDIDO: 50% AVATAR | 50% INFO ========== */}
-      <div className="flex-1 flex items-center justify-center px-32 py-8 relative z-10">
-        <div className="w-full max-w-7xl flex gap-8 h-full">
+      <div
+        className={`flex-1 flex items-center justify-center relative z-10 ${
+          deviceType === 'mobile'
+            ? 'px-2 py-1'
+            : deviceType === 'tablet'
+              ? 'px-6 py-4'
+              : 'px-32 py-8'
+        }`}
+      >
+        <div
+          className={`w-full flex h-full ${
+            deviceType === 'mobile'
+              ? 'gap-1 max-w-full px-2'
+              : deviceType === 'tablet'
+                ? 'gap-4 max-w-5xl px-4'
+                : 'gap-8 max-w-7xl px-8'
+          }`}
+        >
           {/* ========== COLUMNA IZQUIERDA - AVATAR 3D GIGANTE ========== */}
           <div className="w-1/2 relative flex items-center justify-center">
             <motion.div
@@ -653,14 +932,22 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="relative w-full h-full flex items-center justify-center"
             >
-              {/* Resplandor/Glow detrás del avatar */}
+              {/* Resplandor/Glow detrás del avatar - responsive */}
               <motion.div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
                 style={{
-                  width: '500px',
-                  height: '500px',
-                  background: 'radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, rgba(99, 102, 241, 0.3) 25%, rgba(168, 85, 247, 0.2) 50%, transparent 70%)',
-                  filter: 'blur(40px)',
+                  width:
+                    deviceType === 'mobile' ? '250px' : deviceType === 'tablet' ? '350px' : '500px',
+                  height:
+                    deviceType === 'mobile' ? '250px' : deviceType === 'tablet' ? '350px' : '500px',
+                  background:
+                    'radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, rgba(99, 102, 241, 0.3) 25%, rgba(168, 85, 247, 0.2) 50%, transparent 70%)',
+                  filter:
+                    deviceType === 'mobile'
+                      ? 'blur(20px)'
+                      : deviceType === 'tablet'
+                        ? 'blur(30px)'
+                        : 'blur(40px)',
                 }}
                 animate={{
                   scale: [1, 1.15, 1],
@@ -673,26 +960,31 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 }}
               />
 
-              {/* Segundo anillo de resplandor - más amplio y sutil */}
-              <motion.div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-                style={{
-                  width: '650px',
-                  height: '650px',
-                  background: 'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(59, 130, 246, 0.15) 40%, transparent 65%)',
-                  filter: 'blur(50px)',
-                }}
-                animate={{
-                  scale: [1, 1.1, 1],
-                  opacity: [0.4, 0.6, 0.4],
-                }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                  delay: 1,
-                }}
-              />
+              {/* Segundo anillo de resplandor - más amplio y sutil - Solo Desktop/Tablet */}
+              {(deviceType === 'desktop' ||
+                deviceType === 'ultrawide' ||
+                deviceType === 'tablet') && (
+                <motion.div
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+                  style={{
+                    width: deviceType === 'tablet' ? '450px' : '650px',
+                    height: deviceType === 'tablet' ? '450px' : '650px',
+                    background:
+                      'radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(59, 130, 246, 0.15) 40%, transparent 65%)',
+                    filter: deviceType === 'tablet' ? 'blur(35px)' : 'blur(50px)',
+                  }}
+                  animate={{
+                    scale: [1, 1.1, 1],
+                    opacity: [0.4, 0.6, 0.4],
+                  }}
+                  transition={{
+                    duration: 5,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: 1,
+                  }}
+                />
+              )}
 
               {/* Avatar 3D Animado - CLICKEABLE PARA ANIMAR */}
               <div
@@ -710,10 +1002,28 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                     animationUrl={currentAnimation}
                     width="100%"
                     height="100%"
-                    cameraPosition={[0, 0.6, 2.4]}
-                    cameraFov={50}
-                    scale={1.15}
-                    position={[-0.3, -0.45, 0]}
+                    cameraPosition={
+                      deviceType === 'mobile'
+                        ? [-1, 1.5, 1] // Mobile: SÚPER CERCA - cinematic chest + face
+                        : deviceType === 'tablet'
+                          ? [-0.3, 1.6, 1.2] // Tablet: más cerca que antes
+                          : [0, 0.6, 2.4] // Desktop: normal
+                    }
+                    cameraFov={deviceType === 'mobile' ? 42 : 50} // FOV más abierto para ver cabeza
+                    scale={
+                      deviceType === 'mobile'
+                        ? 1.3 // Mobile: ajustado para ver más
+                        : deviceType === 'tablet'
+                          ? 1.25
+                          : 1.15
+                    }
+                    position={
+                      deviceType === 'mobile'
+                        ? [-0.25, -0.55, 0] // Mobile: avatar MÁS ABAJO para ver cabeza completa
+                        : deviceType === 'tablet'
+                          ? [-0.3, -0.3, 0]
+                          : [-0.3, -0.45, 0]
+                    }
                     rotation={[0, 0.26, 0]}
                     enableControls={false}
                   />
@@ -723,98 +1033,57 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
           </div>
 
           {/* ========== COLUMNA DERECHA - INFO + STATS + CTA ========== */}
-          <div className="w-1/2 flex flex-col justify-center gap-8">
-            {/* Badge de nivel */}
+          <div
+            className={`w-1/2 flex flex-col justify-center pb-20 ${
+              deviceType === 'mobile' ? 'gap-2' : deviceType === 'tablet' ? 'gap-4' : 'gap-8'
+            }`}
+          >
+            {/* Saludo personalizado al estudiante - ALINEADO A LA IZQUIERDA */}
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: 'spring' }}
-              className="flex justify-center"
-            >
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl px-8 py-4 border-4 border-white shadow-2xl">
-                <div className="text-center">
-                  <div className="text-white/80 text-sm font-bold uppercase tracking-wider">
-                    Nivel
-                  </div>
-                  <div className="text-white text-6xl font-black">{estudiante.nivel_actual}</div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Barra XP */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
+              initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.35 }}
-              className="bg-black/30 backdrop-blur-sm rounded-2xl p-4 border-2 border-white/20"
+              transition={{ delay: 0.35, type: 'spring' }}
+              className="text-left"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white text-sm font-bold">
-                  Progreso al Nivel {nivelCalculado + 1}
-                </span>
-                <span className="text-white/80 text-sm font-bold">
-                  {xpEnNivelActual} / {xpNecesarioParaSiguienteNivel} XP
-                </span>
-              </div>
-              <div className="w-full h-6 bg-black/40 rounded-full overflow-hidden border-2 border-white/10">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(porcentajeProgresoNivel, 100)}%` }}
-                  transition={{ delay: 0.5, duration: 1, ease: 'easeOut' }}
-                  className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full shadow-lg shadow-orange-500/50"
-                />
-              </div>
-            </motion.div>
-
-            {/* Stats verticales */}
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="grid grid-cols-3 gap-4"
-            >
-              <StatCard3D
-                icon={<Zap className="w-6 h-6" />}
-                value={`${racha_dias} días`}
-                label="RACHA"
-                subtitle="¡Sigue así!"
-                gradient="from-orange-500 to-red-600"
-                glowColor="orange"
-                onClick={() =>
-                  triggerAnimation(
-                    'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb',
-                    3000,
-                  )
-                }
-              />
-              <StatCard3D
-                icon={<Trophy className="w-6 h-6" />}
-                value="12/50"
-                label="LOGROS"
-                subtitle="Desbloqueados"
-                gradient="from-yellow-500 to-amber-600"
-                glowColor="yellow"
-                onClick={() =>
-                  triggerAnimation(
-                    'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_002.glb',
-                    3000,
-                  )
-                }
-              />
-              <StatCard3D
-                icon={<Target className="w-6 h-6" />}
-                value="85%"
-                label="ÁLGEBRA"
-                subtitle="¡Casi maestro!"
-                gradient="from-purple-500 to-pink-600"
-                glowColor="purple"
-                onClick={() =>
-                  triggerAnimation(
-                    'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb',
-                    3500,
-                  )
-                }
-              />
+              <h2
+                className={`font-[family-name:var(--font-lilita)] font-black uppercase text-white leading-tight ${
+                  deviceType === 'mobile'
+                    ? 'text-xl'
+                    : deviceType === 'tablet'
+                      ? 'text-2xl'
+                      : 'text-4xl'
+                }`}
+                style={{
+                  textShadow: '0 0 30px rgba(255,255,255,0.3), 0 4px 0 rgba(0,0,0,0.3)',
+                }}
+              >
+                ¡Hola, {estudiante.nombre.split(' ')[0]}!
+              </h2>
+              <motion.p
+                className={`text-cyan-300 font-bold uppercase tracking-wider ${
+                  deviceType === 'mobile'
+                    ? 'text-[10px] mt-0.5'
+                    : deviceType === 'tablet'
+                      ? 'text-xs mt-1'
+                      : 'text-base mt-2'
+                }`}
+                style={{
+                  textShadow: '0 2px 10px rgba(6,182,212,0.5)',
+                }}
+                animate={{
+                  opacity: [0.7, 1, 0.7],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              >
+                {/* Detectar género por avatar_url (masculine/feminine) */}
+                {estudiante.animacion_idle_url?.includes('/feminine/')
+                  ? '¡Lista para entrenar!'
+                  : '¡Listo para entrenar!'}
+              </motion.p>
             </motion.div>
 
             {/* Próxima Clase Card */}
@@ -824,10 +1093,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.42 }}
               >
-                <ProximaClaseCard
-                  clase={proximaClase}
-                  delay={0.42}
-                />
+                <ProximaClaseCard clase={proximaClase} delay={0.42} />
               </motion.div>
             )}
 
@@ -855,16 +1121,19 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   }
                 }}
                 className={`
-                  w-full h-24
-                  ${esHoy && proximaClase
-                    ? 'bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 border-green-600'
-                    : 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 border-yellow-600'
+                  w-full
+                  ${deviceType === 'mobile' ? 'h-12 rounded-xl' : deviceType === 'tablet' ? 'h-16 rounded-2xl' : 'h-24 rounded-3xl'}
+                  ${
+                    esHoy && proximaClase
+                      ? 'bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 border-green-600'
+                      : 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 border-yellow-600'
                   }
-                  rounded-3xl
-                  shadow-[0_12px_0_rgba(0,0,0,0.3)]
-                  hover:shadow-[0_8px_0_rgba(0,0,0,0.3)]
-                  active:shadow-[0_2px_0_rgba(0,0,0,0.3)]
-                  border-4
+                  ${
+                    deviceType === 'mobile'
+                      ? 'shadow-[0_4px_0_rgba(0,0,0,0.3)] hover:shadow-[0_3px_0_rgba(0,0,0,0.3)] active:shadow-[0_1px_0_rgba(0,0,0,0.3)]'
+                      : 'shadow-[0_12px_0_rgba(0,0,0,0.3)] hover:shadow-[0_8px_0_rgba(0,0,0,0.3)] active:shadow-[0_2px_0_rgba(0,0,0,0.3)]'
+                  }
+                  ${deviceType === 'mobile' ? 'border-2' : 'border-4'}
                   relative overflow-hidden
                   transition-all
                 `}
@@ -877,21 +1146,103 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 />
 
                 <div className="relative z-10 text-center">
-                  <div className="text-white text-4xl font-black uppercase tracking-wider drop-shadow-lg">
+                  <div
+                    className={`text-white font-black uppercase tracking-wider drop-shadow-lg ${
+                      deviceType === 'mobile'
+                        ? 'text-sm'
+                        : deviceType === 'tablet'
+                          ? 'text-xl'
+                          : 'text-4xl'
+                    }`}
+                  >
                     {esHoy && proximaClase ? '¡INGRESAR A CLASE!' : '¡ENTRENAR MATEMÁTICAS!'}
                   </div>
-                  <div className="text-white/90 text-sm font-bold uppercase tracking-wide">
-                    {esHoy && proximaClase
-                      ? '¡Tu equipo te espera!'
-                      : 'Resolvé desafíos y dominá números'
-                    }
-                  </div>
+                  {(deviceType === 'desktop' ||
+                    deviceType === 'ultrawide' ||
+                    deviceType === 'tablet') && (
+                    <div className="text-white/90 text-sm font-bold uppercase tracking-wide">
+                      {esHoy && proximaClase
+                        ? '¡Tu equipo te espera!'
+                        : 'Resolvé desafíos y dominá números'}
+                    </div>
+                  )}
                 </div>
               </motion.button>
             </motion.div>
           </div>
         </div>
       </div>
+
+      {/* ========== MODAL MENÚ MOBILE/TABLET ========== */}
+      <AnimatePresence>
+        {showMobileMenu && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md"
+            onClick={() => setShowMobileMenu(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 50 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative bg-gradient-to-br from-slate-900/95 via-indigo-950/95 to-slate-900/95
+                         backdrop-blur-xl rounded-3xl
+                         p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto
+                         shadow-[0_0_80px_rgba(99,102,241,0.4)]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-white text-2xl font-black mb-6 text-center font-[family-name:var(--font-lilita)]">
+                MENÚ
+              </h2>
+
+              <div className="space-y-3">
+                {[...NAV_LEFT, ...NAV_RIGHT].map((item) => (
+                  <motion.button
+                    key={item.id}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      if (item.id === 'cerrar-sesion') {
+                        setShowMobileMenu(false);
+                        setShowLogoutModal(true);
+                      } else if (item.overlayId) {
+                        setShowMobileMenu(false);
+                        openOverlay(item.overlayId);
+                      } else {
+                        setShowMobileMenu(false);
+                        setActiveView(item.id);
+                      }
+                    }}
+                    className={`w-full bg-gradient-to-r ${item.gradient} rounded-2xl p-4 flex items-center gap-4
+                               border-2 border-white/20 shadow-lg relative`}
+                  >
+                    <div className="text-white">{item.icon}</div>
+                    <div className="flex-1 text-left">
+                      <div className="text-white font-black text-sm uppercase">{item.label}</div>
+                      <div className="text-white/70 text-xs">{item.description}</div>
+                    </div>
+                    {(item.badge ?? 0) > 0 && (
+                      <div className="bg-red-500 text-white text-xs font-black px-2 py-1 rounded-full">
+                        {item.badge}
+                      </div>
+                    )}
+                  </motion.button>
+                ))}
+              </div>
+
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowMobileMenu(false)}
+                className="mt-6 w-full bg-white/10 text-white font-bold py-3 rounded-2xl"
+              >
+                CERRAR
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ========== MODAL DE CONFIRMACIÓN DE LOGOUT - ULTRA PREMIUM ========== */}
       <AnimatePresence>
@@ -933,14 +1284,15 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               exit={{ scale: 0.8, y: 50, rotateX: -20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="relative bg-gradient-to-br from-slate-900/95 via-red-950/95 to-slate-900/95
-                         backdrop-blur-xl rounded-3xl
-                         p-8 md:p-12 max-w-md w-full mx-4
+                         backdrop-blur-xl rounded-2xl sm:rounded-3xl
+                         p-6 sm:p-8 md:p-12 max-w-md w-full mx-3 sm:mx-4
                          shadow-[0_0_80px_rgba(239,68,68,0.4)]
                          overflow-hidden"
               style={{
                 transformStyle: 'preserve-3d',
                 border: '2px solid transparent',
-                backgroundImage: 'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(236,72,153,0.1) 100%)',
+                backgroundImage:
+                  'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(236,72,153,0.1) 100%)',
                 backgroundClip: 'padding-box',
               }}
               onClick={(e) => e.stopPropagation()}
@@ -966,12 +1318,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 }}
               />
 
-              {/* Icono con resplandor pulsante */}
+              {/* Icono con resplandor pulsante - RESPONSIVE */}
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                className="flex justify-center mb-6 relative"
+                className="flex justify-center mb-4 sm:mb-6 relative"
               >
                 {/* Resplandor pulsante */}
                 <motion.div
@@ -986,19 +1338,24 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   transition={{ duration: 2, repeat: Infinity }}
                 />
 
-                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-red-500 via-pink-600 to-red-700
+                <div
+                  className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-red-500 via-pink-600 to-red-700
                                flex items-center justify-center z-10
-                               shadow-[0_0_40px_rgba(239,68,68,0.6)]">
-                  <LogOut className="w-12 h-12 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" strokeWidth={3} />
+                               shadow-[0_0_40px_rgba(239,68,68,0.6)]"
+                >
+                  <LogOut
+                    className="w-10 h-10 sm:w-12 sm:h-12 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                    strokeWidth={3}
+                  />
                 </div>
               </motion.div>
 
-              {/* Título con efecto holográfico */}
+              {/* Título con efecto holográfico - RESPONSIVE */}
               <motion.h2
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-4xl font-black text-white text-center mb-4
+                className="text-3xl sm:text-4xl font-black text-white text-center mb-3 sm:mb-4
                            font-[family-name:var(--font-lilita)]"
                 style={{
                   textShadow: '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(236,72,153,0.4)',
@@ -1007,33 +1364,35 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 ¿SALIR DEL GIMNASIO?
               </motion.h2>
 
-              {/* Mensaje */}
+              {/* Mensaje - RESPONSIVE */}
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-white/90 text-center text-lg mb-8 font-medium"
+                className="text-white/90 text-center text-base sm:text-lg mb-6 sm:mb-8 font-medium"
               >
                 ¿Estás seguro que querés cerrar sesión?
                 <br />
-                <span className="text-white/60 text-base">Podrás volver cuando quieras</span>
+                <span className="text-white/60 text-sm sm:text-base">
+                  Podrás volver cuando quieras
+                </span>
               </motion.p>
 
-              {/* Botones con efecto 3D */}
+              {/* Botones con efecto 3D - RESPONSIVE */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="flex gap-4"
+                className="flex gap-3 sm:gap-4"
               >
-                {/* Botón Cancelar */}
+                {/* Botón Cancelar - RESPONSIVE */}
                 <motion.button
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95, y: 0 }}
                   onClick={() => setShowLogoutModal(false)}
                   disabled={isLoggingOut}
                   className="flex-1 bg-white/10 hover:bg-white/20
-                             text-white font-bold text-lg py-4 rounded-2xl
+                             text-white font-bold text-base sm:text-lg py-3 sm:py-4 rounded-xl sm:rounded-2xl
                              border-2 border-white/30 hover:border-white/50
                              transition-all disabled:opacity-50
                              shadow-[0_4px_0_rgba(255,255,255,0.1)]
@@ -1043,7 +1402,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   CANCELAR
                 </motion.button>
 
-                {/* Botón Confirmar */}
+                {/* Botón Confirmar - RESPONSIVE */}
                 <motion.button
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95, y: 0 }}
@@ -1060,7 +1419,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   disabled={isLoggingOut}
                   className="flex-1 bg-gradient-to-r from-red-500 via-pink-600 to-red-600
                              hover:from-red-600 hover:via-pink-700 hover:to-red-700
-                             text-white font-black text-lg py-4 rounded-2xl
+                             text-white font-black text-base sm:text-lg py-3 sm:py-4 rounded-xl sm:rounded-2xl
                              border-2 border-red-400/50
                              transition-all disabled:opacity-50 disabled:cursor-not-allowed
                              shadow-[0_4px_0_rgba(220,38,38,0.8),0_0_40px_rgba(239,68,68,0.3)]
@@ -1115,14 +1474,15 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               exit={{ scale: 0.8, y: 50, rotateX: -20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="relative bg-gradient-to-br from-slate-900/95 via-cyan-950/95 to-slate-900/95
-                         backdrop-blur-xl rounded-3xl
-                         p-8 md:p-12 max-w-md w-full mx-4
+                         backdrop-blur-xl rounded-2xl sm:rounded-3xl
+                         p-6 sm:p-8 md:p-12 max-w-md w-full mx-3 sm:mx-4
                          shadow-[0_0_80px_rgba(34,211,238,0.4)]
                          overflow-hidden"
               style={{
                 transformStyle: 'preserve-3d',
                 border: '2px solid transparent',
-                backgroundImage: 'linear-gradient(135deg, rgba(34,211,238,0.1) 0%, rgba(59,130,246,0.1) 100%)',
+                backgroundImage:
+                  'linear-gradient(135deg, rgba(34,211,238,0.1) 0%, rgba(59,130,246,0.1) 100%)',
                 backgroundClip: 'padding-box',
               }}
               onClick={(e) => e.stopPropagation()}
@@ -1148,12 +1508,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 }}
               />
 
-              {/* Icono con resplandor pulsante */}
+              {/* Icono con resplandor pulsante - RESPONSIVE */}
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                className="flex justify-center mb-6 relative"
+                className="flex justify-center mb-4 sm:mb-6 relative"
               >
                 {/* Resplandor pulsante cyan */}
                 <motion.div
@@ -1168,19 +1528,24 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   transition={{ duration: 2, repeat: Infinity }}
                 />
 
-                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-cyan-600
+                <div
+                  className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-cyan-600
                                flex items-center justify-center z-10
-                               shadow-[0_0_40px_rgba(34,211,238,0.6)]">
-                  <Calendar className="w-12 h-12 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" strokeWidth={3} />
+                               shadow-[0_0_40px_rgba(34,211,238,0.6)]"
+                >
+                  <Calendar
+                    className="w-10 h-10 sm:w-12 sm:h-12 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                    strokeWidth={3}
+                  />
                 </div>
               </motion.div>
 
-              {/* Título con efecto holográfico */}
+              {/* Título con efecto holográfico - RESPONSIVE */}
               <motion.h2
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-4xl font-black text-white text-center mb-4
+                className="text-3xl sm:text-4xl font-black text-white text-center mb-3 sm:mb-4
                            font-[family-name:var(--font-lilita)]"
                 style={{
                   textShadow: '0 0 20px rgba(34,211,238,0.8), 0 0 40px rgba(59,130,246,0.4)',
@@ -1189,12 +1554,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 ¡TODAVÍA NO ES HORA!
               </motion.h2>
 
-              {/* Mensaje */}
+              {/* Mensaje - RESPONSIVE */}
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-white/90 text-center text-lg mb-2 font-medium"
+                className="text-white/90 text-center text-base sm:text-lg mb-1.5 sm:mb-2 font-medium"
               >
                 Tu clase aún no comienza.
               </motion.p>
@@ -1202,7 +1567,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-                className="text-cyan-300 text-center text-2xl font-black mb-8"
+                className="text-cyan-300 text-center text-xl sm:text-2xl font-black mb-6 sm:mb-8"
                 style={{
                   textShadow: '0 0 15px rgba(34,211,238,0.6)',
                 }}
@@ -1210,7 +1575,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 Volvé en {formatearTiempoRestante(minutosRestantes)}
               </motion.p>
 
-              {/* Botón OK con efecto 3D */}
+              {/* Botón OK con efecto 3D - RESPONSIVE */}
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1220,7 +1585,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 onClick={() => setShowClaseNoComenzModal(false)}
                 className="w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-500
                            hover:from-cyan-500 hover:via-blue-600 hover:to-cyan-600
-                           text-white font-black text-xl py-4 rounded-2xl
+                           text-white font-black text-lg sm:text-xl py-3 sm:py-4 rounded-xl sm:rounded-2xl
                            border-2 border-cyan-300/50
                            transition-all
                            shadow-[0_4px_0_rgba(6,182,212,0.8),0_0_40px_rgba(34,211,238,0.3)]
@@ -1407,10 +1772,10 @@ function ResourcePill({
 }) {
   return (
     <div
-      className={`bg-gradient-to-br ${gradient} rounded-xl px-4 py-2 flex items-center gap-2 border-2 border-${borderColor} shadow-lg`}
+      className={`bg-gradient-to-br ${gradient} rounded-2xl px-6 py-4 flex items-center gap-3 border-2 border-${borderColor} shadow-lg h-[64px] min-w-[120px] justify-center`}
     >
-      <div className="text-white">{icon}</div>
-      <span className="text-white font-bold">{value}</span>
+      <div className="text-white scale-125">{icon}</div>
+      <span className="text-white font-black text-2xl">{value}</span>
     </div>
   );
 }
@@ -1423,6 +1788,7 @@ function StatCard3D({
   gradient,
   glowColor,
   onClick,
+  deviceType = 'desktop',
 }: {
   icon: React.ReactNode;
   value: string;
@@ -1431,22 +1797,25 @@ function StatCard3D({
   gradient: string;
   glowColor: string;
   onClick?: () => void;
+  deviceType?: 'mobile' | 'tablet' | 'desktop' | 'ultrawide';
 }) {
   return (
     <motion.div
       whileHover={{
         scale: 1.05,
-        rotateY: 5,
+        rotateY: deviceType === 'mobile' ? 0 : 5,
       }}
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
       className={`
         relative bg-gradient-to-br ${gradient}
-        rounded-2xl p-4
-        shadow-[0_8px_0_rgba(0,0,0,0.3)]
-        hover:shadow-[0_6px_0_rgba(0,0,0,0.3)]
-        active:shadow-[0_2px_0_rgba(0,0,0,0.3)]
-        border-4 border-white/20
+        ${deviceType === 'mobile' ? 'rounded-lg p-1.5' : deviceType === 'tablet' ? 'rounded-xl p-3' : 'rounded-2xl p-4'}
+        ${
+          deviceType === 'mobile'
+            ? 'shadow-[0_3px_0_rgba(0,0,0,0.3)] hover:shadow-[0_2px_0_rgba(0,0,0,0.3)] active:shadow-[0_1px_0_rgba(0,0,0,0.3)]'
+            : 'shadow-[0_8px_0_rgba(0,0,0,0.3)] hover:shadow-[0_6px_0_rgba(0,0,0,0.3)] active:shadow-[0_2px_0_rgba(0,0,0,0.3)]'
+        }
+        ${deviceType === 'mobile' ? 'border border-white/20' : 'border-4 border-white/20'}
         cursor-pointer
         transition-all
       `}
@@ -1454,14 +1823,30 @@ function StatCard3D({
         transformStyle: 'preserve-3d',
       }}
     >
-      {/* Glow effect */}
-      <div className={`absolute inset-0 bg-${glowColor}-500/50 blur-xl -z-10 rounded-2xl`} />
+      {/* Glow effect - reducido en mobile */}
+      {deviceType !== 'mobile' && (
+        <div className={`absolute inset-0 bg-${glowColor}-500/50 blur-xl -z-10 rounded-2xl`} />
+      )}
 
       <div className="text-center">
-        <div className="flex items-center justify-center mb-2 text-white">{icon}</div>
-        <div className="text-white text-2xl font-black">{value}</div>
-        <div className="text-white/80 text-xs font-bold uppercase tracking-wide">{label}</div>
-        {subtitle && <div className="text-white/60 text-xs mt-1 font-medium">{subtitle}</div>}
+        <div
+          className={`flex items-center justify-center text-white ${deviceType === 'mobile' ? 'mb-0.5' : 'mb-2'}`}
+        >
+          {icon}
+        </div>
+        <div
+          className={`text-white font-black ${deviceType === 'mobile' ? 'text-xs' : deviceType === 'tablet' ? 'text-lg' : 'text-2xl'}`}
+        >
+          {value}
+        </div>
+        <div
+          className={`text-white/80 font-bold uppercase tracking-wide ${deviceType === 'mobile' ? 'text-[9px]' : 'text-xs'}`}
+        >
+          {label}
+        </div>
+        {subtitle && deviceType !== 'mobile' && (
+          <div className="text-white/60 text-xs mt-1 font-medium">{subtitle}</div>
+        )}
       </div>
     </motion.div>
   );

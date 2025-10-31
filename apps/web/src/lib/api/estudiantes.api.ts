@@ -171,6 +171,7 @@ export const estudiantesApi = {
     duracion_minutos: number;
     docente: { nombre: string; apellido: string };
     ruta_curricular?: { nombre: string; descripcion?: string };
+    link_meet?: string;
   } | null> => {
     try {
       const response = await apiClient.get('/estudiantes/mi-proxima-clase');
@@ -196,6 +197,32 @@ export const estudiantesApi = {
       return response;
     } catch (error) {
       console.error('Error al obtener compañeros:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener sectores del estudiante autenticado (Matemática, Programación, Ciencias)
+   * @returns Array de sectores con grupos agrupados
+   */
+  getMisSectores: async (): Promise<Array<{
+    id: string;
+    nombre: string;
+    descripcion: string | null;
+    color: string;
+    icono: string;
+    grupos: Array<{
+      id: string;
+      codigo: string;
+      nombre: string;
+      link_meet: string | null;
+    }>;
+  }>> => {
+    try {
+      const response = await apiClient.get('/estudiantes/mis-sectores');
+      return response;
+    } catch (error) {
+      console.error('Error al obtener sectores:', error);
       throw error;
     }
   },
