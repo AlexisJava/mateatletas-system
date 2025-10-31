@@ -19,19 +19,6 @@ const rutaCurricularEnClaseSchema = z.object({
 });
 
 /**
- * Schema de Docente simplificado (para relación en Clase)
- */
-const docenteEnClaseSchema = z.object({
-  id: z.string().optional(),
-  nombre: z.string().nullish(),
-  apellido: z.string().nullish(),
-  user: z.object({
-    nombre: z.string(),
-    apellido: z.string(),
-  }).nullish(),
-}).nullish();
-
-/**
  * Schema de Sector simplificado (para relación en Clase)
  */
 const sectorEnClaseSchema = z.object({
@@ -40,6 +27,24 @@ const sectorEnClaseSchema = z.object({
   icono: z.string(),
   color: z.string(),
 }).nullish();
+
+/**
+ * Schema de Docente simplificado (para relación en Clase)
+ */
+const docenteEnClaseSchema = z
+  .object({
+    id: z.string().optional(),
+    nombre: z.string().nullish(),
+    apellido: z.string().nullish(),
+    user: z
+      .object({
+        nombre: z.string(),
+        apellido: z.string(),
+      })
+      .nullish(),
+    sector: sectorEnClaseSchema,
+  })
+  .nullish();
 
 /**
  * Schema de Estudiante simplificado (para inscripciones)

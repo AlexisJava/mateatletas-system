@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { X, Calendar, Clock, Video, MapPin, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getClases } from '@/lib/api/clases.api';
 import { useOverlayStack } from '../contexts/OverlayStackProvider';
-import type { Clase } from '@/types/clases.types';
+import type { ClaseConRelaciones } from '@/types/clases.types';
 
 interface CalendarioViewProps {
   estudiante: {
@@ -14,9 +14,9 @@ interface CalendarioViewProps {
   };
 }
 
-export function CalendarioView({ estudiante }: CalendarioViewProps) {
+export function CalendarioView({ estudiante: _estudiante }: CalendarioViewProps) {
   const { pop } = useOverlayStack();
-  const [clases, setClases] = useState<Clase[]>([]);
+  const [clases, setClases] = useState<ClaseConRelaciones[]>([]);
   const [loading, setLoading] = useState(true);
   const [mesActual, setMesActual] = useState(new Date());
 
@@ -56,9 +56,12 @@ export function CalendarioView({ estudiante }: CalendarioViewProps) {
   const nombreMes = mesActual.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
 
   // Agrupar clases por día
-  const clasesPorDia: Record<string, Clase[]> = {};
+  const clasesPorDia: Record<string, ClaseConRelaciones[]> = {};
   clases.forEach((clase) => {
-    const fecha = new Date(clase.fecha_hora_inicio).toISOString().split('T')[0];
+    const [fecha] = new Date(clase.fecha_hora_inicio).toISOString().split('T');
+    if (!fecha) {
+      return;
+    }
     if (!clasesPorDia[fecha]) {
       clasesPorDia[fecha] = [];
     }
@@ -159,7 +162,7 @@ export function CalendarioView({ estudiante }: CalendarioViewProps) {
 
 interface DiaCardProps {
   dia: number;
-  clases: Clase[];
+  clases: ClaseConRelaciones[];
   esHoy: boolean;
 }
 
@@ -226,7 +229,7 @@ function DiaCard({ dia, clases, esHoy }: DiaCardProps) {
 }
 
 interface ClaseCardProps {
-  clase: Clase;
+  clase: ClaseConRelaciones;
 }
 
 function ClaseCard({ clase }: ClaseCardProps) {

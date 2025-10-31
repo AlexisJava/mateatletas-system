@@ -24,6 +24,8 @@ export interface TemaColors {
   gradient: string;
   border: string;
   glow: string;
+  primary: string;
+  secondary: string;
 }
 
 /**
@@ -34,21 +36,29 @@ export const TEMA_COLORS: Record<TemaCiencia, TemaColors> = {
     gradient: 'from-emerald-500 to-emerald-700',
     border: '#10b981',
     glow: 'rgba(16, 185, 129, 0.6)',
+    primary: '#34d399',
+    secondary: '#059669',
   },
   astronomia: {
     gradient: 'from-purple-600 to-indigo-800',
     border: '#9333ea',
     glow: 'rgba(147, 51, 234, 0.6)',
+    primary: '#c084fc',
+    secondary: '#4c1d95',
   },
   fisica: {
     gradient: 'from-orange-500 to-red-600',
     border: '#f97316',
     glow: 'rgba(249, 115, 22, 0.6)',
+    primary: '#fb923c',
+    secondary: '#b91c1c',
   },
   informatica: {
     gradient: 'from-cyan-500 to-blue-600',
     border: '#06b6d4',
     glow: 'rgba(6, 182, 212, 0.6)',
+    primary: '#22d3ee',
+    secondary: '#1d4ed8',
   },
 };
 

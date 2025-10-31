@@ -6,9 +6,9 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useOverlayStack } from '../../contexts/OverlayStackProvider';
 import { getActividadById } from '../../data/actividades-mes-ciencia';
 import { TIPO_ACTIVIDAD_COLORS } from '../../types/actividad.types';
@@ -20,7 +20,8 @@ import { ResultsView } from '../results/ResultsView';
 import { calcularResultado } from '../../utils/results-calculator';
 // TODO: ClaseSincronicaQuimica será redefinida desde cero
 // import { ClaseSincronicaQuimica } from './ClaseSincronicaQuimica';
-import type { OverlayConfig, Pregunta, ContenidoEjercicio, ContenidoVideo } from '../../types/actividad.types';
+import type { OverlayConfig } from '../../types/overlay.types';
+import type { Pregunta, ContenidoEjercicio, ContenidoVideo } from '../../types/actividad.types';
 import type { RespuestaRegistrada, ResultadoCalculado } from '../../utils/results-calculator';
 
 export interface EjecutarActividadViewProps {
@@ -121,6 +122,14 @@ export function EjecutarActividadView({ config, estudiante }: EjecutarActividadV
         }
 
         const pregunta = contenidoEjercicio.preguntas[preguntaActual];
+
+        if (!pregunta) {
+          return (
+            <div className="text-center text-white text-2xl">
+              ⚠️ Pregunta no disponible
+            </div>
+          );
+        }
 
         return (
           <div className="w-full">
@@ -345,7 +354,7 @@ export function EjecutarActividadView({ config, estudiante }: EjecutarActividadV
           onVolver={handleVolver}
           onReintentar={handleReintentar}
           estudianteId={estudiante?.id}
-          actividadId={config.actividad?.id}
+          actividadId={config.actividadId}
         />
       )}
     </motion.div>

@@ -1,4 +1,9 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  AxiosRequestConfig,
+  InternalAxiosRequestConfig,
+} from 'axios';
 
 /**
  * Cliente Axios configurado para comunicarse con el backend
@@ -10,14 +15,40 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
  * - Interceptor de response: maneja errores 401 (redirección a login)
  */
 
-const apiClient = axios.create({
+type ApiClient = Omit<AxiosInstance, 'get' | 'post' | 'put' | 'patch' | 'delete'> & {
+  get<T = unknown, D = any>(
+    url: string,
+    config?: AxiosRequestConfig<D>,
+  ): Promise<T>;
+  post<T = unknown, D = any>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig<D>,
+  ): Promise<T>;
+  put<T = unknown, D = any>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig<D>,
+  ): Promise<T>;
+  patch<T = unknown, D = any>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig<D>,
+  ): Promise<T>;
+  delete<T = unknown, D = any>(
+    url: string,
+    config?: AxiosRequestConfig<D>,
+  ): Promise<T>;
+};
+
+const apiClient: ApiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true, // CRÍTICO: Envía cookies automáticamente
-});
+}) as ApiClient;
 
 /**
  * Request Interceptor

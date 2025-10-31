@@ -65,7 +65,8 @@ export function OverlayStackProvider({ children }: OverlayStackProviderProps) {
    * Computed values
    */
   const canGoBack = stack.length > 0;
-  const currentOverlay = stack.length > 0 ? stack[stack.length - 1] : null;
+  const currentOverlay: OverlayConfig | null =
+    stack.length > 0 ? stack[stack.length - 1]! : null;
   const depth = stack.length;
 
   /**
@@ -121,13 +122,12 @@ export function useOverlayStack(): OverlayStackContextType {
  * Permite migración gradual de componentes
  */
 export function useOverlay() {
-  const { stack, push, pop, currentOverlay } = useOverlayStack();
+  const { push, pop, currentOverlay } = useOverlayStack();
 
   return {
     activeOverlay: currentOverlay?.type || null,
-    openOverlay: (type: string) => {
-      // Convertir string simple a OverlayConfig
-      push({ type: type as OverlayConfig['type'] });
+    openOverlay: (type: OverlayConfig['type']) => {
+      push({ type });
     },
     closeOverlay: pop,
   };
