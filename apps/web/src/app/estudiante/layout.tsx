@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import Script from 'next/script';
-
 /**
  * Portal Estudiante - Layout con Auth Guard
  *
@@ -147,27 +146,47 @@ export default function EstudianteLayout({ children }: { children: React.ReactNo
 }
 
 function LoadingScreen() {
+  // Generate stars only on client-side to prevent hydration mismatch
+  const [stars, setStars] = useState<Array<{
+    size: number
+    left: number
+    top: number
+    duration: number
+    delay: number
+    opacity: number
+  }>>([])
+
+  useEffect(() => {
+    // Generate stars after mount (client-side only)
+    const generatedStars = [...Array(200)].map(() => ({
+      size: Math.random() * 3,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: Math.random() * 3 + 2,
+      delay: Math.random() * 2,
+      opacity: Math.random() * 0.8 + 0.2,
+    }))
+    setStars(generatedStars)
+  }, [])
+
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-black">
       {/* CAMPO DE ESTRELLAS */}
       <div className="absolute inset-0">
-        {[...Array(200)].map((_, i) => {
-          const size = Math.random() * 3
-          return (
-            <div
-              key={`star-${i}`}
-              className="absolute rounded-full bg-white"
-              style={{
-                width: `${size}px`,
-                height: `${size}px`,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animation: `twinkle ${Math.random() * 3 + 2}s ease-in-out ${Math.random() * 2}s infinite`,
-                opacity: Math.random() * 0.8 + 0.2,
-              }}
-            />
-          )
-        })}
+        {stars.map((star, i) => (
+          <div
+            key={`star-${i}`}
+            className="absolute rounded-full bg-white"
+            style={{
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              left: `${star.left}%`,
+              top: `${star.top}%`,
+              animation: `twinkle ${star.duration}s ease-in-out ${star.delay}s infinite`,
+              opacity: star.opacity,
+            }}
+          />
+        ))}
       </div>
 
       {/* NEBULOSAS */}
