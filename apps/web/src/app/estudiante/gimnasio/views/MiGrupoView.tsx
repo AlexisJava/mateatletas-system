@@ -92,10 +92,10 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
             </div>
           </div>
 
-          {/* CONTENEDOR con scroll - SOLO el grid de compañeros */}
+          {/* CONTENEDOR con scroll - LISTA VERTICAL de compañeros */}
           {companeros.length > 0 ? (
             <div className="flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-cyan-500/50 scrollbar-track-transparent">
-              <div className="grid grid-cols-3 auto-rows-min gap-2">
+              <div className="flex flex-col gap-3">
                 {/* Mostrar TODOS los compañeros */}
                 {companeros.map((companero) => {
                 const esTu = companero.id === estudiante.id;
@@ -103,27 +103,33 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
                   <div
                     key={companero.id}
                     className={`
-                      rounded-xl p-2 border-2 flex flex-col items-center justify-center gap-0.5
+                      rounded-2xl p-4 border-2 flex items-center gap-4
                       ${esTu
                         ? 'bg-yellow-400/20 border-yellow-400/60 shadow-lg'
                         : 'bg-white/5 border-white/10'
                       }
                     `}
                   >
-                    <div className="text-xl">👤</div>
-                    <p className={`font-black text-center text-sm ${esTu ? 'text-yellow-300' : 'text-white'}`}>
-                      {companero.nombre}
-                    </p>
-                    <p className={`font-bold text-center text-xs ${esTu ? 'text-yellow-300' : 'text-white/80'}`}>
-                      {companero.apellido}
-                    </p>
-                    <div className={`text-sm font-black ${esTu ? 'text-yellow-400' : 'text-cyan-400'}`}>
-                      {companero.puntos.toLocaleString()} pts
+                    {/* Avatar */}
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-2xl">
+                      👤
                     </div>
+
+                    {/* Info del compañero */}
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-black text-lg ${esTu ? 'text-yellow-300' : 'text-white'} truncate`}>
+                        {companero.nombre} {companero.apellido}
+                      </p>
+                      <p className="text-cyan-400 text-xs font-medium">
+                        {companero.puntos.toLocaleString()} puntos
+                      </p>
+                    </div>
+
+                    {/* Badge "TÚ" */}
                     {esTu && (
-                      <span className="px-1.5 py-0.5 bg-yellow-400/40 text-yellow-200 text-[8px] font-black rounded-full">
+                      <div className="flex-shrink-0 px-3 py-1 bg-yellow-400/40 text-yellow-200 text-xs font-black rounded-full">
                         TÚ
-                      </span>
+                      </div>
                     )}
                   </div>
                 );
