@@ -113,6 +113,9 @@ const NAV_LEFT: NavButton[] = [
     glowColor: 'green',
     badge: 0,
   },
+];
+
+const NAV_RIGHT: NavButton[] = [
   {
     id: 'animaciones',
     overlayId: 'animaciones',
@@ -124,9 +127,6 @@ const NAV_LEFT: NavButton[] = [
     badge: 0,
     pulse: false,
   },
-];
-
-const NAV_RIGHT: NavButton[] = [
   {
     id: 'mi-grupo',
     overlayId: 'mi-grupo',
