@@ -71,13 +71,13 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
       </div>
 
       {/* Layout: Lista de compañeros + Stats */}
-      <div className="flex-1 flex gap-6">
+      <div className="flex-1 flex gap-6 min-h-0">
         {/* COLUMNA IZQUIERDA: Lista de compañeros (60%) */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="flex-[3] bg-blue-900/60 backdrop-blur-xl rounded-3xl p-6
-                     border-2 border-white/20 flex flex-col"
+                     border-2 border-white/20 flex flex-col min-h-0"
         >
           {/* Header FIJO del grupo */}
           <div className="flex items-center gap-3 mb-4 flex-shrink-0">
@@ -94,7 +94,7 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
 
           {/* CONTENEDOR con scroll - SOLO el grid de compañeros */}
           {companeros.length > 0 ? (
-            <div className="flex-1 min-h-0 overflow-y-auto pr-2">
+            <div className="flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-cyan-500/50 scrollbar-track-transparent">
               <div className="grid grid-cols-3 auto-rows-min gap-2">
                 {/* Mostrar TODOS los compañeros */}
                 {companeros.map((companero) => {
