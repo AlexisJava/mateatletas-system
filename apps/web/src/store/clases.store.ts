@@ -6,6 +6,7 @@ import { getErrorMessage } from '@/lib/utils/error-handler';
 import { create } from 'zustand';
 import {
   Clase,
+  ClaseConRelaciones,
   InscripcionClase,
   RutaCurricular,
   FiltroClases,
@@ -15,10 +16,10 @@ import * as clasesApi from '@/lib/api/clases.api';
 
 interface ClasesStore {
   // Estado
-  clases: Clase[];
+  clases: ClaseConRelaciones[];
   misReservas: InscripcionClase[];
   rutasCurriculares: RutaCurricular[];
-  claseSeleccionada: Clase | null;
+  claseSeleccionada: ClaseConRelaciones | null;
   filtros: FiltroClases;
   isLoading: boolean;
   error: string | null;
@@ -31,7 +32,7 @@ interface ClasesStore {
   resetFiltros: () => void;
   reservarClase: (claseId: string, data: CrearReservaDto) => Promise<boolean>;
   cancelarReserva: (inscripcionId: string) => Promise<boolean>;
-  setClaseSeleccionada: (clase: Clase | null) => void;
+  setClaseSeleccionada: (clase: ClaseConRelaciones | null) => void;
   getClasesFiltradas: () => Clase[];
 }
 
@@ -204,7 +205,7 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
   },
 
   // Seleccionar una clase
-  setClaseSeleccionada: (clase: Clase | null) => {
+  setClaseSeleccionada: (clase: ClaseConRelaciones | null) => {
     set({ claseSeleccionada: clase });
   },
 

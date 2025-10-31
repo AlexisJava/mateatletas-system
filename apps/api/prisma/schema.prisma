@@ -2716,3 +2716,8 @@ model CanjePadre {
   @@index([fecha_canje])
   @@map("canjes_padres")
 }
+
+// ========================================
+// SISTEMA DE CAMPAÑAS NARRATIVAS
+// ========================================
+

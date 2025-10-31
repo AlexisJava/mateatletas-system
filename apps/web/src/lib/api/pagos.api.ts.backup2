@@ -167,7 +167,7 @@ export const getMetricasDashboard = async (params?: {
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get(url);
-    return response.data;
+    return response as MetricasDashboardResponse;
   } catch (error) {
     console.error('Error al obtener las métricas del dashboard de pagos:', error);
     throw error;
@@ -184,7 +184,7 @@ export const getConfiguracionPrecios = async (): Promise<ConfiguracionPrecios> =
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get('/pagos/configuracion');
-    return response.data;
+    return response as ConfiguracionPrecios;
   } catch (error) {
     console.error('Error al obtener la configuración de precios:', error);
     throw error;
@@ -201,7 +201,7 @@ export const getHistorialCambios = async (): Promise<HistorialCambioPrecios[]> =
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get('/pagos/historial-cambios');
-    return response.data;
+    return response as HistorialCambioPrecios[];
   } catch (error) {
     console.error('Error al obtener el historial de cambios de precios:', error);
     throw error;
@@ -218,7 +218,7 @@ export const getInscripcionesPendientes = async (): Promise<InscripcionMensualCo
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get('/pagos/inscripciones/pendientes');
-    return response.data;
+    return response as InscripcionMensualConRelaciones[];
   } catch (error) {
     console.error('Error al obtener las inscripciones pendientes:', error);
     throw error;
@@ -235,7 +235,7 @@ export const getEstudiantesConDescuentos = async (): Promise<EstudianteConDescue
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get('/pagos/estudiantes-descuentos');
-    return response.data;
+    return response as EstudianteConDescuento[];
   } catch (error) {
     console.error('Error al obtener los estudiantes con descuentos:', error);
     throw error;
@@ -255,7 +255,7 @@ export const updateConfiguracionPrecios = async (
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.post('/pagos/configuracion/actualizar', data);
-    return response.data;
+    return response as ConfiguracionPrecios;
   } catch (error) {
     console.error('Error al actualizar la configuración de precios:', error);
     throw error;

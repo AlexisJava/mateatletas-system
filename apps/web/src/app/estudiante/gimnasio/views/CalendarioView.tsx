@@ -240,7 +240,7 @@ function ClaseCard({ clase }: ClaseCardProps) {
       <div className="flex items-start justify-between mb-2">
         <div>
           <h4 className="font-bold text-white">{clase.nombre}</h4>
-          <p className="text-sm text-white/60">{clase.rutaCurricular?.nombre || 'Sin ruta'}</p>
+          <p className="text-sm text-white/60">{clase.ruta_curricular?.nombre || 'Sin ruta'}</p>
         </div>
         {clase.modalidad === 'virtual' && (
           <Video className="w-5 h-5 text-cyan-400" />
