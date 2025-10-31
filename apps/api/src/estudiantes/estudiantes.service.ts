@@ -988,9 +988,18 @@ export class EstudiantesService {
 
     // Si encontramos clase grupal, calcular la próxima fecha según el día de la semana
     if (proximaClaseGrupo) {
-      const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      // Mapeo de enum DiaSemana de Prisma a índices de JavaScript (0=Domingo, 6=Sábado)
+      const diasSemanaMap: Record<string, number> = {
+        'DOMINGO': 0,
+        'LUNES': 1,
+        'MARTES': 2,
+        'MIERCOLES': 3,
+        'JUEVES': 4,
+        'VIERNES': 5,
+        'SABADO': 6,
+      };
       const diaActual = ahora.getDay();
-      const diaClase = diasSemana.indexOf(proximaClaseGrupo.dia_semana);
+      const diaClase = diasSemanaMap[proximaClaseGrupo.dia_semana] ?? -1;
 
       // Parsear hora (formato "HH:MM")
       const [horas, minutos] = proximaClaseGrupo.hora_inicio.split(':').map(Number);
