@@ -7,12 +7,16 @@
 
 import { motion } from 'framer-motion';
 import { useOverlayStack } from '../../contexts/OverlayStackProvider';
-import type { PlanificacionCardMensualProps, EstadoConfig } from '../../types/planificaciones.types';
+import type {
+  PlanificacionCardMensualProps,
+  EstadoConfig,
+  EstadoPlanificacion,
+} from '../../types/planificaciones.types';
 
 /**
  * Configuración visual por estado
  */
-const ESTADO_CONFIG: Record<string, EstadoConfig> = {
+const ESTADO_CONFIG: Record<EstadoPlanificacion, EstadoConfig> = {
   disponible: {
     border: 'border-cyan-400',
     bg: 'from-cyan-600/20 to-blue-600/20',
@@ -75,7 +79,7 @@ function extraerTema(codigo: string): 'astronomia' | 'fisica' | 'quimica' | 'inf
 
 export function PlanificacionCardMensual({ planificacion }: PlanificacionCardMensualProps) {
   const { push } = useOverlayStack();
-  const config = ESTADO_CONFIG[planificacion.estado];
+  const config = ESTADO_CONFIG[planificacion.estado] ?? ESTADO_CONFIG.disponible;
   const esBloqueada = planificacion.estado === 'bloqueada';
 
   const handleClick = () => {

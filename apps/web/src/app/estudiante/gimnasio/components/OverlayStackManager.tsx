@@ -19,7 +19,6 @@ import { RankingView } from '../views/RankingView';
 import { NotificacionesView } from '../views/NotificacionesView';
 import { AjustesView } from '../views/AjustesView';
 import { EntrenamientosView } from '../views/EntrenamientosView';
-import { TiendaView } from '../views/TiendaView';
 import { CursosView } from '../views/CursosView';
 import { MisCursosView } from '../views/MisCursosView';
 import { AnimacionesView } from '../views/AnimacionesView';
@@ -27,12 +26,11 @@ import { PlanificacionView } from './overlays/PlanificacionView';
 import { ActividadView } from './overlays/ActividadView';
 import { EjecutarActividadView } from './overlays/EjecutarActividadView';
 import { LaboratorioEcosistema } from './overlays/LaboratorioEcosistema';
-import { PlanificacionClient } from '@/app/estudiante/planificaciones/[codigo]/PlanificacionClient';
 
 /**
  * Configuración de metadatos para cada tipo de overlay
  */
-const OVERLAY_METADATA: Record<string, OverlayMetadata> = {
+const OVERLAY_METADATA: Record<OverlayConfig['type'], OverlayMetadata> = {
   'mi-grupo': {
     gradient: 'from-cyan-400/20 to-blue-600/20',
     renderType: 'modal',

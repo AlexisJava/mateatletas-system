@@ -23,7 +23,7 @@ export interface ActividadViewProps {
   };
 }
 
-export function ActividadView({ config, estudiante }: ActividadViewProps) {
+export function ActividadView({ config, estudiante: _estudiante }: ActividadViewProps) {
   const { pop, push } = useOverlayStack();
 
   if (!config || config.type !== 'actividad') {

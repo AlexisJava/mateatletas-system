@@ -135,11 +135,9 @@ export const getPlanificaciones = async (
 
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.get<PlanificacionListResponseApi>(
+    const data = await axios.get<PlanificacionListResponseApi>(
       `/planificaciones?${params.toString()}`,
     );
-
-    const data = response as PlanificacionListResponseApi;
 
     return {
       data: data.data.map(mapPlanificacionListItem),
@@ -166,7 +164,7 @@ export const getPlanificacionById = async (
     const response = await axios.get<PlanificacionDetalleApi>(
       `/planificaciones/${id}`,
     );
-    return mapPlanificacionDetalle(response as PlanificacionDetalleApi);
+    return mapPlanificacionDetalle(response);
   } catch (error) {
     console.error('Error al obtener la planificación por ID:', error);
     throw error;
@@ -186,7 +184,7 @@ export const createPlanificacion = async (
       '/planificaciones',
       data,
     );
-    return mapPlanificacionDetalle(response as PlanificacionDetalleApi);
+    return mapPlanificacionDetalle(response);
   } catch (error) {
     console.error('Error al crear la planificación:', error);
     throw error;
@@ -207,7 +205,7 @@ export const updatePlanificacion = async (
       `/planificaciones/${id}`,
       data,
     );
-    return mapPlanificacionDetalle(response as PlanificacionDetalleApi);
+    return mapPlanificacionDetalle(response);
   } catch (error) {
     console.error('Error al actualizar la planificación:', error);
     throw error;
@@ -241,7 +239,7 @@ export const addActividadToPlanificacion = async (
       `/planificaciones/${planificacionId}/actividades`,
       data,
     );
-    return mapActividad(response as ActividadApi);
+    return mapActividad(response);
   } catch (error) {
     console.error('Error al agregar la actividad a la planificación:', error);
     throw error;
@@ -263,7 +261,7 @@ export const updateActividad = async (
       `/planificaciones/${planificacionId}/actividades/${actividadId}`,
       data,
     );
-    return mapActividad(response as ActividadApi);
+    return mapActividad(response);
   } catch (error) {
     console.error('Error al actualizar la actividad de la planificación:', error);
     throw error;
