@@ -5,17 +5,49 @@ import { HubView } from './views/HubView'
 import { useAuthStore } from '@/store/auth.store'
 import { OverlayStackProvider, useOverlayStack } from './contexts/OverlayStackProvider'
 import { OverlayStackManager } from './components/OverlayStackManager'
+import { DailyWelcomeModal } from './components/DailyWelcomeModal'
+import { useRachaAutomatica } from '@/hooks/useRachaAutomatica'
 
 // Componente interno que usa el hook del overlay stack
 function GimnasioContent({ avatarUrl }: { avatarUrl: string | null }) {
   const { user } = useAuthStore()
   const { stack } = useOverlayStack()
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
+
+  // Cargar racha automáticamente y determinar si mostrar modal
+  const { racha, loading: loadingRacha } = useRachaAutomatica(user?.sub || user?.id)
 
   // Ocultar HubView cuando hay overlays abiertos
   const showHub = stack.length === 0
 
+  // Mostrar modal de bienvenida solo UNA VEZ por día
+  useEffect(() => {
+    if (!racha || loadingRacha || !user) return
+
+    const hoy = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+    const lastWelcomeDate = localStorage.getItem('lastWelcomeDate')
+
+    // Mostrar modal si es un día diferente
+    if (lastWelcomeDate !== hoy) {
+      setShowWelcomeModal(true)
+      localStorage.setItem('lastWelcomeDate', hoy)
+    }
+  }, [racha, loadingRacha, user])
+
   return (
     <>
+      {/* Modal de bienvenida diaria */}
+      {showWelcomeModal && racha && user && (
+        <DailyWelcomeModal
+          estudiante={{
+            nombre: user.nombre || 'Estudiante',
+            apellido: user.apellido || '',
+          }}
+          racha={racha}
+          onClose={() => setShowWelcomeModal(false)}
+        />
+      )}
+
       {/* Dashboard principal - SOLO visible cuando NO hay overlays */}
       {showHub && (
         <div className="h-screen overflow-hidden">
