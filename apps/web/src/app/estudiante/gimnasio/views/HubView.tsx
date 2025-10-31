@@ -896,74 +896,160 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
         </div>
       </div>
 
-      {/* ========== MODAL DE CONFIRMACIÓN DE LOGOUT ========== */}
+      {/* ========== MODAL DE CONFIRMACIÓN DE LOGOUT - ULTRA PREMIUM ========== */}
       <AnimatePresence>
         {showLogoutModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md"
             onClick={() => !isLoggingOut && setShowLogoutModal(false)}
           >
+            {/* Partículas flotantes de fondo */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(30)].map((_, i) => (
+                <motion.div
+                  key={`particle-logout-${i}`}
+                  className="absolute w-1 h-1 bg-red-400/30 rounded-full"
+                  initial={{
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    scale: Math.random() * 0.5 + 0.5,
+                  }}
+                  animate={{
+                    y: [null, Math.random() * -100 - 50],
+                    opacity: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: Math.random() * 3 + 2,
+                    repeat: Infinity,
+                    delay: Math.random() * 2,
+                  }}
+                />
+              ))}
+            </div>
+
             <motion.div
-              initial={{ scale: 0.8, y: 50 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.8, y: 50 }}
+              initial={{ scale: 0.8, y: 50, rotateX: 20 }}
+              animate={{ scale: 1, y: 0, rotateX: 0 }}
+              exit={{ scale: 0.8, y: 50, rotateX: -20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900
-                         border-4 border-red-500/50 rounded-3xl
+              className="relative bg-gradient-to-br from-slate-900/95 via-red-950/95 to-slate-900/95
+                         backdrop-blur-xl rounded-3xl
                          p-8 md:p-12 max-w-md w-full mx-4
-                         shadow-2xl shadow-red-500/30"
+                         shadow-[0_0_80px_rgba(239,68,68,0.4)]
+                         overflow-hidden"
+              style={{
+                transformStyle: 'preserve-3d',
+                border: '2px solid transparent',
+                backgroundImage: 'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(236,72,153,0.1) 100%)',
+                backgroundClip: 'padding-box',
+              }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Icono */}
+              {/* Borde animado con gradiente */}
               <motion.div
-                initial={{ rotate: 0 }}
-                animate={{ rotate: [0, -10, 10, -10, 0] }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex justify-center mb-6"
+                className="absolute inset-0 rounded-3xl pointer-events-none"
+                style={{
+                  background: 'linear-gradient(90deg, #ef4444, #ec4899, #ef4444)',
+                  backgroundSize: '200% 100%',
+                  padding: '2px',
+                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                }}
+                animate={{
+                  backgroundPosition: ['0% 50%', '200% 50%'],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+              />
+
+              {/* Icono con resplandor pulsante */}
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                className="flex justify-center mb-6 relative"
               >
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-pink-600
-                               flex items-center justify-center
-                               shadow-xl shadow-red-500/50">
-                  <LogOut className="w-12 h-12 text-white" strokeWidth={3} />
+                {/* Resplandor pulsante */}
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  animate={{
+                    boxShadow: [
+                      '0 0 40px 10px rgba(239,68,68,0.4)',
+                      '0 0 60px 20px rgba(239,68,68,0.6)',
+                      '0 0 40px 10px rgba(239,68,68,0.4)',
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+
+                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-red-500 via-pink-600 to-red-700
+                               flex items-center justify-center z-10
+                               shadow-[0_0_40px_rgba(239,68,68,0.6)]">
+                  <LogOut className="w-12 h-12 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" strokeWidth={3} />
                 </div>
               </motion.div>
 
-              {/* Título */}
-              <h2 className="text-4xl font-black text-white text-center mb-4
-                             font-[family-name:var(--font-lilita)]">
+              {/* Título con efecto holográfico */}
+              <motion.h2
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl font-black text-white text-center mb-4
+                           font-[family-name:var(--font-lilita)]"
+                style={{
+                  textShadow: '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(236,72,153,0.4)',
+                }}
+              >
                 ¿SALIR DEL GIMNASIO?
-              </h2>
+              </motion.h2>
 
               {/* Mensaje */}
-              <p className="text-white/80 text-center text-lg mb-8 font-medium">
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-white/90 text-center text-lg mb-8 font-medium"
+              >
                 ¿Estás seguro que querés cerrar sesión?
                 <br />
-                <span className="text-white/60 text-base">Podrás volver cuando quieras 💪</span>
-              </p>
+                <span className="text-white/60 text-base">Podrás volver cuando quieras</span>
+              </motion.p>
 
-              {/* Botones */}
-              <div className="flex gap-4">
+              {/* Botones con efecto 3D */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="flex gap-4"
+              >
                 {/* Botón Cancelar */}
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95, y: 0 }}
                   onClick={() => setShowLogoutModal(false)}
                   disabled={isLoggingOut}
                   className="flex-1 bg-white/10 hover:bg-white/20
                              text-white font-bold text-lg py-4 rounded-2xl
-                             border-2 border-white/30
-                             transition-all disabled:opacity-50"
+                             border-2 border-white/30 hover:border-white/50
+                             transition-all disabled:opacity-50
+                             shadow-[0_4px_0_rgba(255,255,255,0.1)]
+                             hover:shadow-[0_6px_20px_rgba(255,255,255,0.2)]
+                             active:shadow-[0_2px_0_rgba(255,255,255,0.1)]"
                 >
-                  ❌ CANCELAR
+                  CANCELAR
                 </motion.button>
 
                 {/* Botón Confirmar */}
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95, y: 0 }}
                   onClick={async () => {
                     try {
                       setIsLoggingOut(true);
@@ -975,100 +1061,177 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                     }
                   }}
                   disabled={isLoggingOut}
-                  className="flex-1 bg-gradient-to-r from-red-500 to-pink-600
-                             hover:from-red-600 hover:to-pink-700
+                  className="flex-1 bg-gradient-to-r from-red-500 via-pink-600 to-red-600
+                             hover:from-red-600 hover:via-pink-700 hover:to-red-700
                              text-white font-black text-lg py-4 rounded-2xl
-                             shadow-xl shadow-red-500/50
                              border-2 border-red-400/50
-                             transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                             transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                             shadow-[0_4px_0_rgba(220,38,38,0.8),0_0_40px_rgba(239,68,68,0.3)]
+                             hover:shadow-[0_6px_20px_rgba(239,68,68,0.6)]
+                             active:shadow-[0_2px_0_rgba(220,38,38,0.8)]"
                 >
-                  {isLoggingOut ? '⏳ SALIENDO...' : '✅ SÍ, SALIR'}
+                  {isLoggingOut ? 'SALIENDO...' : 'SÍ, SALIR'}
                 </motion.button>
-              </div>
-
-              {/* Decoración */}
-              <div className="absolute -top-6 -right-6 text-8xl opacity-20 pointer-events-none">
-                👋
-              </div>
-              <div className="absolute -bottom-6 -left-6 text-8xl opacity-20 pointer-events-none">
-                🚪
-              </div>
+              </motion.div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ========== MODAL: CLASE AÚN NO COMIENZA ========== */}
+      {/* ========== MODAL: CLASE AÚN NO COMIENZA - ULTRA PREMIUM ========== */}
       <AnimatePresence>
         {showClaseNoComenzModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md"
             onClick={() => setShowClaseNoComenzModal(false)}
           >
+            {/* Partículas flotantes de fondo cyan/azul */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(30)].map((_, i) => (
+                <motion.div
+                  key={`particle-clase-${i}`}
+                  className="absolute w-1 h-1 bg-cyan-400/30 rounded-full"
+                  initial={{
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    scale: Math.random() * 0.5 + 0.5,
+                  }}
+                  animate={{
+                    y: [null, Math.random() * -100 - 50],
+                    opacity: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: Math.random() * 3 + 2,
+                    repeat: Infinity,
+                    delay: Math.random() * 2,
+                  }}
+                />
+              ))}
+            </div>
+
             <motion.div
-              initial={{ scale: 0.8, y: 50 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.8, y: 50 }}
+              initial={{ scale: 0.8, y: 50, rotateX: 20 }}
+              animate={{ scale: 1, y: 0, rotateX: 0 }}
+              exit={{ scale: 0.8, y: 50, rotateX: -20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900
-                         border-4 border-cyan-400/50 rounded-3xl
+              className="relative bg-gradient-to-br from-slate-900/95 via-cyan-950/95 to-slate-900/95
+                         backdrop-blur-xl rounded-3xl
                          p-8 md:p-12 max-w-md w-full mx-4
-                         shadow-2xl shadow-cyan-400/30"
+                         shadow-[0_0_80px_rgba(34,211,238,0.4)]
+                         overflow-hidden"
+              style={{
+                transformStyle: 'preserve-3d',
+                border: '2px solid transparent',
+                backgroundImage: 'linear-gradient(135deg, rgba(34,211,238,0.1) 0%, rgba(59,130,246,0.1) 100%)',
+                backgroundClip: 'padding-box',
+              }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Icono */}
+              {/* Borde animado con gradiente cyan-azul */}
               <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-                className="flex justify-center mb-6"
+                className="absolute inset-0 rounded-3xl pointer-events-none"
+                style={{
+                  background: 'linear-gradient(90deg, #22d3ee, #3b82f6, #22d3ee)',
+                  backgroundSize: '200% 100%',
+                  padding: '2px',
+                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                }}
+                animate={{
+                  backgroundPosition: ['0% 50%', '200% 50%'],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+              />
+
+              {/* Icono con resplandor pulsante */}
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                className="flex justify-center mb-6 relative"
               >
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500
-                               flex items-center justify-center
-                               shadow-xl shadow-cyan-400/50">
-                  <Calendar className="w-12 h-12 text-white" strokeWidth={3} />
+                {/* Resplandor pulsante cyan */}
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  animate={{
+                    boxShadow: [
+                      '0 0 40px 10px rgba(34,211,238,0.4)',
+                      '0 0 60px 20px rgba(34,211,238,0.6)',
+                      '0 0 40px 10px rgba(34,211,238,0.4)',
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+
+                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-cyan-600
+                               flex items-center justify-center z-10
+                               shadow-[0_0_40px_rgba(34,211,238,0.6)]">
+                  <Calendar className="w-12 h-12 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" strokeWidth={3} />
                 </div>
               </motion.div>
 
-              {/* Título */}
-              <h2 className="text-4xl font-black text-white text-center mb-4
-                             font-[family-name:var(--font-lilita)]">
+              {/* Título con efecto holográfico */}
+              <motion.h2
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl font-black text-white text-center mb-4
+                           font-[family-name:var(--font-lilita)]"
+                style={{
+                  textShadow: '0 0 20px rgba(34,211,238,0.8), 0 0 40px rgba(59,130,246,0.4)',
+                }}
+              >
                 ¡TODAVÍA NO ES HORA!
-              </h2>
+              </motion.h2>
 
               {/* Mensaje */}
-              <p className="text-white/90 text-center text-lg mb-2 font-medium">
-                Tu clase aún no comienza.
-              </p>
-              <p className="text-cyan-300 text-center text-2xl font-black mb-8">
-                Volvé en {formatearTiempoRestante(minutosRestantes)} ⏰
-              </p>
-
-              {/* Botón OK */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowClaseNoComenzModal(false)}
-                className="w-full bg-gradient-to-r from-cyan-400 to-blue-500
-                           hover:from-cyan-500 hover:to-blue-600
-                           text-white font-black text-xl py-4 rounded-2xl
-                           shadow-xl shadow-cyan-400/50
-                           border-2 border-cyan-300/50
-                           transition-all"
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-white/90 text-center text-lg mb-2 font-medium"
               >
-                ✅ ENTENDIDO
-              </motion.button>
+                Tu clase aún no comienza.
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+                className="text-cyan-300 text-center text-2xl font-black mb-8"
+                style={{
+                  textShadow: '0 0 15px rgba(34,211,238,0.6)',
+                }}
+              >
+                Volvé en {formatearTiempoRestante(minutosRestantes)}
+              </motion.p>
 
-              {/* Decoración */}
-              <div className="absolute -top-6 -right-6 text-8xl opacity-20 pointer-events-none">
-                ⏰
-              </div>
-              <div className="absolute -bottom-6 -left-6 text-8xl opacity-20 pointer-events-none">
-                📚
-              </div>
+              {/* Botón OK con efecto 3D */}
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95, y: 0 }}
+                onClick={() => setShowClaseNoComenzModal(false)}
+                className="w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-500
+                           hover:from-cyan-500 hover:via-blue-600 hover:to-cyan-600
+                           text-white font-black text-xl py-4 rounded-2xl
+                           border-2 border-cyan-300/50
+                           transition-all
+                           shadow-[0_4px_0_rgba(6,182,212,0.8),0_0_40px_rgba(34,211,238,0.3)]
+                           hover:shadow-[0_6px_20px_rgba(34,211,238,0.6)]
+                           active:shadow-[0_2px_0_rgba(6,182,212,0.8)]"
+              >
+                ENTENDIDO
+              </motion.button>
             </motion.div>
           </motion.div>
         )}
