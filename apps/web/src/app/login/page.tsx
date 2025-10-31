@@ -531,24 +531,24 @@ export default function LoginPage() {
 
                   {/* Login Form */}
                   <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
-                    {/* Email Input - Brawl Style */}
+                    {/* Username Input - Brawl Style */}
                     <div className="space-y-1">
                       <label htmlFor="email" className="block text-[10px] sm:text-xs font-bold text-white/90">
-                        Correo electrónico
+                        Nombre de Usuario
                       </label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-2.5 sm:pl-3 flex items-center pointer-events-none">
-                          <Mail className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-orange-300/60 group-focus-within:text-orange-300 transition-colors" />
+                          <User className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-orange-300/60 group-focus-within:text-orange-300 transition-colors" />
                         </div>
                         <input
                           id="email"
-                          type="email"
+                          type="text"
                           value={email}
                           onChange={handleEmailChange}
                           required
-                          placeholder="tu@email.com"
+                          placeholder="usuario"
                           disabled={isLoading}
-                          autoComplete="email"
+                          autoComplete="username"
                           className="w-full pl-8 sm:pl-10 pr-2.5 sm:pr-3 py-2 sm:py-2.5 text-xs sm:text-sm bg-black/50 border-2 border-orange-400/20 rounded-lg sm:rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </div>
