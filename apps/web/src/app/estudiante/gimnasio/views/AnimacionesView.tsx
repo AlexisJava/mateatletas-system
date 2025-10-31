@@ -277,6 +277,15 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
                 <button
                   onClick={() => {
                     setSelectedAnimation(previewAnimation.id)
+
+                    // Guardar en localStorage para que HubView la use
+                    localStorage.setItem('selected_idle_animation', previewAnimation.url)
+
+                    // Disparar evento custom para que HubView se entere del cambio
+                    window.dispatchEvent(new CustomEvent('animation-selected', {
+                      detail: { animationUrl: previewAnimation.url }
+                    }))
+
                     setPreviewAnimation(null)
                     toast.success(`¡Animación "${previewAnimation.displayName}" seleccionada!`, {
                       description: 'Tu avatar usará esta animación',
