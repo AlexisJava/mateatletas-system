@@ -3,6 +3,9 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  Inject,
+  forwardRef,
+  Logger,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
@@ -18,6 +21,7 @@ import {
   generarPasswordTemporal,
   hashPassword,
 } from './utils/credenciales.utils';
+import { LogrosService } from '../gamificacion/services/logros.service';
 
 /**
  * Service para gestionar operaciones CRUD de estudiantes
@@ -25,7 +29,13 @@ import {
  */
 @Injectable()
 export class EstudiantesService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(EstudiantesService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => LogrosService))
+    private logrosService: LogrosService,
+  ) {}
 
   /**
    * Crea un nuevo estudiante asociado a un tutor
@@ -178,8 +188,11 @@ export class EstudiantesService {
       throw new NotFoundException('Estudiante no encontrado');
     }
 
+    // Verificar si es la primera vez que crea avatar
+    const esPrimerAvatar = !estudiante.avatar_url;
+
     // Actualizar solo el avatar 3D
-    return this.prisma.estudiante.update({
+    const estudianteActualizado = await this.prisma.estudiante.update({
       where: { id },
       data: { avatar_url },
       include: {
@@ -194,6 +207,20 @@ export class EstudiantesService {
         },
       },
     });
+
+    // Otorgar logro de avatar creado si es la primera vez
+    if (esPrimerAvatar) {
+      try {
+        await this.logrosService.desbloquearLogro(id, 'AVATAR_CREADO');
+        this.logger.log(`Logro AVATAR_CREADO otorgado a estudiante ${id}`);
+      } catch (error) {
+        this.logger.error(
+          `Error al otorgar logro AVATAR_CREADO: ${error}`,
+        );
+      }
+    }
+
+    return estudianteActualizado;
   }
 
   async updateAnimacionIdle(id: string, animacion_idle_url: string) {
@@ -980,6 +1007,14 @@ export class EstudiantesService {
             descripcion: true,
           },
         },
+        grupo: {
+          select: {
+            id: true,
+            codigo: true,
+            nombre: true,
+            link_meet: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'asc', // Podemos usar createdAt como referencia temporal
@@ -1038,6 +1073,7 @@ export class EstudiantesService {
         ruta_curricular: proximaClaseGrupo.rutaCurricular,
         dia_semana: proximaClaseGrupo.dia_semana,
         hora_inicio: proximaClaseGrupo.hora_inicio,
+        link_meet: proximaClaseGrupo.grupo?.link_meet,
       };
     }
 
@@ -1137,5 +1173,84 @@ export class EstudiantesService {
       apellido: c.apellido,
       puntos: c.puntos_totales,
     }));
+  }
+
+  /**
+   * Obtener los sectores (Matemática, Programación, Ciencias) en los que está inscrito el estudiante
+   * Agrupa los grupos por sector para mostrar en el portal del estudiante
+   * @param estudianteId - ID del estudiante autenticado
+   * @returns Array de sectores con sus grupos y metadata
+   */
+  async obtenerMisSectores(estudianteId: string) {
+    // 1. Obtener todas las inscripciones del estudiante con grupos y sectores
+    const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
+      where: {
+        estudiante_id: estudianteId,
+        fecha_baja: null, // Solo inscripciones activas
+      },
+      include: {
+        claseGrupo: {
+          include: {
+            grupo: {
+              include: {
+                sector: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // 2. Extraer sectores únicos
+    const sectoresMap = new Map<string, {
+      id: string;
+      nombre: string;
+      descripcion: string | null;
+      color: string;
+      icono: string;
+      grupos: Array<{
+        id: string;
+        codigo: string;
+        nombre: string;
+        link_meet: string | null;
+      }>;
+    }>();
+
+    for (const inscripcion of inscripciones) {
+      const grupo = inscripcion.claseGrupo.grupo;
+      const sector = grupo.sector;
+
+      if (!sector) continue; // Saltar grupos sin sector
+
+      // Si el sector no está en el map, agregarlo
+      if (!sectoresMap.has(sector.id)) {
+        sectoresMap.set(sector.id, {
+          id: sector.id,
+          nombre: sector.nombre,
+          descripcion: sector.descripcion,
+          color: sector.color,
+          icono: sector.icono,
+          grupos: [],
+        });
+      }
+
+      // Agregar grupo al sector (evitar duplicados)
+      const sectorData = sectoresMap.get(sector.id)!;
+      const grupoExiste = sectorData.grupos.some(g => g.id === grupo.id);
+
+      if (!grupoExiste) {
+        sectorData.grupos.push({
+          id: grupo.id,
+          codigo: grupo.codigo,
+          nombre: grupo.nombre,
+          link_meet: grupo.link_meet,
+        });
+      }
+    }
+
+    // 3. Convertir Map a Array y ordenar por nombre
+    return Array.from(sectoresMap.values()).sort((a, b) =>
+      a.nombre.localeCompare(b.nombre)
+    );
   }
 }

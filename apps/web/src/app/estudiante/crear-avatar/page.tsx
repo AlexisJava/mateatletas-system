@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AvatarCreator, AvatarCreatorConfig, AvatarExportedEvent } from '@readyplayerme/react-avatar-creator'
 import { Sparkles, ArrowRight, Loader2, AlertCircle } from 'lucide-react'
 import { BrawlBackground } from '../gimnasio/components/BrawlBackground'
+import { LandscapeOnlyGuard } from '../gimnasio/components/LandscapeOnlyGuard'
 import { RPM_CONFIG } from '@/lib/ready-player-me.config'
 
 type Paso = 'bienvenida' | 'creando' | 'preview'
@@ -117,8 +118,9 @@ export default function CrearAvatarPage() {
   }
 
   return (
-    <BrawlBackground>
-      <AnimatePresence mode="wait">
+    <LandscapeOnlyGuard>
+      <BrawlBackground>
+        <AnimatePresence mode="wait">
 
         {/* BIENVENIDA */}
         {paso === 'bienvenida' && (
@@ -352,7 +354,8 @@ export default function CrearAvatarPage() {
           </motion.div>
         )}
 
-      </AnimatePresence>
-    </BrawlBackground>
+        </AnimatePresence>
+      </BrawlBackground>
+    </LandscapeOnlyGuard>
   )
 }

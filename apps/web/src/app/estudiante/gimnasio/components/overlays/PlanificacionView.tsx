@@ -172,9 +172,9 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
         onClick={!esBloqueada ? onClick : undefined}
         className={`
           relative
-          w-72
-          h-[500px]
-          rounded-3xl
+          w-64 sm:w-72
+          h-[450px] sm:h-[500px]
+          rounded-2xl sm:rounded-3xl
           overflow-hidden
           ${esBloqueada ? 'cursor-not-allowed' : 'cursor-pointer'}
         `}
@@ -187,9 +187,9 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
         whileHover={!esBloqueada ? { y: -12, scale: 1.03 } : undefined}
         whileTap={!esBloqueada ? { scale: 0.97 } : undefined}
       >
-        {/* Contenedor principal con glassmorphism premium */}
+        {/* Contenedor principal con glassmorphism premium - RESPONSIVE */}
         <div
-          className="relative w-full h-full rounded-3xl overflow-hidden"
+          className="relative w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden"
           style={{
             background: esBloqueada
               ? 'linear-gradient(145deg, #2d3748 0%, #1a202c 100%)'
@@ -236,7 +236,7 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
 
           {/* Badge NUEVA - más sutil y premium */}
           {esNueva && !esBloqueada && (
-            <div className="absolute top-4 right-4 z-20">
+            <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-20">
               <motion.div
                 className="relative"
                 animate={{
@@ -249,22 +249,22 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
                 }}
               >
                 <div
-                  className="backdrop-blur-xl rounded-full px-4 py-1.5 flex items-center gap-2 border"
+                  className="backdrop-blur-xl rounded-full px-3 sm:px-4 py-1 sm:py-1.5 flex items-center gap-1.5 sm:gap-2 border"
                   style={{
                     background: 'rgba(251, 191, 36, 0.15)',
                     borderColor: 'rgba(251, 191, 36, 0.4)',
                     boxShadow: '0 4px 20px rgba(251, 191, 36, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
                   }}
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-yellow-300" strokeWidth={2.5} />
-                  <span className="text-xs font-bold text-yellow-100 uppercase tracking-wider">Nueva</span>
+                  <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-yellow-300" strokeWidth={2.5} />
+                  <span className="text-[10px] sm:text-xs font-bold text-yellow-100 uppercase tracking-wider">Nueva</span>
                 </div>
               </motion.div>
             </div>
           )}
 
           {/* Sección superior - Ilustración */}
-          <div className="relative h-64 flex items-center justify-center overflow-hidden">
+          <div className="relative h-56 sm:h-64 flex items-center justify-center overflow-hidden">
             {/* Gradient overlay superior */}
             <div
               className="absolute inset-0 z-10"
@@ -286,7 +286,7 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
-                    <Lock className="w-24 h-24 text-white/30" strokeWidth={1.5} />
+                    <Lock className="w-20 sm:w-24 h-20 sm:h-24 text-white/30" strokeWidth={1.5} />
                   </motion.div>
                   <div
                     className="absolute inset-0"
@@ -372,14 +372,14 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
 
           {/* Sección inferior - Info */}
           <div
-            className="relative h-[236px] p-6 flex flex-col"
+            className="relative h-[220px] sm:h-[236px] p-4 sm:p-6 flex flex-col"
             style={{
               background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%)',
             }}
           >
             {/* Título */}
             <h3
-              className="font-[family-name:var(--font-lilita)] text-3xl text-white text-center mb-5 leading-tight"
+              className="font-[family-name:var(--font-lilita)] text-2xl sm:text-3xl text-white text-center mb-4 sm:mb-5 leading-tight"
               style={{
                 textShadow: '0 4px 12px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4)',
                 letterSpacing: '0.02em',
@@ -389,8 +389,8 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
             </h3>
 
             {/* Progress circular premium */}
-            <div className="flex justify-center mb-5">
-              <div className="relative w-24 h-24">
+            <div className="flex justify-center mb-4 sm:mb-5">
+              <div className="relative w-20 sm:w-24 h-20 sm:h-24">
                 {/* Shadow base */}
                 <div
                   className="absolute inset-0 rounded-full blur-md"
@@ -400,7 +400,7 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
                   }}
                 />
                 {/* SVG Progress */}
-                <svg className="w-24 h-24 transform -rotate-90 relative z-10">
+                <svg className="w-20 sm:w-24 h-20 sm:h-24 transform -rotate-90 relative z-10">
                   {/* Track */}
                   <circle
                     cx="48"
@@ -432,7 +432,7 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
                 {/* Percentage text */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span
-                    className="text-white font-black text-2xl"
+                    className="text-white font-black text-xl sm:text-2xl"
                     style={{
                       textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)',
                     }}
@@ -449,28 +449,28 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
             <div className="mt-auto">
               {esBloqueada && (
                 <div
-                  className="w-full backdrop-blur-xl rounded-2xl py-3 flex items-center justify-center gap-2.5 border"
+                  className="w-full backdrop-blur-xl rounded-xl sm:rounded-2xl py-2.5 sm:py-3 flex items-center justify-center gap-2 sm:gap-2.5 border"
                   style={{
                     background: 'rgba(239, 68, 68, 0.15)',
                     borderColor: 'rgba(239, 68, 68, 0.3)',
                     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
                   }}
                 >
-                  <Lock className="w-4 h-4 text-red-300" strokeWidth={2.5} />
-                  <span className="text-red-200 font-bold text-sm uppercase tracking-widest">Bloqueada</span>
+                  <Lock className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-red-300" strokeWidth={2.5} />
+                  <span className="text-red-200 font-bold text-xs sm:text-sm uppercase tracking-widest">Bloqueada</span>
                 </div>
               )}
               {!esBloqueada && semana.estado === 'disponible' && (
                 <div
-                  className="w-full backdrop-blur-xl rounded-2xl py-3 flex items-center justify-center gap-2.5 border"
+                  className="w-full backdrop-blur-xl rounded-xl sm:rounded-2xl py-2.5 sm:py-3 flex items-center justify-center gap-2 sm:gap-2.5 border"
                   style={{
                     background: `linear-gradient(135deg, ${style.accent}22 0%, ${style.accent}11 100%)`,
                     borderColor: `${style.accent}66`,
                     boxShadow: `0 4px 20px ${style.glow}, inset 0 1px 0 rgba(255, 255, 255, 0.2)`,
                   }}
                 >
-                  <Sparkles className="w-4 h-4 text-white" strokeWidth={2.5} />
-                  <span className="text-white font-bold text-sm uppercase tracking-widest">Disponible</span>
+                  <Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-white" strokeWidth={2.5} />
+                  <span className="text-white font-bold text-xs sm:text-sm uppercase tracking-widest">Disponible</span>
                 </div>
               )}
             </div>
@@ -572,7 +572,7 @@ export function PlanificacionView({ config: _config, estudiante: _estudiante }: 
 
       {/* Header premium */}
       <header
-        className="relative h-24 backdrop-blur-2xl border-b px-10 flex items-center justify-between"
+        className="relative h-20 sm:h-24 backdrop-blur-2xl border-b px-4 sm:px-10 flex items-center justify-between"
         style={{
           background: 'rgba(0, 0, 0, 0.2)',
           borderColor: 'rgba(255, 255, 255, 0.08)',
@@ -581,20 +581,20 @@ export function PlanificacionView({ config: _config, estudiante: _estudiante }: 
       >
         <button
           onClick={pop}
-          className="group flex items-center gap-3 backdrop-blur-xl rounded-2xl px-7 py-3.5 border transition-all duration-200"
+          className="group flex items-center gap-2 sm:gap-3 backdrop-blur-xl rounded-xl sm:rounded-2xl px-5 sm:px-7 py-2.5 sm:py-3.5 border transition-all duration-200"
           style={{
             background: 'rgba(255, 255, 255, 0.05)',
             borderColor: 'rgba(255, 255, 255, 0.15)',
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
           }}
         >
-          <ArrowLeft className="w-5 h-5 text-white transition-transform group-hover:-translate-x-1" strokeWidth={2.5} />
-          <span className="font-bold text-white text-sm uppercase tracking-wider">Volver</span>
+          <ArrowLeft className="w-4 sm:w-5 h-4 sm:h-5 text-white transition-transform group-hover:-translate-x-1" strokeWidth={2.5} />
+          <span className="font-bold text-white text-xs sm:text-sm uppercase tracking-wider">Volver</span>
         </button>
 
         <div className="text-center">
           <h1
-            className="font-[family-name:var(--font-lilita)] text-5xl text-white tracking-wide uppercase mb-1"
+            className="font-[family-name:var(--font-lilita)] text-3xl sm:text-5xl text-white tracking-wide uppercase mb-1"
             style={{
               textShadow: '0 4px 20px rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.6)',
               letterSpacing: '0.05em',
@@ -603,7 +603,7 @@ export function PlanificacionView({ config: _config, estudiante: _estudiante }: 
             MES DE LA CIENCIA
           </h1>
           <p
-            className="text-cyan-300 text-sm font-bold uppercase tracking-widest"
+            className="text-cyan-300 text-xs sm:text-sm font-bold uppercase tracking-widest"
             style={{
               textShadow: '0 2px 8px rgba(6, 182, 212, 0.5)',
             }}
@@ -612,12 +612,12 @@ export function PlanificacionView({ config: _config, estudiante: _estudiante }: 
           </p>
         </div>
 
-        <div className="w-32" />
+        <div className="w-20 sm:w-32" />
       </header>
 
       {/* Carrusel centrado */}
-      <div className="flex-1 flex items-center justify-center px-8 py-10">
-        <div className="flex gap-7 items-center justify-center max-w-[1400px]">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-8 py-6 sm:py-10">
+        <div className="flex gap-4 sm:gap-7 items-center justify-center max-w-[1400px]">
           {SEMANAS_MES_CIENCIA.map((semana, index) => (
             <PS5Card
               key={semana.id}

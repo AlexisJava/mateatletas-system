@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
@@ -14,6 +14,7 @@ import {
 import { DatabaseModule } from '../core/database/database.module';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
+import { GamificacionModule } from '../gamificacion/gamificacion.module';
 
 /**
  * Módulo de autenticación
@@ -31,6 +32,7 @@ import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
 @Module({
   imports: [
     DatabaseModule, // Para PrismaService en handlers
+    forwardRef(() => GamificacionModule), // Para LogrosService
     // Configuración de Passport
     PassportModule.register({
       defaultStrategy: 'jwt',
