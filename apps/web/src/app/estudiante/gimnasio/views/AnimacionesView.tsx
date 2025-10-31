@@ -6,6 +6,8 @@ import { X, Lock, Check, Play, Sparkles } from 'lucide-react'
 import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D'
 import { useStudentAnimations } from '@/hooks/useStudentAnimations'
 import { useOverlayStack } from '../contexts/OverlayStackProvider'
+import { toast } from 'sonner'
+import { estudiantesApi } from '@/lib/api/estudiantes.api'
 
 interface AnimacionesViewProps {
   estudiante: {
@@ -52,7 +54,7 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
       ]
 
   const handleUnlockAnimation = async (animationId: string, cost: number) => {
-    // TODO: Implementar llamada al backend
+    // TODO: Implementar llamada al backend para desbloquear animación
     console.log(`Desbloqueando animación ${animationId} por ${cost} puntos`)
   }
 
@@ -208,12 +210,12 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
 
       {/* Modal de preview */}
       <AnimatePresence>
-        {previewAnimation && estudiante.avatar_url && (
+        {previewAnimation && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
             onClick={() => setPreviewAnimation(null)}
           >
             <motion.div
@@ -239,20 +241,68 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
               </div>
 
               <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-blue-900/50 to-purple-900/50">
-                <AnimatedAvatar3D
-                  avatarUrl={estudiante.avatar_url}
-                  animationUrl={previewAnimation.url}
-                  width="100%"
-                  height="100%"
-                  enableControls
-                />
+                {estudiante.avatar_url ? (
+                  <AnimatedAvatar3D
+                    key={`preview-${previewAnimation.id}`}
+                    avatarUrl={estudiante.avatar_url}
+                    animationUrl={previewAnimation.url}
+                    width="100%"
+                    height="100%"
+                    enableControls
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8">
+                    <div className="text-6xl">🎭</div>
+                    <div className="text-center">
+                      <h3 className="text-white font-bold text-xl mb-2">
+                        Crea tu Avatar
+                      </h3>
+                      <p className="text-white/70 text-sm">
+                        Necesitas un avatar para ver las animaciones en 3D
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setPreviewAnimation(null)
+                        // TODO: Navegar a creación de avatar
+                      }}
+                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold hover:from-blue-400 hover:to-cyan-400 transition-all"
+                    >
+                      Ir a Crear Avatar
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 flex gap-4">
                 <button
-                  onClick={() => {
-                    setSelectedAnimation(previewAnimation.id)
-                    setPreviewAnimation(null)
+                  onClick={async () => {
+                    try {
+                      setSelectedAnimation(previewAnimation.id)
+
+                      // 1. Guardar en backend
+                      await estudiantesApi.updateAnimacion(previewAnimation.url)
+
+                      // 2. Guardar en localStorage para que HubView la use
+                      localStorage.setItem('selected_idle_animation', previewAnimation.url)
+
+                      // 3. Disparar evento custom para que HubView se entere del cambio
+                      window.dispatchEvent(new CustomEvent('animation-selected', {
+                        detail: { animationUrl: previewAnimation.url }
+                      }))
+
+                      setPreviewAnimation(null)
+                      toast.success(`¡Animación "${previewAnimation.displayName}" seleccionada!`, {
+                        description: 'Guardada en la base de datos',
+                        duration: 3000,
+                      })
+                    } catch (error) {
+                      console.error('Error al guardar animación:', error)
+                      toast.error('Error al guardar la animación', {
+                        description: 'Intenta nuevamente',
+                        duration: 3000,
+                      })
+                    }
                   }}
                   className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-black text-lg hover:from-green-400 hover:to-emerald-400 transition-all flex items-center justify-center gap-2"
                 >

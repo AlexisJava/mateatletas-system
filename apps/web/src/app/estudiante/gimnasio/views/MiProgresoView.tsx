@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { gamificacionApi } from '@/lib/api/gamificacion.api';
 
 interface StatData {
   id: string;
@@ -16,116 +17,180 @@ interface StatData {
   };
 }
 
-const STATS_DATA: StatData[] = [
-  {
-    id: 'monedas',
-    emoji: '💰',
-    value: '168',
-    label: 'MONEDAS',
-    gradient: 'from-yellow-400 to-orange-500',
-    detalles: {
-      titulo: 'Tus Monedas',
-      items: [
-        'Ganadas esta semana: +45',
-        'Ganadas este mes: +168',
-        'Total histórico: 523',
-        'Próxima recompensa: 200 monedas',
-      ]
-    }
-  },
-  {
-    id: 'dias',
-    emoji: '📅',
-    value: '12',
-    label: 'DÍAS ESTE MES',
-    gradient: 'from-blue-500 to-cyan-400',
-    detalles: {
-      titulo: 'Días Estudiados',
-      items: [
-        'Este mes: 12 días',
-        'Mes pasado: 8 días',
-        'Mejor mes: 15 días (Junio)',
-        'Promedio: 10 días/mes',
-      ]
-    }
-  },
-  {
-    id: 'racha',
-    emoji: '🔥',
-    value: '3',
-    label: 'DÍAS DE RACHA',
-    gradient: 'from-orange-500 to-red-600',
-    detalles: {
-      titulo: 'Racha Actual',
-      items: [
-        'Racha actual: 3 días',
-        'Mejor racha: 7 días',
-        'No pierdas la racha de hoy!',
-        'Bonus racha 7 días: +100 pts',
-      ]
-    }
-  },
-  {
-    id: 'nivel',
-    emoji: '⭐',
-    value: '1',
-    label: 'NIVEL',
-    gradient: 'from-purple-500 to-pink-600',
-    detalles: {
-      titulo: 'Tu Nivel',
-      items: [
-        'Nivel actual: 1',
-        'XP para nivel 2: 450/1000',
-        'Falta: 550 XP',
-        'Siguiente recompensa: Avatar especial',
-      ]
-    }
-  },
-  {
-    id: 'algebra',
-    emoji: '🎯',
-    value: '85%',
-    label: 'ÁLGEBRA',
-    gradient: 'from-green-500 to-emerald-600',
-    detalles: {
-      titulo: 'Dominio de Álgebra',
-      items: [
-        'Progreso: 85%',
-        'Temas completados: 17/20',
-        'Próximo tema: Ecuaciones cuadráticas',
-        'Tiempo invertido: 5.2 horas',
-      ]
-    }
-  },
-  {
-    id: 'logros',
-    emoji: '🏆',
-    value: '12',
-    label: 'LOGROS',
-    gradient: 'from-amber-500 to-yellow-600',
-    detalles: {
-      titulo: 'Tus Logros',
-      items: [
-        'Desbloqueados: 12/50',
-        'Último logro: Maestro de Tablas',
-        'Próximo: Racha de 7 días',
-        'Logros legendarios: 0/5',
-      ]
-    }
-  },
-];
-
 interface MiProgresoViewProps {
   estudiante: {
+    id: string;
     nombre: string;
     puntos_totales?: number;
   };
 }
 
-export function MiProgresoView({ estudiante: _estudiante }: MiProgresoViewProps) {
+export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const [statsData, setStatsData] = useState<StatData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const selectedData = STATS_DATA.find(s => s.id === selectedCard);
+  // Cargar datos reales del backend
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        setLoading(true);
+
+        // Cargar datos en paralelo
+        const [dashboard, recursos, racha, logros, progresoLogros] = await Promise.all([
+          gamificacionApi.getDashboard(estudiante.id),
+          gamificacionApi.obtenerRecursos(estudiante.id),
+          gamificacionApi.obtenerRacha(estudiante.id),
+          gamificacionApi.obtenerMisLogrosV2(estudiante.id),
+          gamificacionApi.obtenerProgresoV2(estudiante.id),
+        ]);
+
+        // Calcular días estudiados este mes (aproximación desde asistencias)
+        const diasEsteMes = dashboard.stats.clasesAsistidas || 0;
+
+        // Calcular logros desbloqueados
+        const logrosDesbloqueados = logros.filter((l) => l.desbloqueado).length;
+        const totalLogros = logros.length;
+
+        // Obtener mejor racha
+        const mejorRacha = racha.record_personal || racha.dias_consecutivos;
+
+        // Construir estadísticas dinámicas
+        const stats: StatData[] = [
+          {
+            id: 'monedas',
+            emoji: '💰',
+            value: (recursos.monedas ?? 0).toString(),
+            label: 'MONEDAS',
+            gradient: 'from-yellow-400 to-orange-500',
+            detalles: {
+              titulo: 'Tus Monedas',
+              items: [
+                `Total acumulado: ${recursos.monedas ?? 0} monedas`,
+                `Canjealas por cursos en la tienda`,
+                `Gana más monedas completando actividades`,
+                `Cada logro te da monedas extra`,
+              ],
+            },
+          },
+          {
+            id: 'dias',
+            emoji: '📅',
+            value: diasEsteMes.toString(),
+            label: 'CLASES ASISTIDAS',
+            gradient: 'from-blue-500 to-cyan-400',
+            detalles: {
+              titulo: 'Asistencia a Clases',
+              items: [
+                `Total clases asistidas: ${dashboard.stats.clasesAsistidas}`,
+                `Clases totales disponibles: ${dashboard.stats.clasesTotales}`,
+                `Asiste regularmente para mantener tu racha`,
+                `La asistencia te da puntos automáticos`,
+              ],
+            },
+          },
+          {
+            id: 'racha',
+            emoji: '🔥',
+            value: racha.dias_consecutivos.toString(),
+            label: 'DÍAS DE RACHA',
+            gradient: 'from-orange-500 to-red-600',
+            detalles: {
+              titulo: 'Racha Actual',
+              items: [
+                `Racha actual: ${racha.dias_consecutivos} ${racha.dias_consecutivos === 1 ? 'día' : 'días'}`,
+                `Mejor racha: ${mejorRacha} ${mejorRacha === 1 ? 'día' : 'días'}`,
+                `${racha.dias_consecutivos > 0 ? '¡No pierdas tu racha!' : 'Comienza una racha estudiando hoy'}`,
+                `Bonus por racha de 7 días: +100 pts`,
+              ],
+            },
+          },
+          {
+            id: 'nivel',
+            emoji: '⭐',
+            value: recursos.nivel.toString(),
+            label: 'NIVEL',
+            gradient: 'from-purple-500 to-pink-600',
+            detalles: {
+              titulo: 'Tu Nivel',
+              items: [
+                `Nivel actual: ${recursos.nivel}`,
+                `XP actual: ${recursos.xp} XP`,
+                `XP para siguiente nivel: ${recursos.xp_siguiente_nivel} XP`,
+                `Falta: ${Math.max(0, recursos.xp_siguiente_nivel - recursos.xp)} XP`,
+              ],
+            },
+          },
+          {
+            id: 'puntos',
+            emoji: '🎯',
+            value: dashboard.stats.puntosToales.toLocaleString(),
+            label: 'PUNTOS TOTALES',
+            gradient: 'from-green-500 to-emerald-600',
+            detalles: {
+              titulo: 'Puntos Acumulados',
+              items: [
+                `Total: ${dashboard.stats.puntosToales.toLocaleString()} puntos`,
+                `Gana puntos con ejercicios y asistencia`,
+                `Compite con tu equipo en el ranking`,
+                `Usa puntos para canjear en la tienda`,
+              ],
+            },
+          },
+          {
+            id: 'logros',
+            emoji: '🏆',
+            value: `${logrosDesbloqueados}/${totalLogros}`,
+            label: 'LOGROS',
+            gradient: 'from-amber-500 to-yellow-600',
+            detalles: {
+              titulo: 'Tus Logros',
+              items: [
+                `Desbloqueados: ${logrosDesbloqueados}/${totalLogros}`,
+                `Progreso: ${(progresoLogros.porcentaje ?? 0).toFixed(0)}%`,
+                `${logrosDesbloqueados > 0 ? `Último: ${logros.find((l) => l.desbloqueado)?.nombre || 'N/A'}` : 'Aún no has desbloqueado ninguno'}`,
+                `Cada logro te da XP y monedas`,
+              ],
+            },
+          },
+        ];
+
+        setStatsData(stats);
+      } catch (error) {
+        console.error('Error al cargar datos de progreso:', error);
+        // Fallback a datos mínimos
+        setStatsData([
+          {
+            id: 'error',
+            emoji: '⚠️',
+            value: 'Error',
+            label: 'NO DISPONIBLE',
+            gradient: 'from-red-500 to-red-600',
+            detalles: {
+              titulo: 'Error al cargar',
+              items: ['No se pudieron cargar los datos', 'Intenta recargar la página'],
+            },
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (estudiante.id) {
+      cargarDatos();
+    }
+  }, [estudiante.id]);
+
+  const selectedData = statsData.find((s) => s.id === selectedCard);
+
+  if (loading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-white/60 text-2xl font-bold">Cargando progreso...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full p-8 flex flex-col">
@@ -143,7 +208,7 @@ export function MiProgresoView({ estudiante: _estudiante }: MiProgresoViewProps)
 
       {/* Grid 3x2 FIJO - sin animaciones */}
       <div className="flex-1 grid grid-cols-3 grid-rows-2 gap-6">
-        {STATS_DATA.map((stat) => (
+        {statsData.map((stat) => (
           <button
             key={stat.id}
             onClick={() => setSelectedCard(stat.id)}

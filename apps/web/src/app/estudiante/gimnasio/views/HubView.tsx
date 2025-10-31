@@ -2,14 +2,19 @@
 
 /// <reference path="../../../../types/model-viewer.d.ts" />
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { useOverlay, useOverlayStack } from '../contexts/OverlayStackProvider';
 import type { OverlayConfig } from '../types/overlay.types';
 import { recursosApi } from '@/lib/api/tienda.api';
 import type { RecursosEstudiante } from '@mateatletas/contracts';
 import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D';
 import { useStudentAnimations } from '@/hooks/useStudentAnimations';
+import { useAuthStore } from '@/store/auth.store';
+import { ProximaClaseCard } from '@/components/dashboard/ProximaClaseCard';
+import { estudiantesApi } from '@/lib/api/estudiantes.api';
+import { useRachaAutomatica } from '@/hooks/useRachaAutomatica';
 
 // Type compatible con sistema antiguo
 type OverlayType = OverlayConfig['type'] | null;
@@ -25,10 +30,13 @@ import {
   Star,
   Coins,
   Gem,
+  Brain,
   Zap,
   Target,
   BarChart3,
   Sparkles,
+  LogOut,
+  Calendar,
 } from 'lucide-react';
 
 interface HubViewProps {
@@ -40,6 +48,7 @@ interface HubViewProps {
     nivel_actual: number;
     puntos_totales: number;
     avatar_url?: string | null;
+    animacion_idle_url?: string | null;
   };
 }
 
@@ -70,18 +79,18 @@ const NAV_LEFT: NavButton[] = [
     id: 'entrenamientos',
     overlayId: 'entrenamientos',
     label: 'ENTRENAMIENTOS',
-    description: 'Práctica y ejercicios',
-    icon: <Zap className="w-7 h-7" />,
-    gradient: 'from-orange-500 via-amber-500 to-yellow-500',
-    glowColor: 'orange',
-    badge: 3,
-    pulse: true,
+    description: 'Juegos y desafíos mentales',
+    icon: <Brain className="w-7 h-7" />,
+    gradient: 'from-pink-500 via-rose-500 to-red-500',
+    glowColor: 'pink',
+    badge: 0,
+    pulse: false,
   },
   {
     id: 'tareas-asignadas',
-    overlayId: 'planificacion',
+    overlayId: 'tareas-asignadas',
     label: 'TAREAS ASIGNADAS',
-    description: 'Mes de la Ciencia',
+    description: 'Actividades pendientes',
     icon: <BookOpen className="w-7 h-7" />,
     gradient: 'from-purple-500 via-violet-500 to-indigo-600',
     glowColor: 'purple',
@@ -109,6 +118,9 @@ const NAV_LEFT: NavButton[] = [
     glowColor: 'green',
     badge: 0,
   },
+];
+
+const NAV_RIGHT: NavButton[] = [
   {
     id: 'animaciones',
     overlayId: 'animaciones',
@@ -120,9 +132,6 @@ const NAV_LEFT: NavButton[] = [
     badge: 0,
     pulse: false,
   },
-];
-
-const NAV_RIGHT: NavButton[] = [
   {
     id: 'mi-grupo',
     overlayId: 'mi-grupo',
@@ -155,13 +164,13 @@ const NAV_RIGHT: NavButton[] = [
     pulse: true,
   },
   {
-    id: 'ajustes',
-    overlayId: 'ajustes',
-    label: 'AJUSTES',
-    description: 'Configuración',
-    icon: <Settings className="w-7 h-7" />,
-    gradient: 'from-slate-600 via-gray-600 to-slate-700',
-    glowColor: 'slate',
+    id: 'cerrar-sesion',
+    overlayId: null, // No abre overlay, abre modal
+    label: 'SALIR',
+    description: 'Cerrar sesión',
+    icon: <LogOut className="w-7 h-7" />,
+    gradient: 'from-red-500 via-pink-500 to-red-600',
+    glowColor: 'red',
     badge: 0,
   },
 ];
@@ -170,24 +179,55 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [activeView, setActiveView] = useState('hub');
   const [isMounted, setIsMounted] = useState(false);
   const [recursos, setRecursos] = useState<RecursosEstudiante | null>(null);
+  const [proximaClase, setProximaClase] = useState<any>(null);
   const [currentAnimation, setCurrentAnimation] = useState<string | undefined>(undefined);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showClaseNoComenzModal, setShowClaseNoComenzModal] = useState(false);
+  const [minutosRestantes, setMinutosRestantes] = useState(0);
   // const _modelRef = useRef<any>(null); // TODO: usar para controlar el modelo 3D
   const { openOverlay } = useOverlay();
   const { push } = useOverlayStack();
+  const { logout } = useAuthStore();
+  const router = useRouter();
 
   // Hook de animaciones
   const { getRandomAnimation, animationsByCategory } = useStudentAnimations({
     studentPoints: estudiante.puntos_totales,
   });
 
+  // Hook de racha automática - registra actividad del día al entrar
+  const { racha: rachaData } = useRachaAutomatica(estudiante.id);
+
   useEffect(() => {
     setIsMounted(true);
 
-    // Usar M_Standing_Idle_001 que tiene loop suave y continuo
-    const smoothIdleUrl =
+    // Cargar animación con prioridad:
+    // 1. animacion_idle_url del backend (viene del login)
+    // 2. localStorage (selección temporal)
+    // 3. default idle animation
+    const defaultIdleUrl =
       'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb';
-    setCurrentAnimation(smoothIdleUrl);
-  }, []);
+
+    const animacionInicial =
+      estudiante.animacion_idle_url ||
+      localStorage.getItem('selected_idle_animation') ||
+      defaultIdleUrl;
+
+    setCurrentAnimation(animacionInicial);
+
+    // Escuchar cambios de animación desde AnimacionesView
+    const handleAnimationSelected = (event: CustomEvent) => {
+      const { animationUrl } = event.detail;
+      setCurrentAnimation(animationUrl);
+    };
+
+    window.addEventListener('animation-selected', handleAnimationSelected as EventListener);
+
+    return () => {
+      window.removeEventListener('animation-selected', handleAnimationSelected as EventListener);
+    };
+  }, [estudiante.animacion_idle_url]);
 
   // Cargar recursos del estudiante
   useEffect(() => {
@@ -202,6 +242,29 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
     if (estudiante.id) {
       cargarRecursos();
+    }
+  }, [estudiante.id]);
+
+  // Cargar próxima clase del estudiante
+  useEffect(() => {
+    const cargarProximaClase = async () => {
+      try {
+        const data = await estudiantesApi.getProximaClase();
+        setProximaClase(data);
+      } catch (err) {
+        // Si es 403 o 404, simplemente no hay clase - no es un error crítico
+        const error = err as { response?: { status?: number } };
+        if (error?.response?.status === 403 || error?.response?.status === 404) {
+          console.log('ℹ️ No hay próxima clase programada para este estudiante');
+          setProximaClase(null);
+        } else {
+          console.error('Error cargando próxima clase:', err);
+        }
+      }
+    };
+
+    if (estudiante.id) {
+      cargarProximaClase();
     }
   }, [estudiante.id]);
 
@@ -228,6 +291,64 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
   // NO rotar animaciones automáticamente - mantener idle continuo
   // Solo cambiar cuando el usuario interactúa
+
+  // Calcular si la próxima clase es HOY
+  const esHoy = useMemo(() => {
+    if (!proximaClase || !proximaClase.fecha_hora_inicio) return false;
+
+    const fechaClase = new Date(proximaClase.fecha_hora_inicio);
+    const hoy = new Date();
+
+    return (
+      fechaClase.getFullYear() === hoy.getFullYear() &&
+      fechaClase.getMonth() === hoy.getMonth() &&
+      fechaClase.getDate() === hoy.getDate()
+    );
+  }, [proximaClase]);
+
+  // Helper para formatear tiempo en formato amigable
+  const formatearTiempoRestante = useCallback((minutos: number): string => {
+    if (minutos < 60) {
+      return `${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`;
+    }
+
+    const horas = Math.floor(minutos / 60);
+    const minutosRestantes = minutos % 60;
+
+    if (minutosRestantes === 0) {
+      return `${horas} ${horas === 1 ? 'hora' : 'horas'}`;
+    }
+
+    return `${horas} ${horas === 1 ? 'hora' : 'horas'} y ${minutosRestantes} ${minutosRestantes === 1 ? 'minuto' : 'minutos'}`;
+  }, []);
+
+  // Handler para intentar ingresar a la clase
+  const handleIngresarClase = useCallback(() => {
+    if (!proximaClase || !proximaClase.fecha_hora_inicio) return;
+
+    const ahora = new Date();
+    const fechaClase = new Date(proximaClase.fecha_hora_inicio);
+    const minutosRestantes = Math.floor((fechaClase.getTime() - ahora.getTime()) / (1000 * 60));
+
+    // Si faltan más de 5 minutos, mostrar modal
+    if (minutosRestantes > 5) {
+      setMinutosRestantes(minutosRestantes);
+      setShowClaseNoComenzModal(true);
+      return;
+    }
+
+    // Si faltan 5 minutos o menos, o ya empezó (pero no pasó mucho tiempo), permitir acceso
+    // Animación energética antes de navegar
+    const energeticUrl =
+      'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
+    triggerAnimation(energeticUrl, 2000);
+
+    setTimeout(() => {
+      // TODO: Navegar a la vista de clase sincrónica
+      console.log('🎓 Ingresando a clase:', proximaClase);
+      // onNavigate('clase-sincronica'); // Implementar cuando exista la vista
+    }, 1800);
+  }, [proximaClase, triggerAnimation]);
 
   // Valores de recursos (del backend o fallback si está cargando)
   const monedas = recursos?.monedas_total ?? 0;
@@ -411,14 +532,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               item={item}
               isActive={activeView === item.id}
               onClick={() => {
-                // ENTRENAMIENTOS y TAREAS ASIGNADAS abren directamente el Mes de la Ciencia
-                if (item.id === 'entrenamientos' || item.id === 'tareas-asignadas') {
-                  push({
-                    type: 'planificacion',
-                    codigo: '2025-11-mes-ciencia',
-                    tema: 'quimica',
-                  });
-                } else if (item.overlayId) {
+                if (item.overlayId) {
                   openOverlay(item.overlayId);
                 } else {
                   setActiveView(item.id);
@@ -443,7 +557,10 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               item={item}
               isActive={activeView === item.id}
               onClick={() => {
-                if (item.overlayId) {
+                if (item.id === 'cerrar-sesion') {
+                  // Abrir modal de confirmación
+                  setShowLogoutModal(true);
+                } else if (item.overlayId) {
                   openOverlay(item.overlayId);
                 } else {
                   setActiveView(item.id);
@@ -700,7 +817,21 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               />
             </motion.div>
 
-            {/* Botón CTA GIGANTE */}
+            {/* Próxima Clase Card */}
+            {proximaClase && (
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.42 }}
+              >
+                <ProximaClaseCard
+                  clase={proximaClase}
+                  delay={0.42}
+                />
+              </motion.div>
+            )}
+
+            {/* Botón CTA GIGANTE - Condicional según clase de hoy */}
             <motion.div
               initial={{ y: 20, opacity: 0, scale: 0.9 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -710,25 +841,33 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 whileHover={{ scale: 1.05, y: -5 }}
                 whileTap={{ scale: 0.95, y: 0 }}
                 onClick={() => {
-                  // Animación energética antes de navegar
-                  const energeticUrl =
-                    'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
-                  triggerAnimation(energeticUrl, 2000);
-                  setTimeout(() => {
-                    onNavigate('entrenamientos');
-                  }, 1800);
+                  // Si hay clase hoy, intentar ingresar
+                  if (esHoy && proximaClase) {
+                    handleIngresarClase();
+                  } else {
+                    // Caso default: entrenar matemáticas
+                    const energeticUrl =
+                      'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
+                    triggerAnimation(energeticUrl, 2000);
+                    setTimeout(() => {
+                      onNavigate('entrenamientos');
+                    }, 1800);
+                  }
                 }}
-                className="
+                className={`
                   w-full h-24
-                  bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500
+                  ${esHoy && proximaClase
+                    ? 'bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 border-green-600'
+                    : 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 border-yellow-600'
+                  }
                   rounded-3xl
                   shadow-[0_12px_0_rgba(0,0,0,0.3)]
                   hover:shadow-[0_8px_0_rgba(0,0,0,0.3)]
                   active:shadow-[0_2px_0_rgba(0,0,0,0.3)]
-                  border-4 border-yellow-600
+                  border-4
                   relative overflow-hidden
                   transition-all
-                "
+                `}
               >
                 {/* Brillo animado */}
                 <motion.div
@@ -739,10 +878,13 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
                 <div className="relative z-10 text-center">
                   <div className="text-white text-4xl font-black uppercase tracking-wider drop-shadow-lg">
-                    ¡ENTRENAR MATEMÁTICAS!
+                    {esHoy && proximaClase ? '¡INGRESAR A CLASE!' : '¡ENTRENAR MATEMÁTICAS!'}
                   </div>
                   <div className="text-white/90 text-sm font-bold uppercase tracking-wide">
-                    Resolvé desafíos y dominá números
+                    {esHoy && proximaClase
+                      ? '¡Tu equipo te espera!'
+                      : 'Resolvé desafíos y dominá números'
+                    }
                   </div>
                 </div>
               </motion.button>
@@ -750,6 +892,347 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
           </div>
         </div>
       </div>
+
+      {/* ========== MODAL DE CONFIRMACIÓN DE LOGOUT - ULTRA PREMIUM ========== */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md"
+            onClick={() => !isLoggingOut && setShowLogoutModal(false)}
+          >
+            {/* Partículas flotantes de fondo */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(30)].map((_, i) => (
+                <motion.div
+                  key={`particle-logout-${i}`}
+                  className="absolute w-1 h-1 bg-red-400/30 rounded-full"
+                  initial={{
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    scale: Math.random() * 0.5 + 0.5,
+                  }}
+                  animate={{
+                    y: [null, Math.random() * -100 - 50],
+                    opacity: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: Math.random() * 3 + 2,
+                    repeat: Infinity,
+                    delay: Math.random() * 2,
+                  }}
+                />
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ scale: 0.8, y: 50, rotateX: 20 }}
+              animate={{ scale: 1, y: 0, rotateX: 0 }}
+              exit={{ scale: 0.8, y: 50, rotateX: -20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative bg-gradient-to-br from-slate-900/95 via-red-950/95 to-slate-900/95
+                         backdrop-blur-xl rounded-3xl
+                         p-8 md:p-12 max-w-md w-full mx-4
+                         shadow-[0_0_80px_rgba(239,68,68,0.4)]
+                         overflow-hidden"
+              style={{
+                transformStyle: 'preserve-3d',
+                border: '2px solid transparent',
+                backgroundImage: 'linear-gradient(135deg, rgba(239,68,68,0.1) 0%, rgba(236,72,153,0.1) 100%)',
+                backgroundClip: 'padding-box',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Borde animado con gradiente */}
+              <motion.div
+                className="absolute inset-0 rounded-3xl pointer-events-none"
+                style={{
+                  background: 'linear-gradient(90deg, #ef4444, #ec4899, #ef4444)',
+                  backgroundSize: '200% 100%',
+                  padding: '2px',
+                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                }}
+                animate={{
+                  backgroundPosition: ['0% 50%', '200% 50%'],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+              />
+
+              {/* Icono con resplandor pulsante */}
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                className="flex justify-center mb-6 relative"
+              >
+                {/* Resplandor pulsante */}
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  animate={{
+                    boxShadow: [
+                      '0 0 40px 10px rgba(239,68,68,0.4)',
+                      '0 0 60px 20px rgba(239,68,68,0.6)',
+                      '0 0 40px 10px rgba(239,68,68,0.4)',
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+
+                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-red-500 via-pink-600 to-red-700
+                               flex items-center justify-center z-10
+                               shadow-[0_0_40px_rgba(239,68,68,0.6)]">
+                  <LogOut className="w-12 h-12 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" strokeWidth={3} />
+                </div>
+              </motion.div>
+
+              {/* Título con efecto holográfico */}
+              <motion.h2
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl font-black text-white text-center mb-4
+                           font-[family-name:var(--font-lilita)]"
+                style={{
+                  textShadow: '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(236,72,153,0.4)',
+                }}
+              >
+                ¿SALIR DEL GIMNASIO?
+              </motion.h2>
+
+              {/* Mensaje */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-white/90 text-center text-lg mb-8 font-medium"
+              >
+                ¿Estás seguro que querés cerrar sesión?
+                <br />
+                <span className="text-white/60 text-base">Podrás volver cuando quieras</span>
+              </motion.p>
+
+              {/* Botones con efecto 3D */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="flex gap-4"
+              >
+                {/* Botón Cancelar */}
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95, y: 0 }}
+                  onClick={() => setShowLogoutModal(false)}
+                  disabled={isLoggingOut}
+                  className="flex-1 bg-white/10 hover:bg-white/20
+                             text-white font-bold text-lg py-4 rounded-2xl
+                             border-2 border-white/30 hover:border-white/50
+                             transition-all disabled:opacity-50
+                             shadow-[0_4px_0_rgba(255,255,255,0.1)]
+                             hover:shadow-[0_6px_20px_rgba(255,255,255,0.2)]
+                             active:shadow-[0_2px_0_rgba(255,255,255,0.1)]"
+                >
+                  CANCELAR
+                </motion.button>
+
+                {/* Botón Confirmar */}
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95, y: 0 }}
+                  onClick={async () => {
+                    try {
+                      setIsLoggingOut(true);
+                      await logout();
+                      router.push('/login');
+                    } catch (error) {
+                      console.error('Error al cerrar sesión:', error);
+                      setIsLoggingOut(false);
+                    }
+                  }}
+                  disabled={isLoggingOut}
+                  className="flex-1 bg-gradient-to-r from-red-500 via-pink-600 to-red-600
+                             hover:from-red-600 hover:via-pink-700 hover:to-red-700
+                             text-white font-black text-lg py-4 rounded-2xl
+                             border-2 border-red-400/50
+                             transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                             shadow-[0_4px_0_rgba(220,38,38,0.8),0_0_40px_rgba(239,68,68,0.3)]
+                             hover:shadow-[0_6px_20px_rgba(239,68,68,0.6)]
+                             active:shadow-[0_2px_0_rgba(220,38,38,0.8)]"
+                >
+                  {isLoggingOut ? 'SALIENDO...' : 'SÍ, SALIR'}
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ========== MODAL: CLASE AÚN NO COMIENZA - ULTRA PREMIUM ========== */}
+      <AnimatePresence>
+        {showClaseNoComenzModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md"
+            onClick={() => setShowClaseNoComenzModal(false)}
+          >
+            {/* Partículas flotantes de fondo cyan/azul */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              {[...Array(30)].map((_, i) => (
+                <motion.div
+                  key={`particle-clase-${i}`}
+                  className="absolute w-1 h-1 bg-cyan-400/30 rounded-full"
+                  initial={{
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    scale: Math.random() * 0.5 + 0.5,
+                  }}
+                  animate={{
+                    y: [null, Math.random() * -100 - 50],
+                    opacity: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: Math.random() * 3 + 2,
+                    repeat: Infinity,
+                    delay: Math.random() * 2,
+                  }}
+                />
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ scale: 0.8, y: 50, rotateX: 20 }}
+              animate={{ scale: 1, y: 0, rotateX: 0 }}
+              exit={{ scale: 0.8, y: 50, rotateX: -20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative bg-gradient-to-br from-slate-900/95 via-cyan-950/95 to-slate-900/95
+                         backdrop-blur-xl rounded-3xl
+                         p-8 md:p-12 max-w-md w-full mx-4
+                         shadow-[0_0_80px_rgba(34,211,238,0.4)]
+                         overflow-hidden"
+              style={{
+                transformStyle: 'preserve-3d',
+                border: '2px solid transparent',
+                backgroundImage: 'linear-gradient(135deg, rgba(34,211,238,0.1) 0%, rgba(59,130,246,0.1) 100%)',
+                backgroundClip: 'padding-box',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Borde animado con gradiente cyan-azul */}
+              <motion.div
+                className="absolute inset-0 rounded-3xl pointer-events-none"
+                style={{
+                  background: 'linear-gradient(90deg, #22d3ee, #3b82f6, #22d3ee)',
+                  backgroundSize: '200% 100%',
+                  padding: '2px',
+                  WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                  WebkitMaskComposite: 'xor',
+                  maskComposite: 'exclude',
+                }}
+                animate={{
+                  backgroundPosition: ['0% 50%', '200% 50%'],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+              />
+
+              {/* Icono con resplandor pulsante */}
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                className="flex justify-center mb-6 relative"
+              >
+                {/* Resplandor pulsante cyan */}
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  animate={{
+                    boxShadow: [
+                      '0 0 40px 10px rgba(34,211,238,0.4)',
+                      '0 0 60px 20px rgba(34,211,238,0.6)',
+                      '0 0 40px 10px rgba(34,211,238,0.4)',
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+
+                <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-cyan-600
+                               flex items-center justify-center z-10
+                               shadow-[0_0_40px_rgba(34,211,238,0.6)]">
+                  <Calendar className="w-12 h-12 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" strokeWidth={3} />
+                </div>
+              </motion.div>
+
+              {/* Título con efecto holográfico */}
+              <motion.h2
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl font-black text-white text-center mb-4
+                           font-[family-name:var(--font-lilita)]"
+                style={{
+                  textShadow: '0 0 20px rgba(34,211,238,0.8), 0 0 40px rgba(59,130,246,0.4)',
+                }}
+              >
+                ¡TODAVÍA NO ES HORA!
+              </motion.h2>
+
+              {/* Mensaje */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-white/90 text-center text-lg mb-2 font-medium"
+              >
+                Tu clase aún no comienza.
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+                className="text-cyan-300 text-center text-2xl font-black mb-8"
+                style={{
+                  textShadow: '0 0 15px rgba(34,211,238,0.6)',
+                }}
+              >
+                Volvé en {formatearTiempoRestante(minutosRestantes)}
+              </motion.p>
+
+              {/* Botón OK con efecto 3D */}
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95, y: 0 }}
+                onClick={() => setShowClaseNoComenzModal(false)}
+                className="w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-500
+                           hover:from-cyan-500 hover:via-blue-600 hover:to-cyan-600
+                           text-white font-black text-xl py-4 rounded-2xl
+                           border-2 border-cyan-300/50
+                           transition-all
+                           shadow-[0_4px_0_rgba(6,182,212,0.8),0_0_40px_rgba(34,211,238,0.3)]
+                           hover:shadow-[0_6px_20px_rgba(34,211,238,0.6)]
+                           active:shadow-[0_2px_0_rgba(6,182,212,0.8)]"
+              >
+                ENTENDIDO
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

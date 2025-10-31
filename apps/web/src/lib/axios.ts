@@ -118,7 +118,13 @@ apiClient.interceptors.response.use(
 
         case 404: {
           // Not Found - Recurso no encontrado
-          console.error('❌ Recurso no encontrado:', error.config?.url);
+          // Silenciar 404 esperados (endpoints mock o en desarrollo)
+          const url = error.config?.url || '';
+          const isExpectedMissing = url.includes('/gamificacion/dashboard');
+
+          if (!isExpectedMissing) {
+            console.error('❌ Recurso no encontrado:', url);
+          }
           break;
         }
 

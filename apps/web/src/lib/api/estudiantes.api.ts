@@ -142,4 +142,61 @@ export const estudiantesApi = {
       throw error;
     }
   },
+
+  /**
+   * Actualizar la animación idle del estudiante autenticado
+   * @param animacion_idle_url - URL de la animación .glb
+   * @returns Estudiante actualizado
+   */
+  updateAnimacion: async (animacion_idle_url: string): Promise<Estudiante> => {
+    try {
+      const response = await apiClient.patch('/estudiantes/animacion', {
+        animacion_idle_url,
+      });
+      return estudianteSchema.parse(response);
+    } catch (error) {
+      console.error('Error al actualizar la animación:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener la próxima clase del estudiante autenticado
+   * @returns Información de la próxima clase o null si no hay ninguna
+   */
+  getProximaClase: async (): Promise<{
+    tipo: 'grupo' | 'individual';
+    id: string;
+    fecha_hora_inicio: Date;
+    duracion_minutos: number;
+    docente: { nombre: string; apellido: string };
+    ruta_curricular?: { nombre: string; descripcion?: string };
+  } | null> => {
+    try {
+      const response = await apiClient.get('/estudiantes/mi-proxima-clase');
+      return response;
+    } catch (error) {
+      console.error('Error al obtener la próxima clase:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtener compañeros del ClaseGrupo del estudiante autenticado
+   * @returns Lista de compañeros ordenados por puntos (descendente)
+   */
+  getMisCompaneros: async (): Promise<Array<{
+    id: string;
+    nombre: string;
+    apellido: string;
+    puntos: number;
+  }>> => {
+    try {
+      const response = await apiClient.get('/estudiantes/mis-companeros');
+      return response;
+    } catch (error) {
+      console.error('Error al obtener compañeros:', error);
+      throw error;
+    }
+  },
 };

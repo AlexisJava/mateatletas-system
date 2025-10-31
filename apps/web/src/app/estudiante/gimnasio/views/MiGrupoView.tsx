@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { gamificacionApi, type DashboardData } from '@/lib/api/gamificacion.api';
+import { estudiantesApi } from '@/lib/api/estudiantes.api';
 
 interface MiGrupoViewProps {
   estudiante: {
@@ -14,17 +15,22 @@ interface MiGrupoViewProps {
 
 export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [companeros, setCompaneros] = useState<Array<{ id: string; nombre: string; apellido: string; puntos: number }>>([]);
   const [loading, setLoading] = useState(true);
 
-  // Cargar datos del dashboard (incluye info del equipo)
+  // Cargar datos del dashboard y compañeros
   useEffect(() => {
     const cargarDatos = async () => {
       try {
         setLoading(true);
-        const data = await gamificacionApi.getDashboard(estudiante.id);
-        setDashboard(data);
+        const [dashboardData, companerosData] = await Promise.all([
+          gamificacionApi.getDashboard(estudiante.id),
+          estudiantesApi.getMisCompaneros(),
+        ]);
+        setDashboard(dashboardData);
+        setCompaneros(companerosData);
       } catch (error) {
-        console.error('Error al cargar datos del equipo:', error);
+        console.error('Error al cargar datos del grupo:', error);
       } finally {
         setLoading(false);
       }
@@ -35,9 +41,8 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
     }
   }, [estudiante.id]);
 
-  // Calcular datos del equipo
-  const nombreEquipo = dashboard?.estudiante.equipo.nombre || 'Equipo Fénix';
-  // const _colorEquipo = dashboard?.estudiante.equipo.color || '#FF6B00'; // TODO: usar para tema del equipo
+  // Calcular datos del grupo
+  const nombreGrupo = companeros.length > 0 ? 'Mi Grupo' : 'Sin Grupo';
   const misPuntos = dashboard?.stats.puntosToales || 0;
   const clasesAsistidas = dashboard?.stats.clasesAsistidas || 0;
   const rachaActual = dashboard?.stats.racha || 0;
@@ -65,105 +70,135 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
         </h1>
       </div>
 
-      {/* Grid 3 columnas - LAYOUT HORIZONTAL */}
-      <div className="flex-1 grid grid-cols-3 gap-6">
-        {/* COLUMNA 1: Info del equipo */}
+      {/* Layout: Lista de compañeros + Stats */}
+      <div className="flex-1 flex gap-6 min-h-0">
+        {/* COLUMNA IZQUIERDA: Lista de compañeros (60%) */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-blue-900/60 backdrop-blur-xl rounded-3xl p-6
-                     border-2 border-white/20 flex flex-col items-center justify-center gap-4"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex-[3] bg-blue-900/60 backdrop-blur-xl rounded-3xl p-6
+                     border-2 border-white/20 flex flex-col min-h-0"
         >
-          <div
-            className="w-20 h-20 rounded-2xl
-                         bg-gradient-to-br from-yellow-400 to-orange-500
-                         flex items-center justify-center text-5xl
-                         border-4 border-white/30 shadow-xl"
-          >
-            🔥
-          </div>
-
-          <div className="text-center">
-            <h2 className="text-3xl font-black text-white mb-2">{nombreEquipo.toUpperCase()}</h2>
-            <p className="text-white/70 text-lg font-bold">{clasesAsistidas} clases asistidas</p>
-            <p className="text-white/70 text-lg font-bold">🔥 Racha de {rachaActual} días</p>
-          </div>
-        </motion.div>
-
-        {/* COLUMNA 2: Misión grupal */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-blue-900/60 backdrop-blur-xl rounded-3xl p-6
-                     border-2 border-white/20 flex flex-col justify-between"
-        >
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-3xl">🎯</span>
-              <h3 className="text-2xl font-black text-white">MISIÓN SEMANAL</h3>
+          {/* Header FIJO del grupo */}
+          <div className="flex items-center gap-3 mb-4 flex-shrink-0">
+            <span className="text-4xl">👥</span>
+            <div>
+              <h2 className="text-3xl font-black text-white">
+                {companeros.length > 0 ? nombreGrupo.toUpperCase() : 'SIN GRUPO'}
+              </h2>
+              <p className="text-cyan-300 text-sm font-bold">
+                {companeros.length} {companeros.length === 1 ? 'compañero' : 'compañeros'} en tu grupo
+              </p>
             </div>
-
-            <p className="text-white/80 text-lg font-bold mb-6">
-              Completar 100 ejercicios entre todos
-            </p>
           </div>
 
-          {/* Barra de progreso */}
-          <div>
-            <div className="relative h-10 bg-black/40 rounded-xl overflow-hidden border-2 border-white/20 mb-3">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: '73%' }}
-                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
-                className="h-full bg-gradient-to-r from-green-500 to-emerald-400"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-white font-black text-xl">73 / 100</span>
+          {/* CONTENEDOR con scroll - LISTA VERTICAL de compañeros */}
+          {companeros.length > 0 ? (
+            <div className="flex-1 min-h-0 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-cyan-500/50 scrollbar-track-transparent">
+              <div className="flex flex-col gap-3">
+                {/* Mostrar TODOS los compañeros */}
+                {companeros.map((companero) => {
+                const esTu = companero.id === estudiante.id;
+                return (
+                  <div
+                    key={companero.id}
+                    className={`
+                      rounded-2xl p-4 border-2 flex items-center gap-4
+                      ${esTu
+                        ? 'bg-yellow-400/20 border-yellow-400/60 shadow-lg'
+                        : 'bg-white/5 border-white/10'
+                      }
+                    `}
+                  >
+                    {/* Avatar */}
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-2xl">
+                      👤
+                    </div>
+
+                    {/* Info del compañero */}
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-black text-lg ${esTu ? 'text-yellow-300' : 'text-white'} truncate`}>
+                        {companero.nombre} {companero.apellido}
+                      </p>
+                      <p className="text-cyan-400 text-xs font-medium">
+                        {companero.puntos.toLocaleString()} puntos
+                      </p>
+                    </div>
+
+                    {/* Badge "TÚ" */}
+                    {esTu && (
+                      <div className="flex-shrink-0 px-3 py-1 bg-yellow-400/40 text-yellow-200 text-xs font-black rounded-full">
+                        TÚ
+                      </div>
+                    )}
+                  </div>
+                );
+                })}
               </div>
             </div>
-            <p className="text-white/70 text-center text-sm font-bold">¡Solo faltan 27! 💪</p>
-          </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center text-white/50">
+                <div className="text-6xl mb-4">📢</div>
+                <p className="text-xl font-bold mb-2">No estás inscrito en ningún grupo</p>
+                <p className="text-sm">Habla con tu tutor para unirte a un grupo de estudio</p>
+              </div>
+            </div>
+          )}
         </motion.div>
 
-        {/* COLUMNA 3: Actividad reciente */}
+        {/* COLUMNA DERECHA: Stats del grupo (40%) */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-blue-900/60 backdrop-blur-xl rounded-3xl p-6
-                     border-2 border-white/20 flex flex-col"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex-[2] flex flex-col gap-4"
         >
-          <h3 className="text-2xl font-black text-white mb-4">ACTIVIDAD RECIENTE</h3>
+          {/* Card: Puntos del grupo */}
+          <div className="flex-1 bg-gradient-to-br from-purple-900/60 to-pink-900/60
+                          backdrop-blur-xl rounded-3xl p-4
+                          border-2 border-white/20 flex flex-col items-center justify-center gap-2">
+            <div className="text-4xl">💎</div>
+            <div className="text-center">
+              <h3 className="text-3xl font-black text-white mb-1">
+                {companeros.reduce((sum, c) => sum + c.puntos, 0).toLocaleString()}
+              </h3>
+              <p className="text-purple-300 text-sm font-bold">PUNTOS DEL GRUPO</p>
+              <p className="text-white/60 text-xs mt-1">Entre todos</p>
+            </div>
+          </div>
 
-          <div className="flex-1 space-y-3">
-            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-              <p className="text-white font-bold">Juan</p>
-              <p className="text-white/70 text-sm">+20 puntos</p>
+          {/* Card: Tus puntos */}
+          <div className="flex-1 bg-gradient-to-br from-yellow-500/20 to-orange-600/20
+                          backdrop-blur-xl rounded-3xl p-4
+                          border-2 border-yellow-400/40 flex flex-col items-center justify-center gap-2">
+            <div className="text-4xl">🎯</div>
+            <div className="text-center">
+              <h3 className="text-3xl font-black text-yellow-400 mb-1">
+                {misPuntos.toLocaleString()}
+              </h3>
+              <p className="text-yellow-300 text-sm font-bold">TUS PUNTOS</p>
+              <p className="text-white/60 text-xs mt-1">Tu aporte</p>
             </div>
-            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-              <p className="text-white font-bold">María</p>
-              <p className="text-white/70 text-sm">+15 puntos</p>
-            </div>
-            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-              <p className="text-white font-bold">Pedro</p>
-              <p className="text-white/70 text-sm">+12 puntos</p>
+          </div>
+
+          {/* Card: Tu racha */}
+          <div className="flex-1 bg-gradient-to-br from-orange-600/20 to-red-700/20
+                          backdrop-blur-xl rounded-3xl p-4
+                          border-2 border-orange-500/40 flex flex-col items-center justify-center gap-2">
+            <div className="text-4xl">🔥</div>
+            <div className="text-center">
+              <h3 className="text-3xl font-black text-orange-400 mb-1">
+                {rachaActual}
+              </h3>
+              <p className="text-orange-300 text-sm font-bold">
+                {rachaActual === 1 ? 'DÍA' : 'DÍAS'}
+              </p>
+              <p className="text-white/60 text-xs mt-1">Racha</p>
             </div>
           </div>
         </motion.div>
       </div>
-
-      {/* Banner inferior: Mis puntos */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="mt-6 bg-blue-900/60 backdrop-blur-xl rounded-2xl px-8 py-4
-                   border-2 border-white/20 flex items-center justify-between"
-      >
-        <p className="text-white text-xl font-bold">🏆 Tus puntos totales</p>
-        <div className="text-yellow-400 text-3xl font-black">{misPuntos.toLocaleString()} pts</div>
-      </motion.div>
     </div>
   );
 }
