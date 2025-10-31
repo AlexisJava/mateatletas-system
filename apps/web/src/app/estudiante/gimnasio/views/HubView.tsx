@@ -244,8 +244,14 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
       try {
         const data = await estudiantesApi.getProximaClase();
         setProximaClase(data);
-      } catch (error) {
-        console.error('Error cargando próxima clase:', error);
+      } catch (error: any) {
+        // Si es 403 o 404, simplemente no hay clase - no es un error crítico
+        if (error?.response?.status === 403 || error?.response?.status === 404) {
+          console.log('ℹ️ No hay próxima clase programada para este estudiante');
+          setProximaClase(null);
+        } else {
+          console.error('Error cargando próxima clase:', error);
+        }
       }
     };
 
