@@ -91,54 +91,104 @@ export default function GimnasioPage() {
   // Loading screen mientras carga avatar
   if (isLoadingAvatar) {
     return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-cyan-900">
-        {/* Fondo animado con círculos de energía */}
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center bg-black">
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* CAMPO DE ESTRELLAS - STARFIELD INFINITO */}
+        {/* ═══════════════════════════════════════════════════════ */}
         <div className="absolute inset-0">
-          {[...Array(20)].map((_, i) => (
+          {[...Array(200)].map((_, i) => {
+            const size = Math.random() * 3
+            return (
+              <div
+                key={`star-${i}`}
+                className="absolute rounded-full bg-white"
+                style={{
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animation: `twinkle ${Math.random() * 3 + 2}s ease-in-out ${Math.random() * 2}s infinite`,
+                  opacity: Math.random() * 0.8 + 0.2,
+                }}
+              />
+            )
+          })}
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* NEBULOSAS DE FONDO - EFECTO ESPACIAL */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <div className="absolute inset-0">
+          <div className="absolute w-[800px] h-[800px] rounded-full bg-purple-600/10 blur-[120px] -top-40 -left-40 animate-pulse" style={{ animationDuration: '8s' }} />
+          <div className="absolute w-[600px] h-[600px] rounded-full bg-blue-600/10 blur-[100px] -bottom-20 -right-20 animate-pulse" style={{ animationDuration: '6s' }} />
+          <div className="absolute w-[700px] h-[700px] rounded-full bg-cyan-600/10 blur-[110px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" style={{ animationDuration: '10s' }} />
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* AGUJERO NEGRO CENTRAL - VÓRTICE */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative w-[400px] h-[400px]">
+            {/* Anillos del agujero negro */}
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={`ring-${i}`}
+                className="absolute inset-0 rounded-full border-2"
+                style={{
+                  borderColor: `rgba(100, 200, 255, ${0.3 - i * 0.03})`,
+                  transform: `scale(${1 - i * 0.12})`,
+                  animation: `blackHoleRing ${3 + i * 0.5}s linear infinite`,
+                  animationDirection: i % 2 === 0 ? 'normal' : 'reverse',
+                }}
+              />
+            ))}
+            {/* Centro oscuro del agujero negro */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-32 h-32 rounded-full bg-black border-4 border-blue-500/50 shadow-[0_0_80px_rgba(59,130,246,0.8)]" />
+            </div>
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* PARTÍCULAS CÓSMICAS - POLVO ESTELAR */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(50)].map((_, i) => (
             <div
-              key={i}
-              className="absolute rounded-full bg-white/5"
+              key={`particle-${i}`}
+              className="absolute w-1 h-1 bg-cyan-300/60 rounded-full"
               style={{
-                width: `${Math.random() * 300 + 100}px`,
-                height: `${Math.random() * 300 + 100}px`,
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
+                animation: `floatParticle ${Math.random() * 20 + 10}s linear infinite`,
                 animationDelay: `${Math.random() * 5}s`,
               }}
             />
           ))}
         </div>
 
-        {/* Partículas matemáticas flotantes */}
-        <div className="absolute inset-0 overflow-hidden">
-          {['∑', 'π', '∫', '√', 'α', 'β', 'θ', '∞', '≠', '≈', '±', '÷', '×', 'Δ', 'Ω'].map((symbol, i) => (
-            <div
-              key={symbol + i}
-              className="absolute text-white/20 font-bold text-4xl"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animation: `mathFloat ${Math.random() * 8 + 4}s linear infinite`,
-                animationDelay: `${Math.random() * 4}s`,
-              }}
-            >
-              {symbol}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* TEXTO PRINCIPAL - EFECTO HOLOGRÁFICO 3D */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        <div className="relative z-20 text-center">
+          {/* Logo MATEATLETAS con efecto 3D holográfico */}
+          <div className="mb-12 relative">
+            {/* Sombra 3D profunda */}
+            <div className="absolute inset-0 text-9xl font-black text-blue-500/20 blur-md" style={{ transform: 'translateZ(-50px) translateY(4px) translateX(4px)' }}>
+              MATEATLETAS
             </div>
-          ))}
-        </div>
 
-        <div className="relative z-10 text-center">
-          {/* Logo MATEATLETAS con animación épica */}
-          <div className="mb-8 relative">
-            <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 animate-pulse">
+            {/* Texto principal con gradiente holográfico */}
+            <div className="relative text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500" style={{
+              textShadow: '0 0 40px rgba(56, 189, 248, 0.8), 0 0 80px rgba(56, 189, 248, 0.4)',
+              animation: 'holographicGlow 3s ease-in-out infinite'
+            }}>
               {'MATEATLETAS'.split('').map((letter, i) => (
                 <span
                   key={i}
                   className="inline-block"
                   style={{
-                    animation: `letterBounce 0.6s ease-in-out ${i * 0.1}s infinite`,
-                    textShadow: '0 0 30px rgba(251, 191, 36, 0.8)',
+                    animation: `letterFloat 3s ease-in-out ${i * 0.15}s infinite`,
                   }}
                 >
                   {letter}
@@ -146,69 +196,107 @@ export default function GimnasioPage() {
               ))}
             </div>
 
-            {/* Anillo de energía rotando */}
-            <div className="absolute inset-0 flex items-center justify-center -z-10">
-              <div className="w-[600px] h-[600px] border-4 border-yellow-400/30 rounded-full animate-spin" style={{ animationDuration: '4s' }} />
-              <div className="absolute w-[550px] h-[550px] border-4 border-orange-400/20 rounded-full animate-spin" style={{ animationDuration: '3s', animationDirection: 'reverse' }} />
-              <div className="absolute w-[500px] h-[500px] border-4 border-red-400/10 rounded-full animate-spin" style={{ animationDuration: '5s' }} />
+            {/* Líneas de escaneo holográfico */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="w-full h-1 bg-cyan-400/30 absolute" style={{ animation: 'scanLine 3s linear infinite' }} />
             </div>
           </div>
 
-          {/* Texto de carga */}
-          <p className="text-white text-2xl font-bold mb-6 animate-pulse">
-            Preparando tu gimnasio matemático...
-          </p>
-
-          {/* Barra de progreso épica */}
-          <div className="w-96 h-3 bg-white/10 rounded-full overflow-hidden mx-auto backdrop-blur-sm">
-            <div
-              className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full"
-              style={{
-                animation: 'progressBar 2s ease-in-out infinite',
-              }}
-            />
+          {/* Subtítulo con efecto de máquina de escribir */}
+          <div className="mb-8 h-8">
+            <p className="text-cyan-300 text-2xl font-mono tracking-wider" style={{
+              animation: 'typewriter 2s steps(40) infinite',
+              textShadow: '0 0 10px rgba(103, 232, 249, 0.8)'
+            }}>
+              [ INICIANDO SISTEMA CUÁNTICO ]
+            </p>
           </div>
 
-          {/* Sparkles animados */}
-          <div className="mt-8 flex justify-center gap-4">
-            {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="text-4xl"
-                style={{
-                  animation: `sparkle 1.5s ease-in-out ${i * 0.2}s infinite`,
-                }}
-              >
-                ✨
+          {/* Barra de progreso futurista */}
+          <div className="w-[500px] mx-auto mb-8">
+            <div className="relative h-2 bg-gray-800/50 rounded-full overflow-hidden border border-cyan-500/30">
+              {/* Barra de progreso con efecto warp */}
+              <div className="h-full relative">
+                <div
+                  className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600"
+                  style={{ animation: 'warpProgress 2s ease-in-out infinite' }}
+                />
+                {/* Efecto de brillo que se mueve */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent" style={{ animation: 'shine 2s ease-in-out infinite' }} />
               </div>
-            ))}
+            </div>
+            {/* Indicadores de carga */}
+            <div className="flex justify-between mt-2 text-cyan-400 text-xs font-mono">
+              <span style={{ animation: 'blink 1s ease-in-out infinite' }}>◆ NEURAL NET</span>
+              <span style={{ animation: 'blink 1s ease-in-out 0.3s infinite' }}>◆ QUANTUM CORE</span>
+              <span style={{ animation: 'blink 1s ease-in-out 0.6s infinite' }}>◆ MATRIX READY</span>
+            </div>
+          </div>
+
+          {/* Datos técnicos nerds */}
+          <div className="grid grid-cols-3 gap-4 w-[600px] mx-auto text-xs font-mono text-cyan-400/60">
+            <div className="border border-cyan-500/20 rounded p-2 backdrop-blur-sm">
+              <div className="text-cyan-300">CONEXIÓN</div>
+              <div className="text-green-400 animate-pulse">█████ 100%</div>
+            </div>
+            <div className="border border-cyan-500/20 rounded p-2 backdrop-blur-sm">
+              <div className="text-cyan-300">LATENCIA</div>
+              <div className="text-yellow-400">23ms</div>
+            </div>
+            <div className="border border-cyan-500/20 rounded p-2 backdrop-blur-sm">
+              <div className="text-cyan-300">FPS</div>
+              <div className="text-green-400">∞</div>
+            </div>
           </div>
         </div>
 
-        {/* Estilos de animación inline */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* ESTILOS DE ANIMACIÓN */}
+        {/* ═══════════════════════════════════════════════════════ */}
         <style jsx>{`
-          @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
-            50% { transform: translateY(-50px) scale(1.1); opacity: 0.6; }
+          @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
           }
-          @keyframes mathFloat {
-            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.4; }
-            90% { opacity: 0.4; }
-            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+          @keyframes blackHoleRing {
+            0% { transform: scale(1) rotate(0deg); opacity: 0.4; }
+            50% { transform: scale(0.8) rotate(180deg); opacity: 0.2; }
+            100% { transform: scale(1) rotate(360deg); opacity: 0.4; }
           }
-          @keyframes letterBounce {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-20px) scale(1.2); }
+          @keyframes floatParticle {
+            0% { transform: translate(0, 0) scale(1); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translate(100vw, -100vh) scale(0.5); opacity: 0; }
           }
-          @keyframes progressBar {
-            0% { width: 0%; }
-            50% { width: 70%; }
-            100% { width: 100%; }
+          @keyframes letterFloat {
+            0%, 100% { transform: translateY(0) translateZ(0); }
+            50% { transform: translateY(-15px) translateZ(20px); }
           }
-          @keyframes sparkle {
-            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
-            50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+          @keyframes holographicGlow {
+            0%, 100% { filter: brightness(1) contrast(1); }
+            50% { filter: brightness(1.3) contrast(1.2); }
+          }
+          @keyframes scanLine {
+            0% { top: 0%; }
+            100% { top: 100%; }
+          }
+          @keyframes typewriter {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+          @keyframes warpProgress {
+            0% { width: 0%; transform: scaleX(1); }
+            50% { width: 60%; transform: scaleX(1.1); }
+            100% { width: 95%; transform: scaleX(1); }
+          }
+          @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+          }
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
           }
         `}</style>
       </div>
