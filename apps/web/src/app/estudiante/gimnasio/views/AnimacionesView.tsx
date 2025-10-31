@@ -7,6 +7,7 @@ import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D'
 import { useStudentAnimations } from '@/hooks/useStudentAnimations'
 import { useOverlayStack } from '../contexts/OverlayStackProvider'
 import { toast } from 'sonner'
+import { estudiantesApi } from '@/lib/api/estudiantes.api'
 
 interface AnimacionesViewProps {
   estudiante: {
@@ -275,23 +276,33 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
 
               <div className="mt-6 flex gap-4">
                 <button
-                  onClick={() => {
-                    setSelectedAnimation(previewAnimation.id)
+                  onClick={async () => {
+                    try {
+                      setSelectedAnimation(previewAnimation.id)
 
-                    // Guardar en localStorage para que HubView la use
-                    localStorage.setItem('selected_idle_animation', previewAnimation.url)
+                      // 1. Guardar en backend
+                      await estudiantesApi.updateAnimacion(previewAnimation.url)
 
-                    // Disparar evento custom para que HubView se entere del cambio
-                    window.dispatchEvent(new CustomEvent('animation-selected', {
-                      detail: { animationUrl: previewAnimation.url }
-                    }))
+                      // 2. Guardar en localStorage para que HubView la use
+                      localStorage.setItem('selected_idle_animation', previewAnimation.url)
 
-                    setPreviewAnimation(null)
-                    toast.success(`¡Animación "${previewAnimation.displayName}" seleccionada!`, {
-                      description: 'Tu avatar usará esta animación',
-                      duration: 3000,
-                    })
-                    // TODO: Guardar en backend la animación seleccionada del estudiante
+                      // 3. Disparar evento custom para que HubView se entere del cambio
+                      window.dispatchEvent(new CustomEvent('animation-selected', {
+                        detail: { animationUrl: previewAnimation.url }
+                      }))
+
+                      setPreviewAnimation(null)
+                      toast.success(`¡Animación "${previewAnimation.displayName}" seleccionada!`, {
+                        description: 'Guardada en la base de datos',
+                        duration: 3000,
+                      })
+                    } catch (error) {
+                      console.error('Error al guardar animación:', error)
+                      toast.error('Error al guardar la animación', {
+                        description: 'Intenta nuevamente',
+                        duration: 3000,
+                      })
+                    }
                   }}
                   className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-black text-lg hover:from-green-400 hover:to-emerald-400 transition-all flex items-center justify-center gap-2"
                 >

@@ -142,4 +142,21 @@ export const estudiantesApi = {
       throw error;
     }
   },
+
+  /**
+   * Actualizar la animación idle del estudiante autenticado
+   * @param animacion_idle_url - URL de la animación .glb
+   * @returns Estudiante actualizado
+   */
+  updateAnimacion: async (animacion_idle_url: string): Promise<Estudiante> => {
+    try {
+      const response = await apiClient.patch('/estudiantes/animacion', {
+        animacion_idle_url,
+      });
+      return estudianteSchema.parse(response);
+    } catch (error) {
+      console.error('Error al actualizar la animación:', error);
+      throw error;
+    }
+  },
 };
