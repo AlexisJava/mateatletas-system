@@ -79,7 +79,8 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
           className="flex-[3] bg-blue-900/60 backdrop-blur-xl rounded-3xl p-6
                      border-2 border-white/20 flex flex-col"
         >
-          <div className="flex items-center gap-3 mb-6">
+          {/* Header FIJO del grupo */}
+          <div className="flex items-center gap-3 mb-4 flex-shrink-0">
             <span className="text-4xl">👥</span>
             <div>
               <h2 className="text-3xl font-black text-white">
@@ -91,11 +92,12 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
             </div>
           </div>
 
-          {/* Lista de compañeros - GRID con SCROLL */}
+          {/* CONTENEDOR con scroll - SOLO el grid de compañeros */}
           {companeros.length > 0 ? (
-            <div className="flex-1 overflow-y-auto grid grid-cols-3 auto-rows-min gap-2 pr-2">
-              {/* Mostrar TODOS los compañeros */}
-              {companeros.map((companero) => {
+            <div className="flex-1 min-h-0 overflow-y-auto pr-2">
+              <div className="grid grid-cols-3 auto-rows-min gap-2">
+                {/* Mostrar TODOS los compañeros */}
+                {companeros.map((companero) => {
                 const esTu = companero.id === estudiante.id;
                 return (
                   <div
@@ -125,7 +127,8 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
                     )}
                   </div>
                 );
-              })}
+                })}
+              </div>
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center">
