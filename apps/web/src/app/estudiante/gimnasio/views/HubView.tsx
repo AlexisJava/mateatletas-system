@@ -3,9 +3,10 @@
 /// <reference path="../../../../types/model-viewer.d.ts" />
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useOverlay, useOverlayStack } from '../contexts/OverlayStackProvider';
+import { useOverlay } from '../contexts/OverlayStackProvider';
 import type { OverlayConfig } from '../types/overlay.types';
 import { recursosApi } from '@/lib/api/tienda.api';
 import type { RecursosEstudiante } from '@mateatletas/contracts';
@@ -25,15 +26,12 @@ import {
   Trophy,
   ShoppingBag,
   Users,
-  Settings,
   Bell,
   Flame,
   Star,
   Coins,
   Gem,
   Brain,
-  Zap,
-  Target,
   BarChart3,
   Sparkles,
   LogOut,
@@ -41,7 +39,7 @@ import {
 } from 'lucide-react';
 
 interface HubViewProps {
-  onNavigate: (vista: string) => void;
+  onNavigate: (_view: string) => void;
   estudiante: {
     id: string;
     nombre: string;
@@ -58,12 +56,19 @@ interface NavButton {
   overlayId: OverlayType;
   label: string;
   description: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   gradient: string;
   glowColor: string;
   badge?: number;
   pulse?: boolean;
 }
+
+type ProximaClase = Awaited<ReturnType<typeof estudiantesApi.getProximaClase>>;
+
+const FALLBACK_IDLE_ANIMATION_URL =
+  'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb';
+const FALLBACK_ACTIVE_ANIMATION_URL =
+  'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
 
 const NAV_LEFT: NavButton[] = [
   {
@@ -179,7 +184,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [activeView, setActiveView] = useState('hub');
   const [isMounted, setIsMounted] = useState(false);
   const [recursos, setRecursos] = useState<RecursosEstudiante | null>(null);
-  const [proximaClase, setProximaClase] = useState<any>(null);
+  const [proximaClase, setProximaClase] = useState<ProximaClase>(null);
   const [currentAnimation, setCurrentAnimation] = useState<string | undefined>(undefined);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -188,17 +193,35 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   // const _modelRef = useRef<any>(null); // TODO: usar para controlar el modelo 3D
   const { openOverlay } = useOverlay();
-  const { push } = useOverlayStack();
   const { logout } = useAuthStore();
   const router = useRouter();
 
   // Hook de detección de dispositivo
   const { deviceType } = useDeviceType();
 
+  const studentGender = useMemo<'masculine' | 'feminine' | undefined>(() => {
+    if (!estudiante.avatar_url) return undefined;
+    return estudiante.avatar_url.includes('/feminine/') ? 'feminine' : 'masculine';
+  }, [estudiante.avatar_url]);
+
   // Hook de animaciones
   const { getRandomAnimation, animationsByCategory } = useStudentAnimations({
     studentPoints: estudiante.puntos_totales,
+    gender: studentGender,
   });
+
+  const defaultIdleAnimationUrl = useMemo(() => {
+    const idleAnimations = animationsByCategory?.idle ?? [];
+
+    if (studentGender) {
+      const genderMatched = idleAnimations.find((animation) => animation.gender === studentGender);
+      if (genderMatched) {
+        return genderMatched.url;
+      }
+    }
+
+    return idleAnimations[0]?.url ?? FALLBACK_IDLE_ANIMATION_URL;
+  }, [animationsByCategory, studentGender]);
 
   // Hook de racha automática - registra actividad del día al entrar
   const { racha: rachaData } = useRachaAutomatica(estudiante.id);
@@ -210,28 +233,31 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     // 1. animacion_idle_url del backend (viene del login)
     // 2. localStorage (selección temporal)
     // 3. default idle animation
-    const defaultIdleUrl =
-      'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb';
-
+    const storedAnimation =
+      typeof window !== 'undefined'
+        ? window.localStorage.getItem('selected_idle_animation')
+        : null;
     const animacionInicial =
-      estudiante.animacion_idle_url ||
-      localStorage.getItem('selected_idle_animation') ||
-      defaultIdleUrl;
+      estudiante.animacion_idle_url ?? storedAnimation ?? defaultIdleAnimationUrl;
 
     setCurrentAnimation(animacionInicial);
 
     // Escuchar cambios de animación desde AnimacionesView
-    const handleAnimationSelected = (event: CustomEvent) => {
-      const { animationUrl } = event.detail;
-      setCurrentAnimation(animationUrl);
+    const handleAnimationSelected = (event: Event) => {
+      const customEvent = event as CustomEvent<{ animationUrl?: string }>;
+      if (customEvent.detail?.animationUrl) {
+        setCurrentAnimation(customEvent.detail.animationUrl);
+      } else {
+        setCurrentAnimation(defaultIdleAnimationUrl);
+      }
     };
 
-    window.addEventListener('animation-selected', handleAnimationSelected as EventListener);
+    window.addEventListener('animation-selected', handleAnimationSelected);
 
     return () => {
-      window.removeEventListener('animation-selected', handleAnimationSelected as EventListener);
+      window.removeEventListener('animation-selected', handleAnimationSelected);
     };
-  }, [estudiante.animacion_idle_url]);
+  }, [estudiante.animacion_idle_url, defaultIdleAnimationUrl]);
 
   // Cargar recursos del estudiante
   useEffect(() => {
@@ -273,22 +299,23 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   }, [estudiante.id]);
 
   // Hook para animaciones del avatar - triggers manuales
-  const triggerAnimation = useCallback((animationUrl: string, returnToIdleAfter?: number) => {
-    try {
-      setCurrentAnimation(animationUrl);
+  const triggerAnimation = useCallback(
+    (animationUrl?: string | null, returnToIdleAfter?: number) => {
+      try {
+        const nextAnimation = animationUrl ?? defaultIdleAnimationUrl;
+        setCurrentAnimation(nextAnimation);
 
-      // Si se especifica duración, volver a idle después
-      if (returnToIdleAfter) {
-        setTimeout(() => {
-          const idleUrl =
-            'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb';
-          setCurrentAnimation(idleUrl);
-        }, returnToIdleAfter);
+        if (returnToIdleAfter) {
+          setTimeout(() => {
+            setCurrentAnimation(defaultIdleAnimationUrl);
+          }, returnToIdleAfter);
+        }
+      } catch (error) {
+        console.debug('Animation error:', error);
       }
-    } catch (error) {
-      console.debug('Animation error:', error);
-    }
-  }, []);
+    },
+    [defaultIdleAnimationUrl],
+  );
 
   // NO rotar animaciones automáticamente - mantener idle continuo
   // Solo cambiar cuando el usuario interactúa
@@ -341,7 +368,9 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     // Si faltan 5 minutos o menos, o ya empezó (pero no pasó mucho tiempo), permitir acceso
     // Animación energética antes de navegar
     const energeticUrl =
-      'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
+      getRandomAnimation('expression')?.url ??
+      getRandomAnimation('idle')?.url ??
+      FALLBACK_ACTIVE_ANIMATION_URL;
     triggerAnimation(energeticUrl, 2000);
 
     setTimeout(() => {
@@ -349,7 +378,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
       console.log('🎓 Ingresando a clase:', proximaClase);
       // onNavigate('clase-sincronica'); // Implementar cuando exista la vista
     }, 1800);
-  }, [proximaClase, triggerAnimation]);
+  }, [getRandomAnimation, proximaClase, triggerAnimation]);
 
   // Valores de recursos (del backend o fallback si está cargando)
   const monedas = recursos?.monedas_total ?? 0;
@@ -798,6 +827,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
             borderColor="yellow-600"
           />
           <ResourcePill
+            icon={<Gem className={deviceType === 'mobile' ? 'w-5 h-5' : 'w-6 h-6'} />}
+            value={gemas}
+            gradient="from-sky-400 to-indigo-500"
+            borderColor="sky-600"
+          />
+          <ResourcePill
             icon={<Flame className={deviceType === 'mobile' ? 'w-5 h-5' : 'w-6 h-6'} />}
             value={racha_dias}
             gradient="from-orange-500 to-red-600"
@@ -990,10 +1025,11 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               <div
                 className="relative z-20 cursor-pointer w-full h-full"
                 onClick={() => {
-                  // Variations_005 (la más dinámica) al hacer click
-                  const clickUrl =
-                    'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
-                  triggerAnimation(clickUrl, 4000);
+                  const clickAnimationUrl =
+                    getRandomAnimation('dance')?.url ??
+                    getRandomAnimation('expression')?.url ??
+                    FALLBACK_ACTIVE_ANIMATION_URL;
+                  triggerAnimation(clickAnimationUrl, 4000);
                 }}
               >
                 {isMounted && estudiante.avatar_url && (
@@ -1113,7 +1149,9 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   } else {
                     // Caso default: entrenar matemáticas
                     const energeticUrl =
-                      'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
+                      getRandomAnimation('expression')?.url ??
+                      getRandomAnimation('idle')?.url ??
+                      FALLBACK_ACTIVE_ANIMATION_URL;
                     triggerAnimation(energeticUrl, 2000);
                     setTimeout(() => {
                       onNavigate('entrenamientos');
@@ -1765,7 +1803,7 @@ function ResourcePill({
   gradient,
   borderColor,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   value: number;
   gradient: string;
   borderColor: string;
@@ -1777,77 +1815,5 @@ function ResourcePill({
       <div className="text-white scale-125">{icon}</div>
       <span className="text-white font-black text-2xl">{value}</span>
     </div>
-  );
-}
-
-function StatCard3D({
-  icon,
-  value,
-  label,
-  subtitle,
-  gradient,
-  glowColor,
-  onClick,
-  deviceType = 'desktop',
-}: {
-  icon: React.ReactNode;
-  value: string;
-  label: string;
-  subtitle?: string;
-  gradient: string;
-  glowColor: string;
-  onClick?: () => void;
-  deviceType?: 'mobile' | 'tablet' | 'desktop' | 'ultrawide';
-}) {
-  return (
-    <motion.div
-      whileHover={{
-        scale: 1.05,
-        rotateY: deviceType === 'mobile' ? 0 : 5,
-      }}
-      whileTap={{ scale: 0.95 }}
-      onClick={onClick}
-      className={`
-        relative bg-gradient-to-br ${gradient}
-        ${deviceType === 'mobile' ? 'rounded-lg p-1.5' : deviceType === 'tablet' ? 'rounded-xl p-3' : 'rounded-2xl p-4'}
-        ${
-          deviceType === 'mobile'
-            ? 'shadow-[0_3px_0_rgba(0,0,0,0.3)] hover:shadow-[0_2px_0_rgba(0,0,0,0.3)] active:shadow-[0_1px_0_rgba(0,0,0,0.3)]'
-            : 'shadow-[0_8px_0_rgba(0,0,0,0.3)] hover:shadow-[0_6px_0_rgba(0,0,0,0.3)] active:shadow-[0_2px_0_rgba(0,0,0,0.3)]'
-        }
-        ${deviceType === 'mobile' ? 'border border-white/20' : 'border-4 border-white/20'}
-        cursor-pointer
-        transition-all
-      `}
-      style={{
-        transformStyle: 'preserve-3d',
-      }}
-    >
-      {/* Glow effect - reducido en mobile */}
-      {deviceType !== 'mobile' && (
-        <div className={`absolute inset-0 bg-${glowColor}-500/50 blur-xl -z-10 rounded-2xl`} />
-      )}
-
-      <div className="text-center">
-        <div
-          className={`flex items-center justify-center text-white ${deviceType === 'mobile' ? 'mb-0.5' : 'mb-2'}`}
-        >
-          {icon}
-        </div>
-        <div
-          className={`text-white font-black ${deviceType === 'mobile' ? 'text-xs' : deviceType === 'tablet' ? 'text-lg' : 'text-2xl'}`}
-        >
-          {value}
-        </div>
-        <div
-          className={`text-white/80 font-bold uppercase tracking-wide ${deviceType === 'mobile' ? 'text-[9px]' : 'text-xs'}`}
-        >
-          {label}
-        </div>
-        {subtitle && deviceType !== 'mobile' && (
-          <div className="text-white/60 text-xs mt-1 font-medium">{subtitle}</div>
-        )}
-      </div>
-    </motion.div>
   );
 }

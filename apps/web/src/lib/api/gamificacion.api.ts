@@ -21,6 +21,7 @@ import {
   type RecursosEstudiante,
   type TransaccionRecurso,
 } from '@mateatletas/contracts';
+import type { ProgresoLogros } from '@/types/gamificacion';
 
 export type DashboardData = DashboardGamificacion;
 export type ProximaClase = DashboardData['proximasClases'][number];
@@ -28,7 +29,7 @@ export type Logro = ContractsLogro;
 export type Puntos = ContractsPuntos;
 export type Ranking = ContractsRanking;
 export type Progreso = ProgresoRuta;
-export type AccionPuntuable = ContractsAccionPuntuable;
+export type AccionPuntuable = ContractsAccionPuntuable & { codigo?: string };
 export type PuntoObtenido = ContractsPuntoObtenido;
 export type OtorgarPuntosData = OtorgarPuntosInput;
 export type RankingEquipoEntry = RankingIntegrante;
@@ -39,7 +40,14 @@ export interface ProgresoLogroV2 {
   total: number;
   desbloqueados: number;
   porcentaje: number;
-  categorias: Record<string, { total: number; desbloqueados: number }>;
+  categorias: Record<
+    string,
+    {
+      total: number;
+      desbloqueados: number;
+      logros?: Array<Logro & { desbloqueado: boolean; fecha_desbloqueo: string | null; secreto?: boolean }>;
+    }
+  >;
 }
 
 export interface RecursosResponse {
@@ -264,10 +272,46 @@ export const gamificacionApi = {
   /**
    * Obtener progreso de logros V2
    */
-  obtenerProgresoV2: async (estudianteId: string): Promise<ProgresoLogroV2> => {
+  obtenerProgresoV2: async (estudianteId: string): Promise<ProgresoLogros> => {
     try {
-      const response = await apiClient.get(`/gamificacion/logros/estudiante/${estudianteId}/progreso`);
-      return response as ProgresoLogroV2;
+      const response = await apiClient.get<ProgresoLogros | ProgresoLogroV2>(
+        `/gamificacion/logros/estudiante/${estudianteId}/progreso`,
+      );
+
+      const isProgresoLogros = (value: unknown): value is ProgresoLogros =>
+        typeof value === 'object' &&
+        value !== null &&
+        'total_logros' in value &&
+        'logros_desbloqueados' in value &&
+        'por_categoria' in value;
+
+      if (isProgresoLogros(response)) {
+        return response;
+      }
+
+      const data = response as ProgresoLogroV2;
+
+      const porCategoria = Object.entries(data.categorias ?? {}).reduce<ProgresoLogros['por_categoria']>(
+        (acc, [categoria, valores]) => {
+          acc[categoria] = {
+            total: valores.total ?? 0,
+            desbloqueados: valores.desbloqueados ?? 0,
+            logros: (valores.logros ?? []).map((logro) => ({
+              ...logro,
+              fecha_desbloqueo: logro.fecha_desbloqueo ? new Date(logro.fecha_desbloqueo) : null,
+            })),
+          };
+          return acc;
+        },
+        {},
+      );
+
+      return {
+        total_logros: data.total ?? 0,
+        logros_desbloqueados: data.desbloqueados ?? 0,
+        porcentaje: data.porcentaje ?? 0,
+        por_categoria: porCategoria,
+      };
     } catch (error) {
       console.error('Error al obtener progreso V2:', error);
       throw error;

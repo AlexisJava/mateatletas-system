@@ -190,7 +190,7 @@ interface PlanificacionRowData {
   estadoLabel: string;
 }
 
-const usePlanificacionRowData = (planificacion: PlanificacionListItem): PlanificacionRowData => {
+const getPlanificacionRowData = (planificacion: PlanificacionListItem): PlanificacionRowData => {
   const grupoCodigo = planificacion.grupo?.codigo ?? planificacion.codigo_grupo ?? DEFAULT_GRUPO;
   const grupoColor = getGrupoColor(grupoCodigo);
   const estadoColor = getEstadoColor(planificacion.estado);
@@ -447,7 +447,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
               {planificaciones.map((planificacion, index) => (
                 <DesktopTableRow
                   key={planificacion.id}
-                  data={usePlanificacionRowData(planificacion)}
+                  data={getPlanificacionRowData(planificacion)}
                   index={index}
                   onViewDetails={onViewDetails}
                 />
@@ -461,7 +461,7 @@ export const PlanificacionesTable: React.FC<PlanificacionesTableProps> = ({
           {planificaciones.map((planificacion, index) => (
             <MobileCard
               key={planificacion.id}
-              data={usePlanificacionRowData(planificacion)}
+              data={getPlanificacionRowData(planificacion)}
               index={index}
               onViewDetails={onViewDetails}
             />

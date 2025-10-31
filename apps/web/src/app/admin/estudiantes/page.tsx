@@ -94,10 +94,21 @@ export default function AdminEstudiantesPage() {
     }
   };
 
+  const isSectoresPayload = (value: Sector[] | { data?: Sector[] }): value is { data?: Sector[] } =>
+    typeof value === 'object' && value !== null && !Array.isArray(value);
+
   const loadSectores = async () => {
     try {
-      const response = await apiClient.get<{ data?: unknown[] } | unknown[]>('/admin/sectores');
-      setSectores((response as { data?: unknown[] })?.data || []);
+      const response = await apiClient.get<Sector[] | { data?: Sector[] }>('/admin/sectores');
+
+      let sectoresData: Sector[] = [];
+      if (Array.isArray(response)) {
+        sectoresData = response;
+      } else if (isSectoresPayload(response) && Array.isArray(response.data)) {
+        sectoresData = response.data;
+      }
+
+      setSectores(sectoresData);
     } catch (err: unknown) {
       console.error('Error al cargar sectores:', err);
     }
