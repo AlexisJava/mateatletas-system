@@ -38,8 +38,8 @@ type PlanificacionListItemApi = {
   estado: EstadoPlanificacion;
   notas_docentes: string | null;
   fecha_publicacion: string | null;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   total_actividades: number;
   total_asignaciones: number;
 };
@@ -60,8 +60,8 @@ type ActividadApi = {
   descripcion: string;
   props: Record<string, unknown> | null;
   orden: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type PlanificacionDetalleApi = PlanificacionListItemApi & {
@@ -88,8 +88,8 @@ const mapPlanificacionListItem = (
   estado: planificacion.estado,
   notas_docentes: planificacion.notas_docentes,
   fecha_publicacion: planificacion.fecha_publicacion,
-  created_at: planificacion.created_at,
-  updated_at: planificacion.updated_at,
+  createdAt: planificacion.created_at,
+  updatedAt: planificacion.updated_at,
   total_actividades: planificacion.total_actividades ?? 0,
   total_asignaciones: planificacion.total_asignaciones ?? 0,
 });
@@ -102,8 +102,8 @@ const mapActividad = (actividad: ActividadApi): Actividad => ({
   descripcion: actividad.descripcion,
   props: actividad.props ?? {},
   orden: actividad.orden,
-  created_at: actividad.created_at,
-  updated_at: actividad.updated_at,
+  createdAt: actividad.created_at,
+  updatedAt: actividad.updated_at,
 });
 
 const mapPlanificacionDetalle = (
@@ -144,7 +144,7 @@ export const getPlanificaciones = async (
       total: data.total,
       page: data.page,
       limit: data.limit,
-      totalPages: data.total_pages,
+      total_pages: data.total_pages,
     };
   } catch (error) {
     console.error('Error al obtener las planificaciones:', error);

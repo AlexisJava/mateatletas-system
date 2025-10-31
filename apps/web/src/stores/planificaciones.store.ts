@@ -90,7 +90,7 @@ export const usePlanificacionesStore = create<PlanificacionesState>((set, get) =
         total: response.total,
         page: response.page,
         limit: response.limit,
-        totalPages: response.totalPages,
+        totalPages: response.total_pages,
         isLoadingList: false,
       });
     } catch (err: unknown) {

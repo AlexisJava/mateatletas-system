@@ -57,13 +57,13 @@ export default function SalaClaseDocentePage() {
     const fetchClase = async () => {
       try {
         // El interceptor ya retorna response.data directamente
-        const claseData = (await apiClient.get<ClaseData>(`/clases/${claseId}`)).data;
+        const claseData = await apiClient.get<ClaseData>(`/clases/${claseId}`);
         setClase(claseData);
 
         // Cargar estudiantes inscritos
-        const estudiantesData = (await apiClient.get<Estudiante[]>(
+        const estudiantesData = await apiClient.get<Estudiante[]>(
           `/clases/${claseId}/estudiantes`,
-        )).data;
+        );
         setEstudiantes(estudiantesData);
       } catch {
         // Error loading class
