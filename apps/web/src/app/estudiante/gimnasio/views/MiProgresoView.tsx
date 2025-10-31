@@ -147,7 +147,7 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               titulo: 'Tus Logros',
               items: [
                 `Desbloqueados: ${logrosDesbloqueados}/${totalLogros}`,
-                `Progreso: ${progresoLogros.porcentaje.toFixed(0)}%`,
+                `Progreso: ${(progresoLogros.porcentaje ?? 0).toFixed(0)}%`,
                 `${logrosDesbloqueados > 0 ? `Último: ${logros.find((l) => l.desbloqueado)?.nombre || 'N/A'}` : 'Aún no has desbloqueado ninguno'}`,
                 `Cada logro te da XP y monedas`,
               ],
