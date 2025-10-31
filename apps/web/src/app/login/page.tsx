@@ -369,14 +369,14 @@ export default function LoginPage() {
 
       {/* Main Content - Split 50/50 */}
       <div className="relative h-screen flex items-center justify-center overflow-hidden pt-20">
-        <div className="max-w-7xl w-full mx-auto px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center max-h-[calc(100vh-10rem)] overflow-y-auto">
-            {/* Epic Message - LEFT SIDE */}
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 items-center max-h-[calc(100vh-8rem)] sm:max-h-[calc(100vh-10rem)] overflow-y-auto">
+            {/* Epic Message - LEFT SIDE - HIDDEN ON MOBILE */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-center lg:text-left space-y-4"
+              className="hidden lg:block text-center lg:text-left space-y-4"
             >
               {/* Badge */}
               <motion.div
@@ -446,36 +446,36 @@ export default function LoginPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500/30 to-yellow-500/30 blur-[60px] opacity-40" />
 
               {/* Login Card */}
-              <div className="relative bg-gradient-to-br from-zinc-900/95 via-zinc-900/80 to-zinc-900/95 backdrop-blur-2xl rounded-3xl border-2 border-orange-400/40 shadow-2xl shadow-orange-500/40 overflow-hidden">
+              <div className="relative bg-gradient-to-br from-zinc-900/95 via-zinc-900/80 to-zinc-900/95 backdrop-blur-2xl rounded-2xl sm:rounded-3xl border-2 border-orange-400/40 shadow-2xl shadow-orange-500/40 overflow-hidden">
                 {/* Card header glow */}
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-orange-300/90 to-transparent" />
 
-                <div className="p-5 lg:p-6">
+                <div className="p-4 sm:p-5 lg:p-6">
                   {/* Title */}
-                  <div className="mb-4 space-y-1 text-center">
-                    <h2 className="text-xl font-black tracking-tight bg-gradient-to-r from-orange-300 to-yellow-300 text-transparent bg-clip-text drop-shadow-[0_0_20px_rgba(251,146,60,0.4)]">
+                  <div className="mb-3 sm:mb-4 space-y-1 text-center">
+                    <h2 className="text-lg sm:text-xl font-black tracking-tight bg-gradient-to-r from-orange-300 to-yellow-300 text-transparent bg-clip-text drop-shadow-[0_0_20px_rgba(251,146,60,0.4)]">
                       ENTRAR A LA ARENA
                     </h2>
-                    <p className="text-white/70 text-xs">Selecciona tu tipo de usuario y accede</p>
+                    <p className="text-white/70 text-[10px] sm:text-xs">Selecciona tu tipo de usuario y accede</p>
                   </div>
 
                   {/* Toggle Tutor/Estudiante - Brawl Style */}
-                  <div className="mb-4 grid grid-cols-2 gap-2 p-1 rounded-2xl bg-black/50 border-2 border-orange-400/30">
+                  <div className="mb-3 sm:mb-4 grid grid-cols-2 gap-1.5 sm:gap-2 p-1 rounded-xl sm:rounded-2xl bg-black/50 border-2 border-orange-400/30">
                     <button
                       type="button"
                       onClick={() => {
                         setUserType('tutor');
                         setError('');
                       }}
-                      className={`relative py-2 px-3 rounded-xl font-bold transition-all ${
+                      className={`relative py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl font-bold transition-all ${
                         userType === 'tutor'
                           ? 'bg-gradient-to-br from-orange-500/40 to-yellow-500/40 text-orange-200 shadow-lg shadow-orange-500/50 border-2 border-orange-400/70'
                           : 'text-white/50 hover:text-white/70 border-2 border-transparent'
                       }`}
                     >
-                      <div className="flex items-center justify-center gap-1.5">
-                        <User className="w-3.5 h-3.5" strokeWidth={2.5} />
-                        <span className="text-xs">Tutor/Padre</span>
+                      <div className="flex items-center justify-center gap-1 sm:gap-1.5">
+                        <User className="w-3 sm:w-3.5 h-3 sm:h-3.5" strokeWidth={2.5} />
+                        <span className="text-[10px] sm:text-xs">Tutor/Padre</span>
                       </div>
                     </button>
                     <button
@@ -484,15 +484,15 @@ export default function LoginPage() {
                         setUserType('estudiante');
                         setError('');
                       }}
-                      className={`relative py-2 px-3 rounded-xl font-bold transition-all ${
+                      className={`relative py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg sm:rounded-xl font-bold transition-all ${
                         userType === 'estudiante'
                           ? 'bg-gradient-to-br from-orange-500/40 to-yellow-500/40 text-orange-200 shadow-lg shadow-orange-500/50 border-2 border-orange-400/70'
                           : 'text-white/50 hover:text-white/70 border-2 border-transparent'
                       }`}
                     >
-                      <div className="flex items-center justify-center gap-1.5">
-                        <GraduationCap className="w-3.5 h-3.5" strokeWidth={2.5} />
-                        <span className="text-xs">Estudiante</span>
+                      <div className="flex items-center justify-center gap-1 sm:gap-1.5">
+                        <GraduationCap className="w-3 sm:w-3.5 h-3 sm:h-3.5" strokeWidth={2.5} />
+                        <span className="text-[10px] sm:text-xs">Estudiante</span>
                       </div>
                     </button>
                   </div>
@@ -512,15 +512,15 @@ export default function LoginPage() {
                   )}
 
                   {/* Login Form */}
-                  <form onSubmit={handleSubmit} className="space-y-3">
+                  <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
                     {/* Email Input - Brawl Style */}
                     <div className="space-y-1">
-                      <label htmlFor="email" className="block text-xs font-bold text-white/90">
+                      <label htmlFor="email" className="block text-[10px] sm:text-xs font-bold text-white/90">
                         Correo electrónico
                       </label>
                       <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Mail className="w-4 h-4 text-orange-300/60 group-focus-within:text-orange-300 transition-colors" />
+                        <div className="absolute inset-y-0 left-0 pl-2.5 sm:pl-3 flex items-center pointer-events-none">
+                          <Mail className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-orange-300/60 group-focus-within:text-orange-300 transition-colors" />
                         </div>
                         <input
                           id="email"
@@ -531,7 +531,7 @@ export default function LoginPage() {
                           placeholder="tu@email.com"
                           disabled={isLoading}
                           autoComplete="email"
-                          className="w-full pl-10 pr-3 py-2.5 text-sm bg-black/50 border-2 border-orange-400/20 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full pl-8 sm:pl-10 pr-2.5 sm:pr-3 py-2 sm:py-2.5 text-xs sm:text-sm bg-black/50 border-2 border-orange-400/20 rounded-lg sm:rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </div>
                     </div>
@@ -539,16 +539,16 @@ export default function LoginPage() {
                     {/* Password Input - Brawl Style */}
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
-                        <label htmlFor="password" className="block text-xs font-bold text-white/90">
+                        <label htmlFor="password" className="block text-[10px] sm:text-xs font-bold text-white/90">
                           Contraseña
                         </label>
-                        <span className="text-[10px] text-gray-400">
+                        <span className="text-[9px] sm:text-[10px] text-gray-400">
                           ¿Olvidaste tu contraseña?
                         </span>
                       </div>
                       <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <Lock className="w-4 h-4 text-orange-300/60 group-focus-within:text-orange-300 transition-colors" />
+                        <div className="absolute inset-y-0 left-0 pl-2.5 sm:pl-3 flex items-center pointer-events-none">
+                          <Lock className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-orange-300/60 group-focus-within:text-orange-300 transition-colors" />
                         </div>
                         <input
                           id="password"
@@ -559,18 +559,18 @@ export default function LoginPage() {
                           placeholder="••••••••"
                           disabled={isLoading}
                           autoComplete="current-password"
-                          className="w-full pl-10 pr-10 py-2.5 text-sm bg-black/50 border-2 border-orange-400/20 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full pl-8 sm:pl-10 pr-9 sm:pr-10 py-2 sm:py-2.5 text-xs sm:text-sm bg-black/50 border-2 border-orange-400/20 rounded-lg sm:rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           disabled={isLoading}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-white/50 hover:text-orange-300 transition-colors disabled:opacity-50"
+                          className="absolute inset-y-0 right-0 pr-2.5 sm:pr-3 flex items-center text-white/50 hover:text-orange-300 transition-colors disabled:opacity-50"
                         >
                           {showPassword ? (
-                            <EyeOff className="w-4 h-4" />
+                            <EyeOff className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                           ) : (
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                           )}
                         </button>
                       </div>
@@ -582,9 +582,9 @@ export default function LoginPage() {
                         id="remember"
                         type="checkbox"
                         disabled={isLoading}
-                        className="w-3.5 h-3.5 rounded border-orange-400/30 bg-black/50 text-orange-400 focus:ring-2 focus:ring-orange-400/30 focus:ring-offset-0 disabled:opacity-50"
+                        className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded border-orange-400/30 bg-black/50 text-orange-400 focus:ring-2 focus:ring-orange-400/30 focus:ring-offset-0 disabled:opacity-50"
                       />
-                      <label htmlFor="remember" className="ml-2 text-xs text-white/70">
+                      <label htmlFor="remember" className="ml-2 text-[10px] sm:text-xs text-white/70">
                         Mantener sesión iniciada
                       </label>
                     </div>
@@ -593,7 +593,7 @@ export default function LoginPage() {
                     <MagneticButton
                       type="submit"
                       disabled={isLoading || isSubmitting}
-                      className="w-full group px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-base font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all inline-flex items-center justify-center gap-2 shadow-xl shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm sm:text-base font-semibold rounded-lg sm:rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all inline-flex items-center justify-center gap-2 shadow-xl shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading || isSubmitting ? (
                         <>
