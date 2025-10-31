@@ -35,6 +35,7 @@ import {
   BarChart3,
   Sparkles,
   LogOut,
+  Calendar,
 } from 'lucide-react';
 
 interface HubViewProps {
