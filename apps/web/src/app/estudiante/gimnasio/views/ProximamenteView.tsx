@@ -152,7 +152,7 @@ export function ProximamenteView({
             </h3>
             <p className="text-white/80 text-sm mb-4 max-w-2xl mx-auto">
               Estamos trabajando en crear la mejor experiencia de entrenamiento matemático.
-              Mientras tanto, explorá las tareas asignadas y seguí ganando puntos.
+              Mientras tanto, seguí con el <span className="text-purple-300 font-bold">Mes de la Ciencia</span> y ganá más puntos.
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
               <motion.div

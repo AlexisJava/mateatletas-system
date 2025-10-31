@@ -159,4 +159,18 @@ export const estudiantesApi = {
       throw error;
     }
   },
+
+  /**
+   * Obtener la próxima clase del estudiante autenticado
+   * @returns Información de la próxima clase o null si no hay ninguna
+   */
+  getProximaClase: async (): Promise<any> => {
+    try {
+      const response = await apiClient.get('/estudiantes/mi-proxima-clase');
+      return response;
+    } catch (error) {
+      console.error('Error al obtener la próxima clase:', error);
+      throw error;
+    }
+  },
 };

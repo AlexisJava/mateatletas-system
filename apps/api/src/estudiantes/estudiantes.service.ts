@@ -946,4 +946,124 @@ export class EstudiantesService {
     // Filtrar las que tienen cupos disponibles
     return clases.filter((clase) => clase.cupos_ocupados < clase.cupos_maximo);
   }
+
+  /**
+   * Obtener la próxima clase del estudiante (más cercana en el tiempo)
+   * @param estudianteId - ID del estudiante
+   * @returns La próxima clase programada o null si no hay ninguna
+   */
+  async obtenerProximaClase(estudianteId: string) {
+    const ahora = new Date();
+
+    // Buscar en clases grupales (ClaseGrupo)
+    const proximaClaseGrupo = await this.prisma.claseGrupo.findFirst({
+      where: {
+        inscripciones_clase_grupo: {
+          some: {
+            estudiante_id: estudianteId,
+          },
+        },
+        activa: true,
+      },
+      include: {
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        ruta_curricular: {
+          select: {
+            id: true,
+            nombre: true,
+            descripcion: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'asc', // Podemos usar createdAt como referencia temporal
+      },
+    });
+
+    // Si encontramos clase grupal, calcular la próxima fecha según el día de la semana
+    if (proximaClaseGrupo) {
+      const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const diaActual = ahora.getDay();
+      const diaClase = diasSemana.indexOf(proximaClaseGrupo.dia_semana);
+
+      let diasHasta = diaClase - diaActual;
+      if (diasHasta <= 0) {
+        diasHasta += 7; // Si ya pasó esta semana, calcular para la próxima
+      }
+
+      const fechaProxima = new Date(ahora);
+      fechaProxima.setDate(ahora.getDate() + diasHasta);
+
+      // Parsear hora (formato "HH:MM")
+      const [horas, minutos] = proximaClaseGrupo.hora_inicio.split(':').map(Number);
+      fechaProxima.setHours(horas, minutos, 0, 0);
+
+      return {
+        tipo: 'grupo' as const,
+        id: proximaClaseGrupo.id,
+        nombre: proximaClaseGrupo.nombre,
+        codigo: proximaClaseGrupo.codigo,
+        fecha_hora_inicio: fechaProxima,
+        duracion_minutos: proximaClaseGrupo.duracion_minutos,
+        docente: proximaClaseGrupo.docente,
+        ruta_curricular: proximaClaseGrupo.ruta_curricular,
+        dia_semana: proximaClaseGrupo.dia_semana,
+        hora_inicio: proximaClaseGrupo.hora_inicio,
+      };
+    }
+
+    // Si no hay clase grupal, buscar en clases individuales (Clase)
+    const proximaClaseIndividual = await this.prisma.clase.findFirst({
+      where: {
+        inscripciones: {
+          some: {
+            estudiante_id: estudianteId,
+          },
+        },
+        fecha_hora_inicio: {
+          gte: ahora,
+        },
+        estado: 'Programada',
+      },
+      include: {
+        docente: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+          },
+        },
+        ruta_curricular: {
+          select: {
+            id: true,
+            nombre: true,
+            descripcion: true,
+          },
+        },
+      },
+      orderBy: {
+        fecha_hora_inicio: 'asc',
+      },
+    });
+
+    if (proximaClaseIndividual) {
+      return {
+        tipo: 'individual' as const,
+        id: proximaClaseIndividual.id,
+        fecha_hora_inicio: proximaClaseIndividual.fecha_hora_inicio,
+        duracion_minutos: proximaClaseIndividual.duracion_minutos,
+        docente: proximaClaseIndividual.docente,
+        ruta_curricular: proximaClaseIndividual.ruta_curricular,
+        estado: proximaClaseIndividual.estado,
+      };
+    }
+
+    return null;
+  }
 }
