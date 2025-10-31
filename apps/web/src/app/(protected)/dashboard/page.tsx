@@ -54,8 +54,8 @@ export default function DashboardPage() {
 
       // Cargar estudiantes, clases y dashboard resumen en paralelo
       const [estudiantesRes, clasesRes, dashboardRes] = await Promise.all([
-        apiClient.get('/estudiantes'),
-        apiClient.get('/clases'),
+        apiClient.get<{ data: Estudiante[]; metadata?: unknown }>('/estudiantes'),
+        apiClient.get<{ data: Clase[]; metadata?: unknown }>('/clases'),
         getDashboardResumen(),
       ]);
 
@@ -69,8 +69,8 @@ export default function DashboardPage() {
 
       // El endpoint /estudiantes devuelve { data: [...], metadata: {...} }
       // Axios interceptor ya extrajo response.data, entonces estudiantesRes ES {data: [...], metadata: {...}}
-      setEstudiantes(estudiantesRes?.data || []);
-      setClases(clasesRes?.data || []);
+      setEstudiantes(estudiantesRes.data || []);
+      setClases(clasesRes.data || []);
       setDashboardData(dashboardRes);
 
       console.log('💾 Estado seteado - dashboardData:', dashboardRes);

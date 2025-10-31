@@ -177,7 +177,7 @@ export async function misPlanificaciones(): Promise<Array<{
 }>> {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = (await apiClient.get('/planificaciones/mis-planificaciones')).data;
+    const response = await apiClient.get('/planificaciones/mis-planificaciones');
     return response as Array<{
       codigo: string;
       titulo: string;
@@ -314,7 +314,7 @@ export async function misAsignaciones(): Promise<
 > {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = (await apiClient.get('/planificaciones/mis-asignaciones')).data;
+    const response = await apiClient.get('/planificaciones/mis-asignaciones');
     return response as Array<{
       id: string;
       planificacion: PlanificacionSimple;
@@ -375,9 +375,9 @@ export async function verProgresoEstudiantes(asignacionId: string): Promise<{
 }> {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = (await apiClient.get(
+    const response = await apiClient.get(
       `/planificaciones/asignacion/${asignacionId}/progreso`,
-    )).data;
+    );
     return response as {
       asignacion: { id: string; grupo: { id: string; nombre: string } };
       planificacion: { codigo: string; titulo: string; semanas_total: number };

@@ -88,8 +88,8 @@ const mapPlanificacionListItem = (
   estado: planificacion.estado,
   notas_docentes: planificacion.notas_docentes,
   fecha_publicacion: planificacion.fecha_publicacion,
-  createdAt: planificacion.created_at,
-  updatedAt: planificacion.updated_at,
+  createdAt: planificacion.createdAt,
+  updatedAt: planificacion.updatedAt,
   total_actividades: planificacion.total_actividades ?? 0,
   total_asignaciones: planificacion.total_asignaciones ?? 0,
 });
@@ -102,8 +102,8 @@ const mapActividad = (actividad: ActividadApi): Actividad => ({
   descripcion: actividad.descripcion,
   props: actividad.props ?? {},
   orden: actividad.orden,
-  createdAt: actividad.created_at,
-  updatedAt: actividad.updated_at,
+  createdAt: actividad.createdAt,
+  updatedAt: actividad.updatedAt,
 });
 
 const mapPlanificacionDetalle = (

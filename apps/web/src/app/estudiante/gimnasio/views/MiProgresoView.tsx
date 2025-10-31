@@ -122,7 +122,7 @@ interface MiProgresoViewProps {
   };
 }
 
-export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
+export function MiProgresoView({ estudiante: _estudiante }: MiProgresoViewProps) {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
 
   const selectedData = STATS_DATA.find(s => s.id === selectedCard);

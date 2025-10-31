@@ -9,18 +9,12 @@ import {
   CheckCircle,
   Star,
   Clock,
-  TrendingUp,
   Calendar,
   MessageSquare,
-  Target,
-  Award,
   ThumbsUp,
   AlertCircle,
-  Minus,
-  ClipboardList,
   UserCheck,
   Trophy,
-  Flame,
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/effects';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
@@ -28,8 +22,6 @@ import { toast } from '@/components/ui/Toast';
 import {
   obtenerDetalleCompletoGrupo,
   type GrupoDetalleCompletoDto,
-  type EstudianteConStatsDto,
-  type ObservacionRecienteDto,
 } from '@/lib/api/clase-grupos.api';
 import TomarAsistenciaModal from './components/TomarAsistenciaModal';
 import AgregarObservacionModal from './components/AgregarObservacionModal';

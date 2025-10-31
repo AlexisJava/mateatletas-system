@@ -28,8 +28,7 @@ import { productoSchema, productosListSchema } from '@/lib/schemas/producto.sche
 export const getDashboard = async (): Promise<DashboardData> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.get<DashboardData>('/admin/dashboard');
-    return response.data;
+    return await axios.get<DashboardData>('/admin/dashboard');
   } catch (error) {
     console.error('Error al obtener el dashboard de administración:', error);
     throw error;
@@ -39,8 +38,7 @@ export const getDashboard = async (): Promise<DashboardData> => {
 export const getSystemStats = async (): Promise<SystemStats> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.get<SystemStats>('/admin/estadisticas');
-    return response.data;
+    return await axios.get<SystemStats>('/admin/estadisticas');
   } catch (error) {
     console.error('Error al obtener las estadísticas del sistema:', error);
     throw error;
@@ -50,8 +48,7 @@ export const getSystemStats = async (): Promise<SystemStats> => {
 export const getAllUsers = async (): Promise<AdminUser[]> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.get<AdminUser[]>('/admin/usuarios');
-    return response.data;
+    return await axios.get<AdminUser[]>('/admin/usuarios');
   } catch (error) {
     console.error('Error al obtener los usuarios administradores:', error);
     throw error;
@@ -109,8 +106,7 @@ export const getAllEstudiantes = async (options?: {
 
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.get<EstudiantesResponse>(url);
-    return response.data;
+    return await axios.get<EstudiantesResponse>(url);
   } catch (error) {
     console.error('Error al obtener el listado de estudiantes:', error);
     throw error;
@@ -120,11 +116,10 @@ export const getAllEstudiantes = async (options?: {
 export const changeUserRole = async (userId: string, data: ChangeRoleDto): Promise<AdminUser> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.post<AdminUser>(
+    return await axios.post<AdminUser>(
       `/admin/usuarios/${userId}/role`,
       data
     );
-    return response.data;
   } catch (error) {
     console.error('Error al cambiar el rol del usuario:', error);
     throw error;
@@ -134,11 +129,10 @@ export const changeUserRole = async (userId: string, data: ChangeRoleDto): Promi
 export const updateUserRoles = async (userId: string, data: UpdateRolesDto): Promise<{ message: string; userId: string; roles: string[] }> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.put<{ message: string; userId: string; roles: string[] }>(
+    return await axios.put<{ message: string; userId: string; roles: string[] }>(
       `/admin/usuarios/${userId}/roles`,
       data
     );
-    return response.data;
   } catch (error) {
     console.error('Error al actualizar los roles del usuario:', error);
     throw error;

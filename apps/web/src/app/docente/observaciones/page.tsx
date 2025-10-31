@@ -25,7 +25,6 @@ import {
   Star,
   CheckCircle,
   XCircle,
-  BookOpen,
   Award,
   Target,
 } from 'lucide-react';

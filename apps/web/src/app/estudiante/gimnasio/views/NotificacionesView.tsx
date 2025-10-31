@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { gamificacionApi, type Logro, type ProximaClase } from '@/lib/api/gamificacion.api';
+import { gamificacionApi, type ProximaClase } from '@/lib/api/gamificacion.api';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 

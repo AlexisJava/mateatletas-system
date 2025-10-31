@@ -127,7 +127,7 @@ const ELECTRONES: Electron[] = [
   },
 ];
 
-export function LaboratorioEcosistema({ semanaId }: LaboratorioEcosistemaProps) {
+export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosistemaProps) {
   const { pop, push } = useOverlayStack();
   const [electronSeleccionado, setElectronSeleccionado] = useState<string | null>(null);
   const [reaccionando, setReaccionando] = useState(false);
@@ -152,9 +152,9 @@ export function LaboratorioEcosistema({ semanaId }: LaboratorioEcosistemaProps) 
     playHoverSound();
   };
 
-  const handleClearHover = () => {
-    setElectronHovered(null);
-  };
+  // const handleClearHover = () => {
+  //   setElectronHovered(null);
+  // }; // TODO: usar en onMouseLeave
 
   const handleElectronClickSplit = (electronId: string, event: React.MouseEvent) => {
     const electron = ELECTRONES.find((e) => e.id === electronId);

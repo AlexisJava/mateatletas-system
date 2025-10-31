@@ -7,8 +7,6 @@ import { Producto, TipoProducto } from '@/types/catalogo.types';
 import {
   productoSchema,
   productosListSchema,
-  createProductoSchema,
-  updateProductoSchema,
   type CreateProductoDto,
   type UpdateProductoDto,
 } from '@mateatletas/contracts';

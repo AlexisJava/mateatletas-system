@@ -78,8 +78,6 @@ function ContenidoPlanificacion() {
   const {
     progreso,
     guardarEstado,
-    avanzarSemana,
-    completarSemana,
   } = usePlanificacion();
 
   // Estado local del juego
@@ -368,8 +366,8 @@ interface ActividadContentProps {
   onGuardar: () => void;
 }
 
-function ActividadContent({ numero, estado, onEstadoChange, onGuardar }: ActividadContentProps) {
-  // TODO: Implementar contenido de cada actividad
+function ActividadContent({ numero }: ActividadContentProps) {
+  // TODO: Implementar contenido de cada actividad usando estado, onEstadoChange, onGuardar
   // Por ahora mostramos placeholder
 
   return (

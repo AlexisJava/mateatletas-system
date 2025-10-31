@@ -2,7 +2,7 @@
 
 /// <reference path="../../../../types/model-viewer.d.ts" />
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOverlay, useOverlayStack } from '../contexts/OverlayStackProvider';
 import type { OverlayConfig } from '../types/overlay.types';
@@ -171,7 +171,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [recursos, setRecursos] = useState<RecursosEstudiante | null>(null);
   const [currentAnimation, setCurrentAnimation] = useState<string | undefined>(undefined);
-  const modelRef = useRef<any>(null);
+  // const _modelRef = useRef<any>(null); // TODO: usar para controlar el modelo 3D
   const { openOverlay } = useOverlay();
   const { push } = useOverlayStack();
 

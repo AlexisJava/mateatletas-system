@@ -78,10 +78,12 @@ export default function AdminEstudiantesPage() {
       setIsLoading(true);
       setError(null);
       // Endpoint para admin que trae TODOS los estudiantes SIN límite
-      const response = (await apiClient.get('/admin/estudiantes')).data;
+      const response = await apiClient.get<{ data?: Estudiante[] } | Estudiante[]>('/admin/estudiantes');
       console.log('📊 Respuesta del servidor:', response);
       // El backend devuelve { data: [], metadata: {} }
-      const estudiantes = response?.data ? response.data : (Array.isArray(response) ? response : []);
+      const estudiantes = (response as { data?: Estudiante[] })?.data
+        ? (response as { data: Estudiante[] }).data
+        : (Array.isArray(response) ? response : []);
       console.log('👥 Estudiantes procesados:', estudiantes.length);
       setEstudiantes(estudiantes as Estudiante[]);
     } catch (err: unknown) {
@@ -94,8 +96,8 @@ export default function AdminEstudiantesPage() {
 
   const loadSectores = async () => {
     try {
-      const response = (await apiClient.get('/admin/sectores')).data;
-      setSectores(response.data || []);
+      const response = await apiClient.get<{ data?: unknown[] } | unknown[]>('/admin/sectores');
+      setSectores((response as { data?: unknown[] })?.data || []);
     } catch (err: unknown) {
       console.error('Error al cargar sectores:', err);
     }

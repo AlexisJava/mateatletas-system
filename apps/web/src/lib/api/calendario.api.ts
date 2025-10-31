@@ -17,10 +17,9 @@ import type {
 // ==================== CREAR EVENTOS ====================
 
 export const crearTarea = async (data: CreateTareaDto): Promise<Evento> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.post<Evento>('/eventos/tareas', data)).data;
-    return response;
+    return await apiClient.post<Evento>('/eventos/tareas', data);
   } catch (error) {
     console.error('Error al crear tarea en el calendario:', error);
     throw error;
@@ -30,13 +29,9 @@ export const crearTarea = async (data: CreateTareaDto): Promise<Evento> => {
 export const crearRecordatorio = async (
   data: CreateRecordatorioDto
 ): Promise<Evento> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.post<Evento>(
-      '/eventos/recordatorios',
-      data
-    )).data;
-    return response;
+    return await apiClient.post<Evento>('/eventos/recordatorios', data);
   } catch (error) {
     console.error('Error al crear recordatorio en el calendario:', error);
     throw error;
@@ -44,10 +39,9 @@ export const crearRecordatorio = async (
 };
 
 export const crearNota = async (data: CreateNotaDto): Promise<Evento> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.post<Evento>('/eventos/notas', data)).data;
-    return response;
+    return await apiClient.post<Evento>('/eventos/notas', data);
   } catch (error) {
     console.error('Error al crear nota en el calendario:', error);
     throw error;
@@ -66,12 +60,9 @@ export const obtenerEventos = async (
   if (filtros?.tipo) params.append('tipo', filtros.tipo);
   if (filtros?.busqueda) params.append('busqueda', filtros.busqueda);
 
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.get<Evento[]>(
-      `/eventos?${params.toString()}`
-    )).data;
-    return response;
+    return await apiClient.get<Evento[]>(`/eventos?${params.toString()}`);
   } catch (error) {
     console.error('Error al obtener eventos del calendario:', error);
     throw error;
@@ -79,10 +70,9 @@ export const obtenerEventos = async (
 };
 
 export const obtenerEvento = async (id: string): Promise<Evento> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.get<Evento>(`/eventos/${id}`)).data;
-    return response;
+    return await apiClient.get<Evento>(`/eventos/${id}`);
   } catch (error) {
     console.error('Error al obtener el evento del calendario:', error);
     throw error;
@@ -90,12 +80,9 @@ export const obtenerEvento = async (id: string): Promise<Evento> => {
 };
 
 export const obtenerVistaAgenda = async (): Promise<VistaAgendaData> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.get<VistaAgendaData>(
-      '/eventos/vista-agenda'
-    )).data;
-    return response;
+    return await apiClient.get<VistaAgendaData>('/eventos/vista-agenda');
   } catch (error) {
     console.error('Error al obtener la vista de agenda del calendario:', error);
     throw error;
@@ -104,12 +91,9 @@ export const obtenerVistaAgenda = async (): Promise<VistaAgendaData> => {
 
 export const obtenerVistaSemana = async (fecha?: string): Promise<Evento[]> => {
   const params = fecha ? `?fecha=${fecha}` : '';
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.get<Evento[]>(
-      `/eventos/vista-semana${params}`
-    )).data;
-    return response;
+    return await apiClient.get<Evento[]>(`/eventos/vista-semana${params}`);
   } catch (error) {
     console.error('Error al obtener la vista semanal del calendario:', error);
     throw error;
@@ -117,12 +101,9 @@ export const obtenerVistaSemana = async (fecha?: string): Promise<Evento[]> => {
 };
 
 export const obtenerEstadisticas = async (): Promise<EstadisticasCalendario> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.get<EstadisticasCalendario>(
-      '/eventos/estadisticas'
-    )).data;
-    return response;
+    return await apiClient.get<EstadisticasCalendario>('/eventos/estadisticas');
   } catch (error) {
     console.error('Error al obtener las estadísticas del calendario:', error);
     throw error;
@@ -135,13 +116,9 @@ export const actualizarTarea = async (
   id: string,
   data: Partial<CreateTareaDto>
 ): Promise<Evento> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.patch<Evento>(
-      `/eventos/tareas/${id}`,
-      data
-    )).data;
-    return response;
+    return await apiClient.patch<Evento>(`/eventos/tareas/${id}`, data);
   } catch (error) {
     console.error('Error al actualizar la tarea del calendario:', error);
     throw error;
@@ -152,13 +129,9 @@ export const actualizarRecordatorio = async (
   id: string,
   data: Partial<CreateRecordatorioDto>
 ): Promise<Evento> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.patch<Evento>(
-      `/eventos/recordatorios/${id}`,
-      data
-    )).data;
-    return response;
+    return await apiClient.patch<Evento>(`/eventos/recordatorios/${id}`, data);
   } catch (error) {
     console.error('Error al actualizar el recordatorio del calendario:', error);
     throw error;
@@ -169,13 +142,9 @@ export const actualizarNota = async (
   id: string,
   data: Partial<CreateNotaDto>
 ): Promise<Evento> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.patch<Evento>(
-      `/eventos/notas/${id}`,
-      data
-    )).data;
-    return response;
+    return await apiClient.patch<Evento>(`/eventos/notas/${id}`, data);
   } catch (error) {
     console.error('Error al actualizar la nota del calendario:', error);
     throw error;
@@ -187,13 +156,12 @@ export const actualizarFechasEvento = async (
   fecha_inicio: string,
   fecha_fin: string
 ): Promise<Evento> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = (await apiClient.patch<Evento>(`/eventos/${id}/fechas`, {
+    return await apiClient.patch<Evento>(`/eventos/${id}/fechas`, {
       fecha_inicio,
       fecha_fin,
-    })).data;
-    return response;
+    });
   } catch (error) {
     console.error('Error al actualizar las fechas del evento:', error);
     throw error;

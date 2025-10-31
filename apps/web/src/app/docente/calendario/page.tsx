@@ -1,13 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
+import { motion } from 'framer-motion';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Users, BookOpen } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { LoadingSpinner } from '@/components/effects';
-import { docentesApi } from '@/lib/api/docentes.api';
 
 /**
  * CALENDARIO DOCENTE - BRUTAL & INTELIGENTE
@@ -40,8 +39,7 @@ interface EventoDia {
 export default function DocenteCalendarioPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
-  const [clasesDelMes, setClasesDelMes] = useState<ClaseDelDia[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [, setClasesDelMes] = useState<ClaseDelDia[]>([]); // TODO: usar para mostrar clases
 
   useEffect(() => {
     fetchClasesDelMes();
@@ -73,7 +71,7 @@ export default function DocenteCalendarioPage() {
   const goToToday = () => setCurrentDate(new Date());
 
   // Mock: obtener eventos de un día
-  const getEventosDelDia = (date: Date): EventoDia[] => {
+  const getEventosDelDia = (_date: Date): EventoDia[] => {
     const eventos: EventoDia[] = [];
 
     // Buscar clases de ese día
@@ -213,7 +211,7 @@ export default function DocenteCalendarioPage() {
               const esHoy = isToday(day);
               const esMesActual = isSameMonth(day, currentDate);
               const eventos = getEventosDelDia(day);
-              const tieneClases = eventos.some(e => e.tipo === 'clase');
+              // const tieneClases = eventos.some(e => e.tipo === 'clase'); // TODO: usar para mostrar indicador
 
               return (
                 <motion.div
@@ -221,7 +219,7 @@ export default function DocenteCalendarioPage() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.01 }}
-                  onClick={() => setSelectedDate(day)}
+                  onClick={() => {/* TODO: mostrar modal con clases del día */}}
                   className={`
                     relative min-h-[100px] p-2 rounded-xl cursor-pointer transition-all
                     ${esMesActual

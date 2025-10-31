@@ -24,7 +24,7 @@
 import { PlanificacionWrapper, usePlanificacion } from '@/planificaciones/shared';
 import type { PlanificacionConfig } from '@/planificaciones/shared';
 import { useState } from 'react';
-import { Zap, Sparkles, Trophy, Star, ChevronRight, Lock, Activity } from 'lucide-react';
+import { Zap,  Trophy, Star, ChevronRight, Lock, Activity } from 'lucide-react';
 
 // ============================================================================
 // CONFIGURACIÓN

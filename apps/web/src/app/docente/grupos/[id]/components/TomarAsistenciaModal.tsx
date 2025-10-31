@@ -53,13 +53,17 @@ export default function TomarAsistenciaModal({
 
   const handleEstadoChange = (index: number, estado: EstadoAsistencia) => {
     const newEstados = [...estadosEstudiantes];
-    newEstados[index].estado = estado;
+    if (newEstados[index]) {
+      newEstados[index].estado = estado;
+    }
     setEstadosEstudiantes(newEstados);
   };
 
   const handleObservacionChange = (index: number, observacion: string) => {
     const newEstados = [...estadosEstudiantes];
-    newEstados[index].observaciones = observacion;
+    if (newEstados[index]) {
+      newEstados[index].observaciones = observacion;
+    }
     setEstadosEstudiantes(newEstados);
   };
 
@@ -93,7 +97,7 @@ export default function TomarAsistenciaModal({
         })
       );
 
-      const fechaHoy = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const fechaHoy = new Date().toISOString().split('T')[0] as string; // YYYY-MM-DD
 
       const response = await tomarAsistenciaBatch({
         clase_grupo_id: claseGrupoId,

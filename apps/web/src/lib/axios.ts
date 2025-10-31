@@ -75,11 +75,11 @@ apiClient.interceptors.request.use(
  * - 422 Unprocessable Entity: Errores de validación
  * - 500 Internal Server Error: Error del servidor
  *
- * NOTA: No modificamos la respuesta, mantenemos type safety completo
+ * NOTA: Retornamos response.data directamente para simplificar el uso en los archivos API
  */
 apiClient.interceptors.response.use(
   (response) => {
-    return response;
+    return response.data;
   },
   (error: AxiosError<{ message?: string; errors?: Record<string, string[]> }>) => {
     // Verificar si estamos en el navegador
