@@ -190,10 +190,23 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   useEffect(() => {
     setIsMounted(true);
 
-    // Usar M_Standing_Idle_001 que tiene loop suave y continuo
-    const smoothIdleUrl =
+    // Cargar animación guardada o usar default
+    const savedAnimation = localStorage.getItem('selected_idle_animation');
+    const defaultIdleUrl =
       'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb';
-    setCurrentAnimation(smoothIdleUrl);
+    setCurrentAnimation(savedAnimation || defaultIdleUrl);
+
+    // Escuchar cambios de animación desde AnimacionesView
+    const handleAnimationSelected = (event: CustomEvent) => {
+      const { animationUrl } = event.detail;
+      setCurrentAnimation(animationUrl);
+    };
+
+    window.addEventListener('animation-selected', handleAnimationSelected as EventListener);
+
+    return () => {
+      window.removeEventListener('animation-selected', handleAnimationSelected as EventListener);
+    };
   }, []);
 
   // Cargar recursos del estudiante
