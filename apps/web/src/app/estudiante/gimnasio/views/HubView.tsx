@@ -441,8 +441,8 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               item={item}
               isActive={activeView === item.id}
               onClick={() => {
-                // ENTRENAMIENTOS y TAREAS ASIGNADAS abren directamente el Mes de la Ciencia
-                if (item.id === 'entrenamientos' || item.id === 'tareas-asignadas') {
+                // TAREAS ASIGNADAS abre directamente el Mes de la Ciencia
+                if (item.id === 'tareas-asignadas') {
                   push({
                     type: 'planificacion',
                     codigo: '2025-11-mes-ciencia',
