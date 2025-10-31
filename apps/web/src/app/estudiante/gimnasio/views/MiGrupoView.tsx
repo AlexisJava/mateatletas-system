@@ -91,11 +91,11 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
             </div>
           </div>
 
-          {/* Lista de compañeros - GRID 3x4 FIJO (12 slots) */}
+          {/* Lista de compañeros - GRID con SCROLL */}
           {companeros.length > 0 ? (
-            <div className="flex-1 grid grid-cols-3 grid-rows-4 gap-2">
-              {/* Mostrar primeros 11 compañeros */}
-              {companeros.slice(0, 11).map((companero) => {
+            <div className="flex-1 overflow-y-auto grid grid-cols-3 auto-rows-min gap-2 pr-2">
+              {/* Mostrar TODOS los compañeros */}
+              {companeros.map((companero) => {
                 const esTu = companero.id === estudiante.id;
                 return (
                   <div
@@ -126,44 +126,6 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
                   </div>
                 );
               })}
-
-              {/* Slot 12: o compañero #12 o indicador "+N más" */}
-              {companeros.length === 12 ? (
-                // Si son exactamente 12, mostrar el 12vo compañero
-                <div
-                  className={`
-                    rounded-xl p-2 border-2 flex flex-col items-center justify-center gap-0.5
-                    ${companeros[11].id === estudiante.id
-                      ? 'bg-yellow-400/20 border-yellow-400/60 shadow-lg'
-                      : 'bg-white/5 border-white/10'
-                    }
-                  `}
-                >
-                  <div className="text-xl">👤</div>
-                  <p className={`font-black text-center text-sm ${companeros[11].id === estudiante.id ? 'text-yellow-300' : 'text-white'}`}>
-                    {companeros[11].nombre}
-                  </p>
-                  <p className={`font-bold text-center text-xs ${companeros[11].id === estudiante.id ? 'text-yellow-300' : 'text-white/80'}`}>
-                    {companeros[11].apellido}
-                  </p>
-                  <div className={`text-sm font-black ${companeros[11].id === estudiante.id ? 'text-yellow-400' : 'text-cyan-400'}`}>
-                    {companeros[11].puntos.toLocaleString()} pts
-                  </div>
-                  {companeros[11].id === estudiante.id && (
-                    <span className="px-1.5 py-0.5 bg-yellow-400/40 text-yellow-200 text-[8px] font-black rounded-full">
-                      TÚ
-                    </span>
-                  )}
-                </div>
-              ) : companeros.length > 12 ? (
-                // Si son más de 12, mostrar indicador "+N más"
-                <div className="rounded-xl p-2 border-2 border-white/10
-                                bg-white/5 flex items-center justify-center">
-                  <p className="text-white/60 text-xs font-bold">
-                    +{companeros.length - 11} más
-                  </p>
-                </div>
-              ) : null}
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center">
