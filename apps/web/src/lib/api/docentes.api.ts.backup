@@ -196,7 +196,7 @@ export const docentesApi = {
    */
   getDashboard: async (): Promise<DashboardDocenteResponse> => {
     try {
-      const response = (await apiClient.get<DashboardDocenteResponse>('/docentes/me/dashboard')).data;
+      const response = await apiClient.get<DashboardDocenteResponse>('/docentes/me/dashboard');
       return response;
     } catch (error) {
       console.error('Error al obtener el dashboard del docente:', error);
@@ -210,7 +210,7 @@ export const docentesApi = {
    */
   getEstadisticasCompletas: async (): Promise<EstadisticasCompletasResponse> => {
     try {
-      const response = (await apiClient.get<EstadisticasCompletasResponse>('/docentes/me/estadisticas-completas')).data;
+      const response = await apiClient.get<EstadisticasCompletasResponse>('/docentes/me/estadisticas-completas');
       return response;
     } catch (error) {
       console.error('Error al obtener las estadísticas completas:', error);
@@ -223,7 +223,7 @@ export const docentesApi = {
    */
   getMe: async (): Promise<Docente> => {
     try {
-      const response = (await apiClient.get<Docente>('/docentes/me')).data;
+      const response = await apiClient.get<Docente>('/docentes/me');
       return response;
     } catch (error) {
       console.error('Error al obtener el perfil del docente:', error);
@@ -236,7 +236,7 @@ export const docentesApi = {
    */
   updateMe: async (data: UpdateDocenteData): Promise<Docente> => {
     try {
-      const response = (await apiClient.patch<Docente>('/docentes/me', data)).data;
+      const response = await apiClient.patch<Docente>('/docentes/me', data);
       return response;
     } catch (error) {
       console.error('Error al actualizar el perfil del docente:', error);
@@ -249,7 +249,7 @@ export const docentesApi = {
    */
   getAll: async (): Promise<Docente[]> => {
     try {
-      const response = (await apiClient.get<Docente[]>('/docentes')).data;
+      const response = await apiClient.get<Docente[]>('/docentes');
       return response;
     } catch (error) {
       console.error('Error al obtener la lista de docentes:', error);
@@ -262,7 +262,7 @@ export const docentesApi = {
    */
   getById: async (id: string): Promise<Docente> => {
     try {
-      const response = (await apiClient.get<Docente>(`/docentes/${id}`)).data;
+      const response = await apiClient.get<Docente>(`/docentes/${id}`);
       return response;
     } catch (error) {
       console.error('Error al obtener el docente por ID:', error);
@@ -277,10 +277,10 @@ export const docentesApi = {
    */
   create: async (data: CreateDocenteData): Promise<CreateDocenteResponse> => {
     try {
-      const response = (await apiClient.post<CreateDocenteResponse>(
+      const response = await apiClient.post<CreateDocenteResponse>(
         '/docentes',
         data
-      )).data;
+      );
       return response;
     } catch (error) {
       console.error('Error al crear el docente:', error);
@@ -293,10 +293,10 @@ export const docentesApi = {
    */
   update: async (id: string, data: UpdateDocenteData): Promise<Docente> => {
     try {
-      const response = (await apiClient.patch<Docente>(
+      const response = await apiClient.patch<Docente>(
         `/docentes/${id}`,
         data
-      )).data;
+      );
       return response;
     } catch (error) {
       console.error('Error al actualizar el docente:', error);
@@ -324,12 +324,12 @@ export const docentesApi = {
     toDocenteId: string
   ): Promise<{ clasesReasignadas: number }> => {
     try {
-      const response = (await apiClient.post<{ clasesReasignadas: number }>(
+      const response = await apiClient.post<{ clasesReasignadas: number }>(
         `/docentes/${fromDocenteId}/reasignar-clases`,
         {
           toDocenteId,
         }
-      )).data;
+      );
       return response;
     } catch (error) {
       console.error('Error al reasignar las clases del docente:', error);

@@ -15,7 +15,6 @@ import { useStudentAnimations } from '@/hooks/useStudentAnimations';
 type OverlayType = OverlayConfig['type'] | null;
 import {
   Home,
-  Gamepad2,
   BookOpen,
   Trophy,
   ShoppingBag,
@@ -72,7 +71,7 @@ const NAV_LEFT: NavButton[] = [
     overlayId: 'entrenamientos',
     label: 'ENTRENAMIENTOS',
     description: 'Práctica y ejercicios',
-    icon: <Gamepad2 className="w-7 h-7" />,
+    icon: <Zap className="w-7 h-7" />,
     gradient: 'from-orange-500 via-amber-500 to-yellow-500',
     glowColor: 'orange',
     badge: 3,

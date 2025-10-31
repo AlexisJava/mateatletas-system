@@ -21,6 +21,8 @@ import {
 } from '@mateatletas/contracts';
 import { completarLeccionResponseSchema } from '@/lib/schemas/logro.schema';
 
+
+type CompletarLeccionResponse = z.infer<typeof completarLeccionResponseSchema>;
 // ============================================================================
 // TYPES
 // ============================================================================
