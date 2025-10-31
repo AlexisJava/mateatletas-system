@@ -196,6 +196,34 @@ export class EstudiantesService {
     });
   }
 
+  async updateAnimacionIdle(id: string, animacion_idle_url: string) {
+    // Verificar que el estudiante existe
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException('Estudiante no encontrado');
+    }
+
+    // Actualizar solo la animación idle
+    return this.prisma.estudiante.update({
+      where: { id },
+      data: { animacion_idle_url },
+      include: {
+        equipo: true,
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
   async findOne(id: string, tutorId: string) {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id },

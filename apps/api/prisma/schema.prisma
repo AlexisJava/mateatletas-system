@@ -87,6 +87,9 @@ model Estudiante {
   /// URL del avatar 3D de Ready Player Me
   /// Ejemplo: https://models.readyplayer.me/abc123.glb
   avatar_url                String?                           @db.Text
+  /// URL de la animación idle seleccionada por el estudiante
+  /// Ejemplo: https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb
+  animacion_idle_url        String?                           @db.Text
   /// DEPRECADO: URL de la foto de perfil del estudiante (mantener por compatibilidad)
   foto_url                  String?
   /// ID del tutor que gestiona este estudiante

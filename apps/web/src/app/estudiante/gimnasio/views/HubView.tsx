@@ -43,6 +43,7 @@ interface HubViewProps {
     nivel_actual: number;
     puntos_totales: number;
     avatar_url?: string | null;
+    animacion_idle_url?: string | null;
   };
 }
 
@@ -190,11 +191,19 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   useEffect(() => {
     setIsMounted(true);
 
-    // Cargar animación guardada o usar default
-    const savedAnimation = localStorage.getItem('selected_idle_animation');
+    // Cargar animación con prioridad:
+    // 1. animacion_idle_url del backend (viene del login)
+    // 2. localStorage (selección temporal)
+    // 3. default idle animation
     const defaultIdleUrl =
       'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb';
-    setCurrentAnimation(savedAnimation || defaultIdleUrl);
+
+    const animacionInicial =
+      estudiante.animacion_idle_url ||
+      localStorage.getItem('selected_idle_animation') ||
+      defaultIdleUrl;
+
+    setCurrentAnimation(animacionInicial);
 
     // Escuchar cambios de animación desde AnimacionesView
     const handleAnimationSelected = (event: CustomEvent) => {
@@ -207,7 +216,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     return () => {
       window.removeEventListener('animation-selected', handleAnimationSelected as EventListener);
     };
-  }, []);
+  }, [estudiante.animacion_idle_url]);
 
   // Cargar recursos del estudiante
   useEffect(() => {
