@@ -18,6 +18,8 @@ import { VerdaderoFalsoQuestion } from '../ejercicios/VerdaderoFalsoQuestion';
 import { VideoPlayer } from '../ejercicios/VideoPlayer';
 import { ResultsView } from '../results/ResultsView';
 import { calcularResultado } from '../../utils/results-calculator';
+// TODO: ClaseSincronicaQuimica será redefinida desde cero
+// import { ClaseSincronicaQuimica } from './ClaseSincronicaQuimica';
 import type { OverlayConfig } from '../../types/overlay.types';
 import type { Pregunta, ContenidoEjercicio, ContenidoVideo } from '../../types/actividad.types';
 import type { RespuestaRegistrada, ResultadoCalculado } from '../../utils/results-calculator';
@@ -31,15 +33,8 @@ export interface EjecutarActividadViewProps {
 }
 
 export function EjecutarActividadView({ config, estudiante }: EjecutarActividadViewProps) {
-  // TODOS LOS HOOKS PRIMERO - antes de cualquier return
   const { pop } = useOverlayStack();
-  const [preguntaActual, setPreguntaActual] = useState(0);
-  const [respuestas, setRespuestas] = useState<RespuestaRegistrada[]>([]);
-  const [mostrarResultados, setMostrarResultados] = useState(false);
-  const [resultado, setResultado] = useState<ResultadoCalculado | null>(null);
-  const tiempoInicioRef = useRef<number>(Date.now());
 
-  // AHORA SÍ las validaciones
   if (!config || config.type !== 'ejecutar-actividad') {
     return null;
   }
@@ -59,6 +54,13 @@ export function EjecutarActividadView({ config, estudiante }: EjecutarActividadV
     );
   }
 
+  const [preguntaActual, setPreguntaActual] = useState(0);
+  const [respuestas, setRespuestas] = useState<RespuestaRegistrada[]>([]);
+  const [mostrarResultados, setMostrarResultados] = useState(false);
+  const [resultado, setResultado] = useState<ResultadoCalculado | null>(null);
+
+  const tiempoInicioRef = useRef<number>(Date.now());
+
   const tipoColors = TIPO_ACTIVIDAD_COLORS[actividad.tipo];
 
   // State para ejercicios
@@ -67,7 +69,7 @@ export function EjecutarActividadView({ config, estudiante }: EjecutarActividadV
       ? (actividad.contenido as ContenidoEjercicio)
       : null;
 
-  const totalPreguntas = contenidoEjercicio ? contenidoEjercicio.preguntas.length : 0;
+  const totalPreguntas = contenidoEjercicio?.preguntas.length || 0;
   const preguntasRespondidas = respuestas.length;
   const progresoEjercicio = totalPreguntas > 0 ? (preguntasRespondidas / totalPreguntas) * 100 : 0;
 

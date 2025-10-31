@@ -29,6 +29,7 @@ import {
   ResponsiveContainer,
   type TooltipProps,
 } from 'recharts';
+import type { Payload as TooltipPayload } from 'recharts/types/component/DefaultTooltipContent';
 import type { ReporteAdmin } from '@/types/reportes.types';
 
 export default function AdminReportesPage() {
@@ -214,12 +215,18 @@ export default function AdminReportesPage() {
   }));
 
   // Custom tooltip for charts
-  const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
-    if (!active) {
+  type CustomTooltipProps = TooltipProps<number, string> & {
+    active?: boolean;
+    payload?: ReadonlyArray<TooltipPayload<number, string>>;
+    label?: string | number;
+  };
+
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+    if (!active || !payload) {
       return null;
     }
 
-    const item = payload?.[0];
+    const item = payload[0];
     if (!item) {
       return null;
     }

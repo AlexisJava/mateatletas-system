@@ -16,14 +16,14 @@ interface AvatarModelProps {
 function AvatarModel({ avatarUrl, animationUrl, scale = 1, position = [0, -1, 0], rotation = [0, 0, 0] }: AvatarModelProps) {
   const group = useRef<THREE.Group>(null)
 
-  // Cargar modelo del avatar - SIEMPRE
+  // Cargar modelo del avatar
   const { scene } = useGLTF(avatarUrl)
 
-  // Cargar animación - SIEMPRE para respetar reglas de hooks
-  const animationData = useGLTF(animationUrl || avatarUrl)
-  const animationClips = animationUrl ? animationData.animations : []
+  // Cargar animación si se proporciona
+  const { animations: animationClips } = animationUrl
+    ? useGLTF(animationUrl)
+    : { animations: [] }
 
-  const { actions, mixer } = useAnimations(animationClips, group)
   const { actions, mixer } = useAnimations(animationClips, group)
 
   // Reproducir animación cuando cambie

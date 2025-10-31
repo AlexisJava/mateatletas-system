@@ -155,6 +155,7 @@ export interface ObservacionRecienteDto {
     id: string;
     nombre: string;
     apellido: string;
+    avatar_url?: string | null;
   };
   observacion: string;
   fecha: string;

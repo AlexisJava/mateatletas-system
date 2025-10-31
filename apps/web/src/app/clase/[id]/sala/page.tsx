@@ -41,12 +41,33 @@ export default function SalaClasePage() {
 
   const claseId = params.id as string;
 
+  const isClaseData = (value: unknown): value is ClaseData => {
+    if (typeof value !== 'object' || value === null) return false;
+    const claseValue = value as Partial<ClaseData>;
+    return (
+      typeof claseValue.id === 'string' &&
+      typeof claseValue.fecha_hora_inicio === 'string' &&
+      typeof claseValue.duracion_minutos === 'number'
+    );
+  };
+
   // Cargar datos de la clase
   useEffect(() => {
     const fetchClase = async () => {
       try {
-        const response = await apiClient.get<{ data: unknown }>(`/clases/${claseId}`);
-        setClase(response.data);
+        const response = await apiClient.get<ClaseData | { data?: ClaseData }>(`/clases/${claseId}`);
+
+        let claseData: ClaseData | null = null;
+        if (isClaseData(response)) {
+          claseData = response;
+        } else if (typeof response === 'object' && response !== null && 'data' in response) {
+          const data = (response as { data?: ClaseData }).data;
+          if (isClaseData(data)) {
+            claseData = data;
+          }
+        }
+
+        setClase(claseData);
       } catch {
         // Error loading class
       } finally {

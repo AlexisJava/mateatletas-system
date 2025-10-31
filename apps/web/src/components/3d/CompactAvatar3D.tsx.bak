@@ -14,11 +14,10 @@ function AvatarModel({ avatarUrl, animationUrl }: AvatarModelProps) {
   const group = useRef<THREE.Group>(null)
 
   const { scene } = useGLTF(avatarUrl)
-  const { scene } = useGLTF(avatarUrl)
-  const animationData = useGLTF(animationUrl || avatarUrl)
-  const animationClips = animationUrl ? animationData.animations : []
+  const { animations: animationClips } = animationUrl
+    ? useGLTF(animationUrl)
+    : { animations: [] }
 
-  const { actions, mixer } = useAnimations(animationClips, group)
   const { actions, mixer } = useAnimations(animationClips, group)
 
   useEffect(() => {

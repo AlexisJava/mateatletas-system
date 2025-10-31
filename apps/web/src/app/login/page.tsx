@@ -173,7 +173,7 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, user, router, isLoading, mustChangePassword, hasMultipleRoles, selectedRole]);
 
-  const [userType, setUserType] = useState<'tutor' | 'estudiante' | 'docente'>('tutor');
+  const [userType, setUserType] = useState<'tutor' | 'estudiante' | 'docente'>('estudiante');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -510,7 +510,7 @@ export default function LoginPage() {
                     >
                       <div className="flex items-center justify-center gap-1 sm:gap-1.5">
                         <Terminal className="w-3 sm:w-3.5 h-3 sm:h-3.5" strokeWidth={2.5} />
-                        <span className="text-[9px] sm:text-xs">Admin</span>
+                        <span className="text-[9px] sm:text-xs">Docente</span>
                       </div>
                     </button>
                   </div>

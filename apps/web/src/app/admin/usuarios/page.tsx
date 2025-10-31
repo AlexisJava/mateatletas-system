@@ -93,7 +93,7 @@ export default function UsuariosPage() {
         if (errorMsg.includes('clase(s) asignada(s)')) {
           // Extraer número de clases del mensaje
           const match = errorMsg.match(/(\d+) clase\(s\)/);
-          const numClases = match ? parseInt(match[1]) : 0;
+          const numClases = match && match[1] ? parseInt(match[1], 10) : 0;
           setClasesCount(numClases);
           setDeleteError(errorMsg);
           setNeedsReassignment(true); // Marcar que necesita reasignación

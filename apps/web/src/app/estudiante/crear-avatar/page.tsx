@@ -24,10 +24,6 @@ export default function CrearAvatarPage() {
     bodyType: 'fullbody',
     quickStart: false,
     language: 'es',
-    // Configuración de la aplicación
-    headers: {
-      'X-App-Id': RPM_CONFIG.appId,
-    },
   }
 
   // Log de configuración
