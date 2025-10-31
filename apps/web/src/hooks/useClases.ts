@@ -55,7 +55,7 @@ export function useClasesFormData() {
       setRutas(rutasResponse);
       setDocentes(docentesResponse);
       setSectores(sectoresResponse);
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('Error loading form data:', err);
       setError('Error cargando datos del formulario');
       setRutas([]);

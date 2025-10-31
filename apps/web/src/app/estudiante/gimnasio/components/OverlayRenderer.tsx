@@ -7,7 +7,7 @@
 
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import type { OverlayRendererProps, DepthTransform } from '../types/overlay.types';
+import type { OverlayRendererProps, DepthTransform, OverlayComponentProps } from '../types/overlay.types';
 
 /**
  * Calcular transformaciones visuales según profundidad
@@ -58,7 +58,7 @@ function calculateDepthTransform(depth: number): DepthTransform {
 }
 
 export interface OverlayRendererInternalProps extends OverlayRendererProps {
-  component: React.ComponentType<any>;
+  component: React.ComponentType<OverlayComponentProps>;
   gradient: string;
   renderType: 'modal' | 'sidebar' | 'fullscreen';
   estudiante: {

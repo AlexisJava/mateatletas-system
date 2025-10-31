@@ -3,6 +3,8 @@
  * Cada semana tiene 4 actividades temáticas
  */
 
+import type { JsonValue } from '@/types/common';
+
 export type TipoActividad = 'video' | 'ejercicio' | 'juego' | 'evaluacion';
 export type EstadoActividad = 'bloqueada' | 'disponible' | 'en-progreso' | 'completada';
 export type DificultadActividad = 'facil' | 'medio' | 'dificil';
@@ -91,7 +93,7 @@ export interface ContenidoJuego {
   juegoId: string;
   instrucciones: string;
   objetivo: string;
-  config: Record<string, unknown>;
+  config: Record<string, JsonValue>;
 }
 
 /**

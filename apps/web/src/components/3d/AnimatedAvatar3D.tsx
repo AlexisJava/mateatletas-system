@@ -24,7 +24,6 @@ function AvatarModel({ avatarUrl, animationUrl, scale = 1, position = [0, -1, 0]
   const animationClips = animationUrl ? animationData.animations : []
 
   const { actions, mixer } = useAnimations(animationClips, group)
-  const { actions, mixer } = useAnimations(animationClips, group)
 
   // Reproducir animación cuando cambie
   useEffect(() => {
@@ -34,7 +33,7 @@ function AvatarModel({ avatarUrl, animationUrl, scale = 1, position = [0, -1, 0]
     Object.values(actions).forEach(action => action?.stop())
 
     // Reproducir la primera animación del archivo GLB
-    const firstAction = actions[animationClips[0].name]
+    const firstAction = actions[animationClips[0]?.name ?? '']
     if (firstAction) {
       firstAction.reset().fadeIn(0.5).play()
     }

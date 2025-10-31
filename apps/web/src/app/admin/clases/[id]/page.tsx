@@ -20,6 +20,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import axios from '@/lib/axios';
+import { isAxiosError } from 'axios';
 
 interface ClaseDetalle {
   id: string;
@@ -118,6 +119,13 @@ interface Estudiante {
   nivel_escolar?: string | null;
 }
 
+interface ObservacionHistorial {
+  fecha: string;
+  observaciones?: string;
+  feedback?: string;
+  estado: string;
+}
+
 export default function ClaseAulaPage() {
   const params = useParams();
   const router = useRouter();
@@ -132,7 +140,29 @@ export default function ClaseAulaPage() {
   const [estudianteParaRemover, setEstudianteParaRemover] = useState<{ id: string; nombre: string; apellido: string } | null>(null);
   const [planificaciones, setPlanificaciones] = useState<Array<{ id: string; mes: number; anio: number; titulo: string; estado: string }>>([]);
   const [estudianteConObservaciones, setEstudianteConObservaciones] = useState<string | null>(null);
-  const [observacionesEstudiante, setObservacionesEstudiante] = useState<Array<{ fecha: string; observaciones?: string; feedback?: string; estado: string }>>([]);
+  const [observacionesEstudiante, setObservacionesEstudiante] = useState<ObservacionHistorial[]>([]);
+
+  const extractEntity = <T,>(payload: T | { data?: T }): T => {
+    if (payload && typeof payload === 'object' && 'data' in payload) {
+      const data = (payload as { data?: T }).data;
+      if (data !== undefined) {
+        return data;
+      }
+    }
+    return payload as T;
+  };
+
+  const extractList = <T,>(payload: T[] | { data?: T[] }): T[] => {
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+
+    if (payload && typeof payload === 'object' && Array.isArray(payload.data)) {
+      return payload.data;
+    }
+
+    return [];
+  };
 
   useEffect(() => {
     if (claseId) {
@@ -143,12 +173,10 @@ export default function ClaseAulaPage() {
   const loadClase = async () => {
     try {
       setIsLoading(true);
-      // Usar el endpoint correcto para ClaseGrupo
-      const payload: any = await axios.get(`/admin/clase-grupos/${claseId}`);
-      const data =
-        payload && typeof payload === 'object' && 'data' in payload
-          ? (payload as { data: ClaseDetalle }).data
-          : (payload as ClaseDetalle);
+      const payload = await axios.get<ClaseDetalle | { data?: ClaseDetalle }>(
+        `/admin/clase-grupos/${claseId}`,
+      );
+      const data = extractEntity(payload);
       setClase(data);
 
       // Cargar planificaciones del grupo pedagógico
@@ -165,19 +193,16 @@ export default function ClaseAulaPage() {
 
   const loadPlanificaciones = async (grupoId: string, anioLectivo: number) => {
     try {
-      // Buscar planificaciones por grupo_id usando el endpoint de grupos
-      const payload: any = await axios.get(`/grupos/${grupoId}/planificaciones`, {
+      const payload = await axios.get<
+        Array<{ id: string; mes: number; anio: number; titulo: string; estado: string }> | {
+          data?: Array<{ id: string; mes: number; anio: number; titulo: string; estado: string }>;
+        }
+      >(`/grupos/${grupoId}/planificaciones`, {
         params: {
           anio: anioLectivo,
-        }
+        },
       });
-      const data =
-        payload && typeof payload === 'object' && 'data' in payload
-          ? (payload as { data: unknown }).data
-          : payload;
-      const planes = Array.isArray(data)
-        ? data
-        : (data as { data?: typeof planificaciones }).data ?? [];
+      const planes = extractList(payload);
       setPlanificaciones(planes);
     } catch (error) {
       console.error('Error cargando planificaciones:', error);
@@ -189,17 +214,14 @@ export default function ClaseAulaPage() {
   const loadEstudiantesDisponibles = async () => {
     try {
       setIsLoadingEstudiantes(true);
-      const payload: any = await axios.get('/admin/estudiantes');
-      // El backend devuelve { data: [...], metadata: {...} }
-      const data =
-        payload && typeof payload === 'object' && 'data' in payload
-          ? (payload as { data: Estudiante[] }).data
-          : payload;
-      const estudiantes = Array.isArray(data) ? data : [];
+      const payload = await axios.get<Estudiante[] | { data?: Estudiante[] }>(
+        '/admin/estudiantes',
+      );
+      const estudiantes = extractList(payload);
 
       // Filtrar estudiantes que ya están inscritos
       const estudiantesYaInscritos = clase?.inscripciones?.map(i => i.estudiante_id) || [];
-      const disponibles = estudiantes.filter((est: Estudiante) => !estudiantesYaInscritos.includes(est.id));
+      const disponibles = estudiantes.filter(est => !estudiantesYaInscritos.includes(est.id));
 
       setEstudiantesDisponibles(disponibles);
     } catch (error) {
@@ -227,9 +249,13 @@ export default function ClaseAulaPage() {
       await loadClase();
       setShowAgregarModal(false);
       setEstudiantesSeleccionados([]);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error agregando estudiantes:', error);
-      alert(error.response?.data?.message || 'Error al agregar estudiantes');
+      if (isAxiosError(error)) {
+        alert(error.response?.data?.message || 'Error al agregar estudiantes');
+      } else {
+        alert('Error al agregar estudiantes');
+      }
     }
   };
 
@@ -240,9 +266,13 @@ export default function ClaseAulaPage() {
       // Recargar la clase para mostrar los cambios
       await loadClase();
       setEstudianteParaRemover(null);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error removiendo estudiante:', error);
-      alert(error.response?.data?.message || 'Error al remover estudiante');
+      if (isAxiosError(error)) {
+        alert(error.response?.data?.message || 'Error al remover estudiante');
+      } else {
+        alert('Error al remover estudiante');
+      }
     }
   };
 
@@ -256,25 +286,40 @@ export default function ClaseAulaPage() {
 
   const handleVerObservaciones = async (estudianteId: string) => {
     try {
-      const payload: any = await axios.get(`/admin/clase-grupos/${claseId}/asistencias/historial`, {
-        params: { estudiante_id: estudianteId }
+      const payload = await axios.get<
+        ObservacionHistorial[] | { asistencias?: ObservacionHistorial[] } | {
+          data?: { asistencias?: ObservacionHistorial[] };
+        }
+      >(`/admin/clase-grupos/${claseId}/asistencias/historial`, {
+        params: { estudiante_id: estudianteId },
       });
-      const data =
-        payload && typeof payload === 'object' && 'data' in payload
-          ? (payload as { data: { asistencias?: unknown[] } }).data
-          : payload;
-      const asistenciasData = Array.isArray(data)
-        ? data
-        : ((data as { asistencias?: unknown[]; data?: { asistencias?: unknown[] } }).asistencias ??
-           (data as { data?: { asistencias?: unknown[] } }).data?.asistencias ??
-           []);
 
-      setObservacionesEstudiante(asistenciasData.map((a: { fecha: string; observaciones?: string; feedback?: string; estado: string }) => ({
-        fecha: a.fecha,
-        observaciones: a.observaciones,
-        feedback: a.feedback,
-        estado: a.estado,
-      })));
+      let observaciones: ObservacionHistorial[] = [];
+
+      if (Array.isArray(payload)) {
+        observaciones = payload;
+      } else if (payload && typeof payload === 'object') {
+        const asistenciasDirectas = (payload as { asistencias?: ObservacionHistorial[] }).asistencias;
+        if (Array.isArray(asistenciasDirectas)) {
+          observaciones = asistenciasDirectas;
+        } else if ('data' in payload) {
+          const asistenciasAnidadas = (payload as {
+            data?: { asistencias?: ObservacionHistorial[] };
+          }).data?.asistencias;
+          if (Array.isArray(asistenciasAnidadas)) {
+            observaciones = asistenciasAnidadas;
+          }
+        }
+      }
+
+      setObservacionesEstudiante(
+        observaciones.map((observacion) => ({
+          fecha: observacion.fecha,
+          observaciones: observacion.observaciones,
+          feedback: observacion.feedback,
+          estado: observacion.estado,
+        })),
+      );
       setEstudianteConObservaciones(estudianteId);
     } catch (error) {
       console.error('Error cargando observaciones:', error);

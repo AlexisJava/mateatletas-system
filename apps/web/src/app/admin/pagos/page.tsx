@@ -36,6 +36,7 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
+import type { ChartOptions, TooltipItem } from 'chart.js';
 import {
   getMetricasDashboard,
   getConfiguracionPrecios,
@@ -367,7 +368,7 @@ export default function PagosDashboard() {
   };
 
   // Opciones para el gráfico de barras
-  const barChartOptions = {
+  const barChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -399,8 +400,8 @@ export default function PagosDashboard() {
         },
         ticks: {
           color: 'rgba(255, 255, 255, 0.7)',
-          callback: function (value: any) {
-            return formatCurrency(value);
+          callback: function (value: string | number) {
+            return formatCurrency(typeof value === 'string' ? parseFloat(value) : value);
           },
         },
       },
@@ -408,7 +409,7 @@ export default function PagosDashboard() {
   };
 
   // Opciones para el gráfico doughnut
-  const doughnutChartOptions = {
+  const doughnutChartOptions: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -424,7 +425,7 @@ export default function PagosDashboard() {
       },
       tooltip: {
         callbacks: {
-          label: function (context: any) {
+          label: function (context: TooltipItem<'doughnut'>) {
             const label = context.label || '';
             const value = context.parsed || 0;
             return `${label}: ${value.toFixed(1)}%`;

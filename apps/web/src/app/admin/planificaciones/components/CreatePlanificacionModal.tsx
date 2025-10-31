@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Calendar, AlertCircle } from 'lucide-react';
 import { createPlanificacion } from '@/lib/api/planificaciones.api';
+import { isAxiosError } from 'axios';
 
 interface Grupo {
   id: string;
@@ -151,9 +152,13 @@ export const CreatePlanificacionModal: React.FC<CreatePlanificacionModalProps> =
 
       onSuccess();
       onClose();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error al crear planificación:', err);
-      setError(err.response?.data?.message || 'Error al crear la planificación');
+      if (isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Error al crear la planificación');
+      } else {
+        setError('Error al crear la planificación');
+      }
     } finally {
       setIsSubmitting(false);
     }

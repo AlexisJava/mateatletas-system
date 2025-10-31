@@ -84,7 +84,7 @@ export function CreateGrupoModal({ isOpen, onClose, onSuccess }: CreateGrupoModa
       // Success
       onSuccess();
       handleClose();
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('Error al crear grupo:', err);
       if (err instanceof Error) {
         setError(err.message || 'Error al crear el grupo');

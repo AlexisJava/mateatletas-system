@@ -93,7 +93,7 @@ export const usePlanificacionesStore = create<PlanificacionesState>((set, get) =
         totalPages: response.total_pages,
         isLoadingList: false,
       });
-    } catch (err: unknown) {
+    } catch (err) {
       set({
         error: getErrorMessage(err, 'Error al cargar planificaciones'),
         planificaciones: [],
@@ -111,7 +111,7 @@ export const usePlanificacionesStore = create<PlanificacionesState>((set, get) =
       const detalle = await planificacionesApi.getPlanificacionById(id);
       set({ detalle, isLoadingDetalle: false });
       return detalle;
-    } catch (err: unknown) {
+    } catch (err) {
       set({
         error: getErrorMessage(err, 'Error al cargar la planificación'),
         detalle: null,
@@ -128,7 +128,7 @@ export const usePlanificacionesStore = create<PlanificacionesState>((set, get) =
       set({ success: 'Planificación creada correctamente.', isSubmitting: false });
       await get().fetchPlanificaciones({ ...get().filters }, { page: 1, limit: get().limit });
       return true;
-    } catch (err: unknown) {
+    } catch (err) {
       set({
         error: getErrorMessage(err, 'Error al crear la planificación'),
         isSubmitting: false,
@@ -149,7 +149,7 @@ export const usePlanificacionesStore = create<PlanificacionesState>((set, get) =
       }));
       await get().fetchPlanificaciones();
       return true;
-    } catch (err: unknown) {
+    } catch (err) {
       set({
         error: getErrorMessage(err, 'Error al actualizar la planificación'),
         isSubmitting: false,
@@ -170,7 +170,7 @@ export const usePlanificacionesStore = create<PlanificacionesState>((set, get) =
       }));
       await get().fetchPlanificaciones();
       return true;
-    } catch (err: unknown) {
+    } catch (err) {
       set({
         error: getErrorMessage(err, 'Error al eliminar la planificación'),
         isSubmitting: false,
@@ -193,7 +193,7 @@ export const usePlanificacionesStore = create<PlanificacionesState>((set, get) =
         isSubmitting: false,
       }));
       return actividad;
-    } catch (err: unknown) {
+    } catch (err) {
       set({
         error: getErrorMessage(err, 'Error al agregar la actividad'),
         isSubmitting: false,
@@ -231,7 +231,7 @@ export const usePlanificacionesStore = create<PlanificacionesState>((set, get) =
       }));
 
       return actividadActualizada;
-    } catch (err: unknown) {
+    } catch (err) {
       set({
         error: getErrorMessage(err, 'Error al actualizar la actividad'),
         isSubmitting: false,
@@ -257,7 +257,7 @@ export const usePlanificacionesStore = create<PlanificacionesState>((set, get) =
         isSubmitting: false,
       }));
       return true;
-    } catch (err: unknown) {
+    } catch (err) {
       set({
         error: getErrorMessage(err, 'Error al eliminar la actividad'),
         isSubmitting: false,

@@ -127,7 +127,7 @@ export function useOverlay() {
   return {
     activeOverlay: currentOverlay?.type || null,
     openOverlay: (type: OverlayConfig['type']) => {
-      push({ type });
+      push({ type } as OverlayConfig);
     },
     closeOverlay: pop,
   };

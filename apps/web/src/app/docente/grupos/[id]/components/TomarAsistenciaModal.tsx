@@ -18,6 +18,7 @@ import {
   type AsistenciaEstudianteItem,
 } from '@/lib/api/asistencia.api';
 import type { EstudianteConStatsDto } from '@/lib/api/clase-grupos.api';
+import { isAxiosError } from 'axios';
 
 interface TomarAsistenciaModalProps {
   isOpen: boolean;
@@ -111,12 +112,16 @@ export default function TomarAsistenciaModal({
 
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error al tomar asistencia:', error);
-      toast.error(
-        error?.response?.data?.message ||
-          'Error al guardar asistencia. Intenta nuevamente.'
-      );
+      if (isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message ||
+            'Error al guardar asistencia. Intenta nuevamente.'
+        );
+      } else {
+        toast.error('Error al guardar asistencia. Intenta nuevamente.');
+      }
     } finally {
       setIsSubmitting(false);
     }

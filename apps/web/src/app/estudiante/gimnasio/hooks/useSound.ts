@@ -2,13 +2,33 @@
 
 import { useRef, useCallback } from 'react';
 
+type SupportedAudioContext = AudioContext;
+type AudioContextConstructor = typeof AudioContext;
+
+const getAudioContextConstructor = (): AudioContextConstructor => {
+  const globalWindow = window as typeof window & {
+    webkitAudioContext?: AudioContextConstructor;
+  };
+
+  if (typeof globalWindow.AudioContext === 'function') {
+    return globalWindow.AudioContext;
+  }
+
+  if (typeof globalWindow.webkitAudioContext === 'function') {
+    return globalWindow.webkitAudioContext;
+  }
+
+  throw new Error('Web Audio API no está soportado en este navegador');
+};
+
 export function useSound() {
   // Usamos el Web Audio API para generar sonidos sintéticos
-  const audioContext = useRef<AudioContext | null>(null);
+  const audioContext = useRef<SupportedAudioContext | null>(null);
 
   const getAudioContext = useCallback(() => {
     if (!audioContext.current) {
-      audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextCtor = getAudioContextConstructor();
+      audioContext.current = new AudioContextCtor();
     }
     return audioContext.current;
   }, []);

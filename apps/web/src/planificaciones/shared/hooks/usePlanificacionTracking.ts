@@ -5,6 +5,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import type { JsonValue } from '../types';
 // TODO: Integrar con el API cuando esté listo
 // import { planificacionesApi } from '@/lib/api/planificaciones.api';
 
@@ -12,7 +13,7 @@ interface ProgresoData {
   puntos_obtenidos?: number;
   tiempo_total_minutos?: number;
   completado?: boolean;
-  estado_juego?: Record<string, any>;
+  estado_juego?: Record<string, JsonValue>;
 }
 
 export function usePlanificacionTracking(codigoPlanificacion: string) {
@@ -31,11 +32,21 @@ export function usePlanificacionTracking(codigoPlanificacion: string) {
 
     // Por ahora guardamos en localStorage
     const key = `planificacion_${codigoPlanificacion}_progreso`;
-    const progresoActual = JSON.parse(localStorage.getItem(key) || '{}');
+    const progresoActualRaw = localStorage.getItem(key);
+    let progresoActual: Partial<ProgresoData> = {};
+
+    if (progresoActualRaw) {
+      try {
+        progresoActual = JSON.parse(progresoActualRaw) as Partial<ProgresoData>;
+      } catch (error) {
+        console.error('[Tracking] Error al parsear progreso guardado:', error);
+      }
+    }
+
     localStorage.setItem(key, JSON.stringify({ ...progresoActual, ...data }));
   }, [codigoPlanificacion]);
 
-  const guardarEstado = useCallback((estadoJuego?: Record<string, any>) => {
+  const guardarEstado = useCallback((estadoJuego?: Record<string, JsonValue>) => {
     // TODO: Llamar al API para guardar estado
     console.log(`[Tracking] Estado guardado automáticamente`);
 
@@ -45,14 +56,14 @@ export function usePlanificacionTracking(codigoPlanificacion: string) {
     }
   }, [codigoPlanificacion]);
 
-  const cargarEstado = useCallback((): Record<string, any> | null => {
+  const cargarEstado = useCallback((): Record<string, JsonValue> | null => {
     // TODO: Llamar al API para cargar estado
     const key = `planificacion_${codigoPlanificacion}_estado`;
     const estadoGuardado = localStorage.getItem(key);
 
     if (estadoGuardado) {
       try {
-        return JSON.parse(estadoGuardado);
+        return JSON.parse(estadoGuardado) as Record<string, JsonValue>;
       } catch (error) {
         console.error('[Tracking] Error al cargar estado:', error);
         return null;

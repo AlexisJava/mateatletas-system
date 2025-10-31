@@ -34,8 +34,8 @@ export default function AdminPlanificacionesSimplesPage() {
 
       const data = await listarPlanificaciones(filtros);
       setPlanificaciones(data);
-    } catch (err: unknown) {
-      const errorMessage = getErrorMessage(err, 'Error al cargar planificaciones');
+    } catch (err) {
+      const errorMessage = getErrorMessage(err as Error, 'Error al cargar planificaciones');
       setError(errorMessage);
       setPlanificaciones([]);
       console.error('Error loading planificaciones:', err);

@@ -1,9 +1,11 @@
 import axios, {
   AxiosError,
   AxiosInstance,
-  AxiosRequestConfig,
+  type AxiosRequestConfig,
   InternalAxiosRequestConfig,
 } from 'axios';
+
+import type { JsonValue, RequestData } from '@/types/common';
 
 /**
  * Cliente Axios configurado para comunicarse con el backend
@@ -16,26 +18,26 @@ import axios, {
  */
 
 type ApiClient = Omit<AxiosInstance, 'get' | 'post' | 'put' | 'patch' | 'delete'> & {
-  get<T = unknown, D = any>(
+  get<T = JsonValue, D = RequestData>(
     url: string,
     config?: AxiosRequestConfig<D>,
   ): Promise<T>;
-  post<T = unknown, D = any>(
-    url: string,
-    data?: D,
-    config?: AxiosRequestConfig<D>,
-  ): Promise<T>;
-  put<T = unknown, D = any>(
+  post<T = JsonValue, D = RequestData>(
     url: string,
     data?: D,
     config?: AxiosRequestConfig<D>,
   ): Promise<T>;
-  patch<T = unknown, D = any>(
+  put<T = JsonValue, D = RequestData>(
     url: string,
     data?: D,
     config?: AxiosRequestConfig<D>,
   ): Promise<T>;
-  delete<T = unknown, D = any>(
+  patch<T = JsonValue, D = RequestData>(
+    url: string,
+    data?: D,
+    config?: AxiosRequestConfig<D>,
+  ): Promise<T>;
+  delete<T = JsonValue, D = RequestData>(
     url: string,
     config?: AxiosRequestConfig<D>,
   ): Promise<T>;

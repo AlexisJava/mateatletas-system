@@ -2,7 +2,10 @@
  * Sistema de errores type-safe para el admin portal
  */
 
+import type { AxiosError } from 'axios';
 import { z } from 'zod';
+
+import type { ErrorLike, JsonValue } from '@/types/common';
 
 /**
  * Códigos de error estandarizados
@@ -39,7 +42,7 @@ export enum ErrorCode {
 export interface AppError {
   code: ErrorCode;
   message: string;
-  details?: Record<string, unknown>;
+  details?: Record<string, JsonValue>;
   timestamp: string;
 }
 
@@ -80,12 +83,23 @@ export interface BusinessError extends AppError {
 /**
  * Schema Zod para validar errores de API
  */
+const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(jsonValueSchema),
+    z.record(jsonValueSchema),
+  ])
+);
+
 export const ApiErrorSchema = z.object({
   statusCode: z.number(),
   message: z.string(),
   error: z.string().optional(),
   errorMessage: z.string().optional(),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(jsonValueSchema).optional(),
 });
 
 export type ApiErrorResponse = z.infer<typeof ApiErrorSchema>;
@@ -155,69 +169,86 @@ export class ErrorFactory {
   /**
    * Convierte un error de Axios en AppError
    */
-  static fromAxiosError(error: unknown): AppError {
-    if (!error || typeof error !== 'object') {
+  static fromAxiosError(error: ErrorLike): AppError {
+    if (error === null || typeof error === 'undefined') {
       return this.unknown('Error desconocido');
     }
 
-    const axiosError = error as {
-      response?: {
-        status?: number;
-        data?: unknown;
-      };
-      message?: string;
-      code?: string;
-    };
-
-    // Timeout
-    if (axiosError.code === 'ECONNABORTED') {
-      return this.network('Tiempo de espera agotado', undefined, 408);
+    if (typeof error === 'string' || typeof error === 'number' || typeof error === 'boolean') {
+      return this.unknown(String(error));
     }
 
-    // Error de red sin respuesta
-    if (!axiosError.response) {
-      return this.network(
-        axiosError.message || 'Error de conexión',
-        undefined,
-        0
-      );
+    if (
+      typeof error === 'object' &&
+      'isAxiosError' in error &&
+      (error as { isAxiosError?: boolean }).isAxiosError === true
+    ) {
+      const axiosError = error as AxiosError<ApiErrorResponse> & { code?: string };
+
+      // Timeout
+      if (axiosError.code === 'ECONNABORTED') {
+        return this.network('Tiempo de espera agotado', undefined, 408);
+      }
+
+      // Error de red sin respuesta
+      if (!axiosError.response) {
+        return this.network(axiosError.message || 'Error de conexión', undefined, 0);
+      }
+
+      const status = axiosError.response.status ?? 500;
+      const data = axiosError.response.data;
+
+      // Parsear respuesta de error de la API
+      const apiError = ApiErrorSchema.safeParse(data);
+      const errorMessage = apiError.success
+        ? apiError.data.errorMessage || apiError.data.message
+        : 'Error del servidor';
+      const details = apiError.success ? apiError.data.details : undefined;
+
+      const withDetails = <T extends AppError>(appError: T): T =>
+        details ? ({ ...appError, details } as T) : appError;
+
+      // Mapear código HTTP a ErrorCode
+      if (status === 401) {
+        return withDetails(this.auth(errorMessage, ErrorCode.UNAUTHORIZED));
+      }
+
+      if (status === 403) {
+        return withDetails(this.auth(errorMessage, ErrorCode.FORBIDDEN));
+      }
+
+      if (status === 404) {
+        return withDetails(this.business(errorMessage, ErrorCode.NOT_FOUND));
+      }
+
+      if (status === 409) {
+        return withDetails(this.business(errorMessage, ErrorCode.CONFLICT));
+      }
+
+      if (status === 422) {
+        return withDetails(this.validation(errorMessage));
+      }
+
+      if (status >= 500) {
+        return withDetails(this.server(errorMessage));
+      }
+
+      return withDetails(this.unknown(errorMessage));
     }
 
-    const status = axiosError.response.status || 500;
-    const data = axiosError.response.data;
-
-    // Parsear respuesta de error de la API
-    const apiError = ApiErrorSchema.safeParse(data);
-    const errorMessage = apiError.success
-      ? apiError.data.errorMessage || apiError.data.message
-      : 'Error del servidor';
-
-    // Mapear código HTTP a ErrorCode
-    if (status === 401) {
-      return this.auth(errorMessage, ErrorCode.UNAUTHORIZED);
+    if (error instanceof Error) {
+      return this.unknown(error.message);
     }
 
-    if (status === 403) {
-      return this.auth(errorMessage, ErrorCode.FORBIDDEN);
+    if (
+      typeof error === 'object' &&
+      'message' in error &&
+      typeof (error as { message?: string }).message === 'string'
+    ) {
+      return this.unknown((error as { message?: string }).message ?? 'Error desconocido');
     }
 
-    if (status === 404) {
-      return this.business(errorMessage, ErrorCode.NOT_FOUND);
-    }
-
-    if (status === 409) {
-      return this.business(errorMessage, ErrorCode.CONFLICT);
-    }
-
-    if (status === 422) {
-      return this.validation(errorMessage);
-    }
-
-    if (status >= 500) {
-      return this.server(errorMessage);
-    }
-
-    return this.unknown(errorMessage);
+    return this.unknown('Error desconocido');
   }
 
   /**

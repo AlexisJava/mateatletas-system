@@ -113,7 +113,7 @@ export function ModalRecordatorio({
       }
       onClose();
       resetForm();
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error al guardar recordatorio:', error);
     }
   };

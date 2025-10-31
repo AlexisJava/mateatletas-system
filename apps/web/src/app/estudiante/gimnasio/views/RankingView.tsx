@@ -108,9 +108,9 @@ export function RankingView({ estudiante }: RankingViewProps) {
             <div className="text-right">
               <p className="text-xs text-white/60 uppercase tracking-wide">Tus Puntos</p>
               <p className="text-2xl font-black text-white">
-                {tab === 'equipo'
-                  ? ranking.rankingEquipo?.[miPosicionEquipo]?.puntos_totales || 0
-                  : ranking.rankingGlobal?.[miPosicionGlobal]?.puntos_totales || 0}
+                {String((tab === 'equipo'
+                  ? ranking.rankingEquipo?.[miPosicionEquipo]?.puntos_totales
+                  : ranking.rankingGlobal?.[miPosicionGlobal]?.puntos_totales) ?? 0)}
               </p>
             </div>
           </div>

@@ -47,12 +47,13 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data)
 
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Error al obtener avatar'
     console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-    console.error('❌ [FRONTEND API] ERROR:', error.message)
+    console.error('❌ [FRONTEND API] ERROR:', message)
     console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
     return NextResponse.json(
-      { error: error.message },
+      { error: message },
       { status: 500 }
     )
   }

@@ -136,12 +136,12 @@ export function MathBackground({ racha = 0 }: { racha?: number }) {
     // Generar partículas con distribución aleatoria
     return Array.from({ length: particleCount }, (_, i) => ({
       id: i,
-      latex: formulas[Math.floor(Math.random() * formulas.length)],
+      latex: formulas[Math.floor(Math.random() * formulas.length)]!,
       delay: Math.random() * 25, // Escalonado en 25 segundos
       duration: 18 + Math.random() * 12, // 18-30 segundos
       startX: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920),
-      color: colors[Math.floor(Math.random() * colors.length)],
-      size: sizes[Math.floor(Math.random() * sizes.length)],
+      color: colors[Math.floor(Math.random() * colors.length)]!,
+      size: sizes[Math.floor(Math.random() * sizes.length)]!,
     }));
   }, [racha]);
 

@@ -136,7 +136,7 @@ export function EditClaseGrupoModal({
           : [];
 
       setDocentesDisponibles(docentes);
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('❌ Error al cargar docentes:', err);
       setDocentesDisponibles([]);
     }
@@ -152,7 +152,7 @@ export function EditClaseGrupoModal({
           : [];
 
       setEstudiantesDisponibles(estudiantes);
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('❌ Error al cargar estudiantes:', err);
       setEstudiantesDisponibles([]);
     }
@@ -221,7 +221,7 @@ export function EditClaseGrupoModal({
       console.log('🔄 Refrescando lista de grupos...');
       await onSuccess();
       console.log('✅ Lista refrescada');
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('❌ Error al actualizar horario:', err);
       if (
         typeof err === 'object' &&

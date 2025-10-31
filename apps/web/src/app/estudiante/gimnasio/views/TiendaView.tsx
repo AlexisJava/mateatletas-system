@@ -16,6 +16,7 @@ import type {
   RarezaItem,
   ItemObtenidoConInfo,
 } from '@mateatletas/contracts';
+import { isAxiosError } from 'axios';
 
 interface TiendaViewProps {
   estudiante: {
@@ -148,9 +149,13 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
 
       // Cerrar modal
       setItemSeleccionado(null);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error al comprar:', error);
-      alert(error?.response?.data?.message || 'Error al comprar el item');
+      if (isAxiosError(error)) {
+        alert(error.response?.data?.message || 'Error al comprar el item');
+      } else {
+        alert('Error al comprar el item');
+      }
     } finally {
       setComprando(false);
     }
@@ -176,9 +181,13 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
       );
 
       alert(itemObtenido.equipado ? 'Item desequipado' : '¡Item equipado! ✨');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error al equipar item:', error);
-      alert(error?.response?.data?.message || 'Error al equipar el item');
+      if (isAxiosError(error)) {
+        alert(error.response?.data?.message || 'Error al equipar el item');
+      } else {
+        alert('Error al equipar el item');
+      }
     }
   };
 

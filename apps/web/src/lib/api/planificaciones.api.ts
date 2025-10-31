@@ -10,6 +10,7 @@
  * - POST   /api/planificaciones/:id/actividades - Agregar actividad
  */
 
+import type { JsonValue } from '@/types/common';
 import axios from '../axios';
 import {
   PlanificacionListResponse,
@@ -58,7 +59,7 @@ type ActividadApi = {
   semana: number;
   componente: Actividad['componente'];
   descripcion: string;
-  props: Record<string, unknown> | null;
+  props: Record<string, JsonValue> | null;
   orden: number;
   createdAt: string;
   updatedAt: string;

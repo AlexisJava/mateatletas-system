@@ -227,7 +227,7 @@ export default function LoginPage() {
         // Para tutores, docentes y admin usamos el login normal
         await login(email, password);
       }
-    } catch (err: unknown) {
+    } catch (err) {
       // Si hay error, resetear el flag
       setHasJustLoggedIn(false);
 

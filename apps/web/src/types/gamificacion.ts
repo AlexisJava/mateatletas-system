@@ -1,3 +1,5 @@
+import type { JsonValue } from '@/types/common';
+
 export interface Logro {
   id: string;
   codigo: string;
@@ -55,7 +57,7 @@ export interface TransaccionRecurso {
   tipo_recurso: 'MONEDAS' | 'XP';
   cantidad: number;
   razon: string;
-  metadata: any;
+  metadata: Record<string, JsonValue> | null;
   fecha: Date;
 }
 

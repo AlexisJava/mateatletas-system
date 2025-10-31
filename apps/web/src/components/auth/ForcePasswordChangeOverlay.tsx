@@ -85,7 +85,7 @@ export function ForcePasswordChangeOverlay({
       if (onSuccess) {
         onSuccess();
       }
-    } catch (err: unknown) {
+    } catch (err) {
       setError(getErrorMessage(err, 'Error al cambiar contraseña'));
     } finally {
       setIsSubmitting(false);

@@ -93,7 +93,7 @@ export const estudiantesApi = {
    */
   delete: async (id: string): Promise<{ message: string }> => {
     try {
-      const response = await apiClient.delete(`/estudiantes/${id}`);
+      const response = await apiClient.delete<{ message: string }>(`/estudiantes/${id}`);
       return response;
     } catch (error) {
       console.error('Error al eliminar el estudiante:', error);
@@ -107,7 +107,7 @@ export const estudiantesApi = {
    */
   count: async (): Promise<{ count: number }> => {
     try {
-      const response = await apiClient.get('/estudiantes/count');
+      const response = await apiClient.get<{ count: number }>('/estudiantes/count');
       return response;
     } catch (error) {
       console.error('Error al contar los estudiantes:', error);

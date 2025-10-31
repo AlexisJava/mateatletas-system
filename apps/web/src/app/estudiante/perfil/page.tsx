@@ -8,6 +8,7 @@ import { LogroCard } from '@/components/gamificacion/LogroCard';
 import { motion } from 'framer-motion';
 import { formatearNumero } from '@/lib/utils/gamificacion.utils';
 import { useAuthStore } from '@/store/auth.store';
+import type { TransaccionRecurso, LogroEstudiante } from '@/types/gamificacion';
 
 export default function PerfilPage() {
   const { user } = useAuthStore();
@@ -58,7 +59,7 @@ export default function PerfilPage() {
                 <div className="text-center">
                   <div className="text-4xl mb-2">💰</div>
                   <div className="text-2xl font-bold text-white">
-                    {formatearNumero(recursos.monedas_total)}
+                    {formatearNumero(recursos?.monedas_total ?? 0)}
                   </div>
                   <div className="text-gray-400 text-sm">Monedas</div>
                 </div>
@@ -66,7 +67,7 @@ export default function PerfilPage() {
                 <div className="text-center">
                   <div className="text-4xl mb-2">⚡</div>
                   <div className="text-2xl font-bold text-white">
-                    {formatearNumero(recursos.xp_total)}
+                    {formatearNumero(recursos?.xp_total ?? 0)}
                   </div>
                   <div className="text-gray-400 text-sm">XP Total</div>
                 </div>
@@ -74,7 +75,7 @@ export default function PerfilPage() {
                 <div className="text-center">
                   <div className="text-4xl mb-2">🎯</div>
                   <div className="text-2xl font-bold text-white">
-                    {recursos.nivel}
+                    {recursos?.nivel ?? 1}
                   </div>
                   <div className="text-gray-400 text-sm">Nivel</div>
                 </div>
@@ -82,7 +83,7 @@ export default function PerfilPage() {
                 <div className="text-center">
                   <div className="text-4xl mb-2">🏆</div>
                   <div className="text-2xl font-bold text-white">
-                    {logrosRecientes?.length || 0}
+                    {Array.isArray(logrosRecientes) ? logrosRecientes.length : 0}
                   </div>
                   <div className="text-gray-400 text-sm">Logros</div>
                 </div>
@@ -96,9 +97,9 @@ export default function PerfilPage() {
               📜 Historial Reciente
             </h2>
 
-            {historial && historial.length > 0 ? (
+            {historial && Array.isArray(historial) && historial.length > 0 ? (
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {historial.slice(0, 20).map((transaccion) => (
+                {historial.slice(0, 20).map((transaccion: TransaccionRecurso) => (
                   <div
                     key={transaccion.id}
                     className="flex items-center justify-between p-4 bg-gray-800 rounded-xl"
@@ -111,7 +112,7 @@ export default function PerfilPage() {
                         <p className="text-white font-semibold">
                           {transaccion.razon
                             .replace('_', ' ')
-                            .replace(/\b\w/g, (l) => l.toUpperCase())}
+                            .replace(/\b\w/g, (l: string) => l.toUpperCase())}
                         </p>
                         <p className="text-gray-400 text-sm">
                           {new Date(transaccion.fecha).toLocaleDateString('es-AR')}
@@ -150,9 +151,9 @@ export default function PerfilPage() {
               🏆 Logros Recientes
             </h2>
 
-            {logrosRecientes && logrosRecientes.length > 0 ? (
+            {logrosRecientes && Array.isArray(logrosRecientes) && logrosRecientes.length > 0 ? (
               <div className="space-y-4">
-                {logrosRecientes.map((logroEstudiante) => (
+                {logrosRecientes.map((logroEstudiante: LogroEstudiante) => (
                   <div key={logroEstudiante.id}>
                     <LogroCard
                       logro={logroEstudiante.logro}

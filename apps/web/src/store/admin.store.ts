@@ -58,7 +58,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
     try {
       const data = await adminApi.getDashboard();
       set({ dashboard: data, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error loading dashboard'), isLoading: false });
     }
   },
@@ -68,7 +68,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
     try {
       const stats = await adminApi.getSystemStats();
       set({ stats, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error loading stats'), isLoading: false });
     }
   },
@@ -78,7 +78,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
     try {
       const users = await adminApi.getAllUsers();
       set({ users, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error loading users'), isLoading: false });
     }
   },
@@ -88,7 +88,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       await adminApi.changeUserRole(userId, { role });
       await get().fetchUsers();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error changing role') });
       return false;
     }
@@ -99,7 +99,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       await adminApi.updateUserRoles(userId, { roles });
       await get().fetchUsers();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error updating roles') });
       return false;
     }
@@ -110,7 +110,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       await adminApi.deleteUser(userId);
       await get().fetchUsers();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error deleting user') });
       // Propagar el error para que el componente pueda manejarlo
       throw error;
@@ -122,7 +122,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
     try {
       const { data } = await adminApi.getAllClasses();
       set({ classes: data, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error loading classes'), classes: [], isLoading: false });
     }
   },
@@ -132,7 +132,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       await adminApi.createClass(data);
       await get().fetchClasses();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error creating class') });
       return false;
     }
@@ -143,7 +143,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       await adminApi.cancelarClase(claseId);
       await get().fetchClasses();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error canceling class') });
       return false;
     }
@@ -154,7 +154,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
     try {
       const products = await adminApi.getAllProducts(includeInactive);
       set({ products, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error loading products'), isLoading: false });
     }
   },
@@ -164,7 +164,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       await adminApi.createProduct(data);
       await get().fetchProducts();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error creating product') });
       return false;
     }
@@ -175,7 +175,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       await adminApi.updateProduct(id, data);
       await get().fetchProducts();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error updating product') });
       return false;
     }
@@ -186,7 +186,7 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       await adminApi.deleteProduct(id, hardDelete);
       await get().fetchProducts();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error deleting product') });
       return false;
     }

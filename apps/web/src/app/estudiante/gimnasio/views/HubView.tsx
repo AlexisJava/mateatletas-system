@@ -191,7 +191,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const [showClaseNoComenzModal, setShowClaseNoComenzModal] = useState(false);
   const [minutosRestantes, setMinutosRestantes] = useState(0);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  // const _modelRef = useRef<any>(null); // TODO: usar para controlar el modelo 3D
+  // const _modelRef = useRef<unknown>(null); // TODO: usar para controlar el modelo 3D
   const { openOverlay } = useOverlay();
   const { logout } = useAuthStore();
   const router = useRouter();
@@ -1129,7 +1129,16 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.42 }}
               >
-                <ProximaClaseCard clase={proximaClase} delay={0.42} />
+                <ProximaClaseCard
+                  clase={{
+                    ...proximaClase,
+                    ruta_curricular: proximaClase.ruta_curricular ? {
+                      nombre: proximaClase.ruta_curricular.nombre,
+                      color: '#3B82F6' // Color por defecto azul
+                    } : undefined
+                  }}
+                  delay={0.42}
+                />
               </motion.div>
             )}
 

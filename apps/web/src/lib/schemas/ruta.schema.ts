@@ -13,7 +13,7 @@ export const docenteRutaSchema = z.object({
   asignadoEn: z.string(),
 
   // Relaciones opcionales
-  ruta: z.lazy(() => z.any()).optional(), // RutaEspecialidad - lazy to avoid circular dependency
+  ruta: z.lazy(() => z.unknown()).optional(), // RutaEspecialidad - lazy to avoid circular dependency
   sector: sectorSchema.optional(),
   docente: z.object({
     id: z.string(),

@@ -86,9 +86,9 @@ export default function AdminEstudiantesPage() {
         : (Array.isArray(response) ? response : []);
       console.log('👥 Estudiantes procesados:', estudiantes.length);
       setEstudiantes(estudiantes as Estudiante[]);
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('❌ Error al cargar estudiantes:', err);
-      setError(getErrorMessage(err, 'Error al cargar estudiantes'));
+      setError(getErrorMessage(err as Error, 'Error al cargar estudiantes'));
     } finally {
       setIsLoading(false);
     }
@@ -109,7 +109,7 @@ export default function AdminEstudiantesPage() {
       }
 
       setSectores(sectoresData);
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('Error al cargar sectores:', err);
     }
   };

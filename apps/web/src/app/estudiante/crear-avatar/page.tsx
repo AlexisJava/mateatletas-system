@@ -99,11 +99,12 @@ export default function CrearAvatarPage() {
         router.push('/estudiante/gimnasio')
       }, 1000)
 
-    } catch (err: any) {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al guardar avatar'
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
       console.error('❌ [CREAR-AVATAR] ERROR:', err)
       console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')
-      setError(err.message || 'Error al guardar avatar')
+      setError(message)
       setGuardando(false)
     }
   }

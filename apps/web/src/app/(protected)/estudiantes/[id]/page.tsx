@@ -41,7 +41,7 @@ export default function EstudianteProfilePage() {
       try {
         await deleteEstudiante(id);
         router.push('/estudiantes');
-      } catch (error: unknown) {
+      } catch (error) {
         // Error deleting student
       }
     }

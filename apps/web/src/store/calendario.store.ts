@@ -96,7 +96,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
       
       // Recargar estadísticas
       await get().cargarEstadisticas();
-    } catch (error: unknown) {
+    } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
       throw error;
     }
@@ -120,7 +120,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
       }
       
       await get().cargarEstadisticas();
-    } catch (error: unknown) {
+    } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
       throw error;
     }
@@ -144,7 +144,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
       }
       
       await get().cargarEstadisticas();
-    } catch (error: unknown) {
+    } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
       throw error;
     }
@@ -157,7 +157,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
     try {
       const eventos = await calendarioApi.obtenerEventos(filtros || get().filtros);
       set({ eventos, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
     }
   },
@@ -167,7 +167,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
     try {
       const evento = await calendarioApi.obtenerEvento(id);
       set({ eventoSeleccionado: evento, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
     }
   },
@@ -177,7 +177,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
     try {
       const vistaAgenda = await calendarioApi.obtenerVistaAgenda();
       set({ vistaAgenda, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
     }
   },
@@ -187,7 +187,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
     try {
       const vistaSemana = await calendarioApi.obtenerVistaSemana(fecha);
       set({ vistaSemana, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
     }
   },
@@ -196,7 +196,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
     try {
       const estadisticas = await calendarioApi.obtenerEstadisticas();
       set({ estadisticas });
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error cargando estadísticas:', error);
     }
   },
@@ -222,7 +222,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
       }
       
       await get().cargarEstadisticas();
-    } catch (error: unknown) {
+    } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
       throw error;
     }
@@ -244,7 +244,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
       } else {
         await get().cargarVistaSemana();
       }
-    } catch (error: unknown) {
+    } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
       throw error;
     }
@@ -266,7 +266,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
       } else {
         await get().cargarVistaSemana();
       }
-    } catch (error: unknown) {
+    } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
       throw error;
     }
@@ -290,7 +290,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
       } else {
         await get().cargarVistaSemana();
       }
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error) });
       throw error;
     }
@@ -317,7 +317,7 @@ export const useCalendarioStore = create<CalendarioState>((set, get) => ({
       }
       
       await get().cargarEstadisticas();
-    } catch (error: unknown) {
+    } catch (error) {
       set({ isLoading: false, error: getErrorMessage(error) });
       throw error;
     }

@@ -148,7 +148,7 @@ export function EstudianteFormModal({
       onSuccess?.();
 
       onClose();
-    } catch (error: unknown) {
+    } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
 
       setErrors({

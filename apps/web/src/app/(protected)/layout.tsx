@@ -48,7 +48,7 @@ export default function ProtectedLayout({
           await checkAuth();
           // Si checkAuth tiene éxito, el usuario está autenticado
           setIsValidating(false);
-        } catch (error: unknown) {
+        } catch (error) {
           // No hay sesión válida, redirigir a login
           router.push('/login');
         }
@@ -59,7 +59,7 @@ export default function ProtectedLayout({
       try {
         await checkAuth();
         setIsValidating(false);
-      } catch (error: unknown) {
+      } catch (error) {
         // Sesión expirada o inválida, redirigir a login
         router.push('/login');
       }

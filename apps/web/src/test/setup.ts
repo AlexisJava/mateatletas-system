@@ -6,6 +6,7 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
+import type { LoggableValue } from '@/types/common';
 
 // Cleanup automático después de cada test
 afterEach(() => {
@@ -46,7 +47,7 @@ const originalError = console.error;
 const originalWarn = console.warn;
 
 beforeAll(() => {
-  console.error = (...args: unknown[]) => {
+  console.error = (...args: LoggableValue[]) => {
     if (
       typeof args[0] === 'string' &&
       (args[0].includes('Warning: ReactDOM.render') ||
@@ -57,7 +58,7 @@ beforeAll(() => {
     originalError.call(console, ...args);
   };
 
-  console.warn = (...args: unknown[]) => {
+  console.warn = (...args: LoggableValue[]) => {
     if (
       typeof args[0] === 'string' &&
       args[0].includes('componentWillReceiveProps')

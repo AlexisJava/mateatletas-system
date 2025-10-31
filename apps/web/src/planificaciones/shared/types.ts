@@ -2,6 +2,14 @@
  * Tipos para el sistema de planificaciones simplificado
  */
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
 /**
  * Configuración que debe exportar cada planificación
  * Esta es la ÚNICA configuración que necesitás definir
@@ -37,7 +45,7 @@ export interface ProgresoEstudiante {
   ultimaActividad: Date;
 
   /** Estado guardado (flexible, definido por tu componente) */
-  estadoGuardado?: any;
+  estadoGuardado?: JsonValue;
 
   /** Tiempo total en minutos */
   tiempoTotalMinutos: number;
@@ -77,7 +85,7 @@ export interface UsePlanificacionProgressReturn {
   error: string | null;
 
   /** Guardar estado personalizado del juego */
-  guardarEstado: (estado: any) => Promise<void>;
+  guardarEstado: (estado: JsonValue) => Promise<void>;
 
   /** Avanzar a la siguiente semana */
   avanzarSemana: () => Promise<void>;

@@ -12,6 +12,7 @@ import {
   formatUsersForExport
 } from '@/lib/utils/export.utils';
 import { getErrorMessage } from '@/lib/utils/error.utils';
+import { toErrorLike } from '@/types/common';
 import { Users, Crown, Plus, Download, Eye, Trash2, UserCog, X } from 'lucide-react';
 import CreateDocenteForm from '@/components/admin/CreateDocenteForm';
 import ViewEditDocenteModal from '@/components/admin/ViewEditDocenteModal';
@@ -83,7 +84,7 @@ export default function UsuariosPage() {
         setModalType(null);
         setSelectedUser(null);
       }
-    } catch (error: unknown) {
+    } catch (error) {
       // Solo detectar error de clases asignadas si es DOCENTE
       if (selectedUser.role === 'docente') {
         const axiosError = error as { response?: { data?: { errorMessage?: string; message?: string } }; message?: string };
@@ -140,8 +141,8 @@ export default function UsuariosPage() {
         setSelectedUser(null);
         setTargetDocenteId('');
       }
-    } catch (error: unknown) {
-      setDeleteError(getErrorMessage(error as Error));
+    } catch (error) {
+      setDeleteError(getErrorMessage(toErrorLike(error)));
     } finally {
       setFormLoading(false);
     }
@@ -175,7 +176,7 @@ export default function UsuariosPage() {
       await fetchUsers();
       setModalType(null);
     } catch (error) {
-      setFormError(getErrorMessage(error));
+      setFormError(getErrorMessage(toErrorLike(error)));
       throw error;
     } finally {
       setFormLoading(false);
@@ -190,7 +191,7 @@ export default function UsuariosPage() {
       setModalType('viewDocente');
     } catch (error) {
       console.error('Error fetching docente:', error);
-      setFormError(getErrorMessage(error));
+      setFormError(getErrorMessage(toErrorLike(error)));
     } finally {
       setFormLoading(false);
     }
@@ -229,7 +230,7 @@ export default function UsuariosPage() {
         telefono: '',
       });
     } catch (error) {
-      setFormError(getErrorMessage(error));
+      setFormError(getErrorMessage(toErrorLike(error)));
     } finally {
       setFormLoading(false);
     }

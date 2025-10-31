@@ -61,8 +61,8 @@ export default function CredencialesPage() {
       setTutores(data.tutores || []);
       setEstudiantes(data.estudiantes || []);
       setDocentes(data.docentes || []);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Error al cargar credenciales'));
+    } catch (err) {
+      setError(getErrorMessage(err as Error, 'Error al cargar credenciales'));
     } finally {
       setIsLoading(false);
     }
@@ -132,8 +132,8 @@ export default function CredencialesPage() {
 
       // Limpiar después de 10 segundos
       setTimeout(() => setResetSuccess(null), 10000);
-    } catch (err: unknown) {
-      alert(getErrorMessage(err, 'Error al resetear contraseña'));
+    } catch (err) {
+      alert(getErrorMessage(err as Error, 'Error al resetear contraseña'));
     } finally {
       setResettingId(null);
     }

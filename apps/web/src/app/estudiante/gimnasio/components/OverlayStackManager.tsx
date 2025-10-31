@@ -9,7 +9,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useOverlayStack } from '../contexts/OverlayStackProvider';
 import { useAuthStore } from '@/store/auth.store';
 import { OverlayRenderer } from './OverlayRenderer';
-import type { OverlayConfig, OverlayMetadata } from '../types/overlay.types';
+import type { OverlayConfig, OverlayMetadata, OverlayComponentProps } from '../types/overlay.types';
 
 // Importar vistas de overlays
 import { MiGrupoView } from '../views/MiGrupoView';
@@ -28,6 +28,7 @@ import { EjecutarActividadView } from './overlays/EjecutarActividadView';
 import { LaboratorioEcosistema } from './overlays/LaboratorioEcosistema';
 import { TareasAsignadasOverlay } from './overlays/TareasAsignadasOverlay';
 import { PlanificacionesSectorOverlay } from './overlays/PlanificacionesSectorOverlay';
+import { TiendaView } from '../views/TiendaView';
 
 /**
  * Configuración de metadatos para cada tipo de overlay
@@ -99,52 +100,161 @@ const OVERLAY_METADATA: Record<OverlayConfig['type'], OverlayMetadata> = {
   },
 };
 
+type OverlayComponent = React.ComponentType<OverlayComponentProps>;
+
+const MiGrupoOverlay: OverlayComponent = ({ estudiante }) => (
+  <MiGrupoView
+    estudiante={{
+      id: estudiante.id ?? '',
+      nombre: estudiante.nombre || 'Estudiante',
+      apellido: estudiante.apellido ?? '',
+    }}
+  />
+);
+const MiProgresoOverlay: OverlayComponent = ({ estudiante }) => (
+  <MiProgresoView
+    estudiante={{
+      id: estudiante.id ?? '',
+      nombre: estudiante.nombre || 'Estudiante',
+      puntos_totales: estudiante.puntos_totales ?? 0,
+    }}
+  />
+);
+const MisLogrosOverlay: OverlayComponent = ({ estudiante }) => (
+  <MisLogrosView
+    estudiante={{
+      id: estudiante.id ?? '',
+      nombre: estudiante.nombre || 'Estudiante',
+    }}
+  />
+);
+const RankingOverlay: OverlayComponent = ({ estudiante }) => (
+  <RankingView
+    estudiante={{
+      id: estudiante.id ?? '',
+      nombre: estudiante.nombre || 'Estudiante',
+      apellido: estudiante.apellido ?? '',
+    }}
+  />
+);
+const NotificacionesOverlay: OverlayComponent = ({ estudiante }) => (
+  <NotificacionesView
+    estudiante={{
+      id: estudiante.id ?? '',
+      nombre: estudiante.nombre || 'Estudiante',
+      apellido: estudiante.apellido ?? '',
+    }}
+  />
+);
+const ProximamenteOverlay: OverlayComponent = () => <ProximamenteView />;
+const CursosOverlay: OverlayComponent = ({ estudiante }) => (
+  <CursosView
+    estudiante={{
+      id: estudiante.id ?? '',
+      username: estudiante.nombre || 'Estudiante',
+      nivel_actual: estudiante.nivel_actual ?? 1,
+    }}
+  />
+);
+const MisCursosOverlay: OverlayComponent = ({ estudiante }) => (
+  <MisCursosView
+    estudiante={{
+      id: estudiante.id ?? '',
+      username: estudiante.nombre || 'Estudiante',
+    }}
+  />
+);
+const AnimacionesOverlay: OverlayComponent = ({ estudiante }) => (
+  <AnimacionesView
+    estudiante={{
+      id: estudiante.id ?? '',
+      nombre: estudiante.nombre || 'Estudiante',
+      puntos_totales: estudiante.puntos_totales ?? 0,
+      avatar_url: estudiante.avatar_url,
+    }}
+  />
+);
+const AjustesOverlay: OverlayComponent = () => <AjustesView />;
+const PlanificacionOverlay: OverlayComponent = (props) => <PlanificacionView {...props} />;
+const PlanificacionesSectorComponent: OverlayComponent = ({ config }) => (
+  <PlanificacionesSectorOverlay config={config?.type === 'planificaciones-sector' ? config : undefined} />
+);
+const ActividadOverlay: OverlayComponent = ({ estudiante, config }) => {
+  if (!config || config.type !== 'actividad' || !config.semanaId) {
+    console.warn('ActividadOverlay requiere config.type "actividad" con semanaId definido');
+    return null;
+  }
+  return (
+    <ActividadView
+      estudiante={estudiante}
+      config={{ ...config, semanaId: config.semanaId }}
+    />
+  );
+};
+const LaboratorioOverlay: OverlayComponent = ({ config }) => {
+  if (!config || config.type !== 'laboratorio-ecosistema' || !config.semanaId) {
+    console.warn('LaboratorioOverlay requiere config.type "laboratorio-ecosistema" con semanaId');
+    return null;
+  }
+  return <LaboratorioEcosistema semanaId={config.semanaId} />;
+};
+const EjecutarActividadOverlay: OverlayComponent = ({ estudiante, config }) => {
+  if (!config || config.type !== 'ejecutar-actividad' || !config.actividadId || !config.semanaId) {
+    console.warn('EjecutarActividadOverlay requiere config.type "ejecutar-actividad" con actividadId y semanaId');
+    return null;
+  }
+  return (
+    <EjecutarActividadView
+      estudiante={estudiante}
+      config={{
+        ...config,
+        actividadId: config.actividadId,
+        semanaId: config.semanaId,
+      }}
+    />
+  );
+};
+const TareasAsignadasComponent: OverlayComponent = () => <TareasAsignadasOverlay />;
+const TiendaOverlay: OverlayComponent = ({ estudiante }) => (
+  <TiendaView
+    estudiante={{
+      id: estudiante.id ?? '',
+      nombre: estudiante.nombre || 'Estudiante',
+      nivel_actual: estudiante.nivel_actual ?? 1,
+    }}
+  />
+);
+
+const overlayComponentMap: Record<OverlayConfig['type'], OverlayComponent> = {
+  'mi-grupo': MiGrupoOverlay,
+  'mi-progreso': MiProgresoOverlay,
+  'mis-logros': MisLogrosOverlay,
+  ranking: RankingOverlay,
+  entrenamientos: ProximamenteOverlay,
+  planificacion: PlanificacionOverlay,
+  'tareas-asignadas': TareasAsignadasComponent,
+  'planificaciones-sector': PlanificacionesSectorComponent,
+  actividad: ActividadOverlay,
+  'laboratorio-ecosistema': LaboratorioOverlay,
+  'ejecutar-actividad': EjecutarActividadOverlay,
+  'mis-cursos': MisCursosOverlay,
+  tienda: TiendaOverlay,
+  notificaciones: NotificacionesOverlay,
+  ajustes: AjustesOverlay,
+  animaciones: AnimacionesOverlay,
+};
+
 /**
  * Mapeo de tipos de overlay a componentes
  */
-function getOverlayComponent(config: OverlayConfig): React.ComponentType<any> {
-  switch (config.type) {
-    case 'mi-grupo':
-      return MiGrupoView;
-    case 'mi-progreso':
-      return MiProgresoView;
-    case 'entrenamientos':
-      return ProximamenteView;
-    case 'planificacion':
-      return PlanificacionView; // Mes de la Ciencia con grid 2×2 semanas
-    case 'tareas-asignadas':
-      return TareasAsignadasOverlay; // Vista de tareas asignadas con estados bloqueado/desbloqueado
-    case 'planificaciones-sector':
-      return PlanificacionesSectorOverlay; // Planificaciones de un sector específico (bloqueadas hasta fecha)
-    case 'actividad':
-      return ActividadView; // Grid 2×2 de las 4 actividades de una semana
-    case 'laboratorio-ecosistema':
-      return LaboratorioEcosistema; // Ecosistema LearnDash para Laboratorio Mágico
-    case 'ejecutar-actividad':
-      return EjecutarActividadView; // Vista de ejecución individual (ejercicios, videos, juegos)
-    case 'mis-cursos':
-      return MisCursosView;
-    case 'tienda':
-      return CursosView;
-    case 'notificaciones':
-      return NotificacionesView;
-    case 'ajustes':
-      return AjustesView;
-    case 'mis-logros':
-      return MisLogrosView;
-    case 'ranking':
-      return RankingView;
-    case 'animaciones':
-      return AnimacionesView;
-    default:
-      return PlaceholderView;
-  }
+function getOverlayComponent(config: OverlayConfig): OverlayComponent {
+  return overlayComponentMap[config.type] ?? PlaceholderView;
 }
 
 /**
  * Componente placeholder para overlays no implementados
  */
-function PlaceholderView({ config }: { config?: OverlayConfig }) {
+const PlaceholderView: OverlayComponent = ({ config }) => {
   const emojiMap: Record<string, string> = {
     'mis-logros': '🏆',
     'mis-cursos': '📚',
@@ -173,7 +283,7 @@ function PlaceholderView({ config }: { config?: OverlayConfig }) {
       </div>
     </div>
   );
-}
+};
 
 export function OverlayStackManager() {
   const { stack, pop } = useOverlayStack();

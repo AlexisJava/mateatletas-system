@@ -15,6 +15,7 @@ import { toast } from '@/components/ui/Toast';
 import { StudentAvatar } from '@/components/ui/StudentAvatar';
 import type { EstudianteConStatsDto } from '@/lib/api/clase-grupos.api';
 import axios from '@/lib/axios';
+import { isAxiosError } from 'axios';
 
 interface AgregarObservacionModalProps {
   isOpen: boolean;
@@ -81,12 +82,16 @@ export default function AgregarObservacionModal({
 
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error al agregar observación:', error);
-      toast.error(
-        error?.response?.data?.message ||
-          'Error al guardar observación. Intenta nuevamente.'
-      );
+      if (isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message ||
+            'Error al guardar observación. Intenta nuevamente.'
+        );
+      } else {
+        toast.error('Error al guardar observación. Intenta nuevamente.');
+      }
     } finally {
       setIsSubmitting(false);
     }

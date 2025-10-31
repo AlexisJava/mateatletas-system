@@ -37,7 +37,7 @@ export const useClassesStore = create<ClassesStore>((set, get) => ({
     try {
       const { data } = await adminApi.getAllClasses();
       set({ classes: data, isLoading: false });
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error loading classes'), classes: [], isLoading: false });
     }
   },
@@ -47,7 +47,7 @@ export const useClassesStore = create<ClassesStore>((set, get) => ({
       await adminApi.createClass(data);
       await get().fetchClasses();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error creating class') });
       return false;
     }
@@ -58,7 +58,7 @@ export const useClassesStore = create<ClassesStore>((set, get) => ({
       await adminApi.cancelarClase(claseId);
       await get().fetchClasses();
       return true;
-    } catch (error: unknown) {
+    } catch (error) {
       set({ error: getErrorMessage(error, 'Error canceling class') });
       return false;
     }

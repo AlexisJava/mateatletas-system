@@ -1,4 +1,4 @@
-import { getErrorMessage } from '@/lib/utils/error-handler';
+import { getErrorMessage, toErrorLike } from '@/lib/utils/error-handler';
 import { create } from 'zustand';
 import {
   gamificacionApi,
@@ -77,11 +77,14 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
           isLoading: Object.values(nextLoading).some(Boolean),
         };
       });
-    } catch (error: unknown) {
+    } catch (error) {
       set((state) => {
         const nextLoading = { ...state.loading, dashboard: false };
         return {
-          error: getErrorMessage(error, 'Error al cargar dashboard'),
+          error: getErrorMessage(
+            toErrorLike(error),
+            'Error al cargar dashboard',
+          ),
           loading: nextLoading,
           isLoading: Object.values(nextLoading).some(Boolean),
         };
@@ -111,11 +114,11 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
           isLoading: Object.values(nextLoading).some(Boolean),
         };
       });
-    } catch (error: unknown) {
+    } catch (error) {
       set((state) => {
         const nextLoading = { ...state.loading, logros: false };
         return {
-          error: getErrorMessage(error, 'Error al cargar logros'),
+          error: getErrorMessage(toErrorLike(error), 'Error al cargar logros'),
           loading: nextLoading,
           isLoading: Object.values(nextLoading).some(Boolean),
         };
@@ -130,8 +133,8 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
     try {
       const puntos = await gamificacionApi.getPuntos(estudianteId);
       set({ puntos });
-    } catch (error: unknown) {
-      console.error('Error al cargar puntos:', error);
+    } catch (error) {
+      console.error('Error al cargar puntos:', toErrorLike(error));
     }
   },
 
@@ -157,11 +160,14 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
           isLoading: Object.values(nextLoading).some(Boolean),
         };
       });
-    } catch (error: unknown) {
+    } catch (error) {
       set((state) => {
         const nextLoading = { ...state.loading, ranking: false };
         return {
-          error: getErrorMessage(error, 'Error al cargar ranking'),
+          error: getErrorMessage(
+            toErrorLike(error),
+            'Error al cargar ranking',
+          ),
           loading: nextLoading,
           isLoading: Object.values(nextLoading).some(Boolean),
         };
@@ -190,7 +196,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
           isLoading: Object.values(nextLoading).some(Boolean),
         };
       });
-    } catch (error: unknown) {
+    } catch (error) {
       set((state) => {
         const nextLoading = { ...state.loading, progreso: false };
         return {
@@ -198,7 +204,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
           isLoading: Object.values(nextLoading).some(Boolean),
         };
       });
-      console.error('Error al cargar progreso:', error);
+      console.error('Error al cargar progreso:', toErrorLike(error));
     }
   },
 
@@ -222,8 +228,8 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
         logros,
         logroRecienDesbloqueado: logroDesbloqueado || null,
       });
-    } catch (error: unknown) {
-      console.error('Error al desbloquear logro:', error);
+    } catch (error) {
+      console.error('Error al desbloquear logro:', toErrorLike(error));
     }
   },
 
