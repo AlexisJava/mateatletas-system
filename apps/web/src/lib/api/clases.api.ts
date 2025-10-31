@@ -4,7 +4,7 @@
 
 import axios from '@/lib/axios';
 import {
-  Clase,
+  ClaseConRelaciones,
   InscripcionClase,
   RutaCurricular,
   CrearReservaDto,
@@ -14,7 +14,9 @@ import {
 /**
  * Obtener todas las clases disponibles
  */
-export const getClases = async (filtros?: FiltroClases): Promise<Clase[]> => {
+export const getClases = async (
+  filtros?: FiltroClases,
+): Promise<ClaseConRelaciones[]> => {
   const params = new URLSearchParams();
 
   if (filtros?.ruta_curricular_id) {
@@ -32,7 +34,9 @@ export const getClases = async (filtros?: FiltroClases): Promise<Clase[]> => {
 
     // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<Clase[]>(`/clases?${params.toString()}`);
+    const response = await axios.get<ClaseConRelaciones[]>(
+      `/clases?${params.toString()}`,
+    );
     return response;
   } catch (error) {
     console.error('Error al obtener la lista de clases:', error);
@@ -43,10 +47,12 @@ export const getClases = async (filtros?: FiltroClases): Promise<Clase[]> => {
 /**
  * Obtener una clase por ID
  */
-export const getClaseById = async (claseId: string): Promise<Clase> => {
+export const getClaseById = async (
+  claseId: string,
+): Promise<ClaseConRelaciones> => {
     // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<Clase>(`/clases/${claseId}`);
+    const response = await axios.get<ClaseConRelaciones>(`/clases/${claseId}`);
     return response;
   } catch (error) {
     console.error('Error al obtener la clase por ID:', error);
@@ -146,8 +152,8 @@ export const getRutaCurricularById = async (
  * @param incluirPasadas Incluir clases finalizadas/canceladas
  */
 export const getMisClasesDocente = async (
-  incluirPasadas: boolean = false
-): Promise<Clase[]> => {
+  incluirPasadas: boolean = false,
+): Promise<ClaseConRelaciones[]> => {
   const params = new URLSearchParams();
   if (incluirPasadas) {
     params.append('incluirPasadas', 'true');
@@ -155,7 +161,7 @@ export const getMisClasesDocente = async (
 
     // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<Clase[]>(
+    const response = await axios.get<ClaseConRelaciones[]>(
       `/clases/docente/mis-clases?${params.toString()}`
     );
     return response;
