@@ -51,6 +51,16 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
         ...lockedAnimations.filter(a => a.category === selectedCategory)
       ]
 
+  // DEBUG: Log to console
+  console.log('🎬 AnimacionesView DEBUG:', {
+    estudianteNombre: estudiante.nombre,
+    puntosEstudiante: estudiante.puntos_totales,
+    availableCount: availableAnimations.length,
+    lockedCount: lockedAnimations.length,
+    stats,
+    displayAnimationsCount: displayAnimations.length,
+  })
+
   const handleUnlockAnimation = async (animationId: string, cost: number) => {
     // TODO: Implementar llamada al backend
     console.log(`Desbloqueando animación ${animationId} por ${cost} puntos`)
