@@ -885,7 +885,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   </div>
                   <div className="text-white/90 text-sm font-bold uppercase tracking-wide">
                     {esHoy && proximaClase
-                      ? '¡Tu clase comienza pronto, prepárate!'
+                      ? '¡Tu equipo te espera!'
                       : 'Resolvé desafíos y dominá números'
                     }
                   </div>
