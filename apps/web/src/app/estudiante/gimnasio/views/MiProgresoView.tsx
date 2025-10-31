@@ -60,13 +60,13 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
           {
             id: 'monedas',
             emoji: '💰',
-            value: recursos.monedas.toString(),
+            value: (recursos.monedas ?? 0).toString(),
             label: 'MONEDAS',
             gradient: 'from-yellow-400 to-orange-500',
             detalles: {
               titulo: 'Tus Monedas',
               items: [
-                `Total acumulado: ${recursos.monedas} monedas`,
+                `Total acumulado: ${recursos.monedas ?? 0} monedas`,
                 `Canjealas por cursos en la tienda`,
                 `Gana más monedas completando actividades`,
                 `Cada logro te da monedas extra`,
