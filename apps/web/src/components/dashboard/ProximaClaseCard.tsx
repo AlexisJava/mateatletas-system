@@ -71,28 +71,22 @@ export function ProximaClaseCard({ clase, onIrAClase, delay = 0 }: ProximaClaseC
   const fechaClase = new Date(clase.fecha_hora_inicio);
   const ruta = clase.ruta_curricular ?? clase.rutaCurricular;
   const rutaColor = ruta?.color ?? '#6366f1';
-  const rutaNombre = ruta?.nombre ?? 'Sin ruta';
-  const cuposDisponibles =
-    clase.cupos_disponibles ??
-    Math.max(
-      (clase.cupo_maximo ?? 0) - (clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0),
-      0,
-    );
+  const rutaNombre = ruta?.nombre ?? 'Clase Programada';
+
   const esHoy = format(fechaClase, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
   const esMañana =
     format(fechaClase, 'yyyy-MM-dd') ===
     format(new Date(Date.now() + 86400000), 'yyyy-MM-dd');
 
-  let tiempoRelativo = '';
+  // Mostrar día de la semana + hora
+  const diaYHora = format(fechaClase, "EEEE HH:mm 'hs'", { locale: es });
+  const diaMayus = diaYHora.charAt(0).toUpperCase() + diaYHora.slice(1);
+
+  let badge = '';
   if (esHoy) {
-    tiempoRelativo = 'Hoy';
+    badge = 'HOY';
   } else if (esMañana) {
-    tiempoRelativo = 'Mañana';
-  } else {
-    tiempoRelativo = formatDistanceToNow(fechaClase, {
-      addSuffix: true,
-      locale: es,
-    });
+    badge = 'MAÑANA';
   }
 
   return (
@@ -100,66 +94,41 @@ export function ProximaClaseCard({ clase, onIrAClase, delay = 0 }: ProximaClaseC
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-white rounded-2xl shadow-lg border-2 border-blue-100 p-6 hover:shadow-xl transition-shadow"
+      className="bg-gradient-to-br from-purple-900/30 via-blue-900/30 to-cyan-900/30 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-4 hover:border-purple-400/50 transition-all shadow-lg"
     >
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="text-xl font-bold text-gray-800 mb-1">Próxima Clase</h3>
-          <p className="text-gray-600 text-sm">{tiempoRelativo}</p>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-cyan-400" />
+          <h3 className="text-sm font-black text-white">PRÓXIMA CLASE</h3>
         </div>
-        <div className="text-3xl">📚</div>
+        {badge && (
+          <span className="px-2 py-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-xs font-black rounded-lg">
+            {badge}
+          </span>
+        )}
       </div>
 
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-4 mb-4 border border-blue-200">
-        <div className="flex items-center gap-2 mb-2">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
           <div
-            className="w-4 h-4 rounded-full"
-            style={{ backgroundColor: rutaColor }}
+            className="w-3 h-3 rounded-full shadow-lg"
+            style={{ backgroundColor: rutaColor, boxShadow: `0 0 10px ${rutaColor}` }}
           />
-          <h4 className="font-bold text-gray-800 text-lg">{rutaNombre}</h4>
+          <span className="text-white font-bold text-sm">{rutaNombre}</span>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+        <div className="flex items-center gap-2 text-sm text-cyan-300">
           <User className="w-4 h-4" />
           <span>
             Prof. {clase.docente.nombre} {clase.docente.apellido}
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-sm font-semibold text-blue-700">
+        <div className="flex items-center gap-2 text-sm font-bold text-orange-400">
           <Calendar className="w-4 h-4" />
-          <span>{format(fechaClase, "HH:mm 'hs'", { locale: es })}</span>
+          <span>{diaMayus}</span>
         </div>
-
-        {clase.modalidad && (
-          <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-            <MapPin className="w-4 h-4" />
-            <span className="capitalize">{clase.modalidad}</span>
-          </div>
-        )}
       </div>
-
-      {cuposDisponibles > 0 && (
-        <div
-          className={`text-center py-2 rounded-lg mb-4 ${
-            cuposDisponibles <= 3 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-          }`}
-        >
-          <p className="text-sm font-semibold">
-            {cuposDisponibles} {cuposDisponibles === 1 ? 'cupo' : 'cupos'}{' '}
-            {cuposDisponibles <= 3 ? '¡Últimos!' : 'disponibles'}
-          </p>
-        </div>
-      )}
-
-      {onIrAClase && esHoy && (
-        <button
-          onClick={onIrAClase}
-          className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all"
-        >
-          ¡Ir a la Clase!
-        </button>
-      )}
     </motion.div>
   );
 }
