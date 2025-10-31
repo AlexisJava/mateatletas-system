@@ -91,10 +91,11 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
             </div>
           </div>
 
-          {/* Lista de compañeros - MAX 6 VISIBLE */}
+          {/* Lista de compañeros - GRID 2x3 FIJO (6 slots) */}
           {companeros.length > 0 ? (
             <div className="flex-1 grid grid-cols-2 grid-rows-3 gap-3">
-              {companeros.slice(0, 6).map((companero) => {
+              {/* Mostrar primeros 5 compañeros */}
+              {companeros.slice(0, 5).map((companero) => {
                 const esTu = companero.id === estudiante.id;
                 return (
                   <div
@@ -125,15 +126,44 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
                   </div>
                 );
               })}
-              {/* Mostrar +N si hay más compañeros */}
-              {companeros.length > 6 && (
-                <div className="col-span-2 rounded-2xl p-3 border-2 border-white/10
+
+              {/* Slot 6: o compañero #6 o indicador "+N más" */}
+              {companeros.length === 6 ? (
+                // Si son exactamente 6, mostrar el 6to compañero
+                <div
+                  className={`
+                    rounded-2xl p-3 border-2 flex flex-col items-center justify-center gap-1
+                    ${companeros[5].id === estudiante.id
+                      ? 'bg-yellow-400/20 border-yellow-400/60 shadow-lg'
+                      : 'bg-white/5 border-white/10'
+                    }
+                  `}
+                >
+                  <div className="text-2xl">👤</div>
+                  <p className={`font-black text-center ${companeros[5].id === estudiante.id ? 'text-yellow-300' : 'text-white'}`}>
+                    {companeros[5].nombre}
+                  </p>
+                  <p className={`font-black text-center text-sm ${companeros[5].id === estudiante.id ? 'text-yellow-300' : 'text-white'}`}>
+                    {companeros[5].apellido}
+                  </p>
+                  <div className={`text-lg font-black ${companeros[5].id === estudiante.id ? 'text-yellow-400' : 'text-cyan-400'}`}>
+                    {companeros[5].puntos.toLocaleString()} pts
+                  </div>
+                  {companeros[5].id === estudiante.id && (
+                    <span className="px-2 py-0.5 bg-yellow-400/40 text-yellow-200 text-[10px] font-black rounded-full">
+                      TÚ
+                    </span>
+                  )}
+                </div>
+              ) : companeros.length > 6 ? (
+                // Si son más de 6, mostrar indicador "+N más"
+                <div className="rounded-2xl p-3 border-2 border-white/10
                                 bg-white/5 flex items-center justify-center">
                   <p className="text-white/60 text-sm font-bold">
-                    +{companeros.length - 6} compañeros más
+                    +{companeros.length - 5} más
                   </p>
                 </div>
-              )}
+              ) : null}
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center">
