@@ -170,31 +170,16 @@ export default function GimnasioPage() {
         {/* ═══════════════════════════════════════════════════════ */}
         {/* TEXTO PRINCIPAL - EFECTO HOLOGRÁFICO 3D */}
         {/* ═══════════════════════════════════════════════════════ */}
-        <div className="relative z-20 text-center">
+        <div className="relative z-20 text-center px-8">
           {/* Logo MATEATLETAS con efecto 3D holográfico */}
-          <div className="mb-12 relative">
-            {/* Sombra 3D profunda */}
-            <div className="absolute inset-0 text-9xl font-black text-blue-500/20 blur-md" style={{ transform: 'translateZ(-50px) translateY(4px) translateX(4px)' }}>
-              MATEATLETAS
-            </div>
-
-            {/* Texto principal con gradiente holográfico */}
-            <div className="relative text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500" style={{
+          <div className="mb-12 relative py-8">
+            {/* Texto principal con gradiente holográfico - SIN SOMBRA PARA EVITAR CORTES */}
+            <h1 className="relative text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-500 whitespace-nowrap" style={{
               textShadow: '0 0 40px rgba(56, 189, 248, 0.8), 0 0 80px rgba(56, 189, 248, 0.4)',
               animation: 'holographicGlow 3s ease-in-out infinite'
             }}>
-              {'MATEATLETAS'.split('').map((letter, i) => (
-                <span
-                  key={i}
-                  className="inline-block"
-                  style={{
-                    animation: `letterFloat 3s ease-in-out ${i * 0.15}s infinite`,
-                  }}
-                >
-                  {letter}
-                </span>
-              ))}
-            </div>
+              MATEATLETAS
+            </h1>
 
             {/* Líneas de escaneo holográfico */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -268,10 +253,6 @@ export default function GimnasioPage() {
             10% { opacity: 0.8; }
             90% { opacity: 0.8; }
             100% { transform: translate(100vw, -100vh) scale(0.5); opacity: 0; }
-          }
-          @keyframes letterFloat {
-            0%, 100% { transform: translateY(0) translateZ(0); }
-            50% { transform: translateY(-15px) translateZ(20px); }
           }
           @keyframes holographicGlow {
             0%, 100% { filter: brightness(1) contrast(1); }
