@@ -91,40 +91,49 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
             </div>
           </div>
 
-          {/* Lista de compañeros */}
+          {/* Lista de compañeros - MAX 6 VISIBLE */}
           {companeros.length > 0 ? (
-            <div className="flex-1 grid grid-cols-2 gap-3 content-start">
-              {companeros.map((companero) => {
+            <div className="flex-1 grid grid-cols-2 grid-rows-3 gap-3">
+              {companeros.slice(0, 6).map((companero) => {
                 const esTu = companero.id === estudiante.id;
                 return (
                   <div
                     key={companero.id}
                     className={`
-                      rounded-2xl p-4 border-2 flex flex-col items-center justify-center gap-2
+                      rounded-2xl p-3 border-2 flex flex-col items-center justify-center gap-1
                       ${esTu
                         ? 'bg-yellow-400/20 border-yellow-400/60 shadow-lg'
                         : 'bg-white/5 border-white/10'
                       }
                     `}
                   >
-                    <div className="text-3xl">👤</div>
-                    <p className={`font-black text-center text-lg ${esTu ? 'text-yellow-300' : 'text-white'}`}>
+                    <div className="text-2xl">👤</div>
+                    <p className={`font-black text-center ${esTu ? 'text-yellow-300' : 'text-white'}`}>
                       {companero.nombre}
                     </p>
-                    <p className={`font-black text-center ${esTu ? 'text-yellow-300' : 'text-white'}`}>
+                    <p className={`font-black text-center text-sm ${esTu ? 'text-yellow-300' : 'text-white'}`}>
                       {companero.apellido}
                     </p>
-                    <div className={`text-xl font-black ${esTu ? 'text-yellow-400' : 'text-cyan-400'}`}>
+                    <div className={`text-lg font-black ${esTu ? 'text-yellow-400' : 'text-cyan-400'}`}>
                       {companero.puntos.toLocaleString()} pts
                     </div>
                     {esTu && (
-                      <span className="px-3 py-1 bg-yellow-400/40 text-yellow-200 text-xs font-black rounded-full">
+                      <span className="px-2 py-0.5 bg-yellow-400/40 text-yellow-200 text-[10px] font-black rounded-full">
                         TÚ
                       </span>
                     )}
                   </div>
                 );
               })}
+              {/* Mostrar +N si hay más compañeros */}
+              {companeros.length > 6 && (
+                <div className="col-span-2 rounded-2xl p-3 border-2 border-white/10
+                                bg-white/5 flex items-center justify-center">
+                  <p className="text-white/60 text-sm font-bold">
+                    +{companeros.length - 6} compañeros más
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center">
