@@ -227,7 +227,23 @@ export class EstudiantesController {
   @Roles(Role.Estudiante)
   async obtenerMiProximaClase(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
-    return this.estudiantesService.obtenerProximaClase(estudianteId);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📅 [BACKEND] GET /estudiantes/mi-proxima-clase');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('👤 Estudiante ID:', estudianteId);
+    console.log('🔑 User roles:', req.user.roles);
+    console.log('🔑 User role:', req.user.role);
+
+    const resultado = await this.estudiantesService.obtenerProximaClase(estudianteId);
+
+    console.log('📤 Próxima clase encontrada:', resultado ? 'Sí' : 'No');
+    if (resultado) {
+      console.log('📅 Tipo de clase:', resultado.tipo);
+      console.log('📅 Fecha:', resultado.fecha_hora_inicio);
+    }
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+    return resultado;
   }
 
   /**
