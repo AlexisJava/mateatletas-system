@@ -499,6 +499,9 @@ model Grupo {
   /// Sector al que pertenece (Matemática o Programación)
   sector_id String?
 
+  /// Link de Google Meet para las clases de este grupo
+  link_meet String?
+
   /// Indica si el grupo está activo
   activo Boolean @default(true)
 

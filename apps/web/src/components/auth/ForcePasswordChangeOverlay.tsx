@@ -14,6 +14,7 @@ interface ForcePasswordChangeOverlayProps {
 
 /**
  * Modal forzado para cambio de contraseña en primer ingreso
+ * NO se muestra para estudiantes (usan PIN de 4 dígitos)
  */
 export function ForcePasswordChangeOverlay({
   onSuccess,
@@ -27,7 +28,9 @@ export function ForcePasswordChangeOverlay({
   const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const shouldShow = Boolean(user?.debe_cambiar_password);
+  // No mostrar para estudiantes (usan PIN de 4 dígitos que no cambian)
+  const isEstudiante = user?.role === 'estudiante' || user?.roles?.includes('estudiante');
+  const shouldShow = Boolean(user?.debe_cambiar_password && !isEstudiante);
 
   const passwordStrengthMessage = useMemo(() => {
     if (!nuevaPassword) return '';
