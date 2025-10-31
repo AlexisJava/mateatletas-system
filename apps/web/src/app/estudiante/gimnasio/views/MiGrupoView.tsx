@@ -90,64 +90,85 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
           </div>
         </motion.div>
 
-        {/* COLUMNA 2: Misión grupal */}
+        {/* COLUMNA 2: Ranking del equipo */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="bg-blue-900/60 backdrop-blur-xl rounded-3xl p-6
-                     border-2 border-white/20 flex flex-col justify-between"
+                     border-2 border-white/20 flex flex-col"
         >
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-3xl">🎯</span>
-              <h3 className="text-2xl font-black text-white">MISIÓN SEMANAL</h3>
-            </div>
-
-            <p className="text-white/80 text-lg font-bold mb-6">
-              Completar 100 ejercicios entre todos
-            </p>
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-3xl">🏆</span>
+            <h3 className="text-2xl font-black text-white">RANKING DEL EQUIPO</h3>
           </div>
 
-          {/* Barra de progreso */}
-          <div>
-            <div className="relative h-10 bg-black/40 rounded-xl overflow-hidden border-2 border-white/20 mb-3">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: '73%' }}
-                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
-                className="h-full bg-gradient-to-r from-green-500 to-emerald-400"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-white font-black text-xl">73 / 100</span>
+          <div className="flex-1 space-y-3 overflow-y-auto">
+            {dashboard?.equipoRanking && dashboard.equipoRanking.length > 0 ? (
+              dashboard.equipoRanking.slice(0, 5).map((miembro: any, index: number) => (
+                <div
+                  key={miembro.id || index}
+                  className={`bg-white/5 rounded-xl p-3 border flex items-center justify-between ${
+                    miembro.id === estudiante.id ? 'border-yellow-400/50 bg-yellow-400/10' : 'border-white/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="text-2xl font-black text-white/60">#{index + 1}</div>
+                    <div>
+                      <p className="text-white font-bold">
+                        {miembro.nombre} {miembro.apellido}
+                        {miembro.id === estudiante.id && ' (Tú)'}
+                      </p>
+                      <p className="text-white/70 text-sm">{miembro.puntos?.toLocaleString() || 0} pts</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-white/50 text-center py-8">
+                <p>No hay datos del ranking</p>
               </div>
-            </div>
-            <p className="text-white/70 text-center text-sm font-bold">¡Solo faltan 27! 💪</p>
+            )}
           </div>
         </motion.div>
 
-        {/* COLUMNA 3: Actividad reciente */}
+        {/* COLUMNA 3: Estadísticas del equipo */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="bg-blue-900/60 backdrop-blur-xl rounded-3xl p-6
-                     border-2 border-white/20 flex flex-col"
+                     border-2 border-white/20 flex flex-col justify-between"
         >
-          <h3 className="text-2xl font-black text-white mb-4">ACTIVIDAD RECIENTE</h3>
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-3xl">📊</span>
+              <h3 className="text-2xl font-black text-white">ESTADÍSTICAS</h3>
+            </div>
 
-          <div className="flex-1 space-y-3">
-            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-              <p className="text-white font-bold">Juan</p>
-              <p className="text-white/70 text-sm">+20 puntos</p>
-            </div>
-            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-              <p className="text-white font-bold">María</p>
-              <p className="text-white/70 text-sm">+15 puntos</p>
-            </div>
-            <div className="bg-white/5 rounded-xl p-3 border border-white/10">
-              <p className="text-white font-bold">Pedro</p>
-              <p className="text-white/70 text-sm">+12 puntos</p>
+            <div className="space-y-4">
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <p className="text-white/70 text-sm mb-1">Puntos totales del equipo</p>
+                <p className="text-white font-black text-2xl">
+                  {dashboard?.equipoRanking
+                    ?.reduce((sum: number, m: any) => sum + (m.puntos || 0), 0)
+                    .toLocaleString() || 0}
+                </p>
+              </div>
+
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <p className="text-white/70 text-sm mb-1">Integrantes activos</p>
+                <p className="text-white font-black text-2xl">
+                  {dashboard?.equipoRanking?.length || 0}
+                </p>
+              </div>
+
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <p className="text-white/70 text-sm mb-1">Tu racha actual</p>
+                <p className="text-white font-black text-2xl">
+                  {rachaActual} {rachaActual === 1 ? 'día' : 'días'}
+                </p>
+              </div>
             </div>
           </div>
         </motion.div>
