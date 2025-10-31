@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth.store'
 import { OverlayStackProvider, useOverlayStack } from './contexts/OverlayStackProvider'
 import { OverlayStackManager } from './components/OverlayStackManager'
 import { DailyWelcomeModal } from './components/DailyWelcomeModal'
+import { LandscapeOnlyGuard } from './components/LandscapeOnlyGuard'
 import { useRachaAutomatica } from '@/hooks/useRachaAutomatica'
 
 // Componente interno que usa el hook del overlay stack
@@ -127,7 +128,9 @@ export default function GimnasioPage() {
 
   return (
     <OverlayStackProvider>
-      <GimnasioContent avatarUrl={avatarUrl} />
+      <LandscapeOnlyGuard>
+        <GimnasioContent avatarUrl={avatarUrl} />
+      </LandscapeOnlyGuard>
     </OverlayStackProvider>
   )
 }
