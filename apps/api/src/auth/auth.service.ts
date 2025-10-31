@@ -4,6 +4,8 @@ import {
   UnauthorizedException,
   NotFoundException,
   Logger,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../core/database/prisma.service';
@@ -13,6 +15,7 @@ import * as bcrypt from 'bcrypt';
 import { Role } from './decorators/roles.decorator';
 import { parseUserRoles } from '../common/utils/role.utils';
 import { Tutor, Docente, Admin as AdminModel } from '@prisma/client';
+import { LogrosService } from '../gamificacion/services/logros.service';
 
 type AuthenticatedUser = Tutor | Docente | AdminModel;
 
@@ -41,6 +44,8 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    @Inject(forwardRef(() => LogrosService))
+    private logrosService: LogrosService,
   ) {}
 
   /**
@@ -613,6 +618,30 @@ export class AuthService {
 
       if (!passwordValida) {
         throw new UnauthorizedException('Credenciales inválidas');
+      }
+
+      // Verificar si es el primer login (no tiene logros desbloqueados)
+      const logrosDesbloqueados = await this.prisma.logroEstudiante.count({
+        where: { estudiante_id: estudiante.id },
+      });
+
+      const esPrimerLogin = logrosDesbloqueados === 0;
+
+      // Otorgar logro de primer ingreso
+      if (esPrimerLogin) {
+        try {
+          await this.logrosService.desbloquearLogro(
+            estudiante.id,
+            'PRIMER_INGRESO',
+          );
+          this.logger.log(
+            `Logro PRIMER_INGRESO otorgado a estudiante ${estudiante.id}`,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Error al otorgar logro PRIMER_INGRESO: ${error}`,
+          );
+        }
       }
 
       const roles = parseUserRoles(estudiante.roles);

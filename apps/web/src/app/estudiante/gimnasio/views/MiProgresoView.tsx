@@ -193,51 +193,51 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
   }
 
   return (
-    <div className="w-full h-full p-8 flex flex-col">
+    <div className="w-full h-full p-4 sm:p-8 flex flex-col">
 
-      {/* Header fijo */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="w-14 h-14 rounded-2xl bg-white/20
-                       flex items-center justify-center text-3xl">
+      {/* Header fijo - RESPONSIVE */}
+      <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
+        <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white/20
+                       flex items-center justify-center text-2xl sm:text-3xl">
           📊
         </div>
-        <h1 className="text-5xl font-black text-white font-[family-name:var(--font-lilita)]">
+        <h1 className="text-3xl sm:text-5xl font-black text-white font-[family-name:var(--font-lilita)]">
           MI PROGRESO
         </h1>
       </div>
 
-      {/* Grid 3x2 FIJO - sin animaciones */}
-      <div className="flex-1 grid grid-cols-3 grid-rows-2 gap-6">
+      {/* Grid RESPONSIVE - 2 columnas en mobile, 3 columnas en desktop */}
+      <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6">
         {statsData.map((stat) => (
           <button
             key={stat.id}
             onClick={() => setSelectedCard(stat.id)}
             className={`
               bg-gradient-to-br ${stat.gradient}
-              rounded-3xl p-8
+              rounded-2xl sm:rounded-3xl p-4 sm:p-8
               flex flex-col items-center justify-center
               shadow-xl
-              border-4
+              border-2 sm:border-4
               hover:scale-[1.02] active:scale-[0.98]
               transition-transform duration-150
               ${selectedCard === stat.id
-                ? 'border-white ring-4 ring-white/50'
+                ? 'border-white ring-2 sm:ring-4 ring-white/50'
                 : 'border-white/20'
               }
             `}
           >
-            {/* Emoji */}
-            <div className="text-6xl mb-4">
+            {/* Emoji - RESPONSIVE */}
+            <div className="text-4xl sm:text-6xl mb-2 sm:mb-4">
               {stat.emoji}
             </div>
 
-            {/* Valor */}
-            <div className="text-5xl font-black text-white mb-2">
+            {/* Valor - RESPONSIVE */}
+            <div className="text-3xl sm:text-5xl font-black text-white mb-1 sm:mb-2">
               {stat.value}
             </div>
 
-            {/* Label */}
-            <div className="text-lg font-bold text-white/80 uppercase text-center">
+            {/* Label - RESPONSIVE */}
+            <div className="text-xs sm:text-lg font-bold text-white/80 uppercase text-center">
               {stat.label}
             </div>
           </button>
@@ -258,60 +258,60 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
             />
 
-            {/* Modal centrado */}
+            {/* Modal centrado - RESPONSIVE */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="fixed inset-0 flex items-center justify-center z-50 p-8 pointer-events-none"
+              className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8 pointer-events-none"
             >
               <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl
-                           rounded-3xl p-8 border-2 border-white/20
+                           rounded-2xl sm:rounded-3xl p-4 sm:p-8 border-2 border-white/20
                            pointer-events-auto">
-                {/* Header del modal */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-4">
+                {/* Header del modal - RESPONSIVE */}
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <div className="flex items-center gap-2 sm:gap-4">
                     <div className={`
-                      w-16 h-16 rounded-2xl
+                      w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl
                       bg-gradient-to-br ${selectedData.gradient}
-                      flex items-center justify-center text-4xl
+                      flex items-center justify-center text-2xl sm:text-4xl
                       shadow-xl
                     `}>
                       {selectedData.emoji}
                     </div>
                     <div>
-                      <h2 className="text-3xl font-black text-white">
+                      <h2 className="text-xl sm:text-3xl font-black text-white">
                         {selectedData.detalles.titulo}
                       </h2>
-                      <p className="text-lg text-white/70 font-bold">
+                      <p className="text-sm sm:text-lg text-white/70 font-bold">
                         {selectedData.label}
                       </p>
                     </div>
                   </div>
 
-                  {/* Botón cerrar */}
+                  {/* Botón cerrar - RESPONSIVE */}
                   <button
                     onClick={() => setSelectedCard(null)}
-                    className="w-10 h-10 rounded-xl bg-white/10
+                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/10
                                hover:bg-white/20 flex items-center justify-center
-                               transition-colors"
+                               transition-colors flex-shrink-0"
                   >
-                    <X className="w-5 h-5 text-white" />
+                    <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </button>
                 </div>
 
-                {/* Lista de detalles */}
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                {/* Lista de detalles - RESPONSIVE */}
+                <div className="space-y-2 sm:space-y-3 max-h-96 overflow-y-auto">
                   {selectedData.detalles.items.map((item, i) => (
                     <div
                       key={i}
-                      className="bg-white/5 backdrop-blur-sm rounded-2xl p-5
+                      className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-5
                                  border border-white/10"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-white/50" />
-                        <p className="text-white text-lg font-medium">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white/50 flex-shrink-0" />
+                        <p className="text-white text-sm sm:text-lg font-medium">
                           {item}
                         </p>
                       </div>

@@ -27,6 +27,7 @@ import { ActividadView } from './overlays/ActividadView';
 import { EjecutarActividadView } from './overlays/EjecutarActividadView';
 import { LaboratorioEcosistema } from './overlays/LaboratorioEcosistema';
 import { TareasAsignadasOverlay } from './overlays/TareasAsignadasOverlay';
+import { PlanificacionesSectorOverlay } from './overlays/PlanificacionesSectorOverlay';
 
 /**
  * Configuración de metadatos para cada tipo de overlay
@@ -58,6 +59,10 @@ const OVERLAY_METADATA: Record<OverlayConfig['type'], OverlayMetadata> = {
   },
   'tareas-asignadas': {
     gradient: 'from-purple-900 via-violet-900 to-indigo-900',
+    renderType: 'modal',
+  },
+  'planificaciones-sector': {
+    gradient: 'from-slate-900 via-purple-900 to-slate-900',
     renderType: 'modal',
   },
   'actividad': {
@@ -109,6 +114,8 @@ function getOverlayComponent(config: OverlayConfig): React.ComponentType<any> {
       return PlanificacionView; // Mes de la Ciencia con grid 2×2 semanas
     case 'tareas-asignadas':
       return TareasAsignadasOverlay; // Vista de tareas asignadas con estados bloqueado/desbloqueado
+    case 'planificaciones-sector':
+      return PlanificacionesSectorOverlay; // Planificaciones de un sector específico (bloqueadas hasta fecha)
     case 'actividad':
       return ActividadView; // Grid 2×2 de las 4 actividades de una semana
     case 'laboratorio-ecosistema':
@@ -203,6 +210,8 @@ export function OverlayStackManager() {
     ? `${currentView.type}-${currentView.semanaId}`
     : currentView.type === 'ejecutar-actividad' && 'actividadId' in currentView
     ? `${currentView.type}-${currentView.actividadId}`
+    : currentView.type === 'planificaciones-sector' && 'sectorNombre' in currentView
+    ? `${currentView.type}-${currentView.sectorNombre}`
     : currentView.type;
 
   return (

@@ -94,38 +94,38 @@ export function ProximaClaseCard({ clase, onIrAClase, delay = 0 }: ProximaClaseC
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-gradient-to-br from-purple-900/30 via-blue-900/30 to-cyan-900/30 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-4 hover:border-purple-400/50 transition-all shadow-lg"
+      className="bg-gradient-to-br from-purple-900/30 via-blue-900/30 to-cyan-900/30 backdrop-blur-sm rounded-2xl border-2 border-purple-500/30 p-6 hover:border-purple-400/50 transition-all shadow-lg"
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-cyan-400" />
-          <h3 className="text-sm font-black text-white">PRÓXIMA CLASE</h3>
+          <Calendar className="w-6 h-6 text-cyan-400" />
+          <h3 className="text-base font-black text-white">PRÓXIMA CLASE</h3>
         </div>
         {badge && (
-          <span className="px-2 py-1 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-xs font-black rounded-lg">
+          <span className="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-sm font-black rounded-lg">
             {badge}
           </span>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center gap-2">
           <div
-            className="w-3 h-3 rounded-full shadow-lg"
+            className="w-4 h-4 rounded-full shadow-lg"
             style={{ backgroundColor: rutaColor, boxShadow: `0 0 10px ${rutaColor}` }}
           />
-          <span className="text-white font-bold text-sm">{rutaNombre}</span>
+          <span className="text-white font-bold text-base">{rutaNombre}</span>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-cyan-300">
-          <User className="w-4 h-4" />
+        <div className="flex items-center gap-2 text-base text-cyan-300">
+          <User className="w-5 h-5" />
           <span>
             Prof. {clase.docente.nombre} {clase.docente.apellido}
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-sm font-bold text-orange-400">
-          <Calendar className="w-4 h-4" />
+        <div className="flex items-center gap-2 text-base font-bold text-orange-400">
+          <Calendar className="w-5 h-5" />
           <span>{diaMayus}</span>
         </div>
       </div>

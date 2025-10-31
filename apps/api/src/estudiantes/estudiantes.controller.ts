@@ -260,6 +260,21 @@ export class EstudiantesController {
   }
 
   /**
+   * GET /estudiantes/mis-sectores - Obtener sectores en los que está inscrito el estudiante
+   * Para el portal de estudiantes - sección "Tareas Asignadas"
+   * Devuelve: Matemática, Programación, Ciencias (según inscripciones)
+   * @param req - Request con usuario autenticado
+   * @returns Array de sectores con grupos agrupados
+   */
+  @Get('mis-sectores')
+  @UseGuards(RolesGuard)
+  @Roles(Role.Estudiante)
+  async obtenerMisSectores(@Request() req: RequestWithAuthUser) {
+    const estudianteId = req.user.id;
+    return this.estudiantesService.obtenerMisSectores(estudianteId);
+  }
+
+  /**
    * GET /estudiantes/:id/detalle-completo - Obtener detalle COMPLETO del estudiante
    * Para el portal de tutores - pestaña "Mis Hijos"
    * Incluye: gamificación, asistencias, inscripciones, estadísticas
