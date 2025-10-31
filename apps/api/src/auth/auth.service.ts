@@ -169,6 +169,7 @@ export class AuthService {
         edad: estudiante.edad,
         nivel_escolar: estudiante.nivel_escolar,
         foto_url: estudiante.foto_url,
+        avatar_url: estudiante.avatar_url, // Avatar 3D de Ready Player Me
         puntos_totales: estudiante.puntos_totales,
         nivel_actual: estudiante.nivel_actual,
         equipo: estudiante.equipo,
