@@ -151,51 +151,49 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex-[2] flex flex-col gap-6"
+          className="flex-[2] flex flex-col gap-4"
         >
           {/* Card: Puntos del grupo */}
           <div className="flex-1 bg-gradient-to-br from-purple-900/60 to-pink-900/60
-                          backdrop-blur-xl rounded-3xl p-6
-                          border-2 border-white/20 flex flex-col items-center justify-center gap-4">
-            <div className="text-5xl">💎</div>
+                          backdrop-blur-xl rounded-3xl p-4
+                          border-2 border-white/20 flex flex-col items-center justify-center gap-2">
+            <div className="text-4xl">💎</div>
             <div className="text-center">
-              <h3 className="text-4xl font-black text-white mb-2">
+              <h3 className="text-3xl font-black text-white mb-1">
                 {companeros.reduce((sum, c) => sum + c.puntos, 0).toLocaleString()}
               </h3>
-              <p className="text-purple-300 text-lg font-bold">PUNTOS DEL GRUPO</p>
-              <p className="text-white/60 text-sm mt-2">Entre todos acumularon</p>
+              <p className="text-purple-300 text-sm font-bold">PUNTOS DEL GRUPO</p>
+              <p className="text-white/60 text-xs mt-1">Entre todos</p>
             </div>
           </div>
 
           {/* Card: Tus puntos */}
           <div className="flex-1 bg-gradient-to-br from-yellow-500/20 to-orange-600/20
-                          backdrop-blur-xl rounded-3xl p-6
-                          border-2 border-yellow-400/40 flex flex-col items-center justify-center gap-4">
-            <div className="text-5xl">🎯</div>
+                          backdrop-blur-xl rounded-3xl p-4
+                          border-2 border-yellow-400/40 flex flex-col items-center justify-center gap-2">
+            <div className="text-4xl">🎯</div>
             <div className="text-center">
-              <h3 className="text-4xl font-black text-yellow-400 mb-2">
+              <h3 className="text-3xl font-black text-yellow-400 mb-1">
                 {misPuntos.toLocaleString()}
               </h3>
-              <p className="text-yellow-300 text-lg font-bold">TUS PUNTOS</p>
-              <p className="text-white/60 text-sm mt-2">Tu aporte al equipo</p>
+              <p className="text-yellow-300 text-sm font-bold">TUS PUNTOS</p>
+              <p className="text-white/60 text-xs mt-1">Tu aporte</p>
             </div>
           </div>
 
           {/* Card: Tu racha */}
           <div className="flex-1 bg-gradient-to-br from-orange-600/20 to-red-700/20
-                          backdrop-blur-xl rounded-3xl p-6
-                          border-2 border-orange-500/40 flex flex-col items-center justify-center gap-4">
-            <div className="text-5xl">🔥</div>
+                          backdrop-blur-xl rounded-3xl p-4
+                          border-2 border-orange-500/40 flex flex-col items-center justify-center gap-2">
+            <div className="text-4xl">🔥</div>
             <div className="text-center">
-              <h3 className="text-4xl font-black text-orange-400 mb-2">
+              <h3 className="text-3xl font-black text-orange-400 mb-1">
                 {rachaActual}
               </h3>
-              <p className="text-orange-300 text-lg font-bold">
-                {rachaActual === 1 ? 'DÍA DE RACHA' : 'DÍAS DE RACHA'}
+              <p className="text-orange-300 text-sm font-bold">
+                {rachaActual === 1 ? 'DÍA' : 'DÍAS'}
               </p>
-              <p className="text-white/60 text-sm mt-2">
-                {rachaActual > 0 ? '¡Sigue así!' : 'Empieza hoy'}
-              </p>
+              <p className="text-white/60 text-xs mt-1">Racha</p>
             </div>
           </div>
         </motion.div>
