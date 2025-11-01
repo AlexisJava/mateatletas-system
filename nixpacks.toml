@@ -1,0 +1,29 @@
+# Nixpacks configuration for Railway
+# Configuración para monorepo de Mateatletas
+
+[phases.setup]
+nixPkgs = ["nodejs-20_x", "openssl"]
+
+[phases.install]
+cmds = [
+    # Instalar dependencias desde la raíz (workspaces)
+    "npm install --legacy-peer-deps",
+
+    # Build del paquete contracts (dependencia local)
+    "cd packages/contracts && npm run build && cd ../..",
+
+    # Generar cliente de Prisma
+    "cd apps/api && npx prisma generate && cd ../.."
+]
+
+[phases.build]
+cmds = [
+    # Build del API
+    "cd apps/api && npm run build"
+]
+
+[start]
+cmd = "cd apps/api && npx prisma migrate deploy && npm run start:prod"
+
+[variables]
+NODE_ENV = "production"
