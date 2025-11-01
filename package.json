@@ -21,6 +21,11 @@
     "stop:all": "npm run dev:stop",
     "prebuild": "cd apps/api && npx prisma generate && npm run detect-planificaciones",
     "build": "turbo run build",
+    "build:web": "npm run build --workspace=apps/web",
+    "build:api": "npm run build --workspace=apps/api",
+    "start:web": "npm run start --workspace=apps/web",
+    "start:api": "npm run start --workspace=apps/api",
+    "start:prod:api": "cd apps/api && npm run start:prod",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
@@ -32,7 +37,11 @@
     "test:e2e:report": "playwright show-report",
     "clean": "turbo run clean",
     "detect-planificaciones": "cd apps/api && npm run detect-planificaciones",
-    "upload-animations": "node scripts/upload-animations.mjs"
+    "upload-animations": "node scripts/upload-animations.mjs",
+    "docker:build:web": "docker build --build-arg APP_NAME=web -t mateatletas-web .",
+    "docker:build:api": "docker build --build-arg APP_NAME=api -t mateatletas-api .",
+    "docker:run:web": "docker run -p 3000:3000 mateatletas-web",
+    "docker:run:api": "docker run -p 3001:3001 mateatletas-api"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",
