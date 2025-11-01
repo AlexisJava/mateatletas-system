@@ -11,9 +11,6 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "paths": {
-      "@mateatletas/contracts": ["../../packages/contracts/src"]
-    },
     "incremental": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
