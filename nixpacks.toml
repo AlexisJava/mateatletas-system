@@ -6,14 +6,9 @@ nixPkgs = ["nodejs-20_x", "openssl"]
 
 [phases.install]
 cmds = [
-    # Paso 1: Instalar dependencias sin ejecutar scripts
-    "npm install --legacy-peer-deps --include-workspace-root --ignore-scripts",
-
-    # Paso 2: Build de contracts (debe existir antes que API lo necesite)
-    "cd packages/contracts && npm run build",
-
-    # Paso 3: Reinstalar para linkear correctamente contracts buildeado
-    "npm install --legacy-peer-deps --include-workspace-root"
+    # Instalar todas las dependencias (Railway usa npm ci automáticamente)
+    # El comando se ejecuta después de que Railway haga npm ci
+    "cd packages/contracts && npm run build"
 ]
 
 [phases.build]
