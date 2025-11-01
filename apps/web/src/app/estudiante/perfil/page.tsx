@@ -153,15 +153,23 @@ export default function PerfilPage() {
 
             {logrosRecientes && Array.isArray(logrosRecientes) && logrosRecientes.length > 0 ? (
               <div className="space-y-4">
-                {logrosRecientes.map((logroEstudiante: LogroEstudiante) => (
-                  <div key={logroEstudiante.id}>
-                    <LogroCard
-                      logro={logroEstudiante.logro}
-                      desbloqueado={true}
-                      fecha_desbloqueo={logroEstudiante.fecha_desbloqueo}
-                    />
-                  </div>
-                ))}
+                {logrosRecientes.map((logroEstudiante: LogroEstudiante) => {
+                  if (!logroEstudiante.logro) {
+                    return null;
+                  }
+                  const fecha = logroEstudiante.fecha_desbloqueo
+                    ? new Date(logroEstudiante.fecha_desbloqueo)
+                    : null;
+                  return (
+                    <div key={logroEstudiante.id}>
+                      <LogroCard
+                        logro={logroEstudiante.logro}
+                        desbloqueado={true}
+                        fecha_desbloqueo={fecha}
+                      />
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-gray-400 text-center py-8">

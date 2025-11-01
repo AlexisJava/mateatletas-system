@@ -4,7 +4,7 @@
 
 'use client';
 
-import type { ProgressTrackerProps } from '../types';
+import type { ProgressTrackerProps } from '../types/index';
 
 export function ProgressTracker({
   progreso,

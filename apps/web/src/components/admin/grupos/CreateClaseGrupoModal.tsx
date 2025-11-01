@@ -180,7 +180,9 @@ export function CreateClaseGrupoModal({
         typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message ===
           'string'
       ) {
-        setError((err as { response?: { data?: { message?: string } } }).response?.data?.message);
+        const mensaje =
+          (err as { response?: { data?: { message?: string } } }).response?.data?.message;
+        setError(mensaje ?? 'Error al crear el horario');
       } else {
         setError('Error al crear el horario');
       }

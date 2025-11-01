@@ -23,7 +23,7 @@ export type {
   ProgressTrackerProps,
   AchievementData,
   AchievementPopupProps,
-} from './types';
+} from './types/index';
 
 // ============================================================================
 // NUEVO SISTEMA SIMPLIFICADO (Convention over Configuration)

@@ -65,14 +65,22 @@ export default function GamificacionPage() {
 
             {logrosRecientes && Array.isArray(logrosRecientes) && logrosRecientes.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {logrosRecientes.map((logroEstudiante) => (
-                  <LogroCard
-                    key={logroEstudiante.id}
-                    logro={logroEstudiante.logro}
-                    desbloqueado={true}
-                    fecha_desbloqueo={logroEstudiante.fecha_desbloqueo}
-                  />
-                ))}
+                {logrosRecientes.map((logroEstudiante) => {
+                  if (!logroEstudiante.logro) {
+                    return null;
+                  }
+                  const fecha = logroEstudiante.fecha_desbloqueo
+                    ? new Date(logroEstudiante.fecha_desbloqueo)
+                    : null;
+                  return (
+                    <LogroCard
+                      key={logroEstudiante.id}
+                      logro={logroEstudiante.logro}
+                      desbloqueado={true}
+                      fecha_desbloqueo={fecha}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-8">

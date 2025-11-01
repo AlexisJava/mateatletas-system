@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { X, UserPlus, Users } from 'lucide-react';
 import apiClient from '@/lib/axios';
 import { getErrorMessage } from '@/lib/utils/error-handler';
+import type { ErrorLike } from '@/types/common';
 
 interface EstudianteForm {
   nombre: string;
@@ -37,6 +38,11 @@ interface CreacionExitosa {
   tutor?: { username: string; password: string };
 }
 
+interface CrearEstudiantesResponse {
+  estudiantes: CreacionExitosa['estudiantes'];
+  credenciales: CreacionExitosa;
+}
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -63,9 +69,9 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
 
   const loadSectores = useCallback(async () => {
     try {
-      const response = (await apiClient.get('/admin/sectores')).data;
+      const response = await apiClient.get<Sector[]>('/admin/sectores');
       // Filtrar el sector actual
-      const otros = response.filter((s: Sector) => s.id !== sectorId);
+      const otros = response.filter((s) => s.id !== sectorId);
       setSectoresDisponibles(otros);
     } catch (err) {
       console.error('Error al cargar sectores:', err);
@@ -89,14 +95,24 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
     }
   };
 
-  const handleEstudianteChange = (index: number, field: keyof EstudianteForm, value: string | number | string[]) => {
+  const handleEstudianteChange = <K extends keyof EstudianteForm>(
+    index: number,
+    field: K,
+    value: EstudianteForm[K],
+  ) => {
     const nuevosEstudiantes = [...estudiantes];
-    nuevosEstudiantes[index] = { ...nuevosEstudiantes[index], [field]: value };
+    nuevosEstudiantes[index] = {
+      ...nuevosEstudiantes[index],
+      [field]: value,
+    } as EstudianteForm;
     setEstudiantes(nuevosEstudiantes);
   };
 
   const toggleSectorAdicionalEstudiante = (estudianteIndex: number, sectorIdToggle: string) => {
     const estudiante = estudiantes[estudianteIndex];
+    if (!estudiante) {
+      return;
+    }
     const sectoresActuales = estudiante.sectoresAdicionales;
 
     let nuevosSectores: string[];
@@ -136,36 +152,41 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
       }
 
       // Crear en sector principal
-      const response = (await apiClient.post('/estudiantes/crear-con-tutor', {
-        estudiantes: estudiantesValidos.map(est => ({
-          nombre: est.nombre,
-          apellido: est.apellido,
-          edad: Number(est.edad),
-          nivel_escolar: est.nivel_escolar,
-          email: est.email || undefined
-        })),
-        tutor: {
-          nombre: tutor.nombre,
-          apellido: tutor.apellido,
-          email: tutor.email || undefined,
-          telefono: tutor.telefono || undefined,
-          dni: tutor.dni || undefined
+      const response = await apiClient.post<CrearEstudiantesResponse>(
+        '/estudiantes/crear-con-tutor',
+        {
+          estudiantes: estudiantesValidos.map((est) => ({
+            nombre: est.nombre,
+            apellido: est.apellido,
+            edad: Number(est.edad),
+            nivel_escolar: est.nivel_escolar,
+            email: est.email || undefined,
+          })),
+          tutor: {
+            nombre: tutor.nombre,
+            apellido: tutor.apellido,
+            email: tutor.email || undefined,
+            telefono: tutor.telefono || undefined,
+            dni: tutor.dni || undefined,
+          },
+          sectorId,
         },
-        sectorId
-      })).data;
+      );
 
       // Copiar cada estudiante a sus sectores adicionales específicos
       const estudiantesCreados = response.estudiantes;
 
       for (let i = 0; i < estudiantesCreados.length; i++) {
         const estudiante = estudiantesCreados[i];
-        const sectoresAdicionalesEstudiante = estudiantesValidos[i].sectoresAdicionales;
+        const estudianteValido = estudiantesValidos[i];
+        if (!estudiante || !estudianteValido) continue;
+        const sectoresAdicionalesEstudiante = estudianteValido.sectoresAdicionales;
 
         if (sectoresAdicionalesEstudiante.length > 0) {
           for (const sectorDestino of sectoresAdicionalesEstudiante) {
             try {
               await apiClient.patch(`/estudiantes/${estudiante.id}/copiar-a-sector`, {
-                sectorId: sectorDestino
+                sectorId: sectorDestino,
               });
             } catch (err) {
               console.error(`Error al copiar estudiante ${estudiante.id} a sector ${sectorDestino}:`, err);
@@ -177,7 +198,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
       // Mostrar credenciales generadas
       setCredenciales(response.credenciales);
     } catch (err) {
-      setError(getErrorMessage(err, 'Error al crear estudiante(s)'));
+      setError(getErrorMessage(err as ErrorLike, 'Error al crear estudiante(s)'));
     } finally {
       setIsSubmitting(false);
     }

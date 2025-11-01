@@ -415,8 +415,10 @@ export const getProgresoCurso = async (productoId: string): Promise<ProgresoCurs
 export const getSiguienteLeccion = async (productoId: string): Promise<Leccion | null> => {
     // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get(`/cursos/productos/${productoId}/siguiente-leccion`);
-    if (response.data === null) {
+    const response = await axios.get<Leccion | null>(
+      `/cursos/productos/${productoId}/siguiente-leccion`,
+    );
+    if (response === null) {
       return null;
     }
     return leccionSchema.parse(response);

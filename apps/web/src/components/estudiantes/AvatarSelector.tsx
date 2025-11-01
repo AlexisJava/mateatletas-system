@@ -32,7 +32,9 @@ export default function AvatarSelector({
   const [isSelecting, setIsSelecting] = useState(false);
 
   const initials = getInitials(nombre, apellido);
-  const previewGradient = AVATAR_GRADIENTS.find(g => g.id === previewGradientId) || AVATAR_GRADIENTS[0];
+  const fallbackGradient = AVATAR_GRADIENTS[0];
+  const previewGradient =
+    AVATAR_GRADIENTS.find((g) => g.id === previewGradientId) ?? fallbackGradient;
 
   const handleSelect = async (gradientId: number) => {
     setIsSelecting(true);
@@ -47,11 +49,12 @@ export default function AvatarSelector({
   };
 
   const handleSurprise = () => {
-    const randomId = Math.floor(Math.random() * AVATAR_GRADIENTS.length);
-    setPreviewGradientId(randomId);
+    if (AVATAR_GRADIENTS.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * AVATAR_GRADIENTS.length);
+    setPreviewGradientId(AVATAR_GRADIENTS[randomIndex]?.id ?? previewGradientId);
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !previewGradient) return null;
 
   return (
     <AnimatePresence>

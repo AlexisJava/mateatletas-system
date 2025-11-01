@@ -3,16 +3,14 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Flame, Zap, Trophy, Star, Target } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import type { RachaEstudiante } from '@/types/gamificacion';
 
 interface DailyWelcomeModalProps {
   estudiante: {
     nombre: string;
     apellido: string;
   };
-  racha: {
-    dias_consecutivos: number;
-    record_personal: number;
-  };
+  racha: Pick<RachaEstudiante, 'racha_actual' | 'racha_maxima'>;
   onClose: () => void;
 }
 
@@ -38,14 +36,14 @@ export function DailyWelcomeModal({
   });
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
 
-  const esPrimerDia = racha.dias_consecutivos === 1;
-  const esRecordNuevo = racha.dias_consecutivos > racha.record_personal;
-  const rachaFuerte = racha.dias_consecutivos >= 7;
-  const rachaImparable = racha.dias_consecutivos >= 30;
+  const esPrimerDia = racha.racha_actual === 1;
+  const esRecordNuevo = racha.racha_actual > racha.racha_maxima;
+  const rachaFuerte = racha.racha_actual >= 7;
+  const rachaImparable = racha.racha_actual >= 30;
 
   // Calcular próximo milestone
   const proximoMilestone = rachaFuerte ? (rachaImparable ? 60 : 30) : 7;
-  const diasParaMilestone = proximoMilestone - racha.dias_consecutivos;
+  const diasParaMilestone = proximoMilestone - racha.racha_actual;
 
   // Generar partículas de fondo
   useEffect(() => {
@@ -212,10 +210,10 @@ export function DailyWelcomeModal({
                     className="text-[6rem] sm:text-[10rem] font-black text-white leading-none
                              drop-shadow-[0_0_40px_rgba(255,165,0,1)]"
                   >
-                    {racha.dias_consecutivos}
+                    {racha.racha_actual}
                   </motion.div>
                   <p className="text-2xl sm:text-4xl font-black text-orange-400 mt-1 sm:mt-2">
-                    {racha.dias_consecutivos === 1 ? 'DÍA' : 'DÍAS'}
+                    {racha.racha_actual === 1 ? 'DÍA' : 'DÍAS'}
                   </p>
                   <p className="text-base sm:text-xl font-bold text-orange-300 mt-0.5 sm:mt-1">DE RACHA</p>
                 </div>
@@ -268,8 +266,8 @@ export function DailyWelcomeModal({
                             ¡SUPERASTE TU RÉCORD!
                           </h3>
                           <p className="text-sm sm:text-lg text-white">
-                            Antes tu mejor era {racha.record_personal} {racha.record_personal === 1 ? 'día' : 'días'}.
-                            ¡Ahora vas por {racha.dias_consecutivos}! 🚀
+                            Antes tu mejor era {racha.racha_maxima} {racha.racha_maxima === 1 ? 'día' : 'días'}.
+                            ¡Ahora vas por {racha.racha_actual}! 🚀
                           </p>
                         </>
                       ) : (
@@ -278,7 +276,7 @@ export function DailyWelcomeModal({
                             ¡SEGUÍ ASÍ, CRACK!
                           </h3>
                           <p className="text-sm sm:text-lg text-purple-200">
-                            Tu récord es de <span className="font-black text-yellow-400">{racha.record_personal}</span> días.
+                            Tu récord es de <span className="font-black text-yellow-400">{racha.racha_maxima}</span> días.
                             {diasParaMilestone > 0 && (
                               <span className="block mt-1 sm:mt-2 text-cyan-300">
                                 Te faltan <span className="font-black">{diasParaMilestone}</span> días para {proximoMilestone} días 🎯

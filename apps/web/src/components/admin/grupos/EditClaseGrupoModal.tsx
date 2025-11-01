@@ -16,11 +16,12 @@ interface ClaseGrupo {
   fecha_fin: string | null;
   anio_lectivo: number;
   cupo_maximo: number;
-  docente: {
-    id: string;
+  docente?: {
+    id?: string;
     nombre: string;
     apellido: string;
-  };
+    email?: string;
+  } | null;
   nivel?: string | null;
   inscripciones?: Array<{
     estudiante_id: string;
@@ -230,7 +231,9 @@ export function EditClaseGrupoModal({
         typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message ===
           'string'
       ) {
-        setError((err as { response?: { data?: { message?: string } } }).response?.data?.message);
+        const mensaje =
+          (err as { response?: { data?: { message?: string } } }).response?.data?.message;
+        setError(mensaje ?? 'Error al actualizar el horario');
       } else {
         setError('Error al actualizar el horario');
       }

@@ -53,20 +53,20 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
         const totalLogros = logros.length;
 
         // Obtener mejor racha
-        const mejorRacha = racha.record_personal || racha.dias_consecutivos;
+        const mejorRacha = racha.racha_maxima || racha.racha_actual;
 
         // Construir estadísticas dinámicas
         const stats: StatData[] = [
           {
             id: 'monedas',
             emoji: '💰',
-            value: (recursos.monedas ?? 0).toString(),
+            value: (recursos.monedas_total ?? 0).toString(),
             label: 'MONEDAS',
             gradient: 'from-yellow-400 to-orange-500',
             detalles: {
               titulo: 'Tus Monedas',
               items: [
-                `Total acumulado: ${recursos.monedas ?? 0} monedas`,
+                `Total acumulado: ${recursos.monedas_total ?? 0} monedas`,
                 `Canjealas por cursos en la tienda`,
                 `Gana más monedas completando actividades`,
                 `Cada logro te da monedas extra`,
@@ -92,15 +92,15 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
           {
             id: 'racha',
             emoji: '🔥',
-            value: racha.dias_consecutivos.toString(),
+            value: racha.racha_actual.toString(),
             label: 'DÍAS DE RACHA',
             gradient: 'from-orange-500 to-red-600',
             detalles: {
               titulo: 'Racha Actual',
               items: [
-                `Racha actual: ${racha.dias_consecutivos} ${racha.dias_consecutivos === 1 ? 'día' : 'días'}`,
+                `Racha actual: ${racha.racha_actual} ${racha.racha_actual === 1 ? 'día' : 'días'}`,
                 `Mejor racha: ${mejorRacha} ${mejorRacha === 1 ? 'día' : 'días'}`,
-                `${racha.dias_consecutivos > 0 ? '¡No pierdas tu racha!' : 'Comienza una racha estudiando hoy'}`,
+                `${racha.racha_actual > 0 ? '¡No pierdas tu racha!' : 'Comienza una racha estudiando hoy'}`,
                 `Bonus por racha de 7 días: +100 pts`,
               ],
             },
@@ -115,9 +115,9 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               titulo: 'Tu Nivel',
               items: [
                 `Nivel actual: ${recursos.nivel}`,
-                `XP actual: ${recursos.xp} XP`,
-                `XP para siguiente nivel: ${recursos.xp_siguiente_nivel} XP`,
-                `Falta: ${Math.max(0, recursos.xp_siguiente_nivel - recursos.xp)} XP`,
+                `XP actual: ${recursos.xp_total} XP`,
+                `XP para siguiente nivel: ${recursos.xp_necesario} XP`,
+                `Falta: ${Math.max(0, recursos.xp_necesario - recursos.xp_total)} XP`,
               ],
             },
           },

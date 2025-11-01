@@ -30,13 +30,14 @@ export function FloatingParticles({
   maxDuration = 20,
 }: FloatingParticlesProps) {
   const particles = useMemo<Particle[]>(() => {
+    const palette = colors.length > 0 ? colors : ['#ffffff'];
     return Array.from({ length: count }, (_, i) => ({
       id: i,
       x: `${Math.random() * 100}%`,
       size: Math.random() * (maxSize - minSize) + minSize,
       duration: Math.random() * (maxDuration - minDuration) + minDuration,
       delay: Math.random() * 5,
-      color: colors[Math.floor(Math.random() * colors.length)],
+      color: palette[Math.floor(Math.random() * palette.length)] ?? '#ffffff',
     }));
   }, [count, colors, minSize, maxSize, minDuration, maxDuration]);
 

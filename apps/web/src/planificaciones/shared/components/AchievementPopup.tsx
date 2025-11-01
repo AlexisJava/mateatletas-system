@@ -5,7 +5,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import type { AchievementPopupProps } from '../types';
+import type { AchievementPopupProps } from '../types/index';
 
 export function AchievementPopup({
   achievement,

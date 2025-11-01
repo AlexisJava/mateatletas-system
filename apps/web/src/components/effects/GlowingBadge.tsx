@@ -10,7 +10,10 @@ interface GlowingBadgeProps {
   pulse?: boolean;
 }
 
-const colorMap = {
+const colorMap: Record<
+  NonNullable<GlowingBadgeProps['color']>,
+  { bg: string; shadow: string; _glow: string }
+> = {
   gold: {
     bg: 'bg-gradient-to-br from-yellow-400 to-orange-500',
     shadow: 'rgba(255, 215, 0, 0.6)',
@@ -52,6 +55,9 @@ export function GlowingBadge({
 }: GlowingBadgeProps) {
   const { bg, shadow } = colorMap[color];
   const _glowSize = intensityMap[intensity];
+  const glowParts = _glowSize.split(' ');
+  const glowRadiusRaw = glowParts[2]?.replace('px', '') ?? '0';
+  const glowRadius = Number.parseInt(glowRadiusRaw, 10) || 0;
 
   return (
     <motion.div
@@ -64,7 +70,7 @@ export function GlowingBadge({
           ? {
               boxShadow: [
                 `5px 5px 0px rgba(0,0,0,1), ${_glowSize} ${shadow}`,
-                `5px 5px 0px rgba(0,0,0,1), 0 0 ${parseInt(_glowSize.split(' ')[2]) + 20}px ${shadow}`,
+                `5px 5px 0px rgba(0,0,0,1), 0 0 ${glowRadius + 20}px ${shadow}`,
                 `5px 5px 0px rgba(0,0,0,1), ${_glowSize} ${shadow}`,
               ],
             }
@@ -77,7 +83,7 @@ export function GlowingBadge({
       }}
       whileHover={{
         scale: 1.05,
-        boxShadow: `8px 8px 0px rgba(0,0,0,1), 0 0 ${parseInt(_glowSize.split(' ')[2]) + 30}px ${shadow}`,
+        boxShadow: `8px 8px 0px rgba(0,0,0,1), 0 0 ${glowRadius + 30}px ${shadow}`,
       }}
     >
       {/* Shine effect */}
