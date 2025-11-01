@@ -63,10 +63,6 @@ RUN if [ "$APP_NAME" = "api" ]; then \
 # Build de la app específica
 RUN npm run build --workspace=apps/${APP_NAME}
 
-# Limpiar devDependencies para reducir tamaño
-RUN npm ci --only=production --legacy-peer-deps && \
-    npm cache clean --force
-
 # ============================================
 # STAGE 3: Runner (Imagen final optimizada)
 # Solo contiene lo necesario para ejecutar
