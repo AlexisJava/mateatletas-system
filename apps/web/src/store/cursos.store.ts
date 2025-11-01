@@ -108,10 +108,12 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
         await get().fetchProgresoCurso(cursoActual.id);
       }
 
+      const logroDesbloqueado = result.logro_desbloqueado ?? undefined;
+
       return {
         success: true,
         puntos: result.puntos_ganados,
-        logro: result.logro_desbloqueado
+        logro: logroDesbloqueado
       };
     } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error al completar lección') });

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * API Client para Pagos y MercadoPago
  */

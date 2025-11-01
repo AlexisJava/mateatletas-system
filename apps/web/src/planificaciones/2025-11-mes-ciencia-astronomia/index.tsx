@@ -24,7 +24,8 @@
 import { PlanificacionWrapper, usePlanificacion } from '@/planificaciones/shared';
 import type { PlanificacionConfig } from '@/planificaciones/shared';
 import { useState } from 'react';
-import { Telescope,  Trophy, Star, ChevronRight, Lock, Rocket } from 'lucide-react';
+import { Telescope, Trophy, Star, ChevronRight, Lock, Rocket } from 'lucide-react';
+import type { JsonValue } from '@/types/common';
 
 // ============================================================================
 // CONFIGURACIÓN
@@ -48,6 +49,7 @@ interface EstadoAstronomia {
   tiempoActividad: number[];
   planetasExplorados: string[];
   mejorRacha: number;
+  [key: string]: JsonValue;
 }
 
 interface ActividadConfig {
@@ -300,11 +302,13 @@ function ContenidoPlanificacion() {
                     </p>
 
                     {/* Progreso si ya se jugó */}
-                    {estadoLocal.puntosActividad[actividad.numero - 1] > 0 && (
+                    {(estadoLocal.puntosActividad?.[actividad.numero - 1] ?? 0) > 0 && (
                       <div className="relative mb-4 p-3 rounded-xl bg-green-500/20 border border-green-500/30">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-green-400 font-bold">Completado</span>
-                          <span className="text-green-300">{estadoLocal.puntosActividad[actividad.numero - 1]} pts</span>
+                          <span className="text-green-300">
+                            {(estadoLocal.puntosActividad?.[actividad.numero - 1] ?? 0)} pts
+                          </span>
                         </div>
                       </div>
                     )}
@@ -315,7 +319,7 @@ function ContenidoPlanificacion() {
                         <Lock className="w-5 h-5" />
                         BLOQUEADO
                       </div>
-                    ) : estadoLocal.puntosActividad[actividad.numero - 1] > 0 ? (
+                    ) : (estadoLocal.puntosActividad?.[actividad.numero - 1] ?? 0) > 0 ? (
                       <div className="relative flex items-center justify-center gap-2 py-3 rounded-xl bg-green-500/20 border-2 border-green-500/50 text-green-400 font-black uppercase text-sm hover:bg-green-500/30 transition-all">
                         <ChevronRight className="w-5 h-5" />
                         VOLVER A JUGAR

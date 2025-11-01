@@ -18,7 +18,8 @@ import type { LogroEstudiante, NotificacionLogro } from '@/types/gamificacion';
  * }
  */
 export function useNotificacionesLogros(estudianteId: string) {
-  const { data: logrosNoVistos = [], isLoading } = useLogrosNoVistos(estudianteId);
+  const { data, isLoading } = useLogrosNoVistos(estudianteId);
+  const logrosNoVistos = Array.isArray(data) ? data : [];
   const marcarVisto = useMarcarLogroVisto(estudianteId);
 
   const [indiceActual, setIndiceActual] = useState(0);
@@ -32,24 +33,25 @@ export function useNotificacionesLogros(estudianteId: string) {
     }
   }, [logrosNoVistos, isLoading]);
 
-  const notificacionActual: NotificacionLogro | null = cola[indiceActual]
+  const logroActual = cola[indiceActual];
+  const notificacionActual: NotificacionLogro | null = logroActual
     ? {
-        logro: cola[indiceActual].logro,
+        logro: logroActual,
         recompensas: {
-          monedas: cola[indiceActual].logro.monedas_recompensa,
-          xp: cola[indiceActual].logro.xp_recompensa,
+          monedas: logroActual.logro.monedas_recompensa ?? 0,
+          xp: logroActual.logro.xp_recompensa ?? 0,
         },
-        // Aquí podrías calcular si subió de nivel basado en el XP
-        // pero requeriría conocer el nivel anterior
+        timestamp: new Date(),
+        mostrada: false,
       }
     : null;
 
   const cerrarNotificacion = useCallback(() => {
-    const logroActual = cola[indiceActual];
-    if (!logroActual) return;
+    const itemActual = cola[indiceActual];
+    if (!itemActual) return;
 
     // Marcar como visto en el backend
-    marcarVisto.mutate(logroActual.logro_id, {
+    marcarVisto.mutate(itemActual.logro_id, {
       onSuccess: () => {
         // Avanzar al siguiente logro en la cola
         if (indiceActual < cola.length - 1) {

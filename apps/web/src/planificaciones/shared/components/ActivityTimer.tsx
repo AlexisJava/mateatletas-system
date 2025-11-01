@@ -5,7 +5,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import type { ActivityTimerProps } from '../types';
+import type { ActivityTimerProps } from '../types/index';
 
 export function ActivityTimer({
   tiempoRestante,
