@@ -6,17 +6,23 @@ nixPkgs = ["nodejs-20_x", "openssl"]
 
 [phases.install]
 cmds = [
-    # Instalar todas las dependencias usando npm workspaces
+    # Paso 1: Instalar dependencias sin ejecutar scripts
+    "npm install --legacy-peer-deps --include-workspace-root --ignore-scripts",
+
+    # Paso 2: Build de contracts (debe existir antes que API lo necesite)
+    "cd packages/contracts && npm run build",
+
+    # Paso 3: Reinstalar para linkear correctamente contracts buildeado
     "npm install --legacy-peer-deps --include-workspace-root"
 ]
 
 [phases.build]
 cmds = [
-    # Build del paquete contracts primero (dependencia local)
-    "cd packages/contracts && npm run build",
+    # Generar cliente de Prisma
+    "cd apps/api && npx prisma generate",
 
-    # Generar cliente de Prisma y build del API
-    "cd apps/api && npx prisma generate && npm run build"
+    # Build del API (contracts ya está buildeado y linkeado)
+    "cd apps/api && npm run build"
 ]
 
 [start]
