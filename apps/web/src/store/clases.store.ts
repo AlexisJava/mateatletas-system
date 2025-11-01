@@ -55,7 +55,7 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
       const { filtros } = get();
       const clases = await clasesApi.getClases(filtros);
       set({ clases, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: getErrorMessage(error, 'Error al cargar clases'),
         isLoading: false,
@@ -69,7 +69,7 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
     try {
       const misReservas = await clasesApi.getMisReservas();
       set({ misReservas, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: getErrorMessage(error, 'Error al cargar reservas'),
         isLoading: false,
@@ -83,7 +83,7 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
     try {
       const rutasCurriculares = await clasesApi.getRutasCurriculares();
       set({ rutasCurriculares, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error:
           getErrorMessage(error, 'Error al cargar rutas curriculares'),
@@ -140,7 +140,7 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
       });
 
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: getErrorMessage(error, 'Error al reservar clase'),
         isLoading: false,
@@ -195,7 +195,7 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
       });
 
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: getErrorMessage(error, 'Error al cancelar reserva'),
         isLoading: false,

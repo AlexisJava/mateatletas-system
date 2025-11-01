@@ -23,7 +23,7 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
     try {
       const data = await adminApi.getDashboard();
       set({ dashboard: data, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error loading dashboard'), isLoading: false });
     }
   },

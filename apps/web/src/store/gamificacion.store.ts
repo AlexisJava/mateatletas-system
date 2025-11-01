@@ -77,7 +77,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
           isLoading: Object.values(nextLoading).some(Boolean),
         };
       });
-    } catch (error) {
+    } catch (error: unknown) {
       set((state) => {
         const nextLoading = { ...state.loading, dashboard: false };
         return {
@@ -114,7 +114,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
           isLoading: Object.values(nextLoading).some(Boolean),
         };
       });
-    } catch (error) {
+    } catch (error: unknown) {
       set((state) => {
         const nextLoading = { ...state.loading, logros: false };
         return {
@@ -133,7 +133,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
     try {
       const puntos = await gamificacionApi.getPuntos(estudianteId);
       set({ puntos });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al cargar puntos:', toErrorLike(error));
     }
   },
@@ -160,7 +160,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
           isLoading: Object.values(nextLoading).some(Boolean),
         };
       });
-    } catch (error) {
+    } catch (error: unknown) {
       set((state) => {
         const nextLoading = { ...state.loading, ranking: false };
         return {
@@ -196,7 +196,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
           isLoading: Object.values(nextLoading).some(Boolean),
         };
       });
-    } catch (error) {
+    } catch (error: unknown) {
       set((state) => {
         const nextLoading = { ...state.loading, progreso: false };
         return {
@@ -228,7 +228,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
         logros,
         logroRecienDesbloqueado: logroDesbloqueado || null,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al desbloquear logro:', toErrorLike(error));
     }
   },

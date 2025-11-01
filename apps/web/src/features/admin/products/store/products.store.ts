@@ -27,7 +27,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
     try {
       const products = await adminApi.getAllProducts(includeInactive);
       set({ products, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error loading products'), isLoading: false });
     }
   },
@@ -37,7 +37,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       await adminApi.createProduct(data);
       await get().fetchProducts();
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error creating product') });
       return false;
     }
@@ -48,7 +48,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       await adminApi.updateProduct(id, data);
       await get().fetchProducts();
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error updating product') });
       return false;
     }
@@ -59,7 +59,7 @@ export const useProductsStore = create<ProductsStore>((set, get) => ({
       await adminApi.deleteProduct(id, hardDelete);
       await get().fetchProducts();
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error deleting product') });
       return false;
     }
