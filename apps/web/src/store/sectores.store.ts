@@ -60,7 +60,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
     try {
       const sectores = await sectoresApi.listarSectores();
       set({ sectores, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: handleStoreError(
           'SectoresStore.fetchSectores',
@@ -81,7 +81,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
         isLoading: false,
       }));
       return sector;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: handleStoreError(
           'SectoresStore.crearSector',
@@ -103,7 +103,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
         isLoading: false,
       }));
       return sector;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: handleStoreError(
           'SectoresStore.actualizarSector',
@@ -125,7 +125,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
         isLoading: false,
       }));
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: handleStoreError(
           'SectoresStore.eliminarSector',
@@ -147,7 +147,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
     try {
       const rutas = await sectoresApi.listarRutasEspecialidad(sectorId);
       set({ rutas, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: handleStoreError(
           'SectoresStore.fetchRutas',
@@ -172,7 +172,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       await get().fetchSectores();
 
       return ruta;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: handleStoreError(
           'SectoresStore.crearRuta',
@@ -194,7 +194,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
         isLoading: false,
       }));
       return ruta;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: handleStoreError(
           'SectoresStore.actualizarRuta',
@@ -220,7 +220,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       await get().fetchSectores();
 
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: handleStoreError(
           'SectoresStore.eliminarRuta',
@@ -243,7 +243,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       await sectoresApi.asignarRutasDocente(docenteId, data);
       set({ isLoading: false });
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: handleStoreError(
           'SectoresStore.asignarRutasDocente',
@@ -262,7 +262,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       const rutas = await sectoresApi.obtenerRutasDocente(docenteId);
       set({ isLoading: false });
       return rutas;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: handleStoreError(
           'SectoresStore.obtenerRutasDocente',

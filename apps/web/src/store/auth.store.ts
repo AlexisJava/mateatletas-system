@@ -93,7 +93,7 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             selectedRole: null,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           set({ isLoading: false });
           throw error;
         }
@@ -122,7 +122,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true,
             isLoading: false,
           });
-        } catch (error) {
+        } catch (error: unknown) {
           set({ isLoading: false });
           throw error; // Propagar error para manejo en componente
         }
@@ -142,7 +142,7 @@ export const useAuthStore = create<AuthState>()(
 
           // Hacer login automáticamente después del registro
           await get().login(data.email, data.password);
-        } catch (error) {
+        } catch (error: unknown) {
           set({ isLoading: false });
           throw error; // Propagar error para manejo en componente
         }
@@ -157,7 +157,7 @@ export const useAuthStore = create<AuthState>()(
           // Llamar al endpoint de logout del backend
           // El backend limpia la cookie httpOnly automáticamente
           await authApi.logout();
-        } catch (error) {
+        } catch (error: unknown) {
           // Ignorar errores del backend en logout
           console.error('Error en logout del backend:', error);
         } finally {
@@ -251,7 +251,7 @@ export const useAuthStore = create<AuthState>()(
           } else {
             set({ isLoading: false });
           }
-        } catch (error) {
+        } catch (error: unknown) {
           set({ isLoading: false });
           throw error;
         }
