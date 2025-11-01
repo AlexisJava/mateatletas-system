@@ -1,7 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run build",
-  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "cd ../.. && npm run prebuild && cd apps/web && npm run build",
+  "installCommand": "cd ../.. && npm install --legacy-peer-deps",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
   "build": {
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1",
