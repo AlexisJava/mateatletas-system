@@ -85,6 +85,7 @@ COPY --from=builder --chown=appuser:nodejs /app/packages ./packages
 
 # Copiar archivos específicos según la app
 COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/package.json ./apps/${APP_NAME}/
+COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/node_modules ./apps/${APP_NAME}/node_modules
 
 # Si es API (NestJS)
 RUN if [ "$APP_NAME" = "api" ]; then \
