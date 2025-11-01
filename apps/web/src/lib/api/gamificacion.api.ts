@@ -24,6 +24,7 @@ import {
   type TransaccionRecurso,
 } from '@mateatletas/contracts';
 import type { ProgresoLogros } from '@/types/gamificacion';
+import { normalizarLogros } from '@/types/gamificacion';
 
 export type DashboardData = DashboardGamificacion;
 export type ProximaClase = DashboardData['proximasClases'][number];
@@ -122,8 +123,9 @@ export const gamificacionApi = {
    */
   getLogros: async (estudianteId: string): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get(`/gamificacion/logros/estudiante/${estudianteId}`);
-      return logrosListSchema.parse(response);
+      const response = await apiClient.get<Logro[]>(`/gamificacion/logros/estudiante/${estudianteId}`);
+      const validados = logrosListSchema.parse(response);
+      return normalizarLogros(validados);
     } catch (error) {
       console.error('Error al obtener los logros de gamificación:', error);
       throw error;
@@ -232,8 +234,9 @@ export const gamificacionApi = {
    */
   obtenerTodosLogrosV2: async (): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get('/gamificacion/logros');
-      return logrosListSchema.parse(response);
+      const response = await apiClient.get<Logro[]>('/gamificacion/logros');
+      const validados = logrosListSchema.parse(response);
+      return normalizarLogros(validados);
     } catch (error) {
       console.error('Error al obtener logros V2:', error);
       throw error;
@@ -245,8 +248,9 @@ export const gamificacionApi = {
    */
   obtenerMisLogrosV2: async (estudianteId: string): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get(`/gamificacion/logros/estudiante/${estudianteId}`);
-      return logrosListSchema.parse(response);
+      const response = await apiClient.get<Logro[]>(`/gamificacion/logros/estudiante/${estudianteId}`);
+      const validados = logrosListSchema.parse(response);
+      return normalizarLogros(validados);
     } catch (error) {
       console.error('Error al obtener mis logros V2:', error);
       throw error;
@@ -258,8 +262,9 @@ export const gamificacionApi = {
    */
   obtenerLogrosNoVistos: async (estudianteId: string): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get(`/gamificacion/logros/estudiante/${estudianteId}/no-vistos`);
-      return logrosListSchema.parse(response);
+      const response = await apiClient.get<Logro[]>(`/gamificacion/logros/estudiante/${estudianteId}/no-vistos`);
+      const validados = logrosListSchema.parse(response);
+      return normalizarLogros(validados);
     } catch (error) {
       console.error('Error al obtener logros no vistos:', error);
       throw error;
