@@ -59,12 +59,9 @@ audit_artifacts/
 
 # CI/CD
 .github
-railway.json
-.railwayignore
 vercel.json
 
 # Docker
-Dockerfile*
 docker-compose*
 
 # Vercel
