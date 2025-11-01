@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { authApi } from '@/lib/api/auth.api';
 import { useAuthStore } from '@/store/auth.store';
 import { getErrorMessage } from '@/lib/utils/error-handler';
+import type { ErrorLike } from '@/types/common';
 
 interface ForcePasswordChangeOverlayProps {
   /**
@@ -86,7 +87,7 @@ export function ForcePasswordChangeOverlay({
         onSuccess();
       }
     } catch (err) {
-      setError(getErrorMessage(err, 'Error al cambiar contraseña'));
+      setError(getErrorMessage(err as ErrorLike, 'Error al cambiar contraseña'));
     } finally {
       setIsSubmitting(false);
     }

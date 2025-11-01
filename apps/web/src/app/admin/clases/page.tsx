@@ -28,12 +28,14 @@ interface ClaseGrupoLocal {
   dia_semana: string;
   hora_inicio: string;
   hora_fin: string;
-  fecha_inicio?: string;
-  fecha_fin?: string | null;
-  anio_lectivo?: number;
-  docente: {
+  fecha_inicio: string;
+  fecha_fin: string | null;
+  anio_lectivo: number;
+  docente?: {
+    id?: string;
     nombre: string;
     apellido: string;
+    email?: string;
   };
   cupo_maximo: number;
   total_inscriptos?: number;
@@ -153,7 +155,12 @@ export default function AdminGruposClasesPage() {
             console.log(`   Es array?:`, Array.isArray(response));
 
             // Extraer el array de clases
-            const clases = extractList(response);
+            const clases = extractList(response).map((clase) => ({
+              ...clase,
+              fecha_inicio: clase.fecha_inicio ?? '',
+              fecha_fin: clase.fecha_fin ?? null,
+              anio_lectivo: clase.anio_lectivo ?? new Date().getFullYear(),
+            }));
 
             console.log(`✅ Clases finales para ${grupo.codigo}:`, clases.length, 'horarios');
 
@@ -483,7 +490,9 @@ export default function AdminGruposClasesPage() {
 
                               {/* Docente */}
                               <div className="text-xs text-white/60 mb-2">
-                                👨‍🏫 {clase.docente.nombre} {clase.docente.apellido}
+                                👨‍🏫 {clase.docente
+                                  ? `${clase.docente.nombre} ${clase.docente.apellido}`
+                                  : 'Docente no asignado'}
                               </div>
 
                               {/* Cupos */}

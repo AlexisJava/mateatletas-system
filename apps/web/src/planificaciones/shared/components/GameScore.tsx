@@ -4,7 +4,7 @@
 
 'use client';
 
-import type { GameScoreProps } from '../types';
+import type { GameScoreProps } from '../types/index';
 
 export function GameScore({ puntos, className = '' }: GameScoreProps) {
   return (

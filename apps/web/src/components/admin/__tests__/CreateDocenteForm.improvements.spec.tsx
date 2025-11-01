@@ -10,7 +10,8 @@
  * 6. Título profesional se mantiene
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import CreateDocenteForm from '../CreateDocenteForm';
 
@@ -148,7 +149,7 @@ describe('CreateDocenteForm - Mejoras (TDD)', () => {
       expect(screen.getByLabelText(/programación/i)).toBeInTheDocument();
 
       // No debe haber otros sectores
-      const checkboxes = screen.getAllByRole('checkbox').filter(cb =>
+      const checkboxes = screen.getAllByRole('checkbox').filter((cb: HTMLElement) =>
         cb.closest('div')?.textContent?.toLowerCase().includes('sector')
       );
       expect(checkboxes.length).toBeLessThanOrEqual(2);

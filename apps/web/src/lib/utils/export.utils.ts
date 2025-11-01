@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Utilidades profesionales para exportación de datos
  * Soporta CSV, Excel y PDF

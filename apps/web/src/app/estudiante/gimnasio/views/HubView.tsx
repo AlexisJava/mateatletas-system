@@ -384,7 +384,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const monedas = recursos?.monedas_total ?? 0;
   const gemas = recursos?.gemas_total ?? 0;
   const xp_total = recursos?.xp_total ?? 0;
-  const racha_dias = rachaData?.dias_consecutivos ?? 0;
+  const racha_dias = rachaData?.racha_actual ?? 0;
 
   // Calcular nivel basado en XP (fórmula: nivel = floor(sqrt(XP / 100)) + 1)
   const nivelCalculado = Math.floor(Math.sqrt(xp_total / 100)) + 1;

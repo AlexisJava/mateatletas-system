@@ -86,7 +86,7 @@ apiClient.interceptors.response.use(
   (error: AxiosError<{ message?: string; errors?: Record<string, string[]> }>) => {
     // Verificar si estamos en el navegador
     if (typeof window !== 'undefined') {
-      const status = error.response?.status;
+      const status = error.response?.status ?? 0;
       const currentPath = window.location.pathname;
       const isAuthPage = currentPath === '/login' || currentPath === '/register';
 

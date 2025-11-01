@@ -160,8 +160,11 @@ export const getAllClasses = async (): Promise<ClasesResponse> => {
     }
 
     // Fallback: si no tiene meta, extraer solo el array y envolver
-    const list = clasesListSchema.parse(response);
-    return { data: list };
+    const list = clasesListSchema.parse(response).map((clase) => ({
+      ...clase,
+      ruta_curricular: clase.ruta_curricular ?? clase.rutaCurricular ?? undefined,
+    }));
+    return { data: list, meta: undefined };
   } catch (error) {
     console.error('Error al obtener todas las clases para administración:', error);
     throw error;
@@ -260,7 +263,11 @@ export const getAllProducts = async (includeInactive = true): Promise<Producto[]
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get(`/productos?soloActivos=${!includeInactive}`);
-    return productosListSchema.parse(response);
+    const productos = productosListSchema.parse(response);
+    return productos.map((producto) => ({
+      ...producto,
+      descripcion: producto.descripcion ?? '',
+    }));
   } catch (error) {
     console.error('Error al obtener los productos (admin):', error);
     throw error;
@@ -271,7 +278,11 @@ export const getProductById = async (id: string): Promise<Producto> => {
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.get(`/productos/${id}`);
-    return productoSchema.parse(response);
+    const producto = productoSchema.parse(response);
+    return {
+      ...producto,
+      descripcion: producto.descripcion ?? '',
+    };
   } catch (error) {
     console.error('Error al obtener el producto por ID:', error);
     throw error;
@@ -282,7 +293,11 @@ export const createProduct = async (data: CrearProductoDto): Promise<Producto> =
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.post('/productos', data);
-    return productoSchema.parse(response);
+    const producto = productoSchema.parse(response);
+    return {
+      ...producto,
+      descripcion: producto.descripcion ?? '',
+    };
   } catch (error) {
     console.error('Error al crear el producto:', error);
     throw error;
@@ -296,7 +311,11 @@ export const updateProduct = async (
   try {
     // El interceptor ya retorna response.data directamente
     const response = await axios.patch(`/productos/${id}`, data);
-    return productoSchema.parse(response);
+    const producto = productoSchema.parse(response);
+    return {
+      ...producto,
+      descripcion: producto.descripcion ?? '',
+    };
   } catch (error) {
     console.error('Error al actualizar el producto:', error);
     throw error;

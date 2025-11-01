@@ -93,6 +93,18 @@ export const logroSchema = z.object({
   rareza: z.string().optional(),
   desbloqueado: z.boolean(),
   fecha_desbloqueo: z.union([z.string(), z.date()]).optional(),
+
+  // CAMPOS DE RECOMPENSAS (del backend)
+  monedas_recompensa: z.number().int().nonnegative().default(0),
+  xp_recompensa: z.number().int().nonnegative().default(0),
+  secreto: z.boolean().default(false),
+
+  // CAMPOS ADICIONALES del backend
+  codigo: z.string().optional(),
+  titulo: z.string().optional(), // Título especial para logros desbloqueados
+  criterio_tipo: z.string().optional(),
+  criterio_valor: z.string().optional(),
+  extras: z.record(z.string(), z.unknown()).optional(), // Metadata adicional
 });
 
 export type Logro = z.infer<typeof logroSchema>;

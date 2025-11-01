@@ -1,18 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { gamificacionApi } from '@/lib/api/gamificacion.api';
-
-interface RachaData {
-  dias_consecutivos: number;
-  ultima_actividad: string;
-  record_personal: number;
-}
+import type { RachaEstudiante } from '@/types/gamificacion';
 
 /**
  * Hook para registrar automáticamente la actividad del día y mantener la racha
  * Solo registra UNA VEZ por sesión cuando el estudiante entra al Gimnasio
  */
 export function useRachaAutomatica(estudianteId: string | undefined) {
-  const [racha, setRacha] = useState<RachaData | null>(null);
+  const [racha, setRacha] = useState<RachaEstudiante | null>(null);
   const [loading, setLoading] = useState(true);
   const hasRegisteredRef = useRef(false);
 

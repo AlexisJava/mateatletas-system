@@ -12,7 +12,7 @@ import type { RecursosEstudiante, RachaEstudiante, NotificacionLogro } from '@/t
 
 interface GamificacionContextType {
   // Recursos del estudiante
-  recursos: (RecursosEstudiante & { racha: RachaEstudiante }) | undefined;
+  recursos: (RecursosEstudiante & { racha: RachaEstudiante | null }) | undefined;
   isLoadingRecursos: boolean;
 
   // Notificaciones de logros

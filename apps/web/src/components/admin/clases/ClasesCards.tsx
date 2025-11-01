@@ -63,8 +63,16 @@ export function ClasesCards({ clases }: ClasesCardsProps) {
       {clases.map((clase) => {
         const sectorNombre = (clase.sector?.nombre || 'Matemática') as keyof typeof SECTOR_COLORS;
         const sectorConfig = SECTOR_COLORS[sectorNombre] || SECTOR_COLORS['Matemática'];
-        const inscripciones = clase._count?.inscripciones || 0;
-        const cupoMaximo = clase.cupo_maximo;
+        const inscripciones = clase._count?.inscripciones ?? 0;
+        const capacidadReportada =
+          (typeof clase.cupo_maximo === 'number'
+            ? clase.cupo_maximo
+            : (clase as { cupos_maximo?: number }).cupos_maximo) ?? 0;
+        const cupoMaximo = capacidadReportada > 0 ? capacidadReportada : 1;
+        const porcentajeOcupacion = Math.min(
+          (inscripciones / cupoMaximo) * 100,
+          100,
+        );
 
         return (
           <div
@@ -142,13 +150,13 @@ export function ClasesCards({ clases }: ClasesCardsProps) {
                 <div className="h-2 bg-black/30 rounded-full overflow-hidden">
                   <div
                     className={`h-full bg-gradient-to-r ${
-                      (inscripciones / cupoMaximo) * 100 >= 90
+                      porcentajeOcupacion >= 90
                         ? 'from-red-500 to-rose-500'
-                        : (inscripciones / cupoMaximo) * 100 >= 75
+                        : porcentajeOcupacion >= 75
                         ? 'from-orange-500 to-amber-500'
                         : 'from-green-500 to-emerald-500'
                     } transition-all duration-500`}
-                    style={{ width: `${(inscripciones / cupoMaximo) * 100}%` }}
+                    style={{ width: `${porcentajeOcupacion}%` }}
                   />
                 </div>
               </div>

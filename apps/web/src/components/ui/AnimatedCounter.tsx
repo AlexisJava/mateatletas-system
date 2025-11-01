@@ -9,13 +9,14 @@ interface AnimatedCounterProps {
 
 export function AnimatedCounter({ value, suffix = '' }: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
-  const targetValue = parseInt(value.replace(/\D/g, ''));
+  const targetValue = Number.parseInt(value.replace(/\D/g, ''), 10) || 0;
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        const entry = entries[0];
+        if (entry && entry.isIntersecting) {
           let start = 0;
           const end = targetValue;
           const duration = 2000;
@@ -30,7 +31,6 @@ export function AnimatedCounter({ value, suffix = '' }: AnimatedCounterProps) {
               setCount(Math.floor(start));
             }
           }, 16);
-
           return () => clearInterval(timer);
         }
       },

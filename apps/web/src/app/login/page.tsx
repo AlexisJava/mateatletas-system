@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
-import { useAuthStore } from '@/store/auth.store';
+import { useAuthStore, type UserRole } from '@/store/auth.store';
 import ForcePasswordChangeOverlay from '@/components/auth/ForcePasswordChangeOverlay';
 import { RoleSelectorModal } from '@/components/auth/RoleSelectorModal';
 import {
@@ -261,7 +261,7 @@ export default function LoginPage() {
   /**
    * Maneja la selección de rol cuando el usuario tiene múltiples roles
    */
-  const handleRoleSelect = (role: 'admin' | 'docente') => {
+  const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
     setShowRoleSelector(false);
     // No resetear hasJustLoggedIn aquí, el useEffect se encarga de la redirección

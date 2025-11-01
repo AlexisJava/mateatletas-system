@@ -20,19 +20,40 @@ export interface PlanificacionClientProps {
     apellido?: string;
     nivel_actual?: number;
     id?: string;
+    sub?: string;
   };
 }
 
-export function PlanificacionClient({ codigo: codigoProp, config, estudiante: estudianteProp }: PlanificacionClientProps) {
+export function PlanificacionClient({
+  codigo: codigoProp,
+  config,
+  estudiante: estudianteProp,
+}: PlanificacionClientProps) {
   // Determinar código: desde prop o desde config
-  const codigo = codigoProp || (config?.type === 'planificacion' ? config.codigo : '');
+  const codigoDesdeConfig =
+    config?.type === 'planificacion' ? config.codigo : undefined;
+  const codigo = codigoProp ?? codigoDesdeConfig;
 
   // Obtener usuario del store (fallback si no viene desde overlay)
   const { user } = useAuthStore();
   const estudiante = estudianteProp || user;
 
+  if (!codigo) {
+    const codigoFallback = codigoProp ?? codigoDesdeConfig ?? '';
+    return (
+      <ErrorPlanificacion
+        error={new Error('Debes seleccionar una planificación para continuar')}
+        codigo={codigoFallback}
+      />
+    );
+  }
+
   // Cargar planificación dinámicamente
-  const { isLoading, error, component: PlanificacionComponent } = usePlanificacionLoader(codigo);
+  const {
+    isLoading,
+    error,
+    component: PlanificacionComponent,
+  } = usePlanificacionLoader(codigo);
 
   // Loading state
   if (isLoading) {

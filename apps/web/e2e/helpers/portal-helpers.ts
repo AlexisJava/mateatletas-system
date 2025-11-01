@@ -53,8 +53,8 @@ export const TEST_USERS = {
  */
 export async function loginEstudiante(
   page: Page,
-  email = TEST_USERS.estudiante1.email,
-  password = TEST_USERS.estudiante1.password
+  email: string = TEST_USERS.estudiante1.email,
+  password: string = TEST_USERS.estudiante1.password
 ) {
   console.log(`🎓 Login como estudiante: ${email}`);
 
