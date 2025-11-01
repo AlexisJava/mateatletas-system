@@ -67,14 +67,8 @@ COPY --from=builder --chown=nestjs:nodejs /monorepo/apps/api/prisma ./prisma/
 # 3. Código compilado
 COPY --from=builder --chown=nestjs:nodejs /monorepo/apps/api/dist ./dist/
 
-# 4. node_modules de PRISMA generado (crítico)
-COPY --from=builder --chown=nestjs:nodejs /monorepo/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nestjs:nodejs /monorepo/node_modules/@prisma ./node_modules/@prisma
-
-# 5. Instalar SOLO dependencias de producción de la API
-# Esto crea un node_modules limpio sin workspaces
-RUN npm install --only=production --legacy-peer-deps && \
-    npm cache clean --force
+# 4. Copiar node_modules completo del builder (ya tiene todo instalado correctamente)
+COPY --from=builder --chown=nestjs:nodejs /monorepo/node_modules ./node_modules
 
 USER nestjs
 
