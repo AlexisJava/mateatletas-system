@@ -2,7 +2,8 @@ import { Logger } from '@nestjs/common';
 const logger = new Logger('CacheModule');
 import { Module, Global } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-redis-yet';
+import Keyv from 'keyv';
+import KeyvRedis from '@keyv/redis';
 
 /**
  * Cache Module Global
@@ -30,25 +31,24 @@ import { redisStore } from 'cache-manager-redis-yet';
         // Configuración de Redis si está disponible
         if (redisUrl) {
           try {
-            return {
-              store: await redisStore({
-                url: redisUrl,
-                // Opciones de conexión
+            const keyv = new Keyv({
+              store: new KeyvRedis(redisUrl, {
                 socket: {
-                  connectTimeout: 5000, // 5 segundos timeout
+                  connectTimeout: 5000,
                   reconnectStrategy: (retries: number) => {
-                    // Reconectar con backoff exponencial
                     if (retries > 10) {
-                      // Después de 10 intentos, no reconectar
                       logger.error('❌ Redis: Máximo de reintentos alcanzado');
                       return new Error('Demasiados reintentos de Redis');
                     }
-                    // Esperar 2^retries * 100ms (máx 3 segundos)
                     return Math.min(retries * 100, 3000);
                   },
                 },
               }),
-              ttl: 300000, // 5 minutos default (en milisegundos para cache-manager-redis-yet)
+            });
+
+            return {
+              store: keyv,
+              ttl: 300000, // 5 minutos (en milisegundos)
               isGlobal: true,
             };
           } catch (error) {
