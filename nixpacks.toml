@@ -1,22 +1,15 @@
 # Nixpacks configuration for Railway
 # Configuración para monorepo de Mateatletas
 
-[phases.setup]
-nixPkgs = ["nodejs-20_x", "openssl"]
-
 [phases.install]
 cmds = [
-    # FORZAR npm install en lugar de npm ci
     "npm install",
-    # Build de contracts
     "cd packages/contracts && npm run build"
 ]
 
 [phases.build]
 cmds = [
-    # Generar cliente de Prisma
     "cd apps/api && npx prisma generate",
-    # Build del API
     "cd apps/api && npm run build"
 ]
 
