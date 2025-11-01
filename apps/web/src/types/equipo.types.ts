@@ -1,105 +1,66 @@
 /**
- * Tipos TypeScript para el módulo de Equipos
- * Deben coincidir con los modelos del backend (Prisma)
+ * Re-exportación de tipos de Equipo desde el contrato oficial
+ *
+ * IMPORTANTE: Este archivo NO define tipos propios, solo re-exporta
+ * los tipos canónicos desde @mateatletas/contracts
  */
 
-/**
- * Tipo base de Equipo
- * Representa un equipo de gamificación en el sistema
- */
-export interface Equipo {
-  id: string;
-  nombre: string;
-  color_primario: string;
-  color_secundario: string;
-  icono_url: string | null;
-  puntos_totales: number;
-  createdAt: string;
-  updatedAt: string;
-  estudiantes?: EstudianteEnEquipo[];
-}
+import type {
+  Equipo,
+  EstudianteEnEquipo,
+  CreateEquipoDto,
+  UpdateEquipoDto,
+  EquiposResponse,
+  EquiposEstadisticas,
+  EquipoRanking,
+  DeleteEquipoResponse,
+} from '@mateatletas/contracts';
+import { equipoSchema, equiposListSchema } from '@mateatletas/contracts';
+
+// Re-exportar tipos del contrato (source of truth)
+export type {
+  Equipo,
+  EstudianteEnEquipo,
+  CreateEquipoDto,
+  UpdateEquipoDto,
+  EquiposResponse,
+  EquiposEstadisticas,
+  EquipoRanking,
+  DeleteEquipoResponse,
+};
 
 /**
- * Estudiante simplificado para mostrar en Equipo
- */
-export interface EstudianteEnEquipo {
-  id: string;
-  nombre: string;
-  apellido: string;
-  puntos_totales: number;
-  nivel_actual?: number;
-}
-
-/**
- * DTO para crear un nuevo equipo
- */
-export interface CreateEquipoDto {
-  nombre: string;
-  color_primario: string;
-  color_secundario: string;
-  icono_url?: string;
-}
-
-/**
- * DTO para actualizar un equipo existente
- * Todos los campos son opcionales
- */
-export interface UpdateEquipoDto {
-  nombre?: string;
-  color_primario?: string;
-  color_secundario?: string;
-  icono_url?: string;
-}
-
-/**
- * Parámetros de query para filtrar equipos
+ * Parámetros de query para filtrar equipos (definido localmente, no en contracts)
  */
 export interface QueryEquiposDto {
-  page?: string;
-  limit?: string;
+  page?: number;
+  limit?: number;
   search?: string;
-  sortBy?: 'nombre' | 'puntos_totales' | 'createdAt';
+  sortBy?: string;
   order?: 'asc' | 'desc';
 }
 
 /**
- * Respuesta paginada de equipos
+ * Normaliza y valida un objeto Equipo desde el backend
+ * Usa el schema de Zod para garantizar que cumple el contrato
+ *
+ * @param raw - Objeto crudo desde la API
+ * @returns Equipo validado
+ * @throws ZodError si el objeto no cumple el schema
  */
-export interface EquiposResponse {
-  data: Equipo[];
-  metadata: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+export function normalizarEquipo(raw: Equipo): Equipo {
+  // Validar con zod que efectivamente cumple el contrato
+  const validado = equipoSchema.parse(raw);
+
+  // Si necesitamos conversiones (ej: string datetime → Date), las hacemos acá
+  // Por ahora lo devolvemos tal cual porque el backend ya cumple el contrato
+  return validado;
 }
 
 /**
- * Estadísticas de equipos
+ * Normaliza un array de equipos
  */
-export interface EquiposEstadisticas {
-  totalEquipos: number;
-  totalEstudiantes: number;
-  promedioEstudiantesPorEquipo: number;
-  ranking: EquipoRanking[];
-}
-
-/**
- * Item de ranking de equipos
- */
-export interface EquipoRanking {
-  posicion: number;
-  id: string;
-  nombre: string;
-  puntos_totales: number;
-  cantidad_estudiantes: number;
-}
-
-/**
- * Respuesta al eliminar un equipo
- */
-export interface DeleteEquipoResponse {
-  message: string;
-  estudiantesDesvinculados: number;
+export function normalizarEquipos(raw: Equipo[]): Equipo[] {
+  const validados = equiposListSchema.parse(raw);
+  return validados.map(normalizarEquipo);
 }
