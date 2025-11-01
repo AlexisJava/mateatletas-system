@@ -113,7 +113,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 # Start command dinámico según la app
 CMD if [ "$APP_NAME" = "api" ]; then \
-        cd apps/api && npx prisma migrate deploy && npm run start:prod; \
+        cd apps/api && npx prisma migrate deploy && NODE_PATH=/app/node_modules:/app/apps/api/node_modules node dist/main.js; \
     else \
         cd apps/web && npm run start; \
     fi
