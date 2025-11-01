@@ -1,0 +1,15 @@
+[phases.install]
+cmds = [
+    "npm install --workspace=packages/contracts",
+    "npm run build --workspace=packages/contracts",
+    "npm install"
+]
+
+[phases.build]
+cmds = [
+    "cd apps/api && npx prisma generate",
+    "npm run build --workspace=apps/api"
+]
+
+[start]
+cmd = "cd apps/api && npx prisma migrate deploy && npm run start:prod"
