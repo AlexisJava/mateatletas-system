@@ -79,7 +79,7 @@ export const useEquiposStore = create<EquiposState>((set) => ({
         totalPages: response.metadata?.totalPages || 0,
         isLoading: false,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al cargar equipos:', error);
       set({
         equipos: [],
@@ -103,7 +103,7 @@ export const useEquiposStore = create<EquiposState>((set) => ({
         equipoActual: equipo,
         isLoading: false,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error al cargar equipo ${id}:`, error);
       set({
         equipoActual: null,
@@ -130,7 +130,7 @@ export const useEquiposStore = create<EquiposState>((set) => ({
       }));
 
       return nuevoEquipo;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al crear equipo:', error);
       const errorMessage =
         getErrorMessage(error, 'Error al crear equipo');
@@ -164,7 +164,7 @@ export const useEquiposStore = create<EquiposState>((set) => ({
       }));
 
       return equipoActualizado;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error al actualizar equipo ${id}:`, error);
       const errorMessage =
         getErrorMessage(error, 'Error al actualizar equipo');
@@ -192,7 +192,7 @@ export const useEquiposStore = create<EquiposState>((set) => ({
         equipoActual: state.equipoActual?.id === id ? null : state.equipoActual,
         isLoading: false,
       }));
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error al eliminar equipo ${id}:`, error);
       const errorMessage =
         getErrorMessage(error, 'Error al eliminar equipo');
@@ -217,7 +217,7 @@ export const useEquiposStore = create<EquiposState>((set) => ({
         estadisticas,
         isLoading: false,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al cargar estadísticas:', error);
       set({
         estadisticas: null,
@@ -250,7 +250,7 @@ export const useEquiposStore = create<EquiposState>((set) => ({
       }));
 
       return equipoActualizado;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error al recalcular puntos del equipo ${id}:`, error);
       const errorMessage =
         getErrorMessage(error, 'Error al recalcular puntos');

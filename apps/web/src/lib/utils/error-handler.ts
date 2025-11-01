@@ -27,35 +27,38 @@ export function isAxiosError(error: unknown): error is AxiosError<ApiErrorRespon
 }
 
 /**
- * Extract error message from error-like value
+ * Extract error message from unknown error value
+ * Convierte automáticamente a ErrorLike internamente
  */
-export function getErrorMessage(error: ErrorLike, fallback = 'An error occurred'): string {
+export function getErrorMessage(error: unknown, fallback = 'An error occurred'): string {
+  const errorLike = toErrorLike(error);
+
   // Axios error with response
-  if (isAxiosError(error) && error.response?.data?.message) {
-    return error.response.data.message;
+  if (isAxiosError(errorLike) && errorLike.response?.data?.message) {
+    return errorLike.response.data.message;
   }
 
   // Regular Error
-  if (error instanceof Error) {
-    return error.message;
+  if (errorLike instanceof Error) {
+    return errorLike.message;
   }
 
   // String error
-  if (typeof error === 'string') {
-    return error;
+  if (typeof errorLike === 'string') {
+    return errorLike;
   }
 
-  if (typeof error === 'number' || typeof error === 'boolean') {
-    return String(error);
+  if (typeof errorLike === 'number' || typeof errorLike === 'boolean') {
+    return String(errorLike);
   }
 
   if (
-    typeof error === 'object' &&
-    error !== null &&
-    'message' in error &&
-    typeof (error as { message?: string }).message === 'string'
+    typeof errorLike === 'object' &&
+    errorLike !== null &&
+    'message' in errorLike &&
+    typeof (errorLike as { message?: string }).message === 'string'
   ) {
-    return (error as { message?: string }).message ?? fallback;
+    return (errorLike as { message?: string }).message ?? fallback;
   }
 
   // Unknown error
@@ -64,8 +67,9 @@ export function getErrorMessage(error: ErrorLike, fallback = 'An error occurred'
 
 /**
  * Log error with context
+ * Acepta unknown y convierte automáticamente
  */
-export function logError(context: string, error: ErrorLike): void {
+export function logError(context: string, error: unknown): void {
   const message = getErrorMessage(error);
   console.error(`[${context}]`, message, error);
 }

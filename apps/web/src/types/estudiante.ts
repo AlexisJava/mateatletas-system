@@ -1,57 +1,36 @@
 /**
- * Interfaz para Estudiante
- * Representa un estudiante en el sistema
+ * Re-exportación de tipos de Estudiante desde el contrato oficial
+ *
+ * IMPORTANTE: Este archivo NO define tipos propios, solo re-exporta
+ * los tipos canónicos desde @mateatletas/contracts
  */
-export interface Estudiante {
-  id: string;
-  nombre: string;
-  apellido: string;
-  fecha_nacimiento: string;
-  nivel_escolar: 'Primaria' | 'Secundaria' | 'Universidad';
-  foto_url?: string;
-  tutor_id: string;
-  equipo_id?: string;
-  puntos_totales: number;
-  nivel_actual: number;
-  createdAt: string;
-  updatedAt: string;
 
-  // Relaciones
-  equipo?: Equipo;
-}
+import type {
+  Estudiante,
+  CreateEstudianteDto,
+  UpdateEstudianteDto,
+  EstudiantesResponse,
+  EstadisticasEstudiantes,
+  Equipo,
+} from '@mateatletas/contracts';
+import { estudianteSchema } from '@mateatletas/contracts';
+
+// Re-exportar tipos del contrato (source of truth)
+export type {
+  Estudiante,
+  CreateEstudianteDto,
+  UpdateEstudianteDto,
+  EstudiantesResponse,
+  EstadisticasEstudiantes,
+  Equipo,
+};
+
+// Alias para compatibilidad con código legacy
+export type CreateEstudianteData = CreateEstudianteDto;
+export type UpdateEstudianteData = UpdateEstudianteDto;
 
 /**
- * Interfaz para Equipo
- * Representa un equipo de gamificación
- */
-export interface Equipo {
-  id: string;
-  nombre: string;
-  color_primario: string;
-  color_secundario: string;
-  icono_url?: string;
-  puntos_totales: number;
-}
-
-/**
- * DTO para crear un estudiante
- */
-export interface CreateEstudianteData {
-  nombre: string;
-  apellido: string;
-  fecha_nacimiento: string; // ISO format
-  nivel_escolar: 'Primaria' | 'Secundaria' | 'Universidad';
-  foto_url?: string;
-  equipo_id?: string;
-}
-
-/**
- * DTO para actualizar un estudiante
- */
-export type UpdateEstudianteData = Partial<CreateEstudianteData>;
-
-/**
- * Parámetros de consulta para listar estudiantes
+ * Parámetros de query para filtrar estudiantes
  */
 export interface QueryEstudiantesParams {
   equipo_id?: string;
@@ -61,24 +40,25 @@ export interface QueryEstudiantesParams {
 }
 
 /**
- * Respuesta de la API al listar estudiantes
+ * Normaliza y valida un objeto Estudiante desde el backend
+ * Usa el schema de Zod para garantizar que cumple el contrato
+ *
+ * @param raw - Objeto crudo desde la API
+ * @returns Estudiante validado
+ * @throws ZodError si el objeto no cumple el schema
  */
-export interface EstudiantesResponse {
-  data: Estudiante[];
-  metadata: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+export function normalizarEstudiante(raw: Estudiante): Estudiante {
+  // Validar con zod que efectivamente cumple el contrato
+  const validado = estudianteSchema.parse(raw);
+
+  // Si necesitamos conversiones (ej: string datetime → Date), las hacemos acá
+  // Por ahora lo devolvemos tal cual porque el backend ya cumple el contrato
+  return validado;
 }
 
 /**
- * Estadísticas de estudiantes
+ * Normaliza un array de estudiantes
  */
-export interface EstadisticasEstudiantes {
-  total: number;
-  por_nivel: Record<string, number>;
-  por_equipo: Record<string, number>;
-  puntos_totales: number;
+export function normalizarEstudiantes(raw: Estudiante[]): Estudiante[] {
+  return raw.map(normalizarEstudiante);
 }

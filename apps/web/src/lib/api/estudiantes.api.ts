@@ -1,19 +1,108 @@
+/**
+ * API Client para operaciones de estudiantes
+ *
+ * REGLAS APLICADAS:
+ * ✅ Tipos explícitos importados desde @mateatletas/contracts
+ * ✅ Todas las funciones retornan Promise<TipoExplicito>
+ * ✅ Todas las respuestas pasan por normalizarEstudiante()
+ * ✅ PROHIBIDO: any, unknown, casts "as"
+ * ✅ Validación con Zod en cada respuesta
+ */
+
 import apiClient from '../axios';
 import type {
   Estudiante,
-  CreateEstudianteData,
-  UpdateEstudianteData,
+  CreateEstudianteDto,
+  UpdateEstudianteDto,
   QueryEstudiantesParams,
   EstudiantesResponse,
   EstadisticasEstudiantes,
   Equipo,
 } from '@/types/estudiante';
+import { normalizarEstudiante, normalizarEstudiantes } from '@/types/estudiante';
 import {
   estudianteSchema,
   estudiantesResponseSchema,
   estadisticasEstudiantesSchema,
   equiposListSchema,
 } from '@mateatletas/contracts';
+import { z } from 'zod';
+
+/**
+ * Schema para respuesta de delete
+ */
+const deleteResponseSchema = z.object({
+  message: z.string(),
+});
+
+/**
+ * Schema para respuesta de count
+ */
+const countResponseSchema = z.object({
+  count: z.number(),
+});
+
+/**
+ * Schema para próxima clase
+ */
+const proximaClaseSchema = z.union([
+  z.object({
+    tipo: z.enum(['grupo', 'individual']),
+    id: z.string(),
+    fecha_hora_inicio: z.string().datetime(),
+    duracion_minutos: z.number(),
+    docente: z.object({
+      nombre: z.string(),
+      apellido: z.string(),
+    }),
+    ruta_curricular: z.object({
+      nombre: z.string(),
+      descripcion: z.string().optional(),
+    }).optional(),
+    link_meet: z.string().optional(),
+  }),
+  z.null(),
+]);
+
+/**
+ * Schema para compañeros
+ */
+const companeroSchema = z.object({
+  id: z.string(),
+  nombre: z.string(),
+  apellido: z.string(),
+  puntos: z.number(),
+});
+
+const companerosList = z.array(companeroSchema);
+
+/**
+ * Schema para sectores
+ */
+const sectorSchema = z.object({
+  id: z.string(),
+  nombre: z.string(),
+  descripcion: z.string().nullable(),
+  color: z.string(),
+  icono: z.string(),
+  grupos: z.array(
+    z.object({
+      id: z.string(),
+      codigo: z.string(),
+      nombre: z.string(),
+      link_meet: z.string().nullable(),
+    })
+  ),
+});
+
+const sectoresList = z.array(sectorSchema);
+
+// Tipos inferidos de los schemas
+type DeleteResponse = z.infer<typeof deleteResponseSchema>;
+type CountResponse = z.infer<typeof countResponseSchema>;
+type ProximaClase = z.infer<typeof proximaClaseSchema>;
+type Companero = z.infer<typeof companeroSchema>;
+type Sector = z.infer<typeof sectorSchema>;
 
 /**
  * API Client para operaciones de estudiantes
@@ -23,12 +112,14 @@ export const estudiantesApi = {
   /**
    * Crear un nuevo estudiante
    * @param data - Datos del estudiante
-   * @returns Estudiante creado
-  */
-  create: async (data: CreateEstudianteData): Promise<Estudiante> => {
+   * @returns Estudiante creado y validado
+   */
+  create: async (data: CreateEstudianteDto): Promise<Estudiante> => {
     try {
       const response = await apiClient.post<Estudiante>('/estudiantes', data);
-      return estudianteSchema.parse(response);
+      // El interceptor ya retorna response.data, validar con schema
+      const validado = estudianteSchema.parse(response);
+      return normalizarEstudiante(validado);
     } catch (error) {
       console.error('Error al crear el estudiante:', error);
       throw error;
@@ -44,8 +135,14 @@ export const estudiantesApi = {
     params?: QueryEstudiantesParams,
   ): Promise<EstudiantesResponse> => {
     try {
-      const response = await apiClient.get('/estudiantes', { params });
-      return estudiantesResponseSchema.parse(response);
+      const response = await apiClient.get<EstudiantesResponse>('/estudiantes', { params });
+      // Validar estructura de respuesta paginada
+      const validado = estudiantesResponseSchema.parse(response);
+      // Normalizar cada estudiante del array data
+      return {
+        ...validado,
+        data: normalizarEstudiantes(validado.data),
+      };
     } catch (error) {
       console.error('Error al obtener los estudiantes:', error);
       throw error;
@@ -59,8 +156,9 @@ export const estudiantesApi = {
    */
   getById: async (id: string): Promise<Estudiante> => {
     try {
-      const response = await apiClient.get(`/estudiantes/${id}`);
-      return estudianteSchema.parse(response);
+      const response = await apiClient.get<Estudiante>(`/estudiantes/${id}`);
+      const validado = estudianteSchema.parse(response);
+      return normalizarEstudiante(validado);
     } catch (error) {
       console.error('Error al obtener el estudiante:', error);
       throw error;
@@ -75,11 +173,12 @@ export const estudiantesApi = {
    */
   update: async (
     id: string,
-    data: UpdateEstudianteData,
+    data: UpdateEstudianteDto,
   ): Promise<Estudiante> => {
     try {
-      const response = await apiClient.patch(`/estudiantes/${id}`, data);
-      return estudianteSchema.parse(response);
+      const response = await apiClient.patch<Estudiante>(`/estudiantes/${id}`, data);
+      const validado = estudianteSchema.parse(response);
+      return normalizarEstudiante(validado);
     } catch (error) {
       console.error('Error al actualizar el estudiante:', error);
       throw error;
@@ -91,10 +190,10 @@ export const estudiantesApi = {
    * @param id - ID del estudiante
    * @returns Mensaje de confirmación
    */
-  delete: async (id: string): Promise<{ message: string }> => {
+  delete: async (id: string): Promise<DeleteResponse> => {
     try {
-      const response = await apiClient.delete<{ message: string }>(`/estudiantes/${id}`);
-      return response;
+      const response = await apiClient.delete<DeleteResponse>(`/estudiantes/${id}`);
+      return deleteResponseSchema.parse(response);
     } catch (error) {
       console.error('Error al eliminar el estudiante:', error);
       throw error;
@@ -105,10 +204,10 @@ export const estudiantesApi = {
    * Contar estudiantes del tutor
    * @returns Total de estudiantes
    */
-  count: async (): Promise<{ count: number }> => {
+  count: async (): Promise<CountResponse> => {
     try {
-      const response = await apiClient.get<{ count: number }>('/estudiantes/count');
-      return response;
+      const response = await apiClient.get<CountResponse>('/estudiantes/count');
+      return countResponseSchema.parse(response);
     } catch (error) {
       console.error('Error al contar los estudiantes:', error);
       throw error;
@@ -121,7 +220,7 @@ export const estudiantesApi = {
    */
   getEstadisticas: async (): Promise<EstadisticasEstudiantes> => {
     try {
-      const response = await apiClient.get('/estudiantes/estadisticas');
+      const response = await apiClient.get<EstadisticasEstudiantes>('/estudiantes/estadisticas');
       return estadisticasEstudiantesSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener las estadísticas de estudiantes:', error);
@@ -135,7 +234,7 @@ export const estudiantesApi = {
    */
   getEquipos: async (): Promise<Equipo[]> => {
     try {
-      const response = await apiClient.get('/equipos');
+      const response = await apiClient.get<Equipo[]>('/equipos');
       return equiposListSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener los equipos de estudiantes:', error);
@@ -150,10 +249,11 @@ export const estudiantesApi = {
    */
   updateAnimacion: async (animacion_idle_url: string): Promise<Estudiante> => {
     try {
-      const response = await apiClient.patch('/estudiantes/animacion', {
+      const response = await apiClient.patch<Estudiante>('/estudiantes/animacion', {
         animacion_idle_url,
       });
-      return estudianteSchema.parse(response);
+      const validado = estudianteSchema.parse(response);
+      return normalizarEstudiante(validado);
     } catch (error) {
       console.error('Error al actualizar la animación:', error);
       throw error;
@@ -164,18 +264,10 @@ export const estudiantesApi = {
    * Obtener la próxima clase del estudiante autenticado
    * @returns Información de la próxima clase o null si no hay ninguna
    */
-  getProximaClase: async (): Promise<{
-    tipo: 'grupo' | 'individual';
-    id: string;
-    fecha_hora_inicio: Date;
-    duracion_minutos: number;
-    docente: { nombre: string; apellido: string };
-    ruta_curricular?: { nombre: string; descripcion?: string };
-    link_meet?: string;
-  } | null> => {
+  getProximaClase: async (): Promise<ProximaClase> => {
     try {
-      const response = await apiClient.get('/estudiantes/mi-proxima-clase');
-      return response;
+      const response = await apiClient.get<ProximaClase>('/estudiantes/mi-proxima-clase');
+      return proximaClaseSchema.parse(response);
     } catch (error) {
       console.error('Error al obtener la próxima clase:', error);
       throw error;
@@ -186,15 +278,10 @@ export const estudiantesApi = {
    * Obtener compañeros del ClaseGrupo del estudiante autenticado
    * @returns Lista de compañeros ordenados por puntos (descendente)
    */
-  getMisCompaneros: async (): Promise<Array<{
-    id: string;
-    nombre: string;
-    apellido: string;
-    puntos: number;
-  }>> => {
+  getMisCompaneros: async (): Promise<Companero[]> => {
     try {
-      const response = await apiClient.get('/estudiantes/mis-companeros');
-      return response;
+      const response = await apiClient.get<Companero[]>('/estudiantes/mis-companeros');
+      return companerosList.parse(response);
     } catch (error) {
       console.error('Error al obtener compañeros:', error);
       throw error;
@@ -205,22 +292,10 @@ export const estudiantesApi = {
    * Obtener sectores del estudiante autenticado (Matemática, Programación, Ciencias)
    * @returns Array de sectores con grupos agrupados
    */
-  getMisSectores: async (): Promise<Array<{
-    id: string;
-    nombre: string;
-    descripcion: string | null;
-    color: string;
-    icono: string;
-    grupos: Array<{
-      id: string;
-      codigo: string;
-      nombre: string;
-      link_meet: string | null;
-    }>;
-  }>> => {
+  getMisSectores: async (): Promise<Sector[]> => {
     try {
-      const response = await apiClient.get('/estudiantes/mis-sectores');
-      return response;
+      const response = await apiClient.get<Sector[]>('/estudiantes/mis-sectores');
+      return sectoresList.parse(response);
     } catch (error) {
       console.error('Error al obtener sectores:', error);
       throw error;

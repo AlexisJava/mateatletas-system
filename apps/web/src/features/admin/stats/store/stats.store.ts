@@ -29,7 +29,7 @@ export const useStatsStore = create<StatsStore>((set) => ({
       const stats = parseSystemStats(rawStats);
 
       set({ stats, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       // Convertir error a AppError
       let appError: AppError;
 

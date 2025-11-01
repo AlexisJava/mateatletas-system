@@ -20,10 +20,15 @@ import {
   type RankingGlobalItem,
   type RankingIntegrante,
   type ProgresoRuta,
-  type RecursosEstudiante,
-  type TransaccionRecurso,
 } from '@mateatletas/contracts';
-import type { ProgresoLogros } from '@/types/gamificacion';
+import type {
+  ProgresoLogros,
+  RachaEstudiante,
+  RecursosEstudiante,
+  TransaccionRecurso,
+} from '@/types/gamificacion';
+import { normalizarLogros } from '@/types/gamificacion';
+import { mapLogrosToEstudiante } from '@/lib/utils/gamificacion.utils';
 
 export type DashboardData = DashboardGamificacion;
 export type ProximaClase = DashboardData['proximasClases'][number];
@@ -122,8 +127,9 @@ export const gamificacionApi = {
    */
   getLogros: async (estudianteId: string): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get(`/gamificacion/logros/estudiante/${estudianteId}`);
-      return logrosListSchema.parse(response);
+      const response = await apiClient.get<Logro[]>(`/gamificacion/logros/estudiante/${estudianteId}`);
+      const validados = logrosListSchema.parse(response);
+      return normalizarLogros(validados);
     } catch (error) {
       console.error('Error al obtener los logros de gamificación:', error);
       throw error;
@@ -215,8 +221,7 @@ export const gamificacionApi = {
   otorgarPuntos: async (data: OtorgarPuntosData): Promise<void> => {
     try {
       const payload = otorgarPuntosSchema.parse(data);
-      const response = await apiClient.post('/gamificacion/puntos', payload);
-      return response;
+      await apiClient.post<void, typeof payload>('/gamificacion/puntos', payload);
     } catch (error) {
       console.error('Error al otorgar puntos de gamificación:', error);
       throw error;
@@ -232,8 +237,9 @@ export const gamificacionApi = {
    */
   obtenerTodosLogrosV2: async (): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get('/gamificacion/logros');
-      return logrosListSchema.parse(response);
+      const response = await apiClient.get<Logro[]>('/gamificacion/logros');
+      const validados = logrosListSchema.parse(response);
+      return normalizarLogros(validados);
     } catch (error) {
       console.error('Error al obtener logros V2:', error);
       throw error;
@@ -245,8 +251,9 @@ export const gamificacionApi = {
    */
   obtenerMisLogrosV2: async (estudianteId: string): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get(`/gamificacion/logros/estudiante/${estudianteId}`);
-      return logrosListSchema.parse(response);
+      const response = await apiClient.get<Logro[]>(`/gamificacion/logros/estudiante/${estudianteId}`);
+      const validados = logrosListSchema.parse(response);
+      return normalizarLogros(validados);
     } catch (error) {
       console.error('Error al obtener mis logros V2:', error);
       throw error;
@@ -258,8 +265,9 @@ export const gamificacionApi = {
    */
   obtenerLogrosNoVistos: async (estudianteId: string): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get(`/gamificacion/logros/estudiante/${estudianteId}/no-vistos`);
-      return logrosListSchema.parse(response);
+      const response = await apiClient.get<Logro[]>(`/gamificacion/logros/estudiante/${estudianteId}/no-vistos`);
+      const validados = logrosListSchema.parse(response);
+      return normalizarLogros(validados);
     } catch (error) {
       console.error('Error al obtener logros no vistos:', error);
       throw error;
@@ -302,23 +310,26 @@ export const gamificacionApi = {
 
       const porCategoria = Object.entries(data.categorias ?? {}).reduce<ProgresoLogros['por_categoria']>(
         (acc, [categoria, valores]) => {
+          const logrosNormalizados = normalizarLogros(valores.logros ?? []);
           acc[categoria] = {
             total: valores.total ?? 0,
             desbloqueados: valores.desbloqueados ?? 0,
-            logros: (valores.logros ?? []).map((logro) => ({
-              ...logro,
-              fecha_desbloqueo: logro.fecha_desbloqueo ? new Date(logro.fecha_desbloqueo) : null,
-            })),
+            logros: mapLogrosToEstudiante(estudianteId, logrosNormalizados),
           };
           return acc;
         },
         {},
       );
 
+      const total = data.total ?? 0;
+      const desbloqueados = data.desbloqueados ?? 0;
+
       return {
-        total_logros: data.total ?? 0,
-        logros_desbloqueados: data.desbloqueados ?? 0,
+        total,
+        desbloqueados,
         porcentaje: data.porcentaje ?? 0,
+        total_logros: total,
+        logros_desbloqueados: desbloqueados,
         por_categoria: porCategoria,
       };
     } catch (error) {
@@ -330,10 +341,13 @@ export const gamificacionApi = {
   /**
    * Obtener recursos del estudiante (XP + Monedas + Nivel)
    */
-  obtenerRecursos: async (estudianteId: string): Promise<RecursosResponse> => {
+  obtenerRecursos: async (estudianteId: string): Promise<RecursosEstudiante & { racha: RachaEstudiante }> => {
     try {
-      const response = await apiClient.get(`/gamificacion/recursos/${estudianteId}`);
-      return response as RecursosResponse;
+      const response = await apiClient.get<RecursosEstudiante & { racha: RachaEstudiante }>(
+        `/gamificacion/recursos/${estudianteId}`,
+      );
+      // TODO: Crear schema Zod en contracts para validar esta respuesta
+      return response;
     } catch (error) {
       console.error('Error al obtener recursos:', error);
       throw error;
@@ -345,8 +359,11 @@ export const gamificacionApi = {
    */
   obtenerHistorialRecursos: async (estudianteId: string): Promise<TransaccionRecurso[]> => {
     try {
-      const response = await apiClient.get(`/gamificacion/recursos/${estudianteId}/historial`);
-      return response as TransaccionRecurso[];
+      const response = await apiClient.get<TransaccionRecurso[]>(
+        `/gamificacion/recursos/${estudianteId}/historial`,
+      );
+      // TODO: Crear schema Zod en contracts para validar esta respuesta
+      return response;
     } catch (error) {
       console.error('Error al obtener historial de recursos:', error);
       throw error;
@@ -356,10 +373,11 @@ export const gamificacionApi = {
   /**
    * Obtener racha del estudiante
    */
-  obtenerRacha: async (estudianteId: string): Promise<RachaResponse> => {
+  obtenerRacha: async (estudianteId: string): Promise<RachaEstudiante> => {
     try {
-      const response = await apiClient.get(`/gamificacion/recursos/${estudianteId}/racha`);
-      return response as RachaResponse;
+      const response = await apiClient.get<RachaEstudiante>(`/gamificacion/recursos/${estudianteId}/racha`);
+      // TODO: Crear schema Zod en contracts para validar esta respuesta
+      return response;
     } catch (error) {
       console.error('Error al obtener racha:', error);
       throw error;
@@ -369,10 +387,11 @@ export const gamificacionApi = {
   /**
    * Registrar actividad del día (actualiza racha)
    */
-  registrarActividad: async (estudianteId: string): Promise<RachaResponse> => {
+  registrarActividad: async (estudianteId: string): Promise<RachaEstudiante> => {
     try {
-      const response = await apiClient.post(`/gamificacion/recursos/${estudianteId}/racha`);
-      return response as RachaResponse;
+      const response = await apiClient.post<RachaEstudiante>(`/gamificacion/recursos/${estudianteId}/racha`);
+      // TODO: Crear schema Zod en contracts para validar esta respuesta
+      return response;
     } catch (error) {
       console.error('Error al registrar actividad:', error);
       throw error;

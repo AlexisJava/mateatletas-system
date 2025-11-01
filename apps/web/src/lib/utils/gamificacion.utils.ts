@@ -1,6 +1,59 @@
+import type { Logro, LogroEstudiante } from '@/types/gamificacion';
+
 /**
  * Utilidades para el sistema de gamificación
  */
+
+const toValidDate = (valor: unknown): Date | null => {
+  if (valor instanceof Date) return valor;
+  if (typeof valor === 'string' || typeof valor === 'number') {
+    const parsed = new Date(valor);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  return null;
+};
+
+/**
+ * Normaliza un logro hacia el formato LogroEstudiante cuando cuenta con fecha válida.
+ */
+export function mapLogroToLogroEstudiante(
+  estudianteId: string,
+  logro: Logro,
+): LogroEstudiante | null {
+  if (!logro.desbloqueado) {
+    return null;
+  }
+
+  const fecha = toValidDate(logro.fecha_desbloqueo);
+  if (!fecha) {
+    return null;
+  }
+
+  return {
+    id: `${estudianteId}-${logro.id}`,
+    estudiante_id: estudianteId,
+    logro_id: logro.id,
+    fecha_desbloqueo: fecha,
+    visto: logro.desbloqueado,
+    logro,
+  };
+}
+
+/**
+ * Convierte una lista de logros a LogroEstudiante filtrando los que no están desbloqueados.
+ */
+export function mapLogrosToEstudiante(
+  estudianteId: string,
+  logros: Logro[],
+): LogroEstudiante[] {
+  return logros.reduce<LogroEstudiante[]>((acc, logroActual) => {
+    const normalizado = mapLogroToLogroEstudiante(estudianteId, logroActual);
+    if (normalizado) {
+      acc.push(normalizado);
+    }
+    return acc;
+  }, []);
+}
 
 /**
  * Calcular nivel basado en XP total
