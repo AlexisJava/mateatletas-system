@@ -110,7 +110,7 @@ export const useDocenteStore = create<DocenteStore>((set, get) => ({
     try {
       const clases = await getMisClasesDocente(incluir);
       set({ misClases: clases, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMsg = getErrorMessage(error, 'Error al cargar clases');
       set({ error: errorMsg, isLoading: false });
       console.error('Error fetchMisClases:', error);
@@ -122,7 +122,7 @@ export const useDocenteStore = create<DocenteStore>((set, get) => ({
     try {
       const clase = await getClaseById(claseId);
       set({ claseActual: clase, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMsg = getErrorMessage(error, 'Error al cargar detalle de clase');
       set({ error: errorMsg, isLoading: false });
       console.error('Error fetchClaseDetalle:', error);
@@ -139,7 +139,7 @@ export const useDocenteStore = create<DocenteStore>((set, get) => ({
 
       set({ isLoadingAction: false });
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       const errorMsg = getErrorMessage(error, 'Error al cancelar clase');
       set({ error: errorMsg, isLoadingAction: false });
       console.error('Error cancelarClase:', error);

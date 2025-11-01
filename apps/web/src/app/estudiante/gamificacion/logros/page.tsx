@@ -94,7 +94,7 @@ export default function LogrosPage() {
             <div className="text-4xl mb-2">🎭</div>
             <div className="text-3xl font-bold mb-1">
               {Object.values(progreso.por_categoria).reduce(
-                (acc, cat) => acc + cat.logros.filter((l) => l.secreto && l.desbloqueado).length,
+                (acc, cat) => acc + cat.logros.filter((l) => l.logro.secreto && l.logro.desbloqueado).length,
                 0
               )}
             </div>

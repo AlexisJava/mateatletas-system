@@ -46,7 +46,7 @@ export const usePagosStore = create<PagosStore>((set) => ({
     try {
       const membresia = await pagosApi.getMembresiaActual();
       set({ membresiaActual: membresia, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: getErrorMessage(error, 'Error al cargar membresía'),
         isLoading: false,
@@ -60,7 +60,7 @@ export const usePagosStore = create<PagosStore>((set) => ({
     try {
       const inscripciones = await pagosApi.getInscripciones();
       set({ inscripciones, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error:
           getErrorMessage(error, 'Error al cargar inscripciones'),
@@ -78,7 +78,7 @@ export const usePagosStore = create<PagosStore>((set) => ({
       );
       set({ preferenciaPago: preferencia, isLoading: false });
       return preferencia.init_point;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: getErrorMessage(error, 'Error al crear preferencia de pago'),
         isLoading: false,
@@ -97,7 +97,7 @@ export const usePagosStore = create<PagosStore>((set) => ({
       );
       set({ preferenciaPago: preferencia, isLoading: false });
       return preferencia.init_point;
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error: getErrorMessage(error, 'Error al crear preferencia de pago'),
         isLoading: false,
@@ -112,7 +112,7 @@ export const usePagosStore = create<PagosStore>((set) => ({
     try {
       const membresia = await pagosApi.activarMembresiaManual(membresiaId);
       set({ membresiaActual: membresia, isLoading: false });
-    } catch (error) {
+    } catch (error: unknown) {
       set({
         error:
           getErrorMessage(error, 'Error al activar membresía'),

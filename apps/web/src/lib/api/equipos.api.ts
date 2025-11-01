@@ -1,3 +1,14 @@
+/**
+ * API Client para operaciones de equipos
+ *
+ * REGLAS APLICADAS:
+ * ✅ Tipos explícitos importados desde @mateatletas/contracts
+ * ✅ Todas las funciones retornan Promise<TipoExplicito>
+ * ✅ Todas las respuestas pasan por normalizarEquipo()
+ * ✅ PROHIBIDO: any, unknown, casts "as"
+ * ✅ Validación con Zod en cada respuesta
+ */
+
 import apiClient from '../axios';
 import type {
   Equipo,
@@ -8,6 +19,7 @@ import type {
   EquiposEstadisticas,
   DeleteEquipoResponse,
 } from '@/types/equipo.types';
+import { normalizarEquipo, normalizarEquipos } from '@/types/equipo.types';
 import {
   equipoSchema,
   equiposResponseSchema,
@@ -28,10 +40,10 @@ import {
  * POST /api/equipos
  */
 async function create(data: CreateEquipoDto): Promise<Equipo> {
-  // El interceptor ya retorna response.data directamente
   try {
     const response = await apiClient.post<Equipo>('/equipos', data);
-    return equipoSchema.parse(response);
+    const validado = equipoSchema.parse(response);
+    return normalizarEquipo(validado);
   } catch (error) {
     console.error('Error al crear el equipo:', error);
     throw error;
@@ -43,10 +55,14 @@ async function create(data: CreateEquipoDto): Promise<Equipo> {
  * GET /api/equipos?page=1&limit=10&search=...&sortBy=...&order=...
  */
 async function getAll(params?: QueryEquiposDto): Promise<EquiposResponse> {
-  // El interceptor ya retorna response.data directamente
   try {
     const response = await apiClient.get<EquiposResponse>('/equipos', { params });
-    return equiposResponseSchema.parse(response);
+    const validado = equiposResponseSchema.parse(response);
+    // Normalizar cada equipo del array data
+    return {
+      ...validado,
+      data: normalizarEquipos(validado.data),
+    };
   } catch (error) {
     console.error('Error al obtener los equipos:', error);
     throw error;
@@ -58,10 +74,10 @@ async function getAll(params?: QueryEquiposDto): Promise<EquiposResponse> {
  * GET /api/equipos/:id
  */
 async function getById(id: string): Promise<Equipo> {
-  // El interceptor ya retorna response.data directamente
   try {
     const response = await apiClient.get<Equipo>(`/equipos/${id}`);
-    return equipoSchema.parse(response);
+    const validado = equipoSchema.parse(response);
+    return normalizarEquipo(validado);
   } catch (error) {
     console.error('Error al obtener el equipo por ID:', error);
     throw error;
@@ -76,10 +92,10 @@ async function update(
   id: string,
   data: UpdateEquipoDto,
 ): Promise<Equipo> {
-  // El interceptor ya retorna response.data directamente
   try {
     const response = await apiClient.patch<Equipo>(`/equipos/${id}`, data);
-    return equipoSchema.parse(response);
+    const validado = equipoSchema.parse(response);
+    return normalizarEquipo(validado);
   } catch (error) {
     console.error('Error al actualizar el equipo:', error);
     throw error;
@@ -133,10 +149,10 @@ async function getEstadisticas(): Promise<EquiposEstadisticas> {
  * y actualiza el campo puntos_totales
  */
 async function recalcularPuntos(id: string): Promise<Equipo> {
-  // El interceptor ya retorna response.data directamente
   try {
     const response = await apiClient.post<Equipo>(`/equipos/${id}/recalcular-puntos`);
-    return equipoSchema.parse(response);
+    const validado = equipoSchema.parse(response);
+    return normalizarEquipo(validado);
   } catch (error) {
     console.error('Error al recalcular los puntos del equipo:', error);
     throw error;

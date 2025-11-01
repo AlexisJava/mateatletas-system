@@ -25,13 +25,14 @@ export function ListaLogros({ estudianteId }: ListaLogrosProps) {
     );
   }
 
-  const categorias = Object.keys(progreso.por_categoria);
+  const categoriasMap = progreso.por_categoria ?? {};
+  const categorias = Object.keys(categoriasMap);
   const logrosAMostrar = categoriaActiva
-    ? progreso.por_categoria[categoriaActiva].logros
-    : Object.values(progreso.por_categoria).flatMap((cat) => cat.logros);
+    ? categoriasMap[categoriaActiva]?.logros ?? []
+    : Object.values(categoriasMap).flatMap((cat) => cat.logros ?? []);
 
   const logrosFiltrados = soloDesbloqueados
-    ? logrosAMostrar.filter((l) => l.desbloqueado)
+    ? logrosAMostrar.filter((l) => l.logro.desbloqueado)
     : logrosAMostrar;
 
   return (
@@ -61,8 +62,8 @@ export function ListaLogros({ estudianteId }: ListaLogrosProps) {
           >
             {getEmojiCategoria(categoria)}{' '}
             {categoria.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())} (
-            {progreso.por_categoria[categoria].desbloqueados}/
-            {progreso.por_categoria[categoria].total})
+            {categoriasMap[categoria]?.desbloqueados ?? 0}/
+            {categoriasMap[categoria]?.total ?? 0})
           </button>
         ))}
 
@@ -108,8 +109,8 @@ export function ListaLogros({ estudianteId }: ListaLogrosProps) {
         {logrosFiltrados.map((logro) => (
           <motion.div key={logro.id} layout>
             <LogroCard
-              logro={logro}
-              desbloqueado={logro.desbloqueado}
+              logro={logro.logro}
+              desbloqueado={logro.logro.desbloqueado}
               fecha_desbloqueo={logro.fecha_desbloqueo}
             />
           </motion.div>
