@@ -5,7 +5,7 @@ import type { RecursosEstudiante, RachaEstudiante } from '@/types/gamificacion';
 import { formatearNumero } from '@/lib/utils/gamificacion.utils';
 
 interface ProgresoNivelProps {
-  recursos: RecursosEstudiante & { racha: RachaEstudiante };
+  recursos: RecursosEstudiante & { racha?: RachaEstudiante | null };
 }
 
 export function ProgresoNivel({ recursos }: ProgresoNivelProps) {

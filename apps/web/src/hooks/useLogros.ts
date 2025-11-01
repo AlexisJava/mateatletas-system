@@ -1,10 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { gamificacionApi } from '@/lib/api/gamificacion.api';
-import type {
-  Logro,
-  LogroEstudiante,
-  ProgresoLogros,
-} from '@/types/gamificacion';
+import type { Logro, LogroEstudiante, ProgresoLogros } from '@/types/gamificacion';
+import { mapLogrosToEstudiante } from '@/lib/utils/gamificacion.utils';
 
 /**
  * Hook para obtener todos los logros disponibles del sistema
@@ -23,7 +20,10 @@ export function useTodosLogros() {
 export function useMisLogros(estudianteId: string) {
   return useQuery<LogroEstudiante[]>({
     queryKey: ['mis-logros', estudianteId],
-    queryFn: () => gamificacionApi.obtenerMisLogrosV2(estudianteId),
+    queryFn: async () => {
+      const logros = await gamificacionApi.obtenerMisLogrosV2(estudianteId);
+      return mapLogrosToEstudiante(estudianteId, logros);
+    },
     enabled: !!estudianteId,
   });
 }
@@ -34,7 +34,10 @@ export function useMisLogros(estudianteId: string) {
 export function useLogrosNoVistos(estudianteId: string) {
   return useQuery<LogroEstudiante[]>({
     queryKey: ['logros-no-vistos', estudianteId],
-    queryFn: () => gamificacionApi.obtenerLogrosNoVistos(estudianteId),
+    queryFn: async () => {
+      const logros = await gamificacionApi.obtenerLogrosNoVistos(estudianteId);
+      return mapLogrosToEstudiante(estudianteId, logros);
+    },
     refetchInterval: 10000, // Actualizar cada 10s para notificaciones
     enabled: !!estudianteId,
   });
@@ -79,11 +82,10 @@ export function useLogrosRecientes(estudianteId: string, limit: number = 10) {
     queryKey: ['logros-recientes', estudianteId, limit],
     queryFn: async () => {
       const logros = await gamificacionApi.obtenerMisLogrosV2(estudianteId);
+      const logrosNormalizados = mapLogrosToEstudiante(estudianteId, logros);
       // Ordenar por fecha de desbloqueo (más recientes primero)
-      return logros
-        .sort((a, b) => {
-          return new Date(b.fecha_desbloqueo).getTime() - new Date(a.fecha_desbloqueo).getTime();
-        })
+      return logrosNormalizados
+        .sort((a, b) => b.fecha_desbloqueo.getTime() - a.fecha_desbloqueo.getTime())
         .slice(0, limit);
     },
     enabled: !!estudianteId,

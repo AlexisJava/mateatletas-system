@@ -38,6 +38,8 @@ export type LoggableValue =
 
 export type RequestData =
   | JsonValue
+  | Record<string, unknown>
+  | object
   | FormData
   | URLSearchParams
   | Blob

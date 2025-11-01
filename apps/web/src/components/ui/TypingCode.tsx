@@ -1,7 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { CodeLine } from '@/app/(landing)/data/landing-data';
+
+interface CodeLine {
+  text: string;
+  color: string;
+  rest?: string;
+  restColor?: string;
+  isKeyword?: boolean;
+}
 
 interface TypingCodeProps {
   codeLines: CodeLine[];

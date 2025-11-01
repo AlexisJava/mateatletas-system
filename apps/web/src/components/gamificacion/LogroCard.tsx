@@ -14,7 +14,12 @@ interface LogroCardProps {
 
 export function LogroCard({ logro, desbloqueado, fecha_desbloqueo }: LogroCardProps) {
   const [modalOpen, setModalOpen] = useState(false);
-  const colores = getColorRareza(logro.rareza);
+  const rareza = (logro.rareza ?? 'comun') as 'comun' | 'raro' | 'epico' | 'legendario';
+  const colores = getColorRareza(rareza);
+  const monedas = logro.monedas_recompensa ?? 0;
+  const xp = logro.xp_recompensa ?? 0;
+  const esSecreto = Boolean(logro.secreto);
+  const fecha = fecha_desbloqueo ? new Date(fecha_desbloqueo) : null;
 
   return (
     <>
@@ -35,7 +40,7 @@ export function LogroCard({ logro, desbloqueado, fecha_desbloqueo }: LogroCardPr
               desbloqueado ? 'bg-white/90 text-gray-800' : 'bg-gray-700 text-gray-400'
             }`}
           >
-            {logro.rareza}
+            {rareza}
           </span>
         </div>
 
@@ -64,7 +69,7 @@ export function LogroCard({ logro, desbloqueado, fecha_desbloqueo }: LogroCardPr
             desbloqueado ? 'text-white' : 'text-gray-400'
           }`}
         >
-          {logro.secreto && !desbloqueado ? '???' : logro.nombre}
+          {esSecreto && !desbloqueado ? '???' : logro.nombre}
         </h3>
 
         {/* Descripción */}
@@ -73,7 +78,7 @@ export function LogroCard({ logro, desbloqueado, fecha_desbloqueo }: LogroCardPr
             desbloqueado ? 'text-white/90' : 'text-gray-500'
           }`}
         >
-          {logro.secreto && !desbloqueado
+          {esSecreto && !desbloqueado
             ? 'Logro secreto. ¡Descúbrelo jugando!'
             : logro.descripcion}
         </p>
@@ -81,25 +86,25 @@ export function LogroCard({ logro, desbloqueado, fecha_desbloqueo }: LogroCardPr
         {/* Recompensas */}
         {desbloqueado && (
           <div className="flex items-center justify-center gap-3 text-white font-semibold">
-            {logro.monedas_recompensa > 0 && (
+            {monedas > 0 && (
               <div className="flex items-center gap-1">
                 <span>💰</span>
-                <span>+{logro.monedas_recompensa}</span>
+                <span>+{monedas}</span>
               </div>
             )}
-            {logro.xp_recompensa > 0 && (
+            {xp > 0 && (
               <div className="flex items-center gap-1">
                 <span>⚡</span>
-                <span>+{logro.xp_recompensa}</span>
+                <span>+{xp}</span>
               </div>
             )}
           </div>
         )}
 
         {/* Fecha de desbloqueo */}
-        {desbloqueado && fecha_desbloqueo && (
+        {desbloqueado && fecha && (
           <p className="text-white/70 text-xs mt-2">
-            Desbloqueado: {new Date(fecha_desbloqueo).toLocaleDateString('es-AR')}
+            Desbloqueado: {fecha.toLocaleDateString('es-AR')}
           </p>
         )}
 

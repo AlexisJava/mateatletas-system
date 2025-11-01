@@ -43,9 +43,16 @@ export function ClassCard({
   const colorRuta = rutaCurricular?.color ?? '#00d9ff';
   const nombreRuta = rutaCurricular?.nombre ?? 'Sin ruta';
 
-  const cupoMaximo = clase.cupo_maximo ?? 0;
-  const cuposOcupados = clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0;
+  const cupoMaximo =
+    (typeof (clase as { cupo_maximo?: number }).cupo_maximo === 'number'
+      ? (clase as { cupo_maximo?: number }).cupo_maximo
+      : (clase as { cupos_maximo?: number }).cupos_maximo) ?? 0;
+  const cuposOcupados =
+    (clase as { cupos_ocupados?: number }).cupos_ocupados ??
+    clase._count?.inscripciones ??
+    0;
   const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);
+  const duracionMinutos = (clase as { duracion_minutos?: number }).duracion_minutos ?? 0;
 
   // Determinar si hay cupos disponibles
   const sinCupos = cuposDisponibles === 0;
@@ -104,13 +111,15 @@ export function ClassCard({
 
         {/* Título de la clase */}
         <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark line-clamp-2">
-          {clase.titulo}
+          {(clase as { titulo?: string; nombre?: string }).titulo ??
+            (clase as { nombre?: string }).nombre ??
+            'Clase sin título'}
         </h3>
 
         {/* Descripción */}
-        {clase.descripcion && (
+        {(clase as { descripcion?: string | null }).descripcion && (
           <p className="text-sm text-gray-600 line-clamp-2">
-            {clase.descripcion}
+            {(clase as { descripcion?: string }).descripcion}
           </p>
         )}
 
@@ -122,7 +131,7 @@ export function ClassCard({
             <div>
               <p className="font-bold text-dark capitalize">{fechaFormateada}</p>
               <p className="text-gray-600">
-                {horaFormateada} • {clase.duracion_minutos} min
+                {horaFormateada} • {duracionMinutos} min
               </p>
             </div>
           </div>

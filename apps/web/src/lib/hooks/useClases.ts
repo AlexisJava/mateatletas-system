@@ -8,6 +8,7 @@
  * - Mejor performance
  */
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ClaseConRelaciones,
   InscripcionClase,

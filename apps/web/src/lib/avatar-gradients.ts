@@ -77,8 +77,13 @@ export const AVATAR_GRADIENTS: AvatarGradient[] = [
  * Obtiene un gradiente por su ID
  */
 export function getGradientById(id: number): AvatarGradient {
-  const gradient = AVATAR_GRADIENTS.find(g => g.id === id);
-  return gradient || AVATAR_GRADIENTS[0]; // Default a Sunset
+  const fallback = AVATAR_GRADIENTS[0];
+  if (!fallback) {
+    throw new Error('No hay gradientes configurados');
+  }
+
+  const gradient = AVATAR_GRADIENTS.find((g) => g.id === id);
+  return gradient ?? fallback; // Default a Sunset
 }
 
 /**
