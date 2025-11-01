@@ -267,8 +267,8 @@ async function limpiarPlanificacionesHuerfanas(
       where: { auto_detectada: true },
     });
 
-    const codigosEnBD = todasEnBD.map((p) => p.codigo);
-    const huerfanas = codigosEnBD.filter((c) => !codigosActuales.includes(c));
+    const codigosEnBD = todasEnBD.map((p: { codigo: string }) => p.codigo);
+    const huerfanas = codigosEnBD.filter((c: string) => !codigosActuales.includes(c));
 
     if (huerfanas.length > 0) {
       log(
