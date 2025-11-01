@@ -1,48 +1,84 @@
-# Node modules
+# ============================================
+# .dockerignore - Mateatletas Monorepo
+# Optimiza Docker builds excluyendo archivos innecesarios
+# ============================================
+
+# Node
 node_modules
 **/node_modules
-npm-debug.log
-yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
 # Build outputs
-.next
 dist
-build
+.next
 .turbo
+*.tsbuildinfo
+build
+out
+
+# Testing
+coverage
+.nyc_output
+test-results
+playwright-report
+e2e
 
 # Environment files
-.env.local
-.env*.local
+.env
+.env.*
+!.env.example
+!.env.production.template
 
 # Git
 .git
 .gitignore
-
-# Documentation
-*.md
-!README.md
-docs/
-audit_artifacts/
+.gitattributes
 
 # IDE
 .vscode
 .idea
-
-# Tests
-coverage
-.nyc_output
-playwright-report
+*.swp
+*.swo
+*~
+.DS_Store
 
 # Logs
 logs
 *.log
+*.log.gz
 apps/api/logs
 
-# OS
-.DS_Store
-Thumbs.db
+# Documentation
+*.md
+!apps/*/README.md
+docs/
+audit_artifacts/
 
-# Temporary files
+# CI/CD
+.github
+railway.json
+.railwayignore
+vercel.json
+
+# Docker
+Dockerfile*
+docker-compose*
+
+# Vercel
+.vercel
+
+# Temporal
 tmp
 temp
 *.tmp
+*.temp
+
+# Scripts desarrollo
+scripts/verify-dev-environment.sh
+scripts/test-health.sh
+
+# Husky
+.husky
