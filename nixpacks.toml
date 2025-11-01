@@ -6,8 +6,9 @@ nixPkgs = ["nodejs-20_x", "openssl"]
 
 [phases.install]
 cmds = [
-    # Instalar todas las dependencias (Railway usa npm ci automáticamente)
-    # El comando se ejecuta después de que Railway haga npm ci
+    # FORZAR npm install en lugar de npm ci
+    "npm install",
+    # Build de contracts
     "cd packages/contracts && npm run build"
 ]
 
@@ -15,8 +16,7 @@ cmds = [
 cmds = [
     # Generar cliente de Prisma
     "cd apps/api && npx prisma generate",
-
-    # Build del API (contracts ya está buildeado y linkeado)
+    # Build del API
     "cd apps/api && npm run build"
 ]
 
