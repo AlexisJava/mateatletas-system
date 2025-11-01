@@ -28,7 +28,7 @@ COPY .npmrc ./
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
 COPY packages/contracts/package.json ./packages/contracts/
-COPY packages/shared/package.json ./packages/shared/ 2>/dev/null || true
+COPY packages/shared/package.json ./packages/shared/
 
 # Instalar dependencias usando npm ci (reproducible)
 # Incluye devDependencies necesarias para el build
