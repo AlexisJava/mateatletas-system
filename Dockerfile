@@ -95,10 +95,11 @@ RUN if [ "$APP_NAME" = "api" ]; then \
         mkdir -p ./apps/api/dist ./apps/api/prisma; \
     fi
 
-COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/dist ./apps/${APP_NAME}/dist/ 2>/dev/null || true
-COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/.next ./apps/${APP_NAME}/.next/ 2>/dev/null || true
-COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/public ./apps/${APP_NAME}/public/ 2>/dev/null || true
-COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/prisma ./apps/${APP_NAME}/prisma/ 2>/dev/null || true
+# Copiar archivos compilados según la app
+# Para API: dist y prisma
+# Para Web: .next y public
+COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/dist ./apps/${APP_NAME}/dist/
+COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/prisma ./apps/${APP_NAME}/prisma/
 
 # Copiar archivos de configuración necesarios
 COPY --from=builder --chown=appuser:nodejs /app/package.json ./package.json
