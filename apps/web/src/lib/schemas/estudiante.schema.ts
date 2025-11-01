@@ -138,13 +138,6 @@ const asistenciaDetalleSchema = z.object({
 
 export const estudianteDetalleSchema = estudianteSchema
   .extend({
-    fecha_nacimiento: z
-      .union([z.string(), z.date()])
-      .nullable()
-      .optional()
-      .transform((value) =>
-        value instanceof Date ? value.toISOString() : value ?? null,
-      ),
     perfil_gamificacion: z
       .object({
         nivel: z.number(),

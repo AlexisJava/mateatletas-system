@@ -36,7 +36,7 @@ export interface AuthUser {
   ha_completado_onboarding?: boolean;
   titulo?: string | null;
   bio?: string | null;
-  fecha_nacimiento?: string;
+  edad?: number;
   nivel_escolar?: string;
   foto_url?: string | null;
   puntos_totales?: number;
