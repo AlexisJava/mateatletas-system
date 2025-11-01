@@ -1,119 +1,88 @@
 # ============================================
-# DOCKERFILE MULTI-STAGE PARA MONOREPO
-# Mateatletas - Enterprise Grade
+# DOCKERFILE ROBUSTO PARA API - MATEATLETAS
 # ============================================
-# Soporta: Node 20.19.0 (requerido por Vite 7.x)
-# Optimizado para: Railway deployment
-# Apps disponibles: web (Next.js), api (NestJS)
+# Estrategia: Build en monorepo, deploy standalone
+# Node 20.19.0 (requerido por Vite 7.x)
+# ============================================
 
 ARG NODE_VERSION=20.19.0
-ARG APP_NAME=api
 
 # ============================================
-# STAGE 1: Dependencies
-# Instala TODAS las dependencias (prod + dev)
+# STAGE 1: Builder - Compila en contexto monorepo
 # ============================================
-FROM node:${NODE_VERSION}-alpine AS deps
+FROM node:${NODE_VERSION}-alpine AS builder
 
-# Instalar dependencias del sistema necesarias
+# Dependencias del sistema
 RUN apk add --no-cache libc6-compat openssl
 
-WORKDIR /app
+WORKDIR /monorepo
 
-# Copiar archivos de configuración de npm
-COPY package.json package-lock.json ./
-COPY .npmrc ./
+# Copiar configuración npm
+COPY package.json package-lock.json .npmrc ./
 
-# Copiar package.json de todos los workspaces
+# Copiar todos los package.json para workspaces
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
 COPY packages/contracts/package.json ./packages/contracts/
 COPY packages/shared/package.json ./packages/shared/
 
-# Instalar dependencias usando npm ci (reproducible)
-# Incluye devDependencies necesarias para el build
+# Instalar TODAS las dependencias del monorepo
 RUN npm ci --legacy-peer-deps
 
-# ============================================
-# STAGE 2: Builder
-# Compila la aplicación específica
-# ============================================
-FROM node:${NODE_VERSION}-alpine AS builder
-
-ARG APP_NAME
-
-WORKDIR /app
-
-# Copiar node_modules del stage anterior
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps ./apps
-COPY --from=deps /app/packages ./packages
-
-# Copiar código fuente completo
+# Copiar TODO el código fuente
 COPY . .
 
-# Build packages compartidos primero
+# Build contracts
 RUN npm run build --workspace=packages/contracts --if-present
 
-# Generar Prisma client si es API
-RUN if [ "$APP_NAME" = "api" ]; then \
-        cd apps/api && npx prisma generate; \
-    fi
+# Generar Prisma client
+RUN cd apps/api && npx prisma generate
 
-# Build de la app específica
-RUN npm run build --workspace=apps/${APP_NAME}
+# Build API
+RUN npm run build --workspace=apps/api
 
 # ============================================
-# STAGE 3: Runner (Imagen final optimizada)
-# Solo contiene lo necesario para ejecutar
+# STAGE 2: Runner - Standalone API sin monorepo
 # ============================================
 FROM node:${NODE_VERSION}-alpine AS runner
 
-ARG APP_NAME
-ENV NODE_ENV=production
-ENV APP_NAME=${APP_NAME}
+# Dependencias del sistema
+RUN apk add --no-cache libc6-compat openssl
 
-# Crear usuario no-root para seguridad
+# Usuario no-root para seguridad
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 appuser
+    adduser --system --uid 1001 nestjs
 
 WORKDIR /app
 
-# Copiar node_modules de producción
-COPY --from=builder --chown=appuser:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=appuser:nodejs /app/packages ./packages
+ENV NODE_ENV=production
 
-# Copiar archivos específicos según la app
-COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/package.json ./apps/${APP_NAME}/
-COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/node_modules ./apps/${APP_NAME}/node_modules
+# Copiar SOLO lo necesario para ejecutar la API
+# 1. Package.json de la API
+COPY --from=builder --chown=nestjs:nodejs /monorepo/apps/api/package*.json ./
 
-# Si es API (NestJS)
-RUN if [ "$APP_NAME" = "api" ]; then \
-        mkdir -p ./apps/api/dist ./apps/api/prisma; \
-    fi
+# 2. Prisma
+COPY --from=builder --chown=nestjs:nodejs /monorepo/apps/api/prisma ./prisma/
 
-# Copiar archivos compilados según la app
-# Para API: dist y prisma
-# Para Web: .next y public
-COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/dist ./apps/${APP_NAME}/dist/
-COPY --from=builder --chown=appuser:nodejs /app/apps/${APP_NAME}/prisma ./apps/${APP_NAME}/prisma/
+# 3. Código compilado
+COPY --from=builder --chown=nestjs:nodejs /monorepo/apps/api/dist ./dist/
 
-# Copiar archivos de configuración necesarios
-COPY --from=builder --chown=appuser:nodejs /app/package.json ./package.json
+# 4. node_modules de PRISMA generado (crítico)
+COPY --from=builder --chown=nestjs:nodejs /monorepo/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nestjs:nodejs /monorepo/node_modules/@prisma ./node_modules/@prisma
 
-USER appuser
+# 5. Instalar SOLO dependencias de producción de la API
+# Esto crea un node_modules limpio sin workspaces
+RUN npm install --only=production --legacy-peer-deps && \
+    npm cache clean --force
 
-# Exponer puertos
-# API: 3001, Web: 3000
-EXPOSE 3000 3001
+USER nestjs
+
+EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:${APP_NAME === 'api' ? '3001' : '3000'}/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+    CMD node -e "require('http').get('http://localhost:3001/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start command dinámico según la app
-CMD if [ "$APP_NAME" = "api" ]; then \
-        cd apps/api && npx prisma migrate deploy && NODE_PATH=/app/node_modules:/app/apps/api/node_modules node dist/main.js; \
-    else \
-        cd apps/web && npm run start; \
-    fi
+# Start
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
