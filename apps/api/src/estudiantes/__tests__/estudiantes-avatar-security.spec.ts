@@ -72,11 +72,11 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
   });
 
   describe('SECURITY: Avatar Update Authorization', () => {
-    it('should have EstudianteOwnershipGuard applied to updateAvatar', () => {
+    it('should have EstudianteOwnershipGuard applied to updateAvatarGradient', () => {
       // ✅ TEST: Verificar que el guard está aplicado
       const metadata = Reflect.getMetadata(
         '__guards__',
-        controller.updateAvatar,
+        controller.updateAvatarGradient,
       );
 
       // Este test FALLARÁ hasta que agreguemos el guard
@@ -108,7 +108,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
       } as any);
 
       // Act
-      const result = await service.updateAvatar('est-123', 5);
+      const result = await service.updateAvatarGradient('est-123', 5);
 
       // Assert
       expect(result).toHaveProperty('id', 'est-123');
@@ -137,7 +137,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         avatar_gradient: 3,
       } as any);
 
-      const result = await service.updateAvatar(
+      const result = await service.updateAvatarGradient(
         'est-123',
         3,
       );
@@ -152,7 +152,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
       await expect(
-        service.updateAvatar('non-existent', 5),
+        service.updateAvatarGradient('non-existent', 5),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -173,7 +173,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         avatar_gradient: 2,
       } as any);
 
-      const result = await service.updateAvatar('est-123', 2);
+      const result = await service.updateAvatarGradient('est-123', 2);
 
       // No debe retornar password_hash
       expect(result).not.toHaveProperty('password_hash');
@@ -192,7 +192,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         avatar_gradient: 0,
       } as any);
 
-      const result = await service.updateAvatar('est-123', 0);
+      const result = await service.updateAvatarGradient('est-123', 0);
       expect(result.avatar_gradient).toBe(0);
     });
 
@@ -205,7 +205,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         avatar_gradient: 9,
       } as any);
 
-      const result = await service.updateAvatar('est-123', 9);
+      const result = await service.updateAvatarGradient('est-123', 9);
       expect(result.avatar_gradient).toBe(9);
     });
   });
