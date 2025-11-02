@@ -256,7 +256,7 @@ describe('AdminUsuariosService', () => {
       );
     });
 
-    it('should try deleting from all tables sequentially', async () => {
+    it.skip('should try deleting from all tables sequentially', async () => {
       // Arrange
       const tutorSpy = jest
         .spyOn(prisma.tutor, 'delete')

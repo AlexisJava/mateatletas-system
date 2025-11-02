@@ -29,6 +29,7 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
               findUnique: jest.fn(),
               findFirst: jest.fn(),
               update: jest.fn(),
+              create: jest.fn(),
             },
             sector: {
               findUnique: jest.fn(),
@@ -47,6 +48,14 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
 
     service = module.get<EstudiantesService>(EstudiantesService);
     prisma = module.get<PrismaService>(PrismaService);
+
+    // Mock por defecto para create
+    (prisma.estudiante.create as jest.Mock).mockImplementation(
+      async (args: any) => ({
+        id: 'new-estudiante-id',
+        ...args.data,
+      }),
+    );
   });
 
   describe('RED - Test 8: Copiar estudiante existente a nuevo sector', () => {
@@ -60,6 +69,14 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
         nombre: 'Juan',
         apellido: 'Pérez',
         sector_id: 'sector-matematica-id',
+        tutor_id: 'tutor-id',
+        edad: 10,
+        nivel_escolar: 'Primaria',
+        email: 'juan@example.com',
+        nivel_actual: 1,
+        puntos_totales: 0,
+        avatar_gradient: 1,
+        equipo_id: null,
         tutor: { id: 'tutor-id', nombre: 'María' },
       };
 
@@ -74,9 +91,14 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
       jest
         .spyOn(prisma.sector, 'findUnique')
         .mockResolvedValue(nuevoSector as any);
-      jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
+      // Mock findFirst para que no encuentre duplicado
+      jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(null);
+      // Mock create para devolver el estudiante duplicado
+      jest.spyOn(prisma.estudiante, 'create').mockResolvedValue({
         ...estudianteExistente,
+        id: 'new-estudiante-id',
         sector_id: nuevoSectorId,
+        sector: nuevoSector,
       } as any);
 
       // Act
@@ -88,10 +110,24 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result.sector_id).toBe(nuevoSectorId);
-      expect(prisma.estudiante.update).toHaveBeenCalledWith({
-        where: { id: estudianteId },
-        data: { sector_id: nuevoSectorId },
-        include: expect.any(Object),
+      expect(prisma.estudiante.create).toHaveBeenCalledWith({
+        data: {
+          nombre: estudianteExistente.nombre,
+          apellido: estudianteExistente.apellido,
+          edad: estudianteExistente.edad,
+          nivel_escolar: estudianteExistente.nivel_escolar,
+          email: estudianteExistente.email,
+          tutor_id: estudianteExistente.tutor_id,
+          sector_id: nuevoSectorId,
+          nivel_actual: estudianteExistente.nivel_actual,
+          puntos_totales: estudianteExistente.puntos_totales,
+          avatar_gradient: estudianteExistente.avatar_gradient,
+          equipo_id: estudianteExistente.equipo_id,
+        },
+        include: {
+          sector: true,
+          tutor: true,
+        },
       });
     });
   });
@@ -146,6 +182,9 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
 
       const estudiante = {
         id: estudianteId,
+        nombre: 'Juan',
+        apellido: 'Pérez',
+        tutor_id: 'tutor-id',
         sector_id: sectorId, // Ya está en ese sector
       };
 
@@ -155,6 +194,14 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
       jest
         .spyOn(prisma.sector, 'findUnique')
         .mockResolvedValue({ id: sectorId } as any);
+      // Mock findFirst para simular que ya existe un duplicado
+      jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue({
+        id: 'duplicado-id',
+        nombre: 'Juan',
+        apellido: 'Pérez',
+        tutor_id: 'tutor-id',
+        sector_id: sectorId,
+      } as any);
 
       // Act & Assert
       await expect(
@@ -162,7 +209,7 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
       ).rejects.toThrow(ConflictException);
       await expect(
         service.copiarEstudianteASector(estudianteId, sectorId),
-      ).rejects.toThrow('El estudiante ya está asignado a este sector');
+      ).rejects.toThrow('Este estudiante ya está inscrito en el sector destino');
     });
   });
 
@@ -176,22 +223,41 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
         id: 'estudiante-id',
         email,
         nombre: 'Juan',
+        apellido: 'Pérez',
+        tutor_id: 'tutor-id',
         sector_id: 'sector-matematica-id',
+        edad: 10,
+        nivel_escolar: 'Primaria',
+        nivel_actual: 1,
+        puntos_totales: 0,
+        avatar_gradient: 1,
+        equipo_id: null,
         tutor: { id: 'tutor-id', nombre: 'María' },
+        sector: { id: 'sector-matematica-id', nombre: 'Matemática' },
       };
 
+      const nuevoSector = {
+        id: nuevoSectorId,
+        nombre: 'Programación',
+      };
+
+      // Primera llamada a findFirst: buscar por email
+      // Segunda llamada a findFirst: verificar duplicado (debe retornar null)
       jest
         .spyOn(prisma.estudiante, 'findFirst')
-        .mockResolvedValue(estudiante as any);
+        .mockResolvedValueOnce(estudiante as any) // Buscar por email
+        .mockResolvedValueOnce(null); // Verificar duplicado
       jest
         .spyOn(prisma.estudiante, 'findUnique')
         .mockResolvedValue(estudiante as any);
       jest
         .spyOn(prisma.sector, 'findUnique')
-        .mockResolvedValue({ id: nuevoSectorId } as any);
-      jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({
+        .mockResolvedValue(nuevoSector as any);
+      jest.spyOn(prisma.estudiante, 'create').mockResolvedValue({
         ...estudiante,
+        id: 'new-estudiante-id',
         sector_id: nuevoSectorId,
+        sector: nuevoSector,
       } as any);
 
       // Act
