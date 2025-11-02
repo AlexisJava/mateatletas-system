@@ -67,11 +67,13 @@ async function bootstrap() {
 
   // Soportar múltiples URLs separadas por coma en FRONTEND_URL
   const frontendUrls = process.env.FRONTEND_URL
-    ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+    ? process.env.FRONTEND_URL.split(',').map((url) => url.trim()).filter(Boolean)
     : [];
 
   const allowedOrigins = isProduction
-    ? frontendUrls // Solo dominios específicos en producción
+    ? frontendUrls.length > 0
+      ? frontendUrls
+      : ['*'] // Fallback temporal si no hay URLs configuradas
     : [
         'http://localhost:3000',
         'http://localhost:3001',
