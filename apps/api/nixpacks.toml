@@ -5,7 +5,7 @@ nixPkgs = ["nodejs", "npm"]
 cmds = ["npm ci"]
 
 [phases.build]
-cmds = ["npm run build", "npx prisma generate"]
+cmds = ["npm run build", "npx prisma generate --schema=apps/api/prisma/schema.prisma"]
 
 [start]
-cmd = "npx prisma migrate deploy && node dist/main.js"
+cmd = "npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma && node apps/api/dist/main.js"
