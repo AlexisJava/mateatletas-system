@@ -64,12 +64,18 @@ async function bootstrap() {
 
   // Enable CORS with environment-aware configuration
   const isProduction = process.env.NODE_ENV === 'production';
+
+  // Soportar múltiples URLs separadas por coma en FRONTEND_URL
+  const frontendUrls = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+    : [];
+
   const allowedOrigins = isProduction
-    ? [process.env.FRONTEND_URL].filter(Boolean) // Solo dominios específicos en producción
+    ? frontendUrls // Solo dominios específicos en producción
     : [
         'http://localhost:3000',
         'http://localhost:3001',
-        process.env.FRONTEND_URL,
+        ...frontendUrls,
       ].filter(Boolean);
 
   app.enableCors({
