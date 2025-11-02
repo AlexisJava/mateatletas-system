@@ -76,8 +76,8 @@ model Tutor {
 model Estudiante {
   /// Identificador único del estudiante
   id                        String                            @id @default(cuid())
-  /// Username único del estudiante - usado para autenticación
-  username                  String?                           @unique
+  /// Username único del estudiante - usado para autenticación (OBLIGATORIO)
+  username                  String                            @unique
   /// Nombre del estudiante
   nombre                    String
   /// Apellido del estudiante

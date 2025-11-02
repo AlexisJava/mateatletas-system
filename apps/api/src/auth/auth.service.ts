@@ -160,7 +160,7 @@ export class AuthService {
     // 5. Generar token JWT (usar username en lugar de email)
     const accessToken = this.generateJwtToken(
       estudiante.id,
-      estudiante.username,
+      estudiante.username || estudiante.email || estudiante.id,
       finalRoles,
     );
 
@@ -648,7 +648,7 @@ export class AuthService {
       const roles = parseUserRoles(estudiante.roles);
       const token = this.generateJwtToken(
         estudiante.id,
-        estudiante.username,
+        estudiante.username || estudiante.email || estudiante.id,
         roles,
       );
 
