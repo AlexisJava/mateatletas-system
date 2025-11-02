@@ -58,7 +58,7 @@ next-env.d.ts
 Thumbs.db
 
 # Prisma
-apps/api/prisma/migrations/
+# NOTA: Las migraciones DEBEN estar en el repositorio para que Railway las ejecute
 
 # Logs
 logs/
