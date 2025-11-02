@@ -168,23 +168,24 @@ vercel --prod --yes
 3. Desactiva "Vercel Authentication" para producción
 4. O configura un dominio personalizado
 
-### 2. Actualizar NEXT_PUBLIC_API_URL
+### 2. Actualizar NEXT_PUBLIC_API_URL ✅ COMPLETADO
 
-**Actualmente:** `https://mateatletas-system.railway.internal/api` (URL interna)
+**Antes:** `https://mateatletas-system.railway.internal/api` (URL interna - NO funciona desde Vercel)
 
-**Actualizar a:** URL pública de Railway cuando esté disponible
+**Ahora:** `https://mateatletas-system-production.up.railway.app/api` (URL pública - ✅ FUNCIONANDO)
 
 ```bash
-# Obtener URL pública de Railway
-railway domain
+# Generamos dominio Railway público
+railway domain --service mateatletas-system
+# → https://mateatletas-system-production.up.railway.app
 
-# Actualizar en Vercel
-vercel env rm NEXT_PUBLIC_API_URL production
-vercel env add NEXT_PUBLIC_API_URL production
-# Ingresar: https://mateatletas-system-production-xxxx.up.railway.app/api
+# Actualizado en Vercel
+vercel env rm NEXT_PUBLIC_API_URL production --yes
+echo "https://mateatletas-system-production.up.railway.app/api" | vercel env add NEXT_PUBLIC_API_URL production
 
-# Redeploy
+# Redeployado
 vercel --prod
+# → https://mateatletas-fztrxxmes-alexis-figueroas-projects-d4fb75f1.vercel.app
 ```
 
 ### 3. Configurar Dominio Personalizado (Opcional)
@@ -197,24 +198,24 @@ vercel domains add mateatletas.com
 
 ## 🔗 INTEGRACIÓN BACKEND
 
-### Configuración CORS en Railway
-
-Asegurarse de que el backend (Railway) tenga configurado:
+### Configuración CORS en Railway ✅ COMPLETADO
 
 ```bash
-# Variable en Railway
-FRONTEND_URL=https://mateatletas-kir91kez1-alexis-figueroas-projects-d4fb75f1.vercel.app
+# Variable actualizada en Railway
+FRONTEND_URL=https://mateatletas-fztrxxmes-alexis-figueroas-projects-d4fb75f1.vercel.app
 
-# O con dominio personalizado
-FRONTEND_URL=https://mateatletas.com
+# Comando usado:
+railway variables --set FRONTEND_URL=https://mateatletas-fztrxxmes-alexis-figueroas-projects-d4fb75f1.vercel.app
 ```
 
-### Health Check del Backend
+### Health Check del Backend ✅ VERIFICADO
 
 ```bash
-curl https://mateatletas-system.railway.internal/api/health
-# O con URL pública:
-curl https://TU-URL-RAILWAY.up.railway.app/api/health
+# URL pública de Railway
+curl https://mateatletas-system-production.up.railway.app/api/health
+
+# Respuesta:
+# {"status":"ok","timestamp":"2025-11-02T05:40:29.971Z","service":"Mateatletas API"}
 ```
 
 ---
@@ -319,10 +320,14 @@ Mateatletas-Ecosystem/
 - ✅ 44 rutas generadas
 - ✅ Variables de entorno configuradas
 
+**Completado:**
+- ✅ Generar URL pública de Railway (`mateatletas-system-production.up.railway.app`)
+- ✅ Actualizar `NEXT_PUBLIC_API_URL` en Vercel
+- ✅ Configurar `FRONTEND_URL` en Railway para CORS
+- ✅ Frontend y Backend comunicándose correctamente
+
 **Pendiente:**
-- ⚠️ Desactivar Deployment Protection
-- ⚠️ Actualizar `NEXT_PUBLIC_API_URL` con URL pública de Railway
-- ⚠️ Configurar `FRONTEND_URL` en Railway
+- ⚠️ Desactivar Deployment Protection en Vercel (requiere autenticación actualmente)
 - ⚠️ Opcional: Configurar dominio personalizado
 
 **Tiempo Total:** ~30 minutos
