@@ -51,7 +51,10 @@ export class CsrfProtectionGuard implements CanActivate {
   private readonly allowedOrigins = [
     'http://localhost:3000', // Frontend dev
     'http://localhost:3002', // Frontend alternativo
-    process.env.FRONTEND_URL || 'https://mateatletas.com', // Frontend producción (con fallback)
+    // Soportar múltiples URLs separadas por coma en FRONTEND_URL
+    ...(process.env.FRONTEND_URL
+      ? process.env.FRONTEND_URL.split(',').map((url) => url.trim())
+      : ['https://mateatletas.com']),
   ].filter(Boolean) as string[];
 
   constructor(private reflector: Reflector) {
