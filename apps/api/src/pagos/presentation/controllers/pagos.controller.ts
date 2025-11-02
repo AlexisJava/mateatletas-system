@@ -472,4 +472,42 @@ export class PagosController {
       estudianteId,
     );
   }
+
+  /**
+   * POST /pagos/registrar-pago-manual/:estudianteId
+   * Registra un pago manual para un estudiante
+   * Detecta automáticamente el monto adeudado del periodo actual y lo marca como pagado
+   */
+  @Post('registrar-pago-manual/:estudianteId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Tutor)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Registrar pago manual de un estudiante',
+    description: `
+      Registra un pago manual para un estudiante del periodo actual.
+      Automáticamente detecta el monto adeudado y lo marca como pagado.
+
+      Proceso:
+      1. Busca inscripciones mensuales pendientes del estudiante en el periodo actual
+      2. Calcula el total adeudado
+      3. Registra el pago con método "Manual"
+      4. Marca las inscripciones como "Pagado"
+      5. Retorna el resumen del pago registrado
+    `,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Pago registrado exitosamente',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Estudiante no encontrado o sin inscripciones pendientes',
+  })
+  async registrarPagoManual(
+    @Param('estudianteId') estudianteId: string,
+    @GetUser() user: AuthUser,
+  ) {
+    return await this.pagosService.registrarPagoManual(estudianteId, user.id);
+  }
 }
