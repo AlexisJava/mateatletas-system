@@ -157,10 +157,10 @@ export class AuthService {
     const finalRoles =
       estudianteRoles.length > 0 ? estudianteRoles : [Role.Estudiante];
 
-    // 5. Generar token JWT
+    // 5. Generar token JWT (usar username en lugar de email)
     const accessToken = this.generateJwtToken(
       estudiante.id,
-      estudiante.email,
+      estudiante.username,
       finalRoles,
     );
 
@@ -169,7 +169,7 @@ export class AuthService {
       access_token: accessToken,
       user: {
         id: estudiante.id,
-        email: estudiante.email,
+        email: estudiante.email || estudiante.username, // Fallback a username si no tiene email
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
         edad: estudiante.edad,
