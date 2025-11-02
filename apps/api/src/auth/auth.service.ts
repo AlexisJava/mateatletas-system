@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../core/database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { LoginEstudianteDto } from './dto/login-estudiante.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from './decorators/roles.decorator';
 import { parseUserRoles } from '../common/utils/role.utils';
@@ -106,17 +107,17 @@ export class AuthService {
   }
 
   /**
-   * Autentica un estudiante con sus credenciales propias
-   * @param loginDto - Credenciales del estudiante
+   * Autentica un estudiante con sus credenciales propias (username + password)
+   * @param loginEstudianteDto - Credenciales del estudiante (username, password)
    * @returns Token JWT y datos del estudiante
    * @throws UnauthorizedException si las credenciales son inválidas
    */
-  async loginEstudiante(loginDto: LoginDto) {
-    const { email, password } = loginDto;
+  async loginEstudiante(loginEstudianteDto: LoginEstudianteDto) {
+    const { username, password } = loginEstudianteDto;
 
-    // 1. Buscar estudiante por email
+    // 1. Buscar estudiante por username
     const estudiante = await this.prisma.estudiante.findUnique({
-      where: { email },
+      where: { username },
       include: {
         tutor: {
           select: {
@@ -137,7 +138,7 @@ export class AuthService {
     });
 
     // 2. Verificar que el estudiante exista y tenga credenciales configuradas
-    if (!estudiante || !estudiante.password_hash || !estudiante.email) {
+    if (!estudiante || !estudiante.password_hash || !estudiante.username) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 

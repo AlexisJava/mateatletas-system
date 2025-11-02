@@ -20,6 +20,7 @@ import {
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { LoginEstudianteDto } from './dto/login-estudiante.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
@@ -154,7 +155,7 @@ export class AuthController {
    * Autentica un estudiante con sus credenciales propias y genera un token JWT
    * El token se envía como httpOnly cookie en lugar de en el body
    *
-   * @param loginDto - Credenciales del estudiante (email, password)
+   * @param loginEstudianteDto - Credenciales del estudiante (username, password)
    * @param res - Response object para configurar cookies
    * @returns 200 OK - { user } sin access_token (va en cookie)
    * @throws 401 Unauthorized - Credenciales inválidas o estudiante sin credenciales configuradas
@@ -163,7 +164,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Autenticación de estudiante',
     description:
-      'Autentica un estudiante con credenciales propias y retorna un token JWT en httpOnly cookie',
+      'Autentica un estudiante con username y password, retorna un token JWT en httpOnly cookie',
   })
   @ApiResponse({
     status: 200,
@@ -174,14 +175,14 @@ export class AuthController {
     description:
       'Credenciales inválidas o estudiante sin credenciales configuradas',
   })
-  @ApiBody({ type: LoginDto })
+  @ApiBody({ type: LoginEstudianteDto })
   @Post('estudiante/login')
   @HttpCode(HttpStatus.OK)
   async loginEstudiante(
-    @Body() loginDto: LoginDto,
+    @Body() loginEstudianteDto: LoginEstudianteDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const result = await this.authService.loginEstudiante(loginDto);
+    const result = await this.authService.loginEstudiante(loginEstudianteDto);
 
     // Configurar cookie httpOnly
     res.cookie('auth-token', result.access_token, {
