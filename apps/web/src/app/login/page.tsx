@@ -174,7 +174,7 @@ export default function LoginPage() {
   }, [isAuthenticated, user, router, isLoading, mustChangePassword, hasMultipleRoles, selectedRole]);
 
   const [userType, setUserType] = useState<'tutor' | 'estudiante' | 'docente'>('estudiante');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -209,7 +209,7 @@ export default function LoginPage() {
     abortControllerRef.current = new AbortController();
 
     // Validación básica
-    if (!email || !password) {
+    if (!username || !password) {
       setError('Por favor completa todos los campos');
       setIsSubmitting(false);
       return;
@@ -222,10 +222,10 @@ export default function LoginPage() {
 
       // Usar método de login según el tipo de usuario seleccionado
       if (userType === 'estudiante') {
-        await loginEstudiante(email, password);
+        await loginEstudiante(username, password);
       } else {
         // Para tutores, docentes y admin usamos el login normal
-        await login(email, password);
+        await login(username, password);
       }
     } catch (err) {
       // Si hay error, resetear el flag
@@ -270,8 +270,8 @@ export default function LoginPage() {
   /**
    * Limpia el error cuando el usuario empieza a escribir
    */
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.target.value);
     if (error) setError('');
   };
 
@@ -543,8 +543,8 @@ export default function LoginPage() {
                         <input
                           id="email"
                           type="text"
-                          value={email}
-                          onChange={handleEmailChange}
+                          value={username}
+                          onChange={handleUsernameChange}
                           required
                           placeholder="usuario"
                           disabled={isLoading}
