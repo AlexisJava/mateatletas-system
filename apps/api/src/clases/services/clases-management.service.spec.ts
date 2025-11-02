@@ -34,7 +34,7 @@ describe('ClasesManagementService', () => {
     nombre: 'Clase de Álgebra',
     ruta_curricular_id: 'ruta-1',
     docente_id: 'doc-1',
-    fecha_hora_inicio: new Date('2025-12-01T10:00:00Z').toISOString(),
+    fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
     duracion_minutos: 60,
     cupos_maximo: 20,
     cupos_ocupados: 5,

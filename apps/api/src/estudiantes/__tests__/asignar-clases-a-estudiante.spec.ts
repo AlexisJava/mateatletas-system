@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EstudiantesService } from '../estudiantes.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { BadRequestException, ConflictException } from '@nestjs/common';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 /**
  * TDD: Asignar clases a estudiante en un sector
@@ -38,6 +39,13 @@ describe('EstudiantesService - Asignar Clases', () => {
               createMany: jest.fn(),
             },
             $transaction: jest.fn(),
+          },
+        },
+        {
+          provide: LogrosService,
+          useValue: {
+            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
+            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
           },
         },
       ],

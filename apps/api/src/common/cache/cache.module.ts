@@ -29,21 +29,12 @@ import KeyvRedis from '@keyv/redis';
         const isProduction = process.env.NODE_ENV === 'production';
 
         // Configuración de Redis si está disponible
+        // Nota: KeyvRedis maneja automáticamente reconexión y retry
+        // Para configuración avanzada, usar query params en REDIS_URL
         if (redisUrl) {
           try {
             const keyv = new Keyv({
-              store: new KeyvRedis(redisUrl, {
-                socket: {
-                  connectTimeout: 5000,
-                  reconnectStrategy: (retries: number) => {
-                    if (retries > 10) {
-                      logger.error('❌ Redis: Máximo de reintentos alcanzado');
-                      return new Error('Demasiados reintentos de Redis');
-                    }
-                    return Math.min(retries * 100, 3000);
-                  },
-                },
-              }),
+              store: new KeyvRedis(redisUrl),
             });
 
             return {

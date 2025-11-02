@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EstudiantesService } from '../estudiantes.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { BadRequestException, ConflictException } from '@nestjs/common';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 /**
  * TDD: Copiar estudiante existente a otro sector
@@ -32,6 +33,13 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
             sector: {
               findUnique: jest.fn(),
             },
+          },
+        },
+        {
+          provide: LogrosService,
+          useValue: {
+            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
+            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
           },
         },
       ],

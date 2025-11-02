@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { EstudiantesService } from '../estudiantes.service';
 import { PrismaService } from '../../core/database/prisma.service';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 /**
  * EstudiantesService - COMPREHENSIVE TESTS
@@ -75,6 +76,13 @@ describe('EstudiantesService', () => {
               delete: jest.fn(),
               count: jest.fn(),
             },
+          },
+        },
+        {
+          provide: LogrosService,
+          useValue: {
+            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
+            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
           },
         },
       ],

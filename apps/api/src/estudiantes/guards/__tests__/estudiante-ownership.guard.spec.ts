@@ -8,6 +8,7 @@ import { EstudianteOwnershipGuard } from '../estudiante-ownership.guard';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { AuthUser } from '../../../auth/interfaces';
 import { Role } from '../../../auth/decorators/roles.decorator';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 /**
  * EstudianteOwnershipGuard - COMPREHENSIVE TESTS

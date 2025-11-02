@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ClasesReservasService } from './clases-reservas.service';
 import { PrismaService } from '../../core/database/prisma.service';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 describe('ClasesReservasService', () => {
   let service: ClasesReservasService;

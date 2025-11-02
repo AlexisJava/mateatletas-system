@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../core/database/prisma.service';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 /**
  * Tests para validar que las clases se crean correctamente con sus sectores

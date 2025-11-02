@@ -16,6 +16,7 @@ import { ProductosService } from '../../catalogo/productos.service';
 import { MercadoPagoService } from '../mercadopago.service';
 import { TipoProducto } from '@prisma/client';
 import { MercadoPagoWebhookDto } from '../dto/mercadopago-webhook.dto';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 class MockPagosService {
   public generarPreferenciaSuscripcion = jest.fn();

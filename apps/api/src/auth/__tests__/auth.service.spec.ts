@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../auth.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Role } from '../decorators/roles.decorator';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 /**
  * AuthService - COMPREHENSIVE TESTS
@@ -138,6 +139,13 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
           provide: JwtService,
           useValue: {
             sign: jest.fn().mockReturnValue('mock_jwt_token'),
+          },
+        },
+        {
+          provide: LogrosService,
+          useValue: {
+            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
+            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
           },
         },
       ],
@@ -599,7 +607,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest
         .spyOn(prisma.tutor, 'findUnique')
         .mockRejectedValue(new Error('Database connection failed'));
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const loggerErrorSpy = jest.spyOn(service['logger'], 'error').mockImplementation();
 
       // Act
       const result = await service.validateUser(
@@ -609,12 +617,12 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
       // Assert
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error en validateUser:',
-        expect.any(Error),
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'Error en validateUser',
+        expect.any(String),
       );
 
-      consoleErrorSpy.mockRestore();
+      loggerErrorSpy.mockRestore();
     });
   });
 
