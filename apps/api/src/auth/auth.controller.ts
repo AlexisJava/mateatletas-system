@@ -182,6 +182,13 @@ export class AuthController {
     @Body() loginEstudianteDto: LoginEstudianteDto,
     @Res({ passthrough: true }) res: Response,
   ) {
+    // 🔍 LOGGING TEMPORAL: Diagnosticar error 400
+    console.log('📥 [LOGIN ESTUDIANTE] Request recibido:', {
+      username: loginEstudianteDto.username,
+      password_length: loginEstudianteDto.password?.length || 0,
+      dto_keys: Object.keys(loginEstudianteDto),
+    });
+
     const result = await this.authService.loginEstudiante(loginEstudianteDto);
 
     // Configurar cookie httpOnly

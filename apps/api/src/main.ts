@@ -120,6 +120,18 @@ async function bootstrap() {
       disableErrorMessages: false,
       // Validación de parámetros de rutas y queries
       validateCustomDecorators: true,
+      // 🔍 LOGGING TEMPORAL: Capturar errores de validación detallados
+      exceptionFactory: (errors) => {
+        console.error('❌ [VALIDATION ERROR] Detalles completos:', JSON.stringify(errors, null, 2));
+        console.error('❌ [VALIDATION ERROR] Campos con error:', errors.map(e => ({
+          property: e.property,
+          value: e.value,
+          constraints: e.constraints,
+        })));
+        // Retornar el error por defecto de ValidationPipe
+        const messages = errors.map(error => Object.values(error.constraints || {}).join(', '));
+        return new Error(`Validation failed: ${messages.join('; ')}`);
+      },
     }),
   );
 
