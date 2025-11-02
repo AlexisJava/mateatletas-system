@@ -619,7 +619,10 @@ describe('DocentesService', () => {
       // Arrange
       jest
         .spyOn(prisma.docente, 'findUnique')
-        .mockResolvedValue(mockDocente as any);
+        .mockResolvedValue({
+          ...mockDocente,
+          _count: { clases: 0 }, // Sin clases asignadas
+        } as any);
       jest
         .spyOn(prisma.docente, 'delete')
         .mockResolvedValue(mockDocente as any);
