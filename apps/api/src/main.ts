@@ -17,6 +17,7 @@ async function bootstrap() {
 
   // Obtener instancia del LoggerService para los filters
   const logger = app.get(LoggerService);
+  logger.log('🚀 Iniciando aplicación Mateatletas API...');
 
   // Cookie parser middleware (debe ir ANTES de las rutas)
   app.use(cookieParser());
