@@ -85,9 +85,10 @@ async function main() {
 
   // Dante Migani (tutor: Laura)
   await prisma.estudiante.upsert({
-    where: { email: 'dante.migani@estudiante.com' },
+    where: { username: 'dante.migani' },
     update: {},
     create: {
+      username: 'dante.migani',
       email: 'dante.migani@estudiante.com',
       password_hash: hashedPassword,
       nombre: 'Dante',
@@ -101,9 +102,10 @@ async function main() {
 
   // Nicolas Schenone (tutor: Adriana)
   await prisma.estudiante.upsert({
-    where: { email: 'nicolas.schenone@estudiante.com' },
+    where: { username: 'nicolas.schenone' },
     update: {},
     create: {
+      username: 'nicolas.schenone',
       email: 'nicolas.schenone@estudiante.com',
       password_hash: hashedPassword,
       nombre: 'Nicolas',
@@ -117,9 +119,10 @@ async function main() {
 
   // Isabella Schenone (tutor: Adriana)
   await prisma.estudiante.upsert({
-    where: { email: 'isabella.schenone@estudiante.com' },
+    where: { username: 'isabella.schenone' },
     update: {},
     create: {
+      username: 'isabella.schenone',
       email: 'isabella.schenone@estudiante.com',
       password_hash: hashedPassword,
       nombre: 'Isabella',
@@ -133,9 +136,10 @@ async function main() {
 
   // Giuliana Schenone (tutor: Adriana)
   await prisma.estudiante.upsert({
-    where: { email: 'giuliana.schenone@estudiante.com' },
+    where: { username: 'giuliana.schenone' },
     update: {},
     create: {
+      username: 'giuliana.schenone',
       email: 'giuliana.schenone@estudiante.com',
       password_hash: hashedPassword,
       nombre: 'Giuliana',
@@ -149,9 +153,10 @@ async function main() {
 
   // Theo Ghesla (tutor: Adriana)
   await prisma.estudiante.upsert({
-    where: { email: 'theo.ghesla@estudiante.com' },
+    where: { username: 'theo.ghesla' },
     update: {},
     create: {
+      username: 'theo.ghesla',
       email: 'theo.ghesla@estudiante.com',
       password_hash: hashedPassword,
       nombre: 'Theo',

@@ -53,6 +53,7 @@ export async function seedTutor(prisma: PrismaClient) {
       where: { email: estData.email },
       update: {},
       create: {
+        username: `${estData.nombre.toLowerCase()}.${estData.apellido.toLowerCase()}`,
         nombre: estData.nombre,
         apellido: estData.apellido,
         edad: estData.edad,
