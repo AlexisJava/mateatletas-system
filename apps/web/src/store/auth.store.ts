@@ -102,15 +102,15 @@ export const useAuthStore = create<AuthState>()(
       /**
        * Login Estudiante: Autentica a un estudiante con sus credenciales propias
        * El token se guarda automáticamente como httpOnly cookie en el backend
-       * @param email - Email del estudiante
+       * @param username - Username del estudiante
        * @param password - Contraseña del estudiante
        * @throws Error si las credenciales son inválidas
        */
-      loginEstudiante: async (email: string, password: string) => {
+      loginEstudiante: async (username: string, password: string) => {
         set({ isLoading: true });
 
         try {
-          const response = await authApi.loginEstudiante({ email, password });
+          const response = await authApi.loginEstudiante({ username, password });
 
           // Ya NO guardamos token en localStorage (se usa httpOnly cookie)
           // El backend configura la cookie automáticamente

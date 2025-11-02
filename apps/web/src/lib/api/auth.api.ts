@@ -18,6 +18,11 @@ export interface LoginData {
   password: string;
 }
 
+export interface LoginEstudianteData {
+  username: string;
+  password: string;
+}
+
 /**
  * Tipos para las responses de autenticación
  */
@@ -136,10 +141,10 @@ export const authApi = {
   /**
    * Autentica un estudiante con sus credenciales propias
    * El token se guarda automáticamente como httpOnly cookie en el backend
-   * @param data - Credenciales del estudiante (email, password)
+   * @param data - Credenciales del estudiante (username, password)
    * @returns Promise con los datos del estudiante (sin token)
    */
-  loginEstudiante: async (data: LoginData): Promise<LoginResponse> => {
+  loginEstudiante: async (data: LoginEstudianteData): Promise<LoginResponse> => {
     try {
       // El interceptor ya retorna response.data directamente
       return await apiClient.post<LoginResponse>('/auth/estudiante/login', data);
