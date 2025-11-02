@@ -7,6 +7,7 @@ CREATE TABLE "docentes" (
     "apellido" TEXT NOT NULL,
     "titulo" TEXT,
     "bio" TEXT,
+    "debe_cambiar_password" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
