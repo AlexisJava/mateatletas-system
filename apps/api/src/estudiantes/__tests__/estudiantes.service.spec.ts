@@ -590,8 +590,8 @@ describe('EstudiantesService', () => {
     });
   });
 
-  describe('updateAvatar', () => {
-    it('should update avatar successfully', async () => {
+  describe('updateAvatarGradient', () => {
+    it('should update avatar gradient successfully', async () => {
       // Arrange
       jest
         .spyOn(prisma.estudiante, 'findUnique')
@@ -604,7 +604,7 @@ describe('EstudiantesService', () => {
       } as any);
 
       // Act
-      const result = await service.updateAvatar('est-1', 4);
+      const result = await service.updateAvatarGradient('est-1', 4);
 
       // Assert
       expect(result.avatar_gradient).toBe(4);
@@ -626,7 +626,7 @@ describe('EstudiantesService', () => {
 
       // Act & Assert
       await expect(
-        service.updateAvatar('non-existent', 7),
+        service.updateAvatarGradient('non-existent', 7),
       ).rejects.toThrow(NotFoundException);
     });
   });

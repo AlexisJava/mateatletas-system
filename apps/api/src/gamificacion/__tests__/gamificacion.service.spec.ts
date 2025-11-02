@@ -260,7 +260,11 @@ describe('GamificacionService', () => {
       // Verify estudiante data
       expect(result.estudiante.id).toBe('estudiante-123');
       expect(result.estudiante.nombre).toBe('María');
-      expect(result.estudiante.equipo).toEqual(mockEstudiante.equipo);
+      expect(result.estudiante.equipo).toEqual({
+        id: 'equipo-1',
+        nombre: 'Los Números',
+        color: '#FF0000', // Servicio mapea color_primario -> color
+      });
 
       // Verify stats
       expect(result.stats.puntosToales).toBe(350); // typo intencional para match con schema

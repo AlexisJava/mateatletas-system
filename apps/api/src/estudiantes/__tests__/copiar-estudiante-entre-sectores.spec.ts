@@ -166,15 +166,15 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
     });
   });
 
-  describe('RED - Test 12: Buscar estudiante por DNI para copiar', () => {
-    it('debería permitir buscar estudiante por DNI para copiarlo', async () => {
+  describe('RED - Test 12: Buscar estudiante por email para copiar', () => {
+    it('debería permitir buscar estudiante por email para copiarlo', async () => {
       // Arrange
-      const dni = '12345678';
+      const email = 'juan@example.com';
       const nuevoSectorId = 'sector-programacion-id';
 
       const estudiante = {
         id: 'estudiante-id',
-        dni,
+        email,
         nombre: 'Juan',
         sector_id: 'sector-matematica-id',
         tutor: { id: 'tutor-id', nombre: 'María' },
@@ -196,7 +196,7 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
 
       // Act
       const result = await service.copiarEstudiantePorDNIASector(
-        dni,
+        email,
         nuevoSectorId,
       );
 
@@ -204,7 +204,7 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
       expect(result).toBeDefined();
       expect(result.sector_id).toBe(nuevoSectorId);
       expect(prisma.estudiante.findFirst).toHaveBeenCalledWith({
-        where: { dni },
+        where: { email },
         include: expect.any(Object),
       });
     });

@@ -288,46 +288,6 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
     });
   });
 
-  describe('RED - Test 5: Validación de DNI duplicado', () => {
-    it('debería lanzar ConflictException si un estudiante con ese DNI ya existe', async () => {
-      // Arrange
-      const dto = {
-        estudiantes: [
-          {
-            nombre: 'Juan',
-            apellido: 'Pérez',
-            dni: '12345678',
-            fechaNacimiento: '2010-05-15',
-            edad: 10,
-            nivel_escolar: 'Primaria',
-          },
-        ],
-        tutor: {
-          nombre: 'María',
-          apellido: 'Pérez',
-          dni: '87654321',
-          email: 'maria@example.com',
-        },
-        sectorId: 'sector-id',
-      };
-
-      jest
-        .spyOn(prisma.sector, 'findUnique')
-        .mockResolvedValue({ id: 'sector-id' } as any);
-      jest
-        .spyOn(prisma.estudiante, 'findFirst')
-        .mockResolvedValue({ id: 'existing-id', dni: '12345678' } as any);
-
-      // Act & Assert
-      await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow(
-        ConflictException,
-      );
-      await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow(
-        'Ya existe un estudiante con el DNI 12345678',
-      );
-    });
-  });
-
   describe('RED - Test 6: Generación automática de username', () => {
     it('debería generar username único basado en nombre.apellido', async () => {
       // Arrange

@@ -15,7 +15,7 @@ describe('ClasesReservasService', () => {
   const mockClase = {
     id: 'clase-1',
     estado: 'Programada',
-    fecha_hora_inicio: new Date('2025-12-01T10:00:00Z').toISOString(),
+    fecha_hora_inicio: new Date('2025-12-01T10:00:00Z'),
     cupos_ocupados: 5,
     cupos_maximo: 20,
     producto_id: null,
@@ -178,10 +178,11 @@ describe('ClasesReservasService', () => {
             clase: {
               findUnique: jest.fn().mockResolvedValue({
                 ...mockClase,
-                fecha_hora_inicio: new Date(
-                  '2020-01-01T10:00:00Z',
-                ).toISOString(), // Pasada
+                fecha_hora_inicio: new Date('2020-01-01T10:00:00Z'), // Pasada (Date object)
               }),
+            },
+            inscripcionClase: {
+              findUnique: jest.fn().mockResolvedValue(null),
             },
           });
         });
@@ -487,7 +488,7 @@ describe('ClasesReservasService', () => {
         ...mockInscripcionCompleta,
         clase: {
           ...mockInscripcionCompleta.clase,
-          fecha_hora_inicio: new Date('2020-01-01T10:00:00Z').toISOString(), // Pasada
+          fecha_hora_inicio: new Date('2020-01-01T10:00:00Z'), // Pasada (Date object)
         },
       } as any);
 

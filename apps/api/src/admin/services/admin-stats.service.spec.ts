@@ -38,6 +38,12 @@ describe('AdminStatsService', () => {
               count: jest.fn(),
               groupBy: jest.fn(),
             },
+            inscripcionClaseGrupo: {
+              count: jest.fn(),
+            },
+            inscripcionMensual: {
+              findMany: jest.fn(),
+            },
             clase: {
               count: jest.fn(),
             },
@@ -78,7 +84,7 @@ describe('AdminStatsService', () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      jest.spyOn(prisma.membresia, 'count').mockResolvedValue(5);
+      jest.spyOn(prisma.inscripcionClaseGrupo, 'count').mockResolvedValue(5);
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(10);
       jest.spyOn(prisma.alerta, 'count').mockResolvedValue(3);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(50);
@@ -99,10 +105,10 @@ describe('AdminStatsService', () => {
       expect(result.fecha).toBeInstanceOf(Date);
     });
 
-    it('should call Prisma with correct filters for active memberships', async () => {
+    it('should call Prisma with correct filters for active inscriptions', async () => {
       // Arrange
       const countSpy = jest
-        .spyOn(prisma.membresia, 'count')
+        .spyOn(prisma.inscripcionClaseGrupo, 'count')
         .mockResolvedValue(5);
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.alerta, 'count').mockResolvedValue(0);
@@ -115,7 +121,7 @@ describe('AdminStatsService', () => {
 
       // Assert
       expect(countSpy).toHaveBeenCalledWith({
-        where: { estado: 'Activa' },
+        where: { fecha_baja: null },
       });
     });
 
@@ -124,7 +130,7 @@ describe('AdminStatsService', () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      jest.spyOn(prisma.membresia, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.inscripcionClaseGrupo, 'count').mockResolvedValue(0);
       const claseSpy = jest.spyOn(prisma.clase, 'count').mockResolvedValue(10);
       jest.spyOn(prisma.alerta, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(0);
@@ -145,7 +151,7 @@ describe('AdminStatsService', () => {
 
     it('should handle zero counts gracefully', async () => {
       // Arrange
-      jest.spyOn(prisma.membresia, 'count').mockResolvedValue(0);
+      jest.spyOn(prisma.inscripcionClaseGrupo, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.alerta, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(0);
@@ -177,10 +183,7 @@ describe('AdminStatsService', () => {
         .mockResolvedValueOnce(100) // Total clases
         .mockResolvedValueOnce(30); // Clases activas
       jest.spyOn(prisma.producto, 'count').mockResolvedValue(10);
-      jest.spyOn(prisma.membresia, 'groupBy').mockResolvedValue([
-        { estado: EstadoMembresia.Activa, _count: 20 },
-        { estado: EstadoMembresia.Atrasada, _count: 5 },
-      ] as any);
+      jest.spyOn(prisma.inscripcionMensual, 'findMany').mockResolvedValue([]);
 
       // Act
       const result = await service.getSystemStats();
@@ -194,10 +197,15 @@ describe('AdminStatsService', () => {
       expect(result).toHaveProperty('clasesActivas', 30);
       expect(result).toHaveProperty('totalProductos', 10);
       expect(result).toHaveProperty('ingresosTotal', 0);
+      expect(result).toHaveProperty('pagosPendientes', 0);
+      expect(result).toHaveProperty('inscripcionesActivas', 0);
     });
 
-    it('should group memberships by status correctly', async () => {
+    it('should calculate inscripciones mensuales correctly', async () => {
       // Arrange
+      const now = new Date();
+      const periodo = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+
       jest.spyOn(prisma.tutor, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.docente, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.admin, 'count').mockResolvedValue(0);
@@ -205,26 +213,23 @@ describe('AdminStatsService', () => {
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.producto, 'count').mockResolvedValue(0);
 
-      const groupBySpy = jest
-        .spyOn(prisma.membresia, 'groupBy')
+      const findManySpy = jest
+        .spyOn(prisma.inscripcionMensual, 'findMany')
         .mockResolvedValue([
-          { estado: EstadoMembresia.Activa, _count: 15 },
-          { estado: EstadoMembresia.Atrasada, _count: 3 },
-          { estado: EstadoMembresia.Cancelada, _count: 2 },
+          { id: '1', periodo, estado_pago: 'Pagado', precio_final: { toNumber: () => 1000 } },
+          { id: '2', periodo, estado_pago: 'Pendiente', precio_final: { toNumber: () => 500 } },
         ] as any);
 
       // Act
       const result = await service.getSystemStats();
 
       // Assert
-      expect(groupBySpy).toHaveBeenCalledWith({
-        by: ['estado'],
-        _count: true,
+      expect(findManySpy).toHaveBeenCalledWith({
+        where: { periodo },
       });
-      // El servicio actual NO retorna membresías agrupadas, solo totales
-      // Este test está verificando una funcionalidad no implementada
-      expect(result).toHaveProperty('totalUsuarios', 0);
-      expect(result).toHaveProperty('ingresosTotal', 0);
+      expect(result).toHaveProperty('ingresosTotal', 1000);
+      expect(result).toHaveProperty('pagosPendientes', 500);
+      expect(result).toHaveProperty('inscripcionesActivas', 2);
     });
 
     it('should handle empty counts gracefully', async () => {
@@ -235,7 +240,7 @@ describe('AdminStatsService', () => {
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.producto, 'count').mockResolvedValue(0);
-      jest.spyOn(prisma.membresia, 'groupBy').mockResolvedValue([]);
+      jest.spyOn(prisma.inscripcionMensual, 'findMany').mockResolvedValue([]);
 
       // Act
       const result = await service.getSystemStats();
@@ -249,6 +254,8 @@ describe('AdminStatsService', () => {
       expect(result).toHaveProperty('clasesActivas', 0);
       expect(result).toHaveProperty('totalProductos', 0);
       expect(result).toHaveProperty('ingresosTotal', 0);
+      expect(result).toHaveProperty('pagosPendientes', 0);
+      expect(result).toHaveProperty('inscripcionesActivas', 0);
     });
 
     it('should call count only for active products', async () => {
@@ -258,7 +265,7 @@ describe('AdminStatsService', () => {
       jest.spyOn(prisma.admin, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.estudiante, 'count').mockResolvedValue(0);
       jest.spyOn(prisma.clase, 'count').mockResolvedValue(0);
-      jest.spyOn(prisma.membresia, 'groupBy').mockResolvedValue([]);
+      jest.spyOn(prisma.inscripcionMensual, 'findMany').mockResolvedValue([]);
 
       const productoSpy = jest
         .spyOn(prisma.producto, 'count')
