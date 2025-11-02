@@ -70,6 +70,9 @@ COPY --from=builder --chown=nestjs:nodejs /monorepo/apps/api/dist ./dist/
 # 4. Copiar node_modules completo del builder (ya tiene todo instalado correctamente)
 COPY --from=builder --chown=nestjs:nodejs /monorepo/node_modules ./node_modules
 
+# 5. Crear directorio logs con permisos correctos ANTES de cambiar a usuario nestjs
+RUN mkdir -p logs && chown -R nestjs:nodejs logs
+
 USER nestjs
 
 EXPOSE 3001
