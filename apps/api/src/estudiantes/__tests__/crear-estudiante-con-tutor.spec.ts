@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EstudiantesService } from '../estudiantes.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { BadRequestException, ConflictException } from '@nestjs/common';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 /**
  * TDD: Crear estudiante(s) con tutor en un sector específico
@@ -44,6 +45,13 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
               findUnique: jest.fn(),
             },
             $transaction: jest.fn(),
+          },
+        },
+        {
+          provide: LogrosService,
+          useValue: {
+            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
+            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
           },
         },
       ],

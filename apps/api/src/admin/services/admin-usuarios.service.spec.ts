@@ -3,6 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 import { AdminUsuariosService } from './admin-usuarios.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Role } from '../../auth/decorators/roles.decorator';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 describe('AdminUsuariosService', () => {
   let service: AdminUsuariosService;

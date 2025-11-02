@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AdminStatsService } from './admin-stats.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { EstadoMembresia } from '@prisma/client';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 describe('AdminStatsService', () => {
   let service: AdminStatsService;

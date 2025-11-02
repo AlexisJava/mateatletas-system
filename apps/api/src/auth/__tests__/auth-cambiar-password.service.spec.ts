@@ -4,6 +4,7 @@ import { PrismaService } from '../../core/database/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 describe('AuthService - Cambiar Password (TDD RED)', () => {
   let service: AuthService;
@@ -36,6 +37,13 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
           provide: JwtService,
           useValue: {
             sign: jest.fn().mockReturnValue('mock-jwt-token'),
+          },
+        },
+        {
+          provide: LogrosService,
+          useValue: {
+            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
+            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
           },
         },
       ],

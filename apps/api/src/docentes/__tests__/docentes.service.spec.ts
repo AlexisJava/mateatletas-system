@@ -4,6 +4,7 @@ import { PrismaService } from '../../core/database/prisma.service';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { generateSecurePassword } from '../../common/utils/password.utils';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 // Mock bcrypt
 jest.mock('bcrypt');
@@ -91,6 +92,13 @@ describe('DocentesService', () => {
               delete: jest.fn(),
               count: jest.fn(),
             },
+          },
+        },
+        {
+          provide: LogrosService,
+          useValue: {
+            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
+            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
           },
         },
       ],

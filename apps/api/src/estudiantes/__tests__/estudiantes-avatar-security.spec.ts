@@ -5,6 +5,7 @@ import { EstudiantesService } from '../estudiantes.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { EstudianteOwnershipGuard } from '../guards/estudiante-ownership.guard';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { LogrosService } from '../../gamificacion/services/logros.service';
 
 describe('EstudiantesController - Avatar Ownership Security', () => {
   let controller: EstudiantesController;
@@ -48,6 +49,13 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
             tutor: {
               findUnique: jest.fn(),
             },
+          },
+        },
+        {
+          provide: LogrosService,
+          useValue: {
+            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
+            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
           },
         },
       ],
