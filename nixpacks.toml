@@ -9,3 +9,5 @@ cmds = ["npm run build", "npx prisma generate --schema=apps/api/prisma/schema.pr
 
 [start]
 cmd = "npx prisma db push --schema=apps/api/prisma/schema.prisma --accept-data-loss --skip-generate && node apps/api/dist/main.js"
+
+# Redeploy forzado después de limpiar _prisma_migrations - 2025-11-02 17:34:30
