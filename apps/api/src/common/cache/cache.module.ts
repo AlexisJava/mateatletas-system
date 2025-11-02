@@ -4,6 +4,7 @@ import { Module, Global } from '@nestjs/common';
 import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
 import Keyv from 'keyv';
 import KeyvRedis from '@keyv/redis';
+import { createClient } from 'redis';
 
 /**
  * Cache Module Global
@@ -29,13 +30,37 @@ import KeyvRedis from '@keyv/redis';
         const isProduction = process.env.NODE_ENV === 'production';
 
         // Configuración de Redis si está disponible
-        // Nota: KeyvRedis maneja automáticamente reconexión y retry
-        // Para configuración avanzada, usar query params en REDIS_URL
         if (redisUrl) {
           try {
-            const keyv = new Keyv({
-              store: new KeyvRedis(redisUrl),
+            // Crear cliente Redis con logging de eventos
+            const redisClient = createClient({ url: redisUrl });
+
+            // Event handlers para monitoreo
+            redisClient.on('error', (err: Error) => {
+              logger.error('❌ Redis connection error:', err.message);
             });
+
+            redisClient.on('connect', () => {
+              logger.log('✅ Redis connected successfully');
+            });
+
+            redisClient.on('reconnecting', () => {
+              logger.warn('🔄 Redis reconnecting...');
+            });
+
+            redisClient.on('ready', () => {
+              logger.log('🚀 Redis ready to accept commands');
+            });
+
+            // Conectar al cliente
+            await redisClient.connect();
+
+            const keyv = new Keyv({
+              store: new KeyvRedis(redisClient),
+            });
+
+            // Log de éxito
+            logger.log('💾 Cache configurado con Redis');
 
             return {
               store: keyv,
@@ -44,7 +69,7 @@ import KeyvRedis from '@keyv/redis';
             };
           } catch (error) {
             logger.warn('⚠️  Redis no disponible, usando cache en memoria');
-            logger.error(error);
+            logger.error(error instanceof Error ? error.message : String(error));
             // Fallback a memoria
           }
         }
