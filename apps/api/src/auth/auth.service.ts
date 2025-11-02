@@ -648,7 +648,7 @@ export class AuthService {
       const roles = parseUserRoles(estudiante.roles);
       const token = this.generateJwtToken(
         estudiante.id,
-        estudiante.email || '',
+        estudiante.username,
         roles,
       );
 
