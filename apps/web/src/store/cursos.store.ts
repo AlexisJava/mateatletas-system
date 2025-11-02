@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import * as cursosApi from '@/lib/api/cursos.api';
 import type { Modulo, Leccion, ProgresoCurso } from '@/lib/api/cursos.api';
 import type { Producto } from '@/types/catalogo.types';
+import { apiClient } from '@/lib/axios';
 
 interface Logro {
   id: string;
@@ -60,9 +61,12 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
       // TODO: Implementar endpoint /estudiantes/mis-cursos que retorne
       // los cursos en los que el estudiante está inscrito
       // Por ahora, obtenemos todos los cursos tipo 'Curso' del catálogo
-      const response = await fetch('/api/productos?tipo=Curso&soloActivos=true');
-      if (!response.ok) throw new Error('Error al cargar cursos');
-      const data = await response.json();
+      const data = await apiClient.get<Producto[]>('/productos', {
+        params: {
+          tipo: 'Curso',
+          soloActivos: 'true'
+        }
+      });
       set({ misCursos: data, isLoading: false });
     } catch (error: unknown) {
       set({
