@@ -385,4 +385,74 @@ export class PagosService {
       paymentStatus: payment.status,
     };
   }
+
+  /**
+   * Registra un pago manual para un estudiante
+   * Detecta automáticamente inscripciones pendientes del periodo actual y las marca como pagadas
+   */
+  async registrarPagoManual(estudianteId: string, tutorId: string) {
+    this.logger.log(`💵 Registrando pago manual para estudiante: ${estudianteId}`);
+
+    // Obtener periodo actual
+    const now = new Date();
+    const periodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    // Buscar inscripciones pendientes del estudiante en el periodo actual
+    const inscripcionesPendientes = await this.prisma.inscripcionMensual.findMany({
+      where: {
+        estudiante_id: estudianteId,
+        tutor_id: tutorId,
+        periodo,
+        estado_pago: 'Pendiente',
+      },
+      include: {
+        estudiante: {
+          select: {
+            nombre: true,
+            apellido: true,
+          },
+        },
+      },
+    });
+
+    if (inscripcionesPendientes.length === 0) {
+      this.logger.warn(`⚠️ No se encontraron inscripciones pendientes para estudiante ${estudianteId} en periodo ${periodo}`);
+      throw new Error('No se encontraron inscripciones pendientes para este estudiante');
+    }
+
+    // Calcular total adeudado
+    const totalAdeudado = inscripcionesPendientes.reduce(
+      (sum, insc) => sum + Number(insc.precio_final),
+      0,
+    );
+
+    // Marcar todas las inscripciones como pagadas
+    const fechaPago = new Date();
+    await this.prisma.inscripcionMensual.updateMany({
+      where: {
+        estudiante_id: estudianteId,
+        tutor_id: tutorId,
+        periodo,
+        estado_pago: 'Pendiente',
+      },
+      data: {
+        estado_pago: 'Pagado',
+        fecha_pago: fechaPago,
+        metodo_pago: 'Manual',
+        observaciones: `Pago registrado manualmente el ${fechaPago.toLocaleDateString('es-AR')}`,
+      },
+    });
+
+    this.logger.log(`✅ Pago manual registrado: ${inscripcionesPendientes.length} inscripciones - Total: $${totalAdeudado}`);
+
+    return {
+      success: true,
+      estudianteNombre: `${inscripcionesPendientes[0].estudiante.nombre} ${inscripcionesPendientes[0].estudiante.apellido}`,
+      periodo,
+      cantidadInscripciones: inscripcionesPendientes.length,
+      montoTotal: totalAdeudado,
+      fechaPago,
+      metodoPago: 'Manual',
+    };
+  }
 }

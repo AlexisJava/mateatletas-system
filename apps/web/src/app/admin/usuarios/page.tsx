@@ -13,7 +13,7 @@ import {
 } from '@/lib/utils/export.utils';
 import { getErrorMessage } from '@/lib/utils/error.utils';
 import { toErrorLike } from '@/types/common';
-import { Users, Crown, Plus, Download, Eye, Trash2, UserCog, X } from 'lucide-react';
+import { Users, Crown, Plus, Download, Eye, Trash2, UserCog, X, DollarSign } from 'lucide-react';
 import CreateDocenteForm from '@/components/admin/CreateDocenteForm';
 import ViewEditDocenteModal from '@/components/admin/ViewEditDocenteModal';
 import MultiRoleModal from '@/components/admin/MultiRoleModal';
@@ -39,6 +39,7 @@ export default function UsuariosPage() {
   const [docentesDisponibles, setDocentesDisponibles] = useState<Docente[]>([]);
   const [targetDocenteId, setTargetDocenteId] = useState<string>('');
   const [needsReassignment, setNeedsReassignment] = useState<boolean>(false);
+  const [pagoLoading, setPagoLoading] = useState<string | null>(null);
 
   // Form states para crear Admin
   const [adminForm, setAdminForm] = useState<CreateAdminData>({
@@ -255,6 +256,41 @@ export default function UsuariosPage() {
     setNeedsReassignment(false);
   };
 
+  const handleRegistrarPago = async (tutorId: string) => {
+    if (pagoLoading) return;
+
+    setPagoLoading(tutorId);
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        alert('No estás autenticado');
+        return;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pagos/registrar-pago-manual/${tutorId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al registrar el pago');
+      }
+
+      alert(`✅ Pago registrado exitosamente\n\nEstudiante: ${data.estudianteNombre}\nPeríodo: ${data.periodo}\nMonto: $${data.montoTotal.toLocaleString()}\nInscripciones: ${data.cantidadInscripciones}`);
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al registrar el pago';
+      alert(`❌ ${errorMessage}`);
+    } finally {
+      setPagoLoading(null);
+    }
+  };
+
   const handleExport = (format: 'excel' | 'csv' | 'pdf') => {
     const formattedData = formatUsersForExport(displayedUsers);
     const timestamp = new Date().getTime();
@@ -420,20 +456,11 @@ export default function UsuariosPage() {
                   <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
                     Username
                   </th>
-                  <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
-                    Email
-                  </th>
                   {activeTab === 'tutores' && (
                     <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
                       Credencial
                     </th>
                   )}
-                  <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
-                    Rol
-                  </th>
-                  <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
-                    Registrado
-                  </th>
                   <th className="px-8 py-5 text-right text-xs font-black text-white uppercase tracking-wider">
                     Acciones
                   </th>
@@ -462,9 +489,6 @@ export default function UsuariosPage() {
                         {user.username || `${user.nombre.toLowerCase()}.${user.apellido.toLowerCase()}`}
                       </div>
                     </td>
-                    <td className="px-8 py-5 whitespace-nowrap">
-                      <div className="text-sm text-white/70 font-medium">{user.email}</div>
-                    </td>
                     {activeTab === 'tutores' && (
                       <td className="px-8 py-5 whitespace-nowrap">
                         {user.password_temporal ? (
@@ -478,24 +502,22 @@ export default function UsuariosPage() {
                         )}
                       </td>
                     )}
-                    <td className="px-8 py-5">
-                      <div className="flex flex-wrap gap-2">
-                        {(user.roles && user.roles.length > 0 ? user.roles : [user.role]).map((role) => (
-                          <span key={role} className={`px-4 py-2 text-xs font-black rounded-xl shadow-lg ${roleColors[role]}`}>
-                            {roleLabels[role]}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-8 py-5 whitespace-nowrap text-sm text-white/60 font-bold">
-                      {new Date(user.createdAt).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </td>
                     <td className="px-8 py-5 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
+                        {activeTab === 'tutores' && (
+                          <button
+                            onClick={() => handleRegistrarPago(user.id)}
+                            disabled={pagoLoading === user.id}
+                            className="p-3 text-green-400 hover:bg-green-500/20 rounded-xl transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Registrar pago"
+                          >
+                            {pagoLoading === user.id ? (
+                              <div className="w-5 h-5 border-2 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                              <DollarSign className="w-5 h-5" />
+                            )}
+                          </button>
+                        )}
                         <button
                           onClick={() => {
                             if (user.role === 'docente') {
