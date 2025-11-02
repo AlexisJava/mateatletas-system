@@ -25,6 +25,33 @@ export class AdminEstudiantesService {
   constructor(private prisma: PrismaService) {}
 
   /**
+   * Genera un username único basado en nombre y apellido
+   * Formato: nombre.apellido (normalizado)
+   * Si existe, agrega número: nombre.apellido1, nombre.apellido2
+   */
+  private async generarUsernameUnico(
+    nombre: string,
+    apellido: string,
+  ): Promise<string> {
+    const baseUsername = `${nombre}.${apellido}`
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remover acentos
+      .replace(/[^a-z0-9.]/g, ''); // Solo letras, números y puntos
+
+    let username = baseUsername;
+    let contador = 1;
+
+    // Verificar si existe y agregar número si es necesario
+    while (await this.prisma.estudiante.findUnique({ where: { username } })) {
+      username = `${baseUsername}${contador}`;
+      contador++;
+    }
+
+    return username;
+  }
+
+  /**
    * Listar estudiantes del sistema con paginación y filtros
    *
    * PAGINACIÓN:
@@ -256,6 +283,7 @@ export class AdminEstudiantesService {
       data: {
         nombre: data.nombre,
         apellido: data.apellido,
+        username: await this.generarUsernameUnico(data.nombre, data.apellido),
         edad: data.edad,
         nivel_escolar: data.nivel_escolar,
         tutor_id: tutor.id,

@@ -38,6 +38,34 @@ export class EstudiantesService {
   ) {}
 
   /**
+   * Genera un username único basado en nombre y apellido
+   * Formato: nombre.apellido (normalizado)
+   * Si existe, agrega número: nombre.apellido1, nombre.apellido2
+   */
+  private async generarUsernameUnico(
+    nombre: string,
+    apellido: string,
+    sufijo?: string,
+  ): Promise<string> {
+    const baseUsername = `${nombre}.${apellido}${sufijo ? `.${sufijo}` : ''}`
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remover acentos
+      .replace(/[^a-z0-9.]/g, ''); // Solo letras, números y puntos
+
+    let username = baseUsername;
+    let contador = 1;
+
+    // Verificar si existe y agregar número si es necesario
+    while (await this.prisma.estudiante.findUnique({ where: { username } })) {
+      username = `${baseUsername}${contador}`;
+      contador++;
+    }
+
+    return username;
+  }
+
+  /**
    * Crea un nuevo estudiante asociado a un tutor
    * @param tutorId - ID del tutor que crea el estudiante
    * @param createDto - Datos del estudiante a crear
@@ -73,6 +101,10 @@ export class EstudiantesService {
     const estudiante = await this.prisma.estudiante.create({
       data: {
         ...createDto,
+        username: await this.generarUsernameUnico(
+          createDto.nombre,
+          createDto.apellido,
+        ),
         tutor_id: tutorId,
       },
       include: {
@@ -730,6 +762,11 @@ export class EstudiantesService {
       data: {
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
+        username: await this.generarUsernameUnico(
+          estudiante.nombre,
+          estudiante.apellido,
+          nuevoSectorId.slice(0, 4), // Sufijo con ID del sector
+        ),
         edad: estudiante.edad,
         nivel_escolar: estudiante.nivel_escolar,
         email: estudiante.email,
