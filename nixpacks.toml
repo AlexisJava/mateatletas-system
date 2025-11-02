@@ -14,3 +14,4 @@ cmd = "npx prisma db push --schema=apps/api/prisma/schema.prisma --accept-data-l
 
 # Deploy con _prisma_migrations vacía confirmada - 2025-11-02 17:47:44
 # Deploy con BD limpia: dom 02 nov 2025 18:36:55 -03
+# Redeploy forzado: dom 02 nov 2025 18:49:22 -03
