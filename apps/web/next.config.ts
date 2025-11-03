@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   eslint: {
@@ -18,6 +19,14 @@ const nextConfig: NextConfig = {
         pathname: '/7.x/**',
       },
     ],
+  },
+  // Configuración para monorepo: resuelve módulos desde el root
+  webpack: (config) => {
+    config.resolve.modules = [
+      ...(config.resolve.modules || []),
+      path.resolve(__dirname, '../../node_modules'),
+    ];
+    return config;
   },
 };
 
