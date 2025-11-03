@@ -5,7 +5,7 @@ nixPkgs = ["nodejs", "npm"]
 cmds = ["npm ci"]
 
 [phases.build]
-cmds = ["npm run build --workspace=apps/api", "npx prisma generate --schema=apps/api/prisma/schema.prisma"]
+cmds = ["npx prisma generate --schema=apps/api/prisma/schema.prisma", "cd apps/api && npx nest build"]
 
 [start]
 cmd = "npx prisma db push --schema=apps/api/prisma/schema.prisma --accept-data-loss --skip-generate && node apps/api/dist/main.js"
