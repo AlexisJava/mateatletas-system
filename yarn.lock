@@ -2265,19 +2265,19 @@ __metadata:
 
 "@mateatletas/contracts@file:../../packages/contracts::locator=api%40workspace%3Aapps%2Fapi":
   version: 1.0.0
-  resolution: "@mateatletas/contracts@file:../../packages/contracts#../../packages/contracts::hash=1241ee&locator=api%40workspace%3Aapps%2Fapi"
+  resolution: "@mateatletas/contracts@file:../../packages/contracts#../../packages/contracts::hash=c52df7&locator=api%40workspace%3Aapps%2Fapi"
   dependencies:
     zod: "npm:^3.22.4"
-  checksum: 10c0/e372ac9eb989d0607531219326b05dbf3acd20d8742d393da593e91a35e2f2bfdabee270e491e9c72ba414cf10deb3a7371511c2c56bf14d017459b9cc918df2
+  checksum: 10c0/d7c91698e474700af1ac1e832ebdbf532965d474059c05cd6d083b139da627156c24ce8d84a1257f2d26a9c3e9ef26c8374cffc71c39578fb130a0dd956acbc6
   languageName: node
   linkType: hard
 
 "@mateatletas/contracts@file:../../packages/contracts::locator=web%40workspace%3Aapps%2Fweb":
   version: 1.0.0
-  resolution: "@mateatletas/contracts@file:../../packages/contracts#../../packages/contracts::hash=1241ee&locator=web%40workspace%3Aapps%2Fweb"
+  resolution: "@mateatletas/contracts@file:../../packages/contracts#../../packages/contracts::hash=c52df7&locator=web%40workspace%3Aapps%2Fweb"
   dependencies:
     zod: "npm:^3.22.4"
-  checksum: 10c0/e372ac9eb989d0607531219326b05dbf3acd20d8742d393da593e91a35e2f2bfdabee270e491e9c72ba414cf10deb3a7371511c2c56bf14d017459b9cc918df2
+  checksum: 10c0/d7c91698e474700af1ac1e832ebdbf532965d474059c05cd6d083b139da627156c24ce8d84a1257f2d26a9c3e9ef26c8374cffc71c39578fb130a0dd956acbc6
   languageName: node
   linkType: hard
 
