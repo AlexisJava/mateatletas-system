@@ -50,10 +50,9 @@ ENV NODE_ENV=production
 
 # Copiar solo deps de producción usando workspaces focus
 COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
 COPY apps/api/package.json ./apps/api/
 COPY packages/contracts/package.json ./packages/contracts/
-RUN yarn workspaces focus @mateatletas/api --production
+RUN yarn workspaces focus api --production
 
 # Copiar código compilado
 COPY --from=builder /monorepo/apps/api/dist ./apps/api/dist
