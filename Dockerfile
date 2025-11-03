@@ -12,6 +12,7 @@ COPY .yarn ./.yarn
 
 # Copiar TODO el código de los packages primero (necesario para workspaces file:)
 COPY packages ./packages
+RUN ls -la packages/contracts/
 
 # Copiar solo package.json de apps (para optimizar cache)
 COPY apps/api/package.json ./apps/api/
