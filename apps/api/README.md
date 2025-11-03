@@ -165,3 +165,4 @@ Ver [PRISMA_SETUP.md](./PRISMA_SETUP.md) para documentación completa.
 4. Crear módulos de usuarios, atletas, entrenadores
 5. Implementar autorización con Guards
 6. Agregar logging y monitoring
+# Trigger rebuild
