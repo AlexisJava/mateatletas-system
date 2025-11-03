@@ -11,6 +11,14 @@
 
 ---
 
+## 📖 Guías de Deployment
+
+Este documento cubre el **Backend (Railway)**. Para el frontend:
+
+**👉 [DEPLOYMENT-VERCEL.md](DEPLOYMENT-VERCEL.md) - Guía completa de Frontend en Vercel**
+
+---
+
 ## 📦 Backend - Railway (Docker)
 
 ### Método de Deploy: Dockerfile
@@ -512,10 +520,77 @@ Si después de revisar esta documentación y el troubleshooting sigues teniendo 
 
 ---
 
+## 🚀 Secuencia de Deployment Completo (Backend + Frontend)
+
+Para desplegar la aplicación completa correctamente:
+
+### 1️⃣ Deploy Backend (Railway) - PRIMERO
+
+```bash
+# Asegúrate de estar en la branch correcta
+git checkout test/deployment-fix-complete
+
+# Push a Railway
+git push origin main
+# O si usas Railway CLI:
+railway up
+```
+
+**Resultado esperado:**
+- ✅ Build exitoso en Railway
+- ✅ Migraciones aplicadas automáticamente
+- ✅ API corriendo en: `https://mateatletas-system-production.up.railway.app`
+
+### 2️⃣ Configurar Variables en Vercel
+
+Usa la URL pública de Railway:
+```bash
+NEXT_PUBLIC_API_URL=https://mateatletas-system-production.up.railway.app/api
+```
+
+Ver guía completa en [DEPLOYMENT-VERCEL.md](DEPLOYMENT-VERCEL.md)
+
+### 3️⃣ Deploy Frontend (Vercel)
+
+```bash
+vercel --prod
+```
+
+**Resultado esperado:**
+- ✅ Build exitoso
+- ✅ Frontend accesible en: `https://mateatletas.vercel.app`
+
+### 4️⃣ Actualizar CORS en Railway
+
+```bash
+railway variables set FRONTEND_URL="https://mateatletas.vercel.app,https://www.tu-dominio.com"
+```
+
+Railway redeployará automáticamente con la nueva configuración de CORS.
+
+### 5️⃣ Verificación Final
+
+```bash
+# Verificar backend
+curl https://mateatletas-system-production.up.railway.app/api/health
+# Debe retornar: {"status":"ok","info":{...}}
+
+# Verificar frontend
+# Abrir en navegador y probar login
+```
+
+**✅ Deployment completo exitoso cuando:**
+- Login funciona desde el frontend
+- Las llamadas a la API se completan sin errores CORS
+- Los assets se cargan correctamente
+
+---
+
 ## ✅ Checklist de Health Check
 
 Usa este checklist para verificar que todo está configurado correctamente:
 
+### Backend (Railway)
 - [ ] `npm run verify:deploy` pasa sin errores
 - [ ] `npm run verify:migrations` pasa sin errores
 - [ ] `npm run verify:build` genera `apps/api/dist/src/main.js`
@@ -526,6 +601,13 @@ Usa este checklist para verificar que todo está configurado correctamente:
 - [ ] El pre-commit hook está activo (`.husky/pre-commit` existe)
 - [ ] Las migraciones están en orden cronológico
 - [ ] No hay archivos temporales en `prisma/migrations/`
+
+### Frontend (Vercel)
+- [ ] `NEXT_PUBLIC_API_URL` configurada apuntando a Railway
+- [ ] Build local exitoso: `yarn workspace web build`
+- [ ] Variables de entorno configuradas en Vercel Dashboard
+- [ ] `FRONTEND_URL` en Railway incluye la URL de Vercel
+- [ ] CORS funcionando correctamente (sin errores en DevTools)
 
 ---
 

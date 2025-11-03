@@ -6,25 +6,41 @@ Plataforma educativa de matemáticas con gamificación, gestión de clases y mú
 
 ---
 
-## ⚠️ IMPORTANTE - Archivos Críticos de Deploy
+## 🚀 Deployment
 
-Este proyecto tiene archivos de configuración **críticos** para el deployment en Railway.
+### Guías Completas
 
-**Antes de modificar cualquiera de estos archivos:**
+- **📦 [DEPLOYMENT.md](DEPLOYMENT.md)** - Backend en Railway (Docker)
+- **🌐 [DEPLOYMENT-VERCEL.md](DEPLOYMENT-VERCEL.md)** - Frontend en Vercel (Next.js)
+
+### Quick Start - Deployment Completo
+
+```bash
+# 1. Verificar configuración
+npm run verify:deploy
+
+# 2. Deploy Backend (Railway)
+git push origin main
+
+# 3. Configurar Vercel con URL de Railway
+# NEXT_PUBLIC_API_URL=https://tu-railway-url.app/api
+
+# 4. Deploy Frontend (Vercel)
+vercel --prod
+
+# 5. Actualizar CORS en Railway
+railway variables set FRONTEND_URL="https://tu-vercel-url.app"
+```
+
+### ⚠️ Archivos Críticos
+
+**Antes de modificar estos archivos, ejecutar `npm run verify:deploy`:**
 - [Dockerfile](Dockerfile)
 - [apps/api/nest-cli.json](apps/api/nest-cli.json)
 - [apps/api/tsconfig.json](apps/api/tsconfig.json)
 - [apps/api/package.json](apps/api/package.json) (scripts)
+- [vercel.json](vercel.json)
 - Migraciones de Prisma en [apps/api/prisma/migrations/](apps/api/prisma/migrations/)
-
-**EJECUTAR:**
-```bash
-npm run verify:deploy
-```
-
-Este comando verificará que todas las configuraciones críticas sean correctas y que el deploy no se romperá.
-
-**Ver guía completa de deployment:** [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ---
 
