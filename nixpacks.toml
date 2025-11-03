@@ -1,8 +1,12 @@
 [phases.setup]
-nixPkgs = ["nodejs", "yarn"]
+nixPkgs = ["nodejs"]
 
 [phases.install]
-cmds = ["yarn install --frozen-lockfile"]
+cmds = [
+  "corepack enable",
+  "corepack prepare yarn@4.10.3 --activate",
+  "yarn install --immutable"
+]
 
 [phases.build]
 cmds = [

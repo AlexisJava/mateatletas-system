@@ -1,13 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "yarn workspace @mateatletas/contracts build && yarn workspace web build",
-  "installCommand": "yarn install --frozen-lockfile",
+  "installCommand": "corepack enable && yarn install",
   "outputDirectory": "apps/web/.next",
   "framework": "nextjs",
   "build": {
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1",
-      "NODE_OPTIONS": "--max-old-space-size=4096"
+      "NODE_OPTIONS": "--max-old-space-size=4096",
+      "YARN_ENABLE_IMMUTABLE_INSTALLS": "false"
     }
   }
 }
