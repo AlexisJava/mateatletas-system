@@ -7,6 +7,7 @@ WORKDIR /monorepo
 
 FROM base AS deps
 # Copiar archivos de configuración de Yarn
+# Force rebuild: nmHoistingLimits workspaces
 COPY package.json yarn.lock .yarnrc.yml ./
 RUN cat .yarnrc.yml
 COPY .yarn ./.yarn
