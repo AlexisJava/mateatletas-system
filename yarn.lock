@@ -2265,19 +2265,19 @@ __metadata:
 
 "@mateatletas/contracts@file:../../packages/contracts::locator=api%40workspace%3Aapps%2Fapi":
   version: 1.0.0
-  resolution: "@mateatletas/contracts@file:../../packages/contracts#../../packages/contracts::hash=d4abe5&locator=api%40workspace%3Aapps%2Fapi"
+  resolution: "@mateatletas/contracts@file:../../packages/contracts#../../packages/contracts::hash=7a9f6a&locator=api%40workspace%3Aapps%2Fapi"
   dependencies:
     zod: "npm:^3.22.4"
-  checksum: 10c0/d5a6d862b892908156e256d3c295287e13fe24cf691836c8866da5c3b2b22b4dafef30626c49faf9161432545ff64a06c8b30a35673e1c96f1fe1e354de3f707
+  checksum: 10c0/64ca0116a1a98d8808b165406971073371348a1226db4eb84e482c348503dca1dd83b0828c9d5945bad4bafae7dd48ca0710f87627f782d91b0176213bdcfcf7
   languageName: node
   linkType: hard
 
 "@mateatletas/contracts@file:../../packages/contracts::locator=web%40workspace%3Aapps%2Fweb":
   version: 1.0.0
-  resolution: "@mateatletas/contracts@file:../../packages/contracts#../../packages/contracts::hash=d4abe5&locator=web%40workspace%3Aapps%2Fweb"
+  resolution: "@mateatletas/contracts@file:../../packages/contracts#../../packages/contracts::hash=7a9f6a&locator=web%40workspace%3Aapps%2Fweb"
   dependencies:
     zod: "npm:^3.22.4"
-  checksum: 10c0/d5a6d862b892908156e256d3c295287e13fe24cf691836c8866da5c3b2b22b4dafef30626c49faf9161432545ff64a06c8b30a35673e1c96f1fe1e354de3f707
+  checksum: 10c0/64ca0116a1a98d8808b165406971073371348a1226db4eb84e482c348503dca1dd83b0828c9d5945bad4bafae7dd48ca0710f87627f782d91b0176213bdcfcf7
   languageName: node
   linkType: hard
 
@@ -5991,6 +5991,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"async-generator-function@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "async-generator-function@npm:1.0.0"
+  checksum: 10c0/2c50ef856c543ad500d8d8777d347e3c1ba623b93e99c9263ecc5f965c1b12d2a140e2ab6e43c3d0b85366110696f28114649411cbcd10b452a92a2318394186
+  languageName: node
+  linkType: hard
+
 "async-retry@npm:^1.3.3":
   version: 1.3.3
   resolution: "async-retry@npm:1.3.3"
@@ -6478,12 +6485,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"camera-controls@npm:^3.1.0":
-  version: 3.1.1
-  resolution: "camera-controls@npm:3.1.1"
+"camera-controls@npm:2.9.0":
+  version: 2.9.0
+  resolution: "camera-controls@npm:2.9.0"
   peerDependencies:
     three: ">=0.126.1"
-  checksum: 10c0/e53c12cc4f85dd701cfbef88dfceab675ae63b6ff8f7de53a05e964256fe9d065eba128f181eea53b4ac01d009337b60bd5711a66eda1562fa95105a55fce7f1
+  checksum: 10c0/a772881a7a290615f144dac35e9fae78db14472e96eeb6cdf8d328a40f76bf007e64fb4ed093b1256e5b3bb9b9da2a94b97f623bbbd5cbd9485e6e75dc84af75
   languageName: node
   linkType: hard
 
@@ -9085,20 +9092,23 @@ __metadata:
   linkType: hard
 
 "get-intrinsic@npm:^1.2.4, get-intrinsic@npm:^1.2.5, get-intrinsic@npm:^1.2.6, get-intrinsic@npm:^1.2.7, get-intrinsic@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "get-intrinsic@npm:1.3.0"
+  version: 1.3.1
+  resolution: "get-intrinsic@npm:1.3.1"
   dependencies:
+    async-function: "npm:^1.0.0"
+    async-generator-function: "npm:^1.0.0"
     call-bind-apply-helpers: "npm:^1.0.2"
     es-define-property: "npm:^1.0.1"
     es-errors: "npm:^1.3.0"
     es-object-atoms: "npm:^1.1.1"
     function-bind: "npm:^1.1.2"
+    generator-function: "npm:^2.0.0"
     get-proto: "npm:^1.0.1"
     gopd: "npm:^1.2.0"
     has-symbols: "npm:^1.1.0"
     hasown: "npm:^2.0.2"
     math-intrinsics: "npm:^1.1.0"
-  checksum: 10c0/52c81808af9a8130f581e6a6a83e1ba4a9f703359e7a438d1369a5267a25412322f03dcbd7c549edaef0b6214a0630a28511d7df0130c93cfd380f4fa0b5b66a
+  checksum: 10c0/9f4ab0cf7efe0fd2c8185f52e6f637e708f3a112610c88869f8f041bb9ecc2ce44bf285dfdbdc6f4f7c277a5b88d8e94a432374d97cca22f3de7fc63795deb5d
   languageName: node
   linkType: hard
 
@@ -11447,11 +11457,11 @@ __metadata:
   linkType: hard
 
 "memfs@npm:^3.4.1":
-  version: 3.6.0
-  resolution: "memfs@npm:3.6.0"
+  version: 3.5.3
+  resolution: "memfs@npm:3.5.3"
   dependencies:
     fs-monkey: "npm:^1.0.4"
-  checksum: 10c0/af567f9038bbb5bbacf100b35d5839e90a89f882d191d8a1c7002faeb224c6cfcebd0e97c0150e9af8be95ec7b5b75a52af56fcd109d0bc18807c1f4e004f053
+  checksum: 10c0/038fc81bce17ea92dde15aaa68fa0fdaf4960c721ce3ffc7c2cb87a259333f5159784ea48b3b72bf9e054254d9d0d0d5209d0fdc3d07d08653a09933b168fbd7
   languageName: node
   linkType: hard
 
