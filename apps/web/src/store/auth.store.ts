@@ -258,6 +258,7 @@ export const useAuthStore = create<AuthState>()(
     {
       // Configuración de persistencia
       name: 'auth-storage', // Nombre del key en localStorage
+      version: 2, // NUEVO: Versión del schema - incrementar para forzar migración
       partialize: (state) => ({
         // Persistir SOLO user y token
         // NO persistir isAuthenticated para evitar bucles de redirección
@@ -265,6 +266,17 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         token: state.token,
       }),
+      // Migración automática cuando cambia la versión
+      migrate: (persistedState: any, version: number) => {
+        // Si la versión persistida es < 2, limpiar selectedRole del localStorage viejo
+        if (version < 2) {
+          // Eliminar selectedRole si existe en el estado viejo
+          if (persistedState && 'selectedRole' in persistedState) {
+            delete persistedState.selectedRole;
+          }
+        }
+        return persistedState;
+      },
       // Callback después de rehidratar: calcular isAuthenticated basado en user
       onRehydrateStorage: () => (state) => {
         if (state) {
