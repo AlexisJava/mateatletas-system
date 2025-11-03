@@ -79,3 +79,7 @@ scripts/test-health.sh
 
 # Husky
 .husky
+
+# Node modules en packages (para evitar hash mismatch con workspace:)
+packages/*/node_modules
+packages/*/dist
