@@ -48,19 +48,23 @@ FROM base AS runner
 WORKDIR /monorepo
 ENV NODE_ENV=production
 
-# Copiar solo deps de producción usando workspaces focus
+# Copiar deps de producción (sin Prisma client aún, se sobrescribirá)
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/contracts/package.json ./packages/contracts/
 RUN yarn workspaces focus api --production
 
+# Copiar schema y Prisma Client GENERADO desde builder
+COPY --from=builder /monorepo/apps/api/prisma ./apps/api/prisma
+COPY --from=builder /monorepo/apps/api/node_modules/@prisma/client ./apps/api/node_modules/@prisma/client
+COPY --from=builder /monorepo/apps/api/node_modules/.prisma/client ./apps/api/node_modules/.prisma/client
+
 # Copiar código compilado
 COPY --from=builder /monorepo/apps/api/dist ./apps/api/dist
-COPY --from=builder /monorepo/apps/api/prisma ./apps/api/prisma
 COPY --from=builder /monorepo/packages/contracts/dist ./packages/contracts/dist
 
 EXPOSE 8080
-CMD ["node", "apps/api/dist/main.js"]
+CMD ["node", "apps/api/dist/src/main.js"]
 
 # Rebuild: 20251103-145500
 
