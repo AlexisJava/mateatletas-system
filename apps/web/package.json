@@ -22,7 +22,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@lottiefiles/dotlottie-react": "^0.17.5",
-    "@mateatletas/contracts": "file:../../packages/contracts",
+    "@mateatletas/contracts": "workspace:^",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
     "@tailwindcss/postcss": "^4",

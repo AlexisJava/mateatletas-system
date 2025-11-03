@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@keyv/redis": "^5.1.3",
-    "@mateatletas/contracts": "file:../../packages/contracts",
+    "@mateatletas/contracts": "workspace:^",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/common": "^11.0.1",

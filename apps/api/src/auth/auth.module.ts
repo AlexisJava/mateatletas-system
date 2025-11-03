@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -40,6 +40,7 @@ import { GamificacionModule } from '../gamificacion/gamificacion.module';
 
     // Configuración de JWT con variables de entorno
     JwtModule.registerAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService): JwtModuleOptions => {
         const secret = config.get<string>('JWT_SECRET');
