@@ -68,3 +68,5 @@ logs/
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+.yarn/cache
+.yarn/install-state.gz
