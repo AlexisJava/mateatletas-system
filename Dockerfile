@@ -31,6 +31,14 @@ COPY --from=deps /monorepo/node_modules ./node_modules
 COPY --from=deps /monorepo/apps/api/node_modules ./apps/api/node_modules
 COPY --from=deps /monorepo/.yarn ./.yarn
 
+# Prisma expects its CLI and generated client to live inside the api workspace
+# node_modules directory. The Yarn hoisting setup keeps the actual packages in
+# the monorepo root, so we create workspace-level symlinks that point back to
+# those hoisted copies before running any Prisma commands.
+RUN mkdir -p apps/api/node_modules \
+    && ln -sfn ../../node_modules/prisma apps/api/node_modules/prisma \
+    && ln -sfn ../../node_modules/@prisma apps/api/node_modules/@prisma
+
 # Copiar TODO el código fuente
 COPY . .
 
@@ -44,7 +52,10 @@ ENV NODE_ENV=production
 
 # Copiar solo lo necesario para runtime
 COPY --from=builder /monorepo/node_modules ./node_modules
-COPY --from=builder /monorepo/apps/api/node_modules ./apps/api/node_modules
+RUN mkdir -p apps/api/node_modules \
+    && ln -sfn ../../node_modules/prisma apps/api/node_modules/prisma \
+    && ln -sfn ../../node_modules/@prisma apps/api/node_modules/@prisma
+
 COPY --from=builder /monorepo/apps/api/dist ./apps/api/dist
 COPY --from=builder /monorepo/apps/api/prisma ./apps/api/prisma
 COPY --from=builder /monorepo/apps/api/package.json ./apps/api/
