@@ -21,7 +21,7 @@
     "stop:all": "npm run dev:stop",
     "prebuild": "cd apps/api && npx prisma generate && npm run detect-planificaciones",
     "build": "turbo run build",
-    "build:web": "npm run build --workspace=apps/web",
+    "build:web": "cd apps/web && npm run build",
     "build:api": "npm run build --workspace=apps/api",
     "start:web": "npm run start --workspace=apps/web",
     "start:api": "npm run start --workspace=apps/api",

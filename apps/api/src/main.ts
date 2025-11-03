@@ -99,8 +99,8 @@ async function bootstrap() {
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    exposedHeaders: ['Content-Disposition'], // Para descargas de archivos
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+    exposedHeaders: ['Content-Disposition', 'set-cookie'], // Para descargas de archivos y cookies cross-domain
     maxAge: isProduction ? 86400 : 3600, // 24 horas en prod, 1 hora en dev
   });
 

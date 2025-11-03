@@ -141,7 +141,8 @@ export class AuthController {
     res.cookie('auth-token', result.access_token, {
       httpOnly: true, // No accesible desde JavaScript
       secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // strict en prod, lax en dev (permite cross-port)
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // none en prod para cross-domain, lax en dev
+      domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined, // Dominio compartido en producción
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
       path: '/',
     });
@@ -195,7 +196,8 @@ export class AuthController {
     res.cookie('auth-token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // strict en prod, lax en dev (permite cross-port)
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // none en prod para cross-domain, lax en dev
+      domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined, // Dominio compartido en producción
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
       path: '/',
     });
@@ -297,7 +299,8 @@ export class AuthController {
     res.clearCookie('auth-token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
       path: '/',
     });
 
