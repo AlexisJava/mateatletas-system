@@ -1,0 +1,1 @@
+# Ensures the .yarn directory is tracked for Docker builds
