@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run build --workspace=@mateatletas/contracts && npm run build --workspace=web",
-  "installCommand": "npm ci",
+  "buildCommand": "yarn workspace @mateatletas/contracts build && yarn workspace web build",
+  "installCommand": "yarn install --frozen-lockfile",
   "outputDirectory": "apps/web/.next",
   "framework": "nextjs",
   "build": {
