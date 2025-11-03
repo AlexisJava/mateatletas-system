@@ -8,6 +8,7 @@ WORKDIR /monorepo
 FROM base AS deps
 # Copiar archivos de configuración de Yarn
 COPY package.json yarn.lock .yarnrc.yml ./
+RUN cat .yarnrc.yml
 COPY .yarn ./.yarn
 
 # Copiar TODO el código de los packages primero (necesario para workspaces file:)
