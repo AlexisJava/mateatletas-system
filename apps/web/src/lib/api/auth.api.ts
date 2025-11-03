@@ -68,7 +68,7 @@ export interface RegisterResponse {
 }
 
 export interface LoginResponse {
-  // Ya NO retorna access_token (va en httpOnly cookie)
+  access_token: string; // Token JWT para autenticación
   user: AuthUser;
 }
 

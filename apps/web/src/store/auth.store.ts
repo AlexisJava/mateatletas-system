@@ -86,9 +86,14 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authApi.login({ email, password });
 
+          // Guardar token en localStorage para el interceptor de axios
+          if (typeof window !== 'undefined' && response.access_token) {
+            localStorage.setItem('access_token', response.access_token);
+          }
+
           set({
             user: response.user as User,
-            token: null,
+            token: response.access_token,
             isAuthenticated: true,
             isLoading: false,
             selectedRole: null,
@@ -112,13 +117,15 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authApi.loginEstudiante({ username, password });
 
-          // Ya NO guardamos token en localStorage (se usa httpOnly cookie)
-          // El backend configura la cookie automáticamente
+          // Guardar token en localStorage para el interceptor de axios
+          if (typeof window !== 'undefined' && response.access_token) {
+            localStorage.setItem('access_token', response.access_token);
+          }
 
-          // Actualizar estado (sin token)
+          // Actualizar estado con token
           set({
             user: response.user as User,
-            token: null, // Ya no guardamos el token aquí
+            token: response.access_token,
             isAuthenticated: true,
             isLoading: false,
           });
@@ -161,6 +168,11 @@ export const useAuthStore = create<AuthState>()(
           // Ignorar errores del backend en logout
           console.error('Error en logout del backend:', error);
         } finally {
+          // Limpiar token de localStorage
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token');
+          }
+
           // Limpiar estado completamente
           set({
             user: null,
