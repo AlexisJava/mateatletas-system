@@ -1,14 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "cd ../.. && yarn workspace @mateatletas/contracts build && yarn workspace web build",
-  "installCommand": "cd ../.. && corepack enable && corepack prepare yarn@4.10.3 --activate && yarn install",
+  "installCommand": "cd ../.. && corepack enable && corepack prepare yarn@4.10.3 --activate && yarn set version 4.10.3 && yarn install",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "build": {
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1",
       "NODE_OPTIONS": "--max-old-space-size=4096",
-      "YARN_ENABLE_IMMUTABLE_INSTALLS": "false"
+      "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
+      "YARN_IGNORE_PATH": "1"
     }
   }
 }
