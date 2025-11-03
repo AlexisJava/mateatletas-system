@@ -1,13 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  transpilePackages: ['@mateatletas/contracts'],
   eslint: {
-    // Ignora errores de ESLint durante el build en producción
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // Ignora errores de TypeScript durante el build en producción
-    // Temporal: quedan errores en admin (no críticos para flujo estudiante)
     ignoreBuildErrors: true,
   },
   images: {
@@ -19,8 +17,6 @@ const nextConfig = {
       },
     ],
   },
-  // Webpack config removido: npm workspaces automáticamente resuelve módulos desde el root
-  // La configuración manual causaba conflictos con el hoisting de dependencias en Vercel
 };
 
 module.exports = nextConfig;
