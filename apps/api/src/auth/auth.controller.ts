@@ -142,7 +142,10 @@ export class AuthController {
       httpOnly: true, // No accesible desde JavaScript
       secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // none en prod para cross-domain, lax en dev
-      domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined, // Dominio compartido en producción
+      // NOTA: domain comentado temporalmente - frontend y backend están en dominios diferentes
+      // Para que las cookies funcionen entre Railway y Vercel, NO especificar domain
+      // TODO: Configurar api.mateatletasclub.com.ar en Railway, luego descomentar:
+      // domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
       path: '/',
     });
@@ -197,7 +200,10 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // none en prod para cross-domain, lax en dev
-      domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined, // Dominio compartido en producción
+      // NOTA: domain comentado temporalmente - frontend y backend están en dominios diferentes
+      // Para que las cookies funcionen entre Railway y Vercel, NO especificar domain
+      // TODO: Configurar api.mateatletasclub.com.ar en Railway, luego descomentar:
+      // domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
       path: '/',
     });
@@ -300,7 +306,8 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
+      // NOTA: domain comentado - debe coincidir con la configuración de login
+      // domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
       path: '/',
     });
 
