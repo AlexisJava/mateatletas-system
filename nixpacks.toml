@@ -1,3 +1,9 @@
+# ============================================
+# nixpacks.toml - Railway Build Configuration
+# ============================================
+# NOTA: Railway usa Docker, este archivo es para Nixpacks legacy.
+# Para deployment actual usar Dockerfile directamente.
+
 [phases.setup]
 nixPkgs = ["nodejs"]
 
@@ -11,8 +17,9 @@ cmds = [
 [phases.build]
 cmds = [
   "yarn workspace api prisma generate",
+  "yarn workspace @mateatletas/contracts build",
   "yarn workspace api build"
 ]
 
 [start]
-cmd = "yarn workspace api prisma db push --accept-data-loss --skip-generate && node apps/api/dist/main.js"
+cmd = "yarn workspace api prisma migrate deploy && node apps/api/dist/src/main.js"

@@ -1,10 +1,23 @@
-# 🚀 Guía de Deployment a Railway
+# 🚀 Guía de Deployment - Mateatletas (ACTUALIZADO 2025-11-03)
 
-Esta guía documenta el proceso de deployment de la API de Mateatletas a Railway, incluyendo los archivos críticos de configuración y troubleshooting de problemas comunes.
+## ✅ Estado Actual: PRODUCTION READY
+
+- **Docker Image:** 602MB (optimizado, -76% vs baseline)
+- **Container:** ✅ Probado localmente con BD
+- **Health Checks:** ✅ Todos pasando
+- **API Endpoints:** 194 documentados en Swagger
+- **Branch:** `test/deployment-fix-complete`
+- **Last Commit:** `888e001` - fix Docker init
 
 ---
 
-## ⚠️ ARCHIVOS CRÍTICOS (No modificar sin extremo cuidado)
+## 📦 Backend - Railway (Docker)
+
+### Método de Deploy: Dockerfile
+
+Railway detectará automáticamente el `Dockerfile` optimizado. **NO usar Nixpacks.**
+
+### ⚠️ ARCHIVOS CRÍTICOS (No modificar sin extremo cuidado)
 
 ### Archivos de Configuración de Build
 
