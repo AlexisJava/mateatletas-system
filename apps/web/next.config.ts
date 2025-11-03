@@ -1,5 +1,4 @@
 import type { NextConfig } from 'next';
-import path from 'path';
 
 const nextConfig: NextConfig = {
   eslint: {
@@ -20,14 +19,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Configuración para monorepo: resuelve módulos desde el root
-  webpack: (config) => {
-    config.resolve.modules = [
-      ...(config.resolve.modules || []),
-      path.resolve(__dirname, '../../node_modules'),
-    ];
-    return config;
-  },
+  // Webpack config removido: npm workspaces automáticamente resuelve módulos desde el root
+  // La configuración manual causaba conflictos con el hoisting de dependencias en Vercel
 };
 
 export default nextConfig;
