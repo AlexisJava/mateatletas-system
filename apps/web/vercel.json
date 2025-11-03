@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "cd ../.. && yarn workspace @mateatletas/contracts build && yarn workspace web build",
-  "installCommand": "cd ../.. && corepack enable && corepack prepare yarn@4.10.3 --activate && yarn set version 4.10.3 && yarn install",
+  "installCommand": "cd ../.. && rm -rf /yarn1 && corepack enable && corepack prepare yarn@4.10.3 --activate && yarn set version 4.10.3 && yarn install",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "build": {
