@@ -9,7 +9,7 @@ import {
   type CreatePlanificacionInput,
   type UpdatePlanificacionInput,
   type CreateActividadInput,
-} from '@mateatletas/shared';
+} from '@mateatletas/contracts';
 
 export { estadoPlanificacionEnum };
 export type EstadoPlanificacion = SharedEstadoPlanificacion;

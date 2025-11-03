@@ -27,7 +27,7 @@ import {
   type InscripcionMensualConRelaciones as SharedInscripcionMensualConRelaciones,
   type EstudianteConDescuento as SharedEstudianteConDescuento,
   type ActualizarConfiguracionPreciosInput,
-} from '@mateatletas/shared';
+} from '@mateatletas/contracts';
 import { z } from 'zod';
 
 export { estadoMembresiaEnum, estadoInscripcionEnum };

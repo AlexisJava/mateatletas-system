@@ -161,15 +161,13 @@ export const useAuthStore = create<AuthState>()(
           // Ignorar errores del backend en logout
           console.error('Error en logout del backend:', error);
         } finally {
-          // Ya NO necesitamos limpiar localStorage (no hay token aquí)
-
-          // Limpiar estado
+          // Limpiar estado completamente
           set({
             user: null,
             token: null,
             isAuthenticated: false,
             isLoading: false,
-            selectedRole: null, // Reset selectedRole en logout
+            selectedRole: null, // CRÍTICO: Reset selectedRole para próximo login
           });
         }
       },
@@ -261,11 +259,11 @@ export const useAuthStore = create<AuthState>()(
       // Configuración de persistencia
       name: 'auth-storage', // Nombre del key en localStorage
       partialize: (state) => ({
-        // Persistir user, token y selectedRole
+        // Persistir SOLO user y token
         // NO persistir isAuthenticated para evitar bucles de redirección
+        // NO persistir selectedRole - debe ser selección de sesión, no permanente
         user: state.user,
         token: state.token,
-        selectedRole: state.selectedRole,
       }),
       // Callback después de rehidratar: calcular isAuthenticated basado en user
       onRehydrateStorage: () => (state) => {
@@ -273,8 +271,9 @@ export const useAuthStore = create<AuthState>()(
           // Si hay user, marcamos como autenticado
           state.isAuthenticated = !!state.user;
 
-          // selectedRole ya se rehidrata automáticamente desde localStorage
-          // NO resetear para mantener la selección del usuario
+          // IMPORTANTE: selectedRole NO se persiste, siempre empieza en null
+          // Esto fuerza al usuario a elegir su rol en cada sesión si tiene múltiples roles
+          state.selectedRole = null;
         }
       },
     },

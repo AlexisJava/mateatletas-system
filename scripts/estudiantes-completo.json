@@ -1,0 +1,1506 @@
+[
+  {
+    "nombre": "Jazmin",
+    "apellido": "Acosta",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Miercoles",
+        "horario": "18:00",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Olivia Anfus",
+    "apellido": "Basilone",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Martes",
+        "horario": "14:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Nicolas",
+    "apellido": "Bellomo",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO L4 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 13, 14 y 15  años ) \"",
+        "codigo": "B4",
+        "dia": "Miercoles",
+        "horario": "20:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Nehuen",
+    "apellido": "Besagonill",
+    "grupos": [
+      {
+        "nombre": "GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 6 y 7 años )",
+        "codigo": "B1",
+        "dia": "Lunes",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Gino",
+    "apellido": "Blasco",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Lunes",
+        "horario": "18:00",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      },
+      {
+        "nombre": "Curso MiniEmprendedores STEAM --> Divulgación Científica",
+        "codigo": "Matemática Financiera",
+        "dia": "Miercoles",
+        "horario": "18:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Divulgación"
+      }
+    ]
+  },
+  {
+    "nombre": "Santino",
+    "apellido": "Budaretto",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - ARDUINO CON SCRATCH",
+        "codigo": "Arduino Con Scratch",
+        "dia": "Lunes",
+        "horario": "19:30",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Máximo Nicolas",
+    "apellido": "Cal",
+    "grupos": [
+      {
+        "nombre": "Curso Astro - Exploradores -> Divulgación Científica",
+        "codigo": "Astronomía",
+        "dia": "Jueves",
+        "horario": "18:00",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Divulgación"
+      }
+    ]
+  },
+  {
+    "nombre": "Laureano",
+    "apellido": "Calalesina",
+    "grupos": [
+      {
+        "nombre": "GRUPO L1 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 10 años  - OLÍMPICO )",
+        "codigo": "L1",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Amadeo",
+    "apellido": "Cambero",
+    "grupos": [
+      {
+        "nombre": "Curso Astro - Exploradores -> Divulgación Científica",
+        "codigo": "Astronomía",
+        "dia": "Miercoles",
+        "horario": "14:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Divulgación"
+      }
+    ]
+  },
+  {
+    "nombre": "Augusto",
+    "apellido": "Carrilo",
+    "grupos": [
+      {
+        "nombre": "Curso Astro - Exploradores -> Divulgación Científica",
+        "codigo": "Astronomía",
+        "dia": "Miercoles",
+        "horario": "14:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Divulgación"
+      }
+    ]
+  },
+  {
+    "nombre": "Felipe",
+    "apellido": "Casarotto",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO L4 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 13, 14 y 15  años ) \"",
+        "codigo": "B4",
+        "dia": "Miercoles",
+        "horario": "20:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      },
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Nicolas",
+    "apellido": "Castro",
+    "grupos": [
+      {
+        "nombre": "Matemáticas Presencial - Grupo Lógico Desafiante (12 - 14 años)",
+        "codigo": "L4",
+        "dia": "Lunes",
+        "horario": "17:00",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Alice",
+    "apellido": "Ceballos",
+    "grupos": [
+      {
+        "nombre": "Matemáticas Presencial - Grupo Lógico Desafiante (12 - 14 años)",
+        "codigo": "L4",
+        "dia": "Lunes",
+        "horario": "17:00",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Lionel",
+    "apellido": "Celiz",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - Roblox Studio",
+        "codigo": "Roblox Studio",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Nicolas",
+    "apellido": "Celiz",
+    "grupos": [
+      {
+        "nombre": "GRUPO L3 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 12 años  - OLÍMPICO )",
+        "codigo": "L3",
+        "dia": "Jueves",
+        "horario": "18:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Facundo Torres",
+    "apellido": "Choque",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - ARDUINO CON SCRATCH",
+        "codigo": "Arduino Con Scratch",
+        "dia": "Lunes",
+        "horario": "18:00",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      },
+      {
+        "nombre": "CURSO PROGRAMACIÓN - Matemáticas + Scratch",
+        "codigo": "Matemáticas + Scratch",
+        "dia": "Jueves",
+        "horario": "18:00",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Ulises Luis",
+    "apellido": "Collar",
+    "grupos": [
+      {
+        "nombre": "Matemáticas Presencial - Grupo Base Progresivo (7 y 8 años)",
+        "codigo": "B2",
+        "dia": "Lunes",
+        "horario": "19:00",
+        "profesor": "Ayelen Yañez",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Diego",
+    "apellido": "Colman",
+    "grupos": [
+      {
+        "nombre": "Curso MiniEmprendedores STEAM --> Divulgación Científica",
+        "codigo": "Matemática Financiera",
+        "dia": "Miercoles",
+        "horario": "18:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Divulgación"
+      }
+    ]
+  },
+  {
+    "nombre": "Esteban",
+    "apellido": "Crespo",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - ARDUINO CON SCRATCH",
+        "codigo": "Arduino Con Scratch",
+        "dia": "Lunes",
+        "horario": "19:30",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Genaro",
+    "apellido": "D'Amico",
+    "grupos": [
+      {
+        "nombre": "GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 6 y 7 años )",
+        "codigo": "B1",
+        "dia": "Lunes",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Padme",
+    "apellido": "Demelza",
+    "grupos": [
+      {
+        "nombre": "GRUPO L2 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 11 años  - OLÍMPICO )",
+        "codigo": "L2",
+        "dia": "Martes",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Luis",
+    "apellido": "Diaz",
+    "grupos": [
+      {
+        "nombre": "Matemáticas Presencial - Grupo Lógico Desafiante (12 - 14 años)",
+        "codigo": "L4",
+        "dia": "Lunes",
+        "horario": "17:00",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Melina",
+    "apellido": "Diaz",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Martes",
+        "horario": "18:00",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Nereo",
+    "apellido": "Digiacomo",
+    "grupos": [
+      {
+        "nombre": "GRUPO L2 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 11 años  - OLÍMPICO )",
+        "codigo": "L2",
+        "dia": "Martes",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Camilo Torres",
+    "apellido": "Dominguez",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Abril",
+    "apellido": "Dondi",
+    "grupos": [
+      {
+        "nombre": "GRUPO L1 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 10 años  - OLÍMPICO )",
+        "codigo": "L1",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Ludovico Samperi",
+    "apellido": "Durán",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - Matemáticas + Scratch",
+        "codigo": "Matemáticas + Scratch",
+        "dia": "Jueves",
+        "horario": "18:00",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Franco Leonel",
+    "apellido": "Díaz",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Viernes",
+        "horario": "18:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Gael David",
+    "apellido": "Díaz",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Martes",
+        "horario": "18:00",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Santiago",
+    "apellido": "Erbojo",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Martes",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Bautista",
+    "apellido": "Escobar",
+    "grupos": [
+      {
+        "nombre": "GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 6 y 7 años )",
+        "codigo": "B1",
+        "dia": "Lunes",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Benjamin",
+    "apellido": "Ferrini",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - Roblox Studio",
+        "codigo": "Roblox Studio",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Julian Agustin",
+    "apellido": "Figueroa",
+    "grupos": [
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Mateo",
+    "apellido": "Fiorenza",
+    "grupos": [
+      {
+        "nombre": "GRUPO L2 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 11 años  - OLÍMPICO )",
+        "codigo": "L2",
+        "dia": "Martes",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Bastian",
+    "apellido": "Fleischer",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Lian André Guzman",
+    "apellido": "Fuentes",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Miercoles",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Joaquin",
+    "apellido": "Fugante",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Joaquín",
+    "apellido": "Fugante",
+    "grupos": [
+      {
+        "nombre": "Curso MiniEmprendedores STEAM --> Divulgación Científica",
+        "codigo": "Matemática Financiera",
+        "dia": "Jueves",
+        "horario": "14:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Divulgación"
+      }
+    ]
+  },
+  {
+    "nombre": "Amadeo",
+    "apellido": "Gallardo",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Martes",
+        "horario": "18:00",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Andre Santos",
+    "apellido": "Garcia",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Geraldin Santos",
+    "apellido": "García",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO L4 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 13, 14 y 15  años ) \"",
+        "codigo": "B4",
+        "dia": "Miercoles",
+        "horario": "20:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Barrales Agustín",
+    "apellido": "Gastón",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Viernes",
+        "horario": "18:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Theo",
+    "apellido": "Ghesla",
+    "grupos": [
+      {
+        "nombre": "Matemáticas Presencial - Grupo Base Progresivo (7 y 8 años)",
+        "codigo": "B2",
+        "dia": "Lunes",
+        "horario": "19:00",
+        "profesor": "Ayelen Yañez",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Valentino",
+    "apellido": "Gimenez",
+    "grupos": [
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      },
+      {
+        "nombre": "Curso MiniEmprendedores STEAM --> Divulgación Científica",
+        "codigo": "Matemática Financiera",
+        "dia": "Miercoles",
+        "horario": "18:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Divulgación"
+      }
+    ]
+  },
+  {
+    "nombre": "Benjamin",
+    "apellido": "Gonzales",
+    "grupos": [
+      {
+        "nombre": "GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 6 y 7 años )",
+        "codigo": "B1",
+        "dia": "Lunes",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Diego Paolo Colman",
+    "apellido": "Gonzalez",
+    "grupos": [
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Ivana",
+    "apellido": "Gonzalez",
+    "grupos": [
+      {
+        "nombre": "GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 6 y 7 años )",
+        "codigo": "B1",
+        "dia": "Lunes",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Mateo",
+    "apellido": "Gori",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Miercoles",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Mateo",
+    "apellido": "Groia",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Lunes",
+        "horario": "18:00",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Catalina",
+    "apellido": "Iglesias",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Miercoles",
+        "horario": "18:00",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Antonela",
+    "apellido": "Jimenez",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Sofia Lujan",
+    "apellido": "Lamas",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Viernes",
+        "horario": "18:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Tomás",
+    "apellido": "Lambruschini",
+    "grupos": [
+      {
+        "nombre": "GRUPO L2 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 11 años  - OLÍMPICO )",
+        "codigo": "L2",
+        "dia": "Martes",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Josefina",
+    "apellido": "Lensinas",
+    "grupos": [
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Octavio",
+    "apellido": "Lensinas",
+    "grupos": [
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Rebeca Trujillo",
+    "apellido": "Maldonado",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Jazmín Acosta",
+    "apellido": "Mangini",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - ARDUINO CON SCRATCH",
+        "codigo": "Arduino Con Scratch",
+        "dia": "Lunes",
+        "horario": "19:30",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Dobler",
+    "apellido": "Martina",
+    "grupos": [
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Selica Juan",
+    "apellido": "Martín",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Miercoles",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Augusto",
+    "apellido": "Marx",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Martes",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      },
+      {
+        "nombre": "CURSO PROGRAMACIÓN - Roblox Studio",
+        "codigo": "Roblox Studio",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Rafael",
+    "apellido": "Massa",
+    "grupos": [
+      {
+        "nombre": "Curso Astro - Exploradores -> Divulgación Científica",
+        "codigo": "Astronomía",
+        "dia": "Jueves",
+        "horario": "18:00",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Divulgación"
+      }
+    ]
+  },
+  {
+    "nombre": "Estefania",
+    "apellido": "Matias",
+    "grupos": [
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Ángel",
+    "apellido": "Mañque",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Juan Bautista",
+    "apellido": "Memole",
+    "grupos": [
+      {
+        "nombre": "Curso Astro - Exploradores -> Divulgación Científica",
+        "codigo": "Astronomía",
+        "dia": "Miercoles",
+        "horario": "14:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Divulgación"
+      }
+    ]
+  },
+  {
+    "nombre": "Pilar Gonzalez",
+    "apellido": "Merlo",
+    "grupos": [
+      {
+        "nombre": "GRUPO L3 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 12 años  - OLÍMPICO )",
+        "codigo": "L3",
+        "dia": "Jueves",
+        "horario": "18:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Dante",
+    "apellido": "Migani",
+    "grupos": [
+      {
+        "nombre": "Matemáticas Presencial - Grupo Base Progresivo (7 y 8 años)",
+        "codigo": "B2",
+        "dia": "Lunes",
+        "horario": "19:00",
+        "profesor": "Ayelen Yañez",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Felipe",
+    "apellido": "Negrette",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Viernes",
+        "horario": "18:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Lara",
+    "apellido": "Pacheco",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Martes",
+        "horario": "14:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Mora",
+    "apellido": "Pacheco",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Martes",
+        "horario": "14:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Adriana",
+    "apellido": "Patti",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Ticiana",
+    "apellido": "Peña",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO L4 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 13, 14 y 15  años ) \"",
+        "codigo": "B4",
+        "dia": "Miercoles",
+        "horario": "20:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Bautista",
+    "apellido": "Porras",
+    "grupos": [
+      {
+        "nombre": "GRUPO L1 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 10 años  - OLÍMPICO )",
+        "codigo": "L1",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Benjamin",
+    "apellido": "Porras",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Martes",
+        "horario": "18:00",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Clara",
+    "apellido": "Regis",
+    "grupos": [
+      {
+        "nombre": "Matemáticas Presencial - Grupo Lógico Desafiante (12 - 14 años)",
+        "codigo": "L4",
+        "dia": "Lunes",
+        "horario": "17:00",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Paula Blanco",
+    "apellido": "Rochaix",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Gael Froilán",
+    "apellido": "Rodriguez",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Martes",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Nahuel",
+    "apellido": "Rodriguez",
+    "grupos": [
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Thiago",
+    "apellido": "Rodriguez",
+    "grupos": [
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Augusto Carrillo Bascary",
+    "apellido": "Rojas",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - ARDUINO CON SCRATCH",
+        "codigo": "Arduino Con Scratch",
+        "dia": "Lunes",
+        "horario": "18:00",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Manuel",
+    "apellido": "Roldan",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Martes",
+        "horario": "14:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Lucio",
+    "apellido": "Ronchese",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Lunes",
+        "horario": "18:00",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Lucio Pepe",
+    "apellido": "Ronchese",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - ARDUINO CON SCRATCH",
+        "codigo": "Arduino Con Scratch",
+        "dia": "Lunes",
+        "horario": "19:30",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Ursula",
+    "apellido": "Safi",
+    "grupos": [
+      {
+        "nombre": "GRUPO L2 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 11 años  - OLÍMPICO )",
+        "codigo": "L2",
+        "dia": "Martes",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Sofia",
+    "apellido": "Salinas",
+    "grupos": [
+      {
+        "nombre": "Matemáticas Presencial - Grupo Lógico Desafiante (12 - 14 años)",
+        "codigo": "L4",
+        "dia": "Lunes",
+        "horario": "17:00",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Eva",
+    "apellido": "Sambueza",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Miercoles",
+        "horario": "18:00",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Mateo",
+    "apellido": "Sambueza",
+    "grupos": [
+      {
+        "nombre": "GRUPO L3 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 12 años  - OLÍMPICO )",
+        "codigo": "L3",
+        "dia": "Jueves",
+        "horario": "18:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Nicolas",
+    "apellido": "Schenone",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Miercoles",
+        "horario": "18:00",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Nicolás",
+    "apellido": "Schenone",
+    "grupos": [
+      {
+        "nombre": "Curso Astro - Exploradores -> Divulgación Científica",
+        "codigo": "Astronomía",
+        "dia": "Jueves",
+        "horario": "18:00",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Divulgación"
+      }
+    ]
+  },
+  {
+    "nombre": "Giuliana",
+    "apellido": "Schenonne",
+    "grupos": [
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Isabella",
+    "apellido": "Schenonne",
+    "grupos": [
+      {
+        "nombre": "Matemáticas Presencial - Grupo Base Progresivo (7 y 8 años)",
+        "codigo": "B2",
+        "dia": "Lunes",
+        "horario": "19:00",
+        "profesor": "Ayelen Yañez",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Santiago",
+    "apellido": "Sierra",
+    "grupos": [
+      {
+        "nombre": "GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 6 y 7 años )",
+        "codigo": "B1",
+        "dia": "Lunes",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Victoria",
+    "apellido": "Smerkin",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Miercoles",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Jose",
+    "apellido": "Sobrevilla",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Viernes",
+        "horario": "18:00",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Delfina",
+    "apellido": "Soler",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Miercoles",
+        "horario": "19:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Gael",
+    "apellido": "Somerville",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Martes",
+        "horario": "14:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Julian",
+    "apellido": "Taniguchi",
+    "grupos": [
+      {
+        "nombre": "Programación Presencial (12 - 14 años)",
+        "codigo": "Programación de videojuegos",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Santiago",
+    "apellido": "Tesone",
+    "grupos": [
+      {
+        "nombre": "GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años )",
+        "codigo": "B2",
+        "dia": "Martes",
+        "horario": "14:30",
+        "profesor": "Gimena Reniero",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Bruno Mella",
+    "apellido": "Toranzo",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - Roblox Studio",
+        "codigo": "Roblox Studio",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Benjamín",
+    "apellido": "Torquato",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - ARDUINO CON SCRATCH",
+        "codigo": "Arduino Con Scratch",
+        "dia": "Lunes",
+        "horario": "19:30",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  },
+  {
+    "nombre": "Camilo",
+    "apellido": "Torres",
+    "grupos": [
+      {
+        "nombre": "GRUPO L1 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 10 años  - OLÍMPICO )",
+        "codigo": "L1",
+        "dia": "Jueves",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Lógico Desafiante"
+      }
+    ]
+  },
+  {
+    "nombre": "Francisco",
+    "apellido": "Vilte",
+    "grupos": [
+      {
+        "nombre": "\"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) \"",
+        "codigo": "B3",
+        "dia": "Viernes",
+        "horario": "19:30",
+        "profesor": "Fabricio Carinelli",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Máximo",
+    "apellido": "Weimann",
+    "grupos": [
+      {
+        "nombre": "Curso MiniEmprendedores STEAM --> Divulgación Científica",
+        "codigo": "Matemática Financiera",
+        "dia": "Jueves",
+        "horario": "14:30",
+        "profesor": "Alexis Figueroa",
+        "perfil": "Divulgación"
+      }
+    ]
+  },
+  {
+    "nombre": "Vicente",
+    "apellido": "Wendt",
+    "grupos": [
+      {
+        "nombre": "Matemáticas Presencial - Grupo Base Progresivo (7 y 8 años)",
+        "codigo": "B2",
+        "dia": "Lunes",
+        "horario": "19:00",
+        "profesor": "Ayelen Yañez",
+        "perfil": "Base Progresivo"
+      }
+    ]
+  },
+  {
+    "nombre": "Lucio Long",
+    "apellido": "Wong",
+    "grupos": [
+      {
+        "nombre": "CURSO PROGRAMACIÓN - ARDUINO CON SCRATCH",
+        "codigo": "Arduino Con Scratch",
+        "dia": "Lunes",
+        "horario": "18:00",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      },
+      {
+        "nombre": "CURSO PROGRAMACIÓN - Matemáticas + Scratch",
+        "codigo": "Matemáticas + Scratch",
+        "dia": "Jueves",
+        "horario": "18:00",
+        "profesor": "Marcos Reyeros",
+        "perfil": "Programación"
+      }
+    ]
+  }
+]

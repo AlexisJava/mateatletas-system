@@ -1,4 +1,4 @@
-import type { ApiResponse, CursoDetalle, Leccion } from '@mateatletas/shared';
+import type { ApiResponse, CursoDetalle, Leccion } from '@mateatletas/contracts';
 
 /**
  * Factory para mocks de respuestas de detalle de curso en tests frontend

@@ -11,7 +11,7 @@ import {
   type InscripcionClase as SharedInscripcionClase,
   type ReservarClaseInput,
   type EstadoClase as SharedEstadoClase,
-} from '@mateatletas/shared';
+} from '@mateatletas/contracts';
 import { z } from 'zod';
 
 /**

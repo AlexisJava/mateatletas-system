@@ -1,0 +1,136 @@
+Rol,,Nombre y Apellido,,Si (estudiante) Entonces tiene (profesor),,Día,,Horario,,Grupo ,,Perfil ,,Madre/Padre/Tutor
+Administrador - CTO - PROFESOR,,Alexis Figueroa ,,-,,Full Time,,Full Time ,,-,,-,,
+Administradora - Directora Pedagógica - Profesora,,Ayelen Yañez,,-,,Full Time,,Full Time ,,-,,-,,
+Profesora ,,Gimena Reniero,,-,,Part Time,,Part Time ,,-,,-,,
+Profesor,,Fabricio Carinelli,,-,,Part Time,,Part Time ,,-,,-,,
+Profesor ,,Marcos Reyeros,,-,,Part Time,,Part Time ,,-,,-,,
+GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 6 y 7 años ) ,,,,,,,,,,,,,,
+Estudiante,,Santiago Sierra ,,Gimena Reniero,,Lunes,,19:30,,B1,,Base Progresivo ,,Vanesa Elida Reyes
+Estudiante,,Nehuen Besagonill,,Gimena Reniero,,Lunes,,19:30,,B1,,Base Progresivo ,,Gloria Echevarria
+Estudiante,,Benjamin Gonzales,,Gimena Reniero,,Lunes,,19:30,,B1,,Base Progresivo ,,Lucia Angelica Morales Diaz
+Estudiante,,Bautista Escobar,,Gimena Reniero,,Lunes,,19:30,,B1,,Base Progresivo ,,Adriana Veronica Bou Khair
+Estudiante,,Ivana Gonzalez,,Gimena Reniero,,Lunes,,19:30,,B1,,Base Progresivo ,,Carla Vallejos Ari
+Estudiante,,Genaro D'Amico,,Gimena Reniero,,Lunes,,19:30,,B1,,Base Progresivo ,,Ludmila Criniti
+GRUPO B2 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 8 y 9 años ) ,,,,,,,,,,,,,,
+Estudiante,,Olivia Anfus Basilone,,Gimena Reniero,,Martes,,14:30,,B2,,Base Progresivo,,Laura Elizabet Basilone
+Estudiante,,Mora Pacheco,,Gimena Reniero,,Martes,,14:30,,B2,,Base Progresivo,,Cluadio Dario Pacheco / Elsa Spena
+Estudiante,,Lara Pacheco,,Gimena Reniero,,Martes,,14:30,,B2,,Base Progresivo,,Cluadio Dario Pacheco / Elsa Spena
+Estudiante,,Gael Somerville,,Gimena Reniero,,Martes,,14:30,,B2,,Base Progresivo,,Adriana Judith Morales
+Estudiante,,Manuel Roldan,,Gimena Reniero,,Martes,,14:30,,B2,,Base Progresivo,,Luciana Jara
+Estudiante,,Gael Froilán Rodriguez,,Gimena Reniero,,Martes,,19:30,,B2,,Base Progresivo,,Maria Laura Arroyo
+Estudiante,,Augusto Marx,,Gimena Reniero,,Martes,,19:30,,B2,,Base Progresivo,,Efigenia An Di Benedetto
+Estudiante,,Santiago Erbojo,,Gimena Reniero,,Martes,,19:30,,B2,,Base Progresivo,,Maria Leonella Gadea
+Estudiante,,Santiago Tesone,,Gimena Reniero,,Martes,,14:30,,B2,,Base Progresivo,,Mariano Tessone / Carla Maria Fournier
+Estudiante,,Selica Juan Martín,,Gimena Reniero,,Miercoles,,19:30,,B2,,Base Progresivo,,Eugenia Velazquez
+Estudiante,,Delfina Soler,,Gimena Reniero,,Miercoles,,19:30,,B2,,Base Progresivo,,Sabrina Jesica Moschini
+Estudiante,,Lian André Guzman Fuentes,,Gimena Reniero,,Miercoles,,19:30,,B2,,Base Progresivo,,Yenisei del Rocio Fuentes Gutierrez
+Estudiante,,Victoria Smerkin,,Gimena Reniero,,Miercoles,,19:30,,B2,,Base Progresivo,,Melisa Gisela Santilli
+Estudiante,,Mateo Gori,,Gimena Reniero,,Miercoles,,19:30,,B2,,Base Progresivo,,Mauricio German Gori / Carla Fernández
+Estudiante,,Andre Santos Garcia,,Gimena Reniero,,Jueves,,19:30,,B2,,Base Progresivo,,Ketty Yamina Garcia Acosta
+Estudiante,,Ángel Mañque,,Gimena Reniero,,Jueves,,19:30,,B2,,Base Progresivo,,Florencia Jesica Ostaszewski
+Estudiante,,Rebeca Trujillo Maldonado,,Gimena Reniero,,Jueves,,19:30,,B2,,Base Progresivo,,Maria Celeste Maldonado
+Estudiante,,Bastian Fleischer,,Gimena Reniero,,Jueves,,19:30,,B2,,Base Progresivo,,Viviana Alicia Veronica Sulka
+Estudiante,,Antonela Jimenez,,Gimena Reniero,,Jueves,,19:30,,B2,,Base Progresivo,,Santos Briceño Rocio
+Estudiante,,Paula Blanco Rochaix,,Gimena Reniero,,Jueves,,19:30,,B2,,Base Progresivo,,Luciana Natalia Rochaix
+Estudiante,,Sofia Lujan Lamas ,,Fabricio Carinelli,,Viernes,,18:00,,B2,,Base Progresivo,,Azucena Atanasia Salva
+Estudiante,,Barrales Agustín Gastón,,Fabricio Carinelli,,Viernes,,18:00,,B2,,Base Progresivo,,Maria Lujan Fritz
+Estudiante,,Felipe Negrette ,,Fabricio Carinelli,,Viernes,,18:00,,B2,,Base Progresivo,,Castro Salomé
+Estudiante,,Franco Leonel Díaz,,Fabricio Carinelli,,Viernes,,18:00,,B2,,Base Progresivo,,Federico Manuel Diaz / Claudia Pincheira
+Estudiante,,Jose Sobrevilla,,Fabricio Carinelli,,Viernes,,18:00,,B2,,Base Progresivo,,Monica Adriana Rios
+"GRUPO B3 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 10, 11 y 12  años ) ",,,,,,,,,,,,,,
+Estudiante,,Gino Blasco,,Gimena Reniero,,Lunes,,18:00,,B3,,Base Progresivo,,Gabriel Fernando Blasco Porro / Maria Adela reyes
+Estudiante,,Lucio Ronchese,,Gimena Reniero,,Lunes,,18:00,,B3,,Base Progresivo,,Jorge Julian Pepe / Laura Paola Ronchese
+Estudiante,,Mateo Groia,,Gimena Reniero,,Lunes,,18:00,,B3,,Base Progresivo,,Perez Romina Celina
+Estudiante,,Amadeo Gallardo,,Gimena Reniero,,Martes,,18:00,,B3,,Base Progresivo,,Atilio Rolando Gallardo
+Estudiante,,Gael David Díaz,,Gimena Reniero,,Martes,,18:00,,B3,,Base Progresivo,,Federico Manuel Diaz / Pincheira Claudia
+Estudiante,,Benjamin Porras,,Gimena Reniero,,Martes,,18:00,,B3,,Base Progresivo,,Idania Margarita Abarca Zambrano
+Estudiante,,Melina Diaz,,Gimena Reniero,,Martes,,18:00,,B3,,Base Progresivo,,Diego Dante Diaz / Rita Lujan Raffaele
+Estudiante,,Catalina Iglesias,,Gimena Reniero,,Miercoles,,18:00,,B3,,Base Progresivo,,Valeria Calero
+Estudiante,,Jazmin Acosta,,Gimena Reniero,,Miercoles,,18:00,,B3,,Base Progresivo,,Daniela Soledad Mangini
+Estudiante,,Nicolas Schenone,,Gimena Reniero,,Miercoles,,18:00,,B3,,Base Progresivo,,Adriana Lui
+Estudiante,,Eva Sambueza,,Gimena Reniero,,Miercoles,,18:00,,B3	,,Base Progresivo,,Jesica Anahi Rodriguez
+Estudiante,,Joaquin Fugante,,Fabricio Carinelli,,Viernes,,19:30,,B3	,,Base Progresivo,,Patricia Maccari Fugante
+Estudiante,,Adriana Patti,,Fabricio Carinelli,,Viernes,,19:30,,B3	,,Base Progresivo,,Bibiana Beatriz Bravo
+Estudiante,,Camilo Torres Dominguez,,Fabricio Carinelli,,Viernes,,19:30,,B3	,,Base Progresivo,,Julieta Lia Dominguez
+Estudiante,,Francisco Vilte,,Fabricio Carinelli,,Viernes,,19:30,,B3	,,Base Progresivo,,Ariel Fernando Vilte
+"GRUPO L4 - MATEMÁTICA - PERFIL BASE PROGRESIVO ( 13, 14 y 15  años ) ",,,,,,,,,,,,,,
+Estudiante,,Nicolas Bellomo,,Fabricio Carinelli,,Miercoles,,20:00,,B4,,Base Progresivo,,Graciela Benita Sarapura
+Estudiante,,Geraldin Santos García,,Fabricio Carinelli,,Miercoles,,20:00,,B4,,Base Progresivo,,Ketty Yamina Garcia Acosta
+Estudiante,,Felipe Casarotto ,,Fabricio Carinelli,,Miercoles,,20:00,,B4,,Base Progresivo,,Jorgelina Adriana Soledad Perez
+Estudiante,,Ticiana Peña,,Fabricio Carinelli,,Miercoles,,20:00,,B4,,Base Progresivo,,Graciela Benita Sarapura
+GRUPO L1 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 10 años  - OLÍMPICO ) ,,,,,,,,,,,,,,
+Estudiante,,Laureano Calalesina,,Fabricio Carinelli,,Jueves,,19:30,,L1,,Lógico Desafiante,,Montoya Luciana
+Estudiante,,Abril Dondi,,Fabricio Carinelli,,Jueves,,19:30,,L1,,Lógico Desafiante,,Mariana Cecilia Zamar
+Estudiante,,Bautista Porras,,Fabricio Carinelli,,Jueves,,19:30,,L1,,Lógico Desafiante,,Idania Margarita Abarca Zambrano
+Estudiante,,Camilo Torres ,,Fabricio Carinelli,,Jueves,,19:30,,L1,,Lógico Desafiante,,Julieta Lia Dominguez
+GRUPO L2 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 11 años  - OLÍMPICO ) ,,,,,,,,,,,,,,
+Estudiante,,Nereo Digiacomo,,Fabricio Carinelli,,Martes,,19:30,,L2,,Lógico Desafiante,,Cecilia Beatriz Gramajo
+Estudiante,,Padme Demelza,,Fabricio Carinelli,,Martes,,19:30,,L2,,Lógico Desafiante,,Yenisei del Rocio Fuentes Gutierrez
+Estudiante,,Ursula Safi,,Fabricio Carinelli,,Martes,,19:30,,L2,,Lógico Desafiante,,Orestes Antonio Safi / Nazarena Bardon
+Estudiante,,Tomás Lambruschini,,Fabricio Carinelli,,Martes,,19:30,,L2,,Lógico Desafiante,,Patricia D'Alessandre
+Estudiante,,Mateo Fiorenza,,Fabricio Carinelli,,Martes,,19:30,,L2,,Lógico Desafiante,,Maria Ines Visco
+GRUPO L3 - MATEMÁTICA - PERFIL LÓGICO DESAFIANTE ( 12 años  - OLÍMPICO ) ,,,,,,,,,,,,,,
+Estudiante,,Nicolas Celiz,,Fabricio Carinelli,,Jueves,,18:00,,L3,,Lógico Desafiante,,Andrea Benitez
+Estudiante,,Mateo Sambueza,,Fabricio Carinelli,,Jueves,,18:00,,L3,,Lógico Desafiante,,Eva sambueza
+Estudiante,,Pilar Gonzalez Merlo,,Fabricio Carinelli,,Jueves,,18:00,,L3,,Lógico Desafiante,,Carina Eugenia Merlo
+CURSO PROGRAMACIÓN - ARDUINO CON SCRATCH ,,,,,,,,,,,,,,
+Estudiante,,Lucio Long Wong ,,Marcos Reyeros,,Lunes,,18:00,,Arduino Con Scratch ,,Programación,,Erika Cecil Gaspar Paredes
+Estudiante,,Augusto Carrillo Bascary Rojas,,Marcos Reyeros,,Lunes,,18:00,,Arduino Con Scratch ,,Programación,,Laura Cecilia Rojas
+Estudiante,,Facundo Torres Choque,,Marcos Reyeros,,Lunes,,18:00,,Arduino Con Scratch ,,Programación,,Lia Ines Torres
+Estudiante,,Benjamín Torquato ,,Marcos Reyeros,,Lunes,,19:30,,Arduino Con Scratch ,,Programación,,Gabriela Adriana Reynoso
+Estudiante,,Esteban Crespo,,Marcos Reyeros,,Lunes,,19:30,,Arduino Con Scratch ,,Programación,,Laura María Diaz
+Estudiante,,Lucio Pepe Ronchese,,Marcos Reyeros,,Lunes,,19:30,,Arduino Con Scratch ,,Programación,,Jorge Julian Pepe / Laura Paola Ronchese
+Estudiante,,Santino Budaretto,,Marcos Reyeros,,Lunes,,19:30,,Arduino Con Scratch ,,Programación,,Vanesa Alejandra Laso
+Estudiante,,Jazmín Acosta Mangini,,Marcos Reyeros,,Lunes,,19:30,,Arduino Con Scratch ,,Programación,,Daniela Soledad Mangini
+CURSO PROGRAMACIÓN - Matemáticas + Scratch ,,,,,,,,,,,,,,
+Estudiante,,Ludovico Samperi Durán,,Marcos Reyeros,,Jueves,,18:00,,Matemáticas + Scratch ,,Programación,,Maria Delfina Samperi
+Estudiante,,Lucio Long Wong,,Marcos Reyeros,,Jueves,,18:00,,Matemáticas + Scratch ,,Programación,,Erika Cecil Gaspar Paredes
+Estudiante,,Facundo Torres Choque,,Marcos Reyeros,,Jueves,,18:00,,Matemáticas + Scratch ,,Programación,,Lia Ines Torres
+CURSO PROGRAMACIÓN - Roblox Studio ,,,,,,,,,,,,,,
+Estudiante,,Benjamin Ferrini,,Marcos Reyeros,,Jueves,,19:30,,Roblox Studio,,Programación,,Manuel Ferrini
+Estudiante,,Augusto Marx,,Marcos Reyeros,,Jueves,,19:30,,Roblox Studio,,Programación,,Efigenia An Di Benedetto
+Estudiante,,Lionel Celiz,,Marcos Reyeros,,Jueves,,19:30,,Roblox Studio,,Programación,,Andrea Celiz
+Estudiante,,Bruno Mella Toranzo,,Marcos Reyeros,,Jueves,,19:30,,Roblox Studio,,Programación,,Natalia Soledad Toranzo
+Matemáticas Presencial - Grupo Base Progresivo (7 y 8 años) ,,,,,,,,,,,,,,
+Estudiante,,Theo Ghesla,,Ayelen Yañez,,Lunes,,19:00,,B2,,Base Progresivo,,Estefania Otero
+Estudiante,,Ulises Luis Collar,,Ayelen Yañez,,Lunes,,19:00,,B2,,Base Progresivo,,Joaquina Collar Yagas
+Estudiante,,Isabella Schenonne ,,Ayelen Yañez,,Lunes,,19:00,,B2,,Base Progresivo,,Adriana Lui
+Estudiante,,Vicente Wendt ,,Ayelen Yañez,,Lunes,,19:00,,B2,,Base Progresivo,,Noelia Luz Lopez
+Estudiante,,Dante Migani,,Ayelen Yañez,,Lunes,,19:00,,B2,,Base Progresivo,,Laura Hermoso
+Matemáticas Presencial - Grupo Lógico Desafiante (12 - 14 años)  ,,,,,,,,,,,,,,
+Estudiante,,Clara Regis,,Alexis Figueroa,,Lunes,,17:00,,L4,,Lógico Desafiante,,Maria Guadalupe Torrado
+Estudiante,,Sofia Salinas ,,Alexis Figueroa,,Lunes,,17:00,,L4,,Lógico Desafiante,,Carolina Garcia
+Estudiante,,Luis Diaz,,Alexis Figueroa,,Lunes,,17:00,,L4,,Lógico Desafiante,,Cecilia Diaz
+Estudiante,,Nicolas Castro ,,Alexis Figueroa,,Lunes,,17:00,,L4,,Lógico Desafiante,,Nataly Roca
+Estudiante,,Alice Ceballos ,,Alexis Figueroa,,Lunes,,17:00,,L4,,Lógico Desafiante,,Oskarly Ceballos
+Programación Presencial (12 - 14 años)  ,,,,,,,,,,,,,,
+Estudiante,,Josefina Lensinas,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Maria Viviana Leal
+Estudiante,,Felipe Casarotto,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Jorgelina Adriana Soledad Perez
+Estudiante,,Estefania Matias,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Natalia Paola Crespo
+Estudiante,,Nahuel Rodriguez,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Diego Alejandro Rodriguez
+Estudiante,,Thiago Rodriguez,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Diego Alejandro Rodriguez
+Estudiante,,Dobler Martina,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Maria Mercedes Escudero
+Estudiante,,Julian Agustin Figueroa,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Carolina Alejandra Gonzalez
+Estudiante,,Valentino Gimenez,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Silvina Maricel Castañon
+Estudiante,,Giuliana Schenonne,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Adriana Lui
+Estudiante,,Diego Paolo Colman Gonzalez,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Colman Recarte Pablo Edinson
+Estudiante,,Octavio Lensinas,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Maria Viviana Leal
+Estudiante,,Julian Taniguchi,,Alexis Figueroa,,Viernes,,19:30,,Programación de videojuegos,,Programación,,Griselda Brenda Riquelme
+Curso Astro - Exploradores -> Divulgación Científica,,,,,,,,,,,,,,
+Estudiante,,Juan Bautista Memole,,Alexis Figueroa,,Miercoles,,14:30,,Astronomía,,Divulgación,,María Jimena Zanin
+Estudiante,,Augusto Carrilo,,Alexis Figueroa,,Miercoles,,14:30,,Astronomía,,Divulgación,,Laura Cecilia Rojas
+Estudiante,,Amadeo Cambero,,Alexis Figueroa,,Miercoles,,14:30,,Astronomía,,Divulgación,,Leila Cambero
+Estudiante,,Rafael Massa,,Alexis Figueroa,,Jueves,,18:00,,Astronomía,,Divulgación,,Seoane Fernanda
+Estudiante,,Nicolás Schenone,,Alexis Figueroa,,Jueves,,18:00,,Astronomía,,Divulgación,,Adriana Lui
+Estudiante,,Máximo Nicolas Cal,,Alexis Figueroa,,Jueves,,18:00,,Astronomía,,Divulgación,,Natalia Fernanda Vecchioli
+Curso MiniEmprendedores STEAM --> Divulgación Científica,,,,,,,,,,,,,,
+Estudiante,,Diego Colman,,Alexis Figueroa,,Miercoles,,18:30,,Matemática Financiera ,,Divulgación,,Colman Recarte Pablo Edinson
+Estudiante,,Valentino Gimenez,,Alexis Figueroa,,Miercoles,,18:30,,Matemática Financiera ,,Divulgación,,Silvina Maricel Castañon
+Estudiante,,Gino Blasco,,Alexis Figueroa,,Miercoles,,18:30,,Matemática Financiera ,,Divulgación,,Gabriel Fernando Blasco Porro / Maria Adela reyes
+Estudiante,,Joaquín Fugante,,Alexis Figueroa,,Jueves,,14:30,,Matemática Financiera ,,Divulgación,,Patricia Maccari Fugante
+Estudiante,,Máximo Weimann ,,Alexis Figueroa,,Jueves,,14:30,,Matemática Financiera ,,Divulgación,,Lidia Virginia Diaz
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,
+,113 estudiantes,,,,,,,,,,,,,
