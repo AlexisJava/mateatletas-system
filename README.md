@@ -4,6 +4,30 @@ Plataforma educativa de matemáticas con gamificación, gestión de clases y mú
 
 **Monorepo construido con Turborepo + NestJS + Next.js**
 
+---
+
+## ⚠️ IMPORTANTE - Archivos Críticos de Deploy
+
+Este proyecto tiene archivos de configuración **críticos** para el deployment en Railway.
+
+**Antes de modificar cualquiera de estos archivos:**
+- [Dockerfile](Dockerfile)
+- [apps/api/nest-cli.json](apps/api/nest-cli.json)
+- [apps/api/tsconfig.json](apps/api/tsconfig.json)
+- [apps/api/package.json](apps/api/package.json) (scripts)
+- Migraciones de Prisma en [apps/api/prisma/migrations/](apps/api/prisma/migrations/)
+
+**EJECUTAR:**
+```bash
+npm run verify:deploy
+```
+
+Este comando verificará que todas las configuraciones críticas sean correctas y que el deploy no se romperá.
+
+**Ver guía completa de deployment:** [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+---
+
 ## 🌟 Estado del Proyecto
 
 **Backend API**: ✅ **9.5/10 - WORLD-CLASS** ([Ver detalle](WORLD_CLASS_BACKEND_SUMMARY.md))
