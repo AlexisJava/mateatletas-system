@@ -29,15 +29,8 @@ WORKDIR /monorepo
 # Copiar node_modules y .yarn desde deps
 COPY --from=deps /monorepo/node_modules ./node_modules
 COPY --from=deps /monorepo/apps/api/node_modules ./apps/api/node_modules
+COPY --from=deps /monorepo/packages/contracts/node_modules ./packages/contracts/node_modules
 COPY --from=deps /monorepo/.yarn ./.yarn
-
-# Prisma expects its CLI and generated client to live inside the api workspace
-# node_modules directory. The Yarn hoisting setup keeps the actual packages in
-# the monorepo root, so we create workspace-level symlinks that point back to
-# those hoisted copies before running any Prisma commands.
-RUN mkdir -p apps/api/node_modules \
-    && ln -sfn ../../node_modules/prisma apps/api/node_modules/prisma \
-    && ln -sfn ../../node_modules/@prisma apps/api/node_modules/@prisma
 
 # Copiar TODO el código fuente
 COPY . .
@@ -55,16 +48,17 @@ FROM base AS runner
 WORKDIR /monorepo
 ENV NODE_ENV=production
 
-# Copiar solo lo necesario para runtime
-COPY --from=builder /monorepo/node_modules ./node_modules
-RUN mkdir -p apps/api/node_modules \
-    && ln -sfn ../../node_modules/prisma apps/api/node_modules/prisma \
-    && ln -sfn ../../node_modules/@prisma apps/api/node_modules/@prisma
+# Copiar solo deps de producción usando workspaces focus
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
+COPY apps/api/package.json ./apps/api/
+COPY packages/contracts/package.json ./packages/contracts/
+RUN yarn workspaces focus @mateatletas/api --production
 
+# Copiar código compilado
 COPY --from=builder /monorepo/apps/api/dist ./apps/api/dist
 COPY --from=builder /monorepo/apps/api/prisma ./apps/api/prisma
-COPY --from=builder /monorepo/apps/api/package.json ./apps/api/
-COPY --from=builder /monorepo/package.json ./
+COPY --from=builder /monorepo/packages/contracts/dist ./packages/contracts/dist
 
 EXPOSE 8080
 CMD ["node", "apps/api/dist/main.js"]
