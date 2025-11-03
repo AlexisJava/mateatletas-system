@@ -12,13 +12,15 @@ COPY package.json yarn.lock .yarnrc.yml ./
 RUN cat .yarnrc.yml
 COPY .yarn ./.yarn
 
-# Copiar TODO el código de los packages primero (necesario para workspaces file:)
+# Copiar TODO el código de los packages primero (necesario para workspaces)
 COPY packages ./packages
 
-# Copiar solo package.json de apps (para optimizar cache)
+# Copiar TODOS los package.json de apps (Yarn necesita saber que existen TODOS los workspaces)
+# Aunque solo buildeemos api, el lockfile fue generado con ambos workspaces presentes
 COPY apps/api/package.json ./apps/api/
+COPY apps/web/package.json ./apps/web/
 
-# Ahora sí, instalar con lockfile inmutable
+# Ahora sí, instalar con lockfile inmutable (sin inconsistencias)
 RUN yarn install --immutable
 
 FROM base AS builder
