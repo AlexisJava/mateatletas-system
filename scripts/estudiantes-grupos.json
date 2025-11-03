@@ -1,0 +1,28 @@
+[
+  {
+    "nombre": "Lucas",
+    "apellido": "García",
+    "grupos": [
+      {
+        "nombre": "GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO (6 y 7 años)",
+        "codigo": "B1",
+        "dia": "LUNES",
+        "hora_inicio": "19:30",
+        "hora_fin": "21:00"
+      }
+    ]
+  },
+  {
+    "nombre": "Sofía",
+    "apellido": "García",
+    "grupos": [
+      {
+        "nombre": "GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO (6 y 7 años)",
+        "codigo": "B1",
+        "dia": "LUNES",
+        "hora_inicio": "19:30",
+        "hora_fin": "21:00"
+      }
+    ]
+  }
+]
