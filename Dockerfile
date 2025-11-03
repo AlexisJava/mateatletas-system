@@ -44,6 +44,11 @@ COPY . .
 
 # Generar Prisma client y buildear
 RUN yarn workspace api prisma generate
+
+# Buildear packages compartidos ANTES de buildear apps
+RUN yarn workspace @mateatletas/contracts build
+
+# Ahora sí buildear la API
 RUN yarn workspace api build
 
 FROM base AS runner
