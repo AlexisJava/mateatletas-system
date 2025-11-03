@@ -12,7 +12,6 @@ COPY .yarn ./.yarn
 
 # Copiar TODO el código de los packages primero (necesario para workspaces file:)
 COPY packages ./packages
-RUN ls -la packages/contracts/
 
 # Copiar solo package.json de apps (para optimizar cache)
 COPY apps/api/package.json ./apps/api/
@@ -48,5 +47,5 @@ COPY --from=builder /monorepo/package.json ./
 EXPOSE 8080
 CMD ["node", "apps/api/dist/main.js"]
 
-# Rebuild: 20251103-121500
+# Rebuild: 20251103-145500
 
