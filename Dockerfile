@@ -28,6 +28,7 @@ WORKDIR /monorepo
 
 # Copiar node_modules y .yarn desde deps
 COPY --from=deps /monorepo/node_modules ./node_modules
+COPY --from=deps /monorepo/apps/api/node_modules ./apps/api/node_modules
 COPY --from=deps /monorepo/.yarn ./.yarn
 
 # Prisma expects its CLI and generated client to live inside the api workspace
