@@ -46,3 +46,4 @@ COPY --from=builder /monorepo/package.json ./
 
 EXPOSE 8080
 CMD ["node", "apps/api/dist/main.js"]
+
