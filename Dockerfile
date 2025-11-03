@@ -28,6 +28,7 @@ WORKDIR /monorepo
 
 # Copiar node_modules y .yarn desde deps
 COPY --from=deps /monorepo/node_modules ./node_modules
+COPY --from=deps /monorepo/apps/api/node_modules ./apps/api/node_modules
 COPY --from=deps /monorepo/.yarn ./.yarn
 
 # Copiar TODO el código fuente
@@ -43,6 +44,7 @@ ENV NODE_ENV=production
 
 # Copiar solo lo necesario para runtime
 COPY --from=builder /monorepo/node_modules ./node_modules
+COPY --from=builder /monorepo/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /monorepo/apps/api/dist ./apps/api/dist
 COPY --from=builder /monorepo/apps/api/prisma ./apps/api/prisma
 COPY --from=builder /monorepo/apps/api/package.json ./apps/api/
