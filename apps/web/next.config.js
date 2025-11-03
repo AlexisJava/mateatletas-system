@@ -1,6 +1,6 @@
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'standalone',
   eslint: {
     // Ignora errores de ESLint durante el build en producción
     ignoreDuringBuilds: true,
@@ -23,4 +23,4 @@ const nextConfig: NextConfig = {
   // La configuración manual causaba conflictos con el hoisting de dependencias en Vercel
 };
 
-export default nextConfig;
+module.exports = nextConfig;
