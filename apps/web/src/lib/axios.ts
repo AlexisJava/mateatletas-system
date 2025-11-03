@@ -54,12 +54,18 @@ const apiClient: ApiClient = axios.create({
 
 /**
  * Request Interceptor
- * Ya NO es necesario adjuntar el token manualmente.
+ * Adjunta el token JWT desde localStorage al header Authorization
  * Las cookies httpOnly se envían automáticamente con withCredentials: true
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Las cookies se envían automáticamente, no hay nada que hacer aquí
+    // Adjuntar token JWT si existe en localStorage
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
     return config;
   },
   (error: AxiosError) => {
