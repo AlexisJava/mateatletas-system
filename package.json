@@ -41,7 +41,13 @@
     "docker:build:web": "docker build --build-arg APP_NAME=web -t mateatletas-web .",
     "docker:build:api": "docker build --build-arg APP_NAME=api -t mateatletas-api .",
     "docker:run:web": "docker run -p 3000:3000 mateatletas-web",
-    "docker:run:api": "docker run -p 3001:3001 mateatletas-api"
+    "docker:run:api": "docker run -p 3001:3001 mateatletas-api",
+    "verify:deploy": "bash scripts/verify-deploy.sh",
+    "verify:build": "npm run build --workspace=apps/api && test -f apps/api/dist/src/main.js",
+    "verify:migrations": "bash scripts/verify-migrations.sh",
+    "deploy:safe": "npm run verify:deploy && git push origin main",
+    "railway:logs": "railway logs",
+    "railway:connect": "railway connect Postgres-yuMB"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",

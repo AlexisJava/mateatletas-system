@@ -1,11 +1,70 @@
 #!/bin/bash
 
+# ============================================
+# PRE-COMMIT HOOK - MATEATLETAS
+# ============================================
+# 1. Verificación de deployment crítico
+# 2. Lint de TypeScript en archivos staged
+# ============================================
+
+echo ""
+echo "🔒 Ejecutando verificaciones pre-commit..."
+echo ""
+
+# ============================================
+# VERIFICACIÓN 1: Deployment Safety
+# ============================================
+echo "📦 [1/2] Verificando configuración de deploy..."
+echo ""
+
+if ! npm run verify:deploy; then
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "⛔ COMMIT BLOQUEADO"
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo ""
+  echo "La verificación de deploy falló."
+  echo "Corrige los errores antes de hacer commit."
+  echo ""
+  echo "Para más información: DEPLOYMENT.md"
+  echo ""
+  exit 1
+fi
+
+echo ""
+
+# ============================================
+# VERIFICACIÓN 2: TypeScript Quality
+# ============================================
+echo "🔍 [2/2] Verificando calidad de TypeScript..."
+echo ""
+
 # Obtener archivos staged de TypeScript
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' | grep '^apps/')
 
 if [ -n "$STAGED_FILES" ]; then
-  echo "🔍 Verificando calidad de TypeScript en archivos staged..."
+  echo "Archivos a verificar:"
+  echo "$STAGED_FILES" | sed 's/^/  - /'
+  echo ""
 
   # Ejecutar script strict en archivos staged
-  bash scripts/lint-strict.sh $STAGED_FILES || exit 1
+  if ! bash scripts/lint-strict.sh $STAGED_FILES; then
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "⛔ COMMIT BLOQUEADO"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Errores de lint detectados."
+    echo "Corrige los errores antes de hacer commit."
+    echo ""
+    exit 1
+  fi
+else
+  echo "No hay archivos TypeScript staged para verificar."
 fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ Todas las verificaciones pasaron"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
