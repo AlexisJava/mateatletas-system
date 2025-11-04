@@ -18,10 +18,8 @@ import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
  * - Convierte entre tipos de Prisma y tipos del Domain
  * - Maneja la persistencia con Decimal correctamente
  *
- * NOTA: Skipped temporalmente - faltan migraciones de Prisma para las tablas:
- * - configuracion_precios
- * - historial_cambio_precios
- * Estas son features nuevas que aún no están en la DB de test.
+ * NOTA: Skipped temporalmente - la DB de test no tiene el schema actualizado completo.
+ * Necesitas ejecutar TODAS las migraciones en la DB de test desde cero.
  */
 describe.skip('ConfiguracionPreciosRepository - Infrastructure Layer', () => {
   let prismaClient: PrismaClient;

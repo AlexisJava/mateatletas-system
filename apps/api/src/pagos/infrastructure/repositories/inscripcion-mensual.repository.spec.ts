@@ -14,9 +14,9 @@ import { CrearInscripcionMensualDTO } from '../../domain/repositories/inscripcio
  * - Manejo correcto de Decimals
  * - Relaciones con estudiantes, tutores, productos
  *
- * NOTA: Skipped temporalmente - faltan migraciones de Prisma para las tablas:
- * - inscripciones_mensuales
- * Estas son features nuevas que aún no están en la DB de test.
+ * NOTA: Skipped temporalmente - la DB de test no tiene el schema actualizado completo.
+ * Específicamente falta: columna 'username' en tabla 'tutores'.
+ * Necesitas ejecutar TODAS las migraciones en la DB de test desde cero.
  */
 describe.skip('InscripcionMensualRepository - Infrastructure Layer', () => {
   let prismaClient: PrismaClient;
