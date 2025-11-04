@@ -133,6 +133,7 @@ describe('EstudiantesService', () => {
         data: {
           ...createDto,
           tutor_id: 'tutor-1',
+          username: 'maria.gonzalez', // Username generado automáticamente
         },
         include: {
           equipo: true,

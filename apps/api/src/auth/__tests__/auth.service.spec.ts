@@ -86,6 +86,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
   const mockEstudiante = {
     id: 'est-123',
     email: 'estudiante@test.com',
+    username: 'pedro.martinez',
     password_hash: 'hashed_password',
     nombre: 'Pedro',
     apellido: 'Martínez',
