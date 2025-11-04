@@ -104,10 +104,34 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.spec.ts",
+      "!**/*.interface.ts",
+      "!**/*.dto.ts",
+      "!**/*.module.ts",
+      "!**/node_modules/**",
+      "!**/dist/**",
+      "!**/coverage/**"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "coverageReporters": [
+      "text",
+      "text-summary",
+      "html",
+      "lcov",
+      "json-summary"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 60,
+        "functions": 65,
+        "lines": 70,
+        "statements": 70
+      }
+    },
+    "testEnvironment": "node",
+    "maxWorkers": "50%",
+    "testTimeout": 10000
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

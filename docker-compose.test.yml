@@ -1,0 +1,88 @@
+# ============================================================================
+# Docker Compose para TESTING LOCAL - Mateatletas
+# ============================================================================
+#
+# Este archivo levanta una infraestructura completa de testing:
+# - PostgreSQL 16 (database de test)
+# - Redis 7 (cache de test)
+# - Adminer (UI para inspeccionar DB)
+#
+# Uso:
+#   docker-compose -f docker-compose.test.yml up -d
+#   docker-compose -f docker-compose.test.yml down
+#
+
+version: '3.9'
+
+services:
+  # ==========================================================================
+  # PostgreSQL 16 - Database de Test
+  # ==========================================================================
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: mateatletas-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test_password_123
+      POSTGRES_DB: mateatletas_test
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5433:5432"  # Puerto 5433 para no conflictuar con postgres de desarrollo
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+      - ./apps/api/prisma/schema.prisma:/docker-entrypoint-initdb.d/schema.prisma:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # ==========================================================================
+  # Redis 7 - Cache de Test
+  # ==========================================================================
+  redis-test:
+    image: redis:7-alpine
+    container_name: mateatletas-redis-test
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6380:6379"  # Puerto 6380 para no conflictuar con redis de desarrollo
+    volumes:
+      - redis-test-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # ==========================================================================
+  # Adminer - UI para inspeccionar PostgreSQL
+  # ==========================================================================
+  adminer:
+    image: adminer:latest
+    container_name: mateatletas-adminer-test
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres-test
+    depends_on:
+      - postgres-test
+    networks:
+      - test-network
+
+volumes:
+  postgres-test-data:
+    name: mateatletas-postgres-test-data
+  redis-test-data:
+    name: mateatletas-redis-test-data
+
+networks:
+  test-network:
+    name: mateatletas-test-network
+    driver: bridge

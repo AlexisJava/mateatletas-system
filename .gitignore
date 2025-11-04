@@ -9,6 +9,9 @@ coverage/
 *.log
 playwright-report/
 test-results/
+artillery-report-*.json
+artillery-report-*.html
+.artillery/
 
 # Next.js
 .next/

@@ -1,0 +1,176 @@
+# ============================================================================
+# Artillery Load Testing Configuration - Mateatletas
+# ============================================================================
+#
+# Este archivo define escenarios de carga para testear el performance
+# del sistema bajo diferentes condiciones.
+#
+# Instalación:
+#   npm install --save-dev artillery
+#
+# Uso:
+#   # Test básico (local):
+#   artillery run artillery.yml
+#
+#   # Test contra staging:
+#   artillery run --target https://mateatletas-system-staging.up.railway.app artillery.yml
+#
+#   # Test con más usuarios:
+#   artillery run -e stress artillery.yml
+#
+# Reportes:
+#   artillery run artillery.yml --output report.json
+#   artillery report report.json
+
+config:
+  target: "http://localhost:3001"
+  phases:
+    # Fase 1: Warmup (30s)
+    - duration: 30
+      arrivalRate: 5  # 5 usuarios/segundo
+      name: "Warmup"
+
+    # Fase 2: Ramp up (60s)
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 20  # Incrementar gradualmente a 20 usuarios/segundo
+      name: "Ramp up"
+
+    # Fase 3: Sustained load (120s)
+    - duration: 120
+      arrivalRate: 20  # 20 usuarios/segundo sostenidos
+      name: "Sustained load"
+
+    # Fase 4: Spike (30s)
+    - duration: 30
+      arrivalRate: 50  # Pico de 50 usuarios/segundo
+      name: "Spike test"
+
+  # Timeouts y configuración
+  timeout: 10
+
+  # Variables de entorno
+  variables:
+    testEmail: "test@example.com"
+    testPassword: "wrongpassword123"
+
+  # Plugins para métricas avanzadas
+  plugins:
+    metrics-by-endpoint:
+      stripQueryString: true
+
+  # Métricas a capturar
+  ensure:
+    maxErrorRate: 1  # Máximo 1% de errores permitidos
+    p95: 2000        # 95% de requests deben responder en <2s
+    p99: 5000        # 99% de requests deben responder en <5s
+
+# ============================================================================
+# Escenarios de carga
+# ============================================================================
+scenarios:
+  # --------------------------------------------------------------------------
+  # Escenario 1: Health Check (más liviano)
+  # --------------------------------------------------------------------------
+  - name: "Health Check Monitoring"
+    weight: 20  # 20% del tráfico
+    flow:
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200
+            - contentType: json
+            - hasProperty: status
+
+  # --------------------------------------------------------------------------
+  # Escenario 2: Login attempts (carga media)
+  # --------------------------------------------------------------------------
+  - name: "Auth - Login Attempts"
+    weight: 50  # 50% del tráfico
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "{{ testEmail }}"
+            password: "{{ testPassword }}"
+          expect:
+            - statusCode:
+                - 400
+                - 401  # Esperamos fallo de autenticación
+          capture:
+            - json: "$.message"
+              as: "errorMessage"
+
+  # --------------------------------------------------------------------------
+  # Escenario 3: API Docs access
+  # --------------------------------------------------------------------------
+  - name: "Swagger Documentation"
+    weight: 10  # 10% del tráfico
+    flow:
+      - get:
+          url: "/api/docs"
+          expect:
+            - statusCode: 200
+
+  # --------------------------------------------------------------------------
+  # Escenario 4: Frontend pages (más pesado)
+  # --------------------------------------------------------------------------
+  - name: "Frontend Page Loads"
+    weight: 20  # 20% del tráfico
+    flow:
+      - get:
+          url: "/"
+          expect:
+            - statusCode: 200
+      - think: 2  # Simular 2 segundos de "pensamiento" del usuario
+      - get:
+          url: "/login"
+          expect:
+            - statusCode: 200
+
+# ============================================================================
+# Environments (diferentes configuraciones)
+# ============================================================================
+environments:
+  # Local development
+  local:
+    target: "http://localhost:3001"
+    phases:
+      - duration: 60
+        arrivalRate: 10
+
+  # Staging environment
+  staging:
+    target: "https://mateatletas-system-staging.up.railway.app"
+    phases:
+      - duration: 120
+        arrivalRate: 20
+    ensure:
+      maxErrorRate: 2
+      p95: 3000
+      p99: 6000
+
+  # Production smoke test (ligero)
+  production-smoke:
+    target: "https://mateatletas-system-production.up.railway.app"
+    phases:
+      - duration: 60
+        arrivalRate: 5  # Solo 5 usuarios/seg para no sobrecargar
+    ensure:
+      maxErrorRate: 0.5
+      p95: 1500
+      p99: 3000
+
+  # Stress test (brutal)
+  stress:
+    target: "http://localhost:3001"
+    phases:
+      - duration: 60
+        arrivalRate: 50
+        rampTo: 100  # Rampa hasta 100 usuarios/segundo
+      - duration: 120
+        arrivalRate: 100  # 100 usuarios/segundo sostenidos
+    ensure:
+      maxErrorRate: 5
+      p95: 5000
+      p99: 10000
