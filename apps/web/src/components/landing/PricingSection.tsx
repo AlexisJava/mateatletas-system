@@ -1,7 +1,13 @@
+'use client';
+
+import { useState } from 'react';
+
 interface Plan {
   name: string;
-  price: string;
-  originalPrice?: string;
+  priceARS: string;
+  priceUSD: string;
+  originalPriceARS?: string;
+  originalPriceUSD?: string;
   discount?: string;
   description: string;
   features: string[];
@@ -10,10 +16,13 @@ interface Plan {
 }
 
 export default function PricingSection() {
+  const [currency, setCurrency] = useState<'ARS' | 'USD'>('ARS');
+
   const plans: Plan[] = [
     {
       name: 'Individual',
-      price: '$55.000',
+      priceARS: '$55.000',
+      priceUSD: '$60',
       description: 'Clases personalizadas 1 a 1',
       features: [
         'Clases individuales en vivo',
@@ -27,8 +36,10 @@ export default function PricingSection() {
     },
     {
       name: 'Grupal',
-      price: '$38.000',
-      originalPrice: '$50.000',
+      priceARS: '$38.000',
+      priceUSD: '$42',
+      originalPriceARS: '$50.000',
+      originalPriceUSD: '$55',
       discount: '24% OFF',
       description: 'Grupos reducidos de 10-15 estudiantes',
       features: [
@@ -46,7 +57,8 @@ export default function PricingSection() {
     },
     {
       name: 'Familia',
-      price: '$42.000',
+      priceARS: '$42.000',
+      priceUSD: '$46',
       description: 'Por estudiante (2 o más hijos)',
       features: [
         'Descuentos por familia',
@@ -72,9 +84,29 @@ export default function PricingSection() {
           <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
             Elige tu plan
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto mb-8">
             Precios transparentes con sistema de descuentos por familia. Desde $38.000/mes.
           </p>
+
+          {/* Currency Toggle */}
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <span className={`text-sm font-bold transition-colors ${currency === 'ARS' ? 'text-[#0ea5e9]' : 'text-gray-400'}`}>
+              ARS
+            </span>
+            <button
+              onClick={() => setCurrency(currency === 'ARS' ? 'USD' : 'ARS')}
+              className="relative w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors hover:bg-gray-300 dark:hover:bg-gray-600"
+            >
+              <div
+                className={`absolute top-1 left-1 w-6 h-6 bg-gradient-to-r from-[#0ea5e9] to-[#0284c7] rounded-full shadow-md transition-transform duration-300 ${
+                  currency === 'USD' ? 'translate-x-8' : 'translate-x-0'
+                }`}
+              />
+            </button>
+            <span className={`text-sm font-bold transition-colors ${currency === 'USD' ? 'text-[#10b981]' : 'text-gray-400'}`}>
+              USD
+            </span>
+          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -123,13 +155,18 @@ export default function PricingSection() {
 
                 {/* Price */}
                 <div className="text-center mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-                  {plan.originalPrice && (
+                  {currency === 'ARS' && plan.originalPriceARS && (
                     <div className="text-lg text-gray-400 line-through mb-1">
-                      {plan.originalPrice}
+                      {plan.originalPriceARS}
+                    </div>
+                  )}
+                  {currency === 'USD' && plan.originalPriceUSD && (
+                    <div className="text-lg text-gray-400 line-through mb-1">
+                      {plan.originalPriceUSD}
                     </div>
                   )}
                   <div className={`text-5xl font-black bg-gradient-to-r ${plan.gradient} bg-clip-text text-transparent`}>
-                    {plan.price}
+                    {currency === 'ARS' ? plan.priceARS : plan.priceUSD}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     por mes
