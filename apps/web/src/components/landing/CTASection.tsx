@@ -26,13 +26,15 @@ export default function CTASection() {
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
             <Link
               href="/club"
-              className="px-10 py-5 bg-white text-[#0ea5e9] rounded-xl font-black text-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-2xl hover:shadow-white/20"
+              className="btn-pulse"
+              style={{ backgroundColor: 'white', color: '#0ea5e9', animation: 'none' }}
             >
               Comenzar ahora
             </Link>
             <Link
               href="/nosotros"
-              className="px-10 py-5 bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 rounded-xl font-black text-lg hover:bg-white/20 transition-all hover:scale-105"
+              className="btn-arrow"
+              style={{ borderColor: 'white', color: 'white' }}
             >
               Conocer más
             </Link>
