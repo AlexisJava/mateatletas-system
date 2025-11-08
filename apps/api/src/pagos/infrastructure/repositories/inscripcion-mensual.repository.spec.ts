@@ -18,7 +18,7 @@ import { CrearInscripcionMensualDTO } from '../../domain/repositories/inscripcio
  * Específicamente falta: columna 'username' en tabla 'tutores'.
  * Necesitas ejecutar TODAS las migraciones en la DB de test desde cero.
  */
-describe.skip('InscripcionMensualRepository - Infrastructure Layer', () => {
+describe('InscripcionMensualRepository - Infrastructure Layer', () => {
   let prismaClient: PrismaClient;
   let prisma: PrismaService;
   let repository: InscripcionMensualRepository;

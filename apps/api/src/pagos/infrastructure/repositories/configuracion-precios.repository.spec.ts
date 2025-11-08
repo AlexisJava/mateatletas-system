@@ -21,7 +21,7 @@ import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
  * NOTA: Skipped temporalmente - la DB de test no tiene el schema actualizado completo.
  * Necesitas ejecutar TODAS las migraciones en la DB de test desde cero.
  */
-describe.skip('ConfiguracionPreciosRepository - Infrastructure Layer', () => {
+describe('ConfiguracionPreciosRepository - Infrastructure Layer', () => {
   let prismaClient: PrismaClient;
   let prisma: PrismaService;
   let repository: ConfiguracionPreciosRepository;
