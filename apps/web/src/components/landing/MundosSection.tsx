@@ -74,7 +74,7 @@ export default function MundosSection() {
               className="relative group"
             >
               {/* Card Container */}
-              <div className={`relative h-full p-8 bg-gradient-to-br ${mundo.bgGradient} rounded-3xl border border-gray-200 dark:border-gray-700 hover:border-transparent transition-all duration-300 hover:shadow-2xl hover:scale-105`}>
+              <div className="card-glass relative h-full p-8 rounded-3xl border-2 border-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:scale-105">
                 {/* Gradient Glow on Hover */}
                 <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${mundo.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300 -z-10 blur-2xl`} />
 

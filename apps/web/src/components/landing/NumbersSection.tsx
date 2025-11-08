@@ -58,7 +58,7 @@ export default function NumbersSection() {
               className="relative group"
             >
               {/* Card */}
-              <div className="relative p-8 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-transparent dark:hover:border-transparent transition-all duration-300 hover:shadow-2xl hover:scale-105">
+              <div className="card-glass relative p-8 rounded-2xl border-2 border-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:scale-105">
                 {/* Gradient Border on Hover */}
                 <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl`} />
 

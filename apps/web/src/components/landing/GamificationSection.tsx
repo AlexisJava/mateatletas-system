@@ -61,7 +61,7 @@ export default function GamificationSection() {
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="text-center p-6 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-gray-700/50"
+              className="card-glass text-center p-6 rounded-2xl border-2 border-white/10"
             >
               <div className="text-4xl font-black bg-gradient-to-r from-[#8b5cf6] to-[#0ea5e9] bg-clip-text text-transparent mb-2">
                 {stat.value}
@@ -84,7 +84,7 @@ export default function GamificationSection() {
               className="relative group"
             >
               {/* Card */}
-              <div className="relative h-full p-6 bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-transparent transition-all duration-300 hover:shadow-2xl hover:scale-105">
+              <div className="card-glass relative h-full p-6 rounded-2xl border-2 border-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:scale-105">
                 {/* Gradient Border Glow */}
                 <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${logro.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl`} />
 
