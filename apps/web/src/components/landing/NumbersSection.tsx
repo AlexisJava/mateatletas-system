@@ -8,33 +8,27 @@ interface Stat {
 export default function NumbersSection() {
   const stats: Stat[] = [
     {
-      value: '73',
-      label: 'Logros',
-      description: 'Sistema completo de gamificación',
+      value: '120+',
+      label: 'Estudiantes activos',
+      description: 'Familias confiando en nosotros',
       color: 'from-[#0ea5e9] to-[#0284c7]',
     },
     {
-      value: '4',
-      label: 'Casas',
-      description: 'Fénix, Dragón, Tigre, Águila',
-      color: 'from-[#FF6B35] to-[#e65929]',
-    },
-    {
       value: '10-15',
-      label: 'Estudiantes',
-      description: 'Por grupo en clases en vivo',
-      color: 'from-[#fbbf24] to-[#f59e0b]',
-    },
-    {
-      value: '15+',
-      label: 'Niveles',
-      description: 'Sistema de progresión XP',
+      label: 'Alumnos por grupo',
+      description: 'Atención personalizada garantizada',
       color: 'from-[#10b981] to-[#059669]',
     },
     {
-      value: '24%',
-      label: 'Descuento',
-      description: 'Hasta 24% con 5 niveles',
+      value: '3',
+      label: 'Mundos STEAM',
+      description: 'Matemática, Programación y Ciencias',
+      color: 'from-[#fbbf24] to-[#f59e0b]',
+    },
+    {
+      value: '100%',
+      label: 'Clases en vivo',
+      description: 'Interacción real con docentes',
       color: 'from-[#8b5cf6] to-[#7c3aed]',
     },
   ];
@@ -51,16 +45,16 @@ export default function NumbersSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
             <div
               key={index}
               className="relative group"
             >
               {/* Card */}
-              <div className="card-glass relative p-8 rounded-2xl border-2 border-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:scale-105">
-                {/* Gradient Border on Hover */}
-                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-xl`} />
+              <div className="card-glass relative p-8 rounded-2xl border-2 border-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-xl">
+                {/* Gradient Glow on Hover - sin blur para mantener legibilidad */}
+                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none`} />
 
                 {/* Content */}
                 <div className="text-center space-y-3">
