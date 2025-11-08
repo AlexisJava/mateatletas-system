@@ -39,7 +39,7 @@ export default function CasasSection() {
   ];
 
   return (
-    <section className="py-20 bg-white dark:bg-gray-900">
+    <section className="py-20 bg-transparent">
       <div className="max-w-[1400px] mx-auto px-6">
         <div className="text-center mb-16">
           <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#FF6B35]/10 to-[#0ea5e9]/10 rounded-full border border-[#FF6B35]/20 mb-6">

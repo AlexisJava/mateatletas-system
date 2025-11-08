@@ -4,7 +4,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="section-landing" style={{ marginTop: '120px', marginBottom: '40px' }}>
+    <footer className="relative bg-transparent py-16">
       <div className="footer-terminal">
         {/* Terminal Header */}
         <div className="terminal-header">

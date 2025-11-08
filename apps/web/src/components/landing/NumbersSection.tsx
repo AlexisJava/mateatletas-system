@@ -34,7 +34,7 @@ export default function NumbersSection() {
   ];
 
   return (
-    <section className="py-20 bg-white dark:bg-gray-900">
+    <section className="py-20 bg-transparent">
       <div className="max-w-[1400px] mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">

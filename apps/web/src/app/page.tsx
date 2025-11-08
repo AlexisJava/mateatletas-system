@@ -4,8 +4,6 @@ import NumbersSection from '@/components/landing/NumbersSection';
 import VideoSection from '@/components/landing/VideoSection';
 import MundosSection from '@/components/landing/MundosSection';
 import GamificationSection from '@/components/landing/GamificationSection';
-import CasasSection from '@/components/landing/CasasSection';
-import TimelineSection from '@/components/landing/TimelineSection';
 import GallerySection from '@/components/landing/GallerySection';
 import TestimonialsSection from '@/components/landing/TestimonialsSection';
 import ComparisonSection from '@/components/landing/ComparisonSection';
@@ -13,11 +11,12 @@ import PricingSection from '@/components/landing/PricingSection';
 import FAQSection from '@/components/landing/FAQSection';
 import CTASection from '@/components/landing/CTASection';
 import Footer from '@/components/landing/Footer';
+import SectionDivider from '@/components/landing/SectionDivider';
 
 /**
  * Landing page completa de Mateatletas
  *
- * 15 secciones diseñadas con:
+ * 12 secciones diseñadas con:
  * - TypeScript STRICT (sin any, unknown, @ts-ignore)
  * - Nunito font (400-900 weights)
  * - Dark mode support
@@ -35,17 +34,25 @@ export default function HomePage() {
       <main className="min-h-screen">
         <Navbar />
         <Hero />
+        <SectionDivider color="blue" />
         <NumbersSection />
+        <SectionDivider color="yellow" />
         <VideoSection />
+        <SectionDivider color="blue" />
         <MundosSection />
+        <SectionDivider color="purple" />
         <GamificationSection />
-        <CasasSection />
-        <TimelineSection />
+        <SectionDivider color="green" />
         <GallerySection />
+        <SectionDivider color="yellow" />
         <TestimonialsSection />
+        <SectionDivider color="purple" />
         <ComparisonSection />
+        <SectionDivider color="green" />
         <PricingSection />
+        <SectionDivider color="orange" />
         <FAQSection />
+        <SectionDivider color="blue" />
         <CTASection />
         <Footer />
       </main>

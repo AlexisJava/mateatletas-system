@@ -73,7 +73,7 @@ export default function PricingSection() {
   ];
 
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-800 dark:via-blue-950/20 dark:to-purple-950/20">
+    <section className="py-20 bg-transparent">
       <div className="max-w-[1400px] mx-auto px-6">
         <div className="text-center mb-16">
           <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#10b981]/10 to-[#0ea5e9]/10 rounded-full border border-[#10b981]/20 mb-6">
