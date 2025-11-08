@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Nunito, Lilita_One } from 'next/font/google';
+import { Nunito, Lilita_One, Orbitron, Rajdhani } from 'next/font/google';
 import './globals.css';
 import './animations.css';
 import './landing.css';
@@ -23,6 +23,22 @@ const lilitaOne = Lilita_One({
   display: 'swap',
 });
 
+// Orbitron: Fuente futurista para CLUB STEAM
+const orbitron = Orbitron({
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-orbitron',
+  subsets: ['latin'],
+  display: 'swap',
+});
+
+// Rajdhani: Fuente alternativa premium
+const rajdhani = Rajdhani({
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-rajdhani',
+  subsets: ['latin'],
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: 'Mateatletas - Platform for Athletes',
   description:
@@ -37,7 +53,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${nunito.variable} ${lilitaOne.variable} antialiased`}>
+      <body className={`${nunito.variable} ${lilitaOne.variable} ${orbitron.variable} ${rajdhani.variable} antialiased`}>
         <QueryProvider>
           {children}
         </QueryProvider>
