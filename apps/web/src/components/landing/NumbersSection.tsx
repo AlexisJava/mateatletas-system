@@ -8,16 +8,10 @@ interface Stat {
 export default function NumbersSection() {
   const stats: Stat[] = [
     {
-      value: '120+',
+      value: '500+',
       label: 'Estudiantes activos',
       description: 'Familias confiando en nosotros',
       color: 'from-[#0ea5e9] to-[#0284c7]',
-    },
-    {
-      value: '10-15',
-      label: 'Alumnos por grupo',
-      description: 'Atención personalizada garantizada',
-      color: 'from-[#10b981] to-[#059669]',
     },
     {
       value: '3',
@@ -29,6 +23,12 @@ export default function NumbersSection() {
       value: '100%',
       label: 'Clases en vivo',
       description: 'Interacción real con docentes',
+      color: 'from-[#10b981] to-[#059669]',
+    },
+    {
+      value: 'Club',
+      label: 'Social STEAM',
+      description: 'Desarrollo de habilidades sociales',
       color: 'from-[#8b5cf6] to-[#7c3aed]',
     },
   ];
