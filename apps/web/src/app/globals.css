@@ -1,33 +1,9 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Colores del design system Crash Bandicoot - Paleta oficial */
-  --color-primary: #ff6b35;       /* Naranja vibrante */
-  --color-secondary: #f7b801;     /* Amarillo dorado */
-  --color-accent: #00d9ff;        /* Cyan brillante */
-  --color-success: #4caf50;       /* Verde éxito */
-  --color-danger: #f44336;        /* Rojo peligro */
-  --color-dark: #2a1a5e;          /* Morado oscuro */
-  --color-light: #fff9e6;         /* Beige claro */
-
-  /* Aliases para compatibilidad */
-  --color-orange-primary: var(--color-primary);
-  --color-yellow-energy: var(--color-secondary);
-  --color-blue-primary: var(--color-accent);
-  --color-green-success: var(--color-success);
-  --color-red-error: var(--color-danger);
-  --color-purple-special: var(--color-dark);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-
   /* Fuentes */
   --font-nunito: 'Nunito', sans-serif;
   --font-sans: var(--font-nunito);
-
-  /* Sombras chunky (sin blur) */
-  --shadow-chunky-sm: 3px 3px 0px rgba(0,0,0,1);
-  --shadow-chunky-md: 5px 5px 0px rgba(0,0,0,1);
-  --shadow-chunky-lg: 8px 8px 0px rgba(0,0,0,1);
 }
 
 :root {
@@ -153,100 +129,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ==========================================
-   GLASSMORPHISM CARDS - VERDE ESMERALDA
+   SCROLLBAR STYLING
    ========================================== */
 
-.glass-card {
-  @apply backdrop-blur-xl bg-emerald-500/[0.05] dark:bg-emerald-950/60;
-  @apply border border-emerald-500/20 dark:border-emerald-400/30;
-  @apply shadow-2xl shadow-emerald-500/10 dark:shadow-emerald-500/20;
-  @apply rounded-3xl;
-  /* NO padding por defecto - cada componente controla su propio padding */
-}
-
-.glass-card-padded {
-  @apply backdrop-blur-xl bg-emerald-500/[0.05] dark:bg-emerald-950/60;
-  @apply border border-emerald-500/20 dark:border-emerald-400/30;
-  @apply shadow-2xl shadow-emerald-500/10 dark:shadow-emerald-500/20;
-  @apply rounded-3xl p-6;
-}
-
-.glass-card-strong {
-  @apply backdrop-blur-xl bg-emerald-500/[0.08] dark:bg-emerald-950/80;
-  @apply border border-emerald-500/30 dark:border-emerald-400/40;
-  @apply shadow-2xl shadow-emerald-500/20 dark:shadow-emerald-500/30;
-  @apply rounded-3xl;
-  /* NO padding por defecto - cada componente controla su propio padding */
-}
-
-.glass-nav {
-  @apply backdrop-blur-2xl bg-black/50 dark:bg-emerald-950/70;
-  @apply border-b border-emerald-500/10 dark:border-emerald-400/20;
-  @apply shadow-lg shadow-emerald-500/10 dark:shadow-emerald-500/20;
-}
-
-/* Transiciones suaves */
-.transition-smooth {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Hover effects */
-.hover-lift {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px 0 rgba(16, 185, 129, 0.3);
-}
-
-/* Animaciones sutiles */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.5s ease-out;
-}
-
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.animate-slide-in {
-  animation: slide-in-right 0.4s ease-out;
-}
-
-/* Badge con glow effect */
-.badge-glow {
-  box-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(255, 107, 53, 0.8);
-  }
-}
-
-/* Scrollbar Styling */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -272,34 +157,4 @@ h1, h2, h3, h4, h5, h6 {
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgb(71 85 105 / 1); /* slate-600 */
-}
-
-/* ==========================================
-   BLOB ANIMATIONS - Fondo dinámico
-   ========================================== */
-@keyframes blob {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  25% {
-    transform: translate(20px, -20px) scale(1.1);
-  }
-  50% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  75% {
-    transform: translate(20px, 10px) scale(1.05);
-  }
-}
-
-.animate-blob {
-  animation: blob 20s ease-in-out infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
 }

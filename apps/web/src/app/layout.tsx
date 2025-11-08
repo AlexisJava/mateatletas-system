@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Nunito, Lilita_One } from 'next/font/google';
 import './globals.css';
+import './animations.css';
 import { QueryProvider } from '@/lib/providers/QueryProvider';
 import { Toaster } from 'sonner';
 
