@@ -7,16 +7,18 @@ export default function Hero() {
         {/* Left Column - Text Content */}
         <div className="space-y-8">
           <h1 className="text-6xl md:text-7xl font-black leading-tight">
-            <span className="title-gradient">3 Mundos,</span>
+            <span className="text-white">Bienvenidos a </span>
+            <span className="title-gradient">Mateatletas:</span>
             <br />
-            <span className="text-white">Infinitas</span>
+            <span className="text-white">el espacio donde aprender</span>
             <br />
-            <span className="title-gradient">Posibilidades</span>
+            <span className="title-gradient">se vuelve épico</span>
           </h1>
 
           <p className="text-xl text-white/80 leading-relaxed max-w-xl">
-            Explora nuestros mundos de Programación, Matemáticas y Ciencias.
-            Gamificación real, proyectos épicos y comunidad activa.
+            Desde Roblox hasta Cálculo. Desde Química hasta Astronomía.
+            <br />
+            Proyectos reales, comunidad activa, resultados épicos.
           </p>
 
           <ul className="space-y-5">

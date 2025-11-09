@@ -1,105 +1,116 @@
+import ScrollReveal from '@/components/ScrollReveal';
+
 interface Mundo {
   title: string;
-  subtitle: string;
+  icon: string;
   description: string;
   features: string[];
   gradient: string;
-  bgGradient: string;
+  letter: string;
 }
 
 export default function MundosSection() {
   const mundos: Mundo[] = [
     {
-      title: 'Clases Sincrónicas',
-      subtitle: 'Aprendizaje en vivo',
-      description: 'Clases en tiempo real con docentes expertos en grupos reducidos de 10-15 estudiantes',
+      title: 'Matemática',
+      icon: '🔢',
+      description: 'Desde aritmética hasta cálculo avanzado, desarrollamos el pensamiento lógico y la resolución de problemas',
       features: [
-        'Individual o grupal',
-        'Reserva de clases',
-        'Asistencia digital',
-        'Seguimiento personalizado',
+        'Álgebra y geometría',
+        'Trigonometría y cálculo',
+        'Estadística y probabilidad',
+        'Problemas del mundo real',
       ],
       gradient: 'from-[#0ea5e9] to-[#0284c7]',
-      bgGradient: 'from-[#0ea5e9]/10 to-[#0284c7]/5',
+      letter: 'M',
     },
     {
-      title: 'Portal Estudiante',
-      subtitle: 'El Gimnasio',
-      description: 'Dashboard gamificado donde los estudiantes entrenan, compiten y evolucionan',
+      title: 'Ciencia',
+      icon: '🔬',
+      description: 'Física, química y biología aplicada con experimentos virtuales y proyectos científicos',
       features: [
-        'Progreso y ranking',
-        'Avatares 3D personalizables',
-        'Calendario de clases',
-        'Tienda virtual',
-      ],
-      gradient: 'from-[#FF6B35] to-[#fbbf24]',
-      bgGradient: 'from-[#FF6B35]/10 to-[#fbbf24]/5',
-    },
-    {
-      title: 'Portal Tutor',
-      subtitle: 'Seguimiento integral',
-      description: 'Gestiona múltiples hijos, realiza pagos y visualiza el progreso de cada estudiante',
-      features: [
-        'Gestión de familia',
-        'Pagos y descuentos',
-        'Informes de progreso',
-        'Historial académico',
+        'Método científico',
+        'Experimentos interactivos',
+        'Proyectos de investigación',
+        'Ciencia aplicada',
       ],
       gradient: 'from-[#10b981] to-[#059669]',
-      bgGradient: 'from-[#10b981]/10 to-[#059669]/5',
+      letter: 'S',
+    },
+    {
+      title: 'Programación',
+      icon: '💻',
+      description: 'Codificación desde cero hasta desarrollo de proyectos reales con tecnologías modernas',
+      features: [
+        'Python y JavaScript',
+        'Algoritmos y lógica',
+        'Desarrollo web y apps',
+        'Proyectos personales',
+      ],
+      gradient: 'from-[#8b5cf6] to-[#7c3aed]',
+      letter: 'T',
     },
   ];
 
   return (
     <section className="py-20 bg-transparent">
       <div className="max-w-[1400px] mx-auto px-6">
-        <div className="text-center mb-16">
-          <div className="inline-block px-4 py-2 bg-[#0ea5e9]/10 rounded-full border border-[#0ea5e9]/20 mb-6">
-            <span className="text-[#0ea5e9] dark:text-[#38bdf8] font-semibold text-sm">
-              Tres pilares fundamentales
-            </span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-            Los 3 mundos de Mateatletas
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto">
-            Un ecosistema integrado que conecta clases en vivo, gamificación y seguimiento familiar
-          </p>
-        </div>
+        {/* Single Big Card */}
+        <div className="card-glass p-10 md:p-12 rounded-3xl border-2 border-white/20">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#0ea5e9]/10 via-[#10b981]/10 to-[#8b5cf6]/10 rounded-full border border-[#0ea5e9]/20 mb-6">
+              <span className="bg-gradient-to-r from-[#0ea5e9] via-[#10b981] to-[#8b5cf6] bg-clip-text text-transparent font-semibold text-sm">
+                Tres áreas de desarrollo
+              </span>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
+              Elegí tu propio mundo
+            </h2>
+
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-medium mb-6">
+              O combinalos, las posibilidades son infinitas
+            </p>
+
+            <div className="flex justify-center mb-6">
+              <div className="px-5 py-2.5 bg-gradient-to-r from-[#0ea5e9]/20 to-[#10b981]/20 rounded-full border border-[#0ea5e9]/30">
+                <span className="text-base font-bold text-gray-900 dark:text-white">
+                  👦 👧 Niños de 6 a 18 años
+                </span>
+              </div>
+            </div>
+
+            <p className="text-lg text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto">
+              Matemática, Ciencia y Programación integradas en una experiencia de aprendizaje única
+            </p>
+          </div>
+
+          {/* Mundos Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {mundos.map((mundo, index) => (
-            <div
-              key={index}
-              className="relative group"
+            <ScrollReveal key={index} animation="zoom-in" delay={index * 150}>
+              <div className="relative group"
             >
               {/* Card Container */}
-              <div className="card-glass relative h-full p-8 rounded-3xl border-2 border-white/10 hover:border-white/20 transition-all duration-300 hover:shadow-2xl hover:scale-105">
-                {/* Gradient Glow on Hover */}
-                <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${mundo.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300 -z-10 blur-2xl`} />
-
-                {/* Icon Placeholder */}
-                <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br ${mundo.gradient} rounded-2xl shadow-lg mb-6`}>
-                  <span className="text-3xl font-black text-white">{index + 1}</span>
+              <div className="card-glass relative h-full p-8 rounded-3xl border-2 border-white/10 hover:border-white/30 transition-all duration-300">
+                {/* Icon */}
+                <div className={`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br ${mundo.gradient} rounded-2xl shadow-lg mb-6`}>
+                  <span className="text-4xl">{mundo.icon}</span>
                 </div>
 
                 {/* Content */}
                 <div className="space-y-4">
-                  <div>
-                    <div className={`text-sm font-bold bg-gradient-to-r ${mundo.gradient} bg-clip-text text-transparent mb-2`}>
-                      {mundo.subtitle}
-                    </div>
-                    <h3 className="text-2xl font-black text-gray-900 dark:text-white">
-                      {mundo.title}
-                    </h3>
-                  </div>
+                  <h3 className="text-3xl font-black text-gray-900 dark:text-white">
+                    {mundo.title}
+                  </h3>
 
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
                     {mundo.description}
                   </p>
 
                   {/* Features List */}
-                  <ul className="space-y-2 pt-4">
+                  <ul className="space-y-3 pt-4">
                     {mundo.features.map((feature, featureIndex) => (
                       <li
                         key={featureIndex}
@@ -116,8 +127,35 @@ export default function MundosSection() {
                   </ul>
                 </div>
               </div>
-            </div>
+              </div>
+            </ScrollReveal>
           ))}
+          </div>
+        </div>
+
+        {/* STEAM Banner */}
+        <div className="mt-20 text-center">
+          <div className="flex items-center justify-center gap-2 md:gap-4 mb-8">
+            <span className="text-7xl md:text-9xl font-black bg-gradient-to-r from-[#0ea5e9] to-[#0284c7] bg-clip-text text-transparent" style={{ fontFamily: 'Orbitron, monospace', filter: 'drop-shadow(0 0 20px rgba(14, 165, 233, 0.6))' }}>
+              S
+            </span>
+            <span className="text-7xl md:text-9xl font-black bg-gradient-to-r from-[#10b981] to-[#059669] bg-clip-text text-transparent" style={{ fontFamily: 'Orbitron, monospace', filter: 'drop-shadow(0 0 20px rgba(16, 185, 129, 0.6))' }}>
+              T
+            </span>
+            <span className="text-7xl md:text-9xl font-black bg-gradient-to-r from-[#fbbf24] to-[#f59e0b] bg-clip-text text-transparent" style={{ fontFamily: 'Orbitron, monospace', filter: 'drop-shadow(0 0 20px rgba(251, 191, 36, 0.6))' }}>
+              E
+            </span>
+            <span className="text-7xl md:text-9xl font-black bg-gradient-to-r from-[#FF6B35] to-[#f59e0b] bg-clip-text text-transparent" style={{ fontFamily: 'Orbitron, monospace', filter: 'drop-shadow(0 0 20px rgba(255, 107, 53, 0.6))' }}>
+              A
+            </span>
+            <span className="text-7xl md:text-9xl font-black bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] bg-clip-text text-transparent" style={{ fontFamily: 'Orbitron, monospace', filter: 'drop-shadow(0 0 20px rgba(139, 92, 246, 0.6))' }}>
+              M
+            </span>
+          </div>
+
+          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-light max-w-4xl mx-auto">
+            Science · Technology · Engineering · Arts · Mathematics
+          </p>
         </div>
       </div>
     </section>

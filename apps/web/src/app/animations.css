@@ -30,3 +30,199 @@
 .animation-delay-4000 {
   animation-delay: 4s;
 }
+
+/* ============================================
+   DIVIDER ANIMATIONS - Landing Page Separators
+   ============================================ */
+
+/* HeroToNumbers - Partículas cayendo */
+@keyframes particle-fall {
+  0% {
+    top: -10%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 110%;
+    opacity: 0;
+  }
+}
+
+.animate-particle-fall {
+  animation: particle-fall 4s ease-in infinite;
+}
+
+/* NumbersToGamification - Rayo pulsante */
+@keyframes beam-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 40px rgba(14, 165, 233, 0.8));
+    height: 4px;
+  }
+  50% {
+    filter: drop-shadow(0 0 60px rgba(255, 107, 53, 1));
+    height: 6px;
+  }
+}
+
+.animate-beam-pulse {
+  animation: beam-pulse 3s ease-in-out infinite;
+}
+
+/* NumbersToGamification - Ícono flotante */
+@keyframes icon-float {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    filter: drop-shadow(0 0 20px rgba(14, 165, 233, 0.8));
+  }
+  50% {
+    transform: translate(-50%, -60%) scale(1.2);
+    filter: drop-shadow(0 0 40px rgba(255, 107, 53, 1));
+  }
+}
+
+.animate-icon-float {
+  animation: icon-float 4s ease-in-out infinite;
+}
+
+/* GamificationToMundos - Orbes flotantes */
+@keyframes orb-float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.1);
+  }
+}
+
+.animate-orb-float {
+  animation: orb-float 4s ease-in-out infinite;
+}
+
+/* MundosToTestimonials - Comillas pulsantes */
+@keyframes quote-fade {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.animate-quote-fade {
+  animation: quote-fade 3s ease-in-out infinite;
+}
+
+/* TestimonialsToComparison - VS brillante */
+@keyframes vs-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(14, 165, 233, 0.5));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 30px rgba(255, 107, 53, 0.8));
+    transform: scale(1.1);
+  }
+}
+
+.animate-vs-glow {
+  animation: vs-glow 2s ease-in-out infinite;
+}
+
+/* ComparisonToPricing - Spotlight giratorio (CRÍTICO) */
+@keyframes spotlight-rotate {
+  0% {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  100% {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+.animate-spotlight-rotate {
+  animation: spotlight-rotate 10s linear infinite;
+}
+
+/* ComparisonToPricing - Flecha rebotando */
+@keyframes arrow-bounce {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-20px);
+  }
+}
+
+.animate-arrow-bounce {
+  animation: arrow-bounce 2s ease-in-out infinite;
+}
+
+/* ComparisonToPricing - Línea brillante inferior */
+@keyframes glow-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
+  }
+}
+
+.animate-glow-shift {
+  animation: glow-shift 4s linear infinite;
+}
+
+/* PricingToFAQ - Signo de interrogación pulsante */
+@keyframes question-pulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+    opacity: 1;
+  }
+}
+
+.animate-question-pulse {
+  animation: question-pulse 3s ease-in-out infinite;
+}
+
+/* FAQToCTA - Rayos expandiéndose */
+@keyframes ray-expand {
+  0% {
+    opacity: 0;
+    height: 0%;
+  }
+  50% {
+    opacity: 1;
+    height: 100%;
+  }
+  100% {
+    opacity: 0;
+    height: 100%;
+  }
+}
+
+.animate-ray-expand {
+  animation: ray-expand 4s ease-in-out infinite;
+}
+
+/* Scroll to top button */
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}

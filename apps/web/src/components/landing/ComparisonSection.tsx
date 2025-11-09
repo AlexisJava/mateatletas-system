@@ -7,22 +7,21 @@ interface Feature {
 
 export default function ComparisonSection() {
   const features: Feature[] = [
-    { name: 'Clases en vivo', mateatletas: true, traditional: true },
-    { name: 'Grupos reducidos (10-15)', mateatletas: true, traditional: false },
-    { name: 'Sistema de gamificación', mateatletas: '73 logros', traditional: false, highlight: true },
     { name: 'Avatares 3D personalizables', mateatletas: 'Ready Player Me', traditional: false, highlight: true },
-    { name: 'Sistema de casas', mateatletas: '4 casas', traditional: false },
+    { name: 'Sistema de gamificación', mateatletas: '73 logros', traditional: false, highlight: true },
+    { name: 'Asesoría Psicopedagógica', mateatletas: 'Personalizada', traditional: false, highlight: true },
     { name: 'XP y niveles', mateatletas: '15+ niveles', traditional: false },
-    { name: 'Tienda virtual', mateatletas: true, traditional: false },
-    { name: 'Ranking y competencias', mateatletas: true, traditional: false },
-    { name: 'Portal de tutor', mateatletas: 'Completo', traditional: 'Básico' },
+    { name: 'Tienda virtual de items', mateatletas: true, traditional: false },
+    { name: 'Clases en vivo', mateatletas: true, traditional: true },
+    { name: 'Grupos reducidos', mateatletas: '8-10 estudiantes', traditional: '25+ estudiantes' },
+    { name: 'Portal de padres', mateatletas: 'Completo', traditional: 'Inexistente' },
     { name: 'Seguimiento de progreso', mateatletas: 'Tiempo real', traditional: 'Mensual' },
-    { name: 'Descuentos por familia', mateatletas: 'Hasta 24%', traditional: 'Variable', highlight: true },
+    { name: 'Descuentos por familia', mateatletas: true, traditional: 'Variable' },
     { name: 'Asistencia digital', mateatletas: true, traditional: false },
   ];
 
   return (
-    <section className="py-20 bg-white dark:bg-gray-900">
+    <section className="py-20 bg-transparent">
       <div className="max-w-[1400px] mx-auto px-6">
         <div className="text-center mb-16">
           <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#0ea5e9]/10 to-[#10b981]/10 rounded-full border border-[#0ea5e9]/20 mb-6">
@@ -34,7 +33,7 @@ export default function ComparisonSection() {
             ¿Por qué elegir Mateatletas?
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto">
-            Comparación entre Mateatletas y academias tradicionales de matemáticas
+            La diferencia entre una clase tradicional y una aventura de aprendizaje
           </p>
         </div>
 

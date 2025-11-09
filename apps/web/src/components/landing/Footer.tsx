@@ -18,14 +18,13 @@ export default function Footer() {
         <div className="terminal-body">
           {/* About */}
           <div className="terminal-line">
-            <span className="terminal-prompt">$</span>{' '}
-            <span className="terminal-command">cat about.txt</span>
-            <span className="cursor" />
+            <span className="terminal-prompt text-2xl">$</span>{' '}
+            <span className="terminal-command text-2xl">cat about.txt</span>
           </div>
-          <div className="terminal-output">
+          <div className="terminal-output text-xl leading-relaxed">
             Plataforma educativa STEAM con gamificación inmersiva.
             <br />
-            120+ estudiantes activos | 15 cursos | 4 casas épicas
+            120+ estudiantes activos | 15 cursos épicos
             <br />
             Transformando el aprendizaje en Argentina y LATAM.
           </div>
@@ -34,28 +33,28 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mt-10 pt-10 border-t border-[#0ea5e9]/30">
             {/* Navigate */}
             <div>
-              <h4 className="text-[#0ea5e9] text-xs font-black uppercase tracking-widest mb-5">
-                // NAVIGATE
+              <h4 className="text-[#0ea5e9] text-lg font-black uppercase tracking-widest mb-6">
+                // NAVEGAR
               </h4>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 <li>
-                  <Link href="/club" className="terminal-link">
+                  <Link href="/club" className="terminal-link text-xl">
                     cd ~/club
                   </Link>
                 </li>
                 <li>
-                  <Link href="#casas" className="terminal-link">
+                  <Link href="#casas" className="terminal-link text-xl">
                     cd ~/casas
                   </Link>
                 </li>
                 <li>
-                  <Link href="#pricing" className="terminal-link">
-                    cd ~/pricing
+                  <Link href="#pricing" className="terminal-link text-xl">
+                    cd ~/precios
                   </Link>
                 </li>
                 <li>
-                  <Link href="/estudiante/gimnasio" className="terminal-link">
-                    cd ~/dashboard
+                  <Link href="/estudiante/gimnasio" className="terminal-link text-xl">
+                    cd ~/panel
                   </Link>
                 </li>
               </ul>
@@ -63,27 +62,27 @@ export default function Footer() {
 
             {/* Learn */}
             <div>
-              <h4 className="text-[#0ea5e9] text-xs font-black uppercase tracking-widest mb-5">
-                // LEARN
+              <h4 className="text-[#0ea5e9] text-lg font-black uppercase tracking-widest mb-6">
+                // APRENDER
               </h4>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 <li>
-                  <Link href="/cursos-online" className="terminal-link">
+                  <Link href="/cursos-online" className="terminal-link text-xl">
                     ./cursos.sh
                   </Link>
                 </li>
                 <li>
-                  <Link href="/club" className="terminal-link">
+                  <Link href="/club" className="terminal-link text-xl">
                     ./clases-vivo.py
                   </Link>
                 </li>
                 <li>
-                  <Link href="/colonia" className="terminal-link">
+                  <Link href="/colonia" className="terminal-link text-xl">
                     ./colonia.js
                   </Link>
                 </li>
                 <li>
-                  <Link href="/estudiante/gamificacion" className="terminal-link">
+                  <Link href="/estudiante/gamificacion" className="terminal-link text-xl">
                     ./gamificacion.lua
                   </Link>
                 </li>
@@ -92,27 +91,27 @@ export default function Footer() {
 
             {/* Connect */}
             <div>
-              <h4 className="text-[#0ea5e9] text-xs font-black uppercase tracking-widest mb-5">
-                // CONNECT
+              <h4 className="text-[#0ea5e9] text-lg font-black uppercase tracking-widest mb-6">
+                // CONECTAR
               </h4>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 <li>
-                  <a href="#" className="terminal-link">
+                  <a href="#" className="terminal-link text-xl">
                     ping instagram
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="terminal-link">
+                  <a href="#" className="terminal-link text-xl">
                     ping facebook
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="terminal-link">
+                  <a href="#" className="terminal-link text-xl">
                     ping twitter
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="terminal-link">
+                  <a href="#" className="terminal-link text-xl">
                     ping linkedin
                   </a>
                 </li>
@@ -121,27 +120,27 @@ export default function Footer() {
 
             {/* System */}
             <div>
-              <h4 className="text-[#0ea5e9] text-xs font-black uppercase tracking-widest mb-5">
-                // SYSTEM
+              <h4 className="text-[#0ea5e9] text-lg font-black uppercase tracking-widest mb-6">
+                // SISTEMA
               </h4>
-              <ul className="space-y-3">
+              <ul className="space-y-4">
                 <li>
-                  <Link href="/nosotros" className="terminal-link">
+                  <Link href="/nosotros" className="terminal-link text-xl">
                     man ayuda
                   </Link>
                 </li>
                 <li>
-                  <Link href="/legal/terminos" className="terminal-link">
+                  <Link href="/legal/terminos" className="terminal-link text-xl">
                     cat terminos.txt
                   </Link>
                 </li>
                 <li>
-                  <Link href="/legal/privacidad" className="terminal-link">
+                  <Link href="/legal/privacidad" className="terminal-link text-xl">
                     cat privacidad.txt
                   </Link>
                 </li>
                 <li>
-                  <Link href="/nosotros#contact" className="terminal-link">
+                  <Link href="/nosotros#contact" className="terminal-link text-xl">
                     sudo contacto
                   </Link>
                 </li>
@@ -151,8 +150,8 @@ export default function Footer() {
 
           {/* Copyright */}
           <div className="terminal-line mt-10">
-            <span className="terminal-prompt">$</span>{' '}
-            <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+            <span className="terminal-prompt text-2xl">$</span>{' '}
+            <span className="text-xl" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
               © {currentYear} Mateatletas | Coded with ❤️ in Neuquén, Argentina
             </span>
             <span className="cursor" />

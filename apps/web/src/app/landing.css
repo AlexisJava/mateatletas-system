@@ -4,65 +4,9 @@
  */
 
 /* ============================================ */
-/* BACKGROUND GRADIENT */
+/* BACKGROUND - Ahora usando CosmosBackground */
 /* ============================================ */
-.landing-background {
-  background: linear-gradient(180deg,
-    #000000 0%,
-    #0a1428 30%,
-    #1a2a4a 50%,
-    #0a1428 70%,
-    #000000 100%
-  );
-  background-attachment: fixed;
-  min-height: 100vh;
-}
-
-/* ============================================ */
-/* ANIMATED ORBS */
-/* ============================================ */
-.orb-1 {
-  position: fixed;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, #0ea5e9, transparent);
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.35;
-  pointer-events: none;
-  z-index: 1;
-  top: 10%;
-  left: 5%;
-  animation: float1 25s ease-in-out infinite;
-}
-
-@keyframes float1 {
-  0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(40px, -40px); }
-  50% { transform: translate(-30px, 50px); }
-  75% { transform: translate(50px, 30px); }
-}
-
-.orb-2 {
-  position: fixed;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, #FF6B35, transparent);
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.35;
-  pointer-events: none;
-  z-index: 1;
-  bottom: 10%;
-  right: 10%;
-  animation: float2 30s ease-in-out infinite;
-}
-
-@keyframes float2 {
-  0%, 100% { transform: translate(0, 0); }
-  33% { transform: translate(-50px, 40px); }
-  66% { transform: translate(30px, -50px); }
-}
+/* Los estilos de background antiguos fueron reemplazados por CosmosBackground component */
 
 /* ============================================ */
 /* NAVBAR */
@@ -388,8 +332,8 @@
 }
 
 .terminal-dot {
-  width: 14px;
-  height: 14px;
+  width: 24px !important;
+  height: 24px !important;
   border-radius: 50%;
 }
 
@@ -398,7 +342,7 @@
 .terminal-dot.green { background: #10b981; }
 
 .terminal-title {
-  font-size: 14px;
+  font-size: 24px !important;
   font-weight: 700;
   color: white;
   font-family: 'Courier New', monospace;
@@ -453,16 +397,17 @@
 
 .cursor {
   display: inline-block;
-  width: 10px;
+  width: 2px;
   height: 18px;
   background: #0ea5e9;
   margin-left: 4px;
-  animation: blink 1s infinite;
+  animation: blink 1.2s ease-in-out infinite;
 }
 
 @keyframes blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* ============================================ */

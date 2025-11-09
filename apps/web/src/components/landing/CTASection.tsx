@@ -1,11 +1,13 @@
 import Link from 'next/link';
+import ScrollReveal from '@/components/ScrollReveal';
 
 export default function CTASection() {
   return (
     <section className="relative py-32 overflow-visible bg-transparent">
       <div className="max-w-[1400px] mx-auto px-6">
         {/* Main CTA Card */}
-        <div className="relative group">
+        <ScrollReveal animation="zoom-in">
+          <div className="relative group">
           {/* Glow effect */}
           <div className="absolute -inset-1 bg-gradient-to-r from-[#0ea5e9] via-[#8b5cf6] to-[#10b981] rounded-[3rem] blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
 
@@ -96,7 +98,8 @@ export default function CTASection() {
             {/* Bottom gradient line */}
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#10b981] to-transparent opacity-50" />
           </div>
-        </div>
+          </div>
+        </ScrollReveal>
 
         {/* Trust indicators */}
         <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-500 dark:text-gray-400">
@@ -111,7 +114,7 @@ export default function CTASection() {
             <svg className="w-5 h-5 text-[#10b981]" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            <span className="font-medium">Grupos reducidos de 10-15 estudiantes</span>
+            <span className="font-medium">Grupos reducidos de 8-10 estudiantes</span>
           </div>
           <div className="hidden md:block w-px h-4 bg-gray-300 dark:bg-gray-700" />
           <div className="flex items-center gap-2">

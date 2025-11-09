@@ -9,7 +9,7 @@ export default function GallerySection() {
   ];
 
   return (
-    <section className="py-20 bg-white dark:bg-gray-900">
+    <section className="py-20 bg-transparent">
       <div className="max-w-[1400px] mx-auto px-6">
         <div className="text-center mb-16">
           <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#8b5cf6]/10 to-[#ec4899]/10 rounded-full border border-[#8b5cf6]/20 mb-6">
@@ -57,7 +57,7 @@ export default function GallerySection() {
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center p-8 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div className="text-center p-8 card-glass rounded-2xl border border-white/10">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] rounded-2xl flex items-center justify-center shadow-lg">
               <span className="text-3xl font-black text-white">✨</span>
             </div>
@@ -69,7 +69,7 @@ export default function GallerySection() {
             </p>
           </div>
 
-          <div className="text-center p-8 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div className="text-center p-8 card-glass rounded-2xl border border-white/10">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#0ea5e9] to-[#0284c7] rounded-2xl flex items-center justify-center shadow-lg">
               <span className="text-3xl font-black text-white">🏪</span>
             </div>
@@ -81,7 +81,7 @@ export default function GallerySection() {
             </p>
           </div>
 
-          <div className="text-center p-8 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700">
+          <div className="text-center p-8 card-glass rounded-2xl border border-white/10">
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#10b981] to-[#059669] rounded-2xl flex items-center justify-center shadow-lg">
               <span className="text-3xl font-black text-white">🏆</span>
             </div>

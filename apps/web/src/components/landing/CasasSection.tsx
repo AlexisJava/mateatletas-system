@@ -48,7 +48,7 @@ export default function CasasSection() {
             </span>
           </div>
           <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-            Las 4 Casas de Mateatletas
+            Las Casas de Mateatletas
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto">
             Cada estudiante pertenece a una casa que representa sus fortalezas y estilo de aprendizaje
