@@ -1,0 +1,247 @@
+/* ============================================
+   COSMOS BACKGROUND GLOBAL STYLES
+   ============================================ */
+
+/* Container base */
+.cosmos-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #0f0f1a 0%, #0a0a0f 100%);
+}
+
+/* ============================================
+   ORBES - GRANDES Y VISIBLES
+   ============================================ */
+
+/* Base para todos los orbes */
+.cosmos-orb {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.4;
+  animation: orbFloat 20s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Orbe Cyan - Top Left */
+.orb-cyan {
+  top: 10%;
+  left: 5%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.8) 0%, transparent 70%);
+  animation-delay: 0s;
+}
+
+/* Orbe Purple - Top Right */
+.orb-purple {
+  top: 15%;
+  right: 10%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.8) 0%, transparent 70%);
+  animation-delay: 3s;
+}
+
+/* Orbe Orange - Middle Left */
+.orb-orange {
+  top: 40%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(255, 107, 53, 0.7) 0%, transparent 70%);
+  animation-delay: 6s;
+}
+
+/* Orbe Green - Middle Right */
+.orb-green {
+  top: 50%;
+  right: -5%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.7) 0%, transparent 70%);
+  animation-delay: 9s;
+}
+
+/* Orbe Pink - Bottom Left */
+.orb-pink {
+  bottom: 10%;
+  left: 15%;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.7) 0%, transparent 70%);
+  animation-delay: 12s;
+}
+
+/* Orbe Blue - Bottom Right */
+.orb-blue {
+  bottom: 15%;
+  right: 20%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.8) 0%, transparent 70%);
+  animation-delay: 15s;
+}
+
+@keyframes orbFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
+  25% {
+    transform: translate(50px, -30px) scale(1.1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(30px, 50px) scale(0.9);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translate(-40px, 20px) scale(1.05);
+    opacity: 0.45;
+  }
+}
+
+/* Variaciones de intensidad - NO usar opacity en contenedor */
+.cosmos-background-subtle {
+  /* Intensidad controlada por cantidad de estrellas */
+}
+
+.cosmos-background-normal {
+  /* Intensidad controlada por cantidad de estrellas */
+}
+
+.cosmos-background-intense {
+  /* Intensidad controlada por cantidad de estrellas */
+}
+
+/* Estrellas - MÁS GRANDES Y VISIBLES */
+.cosmos-star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: starTwinkle 3s ease-in-out infinite;
+  will-change: opacity, transform;
+  z-index: 1;
+  /* transform se actualiza vía parallax JavaScript */
+}
+
+.cosmos-star-small {
+  width: 3px;
+  height: 3px;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 1), 0 0 2px white;
+}
+
+.cosmos-star-medium {
+  width: 4px;
+  height: 4px;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 1), 0 0 3px white;
+}
+
+.cosmos-star-large {
+  width: 5px;
+  height: 5px;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 1), 0 0 4px white;
+}
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Nebulosas de fondo */
+.cosmos-nebula {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: nebulaFloat 20s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.cosmos-nebula-1 {
+  top: 10%;
+  left: 10%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.08) 0%, transparent 70%);
+  animation-delay: 0s;
+  filter: blur(80px);
+}
+
+.cosmos-nebula-2 {
+  bottom: 10%;
+  right: 10%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, transparent 70%);
+  animation-delay: 5s;
+  filter: blur(80px);
+}
+
+@keyframes nebulaFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(50px, -50px) scale(1.2);
+    opacity: 0.7;
+  }
+}
+
+/* Partículas cósmicas */
+.cosmos-particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #fbbf24;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #fbbf24;
+  animation: cosmicMove 25s linear infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes cosmicMove {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.8;
+  }
+  95% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-500px, 500px);
+    opacity: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cosmos-nebula {
+    width: 300px;
+    height: 300px;
+    filter: blur(60px);
+  }
+
+  /* Reducir intensidad del parallax en mobile */
+  .cosmos-star,
+  .cosmos-nebula,
+  .cosmos-particle {
+    transform: none !important;
+  }
+}
+
+/* Reducir animaciones si el usuario prefiere */
+@media (prefers-reduced-motion: reduce) {
+  .cosmos-star,
+  .cosmos-nebula,
+  .cosmos-particle {
+    animation: none;
+    transform: none !important;
+  }
+
+  .cosmos-star {
+    opacity: 0.5;
+  }
+}

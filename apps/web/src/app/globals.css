@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+/* ============================================
+   CRITICAL: FORCE DARK BACKGROUND EVERYWHERE
+   ============================================ */
+html {
+  background: #0a0a0f !important;
+  background-color: #0a0a0f !important;
+}
+
+body {
+  background: transparent !important;
+  min-height: 100vh;
+}
+
+/* Prevent white flashes */
+#__next {
+  background: transparent;
+  min-height: 100vh;
+}
+
+main {
+  background: transparent;
+  min-height: 100vh;
+}
+
 @theme inline {
   /* Fuentes */
   --font-nunito: 'Nunito', sans-serif;
@@ -7,11 +31,11 @@
 }
 
 :root {
-  /* Ecosistema del Tutor - Intensidad Media (MODO CLARO) */
-  --background: #f8f9fa;          /* Gris muy claro, más suave que blanco puro */
-  --foreground: #212529;           /* Gris oscuro para texto, menos agresivo que negro puro */
-  --background-card: #ffffff;      /* Blanco para cards */
-  --border-subtle: #dee2e6;        /* Bordes suaves */
+  /* Ecosistema del Tutor - MODO OSCURO POR DEFECTO */
+  --background: #000000;          /* Negro puro */
+  --foreground: #f1f5f9;          /* Texto claro */
+  --background-card: #1e293b;     /* Cards oscuros */
+  --border-subtle: #334155;       /* Bordes en oscuro */
 
   /* Portal Docente - Modo Claro con Purple Gradients */
   --docente-bg-gradient-start: #f0f4ff;    /* Azul muy claro */
@@ -113,7 +137,7 @@
 }
 
 body {
-  background: var(--background);
+  /* Background ahora se maneja con CosmosBackground component */
   color: var(--foreground);
   font-family: var(--font-nunito);
   font-weight: 400;               /* Peso normal por defecto */
