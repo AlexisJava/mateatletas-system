@@ -65,10 +65,10 @@ export default function DocenteLoginPage() {
 
         {/* Floating orbs */}
         <motion.div
-          className="absolute top-40 right-1/4 w-64 h-64 bg-[#8b5cf6]/15 rounded-full blur-[100px]"
+          className="absolute top-40 right-1/4 w-96 h-96 bg-[#8b5cf6]/30 rounded-full blur-[120px]"
           animate={{
-            y: [0, -30, 0],
-            x: [0, 20, 0],
+            y: [0, -40, 0],
+            x: [0, 30, 0],
           }}
           transition={{
             duration: 8,
@@ -77,10 +77,10 @@ export default function DocenteLoginPage() {
           }}
         />
         <motion.div
-          className="absolute bottom-40 left-1/4 w-64 h-64 bg-[#0ea5e9]/15 rounded-full blur-[100px]"
+          className="absolute bottom-40 left-1/4 w-96 h-96 bg-[#0ea5e9]/30 rounded-full blur-[120px]"
           animate={{
-            y: [0, 30, 0],
-            x: [0, -20, 0],
+            y: [0, 40, 0],
+            x: [0, -30, 0],
           }}
           transition={{
             duration: 10,
