@@ -42,7 +42,7 @@ interface AuthState {
 
   // Acciones
   login: (email: string, password: string) => Promise<void>;
-  loginEstudiante: (email: string, password: string) => Promise<void>;
+  loginEstudiante: (username: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
