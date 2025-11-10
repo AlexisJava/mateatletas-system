@@ -122,11 +122,58 @@ export default function NosotrosPage() {
   ];
 
   return (
-    <div>
-      <Navbar />
-      <main className="min-h-screen">
-        {/* Hero Section */}
-        <section className="section-landing relative" style={{ paddingTop: '160px', paddingBottom: '100px' }}>
+    <div className="relative">
+      {/* Cosmos Background - Fixed */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        {/* Animated orbs */}
+        <div className="absolute top-20 left-20 w-96 h-96 bg-[#0ea5e9]/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#10b981]/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#8b5cf6]/10 rounded-full blur-[120px]" />
+
+        {/* Floating orbs */}
+        <motion.div
+          className="absolute top-40 right-1/4 w-64 h-64 bg-[#fbbf24]/10 rounded-full blur-[100px]"
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 20, 0],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-40 left-1/4 w-64 h-64 bg-[#FF6B35]/10 rounded-full blur-[100px]"
+          animate={{
+            y: [0, 30, 0],
+            x: [0, -20, 0],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+
+        {/* Animated grid */}
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(14, 165, 233, 0.1) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(14, 165, 233, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+          }}
+        />
+      </div>
+
+      <div className="relative z-10">
+        <Navbar />
+        <main className="min-h-screen">
+          {/* Hero Section */}
+          <section className="section-landing relative" style={{ paddingTop: '160px', paddingBottom: '100px' }}>
           <div className="max-w-7xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -361,8 +408,9 @@ export default function NosotrosPage() {
             </div>
           </div>
         </section>
-      </main>
-      <Footer />
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }

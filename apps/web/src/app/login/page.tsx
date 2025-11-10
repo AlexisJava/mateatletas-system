@@ -59,6 +59,32 @@ export default function TutorLoginPage() {
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#10b981]/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#8b5cf6]/10 rounded-full blur-[120px]" />
 
+        {/* Floating orbs */}
+        <motion.div
+          className="absolute top-40 right-1/4 w-64 h-64 bg-[#10b981]/15 rounded-full blur-[100px]"
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 20, 0],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-40 left-1/4 w-64 h-64 bg-[#0ea5e9]/15 rounded-full blur-[100px]"
+          animate={{
+            y: [0, 30, 0],
+            x: [0, -20, 0],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+
         <div
           className="absolute inset-0 opacity-20"
           style={{
