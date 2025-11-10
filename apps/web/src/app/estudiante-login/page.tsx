@@ -9,24 +9,25 @@ import {
   Eye,
   EyeOff,
   LogIn,
-  Mail,
+  User,
   Lock,
-  Heart,
-  Users,
-  Shield,
+  Rocket,
+  Trophy,
+  Star,
+  Zap,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 
 /**
- * Login Page - Tutores (Padres/Madres)
+ * Login Page - Estudiantes
  * Ultra-premium cosmos design
- * Ruta: /login
+ * Ruta: /estudiante-login
  */
-export default function TutorLoginPage() {
+export default function EstudianteLoginPage() {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { loginEstudiante } = useAuthStore();
 
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -38,8 +39,8 @@ export default function TutorLoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
-      router.push('/dashboard');
+      await loginEstudiante(username, password);
+      router.push('/estudiante/gimnasio');
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -56,8 +57,8 @@ export default function TutorLoginPage() {
       {/* Cosmos Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-20 left-20 w-96 h-96 bg-[#0ea5e9]/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#10b981]/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#8b5cf6]/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-[#8b5cf6]/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#10b981]/10 rounded-full blur-[120px]" />
 
         <div
           className="absolute inset-0 opacity-20"
@@ -75,7 +76,7 @@ export default function TutorLoginPage() {
       <div className="relative z-10 min-h-screen flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left Side - Message */}
+            {/* Left Side - Epic Message */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -83,30 +84,33 @@ export default function TutorLoginPage() {
               className="text-center lg:text-left"
             >
               <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-[#0ea5e9]/20 to-[#10b981]/20 border border-[#0ea5e9]/30 mb-8">
-                <Heart className="w-4 h-4 text-[#0ea5e9] animate-pulse" />
+                <Sparkles className="w-4 h-4 text-[#0ea5e9] animate-pulse" />
                 <span className="text-xs font-black text-[#0ea5e9] uppercase tracking-widest">
-                  Portal Familias
+                  Portal Estudiantes
                 </span>
               </div>
 
               <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
-                BIENVENIDO
+                CONTINÚA TU
                 <br />
-                <span className="title-gradient">DE VUELTA</span>
+                <span className="title-gradient">AVENTURA</span>
+                <br />
+                EN MATEATLETAS
               </h1>
 
               <p className="text-xl text-white/70 mb-8 leading-relaxed">
-                Accede al panel para seguir el progreso de tus hijos,
+                Accede a tus mundos, desafíos y logros.
                 <br />
-                gestionar cursos y estar al día con todo.
+                <strong className="text-white">La aventura continúa aquí.</strong>
               </p>
 
+              {/* Stats */}
               <div className="grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0">
                 {[
-                  { icon: Users, label: 'Mis Hijos' },
-                  { icon: Shield, label: 'Seguro' },
-                  { icon: Heart, label: 'Confiable' },
-                ].map((item, i) => (
+                  { icon: Trophy, label: 'Logros', value: 'Infinitos' },
+                  { icon: Star, label: 'Misiones', value: 'Épicas' },
+                  { icon: Zap, label: 'Poder', value: '100%' },
+                ].map((stat, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, y: 20 }}
@@ -114,8 +118,9 @@ export default function TutorLoginPage() {
                     transition={{ delay: 0.3 + i * 0.1 }}
                     className="card-glass p-4 rounded-2xl border border-white/10 text-center"
                   >
-                    <item.icon className="w-8 h-8 text-[#0ea5e9] mx-auto mb-2" />
-                    <div className="text-xs text-white/50">{item.label}</div>
+                    <stat.icon className="w-8 h-8 text-[#0ea5e9] mx-auto mb-2" />
+                    <div className="text-sm font-black text-white">{stat.value}</div>
+                    <div className="text-xs text-white/50">{stat.label}</div>
                   </motion.div>
                 ))}
               </div>
@@ -134,29 +139,29 @@ export default function TutorLoginPage() {
                   {/* Header */}
                   <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0ea5e9] to-[#10b981] mb-4 shadow-2xl">
-                      <Heart className="w-8 h-8 text-white" />
+                      <Rocket className="w-8 h-8 text-white" />
                     </div>
-                    <h2 className="text-3xl font-black text-white mb-2">Ingreso Familias</h2>
-                    <p className="text-white/60">Ingresa con tu email y contraseña</p>
+                    <h2 className="text-3xl font-black text-white mb-2">¡Bienvenido de vuelta!</h2>
+                    <p className="text-white/60">Ingresa con tu usuario y contraseña</p>
                   </div>
 
                   {/* Login Form */}
                   <form onSubmit={handleLogin} className="space-y-6">
-                    {/* Email Field */}
+                    {/* Username Field */}
                     <div>
                       <label className="block text-sm font-bold text-white/80 mb-2">
-                        Email
+                        Usuario
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                          <Mail className="w-5 h-5 text-[#0ea5e9]" />
+                          <User className="w-5 h-5 text-[#0ea5e9]" />
                         </div>
                         <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          type="text"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
                           className="w-full pl-12 pr-4 py-4 bg-black/30 border-2 border-white/10 rounded-2xl text-white placeholder-white/40 focus:outline-none focus:border-[#0ea5e9] transition-all"
-                          placeholder="tu@email.com"
+                          placeholder="Tu usuario"
                           required
                           disabled={loading}
                         />
@@ -226,17 +231,17 @@ export default function TutorLoginPage() {
                   {/* Footer Links */}
                   <div className="mt-8 pt-6 border-t border-white/10 text-center space-y-3">
                     <p className="text-sm text-white/60">
-                      ¿No tienes cuenta?{' '}
+                      ¿Problemas para ingresar?{' '}
                       <Link
-                        href="/register"
+                        href="/contacto"
                         className="text-[#0ea5e9] hover:text-[#10b981] transition-colors font-bold"
                       >
-                        Crear cuenta
+                        Contacta a tu tutor
                       </Link>
                     </p>
                     <div className="flex items-center justify-center gap-4 text-xs text-white/40">
-                      <Link href="/estudiante-login" className="hover:text-white transition-colors">
-                        Soy Estudiante
+                      <Link href="/login" className="hover:text-white transition-colors">
+                        Soy Padre/Madre
                       </Link>
                       <span>•</span>
                       <Link href="/docente/login" className="hover:text-white transition-colors">

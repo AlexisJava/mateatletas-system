@@ -271,7 +271,13 @@ export default function Navbar() {
           {/* Desktop Buttons */}
           <div className="hidden md:flex items-center gap-4">
             <Link
-              href="/estudiante/login"
+              href="/login"
+              className="px-7 py-3 bg-transparent border-3 border-[#10b981] rounded-xl text-[#10b981] font-bold transition-all hover:bg-[#10b981] hover:text-white"
+            >
+              Familias
+            </Link>
+            <Link
+              href="/estudiante-login"
               className="px-7 py-3 bg-transparent border-3 border-[#0ea5e9] rounded-xl text-[#0ea5e9] font-bold transition-all hover:bg-[#0ea5e9] hover:text-white"
             >
               Estudiantes
@@ -375,7 +381,14 @@ export default function Navbar() {
             ))}
             <div className="border-t border-white/10 mt-4 pt-4 space-y-2">
               <Link
-                href="/estudiante/login"
+                href="/login"
+                className="block py-2 px-4 text-[#10b981] font-bold hover:bg-white/10 rounded-lg transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Familias
+              </Link>
+              <Link
+                href="/estudiante-login"
                 className="block py-2 px-4 text-[#0ea5e9] font-bold hover:bg-white/10 rounded-lg transition-colors"
                 onClick={() => setIsOpen(false)}
               >
