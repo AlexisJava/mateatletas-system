@@ -1,10 +1,12 @@
 import Navbar from '@/components/landing/Navbar';
 import Hero from '@/components/landing/Hero';
+import Ticker365Section from '@/components/landing/Ticker365Section';
 import NumbersSection from '@/components/landing/NumbersSection';
 import GamificationSection from '@/components/landing/GamificationSection';
 import MundosSection from '@/components/landing/MundosSection';
 import TestimonialsSection from '@/components/landing/TestimonialsSection';
 import ComparisonSection from '@/components/landing/ComparisonSection';
+import PaymentLogicSection from '@/components/landing/PaymentLogicSection';
 import PricingSection from '@/components/landing/PricingSection';
 import FAQSection from '@/components/landing/FAQSection';
 import CTASection from '@/components/landing/CTASection';
@@ -25,7 +27,7 @@ import CTAToFooter from '@/components/dividers/CTAToFooter';
 /**
  * Landing page completa de Mateatletas
  *
- * 11 secciones + 9 separadores contextuales diseñados con:
+ * 13 secciones + 9 separadores contextuales diseñados con:
  * - TypeScript STRICT (sin any, unknown, @ts-ignore)
  * - Nunito font (400-900 weights)
  * - Dark mode support
@@ -40,6 +42,7 @@ export default function HomePage() {
       <main className="min-h-screen">
         <Navbar />
         <Hero />
+        <Ticker365Section />
         <HeroToNumbers />
         <NumbersSection />
         <NumbersToGamification />
@@ -50,6 +53,7 @@ export default function HomePage() {
         <TestimonialsSection />
         <TestimonialsToComparison />
         <ComparisonSection />
+        <PaymentLogicSection />
         <ComparisonToPricing />
         <PricingSection />
         <PricingToFAQ />
