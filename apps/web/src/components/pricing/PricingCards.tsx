@@ -74,6 +74,13 @@ export default function PricingCards() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
   const handleSubscribe = (planId: string) => {
+    // Plan EXPLORADOR va directo a cursos online, no necesita inscripción
+    if (planId === 'base') {
+      router.push('/cursos-online');
+      return;
+    }
+
+    // Otros planes muestran el modal de selección
     setSelectedPlan(planId);
     setShowModal(true);
   };
