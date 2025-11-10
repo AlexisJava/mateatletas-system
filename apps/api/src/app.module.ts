@@ -22,6 +22,7 @@ import { EventosModule } from './eventos/eventos.module';
 import { HealthModule } from './health/health.module';
 import { PlanificacionesSimplesModule } from './planificaciones-simples/planificaciones-simples.module';
 import { TiendaModule } from './tienda/tienda.module';
+import { ColoniaModule } from './colonia/colonia.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -63,6 +64,7 @@ import { TokenBlacklistGuard } from './auth/guards/token-blacklist.guard';
     EventosModule, // Sistema de calendario y eventos para docentes
     PlanificacionesSimplesModule, // Sistema de planificaciones auto-detectable (Convention over Configuration)
     TiendaModule, // Sistema de tienda, recursos (XP, monedas, gemas), inventario y compras
+    ColoniaModule, // Sistema de inscripciones para Colonia de Verano 2026
     HealthModule, // Health checks para monitoreo del sistema
   ],
   controllers: [AppController],

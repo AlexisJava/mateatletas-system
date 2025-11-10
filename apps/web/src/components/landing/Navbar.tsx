@@ -102,7 +102,7 @@ export default function Navbar() {
         ],
       },
     },
-    { href: '/colonia', label: 'Colonia de Verano' },
+    { href: '/colonia-verano-2025', label: 'Colonia Verano 2026' },
     { href: '/nosotros', label: 'Nosotros' },
   ];
 

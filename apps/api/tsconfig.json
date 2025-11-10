@@ -15,7 +15,18 @@
     "strictNullChecks": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "strictPropertyInitialization": false
   },
-  "exclude": ["**/__tests__/**", "**/*.spec.ts", "**/*.e2e-spec.ts", "**/seeds/**", "prisma/**/*.ts", "scripts/**/*.ts", "test/**", "dist/**", "check-*.ts"]
+  "exclude": [
+    "**/__tests__/**",
+    "**/*.spec.ts",
+    "**/*.e2e-spec.ts",
+    "**/seeds/**",
+    "prisma/**/*.ts",
+    "scripts/**/*.ts",
+    "test/**",
+    "dist/**",
+    "check-*.ts"
+  ]
 }

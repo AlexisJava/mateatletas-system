@@ -68,6 +68,9 @@ model Tutor {
   solicitudes_canje         SolicitudCanje[]
   canjes                    CanjePadre[]
 
+  /// COLONIA DE VERANO 2026
+  inscripciones_colonia     ColoniaInscripcion[]
+
   @@map("tutores")
 }
 
@@ -155,6 +158,9 @@ model Estudiante {
   racha                     RachaEstudiante?
   solicitudes_canje         SolicitudCanje[]
   cursos_canjeados          CursoEstudiante[]
+
+  /// COLONIA DE VERANO 2026
+  colonia_inscripciones     ColoniaEstudiante[]
 
   @@map("estudiantes")
 }
@@ -2726,4 +2732,104 @@ model CanjePadre {
 // ========================================
 // SISTEMA DE CAMPAÑAS NARRATIVAS
 // ========================================
+
+// ========================================
+// COLONIA DE VERANO 2026
+// ========================================
+
+/// Modelo para inscripciones a la Colonia de Verano 2026
+model ColoniaInscripcion {
+  id String @id @default(cuid())
+
+  tutor_id String
+  estado String @default("active") // "active", "blocked", "cancelled"
+  descuento_aplicado Int // 0, 12 o 20
+  total_mensual Int // Monto que se cobra cada mes
+  fecha_inscripcion DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tutor Tutor @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  estudiantes ColoniaEstudiante[]
+  pagos ColoniaPago[]
+
+  @@index([tutor_id])
+  @@index([estado])
+  @@map("colonia_inscripciones")
+}
+
+/// Modelo para estudiantes inscritos en la colonia
+model ColoniaEstudiante {
+  id String @id @default(cuid())
+
+  inscripcion_id String
+  estudiante_id String // Referencia a la tabla estudiantes
+  nombre String
+  edad Int
+  pin String @unique // 4 dígitos para acceso
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inscripcion ColoniaInscripcion @relation(fields: [inscripcion_id], references: [id], onDelete: Cascade)
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  cursos ColoniaEstudianteCurso[]
+
+  @@index([inscripcion_id])
+  @@index([estudiante_id])
+  @@index([pin])
+  @@map("colonia_estudiantes")
+}
+
+/// Modelo para cursos seleccionados por cada estudiante
+model ColoniaEstudianteCurso {
+  id String @id @default(cuid())
+
+  colonia_estudiante_id String
+  course_id String // ID del curso (ej: 'mat-juegos-desafios')
+  course_name String
+  course_area String // "Matemática", "Programación", "Ciencias"
+  instructor String
+  day_of_week String // "Lunes", "Martes", etc
+  time_slot String // "10:30-12:00", "14:30-16:00"
+  precio_base Int // 55000
+  precio_con_descuento Int // Después de aplicar descuento
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  estudiante ColoniaEstudiante @relation(fields: [colonia_estudiante_id], references: [id], onDelete: Cascade)
+
+  @@index([colonia_estudiante_id])
+  @@index([course_id])
+  @@map("colonia_estudiante_cursos")
+}
+
+/// Modelo para pagos mensuales de la colonia
+model ColoniaPago {
+  id String @id @default(cuid())
+
+  inscripcion_id String
+  mes String // "enero", "febrero", "marzo"
+  anio Int // 2026
+  monto Int
+  estado String @default("pending") // "pending", "paid", "failed", "cancelled"
+  mercadopago_preference_id String?
+  mercadopago_payment_id String?
+  fecha_vencimiento DateTime // Día 5 del mes
+  fecha_pago DateTime?
+  fecha_creacion DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inscripcion ColoniaInscripcion @relation(fields: [inscripcion_id], references: [id], onDelete: Cascade)
+
+  @@index([inscripcion_id])
+  @@index([estado])
+  @@index([fecha_vencimiento])
+  @@index([mercadopago_preference_id])
+  @@map("colonia_pagos")
+}
 
