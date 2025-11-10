@@ -1,4 +1,13 @@
-import type { ApiResponse, CursoDetalle, Leccion } from '@mateatletas/contracts';
+import type { CursoDetalle, Leccion } from '@mateatletas/contracts';
+
+/**
+ * Tipo para respuestas genéricas de la API
+ */
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
 
 /**
  * Factory para mocks de respuestas de detalle de curso en tests frontend

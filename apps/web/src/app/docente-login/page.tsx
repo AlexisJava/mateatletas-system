@@ -41,8 +41,12 @@ export default function DocenteLoginPage() {
 
     try {
       await login(email, password);
-      // El redirect se maneja automáticamente según el rol del usuario
-      const redirectPath = userType === 'admin' ? '/admin/dashboard' : '/docente/dashboard';
+
+      // CRÍTICO: Obtener el rol REAL del usuario desde el store
+      // No usar userType (toggle UI) ya que puede no coincidir con el rol del backend
+      const user = useAuthStore.getState().user;
+      const redirectPath = user?.role === 'admin' ? '/admin/dashboard' : '/docente/dashboard';
+
       router.push(redirectPath);
     } catch (err) {
       if (err instanceof Error) {

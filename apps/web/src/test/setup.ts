@@ -5,7 +5,7 @@
 
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterEach, beforeAll, afterAll, vi } from 'vitest';
 import type { LoggableValue } from '@/types/common';
 
 // Cleanup automático después de cada test
