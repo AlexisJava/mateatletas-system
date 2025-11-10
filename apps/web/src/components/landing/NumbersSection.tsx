@@ -11,26 +11,26 @@ export default function NumbersSection() {
   const stats: Stat[] = [
     {
       value: '500+',
-      label: 'Estudiantes activos',
-      description: 'Familias confiando en nosotros',
+      label: 'Familias que nos eligen',
+      description: 'Padres y madres confiando en nosotros',
       color: 'from-[#0ea5e9] to-[#0284c7]',
     },
     {
       value: '3',
-      label: 'Mundos STEAM',
+      label: 'Áreas de aprendizaje',
       description: 'Matemática, Programación y Ciencias',
       color: 'from-[#fbbf24] to-[#f59e0b]',
     },
     {
       value: '100%',
       label: 'Clases en vivo',
-      description: 'Interacción real con docentes',
+      description: 'Profesores reales que inspiran',
       color: 'from-[#10b981] to-[#059669]',
     },
     {
-      value: 'Club',
-      label: 'Social STEAM',
-      description: 'Desarrollo de habilidades sociales',
+      value: '365',
+      label: 'Días de aprendizaje',
+      description: 'Aprenden todo el año, cuando quieran',
       color: 'from-[#8b5cf6] to-[#7c3aed]',
     },
   ];
@@ -41,10 +41,10 @@ export default function NumbersSection() {
         <ScrollReveal animation="fade-up">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-              Mateatletas en números
+              Los resultados que importan
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto">
-              Un ecosistema completo diseñado para transformar el aprendizaje de matemáticas
+              Más de 500 familias argentinas ya vieron el cambio en sus hijos
             </p>
           </div>
         </ScrollReveal>

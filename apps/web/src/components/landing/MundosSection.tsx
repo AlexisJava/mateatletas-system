@@ -14,25 +14,25 @@ export default function MundosSection() {
     {
       title: 'Matemática',
       icon: '🔢',
-      description: 'Desde aritmética hasta cálculo avanzado, desarrollamos el pensamiento lógico y la resolución de problemas',
+      description: 'De las tablas de multiplicar hasta ecuaciones complejas. Van a su ritmo, sin presión, pero siempre avanzando.',
       features: [
-        'Álgebra y geometría',
-        'Trigonometría y cálculo',
-        'Estadística y probabilidad',
-        'Problemas del mundo real',
+        'Desde lo básico hasta lo avanzado',
+        'Aprenden por qué funciona, no de memoria',
+        'Usan la matemática en situaciones reales',
+        'Se preparan para olimpiadas si quieren',
       ],
       gradient: 'from-[#0ea5e9] to-[#0284c7]',
       letter: 'M',
     },
     {
-      title: 'Ciencia',
+      title: 'Ciencias',
       icon: '🔬',
-      description: 'Física, química y biología aplicada con experimentos virtuales y proyectos científicos',
+      description: 'Experimentos que pueden hacer en casa. Entienden cómo funciona el mundo a través de la curiosidad.',
       features: [
-        'Método científico',
-        'Experimentos interactivos',
-        'Proyectos de investigación',
-        'Ciencia aplicada',
+        'Experimentos seguros y fascinantes',
+        'Aprenden haciendo, no leyendo',
+        'Investigan temas que les apasionan',
+        'Conectan la ciencia con su vida',
       ],
       gradient: 'from-[#10b981] to-[#059669]',
       letter: 'S',
@@ -40,12 +40,12 @@ export default function MundosSection() {
     {
       title: 'Programación',
       icon: '💻',
-      description: 'Codificación desde cero hasta desarrollo de proyectos reales con tecnologías modernas',
+      description: 'Crean sus propios juegos, páginas web y aplicaciones. Ven resultados reales desde la primera clase.',
       features: [
-        'Python y JavaScript',
-        'Algoritmos y lógica',
-        'Desarrollo web y apps',
-        'Proyectos personales',
+        'Empiezan desde cero, sin experiencia',
+        'Crean proyectos que pueden mostrar',
+        'Aprenden los lenguajes más usados',
+        'Desarrollan habilidades para el futuro',
       ],
       gradient: 'from-[#8b5cf6] to-[#7c3aed]',
       letter: 'T',
@@ -61,28 +61,28 @@ export default function MundosSection() {
           <div className="text-center mb-12">
             <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#0ea5e9]/10 via-[#10b981]/10 to-[#8b5cf6]/10 rounded-full border border-[#0ea5e9]/20 mb-6">
               <span className="bg-gradient-to-r from-[#0ea5e9] via-[#10b981] to-[#8b5cf6] bg-clip-text text-transparent font-semibold text-sm">
-                Tres áreas de desarrollo
+                Tres caminos, infinitas posibilidades
               </span>
             </div>
 
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-              Elegí tu propio mundo
+              Dejá que elijan lo que les apasiona
             </h2>
 
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 font-medium mb-6">
-              O combinalos, las posibilidades son infinitas
+              O que prueben los tres. No hay límites.
             </p>
 
             <div className="flex justify-center mb-6">
               <div className="px-5 py-2.5 bg-gradient-to-r from-[#0ea5e9]/20 to-[#10b981]/20 rounded-full border border-[#0ea5e9]/30">
                 <span className="text-base font-bold text-gray-900 dark:text-white">
-                  👦 👧 Niños de 6 a 18 años
+                  👦 👧 Para chicos de 6 a 18 años
                 </span>
               </div>
             </div>
 
             <p className="text-lg text-gray-600 dark:text-gray-400 font-light max-w-2xl mx-auto">
-              Matemática, Ciencia y Programación integradas en una experiencia de aprendizaje única
+              Matemática, Ciencias y Programación pensadas para que descubran qué los motiva de verdad
             </p>
           </div>
 

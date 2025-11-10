@@ -38,17 +38,17 @@ export default function CTASection() {
               {/* Main heading */}
               <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-center mb-6 leading-[1.1]">
                 <span className="bg-gradient-to-r from-white via-white to-white/80 bg-clip-text text-transparent">
-                  Transformá el futuro
+                  Dale a tus hijos lo que
                 </span>
                 <br />
                 <span className="bg-gradient-to-r from-[#0ea5e9] via-[#8b5cf6] to-[#10b981] bg-clip-text text-transparent">
-                  de tus hijos hoy
+                  la escuela no puede darles
                 </span>
               </h2>
 
               {/* Subtitle */}
               <p className="text-xl md:text-2xl text-white/60 text-center max-w-3xl mx-auto mb-12 font-light leading-relaxed">
-                Únete a más de 500 familias que confían en Mateatletas para el desarrollo STEAM de sus hijos
+                Más de 500 familias argentinas ya eligieron Mateatletas para que sus hijos descubran su potencial
               </p>
 
               {/* CTA Buttons */}
@@ -57,14 +57,14 @@ export default function CTASection() {
                   href="/club"
                   className="group/btn relative px-10 py-5 bg-gradient-to-r from-[#0ea5e9] via-[#0ea5e9] to-[#0284c7] rounded-2xl font-black text-lg text-white transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#0ea5e9]/50"
                 >
-                  <span className="relative z-10">Ver planes y precios</span>
+                  <span className="relative z-10">Quiero inscribir a mi hijo</span>
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#0ea5e9] to-[#0284c7] blur opacity-0 group-hover/btn:opacity-50 transition-opacity" />
                 </Link>
                 <Link
                   href="/nosotros"
                   className="group/btn px-10 py-5 bg-white/5 hover:bg-white/10 border-2 border-white/20 hover:border-white/40 rounded-2xl font-bold text-lg text-white transition-all duration-300 hover:scale-105"
                 >
-                  Conocer más
+                  Conocer nuestra historia
                   <span className="inline-block ml-2 transition-transform group-hover/btn:translate-x-1">→</span>
                 </Link>
               </div>
@@ -72,10 +72,10 @@ export default function CTASection() {
               {/* Stats grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-5xl mx-auto">
                 {[
-                  { value: '500+', label: 'Estudiantes activos' },
-                  { value: '73', label: 'Logros desbloqueables' },
-                  { value: '4', label: 'Casas competitivas' },
-                  { value: '24%', label: 'Descuento máximo' },
+                  { value: '500+', label: 'Familias que nos eligen' },
+                  { value: '95%', label: 'Chicos más motivados' },
+                  { value: '8-10', label: 'Estudiantes por grupo' },
+                  { value: '365', label: 'Días de aprendizaje' },
                 ].map((stat, index) => (
                   <div
                     key={index}
@@ -104,21 +104,21 @@ export default function CTASection() {
         {/* Trust indicators */}
         <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-gray-500 dark:text-gray-400">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-[#10b981]" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-5 h-5 text-[#10b981]" fill="currentColor" viewBox="0 0 20 20" role="img" aria-label="Verificado">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
             <span className="font-medium">Clases en vivo con docentes certificados</span>
           </div>
           <div className="hidden md:block w-px h-4 bg-gray-300 dark:bg-gray-700" />
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-[#10b981]" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-5 h-5 text-[#10b981]" fill="currentColor" viewBox="0 0 20 20" role="img" aria-label="Verificado">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
             <span className="font-medium">Grupos reducidos de 8-10 estudiantes</span>
           </div>
           <div className="hidden md:block w-px h-4 bg-gray-300 dark:bg-gray-700" />
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-[#10b981]" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-5 h-5 text-[#10b981]" fill="currentColor" viewBox="0 0 20 20" role="img" aria-label="Verificado">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
             <span className="font-medium">Pago seguro con MercadoPago</span>

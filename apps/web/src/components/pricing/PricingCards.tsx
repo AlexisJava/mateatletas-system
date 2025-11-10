@@ -14,53 +14,53 @@ interface PricingPlan {
 const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'base',
-    name: 'BASE',
-    description: 'Acceso completo a la plataforma',
+    name: 'EXPLORADOR',
+    description: 'Para que aprendan a su ritmo, cuando quieran',
     price: 30000,
     period: '/mes',
-    tags: ['Online 24/7'],
+    tags: ['Disponible 24/7'],
     isPopular: false,
     features: [
-      'Cursos asincrónicos ilimitados',
-      '73 Logros desbloqueables',
-      'Sistema XP & Niveles',
-      'Avatar 3D personalizado',
-      'Tienda virtual de ítems',
-      'Portal de padres'
+      'Lecciones en video siempre disponibles',
+      'Sistema de logros y recompensas',
+      'Progreso visible por niveles',
+      'Personaje digital para personalizar',
+      'Accesorios virtuales motivadores',
+      'Panel de control para padres'
     ]
   },
   {
     id: 'plus',
-    name: 'PLUS',
-    description: 'BASE + Clases con profesor',
+    name: 'ACOMPAÑADO',
+    description: 'Con profesor en vivo + todo lo del plan Explorador',
     price: 50000,
     period: '/mes',
-    tags: ['🔥 Más Popular', 'Online + Vivo'],
+    tags: ['🔥 El favorito de las familias', 'Clases en vivo'],
     isPopular: true,
     features: [
-      'Todo de BASE incluido',
-      '1 Grupo sincrónico',
-      '8-10 estudiantes máximo',
-      'Docentes certificados',
-      'Asesoría psicopedagógica',
-      'Tracking en tiempo real'
+      'Todo del plan Explorador incluido',
+      '1 clase grupal en vivo por semana',
+      'Grupos chicos: 8-10 chicos máximo',
+      'Profesores que inspiran y motivan',
+      'Acompañamiento pedagógico personalizado',
+      'Seguimiento en vivo del progreso'
     ]
   },
   {
     id: 'ultra',
-    name: 'ULTRA',
-    description: 'Doble experiencia de aprendizaje',
+    name: 'COMPLETO',
+    description: 'Máximo desarrollo: dos mundos cada semana',
     price: 88000,
     period: '/mes',
-    tags: ['-12% Descuento', 'x2 Mundos'],
+    tags: ['Ahorrás 12%', 'Doble impacto'],
     isPopular: false,
     features: [
-      'Todo de PLUS incluido',
-      '2 Grupos sincrónicos',
-      'Combina mundos libremente',
-      'Mate + Progra + Ciencias',
-      '12% descuento aplicado',
-      '$44k por actividad'
+      'Todo del plan Acompañado incluido',
+      '2 clases en vivo por semana',
+      'Elegí libremente: Mate, Progra o Ciencias',
+      'Desarrollo integral STEAM',
+      'Ya incluye el 12% de descuento',
+      'Sale $44.000 por mundo'
     ]
   }
 ];
@@ -123,6 +123,29 @@ export default function PricingCards() {
                 </span>
                 <span className="price-period">{plan.period}</span>
               </div>
+
+              {/* Inscription Fee */}
+              {plan.id === 'base' ? (
+                <div className="inscription-fee inscription-free">
+                  <span className="inscription-icon">
+                    <span role="img" aria-label="Brillos - Sin inscripción">✨</span>
+                  </span>
+                  <div className="inscription-text">
+                    <span className="inscription-label">Inscripción</span>
+                    <span className="inscription-amount inscription-free-text">Sin Inscripción</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="inscription-fee">
+                  <span className="inscription-icon">
+                    <span role="img" aria-label="Diamante - Inscripción única">💎</span>
+                  </span>
+                  <div className="inscription-text">
+                    <span className="inscription-label">Inscripción (única vez)</span>
+                    <span className="inscription-amount">$20.000</span>
+                  </div>
+                </div>
+              )}
 
               {/* Features */}
               <ul className="features-list">
@@ -285,7 +308,7 @@ export default function PricingCards() {
           display: flex;
           align-items: baseline;
           gap: 6px;
-          margin-bottom: 32px;
+          margin-bottom: 16px;
         }
 
         .price-main {
@@ -320,6 +343,60 @@ export default function PricingCards() {
           font-family: 'Nunito', sans-serif;
           font-size: 0.9rem;
           color: #64748b;
+        }
+
+        /* Inscription Fee */
+        .inscription-fee {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          background: rgba(251, 191, 36, 0.08);
+          border: 1px solid rgba(251, 191, 36, 0.2);
+          border-radius: 12px;
+          padding: 12px 16px;
+          margin-bottom: 24px;
+        }
+
+        .inscription-icon {
+          font-size: 1.5rem;
+          filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.3));
+        }
+
+        .inscription-text {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          flex: 1;
+        }
+
+        .inscription-label {
+          font-family: 'Nunito', sans-serif;
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: #94a3b8;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .inscription-amount {
+          font-family: 'Nunito', sans-serif;
+          font-size: 1.2rem;
+          font-weight: 800;
+          color: #fbbf24;
+        }
+
+        /* Inscription Free (BASE plan) */
+        .inscription-free {
+          background: rgba(16, 185, 129, 0.08);
+          border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .inscription-free .inscription-icon {
+          filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3));
+        }
+
+        .inscription-free-text {
+          color: #10b981 !important;
         }
 
         /* Features List */
@@ -425,6 +502,14 @@ export default function PricingCards() {
 
           .price-main {
             font-size: 3rem;
+          }
+
+          .inscription-fee {
+            padding: 10px 14px;
+          }
+
+          .inscription-amount {
+            font-size: 1.1rem;
           }
         }
       `}</style>

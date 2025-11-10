@@ -9,12 +9,20 @@ interface SubMenuItem {
   icon: string;
   color: string;
   gradient: string;
+  description: string;
 }
 
 interface NavLink {
   href?: string;
   label: string;
-  submenu?: SubMenuItem[];
+  submenu?: {
+    title: string;
+    subtitle: string;
+    footer: string;
+    titleColor: string;
+    footerColor: string;
+    items: SubMenuItem[];
+  };
 }
 
 export default function Navbar() {
@@ -24,55 +32,75 @@ export default function Navbar() {
   const navLinks: NavLink[] = [
     {
       label: 'Club',
-      submenu: [
-        {
-          href: '/club/matematica',
-          label: 'Matemática',
-          icon: '🔢',
-          color: '#fbbf24',
-          gradient: 'from-[#fbbf24] to-[#f59e0b]',
-        },
-        {
-          href: '/club/programacion',
-          label: 'Programación',
-          icon: '💻',
-          color: '#0ea5e9',
-          gradient: 'from-[#0ea5e9] to-[#0284c7]',
-        },
-        {
-          href: '/club/ciencias',
-          label: 'Ciencias',
-          icon: '🔬',
-          color: '#FF6B35',
-          gradient: 'from-[#FF6B35] to-[#e65929]',
-        },
-      ],
+      submenu: {
+        title: '💎 Suscripción Mensual',
+        subtitle: 'Clases en vivo con profesor todo el año',
+        footer: 'Online desde tu casa',
+        titleColor: '#fbbf24',
+        footerColor: '#fbbf24',
+        items: [
+          {
+            href: '/club/matematica',
+            label: 'Matemática',
+            icon: '🔢',
+            color: '#fbbf24',
+            gradient: 'from-[#fbbf24] to-[#f59e0b]',
+            description: 'Desde álgebra hasta cálculo',
+          },
+          {
+            href: '/club/programacion',
+            label: 'Programación',
+            icon: '💻',
+            color: '#0ea5e9',
+            gradient: 'from-[#0ea5e9] to-[#0284c7]',
+            description: 'Crean juegos y aplicaciones reales',
+          },
+          {
+            href: '/club/ciencias',
+            label: 'Ciencias',
+            icon: '🔬',
+            color: '#FF6B35',
+            gradient: 'from-[#FF6B35] to-[#e65929]',
+            description: 'Experimentos fascinantes cada semana',
+          },
+        ],
+      },
     },
     {
       label: 'Cursos Online',
-      submenu: [
-        {
-          href: '/cursos-online/matematica',
-          label: 'Matemática',
-          icon: '🔢',
-          color: '#fbbf24',
-          gradient: 'from-[#fbbf24] to-[#f59e0b]',
-        },
-        {
-          href: '/cursos-online/programacion',
-          label: 'Programación',
-          icon: '💻',
-          color: '#0ea5e9',
-          gradient: 'from-[#0ea5e9] to-[#0284c7]',
-        },
-        {
-          href: '/cursos-online/ciencias',
-          label: 'Ciencias',
-          icon: '🔬',
-          color: '#FF6B35',
-          gradient: 'from-[#FF6B35] to-[#e65929]',
-        },
-      ],
+      submenu: {
+        title: '📚 Cursos Intensivos',
+        subtitle: 'Pago único - Duración 2 a 3 meses',
+        footer: '💰 Un solo pago, acceso completo',
+        titleColor: '#8b5cf6',
+        footerColor: '#8b5cf6',
+        items: [
+          {
+            href: '/cursos-online/matematica',
+            label: 'Matemática',
+            icon: '🔢',
+            color: '#fbbf24',
+            gradient: 'from-[#fbbf24] to-[#f59e0b]',
+            description: 'Cursos temáticos específicos',
+          },
+          {
+            href: '/cursos-online/programacion',
+            label: 'Programación',
+            icon: '💻',
+            color: '#0ea5e9',
+            gradient: 'from-[#0ea5e9] to-[#0284c7]',
+            description: 'Proyectos completos paso a paso',
+          },
+          {
+            href: '/cursos-online/ciencias',
+            label: 'Ciencias',
+            icon: '🔬',
+            color: '#FF6B35',
+            gradient: 'from-[#FF6B35] to-[#e65929]',
+            description: 'Experimentos y teoría aplicada',
+          },
+        ],
+      },
     },
     { href: '/colonia', label: 'Colonia de Verano' },
     { href: '/nosotros', label: 'Nosotros' },
@@ -84,12 +112,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex flex-col items-start group">
-            <span className="text-3xl font-black title-gradient leading-none">
-              Mateatletas
-            </span>
-            <span className="logo-subtitle">
-              CLUB STEAM
-            </span>
+            <span className="text-3xl font-black title-gradient leading-none">Mateatletas</span>
+            <span className="logo-subtitle">CLUB STEAM</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -103,23 +127,73 @@ export default function Navbar() {
               >
                 {link.submenu ? (
                   <>
-                    <button className="nav-link-landing">
+                    <button
+                      className="nav-link-landing"
+                      onClick={() => setOpenDropdown(openDropdown === link.label ? null : link.label)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setOpenDropdown(openDropdown === link.label ? null : link.label);
+                        }
+                        if (e.key === 'Escape') {
+                          setOpenDropdown(null);
+                        }
+                      }}
+                      aria-haspopup="true"
+                      aria-expanded={openDropdown === link.label}
+                      aria-label={`Menú ${link.label}`}
+                    >
                       {link.label}
                     </button>
                     {/* Dropdown Menu - Mega Menu Style */}
                     {openDropdown === link.label && (
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-[600px] bg-[#0a1428]/98 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl p-4 z-50">
-                        <div className="grid grid-cols-3 gap-3">
-                          {link.submenu.map((item) => (
+                      <div
+                        className="absolute top-full left-1/2 -translate-x-1/2 w-[700px] bg-[#0a1428]/98 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl p-6 pt-10 z-50"
+                        style={{ marginTop: '10px' }}
+                        role="menu"
+                        aria-label={`Submenú de ${link.label}`}
+                      >
+                        {/* Bridge invisible para mantener hover */}
+                        <div
+                          className="absolute -top-[10px] left-0 right-0 h-[10px]"
+                          style={{ background: 'transparent' }}
+                        />
+
+                        {/* Header con título y subtítulo */}
+                        <div className="text-center mb-6 pb-5 border-b border-white/10">
+                          <h3
+                            className="text-2xl font-bold mb-2"
+                            style={{ color: link.submenu.titleColor }}
+                            id={`${link.label}-menu-title`}
+                          >
+                            {link.submenu.title}
+                          </h3>
+                          <p className="text-sm text-white/60">{link.submenu.subtitle}</p>
+                        </div>
+
+                        {/* Grid de mundos */}
+                        <div className="grid grid-cols-3 gap-4" role="list">
+                          {link.submenu.items.map((item) => (
                             <Link
                               key={item.href}
                               href={item.href}
-                              className="group/item relative p-5 rounded-xl border-2 border-transparent hover:border-white/20 transition-all duration-300 bg-gradient-to-br from-white/5 to-transparent hover:scale-105"
+                              className="group/item relative p-5 rounded-xl border-2 border-transparent hover:border-white/20 transition-all duration-300 bg-gradient-to-br from-white/5 to-transparent hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#0a1428]"
                               style={{
-                                boxShadow: `0 0 0 rgba(${item.color === '#0ea5e9' ? '14, 165, 233' : item.color === '#fbbf24' ? '251, 191, 36' : '255, 107, 53'}, 0)`,
+                                boxShadow: `0 0 0 rgba(${
+                                  item.color === '#0ea5e9'
+                                    ? '14, 165, 233'
+                                    : item.color === '#fbbf24'
+                                      ? '251, 191, 36'
+                                      : '255, 107, 53'
+                                }, 0)`,
                               }}
                               onMouseEnter={(e) => {
-                                const rgb = item.color === '#0ea5e9' ? '14, 165, 233' : item.color === '#fbbf24' ? '251, 191, 36' : '255, 107, 53';
+                                const rgb =
+                                  item.color === '#0ea5e9'
+                                    ? '14, 165, 233'
+                                    : item.color === '#fbbf24'
+                                      ? '251, 191, 36'
+                                      : '255, 107, 53';
                                 e.currentTarget.style.boxShadow = `0 0 30px rgba(${rgb}, 0.5)`;
                                 e.currentTarget.style.borderColor = item.color;
                               }}
@@ -127,36 +201,66 @@ export default function Navbar() {
                                 e.currentTarget.style.boxShadow = '0 0 0 rgba(0, 0, 0, 0)';
                                 e.currentTarget.style.borderColor = 'transparent';
                               }}
+                              role="menuitem"
+                              aria-label={`${item.label} - ${item.description}`}
                             >
                               {/* Icon con gradiente */}
                               <div
-                                className={`w-14 h-14 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center text-3xl mb-3 shadow-lg group-hover/item:scale-110 transition-transform`}
+                                className={`w-16 h-16 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center text-3xl mb-3 shadow-lg group-hover/item:scale-110 transition-transform`}
                               >
-                                {item.icon}
+                                <span role="img" aria-label={`Icono de ${item.label}`}>{item.icon}</span>
                               </div>
 
                               {/* Label */}
-                              <div className="text-white font-bold text-base group-hover/item:text-white transition-colors">
+                              <div className="text-white font-bold text-base mb-2 group-hover/item:text-white transition-colors">
                                 {item.label}
+                              </div>
+
+                              {/* Description */}
+                              <div className="text-xs text-white/60 leading-relaxed">
+                                {item.description}
                               </div>
 
                               {/* Arrow indicator */}
                               <div
                                 className="absolute bottom-3 right-3 opacity-0 group-hover/item:opacity-100 transition-opacity"
                                 style={{ color: item.color }}
+                                aria-hidden="true"
                               >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                                  />
                                 </svg>
                               </div>
                             </Link>
                           ))}
                         </div>
+
+                        {/* Footer con precio/info */}
+                        <div
+                          className="mt-5 pt-5 border-t border-white/10 text-center text-sm font-semibold"
+                          style={{ color: link.submenu.footerColor }}
+                        >
+                          {link.submenu.footer}
+                        </div>
                       </div>
                     )}
                   </>
                 ) : (
-                  <Link href={link.href!} className="nav-link-landing">
+                  <Link
+                    href={link.href!}
+                    className="nav-link-landing"
+                    aria-label={link.label}
+                  >
                     {link.label}
                   </Link>
                 )}
@@ -193,9 +297,7 @@ export default function Navbar() {
                 }`}
               />
               <span
-                className={`block h-0.5 bg-white transition-all ${
-                  isOpen ? 'opacity-0' : ''
-                }`}
+                className={`block h-0.5 bg-white transition-all ${isOpen ? 'opacity-0' : ''}`}
               />
               <span
                 className={`block h-0.5 bg-white transition-all ${
@@ -208,16 +310,22 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden mt-4 pb-4 space-y-3">
+          <div className="md:hidden mt-4 pb-4 space-y-4">
             {navLinks.map((link) => (
               <div key={link.label}>
                 {link.submenu ? (
                   <div>
-                    <div className="py-2 px-4 text-white font-semibold text-sm opacity-60 uppercase tracking-wide">
-                      {link.label}
+                    <div className="py-3 px-4 rounded-lg bg-white/5 border border-white/10 mb-3">
+                      <div
+                        className="font-bold text-lg mb-1"
+                        style={{ color: link.submenu.titleColor }}
+                      >
+                        {link.submenu.title}
+                      </div>
+                      <div className="text-xs text-white/60">{link.submenu.subtitle}</div>
                     </div>
                     <div className="space-y-2 px-2">
-                      {link.submenu.map((item) => (
+                      {link.submenu.items.map((item) => (
                         <Link
                           key={item.href}
                           href={item.href}
@@ -226,7 +334,12 @@ export default function Navbar() {
                             boxShadow: `0 0 0 rgba(0,0,0,0)`,
                           }}
                           onMouseEnter={(e) => {
-                            const rgb = item.color === '#0ea5e9' ? '14, 165, 233' : item.color === '#fbbf24' ? '251, 191, 36' : '255, 107, 53';
+                            const rgb =
+                              item.color === '#0ea5e9'
+                                ? '14, 165, 233'
+                                : item.color === '#fbbf24'
+                                  ? '251, 191, 36'
+                                  : '255, 107, 53';
                             e.currentTarget.style.boxShadow = `0 0 20px rgba(${rgb}, 0.4)`;
                             e.currentTarget.style.borderColor = item.color;
                           }}
@@ -237,13 +350,14 @@ export default function Navbar() {
                           onClick={() => setIsOpen(false)}
                         >
                           <div
-                            className={`w-10 h-10 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center text-xl flex-shrink-0 shadow-md`}
+                            className={`w-12 h-12 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center text-xl flex-shrink-0 shadow-md`}
                           >
-                            {item.icon}
+                            <span role="img" aria-label={`Icono de ${item.label}`}>{item.icon}</span>
                           </div>
-                          <span className="text-white font-semibold text-sm">
-                            {item.label}
-                          </span>
+                          <div className="flex-1">
+                            <div className="text-white font-semibold text-sm">{item.label}</div>
+                            <div className="text-xs text-white/60">{item.description}</div>
+                          </div>
                         </Link>
                       ))}
                     </div>

@@ -13,24 +13,24 @@ export default function FAQSection() {
 
   const faqs: FAQ[] = [
     {
-      question: '¿Cómo funciona el sistema de gamificación?',
-      answer: 'Los estudiantes ganan XP y monedas completando clases, desafíos y objetivos. Existen 73 logros divididos en 4 raridades (Común, Raro, Épico, Legendario) que otorgan recompensas. El XP permite subir de nivel (15+ niveles) y las monedas se usan en la tienda virtual para comprar items para el avatar 3D.',
+      question: '¿Cómo hacen para que los chicos se mantengan motivados?',
+      answer: 'Usamos un sistema de recompensas que los chicos aman: ganan puntos y monedas virtuales completando clases y desafíos. Hay 73 logros para alcanzar (desde básicos hasta maestros) que dan premios. Los puntos les permiten subir de nivel (más de 15 niveles) y las monedas las usan para comprar ropa y accesorios para su personaje digital. Es como un videojuego, pero aprenden de verdad.',
     },
     {
-      question: '¿Cuántos estudiantes hay por grupo?',
-      answer: 'Los grupos tienen un máximo de 8-10 estudiantes para garantizar atención personalizada. También ofrecemos clases individuales 1 a 1 para quienes prefieren atención exclusiva.',
+      question: '¿Cuántos chicos hay por clase? ¿Mi hijo va a recibir atención?',
+      answer: 'Las clases tienen máximo 8-10 estudiantes, nunca más. Esto nos permite que cada chico reciba atención personalizada y pueda hacer preguntas sin vergüenza. También ofrecemos clases individuales 1 a 1 si preferís que tu hijo tenga atención exclusiva de un profesor.',
     },
     {
-      question: '¿Cómo funcionan los descuentos por familia?',
-      answer: 'Tenemos 5 niveles de descuento automático: 2 hijos (5%), 3 hijos (10%), 4 hijos (16%), 5 hijos (20%), 6 o más hijos (24%). Los descuentos se calculan automáticamente según la cantidad de estudiantes activos de la misma familia.',
+      question: '¿Tienen descuentos si tengo más de un hijo?',
+      answer: 'Sí! Y son automáticos. Si tenés 2 hijos, 5% de descuento. Con 3, 10%. Con 4, 16%. Con 5, 20%. Y si tenés 6 o más, te hacemos un 24% de descuento. El sistema lo calcula solo, vos no tenés que hacer nada. Queremos que sea accesible para toda la familia.',
     },
     {
-      question: '¿Qué incluye el portal de tutor?',
-      answer: 'El portal permite gestionar múltiples hijos en un solo lugar, realizar pagos, visualizar descuentos aplicados, ver progreso académico en tiempo real, consultar historial de clases, y acceder a informes detallados de cada estudiante.',
+      question: '¿Puedo ver cómo va mi hijo desde mi celular?',
+      answer: 'Totalmente. Desde tu panel de control podés ver el progreso de todos tus hijos en un solo lugar: qué clases hicieron, qué nota sacaron, cuántos puntos ganaron, qué logros desbloquearon. También podés hacer los pagos, consultar el historial completo y descargar informes detallados. Todo desde tu celu, tablet o compu.',
     },
     {
-      question: '¿Qué edades pueden participar?',
-      answer: 'Mateatletas está diseñado para estudiantes de primaria y secundaria. Los grupos se organizan por nivel académico para garantizar que el contenido sea apropiado y desafiante para cada edad.',
+      question: '¿Para qué edades es?',
+      answer: 'Desde primaria hasta secundaria. Los grupos se arman por nivel de conocimiento, no por edad. Así tu hijo está con otros chicos que saben lo mismo que él, nadie se aburre ni se siente perdido. El contenido se adapta para que siempre sea desafiante pero alcanzable.',
     },
   ];
 
@@ -49,10 +49,10 @@ export default function FAQSection() {
               </span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-              ¿Tienes dudas?
+              Las preguntas que nos hacen los padres
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto">
-              Encuentra respuestas a las preguntas más comunes sobre Mateatletas
+              Entendemos tus dudas. Acá respondemos las más comunes con total transparencia.
             </p>
           </div>
         </ScrollReveal>
@@ -66,6 +66,10 @@ export default function FAQSection() {
               <button
                 onClick={() => toggleFAQ(index)}
                 className="w-full p-6 text-left flex items-center justify-between hover:bg-white/5 transition-colors"
+                aria-expanded={openIndex === index}
+                aria-controls={`faq-answer-${index}`}
+                id={`faq-question-${index}`}
+                aria-label={`${faq.question} - ${openIndex === index ? 'Cerrar' : 'Abrir'} respuesta`}
               >
                 <span className="text-lg font-bold text-gray-900 dark:text-white pr-8">
                   {faq.question}
@@ -73,7 +77,7 @@ export default function FAQSection() {
                 <div className={`flex-shrink-0 w-8 h-8 bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] rounded-full flex items-center justify-center transition-transform ${
                   openIndex === index ? 'rotate-180' : ''
                 }`}>
-                  <span className="text-white font-bold text-xl">
+                  <span className="text-white font-bold text-xl" aria-hidden="true">
                     {openIndex === index ? '−' : '+'}
                   </span>
                 </div>
@@ -81,7 +85,12 @@ export default function FAQSection() {
 
               {/* Answer */}
               {openIndex === index && (
-                <div className="px-6 pb-6 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div
+                  className="px-6 pb-6 animate-in fade-in slide-in-from-top-2 duration-200"
+                  id={`faq-answer-${index}`}
+                  role="region"
+                  aria-labelledby={`faq-question-${index}`}
+                >
                   <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                     {faq.answer}
                   </p>
@@ -95,10 +104,10 @@ export default function FAQSection() {
         {/* Bottom Contact */}
         <div className="text-center mt-12">
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            ¿No encontraste la respuesta que buscabas?
+            ¿Tenés otra pregunta? Estamos para ayudarte
           </p>
           <button className="px-8 py-4 bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] text-white rounded-xl font-bold hover:shadow-2xl hover:shadow-[#8b5cf6]/40 transition-all hover:scale-105">
-            Contactar soporte
+            Hablá con nosotros
           </button>
         </div>
       </div>

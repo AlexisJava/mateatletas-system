@@ -13,44 +13,44 @@ export default function TestimonialsSection() {
   const testimonialsRow1: Testimonial[] = [
     {
       name: 'María González',
-      role: 'Madre de estudiante',
-      testimonial: 'Mi hija pasó de odiar las matemáticas a pedirme que reserve más clases. El sistema de gamificación es increíble.',
+      role: 'Mamá de Valentina, 10 años',
+      testimonial: 'Mi hija pasó de odiar las matemáticas a pedirme que reserve más clases. No lo podía creer cuando me preguntó si podía tener clase el sábado también.',
       rating: 5,
     },
     {
       name: 'Carlos Rodríguez',
       role: 'Estudiante de 14 años',
-      testimonial: 'Los avatares 3D son geniales. Ya desbloqueé 45 logros y me encanta personalizar mi personaje.',
+      testimonial: 'Me encanta mi personaje 3D. Ya tengo 45 logros y me compré un montón de ropa virtual. Es como jugar pero estoy aprendiendo posta.',
       rating: 5,
     },
     {
       name: 'Ana Martínez',
-      role: 'Tutora de 3 hijos',
-      testimonial: 'El portal de tutor me permite hacer seguimiento de todos mis hijos en un solo lugar. Los descuentos ayudan mucho.',
+      role: 'Mamá de 3 chicos',
+      testimonial: 'Desde mi celu veo cómo van los tres. El descuento por hermanos es un golazo, y verlos motivados no tiene precio.',
       rating: 5,
     },
     {
       name: 'Lucas Fernández',
       role: 'Estudiante de 12 años',
-      testimonial: 'Las clases en vivo son divertidas. Los profes son muy buenos y siempre nos ayudan.',
+      testimonial: 'Las clases son re divertidas. Los profes explican re bien y si no entendés algo te ayudan al toque. Ya no me da miedo preguntar.',
       rating: 5,
     },
     {
       name: 'Patricia López',
-      role: 'Madre de estudiante',
-      testimonial: 'El progreso académico es real. Mi hijo mejoró sus notas en el colegio desde que empezó.',
+      role: 'Mamá de Tomás, 13 años',
+      testimonial: 'Las notas del colegio mejoraron banda. Pero lo mejor es que ahora estudia sin que le diga. Eso para mí no tiene precio.',
       rating: 5,
     },
     {
       name: 'Diego Santos',
       role: 'Estudiante de 16 años',
-      testimonial: 'Me encanta aprender programación aquí. Los proyectos son super interesantes y útiles.',
+      testimonial: 'Estoy creando mi propia app. Los profes te enseñan cosas que de verdad se usan, no boludeces. Ahora quiero estudiar programación en serio.',
       rating: 5,
     },
     {
       name: 'Sofía Ruiz',
       role: 'Estudiante de 10 años',
-      testimonial: 'Hacer experimentos virtuales de ciencia es lo mejor. Aprendí mucho más que en el colegio.',
+      testimonial: 'Los experimentos de ciencia son lo más. Aprendí más acá en 3 meses que en todo el año en la escuela. Y me divierto un montón.',
       rating: 5,
     },
   ];
@@ -58,44 +58,44 @@ export default function TestimonialsSection() {
   const testimonialsRow2: Testimonial[] = [
     {
       name: 'Roberto García',
-      role: 'Padre de 2 estudiantes',
-      testimonial: 'La asistencia digital y el seguimiento en tiempo real me dan tranquilidad. Sé exactamente cómo van mis hijos.',
+      role: 'Papá de 2 chicos',
+      testimonial: 'Entro al panel cuando quiero y veo exactamente cómo van. Eso me da una tranquilidad que antes no tenía. Sé que están aprendiendo.',
       rating: 5,
     },
     {
       name: 'Valentina Morales',
       role: 'Estudiante de 15 años',
-      testimonial: 'El nivel de las clases es excelente. Los docentes saben mucho y explican re bien.',
+      testimonial: 'Los profes son unos genios. Explican re bien y hacen que todo sea interesante. Ya no me parece aburrida la matemática.',
       rating: 5,
     },
     {
       name: 'Julio Castillo',
-      role: 'Tutor de estudiante',
-      testimonial: 'El descuento por familia hace que sea muy accesible. Mis dos hijos están encantados.',
+      role: 'Papá de Lautaro y Emma',
+      testimonial: 'Con el descuento por hermanos sale re bien. Y verlos a los dos re enganchados con las clases no tiene precio.',
       rating: 5,
     },
     {
       name: 'Camila Torres',
       role: 'Estudiante de 13 años',
-      testimonial: 'Gano XP y monedas por estudiar. Es como jugar pero aprendo un montón.',
+      testimonial: 'Subo de nivel y gano monedas virtuales. Me compré un montón de cosas para mi personaje. Es adictivo pero aprendo banda.',
       rating: 5,
     },
     {
       name: 'Fernando Paz',
-      role: 'Padre de estudiante',
-      testimonial: 'La plataforma es muy profesional. Todo funciona perfecto y el soporte responde rápido.',
+      role: 'Papá de Agustín, 12 años',
+      testimonial: 'Todo funciona perfecto. Si tengo alguna duda, me responden al toque. Es súper profesional pero sin perder el lado humano.',
       rating: 5,
     },
     {
       name: 'Martina Silva',
       role: 'Estudiante de 11 años',
-      testimonial: 'Hacer cálculo ahora es divertido. Los desafíos están buenos y aprendo sin aburrirme.',
+      testimonial: 'Ahora las ecuaciones me parecen re fáciles. Los desafíos son divertidos y voy aprendiendo sin darme cuenta.',
       rating: 5,
     },
     {
       name: 'Andrés Vega',
-      role: 'Tutor de 3 estudiantes',
-      testimonial: 'Mis tres hijos están en diferentes niveles y todos progresan a su ritmo. Excelente sistema.',
+      role: 'Papá de 3 chicos',
+      testimonial: 'Cada uno va a su ritmo, sin presión. El grande está avanzado, la del medio va tranquila, y el chiquito arrancó de cero. Todos felices.',
       rating: 5,
     },
   ];
@@ -107,14 +107,14 @@ export default function TestimonialsSection() {
           <div className="text-center">
             <div className="inline-block px-4 py-2 bg-[#10b981]/10 rounded-full border border-[#10b981]/20 mb-6">
               <span className="text-[#10b981] dark:text-[#34d399] font-semibold text-sm">
-                Testimonios reales
+                Historias reales
               </span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-              Lo que dicen nuestras familias
+              Lo que cuentan los padres y los chicos
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto">
-              Estudiantes y tutores comparten su experiencia con Mateatletas
+              Más de 500 familias argentinas ya están viviendo el cambio
             </p>
           </div>
         </ScrollReveal>
@@ -130,9 +130,9 @@ export default function TestimonialsSection() {
             >
               <div className="h-full p-8 card-glass rounded-2xl border border-white/10 hover:border-[#10b981]/50 transition-all shadow-lg">
                 {/* Rating Stars */}
-                <div className="flex items-center space-x-1 mb-4">
+                <div className="flex items-center space-x-1 mb-4" role="img" aria-label={`Calificación: ${testimonial.rating} de 5 estrellas`}>
                   {Array.from({ length: testimonial.rating }).map((_, starIndex) => (
-                    <span key={starIndex} className="text-[#fbbf24] text-xl">★</span>
+                    <span key={starIndex} className="text-[#fbbf24] text-xl" aria-hidden="true">★</span>
                   ))}
                 </div>
 
@@ -179,9 +179,9 @@ export default function TestimonialsSection() {
             >
               <div className="h-full p-8 card-glass rounded-2xl border border-white/10 hover:border-[#10b981]/50 transition-all shadow-lg">
                 {/* Rating Stars */}
-                <div className="flex items-center space-x-1 mb-4">
+                <div className="flex items-center space-x-1 mb-4" role="img" aria-label={`Calificación: ${testimonial.rating} de 5 estrellas`}>
                   {Array.from({ length: testimonial.rating }).map((_, starIndex) => (
-                    <span key={starIndex} className="text-[#fbbf24] text-xl">★</span>
+                    <span key={starIndex} className="text-[#fbbf24] text-xl" aria-hidden="true">★</span>
                   ))}
                 </div>
 
@@ -224,19 +224,19 @@ export default function TestimonialsSection() {
           <div className="text-center p-6 card-glass rounded-2xl border border-white/10">
             <div className="text-4xl font-black text-[#10b981] mb-2">98%</div>
             <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
-              Satisfacción de tutores
+              Padres recomiendan Mateatletas
             </p>
           </div>
           <div className="text-center p-6 card-glass rounded-2xl border border-white/10">
             <div className="text-4xl font-black text-[#0ea5e9] mb-2">95%</div>
             <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
-              Estudiantes más motivados
+              Chicos más motivados que antes
             </p>
           </div>
           <div className="text-center p-6 card-glass rounded-2xl border border-white/10">
             <div className="text-4xl font-black text-[#FF6B35] mb-2">92%</div>
             <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
-              Mejora en notas escolares
+              Mejoraron sus notas en el colegio
             </p>
           </div>
         </div>

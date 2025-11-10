@@ -7,17 +7,17 @@ interface Feature {
 
 export default function ComparisonSection() {
   const features: Feature[] = [
-    { name: 'Avatares 3D personalizables', mateatletas: 'Ready Player Me', traditional: false, highlight: true },
-    { name: 'Sistema de gamificación', mateatletas: '73 logros', traditional: false, highlight: true },
-    { name: 'Asesoría Psicopedagógica', mateatletas: 'Personalizada', traditional: false, highlight: true },
-    { name: 'XP y niveles', mateatletas: '15+ niveles', traditional: false },
-    { name: 'Tienda virtual de items', mateatletas: true, traditional: false },
+    { name: 'Su propio personaje 3D', mateatletas: 'Incluido', traditional: false, highlight: true },
+    { name: 'Sistema de recompensas', mateatletas: '73 logros diferentes', traditional: false, highlight: true },
+    { name: 'Apoyo psicopedagógico', mateatletas: 'Personalizado', traditional: false, highlight: true },
+    { name: 'Progreso visible por niveles', mateatletas: 'Más de 15 niveles', traditional: false },
+    { name: 'Accesorios para personalizar', mateatletas: true, traditional: false },
     { name: 'Clases en vivo', mateatletas: true, traditional: true },
-    { name: 'Grupos reducidos', mateatletas: '8-10 estudiantes', traditional: '25+ estudiantes' },
-    { name: 'Portal de padres', mateatletas: 'Completo', traditional: 'Inexistente' },
-    { name: 'Seguimiento de progreso', mateatletas: 'Tiempo real', traditional: 'Mensual' },
-    { name: 'Descuentos por familia', mateatletas: true, traditional: 'Variable' },
-    { name: 'Asistencia digital', mateatletas: true, traditional: false },
+    { name: 'Tamaño de los grupos', mateatletas: '8-10 chicos', traditional: '25+ chicos' },
+    { name: 'Panel para padres', mateatletas: 'Completo y en tiempo real', traditional: 'No existe' },
+    { name: 'Seguimiento del progreso', mateatletas: 'Mirás cuando quieras', traditional: 'Una vez al mes' },
+    { name: 'Descuentos por hermanos', mateatletas: 'Hasta 24% automático', traditional: 'Según el lugar' },
+    { name: 'Ayuda cuando la necesitan', mateatletas: 'Siempre disponible', traditional: false },
   ];
 
   return (
@@ -26,14 +26,14 @@ export default function ComparisonSection() {
         <div className="text-center mb-16">
           <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#0ea5e9]/10 to-[#10b981]/10 rounded-full border border-[#0ea5e9]/20 mb-6">
             <span className="bg-gradient-to-r from-[#0ea5e9] to-[#10b981] bg-clip-text text-transparent font-semibold text-sm">
-              Comparación objetiva
+              La diferencia es clara
             </span>
           </div>
           <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-            ¿Por qué elegir Mateatletas?
+            Esto es lo que hace diferente a Mateatletas
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400 font-light max-w-3xl mx-auto">
-            La diferencia entre una clase tradicional y una aventura de aprendizaje
+            No es solo otra clase. Es una experiencia que los chicos van a amar.
           </p>
         </div>
 
@@ -122,13 +122,13 @@ export default function ComparisonSection() {
           {/* Bottom CTA */}
           <div className="mt-12 text-center p-8 bg-gradient-to-r from-[#0ea5e9]/10 via-[#10b981]/10 to-[#0ea5e9]/10 rounded-2xl border border-[#0ea5e9]/20">
             <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3">
-              La diferencia está en la experiencia
+              La diferencia la vas a ver en tus hijos
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              No solo enseñamos matemáticas, creamos una aventura de aprendizaje inolvidable
+              Van a pedirte ir a clase. Van a contarte emocionados lo que aprendieron. Van a descubrir que aprender puede ser increíble.
             </p>
             <button className="px-8 py-4 bg-gradient-to-r from-[#0ea5e9] to-[#10b981] text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-[#0ea5e9]/40 transition-all hover:scale-105">
-              Comenzar ahora
+              Quiero probarlo
             </button>
           </div>
         </div>
