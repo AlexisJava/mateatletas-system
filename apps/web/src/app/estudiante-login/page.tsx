@@ -244,7 +244,7 @@ export default function EstudianteLoginPage() {
                         Soy Padre/Madre
                       </Link>
                       <span>•</span>
-                      <Link href="/docente/login" className="hover:text-white transition-colors">
+                      <Link href="/docente-login" className="hover:text-white transition-colors">
                         Soy Docente
                       </Link>
                     </div>

@@ -283,7 +283,7 @@ export default function Navbar() {
               Estudiantes
             </Link>
             <Link
-              href="/docente/login"
+              href="/docente-login"
               className="px-7 py-3 bg-transparent border-3 border-[#8b5cf6] rounded-xl text-[#8b5cf6] font-bold transition-all hover:bg-[#8b5cf6] hover:text-white"
             >
               Docentes
@@ -395,7 +395,7 @@ export default function Navbar() {
                 Estudiantes
               </Link>
               <Link
-                href="/docente/login"
+                href="/docente-login"
                 className="block py-2 px-4 text-[#8b5cf6] font-bold hover:bg-white/10 rounded-lg transition-colors"
                 onClick={() => setIsOpen(false)}
               >

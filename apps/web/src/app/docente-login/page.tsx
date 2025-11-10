@@ -21,7 +21,7 @@ import { useAuthStore } from '@/store/auth.store';
 /**
  * Login Page - Docentes/Admin
  * Ultra-premium cosmos design con toggle docente/admin
- * Ruta: /docente/login
+ * Ruta: /docente-login
  */
 export default function DocenteLoginPage() {
   const router = useRouter();

@@ -239,7 +239,7 @@ export default function TutorLoginPage() {
                         Soy Estudiante
                       </Link>
                       <span>•</span>
-                      <Link href="/docente/login" className="hover:text-white transition-colors">
+                      <Link href="/docente-login" className="hover:text-white transition-colors">
                         Soy Docente
                       </Link>
                     </div>
