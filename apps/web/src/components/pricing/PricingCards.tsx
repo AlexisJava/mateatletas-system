@@ -1,5 +1,8 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 interface PricingPlan {
   id: 'base' | 'plus' | 'ultra';
   name: string;
@@ -33,7 +36,7 @@ const PRICING_PLANS: PricingPlan[] = [
     id: 'plus',
     name: 'ACOMPAÑADO',
     description: 'Con profesor en vivo + todo lo del plan Explorador',
-    price: 50000,
+    price: 60000,
     period: '/mes',
     tags: ['🔥 El favorito de las familias', 'Clases en vivo'],
     isPopular: true,
@@ -50,7 +53,7 @@ const PRICING_PLANS: PricingPlan[] = [
     id: 'ultra',
     name: 'COMPLETO',
     description: 'Máximo desarrollo: dos mundos cada semana',
-    price: 88000,
+    price: 105600,
     period: '/mes',
     tags: ['Ahorrás 12%', 'Doble impacto'],
     isPopular: false,
@@ -60,14 +63,28 @@ const PRICING_PLANS: PricingPlan[] = [
       'Elegí libremente: Mate, Progra o Ciencias',
       'Desarrollo integral STEAM',
       'Ya incluye el 12% de descuento',
-      'Sale $44.000 por mundo'
+      'Sale $52.800 por mundo'
     ]
   }
 ];
 
 export default function PricingCards() {
+  const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+
   const handleSubscribe = (planId: string) => {
-    console.log(`Usuario seleccionó plan: ${planId}`);
+    setSelectedPlan(planId);
+    setShowModal(true);
+  };
+
+  const handleModalChoice = (choice: 'club' | 'colonia') => {
+    setShowModal(false);
+    if (choice === 'club') {
+      router.push('/club');
+    } else {
+      router.push('/colonia');
+    }
   };
 
   return (
@@ -168,6 +185,83 @@ export default function PricingCards() {
           </div>
         ))}
       </div>
+
+      {/* Modal de selección */}
+      {showModal && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="bg-gradient-to-br from-gray-900/95 via-gray-900/98 to-black/95 rounded-3xl border border-white/10 p-8 md:p-12 max-w-2xl w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#0ea5e9]/10 via-[#8b5cf6]/10 to-[#10b981]/10 rounded-full border border-[#0ea5e9]/20 mb-4">
+                <span className="bg-gradient-to-r from-[#0ea5e9] via-[#8b5cf6] to-[#10b981] bg-clip-text text-transparent font-semibold text-sm">
+                  Inscripciones Abiertas 2026
+                </span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black text-white mb-3">
+                ¿A qué querés inscribirte?
+              </h2>
+              <p className="text-gray-400 text-lg">
+                Elegí la opción que más te interese
+              </p>
+            </div>
+
+            {/* Opciones */}
+            <div className="grid md:grid-cols-2 gap-4 mb-8">
+              {/* Opción Club */}
+              <button
+                onClick={() => handleModalChoice('club')}
+                className="group relative p-6 rounded-2xl border-2 border-white/10 hover:border-[#0ea5e9] transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white/5 to-transparent"
+              >
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#0ea5e9]/0 to-[#0ea5e9]/0 group-hover:from-[#0ea5e9]/10 group-hover:to-[#0284c7]/10 transition-all duration-300" />
+                <div className="relative">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#0ea5e9] to-[#0284c7] rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform">
+                    <span role="img" aria-label="Club STEAM">🎓</span>
+                  </div>
+                  <h3 className="text-xl font-black text-white mb-2">
+                    Club STEAM 2026
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    Clases todo el año con profesores en vivo
+                  </p>
+                </div>
+              </button>
+
+              {/* Opción Colonia */}
+              <button
+                onClick={() => handleModalChoice('colonia')}
+                className="group relative p-6 rounded-2xl border-2 border-white/10 hover:border-[#10b981] transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white/5 to-transparent"
+              >
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#10b981]/0 to-[#10b981]/0 group-hover:from-[#10b981]/10 group-hover:to-[#059669]/10 transition-all duration-300" />
+                <div className="relative">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#10b981] to-[#059669] rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform">
+                    <span role="img" aria-label="Colonia de Verano">☀️</span>
+                  </div>
+                  <h3 className="text-xl font-black text-white mb-2">
+                    Colonia de Verano
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    Diversión y aprendizaje en vacaciones
+                  </p>
+                </div>
+              </button>
+            </div>
+
+            {/* Botón cerrar */}
+            <button
+              onClick={() => setShowModal(false)}
+              className="w-full py-3 text-gray-400 hover:text-white transition-colors font-semibold"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         /* Base Card Styles */
