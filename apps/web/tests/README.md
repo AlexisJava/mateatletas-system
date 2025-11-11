@@ -2,205 +2,269 @@
 
 Este directorio contiene los tests end-to-end (E2E) de Playwright para la landing page de la Colonia de Verano 2026.
 
+## 🚀 Configuración de Nivel Producción
+
+Este proyecto utiliza una configuración avanzada de Playwright con:
+
+- ✅ **Multi-browser testing**: Chrome, Firefox, Safari (WebKit)
+- ✅ **Mobile & Tablet testing**: Android (Pixel 5), iOS (iPhone 13), iPad Pro
+- ✅ **Video recording**: Grabación automática de fallos para debugging
+- ✅ **HAR files**: Captura de requests/responses de red
+- ✅ **Multiple reporters**: HTML, JSON, JUnit, GitHub Actions
+- ✅ **Accessibility testing**: Tests WCAG 2.1 AA con axe-core
+- ✅ **Global setup/teardown**: Preparación y limpieza automática
+- ✅ **CI/CD ready**: Configuración optimizada para pipelines
+
 ## Estructura de Tests
 
 ```
 tests/e2e/
-├── 01-smoke.spec.ts                  # Tests de humo básicos
-├── 02-colonia-landing.spec.ts        # Tests visuales de landing page
-├── 03-colonia-catalog.spec.ts        # Tests de catálogo y filtros
+├── 01-smoke.spec.ts                    # Tests de humo básicos
+├── 02-colonia-landing.spec.ts          # Tests visuales de landing page
+├── 03-colonia-catalog.spec.ts          # Tests de catálogo y filtros
 ├── 04-colonia-inscription-form.spec.ts # Tests del formulario de inscripción
-└── 05-colonia-e2e-flow.spec.ts       # Tests de flujo completo de usuario
+├── 05-colonia-e2e-flow.spec.ts         # Tests de flujo completo de usuario
+├── 06-accessibility.spec.ts            # Tests de accesibilidad WCAG 2.1 AA
+├── global-setup.ts                     # Setup global (BD, auth, etc.)
+└── global-teardown.ts                  # Limpieza global
 ```
 
 ## Tests Implementados
 
-### 01-smoke.spec.ts
+### 01-smoke.spec.ts (2 tests)
 - ✅ Verificación básica de que la aplicación carga
 - ✅ Página principal accesible
-- ✅ Página de inscripción 2026 accesible
+- ✅ Página de colonia 2025 accesible
 
-### 02-colonia-landing.spec.ts
-**Smoke Tests de Landing Page:**
+### 02-colonia-landing.spec.ts (11 tests)
 - ✅ Landing page carga correctamente
-- ✅ HeroSection - Elementos principales visibles (título, fechas, badges)
-- ✅ HeroSection - CTAs funcionales ("VER CURSOS", "VER PRECIOS")
-- ✅ InfoSection visible
-- ✅ CourseCatalog - Sección visible con título
+- ✅ HeroSection - Elementos principales visibles
+- ✅ HeroSection - CTAs funcionales
+- ✅ CourseCatalog visible
 - ✅ PricingSection visible
-- ✅ Footer presente
-- ✅ ScrollToTop aparece después de hacer scroll
-- ✅ No hay errores en consola
-- ✅ Responsive - Mobile viewport (375x667)
-- ✅ Responsive - Tablet viewport (768x1024)
+- ✅ Tests responsive (mobile, tablet)
 
-### 03-colonia-catalog.spec.ts
-**Tests de Catálogo y Filtros:**
-- ✅ Filtros de área están visibles y funcionales
-- ✅ Filtros de edad están visibles
-- ✅ Al inicio muestra todos los cursos (11 cursos)
-- ✅ Filtro por área "Matemática" reduce la lista
-- ✅ Filtro por área "Programación" muestra cursos correctos
-- ✅ Filtro por edad "5-6 años" muestra cursos apropiados
-- ✅ Combinación de filtros: área + edad
-- ✅ Mensaje "No hay cursos" con filtros incompatibles
-- ✅ Volver a "Todas" restaura la lista completa
+### 03-colonia-catalog.spec.ts (13 tests)
+- ✅ Filtros de área y edad funcionales
+- ✅ Combinación de filtros
+- ✅ Course cards interactivas
+- ✅ Tests de performance
 
-**Tests de Course Cards:**
-- ✅ Course cards están visibles
-- ✅ Course card tiene botón "VER MÁS" o "ME INTERESA"
-- ✅ Click en curso muestra modal con detalles
+### 04-colonia-inscription-form.spec.ts (20 tests)
+- ✅ Modal de inscripción
+- ✅ Formulario multi-paso (5 pasos)
+- ✅ Validaciones de campos
+- ✅ Navegación entre pasos
+- ✅ Progress bar
 
-**Tests de Performance:**
-- ✅ Los filtros responden rápidamente (< 2 segundos)
+### 05-colonia-e2e-flow.spec.ts (6 tests)
+- ✅ Journey completo de usuario
+- ✅ Journey alternativo
+- ✅ Edge cases
 
-### 04-colonia-inscription-form.spec.ts
-**Tests de Modal:**
-- ✅ Botón "VER CURSOS DISPONIBLES" del Hero NO abre modal
-- ✅ Hay botones de inscripción en diferentes secciones
-- ✅ Click en botón de inscripción abre el modal
-- ✅ Modal tiene botón de cerrar (X)
-- ✅ Click en botón X cierra el modal
+### 06-accessibility.spec.ts (19 tests) 🆕
+- ✅ WCAG 2.1 Level AA compliance
+- ✅ Navegación por teclado
+- ✅ Color contrast
+- ✅ ARIA attributes
+- ✅ Mobile accessibility
 
-**Step 1: Tutor Data:**
-- ✅ Paso 1 muestra todos los campos requeridos
-- ✅ Campo CUIL formatea correctamente con guiones
-- ✅ Contraseñas deben coincidir para avanzar
-- ✅ Con datos válidos, botón Siguiente se habilita
-- ✅ Click en Siguiente avanza al paso 2
+**Total: 71 tests implementados** ✅
 
-**Step 2: Estudiantes:**
-- ✅ Paso 2 muestra formulario de estudiante
-- ✅ Botón "Agregar otro estudiante" funciona
-- ✅ Agregar 2+ estudiantes muestra mensaje de descuento
-- ✅ Agregar 3 estudiantes muestra descuento 24%
-- ✅ Botón "Eliminar" elimina estudiante
-- ✅ Con datos válidos, avanza al paso 3
-- ✅ Botón "Atrás" vuelve al paso 1
+## 📦 Comandos Disponibles
 
-**Step 3: Course Selection:**
-- ✅ Paso 3 muestra lista de cursos disponibles
-- ✅ Se puede seleccionar un curso
-- ✅ Se pueden seleccionar hasta 2 cursos
-- ✅ Con al menos 1 curso seleccionado, se puede avanzar
+### Comandos Básicos
 
-**Navigation & Progress:**
-- ✅ Progress bar muestra paso actual
-- ✅ Progress bar avanza con los pasos
-
-### 05-colonia-e2e-flow.spec.ts
-**User Journey Completo:**
-- ✅ Journey completo: landing → filtros → inscripción (sin pago final)
-- ✅ Journey alternativo: usuario sin hermanos, 1 solo curso
-- ✅ Journey con navegación hacia atrás (back buttons)
-
-**Edge Cases:**
-- ✅ Cerrar modal en medio del proceso
-- ✅ Intentar avanzar sin llenar campos requeridos
-
-**Performance:**
-- ✅ El flujo completo se completa en menos de 2 minutos
-
-## Comandos
-
-### Ejecutar todos los tests
 ```bash
+# Ejecutar todos los tests (todos los browsers)
 yarn workspace web test:e2e
-```
 
-### Ejecutar tests en modo UI (interfaz visual)
-```bash
+# Ejecutar en modo UI (interfaz visual interactiva)
 yarn workspace web test:e2e:ui
-```
 
-### Ejecutar tests en modo headed (con navegador visible)
-```bash
+# Ejecutar con navegador visible
 yarn workspace web test:e2e:headed
+
+# Modo debug (pausa en cada acción)
+yarn workspace web test:e2e:debug
+
+# Ver reporte de resultados
+yarn workspace web test:e2e:report
 ```
 
-### Ver reporte de resultados
+### Comandos por Browser 🆕
+
+```bash
+# Solo Chromium (más rápido)
+yarn workspace web test:e2e:chromium
+
+# Solo Firefox
+yarn workspace web test:e2e:firefox
+
+# Solo WebKit (Safari)
+yarn workspace web test:e2e:webkit
+
+# Todos los browsers desktop
+yarn workspace web test:e2e:desktop
+
+# Solo mobile devices
+yarn workspace web test:e2e:mobile
+```
+
+### Comandos por Test Suite 🆕
+
+```bash
+# Solo smoke tests (rápido)
+yarn workspace web test:e2e:smoke
+
+# Solo tests de accesibilidad
+yarn workspace web test:e2e:accessibility
+```
+
+### Comandos para CI/CD 🆕
+
+```bash
+# Ejecutar en modo CI (con todos los reporters)
+yarn workspace web test:e2e:ci
+
+# Instalar browsers (primera vez o en CI)
+yarn workspace web test:e2e:install
+```
+
+## ⚙️ Configuración
+
+La configuración de Playwright se encuentra en [playwright.config.ts](../playwright.config.ts)
+
+### Variables de Entorno
+
+```bash
+# Base URL (default: http://localhost:3000)
+PLAYWRIGHT_BASE_URL=http://localhost:3000
+
+# Número de workers (default: auto en dev, 1 en CI)
+PLAYWRIGHT_WORKERS=4
+
+# Forzar modo CI
+CI=1
+```
+
+### Projects Configurados
+
+1. **chromium** - Desktop Chrome (1920x1080)
+2. **firefox** - Desktop Firefox (1920x1080)
+3. **webkit** - Desktop Safari (1920x1080)
+4. **Mobile Chrome** - Android Pixel 5
+5. **Mobile Safari** - iPhone 13
+6. **iPad** - iPad Pro
+
+## 🎯 Global Setup & Teardown
+
+### Global Setup
+Ejecuta UNA VEZ antes de todos los tests:
+- Verifica que la aplicación está disponible
+- Puede preparar BD de prueba
+- Valida variables de entorno críticas
+
+### Global Teardown
+Ejecuta UNA VEZ después de todos los tests:
+- Limpia datos de prueba
+- Elimina archivos temporales
+- Genera reportes consolidados
+
+## 📊 Reportes
+
+### HTML Report
 ```bash
 yarn workspace web test:e2e:report
 ```
 
-### Ejecutar solo un archivo de tests
+### JSON Report
+Ubicación: `test-results/results.json`
+
+### JUnit Report
+Ubicación: `test-results/junit.xml` (para CI/CD)
+
+### GitHub Actions
+Annotations automáticas en PRs
+
+## 🎬 Videos y Screenshots
+
+- **Videos**: `test-results/videos/` (solo en fallos)
+- **Screenshots**: `test-results/screenshots/` (solo en fallos)
+- **HAR files**: `test-results/hars/` (solo en desarrollo)
+
+## 🔍 Debugging
+
 ```bash
-yarn workspace web test:e2e tests/e2e/02-colonia-landing.spec.ts
+# Playwright Inspector
+yarn workspace web test:e2e:debug
+
+# Ver trace
+npx playwright show-trace test-results/.../trace.zip
 ```
 
-### Ejecutar tests por nombre
+## 🔒 Accessibility Testing
+
+Tests de accesibilidad con axe-core verifican:
+- WCAG 2.1 Level AA compliance
+- Color contrast (4.5:1 mínimo)
+- Keyboard navigation
+- Screen reader support
+- Form labels
+- Semantic HTML
+
 ```bash
-yarn workspace web test:e2e --grep "Filtros"
+yarn workspace web test:e2e:accessibility
 ```
 
-## Configuración
+## 🚀 CI/CD Integration
 
-La configuración de Playwright se encuentra en `playwright.config.ts`:
-- **testDir**: `./tests/e2e`
-- **timeout**: 30 segundos por test
-- **baseURL**: `http://localhost:3000`
-- **webServer**: Arranca automáticamente el servidor Next.js antes de ejecutar tests
-- **browsers**: Chromium (Desktop Chrome)
+### GitHub Actions
 
-## Notas Importantes
+```yaml
+- name: Install Playwright browsers
+  run: yarn workspace web test:e2e:install
 
-### Tests sin Pago Real
-Los tests del formulario de inscripción **NO** ejecutan el pago final en MercadoPago. Se detienen en el paso de "Resumen" antes de enviar el formulario. Esto evita crear pagos reales durante los tests.
+- name: Run E2E tests
+  run: yarn workspace web test:e2e:ci
 
-### Servidor de Desarrollo
-Los tests configuran automáticamente el servidor de desarrollo (`npm run dev`) antes de ejecutarse. Si el servidor ya está corriendo, se reutiliza.
+- name: Upload test results
+  uses: actions/upload-artifact@v3
+  with:
+    name: playwright-report
+    path: apps/web/test-results/
+```
 
-### Timeouts
-- Test timeout: 30 segundos
-- Expect timeout: 5 segundos
-- Tests E2E marcados como `.slow()`: 90 segundos
+### GitLab CI
 
-## Convenciones
+```yaml
+e2e-tests:
+  image: mcr.microsoft.com/playwright:v1.56.0-noble
+  script:
+    - yarn workspace web test:e2e:ci
+  artifacts:
+    reports:
+      junit: apps/web/test-results/junit.xml
+```
 
-1. **Archivos numerados**: Los tests están numerados para indicar el orden sugerido de ejecución
-2. **Test.describe**: Los tests se agrupan en bloques descriptivos
-3. **Test.beforeEach**: Setup común se extrae a beforeEach hooks
-4. **Selectores semánticos**: Se prefieren selectores por texto visible al usuario
-5. **Esperas inteligentes**: Se usan waitForTimeout solo cuando es necesario
-
-## CI/CD
-
-Los tests están configurados para CI/CD:
-- **forbidOnly**: `true` en CI - Falla si hay `test.only`
-- **retries**: 2 reintentos en CI
-- **workers**: 1 worker en CI (sin paralelización)
-- **reporter**: HTML report
-
-## Troubleshooting
-
-### Error: "test.describe() not expected to be called here"
-- Asegúrate de ejecutar con `yarn workspace web test:e2e` (no `npx playwright test`)
-- Los tests están excluidos de vitest en `vitest.config.ts`
+## 🐛 Troubleshooting
 
 ### Tests fallan por timeout
-- Aumenta el timeout en `playwright.config.ts`
-- Verifica que el servidor de desarrollo esté corriendo correctamente
-- Revisa logs de consola para errores de la aplicación
+- Aumentar timeout: `timeout: 60000` en config
+- Marcar test lento: `test.slow()`
 
 ### Modal no se abre
-- Verifica que el botón de inscripción esté visible
-- Asegúrate de hacer scroll a la posición correcta antes de clickear
-- Revisa que no haya errores de JavaScript en la consola
+- Verificar scroll antes de clickear
+- Usar `{ force: true }` si necesario
 
-## Próximos Pasos
+### Browsers no instalados
+```bash
+yarn workspace web test:e2e:install
+```
 
-Para extender estos tests:
-1. Agregar tests de accesibilidad (axe-core)
-2. Tests visuales de regresión (screenshots comparison)
-3. Tests de performance (Lighthouse CI)
-4. Tests de SEO
-5. Tests de internacionalización (i18n)
-6. Tests con diferentes roles de usuario
-7. Tests de integración con API real
-
-## Referencias
+## 📚 Referencias
 
 - [Playwright Documentation](https://playwright.dev)
 - [Playwright Best Practices](https://playwright.dev/docs/best-practices)
-- [Test selectors](https://playwright.dev/docs/selectors)
-- [CI/CD setup](https://playwright.dev/docs/ci)
+- [Accessibility testing](https://playwright.dev/docs/accessibility-testing)
+- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)

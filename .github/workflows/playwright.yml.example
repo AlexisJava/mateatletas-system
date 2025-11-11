@@ -1,0 +1,140 @@
+name: Playwright E2E Tests
+
+on:
+  push:
+    branches: [main, develop, feature/**]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Ejecutar en paralelo en diferentes browsers
+        project: [chromium, firefox, webkit]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Install Playwright Browsers
+        run: yarn workspace web test:e2e:install
+
+      - name: Run Playwright tests
+        run: yarn workspace web test:e2e:ci --project=${{ matrix.project }}
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          # Agregar otras env vars necesarias aquí
+          # NEXT_PUBLIC_API_URL: ${{ secrets.API_URL }}
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.project }}
+          path: apps/web/test-results/
+          retention-days: 30
+
+      - name: Upload test videos
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-videos-${{ matrix.project }}
+          path: apps/web/test-results/videos/
+          retention-days: 7
+
+  # Job para mobile tests (separado porque puede ser más lento)
+  test-mobile:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Install Playwright Browsers
+        run: yarn workspace web test:e2e:install
+
+      - name: Run Mobile tests
+        run: yarn workspace web test:e2e:mobile
+        env:
+          CI: true
+
+      - name: Upload Mobile Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-mobile
+          path: apps/web/test-results/
+          retention-days: 30
+
+  # Job para accessibility tests (separado para visibilidad)
+  test-accessibility:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Install Playwright Browsers
+        run: yarn workspace web test:e2e:install
+
+      - name: Run Accessibility tests
+        run: yarn workspace web test:e2e:accessibility
+        env:
+          CI: true
+
+      - name: Upload Accessibility Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-accessibility
+          path: apps/web/test-results/
+          retention-days: 30
+
+  # Job consolidado que espera a todos los anteriores
+  test-results:
+    if: always()
+    needs: [test, test-mobile, test-accessibility]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check test results
+        run: |
+          echo "All tests completed!"
+          echo "Desktop browsers: ${{ needs.test.result }}"
+          echo "Mobile: ${{ needs.test-mobile.result }}"
+          echo "Accessibility: ${{ needs.test-accessibility.result }}"

@@ -24,4 +24,25 @@ test.describe('Smoke Tests - Aplicación Básica', () => {
     // Verificar que el contenido principal está visible
     await expect(page.locator('text=COLONIA DE').first()).toBeVisible();
   });
+
+  test('No hay errores críticos en la consola', async ({ page }) => {
+    const errors: string[] = [];
+
+    // Capturar errores de consola
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+
+    await page.goto('/');
+
+    // Filtrar errores conocidos/ignorables
+    const criticalErrors = errors.filter(error =>
+      !error.includes('favicon') &&
+      !error.includes('manifest')
+    );
+
+    expect(criticalErrors.length).toBe(0);
+  });
 });
