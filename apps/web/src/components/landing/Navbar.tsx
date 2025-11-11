@@ -30,42 +30,7 @@ export default function Navbar() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const navLinks: NavLink[] = [
-    {
-      label: 'Club',
-      submenu: {
-        title: '💎 Suscripción Mensual',
-        subtitle: 'Clases en vivo con profesor todo el año',
-        footer: 'Online desde tu casa',
-        titleColor: '#fbbf24',
-        footerColor: '#fbbf24',
-        items: [
-          {
-            href: '/club/matematica',
-            label: 'Matemática',
-            icon: '🔢',
-            color: '#fbbf24',
-            gradient: 'from-[#fbbf24] to-[#f59e0b]',
-            description: 'Desde álgebra hasta cálculo',
-          },
-          {
-            href: '/club/programacion',
-            label: 'Programación',
-            icon: '💻',
-            color: '#0ea5e9',
-            gradient: 'from-[#0ea5e9] to-[#0284c7]',
-            description: 'Crean juegos y aplicaciones reales',
-          },
-          {
-            href: '/club/ciencias',
-            label: 'Ciencias',
-            icon: '🔬',
-            color: '#FF6B35',
-            gradient: 'from-[#FF6B35] to-[#e65929]',
-            description: 'Experimentos fascinantes cada semana',
-          },
-        ],
-      },
-    },
+    { href: '/club/matematica', label: 'Club de Matemática' },
     {
       label: 'Cursos Online',
       submenu: {
