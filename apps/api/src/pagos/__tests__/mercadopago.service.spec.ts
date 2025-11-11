@@ -618,4 +618,304 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
       expect(result.statement_descriptor).toBe('Mateatletas');
     });
   });
+
+  describe('buildInscripcion2026PreferenceData - NEW INTEGRATION', () => {
+    let service: MercadoPagoService;
+
+    beforeEach(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          MercadoPagoService,
+          {
+            provide: ConfigService,
+            useValue: {
+              get: jest.fn().mockReturnValue('XXXXXXXX'),
+            },
+          },
+        ],
+      }).compile();
+
+      service = module.get<MercadoPagoService>(MercadoPagoService);
+    });
+
+    describe('COLONIA Inscription Type', () => {
+      it('should build valid COLONIA preference data structure', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'COLONIA',
+          25000,
+          { email: 'tutor@test.com', nombre: 'Juan', apellido: 'Pérez' },
+          'insc-abc123',
+          'tutor-xyz789',
+          2,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result).toMatchObject({
+          items: [
+            {
+              id: 'inscripcion-2026-colonia',
+              title: 'Inscripción Colonia de Verano 2026',
+              description: 'Inscripción para 2 estudiantes - Colonia de Verano (Enero-Febrero 2026)',
+              quantity: 1,
+              unit_price: 25000,
+              currency_id: 'ARS',
+            },
+          ],
+          payer: {
+            email: 'tutor@test.com',
+            name: 'Juan',
+            surname: 'Pérez',
+          },
+          external_reference: 'inscripcion2026-insc-abc123-tutor-tutor-xyz789-tipo-COLONIA',
+          notification_url: 'http://localhost:3001/api/inscripciones-2026/webhook',
+          back_urls: {
+            success: 'http://localhost:3000/inscripcion-2026/exito?inscripcionId=insc-abc123',
+            failure: 'http://localhost:3000/inscripcion-2026/error?inscripcionId=insc-abc123',
+            pending: 'http://localhost:3000/inscripcion-2026/pendiente?inscripcionId=insc-abc123',
+          },
+          auto_return: 'approved',
+          statement_descriptor: 'Mateatletas 2026',
+        });
+      });
+
+      it('should handle 1 estudiante correctly (singular form)', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'COLONIA',
+          25000,
+          { email: 't@t.com', nombre: 'T', apellido: 'T' },
+          'I1',
+          'T1',
+          1,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result.items[0].description).toBe(
+          'Inscripción para 1 estudiante - Colonia de Verano (Enero-Febrero 2026)',
+        );
+      });
+
+      it('should handle 3+ estudiantes correctly (plural form)', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'COLONIA',
+          25000,
+          { email: 't@t.com', nombre: 'T', apellido: 'T' },
+          'I1',
+          'T1',
+          3,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result.items[0].description).toBe(
+          'Inscripción para 3 estudiantes - Colonia de Verano (Enero-Febrero 2026)',
+        );
+      });
+    });
+
+    describe('CICLO_2026 Inscription Type', () => {
+      it('should build valid CICLO_2026 preference data structure', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'CICLO_2026',
+          50000,
+          { email: 'tutor@test.com', nombre: 'María', apellido: 'González' },
+          'insc-def456',
+          'tutor-abc123',
+          1,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result).toMatchObject({
+          items: [
+            {
+              id: 'inscripcion-2026-ciclo_2026',
+              title: 'Inscripción Ciclo Lectivo 2026 (Early Bird)',
+              description: 'Matrícula Early Bird para 1 estudiante - Ciclo Lectivo 2026',
+              quantity: 1,
+              unit_price: 50000,
+              currency_id: 'ARS',
+            },
+          ],
+          external_reference: 'inscripcion2026-insc-def456-tutor-tutor-abc123-tipo-CICLO_2026',
+        });
+      });
+    });
+
+    describe('PACK_COMPLETO Inscription Type', () => {
+      it('should build valid PACK_COMPLETO preference data structure', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'PACK_COMPLETO',
+          60000,
+          { email: 'tutor@test.com', nombre: 'Carlos', apellido: 'López' },
+          'insc-ghi789',
+          'tutor-def456',
+          2,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result).toMatchObject({
+          items: [
+            {
+              id: 'inscripcion-2026-pack_completo',
+              title: 'Inscripción Pack Completo 2026',
+              description: 'Pack Completo (Colonia + Ciclo 2026) para 2 estudiantes - Ahorro de $15,000',
+              quantity: 1,
+              unit_price: 60000,
+              currency_id: 'ARS',
+            },
+          ],
+          external_reference: 'inscripcion2026-insc-ghi789-tutor-tutor-def456-tipo-PACK_COMPLETO',
+        });
+      });
+    });
+
+    describe('Edge Cases & Validation', () => {
+      it('should handle unknown inscription type (fallback)', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'UNKNOWN_TYPE',
+          10000,
+          { email: 't@t.com', nombre: 'T', apellido: 'T' },
+          'I1',
+          'T1',
+          1,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result.items[0].title).toBe('Inscripción Mateatletas 2026');
+        expect(result.items[0].description).toBe('Inscripción para 1 estudiante');
+      });
+
+      it('should handle tutor with optional fields (nombre/apellido undefined)', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'COLONIA',
+          25000,
+          { email: 'tutor@test.com' },
+          'I1',
+          'T1',
+          1,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result.payer.email).toBe('tutor@test.com');
+        expect(result.payer.name).toBeUndefined();
+        expect(result.payer.surname).toBeUndefined();
+      });
+
+      it('should handle very large amounts (pack familiar)', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'PACK_COMPLETO',
+          180000, // 3 hermanos
+          { email: 't@t.com', nombre: 'T', apellido: 'T' },
+          'I1',
+          'T1',
+          3,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result.items[0].unit_price).toBe(180000);
+      });
+
+      it('should handle special characters in IDs', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'COLONIA',
+          25000,
+          { email: 't@t.com', nombre: 'T', apellido: 'T' },
+          'insc_2026-abc-123',
+          'tutor_xyz-789',
+          1,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result.external_reference).toBe(
+          'inscripcion2026-insc_2026-abc-123-tutor-tutor_xyz-789-tipo-COLONIA',
+        );
+      });
+
+      it('should build correct notification_url for inscripciones 2026', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'COLONIA',
+          25000,
+          { email: 't@t.com', nombre: 'T', apellido: 'T' },
+          'I1',
+          'T1',
+          1,
+          'https://api.mateatletas.com',
+          'https://app.mateatletas.com',
+        );
+
+        expect(result.notification_url).toBe(
+          'https://api.mateatletas.com/api/inscripciones-2026/webhook',
+        );
+      });
+
+      it('should use statement_descriptor "Mateatletas 2026"', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'COLONIA',
+          25000,
+          { email: 't@t.com', nombre: 'T', apellido: 'T' },
+          'I1',
+          'T1',
+          1,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result.statement_descriptor).toBe('Mateatletas 2026');
+      });
+    });
+
+    describe('Pricing Validation', () => {
+      it('should handle COLONIA pricing ($25,000)', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'COLONIA',
+          25000,
+          { email: 't@t.com', nombre: 'T', apellido: 'T' },
+          'I1',
+          'T1',
+          1,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result.items[0].unit_price).toBe(25000);
+      });
+
+      it('should handle CICLO_2026 Early Bird pricing ($50,000)', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'CICLO_2026',
+          50000,
+          { email: 't@t.com', nombre: 'T', apellido: 'T' },
+          'I1',
+          'T1',
+          1,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result.items[0].unit_price).toBe(50000);
+      });
+
+      it('should handle PACK_COMPLETO discounted pricing ($60,000)', () => {
+        const result = service.buildInscripcion2026PreferenceData(
+          'PACK_COMPLETO',
+          60000,
+          { email: 't@t.com', nombre: 'T', apellido: 'T' },
+          'I1',
+          'T1',
+          1,
+          'http://localhost:3001',
+          'http://localhost:3000',
+        );
+
+        expect(result.items[0].unit_price).toBe(60000);
+      });
+    });
+  });
 });

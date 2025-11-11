@@ -87,28 +87,85 @@ export default function CourseDetailModal({ course, onClose, onInscribe }: Cours
                 <Users className="w-5 h-5 text-white/60" />
                 <span className="text-white/80 font-medium">{course.ageRange} años</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-white/60" />
-                <span className="text-white/80 font-medium">{course.dayOfWeek}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-white/60" />
-                <span className="text-white/80 font-medium">{course.timeSlot}</span>
-              </div>
-              <div
-                className="flex items-center gap-2 px-3 py-1 rounded-full"
-                style={{
-                  backgroundColor: `${course.color}20`,
-                }}
-              >
-                <span className="text-sm font-bold" style={{ color: course.color }}>
-                  Profe {course.instructor}
-                </span>
-              </div>
             </div>
           </div>
 
           <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-8" />
+
+          {/* Horarios Disponibles */}
+          {course.schedules.length > 1 ? (
+            <div className="mb-8">
+              <h3
+                className="text-2xl font-black mb-4"
+                style={{ color: course.color }}
+              >
+                Horarios Disponibles
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {course.schedules.map((schedule, index) => (
+                  <div
+                    key={schedule.id}
+                    className="flex items-start gap-4 p-5 rounded-xl bg-white/5 border-2 border-white/10 hover:bg-white/10 hover:border-white/20 transition-all"
+                  >
+                    <div
+                      className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-black"
+                      style={{
+                        backgroundColor: `${course.color}30`,
+                        color: course.color,
+                      }}
+                    >
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-white/60" />
+                        <span className="text-white/90 font-bold">{schedule.dayOfWeek}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-white/60" />
+                        <span className="text-white/80">{schedule.timeSlot}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                          style={{
+                            backgroundColor: `${course.color}30`,
+                            color: course.color,
+                          }}
+                        >
+                          {schedule.instructor[0]}
+                        </div>
+                        <span className="text-white/70 text-sm">Profe {schedule.instructor}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mb-8">
+              <div className="flex flex-wrap gap-6 text-sm p-5 rounded-xl bg-white/5 border border-white/10">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-white/60" />
+                  <span className="text-white/80 font-medium">{course.schedules[0].dayOfWeek}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-white/60" />
+                  <span className="text-white/80 font-medium">{course.schedules[0].timeSlot}</span>
+                </div>
+                <div
+                  className="flex items-center gap-2 px-3 py-1 rounded-full"
+                  style={{
+                    backgroundColor: `${course.color}20`,
+                  }}
+                >
+                  <span className="text-sm font-bold" style={{ color: course.color }}>
+                    Profe {course.schedules[0].instructor}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Descripción */}
           <div className="mb-8">

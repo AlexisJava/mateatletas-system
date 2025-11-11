@@ -73,11 +73,19 @@ export default function CourseCard({ course, index, onInscribe }: CourseCardProp
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Calendar className="w-5 h-5 text-white/60" />
-            <span className="text-white/80 font-medium">{course.dayOfWeek}</span>
+            <span className="text-white/80 font-medium">
+              {course.schedules.length > 1
+                ? 'Múltiples horarios disponibles'
+                : course.schedules[0].dayOfWeek}
+            </span>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Clock className="w-5 h-5 text-white/60" />
-            <span className="text-white/80 font-medium">{course.timeSlot}</span>
+            <span className="text-white/80 font-medium">
+              {course.schedules.length > 1
+                ? `${course.schedules.length} opciones`
+                : course.schedules[0].timeSlot}
+            </span>
           </div>
         </div>
 
@@ -90,11 +98,11 @@ export default function CourseCard({ course, index, onInscribe }: CourseCardProp
               color: course.color,
             }}
           >
-            {course.instructor[0]}
+            {course.schedules[0].instructor[0]}
           </div>
           <div>
             <div className="text-xs text-white/50">Instructor</div>
-            <div className="text-sm font-bold text-white">Profe {course.instructor}</div>
+            <div className="text-sm font-bold text-white">Profe {course.schedules[0].instructor}</div>
           </div>
         </div>
 

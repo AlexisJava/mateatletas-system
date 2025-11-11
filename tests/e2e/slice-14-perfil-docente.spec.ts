@@ -12,7 +12,7 @@ test.describe('Perfil del Docente', () => {
     await loginAsDocente(page);
   });
 
-  test('debe cargar la página de perfil correctamente', async ({ page }) => {
+  test('@smoke debe cargar la página de perfil correctamente', async ({ page }) => {
     await page.goto('/docente/perfil');
 
     // Esperar a que la navegación se complete

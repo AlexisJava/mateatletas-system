@@ -4,7 +4,7 @@ import { Page } from '@playwright/test';
  * Helper para autenticación en tests E2E
  */
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = process.env.PLAYWRIGHT_API_URL || 'http://localhost:3001/api';
 
 export interface AuthCredentials {
   email: string;

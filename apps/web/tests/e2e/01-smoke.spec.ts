@@ -1,0 +1,27 @@
+import { test, expect } from '@playwright/test';
+
+/**
+ * 🔥 SMOKE TEST - Verificación básica de que la aplicación funciona
+ */
+
+test.describe('Smoke Tests - Aplicación Básica', () => {
+  test('La página principal carga correctamente', async ({ page }) => {
+    await page.goto('/');
+
+    // Verificar que la página carga sin errores
+    expect(page.url()).toContain('localhost:3000');
+
+    // Verificar que el título existe
+    await expect(page).toHaveTitle(/Mateatletas/i);
+  });
+
+  test('La página de colonia 2025 carga correctamente', async ({ page }) => {
+    await page.goto('/colonia-verano-2025');
+
+    // Verificar que llegamos a la página correcta
+    expect(page.url()).toContain('colonia-verano-2025');
+
+    // Verificar que el contenido principal está visible
+    await expect(page.locator('text=COLONIA DE').first()).toBeVisible();
+  });
+});

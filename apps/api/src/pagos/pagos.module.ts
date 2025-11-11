@@ -111,6 +111,7 @@ import { MercadoPagoService } from './mercadopago.service';
   exports: [
     PagosService,
     PagosTutorService,
+    MercadoPagoService,
     ConfiguracionPreciosRepository,
     InscripcionMensualRepository,
     VerificacionMorosidadService,

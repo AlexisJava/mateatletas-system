@@ -15,15 +15,28 @@ export default function CourseCatalog({ onInscribe }: CourseCatalogProps) {
   const [selectedArea, setSelectedArea] = useState<CourseArea | 'Todas'>('Todas');
   const [selectedAge, setSelectedAge] = useState<AgeRange | 'Todas'>('Todas');
 
+  // Helper: Check if a specific age falls within a course's age range
+  const ageMatchesRange = (selectedRange: AgeRange, courseRange: AgeRange): boolean => {
+    // Si seleccionaste un rango específico, necesitamos ver si hay solapamiento
+    const [selectedMin, selectedMax] = selectedRange.split('-').map(n => parseInt(n));
+    const [courseMin, courseMax] = courseRange.split('-').map(n => parseInt(n));
+
+    // Hay solapamiento si: el rango seleccionado y el rango del curso se tocan
+    // Ejemplo: seleccionado 8-9, curso 8-12 → hay solapamiento
+    // Ejemplo: seleccionado 10-12, curso 8-12 → hay solapamiento
+    // Ejemplo: seleccionado 5-6, curso 8-12 → NO hay solapamiento
+    return selectedMin <= courseMax && selectedMax >= courseMin;
+  };
+
   // Filter courses
   const filteredCourses = COURSES.filter((course) => {
     const matchesArea = selectedArea === 'Todas' || course.area === selectedArea;
-    const matchesAge = selectedAge === 'Todas' || course.ageRange === selectedAge;
+    const matchesAge = selectedAge === 'Todas' || ageMatchesRange(selectedAge, course.ageRange);
     return matchesArea && matchesAge;
   });
 
   const areas: Array<CourseArea | 'Todas'> = ['Todas', 'Matemática', 'Didáctica de la Matemática', 'Programación', 'Ciencias'];
-  const ages: Array<AgeRange | 'Todas'> = ['Todas', '5-6', '6-7', '8-9', '10-12', '8-12', '13-17'];
+  const ages: Array<AgeRange | 'Todas'> = ['Todas', '5-6', '6-7', '8-9', '10-12', '13-17'];
 
   const areaColors: Record<CourseArea | 'Todas', string> = {
     'Todas': '#8b5cf6',

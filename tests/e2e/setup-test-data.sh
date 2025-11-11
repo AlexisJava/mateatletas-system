@@ -5,7 +5,7 @@
 # Crea los datos necesarios para ejecutar los tests de Playwright
 # ============================================================
 
-API_URL="http://localhost:3001/api"
+API_URL="${PLAYWRIGHT_API_URL:-${E2E_API_URL:-http://localhost:3001/api}}"
 
 # Colores
 GREEN='\033[0;32m'
@@ -18,6 +18,7 @@ echo -e "${BLUE}╔════════════════════�
 echo -e "${BLUE}║  Setup de Datos para Tests E2E - SLICE #14        ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════╝${NC}"
 echo ""
+echo -e "${YELLOW}▶ Usando API_URL: ${API_URL}${NC}"
 
 # 1. Registrar Admin si no existe
 echo -e "${YELLOW}▶ Step 1: Registrar/Login Admin${NC}"

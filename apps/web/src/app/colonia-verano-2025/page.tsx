@@ -10,19 +10,8 @@ import PricingSection from '@/components/colonia/PricingSection';
 import CTASection from '@/components/colonia/CTASection';
 import Footer from '@/components/colonia/Footer';
 import ScrollToTop from '@/components/colonia/ScrollToTop';
-
-// Lazy load del formulario (solo se carga cuando el usuario hace click en "Inscribir")
-const InscriptionForm = dynamic(
-  () => import('@/components/colonia/InscriptionForm'),
-  {
-    loading: () => (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-        <div className="text-white text-xl font-bold animate-pulse">Cargando...</div>
-      </div>
-    ),
-    ssr: false, // No renderizar en el servidor (solo cliente)
-  }
-);
+import GlobalInscriptionModal from '@/components/inscripciones-2026/GlobalInscriptionModal';
+import { TipoInscripcion2026 } from '@/types/inscripciones-2026';
 
 // Lazy load de secciones "below the fold" (no visibles al cargar)
 const ScheduleGridLazy = dynamic(() => import('@/components/colonia/ScheduleGrid'), { ssr: true });
@@ -91,10 +80,12 @@ export default function ColoniaVerano2025Page() {
       {/* SCROLL TO TOP - Navegación rápida */}
       <ScrollToTop />
 
-      {/* INSCRIPTION FORM MODAL - Global */}
-      {showInscriptionForm && (
-        <InscriptionForm onClose={handleCloseInscription} />
-      )}
+      {/* INSCRIPTION FORM MODAL - Global Unificado */}
+      <GlobalInscriptionModal
+        isOpen={showInscriptionForm}
+        onClose={handleCloseInscription}
+        tipoInscripcion={TipoInscripcion2026.COLONIA}
+      />
     </main>
   );
 }

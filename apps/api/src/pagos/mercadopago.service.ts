@@ -247,4 +247,68 @@ export class MercadoPagoService {
       statement_descriptor: 'Mateatletas',
     };
   }
+
+  /**
+   * Construye los datos de una preferencia para inscripción 2026
+   * Soporta 3 tipos: Colonia, Ciclo 2026, Pack Completo
+   */
+  buildInscripcion2026PreferenceData(
+    tipoInscripcion: string,
+    monto: number,
+    tutor: { email: string; nombre?: string; apellido?: string },
+    inscripcionId: string,
+    tutorId: string,
+    numEstudiantes: number,
+    backendUrl: string,
+    frontendUrl: string,
+  ) {
+    // Determinar título y descripción según tipo
+    let title = '';
+    let description = '';
+
+    switch (tipoInscripcion) {
+      case 'COLONIA':
+        title = 'Inscripción Colonia de Verano 2026';
+        description = `Inscripción para ${numEstudiantes} estudiante${numEstudiantes > 1 ? 's' : ''} - Colonia de Verano (Enero-Febrero 2026)`;
+        break;
+      case 'CICLO_2026':
+        title = 'Inscripción Ciclo Lectivo 2026 (Early Bird)';
+        description = `Matrícula Early Bird para ${numEstudiantes} estudiante${numEstudiantes > 1 ? 's' : ''} - Ciclo Lectivo 2026`;
+        break;
+      case 'PACK_COMPLETO':
+        title = 'Inscripción Pack Completo 2026';
+        description = `Pack Completo (Colonia + Ciclo 2026) para ${numEstudiantes} estudiante${numEstudiantes > 1 ? 's' : ''} - Ahorro de $15,000`;
+        break;
+      default:
+        title = 'Inscripción Mateatletas 2026';
+        description = `Inscripción para ${numEstudiantes} estudiante${numEstudiantes > 1 ? 's' : ''}`;
+    }
+
+    return {
+      items: [
+        {
+          id: `inscripcion-2026-${tipoInscripcion.toLowerCase()}`,
+          title: title,
+          description: description,
+          quantity: 1,
+          unit_price: Number(monto),
+          currency_id: 'ARS',
+        },
+      ],
+      payer: {
+        email: tutor.email,
+        name: tutor.nombre,
+        surname: tutor.apellido,
+      },
+      external_reference: `inscripcion2026-${inscripcionId}-tutor-${tutorId}-tipo-${tipoInscripcion}`,
+      notification_url: `${backendUrl}/api/inscripciones-2026/webhook`,
+      back_urls: {
+        success: `${frontendUrl}/inscripcion-2026/exito?inscripcionId=${inscripcionId}`,
+        failure: `${frontendUrl}/inscripcion-2026/error?inscripcionId=${inscripcionId}`,
+        pending: `${frontendUrl}/inscripcion-2026/pendiente?inscripcionId=${inscripcionId}`,
+      },
+      auto_return: 'approved',
+      statement_descriptor: 'Mateatletas 2026',
+    };
+  }
 }

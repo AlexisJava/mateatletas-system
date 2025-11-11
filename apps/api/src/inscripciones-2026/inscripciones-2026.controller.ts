@@ -1,0 +1,120 @@
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  HttpCode,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
+import { Inscripciones2026Service } from './inscripciones-2026.service';
+import {
+  CreateInscripcion2026Dto,
+  CreateInscripcion2026Response,
+} from './dto/create-inscripcion-2026.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { MercadoPagoWebhookGuard } from '../pagos/guards/mercadopago-webhook.guard';
+import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
+
+@Controller('inscripciones-2026')
+export class Inscripciones2026Controller {
+  private readonly logger = new Logger(Inscripciones2026Controller.name);
+
+  constructor(
+    private readonly inscripciones2026Service: Inscripciones2026Service,
+  ) {}
+
+  /**
+   * POST /inscripciones-2026
+   * Crea una nueva inscripción 2026 (público)
+   */
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async create(
+    @Body() createDto: CreateInscripcion2026Dto,
+  ): Promise<CreateInscripcion2026Response> {
+    return this.inscripciones2026Service.createInscripcion2026(createDto);
+  }
+
+  /**
+   * GET /inscripciones-2026/:id
+   * Obtiene una inscripción por ID (requiere autenticación)
+   */
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  async getById(@Param('id') id: string) {
+    return this.inscripciones2026Service.getInscripcionById(id);
+  }
+
+  /**
+   * GET /inscripciones-2026/tutor/:tutorId
+   * Lista todas las inscripciones de un tutor (requiere autenticación)
+   */
+  @Get('tutor/:tutorId')
+  @UseGuards(JwtAuthGuard)
+  async getByTutor(@Param('tutorId') tutorId: string) {
+    return this.inscripciones2026Service.getInscripcionesByTutor(tutorId);
+  }
+
+  /**
+   * GET /inscripciones-2026/mis-inscripciones
+   * Lista inscripciones del tutor autenticado
+   */
+  @Get('mis-inscripciones')
+  @UseGuards(JwtAuthGuard)
+  async getMisInscripciones(@Request() req: any) {
+    const tutorId = req.user.id; // Asume que el JWT contiene el user ID
+    return this.inscripciones2026Service.getInscripcionesByTutor(tutorId);
+  }
+
+  /**
+   * PATCH /inscripciones-2026/:id/estado
+   * Actualiza el estado de una inscripción (admin only)
+   */
+  @Patch(':id/estado')
+  @UseGuards(JwtAuthGuard) // TODO: agregar RolesGuard para admin
+  async updateEstado(
+    @Param('id') id: string,
+    @Body() body: { estado: string; razon: string },
+    @Request() req: any,
+  ) {
+    return this.inscripciones2026Service.updateEstado(
+      id,
+      body.estado,
+      body.razon,
+      req.user.id,
+    );
+  }
+
+  /**
+   * POST /inscripciones-2026/webhook
+   * Webhook de MercadoPago para notificaciones de pago
+   *
+   * IMPORTANTE:
+   * - NO requiere autenticación JWT (es un webhook externo)
+   * - SÍ requiere validación de firma HMAC (MercadoPagoWebhookGuard)
+   * - MercadoPago envía notificaciones cuando cambia el estado de un pago
+   *
+   * Flujo:
+   * 1. MercadoPago envía POST con firma HMAC
+   * 2. Guard valida la firma
+   * 3. Consultamos detalles del pago a MercadoPago
+   * 4. Actualizamos estado de inscripción en DB
+   */
+  @Post('webhook')
+  @UseGuards(MercadoPagoWebhookGuard)
+  @HttpCode(HttpStatus.OK)
+  async handleWebhook(@Body() webhookData: MercadoPagoWebhookDto) {
+    this.logger.log(
+      `📨 Webhook recibido: ${webhookData.type} - ${webhookData.action}`,
+    );
+
+    return await this.inscripciones2026Service.procesarWebhookMercadoPago(
+      webhookData,
+    );
+  }
+}

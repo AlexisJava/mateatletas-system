@@ -23,6 +23,7 @@ export default defineConfig({
       '**/dist/**',
       '**/.next/**',
       '**/cypress/**',
+      '**/tests/e2e/**', // Excluir tests de Playwright
       '**/.{idea,git,cache,output,temp}/**',
     ],
 

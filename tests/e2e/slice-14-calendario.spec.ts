@@ -11,7 +11,7 @@ test.describe('Calendario de Clases', () => {
     await loginAsDocente(page);
   });
 
-  test('debe cargar la página de calendario correctamente', async ({ page }) => {
+  test('@smoke debe cargar la página de calendario correctamente', async ({ page }) => {
     await page.goto('/docente/calendario');
 
     // Verificar título

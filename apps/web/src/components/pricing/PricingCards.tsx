@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import GlobalInscriptionModal from '@/components/inscripciones-2026/GlobalInscriptionModal';
+import { TipoInscripcion2026 } from '@/types/inscripciones-2026';
 
 interface PricingPlan {
-  id: 'base' | 'plus' | 'ultra';
+  id: 'colonia' | 'ciclo2026' | 'pack-completo';
   name: string;
   description: string;
   price: number;
@@ -16,54 +18,55 @@ interface PricingPlan {
 
 const PRICING_PLANS: PricingPlan[] = [
   {
-    id: 'base',
-    name: 'EXPLORADOR',
-    description: 'Para que aprendan a su ritmo, cuando quieran',
-    price: 30000,
+    id: 'colonia',
+    name: '🏖️ COLONIA DE VERANO',
+    description: 'Enero 2026 - 3 semanas intensivas',
+    price: 55000,
     period: '/mes',
-    tags: ['Disponible 24/7'],
+    tags: ['Empieza en Enero'],
     isPopular: false,
     features: [
-      'Lecciones en video siempre disponibles',
-      'Sistema de logros y recompensas',
-      'Progreso visible por niveles',
-      'Personaje digital para personalizar',
-      'Accesorios virtuales motivadores',
-      'Panel de control para padres'
+      'Curso intensivo de 3 semanas',
+      '2 clases de 1.5 horas por semana',
+      'Acceso completo a plataforma gamificada',
+      'Grupos reducidos (máx. 10 estudiantes)',
+      'Progreso guardado para continuar en 2026',
+      'Inscripción: $25.000 (única vez)'
     ]
   },
   {
-    id: 'plus',
-    name: 'ACOMPAÑADO',
-    description: 'Con profesor en vivo + todo lo del plan Explorador',
+    id: 'ciclo2026',
+    name: '🚀 CICLO 2026',
+    description: 'Desde Marzo - Año completo de clases',
     price: 60000,
     period: '/mes',
-    tags: ['🔥 El favorito de las familias', 'Clases en vivo'],
-    isPopular: true,
+    tags: ['Empieza en Marzo', 'Clases en vivo'],
+    isPopular: false,
     features: [
-      'Todo del plan Explorador incluido',
-      '1 clase grupal en vivo por semana',
-      'Grupos chicos: 8-10 chicos máximo',
-      'Profesores que inspiran y motivan',
-      'Acompañamiento pedagógico personalizado',
-      'Seguimiento en vivo del progreso'
+      'Un mundo STEAM (Matemáticas, Programación o Ciencias)',
+      '2 clases en vivo por semana (1.5 horas cada una)',
+      'Total: 3 horas semanales de clase',
+      'Grupos reducidos (máx. 10 estudiantes)',
+      'Tu personaje 3D + sistema de recompensas',
+      'Matrícula EARLY BIRD: $50.000 (Nov-Dic)',
+      '📅 Horarios confirmados antes del 20 feb'
     ]
   },
   {
-    id: 'ultra',
-    name: 'COMPLETO',
-    description: 'Máximo desarrollo: dos mundos cada semana',
-    price: 105600,
+    id: 'pack-completo',
+    name: '⭐ PACK COMPLETO',
+    description: 'Colonia + Ciclo 2026 - Mejor oferta',
+    price: 60000,
     period: '/mes',
-    tags: ['Ahorrás 12%', 'Doble impacto'],
-    isPopular: false,
+    tags: ['🔥 MEJOR OFERTA', 'Máximo ahorro'],
+    isPopular: true,
     features: [
-      'Todo del plan Acompañado incluido',
-      '2 clases en vivo por semana',
-      'Elegí libremente: Mate, Progra o Ciencias',
-      'Desarrollo integral STEAM',
-      'Ya incluye el 12% de descuento',
-      'Sale $52.800 por mundo'
+      'Todo de Colonia + Todo de Ciclo 2026',
+      'Inscripción total: $60.000 (ahorrás $15.000)',
+      'Enero: $55.000/mes • Marzo: $60.000/mes',
+      'Prioridad ABSOLUTA en elección de horarios',
+      'Continuidad del progreso (XP, avatar, casa)',
+      'Sin interrupciones en el aprendizaje'
     ]
   }
 ];
@@ -71,207 +74,311 @@ const PRICING_PLANS: PricingPlan[] = [
 export default function PricingCards() {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<TipoInscripcion2026 | null>(null);
 
   const handleSubscribe = (planId: string) => {
-    // Plan EXPLORADOR va directo a cursos online, no necesita inscripción
-    if (planId === 'base') {
+    // Modalidad asincrónica va directo a cursos online
+    if (planId === 'asincronica') {
       router.push('/cursos-online');
       return;
     }
 
-    // Otros planes muestran el modal de selección
-    setSelectedPlan(planId);
-    setShowModal(true);
-  };
+    // Mapear planId a TipoInscripcion2026 y abrir modal
+    let tipoInscripcion: TipoInscripcion2026;
 
-  const handleModalChoice = (choice: 'club' | 'colonia') => {
-    setShowModal(false);
-    if (choice === 'club') {
-      router.push('/club');
-    } else {
-      router.push('/colonia');
+    switch (planId) {
+      case 'colonia':
+        tipoInscripcion = TipoInscripcion2026.COLONIA;
+        break;
+      case 'ciclo2026':
+        tipoInscripcion = TipoInscripcion2026.CICLO_2026;
+        break;
+      case 'pack-completo':
+        tipoInscripcion = TipoInscripcion2026.PACK_COMPLETO;
+        break;
+      default:
+        // Fallback a página de registro antigua
+        router.push('/register');
+        return;
     }
+
+    setSelectedPlan(tipoInscripcion);
+    setShowModal(true);
   };
 
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-[1200px] mx-auto">
-        {PRICING_PLANS.map((plan) => (
+      {/* Grid de 2 cards pequeñas arriba */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-[900px] mx-auto mb-6">
+        {PRICING_PLANS.filter(p => p.id !== 'pack-completo').map((plan) => (
           <div
             key={plan.id}
-            className={`pricing-card relative ${plan.isPopular ? 'popular-card' : ''}`}
+            className="compact-card"
           >
-            {/* Top Bar - Animated para PLUS */}
-            <div className={`top-bar ${plan.isPopular ? 'top-bar-animated' : ''}`} />
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h3 className="text-xl font-black text-white mb-1">{plan.name}</h3>
+                <p className="text-sm text-gray-400">{plan.description}</p>
+              </div>
+            </div>
 
-            {/* Particles - Solo para PLUS */}
-            {plan.isPopular && (
-              <>
-                <div className="particle particle-1" style={{ left: '10%', animationDelay: '0s' }} />
-                <div className="particle particle-2" style={{ left: '30%', animationDelay: '0.5s' }} />
-                <div className="particle particle-3" style={{ left: '50%', animationDelay: '1s' }} />
-                <div className="particle particle-4" style={{ left: '70%', animationDelay: '1.5s' }} />
-                <div className="particle particle-5" style={{ left: '90%', animationDelay: '2s' }} />
-              </>
+            {/* Pricing structure */}
+            {plan.id === 'colonia' && (
+              <div className="mb-3">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-3xl font-black text-white">
+                    $25.000
+                  </span>
+                  <span className="text-gray-500 text-sm">inscripción</span>
+                </div>
+                <p className="text-sm text-gray-400">Luego $55.000/mes (3 meses)</p>
+              </div>
+            )}
+            {plan.id === 'ciclo2026' && (
+              <div className="mb-3">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-3xl font-black text-white">
+                    $50.000
+                  </span>
+                  <span className="text-gray-500 text-sm">matrícula EARLY BIRD</span>
+                </div>
+                <p className="text-sm text-gray-400">Luego $60.000/mes</p>
+              </div>
             )}
 
-            {/* Card Content */}
-            <div className="relative z-10">
-              {/* Tags */}
-              {plan.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {plan.tags.map((tag, index) => (
-                    <div
-                      key={index}
-                      className={`tag ${
-                        plan.isPopular && index === 0 ? 'tag-popular' : 'tag-default'
-                      }`}
-                    >
-                      {tag}
-                    </div>
-                  ))}
-                </div>
-              )}
+            <ul className="space-y-1.5 mb-4">
+              {plan.features.slice(0, 3).map((feature, index) => (
+                <li key={index} className="text-xs text-gray-300 flex items-start gap-2">
+                  <span className="text-[#10b981] mt-0.5">✓</span>
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
 
-              {/* Plan Name */}
-              <h3 className="plan-name">{plan.name}</h3>
-
-              {/* Description */}
-              <p className="plan-description">{plan.description}</p>
-
-              {/* Price */}
-              <div className={`price-container ${plan.isPopular ? 'price-glow' : ''}`}>
-                <span className={`price-main ${plan.isPopular ? 'price-gradient' : ''}`}>
-                  ${plan.price.toLocaleString('es-AR')}
-                </span>
-                <span className="price-period">{plan.period}</span>
-              </div>
-
-              {/* Inscription Fee */}
-              {plan.id === 'base' ? (
-                <div className="inscription-fee inscription-free">
-                  <span className="inscription-icon">
-                    <span role="img" aria-label="Brillos - Sin inscripción">✨</span>
-                  </span>
-                  <div className="inscription-text">
-                    <span className="inscription-label">Inscripción</span>
-                    <span className="inscription-amount inscription-free-text">Sin Inscripción</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="inscription-fee">
-                  <span className="inscription-icon">
-                    <span role="img" aria-label="Diamante - Inscripción única">💎</span>
-                  </span>
-                  <div className="inscription-text">
-                    <span className="inscription-label">Inscripción (única vez)</span>
-                    <span className="inscription-amount">$20.000</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Features */}
-              <ul className="features-list">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="feature-item">
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA Button */}
-              <button
-                onClick={() => handleSubscribe(plan.id)}
-                className={`cta-button ${plan.isPopular ? 'cta-gradient' : 'cta-default'}`}
-                aria-label={`Inscribirme al plan ${plan.name}`}
-              >
-                Inscribirme
-              </button>
-            </div>
+            <button
+              onClick={() => handleSubscribe(plan.id)}
+              className="compact-button"
+            >
+              Inscribirme
+            </button>
           </div>
         ))}
       </div>
 
-      {/* Modal de selección */}
-      {showModal && (
+      {/* Pack Completo destacado - Card grande */}
+      {PRICING_PLANS.filter(p => p.id === 'pack-completo').map((plan) => (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setShowModal(false)}
+          key={plan.id}
+          className="featured-card"
         >
-          <div
-            className="bg-gradient-to-br from-gray-900/95 via-gray-900/98 to-black/95 rounded-3xl border border-white/10 p-8 md:p-12 max-w-2xl w-full shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="text-center mb-8">
-              <div className="inline-block px-4 py-2 bg-gradient-to-r from-[#0ea5e9]/10 via-[#8b5cf6]/10 to-[#10b981]/10 rounded-full border border-[#0ea5e9]/20 mb-4">
-                <span className="bg-gradient-to-r from-[#0ea5e9] via-[#8b5cf6] to-[#10b981] bg-clip-text text-transparent font-semibold text-sm">
-                  Inscripciones Abiertas 2026
+          <div className="featured-badge">
+            🔥 MEJOR OFERTA
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-3xl font-black text-white mb-2">{plan.name}</h3>
+              <p className="text-gray-300 mb-4">{plan.description}</p>
+
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className="text-5xl font-black bg-gradient-to-r from-[#fbbf24] to-[#f97316] bg-clip-text text-transparent">
+                  $60.000
                 </span>
+                <span className="text-gray-400">inscripción total</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-black text-white mb-3">
-                ¿A qué querés inscribirte?
-              </h2>
-              <p className="text-gray-400 text-lg">
-                Elegí la opción que más te interese
+              <p className="text-sm text-[#10b981] font-bold mb-3">💰 Ahorrás $15.000 en matrícula</p>
+
+              <div className="bg-white/5 rounded-lg p-3 mb-6 border border-white/10">
+                <p className="text-xs text-gray-400 mb-2">Cuotas mensuales:</p>
+                <p className="text-sm text-white font-bold">📅 Enero-Febrero: $55.000/mes</p>
+                <p className="text-xs text-gray-400 mb-1">(Durante la Colonia)</p>
+                <p className="text-sm text-white font-bold mt-2">📅 Marzo en adelante: $60.000/mes</p>
+                <p className="text-xs text-gray-400">(Durante el Ciclo 2026)</p>
+              </div>
+
+              <button
+                onClick={() => handleSubscribe(plan.id)}
+                className="featured-button"
+              >
+                Inscribirme al Pack Completo →
+              </button>
+            </div>
+
+            <div>
+              <ul className="space-y-2">
+                {plan.features.slice(0, 4).map((feature, index) => (
+                  <li key={index} className="text-sm text-gray-200 flex items-start gap-2">
+                    <span className="text-[#fbbf24] mt-0.5 font-bold">✓</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {/* Modalidad Asincrónica - Card compacta */}
+      <div className="mt-8 max-w-[900px] mx-auto">
+        <div className="async-card">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="flex-1">
+              <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Modalidad Asincrónica</div>
+              <h3 className="text-2xl font-black text-white mb-1">📚 EXPLORADOR</h3>
+              <p className="text-sm text-gray-400 mb-3">
+                Para que aprendan a su ritmo, cuando quieran. Sin clases en vivo.
               </p>
+              <div className="flex items-baseline gap-2 mb-1">
+                <span className="text-3xl font-black text-[#0ea5e9]">$30.000</span>
+                <span className="text-gray-500 text-sm">/mes</span>
+              </div>
+              <p className="text-xs text-[#10b981]">✨ Sin inscripción</p>
             </div>
 
-            {/* Opciones */}
-            <div className="grid md:grid-cols-2 gap-4 mb-8">
-              {/* Opción Club */}
-              <button
-                onClick={() => handleModalChoice('club')}
-                className="group relative p-6 rounded-2xl border-2 border-white/10 hover:border-[#0ea5e9] transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white/5 to-transparent"
-              >
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#0ea5e9]/0 to-[#0ea5e9]/0 group-hover:from-[#0ea5e9]/10 group-hover:to-[#0284c7]/10 transition-all duration-300" />
-                <div className="relative">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#0ea5e9] to-[#0284c7] rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform">
-                    <span role="img" aria-label="Club STEAM">🎓</span>
-                  </div>
-                  <h3 className="text-xl font-black text-white mb-2">
-                    Club STEAM 2026
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    Clases todo el año con profesores en vivo
-                  </p>
-                </div>
-              </button>
-
-              {/* Opción Colonia */}
-              <button
-                onClick={() => handleModalChoice('colonia')}
-                className="group relative p-6 rounded-2xl border-2 border-white/10 hover:border-[#10b981] transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white/5 to-transparent"
-              >
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#10b981]/0 to-[#10b981]/0 group-hover:from-[#10b981]/10 group-hover:to-[#059669]/10 transition-all duration-300" />
-                <div className="relative">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-[#10b981] to-[#059669] rounded-2xl flex items-center justify-center text-3xl shadow-lg group-hover:scale-110 transition-transform">
-                    <span role="img" aria-label="Colonia de Verano">☀️</span>
-                  </div>
-                  <h3 className="text-xl font-black text-white mb-2">
-                    Colonia de Verano
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    Diversión y aprendizaje en vacaciones
-                  </p>
-                </div>
-              </button>
-            </div>
-
-            {/* Botón cerrar */}
             <button
-              onClick={() => setShowModal(false)}
-              className="w-full py-3 text-gray-400 hover:text-white transition-colors font-semibold"
+              onClick={() => handleSubscribe('asincronica')}
+              className="async-button"
             >
-              Cancelar
+              Ver Cursos Online →
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Modal Global de Inscripciones 2026 */}
+      {showModal && selectedPlan && (
+        <GlobalInscriptionModal
+          isOpen={showModal}
+          onClose={() => {
+            setShowModal(false);
+            setSelectedPlan(null);
+          }}
+          tipoInscripcion={selectedPlan}
+        />
       )}
 
+
       <style jsx>{`
-        /* Base Card Styles */
+        /* Compact Card - Cards pequeñas arriba */
+        .compact-card {
+          background: linear-gradient(145deg, rgba(30, 41, 59, 0.4), rgba(15, 23, 42, 0.6));
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 16px;
+          padding: 20px;
+          transition: all 0.3s ease;
+        }
+
+        .compact-card:hover {
+          border-color: rgba(14, 165, 233, 0.4);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 32px rgba(14, 165, 233, 0.15);
+        }
+
+        .compact-button {
+          width: 100%;
+          padding: 10px 16px;
+          background: rgba(14, 165, 233, 0.1);
+          border: 1px solid rgba(14, 165, 233, 0.3);
+          border-radius: 8px;
+          color: #0ea5e9;
+          font-weight: 700;
+          font-size: 0.875rem;
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+
+        .compact-button:hover {
+          background: rgba(14, 165, 233, 0.2);
+          border-color: rgba(14, 165, 233, 0.5);
+          transform: translateY(-1px);
+        }
+
+        /* Featured Card - Pack Completo */
+        .featured-card {
+          background: linear-gradient(145deg, rgba(139, 92, 246, 0.1), rgba(251, 191, 36, 0.05));
+          backdrop-filter: blur(20px);
+          border: 2px solid rgba(251, 191, 36, 0.3);
+          border-radius: 20px;
+          padding: 32px;
+          max-width: 900px;
+          margin: 0 auto;
+          position: relative;
+          box-shadow: 0 20px 60px rgba(251, 191, 36, 0.2);
+          transition: all 0.3s ease;
+        }
+
+        .featured-card:hover {
+          border-color: rgba(251, 191, 36, 0.5);
+          box-shadow: 0 24px 72px rgba(251, 191, 36, 0.3);
+        }
+
+        .featured-badge {
+          position: absolute;
+          top: -12px;
+          left: 32px;
+          background: linear-gradient(135deg, #FF6B35, #fbbf24);
+          color: white;
+          padding: 6px 16px;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+        }
+
+        .featured-button {
+          padding: 14px 32px;
+          background: linear-gradient(135deg, #fbbf24, #f97316);
+          border: none;
+          border-radius: 12px;
+          color: #000;
+          font-weight: 900;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 4px 16px rgba(251, 191, 36, 0.3);
+        }
+
+        .featured-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(251, 191, 36, 0.4);
+        }
+
+        /* Async Card - Modalidad asincrónica */
+        .async-card {
+          background: linear-gradient(145deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.4));
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 16px;
+          padding: 24px;
+          transition: all 0.3s ease;
+        }
+
+        .async-card:hover {
+          border-color: rgba(14, 165, 233, 0.3);
+        }
+
+        .async-button {
+          padding: 12px 24px;
+          background: transparent;
+          border: 1px solid rgba(14, 165, 233, 0.3);
+          border-radius: 8px;
+          color: #0ea5e9;
+          font-weight: 700;
+          font-size: 0.875rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+        }
+
+        .async-button:hover {
+          background: rgba(14, 165, 233, 0.1);
+          border-color: rgba(14, 165, 233, 0.5);
+        }
+
+        /* OLD STYLES - KEEP FOR BACKWARDS COMPAT BUT NOT USED */
         .pricing-card {
           background: linear-gradient(145deg, #1e293b, #0f172a);
           border-radius: 24px;

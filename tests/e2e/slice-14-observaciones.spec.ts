@@ -11,7 +11,7 @@ test.describe('Observaciones del Docente', () => {
     await loginAsDocente(page);
   });
 
-  test('debe cargar la página de observaciones correctamente', async ({ page }) => {
+  test('@smoke debe cargar la página de observaciones correctamente', async ({ page }) => {
     await page.goto('/docente/observaciones');
 
     // Verificar título

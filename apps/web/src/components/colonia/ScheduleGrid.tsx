@@ -1,13 +1,13 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Calendar, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { COURSES } from '@/data/colonia-courses';
-import type { Course, DayOfWeek, TimeSlot } from '@/types/colonia';
+import type { Course, CourseSchedule, DayOfWeek } from '@/types/colonia';
 
 export default function ScheduleGrid() {
   const days: DayOfWeek[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves'];
-  const timeSlots: TimeSlot[] = ['10:30-11:30', '10:30-12:00', '14:30-16:00', '15:00-16:00'];
+  const [activeDay, setActiveDay] = useState(0);
 
   // Helper function to calculate duration
   const calculateDuration = (timeSlot: string): number => {
@@ -18,76 +18,35 @@ export default function ScheduleGrid() {
     return end - start;
   };
 
-  // Get course for specific day and time slot
-  const getCourse = (day: DayOfWeek, timeSlot: TimeSlot): Course | null => {
-    return COURSES.find(c => c.dayOfWeek === day && c.timeSlot === timeSlot) || null;
+  // Get ALL courses for a specific day (sorted by time)
+  const getAllCoursesForDay = (day: DayOfWeek): Array<{ course: Course; schedule: CourseSchedule }> => {
+    const results: Array<{ course: Course; schedule: CourseSchedule }> = [];
+    for (const course of COURSES) {
+      for (const schedule of course.schedules) {
+        if (schedule.dayOfWeek === day) {
+          results.push({ course, schedule });
+        }
+      }
+    }
+    // Sort by time slot
+    return results.sort((a, b) => {
+      const timeA = a.schedule.timeSlot.split('-')[0];
+      const timeB = b.schedule.timeSlot.split('-')[0];
+      return timeA.localeCompare(timeB);
+    });
   };
 
-  // Render course card
-  const renderCourseCell = (course: Course | null, dayIndex: number, timeIndex: number, isMobile: boolean = false) => {
-    if (!course) {
-      return (
-        <div className="h-full min-h-[200px] card-glass rounded-xl border border-white/5 flex items-center justify-center">
-          <span className="text-white/20 text-sm">-</span>
-        </div>
-      );
+  // Navigation functions
+  const nextDay = () => {
+    if (activeDay < days.length - 1) {
+      setActiveDay(activeDay + 1);
     }
+  };
 
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.3, delay: (dayIndex + timeIndex) * 0.05 }}
-        className={`group relative h-full ${isMobile ? 'min-h-[180px]' : 'min-h-[200px]'} card-glass rounded-xl border-2 border-white/10 p-4 transition-all hover:scale-[1.02]`}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = course.color;
-          e.currentTarget.style.boxShadow = `0 0 20px ${course.color}40`;
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-          e.currentTarget.style.boxShadow = 'none';
-        }}
-      >
-        {/* Icon + Area */}
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-2xl">{course.icon}</span>
-          <span
-            className="text-[10px] font-black uppercase tracking-wider"
-            style={{ color: course.color }}
-          >
-            {course.area}
-          </span>
-        </div>
-
-        {/* Course Name */}
-        <h3 className="text-sm font-black text-white leading-tight mb-3 line-clamp-2">
-          {course.name}
-        </h3>
-
-        {/* Age Range */}
-        <div className="flex items-center gap-1 mb-2">
-          <div className="text-[10px] text-white/50">Edad:</div>
-          <div className="text-xs font-bold text-white">{course.ageRange} años</div>
-        </div>
-
-        {/* Instructor */}
-        <div className="flex items-center gap-2 pt-2 mt-auto border-t border-white/10">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#fbbf24] to-[#f97316] flex items-center justify-center text-[10px] font-black">
-            {course.instructor[0]}
-          </div>
-          <div className="text-[10px] font-bold text-white/70">{course.instructor}</div>
-        </div>
-
-        {/* Glow effect */}
-        <div
-          className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-          style={{
-            background: `radial-gradient(circle at center, ${course.color}10 0%, transparent 70%)`,
-          }}
-        />
-      </motion.div>
-    );
+  const prevDay = () => {
+    if (activeDay > 0) {
+      setActiveDay(activeDay - 1);
+    }
   };
 
   return (
@@ -95,176 +54,252 @@ export default function ScheduleGrid() {
       <div className="container mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 mb-6"
-          >
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 mb-6">
             <Calendar className="w-5 h-5 text-[#fbbf24]" />
             <span className="text-sm font-black text-white uppercase tracking-widest">
               Horarios
             </span>
-          </motion.div>
+          </div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-6"
-          >
+          <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-6">
             ORGANIZA TU
             <br />
             <span className="title-gradient">SEMANA</span>
-          </motion.h2>
+          </h2>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto"
-          >
+          <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto">
             Lunes a Jueves. Viernes, sábado y domingo libres para disfrutar el verano.
-          </motion.p>
+          </p>
         </div>
 
-        {/* Calendar Grid */}
-        <div className="max-w-7xl mx-auto mb-16">
-          {/* Desktop Grid */}
-          <div className="hidden lg:block overflow-x-auto">
-            <div className="min-w-[900px]">
-              {/* Header Row - Days */}
-              <div className="grid grid-cols-5 gap-4 mb-4">
-                <div></div> {/* Empty corner */}
-                {days.map((day, index) => (
-                  <motion.div
-                    key={day}
-                    initial={{ opacity: 0, y: -20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className="text-center"
-                  >
-                    <div className="card-glass rounded-xl border border-[#fbbf24]/20 py-4 px-2">
-                      <div className="text-2xl font-black text-white">{day}</div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+        {/* Carousel Container */}
+        <div className="max-w-4xl mx-auto mb-12">
+          {/* Current Day Indicator */}
+          <div className="text-center mb-8">
+            <div className="inline-block card-glass rounded-2xl border-2 border-[#fbbf24]/30 px-8 py-4">
+              <h3 className="text-3xl md:text-4xl font-black text-white">
+                {days[activeDay]}
+              </h3>
+            </div>
+          </div>
 
-              {/* Time Slots Rows */}
-              {timeSlots.map((timeSlot, timeIndex) => {
-                const startHour = parseInt(timeSlot.split(':')[0]);
-                const isAfternoon = startHour >= 12;
+          {/* Carousel Track Container */}
+          <div className="relative overflow-hidden rounded-2xl">
+            <div
+              className="flex transition-transform duration-300 ease-out"
+              style={{
+                transform: `translateX(-${activeDay * 100}%)`,
+                willChange: 'transform',
+              }}
+            >
+              {/* Slides - One per day */}
+              {days.map((day, dayIndex) => {
+                const coursesForDay = getAllCoursesForDay(day);
 
                 return (
-                  <motion.div
-                    key={timeSlot}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: timeIndex * 0.1 }}
-                    className="grid grid-cols-5 gap-4 mb-4"
+                  <div
+                    key={day}
+                    className="w-full flex-shrink-0 px-4"
+                    style={{ minWidth: '100%' }}
                   >
-                    {/* Time Label */}
-                    <div className="flex items-center">
-                      <div className="card-glass rounded-xl border-2 border-white/10 p-4 w-full">
-                        <div className="flex items-center gap-3">
-                          <Clock
-                            className="w-6 h-6"
-                            style={{ color: isAfternoon ? '#0ea5e9' : '#fbbf24' }}
-                          />
-                          <div>
-                            <div className="text-sm font-black text-white whitespace-nowrap">
-                              {timeSlot}
-                            </div>
-                            <div className="text-[10px] text-white/50">
-                              {calculateDuration(timeSlot)}min
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    {/* Courses List */}
+                    <div className="space-y-3">
+                      {coursesForDay.map(({ course, schedule }, index) => {
+                        const startHour = parseInt(schedule.timeSlot.split(':')[0]);
+                        const isAfternoon = startHour >= 12;
 
-                    {/* Course Cells */}
-                    {days.map((day, dayIndex) => (
-                      <div key={`${day}-${timeSlot}`}>
-                        {renderCourseCell(getCourse(day, timeSlot), dayIndex, timeIndex)}
-                      </div>
-                    ))}
-                  </motion.div>
+                        return (
+                          <div
+                            key={schedule.id}
+                            className="group relative card-glass rounded-xl border-2 border-white/10 transition-all hover:scale-[1.005] cursor-pointer overflow-hidden"
+                            style={{
+                              minHeight: '110px',
+                              backfaceVisibility: 'hidden',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = course.color;
+                              e.currentTarget.style.boxShadow = `0 0 30px ${course.color}60`;
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                              e.currentTarget.style.boxShadow = 'none';
+                            }}
+                          >
+                            <div className="flex min-h-[110px]">
+                              {/* Left Sidebar - Horario (20% width) */}
+                              <div
+                                className="flex-shrink-0 w-[20%] min-w-[100px] flex flex-col items-center justify-center gap-2 border-r-2"
+                                style={{
+                                  backgroundColor: `${course.color}15`,
+                                  borderColor: `${course.color}40`,
+                                }}
+                              >
+                                <Clock
+                                  className="w-6 h-6"
+                                  style={{ color: course.color }}
+                                />
+                                <div className="text-center px-2">
+                                  <div
+                                    className="text-sm md:text-base font-black leading-tight"
+                                    style={{ color: course.color }}
+                                  >
+                                    {schedule.timeSlot}
+                                  </div>
+                                  <div className="text-[10px] text-white/60 font-bold mt-1">
+                                    {calculateDuration(schedule.timeSlot)} min
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Right Content - Course Info (80% width) */}
+                              <div className="flex-1 p-4 flex items-center gap-4">
+                                {/* Icon */}
+                                <div
+                                  className="flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center text-3xl"
+                                  style={{
+                                    backgroundColor: `${course.color}20`,
+                                    border: `2px solid ${course.color}40`,
+                                  }}
+                                >
+                                  {course.icon}
+                                </div>
+
+                                {/* Course Name & Area */}
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-sm md:text-base font-black text-white leading-tight mb-1">
+                                    {course.name}
+                                  </h4>
+                                  <div
+                                    className="text-[10px] md:text-xs font-bold"
+                                    style={{ color: course.color }}
+                                  >
+                                    {course.area}
+                                  </div>
+                                </div>
+
+                                {/* Right Side - Age + Instructor */}
+                                <div className="flex-shrink-0 flex flex-col items-end gap-2">
+                                  <div
+                                    className="px-3 py-1 rounded-full text-xs font-black"
+                                    style={{
+                                      backgroundColor: `${course.color}30`,
+                                      color: course.color,
+                                    }}
+                                  >
+                                    {course.ageRange} años
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <div
+                                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black"
+                                      style={{
+                                        backgroundColor: `${course.color}40`,
+                                        color: course.color,
+                                      }}
+                                    >
+                                      {schedule.instructor[0]}
+                                    </div>
+                                    <span className="text-white/70 text-xs font-semibold hidden sm:inline">
+                                      {schedule.instructor}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Glow effect on hover - inset para evitar cortes */}
+                            <div
+                              className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                              style={{
+                                background: `radial-gradient(circle at center, ${course.color}20 0%, transparent 60%)`,
+                                boxShadow: `inset 0 0 40px ${course.color}30`,
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Mobile/Tablet - Stacked by Day */}
-          <div className="lg:hidden space-y-8">
-            {days.map((day, dayIndex) => (
-              <motion.div
-                key={day}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: dayIndex * 0.1 }}
-              >
-                {/* Day Header */}
-                <div className="card-glass rounded-xl border border-[#fbbf24]/20 py-3 px-4 mb-4">
-                  <div className="text-2xl font-black text-white text-center">{day}</div>
-                </div>
+          {/* Navigation Controls */}
+          <div className="flex items-center justify-center gap-6 mt-8">
+            {/* Previous Button */}
+            <button
+              onClick={prevDay}
+              disabled={activeDay === 0}
+              className="group flex items-center gap-3 px-6 py-4 rounded-xl bg-white/5 border-2 border-white/10 hover:bg-white/10 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              <ChevronLeft className="w-6 h-6 text-white group-disabled:text-white/30" />
+              <div className="text-left hidden sm:block">
+                <div className="text-xs text-white/50 font-bold uppercase">Anterior</div>
+                {activeDay > 0 && (
+                  <div className="text-sm text-white font-black">{days[activeDay - 1]}</div>
+                )}
+              </div>
+            </button>
 
-                {/* Day's Courses */}
-                <div className="space-y-4">
-                  {timeSlots.map((timeSlot, timeIndex) => {
-                    const course = getCourse(day, timeSlot);
-                    if (!course) return null;
+            {/* Dot Indicators */}
+            <div className="flex items-center gap-2">
+              {days.map((day, index) => (
+                <button
+                  key={day}
+                  onClick={() => setActiveDay(index)}
+                  className="group relative"
+                  aria-label={`Ir a ${day}`}
+                >
+                  <div
+                    className={`w-3 h-3 rounded-full transition-all ${
+                      index === activeDay
+                        ? 'bg-[#fbbf24] scale-125'
+                        : 'bg-white/30 hover:bg-white/50'
+                    }`}
+                  />
+                  {/* Tooltip */}
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 rounded-lg bg-black/90 text-white text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    {day}
+                  </div>
+                </button>
+              ))}
+            </div>
 
-                    return (
-                      <div key={timeSlot}>
-                        {/* Time Label */}
-                        <div className="flex items-center gap-3 mb-2">
-                          <Clock className="w-5 h-5 text-[#fbbf24]" />
-                          <span className="text-sm font-bold text-white">{timeSlot}</span>
-                          <span className="text-xs text-white/50">
-                            ({calculateDuration(timeSlot)}min)
-                          </span>
-                        </div>
-                        {renderCourseCell(course, dayIndex, timeIndex, true)}
-                      </div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            ))}
+            {/* Next Button */}
+            <button
+              onClick={nextDay}
+              disabled={activeDay === days.length - 1}
+              className="group flex items-center gap-3 px-6 py-4 rounded-xl bg-white/5 border-2 border-white/10 hover:bg-white/10 hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            >
+              <div className="text-right hidden sm:block">
+                <div className="text-xs text-white/50 font-bold uppercase">Siguiente</div>
+                {activeDay < days.length - 1 && (
+                  <div className="text-sm text-white font-black">{days[activeDay + 1]}</div>
+                )}
+              </div>
+              <ChevronRight className="w-6 h-6 text-white group-disabled:text-white/30" />
+            </button>
+          </div>
+
+          {/* Mobile: Swipe Hint */}
+          <div className="text-center mt-6 sm:hidden">
+            <p className="text-xs text-white/40">
+              👆 Deslizá o usá las flechas para ver otros días
+            </p>
           </div>
         </div>
 
         {/* Info Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="card-glass rounded-2xl md:rounded-3xl border-2 border-white/10 p-6 md:p-8 max-w-4xl mx-auto text-center mb-12"
-        >
+        <div className="card-glass rounded-2xl md:rounded-3xl border-2 border-white/10 p-6 md:p-8 max-w-4xl mx-auto text-center mb-12">
           <div className="text-white/80 text-base md:text-lg leading-relaxed">
             <strong className="text-white font-black">Podés tomar todos los cursos que quieras.</strong>
             <br />
             Elegí los horarios que mejor se adapten a tu rutina de verano.
           </div>
-        </motion.div>
+        </div>
 
         {/* Legend */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-wrap justify-center gap-4 md:gap-6"
-        >
+        <div className="flex flex-wrap justify-center gap-4 md:gap-6">
           {[
             { area: 'Matemática', color: '#10b981', icon: '📊' },
             { area: 'Didáctica de la Matemática', color: '#10b981', icon: '🌟' },
@@ -281,7 +316,7 @@ export default function ScheduleGrid() {
               </span>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

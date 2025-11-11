@@ -42,6 +42,11 @@ const envConfig = {
 
 const config = envConfig[environment as keyof typeof envConfig] || envConfig.local;
 
+// Exponer la API URL al runtime de Playwright para helpers/scripts
+if (!process.env.PLAYWRIGHT_API_URL) {
+  process.env.PLAYWRIGHT_API_URL = config.apiURL;
+}
+
 export default defineConfig({
   testDir: './tests/e2e',
 

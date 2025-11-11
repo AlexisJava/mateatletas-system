@@ -1,6 +1,8 @@
-import { Controller, Post, Body, Logger, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Logger, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { ColoniaService } from './colonia.service';
 import { CreateInscriptionDto } from './dto/create-inscription.dto';
+import { MercadoPagoWebhookGuard } from '../pagos/guards/mercadopago-webhook.guard';
+import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
 
 @Controller('colonia')
 export class ColoniaController {
@@ -60,5 +62,25 @@ export class ColoniaController {
       this.logger.error(`Error en inscripción: ${errorMessage}`, errorStack);
       throw error;
     }
+  }
+
+  /**
+   * POST /api/colonia/webhook
+   * Webhook de MercadoPago para notificaciones de pago de Colonia
+   *
+   * IMPORTANTE:
+   * - NO requiere autenticación JWT (es un webhook externo)
+   * - SÍ requiere validación de firma HMAC (MercadoPagoWebhookGuard)
+   * - MercadoPago envía notificaciones cuando cambia el estado de un pago
+   */
+  @Post('webhook')
+  @UseGuards(MercadoPagoWebhookGuard)
+  @HttpCode(HttpStatus.OK)
+  async handleWebhook(@Body() webhookData: MercadoPagoWebhookDto) {
+    this.logger.log(
+      `📨 Webhook recibido: ${webhookData.type} - ${webhookData.action}`,
+    );
+
+    return await this.coloniaService.procesarWebhookMercadoPago(webhookData);
   }
 }

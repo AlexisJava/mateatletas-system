@@ -2,6 +2,7 @@ import { Injectable, Logger, ConflictException, BadRequestException } from '@nes
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { MercadoPagoService } from '../pagos/mercadopago.service';
+import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
 import { CreateInscriptionDto } from './dto/create-inscription.dto';
 
 @Injectable()
@@ -250,6 +251,131 @@ export class ColoniaService {
         mercadoPagoUrl: preference.init_point,
         mercadoPagoSandboxUrl: preference.sandbox_init_point,
       },
+    };
+  }
+
+  /**
+   * Procesa webhook de MercadoPago para pagos de Colonia
+   */
+  async procesarWebhookMercadoPago(webhookData: MercadoPagoWebhookDto) {
+    this.logger.log(
+      `📨 Webhook Colonia recibido: ${webhookData.type} - ${webhookData.action}`,
+    );
+
+    // Solo procesar notificaciones de tipo "payment"
+    if (webhookData.type !== 'payment') {
+      this.logger.log(`⏭️ Ignorando webhook de tipo: ${webhookData.type}`);
+      return { message: 'Webhook type not handled' };
+    }
+
+    const paymentId = webhookData.data.id;
+    this.logger.log(`💳 Procesando pago Colonia ID: ${paymentId}`);
+
+    try {
+      // Consultar detalles del pago a MercadoPago
+      const payment = await this.mercadoPagoService.getPayment(paymentId);
+
+      this.logger.log(
+        `💰 Pago Colonia consultado - Estado: ${payment.status} - Ref Externa: ${payment.external_reference}`,
+      );
+
+      // Parsear external_reference para identificar pago
+      const externalRef = payment.external_reference;
+
+      if (!externalRef || !externalRef.startsWith('colonia-')) {
+        this.logger.warn('⚠️ Pago sin external_reference válida para Colonia - Ignorando');
+        return { message: 'Payment without valid external_reference' };
+      }
+
+      // Extraer inscripcionId del external_reference
+      // Formato: colonia-{inscripcionId}
+      const inscripcionId = externalRef.replace('colonia-', '');
+
+      if (!inscripcionId) {
+        this.logger.error('❌ No se pudo extraer inscripcionId de external_reference');
+        return { message: 'Invalid external_reference format' };
+      }
+
+      // Buscar el pago en la base de datos
+      const pago = await this.prisma.coloniaPago.findFirst({
+        where: {
+          inscripcion_id: inscripcionId,
+          mercadopago_preference_id: payment.additional_info?.items?.[0]?.id,
+        },
+      });
+
+      if (!pago) {
+        this.logger.warn(
+          `⚠️ No se encontró pago de Colonia para inscripción ${inscripcionId} - Puede ser el primer webhook`,
+        );
+        // Buscar cualquier pago pendiente de esta inscripción
+        const pagoPendiente = await this.prisma.coloniaPago.findFirst({
+          where: {
+            inscripcion_id: inscripcionId,
+            estado: 'pending',
+          },
+          orderBy: { fecha_creacion: 'asc' },
+        });
+
+        if (!pagoPendiente) {
+          this.logger.error(`❌ No hay pagos pendientes para inscripción ${inscripcionId}`);
+          return { message: 'No pending payments found' };
+        }
+
+        // Usar el primer pago pendiente
+        return this.actualizarPagoColonia(pagoPendiente.id, payment);
+      }
+
+      return this.actualizarPagoColonia(pago.id, payment);
+    } catch (error) {
+      this.logger.error('❌ Error procesando webhook de Colonia:', error);
+      throw new BadRequestException('Error processing webhook');
+    }
+  }
+
+  /**
+   * Actualiza el estado de un pago de Colonia según respuesta de MercadoPago
+   */
+  private async actualizarPagoColonia(pagoId: string, payment: any) {
+    // Determinar nuevo estado según respuesta de MercadoPago
+    let nuevoEstadoPago = 'pending';
+
+    switch (payment.status) {
+      case 'approved':
+        nuevoEstadoPago = 'paid';
+        break;
+      case 'rejected':
+      case 'cancelled':
+        nuevoEstadoPago = 'failed';
+        break;
+      case 'in_process':
+      case 'pending':
+        nuevoEstadoPago = 'pending';
+        break;
+      default:
+        this.logger.warn(`⚠️ Estado de pago desconocido: ${payment.status}`);
+        nuevoEstadoPago = 'pending';
+    }
+
+    // Actualizar pago en DB
+    const pagoActualizado = await this.prisma.coloniaPago.update({
+      where: { id: pagoId },
+      data: {
+        estado: nuevoEstadoPago,
+        mercadopago_payment_id: payment.id?.toString(),
+        fecha_pago: payment.status === 'approved' ? new Date() : undefined,
+      },
+    });
+
+    this.logger.log(
+      `✅ Pago Colonia procesado - ID: ${pagoId} → Estado: ${nuevoEstadoPago}`,
+    );
+
+    return {
+      success: true,
+      pagoId: pagoId,
+      inscripcionId: pagoActualizado.inscripcion_id,
+      paymentStatus: nuevoEstadoPago,
     };
   }
 }

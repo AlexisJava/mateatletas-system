@@ -43,6 +43,8 @@ model Tutor {
   apellido                  String
   /// Documento Nacional de Identidad (opcional)
   dni                       String?
+  /// CUIL/CUIT para facturación (REQUERIDO para inscripciones 2026)
+  cuil                      String?
   /// Teléfono de contacto (opcional)
   telefono                  String?
   /// Fecha en que el tutor se registró en la plataforma
@@ -64,12 +66,13 @@ model Tutor {
   inscripciones_mensuales   InscripcionMensual[]
 
   /// NUEVAS RELACIONES - GAMIFICACIÓN V2 (PUNTOS PADRES)
-  puntos                    PuntosPadre?
-  solicitudes_canje         SolicitudCanje[]
-  canjes                    CanjePadre[]
+  puntos            PuntosPadre?
+  solicitudes_canje SolicitudCanje[]
+  canjes            CanjePadre[]
 
   /// COLONIA DE VERANO 2026
-  inscripciones_colonia     ColoniaInscripcion[]
+  inscripciones_colonia ColoniaInscripcion[]
+  Inscripcion2026       Inscripcion2026[]
 
   @@map("tutores")
 }
@@ -154,13 +157,14 @@ model Estudiante {
   itemsObtenidos            ItemObtenido[]
 
   /// NUEVAS RELACIONES - GAMIFICACIÓN V2
-  logros_desbloqueados      LogroEstudiante[]
-  racha                     RachaEstudiante?
-  solicitudes_canje         SolicitudCanje[]
-  cursos_canjeados          CursoEstudiante[]
+  logros_desbloqueados LogroEstudiante[]
+  racha                RachaEstudiante?
+  solicitudes_canje    SolicitudCanje[]
+  cursos_canjeados     CursoEstudiante[]
 
   /// COLONIA DE VERANO 2026
   colonia_inscripciones     ColoniaEstudiante[]
+  EstudianteInscripcion2026 EstudianteInscripcion2026[]
 
   @@map("estudiantes")
 }
@@ -899,10 +903,10 @@ model LogroDesbloqueado {
   /// Timestamp de creación del registro
   createdAt      DateTime   @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt      DateTime    @updatedAt
-  docente        Docente?    @relation("LogrosAprobados", fields: [docente_id], references: [id])
-  estudiante     Estudiante  @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  logro          LogroCurso  @relation(fields: [logro_id], references: [id])
+  updatedAt      DateTime   @updatedAt
+  docente        Docente?   @relation("LogrosAprobados", fields: [docente_id], references: [id])
+  estudiante     Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  logro          LogroCurso @relation(fields: [logro_id], references: [id])
 
   @@unique([estudiante_id, logro_id])
   @@index([estudiante_id])
@@ -2136,9 +2140,9 @@ model RecursosEstudiante {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  estudiante     Estudiante           @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  transacciones  TransaccionRecurso[]
-  compras        CompraItem[]
+  estudiante    Estudiante           @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  transacciones TransaccionRecurso[]
+  compras       CompraItem[]
 
   @@index([estudiante_id])
   @@map("recursos_estudiante")
@@ -2275,8 +2279,8 @@ model ItemTienda {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  categoria CategoriaItem      @relation(fields: [categoria_id], references: [id])
-  compras   CompraItem[]
+  categoria      CategoriaItem  @relation(fields: [categoria_id], references: [id])
+  compras        CompraItem[]
   itemsObtenidos ItemObtenido[]
 
   @@index([categoria_id])
@@ -2318,8 +2322,8 @@ model ItemObtenido {
   updatedAt DateTime @updatedAt
 
   /// Relaciones
-  estudiante Estudiante  @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  item       ItemTienda  @relation(fields: [item_id], references: [id])
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  item       ItemTienda @relation(fields: [item_id], references: [id])
 
   @@unique([estudiante_id, item_id])
   @@index([estudiante_id])
@@ -2377,15 +2381,15 @@ enum TipoRecurso {
 
 /// Tipos de items de la tienda
 enum TipoItem {
-  AVATAR          // Avatar 3D completo
-  SKIN            // Skin/outfit para avatar
-  ACCESORIO       // Accesorios (sombreros, gafas, etc.)
-  POWERUP         // Power-ups temporales (2x XP, etc.)
-  COSMETICO       // Efectos cosméticos (partículas, auras, etc.)
-  TITULO          // Títulos/badges personalizados
-  EMOJI           // Emojis/stickers personalizados
-  FONDO           // Fondos de perfil
-  MARCO           // Marcos de avatar
+  AVATAR // Avatar 3D completo
+  SKIN // Skin/outfit para avatar
+  ACCESORIO // Accesorios (sombreros, gafas, etc.)
+  POWERUP // Power-ups temporales (2x XP, etc.)
+  COSMETICO // Efectos cosméticos (partículas, auras, etc.)
+  TITULO // Títulos/badges personalizados
+  EMOJI // Emojis/stickers personalizados
+  FONDO // Fondos de perfil
+  MARCO // Marcos de avatar
 
   @@map("tipo_item")
 }
@@ -2419,31 +2423,31 @@ model Logro {
   id String @id @default(cuid())
 
   // Identificación
-  codigo String @unique // "racha_7_dias", "completista", etc
-  nombre String // "Racha de Fuego"
+  codigo      String @unique // "racha_7_dias", "completista", etc
+  nombre      String // "Racha de Fuego"
   descripcion String
-  categoria String // "consistencia", "maestria", "social", etc
+  categoria   String // "consistencia", "maestria", "social", etc
 
   // Recompensas
   monedas_recompensa Int
-  xp_recompensa Int
+  xp_recompensa      Int
 
   // Criterios de desbloqueo
-  criterio_tipo String // "racha_dias", "temas_completados", etc
+  criterio_tipo  String // "racha_dias", "temas_completados", etc
   criterio_valor String // JSON con valor(es) necesarios
 
   // Metadata
-  icono String
-  rareza String // "comun", "raro", "epico", "legendario"
-  secreto Boolean @default(false)
-  animacion String? // ID de animación desbloqueada
-  titulo String? // Título que otorga
-  badge String? // Badge que otorga
+  icono              String
+  rareza             String // "comun", "raro", "epico", "legendario"
+  secreto            Boolean @default(false)
+  animacion          String? // ID de animación desbloqueada
+  titulo             String? // Título que otorga
+  badge              String? // Badge que otorga
   mensaje_desbloqueo String? // Mensaje especial al desbloquear
-  extras Json? // Array de extras (["texto1", "texto2"])
+  extras             Json? // Array de extras (["texto1", "texto2"])
 
   // Orden y estado
-  orden Int @default(0)
+  orden  Int     @default(0)
   activo Boolean @default(true)
 
   created_at DateTime @default(now())
@@ -2463,14 +2467,14 @@ model LogroEstudiante {
   id String @id @default(cuid())
 
   estudiante_id String
-  logro_id String
+  logro_id      String
 
   fecha_desbloqueo DateTime @default(now())
-  visto Boolean @default(false) // Para notificaciones
+  visto            Boolean  @default(false) // Para notificaciones
 
   // Relaciones
   estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  logro Logro @relation(fields: [logro_id], references: [id])
+  logro      Logro      @relation(fields: [logro_id], references: [id])
 
   @@unique([estudiante_id, logro_id])
   @@index([estudiante_id])
@@ -2484,7 +2488,7 @@ model LogroEstudiante {
 // ==========================================
 
 model RachaEstudiante {
-  id String @id @default(cuid())
+  id            String @id @default(cuid())
   estudiante_id String @unique
 
   // Estado actual
@@ -2492,7 +2496,7 @@ model RachaEstudiante {
   racha_maxima Int @default(0)
 
   // Fechas
-  ultima_actividad DateTime?
+  ultima_actividad    DateTime?
   inicio_racha_actual DateTime?
 
   // Metadata
@@ -2516,40 +2520,40 @@ model CursoCatalogo {
   id String @id @default(cuid())
 
   // Información básica
-  codigo String @unique // "quimica_explosiva"
-  titulo String
-  descripcion String @db.Text
-  categoria String // "ciencia", "programacion", "robotica", "diseno"
+  codigo       String  @unique // "quimica_explosiva"
+  titulo       String
+  descripcion  String  @db.Text
+  categoria    String // "ciencia", "programacion", "robotica", "diseno"
   subcategoria String?
 
   // Detalles académicos
   duracion_clases Int
-  nivel_requerido Int @default(1) // Nivel mínimo estudiante
-  contenido Json? // Syllabus, módulos, etc
+  nivel_requerido Int   @default(1) // Nivel mínimo estudiante
+  contenido       Json? // Syllabus, módulos, etc
 
   // Pricing
-  precio_usd Decimal @db.Decimal(10,2)
+  precio_usd     Decimal @db.Decimal(10, 2)
   precio_monedas Int // precio_usd * 20
 
   // Media
-  imagen_url String?
+  imagen_url        String?
   video_preview_url String?
 
   // Metadata
   destacado Boolean @default(false)
-  nuevo Boolean @default(false)
-  activo Boolean @default(true)
-  orden Int @default(0)
+  nuevo     Boolean @default(false)
+  activo    Boolean @default(true)
+  orden     Int     @default(0)
 
   // Stats
-  total_canjes Int @default(0)
-  rating Decimal @db.Decimal(3,2) @default(0)
+  total_canjes Int     @default(0)
+  rating       Decimal @default(0) @db.Decimal(3, 2)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   // Relaciones
-  solicitudes_canje SolicitudCanje[]
+  solicitudes_canje  SolicitudCanje[]
   cursos_estudiantes CursoEstudiante[]
 
   @@index([categoria])
@@ -2567,27 +2571,27 @@ model SolicitudCanje {
 
   // Partes involucradas
   estudiante_id String
-  tutor_id String
-  curso_id String
+  tutor_id      String
+  curso_id      String
 
   // Detalles del canje
   monedas_usadas Int
-  estado String // "pendiente", "aprobada", "rechazada", "cancelada"
+  estado         String // "pendiente", "aprobada", "rechazada", "cancelada"
 
   // Decisión del padre
   fecha_decision DateTime?
-  opcion_pago String? // "padre_paga_todo", "hijo_paga_mitad", "hijo_paga_todo"
-  monto_padre Decimal? @db.Decimal(10,2) // Cuánto pagó el padre
-  mensaje_padre String? @db.Text
+  opcion_pago    String? // "padre_paga_todo", "hijo_paga_mitad", "hijo_paga_todo"
+  monto_padre    Decimal?  @db.Decimal(10, 2) // Cuánto pagó el padre
+  mensaje_padre  String?   @db.Text
 
   // Metadata
-  fecha_solicitud DateTime @default(now())
+  fecha_solicitud  DateTime  @default(now())
   fecha_expiracion DateTime? // Opcional: expira en 7 días
 
   // Relaciones
-  estudiante Estudiante @relation(fields: [estudiante_id], references: [id])
-  tutor Tutor @relation(fields: [tutor_id], references: [id])
-  curso CursoCatalogo @relation(fields: [curso_id], references: [id])
+  estudiante Estudiante    @relation(fields: [estudiante_id], references: [id])
+  tutor      Tutor         @relation(fields: [tutor_id], references: [id])
+  curso      CursoCatalogo @relation(fields: [curso_id], references: [id])
 
   @@index([estudiante_id])
   @@index([tutor_id])
@@ -2604,17 +2608,17 @@ model CursoEstudiante {
   id String @id @default(cuid())
 
   estudiante_id String
-  curso_id String
+  curso_id      String
 
   // Progreso
-  progreso Int @default(0) // 0-100%
-  completado Boolean @default(false)
-  fecha_inicio DateTime @default(now())
+  progreso         Int       @default(0) // 0-100%
+  completado       Boolean   @default(false)
+  fecha_inicio     DateTime  @default(now())
   fecha_completado DateTime?
 
   // Relaciones
-  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  curso CursoCatalogo @relation(fields: [curso_id], references: [id])
+  estudiante Estudiante    @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  curso      CursoCatalogo @relation(fields: [curso_id], references: [id])
 
   @@unique([estudiante_id, curso_id])
   @@index([estudiante_id])
@@ -2627,23 +2631,23 @@ model CursoEstudiante {
 // ==========================================
 
 model PuntosPadre {
-  id String @id @default(cuid())
+  id       String @id @default(cuid())
   tutor_id String @unique
 
   // Recursos
   puntos_total Int @default(0)
-  xp_total Int @default(0)
+  xp_total     Int @default(0)
 
   // Stats
   pagos_puntuales_consecutivos Int @default(0)
-  total_referidos_activos Int @default(0)
+  total_referidos_activos      Int @default(0)
 
   updated_at DateTime @updatedAt
 
   // Relaciones
-  tutor Tutor @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  tutor         Tutor                    @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
   transacciones TransaccionPuntosPadre[]
-  canjes CanjePadre[]
+  canjes        CanjePadre[]
 
   @@index([tutor_id])
   @@map("puntos_padres")
@@ -2654,15 +2658,15 @@ model PuntosPadre {
 // ==========================================
 
 model TransaccionPuntosPadre {
-  id String @id @default(cuid())
+  id              String @id @default(cuid())
   puntos_padre_id String
 
   tipo_recurso String // "PUNTOS", "XP"
-  cantidad Int
-  razon String // "pago_puntual", "referido", "engagement"
+  cantidad     Int
+  razon        String // "pago_puntual", "referido", "engagement"
 
   metadata Json?
-  fecha DateTime @default(now())
+  fecha    DateTime @default(now())
 
   puntos_padre PuntosPadre @relation(fields: [puntos_padre_id], references: [id], onDelete: Cascade)
 
@@ -2680,19 +2684,19 @@ model PremioPadre {
   id String @id @default(cuid())
 
   // Información
-  codigo String @unique
-  titulo String
+  codigo      String @unique
+  titulo      String
   descripcion String @db.Text
-  categoria String // "digital", "acceso", "premium", "epico"
+  categoria   String // "digital", "acceso", "premium", "epico"
 
   // Costo
   puntos_requeridos Int
-  costo_real_usd Decimal? @db.Decimal(10,2)
+  costo_real_usd    Decimal? @db.Decimal(10, 2)
 
   // Metadata
-  icono String
+  icono  String
   activo Boolean @default(true)
-  orden Int @default(0)
+  orden  Int     @default(0)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -2711,17 +2715,17 @@ model PremioPadre {
 model CanjePadre {
   id String @id @default(cuid())
 
-  tutor_id String
-  premio_id String
+  tutor_id        String
+  premio_id       String
   puntos_padre_id String
 
   puntos_usados Int
-  estado String @default("completado")
+  estado        String @default("completado")
 
   fecha_canje DateTime @default(now())
 
-  tutor Tutor @relation(fields: [tutor_id], references: [id])
-  premio PremioPadre @relation(fields: [premio_id], references: [id])
+  tutor        Tutor       @relation(fields: [tutor_id], references: [id])
+  premio       PremioPadre @relation(fields: [premio_id], references: [id])
   puntos_padre PuntosPadre @relation(fields: [puntos_padre_id], references: [id])
 
   @@index([tutor_id])
@@ -2741,18 +2745,18 @@ model CanjePadre {
 model ColoniaInscripcion {
   id String @id @default(cuid())
 
-  tutor_id String
-  estado String @default("active") // "active", "blocked", "cancelled"
+  tutor_id           String
+  estado             String   @default("active") // "active", "blocked", "cancelled"
   descuento_aplicado Int // 0, 12 o 20
-  total_mensual Int // Monto que se cobra cada mes
-  fecha_inscripcion DateTime @default(now())
+  total_mensual      Int // Monto que se cobra cada mes
+  fecha_inscripcion  DateTime @default(now())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tutor Tutor @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  tutor       Tutor               @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
   estudiantes ColoniaEstudiante[]
-  pagos ColoniaPago[]
+  pagos       ColoniaPago[]
 
   @@index([tutor_id])
   @@index([estado])
@@ -2764,17 +2768,17 @@ model ColoniaEstudiante {
   id String @id @default(cuid())
 
   inscripcion_id String
-  estudiante_id String // Referencia a la tabla estudiantes
-  nombre String
-  edad Int
-  pin String @unique // 4 dígitos para acceso
+  estudiante_id  String // Referencia a la tabla estudiantes
+  nombre         String
+  edad           Int
+  pin            String @unique // 4 dígitos para acceso
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  inscripcion ColoniaInscripcion @relation(fields: [inscripcion_id], references: [id], onDelete: Cascade)
-  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  cursos ColoniaEstudianteCurso[]
+  inscripcion ColoniaInscripcion       @relation(fields: [inscripcion_id], references: [id], onDelete: Cascade)
+  estudiante  Estudiante               @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  cursos      ColoniaEstudianteCurso[]
 
   @@index([inscripcion_id])
   @@index([estudiante_id])
@@ -2787,14 +2791,14 @@ model ColoniaEstudianteCurso {
   id String @id @default(cuid())
 
   colonia_estudiante_id String
-  course_id String // ID del curso (ej: 'mat-juegos-desafios')
-  course_name String
-  course_area String // "Matemática", "Programación", "Ciencias"
-  instructor String
-  day_of_week String // "Lunes", "Martes", etc
-  time_slot String // "10:30-12:00", "14:30-16:00"
-  precio_base Int // 55000
-  precio_con_descuento Int // Después de aplicar descuento
+  course_id             String // ID del curso (ej: 'mat-juegos-desafios')
+  course_name           String
+  course_area           String // "Matemática", "Programación", "Ciencias"
+  instructor            String
+  day_of_week           String // "Lunes", "Martes", etc
+  time_slot             String // "10:30-12:00", "14:30-16:00"
+  precio_base           Int // 55000
+  precio_con_descuento  Int // Después de aplicar descuento
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2810,16 +2814,16 @@ model ColoniaEstudianteCurso {
 model ColoniaPago {
   id String @id @default(cuid())
 
-  inscripcion_id String
-  mes String // "enero", "febrero", "marzo"
-  anio Int // 2026
-  monto Int
-  estado String @default("pending") // "pending", "paid", "failed", "cancelled"
+  inscripcion_id            String
+  mes                       String // "enero", "febrero", "marzo"
+  anio                      Int // 2026
+  monto                     Int
+  estado                    String    @default("pending") // "pending", "paid", "failed", "cancelled"
   mercadopago_preference_id String?
-  mercadopago_payment_id String?
-  fecha_vencimiento DateTime // Día 5 del mes
-  fecha_pago DateTime?
-  fecha_creacion DateTime @default(now())
+  mercadopago_payment_id    String?
+  fecha_vencimiento         DateTime // Día 5 del mes
+  fecha_pago                DateTime?
+  fecha_creacion            DateTime  @default(now())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2833,3 +2837,285 @@ model ColoniaPago {
   @@map("colonia_pagos")
 }
 
+// ============================================================================
+// SISTEMA DE INSCRIPCIONES 2026 - UNIFICADO
+// ============================================================================
+// Este sistema maneja las 3 opciones de inscripción para 2026:
+// 1. Colonia de Verano (Enero-Febrero)
+// 2. Ciclo 2026 (Marzo-Diciembre)
+// 3. Pack Completo (Colonia + Ciclo)
+// ============================================================================
+
+/// Modelo principal para inscripciones 2026
+/// Una inscripción representa la decisión del tutor de inscribir estudiantes
+/// en uno de los 3 tipos disponibles: Colonia, Ciclo 2026 o Pack Completo
+model Inscripcion2026 {
+  /// Identificador único de la inscripción
+  id String @id @default(cuid())
+
+  /// ID del tutor responsable
+  tutor_id String
+
+  /// Tipo de inscripción elegida
+  /// - "colonia": Solo Colonia de Verano (Enero-Febrero)
+  /// - "ciclo2026": Solo Ciclo 2026 (Marzo-Diciembre)
+  /// - "pack-completo": Ambos con descuento
+  tipo_inscripcion String // "colonia" | "ciclo2026" | "pack-completo"
+
+  /// Estado de la inscripción
+  /// - "pending": Creada pero sin pagar inscripción inicial
+  /// - "active": Inscripción pagada, estudiante puede acceder
+  /// - "blocked": Bloqueada por falta de pago mensual
+  /// - "cancelled": Cancelada por el tutor o por falta de pago
+  estado String @default("pending") // "pending" | "active" | "blocked" | "cancelled"
+
+  /// Monto de inscripción/matrícula inicial pagado
+  /// - Colonia: $25.000
+  /// - Ciclo 2026: $50.000 (Early Bird Nov-Dic)
+  /// - Pack Completo: $60.000 (ahorro de $15.000)
+  inscripcion_pagada Int
+
+  /// Porcentaje de descuento aplicado (0-20%)
+  /// Solo aplica para Colonia (por hermanos o múltiples cursos)
+  descuento_aplicado Int @default(0)
+
+  /// Monto mensual actual (puede variar según el mes)
+  /// Colonia: $55.000/mes (Ene-Feb)
+  /// Ciclo 2026: $60.000/mes (Mar+)
+  /// Pack: $55.000 (Ene-Feb) → $60.000 (Mar+)
+  total_mensual_actual Int
+
+  /// Origen de la inscripción - ¿Cómo nos conociste?
+  /// Ejemplos: "Instagram", "Facebook", "Recomendación", "Google", "Otro"
+  origen_inscripcion String?
+
+  /// Ciudad/localidad de donde se inscribe
+  ciudad String?
+
+  /// Fecha en que se realizó la inscripción
+  fecha_inscripcion DateTime @default(now())
+
+  /// Fecha de inicio de las clases
+  /// Colonia/Pack: Enero 2026
+  /// Ciclo: Marzo 2026
+  fecha_inicio DateTime?
+
+  /// Fecha de finalización esperada
+  /// Colonia: Febrero 2026
+  /// Ciclo/Pack: Diciembre 2026
+  fecha_fin DateTime?
+
+  /// Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  tutor                    Tutor                            @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  estudiantes              EstudianteInscripcion2026[]
+  pagos                    PagoInscripcion2026[]
+  historial_estado_cambios HistorialEstadoInscripcion2026[]
+
+  @@index([tutor_id])
+  @@index([tipo_inscripcion])
+  @@index([estado])
+  @@index([fecha_inscripcion])
+  @@map("inscripciones_2026")
+}
+
+/// Modelo para vincular estudiantes con inscripciones 2026
+/// Cada registro representa un estudiante inscrito en una opción específica
+model EstudianteInscripcion2026 {
+  /// Identificador único del registro
+  id String @id @default(cuid())
+
+  /// ID de la inscripción padre
+  inscripcion_id String
+
+  /// ID del estudiante (puede ser existente o nuevo)
+  estudiante_id String
+
+  /// Nombre del estudiante (snapshot al momento de inscripción)
+  nombre String
+
+  /// Edad del estudiante al momento de inscripción
+  edad Int
+
+  /// DNI del estudiante (opcional)
+  dni String?
+
+  /// PIN de 4 dígitos para login del estudiante
+  /// Generado automáticamente al crear la inscripción
+  pin String
+
+  /// Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  inscripcion    Inscripcion2026                @relation(fields: [inscripcion_id], references: [id], onDelete: Cascade)
+  estudiante     Estudiante                     @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  cursos_colonia ColoniaCursoSeleccionado2026[]
+  mundos_ciclo   CicloMundoSeleccionado2026[]
+
+  @@unique([inscripcion_id, estudiante_id])
+  @@index([inscripcion_id])
+  @@index([estudiante_id])
+  @@map("estudiantes_inscripciones_2026")
+}
+
+/// Modelo para cursos de Colonia seleccionados por estudiante
+/// Solo se usa si tipo_inscripcion === "colonia" O "pack-completo"
+model ColoniaCursoSeleccionado2026 {
+  /// Identificador único del registro
+  id String @id @default(cuid())
+
+  /// ID del estudiante-inscripción
+  estudiante_inscripcion_id String
+
+  /// ID del curso de colonia (del catálogo de 11 cursos)
+  course_id String
+
+  /// Datos del curso (snapshot para histórico)
+  course_name String
+  course_area String
+  instructor  String
+  day_of_week String
+  time_slot   String
+
+  /// Precios
+  precio_base          Int // $55.000
+  precio_con_descuento Int // Con descuento aplicado si hay
+
+  /// Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  estudiante_inscripcion EstudianteInscripcion2026 @relation(fields: [estudiante_inscripcion_id], references: [id], onDelete: Cascade)
+
+  @@index([estudiante_inscripcion_id])
+  @@index([course_id])
+  @@map("colonia_cursos_seleccionados_2026")
+}
+
+/// Modelo para mundo STEAM seleccionado en Ciclo 2026
+/// Solo se usa si tipo_inscripcion === "ciclo2026" O "pack-completo"
+model CicloMundoSeleccionado2026 {
+  /// Identificador único del registro
+  id String @id @default(cuid())
+
+  /// ID del estudiante-inscripción
+  estudiante_inscripcion_id String
+
+  /// Mundo STEAM elegido por el estudiante
+  /// - "matematica": Mundo de matemáticas
+  /// - "programacion": Mundo de programación
+  /// - "ciencias": Mundo de ciencias
+  mundo String // "matematica" | "programacion" | "ciencias"
+
+  /// Horario asignado (se define después, antes del 20 feb 2026)
+  dia_semana String? // "lunes", "martes", etc.
+  horario    String? // "16:00-17:30", "18:00-19:30", etc.
+
+  /// Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  estudiante_inscripcion EstudianteInscripcion2026 @relation(fields: [estudiante_inscripcion_id], references: [id], onDelete: Cascade)
+
+  @@index([estudiante_inscripcion_id])
+  @@index([mundo])
+  @@map("ciclo_mundos_seleccionados_2026")
+}
+
+/// Modelo para pagos relacionados con inscripciones 2026
+/// Incluye tanto el pago inicial de inscripción como los pagos mensuales
+model PagoInscripcion2026 {
+  /// Identificador único del pago
+  id String @id @default(cuid())
+
+  /// ID de la inscripción asociada
+  inscripcion_id String
+
+  /// Tipo de pago
+  /// - "inscripcion": Pago único inicial (matrícula)
+  /// - "mensualidad": Cuota mensual
+  tipo String // "inscripcion" | "mensualidad"
+
+  /// Para mensualidades: mes y año
+  mes  String? // "enero", "febrero", "marzo", etc.
+  anio Int? // 2026
+
+  /// Monto a pagar
+  monto Int
+
+  /// Estado del pago
+  /// - "pending": Pendiente de pago
+  /// - "paid": Pagado correctamente
+  /// - "failed": Pago fallido
+  /// - "cancelled": Pago cancelado
+  estado String @default("pending") // "pending" | "paid" | "failed" | "cancelled"
+
+  /// IDs de MercadoPago para tracking
+  mercadopago_preference_id String? // Preference ID de MP
+  mercadopago_payment_id    String? // Payment ID una vez pagado
+
+  /// Fecha límite de pago (día 5 del mes para mensualidades)
+  fecha_vencimiento DateTime?
+
+  /// Fecha en que se realizó el pago
+  fecha_pago DateTime?
+
+  /// Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  inscripcion Inscripcion2026 @relation(fields: [inscripcion_id], references: [id], onDelete: Cascade)
+
+  @@index([inscripcion_id])
+  @@index([tipo])
+  @@index([estado])
+  @@index([fecha_vencimiento])
+  @@index([mercadopago_preference_id])
+  @@index([mercadopago_payment_id])
+  @@map("pagos_inscripciones_2026")
+}
+
+/// Modelo para historial de cambios de estado de inscripciones
+/// Permite auditar y rastrear todos los cambios de estado
+model HistorialEstadoInscripcion2026 {
+  /// Identificador único del registro
+  id String @id @default(cuid())
+
+  /// ID de la inscripción
+  inscripcion_id String
+
+  /// Estado anterior
+  estado_anterior String // "pending", "active", "blocked", "cancelled"
+
+  /// Estado nuevo
+  estado_nuevo String // "pending", "active", "blocked", "cancelled"
+
+  /// Razón del cambio
+  /// Ejemplos:
+  /// - "Pago de inscripción recibido"
+  /// - "Falta de pago mensual"
+  /// - "Cancelación solicitada por tutor"
+  razon String
+
+  /// Usuario/sistema que realizó el cambio
+  /// Puede ser "system" para cambios automáticos o un ID de admin
+  realizado_por String @default("system")
+
+  /// Timestamp del cambio
+  fecha_cambio DateTime @default(now())
+
+  /// Relaciones
+  inscripcion Inscripcion2026 @relation(fields: [inscripcion_id], references: [id], onDelete: Cascade)
+
+  @@index([inscripcion_id])
+  @@index([fecha_cambio])
+  @@map("historial_estado_inscripciones_2026")
+}
