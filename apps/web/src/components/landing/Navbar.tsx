@@ -69,35 +69,27 @@ export default function Navbar() {
     {
       label: 'Cursos Online',
       submenu: {
-        title: '📚 Cursos Intensivos',
-        subtitle: 'Pago único - Duración 2 a 3 meses',
-        footer: '💰 Un solo pago, acceso completo',
+        title: '📚 Cursos Online',
+        subtitle: 'Elige la modalidad que mejor se adapte a ti',
+        footer: '🎓 Flexibilidad y calidad premium',
         titleColor: '#8b5cf6',
         footerColor: '#8b5cf6',
         items: [
           {
-            href: '/cursos-online/matematica',
-            label: 'Matemática',
-            icon: '🔢',
-            color: '#fbbf24',
-            gradient: 'from-[#fbbf24] to-[#f59e0b]',
-            description: 'Cursos temáticos específicos',
+            href: '/cursos-online/sincronicos',
+            label: 'Sincrónicos',
+            icon: '🎥',
+            color: '#8b5cf6',
+            gradient: 'from-[#8b5cf6] to-[#7c3aed]',
+            description: 'Clases en vivo con docentes',
           },
           {
-            href: '/cursos-online/programacion',
-            label: 'Programación',
-            icon: '💻',
+            href: '/cursos-online/asincronicos',
+            label: 'Asincrónicos',
+            icon: '📚',
             color: '#0ea5e9',
             gradient: 'from-[#0ea5e9] to-[#0284c7]',
-            description: 'Proyectos completos paso a paso',
-          },
-          {
-            href: '/cursos-online/ciencias',
-            label: 'Ciencias',
-            icon: '🔬',
-            color: '#FF6B35',
-            gradient: 'from-[#FF6B35] to-[#e65929]',
-            description: 'Experimentos y teoría aplicada',
+            description: 'Estudia a tu ritmo 24/7',
           },
         ],
       },
@@ -172,7 +164,7 @@ export default function Navbar() {
                         </div>
 
                         {/* Grid de mundos */}
-                        <div className="grid grid-cols-3 gap-4" role="list">
+                        <div className={`grid gap-4 ${link.submenu.items.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`} role="list">
                           {link.submenu.items.map((item) => (
                             <Link
                               key={item.href}
