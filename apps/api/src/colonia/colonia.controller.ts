@@ -55,7 +55,9 @@ export class ColoniaController {
 
       return result;
     } catch (error) {
-      this.logger.error(`Error en inscripción: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Error en inscripción: ${errorMessage}`, errorStack);
       throw error;
     }
   }

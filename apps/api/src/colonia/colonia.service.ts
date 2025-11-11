@@ -18,7 +18,7 @@ export class ColoniaService {
    * Genera un PIN de 4 dígitos único
    */
   private async generateUniquePin(): Promise<string> {
-    let pin: string;
+    let pin = '';
     let exists = true;
 
     while (exists) {
