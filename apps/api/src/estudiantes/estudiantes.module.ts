@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { EstudiantesService } from './estudiantes.service';
 import { EstudiantesFacadeService } from './estudiantes-facade.service';
 import { EstudiantesController } from './estudiantes.controller';
 import { EquiposController } from './equipos.controller';
@@ -35,15 +34,11 @@ import { EstudianteStatsService } from './services/estudiante-stats.service';
     EstudianteCommandService,
     EstudianteCopyService,
     EstudianteStatsService,
-    // Facade (API pública)
+    // Facade (API pública) - Usado por EstudiantesController
     EstudiantesFacadeService,
-    // DEPRECADO: Mantener por compatibilidad temporal
-    // TODO: Migrar controllers a usar EstudiantesFacadeService
-    EstudiantesService,
   ],
   exports: [
-    EstudiantesFacadeService, // Nueva API recomendada
-    EstudiantesService, // Por compatibilidad con otros módulos
+    EstudiantesFacadeService, // API pública del módulo
   ],
 })
 export class EstudiantesModule {}

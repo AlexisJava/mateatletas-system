@@ -11,7 +11,7 @@ import {
   BadRequestException,
   Request,
 } from '@nestjs/common';
-import { EstudiantesService } from './estudiantes.service';
+import { EstudiantesFacadeService } from './estudiantes-facade.service';
 import { CreateEstudianteDto } from './dto/create-estudiante.dto';
 import { UpdateEstudianteDto } from './dto/update-estudiante.dto';
 import { QueryEstudiantesDto } from './dto/query-estudiantes.dto';
@@ -36,7 +36,7 @@ import { AuthUser, RequestWithAuthUser } from '../auth/interfaces';
 @Controller('estudiantes')
 @UseGuards(JwtAuthGuard)
 export class EstudiantesController {
-  constructor(private readonly estudiantesService: EstudiantesService) {}
+  constructor(private readonly estudiantesService: EstudiantesFacadeService) {}
 
   /**
    * POST /estudiantes - Crear nuevo estudiante

@@ -215,7 +215,7 @@ export class EstudianteCommandService {
    * @returns El estudiante actualizado
    */
   async updateAvatarGradient(id: string, gradientId: number) {
-    // Verificar que el estudiante existe
+    // Verificar que el estudiante exists
     await this.validator.validateEstudianteExists(id);
 
     const estudiante = await this.prisma.estudiante.update({
@@ -234,6 +234,56 @@ export class EstudianteCommandService {
     this.logger.log(`Avatar gradient actualizado para estudiante: ${id}`);
 
     return estudiante;
+  }
+
+  /**
+   * Actualiza el avatar 3D del estudiante
+   * @param id - ID del estudiante
+   * @param avatarUrl - URL del avatar 3D
+   * @returns El estudiante actualizado
+   */
+  async updateAvatar3D(id: string, avatarUrl: string) {
+    // Verificar que el estudiante existe
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id },
+    });
+
+    if (!estudiante) {
+      throw new NotFoundException('Estudiante no encontrado');
+    }
+
+    // Verificar si es la primera vez que crea avatar
+    const esPrimerAvatar = !estudiante.avatarUrl;
+
+    // Actualizar solo el avatar 3D
+    const estudianteActualizado = await this.prisma.estudiante.update({
+      where: { id },
+      data: { avatarUrl },
+      include: {
+        equipo: true,
+        tutor: {
+          select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // Emitir evento si es la primera vez que crea avatar
+    if (esPrimerAvatar) {
+      this.eventEmitter.emit('estudiante.avatar.created', {
+        estudianteId: id,
+        logroId: 'AVATAR_CREADO',
+      });
+      this.logger.log(`Evento avatar.created emitido para estudiante ${id}`);
+    }
+
+    this.logger.log(`Avatar 3D actualizado para estudiante: ${id}`);
+
+    return estudianteActualizado;
   }
 
   /**

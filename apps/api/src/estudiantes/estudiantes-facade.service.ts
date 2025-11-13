@@ -136,6 +136,13 @@ export class EstudiantesFacadeService {
   }
 
   /**
+   * Actualiza el avatar 3D del estudiante
+   */
+  async updateAvatar3D(id: string, avatarUrl: string) {
+    return this.commandService.updateAvatar3D(id, avatarUrl);
+  }
+
+  /**
    * TDD: Crear uno o múltiples estudiantes con tutor en un sector
    */
   async crearEstudiantesConTutor(dto: CrearEstudiantesConTutorDto) {
