@@ -1,19 +1,49 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { EstudiantesService } from './estudiantes.service';
+import { EstudiantesFacadeService } from './estudiantes-facade.service';
 import { EstudiantesController } from './estudiantes.controller';
 import { EquiposController } from './equipos.controller';
 import { AuthModule } from '../auth/auth.module';
-import { GamificacionModule } from '../gamificacion/gamificacion.module';
+import { EstudianteBusinessValidator } from './validators/estudiante-business.validator';
+import { EstudianteQueryService } from './services/estudiante-query.service';
+import { EstudianteCommandService } from './services/estudiante-command.service';
+import { EstudianteCopyService } from './services/estudiante-copy.service';
+import { EstudianteStatsService } from './services/estudiante-stats.service';
 
 /**
- * Módulo de Estudiantes
+ * Módulo de Estudiantes - Refactorizado con CQRS + Facade Pattern
  * Gestiona la funcionalidad CRUD de estudiantes y equipos
- * PrismaService está disponible globalmente a través de DatabaseModule
+ *
+ * ARQUITECTURA:
+ * - EstudiantesFacadeService: API pública (183 líneas)
+ * - EstudianteQueryService: Operaciones de lectura (590 líneas)
+ * - EstudianteCommandService: Operaciones de escritura (518 líneas)
+ * - EstudianteCopyService: Operaciones de copia (148 líneas)
+ * - EstudianteStatsService: Estadísticas (60 líneas)
+ * - EstudianteBusinessValidator: Validaciones de negocio (130 líneas)
+ *
+ * NOTA: Se eliminó forwardRef(() => GamificacionModule)
+ * Ahora se usa EventEmitter2 para evitar dependencia circular
  */
 @Module({
-  imports: [AuthModule, forwardRef(() => GamificacionModule)],
+  imports: [AuthModule],
   controllers: [EstudiantesController, EquiposController],
-  providers: [EstudiantesService],
-  exports: [EstudiantesService],
+  providers: [
+    // Servicios especializados
+    EstudianteBusinessValidator,
+    EstudianteQueryService,
+    EstudianteCommandService,
+    EstudianteCopyService,
+    EstudianteStatsService,
+    // Facade (API pública)
+    EstudiantesFacadeService,
+    // DEPRECADO: Mantener por compatibilidad temporal
+    // TODO: Migrar controllers a usar EstudiantesFacadeService
+    EstudiantesService,
+  ],
+  exports: [
+    EstudiantesFacadeService, // Nueva API recomendada
+    EstudiantesService, // Por compatibilidad con otros módulos
+  ],
 })
 export class EstudiantesModule {}
