@@ -27,7 +27,7 @@ export class CrearEstudianteDto {
 
   @IsNotEmpty({ message: 'El nivel escolar es requerido' })
   @IsString({ message: 'El nivel escolar debe ser un string' })
-  nivel_escolar!: string;
+  nivelEscolar!: string;
 
   @IsOptional()
   @IsEmail({}, { message: 'El email debe ser válido' })

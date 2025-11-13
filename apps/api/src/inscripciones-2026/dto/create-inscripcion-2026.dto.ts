@@ -73,7 +73,7 @@ export class TutorDataDto {
 export class CourseSelectionDto {
   @IsString()
   @IsNotEmpty()
-  course_id: string;
+  courseId: string;
 
   @IsString()
   @IsNotEmpty()
@@ -164,8 +164,8 @@ export class CreateInscripcion2026Dto {
  */
 export interface CreateInscripcion2026Response {
   success: boolean;
-  inscripcion_id: string;
-  tutor_id: string;
+  inscripcionId: string;
+  tutorId: string;
   estudiantes_creados: {
     id: string;
     nombre: string;
@@ -174,7 +174,7 @@ export interface CreateInscripcion2026Response {
   pago_info: {
     monto_total: number;
     descuento_aplicado: number;
-    mercadopago_preference_id: string;
+    mercadopagoPreferenceId: string;
     mercadopago_init_point: string;
   };
 }

@@ -261,18 +261,14 @@ export default function UsuariosPage() {
 
     setPagoLoading(tutorId);
     try {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        alert('No estás autenticado');
-        return;
-      }
-
+      // ✅ SECURITY FIX: NO usar localStorage ni Authorization header
+      // El token viaja automáticamente en httpOnly cookie con credentials: 'include'
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pagos/registrar-pago-manual/${tutorId}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // ✅ Envía cookies automáticamente
       });
 
       const data = await response.json();

@@ -4,10 +4,9 @@ import {
   UnauthorizedException,
   NotFoundException,
   Logger,
-  Inject,
-  forwardRef,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../core/database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -16,7 +15,7 @@ import * as bcrypt from 'bcrypt';
 import { Role } from './decorators/roles.decorator';
 import { parseUserRoles } from '../common/utils/role.utils';
 import { Tutor, Docente, Admin as AdminModel } from '@prisma/client';
-import { LogrosService } from '../gamificacion/services/logros.service';
+import { EstudiantePrimerLoginEvent, UserLoggedInEvent, UserRegisteredEvent } from '../common/events';
 
 type AuthenticatedUser = Tutor | Docente | AdminModel;
 
@@ -45,8 +44,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-    @Inject(forwardRef(() => LogrosService))
-    private logrosService: LogrosService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -96,6 +94,21 @@ export class AuthService {
         updatedAt: true,
       },
     });
+
+    // 4. Emitir evento de registro exitoso
+    // Este evento será escuchado por GamificacionModule para asignar casa y logros
+    this.eventEmitter.emit(
+      'user.registered',
+      new UserRegisteredEvent(
+        tutor.id,
+        'tutor',
+        tutor.email,
+        tutor.nombre,
+        tutor.apellido,
+      ),
+    );
+
+    this.logger.log(`Tutor registrado exitosamente: ${tutor.id} (${tutor.email})`);
 
     return {
       message: 'Tutor registrado exitosamente',
@@ -238,14 +251,26 @@ export class AuthService {
       throw new UnauthorizedException('El usuario no tiene email configurado');
     }
 
-    // 7. Generar token JWT con todos los roles del usuario
+    // 7. Emitir evento de login exitoso
+    const userType = isTutorUser(user) ? 'tutor' : isDocenteUser(user) ? 'docente' : 'admin';
+    this.eventEmitter.emit(
+      'user.logged-in',
+      new UserLoggedInEvent(
+        user.id,
+        userType,
+        user.email,
+        false, // Los tutores/docentes/admins no tienen "primer login"
+      ),
+    );
+
+    // 8. Generar token JWT con todos los roles del usuario
     const accessToken = this.generateJwtToken(
       user.id,
       user.email,
       finalUserRoles,
     );
 
-    // 7. Retornar token y datos del usuario (estructura diferente según rol)
+    // 9. Retornar token y datos del usuario (estructura diferente según rol)
     if (isTutorUser(user)) {
       return {
         access_token: accessToken,
@@ -628,21 +653,29 @@ export class AuthService {
 
       const esPrimerLogin = logrosDesbloqueados === 0;
 
-      // Otorgar logro de primer ingreso
+      // Emitir evento de login de estudiante
+      this.eventEmitter.emit(
+        'estudiante.logged-in',
+        new UserLoggedInEvent(
+          estudiante.id,
+          'estudiante',
+          estudiante.email || estudiante.username || '',
+          esPrimerLogin,
+        ),
+      );
+
+      // Emitir evento específico de primer login si aplica
       if (esPrimerLogin) {
-        try {
-          await this.logrosService.desbloquearLogro(
+        this.eventEmitter.emit(
+          'estudiante.primer-login',
+          new EstudiantePrimerLoginEvent(
             estudiante.id,
-            'PRIMER_INGRESO',
-          );
-          this.logger.log(
-            `Logro PRIMER_INGRESO otorgado a estudiante ${estudiante.id}`,
-          );
-        } catch (error) {
-          this.logger.error(
-            `Error al otorgar logro PRIMER_INGRESO: ${error}`,
-          );
-        }
+            estudiante.username || estudiante.id,
+          ),
+        );
+        this.logger.log(
+          `Primer login detectado para estudiante ${estudiante.id}`,
+        );
       }
 
       const roles = parseUserRoles(estudiante.roles);

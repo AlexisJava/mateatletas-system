@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -11,6 +10,7 @@ import {
   AllExceptionsFilter,
 } from './common/filters';
 import { LoggerService } from './common/logger/logger.service';
+import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -121,17 +121,17 @@ async function bootstrap() {
       disableErrorMessages: false,
       // Validación de parámetros de rutas y queries
       validateCustomDecorators: true,
-      // 🔍 LOGGING TEMPORAL: Capturar errores de validación detallados
+      // ✅ SECURITY FIX: Lanzar BadRequestException para devolver 400 en lugar de 500
+      // ✅ SECURITY FIX: No loggear valores de campos sensibles (passwords, tokens, etc.)
       exceptionFactory: (errors) => {
-        console.error('❌ [VALIDATION ERROR] Detalles completos:', JSON.stringify(errors, null, 2));
-        console.error('❌ [VALIDATION ERROR] Campos con error:', errors.map(e => ({
-          property: e.property,
-          value: e.value,
-          constraints: e.constraints,
-        })));
-        // Retornar el error por defecto de ValidationPipe
-        const messages = errors.map(error => Object.values(error.constraints || {}).join(', '));
-        return new Error(`Validation failed: ${messages.join('; ')}`);
+        // Construir mensajes de error sin incluir valores sensibles
+        const messages = errors.map((error) => {
+          const constraints = Object.values(error.constraints || {});
+          return `${error.property}: ${constraints.join(', ')}`;
+        });
+
+        // Lanzar BadRequestException con array de errores (status 400)
+        return new BadRequestException(messages);
       },
     }),
   );
@@ -143,6 +143,11 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter(logger));
   // 3. PrismaExceptionFilter - Errores de base de datos
   app.useGlobalFilters(new PrismaExceptionFilter(logger));
+
+  // Global interceptors (aplicar DESPUÉS de ValidationPipe y filters)
+  // TransformResponseInterceptor - Estandariza formato de respuestas
+  // Todas las respuestas seguirán el formato: { data, metadata, message? }
+  app.useGlobalInterceptors(new TransformResponseInterceptor());
 
   // Swagger API Documentation
   const config = new DocumentBuilder()

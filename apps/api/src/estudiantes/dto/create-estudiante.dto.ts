@@ -95,7 +95,7 @@ export class CreateEstudianteDto {
     message: 'El nivel escolar debe ser: Primaria, Secundaria o Universidad',
   })
   @Trim()
-  nivel_escolar!: string;
+  nivelEscolar!: string;
 
   /**
    * URL de la foto del estudiante (opcional)
@@ -115,11 +115,11 @@ export class CreateEstudianteDto {
     },
   )
   @Trim()
-  foto_url?: string;
+  fotoUrl?: string;
 
   /**
    * URL del avatar 3D de Ready Player Me (opcional)
-   * Reemplaza a foto_url como método principal de avatar
+   * Reemplaza a fotoUrl como método principal de avatar
    */
   @ApiPropertyOptional({
     description: 'URL del avatar 3D de Ready Player Me (.glb)',
@@ -129,7 +129,7 @@ export class CreateEstudianteDto {
   @IsOptional()
   @IsString({ message: 'La URL del avatar debe ser un texto' })
   @Trim()
-  avatar_url?: string;
+  avatarUrl?: string;
 
   /**
    * ID del equipo al que pertenece (opcional)
@@ -144,5 +144,5 @@ export class CreateEstudianteDto {
   @IsString({ message: 'El ID del equipo debe ser un texto' })
   @IsUUID('4', { message: 'El ID del equipo debe ser un UUID válido' })
   @Trim()
-  equipo_id?: string;
+  equipoId?: string;
 }

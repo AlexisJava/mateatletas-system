@@ -7,9 +7,15 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
+import { REQUIRE_CSRF_KEY } from '../decorators/require-csrf.decorator';
 
 /**
- * Guard de protección CSRF (Cross-Site Request Forgery)
+ * Guard de protección CSRF (Cross-Site Request Forgery) - OPT-IN
+ *
+ * ✅ SECURITY FIX: Convertido de global a opt-in
+ * ------------------------------------------------
+ * ANTES: Aplicado globalmente, bloqueaba webhooks y API calls legítimas
+ * AHORA: Solo se aplica en endpoints marcados con @RequireCsrf()
  *
  * ¿QUÉ ES CSRF?
  * --------------
@@ -37,11 +43,21 @@ import { Request } from 'express';
  * - GET, HEAD, OPTIONS → No modifican datos, no necesitan protección
  * - POST, PUT, PATCH, DELETE → Modifican datos, NECESITAN protección
  *
- * USO:
- * ----
- * 1. Aplicar globalmente en main.ts (todos los endpoints)
- * 2. O aplicar en controllers específicos con @UseGuards(CsrfProtectionGuard)
- * 3. Marcar excepciones con @Public() decorator
+ * USO (OPT-IN):
+ * -------------
+ * Solo aplicar en endpoints que:
+ * 1. Son llamados desde el navegador/frontend web
+ * 2. Modifican estado sensible
+ * 3. NO son webhooks ni API pura
+ *
+ * @example
+ * ```typescript
+ * @Post('login')
+ * @RequireCsrf() // ✅ Proteger login de CSRF
+ * async login(@Body() dto: LoginDto) {
+ *   // ...
+ * }
+ * ```
  */
 @Injectable()
 export class CsrfProtectionGuard implements CanActivate {
@@ -74,6 +90,19 @@ export class CsrfProtectionGuard implements CanActivate {
   }
 
   canActivate(context: ExecutionContext): boolean {
+    // ✅ SECURITY FIX: Solo aplicar CSRF si el endpoint tiene @RequireCsrf()
+    const requireCsrf = this.reflector.getAllAndOverride<boolean>(
+      REQUIRE_CSRF_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
+    if (!requireCsrf) {
+      // ✅ Endpoint NO requiere CSRF, permitir request
+      // Esto permite webhooks, API calls, Postman, etc.
+      return true;
+    }
+
+    // ✅ Endpoint requiere CSRF, validar Origin/Referer
     const request = context.switchToHttp().getRequest<Request>();
     const method = request.method.toUpperCase();
 
@@ -82,16 +111,14 @@ export class CsrfProtectionGuard implements CanActivate {
       return true;
     }
 
-    // 2. Verificar si la ruta está marcada como @Public() o similar
-    // (puedes agregar un decorator @SkipCsrf() si lo necesitas)
+    // 2. Verificar si la ruta está marcada como @Public()
     const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
       context.getHandler(),
       context.getClass(),
     ]);
 
     if (isPublic) {
-      // Rutas públicas como /auth/login no necesitan CSRF
-      // (aunque deberían usar CAPTCHA u otra protección)
+      // Rutas públicas no necesitan CSRF (aunque deberían usar CAPTCHA)
       return true;
     }
 

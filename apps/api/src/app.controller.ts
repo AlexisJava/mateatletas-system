@@ -1,41 +1,35 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { PrismaService } from './core/database/prisma.service';
 
+/**
+ * AppController - Root Controller
+ *
+ * Proporciona información básica sobre la API y redirecciona
+ * a endpoints útiles (documentación, health checks).
+ *
+ * Para health checks completos, usar HealthModule en /health
+ */
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly appService: AppService) {}
 
+  /**
+   * GET /
+   * Endpoint raíz que proporciona información sobre la API
+   * y enlaces a recursos útiles
+   */
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
-
-  @Get('health')
-  healthCheck(): {
-    status: string;
-    timestamp: string;
-    service: string;
+  getApiInfo(): {
+    message: string;
+    version: string;
+    docs: string;
+    health: string;
   } {
     return {
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      service: 'Mateatletas API',
-    };
-  }
-
-  @Get('db-test')
-  async testDatabase(): Promise<{
-    status: string;
-    test_models_count: number;
-  }> {
-    const count = await this.prisma.testModel.count();
-    return {
-      status: 'Database connected',
-      test_models_count: count,
+      message: 'Mateatletas API',
+      version: '1.0.0',
+      docs: '/api-docs',
+      health: '/health',
     };
   }
 }

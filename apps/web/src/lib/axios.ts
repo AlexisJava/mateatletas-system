@@ -53,25 +53,15 @@ const apiClient: ApiClient = axios.create({
 }) as ApiClient;
 
 /**
- * Request Interceptor
- * Adjunta el token JWT desde localStorage al header Authorization
- * Las cookies httpOnly se envían automáticamente con withCredentials: true
+ * ✅ SECURITY FIX: NO usar interceptor de Authorization header
+ * El token viaja automáticamente en httpOnly cookie con withCredentials: true
+ * El backend (JwtStrategy) lee el token de la cookie, no del header Authorization
+ *
+ * Mantener el fallback a Bearer header en JwtStrategy es solo para:
+ * - Tests automatizados
+ * - Swagger UI
+ * - Herramientas de desarrollo
  */
-apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    // Adjuntar token JWT si existe en localStorage
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return config;
-  },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  },
-);
 
 /**
  * Response Interceptor

@@ -26,6 +26,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { AuthUser } from './interfaces';
+import { RequireCsrf } from '../common/decorators';
 
 /**
  * Controlador de autenticación
@@ -130,6 +131,7 @@ export class AuthController {
   })
   @ApiBody({ type: LoginDto })
   @Post('login')
+  @RequireCsrf() // ✅ Proteger login de CSRF (solo formularios web)
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() loginDto: LoginDto,
@@ -186,12 +188,8 @@ export class AuthController {
     @Body() loginEstudianteDto: LoginEstudianteDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    // 🔍 LOGGING TEMPORAL: Diagnosticar error 400
-    console.log('📥 [LOGIN ESTUDIANTE] Request recibido:', {
-      username: loginEstudianteDto.username,
-      password_length: loginEstudianteDto.password?.length || 0,
-      dto_keys: Object.keys(loginEstudianteDto),
-    });
+    // ✅ SECURITY FIX: Removido logging de credenciales
+    // El logger global con redaction ya maneja el logging seguro
 
     const result = await this.authService.loginEstudiante(loginEstudianteDto);
 
@@ -289,6 +287,7 @@ export class AuthController {
   })
   @ApiBearerAuth('JWT-auth')
   @Post('logout')
+  @RequireCsrf() // ✅ Proteger logout de CSRF
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
@@ -347,6 +346,7 @@ export class AuthController {
   })
   @ApiBearerAuth('JWT-auth')
   @Post('change-password')
+  @RequireCsrf() // ✅ Proteger cambio de contraseña de CSRF (operación sensible)
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async changePassword(

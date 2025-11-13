@@ -82,7 +82,7 @@ export interface AsistenciaBatchResponse {
   registrosCreados: number;
   registrosActualizados: number;
   estudiantes: Array<{
-    estudiante_id: string;
+    estudianteId: string;
     nombre: string;
     apellido: string;
     estado: EstadoAsistencia;

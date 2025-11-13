@@ -5,10 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthService } from '../auth.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Role } from '../decorators/roles.decorator';
-import { LogrosService } from '../../gamificacion/services/logros.service';
 
 /**
  * AuthService - COMPREHENSIVE TESTS
@@ -143,10 +143,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
           },
         },
         {
-          provide: LogrosService,
+          provide: EventEmitter2,
           useValue: {
-            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
-            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
+            emit: jest.fn(),
           },
         },
       ],
@@ -406,7 +405,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       expect(jwtService.sign).toHaveBeenCalledWith(
         expect.objectContaining({
           sub: mockEstudiante.id,
-          email: mockEstudiante.email,
+          email: mockEstudiante.username, // loginEstudiante uses username as email
           roles: [Role.Estudiante],
         }),
       );

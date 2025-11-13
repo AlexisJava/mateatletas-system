@@ -117,6 +117,61 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   /**
+   * Redacta campos sensibles de un objeto antes de loggear
+   * Reemplaza valores de campos sensibles con "[REDACTED]"
+   */
+  private redactSensitive(data: unknown): unknown {
+    if (!data || typeof data !== 'object') {
+      return data;
+    }
+
+    // Lista de campos sensibles a redactar
+    const sensitiveFields = [
+      'password',
+      'passwordActual',
+      'nuevaPassword',
+      'password_hash',
+      'token',
+      'access_token',
+      'refresh_token',
+      'authorization',
+      'secret',
+      'apiKey',
+      'api_key',
+      'creditCard',
+      'credit_card',
+      'cvv',
+      'ssn',
+      'private_key',
+      'privateKey',
+    ];
+
+    // Si es un array, redactar cada elemento
+    if (Array.isArray(data)) {
+      return data.map((item) => this.redactSensitive(item));
+    }
+
+    // Clonar el objeto para no mutar el original
+    const redacted = { ...data } as Record<string, unknown>;
+
+    // Redactar campos sensibles
+    for (const key of Object.keys(redacted)) {
+      const lowerKey = key.toLowerCase();
+
+      // Si el campo es sensible, redactarlo
+      if (sensitiveFields.some((field) => lowerKey.includes(field.toLowerCase()))) {
+        redacted[key] = '[REDACTED]';
+      }
+      // Si el valor es un objeto, redactar recursivamente
+      else if (redacted[key] && typeof redacted[key] === 'object') {
+        redacted[key] = this.redactSensitive(redacted[key]);
+      }
+    }
+
+    return redacted;
+  }
+
+  /**
    * Loggear error crítico con contexto completo
    */
   private logCriticalError(
@@ -146,9 +201,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
       userRole: user?.role,
       ip: request.ip,
       userAgent: headers['user-agent'],
-      body,
-      query,
-      params,
+      // ✅ SECURITY FIX: Redactar datos sensibles antes de loggear
+      body: this.redactSensitive(body),
+      query: this.redactSensitive(query) as string | Record<string, unknown> | undefined,
+      params: this.redactSensitive(params),
       exceptionType: exception instanceof Error ? exception.name : undefined,
     };
 

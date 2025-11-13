@@ -8,6 +8,7 @@ import { LogrosController } from './controllers/logros.controller';
 import { RecursosController } from './controllers/recursos.controller';
 import { TiendaController } from './controllers/tienda.controller';
 import { PrismaService } from '../core/database/prisma.service';
+import { AuthEventsListener } from './listeners/auth-events.listener';
 
 @Module({
   controllers: [LogrosController, RecursosController, TiendaController],
@@ -18,6 +19,8 @@ import { PrismaService } from '../core/database/prisma.service';
     VerificadorLogrosService,
     TiendaService,
     PrismaService,
+    // Event Listeners
+    AuthEventsListener,
   ],
   exports: [
     LogrosService,

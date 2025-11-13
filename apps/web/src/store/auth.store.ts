@@ -75,7 +75,8 @@ export const useAuthStore = create<AuthState>()(
 
       /**
        * Login: Autentica al usuario
-       * El token se guarda automáticamente como httpOnly cookie en el backend
+       * ✅ SECURITY FIX: El token viaja SOLO en httpOnly cookie (no localStorage)
+       * El backend configura la cookie automáticamente en la respuesta
        * @param email - Email del usuario
        * @param password - Contraseña del usuario
        * @throws Error si las credenciales son inválidas
@@ -86,14 +87,12 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authApi.login({ email, password });
 
-          // Guardar token en localStorage para el interceptor de axios
-          if (typeof window !== 'undefined' && response.access_token) {
-            localStorage.setItem('access_token', response.access_token);
-          }
+          // ✅ NO guardar token en localStorage (vulnerabilidad XSS)
+          // El token ya está en httpOnly cookie enviada por el backend
 
           set({
             user: response.user as User,
-            token: response.access_token,
+            token: null, // ✅ No almacenar token en memoria/localStorage
             isAuthenticated: true,
             isLoading: false,
             selectedRole: null,
@@ -106,7 +105,8 @@ export const useAuthStore = create<AuthState>()(
 
       /**
        * Login Estudiante: Autentica a un estudiante con sus credenciales propias
-       * El token se guarda automáticamente como httpOnly cookie en el backend
+       * ✅ SECURITY FIX: El token viaja SOLO en httpOnly cookie (no localStorage)
+       * El backend configura la cookie automáticamente en la respuesta
        * @param username - Username del estudiante
        * @param password - Contraseña del estudiante
        * @throws Error si las credenciales son inválidas
@@ -117,15 +117,13 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authApi.loginEstudiante({ username, password });
 
-          // Guardar token en localStorage para el interceptor de axios
-          if (typeof window !== 'undefined' && response.access_token) {
-            localStorage.setItem('access_token', response.access_token);
-          }
+          // ✅ NO guardar token en localStorage (vulnerabilidad XSS)
+          // El token ya está en httpOnly cookie enviada por el backend
 
-          // Actualizar estado con token
+          // Actualizar estado sin token
           set({
             user: response.user as User,
-            token: response.access_token,
+            token: null, // ✅ No almacenar token en memoria/localStorage
             isAuthenticated: true,
             isLoading: false,
           });
@@ -157,7 +155,7 @@ export const useAuthStore = create<AuthState>()(
 
       /**
        * Logout: Cierra la sesión del usuario
-       * El backend elimina la httpOnly cookie automáticamente
+       * ✅ SECURITY FIX: Solo limpia estado, backend limpia httpOnly cookie
        */
       logout: async () => {
         try {
@@ -168,10 +166,7 @@ export const useAuthStore = create<AuthState>()(
           // Ignorar errores del backend en logout
           console.error('Error en logout del backend:', error);
         } finally {
-          // Limpiar token de localStorage
-          if (typeof window !== 'undefined') {
-            localStorage.removeItem('access_token');
-          }
+          // ✅ NO limpiar localStorage porque no guardamos token ahí
 
           // Limpiar estado completamente
           set({

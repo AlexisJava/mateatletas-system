@@ -101,7 +101,7 @@ export class EstudiantesController {
   /**
    * PATCH /estudiantes/avatar - Actualizar avatar 3D Ready Player Me del estudiante logueado
    * @param req - Request con usuario autenticado
-   * @param body - { avatar_url: string }
+   * @param body - { avatarUrl: string }
    * @returns Estudiante actualizado
    */
   @Patch('avatar')
@@ -109,30 +109,19 @@ export class EstudiantesController {
   @Roles(Role.Estudiante)
   async actualizarAvatar3D(
     @Request() req: RequestWithAuthUser,
-    @Body() body: { avatar_url: string },
+    @Body() body: { avatarUrl: string },
   ) {
     const estudianteId = req.user.id;
 
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🔧 [BACKEND] PATCH /estudiantes/avatar');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('👤 Estudiante ID:', estudianteId);
-    console.log('🔗 Avatar URL recibida:', body.avatar_url);
-    console.log('📏 Longitud URL:', body.avatar_url?.length);
-    console.log('✅ Incluye readyplayer.me?', body.avatar_url?.includes('readyplayer.me'));
-    console.log('✅ Incluye .glb?', body.avatar_url?.includes('.glb'));
 
     // Validar que sea URL válida de Ready Player Me
-    if (!body.avatar_url || !body.avatar_url.includes('readyplayer.me')) {
-      console.error('❌ URL de avatar inválida');
+    if (!body.avatarUrl || !body.avatarUrl.includes('readyplayer.me')) {
       throw new BadRequestException('URL de avatar inválida');
     }
 
     // Actualizar avatar 3D sin validación de ownership (el estudiante actualiza su propio avatar)
-    const resultado = await this.estudiantesService.updateAvatar3D(estudianteId, body.avatar_url);
+    const resultado = await this.estudiantesService.updateAvatar3D(estudianteId, body.avatarUrl);
 
-    console.log('✅ Avatar actualizado en BD:', resultado.avatar_url);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     return resultado;
   }
@@ -152,17 +141,9 @@ export class EstudiantesController {
   ) {
     const estudianteId = req.user.id;
 
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🎬 [BACKEND] PATCH /estudiantes/animacion');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('👤 Estudiante ID:', estudianteId);
-    console.log('🔗 Animación URL recibida:', body.animacion_idle_url);
-    console.log('📏 Longitud URL:', body.animacion_idle_url?.length);
-    console.log('✅ Incluye .glb?', body.animacion_idle_url?.includes('.glb'));
 
     // Validar que sea URL válida
     if (!body.animacion_idle_url || !body.animacion_idle_url.includes('.glb')) {
-      console.error('❌ URL de animación inválida');
       throw new BadRequestException('URL de animación inválida');
     }
 
@@ -172,8 +153,6 @@ export class EstudiantesController {
       body.animacion_idle_url,
     );
 
-    console.log('✅ Animación actualizada en BD:', resultado.animacion_idle_url);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     return resultado;
   }
@@ -181,7 +160,7 @@ export class EstudiantesController {
   /**
    * GET /estudiantes/mi-avatar - Obtener avatar del estudiante logueado
    * @param req - Request con usuario autenticado
-   * @returns { avatar_url: string, tiene_avatar: boolean }
+   * @returns { avatarUrl: string, tiene_avatar: boolean }
    */
   @Get('mi-avatar')
   @UseGuards(RolesGuard)
@@ -189,30 +168,19 @@ export class EstudiantesController {
   async obtenerMiAvatar(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
 
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🔍 [BACKEND] GET /estudiantes/mi-avatar');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('👤 Estudiante ID:', estudianteId);
 
     // Buscar directamente sin ownership check (el estudiante accede a sus propios datos)
     const estudiante = await this.estudiantesService.findOneById(estudianteId);
 
-    console.log('📦 Estudiante encontrado:', estudiante.nombre, estudiante.apellido);
-    console.log('🔗 Avatar URL en BD:', estudiante.avatar_url);
-    console.log('✅ Tiene avatar?', !!estudiante.avatar_url);
 
-    if (estudiante.avatar_url) {
-      console.log('📏 Longitud URL:', estudiante.avatar_url.length);
-      console.log('🔍 Formato:', estudiante.avatar_url.substring(0, 50) + '...');
+    if (estudiante.avatarUrl) {
     }
 
     const resultado = {
-      avatar_url: estudiante.avatar_url,
-      tiene_avatar: !!estudiante.avatar_url,
+      avatarUrl: estudiante.avatarUrl,
+      tiene_avatar: !!estudiante.avatarUrl,
     };
 
-    console.log('📤 Respuesta:', resultado);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     return resultado;
   }
@@ -227,21 +195,11 @@ export class EstudiantesController {
   @Roles(Role.Estudiante)
   async obtenerMiProximaClase(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('📅 [BACKEND] GET /estudiantes/mi-proxima-clase');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('👤 Estudiante ID:', estudianteId);
-    console.log('🔑 User roles:', req.user.roles);
-    console.log('🔑 User role:', req.user.role);
 
     const resultado = await this.estudiantesService.obtenerProximaClase(estudianteId);
 
-    console.log('📤 Próxima clase encontrada:', resultado ? 'Sí' : 'No');
     if (resultado) {
-      console.log('📅 Tipo de clase:', resultado.tipo);
-      console.log('📅 Fecha:', resultado.fecha_hora_inicio);
     }
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     return resultado;
   }
@@ -328,7 +286,7 @@ export class EstudiantesController {
    * - Previene CVE-INTERNAL-001: Unauthorized avatar modification
    *
    * @param id - ID del estudiante
-   * @param body - { avatar_url: string }
+   * @param body - { avatarUrl: string }
    * @param user - Usuario autenticado (inyectado por JwtAuthGuard, usado por EstudianteOwnershipGuard)
    * @returns Estudiante actualizado con nuevo avatar
    * @throws {ForbiddenException} Si el tutor no es dueño del estudiante

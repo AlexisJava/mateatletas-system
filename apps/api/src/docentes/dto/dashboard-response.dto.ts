@@ -29,7 +29,7 @@ export interface ClaseDelDia {
   hora_fin: string;
   estudiantes: EstudianteInscrito[];
   cupo_maximo: number;
-  grupo_id: string;
+  grupoId: string;
 }
 
 /**

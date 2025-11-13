@@ -25,6 +25,7 @@ import { TiendaModule } from './tienda/tienda.module';
 import { ColoniaModule } from './colonia/colonia.module';
 import { Inscripciones2026Module } from './inscripciones-2026/inscripciones-2026.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { UserThrottlerGuard, CsrfProtectionGuard } from './common/guards';
@@ -45,6 +46,18 @@ import { TokenBlacklistGuard } from './auth/guards/token-blacklist.guard';
         ),
       },
     ]),
+    // Event Emitter: Sistema de eventos para desacoplar módulos
+    // - Permite comunicación async entre módulos sin dependencias circulares
+    // - Usado para resolver Auth ↔ Gamificación circular dependency
+    EventEmitterModule.forRoot({
+      wildcard: false,
+      delimiter: '.',
+      newListener: false,
+      removeListener: false,
+      maxListeners: 10,
+      verboseMemoryLeak: false,
+      ignoreErrors: false,
+    }),
     AppConfigModule,
     DatabaseModule,
     LoggerModule, // Logging estructurado global
@@ -72,13 +85,11 @@ import { TokenBlacklistGuard } from './auth/guards/token-blacklist.guard';
   controllers: [AppController],
   providers: [
     AppService,
-    // Aplicar CSRF protection globalmente
-    // Valida que requests POST/PUT/PATCH/DELETE vengan de origins permitidos
-    // Previene ataques CSRF (Cross-Site Request Forgery)
-    {
-      provide: APP_GUARD,
-      useClass: CsrfProtectionGuard,
-    },
+    // ✅ SECURITY FIX: CSRF removido de guards globales
+    // CSRF es ahora opt-in con @RequireCsrf() decorator
+    // Esto permite webhooks, API calls, y Postman sin bloqueos
+    // Ver: docs/CSRF-PROTECTION-STRATEGY.md
+
     // Aplicar Token Blacklist guard globalmente
     // Verifica que tokens no estén invalidados (logout, cambio contraseña, etc.)
     // Fix #6: Token Blacklist (P3 - Security Improvement)

@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -14,25 +14,29 @@ import {
 import { DatabaseModule } from '../core/database/database.module';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
-import { GamificacionModule } from '../gamificacion/gamificacion.module';
 
 /**
  * Módulo de autenticación
  *
  * ETAPA 2: Implementación de Strategy Pattern para roles
+ * ETAPA 3: Event-Driven Architecture para eliminar dependencias circulares
  *
  * Este módulo configura:
  * - PassportModule para estrategias de autenticación
  * - JwtModule para generación y validación de tokens
  * - JwtStrategy para validar tokens JWT
- * - AuthService para lógica de negocio
+ * - AuthService para lógica de negocio (emite eventos)
  * - AuthController para endpoints públicos
  * - Role Handlers (Strategy Pattern) para cada tipo de usuario
+ *
+ * Dependencias circulares resueltas:
+ * - AuthModule ya NO importa GamificacionModule
+ * - En su lugar, AuthService emite eventos que GamificacionModule escucha
+ * - Ver: src/gamificacion/listeners/auth-events.listener.ts
  */
 @Module({
   imports: [
     DatabaseModule, // Para PrismaService en handlers
-    forwardRef(() => GamificacionModule), // Para LogrosService
     // Configuración de Passport
     PassportModule.register({
       defaultStrategy: 'jwt',

@@ -82,9 +82,9 @@ export class EstudiantesService {
     }
 
     // Validar equipo si se proporciona
-    if (createDto.equipo_id) {
+    if (createDto.equipoId) {
       const equipo = await this.prisma.equipo.findUnique({
-        where: { id: createDto.equipo_id },
+        where: { id: createDto.equipoId },
       });
 
       if (!equipo) {
@@ -131,12 +131,12 @@ export class EstudiantesService {
       tutor_id: tutorId,
     };
 
-    if (query?.equipo_id) {
-      where.equipo_id = query.equipo_id;
+    if (query?.equipoId) {
+      where.equipoId = query.equipoId;
     }
 
-    if (query?.nivel_escolar) {
-      where.nivel_escolar = query.nivel_escolar;
+    if (query?.nivelEscolar) {
+      where.nivelEscolar = query.nivelEscolar;
     }
 
     // Ejecutar consultas en paralelo
@@ -206,11 +206,11 @@ export class EstudiantesService {
    * Actualiza el avatar 3D (Ready Player Me) del estudiante sin validación de ownership
    * Útil para que el estudiante actualice su propio avatar 3D
    * @param id - ID del estudiante
-   * @param avatar_url - URL del avatar de Ready Player Me
+   * @param avatarUrl - URL del avatar de Ready Player Me
    * @returns Estudiante actualizado
    * @throws NotFoundException si no existe
    */
-  async updateAvatar3D(id: string, avatar_url: string) {
+  async updateAvatar3D(id: string, avatarUrl: string) {
     // Verificar que el estudiante existe
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id },
@@ -221,12 +221,12 @@ export class EstudiantesService {
     }
 
     // Verificar si es la primera vez que crea avatar
-    const esPrimerAvatar = !estudiante.avatar_url;
+    const esPrimerAvatar = !estudiante.avatarUrl;
 
     // Actualizar solo el avatar 3D
     const estudianteActualizado = await this.prisma.estudiante.update({
       where: { id },
-      data: { avatar_url },
+      data: { avatarUrl },
       include: {
         equipo: true,
         tutor: {
@@ -321,10 +321,10 @@ export class EstudiantesService {
     // Verificar ownership
     await this.findOne(id, tutorId);
 
-    // Si se cambia equipo_id, validar que el nuevo equipo existe
-    if (updateDto.equipo_id) {
+    // Si se cambia equipoId, validar que el nuevo equipo existe
+    if (updateDto.equipoId) {
       const equipo = await this.prisma.equipo.findUnique({
-        where: { id: updateDto.equipo_id },
+        where: { id: updateDto.equipoId },
       });
 
       if (!equipo) {
@@ -340,14 +340,14 @@ export class EstudiantesService {
     }
 
     // Validar que el equipo existe si se está asignando
-    if (updateDto.equipo_id) {
+    if (updateDto.equipoId) {
       const equipoExists = await this.prisma.equipo.findUnique({
-        where: { id: updateDto.equipo_id },
+        where: { id: updateDto.equipoId },
       });
 
       if (!equipoExists) {
         throw new NotFoundException(
-          `Equipo con ID ${updateDto.equipo_id} no encontrado`,
+          `Equipo con ID ${updateDto.equipoId} no encontrado`,
         );
       }
     }
@@ -408,7 +408,7 @@ export class EstudiantesService {
     // Distribución por nivel escolar
     const porNivel = estudiantes.reduce(
       (acc: Record<string, number>, est) => {
-        acc[est.nivel_escolar] = (acc[est.nivel_escolar] || 0) + 1;
+        acc[est.nivelEscolar] = (acc[est.nivelEscolar] || 0) + 1;
         return acc;
       },
       {} as Record<string, number>,
@@ -678,7 +678,7 @@ export class EstudiantesService {
               nombre: estDto.nombre,
               apellido: estDto.apellido,
               edad: estDto.edad,
-              nivel_escolar: estDto.nivel_escolar,
+              nivelEscolar: estDto.nivelEscolar,
               email: estDto.email,
               username: usernameEstudiante,
               password_hash: passwordHash,
@@ -768,7 +768,7 @@ export class EstudiantesService {
           nuevoSectorId.slice(0, 4), // Sufijo con ID del sector
         ),
         edad: estudiante.edad,
-        nivel_escolar: estudiante.nivel_escolar,
+        nivelEscolar: estudiante.nivelEscolar,
         email: estudiante.email,
         tutor_id: estudiante.tutor_id,
         sector_id: nuevoSectorId,
@@ -776,7 +776,7 @@ export class EstudiantesService {
         nivel_actual: estudiante.nivel_actual,
         puntos_totales: estudiante.puntos_totales,
         avatar_gradient: estudiante.avatar_gradient,
-        equipo_id: estudiante.equipo_id,
+        equipoId: estudiante.equipoId,
       },
       include: {
         sector: true,

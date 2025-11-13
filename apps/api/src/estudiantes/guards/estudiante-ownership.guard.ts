@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   ForbiddenException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { AuthUser } from '../../auth/interfaces';
@@ -15,6 +16,8 @@ import { AuthUser } from '../../auth/interfaces';
  */
 @Injectable()
 export class EstudianteOwnershipGuard implements CanActivate {
+  private readonly logger = new Logger(EstudianteOwnershipGuard.name);
+
   constructor(private prisma: PrismaService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -22,25 +25,25 @@ export class EstudianteOwnershipGuard implements CanActivate {
     const user = request.user as AuthUser | undefined;
     const estudianteId = request.params?.id as string | undefined;
 
-    console.log('[Guard] userId:', user?.id, 'role:', user?.role, 'estudianteId:', estudianteId);
+    this.logger.debug(`Validating ownership - userId: ${user?.id}, role: ${user?.role}, estudianteId: ${estudianteId}`);
 
     if (!user) {
-      console.log('[Guard] ❌ No user');
+      this.logger.warn('Access denied - No authenticated user');
       throw new ForbiddenException('Usuario no autenticado');
     }
 
     if (!estudianteId) {
-      console.log('[Guard] ✅ No estudianteId - allowing');
+      this.logger.debug('No estudianteId in params - allowing access');
       return true;
     }
 
     // CASO 1: El estudiante accede a su propio perfil
     if (user.role === 'estudiante' && user.id === estudianteId) {
-      console.log('[Guard] ✅ CASO 1: Self-access OK');
+      this.logger.debug(`Self-access granted for estudiante ${estudianteId}`);
       return true;
     }
 
-    console.log('[Guard] Checking other cases...');
+    this.logger.debug('Checking tutor/admin/docente access...');
 
     // CASO 2: El tutor accede al perfil de su estudiante
     if (user.role === 'tutor') {

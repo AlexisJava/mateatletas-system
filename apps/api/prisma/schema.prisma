@@ -7,13 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model TestModel {
-  id         String   @id @default(uuid())
-  name       String
-  created_at DateTime @default(now())
-
-  @@map("test_models")
-}
 
 /// Modelo principal para tutores/docentes de la plataforma
 /// Representa a los usuarios educadores que crean y gestionan contenido educativo
@@ -89,19 +82,19 @@ model Estudiante {
   /// Apellido del estudiante
   apellido                  String
   /// Nivel escolar del estudiante: Primaria, Secundaria, Universidad
-  nivel_escolar             String
+  nivelEscolar              String                            @map("nivel_escolar")
   /// URL del avatar 3D de Ready Player Me
   /// Ejemplo: https://models.readyplayer.me/abc123.glb
-  avatar_url                String?                           @db.Text
+  avatarUrl                 String?                           @map("avatar_url") @db.Text
   /// URL de la animación idle seleccionada por el estudiante
   /// Ejemplo: https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb
   animacion_idle_url        String?                           @db.Text
   /// DEPRECADO: URL de la foto de perfil del estudiante (mantener por compatibilidad)
-  foto_url                  String?
+  fotoUrl                   String?                           @map("foto_url")
   /// ID del tutor que gestiona este estudiante
   tutor_id                  String
   /// ID del equipo al que pertenece el estudiante (opcional, para gamificación)
-  equipo_id                 String?
+  equipoId                  String?                           @map("equipo_id")
   /// Puntos totales acumulados por el estudiante (gamificación)
   puntos_totales            Int                               @default(0)
   /// Nivel actual del estudiante en el sistema de gamificación
@@ -136,7 +129,7 @@ model Estudiante {
   sector_id                 String?
   alertas                   Alerta[]
   asistencias               Asistencia[]
-  equipo                    Equipo?                           @relation(fields: [equipo_id], references: [id])
+  equipo                    Equipo?                           @relation(fields: [equipoId], references: [id])
   /// DEPRECADO: Relación uno-a-uno con sector (usar sectores[] en su lugar)
   sector                    Sector?                           @relation("EstudianteSectorLegacy", fields: [sector_id], references: [id])
   /// NUEVO: Relación muchos-a-muchos con sectores a través de EstudianteSector

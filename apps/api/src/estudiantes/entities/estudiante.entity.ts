@@ -7,10 +7,10 @@ export interface Estudiante {
   nombre: string;
   apellido: string;
   edad: number;
-  nivel_escolar: string;
-  foto_url?: string;
+  nivelEscolar: string;
+  fotoUrl?: string;
   tutor_id: string;
-  equipo_id?: string;
+  equipoId?: string;
   puntos_totales: number;
   nivel_actual: number;
   createdAt: Date;
