@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException, BadRequestException } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ClasesManagementService } from '../services/clases-management.service';
+import { ClaseCommandService } from '../services/clase-command.service';
+import { ClaseBusinessValidator } from '../validators/clase-business.validator';
 import { PrismaService } from '../../core/database/prisma.service';
 import { NotificacionesService } from '../../notificaciones/notificaciones.service';
 
-describe('ClasesManagementService - Cancelar Clase Security', () => {
-  let service: ClasesManagementService;
+describe('ClaseCommandService - Cancelar Clase Security', () => {
+  let service: ClaseCommandService;
   let prisma: PrismaService;
 
   const mockClaseProgramada = {
@@ -27,7 +27,8 @@ describe('ClasesManagementService - Cancelar Clase Security', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ClasesManagementService,
+        ClaseCommandService,
+        ClaseBusinessValidator,
         {
           provide: PrismaService,
           useValue: {
@@ -44,18 +45,10 @@ describe('ClasesManagementService - Cancelar Clase Security', () => {
             create: jest.fn(),
           },
         },
-        {
-          provide: CACHE_MANAGER,
-          useValue: {
-            get: jest.fn(),
-            set: jest.fn(),
-            del: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
-    service = module.get<ClasesManagementService>(ClasesManagementService);
+    service = module.get<ClaseCommandService>(ClaseCommandService);
     prisma = module.get<PrismaService>(PrismaService);
   });
 

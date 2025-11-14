@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ClasesManagementService } from './services/clases-management.service';
+import { ClasesManagementFacade } from './services/clases-management-facade.service';
 import { ClasesReservasService } from './services/clases-reservas.service';
 import { ClasesAsistenciaService } from './services/clases-asistencia.service';
 import { CrearClaseDto } from './dto/crear-clase.dto';
@@ -13,53 +13,56 @@ import { RegistrarAsistenciaDto } from './dto/registrar-asistencia.dto';
  * a servicios especializados, eliminando duplicación de código.
  *
  * Servicios especializados:
- * - ClasesManagementService: CRUD de clases (programar, cancelar, listar, obtener)
+ * - ClasesManagementFacade: CRUD de clases (programar, cancelar, listar, obtener)
+ *   └─ ClaseQueryService: Queries (8 métodos)
+ *   └─ ClaseCommandService: Commands (4 métodos)
+ *   └─ ClaseStatsService: Estadísticas (3 métodos)
  * - ClasesReservasService: Reservas (reservar, cancelar reservas)
  * - ClasesAsistenciaService: Asistencia (registrar asistencia)
  *
- * Patrón: FACADE
+ * Patrón: FACADE + CQRS
  * Beneficio: Separación de responsabilidades, código más mantenible
  * Reducción: 683 líneas → ~150 líneas (78% reducción)
  */
 @Injectable()
 export class ClasesService {
   constructor(
-    private managementService: ClasesManagementService,
+    private managementFacade: ClasesManagementFacade,
     private reservasService: ClasesReservasService,
     private asistenciaService: ClasesAsistenciaService,
   ) {}
 
   // ============================================================================
-  // GESTIÓN DE CLASES (delegación a ClasesManagementService)
+  // GESTIÓN DE CLASES (delegación a ClasesManagementFacade)
   // ============================================================================
 
   /**
    * Programar una nueva clase (solo Admin)
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseCommandService
    */
   async programarClase(dto: CrearClaseDto) {
-    return this.managementService.programarClase(dto);
+    return this.managementFacade.programarClase(dto);
   }
 
   /**
    * Cancelar una clase (Admin o Docente de la clase)
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseCommandService
    */
   async cancelarClase(id: string, userId: string, userRole: string) {
-    return this.managementService.cancelarClase(id, userId, userRole);
+    return this.managementFacade.cancelarClase(id, userId, userRole);
   }
 
   /**
    * Eliminar una clase permanentemente (Admin)
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseCommandService
    */
   async eliminarClase(id: string) {
-    return this.managementService.eliminarClase(id);
+    return this.managementFacade.eliminarClase(id);
   }
 
   /**
    * Listar todas las clases (Admin) con paginación
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseQueryService
    */
   async listarTodasLasClases(
     filtros?: {
@@ -72,15 +75,15 @@ export class ClasesService {
     page?: number,
     limit?: number,
   ) {
-    return this.managementService.listarTodasLasClases(filtros, page, limit);
+    return this.managementFacade.listarTodasLasClases(filtros, page, limit);
   }
 
   /**
    * Listar clases disponibles para tutores
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseQueryService
    */
   async listarClasesParaTutor(tutorId: string) {
-    return this.managementService.listarClasesParaTutor(tutorId);
+    return this.managementFacade.listarClasesParaTutor(tutorId);
   }
 
   /**
@@ -93,18 +96,18 @@ export class ClasesService {
 
   /**
    * Obtener calendario de clases para un tutor (filtrado por mes/año)
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseQueryService
    */
   async obtenerCalendarioTutor(tutorId: string, mes?: number, anio?: number) {
-    return this.managementService.obtenerCalendarioTutor(tutorId, mes, anio);
+    return this.managementFacade.obtenerCalendarioTutor(tutorId, mes, anio);
   }
 
   /**
    * Listar clases de un docente
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseQueryService
    */
   async listarClasesDeDocente(docenteId: string, incluirPasadas = false) {
-    return this.managementService.listarClasesDeDocente(
+    return this.managementFacade.listarClasesDeDocente(
       docenteId,
       incluirPasadas,
     );
@@ -112,34 +115,34 @@ export class ClasesService {
 
   /**
    * Obtener detalles de una clase específica
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseQueryService
    */
   async obtenerClase(id: string) {
-    return this.managementService.obtenerClase(id);
+    return this.managementFacade.obtenerClase(id);
   }
 
   /**
    * Obtener rutas curriculares (para formularios)
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseQueryService
    */
   async listarRutasCurriculares() {
-    return this.managementService.listarRutasCurriculares();
+    return this.managementFacade.listarRutasCurriculares();
   }
 
   /**
    * Obtener detalles de una ruta curricular específica
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseQueryService
    */
   async obtenerRutaCurricularPorId(id: string) {
-    return this.managementService.obtenerRutaCurricularPorId(id);
+    return this.managementFacade.obtenerRutaCurricularPorId(id);
   }
 
   /**
    * Asignar estudiantes a una clase (solo Admin)
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseCommandService
    */
   async asignarEstudiantesAClase(claseId: string, estudianteIds: string[]) {
-    return this.managementService.asignarEstudiantesAClase(
+    return this.managementFacade.asignarEstudiantesAClase(
       claseId,
       estudianteIds,
     );
@@ -147,10 +150,10 @@ export class ClasesService {
 
   /**
    * Obtener estudiantes inscritos en una clase
-   * DELEGACIÓN: ClasesManagementService
+   * DELEGACIÓN: ClasesManagementFacade → ClaseQueryService
    */
   async obtenerEstudiantesDeClase(claseId: string) {
-    return this.managementService.obtenerEstudiantesDeClase(claseId);
+    return this.managementFacade.obtenerEstudiantesDeClase(claseId);
   }
 
   // ============================================================================
