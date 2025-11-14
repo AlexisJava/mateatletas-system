@@ -28,7 +28,7 @@ export class CrearEstudianteRapidoDto {
 
   @IsEnum(['Primaria', 'Secundaria', 'Universidad'])
   @IsNotEmpty({ message: 'El nivel escolar es obligatorio' })
-  nivel_escolar!: 'Primaria' | 'Secundaria' | 'Universidad';
+  nivelEscolar!: 'Primaria' | 'Secundaria' | 'Universidad';
 
   @IsString()
   @IsOptional()

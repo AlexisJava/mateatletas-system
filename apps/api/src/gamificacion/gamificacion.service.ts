@@ -35,10 +35,10 @@ export class GamificacionService {
         id: true,
         nombre: true,
         apellido: true,
-        foto_url: true,
+        fotoUrl: true,
         avatar_gradient: true,
         puntos_totales: true,
-        equipo_id: true,
+        equipoId: true,
         equipo: {
           select: {
             id: true,
@@ -151,8 +151,8 @@ export class GamificacionService {
     });
 
     // Ranking del equipo (solo si tiene equipo) - delegado al RankingService
-    const equipoRanking = estudiante.equipo_id
-      ? await this.rankingService.getEquipoRanking(estudiante.equipo_id)
+    const equipoRanking = estudiante.equipoId
+      ? await this.rankingService.getEquipoRanking(estudiante.equipoId)
       : [];
 
     return {
@@ -160,7 +160,7 @@ export class GamificacionService {
         id: estudiante.id,
         nombre: estudiante.nombre,
         apellido: estudiante.apellido,
-        foto_url: estudiante.foto_url,
+        fotoUrl: estudiante.fotoUrl,
         avatar_gradient: estudiante.avatar_gradient,
         equipo: estudiante.equipo ? {
           id: estudiante.equipo.id,

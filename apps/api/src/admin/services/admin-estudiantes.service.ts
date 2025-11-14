@@ -171,7 +171,7 @@ export class AdminEstudiantesService {
       nombre: est.nombre,
       apellido: est.apellido,
       edad: est.edad,
-      nivelEscolar: est.nivel_escolar, // Convertir a camelCase para el frontend
+      nivelEscolar: est.nivelEscolar, // Convertir a camelCase para el frontend
       nivel_actual: est.nivel_actual,
       puntos_totales: est.puntos_totales,
       tutor: est.tutor,
@@ -218,7 +218,7 @@ export class AdminEstudiantesService {
     nombre: string;
     apellido: string;
     edad: number;
-    nivel_escolar: 'Primaria' | 'Secundaria' | 'Universidad';
+    nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
     tutor_id?: string;
     tutor_email?: string;
     tutor_nombre?: string;
@@ -285,7 +285,7 @@ export class AdminEstudiantesService {
         apellido: data.apellido,
         username: await this.generarUsernameUnico(data.nombre, data.apellido),
         edad: data.edad,
-        nivel_escolar: data.nivel_escolar,
+        nivelEscolar: data.nivelEscolar,
         tutor_id: tutor.id,
         nivel_actual: 1,
         puntos_totales: 0,
@@ -352,7 +352,7 @@ export class AdminEstudiantesService {
         ...(data.nombre && { nombre: data.nombre }),
         ...(data.apellido && { apellido: data.apellido }),
         ...(data.edad && { edad: data.edad }),
-        ...(data.nivel_escolar && { nivel_escolar: data.nivel_escolar }),
+        ...(data.nivel_escolar && { nivelEscolar: data.nivel_escolar }),
         ...(data.tutor_id && { tutor_id: data.tutor_id }),
       },
       include: {
@@ -599,17 +599,17 @@ export class AdminEstudiantesService {
           apellido: dto.apellidoEstudiante,
           username: estudianteUsername,
           edad: dto.edadEstudiante,
-          nivel_escolar: dto.nivelEscolar,
+          nivelEscolar: dto.nivelEscolar,
           tutor_id: tutor.id,
           password_hash: estudiantePinHash,
           password_temporal: estudiantePin,
           debe_cambiar_password: true,
           sector_id: dto.sectorId,
-          equipo_id: dto.equipoId || null,
+          equipoId: dto.equipoId || null,
           puntos_totales: dto.puntosIniciales ?? 0,
           nivel_actual: dto.nivelInicial ?? 1,
           avatar_gradient: 0,
-          foto_url: null,
+          fotoUrl: null,
         },
       });
 

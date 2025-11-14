@@ -260,7 +260,7 @@ export class Inscripciones2026Service {
           nombre: estudianteData.nombre,
           apellido: '', // Campo requerido, se puede actualizar después
           edad: estudianteData.edad,
-          nivel_escolar: 'Primaria', // Default, se puede actualizar después
+          nivelEscolar: 'Primaria', // Default, se puede actualizar después
           tutor_id: tutor.id,
         },
       });
@@ -399,7 +399,7 @@ export class Inscripciones2026Service {
     // 10. Retornar respuesta
     return {
       success: true,
-      inscripcion_id: inscripcion.id,
+      inscripcionId: inscripcion.id,
       tutor_id: tutor.id,
       estudiantes_creados: estudiantesCreados,
       pago_info: {

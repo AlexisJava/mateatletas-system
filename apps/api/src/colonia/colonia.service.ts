@@ -143,7 +143,7 @@ export class ColoniaService {
             nombre: estudianteDto.nombre,
             apellido: '', // No pedimos apellido
             edad: estudianteDto.edad,
-            nivel_escolar: estudianteDto.edad <= 7 ? 'Primaria' : estudianteDto.edad <= 12 ? 'Primaria' : 'Secundaria',
+            nivelEscolar: estudianteDto.edad <= 7 ? 'Primaria' : estudianteDto.edad <= 12 ? 'Primaria' : 'Secundaria',
             tutor_id: tutor.id,
           },
         });
@@ -168,7 +168,7 @@ export class ColoniaService {
           const cursoId = crypto.randomUUID();
           await tx.$executeRaw`
             INSERT INTO colonia_estudiante_cursos (
-              id, colonia_estudiante_id, course_id, course_name, course_area, instructor, day_of_week, time_slot, precio_base, precio_con_descuento, "createdAt", "updatedAt"
+              id, colonia_estudiante_id, courseId, course_name, course_area, instructor, day_of_week, time_slot, precio_base, precio_con_descuento, "createdAt", "updatedAt"
             ) VALUES (
               ${cursoId}, ${coloniaEstudianteId}, ${curso.id}, ${curso.name}, ${curso.area}, ${curso.instructor}, ${curso.dayOfWeek}, ${curso.timeSlot}, ${this.PRECIO_BASE_CURSO}, ${precioConDescuento}, NOW(), NOW()
             )
@@ -233,7 +233,7 @@ export class ColoniaService {
     // 6. Actualizar pago con preference ID
     await this.prisma.$executeRaw`
       UPDATE colonia_pagos
-      SET mercadopago_preference_id = ${preference.id}
+      SET mercadopagoPreferenceId = ${preference.id}
       WHERE id = ${result.pagoEneroId}
     `;
 

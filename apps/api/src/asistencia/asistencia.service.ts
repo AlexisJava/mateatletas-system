@@ -146,7 +146,7 @@ export class AsistenciaService {
               id: true,
               nombre: true,
               apellido: true,
-              nivel_escolar: true,
+              nivelEscolar: true,
             },
           },
         },

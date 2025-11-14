@@ -20,8 +20,8 @@ export interface DetailedAuthUserBase extends Omit<AuthUser, 'role'> {
 export interface AuthEstudiante extends DetailedAuthUserBase {
   role: Role.Estudiante;
   edad: number;
-  nivel_escolar: 'Primaria' | 'Secundaria' | 'Universidad';
-  foto_url: string | null;
+  nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
+  fotoUrl: string | null;
   puntos_totales: number;
   nivel_actual: number;
   tutor: {

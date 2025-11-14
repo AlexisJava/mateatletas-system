@@ -9,7 +9,7 @@ export interface ClaseInminente {
   id: string;
   titulo: string;
   grupoNombre: string;
-  grupoId: string;
+  grupo_id: string;
   fecha_hora: string;
   duracion: number;
   estudiantesInscritos: number;
@@ -29,7 +29,7 @@ export interface ClaseDelDia {
   hora_fin: string;
   estudiantes: EstudianteInscrito[];
   cupo_maximo: number;
-  grupoId: string;
+  grupo_id: string;
 }
 
 /**

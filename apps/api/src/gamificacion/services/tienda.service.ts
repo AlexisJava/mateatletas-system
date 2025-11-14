@@ -513,7 +513,7 @@ export class TiendaService {
             nombre: true,
             apellido: true,
             username: true,
-            avatar_url: true,
+            avatarUrl: true,
           },
         },
         curso: true,

@@ -87,8 +87,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           nombre: true,
           apellido: true,
           edad: true,
-          nivel_escolar: true,
-          foto_url: true,
+          nivelEscolar: true,
+          fotoUrl: true,
           puntos_totales: true,
           nivel_actual: true,
           tutor: {

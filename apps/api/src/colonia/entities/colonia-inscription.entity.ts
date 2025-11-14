@@ -46,7 +46,7 @@ export interface ColoniaPayment {
   anio: number; // 2026
   monto: number;
   estado: 'pending' | 'paid' | 'failed' | 'cancelled';
-  mercadopago_preference_id?: string;
+  mercadopagoPreferenceId?: string;
   mercadopago_payment_id?: string;
   fecha_vencimiento: Date; // Día 5 del mes
   fecha_pago?: Date;

@@ -22,7 +22,7 @@ export class AdminAlertasService {
             id: true,
             nombre: true,
             apellido: true,
-            nivel_escolar: true,
+            nivelEscolar: true,
           },
         },
         clase: {
@@ -97,7 +97,7 @@ export class AdminAlertasService {
           select: {
             nombre: true,
             apellido: true,
-            nivel_escolar: true,
+            nivelEscolar: true,
           },
         },
         clase: {
@@ -170,10 +170,10 @@ export class AdminAlertasService {
    */
   private generarSugerenciaEstatica(alerta: {
     descripcion: string;
-    estudiante: { nivel_escolar: string };
+    estudiante: { nivelEscolar: string };
     clase: { rutaCurricular: { nombre: string } | null };
   }): string {
-    const nivel = alerta.estudiante.nivel_escolar;
+    const nivel = alerta.estudiante.nivelEscolar;
     const ruta = alerta.clase.rutaCurricular?.nombre || 'General';
 
     // Sugerencias basadas en patrones comunes

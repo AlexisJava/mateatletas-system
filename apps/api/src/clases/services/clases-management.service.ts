@@ -570,7 +570,7 @@ export class ClasesManagementService {
                 id: true,
                 nombre: true,
                 apellido: true,
-                nivel_escolar: true,
+                nivelEscolar: true,
               },
             },
             tutor: {
@@ -798,7 +798,7 @@ export class ClasesManagementService {
                 id: true,
                 nombre: true,
                 apellido: true,
-                nivel_escolar: true,
+                nivelEscolar: true,
                 avatar_gradient: true,
                 tutor: {
                   select: {
@@ -839,7 +839,7 @@ export class ClasesManagementService {
         estudianteId: inscripcion.estudiante.id,
         nombre: inscripcion.estudiante.nombre,
         apellido: inscripcion.estudiante.apellido,
-        nivelEscolar: inscripcion.estudiante.nivel_escolar,
+        nivelEscolar: inscripcion.estudiante.nivelEscolar,
         avatarUrl: inscripcion.estudiante.avatar_gradient,
         fechaInscripcion: inscripcion.fecha_inscripcion,
         tutor: inscripcion.estudiante.tutor,

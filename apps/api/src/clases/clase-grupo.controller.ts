@@ -66,7 +66,7 @@ export class ClaseGrupoController {
             id: 'est-id',
             nombre: 'Juan',
             apellido: 'Pérez',
-            avatar_url: null,
+            avatarUrl: null,
             email: 'juan@example.com',
             equipo: { nombre: 'Rojo', color: '#FF0000' },
             stats: {

@@ -23,8 +23,8 @@ export class RankingService {
     }
 
     // Ranking del equipo (solo si tiene equipo)
-    const rankingEquipo = estudiante.equipo_id
-      ? await this.getEquipoRanking(estudiante.equipo_id)
+    const rankingEquipo = estudiante.equipoId
+      ? await this.getEquipoRanking(estudiante.equipoId)
       : [];
 
     // Ranking global (top 20)
@@ -58,12 +58,12 @@ export class RankingService {
    */
   async getEquipoRanking(equipoId: string) {
     const estudiantes = await this.prisma.estudiante.findMany({
-      where: { equipo_id: equipoId },
+      where: { equipoId: equipoId },
       select: {
         id: true,
         nombre: true,
         apellido: true,
-        foto_url: true,
+        fotoUrl: true,
         puntos_totales: true,
       },
       orderBy: {
@@ -75,7 +75,7 @@ export class RankingService {
       id: e.id,
       nombre: e.nombre,
       apellido: e.apellido,
-      avatar: e.foto_url,
+      avatar: e.fotoUrl,
       puntos: e.puntos_totales,
     }));
   }
@@ -117,7 +117,7 @@ export class RankingService {
       id: e.id,
       nombre: e.nombre,
       apellido: e.apellido,
-      avatar: e.foto_url,
+      avatar: e.fotoUrl,
       equipo: e.equipo,
       puntos: e.puntos_totales,
       posicion: skip + index + 1, // Posición absoluta en el ranking

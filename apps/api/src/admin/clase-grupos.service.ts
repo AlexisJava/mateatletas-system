@@ -297,7 +297,7 @@ export class ClaseGruposService {
                 nombre: true,
                 apellido: true,
                 edad: true,
-                nivel_escolar: true,
+                nivelEscolar: true,
               },
             },
             tutor: {

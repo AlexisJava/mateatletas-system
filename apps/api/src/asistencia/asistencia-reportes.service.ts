@@ -326,7 +326,7 @@ export class AsistenciaReportesService {
             id: true,
             nombre: true,
             apellido: true,
-            foto_url: true,
+            fotoUrl: true,
           },
         },
         clase: {
@@ -368,7 +368,7 @@ export class AsistenciaReportesService {
             id: true,
             nombre: true,
             apellido: true,
-            foto_url: true,
+            fotoUrl: true,
           },
         },
         clase: {
@@ -416,7 +416,7 @@ export class AsistenciaReportesService {
     // 3. Top 10 most frequent students
     const porEstudiante: Record<
       string,
-      { nombre: string; foto_url: string | null; asistencias: number }
+      { nombre: string; fotoUrl: string | null; asistencias: number }
     > = {};
 
     todasAsistencias.forEach((asistencia) => {
@@ -425,7 +425,7 @@ export class AsistenciaReportesService {
         if (!porEstudiante[key]) {
           porEstudiante[key] = {
             nombre: `${asistencia.estudiante.nombre} ${asistencia.estudiante.apellido}`,
-            foto_url: asistencia.estudiante.foto_url || null,
+            fotoUrl: asistencia.estudiante.fotoUrl || null,
             asistencias: 0,
           };
         }

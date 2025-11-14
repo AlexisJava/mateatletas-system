@@ -24,7 +24,7 @@ import { REQUIRE_CSRF_KEY } from '../decorators/require-csrf.decorator';
  *
  *   fetch('https://mateatletas.com/api/estudiantes/123/avatar', {
  *     method: 'PATCH',
- *     body: JSON.stringify({ avatar_url: 'imagen-mala.jpg' }),
+ *     body: JSON.stringify({ avatarUrl: 'imagen-mala.jpg' }),
  *     credentials: 'include' // ⚠️ Envía cookies automáticamente
  *   })
  *

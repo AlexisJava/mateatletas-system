@@ -403,7 +403,7 @@ export class DocentesService {
           id: claseGrupo.id,
           titulo: claseGrupo.nombre,
           grupoNombre: claseGrupo.codigo,
-          grupoId: claseGrupo.id, // FIXED: Use ClaseGrupo ID, not Grupo Pedagógico ID
+          grupo_id: claseGrupo.id, // FIXED: Use ClaseGrupo ID, not Grupo Pedagógico ID
           fecha_hora: fechaHoraClase.toISOString(),
           duracion,
           estudiantesInscritos: claseGrupo.inscripciones?.length || 0,
@@ -708,7 +708,7 @@ export class DocentesService {
         id: true,
         nombre: true,
         apellido: true,
-        foto_url: true,
+        fotoUrl: true,
       },
     });
 
@@ -772,7 +772,7 @@ export class DocentesService {
         return {
           estudiante_id,
           total,
-          estudiante: estudiante || { id: estudiante_id, nombre: '', apellido: '', foto_url: null },
+          estudiante: estudiante || { id: estudiante_id, nombre: '', apellido: '', fotoUrl: null },
         };
       })
       .sort((a, b) => b.total - a.total)
@@ -801,7 +801,7 @@ export class DocentesService {
           estudiante_id: est.id,
           nombre: est.nombre,
           apellido: est.apellido,
-          foto_url: est.foto_url,
+          fotoUrl: est.fotoUrl,
           grupos: est.grupos,
           total_asistencias: total,
           presentes,
@@ -911,7 +911,7 @@ export class DocentesService {
         id: top.estudiante.id,
         nombre: top.estudiante.nombre,
         apellido: top.estudiante.apellido,
-        foto_url: top.estudiante.foto_url,
+        fotoUrl: top.estudiante.fotoUrl,
         puntos_totales: top.total,
         porcentaje_asistencia: asistenciaData?.porcentaje_asistencia || 0,
       };
