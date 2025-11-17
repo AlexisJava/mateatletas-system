@@ -1,20 +1,26 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Role, ROLES_KEY } from '../decorators/roles.decorator';
+import { ROLES_KEY } from '../decorators/roles.decorator';
 import { AuthUser } from '../interfaces';
+import { Role, cumpleJerarquia, esRoleValido } from '../../domain/constants';
 
 /**
  * Guard para verificar que el usuario tenga los roles requeridos
  *
  * Este guard trabaja en conjunto con el decorator @Roles()
- * para controlar el acceso basado en roles
+ * para controlar el acceso basado en roles con jerarquía.
+ *
+ * Jerarquía de roles (menor a mayor privilegio):
+ * ESTUDIANTE (1) < TUTOR (2) < DOCENTE (3) < ADMIN (4) < SUPER_ADMIN (5)
+ *
+ * Si se requiere Role.DOCENTE, también tienen acceso ADMIN y SUPER_ADMIN.
  *
  * Uso (combinado con JwtAuthGuard):
  * @UseGuards(JwtAuthGuard, RolesGuard)
  * @Roles(Role.TUTOR)
- * @Get('admin')
- * getAdminResource() {
- *   return 'Solo para tutores';
+ * @Get('dashboard')
+ * getDashboard() {
+ *   return 'Dashboard del tutor';
  * }
  */
 @Injectable()
@@ -40,17 +46,28 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
-    // Verificar si el usuario tiene alguno de los roles requeridos
-    // El campo 'roles' viene del payload JWT como array de roles
+    // Obtener roles del usuario (puede ser array o string)
     const userRoles = user.roles || (user.role ? [user.role] : []);
 
     if (!userRoles || userRoles.length === 0) {
       return false;
     }
 
-    // El usuario tiene acceso si tiene AL MENOS UNO de los roles requeridos
+    // Normalizar roles del usuario a strings uppercase
+    const normalizedUserRoles = userRoles
+      .map(r => typeof r === 'string' ? r.toUpperCase() : r)
+      .filter(esRoleValido);
+
+    if (normalizedUserRoles.length === 0) {
+      return false;
+    }
+
+    // Verificar si el usuario cumple con la jerarquía de AL MENOS UNO de los roles requeridos
+    // Un usuario con rol superior (ej: ADMIN) puede acceder a endpoints que requieren roles inferiores (ej: DOCENTE)
     return requiredRoles.some((requiredRole: Role) =>
-      userRoles.some((userRole: Role) => userRole === requiredRole),
+      normalizedUserRoles.some((userRole: Role) =>
+        cumpleJerarquia(userRole, requiredRole)
+      ),
     );
   }
 }

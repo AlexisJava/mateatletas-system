@@ -141,8 +141,8 @@ export class AdminRolesService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getDefaultRole(user: Record<string, any>): Role {
     // Determinar rol por defecto según la estructura del objeto
-    if ('estudiantes' in user) return Role.Tutor;
-    if ('clases' in user) return Role.Docente;
-    return Role.Admin;
+    if ('estudiantes' in user) return Role.TUTOR;
+    if ('clases' in user) return Role.DOCENTE;
+    return Role.ADMIN;
   }
 }

@@ -47,7 +47,7 @@ export class CursosController {
    */
   @Post('productos/:productoId/modulos')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   createModulo(
     @Param('productoId') productoId: string,
     @Body() createModuloDto: CreateModuloDto,
@@ -81,7 +81,7 @@ export class CursosController {
    */
   @Patch('modulos/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   updateModulo(
     @Param('id') id: string,
     @Body() updateModuloDto: UpdateModuloDto,
@@ -96,7 +96,7 @@ export class CursosController {
    */
   @Delete('modulos/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   removeModulo(@Param('id') id: string) {
     return this.cursosService.removeModulo(id);
   }
@@ -109,7 +109,7 @@ export class CursosController {
    */
   @Post('productos/:productoId/modulos/reordenar')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   reordenarModulos(
     @Param('productoId') productoId: string,
     @Body() dto: ReordenarModulosDto,
@@ -128,7 +128,7 @@ export class CursosController {
    */
   @Post('modulos/:moduloId/lecciones')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   createLeccion(
     @Param('moduloId') moduloId: string,
     @Body() createLeccionDto: CreateLeccionDto,
@@ -164,7 +164,7 @@ export class CursosController {
    */
   @Patch('lecciones/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   updateLeccion(
     @Param('id') id: string,
     @Body() updateLeccionDto: UpdateLeccionDto,
@@ -179,7 +179,7 @@ export class CursosController {
    */
   @Delete('lecciones/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   removeLeccion(@Param('id') id: string) {
     return this.cursosService.removeLeccion(id);
   }
@@ -192,7 +192,7 @@ export class CursosController {
    */
   @Post('modulos/:moduloId/lecciones/reordenar')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   reordenarLecciones(
     @Param('moduloId') moduloId: string,
     @Body() dto: ReordenarLeccionesDto,

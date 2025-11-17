@@ -58,7 +58,7 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
  */
 @Controller('eventos')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.Docente)
+@Roles(Role.DOCENTE)
 export class EventosController {
   constructor(private readonly eventosService: EventosService) {}
 

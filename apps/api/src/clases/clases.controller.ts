@@ -32,7 +32,7 @@ export class ClasesController {
    * POST /api/clases
    */
   @Post()
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async programarClase(@Body() dto: CrearClaseDto) {
     return this.clasesService.programarClase(dto);
   }
@@ -42,7 +42,7 @@ export class ClasesController {
    * GET /api/clases/admin/todas
    */
   @Get('admin/todas')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async listarTodasLasClases(
     @Query('fechaDesde') fechaDesde?: string,
     @Query('fechaHasta') fechaHasta?: string,
@@ -64,7 +64,7 @@ export class ClasesController {
    * PATCH /api/clases/:id/cancelar
    */
   @Patch(':id/cancelar')
-  @Roles(Role.Admin, Role.Docente)
+  @Roles(Role.ADMIN, Role.DOCENTE)
   async cancelarClase(
     @Param('id') id: string,
     @Req() req: RequestWithAuthUser,
@@ -81,7 +81,7 @@ export class ClasesController {
    * DELETE /api/clases/:id
    */
   @Delete(':id')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async eliminarClase(@Param('id') id: string) {
     return this.clasesService.eliminarClase(id);
   }
@@ -91,7 +91,7 @@ export class ClasesController {
    * POST /api/clases/:id/asignar-estudiantes
    */
   @Post(':id/asignar-estudiantes')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async asignarEstudiantes(
     @Param('id') claseId: string,
     @Body() dto: AsignarEstudiantesDto,
@@ -109,7 +109,7 @@ export class ClasesController {
    * GET /api/clases
    */
   @Get()
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async listarClasesParaTutor(@Req() req: RequestWithAuthUser) {
     const tutorId = req.user.id;
     return this.clasesService.listarClasesParaTutor(tutorId);
@@ -120,7 +120,7 @@ export class ClasesController {
    * GET /api/clases/mis-reservas
    */
   @Get('mis-reservas')
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async listarReservasDelTutor(@Req() req: RequestWithAuthUser) {
     const tutorId = req.user.id;
     return this.clasesService.listarReservasDeTutor(tutorId);
@@ -136,7 +136,7 @@ export class ClasesController {
    * @returns Clases del tutor organizadas por fecha
    */
   @Get('calendario')
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async obtenerCalendarioTutor(
     @Req() req: RequestWithAuthUser,
     @Query('mes') mes?: string,
@@ -153,7 +153,7 @@ export class ClasesController {
    * POST /api/clases/:id/reservar
    */
   @Post(':id/reservar')
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async reservarClase(
     @Param('id') claseId: string,
     @Body() dto: ReservarClaseDto,
@@ -168,7 +168,7 @@ export class ClasesController {
    * DELETE /api/clases/reservas/:id
    */
   @Delete('reservas/:id')
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async cancelarReserva(
     @Param('id') inscripcionId: string,
     @Req() req: RequestWithAuthUser,
@@ -184,7 +184,7 @@ export class ClasesController {
    * GET /api/clases/docente/mis-clases
    */
   @Get('docente/mis-clases')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async listarClasesDeDocente(
     @Req() req: RequestWithAuthUser,
     @Query('incluirPasadas') incluirPasadas?: string,
@@ -201,7 +201,7 @@ export class ClasesController {
    * POST /api/clases/:id/asistencia
    */
   @Post(':id/asistencia')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async registrarAsistencia(
     @Param('id') claseId: string,
     @Body() dto: RegistrarAsistenciaDto,
@@ -219,7 +219,7 @@ export class ClasesController {
    * IMPORTANTE: Debe estar ANTES de GET /api/clases/:id
    */
   @Get(':id/estudiantes')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async obtenerEstudiantes(@Param('id') claseId: string) {
     return this.clasesService.obtenerEstudiantesDeClase(claseId);
   }
@@ -229,7 +229,7 @@ export class ClasesController {
    * GET /api/clases/:id
    */
   @Get(':id')
-  @Roles(Role.Admin, Role.Docente, Role.Tutor)
+  @Roles(Role.ADMIN, Role.DOCENTE, Role.TUTOR)
   async obtenerClase(@Param('id') id: string) {
     return this.clasesService.obtenerClase(id);
   }
@@ -239,7 +239,7 @@ export class ClasesController {
    * GET /api/clases/rutas-curriculares
    */
   @Get('metadata/rutas-curriculares')
-  @Roles(Role.Admin, Role.Docente, Role.Tutor)
+  @Roles(Role.ADMIN, Role.DOCENTE, Role.TUTOR)
   async listarRutasCurriculares() {
     return this.clasesService.listarRutasCurriculares();
   }
@@ -249,7 +249,7 @@ export class ClasesController {
    * GET /api/clases/metadata/rutas-curriculares/:id
    */
   @Get('metadata/rutas-curriculares/:id')
-  @Roles(Role.Admin, Role.Docente, Role.Tutor)
+  @Roles(Role.ADMIN, Role.DOCENTE, Role.TUTOR)
   async obtenerRutaCurricular(@Param('id') id: string) {
     return this.clasesService.obtenerRutaCurricularPorId(id);
   }

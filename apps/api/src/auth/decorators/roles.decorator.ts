@@ -1,15 +1,10 @@
 import { SetMetadata } from '@nestjs/common';
+import { Role } from '../../domain/constants';
 
 /**
- * Enum de roles disponibles en la plataforma
- * Roles: Tutor (tutores/padres), Docente (profesores), Admin (administradores), Estudiante (alumnos)
+ * Re-export Role para compatibilidad con imports existentes
  */
-export enum Role {
-  Tutor = 'tutor',
-  Docente = 'docente',
-  Admin = 'admin',
-  Estudiante = 'estudiante',
-}
+export { Role };
 
 /**
  * Clave para almacenar los roles requeridos en los metadatos

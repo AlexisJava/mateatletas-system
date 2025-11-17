@@ -50,7 +50,7 @@ export class TiendaController {
    * Obtiene todas las categorías activas
    */
   @Get('categorias')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerCategorias(): Promise<CategoriaItem[]> {
     return await this.tiendaService.obtenerCategorias();
   }
@@ -60,7 +60,7 @@ export class TiendaController {
    * Crea una nueva categoría (ADMIN)
    */
   @Post('categorias')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async crearCategoria(
     @Body() data: CreateCategoriaItem,
   ): Promise<CategoriaItem> {
@@ -72,7 +72,7 @@ export class TiendaController {
    * Actualiza una categoría (ADMIN)
    */
   @Put('categorias/:id')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async actualizarCategoria(
     @Param('id') id: string,
     @Body() data: UpdateCategoriaItem,
@@ -89,7 +89,7 @@ export class TiendaController {
    * Obtiene items de la tienda con filtros opcionales
    */
   @Get('items')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerItemsTienda(
     @Query('categoria_id') categoria_id?: string,
     @Query('tipo_item') tipo_item?: string,
@@ -115,7 +115,7 @@ export class TiendaController {
    * Obtiene un item específico por ID
    */
   @Get('items/:id')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerItemPorId(@Param('id') id: string): Promise<ItemTiendaConCategoria> {
     return await this.tiendaService.obtenerItemPorId(id);
   }
@@ -125,7 +125,7 @@ export class TiendaController {
    * Crea un nuevo item en la tienda (ADMIN)
    */
   @Post('items')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async crearItem(@Body() data: CreateItemTienda): Promise<ItemTienda> {
     return await this.tiendaService.crearItem(data);
   }
@@ -135,7 +135,7 @@ export class TiendaController {
    * Actualiza un item de la tienda (ADMIN)
    */
   @Put('items/:id')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async actualizarItem(
     @Param('id') id: string,
     @Body() data: UpdateItemTienda,
@@ -152,7 +152,7 @@ export class TiendaController {
    * Obtiene el inventario completo del estudiante
    */
   @Get('inventario/:estudianteId')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerInventario(
     @Param('estudianteId') estudianteId: string,
   ): Promise<InventarioEstudianteResponse> {
@@ -165,7 +165,7 @@ export class TiendaController {
    */
   @Put('inventario/:estudianteId/equipar/:itemId')
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async equiparItem(
     @Param('estudianteId') estudianteId: string,
     @Param('itemId') itemId: string,
@@ -183,7 +183,7 @@ export class TiendaController {
    */
   @Post('comprar')
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async realizarCompra(@Body() data: RealizarCompra): Promise<CompraResponse> {
     return await this.tiendaService.realizarCompra(data);
   }
@@ -193,7 +193,7 @@ export class TiendaController {
    * Obtiene el historial de compras del estudiante
    */
   @Get('compras/:estudianteId')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerHistorialCompras(
     @Param('estudianteId') estudianteId: string,
   ): Promise<CompraResponse[]> {

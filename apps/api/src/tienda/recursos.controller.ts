@@ -36,7 +36,7 @@ export class RecursosController {
    * Obtiene los recursos actuales de un estudiante
    */
   @Get(':estudianteId')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerRecursos(
     @Param('estudianteId') estudianteId: string,
   ): Promise<RecursosEstudiante> {
@@ -49,7 +49,7 @@ export class RecursosController {
    */
   @Post('actualizar-por-actividad')
   @HttpCode(HttpStatus.OK)
-  @Roles(Role.Estudiante, Role.Docente)
+  @Roles(Role.ESTUDIANTE, Role.DOCENTE)
   async actualizarPorActividad(
     @Body() data: ActualizarRecursosPorActividad,
   ): Promise<RecursosActualizadosResponse> {
@@ -61,7 +61,7 @@ export class RecursosController {
    * Obtiene el historial de transacciones de recursos
    */
   @Get(':estudianteId/historial')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerHistorial(
     @Param('estudianteId') estudianteId: string,
     @Query('tipo') tipo?: TipoRecurso,

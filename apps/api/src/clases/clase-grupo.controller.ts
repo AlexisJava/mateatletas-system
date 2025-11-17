@@ -31,7 +31,7 @@ export class ClaseGrupoController {
    * Solo accesible para el docente titular del grupo o admins
    */
   @Get(':id/detalle-completo')
-  @Roles(Role.Docente, Role.Admin)
+  @Roles(Role.DOCENTE, Role.ADMIN)
   @ApiOperation({
     summary: 'Obtener detalle completo de un grupo de clase',
     description:

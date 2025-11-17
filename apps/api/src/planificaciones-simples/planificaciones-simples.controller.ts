@@ -45,7 +45,7 @@ export class PlanificacionesSimplesController {
    * Listar todas las planificaciones (Admin)
    */
   @Get()
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async listarPlanificaciones(
     @Query('estado') estado?: string,
     @Query('grupo_codigo') grupo_codigo?: string,
@@ -70,7 +70,7 @@ export class PlanificacionesSimplesController {
    * Obtener todas las planificaciones del estudiante autenticado
    */
   @Get('mis-planificaciones')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async misPlanificaciones(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.service.obtenerPlanificacionesEstudiante(estudianteId);
@@ -81,7 +81,7 @@ export class PlanificacionesSimplesController {
    * Obtener progreso del estudiante en una planificación
    */
   @Get(':codigo/progreso')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async obtenerProgreso(@Param('codigo') codigo: string, @Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.service.obtenerProgreso(estudianteId, codigo);
@@ -92,7 +92,7 @@ export class PlanificacionesSimplesController {
    * Guardar estado del juego
    */
   @Put(':codigo/progreso')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async guardarEstado(
     @Param('codigo') codigo: string,
     @Request() req: RequestWithAuthUser,
@@ -111,7 +111,7 @@ export class PlanificacionesSimplesController {
    * Avanzar a la siguiente semana
    */
   @Post(':codigo/progreso/avanzar')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async avanzarSemana(@Param('codigo') codigo: string, @Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.service.avanzarSemana(estudianteId, codigo);
@@ -122,7 +122,7 @@ export class PlanificacionesSimplesController {
    * Completar semana con puntos
    */
   @Post(':codigo/progreso/completar-semana')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async completarSemana(
     @Param('codigo') codigo: string,
     @Request() req: RequestWithAuthUser,
@@ -142,7 +142,7 @@ export class PlanificacionesSimplesController {
    * Registrar tiempo jugado
    */
   @Post(':codigo/progreso/tiempo')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async registrarTiempo(
     @Param('codigo') codigo: string,
     @Request() req: RequestWithAuthUser,
@@ -161,7 +161,7 @@ export class PlanificacionesSimplesController {
    * Listar asignaciones del docente autenticado
    */
   @Get('mis-asignaciones')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async misAsignaciones(@Request() req: RequestWithAuthUser) {
     const docenteId = req.user.id;
     return this.service.listarAsignacionesDocente(docenteId);
@@ -172,7 +172,7 @@ export class PlanificacionesSimplesController {
    * Activar una semana específica
    */
   @Post('asignacion/:asignacionId/semana/:semana/activar')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async activarSemana(
     @Param('asignacionId') asignacionId: string,
     @Param('semana') semana: string,
@@ -191,7 +191,7 @@ export class PlanificacionesSimplesController {
    * Desactivar una semana específica
    */
   @Post('asignacion/:asignacionId/semana/:semana/desactivar')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async desactivarSemana(
     @Param('asignacionId') asignacionId: string,
     @Param('semana') semana: string,
@@ -210,7 +210,7 @@ export class PlanificacionesSimplesController {
    * Ver progreso de estudiantes en una asignación
    */
   @Get('asignacion/:asignacionId/progreso')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async verProgresoEstudiantes(
     @Param('asignacionId') asignacionId: string,
     @Request() req: RequestWithAuthUser,
@@ -228,7 +228,7 @@ export class PlanificacionesSimplesController {
    * Obtener detalle completo de planificación (Admin)
    */
   @Get(':codigo/detalle')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async obtenerDetalle(@Param('codigo') codigo: string) {
     return this.service.obtenerDetallePlanificacion(codigo);
   }
@@ -238,7 +238,7 @@ export class PlanificacionesSimplesController {
    * Asignar planificación a docente (Admin)
    */
   @Post(':codigo/asignar')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async asignarPlanificacion(
     @Param('codigo') codigo: string,
     @Body() body: { docente_id: string; clase_grupo_id: string },

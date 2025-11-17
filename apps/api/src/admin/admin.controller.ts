@@ -48,7 +48,7 @@ import {
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.Admin)
+@Roles(Role.ADMIN)
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
@@ -266,7 +266,7 @@ export class AdminController {
    * Rol: Admin, Docente (también necesitan ver rutas)
    */
   @Get('rutas-curriculares')
-  @Roles(Role.Admin, Role.Docente)
+  @Roles(Role.ADMIN, Role.DOCENTE)
   async listarRutas() {
     return this.rutasService.listarTodas();
   }
@@ -277,7 +277,7 @@ export class AdminController {
    * Rol: Admin, Docente
    */
   @Get('rutas-curriculares/:id')
-  @Roles(Role.Admin, Role.Docente)
+  @Roles(Role.ADMIN, Role.DOCENTE)
   async obtenerRuta(@Param('id') id: string) {
     return this.rutasService.obtenerPorId(id);
   }

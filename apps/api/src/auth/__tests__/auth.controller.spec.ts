@@ -105,7 +105,7 @@ describe('AuthController', () => {
         dni: null,
         telefono: null,
         role: 'Tutor',
-        roles: [Role.Tutor] as Role[],
+        roles: [Role.TUTOR] as Role[],
         debe_cambiar_password: false,
       };
       authService.login.mockResolvedValue({
@@ -156,7 +156,7 @@ describe('AuthController', () => {
           email: 'tutor@test.com',
         },
         role: 'Estudiante',
-        roles: [Role.Estudiante] as Role[],
+        roles: [Role.ESTUDIANTE] as Role[],
         debe_cambiar_password: false,
       };
       authService.loginEstudiante.mockResolvedValue({

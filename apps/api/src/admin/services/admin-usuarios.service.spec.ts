@@ -103,9 +103,9 @@ describe('AdminUsuariosService', () => {
 
       // Assert
       expect(result).toHaveLength(3);
-      expect(result[0]).toHaveProperty('role', Role.Tutor);
-      expect(result[1]).toHaveProperty('role', Role.Docente);
-      expect(result[2]).toHaveProperty('role', Role.Admin);
+      expect(result[0]).toHaveProperty('role', Role.TUTOR);
+      expect(result[1]).toHaveProperty('role', Role.DOCENTE);
+      expect(result[2]).toHaveProperty('role', Role.ADMIN);
     });
 
     it('should include _count for tutores', async () => {

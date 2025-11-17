@@ -67,6 +67,10 @@ export enum TipoExternalReference {
   CLASE_INSCRIPCION = 'CLASE_INSCRIPCION',
   CURSO_INSCRIPCION = 'CURSO_INSCRIPCION',
   ESTUDIANTE_RECARGA = 'ESTUDIANTE_RECARGA',
+  MEMBRESIA = 'MEMBRESIA', // Legacy: membresia-{id}-tutor-{id}-producto-{id}
+  INSCRIPCION_MENSUAL = 'INSCRIPCION_MENSUAL', // Legacy: inscripcion-{id}-estudiante-{id}-producto-{id}
+  INSCRIPCION_2026 = 'INSCRIPCION_2026', // inscripcion2026-{id}-tutor-{id}-tipo-{tipo}
+  PAGO_COLONIA = 'PAGO_COLONIA', // Colonia enero
 }
 
 /**
@@ -129,10 +133,42 @@ export const EXTERNAL_REFERENCE_FORMATS = {
   estudianteRecarga(estudianteId: string, monto: number): string {
     return `${TipoExternalReference.ESTUDIANTE_RECARGA}:${estudianteId}:${monto}`;
   },
+
+  /**
+   * Crear external_reference para membresía (Legacy)
+   * Format: "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
+   */
+  membresia(membresiaId: string, tutorId: string, productoId: string): string {
+    return `membresia-${membresiaId}-tutor-${tutorId}-producto-${productoId}`;
+  },
+
+  /**
+   * Crear external_reference para inscripción mensual (Legacy)
+   * Format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
+   */
+  inscripcionMensual(inscripcionId: string, estudianteId: string, productoId: string): string {
+    return `inscripcion-${inscripcionId}-estudiante-${estudianteId}-producto-${productoId}`;
+  },
+
+  /**
+   * Crear external_reference para inscripción 2026
+   * Format: "inscripcion2026-{inscripcionId}-tutor-{tutorId}-tipo-{tipoInscripcion}"
+   */
+  inscripcion2026(inscripcionId: string, tutorId: string, tipoInscripcion: string): string {
+    return `inscripcion2026-${inscripcionId}-tutor-${tutorId}-tipo-${tipoInscripcion}`;
+  },
 };
 
 /**
- * Parser de external_reference
+ * Resultado de parsear external_reference legacy
+ */
+export interface LegacyExternalReferenceResult {
+  tipo: TipoExternalReference;
+  ids: Record<string, string>;
+}
+
+/**
+ * Parser de external_reference (formatos nuevos con ':')
  * @param externalReference - String en formato "TIPO:param1:param2:..."
  * @returns Objeto parseado o null si formato inválido
  */
@@ -169,6 +205,82 @@ export function parseExternalReference(externalReference: string): ExternalRefer
     default:
       return null;
   }
+}
+
+/**
+ * Parser de external_reference legacy (formatos con '-')
+ * @param externalReference - String en formato legacy
+ * @returns Objeto parseado o null si formato inválido
+ *
+ * Formatos soportados:
+ * - "membresia-{id}-tutor-{id}-producto-{id}"
+ * - "inscripcion-{id}-estudiante-{id}-producto-{id}"
+ * - "inscripcion2026-{id}-tutor-{id}-tipo-{tipo}"
+ * - ID directo (colonia)
+ */
+export function parseLegacyExternalReference(
+  externalReference: string,
+): LegacyExternalReferenceResult | null {
+  // Caso 1: Membresía
+  if (externalReference.startsWith('membresia-')) {
+    const match = externalReference.match(
+      /^membresia-(.+?)-tutor-(.+?)-producto-(.+)$/,
+    );
+    if (!match) return null;
+    return {
+      tipo: TipoExternalReference.MEMBRESIA,
+      ids: {
+        membresiaId: match[1],
+        tutorId: match[2],
+        productoId: match[3],
+      },
+    };
+  }
+
+  // Caso 2: Inscripción mensual
+  if (externalReference.startsWith('inscripcion-')) {
+    const match = externalReference.match(
+      /^inscripcion-(.+?)-estudiante-(.+?)-producto-(.+)$/,
+    );
+    if (!match) return null;
+    return {
+      tipo: TipoExternalReference.INSCRIPCION_MENSUAL,
+      ids: {
+        inscripcionId: match[1],
+        estudianteId: match[2],
+        productoId: match[3],
+      },
+    };
+  }
+
+  // Caso 3: Inscripción 2026
+  if (externalReference.startsWith('inscripcion2026-')) {
+    const match = externalReference.match(
+      /^inscripcion2026-(.+?)-tutor-(.+?)-tipo-(.+)$/,
+    );
+    if (!match) return null;
+    return {
+      tipo: TipoExternalReference.INSCRIPCION_2026,
+      ids: {
+        inscripcionId: match[1],
+        tutorId: match[2],
+        tipoInscripcion: match[3],
+      },
+    };
+  }
+
+  // Caso 4: ID directo (colonia, etc.)
+  // Asumimos que es un ID si es solo dígitos
+  if (/^\d+$/.test(externalReference)) {
+    return {
+      tipo: TipoExternalReference.PAGO_COLONIA,
+      ids: {
+        pagoId: externalReference,
+      },
+    };
+  }
+
+  return null;
 }
 
 /**

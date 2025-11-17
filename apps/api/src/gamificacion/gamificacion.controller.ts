@@ -50,7 +50,7 @@ export class GamificacionController {
    * Dashboard completo del estudiante con stats
    */
   @Get('dashboard/:estudianteId')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async getDashboard(
     @Param('estudianteId') estudianteId: string,
     @Request() req: RequestWithAuthUser,
@@ -59,7 +59,7 @@ export class GamificacionController {
     // o que sea un tutor/docente/admin
     const user = req.user;
     if (
-      user.role === Role.Estudiante &&
+      user.role === Role.ESTUDIANTE &&
       user.id !== estudianteId
     ) {
       throw new ForbiddenException('No tienes permiso para acceder a este estudiante');
@@ -73,7 +73,7 @@ export class GamificacionController {
    * Todos los logros (desbloqueados y bloqueados)
    */
   @Get('logros/:estudianteId')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async getLogros(@Param('estudianteId') estudianteId: string) {
     return this.gamificacionService.getLogrosEstudiante(estudianteId);
   }
@@ -83,7 +83,7 @@ export class GamificacionController {
    * Puntos totales y por ruta curricular
    */
   @Get('puntos/:estudianteId')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async getPuntos(@Param('estudianteId') estudianteId: string) {
     return this.gamificacionService.getPuntosEstudiante(estudianteId);
   }
@@ -93,7 +93,7 @@ export class GamificacionController {
    * Ranking del estudiante (equipo y global)
    */
   @Get('ranking/:estudianteId')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async getRanking(@Param('estudianteId') estudianteId: string) {
     return this.gamificacionService.getRankingEstudiante(estudianteId);
   }
@@ -112,7 +112,7 @@ export class GamificacionController {
    * Obtener lista de acciones puntuables disponibles (para docentes)
    */
   @Get('acciones')
-  @Roles(Role.Docente, Role.Admin)
+  @Roles(Role.DOCENTE, Role.ADMIN)
   async getAcciones() {
     return this.gamificacionService.getAccionesPuntuables();
   }
@@ -131,7 +131,7 @@ export class GamificacionController {
    * Otorgar puntos a un estudiante (solo docentes y admins)
    */
   @Post('puntos')
-  @Roles(Role.Docente, Role.Admin)
+  @Roles(Role.DOCENTE, Role.ADMIN)
   async otorgarPuntos(
     @Body() dto: OtorgarPuntosDto,
     @Request() req: RequestWithAuthUser,

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { CircuitBreaker } from '../common/circuit-breaker/circuit-breaker';
+import { EXTERNAL_REFERENCE_FORMATS } from '../domain/constants';
 
 /**
  * Servicio dedicado a la integración con MercadoPago SDK
@@ -196,7 +197,11 @@ export class MercadoPagoService {
         name: tutor.nombre,
         surname: tutor.apellido,
       },
-      external_reference: `membresia-${membresiaId}-tutor-${tutorId}-producto-${producto.id}`,
+      external_reference: EXTERNAL_REFERENCE_FORMATS.membresia(
+        membresiaId,
+        tutorId,
+        producto.id,
+      ),
       notification_url: `${backendUrl}/api/pagos/webhook`,
       back_urls: {
         success: `${frontendUrl}/suscripcion/exito?membresiaId=${membresiaId}`,
@@ -236,7 +241,11 @@ export class MercadoPagoService {
         name: tutor.nombre,
         surname: tutor.apellido,
       },
-      external_reference: `inscripcion-${inscripcionId}-estudiante-${estudianteId}-producto-${producto.id}`,
+      external_reference: EXTERNAL_REFERENCE_FORMATS.inscripcionMensual(
+        inscripcionId,
+        estudianteId,
+        producto.id,
+      ),
       notification_url: `${backendUrl}/api/pagos/webhook`,
       back_urls: {
         success: `${frontendUrl}/cursos/exito?inscripcionId=${inscripcionId}`,
@@ -300,7 +309,11 @@ export class MercadoPagoService {
         name: tutor.nombre,
         surname: tutor.apellido,
       },
-      external_reference: `inscripcion2026-${inscripcionId}-tutor-${tutorId}-tipo-${tipoInscripcion}`,
+      external_reference: EXTERNAL_REFERENCE_FORMATS.inscripcion2026(
+        inscripcionId,
+        tutorId,
+        tipoInscripcion,
+      ),
       notification_url: `${backendUrl}/api/inscripciones-2026/webhook`,
       back_urls: {
         success: `${frontendUrl}/inscripcion-2026/exito?inscripcionId=${inscripcionId}`,

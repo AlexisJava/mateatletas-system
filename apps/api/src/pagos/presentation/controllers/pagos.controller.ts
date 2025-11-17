@@ -15,6 +15,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PagosService } from '../services/pagos.service';
 import { PagosTutorService } from '../services/pagos-tutor.service';
 import { VerificacionMorosidadService } from '../../services/verificacion-morosidad.service';
+import { PagosManagementFacadeService } from '../../services/pagos-management-facade.service';
 import { CalcularPrecioRequestDto } from '../dtos/calcular-precio-request.dto';
 import { ActualizarConfiguracionPreciosRequestDto } from '../dtos/actualizar-configuracion-precios-request.dto';
 import { CrearInscripcionMensualRequestDto } from '../dtos/crear-inscripcion-mensual-request.dto';
@@ -48,6 +49,7 @@ export class PagosController {
     private readonly pagosService: PagosService,
     private readonly pagosTutorService: PagosTutorService,
     private readonly verificacionMorosidadService: VerificacionMorosidadService,
+    private readonly pagosFacade: PagosManagementFacadeService,
   ) {}
 
   /**
@@ -56,7 +58,7 @@ export class PagosController {
    */
   @Post('suscripcion')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async crearPreferenciaSuscripcion(
     @Body() body: CrearPreferenciaSuscripcionRequestDto,
     @GetUser() user: AuthUser,
@@ -73,7 +75,7 @@ export class PagosController {
    */
   @Post('curso')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async crearPreferenciaCurso(
     @Body() body: CrearPreferenciaCursoRequestDto,
     @GetUser() user: AuthUser,
@@ -91,7 +93,7 @@ export class PagosController {
    */
   @Get('membresia')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async obtenerMembresiaActual(@GetUser() user: AuthUser) {
     const membresia = await this.pagosTutorService.obtenerMembresiaActual(
       user.id,
@@ -110,7 +112,7 @@ export class PagosController {
    */
   @Get('membresia/:id/estado')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async obtenerEstadoMembresia(
     @Param('id') membresiaId: string,
     @GetUser() user: AuthUser,
@@ -127,7 +129,7 @@ export class PagosController {
    */
   @Post('mock/activar-membresia/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Tutor, Role.Admin)
+  @Roles(Role.TUTOR, Role.ADMIN)
   async activarMembresiaManual(
     @Param('id') membresiaId: string,
     @GetUser() user: AuthUser,
@@ -144,7 +146,7 @@ export class PagosController {
    */
   @Get('inscripciones')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async obtenerInscripciones(@GetUser() user: AuthUser) {
     return await this.pagosTutorService.obtenerInscripcionesTutor(user.id);
   }
@@ -304,7 +306,7 @@ export class PagosController {
     description: 'Configuración obtenida exitosamente',
   })
   async obtenerConfiguracion() {
-    return await this.pagosService.obtenerConfiguracion();
+    return await this.pagosFacade.obtenerConfiguracion();
   }
 
   /**
@@ -323,7 +325,7 @@ export class PagosController {
     description: 'Historial obtenido exitosamente',
   })
   async obtenerHistorialCambios() {
-    return await this.pagosService.obtenerHistorialCambios();
+    return await this.pagosFacade.obtenerHistorialCambios();
   }
 
   /**
@@ -342,7 +344,7 @@ export class PagosController {
     description: 'Inscripciones pendientes obtenidas exitosamente',
   })
   async obtenerInscripcionesPendientes() {
-    return await this.pagosService.obtenerInscripcionesPendientes();
+    return await this.pagosFacade.obtenerInscripcionesPendientes();
   }
 
   /**
@@ -360,7 +362,7 @@ export class PagosController {
     description: 'Estudiantes con descuentos obtenidos exitosamente',
   })
   async obtenerEstudiantesConDescuentos() {
-    return await this.pagosService.obtenerEstudiantesConDescuentos();
+    return await this.pagosFacade.obtenerEstudiantesConDescuentos();
   }
 
   /**
@@ -413,9 +415,9 @@ export class PagosController {
   async procesarWebhook(
     @Body() webhookData: MercadoPagoWebhookDto,
     @Headers('x-signature') _signature: string,
-    @Headers('x-request-id') requestId: string,
+    @Headers('x-request-id') _requestId: string,
   ) {
-    return await this.pagosService.procesarWebhookMercadoPago(webhookData);
+    return await this.pagosFacade.procesarWebhookMercadoPago(webhookData);
   }
 
   /**
@@ -424,7 +426,7 @@ export class PagosController {
    */
   @Get('morosidad/tutor/:tutorId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.Tutor)
+  @Roles(Role.ADMIN, Role.TUTOR)
   @ApiOperation({ summary: 'Verificar morosidad de un tutor' })
   @ApiResponse({ status: 200, description: 'Estado de morosidad obtenido' })
   async verificarMorosidadTutor(
@@ -432,7 +434,7 @@ export class PagosController {
     @GetUser() user: AuthUser,
   ) {
     // Si es tutor, solo puede ver su propia información
-    if (user.role === 'tutor' && user.id !== tutorId) {
+    if (user.role === Role.TUTOR && user.id !== tutorId) {
       throw new NotFoundException(
         'No tienes permiso para ver esta información',
       );
@@ -449,7 +451,7 @@ export class PagosController {
    */
   @Get('morosidad/estudiantes')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Obtener lista de estudiantes morosos' })
   @ApiResponse({ status: 200, description: 'Lista de estudiantes morosos' })
   async obtenerEstudiantesMorosos() {
@@ -462,7 +464,7 @@ export class PagosController {
    */
   @Get('morosidad/estudiante/:estudianteId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.Tutor)
+  @Roles(Role.ADMIN, Role.TUTOR)
   @ApiOperation({
     summary: 'Verificar acceso de estudiante según estado de pagos',
   })
@@ -480,7 +482,7 @@ export class PagosController {
    */
   @Post('registrar-pago-manual/:estudianteId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.Tutor)
+  @Roles(Role.ADMIN, Role.TUTOR)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Registrar pago manual de un estudiante',
@@ -508,6 +510,9 @@ export class PagosController {
     @Param('estudianteId') estudianteId: string,
     @GetUser() user: AuthUser,
   ) {
-    return await this.pagosService.registrarPagoManual(estudianteId, user.id);
+    return await this.pagosFacade.registrarPagoManual({
+      estudianteId,
+      tutorId: user.id,
+    });
   }
 }

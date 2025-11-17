@@ -16,10 +16,10 @@ export function parseUserRoles(
   roles: string | Role[] | JsonValue | null | undefined,
 ): Role[] {
   const validRoles = new Set<Role>([
-    Role.Admin,
-    Role.Docente,
-    Role.Estudiante,
-    Role.Tutor,
+    Role.ADMIN,
+    Role.DOCENTE,
+    Role.ESTUDIANTE,
+    Role.TUTOR,
   ]);
   const isRole = (value: unknown): value is Role =>
     typeof value === 'string' && validRoles.has(value as Role);

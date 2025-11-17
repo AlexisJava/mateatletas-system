@@ -34,7 +34,7 @@ export class DocentesController {
    * @returns Docente creado
    */
   @Post()
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async create(@Body() createDto: CreateDocenteDto) {
     return this.docentesService.create(createDto);
   }
@@ -44,7 +44,7 @@ export class DocentesController {
    * @returns Lista de docentes
    */
   @Get()
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async findAll() {
     return this.docentesService.findAll();
   }
@@ -56,7 +56,7 @@ export class DocentesController {
    * @returns Dashboard con clase inminente, alertas y stats
    */
   @Get('me/dashboard')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async getDashboard(@GetUser() user: AuthUser) {
     return this.docentesService.getDashboard(user.id);
   }
@@ -69,7 +69,7 @@ export class DocentesController {
    * @returns Estadísticas completas y detalladas
    */
   @Get('me/estadisticas-completas')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async getEstadisticasCompletas(@GetUser() user: AuthUser) {
     return this.docentesService.getEstadisticasCompletas(user.id);
   }
@@ -80,7 +80,7 @@ export class DocentesController {
    * @returns Perfil del docente
    */
   @Get('me')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async getProfile(@GetUser() user: AuthUser) {
     return this.docentesService.findById(user.id);
   }
@@ -92,7 +92,7 @@ export class DocentesController {
    * @returns Docente actualizado
    */
   @Patch('me')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async updateProfile(
     @GetUser() user: AuthUser,
     @Body() updateDto: UpdateDocenteDto,
@@ -106,7 +106,7 @@ export class DocentesController {
    * @returns Docente encontrado
    */
   @Get(':id')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async findOne(@Param('id') id: string) {
     return this.docentesService.findById(id);
   }
@@ -118,7 +118,7 @@ export class DocentesController {
    * @returns Docente actualizado
    */
   @Patch(':id')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async update(@Param('id') id: string, @Body() updateDto: UpdateDocenteDto) {
     return this.docentesService.update(id, updateDto);
   }
@@ -130,7 +130,7 @@ export class DocentesController {
    * @returns Cantidad de clases reasignadas
    */
   @Post(':id/reasignar-clases')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async reasignarClases(
     @Param('id') fromDocenteId: string,
     @Body() dto: ReasignarClasesDto,
@@ -145,7 +145,7 @@ export class DocentesController {
    * @returns Mensaje de confirmación
    */
   @Delete(':id')
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async remove(@Param('id') id: string) {
     return this.docentesService.remove(id);
   }

@@ -16,7 +16,7 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
 
 @Controller('notificaciones')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.Docente)
+@Roles(Role.DOCENTE)
 export class NotificacionesController {
   constructor(private readonly notificacionesService: NotificacionesService) {}
 

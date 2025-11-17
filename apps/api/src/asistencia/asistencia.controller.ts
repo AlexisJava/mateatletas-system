@@ -32,7 +32,7 @@ export class AsistenciaController {
    * Rol: Docente
    */
   @Post('clases/:claseId/estudiantes/:estudianteId')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async marcarAsistencia(
     @Param('claseId') claseId: string,
     @Param('estudianteId') estudianteId: string,
@@ -53,13 +53,13 @@ export class AsistenciaController {
    * Rol: Docente, Admin
    */
   @Get('clases/:claseId')
-  @Roles(Role.Docente, Role.Admin)
+  @Roles(Role.DOCENTE, Role.ADMIN)
   async obtenerAsistenciaClase(
     @Param('claseId') claseId: string,
     @GetUser() user: AuthUser,
   ) {
     // Si es docente, verificar que es el titular
-    const docenteId = user.role === Role.Docente ? user.id : undefined;
+    const docenteId = user.role === Role.DOCENTE ? user.id : undefined;
     return this.asistenciaService.obtenerAsistenciaClase(claseId, docenteId);
   }
 
@@ -69,7 +69,7 @@ export class AsistenciaController {
    * Rol: Docente, Admin
    */
   @Get('clases/:claseId/estadisticas')
-  @Roles(Role.Docente, Role.Admin)
+  @Roles(Role.DOCENTE, Role.ADMIN)
   async obtenerEstadisticasClase(@Param('claseId') claseId: string) {
     return this.reportesService.obtenerEstadisticasClase(claseId);
   }
@@ -80,7 +80,7 @@ export class AsistenciaController {
    * Rol: Tutor, Docente, Admin
    */
   @Get('estudiantes/:estudianteId')
-  @Roles(Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerHistorialEstudiante(
     @Param('estudianteId') estudianteId: string,
     @Query() filtros: FiltrarAsistenciaDto,
@@ -97,7 +97,7 @@ export class AsistenciaController {
    * Rol: Docente
    */
   @Get('docente/resumen')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async obtenerResumenDocente(@GetUser() user: AuthUser) {
     return this.reportesService.obtenerResumenDocente(user.id);
   }
@@ -108,7 +108,7 @@ export class AsistenciaController {
    * Rol: Docente
    */
   @Get('docente/observaciones')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async obtenerObservacionesDocente(
     @GetUser() user: AuthUser,
     @Query('estudianteId') estudianteId?: string,
@@ -130,7 +130,7 @@ export class AsistenciaController {
    * Rol: Docente
    */
   @Get('docente/reportes')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async obtenerReportesDocente(@GetUser() user: AuthUser) {
     return this.reportesService.obtenerReportesDocente(user.id);
   }
@@ -142,7 +142,7 @@ export class AsistenciaController {
    * Rol: Estudiante
    */
   @Post()
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async autoRegistrarAsistencia(
     @Body() dto: { claseId: string; presente: boolean },
     @GetUser() user: AuthUser,
@@ -175,7 +175,7 @@ export class AsistenciaController {
    * Permite tomar asistencia de todos los estudiantes en una sola request
    */
   @Post('clase-grupo/batch')
-  @Roles(Role.Docente)
+  @Roles(Role.DOCENTE)
   async tomarAsistenciaBatch(
     @Body() dto: import('./dto/tomar-asistencia-batch.dto').TomarAsistenciaBatchDto,
     @GetUser() user: AuthUser,

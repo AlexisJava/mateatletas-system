@@ -80,7 +80,7 @@ export class ProductosController {
    */
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async create(@Body() createDto: CrearProductoDto) {
     return this.productosService.create(createDto);
   }
@@ -92,7 +92,7 @@ export class ProductosController {
    */
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async update(
     @Param('id') id: string,
     @Body() updateDto: ActualizarProductoDto,
@@ -111,7 +111,7 @@ export class ProductosController {
    */
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async remove(
     @Param('id') id: string,
     @Query('hardDelete') hardDelete?: string,

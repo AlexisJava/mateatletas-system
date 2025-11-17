@@ -28,7 +28,7 @@ import { AuthUser } from '../auth/types/auth-user.type';
 @ApiTags('Tutor')
 @Controller('tutor')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.Tutor)
+@Roles(Role.TUTOR)
 @ApiBearerAuth()
 export class TutorController {
   constructor(private readonly tutorService: TutorService) {}

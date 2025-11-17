@@ -18,7 +18,7 @@ export interface DetailedAuthUserBase extends Omit<AuthUser, 'role'> {
 }
 
 export interface AuthEstudiante extends DetailedAuthUserBase {
-  role: Role.Estudiante;
+  role: Role.ESTUDIANTE;
   edad: number;
   nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
   fotoUrl: string | null;
@@ -37,13 +37,13 @@ export interface AuthEstudiante extends DetailedAuthUserBase {
 }
 
 export interface AuthDocente extends DetailedAuthUserBase {
-  role: Role.Docente;
+  role: Role.DOCENTE;
   titulo: string | null;
   bio: string | null;
 }
 
 export interface AuthTutor extends DetailedAuthUserBase {
-  role: Role.Tutor;
+  role: Role.TUTOR;
   dni: string;
   telefono: string | null;
   fecha_registro: Date;
@@ -51,7 +51,7 @@ export interface AuthTutor extends DetailedAuthUserBase {
 }
 
 export interface AuthAdmin extends DetailedAuthUserBase {
-  role: Role.Admin;
+  role: Role.ADMIN;
   fecha_registro: Date;
 }
 
@@ -69,17 +69,17 @@ export type DetailedAuthUser =
  * Type guards para verificar el rol del usuario
  */
 export function isEstudiante(user: DetailedAuthUser): user is AuthEstudiante {
-  return user.role === Role.Estudiante;
+  return user.role === Role.ESTUDIANTE;
 }
 
 export function isDocente(user: DetailedAuthUser): user is AuthDocente {
-  return user.role === Role.Docente;
+  return user.role === Role.DOCENTE;
 }
 
 export function isTutor(user: DetailedAuthUser): user is AuthTutor {
-  return user.role === Role.Tutor;
+  return user.role === Role.TUTOR;
 }
 
 export function isAdmin(user: DetailedAuthUser): user is AuthAdmin {
-  return user.role === Role.Admin;
+  return user.role === Role.ADMIN;
 }

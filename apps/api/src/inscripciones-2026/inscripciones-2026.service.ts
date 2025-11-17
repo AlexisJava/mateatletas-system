@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../core/database/prisma.service';
 import { MercadoPagoService } from '../pagos/mercadopago.service';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
+import { parseLegacyExternalReference, TipoExternalReference } from '../domain/constants';
 import * as bcrypt from 'bcrypt';
 import {
   CreateInscripcion2026Dto,
@@ -515,20 +516,20 @@ export class Inscripciones2026Service {
       // Parsear external_reference para identificar inscripción
       const externalRef = payment.external_reference;
 
-      if (!externalRef || !externalRef.startsWith('inscripcion2026-')) {
-        this.logger.warn('⚠️ Pago sin external_reference válida - Ignorando');
-        return { message: 'Payment without valid external_reference' };
+      if (!externalRef) {
+        this.logger.warn('⚠️ Pago sin external_reference - Ignorando');
+        return { message: 'Payment without external_reference' };
       }
 
-      // Extraer inscripcionId del external_reference
-      // Formato: inscripcion2026-{inscripcionId}-tutor-{tutorId}-tipo-{tipo}
-      const parts = externalRef.split('-');
-      const inscripcionId = parts[1];
+      // Usar parser de constantes para extraer IDs
+      const parsed = parseLegacyExternalReference(externalRef);
 
-      if (!inscripcionId) {
-        this.logger.error('❌ No se pudo extraer inscripcionId de external_reference');
+      if (!parsed || parsed.tipo !== TipoExternalReference.INSCRIPCION_2026) {
+        this.logger.warn('⚠️ External reference inválida o no es de tipo INSCRIPCION_2026');
         return { message: 'Invalid external_reference format' };
       }
+
+      const { inscripcionId } = parsed.ids;
 
       // Buscar el pago en la base de datos
       const pago = await this.prisma.pagoInscripcion2026.findFirst({

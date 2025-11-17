@@ -58,7 +58,7 @@ export class EstudiantesController {
    */
   @Get('admin/all')
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async findAllForAdmin() {
     return this.estudiantesService.findAll();
   }
@@ -106,7 +106,7 @@ export class EstudiantesController {
    */
   @Patch('avatar')
   @UseGuards(RolesGuard)
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async actualizarAvatar3D(
     @Request() req: RequestWithAuthUser,
     @Body() body: { avatarUrl: string },
@@ -134,7 +134,7 @@ export class EstudiantesController {
    */
   @Patch('animacion')
   @UseGuards(RolesGuard)
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async actualizarAnimacion(
     @Request() req: RequestWithAuthUser,
     @Body() body: { animacion_idle_url: string },
@@ -164,7 +164,7 @@ export class EstudiantesController {
    */
   @Get('mi-avatar')
   @UseGuards(RolesGuard)
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async obtenerMiAvatar(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
 
@@ -192,7 +192,7 @@ export class EstudiantesController {
    */
   @Get('mi-proxima-clase')
   @UseGuards(RolesGuard)
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async obtenerMiProximaClase(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
 
@@ -211,7 +211,7 @@ export class EstudiantesController {
    */
   @Get('mis-companeros')
   @UseGuards(RolesGuard)
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async obtenerMisCompaneros(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.estudiantesService.obtenerCompanerosDeClase(estudianteId);
@@ -226,7 +226,7 @@ export class EstudiantesController {
    */
   @Get('mis-sectores')
   @UseGuards(RolesGuard)
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async obtenerMisSectores(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
     return this.estudiantesService.obtenerMisSectores(estudianteId);
@@ -327,7 +327,7 @@ export class EstudiantesController {
    */
   @Post('crear-con-tutor')
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async crearConTutor(@Body() dto: CrearEstudiantesConTutorDto) {
     return this.estudiantesService.crearEstudiantesConTutor(dto);
   }
@@ -340,7 +340,7 @@ export class EstudiantesController {
    */
   @Patch(':id/copiar-a-sector')
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async copiarASector(
     @Param('id') id: string,
     @Body() dto: CopiarEstudianteDto,
@@ -355,7 +355,7 @@ export class EstudiantesController {
    */
   @Post('copiar-por-email')
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async copiarPorEmail(
     @Body() body: BuscarEstudiantePorEmailDto & { sectorId: string },
   ) {
@@ -373,7 +373,7 @@ export class EstudiantesController {
    */
   @Post(':id/asignar-clases')
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async asignarClases(@Param('id') id: string, @Body() dto: AsignarClasesDto) {
     if (dto.clasesIds.length === 1) {
       return [
@@ -393,7 +393,7 @@ export class EstudiantesController {
    */
   @Get(':id/clases-disponibles')
   @UseGuards(RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.ADMIN)
   async obtenerClasesDisponibles(@Param('id') id: string) {
     return this.estudiantesService.obtenerClasesDisponiblesParaEstudiante(id);
   }

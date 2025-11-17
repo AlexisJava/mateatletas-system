@@ -84,7 +84,7 @@ export class AdminUsuariosService {
     }>,
   ) {
     const userRoles = parseUserRoles(tutor.roles);
-    const finalRoles = userRoles.length > 0 ? userRoles : [Role.Tutor];
+    const finalRoles = userRoles.length > 0 ? userRoles : [Role.TUTOR];
 
     // Generar username: nombre.apellido (sin espacios, minúsculas)
     const username =
@@ -124,7 +124,7 @@ export class AdminUsuariosService {
     }>,
   ) {
     const userRoles = parseUserRoles(docente.roles);
-    const finalRoles = userRoles.length > 0 ? userRoles : [Role.Docente];
+    const finalRoles = userRoles.length > 0 ? userRoles : [Role.DOCENTE];
 
     // Generar username: nombre.apellido (sin espacios, minúsculas)
     const username = `${docente.nombre.toLowerCase()}.${docente.apellido.toLowerCase()}`;
@@ -154,7 +154,7 @@ export class AdminUsuariosService {
    */
   private mapAdminToUser(admin: Prisma.AdminGetPayload<Record<string, never>>) {
     const userRoles = parseUserRoles(admin.roles);
-    const finalRoles = userRoles.length > 0 ? userRoles : [Role.Admin];
+    const finalRoles = userRoles.length > 0 ? userRoles : [Role.ADMIN];
 
     // Generar username: nombre.apellido (sin espacios, minúsculas)
     const username = `${admin.nombre.toLowerCase()}.${admin.apellido.toLowerCase()}`;

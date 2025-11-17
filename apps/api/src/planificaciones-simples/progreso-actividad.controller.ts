@@ -36,7 +36,7 @@ export class ProgresoActividadController {
    * Marca una actividad como iniciada
    */
   @Post('iniciar')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   @HttpCode(HttpStatus.OK)
   async iniciarActividad(@Body() data: IniciarActividad) {
     return await this.progresoService.iniciarActividad(data);
@@ -47,7 +47,7 @@ export class ProgresoActividadController {
    * Guarda progreso parcial de una actividad
    */
   @Post('guardar')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   @HttpCode(HttpStatus.OK)
   async guardarProgreso(@Body() data: GuardarProgresoActividad) {
     return await this.progresoService.guardarProgreso(data);
@@ -58,7 +58,7 @@ export class ProgresoActividadController {
    * Completa una actividad y otorga recompensas
    */
   @Post('completar')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   @HttpCode(HttpStatus.OK)
   async completarActividad(
     @Body() data: CompletarActividad,
@@ -71,7 +71,7 @@ export class ProgresoActividadController {
    * Obtiene el historial completo de progreso del estudiante
    */
   @Get('historial/:estudianteId')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerHistorial(
     @Param('estudianteId') estudianteId: string,
   ): Promise<HistorialProgresoEstudiante> {
@@ -83,7 +83,7 @@ export class ProgresoActividadController {
    * Obtiene el progreso de una actividad específica
    */
   @Get(':estudianteId/:actividadId/:asignacionId')
-  @Roles(Role.Estudiante, Role.Tutor, Role.Docente, Role.Admin)
+  @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
   async obtenerProgreso(
     @Param('estudianteId') estudianteId: string,
     @Param('actividadId') actividadId: string,

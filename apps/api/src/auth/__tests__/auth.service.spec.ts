@@ -194,7 +194,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       expect(result.message).toBe('Tutor registrado exitosamente');
       expect(result.user.email).toBe(registerDto.email);
       expect(result.user.nombre).toBe(registerDto.nombre);
-      expect(result.user.role).toBe(Role.Tutor);
+      expect(result.user.role).toBe(Role.TUTOR);
       expect(prisma.tutor.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -318,7 +318,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockEstudiante.email);
       expect(result.user.nombre).toBe(mockEstudiante.nombre);
-      expect(result.user.role).toBe(Role.Estudiante);
+      expect(result.user.role).toBe(Role.ESTUDIANTE);
       expect(result.user.equipo).toEqual(mockEstudiante.equipo);
       expect(result.user.tutor).toEqual(mockEstudiante.tutor);
     });
@@ -406,7 +406,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         expect.objectContaining({
           sub: mockEstudiante.id,
           email: mockEstudiante.username, // loginEstudiante uses username as email
-          roles: [Role.Estudiante],
+          roles: [Role.ESTUDIANTE],
         }),
       );
     });
@@ -431,7 +431,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       // Assert
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockTutor.email);
-      expect(result.user.role).toBe(Role.Tutor);
+      expect(result.user.role).toBe(Role.TUTOR);
       expect('dni' in result.user && result.user.dni).toBe(mockTutor.dni);
     });
 
@@ -454,7 +454,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       // Assert
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockDocente.email);
-      expect(result.user.role).toBe(Role.Docente);
+      expect(result.user.role).toBe(Role.DOCENTE);
       expect('titulo' in result.user && result.user.titulo).toBe(
         mockDocente.titulo,
       );
@@ -480,7 +480,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       // Assert
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockAdmin.email);
-      expect(result.user.role).toBe(Role.Admin);
+      expect(result.user.role).toBe(Role.ADMIN);
     });
 
     it('should throw UnauthorizedException when user does not exist', async () => {
@@ -545,7 +545,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         expect.objectContaining({
           sub: mockAdmin.id,
           email: mockAdmin.email,
-          roles: [Role.Admin, Role.Docente],
+          roles: [Role.ADMIN, Role.DOCENTE],
         }),
       );
     });
@@ -636,11 +636,11 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         .mockResolvedValue(tutorSinPassword as any);
 
       // Act
-      const result = await service.getProfile('tutor-123', Role.Tutor);
+      const result = await service.getProfile('tutor-123', Role.TUTOR);
 
       // Assert
       expect(result.email).toBe(mockTutor.email);
-      expect(result.role).toBe(Role.Tutor);
+      expect(result.role).toBe(Role.TUTOR);
       expect(result).not.toHaveProperty('password_hash'); // Security
     });
 
@@ -651,11 +651,11 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         .mockResolvedValue(mockDocente as any);
 
       // Act
-      const result = await service.getProfile('docente-123', Role.Docente);
+      const result = await service.getProfile('docente-123', Role.DOCENTE);
 
       // Assert
       expect(result.email).toBe(mockDocente.email);
-      expect(result.role).toBe(Role.Docente);
+      expect(result.role).toBe(Role.DOCENTE);
       expect((result as any).titulo).toBe(mockDocente.titulo);
     });
 
@@ -666,11 +666,11 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         .mockResolvedValue(mockAdmin as any);
 
       // Act
-      const result = await service.getProfile('admin-123', Role.Admin);
+      const result = await service.getProfile('admin-123', Role.ADMIN);
 
       // Assert
       expect(result.email).toBe(mockAdmin.email);
-      expect(result.role).toBe(Role.Admin);
+      expect(result.role).toBe(Role.ADMIN);
     });
 
     it('should return estudiante profile', async () => {
@@ -680,11 +680,11 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         .mockResolvedValue(mockEstudiante as any);
 
       // Act
-      const result = await service.getProfile('est-123', Role.Estudiante);
+      const result = await service.getProfile('est-123', Role.ESTUDIANTE);
 
       // Assert
       expect(result.email).toBe(mockEstudiante.email);
-      expect(result.role).toBe(Role.Estudiante);
+      expect(result.role).toBe(Role.ESTUDIANTE);
       expect((result as any).puntos_totales).toBe(150);
     });
 
@@ -694,10 +694,10 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.getProfile('nonexistent-id', Role.Tutor),
+        service.getProfile('nonexistent-id', Role.TUTOR),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        service.getProfile('nonexistent-id', Role.Tutor),
+        service.getProfile('nonexistent-id', Role.TUTOR),
       ).rejects.toThrow('Tutor no encontrado');
     });
 
@@ -707,7 +707,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.getProfile('nonexistent-id', Role.Docente),
+        service.getProfile('nonexistent-id', Role.DOCENTE),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -717,7 +717,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.getProfile('nonexistent-id', Role.Admin),
+        service.getProfile('nonexistent-id', Role.ADMIN),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -727,7 +727,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
 
       // Act & Assert
       await expect(
-        service.getProfile('nonexistent-id', Role.Estudiante),
+        service.getProfile('nonexistent-id', Role.ESTUDIANTE),
       ).rejects.toThrow(NotFoundException);
     });
   });

@@ -62,8 +62,8 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(undefined);
       const mockContext = createMockContext({
         id: 'user-123',
-        role: Role.Tutor,
-        roles: [Role.Tutor],
+        role: Role.TUTOR,
+        roles: [Role.TUTOR],
       });
 
       // Act
@@ -78,8 +78,8 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([]);
       const mockContext = createMockContext({
         id: 'user-123',
-        role: Role.Tutor,
-        roles: [Role.Tutor],
+        role: Role.TUTOR,
+        roles: [Role.TUTOR],
       });
 
       // Act
@@ -93,11 +93,11 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
   describe('User with Matching Roles', () => {
     it('should allow access when user has exact matching role (multi-role user)', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
       const mockContext = createMockContext({
         id: 'user-123',
-        role: Role.Admin,
-        roles: [Role.Admin, Role.Docente],
+        role: Role.ADMIN,
+        roles: [Role.ADMIN, Role.DOCENTE],
       });
 
       // Act
@@ -111,11 +111,11 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
       // Arrange
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValue([Role.Admin, Role.Docente]);
+        .mockReturnValue([Role.ADMIN, Role.DOCENTE]);
       const mockContext = createMockContext({
         id: 'user-123',
-        role: Role.Docente,
-        roles: [Role.Docente], // User has docente, which is one of the required roles
+        role: Role.DOCENTE,
+        roles: [Role.DOCENTE], // User has docente, which is one of the required roles
       });
 
       // Act
@@ -127,11 +127,11 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
 
     it('should allow access when user has multiple roles and one matches', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Tutor]);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.TUTOR]);
       const mockContext = createMockContext({
         id: 'user-123',
-        role: Role.Tutor,
-        roles: [Role.Tutor, Role.Estudiante], // User has multiple roles, one matches
+        role: Role.TUTOR,
+        roles: [Role.TUTOR, Role.ESTUDIANTE], // User has multiple roles, one matches
       });
 
       // Act
@@ -143,10 +143,10 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
 
     it('should support legacy single role format (user.role instead of user.roles)', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Tutor]);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.TUTOR]);
       const mockContext = createMockContext({
         id: 'user-123',
-        role: Role.Tutor, // Legacy format: single role, not array
+        role: Role.TUTOR, // Legacy format: single role, not array
       });
 
       // Act
@@ -160,11 +160,11 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
   describe('User without Matching Roles', () => {
     it('should deny access when user role does not match required role', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
       const mockContext = createMockContext({
         id: 'user-123',
-        role: Role.Tutor,
-        roles: [Role.Tutor], // User is tutor, but admin is required
+        role: Role.TUTOR,
+        roles: [Role.TUTOR], // User is tutor, but admin is required
       });
 
       // Act
@@ -176,11 +176,11 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
 
     it('should deny access when user has multiple roles but none match', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
       const mockContext = createMockContext({
         id: 'user-123',
-        role: Role.Tutor,
-        roles: [Role.Tutor, Role.Estudiante], // User has multiple roles, but none is admin
+        role: Role.TUTOR,
+        roles: [Role.TUTOR, Role.ESTUDIANTE], // User has multiple roles, but none is admin
       });
 
       // Act
@@ -192,7 +192,7 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
 
     it('should deny access when user has no roles property', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
       const mockContext = createMockContext({
         id: 'user-123',
         // No roles or role property
@@ -207,7 +207,7 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
 
     it('should deny access when user.roles is empty array', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
       const mockContext = createMockContext({
         id: 'user-123',
         roles: [], // Empty roles array
@@ -224,7 +224,7 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
   describe('No User in Request', () => {
     it('should deny access when user is not in request', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Tutor]);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.TUTOR]);
       const mockContext = createMockContext(null); // No user
 
       // Act
@@ -236,7 +236,7 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
 
     it('should deny access when user is undefined', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Tutor]);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.TUTOR]);
       const mockContext = createMockContext(
         undefined as unknown as Partial<AuthUser>,
       );
@@ -252,7 +252,7 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
   describe('Edge Cases', () => {
     it('should handle case-sensitive role comparison correctly', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
       const mockContext = createMockContext({
         id: 'user-123',
         roles: ['Admin' as unknown as Role], // Uppercase 'A' - should NOT match 'admin'
@@ -267,11 +267,11 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
 
     it('should handle user with both role and roles properties (prefer roles array)', () => {
       // Arrange
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.Admin]);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
       const mockContext = createMockContext({
         id: 'user-123',
-        role: Role.Tutor, // Legacy single role
-        roles: [Role.Admin], // Modern roles array - should take precedence
+        role: Role.TUTOR, // Legacy single role
+        roles: [Role.ADMIN], // Modern roles array - should take precedence
       });
 
       // Act
@@ -285,10 +285,10 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
       // Arrange
       jest
         .spyOn(reflector, 'getAllAndOverride')
-        .mockReturnValue([Role.Admin, Role.Docente, Role.Tutor]);
+        .mockReturnValue([Role.ADMIN, Role.DOCENTE, Role.TUTOR]);
       const mockContext = createMockContext({
         id: 'user-123',
-        roles: [Role.Tutor], // User only has tutor, which is one of the three required
+        roles: [Role.TUTOR], // User only has tutor, which is one of the three required
       });
 
       // Act
@@ -307,7 +307,7 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
         .mockReturnValue([]);
       const mockContext = createMockContext({
         id: 'user-123',
-        roles: [Role.Tutor],
+        roles: [Role.TUTOR],
       });
 
       // Act

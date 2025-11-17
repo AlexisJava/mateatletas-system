@@ -114,7 +114,7 @@ export class AuthService {
       message: 'Tutor registrado exitosamente',
       user: {
         ...tutor,
-        role: Role.Tutor,
+        role: Role.TUTOR,
       },
     };
   }
@@ -168,7 +168,7 @@ export class AuthService {
     // 4. Obtener roles del estudiante desde la BD - usando utility segura
     const estudianteRoles = parseUserRoles(estudiante.roles);
     const finalRoles =
-      estudianteRoles.length > 0 ? estudianteRoles : [Role.Estudiante];
+      estudianteRoles.length > 0 ? estudianteRoles : [Role.ESTUDIANTE];
 
     // 5. Generar token JWT (usar username en lugar de email)
     const accessToken = this.generateJwtToken(
@@ -241,10 +241,10 @@ export class AuthService {
     // 6. Obtener roles del usuario desde la BD (puede tener múltiples roles) - usando utility segura
     const userRoles = parseUserRoles(user.roles);
     const detectedRole = isTutorUser(user)
-      ? Role.Tutor
+      ? Role.TUTOR
       : isDocenteUser(user)
-        ? Role.Docente
-        : Role.Admin;
+        ? Role.DOCENTE
+        : Role.ADMIN;
     const finalUserRoles = userRoles.length > 0 ? userRoles : [detectedRole];
 
     if (!user.email) {
@@ -394,7 +394,7 @@ export class AuthService {
 
       return {
         ...docente,
-        role: Role.Docente,
+        role: Role.DOCENTE,
       };
     }
 
@@ -418,7 +418,7 @@ export class AuthService {
 
       return {
         ...admin,
-        role: Role.Admin,
+        role: Role.ADMIN,
       };
     }
 
@@ -748,11 +748,11 @@ export class AuthService {
   private generateJwtToken(
     userId: string,
     email: string,
-    roles: Role[] | Role = [Role.Tutor],
+    roles: Role[] | Role = [Role.TUTOR],
   ): string {
     // Normalizar roles a array si viene como un único rol (retrocompatibilidad)
     const rolesArray = Array.isArray(roles) ? roles : [roles];
-    const normalizedRoles = rolesArray.length > 0 ? rolesArray : [Role.Tutor];
+    const normalizedRoles = rolesArray.length > 0 ? rolesArray : [Role.TUTOR];
 
     const payload = {
       sub: userId, // Subject (ID del usuario)

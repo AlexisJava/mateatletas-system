@@ -6,6 +6,13 @@ import { PagosService } from './presentation/services/pagos.service';
 import { PagosTutorService } from './presentation/services/pagos-tutor.service';
 import { VerificacionMorosidadService } from './services/verificacion-morosidad.service';
 
+// CQRS Services (NEW)
+import { PagosManagementFacadeService } from './services/pagos-management-facade.service';
+import { PaymentQueryService } from './services/payment-query.service';
+import { PaymentCommandService } from './services/payment-command.service';
+import { PaymentWebhookService } from './services/payment-webhook.service';
+import { PaymentStateMapperService } from './services/payment-state-mapper.service';
+
 // Use Cases
 import { CalcularPrecioUseCase } from './application/use-cases/calcular-precio.use-case';
 import { ActualizarConfiguracionPreciosUseCase } from './application/use-cases/actualizar-configuracion-precios.use-case';
@@ -46,21 +53,37 @@ import { MercadoPagoService } from './mercadopago.service';
   imports: [DatabaseModule, CatalogoModule],
   controllers: [PagosController],
   providers: [
-    // Presentation Layer
+    // === CQRS Services (NEW) ===
+    // Facade - Punto de entrada único
+    PagosManagementFacadeService,
+
+    // Query Service - Solo lecturas
+    PaymentQueryService,
+
+    // Command Service - Solo escrituras
+    PaymentCommandService,
+
+    // Webhook Service - Procesamiento de webhooks
+    PaymentWebhookService,
+
+    // State Mapper - Mapeo de estados centralizado
+    PaymentStateMapperService,
+
+    // === Legacy Presentation Layer (mantener temporalmente) ===
     PagosService,
     PagosTutorService,
     MercadoPagoService,
     VerificacionMorosidadService,
 
-    // Infrastructure Layer - Repositories propios del módulo
+    // === Infrastructure Layer - Repositories ===
     ConfiguracionPreciosRepository,
     InscripcionMensualRepository,
 
-    // Infrastructure Layer - Adapters para repositorios externos
+    // === Infrastructure Layer - Adapters ===
     EstudianteRepositoryAdapter,
     ProductoRepositoryAdapter,
 
-    // Application Layer - Use Cases con inyección de implementaciones concretas
+    // === Application Layer - Use Cases ===
     {
       provide: CalcularPrecioUseCase,
       useFactory: (
@@ -109,6 +132,10 @@ import { MercadoPagoService } from './mercadopago.service';
     },
   ],
   exports: [
+    // Export new facade as main interface
+    PagosManagementFacadeService,
+
+    // Export legacy services for backwards compatibility
     PagosService,
     PagosTutorService,
     MercadoPagoService,

@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { AuthUser } from '../../auth/interfaces';
+import { Role } from '../../domain/constants';
 
 /**
  * Guard que verifica que un estudiante pertenece al tutor autenticado
@@ -38,7 +39,7 @@ export class EstudianteOwnershipGuard implements CanActivate {
     }
 
     // CASO 1: El estudiante accede a su propio perfil
-    if (user.role === 'estudiante' && user.id === estudianteId) {
+    if (user.role === Role.ESTUDIANTE && user.id === estudianteId) {
       this.logger.debug(`Self-access granted for estudiante ${estudianteId}`);
       return true;
     }
@@ -46,7 +47,7 @@ export class EstudianteOwnershipGuard implements CanActivate {
     this.logger.debug('Checking tutor/admin/docente access...');
 
     // CASO 2: El tutor accede al perfil de su estudiante
-    if (user.role === 'tutor') {
+    if (user.role === Role.TUTOR) {
       const estudiante = await this.prisma.estudiante.findUnique({
         where: { id: estudianteId },
         select: { tutor_id: true },
@@ -66,7 +67,7 @@ export class EstudianteOwnershipGuard implements CanActivate {
     }
 
     // CASO 3: Admin o docente (pueden acceder a cualquier estudiante)
-    if (user.role === 'admin' || user.role === 'docente') {
+    if (user.role === Role.ADMIN || user.role === Role.DOCENTE) {
       return true;
     }
 

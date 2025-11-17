@@ -100,7 +100,7 @@ export class TiendaController {
    * @returns Solicitud de canje creada (pendiente de aprobación)
    */
   @Post('canjear')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   @HttpCode(HttpStatus.CREATED)
   async solicitarCanje(
     @GetUser() user: AuthUser,
@@ -119,7 +119,7 @@ export class TiendaController {
    * @returns Lista de cursos del estudiante con progreso
    */
   @Get('mis-cursos')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async obtenerMisCursos(@GetUser() user: AuthUser) {
     const estudianteId = user.id;
     return this.tiendaService.obtenerCursosEstudiante(estudianteId);
@@ -136,7 +136,7 @@ export class TiendaController {
    * @returns Curso actualizado
    */
   @Patch('mis-cursos/:cursoId/progreso')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async actualizarProgreso(
     @GetUser() user: AuthUser,
     @Param('cursoId') cursoId: string,
@@ -161,7 +161,7 @@ export class TiendaController {
    * @returns Lista de solicitudes pendientes de sus estudiantes
    */
   @Get('solicitudes-pendientes')
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async obtenerSolicitudesPendientes(@GetUser() user: AuthUser) {
     const tutorId = user.id;
     return this.tiendaService.obtenerSolicitudesPendientes(tutorId);
@@ -178,7 +178,7 @@ export class TiendaController {
    * @returns Últimas 50 solicitudes ordenadas por fecha
    */
   @Get('solicitudes/historial')
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   async obtenerHistorialSolicitudes(@GetUser() user: AuthUser) {
     const tutorId = user.id;
     return this.tiendaService.obtenerHistorialSolicitudes(tutorId);
@@ -206,7 +206,7 @@ export class TiendaController {
    * @returns Solicitud aprobada con detalles
    */
   @Post('solicitudes/:id/aprobar')
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   @HttpCode(HttpStatus.OK)
   async aprobarCanje(
     @GetUser() user: AuthUser,
@@ -239,7 +239,7 @@ export class TiendaController {
    * @returns Solicitud rechazada
    */
   @Post('solicitudes/:id/rechazar')
-  @Roles(Role.Tutor)
+  @Roles(Role.TUTOR)
   @HttpCode(HttpStatus.OK)
   async rechazarCanje(
     @GetUser() user: AuthUser,
@@ -261,7 +261,7 @@ export class TiendaController {
    * @returns Lista de solicitudes del estudiante
    */
   @Get('mis-solicitudes')
-  @Roles(Role.Estudiante)
+  @Roles(Role.ESTUDIANTE)
   async obtenerMisSolicitudes(@GetUser() user: AuthUser) {
     const estudianteId = user.id;
     return this.tiendaService.obtenerSolicitudesEstudiante(estudianteId);
