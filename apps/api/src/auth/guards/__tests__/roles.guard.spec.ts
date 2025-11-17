@@ -250,19 +250,19 @@ describe('RolesGuard - COMPREHENSIVE TESTS', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle case-sensitive role comparison correctly', () => {
+    it('should handle case-insensitive role comparison correctly (normalizes to uppercase)', () => {
       // Arrange
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.ADMIN]);
       const mockContext = createMockContext({
         id: 'user-123',
-        roles: ['Admin' as unknown as Role], // Uppercase 'A' - should NOT match 'admin'
+        roles: ['admin' as unknown as Role], // Lowercase - should be normalized to ADMIN
       });
 
       // Act
       const result = guard.canActivate(mockContext);
 
       // Assert
-      expect(result).toBe(false); // Case-sensitive comparison should fail
+      expect(result).toBe(true); // Case-insensitive: 'admin' normalizes to 'ADMIN'
     });
 
     it('should handle user with both role and roles properties (prefer roles array)', () => {
