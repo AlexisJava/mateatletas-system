@@ -21,7 +21,7 @@ describe('RankingService - Pagination', () => {
       id: `est-${i + 1}`,
       nombre: `Estudiante${i + 1}`,
       apellido: `Apellido${i + 1}`,
-      foto_url: `https://example.com/foto${i + 1}.jpg`,
+      fotoUrl: `https://example.com/foto${i + 1}.jpg`, // camelCase para coincidir con el servicio
       puntos_totales: 1000 - i * 10, // Descendente
       equipo: {
         id: `equipo-${(i % 3) + 1}`,

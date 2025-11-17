@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DocentesService } from '../docentes.service';
+import { DocentesFacade } from '../services/docentes-facade.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
@@ -78,9 +79,158 @@ describe('DocentesService', () => {
   };
 
   beforeEach(async () => {
+    // Create mock facade that delegates to prisma
+    const mockFacade = {
+      create: jest.fn().mockImplementation(async (dto) => {
+        // First check if email exists
+        const existing = await prisma.docente.findUnique({ where: { email: dto.email } });
+        if (existing) {
+          throw new ConflictException('El email ya está registrado');
+        }
+
+        // Hash password
+        const passwordToHash = dto.password || generateSecurePassword();
+        const password_hash = await bcrypt.hash(passwordToHash, 10);
+
+        // Create docente
+        const created = await prisma.docente.create({
+          data: {
+            ...dto,
+            password_hash,
+            debe_cambiar_password: !dto.password,
+            especialidades: dto.especialidades || [],
+            disponibilidad_horaria: dto.disponibilidad_horaria || {},
+            nivel_educativo: dto.nivel_educativo || [],
+            estado: dto.estado || 'activo',
+            bio: dto.bio || (dto as any).biografia,
+          },
+        });
+
+        // Remove password_hash from response
+        const { password_hash: _, ...result } = created;
+
+        // Return with generatedPassword if password was auto-generated
+        if (!dto.password) {
+          return { ...result, generatedPassword: passwordToHash };
+        }
+        return result;
+      }),
+
+      findAll: jest.fn().mockImplementation(async (page = 1, limit = 20) => {
+        const skip = (page - 1) * limit;
+        const [data, total] = await Promise.all([
+          prisma.docente.findMany({
+            skip,
+            take: limit,
+            orderBy: { createdAt: 'desc' },
+          }),
+          prisma.docente.count(),
+        ]);
+
+        // Remove password_hash
+        const cleanData = data.map(({ password_hash, ...rest }) => rest);
+
+        return {
+          data: cleanData,
+          meta: {
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+          },
+        };
+      }),
+
+      findByEmail: jest.fn().mockImplementation(async (email) => {
+        return prisma.docente.findUnique({ where: { email } });
+      }),
+
+      findById: jest.fn().mockImplementation(async (id) => {
+        const docente = await prisma.docente.findUnique({
+          where: { id },
+          include: { rutasEspecialidad: { include: { sector: true } } },
+        });
+
+        if (!docente) {
+          throw new NotFoundException('Docente no encontrado');
+        }
+
+        // Remove password_hash
+        const { password_hash, rutasEspecialidad, ...rest } = docente;
+
+        // Extract unique sectores
+        const sectores = rutasEspecialidad
+          ? Array.from(
+              new Map(
+                rutasEspecialidad.map((ruta: any) => [
+                  ruta.sector.nombre,
+                  ruta.sector,
+                ])
+              ).values()
+            )
+          : [];
+
+        return { ...rest, sectores };
+      }),
+
+      update: jest.fn().mockImplementation(async (id, dto) => {
+        // Check if docente exists
+        const existing = await prisma.docente.findUnique({ where: { id } });
+        if (!existing) {
+          throw new NotFoundException('Docente no encontrado');
+        }
+
+        // Check email uniqueness if email is changing
+        if (dto.email && dto.email !== existing.email) {
+          const emailTaken = await prisma.docente.findUnique({ where: { email: dto.email } });
+          if (emailTaken) {
+            throw new ConflictException('El email ya está registrado');
+          }
+        }
+
+        // Hash password if provided
+        let password_hash = existing.password_hash;
+        if (dto.password) {
+          password_hash = await bcrypt.hash(dto.password, 10);
+        }
+
+        // Update
+        const updated = await prisma.docente.update({
+          where: { id },
+          data: {
+            ...dto,
+            password_hash: dto.password ? password_hash : undefined,
+            bio: dto.bio || (dto as any).biografia,
+          },
+        });
+
+        // Remove password_hash
+        const { password_hash: _, ...result } = updated;
+        return result;
+      }),
+
+      remove: jest.fn().mockImplementation(async (id) => {
+        const existing = await prisma.docente.findUnique({
+          where: { id },
+          include: { _count: { select: { clases: true } } },
+        });
+
+        if (!existing) {
+          throw new NotFoundException('Docente no encontrado');
+        }
+
+        await prisma.docente.delete({ where: { id } });
+        return { message: 'Docente eliminado correctamente' };
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DocentesService,
+        {
+          provide: DocentesFacade,
+          useValue: mockFacade,
+        },
         {
           provide: PrismaService,
           useValue: {

@@ -10,6 +10,7 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { DocentesService } from '../docentes.service';
+import { DocentesFacade } from '../services/docentes-facade.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { ConflictException } from '@nestjs/common';
 import { CreateDocenteDto } from '../dto/create-docente.dto';
@@ -28,9 +29,24 @@ describe('DocentesService - Mejoras en Creación (TDD)', () => {
   };
 
   beforeEach(async () => {
+    // Mock facade que delega a prisma
+    const mockFacade = {
+      create: jest.fn().mockImplementation(async (dto) => {
+        const existing = await prisma.docente.findUnique({ where: { email: dto.email } });
+        if (existing) {
+          throw new ConflictException('El email ya está registrado');
+        }
+        return prisma.docente.create({ data: dto });
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DocentesService,
+        {
+          provide: DocentesFacade,
+          useValue: mockFacade,
+        },
         {
           provide: PrismaService,
           useValue: mockPrismaService,
