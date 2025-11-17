@@ -23,6 +23,38 @@ import {
  *
  * Patrón: CQRS (Command Query Responsibility Segregation)
  */
+
+// Tipos internos para helpers privados
+type EstudianteBasico = {
+  id: string;
+  nombre: string;
+  apellido: string;
+  fotoUrl: string | null;
+};
+
+type EstudianteConGrupos = EstudianteBasico & {
+  grupos: Array<{
+    id: string;
+    nombre: string;
+    codigo: string;
+  }>;
+};
+
+type AsistenciaEstudiante = {
+  estudiante_id: string;
+  nombre: string;
+  apellido: string;
+  fotoUrl: string | null;
+  grupos: Array<{
+    id: string;
+    nombre: string;
+    codigo: string;
+  }>;
+  total_asistencias: number;
+  presentes: number;
+  porcentaje_asistencia: number;
+};
+
 @Injectable()
 export class DocenteStatsService {
   constructor(
@@ -490,8 +522,8 @@ export class DocenteStatsService {
   // ============================================================================
 
   private async calcularTopEstudiantesPorPuntos(
-    estudiantesUnicos: any[],
-    estudiantes: any[],
+    estudiantesUnicos: EstudianteConGrupos[],
+    estudiantes: EstudianteBasico[],
   ) {
     const puntosObtenidosRaw = await this.prisma.puntoObtenido.findMany({
       where: {
@@ -536,7 +568,7 @@ export class DocenteStatsService {
 
     return topEstudiantesPorPuntos.map((top) => {
       const asistenciaData = asistenciasPorEstudiante.find(
-        (a: any) => a.estudiante_id === top.estudiante_id,
+        (a) => a.estudiante_id === top.estudiante_id,
       );
 
       return {
@@ -551,7 +583,7 @@ export class DocenteStatsService {
   }
 
   private async calcularAsistenciaPerfecta(
-    estudiantesUnicos: any[],
+    estudiantesUnicos: EstudianteConGrupos[],
     docenteId: string,
   ) {
     const asistenciasPorEstudiante = await Promise.all(
@@ -597,7 +629,7 @@ export class DocenteStatsService {
   }
 
   private async calcularEstudiantesSinTareas(
-    estudiantesUnicos: any[],
+    estudiantesUnicos: EstudianteConGrupos[],
     estudiantesIdsUnicos: string[],
   ) {
     const progresoPlanificaciones =
@@ -624,7 +656,7 @@ export class DocenteStatsService {
 
   private async calcularRankingGrupos(
     docenteId: string,
-    inscripciones: any[],
+    inscripciones: Array<{ estudiante_id: string; clase_grupo_id: string }>,
     gruposIds: string[],
   ) {
     const gruposDelDocente = await this.prisma.claseGrupo.findMany({
@@ -717,9 +749,9 @@ export class DocenteStatsService {
   }
 
   private async calcularAsistenciaPorEstudiante(
-    estudiantesUnicos: any[],
+    estudiantesUnicos: EstudianteConGrupos[],
     estudiantesIds: string[],
-  ) {
+  ): Promise<AsistenciaEstudiante[]> {
     return await Promise.all(
       estudiantesUnicos.map(async (est) => {
         const asistencias = await this.prisma.asistenciaClaseGrupo.findMany({
