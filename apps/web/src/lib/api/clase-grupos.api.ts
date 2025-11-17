@@ -38,14 +38,14 @@ export async function listarClaseGrupos(
 }> {
   const queryParams = new URLSearchParams();
 
-  if (params?.anio_lectivo) {
-    queryParams.append('anio_lectivo', params.anio_lectivo.toString());
+  if (params?.anioLectivo) {
+    queryParams.append('anio_lectivo', params.anioLectivo.toString());
   }
   if (params?.activo !== undefined) {
     queryParams.append('activo', params.activo.toString());
   }
-  if (params?.docente_id) {
-    queryParams.append('docente_id', params.docente_id);
+  if (params?.docenteId) {
+    queryParams.append('docente_id', params.docenteId);
   }
   if (params?.tipo) {
     queryParams.append('tipo', params.tipo);

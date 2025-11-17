@@ -31,15 +31,15 @@ interface EstudianteOption {
 }
 
 interface ClaseGrupoFormProps {
-  formData: Omit<CrearClaseGrupoDto, 'estudiantes_ids'> & {
-    estudiantes_ids: string[];
+  formData: Omit<CrearClaseGrupoDto, 'estudiantesIds'> & {
+    estudiantesIds: string[];
   };
   docentes: DocenteOption[];
   sectores: SectorOption[];
   rutasCurriculares: RutaCurricularOption[];
   estudiantes: EstudianteOption[];
   onFieldChange: (
-    _field: keyof (Omit<CrearClaseGrupoDto, 'estudiantes_ids'> & { estudiantes_ids: string[] }),
+    _field: keyof (Omit<CrearClaseGrupoDto, 'estudiantesIds'> & { estudiantesIds: string[] }),
     _value: string | number | string[] | TipoClaseGrupo | DiaSemana | undefined,
   ) => void;
   onSubmit: () => void;
@@ -62,7 +62,7 @@ export function ClaseGrupoForm({
   isLoading = false,
 }: ClaseGrupoFormProps) {
   const [selectedEstudiantes, setSelectedEstudiantes] = useState<string[]>(
-    formData.estudiantes_ids || []
+    formData.estudiantesIds || []
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -76,7 +76,7 @@ export function ClaseGrupoForm({
       : [...selectedEstudiantes, estudianteId];
 
     setSelectedEstudiantes(newSelection);
-    onFieldChange('estudiantes_ids', newSelection);
+    onFieldChange('estudiantesIds', newSelection);
   };
 
   // Auto-calculate fecha_fin for GRUPO_REGULAR
@@ -154,8 +154,8 @@ export function ClaseGrupoForm({
             Día de la Semana *
           </label>
           <select
-            value={formData.dia_semana}
-            onChange={(e) => onFieldChange('dia_semana', e.target.value as DiaSemana)}
+            value={formData.diaSemana}
+            onChange={(e) => onFieldChange('diaSemana', e.target.value as DiaSemana)}
             className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             required
             disabled={isLoading}
@@ -175,8 +175,8 @@ export function ClaseGrupoForm({
           </label>
           <input
             type="time"
-            value={formData.hora_inicio}
-            onChange={(e) => onFieldChange('hora_inicio', e.target.value)}
+            value={formData.horaInicio}
+            onChange={(e) => onFieldChange('horaInicio', e.target.value)}
             className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             required
             disabled={isLoading}
@@ -190,8 +190,8 @@ export function ClaseGrupoForm({
           </label>
           <input
             type="time"
-            value={formData.hora_fin}
-            onChange={(e) => onFieldChange('hora_fin', e.target.value)}
+            value={formData.horaFin}
+            onChange={(e) => onFieldChange('horaFin', e.target.value)}
             className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             required
             disabled={isLoading}
@@ -208,8 +208,8 @@ export function ClaseGrupoForm({
           </label>
           <input
             type="date"
-            value={formData.fecha_inicio}
-            onChange={(e) => onFieldChange('fecha_inicio', e.target.value)}
+            value={formData.fechaInicio}
+            onChange={(e) => onFieldChange('fechaInicio', e.target.value)}
             className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             required
             disabled={isLoading}
@@ -224,8 +224,8 @@ export function ClaseGrupoForm({
             </label>
             <input
               type="date"
-              value={formData.fecha_fin || ''}
-              onChange={(e) => onFieldChange('fecha_fin', e.target.value)}
+              value={formData.fechaFin || ''}
+              onChange={(e) => onFieldChange('fechaFin', e.target.value)}
               className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
               required={shouldShowFechaFin}
               disabled={isLoading}
@@ -240,8 +240,8 @@ export function ClaseGrupoForm({
           </label>
           <input
             type="number"
-            value={formData.anio_lectivo}
-            onChange={(e) => onFieldChange('anio_lectivo', parseInt(e.target.value))}
+            value={formData.anioLectivo}
+            onChange={(e) => onFieldChange('anioLectivo', parseInt(e.target.value))}
             min="2024"
             max="2100"
             className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
@@ -259,8 +259,8 @@ export function ClaseGrupoForm({
             Docente *
           </label>
           <select
-            value={formData.docente_id}
-            onChange={(e) => onFieldChange('docente_id', e.target.value)}
+            value={formData.docenteId}
+            onChange={(e) => onFieldChange('docenteId', e.target.value)}
             className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             required
             disabled={isLoading}
@@ -282,8 +282,8 @@ export function ClaseGrupoForm({
             Ruta Curricular
           </label>
           <select
-            value={formData.ruta_curricular_id || ''}
-            onChange={(e) => onFieldChange('ruta_curricular_id', e.target.value || undefined)}
+            value={formData.rutaCurricularId || ''}
+            onChange={(e) => onFieldChange('rutaCurricularId', e.target.value || undefined)}
             className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             disabled={isLoading}
           >
@@ -304,8 +304,8 @@ export function ClaseGrupoForm({
             Sector
           </label>
           <select
-            value={formData.sector_id || ''}
-            onChange={(e) => onFieldChange('sector_id', e.target.value || undefined)}
+            value={formData.sectorId || ''}
+            onChange={(e) => onFieldChange('sectorId', e.target.value || undefined)}
             className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             disabled={isLoading}
           >
@@ -334,8 +334,8 @@ export function ClaseGrupoForm({
           </label>
           <input
             type="number"
-            value={formData.cupo_maximo}
-            onChange={(e) => onFieldChange('cupo_maximo', parseInt(e.target.value))}
+            value={formData.cupoMaximo}
+            onChange={(e) => onFieldChange('cupoMaximo', parseInt(e.target.value))}
             min="1"
             max="50"
             className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"

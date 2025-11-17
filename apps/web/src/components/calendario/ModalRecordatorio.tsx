@@ -59,13 +59,13 @@ export function ModalRecordatorio({
       setTitulo(recordatorioExistente.titulo);
       setDescripcion(recordatorioExistente.descripcion || '');
 
-      setFechaInicio(getDatePartFromISO(recordatorioExistente.fecha_inicio));
-      setHoraInicio(getTimePartFromISO(recordatorioExistente.fecha_inicio, '09:00'));
+      setFechaInicio(getDatePartFromISO(recordatorioExistente.fechaInicio));
+      setHoraInicio(getTimePartFromISO(recordatorioExistente.fechaInicio, '09:00'));
 
-      setFechaFin(getDatePartFromISO(recordatorioExistente.fecha_fin));
-      setHoraFin(getTimePartFromISO(recordatorioExistente.fecha_fin, '09:00'));
+      setFechaFin(getDatePartFromISO(recordatorioExistente.fechaFin));
+      setHoraFin(getTimePartFromISO(recordatorioExistente.fechaFin, '09:00'));
 
-      setEsTodoElDia(recordatorioExistente.es_todo_el_dia);
+      setEsTodoElDia(recordatorioExistente.esTodoElDia);
 
       if (recordatorioExistente.recordatorio) {
         setColor(recordatorioExistente.recordatorio.color);
@@ -95,9 +95,9 @@ export function ModalRecordatorio({
       titulo,
       descripcion: descripcion || undefined,
       tipo: TipoEvento.RECORDATORIO,
-      fecha_inicio: fechaInicioISO,
-      fecha_fin: fechaFinISO,
-      es_todo_el_dia: esTodoElDia,
+      fechaInicio: fechaInicioISO,
+      fechaFin: fechaFinISO,
+      esTodoElDia: esTodoElDia,
       color,
       completado,
     };

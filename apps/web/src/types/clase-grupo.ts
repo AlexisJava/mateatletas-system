@@ -37,17 +37,17 @@ export interface ClaseGrupo {
   codigo: string;
   nombre: string;
   tipo: TipoClaseGrupo;
-  dia_semana: DiaSemana;
-  hora_inicio: string; // "19:30"
-  hora_fin: string; // "21:00"
-  fecha_inicio: string; // ISO date
-  fecha_fin: string; // ISO date
-  anio_lectivo: number;
-  cupo_maximo: number;
+  diaSemana: DiaSemana;
+  horaInicio: string; // "19:30"
+  horaFin: string; // "21:00"
+  fechaInicio: string; // ISO date
+  fechaFin: string; // ISO date
+  anioLectivo: number;
+  cupoMaximo: number;
   activo: boolean;
-  docente_id: string;
-  ruta_curricular_id?: string;
-  sector_id?: string;
+  docenteId: string;
+  rutaCurricularId?: string;
+  sectorId?: string;
   nivel?: string;
   created_at: string;
   updated_at: string;
@@ -72,18 +72,18 @@ export interface ClaseGrupo {
   inscripciones?: InscripcionClaseGrupo[];
 
   // Computed fields
-  total_inscriptos?: number;
-  total_asistencias?: number;
-  cupos_disponibles?: number;
+  totalInscriptos?: number;
+  totalAsistencias?: number;
+  cuposDisponibles?: number;
 }
 
 export interface InscripcionClaseGrupo {
   id: string;
-  clase_grupo_id: string;
-  estudiante_id: string;
-  tutor_id: string;
-  fecha_inscripcion: string;
-  fecha_baja?: string;
+  claseGrupoId: string;
+  estudianteId: string;
+  tutorId: string;
+  fechaInscripcion: string;
+  fechaBaja?: string;
 
   estudiante?: {
     id: string;
@@ -101,26 +101,27 @@ export interface InscripcionClaseGrupo {
 }
 
 export interface CrearClaseGrupoDto {
+  grupoId: string;
   codigo: string;
   nombre: string;
   tipo: TipoClaseGrupo;
-  dia_semana: DiaSemana;
-  hora_inicio: string; // "HH:MM"
-  hora_fin: string; // "HH:MM"
-  fecha_inicio: string; // ISO date
-  fecha_fin?: string; // Optional - auto-calculated for GRUPO_REGULAR
-  anio_lectivo: number;
-  cupo_maximo: number;
-  docente_id: string;
-  ruta_curricular_id?: string;
-  sector_id?: string;
+  diaSemana: DiaSemana;
+  horaInicio: string; // "HH:MM"
+  horaFin: string; // "HH:MM"
+  fechaInicio: string; // ISO date
+  fechaFin?: string; // Optional - auto-calculated for GRUPO_REGULAR
+  anioLectivo: number;
+  cupoMaximo: number;
+  docenteId: string;
+  rutaCurricularId?: string;
+  sectorId?: string;
   nivel?: string;
-  estudiantes_ids: string[];
+  estudiantesIds: string[];
 }
 
 export interface ListarClaseGruposParams {
-  anio_lectivo?: number;
+  anioLectivo?: number;
   activo?: boolean;
-  docente_id?: string;
+  docenteId?: string;
   tipo?: TipoClaseGrupo;
 }

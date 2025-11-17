@@ -63,19 +63,19 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
       setTitulo(tareaExistente.titulo);
       setDescripcion(tareaExistente.descripcion || '');
 
-      setFechaInicio(getDatePartFromISO(tareaExistente.fecha_inicio));
-      setHoraInicio(getTimePartFromISO(tareaExistente.fecha_inicio, '09:00'));
+      setFechaInicio(getDatePartFromISO(tareaExistente.fechaInicio));
+      setHoraInicio(getTimePartFromISO(tareaExistente.fechaInicio, '09:00'));
 
-      setFechaFin(getDatePartFromISO(tareaExistente.fecha_fin));
-      setHoraFin(getTimePartFromISO(tareaExistente.fecha_fin, '10:00'));
+      setFechaFin(getDatePartFromISO(tareaExistente.fechaFin));
+      setHoraFin(getTimePartFromISO(tareaExistente.fechaFin, '10:00'));
 
       setEstado(tareaExistente.tarea.estado);
       setPrioridad(tareaExistente.tarea.prioridad);
-      setPorcentajeCompletado(tareaExistente.tarea.porcentaje_completado);
+      setPorcentajeCompletado(tareaExistente.tarea.porcentajeCompletado);
       setCategoria(tareaExistente.tarea.categoria || '');
       setEtiquetas(tareaExistente.tarea.etiquetas);
       setSubtareas(tareaExistente.tarea.subtareas || []);
-      setTiempoEstimado(tareaExistente.tarea.tiempo_estimado_minutos || undefined);
+      setTiempoEstimado(tareaExistente.tarea.tiempoEstimadoMinutos || undefined);
     } else {
       resetForm();
     }
@@ -111,16 +111,16 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
       titulo,
       descripcion: descripcion || undefined,
       tipo: TipoEvento.TAREA,
-      fecha_inicio: fechaInicioISO,
-      fecha_fin: fechaFinISO,
-      es_todo_el_dia: false,
+      fechaInicio: fechaInicioISO,
+      fechaFin: fechaFinISO,
+      esTodoElDia: false,
       estado,
       prioridad,
-      porcentaje_completado: porcentajeCompletado,
+      porcentajeCompletado: porcentajeCompletado,
       categoria: categoria || undefined,
       etiquetas,
       subtareas,
-      tiempo_estimado_minutos: tiempoEstimado,
+      tiempoEstimadoMinutos: tiempoEstimado,
     };
 
     try {

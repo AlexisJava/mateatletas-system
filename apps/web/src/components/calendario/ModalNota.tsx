@@ -60,8 +60,8 @@ export function ModalNota({ isOpen, onClose, notaExistente }: ModalNotaProps) {
       setTitulo(notaExistente.titulo);
       setDescripcion(notaExistente.descripcion || '');
 
-      setFechaInicio(getDatePartFromISO(notaExistente.fecha_inicio));
-      setHoraInicio(getTimePartFromISO(notaExistente.fecha_inicio));
+      setFechaInicio(getDatePartFromISO(notaExistente.fechaInicio));
+      setHoraInicio(getTimePartFromISO(notaExistente.fechaInicio));
 
       setContenido(notaExistente.nota.contenido);
       setCategoria(notaExistente.nota.categoria || '');
@@ -92,9 +92,9 @@ export function ModalNota({ isOpen, onClose, notaExistente }: ModalNotaProps) {
       titulo,
       descripcion: descripcion || undefined,
       tipo: TipoEvento.NOTA,
-      fecha_inicio: fechaInicioISO,
-      fecha_fin: fechaFinISO,
-      es_todo_el_dia: true,
+      fechaInicio: fechaInicioISO,
+      fechaFin: fechaFinISO,
+      esTodoElDia: true,
       contenido,
       categoria: categoria || undefined,
       color,

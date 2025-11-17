@@ -41,13 +41,13 @@ export interface Archivo {
 export interface Recurrencia {
   tipo: 'DIARIA' | 'SEMANAL' | 'MENSUAL';
   intervalo: number;
-  dias_semana?: number[];
-  fecha_fin?: string;
+  diasSemana?: number[];
+  fechaFin?: string;
   excepciones?: string[];
 }
 
 export interface RecordatorioTarea {
-  minutos_antes: number;
+  minutosAntes: number;
   enviado: boolean;
 }
 
@@ -57,14 +57,14 @@ export interface Evento {
   titulo: string;
   descripcion?: string;
   tipo: TipoEvento;
-  fecha_inicio: string;
-  fecha_fin: string;
-  es_todo_el_dia: boolean;
-  docente_id: string;
-  clase_id?: string;
+  fechaInicio: string;
+  fechaFin: string;
+  esTodoElDia: boolean;
+  docenteId: string;
+  claseId?: string;
   createdAt: string;
   updatedAt: string;
-  
+
   // Relaciones polimórficas
   tarea?: Tarea;
   recordatorio?: Recordatorio;
@@ -75,18 +75,18 @@ export interface Evento {
 // Tarea completa
 export interface Tarea {
   id: string;
-  evento_id: string;
+  eventoId: string;
   estado: EstadoTarea;
   prioridad: PrioridadTarea;
-  porcentaje_completado: number;
+  porcentajeCompletado: number;
   categoria?: string;
   etiquetas: string[];
   subtareas: Subtarea[];
   archivos: Archivo[];
-  clase_relacionada_id?: string;
-  estudiante_relacionado_id?: string;
-  tiempo_estimado_minutos?: number;
-  tiempo_real_minutos?: number;
+  claseRelacionadaId?: string;
+  estudianteRelacionadoId?: string;
+  tiempoEstimadoMinutos?: number;
+  tiempoRealMinutos?: number;
   recurrencia?: Recurrencia;
   recordatorios: RecordatorioTarea[];
   completedAt?: string;
@@ -95,7 +95,7 @@ export interface Tarea {
 // Recordatorio simple
 export interface Recordatorio {
   id: string;
-  evento_id: string;
+  eventoId: string;
   completado: boolean;
   color: string;
 }
@@ -103,7 +103,7 @@ export interface Recordatorio {
 // Nota de texto largo
 export interface Nota {
   id: string;
-  evento_id: string;
+  eventoId: string;
   contenido: string;
   categoria?: string;
   color: string;
@@ -114,24 +114,24 @@ export interface CreateEventoBase {
   titulo: string;
   descripcion?: string;
   tipo: TipoEvento;
-  fecha_inicio: string;
-  fecha_fin: string;
-  es_todo_el_dia?: boolean;
-  clase_id?: string;
+  fechaInicio: string;
+  fechaFin: string;
+  esTodoElDia?: boolean;
+  claseId?: string;
 }
 
 export interface CreateTareaDto extends CreateEventoBase {
   estado?: EstadoTarea;
   prioridad?: PrioridadTarea;
-  porcentaje_completado?: number;
+  porcentajeCompletado?: number;
   categoria?: string;
   etiquetas?: string[];
   subtareas?: Subtarea[];
   archivos?: Archivo[];
-  clase_relacionada_id?: string;
-  estudiante_relacionado_id?: string;
-  tiempo_estimado_minutos?: number;
-  tiempo_real_minutos?: number;
+  claseRelacionadaId?: string;
+  estudianteRelacionadoId?: string;
+  tiempoEstimadoMinutos?: number;
+  tiempoRealMinutos?: number;
   recurrencia?: Recurrencia;
   recordatorios?: RecordatorioTarea[];
 }
