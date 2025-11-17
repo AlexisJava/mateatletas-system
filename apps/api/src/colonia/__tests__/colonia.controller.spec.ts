@@ -4,6 +4,7 @@ import { ColoniaService } from '../colonia.service';
 import { CreateInscriptionDto } from '../dto/create-inscription.dto';
 import { Logger } from '@nestjs/common';
 import { ConflictException, BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 describe('ColoniaController', () => {
   let controller: ColoniaController;
@@ -83,6 +84,15 @@ describe('ColoniaController', () => {
         {
           provide: ColoniaService,
           useValue: service,
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return 'test-secret';
+              return null;
+            }),
+          },
         },
       ],
     }).compile();

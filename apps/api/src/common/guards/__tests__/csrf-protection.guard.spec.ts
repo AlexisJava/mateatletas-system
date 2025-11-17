@@ -32,7 +32,18 @@ describe('CsrfProtectionGuard - CSRF Security', () => {
     headers: Record<string, string> = {},
     isPublic = false,
   ): ExecutionContext => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(isPublic);
+    // Mock del Reflector para manejar las dos llamadas del guard:
+    // 1. REQUIRE_CSRF_KEY → retornar true (simular que endpoint tiene @RequireCsrf())
+    // 2. 'isPublic' → retornar el parámetro isPublic
+    jest.spyOn(reflector, 'getAllAndOverride').mockImplementation((key: string) => {
+      if (key === 'require_csrf') {
+        return true; // Simular que endpoint requiere CSRF
+      }
+      if (key === 'isPublic') {
+        return isPublic;
+      }
+      return false;
+    });
 
     return {
       switchToHttp: () => ({
@@ -235,7 +246,11 @@ describe('CsrfProtectionGuard - CSRF Security', () => {
 
       guard.canActivate(context);
 
-      // Verificar que se llamó a getAllAndOverride con 'isPublic'
+      // Verificar que se llamó a getAllAndOverride con 'require_csrf' y 'isPublic'
+      expect(reflector.getAllAndOverride).toHaveBeenCalledWith(
+        'require_csrf',
+        expect.any(Array),
+      );
       expect(reflector.getAllAndOverride).toHaveBeenCalledWith(
         'isPublic',
         expect.any(Array),
