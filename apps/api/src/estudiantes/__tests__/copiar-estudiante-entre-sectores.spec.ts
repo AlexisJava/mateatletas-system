@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EstudiantesService } from '../estudiantes.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EstudianteCopyService } from '../services/estudiante-copy.service';
+import { EstudianteBusinessValidator } from '../validators/estudiante-business.validator';
 import { PrismaService } from '../../core/database/prisma.service';
 import { BadRequestException, ConflictException } from '@nestjs/common';
-import { LogrosService } from '../../gamificacion/services/logros.service';
 
 /**
  * TDD: Copiar estudiante existente a otro sector
@@ -14,14 +15,15 @@ import { LogrosService } from '../../gamificacion/services/logros.service';
  * - No duplicar el usuario, solo agregar sector
  * - Validar que el estudiante no esté ya en ese sector
  */
-describe('EstudiantesService - Copiar entre Sectores', () => {
-  let service: EstudiantesService;
+describe('EstudianteCopyService - Copiar entre Sectores', () => {
+  let service: EstudianteCopyService;
   let prisma: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        EstudiantesService,
+        EstudianteCopyService,
+        EstudianteBusinessValidator,
         {
           provide: PrismaService,
           useValue: {
@@ -37,16 +39,16 @@ describe('EstudiantesService - Copiar entre Sectores', () => {
           },
         },
         {
-          provide: LogrosService,
+          provide: EventEmitter2,
           useValue: {
-            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
-            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
+            emit: jest.fn(),
+            emitAsync: jest.fn(),
           },
         },
       ],
     }).compile();
 
-    service = module.get<EstudiantesService>(EstudiantesService);
+    service = module.get<EstudianteCopyService>(EstudianteCopyService);
     prisma = module.get<PrismaService>(PrismaService);
 
     // Mock por defecto para create

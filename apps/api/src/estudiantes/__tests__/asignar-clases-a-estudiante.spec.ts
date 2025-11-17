@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EstudiantesService } from '../estudiantes.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EstudianteCommandService } from '../services/estudiante-command.service';
+import { EstudianteBusinessValidator } from '../validators/estudiante-business.validator';
 import { PrismaService } from '../../core/database/prisma.service';
 import { BadRequestException, ConflictException } from '@nestjs/common';
-import { LogrosService } from '../../gamificacion/services/logros.service';
 
 /**
  * TDD: Asignar clases a estudiante en un sector
@@ -14,14 +15,15 @@ import { LogrosService } from '../../gamificacion/services/logros.service';
  * - Validar cupos disponibles
  * - Prevenir inscripciones duplicadas
  */
-describe('EstudiantesService - Asignar Clases', () => {
-  let service: EstudiantesService;
+describe('EstudianteCommandService - Asignar Clases', () => {
+  let service: EstudianteCommandService;
   let prisma: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        EstudiantesService,
+        EstudianteCommandService,
+        EstudianteBusinessValidator,
         {
           provide: PrismaService,
           useValue: {
@@ -42,16 +44,16 @@ describe('EstudiantesService - Asignar Clases', () => {
           },
         },
         {
-          provide: LogrosService,
+          provide: EventEmitter2,
           useValue: {
-            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
-            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
+            emit: jest.fn(),
+            emitAsync: jest.fn(),
           },
         },
       ],
     }).compile();
 
-    service = module.get<EstudiantesService>(EstudiantesService);
+    service = module.get<EstudianteCommandService>(EstudianteCommandService);
     prisma = module.get<PrismaService>(PrismaService);
 
     jest.clearAllMocks();

@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EstudiantesService } from '../estudiantes.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EstudianteCommandService } from '../services/estudiante-command.service';
+import { EstudianteBusinessValidator } from '../validators/estudiante-business.validator';
 import { PrismaService } from '../../core/database/prisma.service';
-import { BadRequestException, ConflictException } from '@nestjs/common';
-import { LogrosService } from '../../gamificacion/services/logros.service';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 
 /**
  * TDD: Crear estudiante(s) con tutor en un sector específico
@@ -14,14 +15,15 @@ import { LogrosService } from '../../gamificacion/services/logros.service';
  * - Generar credenciales automáticas para estudiantes y tutor
  * - Validar que un estudiante pueda estar en múltiples sectores
  */
-describe('EstudiantesService - Crear con Tutor y Sector', () => {
-  let service: EstudiantesService;
+describe('EstudianteCommandService - Crear con Tutor y Sector', () => {
+  let service: EstudianteCommandService;
   let prisma: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        EstudiantesService,
+        EstudianteCommandService,
+        EstudianteBusinessValidator,
         {
           provide: PrismaService,
           useValue: {
@@ -48,16 +50,16 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
           },
         },
         {
-          provide: LogrosService,
+          provide: EventEmitter2,
           useValue: {
-            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
-            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
+            emit: jest.fn(),
+            emitAsync: jest.fn(),
           },
         },
       ],
     }).compile();
 
-    service = module.get<EstudiantesService>(EstudiantesService);
+    service = module.get<EstudianteCommandService>(EstudianteCommandService);
     prisma = module.get<PrismaService>(PrismaService);
 
     jest.clearAllMocks();
@@ -254,7 +256,7 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
   });
 
   describe('RED - Test 4: Validación de sector existente', () => {
-    it('debería lanzar BadRequestException si el sector no existe', async () => {
+    it('debería lanzar NotFoundException si el sector no existe', async () => {
       // Arrange
       const dto = {
         estudiantes: [
@@ -280,10 +282,10 @@ describe('EstudiantesService - Crear con Tutor y Sector', () => {
 
       // Act & Assert
       await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow(
-        BadRequestException,
+        NotFoundException,
       );
       await expect(service.crearEstudiantesConTutor(dto)).rejects.toThrow(
-        'El sector especificado no existe',
+        'Sector no encontrado',
       );
     });
   });

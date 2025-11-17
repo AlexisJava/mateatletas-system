@@ -1,15 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EstudiantesController } from '../estudiantes.controller';
-import { EstudiantesService } from '../estudiantes.service';
+import { EstudiantesFacadeService } from '../estudiantes-facade.service';
+import { EstudianteCommandService } from '../services/estudiante-command.service';
+import { EstudianteQueryService } from '../services/estudiante-query.service';
+import { EstudianteCopyService } from '../services/estudiante-copy.service';
+import { EstudianteStatsService } from '../services/estudiante-stats.service';
+import { EstudianteBusinessValidator } from '../validators/estudiante-business.validator';
 import { PrismaService } from '../../core/database/prisma.service';
 import { EstudianteOwnershipGuard } from '../guards/estudiante-ownership.guard';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { LogrosService } from '../../gamificacion/services/logros.service';
 
 describe('EstudiantesController - Avatar Ownership Security', () => {
   let controller: EstudiantesController;
-  let service: EstudiantesService;
+  let facadeService: EstudiantesFacadeService;
+  let commandService: EstudianteCommandService;
+  let queryService: EstudianteQueryService;
   let prisma: PrismaService;
 
   const mockEstudiante = {
@@ -33,7 +40,12 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [EstudiantesController],
       providers: [
-        EstudiantesService,
+        EstudiantesFacadeService,
+        EstudianteCommandService,
+        EstudianteQueryService,
+        EstudianteCopyService,
+        EstudianteStatsService,
+        EstudianteBusinessValidator,
         {
           provide: PrismaService,
           useValue: {
@@ -52,10 +64,10 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
           },
         },
         {
-          provide: LogrosService,
+          provide: EventEmitter2,
           useValue: {
-            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
-            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
+            emit: jest.fn(),
+            emitAsync: jest.fn(),
           },
         },
       ],
@@ -67,7 +79,9 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
       .compile();
 
     controller = module.get<EstudiantesController>(EstudiantesController);
-    service = module.get<EstudiantesService>(EstudiantesService);
+    facadeService = module.get<EstudiantesFacadeService>(EstudiantesFacadeService);
+    commandService = module.get<EstudianteCommandService>(EstudianteCommandService);
+    queryService = module.get<EstudianteQueryService>(EstudianteQueryService);
     prisma = module.get<PrismaService>(PrismaService);
   });
 
@@ -92,7 +106,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
 
       // Act & Assert - Simular que el guard rechazó
       // El guard verifica ownership, el service solo actualiza
-      await expect(service.findOne('est-123', 'tutor-other')).rejects.toThrow(
+      await expect(queryService.findOne('est-123', 'tutor-other')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -108,7 +122,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
       } as any);
 
       // Act
-      const result = await service.updateAvatarGradient('est-123', 5);
+      const result = await commandService.updateAvatarGradient('est-123', 5);
 
       // Assert
       expect(result).toHaveProperty('id', 'est-123');
@@ -137,7 +151,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         avatar_gradient: 3,
       } as any);
 
-      const result = await service.updateAvatarGradient(
+      const result = await commandService.updateAvatarGradient(
         'est-123',
         3,
       );
@@ -152,7 +166,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
       await expect(
-        service.updateAvatarGradient('non-existent', 5),
+        commandService.updateAvatarGradient('non-existent', 5),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -173,7 +187,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         avatar_gradient: 2,
       } as any);
 
-      const result = await service.updateAvatarGradient('est-123', 2);
+      const result = await commandService.updateAvatarGradient('est-123', 2);
 
       // No debe retornar password_hash
       expect(result).not.toHaveProperty('password_hash');
@@ -192,7 +206,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         avatar_gradient: 0,
       } as any);
 
-      const result = await service.updateAvatarGradient('est-123', 0);
+      const result = await commandService.updateAvatarGradient('est-123', 0);
       expect(result.avatar_gradient).toBe(0);
     });
 
@@ -205,7 +219,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         avatar_gradient: 9,
       } as any);
 
-      const result = await service.updateAvatarGradient('est-123', 9);
+      const result = await commandService.updateAvatarGradient('est-123', 9);
       expect(result.avatar_gradient).toBe(9);
     });
   });
