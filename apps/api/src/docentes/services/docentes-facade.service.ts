@@ -1,30 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { DocentesFacade } from './services/docentes-facade.service';
-import { CreateDocenteDto } from './dto/create-docente.dto';
-import { UpdateDocenteDto } from './dto/update-docente.dto';
+import { DocenteQueryService } from './docente-query.service';
+import { DocenteCommandService } from './docente-command.service';
+import { DocenteStatsService } from './docente-stats.service';
+import { CreateDocenteDto } from '../dto/create-docente.dto';
+import { UpdateDocenteDto } from '../dto/update-docente.dto';
 
 /**
- * FACADE SERVICE para el módulo Docentes
+ * Facade Service para el módulo Docentes
  *
- * Este servicio actúa como una fachada que delega toda la lógica
- * a servicios especializados, eliminando duplicación de código.
- *
- * Servicios especializados:
- * - DocenteQueryService: Queries (4 métodos)
- * - DocenteCommandService: Commands (4 métodos)
- * - DocenteStatsService: Statistics (2 métodos)
- * - DocenteBusinessValidator: Validaciones de negocio (5 métodos)
+ * Unifica las operaciones de Query, Command y Stats.
+ * Proporciona una API simplificada para el controlador.
  *
  * Patrón: FACADE + CQRS
- * Beneficio: Separación de responsabilidades, código más mantenible
- * Reducción: 927 líneas → ~120 líneas (87% reducción)
+ * Beneficio: Separación de responsabilidades manteniendo API simple
  */
 @Injectable()
-export class DocentesService {
-  constructor(private facade: DocentesFacade) {}
+export class DocentesFacade {
+  constructor(
+    private queryService: DocenteQueryService,
+    private commandService: DocenteCommandService,
+    private statsService: DocenteStatsService,
+  ) {}
 
   // ============================================================================
-  // COMMANDS (Escritura) - Delegación a Facade → CommandService
+  // COMMANDS (Escritura) - Delegación a CommandService
   // ============================================================================
 
   /**
@@ -33,7 +32,7 @@ export class DocentesService {
    * @returns Docente creado (sin password_hash) + generatedPassword si se auto-generó
    */
   async create(createDto: CreateDocenteDto) {
-    return this.facade.create(createDto);
+    return this.commandService.create(createDto);
   }
 
   /**
@@ -43,7 +42,7 @@ export class DocentesService {
    * @returns Docente actualizado sin password_hash
    */
   async update(id: string, updateDto: UpdateDocenteDto) {
-    return this.facade.update(id, updateDto);
+    return this.commandService.update(id, updateDto);
   }
 
   /**
@@ -52,7 +51,7 @@ export class DocentesService {
    * @returns Mensaje de confirmación
    */
   async remove(id: string) {
-    return this.facade.remove(id);
+    return this.commandService.remove(id);
   }
 
   /**
@@ -62,11 +61,11 @@ export class DocentesService {
    * @returns Resultado de la reasignación
    */
   async reasignarClases(fromDocenteId: string, toDocenteId: string) {
-    return this.facade.reasignarClases(fromDocenteId, toDocenteId);
+    return this.commandService.reasignarClases(fromDocenteId, toDocenteId);
   }
 
   // ============================================================================
-  // QUERIES (Lectura) - Delegación a Facade → QueryService
+  // QUERIES (Lectura) - Delegación a QueryService
   // ============================================================================
 
   /**
@@ -76,7 +75,7 @@ export class DocentesService {
    * @returns Lista paginada de docentes sin password_hash
    */
   async findAll(page?: number, limit?: number) {
-    return this.facade.findAll(page, limit);
+    return this.queryService.findAll(page, limit);
   }
 
   /**
@@ -86,7 +85,7 @@ export class DocentesService {
    * @returns Docente con password_hash incluido, o null si no existe
    */
   async findByEmail(email: string) {
-    return this.facade.findByEmail(email);
+    return this.queryService.findByEmail(email);
   }
 
   /**
@@ -95,11 +94,11 @@ export class DocentesService {
    * @returns Docente sin password_hash, incluye sectores únicos
    */
   async findById(id: string) {
-    return this.facade.findById(id);
+    return this.queryService.findById(id);
   }
 
   // ============================================================================
-  // STATISTICS (Estadísticas) - Delegación a Facade → StatsService
+  // STATISTICS (Estadísticas) - Delegación a StatsService
   // ============================================================================
 
   /**
@@ -108,7 +107,7 @@ export class DocentesService {
    * @returns Dashboard con clase inminente, alertas y estadísticas
    */
   async getDashboard(docenteId: string) {
-    return this.facade.getDashboard(docenteId);
+    return this.statsService.getDashboard(docenteId);
   }
 
   /**
@@ -117,6 +116,6 @@ export class DocentesService {
    * @returns Estadísticas detalladas (top estudiantes, asistencia, ranking)
    */
   async getEstadisticasCompletas(docenteId: string) {
-    return this.facade.getEstadisticasCompletas(docenteId);
+    return this.statsService.getEstadisticasCompletas(docenteId);
   }
 }
