@@ -36,10 +36,10 @@ describe('GamificacionService', () => {
     id: 'estudiante-123',
     nombre: 'María',
     apellido: 'González',
-    foto_url: 'https://example.com/foto.jpg',
-    avatar_url: 'https://example.com/avatar.png',
+    fotoUrl: 'https://example.com/foto.jpg', // camelCase para coincidir con servicio
+    avatar_gradient: 1,
     puntos_totales: 350,
-    equipo_id: 'equipo-1',
+    equipoId: 'equipo-1', // camelCase para coincidir con servicio
     equipo: {
       id: 'equipo-1',
       nombre: 'Los Números',
@@ -301,11 +301,11 @@ describe('GamificacionService', () => {
       ).rejects.toThrow('Estudiante no encontrado');
     });
 
-    it('should handle estudiante without equipo (equipo_id = null)', async () => {
+    it('should handle estudiante without equipo (equipoId = null)', async () => {
       // Arrange
       const estudianteSinEquipo = {
         ...mockEstudiante,
-        equipo_id: null,
+        equipoId: null,
         equipo: null,
       };
 
