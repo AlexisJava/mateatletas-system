@@ -400,7 +400,7 @@ export class Inscripciones2026Service {
     return {
       success: true,
       inscripcionId: inscripcion.id,
-      tutor_id: tutor.id,
+      tutorId: tutor.id,
       estudiantes_creados: estudiantesCreados,
       pago_info: {
         monto_total: inscripcionFee,

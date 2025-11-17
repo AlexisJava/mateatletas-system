@@ -1,0 +1,57 @@
+import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { TokenBlacklistGuard } from '../auth/guards/token-blacklist.guard';
+import { UserThrottlerGuard } from '../common/guards/user-throttler.guard';
+
+/**
+ * SecurityModule
+ *
+ * Módulo especializado en seguridad global de la aplicación.
+ *
+ * Responsabilidades:
+ * - Rate Limiting (protección contra brute force, DDoS)
+ * - Token Blacklist (validación de tokens invalidados)
+ * - User Throttler (límites por usuario/IP)
+ *
+ * Patrón: Security Module
+ * Beneficio: Centraliza toda la configuración de seguridad
+ */
+@Module({
+  imports: [
+    // Rate Limiting: Protege contra brute force, DDoS y abuso de API
+    // - Configurable via variables de entorno RATE_LIMIT_TTL y RATE_LIMIT_MAX
+    // - Default: 100 req/min en producción, 1000 req/min en desarrollo
+    ThrottlerModule.forRoot([
+      {
+        ttl: parseInt(process.env.RATE_LIMIT_TTL || '60000', 10), // Default: 60 segundos
+        limit: parseInt(
+          process.env.RATE_LIMIT_MAX ||
+            (process.env.NODE_ENV === 'production' ? '100' : '1000'),
+          10,
+        ),
+      },
+    ]),
+  ],
+  providers: [
+    // ✅ SECURITY FIX: CSRF removido de guards globales
+    // CSRF es ahora opt-in con @RequireCsrf() decorator
+    // Esto permite webhooks, API calls, y Postman sin bloqueos
+    // Ver: docs/CSRF-PROTECTION-STRATEGY.md
+
+    // Aplicar Token Blacklist guard globalmente
+    // Verifica que tokens no estén invalidados (logout, cambio contraseña, etc.)
+    // Fix #6: Token Blacklist (P3 - Security Improvement)
+    {
+      provide: APP_GUARD,
+      useClass: TokenBlacklistGuard,
+    },
+    // Aplicar rate limiting globalmente con UserThrottlerGuard
+    // Limita por user.id (autenticados) o IP (anónimos)
+    {
+      provide: APP_GUARD,
+      useClass: UserThrottlerGuard,
+    },
+  ],
+})
+export class SecurityModule {}

@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AppConfigModule } from './core/config/config.module';
-import { DatabaseModule } from './core/database/database.module';
-import { LoggerModule } from './common/logger/logger.module';
-import { CacheConfigModule } from './common/cache/cache.module';
+
+// Core & Infrastructure Modules
+import { CoreModule } from './core/core.module';
+import { SecurityModule } from './security/security.module';
+import { ObservabilityModule } from './observability/observability.module';
+import { InfrastructureModule } from './infrastructure/infrastructure.module';
+
+// Feature Modules
 import { AuthModule } from './auth/auth.module';
 import { EstudiantesModule } from './estudiantes/estudiantes.module';
 import { EquiposModule } from './equipos/equipos.module';
@@ -17,51 +21,43 @@ import { AsistenciaModule } from './asistencia/asistencia.module';
 import { AdminModule } from './admin/admin.module';
 import { GamificacionModule } from './gamificacion/gamificacion.module';
 import { CursosModule } from './cursos/cursos.module';
-import { NotificacionesModule } from './notificaciones/notificaciones.module';
 import { EventosModule } from './eventos/eventos.module';
 import { HealthModule } from './health/health.module';
 import { PlanificacionesSimplesModule } from './planificaciones-simples/planificaciones-simples.module';
 import { TiendaModule } from './tienda/tienda.module';
 import { ColoniaModule } from './colonia/colonia.module';
 import { Inscripciones2026Module } from './inscripciones-2026/inscripciones-2026.module';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { UserThrottlerGuard, CsrfProtectionGuard } from './common/guards';
-import { TokenBlacklistGuard } from './auth/guards/token-blacklist.guard';
 
+/**
+ * AppModule
+ *
+ * Módulo raíz de la aplicación - Refactorizado para eliminar Big Ball of Mud.
+ *
+ * Arquitectura modular:
+ * - CoreModule: Configuración base (Config, Database)
+ * - SecurityModule: Seguridad global (Guards, Rate Limiting)
+ * - ObservabilityModule: Logging e instrumentación
+ * - InfrastructureModule: Servicios transversales (Cache, Events, Notifications)
+ * - Feature Modules: Módulos de dominio
+ *
+ * Patrón: Modular Architecture
+ * Beneficio: Separación de responsabilidades, bajo acoplamiento, alta cohesión
+ *
+ * Fixes: #2 de ANTI-PATTERNS-AUDIT.md (Big Ball of Mud)
+ */
 @Module({
   imports: [
-    // Rate Limiting: Protege contra brute force, DDoS y abuso de API
-    // - Configurable via variables de entorno RATE_LIMIT_TTL y RATE_LIMIT_MAX
-    // - Default: 100 req/min en producción, 1000 req/min en desarrollo
-    ThrottlerModule.forRoot([
-      {
-        ttl: parseInt(process.env.RATE_LIMIT_TTL || '60000', 10), // Default: 60 segundos
-        limit: parseInt(
-          process.env.RATE_LIMIT_MAX ||
-            (process.env.NODE_ENV === 'production' ? '100' : '1000'),
-          10,
-        ),
-      },
-    ]),
-    // Event Emitter: Sistema de eventos para desacoplar módulos
-    // - Permite comunicación async entre módulos sin dependencias circulares
-    // - Usado para resolver Auth ↔ Gamificación circular dependency
-    EventEmitterModule.forRoot({
-      wildcard: false,
-      delimiter: '.',
-      newListener: false,
-      removeListener: false,
-      maxListeners: 10,
-      verboseMemoryLeak: false,
-      ignoreErrors: false,
-    }),
-    AppConfigModule,
-    DatabaseModule,
-    LoggerModule, // Logging estructurado global
-    CacheConfigModule, // Cache global con Redis (fallback a memoria)
+    // ============================================================================
+    // CORE & INFRASTRUCTURE
+    // ============================================================================
+    CoreModule,           // Config + Database (Global)
+    SecurityModule,       // Guards + Rate Limiting
+    ObservabilityModule,  // Logging + Interceptors
+    InfrastructureModule, // Cache + Events + Notifications (Global)
+
+    // ============================================================================
+    // FEATURE MODULES
+    // ============================================================================
     AuthModule,
     EstudiantesModule,
     EquiposModule,
@@ -73,42 +69,15 @@ import { TokenBlacklistGuard } from './auth/guards/token-blacklist.guard';
     AsistenciaModule,
     AdminModule,
     GamificacionModule,
-    CursosModule, // SLICE #16: Estructura de cursos y lecciones
-    NotificacionesModule, // Sistema de notificaciones para docentes
-    EventosModule, // Sistema de calendario y eventos para docentes
-    PlanificacionesSimplesModule, // Sistema de planificaciones auto-detectable (Convention over Configuration)
-    TiendaModule, // Sistema de tienda, recursos (XP, monedas, gemas), inventario y compras
-    ColoniaModule, // Sistema de inscripciones para Colonia de Verano 2026
-    Inscripciones2026Module, // Sistema unificado de inscripciones 2026 (Colonia + Ciclo + Pack)
-    HealthModule, // Health checks para monitoreo del sistema
+    CursosModule,
+    EventosModule,
+    PlanificacionesSimplesModule,
+    TiendaModule,
+    ColoniaModule,
+    Inscripciones2026Module,
+    HealthModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    // ✅ SECURITY FIX: CSRF removido de guards globales
-    // CSRF es ahora opt-in con @RequireCsrf() decorator
-    // Esto permite webhooks, API calls, y Postman sin bloqueos
-    // Ver: docs/CSRF-PROTECTION-STRATEGY.md
-
-    // Aplicar Token Blacklist guard globalmente
-    // Verifica que tokens no estén invalidados (logout, cambio contraseña, etc.)
-    // Fix #6: Token Blacklist (P3 - Security Improvement)
-    {
-      provide: APP_GUARD,
-      useClass: TokenBlacklistGuard,
-    },
-    // Aplicar rate limiting globalmente con UserThrottlerGuard
-    // Limita por user.id (autenticados) o IP (anónimos)
-    {
-      provide: APP_GUARD,
-      useClass: UserThrottlerGuard,
-    },
-    // Aplicar logging interceptor globalmente
-    // Registra todas las peticiones HTTP con duración y metadata
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
