@@ -219,11 +219,11 @@ export class AdminEstudiantesService {
     apellido: string;
     edad: number;
     nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
-    tutor_id?: string;
-    tutor_email?: string;
-    tutor_nombre?: string;
-    tutor_apellido?: string;
-    tutor_telefono?: string;
+    sectorId?: string;
+    tutorNombre?: string;
+    tutorApellido?: string;
+    tutorEmail?: string;
+    tutorTelefono?: string;
   }) {
     // Validar datos del estudiante
     if (!data.nombre || !data.apellido) {
@@ -239,24 +239,24 @@ export class AdminEstudiantesService {
     // 1. Determinar o crear el tutor
     let tutor;
 
-    if (data.tutor_id) {
+    if (data.sectorId) {
       // Usar tutor existente
       tutor = await this.prisma.tutor.findUnique({
-        where: { id: data.tutor_id },
+        where: { id: data.sectorId },
       });
 
       if (!tutor) {
         throw new NotFoundException(
-          `Tutor con ID ${data.tutor_id} no encontrado`,
+          `Tutor con ID ${data.sectorId} no encontrado`,
         );
       }
     } else {
       // Crear tutor nuevo si no existe
       const tutorEmail =
-        data.tutor_email ||
+        data.tutorEmail ||
         `tutor.${data.nombre.toLowerCase()}.${data.apellido.toLowerCase()}@temp.com`;
-      const tutorNombre = data.tutor_nombre || 'Tutor';
-      const tutorApellido = data.tutor_apellido || 'Genérico';
+      const tutorNombre = data.tutorNombre || 'Tutor';
+      const tutorApellido = data.tutorApellido || 'Genérico';
 
       // Generar password temporal
       const tempPassword = Math.random().toString(36).slice(-8);
@@ -268,7 +268,7 @@ export class AdminEstudiantesService {
           password_hash: passwordHash,
           nombre: tutorNombre,
           apellido: tutorApellido,
-          telefono: data.tutor_telefono || null,
+          telefono: data.tutorTelefono || null,
           roles: ['tutor'],
         },
       });
@@ -306,7 +306,7 @@ export class AdminEstudiantesService {
       success: true,
       message: 'Estudiante creado exitosamente',
       estudiante,
-      tutor_creado: !data.tutor_id, // Indica si se creó un tutor nuevo
+      tutor_creado: !data.sectorId, // Indica si se creó un tutor nuevo
     };
   }
 

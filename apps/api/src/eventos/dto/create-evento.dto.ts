@@ -32,19 +32,19 @@ export class CreateEventoBaseDto {
 
   @IsDateString()
   @IsNotEmpty()
-  fecha_inicio!: string;
+  fechaInicio!: string;
 
   @IsDateString()
   @IsNotEmpty()
-  fecha_fin!: string;
+  fechaFin!: string;
 
   @IsBoolean()
   @IsOptional()
-  es_todo_el_dia?: boolean;
+  esTodoElDia?: boolean;
 
   @IsString()
   @IsOptional()
-  clase_id?: string;
+  claseId?: string;
 }
 
 /**
@@ -107,11 +107,11 @@ export class RecurrenciaDto {
   @IsArray()
   @IsInt({ each: true })
   @IsOptional()
-  dias_semana?: number[];
+  diasSemana?: number[];
 
   @IsDateString()
   @IsOptional()
-  fecha_fin?: string;
+  fechaFin?: string;
 
   @IsArray()
   @IsString({ each: true })
@@ -125,7 +125,7 @@ export class RecurrenciaDto {
 export class RecordatorioTareaDto {
   @IsInt()
   @Min(0)
-  minutos_antes!: number;
+  minutosAntes!: number;
 
   @IsBoolean()
   enviado!: boolean;
@@ -147,7 +147,7 @@ export class CreateTareaDto extends CreateEventoBaseDto {
   @Min(0)
   @Max(100)
   @IsOptional()
-  porcentaje_completado?: number;
+  porcentajeCompletado?: number;
 
   @IsString()
   @IsOptional()
@@ -170,21 +170,21 @@ export class CreateTareaDto extends CreateEventoBaseDto {
 
   @IsString()
   @IsOptional()
-  clase_relacionada_id?: string;
+  claseRelacionadaId?: string;
 
   @IsString()
   @IsOptional()
-  estudiante_relacionado_id?: string;
+  estudianteRelacionadoId?: string;
 
   @IsInt()
   @Min(0)
   @IsOptional()
-  tiempo_estimado_minutos?: number;
+  tiempoEstimadoMinutos?: number;
 
   @IsInt()
   @Min(0)
   @IsOptional()
-  tiempo_real_minutos?: number;
+  tiempoRealMinutos?: number;
 
   @ValidateNested()
   @Type(() => RecurrenciaDto)

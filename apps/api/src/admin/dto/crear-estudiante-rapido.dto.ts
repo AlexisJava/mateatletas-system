@@ -33,21 +33,21 @@ export class CrearEstudianteRapidoDto {
   @IsString()
   @IsOptional()
   @IsUUID('4', { message: 'El ID del sector debe ser un UUID válido' })
-  sector_id?: string;
+  sectorId?: string;
 
   @IsString()
   @IsOptional()
-  tutor_nombre?: string;
+  tutorNombre?: string;
 
   @IsString()
   @IsOptional()
-  tutor_apellido?: string;
+  tutorApellido?: string;
 
   @IsString()
   @IsOptional()
-  tutor_email?: string;
+  tutorEmail?: string;
 
   @IsString()
   @IsOptional()
-  tutor_telefono?: string;
+  tutorTelefono?: string;
 }

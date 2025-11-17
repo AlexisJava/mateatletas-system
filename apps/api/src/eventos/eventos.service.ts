@@ -56,24 +56,24 @@ export class EventosService {
         titulo: dto.titulo,
         descripcion: dto.descripcion,
         tipo: TipoEvento.TAREA,
-        fecha_inicio: new Date(dto.fecha_inicio),
-        fecha_fin: new Date(dto.fecha_fin),
-        es_todo_el_dia: dto.es_todo_el_dia ?? false,
+        fecha_inicio: new Date(dto.fechaInicio),
+        fecha_fin: new Date(dto.fechaFin),
+        es_todo_el_dia: dto.esTodoElDia ?? false,
         docente_id: docenteId,
-        clase_id: dto.clase_id,
+        clase_id: dto.claseId,
         tarea: {
           create: {
             estado: dto.estado ?? 'PENDIENTE',
             prioridad: dto.prioridad ?? 'MEDIA',
-            porcentaje_completado: dto.porcentaje_completado ?? 0,
+            porcentaje_completado: dto.porcentajeCompletado ?? 0,
             categoria: dto.categoria,
             etiquetas: dto.etiquetas ?? [],
             subtareas: subtareasJson,
             archivos: archivosJson,
-            clase_relacionada_id: dto.clase_relacionada_id,
-            estudiante_relacionado_id: dto.estudiante_relacionado_id,
-            tiempo_estimado_minutos: dto.tiempo_estimado_minutos,
-            tiempo_real_minutos: dto.tiempo_real_minutos,
+            clase_relacionada_id: dto.claseRelacionadaId,
+            estudiante_relacionado_id: dto.estudianteRelacionadoId,
+            tiempo_estimado_minutos: dto.tiempoEstimadoMinutos,
+            tiempo_real_minutos: dto.tiempoRealMinutos,
             recurrencia: recurrenciaJson,
             recordatorios: recordatoriosJson,
           },
@@ -95,11 +95,11 @@ export class EventosService {
         titulo: dto.titulo,
         descripcion: dto.descripcion,
         tipo: TipoEvento.RECORDATORIO,
-        fecha_inicio: new Date(dto.fecha_inicio),
-        fecha_fin: new Date(dto.fecha_fin),
-        es_todo_el_dia: dto.es_todo_el_dia ?? false,
+        fecha_inicio: new Date(dto.fechaInicio),
+        fecha_fin: new Date(dto.fechaFin),
+        es_todo_el_dia: dto.esTodoElDia ?? false,
         docente_id: docenteId,
-        clase_id: dto.clase_id,
+        clase_id: dto.claseId,
         recordatorio: {
           create: {
             completado: dto.completado ?? false,
@@ -123,11 +123,11 @@ export class EventosService {
         titulo: dto.titulo,
         descripcion: dto.descripcion,
         tipo: TipoEvento.NOTA,
-        fecha_inicio: new Date(dto.fecha_inicio),
-        fecha_fin: new Date(dto.fecha_fin),
-        es_todo_el_dia: dto.es_todo_el_dia ?? false,
+        fecha_inicio: new Date(dto.fechaInicio),
+        fecha_fin: new Date(dto.fechaFin),
+        es_todo_el_dia: dto.esTodoElDia ?? false,
         docente_id: docenteId,
-        clase_id: dto.clase_id,
+        clase_id: dto.claseId,
         nota: {
           create: {
             contenido: dto.contenido,
@@ -318,15 +318,15 @@ export class EventosService {
     // Actualizar campos del evento base
     if (dto.titulo !== undefined) updateData.titulo = dto.titulo;
     if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;
-    if (dto.fecha_inicio !== undefined)
-      updateData.fecha_inicio = new Date(dto.fecha_inicio);
-    if (dto.fecha_fin !== undefined)
-      updateData.fecha_fin = new Date(dto.fecha_fin);
-    if (dto.es_todo_el_dia !== undefined)
-      updateData.es_todo_el_dia = dto.es_todo_el_dia;
-    if (dto.clase_id !== undefined) {
-      updateData.clase = dto.clase_id
-        ? { connect: { id: dto.clase_id } }
+    if (dto.fechaInicio !== undefined)
+      updateData.fecha_inicio = new Date(dto.fechaInicio);
+    if (dto.fechaFin !== undefined)
+      updateData.fecha_fin = new Date(dto.fechaFin);
+    if (dto.esTodoElDia !== undefined)
+      updateData.es_todo_el_dia = dto.esTodoElDia;
+    if (dto.claseId !== undefined) {
+      updateData.clase = dto.claseId
+        ? { connect: { id: dto.claseId } }
         : { disconnect: true };
     }
 
@@ -334,29 +334,29 @@ export class EventosService {
     const tareaUpdate: Prisma.TareaUpdateInput = {};
     if (dto.estado !== undefined) tareaUpdate.estado = dto.estado;
     if (dto.prioridad !== undefined) tareaUpdate.prioridad = dto.prioridad;
-    if (dto.porcentaje_completado !== undefined)
-      tareaUpdate.porcentaje_completado = dto.porcentaje_completado;
+    if (dto.porcentajeCompletado !== undefined)
+      tareaUpdate.porcentaje_completado = dto.porcentajeCompletado;
     if (dto.categoria !== undefined) tareaUpdate.categoria = dto.categoria;
     if (dto.etiquetas !== undefined) tareaUpdate.etiquetas = dto.etiquetas;
     if (dto.subtareas !== undefined)
       tareaUpdate.subtareas = this.serializeArray(dto.subtareas);
     if (dto.archivos !== undefined)
       tareaUpdate.archivos = this.serializeArray(dto.archivos);
-    if (dto.clase_relacionada_id !== undefined)
-      tareaUpdate.clase_relacionada_id = dto.clase_relacionada_id;
-    if (dto.estudiante_relacionado_id !== undefined)
-      tareaUpdate.estudiante_relacionado_id = dto.estudiante_relacionado_id;
-    if (dto.tiempo_estimado_minutos !== undefined)
-      tareaUpdate.tiempo_estimado_minutos = dto.tiempo_estimado_minutos;
-    if (dto.tiempo_real_minutos !== undefined)
-      tareaUpdate.tiempo_real_minutos = dto.tiempo_real_minutos;
+    if (dto.claseRelacionadaId !== undefined)
+      tareaUpdate.clase_relacionada_id = dto.claseRelacionadaId;
+    if (dto.estudianteRelacionadoId !== undefined)
+      tareaUpdate.estudiante_relacionado_id = dto.estudianteRelacionadoId;
+    if (dto.tiempoEstimadoMinutos !== undefined)
+      tareaUpdate.tiempo_estimado_minutos = dto.tiempoEstimadoMinutos;
+    if (dto.tiempoRealMinutos !== undefined)
+      tareaUpdate.tiempo_real_minutos = dto.tiempoRealMinutos;
     if (dto.recurrencia !== undefined)
       tareaUpdate.recurrencia = this.serializeObject(dto.recurrencia);
     if (dto.recordatorios !== undefined)
       tareaUpdate.recordatorios = this.serializeArray(dto.recordatorios);
 
     // Marcar como completada si porcentaje es 100
-    if (dto.porcentaje_completado === 100) {
+    if (dto.porcentajeCompletado === 100) {
       tareaUpdate.completedAt = new Date();
       tareaUpdate.estado = 'COMPLETADA';
     }
@@ -395,15 +395,15 @@ export class EventosService {
 
     if (dto.titulo !== undefined) updateData.titulo = dto.titulo;
     if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;
-    if (dto.fecha_inicio !== undefined)
-      updateData.fecha_inicio = new Date(dto.fecha_inicio);
-    if (dto.fecha_fin !== undefined)
-      updateData.fecha_fin = new Date(dto.fecha_fin);
-    if (dto.es_todo_el_dia !== undefined)
-      updateData.es_todo_el_dia = dto.es_todo_el_dia;
-    if (dto.clase_id !== undefined) {
-      updateData.clase = dto.clase_id
-        ? { connect: { id: dto.clase_id } }
+    if (dto.fechaInicio !== undefined)
+      updateData.fecha_inicio = new Date(dto.fechaInicio);
+    if (dto.fechaFin !== undefined)
+      updateData.fecha_fin = new Date(dto.fechaFin);
+    if (dto.esTodoElDia !== undefined)
+      updateData.es_todo_el_dia = dto.esTodoElDia;
+    if (dto.claseId !== undefined) {
+      updateData.clase = dto.claseId
+        ? { connect: { id: dto.claseId } }
         : { disconnect: true };
     }
 
@@ -442,15 +442,15 @@ export class EventosService {
 
     if (dto.titulo !== undefined) updateData.titulo = dto.titulo;
     if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;
-    if (dto.fecha_inicio !== undefined)
-      updateData.fecha_inicio = new Date(dto.fecha_inicio);
-    if (dto.fecha_fin !== undefined)
-      updateData.fecha_fin = new Date(dto.fecha_fin);
-    if (dto.es_todo_el_dia !== undefined)
-      updateData.es_todo_el_dia = dto.es_todo_el_dia;
-    if (dto.clase_id !== undefined) {
-      updateData.clase = dto.clase_id
-        ? { connect: { id: dto.clase_id } }
+    if (dto.fechaInicio !== undefined)
+      updateData.fecha_inicio = new Date(dto.fechaInicio);
+    if (dto.fechaFin !== undefined)
+      updateData.fecha_fin = new Date(dto.fechaFin);
+    if (dto.esTodoElDia !== undefined)
+      updateData.es_todo_el_dia = dto.esTodoElDia;
+    if (dto.claseId !== undefined) {
+      updateData.clase = dto.claseId
+        ? { connect: { id: dto.claseId } }
         : { disconnect: true };
     }
 

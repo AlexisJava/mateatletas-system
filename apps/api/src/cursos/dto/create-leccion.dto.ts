@@ -31,7 +31,7 @@ export class CreateLeccionDto {
   descripcion?: string;
 
   @IsEnum(TipoContenido, { message: 'Tipo de contenido inválido' })
-  tipo_contenido!: TipoContenido;
+  tipoContenido!: TipoContenido;
 
   @IsString()
   contenido!: string; // Puede ser URL, Markdown, JSON según tipo
@@ -44,11 +44,11 @@ export class CreateLeccionDto {
   @IsInt()
   @Min(0)
   @Max(50, { message: 'Los puntos no pueden exceder 50 por lección' })
-  puntos_por_completar?: number;
+  puntosPorCompletar?: number;
 
   @IsOptional()
   @IsString()
-  logro_desbloqueable_id?: string;
+  logroDesbloqueableId?: string;
 
   @IsOptional()
   @IsInt()
@@ -56,7 +56,7 @@ export class CreateLeccionDto {
   @Max(30, {
     message: 'La duración debe estar entre 1 y 30 minutos (Microlearning)',
   })
-  duracion_estimada_minutos?: number;
+  duracionEstimadaMinutos?: number;
 
   @IsOptional()
   @IsBoolean()
@@ -64,9 +64,9 @@ export class CreateLeccionDto {
 
   @IsOptional()
   @IsJSON()
-  recursos_adicionales?: string; // JSON string
+  recursosAdicionales?: string; // JSON string
 
   @IsOptional()
   @IsString()
-  leccion_prerequisito_id?: string;
+  leccionPrerequisitoId?: string;
 }

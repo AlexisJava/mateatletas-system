@@ -178,9 +178,9 @@ export class ModulosService {
     }
 
     // If there is a prerequisite, verify that it exists
-    if (createLeccionDto.leccion_prerequisito_id) {
+    if (createLeccionDto.leccionPrerequisitoId) {
       const prerequisito = await this.prisma.leccion.findUnique({
-        where: { id: createLeccionDto.leccion_prerequisito_id },
+        where: { id: createLeccionDto.leccionPrerequisitoId },
       });
 
       if (!prerequisito) {
@@ -192,7 +192,17 @@ export class ModulosService {
     const leccion = await this.prisma.leccion.create({
       data: {
         modulo_id: moduloId,
-        ...createLeccionDto,
+        titulo: createLeccionDto.titulo,
+        descripcion: createLeccionDto.descripcion,
+        tipo_contenido: createLeccionDto.tipoContenido,
+        contenido: createLeccionDto.contenido,
+        orden: createLeccionDto.orden,
+        puntos_por_completar: createLeccionDto.puntosPorCompletar,
+        logro_desbloqueable_id: createLeccionDto.logroDesbloqueableId,
+        duracion_estimada_minutos: createLeccionDto.duracionEstimadaMinutos,
+        activo: createLeccionDto.activo,
+        recursos_adicionales: createLeccionDto.recursosAdicionales,
+        leccion_prerequisito_id: createLeccionDto.leccionPrerequisitoId,
       },
       include: {
         modulo: {

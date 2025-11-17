@@ -29,22 +29,22 @@ export class ClaseGruposService {
 
     // Validar que el docente exista
     const docente = await this.prisma.docente.findUnique({
-      where: { id: dto.docente_id },
+      where: { id: dto.docenteId },
     });
 
     if (!docente) {
       throw new NotFoundException(
-        `No se encontró el docente con ID ${dto.docente_id}`,
+        `No se encontró el docente con ID ${dto.docenteId}`,
       );
     }
 
     // Validar que los estudiantes existan
     const estudiantes = await this.prisma.estudiante.findMany({
-      where: { id: { in: dto.estudiantes_ids } },
+      where: { id: { in: dto.estudiantesIds } },
       include: { tutor: true },
     });
 
-    if (estudiantes.length !== dto.estudiantes_ids.length) {
+    if (estudiantes.length !== dto.estudiantesIds.length) {
       throw new NotFoundException(
         'Uno o más estudiantes no fueron encontrados',
       );
@@ -52,14 +52,14 @@ export class ClaseGruposService {
 
     // Calcular fecha_fin automática para GRUPO_REGULAR
     let fechaFin: Date;
-    if (dto.tipo === TipoClaseGrupo.GRUPO_REGULAR && !dto.fecha_fin) {
+    if (dto.tipo === TipoClaseGrupo.GRUPO_REGULAR && !dto.fechaFin) {
       // Siempre 15 de diciembre del año lectivo
-      fechaFin = new Date(dto.anio_lectivo, 11, 15); // Mes 11 = diciembre (0-indexed)
+      fechaFin = new Date(dto.anioLectivo, 11, 15); // Mes 11 = diciembre (0-indexed)
     } else {
-      fechaFin = new Date(dto.fecha_fin!);
+      fechaFin = new Date(dto.fechaFin!);
     }
 
-    const fechaInicio = new Date(dto.fecha_inicio);
+    const fechaInicio = new Date(dto.fechaInicio);
 
     // Validar que fecha_fin sea posterior a fecha_inicio
     if (fechaFin <= fechaInicio) {
@@ -74,20 +74,20 @@ export class ClaseGruposService {
         // Crear el grupo
         const grupo = await tx.claseGrupo.create({
           data: {
-            grupo_id: dto.grupo_id,
+            grupo_id: dto.grupoId,
             codigo: dto.codigo,
             nombre: dto.nombre,
             tipo: dto.tipo,
-            dia_semana: dto.dia_semana,
-            hora_inicio: dto.hora_inicio,
-            hora_fin: dto.hora_fin,
+            dia_semana: dto.diaSemana,
+            hora_inicio: dto.horaInicio,
+            hora_fin: dto.horaFin,
             fecha_inicio: fechaInicio,
             fecha_fin: fechaFin,
-            anio_lectivo: dto.anio_lectivo,
-            cupo_maximo: dto.cupo_maximo,
-            docente_id: dto.docente_id,
-            ruta_curricular_id: dto.ruta_curricular_id,
-            sector_id: dto.sector_id,
+            anio_lectivo: dto.anioLectivo,
+            cupo_maximo: dto.cupoMaximo,
+            docente_id: dto.docenteId,
+            ruta_curricular_id: dto.rutaCurricularId,
+            sector_id: dto.sectorId,
             nivel: dto.nivel,
             activo: true,
           },
@@ -370,14 +370,14 @@ export class ClaseGruposService {
     }
 
     // Si se está cambiando el docente, validar que exista
-    if (dto.docente_id) {
+    if (dto.docenteId) {
       const docente = await this.prisma.docente.findUnique({
-        where: { id: dto.docente_id },
+        where: { id: dto.docenteId },
       });
 
       if (!docente) {
         throw new NotFoundException(
-          `No se encontró el docente con ID ${dto.docente_id}`,
+          `No se encontró el docente con ID ${dto.docenteId}`,
         );
       }
     }
@@ -387,24 +387,24 @@ export class ClaseGruposService {
 
     if (dto.nombre) updateData.nombre = dto.nombre;
     if (dto.tipo) updateData.tipo = dto.tipo;
-    if (dto.dia_semana) updateData.dia_semana = dto.dia_semana;
-    if (dto.hora_inicio) updateData.hora_inicio = dto.hora_inicio;
-    if (dto.hora_fin) updateData.hora_fin = dto.hora_fin;
-    if (dto.fecha_inicio) updateData.fecha_inicio = new Date(dto.fecha_inicio);
-    if (dto.fecha_fin) updateData.fecha_fin = new Date(dto.fecha_fin);
-    if (dto.anio_lectivo) updateData.anio_lectivo = dto.anio_lectivo;
-    if (dto.cupo_maximo) updateData.cupo_maximo = dto.cupo_maximo;
-    if (dto.docente_id) {
-      updateData.docente = { connect: { id: dto.docente_id } };
+    if (dto.diaSemana) updateData.dia_semana = dto.diaSemana;
+    if (dto.horaInicio) updateData.hora_inicio = dto.horaInicio;
+    if (dto.horaFin) updateData.hora_fin = dto.horaFin;
+    if (dto.fechaInicio) updateData.fecha_inicio = new Date(dto.fechaInicio);
+    if (dto.fechaFin) updateData.fecha_fin = new Date(dto.fechaFin);
+    if (dto.anioLectivo) updateData.anio_lectivo = dto.anioLectivo;
+    if (dto.cupoMaximo) updateData.cupo_maximo = dto.cupoMaximo;
+    if (dto.docenteId) {
+      updateData.docente = { connect: { id: dto.docenteId } };
     }
-    if (dto.ruta_curricular_id !== undefined) {
-      updateData.rutaCurricular = dto.ruta_curricular_id
-        ? { connect: { id: dto.ruta_curricular_id } }
+    if (dto.rutaCurricularId !== undefined) {
+      updateData.rutaCurricular = dto.rutaCurricularId
+        ? { connect: { id: dto.rutaCurricularId } }
         : { disconnect: true };
     }
-    if (dto.sector_id !== undefined) {
-      updateData.sector = dto.sector_id
-        ? { connect: { id: dto.sector_id } }
+    if (dto.sectorId !== undefined) {
+      updateData.sector = dto.sectorId
+        ? { connect: { id: dto.sectorId } }
         : { disconnect: true };
     }
     if (dto.nivel !== undefined) updateData.nivel = dto.nivel;
@@ -442,15 +442,15 @@ export class ClaseGruposService {
           },
         });
 
-        // Si se especificaron estudiantes_ids, actualizar las inscripciones
-        if (dto.estudiantes_ids !== undefined) {
+        // Si se especificaron estudiantesIds, actualizar las inscripciones
+        if (dto.estudiantesIds !== undefined) {
           // Validar que los estudiantes existan
           const estudiantes = await tx.estudiante.findMany({
-            where: { id: { in: dto.estudiantes_ids } },
+            where: { id: { in: dto.estudiantesIds } },
             include: { tutor: true },
           });
 
-          if (estudiantes.length !== dto.estudiantes_ids.length) {
+          if (estudiantes.length !== dto.estudiantesIds.length) {
             throw new NotFoundException(
               'Uno o más estudiantes no fueron encontrados',
             );

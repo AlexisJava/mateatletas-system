@@ -37,7 +37,7 @@ export class ActualizarClaseGrupoDto {
   })
   @IsOptional()
   @IsEnum(DiaSemana)
-  dia_semana?: DiaSemana;
+  diaSemana?: DiaSemana;
 
   @ApiPropertyOptional({
     description: 'Hora de inicio en formato HH:MM',
@@ -46,9 +46,9 @@ export class ActualizarClaseGrupoDto {
   @IsOptional()
   @IsString()
   @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
-    message: 'hora_inicio debe tener formato HH:MM',
+    message: 'horaInicio debe tener formato HH:MM',
   })
-  hora_inicio?: string;
+  horaInicio?: string;
 
   @ApiPropertyOptional({
     description: 'Hora de fin en formato HH:MM',
@@ -57,9 +57,9 @@ export class ActualizarClaseGrupoDto {
   @IsOptional()
   @IsString()
   @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
-    message: 'hora_fin debe tener formato HH:MM',
+    message: 'horaFin debe tener formato HH:MM',
   })
-  hora_fin?: string;
+  horaFin?: string;
 
   @ApiPropertyOptional({
     description: 'Fecha de inicio de vigencia del grupo',
@@ -67,7 +67,7 @@ export class ActualizarClaseGrupoDto {
   })
   @IsOptional()
   @IsDateString()
-  fecha_inicio?: string;
+  fechaInicio?: string;
 
   @ApiPropertyOptional({
     description: 'Fecha de fin de vigencia',
@@ -75,7 +75,7 @@ export class ActualizarClaseGrupoDto {
   })
   @IsOptional()
   @IsDateString()
-  fecha_fin?: string;
+  fechaFin?: string;
 
   @ApiPropertyOptional({
     description: 'Año lectivo al que pertenece',
@@ -85,7 +85,7 @@ export class ActualizarClaseGrupoDto {
   @IsInt()
   @Min(2024)
   @Max(2100)
-  anio_lectivo?: number;
+  anioLectivo?: number;
 
   @ApiPropertyOptional({
     description: 'Cupo máximo de estudiantes',
@@ -95,7 +95,7 @@ export class ActualizarClaseGrupoDto {
   @IsInt()
   @Min(1)
   @Max(50)
-  cupo_maximo?: number;
+  cupoMaximo?: number;
 
   @ApiPropertyOptional({
     description: 'ID del docente asignado',
@@ -103,7 +103,7 @@ export class ActualizarClaseGrupoDto {
   })
   @IsOptional()
   @IsString()
-  docente_id?: string;
+  docenteId?: string;
 
   @ApiPropertyOptional({
     description: 'ID de la ruta curricular (tema)',
@@ -111,7 +111,7 @@ export class ActualizarClaseGrupoDto {
   })
   @IsOptional()
   @IsString()
-  ruta_curricular_id?: string;
+  rutaCurricularId?: string;
 
   @ApiPropertyOptional({
     description: 'ID del sector (Matemática o Programación)',
@@ -119,7 +119,7 @@ export class ActualizarClaseGrupoDto {
   })
   @IsOptional()
   @IsString()
-  sector_id?: string;
+  sectorId?: string;
 
   @ApiPropertyOptional({
     description: 'Nivel o descripción del grupo',
@@ -138,5 +138,5 @@ export class ActualizarClaseGrupoDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  estudiantes_ids?: string[];
+  estudiantesIds?: string[];
 }

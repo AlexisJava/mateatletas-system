@@ -20,7 +20,7 @@ export class CrearClaseGrupoDto {
   })
   @IsString()
   @IsNotEmpty()
-  grupo_id!: string;
+  grupoId!: string;
 
   @ApiProperty({
     description: 'Código único del grupo (ej: B1, B2, OLIMP-2025)',
@@ -52,7 +52,7 @@ export class CrearClaseGrupoDto {
     example: DiaSemana.LUNES,
   })
   @IsEnum(DiaSemana)
-  dia_semana!: DiaSemana;
+  diaSemana!: DiaSemana;
 
   @ApiProperty({
     description: 'Hora de inicio en formato HH:MM',
@@ -60,9 +60,9 @@ export class CrearClaseGrupoDto {
   })
   @IsString()
   @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
-    message: 'hora_inicio debe tener formato HH:MM',
+    message: 'horaInicio debe tener formato HH:MM',
   })
-  hora_inicio!: string;
+  horaInicio!: string;
 
   @ApiProperty({
     description: 'Hora de fin en formato HH:MM',
@@ -70,16 +70,16 @@ export class CrearClaseGrupoDto {
   })
   @IsString()
   @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
-    message: 'hora_fin debe tener formato HH:MM',
+    message: 'horaFin debe tener formato HH:MM',
   })
-  hora_fin!: string;
+  horaFin!: string;
 
   @ApiProperty({
     description: 'Fecha de inicio de vigencia del grupo',
     example: '2025-03-01',
   })
   @IsDateString()
-  fecha_inicio!: string;
+  fechaInicio!: string;
 
   @ApiPropertyOptional({
     description:
@@ -88,7 +88,7 @@ export class CrearClaseGrupoDto {
   })
   @IsOptional()
   @IsDateString()
-  fecha_fin?: string;
+  fechaFin?: string;
 
   @ApiProperty({
     description: 'Año lectivo al que pertenece',
@@ -97,7 +97,7 @@ export class CrearClaseGrupoDto {
   @IsInt()
   @Min(2024)
   @Max(2100)
-  anio_lectivo!: number;
+  anioLectivo!: number;
 
   @ApiProperty({
     description: 'Cupo máximo de estudiantes',
@@ -106,7 +106,7 @@ export class CrearClaseGrupoDto {
   @IsInt()
   @Min(1)
   @Max(50)
-  cupo_maximo!: number;
+  cupoMaximo!: number;
 
   @ApiProperty({
     description: 'ID del docente asignado',
@@ -114,7 +114,7 @@ export class CrearClaseGrupoDto {
   })
   @IsString()
   @IsNotEmpty()
-  docente_id!: string;
+  docenteId!: string;
 
   @ApiPropertyOptional({
     description: 'ID de la ruta curricular (tema)',
@@ -122,7 +122,7 @@ export class CrearClaseGrupoDto {
   })
   @IsOptional()
   @IsString()
-  ruta_curricular_id?: string;
+  rutaCurricularId?: string;
 
   @ApiPropertyOptional({
     description: 'ID del sector (Matemática o Programación)',
@@ -130,7 +130,7 @@ export class CrearClaseGrupoDto {
   })
   @IsOptional()
   @IsString()
-  sector_id?: string;
+  sectorId?: string;
 
   @ApiPropertyOptional({
     description: 'Nivel o descripción del grupo',
@@ -147,5 +147,5 @@ export class CrearClaseGrupoDto {
   })
   @IsArray()
   @IsString({ each: true })
-  estudiantes_ids!: string[];
+  estudiantesIds!: string[];
 }
