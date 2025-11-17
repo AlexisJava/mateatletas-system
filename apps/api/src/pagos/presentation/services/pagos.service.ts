@@ -9,6 +9,10 @@ import { InscripcionMensualRepository } from '../../infrastructure/repositories/
 import { MercadoPagoService } from '../../mercadopago.service';
 import { PrismaService } from '../../../core/database/prisma.service';
 import {
+  EstadoMercadoPago,
+  mapearEstadoMercadoPago,
+} from '../../../domain/constants';
+import {
   CalcularPrecioInputDTO,
   CalcularPrecioOutputDTO,
 } from '../../application/dtos/calcular-precio.dto';
@@ -290,19 +294,19 @@ export class PagosService {
     this.logger.log(`🎫 Procesando pago de membresía ID: ${membresiaId}`);
 
     // Mapear estado de MercadoPago a estado de membresía
+    const estadoPago = mapearEstadoMercadoPago(payment.status);
+
+    // Convertir EstadoPago a estado de membresía
     let nuevoEstado: 'Activa' | 'Pendiente' | 'Cancelada' = 'Pendiente';
 
-    switch (payment.status) {
-      case 'approved':
+    switch (estadoPago) {
+      case 'PAGADO':
         nuevoEstado = 'Activa';
         break;
-      case 'rejected':
-      case 'cancelled':
+      case 'CANCELADO':
+      case 'RECHAZADO':
         nuevoEstado = 'Pendiente'; // Permitir reintentar
         break;
-      case 'pending':
-      case 'in_process':
-      case 'in_mediation':
       default:
         nuevoEstado = 'Pendiente';
         break;
@@ -347,19 +351,19 @@ export class PagosService {
     this.logger.log(`📚 Procesando pago de inscripción ID: ${inscripcionId}`);
 
     // Mapear estado de MercadoPago a estado de pago
+    const estadoPago = mapearEstadoMercadoPago(payment.status);
+
+    // Convertir EstadoPago a estado de inscripción
     let nuevoEstado: 'Pagado' | 'Pendiente' = 'Pendiente';
 
-    switch (payment.status) {
-      case 'approved':
+    switch (estadoPago) {
+      case 'PAGADO':
         nuevoEstado = 'Pagado';
         break;
-      case 'rejected':
-      case 'cancelled':
+      case 'CANCELADO':
+      case 'RECHAZADO':
         nuevoEstado = 'Pendiente'; // Permitir reintentar
         break;
-      case 'pending':
-      case 'in_process':
-      case 'in_mediation':
       default:
         nuevoEstado = 'Pendiente';
         break;

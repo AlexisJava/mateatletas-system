@@ -6,6 +6,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { BCRYPT_ROUNDS } from '../../common/constants/security.constants';
+import {
+  BUSINESS_RULES,
+  esEdadValida,
+  getMensajeErrorEdad,
+} from '../../domain/constants';
 import * as bcrypt from 'bcrypt';
 import {
   generateEstudianteUsername,
@@ -232,8 +237,8 @@ export class AdminEstudiantesService {
       );
     }
 
-    if (data.edad < 3 || data.edad > 99) {
-      throw new BadRequestException('La edad debe estar entre 3 y 99 años');
+    if (!esEdadValida(data.edad)) {
+      throw new BadRequestException(getMensajeErrorEdad());
     }
 
     // 1. Determinar o crear el tutor

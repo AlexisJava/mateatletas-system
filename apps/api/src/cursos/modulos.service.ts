@@ -307,8 +307,8 @@ export class ModulosService {
       },
     });
 
-    // Recalculate module points if puntos_por_completar changed
-    if (updateLeccionDto.puntos_por_completar !== undefined) {
+    // Recalculate module points if puntosPorCompletar changed
+    if (updateLeccionDto.puntosPorCompletar !== undefined) {
       await this.recalcularPuntosModulo(leccion.modulo_id);
     }
 

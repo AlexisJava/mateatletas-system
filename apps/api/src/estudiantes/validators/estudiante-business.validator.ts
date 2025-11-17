@@ -4,6 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
+import { esEdadValida, getMensajeErrorEdad } from '../../domain/constants';
 
 /**
  * Validator para reglas de negocio de estudiantes
@@ -54,8 +55,8 @@ export class EstudianteBusinessValidator {
    * @throws BadRequestException si la edad es inválida
    */
   validateEdad(edad: number): void {
-    if (edad < 3 || edad > 99) {
-      throw new BadRequestException('La edad debe estar entre 3 y 99 años');
+    if (!esEdadValida(edad)) {
+      throw new BadRequestException(getMensajeErrorEdad());
     }
   }
 
