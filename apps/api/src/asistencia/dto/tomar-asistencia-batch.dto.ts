@@ -21,7 +21,7 @@ export class AsistenciaItemDto {
     example: 'cmh3iy3dd0000xw0awic6dep9',
   })
   @IsString()
-  estudiante_id!: string;
+  estudianteId!: string;
 
   @ApiProperty({
     description: 'Estado de asistencia del estudiante',
@@ -53,7 +53,7 @@ export class TomarAsistenciaBatchDto {
     example: 'cmh6d8pqn0001xwd0wf5sv4d8',
   })
   @IsString()
-  clase_grupo_id!: string;
+  claseGrupoId!: string;
 
   @ApiProperty({
     description: 'Fecha de la clase en formato ISO (YYYY-MM-DD)',

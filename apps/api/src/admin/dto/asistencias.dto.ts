@@ -22,7 +22,7 @@ export class RegistrarAsistenciaItemDto {
   })
   @IsString()
   @IsNotEmpty()
-  estudiante_id!: string;
+  estudianteId!: string;
 
   @ApiProperty({
     description: 'Estado de la asistencia',
@@ -115,7 +115,7 @@ export class FiltrosHistorialAsistenciasDto {
   })
   @IsOptional()
   @IsDateString()
-  fecha_desde?: string;
+  fechaDesde?: string;
 
   @ApiPropertyOptional({
     description: 'Fecha de fin del rango (ISO 8601)',
@@ -123,7 +123,7 @@ export class FiltrosHistorialAsistenciasDto {
   })
   @IsOptional()
   @IsDateString()
-  fecha_hasta?: string;
+  fechaHasta?: string;
 
   @ApiPropertyOptional({
     description: 'Filtrar por estudiante específico',
@@ -131,5 +131,5 @@ export class FiltrosHistorialAsistenciasDto {
   })
   @IsOptional()
   @IsString()
-  estudiante_id?: string;
+  estudianteId?: string;
 }

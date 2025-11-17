@@ -10,12 +10,12 @@ export class CrearPreferenciaCursoRequestDto {
     example: 'prod-curso-001',
   })
   @IsString()
-  producto_id!: string;
+  productoId!: string;
 
   @ApiProperty({
     description: 'ID del estudiante que se desea inscribir',
     example: 'est-123',
   })
   @IsString()
-  estudiante_id!: string;
+  estudianteId!: string;
 }

@@ -12,7 +12,13 @@ export class NotificacionesService {
    */
   async create(createNotificacionDto: CreateNotificacionDto) {
     return this.prisma.notificacion.create({
-      data: createNotificacionDto,
+      data: {
+        tipo: createNotificacionDto.tipo,
+        titulo: createNotificacionDto.titulo,
+        mensaje: createNotificacionDto.mensaje,
+        docente_id: createNotificacionDto.docenteId,
+        metadata: createNotificacionDto.metadata,
+      },
     });
   }
 
@@ -138,7 +144,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.ClaseProxima,
       titulo: 'Clase próxima',
       mensaje: `La clase "${claseTitulo}" comienza mañana a las ${fechaHora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`,
-      docente_id: docenteId,
+      docenteId: docenteId,
       metadata: { clase_id: claseId },
     });
   }
@@ -155,7 +161,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.AsistenciaPendiente,
       titulo: 'Asistencia pendiente',
       mensaje: `Recuerda registrar la asistencia de la clase "${claseTitulo}"`,
-      docente_id: docenteId,
+      docenteId: docenteId,
       metadata: { clase_id: claseId },
     });
   }
@@ -173,7 +179,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.EstudianteAlerta,
       titulo: 'Alerta de estudiante',
       mensaje: `${estudianteNombre}: ${razon}`,
-      docente_id: docenteId,
+      docenteId: docenteId,
       metadata: { estudiante_id: estudianteId },
     });
   }
@@ -191,7 +197,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.ClaseCancelada,
       titulo: 'Clase cancelada',
       mensaje: `La clase "${claseTitulo}" ha sido cancelada${motivo ? ': ' + motivo : ''}`,
-      docente_id: docenteId,
+      docenteId: docenteId,
       metadata: { clase_id: claseId },
     });
   }
@@ -209,7 +215,7 @@ export class NotificacionesService {
       tipo: TipoNotificacion.LogroEstudiante,
       titulo: 'Logro desbloqueado',
       mensaje: `${estudianteNombre} ha desbloqueado: ${logroTitulo}`,
-      docente_id: docenteId,
+      docenteId: docenteId,
       metadata: { estudiante_id: estudianteId },
     });
   }

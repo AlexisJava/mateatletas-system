@@ -63,7 +63,7 @@ export class PagosController {
   ) {
     return await this.pagosTutorService.crearPreferenciaSuscripcion(
       user.id,
-      body.producto_id,
+      body.productoId,
     );
   }
 
@@ -80,8 +80,8 @@ export class PagosController {
   ) {
     return await this.pagosTutorService.crearPreferenciaCurso(
       user.id,
-      body.estudiante_id,
-      body.producto_id,
+      body.estudianteId,
+      body.productoId,
     );
   }
 

@@ -14,5 +14,5 @@ export class CrearPreferenciaSuscripcionRequestDto {
   })
   @IsOptional()
   @IsString()
-  producto_id?: string;
+  productoId?: string;
 }

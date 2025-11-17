@@ -181,7 +181,7 @@ export class AsistenciaController {
     @GetUser() user: AuthUser,
   ) {
     return this.asistenciaService.tomarAsistenciaClaseGrupoBatch(
-      dto.clase_grupo_id,
+      dto.claseGrupoId,
       dto.fecha,
       dto.asistencias,
       user.id,

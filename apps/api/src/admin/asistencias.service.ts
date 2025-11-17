@@ -41,7 +41,7 @@ export class AsistenciasService {
       (i) => i.estudiante_id,
     );
     const estudiantesNoInscritos = dto.asistencias.filter(
-      (a) => !estudiantesInscritos.includes(a.estudiante_id),
+      (a) => !estudiantesInscritos.includes(a.estudianteId),
     );
 
     if (estudiantesNoInscritos.length > 0) {
@@ -59,7 +59,7 @@ export class AsistenciasService {
         const existente = await this.prisma.asistenciaClaseGrupo.findFirst({
           where: {
             clase_grupo_id: claseGrupoId,
-            estudiante_id: asistencia.estudiante_id,
+            estudiante_id: asistencia.estudianteId,
             fecha: fecha,
           },
         });
@@ -88,7 +88,7 @@ export class AsistenciasService {
           return this.prisma.asistenciaClaseGrupo.create({
             data: {
               clase_grupo_id: claseGrupoId,
-              estudiante_id: asistencia.estudiante_id,
+              estudiante_id: asistencia.estudianteId,
               fecha: fecha,
               estado: asistencia.estado,
               observaciones: asistencia.observaciones,
@@ -166,18 +166,18 @@ export class AsistenciasService {
       clase_grupo_id: claseGrupoId,
     };
 
-    if (filtros?.fecha_desde || filtros?.fecha_hasta) {
+    if (filtros?.fechaDesde || filtros?.fechaHasta) {
       where.fecha = {};
-      if (filtros.fecha_desde) {
-        where.fecha.gte = new Date(filtros.fecha_desde);
+      if (filtros.fechaDesde) {
+        where.fecha.gte = new Date(filtros.fechaDesde);
       }
-      if (filtros.fecha_hasta) {
-        where.fecha.lte = new Date(filtros.fecha_hasta);
+      if (filtros.fechaHasta) {
+        where.fecha.lte = new Date(filtros.fechaHasta);
       }
     }
 
-    if (filtros?.estudiante_id) {
-      where.estudiante_id = filtros.estudiante_id;
+    if (filtros?.estudianteId) {
+      where.estudiante_id = filtros.estudianteId;
     }
 
     const asistencias = await this.prisma.asistenciaClaseGrupo.findMany({

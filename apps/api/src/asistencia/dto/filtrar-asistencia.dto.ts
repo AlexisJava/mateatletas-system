@@ -4,11 +4,11 @@ import { EstadoAsistencia } from '@prisma/client';
 export class FiltrarAsistenciaDto {
   @IsOptional()
   @IsString()
-  clase_id?: string;
+  claseId?: string;
 
   @IsOptional()
   @IsString()
-  estudiante_id?: string;
+  estudianteId?: string;
 
   @IsOptional()
   @IsEnum(EstadoAsistencia)
@@ -16,9 +16,9 @@ export class FiltrarAsistenciaDto {
 
   @IsOptional()
   @IsDateString()
-  fecha_desde?: string;
+  fechaDesde?: string;
 
   @IsOptional()
   @IsDateString()
-  fecha_hasta?: string;
+  fechaHasta?: string;
 }

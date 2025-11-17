@@ -91,8 +91,8 @@ export class AsistenciaReportesService {
       estudiante_id: estudianteId,
     };
 
-    if (filtros.clase_id) {
-      whereInscripcion.clase_id = filtros.clase_id;
+    if (filtros.claseId) {
+      whereInscripcion.clase_id = filtros.claseId;
     }
 
     // Optimized: Execute queries in parallel
@@ -100,8 +100,8 @@ export class AsistenciaReportesService {
       estudiante_id: estudianteId,
     };
 
-    if (filtros.clase_id) {
-      whereAsistencia.clase_id = filtros.clase_id;
+    if (filtros.claseId) {
+      whereAsistencia.clase_id = filtros.claseId;
     }
 
     const [inscripciones, asistencias] = await Promise.all([

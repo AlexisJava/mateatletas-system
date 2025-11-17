@@ -12,7 +12,7 @@ export class CreateNotificacionDto {
   mensaje!: string;
 
   @IsString()
-  docente_id!: string;
+  docenteId!: string;
 
   @IsOptional()
   @IsObject()

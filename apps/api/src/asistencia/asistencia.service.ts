@@ -204,7 +204,7 @@ export class AsistenciaService {
     clase_grupo_id: string,
     fecha: string,
     asistencias: Array<{
-      estudiante_id: string;
+      estudianteId: string;
       estado: import('@prisma/client').EstadoAsistencia;
       observaciones?: string;
     }>,
@@ -238,7 +238,7 @@ export class AsistenciaService {
     }
 
     // 2. Verificar que todos los estudiantes están inscritos en el grupo
-    const estudiantesIds = asistencias.map((a) => a.estudiante_id);
+    const estudiantesIds = asistencias.map((a) => a.estudianteId);
     const inscripciones = await this.prisma.inscripcionClaseGrupo.findMany({
       where: {
         clase_grupo_id,
@@ -278,13 +278,13 @@ export class AsistenciaService {
           where: {
             clase_grupo_id_estudiante_id_fecha: {
               clase_grupo_id,
-              estudiante_id: asistencia.estudiante_id,
+              estudiante_id: asistencia.estudianteId,
               fecha: fechaISO,
             },
           },
           create: {
             clase_grupo_id,
-            estudiante_id: asistencia.estudiante_id,
+            estudiante_id: asistencia.estudianteId,
             fecha: fechaISO,
             estado: asistencia.estado,
             observaciones: asistencia.observaciones || null,
