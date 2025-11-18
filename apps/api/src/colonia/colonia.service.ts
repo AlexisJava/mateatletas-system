@@ -7,6 +7,8 @@ import {
   parseLegacyExternalReference,
   TipoExternalReference,
   PRECIOS,
+  DEFAULT_ROLES,
+  calcularFechaVencimiento,
 } from '../domain/constants';
 import { PricingCalculatorService } from '../domain/services/pricing-calculator.service';
 import { CreateInscriptionDto } from './dto/create-inscription.dto';
@@ -23,23 +25,24 @@ export class ColoniaService {
 
   /**
    * Genera un PIN de 4 dígitos único
+   *
+   * @returns PIN único de 4 dígitos
    */
   private async generateUniquePin(): Promise<string> {
-    let pin = '';
-    let exists = true;
+    let pin: string;
 
-    while (exists) {
+    while (true) {
       pin = Math.floor(1000 + Math.random() * 9000).toString();
 
-      // Verificar que no exista en la tabla colonia_estudiantes
-      const existingStudent = await this.prisma.$queryRaw<any[]>`
-        SELECT id FROM colonia_estudiantes WHERE pin = ${pin} LIMIT 1
-      `;
+      // Verificar que no exista usando Prisma Client (type-safe)
+      const count = await this.prisma.coloniaEstudiante.count({
+        where: { pin },
+      });
 
-      exists = existingStudent.length > 0;
+      if (count === 0) {
+        return pin;
+      }
     }
-
-    return pin;
   }
 
   /**
@@ -112,7 +115,7 @@ export class ColoniaService {
           debe_cambiar_password: false, // El tutor ya eligió su propia contraseña
           debe_completar_perfil: false,
           ha_completado_onboarding: true,
-          roles: JSON.parse('["tutor"]'),
+          roles: DEFAULT_ROLES.TUTOR,
         },
       });
 
@@ -231,11 +234,11 @@ export class ColoniaService {
         pin: pins[idx],
       }));
 
-      this.logger.log(`✅ ${estudiantesCreados.length} estudiantes creados con ${cursosData.length} cursos en total`);
+      this.logger.log(`Estudiantes creados: ${estudiantesCreados.length}, cursos totales: ${cursosData.length}`);
 
       // Crear pago de Enero 2026
       const pagoEneroId = crypto.randomUUID();
-      const fechaVencimiento = new Date('2026-02-05'); // Vence el 5 de febrero
+      const fechaVencimiento = calcularFechaVencimiento('Enero', 2026);
 
       await tx.$executeRaw`
         INSERT INTO colonia_pagos (
@@ -286,7 +289,7 @@ export class ColoniaService {
       WHERE id = ${result.pagoEneroId}
     `;
 
-    this.logger.log(`✅ Inscripción completada exitosamente - Preference ID: ${preference.id}`);
+    this.logger.log('Inscripción completada exitosamente', { preferenceId: preference.id, inscriptionId });
 
     return {
       message: 'Inscripción creada exitosamente',
@@ -313,7 +316,7 @@ export class ColoniaService {
 
     // Solo procesar notificaciones de tipo "payment"
     if (webhookData.type !== 'payment') {
-      this.logger.log(`⏭️ Ignorando webhook de tipo: ${webhookData.type}`);
+      this.logger.log(`Webhook ignorado: tipo ${webhookData.type}`);
       return { message: 'Webhook type not handled' };
     }
 
@@ -374,7 +377,7 @@ export class ColoniaService {
           });
 
           if (pago) {
-            this.logger.log(`✅ Pago pendiente encontrado: ${pago.id}`);
+            this.logger.log('Pago pendiente encontrado', { pagoId: pago.id });
           }
         }
       }

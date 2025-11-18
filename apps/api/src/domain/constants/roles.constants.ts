@@ -187,3 +187,12 @@ export function getRolesGestionables(role: Role): Role[] {
 export function esRoleValido(role: string): role is Role {
   return Object.values(Role).includes(role as Role);
 }
+
+/**
+ * Roles por defecto para nuevos usuarios según tipo
+ */
+export const DEFAULT_ROLES = {
+  TUTOR: [Role.TUTOR],
+  ESTUDIANTE: [Role.ESTUDIANTE],
+  DOCENTE: [Role.DOCENTE],
+} as const;

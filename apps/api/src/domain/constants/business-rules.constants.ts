@@ -31,6 +31,13 @@ export const BUSINESS_RULES = {
     EXPERIENCIA_MINIMA_ANOS: 0,
     EXPERIENCIA_MAXIMA_ANOS: 50,
   },
+  PAGOS: {
+    /**
+     * Día del mes en que vencen los pagos mensuales
+     * Por ejemplo: 5 = el 5 de cada mes
+     */
+    DIA_VENCIMIENTO: 5,
+  },
 } as const;
 
 export type BusinessRules = typeof BUSINESS_RULES;
@@ -52,4 +59,42 @@ export function esEdadValida(edad: number): boolean {
  */
 export function getMensajeErrorEdad(): string {
   return `La edad debe estar entre ${BUSINESS_RULES.ESTUDIANTE.EDAD_MINIMA} y ${BUSINESS_RULES.ESTUDIANTE.EDAD_MAXIMA} años`;
+}
+
+/**
+ * Calcula la fecha de vencimiento para un pago mensual
+ *
+ * @param mes - Mes del pago (ej: 'Enero', 'Febrero')
+ * @param anio - Año del pago
+ * @returns Fecha de vencimiento (día 5 del mes siguiente)
+ *
+ * @example
+ * calcularFechaVencimiento('Enero', 2026) // 2026-02-05
+ * calcularFechaVencimiento('Diciembre', 2025) // 2026-01-05
+ */
+export function calcularFechaVencimiento(mes: string, anio: number): Date {
+  const mesesMap: Record<string, number> = {
+    Enero: 0,
+    Febrero: 1,
+    Marzo: 2,
+    Abril: 3,
+    Mayo: 4,
+    Junio: 5,
+    Julio: 6,
+    Agosto: 7,
+    Septiembre: 8,
+    Octubre: 9,
+    Noviembre: 10,
+    Diciembre: 11,
+  };
+
+  const mesNumero = mesesMap[mes];
+  if (mesNumero === undefined) {
+    throw new Error(`Mes inválido: ${mes}`);
+  }
+
+  // Vencimiento es el día 5 del mes siguiente
+  const fechaVencimiento = new Date(anio, mesNumero + 1, BUSINESS_RULES.PAGOS.DIA_VENCIMIENTO);
+
+  return fechaVencimiento;
 }
