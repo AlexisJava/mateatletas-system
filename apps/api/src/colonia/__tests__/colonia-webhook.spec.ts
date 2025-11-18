@@ -6,6 +6,109 @@ import { MercadoPagoService } from '../../pagos/mercadopago.service';
 import { MercadoPagoWebhookDto } from '../../pagos/dto/mercadopago-webhook.dto';
 
 /**
+ * TODO: AUDITORÍA DE TESTS FALLIDOS - COLONIA WEBHOOK
+ * =====================================================
+ *
+ * ESTADO: 14/27 tests fallando (51.8% de fallo)
+ * FECHA: 2024-01-17
+ * IMPACTO: BAJO (funcionalidad real probablemente funciona, solo tests desactualizados)
+ *
+ * PROBLEMA PRINCIPAL:
+ * Los tests usan formato de external_reference que no coincide con el parser
+ * centralizado en payment.constants.ts (parseLegacyExternalReference).
+ *
+ * CAUSA RAÍZ:
+ * El servicio cambió para usar parseLegacyExternalReference() que solo acepta:
+ * 1. IDs numéricos puros (regex: /^\d+$/) → tipo PAGO_COLONIA
+ * 2. Patrones específicos: "membresia-*", "inscripcion-*", "inscripcion2026-*"
+ *
+ * Los tests usan: "pago-colonia-123" (contiene caracteres no numéricos)
+ * El parser rechaza esto y retorna { message: 'Invalid external_reference format' }
+ * Por lo tanto NINGUNO de los tests llega a ejecutar la lógica de actualización.
+ *
+ * TESTS FALLIDOS Y RAZONES:
+ *
+ * 1. "should correctly parse colonia external reference" (línea 125)
+ *    - Espera: que se llame a prisma.coloniaPago.findUnique()
+ *    - Realidad: Parser rechaza "pago-colonia-123", retorna early con error
+ *    - Fix: Cambiar external_reference a valor numérico "123" o actualizar parser
+ *
+ * 2. "should handle null external reference" (línea 150)
+ *    - Espera: mensaje "Payment without valid external_reference"
+ *    - Recibe: mensaje "Payment without external_reference"
+ *    - Fix: Actualizar expectativa del test
+ *
+ * 3-9. Tests de estados de pago (APPROVED, REJECTED, CANCELLED, PENDING) (líneas 165-294)
+ *    - Espera: que se llame a prisma.coloniaPago.update() con estados paid/failed/pending
+ *    - Realidad: Parser rechaza external_reference, nunca llega a update()
+ *    - Fix: Usar external_reference válido (numérico)
+ *
+ * 10. "should fallback to first pending payment" (línea 297)
+ *    - Espera: 2 llamadas a findUnique (preference_id + fallback)
+ *    - Realidad: 0 llamadas porque parser rechaza external_reference
+ *    - Fix: Usar external_reference válido
+ *
+ * 11. "should return error when no pending payments found" (línea 330)
+ *    - Espera: "No pending payments found"
+ *    - Recibe: "Invalid external_reference format"
+ *    - Fix: Usar external_reference válido
+ *
+ * 12. "should handle database errors gracefully" (línea 347)
+ *    - Espera: throw BadRequestException
+ *    - Realidad: Resuelve con { message: "Invalid external_reference format" }
+ *    - Fix: Usar external_reference válido para que llegue al código que puede fallar
+ *
+ * 13. "should handle unknown payment status" (línea 354)
+ *    - Espera: update con estado "pending" (fallback)
+ *    - Realidad: No llega a update() por parser
+ *    - Fix: Usar external_reference válido
+ *
+ * 14. "should handle inscripcion IDs with special characters" (línea 378)
+ *    - Usa: "colonia-insc_2026-abc-123"
+ *    - Espera: result.inscripcionId === "insc_2026-abc-123"
+ *    - Realidad: result es { message: "Invalid external_reference format" }
+ *    - Fix: Actualizar formato o parser
+ *
+ * 15. "should handle very large payment amounts" (línea 401)
+ *    - Espera: result.success === true
+ *    - Realidad: result es { message: "Invalid external_reference format" }
+ *    - Fix: Usar external_reference válido
+ *
+ * SOLUCIONES POSIBLES:
+ *
+ * OPCIÓN A (RECOMENDADA): Actualizar tests para usar formato válido
+ * - Cambiar mockPaymentApproved.external_reference de "pago-colonia-123" a "123"
+ * - Cambiar mockColoniaPago.id para que coincida con "123"
+ * - Actualizar todos los tests que crean custom payments
+ * - Pros: Tests reflejan comportamiento real del parser
+ * - Contras: Requiere actualizar ~15 lugares en el archivo
+ *
+ * OPCIÓN B: Actualizar parser para aceptar formato "pago-colonia-{id}"
+ * - Modificar parseLegacyExternalReference en payment.constants.ts
+ * - Agregar case para /^pago-colonia-(\d+)$/
+ * - Pros: Tests funcionan sin cambios
+ * - Contras: Puede no reflejar formato real de MercadoPago
+ *
+ * OPCIÓN C: Revisar formato real de external_reference en producción
+ * - Verificar qué formato se usa en createPreferenceColonia()
+ * - Actualizar parser Y tests para que coincidan con la realidad
+ * - Pros: Garantiza coherencia con producción
+ * - Contras: Requiere revisar código de creación de preferencias
+ *
+ * PRÓXIMOS PASOS:
+ * 1. Verificar en colonia.service.ts cómo se crea el external_reference
+ * 2. Ver método createPreferenceColonia() y qué formato usa
+ * 3. Decidir entre Opción A, B o C
+ * 4. Implementar fix sistemáticamente
+ * 5. Verificar que los 14 tests pasen
+ *
+ * ARCHIVOS RELACIONADOS:
+ * - apps/api/src/domain/constants/payment.constants.ts (línea 272-281: parser PAGO_COLONIA)
+ * - apps/api/src/colonia/colonia.service.ts (línea 292-296: uso del parser)
+ * - apps/api/src/colonia/colonia.service.ts (línea 140-180: createPreferenceColonia)
+ */
+
+/**
  * TESTS EXHAUSTIVOS PARA WEBHOOK COLONIA
  *
  * Cobertura:
@@ -44,11 +147,11 @@ describe('ColoniaService - Webhook Processing', () => {
   const mockPaymentApproved = {
     id: 987654321,
     status: 'approved',
-    external_reference: 'colonia-insc-colonia-123',
+    external_reference: 'pago-colonia-123', // ID del pago (debe coincidir con mockColoniaPago.id)
     transaction_amount: 55000,
     date_approved: '2024-01-15T10:30:00Z',
     additional_info: {
-      items: [{ id: 'colonia-insc-colonia-123' }],
+      items: [{ id: 'pago-colonia-123' }],
     },
   };
 
