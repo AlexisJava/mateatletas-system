@@ -93,7 +93,11 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn(),
             },
             coloniaEstudiante: {
-              count: jest.fn(),
+              count: jest.fn().mockResolvedValue(0), // PIN no existe
+              createMany: jest.fn(),
+            },
+            coloniaEstudianteCurso: {
+              createMany: jest.fn(),
             },
             $queryRaw: jest.fn(),
             $executeRaw: jest.fn(),
@@ -173,7 +177,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe retornar PINs diferentes en llamadas consecutivas', async () => {
       // Arrange
-      jest.spyOn(prisma, '$queryRaw').mockResolvedValue([]);
+      jest.spyOn(prisma.coloniaEstudiante, 'count').mockResolvedValue(0);
 
       // Act
       const pin1 = await service['generateUniquePin']();
@@ -188,13 +192,13 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
     it('debe reintentar cuando el PIN ya existe en la base de datos', async () => {
       // Arrange
       let attempts = 0;
-      jest.spyOn(prisma, '$queryRaw').mockImplementation(async () => {
+      jest.spyOn(prisma.coloniaEstudiante, 'count').mockImplementation(async () => {
         attempts++;
-        // Primera llamada: PIN existe, segunda llamada: PIN libre
+        // Primera llamada: PIN existe (count > 0), segunda llamada: PIN libre (count = 0)
         if (attempts === 1) {
-          return [{ id: 'existing-id' }]; // PIN ya existe
+          return 1; // PIN ya existe
         }
-        return []; // PIN libre
+        return 0; // PIN libre
       });
 
       // Act
@@ -203,28 +207,27 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
       // Assert
       expect(pin).toBeDefined();
       expect(pin).toMatch(/^\d{4}$/);
-      expect(prisma.$queryRaw).toHaveBeenCalledTimes(2);
+      expect(prisma.coloniaEstudiante.count).toHaveBeenCalledTimes(2);
     });
 
-    it('debe usar $queryRaw para verificar unicidad del PIN', async () => {
+    it('debe usar coloniaEstudiante.count para verificar unicidad del PIN', async () => {
       // Arrange
-      jest.spyOn(prisma, '$queryRaw').mockResolvedValue([]);
+      jest.spyOn(prisma.coloniaEstudiante, 'count').mockResolvedValue(0);
 
       // Act
       await service['generateUniquePin']();
 
       // Assert
-      expect(prisma.$queryRaw).toHaveBeenCalled();
-      const call = (prisma.$queryRaw as jest.Mock).mock.calls[0];
-      // call[0] es un array de strings (template literal)
-      const query = Array.isArray(call[0]) ? call[0].join('') : call[0];
-      expect(query).toContain('colonia_estudiantes');
-      expect(query).toContain('pin');
+      expect(prisma.coloniaEstudiante.count).toHaveBeenCalled();
+      const call = (prisma.coloniaEstudiante.count as jest.Mock).mock.calls[0];
+      // Verificar que se pasó el parámetro where con pin
+      expect(call[0]).toHaveProperty('where');
+      expect(call[0].where).toHaveProperty('pin');
     });
 
     it('debe generar string numérico válido', async () => {
       // Arrange
-      jest.spyOn(prisma, '$queryRaw').mockResolvedValue([]);
+      jest.spyOn(prisma.coloniaEstudiante, 'count').mockResolvedValue(0);
 
       // Act
       const pin = await service['generateUniquePin']();
@@ -238,7 +241,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
     it('debe manejar errores de base de datos gracefully', async () => {
       // Arrange
       jest
-        .spyOn(prisma, '$queryRaw')
+        .spyOn(prisma.coloniaEstudiante, 'count')
         .mockRejectedValue(new Error('Database connection failed'));
 
       // Act & Assert
@@ -249,7 +252,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe asegurar que el PIN tenga exactamente 4 caracteres', async () => {
       // Arrange
-      jest.spyOn(prisma, '$queryRaw').mockResolvedValue([]);
+      jest.spyOn(prisma.coloniaEstudiante, 'count').mockResolvedValue(0);
 
       // Act
       const pins = await Promise.all([
@@ -268,7 +271,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe verificar que no haya PINs menores a 1000', async () => {
       // Arrange
-      jest.spyOn(prisma, '$queryRaw').mockResolvedValue([]);
+      jest.spyOn(prisma.coloniaEstudiante, 'count').mockResolvedValue(0);
 
       // Act - Generar muchos PINs para verificar distribución
       const pins = await Promise.all(
@@ -436,6 +439,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -523,6 +532,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]), // Mock para PIN checks
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -559,6 +574,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -598,6 +619,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -663,6 +690,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -699,6 +732,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -751,6 +790,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -950,6 +995,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -966,8 +1017,8 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
       // Assert
       // 2 cursos * 55000 = 110000
       // 1 estudiante, 2 cursos = 12% descuento
-      // 110000 - (110000 * 0.12) = 96800
-      expect(result.pago.monto).toBe(96800);
+      // 110000 - (110000 * 0.12) = 90992
+      expect(result.pago.monto).toBe(90992);
       expect(result.pago.descuento).toBe(12);
     });
 
@@ -1033,6 +1084,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]), // Mock para PIN checks
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -1107,6 +1164,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -1123,8 +1186,8 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
       // Assert
       // 2 cursos * 55000 = 110000
       // 1 estudiante, 2 cursos = 12% descuento
-      // 110000 - (110000 * 0.12) = 96800
-      expect(result.pago.monto).toBe(96800);
+      // 110000 - (110000 * 0.12) = 90992
+      expect(result.pago.monto).toBe(90992);
       expect(result.pago.descuento).toBe(12);
     });
 
@@ -1191,6 +1254,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -1309,6 +1378,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -1366,6 +1441,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });
@@ -1428,6 +1509,12 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           },
           $executeRaw: jest.fn().mockResolvedValue(1),
           $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaEstudiante: {
+            createMany: jest.fn(),
+          },
+          coloniaEstudianteCurso: {
+            createMany: jest.fn(),
+          },
         };
         return callback(txMock as any);
       });

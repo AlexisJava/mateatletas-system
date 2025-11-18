@@ -2817,6 +2817,7 @@ model ColoniaPago {
   fecha_vencimiento         DateTime // Día 5 del mes
   fecha_pago                DateTime?
   fecha_creacion            DateTime  @default(now())
+  processed_at              DateTime? // Para idempotencia en webhooks
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2827,6 +2828,7 @@ model ColoniaPago {
   @@index([estado])
   @@index([fecha_vencimiento])
   @@index([mercadopago_preference_id])
+  @@index([processed_at])
   @@map("colonia_pagos")
 }
 
@@ -3060,6 +3062,9 @@ model PagoInscripcion2026 {
   /// Fecha en que se realizó el pago
   fecha_pago DateTime?
 
+  /// Timestamp de procesamiento del webhook (para idempotencia)
+  processed_at DateTime?
+
   /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -3073,6 +3078,7 @@ model PagoInscripcion2026 {
   @@index([fecha_vencimiento])
   @@index([mercadopago_preference_id])
   @@index([mercadopago_payment_id])
+  @@index([processed_at])
   @@map("pagos_inscripciones_2026")
 }
 

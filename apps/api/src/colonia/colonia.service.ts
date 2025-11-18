@@ -29,10 +29,11 @@ export class ColoniaService {
    * @returns PIN único de 4 dígitos
    */
   private async generateUniquePin(): Promise<string> {
-    let pin: string;
+    const MAX_ATTEMPTS = 10;
+    let attempts = 0;
 
-    while (true) {
-      pin = Math.floor(1000 + Math.random() * 9000).toString();
+    while (attempts < MAX_ATTEMPTS) {
+      const pin = Math.floor(1000 + Math.random() * 9000).toString();
 
       // Verificar que no exista usando Prisma Client (type-safe)
       const count = await this.prisma.coloniaEstudiante.count({
@@ -42,7 +43,13 @@ export class ColoniaService {
       if (count === 0) {
         return pin;
       }
+
+      attempts++;
     }
+
+    throw new ConflictException(
+      `No se pudo generar un PIN único después de ${MAX_ATTEMPTS} intentos. Por favor intente nuevamente.`
+    );
   }
 
   /**
@@ -146,7 +153,7 @@ export class ColoniaService {
       });
 
       // Paso 2: Crear todos los estudiantes en paralelo (usando Promise.all para mejor performance)
-      // Nota: No usamos createMany porque no está disponible en el contexto de transacción
+      // Nota: Usamos Promise.all con create() en lugar de createMany() porque necesitamos los IDs retornados
       const estudiantesFromDB = await Promise.all(
         estudiantesData.map(data =>
           tx.estudiante.create({ data })
@@ -168,16 +175,10 @@ export class ColoniaService {
         pin: pins[idx],
       }));
 
-      // Paso 6: Insertar todos en colonia_estudiantes (1 query con batch insert)
-      for (const data of coloniaEstudiantesData) {
-        await tx.$executeRaw`
-          INSERT INTO colonia_estudiantes (
-            id, inscripcion_id, estudiante_id, nombre, edad, pin, "createdAt", "updatedAt"
-          ) VALUES (
-            ${data.id}, ${data.inscripcion_id}, ${data.estudiante_id}, ${data.nombre}, ${data.edad}, ${data.pin}, NOW(), NOW()
-          )
-        `;
-      }
+      // Paso 6: Insertar todos en colonia_estudiantes (batch insert optimizado)
+      await tx.coloniaEstudiante.createMany({
+        data: coloniaEstudiantesData,
+      });
 
       // Paso 7: Preparar datos de cursos seleccionados
       const cursosData: any[] = [];
@@ -204,16 +205,10 @@ export class ColoniaService {
         });
       });
 
-      // Paso 8: Insertar todos los cursos (1 query con batch insert)
-      for (const curso of cursosData) {
-        await tx.$executeRaw`
-          INSERT INTO colonia_estudiante_cursos (
-            id, colonia_estudiante_id, courseId, course_name, course_area, instructor, day_of_week, time_slot, precio_base, precio_con_descuento, "createdAt", "updatedAt"
-          ) VALUES (
-            ${curso.id}, ${curso.colonia_estudiante_id}, ${curso.courseId}, ${curso.course_name}, ${curso.course_area}, ${curso.instructor}, ${curso.day_of_week}, ${curso.time_slot}, ${curso.precio_base}, ${curso.precio_con_descuento}, NOW(), NOW()
-          )
-        `;
-      }
+      // Paso 8: Insertar todos los cursos (batch insert optimizado)
+      await tx.coloniaEstudianteCurso.createMany({
+        data: cursosData,
+      });
 
       // Preparar resultado para retornar
       const estudiantesCreados = estudiantesData.map((data, idx) => ({
@@ -277,7 +272,7 @@ export class ColoniaService {
       WHERE id = ${result.pagoEneroId}
     `;
 
-    this.logger.log('Inscripción completada exitosamente', { preferenceId: preference.id, inscriptionId });
+    this.logger.log('Inscripción completada exitosamente', { preferenceId: preference.id, inscriptionId: result.inscriptionId });
 
     return {
       message: 'Inscripción creada exitosamente',
@@ -298,9 +293,10 @@ export class ColoniaService {
    * Procesa webhook de MercadoPago para pagos de Colonia
    */
   async procesarWebhookMercadoPago(webhookData: MercadoPagoWebhookDto) {
-    this.logger.log(
-      `📨 Webhook Colonia recibido: ${webhookData.type} - ${webhookData.action}`,
-    );
+    this.logger.log('Webhook Colonia recibido', {
+      type: webhookData.type,
+      action: webhookData.action,
+    });
 
     // Solo procesar notificaciones de tipo "payment"
     if (webhookData.type !== 'payment') {
@@ -309,21 +305,22 @@ export class ColoniaService {
     }
 
     const paymentId = webhookData.data.id;
-    this.logger.log(`💳 Procesando pago Colonia ID: ${paymentId}`);
+    this.logger.log('Procesando pago Colonia', { paymentId });
 
     try {
       // Consultar detalles del pago a MercadoPago
       const payment = await this.mercadoPagoService.getPayment(paymentId);
 
-      this.logger.log(
-        `💰 Pago Colonia consultado - Estado: ${payment.status} - Ref Externa: ${payment.external_reference}`,
-      );
+      this.logger.log('Pago Colonia consultado', {
+        status: payment.status,
+        externalReference: payment.external_reference,
+      });
 
       // Parsear external_reference para identificar pago
       const externalRef = payment.external_reference;
 
       if (!externalRef) {
-        this.logger.warn('⚠️ Pago sin external_reference - Ignorando');
+        this.logger.warn('Pago sin external_reference', { paymentId });
         return { message: 'Payment without external_reference' };
       }
 
@@ -331,7 +328,11 @@ export class ColoniaService {
       const parsed = parseLegacyExternalReference(externalRef);
 
       if (!parsed || parsed.tipo !== TipoExternalReference.PAGO_COLONIA) {
-        this.logger.warn('⚠️ External reference inválida o no es de tipo PAGO_COLONIA');
+        this.logger.warn('External reference inválida', {
+          externalRef,
+          expectedType: TipoExternalReference.PAGO_COLONIA,
+          actualType: parsed?.tipo,
+        });
         return { message: 'Invalid external_reference format' };
       }
 
@@ -344,14 +345,14 @@ export class ColoniaService {
 
       // Fallback: si no se encuentra por ID, intentar buscar por inscripcion_id
       if (!pago) {
-        this.logger.warn(`⚠️ No se encontró pago con ID ${pagoId}, intentando fallback por inscripcion_id`);
+        this.logger.warn('Pago no encontrado por ID, intentando fallback', { pagoId });
 
         // Extraer inscripcion_id de payment.additional_info.items[0].id
         // Formato esperado: "colonia-{inscriptionId}"
         const itemId = payment.additional_info?.items?.[0]?.id;
         if (itemId && typeof itemId === 'string' && itemId.startsWith('colonia-')) {
           const inscripcionId = itemId.replace('colonia-', '');
-          this.logger.log(`🔄 Buscando pago pendiente para inscripción ${inscripcionId}`);
+          this.logger.log('Buscando pago pendiente por inscripción', { inscripcionId });
 
           // Buscar primer pago pendiente de esta inscripción
           pago = await this.prisma.coloniaPago.findFirst({
@@ -371,13 +372,29 @@ export class ColoniaService {
       }
 
       if (!pago) {
-        this.logger.error(`❌ No se encontró pago de Colonia con ID ${pagoId}`);
+        this.logger.error('No se encontró pago de Colonia', { pagoId, paymentId });
         return { message: 'No pending payments found' };
+      }
+
+      // Verificar idempotencia: si ya fue procesado, ignorar
+      if (pago.processed_at) {
+        this.logger.log('Webhook ya procesado previamente', {
+          pagoId: pago.id,
+          processedAt: pago.processed_at,
+          paymentId,
+        });
+        return {
+          message: 'Webhook already processed',
+          processedAt: pago.processed_at,
+        };
       }
 
       return this.actualizarPagoColonia(pago.id, payment);
     } catch (error) {
-      this.logger.error('❌ Error procesando webhook de Colonia:', error);
+      this.logger.error('Error procesando webhook de Colonia', {
+        paymentId,
+        error: error instanceof Error ? error.message : error,
+      });
       throw new BadRequestException('Error processing webhook');
     }
   }
@@ -402,7 +419,10 @@ export class ColoniaService {
         nuevoEstadoPago = 'pending';
         break;
       default:
-        this.logger.warn(`⚠️ Estado de pago desconocido: ${payment.status}`);
+        this.logger.warn('Estado de pago desconocido', {
+          status: payment.status,
+          paymentId: payment.id,
+        });
         nuevoEstadoPago = 'pending';
     }
 
@@ -413,12 +433,15 @@ export class ColoniaService {
         estado: nuevoEstadoPago,
         mercadopago_payment_id: payment.id?.toString(),
         fecha_pago: payment.status === 'approved' ? new Date() : undefined,
+        processed_at: new Date(), // Marcar como procesado para idempotencia
       },
     });
 
-    this.logger.log(
-      `✅ Pago Colonia procesado - ID: ${pagoId} → Estado: ${nuevoEstadoPago}`,
-    );
+    this.logger.log('Pago Colonia procesado', {
+      pagoId,
+      nuevoEstado: nuevoEstadoPago,
+      inscripcionId: pagoActualizado.inscripcion_id,
+    });
 
     return {
       success: true,
