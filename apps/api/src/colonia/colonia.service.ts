@@ -12,6 +12,8 @@ import {
 } from '../domain/constants';
 import { PricingCalculatorService } from '../domain/services/pricing-calculator.service';
 import { CreateInscriptionDto } from './dto/create-inscription.dto';
+import { PinGeneratorService } from '../shared/services/pin-generator.service';
+import { TutorCreationService } from '../shared/services/tutor-creation.service';
 
 /**
  * Resultado del cálculo de precios para inscripción de colonia
@@ -35,34 +37,21 @@ export class ColoniaService {
     private prisma: PrismaClient,
     private mercadoPagoService: MercadoPagoService,
     private pricingCalculator: PricingCalculatorService,
+    private pinGenerator: PinGeneratorService,
+    private tutorCreation: TutorCreationService,
   ) {}
 
   /**
-   * Genera un PIN de 4 dígitos único
+   * Genera un PIN de 4 dígitos único para ColoniaEstudiante
+   *
+   * Delega la generación de PIN al servicio compartido PinGeneratorService.
    *
    * @returns PIN único de 4 dígitos
    */
   private async generateUniquePin(): Promise<string> {
-    const MAX_ATTEMPTS = 10;
-    let attempts = 0;
-
-    while (attempts < MAX_ATTEMPTS) {
-      const pin = Math.floor(1000 + Math.random() * 9000).toString();
-
-      // Verificar que no exista usando Prisma Client (type-safe)
-      const count = await this.prisma.coloniaEstudiante.count({
-        where: { pin },
-      });
-
-      if (count === 0) {
-        return pin;
-      }
-
-      attempts++;
-    }
-
-    throw new ConflictException(
-      `No se pudo generar un PIN único después de ${MAX_ATTEMPTS} intentos. Por favor intente nuevamente.`
+    return await this.pinGenerator.generateUniquePin(
+      'coloniaEstudiante',
+      async (pin) => await this.prisma.coloniaEstudiante.findFirst({ where: { pin } })
     );
   }
 
@@ -139,17 +128,13 @@ export class ColoniaService {
   /**
    * Valida que el email no esté registrado en el sistema
    *
+   * Delega la validación al servicio compartido TutorCreationService.
+   *
    * @param email - Email a validar
    * @throws ConflictException si el email ya está registrado
    */
   private async validateUniqueEmail(email: string): Promise<void> {
-    const existingTutor = await this.prisma.tutor.findUnique({
-      where: { email },
-    });
-
-    if (existingTutor) {
-      throw new ConflictException('El email ya está registrado');
-    }
+    await this.tutorCreation.validateUniqueEmail(email);
   }
 
   /**

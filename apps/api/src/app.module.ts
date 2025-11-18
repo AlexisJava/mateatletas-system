@@ -8,6 +8,7 @@ import { SecurityModule } from './security/security.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { InfrastructureModule } from './infrastructure/infrastructure.module';
 import { PricingCalculatorModule } from './domain/services/pricing-calculator.module';
+import { SharedModule } from './shared/shared.module';
 
 // Feature Modules
 import { AuthModule } from './auth/auth.module';
@@ -56,6 +57,7 @@ import { Inscripciones2026Module } from './inscripciones-2026/inscripciones-2026
     ObservabilityModule,  // Logging + Interceptors
     InfrastructureModule, // Cache + Events + Notifications (Global)
     PricingCalculatorModule, // Pricing & Discounts (Global)
+    SharedModule,         // Shared Services: PIN Generation, Tutor Creation (Global)
 
     // ============================================================================
     // FEATURE MODULES

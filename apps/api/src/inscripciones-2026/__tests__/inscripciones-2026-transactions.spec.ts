@@ -4,6 +4,8 @@ import { PrismaService } from '../../core/database/prisma.service';
 import { MercadoPagoService } from '../../pagos/mercadopago.service';
 import { ConfigService } from '@nestjs/config';
 import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
+import { PinGeneratorService } from '../../shared/services/pin-generator.service';
+import { TutorCreationService } from '../../shared/services/tutor-creation.service';
 import { BadRequestException, InternalServerErrorException, ConflictException } from '@nestjs/common';
 import { TipoInscripcion2026 } from '../dto/create-inscripcion-2026.dto';
 
@@ -269,6 +271,21 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
             calcularTarifaInscripcion: jest.fn().mockReturnValue(25000),
             calcularTotalInscripcion2026: jest.fn().mockReturnValue({ total: 158400, descuento: 12 }),
             aplicarDescuento: jest.fn((base, desc) => base * (1 - desc / 100)),
+          },
+        },
+        {
+          provide: PinGeneratorService,
+          useValue: {
+            generateUniquePin: jest.fn().mockImplementation(async () =>
+              Math.floor(1000 + Math.random() * 9000).toString()
+            ),
+          },
+        },
+        {
+          provide: TutorCreationService,
+          useValue: {
+            hashPassword: jest.fn().mockResolvedValue('$2b$10$hashedpassword'),
+            validateUniqueEmail: jest.fn(),
           },
         },
       ],

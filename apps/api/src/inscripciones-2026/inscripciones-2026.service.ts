@@ -12,7 +12,8 @@ import {
   DEFAULT_ROLES,
 } from '../domain/constants';
 import { PricingCalculatorService } from '../domain/services/pricing-calculator.service';
-import * as bcrypt from 'bcrypt';
+import { PinGeneratorService } from '../shared/services/pin-generator.service';
+import { TutorCreationService } from '../shared/services/tutor-creation.service';
 import {
   CreateInscripcion2026Dto,
   CreateInscripcion2026Response,
@@ -52,31 +53,22 @@ export class Inscripciones2026Service {
     private readonly mercadoPagoService: MercadoPagoService,
     private readonly configService: ConfigService,
     private readonly pricingCalculator: PricingCalculatorService,
+    private readonly pinGenerator: PinGeneratorService,
+    private readonly tutorCreation: TutorCreationService,
   ) {}
 
   /**
    * Genera un PIN único de 4 dígitos para el estudiante
    *
-   * Implementa timeout de 10 intentos para evitar loops infinitos
-   * @throws ConflictException si no se puede generar PIN único después de MAX_ATTEMPTS
+   * Delega la generación al servicio compartido PinGeneratorService.
+   *
+   * @returns PIN único de 4 dígitos
+   * @throws Error si no se puede generar PIN único después de MAX_RETRIES
    */
   private async generateUniquePin(): Promise<string> {
-    const MAX_ATTEMPTS = 10;
-
-    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-      const pin = Math.floor(1000 + Math.random() * 9000).toString();
-
-      const existingPin = await this.prisma.estudianteInscripcion2026.findFirst({
-        where: { pin },
-      });
-
-      if (!existingPin) {
-        return pin;
-      }
-    }
-
-    throw new ConflictException(
-      `No se pudo generar un PIN único después de ${MAX_ATTEMPTS} intentos. Por favor intente nuevamente.`
+    return await this.pinGenerator.generateUniquePin(
+      'estudianteInscripcion2026',
+      async (pin) => await this.prisma.estudianteInscripcion2026.findFirst({ where: { pin } })
     );
   }
 
@@ -299,6 +291,9 @@ export class Inscripciones2026Service {
 
   /**
    * Busca o crea un tutor en la base de datos
+   *
+   * Usa TutorCreationService.hashPassword() para el hash de contraseña.
+   *
    * @private
    */
   private async findOrCreateTutor(tx: any, tutorDto: any): Promise<any> {
@@ -307,7 +302,7 @@ export class Inscripciones2026Service {
     });
 
     if (!tutor) {
-      const hashedPassword = await bcrypt.hash(tutorDto.password, 10);
+      const hashedPassword = await this.tutorCreation.hashPassword(tutorDto.password);
       tutor = await tx.tutor.create({
         data: {
           nombre: tutorDto.nombre,
