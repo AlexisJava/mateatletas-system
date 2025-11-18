@@ -283,10 +283,16 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
     });
   });
 
-  describe('calculateDiscount - Reglas de Negocio', () => {
+  describe('PricingCalculatorService - Reglas de Negocio de Descuentos', () => {
+    let pricingCalculator: any;
+
+    beforeEach(() => {
+      pricingCalculator = (service as any).pricingCalculator;
+    });
+
     it('debe retornar 20% cuando 2+ estudiantes Y 2+ cursos total', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](2, 2);
+      const discount = pricingCalculator.calcularDescuentoColonia(2, 2);
 
       // Assert
       expect(discount).toBe(20);
@@ -294,7 +300,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe retornar 12% cuando 2+ estudiantes pero 1 curso total', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](2, 1);
+      const discount = pricingCalculator.calcularDescuentoColonia(2, 1);
 
       // Assert
       expect(discount).toBe(12);
@@ -302,7 +308,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe retornar 12% cuando 1 estudiante pero 2+ cursos total', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](1, 2);
+      const discount = pricingCalculator.calcularDescuentoColonia(1, 2);
 
       // Assert
       expect(discount).toBe(12);
@@ -310,7 +316,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe retornar 0% cuando 1 estudiante y 1 curso', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](1, 1);
+      const discount = pricingCalculator.calcularDescuentoColonia(1, 1);
 
       // Assert
       expect(discount).toBe(0);
@@ -318,7 +324,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe manejar edge case: 3 estudiantes, 1 curso (12%)', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](3, 1);
+      const discount = pricingCalculator.calcularDescuentoColonia(3, 1);
 
       // Assert
       expect(discount).toBe(12);
@@ -326,7 +332,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe manejar edge case: 1 estudiante, 3 cursos (12%)', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](1, 3);
+      const discount = pricingCalculator.calcularDescuentoColonia(1, 3);
 
       // Assert
       expect(discount).toBe(12);
@@ -334,7 +340,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe manejar edge case: 5 estudiantes, 10 cursos (20%)', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](5, 10);
+      const discount = pricingCalculator.calcularDescuentoColonia(5, 10);
 
       // Assert
       expect(discount).toBe(20);
@@ -342,7 +348,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe retornar 20% cuando exactamente 2 estudiantes y 2 cursos', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](2, 2);
+      const discount = pricingCalculator.calcularDescuentoColonia(2, 2);
 
       // Assert
       expect(discount).toBe(20);
@@ -350,7 +356,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe retornar 12% cuando hay 0 estudiantes pero 5 cursos', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](0, 5);
+      const discount = pricingCalculator.calcularDescuentoColonia(0, 5);
 
       // Assert
       expect(discount).toBe(12); // 5 >= 2 cursos
@@ -358,7 +364,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe retornar 12% cuando hay 3 estudiantes pero 0 cursos', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](3, 0);
+      const discount = pricingCalculator.calcularDescuentoColonia(3, 0);
 
       // Assert
       expect(discount).toBe(12); // 3 >= 2 estudiantes
@@ -366,7 +372,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe validar que el descuento sea un número', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](2, 3);
+      const discount = pricingCalculator.calcularDescuentoColonia(2, 3);
 
       // Assert
       expect(typeof discount).toBe('number');
@@ -375,7 +381,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
 
     it('debe manejar números muy grandes (100 estudiantes, 200 cursos)', () => {
       // Arrange & Act
-      const discount = service['calculateDiscount'](100, 200);
+      const discount = pricingCalculator.calcularDescuentoColonia(100, 200);
 
       // Assert
       expect(discount).toBe(20); // Máximo 20%
