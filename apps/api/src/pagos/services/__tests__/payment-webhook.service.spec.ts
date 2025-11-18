@@ -7,6 +7,8 @@ import { MercadoPagoService } from '../../mercadopago.service';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { EstadoPago } from '../../../domain/constants';
 import { MercadoPagoWebhookDto } from '../../dto/mercadopago-webhook.dto';
+import { WebhookIdempotencyService } from '../webhook-idempotency.service';
+import { PaymentAmountValidatorService } from '../payment-amount-validator.service';
 
 describe('PaymentWebhookService', () => {
   let service: PaymentWebhookService;
@@ -15,6 +17,8 @@ describe('PaymentWebhookService', () => {
   let commandService: jest.Mocked<PaymentCommandService>;
   let mercadoPagoService: jest.Mocked<MercadoPagoService>;
   let eventEmitter: jest.Mocked<EventEmitter2>;
+  let idempotencyService: jest.Mocked<WebhookIdempotencyService>;
+  let amountValidator: jest.Mocked<PaymentAmountValidatorService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -49,6 +53,23 @@ describe('PaymentWebhookService', () => {
             emit: jest.fn(),
           },
         },
+        {
+          provide: WebhookIdempotencyService,
+          useValue: {
+            wasProcessed: jest.fn().mockResolvedValue(false),
+            markAsProcessed: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: PaymentAmountValidatorService,
+          useValue: {
+            validateMembresia: jest.fn().mockResolvedValue({ isValid: true }),
+            validateInscripcionMensual: jest.fn().mockResolvedValue({ isValid: true }),
+            validateInscripcion2026: jest.fn().mockResolvedValue({ isValid: true }),
+            validatePagoInscripcion2026: jest.fn().mockResolvedValue({ isValid: true }),
+            validateColoniaPago: jest.fn().mockResolvedValue({ isValid: true }),
+          },
+        },
       ],
     }).compile();
 
@@ -58,6 +79,8 @@ describe('PaymentWebhookService', () => {
     commandService = module.get(PaymentCommandService);
     mercadoPagoService = module.get(MercadoPagoService);
     eventEmitter = module.get(EventEmitter2);
+    idempotencyService = module.get(WebhookIdempotencyService);
+    amountValidator = module.get(PaymentAmountValidatorService);
   });
 
   it('should be defined', () => {

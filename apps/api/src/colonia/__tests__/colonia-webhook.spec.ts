@@ -147,16 +147,16 @@ describe('ColoniaService - Webhook Processing', () => {
   const mockPaymentApproved = {
     id: 987654321,
     status: 'approved',
-    external_reference: 'pago-colonia-123', // ID del pago (debe coincidir con mockColoniaPago.id)
+    external_reference: '123', // ID numérico del pago (parseLegacyExternalReference acepta formato numérico)
     transaction_amount: 55000,
     date_approved: '2024-01-15T10:30:00Z',
     additional_info: {
-      items: [{ id: 'pago-colonia-123' }],
+      items: [{ id: '123' }],
     },
   };
 
   const mockColoniaPago = {
-    id: 'pago-colonia-123',
+    id: '123',
     inscripcion_id: 'insc-colonia-123',
     mes: 'enero',
     anio: 2026,
@@ -261,7 +261,7 @@ describe('ColoniaService - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ message: 'Payment without valid external_reference' });
+      expect(result).toEqual({ message: 'Payment without external_reference' });
     });
   });
 
@@ -279,7 +279,7 @@ describe('ColoniaService - Webhook Processing', () => {
       await service.procesarWebhookMercadoPago(mockWebhookData);
 
       expect(prisma.coloniaPago.update).toHaveBeenCalledWith({
-        where: { id: 'pago-colonia-123' },
+        where: { id: '123' },
         data: {
           estado: 'paid',
           mercadopago_payment_id: '987654321',
@@ -293,7 +293,7 @@ describe('ColoniaService - Webhook Processing', () => {
 
       expect(result).toMatchObject({
         success: true,
-        pagoId: 'pago-colonia-123',
+        pagoId: '123',
         inscripcionId: 'insc-colonia-123',
         paymentStatus: 'paid',
       });
@@ -317,7 +317,7 @@ describe('ColoniaService - Webhook Processing', () => {
       await service.procesarWebhookMercadoPago(mockWebhookData);
 
       expect(prisma.coloniaPago.update).toHaveBeenCalledWith({
-        where: { id: 'pago-colonia-123' },
+        where: { id: '123' },
         data: {
           estado: 'failed',
           mercadopago_payment_id: '987654321',
