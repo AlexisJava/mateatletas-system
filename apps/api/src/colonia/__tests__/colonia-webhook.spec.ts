@@ -77,6 +77,7 @@ describe('ColoniaService - Webhook Processing', () => {
           useValue: {
             coloniaPago: {
               findFirst: jest.fn(),
+              findUnique: jest.fn(),
               update: jest.fn(),
             },
           },
@@ -112,7 +113,7 @@ describe('ColoniaService - Webhook Processing', () => {
 
     it('should process payment webhooks', async () => {
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-      jest.spyOn(prisma.coloniaPago, 'findFirst').mockResolvedValue(mockColoniaPago);
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockResolvedValue(mockColoniaPago);
       jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(mockColoniaPago);
 
       await service.procesarWebhookMercadoPago(mockWebhookData);
@@ -124,13 +125,13 @@ describe('ColoniaService - Webhook Processing', () => {
   describe('External Reference Parsing', () => {
     it('should correctly parse colonia external reference', async () => {
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-      jest.spyOn(prisma.coloniaPago, 'findFirst').mockResolvedValue(mockColoniaPago);
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockResolvedValue(mockColoniaPago);
       jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(mockColoniaPago);
 
       await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      // Debe buscar pago con el inscripcion_id extraído
-      expect(prisma.coloniaPago.findFirst).toHaveBeenCalled();
+      // Debe buscar pago con el pagoId extraído
+      expect(prisma.coloniaPago.findUnique).toHaveBeenCalled();
     });
 
     it('should reject external reference without colonia prefix', async () => {
@@ -143,8 +144,8 @@ describe('ColoniaService - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ message: 'Payment without valid external_reference' });
-      expect(prisma.coloniaPago.findFirst).not.toHaveBeenCalled();
+      expect(result).toEqual({ message: 'Invalid external_reference format' });
+      expect(prisma.coloniaPago.findUnique).not.toHaveBeenCalled();
     });
 
     it('should handle null external reference', async () => {
@@ -311,8 +312,8 @@ describe('ColoniaService - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(prisma.coloniaPago.findFirst).toHaveBeenCalledTimes(2);
-      expect(prisma.coloniaPago.findFirst).toHaveBeenLastCalledWith({
+      expect(prisma.coloniaPago.findUnique).toHaveBeenCalledTimes(2);
+      expect(prisma.coloniaPago.findUnique).toHaveBeenLastCalledWith({
         where: {
           inscripcion_id: 'insc-colonia-123',
           estado: 'pending',

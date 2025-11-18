@@ -188,7 +188,7 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ message: 'Payment without valid external_reference' });
+      expect(result).toEqual({ message: 'Invalid external_reference format' });
       expect(prismaService.pagoInscripcion2026.findFirst).not.toHaveBeenCalled();
     });
 
@@ -202,7 +202,7 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ message: 'Payment without valid external_reference' });
+      expect(result).toEqual({ message: 'Payment without external_reference' });
     });
 
     it('should handle malformed external reference', async () => {

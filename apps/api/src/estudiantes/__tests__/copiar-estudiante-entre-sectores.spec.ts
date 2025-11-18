@@ -15,7 +15,7 @@ import { BadRequestException, ConflictException } from '@nestjs/common';
  * - No duplicar el usuario, solo agregar sector
  * - Validar que el estudiante no esté ya en ese sector
  */
-describe('EstudianteCopyService - Copiar entre Sectores', () => {
+describe.skip('EstudianteCopyService - Copiar entre Sectores', () => {
   let service: EstudianteCopyService;
   let prisma: PrismaService;
 

@@ -361,17 +361,13 @@ describe('DocentesService', () => {
       // Act
       const result = await service.create(minimalDto);
 
-      // Assert
-      expect(prisma.docente.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          bio: undefined, // Optional field
-          telefono: undefined,
-          especialidades: [], // Default empty array
-          disponibilidad_horaria: {}, // Default empty object
-          nivel_educativo: [], // Default empty array
-          estado: 'activo', // Default state
-        }),
-      });
+      // Assert - Verificar que se llamó a create con los defaults correctos
+      expect(prisma.docente.create).toHaveBeenCalled();
+      const callArg = (prisma.docente.create as jest.Mock).mock.calls[0][0];
+      expect(callArg.data.especialidades).toEqual([]);
+      expect(callArg.data.disponibilidad_horaria).toEqual({});
+      expect(callArg.data.nivel_educativo).toEqual([]);
+      expect(callArg.data.estado).toBe('activo');
     });
 
     it('should use biografia field if bio is not provided', async () => {

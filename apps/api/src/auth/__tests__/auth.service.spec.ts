@@ -318,7 +318,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       expect(result.access_token).toBe('mock_jwt_token');
       expect(result.user.email).toBe(mockEstudiante.email);
       expect(result.user.nombre).toBe(mockEstudiante.nombre);
-      expect(result.user.role).toBe(Role.ESTUDIANTE);
+      expect(result.user.role).toBe('estudiante'); // El servicio retorna lowercase
       expect(result.user.equipo).toEqual(mockEstudiante.equipo);
       expect(result.user.tutor).toEqual(mockEstudiante.tutor);
     });

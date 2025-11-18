@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { LogrosService } from '../../gamificacion/services/logros.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('AuthService - Cambiar Password (TDD RED)', () => {
   let service: AuthService;
@@ -44,6 +45,13 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
           useValue: {
             asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
             getLogrosDisponibles: jest.fn().mockResolvedValue([]),
+          },
+        },
+        {
+          provide: EventEmitter2,
+          useValue: {
+            emit: jest.fn(),
+            on: jest.fn(),
           },
         },
       ],

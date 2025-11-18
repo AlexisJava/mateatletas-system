@@ -235,11 +235,11 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
       const result = await service.crearEstudianteConCredenciales(dtoSinEquipo);
 
       // Assert
-      expect(result.estudiante.equipo_id).toBeNull();
+      expect(result.estudiante.equipoId).toBeNull();
       expect(mockEstudianteCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            equipo_id: null,
+            equipoId: null,
           }),
         }),
       );
