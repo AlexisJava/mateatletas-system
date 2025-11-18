@@ -11,5 +11,8 @@ export * from './business-rules.constants';
 // Payment
 export * from './payment.constants';
 
+// Pricing
+export * from './pricing.constants';
+
 // Roles
 export * from './roles.constants';

@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { MercadoPagoService } from '../../pagos/mercadopago.service';
 import { ConfigService } from '@nestjs/config';
 import { CreateInscriptionDto } from '../dto/create-inscription.dto';
+import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
 
 /**
  * ColoniaService - TESTS DE SEGURIDAD
@@ -65,6 +66,14 @@ describe('ColoniaService - Security Tests', () => {
               if (key === 'BACKEND_URL') return 'http://localhost:3001';
               return null;
             }),
+          },
+        },
+        {
+          provide: PricingCalculatorService,
+          useValue: {
+            calcularDescuentoColonia: jest.fn(),
+            calcularTotalColonia: jest.fn(),
+            aplicarDescuento: jest.fn(),
           },
         },
       ],

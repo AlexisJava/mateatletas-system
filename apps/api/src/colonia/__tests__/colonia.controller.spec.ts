@@ -5,6 +5,7 @@ import { CreateInscriptionDto } from '../dto/create-inscription.dto';
 import { Logger } from '@nestjs/common';
 import { ConflictException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
 
 describe('ColoniaController', () => {
   let controller: ColoniaController;
@@ -92,6 +93,14 @@ describe('ColoniaController', () => {
               if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return 'test-secret';
               return null;
             }),
+          },
+        },
+        {
+          provide: PricingCalculatorService,
+          useValue: {
+            calcularDescuentoColonia: jest.fn(),
+            calcularTotalColonia: jest.fn(),
+            aplicarDescuento: jest.fn(),
           },
         },
       ],

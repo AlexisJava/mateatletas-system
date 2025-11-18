@@ -5,6 +5,7 @@ import { MercadoPagoService } from '../../pagos/mercadopago.service';
 import { ConfigService } from '@nestjs/config';
 import { ConflictException } from '@nestjs/common';
 import { CreateInscriptionDto } from '../dto/create-inscription.dto';
+import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
 
 /**
  * ColoniaService - TESTS DE CONDICIONES DE CARRERA (Race Conditions)
@@ -67,6 +68,14 @@ describe('ColoniaService - Race Condition Prevention', () => {
               if (key === 'BACKEND_URL') return 'http://localhost:3001';
               return null;
             }),
+          },
+        },
+        {
+          provide: PricingCalculatorService,
+          useValue: {
+            calcularDescuentoColonia: jest.fn(),
+            calcularTotalColonia: jest.fn(),
+            aplicarDescuento: jest.fn(),
           },
         },
       ],

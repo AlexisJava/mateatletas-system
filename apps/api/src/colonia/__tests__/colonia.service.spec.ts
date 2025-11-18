@@ -8,6 +8,7 @@ import { PrismaClient } from '@prisma/client';
 import { MercadoPagoService } from '../../pagos/mercadopago.service';
 import { ConfigService } from '@nestjs/config';
 import { CreateInscriptionDto } from '../dto/create-inscription.dto';
+import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
 
 /**
  * ColoniaService - TESTS COMPREHENSIVOS
@@ -109,6 +110,34 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
               if (key === 'FRONTEND_URL') return 'http://localhost:3000';
               if (key === 'BACKEND_URL') return 'http://localhost:3001';
               return null;
+            }),
+          },
+        },
+        {
+          provide: PricingCalculatorService,
+          useValue: {
+            calcularDescuentoColonia: jest.fn((cantEstudiantes: number, totalCursos: number) => {
+              if (cantEstudiantes >= 2 && totalCursos >= 2) return 20;
+              if (cantEstudiantes >= 2) return 12;
+              if (totalCursos >= 2) return 12;
+              return 0;
+            }),
+            calcularTotalColonia: jest.fn((cursosPerStudent: number[], descuento: number) => {
+              let subtotal = 0;
+              cursosPerStudent.forEach((numCursos) => {
+                if (numCursos === 1) {
+                  subtotal += 55000;
+                } else if (numCursos >= 2) {
+                  subtotal += 55000 + 48400 * (numCursos - 1);
+                }
+              });
+              if (descuento > 0) {
+                return Math.round(subtotal * (1 - descuento / 100));
+              }
+              return subtotal;
+            }),
+            aplicarDescuento: jest.fn((precio: number, descuento: number) => {
+              return Math.round(precio * (1 - descuento / 100));
             }),
           },
         },

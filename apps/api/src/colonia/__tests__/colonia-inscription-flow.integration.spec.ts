@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { ColoniaModule } from '../colonia.module';
 import { ColoniaService } from '../colonia.service';
 import { CreateInscriptionDto } from '../dto/create-inscription.dto';
+import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
 import * as bcrypt from 'bcrypt';
 
 /**
@@ -52,7 +53,14 @@ describe.skip('Colonia Inscription Flow - Integration Tests (REQUIRES DB)', () =
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [ColoniaModule],
-    }).compile();
+    })
+      .overrideProvider(PricingCalculatorService)
+      .useValue({
+        calcularDescuentoColonia: jest.fn(),
+        calcularTotalColonia: jest.fn(),
+        aplicarDescuento: jest.fn(),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
 

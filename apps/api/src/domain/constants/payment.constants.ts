@@ -270,17 +270,14 @@ export function parseLegacyExternalReference(
   }
 
   // Caso 4: ID directo (colonia, etc.)
-  // Asumimos que es un ID si es solo dígitos
-  if (/^\d+$/.test(externalReference)) {
-    return {
-      tipo: TipoExternalReference.PAGO_COLONIA,
-      ids: {
-        pagoId: externalReference,
-      },
-    };
-  }
-
-  return null;
+  // Si no matcheó ningún formato legacy, asumimos que es un ID directo de Colonia
+  // Acepta cualquier formato: UUID, CUID, numérico, etc.
+  return {
+    tipo: TipoExternalReference.PAGO_COLONIA,
+    ids: {
+      pagoId: externalReference,
+    },
+  };
 }
 
 /**

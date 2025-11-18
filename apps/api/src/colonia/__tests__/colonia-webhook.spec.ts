@@ -4,6 +4,7 @@ import { ColoniaService } from '../colonia.service';
 import { PrismaClient } from '@prisma/client';
 import { MercadoPagoService } from '../../pagos/mercadopago.service';
 import { MercadoPagoWebhookDto } from '../../pagos/dto/mercadopago-webhook.dto';
+import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
 
 /**
  * TODO: AUDITORÍA DE TESTS FALLIDOS - COLONIA WEBHOOK
@@ -151,7 +152,7 @@ describe('ColoniaService - Webhook Processing', () => {
     transaction_amount: 55000,
     date_approved: '2024-01-15T10:30:00Z',
     additional_info: {
-      items: [{ id: '123' }],
+      items: [{ id: 'colonia-insc-colonia-123' }],
     },
   };
 
@@ -189,6 +190,14 @@ describe('ColoniaService - Webhook Processing', () => {
           provide: MercadoPagoService,
           useValue: {
             getPayment: jest.fn(),
+          },
+        },
+        {
+          provide: PricingCalculatorService,
+          useValue: {
+            calcularDescuentoColonia: jest.fn(),
+            calcularTotalColonia: jest.fn(),
+            aplicarDescuento: jest.fn(),
           },
         },
       ],
@@ -268,7 +277,7 @@ describe('ColoniaService - Webhook Processing', () => {
   describe('Payment Status Processing - APPROVED', () => {
     beforeEach(() => {
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-      jest.spyOn(prisma.coloniaPago, 'findFirst').mockResolvedValue(mockColoniaPago);
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockResolvedValue(mockColoniaPago);
       jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue({
         ...mockColoniaPago,
         estado: 'paid',
@@ -308,7 +317,7 @@ describe('ColoniaService - Webhook Processing', () => {
       };
 
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentRejected);
-      jest.spyOn(prisma.coloniaPago, 'findFirst').mockResolvedValue(mockColoniaPago);
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockResolvedValue(mockColoniaPago);
       jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue({
         ...mockColoniaPago,
         estado: 'failed',
@@ -335,7 +344,7 @@ describe('ColoniaService - Webhook Processing', () => {
       };
 
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentCancelled);
-      jest.spyOn(prisma.coloniaPago, 'findFirst').mockResolvedValue(mockColoniaPago);
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockResolvedValue(mockColoniaPago);
       jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue({
         ...mockColoniaPago,
         estado: 'failed',
@@ -361,7 +370,7 @@ describe('ColoniaService - Webhook Processing', () => {
       };
 
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentPending);
-      jest.spyOn(prisma.coloniaPago, 'findFirst').mockResolvedValue(mockColoniaPago);
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockResolvedValue(mockColoniaPago);
       jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(mockColoniaPago);
 
       await service.procesarWebhookMercadoPago(mockWebhookData);
@@ -382,7 +391,7 @@ describe('ColoniaService - Webhook Processing', () => {
       };
 
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentInProcess);
-      jest.spyOn(prisma.coloniaPago, 'findFirst').mockResolvedValue(mockColoniaPago);
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockResolvedValue(mockColoniaPago);
       jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(mockColoniaPago);
 
       await service.procesarWebhookMercadoPago(mockWebhookData);
@@ -401,12 +410,11 @@ describe('ColoniaService - Webhook Processing', () => {
     it('should fallback to first pending payment when not found by preference_id', async () => {
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
 
-      // Primera búsqueda no encuentra nada
-      jest
-        .spyOn(prisma.coloniaPago, 'findFirst')
-        .mockResolvedValueOnce(null)
-        // Segunda búsqueda (fallback) encuentra pago pendiente
-        .mockResolvedValueOnce(mockColoniaPago);
+      // Primera búsqueda (findUnique) no encuentra nada
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockResolvedValue(null);
+
+      // Segunda búsqueda (fallback con findFirst) encuentra pago pendiente
+      jest.spyOn(prisma.coloniaPago, 'findFirst').mockResolvedValue(mockColoniaPago);
 
       jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue({
         ...mockColoniaPago,
@@ -415,8 +423,13 @@ describe('ColoniaService - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(prisma.coloniaPago.findUnique).toHaveBeenCalledTimes(2);
-      expect(prisma.coloniaPago.findUnique).toHaveBeenLastCalledWith({
+      expect(prisma.coloniaPago.findUnique).toHaveBeenCalledTimes(1);
+      expect(prisma.coloniaPago.findUnique).toHaveBeenCalledWith({
+        where: { id: '123' },
+      });
+
+      expect(prisma.coloniaPago.findFirst).toHaveBeenCalledTimes(1);
+      expect(prisma.coloniaPago.findFirst).toHaveBeenCalledWith({
         where: {
           inscripcion_id: 'insc-colonia-123',
           estado: 'pending',
@@ -449,7 +462,7 @@ describe('ColoniaService - Webhook Processing', () => {
 
     it('should handle database errors gracefully', async () => {
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-      jest.spyOn(prisma.coloniaPago, 'findFirst').mockRejectedValue(new Error('DB Error'));
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockRejectedValue(new Error('DB Error'));
 
       await expect(service.procesarWebhookMercadoPago(mockWebhookData)).rejects.toThrow(BadRequestException);
     });
@@ -461,7 +474,7 @@ describe('ColoniaService - Webhook Processing', () => {
       };
 
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentUnknown);
-      jest.spyOn(prisma.coloniaPago, 'findFirst').mockResolvedValue(mockColoniaPago);
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockResolvedValue(mockColoniaPago);
       jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(mockColoniaPago);
 
       await service.procesarWebhookMercadoPago(mockWebhookData);
@@ -479,18 +492,22 @@ describe('ColoniaService - Webhook Processing', () => {
 
   describe('Edge Cases', () => {
     it('should handle inscripcion IDs with special characters', async () => {
+      // UUID con guiones (formato real de producción)
+      const uuidPagoId = '550e8400-e29b-41d4-a716-446655440000';
+
       const payment = {
         ...mockPaymentApproved,
-        external_reference: 'colonia-insc_2026-abc-123',
+        external_reference: uuidPagoId,
       };
 
       const updatedMockPago = {
         ...mockColoniaPago,
+        id: uuidPagoId,
         inscripcion_id: 'insc_2026-abc-123',
       };
 
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(payment);
-      jest.spyOn(prisma.coloniaPago, 'findFirst').mockResolvedValue(updatedMockPago);
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockResolvedValue(updatedMockPago);
       jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue({
         ...updatedMockPago,
         estado: 'paid',
@@ -508,7 +525,7 @@ describe('ColoniaService - Webhook Processing', () => {
       };
 
       jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentLarge);
-      jest.spyOn(prisma.coloniaPago, 'findFirst').mockResolvedValue({
+      jest.spyOn(prisma.coloniaPago, 'findUnique').mockResolvedValue({
         ...mockColoniaPago,
         monto: 999999,
       });
