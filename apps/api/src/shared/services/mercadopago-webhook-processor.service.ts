@@ -5,6 +5,7 @@ import {
   parseLegacyExternalReference,
   TipoExternalReference,
 } from '../../domain/constants';
+import { MercadoPagoPayment } from '../../pagos/types/mercadopago.types';
 
 /**
  * Resultado del procesamiento de un webhook de MercadoPago
@@ -14,7 +15,7 @@ export interface WebhookProcessingResult {
   pagoId?: string;
   paymentStatus?: string;
   message?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -22,9 +23,9 @@ export interface WebhookProcessingResult {
  */
 export interface PaymentContext {
   paymentId: string;
-  payment: any;
+  payment: MercadoPagoPayment;
   externalReference: string;
-  parsedReference: any;
+  parsedReference: ReturnType<typeof parseLegacyExternalReference>;
   paymentStatus: string;
 }
 
@@ -32,7 +33,7 @@ export interface PaymentContext {
  * Callback para buscar el pago en la base de datos
  */
 export type FindPaymentCallback<T = any> = (
-  parsedReference: any,
+  parsedReference: ReturnType<typeof parseLegacyExternalReference>,
 ) => Promise<T | null>;
 
 /**
@@ -175,15 +176,18 @@ export class MercadoPagoWebhookProcessorService {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      const stack = error instanceof Error ? error.stack : undefined;
+
       this.logger.error('Error procesando webhook', {
         paymentId,
-        error: error.message,
-        stack: error.stack,
+        error: message,
+        stack,
       });
 
       throw new BadRequestException(
-        `Error procesando webhook: ${error.message}`,
+        `Error procesando webhook: ${message}`,
       );
     }
   }

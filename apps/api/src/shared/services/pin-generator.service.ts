@@ -56,9 +56,9 @@ export class PinGeneratorService {
    * );
    * ```
    */
-  async generateUniquePin(
+  async generateUniquePin<T = unknown>(
     tableName: string,
-    existsCheck: (pin: string) => Promise<any | null>,
+    existsCheck: (pin: string) => Promise<T | null>,
   ): Promise<string> {
     for (let attempt = 0; attempt < this.MAX_RETRIES; attempt++) {
       const pin = this.generateRandomPin();

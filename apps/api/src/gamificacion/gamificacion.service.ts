@@ -112,7 +112,7 @@ export class GamificacionService {
     // Calcular puntos totales basados en asistencias
     const puntosAsistencia =
       estudiante.asistencias.filter(
-        (a: any) => a.estado === EstadoAsistencia.Presente,
+        (a) => a.estado === EstadoAsistencia.Presente,
       ).length * 10;
 
     // Calcular próximas clases (select optimizado)
@@ -171,7 +171,7 @@ export class GamificacionService {
       stats: {
         puntosToales: estudiante.puntos_totales, // typo intencional para match con schema
         clasesAsistidas: estudiante.asistencias.filter(
-          (a: any) => a.estado === EstadoAsistencia.Presente,
+          (a) => a.estado === EstadoAsistencia.Presente,
         ).length,
         clasesTotales: estudiante.inscripciones_clase.length,
         racha: await this.logrosService.calcularRacha(estudianteId),

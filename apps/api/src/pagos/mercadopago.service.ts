@@ -3,6 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { CircuitBreaker } from '../common/circuit-breaker/circuit-breaker';
 import { EXTERNAL_REFERENCE_FORMATS } from '../domain/constants';
+import {
+  MercadoPagoPayment,
+  MercadoPagoPreference,
+  CreateMercadoPagoPreferenceDto,
+} from './types/mercadopago.types';
 
 /**
  * Servicio dedicado a la integración con MercadoPago SDK
@@ -133,7 +138,7 @@ export class MercadoPagoService {
    * @param paymentId - ID del pago en MercadoPago
    * @returns Datos del pago
    */
-  async getPayment(paymentId: string) {
+  async getPayment(paymentId: string): Promise<MercadoPagoPayment> {
     if (this.mockMode) {
       throw new Error(
         'MercadoPago está en modo mock. No se pueden consultar pagos reales.',
@@ -153,11 +158,34 @@ export class MercadoPagoService {
       return await this.paymentClient!.get({ id: paymentId });
     });
 
+    // Validar que la respuesta tenga la estructura esperada
+    if (!payment || !payment.id) {
+      throw new Error('Invalid payment response from MercadoPago');
+    }
+
     this.logger.log(
       `Pago ${paymentId} consultado exitosamente - Estado: ${payment.status} - External Ref: ${payment.external_reference}`,
     );
 
-    return payment;
+    // Convertir PaymentResponse a MercadoPagoPayment
+    return {
+      id: String(payment.id),
+      status: payment.status as MercadoPagoPayment['status'],
+      status_detail: payment.status_detail || '',
+      external_reference: payment.external_reference || null,
+      transaction_amount: payment.transaction_amount || 0,
+      date_approved: payment.date_approved || null,
+      date_created: payment.date_created || '',
+      additional_info: payment.additional_info as MercadoPagoPayment['additional_info'],
+      payer: payment.payer ? {
+        id: payment.payer.id,
+        email: payment.payer.email,
+        identification: payment.payer.identification ? {
+          type: payment.payer.identification.type || '',
+          number: payment.payer.identification.number || '',
+        } : undefined,
+      } : undefined,
+    };
   }
 
   /**

@@ -9,7 +9,7 @@ export class AgregarRecursoDto {
   razon!: string;
 
   @IsOptional()
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 export class GastarMonedasDto {
@@ -21,5 +21,5 @@ export class GastarMonedasDto {
   razon!: string;
 
   @IsOptional()
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }

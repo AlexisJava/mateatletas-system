@@ -1,5 +1,6 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
+import { Prisma, Tutor } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 /**
@@ -134,7 +135,7 @@ export class TutorCreationService {
    * });
    * ```
    */
-  async createTutor(tx: any, data: CreateTutorData): Promise<any> {
+  async createTutor(tx: Prisma.TransactionClient, data: CreateTutorData): Promise<Tutor> {
     const passwordHash = await this.hashPassword(data.password);
     const username = this.generateUsername(data.email);
 
@@ -179,7 +180,7 @@ export class TutorCreationService {
    * // Si no existe, lo crea y luego lo retorna
    * ```
    */
-  async findOrCreateTutor(tx: any, data: CreateTutorData): Promise<any> {
+  async findOrCreateTutor(tx: Prisma.TransactionClient, data: CreateTutorData): Promise<Tutor> {
     const existingTutor = await tx.tutor.findUnique({
       where: { email: data.email.toLowerCase() },
     });

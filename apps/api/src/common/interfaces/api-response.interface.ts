@@ -41,7 +41,7 @@ export interface ApiResponse<T> {
     /** Timestamp ISO 8601 de cuándo se generó la respuesta */
     timestamp: string;
     /** Cualquier otro metadato adicional */
-    [key: string]: any;
+    [key: string]: unknown;
   };
 
   /** Mensaje descriptivo opcional */
@@ -81,7 +81,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
     /** Timestamp ISO 8601 */
     timestamp: string;
     /** Cualquier otro metadato adicional */
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

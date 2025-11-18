@@ -20,6 +20,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MercadoPagoWebhookGuard } from '../pagos/guards/mercadopago-webhook.guard';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
 
+interface RequestWithUser extends Request {
+  user: {
+    id: string;
+    [key: string]: unknown;
+  };
+}
+
 @Controller('inscripciones-2026')
 export class Inscripciones2026Controller {
   private readonly logger = new Logger(Inscripciones2026Controller.name);
@@ -66,7 +73,7 @@ export class Inscripciones2026Controller {
    */
   @Get('mis-inscripciones')
   @UseGuards(JwtAuthGuard)
-  async getMisInscripciones(@Request() req: any) {
+  async getMisInscripciones(@Request() req: RequestWithUser) {
     const tutorId = req.user.id; // Asume que el JWT contiene el user ID
     return this.inscripciones2026Service.getInscripcionesByTutor(tutorId);
   }
@@ -80,7 +87,7 @@ export class Inscripciones2026Controller {
   async updateEstado(
     @Param('id') id: string,
     @Body() body: { estado: string; razon: string },
-    @Request() req: any,
+    @Request() req: RequestWithUser,
   ) {
     return this.inscripciones2026Service.updateEstado(
       id,

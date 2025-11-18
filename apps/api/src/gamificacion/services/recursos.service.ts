@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class RecursosService {
@@ -50,7 +51,7 @@ export class RecursosService {
     estudianteId: string,
     cantidad: number,
     razon: string,
-    metadata?: any,
+    metadata?: Prisma.InputJsonValue,
   ) {
     const recursos = await this.obtenerRecursos(estudianteId);
 
@@ -83,7 +84,7 @@ export class RecursosService {
     estudianteId: string,
     cantidad: number,
     razon: string,
-    metadata?: any,
+    metadata?: Prisma.InputJsonValue,
   ) {
     const recursos = await this.obtenerRecursos(estudianteId);
 
@@ -126,7 +127,7 @@ export class RecursosService {
     estudianteId: string,
     cantidad: number,
     razon: string,
-    metadata?: any,
+    metadata?: Prisma.InputJsonValue,
   ) {
     const recursos = await this.obtenerRecursos(estudianteId);
 
