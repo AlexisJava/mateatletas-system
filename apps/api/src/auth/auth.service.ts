@@ -194,7 +194,7 @@ export class AuthService {
         nivel_actual: estudiante.nivel_actual,
         equipo: estudiante.equipo,
         tutor: estudiante.tutor,
-        role: 'estudiante',
+        role: Role.ESTUDIANTE,
         debe_cambiar_password: estudiante.debe_cambiar_password,
       },
     };
@@ -283,7 +283,7 @@ export class AuthService {
           telefono: user.telefono ?? null,
           fecha_registro: user.fecha_registro,
           ha_completado_onboarding: user.ha_completado_onboarding,
-          role: 'tutor',
+          role: Role.TUTOR,
           roles: finalUserRoles, // Array de todos los roles del usuario
           debe_cambiar_password: user.debe_cambiar_password,
         },
@@ -300,7 +300,7 @@ export class AuthService {
           apellido: user.apellido,
           titulo: user.titulo ?? null,
           bio: user.bio ?? null,
-          role: 'docente',
+          role: Role.DOCENTE,
           roles: finalUserRoles, // Array de todos los roles del usuario
           debe_cambiar_password: user.debe_cambiar_password,
         },
@@ -318,7 +318,7 @@ export class AuthService {
         fecha_registro: user.fecha_registro,
         dni: isAdminUser(user) ? (user.dni ?? null) : null,
         telefono: isAdminUser(user) ? (user.telefono ?? null) : null,
-        role: 'admin',
+        role: Role.ADMIN,
         roles: finalUserRoles, // Array de todos los roles del usuario
         debe_cambiar_password: isAdminUser(user)
           ? user.debe_cambiar_password
@@ -449,7 +449,7 @@ export class AuthService {
 
       return {
         ...estudiante,
-        role: 'estudiante',
+        role: Role.ESTUDIANTE,
       };
     }
 
@@ -478,7 +478,7 @@ export class AuthService {
 
     return {
       ...tutor,
-      role: 'tutor',
+      role: Role.TUTOR,
     };
   }
 

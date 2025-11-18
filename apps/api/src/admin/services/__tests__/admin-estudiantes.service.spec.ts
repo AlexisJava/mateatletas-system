@@ -219,7 +219,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
 
       const mockEstudianteCreate = jest.fn().mockResolvedValue({
         ...mockEstudiante,
-        equipo_id: null,
+        equipoId: null,
       });
 
       jest
