@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
 import { PinGeneratorService } from '../../shared/services/pin-generator.service';
 import { TutorCreationService } from '../../shared/services/tutor-creation.service';
+import { MercadoPagoWebhookProcessorService } from '../../shared/services/mercadopago-webhook-processor.service';
 import { MercadoPagoWebhookDto } from '../../pagos/dto/mercadopago-webhook.dto';
 
 /**
@@ -145,6 +146,9 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
             validateUniqueEmail: jest.fn(),
           },
         },
+        // Provide the real webhook processor since it's just a thin wrapper
+        // We mock MercadoPagoService.getPayment which is what the processor calls
+        MercadoPagoWebhookProcessorService,
       ],
     }).compile();
 
@@ -164,7 +168,7 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(webhookData);
 
-      expect(result).toEqual({ message: 'Webhook type not handled' });
+      expect(result).toEqual({ success: false, message: 'Webhook type not handled' });
       expect(mercadoPagoService.getPayment).not.toHaveBeenCalled();
     });
 
@@ -214,7 +218,7 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ message: 'Invalid external_reference format' });
+      expect(result).toEqual({ success: false, message: 'Invalid external_reference format' });
       expect(prismaService.pagoInscripcion2026.findFirst).not.toHaveBeenCalled();
     });
 
@@ -228,7 +232,7 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ message: 'Payment without external_reference' });
+      expect(result).toEqual({ success: false, message: 'Payment without external_reference' });
     });
 
     it('should handle malformed external reference', async () => {
@@ -241,7 +245,7 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ message: 'Invalid external_reference format' });
+      expect(result).toEqual({ success: false, message: 'Invalid external_reference format' });
     });
   });
 
@@ -419,7 +423,7 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ message: 'Payment record not found' });
+      expect(result).toEqual({ success: false, message: 'Payment not found in database' });
     });
 
     it('should handle MercadoPago API errors', async () => {

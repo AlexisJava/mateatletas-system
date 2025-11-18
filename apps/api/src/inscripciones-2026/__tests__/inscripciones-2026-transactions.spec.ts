@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
 import { PinGeneratorService } from '../../shared/services/pin-generator.service';
 import { TutorCreationService } from '../../shared/services/tutor-creation.service';
+import { MercadoPagoWebhookProcessorService } from '../../shared/services/mercadopago-webhook-processor.service';
 import { BadRequestException, InternalServerErrorException, ConflictException } from '@nestjs/common';
 import { TipoInscripcion2026 } from '../dto/create-inscripcion-2026.dto';
 
@@ -288,6 +289,7 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
             validateUniqueEmail: jest.fn(),
           },
         },
+        MercadoPagoWebhookProcessorService,
       ],
     }).compile();
 

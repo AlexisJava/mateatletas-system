@@ -14,6 +14,7 @@ import {
 import { PricingCalculatorService } from '../domain/services/pricing-calculator.service';
 import { PinGeneratorService } from '../shared/services/pin-generator.service';
 import { TutorCreationService } from '../shared/services/tutor-creation.service';
+import { MercadoPagoWebhookProcessorService } from '../shared/services/mercadopago-webhook-processor.service';
 import {
   CreateInscripcion2026Dto,
   CreateInscripcion2026Response,
@@ -55,6 +56,7 @@ export class Inscripciones2026Service {
     private readonly pricingCalculator: PricingCalculatorService,
     private readonly pinGenerator: PinGeneratorService,
     private readonly tutorCreation: TutorCreationService,
+    private readonly webhookProcessor: MercadoPagoWebhookProcessorService,
   ) {}
 
   /**
@@ -725,121 +727,91 @@ async createInscripcion2026(
   }
 
   /**
-   * Procesa webhook de MercadoPago para inscripciones 2026
+   * Procesa webhook de MercadoPago para pagos de Inscripción 2026
+   *
+   * Utiliza el servicio compartido MercadoPagoWebhookProcessorService
+   * y proporciona callbacks específicos para la lógica de Inscripciones2026.
    */
   async procesarWebhookMercadoPago(webhookData: MercadoPagoWebhookDto) {
     this.logger.log(
       `📨 Webhook recibido: ${webhookData.type} - ${webhookData.action}`,
     );
 
-    // Solo procesar notificaciones de tipo "payment"
-    if (webhookData.type !== 'payment') {
-      this.logger.log(`⏭️ Ignorando webhook de tipo: ${webhookData.type}`);
-      return { message: 'Webhook type not handled' };
-    }
+    return this.webhookProcessor.processWebhook(
+      webhookData,
+      TipoExternalReference.INSCRIPCION_2026,
+      // Callback: Buscar pago en DB
+      async (parsed) => {
+        const { inscripcionId } = parsed.ids;
 
-    const paymentId = webhookData.data.id;
-    this.logger.log(`💳 Procesando pago ID: ${paymentId}`);
+        const pago = await this.prisma.pagoInscripcion2026.findFirst({
+          where: {
+            inscripcion_id: inscripcionId,
+            tipo: 'inscripcion',
+          },
+          include: {
+            inscripcion: true,
+          },
+        });
 
-    try {
-      // Consultar detalles del pago a MercadoPago
-      const payment = await this.mercadoPagoService.getPayment(paymentId);
+        if (!pago) {
+          this.logger.error(`❌ No se encontró el pago para inscripción ${inscripcionId}`);
+        }
 
-      this.logger.log(
-        `💰 Pago consultado - Estado: ${payment.status} - Ref Externa: ${payment.external_reference}`,
-      );
+        return pago;
+      },
+      // Callback: Actualizar pago e inscripción
+      async (pago, context) => {
+        const { inscripcionId } = context.parsedReference.ids;
 
-      // Parsear external_reference para identificar inscripción
-      const externalRef = payment.external_reference;
+        // Mapear estado de MercadoPago a estado interno
+        const nuevoEstadoPago = this.webhookProcessor.mapPaymentStatus(context.paymentStatus);
 
-      if (!externalRef) {
-        this.logger.warn('⚠️ Pago sin external_reference - Ignorando');
-        return { message: 'Payment without external_reference' };
-      }
+        // Determinar estado de inscripción según estado del pago
+        let nuevoEstadoInscripcion = 'pending';
+        switch (nuevoEstadoPago) {
+          case 'paid':
+            nuevoEstadoInscripcion = 'active';
+            break;
+          case 'failed':
+            nuevoEstadoInscripcion = 'payment_failed';
+            break;
+          case 'pending':
+            nuevoEstadoInscripcion = 'pending';
+            break;
+        }
 
-      // Usar parser de constantes para extraer IDs
-      const parsed = parseLegacyExternalReference(externalRef);
+        // Actualizar pago en DB
+        await this.prisma.pagoInscripcion2026.update({
+          where: { id: pago.id },
+          data: {
+            estado: nuevoEstadoPago,
+            mercadopago_payment_id: context.payment.id?.toString(),
+            fecha_pago: context.paymentStatus === 'approved' ? new Date() : undefined,
+          },
+        });
 
-      if (!parsed || parsed.tipo !== TipoExternalReference.INSCRIPCION_2026) {
-        this.logger.warn('⚠️ External reference inválida o no es de tipo INSCRIPCION_2026');
-        return { message: 'Invalid external_reference format' };
-      }
+        // Actualizar estado de la inscripción si cambió
+        if (nuevoEstadoInscripcion !== pago.inscripcion.estado) {
+          await this.updateEstado(
+            inscripcionId,
+            nuevoEstadoInscripcion,
+            `Pago ${nuevoEstadoPago} - MercadoPago Payment ID: ${context.payment.id}`,
+            'mercadopago-webhook',
+          );
+        }
 
-      const { inscripcionId } = parsed.ids;
-
-      // Buscar el pago en la base de datos
-      const pago = await this.prisma.pagoInscripcion2026.findFirst({
-        where: {
-          inscripcion_id: inscripcionId,
-          tipo: 'inscripcion',
-        },
-        include: {
-          inscripcion: true,
-        },
-      });
-
-      if (!pago) {
-        this.logger.error(`❌ No se encontró el pago para inscripción ${inscripcionId}`);
-        return { message: 'Payment record not found' };
-      }
-
-      // Actualizar estado del pago según respuesta de MercadoPago
-      let nuevoEstadoPago = 'pending';
-      let nuevoEstadoInscripcion = 'pending';
-
-      switch (payment.status) {
-        case 'approved':
-          nuevoEstadoPago = 'paid';
-          nuevoEstadoInscripcion = 'active';
-          break;
-        case 'rejected':
-        case 'cancelled':
-          nuevoEstadoPago = 'failed';
-          nuevoEstadoInscripcion = 'payment_failed';
-          break;
-        case 'in_process':
-        case 'pending':
-          nuevoEstadoPago = 'pending';
-          nuevoEstadoInscripcion = 'pending';
-          break;
-        default:
-          this.logger.warn(`⚠️ Estado de pago desconocido: ${payment.status}`);
-          nuevoEstadoPago = 'pending';
-      }
-
-      // Actualizar pago en DB
-      await this.prisma.pagoInscripcion2026.update({
-        where: { id: pago.id },
-        data: {
-          estado: nuevoEstadoPago,
-          mercadopago_payment_id: payment.id?.toString(),
-          fecha_pago: payment.status === 'approved' ? new Date() : undefined,
-        },
-      });
-
-      // Actualizar estado de la inscripción
-      if (nuevoEstadoInscripcion !== pago.inscripcion.estado) {
-        await this.updateEstado(
-          inscripcionId,
-          nuevoEstadoInscripcion,
-          `Pago ${nuevoEstadoPago} - MercadoPago Payment ID: ${payment.id}`,
-          'mercadopago-webhook',
+        this.logger.log(
+          `✅ Pago procesado exitosamente - Inscripción ${inscripcionId} → Estado: ${nuevoEstadoInscripcion}`,
         );
-      }
 
-      this.logger.log(
-        `✅ Pago procesado exitosamente - Inscripción ${inscripcionId} → Estado: ${nuevoEstadoInscripcion}`,
-      );
-
-      return {
-        success: true,
-        inscripcionId,
-        paymentStatus: nuevoEstadoPago,
-        inscripcionStatus: nuevoEstadoInscripcion,
-      };
-    } catch (error) {
-      this.logger.error('❌ Error procesando webhook de MercadoPago:', error);
-      throw new BadRequestException('Error processing webhook');
-    }
+        return {
+          success: true,
+          inscripcionId,
+          paymentStatus: nuevoEstadoPago,
+          inscripcionStatus: nuevoEstadoInscripcion,
+        };
+      },
+    );
   }
 }
