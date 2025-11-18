@@ -13,6 +13,20 @@ import {
 import { PricingCalculatorService } from '../domain/services/pricing-calculator.service';
 import { CreateInscriptionDto } from './dto/create-inscription.dto';
 
+/**
+ * Resultado del cálculo de precios para inscripción de colonia
+ */
+interface PricingResult {
+  /** Cantidad total de estudiantes */
+  cantidadEstudiantes: number;
+  /** Cantidad total de cursos seleccionados */
+  totalCursos: number;
+  /** Porcentaje de descuento aplicado (0-100) */
+  descuentoPorcentaje: number;
+  /** Monto total mensual con descuento aplicado */
+  totalMensual: number;
+}
+
 @Injectable()
 export class ColoniaService {
   private readonly logger = new Logger(ColoniaService.name);
@@ -123,6 +137,267 @@ export class ColoniaService {
   }
 
   /**
+   * Valida que el email no esté registrado en el sistema
+   *
+   * @param email - Email a validar
+   * @throws ConflictException si el email ya está registrado
+   */
+  private async validateUniqueEmail(email: string): Promise<void> {
+    const existingTutor = await this.prisma.tutor.findUnique({
+      where: { email },
+    });
+
+    if (existingTutor) {
+      throw new ConflictException('El email ya está registrado');
+    }
+  }
+
+  /**
+   * Valida que se haya seleccionado al menos un curso
+   *
+   * @param estudiantes - Lista de estudiantes con cursos seleccionados
+   * @throws BadRequestException si no hay cursos seleccionados
+   */
+  private validateCourseSelection(estudiantes: CreateInscriptionDto['estudiantes']): void {
+    const totalCursos = estudiantes.reduce((sum, est) => sum + est.cursosSeleccionados.length, 0);
+
+    if (totalCursos === 0) {
+      throw new BadRequestException('Debe seleccionar al menos un curso');
+    }
+  }
+
+  /**
+   * Calcula precios, descuentos y totales para la inscripción
+   *
+   * @param dto - Datos de la inscripción
+   * @returns Resultado con cantidades, descuento y total mensual
+   */
+  private calculatePricing(dto: CreateInscriptionDto): PricingResult {
+    const cantidadEstudiantes = dto.estudiantes.length;
+    const totalCursos = dto.estudiantes.reduce((sum, est) => sum + est.cursosSeleccionados.length, 0);
+
+    // Usar PricingCalculatorService para calcular descuentos y totales
+    const descuentoPorcentaje = this.pricingCalculator.calcularDescuentoColonia(cantidadEstudiantes, totalCursos);
+    const cursosPerStudent = dto.estudiantes.map(est => est.cursosSeleccionados.length);
+    const totalMensual = this.pricingCalculator.calcularTotalColonia(cursosPerStudent, descuentoPorcentaje);
+
+    this.logger.log(`Cálculo: ${totalCursos} cursos, ${cantidadEstudiantes} estudiantes, descuento ${descuentoPorcentaje}%, total mensual: $${totalMensual}`);
+
+    return {
+      cantidadEstudiantes,
+      totalCursos,
+      descuentoPorcentaje,
+      totalMensual,
+    };
+  }
+
+  /**
+   * Genera un username único basado en el nombre del estudiante
+   *
+   * @param nombre - Nombre del estudiante
+   * @returns Username único en formato {nombre}{random4digits}
+   */
+  private generateUsername(nombre: string): string {
+    const baseUsername = nombre.toLowerCase().replace(/\s+/g, '');
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    return `${baseUsername}${randomNum}`;
+  }
+
+  /**
+   * Crea estudiantes con sus respectivos PINs en una transacción
+   *
+   * @param tx - Cliente de transacción de Prisma
+   * @param dto - Datos de la inscripción
+   * @param tutorId - ID del tutor asociado
+   * @returns Objeto con estudiantes creados, datos preparados y PINs generados
+   */
+  private async createEstudiantesConPins(
+    tx: any,
+    dto: CreateInscriptionDto,
+    tutorId: string
+  ): Promise<{ estudiantesFromDB: any[]; estudiantesData: any[]; pins: string[] }> {
+    // Preparar datos de estudiantes y generar usernames únicos
+    const estudiantesData = dto.estudiantes.map((estudianteDto) => {
+      const username = this.generateUsername(estudianteDto.nombre);
+
+      return {
+        username,
+        nombre: estudianteDto.nombre,
+        apellido: '',
+        edad: estudianteDto.edad,
+        nivelEscolar: estudianteDto.edad <= 7 ? 'Primaria' : estudianteDto.edad <= 12 ? 'Primaria' : 'Secundaria',
+        tutor_id: tutorId,
+      };
+    });
+
+    // Crear todos los estudiantes en paralelo
+    const estudiantesFromDB = await Promise.all(
+      estudiantesData.map(data => tx.estudiante.create({ data }))
+    );
+
+    // Generar todos los PINs en paralelo
+    const pins = await Promise.all(
+      estudiantesFromDB.map(() => this.generateUniquePin())
+    );
+
+    return { estudiantesFromDB, estudiantesData, pins };
+  }
+
+  /**
+   * Crea registros de colonia_estudiante vinculando estudiantes a la inscripción
+   *
+   * @param tx - Cliente de transacción de Prisma
+   * @param inscriptionId - ID de la inscripción de colonia
+   * @param estudiantesFromDB - Lista de estudiantes creados
+   * @param pins - Lista de PINs generados
+   * @returns Lista de registros colonia_estudiante creados
+   */
+  private async createColoniaEstudiantes(
+    tx: any,
+    inscriptionId: string,
+    estudiantesFromDB: any[],
+    pins: string[]
+  ): Promise<any[]> {
+    return Promise.all(
+      estudiantesFromDB.map(async (estudiante, idx) => {
+        return await tx.coloniaEstudiante.create({
+          data: {
+            inscripcion_id: inscriptionId,
+            estudiante_id: estudiante.id,
+            nombre: estudiante.nombre,
+            edad: estudiante.edad,
+            pin: pins[idx],
+          },
+        });
+      })
+    );
+  }
+
+  /**
+   * Prepara los datos de cursos para ser creados en batch
+   *
+   * @param dto - Datos de la inscripción
+   * @param coloniaEstudiantesCreados - Lista de colonia_estudiante creados
+   * @param descuentoPorcentaje - Porcentaje de descuento a aplicar
+   * @returns Array de promesas de creación de cursos
+   */
+  private prepareCursosData(
+    dto: CreateInscriptionDto,
+    coloniaEstudiantesCreados: any[],
+    descuentoPorcentaje: number
+  ): any[] {
+    const cursosData: any[] = [];
+
+    dto.estudiantes.forEach((estudianteDto, idx) => {
+      const coloniaEstudianteId = coloniaEstudiantesCreados[idx].id;
+      const precioConDescuento = this.pricingCalculator.aplicarDescuento(
+        PRECIOS.COLONIA_CURSO_BASE,
+        descuentoPorcentaje
+      );
+
+      estudianteDto.cursosSeleccionados.forEach((curso) => {
+        cursosData.push({
+          colonia_estudiante_id: coloniaEstudianteId,
+          courseId: curso.id,
+          course_name: curso.name,
+          course_area: curso.area,
+          instructor: curso.instructor,
+          day_of_week: curso.dayOfWeek,
+          time_slot: curso.timeSlot,
+          precio_base: PRECIOS.COLONIA_CURSO_BASE,
+          precio_con_descuento: precioConDescuento,
+        });
+      });
+    });
+
+    return cursosData;
+  }
+
+  /**
+   * Crea todos los cursos en la base de datos en paralelo
+   *
+   * @param tx - Cliente de transacción de Prisma
+   * @param cursosData - Array de datos de cursos a crear
+   * @returns Promesa que se resuelve cuando todos los cursos están creados
+   */
+  private async createCursos(tx: any, cursosData: any[]): Promise<void> {
+    const cursosPromises = cursosData.map((cursoData) =>
+      tx.coloniaEstudianteCurso.create({ data: cursoData })
+    );
+
+    await Promise.all(cursosPromises);
+    this.logger.log(`Cursos creados: ${cursosData.length}`);
+  }
+
+  /**
+   * Construye la preferencia de MercadoPago para el pago de la inscripción
+   *
+   * @param result - Resultado de la transacción con datos de inscripción
+   * @param pricing - Información de precios calculados
+   * @returns Objeto de preferencia de MercadoPago
+   */
+  private buildMercadoPagoPreference(
+    result: {
+      inscriptionId: string;
+      pagoEneroId: string;
+    },
+    pricing: PricingResult
+  ): any {
+    return {
+      items: [
+        {
+          id: `colonia-${result.inscriptionId}`,
+          title: `Colonia de Verano 2026 - Enero`,
+          description: `${pricing.totalCursos} curso(s) - ${pricing.cantidadEstudiantes} estudiante(s)${pricing.descuentoPorcentaje > 0 ? ` - ${pricing.descuentoPorcentaje}% descuento` : ''}`,
+          quantity: 1,
+          unit_price: pricing.totalMensual,
+          currency_id: 'ARS',
+        },
+      ],
+      back_urls: {
+        success: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=success&payment_id={{payment_id}}&inscription_id=${result.inscriptionId}`,
+        failure: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=failure&payment_id={{payment_id}}&inscription_id=${result.inscriptionId}`,
+        pending: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=pending&payment_id={{payment_id}}&inscription_id=${result.inscriptionId}`,
+      },
+      auto_return: 'approved' as any,
+      external_reference: result.pagoEneroId,
+      notification_url: `${process.env.BACKEND_URL}/api/colonia/webhook`,
+    };
+  }
+
+  /**
+   * Construye la respuesta final de la inscripción
+   *
+   * @param result - Resultado de la transacción
+   * @param preference - Preferencia de MercadoPago creada
+   * @param pricing - Información de precios
+   * @returns Objeto de respuesta con datos de inscripción y pago
+   */
+  private buildInscriptionResponse(
+    result: {
+      tutorId: string;
+      inscriptionId: string;
+      estudiantes: Array<{ nombre: string; username: string; pin: string }>;
+    },
+    preference: any,
+    pricing: PricingResult
+  ): any {
+    return {
+      message: 'Inscripción creada exitosamente',
+      tutorId: result.tutorId,
+      inscriptionId: result.inscriptionId,
+      estudiantes: result.estudiantes,
+      pago: {
+        mes: 'enero',
+        monto: pricing.totalMensual,
+        descuento: pricing.descuentoPorcentaje,
+        mercadoPagoUrl: preference.init_point,
+        mercadoPagoSandboxUrl: preference.sandbox_init_point,
+      },
+    };
+  }
+
+  /**
    * Crea una inscripción completa a la Colonia de Verano 2026
    *
    * Flujo:
@@ -139,45 +414,25 @@ export class ColoniaService {
   async createInscription(dto: CreateInscriptionDto) {
     this.logger.log(`Iniciando inscripción para ${dto.email}`);
 
-    // 1. Verificar email único
-    const existingTutor = await this.prisma.tutor.findUnique({
-      where: { email: dto.email },
-    });
+    // 1. Validaciones
+    await this.validateUniqueEmail(dto.email);
+    this.validateCourseSelection(dto.estudiantes);
 
-    if (existingTutor) {
-      throw new ConflictException('El email ya está registrado');
-    }
-
-    // 2. Calcular precios
-    const cantidadEstudiantes = dto.estudiantes.length;
-    const totalCursos = dto.estudiantes.reduce((sum, est) => sum + est.cursosSeleccionados.length, 0);
-
-    if (totalCursos === 0) {
-      throw new BadRequestException('Debe seleccionar al menos un curso');
-    }
-
-    // Usar PricingCalculatorService para calcular descuentos y totales
-    const descuentoPorcentaje = this.pricingCalculator.calcularDescuentoColonia(cantidadEstudiantes, totalCursos);
-    const cursosPerStudent = dto.estudiantes.map(est => est.cursosSeleccionados.length);
-    const totalMensual = this.pricingCalculator.calcularTotalColonia(cursosPerStudent, descuentoPorcentaje);
-
-    this.logger.log(`Cálculo: ${totalCursos} cursos, ${cantidadEstudiantes} estudiantes, descuento ${descuentoPorcentaje}%, total mensual: $${totalMensual}`);
-
-    // 3. Hash de contraseña
+    // 2. Cálculos
+    const pricing = this.calculatePricing(dto);
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
-    // 4. Crear todo en una transacción
+    // 3. Transacción
     const result = await this.prisma.$transaction(async (tx) => {
-      // Crear tutor
       const tutor = await tx.tutor.create({
         data: {
           email: dto.email,
           nombre: dto.nombre,
-          apellido: '', // No pedimos apellido en el form, usar email como apellido temporal
+          apellido: '',
           password_hash: passwordHash,
           dni: dto.dni || null,
           telefono: dto.telefono,
-          debe_cambiar_password: false, // El tutor ya eligió su propia contraseña
+          debe_cambiar_password: false,
           debe_completar_perfil: false,
           ha_completado_onboarding: true,
           roles: DEFAULT_ROLES.TUTOR,
@@ -186,191 +441,69 @@ export class ColoniaService {
 
       this.logger.log(`Tutor creado: ${tutor.id}`);
 
-      // Crear inscripción de colonia
-      // ✅ Prisma genera el ID automáticamente
       const inscripcion = await tx.coloniaInscripcion.create({
         data: {
           tutor_id: tutor.id,
           estado: 'active',
-          descuento_aplicado: descuentoPorcentaje,
-          total_mensual: totalMensual,
+          descuento_aplicado: pricing.descuentoPorcentaje,
+          total_mensual: pricing.totalMensual,
           fecha_inscripcion: new Date(),
         },
       });
 
-      const inscriptionId = inscripcion.id;
+      this.logger.log(`Inscripción creada: ${inscripcion.id}`);
 
-      this.logger.log(`Inscripción creada: ${inscriptionId}`);
-
-      // OPTIMIZACIÓN N+1 QUERY:
-      // - ANTES: N × (1 create estudiante + 1 PIN + 1 insert colonia + M inserts cursos)
-      // - AHORA: 1 createMany estudiantes + N PINs batch + 1 createMany colonia + 1 createMany cursos
-      //
-      // PERFORMANCE:
-      // - Con 3 estudiantes y 2 cursos cada uno: 15 queries → 4 queries (73% reducción)
-      // - Con 10 estudiantes y 2 cursos cada uno: 50 queries → 4 queries (92% reducción)
-
-      // Paso 1: Preparar datos de estudiantes y generar usernames únicos
-      const estudiantesData = dto.estudiantes.map((estudianteDto) => {
-        const baseUsername = estudianteDto.nombre.toLowerCase().replace(/\s+/g, '');
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        const username = `${baseUsername}${randomNum}`;
-
-        return {
-          username,
-          nombre: estudianteDto.nombre,
-          apellido: '', // No pedimos apellido
-          edad: estudianteDto.edad,
-          nivelEscolar: estudianteDto.edad <= 7 ? 'Primaria' : estudianteDto.edad <= 12 ? 'Primaria' : 'Secundaria',
-          tutor_id: tutor.id,
-        };
-      });
-
-      // Paso 2: Crear todos los estudiantes en paralelo (usando Promise.all para mejor performance)
-      // Nota: Usamos Promise.all con create() en lugar de createMany() porque necesitamos los IDs retornados
-      const estudiantesFromDB = await Promise.all(
-        estudiantesData.map(data =>
-          tx.estudiante.create({ data })
-        )
+      const { estudiantesFromDB, estudiantesData, pins } = await this.createEstudiantesConPins(tx, dto, tutor.id);
+      const coloniaEstudiantesCreados = await this.createColoniaEstudiantes(
+        tx,
+        inscripcion.id,
+        estudiantesFromDB,
+        pins
       );
 
-      // Paso 4: Generar todos los PINs en paralelo (N queries en paralelo, no secuencial)
-      const pins = await Promise.all(
-        estudiantesFromDB.map(() => this.generateUniquePin())
-      );
-
-      // Paso 5 y 6: Crear colonia_estudiantes y capturar IDs generados
-      // ✅ Usamos create() en lugar de createMany() para obtener los IDs auto-generados
-      // Nota: Prisma no soporta createMany con skipDuplicates en transacciones PostgreSQL
-      const coloniaEstudiantesCreados = await Promise.all(
-        estudiantesFromDB.map(async (estudiante, idx) => {
-          return await tx.coloniaEstudiante.create({
-            data: {
-              inscripcion_id: inscriptionId,
-              estudiante_id: estudiante.id,
-              nombre: estudiante.nombre,
-              edad: estudiante.edad,
-              pin: pins[idx],
-            },
-          });
-        })
-      );
-
-      // Paso 7 y 8: Crear cursos seleccionados (sin IDs manuales)
-      // ✅ Usamos create() en lugar de createMany() para que Prisma genere los IDs automáticamente
-      const cursosPromises: Promise<any>[] = [];
-      let totalCursos = 0;
-
-      dto.estudiantes.forEach((estudianteDto, idx) => {
-        const coloniaEstudianteId = coloniaEstudiantesCreados[idx].id;
-        const precioConDescuento = this.pricingCalculator.aplicarDescuento(
-          PRECIOS.COLONIA_CURSO_BASE,
-          descuentoPorcentaje
-        );
-
-        estudianteDto.cursosSeleccionados.forEach((curso) => {
-          cursosPromises.push(
-            tx.coloniaEstudianteCurso.create({
-              data: {
-                colonia_estudiante_id: coloniaEstudianteId,
-                courseId: curso.id,
-                course_name: curso.name,
-                course_area: curso.area,
-                instructor: curso.instructor,
-                day_of_week: curso.dayOfWeek,
-                time_slot: curso.timeSlot,
-                precio_base: PRECIOS.COLONIA_CURSO_BASE,
-                precio_con_descuento: precioConDescuento,
-              },
-            })
-          );
-          totalCursos++;
-        });
-      });
-
-      // Ejecutar todas las inserciones de cursos en paralelo
-      await Promise.all(cursosPromises);
-
-      // Preparar resultado para retornar
-      const estudiantesCreados = estudiantesData.map((data, idx) => ({
-        nombre: data.nombre,
-        username: data.username,
-        pin: pins[idx],
-      }));
-
-      this.logger.log(`Estudiantes creados: ${estudiantesCreados.length}, cursos totales: ${totalCursos}`);
-
-      // Crear pago de Enero 2026
-      // ✅ Prisma genera el ID automáticamente
-      const fechaVencimiento = calcularFechaVencimiento('Enero', 2026);
+      const cursosData = this.prepareCursosData(dto, coloniaEstudiantesCreados, pricing.descuentoPorcentaje);
+      await this.createCursos(tx, cursosData);
 
       const pagoEnero = await tx.coloniaPago.create({
         data: {
-          inscripcion_id: inscriptionId,
+          inscripcion_id: inscripcion.id,
           mes: 'enero',
           anio: 2026,
-          monto: totalMensual,
+          monto: pricing.totalMensual,
           estado: 'pending',
-          fecha_vencimiento: fechaVencimiento,
+          fecha_vencimiento: calcularFechaVencimiento('Enero', 2026),
           fecha_creacion: new Date(),
         },
       });
 
-      const pagoEneroId = pagoEnero.id;
-
-      this.logger.log(`Pago Enero 2026 creado: ${pagoEneroId}`);
+      this.logger.log(`Pago Enero 2026 creado: ${pagoEnero.id}`);
 
       return {
         tutorId: tutor.id,
-        inscriptionId,
-        pagoEneroId,
-        estudiantes: estudiantesCreados,
-        totalMensual,
-        descuentoPorcentaje,
+        inscriptionId: inscripcion.id,
+        pagoEneroId: pagoEnero.id,
+        estudiantes: estudiantesData.map((data, idx) => ({
+          nombre: data.nombre,
+          username: data.username,
+          pin: pins[idx],
+        })),
       };
     });
 
-    // 5. Crear preferencia de MercadoPago
-    const preference = await this.mercadoPagoService.createPreference({
-      items: [
-        {
-          id: `colonia-${result.inscriptionId}`,
-          title: `Colonia de Verano 2026 - Enero`,
-          description: `${totalCursos} curso(s) - ${cantidadEstudiantes} estudiante(s)${descuentoPorcentaje > 0 ? ` - ${descuentoPorcentaje}% descuento` : ''}`,
-          quantity: 1,
-          unit_price: totalMensual,
-          currency_id: 'ARS',
-        },
-      ],
-      back_urls: {
-        success: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=success&payment_id={{payment_id}}&inscription_id=${result.inscriptionId}`,
-        failure: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=failure&payment_id={{payment_id}}&inscription_id=${result.inscriptionId}`,
-        pending: `${process.env.FRONTEND_URL}/colonia/confirmacion?status=pending&payment_id={{payment_id}}&inscription_id=${result.inscriptionId}`,
-      },
-      auto_return: 'approved' as any,
-      external_reference: result.pagoEneroId,
-      notification_url: `${process.env.BACKEND_URL}/api/colonia/webhook`,
-    });
+    // 4. MercadoPago
+    const preference = await this.mercadoPagoService.createPreference(
+      this.buildMercadoPagoPreference(result, pricing)
+    );
 
-    // 6. Actualizar pago con preference ID
-    // ✅ Usamos update() de Prisma con retry logic
     await this.updatePreferenceIdWithRetry(result.pagoEneroId, preference.id);
 
-    this.logger.log('Inscripción completada exitosamente', { preferenceId: preference.id, inscriptionId: result.inscriptionId });
-
-    return {
-      message: 'Inscripción creada exitosamente',
-      tutorId: result.tutorId,
+    this.logger.log('Inscripción completada exitosamente', {
+      preferenceId: preference.id,
       inscriptionId: result.inscriptionId,
-      estudiantes: result.estudiantes,
-      pago: {
-        mes: 'enero',
-        monto: totalMensual,
-        descuento: descuentoPorcentaje,
-        mercadoPagoUrl: preference.init_point,
-        mercadoPagoSandboxUrl: preference.sandbox_init_point,
-      },
-    };
+    });
+
+    // 5. Respuesta
+    return this.buildInscriptionResponse(result, preference, pricing);
   }
 
   /**

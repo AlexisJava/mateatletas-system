@@ -20,6 +20,29 @@ import {
   MundoSTEAM,
 } from './dto/create-inscripcion-2026.dto';
 
+/**
+ * Representa un estudiante creado en la transacción con sus datos relacionados
+ */
+interface EstudianteCreado {
+  estudiante: any;
+  estudianteInscripcion: any;
+  pin: string;
+  cursosSeleccionados: any[];
+  mundoSeleccionado?: any;
+}
+
+/**
+ * Resultado completo de la transacción de inscripción
+ */
+interface TransactionResult {
+  inscripcion: any;
+  tutor: any;
+  estudiantes: EstudianteCreado[];
+  pago: any;
+  cursosCount: number;
+  mundosCount: number;
+}
+
 @Injectable()
 export class Inscripciones2026Service {
   private readonly logger = new Logger(Inscripciones2026Service.name);
@@ -190,6 +213,342 @@ export class Inscripciones2026Service {
     });
   }
 
+  /**
+   * Construye los datos de preferencia de MercadoPago para la inscripción
+   * @private
+   */
+  private buildMercadoPagoPreferenceData(
+    dto: CreateInscripcion2026Dto,
+    inscripcionFee: number,
+    backendUrl: string,
+    frontendUrl: string,
+  ): any {
+    return this.mercadoPagoService.buildInscripcion2026PreferenceData(
+      dto.tipo_inscripcion,
+      inscripcionFee,
+      {
+        email: dto.tutor.email,
+        nombre: dto.tutor.nombre,
+        apellido: undefined,
+      },
+      'TEMP_INSCRIPCION_ID',
+      'TEMP_TUTOR_ID',
+      dto.estudiantes.length,
+      backendUrl,
+      frontendUrl,
+    );
+  }
+
+  /**
+   * Crea preferencia de MercadoPago con manejo de modo mock y errores
+   * @private
+   */
+  private async createMercadoPagoPreference(
+    dto: CreateInscripcion2026Dto,
+    inscripcionFee: number,
+    backendUrl: string,
+    frontendUrl: string,
+  ): Promise<{ mercadopagoPreferenceId: string; mercadopagoInitPoint: string }> {
+    // Verificar si MercadoPago está en modo mock
+    if (this.mercadoPagoService.isMockMode()) {
+      this.logger.warn('MercadoPago en modo MOCK - Generando preferencia placeholder');
+      return {
+        mercadopagoPreferenceId: 'MP-MOCK-TEMP',
+        mercadopagoInitPoint: `${frontendUrl}/inscripcion-2026/mock-checkout`,
+      };
+    }
+
+    // Generar preferencia real con MercadoPago
+    const preferenceData = this.buildMercadoPagoPreferenceData(
+      dto,
+      inscripcionFee,
+      backendUrl,
+      frontendUrl,
+    );
+
+    try {
+      const preference = await this.mercadoPagoService.createPreference(preferenceData);
+      const mercadopagoPreferenceId = preference.id || '';
+      const mercadopagoInitPoint = preference.init_point || '';
+
+      this.logger.log('MercadoPago preference created successfully', {
+        preferenceId: mercadopagoPreferenceId,
+        initPoint: mercadopagoInitPoint,
+        amount: inscripcionFee,
+      });
+
+      return { mercadopagoPreferenceId, mercadopagoInitPoint };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error('Failed to create MercadoPago preference', {
+        error: errorMessage,
+        stack: errorStack,
+        dto: {
+          tipo: dto.tipo_inscripcion,
+          numEstudiantes: dto.estudiantes.length,
+        },
+      });
+
+      throw new BadRequestException(
+        'No se pudo crear la preferencia de pago. Intente nuevamente.'
+      );
+    }
+  }
+
+  /**
+   * Busca o crea un tutor en la base de datos
+   * @private
+   */
+  private async findOrCreateTutor(tx: any, tutorDto: any): Promise<any> {
+    let tutor = await tx.tutor.findUnique({
+      where: { email: tutorDto.email },
+    });
+
+    if (!tutor) {
+      const hashedPassword = await bcrypt.hash(tutorDto.password, 10);
+      tutor = await tx.tutor.create({
+        data: {
+          nombre: tutorDto.nombre,
+          apellido: '',
+          email: tutorDto.email,
+          telefono: tutorDto.telefono,
+          dni: tutorDto.dni,
+          cuil: tutorDto.cuil,
+          password_hash: hashedPassword,
+          debe_cambiar_password: false,
+          debe_completar_perfil: false,
+          ha_completado_onboarding: true,
+          roles: DEFAULT_ROLES.TUTOR,
+        },
+      });
+    }
+
+    return tutor;
+  }
+
+  /**
+   * Crea el registro de inscripción en la base de datos
+   * @private
+   */
+  private async createInscripcion(
+    tx: any,
+    tutorId: string,
+    dto: CreateInscripcion2026Dto,
+    inscripcionFee: number,
+    siblingDiscount: number,
+    monthlyTotal: number,
+  ): Promise<any> {
+    return tx.inscripcion2026.create({
+      data: {
+        tutor_id: tutorId,
+        tipo_inscripcion: dto.tipo_inscripcion,
+        estado: 'pending',
+        inscripcion_pagada: inscripcionFee,
+        descuento_aplicado: siblingDiscount,
+        total_mensual_actual: monthlyTotal,
+        origen_inscripcion: dto.origen_inscripcion,
+        ciudad: dto.ciudad,
+      },
+    });
+  }
+
+  /**
+   * Crea estudiantes y sus registros de inscripción con PINs únicos
+   * @private
+   */
+  private async createEstudiantesConInscripciones(
+    tx: any,
+    inscripcionId: string,
+    estudiantesDto: any[],
+    tutorId: string,
+  ): Promise<EstudianteCreado[]> {
+    const estudiantesCreados: EstudianteCreado[] = [];
+
+    for (const estudianteDto of estudiantesDto) {
+      // Generar PIN único
+      const pin = await this.generateUniquePin();
+
+      // Generar username
+      const username = this.generateUsername(estudianteDto.nombre);
+
+      // Crear estudiante en tabla principal
+      const estudiante = await tx.estudiante.create({
+        data: {
+          tutor_id: tutorId,
+          nombre: estudianteDto.nombre,
+          apellido: '',
+          edad: estudianteDto.edad,
+          nivelEscolar: 'Primaria',
+          username,
+          password_hash: await bcrypt.hash(pin, 10),
+          debe_cambiar_password: true,
+          roles: DEFAULT_ROLES.ESTUDIANTE,
+        },
+      });
+
+      // Crear registro de inscripción de estudiante
+      const estudianteInscripcion = await tx.estudianteInscripcion2026.create({
+        data: {
+          inscripcion_id: inscripcionId,
+          estudiante_id: estudiante.id,
+          nombre: estudianteDto.nombre,
+          edad: estudianteDto.edad,
+          dni: estudianteDto.dni,
+          pin,
+        },
+      });
+
+      estudiantesCreados.push({
+        estudiante,
+        estudianteInscripcion,
+        pin,
+        cursosSeleccionados: estudianteDto.cursos_seleccionados || [],
+        mundoSeleccionado: estudianteDto.mundo_seleccionado,
+      });
+    }
+
+    return estudiantesCreados;
+  }
+
+  /**
+   * Prepara datos de cursos de Colonia para creación en batch
+   * @private
+   */
+  private prepareCursosData(estudiantesCreados: EstudianteCreado[]): any[] {
+    const cursosData: any[] = [];
+
+    estudiantesCreados.forEach(({ estudianteInscripcion, cursosSeleccionados }) => {
+      if (cursosSeleccionados && cursosSeleccionados.length > 0) {
+        cursosSeleccionados.forEach((curso, cursoIdx) => {
+          const precioBase = PRECIOS.COLONIA_CURSO_BASE;
+          const descuentoCurso = cursoIdx === 1 ? DESCUENTOS.COLONIA.SEGUNDO_CURSO : 0;
+          const precioConDescuento = this.pricingCalculator.aplicarDescuento(precioBase, descuentoCurso);
+
+          cursosData.push({
+            estudiante_inscripcion_id: estudianteInscripcion.id,
+            course_id: curso.course_id,
+            course_name: curso.course_name,
+            course_area: curso.course_area,
+            instructor: curso.instructor,
+            day_of_week: curso.day_of_week,
+            time_slot: curso.time_slot,
+            precio_base: precioBase,
+            precio_con_descuento: precioConDescuento,
+          });
+        });
+      }
+    });
+
+    return cursosData;
+  }
+
+  /**
+   * Prepara datos de mundos STEAM para creación en batch
+   * @private
+   */
+  private prepareMundosData(estudiantesCreados: EstudianteCreado[]): any[] {
+    const mundosData: any[] = [];
+
+    estudiantesCreados.forEach(({ estudianteInscripcion, mundoSeleccionado }) => {
+      if (mundoSeleccionado) {
+        mundosData.push({
+          estudiante_inscripcion_id: estudianteInscripcion.id,
+          mundo: mundoSeleccionado,
+        });
+      }
+    });
+
+    return mundosData;
+  }
+
+  /**
+   * Crea cursos y mundos en batch usando Promise.all
+   * @private
+   */
+  private async createCursosAndMundos(tx: any, cursosData: any[], mundosData: any[]): Promise<void> {
+    const cursosPromises: Promise<any>[] = cursosData.map(data =>
+      tx.coloniaCursoSeleccionado2026.create({ data })
+    );
+
+    const mundosPromises: Promise<any>[] = mundosData.map(data =>
+      tx.cicloMundoSeleccionado2026.create({ data })
+    );
+
+    const allPromises = [...cursosPromises, ...mundosPromises];
+
+    if (allPromises.length > 0) {
+      await Promise.all(allPromises);
+    }
+  }
+
+  /**
+   * Crea el registro de pago de inscripción
+   * @private
+   */
+  private async createPago(
+    tx: any,
+    inscripcionId: string,
+    inscripcionFee: number,
+    mercadopagoPreferenceId: string,
+  ): Promise<any> {
+    return tx.pagoInscripcion2026.create({
+      data: {
+        inscripcion_id: inscripcionId,
+        tipo: 'inscripcion',
+        monto: inscripcionFee,
+        estado: 'pending',
+        mercadopago_preference_id: mercadopagoPreferenceId,
+      },
+    });
+  }
+
+  /**
+   * Crea el historial inicial de estado de inscripción
+   * @private
+   */
+  private async createHistorial(tx: any, inscripcionId: string): Promise<void> {
+    await tx.historialEstadoInscripcion2026.create({
+      data: {
+        inscripcion_id: inscripcionId,
+        estado_anterior: 'none',
+        estado_nuevo: 'pending',
+        razon: 'Inscripción creada',
+        realizado_por: 'system',
+      },
+    });
+  }
+
+  /**
+   * Construye la respuesta de la API para createInscripcion2026
+   * @private
+   */
+  private buildInscripcionResponse(
+    result: TransactionResult,
+    inscripcionFee: number,
+    siblingDiscount: number,
+    mercadopagoPreferenceId: string,
+    mercadopagoInitPoint: string,
+  ): CreateInscripcion2026Response {
+    return {
+      success: true,
+      inscripcionId: result.inscripcion.id,
+      tutorId: result.tutor.id,
+      estudiantes_creados: result.estudiantes.map(e => ({
+        id: e.estudiante.id,
+        nombre: e.estudiante.nombre,
+        pin: e.pin,
+      })),
+      pago_info: {
+        monto_total: inscripcionFee,
+        descuento_aplicado: siblingDiscount,
+        mercadopago_preference_id: mercadopagoPreferenceId,
+        mercadopago_init_point: mercadopagoInitPoint,
+      },
+    };
+  }
+
 /**
  * Crea una nueva inscripción 2026 con transacción atómica completa
  *
@@ -218,243 +577,46 @@ async createInscripcion2026(
       cursosPerStudent,
     );
 
-  // 3️⃣ 🔥 CRÍTICO: Crear preferencia MercadoPago PRIMERO (fail-fast)
+  // 3️⃣ CRÍTICO: Crear preferencia MercadoPago PRIMERO (fail-fast)
   const backendUrl = this.configService.get<string>('BACKEND_URL') || 'http://localhost:3001';
   const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
 
-  let mercadopagoPreferenceId = '';
-  let mercadopagoInitPoint = '';
+  const { mercadopagoPreferenceId, mercadopagoInitPoint } = await this.createMercadoPagoPreference(
+    dto,
+    inscripcionFee,
+    backendUrl,
+    frontendUrl
+  );
 
-  // Verificar si MercadoPago está en modo mock
-  if (this.mercadoPagoService.isMockMode()) {
-    this.logger.warn('MercadoPago en modo MOCK - Generando preferencia placeholder');
-    // En modo mock, generamos IDs temporales que se actualizarán en la transacción
-    mercadopagoPreferenceId = 'MP-MOCK-TEMP';
-    mercadopagoInitPoint = `${frontendUrl}/inscripcion-2026/mock-checkout`;
-  } else {
-    // Generar preferencia real con MercadoPago ANTES de transacción
-    // Usamos datos temporales del tutor del DTO (no existe en DB todavía)
-    const preferenceData = this.mercadoPagoService.buildInscripcion2026PreferenceData(
-      dto.tipo_inscripcion,
-      inscripcionFee,
-      {
-        email: dto.tutor.email,
-        nombre: dto.tutor.nombre,
-        apellido: undefined,
-      },
-      'TEMP_INSCRIPCION_ID', // Se actualizará después
-      'TEMP_TUTOR_ID', // Se actualizará después
-      dto.estudiantes.length,
-      backendUrl,
-      frontendUrl,
-    );
-
-    try {
-      const preference = await this.mercadoPagoService.createPreference(preferenceData);
-      mercadopagoPreferenceId = preference.id || '';
-      mercadopagoInitPoint = preference.init_point || '';
-
-      this.logger.log('MercadoPago preference created successfully', {
-        preferenceId: mercadopagoPreferenceId,
-        initPoint: mercadopagoInitPoint,
-        amount: inscripcionFee,
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const errorStack = error instanceof Error ? error.stack : undefined;
-
-      this.logger.error('Failed to create MercadoPago preference', {
-        error: errorMessage,
-        stack: errorStack,
-        dto: {
-          tipo: dto.tipo_inscripcion,
-          numEstudiantes: dto.estudiantes.length,
-        },
-      });
-      throw new BadRequestException(
-        'No se pudo crear la preferencia de pago. Intente nuevamente.'
-      );
-    }
-  }
-
-  // 4️⃣ 🔥 TODO lo demás en transacción atómica
+  // 4️⃣ TODO lo demás en transacción atómica
   const startTime = Date.now();
-  let result;
+  let result: TransactionResult;
 
   try {
     result = await this.prisma.$transaction(async (tx) => {
-      // 4.1. Buscar o crear tutor
-      let tutor = await tx.tutor.findUnique({
-        where: { email: dto.tutor.email },
-      });
+      const tutor = await this.findOrCreateTutor(tx, dto.tutor);
+      const inscripcion = await this.createInscripcion(tx, tutor.id, dto, inscripcionFee, siblingDiscount, monthlyTotal);
+      const estudiantesCreados = await this.createEstudiantesConInscripciones(tx, inscripcion.id, dto.estudiantes, tutor.id);
 
-      if (!tutor) {
-        const hashedPassword = await bcrypt.hash(dto.tutor.password, 10);
-        tutor = await tx.tutor.create({
-          data: {
-            nombre: dto.tutor.nombre,
-            apellido: '',
-            email: dto.tutor.email,
-            telefono: dto.tutor.telefono,
-            dni: dto.tutor.dni,
-            cuil: dto.tutor.cuil,
-            password_hash: hashedPassword,
-            debe_cambiar_password: false,
-            debe_completar_perfil: false,
-            ha_completado_onboarding: true,
-            roles: DEFAULT_ROLES.TUTOR,
-          },
-        });
-      }
+      const cursosData = this.prepareCursosData(estudiantesCreados);
+      const mundosData = this.prepareMundosData(estudiantesCreados);
+      await this.createCursosAndMundos(tx, cursosData, mundosData);
 
-      // 4.2. Crear inscripción
-      const inscripcion = await tx.inscripcion2026.create({
-        data: {
-          tutor_id: tutor.id,
-          tipo_inscripcion: dto.tipo_inscripcion,
-          estado: 'pending',
-          inscripcion_pagada: inscripcionFee,
-          descuento_aplicado: siblingDiscount,
-          total_mensual_actual: monthlyTotal,
-          origen_inscripcion: dto.origen_inscripcion,
-          ciudad: dto.ciudad,
-        },
-      });
+      const pago = await this.createPago(tx, inscripcion.id, inscripcionFee, mercadopagoPreferenceId);
+      await this.createHistorial(tx, inscripcion.id);
 
-      // 4.3. Crear estudiantes con PINs y sus inscripciones
-      const estudiantesCreados = [];
-
-      for (const estudianteDto of dto.estudiantes) {
-        // Generar PIN único
-        const pin = await this.generateUniquePin();
-
-        // Generar username
-        const username = this.generateUsername(estudianteDto.nombre);
-
-        // Crear estudiante en tabla principal
-        const estudiante = await tx.estudiante.create({
-          data: {
-            tutor_id: tutor.id,
-            nombre: estudianteDto.nombre,
-            apellido: '',
-            edad: estudianteDto.edad,
-            nivelEscolar: 'Primaria',
-            username,
-            password_hash: await bcrypt.hash(pin, 10),
-            debe_cambiar_password: true,
-            roles: DEFAULT_ROLES.ESTUDIANTE,
-          },
-        });
-
-        // Crear registro de inscripción de estudiante
-        const estudianteInscripcion = await tx.estudianteInscripcion2026.create({
-          data: {
-            inscripcion_id: inscripcion.id,
-            estudiante_id: estudiante.id,
-            nombre: estudianteDto.nombre,
-            edad: estudianteDto.edad,
-            dni: estudianteDto.dni,
-            pin,
-          },
-        });
-
-        estudiantesCreados.push({
-          estudiante,
-          estudianteInscripcion,
-          pin,
-          cursosSeleccionados: estudianteDto.cursos_seleccionados || [],
-          mundoSeleccionado: estudianteDto.mundo_seleccionado,
-        });
-      }
-
-      // 4.4. Crear cursos seleccionados (usando create individual con Promise.all)
-      const cursosPromises: Promise<any>[] = [];
-      estudiantesCreados.forEach(({ estudianteInscripcion, cursosSeleccionados }) => {
-        if (cursosSeleccionados && cursosSeleccionados.length > 0) {
-          cursosSeleccionados.forEach((curso, cursoIdx) => {
-            const precioBase = PRECIOS.COLONIA_CURSO_BASE;
-            const descuentoCurso = cursoIdx === 1 ? DESCUENTOS.COLONIA.SEGUNDO_CURSO : 0;
-            const precioConDescuento = this.pricingCalculator.aplicarDescuento(precioBase, descuentoCurso);
-
-            cursosPromises.push(
-              tx.coloniaCursoSeleccionado2026.create({
-                data: {
-                  estudiante_inscripcion_id: estudianteInscripcion.id,
-                  course_id: curso.course_id,
-                  course_name: curso.course_name,
-                  course_area: curso.course_area,
-                  instructor: curso.instructor,
-                  day_of_week: curso.day_of_week,
-                  time_slot: curso.time_slot,
-                  precio_base: precioBase,
-                  precio_con_descuento: precioConDescuento,
-                },
-              })
-            );
-          });
-        }
-      });
-
-      if (cursosPromises.length > 0) {
-        await Promise.all(cursosPromises);
-      }
-
-      // 4.5. Crear mundos seleccionados (usando create individual con Promise.all)
-      const mundosPromises: Promise<any>[] = [];
-      estudiantesCreados.forEach(({ estudianteInscripcion, mundoSeleccionado }) => {
-        if (mundoSeleccionado) {
-          mundosPromises.push(
-            tx.cicloMundoSeleccionado2026.create({
-              data: {
-                estudiante_inscripcion_id: estudianteInscripcion.id,
-                mundo: mundoSeleccionado,
-              },
-            })
-          );
-        }
-      });
-
-      if (mundosPromises.length > 0) {
-        await Promise.all(mundosPromises);
-      }
-
-      // 4.6. 🔥 Crear pago CON preference_id
-      const pago = await tx.pagoInscripcion2026.create({
-        data: {
-          inscripcion_id: inscripcion.id,
-          tipo: 'inscripcion',
-          monto: inscripcionFee,
-          estado: 'pending',
-          mercadopago_preference_id: mercadopagoPreferenceId,
-        },
-      });
-
-      // 4.7. Crear historial
-      await tx.historialEstadoInscripcion2026.create({
-        data: {
-          inscripcion_id: inscripcion.id,
-          estado_anterior: 'none',
-          estado_nuevo: 'pending',
-          razon: 'Inscripción creada',
-          realizado_por: 'system',
-        },
-      });
-
-      // Retornar todo lo necesario
       return {
         inscripcion,
         tutor,
         estudiantes: estudiantesCreados,
         pago,
-        cursosCount: cursosPromises.length,
-        mundosCount: mundosPromises.length,
+        cursosCount: cursosData.length,
+        mundosCount: mundosData.length,
       };
-
     }, {
-      timeout: 30000, // 30 segundos
+      timeout: 30000,
       isolationLevel: 'ReadCommitted',
     });
-
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStack = error instanceof Error ? error.stack : undefined;
@@ -465,7 +627,6 @@ async createInscripcion2026(
       preferenceId: mercadopagoPreferenceId,
     });
 
-    // La transacción ya hizo rollback automáticamente
     throw new InternalServerErrorException(
       'Error al crear la inscripción. No se realizaron cambios en la base de datos.'
     );
@@ -473,7 +634,6 @@ async createInscripcion2026(
 
   // Log de performance
   const duration = Date.now() - startTime;
-
   this.logger.log('Transaction completed successfully', {
     durationMs: duration,
     inscripcionId: result.inscripcion.id,
@@ -484,22 +644,13 @@ async createInscripcion2026(
   });
 
   // 5️⃣ Construir respuesta
-  return {
-    success: true,
-    inscripcionId: result.inscripcion.id,
-    tutorId: result.tutor.id,
-    estudiantes_creados: result.estudiantes.map(e => ({
-      id: e.estudiante.id,
-      nombre: e.estudiante.nombre,
-      pin: e.pin,
-    })),
-    pago_info: {
-      monto_total: inscripcionFee,
-      descuento_aplicado: siblingDiscount,
-      mercadopago_preference_id: mercadopagoPreferenceId,
-      mercadopago_init_point: mercadopagoInitPoint,
-    },
-  };
+  return this.buildInscripcionResponse(
+    result,
+    inscripcionFee,
+    siblingDiscount,
+    mercadopagoPreferenceId,
+    mercadopagoInitPoint
+  );
 }
 
   /**
