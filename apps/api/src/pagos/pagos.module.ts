@@ -13,6 +13,10 @@ import { PaymentCommandService } from './services/payment-command.service';
 import { PaymentWebhookService } from './services/payment-webhook.service';
 import { PaymentStateMapperService } from './services/payment-state-mapper.service';
 
+// Security Services (CRITICAL)
+import { WebhookIdempotencyService } from './services/webhook-idempotency.service';
+import { PaymentAmountValidatorService } from './services/payment-amount-validator.service';
+
 // Use Cases
 import { CalcularPrecioUseCase } from './application/use-cases/calcular-precio.use-case';
 import { ActualizarConfiguracionPreciosUseCase } from './application/use-cases/actualizar-configuracion-precios.use-case';
@@ -53,6 +57,13 @@ import { MercadoPagoService } from './mercadopago.service';
   imports: [DatabaseModule, CatalogoModule],
   controllers: [PagosController],
   providers: [
+    // === SECURITY SERVICES (CRITICAL) ===
+    // Protección contra webhooks duplicados (idempotencia)
+    WebhookIdempotencyService,
+
+    // Validación de montos de pagos (prevención de fraude)
+    PaymentAmountValidatorService,
+
     // === CQRS Services (NEW) ===
     // Facade - Punto de entrada único
     PagosManagementFacadeService,
@@ -132,6 +143,10 @@ import { MercadoPagoService } from './mercadopago.service';
     },
   ],
   exports: [
+    // Export security services for external modules
+    WebhookIdempotencyService,
+    PaymentAmountValidatorService,
+
     // Export new facade as main interface
     PagosManagementFacadeService,
 

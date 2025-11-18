@@ -5,6 +5,8 @@ import { PaymentStateMapperService } from './payment-state-mapper.service';
 import { PaymentCommandService } from './payment-command.service';
 import { MercadoPagoService } from '../mercadopago.service';
 import { MercadoPagoWebhookDto } from '../dto/mercadopago-webhook.dto';
+import { WebhookIdempotencyService } from './webhook-idempotency.service';
+import { PaymentAmountValidatorService } from './payment-amount-validator.service';
 
 /**
  * Datos de pago de MercadoPago (simplificado)
@@ -26,6 +28,11 @@ export interface MercadoPagoPaymentData {
  * - Actualizar estados de membresías e inscripciones
  * - Emitir eventos de dominio
  *
+ * SEGURIDAD (v2.0):
+ * ✅ Idempotencia: Previene doble procesamiento de webhooks
+ * ✅ Validación de montos: Verifica que el amount coincida con precio esperado
+ * ✅ Eventos de fraude: Emite alertas cuando se detecta monto inválido
+ *
  * Formatos de external_reference soportados:
  * - "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
  * - "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
@@ -39,17 +46,21 @@ export class PaymentWebhookService {
     private readonly stateMapper: PaymentStateMapperService,
     private readonly commandService: PaymentCommandService,
     private readonly mercadoPagoService: MercadoPagoService,
+    private readonly idempotency: WebhookIdempotencyService,
+    private readonly amountValidator: PaymentAmountValidatorService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
-   * Procesa webhook de MercadoPago
+   * Procesa webhook de MercadoPago CON SEGURIDAD MEJORADA
    *
    * Flujo:
    * 1. Valida que sea notificación de tipo "payment"
-   * 2. Consulta detalles del pago a MercadoPago API
-   * 3. Parsea external_reference para identificar el tipo
-   * 4. Delega a métodos específicos según el tipo
+   * 2. ✅ NUEVO: Verifica idempotencia (previene doble procesamiento)
+   * 3. Consulta detalles del pago a MercadoPago API
+   * 4. Parsea external_reference para identificar el tipo
+   * 5. Delega a métodos específicos según el tipo
+   * 6. ✅ NUEVO: Marca webhook como procesado
    *
    * @param webhookData - Datos del webhook de MercadoPago
    * @returns Resultado del procesamiento
@@ -69,6 +80,20 @@ export class PaymentWebhookService {
     this.logger.log(`💳 Procesando pago ID: ${paymentId}`);
 
     try {
+      // ✅ PASO 1: Verificar idempotencia (prevenir doble procesamiento)
+      const yaFueProcesado = await this.idempotency.wasProcessed(paymentId);
+
+      if (yaFueProcesado) {
+        this.logger.warn(
+          `⏭️ Webhook duplicado ignorado: payment_id=${paymentId}`,
+        );
+        return {
+          success: true,
+          message: 'Webhook already processed (idempotent)',
+          paymentId,
+        };
+      }
+
       // Consultar detalles del pago a MercadoPago
       const payment = await this.mercadoPagoService.getPayment(paymentId);
 
@@ -90,11 +115,24 @@ export class PaymentWebhookService {
       }
 
       // Parsear external_reference y delegar
-      return await this.procesarPorTipoExternalReference({
+      const result = await this.procesarPorTipoExternalReference({
         external_reference: externalRef,
         id: payment.id,
         status: payment.status,
+        transaction_amount: payment.transaction_amount,
       });
+
+      // ✅ PASO 2: Marcar como procesado SOLO si fue exitoso
+      if (result.success !== false) {
+        await this.idempotency.markAsProcessed({
+          paymentId,
+          webhookType: result.type || 'unknown',
+          status: payment.status,
+          externalReference: externalRef,
+        });
+      }
+
+      return result;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -110,13 +148,14 @@ export class PaymentWebhookService {
   /**
    * Procesa pago según el tipo de external_reference
    *
-   * @param payment - Datos del pago con external_reference, id y status
+   * @param payment - Datos del pago con external_reference, id, status y monto
    * @returns Resultado del procesamiento
    */
   private async procesarPorTipoExternalReference(payment: {
     external_reference: string;
     id: number;
     status: string;
+    transaction_amount?: number;
   }) {
     const externalRef = payment.external_reference;
 
@@ -129,12 +168,16 @@ export class PaymentWebhookService {
       this.logger.warn(
         `⚠️ Formato de external_reference desconocido: ${externalRef}`,
       );
-      return { message: 'Unknown external_reference format' };
+      return {
+        success: false,
+        message: 'Unknown external_reference format',
+        type: 'unknown'
+      };
     }
   }
 
   /**
-   * Procesa pago de membresía
+   * Procesa pago de membresía CON VALIDACIÓN DE MONTO
    *
    * external_reference format: "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
    *
@@ -145,12 +188,47 @@ export class PaymentWebhookService {
     external_reference: string;
     id: number;
     status: string;
+    transaction_amount?: number;
   }) {
     const externalRef = payment.external_reference;
     const parts = externalRef.split('-');
     const membresiaId = parts[1]; // "membresia-{ID}-tutor-..."
 
     this.logger.log(`🎫 Procesando pago de membresía ID: ${membresiaId}`);
+
+    // ✅ VALIDAR MONTO ANTES DE PROCESAR (solo para pagos aprobados)
+    if (payment.status === 'approved' && payment.transaction_amount) {
+      const validation = await this.amountValidator.validateMembresia(
+        membresiaId,
+        payment.transaction_amount,
+      );
+
+      if (!validation.isValid) {
+        this.logger.error(
+          `🚨 FRAUDE DETECTADO - Monto inválido en membresía ${membresiaId}: ${validation.reason}`,
+        );
+
+        // Emitir evento de fraude
+        this.eventEmitter.emit('webhook.fraud_detected', {
+          paymentId: payment.id,
+          membresiaId,
+          validation,
+          type: 'membresia',
+        });
+
+        // NO procesar el pago
+        return {
+          success: false,
+          error: 'Amount validation failed',
+          validation,
+          type: 'membresia',
+        };
+      }
+
+      this.logger.log(
+        `✅ Monto validado correctamente para membresía ${membresiaId}`,
+      );
+    }
 
     // Mapear estado de MercadoPago a estado de pago
     const estadoPago = this.stateMapper.mapearEstadoPago(payment.status);
@@ -167,6 +245,7 @@ export class PaymentWebhookService {
       estadoPago,
       paymentId: payment.id,
       paymentStatus: payment.status,
+      amountValidated: !!payment.transaction_amount,
     });
 
     this.logger.log(
@@ -174,6 +253,7 @@ export class PaymentWebhookService {
     );
 
     return {
+      success: true,
       message: 'Webhook processed successfully',
       type: 'membresia',
       membresiaId,
@@ -183,7 +263,7 @@ export class PaymentWebhookService {
   }
 
   /**
-   * Procesa pago de inscripción a curso
+   * Procesa pago de inscripción a curso CON VALIDACIÓN DE MONTO
    *
    * external_reference format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
    *
@@ -194,12 +274,47 @@ export class PaymentWebhookService {
     external_reference: string;
     id: number;
     status: string;
+    transaction_amount?: number;
   }) {
     const externalRef = payment.external_reference;
     const parts = externalRef.split('-');
     const inscripcionId = parts[1]; // "inscripcion-{ID}-estudiante-..."
 
     this.logger.log(`📚 Procesando pago de inscripción ID: ${inscripcionId}`);
+
+    // ✅ VALIDAR MONTO ANTES DE PROCESAR (solo para pagos aprobados)
+    if (payment.status === 'approved' && payment.transaction_amount) {
+      const validation = await this.amountValidator.validateInscripcionMensual(
+        inscripcionId,
+        payment.transaction_amount,
+      );
+
+      if (!validation.isValid) {
+        this.logger.error(
+          `🚨 FRAUDE DETECTADO - Monto inválido en inscripción ${inscripcionId}: ${validation.reason}`,
+        );
+
+        // Emitir evento de fraude
+        this.eventEmitter.emit('webhook.fraud_detected', {
+          paymentId: payment.id,
+          inscripcionId,
+          validation,
+          type: 'inscripcion',
+        });
+
+        // NO procesar el pago
+        return {
+          success: false,
+          error: 'Amount validation failed',
+          validation,
+          type: 'inscripcion',
+        };
+      }
+
+      this.logger.log(
+        `✅ Monto validado correctamente para inscripción ${inscripcionId}`,
+      );
+    }
 
     // Mapear estado de MercadoPago a estado de pago
     const estadoPago = this.stateMapper.mapearEstadoPago(payment.status);
@@ -216,6 +331,7 @@ export class PaymentWebhookService {
       estadoPago,
       paymentId: payment.id,
       paymentStatus: payment.status,
+      amountValidated: !!payment.transaction_amount,
     });
 
     this.logger.log(
@@ -223,6 +339,7 @@ export class PaymentWebhookService {
     );
 
     return {
+      success: true,
       message: 'Webhook processed successfully',
       type: 'inscripcion',
       inscripcionId,

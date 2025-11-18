@@ -3112,3 +3112,49 @@ model HistorialEstadoInscripcion2026 {
   @@index([fecha_cambio])
   @@map("historial_estado_inscripciones_2026")
 }
+
+/// =============================================================================
+/// SECURITY: Sistema de Idempotencia de Webhooks
+/// =============================================================================
+
+/// Modelo para tracking de webhooks procesados de MercadoPago
+/// Previene doble procesamiento de pagos (idempotencia)
+///
+/// MercadoPago puede enviar el mismo webhook múltiples veces por:
+/// - Reintentos automáticos si no respondemos 200 OK rápido
+/// - Timeouts de red
+/// - Problemas en infraestructura
+///
+/// Esta tabla garantiza que cada payment_id se procesa UNA SOLA VEZ
+model WebhookProcessed {
+  /// Identificador único del registro
+  id String @id @default(uuid())
+
+  /// ID del pago de MercadoPago (payment_id)
+  /// UNIQUE constraint previene doble procesamiento
+  payment_id String @unique
+
+  /// Tipo de webhook procesado
+  /// Ejemplos: "inscripcion", "membresia", "inscripcion2026", "colonia"
+  webhook_type String
+
+  /// Estado del pago cuando se procesó
+  /// Ejemplos: "approved", "rejected", "pending"
+  status String
+
+  /// External reference del pago (para debugging)
+  /// Formato: "inscripcion-{id}-estudiante-{id}-producto-{id}"
+  external_reference String
+
+  /// Timestamp de cuando se procesó el webhook
+  processed_at DateTime @default(now())
+
+  /// Timestamp de creación del registro
+  created_at DateTime @default(now())
+
+  /// Índices para queries eficientes
+  @@index([payment_id])
+  @@index([processed_at])
+  @@index([webhook_type])
+  @@map("webhooks_processed")
+}
