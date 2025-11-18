@@ -92,12 +92,21 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
             estudiante: {
               create: jest.fn(),
             },
+            coloniaInscripcion: {
+              create: jest.fn(),
+            },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
+              create: jest.fn(),
               createMany: jest.fn(),
             },
             coloniaEstudianteCurso: {
+              create: jest.fn(),
               createMany: jest.fn(),
+            },
+            coloniaPago: {
+              create: jest.fn(),
+              update: jest.fn(),
             },
             $queryRaw: jest.fn(),
             $executeRaw: jest.fn(),
@@ -437,13 +446,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           estudiante: {
             create: jest.fn().mockResolvedValue(mockEstudiante),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -453,7 +467,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       const result = await service.createInscription(validDto);
@@ -530,13 +544,20 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
               .mockResolvedValueOnce({ ...mockEstudiante, id: 'est-1' })
               .mockResolvedValueOnce({ ...mockEstudiante, id: 'est-2' }),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]), // Mock para PIN checks
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn()
+              .mockResolvedValueOnce({ id: 'col-est-1', pin: '1234' })
+              .mockResolvedValueOnce({ id: 'col-est-2', pin: '5678' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -546,7 +567,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       const result = await service.createInscription(dtoWith2Students);
@@ -572,13 +593,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           estudiante: {
             create: jest.fn().mockResolvedValue(mockEstudiante),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -588,7 +614,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       await service.createInscription(validDto);
@@ -617,13 +643,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           estudiante: {
             create: jest.fn().mockResolvedValue(mockEstudiante),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -633,7 +664,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       await service.createInscription(validDto);
@@ -688,13 +719,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
               return Promise.resolve({ ...mockEstudiante, username: data.data.username });
             }),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -704,7 +740,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       await service.createInscription(dtoWithMultipleStudents);
@@ -730,13 +766,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           estudiante: {
             create: jest.fn().mockResolvedValue(mockEstudiante),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -746,7 +787,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       await service.createInscription(validDto);
@@ -788,13 +829,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           estudiante: {
             create: jest.fn().mockResolvedValue(mockEstudiante),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -804,7 +850,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       const result = await service.createInscription(validDto);
@@ -993,13 +1039,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           estudiante: {
             create: jest.fn().mockResolvedValue(mockEstudiante),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -1009,7 +1060,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       const result = await service.createInscription(dto);
@@ -1082,13 +1133,20 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
               .mockResolvedValueOnce({ ...mockEstudiante, id: 'est-1' })
               .mockResolvedValueOnce({ ...mockEstudiante, id: 'est-2' }),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]), // Mock para PIN checks
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn()
+              .mockResolvedValueOnce({ id: 'col-est-1', pin: '1234' })
+              .mockResolvedValueOnce({ id: 'col-est-2', pin: '5678' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -1098,7 +1156,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       const result = await service.createInscription(dto);
@@ -1162,13 +1220,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           estudiante: {
             create: jest.fn().mockResolvedValue(mockEstudiante),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -1178,7 +1241,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       const result = await service.createInscription(dto);
@@ -1252,13 +1315,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           estudiante: {
             create: jest.fn().mockResolvedValue(mockEstudiante),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -1268,7 +1336,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       const result = await service.createInscription(dto);
@@ -1376,13 +1444,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           estudiante: {
             create: jest.fn().mockResolvedValue(mockEstudiante),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -1439,13 +1512,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           estudiante: {
             create: jest.fn().mockResolvedValue(mockEstudiante),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -1455,7 +1533,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       await service.createInscription(dto);
@@ -1507,13 +1585,18 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
           estudiante: {
             create: jest.fn().mockResolvedValue(mockEstudiante),
           },
-          $executeRaw: jest.fn().mockResolvedValue(1),
-          $queryRaw: jest.fn().mockResolvedValue([]),
+          coloniaInscripcion: {
+            create: jest.fn().mockResolvedValue({ id: 'inscripcion-123', tutor_id: mockTutor.id }),
+          },
           coloniaEstudiante: {
-            createMany: jest.fn(),
+            count: jest.fn().mockResolvedValue(0), // PIN no existe
+            create: jest.fn().mockResolvedValue({ id: 'colonia-estudiante-123', pin: '1234' }),
           },
           coloniaEstudianteCurso: {
-            createMany: jest.fn(),
+            create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
+          },
+          coloniaPago: {
+            create: jest.fn().mockResolvedValue({ id: 'pago-enero-123', monto: 90992 }),
           },
         };
         return callback(txMock as any);
@@ -1523,7 +1606,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
         .spyOn(mercadoPagoService, 'createPreference')
         .mockResolvedValue(mockMercadoPagoPreference as any);
 
-      jest.spyOn(prisma, '$executeRaw').mockResolvedValue(1);
+      jest.spyOn(prisma.coloniaPago, 'update').mockResolvedValue(null as any);
 
       // Act
       const result = await service.createInscription(dto);

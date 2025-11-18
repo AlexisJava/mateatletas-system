@@ -53,6 +53,76 @@ export class ColoniaService {
   }
 
   /**
+   * Actualiza el preference ID de MercadoPago en un pago con reintentos
+   *
+   * Implementa exponential backoff para manejar fallos transitorios
+   * de conexión a la base de datos.
+   *
+   * @param pagoId - ID del pago a actualizar
+   * @param preferenceId - ID de preferencia de MercadoPago
+   * @param maxRetries - Número máximo de reintentos (default: 3)
+   * @throws BadRequestException si falla después de todos los reintentos
+   */
+  private async updatePreferenceIdWithRetry(
+    pagoId: string,
+    preferenceId: string,
+    maxRetries: number = 3
+  ): Promise<void> {
+    let lastError: Error;
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        await this.prisma.coloniaPago.update({
+          where: { id: pagoId },
+          data: { mercadopagoPreferenceId: preferenceId },
+        });
+
+        // Éxito - log y retornar
+        if (attempt > 0) {
+          this.logger.log('Preference ID actualizado con reintentos', {
+            pagoId,
+            preferenceId,
+            attempt,
+          });
+        }
+
+        return;
+      } catch (error) {
+        lastError = error;
+
+        if (attempt < maxRetries) {
+          // Calcular backoff exponencial: 100ms, 200ms, 400ms
+          const delayMs = 100 * Math.pow(2, attempt);
+
+          this.logger.warn('Fallo al actualizar preference ID, reintentando', {
+            pagoId,
+            preferenceId,
+            attempt: attempt + 1,
+            maxRetries,
+            delayMs,
+            error: error.message,
+          });
+
+          // Esperar antes del siguiente reintento
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+      }
+    }
+
+    // Si llegamos aquí, fallaron todos los reintentos
+    this.logger.error('Fallo al actualizar preference ID después de todos los reintentos', {
+      pagoId,
+      preferenceId,
+      maxRetries,
+      error: lastError.message,
+    });
+
+    throw new BadRequestException(
+      `No se pudo actualizar el preference ID después de ${maxRetries} reintentos. Por favor contacte a soporte.`
+    );
+  }
+
+  /**
    * Crea una inscripción completa a la Colonia de Verano 2026
    *
    * Flujo:
@@ -117,14 +187,18 @@ export class ColoniaService {
       this.logger.log(`Tutor creado: ${tutor.id}`);
 
       // Crear inscripción de colonia
-      const inscriptionId = crypto.randomUUID();
-      await tx.$executeRaw`
-        INSERT INTO colonia_inscripciones (
-          id, tutor_id, estado, descuento_aplicado, total_mensual, fecha_inscripcion, "createdAt", "updatedAt"
-        ) VALUES (
-          ${inscriptionId}, ${tutor.id}, 'active', ${descuentoPorcentaje}, ${totalMensual}, NOW(), NOW(), NOW()
-        )
-      `;
+      // ✅ Prisma genera el ID automáticamente
+      const inscripcion = await tx.coloniaInscripcion.create({
+        data: {
+          tutor_id: tutor.id,
+          estado: 'active',
+          descuento_aplicado: descuentoPorcentaje,
+          total_mensual: totalMensual,
+          fecha_inscripcion: new Date(),
+        },
+      });
+
+      const inscriptionId = inscripcion.id;
 
       this.logger.log(`Inscripción creada: ${inscriptionId}`);
 
@@ -165,50 +239,57 @@ export class ColoniaService {
         estudiantesFromDB.map(() => this.generateUniquePin())
       );
 
-      // Paso 5: Preparar datos de colonia_estudiantes
-      const coloniaEstudiantesData = estudiantesFromDB.map((estudiante, idx) => ({
-        id: crypto.randomUUID(),
-        inscripcion_id: inscriptionId,
-        estudiante_id: estudiante.id,
-        nombre: estudiante.nombre,
-        edad: estudiante.edad,
-        pin: pins[idx],
-      }));
+      // Paso 5 y 6: Crear colonia_estudiantes y capturar IDs generados
+      // ✅ Usamos create() en lugar de createMany() para obtener los IDs auto-generados
+      // Nota: Prisma no soporta createMany con skipDuplicates en transacciones PostgreSQL
+      const coloniaEstudiantesCreados = await Promise.all(
+        estudiantesFromDB.map(async (estudiante, idx) => {
+          return await tx.coloniaEstudiante.create({
+            data: {
+              inscripcion_id: inscriptionId,
+              estudiante_id: estudiante.id,
+              nombre: estudiante.nombre,
+              edad: estudiante.edad,
+              pin: pins[idx],
+            },
+          });
+        })
+      );
 
-      // Paso 6: Insertar todos en colonia_estudiantes (batch insert optimizado)
-      await tx.coloniaEstudiante.createMany({
-        data: coloniaEstudiantesData,
-      });
+      // Paso 7 y 8: Crear cursos seleccionados (sin IDs manuales)
+      // ✅ Usamos create() en lugar de createMany() para que Prisma genere los IDs automáticamente
+      const cursosPromises: Promise<any>[] = [];
+      let totalCursos = 0;
 
-      // Paso 7: Preparar datos de cursos seleccionados
-      const cursosData: any[] = [];
       dto.estudiantes.forEach((estudianteDto, idx) => {
-        const coloniaEstudianteId = coloniaEstudiantesData[idx].id;
+        const coloniaEstudianteId = coloniaEstudiantesCreados[idx].id;
         const precioConDescuento = this.pricingCalculator.aplicarDescuento(
           PRECIOS.COLONIA_CURSO_BASE,
           descuentoPorcentaje
         );
 
         estudianteDto.cursosSeleccionados.forEach((curso) => {
-          cursosData.push({
-            id: crypto.randomUUID(),
-            colonia_estudiante_id: coloniaEstudianteId,
-            courseId: curso.id,
-            course_name: curso.name,
-            course_area: curso.area,
-            instructor: curso.instructor,
-            day_of_week: curso.dayOfWeek,
-            time_slot: curso.timeSlot,
-            precio_base: PRECIOS.COLONIA_CURSO_BASE,
-            precio_con_descuento: precioConDescuento,
-          });
+          cursosPromises.push(
+            tx.coloniaEstudianteCurso.create({
+              data: {
+                colonia_estudiante_id: coloniaEstudianteId,
+                courseId: curso.id,
+                course_name: curso.name,
+                course_area: curso.area,
+                instructor: curso.instructor,
+                day_of_week: curso.dayOfWeek,
+                time_slot: curso.timeSlot,
+                precio_base: PRECIOS.COLONIA_CURSO_BASE,
+                precio_con_descuento: precioConDescuento,
+              },
+            })
+          );
+          totalCursos++;
         });
       });
 
-      // Paso 8: Insertar todos los cursos (batch insert optimizado)
-      await tx.coloniaEstudianteCurso.createMany({
-        data: cursosData,
-      });
+      // Ejecutar todas las inserciones de cursos en paralelo
+      await Promise.all(cursosPromises);
 
       // Preparar resultado para retornar
       const estudiantesCreados = estudiantesData.map((data, idx) => ({
@@ -217,19 +298,25 @@ export class ColoniaService {
         pin: pins[idx],
       }));
 
-      this.logger.log(`Estudiantes creados: ${estudiantesCreados.length}, cursos totales: ${cursosData.length}`);
+      this.logger.log(`Estudiantes creados: ${estudiantesCreados.length}, cursos totales: ${totalCursos}`);
 
       // Crear pago de Enero 2026
-      const pagoEneroId = crypto.randomUUID();
+      // ✅ Prisma genera el ID automáticamente
       const fechaVencimiento = calcularFechaVencimiento('Enero', 2026);
 
-      await tx.$executeRaw`
-        INSERT INTO colonia_pagos (
-          id, inscripcion_id, mes, anio, monto, estado, fecha_vencimiento, fecha_creacion, "createdAt", "updatedAt"
-        ) VALUES (
-          ${pagoEneroId}, ${inscriptionId}, 'enero', 2026, ${totalMensual}, 'pending', ${fechaVencimiento}, NOW(), NOW(), NOW()
-        )
-      `;
+      const pagoEnero = await tx.coloniaPago.create({
+        data: {
+          inscripcion_id: inscriptionId,
+          mes: 'enero',
+          anio: 2026,
+          monto: totalMensual,
+          estado: 'pending',
+          fecha_vencimiento: fechaVencimiento,
+          fecha_creacion: new Date(),
+        },
+      });
+
+      const pagoEneroId = pagoEnero.id;
 
       this.logger.log(`Pago Enero 2026 creado: ${pagoEneroId}`);
 
@@ -266,11 +353,8 @@ export class ColoniaService {
     });
 
     // 6. Actualizar pago con preference ID
-    await this.prisma.$executeRaw`
-      UPDATE colonia_pagos
-      SET mercadopagoPreferenceId = ${preference.id}
-      WHERE id = ${result.pagoEneroId}
-    `;
+    // ✅ Usamos update() de Prisma con retry logic
+    await this.updatePreferenceIdWithRetry(result.pagoEneroId, preference.id);
 
     this.logger.log('Inscripción completada exitosamente', { preferenceId: preference.id, inscriptionId: result.inscriptionId });
 

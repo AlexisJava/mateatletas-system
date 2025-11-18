@@ -4,6 +4,7 @@ import { Inscripciones2026Service } from '../inscripciones-2026.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { MercadoPagoService } from '../../pagos/mercadopago.service';
 import { ConfigService } from '@nestjs/config';
+import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
 import { MercadoPagoWebhookDto } from '../../pagos/dto/mercadopago-webhook.dto';
 
 /**
@@ -117,6 +118,14 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
               if (key === 'FRONTEND_URL') return 'http://localhost:3000';
               return null;
             }),
+          },
+        },
+        {
+          provide: PricingCalculatorService,
+          useValue: {
+            calcularTarifaInscripcion: jest.fn().mockReturnValue(25000),
+            calcularTotalInscripcion2026: jest.fn().mockReturnValue({ total: 158400, descuento: 12 }),
+            aplicarDescuento: jest.fn((base, desc) => base * (1 - desc / 100)),
           },
         },
       ],
