@@ -46,18 +46,6 @@ export class ColoniaService {
   }
 
   /**
-   * Calcula el descuento según la lógica de negocio:
-   * - 2+ hermanos Y 2+ cursos total = 20%
-   * - 2+ hermanos O 2+ cursos total = 12%
-   * - Caso contrario = 0%
-   *
-   * @deprecated Usar PricingHelpers.calcularDescuentoColonia() desde domain/constants
-   */
-  private calculateDiscount(cantidadEstudiantes: number, totalCursos: number): number {
-    return PricingHelpers.calcularDescuentoColonia(cantidadEstudiantes, totalCursos);
-  }
-
-  /**
    * Crea una inscripción completa a la Colonia de Verano 2026
    *
    * Flujo:
