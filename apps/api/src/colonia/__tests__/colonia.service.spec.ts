@@ -92,6 +92,9 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
             estudiante: {
               create: jest.fn(),
             },
+            coloniaEstudiante: {
+              count: jest.fn(),
+            },
             $queryRaw: jest.fn(),
             $executeRaw: jest.fn(),
             $transaction: jest.fn(),
