@@ -372,7 +372,7 @@ export class AuthService {
    */
   async getProfile(userId: string, role: string) {
     // Comparar directamente con strings en lugar de usar el enum
-    if (role === 'docente') {
+    if (role === 'docente' || role === Role.DOCENTE) {
       const docente = await this.prisma.docente.findUnique({
         where: { id: userId },
         select: {
@@ -398,7 +398,7 @@ export class AuthService {
       };
     }
 
-    if (role === 'admin') {
+    if (role === 'admin' || role === Role.ADMIN) {
       const admin = await this.prisma.admin.findUnique({
         where: { id: userId },
         select: {
@@ -422,7 +422,7 @@ export class AuthService {
       };
     }
 
-    if (role === 'estudiante') {
+    if (role === 'estudiante' || role === Role.ESTUDIANTE) {
       const estudiante = await this.prisma.estudiante.findUnique({
         where: { id: userId },
         select: {

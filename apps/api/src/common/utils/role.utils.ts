@@ -22,14 +22,16 @@ export function parseUserRoles(
     Role.TUTOR,
   ]);
   const isRole = (value: unknown): value is Role =>
-    typeof value === 'string' && validRoles.has(value as Role);
+    typeof value === 'string' && validRoles.has(value.toUpperCase() as Role);
 
   // Si ya es un array, retornarlo directamente
   if (Array.isArray(roles)) {
-    // Filtrar solo elementos válidos como Role (strings)
+    // Filtrar solo elementos válidos como Role (strings) y normalizar a mayúsculas
     // TypeScript no puede inferir correctamente el type guard en arrays de JsonValue
     // Usamos as para hacer un type assertion seguro después de validar con el type guard
-    return roles.filter((item): item is Role => isRole(item)) as Role[];
+    return roles
+      .filter((item): item is Role => isRole(item))
+      .map((item) => item.toUpperCase() as Role);
   }
 
   // Si es un string, intentar parsearlo como JSON
@@ -38,7 +40,7 @@ export function parseUserRoles(
       const parsed = JSON.parse(roles) as unknown;
       // Verificar que el resultado sea un array
       if (Array.isArray(parsed)) {
-        return parsed.filter(isRole);
+        return parsed.filter(isRole).map((item) => item.toUpperCase() as Role);
       }
       logger.warn('Roles parseados no son un array:', parsed);
       return [];
