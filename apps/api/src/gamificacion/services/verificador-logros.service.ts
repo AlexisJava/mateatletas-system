@@ -222,9 +222,10 @@ export class VerificadorLogrosService {
           `Logro "${codigoLogro}" desbloqueado para estudiante ${estudianteId}`,
         );
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
-        `Error al desbloquear logro "${codigoLogro}": ${error.message}`,
+        `Error al desbloquear logro "${codigoLogro}": ${message}`,
       );
     }
   }

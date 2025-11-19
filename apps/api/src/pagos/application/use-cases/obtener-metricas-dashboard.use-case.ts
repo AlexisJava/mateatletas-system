@@ -237,7 +237,7 @@ export class ObtenerMetricasDashboardUseCase {
    * Calcula distribución por estados de pago
    */
   private calcularDistribucionEstados(
-    metricas: any,
+    metricas: MetricasPeriodo,
   ): DistribucionEstadoPagoDTO[] {
     const total = metricas.totalIngresos
       .plus(metricas.totalPendientes)

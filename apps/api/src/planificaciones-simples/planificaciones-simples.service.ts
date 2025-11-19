@@ -4,6 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
+import { Prisma, EstadoPlanificacionSimple } from '@prisma/client';
 
 /**
  * Servicio para gestionar planificaciones simples
@@ -94,7 +95,7 @@ export class PlanificacionesSimplesService {
           inscripcion.claseGrupo.asignacionesPlanificacionesSimples;
         for (const asignacion of asignaciones) {
           semanasActivas.push(
-            ...asignacion.semanas_activas.map((s: any) => s.numero_semana),
+            ...asignacion.semanas_activas.map((s) => s.numero_semana),
           );
         }
       }
@@ -119,7 +120,7 @@ export class PlanificacionesSimplesService {
   async guardarEstado(
     estudianteId: string,
     codigoPlanificacion: string,
-    estadoGuardado: any,
+    estadoGuardado: Prisma.InputJsonValue,
   ) {
     const planificacion = await this.prisma.planificacionSimple.findUnique({
       where: { codigo: codigoPlanificacion },
@@ -318,10 +319,10 @@ export class PlanificacionesSimplesService {
     mes?: number;
     anio?: number;
   }) {
-    const where: any = {};
+    const where: Prisma.PlanificacionSimpleWhereInput = {};
 
     if (filtros?.estado) {
-      where.estado = filtros.estado;
+      where.estado = filtros.estado as EstadoPlanificacionSimple;
     }
     if (filtros?.grupo_codigo) {
       where.grupo_codigo = filtros.grupo_codigo;
@@ -708,7 +709,7 @@ export class PlanificacionesSimplesService {
       },
     });
 
-    return progresos.map((progreso: any) => ({
+    return progresos.map((progreso) => ({
       codigo: progreso.planificacion.codigo,
       titulo: progreso.planificacion.titulo,
       grupo_codigo: progreso.planificacion.grupo_codigo,

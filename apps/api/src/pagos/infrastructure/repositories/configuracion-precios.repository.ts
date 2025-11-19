@@ -188,7 +188,7 @@ export class ConfiguracionPreciosRepository
    * Convierte Decimals a strings para almacenamiento en JSON
    */
   private extraerValoresParaHistorial(
-    config: any,
+    config: Prisma.ConfiguracionPreciosGetPayload<object>,
   ): Record<string, string | boolean> {
     return {
       precio_club_matematicas: config.precio_club_matematicas.toString(),

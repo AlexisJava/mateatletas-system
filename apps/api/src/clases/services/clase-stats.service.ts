@@ -4,6 +4,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
+import { Prisma } from '@prisma/client';
 
 /**
  * Servicio especializado para estadísticas y agregaciones de clases
@@ -33,7 +34,7 @@ export class ClaseStatsService {
     docenteId?: string;
     rutaCurricularId?: string;
   }) {
-    const where: any = {};
+    const where: Prisma.ClaseWhereInput = {};
 
     if (filtros?.fechaDesde || filtros?.fechaHasta) {
       where.fecha_hora_inicio = {};

@@ -1,5 +1,7 @@
 import { Injectable, BadRequestException, ConflictException, Logger, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
+import { Prisma, Tutor, Estudiante, Inscripcion2026, PagoInscripcion2026, EstudianteInscripcion2026 } from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
 import { MercadoPagoService } from '../pagos/mercadopago.service';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
@@ -20,27 +22,30 @@ import {
   CreateInscripcion2026Response,
   TipoInscripcion2026,
   MundoSTEAM,
+  CourseSelectionDto,
+  TutorDataDto,
+  EstudianteInscripcionDto,
 } from './dto/create-inscripcion-2026.dto';
 
 /**
  * Representa un estudiante creado en la transacción con sus datos relacionados
  */
 interface EstudianteCreado {
-  estudiante: any;
-  estudianteInscripcion: any;
+  estudiante: Estudiante;
+  estudianteInscripcion: EstudianteInscripcion2026;
   pin: string;
-  cursosSeleccionados: any[];
-  mundoSeleccionado?: any;
+  cursosSeleccionados: CourseSelectionDto[];
+  mundoSeleccionado?: MundoSTEAM;
 }
 
 /**
  * Resultado completo de la transacción de inscripción
  */
 interface TransactionResult {
-  inscripcion: any;
-  tutor: any;
+  inscripcion: Inscripcion2026;
+  tutor: Tutor;
   estudiantes: EstudianteCreado[];
-  pago: any;
+  pago: PagoInscripcion2026;
   cursosCount: number;
   mundosCount: number;
 }
@@ -216,7 +221,7 @@ export class Inscripciones2026Service {
     inscripcionFee: number,
     backendUrl: string,
     frontendUrl: string,
-  ): any {
+  ): ReturnType<typeof this.mercadoPagoService.buildInscripcion2026PreferenceData> {
     return this.mercadoPagoService.buildInscripcion2026PreferenceData(
       dto.tipo_inscripcion,
       inscripcionFee,
@@ -298,7 +303,10 @@ export class Inscripciones2026Service {
    *
    * @private
    */
-  private async findOrCreateTutor(tx: any, tutorDto: any): Promise<any> {
+  private async findOrCreateTutor(
+    tx: Prisma.TransactionClient,
+    tutorDto: TutorDataDto
+  ): Promise<Tutor> {
     let tutor = await tx.tutor.findUnique({
       where: { email: tutorDto.email },
     });
@@ -330,13 +338,13 @@ export class Inscripciones2026Service {
    * @private
    */
   private async createInscripcion(
-    tx: any,
+    tx: Prisma.TransactionClient,
     tutorId: string,
     dto: CreateInscripcion2026Dto,
     inscripcionFee: number,
     siblingDiscount: number,
     monthlyTotal: number,
-  ): Promise<any> {
+  ): Promise<Inscripcion2026> {
     return tx.inscripcion2026.create({
       data: {
         tutor_id: tutorId,
@@ -356,9 +364,9 @@ export class Inscripciones2026Service {
    * @private
    */
   private async createEstudiantesConInscripciones(
-    tx: any,
+    tx: Prisma.TransactionClient,
     inscripcionId: string,
-    estudiantesDto: any[],
+    estudiantesDto: EstudianteInscripcionDto[],
     tutorId: string,
   ): Promise<EstudianteCreado[]> {
     const estudiantesCreados: EstudianteCreado[] = [];
@@ -413,8 +421,8 @@ export class Inscripciones2026Service {
    * Prepara datos de cursos de Colonia para creación en batch
    * @private
    */
-  private prepareCursosData(estudiantesCreados: EstudianteCreado[]): any[] {
-    const cursosData: any[] = [];
+  private prepareCursosData(estudiantesCreados: EstudianteCreado[]): Prisma.ColoniaCursoSeleccionado2026CreateManyInput[] {
+    const cursosData: Prisma.ColoniaCursoSeleccionado2026CreateManyInput[] = [];
 
     estudiantesCreados.forEach(({ estudianteInscripcion, cursosSeleccionados }) => {
       if (cursosSeleccionados && cursosSeleccionados.length > 0) {
@@ -445,8 +453,8 @@ export class Inscripciones2026Service {
    * Prepara datos de mundos STEAM para creación en batch
    * @private
    */
-  private prepareMundosData(estudiantesCreados: EstudianteCreado[]): any[] {
-    const mundosData: any[] = [];
+  private prepareMundosData(estudiantesCreados: EstudianteCreado[]): Prisma.CicloMundoSeleccionado2026CreateManyInput[] {
+    const mundosData: Prisma.CicloMundoSeleccionado2026CreateManyInput[] = [];
 
     estudiantesCreados.forEach(({ estudianteInscripcion, mundoSeleccionado }) => {
       if (mundoSeleccionado) {
@@ -464,12 +472,16 @@ export class Inscripciones2026Service {
    * Crea cursos y mundos en batch usando Promise.all
    * @private
    */
-  private async createCursosAndMundos(tx: any, cursosData: any[], mundosData: any[]): Promise<void> {
-    const cursosPromises: Promise<any>[] = cursosData.map(data =>
+  private async createCursosAndMundos(
+    tx: Prisma.TransactionClient,
+    cursosData: Prisma.ColoniaCursoSeleccionado2026CreateManyInput[],
+    mundosData: Prisma.CicloMundoSeleccionado2026CreateManyInput[]
+  ): Promise<void> {
+    const cursosPromises = cursosData.map(data =>
       tx.coloniaCursoSeleccionado2026.create({ data })
     );
 
-    const mundosPromises: Promise<any>[] = mundosData.map(data =>
+    const mundosPromises = mundosData.map(data =>
       tx.cicloMundoSeleccionado2026.create({ data })
     );
 
@@ -485,11 +497,11 @@ export class Inscripciones2026Service {
    * @private
    */
   private async createPago(
-    tx: any,
+    tx: Prisma.TransactionClient,
     inscripcionId: string,
     inscripcionFee: number,
     mercadopagoPreferenceId: string,
-  ): Promise<any> {
+  ): Promise<PagoInscripcion2026> {
     return tx.pagoInscripcion2026.create({
       data: {
         inscripcion_id: inscripcionId,
@@ -505,7 +517,10 @@ export class Inscripciones2026Service {
    * Crea el historial inicial de estado de inscripción
    * @private
    */
-  private async createHistorial(tx: any, inscripcionId: string): Promise<void> {
+  private async createHistorial(
+    tx: Prisma.TransactionClient,
+    inscripcionId: string
+  ): Promise<void> {
     await tx.historialEstadoInscripcion2026.create({
       data: {
         inscripcion_id: inscripcionId,
@@ -762,6 +777,9 @@ async createInscripcion2026(
       },
       // Callback: Actualizar pago e inscripción
       async (pago, context) => {
+        if (!context.parsedReference) {
+          throw new Error('Invalid parsed reference');
+        }
         const { inscripcionId } = context.parsedReference.ids;
 
         // Mapear estado de MercadoPago a estado interno

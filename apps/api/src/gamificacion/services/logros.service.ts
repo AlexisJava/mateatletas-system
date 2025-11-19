@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { RecursosService } from './recursos.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class LogrosService {
@@ -17,7 +18,7 @@ export class LogrosService {
     rareza?: string;
     activo?: boolean;
   }) {
-    const where: any = {};
+    const where: Prisma.LogroWhereInput = {};
 
     if (params?.categoria) {
       where.categoria = params.categoria;

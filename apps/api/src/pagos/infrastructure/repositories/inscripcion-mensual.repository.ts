@@ -371,10 +371,23 @@ export class InscripcionMensualRepository
   }
 
   /**
+   * Mapea el enum EstadoPago de Prisma al enum del Domain
+   * Valida que el valor sea correcto
+   */
+  private mapearEstadoPago(estadoPago: string): EstadoPago {
+    // Validar que el valor sea uno de los valores válidos
+    const valoresValidos: string[] = Object.values(EstadoPago);
+    if (!valoresValidos.includes(estadoPago)) {
+      throw new Error(`Estado de pago inválido: ${estadoPago}`);
+    }
+    return estadoPago as EstadoPago;
+  }
+
+  /**
    * Convierte de tipos de Prisma a tipos del Domain
    * IMPORTANTE: Convierte Prisma.Decimal a Decimal de decimal.js
    */
-  private mapearPrismaADomain(inscripcion: any): InscripcionMensual {
+  private mapearPrismaADomain(inscripcion: Prisma.InscripcionMensualGetPayload<object>): InscripcionMensual {
     return {
       id: inscripcion.id,
       estudianteId: inscripcion.estudiante_id,
@@ -386,9 +399,9 @@ export class InscripcionMensualRepository
       precioBase: new Decimal(inscripcion.precio_base.toString()),
       descuentoAplicado: new Decimal(inscripcion.descuento_aplicado.toString()),
       precioFinal: new Decimal(inscripcion.precio_final.toString()),
-      tipoDescuento: inscripcion.tipo_descuento,
+      tipoDescuento: this.mapearTipoDescuento(inscripcion.tipo_descuento),
       detalleCalculo: inscripcion.detalle_calculo,
-      estadoPago: inscripcion.estado_pago,
+      estadoPago: this.mapearEstadoPago(inscripcion.estado_pago),
       fechaPago: inscripcion.fecha_pago,
       metodoPago: inscripcion.metodo_pago,
       comprobanteUrl: inscripcion.comprobante_url,

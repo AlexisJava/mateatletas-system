@@ -85,18 +85,20 @@ export class WebhookIdempotencyService {
       this.logger.log(
         `✅ Webhook marcado como procesado: payment_id=${data.paymentId}, type=${data.webhookType}, status=${data.status}`,
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Si falla por unique constraint, significa que otro proceso ya lo guardó (race condition)
       // Esto es OK, simplemente logueamos
-      if (error.code === 'P2002') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
         this.logger.warn(
           `⚠️ Race condition detectada al marcar webhook: payment_id=${data.paymentId}. Otro proceso ya lo procesó.`,
         );
       } else {
         // Otros errores sí son problemáticos
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        const stack = error instanceof Error ? error.stack : undefined;
         this.logger.error(
-          `❌ Error al marcar webhook como procesado: ${error.message}`,
-          error.stack,
+          `❌ Error al marcar webhook como procesado: ${message}`,
+          stack,
         );
         throw error;
       }

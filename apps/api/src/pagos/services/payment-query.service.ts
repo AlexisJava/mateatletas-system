@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { ConfiguracionPreciosRepository } from '../infrastructure/repositories/configuracion-precios.repository';
 import { InscripcionMensualRepository } from '../infrastructure/repositories/inscripcion-mensual.repository';
-import { EstadoPago, EstadoMembresia } from '@prisma/client';
+import { EstadoPago, EstadoMembresia, Prisma } from '@prisma/client';
 
 /**
  * Parámetros para búsqueda de inscripciones
@@ -54,12 +54,12 @@ export class PaymentQueryService {
       limit = 10,
     } = params;
 
-    const where: any = {};
+    const where: Prisma.InscripcionMensualWhereInput = {};
     if (tutorId) where.tutor_id = String(tutorId);
     if (estudianteId) where.estudiante_id = String(estudianteId);
     if (anio) where.anio = anio;
     if (mes) where.mes = mes;
-    if (estado) where.estado_pago = estado;
+    if (estado) where.estado_pago = estado as EstadoPago;
 
     const [data, total] = await Promise.all([
       this.prisma.inscripcionMensual.findMany({
