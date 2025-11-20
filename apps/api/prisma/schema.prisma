@@ -368,11 +368,13 @@ model Membresia {
   /// Fecha del próximo pago (se calcula cuando webhook confirma)
   fecha_proximo_pago DateTime?
   /// ID de preferencia de MercadoPago (para tracking)
-  preferencia_id     String?
+  preferencia_id          String?
+  /// ID del pago confirmado de MercadoPago (para auditoría y soporte)
+  mercadopago_payment_id  String?
   /// Timestamp de creación del registro
-  createdAt          DateTime        @default(now())
+  createdAt               DateTime        @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt          DateTime        @updatedAt
+  updatedAt               DateTime        @updatedAt
   producto           Producto        @relation(fields: [producto_id], references: [id])
   tutor              Tutor           @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
 

@@ -233,10 +233,11 @@ export class PaymentWebhookService {
     // Mapear estado de MercadoPago a estado de pago
     const estadoPago = this.stateMapper.mapearEstadoPago(payment.status);
 
-    // Actualizar membresía usando command service
+    // Actualizar membresía usando command service (persistiendo payment_id)
     await this.commandService.actualizarEstadoMembresia(
       membresiaId,
       estadoPago,
+      payment.id, // ✅ Persistir payment_id para auditoría
     );
 
     // Emitir evento específico de webhook

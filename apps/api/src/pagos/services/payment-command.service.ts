@@ -147,9 +147,14 @@ export class PaymentCommandService {
    *
    * @param membresiaId - ID de la membresía
    * @param estadoPago - Estado de pago a aplicar
+   * @param paymentId - ID del pago de MercadoPago (opcional, para auditoría)
    * @returns Membresía actualizada
    */
-  async actualizarEstadoMembresia(membresiaId: string, estadoPago: EstadoPago) {
+  async actualizarEstadoMembresia(
+    membresiaId: string,
+    estadoPago: EstadoPago,
+    paymentId?: string,
+  ) {
     const estadoMembresia = this.stateMapper.mapearEstadoMembresia(estadoPago);
 
     const updated = await this.prisma.membresia.update({
@@ -160,6 +165,8 @@ export class PaymentCommandService {
           estadoMembresia === EstadoMembresia.Activa ? new Date() : undefined,
         fecha_proximo_pago:
           estadoMembresia === EstadoMembresia.Activa ? this.calcularProximoPago() : null,
+        // ✅ SEGURIDAD: Persistir payment_id para auditoría y soporte
+        mercadopago_payment_id: paymentId || undefined,
       },
     });
 
@@ -168,11 +175,12 @@ export class PaymentCommandService {
       membresiaId,
       estadoPago,
       estadoMembresia,
+      paymentId,
       fechaActualizacion: new Date(),
     });
 
     this.logger.log(
-      `✅ Membresía ${membresiaId} actualizada a estado: ${estadoMembresia}`,
+      `✅ Membresía ${membresiaId} actualizada a estado: ${estadoMembresia}${paymentId ? ` | payment_id: ${paymentId}` : ''}`,
     );
 
     return updated;
