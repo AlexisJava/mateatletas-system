@@ -757,6 +757,9 @@ async createInscripcion2026(
       TipoExternalReference.INSCRIPCION_2026,
       // Callback: Buscar pago en DB
       async (parsed) => {
+        if (!parsed) {
+          throw new Error('Failed to parse external reference');
+        }
         const { inscripcionId } = parsed.ids;
 
         const pago = await this.prisma.pagoInscripcion2026.findFirst({

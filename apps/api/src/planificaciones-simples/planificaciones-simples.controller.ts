@@ -102,7 +102,7 @@ export class PlanificacionesSimplesController {
     return this.service.guardarEstado(
       estudianteId,
       codigo,
-      body.estado_guardado,
+      body.estado_guardado as Prisma.InputJsonValue,
     );
   }
 

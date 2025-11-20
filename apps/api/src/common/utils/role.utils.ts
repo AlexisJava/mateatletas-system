@@ -27,11 +27,16 @@ export function parseUserRoles(
   // Si ya es un array, retornarlo directamente
   if (Array.isArray(roles)) {
     // Filtrar solo elementos válidos como Role (strings) y normalizar a mayúsculas
-    // TypeScript no puede inferir correctamente el type guard en arrays de JsonValue
-    // Usamos as para hacer un type assertion seguro después de validar con el type guard
-    return roles
-      .filter((item): item is Role => isRole(item))
-      .map((item) => item.toUpperCase() as Role);
+    const result: Role[] = [];
+    for (const item of roles) {
+      if (typeof item === 'string' && item !== null) {
+        const upperRole = item.toUpperCase() as Role;
+        if (validRoles.has(upperRole)) {
+          result.push(upperRole);
+        }
+      }
+    }
+    return result;
   }
 
   // Si es un string, intentar parsearlo como JSON

@@ -286,7 +286,7 @@ export class PagosService {
    * Procesa pago de membresía
    * external_reference format: "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
    */
-  private async procesarPagoMembresia(payment: { external_reference: string; id: number; status: string }) {
+  private async procesarPagoMembresia(payment: { external_reference: string; id: string; status: string }) {
     const externalRef = payment.external_reference;
     const parts = externalRef.split('-');
     const membresiaId = parts[1]; // "membresia-{ID}-tutor-..."
@@ -343,7 +343,7 @@ export class PagosService {
    * Procesa pago de inscripción a curso
    * external_reference format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
    */
-  private async procesarPagoInscripcion(payment: { external_reference: string; id: number; status: string }) {
+  private async procesarPagoInscripcion(payment: { external_reference: string; id: string; status: string }) {
     const externalRef = payment.external_reference;
     const parts = externalRef.split('-');
     const inscripcionId = parts[1]; // "inscripcion-{ID}-estudiante-..."

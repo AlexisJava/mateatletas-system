@@ -142,14 +142,14 @@ export class TutorCreationService {
     return await tx.tutor.create({
       data: {
         nombre: data.nombre,
+        apellido: '',
         email: data.email.toLowerCase(),
         username: username,
-        password: passwordHash,
+        password_hash: passwordHash,
         telefono: data.telefono,
         cuil: data.cuil,
         dni: data.dni,
-        ciudad: data.ciudad,
-        rol: 'TUTOR',
+        roles: ['TUTOR'],
       },
     });
   }

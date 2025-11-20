@@ -79,7 +79,7 @@ interface MercadoPagoPreferenceResponse {
 /**
  * Respuesta de inscripción a colonia
  */
-interface InscriptionResponse {
+export interface InscriptionResponse {
   message: string;
   tutorId: string;
   inscriptionId: string;

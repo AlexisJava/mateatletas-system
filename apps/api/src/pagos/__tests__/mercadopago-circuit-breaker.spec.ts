@@ -242,6 +242,19 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
         id: 'pay-123',
         status: 'approved',
         external_reference: 'membresia-1-tutor-2',
+        status_detail: 'accredited',
+        transaction_amount: 15000,
+        date_approved: '2025-01-01T00:00:00Z',
+        date_created: '2025-01-01T00:00:00Z',
+        additional_info: {},
+        payer: {
+          id: 'payer-1',
+          email: 'test@test.com',
+          identification: {
+            type: 'DNI',
+            number: '12345678',
+          },
+        },
       };
 
       const mockGet = jest.fn().mockResolvedValue(mockPayment);
@@ -252,8 +265,25 @@ describe('MercadoPagoService - Circuit Breaker Protection', () => {
       // Act
       const result = await service.getPayment('pay-123');
 
-      // Assert
-      expect(result).toEqual(mockPayment);
+      // Assert: Verificar estructura completa del resultado transformado
+      expect(result).toEqual({
+        id: 'pay-123',
+        status: 'approved',
+        external_reference: 'membresia-1-tutor-2',
+        status_detail: 'accredited',
+        transaction_amount: 15000,
+        date_approved: '2025-01-01T00:00:00Z',
+        date_created: '2025-01-01T00:00:00Z',
+        additional_info: {},
+        payer: {
+          id: 'payer-1',
+          email: 'test@test.com',
+          identification: {
+            type: 'DNI',
+            number: '12345678',
+          },
+        },
+      });
       expect(mockGet).toHaveBeenCalledWith({ id: 'pay-123' });
 
       // Verify circuit is CLOSED

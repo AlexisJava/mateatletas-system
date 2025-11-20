@@ -12,7 +12,7 @@ import { PaymentAmountValidatorService } from './payment-amount-validator.servic
  * Datos de pago de MercadoPago (simplificado)
  */
 export interface MercadoPagoPaymentData {
-  id: number;
+  id: string;
   status: string;
   external_reference: string;
   transaction_amount?: number;
@@ -153,7 +153,7 @@ export class PaymentWebhookService {
    */
   private async procesarPorTipoExternalReference(payment: {
     external_reference: string;
-    id: number;
+    id: string;
     status: string;
     transaction_amount?: number;
   }) {
@@ -186,7 +186,7 @@ export class PaymentWebhookService {
    */
   private async procesarPagoMembresia(payment: {
     external_reference: string;
-    id: number;
+    id: string;
     status: string;
     transaction_amount?: number;
   }) {
@@ -272,7 +272,7 @@ export class PaymentWebhookService {
    */
   private async procesarPagoInscripcion(payment: {
     external_reference: string;
-    id: number;
+    id: string;
     status: string;
     transaction_amount?: number;
   }) {
