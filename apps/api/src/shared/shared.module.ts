@@ -1,8 +1,9 @@
-import { Module, Global } from '@nestjs/common';
+import { Module, Global, forwardRef } from '@nestjs/common';
 import { PinGeneratorService } from './services/pin-generator.service';
 import { TutorCreationService } from './services/tutor-creation.service';
 import { MercadoPagoWebhookProcessorService } from './services/mercadopago-webhook-processor.service';
 import { PrismaService } from '../core/database/prisma.service';
+import { PagosModule } from '../pagos/pagos.module';
 
 /**
  * SharedModule - Módulo global con servicios reutilizables
@@ -31,6 +32,9 @@ import { PrismaService } from '../core/database/prisma.service';
  */
 @Global()
 @Module({
+  imports: [
+    forwardRef(() => PagosModule), // Forward reference para evitar dependencias circulares
+  ],
   providers: [
     PrismaService,
     PinGeneratorService,
