@@ -14,6 +14,7 @@ import {
 import { DatabaseModule } from '../core/database/database.module';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
+import { MfaModule } from './mfa/mfa.module';
 
 /**
  * Módulo de autenticación
@@ -37,6 +38,7 @@ import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
 @Module({
   imports: [
     DatabaseModule, // Para PrismaService en handlers
+    MfaModule, // Multi-Factor Authentication para cuentas administrativas
     // Configuración de Passport
     PassportModule.register({
       defaultStrategy: 'jwt',

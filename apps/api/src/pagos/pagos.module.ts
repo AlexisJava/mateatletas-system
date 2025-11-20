@@ -16,6 +16,7 @@ import { PaymentStateMapperService } from './services/payment-state-mapper.servi
 // Security Services (CRITICAL)
 import { WebhookIdempotencyService } from './services/webhook-idempotency.service';
 import { PaymentAmountValidatorService } from './services/payment-amount-validator.service';
+import { MercadoPagoIpWhitelistService } from './services/mercadopago-ip-whitelist.service';
 
 // Use Cases
 import { CalcularPrecioUseCase } from './application/use-cases/calcular-precio.use-case';
@@ -63,6 +64,9 @@ import { MercadoPagoService } from './mercadopago.service';
 
     // Validación de montos de pagos (prevención de fraude)
     PaymentAmountValidatorService,
+
+    // IP Whitelisting para webhooks de MercadoPago (solo IPs oficiales)
+    MercadoPagoIpWhitelistService,
 
     // === CQRS Services (NEW) ===
     // Facade - Punto de entrada único

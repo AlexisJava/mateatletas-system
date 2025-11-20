@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TokenBlacklistGuard } from '../auth/guards/token-blacklist.guard';
 import { UserThrottlerGuard } from '../common/guards/user-throttler.guard';
+import { SecretRotationService } from './services/secret-rotation.service';
+import { DatabaseModule } from '../core/database/database.module';
 
 /**
  * SecurityModule
@@ -19,6 +22,8 @@ import { UserThrottlerGuard } from '../common/guards/user-throttler.guard';
  */
 @Module({
   imports: [
+    DatabaseModule, // Para PrismaService en SecretRotationService
+    ScheduleModule.forRoot(), // Para cronjobs de SecretRotationService
     // Rate Limiting: Protege contra brute force, DDoS y abuso de API
     // - Configurable via variables de entorno RATE_LIMIT_TTL y RATE_LIMIT_MAX
     // - Default: 100 req/min en producción, 1000 req/min en desarrollo
@@ -34,6 +39,9 @@ import { UserThrottlerGuard } from '../common/guards/user-throttler.guard';
     ]),
   ],
   providers: [
+    // Servicio de rotación automática de secrets críticos
+    // Monitorea JWT_SECRET y WEBHOOK_SECRET cada 90 días
+    SecretRotationService,
     // ✅ SECURITY FIX: CSRF removido de guards globales
     // CSRF es ahora opt-in con @RequireCsrf() decorator
     // Esto permite webhooks, API calls, y Postman sin bloqueos

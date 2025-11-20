@@ -48,6 +48,25 @@ export class AuthService {
   ) {}
 
   /**
+   * Genera un token temporal para verificación MFA
+   * Este token es válido solo 5 minutos y solo para el endpoint de verificación MFA
+   * @param userId - ID del usuario
+   * @param email - Email del usuario
+   * @returns Token JWT temporal
+   */
+  private generateMfaToken(userId: string, email: string): string {
+    const payload = {
+      sub: userId,
+      email,
+      type: 'mfa_pending', // Tipo especial para distinguir de tokens regulares
+    };
+
+    return this.jwtService.sign(payload, {
+      expiresIn: '5m', // Token válido solo 5 minutos
+    });
+  }
+
+  /**
    * Registra un nuevo tutor en la plataforma
    * @param registerDto - Datos del tutor a registrar
    * @returns Datos del tutor registrado (sin password_hash)
@@ -220,10 +239,12 @@ export class AuthService {
       });
     }
 
+    let adminUser: AdminModel | null = null;
     if (!user) {
-      user = await this.prisma.admin.findUnique({
+      adminUser = await this.prisma.admin.findUnique({
         where: { email },
       });
+      user = adminUser;
     }
 
     // 4. Verificar que el usuario exista
@@ -236,6 +257,25 @@ export class AuthService {
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    // 5.5. Si es admin y tiene MFA habilitado, retornar token temporal
+    if (adminUser && isAdminUser(user) && adminUser.mfa_enabled) {
+      this.logger.log(`Admin ${user.email} requiere verificación MFA`);
+
+      const mfaToken = this.generateMfaToken(user.id, user.email);
+
+      return {
+        requires_mfa: true,
+        mfa_token: mfaToken,
+        user: {
+          id: user.id,
+          email: user.email,
+          nombre: user.nombre,
+          apellido: user.apellido,
+        },
+        message: 'Verificación MFA requerida. Por favor ingresa tu código de autenticación.',
+      };
     }
 
     // 6. Obtener roles del usuario desde la BD (puede tener múltiples roles) - usando utility segura
@@ -733,6 +773,130 @@ export class AuthService {
         apellido: tutor.apellido,
         debe_cambiar_password: tutor.debe_cambiar_password,
         roles,
+      },
+    };
+  }
+
+  /**
+   * Completa el login verificando el código MFA
+   *
+   * @param mfaToken - Token temporal MFA recibido en el login inicial
+   * @param totpCode - Código TOTP de 6 dígitos (opcional)
+   * @param backupCode - Código de backup (opcional)
+   * @returns Token JWT final y datos del usuario
+   * @throws UnauthorizedException si el token es inválido o el código es incorrecto
+   */
+  async completeMfaLogin(
+    mfaToken: string,
+    totpCode?: string,
+    backupCode?: string,
+  ) {
+    // 1. Verificar y decodificar el token temporal MFA
+    let payload: { sub: string; email: string; type: string };
+    try {
+      payload = this.jwtService.verify(mfaToken) as {
+        sub: string;
+        email: string;
+        type: string;
+      };
+    } catch {
+      throw new UnauthorizedException('Token MFA inválido o expirado');
+    }
+
+    // 2. Verificar que sea un token MFA válido
+    if (payload.type !== 'mfa_pending') {
+      throw new UnauthorizedException('Token MFA inválido');
+    }
+
+    const userId = payload.sub;
+
+    // 3. Obtener el admin de la base de datos
+    const admin = await this.prisma.admin.findUnique({
+      where: { id: userId },
+    });
+
+    if (!admin) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    if (!admin.mfa_enabled || !admin.mfa_secret) {
+      throw new UnauthorizedException('MFA no está habilitado para este usuario');
+    }
+
+    // 4. Verificar el código TOTP o backup code
+    let isValid = false;
+
+    if (totpCode) {
+      // Verificar código TOTP
+      const authenticator = require('otplib').authenticator;
+      authenticator.options = {
+        window: 1,
+        step: 30,
+      };
+      isValid = authenticator.verify({
+        token: totpCode,
+        secret: admin.mfa_secret,
+      });
+    } else if (backupCode) {
+      // Verificar backup code
+      const bcrypt = require('bcrypt');
+      for (const [index, hashedCode] of admin.mfa_backup_codes.entries()) {
+        const isMatch = await bcrypt.compare(backupCode, hashedCode);
+        if (isMatch) {
+          isValid = true;
+          // Eliminar el código usado (single-use)
+          const updatedCodes = admin.mfa_backup_codes.filter(
+            (_, i) => i !== index,
+          );
+          await this.prisma.admin.update({
+            where: { id: userId },
+            data: { mfa_backup_codes: updatedCodes },
+          });
+          this.logger.warn(
+            `⚠️ Código de backup usado para ${admin.email}. Códigos restantes: ${updatedCodes.length}`,
+          );
+          break;
+        }
+      }
+    }
+
+    if (!isValid) {
+      this.logger.error(
+        `❌ Código MFA inválido para usuario ${admin.email} (${userId})`,
+      );
+      throw new UnauthorizedException(
+        'Código de verificación inválido. Por favor intenta nuevamente.',
+      );
+    }
+
+    // 5. Generar token JWT final
+    const userRoles = parseUserRoles(admin.roles);
+    const finalRoles = userRoles.length > 0 ? userRoles : [Role.ADMIN];
+
+    const accessToken = this.generateJwtToken(userId, admin.email, finalRoles);
+
+    // 6. Emitir evento de login exitoso
+    this.eventEmitter.emit(
+      'user.logged-in',
+      new UserLoggedInEvent(userId, 'admin', admin.email, false),
+    );
+
+    this.logger.log(`✅ Login MFA completado exitosamente para ${admin.email}`);
+
+    // 7. Retornar token y datos del usuario
+    return {
+      access_token: accessToken,
+      user: {
+        id: admin.id,
+        email: admin.email,
+        nombre: admin.nombre,
+        apellido: admin.apellido,
+        fecha_registro: admin.fecha_registro,
+        dni: admin.dni ?? null,
+        telefono: admin.telefono ?? null,
+        role: Role.ADMIN,
+        roles: finalRoles,
+        debe_cambiar_password: admin.debe_cambiar_password,
       },
     };
   }

@@ -312,6 +312,14 @@ model Admin {
   roles                 Json      @default("[\"admin\"]")
   /// Teléfono del admin (opcional)
   telefono              String?
+  /// Secret TOTP para MFA (Multi-Factor Authentication)
+  /// Guardado encriptado en DB para seguridad
+  mfa_secret            String?
+  /// Indica si MFA está habilitado para este admin
+  mfa_enabled           Boolean   @default(false)
+  /// Códigos de backup para MFA (hasheados con bcrypt)
+  /// Array de strings - cada código es de un solo uso
+  mfa_backup_codes      String[]  @default([])
 
   @@map("admins")
 }
@@ -3165,4 +3173,166 @@ model WebhookProcessed {
   @@index([processed_at])
   @@index([webhook_type])
   @@map("webhooks_processed")
+}
+
+/// Modelo de Audit Logs para rastrear todas las acciones críticas del sistema
+/// PROPÓSITO: Seguridad, compliance y debugging de operaciones sensibles
+///
+/// CASOS DE USO:
+/// - Detectar accesos no autorizados o sospechosos
+/// - Auditorías de seguridad y compliance (GDPR, regulaciones)
+/// - Debugging de cambios inesperados en datos críticos
+/// - Forense digital en caso de incidentes
+///
+/// QUÉ SE LOGUEA:
+/// - Cambios en datos sensibles (precios, pagos, usuarios)
+/// - Acciones administrativas críticas (crear/modificar/eliminar usuarios)
+/// - Eventos de seguridad (login fallido, MFA, cambio de permisos)
+/// - Operaciones de pago (creación, actualización de estados)
+/// - Modificaciones de configuración del sistema
+///
+/// RETENCIÓN:
+/// - Logs se mantienen indefinidamente para auditorías
+/// - Se pueden archivar logs antiguos (>1 año) a almacenamiento frío
+model AuditLog {
+  /// ID único del log (CUID)
+  id String @id @default(cuid())
+
+  /// Timestamp de cuando ocurrió la acción (indexado para búsquedas por fecha)
+  timestamp DateTime @default(now())
+
+  /// ID del usuario que realizó la acción (null para acciones del sistema)
+  /// Formato: UUID del usuario (tutor, admin, docente, estudiante)
+  user_id String?
+
+  /// Tipo de usuario que realizó la acción
+  /// Valores: "tutor", "admin", "docente", "estudiante", "system"
+  user_type String?
+
+  /// Email del usuario (para facilitar búsquedas)
+  user_email String?
+
+  /// Acción realizada
+  /// Ejemplos: "create", "update", "delete", "login", "logout", "payment_created", "mfa_enabled"
+  action String
+
+  /// Entidad afectada
+  /// Ejemplos: "Tutor", "Admin", "Pago", "Inscripcion", "Membresia", "Auth"
+  entity_type String
+
+  /// ID de la entidad afectada (si aplica)
+  /// Formato: UUID de la entidad modificada
+  entity_id String?
+
+  /// Descripción legible de la acción
+  /// Ejemplo: "Creó inscripción mensual para estudiante Juan Pérez ($5000)"
+  description String
+
+  /// Cambios realizados (JSON)
+  /// Formato: { "before": {...}, "after": {...} }
+  /// IMPORTANTE: NO incluir datos sensibles como passwords
+  changes Json?
+
+  /// Metadata adicional (JSON)
+  /// Puede incluir: IP, user agent, request ID, etc.
+  metadata Json?
+
+  /// Severidad del evento
+  /// Valores: "info", "warning", "error", "critical"
+  severity String @default("info")
+
+  /// Categoría del evento
+  /// Valores: "auth", "payment", "user_management", "data_modification", "security"
+  category String
+
+  /// IP desde donde se realizó la acción
+  ip_address String?
+
+  /// User agent del cliente
+  user_agent String?
+
+  /// Request ID (para correlacionar con logs de aplicación)
+  request_id String?
+
+  /// Timestamp de creación del registro (siempre NOW)
+  created_at DateTime @default(now())
+
+  /// Índices para queries eficientes
+  @@index([timestamp])
+  @@index([user_id])
+  @@index([action])
+  @@index([entity_type])
+  @@index([category])
+  @@index([severity])
+  @@index([user_email])
+  @@map("audit_logs")
+}
+
+/// Modelo de Rotación de Secrets
+/// PROPÓSITO: Gestión segura de rotación de secretos críticos del sistema
+///
+/// PROBLEMA QUE RESUELVE:
+/// - Secretos estáticos (JWT_SECRET, WEBHOOK_SECRET) nunca expiran
+/// - Si un secret se compromete, afecta toda la seguridad del sistema
+/// - No hay forma automática de rotar secrets sin downtime
+///
+/// SOLUCIÓN:
+/// - Rotación automática cada 90 días
+/// - Período de gracia de 7 días donde ambos secrets son válidos
+/// - Historial de rotaciones para auditoría
+/// - Alertas antes de expiración
+///
+/// SECRETS GESTIONADOS:
+/// - JWT_SECRET: Para tokens de autenticación
+/// - MERCADOPAGO_WEBHOOK_SECRET: Para validación de webhooks
+///
+/// FLUJO DE ROTACIÓN:
+/// 1. Sistema detecta que secret tiene 83+ días (7 días antes de expirar)
+/// 2. Genera nuevo secret y lo marca como "pending"
+/// 3. Admin recibe alerta para actualizar variables de entorno
+/// 4. Al día 90, el secret viejo expira y solo el nuevo es válido
+/// 5. Período de gracia permite transición sin downtime
+model SecretRotation {
+  /// ID único del registro
+  id String @id @default(cuid())
+
+  /// Tipo de secret
+  /// Valores: "JWT_SECRET", "WEBHOOK_SECRET"
+  secret_type String
+
+  /// Versión del secret (incremental)
+  /// Ejemplo: v1, v2, v3...
+  version Int
+
+  /// Hash SHA-256 del secret (para verificación sin exponer el secret)
+  /// El secret real se almacena en variables de entorno
+  secret_hash String
+
+  /// Estado del secret
+  /// Valores: "active" (en uso), "pending" (nuevo, en período de gracia), "expired" (ya no válido)
+  status String @default("active")
+
+  /// Fecha de creación del secret
+  created_at DateTime @default(now())
+
+  /// Fecha de expiración (90 días después de created_at)
+  expires_at DateTime
+
+  /// Fecha en que fue rotado (cuando pasó de active a expired)
+  rotated_at DateTime?
+
+  /// ID del admin que activó la rotación
+  rotated_by String?
+
+  /// Metadata adicional (JSON)
+  /// Puede incluir: razón de rotación, IP de quien lo rotó, etc.
+  metadata Json?
+
+  /// Índices para queries eficientes
+  @@index([secret_type])
+  @@index([status])
+  @@index([expires_at])
+  @@index([version])
+  @@unique([secret_type, version])
+  @@map("secret_rotations")
 }

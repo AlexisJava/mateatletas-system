@@ -22,6 +22,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginEstudianteDto } from './dto/login-estudiante.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { CompleteMfaLoginDto } from './mfa/dto/complete-mfa-login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { TokenBlacklistService } from './token-blacklist.service';
@@ -314,6 +315,66 @@ export class AuthController {
       message: 'Logout exitoso',
       description: 'La sesión ha sido cerrada y el token invalidado',
     };
+  }
+
+  /**
+   * POST /api/auth/complete-mfa-login
+   * Completa el login de un admin verificando el código MFA (TOTP o backup code)
+   * Este endpoint es PÚBLICO (no requiere JWT) ya que el usuario aún no está completamente autenticado
+   *
+   * @param dto - Token temporal MFA y código de verificación
+   * @param res - Response object para configurar cookies
+   * @returns 200 OK - { user } con token JWT final en cookie
+   * @throws 401 Unauthorized - Token MFA inválido o código incorrecto
+   */
+  @ApiOperation({
+    summary: 'Completar login con MFA',
+    description:
+      'Verifica el código TOTP o backup code y completa el login del admin',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Login MFA completado exitosamente (token final en cookie)',
+    schema: {
+      example: {
+        user: {
+          id: 'uuid-del-admin',
+          email: 'admin@example.com',
+          nombre: 'Admin',
+          apellido: 'Principal',
+          role: 'admin',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token MFA inválido/expirado o código de verificación incorrecto',
+  })
+  @ApiBody({ type: CompleteMfaLoginDto })
+  @Post('complete-mfa-login')
+  @HttpCode(HttpStatus.OK)
+  async completeMfaLogin(
+    @Body() dto: CompleteMfaLoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.completeMfaLogin(
+      dto.mfa_token,
+      dto.totp_code,
+      dto.backup_code,
+    );
+
+    // Configurar cookie httpOnly con el token JWT final
+    res.cookie('auth-token', result.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      path: '/',
+    });
+
+    // Retornar solo el user (el token va en la cookie)
+    return { user: result.user };
   }
 
   /**

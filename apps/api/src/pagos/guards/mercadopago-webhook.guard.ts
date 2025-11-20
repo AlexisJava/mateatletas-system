@@ -4,10 +4,12 @@ import {
   ExecutionContext,
   UnauthorizedException,
   Logger,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import * as crypto from 'crypto';
+import { MercadoPagoIpWhitelistService } from '../services/mercadopago-ip-whitelist.service';
 
 /**
  * Tipos seguros para la estructura de webhook de MercadoPago
@@ -45,14 +47,16 @@ interface SignatureValidationResult {
  * Header x-signature: "ts=1234567890,v1=abcdef123456..."
  *
  * Algoritmo de validación:
- * 1. Extraer timestamp (ts) y firma (v1) del header x-signature
- * 2. Validar que timestamp no esté expirado (max 5 minutos)
- * 3. Construir payload: `${timestamp}.${JSON.stringify(body)}`
- * 4. Calcular HMAC-SHA256 con secret
- * 5. Comparación timing-safe con v1
- * 6. Validar campos obligatorios: type, user_id, live_mode
+ * 1. Validar IP del cliente (solo IPs de MercadoPago permitidas)
+ * 2. Extraer timestamp (ts) y firma (v1) del header x-signature
+ * 3. Validar que timestamp no esté expirado (max 5 minutos)
+ * 4. Construir payload: `${timestamp}.${JSON.stringify(body)}`
+ * 5. Calcular HMAC-SHA256 con secret
+ * 6. Comparación timing-safe con v1
+ * 7. Validar campos obligatorios: type, user_id, live_mode
  *
  * Seguridad:
+ * - ✅ IP Whitelisting (solo IPs oficiales de MercadoPago)
  * - ✅ Validación de timestamp para prevenir replay attacks
  * - ✅ Comparación timing-safe para prevenir timing attacks
  * - ✅ Validación de estructura de body
@@ -65,7 +69,10 @@ export class MercadoPagoWebhookGuard implements CanActivate {
   private readonly strictMode: boolean;
   private readonly maxTimestampDiffSeconds = 300; // 5 minutos
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private ipWhitelistService: MercadoPagoIpWhitelistService,
+  ) {
     this.webhookSecret =
       this.configService.get<string>('MERCADOPAGO_WEBHOOK_SECRET') || null;
 
@@ -91,6 +98,27 @@ export class MercadoPagoWebhookGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
+
+    // 0. Validar IP del cliente (primera línea de defensa)
+    const clientIp = this.ipWhitelistService.extractRealIp(
+      request.headers as Record<string, string | string[] | undefined>,
+      request.socket.remoteAddress,
+    );
+
+    const isDevelopment = !this.strictMode;
+    const isIpAllowed = this.ipWhitelistService.isIpAllowed(
+      clientIp,
+      isDevelopment,
+    );
+
+    if (!isIpAllowed) {
+      this.logger.error(
+        `🚨 INTENTO DE WEBHOOK DESDE IP NO AUTORIZADA: ${clientIp}`,
+      );
+      throw new ForbiddenException(
+        `Access denied: IP ${clientIp} is not authorized to send webhooks`,
+      );
+    }
 
     // Si no hay secret configurado
     if (!this.webhookSecret) {
@@ -125,11 +153,11 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       this.validateTimestamp(validationResult.timestamp);
 
       this.logger.log(
-        `✅ Webhook validado: type=${request.body.type}, data_id=${request.body.data?.id}, user_id=${request.body.user_id}`,
+        `✅ Webhook validado: IP=${clientIp}, type=${request.body.type}, data_id=${request.body.data?.id}, user_id=${request.body.user_id}`,
       );
       return true;
     } catch (error) {
-      if (error instanceof UnauthorizedException) {
+      if (error instanceof UnauthorizedException || error instanceof ForbiddenException) {
         throw error;
       }
       const errorMessage =

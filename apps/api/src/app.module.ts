@@ -29,6 +29,7 @@ import { PlanificacionesSimplesModule } from './planificaciones-simples/planific
 import { TiendaModule } from './tienda/tienda.module';
 import { ColoniaModule } from './colonia/colonia.module';
 import { Inscripciones2026Module } from './inscripciones-2026/inscripciones-2026.module';
+import { AuditModule } from './audit/audit.module';
 
 /**
  * AppModule
@@ -58,6 +59,7 @@ import { Inscripciones2026Module } from './inscripciones-2026/inscripciones-2026
     InfrastructureModule, // Cache + Events + Notifications (Global)
     PricingCalculatorModule, // Pricing & Discounts (Global)
     SharedModule,         // Shared Services: PIN Generation, Tutor Creation (Global)
+    AuditModule,          // Audit Logs para seguridad y compliance (Global)
 
     // ============================================================================
     // FEATURE MODULES
