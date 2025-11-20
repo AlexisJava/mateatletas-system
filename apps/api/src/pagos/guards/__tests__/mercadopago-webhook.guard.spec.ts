@@ -5,24 +5,66 @@ import { MercadoPagoWebhookGuard } from '../mercadopago-webhook.guard';
 import * as crypto from 'crypto';
 
 /**
- * MercadoPagoWebhookGuard - SECURITY TESTS
+ * MercadoPagoWebhookGuard - SECURITY TESTS (Formato 2025)
  *
  * OBJETIVO: Validar que SOLO webhooks auténticos de MercadoPago sean aceptados
  *
- * Casos de test:
- * 1. ✅ Webhook válido con firma correcta → PERMITIR
- * 2. ❌ Webhook sin headers → RECHAZAR
- * 3. ❌ Webhook con firma inválida → RECHAZAR
- * 4. ❌ Webhook sin data.id → RECHAZAR
- * 5. ⚠️  Modo desarrollo sin secret → PERMITIR (warn)
- * 6. 🚨 Modo producción sin secret → RECHAZAR
+ * Formato oficial 2025:
+ * - Header x-signature: "ts=1234567890,v1=abcdef123456..."
+ * - Payload: `${timestamp}.${JSON.stringify(body)}`
+ *
+ * Casos de test de seguridad:
+ * 1. ✅ Webhook válido con firma correcta y timestamp válido → PERMITIR
+ * 2. ❌ Webhook con firma inválida → RECHAZAR
+ * 3. ❌ Webhook con timestamp expirado (replay attack) → RECHAZAR
+ * 4. ❌ Webhook sin headers obligatorios → RECHAZAR
+ * 5. ❌ Webhook sin campos obligatorios en body → RECHAZAR
+ * 6. ❌ Webhook con formato de firma incorrecto → RECHAZAR
+ * 7. ❌ Timing attack: firma casi correcta → RECHAZAR
+ * 8. 🚨 Producción sin secret → RECHAZAR
+ * 9. ⚠️  Desarrollo sin secret → PERMITIR (warn)
  */
 
-describe('MercadoPagoWebhookGuard', () => {
+describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
   let guard: MercadoPagoWebhookGuard;
-  const TEST_SECRET = 'test-secret-123';
+  const TEST_SECRET = 'test-secret-mercadopago-2025';
 
-  describe('Production Mode - Strict validation', () => {
+  /**
+   * Helper para generar firma válida según formato 2025
+   */
+  function generateValidSignature(
+    body: Record<string, string | number | boolean | Record<string, string>>,
+    secret: string,
+    timestamp?: number,
+  ): { signature: string; timestamp: number } {
+    const ts = timestamp || Math.floor(Date.now() / 1000);
+    const payload = `${ts}.${JSON.stringify(body)}`;
+    const v1 = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    return {
+      signature: `ts=${ts},v1=${v1}`,
+      timestamp: ts,
+    };
+  }
+
+  /**
+   * Helper para crear body válido de webhook
+   */
+  function createValidWebhookBody(): Record<string, string | number | boolean | Record<string, string>> {
+    return {
+      action: 'payment.created',
+      api_version: 'v1',
+      data: {
+        id: 'payment-12345',
+      },
+      date_created: '2025-01-01T00:00:00Z',
+      id: 'webhook-id-123',
+      live_mode: true,
+      type: 'payment',
+      user_id: '166135502',
+    };
+  }
+
+  describe('✅ Casos válidos', () => {
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
         providers: [
@@ -43,26 +85,16 @@ describe('MercadoPagoWebhookGuard', () => {
       guard = module.get<MercadoPagoWebhookGuard>(MercadoPagoWebhookGuard);
     });
 
-    it('should allow webhook with valid signature', () => {
+    it('should allow webhook with valid signature (formato 2025)', () => {
       // Arrange
-      const dataId = 'payment-123';
-      const requestId = 'req-456';
-      const manifest = `id:${dataId};request-id:${requestId};`;
-      const validSignature = crypto
-        .createHmac('sha256', TEST_SECRET)
-        .update(manifest)
-        .digest('hex');
+      const body = createValidWebhookBody();
+      const { signature } = generateValidSignature(body, TEST_SECRET);
 
       const mockContext = createMockExecutionContext({
         headers: {
-          'x-signature': validSignature,
-          'x-request-id': requestId,
+          'x-signature': signature,
         },
-        body: {
-          data: {
-            id: dataId,
-          },
-        },
+        body,
       });
 
       // Act
@@ -72,175 +104,61 @@ describe('MercadoPagoWebhookGuard', () => {
       expect(result).toBe(true);
     });
 
-    it('should reject webhook with invalid signature', () => {
+    it('should allow webhook for payment.created event', () => {
       // Arrange
+      const body = {
+        ...createValidWebhookBody(),
+        action: 'payment.created',
+        type: 'payment',
+      };
+      const { signature } = generateValidSignature(body, TEST_SECRET);
+
       const mockContext = createMockExecutionContext({
-        headers: {
-          'x-signature': 'invalid-signature-123',
-          'x-request-id': 'req-456',
-        },
-        body: {
-          data: {
-            id: 'payment-123',
-          },
-        },
+        headers: { 'x-signature': signature },
+        body,
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        UnauthorizedException,
-      );
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        'Webhook validation failed',
-      );
+      expect(guard.canActivate(mockContext)).toBe(true);
     });
 
-    it('should reject webhook without x-signature header', () => {
+    it('should allow webhook for payment.updated event', () => {
       // Arrange
+      const body = {
+        ...createValidWebhookBody(),
+        action: 'payment.updated',
+        type: 'payment',
+      };
+      const { signature } = generateValidSignature(body, TEST_SECRET);
+
       const mockContext = createMockExecutionContext({
-        headers: {
-          'x-request-id': 'req-456',
-        },
-        body: {
-          data: {
-            id: 'payment-123',
-          },
-        },
+        headers: { 'x-signature': signature },
+        body,
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        UnauthorizedException,
-      );
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        'Invalid webhook headers',
-      );
+      expect(guard.canActivate(mockContext)).toBe(true);
     });
 
-    it('should reject webhook without x-request-id header', () => {
+    it('should allow webhook with numeric user_id', () => {
       // Arrange
+      const body = {
+        ...createValidWebhookBody(),
+        user_id: 166135502, // Numérico
+      };
+      const { signature } = generateValidSignature(body, TEST_SECRET);
+
       const mockContext = createMockExecutionContext({
-        headers: {
-          'x-signature': 'some-signature',
-        },
-        body: {
-          data: {
-            id: 'payment-123',
-          },
-        },
+        headers: { 'x-signature': signature },
+        body,
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        UnauthorizedException,
-      );
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        'Invalid webhook headers',
-      );
-    });
-
-    it('should reject webhook without data.id in body', () => {
-      // Arrange
-      const mockContext = createMockExecutionContext({
-        headers: {
-          'x-signature': 'some-signature',
-          'x-request-id': 'req-456',
-        },
-        body: {
-          data: {},
-        },
-      });
-
-      // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        UnauthorizedException,
-      );
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        'Invalid webhook body',
-      );
-    });
-
-    it('should reject webhook with empty body', () => {
-      // Arrange
-      const mockContext = createMockExecutionContext({
-        headers: {
-          'x-signature': 'some-signature',
-          'x-request-id': 'req-456',
-        },
-        body: {},
-      });
-
-      // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        UnauthorizedException,
-      );
-    });
-
-    it('should use timing-safe comparison for signature validation', () => {
-      // Arrange
-      const dataId = 'payment-123';
-      const requestId = 'req-456';
-      const manifest = `id:${dataId};request-id:${requestId};`;
-      const validSignature = crypto
-        .createHmac('sha256', TEST_SECRET)
-        .update(manifest)
-        .digest('hex');
-
-      // Modificar un solo caracter (ataque de timing)
-      const almostValidSignature =
-        validSignature.substring(0, validSignature.length - 1) + 'X';
-
-      const mockContext = createMockExecutionContext({
-        headers: {
-          'x-signature': almostValidSignature,
-          'x-request-id': requestId,
-        },
-        body: {
-          data: {
-            id: dataId,
-          },
-        },
-      });
-
-      // Act & Assert - Debe rechazar incluso con un solo caracter diferente
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        UnauthorizedException,
-      );
-    });
-
-    it('should correctly construct manifest string', () => {
-      // Arrange
-      const dataId = 'payment-999';
-      const requestId = 'req-888';
-
-      // Construir manifest esperado según documentación de MercadoPago
-      const expectedManifest = `id:${dataId};request-id:${requestId};`;
-      const expectedSignature = crypto
-        .createHmac('sha256', TEST_SECRET)
-        .update(expectedManifest)
-        .digest('hex');
-
-      const mockContext = createMockExecutionContext({
-        headers: {
-          'x-signature': expectedSignature,
-          'x-request-id': requestId,
-        },
-        body: {
-          data: {
-            id: dataId,
-          },
-        },
-      });
-
-      // Act
-      const result = guard.canActivate(mockContext);
-
-      // Assert
-      expect(result).toBe(true);
+      expect(guard.canActivate(mockContext)).toBe(true);
     });
   });
 
-  describe('Development Mode - Permissive validation', () => {
+  describe('❌ Ataques de firma inválida', () => {
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
         providers: [
@@ -249,7 +167,410 @@ describe('MercadoPagoWebhookGuard', () => {
             provide: ConfigService,
             useValue: {
               get: jest.fn((key: string) => {
-                if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return null; // No secret
+                if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return TEST_SECRET;
+                if (key === 'NODE_ENV') return 'production';
+                return null;
+              }),
+            },
+          },
+        ],
+      }).compile();
+
+      guard = module.get<MercadoPagoWebhookGuard>(MercadoPagoWebhookGuard);
+    });
+
+    it('should reject webhook with completely invalid signature', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const mockContext = createMockExecutionContext({
+        headers: {
+          'x-signature': 'ts=1234567890,v1=invalid-signature-fake',
+        },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow('Invalid webhook signature');
+    });
+
+    it('should reject webhook with wrong secret', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const { signature } = generateValidSignature(body, 'wrong-secret');
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': signature },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+    });
+
+    it('should reject webhook with modified body (firma no coincide)', () => {
+      // Arrange
+      const originalBody = createValidWebhookBody();
+      const { signature } = generateValidSignature(originalBody, TEST_SECRET);
+
+      // Modificar body después de firmar (ataque)
+      const modifiedBody = { ...originalBody, data: { id: 'hacked-payment-id' } };
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': signature },
+        body: modifiedBody,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+    });
+
+    it('should reject timing attack: signature with one character changed', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const { signature } = generateValidSignature(body, TEST_SECRET);
+
+      // Modificar último caracter de la firma (timing attack)
+      const tamperedSignature = signature.substring(0, signature.length - 1) + 'X';
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': tamperedSignature },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+    });
+
+    it('should reject signature with wrong format (missing ts)', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const mockContext = createMockExecutionContext({
+        headers: {
+          'x-signature': 'v1=abcdef123456', // Falta ts=
+        },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+    });
+
+    it('should reject signature with wrong format (missing v1)', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const mockContext = createMockExecutionContext({
+        headers: {
+          'x-signature': 'ts=1234567890', // Falta v1=
+        },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+    });
+
+    it('should reject signature with invalid timestamp (non-numeric)', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const mockContext = createMockExecutionContext({
+        headers: {
+          'x-signature': 'ts=invalid,v1=abcdef123456',
+        },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+    });
+
+    it('should reject signature with empty v1', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const mockContext = createMockExecutionContext({
+        headers: {
+          'x-signature': 'ts=1234567890,v1=',
+        },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('❌ Ataques de replay (timestamp expirado)', () => {
+    beforeEach(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          MercadoPagoWebhookGuard,
+          {
+            provide: ConfigService,
+            useValue: {
+              get: jest.fn((key: string) => {
+                if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return TEST_SECRET;
+                if (key === 'NODE_ENV') return 'production';
+                return null;
+              }),
+            },
+          },
+        ],
+      }).compile();
+
+      guard = module.get<MercadoPagoWebhookGuard>(MercadoPagoWebhookGuard);
+    });
+
+    it('should reject webhook with expired timestamp (6 minutes old)', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const oldTimestamp = Math.floor(Date.now() / 1000) - 360; // 6 minutos atrás
+      const { signature } = generateValidSignature(body, TEST_SECRET, oldTimestamp);
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': signature },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow('Timestamp expired');
+    });
+
+    it('should reject webhook with future timestamp (6 minutes ahead)', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const futureTimestamp = Math.floor(Date.now() / 1000) + 360; // 6 minutos adelante
+      const { signature } = generateValidSignature(body, TEST_SECRET, futureTimestamp);
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': signature },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+    });
+
+    it('should accept webhook with timestamp within 5 minutes', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const recentTimestamp = Math.floor(Date.now() / 1000) - 240; // 4 minutos atrás
+      const { signature } = generateValidSignature(body, TEST_SECRET, recentTimestamp);
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': signature },
+        body,
+      });
+
+      // Act & Assert
+      expect(guard.canActivate(mockContext)).toBe(true);
+    });
+  });
+
+  describe('❌ Headers faltantes', () => {
+    beforeEach(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          MercadoPagoWebhookGuard,
+          {
+            provide: ConfigService,
+            useValue: {
+              get: jest.fn((key: string) => {
+                if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return TEST_SECRET;
+                if (key === 'NODE_ENV') return 'production';
+                return null;
+              }),
+            },
+          },
+        ],
+      }).compile();
+
+      guard = module.get<MercadoPagoWebhookGuard>(MercadoPagoWebhookGuard);
+    });
+
+    it('should reject webhook without x-signature header', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const mockContext = createMockExecutionContext({
+        headers: {},
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+    });
+
+    it('should reject webhook with empty x-signature header', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': '' },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('❌ Body inválido', () => {
+    beforeEach(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          MercadoPagoWebhookGuard,
+          {
+            provide: ConfigService,
+            useValue: {
+              get: jest.fn((key: string) => {
+                if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return TEST_SECRET;
+                if (key === 'NODE_ENV') return 'production';
+                return null;
+              }),
+            },
+          },
+        ],
+      }).compile();
+
+      guard = module.get<MercadoPagoWebhookGuard>(MercadoPagoWebhookGuard);
+    });
+
+    it('should reject webhook with missing action field', () => {
+      // Arrange
+      const body = { ...createValidWebhookBody() };
+      delete (body as Record<string, string>).action;
+      const { signature } = generateValidSignature(body, TEST_SECRET);
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': signature },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow('missing fields');
+    });
+
+    it('should reject webhook with missing type field', () => {
+      // Arrange
+      const body = { ...createValidWebhookBody() };
+      delete (body as Record<string, string>).type;
+      const { signature } = generateValidSignature(body, TEST_SECRET);
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': signature },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+    });
+
+    it('should reject webhook with missing data.id', () => {
+      // Arrange
+      const body = { ...createValidWebhookBody(), data: {} };
+      const { signature } = generateValidSignature(body, TEST_SECRET);
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': signature },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow('data.id must be a string');
+    });
+
+    it('should reject webhook with empty type', () => {
+      // Arrange
+      const body = { ...createValidWebhookBody(), type: '' };
+      const { signature } = generateValidSignature(body, TEST_SECRET);
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': signature },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow('non-empty string');
+    });
+
+    it('should reject webhook with non-boolean live_mode', () => {
+      // Arrange
+      const body = { ...createValidWebhookBody(), live_mode: 'true' }; // String en vez de boolean
+      const { signature } = generateValidSignature(body, TEST_SECRET);
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': signature },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow('live_mode must be a boolean');
+    });
+
+    it('should reject webhook with invalid user_id type', () => {
+      // Arrange
+      const body = { ...createValidWebhookBody(), user_id: true }; // Boolean
+      const { signature } = generateValidSignature(body, TEST_SECRET);
+
+      const mockContext = createMockExecutionContext({
+        headers: { 'x-signature': signature },
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow('user_id must be a string or number');
+    });
+  });
+
+  describe('🚨 Producción sin secret', () => {
+    beforeEach(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          MercadoPagoWebhookGuard,
+          {
+            provide: ConfigService,
+            useValue: {
+              get: jest.fn((key: string) => {
+                if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return null; // Sin secret
+                if (key === 'NODE_ENV') return 'production';
+                return null;
+              }),
+            },
+          },
+        ],
+      }).compile();
+
+      guard = module.get<MercadoPagoWebhookGuard>(MercadoPagoWebhookGuard);
+    });
+
+    it('should reject all webhooks in production without secret', () => {
+      // Arrange
+      const body = createValidWebhookBody();
+      const mockContext = createMockExecutionContext({
+        headers: {},
+        body,
+      });
+
+      // Act & Assert
+      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow('Webhook secret not configured');
+    });
+  });
+
+  describe('⚠️ Desarrollo sin secret (permisivo)', () => {
+    beforeEach(async () => {
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          MercadoPagoWebhookGuard,
+          {
+            provide: ConfigService,
+            useValue: {
+              get: jest.fn((key: string) => {
+                if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return null; // Sin secret
                 if (key === 'NODE_ENV') return 'development';
                 return null;
               }),
@@ -261,196 +582,12 @@ describe('MercadoPagoWebhookGuard', () => {
       guard = module.get<MercadoPagoWebhookGuard>(MercadoPagoWebhookGuard);
     });
 
-    it('should allow webhook without secret in development mode', () => {
+    it('should allow all webhooks in development without secret (warning)', () => {
       // Arrange
+      const body = createValidWebhookBody();
       const mockContext = createMockExecutionContext({
         headers: {},
-        body: {
-          data: {
-            id: 'payment-123',
-          },
-        },
-      });
-
-      // Act
-      const result = guard.canActivate(mockContext);
-
-      // Assert - Debe permitir en desarrollo sin secret
-      expect(result).toBe(true);
-    });
-  });
-
-  describe('Production Mode - No secret configured', () => {
-    beforeEach(async () => {
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          MercadoPagoWebhookGuard,
-          {
-            provide: ConfigService,
-            useValue: {
-              get: jest.fn((key: string) => {
-                if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return null; // No secret
-                if (key === 'NODE_ENV') return 'production';
-                return null;
-              }),
-            },
-          },
-        ],
-      }).compile();
-
-      guard = module.get<MercadoPagoWebhookGuard>(MercadoPagoWebhookGuard);
-    });
-
-    it('should reject webhook without secret in production mode', () => {
-      // Arrange
-      const mockContext = createMockExecutionContext({
-        headers: {},
-        body: {
-          data: {
-            id: 'payment-123',
-          },
-        },
-      });
-
-      // Act & Assert - Debe rechazar en producción sin secret
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        UnauthorizedException,
-      );
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        'Webhook secret not configured',
-      );
-    });
-  });
-
-  describe('Error Handling', () => {
-    beforeEach(async () => {
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          MercadoPagoWebhookGuard,
-          {
-            provide: ConfigService,
-            useValue: {
-              get: jest.fn((key: string) => {
-                if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return TEST_SECRET;
-                if (key === 'NODE_ENV') return 'production';
-                return null;
-              }),
-            },
-          },
-        ],
-      }).compile();
-
-      guard = module.get<MercadoPagoWebhookGuard>(MercadoPagoWebhookGuard);
-    });
-
-    it('should handle crypto errors gracefully', () => {
-      // Arrange - Crear contexto con longitudes de firma inválidas
-      const mockContext = createMockExecutionContext({
-        headers: {
-          'x-signature': 'short', // Firma muy corta (causará error en timingSafeEqual)
-          'x-request-id': 'req-456',
-        },
-        body: {
-          data: {
-            id: 'payment-123',
-          },
-        },
-      });
-
-      // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        UnauthorizedException,
-      );
-      expect(() => guard.canActivate(mockContext)).toThrow(
-        'Webhook validation failed',
-      );
-    });
-  });
-
-  describe('Real MercadoPago Integration Scenarios', () => {
-    beforeEach(async () => {
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          MercadoPagoWebhookGuard,
-          {
-            provide: ConfigService,
-            useValue: {
-              get: jest.fn((key: string) => {
-                if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return TEST_SECRET;
-                if (key === 'NODE_ENV') return 'production';
-                return null;
-              }),
-            },
-          },
-        ],
-      }).compile();
-
-      guard = module.get<MercadoPagoWebhookGuard>(MercadoPagoWebhookGuard);
-    });
-
-    it('should validate webhook for payment.created event', () => {
-      // Arrange - Simular webhook real de payment.created
-      const dataId = '12345678';
-      const requestId = 'abc-def-ghi-123';
-      const manifest = `id:${dataId};request-id:${requestId};`;
-      const validSignature = crypto
-        .createHmac('sha256', TEST_SECRET)
-        .update(manifest)
-        .digest('hex');
-
-      const mockContext = createMockExecutionContext({
-        headers: {
-          'x-signature': validSignature,
-          'x-request-id': requestId,
-        },
-        body: {
-          action: 'payment.created',
-          api_version: 'v1',
-          data: {
-            id: dataId,
-          },
-          date_created: '2025-01-01T00:00:00Z',
-          id: 12345,
-          live_mode: true,
-          type: 'payment',
-          user_id: 123456,
-        },
-      });
-
-      // Act
-      const result = guard.canActivate(mockContext);
-
-      // Assert
-      expect(result).toBe(true);
-    });
-
-    it('should validate webhook for payment.updated event', () => {
-      // Arrange - Simular webhook real de payment.updated
-      const dataId = '87654321';
-      const requestId = 'xyz-123-456';
-      const manifest = `id:${dataId};request-id:${requestId};`;
-      const validSignature = crypto
-        .createHmac('sha256', TEST_SECRET)
-        .update(manifest)
-        .digest('hex');
-
-      const mockContext = createMockExecutionContext({
-        headers: {
-          'x-signature': validSignature,
-          'x-request-id': requestId,
-        },
-        body: {
-          action: 'payment.updated',
-          api_version: 'v1',
-          data: {
-            id: dataId,
-          },
-          date_created: '2025-01-01T00:00:00Z',
-          id: 67890,
-          live_mode: true,
-          type: 'payment',
-          user_id: 654321,
-        },
+        body,
       });
 
       // Act
@@ -467,7 +604,7 @@ describe('MercadoPagoWebhookGuard', () => {
  */
 function createMockExecutionContext(request: {
   headers: Record<string, string>;
-  body: any;
+  body: Record<string, string | number | boolean | Record<string, string>>;
 }): ExecutionContext {
   return {
     switchToHttp: () => ({
@@ -482,5 +619,5 @@ function createMockExecutionContext(request: {
     switchToRpc: jest.fn(),
     switchToWs: jest.fn(),
     getType: jest.fn(),
-  } as unknown as ExecutionContext;
+  } as ExecutionContext;
 }

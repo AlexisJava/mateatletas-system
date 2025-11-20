@@ -10,26 +10,60 @@ import { Request } from 'express';
 import * as crypto from 'crypto';
 
 /**
- * Guard para validar webhooks de MercadoPago usando firma HMAC
+ * Tipos seguros para la estructura de webhook de MercadoPago
+ */
+interface MercadoPagoWebhookBody {
+  action: string;
+  api_version: string;
+  data: {
+    id: string;
+  };
+  date_created: string;
+  id: string;
+  live_mode: boolean;
+  type: string;
+  user_id: string;
+}
+
+/**
+ * Resultado de la validación de firma
+ */
+interface SignatureValidationResult {
+  isValid: boolean;
+  timestamp: number;
+  signature: string;
+  reason?: string;
+}
+
+/**
+ * Guard para validar webhooks de MercadoPago usando formato oficial 2025
  *
  * Documentación oficial:
- * https://www.mercadopago.com.ar/developers/es/docs/your-integrations/notifications/webhooks#validar-origen
+ * https://www.mercadopago.com.ar/developers/es/docs/your-integrations/notifications/webhooks
  *
- * MercadoPago envía headers especiales:
- * - x-signature: Firma HMAC-SHA256
- * - x-request-id: ID único de la petición
+ * Formato de firma (2025):
+ * Header x-signature: "ts=1234567890,v1=abcdef123456..."
  *
  * Algoritmo de validación:
- * 1. Extraer data_id y x-request-id del request
- * 2. Construir string: data_id + x-request-id
- * 3. Calcular HMAC-SHA256 con secret
- * 4. Comparar con x-signature header
+ * 1. Extraer timestamp (ts) y firma (v1) del header x-signature
+ * 2. Validar que timestamp no esté expirado (max 5 minutos)
+ * 3. Construir payload: `${timestamp}.${JSON.stringify(body)}`
+ * 4. Calcular HMAC-SHA256 con secret
+ * 5. Comparación timing-safe con v1
+ * 6. Validar campos obligatorios: type, user_id, live_mode
+ *
+ * Seguridad:
+ * - ✅ Validación de timestamp para prevenir replay attacks
+ * - ✅ Comparación timing-safe para prevenir timing attacks
+ * - ✅ Validación de estructura de body
+ * - ✅ Modo estricto en producción
  */
 @Injectable()
 export class MercadoPagoWebhookGuard implements CanActivate {
   private readonly logger = new Logger(MercadoPagoWebhookGuard.name);
   private readonly webhookSecret: string | null;
   private readonly strictMode: boolean;
+  private readonly maxTimestampDiffSeconds = 300; // 5 minutos
 
   constructor(private configService: ConfigService) {
     this.webhookSecret =
@@ -51,7 +85,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
         );
       }
     } else {
-      this.logger.log('✅ Validación de firma de webhook habilitada');
+      this.logger.log('✅ Validación de firma de webhook habilitada (formato 2025)');
     }
   }
 
@@ -71,48 +105,27 @@ export class MercadoPagoWebhookGuard implements CanActivate {
     }
 
     try {
-      // Extraer headers de MercadoPago
-      const signature = request.headers['x-signature'] as string;
-      const requestId = request.headers['x-request-id'] as string;
+      // 1. Validar estructura del body
+      this.validateWebhookBody(request.body);
 
-      if (!signature || !requestId) {
-        this.logger.error(
-          'Headers de validación faltantes (x-signature, x-request-id)',
-        );
-        throw new UnauthorizedException('Invalid webhook headers');
-      }
-
-      // Extraer data.id del body
-      const dataId = request.body?.data?.id;
-      if (!dataId) {
-        this.logger.error('Webhook body sin data.id');
-        throw new UnauthorizedException('Invalid webhook body');
-      }
-
-      // Construir manifest (string a firmar)
-      const manifest = `id:${dataId};request-id:${requestId};`;
-
-      // Calcular HMAC-SHA256
-      const expectedSignature = crypto
-        .createHmac('sha256', this.webhookSecret)
-        .update(manifest)
-        .digest('hex');
-
-      // Comparación segura (timing-safe)
-      const isValid = crypto.timingSafeEqual(
-        Buffer.from(signature),
-        Buffer.from(expectedSignature),
+      // 2. Validar firma (formato 2025)
+      const validationResult = this.validateSignature(
+        request.headers['x-signature'] as string,
+        request.body,
       );
 
-      if (!isValid) {
+      if (!validationResult.isValid) {
         this.logger.error(
-          `Firma inválida: esperada=${expectedSignature.substring(0, 10)}..., recibida=${signature.substring(0, 10)}...`,
+          `❌ Firma inválida: ${validationResult.reason}`,
         );
         throw new UnauthorizedException('Invalid webhook signature');
       }
 
+      // 3. Validar timestamp (prevenir replay attacks)
+      this.validateTimestamp(validationResult.timestamp);
+
       this.logger.log(
-        `✅ Webhook validado: data_id=${dataId}, request_id=${requestId}`,
+        `✅ Webhook validado: type=${request.body.type}, data_id=${request.body.data?.id}, user_id=${request.body.user_id}`,
       );
       return true;
     } catch (error) {
@@ -120,9 +133,157 @@ export class MercadoPagoWebhookGuard implements CanActivate {
         throw error;
       }
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Error validando webhook: ${errorMessage}`);
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`❌ Error validando webhook: ${errorMessage}`);
       throw new UnauthorizedException('Webhook validation failed');
+    }
+  }
+
+  /**
+   * Valida la estructura del body del webhook
+   * @throws UnauthorizedException si la estructura es inválida
+   */
+  private validateWebhookBody(body: MercadoPagoWebhookBody): void {
+    if (!body || typeof body !== 'object') {
+      throw new UnauthorizedException('Invalid webhook body: not an object');
+    }
+
+    // Validar campos obligatorios
+    const requiredFields = ['action', 'api_version', 'data', 'date_created', 'id', 'live_mode', 'type', 'user_id'];
+    const missingFields = requiredFields.filter(field => !(field in body));
+
+    if (missingFields.length > 0) {
+      throw new UnauthorizedException(
+        `Invalid webhook body: missing fields ${missingFields.join(', ')}`
+      );
+    }
+
+    // Validar estructura de data
+    if (!body.data || typeof body.data !== 'object') {
+      throw new UnauthorizedException('Invalid webhook body: data must be an object');
+    }
+
+    const data = body.data as Record<string, unknown>;
+    if (!data.id || typeof data.id !== 'string') {
+      throw new UnauthorizedException('Invalid webhook body: data.id must be a string');
+    }
+
+    // Validar tipos
+    if (typeof body.type !== 'string' || body.type.length === 0) {
+      throw new UnauthorizedException('Invalid webhook body: type must be a non-empty string');
+    }
+
+    if (typeof body.user_id !== 'string' && typeof body.user_id !== 'number') {
+      throw new UnauthorizedException('Invalid webhook body: user_id must be a string or number');
+    }
+
+    if (typeof body.live_mode !== 'boolean') {
+      throw new UnauthorizedException('Invalid webhook body: live_mode must be a boolean');
+    }
+  }
+
+  /**
+   * Valida la firma del webhook (formato 2025: ts=...,v1=...)
+   *
+   * @param signatureHeader - Header x-signature con formato "ts=1234567890,v1=abcdef..."
+   * @param body - Body del webhook
+   * @returns Resultado de validación con timestamp y firma
+   */
+  private validateSignature(
+    signatureHeader: string | undefined,
+    body: MercadoPagoWebhookBody,
+  ): SignatureValidationResult {
+    if (!signatureHeader || typeof signatureHeader !== 'string') {
+      return {
+        isValid: false,
+        timestamp: 0,
+        signature: '',
+        reason: 'Missing or invalid x-signature header',
+      };
+    }
+
+    // Parsear header: "ts=1234567890,v1=abcdef..."
+    const parts = signatureHeader.split(',').map(part => part.trim());
+    const tsPart = parts.find(p => p.startsWith('ts='));
+    const v1Part = parts.find(p => p.startsWith('v1='));
+
+    if (!tsPart || !v1Part) {
+      return {
+        isValid: false,
+        timestamp: 0,
+        signature: '',
+        reason: 'Invalid x-signature format: expected ts=...,v1=...',
+      };
+    }
+
+    const timestamp = parseInt(tsPart.split('=')[1], 10);
+    const receivedSignature = v1Part.split('=')[1];
+
+    if (isNaN(timestamp) || timestamp <= 0) {
+      return {
+        isValid: false,
+        timestamp: 0,
+        signature: receivedSignature,
+        reason: 'Invalid timestamp in signature',
+      };
+    }
+
+    if (!receivedSignature || receivedSignature.length === 0) {
+      return {
+        isValid: false,
+        timestamp,
+        signature: '',
+        reason: 'Empty signature (v1)',
+      };
+    }
+
+    // Construir payload según spec oficial: timestamp + '.' + JSON body
+    const payload = `${timestamp}.${JSON.stringify(body)}`;
+
+    // Calcular HMAC-SHA256
+    const expectedSignature = crypto
+      .createHmac('sha256', this.webhookSecret as string)
+      .update(payload)
+      .digest('hex');
+
+    // Comparación timing-safe
+    try {
+      const isValid = crypto.timingSafeEqual(
+        Buffer.from(receivedSignature, 'hex'),
+        Buffer.from(expectedSignature, 'hex'),
+      );
+
+      return {
+        isValid,
+        timestamp,
+        signature: receivedSignature,
+        reason: isValid ? undefined : 'Signature mismatch',
+      };
+    } catch (error) {
+      // timingSafeEqual lanza si los buffers tienen diferente longitud
+      return {
+        isValid: false,
+        timestamp,
+        signature: receivedSignature,
+        reason: 'Signature length mismatch',
+      };
+    }
+  }
+
+  /**
+   * Valida que el timestamp no esté expirado (prevenir replay attacks)
+   *
+   * @param timestamp - Timestamp Unix en segundos
+   * @throws UnauthorizedException si el timestamp está expirado
+   */
+  private validateTimestamp(timestamp: number): void {
+    const now = Math.floor(Date.now() / 1000);
+    const diff = Math.abs(now - timestamp);
+
+    if (diff > this.maxTimestampDiffSeconds) {
+      throw new UnauthorizedException(
+        `Timestamp expired: diff=${diff}s, max=${this.maxTimestampDiffSeconds}s`
+      );
     }
   }
 }
