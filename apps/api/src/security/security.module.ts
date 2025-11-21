@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -6,6 +6,7 @@ import { TokenBlacklistGuard } from '../auth/guards/token-blacklist.guard';
 import { UserThrottlerGuard } from '../common/guards/user-throttler.guard';
 import { SecretRotationService } from './services/secret-rotation.service';
 import { DatabaseModule } from '../core/database/database.module';
+import { AuthModule } from '../auth/auth.module';
 
 /**
  * SecurityModule
@@ -23,6 +24,7 @@ import { DatabaseModule } from '../core/database/database.module';
 @Module({
   imports: [
     DatabaseModule, // Para PrismaService en SecretRotationService
+    forwardRef(() => AuthModule), // Para TokenBlacklistService
     ScheduleModule.forRoot(), // Para cronjobs de SecretRotationService
     // Rate Limiting: Protege contra brute force, DDoS y abuso de API
     // - Configurable via variables de entorno RATE_LIMIT_TTL y RATE_LIMIT_MAX
