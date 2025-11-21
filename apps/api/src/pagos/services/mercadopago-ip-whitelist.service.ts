@@ -53,6 +53,7 @@ export class MercadoPagoIpWhitelistService {
     '63.128.83.0/24',   // MercadoPago additional range (testing/sandbox)
     '63.128.94.0/24',   // MercadoPago additional range (testing/sandbox)
     '35.186.0.0/16',    // Google Cloud Platform (usado por MercadoPago webhooks)
+    '186.139.0.0/16',   // TEMPORAL: Para testing desde dashboard MP (REMOVER en producción)
   ];
 
   /**
