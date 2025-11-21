@@ -43,9 +43,12 @@ export class MercadoPagoIpWhitelistService {
    * Última actualización: Enero 2025
    */
   private readonly officialIpRanges: string[] = [
-    '209.225.49.0/24', // MercadoPago primary range
-    '216.33.197.0/24', // MercadoPago secondary range
-    '216.33.196.0/24', // MercadoPago tertiary range
+    '209.225.49.0/24',  // MercadoPago primary range
+    '216.33.197.0/24',  // MercadoPago secondary range
+    '216.33.196.0/24',  // MercadoPago tertiary range
+    '63.128.82.0/24',   // MercadoPago additional range (testing/sandbox)
+    '63.128.83.0/24',   // MercadoPago additional range (testing/sandbox)
+    '63.128.94.0/24',   // MercadoPago additional range (testing/sandbox)
   ];
 
   /**
