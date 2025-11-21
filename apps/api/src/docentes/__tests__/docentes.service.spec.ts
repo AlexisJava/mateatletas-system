@@ -90,7 +90,7 @@ describe('DocentesService', () => {
 
         // Hash password
         const passwordToHash = dto.password || generateSecurePassword();
-        const password_hash = await bcrypt.hash(passwordToHash, 10);
+        const password_hash = await bcrypt.hash(passwordToHash, 12);
 
         // Create docente
         const created = await prisma.docente.create({
@@ -191,7 +191,7 @@ describe('DocentesService', () => {
         // Hash password if provided
         let password_hash = existing.password_hash;
         if (dto.password) {
-          password_hash = await bcrypt.hash(dto.password, 10);
+          password_hash = await bcrypt.hash(dto.password, 12);
         }
 
         // Update
@@ -289,7 +289,7 @@ describe('DocentesService', () => {
       expect(result).not.toHaveProperty('password_hash'); // Security check
       expect(result).not.toHaveProperty('generatedPassword'); // Password was provided, not generated
       expect(result.nombre).toBe('Juan');
-      expect(bcrypt.hash).toHaveBeenCalledWith('SecurePass123!', 10); // BCRYPT_ROUNDS = 10
+      expect(bcrypt.hash).toHaveBeenCalledWith('SecurePass123!', 12); // BCRYPT_ROUNDS = 12 (NIST 2025)
       expect(prisma.docente.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           email: 'nuevo@test.com',
@@ -317,7 +317,7 @@ describe('DocentesService', () => {
 
       // Assert
       expect(generateSecurePassword).toHaveBeenCalled();
-      expect(bcrypt.hash).toHaveBeenCalledWith(generatedPassword, 10);
+      expect(bcrypt.hash).toHaveBeenCalledWith(generatedPassword, 12);
       expect(result).toHaveProperty('generatedPassword', generatedPassword); // Must return generated password
       expect(result).not.toHaveProperty('password_hash'); // Security check
       expect(prisma.docente.create).toHaveBeenCalledWith({
@@ -719,7 +719,7 @@ describe('DocentesService', () => {
       await service.update('docente-123', updateDtoWithPassword);
 
       // Assert
-      expect(bcrypt.hash).toHaveBeenCalledWith('NewSecurePass456!', 10);
+      expect(bcrypt.hash).toHaveBeenCalledWith('NewSecurePass456!', 12);
       expect(prisma.docente.update).toHaveBeenCalledWith({
         where: { id: 'docente-123' },
         data: expect.objectContaining({

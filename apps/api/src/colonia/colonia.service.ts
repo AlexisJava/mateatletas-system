@@ -475,7 +475,7 @@ export class ColoniaService {
 
     // 2. Cálculos
     const pricing = this.calculatePricing(dto);
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    const passwordHash = await bcrypt.hash(dto.password, 12);
 
     // 3. Transacción
     const result = await this.prisma.$transaction(async (tx) => {

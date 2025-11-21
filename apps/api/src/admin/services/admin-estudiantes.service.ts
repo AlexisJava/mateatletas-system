@@ -584,7 +584,7 @@ export class AdminEstudiantesService {
             telefono: dto.telefonoTutor,
             dni: dto.dniTutor,
             password_hash: tutorPasswordHash,
-            password_temporal: tutorPassword,
+            // password_temporal removido - solo se retorna en la respuesta
             debe_cambiar_password: true,
             debe_completar_perfil: false,
             roles: ['tutor'],
@@ -607,7 +607,7 @@ export class AdminEstudiantesService {
           nivelEscolar: dto.nivelEscolar,
           tutor_id: tutor.id,
           password_hash: estudiantePinHash,
-          password_temporal: estudiantePin,
+          // password_temporal removido - solo se retorna en la respuesta
           debe_cambiar_password: true,
           sector_id: dto.sectorId,
           equipoId: dto.equipoId || null,
@@ -634,22 +634,21 @@ export class AdminEstudiantesService {
   }
 
   /**
-   * Obtener listado de credenciales temporales de estudiantes y tutores
-   * que aún no han cambiado su contraseña
+   * Obtener listado de usuarios que aún no han cambiado su contraseña
+   *
+   * NOTA: Las passwords temporales ya NO se guardan en la BD por seguridad.
+   * Este método ahora solo lista usuarios pendientes de cambio de contraseña,
+   * pero NO puede mostrar las passwords (fueron entregadas solo al crear).
    */
   async obtenerCredencialesTemporales() {
-    // Obtener estudiantes con password temporal
+    // Obtener estudiantes pendientes de cambio de password
     const estudiantes = await this.prisma.estudiante.findMany({
       where: {
         debe_cambiar_password: true,
-        password_temporal: {
-          not: null,
-        },
       },
       select: {
         id: true,
         username: true,
-        password_temporal: true,
         nombre: true,
         apellido: true,
         createdAt: true,
@@ -671,18 +670,14 @@ export class AdminEstudiantesService {
       },
     });
 
-    // Obtener tutores con password temporal
+    // Obtener tutores pendientes de cambio de password
     const tutores = await this.prisma.tutor.findMany({
       where: {
         debe_cambiar_password: true,
-        password_temporal: {
-          not: null,
-        },
       },
       select: {
         id: true,
         username: true,
-        password_temporal: true,
         nombre: true,
         apellido: true,
         email: true,
@@ -697,7 +692,7 @@ export class AdminEstudiantesService {
     const estudiantesMapped = estudiantes.map((est) => ({
       id: est.id,
       username: est.username || '',
-      passwordTemporal: est.password_temporal || '',
+      passwordTemporal: '[NO DISPONIBLE - Ver respuesta de creación]',
       nombreCompleto: `${est.nombre} ${est.apellido}`,
       sector: est.sector?.nombre || 'Sin sector',
       rol: 'ESTUDIANTE',
@@ -710,7 +705,7 @@ export class AdminEstudiantesService {
     const tutoresMapped = tutores.map((tutor) => ({
       id: tutor.id,
       username: tutor.username || '',
-      passwordTemporal: tutor.password_temporal || '',
+      passwordTemporal: '[NO DISPONIBLE - Ver respuesta de creación]',
       nombreCompleto: `${tutor.nombre} ${tutor.apellido}`,
       sector: 'N/A',
       rol: 'TUTOR',

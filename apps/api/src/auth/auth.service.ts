@@ -39,7 +39,7 @@ const isAdminUser = (user: AuthenticatedUser): user is AdminModel =>
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private readonly BCRYPT_ROUNDS = 10;
+  private readonly BCRYPT_ROUNDS = 12; // ✅ NIST SP 800-63B 2025 (updated from 10)
 
   constructor(
     private prisma: PrismaService,
@@ -370,6 +370,9 @@ export class AuthService {
   /**
    * Valida un usuario por email y password
    * Método auxiliar usado por estrategias de autenticación
+   *
+   * ✅ SECURITY ENHANCEMENT: Rehashes passwords with old rounds (gradual migration)
+   *
    * @param email - Email del tutor
    * @param password - Contraseña en texto plano
    * @returns Tutor si es válido, null si no
@@ -393,6 +396,27 @@ export class AuthService {
         return null;
       }
 
+      // ✅ SECURITY: Rehash password if using old rounds (gradual migration)
+      const currentRounds = this.getRoundsFromHash(tutor.password_hash);
+      if (currentRounds < this.BCRYPT_ROUNDS) {
+        this.logger.log(
+          `Rehashing password for tutor ${tutor.id} from ${currentRounds} to ${this.BCRYPT_ROUNDS} rounds`
+        );
+
+        const newHash = await bcrypt.hash(password, this.BCRYPT_ROUNDS);
+
+        // Update hash in database (non-blocking, fire-and-forget)
+        this.prisma.tutor.update({
+          where: { id: tutor.id },
+          data: { password_hash: newHash }
+        }).catch(error => {
+          this.logger.error(
+            `Failed to rehash password for tutor ${tutor.id}`,
+            error instanceof Error ? error.stack : error
+          );
+        });
+      }
+
       // Retornar tutor sin password_hash
       const { password_hash, ...result } = tutor;
       void password_hash;
@@ -401,6 +425,30 @@ export class AuthService {
       // Log del error sin exponer detalles al cliente
       this.logger.error('Error en validateUser', error instanceof Error ? error.stack : error);
       return null;
+    }
+  }
+
+  /**
+   * Extrae el número de rounds de un hash de bcrypt
+   *
+   * Formato de bcrypt hash: $2b$XX$... donde XX es el número de rounds
+   * Ejemplo: $2b$12$abcdef... -> 12 rounds
+   *
+   * @param hash - Hash de bcrypt
+   * @returns Número de rounds usado en el hash
+   * @private
+   */
+  private getRoundsFromHash(hash: string): number {
+    try {
+      const parts = hash.split('$');
+      if (parts.length < 3) {
+        this.logger.warn(`Invalid bcrypt hash format: ${hash.substring(0, 10)}...`);
+        return 0;
+      }
+      return parseInt(parts[2], 10);
+    } catch (error) {
+      this.logger.error('Error extracting rounds from hash', error instanceof Error ? error.stack : error);
+      return 0;
     }
   }
 

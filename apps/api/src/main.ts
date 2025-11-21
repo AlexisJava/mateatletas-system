@@ -74,7 +74,12 @@ async function bootstrap() {
   const allowedOrigins = isProduction
     ? frontendUrls.length > 0
       ? frontendUrls
-      : ['*'] // Fallback temporal si no hay URLs configuradas
+      : (() => {
+          logger.error('❌ CRITICAL: FRONTEND_URL is not set in production!');
+          logger.error('❌ CORS will block ALL origins for security.');
+          logger.error('❌ Set FRONTEND_URL environment variable to enable CORS.');
+          return []; // Bloquear TODOS los orígenes si no hay config en producción
+        })()
     : [
         'http://localhost:3000',
         'http://localhost:3001',

@@ -124,6 +124,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
             tutor: {
               findUnique: jest.fn(),
               create: jest.fn(),
+              update: jest.fn(),
             },
             docente: {
               findUnique: jest.fn(),
@@ -232,7 +233,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       await service.register(registerDto);
 
       // Assert
-      expect(bcrypt.hash).toHaveBeenCalledWith('PlainTextPassword123!', 10);
+      expect(bcrypt.hash).toHaveBeenCalledWith('PlainTextPassword123!', 12);
     });
 
     it('should throw ConflictException when email already exists', async () => {
@@ -556,6 +557,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       // Arrange
       jest
         .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'update')
         .mockResolvedValue(mockTutor as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 

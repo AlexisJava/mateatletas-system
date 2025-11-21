@@ -148,7 +148,7 @@ export class MfaController {
     // Hash backup codes antes de guardar
     const bcrypt = require('bcrypt');
     const hashedBackupCodes = await Promise.all(
-      backupCodes.map(async (code) => bcrypt.hash(code, 10)),
+      backupCodes.map(async (code) => bcrypt.hash(code, 12)),
     );
 
     await this.mfaService.enableMfa(userId, secret, token, hashedBackupCodes);

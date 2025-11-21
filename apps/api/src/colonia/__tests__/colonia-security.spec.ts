@@ -153,7 +153,7 @@ describe('ColoniaService - Security Tests', () => {
       await service.createInscription(dto);
 
       // Assert
-      expect(bcrypt.hash).toHaveBeenCalledWith('MySecurePassword123!', 10);
+      expect(bcrypt.hash).toHaveBeenCalledWith('MySecurePassword123!', 12);
     });
 
     it('NUNCA debe retornar password_hash en la respuesta', async () => {
@@ -226,7 +226,7 @@ describe('ColoniaService - Security Tests', () => {
       expect(JSON.stringify(result)).not.toContain('hashed_password');
     });
 
-    it('debe usar salt rounds = 10 para bcrypt', async () => {
+    it('debe usar salt rounds = 12 para bcrypt (NIST 2025)', async () => {
       // Arrange
       const dto: CreateInscriptionDto = {
         nombre: 'Juan',

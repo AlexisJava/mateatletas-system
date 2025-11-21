@@ -101,11 +101,11 @@ export class TutorCreationService {
    * @example
    * ```typescript
    * const hash = await hashPassword('SecurePass123');
-   * // Returns: '$2b$10$...'
+   * // Returns: '$2b$12$...'
    * ```
    */
   async hashPassword(password: string): Promise<string> {
-    return await bcrypt.hash(password, 10);
+    return await bcrypt.hash(password, 12);
   }
 
   /**

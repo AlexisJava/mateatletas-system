@@ -173,7 +173,7 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
       // Esperamos que se guarde la password temporal del tutor
     });
 
-    it('debería hashear la password incluso cuando se guarda la temporal', async () => {
+    it('debería hashear la password pero NO guardar password_temporal en DB', async () => {
       // Arrange
       const mockSector = {
         id: 'sector123',
@@ -211,7 +211,7 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
         });
 
       // Act
-      await service.crearEstudianteConCredenciales({
+      const resultado = await service.crearEstudianteConCredenciales({
         nombreEstudiante: 'Juan',
         apellidoEstudiante: 'Pérez',
         edadEstudiante: 10,
@@ -221,22 +221,12 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
         apellidoTutor: 'Pérez',
       });
 
-      // Assert
+      // Assert - password_hash debe existir pero password_temporal NO
       expect(estudianteCreateData.password_hash).toBeDefined();
-      expect(estudianteCreateData.password_temporal).toBeDefined();
-      expect(estudianteCreateData.password_hash).not.toBe(
-        estudianteCreateData.password_temporal,
-      );
+      expect(estudianteCreateData.password_temporal).toBeUndefined();
 
-      // Verificar que es un hash bcrypt válido
-      const pinTemporal = estudianteCreateData.password_temporal;
-      const esHashValido = await bcrypt.compare(
-        pinTemporal,
-        estudianteCreateData.password_hash,
-      );
-
-      // Este test debería PASAR una vez implementemos la lógica
-      expect(esHashValido).toBe(true);
+      // Verificar que la password temporal se retorna en la respuesta
+      expect(resultado.credencialesEstudiante.pin).toBeDefined();
     });
 
     it('debería marcar debe_cambiar_password como true por defecto', async () => {
@@ -325,13 +315,13 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
       }).rejects.toThrow();
     });
 
-    it('debería incluir información del estudiante y sector', async () => {
+    it('debería mostrar mensaje de NO DISPONIBLE para password_temporal', async () => {
       // Arrange
       const mockEstudiantes = [
         {
           id: 'est1',
           username: 'juan.perez.abc1',
-          password_temporal: '1234',
+          password_temporal: null, // Ya no se guarda en DB
           debe_cambiar_password: true,
           nombre: 'Juan',
           apellido: 'Pérez',
@@ -358,7 +348,7 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
       expect(resultado[0].nombreCompleto).toBe('Juan Pérez');
       expect(resultado[0].sector).toBe('Matemática');
       expect(resultado[0].rol).toBe('ESTUDIANTE');
-      expect(resultado[0].passwordTemporal).toBe('1234');
+      expect(resultado[0].passwordTemporal).toBe('[NO DISPONIBLE - Ver respuesta de creación]');
     });
   });
 });

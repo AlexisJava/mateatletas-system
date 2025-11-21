@@ -32,7 +32,7 @@ describe('TutorCreationService', () => {
 
     // Reset mocks
     jest.clearAllMocks();
-    (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$10$hashedPassword');
+    (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$12$hashedPassword');
   });
 
   describe('validateUniqueEmail', () => {
@@ -90,8 +90,8 @@ describe('TutorCreationService', () => {
       const password = 'SecurePass123';
       const hash = await service.hashPassword(password);
 
-      expect(hash).toBe('$2b$10$hashedPassword');
-      expect(bcrypt.hash).toHaveBeenCalledWith(password, 10);
+      expect(hash).toBe('$2b$12$hashedPassword');
+      expect(bcrypt.hash).toHaveBeenCalledWith(password, 12);
     });
   });
 
@@ -114,7 +114,7 @@ describe('TutorCreationService', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$10$hashedPassword');
+      (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$12$hashedPassword');
     });
 
     it('debe crear tutor con datos normalizados', async () => {
@@ -123,8 +123,8 @@ describe('TutorCreationService', () => {
         ...tutorData,
         email: tutorData.email.toLowerCase(),
         username: 'juan',
-        password: '$2b$10$hashedPassword',
-        rol: 'TUTOR',
+        password_hash: '$2b$12$hashedPassword',
+        roles: ['TUTOR'],
       };
 
       mockTx.tutor.create.mockResolvedValue(mockCreatedTutor);
@@ -134,19 +134,19 @@ describe('TutorCreationService', () => {
       expect(mockTx.tutor.create).toHaveBeenCalledWith({
         data: {
           nombre: 'Juan Pérez',
+          apellido: '',
           email: 'juan@example.com',
           username: 'juan',
-          password: '$2b$10$hashedPassword',
+          password_hash: '$2b$12$hashedPassword',
           telefono: '1234567890',
           cuil: '20123456789',
           dni: '12345678',
-          ciudad: 'Buenos Aires',
-          rol: 'TUTOR',
+          roles: ['TUTOR'],
         },
       });
 
       expect(result).toEqual(mockCreatedTutor);
-      expect(bcrypt.hash).toHaveBeenCalledWith('SecurePass123', 10);
+      expect(bcrypt.hash).toHaveBeenCalledWith('SecurePass123', 12);
     });
 
     it('debe normalizar email a lowercase', async () => {
@@ -190,7 +190,7 @@ describe('TutorCreationService', () => {
       expect(mockTx.tutor.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            rol: 'TUTOR',
+            roles: ['TUTOR'],
           }),
         }),
       );
@@ -213,7 +213,6 @@ describe('TutorCreationService', () => {
         expect.objectContaining({
           data: expect.objectContaining({
             dni: undefined,
-            ciudad: undefined,
           }),
         }),
       );
@@ -238,7 +237,7 @@ describe('TutorCreationService', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$10$hashedPassword');
+      (bcrypt.hash as jest.Mock).mockResolvedValue('$2b$12$hashedPassword');
     });
 
     it('debe retornar tutor existente si ya existe', async () => {
@@ -269,7 +268,7 @@ describe('TutorCreationService', () => {
         nombre: 'Juan Pérez',
         email: 'juan@example.com',
         username: 'juan',
-        password: '$2b$10$hashedPassword',
+        password_hash: '$2b$12$hashedPassword',
         telefono: '1234567890',
         cuil: '20123456789',
         rol: 'TUTOR',

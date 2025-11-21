@@ -387,7 +387,7 @@ export class Inscripciones2026Service {
           edad: estudianteDto.edad,
           nivelEscolar: 'Primaria',
           username,
-          password_hash: await bcrypt.hash(pin, 10),
+          password_hash: await bcrypt.hash(pin, 12),
           debe_cambiar_password: true,
           roles: DEFAULT_ROLES.ESTUDIANTE,
         },

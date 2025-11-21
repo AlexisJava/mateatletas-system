@@ -53,8 +53,9 @@ export function generarPasswordTemporal(): string {
 
 /**
  * Hashea una contraseña usando bcrypt
+ * ✅ SECURITY: Uses 12 rounds (NIST SP 800-63B 2025)
  */
 export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 10;
+  const saltRounds = 12; // ✅ Updated from 10 to 12 (2025-11-21)
   return await bcrypt.hash(password, saltRounds);
 }

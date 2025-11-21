@@ -327,7 +327,7 @@ export class EstudianteCommandService {
           username: usernameTutor,
           email: dto.tutor.email,
           password_hash: passwordHash,
-          password_temporal: passwordTutor,
+          // password_temporal removido - solo se retorna en la respuesta
           debe_cambiar_password: true,
         },
       });
@@ -359,7 +359,7 @@ export class EstudianteCommandService {
               email: estDto.email,
               username: usernameEstudiante,
               password_hash: passwordHash,
-              password_temporal: passwordEstudiante,
+              // password_temporal removido - solo se retorna en la respuesta
               debe_cambiar_password: true,
               tutor_id: tutor!.id,
               sector_id: dto.sectorId,

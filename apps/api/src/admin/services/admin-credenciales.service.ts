@@ -105,7 +105,7 @@ export class AdminCredencialesService {
               where: { id: usuarioId },
               data: {
                 password_hash: hashedPassword,
-                password_temporal: nuevaPassword,
+                // password_temporal removido - solo se retorna en la respuesta
                 debe_cambiar_password: true,
               },
               select: {
@@ -122,7 +122,7 @@ export class AdminCredencialesService {
               where: { id: usuarioId },
               data: {
                 password_hash: hashedPassword,
-                password_temporal: nuevaPassword,
+                // password_temporal removido - solo se retorna en la respuesta
                 debe_cambiar_password: true,
               },
               select: {
@@ -139,7 +139,7 @@ export class AdminCredencialesService {
               where: { id: usuarioId },
               data: {
                 password_hash: hashedPassword,
-                password_temporal: nuevaPassword,
+                // password_temporal removido - solo se retorna en la respuesta
                 debe_cambiar_password: true,
               },
               select: {

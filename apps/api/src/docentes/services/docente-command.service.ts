@@ -50,8 +50,7 @@ export class DocenteCommandService {
       data: {
         email: createDto.email,
         password_hash: hashedPassword,
-        // Guardar contraseña temporal solo si se auto-generó
-        password_temporal: wasGenerated ? password : null,
+        // password_temporal removido - solo se retorna en la respuesta
         nombre: createDto.nombre,
         apellido: createDto.apellido,
         titulo: createDto.titulo,

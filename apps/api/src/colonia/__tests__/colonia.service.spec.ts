@@ -590,7 +590,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
       expect(result.pago.descuento).toBe(20);
     });
 
-    it('debe hashear password con bcrypt (salt rounds = 10)', async () => {
+    it('debe hashear password con bcrypt (salt rounds = 12 - NIST 2025)', async () => {
       // Arrange
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
@@ -633,7 +633,7 @@ describe('ColoniaService - COMPREHENSIVE TESTS', () => {
       await service.createInscription(validDto);
 
       // Assert
-      expect(bcrypt.hash).toHaveBeenCalledWith('Password123', 10);
+      expect(bcrypt.hash).toHaveBeenCalledWith('Password123', 12);
     });
 
     it('debe crear tutor con estructura de datos correcta', async () => {
