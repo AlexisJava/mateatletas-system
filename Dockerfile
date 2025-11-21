@@ -52,7 +52,8 @@ ENV NODE_ENV=production
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/contracts/package.json ./packages/contracts/
-RUN yarn workspaces focus api --production
+# Skip postinstall en producción (prisma generate ya se ejecutó en builder)
+RUN yarn workspaces focus api --production --ignore-scripts
 
 # Copiar schema y Prisma Client GENERADO desde builder
 COPY --from=builder /monorepo/apps/api/prisma ./apps/api/prisma
