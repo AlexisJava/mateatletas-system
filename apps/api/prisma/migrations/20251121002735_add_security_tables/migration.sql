@@ -1,5 +1,5 @@
 -- CreateTable: audit_logs
-CREATE TABLE IF NOT EXISTS "audit_logs" (
+CREATE TABLE "audit_logs" (
     "id" TEXT NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "user_id" TEXT,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS "audit_logs" (
 );
 
 -- CreateTable: secret_rotations
-CREATE TABLE IF NOT EXISTS "secret_rotations" (
+CREATE TABLE "secret_rotations" (
     "id" TEXT NOT NULL,
     "secret_type" TEXT NOT NULL,
     "version" INTEGER NOT NULL,
@@ -37,14 +37,14 @@ CREATE TABLE IF NOT EXISTS "secret_rotations" (
 );
 
 -- CreateIndex
-CREATE INDEX IF NOT EXISTS "audit_logs_timestamp_idx" ON "audit_logs"("timestamp");
-CREATE INDEX IF NOT EXISTS "audit_logs_user_id_idx" ON "audit_logs"("user_id");
-CREATE INDEX IF NOT EXISTS "audit_logs_action_idx" ON "audit_logs"("action");
-CREATE INDEX IF NOT EXISTS "audit_logs_entity_type_idx" ON "audit_logs"("entity_type");
-CREATE INDEX IF NOT EXISTS "audit_logs_entity_id_idx" ON "audit_logs"("entity_id");
-CREATE INDEX IF NOT EXISTS "audit_logs_category_idx" ON "audit_logs"("category");
-CREATE INDEX IF NOT EXISTS "audit_logs_severity_idx" ON "audit_logs"("severity");
+CREATE INDEX "audit_logs_timestamp_idx" ON "audit_logs"("timestamp");
+CREATE INDEX "audit_logs_user_id_idx" ON "audit_logs"("user_id");
+CREATE INDEX "audit_logs_action_idx" ON "audit_logs"("action");
+CREATE INDEX "audit_logs_entity_type_idx" ON "audit_logs"("entity_type");
+CREATE INDEX "audit_logs_entity_id_idx" ON "audit_logs"("entity_id");
+CREATE INDEX "audit_logs_category_idx" ON "audit_logs"("category");
+CREATE INDEX "audit_logs_severity_idx" ON "audit_logs"("severity");
 
-CREATE INDEX IF NOT EXISTS "secret_rotations_secret_type_idx" ON "secret_rotations"("secret_type");
-CREATE INDEX IF NOT EXISTS "secret_rotations_status_idx" ON "secret_rotations"("status");
-CREATE UNIQUE INDEX IF NOT EXISTS "secret_rotations_secret_type_version_key" ON "secret_rotations"("secret_type", "version");
+CREATE INDEX "secret_rotations_secret_type_idx" ON "secret_rotations"("secret_type");
+CREATE INDEX "secret_rotations_status_idx" ON "secret_rotations"("status");
+CREATE UNIQUE INDEX "secret_rotations_secret_type_version_key" ON "secret_rotations"("secret_type", "version");
