@@ -97,7 +97,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
   }
 
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<Request & { rawBody?: string }>();
 
     // 0. Validar IP del cliente (primera línea de defensa)
     const clientIp = this.ipWhitelistService.extractRealIp(
@@ -136,10 +136,11 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       // 1. Validar estructura del body
       this.validateWebhookBody(request.body);
 
-      // 2. Validar firma (formato 2025)
+      // 2. Validar firma (formato 2025) usando raw body
       const validationResult = this.validateSignature(
         request.headers['x-signature'] as string,
         request.body,
+        request.rawBody,
       );
 
       if (!validationResult.isValid) {
@@ -214,12 +215,14 @@ export class MercadoPagoWebhookGuard implements CanActivate {
    * Valida la firma del webhook (formato 2025: ts=...,v1=...)
    *
    * @param signatureHeader - Header x-signature con formato "ts=1234567890,v1=abcdef..."
-   * @param body - Body del webhook
+   * @param body - Body del webhook (parseado)
+   * @param rawBody - Raw body string (sin parsear, para validar firma)
    * @returns Resultado de validación con timestamp y firma
    */
   private validateSignature(
     signatureHeader: string | undefined,
     body: MercadoPagoWebhookBody,
+    rawBody?: string,
   ): SignatureValidationResult {
     if (!signatureHeader || typeof signatureHeader !== 'string') {
       return {
@@ -265,13 +268,16 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       };
     }
 
-    // Construir payload según spec oficial: timestamp + '.' + JSON body
-    const payload = `${timestamp}.${JSON.stringify(body)}`;
+    // Construir payload según spec oficial: timestamp + '.' + raw body (sin parsear)
+    // CRITICAL: Usar rawBody en lugar de JSON.stringify(body) para evitar cambios en el orden de claves
+    const bodyString = rawBody || JSON.stringify(body);
+    const payload = `${timestamp}.${bodyString}`;
 
     // DEBUG: Log para ver qué estamos calculando
     this.logger.debug(`🔍 DEBUG Webhook Signature Validation:`);
     this.logger.debug(`  - Timestamp: ${timestamp}`);
-    this.logger.debug(`  - Body: ${JSON.stringify(body)}`);
+    this.logger.debug(`  - Using raw body: ${rawBody ? 'YES ✅' : 'NO ❌ (fallback to JSON.stringify)'}`);
+    this.logger.debug(`  - Body string (first 200 chars): ${bodyString.substring(0, 200)}...`);
     this.logger.debug(`  - Payload: ${payload.substring(0, 200)}...`);
     this.logger.debug(`  - Secret (primeros 10 chars): ${(this.webhookSecret as string).substring(0, 10)}...`);
     this.logger.debug(`  - Received signature: ${receivedSignature}`);

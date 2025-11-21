@@ -19,6 +19,22 @@ async function bootstrap() {
   const logger = app.get(LoggerService);
   logger.log('🚀 Iniciando aplicación Mateatletas API...');
 
+  // Raw body middleware for webhook signature validation
+  // DEBE ir ANTES del JSON parser global
+  app.use(
+    '/api/pagos/webhook',
+    (req: any, res: any, next: any) => {
+      let rawBody = '';
+      req.on('data', (chunk: Buffer) => {
+        rawBody += chunk.toString();
+      });
+      req.on('end', () => {
+        req.rawBody = rawBody;
+        next();
+      });
+    },
+  );
+
   // Cookie parser middleware (debe ir ANTES de las rutas)
   app.use(cookieParser());
 
