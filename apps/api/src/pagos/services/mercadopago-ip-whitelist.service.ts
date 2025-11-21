@@ -40,6 +40,9 @@ export class MercadoPagoIpWhitelistService {
    * Rangos de IP oficiales de MercadoPago (CIDR notation)
    * Fuente oficial: https://www.mercadopago.com.ar/developers/es/docs/your-integrations/notifications/webhooks
    *
+   * NOTA: MercadoPago usa Google Cloud Platform (GCP) para webhooks,
+   * por lo que algunas IPs provienen de rangos de GCP.
+   *
    * Última actualización: Enero 2025
    */
   private readonly officialIpRanges: string[] = [
@@ -49,6 +52,7 @@ export class MercadoPagoIpWhitelistService {
     '63.128.82.0/24',   // MercadoPago additional range (testing/sandbox)
     '63.128.83.0/24',   // MercadoPago additional range (testing/sandbox)
     '63.128.94.0/24',   // MercadoPago additional range (testing/sandbox)
+    '35.186.0.0/16',    // Google Cloud Platform (usado por MercadoPago webhooks)
   ];
 
   /**
