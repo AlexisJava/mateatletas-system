@@ -4,8 +4,10 @@ import { ColoniaController } from './colonia.controller';
 import { ColoniaService } from './colonia.service';
 import { MercadoPagoService } from '../pagos/mercadopago.service';
 import { ConfigService } from '@nestjs/config';
+import { PagosModule } from '../pagos/pagos.module';
 
 @Module({
+  imports: [PagosModule], // Importar PagosModule para MercadoPagoIpWhitelistService
   controllers: [ColoniaController],
   providers: [
     ColoniaService,
