@@ -32,6 +32,7 @@ CREATE TABLE "secret_rotations" (
     "rotated_at" TIMESTAMP(3),
     "rotated_by" TEXT,
     "notes" TEXT,
+    "metadata" JSONB,
 
     CONSTRAINT "secret_rotations_pkey" PRIMARY KEY ("id")
 );
