@@ -268,11 +268,21 @@ export class MercadoPagoWebhookGuard implements CanActivate {
     // Construir payload según spec oficial: timestamp + '.' + JSON body
     const payload = `${timestamp}.${JSON.stringify(body)}`;
 
+    // DEBUG: Log para ver qué estamos calculando
+    this.logger.debug(`🔍 DEBUG Webhook Signature Validation:`);
+    this.logger.debug(`  - Timestamp: ${timestamp}`);
+    this.logger.debug(`  - Body: ${JSON.stringify(body)}`);
+    this.logger.debug(`  - Payload: ${payload.substring(0, 200)}...`);
+    this.logger.debug(`  - Secret (primeros 10 chars): ${(this.webhookSecret as string).substring(0, 10)}...`);
+    this.logger.debug(`  - Received signature: ${receivedSignature}`);
+
     // Calcular HMAC-SHA256
     const expectedSignature = crypto
       .createHmac('sha256', this.webhookSecret as string)
       .update(payload)
       .digest('hex');
+
+    this.logger.debug(`  - Expected signature: ${expectedSignature}`);
 
     // Comparación timing-safe
     try {
