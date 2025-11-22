@@ -3075,6 +3075,9 @@ model PagoInscripcion2026 {
   /// Timestamp de procesamiento del webhook (para idempotencia)
   processed_at DateTime?
 
+  /// IP desde donde se originó el pago (para detección de fraude)
+  ip_address String?
+
   /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

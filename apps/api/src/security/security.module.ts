@@ -5,8 +5,10 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TokenBlacklistGuard } from '../auth/guards/token-blacklist.guard';
 import { UserThrottlerGuard } from '../common/guards/user-throttler.guard';
 import { SecretRotationService } from './services/secret-rotation.service';
+import { FraudDetectionService } from './fraud-detection.service';
 import { DatabaseModule } from '../core/database/database.module';
 import { AuthModule } from '../auth/auth.module';
+import { AuditModule } from '../audit/audit.module';
 
 /**
  * SecurityModule
@@ -24,6 +26,7 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   imports: [
     DatabaseModule, // Para PrismaService en SecretRotationService
+    AuditModule, // Para AuditLogService en FraudDetectionService
     forwardRef(() => AuthModule), // Para TokenBlacklistService
     ScheduleModule.forRoot(), // Para cronjobs de SecretRotationService
     // Rate Limiting: Protege contra brute force, DDoS y abuso de API
@@ -44,6 +47,9 @@ import { AuthModule } from '../auth/auth.module';
     // Servicio de rotación automática de secrets críticos
     // Monitorea JWT_SECRET y WEBHOOK_SECRET cada 90 días
     SecretRotationService,
+    // Servicio de detección de fraude (PASO 2.3)
+    // Detecta patrones sospechosos en pagos e inscripciones
+    FraudDetectionService,
     // ✅ SECURITY FIX: CSRF removido de guards globales
     // CSRF es ahora opt-in con @RequireCsrf() decorator
     // Esto permite webhooks, API calls, y Postman sin bloqueos
@@ -63,5 +69,6 @@ import { AuthModule } from '../auth/auth.module';
       useClass: UserThrottlerGuard,
     },
   ],
+  exports: [FraudDetectionService], // Exportar para uso en otros módulos (ej: Inscripciones2026Module)
 })
 export class SecurityModule {}
