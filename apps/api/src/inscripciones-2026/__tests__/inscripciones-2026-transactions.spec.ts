@@ -7,6 +7,8 @@ import { PricingCalculatorService } from '../../domain/services/pricing-calculat
 import { PinGeneratorService } from '../../shared/services/pin-generator.service';
 import { TutorCreationService } from '../../shared/services/tutor-creation.service';
 import { MercadoPagoWebhookProcessorService } from '../../shared/services/mercadopago-webhook-processor.service';
+import { WebhookIdempotencyService } from '../../pagos/services/webhook-idempotency.service';
+import { PaymentAmountValidatorService } from '../../pagos/services/payment-amount-validator.service';
 import { BadRequestException, InternalServerErrorException, ConflictException } from '@nestjs/common';
 import { TipoInscripcion2026 } from '../dto/create-inscripcion-2026.dto';
 
@@ -287,6 +289,19 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
           useValue: {
             hashPassword: jest.fn().mockResolvedValue('$2b$10$hashedpassword'),
             validateUniqueEmail: jest.fn(),
+          },
+        },
+        {
+          provide: WebhookIdempotencyService,
+          useValue: {
+            checkIdempotency: jest.fn().mockResolvedValue({ isProcessed: false }),
+            markAsProcessed: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: PaymentAmountValidatorService,
+          useValue: {
+            validatePaymentAmount: jest.fn().mockResolvedValue({ isValid: true }),
           },
         },
         MercadoPagoWebhookProcessorService,

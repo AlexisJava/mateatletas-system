@@ -156,10 +156,10 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
    * @param throttlerLimitDetail - Detalles del límite excedido
    * @returns Mensaje de error descriptivo
    */
-  protected getErrorMessage(
+  protected async getErrorMessage(
     context: ExecutionContext,
     throttlerLimitDetail: ThrottlerLimitDetail,
-  ): string {
+  ): Promise<string> {
     const request = context.switchToHttp().getRequest<{
       ip: string;
     }>();
