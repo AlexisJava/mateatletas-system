@@ -2,7 +2,7 @@
 
 ## Contexto General
 
-Soy desarrollador del proyecto **Mateatletas Ecosystem**, un sistema de gestión para una academia deportiva. Hemos completado dos sprints importantes:
+Soy desarrollador del proyecto **Mateatletas Ecosystem**, una plataforma educativa de matemáticas con gamificación, gestión de clases y múltiples portales. Hemos completado dos sprints importantes:
 
 - **Sprint 1:** Correcciones Críticas de Seguridad (7 vulnerabilidades resueltas)
 - **Sprint 2:** Mejoras de Seguridad Adicionales (rate limiting, auditoría, alertas, monitoreo)

@@ -2,7 +2,7 @@
 
 ## Contexto General
 
-Soy desarrollador del proyecto **Mateatletas Ecosystem**, un sistema de gestión para una academia deportiva. Acabamos de completar el **Sprint 1: Correcciones Críticas de Seguridad** donde resolvimos 7 vulnerabilidades críticas en el módulo de inscripciones 2026.
+Soy desarrollador del proyecto **Mateatletas Ecosystem**, una plataforma educativa de matemáticas con gamificación, gestión de clases y múltiples portales. Acabamos de completar el **Sprint 1: Correcciones Críticas de Seguridad** donde resolvimos 7 vulnerabilidades críticas en el módulo de inscripciones 2026.
 
 **IMPORTANTE:** Antes de comenzar, lee la documentación completa del Sprint 1:
 - Archivo: `docs/SPRINT-1-CORRECCIONES-CRITICAS.md`
