@@ -1,5 +1,6 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
+import { RedisService } from '../../core/redis/redis.service';
 
 /**
  * Resultado de validación de monto
@@ -50,10 +51,17 @@ export class PaymentAmountValidatorService {
   // Tolerancia de 1% para diferencias por redondeo
   private readonly TOLERANCE_PERCENTAGE = 0.01;
 
-  constructor(private readonly prisma: PrismaService) {}
+  // Cache configuration (PASO 3.1.B)
+  private readonly CACHE_TTL = 120; // 2 minutos
+  private readonly CACHE_PREFIX = 'payment:amount:';
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+  ) {}
 
   /**
-   * Valida el monto de una inscripción mensual
+   * Valida el monto de una inscripción mensual (con Redis caching - PASO 3.1.B)
    *
    * @param inscripcionId - ID de la inscripción
    * @param receivedAmount - Monto recibido en el pago
@@ -64,6 +72,29 @@ export class PaymentAmountValidatorService {
     inscripcionId: string,
     receivedAmount: number,
   ): Promise<AmountValidationResult> {
+    const cacheKey = `${this.CACHE_PREFIX}InscripcionMensual:${inscripcionId}`;
+    let expectedAmount: number;
+
+    // 1. Intentar recuperar desde cache
+    try {
+      const cached = await this.redis.get(cacheKey);
+      if (cached !== null) {
+        expectedAmount = Number(cached);
+        this.logger.debug(`✅ Cache HIT: ${cacheKey}`);
+        return this.compareAmounts(
+          expectedAmount,
+          receivedAmount,
+          'InscripcionMensual',
+          inscripcionId,
+        );
+      }
+      this.logger.debug(`❌ Cache MISS: ${cacheKey}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`⚠️ Redis error: ${errorMessage} - fallback a DB`);
+    }
+
+    // 2. Cache miss → consultar DB
     const inscripcion = await this.prisma.inscripcionMensual.findUnique({
       where: { id: inscripcionId },
       select: {
@@ -77,7 +108,14 @@ export class PaymentAmountValidatorService {
       );
     }
 
-    const expectedAmount = Number(inscripcion.precio_final);
+    expectedAmount = Number(inscripcion.precio_final);
+
+    // 3. Guardar en cache
+    try {
+      await this.redis.set(cacheKey, String(expectedAmount), this.CACHE_TTL);
+    } catch (error) {
+      // Fallback silencioso
+    }
 
     return this.compareAmounts(
       expectedAmount,
@@ -88,7 +126,7 @@ export class PaymentAmountValidatorService {
   }
 
   /**
-   * Valida el monto de una membresía
+   * Valida el monto de una membresía (con Redis caching - PASO 3.1.B)
    *
    * @param membresiaId - ID de la membresía
    * @param receivedAmount - Monto recibido en el pago
@@ -99,6 +137,29 @@ export class PaymentAmountValidatorService {
     membresiaId: string,
     receivedAmount: number,
   ): Promise<AmountValidationResult> {
+    const cacheKey = `${this.CACHE_PREFIX}Membresia:${membresiaId}`;
+    let expectedAmount: number;
+
+    // 1. Intentar recuperar desde cache
+    try {
+      const cached = await this.redis.get(cacheKey);
+      if (cached !== null) {
+        expectedAmount = Number(cached);
+        this.logger.debug(`✅ Cache HIT: ${cacheKey}`);
+        return this.compareAmounts(
+          expectedAmount,
+          receivedAmount,
+          'Membresia',
+          membresiaId,
+        );
+      }
+      this.logger.debug(`❌ Cache MISS: ${cacheKey}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`⚠️ Redis error: ${errorMessage} - fallback a DB`);
+    }
+
+    // 2. Cache miss → consultar DB
     const membresia = await this.prisma.membresia.findUnique({
       where: { id: membresiaId },
       include: {
@@ -112,7 +173,14 @@ export class PaymentAmountValidatorService {
       );
     }
 
-    const expectedAmount = Number(membresia.producto.precio);
+    expectedAmount = Number(membresia.producto.precio);
+
+    // 3. Guardar en cache
+    try {
+      await this.redis.set(cacheKey, String(expectedAmount), this.CACHE_TTL);
+    } catch (error) {
+      // Fallback silencioso
+    }
 
     return this.compareAmounts(
       expectedAmount,
@@ -123,7 +191,7 @@ export class PaymentAmountValidatorService {
   }
 
   /**
-   * Valida el monto de una inscripción 2026
+   * Valida el monto de una inscripción 2026 (con Redis caching - PASO 3.1.B)
    *
    * @param inscripcionId - ID de la inscripción 2026
    * @param receivedAmount - Monto recibido en el pago
@@ -134,6 +202,29 @@ export class PaymentAmountValidatorService {
     inscripcionId: string,
     receivedAmount: number,
   ): Promise<AmountValidationResult> {
+    const cacheKey = `${this.CACHE_PREFIX}Inscripcion2026:${inscripcionId}`;
+    let expectedAmount: number;
+
+    // 1. Intentar recuperar desde cache
+    try {
+      const cached = await this.redis.get(cacheKey);
+      if (cached !== null) {
+        expectedAmount = Number(cached);
+        this.logger.debug(`✅ Cache HIT: ${cacheKey}`);
+        return this.compareAmounts(
+          expectedAmount,
+          receivedAmount,
+          'Inscripcion2026',
+          inscripcionId,
+        );
+      }
+      this.logger.debug(`❌ Cache MISS: ${cacheKey}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`⚠️ Redis error: ${errorMessage} - fallback a DB`);
+    }
+
+    // 2. Cache miss → consultar DB
     const inscripcion = await this.prisma.inscripcion2026.findUnique({
       where: { id: inscripcionId },
       select: {
@@ -147,7 +238,14 @@ export class PaymentAmountValidatorService {
       );
     }
 
-    const expectedAmount = Number(inscripcion.total_mensual_actual);
+    expectedAmount = Number(inscripcion.total_mensual_actual);
+
+    // 3. Guardar en cache
+    try {
+      await this.redis.set(cacheKey, String(expectedAmount), this.CACHE_TTL);
+    } catch (error) {
+      // Fallback silencioso
+    }
 
     return this.compareAmounts(
       expectedAmount,
@@ -158,7 +256,7 @@ export class PaymentAmountValidatorService {
   }
 
   /**
-   * Valida el monto de un pago de inscripción 2026 (mensualidad o matrícula)
+   * Valida el monto de un pago de inscripción 2026 (con Redis caching - PASO 3.1.B)
    *
    * @param pagoId - ID del pago
    * @param receivedAmount - Monto recibido
@@ -169,6 +267,29 @@ export class PaymentAmountValidatorService {
     pagoId: string,
     receivedAmount: number,
   ): Promise<AmountValidationResult> {
+    const cacheKey = `${this.CACHE_PREFIX}PagoInscripcion2026:${pagoId}`;
+    let expectedAmount: number;
+
+    // 1. Intentar recuperar desde cache
+    try {
+      const cached = await this.redis.get(cacheKey);
+      if (cached !== null) {
+        expectedAmount = Number(cached);
+        this.logger.debug(`✅ Cache HIT: ${cacheKey}`);
+        return this.compareAmounts(
+          expectedAmount,
+          receivedAmount,
+          'PagoInscripcion2026',
+          pagoId,
+        );
+      }
+      this.logger.debug(`❌ Cache MISS: ${cacheKey}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`⚠️ Redis error: ${errorMessage} - fallback a DB`);
+    }
+
+    // 2. Cache miss → consultar DB
     const pago = await this.prisma.pagoInscripcion2026.findUnique({
       where: { id: pagoId },
       select: {
@@ -183,7 +304,14 @@ export class PaymentAmountValidatorService {
       );
     }
 
-    const expectedAmount = Number(pago.monto);
+    expectedAmount = Number(pago.monto);
+
+    // 3. Guardar en cache
+    try {
+      await this.redis.set(cacheKey, String(expectedAmount), this.CACHE_TTL);
+    } catch (error) {
+      // Fallback silencioso
+    }
 
     return this.compareAmounts(
       expectedAmount,
@@ -194,7 +322,7 @@ export class PaymentAmountValidatorService {
   }
 
   /**
-   * Valida el monto de un pago de colonia
+   * Valida el monto de un pago de colonia (con Redis caching - PASO 3.1.B)
    *
    * @param pagoId - ID del pago de colonia
    * @param receivedAmount - Monto recibido
@@ -205,6 +333,29 @@ export class PaymentAmountValidatorService {
     pagoId: string,
     receivedAmount: number,
   ): Promise<AmountValidationResult> {
+    const cacheKey = `${this.CACHE_PREFIX}ColoniaPago:${pagoId}`;
+    let expectedAmount: number;
+
+    // 1. Intentar recuperar desde cache
+    try {
+      const cached = await this.redis.get(cacheKey);
+      if (cached !== null) {
+        expectedAmount = Number(cached);
+        this.logger.debug(`✅ Cache HIT: ${cacheKey}`);
+        return this.compareAmounts(
+          expectedAmount,
+          receivedAmount,
+          'ColoniaPago',
+          pagoId,
+        );
+      }
+      this.logger.debug(`❌ Cache MISS: ${cacheKey}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`⚠️ Redis error: ${errorMessage} - fallback a DB`);
+    }
+
+    // 2. Cache miss → consultar DB
     const pago = await this.prisma.coloniaPago.findUnique({
       where: { id: pagoId },
       select: {
@@ -218,7 +369,14 @@ export class PaymentAmountValidatorService {
       );
     }
 
-    const expectedAmount = Number(pago.monto);
+    expectedAmount = Number(pago.monto);
+
+    // 3. Guardar en cache
+    try {
+      await this.redis.set(cacheKey, String(expectedAmount), this.CACHE_TTL);
+    } catch (error) {
+      // Fallback silencioso
+    }
 
     return this.compareAmounts(
       expectedAmount,
