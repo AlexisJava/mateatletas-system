@@ -3064,7 +3064,7 @@ model PagoInscripcion2026 {
 
   /// IDs de MercadoPago para tracking
   mercadopago_preference_id String? // Preference ID de MP
-  mercadopago_payment_id    String? // Payment ID una vez pagado
+  mercadopago_payment_id    String? @unique // Payment ID una vez pagado (ÚNICO por transacción)
 
   /// Fecha límite de pago (día 5 del mes para mensualidades)
   fecha_vencimiento DateTime?
