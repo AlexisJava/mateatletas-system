@@ -17,6 +17,8 @@ import {
   CreateInscripcion2026Response,
 } from './dto/create-inscripcion-2026.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { MercadoPagoWebhookGuard } from '../pagos/guards/mercadopago-webhook.guard';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
 
@@ -81,9 +83,19 @@ export class Inscripciones2026Controller {
   /**
    * PATCH /inscripciones-2026/:id/estado
    * Actualiza el estado de una inscripción (admin only)
+   *
+   * SEGURIDAD:
+   * - Requiere autenticación (JwtAuthGuard)
+   * - Requiere rol ADMIN o superior (RolesGuard)
+   * - Solo administradores pueden modificar estados de inscripciones
+   * - Previene que tutores/docentes/estudiantes modifiquen estados
+   *
+   * OWASP A01:2021 - Broken Access Control
+   * ISO 27001 A.9.2.3 - Management of privileged access rights
    */
   @Patch(':id/estado')
-  @UseGuards(JwtAuthGuard) // TODO: agregar RolesGuard para admin
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   async updateEstado(
     @Param('id') id: string,
     @Body() body: { estado: string; razon: string },
