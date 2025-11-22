@@ -144,7 +144,11 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       // 1. Validar estructura del body
       this.validateWebhookBody(request.body);
 
-      // 2. Validar firma (formato 2025) usando raw body
+      // 2. Validar live_mode (prevenir webhooks de prueba en producción)
+      // IMPORTANTE: Validar ANTES de firma para fail-fast (performance + seguridad)
+      this.validateLiveMode(request.body.live_mode);
+
+      // 3. Validar firma (formato 2025) usando raw body
       const validationResult = this.validateSignature(
         request.headers['x-signature'] as string,
         request.body,
@@ -158,7 +162,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
         throw new UnauthorizedException('Invalid webhook signature');
       }
 
-      // 3. Validar timestamp (prevenir replay attacks)
+      // 4. Validar timestamp (prevenir replay attacks)
       this.validateTimestamp(validationResult.timestamp);
 
       this.logger.log(
@@ -216,6 +220,45 @@ export class MercadoPagoWebhookGuard implements CanActivate {
 
     if (typeof body.live_mode !== 'boolean') {
       throw new UnauthorizedException('Invalid webhook body: live_mode must be a boolean');
+    }
+  }
+
+  /**
+   * Valida que el webhook sea de producción (live_mode=true)
+   *
+   * PROBLEMA QUE RESUELVE:
+   * - MercadoPago envía webhooks con live_mode=false durante pruebas
+   * - Sin validación: pago de prueba puede activar servicio real
+   * - Atacante puede usar credenciales sandbox para "pagar" gratis
+   *
+   * SOLUCIÓN:
+   * - En producción: rechazar webhooks con live_mode=false
+   * - En desarrollo: permitir live_mode=false (facilita testing local)
+   * - Logging de seguridad para auditoría
+   *
+   * @param liveMode - Indica si el webhook es de producción (true) o prueba (false)
+   * @throws UnauthorizedException si live_mode=false en producción
+   */
+  private validateLiveMode(liveMode: boolean): void {
+    // En modo desarrollo, permitir webhooks de prueba
+    if (!this.strictMode) {
+      if (!liveMode) {
+        this.logger.warn(
+          '⚠️  Webhook de prueba (live_mode=false) permitido en modo desarrollo',
+        );
+      }
+      return;
+    }
+
+    // En producción, rechazar webhooks de prueba
+    if (!liveMode) {
+      this.logger.error(
+        '🚨 WEBHOOK DE PRUEBA RECHAZADO - live_mode=false en producción. ' +
+        'Posible intento de fraude usando credenciales sandbox.',
+      );
+      throw new UnauthorizedException(
+        'Test mode webhooks (live_mode=false) are not allowed in production',
+      );
     }
   }
 
