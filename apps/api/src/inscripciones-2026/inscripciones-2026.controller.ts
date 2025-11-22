@@ -19,6 +19,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
+import { InscripcionOwnershipGuard } from './guards/inscripcion-ownership.guard';
 import { MercadoPagoWebhookGuard } from '../pagos/guards/mercadopago-webhook.guard';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
 
@@ -51,10 +52,24 @@ export class Inscripciones2026Controller {
 
   /**
    * GET /inscripciones-2026/:id
-   * Obtiene una inscripción por ID (requiere autenticación)
+   * Obtiene una inscripción por ID
+   *
+   * SEGURIDAD:
+   * - Requiere autenticación (JwtAuthGuard)
+   * - Requiere ownership (InscripcionOwnershipGuard)
+   * - Solo el tutor dueño o admin pueden ver la inscripción
+   * - Previene enumeración de IDs y acceso a datos de otras familias
+   *
+   * PROTECCIÓN DE DATOS:
+   * - Cumple GDPR Art. 32 (Security of processing)
+   * - Previene violación de privacidad
+   * - Datos personales solo accesibles por el dueño
+   *
+   * OWASP A01:2021 - Broken Access Control
+   * ISO 27001 A.9.4.1 - Information access restriction
    */
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, InscripcionOwnershipGuard)
   async getById(@Param('id') id: string) {
     return this.inscripciones2026Service.getInscripcionById(id);
   }
