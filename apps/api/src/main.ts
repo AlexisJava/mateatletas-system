@@ -41,9 +41,18 @@ async function bootstrap() {
         buf: Buffer,
         encoding: string,
       ) => {
+        // DEBUG: Log para investigar qué URL llega al middleware
+        console.log('🔍 [VERIFY CALLBACK] req.url:', req.url);
+        console.log('🔍 [VERIFY CALLBACK] req.originalUrl:', (req as any).originalUrl);
+        console.log('🔍 [VERIFY CALLBACK] req.path:', (req as any).path);
+        console.log('🔍 [VERIFY CALLBACK] req.baseUrl:', (req as any).baseUrl);
+        console.log('🔍 [VERIFY CALLBACK] buf length:', buf.length);
+        console.log('🔍 [VERIFY CALLBACK] encoding:', encoding);
+
         // Solo guardar raw body para webhooks de MercadoPago
         // CRITICAL: Esto es esencial para validar la firma HMAC-SHA256
         if (req.url === '/api/pagos/webhook') {
+          console.log('✅ [VERIFY CALLBACK] MATCH: Guardando rawBody para /api/pagos/webhook');
           // Usar encoding explícito o UTF-8 por defecto
           const bufferEncoding: BufferEncoding =
             encoding === 'utf-8' || encoding === 'utf8'
@@ -57,6 +66,9 @@ async function bootstrap() {
                     : 'utf8'; // default seguro
 
           req.rawBody = buf.toString(bufferEncoding);
+          console.log('✅ [VERIFY CALLBACK] rawBody guardado, longitud:', req.rawBody.length);
+        } else {
+          console.log('❌ [VERIFY CALLBACK] NO MATCH: req.url !== /api/pagos/webhook');
         }
       },
     }),
