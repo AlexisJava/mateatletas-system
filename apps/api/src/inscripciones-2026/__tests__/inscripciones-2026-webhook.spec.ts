@@ -9,6 +9,8 @@ import { PinGeneratorService } from '../../shared/services/pin-generator.service
 import { TutorCreationService } from '../../shared/services/tutor-creation.service';
 import { MercadoPagoWebhookProcessorService } from '../../shared/services/mercadopago-webhook-processor.service';
 import { MercadoPagoWebhookDto } from '../../pagos/dto/mercadopago-webhook.dto';
+import { WebhookIdempotencyService } from '../../pagos/services/webhook-idempotency.service';
+import { PaymentAmountValidatorService } from '../../pagos/services/payment-amount-validator.service';
 
 /**
  * TESTS EXHAUSTIVOS PARA WEBHOOK INSCRIPCIONES 2026
@@ -87,6 +89,12 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
   };
 
   beforeEach(async () => {
+    // Crear mocks compartidos que serán usados tanto en prismaService como en el tx context
+    const pagoUpdateMock = jest.fn();
+    const inscripcionFindUniqueMock = jest.fn();
+    const inscripcionUpdateMock = jest.fn();
+    const historialCreateMock = jest.fn();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         Inscripciones2026Service,
@@ -95,15 +103,31 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
           useValue: {
             pagoInscripcion2026: {
               findFirst: jest.fn(),
-              update: jest.fn(),
+              update: pagoUpdateMock,
             },
             inscripcion2026: {
-              findUnique: jest.fn(),
-              update: jest.fn(),
+              findUnique: inscripcionFindUniqueMock,
+              update: inscripcionUpdateMock,
             },
             historialEstadoInscripcion2026: {
-              create: jest.fn(),
+              create: historialCreateMock,
             },
+            $transaction: jest.fn((callback: (tx: any) => any) => {
+              // Mock transaction context usando los MISMOS mocks compartidos
+              const tx = {
+                pagoInscripcion2026: {
+                  update: pagoUpdateMock,
+                },
+                inscripcion2026: {
+                  findUnique: inscripcionFindUniqueMock,
+                  update: inscripcionUpdateMock,
+                },
+                historialEstadoInscripcion2026: {
+                  create: historialCreateMock,
+                },
+              };
+              return callback(tx);
+            }),
           },
         },
         {
@@ -149,6 +173,24 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
         // Provide the real webhook processor since it's just a thin wrapper
         // We mock MercadoPagoService.getPayment which is what the processor calls
         MercadoPagoWebhookProcessorService,
+        {
+          provide: WebhookIdempotencyService,
+          useValue: {
+            wasProcessed: jest.fn().mockResolvedValue(false),
+            markAsProcessed: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: PaymentAmountValidatorService,
+          useValue: {
+            validatePagoInscripcion2026: jest.fn().mockResolvedValue({
+              isValid: true,
+              expectedAmount: 25000,
+              receivedAmount: 25000,
+              difference: 0,
+            }),
+          },
+        },
       ],
     }).compile();
 

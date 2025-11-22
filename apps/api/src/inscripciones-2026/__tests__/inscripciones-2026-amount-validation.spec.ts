@@ -55,6 +55,22 @@ describe('Inscripciones2026Service - Amount Validation', () => {
     historialEstadoInscripcion2026: {
       create: jest.fn(),
     },
+    $transaction: jest.fn((callback: (tx: any) => any) => {
+      // Mock transaction context con las mismas operaciones
+      const tx = {
+        pagoInscripcion2026: {
+          update: mockPrismaService.pagoInscripcion2026.update,
+        },
+        inscripcion2026: {
+          findUnique: mockPrismaService.inscripcion2026.findUnique,
+          update: mockPrismaService.inscripcion2026.update,
+        },
+        historialEstadoInscripcion2026: {
+          create: mockPrismaService.historialEstadoInscripcion2026.create,
+        },
+      };
+      return callback(tx);
+    }),
   };
 
   const mockMercadoPagoService = {

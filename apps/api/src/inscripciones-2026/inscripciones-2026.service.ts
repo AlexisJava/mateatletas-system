@@ -862,25 +862,50 @@ async createInscripcion2026(
             break;
         }
 
-        // Actualizar pago en DB
-        await this.prisma.pagoInscripcion2026.update({
-          where: { id: pago.id },
-          data: {
-            estado: nuevoEstadoPago,
-            mercadopago_payment_id: context.payment.id?.toString(),
-            fecha_pago: context.paymentStatus === 'approved' ? new Date() : undefined,
-          },
-        });
+        // ✅ TRANSACCIÓN ATÓMICA: Todas las operaciones de DB en un solo commit
+        // OWASP A04:2021 - Insecure Design
+        // ISO 27001 A.12.6.1 - Management of technical vulnerabilities
+        // Si alguna operación falla, TODAS se revierten automáticamente (ACID compliance)
+        await this.prisma.$transaction(async (tx) => {
+          // 1. Actualizar pago en DB
+          await tx.pagoInscripcion2026.update({
+            where: { id: pago.id },
+            data: {
+              estado: nuevoEstadoPago,
+              mercadopago_payment_id: context.payment.id?.toString(),
+              fecha_pago: context.paymentStatus === 'approved' ? new Date() : undefined,
+            },
+          });
 
-        // Actualizar estado de la inscripción si cambió
-        if (nuevoEstadoInscripcion !== pago.inscripcion.estado) {
-          await this.updateEstado(
-            inscripcionId,
-            nuevoEstadoInscripcion,
-            `Pago ${nuevoEstadoPago} - MercadoPago Payment ID: ${context.payment.id}`,
-            'mercadopago-webhook',
-          );
-        }
+          // 2. Actualizar estado de la inscripción si cambió
+          if (nuevoEstadoInscripcion !== pago.inscripcion.estado) {
+            // Buscar inscripción actual
+            const inscripcion = await tx.inscripcion2026.findUnique({
+              where: { id: inscripcionId },
+            });
+
+            if (!inscripcion) {
+              throw new BadRequestException('Inscripción no encontrada');
+            }
+
+            // Actualizar estado de inscripción
+            await tx.inscripcion2026.update({
+              where: { id: inscripcionId },
+              data: { estado: nuevoEstadoInscripcion },
+            });
+
+            // Crear registro de historial
+            await tx.historialEstadoInscripcion2026.create({
+              data: {
+                inscripcion_id: inscripcionId,
+                estado_anterior: inscripcion.estado,
+                estado_nuevo: nuevoEstadoInscripcion,
+                razon: `Pago ${nuevoEstadoPago} - MercadoPago Payment ID: ${context.payment.id}`,
+                realizado_por: 'mercadopago-webhook',
+              },
+            });
+          }
+        });
 
         this.logger.log(
           `✅ Pago procesado exitosamente - Inscripción ${inscripcionId} → Estado: ${nuevoEstadoInscripcion}`,
