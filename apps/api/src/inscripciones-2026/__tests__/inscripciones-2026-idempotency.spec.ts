@@ -10,6 +10,7 @@ import { PinGeneratorService } from '../../shared/services/pin-generator.service
 import { TutorCreationService } from '../../shared/services/tutor-creation.service';
 import { MercadoPagoWebhookProcessorService } from '../../shared/services/mercadopago-webhook-processor.service';
 import { WebhookIdempotencyService } from '../../pagos/services/webhook-idempotency.service';
+import { PaymentAmountValidatorService } from '../../pagos/services/payment-amount-validator.service';
 import { MercadoPagoWebhookDto } from '../../pagos/dto/mercadopago-webhook.dto';
 import { TipoExternalReference } from '../../domain/constants';
 
@@ -115,6 +116,12 @@ describe('Inscripciones2026Service - Webhook Idempotency', () => {
               };
               return map[status] || 'pending';
             }),
+          },
+        },
+        {
+          provide: PaymentAmountValidatorService,
+          useValue: {
+            validatePagoInscripcion2026: jest.fn(),
           },
         },
       ],
