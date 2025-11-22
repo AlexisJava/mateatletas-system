@@ -6,6 +6,7 @@ import { TokenBlacklistGuard } from '../auth/guards/token-blacklist.guard';
 import { UserThrottlerGuard } from '../common/guards/user-throttler.guard';
 import { SecretRotationService } from './services/secret-rotation.service';
 import { FraudDetectionService } from './fraud-detection.service';
+import { SecurityMonitoringService } from './security-monitoring.service';
 import { DatabaseModule } from '../core/database/database.module';
 import { AuthModule } from '../auth/auth.module';
 import { AuditModule } from '../audit/audit.module';
@@ -50,6 +51,9 @@ import { AuditModule } from '../audit/audit.module';
     // Servicio de detección de fraude (PASO 2.3)
     // Detecta patrones sospechosos en pagos e inscripciones
     FraudDetectionService,
+    // Servicio de monitoreo de seguridad (PASO 2.4)
+    // Métricas en tiempo real, alertas, reportes, health checks
+    SecurityMonitoringService,
     // ✅ SECURITY FIX: CSRF removido de guards globales
     // CSRF es ahora opt-in con @RequireCsrf() decorator
     // Esto permite webhooks, API calls, y Postman sin bloqueos
@@ -69,6 +73,6 @@ import { AuditModule } from '../audit/audit.module';
       useClass: UserThrottlerGuard,
     },
   ],
-  exports: [FraudDetectionService], // Exportar para uso en otros módulos (ej: Inscripciones2026Module)
+  exports: [FraudDetectionService, SecurityMonitoringService], // Exportar para uso en otros módulos
 })
 export class SecurityModule {}

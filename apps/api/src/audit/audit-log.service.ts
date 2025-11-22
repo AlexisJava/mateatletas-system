@@ -61,6 +61,7 @@ export enum EntityType {
   WEBHOOK = 'Webhook',
   CONFIG = 'Config',
   MFA = 'MFA',
+  SYSTEM = 'System',
 }
 
 /**
@@ -387,6 +388,33 @@ export class AuditLogService {
       severity: AuditSeverity.CRITICAL,
       metadata: details,
       ipAddress,
+    });
+  }
+
+  /**
+   * Registra un evento de seguridad general (alertas, monitoreo)
+   *
+   * Usado por SecurityMonitoringService para alertas de:
+   * - Spike de fraudes
+   * - Rate limiting excesivo
+   * - Patrones anómalos
+   * - Health checks críticos
+   *
+   * @param description - Descripción del evento de seguridad
+   * @param details - Detalles adicionales (metadata)
+   */
+  async logSecurityEvent(
+    description: string,
+    details?: Record<string, unknown>,
+  ) {
+    return this.log({
+      userType: 'system',
+      action: 'SECURITY_ALERT',
+      entityType: EntityType.SYSTEM,
+      description: `🔔 ALERTA DE SEGURIDAD: ${description}`,
+      category: AuditCategory.SECURITY,
+      severity: AuditSeverity.WARNING,
+      metadata: details,
     });
   }
 
