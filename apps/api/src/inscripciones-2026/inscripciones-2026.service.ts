@@ -6,6 +6,7 @@ import { PrismaService } from '../core/database/prisma.service';
 import { MercadoPagoService } from '../pagos/mercadopago.service';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
 import { WebhookIdempotencyService } from '../pagos/services/webhook-idempotency.service';
+import { PaymentAmountValidatorService } from '../pagos/services/payment-amount-validator.service';
 import {
   parseLegacyExternalReference,
   TipoExternalReference,
@@ -64,6 +65,7 @@ export class Inscripciones2026Service {
     private readonly tutorCreation: TutorCreationService,
     private readonly webhookProcessor: MercadoPagoWebhookProcessorService,
     private readonly webhookIdempotency: WebhookIdempotencyService,
+    private readonly amountValidator: PaymentAmountValidatorService,
   ) {}
 
   /**
@@ -813,6 +815,38 @@ async createInscripcion2026(
 
         // Mapear estado de MercadoPago a estado interno
         const nuevoEstadoPago = this.webhookProcessor.mapPaymentStatus(context.paymentStatus);
+
+        // ✅ SEGURIDAD: Validar monto del pago ANTES de aprobar
+        // OWASP A04:2021 - Insecure Design
+        // PCI DSS Req 6.5.10 - Broken Authentication
+        if (context.paymentStatus === 'approved' && context.payment.transaction_amount !== undefined) {
+          const receivedAmount: number = Number(context.payment.transaction_amount);
+
+          const validation = await this.amountValidator.validatePagoInscripcion2026(
+            pago.id,
+            receivedAmount,
+          );
+
+          if (!validation.isValid) {
+            this.logger.error(
+              `🚨 FRAUDE DETECTADO - Monto inválido en pago ${pago.id}\n` +
+              `  Esperado: $${validation.expectedAmount.toFixed(2)}\n` +
+              `  Recibido: $${validation.receivedAmount.toFixed(2)}\n` +
+              `  Diferencia: $${validation.difference?.toFixed(2)}\n` +
+              `  Razón: ${validation.reason}`,
+            );
+
+            throw new BadRequestException(
+              `Payment amount validation failed: ${validation.reason}`,
+            );
+          }
+
+          this.logger.log(
+            `✅ Validación de monto exitosa: pago_id=${pago.id}, ` +
+            `esperado=$${validation.expectedAmount.toFixed(2)}, ` +
+            `recibido=$${validation.receivedAmount.toFixed(2)}`,
+          );
+        }
 
         // Determinar estado de inscripción según estado del pago
         let nuevoEstadoInscripcion = 'pending';
