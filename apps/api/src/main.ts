@@ -51,8 +51,11 @@ async function bootstrap() {
 
         // Solo guardar raw body para webhooks de MercadoPago
         // CRITICAL: Esto es esencial para validar la firma HMAC-SHA256
-        if (req.url === '/api/pagos/webhook') {
-          console.log('✅ [VERIFY CALLBACK] MATCH: Guardando rawBody para /api/pagos/webhook');
+        // NOTA: Aceptar tanto /api/pagos/webhook como /api/colonia/webhook (por si hay webhooks mal configurados)
+        const isWebhookUrl = req.url.startsWith('/api/pagos/webhook') || req.url.startsWith('/api/colonia/webhook');
+
+        if (isWebhookUrl) {
+          console.log('✅ [VERIFY CALLBACK] MATCH: Guardando rawBody para', req.url);
           // Usar encoding explícito o UTF-8 por defecto
           const bufferEncoding: BufferEncoding =
             encoding === 'utf-8' || encoding === 'utf8'
@@ -68,7 +71,7 @@ async function bootstrap() {
           req.rawBody = buf.toString(bufferEncoding);
           console.log('✅ [VERIFY CALLBACK] rawBody guardado, longitud:', req.rawBody.length);
         } else {
-          console.log('❌ [VERIFY CALLBACK] NO MATCH: req.url !== /api/pagos/webhook');
+          console.log('❌ [VERIFY CALLBACK] NO MATCH: req.url =', req.url);
         }
       },
     }),
