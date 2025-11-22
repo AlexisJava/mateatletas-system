@@ -681,9 +681,16 @@ export class AuditLogService {
       userAgent: data.userAgent,
     });
 
+    // Validar que el audit log fue creado correctamente
+    if (!auditLog) {
+      throw new Error(
+        `Failed to create audit log for ${data.action} on ${data.entityType}/${data.entityId}`,
+      );
+    }
+
     // Retornar en formato esperado por los tests
     return {
-      id: auditLog?.id || '',
+      id: auditLog.id,
       entityType: data.entityType,
       entityId: data.entityId,
       action: data.action,
@@ -695,7 +702,7 @@ export class AuditLogService {
       ipAddress: data.ipAddress || null,
       userAgent: data.userAgent || null,
       metadata: data.metadata || null,
-      createdAt: auditLog?.timestamp || new Date(),
+      createdAt: auditLog.timestamp,
     };
   }
 
@@ -736,7 +743,7 @@ export class AuditLogService {
       entityId: log.entity_id || '',
       action: log.action,
       performedBy: log.user_id || 'system',
-      performedByType: (log.user_type?.toUpperCase() || 'SYSTEM') as string,
+      performedByType: log.user_type?.toUpperCase() === 'USER' ? 'USER' : 'SYSTEM',
       createdAt: log.timestamp,
     }));
   }
