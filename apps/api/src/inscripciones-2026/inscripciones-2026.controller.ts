@@ -20,6 +20,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles, Role } from '../auth/decorators/roles.decorator';
 import { InscripcionOwnershipGuard } from './guards/inscripcion-ownership.guard';
+import { WebhookRateLimitGuard } from './guards/webhook-rate-limit.guard';
 import { MercadoPagoWebhookGuard } from '../pagos/guards/mercadopago-webhook.guard';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
 
@@ -131,16 +132,27 @@ export class Inscripciones2026Controller {
    * IMPORTANTE:
    * - NO requiere autenticación JWT (es un webhook externo)
    * - SÍ requiere validación de firma HMAC (MercadoPagoWebhookGuard)
+   * - SÍ requiere rate limiting (WebhookRateLimitGuard) - 100 req/min por IP
    * - MercadoPago envía notificaciones cuando cambia el estado de un pago
    *
+   * SEGURIDAD (PASO 2.1):
+   * - Rate Limiting: Previene ataques DoS en endpoint público
+   * - Límite: 100 requests/minuto por IP
+   * - Retorna HTTP 429 si se excede el límite
+   *
+   * ESTÁNDARES:
+   * - OWASP A05:2021 - Security Misconfiguration
+   * - ISO 27001 A.14.2.8 - System security testing
+   * - NIST 800-53 SC-5 - Denial of Service Protection
+   *
    * Flujo:
-   * 1. MercadoPago envía POST con firma HMAC
-   * 2. Guard valida la firma
+   * 1. WebhookRateLimitGuard valida rate limit por IP
+   * 2. MercadoPagoWebhookGuard valida firma HMAC
    * 3. Consultamos detalles del pago a MercadoPago
    * 4. Actualizamos estado de inscripción en DB
    */
   @Post('webhook')
-  @UseGuards(MercadoPagoWebhookGuard)
+  @UseGuards(WebhookRateLimitGuard, MercadoPagoWebhookGuard)
   @HttpCode(HttpStatus.OK)
   async handleWebhook(@Body() webhookData: MercadoPagoWebhookDto) {
     this.logger.log(
