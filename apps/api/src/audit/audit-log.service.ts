@@ -612,4 +612,258 @@ export class AuditLogService {
       take: filters.limit ?? 100,
     });
   }
+
+  /**
+   * Registra un cambio de estado genérico (para Sprint 2 - PASO 2.2)
+   *
+   * PROPÓSITO: API simplificada para loguear cambios de estado con contexto completo
+   *
+   * @param data - Datos del cambio de estado
+   * @returns Audit log creado
+   */
+  async logStateChange(data: {
+    entityType: string;
+    entityId: string;
+    action: string;
+    performedBy: string;
+    performedByType: 'USER' | 'SYSTEM';
+    previousState?: Record<string, unknown> | null;
+    newState?: Record<string, unknown> | null;
+    reason?: string;
+    ipAddress?: string;
+    userAgent?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<{
+    id: string;
+    entityType: string;
+    entityId: string;
+    action: string;
+    performedBy: string;
+    performedByType: string;
+    previousState: Record<string, unknown> | null;
+    newState: Record<string, unknown> | null;
+    reason: string | null;
+    ipAddress: string | null;
+    userAgent: string | null;
+    metadata: Record<string, unknown> | null;
+    createdAt: Date;
+  }> {
+    // Validar campos requeridos
+    if (!data.entityType || !data.entityId || !data.action || !data.performedBy) {
+      throw new Error(
+        'Campos requeridos faltantes: entityType, entityId, action, performedBy',
+      );
+    }
+
+    // Crear descripción
+    const actor =
+      data.performedByType === 'USER' ? `Usuario ${data.performedBy}` : 'Sistema';
+    const entity = `${data.entityType}/${data.entityId}`;
+    const reason = data.reason ? ` - ${data.reason}` : '';
+    const description = `${actor} realizó ${data.action} en ${entity}${reason}`;
+
+    // Usar el método log() existente
+    const auditLog = await this.log({
+      userId: data.performedByType === 'USER' ? data.performedBy : undefined,
+      userType: data.performedByType.toLowerCase(),
+      action: data.action,
+      entityType: data.entityType,
+      entityId: data.entityId,
+      description,
+      changes: {
+        before: data.previousState || undefined,
+        after: data.newState || undefined,
+      },
+      metadata: data.metadata,
+      category: this.determineCategory(data.entityType),
+      severity: this.determineSeverity(data.action),
+      ipAddress: data.ipAddress,
+      userAgent: data.userAgent,
+    });
+
+    // Retornar en formato esperado por los tests
+    return {
+      id: auditLog?.id || '',
+      entityType: data.entityType,
+      entityId: data.entityId,
+      action: data.action,
+      performedBy: data.performedBy,
+      performedByType: data.performedByType,
+      previousState: data.previousState || null,
+      newState: data.newState || null,
+      reason: data.reason || null,
+      ipAddress: data.ipAddress || null,
+      userAgent: data.userAgent || null,
+      metadata: data.metadata || null,
+      createdAt: auditLog?.timestamp || new Date(),
+    };
+  }
+
+  /**
+   * Obtiene el historial de cambios de una entidad específica
+   *
+   * @param entityType - Tipo de entidad
+   * @param entityId - ID de la entidad
+   * @returns Lista de audit logs
+   */
+  async getEntityHistory(
+    entityType: string,
+    entityId: string,
+  ): Promise<
+    Array<{
+      id: string;
+      entityType: string;
+      entityId: string;
+      action: string;
+      performedBy: string;
+      performedByType: string;
+      createdAt: Date;
+    }>
+  > {
+    const logs = await this.prisma.auditLog.findMany({
+      where: {
+        entity_type: entityType,
+        entity_id: entityId,
+      },
+      orderBy: {
+        timestamp: 'desc',
+      },
+    });
+
+    return logs.map((log) => ({
+      id: log.id,
+      entityType: log.entity_type,
+      entityId: log.entity_id || '',
+      action: log.action,
+      performedBy: log.user_id || 'system',
+      performedByType: (log.user_type?.toUpperCase() || 'SYSTEM') as string,
+      createdAt: log.timestamp,
+    }));
+  }
+
+  /**
+   * Obtiene todos los logs de un usuario específico
+   *
+   * @param userId - ID del usuario
+   * @returns Lista de audit logs del usuario
+   */
+  async getUserLogs(userId: string): Promise<
+    Array<{
+      id: string;
+      action: string;
+      performedBy: string;
+      entityId: string;
+      createdAt: Date;
+    }>
+  > {
+    const logs = await this.prisma.auditLog.findMany({
+      where: {
+        user_id: userId,
+      },
+      orderBy: {
+        timestamp: 'desc',
+      },
+    });
+
+    return logs.map((log) => ({
+      id: log.id,
+      action: log.action,
+      performedBy: log.user_id || 'system',
+      entityId: log.entity_id || '',
+      createdAt: log.timestamp,
+    }));
+  }
+
+  /**
+   * Obtiene logs por rango de fechas
+   *
+   * @param startDate - Fecha de inicio
+   * @param endDate - Fecha de fin
+   * @returns Lista de audit logs en el rango
+   */
+  async getLogsByDateRange(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<
+    Array<{
+      id: string;
+      createdAt: Date;
+    }>
+  > {
+    const logs = await this.prisma.auditLog.findMany({
+      where: {
+        timestamp: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      orderBy: {
+        timestamp: 'desc',
+      },
+    });
+
+    return logs.map((log) => ({
+      id: log.id,
+      createdAt: log.timestamp,
+    }));
+  }
+
+  /**
+   * Cuenta logs por acción específica
+   *
+   * @param action - Acción a contar
+   * @returns Número de logs con esa acción
+   */
+  async countLogsByAction(action: string): Promise<number> {
+    const count = await this.prisma.auditLog.count({
+      where: {
+        action,
+      },
+    });
+
+    return count;
+  }
+
+  /**
+   * HELPER: Determinar severidad del evento
+   *
+   * @param action - Acción realizada
+   * @returns Severidad (info, warning, error, critical)
+   */
+  private determineSeverity(action: string): AuditSeverity {
+    const criticalActions = ['DELETE', 'FRAUD_DETECTED', 'UNAUTHORIZED_ACCESS'];
+    const warningActions = ['UPDATE_ESTADO', 'PAYMENT_REJECTED'];
+
+    if (criticalActions.some((a) => action.includes(a))) {
+      return AuditSeverity.CRITICAL;
+    }
+
+    if (warningActions.some((a) => action.includes(a))) {
+      return AuditSeverity.WARNING;
+    }
+
+    return AuditSeverity.INFO;
+  }
+
+  /**
+   * HELPER: Determinar categoría del evento
+   *
+   * @param entityType - Tipo de entidad
+   * @returns Categoría (payment, user_management, data_modification, security)
+   */
+  private determineCategory(entityType: string): AuditCategory {
+    if (entityType.includes('pago') || entityType.includes('payment')) {
+      return AuditCategory.PAYMENT;
+    }
+
+    if (entityType.includes('tutor') || entityType.includes('admin')) {
+      return AuditCategory.USER_MANAGEMENT;
+    }
+
+    if (entityType.includes('inscripcion')) {
+      return AuditCategory.DATA_MODIFICATION;
+    }
+
+    return AuditCategory.DATA_MODIFICATION;
+  }
 }
