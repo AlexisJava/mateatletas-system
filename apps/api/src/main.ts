@@ -4,6 +4,8 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import * as express from 'express';
+import { Request, Response } from 'express';
 import {
   PrismaExceptionFilter,
   HttpExceptionFilter,
@@ -12,28 +14,56 @@ import {
 import { LoggerService } from './common/logger/logger.service';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 
+/**
+ * Extended Express Request interface with rawBody property
+ * Used for MercadoPago webhook signature validation
+ */
+interface RequestWithRawBody extends Request {
+  rawBody?: string;
+}
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false, // Disable NestJS automatic body parsing
+  });
 
   // Obtener instancia del LoggerService para los filters
   const logger = app.get(LoggerService);
   logger.log('🚀 Iniciando aplicación Mateatletas API...');
 
   // Raw body middleware for webhook signature validation
-  // DEBE ir ANTES del JSON parser global
+  // Captura raw body ANTES de parsear JSON
   app.use(
-    '/api/pagos/webhook',
-    (req: any, res: any, next: any) => {
-      let rawBody = '';
-      req.on('data', (chunk: Buffer) => {
-        rawBody += chunk.toString();
-      });
-      req.on('end', () => {
-        req.rawBody = rawBody;
-        next();
-      });
-    },
+    express.json({
+      verify: (
+        req: RequestWithRawBody,
+        _res: Response,
+        buf: Buffer,
+        encoding: string,
+      ) => {
+        // Solo guardar raw body para webhooks de MercadoPago
+        // CRITICAL: Esto es esencial para validar la firma HMAC-SHA256
+        if (req.url === '/api/pagos/webhook') {
+          // Usar encoding explícito o UTF-8 por defecto
+          const bufferEncoding: BufferEncoding =
+            encoding === 'utf-8' || encoding === 'utf8'
+              ? 'utf8'
+              : encoding === 'ascii'
+                ? 'ascii'
+                : encoding === 'base64'
+                  ? 'base64'
+                  : encoding === 'hex'
+                    ? 'hex'
+                    : 'utf8'; // default seguro
+
+          req.rawBody = buf.toString(bufferEncoding);
+        }
+      },
+    }),
   );
+
+  // URL-encoded parser (para formularios)
+  app.use(express.urlencoded({ extended: true }));
 
   // Cookie parser middleware (debe ir ANTES de las rutas)
   app.use(cookieParser());

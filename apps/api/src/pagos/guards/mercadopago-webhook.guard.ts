@@ -12,6 +12,14 @@ import * as crypto from 'crypto';
 import { MercadoPagoIpWhitelistService } from '../services/mercadopago-ip-whitelist.service';
 
 /**
+ * Extended Express Request interface with rawBody property
+ * CRITICAL: Este tipo DEBE coincidir con el definido en main.ts
+ */
+interface RequestWithRawBody extends Request {
+  rawBody?: string;
+}
+
+/**
  * Tipos seguros para la estructura de webhook de MercadoPago
  */
 interface MercadoPagoWebhookBody {
@@ -97,7 +105,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
   }
 
   canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest<Request & { rawBody?: string }>();
+    const request = context.switchToHttp().getRequest<RequestWithRawBody>();
 
     // 0. Validar IP del cliente (primera línea de defensa)
     const clientIp = this.ipWhitelistService.extractRealIp(
