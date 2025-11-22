@@ -5,6 +5,7 @@ import { Prisma, Tutor, Estudiante, Inscripcion2026, PagoInscripcion2026, Estudi
 import { PrismaService } from '../core/database/prisma.service';
 import { MercadoPagoService } from '../pagos/mercadopago.service';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
+import { WebhookIdempotencyService } from '../pagos/services/webhook-idempotency.service';
 import {
   parseLegacyExternalReference,
   TipoExternalReference,
@@ -62,6 +63,7 @@ export class Inscripciones2026Service {
     private readonly pinGenerator: PinGeneratorService,
     private readonly tutorCreation: TutorCreationService,
     private readonly webhookProcessor: MercadoPagoWebhookProcessorService,
+    private readonly webhookIdempotency: WebhookIdempotencyService,
   ) {}
 
   /**
@@ -748,11 +750,35 @@ async createInscripcion2026(
    * y proporciona callbacks específicos para la lógica de Inscripciones2026.
    */
   async procesarWebhookMercadoPago(webhookData: MercadoPagoWebhookDto) {
+    const paymentId: string = webhookData.data.id;
+
+    // ✅ VALIDACIÓN: Verificar que payment_id existe
+    if (!paymentId) {
+      this.logger.error('❌ Webhook rechazado: payment_id faltante');
+      throw new BadRequestException('payment_id is required');
+    }
+
     this.logger.log(
-      `📨 Webhook recibido: ${webhookData.type} - ${webhookData.action}`,
+      `📨 Webhook recibido: ${webhookData.type} - ${webhookData.action}, payment_id=${paymentId}`,
     );
 
-    return this.webhookProcessor.processWebhook(
+    // ✅ SEGURIDAD: Verificar idempotencia (prevenir procesamiento duplicado)
+    // OWASP A04:2021 - Insecure Design
+    const alreadyProcessed: boolean = await this.webhookIdempotency.wasProcessed(paymentId);
+
+    if (alreadyProcessed) {
+      this.logger.warn(
+        `⏭️ Webhook duplicado ignorado (idempotencia): payment_id=${paymentId}`,
+      );
+      return {
+        success: true,
+        message: 'Already processed (idempotent)',
+        paymentId,
+      };
+    }
+
+    // Procesar webhook normalmente
+    const result = await this.webhookProcessor.processWebhook(
       webhookData,
       TipoExternalReference.INSCRIPCION_2026,
       // Callback: Buscar pago en DB
@@ -834,5 +860,44 @@ async createInscripcion2026(
         };
       },
     );
+
+    // ✅ SEGURIDAD: Marcar webhook como procesado (solo si fue exitoso)
+    // OWASP A04:2021 - Insecure Design
+    if (result && typeof result === 'object' && 'success' in result && result.success !== false) {
+      // Extraer externalReference del resultado si está disponible
+      const externalRef: string =
+        ('externalReference' in result && typeof result.externalReference === 'string')
+          ? result.externalReference
+          : paymentId;
+
+      try {
+        await this.webhookIdempotency.markAsProcessed({
+          paymentId,
+          webhookType: 'inscripcion2026',
+          status: webhookData.action || 'unknown',
+          externalReference: externalRef,
+        });
+
+        this.logger.log(
+          `✅ Webhook marcado como procesado: payment_id=${paymentId}`,
+        );
+      } catch (error: unknown) {
+        // Si falla por unique constraint (P2002), significa que otro proceso ya lo marcó (race condition)
+        // Esto es OK, simplemente logueamos y continuamos
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+          this.logger.warn(
+            `⚠️ Race condition al marcar webhook: payment_id=${paymentId}. Otro proceso ya lo procesó.`,
+          );
+        } else {
+          // Otros errores sí son problemáticos, pero no detenemos el flujo
+          const message = error instanceof Error ? error.message : 'Unknown error';
+          this.logger.error(
+            `❌ Error al marcar webhook como procesado: ${message}, payment_id=${paymentId}`,
+          );
+        }
+      }
+    }
+
+    return result;
   }
 }
