@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { Inscripciones2026Controller } from './inscripciones-2026.controller';
 import { Inscripciones2026Service } from './inscripciones-2026.service';
 import { InscripcionOwnershipGuard } from './guards/inscripcion-ownership.guard';
@@ -8,7 +8,7 @@ import { PagosModule } from '../pagos/pagos.module';
 import { WebhookQueueModule } from '../queues/webhook-queue.module';
 
 @Module({
-  imports: [DatabaseModule, PagosModule, WebhookQueueModule],
+  imports: [DatabaseModule, PagosModule, forwardRef(() => WebhookQueueModule)],
   controllers: [Inscripciones2026Controller],
   providers: [
     Inscripciones2026Service,

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WebhookQueueService } from './webhook-queue.service';
@@ -70,7 +70,7 @@ import { Inscripciones2026Module } from '../inscripciones-2026/inscripciones-202
         },
       },
     }),
-    Inscripciones2026Module, // Necesario para WebhookProcessor
+    forwardRef(() => Inscripciones2026Module), // Romper dependencia circular
   ],
   controllers: [QueueMetricsController],
   providers: [WebhookQueueService, WebhookProcessor, QueueHealthIndicator],
