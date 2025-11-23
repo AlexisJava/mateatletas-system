@@ -113,8 +113,9 @@ export default function GlobalInscriptionModal({
       const response = await createInscripcion2026(request);
 
       // Redirigir a MercadoPago
-      if (response.pago_info.mercadopago_init_point) {
-        window.location.href = response.pago_info.mercadopago_init_point;
+      // El interceptor envuelve la respuesta en { data: {...} }
+      if (response.data?.pago_info?.mercadopago_init_point) {
+        window.location.href = response.data.pago_info.mercadopago_init_point;
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear inscripción');

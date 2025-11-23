@@ -11,11 +11,22 @@ import {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 /**
+ * Formato de respuesta estándar de la API (interceptor wrapper)
+ */
+interface ApiResponse<T> {
+  data: T;
+  metadata: {
+    timestamp: string;
+  };
+  message?: string;
+}
+
+/**
  * Crea una nueva inscripción 2026
  */
 export async function createInscripcion2026(
   data: CreateInscripcion2026Request
-): Promise<CreateInscripcion2026Response> {
+): Promise<ApiResponse<CreateInscripcion2026Response>> {
   const response = await fetch(`${API_BASE_URL}/inscripciones-2026`, {
     method: 'POST',
     headers: {
