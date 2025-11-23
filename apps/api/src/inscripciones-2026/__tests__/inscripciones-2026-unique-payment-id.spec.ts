@@ -158,7 +158,6 @@ describe('Inscripciones2026 - Unique Constraint mercadopago_payment_id', () => {
         estado: 'paid',
         mercadopago_payment_id: 'TEST_PAYMENT_123', // ✅ Primer uso
         fecha_pago: new Date(),
-        processed_at: new Date(),
       },
     });
 
@@ -176,7 +175,6 @@ describe('Inscripciones2026 - Unique Constraint mercadopago_payment_id', () => {
           estado: 'paid',
           mercadopago_payment_id: 'TEST_PAYMENT_123', // ❌ Duplicado
           fecha_pago: new Date(),
-          processed_at: new Date(),
         },
       }),
     ).rejects.toThrow(PrismaClientKnownRequestError);
@@ -191,7 +189,6 @@ describe('Inscripciones2026 - Unique Constraint mercadopago_payment_id', () => {
           estado: 'paid',
           mercadopago_payment_id: 'TEST_PAYMENT_123',
           fecha_pago: new Date(),
-          processed_at: new Date(),
         },
       });
 
@@ -245,7 +242,6 @@ describe('Inscripciones2026 - Unique Constraint mercadopago_payment_id', () => {
         estado: 'paid',
         mercadopago_payment_id: 'TEST_PAYMENT_456', // ✅ Único
         fecha_pago: new Date(),
-        processed_at: new Date(),
       },
     });
 
@@ -259,7 +255,6 @@ describe('Inscripciones2026 - Unique Constraint mercadopago_payment_id', () => {
         estado: 'paid',
         mercadopago_payment_id: 'TEST_PAYMENT_789', // ✅ Diferente
         fecha_pago: new Date(),
-        processed_at: new Date(),
       },
     });
 

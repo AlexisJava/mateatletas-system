@@ -5,9 +5,10 @@ import { InscripcionOwnershipGuard } from './guards/inscripcion-ownership.guard'
 import { WebhookRateLimitGuard } from './guards/webhook-rate-limit.guard';
 import { DatabaseModule } from '../core/database/database.module';
 import { PagosModule } from '../pagos/pagos.module';
+import { WebhookQueueModule } from '../queues/webhook-queue.module';
 
 @Module({
-  imports: [DatabaseModule, PagosModule],
+  imports: [DatabaseModule, PagosModule, WebhookQueueModule],
   controllers: [Inscripciones2026Controller],
   providers: [
     Inscripciones2026Service,
