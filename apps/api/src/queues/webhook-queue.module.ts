@@ -3,10 +3,12 @@ import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WebhookQueueService } from './webhook-queue.service';
 import { WebhookProcessor } from './processors/webhook.processor';
+import { QueueMetricsController } from './queue-metrics.controller';
+import { QueueHealthIndicator } from './health/queue-health.indicator';
 import { Inscripciones2026Module } from '../inscripciones-2026/inscripciones-2026.module';
 
 /**
- * WebhookQueueModule - Sistema de Queue Asíncrono con Bull (PASO 3.2)
+ * WebhookQueueModule - Sistema de Queue Asíncrono con Bull (PASO 3.2 + 3.4)
  *
  * PROBLEMA QUE RESUELVE:
  * - MercadoPago envía 100+ webhooks simultáneos durante picos
@@ -36,6 +38,10 @@ import { Inscripciones2026Module } from '../inscripciones-2026/inscripciones-202
  * - Latencia endpoint: 800-1200ms → <50ms (mejora 95%)
  * - Throughput: 100 webhooks/min → 1000+ webhooks/min (10x)
  * - Uptime en picos: 90% → 99.9%
+ *
+ * MONITORING (PASO 3.4):
+ * - QueueMetricsController: Dashboard de métricas en /queues/metrics
+ * - QueueHealthIndicator: Health check para @nestjs/terminus
  */
 @Module({
   imports: [
@@ -66,7 +72,8 @@ import { Inscripciones2026Module } from '../inscripciones-2026/inscripciones-202
     }),
     Inscripciones2026Module, // Necesario para WebhookProcessor
   ],
-  providers: [WebhookQueueService, WebhookProcessor],
-  exports: [WebhookQueueService],
+  controllers: [QueueMetricsController],
+  providers: [WebhookQueueService, WebhookProcessor, QueueHealthIndicator],
+  exports: [WebhookQueueService, QueueHealthIndicator],
 })
 export class WebhookQueueModule {}
