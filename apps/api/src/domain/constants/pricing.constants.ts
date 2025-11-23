@@ -49,10 +49,10 @@ export const PRECIOS = {
   CICLO_2026_MENSUAL: 60000,
 
   /**
-   * Precio del segundo curso de colonia con descuento aplicado
-   * (12% de descuento sobre COLONIA_CURSO_BASE)
+   * @deprecated Ya no se usa - el descuento se aplica sobre el total, no por curso
+   * Mantenido para retrocompatibilidad con tests antiguos
    */
-  COLONIA_SEGUNDO_CURSO: 48400, // 55000 * (1 - 0.12) = 48400
+  COLONIA_SEGUNDO_CURSO: 48400,
 } as const;
 
 /**

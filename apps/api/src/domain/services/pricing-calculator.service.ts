@@ -80,20 +80,14 @@ export class PricingCalculatorService {
   ): number {
     let subtotal = 0;
 
-    // Calcular subtotal considerando descuento al segundo curso
+    // Calcular subtotal SIN descuentos intermedios
+    // El descuento se aplica solo una vez al final sobre el total
     cursosPerStudent.forEach((numCursos) => {
-      if (numCursos === 1) {
-        subtotal += PRECIOS.COLONIA_CURSO_BASE;
-      } else if (numCursos >= 2) {
-        // Primer curso: precio base
-        // Segundo curso: precio base con descuento
-        // Cursos adicionales: precio base con descuento
-        subtotal += PRECIOS.COLONIA_CURSO_BASE; // Primer curso
-        subtotal += PRECIOS.COLONIA_SEGUNDO_CURSO * (numCursos - 1); // Cursos adicionales
-      }
+      // Todos los cursos a precio base
+      subtotal += PRECIOS.COLONIA_CURSO_BASE * numCursos;
     });
 
-    // Aplicar descuento general sobre el subtotal
+    // Aplicar descuento general sobre el subtotal (UNA SOLA VEZ)
     if (descuentoGeneral > 0) {
       return PricingHelpers.aplicarDescuento(subtotal, descuentoGeneral);
     }
