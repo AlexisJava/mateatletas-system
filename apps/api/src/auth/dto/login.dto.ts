@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsString, MinLength, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -23,9 +23,11 @@ export class LoginDto {
     description: 'Contraseña del tutor',
     example: 'MiPassword123!',
     minLength: 8,
+    maxLength: 128,
     type: String,
   })
   @IsString()
   @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
+  @MaxLength(128, { message: 'La contraseña no puede tener más de 128 caracteres' })
   password!: string;
 }

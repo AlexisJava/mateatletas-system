@@ -15,6 +15,7 @@ import { DatabaseModule } from '../core/database/database.module';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
 import { MfaModule } from './mfa/mfa.module';
+import { LoginAttemptService } from './services/login-attempt.service';
 
 /**
  * Módulo de autenticación
@@ -84,6 +85,8 @@ import { MfaModule } from './mfa/mfa.module';
     // Token Blacklist (Fix #6: P3 - Security Improvement)
     TokenBlacklistService,
     TokenBlacklistGuard,
+    // Login Attempt Tracking (Brute Force Protection)
+    LoginAttemptService,
   ],
   exports: [
     JwtStrategy,

@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
   NotFoundException,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -16,6 +17,7 @@ import { Role } from './decorators/roles.decorator';
 import { parseUserRoles } from '../common/utils/role.utils';
 import { Tutor, Docente, Admin as AdminModel } from '@prisma/client';
 import { EstudiantePrimerLoginEvent, UserLoggedInEvent, UserRegisteredEvent } from '../common/events';
+import { LoginAttemptService } from './services/login-attempt.service';
 
 type AuthenticatedUser = Tutor | Docente | AdminModel;
 
@@ -45,6 +47,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private eventEmitter: EventEmitter2,
+    private loginAttemptService: LoginAttemptService,
   ) {}
 
   /**
@@ -81,7 +84,7 @@ export class AuthService {
     });
 
     if (existingTutor) {
-      throw new ConflictException('El email ya está registrado');
+      throw new BadRequestException('Error en el registro. Verifica los datos ingresados.');
     }
 
     // 2. Hashear la contraseña con bcrypt
@@ -144,7 +147,7 @@ export class AuthService {
    * @returns Token JWT y datos del estudiante
    * @throws UnauthorizedException si las credenciales son inválidas
    */
-  async loginEstudiante(loginEstudianteDto: LoginEstudianteDto) {
+  async loginEstudiante(loginEstudianteDto: LoginEstudianteDto, ip: string = 'unknown') {
     const { username, password } = loginEstudianteDto;
 
     // 1. Buscar estudiante por username
@@ -169,20 +172,21 @@ export class AuthService {
       },
     });
 
-    // 2. Verificar que el estudiante exista y tenga credenciales configuradas
-    if (!estudiante || !estudiante.password_hash || !estudiante.username) {
+    // 2. Protección contra timing attack: ejecutar bcrypt SIEMPRE
+    const dummyHash = '$2b$12$dummyhashforunknownusers1234567890ab';
+    const hashToCompare = estudiante?.password_hash || dummyHash;
+    const isPasswordValid = await bcrypt.compare(password, hashToCompare);
+
+    // 3. Verificar que el estudiante exista, tenga credenciales y password válido
+    if (!estudiante || !estudiante.password_hash || !estudiante.username || !isPasswordValid) {
+      // Registrar intento fallido y verificar lockout
+      await this.loginAttemptService.checkAndRecordAttempt(username, ip, false);
+      this.logger.warn(`Intento de login fallido: username=${username}, ip=${ip}, reason=credenciales_invalidas`);
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // 3. Comparar contraseña con bcrypt
-    const isPasswordValid = await bcrypt.compare(
-      password,
-      estudiante.password_hash,
-    );
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
+    // Registrar intento exitoso y limpiar intentos fallidos previos
+    await this.loginAttemptService.checkAndRecordAttempt(username, ip, true);
 
     // 4. Obtener roles del estudiante desde la BD - usando utility segura
     const estudianteRoles = parseUserRoles(estudiante.roles);
@@ -225,7 +229,7 @@ export class AuthService {
    * @returns Token JWT y datos del usuario
    * @throws UnauthorizedException si las credenciales son inválidas
    */
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, ip: string = 'unknown') {
     const { email, password } = loginDto;
 
     // 1. Intentar buscar como tutor primero
@@ -247,17 +251,21 @@ export class AuthService {
       user = adminUser;
     }
 
-    // 4. Verificar que el usuario exista
-    if (!user) {
+    // 4. Protección contra timing attack: ejecutar bcrypt SIEMPRE
+    const dummyHash = '$2b$12$dummyhashforunknownusers1234567890ab';
+    const hashToCompare = user?.password_hash || dummyHash;
+    const isPasswordValid = await bcrypt.compare(password, hashToCompare);
+
+    // 5. Verificar que el usuario exista y el password sea válido
+    if (!user || !isPasswordValid) {
+      // Registrar intento fallido y verificar lockout
+      await this.loginAttemptService.checkAndRecordAttempt(email, ip, false);
+      this.logger.warn(`Intento de login fallido: email=${email}, ip=${ip}, reason=credenciales_invalidas`);
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // 5. Comparar contraseña con bcrypt
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
+    // Registrar intento exitoso y limpiar intentos fallidos previos
+    await this.loginAttemptService.checkAndRecordAttempt(email, ip, true);
 
     // 5.5. Si es admin y tiene MFA habilitado, retornar token temporal
     if (adminUser && isAdminUser(user) && adminUser.mfa_enabled) {

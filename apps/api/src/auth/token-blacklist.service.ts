@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger, UnauthorizedException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { JwtService } from '@nestjs/jwt';
@@ -153,11 +153,10 @@ export class TokenBlacklistService {
     } catch (error) {
       const err = error as Error;
       this.logger.error(
-        `Error al verificar blacklist: ${err.message}`,
+        `Redis caído - bloqueando por seguridad: ${err.message}`,
         err.stack,
       );
-      // En caso de error de Redis, ser permisivo (no bloquear acceso legítimo)
-      return false;
+      throw new UnauthorizedException('Servicio temporalmente no disponible');
     }
   }
 

@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Res,
   Req,
+  Ip,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import {
@@ -17,6 +18,7 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -132,24 +134,26 @@ export class AuthController {
   })
   @ApiBody({ type: LoginDto })
   @Post('login')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @RequireCsrf() // ✅ Proteger login de CSRF (solo formularios web)
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
+    @Ip() ip: string,
   ) {
-    const result = await this.authService.login(loginDto);
+    const result = await this.authService.login(loginDto, ip);
 
     // Configurar cookie httpOnly
     res.cookie('auth-token', result.access_token, {
       httpOnly: true, // No accesible desde JavaScript
       secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // none en prod para cross-domain, lax en dev
+      sameSite: 'lax', // Protección CSRF
       // NOTA: domain comentado temporalmente - frontend y backend están en dominios diferentes
       // Para que las cookies funcionen entre Railway y Vercel, NO especificar domain
       // TODO: Configurar api.mateatletasclub.com.ar en Railway, luego descomentar:
       // domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      maxAge: 60 * 60 * 1000, // 1 hora, igual que JWT en producción
       path: '/',
     });
 
@@ -184,26 +188,28 @@ export class AuthController {
   })
   @ApiBody({ type: LoginEstudianteDto })
   @Post('estudiante/login')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   async loginEstudiante(
     @Body() loginEstudianteDto: LoginEstudianteDto,
     @Res({ passthrough: true }) res: Response,
+    @Ip() ip: string,
   ) {
     // ✅ SECURITY FIX: Removido logging de credenciales
     // El logger global con redaction ya maneja el logging seguro
 
-    const result = await this.authService.loginEstudiante(loginEstudianteDto);
+    const result = await this.authService.loginEstudiante(loginEstudianteDto, ip);
 
     // Configurar cookie httpOnly
     res.cookie('auth-token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // none en prod para cross-domain, lax en dev
+      sameSite: 'lax', // Protección CSRF
       // NOTA: domain comentado temporalmente - frontend y backend están en dominios diferentes
       // Para que las cookies funcionen entre Railway y Vercel, NO especificar domain
       // TODO: Configurar api.mateatletasclub.com.ar en Railway, luego descomentar:
       // domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      maxAge: 60 * 60 * 1000, // 1 hora, igual que JWT en producción
       path: '/',
     });
 
@@ -305,7 +311,7 @@ export class AuthController {
     res.clearCookie('auth-token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: 'lax',
       // NOTA: domain comentado - debe coincidir con la configuración de login
       // domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
       path: '/',
@@ -368,8 +374,8 @@ export class AuthController {
     res.cookie('auth-token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 1000, // 1 hora, igual que JWT en producción
       path: '/',
     });
 
