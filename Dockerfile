@@ -52,12 +52,8 @@ ENV NODE_ENV=production
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY apps/api/package.json ./apps/api/
 COPY packages/contracts/package.json ./packages/contracts/
-# Instalar deps de producción (ya no hay postinstall que ejecutar)
+# Instalar deps de producción (ahora incluye prisma CLI)
 RUN yarn workspaces focus api --production
-
-# Copiar Prisma CLI desde deps (está en apps/api/node_modules debido a nmHoistingLimits)
-COPY --from=deps /monorepo/apps/api/node_modules/.bin/prisma ./apps/api/node_modules/.bin/prisma
-COPY --from=deps /monorepo/apps/api/node_modules/prisma ./apps/api/node_modules/prisma
 
 # Copiar schema y Prisma Client GENERADO desde builder
 COPY --from=builder /monorepo/apps/api/prisma ./apps/api/prisma
