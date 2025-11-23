@@ -7,8 +7,8 @@ export class EstudianteInscripcionDto {
   nombre: string;
 
   @IsNumber()
-  @Min(6)
-  @Max(12)
+  @Min(5)
+  @Max(17)
   edad: number;
 
   @IsArray()
