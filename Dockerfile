@@ -59,6 +59,8 @@ RUN yarn workspaces focus api --production
 COPY --from=builder /monorepo/apps/api/prisma ./apps/api/prisma
 COPY --from=builder /monorepo/apps/api/node_modules/@prisma/client ./apps/api/node_modules/@prisma/client
 COPY --from=builder /monorepo/apps/api/node_modules/.prisma/client ./apps/api/node_modules/.prisma/client
+COPY --from=builder /monorepo/apps/api/node_modules/@prisma/engines ./apps/api/node_modules/@prisma/engines
+
 
 # Copiar código compilado
 COPY --from=builder /monorepo/apps/api/dist ./apps/api/dist
