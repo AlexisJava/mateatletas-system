@@ -55,9 +55,9 @@ COPY packages/contracts/package.json ./packages/contracts/
 # Instalar deps de producción (ya no hay postinstall que ejecutar)
 RUN yarn workspaces focus api --production
 
-# Copiar Prisma CLI desde builder (necesario para migrations)
-COPY --from=builder /monorepo/node_modules/.bin/prisma ./node_modules/.bin/prisma
-COPY --from=builder /monorepo/node_modules/prisma ./node_modules/prisma
+# Copiar Prisma CLI desde deps (necesario para migrations)
+COPY --from=deps /monorepo/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=deps /monorepo/node_modules/prisma ./node_modules/prisma
 
 # Copiar schema y Prisma Client GENERADO desde builder
 COPY --from=builder /monorepo/apps/api/prisma ./apps/api/prisma
