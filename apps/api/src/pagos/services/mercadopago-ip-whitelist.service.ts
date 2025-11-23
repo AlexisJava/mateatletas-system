@@ -63,6 +63,7 @@ export class MercadoPagoIpWhitelistService {
   private readonly additionalAllowedIps: string[] = [
     '127.0.0.1', // Localhost (solo desarrollo)
     '::1', // Localhost IPv6 (solo desarrollo)
+    '::ffff:127.0.0.1', // IPv4-mapped IPv6 localhost (tests de integración)
   ];
 
   constructor() {

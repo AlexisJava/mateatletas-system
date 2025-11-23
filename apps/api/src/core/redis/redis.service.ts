@@ -36,27 +36,50 @@ export class RedisService implements OnModuleDestroy {
   private readonly isAvailable: boolean = false;
 
   constructor(private readonly configService: ConfigService) {
+    // Prioridad 1: REDIS_URL (Railway, Heroku, etc.)
+    const redisUrl = this.configService.get<string>('REDIS_URL');
+
+    // Prioridad 2: REDIS_HOST + REDIS_PORT (configuración manual)
     const host = this.configService.get<string>('REDIS_HOST', 'localhost');
     const port = this.configService.get<number>('REDIS_PORT', 6379);
     const password = this.configService.get<string>('REDIS_PASSWORD');
 
     try {
-      this.client = new Redis({
-        host,
-        port,
-        password,
-        retryStrategy: (times: number) => {
-          // Reintentar cada 2s hasta 5 intentos
-          if (times > 5) {
-            this.logger.error(
-              '❌ Redis no disponible después de 5 reintentos. Fallback a DB.',
-            );
-            return null; // Dejar de reintentar
-          }
-          return Math.min(times * 2000, 10000);
-        },
-        lazyConnect: true, // No conectar inmediatamente (útil para testing)
-      });
+      // Si existe REDIS_URL, usarlo (Railway production)
+      if (redisUrl) {
+        this.logger.log(`🔗 Conectando a Redis usando REDIS_URL...`);
+        this.client = new Redis(redisUrl, {
+          retryStrategy: (times: number) => {
+            if (times > 5) {
+              this.logger.error(
+                '❌ Redis no disponible después de 5 reintentos. Fallback a DB.',
+              );
+              return null;
+            }
+            return Math.min(times * 2000, 10000);
+          },
+          lazyConnect: true,
+        });
+      } else {
+        // Fallback a REDIS_HOST/PORT (desarrollo local)
+        this.logger.log(`🔗 Conectando a Redis usando REDIS_HOST=${host}:${port}...`);
+        this.client = new Redis({
+          host,
+          port,
+          password,
+          retryStrategy: (times: number) => {
+            // Reintentar cada 2s hasta 5 intentos
+            if (times > 5) {
+              this.logger.error(
+                '❌ Redis no disponible después de 5 reintentos. Fallback a DB.',
+              );
+              return null; // Dejar de reintentar
+            }
+            return Math.min(times * 2000, 10000);
+          },
+          lazyConnect: true, // No conectar inmediatamente (útil para testing)
+        });
+      }
 
       // Event listeners
       this.client.on('connect', () => {

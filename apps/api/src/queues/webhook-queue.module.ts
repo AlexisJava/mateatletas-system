@@ -47,17 +47,30 @@ import { Inscripciones2026Module } from '../inscripciones-2026/inscripciones-202
   imports: [
     BullModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        redis: {
-          host: configService.get<string>('REDIS_HOST', 'localhost'),
-          port: configService.get<number>('REDIS_PORT', 6379),
-          password: configService.get<string>('REDIS_PASSWORD'),
-        },
-        defaultJobOptions: {
-          removeOnComplete: 100, // Mantener últimos 100 jobs exitosos
-          removeOnFail: 500, // Mantener últimos 500 jobs fallidos para debugging
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        // Prioridad 1: REDIS_URL (Railway, Heroku, etc.)
+        const redisUrl = configService.get<string>('REDIS_URL');
+
+        // Prioridad 2: REDIS_HOST + REDIS_PORT (desarrollo local)
+        const host = configService.get<string>('REDIS_HOST', 'localhost');
+        const port = configService.get<number>('REDIS_PORT', 6379);
+        const password = configService.get<string>('REDIS_PASSWORD');
+
+        return {
+          redis: redisUrl
+            ? redisUrl // Railway production
+            : {
+                // Desarrollo local
+                host,
+                port,
+                password,
+              },
+          defaultJobOptions: {
+            removeOnComplete: 100, // Mantener últimos 100 jobs exitosos
+            removeOnFail: 500, // Mantener últimos 500 jobs fallidos para debugging
+          },
+        };
+      },
       inject: [ConfigService],
     }),
     BullModule.registerQueue({

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../app.module';
-import * as request from 'supertest';
+import request from 'supertest';
 
 /**
  * ESCENARIOS DE PRODUCCIÓN REALES
@@ -21,6 +21,7 @@ describe('🌍 ESCENARIOS DE PRODUCCIÓN REALES', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api'); // Configurar el mismo prefix que en producción
     await app.init();
   });
 

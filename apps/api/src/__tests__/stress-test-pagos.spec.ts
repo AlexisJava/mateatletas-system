@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../app.module';
-import * as request from 'supertest';
+import request from 'supertest';
 
 /**
  * STRESS TEST EXTREMO - Sistema de Pagos
@@ -17,7 +17,6 @@ import * as request from 'supertest';
  */
 describe('🔥 STRESS TEST EXTREMO - Sistema de Pagos 🔥', () => {
   let app: INestApplication;
-  let baseUrl: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -25,8 +24,8 @@ describe('🔥 STRESS TEST EXTREMO - Sistema de Pagos 🔥', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api'); // Configurar el mismo prefix que en producción
     await app.init();
-    baseUrl = await app.getUrl();
   });
 
   afterAll(async () => {
@@ -39,6 +38,8 @@ describe('🔥 STRESS TEST EXTREMO - Sistema de Pagos 🔥', () => {
 
       const startTime = Date.now();
       const numWebhooks = 1000;
+      const errorSamples: any[] = [];
+      const statusCodes: Map<number, number> = new Map();
 
       // Crear 1000 webhooks únicos
       const webhookPromises = Array.from({ length: numWebhooks }, (_, i) => {
@@ -58,11 +59,34 @@ describe('🔥 STRESS TEST EXTREMO - Sistema de Pagos 🔥', () => {
         return request(app.getHttpServer())
           .post('/api/inscripciones-2026/webhook')
           .send(webhook)
-          .expect((res) => {
+          .then((res) => {
+            // Contar status codes
+            statusCodes.set(res.status, (statusCodes.get(res.status) || 0) + 1);
+
             // Aceptar 200 (procesado), 202 (encolado) o incluso 429 (rate limit)
             if (![200, 202, 429].includes(res.status)) {
+              // Guardar muestra de error (solo primeros 10)
+              if (errorSamples.length < 10) {
+                errorSamples.push({
+                  status: res.status,
+                  body: res.body,
+                  error: res.text,
+                });
+              }
               throw new Error(`Status inesperado: ${res.status}`);
             }
+            return res;
+          })
+          .catch((err) => {
+            // Capturar errores de red/conexión
+            if (errorSamples.length < 10) {
+              errorSamples.push({
+                error: err.message,
+                code: err.code,
+                type: 'NetworkError',
+              });
+            }
+            throw err;
           });
       });
 
@@ -82,9 +106,31 @@ describe('🔥 STRESS TEST EXTREMO - Sistema de Pagos 🔥', () => {
       console.log(`   ⏱️  Duración: ${duration}ms`);
       console.log(`   🚀 Throughput: ${throughput.toFixed(2)} webhooks/segundo`);
 
+      console.log('\n📈 STATUS CODES RECIBIDOS:');
+      statusCodes.forEach((count, status) => {
+        console.log(`   ${status}: ${count} requests`);
+      });
+
+      if (errorSamples.length > 0) {
+        console.log('\n❌ MUESTRAS DE ERRORES (primeros 10):');
+        errorSamples.forEach((err, i) => {
+          console.log(`\n   Error #${i + 1}:`);
+          console.log(`   ${JSON.stringify(err, null, 2)}`);
+        });
+      }
+
       // Criterios de éxito:
       // - Al menos 90% de éxito (algunos pueden fallar por rate limit, es aceptable)
       // - Throughput > 10 webhooks/segundo
+      if (successRate < 90) {
+        throw new Error(
+          `❌ BOMBARDEO FALLIDO:\n` +
+          `   Success rate: ${successRate.toFixed(2)}% (esperado >90%)\n` +
+          `   Fallidos: ${failed}/${numWebhooks}\n` +
+          `   Ver muestras de errores arriba para más detalles`
+        );
+      }
+
       expect(successRate).toBeGreaterThan(90);
       expect(throughput).toBeGreaterThan(10);
     }, 120000); // 2 minutos timeout
