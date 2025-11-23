@@ -93,14 +93,16 @@ export class Inscripciones2026Service {
    * @returns Username normalizado
    */
   private generateUsername(nombreCompleto: string): string {
-    const username = nombreCompleto
+    const baseUsername = nombreCompleto
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // Quitar acentos
-      .replace(/\s+/g, '.') // Espacios a puntos
-      .replace(/[^a-z0-9.]/g, ''); // Solo letras, números y puntos
+      .replace(/\s+/g, '') // Eliminar espacios
+      .replace(/[^a-z0-9]/g, ''); // Solo letras y números
 
-    return username;
+    // Agregar sufijo aleatorio de 4 dígitos para garantizar unicidad
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    return `${baseUsername}${randomSuffix}`;
   }
 
   /**
