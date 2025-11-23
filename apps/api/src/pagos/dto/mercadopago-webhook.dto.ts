@@ -1,10 +1,14 @@
-import { IsString, IsNotEmpty, IsOptional, IsObject } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsObject, IsBoolean, IsNumber } from 'class-validator';
 
 /**
  * DTO para validar webhooks de MercadoPago
  * Documentación: https://www.mercadopago.com.ar/developers/es/docs/your-integrations/notifications/webhooks
  */
 export class MercadoPagoWebhookDto {
+  @IsNumber()
+  @IsNotEmpty()
+  id!: number; // ID del webhook notification
+
   @IsString()
   @IsNotEmpty()
   action!: string; // payment.created, payment.updated, etc.
@@ -19,21 +23,21 @@ export class MercadoPagoWebhookDto {
     id: string; // ID del recurso (payment, merchant_order)
   };
 
-  @IsString()
-  @IsOptional()
-  live_mode?: string; // true o false
+  @IsBoolean()
+  @IsNotEmpty()
+  live_mode!: boolean; // true o false
 
   @IsString()
-  @IsOptional()
-  date_created?: string; // ISO timestamp
+  @IsNotEmpty()
+  date_created!: string; // ISO timestamp
 
   @IsString()
-  @IsOptional()
-  user_id?: string; // ID del usuario de MercadoPago
+  @IsNotEmpty()
+  user_id!: string; // ID del usuario de MercadoPago
 
   @IsString()
-  @IsOptional()
-  api_version?: string; // v1, v2, etc.
+  @IsNotEmpty()
+  api_version!: string; // v1, v2, etc.
 }
 
 /**

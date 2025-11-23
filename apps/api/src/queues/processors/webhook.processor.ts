@@ -1,7 +1,7 @@
 import { Processor, Process, OnQueueActive, OnQueueCompleted, OnQueueFailed } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
-import { MercadoPagoWebhookDto } from '../webhook-queue.service';
+import { MercadoPagoWebhookDto } from '../../pagos/dto/mercadopago-webhook.dto';
 import { Inscripciones2026Service } from '../../inscripciones-2026/inscripciones-2026.service';
 
 /**

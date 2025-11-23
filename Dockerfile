@@ -64,8 +64,10 @@ COPY --from=builder /monorepo/apps/api/node_modules/.prisma/client ./apps/api/no
 COPY --from=builder /monorepo/apps/api/dist ./apps/api/dist
 COPY --from=builder /monorepo/packages/contracts/dist ./packages/contracts/dist
 
-EXPOSE 8080
-CMD ["node", "apps/api/dist/src/main.js"]
+WORKDIR /monorepo/apps/api
 
-# Rebuild: 20251103-145500
+EXPOSE 8080
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
+
+# Rebuild: 20251122-230800
 

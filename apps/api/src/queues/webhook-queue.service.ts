@@ -1,22 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue, JobOptions } from 'bull';
-
-/**
- * DTO para webhooks de MercadoPago
- */
-export interface MercadoPagoWebhookDto {
-  action: string;
-  api_version: string;
-  data: {
-    id: string;
-  };
-  date_created: string;
-  id: number;
-  live_mode: boolean;
-  type: string;
-  user_id: string;
-}
+import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
 
 /**
  * WebhookQueueService - Servicio de Queue Asíncrono (PASO 3.2)
