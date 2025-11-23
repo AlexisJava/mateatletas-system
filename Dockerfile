@@ -55,9 +55,9 @@ COPY packages/contracts/package.json ./packages/contracts/
 # Instalar deps de producción (ya no hay postinstall que ejecutar)
 RUN yarn workspaces focus api --production
 
-# Copiar Prisma CLI desde deps (necesario para migrations)
-COPY --from=deps /monorepo/node_modules/.bin/prisma ./node_modules/.bin/prisma
-COPY --from=deps /monorepo/node_modules/prisma ./node_modules/prisma
+# Copiar Prisma CLI desde deps (está en apps/api/node_modules debido a nmHoistingLimits)
+COPY --from=deps /monorepo/apps/api/node_modules/.bin/prisma ./apps/api/node_modules/.bin/prisma
+COPY --from=deps /monorepo/apps/api/node_modules/prisma ./apps/api/node_modules/prisma
 
 # Copiar schema y Prisma Client GENERADO desde builder
 COPY --from=builder /monorepo/apps/api/prisma ./apps/api/prisma
@@ -71,7 +71,7 @@ COPY --from=builder /monorepo/packages/contracts/dist ./packages/contracts/dist
 WORKDIR /monorepo/apps/api
 
 EXPOSE 8080
-CMD ["sh", "-c", "../../node_modules/.bin/prisma migrate deploy && node dist/src/main.js"]
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node dist/src/main.js"]
 
 # Rebuild: 20251123-190300
 
