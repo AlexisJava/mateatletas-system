@@ -19,6 +19,18 @@ const nextConfig = {
   },
 
   // ========================================
+  // PROXY PARA DESARROLLO (COOKIES)
+  // ========================================
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3001/api/:path*',
+      },
+    ];
+  },
+
+  // ========================================
   // OPTIMIZACIONES DE PERFORMANCE
   // ========================================
 
