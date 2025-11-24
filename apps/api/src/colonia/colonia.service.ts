@@ -248,14 +248,30 @@ export class ColoniaService {
 
   /**
    * Genera un username único basado en el nombre del estudiante
+   * Valida unicidad en la base de datos para prevenir colisiones
    *
    * @param nombre - Nombre del estudiante
+   * @param tx - Cliente de transacción de Prisma
    * @returns Username único en formato {nombre}{random4digits}
    */
-  private generateUsername(nombre: string): string {
-    const baseUsername = nombre.toLowerCase().replace(/\s+/g, '');
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    return `${baseUsername}${randomNum}`;
+  private async generateUniqueUsername(nombre: string, tx: Prisma.TransactionClient): Promise<string> {
+    let username: string;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    do {
+      const baseUsername = nombre.toLowerCase().replace(/\s+/g, '');
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      username = `${baseUsername}${randomNum}`;
+
+      const exists = await tx.estudiante.findFirst({ where: { username } });
+      if (!exists) return username;
+
+      attempts++;
+    } while (attempts < maxAttempts);
+
+    // Fallback: timestamp para garantizar unicidad
+    return `${nombre.toLowerCase().replace(/\s+/g, '')}${Date.now()}`;
   }
 
   /**
@@ -272,18 +288,20 @@ export class ColoniaService {
     tutorId: string
   ): Promise<{ estudiantesFromDB: EstudianteFromDB[]; estudiantesData: EstudianteData[]; pins: string[] }> {
     // Preparar datos de estudiantes y generar usernames únicos
-    const estudiantesData = dto.estudiantes.map((estudianteDto) => {
-      const username = this.generateUsername(estudianteDto.nombre);
+    const estudiantesData = await Promise.all(
+      dto.estudiantes.map(async (estudianteDto) => {
+        const username = await this.generateUniqueUsername(estudianteDto.nombre, tx);
 
-      return {
-        username,
-        nombre: estudianteDto.nombre,
-        apellido: '',
-        edad: estudianteDto.edad,
-        nivelEscolar: estudianteDto.edad <= 7 ? 'Primaria' : estudianteDto.edad <= 12 ? 'Primaria' : 'Secundaria',
-        tutor_id: tutorId,
-      };
-    });
+        return {
+          username,
+          nombre: estudianteDto.nombre,
+          apellido: '',
+          edad: estudianteDto.edad,
+          nivelEscolar: estudianteDto.edad <= 7 ? 'Primaria' : estudianteDto.edad <= 12 ? 'Primaria' : 'Secundaria',
+          tutor_id: tutorId,
+        };
+      })
+    );
 
     // Crear todos los estudiantes en paralelo
     const estudiantesFromDB = await Promise.all(
@@ -680,8 +698,37 @@ export class ColoniaService {
 
   /**
    * Actualiza el estado de un pago de Colonia según respuesta de MercadoPago
+   * FIX CRÍTICO: Valida que el monto pagado coincida con el esperado (anti-fraude)
    */
   private async actualizarPagoColonia(pagoId: string, payment: MercadoPagoPayment) {
+    // Obtener el pago esperado de la BD
+    const pagoEsperado = await this.prisma.coloniaPago.findUnique({
+      where: { id: pagoId },
+    });
+
+    if (!pagoEsperado) {
+      throw new BadRequestException('Pago no encontrado');
+    }
+
+    // VALIDAR MONTO - FIX CRÍTICO ANTI-FRAUDE
+    if (payment.status === 'approved') {
+      const montoEsperado = pagoEsperado.monto;
+      const montoPagado = payment.transaction_amount;
+
+      if (Math.abs(montoPagado - montoEsperado) > 1) {
+        this.logger.error('🚨 INTENTO DE FRAUDE: Monto pagado no coincide', {
+          pagoId,
+          montoEsperado,
+          montoPagado,
+          paymentId: payment.id,
+        });
+
+        throw new BadRequestException(
+          'El monto pagado no coincide con el monto esperado',
+        );
+      }
+    }
+
     // Determinar nuevo estado según respuesta de MercadoPago
     let nuevoEstadoPago = 'pending';
 

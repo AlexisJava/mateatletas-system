@@ -1,4 +1,4 @@
-import { Injectable, TooManyRequestsException } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 
 /**
@@ -53,8 +53,9 @@ export class LoginAttemptService {
 
     // 4. Si hay 5 o más fallos, bloquear cuenta temporalmente
     if (failureCount >= 5) {
-      throw new TooManyRequestsException(
+      throw new HttpException(
         'Demasiados intentos fallidos. Cuenta bloqueada por 15 minutos.',
+        HttpStatus.TOO_MANY_REQUESTS,
       );
     }
   }

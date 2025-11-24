@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Logger, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ColoniaService } from './colonia.service';
 import { CreateInscriptionDto } from './dto/create-inscription.dto';
 import { MercadoPagoWebhookGuard } from '../pagos/guards/mercadopago-webhook.guard';
@@ -46,6 +47,7 @@ export class ColoniaController {
    * }
    */
   @Post('inscripcion')
+  @Throttle({ default: { limit: 5, ttl: 3600000 } })
   @HttpCode(HttpStatus.CREATED)
   async createInscription(@Body() createInscriptionDto: CreateInscriptionDto) {
     this.logger.log(`Nueva solicitud de inscripción - Email: ${createInscriptionDto.email}`);
