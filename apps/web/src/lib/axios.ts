@@ -44,7 +44,8 @@ type ApiClient = Omit<AxiosInstance, 'get' | 'post' | 'put' | 'patch' | 'delete'
 };
 
 const apiClient: ApiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api', // Usar proxy de Next.js en desarrollo
+  // Desarrollo: usa proxy (/api → localhost:3001) | Producción: usa NEXT_PUBLIC_API_URL (Railway)
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

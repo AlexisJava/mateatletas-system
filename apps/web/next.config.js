@@ -22,12 +22,17 @@ const nextConfig = {
   // PROXY PARA DESARROLLO (COOKIES)
   // ========================================
   async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:3001/api/:path*',
-      },
-    ];
+    // Solo usar proxy en desarrollo (localhost)
+    // En producción, axios debe usar NEXT_PUBLIC_API_URL directamente
+    if (process.env.NODE_ENV !== 'production') {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'http://localhost:3001/api/:path*',
+        },
+      ];
+    }
+    return [];
   },
 
   // ========================================
