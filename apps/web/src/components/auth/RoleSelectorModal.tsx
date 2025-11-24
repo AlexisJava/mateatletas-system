@@ -1,156 +1,108 @@
 'use client';
 
+import { Shield, GraduationCap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, GraduationCap, ArrowRight } from 'lucide-react';
-import { UserRole } from '@/store/auth.store';
 
 interface RoleSelectorModalProps {
-  roles: UserRole[];
-  onSelectRole: (_role: UserRole) => void;
-  userName: string;
+  roles: string[];
+  onSelectRole: (role: 'admin' | 'docente') => void;
 }
 
+const ROLE_CONFIG = {
+  admin: {
+    label: 'Administrador',
+    description: 'Gestionar sistema, usuarios y configuración',
+    icon: Shield,
+    gradient: 'from-purple-600 to-violet-600',
+    shadow: 'shadow-purple-500/50',
+  },
+  docente: {
+    label: 'Docente',
+    description: 'Gestionar clases, alumnos y contenido',
+    icon: GraduationCap,
+    gradient: 'from-blue-600 to-cyan-600',
+    shadow: 'shadow-blue-500/50',
+  },
+} as const;
+
 /**
- * Modal de selección de rol/portal
- * Aparece cuando el usuario tiene múltiples roles (ej: ["docente", "admin"])
+ * Modal para seleccionar el rol con el que iniciar sesión
+ * Se muestra cuando el usuario tiene múltiples roles (ej: ADMIN + DOCENTE)
  */
-export function RoleSelectorModal({
-  roles,
-  onSelectRole,
-  userName,
-}: RoleSelectorModalProps) {
-  const roleConfig = {
-    admin: {
-      title: 'Portal Admin',
-      description: 'Gestión completa del sistema',
-      icon: Shield,
-      gradient: 'from-purple-500 to-indigo-600',
-      bgGradient: 'from-purple-500/10 to-indigo-600/10',
-      borderColor: 'border-purple-500/30',
-      hoverBorder: 'hover:border-purple-500/60',
-      shadowColor: 'shadow-purple-500/20',
-    },
-    docente: {
-      title: 'Portal Docente',
-      description: 'Clases, estudiantes y planificaciones',
-      icon: GraduationCap,
-      gradient: 'from-emerald-500 to-teal-600',
-      bgGradient: 'from-emerald-500/10 to-teal-600/10',
-      borderColor: 'border-emerald-500/30',
-      hoverBorder: 'hover:border-emerald-500/60',
-      shadowColor: 'shadow-emerald-500/20',
-    },
-  };
+export default function RoleSelectorModal({ roles, onSelectRole }: RoleSelectorModalProps) {
+  // Filtrar solo roles válidos (admin y docente)
+  const availableRoles = roles
+    .map(r => r.toLowerCase())
+    .filter((r): r is 'admin' | 'docente' => r === 'admin' || r === 'docente');
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center px-4">
+      <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="relative w-full max-w-2xl"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="backdrop-blur-2xl bg-slate-900/90 rounded-3xl max-w-2xl w-full shadow-2xl border border-white/20"
         >
-          {/* Glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-purple-500/20 blur-[80px] opacity-50" />
+          {/* Header */}
+          <div className="p-8 text-center border-b border-white/10">
+            <motion.div
+              initial={{ y: -20 }}
+              animate={{ y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-violet-600 shadow-2xl shadow-purple-500/50 mb-6"
+            >
+              <Shield className="w-10 h-10 text-white" />
+            </motion.div>
+            <h2 className="text-4xl font-black bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent mb-3">
+              Selecciona tu Rol
+            </h2>
+            <p className="text-lg text-white/70 font-medium">
+              Tienes múltiples roles asignados. ¿Cómo quieres acceder hoy?
+            </p>
+          </div>
 
-          {/* Modal content */}
-          <div className="relative bg-gradient-to-br from-zinc-900/95 via-zinc-900/90 to-zinc-900/95 backdrop-blur-2xl rounded-3xl border border-white/[0.08] shadow-2xl overflow-hidden">
-            {/* Top accent line */}
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+          {/* Role Cards */}
+          <div className="p-8 space-y-4">
+            {availableRoles.map((role, index) => {
+              const config = ROLE_CONFIG[role];
+              const Icon = config.icon;
 
-            <div className="p-10">
-              {/* Header */}
-              <div className="text-center mb-8 space-y-3">
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+              return (
+                <motion.button
+                  key={role}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + index * 0.1 }}
+                  onClick={() => onSelectRole(role)}
+                  className={`w-full p-6 rounded-2xl bg-gradient-to-r ${config.gradient} text-white shadow-2xl ${config.shadow} hover:scale-105 transition-all group`}
                 >
-                  <span className="text-sm text-emerald-400 font-semibold">
-                    Bienvenido, {userName}
-                  </span>
-                </motion.div>
+                  <div className="flex items-center gap-5">
+                    <div className="p-4 rounded-2xl bg-white/20 group-hover:bg-white/30 transition-all">
+                      <Icon className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="text-2xl font-black text-white mb-1">
+                        {config.label}
+                      </div>
+                      <div className="text-base text-white/90 font-medium">
+                        {config.description}
+                      </div>
+                    </div>
+                    <div className="text-white/80 text-2xl group-hover:translate-x-1 transition-transform">
+                      →
+                    </div>
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
 
-                <motion.h2
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-3xl font-bold tracking-tight"
-                >
-                  Selecciona tu portal
-                </motion.h2>
-
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-white/60 text-base"
-                >
-                  Tienes acceso a múltiples portales. ¿A cuál querés ingresar?
-                </motion.p>
-              </div>
-
-              {/* Role cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {roles
-                  .filter((role) => role === 'admin' || role === 'docente')
-                  .map((role, index) => {
-                    const config = roleConfig[role as 'admin' | 'docente'];
-                    const Icon = config.icon;
-
-                    return (
-                      <motion.button
-                        key={role}
-                        initial={{ opacity: 0, x: index === 0 ? -20 : 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 + index * 0.1 }}
-                        onClick={() => onSelectRole(role)}
-                        className={`group relative p-6 rounded-2xl bg-gradient-to-br ${config.bgGradient} border ${config.borderColor} ${config.hoverBorder} transition-all hover:scale-[1.02] active:scale-[0.98]`}
-                      >
-                        {/* Icon */}
-                        <div
-                          className={`inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br ${config.gradient} shadow-lg ${config.shadowColor} mb-4`}
-                        >
-                          <Icon className="w-7 h-7 text-white" strokeWidth={2} />
-                        </div>
-
-                        {/* Content */}
-                        <div className="text-left space-y-2">
-                          <h3 className="text-xl font-bold text-white group-hover:text-white/90 transition-colors">
-                            {config.title}
-                          </h3>
-                          <p className="text-sm text-white/50 group-hover:text-white/60 transition-colors">
-                            {config.description}
-                          </p>
-                        </div>
-
-                        {/* Arrow */}
-                        <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <ArrowRight
-                            className="w-5 h-5 text-white/60"
-                            strokeWidth={2.5}
-                          />
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-              </div>
-
-              {/* Footer note */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.7 }}
-                className="mt-6 text-center"
-              >
-                <p className="text-xs text-white/40">
-                  Puedes cambiar de portal en cualquier momento desde la configuración
-                </p>
-              </motion.div>
-            </div>
+          {/* Footer */}
+          <div className="p-8 border-t border-white/10 bg-white/5 rounded-b-3xl">
+            <p className="text-center text-sm text-white/60 font-medium">
+              💡 Podrás cambiar de rol más tarde desde la configuración de tu perfil
+            </p>
           </div>
         </motion.div>
       </div>

@@ -17,6 +17,8 @@ import {
   Shield,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
+import RoleSelectorModal from '@/components/auth/RoleSelectorModal';
+import type { UserRole } from '@/store/auth.store';
 
 /**
  * Login Page - Docentes/Admin
@@ -25,7 +27,7 @@ import { useAuthStore } from '@/store/auth.store';
  */
 export default function DocenteLoginPage() {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { login, setSelectedRole } = useAuthStore();
 
   const [userType, setUserType] = useState<'docente' | 'admin'>('docente');
   const [email, setEmail] = useState('');
@@ -33,6 +35,8 @@ export default function DocenteLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,13 +44,30 @@ export default function DocenteLoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
+      // Hacer login y obtener el usuario directamente del response
+      const user = await login(email, password);
+      console.log('👤 Usuario después del login:', user);
 
-      // CRÍTICO: Obtener el rol REAL del usuario desde el store
-      // No usar userType (toggle UI) ya que puede no coincidir con el rol del backend
-      const user = useAuthStore.getState().user;
-      const redirectPath = user?.role === 'admin' ? '/admin/dashboard' : '/docente/dashboard';
+      // Verificar si el usuario tiene múltiples roles
+      const roles = user.roles || [user.role];
+      console.log('👥 Roles del usuario:', roles);
 
+      // Si tiene múltiples roles (admin + docente), mostrar selector
+      const hasMultipleRoles = roles.length > 1 &&
+        roles.some(r => r.toLowerCase() === 'admin') &&
+        roles.some(r => r.toLowerCase() === 'docente');
+
+      if (hasMultipleRoles) {
+        console.log('🔀 Usuario con múltiples roles - mostrando selector');
+        setUserRoles(roles);
+        setShowRoleSelector(true);
+        setLoading(false);
+        return;
+      }
+
+      // Si solo tiene un rol, redirigir directamente
+      const redirectPath = user.role.toLowerCase() === 'admin' ? '/admin/dashboard' : '/docente/dashboard';
+      console.log('🔀 Redirigiendo a:', redirectPath);
       router.push(redirectPath);
     } catch (err) {
       if (err instanceof Error) {
@@ -57,6 +78,15 @@ export default function DocenteLoginPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRoleSelection = (role: 'admin' | 'docente') => {
+    console.log('✅ Rol seleccionado:', role);
+    setSelectedRole(role as UserRole);
+
+    const redirectPath = role === 'admin' ? '/admin/dashboard' : '/docente/dashboard';
+    console.log('🔀 Redirigiendo a:', redirectPath);
+    router.push(redirectPath);
   };
 
   return (
@@ -320,6 +350,14 @@ export default function DocenteLoginPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Role Selector Modal */}
+      {showRoleSelector && (
+        <RoleSelectorModal
+          roles={userRoles}
+          onSelectRole={handleRoleSelection}
+        />
+      )}
     </div>
   );
 }

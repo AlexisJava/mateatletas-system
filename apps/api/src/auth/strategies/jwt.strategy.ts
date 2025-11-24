@@ -95,8 +95,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     let user;
 
+    // Normalizar el rol a lowercase para comparación case-insensitive
+    const normalizedRole = role?.toLowerCase();
+    console.log('🔄 [JWT-VALIDATE] Role normalizado:', normalizedRole);
+
     // Buscar según el rol especificado en el token
-    if (role === 'estudiante') {
+    if (normalizedRole === 'estudiante') {
       user = await this.prisma.estudiante.findUnique({
         where: { id: userId },
         select: {
@@ -127,7 +131,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           updatedAt: true,
         },
       });
-    } else if (role === 'docente') {
+    } else if (normalizedRole === 'docente') {
       user = await this.prisma.docente.findUnique({
         where: { id: userId },
         select: {
@@ -141,7 +145,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           updatedAt: true,
         },
       });
-    } else if (role === 'admin') {
+    } else if (normalizedRole === 'admin') {
       user = await this.prisma.admin.findUnique({
         where: { id: userId },
         select: {

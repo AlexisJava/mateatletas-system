@@ -41,7 +41,7 @@ interface AuthState {
   selectedRole: UserRole | null; // Rol activo cuando el usuario tiene múltiples roles
 
   // Acciones
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   loginEstudiante: (username: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
@@ -90,13 +90,18 @@ export const useAuthStore = create<AuthState>()(
           // ✅ NO guardar token en localStorage (vulnerabilidad XSS)
           // El token ya está en httpOnly cookie enviada por el backend
 
+          const user = response.user as User;
+
           set({
-            user: response.user as User,
+            user,
             token: null, // ✅ No almacenar token en memoria/localStorage
             isAuthenticated: true,
             isLoading: false,
             selectedRole: null,
           });
+
+          // Retornar el user para que el componente pueda acceder al rol inmediatamente
+          return user;
         } catch (error: unknown) {
           set({ isLoading: false });
           throw error;
