@@ -85,7 +85,7 @@ apiClient.interceptors.response.use(
     if (typeof window !== 'undefined') {
       const status = error.response?.status ?? 0;
       const currentPath = window.location.pathname;
-      const isAuthPage = currentPath === '/login' || currentPath === '/register';
+      const isAuthPage = currentPath === '/login' || currentPath === '/register' || currentPath === '/docente-login';
 
       switch (status) {
         case 401: {
