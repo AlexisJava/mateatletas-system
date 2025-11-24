@@ -142,15 +142,10 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Ip() ip: string,
   ) {
-    console.log('🔐 [LOGIN] Iniciando login para:', loginDto.email);
-    console.log('🌍 [LOGIN] NODE_ENV:', process.env.NODE_ENV);
-    console.log('🌍 [LOGIN] IP del cliente:', ip);
-
     const result = await this.authService.login(loginDto, ip);
-    console.log('✅ [LOGIN] Login exitoso para usuario ID:', result.user.id);
-    console.log('🎫 [LOGIN] Token generado (primeros 20 chars):', result.access_token?.substring(0, 20) + '...');
 
-    const cookieConfig = {
+    // Configurar cookie httpOnly
+    res.cookie('auth-token', result.access_token, {
       httpOnly: true, // No accesible desde JavaScript
       secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
       sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none', // 'none' en dev para cross-port
@@ -160,19 +155,7 @@ export class AuthController {
       // domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
       maxAge: 60 * 60 * 1000, // 1 hora, igual que JWT en producción
       path: '/',
-    } as any;
-
-    console.log('🍪 [LOGIN] Configuración de cookie:', {
-      httpOnly: cookieConfig.httpOnly,
-      secure: cookieConfig.secure,
-      sameSite: cookieConfig.sameSite,
-      maxAge: cookieConfig.maxAge,
-      path: cookieConfig.path,
     });
-
-    // Configurar cookie httpOnly
-    res.cookie('auth-token', result.access_token, cookieConfig);
-    console.log('✅ [LOGIN] Cookie "auth-token" establecida correctamente');
 
     // Retornar solo el user (el token va en la cookie)
     return { user: result.user };
@@ -274,17 +257,10 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async getProfile(@GetUser() user: AuthUser, @Req() req: Request) {
-    console.log('👤 [PROFILE] Request recibido');
-    console.log('🍪 [PROFILE] Cookies recibidas:', req.cookies);
-    console.log('🔑 [PROFILE] Header Authorization:', req.headers.authorization ? 'Presente' : 'Ausente');
-    console.log('✅ [PROFILE] Usuario autenticado:', { id: user.id, email: user.email, role: user.role });
-
+  async getProfile(@GetUser() user: AuthUser) {
     // Usar roles[0] como fallback si role está undefined (multi-role scenario)
     const role = user.role || user.roles[0];
-    const profile = await this.authService.getProfile(user.id, role);
-    console.log('✅ [PROFILE] Perfil obtenido exitosamente');
-    return profile;
+    return this.authService.getProfile(user.id, role);
   }
 
   /**

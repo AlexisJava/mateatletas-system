@@ -44,13 +44,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       // Extraer token desde cookie 'auth-token' o fallback a Bearer header
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request & { cookies?: { 'auth-token'?: string } }) => {
+          console.log('🔍 [JWT-STRATEGY] Extrayendo token...');
+          console.log('🍪 [JWT-STRATEGY] request.cookies:', request?.cookies);
+          console.log('🔑 [JWT-STRATEGY] Authorization header:', request?.headers?.authorization);
+
           // Prioridad 1: Intentar desde cookie
           const token = request?.cookies?.['auth-token'];
-          if (token) return token;
+          if (token) {
+            console.log('✅ [JWT-STRATEGY] Token extraído de COOKIE (primeros 20 chars):', token.substring(0, 20) + '...');
+            return token;
+          }
 
           // Prioridad 2: Fallback a Bearer header (para Swagger y tests)
           const bearerToken = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
-          return bearerToken;
+          if (bearerToken) {
+            console.log('✅ [JWT-STRATEGY] Token extraído de HEADER (primeros 20 chars):', bearerToken.substring(0, 20) + '...');
+            return bearerToken;
+          }
+
+          console.log('❌ [JWT-STRATEGY] NO se encontró token en cookie ni en header');
+          return null;
         },
       ]),
       // No ignorar la expiración del token
@@ -66,6 +79,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @returns Usuario completo desde la base de datos
    */
   async validate(payload: JwtPayload) {
+    console.log('🔐 [JWT-VALIDATE] Token decodificado exitosamente');
+    console.log('📦 [JWT-VALIDATE] Payload:', { sub: payload.sub, email: payload.email, role: payload.role });
+
     const { sub: userId, role, roles } = payload;
 
     const normalizedRoles =
@@ -74,6 +90,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         : role
           ? [role as Role]
           : [];
+
+    console.log('👤 [JWT-VALIDATE] Buscando usuario:', { userId, role, normalizedRoles });
 
     let user;
 
@@ -157,8 +175,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     // Si el usuario no existe, el token es inválido
     if (!user) {
+      console.log('❌ [JWT-VALIDATE] Usuario NO encontrado en BD:', { userId, role });
       throw new UnauthorizedException('Token inválido o usuario no encontrado');
     }
+
+    console.log('✅ [JWT-VALIDATE] Usuario encontrado en BD:', { id: user.id, email: user.email });
+    console.log('✅ [JWT-VALIDATE] Inyectando usuario en request.user');
 
     // El objeto user se inyectará en request.user
     return { ...user, role, roles: normalizedRoles };
