@@ -94,7 +94,7 @@ async function main() {
       nombre: 'Dante',
       apellido: 'Migani',
       edad: 6,
-      nivel_escolar: '2do Primaria',
+      nivelEscolar: '2do Primaria',
       tutor_id: laura.id,
     }
   });
@@ -111,7 +111,7 @@ async function main() {
       nombre: 'Nicolas',
       apellido: 'Schenone',
       edad: 6,
-      nivel_escolar: '3ro Primaria',
+      nivelEscolar: '3ro Primaria',
       tutor_id: adriana.id,
     }
   });
@@ -128,7 +128,7 @@ async function main() {
       nombre: 'Isabella',
       apellido: 'Schenone',
       edad: 5,
-      nivel_escolar: '2do Primaria',
+      nivelEscolar: '2do Primaria',
       tutor_id: adriana.id,
     }
   });
@@ -145,7 +145,7 @@ async function main() {
       nombre: 'Giuliana',
       apellido: 'Schenone',
       edad: 8,
-      nivel_escolar: '4to Primaria',
+      nivelEscolar: '4to Primaria',
       tutor_id: adriana.id,
     }
   });
@@ -162,7 +162,7 @@ async function main() {
       nombre: 'Theo',
       apellido: 'Ghesla',
       edad: 6,
-      nivel_escolar: '3ro Primaria',
+      nivelEscolar: '3ro Primaria',
       tutor_id: adriana.id,
     }
   });
