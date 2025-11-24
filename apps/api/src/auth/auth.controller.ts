@@ -148,7 +148,7 @@ export class AuthController {
     res.cookie('auth-token', result.access_token, {
       httpOnly: true, // No accesible desde JavaScript
       secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
-      sameSite: 'lax', // Protección CSRF
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none', // 'none' en dev para cross-port
       // NOTA: domain comentado temporalmente - frontend y backend están en dominios diferentes
       // Para que las cookies funcionen entre Railway y Vercel, NO especificar domain
       // TODO: Configurar api.mateatletasclub.com.ar en Railway, luego descomentar:
@@ -204,7 +204,7 @@ export class AuthController {
     res.cookie('auth-token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // Protección CSRF
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none', // 'none' en dev para cross-port
       // NOTA: domain comentado temporalmente - frontend y backend están en dominios diferentes
       // Para que las cookies funcionen entre Railway y Vercel, NO especificar domain
       // TODO: Configurar api.mateatletasclub.com.ar en Railway, luego descomentar:
@@ -311,7 +311,7 @@ export class AuthController {
     res.clearCookie('auth-token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none', // 'none' en dev para cross-port
       // NOTA: domain comentado - debe coincidir con la configuración de login
       // domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
       path: '/',
@@ -374,7 +374,7 @@ export class AuthController {
     res.cookie('auth-token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none', // 'none' en dev para cross-port
       maxAge: 60 * 60 * 1000, // 1 hora, igual que JWT en producción
       path: '/',
     });
