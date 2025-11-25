@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Nunito, Lilita_One, Orbitron, Rajdhani } from 'next/font/google';
 import './globals.css';
 import './animations.css';
-import './landing.css';
 import '@/components/backgrounds/CosmosBackgroundGlobal.css';
 import { QueryProvider } from '@/lib/providers/QueryProvider';
 import { Toaster } from 'sonner';
