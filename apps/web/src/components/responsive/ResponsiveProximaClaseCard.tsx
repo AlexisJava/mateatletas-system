@@ -195,7 +195,7 @@ export function ResponsiveProximaClaseCard({
  *     titulo: 'Álgebra Lineal',
  *     fecha_hora_inicio: '2025-10-31T14:00:00',
  *     duracion_minutos: 60,
- *     grupo: { nombre: 'Grupo Fénix' }
+ *     grupo: { nombre: 'Grupo Quantum' }
  *   }}
  *   onClick={() => navigate('/clase')}
  *   delay={0.4}

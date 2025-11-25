@@ -58,10 +58,10 @@
     "password": "Admin123!"
   },
   "equipos": [
-    { "id": 1, "nombre": "Fénix", "color": "rojo" },
-    { "id": 2, "nombre": "Dragón", "color": "azul" },
-    { "id": 3, "nombre": "Tigre", "color": "naranja" },
-    { "id": 4, "nombre": "Águila", "color": "verde" }
+    { "id": 1, "nombre": "Quantum", "color": "verde", "descripcion": "Lógica y Ciberseguridad" },
+    { "id": 2, "nombre": "Vertex", "color": "púrpura", "descripcion": "Diseño y Mundos 3D" },
+    { "id": 3, "nombre": "Nexus", "color": "azul", "descripcion": "Estrategia y Liderazgo" },
+    { "id": 4, "nombre": "Pulsar", "color": "naranja", "descripcion": "Ciencia Experimental" }
   ],
   "estudiantes": [
     {

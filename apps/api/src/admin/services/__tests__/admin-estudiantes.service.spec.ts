@@ -27,10 +27,10 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
   };
 
   const mockEquipo = {
-    id: 'equipo-fenix-id',
-    nombre: 'Fénix',
-    color_primario: '#FF5733',
-    color_secundario: '#FFC300',
+    id: 'equipo-quantum-id',
+    nombre: 'Quantum',
+    color_primario: '#10B981',
+    color_secundario: '#34D399',
     icono_url: null,
     puntos_totales: 0,
     createdAt: new Date(),

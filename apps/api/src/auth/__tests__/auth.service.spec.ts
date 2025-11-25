@@ -105,8 +105,8 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
     },
     equipo: {
       id: 'equipo-123',
-      nombre: 'Los Tigres',
-      color_primario: '#FF5722',
+      nombre: 'Quantum',
+      color_primario: '#10B981',
     },
     createdAt: new Date(),
     updatedAt: new Date(),

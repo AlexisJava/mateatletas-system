@@ -41,10 +41,10 @@ export class EquiposController {
    *
    * Body ejemplo:
    * {
-   *   "nombre": "Fénix",
-   *   "color_primario": "#FF6B35",
-   *   "color_secundario": "#F7B801",
-   *   "icono_url": "https://example.com/fenix.png"
+   *   "nombre": "Quantum",
+   *   "color_primario": "#10B981",
+   *   "color_secundario": "#34D399",
+   *   "icono_url": "https://example.com/quantum.png"
    * }
    *
    * @returns Equipo creado con relaciones
@@ -102,7 +102,7 @@ export class EquiposController {
    *
    * Body ejemplo (todos los campos opcionales):
    * {
-   *   "nombre": "Dragón Actualizado",
+   *   "nombre": "Quantum Actualizado",
    *   "color_primario": "#00FF00"
    * }
    *

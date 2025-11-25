@@ -198,7 +198,7 @@ model EstudianteSector {
 model Equipo {
   /// Identificador único del equipo
   id               String       @id @default(cuid())
-  /// Nombre único del equipo (Fénix, Dragón, Tigre, Águila)
+  /// Nombre único del equipo (Quantum, Vertex, Nexus, Pulsar)
   nombre           String       @unique
   /// Color primario del equipo en formato hexadecimal
   color_primario   String

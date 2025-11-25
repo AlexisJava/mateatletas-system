@@ -9,24 +9,28 @@ export async function seedEquipos(prisma: PrismaClient) {
 
   const equipos = [
     {
-      nombre: 'Fénix',
-      color_primario: '#FF6B35',
-      color_secundario: '#F7B801',
+      nombre: 'Quantum',
+      color_primario: '#10B981',
+      color_secundario: '#34D399',
+      descripcion: 'Lógica y Ciberseguridad. Para los analíticos.',
     },
     {
-      nombre: 'Dragón',
-      color_primario: '#F44336',
-      color_secundario: '#9C27B0',
+      nombre: 'Vertex',
+      color_primario: '#8B5CF6',
+      color_secundario: '#A78BFA',
+      descripcion: 'Diseño y Mundos 3D. Para los creativos.',
     },
     {
-      nombre: 'Tigre',
-      color_primario: '#2196F3',
-      color_secundario: '#00BCD4',
+      nombre: 'Nexus',
+      color_primario: '#0EA5E9',
+      color_secundario: '#38BDF8',
+      descripcion: 'Estrategia y Liderazgo. Para los organizadores.',
     },
     {
-      nombre: 'Águila',
-      color_primario: '#4CAF50',
-      color_secundario: '#8BC34A',
+      nombre: 'Pulsar',
+      color_primario: '#F97316',
+      color_secundario: '#FB923C',
+      descripcion: 'Ciencia Experimental. Para los curiosos.',
     },
   ];
 

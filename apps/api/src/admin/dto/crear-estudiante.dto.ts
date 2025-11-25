@@ -113,7 +113,7 @@ export class CrearEstudianteDto {
   nivelInicial?: number;
 
   @ApiPropertyOptional({
-    description: 'ID del equipo (Fénix, Dragón, Tigre, Águila) - opcional',
+    description: 'ID del equipo (Quantum, Vertex, Nexus, Pulsar) - opcional',
     example: 'cm123abc456def789',
   })
   @IsOptional()

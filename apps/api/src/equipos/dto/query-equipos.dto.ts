@@ -23,7 +23,7 @@ export class QueryEquiposDto {
 
   /**
    * Búsqueda por nombre de equipo (búsqueda parcial case-insensitive)
-   * Ejemplo: "fén" encontrará "Fénix"
+   * Ejemplo: "quan" encontrará "Quantum"
    */
   @IsString()
   @IsOptional()
