@@ -252,7 +252,7 @@ describe('EstudianteQueryService', () => {
         nivel_actual: 5,
         puntos_totales: 100,
         equipo: null,
-        logrosDesbloqueados: [{ id: 'logro-1' }, { id: 'logro-2' }],
+        logros_desbloqueados: [{ id: 'logro-1' }, { id: 'logro-2' }],
         inscripciones_clase: [],
         asistencias: [
           { id: 'asist-1', estado: 'Presente', clase: {} },
@@ -296,7 +296,7 @@ describe('EstudianteQueryService', () => {
         nivel_actual: 1,
         puntos_totales: 0,
         equipo: null,
-        logrosDesbloqueados: [],
+        logros_desbloqueados: [],
         inscripciones_clase: [],
         asistencias: [],
       };
