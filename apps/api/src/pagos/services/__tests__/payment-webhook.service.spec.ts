@@ -64,9 +64,15 @@ describe('PaymentWebhookService', () => {
           provide: PaymentAmountValidatorService,
           useValue: {
             validateMembresia: jest.fn().mockResolvedValue({ isValid: true }),
-            validateInscripcionMensual: jest.fn().mockResolvedValue({ isValid: true }),
-            validateInscripcion2026: jest.fn().mockResolvedValue({ isValid: true }),
-            validatePagoInscripcion2026: jest.fn().mockResolvedValue({ isValid: true }),
+            validateInscripcionMensual: jest
+              .fn()
+              .mockResolvedValue({ isValid: true }),
+            validateInscripcion2026: jest
+              .fn()
+              .mockResolvedValue({ isValid: true }),
+            validatePagoInscripcion2026: jest
+              .fn()
+              .mockResolvedValue({ isValid: true }),
             validateColoniaPago: jest.fn().mockResolvedValue({ isValid: true }),
           },
         },
@@ -95,8 +101,7 @@ describe('PaymentWebhookService', () => {
         data: { id: '123' },
       };
 
-      const result =
-        await service.procesarWebhookMercadoPago(webhookData);
+      const result = await service.procesarWebhookMercadoPago(webhookData);
 
       expect(result.message).toBe('Webhook type not handled');
       expect(mercadoPagoService.getPayment).not.toHaveBeenCalled();
@@ -115,8 +120,7 @@ describe('PaymentWebhookService', () => {
         external_reference: null,
       } as any);
 
-      const result =
-        await service.procesarWebhookMercadoPago(webhookData);
+      const result = await service.procesarWebhookMercadoPago(webhookData);
 
       expect(result.message).toBe('Payment without external_reference');
     });
@@ -140,8 +144,7 @@ describe('PaymentWebhookService', () => {
         estado: 'Activa',
       } as any);
 
-      const result =
-        await service.procesarWebhookMercadoPago(webhookData);
+      const result = await service.procesarWebhookMercadoPago(webhookData);
 
       expect(result.type).toBe('membresia');
       expect(result.membresiaId).toBe('MEM001');
@@ -149,6 +152,7 @@ describe('PaymentWebhookService', () => {
       expect(commandService.actualizarEstadoMembresia).toHaveBeenCalledWith(
         'MEM001',
         EstadoPago.PAGADO,
+        123, // paymentId
       );
       expect(eventEmitter.emit).toHaveBeenCalledWith(
         'webhook.membresia.procesado',
@@ -180,8 +184,7 @@ describe('PaymentWebhookService', () => {
         estado_pago: 'Pagado',
       } as any);
 
-      const result =
-        await service.procesarWebhookMercadoPago(webhookData);
+      const result = await service.procesarWebhookMercadoPago(webhookData);
 
       expect(result.type).toBe('inscripcion');
       expect(result.inscripcionId).toBe('INS001');
@@ -219,8 +222,7 @@ describe('PaymentWebhookService', () => {
         estado: 'Pendiente',
       } as any);
 
-      const result =
-        await service.procesarWebhookMercadoPago(webhookData);
+      const result = await service.procesarWebhookMercadoPago(webhookData);
 
       expect(result.type).toBe('membresia');
       expect(result.membresiaId).toBe('MEM002');
@@ -241,8 +243,7 @@ describe('PaymentWebhookService', () => {
         external_reference: 'unknown-format-ABC123',
       } as any);
 
-      const result =
-        await service.procesarWebhookMercadoPago(webhookData);
+      const result = await service.procesarWebhookMercadoPago(webhookData);
 
       expect(result.message).toBe('Unknown external_reference format');
       expect(commandService.actualizarEstadoMembresia).not.toHaveBeenCalled();
@@ -278,8 +279,7 @@ describe('PaymentWebhookService', () => {
         external_reference: 'membresia-MEM003-tutor-TUT003-producto-PROD003',
       } as any);
 
-      const result =
-        await service.procesarWebhookMercadoPago(webhookData);
+      const result = await service.procesarWebhookMercadoPago(webhookData);
 
       expect(result.message).toBe('Payment without id or status');
       expect(commandService.actualizarEstadoMembresia).not.toHaveBeenCalled();

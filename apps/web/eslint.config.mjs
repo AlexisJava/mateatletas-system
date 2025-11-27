@@ -22,9 +22,12 @@ const eslintConfig = [
   },
   {
     rules: {
-      // Convertir errores de variables/imports no usados a warnings
+      // ===== PROHIBIR any =====
+      "@typescript-eslint/no-explicit-any": "error",
+
+      // ===== VARIABLES NO USADAS =====
       "@typescript-eslint/no-unused-vars": [
-        "warn",
+        "error",
         {
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
@@ -32,7 +35,7 @@ const eslintConfig = [
         },
       ],
       "no-unused-vars": [
-        "warn",
+        "error",
         {
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
@@ -40,10 +43,7 @@ const eslintConfig = [
         },
       ],
 
-      // Mantener errores críticos como errores
-      "@typescript-eslint/no-explicit-any": "warn",
-
-      // Hooks de React como warnings (no bloqueantes)
+      // ===== HOOKS DE REACT =====
       "react-hooks/exhaustive-deps": "warn",
     },
   },

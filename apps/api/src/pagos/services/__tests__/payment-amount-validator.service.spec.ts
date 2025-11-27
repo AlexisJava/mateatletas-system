@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
 import { PaymentAmountValidatorService } from '../payment-amount-validator.service';
 import { PrismaService } from '../../../core/database/prisma.service';
+import { RedisService } from '../../../core/redis/redis.service';
 
 describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
   let service: PaymentAmountValidatorService;
@@ -32,6 +33,15 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: RedisService,
+          useValue: {
+            get: jest.fn().mockResolvedValue(null),
+            set: jest.fn().mockResolvedValue('OK'),
+            del: jest.fn().mockResolvedValue(1),
+            exists: jest.fn().mockResolvedValue(false),
+          },
         },
       ],
     }).compile();
@@ -206,7 +216,10 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
         tipo: 'mensualidad',
       });
 
-      const result = await service.validatePagoInscripcion2026('pago-1', 3000.0);
+      const result = await service.validatePagoInscripcion2026(
+        'pago-1',
+        3000.0,
+      );
 
       expect(result.isValid).toBe(true);
     });
@@ -218,7 +231,10 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
         tipo: 'inscripcion',
       });
 
-      const result = await service.validatePagoInscripcion2026('pago-2', 5000.0);
+      const result = await service.validatePagoInscripcion2026(
+        'pago-2',
+        5000.0,
+      );
 
       expect(result.isValid).toBe(true);
     });
@@ -317,7 +333,9 @@ describe('PaymentAmountValidatorService - FRAUD PREVENTION', () => {
 
       await expect(
         service.validateByExternalReference(externalRef, 5000.0),
-      ).rejects.toThrow('Cannot determine payment type from external reference');
+      ).rejects.toThrow(
+        'Cannot determine payment type from external reference',
+      );
     });
   });
 

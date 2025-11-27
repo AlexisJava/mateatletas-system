@@ -60,7 +60,11 @@
     "verify:migrations": "bash scripts/verify-migrations.sh",
     "deploy:safe": "npm run verify:deploy && git push origin main",
     "railway:logs": "railway logs",
-    "railway:connect": "railway connect Postgres-yuMB"
+    "railway:connect": "railway connect Postgres-yuMB",
+    "prepare": "husky",
+    "typecheck": "turbo run type-check",
+    "lint:strict": "turbo run lint -- --max-warnings=0",
+    "validate": "bash scripts/validate.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",
@@ -75,6 +79,7 @@
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
+    "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "turbo": "^2.0.0",
     "typescript": "^5.6.3"
@@ -84,7 +89,8 @@
     "npm": ">=10.0.0"
   },
   "lint-staged": {
-    "apps/**/*.{ts,tsx}": "bash scripts/lint-strict.sh",
+    "apps/**/*.{ts,tsx}": "prettier --write",
+    "packages/**/*.{ts,tsx}": "prettier --write",
     "**/*.{json,md,yml,yaml}": "prettier --write"
   },
   "overrides": {

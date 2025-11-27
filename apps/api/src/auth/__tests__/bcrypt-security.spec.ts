@@ -141,15 +141,19 @@ describe('Bcrypt Security - Salt Rounds', () => {
  * Útil para debugging y testing
  */
 export function extractRoundsFromHash(hash: string): number {
-  try {
-    const parts = hash.split('$');
-    if (parts.length < 3) {
-      throw new Error('Invalid bcrypt hash format');
-    }
-    return parseInt(parts[2], 10);
-  } catch (error) {
-    throw new Error(`Failed to extract rounds from hash: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  if (!hash || hash.length < 7) {
+    throw new Error('Invalid bcrypt hash: too short');
   }
+  const parts = hash.split('$');
+  // bcrypt hash format: $2b$XX$... (parts: ['', '2b', 'XX', 'rest'])
+  if (parts.length < 4 || !parts[2]) {
+    throw new Error('Invalid bcrypt hash format');
+  }
+  const rounds = parseInt(parts[2], 10);
+  if (isNaN(rounds) || rounds < 1) {
+    throw new Error('Invalid bcrypt rounds value');
+  }
+  return rounds;
 }
 
 describe('extractRoundsFromHash helper', () => {

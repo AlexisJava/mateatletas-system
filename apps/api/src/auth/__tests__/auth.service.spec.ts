@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
-  ConflictException,
+  BadRequestException,
   UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,6 +9,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthService } from '../auth.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Role } from '../decorators/roles.decorator';
+import { LoginAttemptService } from '../services/login-attempt.service';
 
 /**
  * AuthService - COMPREHENSIVE TESTS
@@ -149,6 +150,16 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
             emit: jest.fn(),
           },
         },
+        {
+          provide: LoginAttemptService,
+          useValue: {
+            recordLoginAttempt: jest.fn(),
+            isAccountLocked: jest.fn().mockResolvedValue(false),
+            getRecentAttempts: jest.fn().mockResolvedValue([]),
+            clearAttempts: jest.fn(),
+            checkAndRecordAttempt: jest.fn().mockResolvedValue(undefined),
+          },
+        },
       ],
     }).compile();
 
@@ -236,7 +247,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       expect(bcrypt.hash).toHaveBeenCalledWith('PlainTextPassword123!', 12);
     });
 
-    it('should throw ConflictException when email already exists', async () => {
+    it('should throw BadRequestException when email already exists (no revela existencia)', async () => {
       // Arrange
       const registerDto = {
         email: 'existing@test.com',
@@ -249,12 +260,12 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         .spyOn(prisma.tutor, 'findUnique')
         .mockResolvedValue(mockTutor as any);
 
-      // Act & Assert
+      // Act & Assert - Mensaje genérico por seguridad (no revela si email existe)
       await expect(service.register(registerDto)).rejects.toThrow(
-        ConflictException,
+        BadRequestException,
       );
       await expect(service.register(registerDto)).rejects.toThrow(
-        'El email ya está registrado',
+        'Error en el registro. Verifica los datos ingresados.',
       );
       expect(prisma.tutor.create).not.toHaveBeenCalled();
     });
@@ -558,9 +569,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest
         .spyOn(prisma.tutor, 'findUnique')
         .mockResolvedValue(mockTutor as any);
-      jest
-        .spyOn(prisma.tutor, 'update')
-        .mockResolvedValue(mockTutor as any);
+      jest.spyOn(prisma.tutor, 'update').mockResolvedValue(mockTutor as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
@@ -611,7 +620,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       jest
         .spyOn(prisma.tutor, 'findUnique')
         .mockRejectedValue(new Error('Database connection failed'));
-      const loggerErrorSpy = jest.spyOn(service['logger'], 'error').mockImplementation();
+      const loggerErrorSpy = jest
+        .spyOn(service['logger'], 'error')
+        .mockImplementation();
 
       // Act
       const result = await service.validateUser(

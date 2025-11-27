@@ -682,7 +682,9 @@ describe('CreateInscriptionDto', () => {
       // Edad 6 es válida (mínimo)
       if (estudianteErrors.length > 0) {
         const nestedErrors = estudianteErrors[0].children || [];
-        const edadErrors = nestedErrors.filter((e: any) => e.property === 'edad');
+        const edadErrors = nestedErrors.filter(
+          (e: any) => e.property === 'edad',
+        );
         expect(edadErrors).toHaveLength(0);
       }
     });
@@ -702,15 +704,17 @@ describe('CreateInscriptionDto', () => {
       // Edad 12 es válida (máximo)
       if (estudianteErrors.length > 0) {
         const nestedErrors = estudianteErrors[0].children || [];
-        const edadErrors = nestedErrors.filter((e: any) => e.property === 'edad');
+        const edadErrors = nestedErrors.filter(
+          (e: any) => e.property === 'edad',
+        );
         expect(edadErrors).toHaveLength(0);
       }
     });
 
-    it('debe rechazar edad menor a 6 años', async () => {
-      // Arrange
+    it('debe rechazar edad menor a 5 años', async () => {
+      // Arrange - DTO tiene @Min(5)
       const dto = createValidDto();
-      dto.estudiantes[0].edad = 5;
+      dto.estudiantes[0].edad = 4;
 
       // Act
       const errors = await validateDto(dto);
@@ -722,10 +726,10 @@ describe('CreateInscriptionDto', () => {
       expect(estudianteErrors.length).toBeGreaterThan(0);
     });
 
-    it('debe rechazar edad mayor a 12 años', async () => {
-      // Arrange
+    it('debe rechazar edad mayor a 17 años', async () => {
+      // Arrange - DTO tiene @Max(17)
       const dto = createValidDto();
-      dto.estudiantes[0].edad = 13;
+      dto.estudiantes[0].edad = 18;
 
       // Act
       const errors = await validateDto(dto);

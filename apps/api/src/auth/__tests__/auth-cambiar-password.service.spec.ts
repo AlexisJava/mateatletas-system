@@ -6,6 +6,7 @@ import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { LogrosService } from '../../gamificacion/services/logros.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { LoginAttemptService } from '../services/login-attempt.service';
 
 describe('AuthService - Cambiar Password (TDD RED)', () => {
   let service: AuthService;
@@ -52,6 +53,15 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
           useValue: {
             emit: jest.fn(),
             on: jest.fn(),
+          },
+        },
+        {
+          provide: LoginAttemptService,
+          useValue: {
+            recordLoginAttempt: jest.fn(),
+            isAccountLocked: jest.fn().mockResolvedValue(false),
+            getRecentAttempts: jest.fn().mockResolvedValue([]),
+            clearAttempts: jest.fn(),
           },
         },
       ],

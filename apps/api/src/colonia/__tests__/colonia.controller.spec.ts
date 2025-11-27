@@ -6,6 +6,7 @@ import { Logger } from '@nestjs/common';
 import { ConflictException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
+import { MercadoPagoIpWhitelistService } from '../../pagos/services/mercadopago-ip-whitelist.service';
 
 describe('ColoniaController', () => {
   let controller: ColoniaController;
@@ -101,6 +102,12 @@ describe('ColoniaController', () => {
             calcularDescuentoColonia: jest.fn(),
             calcularTotalColonia: jest.fn(),
             aplicarDescuento: jest.fn(),
+          },
+        },
+        {
+          provide: MercadoPagoIpWhitelistService,
+          useValue: {
+            isWhitelisted: jest.fn().mockReturnValue(true),
           },
         },
       ],

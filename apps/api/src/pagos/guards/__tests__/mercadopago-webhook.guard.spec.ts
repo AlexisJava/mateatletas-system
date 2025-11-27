@@ -2,7 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { MercadoPagoWebhookGuard } from '../mercadopago-webhook.guard';
+import { MercadoPagoIpWhitelistService } from '../../services/mercadopago-ip-whitelist.service';
 import * as crypto from 'crypto';
+
+const mockIpWhitelistService = {
+  isWhitelisted: jest.fn().mockReturnValue(true),
+  isIpAllowed: jest.fn().mockReturnValue(true),
+  extractRealIp: jest.fn().mockReturnValue('127.0.0.1'),
+};
 
 /**
  * MercadoPagoWebhookGuard - SECURITY TESTS (Formato 2025)
@@ -39,7 +46,10 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
   ): { signature: string; timestamp: number } {
     const ts = timestamp || Math.floor(Date.now() / 1000);
     const payload = `${ts}.${JSON.stringify(body)}`;
-    const v1 = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+    const v1 = crypto
+      .createHmac('sha256', secret)
+      .update(payload)
+      .digest('hex');
     return {
       signature: `ts=${ts},v1=${v1}`,
       timestamp: ts,
@@ -49,7 +59,10 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
   /**
    * Helper para crear body válido de webhook
    */
-  function createValidWebhookBody(): Record<string, string | number | boolean | Record<string, string>> {
+  function createValidWebhookBody(): Record<
+    string,
+    string | number | boolean | Record<string, string>
+  > {
     return {
       action: 'payment.created',
       api_version: 'v1',
@@ -78,6 +91,10 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
                 return null;
               }),
             },
+          },
+          {
+            provide: MercadoPagoIpWhitelistService,
+            useValue: mockIpWhitelistService,
           },
         ],
       }).compile();
@@ -173,6 +190,10 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
               }),
             },
           },
+          {
+            provide: MercadoPagoIpWhitelistService,
+            useValue: mockIpWhitelistService,
+          },
         ],
       }).compile();
 
@@ -190,8 +211,12 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
-      expect(() => guard.canActivate(mockContext)).toThrow('Invalid webhook signature');
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        'Invalid webhook signature',
+      );
     });
 
     it('should reject webhook with wrong secret', () => {
@@ -205,7 +230,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should reject webhook with modified body (firma no coincide)', () => {
@@ -214,7 +241,10 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       const { signature } = generateValidSignature(originalBody, TEST_SECRET);
 
       // Modificar body después de firmar (ataque)
-      const modifiedBody = { ...originalBody, data: { id: 'hacked-payment-id' } };
+      const modifiedBody = {
+        ...originalBody,
+        data: { id: 'hacked-payment-id' },
+      };
 
       const mockContext = createMockExecutionContext({
         headers: { 'x-signature': signature },
@@ -222,7 +252,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should reject timing attack: signature with one character changed', () => {
@@ -231,7 +263,8 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       const { signature } = generateValidSignature(body, TEST_SECRET);
 
       // Modificar último caracter de la firma (timing attack)
-      const tamperedSignature = signature.substring(0, signature.length - 1) + 'X';
+      const tamperedSignature =
+        signature.substring(0, signature.length - 1) + 'X';
 
       const mockContext = createMockExecutionContext({
         headers: { 'x-signature': tamperedSignature },
@@ -239,7 +272,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should reject signature with wrong format (missing ts)', () => {
@@ -253,7 +288,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should reject signature with wrong format (missing v1)', () => {
@@ -267,7 +304,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should reject signature with invalid timestamp (non-numeric)', () => {
@@ -281,7 +320,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should reject signature with empty v1', () => {
@@ -295,7 +336,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -314,6 +357,10 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
               }),
             },
           },
+          {
+            provide: MercadoPagoIpWhitelistService,
+            useValue: mockIpWhitelistService,
+          },
         ],
       }).compile();
 
@@ -324,7 +371,11 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       // Arrange
       const body = createValidWebhookBody();
       const oldTimestamp = Math.floor(Date.now() / 1000) - 360; // 6 minutos atrás
-      const { signature } = generateValidSignature(body, TEST_SECRET, oldTimestamp);
+      const { signature } = generateValidSignature(
+        body,
+        TEST_SECRET,
+        oldTimestamp,
+      );
 
       const mockContext = createMockExecutionContext({
         headers: { 'x-signature': signature },
@@ -332,7 +383,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
       expect(() => guard.canActivate(mockContext)).toThrow('Timestamp expired');
     });
 
@@ -340,7 +393,11 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       // Arrange
       const body = createValidWebhookBody();
       const futureTimestamp = Math.floor(Date.now() / 1000) + 360; // 6 minutos adelante
-      const { signature } = generateValidSignature(body, TEST_SECRET, futureTimestamp);
+      const { signature } = generateValidSignature(
+        body,
+        TEST_SECRET,
+        futureTimestamp,
+      );
 
       const mockContext = createMockExecutionContext({
         headers: { 'x-signature': signature },
@@ -348,14 +405,20 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should accept webhook with timestamp within 5 minutes', () => {
       // Arrange
       const body = createValidWebhookBody();
       const recentTimestamp = Math.floor(Date.now() / 1000) - 240; // 4 minutos atrás
-      const { signature } = generateValidSignature(body, TEST_SECRET, recentTimestamp);
+      const { signature } = generateValidSignature(
+        body,
+        TEST_SECRET,
+        recentTimestamp,
+      );
 
       const mockContext = createMockExecutionContext({
         headers: { 'x-signature': signature },
@@ -382,6 +445,10 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
               }),
             },
           },
+          {
+            provide: MercadoPagoIpWhitelistService,
+            useValue: mockIpWhitelistService,
+          },
         ],
       }).compile();
 
@@ -397,7 +464,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should reject webhook with empty x-signature header', () => {
@@ -409,7 +478,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -427,6 +498,10 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
                 return null;
               }),
             },
+          },
+          {
+            provide: MercadoPagoIpWhitelistService,
+            useValue: mockIpWhitelistService,
           },
         ],
       }).compile();
@@ -446,7 +521,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
       expect(() => guard.canActivate(mockContext)).toThrow('missing fields');
     });
 
@@ -462,7 +539,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should reject webhook with missing data.id', () => {
@@ -476,8 +555,12 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
-      expect(() => guard.canActivate(mockContext)).toThrow('data.id must be a string');
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        'data.id must be a string',
+      );
     });
 
     it('should reject webhook with empty type', () => {
@@ -491,7 +574,9 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
       expect(() => guard.canActivate(mockContext)).toThrow('non-empty string');
     });
 
@@ -506,8 +591,12 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
-      expect(() => guard.canActivate(mockContext)).toThrow('live_mode must be a boolean');
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        'live_mode must be a boolean',
+      );
     });
 
     it('should reject webhook with invalid user_id type', () => {
@@ -521,8 +610,12 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
-      expect(() => guard.canActivate(mockContext)).toThrow('user_id must be a string or number');
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        'user_id must be a string or number',
+      );
     });
   });
 
@@ -541,6 +634,10 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
               }),
             },
           },
+          {
+            provide: MercadoPagoIpWhitelistService,
+            useValue: mockIpWhitelistService,
+          },
         ],
       }).compile();
 
@@ -556,8 +653,12 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
       });
 
       // Act & Assert
-      expect(() => guard.canActivate(mockContext)).toThrow(UnauthorizedException);
-      expect(() => guard.canActivate(mockContext)).toThrow('Webhook secret not configured');
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        UnauthorizedException,
+      );
+      expect(() => guard.canActivate(mockContext)).toThrow(
+        'Webhook secret not configured',
+      );
     });
   });
 
@@ -575,6 +676,10 @@ describe('MercadoPagoWebhookGuard (Formato 2025)', () => {
                 return null;
               }),
             },
+          },
+          {
+            provide: MercadoPagoIpWhitelistService,
+            useValue: mockIpWhitelistService,
           },
         ],
       }).compile();
@@ -606,9 +711,13 @@ function createMockExecutionContext(request: {
   headers: Record<string, string>;
   body: Record<string, string | number | boolean | Record<string, string>>;
 }): ExecutionContext {
+  const fullRequest = {
+    ...request,
+    socket: { remoteAddress: '127.0.0.1' },
+  };
   return {
     switchToHttp: () => ({
-      getRequest: () => request,
+      getRequest: () => fullRequest,
       getResponse: jest.fn(),
       getNext: jest.fn(),
     }),

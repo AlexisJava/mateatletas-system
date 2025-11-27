@@ -123,12 +123,12 @@ describe('AuthController', () => {
           httpOnly: true,
           secure: false,
           sameSite: 'lax',
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: 60 * 60 * 1000, // 1 hora
           path: '/',
         }),
       );
       expect(result).toEqual({ user: mockUser });
-      expect(authService.login).toHaveBeenCalledWith(dto);
+      expect(authService.login).toHaveBeenCalledWith(dto, undefined);
     });
   });
 
@@ -174,12 +174,12 @@ describe('AuthController', () => {
           httpOnly: true,
           secure: false,
           sameSite: 'lax',
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: 60 * 60 * 1000, // 1 hora
           path: '/',
         }),
       );
       expect(result).toEqual({ user: mockUser });
-      expect(authService.loginEstudiante).toHaveBeenCalledWith(dto);
+      expect(authService.loginEstudiante).toHaveBeenCalledWith(dto, undefined);
     });
   });
 

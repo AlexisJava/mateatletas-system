@@ -33,11 +33,7 @@ describe('Railway Production Readiness', () => {
       imports: [
         // Importar módulos principales necesarios para checks
       ],
-      providers: [
-        ConfigService,
-        PrismaService,
-        RedisService,
-      ],
+      providers: [ConfigService, PrismaService, RedisService],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -84,9 +80,9 @@ describe('Railway Production Readiness', () => {
     });
 
     it('should have REDIS_PORT configured', () => {
-      const redisPort = configService.get<number>('REDIS_PORT');
+      const redisPort = configService.get<string>('REDIS_PORT');
       expect(redisPort).toBeDefined();
-      expect(redisPort).toBeGreaterThan(0);
+      expect(Number(redisPort)).toBeGreaterThan(0);
     });
 
     it('should have NODE_ENV set to production (or test)', () => {
@@ -112,9 +108,13 @@ describe('Railway Production Readiness', () => {
       expect(migrations.length).toBeGreaterThan(0);
 
       // Verificar migraciones clave del Sprint 3
-      const migrationNames = migrations.map(m => m.migration_name);
-      expect(migrationNames.some(name => name.includes('add_ip_address'))).toBe(true);
-      expect(migrationNames.some(name => name.includes('add_performance_indexes'))).toBe(true);
+      const migrationNames = migrations.map((m) => m.migration_name);
+      expect(
+        migrationNames.some((name) => name.includes('add_ip_address')),
+      ).toBe(true);
+      expect(
+        migrationNames.some((name) => name.includes('add_performance_indexes')),
+      ).toBe(true);
     });
 
     it('should have performance indexes created', async () => {
@@ -128,7 +128,7 @@ describe('Railway Production Readiness', () => {
       // Verificar que existen los 5 índices del PASO 3.3
       expect(indexes.length).toBeGreaterThanOrEqual(5);
 
-      const indexNames = indexes.map(i => i.indexname);
+      const indexNames = indexes.map((i) => i.indexname);
       expect(indexNames).toContain('estudiantes_inscripciones_2026_pin_idx');
       expect(indexNames).toContain('tutores_dni_idx');
       expect(indexNames).toContain('tutores_cuil_idx');
@@ -143,7 +143,7 @@ describe('Railway Production Readiness', () => {
         WHERE schemaname = 'public'
       `;
 
-      const tableNames = tables.map(t => t.tablename);
+      const tableNames = tables.map((t) => t.tablename);
       expect(tableNames).toContain('inscripciones_2026');
       expect(tableNames).toContain('estudiantes_inscripciones_2026');
       expect(tableNames).toContain('tutores');
@@ -198,13 +198,17 @@ describe('Railway Production Readiness', () => {
       // Este test asume que tienes un health endpoint
       // Si no existe, este test fallará indicando que hay que crearlo
 
-      const response = await fetch('http://localhost:3001/health').catch(() => null);
+      const response = await fetch('http://localhost:3001/health').catch(
+        () => null,
+      );
 
       if (response) {
         expect(response.ok).toBe(true);
       } else {
         // Si no hay endpoint, marcar como pendiente
-        console.warn('⚠️ WARNING: /health endpoint not found. Should be implemented for Railway.');
+        console.warn(
+          '⚠️ WARNING: /health endpoint not found. Should be implemented for Railway.',
+        );
       }
     });
   });
@@ -251,7 +255,10 @@ describe('Railway Production Readiness', () => {
       const fs = require('fs');
       const path = require('path');
 
-      const guardPath = path.join(__dirname, '../inscripciones-2026/guards/webhook-rate-limit.guard.ts');
+      const guardPath = path.join(
+        __dirname,
+        '../inscripciones-2026/guards/webhook-rate-limit.guard.ts',
+      );
       expect(fs.existsSync(guardPath)).toBe(true);
     });
 
@@ -284,7 +291,10 @@ describe('Railway Production Readiness', () => {
       const fs = require('fs');
       const path = require('path');
 
-      const interceptorPath = path.join(__dirname, '../shared/interceptors/performance-logging.interceptor.ts');
+      const interceptorPath = path.join(
+        __dirname,
+        '../shared/interceptors/performance-logging.interceptor.ts',
+      );
       expect(fs.existsSync(interceptorPath)).toBe(true);
     });
 
@@ -292,7 +302,10 @@ describe('Railway Production Readiness', () => {
       const fs = require('fs');
       const path = require('path');
 
-      const healthPath = path.join(__dirname, '../queues/health/queue-health.indicator.ts');
+      const healthPath = path.join(
+        __dirname,
+        '../queues/health/queue-health.indicator.ts',
+      );
       expect(fs.existsSync(healthPath)).toBe(true);
     });
 
@@ -300,7 +313,10 @@ describe('Railway Production Readiness', () => {
       const fs = require('fs');
       const path = require('path');
 
-      const metricsPath = path.join(__dirname, '../queues/queue-metrics.controller.ts');
+      const metricsPath = path.join(
+        __dirname,
+        '../queues/queue-metrics.controller.ts',
+      );
       expect(fs.existsSync(metricsPath)).toBe(true);
     });
   });

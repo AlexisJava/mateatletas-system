@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WebhookIdempotencyService } from '../webhook-idempotency.service';
 import { PrismaService } from '../../../core/database/prisma.service';
+import { RedisService } from '../../../core/redis/redis.service';
 
 describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
   let service: WebhookIdempotencyService;
@@ -24,12 +25,19 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: RedisService,
+          useValue: {
+            get: jest.fn().mockResolvedValue(null),
+            set: jest.fn().mockResolvedValue('OK'),
+            del: jest.fn().mockResolvedValue(1),
+            exists: jest.fn().mockResolvedValue(false),
+          },
+        },
       ],
     }).compile();
 
-    service = module.get<WebhookIdempotencyService>(
-      WebhookIdempotencyService,
-    );
+    service = module.get<WebhookIdempotencyService>(WebhookIdempotencyService);
     prisma = module.get<PrismaService>(PrismaService);
 
     jest.clearAllMocks();
@@ -42,11 +50,11 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
       const result = await service.wasProcessed('payment-123');
 
       expect(result).toBe(false);
-      expect(mockPrismaService.webhookProcessed.findUnique).toHaveBeenCalledWith(
-        {
-          where: { payment_id: 'payment-123' },
-        },
-      );
+      expect(
+        mockPrismaService.webhookProcessed.findUnique,
+      ).toHaveBeenCalledWith({
+        where: { payment_id: 'payment-123' },
+      });
     });
 
     it('should return true if webhook was already processed', async () => {
@@ -140,9 +148,7 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
       const loggerWarnSpy = jest.spyOn(service['logger'], 'warn');
 
       // NO debe lanzar error, debe manejar gracefully
-      await expect(
-        service.markAsProcessed(webhookData),
-      ).resolves.not.toThrow();
+      await expect(service.markAsProcessed(webhookData)).resolves.not.toThrow();
 
       expect(loggerWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('Race condition detectada'),
@@ -211,9 +217,9 @@ describe('WebhookIdempotencyService - SECURITY CRITICAL', () => {
       expectedDate.setDate(expectedDate.getDate() - 30);
 
       // Tolerancia de 1 segundo
-      expect(Math.abs(thirtyDaysAgo.getTime() - expectedDate.getTime())).toBeLessThan(
-        1000,
-      );
+      expect(
+        Math.abs(thirtyDaysAgo.getTime() - expectedDate.getTime()),
+      ).toBeLessThan(1000);
     });
 
     it('should return 0 if no old records exist', async () => {
