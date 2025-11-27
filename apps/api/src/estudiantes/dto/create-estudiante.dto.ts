@@ -132,17 +132,18 @@ export class CreateEstudianteDto {
   avatarUrl?: string;
 
   /**
-   * ID del equipo al que pertenece (opcional)
+   * ID de la casa a la que pertenece (opcional)
+   * Normalmente se asigna automáticamente por edad
    */
   @ApiPropertyOptional({
-    description: 'UUID del equipo al que pertenece el estudiante',
+    description: 'UUID de la casa a la que pertenece el estudiante',
     example: '550e8400-e29b-41d4-a716-446655440000',
     type: String,
     format: 'uuid',
   })
   @IsOptional()
-  @IsString({ message: 'El ID del equipo debe ser un texto' })
-  @IsUUID('4', { message: 'El ID del equipo debe ser un UUID válido' })
+  @IsString({ message: 'El ID de la casa debe ser un texto' })
+  @IsUUID('4', { message: 'El ID de la casa debe ser un UUID válido' })
   @Trim()
-  equipoId?: string;
+  casaId?: string;
 }

@@ -68,7 +68,7 @@ export class ClaseGrupoController {
             apellido: 'Pérez',
             avatarUrl: null,
             email: 'juan@example.com',
-            equipo: { nombre: 'Rojo', color: '#FF0000' },
+            casa: { nombre: 'Quantum', color: '#F472B6' },
             stats: {
               porcentajeAsistencia: 85.5,
               puntosAcumulados: 450,

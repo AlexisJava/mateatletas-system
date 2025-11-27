@@ -3,7 +3,7 @@ import { PrismaService } from '../core/database/prisma.service';
 
 /**
  * Servicio de Ranking
- * Gestiona el sistema de ranking y leaderboards: global, por equipo, por estudiante
+ * Gestiona el sistema de ranking y leaderboards: global, por casa, por estudiante
  */
 @Injectable()
 export class RankingService {
@@ -15,16 +15,16 @@ export class RankingService {
   async getRankingEstudiante(estudianteId: string) {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: estudianteId },
-      include: { equipo: true },
+      include: { casa: true },
     });
 
     if (!estudiante) {
       throw new NotFoundException('Estudiante no encontrado');
     }
 
-    // Ranking del equipo (solo si tiene equipo)
-    const rankingEquipo = estudiante.equipoId
-      ? await this.getEquipoRanking(estudiante.equipoId)
+    // Ranking de la casa (solo si tiene casa)
+    const rankingCasa = estudiante.casaId
+      ? await this.getCasaRanking(estudiante.casaId)
       : [];
 
     // Ranking global (top 20)
@@ -40,25 +40,25 @@ export class RankingService {
         },
       })) + 1;
 
-    const posicionEquipo =
-      rankingEquipo.findIndex((e) => e.id === estudianteId) + 1;
+    const posicionCasa =
+      rankingCasa.findIndex((e) => e.id === estudianteId) + 1;
 
     return {
-      equipoActual: estudiante.equipo,
-      posicionEquipo,
+      casaActual: estudiante.casa,
+      posicionCasa,
       posicionGlobal,
-      rankingEquipo: rankingEquipo.slice(0, 10),
+      rankingCasa: rankingCasa.slice(0, 10),
       rankingGlobal: rankingGlobal.data, // Ya viene limitado a 20
     };
   }
 
   /**
-   * Obtener ranking del equipo
-   * Retorna todos los estudiantes del equipo ordenados por puntos
+   * Obtener ranking de la casa
+   * Retorna todos los estudiantes de la casa ordenados por puntos
    */
-  async getEquipoRanking(equipoId: string) {
+  async getCasaRanking(casaId: string) {
     const estudiantes = await this.prisma.estudiante.findMany({
-      where: { equipoId: equipoId },
+      where: { casaId: casaId },
       select: {
         id: true,
         nombre: true,
@@ -104,7 +104,7 @@ export class RankingService {
         skip,
         take: normalizedLimit,
         include: {
-          equipo: true,
+          casa: true,
         },
         orderBy: {
           puntos_totales: 'desc',
@@ -118,7 +118,7 @@ export class RankingService {
       nombre: e.nombre,
       apellido: e.apellido,
       avatar: e.fotoUrl,
-      equipo: e.equipo,
+      casa: e.casa,
       puntos: e.puntos_totales,
       posicion: skip + index + 1, // Posición absoluta en el ranking
     }));

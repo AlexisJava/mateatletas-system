@@ -24,7 +24,7 @@ export class GamificacionService {
    * Orquesta información de múltiples servicios
    *
    * OPTIMIZACIÓN SELECT:
-   * - ANTES: Cargaba objetos completos (equipo, rutaCurricular, clase)
+   * - ANTES: Cargaba objetos completos (casa, rutaCurricular, clase)
    * - AHORA: Select solo campos necesarios
    * - Reducción: ~60-70% del payload size
    */
@@ -38,12 +38,12 @@ export class GamificacionService {
         fotoUrl: true,
         avatar_gradient: true,
         puntos_totales: true,
-        equipoId: true,
-        equipo: {
+        casaId: true,
+        casa: {
           select: {
             id: true,
             nombre: true,
-            color_primario: true,
+            colorPrimary: true,
           },
         },
         tutor: {
@@ -150,9 +150,9 @@ export class GamificacionService {
       take: 5,
     });
 
-    // Ranking del equipo (solo si tiene equipo) - delegado al RankingService
-    const equipoRanking = estudiante.equipoId
-      ? await this.rankingService.getEquipoRanking(estudiante.equipoId)
+    // Ranking de la casa (solo si tiene casa) - delegado al RankingService
+    const casaRanking = estudiante.casaId
+      ? await this.rankingService.getCasaRanking(estudiante.casaId)
       : [];
 
     return {
@@ -162,11 +162,13 @@ export class GamificacionService {
         apellido: estudiante.apellido,
         fotoUrl: estudiante.fotoUrl,
         avatar_gradient: estudiante.avatar_gradient,
-        equipo: estudiante.equipo ? {
-          id: estudiante.equipo.id,
-          nombre: estudiante.equipo.nombre,
-          color: estudiante.equipo.color_primario, // Mapear color_primario -> color
-        } : null,
+        casa: estudiante.casa
+          ? {
+              id: estudiante.casa.id,
+              nombre: estudiante.casa.nombre,
+              color: estudiante.casa.colorPrimary,
+            }
+          : null,
       },
       stats: {
         puntosToales: estudiante.puntos_totales, // typo intencional para match con schema
@@ -178,7 +180,7 @@ export class GamificacionService {
       },
       nivel: nivelInfo,
       proximasClases,
-      equipoRanking,
+      casaRanking,
       ultimasAsistencias: estudiante.asistencias.slice(0, 5),
     };
   }

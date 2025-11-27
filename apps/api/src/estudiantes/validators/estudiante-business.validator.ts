@@ -14,7 +14,7 @@ import { esEdadValida, getMensajeErrorEdad } from '../../domain/constants';
  *
  * Ejemplos de validaciones de negocio:
  * - El tutor existe
- * - El equipo existe
+ * - La casa existe
  * - La edad es válida para el sistema
  * - El estudiante pertenece al tutor (ownership)
  */
@@ -37,16 +37,16 @@ export class EstudianteBusinessValidator {
   }
 
   /**
-   * Valida que un equipo existe en la base de datos
-   * @throws NotFoundException si el equipo no existe
+   * Valida que una casa existe en la base de datos
+   * @throws NotFoundException si la casa no existe
    */
-  async validateEquipoExists(equipoId: string): Promise<void> {
-    const equipo = await this.prisma.equipo.findUnique({
-      where: { id: equipoId },
+  async validateCasaExists(casaId: string): Promise<void> {
+    const casa = await this.prisma.casa.findUnique({
+      where: { id: casaId },
     });
 
-    if (!equipo) {
-      throw new NotFoundException('Equipo no encontrado');
+    if (!casa) {
+      throw new NotFoundException('Casa no encontrada');
     }
   }
 

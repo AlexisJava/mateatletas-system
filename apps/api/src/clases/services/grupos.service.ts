@@ -49,10 +49,10 @@ export class GruposService {
           include: {
             estudiante: {
               include: {
-                equipo: {
+                casa: {
                   select: {
                     nombre: true,
-                    color_primario: true, // El campo correcto del schema
+                    colorPrimary: true,
                   },
                 },
                 asistencias_clase_grupo: {
@@ -101,100 +101,103 @@ export class GruposService {
 
     // 2. Verificar que el docente autenticado es el titular
     if (claseGrupo.docente_id !== docenteId) {
-      throw new ForbiddenException(
-        'No tiene permisos para ver este grupo',
-      );
+      throw new ForbiddenException('No tiene permisos para ver este grupo');
     }
 
     // 3. Calcular estadísticas de cada estudiante
-    const estudiantesConStats: EstudianteConStatsDto[] = claseGrupo.inscripciones.map((insc) => {
-      const estudiante = insc.estudiante;
+    const estudiantesConStats: EstudianteConStatsDto[] =
+      claseGrupo.inscripciones.map((insc) => {
+        const estudiante = insc.estudiante;
 
-      // Asistencias del estudiante en este grupo
-      const asistencias = estudiante.asistencias_clase_grupo;
-      const clasesAsistidas = asistencias.filter(
-        (a) => a.estado === EstadoAsistencia.Presente,
-      ).length;
-      const porcentajeAsistencia =
-        asistencias.length > 0
-          ? Math.round((clasesAsistidas / asistencias.length) * 100)
-          : 0;
+        // Asistencias del estudiante en este grupo
+        const asistencias = estudiante.asistencias_clase_grupo;
+        const clasesAsistidas = asistencias.filter(
+          (a) => a.estado === EstadoAsistencia.Presente,
+        ).length;
+        const porcentajeAsistencia =
+          asistencias.length > 0
+            ? Math.round((clasesAsistidas / asistencias.length) * 100)
+            : 0;
 
-      // Puntos totales del estudiante
-      const puntosTotal = estudiante.puntosObtenidos.reduce(
-        (sum, p) => sum + p.puntos,
-        0,
-      );
+        // Puntos totales del estudiante
+        const puntosTotal = estudiante.puntosObtenidos.reduce(
+          (sum, p) => sum + p.puntos,
+          0,
+        );
 
-      // Última asistencia
-      const ultimaAsistenciaReg = asistencias.length > 0
-        ? asistencias.sort((a, b) => b.fecha.getTime() - a.fecha.getTime())[0]
-        : null;
+        // Última asistencia
+        const ultimaAsistenciaReg =
+          asistencias.length > 0
+            ? asistencias.sort(
+                (a, b) => b.fecha.getTime() - a.fecha.getTime(),
+              )[0]
+            : null;
 
-      return {
-        id: estudiante.id,
-        nombre: estudiante.nombre,
-        apellido: estudiante.apellido,
-        avatar_gradient: estudiante.avatar_gradient,
-        equipo: estudiante.equipo
-          ? {
-              nombre: estudiante.equipo.nombre,
-              color: estudiante.equipo.color_primario, // Mapear color_primario a color
-            }
-          : null,
-        stats: {
-          puntosTotal,
-          clasesAsistidas,
-          porcentajeAsistencia,
-          tareasCompletadas: 0, // TODO: Implementar cuando tengamos sistema de tareas
-          tareasTotal: 0,
-          ultimaAsistencia: ultimaAsistenciaReg
-            ? ultimaAsistenciaReg.fecha.toISOString()
+        return {
+          id: estudiante.id,
+          nombre: estudiante.nombre,
+          apellido: estudiante.apellido,
+          avatar_gradient: estudiante.avatar_gradient,
+          casa: estudiante.casa
+            ? {
+                nombre: estudiante.casa.nombre,
+                color: estudiante.casa.colorPrimary,
+              }
             : null,
-        },
-      };
-    });
+          stats: {
+            puntosTotal,
+            clasesAsistidas,
+            porcentajeAsistencia,
+            tareasCompletadas: 0, // TODO: Implementar cuando tengamos sistema de tareas
+            tareasTotal: 0,
+            ultimaAsistencia: ultimaAsistenciaReg
+              ? ultimaAsistenciaReg.fecha.toISOString()
+              : null,
+          },
+        };
+      });
 
     // 4. Tareas del grupo (por ahora vacío - implementar cuando tengamos sistema de tareas)
     const tareas: TareaGrupoDto[] = [];
 
     // 5. Observaciones recientes con clasificación
-    const observacionesRecientes: ObservacionRecienteDto[] = claseGrupo.asistencias
-      .filter((a) => a.observaciones !== null)
-      .map((a) => {
-        // Clasificar observación por keywords
-        const obs = a.observaciones!.toLowerCase();
-        let tipo: TipoObservacion = 'neutral';
+    const observacionesRecientes: ObservacionRecienteDto[] =
+      claseGrupo.asistencias
+        .filter((a) => a.observaciones !== null)
+        .map((a) => {
+          // Clasificar observación por keywords
+          const obs = a.observaciones!.toLowerCase();
+          let tipo: TipoObservacion = 'neutral';
 
-        if (
-          obs.includes('excelente') ||
-          obs.includes('muy bien') ||
-          obs.includes('destacado') ||
-          obs.includes('felicitaciones')
-        ) {
-          tipo = 'positiva';
-        } else if (
-          obs.includes('debe mejorar') ||
-          obs.includes('atención') ||
-          obs.includes('problema') ||
-          obs.includes('distracción')
-        ) {
-          tipo = 'atencion';
-        }
+          if (
+            obs.includes('excelente') ||
+            obs.includes('muy bien') ||
+            obs.includes('destacado') ||
+            obs.includes('felicitaciones')
+          ) {
+            tipo = 'positiva';
+          } else if (
+            obs.includes('debe mejorar') ||
+            obs.includes('atención') ||
+            obs.includes('problema') ||
+            obs.includes('distracción')
+          ) {
+            tipo = 'atencion';
+          }
 
-        return {
-          id: a.id,
-          estudiante: {
-            id: a.estudiante.id,
-            nombre: a.estudiante.nombre,
-            apellido: a.estudiante.apellido,
-          },
-          observacion: a.observaciones!,
-          fecha: a.fecha.toISOString(),
-          estado: a.estado,
-          tipo,
-        };
-      });
+          return {
+            id: a.id,
+            estudiante: {
+              id: a.estudiante.id,
+              nombre: a.estudiante.nombre,
+              apellido: a.estudiante.apellido,
+            },
+            observacion: a.observaciones!,
+            fecha: a.fecha.toISOString(),
+            estado: a.estado,
+            tipo,
+          };
+        });
 
     // 6. Calcular stats del grupo
     const totalEstudiantes = estudiantesConStats.length;
@@ -210,8 +213,10 @@ export class GruposService {
     const puntosPromedio =
       totalEstudiantes > 0
         ? Math.round(
-            estudiantesConStats.reduce((sum, e) => sum + e.stats.puntosTotal, 0) /
-              totalEstudiantes,
+            estudiantesConStats.reduce(
+              (sum, e) => sum + e.stats.puntosTotal,
+              0,
+            ) / totalEstudiantes,
           )
         : 0;
 

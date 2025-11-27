@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EstudiantesFacadeService } from './estudiantes-facade.service';
 import { EstudiantesController } from './estudiantes.controller';
-import { EquiposController } from './equipos.controller';
 import { AuthModule } from '../auth/auth.module';
 import { EstudianteBusinessValidator } from './validators/estudiante-business.validator';
 import { EstudianteQueryService } from './services/estudiante-query.service';
@@ -11,7 +10,7 @@ import { EstudianteStatsService } from './services/estudiante-stats.service';
 
 /**
  * Módulo de Estudiantes - Refactorizado con CQRS + Facade Pattern
- * Gestiona la funcionalidad CRUD de estudiantes y equipos
+ * Gestiona la funcionalidad CRUD de estudiantes
  *
  * ARQUITECTURA:
  * - EstudiantesFacadeService: API pública (183 líneas)
@@ -23,10 +22,12 @@ import { EstudianteStatsService } from './services/estudiante-stats.service';
  *
  * NOTA: Se eliminó forwardRef(() => GamificacionModule)
  * Ahora se usa EventEmitter2 para evitar dependencia circular
+ *
+ * NOTA 2026: Equipos/Casas ahora se gestionan desde CasasModule
  */
 @Module({
   imports: [AuthModule],
-  controllers: [EstudiantesController, EquiposController],
+  controllers: [EstudiantesController],
   providers: [
     // Servicios especializados
     EstudianteBusinessValidator,

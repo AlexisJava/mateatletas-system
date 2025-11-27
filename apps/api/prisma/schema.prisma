@@ -93,8 +93,8 @@ model Estudiante {
   fotoUrl                   String?                           @map("foto_url")
   /// ID del tutor que gestiona este estudiante
   tutor_id                  String
-  /// ID del equipo al que pertenece el estudiante (opcional, para gamificación)
-  equipoId                  String?                           @map("equipo_id")
+  /// ID de la casa a la que pertenece el estudiante (sistema 2026)
+  casaId                    String?                           @map("casa_id")
   /// Puntos totales acumulados por el estudiante (gamificación)
   puntos_totales            Int                               @default(0)
   /// Nivel actual del estudiante en el sistema de gamificación
@@ -129,7 +129,7 @@ model Estudiante {
   sector_id                 String?
   alertas                   Alerta[]
   asistencias               Asistencia[]
-  equipo                    Equipo?                           @relation(fields: [equipoId], references: [id])
+  casa                      Casa?                             @relation(fields: [casaId], references: [id])
   /// DEPRECADO: Relación uno-a-uno con sector (usar sectores[] en su lugar)
   sector                    Sector?                           @relation("EstudianteSectorLegacy", fields: [sector_id], references: [id])
   /// NUEVO: Relación muchos-a-muchos con sectores a través de EstudianteSector
@@ -192,28 +192,49 @@ model EstudianteSector {
   @@map("estudiante_sectores")
 }
 
-/// Modelo para equipos de gamificación
-/// Representa los equipos a los que pueden unirse los estudiantes
-model Equipo {
-  /// Identificador único del equipo
+/// Modelo para casas del sistema 2026
+/// Las casas agrupan estudiantes por rango de edad con colores y gamificación propios
+/// Reemplaza el modelo Equipo anterior
+model Casa {
+  /// Identificador único de la casa
   id               String       @id @default(cuid())
-  /// Nombre único del equipo (Quantum, Vertex, Pulsar)
+  /// Tipo de casa (QUANTUM, VERTEX, PULSAR) - único
+  tipo             CasaTipo     @unique
+  /// Nombre de la casa para mostrar
   nombre           String       @unique
-  /// Color primario del equipo en formato hexadecimal
-  color_primario   String
-  /// Color secundario del equipo en formato hexadecimal
-  color_secundario String
-  /// URL del ícono del equipo (opcional)
-  icono_url        String?
-  /// Puntos totales acumulados por el equipo
-  puntos_totales   Int          @default(0)
+  /// Emoji representativo de la casa
+  emoji            String
+  /// Slogan o lema de la casa
+  slogan           String?
+
+  /// Edad mínima para pertenecer a esta casa
+  edadMinima       Int          @map("edad_minima")
+  /// Edad máxima para pertenecer a esta casa
+  edadMaxima       Int          @map("edad_maxima")
+
+  /// Color primario en formato hexadecimal (Design System 2026)
+  colorPrimary     String       @map("color_primary")
+  /// Color secundario en formato hexadecimal
+  colorSecondary   String       @map("color_secondary")
+  /// Color de acento en formato hexadecimal
+  colorAccent      String       @map("color_accent")
+  /// Color oscuro en formato hexadecimal
+  colorDark        String       @map("color_dark")
+  /// Gradiente CSS para backgrounds
+  gradiente        String
+
+  /// Puntos totales acumulados por todos los estudiantes de la casa
+  puntosTotales    Int          @default(0) @map("puntos_totales")
+
   /// Timestamp de creación del registro
   createdAt        DateTime     @default(now())
   /// Timestamp de última actualización del registro
   updatedAt        DateTime     @updatedAt
+
+  /// Estudiantes que pertenecen a esta casa
   estudiantes      Estudiante[]
 
-  @@map("equipos")
+  @@map("casas")
 }
 
 /// Modelo para docentes (profesores) de la plataforma
@@ -1255,6 +1276,16 @@ enum TipoProducto {
   Suscripcion
   Curso
   RecursoDigital
+}
+
+/// Enum para tipos de casa (sistema 2026)
+/// Las casas agrupan estudiantes por rango de edad
+enum CasaTipo {
+  QUANTUM // 6-9 años - Exploradores
+  VERTEX  // 10-12 años - Constructores
+  PULSAR  // 13-17 años - Dominadores
+
+  @@map("casa_tipo")
 }
 
 /// Enum para estados de membresía

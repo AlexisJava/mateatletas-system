@@ -7,9 +7,9 @@ import { EstadoAsistencia } from '@prisma/client';
  */
 
 /**
- * Equipo del estudiante (gamificación)
+ * Casa del estudiante (gamificación 2026)
  */
-export interface EquipoDto {
+export interface CasaDto {
   nombre: string;
   color: string;
 }
@@ -34,7 +34,7 @@ export interface EstudianteConStatsDto {
   nombre: string;
   apellido: string;
   avatar_gradient: number;
-  equipo: EquipoDto | null;
+  casa: CasaDto | null;
   stats: EstadisticasEstudianteDto;
 }
 

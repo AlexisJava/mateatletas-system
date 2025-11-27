@@ -16,7 +16,11 @@ import * as bcrypt from 'bcrypt';
 import { Role } from './decorators/roles.decorator';
 import { parseUserRoles } from '../common/utils/role.utils';
 import { Tutor, Docente, Admin as AdminModel } from '@prisma/client';
-import { EstudiantePrimerLoginEvent, UserLoggedInEvent, UserRegisteredEvent } from '../common/events';
+import {
+  EstudiantePrimerLoginEvent,
+  UserLoggedInEvent,
+  UserRegisteredEvent,
+} from '../common/events';
 import { LoginAttemptService } from './services/login-attempt.service';
 
 type AuthenticatedUser = Tutor | Docente | AdminModel;
@@ -84,7 +88,9 @@ export class AuthService {
     });
 
     if (existingTutor) {
-      throw new BadRequestException('Error en el registro. Verifica los datos ingresados.');
+      throw new BadRequestException(
+        'Error en el registro. Verifica los datos ingresados.',
+      );
     }
 
     // 2. Hashear la contraseña con bcrypt
@@ -130,7 +136,9 @@ export class AuthService {
       ),
     );
 
-    this.logger.log(`Tutor registrado exitosamente: ${tutor.id} (${tutor.email})`);
+    this.logger.log(
+      `Tutor registrado exitosamente: ${tutor.id} (${tutor.email})`,
+    );
 
     return {
       message: 'Tutor registrado exitosamente',
@@ -147,7 +155,10 @@ export class AuthService {
    * @returns Token JWT y datos del estudiante
    * @throws UnauthorizedException si las credenciales son inválidas
    */
-  async loginEstudiante(loginEstudianteDto: LoginEstudianteDto, ip: string = 'unknown') {
+  async loginEstudiante(
+    loginEstudianteDto: LoginEstudianteDto,
+    ip: string = 'unknown',
+  ) {
     const { username, password } = loginEstudianteDto;
 
     // 1. Buscar estudiante por username
@@ -162,11 +173,11 @@ export class AuthService {
             email: true,
           },
         },
-        equipo: {
+        casa: {
           select: {
             id: true,
             nombre: true,
-            color_primario: true,
+            colorPrimary: true,
           },
         },
       },
@@ -178,10 +189,17 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, hashToCompare);
 
     // 3. Verificar que el estudiante exista, tenga credenciales y password válido
-    if (!estudiante || !estudiante.password_hash || !estudiante.username || !isPasswordValid) {
+    if (
+      !estudiante ||
+      !estudiante.password_hash ||
+      !estudiante.username ||
+      !isPasswordValid
+    ) {
       // Registrar intento fallido y verificar lockout
       await this.loginAttemptService.checkAndRecordAttempt(username, ip, false);
-      this.logger.warn(`Intento de login fallido: username=${username}, ip=${ip}, reason=credenciales_invalidas`);
+      this.logger.warn(
+        `Intento de login fallido: username=${username}, ip=${ip}, reason=credenciales_invalidas`,
+      );
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
@@ -215,7 +233,7 @@ export class AuthService {
         animacion_idle_url: estudiante.animacion_idle_url, // Animación idle seleccionada
         puntos_totales: estudiante.puntos_totales,
         nivel_actual: estudiante.nivel_actual,
-        equipo: estudiante.equipo,
+        casa: estudiante.casa,
         tutor: estudiante.tutor,
         role: Role.ESTUDIANTE,
         debe_cambiar_password: estudiante.debe_cambiar_password,
@@ -260,7 +278,9 @@ export class AuthService {
     if (!user || !isPasswordValid) {
       // Registrar intento fallido y verificar lockout
       await this.loginAttemptService.checkAndRecordAttempt(email, ip, false);
-      this.logger.warn(`Intento de login fallido: email=${email}, ip=${ip}, reason=credenciales_invalidas`);
+      this.logger.warn(
+        `Intento de login fallido: email=${email}, ip=${ip}, reason=credenciales_invalidas`,
+      );
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
@@ -282,7 +302,8 @@ export class AuthService {
           nombre: user.nombre,
           apellido: user.apellido,
         },
-        message: 'Verificación MFA requerida. Por favor ingresa tu código de autenticación.',
+        message:
+          'Verificación MFA requerida. Por favor ingresa tu código de autenticación.',
       };
     }
 
@@ -300,7 +321,11 @@ export class AuthService {
     }
 
     // 7. Emitir evento de login exitoso
-    const userType = isTutorUser(user) ? 'tutor' : isDocenteUser(user) ? 'docente' : 'admin';
+    const userType = isTutorUser(user)
+      ? 'tutor'
+      : isDocenteUser(user)
+        ? 'docente'
+        : 'admin';
     this.eventEmitter.emit(
       'user.logged-in',
       new UserLoggedInEvent(
@@ -408,21 +433,23 @@ export class AuthService {
       const currentRounds = this.getRoundsFromHash(tutor.password_hash);
       if (currentRounds < this.BCRYPT_ROUNDS) {
         this.logger.log(
-          `Rehashing password for tutor ${tutor.id} from ${currentRounds} to ${this.BCRYPT_ROUNDS} rounds`
+          `Rehashing password for tutor ${tutor.id} from ${currentRounds} to ${this.BCRYPT_ROUNDS} rounds`,
         );
 
         const newHash = await bcrypt.hash(password, this.BCRYPT_ROUNDS);
 
         // Update hash in database (non-blocking, fire-and-forget)
-        this.prisma.tutor.update({
-          where: { id: tutor.id },
-          data: { password_hash: newHash }
-        }).catch(error => {
-          this.logger.error(
-            `Failed to rehash password for tutor ${tutor.id}`,
-            error instanceof Error ? error.stack : error
-          );
-        });
+        this.prisma.tutor
+          .update({
+            where: { id: tutor.id },
+            data: { password_hash: newHash },
+          })
+          .catch((error) => {
+            this.logger.error(
+              `Failed to rehash password for tutor ${tutor.id}`,
+              error instanceof Error ? error.stack : error,
+            );
+          });
       }
 
       // Retornar tutor sin password_hash
@@ -431,7 +458,10 @@ export class AuthService {
       return result;
     } catch (error) {
       // Log del error sin exponer detalles al cliente
-      this.logger.error('Error en validateUser', error instanceof Error ? error.stack : error);
+      this.logger.error(
+        'Error en validateUser',
+        error instanceof Error ? error.stack : error,
+      );
       return null;
     }
   }
@@ -450,12 +480,17 @@ export class AuthService {
     try {
       const parts = hash.split('$');
       if (parts.length < 3) {
-        this.logger.warn(`Invalid bcrypt hash format: ${hash.substring(0, 10)}...`);
+        this.logger.warn(
+          `Invalid bcrypt hash format: ${hash.substring(0, 10)}...`,
+        );
         return 0;
       }
       return parseInt(parts[2], 10);
     } catch (error) {
-      this.logger.error('Error extracting rounds from hash', error instanceof Error ? error.stack : error);
+      this.logger.error(
+        'Error extracting rounds from hash',
+        error instanceof Error ? error.stack : error,
+      );
       return 0;
     }
   }
@@ -531,7 +566,7 @@ export class AuthService {
           fotoUrl: true,
           puntos_totales: true,
           nivel_actual: true,
-          equipoId: true,
+          casaId: true,
           tutor_id: true,
           createdAt: true,
           updatedAt: true,
@@ -720,12 +755,12 @@ export class AuthService {
             apellido: true,
           },
         },
-        equipo: {
+        casa: {
           select: {
             id: true,
             nombre: true,
-            color_primario: true,
-            color_secundario: true,
+            colorPrimary: true,
+            colorSecondary: true,
           },
         },
       },
@@ -792,7 +827,7 @@ export class AuthService {
           nivelEscolar: estudiante.nivelEscolar,
           avatar_gradient: estudiante.avatar_gradient,
           puntos_totales: estudiante.puntos_totales,
-          equipo: estudiante.equipo,
+          casa: estudiante.casa,
           tutor: estudiante.tutor,
           debe_cambiar_password: estudiante.debe_cambiar_password,
           roles,
@@ -876,7 +911,9 @@ export class AuthService {
     }
 
     if (!admin.mfa_enabled || !admin.mfa_secret) {
-      throw new UnauthorizedException('MFA no está habilitado para este usuario');
+      throw new UnauthorizedException(
+        'MFA no está habilitado para este usuario',
+      );
     }
 
     // 4. Verificar el código TOTP o backup code

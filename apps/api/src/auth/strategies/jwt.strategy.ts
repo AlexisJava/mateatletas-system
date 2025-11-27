@@ -46,23 +46,34 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         (request: Request & { cookies?: { 'auth-token'?: string } }) => {
           console.log('🔍 [JWT-STRATEGY] Extrayendo token...');
           console.log('🍪 [JWT-STRATEGY] request.cookies:', request?.cookies);
-          console.log('🔑 [JWT-STRATEGY] Authorization header:', request?.headers?.authorization);
+          console.log(
+            '🔑 [JWT-STRATEGY] Authorization header:',
+            request?.headers?.authorization,
+          );
 
           // Prioridad 1: Intentar desde cookie
           const token = request?.cookies?.['auth-token'];
           if (token) {
-            console.log('✅ [JWT-STRATEGY] Token extraído de COOKIE (primeros 20 chars):', token.substring(0, 20) + '...');
+            console.log(
+              '✅ [JWT-STRATEGY] Token extraído de COOKIE (primeros 20 chars):',
+              token.substring(0, 20) + '...',
+            );
             return token;
           }
 
           // Prioridad 2: Fallback a Bearer header (para Swagger y tests)
           const bearerToken = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
           if (bearerToken) {
-            console.log('✅ [JWT-STRATEGY] Token extraído de HEADER (primeros 20 chars):', bearerToken.substring(0, 20) + '...');
+            console.log(
+              '✅ [JWT-STRATEGY] Token extraído de HEADER (primeros 20 chars):',
+              bearerToken.substring(0, 20) + '...',
+            );
             return bearerToken;
           }
 
-          console.log('❌ [JWT-STRATEGY] NO se encontró token en cookie ni en header');
+          console.log(
+            '❌ [JWT-STRATEGY] NO se encontró token en cookie ni en header',
+          );
           return null;
         },
       ]),
@@ -80,7 +91,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    */
   async validate(payload: JwtPayload) {
     console.log('🔐 [JWT-VALIDATE] Token decodificado exitosamente');
-    console.log('📦 [JWT-VALIDATE] Payload:', { sub: payload.sub, email: payload.email, role: payload.role });
+    console.log('📦 [JWT-VALIDATE] Payload:', {
+      sub: payload.sub,
+      email: payload.email,
+      role: payload.role,
+    });
 
     const { sub: userId, role, roles } = payload;
 
@@ -91,7 +106,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           ? [role as Role]
           : [];
 
-    console.log('👤 [JWT-VALIDATE] Buscando usuario:', { userId, role, normalizedRoles });
+    console.log('👤 [JWT-VALIDATE] Buscando usuario:', {
+      userId,
+      role,
+      normalizedRoles,
+    });
 
     let user;
 
@@ -120,11 +139,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
               apellido: true,
             },
           },
-          equipo: {
+          casa: {
             select: {
               id: true,
               nombre: true,
-              color_primario: true,
+              colorPrimary: true,
             },
           },
           createdAt: true,
@@ -179,11 +198,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     // Si el usuario no existe, el token es inválido
     if (!user) {
-      console.log('❌ [JWT-VALIDATE] Usuario NO encontrado en BD:', { userId, role });
+      console.log('❌ [JWT-VALIDATE] Usuario NO encontrado en BD:', {
+        userId,
+        role,
+      });
       throw new UnauthorizedException('Token inválido o usuario no encontrado');
     }
 
-    console.log('✅ [JWT-VALIDATE] Usuario encontrado en BD:', { id: user.id, email: user.email });
+    console.log('✅ [JWT-VALIDATE] Usuario encontrado en BD:', {
+      id: user.id,
+      email: user.email,
+    });
     console.log('✅ [JWT-VALIDATE] Inyectando usuario en request.user');
 
     // El objeto user se inyectará en request.user

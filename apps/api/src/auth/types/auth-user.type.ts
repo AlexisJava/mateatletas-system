@@ -29,10 +29,10 @@ export interface AuthEstudiante extends DetailedAuthUserBase {
     nombre: string;
     apellido: string;
   };
-  equipo: {
+  casa: {
     id: string;
     nombre: string;
-    color_primario: string;
+    colorPrimary: string;
   } | null;
 }
 

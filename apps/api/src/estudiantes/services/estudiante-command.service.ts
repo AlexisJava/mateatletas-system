@@ -75,9 +75,9 @@ export class EstudianteCommandService {
     // Validar que el tutor existe
     await this.validator.validateTutorExists(tutorId);
 
-    // Validar equipo si se proporciona
-    if (createDto.equipoId) {
-      await this.validator.validateEquipoExists(createDto.equipoId);
+    // Validar casa si se proporciona
+    if (createDto.casaId) {
+      await this.validator.validateCasaExists(createDto.casaId);
     }
 
     // Validar edad
@@ -94,7 +94,7 @@ export class EstudianteCommandService {
         tutor_id: tutorId,
       },
       include: {
-        equipo: true,
+        casa: true,
       },
     });
 
@@ -120,9 +120,9 @@ export class EstudianteCommandService {
     // Verificar ownership
     await this.validator.validateOwnership(id, tutorId);
 
-    // Si se cambia equipoId, validar que el nuevo equipo existe
-    if (updateDto.equipoId) {
-      await this.validator.validateEquipoExists(updateDto.equipoId);
+    // Si se cambia casaId, validar que la nueva casa existe
+    if (updateDto.casaId) {
+      await this.validator.validateCasaExists(updateDto.casaId);
     }
 
     // Validar edad si se actualiza
@@ -135,7 +135,7 @@ export class EstudianteCommandService {
       where: { id },
       data: updateDto,
       include: {
-        equipo: true,
+        casa: true,
       },
     });
 
@@ -191,7 +191,7 @@ export class EstudianteCommandService {
       where: { id },
       data: { animacion_idle_url },
       include: {
-        equipo: true,
+        casa: true,
         tutor: {
           select: {
             id: true,
@@ -260,7 +260,7 @@ export class EstudianteCommandService {
       where: { id },
       data: { avatarUrl },
       include: {
-        equipo: true,
+        casa: true,
         tutor: {
           select: {
             id: true,

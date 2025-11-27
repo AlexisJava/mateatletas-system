@@ -58,11 +58,10 @@ export class GamificacionController {
     // Validar que el estudiante solo pueda ver su propio dashboard
     // o que sea un tutor/docente/admin
     const user = req.user;
-    if (
-      user.role === Role.ESTUDIANTE &&
-      user.id !== estudianteId
-    ) {
-      throw new ForbiddenException('No tienes permiso para acceder a este estudiante');
+    if (user.role === Role.ESTUDIANTE && user.id !== estudianteId) {
+      throw new ForbiddenException(
+        'No tienes permiso para acceder a este estudiante',
+      );
     }
 
     return this.gamificacionService.getDashboardEstudiante(estudianteId);
@@ -90,7 +89,7 @@ export class GamificacionController {
 
   /**
    * GET /gamificacion/ranking/:estudianteId
-   * Ranking del estudiante (equipo y global)
+   * Ranking del estudiante (casa y global)
    */
   @Get('ranking/:estudianteId')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)

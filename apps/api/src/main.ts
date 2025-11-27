@@ -43,7 +43,10 @@ async function bootstrap() {
       ) => {
         // DEBUG: Log para investigar qué URL llega al middleware
         console.log('🔍 [VERIFY CALLBACK] req.url:', req.url);
-        console.log('🔍 [VERIFY CALLBACK] req.originalUrl:', (req as any).originalUrl);
+        console.log(
+          '🔍 [VERIFY CALLBACK] req.originalUrl:',
+          (req as any).originalUrl,
+        );
         console.log('🔍 [VERIFY CALLBACK] req.path:', (req as any).path);
         console.log('🔍 [VERIFY CALLBACK] req.baseUrl:', (req as any).baseUrl);
         console.log('🔍 [VERIFY CALLBACK] buf length:', buf.length);
@@ -52,10 +55,15 @@ async function bootstrap() {
         // Solo guardar raw body para webhooks de MercadoPago
         // CRITICAL: Esto es esencial para validar la firma HMAC-SHA256
         // NOTA: Aceptar tanto /api/pagos/webhook como /api/colonia/webhook (por si hay webhooks mal configurados)
-        const isWebhookUrl = req.url.startsWith('/api/pagos/webhook') || req.url.startsWith('/api/colonia/webhook');
+        const isWebhookUrl =
+          req.url.startsWith('/api/pagos/webhook') ||
+          req.url.startsWith('/api/colonia/webhook');
 
         if (isWebhookUrl) {
-          console.log('✅ [VERIFY CALLBACK] MATCH: Guardando rawBody para', req.url);
+          console.log(
+            '✅ [VERIFY CALLBACK] MATCH: Guardando rawBody para',
+            req.url,
+          );
           // Usar encoding explícito o UTF-8 por defecto
           const bufferEncoding: BufferEncoding =
             encoding === 'utf-8' || encoding === 'utf8'
@@ -69,7 +77,10 @@ async function bootstrap() {
                     : 'utf8'; // default seguro
 
           req.rawBody = buf.toString(bufferEncoding);
-          console.log('✅ [VERIFY CALLBACK] rawBody guardado, longitud:', req.rawBody.length);
+          console.log(
+            '✅ [VERIFY CALLBACK] rawBody guardado, longitud:',
+            req.rawBody.length,
+          );
         } else {
           console.log('❌ [VERIFY CALLBACK] NO MATCH: req.url =', req.url);
         }
@@ -129,7 +140,9 @@ async function bootstrap() {
 
   // Soportar múltiples URLs separadas por coma en FRONTEND_URL
   const frontendUrls = process.env.FRONTEND_URL
-    ? process.env.FRONTEND_URL.split(',').map((url) => url.trim()).filter(Boolean)
+    ? process.env.FRONTEND_URL.split(',')
+        .map((url) => url.trim())
+        .filter(Boolean)
     : [];
 
   const allowedOrigins = isProduction
@@ -138,7 +151,9 @@ async function bootstrap() {
       : (() => {
           logger.error('❌ CRITICAL: FRONTEND_URL is not set in production!');
           logger.error('❌ CORS will block ALL origins for security.');
-          logger.error('❌ Set FRONTEND_URL environment variable to enable CORS.');
+          logger.error(
+            '❌ Set FRONTEND_URL environment variable to enable CORS.',
+          );
           return []; // Bloquear TODOS los orígenes si no hay config en producción
         })()
     : [
@@ -165,7 +180,12 @@ async function bootstrap() {
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'X-Requested-With',
+    ],
     exposedHeaders: ['Content-Disposition', 'set-cookie'], // Para descargas de archivos y cookies cross-domain
     maxAge: isProduction ? 86400 : 3600, // 24 horas en prod, 1 hora en dev
   });
@@ -278,7 +298,10 @@ async function bootstrap() {
     .addTag('Catálogo', 'Productos (suscripciones, cursos, recursos)')
     .addTag('Pagos', 'Integración con MercadoPago')
     .addTag('Gamificación', 'Puntos, logros y ranking')
-    .addTag('Equipos', 'Gestión de equipos de estudiantes')
+    .addTag(
+      'Casas',
+      'Sistema de casas de estudiantes (Quantum, Vertex, Pulsar)',
+    )
     .addTag('Notificaciones', 'Sistema de notificaciones')
     .addTag('Eventos', 'Calendario y eventos')
     .build();

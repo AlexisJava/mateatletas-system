@@ -18,7 +18,7 @@ export class EstudianteStatsService {
     const estudiantes = await this.prisma.estudiante.findMany({
       where: { tutor_id: tutorId },
       include: {
-        equipo: true,
+        casa: true,
       },
     });
 
@@ -31,13 +31,13 @@ export class EstudianteStatsService {
       {} as Record<string, number>,
     );
 
-    // Distribución por equipo
-    const porEquipo = estudiantes.reduce(
+    // Distribución por casa
+    const porCasa = estudiantes.reduce(
       (acc: Record<string, number>, est) => {
-        if (est.equipo) {
-          acc[est.equipo.nombre] = (acc[est.equipo.nombre] || 0) + 1;
+        if (est.casa) {
+          acc[est.casa.nombre] = (acc[est.casa.nombre] || 0) + 1;
         } else {
-          acc['Sin equipo'] = (acc['Sin equipo'] || 0) + 1;
+          acc['Sin casa'] = (acc['Sin casa'] || 0) + 1;
         }
         return acc;
       },
@@ -53,7 +53,7 @@ export class EstudianteStatsService {
     return {
       total: estudiantes.length,
       por_nivel: porNivel,
-      por_equipo: porEquipo,
+      por_casa: porCasa,
       puntos_totales: puntosTotales,
     };
   }

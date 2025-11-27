@@ -16,16 +16,16 @@ import { Trim } from '../../common/decorators/trim.decorator';
  */
 export class QueryEstudiantesDto {
   @ApiPropertyOptional({
-    description: 'Filtrar por ID de equipo (casa)',
+    description: 'Filtrar por ID de casa',
     example: '550e8400-e29b-41d4-a716-446655440000',
     type: String,
     format: 'uuid',
   })
   @IsOptional()
-  @IsString({ message: 'El ID del equipo debe ser un texto' })
-  @IsUUID('4', { message: 'El ID del equipo debe ser un UUID válido' })
+  @IsString({ message: 'El ID de la casa debe ser un texto' })
+  @IsUUID('4', { message: 'El ID de la casa debe ser un UUID válido' })
   @Trim()
-  equipoId?: string;
+  casaId?: string;
 
   @ApiPropertyOptional({
     description: 'Filtrar por nivel escolar',

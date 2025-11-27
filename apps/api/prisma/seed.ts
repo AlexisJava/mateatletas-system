@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
  * - prisma/seeds/admin.seed.ts - Usuario administrador
  * - prisma/seeds/docente.seed.ts - Docente de prueba
  * - prisma/seeds/tutor.seed.ts - Tutor de prueba
- * - prisma/seeds/equipos.seed.ts - 4 equipos base
+ * - prisma/seeds/casas.seed.ts - 3 casas 2026 (Quantum, Vertex, Pulsar)
  * - prisma/seeds/rutas-curriculares.seed.ts - 6 rutas curriculares
  * - prisma/seeds/productos.seed.ts - Catálogo de productos
  * - prisma/seeds/acciones-puntuables.seed.ts - Configuración de gamificación

@@ -28,7 +28,7 @@ import { IsCuid } from '../../common/validators/is-cuid.validator';
  * DIFERENCIA CON AgregarEstudianteConTutorDto:
  * - Este NO requiere claseId (estudiante se crea sin clase)
  * - Este REQUIERE sectorId obligatorio
- * - Este permite equipoId, puntosIniciales, nivelInicial opcionales
+ * - Este permite casaId, puntosIniciales, nivelInicial opcionales
  * - Útil para migración de estudiantes actuales del club
  *
  * CREDENCIALES GENERADAS:
@@ -113,12 +113,12 @@ export class CrearEstudianteDto {
   nivelInicial?: number;
 
   @ApiPropertyOptional({
-    description: 'ID del equipo (Quantum, Vertex, Pulsar) - opcional',
+    description: 'ID de la casa (Quantum, Vertex, Pulsar) - opcional',
     example: 'cm123abc456def789',
   })
   @IsOptional()
   @IsCuid()
-  equipoId?: string;
+  casaId?: string;
 
   // ==================== DATOS DEL TUTOR ====================
 

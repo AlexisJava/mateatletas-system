@@ -108,10 +108,10 @@ export class AdminEstudiantesService {
               email: true,
             },
           },
-          equipo: {
+          casa: {
             select: {
               nombre: true,
-              color_primario: true,
+              colorPrimary: true,
             },
           },
           sector: {
@@ -180,7 +180,7 @@ export class AdminEstudiantesService {
       nivel_actual: est.nivel_actual,
       puntos_totales: est.puntos_totales,
       tutor: est.tutor,
-      equipo: est.equipo,
+      casa: est.casa,
       // LEGACY: sector único (para compatibilidad con código viejo)
       sector: est.sector,
       // NUEVO: array de sectores (relación muchos-a-muchos)
@@ -431,12 +431,12 @@ export class AdminEstudiantesService {
             // SECURITY: Excluye password_hash
           },
         },
-        equipo: {
+        casa: {
           select: {
             id: true,
             nombre: true,
-            color_primario: true,
-            color_secundario: true,
+            colorPrimary: true,
+            colorSecondary: true,
           },
         },
         inscripciones_clase: {
@@ -469,7 +469,7 @@ export class AdminEstudiantesService {
         puntos_totales: estudiante.puntos_totales,
       },
       tutor: estudiante.tutor,
-      equipo: estudiante.equipo,
+      casa: estudiante.casa,
       estadisticas: {
         clases_inscritas: estudiante.inscripciones_clase.length,
         clases_completadas: estudiante.inscripciones_clase.filter(
@@ -495,7 +495,7 @@ export class AdminEstudiantesService {
     edadEstudiante: number;
     nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad';
     sectorId: string;
-    equipoId?: string;
+    casaId?: string;
     puntosIniciales?: number;
     nivelInicial?: number;
     nombreTutor: string;
@@ -514,15 +514,13 @@ export class AdminEstudiantesService {
       );
     }
 
-    // Validar equipo si se proporciona
-    if (dto.equipoId) {
-      const equipo = await this.prisma.equipo.findUnique({
-        where: { id: dto.equipoId },
+    // Validar casa si se proporciona
+    if (dto.casaId) {
+      const casa = await this.prisma.casa.findUnique({
+        where: { id: dto.casaId },
       });
-      if (!equipo) {
-        throw new NotFoundException(
-          `Equipo con ID ${dto.equipoId} no encontrado`,
-        );
+      if (!casa) {
+        throw new NotFoundException(`Casa con ID ${dto.casaId} no encontrada`);
       }
     }
 
@@ -610,7 +608,7 @@ export class AdminEstudiantesService {
           // password_temporal removido - solo se retorna en la respuesta
           debe_cambiar_password: true,
           sector_id: dto.sectorId,
-          equipoId: dto.equipoId || null,
+          casaId: dto.casaId || null,
           puntos_totales: dto.puntosIniciales ?? 0,
           nivel_actual: dto.nivelInicial ?? 1,
           avatar_gradient: 0,

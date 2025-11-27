@@ -105,7 +105,7 @@ export class EstudianteCopyService {
         nivel_actual: estudiante.nivel_actual,
         puntos_totales: estudiante.puntos_totales,
         avatar_gradient: estudiante.avatar_gradient,
-        equipoId: estudiante.equipoId,
+        casaId: estudiante.casaId,
       },
       include: {
         sector: true,

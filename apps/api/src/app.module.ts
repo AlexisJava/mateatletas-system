@@ -13,7 +13,7 @@ import { SharedModule } from './shared/shared.module';
 // Feature Modules
 import { AuthModule } from './auth/auth.module';
 import { EstudiantesModule } from './estudiantes/estudiantes.module';
-import { EquiposModule } from './equipos/equipos.module';
+import { CasasModule } from './casas/casas.module';
 import { DocentesModule } from './docentes/docentes.module';
 import { CatalogoModule } from './catalogo/catalogo.module';
 import { PagosModule } from './pagos/pagos.module';
@@ -52,20 +52,20 @@ import { AuditModule } from './audit/audit.module';
     // ============================================================================
     // CORE & INFRASTRUCTURE
     // ============================================================================
-    CoreModule,           // Config + Database (Global)
-    SecurityModule,       // Guards + Rate Limiting
-    ObservabilityModule,  // Logging + Interceptors
+    CoreModule, // Config + Database (Global)
+    SecurityModule, // Guards + Rate Limiting
+    ObservabilityModule, // Logging + Interceptors
     InfrastructureModule, // Cache + Events + Notifications (Global)
     PricingCalculatorModule, // Pricing & Discounts (Global)
-    SharedModule,         // Shared Services: PIN Generation, Tutor Creation (Global)
-    AuditModule,          // Audit Logs para seguridad y compliance (Global)
+    SharedModule, // Shared Services: PIN Generation, Tutor Creation (Global)
+    AuditModule, // Audit Logs para seguridad y compliance (Global)
 
     // ============================================================================
     // FEATURE MODULES
     // ============================================================================
     AuthModule,
     EstudiantesModule,
-    EquiposModule,
+    CasasModule,
     DocentesModule,
     CatalogoModule,
     PagosModule,

@@ -55,11 +55,11 @@ export class EstudianteHandler implements RoleHandler {
             email: true,
           },
         },
-        equipo: {
+        casa: {
           select: {
             nombre: true,
-            color_primario: true,
-            color_secundario: true,
+            colorPrimary: true,
+            colorSecondary: true,
           },
         },
         inscripciones_clase: {

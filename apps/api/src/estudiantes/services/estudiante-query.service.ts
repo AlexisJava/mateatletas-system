@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service';
 import { QueryEstudiantesDto } from '../dto/query-estudiantes.dto';
@@ -27,8 +31,8 @@ export class EstudianteQueryService {
       tutor_id: tutorId,
     };
 
-    if (query?.equipoId) {
-      where.equipoId = query.equipoId;
+    if (query?.casaId) {
+      where.casaId = query.casaId;
     }
 
     if (query?.nivelEscolar) {
@@ -40,7 +44,7 @@ export class EstudianteQueryService {
       this.prisma.estudiante.findMany({
         where,
         include: {
-          equipo: true,
+          casa: true,
         },
         skip,
         take: limit,
@@ -73,7 +77,7 @@ export class EstudianteQueryService {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id },
       include: {
-        equipo: true,
+        casa: true,
         tutor: {
           select: {
             id: true,
@@ -103,7 +107,7 @@ export class EstudianteQueryService {
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id },
       include: {
-        equipo: true,
+        casa: true,
         tutor: {
           select: {
             id: true,
@@ -130,7 +134,7 @@ export class EstudianteQueryService {
    * Obtiene TODOS los estudiantes (solo para admin)
    * @param page - Número de página
    * @param limit - Límite de resultados por página
-   * @returns Lista completa de estudiantes con tutor y equipo
+   * @returns Lista completa de estudiantes con tutor y casa
    */
   async findAll(page: number = 1, limit: number = 50) {
     const skip = (page - 1) * limit;
@@ -146,7 +150,7 @@ export class EstudianteQueryService {
               email: true,
             },
           },
-          equipo: true,
+          casa: true,
         },
         orderBy: {
           createdAt: 'desc',
@@ -195,7 +199,7 @@ export class EstudianteQueryService {
         tutor_id: tutorId,
       },
       include: {
-        equipo: true,
+        casa: true,
         logros_desbloqueados: {
           include: {
             logro: true,
@@ -359,19 +363,21 @@ export class EstudianteQueryService {
     if (proximaClaseGrupo) {
       // Mapeo de enum DiaSemana de Prisma a índices de JavaScript (0=Domingo, 6=Sábado)
       const diasSemanaMap: Record<string, number> = {
-        'DOMINGO': 0,
-        'LUNES': 1,
-        'MARTES': 2,
-        'MIERCOLES': 3,
-        'JUEVES': 4,
-        'VIERNES': 5,
-        'SABADO': 6,
+        DOMINGO: 0,
+        LUNES: 1,
+        MARTES: 2,
+        MIERCOLES: 3,
+        JUEVES: 4,
+        VIERNES: 5,
+        SABADO: 6,
       };
       const diaActual = ahora.getDay();
       const diaClase = diasSemanaMap[proximaClaseGrupo.dia_semana] ?? -1;
 
       // Parsear hora (formato "HH:MM")
-      const [horas, minutos] = proximaClaseGrupo.hora_inicio.split(':').map(Number);
+      const [horas, minutos] = proximaClaseGrupo.hora_inicio
+        .split(':')
+        .map(Number);
 
       let diasHasta = diaClase - diaActual;
 
@@ -393,8 +399,10 @@ export class EstudianteQueryService {
       fechaProxima.setHours(horas, minutos, 0, 0);
 
       // Calcular duración en minutos desde hora_inicio y hora_fin
-      const [horaFinH, horaFinM] = proximaClaseGrupo.hora_fin.split(':').map(Number);
-      const duracionMinutos = (horaFinH * 60 + horaFinM) - (horas * 60 + minutos);
+      const [horaFinH, horaFinM] = proximaClaseGrupo.hora_fin
+        .split(':')
+        .map(Number);
+      const duracionMinutos = horaFinH * 60 + horaFinM - (horas * 60 + minutos);
 
       return {
         tipo: 'grupo' as const,
@@ -536,19 +544,22 @@ export class EstudianteQueryService {
     });
 
     // 2. Extraer sectores únicos
-    const sectoresMap = new Map<string, {
-      id: string;
-      nombre: string;
-      descripcion: string | null;
-      color: string;
-      icono: string;
-      grupos: Array<{
+    const sectoresMap = new Map<
+      string,
+      {
         id: string;
-        codigo: string;
         nombre: string;
-        link_meet: string | null;
-      }>;
-    }>();
+        descripcion: string | null;
+        color: string;
+        icono: string;
+        grupos: Array<{
+          id: string;
+          codigo: string;
+          nombre: string;
+          link_meet: string | null;
+        }>;
+      }
+    >();
 
     for (const inscripcion of inscripciones) {
       const grupo = inscripcion.claseGrupo.grupo;
@@ -570,7 +581,7 @@ export class EstudianteQueryService {
 
       // Agregar grupo al sector (evitar duplicados)
       const sectorData = sectoresMap.get(sector.id)!;
-      const grupoExiste = sectorData.grupos.some(g => g.id === grupo.id);
+      const grupoExiste = sectorData.grupos.some((g) => g.id === grupo.id);
 
       if (!grupoExiste) {
         sectorData.grupos.push({
@@ -584,7 +595,7 @@ export class EstudianteQueryService {
 
     // 3. Convertir Map a Array y ordenar por nombre
     return Array.from(sectoresMap.values()).sort((a, b) =>
-      a.nombre.localeCompare(b.nombre)
+      a.nombre.localeCompare(b.nombre),
     );
   }
 }

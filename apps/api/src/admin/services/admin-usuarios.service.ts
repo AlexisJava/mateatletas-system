@@ -105,7 +105,7 @@ export class AdminUsuariosService {
       updatedAt: tutor.updatedAt,
       _count: {
         estudiantes: tutor._count.estudiantes,
-        equipos: 0,
+        casas: 0,
         clases: 0,
       },
     };
@@ -143,7 +143,7 @@ export class AdminUsuariosService {
       updatedAt: docente.updatedAt,
       _count: {
         estudiantes: 0,
-        equipos: 0,
+        casas: 0,
         clases: docente._count.clases,
       },
     };
@@ -173,7 +173,7 @@ export class AdminUsuariosService {
       updatedAt: admin.updatedAt,
       _count: {
         estudiantes: 0,
-        equipos: 0,
+        casas: 0,
         clases: 0,
       },
     };

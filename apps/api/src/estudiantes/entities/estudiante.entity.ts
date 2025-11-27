@@ -10,7 +10,7 @@ export interface Estudiante {
   nivelEscolar: string;
   fotoUrl?: string;
   tutor_id: string;
-  equipoId?: string;
+  casaId?: string;
   puntos_totales: number;
   nivel_actual: number;
   createdAt: Date;
