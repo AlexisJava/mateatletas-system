@@ -103,12 +103,7 @@ async function main() {
   data.puntosObtenidos = await prisma.puntoObtenido.findMany();
   console.log(`✓ ${data.puntosObtenidos.length} puntos_obtenidos`);
 
-  // 19. Logros Desbloqueados
-  console.log('Exportando logros_desbloqueados...');
-  data.logrosDesbloqueados = await prisma.logroDesbloqueado.findMany();
-  console.log(`✓ ${data.logrosDesbloqueados.length} logros_desbloqueados`);
-
-  // 20. Notificaciones
+  // 19. Notificaciones (LogrosDesbloqueados eliminado en refactor 2026)
   console.log('Exportando notificaciones...');
   data.notificaciones = await prisma.notificacion.findMany();
   console.log(`✓ ${data.notificaciones.length} notificaciones`);

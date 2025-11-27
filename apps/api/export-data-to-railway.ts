@@ -42,9 +42,7 @@ async function exportData() {
       // 7. Asistencias
       asistencias: await prisma.asistencia.findMany(),
 
-      // 8. Gamificación
-      logrosCurso: await prisma.logroCurso.findMany(),
-      logrosDesbloqueados: await prisma.logroDesbloqueado.findMany(),
+      // 8. Gamificación (LogroCurso y LogroDesbloqueado eliminados en refactor 2026)
       puntosObtenidos: await prisma.puntoObtenido.findMany(),
       accionesPuntuables: await prisma.accionPuntuable.findMany(),
 

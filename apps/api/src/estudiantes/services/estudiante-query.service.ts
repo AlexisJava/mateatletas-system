@@ -196,12 +196,12 @@ export class EstudianteQueryService {
       },
       include: {
         equipo: true,
-        logrosDesbloqueados: {
+        logros_desbloqueados: {
           include: {
             logro: true,
           },
           orderBy: {
-            fecha_obtenido: 'desc',
+            fecha_desbloqueo: 'desc',
           },
         },
         inscripciones_clase: {
@@ -254,7 +254,7 @@ export class EstudianteQueryService {
     // Calcular estadísticas
     const totalClases = estudiante.asistencias.length;
     const clasesPresente = estudiante.asistencias.filter(
-      (a) => a.estado === 'Presente',
+      (a: { estado: string }) => a.estado === 'Presente',
     ).length;
     const tasaAsistencia =
       totalClases > 0 ? Math.round((clasesPresente / totalClases) * 100) : 0;
@@ -267,7 +267,7 @@ export class EstudianteQueryService {
         tasa_asistencia: tasaAsistencia,
         nivel: estudiante.nivel_actual,
         puntos: estudiante.puntos_totales,
-        logros: estudiante.logrosDesbloqueados?.length || 0,
+        logros: estudiante.logros_desbloqueados?.length || 0,
       },
     };
   }

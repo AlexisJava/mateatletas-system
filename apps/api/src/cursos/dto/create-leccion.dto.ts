@@ -46,9 +46,7 @@ export class CreateLeccionDto {
   @Max(50, { message: 'Los puntos no pueden exceder 50 por lección' })
   puntosPorCompletar?: number;
 
-  @IsOptional()
-  @IsString()
-  logroDesbloqueableId?: string;
+  // logroDesbloqueableId eliminado en refactor 2026 - usar nuevo sistema LogroEstudiante
 
   @IsOptional()
   @IsInt()

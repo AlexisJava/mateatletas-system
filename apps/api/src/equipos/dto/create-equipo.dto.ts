@@ -15,7 +15,7 @@ export class CreateEquipoDto {
   /**
    * Nombre del equipo
    * Debe ser único en el sistema
-   * Ejemplos: "Quantum", "Vertex", "Nexus", "Pulsar"
+   * Ejemplos: "Quantum", "Vertex", "Pulsar"
    */
   @IsString()
   @IsNotEmpty({ message: 'El nombre del equipo es requerido' })

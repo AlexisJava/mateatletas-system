@@ -198,7 +198,6 @@ export class ModulosService {
         contenido: createLeccionDto.contenido,
         orden: createLeccionDto.orden,
         puntos_por_completar: createLeccionDto.puntosPorCompletar,
-        logro_desbloqueable_id: createLeccionDto.logroDesbloqueableId,
         duracion_estimada_minutos: createLeccionDto.duracionEstimadaMinutos,
         activo: createLeccionDto.activo,
         recursos_adicionales: createLeccionDto.recursosAdicionales,
@@ -212,7 +211,6 @@ export class ModulosService {
             producto_id: true,
           },
         },
-        logro: true,
         leccionPrerequisito: {
           select: {
             id: true,
@@ -239,14 +237,6 @@ export class ModulosService {
       },
       orderBy: { orden: 'asc' },
       include: {
-        logro: {
-          select: {
-            id: true,
-            nombre: true,
-            icono: true,
-            puntos: true,
-          },
-        },
         leccionPrerequisito: {
           select: {
             id: true,
@@ -274,7 +264,6 @@ export class ModulosService {
             },
           },
         },
-        logro: true,
         leccionPrerequisito: {
           select: {
             id: true,
@@ -303,7 +292,6 @@ export class ModulosService {
       data: updateLeccionDto,
       include: {
         modulo: true,
-        logro: true,
       },
     });
 

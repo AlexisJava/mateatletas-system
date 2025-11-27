@@ -60,8 +60,7 @@
   "equipos": [
     { "id": 1, "nombre": "Quantum", "color": "verde", "descripcion": "Lógica y Ciberseguridad" },
     { "id": 2, "nombre": "Vertex", "color": "púrpura", "descripcion": "Diseño y Mundos 3D" },
-    { "id": 3, "nombre": "Nexus", "color": "azul", "descripcion": "Estrategia y Liderazgo" },
-    { "id": 4, "nombre": "Pulsar", "color": "naranja", "descripcion": "Ciencia Experimental" }
+    { "id": 3, "nombre": "Pulsar", "color": "naranja", "descripcion": "Ciencia Experimental" }
   ],
   "estudiantes": [
     {

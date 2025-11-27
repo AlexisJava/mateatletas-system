@@ -21,12 +21,6 @@ export async function seedEquipos(prisma: PrismaClient) {
       descripcion: 'Diseño y Mundos 3D. Para los creativos.',
     },
     {
-      nombre: 'Nexus',
-      color_primario: '#0EA5E9',
-      color_secundario: '#38BDF8',
-      descripcion: 'Estrategia y Liderazgo. Para los organizadores.',
-    },
-    {
       nombre: 'Pulsar',
       color_primario: '#F97316',
       color_secundario: '#FB923C',

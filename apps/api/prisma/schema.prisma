@@ -139,7 +139,6 @@ model Estudiante {
   inscripciones_clase_grupo InscripcionClaseGrupo[]
   asistencias_clase_grupo   AsistenciaClaseGrupo[]
   inscripciones_curso       InscripcionCurso[]
-  logrosDesbloqueados       LogroDesbloqueado[]
   progresoLecciones         ProgresoLeccion[]
   puntosObtenidos           PuntoObtenido[]
   inscripciones_mensuales   InscripcionMensual[]
@@ -198,7 +197,7 @@ model EstudianteSector {
 model Equipo {
   /// Identificador único del equipo
   id               String       @id @default(cuid())
-  /// Nombre único del equipo (Quantum, Vertex, Nexus, Pulsar)
+  /// Nombre único del equipo (Quantum, Vertex, Pulsar)
   nombre           String       @unique
   /// Color primario del equipo en formato hexadecimal
   color_primario   String
@@ -269,7 +268,6 @@ model Docente {
   claseGrupos                        ClaseGrupo[]
   rutasEspecialidad                  DocenteRuta[]
   eventos                            Evento[]
-  logrosAprobados                    LogroDesbloqueado[]       @relation("LogrosAprobados")
   notificaciones                     Notificacion[]
   puntosOtorgados                    PuntoObtenido[]           @relation("PuntosOtorgados")
   asignacionesPlanificaciones        AsignacionDocente[]
@@ -819,35 +817,6 @@ model AccionPuntuable {
   @@map("acciones_puntuables")
 }
 
-/// DEPRECADO: Modelo legacy de logros para lecciones/cursos
-/// Usar el nuevo modelo Logro de gamificación (al final del archivo)
-model LogroCurso {
-  /// Identificador único del logro
-  id                  String              @id @default(cuid())
-  /// Nombre del logro (ej: "Primera Clase", "Asistencia Perfecta")
-  nombre              String              @unique
-  /// Descripción del logro
-  descripcion         String
-  /// Icono o emoji del logro
-  icono               String
-  /// Puntos extra que otorga desbloquear este logro
-  puntos              Int                 @default(0)
-  /// URL de la imagen del badge (opcional)
-  imagen_url          String?
-  /// Requisito o condición para desbloquear (texto descriptivo)
-  requisito           String?
-  /// Indica si el logro está activo
-  activo              Boolean             @default(true)
-  /// Timestamp de creación del registro
-  createdAt           DateTime            @default(now())
-  /// Timestamp de última actualización del registro
-  updatedAt           DateTime            @updatedAt
-  leccionesDesbloque  Leccion[]
-  logrosDesbloqueados LogroDesbloqueado[]
-
-  @@map("logros_cursos")
-}
-
 /// Modelo para registro de puntos obtenidos (tabla transaccional)
 /// Cada registro representa un evento donde un estudiante ganó puntos
 model PuntoObtenido {
@@ -883,35 +852,6 @@ model PuntoObtenido {
   @@map("puntos_obtenidos")
 }
 
-/// Modelo para logros desbloqueados (tabla transaccional)
-/// Registra cuando un estudiante desbloquea un logro
-model LogroDesbloqueado {
-  /// Identificador único del registro
-  id             String     @id @default(cuid())
-  /// ID del estudiante que desbloqueó el logro
-  estudiante_id  String
-  /// ID del logro desbloqueado
-  logro_id       String
-  /// ID del docente que otorgó el logro (opcional, puede ser automático)
-  docente_id     String?
-  /// Fecha y hora en que se desbloqueó el logro
-  fecha_obtenido DateTime   @default(now())
-  /// Contexto o razón del desbloqueo (opcional)
-  contexto       String?
-  /// Timestamp de creación del registro
-  createdAt      DateTime   @default(now())
-  /// Timestamp de última actualización del registro
-  updatedAt      DateTime   @updatedAt
-  docente        Docente?   @relation("LogrosAprobados", fields: [docente_id], references: [id])
-  estudiante     Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  logro          LogroCurso @relation(fields: [logro_id], references: [id])
-
-  @@unique([estudiante_id, logro_id])
-  @@index([estudiante_id])
-  @@index([logro_id])
-  @@index([fecha_obtenido])
-  @@map("logros_desbloqueados")
-}
 
 /// Módulo dentro de un curso
 /// Agrupa lecciones relacionadas temáticamente
@@ -980,9 +920,6 @@ model Leccion {
   /// Incentiva al estudiante a terminar
   /// Rango recomendado: 5-20 puntos por lección
   puntos_por_completar      Int               @default(10)
-  /// ID del logro que se desbloquea al completar (opcional)
-  /// Ejemplo: "Maestro del Álgebra" al terminar módulo completo
-  logro_desbloqueable_id    String?
   /// Duración estimada en minutos
   /// Ayuda al estudiante a planificar su tiempo
   /// Rango recomendado: 5-15 minutos (Microlearning)
@@ -1003,7 +940,6 @@ model Leccion {
   updatedAt                 DateTime          @updatedAt
   leccionPrerequisito       Leccion?          @relation("LeccionPrerequisito", fields: [leccion_prerequisito_id], references: [id])
   leccionesDependientes     Leccion[]         @relation("LeccionPrerequisito")
-  logro                     LogroCurso?       @relation(fields: [logro_desbloqueable_id], references: [id])
   modulo                    Modulo            @relation(fields: [modulo_id], references: [id], onDelete: Cascade)
   progresos                 ProgresoLeccion[]
 

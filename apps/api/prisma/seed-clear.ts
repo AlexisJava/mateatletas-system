@@ -16,9 +16,6 @@ async function clearDatabase() {
     console.log('📊 Eliminando progreso de lecciones...');
     await prisma.progresoLeccion.deleteMany({});
 
-    console.log('🏆 Eliminando logros desbloqueados...');
-    await prisma.logroDesbloqueado.deleteMany({});
-
     console.log('⭐ Eliminando puntos obtenidos...');
     await prisma.puntoObtenido.deleteMany({});
 

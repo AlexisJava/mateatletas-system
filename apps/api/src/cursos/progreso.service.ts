@@ -116,17 +116,12 @@ export class ProgresoService {
         intentos: 1,
       },
       include: {
-        leccion: {
-          include: {
-            logro: true,
-          },
-        },
+        leccion: true,
       },
     });
 
     // Award points automatically (Gamification)
     const puntosGanados = leccion.puntos_por_completar;
-    let logroDesbloqueado = null;
 
     // Update student's total points
     // TODO: Integrate with GamificacionService to create PuntoObtenido records
@@ -142,49 +137,13 @@ export class ProgresoService {
       });
     }
 
-    // Unlock achievement if exists
-    if (leccion.logro_desbloqueable_id) {
-      const yaDesbloqueado = await this.prisma.logroDesbloqueado.findFirst({
-        where: {
-          estudiante_id: estudianteId,
-          logro_id: leccion.logro_desbloqueable_id,
-        },
-      });
-
-      if (!yaDesbloqueado) {
-        logroDesbloqueado = await this.prisma.logroDesbloqueado.create({
-          data: {
-            estudiante_id: estudianteId,
-            logro_id: leccion.logro_desbloqueable_id,
-            contexto: `Completó lección: ${leccion.titulo}`,
-          },
-          include: {
-            logro: true,
-          },
-        });
-
-        // Award achievement points
-        // TODO: Integrate with GamificacionService
-        if (leccion.logro && leccion.logro.puntos > 0) {
-          await this.prisma.estudiante.update({
-            where: { id: estudianteId },
-            data: {
-              puntos_totales: {
-                increment: leccion.logro.puntos,
-              },
-            },
-          });
-        }
-      }
-    }
+    // TODO: Achievement system will be implemented with new LogroEstudiante model
+    // in FASE 2 of the 2026 refactor
 
     return {
       progreso,
       puntos_ganados: puntosGanados,
-      logro_desbloqueado: logroDesbloqueado,
-      mensaje: logroDesbloqueado
-        ? `¡Felicidades! Ganaste ${puntosGanados} puntos y desbloqueaste el logro "${logroDesbloqueado.logro.nombre}"! 🎉`
-        : `¡Excelente! Ganaste ${puntosGanados} puntos`,
+      mensaje: `¡Excelente! Ganaste ${puntosGanados} puntos`,
     };
   }
 

@@ -54,9 +54,7 @@ async function importData() {
       // 7. Asistencias
       { name: 'asistencias', data: data.asistencias },
 
-      // 8. Gamificación
-      { name: 'logrosCurso', data: data.logrosCurso },
-      { name: 'logrosDesbloqueados', data: data.logrosDesbloqueados },
+      // 8. Gamificación (LogroCurso y LogroDesbloqueado eliminados en refactor 2026)
       { name: 'puntosObtenidos', data: data.puntosObtenidos },
       { name: 'accionesPuntuables', data: data.accionesPuntuables },
 
@@ -99,8 +97,6 @@ async function importData() {
           inscripcionesClaseGrupo: 'inscripcionClaseGrupo',
           inscripcionesClase: 'inscripcionClase',
           asistencias: 'asistencia',
-          logrosCurso: 'logroCurso',
-          logrosDesbloqueados: 'logroDesbloqueado',
           puntosObtenidos: 'puntoObtenido',
           accionesPuntuables: 'accionPuntuable',
           alertas: 'alerta',

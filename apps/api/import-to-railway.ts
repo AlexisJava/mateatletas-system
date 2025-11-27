@@ -28,7 +28,6 @@ interface ExportData {
   nivelesConfig: any[];
   accionesPuntuables: any[];
   puntosObtenidos: any[];
-  logrosDesbloqueados: any[];
   notificaciones: any[];
   rutasCurriculares: any[];
   modulos: any[];
@@ -55,7 +54,6 @@ async function main() {
   await prisma.leccion.deleteMany();
   await prisma.modulo.deleteMany();
   await prisma.notificacion.deleteMany();
-  await prisma.logroDesbloqueado.deleteMany();
   await prisma.puntoObtenido.deleteMany();
   await prisma.accionPuntuable.deleteMany();
   await prisma.nivelConfig.deleteMany();
@@ -251,16 +249,7 @@ async function main() {
     console.log('✓ Puntos Obtenidos importados');
   }
 
-  // 20. Logros Desbloqueados (depende de Estudiantes)
-  if (data.logrosDesbloqueados?.length) {
-    console.log(`Importando ${data.logrosDesbloqueados.length} logros_desbloqueados...`);
-    for (const logro of data.logrosDesbloqueados) {
-      await prisma.logroDesbloqueado.create({ data: logro });
-    }
-    console.log('✓ Logros Desbloqueados importados');
-  }
-
-  // 21. Notificaciones (depende de Tutores)
+  // 20. Notificaciones (depende de Tutores) - LogrosDesbloqueados eliminado en refactor 2026
   if (data.notificaciones?.length) {
     console.log(`Importando ${data.notificaciones.length} notificaciones...`);
     for (const notif of data.notificaciones) {

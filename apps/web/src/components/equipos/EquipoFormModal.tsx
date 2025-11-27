@@ -196,7 +196,7 @@ export default function EquipoFormModal({
               type="text"
               value={formData.nombre}
               onChange={(e) => handleChange('nombre', e.target.value)}
-              placeholder="Ej: Quantum, Vertex, Nexus, Pulsar..."
+              placeholder="Ej: Quantum, Vertex, Pulsar..."
               error={errors.nombre}
               required
               maxLength={50}
