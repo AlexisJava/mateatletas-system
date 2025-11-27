@@ -17,7 +17,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../core/prisma/prisma.service';
+import { PrismaService } from '../core/database/prisma.service';
 import { RedisService } from '../core/redis/redis.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
