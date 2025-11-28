@@ -102,7 +102,9 @@ export class MercadoPagoService {
    * @param preferenceData - Datos de la preferencia según el formato de MercadoPago
    * @returns Preferencia creada con id e init_point
    */
-  async createPreference(preferenceData: Parameters<Preference['create']>[0]['body']) {
+  async createPreference(
+    preferenceData: Parameters<Preference['create']>[0]['body'],
+  ) {
     if (this.mockMode) {
       throw new Error(
         'MercadoPago está en modo mock. Use MockPagosService para crear preferencias mock.',
@@ -176,15 +178,20 @@ export class MercadoPagoService {
       transaction_amount: payment.transaction_amount || 0,
       date_approved: payment.date_approved || null,
       date_created: payment.date_created || '',
-      additional_info: payment.additional_info as MercadoPagoPayment['additional_info'],
-      payer: payment.payer ? {
-        id: payment.payer.id,
-        email: payment.payer.email,
-        identification: payment.payer.identification ? {
-          type: payment.payer.identification.type || '',
-          number: payment.payer.identification.number || '',
-        } : undefined,
-      } : undefined,
+      additional_info:
+        payment.additional_info as MercadoPagoPayment['additional_info'],
+      payer: payment.payer
+        ? {
+            id: payment.payer.id,
+            email: payment.payer.email,
+            identification: payment.payer.identification
+              ? {
+                  type: payment.payer.identification.type || '',
+                  number: payment.payer.identification.number || '',
+                }
+              : undefined,
+          }
+        : undefined,
     };
   }
 
@@ -202,7 +209,12 @@ export class MercadoPagoService {
    * Construye los datos de una preferencia para membresía
    */
   buildMembershipPreferenceData(
-    producto: { id: string; nombre: string; descripcion?: string; precio: number },
+    producto: {
+      id: string;
+      nombre: string;
+      descripcion?: string;
+      precio: number;
+    },
     tutor: { email: string; nombre?: string; apellido?: string },
     membresiaId: string,
     tutorId: string,
@@ -245,7 +257,12 @@ export class MercadoPagoService {
    * Construye los datos de una preferencia para curso
    */
   buildCoursePreferenceData(
-    producto: { id: string; nombre: string; descripcion?: string; precio: number },
+    producto: {
+      id: string;
+      nombre: string;
+      descripcion?: string;
+      precio: number;
+    },
     estudiante: { nombre: string; apellido?: string },
     tutor: { email: string; nombre?: string; apellido?: string },
     inscripcionId: string,

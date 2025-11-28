@@ -63,9 +63,7 @@ describe('WebhookIdempotencyService - Redis Caching (PASO 3.1.B)', () => {
       ],
     }).compile();
 
-    service = module.get<WebhookIdempotencyService>(
-      WebhookIdempotencyService,
-    );
+    service = module.get<WebhookIdempotencyService>(WebhookIdempotencyService);
     prisma = module.get<PrismaService>(PrismaService);
     redis = module.get<RedisService>(RedisService);
 
@@ -91,7 +89,9 @@ describe('WebhookIdempotencyService - Redis Caching (PASO 3.1.B)', () => {
     expect(mockRedisService.get).toHaveBeenCalledWith(
       'webhook:processed:payment-123',
     );
-    expect(mockPrismaService.webhookProcessed.findUnique).not.toHaveBeenCalled(); // ← NO consulta DB
+    expect(
+      mockPrismaService.webhookProcessed.findUnique,
+    ).not.toHaveBeenCalled(); // ← NO consulta DB
   });
 
   /**
@@ -113,7 +113,9 @@ describe('WebhookIdempotencyService - Redis Caching (PASO 3.1.B)', () => {
     expect(mockRedisService.get).toHaveBeenCalledWith(
       'webhook:processed:payment-456',
     );
-    expect(mockPrismaService.webhookProcessed.findUnique).not.toHaveBeenCalled();
+    expect(
+      mockPrismaService.webhookProcessed.findUnique,
+    ).not.toHaveBeenCalled();
   });
 
   /**

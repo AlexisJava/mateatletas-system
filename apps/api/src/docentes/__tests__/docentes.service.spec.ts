@@ -83,7 +83,9 @@ describe('DocentesService', () => {
     const mockFacade = {
       create: jest.fn().mockImplementation(async (dto) => {
         // First check if email exists
-        const existing = await prisma.docente.findUnique({ where: { email: dto.email } });
+        const existing = await prisma.docente.findUnique({
+          where: { email: dto.email },
+        });
         if (existing) {
           throw new ConflictException('El email ya está registrado');
         }
@@ -165,8 +167,8 @@ describe('DocentesService', () => {
                 rutasEspecialidad.map((ruta: any) => [
                   ruta.sector.nombre,
                   ruta.sector,
-                ])
-              ).values()
+                ]),
+              ).values(),
             )
           : [];
 
@@ -182,7 +184,9 @@ describe('DocentesService', () => {
 
         // Check email uniqueness if email is changing
         if (dto.email && dto.email !== existing.email) {
-          const emailTaken = await prisma.docente.findUnique({ where: { email: dto.email } });
+          const emailTaken = await prisma.docente.findUnique({
+            where: { email: dto.email },
+          });
           if (emailTaken) {
             throw new ConflictException('El email ya está registrado');
           }
@@ -763,12 +767,10 @@ describe('DocentesService', () => {
   describe('remove', () => {
     it('should delete docente successfully', async () => {
       // Arrange
-      jest
-        .spyOn(prisma.docente, 'findUnique')
-        .mockResolvedValue({
-          ...mockDocente,
-          _count: { clases: 0 }, // Sin clases asignadas
-        } as any);
+      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue({
+        ...mockDocente,
+        _count: { clases: 0 }, // Sin clases asignadas
+      } as any);
       jest
         .spyOn(prisma.docente, 'delete')
         .mockResolvedValue(mockDocente as any);

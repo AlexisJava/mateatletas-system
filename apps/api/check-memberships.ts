@@ -22,7 +22,9 @@ async function checkMemberships() {
 
   for (const m of membresias) {
     console.log(`📋 Membresía ID: ${m.id}`);
-    console.log(`   Tutor: ${m.tutor.nombre} ${m.tutor.apellido} (${m.tutor.email})`);
+    console.log(
+      `   Tutor: ${m.tutor.nombre} ${m.tutor.apellido} (${m.tutor.email})`,
+    );
     console.log(`   Tutor ID: ${m.tutor_id}`);
     console.log(`   Producto: ${m.producto.nombre}`);
     console.log(`   Estado: ${m.estado}`);

@@ -60,7 +60,8 @@ describe('Inscripciones2026 - Atomic Transaction Rollback', () => {
   const mockPaymentApproved = {
     id: 999888777,
     status: 'approved',
-    external_reference: 'inscripcion2026-inscabc123-tutor-tutorxyz789-tipo-COLONIA',
+    external_reference:
+      'inscripcion2026-inscabc123-tutor-tutorxyz789-tipo-COLONIA',
     transaction_amount: 25000,
     date_approved: '2025-01-22T10:00:00Z',
   };
@@ -135,16 +136,22 @@ describe('Inscripciones2026 - Atomic Transaction Rollback', () => {
           provide: PricingCalculatorService,
           useValue: {
             calcularTarifaInscripcion: jest.fn().mockReturnValue(25000),
-            calcularTotalInscripcion2026: jest.fn().mockReturnValue({ total: 158400, descuento: 12 }),
-            aplicarDescuento: jest.fn((base: number, desc: number) => base * (1 - desc / 100)),
+            calcularTotalInscripcion2026: jest
+              .fn()
+              .mockReturnValue({ total: 158400, descuento: 12 }),
+            aplicarDescuento: jest.fn(
+              (base: number, desc: number) => base * (1 - desc / 100),
+            ),
           },
         },
         {
           provide: PinGeneratorService,
           useValue: {
-            generateUniquePin: jest.fn().mockImplementation(async () =>
-              Math.floor(1000 + Math.random() * 9000).toString()
-            ),
+            generateUniquePin: jest
+              .fn()
+              .mockImplementation(async () =>
+                Math.floor(1000 + Math.random() * 9000).toString(),
+              ),
           },
         },
         {
@@ -177,7 +184,9 @@ describe('Inscripciones2026 - Atomic Transaction Rollback', () => {
     }).compile();
 
     service = module.get<Inscripciones2026Service>(Inscripciones2026Service);
-    webhookIdempotency = module.get<WebhookIdempotencyService>(WebhookIdempotencyService);
+    webhookIdempotency = module.get<WebhookIdempotencyService>(
+      WebhookIdempotencyService,
+    );
 
     jest.clearAllMocks();
   });
@@ -202,34 +211,50 @@ describe('Inscripciones2026 - Atomic Transaction Rollback', () => {
     const mercadoPagoService = service['mercadoPagoService'];
 
     // Mock: getPayment retorna pago aprobado
-    jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
+    jest
+      .spyOn(mercadoPagoService, 'getPayment')
+      .mockResolvedValue(mockPaymentApproved);
 
     // Mock: findFirst retorna pago pendiente
-    jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
+    jest
+      .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+      .mockResolvedValue(mockPagoInscripcion as any);
 
     // Mock: $transaction ejecuta callback y simula error en update inscripción
     const transactionCallback = jest.fn();
-    jest.spyOn(prismaService, '$transaction').mockImplementation(async (callback: any) => {
-      // Simular error en update de inscripción
-      const tx = {
-        pagoInscripcion2026: {
-          update: jest.fn().mockResolvedValue({ ...mockPagoInscripcion, estado: 'paid' }),
-        },
-        inscripcion2026: {
-          findUnique: jest.fn().mockResolvedValue(mockPagoInscripcion.inscripcion),
-          update: jest.fn().mockRejectedValue(new Error('DB Constraint Violation: estado inválido')),
-        },
-        historialEstadoInscripcion2026: {
-          create: jest.fn(),
-        },
-      };
+    jest
+      .spyOn(prismaService, '$transaction')
+      .mockImplementation(async (callback: any) => {
+        // Simular error en update de inscripción
+        const tx = {
+          pagoInscripcion2026: {
+            update: jest
+              .fn()
+              .mockResolvedValue({ ...mockPagoInscripcion, estado: 'paid' }),
+          },
+          inscripcion2026: {
+            findUnique: jest
+              .fn()
+              .mockResolvedValue(mockPagoInscripcion.inscripcion),
+            update: jest
+              .fn()
+              .mockRejectedValue(
+                new Error('DB Constraint Violation: estado inválido'),
+              ),
+          },
+          historialEstadoInscripcion2026: {
+            create: jest.fn(),
+          },
+        };
 
-      // Intentar ejecutar el callback (debe fallar)
-      await callback(tx);
-    });
+        // Intentar ejecutar el callback (debe fallar)
+        await callback(tx);
+      });
 
     // ACT & ASSERT: Debe lanzar error porque la transacción falla
-    await expect(service.procesarWebhookMercadoPago(mockWebhookData)).rejects.toThrow();
+    await expect(
+      service.procesarWebhookMercadoPago(mockWebhookData),
+    ).rejects.toThrow();
 
     // ASSERT: NO debe marcar webhook como procesado si falla la transacción
     expect(webhookIdempotency.markAsProcessed).not.toHaveBeenCalled();
@@ -253,29 +278,46 @@ describe('Inscripciones2026 - Atomic Transaction Rollback', () => {
     const prismaService = service['prisma'];
     const mercadoPagoService = service['mercadoPagoService'];
 
-    jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-    jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
+    jest
+      .spyOn(mercadoPagoService, 'getPayment')
+      .mockResolvedValue(mockPaymentApproved);
+    jest
+      .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+      .mockResolvedValue(mockPagoInscripcion as any);
 
     // Mock: $transaction con error en create historial
-    jest.spyOn(prismaService, '$transaction').mockImplementation(async (callback: any) => {
-      const tx = {
-        pagoInscripcion2026: {
-          update: jest.fn().mockResolvedValue({ ...mockPagoInscripcion, estado: 'paid' }),
-        },
-        inscripcion2026: {
-          findUnique: jest.fn().mockResolvedValue(mockPagoInscripcion.inscripcion),
-          update: jest.fn().mockResolvedValue({ ...mockPagoInscripcion.inscripcion, estado: 'active' }),
-        },
-        historialEstadoInscripcion2026: {
-          create: jest.fn().mockRejectedValue(new Error('Foreign key constraint failed')),
-        },
-      };
+    jest
+      .spyOn(prismaService, '$transaction')
+      .mockImplementation(async (callback: any) => {
+        const tx = {
+          pagoInscripcion2026: {
+            update: jest
+              .fn()
+              .mockResolvedValue({ ...mockPagoInscripcion, estado: 'paid' }),
+          },
+          inscripcion2026: {
+            findUnique: jest
+              .fn()
+              .mockResolvedValue(mockPagoInscripcion.inscripcion),
+            update: jest.fn().mockResolvedValue({
+              ...mockPagoInscripcion.inscripcion,
+              estado: 'active',
+            }),
+          },
+          historialEstadoInscripcion2026: {
+            create: jest
+              .fn()
+              .mockRejectedValue(new Error('Foreign key constraint failed')),
+          },
+        };
 
-      await callback(tx);
-    });
+        await callback(tx);
+      });
 
     // ACT & ASSERT
-    await expect(service.procesarWebhookMercadoPago(mockWebhookData)).rejects.toThrow();
+    await expect(
+      service.procesarWebhookMercadoPago(mockWebhookData),
+    ).rejects.toThrow();
     expect(webhookIdempotency.markAsProcessed).not.toHaveBeenCalled();
   });
 
@@ -296,29 +338,41 @@ describe('Inscripciones2026 - Atomic Transaction Rollback', () => {
     const prismaService = service['prisma'];
     const mercadoPagoService = service['mercadoPagoService'];
 
-    jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-    jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
+    jest
+      .spyOn(mercadoPagoService, 'getPayment')
+      .mockResolvedValue(mockPaymentApproved);
+    jest
+      .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+      .mockResolvedValue(mockPagoInscripcion as any);
 
     // Mock: $transaction con error en findUnique
-    jest.spyOn(prismaService, '$transaction').mockImplementation(async (callback: any) => {
-      const tx = {
-        pagoInscripcion2026: {
-          update: jest.fn().mockResolvedValue({ ...mockPagoInscripcion, estado: 'paid' }),
-        },
-        inscripcion2026: {
-          findUnique: jest.fn().mockRejectedValue(new Error('Database connection lost')),
-          update: jest.fn(),
-        },
-        historialEstadoInscripcion2026: {
-          create: jest.fn(),
-        },
-      };
+    jest
+      .spyOn(prismaService, '$transaction')
+      .mockImplementation(async (callback: any) => {
+        const tx = {
+          pagoInscripcion2026: {
+            update: jest
+              .fn()
+              .mockResolvedValue({ ...mockPagoInscripcion, estado: 'paid' }),
+          },
+          inscripcion2026: {
+            findUnique: jest
+              .fn()
+              .mockRejectedValue(new Error('Database connection lost')),
+            update: jest.fn(),
+          },
+          historialEstadoInscripcion2026: {
+            create: jest.fn(),
+          },
+        };
 
-      await callback(tx);
-    });
+        await callback(tx);
+      });
 
     // ACT & ASSERT
-    await expect(service.procesarWebhookMercadoPago(mockWebhookData)).rejects.toThrow();
+    await expect(
+      service.procesarWebhookMercadoPago(mockWebhookData),
+    ).rejects.toThrow();
     expect(webhookIdempotency.markAsProcessed).not.toHaveBeenCalled();
   });
 
@@ -335,29 +389,39 @@ describe('Inscripciones2026 - Atomic Transaction Rollback', () => {
     const prismaService = service['prisma'];
     const mercadoPagoService = service['mercadoPagoService'];
 
-    jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-    jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
+    jest
+      .spyOn(mercadoPagoService, 'getPayment')
+      .mockResolvedValue(mockPaymentApproved);
+    jest
+      .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+      .mockResolvedValue(mockPagoInscripcion as any);
 
     // Mock: $transaction con inscripción null (no existe)
-    jest.spyOn(prismaService, '$transaction').mockImplementation(async (callback: any) => {
-      const tx = {
-        pagoInscripcion2026: {
-          update: jest.fn().mockResolvedValue({ ...mockPagoInscripcion, estado: 'paid' }),
-        },
-        inscripcion2026: {
-          findUnique: jest.fn().mockResolvedValue(null), // ❌ Inscripción no encontrada
-          update: jest.fn(),
-        },
-        historialEstadoInscripcion2026: {
-          create: jest.fn(),
-        },
-      };
+    jest
+      .spyOn(prismaService, '$transaction')
+      .mockImplementation(async (callback: any) => {
+        const tx = {
+          pagoInscripcion2026: {
+            update: jest
+              .fn()
+              .mockResolvedValue({ ...mockPagoInscripcion, estado: 'paid' }),
+          },
+          inscripcion2026: {
+            findUnique: jest.fn().mockResolvedValue(null), // ❌ Inscripción no encontrada
+            update: jest.fn(),
+          },
+          historialEstadoInscripcion2026: {
+            create: jest.fn(),
+          },
+        };
 
-      await callback(tx);
-    });
+        await callback(tx);
+      });
 
     // ACT & ASSERT: Debe lanzar BadRequestException
-    await expect(service.procesarWebhookMercadoPago(mockWebhookData)).rejects.toThrow(BadRequestException);
+    await expect(
+      service.procesarWebhookMercadoPago(mockWebhookData),
+    ).rejects.toThrow(BadRequestException);
     expect(webhookIdempotency.markAsProcessed).not.toHaveBeenCalled();
   });
 
@@ -387,29 +451,38 @@ describe('Inscripciones2026 - Atomic Transaction Rollback', () => {
       },
     };
 
-    jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-    jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(pagoConInscripcionActiva as any);
+    jest
+      .spyOn(mercadoPagoService, 'getPayment')
+      .mockResolvedValue(mockPaymentApproved);
+    jest
+      .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+      .mockResolvedValue(pagoConInscripcionActiva as any);
 
     const inscripcionUpdateMock = jest.fn();
     const historialCreateMock = jest.fn();
 
     // Mock: $transaction exitosa
-    jest.spyOn(prismaService, '$transaction').mockImplementation(async (callback: any) => {
-      const tx = {
-        pagoInscripcion2026: {
-          update: jest.fn().mockResolvedValue({ ...pagoConInscripcionActiva, estado: 'paid' }),
-        },
-        inscripcion2026: {
-          findUnique: jest.fn(),
-          update: inscripcionUpdateMock,
-        },
-        historialEstadoInscripcion2026: {
-          create: historialCreateMock,
-        },
-      };
+    jest
+      .spyOn(prismaService, '$transaction')
+      .mockImplementation(async (callback: any) => {
+        const tx = {
+          pagoInscripcion2026: {
+            update: jest.fn().mockResolvedValue({
+              ...pagoConInscripcionActiva,
+              estado: 'paid',
+            }),
+          },
+          inscripcion2026: {
+            findUnique: jest.fn(),
+            update: inscripcionUpdateMock,
+          },
+          historialEstadoInscripcion2026: {
+            create: historialCreateMock,
+          },
+        };
 
-      return await callback(tx);
-    });
+        return await callback(tx);
+      });
 
     // ACT
     await service.procesarWebhookMercadoPago(mockWebhookData);

@@ -3,7 +3,12 @@
  * Maneja XP y Monedas del estudiante
  */
 
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
 import type {
   RecursosEstudiante,
@@ -22,7 +27,9 @@ export class RecursosService {
   /**
    * Obtiene o crea los recursos de un estudiante
    */
-  async obtenerOCrearRecursos(estudianteId: string): Promise<RecursosEstudiante> {
+  async obtenerOCrearRecursos(
+    estudianteId: string,
+  ): Promise<RecursosEstudiante> {
     this.logger.log(`Obteniendo recursos para estudiante: ${estudianteId}`);
 
     // Buscar recursos existentes
@@ -32,7 +39,9 @@ export class RecursosService {
 
     // Si no existen, crear con valores iniciales
     if (!recursos) {
-      this.logger.log(`Creando recursos iniciales para estudiante: ${estudianteId}`);
+      this.logger.log(
+        `Creando recursos iniciales para estudiante: ${estudianteId}`,
+      );
       recursos = await this.prisma.recursosEstudiante.create({
         data: {
           estudiante_id: estudianteId,
@@ -55,13 +64,17 @@ export class RecursosService {
       `Actualizando recursos por actividad para estudiante: ${data.estudiante_id}`,
     );
 
-    const { estudiante_id, xp_ganado, monedas_ganadas, actividad_id, metadata } = data;
+    const {
+      estudiante_id,
+      xp_ganado,
+      monedas_ganadas,
+      actividad_id,
+      metadata,
+    } = data;
 
     // Validar que al menos uno de los recursos sea mayor a 0
     if (xp_ganado === 0 && monedas_ganadas === 0) {
-      throw new BadRequestException(
-        'Debe otorgar al menos XP o Monedas',
-      );
+      throw new BadRequestException('Debe otorgar al menos XP o Monedas');
     }
 
     // Obtener o crear recursos
@@ -143,16 +156,16 @@ export class RecursosService {
 
     // Validar que el tipo de recurso sea válido (solo XP o MONEDAS)
     if (tipo !== 'XP' && tipo !== 'MONEDAS') {
-      throw new BadRequestException(`Tipo de recurso inválido: ${tipo}. Solo se permite XP o MONEDAS.`);
+      throw new BadRequestException(
+        `Tipo de recurso inválido: ${tipo}. Solo se permite XP o MONEDAS.`,
+      );
     }
 
     const recursos = await this.obtenerOCrearRecursos(estudianteId);
 
     // Verificar si tiene suficientes recursos
     const recursoActual =
-      tipo === 'XP'
-        ? recursos.xp_total
-        : recursos.monedas_total;
+      tipo === 'XP' ? recursos.xp_total : recursos.monedas_total;
 
     if (recursoActual < cantidad) {
       throw new BadRequestException(

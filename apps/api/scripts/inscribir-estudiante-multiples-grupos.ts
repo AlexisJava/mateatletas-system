@@ -41,12 +41,16 @@ async function main() {
       throw new Error('❌ No se encontró el estudiante con username "prueba"');
     }
 
-    console.log(`✓ Estudiante encontrado: ${estudiante.nombre} ${estudiante.apellido}`);
-    console.log(`✓ Actualmente inscrito en ${estudiante.inscripciones_clase_grupo.length} grupo(s)\n`);
+    console.log(
+      `✓ Estudiante encontrado: ${estudiante.nombre} ${estudiante.apellido}`,
+    );
+    console.log(
+      `✓ Actualmente inscrito en ${estudiante.inscripciones_clase_grupo.length} grupo(s)\n`,
+    );
 
     // 2. Obtener grupos inscritos actualmente
     const gruposInscritos = estudiante.inscripciones_clase_grupo.map(
-      (inscripcion) => inscripcion.claseGrupo.grupo.codigo
+      (inscripcion) => inscripcion.claseGrupo.grupo.codigo,
     );
 
     console.log('Grupos actuales:', gruposInscritos.join(', ') || 'ninguno');
@@ -66,7 +70,10 @@ async function main() {
       },
     });
 
-    const todosLosGrupos = [...gruposObjetivo, ...gruposAdicionales.map(g => g.codigo)];
+    const todosLosGrupos = [
+      ...gruposObjetivo,
+      ...gruposAdicionales.map((g) => g.codigo),
+    ];
 
     console.log(`\nGrupos objetivo: ${todosLosGrupos.join(', ')}\n`);
 
@@ -145,7 +152,9 @@ async function main() {
     console.log('═══════════════════════════════════════════════════════');
     console.log(`Nuevas inscripciones: ${inscripciones}`);
     console.log(`Grupos saltados (ya inscrito): ${saltados}`);
-    console.log(`Total de grupos ahora: ${estudianteFinal?.inscripciones_clase_grupo.length}`);
+    console.log(
+      `Total de grupos ahora: ${estudianteFinal?.inscripciones_clase_grupo.length}`,
+    );
     console.log('═══════════════════════════════════════════════════════');
     console.log('📋 GRUPOS DEL ESTUDIANTE:');
     console.log('═══════════════════════════════════════════════════════');
@@ -159,7 +168,6 @@ async function main() {
     });
 
     console.log('═══════════════════════════════════════════════════════\n');
-
   } catch (error) {
     console.error('❌ Error:', error);
     throw error;

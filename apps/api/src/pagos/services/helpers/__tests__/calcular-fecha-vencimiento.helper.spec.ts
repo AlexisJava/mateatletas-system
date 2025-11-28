@@ -110,7 +110,9 @@ describe('calcularFechaVencimiento', () => {
   describe('Invalid periods', () => {
     it('should throw BadRequestException for invalid month (0)', () => {
       // Act & Assert
-      expect(() => calcularFechaVencimiento('2025-0')).toThrow(BadRequestException);
+      expect(() => calcularFechaVencimiento('2025-0')).toThrow(
+        BadRequestException,
+      );
       expect(() => calcularFechaVencimiento('2025-0')).toThrow(
         'Período inválido recibido para calcular fecha de vencimiento: "2025-0"',
       );
@@ -118,32 +120,44 @@ describe('calcularFechaVencimiento', () => {
 
     it('should throw BadRequestException for invalid month (13)', () => {
       // Act & Assert
-      expect(() => calcularFechaVencimiento('2025-13')).toThrow(BadRequestException);
+      expect(() => calcularFechaVencimiento('2025-13')).toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for negative month', () => {
       // Act & Assert
-      expect(() => calcularFechaVencimiento('2025--1')).toThrow(BadRequestException);
+      expect(() => calcularFechaVencimiento('2025--1')).toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for invalid format (missing dash)', () => {
       // Act & Assert
-      expect(() => calcularFechaVencimiento('202501')).toThrow(BadRequestException);
+      expect(() => calcularFechaVencimiento('202501')).toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for invalid format (only year)', () => {
       // Act & Assert
-      expect(() => calcularFechaVencimiento('2025')).toThrow(BadRequestException);
+      expect(() => calcularFechaVencimiento('2025')).toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for non-numeric year', () => {
       // Act & Assert
-      expect(() => calcularFechaVencimiento('abcd-01')).toThrow(BadRequestException);
+      expect(() => calcularFechaVencimiento('abcd-01')).toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for non-numeric month', () => {
       // Act & Assert
-      expect(() => calcularFechaVencimiento('2025-ab')).toThrow(BadRequestException);
+      expect(() => calcularFechaVencimiento('2025-ab')).toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for empty string', () => {
@@ -153,7 +167,9 @@ describe('calcularFechaVencimiento', () => {
 
     it('should throw BadRequestException for month as string', () => {
       // Act & Assert
-      expect(() => calcularFechaVencimiento('2025-January')).toThrow(BadRequestException);
+      expect(() => calcularFechaVencimiento('2025-January')).toThrow(
+        BadRequestException,
+      );
     });
   });
 

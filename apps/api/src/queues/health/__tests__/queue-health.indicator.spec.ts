@@ -68,13 +68,17 @@ describe('QueueHealthIndicator', () => {
     it('should throw HealthCheckError when Redis is disconnected', async () => {
       mockRedisClient.ping.mockRejectedValue(new Error('Connection refused'));
 
-      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(HealthCheckError);
+      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
+        HealthCheckError,
+      );
     });
 
     it('should throw HealthCheckError when Redis ping fails', async () => {
       mockRedisClient.ping.mockResolvedValue('FAIL');
 
-      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(HealthCheckError);
+      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
+        HealthCheckError,
+      );
     });
   });
 
@@ -104,8 +108,12 @@ describe('QueueHealthIndicator', () => {
       mockQueue.getFailedCount = jest.fn().mockResolvedValue(5);
       mockQueue.getCompletedCount = jest.fn().mockResolvedValue(100);
 
-      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(HealthCheckError);
-      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow('250 waiting');
+      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
+        HealthCheckError,
+      );
+      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
+        '250 waiting',
+      );
     });
   });
 
@@ -137,8 +145,12 @@ describe('QueueHealthIndicator', () => {
       mockQueue.getFailedCount = jest.fn().mockResolvedValue(30);
       mockQueue.getCompletedCount = jest.fn().mockResolvedValue(70);
 
-      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(HealthCheckError);
-      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow('30.00% failed');
+      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
+        HealthCheckError,
+      );
+      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
+        '30.00% failed',
+      );
     });
 
     it('should handle 0% failure rate (no failed jobs)', async () => {
@@ -157,8 +169,12 @@ describe('QueueHealthIndicator', () => {
       mockQueue.getFailedCount = jest.fn().mockResolvedValue(100);
       mockQueue.getCompletedCount = jest.fn().mockResolvedValue(0);
 
-      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(HealthCheckError);
-      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow('100.00% failed');
+      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
+        HealthCheckError,
+      );
+      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
+        '100.00% failed',
+      );
     });
 
     it('should handle no jobs processed yet (0 total)', async () => {
@@ -179,7 +195,9 @@ describe('QueueHealthIndicator', () => {
       mockQueue.getFailedCount = jest.fn().mockResolvedValue(30); // 30% failure rate
       mockQueue.getCompletedCount = jest.fn().mockResolvedValue(70);
 
-      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(HealthCheckError);
+      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
+        HealthCheckError,
+      );
     });
 
     it('should be healthy when waiting is high but failure rate is low', async () => {
@@ -239,16 +257,22 @@ describe('QueueHealthIndicator', () => {
 
   describe('Error Handling', () => {
     it('should throw HealthCheckError when queue metrics fail', async () => {
-      mockQueue.getWaitingCount = jest.fn().mockRejectedValue(new Error('Queue unavailable'));
+      mockQueue.getWaitingCount = jest
+        .fn()
+        .mockRejectedValue(new Error('Queue unavailable'));
 
-      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(HealthCheckError);
+      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
+        HealthCheckError,
+      );
       await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
         'Queue health check failed',
       );
     });
 
     it('should include error message in HealthCheckError', async () => {
-      mockQueue.getFailedCount = jest.fn().mockRejectedValue(new Error('Database timeout'));
+      mockQueue.getFailedCount = jest
+        .fn()
+        .mockRejectedValue(new Error('Database timeout'));
 
       try {
         await healthIndicator.isHealthy('webhooks');
@@ -261,7 +285,9 @@ describe('QueueHealthIndicator', () => {
     it('should handle non-Error exceptions', async () => {
       mockQueue.getCompletedCount = jest.fn().mockRejectedValue('String error');
 
-      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(HealthCheckError);
+      await expect(healthIndicator.isHealthy('webhooks')).rejects.toThrow(
+        HealthCheckError,
+      );
     });
   });
 

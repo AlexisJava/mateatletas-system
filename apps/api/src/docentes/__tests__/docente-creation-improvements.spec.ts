@@ -32,7 +32,9 @@ describe.skip('DocentesService - Mejoras en Creación (TDD)', () => {
     // Mock facade que delega a prisma
     const mockFacade = {
       create: jest.fn().mockImplementation(async (dto) => {
-        const existing = await prisma.docente.findUnique({ where: { email: dto.email } });
+        const existing = await prisma.docente.findUnique({
+          where: { email: dto.email },
+        });
         if (existing) {
           throw new ConflictException('El email ya está registrado');
         }

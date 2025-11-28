@@ -29,7 +29,9 @@ async function main() {
       where: { email },
       data: { password_hash: hashedPassword },
     });
-    console.log(`✅ Docente actualizado: ${docente.nombre} ${docente.apellido}`);
+    console.log(
+      `✅ Docente actualizado: ${docente.nombre} ${docente.apellido}`,
+    );
   }
 
   // Actualizar Tutor (si existe)
@@ -44,7 +46,9 @@ async function main() {
 
   console.log(`\n✅ Contraseña sincronizada en todos los registros`);
   console.log(`🔑 Password: ${password}`);
-  console.log(`\nAhora podés loguearte con cualquiera de tus roles usando la misma contraseña.`);
+  console.log(
+    `\nAhora podés loguearte con cualquiera de tus roles usando la misma contraseña.`,
+  );
 }
 
 main()

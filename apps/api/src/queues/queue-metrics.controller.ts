@@ -50,7 +50,8 @@ export class QueueMetricsController {
   @Get('stats')
   @ApiOperation({
     summary: 'Obtener estadísticas de queue en tiempo real',
-    description: 'Retorna métricas de waiting, active, completed, failed y delayed jobs',
+    description:
+      'Retorna métricas de waiting, active, completed, failed y delayed jobs',
   })
   @ApiResponse({
     status: 200,
@@ -110,7 +111,8 @@ export class QueueMetricsController {
   @Get('failed')
   @ApiOperation({
     summary: 'Obtener jobs fallidos (dead letter queue)',
-    description: 'Retorna últimos 50 webhooks que fallaron después de 3 reintentos',
+    description:
+      'Retorna últimos 50 webhooks que fallaron después de 3 reintentos',
   })
   @ApiResponse({
     status: 200,

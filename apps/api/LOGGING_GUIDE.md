@@ -183,7 +183,7 @@ El `LoggingInterceptor` registra automáticamente todos los requests HTTP:
 
 ```typescript
 this.logger.logValidationError('email', 'invalid-email', {
-  'isEmail': 'email must be a valid email address',
+  isEmail: 'email must be a valid email address',
 });
 ```
 
@@ -402,7 +402,7 @@ this.logger.logEvent('SUBSCRIPTION_RENEWED', { userId, planId });
 // No loggear información sensible
 this.logger.log('User logged in', {
   password: user.password, // ❌ NUNCA
-  creditCard: user.cc,     // ❌ NUNCA
+  creditCard: user.cc, // ❌ NUNCA
 });
 
 // No usar console.log

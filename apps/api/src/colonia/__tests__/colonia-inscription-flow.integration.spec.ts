@@ -303,9 +303,9 @@ describe.skip('Colonia Inscription Flow - Integration Tests (REQUIRES DB)', () =
       await coloniaService.createInscription(dto);
 
       // Act & Assert - Intentar crear segunda inscripción con el mismo email
-      await expect(
-        coloniaService.createInscription(dto),
-      ).rejects.toThrow('Ya existe un tutor registrado con este email');
+      await expect(coloniaService.createInscription(dto)).rejects.toThrow(
+        'Ya existe un tutor registrado con este email',
+      );
     });
 
     it('debe revertir toda la transacción si falla la creación de estudiante', async () => {
@@ -317,9 +317,7 @@ describe.skip('Colonia Inscription Flow - Integration Tests (REQUIRES DB)', () =
       dto.estudiantes[0].edad = 99; // Fuera del rango 6-12
 
       // Act & Assert
-      await expect(
-        coloniaService.createInscription(dto),
-      ).rejects.toThrow();
+      await expect(coloniaService.createInscription(dto)).rejects.toThrow();
 
       // Verificar que NO se creó el tutor en la base de datos
       const tutorInDB = await prisma.tutor.findUnique({
@@ -347,10 +345,7 @@ describe.skip('Colonia Inscription Flow - Integration Tests (REQUIRES DB)', () =
       // Verificar unicidad en la base de datos
       const estudiantes = await prisma.estudiante.findMany({
         where: {
-          OR: [
-            { pin: pin1 },
-            { pin: pin2 },
-          ],
+          OR: [{ pin: pin1 }, { pin: pin2 }],
         },
       });
 

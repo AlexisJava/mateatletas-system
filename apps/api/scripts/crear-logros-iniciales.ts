@@ -31,7 +31,8 @@ async function main() {
         xp_recompensa: 25,
         criterio_tipo: 'primer_login',
         criterio_valor: JSON.stringify({ requiere_primer_login: true }),
-        mensaje_desbloqueo: '¡Bienvenido a Mateatletas! Has dado tu primer paso en esta aventura.',
+        mensaje_desbloqueo:
+          '¡Bienvenido a Mateatletas! Has dado tu primer paso en esta aventura.',
         activo: true,
         secreto: false,
         orden: 1,
@@ -40,7 +41,9 @@ async function main() {
 
     console.log('✅ Logro creado:', logroPrimerIngreso.nombre);
     console.log(`   Código: ${logroPrimerIngreso.codigo}`);
-    console.log(`   XP: ${logroPrimerIngreso.xp_recompensa} | Monedas: ${logroPrimerIngreso.monedas_recompensa}`);
+    console.log(
+      `   XP: ${logroPrimerIngreso.xp_recompensa} | Monedas: ${logroPrimerIngreso.monedas_recompensa}`,
+    );
     console.log(`   Descripción: ${logroPrimerIngreso.descripcion}\n`);
 
     // Logro 2: Avatar Creado
@@ -58,7 +61,8 @@ async function main() {
         xp_recompensa: 50,
         criterio_tipo: 'avatar_creado',
         criterio_valor: JSON.stringify({ requiere_avatar: true }),
-        mensaje_desbloqueo: '¡Tu avatar está listo! Ahora todos pueden ver tu estilo único.',
+        mensaje_desbloqueo:
+          '¡Tu avatar está listo! Ahora todos pueden ver tu estilo único.',
         activo: true,
         secreto: false,
         orden: 2,
@@ -67,16 +71,21 @@ async function main() {
 
     console.log('✅ Logro creado:', logroAvatarCreado.nombre);
     console.log(`   Código: ${logroAvatarCreado.codigo}`);
-    console.log(`   XP: ${logroAvatarCreado.xp_recompensa} | Monedas: ${logroAvatarCreado.monedas_recompensa}`);
+    console.log(
+      `   XP: ${logroAvatarCreado.xp_recompensa} | Monedas: ${logroAvatarCreado.monedas_recompensa}`,
+    );
     console.log(`   Descripción: ${logroAvatarCreado.descripcion}\n`);
 
     console.log('═══════════════════════════════════════════════════════');
     console.log('✅ LOGROS INICIALES CREADOS EXITOSAMENTE');
     console.log('═══════════════════════════════════════════════════════');
-    console.log(`Total XP: ${logroPrimerIngreso.xp_recompensa + logroAvatarCreado.xp_recompensa}`);
-    console.log(`Total Monedas: ${logroPrimerIngreso.monedas_recompensa + logroAvatarCreado.monedas_recompensa}`);
+    console.log(
+      `Total XP: ${logroPrimerIngreso.xp_recompensa + logroAvatarCreado.xp_recompensa}`,
+    );
+    console.log(
+      `Total Monedas: ${logroPrimerIngreso.monedas_recompensa + logroAvatarCreado.monedas_recompensa}`,
+    );
     console.log('═══════════════════════════════════════════════════════\n');
-
   } catch (error) {
     console.error('❌ Error al crear logros:', error);
     throw error;

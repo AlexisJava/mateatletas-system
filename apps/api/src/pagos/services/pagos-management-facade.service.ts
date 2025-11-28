@@ -90,11 +90,7 @@ export class PagosManagementFacadeService {
     anio: number,
     mes: number,
   ) {
-    return this.queryService.tieneInscripcionPendiente(
-      estudianteId,
-      anio,
-      mes,
-    );
+    return this.queryService.tieneInscripcionPendiente(estudianteId, anio, mes);
   }
 
   /**
@@ -147,11 +143,7 @@ export class PagosManagementFacadeService {
     anio: number,
     mes: number,
   ) {
-    return this.queryService.findInscripcionPorPeriodo(
-      estudianteId,
-      anio,
-      mes,
-    );
+    return this.queryService.findInscripcionPorPeriodo(estudianteId, anio, mes);
   }
 
   // ==================== COMMANDS ====================

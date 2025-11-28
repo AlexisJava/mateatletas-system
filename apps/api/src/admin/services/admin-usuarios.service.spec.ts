@@ -121,7 +121,7 @@ describe('AdminUsuariosService', () => {
 
       // Assert
       expect(result[0]._count).toHaveProperty('estudiantes', 2);
-      expect(result[0]._count).toHaveProperty('equipos', 0);
+      expect(result[0]._count).toHaveProperty('casas', 0);
       expect(result[0]._count).toHaveProperty('clases', 0);
     });
 
@@ -139,7 +139,7 @@ describe('AdminUsuariosService', () => {
       // Assert
       expect(result[0]._count).toHaveProperty('clases', 5);
       expect(result[0]._count).toHaveProperty('estudiantes', 0);
-      expect(result[0]._count).toHaveProperty('equipos', 0);
+      expect(result[0]._count).toHaveProperty('casas', 0);
     });
 
     it('should return empty array when no users exist', async () => {

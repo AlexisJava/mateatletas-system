@@ -1,4 +1,17 @@
-import { IsEmail, IsString, MinLength, MaxLength, IsArray, ArrayMinSize, ValidateNested, IsNumber, Min, Max, Matches, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  MaxLength,
+  IsArray,
+  ArrayMinSize,
+  ValidateNested,
+  IsNumber,
+  Min,
+  Max,
+  Matches,
+  IsOptional,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class EstudianteInscripcionDto {
@@ -61,7 +74,8 @@ export class CreateInscriptionDto {
   @MinLength(8)
   @MaxLength(128)
   @Matches(/^(?=.*[A-Z])(?=.*[0-9])/, {
-    message: 'La contraseña debe tener al menos 8 caracteres, una mayúscula y un número',
+    message:
+      'La contraseña debe tener al menos 8 caracteres, una mayúscula y un número',
   })
   password: string;
 

@@ -56,7 +56,10 @@ async function obtenerTutoresConEstudiantes(): Promise<TutorConEstudiantes[]> {
   return tutores;
 }
 
-function generarPDF(tutor: TutorConEstudiantes, outputPath: string): Promise<void> {
+function generarPDF(
+  tutor: TutorConEstudiantes,
+  outputPath: string,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     try {
       // Crear el documento PDF
@@ -78,9 +81,7 @@ function generarPDF(tutor: TutorConEstudiantes, outputPath: string): Promise<voi
       // ═══════════════════════════════════════════════════════
       // HEADER - Logo y título
       // ═══════════════════════════════════════════════════════
-      doc
-        .rect(0, 0, doc.page.width, 120)
-        .fill(primaryColor);
+      doc.rect(0, 0, doc.page.width, 120).fill(primaryColor);
 
       doc
         .fontSize(32)
@@ -130,7 +131,11 @@ function generarPDF(tutor: TutorConEstudiantes, outputPath: string): Promise<voi
         .fontSize(16)
         .fillColor(textColor)
         .font('Helvetica-Bold')
-        .text(`🎓 ACCESO ESTUDIANTES (${tutor.estudiantes.length})`, 50, yPosition);
+        .text(
+          `🎓 ACCESO ESTUDIANTES (${tutor.estudiantes.length})`,
+          50,
+          yPosition,
+        );
 
       yPosition += 30;
 
@@ -150,7 +155,11 @@ function generarPDF(tutor: TutorConEstudiantes, outputPath: string): Promise<voi
           .fontSize(14)
           .fillColor(textColor)
           .font('Helvetica-Bold')
-          .text(`${index + 1}. ${estudiante.nombre} ${estudiante.apellido}`, 70, yPosition + 15);
+          .text(
+            `${index + 1}. ${estudiante.nombre} ${estudiante.apellido}`,
+            70,
+            yPosition + 15,
+          );
 
         // Email del estudiante
         doc
@@ -221,7 +230,11 @@ function generarPDF(tutor: TutorConEstudiantes, outputPath: string): Promise<voi
       doc
         .fillColor(textColor)
         .font('Helvetica')
-        .text('3. Ingresar el correo electrónico y el PIN de 4 dígitos', 50, yPosition);
+        .text(
+          '3. Ingresar el correo electrónico y el PIN de 4 dígitos',
+          50,
+          yPosition,
+        );
 
       yPosition += 25;
 
@@ -237,14 +250,22 @@ function generarPDF(tutor: TutorConEstudiantes, outputPath: string): Promise<voi
         .fontSize(9)
         .fillColor('#6B7280')
         .font('Helvetica')
-        .text('• Los estudiantes usan un PIN de 4 dígitos que NO cambia', 50, yPosition);
+        .text(
+          '• Los estudiantes usan un PIN de 4 dígitos que NO cambia',
+          50,
+          yPosition,
+        );
 
       yPosition += 12;
 
       doc
         .fillColor('#6B7280')
         .font('Helvetica')
-        .text('• Este PIN es personal y único para cada estudiante', 50, yPosition);
+        .text(
+          '• Este PIN es personal y único para cada estudiante',
+          50,
+          yPosition,
+        );
 
       yPosition += 12;
 
@@ -258,7 +279,11 @@ function generarPDF(tutor: TutorConEstudiantes, outputPath: string): Promise<voi
       doc
         .fillColor('#6B7280')
         .font('Helvetica')
-        .text('• El portal de estudiantes funciona mejor en tablets o computadoras', 50, yPosition);
+        .text(
+          '• El portal de estudiantes funciona mejor en tablets o computadoras',
+          50,
+          yPosition,
+        );
 
       // ═══════════════════════════════════════════════════════
       // FOOTER
@@ -271,7 +296,7 @@ function generarPDF(tutor: TutorConEstudiantes, outputPath: string): Promise<voi
           'Mateatletas Club STEAM - Documento generado automáticamente',
           50,
           doc.page.height - 30,
-          { align: 'center', width: doc.page.width - 100 }
+          { align: 'center', width: doc.page.width - 100 },
         );
 
       // Finalizar el documento
@@ -294,7 +319,9 @@ function generarPDF(tutor: TutorConEstudiantes, outputPath: string): Promise<voi
 }
 
 async function main() {
-  console.log('🚀 Iniciando generación de PDFs de credenciales de ESTUDIANTES...\n');
+  console.log(
+    '🚀 Iniciando generación de PDFs de credenciales de ESTUDIANTES...\n',
+  );
 
   try {
     // Obtener todos los tutores con sus estudiantes
@@ -318,7 +345,9 @@ async function main() {
       try {
         // Solo generar PDF si el tutor tiene estudiantes
         if (tutor.estudiantes.length === 0) {
-          console.log(`⚠️ Familia ${tutor.apellido} no tiene estudiantes, omitiendo...`);
+          console.log(
+            `⚠️ Familia ${tutor.apellido} no tiene estudiantes, omitiendo...`,
+          );
           continue;
         }
 
@@ -344,8 +373,12 @@ async function main() {
     console.log('═══════════════════════════════════════════════════════\n');
 
     if (generados > 0) {
-      console.log('🎉 ¡Proceso completado! Los PDFs están listos para enviar a las familias.');
-      console.log('💡 Cada familia recibirá un PDF con las credenciales de sus estudiantes.');
+      console.log(
+        '🎉 ¡Proceso completado! Los PDFs están listos para enviar a las familias.',
+      );
+      console.log(
+        '💡 Cada familia recibirá un PDF con las credenciales de sus estudiantes.',
+      );
     }
   } catch (error) {
     console.error('❌ Error fatal:', error);

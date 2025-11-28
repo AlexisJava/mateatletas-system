@@ -79,8 +79,12 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
       .compile();
 
     controller = module.get<EstudiantesController>(EstudiantesController);
-    facadeService = module.get<EstudiantesFacadeService>(EstudiantesFacadeService);
-    commandService = module.get<EstudianteCommandService>(EstudianteCommandService);
+    facadeService = module.get<EstudiantesFacadeService>(
+      EstudiantesFacadeService,
+    );
+    commandService = module.get<EstudianteCommandService>(
+      EstudianteCommandService,
+    );
     queryService = module.get<EstudianteQueryService>(EstudianteQueryService);
     prisma = module.get<PrismaService>(PrismaService);
   });
@@ -106,9 +110,9 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
 
       // Act & Assert - Simular que el guard rechazó
       // El guard verifica ownership, el service solo actualiza
-      await expect(queryService.findOne('est-123', 'tutor-other')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        queryService.findOne('est-123', 'tutor-other'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should allow avatar update from owner tutor', async () => {
@@ -151,10 +155,7 @@ describe('EstudiantesController - Avatar Ownership Security', () => {
         avatar_gradient: 3,
       } as any);
 
-      const result = await commandService.updateAvatarGradient(
-        'est-123',
-        3,
-      );
+      const result = await commandService.updateAvatarGradient('est-123', 3);
 
       expect(result).toHaveProperty('avatar_gradient', 3);
       expect(result).toHaveProperty('nombre', 'Juan');

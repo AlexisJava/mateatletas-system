@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
-import { IInscripcionMensualRepository, MetricasPeriodo } from '../../domain/repositories/inscripcion-mensual.repository.interface';
+import {
+  IInscripcionMensualRepository,
+  MetricasPeriodo,
+} from '../../domain/repositories/inscripcion-mensual.repository.interface';
 import {
   ObtenerMetricasDashboardInputDTO,
   ObtenerMetricasDashboardOutputDTO,

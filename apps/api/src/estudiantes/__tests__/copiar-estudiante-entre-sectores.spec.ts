@@ -211,7 +211,9 @@ describe.skip('EstudianteCopyService - Copiar entre Sectores', () => {
       ).rejects.toThrow(ConflictException);
       await expect(
         service.copiarEstudianteASector(estudianteId, sectorId),
-      ).rejects.toThrow('Este estudiante ya está inscrito en el sector destino');
+      ).rejects.toThrow(
+        'Este estudiante ya está inscrito en el sector destino',
+      );
     });
   });
 

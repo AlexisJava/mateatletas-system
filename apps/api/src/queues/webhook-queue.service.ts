@@ -70,7 +70,8 @@ export class WebhookQueueService {
         `✅ Webhook agregado a queue: payment_id=${paymentId}, type=${webhookData.type}`,
       );
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.error(
         `❌ Error agregando webhook a queue: payment_id=${paymentId}, error=${errorMessage}`,
       );
@@ -136,7 +137,9 @@ export class WebhookQueueService {
    */
   async cleanCompletedJobs(grace: number = 24 * 60 * 60 * 1000): Promise<void> {
     await this.webhookQueue.clean(grace, 'completed');
-    this.logger.log(`🗑️ Jobs completados antiguos limpiados (grace: ${grace}ms)`);
+    this.logger.log(
+      `🗑️ Jobs completados antiguos limpiados (grace: ${grace}ms)`,
+    );
   }
 
   /**

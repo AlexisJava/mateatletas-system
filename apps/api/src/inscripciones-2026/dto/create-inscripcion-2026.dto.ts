@@ -12,7 +12,7 @@ import {
   Matches,
   MinLength,
   ArrayMinSize,
-  ArrayMaxSize
+  ArrayMaxSize,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -57,12 +57,16 @@ export class TutorDataDto {
 
   @IsString()
   @IsNotEmpty({ message: 'El CUIL/CUIT es requerido para facturación' })
-  @Matches(/^\d{11}$/, { message: 'CUIL/CUIT debe tener 11 dígitos (sin guiones)' })
+  @Matches(/^\d{11}$/, {
+    message: 'CUIL/CUIT debe tener 11 dígitos (sin guiones)',
+  })
   cuil: string;
 
   @IsString()
   @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
-  @Matches(/[A-Z]/, { message: 'La contraseña debe tener al menos una mayúscula' })
+  @Matches(/[A-Z]/, {
+    message: 'La contraseña debe tener al menos una mayúscula',
+  })
   @Matches(/[0-9]/, { message: 'La contraseña debe tener al menos un número' })
   password: string;
 }
@@ -134,7 +138,8 @@ export class EstudianteInscripcionDto {
  */
 export class CreateInscripcion2026Dto {
   @IsEnum(TipoInscripcion2026, {
-    message: 'Tipo de inscripción inválido. Debe ser: colonia, ciclo2026 o pack-completo'
+    message:
+      'Tipo de inscripción inválido. Debe ser: colonia, ciclo2026 o pack-completo',
   })
   @IsNotEmpty()
   tipo_inscripcion: TipoInscripcion2026;

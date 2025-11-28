@@ -66,7 +66,9 @@ export class TiendaController {
       categoria: filtros.categoria,
       destacados: filtros.destacados === 'true',
       nuevos: filtros.nuevos === 'true',
-      nivelMaximo: filtros.nivelMaximo ? Number(filtros.nivelMaximo) : undefined,
+      nivelMaximo: filtros.nivelMaximo
+        ? Number(filtros.nivelMaximo)
+        : undefined,
     });
   }
 
@@ -146,7 +148,7 @@ export class TiendaController {
     return this.tiendaService.actualizarProgresoCurso(
       estudianteId,
       cursoId,
-      body.progreso
+      body.progreso,
     );
   }
 

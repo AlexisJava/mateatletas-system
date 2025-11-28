@@ -65,5 +65,7 @@ export async function seedTutor(prisma: PrismaClient) {
     });
   }
 
-  console.log(`   📚 ${estudiantes.length} estudiantes creados para el tutor\n`);
+  console.log(
+    `   📚 ${estudiantes.length} estudiantes creados para el tutor\n`,
+  );
 }

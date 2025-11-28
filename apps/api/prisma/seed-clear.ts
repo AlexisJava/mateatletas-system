@@ -70,10 +70,8 @@ async function clearDatabase() {
     console.log('🏅 Eliminando logros...');
     await prisma.logro.deleteMany({});
 
-
     console.log('\n✅ Base de datos limpiada exitosamente!');
     console.log('📊 Todos los datos han sido eliminados\n');
-
   } catch (error) {
     console.error('❌ Error limpiando la base de datos:', error);
     throw error;

@@ -148,7 +148,7 @@ describe('AuthController', () => {
         foto_url: null,
         puntos_totales: 0,
         nivel_actual: 1,
-        equipo: null,
+        casa: null,
         tutor: {
           id: 'tutor-1',
           nombre: 'Tutor',

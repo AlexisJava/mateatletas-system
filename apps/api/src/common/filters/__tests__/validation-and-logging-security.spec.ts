@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe, BadRequestException } from '@nestjs/common';
+import {
+  INestApplication,
+  ValidationPipe,
+  BadRequestException,
+} from '@nestjs/common';
 import { AllExceptionsFilter } from '../all-exceptions.filter';
 import { LoggerService } from '../../logger/logger.service';
 import request from 'supertest';

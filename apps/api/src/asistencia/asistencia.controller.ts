@@ -177,7 +177,8 @@ export class AsistenciaController {
   @Post('clase-grupo/batch')
   @Roles(Role.DOCENTE)
   async tomarAsistenciaBatch(
-    @Body() dto: import('./dto/tomar-asistencia-batch.dto').TomarAsistenciaBatchDto,
+    @Body()
+    dto: import('./dto/tomar-asistencia-batch.dto').TomarAsistenciaBatchDto,
     @GetUser() user: AuthUser,
   ) {
     return this.asistenciaService.tomarAsistenciaClaseGrupoBatch(

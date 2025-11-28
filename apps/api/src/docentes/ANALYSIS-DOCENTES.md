@@ -9,6 +9,7 @@
 ## Métodos Públicos Categorizados
 
 ### QUERIES (Lectura) - 4 métodos
+
 1. `findAll(page?, limit?)` - Línea 107 - Lista todos los docentes con paginación
 2. `findByEmail(email)` - Línea 142 - Busca docente por email (para autenticación)
 3. `findById(id)` - Línea 153 - Busca docente por ID con sectores
@@ -16,12 +17,14 @@
 5. `getEstadisticasCompletas(docenteId)` - Línea 674 - Estadísticas detalladas (top estudiantes, asistencia, ranking grupos)
 
 ### COMMANDS (Escritura) - 5 métodos
+
 1. `create(createDto)` - Línea 38 - Crear docente (con generación de password)
 2. `update(id, updateDto)` - Línea 199 - Actualizar docente
 3. `remove(id)` - Línea 259 - Eliminar docente (con validación de clases)
 4. `reasignarClases(fromDocenteId, toDocenteId)` - Línea 296 - Reasignar clases entre docentes
 
 ### STATISTICS - 2 métodos
+
 1. `getDashboard(docenteId)` - Línea 345 - Dashboard con estadísticas en tiempo real
 2. `getEstadisticasCompletas(docenteId)` - Línea 674 - Estadísticas detalladas para página de observaciones
 
@@ -34,6 +37,7 @@ constructor(private prisma: PrismaService) {}
 ```
 
 **Dependencias detectadas:**
+
 - `PrismaService` - Base de datos (TODOS los servicios)
 - `bcrypt` - Hashing de contraseñas (solo COMMANDS create/update)
 - `generateSecurePassword` util - Generación de contraseñas seguras
@@ -45,6 +49,7 @@ constructor(private prisma: PrismaService) {}
 ## Complejidad del Servicio
 
 ### Métodos Complejos (>100 líneas)
+
 1. **`getDashboard()`** - Líneas 345-662 (317 líneas)
    - Calcula clase inminente de hoy
    - Obtiene stats resumen (clases hoy/semana, asistencia promedio)
@@ -61,6 +66,7 @@ constructor(private prisma: PrismaService) {}
    - **Problema**: God Method que hace 4 cálculos diferentes
 
 ### Métodos con Lógica de Negocio
+
 1. **`create()`** - Línea 38
    - Validación de email duplicado
    - Generación automática de password si no se provee
@@ -83,9 +89,11 @@ constructor(private prisma: PrismaService) {}
 ## Distribución Propuesta
 
 ### DocenteBusinessValidator (150 líneas estimadas)
+
 **Responsabilidad**: Validaciones de negocio reutilizables
 
 **Métodos:**
+
 - `validarDocenteExiste(id)` - Verificar existencia
 - `validarEmailUnico(email, excludeId?)` - Email no duplicado
 - `validarDocenteTieneClases(docenteId)` - Verificar clases asignadas
@@ -93,44 +101,53 @@ constructor(private prisma: PrismaService) {}
 - `validarReasignacionValida(fromId, toId)` - Validar que ambos existen y no son el mismo
 
 **Dependencias:**
+
 - PrismaService
 
 ---
 
 ### DocenteQueryService (200 líneas estimadas)
+
 **Responsabilidad**: Operaciones de lectura/búsqueda
 
 **Métodos:**
+
 - `findAll(page?, limit?)` - Lista con paginación
 - `findByEmail(email)` - Buscar por email (para auth)
 - `findById(id)` - Buscar por ID con sectores
 - `findByIds(ids)` - Buscar múltiples docentes (helper interno)
 
 **Dependencias:**
+
 - PrismaService
 
 ---
 
 ### DocenteCommandService (250 líneas estimadas)
+
 **Responsabilidad**: Operaciones de escritura (Create, Update, Delete)
 
 **Métodos:**
+
 - `create(createDto)` - Crear docente
 - `update(id, updateDto)` - Actualizar docente
 - `remove(id)` - Eliminar docente
 - `reasignarClases(fromDocenteId, toDocenteId)` - Reasignar clases
 
 **Helpers privados:**
+
 - `generarYHashearPassword(password?)` - Generar/hashear contraseña
 - `excluirPasswordHash(docente)` - Eliminar password_hash de respuesta
 
 **Dependencias:**
+
 - PrismaService
 - DocenteBusinessValidator (para validaciones)
 - bcrypt (para hashing)
 - generateSecurePassword util
 
 **Eventos a emitir:**
+
 - `docente.created` - Cuando se crea docente
 - `docente.updated` - Cuando se actualiza docente
 - `docente.deleted` - Cuando se elimina docente
@@ -138,9 +155,11 @@ constructor(private prisma: PrismaService) {}
 ---
 
 ### DocenteStatsService (350 líneas estimadas)
+
 **Responsabilidad**: Estadísticas y reportes del docente
 
 **Métodos:**
+
 - `getDashboard(docenteId)` - Dashboard completo
 - `getEstadisticasCompletas(docenteId)` - Estadísticas detalladas
 - `calcularClaseInminente(docenteId)` - Helper privado
@@ -152,15 +171,18 @@ constructor(private prisma: PrismaService) {}
 - `calcularRankingGrupos(gruposIds)` - Helper privado
 
 **Dependencias:**
+
 - PrismaService
 - DocenteBusinessValidator (para validar existencia)
 
 ---
 
 ### DocentesFacade (100 líneas estimadas)
+
 **Responsabilidad**: Fachada que unifica Query, Command y Stats
 
 **Métodos (todos delegación):**
+
 - `create(createDto)` → CommandService
 - `update(id, updateDto)` → CommandService
 - `remove(id)` → CommandService
@@ -172,6 +194,7 @@ constructor(private prisma: PrismaService) {}
 - `getEstadisticasCompletas(docenteId)` → StatsService
 
 **Dependencias:**
+
 - DocenteQueryService
 - DocenteCommandService
 - DocenteStatsService
@@ -180,14 +203,14 @@ constructor(private prisma: PrismaService) {}
 
 ## Métricas Objetivo
 
-| Servicio | Líneas objetivo | Responsabilidades |
-|----------|----------------|-------------------|
-| DocentesService (Facade) | ~100 | Orquestación |
-| DocenteQueryService | ~200 | Queries |
-| DocenteCommandService | ~250 | Commands |
-| DocenteStatsService | ~350 | Statistics |
-| DocenteBusinessValidator | ~150 | Business validation |
-| **TOTAL** | **~1,050** | **5 servicios** |
+| Servicio                 | Líneas objetivo | Responsabilidades   |
+| ------------------------ | --------------- | ------------------- |
+| DocentesService (Facade) | ~100            | Orquestación        |
+| DocenteQueryService      | ~200            | Queries             |
+| DocenteCommandService    | ~250            | Commands            |
+| DocenteStatsService      | ~350            | Statistics          |
+| DocenteBusinessValidator | ~150            | Business validation |
+| **TOTAL**                | **~1,050**      | **5 servicios**     |
 
 **Reducción por servicio**: -84% (de 927 a ~210 líneas promedio)
 
@@ -207,27 +230,32 @@ constructor(private prisma: PrismaService) {}
 ## Casos Especiales a Considerar
 
 ### 1. Generación de Contraseñas
+
 - `create()` genera contraseña automática si no se provee
 - Retorna `generatedPassword` en la respuesta si se generó
 - Flag `debe_cambiar_password` se activa automáticamente
 - Guardar `password_temporal` solo si se auto-generó
 
 ### 2. Exclusión de Password Hash
+
 - TODOS los métodos deben excluir `password_hash` de la respuesta
 - Solo `findByEmail()` retorna password_hash (para auth)
 - Helper `excluirPasswordHash()` reutilizable
 
 ### 3. Validación de Eliminación
+
 - No se puede eliminar docente con clases asignadas
 - Mensaje de error debe indicar cuántas clases tiene
 - Sugerir reasignar clases primero
 
 ### 4. Queries con Raw SQL
+
 - `getDashboard()` usa `prisma.$queryRaw` para estudiantes con faltas
 - `getEstadisticasCompletas()` usa `prisma.$queryRaw` para estudiantes con faltas
 - Mantener estas queries en StatsService
 
 ### 5. Cálculo de Clase Inminente
+
 - Solo considerar clases de hoy (dia_semana actual)
 - Ventana de tiempo: -10 minutos a +60 minutos
 - Calcular fecha/hora combinando fecha actual + hora_inicio de ClaseGrupo
@@ -237,6 +265,7 @@ constructor(private prisma: PrismaService) {}
 ## Verificación Final
 
 **Criterios de éxito:**
+
 - ✅ DocentesService < 150 líneas
 - ✅ Cada servicio especializado < 350 líneas
 - ✅ 0 dependencias circulares (madge)
@@ -249,6 +278,7 @@ constructor(private prisma: PrismaService) {}
 ## Plan de Testing
 
 ### DocenteBusinessValidator (15 tests)
+
 - ✅ Validar docente existe (éxito)
 - ✅ Validar docente no existe (error)
 - ✅ Validar email único (éxito)
@@ -262,6 +292,7 @@ constructor(private prisma: PrismaService) {}
 - ✅ Validar reasignación docente destino no existe (error)
 
 ### DocenteQueryService (12 tests)
+
 - ✅ findAll - sin paginación
 - ✅ findAll - con paginación
 - ✅ findAll - excluye password_hash
@@ -274,6 +305,7 @@ constructor(private prisma: PrismaService) {}
 - ✅ findById - incluye sectores únicos
 
 ### DocenteCommandService (20 tests)
+
 - ✅ create - con password proporcionada
 - ✅ create - auto-generar password
 - ✅ create - retorna generatedPassword si se generó
@@ -296,6 +328,7 @@ constructor(private prisma: PrismaService) {}
 - ✅ reasignarClases - destino no existe (NotFoundException)
 
 ### DocenteStatsService (8 tests)
+
 - ✅ getDashboard - estructura completa
 - ✅ getDashboard - clase inminente existe
 - ✅ getDashboard - clase inminente null

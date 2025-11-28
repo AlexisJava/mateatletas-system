@@ -62,7 +62,9 @@ export class RedisService implements OnModuleDestroy {
         });
       } else {
         // Fallback a REDIS_HOST/PORT (desarrollo local)
-        this.logger.log(`🔗 Conectando a Redis usando REDIS_HOST=${host}:${port}...`);
+        this.logger.log(
+          `🔗 Conectando a Redis usando REDIS_HOST=${host}:${port}...`,
+        );
         this.client = new Redis({
           host,
           port,

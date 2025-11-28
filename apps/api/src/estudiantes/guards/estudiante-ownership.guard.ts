@@ -26,7 +26,9 @@ export class EstudianteOwnershipGuard implements CanActivate {
     const user = request.user as AuthUser | undefined;
     const estudianteId = request.params?.id as string | undefined;
 
-    this.logger.debug(`Validating ownership - userId: ${user?.id}, role: ${user?.role}, estudianteId: ${estudianteId}`);
+    this.logger.debug(
+      `Validating ownership - userId: ${user?.id}, role: ${user?.role}, estudianteId: ${estudianteId}`,
+    );
 
     if (!user) {
       this.logger.warn('Access denied - No authenticated user');

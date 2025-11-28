@@ -11,7 +11,7 @@ async function main() {
 
   // Buscar admin
   const admin = await prisma.admin.findUnique({
-    where: { email }
+    where: { email },
   });
 
   if (!admin) {
@@ -29,7 +29,9 @@ async function main() {
   const passwordMatch = await bcrypt.compare(testPassword, admin.password_hash);
 
   console.log(`\n🔐 Testing password: "${testPassword}"`);
-  console.log(`${passwordMatch ? '✅' : '❌'} Password match: ${passwordMatch}`);
+  console.log(
+    `${passwordMatch ? '✅' : '❌'} Password match: ${passwordMatch}`,
+  );
 
   if (!passwordMatch) {
     console.log('\n⚠️  La contraseña NO coincide. Generando nuevo hash...');

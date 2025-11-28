@@ -183,7 +183,9 @@ describe('Inscripciones2026Service - Webhook Idempotency', () => {
       // ASSERT: NO debe procesar el webhook
       expect(mockMercadoPagoService.getPayment).not.toHaveBeenCalled();
       expect(mockPrisma.pagoInscripcion2026.update).not.toHaveBeenCalled();
-      expect(mockPrisma.historialEstadoInscripcion2026.create).not.toHaveBeenCalled();
+      expect(
+        mockPrisma.historialEstadoInscripcion2026.create,
+      ).not.toHaveBeenCalled();
 
       // ASSERT: Debe retornar éxito con mensaje de duplicado
       expect(result).toEqual(
@@ -496,7 +498,9 @@ describe('Inscripciones2026Service - Webhook Idempotency', () => {
 
       // ACT & ASSERT
       await expect(
-        service.procesarWebhookMercadoPago(webhookData as MercadoPagoWebhookDto),
+        service.procesarWebhookMercadoPago(
+          webhookData as MercadoPagoWebhookDto,
+        ),
       ).rejects.toThrow();
     });
 

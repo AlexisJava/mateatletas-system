@@ -26,7 +26,8 @@ export class RecursosController {
    */
   @Get(':estudianteId')
   async obtenerRecursos(@Param('estudianteId') estudianteId: string) {
-    const recursos = await this.recursosService.obtenerRecursosConNivel(estudianteId);
+    const recursos =
+      await this.recursosService.obtenerRecursosConNivel(estudianteId);
     const racha = await this.rachaService.obtenerEstadisticas(estudianteId);
 
     return {

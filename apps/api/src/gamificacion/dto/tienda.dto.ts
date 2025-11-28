@@ -1,4 +1,13 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsNumber, IsBoolean, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+  Min,
+  Max,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -15,7 +24,8 @@ export class CanjearCursoDto {
  */
 export class AprobarCanjeDto {
   @IsEnum(['padre_paga_todo', 'hijo_paga_mitad', 'hijo_paga_todo'], {
-    message: 'Opción de pago inválida. Debe ser: padre_paga_todo, hijo_paga_mitad o hijo_paga_todo',
+    message:
+      'Opción de pago inválida. Debe ser: padre_paga_todo, hijo_paga_mitad o hijo_paga_todo',
   })
   opcionPago!: 'padre_paga_todo' | 'hijo_paga_mitad' | 'hijo_paga_todo';
 

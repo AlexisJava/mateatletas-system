@@ -54,18 +54,23 @@ describe('PinGeneratorService', () => {
     });
 
     it('debe lanzar error si no puede generar PIN único después de MAX_RETRIES', async () => {
-      const existsCheck = jest.fn().mockResolvedValue({ id: '123', pin: '1234' });
+      const existsCheck = jest
+        .fn()
+        .mockResolvedValue({ id: '123', pin: '1234' });
 
       await expect(
         service.generateUniquePin('estudiante', existsCheck),
-      ).rejects.toThrow('Failed to generate unique PIN for estudiante after 10 attempts');
+      ).rejects.toThrow(
+        'Failed to generate unique PIN for estudiante after 10 attempts',
+      );
 
       expect(existsCheck).toHaveBeenCalledTimes(10);
     });
 
     it('debe verificar unicidad contra la base de datos', async () => {
       const mockEstudiante = { id: '123', nombre: 'Juan', pin: '1234' };
-      const existsCheck = jest.fn()
+      const existsCheck = jest
+        .fn()
         .mockResolvedValueOnce(mockEstudiante) // Primera llamada: PIN existe
         .mockResolvedValueOnce(null); // Segunda llamada: PIN único
 
@@ -81,10 +86,14 @@ describe('PinGeneratorService', () => {
     it('debe generar múltiples PINs únicos', async () => {
       const existsCheck = jest.fn().mockResolvedValue(null);
 
-      const pins = await service.generateMultiplePins(3, 'estudiante', existsCheck);
+      const pins = await service.generateMultiplePins(
+        3,
+        'estudiante',
+        existsCheck,
+      );
 
       expect(pins).toHaveLength(3);
-      pins.forEach(pin => {
+      pins.forEach((pin) => {
         expect(pin).toMatch(/^\d{4}$/);
       });
 
@@ -102,10 +111,14 @@ describe('PinGeneratorService', () => {
         return null; // PIN único
       });
 
-      const pins = await service.generateMultiplePins(3, 'estudiante', existsCheck);
+      const pins = await service.generateMultiplePins(
+        3,
+        'estudiante',
+        existsCheck,
+      );
 
       expect(pins).toHaveLength(3);
-      pins.forEach(pin => {
+      pins.forEach((pin) => {
         expect(pin).toMatch(/^\d{4}$/);
         expect(usedPins.has(pin)).toBe(false); // No debe incluir PINs usados
       });
@@ -117,18 +130,26 @@ describe('PinGeneratorService', () => {
 
     it('debe lanzar error si no puede generar el conjunto completo de PINs', async () => {
       // Simular que todos los PINs colisionan
-      const existsCheck = jest.fn().mockResolvedValue({ id: '123', pin: '1234' });
+      const existsCheck = jest
+        .fn()
+        .mockResolvedValue({ id: '123', pin: '1234' });
 
       await expect(
         service.generateMultiplePins(2, 'estudiante', existsCheck),
-      ).rejects.toThrow('Failed to generate unique PIN for estudiante after 10 attempts');
+      ).rejects.toThrow(
+        'Failed to generate unique PIN for estudiante after 10 attempts',
+      );
     });
 
     it('debe evitar duplicados dentro del mismo conjunto generado', async () => {
       // Mock que retorna null (PIN único) pero puede generar el mismo número aleatoriamente
       const existsCheck = jest.fn().mockResolvedValue(null);
 
-      const pins = await service.generateMultiplePins(5, 'estudiante', existsCheck);
+      const pins = await service.generateMultiplePins(
+        5,
+        'estudiante',
+        existsCheck,
+      );
 
       expect(pins).toHaveLength(5);
 

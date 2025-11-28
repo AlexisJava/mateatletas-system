@@ -94,7 +94,11 @@ export function calcularFechaVencimiento(mes: string, anio: number): Date {
   }
 
   // Vencimiento es el día 5 del mes siguiente
-  const fechaVencimiento = new Date(anio, mesNumero + 1, BUSINESS_RULES.PAGOS.DIA_VENCIMIENTO);
+  const fechaVencimiento = new Date(
+    anio,
+    mesNumero + 1,
+    BUSINESS_RULES.PAGOS.DIA_VENCIMIENTO,
+  );
 
   return fechaVencimiento;
 }

@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PRECIOS, DESCUENTOS, REGLAS_PRICING, PricingHelpers } from '../constants';
+import {
+  PRECIOS,
+  DESCUENTOS,
+  REGLAS_PRICING,
+  PricingHelpers,
+} from '../constants';
 
 /**
  * Servicio centralizado para cálculos de pricing y descuentos
@@ -30,8 +35,14 @@ export class PricingCalculatorService {
    * // descuento = 20
    * ```
    */
-  calcularDescuentoColonia(cantidadEstudiantes: number, totalCursos: number): number {
-    return PricingHelpers.calcularDescuentoColonia(cantidadEstudiantes, totalCursos);
+  calcularDescuentoColonia(
+    cantidadEstudiantes: number,
+    totalCursos: number,
+  ): number {
+    return PricingHelpers.calcularDescuentoColonia(
+      cantidadEstudiantes,
+      totalCursos,
+    );
   }
 
   /**
@@ -118,7 +129,8 @@ export class PricingCalculatorService {
     numEstudiantes: number,
     cursosPerStudent: number[] = [],
   ): { total: number; descuento: number } {
-    const descuentoHermanos = this.calcularDescuentoInscripcion2026(numEstudiantes);
+    const descuentoHermanos =
+      this.calcularDescuentoInscripcion2026(numEstudiantes);
     let subtotal = 0;
 
     switch (tipo) {
@@ -204,8 +216,14 @@ export class PricingCalculatorService {
    * // descuento = 12000
    * ```
    */
-  calcularMontoDescuento(precioBase: number, descuentoPorcentaje: number): number {
-    return PricingHelpers.calcularMontoDescuento(precioBase, descuentoPorcentaje);
+  calcularMontoDescuento(
+    precioBase: number,
+    descuentoPorcentaje: number,
+  ): number {
+    return PricingHelpers.calcularMontoDescuento(
+      precioBase,
+      descuentoPorcentaje,
+    );
   }
 
   /**

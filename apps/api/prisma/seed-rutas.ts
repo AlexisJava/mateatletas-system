@@ -18,8 +18,7 @@ async function main() {
       id: 'seed-ruta-algebra',
       nombre: 'Álgebra',
       color: '#3B82F6', // Azul
-      descripcion:
-        'Ecuaciones, sistemas, funciones y expresiones algebraicas',
+      descripcion: 'Ecuaciones, sistemas, funciones y expresiones algebraicas',
     },
     {
       id: 'seed-ruta-geometria',

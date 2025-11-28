@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Logger, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Logger,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { ColoniaService } from './colonia.service';
 import { CreateInscriptionDto } from './dto/create-inscription.dto';
@@ -50,16 +58,22 @@ export class ColoniaController {
   @Throttle({ default: { limit: 5, ttl: 3600000 } })
   @HttpCode(HttpStatus.CREATED)
   async createInscription(@Body() createInscriptionDto: CreateInscriptionDto) {
-    this.logger.log(`Nueva solicitud de inscripción - Email: ${createInscriptionDto.email}`);
+    this.logger.log(
+      `Nueva solicitud de inscripción - Email: ${createInscriptionDto.email}`,
+    );
 
     try {
-      const result = await this.coloniaService.createInscription(createInscriptionDto);
+      const result =
+        await this.coloniaService.createInscription(createInscriptionDto);
 
-      this.logger.log(`Inscripción exitosa - Inscription ID: ${result.inscriptionId}`);
+      this.logger.log(
+        `Inscripción exitosa - Inscription ID: ${result.inscriptionId}`,
+      );
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Error desconocido';
       const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(`Error en inscripción: ${errorMessage}`, errorStack);
       throw error;

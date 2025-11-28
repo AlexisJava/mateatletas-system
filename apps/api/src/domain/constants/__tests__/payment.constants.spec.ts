@@ -41,11 +41,15 @@ describe('Payment Constants', () => {
     });
 
     it('debe mapear charged_back a REEMBOLSADO', () => {
-      expect(mapearEstadoMercadoPago('charged_back')).toBe(EstadoPago.REEMBOLSADO);
+      expect(mapearEstadoMercadoPago('charged_back')).toBe(
+        EstadoPago.REEMBOLSADO,
+      );
     });
 
     it('debe devolver PENDIENTE para estados desconocidos', () => {
-      expect(mapearEstadoMercadoPago('unknown_status')).toBe(EstadoPago.PENDIENTE);
+      expect(mapearEstadoMercadoPago('unknown_status')).toBe(
+        EstadoPago.PENDIENTE,
+      );
     });
   });
 
@@ -58,7 +62,9 @@ describe('Payment Constants', () => {
           '2025-03-15',
         );
 
-        expect(result).toBe('CLASE_INSCRIPCION:clase123:estudiante456:2025-03-15');
+        expect(result).toBe(
+          'CLASE_INSCRIPCION:clase123:estudiante456:2025-03-15',
+        );
       });
     });
 
@@ -88,7 +94,8 @@ describe('Payment Constants', () => {
   describe('parseExternalReference', () => {
     describe('CLASE_INSCRIPCION', () => {
       it('debe parsear formato válido', () => {
-        const externalRef = 'CLASE_INSCRIPCION:clase123:estudiante456:2025-03-15';
+        const externalRef =
+          'CLASE_INSCRIPCION:clase123:estudiante456:2025-03-15';
         const result = parseExternalReference(externalRef);
 
         expect(result).toEqual({
@@ -191,24 +198,32 @@ describe('Payment Constants', () => {
 
     it('debe rechazar formatos inválidos', () => {
       expect(esExternalReferenceValido('INVALID')).toBe(false);
-      expect(esExternalReferenceValido('CLASE_INSCRIPCION:only-one-param')).toBe(false);
+      expect(
+        esExternalReferenceValido('CLASE_INSCRIPCION:only-one-param'),
+      ).toBe(false);
     });
   });
 
   describe('getTipoExternalReference', () => {
     it('debe extraer tipo CLASE_INSCRIPCION', () => {
       const externalRef = 'CLASE_INSCRIPCION:clase123:estudiante456:2025-03-15';
-      expect(getTipoExternalReference(externalRef)).toBe(TipoExternalReference.CLASE_INSCRIPCION);
+      expect(getTipoExternalReference(externalRef)).toBe(
+        TipoExternalReference.CLASE_INSCRIPCION,
+      );
     });
 
     it('debe extraer tipo CURSO_INSCRIPCION', () => {
       const externalRef = 'CURSO_INSCRIPCION:curso789:estudiante456';
-      expect(getTipoExternalReference(externalRef)).toBe(TipoExternalReference.CURSO_INSCRIPCION);
+      expect(getTipoExternalReference(externalRef)).toBe(
+        TipoExternalReference.CURSO_INSCRIPCION,
+      );
     });
 
     it('debe extraer tipo ESTUDIANTE_RECARGA', () => {
       const externalRef = 'ESTUDIANTE_RECARGA:estudiante456:1500';
-      expect(getTipoExternalReference(externalRef)).toBe(TipoExternalReference.ESTUDIANTE_RECARGA);
+      expect(getTipoExternalReference(externalRef)).toBe(
+        TipoExternalReference.ESTUDIANTE_RECARGA,
+      );
     });
 
     it('debe devolver null para tipo desconocido', () => {

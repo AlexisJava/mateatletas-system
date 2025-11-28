@@ -60,7 +60,9 @@ describe('ClaseBusinessValidator', () => {
 
       await expect(
         validator.validarRutaCurricularExiste('ruta-inexistente'),
-      ).rejects.toThrow('Ruta curricular con ID ruta-inexistente no encontrada');
+      ).rejects.toThrow(
+        'Ruta curricular con ID ruta-inexistente no encontrada',
+      );
     });
   });
 
@@ -309,11 +311,19 @@ describe('ClaseBusinessValidator', () => {
 
     it('debe denegar cancelación si el usuario es estudiante', () => {
       expect(() =>
-        validator.validarPermisosCancelacion(clase, 'estudiante-1', 'estudiante'),
+        validator.validarPermisosCancelacion(
+          clase,
+          'estudiante-1',
+          'estudiante',
+        ),
       ).toThrow(ForbiddenException);
 
       expect(() =>
-        validator.validarPermisosCancelacion(clase, 'estudiante-1', 'estudiante'),
+        validator.validarPermisosCancelacion(
+          clase,
+          'estudiante-1',
+          'estudiante',
+        ),
       ).toThrow('Solo admin y docentes pueden cancelar clases');
     });
 
@@ -332,9 +342,7 @@ describe('ClaseBusinessValidator', () => {
         cupos_ocupados: 5,
       } as any;
 
-      expect(() =>
-        validator.validarCuposDisponibles(clase, 3),
-      ).not.toThrow();
+      expect(() => validator.validarCuposDisponibles(clase, 3)).not.toThrow();
     });
 
     it('debe pasar si se asignan exactamente los cupos disponibles', () => {
@@ -344,9 +352,7 @@ describe('ClaseBusinessValidator', () => {
         cupos_ocupados: 5,
       } as any;
 
-      expect(() =>
-        validator.validarCuposDisponibles(clase, 5),
-      ).not.toThrow();
+      expect(() => validator.validarCuposDisponibles(clase, 5)).not.toThrow();
     });
 
     it('debe lanzar BadRequestException si no hay cupos suficientes', () => {
@@ -356,13 +362,13 @@ describe('ClaseBusinessValidator', () => {
         cupos_ocupados: 8,
       } as any;
 
-      expect(() =>
-        validator.validarCuposDisponibles(clase, 5),
-      ).toThrow(BadRequestException);
+      expect(() => validator.validarCuposDisponibles(clase, 5)).toThrow(
+        BadRequestException,
+      );
 
-      expect(() =>
-        validator.validarCuposDisponibles(clase, 5),
-      ).toThrow('No hay suficientes cupos disponibles. Cupos disponibles: 2, intentando asignar: 5');
+      expect(() => validator.validarCuposDisponibles(clase, 5)).toThrow(
+        'No hay suficientes cupos disponibles. Cupos disponibles: 2, intentando asignar: 5',
+      );
     });
 
     it('debe lanzar BadRequestException si la clase está llena', () => {
@@ -372,9 +378,9 @@ describe('ClaseBusinessValidator', () => {
         cupos_ocupados: 10,
       } as any;
 
-      expect(() =>
-        validator.validarCuposDisponibles(clase, 1),
-      ).toThrow(BadRequestException);
+      expect(() => validator.validarCuposDisponibles(clase, 1)).toThrow(
+        BadRequestException,
+      );
     });
 
     it('debe lanzar BadRequestException si se intenta asignar más de los cupos máximos', () => {
@@ -384,9 +390,9 @@ describe('ClaseBusinessValidator', () => {
         cupos_ocupados: 0,
       } as any;
 
-      expect(() =>
-        validator.validarCuposDisponibles(clase, 15),
-      ).toThrow(BadRequestException);
+      expect(() => validator.validarCuposDisponibles(clase, 15)).toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -493,10 +499,7 @@ describe('ClaseBusinessValidator', () => {
     it('debe pasar si ningún estudiante está inscrito', () => {
       const clase = {
         id: 'clase-1',
-        inscripciones: [
-          { estudiante_id: 'est-1' },
-          { estudiante_id: 'est-2' },
-        ],
+        inscripciones: [{ estudiante_id: 'est-1' }, { estudiante_id: 'est-2' }],
       } as any;
 
       expect(() =>
@@ -518,10 +521,7 @@ describe('ClaseBusinessValidator', () => {
     it('debe lanzar BadRequestException si algún estudiante ya está inscrito', () => {
       const clase = {
         id: 'clase-1',
-        inscripciones: [
-          { estudiante_id: 'est-1' },
-          { estudiante_id: 'est-2' },
-        ],
+        inscripciones: [{ estudiante_id: 'est-1' }, { estudiante_id: 'est-2' }],
       } as any;
 
       expect(() =>
@@ -544,21 +544,26 @@ describe('ClaseBusinessValidator', () => {
       } as any;
 
       expect(() =>
-        validator.validarEstudiantesNoInscritos(clase, ['est-1', 'est-2', 'est-4']),
+        validator.validarEstudiantesNoInscritos(clase, [
+          'est-1',
+          'est-2',
+          'est-4',
+        ]),
       ).toThrow(BadRequestException);
 
       expect(() =>
-        validator.validarEstudiantesNoInscritos(clase, ['est-1', 'est-2', 'est-4']),
+        validator.validarEstudiantesNoInscritos(clase, [
+          'est-1',
+          'est-2',
+          'est-4',
+        ]),
       ).toThrow('Los siguientes estudiantes ya están inscritos: est-1, est-2');
     });
 
     it('debe lanzar BadRequestException si todos los estudiantes están inscritos', () => {
       const clase = {
         id: 'clase-1',
-        inscripciones: [
-          { estudiante_id: 'est-1' },
-          { estudiante_id: 'est-2' },
-        ],
+        inscripciones: [{ estudiante_id: 'est-1' }, { estudiante_id: 'est-2' }],
       } as any;
 
       expect(() =>

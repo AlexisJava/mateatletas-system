@@ -129,9 +129,7 @@ export class PaymentQueryService {
     });
 
     if (!inscripcion) {
-      throw new NotFoundException(
-        `Inscripción mensual ${id} no encontrada`,
-      );
+      throw new NotFoundException(`Inscripción mensual ${id} no encontrada`);
     }
 
     return inscripcion;

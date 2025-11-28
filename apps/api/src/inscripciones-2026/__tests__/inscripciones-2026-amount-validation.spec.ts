@@ -216,7 +216,10 @@ describe('Inscripciones2026Service - Amount Validation', () => {
           _webhookData: MercadoPagoWebhookDto,
           _tipo: string,
           findPaymentCallback: (parsed: unknown) => Promise<unknown>,
-          updatePaymentCallback: (pago: unknown, context: unknown) => Promise<unknown>,
+          updatePaymentCallback: (
+            pago: unknown,
+            context: unknown,
+          ) => Promise<unknown>,
         ) => {
           // Simular búsqueda de pago
           const parsed = {
@@ -239,17 +242,23 @@ describe('Inscripciones2026Service - Amount Validation', () => {
       );
 
       mockWebhookProcessor.mapPaymentStatus.mockReturnValueOnce('paid');
-      mockPrismaService.pagoInscripcion2026.findFirst.mockResolvedValueOnce(mockPago);
+      mockPrismaService.pagoInscripcion2026.findFirst.mockResolvedValueOnce(
+        mockPago,
+      );
       mockPrismaService.pagoInscripcion2026.update.mockResolvedValueOnce({
         ...mockPago,
         estado: 'paid',
       });
-      mockPrismaService.inscripcion2026.findUnique.mockResolvedValueOnce(mockPago.inscripcion);
+      mockPrismaService.inscripcion2026.findUnique.mockResolvedValueOnce(
+        mockPago.inscripcion,
+      );
       mockPrismaService.inscripcion2026.update.mockResolvedValueOnce({
         ...mockPago.inscripcion,
         estado: 'active',
       });
-      mockPrismaService.historialEstadoInscripcion2026.create.mockResolvedValueOnce({});
+      mockPrismaService.historialEstadoInscripcion2026.create.mockResolvedValueOnce(
+        {},
+      );
 
       // ACT
       await service.procesarWebhookMercadoPago(webhookData);
@@ -327,7 +336,10 @@ describe('Inscripciones2026Service - Amount Validation', () => {
           _webhookData: MercadoPagoWebhookDto,
           _tipo: string,
           findPaymentCallback: (parsed: unknown) => Promise<unknown>,
-          updatePaymentCallback: (pago: unknown, context: unknown) => Promise<unknown>,
+          updatePaymentCallback: (
+            pago: unknown,
+            context: unknown,
+          ) => Promise<unknown>,
         ) => {
           const parsed = {
             ids: { inscripcionId },
@@ -347,7 +359,9 @@ describe('Inscripciones2026Service - Amount Validation', () => {
         },
       );
 
-      mockPrismaService.pagoInscripcion2026.findFirst.mockResolvedValueOnce(mockPago);
+      mockPrismaService.pagoInscripcion2026.findFirst.mockResolvedValueOnce(
+        mockPago,
+      );
 
       // ACT & ASSERT: Debe lanzar BadRequestException
       await expect(
@@ -361,7 +375,9 @@ describe('Inscripciones2026Service - Amount Validation', () => {
       );
 
       // ASSERT: NO debe actualizar pago a 'paid'
-      expect(mockPrismaService.pagoInscripcion2026.update).not.toHaveBeenCalled();
+      expect(
+        mockPrismaService.pagoInscripcion2026.update,
+      ).not.toHaveBeenCalled();
 
       // ASSERT: NO debe marcar como procesado
       expect(webhookIdempotency.markAsProcessed).not.toHaveBeenCalled();
@@ -426,7 +442,10 @@ describe('Inscripciones2026Service - Amount Validation', () => {
           _webhookData: MercadoPagoWebhookDto,
           _tipo: string,
           findPaymentCallback: (parsed: unknown) => Promise<unknown>,
-          updatePaymentCallback: (pago: unknown, context: unknown) => Promise<unknown>,
+          updatePaymentCallback: (
+            pago: unknown,
+            context: unknown,
+          ) => Promise<unknown>,
         ) => {
           const parsed = {
             ids: { inscripcionId },
@@ -447,17 +466,23 @@ describe('Inscripciones2026Service - Amount Validation', () => {
       );
 
       mockWebhookProcessor.mapPaymentStatus.mockReturnValueOnce('paid');
-      mockPrismaService.pagoInscripcion2026.findFirst.mockResolvedValueOnce(mockPago);
+      mockPrismaService.pagoInscripcion2026.findFirst.mockResolvedValueOnce(
+        mockPago,
+      );
       mockPrismaService.pagoInscripcion2026.update.mockResolvedValueOnce({
         ...mockPago,
         estado: 'paid',
       });
-      mockPrismaService.inscripcion2026.findUnique.mockResolvedValueOnce(mockPago.inscripcion);
+      mockPrismaService.inscripcion2026.findUnique.mockResolvedValueOnce(
+        mockPago.inscripcion,
+      );
       mockPrismaService.inscripcion2026.update.mockResolvedValueOnce({
         ...mockPago.inscripcion,
         estado: 'active',
       });
-      mockPrismaService.historialEstadoInscripcion2026.create.mockResolvedValueOnce({});
+      mockPrismaService.historialEstadoInscripcion2026.create.mockResolvedValueOnce(
+        {},
+      );
 
       // ACT
       const result = await service.procesarWebhookMercadoPago(webhookData);

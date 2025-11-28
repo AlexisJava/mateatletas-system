@@ -318,7 +318,8 @@ describe('CSRF Protection Opt-In', () => {
         solution: 'Convertir CSRF a opt-in con @RequireCsrf() decorator',
         benefit:
           'Webhooks y API funcionan sin restricciones, solo formularios web protegidos',
-        tradeoff: 'Desarrolladores deben recordar usar @RequireCsrf() explícitamente',
+        tradeoff:
+          'Desarrolladores deben recordar usar @RequireCsrf() explícitamente',
       };
 
       expect(rationale.solution).toContain('opt-in');

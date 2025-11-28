@@ -3,12 +3,14 @@
 ## 📊 Estadísticas Finales
 
 ### Tests
+
 - **Total de Tests**: 450 ✅
 - **Tasa de Éxito**: 100% (450/450 passing)
 - **Nuevos Tests Agregados**: +72 tests (desde 378 → 450)
 - **Coverage**: Servicios críticos ahora 100% testeados
 
 ### Performance
+
 - **Reducción de Queries**: 85-96% en operaciones críticas
 - **Reducción de Payload**: 60-99% según el endpoint
 - **Escalabilidad**: Mejorada significativamente con paginación
@@ -18,6 +20,7 @@
 ## 📅 Semana 1: PAGOS + SECURITY (Completada antes de esta sesión)
 
 ### Fixes Implementados
+
 - ✅ Fix #1: Avatar Ownership Guard (P0 - CRITICAL)
 - ✅ Fix #2: CSRF Protection (P1 - URGENT)
 - ✅ Fix #3: Race Condition en Cupos (P1 - URGENT)
@@ -26,6 +29,7 @@
 - ✅ Fix #6: Token Blacklist (P3 - IMPROVEMENT)
 
 ### Resultados
+
 - Tests: 212/212 passing
 - Breaking changes: 0
 - Seguridad: 6 vulnerabilidades críticas corregidas
@@ -37,11 +41,13 @@
 ### Día 1: Fix N+1 en gamificacion.service (progreso estudiante)
 
 **Problema:**
+
 - ANTES: 1 + (N × 2) queries
 - Con 10 rutas: 21 queries
 - Con 20 rutas: 41 queries
 
 **Solución:**
+
 - Prisma groupBy para agregaciones
 - Query 1: findMany rutas (select optimizado)
 - Query 2: groupBy clases por ruta_curricular_id
@@ -49,12 +55,14 @@
 - Query 4: findMany clases para mapeo clase → ruta
 
 **Resultado:**
+
 - AHORA: 4 queries constantes (independiente de N)
 - Con 10 rutas: 81% reducción (21 → 4)
 - Con 20 rutas: 90% reducción (41 → 4)
 - Con 50 rutas: 96% reducción (101 → 4)
 
 **Archivos:**
+
 - Modified: `src/gamificacion/gamificacion.service.ts`
 - Created: `src/gamificacion/__tests__/gamificacion-progreso-optimized.spec.ts` (9 tests)
 
@@ -63,6 +71,7 @@
 ### Día 2: Paginación en ranking + admin-estudiantes
 
 **Problema:**
+
 - ranking.service.ts - getRankingGlobal(): Retornaba TODOS los estudiantes sin límite
 - admin-estudiantes.service.ts - listarEstudiantes(): Sin paginación ni búsqueda
 - Con 1000 estudiantes: 1 query gigante, payload >100KB
@@ -70,6 +79,7 @@
 **Solución:**
 
 **1. ranking.service.ts - getRankingGlobal(page, limit)**
+
 ```typescript
 async getRankingGlobal(page = 1, limit = 20) {
   // Validación robusta
@@ -89,6 +99,7 @@ async getRankingGlobal(page = 1, limit = 20) {
 ```
 
 **2. admin-estudiantes.service.ts - listarEstudiantes(options)**
+
 ```typescript
 async listarEstudiantes({ page = 1, limit = 50, search }) {
   const where = search
@@ -103,6 +114,7 @@ async listarEstudiantes({ page = 1, limit = 50, search }) {
 ```
 
 **Resultado:**
+
 - Con 1000 estudiantes:
   - ANTES: 1 query → 1000 records (>100KB payload)
   - AHORA: 1 query → 20-50 records (<10KB payload)
@@ -110,6 +122,7 @@ async listarEstudiantes({ page = 1, limit = 50, search }) {
 - Con 10000 estudiantes: 99%+ reducción
 
 **Archivos:**
+
 - Modified: `src/gamificacion/ranking.service.ts`
 - Modified: `src/admin/services/admin-estudiantes.service.ts`
 - Created: `src/gamificacion/__tests__/ranking-pagination.spec.ts` (13 tests)
@@ -119,24 +132,31 @@ async listarEstudiantes({ page = 1, limit = 50, search }) {
 ### Día 3: Optimizar query detalle estudiante
 
 **Problema:**
+
 - getDashboardEstudiante(): Usaba `include: true`, cargaba objetos completos
 - obtenerEstadisticasEstudiante(): **EXPONÍA tutor.password_hash** ❌
 
 **Solución:**
 
 **1. gamificacion.service.ts - getDashboardEstudiante()**
+
 ```typescript
 const estudiante = await this.prisma.estudiante.findUnique({
   where: { id: estudianteId },
   select: {
-    id: true, nombre: true, apellido: true, puntos_totales: true,
+    id: true,
+    nombre: true,
+    apellido: true,
+    puntos_totales: true,
     equipo: { select: { id: true, nombre: true, color_primario: true } },
     tutor: { select: { nombre: true, apellido: true } },
     inscripciones_clase: {
       select: {
         clase: {
           select: {
-            id: true, nombre: true, fecha_hora_inicio: true,
+            id: true,
+            nombre: true,
+            fecha_hora_inicio: true,
             rutaCurricular: { select: { nombre: true, color: true } },
           },
         },
@@ -147,12 +167,17 @@ const estudiante = await this.prisma.estudiante.findUnique({
 ```
 
 **2. admin-estudiantes.service.ts - obtenerEstadisticasEstudiante()**
+
 ```typescript
 const estudiante = await this.prisma.estudiante.findUnique({
   select: {
     tutor: {
       select: {
-        id: true, nombre: true, apellido: true, email: true, telefono: true,
+        id: true,
+        nombre: true,
+        apellido: true,
+        email: true,
+        telefono: true,
         // ❌ NO incluir password_hash (CRITICAL SECURITY FIX)
       },
     },
@@ -161,6 +186,7 @@ const estudiante = await this.prisma.estudiante.findUnique({
 ```
 
 **Resultado:**
+
 - getDashboardEstudiante: 60-70% payload reduction
 - **CRITICAL SECURITY FIX**: password_hash ya no se expone
 - Con 100 estudiantes + 10 inscripciones c/u:
@@ -168,6 +194,7 @@ const estudiante = await this.prisma.estudiante.findUnique({
   - AHORA: ~150KB per request (70% reducción)
 
 **Archivos:**
+
 - Modified: `src/gamificacion/gamificacion.service.ts`
 - Modified: `src/admin/services/admin-estudiantes.service.ts`
 
@@ -176,6 +203,7 @@ const estudiante = await this.prisma.estudiante.findUnique({
 ### Día 4: Batch upserts en asistencia
 
 **Problema:**
+
 - registrarAsistencia(): N individual upserts con Promise.all
 - Para clase con 30 estudiantes: 30 queries separadas
 - Performance: O(N) donde N = número de estudiantes
@@ -216,6 +244,7 @@ async registrarAsistencia(claseId, docenteId, dto) {
 ```
 
 **Resultado:**
+
 - ANTES: N upserts (30 estudiantes = 30 queries)
 - AHORA: 3 queries (1 clase + 1 findMany + 1 transaction)
 - Con 30 estudiantes:
@@ -225,6 +254,7 @@ async registrarAsistencia(claseId, docenteId, dto) {
 - Escalabilidad: O(1) - constante
 
 **Archivos:**
+
 - Modified: `src/clases/services/clases-asistencia.service.ts`
 - Updated: `src/clases/services/clases-asistencia.service.spec.ts`
 - Created: `src/clases/__tests__/asistencia-batch-upsert.spec.ts` (13 tests)
@@ -234,6 +264,7 @@ async registrarAsistencia(claseId, docenteId, dto) {
 ### Día 5: MercadoPago timeout + retry
 
 **Problema:**
+
 - MercadoPago API calls sin protección contra timeouts
 - Si API falla repetidamente, app sigue intentando indefinidamente
 - Requests bloqueados esperando respuesta (hasta 5s timeout)
@@ -288,12 +319,14 @@ export class MercadoPagoService {
 ```
 
 **Comportamiento:**
+
 - **Estados**: CLOSED (normal) → OPEN (rechaza) → HALF_OPEN (prueba recovery)
 - **Threshold**: 3 fallos consecutivos abren el circuito
 - **Reset timeout**: 60 segundos antes de reintentar
 - **Fallback**: Error claro indicando que API no disponible
 
 **Resultado:**
+
 - Con 10 requests fallidos:
   - ANTES: 10 × 5s timeout = 50 segundos bloqueados
   - AHORA: 3 × 5s timeout = 15 segundos bloqueados
@@ -302,6 +335,7 @@ export class MercadoPagoService {
 - Monitoreo: getCircuitBreakerMetrics() para observabilidad
 
 **Archivos:**
+
 - Modified: `src/pagos/mercadopago.service.ts`
 - Created: `src/pagos/__tests__/mercadopago-circuit-breaker.spec.ts` (13 tests)
 
@@ -312,6 +346,7 @@ export class MercadoPagoService {
 ### Día 1-2: Promise.allSettled en servicios críticos
 
 **Problema:**
+
 - cancelarClase solo cancelaba la clase
 - NO notificaba al docente sobre la cancelación
 - Si agregábamos notificación con Promise.all y fallaba, toda la operación fallaría
@@ -354,11 +389,13 @@ async cancelarClase(id: string, userId: string, userRole: string) {
 ```
 
 **Resultado:**
+
 - Clase SIEMPRE se cancela correctamente
 - Notificación es best-effort (no rompe la operación principal)
 - Logs claros indican éxito/fallo de cada operación
 
 **Archivos:**
+
 - Modified: `src/clases/clases.module.ts` (import NotificacionesModule)
 - Modified: `src/clases/services/clases-management.service.ts`
 - Updated: `src/clases/services/clases-management.service.spec.ts`
@@ -371,6 +408,7 @@ async cancelarClase(id: string, userId: string, userRole: string) {
 #### EstudiantesService - 28 tests
 
 **Métodos Testeados (10 total):**
+
 1. **create()** - 5 tests
    - Happy path con todos los campos
    - Tutor existence validation
@@ -404,6 +442,7 @@ async cancelarClase(id: string, userId: string, userRole: string) {
 10. **getDetalleCompleto()** - 3 tests
 
 **Archivo:**
+
 - Created: `src/estudiantes/__tests__/estudiantes.service.spec.ts` (28 tests)
 
 ---
@@ -411,6 +450,7 @@ async cancelarClase(id: string, userId: string, userRole: string) {
 #### DocentesService - 24 tests
 
 **Métodos Testeados (6 total):**
+
 1. **create()** - 6 tests
    - Happy path con password proporcionada
    - Auto-generación de password (retorna generatedPassword)
@@ -449,6 +489,7 @@ async cancelarClase(id: string, userId: string, userRole: string) {
    - NotFoundException si no existe
 
 **Archivo:**
+
 - Created: `src/docentes/__tests__/docentes.service.spec.ts` (24 tests)
 
 ---
@@ -458,6 +499,7 @@ async cancelarClase(id: string, userId: string, userRole: string) {
 #### GamificacionService - 20 tests
 
 **Métodos Testeados:**
+
 1. **getDashboardEstudiante()** - 7 tests
    - Orquestación completa de servicios
    - NotFoundException si estudiante no existe
@@ -486,6 +528,7 @@ async cancelarClase(id: string, userId: string, userRole: string) {
    - getRankingEstudiante → RankingService
 
 **Archivo:**
+
 - Created: `src/gamificacion/__tests__/gamificacion.service.spec.ts` (20 tests)
 
 ---
@@ -493,16 +536,19 @@ async cancelarClase(id: string, userId: string, userRole: string) {
 ## 📈 Progreso Total
 
 ### Tests por Semana
+
 - **Semana 1**: 212 tests (PAGOS + SECURITY)
 - **Semana 2**: +166 tests (378 total - PERFORMANCE)
 - **Semana 3**: +72 tests (450 total - RESILIENCIA + COVERAGE)
 
 ### Archivos Creados
+
 - **Semana 1**: 10 archivos
 - **Semana 2**: 5 archivos
 - **Semana 3**: 4 archivos
 
 ### Archivos Modificados
+
 - **Semana 1**: 9 archivos
 - **Semana 2**: 6 archivos
 - **Semana 3**: 4 archivos
@@ -512,6 +558,7 @@ async cancelarClase(id: string, userId: string, userRole: string) {
 ## 🎯 Logros Destacados
 
 ### Performance
+
 1. **N+1 Query Fix**: 85-96% reducción de queries
 2. **Paginación**: 90-99% reducción de payload
 3. **Select Optimization**: 60-70% reducción de payload
@@ -519,6 +566,7 @@ async cancelarClase(id: string, userId: string, userRole: string) {
 5. **Circuit Breaker**: 70% reducción de tiempo bloqueado
 
 ### Seguridad
+
 1. **CSRF Protection**: Prevención de cross-site attacks
 2. **Token Blacklist**: Revocación inmediata de tokens
 3. **Avatar Ownership**: Prevención de modificación no autorizada
@@ -526,12 +574,14 @@ async cancelarClase(id: string, userId: string, userRole: string) {
 5. **Race Condition**: Fix en reservas de clases
 
 ### Resiliencia
+
 1. **Promise.allSettled**: Operaciones críticas protegidas
 2. **Circuit Breaker**: Prevención de cascading failures
 3. **Transaction Atomicity**: Consistencia de datos garantizada
 4. **Idempotency**: Prevención de webhooks duplicados
 
 ### Testing
+
 1. **450 tests passing** (100% success rate)
 2. **Servicios críticos 100% tested**
 3. **Edge cases comprehensivamente cubiertos**
@@ -542,23 +592,27 @@ async cancelarClase(id: string, userId: string, userRole: string) {
 ## 🚀 Deployment Checklist
 
 ### Pre-Deployment
+
 - [x] Todos los tests passing (450/450)
 - [x] Zero breaking changes
 - [x] TypeScript build success (0 errors)
 - [x] Documentación completa
 
 ### Environment Variables Requeridas
+
 - `FRONTEND_URL` - Para CSRF protection whitelist
 - `MERCADOPAGO_ACCESS_TOKEN` - Para MercadoPago API
 - Redis debe estar corriendo (Token Blacklist + Idempotency)
 
 ### Monitoring
+
 - Circuit Breaker metrics: `GET /api/pagos/circuit-breaker-metrics`
 - Logs para CSRF blocked attempts
 - Logs para webhook idempotency
 - Logs para Promise.allSettled failures
 
 ### Performance Metrics to Monitor
+
 - Query count per request (debe ser constante)
 - Response payload size (debe estar reducido)
 - API timeout rate (debe bajar con circuit breaker)
@@ -569,6 +623,7 @@ async cancelarClase(id: string, userId: string, userRole: string) {
 ## 📝 Notas Finales
 
 Este sprint de 3 semanas ha resultado en mejoras significativas en:
+
 - **Performance**: Queries optimizadas, paginación, select optimization
 - **Seguridad**: CSRF, token blacklist, ownership guards, password leak fix
 - **Resiliencia**: Circuit breaker, Promise.allSettled, transacciones atómicas

@@ -147,7 +147,9 @@ function generarPDF(outputPath: string): Promise<void> {
       }
 
       // Extraer negritas <strong> o <b>
-      const strongMatches = htmlContent.match(/<(strong|b)[^>]*>(.*?)<\/(strong|b)>/gi);
+      const strongMatches = htmlContent.match(
+        /<(strong|b)[^>]*>(.*?)<\/(strong|b)>/gi,
+      );
       if (strongMatches) {
         strongMatches.forEach((strong) => {
           const text = strong.replace(/<\/?(?:strong|b)[^>]*>/gi, '').trim();
@@ -171,7 +173,7 @@ function generarPDF(outputPath: string): Promise<void> {
           'Documento generado automáticamente por Mateatletas',
           50,
           doc.page.height - 30,
-          { align: 'center', width: doc.page.width - 100 }
+          { align: 'center', width: doc.page.width - 100 },
         );
 
       doc.end();

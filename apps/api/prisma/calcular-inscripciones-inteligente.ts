@@ -15,7 +15,7 @@ async function main() {
 
   // Obtener producto Club Matemáticas
   const productoClub = await prisma.producto.findFirst({
-    where: { nombre: { contains: 'Club' }, activo: true }
+    where: { nombre: { contains: 'Club' }, activo: true },
   });
 
   if (!productoClub) {
@@ -37,12 +37,12 @@ async function main() {
         include: {
           inscripciones_clase_grupo: {
             include: {
-              claseGrupo: true
-            }
-          }
-        }
-      }
-    }
+              claseGrupo: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   console.log(`👨‍👩‍👧 Total tutores: ${tutores.length}\n`);
@@ -84,16 +84,19 @@ async function main() {
 
       // Verificar si el estudiante tiene actividades presenciales
       const actividadPresencial = estudiante.inscripciones_clase_grupo.find(
-        i => gruposPresenciales.has(i.claseGrupo.codigo)
+        (i) => gruposPresenciales.has(i.claseGrupo.codigo),
       );
 
       // LÓGICA DE PRECIOS
       if (actividadPresencial) {
         // ESTUDIANTE PRESENCIAL - No aplican descuentos por hermanos
-        const precioPresencial = gruposPresenciales.get(actividadPresencial.claseGrupo.codigo)!;
-        const actividadesVirtuales = estudiante.inscripciones_clase_grupo.filter(
-          i => !gruposPresenciales.has(i.claseGrupo.codigo)
-        );
+        const precioPresencial = gruposPresenciales.get(
+          actividadPresencial.claseGrupo.codigo,
+        )!;
+        const actividadesVirtuales =
+          estudiante.inscripciones_clase_grupo.filter(
+            (i) => !gruposPresenciales.has(i.claseGrupo.codigo),
+          );
         const numVirtuales = actividadesVirtuales.length;
 
         if (numVirtuales === 0) {
@@ -147,11 +150,15 @@ async function main() {
           tipo_descuento: tipoDescuento,
           estado_pago: 'Pendiente',
           detalle_calculo: detalleCalculo,
-        }
+        },
       });
 
-      console.log(`   ✓ ${estudiante.nombre} ${estudiante.apellido}: $${precioFinal.toLocaleString()}`);
-      console.log(`      → ${numActividades} actividad(es): ${estudiante.inscripciones_clase_grupo.map(i => i.claseGrupo.codigo).join(', ')}`);
+      console.log(
+        `   ✓ ${estudiante.nombre} ${estudiante.apellido}: $${precioFinal.toLocaleString()}`,
+      );
+      console.log(
+        `      → ${numActividades} actividad(es): ${estudiante.inscripciones_clase_grupo.map((i) => i.claseGrupo.codigo).join(', ')}`,
+      );
 
       totalInscripciones++;
       totalRecaudacion += precioFinal;

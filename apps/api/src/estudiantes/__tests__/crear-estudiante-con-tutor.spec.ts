@@ -3,7 +3,11 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EstudianteCommandService } from '../services/estudiante-command.service';
 import { EstudianteBusinessValidator } from '../validators/estudiante-business.validator';
 import { PrismaService } from '../../core/database/prisma.service';
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 
 /**
  * TDD: Crear estudiante(s) con tutor en un sector específico

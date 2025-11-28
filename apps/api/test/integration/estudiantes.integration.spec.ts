@@ -211,7 +211,9 @@ describe('[INTEGRATION] Estudiantes Module', () => {
         .expect(201);
 
       // Verificar que los usernames son diferentes
-      expect(response1.body.data.username).not.toBe(response2.body.data.username);
+      expect(response1.body.data.username).not.toBe(
+        response2.body.data.username,
+      );
       expect(response2.body.data.username).toMatch(/pedro\.garcia\d+/i);
     });
   });
@@ -277,7 +279,9 @@ describe('[INTEGRATION] Estudiantes Module', () => {
         .expect(200);
 
       expect(response.body.data).toHaveLength(2);
-      expect(response.body.data.every((e: any) => e.equipoId === equipoId)).toBe(true);
+      expect(
+        response.body.data.every((e: any) => e.equipoId === equipoId),
+      ).toBe(true);
     });
 
     it('should filter by nivelEscolar', async () => {
@@ -288,7 +292,9 @@ describe('[INTEGRATION] Estudiantes Module', () => {
         .expect(200);
 
       expect(response.body.data).toHaveLength(2);
-      expect(response.body.data.every((e: any) => e.nivelEscolar === 'Primaria')).toBe(true);
+      expect(
+        response.body.data.every((e: any) => e.nivelEscolar === 'Primaria'),
+      ).toBe(true);
     });
 
     it('should paginate correctly', async () => {

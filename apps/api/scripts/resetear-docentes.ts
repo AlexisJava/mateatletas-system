@@ -61,7 +61,9 @@ async function resetearDocentes() {
         password: nuevaPassword,
       });
 
-      console.log(`✅ ${docente.nombre} ${docente.apellido} - Contraseña reseteada`);
+      console.log(
+        `✅ ${docente.nombre} ${docente.apellido} - Contraseña reseteada`,
+      );
     }
 
     console.log('\n' + '='.repeat(80));
@@ -78,7 +80,6 @@ async function resetearDocentes() {
     console.log('='.repeat(80));
     console.log('✅ TODAS LAS CONTRASEÑAS HAN SIDO RESETEADAS');
     console.log('='.repeat(80) + '\n');
-
   } catch (error) {
     console.error('❌ Error durante el reseteo:', error);
     throw error;

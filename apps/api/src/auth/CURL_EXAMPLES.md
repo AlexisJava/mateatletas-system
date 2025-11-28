@@ -103,6 +103,7 @@ curl -X POST http://localhost:3001/api/auth/login \
 **Endpoint:** `GET /api/auth/profile`
 
 **Headers requeridos:**
+
 - `Authorization: Bearer <access_token>`
 
 **Request:**
@@ -144,6 +145,7 @@ curl -X GET http://localhost:3001/api/auth/profile \
 **Endpoint:** `POST /api/auth/logout`
 
 **Headers requeridos:**
+
 - `Authorization: Bearer <access_token>`
 
 **Request:**
@@ -321,11 +323,11 @@ curl -s -X POST "$API_BASE/auth/logout" \
 
 ## Códigos de Estado HTTP
 
-| Código | Descripción | Casos de Uso |
-|--------|-------------|--------------|
-| **200** | OK | Login exitoso, perfil obtenido, logout exitoso |
-| **201** | Created | Tutor registrado exitosamente |
-| **400** | Bad Request | Datos de entrada inválidos (validación DTO) |
-| **401** | Unauthorized | Credenciales inválidas o token JWT inválido |
-| **404** | Not Found | Tutor no encontrado en la BD |
-| **409** | Conflict | Email ya está registrado |
+| Código  | Descripción  | Casos de Uso                                   |
+| ------- | ------------ | ---------------------------------------------- |
+| **200** | OK           | Login exitoso, perfil obtenido, logout exitoso |
+| **201** | Created      | Tutor registrado exitosamente                  |
+| **400** | Bad Request  | Datos de entrada inválidos (validación DTO)    |
+| **401** | Unauthorized | Credenciales inválidas o token JWT inválido    |
+| **404** | Not Found    | Tutor no encontrado en la BD                   |
+| **409** | Conflict     | Email ya está registrado                       |

@@ -28,25 +28,31 @@ async function exportEstudiantes() {
 
     // Mapeo de grupos a categorías
     const categorias = {
-      'B1': [],
-      'B2': [],
-      'B3': [],
+      B1: [],
+      B2: [],
+      B3: [],
     };
 
     // Procesar cada grupo
     grupos.forEach((grupo) => {
-      const estudiantes = grupo.inscripciones.map((insc) =>
-        `${insc.estudiante.nombre} ${insc.estudiante.apellido}`
+      const estudiantes = grupo.inscripciones.map(
+        (insc) => `${insc.estudiante.nombre} ${insc.estudiante.apellido}`,
       );
 
       // Clasificar según las reglas
-      if (grupo.nombre.includes('Arduino') && grupo.nombre.includes('LUNES 18:00')) {
+      if (
+        grupo.nombre.includes('Arduino') &&
+        grupo.nombre.includes('LUNES 18:00')
+      ) {
         // Arduino Nivel 1 → B1
         categorias['B1'].push(...estudiantes);
       } else if (grupo.nombre.includes('Matemáticas + Scratch')) {
         // Matemáticas + Scratch → B1
         categorias['B1'].push(...estudiantes);
-      } else if (grupo.nombre.includes('Arduino') && grupo.nombre.includes('LUNES 19:30')) {
+      } else if (
+        grupo.nombre.includes('Arduino') &&
+        grupo.nombre.includes('LUNES 19:30')
+      ) {
         // Arduino Nivel 2 → B2
         categorias['B2'].push(...estudiantes);
       } else if (grupo.nombre.includes('Roblox')) {
@@ -56,14 +62,16 @@ async function exportEstudiantes() {
         categorias['B1'].push(...estudiantes);
       } else if (grupo.nombre.startsWith('B2')) {
         categorias['B2'].push(...estudiantes);
-      } else if (grupo.nombre.startsWith('B3') ||
-                 grupo.nombre.startsWith('L1') ||
-                 grupo.nombre.startsWith('L2') ||
-                 grupo.nombre.startsWith('L3') ||
-                 grupo.nombre.startsWith('L4') ||
-                 grupo.nombre.includes('Astronomía') ||
-                 grupo.nombre.includes('Matemática Financiera') ||
-                 grupo.nombre.includes('Programación de Videojuegos')) {
+      } else if (
+        grupo.nombre.startsWith('B3') ||
+        grupo.nombre.startsWith('L1') ||
+        grupo.nombre.startsWith('L2') ||
+        grupo.nombre.startsWith('L3') ||
+        grupo.nombre.startsWith('L4') ||
+        grupo.nombre.includes('Astronomía') ||
+        grupo.nombre.includes('Matemática Financiera') ||
+        grupo.nombre.includes('Programación de Videojuegos')
+      ) {
         // B3, L1, L2, L3, L4, Astronomía, Mate Financiera, Prog Videojuegos → B3
         categorias['B3'].push(...estudiantes);
       }
@@ -71,7 +79,10 @@ async function exportEstudiantes() {
 
     // Normalizar función para remover acentos
     const normalizar = (str) =>
-      str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      str
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
 
     // Eliminar duplicados (ignorando acentos) y ordenar
     const estudiantesPorGrupo = Object.entries(categorias)
@@ -93,17 +104,23 @@ async function exportEstudiantes() {
           estudiantes: unicos.sort((a, b) => a.localeCompare(b)),
         };
       })
-      .filter(g => g.estudiantes.length > 0);
+      .filter((g) => g.estudiantes.length > 0);
 
     const outputPath = join(process.cwd(), 'estudiantes-por-grupo.json');
-    writeFileSync(outputPath, JSON.stringify(estudiantesPorGrupo, null, 2), 'utf-8');
+    writeFileSync(
+      outputPath,
+      JSON.stringify(estudiantesPorGrupo, null, 2),
+      'utf-8',
+    );
 
     const totalEstudiantes = estudiantesPorGrupo.reduce(
       (sum, g) => sum + g.estudiantes.length,
-      0
+      0,
     );
 
-    console.log(`✅ Exportados ${totalEstudiantes} estudiantes en ${grupos.length} grupos`);
+    console.log(
+      `✅ Exportados ${totalEstudiantes} estudiantes en ${grupos.length} grupos`,
+    );
     console.log(`📁 Archivo: ${outputPath}`);
   } catch (error) {
     console.error('❌ Error al exportar estudiantes:', error);

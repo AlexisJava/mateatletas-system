@@ -14,7 +14,9 @@ export async function seedInscripcionesMensuales(prisma: PrismaClient) {
   });
 
   if (!tutor) {
-    console.log('⚠️  No se encontró el tutor de prueba, saltando inscripciones...');
+    console.log(
+      '⚠️  No se encontró el tutor de prueba, saltando inscripciones...',
+    );
     return;
   }
 
@@ -38,7 +40,9 @@ export async function seedInscripcionesMensuales(prisma: PrismaClient) {
     return;
   }
 
-  console.log(`   🛒 Producto: ${productoMensual.nombre} ($${productoMensual.precio})`);
+  console.log(
+    `   🛒 Producto: ${productoMensual.nombre} ($${productoMensual.precio})`,
+  );
 
   // Crear inscripciones para cada hijo
   const fechaActual = new Date();

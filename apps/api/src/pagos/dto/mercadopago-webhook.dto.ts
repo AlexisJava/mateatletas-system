@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsObject, IsBoolean, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsObject,
+  IsBoolean,
+  IsNumber,
+} from 'class-validator';
 
 /**
  * DTO para validar webhooks de MercadoPago

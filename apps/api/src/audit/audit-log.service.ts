@@ -491,7 +491,10 @@ export class AuditLogService {
     entityType: EntityType,
     entityId: string,
     email: string,
-    changes: { before?: Record<string, unknown>; after?: Record<string, unknown> },
+    changes: {
+      before?: Record<string, unknown>;
+      after?: Record<string, unknown>;
+    },
     updatedBy?: { userId: string; userEmail: string; userType: string },
   ) {
     // Filtrar campos sensibles de los cambios
@@ -677,7 +680,12 @@ export class AuditLogService {
     createdAt: Date;
   }> {
     // Validar campos requeridos
-    if (!data.entityType || !data.entityId || !data.action || !data.performedBy) {
+    if (
+      !data.entityType ||
+      !data.entityId ||
+      !data.action ||
+      !data.performedBy
+    ) {
       throw new Error(
         'Campos requeridos faltantes: entityType, entityId, action, performedBy',
       );
@@ -685,7 +693,9 @@ export class AuditLogService {
 
     // Crear descripción
     const actor =
-      data.performedByType === 'USER' ? `Usuario ${data.performedBy}` : 'Sistema';
+      data.performedByType === 'USER'
+        ? `Usuario ${data.performedBy}`
+        : 'Sistema';
     const entity = `${data.entityType}/${data.entityId}`;
     const reason = data.reason ? ` - ${data.reason}` : '';
     const description = `${actor} realizó ${data.action} en ${entity}${reason}`;
@@ -771,7 +781,8 @@ export class AuditLogService {
       entityId: log.entity_id || '',
       action: log.action,
       performedBy: log.user_id || 'system',
-      performedByType: log.user_type?.toUpperCase() === 'USER' ? 'USER' : 'SYSTEM',
+      performedByType:
+        log.user_type?.toUpperCase() === 'USER' ? 'USER' : 'SYSTEM',
       createdAt: log.timestamp,
     }));
   }

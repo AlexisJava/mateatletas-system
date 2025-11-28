@@ -124,7 +124,9 @@ export class ConfiguracionPreciosRepository
    * Convierte de tipos de Prisma a tipos del Domain
    * IMPORTANTE: Convierte Prisma.Decimal a Decimal de decimal.js
    */
-  private mapearPrismaADomain(config: Prisma.ConfiguracionPreciosGetPayload<object>): ConfiguracionPrecios {
+  private mapearPrismaADomain(
+    config: Prisma.ConfiguracionPreciosGetPayload<object>,
+  ): ConfiguracionPrecios {
     return {
       precioClubMatematicas: new Decimal(
         config.precio_club_matematicas.toString(),

@@ -13,7 +13,9 @@ describe('PerformanceLoggingInterceptor', () => {
       providers: [PerformanceLoggingInterceptor],
     }).compile();
 
-    interceptor = module.get<PerformanceLoggingInterceptor>(PerformanceLoggingInterceptor);
+    interceptor = module.get<PerformanceLoggingInterceptor>(
+      PerformanceLoggingInterceptor,
+    );
 
     // Mock ExecutionContext
     mockExecutionContext = {
@@ -47,7 +49,10 @@ describe('PerformanceLoggingInterceptor', () => {
       const logSpy = jest.spyOn(interceptor['logger'], 'log');
 
       // Execute interceptor
-      const result$ = interceptor.intercept(mockExecutionContext, mockCallHandler);
+      const result$ = interceptor.intercept(
+        mockExecutionContext,
+        mockCallHandler,
+      );
 
       result$.subscribe({
         next: () => {
@@ -63,7 +68,10 @@ describe('PerformanceLoggingInterceptor', () => {
       mockCallHandler.handle = jest.fn().mockReturnValue(of('response'));
       const logSpy = jest.spyOn(interceptor['logger'], 'log');
 
-      const result$ = interceptor.intercept(mockExecutionContext, mockCallHandler);
+      const result$ = interceptor.intercept(
+        mockExecutionContext,
+        mockCallHandler,
+      );
 
       result$.subscribe({
         next: () => {
@@ -88,7 +96,10 @@ describe('PerformanceLoggingInterceptor', () => {
       mockCallHandler.handle = jest.fn().mockReturnValue(of('response'));
       const warnSpy = jest.spyOn(interceptor['logger'], 'warn');
 
-      const result$ = interceptor.intercept(mockExecutionContext, mockCallHandler);
+      const result$ = interceptor.intercept(
+        mockExecutionContext,
+        mockCallHandler,
+      );
 
       result$.subscribe({
         next: () => {
@@ -117,7 +128,10 @@ describe('PerformanceLoggingInterceptor', () => {
       mockCallHandler.handle = jest.fn().mockReturnValue(of('response'));
       const errorSpy = jest.spyOn(interceptor['logger'], 'error');
 
-      const result$ = interceptor.intercept(mockExecutionContext, mockCallHandler);
+      const result$ = interceptor.intercept(
+        mockExecutionContext,
+        mockCallHandler,
+      );
 
       result$.subscribe({
         next: () => {
@@ -139,10 +153,15 @@ describe('PerformanceLoggingInterceptor', () => {
       const testError = new Error('Test error');
       (testError as any).status = 500;
 
-      mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => testError));
+      mockCallHandler.handle = jest
+        .fn()
+        .mockReturnValue(throwError(() => testError));
       const errorSpy = jest.spyOn(interceptor['logger'], 'error');
 
-      const result$ = interceptor.intercept(mockExecutionContext, mockCallHandler);
+      const result$ = interceptor.intercept(
+        mockExecutionContext,
+        mockCallHandler,
+      );
 
       result$.subscribe({
         error: () => {
@@ -160,10 +179,15 @@ describe('PerformanceLoggingInterceptor', () => {
     it('should default to 500 status for errors without status', (done) => {
       const testError = new Error('Unknown error');
 
-      mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => testError));
+      mockCallHandler.handle = jest
+        .fn()
+        .mockReturnValue(throwError(() => testError));
       const errorSpy = jest.spyOn(interceptor['logger'], 'error');
 
-      const result$ = interceptor.intercept(mockExecutionContext, mockCallHandler);
+      const result$ = interceptor.intercept(
+        mockExecutionContext,
+        mockCallHandler,
+      );
 
       result$.subscribe({
         error: () => {
@@ -184,7 +208,10 @@ describe('PerformanceLoggingInterceptor', () => {
       mockCallHandler.handle = jest.fn().mockReturnValue(of('response'));
       const debugSpy = jest.spyOn(interceptor['logger'], 'debug');
 
-      const result$ = interceptor.intercept(mockExecutionContext, mockCallHandler);
+      const result$ = interceptor.intercept(
+        mockExecutionContext,
+        mockCallHandler,
+      );
 
       result$.subscribe({
         next: () => {
@@ -213,7 +240,10 @@ describe('PerformanceLoggingInterceptor', () => {
       mockCallHandler.handle = jest.fn().mockReturnValue(of('response'));
       const debugSpy = jest.spyOn(interceptor['logger'], 'debug');
 
-      const result$ = interceptor.intercept(mockExecutionContext, mockCallHandler);
+      const result$ = interceptor.intercept(
+        mockExecutionContext,
+        mockCallHandler,
+      );
 
       result$.subscribe({
         next: () => {
@@ -233,10 +263,15 @@ describe('PerformanceLoggingInterceptor', () => {
       const testError = new Error('Request failed');
       (testError as any).status = 400;
 
-      mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => testError));
+      mockCallHandler.handle = jest
+        .fn()
+        .mockReturnValue(throwError(() => testError));
       const debugSpy = jest.spyOn(interceptor['logger'], 'debug');
 
-      const result$ = interceptor.intercept(mockExecutionContext, mockCallHandler);
+      const result$ = interceptor.intercept(
+        mockExecutionContext,
+        mockCallHandler,
+      );
 
       result$.subscribe({
         error: () => {

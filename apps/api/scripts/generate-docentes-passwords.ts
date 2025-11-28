@@ -96,7 +96,9 @@ async function main() {
 
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('✅ Proceso completado exitosamente!');
-  console.log('📊 Las credenciales ahora están disponibles en /admin/credenciales');
+  console.log(
+    '📊 Las credenciales ahora están disponibles en /admin/credenciales',
+  );
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 }
 

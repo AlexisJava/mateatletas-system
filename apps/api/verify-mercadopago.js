@@ -45,7 +45,10 @@ function checkCredentials() {
   }
 
   if (!webhookSecret) {
-    log('⚠️', 'MERCADOPAGO_WEBHOOK_SECRET no configurado (opcional para desarrollo)');
+    log(
+      '⚠️',
+      'MERCADOPAGO_WEBHOOK_SECRET no configurado (opcional para desarrollo)',
+    );
   }
 
   log('✅', 'Credenciales encontradas en .env');
@@ -63,11 +66,19 @@ function checkNotMock() {
   const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
 
   // Detectar placeholders comunes
-  const mockIndicators = ['XXXXXXXX', 'TEST-XXXX', 'YOUR_ACCESS_TOKEN', 'placeholder'];
+  const mockIndicators = [
+    'XXXXXXXX',
+    'TEST-XXXX',
+    'YOUR_ACCESS_TOKEN',
+    'placeholder',
+  ];
 
   for (const indicator of mockIndicators) {
     if (accessToken.includes(indicator)) {
-      log('❌', `Token contiene placeholder "${indicator}" - MODO MOCK detectado`);
+      log(
+        '❌',
+        `Token contiene placeholder "${indicator}" - MODO MOCK detectado`,
+      );
       return false;
     }
   }
@@ -84,7 +95,10 @@ function checkNotMock() {
     log('✅', 'Token de TEST/SANDBOX detectado (TEST-...)');
     log('   ', 'Los pagos serán simulados (modo sandbox)');
   } else {
-    log('⚠️', 'Formato de token no reconocido (esperado: APP_USR-... o TEST-...)');
+    log(
+      '⚠️',
+      'Formato de token no reconocido (esperado: APP_USR-... o TEST-...)',
+    );
     log('   ', `Token comienza con: ${accessToken.substring(0, 10)}...`);
   }
 
@@ -107,7 +121,7 @@ async function checkSDKInit() {
       accessToken: accessToken,
       options: {
         timeout: 5000,
-      }
+      },
     });
 
     log('✅', 'SDK de MercadoPago inicializado correctamente');
@@ -141,7 +155,10 @@ async function checkAPIConnectivity(client) {
       // Si recibimos error 404, significa que la API respondió correctamente
       if (error.status === 404) {
         log('✅', 'API de MercadoPago responde correctamente');
-        log('   ', 'Conexión verificada (recibido 404 esperado para pago inexistente)');
+        log(
+          '   ',
+          'Conexión verificada (recibido 404 esperado para pago inexistente)',
+        );
         CHECKS.apiConnectivity = true;
         return true;
       }
@@ -162,7 +179,6 @@ async function checkAPIConnectivity(client) {
     log('✅', 'API de MercadoPago responde correctamente');
     CHECKS.apiConnectivity = true;
     return true;
-
   } catch (error) {
     log('❌', 'Error verificando conectividad con API', error.message);
     return false;
@@ -171,9 +187,13 @@ async function checkAPIConnectivity(client) {
 
 // Ejecutar todas las verificaciones
 async function runVerification() {
-  console.log('═══════════════════════════════════════════════════════════════');
+  console.log(
+    '═══════════════════════════════════════════════════════════════',
+  );
   console.log('🔐 VERIFICACIÓN DE CONFIGURACIÓN DE MERCADOPAGO');
-  console.log('═══════════════════════════════════════════════════════════════\n');
+  console.log(
+    '═══════════════════════════════════════════════════════════════\n',
+  );
 
   // CHECK 1
   const step1 = checkCredentials();
@@ -192,13 +212,19 @@ async function runVerification() {
   console.log('');
 
   // RESUMEN
-  console.log('═══════════════════════════════════════════════════════════════');
+  console.log(
+    '═══════════════════════════════════════════════════════════════',
+  );
   console.log('📊 RESUMEN DE VERIFICACIÓN');
-  console.log('═══════════════════════════════════════════════════════════════\n');
+  console.log(
+    '═══════════════════════════════════════════════════════════════\n',
+  );
 
-  const allPassed = Object.values(CHECKS).every(check => check === true);
+  const allPassed = Object.values(CHECKS).every((check) => check === true);
 
-  console.log(`✅ Credenciales configuradas: ${CHECKS.credentials ? 'SÍ' : 'NO'}`);
+  console.log(
+    `✅ Credenciales configuradas: ${CHECKS.credentials ? 'SÍ' : 'NO'}`,
+  );
   console.log(`✅ No está en modo MOCK: ${CHECKS.notMock ? 'SÍ' : 'NO'}`);
   console.log(`✅ SDK inicializado: ${CHECKS.sdkInit ? 'SÍ' : 'NO'}`);
   console.log(`✅ API conectada: ${CHECKS.apiConnectivity ? 'SÍ' : 'NO'}`);
@@ -207,26 +233,36 @@ async function runVerification() {
   if (allPassed) {
     console.log('🎉 ¡TODAS LAS VERIFICACIONES PASARON!');
     console.log('');
-    console.log('✅ El sistema está configurado correctamente para usar MercadoPago');
+    console.log(
+      '✅ El sistema está configurado correctamente para usar MercadoPago',
+    );
     console.log('✅ Puedes proceder con el deployment a producción');
     console.log('');
-    console.log('⚠️  RECORDATORIO: Si estás usando credenciales de PRODUCCIÓN (APP_USR-),');
-    console.log('   los pagos serán REALES y se procesarán transacciones monetarias.');
+    console.log(
+      '⚠️  RECORDATORIO: Si estás usando credenciales de PRODUCCIÓN (APP_USR-),',
+    );
+    console.log(
+      '   los pagos serán REALES y se procesarán transacciones monetarias.',
+    );
     console.log('');
   } else {
     console.log('❌ ALGUNAS VERIFICACIONES FALLARON');
     console.log('');
-    console.log('Por favor revisa los errores arriba antes de deployar a producción.');
+    console.log(
+      'Por favor revisa los errores arriba antes de deployar a producción.',
+    );
     console.log('');
   }
 
-  console.log('═══════════════════════════════════════════════════════════════\n');
+  console.log(
+    '═══════════════════════════════════════════════════════════════\n',
+  );
 
   process.exit(allPassed ? 0 : 1);
 }
 
 // Ejecutar
-runVerification().catch(error => {
+runVerification().catch((error) => {
   console.error('💥 Error fatal en verificación:', error);
   process.exit(1);
 });

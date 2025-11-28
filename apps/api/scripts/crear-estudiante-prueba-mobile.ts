@@ -27,10 +27,7 @@ async function main() {
     // 1. Verificar si ya existe
     const existente = await prisma.estudiante.findFirst({
       where: {
-        OR: [
-          { username },
-          { email },
-        ],
+        OR: [{ username }, { email }],
       },
     });
 
@@ -65,7 +62,9 @@ async function main() {
     });
 
     if (!tutor) {
-      throw new Error('❌ No hay tutores en el sistema. Crea un tutor primero.');
+      throw new Error(
+        '❌ No hay tutores en el sistema. Crea un tutor primero.',
+      );
     }
 
     console.log(`✓ Tutor encontrado: ${tutor.nombre} ${tutor.apellido}`);
@@ -182,7 +181,6 @@ async function main() {
       }
     }
     console.log('═══════════════════════════════════════════════════════\n');
-
   } catch (error) {
     console.error('❌ Error al crear estudiante:', error);
     throw error;

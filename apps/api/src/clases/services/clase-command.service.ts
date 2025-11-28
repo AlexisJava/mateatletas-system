@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 import { CrearClaseDto } from '../dto/crear-clase.dto';
 import { NotificacionesService } from '../../notificaciones/notificaciones.service';
@@ -230,9 +226,8 @@ export class ClaseCommandService {
     this.validator.validarCuposDisponibles(clase, estudianteIds.length);
 
     // 3. Validar que todos los estudiantes existen
-    const estudiantes = await this.validator.validarEstudiantesExisten(
-      estudianteIds,
-    );
+    const estudiantes =
+      await this.validator.validarEstudiantesExisten(estudianteIds);
 
     // 4. Validar que los estudiantes no estén ya inscritos
     this.validator.validarEstudiantesNoInscritos(clase, estudianteIds);

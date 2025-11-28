@@ -5,7 +5,10 @@ import {
   mapearEstadoMercadoPago,
 } from '../../domain/constants';
 
-import { EstadoMembresia, EstadoPago as EstadoPagoPrisma } from '@prisma/client';
+import {
+  EstadoMembresia,
+  EstadoPago as EstadoPagoPrisma,
+} from '@prisma/client';
 
 /**
  * Resultado de mapeo para estados de membresía

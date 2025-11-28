@@ -23,7 +23,7 @@ describe('RankingService - Pagination', () => {
       apellido: `Apellido${i + 1}`,
       fotoUrl: `https://example.com/foto${i + 1}.jpg`, // camelCase para coincidir con el servicio
       puntos_totales: 1000 - i * 10, // Descendente
-      equipo: {
+      casa: {
         id: `equipo-${(i % 3) + 1}`,
         nombre: `Equipo ${(i % 3) + 1}`,
         color_primario: '#FF5722',
@@ -305,7 +305,7 @@ describe('RankingService - Pagination', () => {
         nombre: 'Estudiante1',
         apellido: 'Apellido1',
         avatar: 'https://example.com/foto1.jpg',
-        equipo: expect.objectContaining({
+        casa: expect.objectContaining({
           id: 'equipo-1',
           nombre: 'Equipo 1',
         }),

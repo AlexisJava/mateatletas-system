@@ -216,8 +216,18 @@ describe('AdminStatsService', () => {
       const findManySpy = jest
         .spyOn(prisma.inscripcionMensual, 'findMany')
         .mockResolvedValue([
-          { id: '1', periodo, estado_pago: 'Pagado', precio_final: { toNumber: () => 1000 } },
-          { id: '2', periodo, estado_pago: 'Pendiente', precio_final: { toNumber: () => 500 } },
+          {
+            id: '1',
+            periodo,
+            estado_pago: 'Pagado',
+            precio_final: { toNumber: () => 1000 },
+          },
+          {
+            id: '2',
+            periodo,
+            estado_pago: 'Pendiente',
+            precio_final: { toNumber: () => 500 },
+          },
         ] as any);
 
       // Act

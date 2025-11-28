@@ -289,7 +289,7 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         nivel_escolar: 'Primaria',
         avatar_url: 'avatar.png',
         puntos_totales: 0,
-        equipo: null,
+        casa: null,
         tutor: { id: 'tutor1', nombre: 'Padre', apellido: 'Pérez' },
       };
 
@@ -321,7 +321,7 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         nivel_escolar: 'Primaria',
         avatar_url: 'avatar.png',
         puntos_totales: 0,
-        equipo: null,
+        casa: null,
         tutor: { id: 'tutor1', nombre: 'Padre', apellido: 'Pérez' },
       };
 

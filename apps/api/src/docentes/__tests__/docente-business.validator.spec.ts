@@ -224,9 +224,7 @@ describe('DocenteBusinessValidator', () => {
 
   describe('validarPasswordSegura', () => {
     it('should not throw if password meets all requirements', () => {
-      expect(() =>
-        validator.validarPasswordSegura('Abc12345'),
-      ).not.toThrow();
+      expect(() => validator.validarPasswordSegura('Abc12345')).not.toThrow();
       expect(() =>
         validator.validarPasswordSegura('SecurePass123!'),
       ).not.toThrow();

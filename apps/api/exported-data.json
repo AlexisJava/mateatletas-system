@@ -29,10 +29,7 @@
       "createdAt": "2025-10-25T23:06:05.631Z",
       "updatedAt": "2025-10-25T23:06:05.631Z",
       "dni": null,
-      "roles": [
-        "admin",
-        "docente"
-      ],
+      "roles": ["admin", "docente"],
       "telefono": null
     }
   ],
@@ -54,9 +51,7 @@
       "ha_completado_onboarding": false,
       "createdAt": "2025-11-02T04:27:05.700Z",
       "updatedAt": "2025-11-02T04:27:05.700Z",
-      "roles": [
-        "tutor"
-      ]
+      "roles": ["tutor"]
     }
   ],
   "docentes": [
@@ -72,29 +67,17 @@
       "createdAt": "2025-10-23T03:48:47.625Z",
       "updatedAt": "2025-10-26T01:03:45.942Z",
       "disponibilidad_horaria": {
-        "lunes": [
-          "18:00-21:00"
-        ],
-        "jueves": [
-          "18:00-21:00"
-        ],
-        "martes": [
-          "18:00-21:00"
-        ],
-        "viernes": [
-          "18:00-21:00"
-        ],
-        "miércoles": [
-          "18:00-21:00"
-        ]
+        "lunes": ["18:00-21:00"],
+        "jueves": ["18:00-21:00"],
+        "martes": ["18:00-21:00"],
+        "viernes": ["18:00-21:00"],
+        "miércoles": ["18:00-21:00"]
       },
       "especialidades": [],
       "estado": "activo",
       "experiencia_anos": null,
       "nivel_educativo": [],
-      "roles": [
-        "docente"
-      ],
+      "roles": ["docente"],
       "telefono": "+5493525563240",
       "debe_cambiar_password": true,
       "fecha_ultimo_cambio": null
@@ -111,21 +94,11 @@
       "createdAt": "2025-10-23T03:42:15.459Z",
       "updatedAt": "2025-10-26T12:28:33.378Z",
       "disponibilidad_horaria": {
-        "lunes": [
-          "18:00-19:30"
-        ],
-        "jueves": [
-          "18:00-19:30"
-        ],
-        "martes": [
-          "18:00-19:30"
-        ],
-        "viernes": [
-          "18:00-19:30"
-        ],
-        "miércoles": [
-          "18:00-19:30"
-        ]
+        "lunes": ["18:00-19:30"],
+        "jueves": ["18:00-19:30"],
+        "martes": ["18:00-19:30"],
+        "viernes": ["18:00-19:30"],
+        "miércoles": ["18:00-19:30"]
       },
       "especialidades": [],
       "estado": "activo",
@@ -148,21 +121,11 @@
       "createdAt": "2025-10-23T03:42:59.208Z",
       "updatedAt": "2025-10-26T01:03:45.663Z",
       "disponibilidad_horaria": {
-        "lunes": [
-          "18:00-19:30"
-        ],
-        "jueves": [
-          "18:00-19:30"
-        ],
-        "martes": [
-          "18:00-19:30"
-        ],
-        "viernes": [
-          "18:00-19:30"
-        ],
-        "miércoles": [
-          "18:00-19:30"
-        ]
+        "lunes": ["18:00-19:30"],
+        "jueves": ["18:00-19:30"],
+        "martes": ["18:00-19:30"],
+        "viernes": ["18:00-19:30"],
+        "miércoles": ["18:00-19:30"]
       },
       "especialidades": [],
       "estado": "activo",
@@ -185,29 +148,17 @@
       "createdAt": "2025-10-23T03:44:40.425Z",
       "updatedAt": "2025-10-26T01:03:45.739Z",
       "disponibilidad_horaria": {
-        "lunes": [
-          "18:00-21:00"
-        ],
-        "jueves": [
-          "18:00-21:00"
-        ],
-        "martes": [
-          "18:00-21:00"
-        ],
-        "viernes": [
-          "18:00-21:00"
-        ],
-        "miércoles": [
-          "18:00-21:00"
-        ]
+        "lunes": ["18:00-21:00"],
+        "jueves": ["18:00-21:00"],
+        "martes": ["18:00-21:00"],
+        "viernes": ["18:00-21:00"],
+        "miércoles": ["18:00-21:00"]
       },
       "especialidades": [],
       "estado": "activo",
       "experiencia_anos": null,
       "nivel_educativo": [],
-      "roles": [
-        "docente"
-      ],
+      "roles": ["docente"],
       "telefono": "+5493456545560",
       "debe_cambiar_password": true,
       "fecha_ultimo_cambio": null
@@ -224,26 +175,16 @@
       "createdAt": "2025-10-23T03:46:19.920Z",
       "updatedAt": "2025-10-26T01:03:45.806Z",
       "disponibilidad_horaria": {
-        "lunes": [
-          "18:00-21:00"
-        ],
-        "jueves": [
-          "18:00-21:00"
-        ],
-        "sábado": [
-          "10:30-12:00"
-        ],
-        "viernes": [
-          "19:30-21:00"
-        ]
+        "lunes": ["18:00-21:00"],
+        "jueves": ["18:00-21:00"],
+        "sábado": ["10:30-12:00"],
+        "viernes": ["19:30-21:00"]
       },
       "especialidades": [],
       "estado": "activo",
       "experiencia_anos": null,
       "nivel_educativo": [],
-      "roles": [
-        "docente"
-      ],
+      "roles": ["docente"],
       "telefono": "+5493515598947",
       "debe_cambiar_password": true,
       "fecha_ultimo_cambio": null
@@ -264,9 +205,7 @@
       "estado": "activo",
       "experiencia_anos": null,
       "nivel_educativo": null,
-      "roles": [
-        "docente"
-      ],
+      "roles": ["docente"],
       "telefono": null,
       "debe_cambiar_password": true,
       "fecha_ultimo_cambio": null
@@ -662,9 +601,7 @@
       "password_temporal": null,
       "debe_cambiar_password": true,
       "fecha_ultimo_cambio": null,
-      "roles": [
-        "estudiante"
-      ],
+      "roles": ["estudiante"],
       "sector_id": null
     }
   ],

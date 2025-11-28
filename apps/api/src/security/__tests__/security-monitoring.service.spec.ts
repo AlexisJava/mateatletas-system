@@ -127,8 +127,12 @@ describe('SecurityMonitoringService', () => {
     expect(metrics.totalEvents).toBe(1250);
     expect(metrics.byCategory).toHaveLength(4);
     expect(metrics.bySeverity).toHaveLength(4);
-    expect(metrics.byCategory.find((c) => c.category === 'fraud_detection')?.count).toBe(45);
-    expect(metrics.bySeverity.find((s) => s.severity === 'critical')?.count).toBe(12);
+    expect(
+      metrics.byCategory.find((c) => c.category === 'fraud_detection')?.count,
+    ).toBe(45);
+    expect(
+      metrics.bySeverity.find((s) => s.severity === 'critical')?.count,
+    ).toBe(12);
 
     // Debe consultar eventos de últimas 24 horas
     expect(prisma.auditLog.count).toHaveBeenCalledWith(

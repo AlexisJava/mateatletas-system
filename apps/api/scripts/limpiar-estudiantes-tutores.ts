@@ -18,13 +18,19 @@ async function limpiarEstudiantesYTutores() {
 
     // 2. Eliminar asistencias a clases grupo
     console.log('🗑️  Eliminando asistencias a clases grupo...');
-    const deleteAsistenciasClaseGrupo = await prisma.asistenciaClaseGrupo.deleteMany({});
-    console.log(`   ✅ ${deleteAsistenciasClaseGrupo.count} asistencias eliminadas\n`);
+    const deleteAsistenciasClaseGrupo =
+      await prisma.asistenciaClaseGrupo.deleteMany({});
+    console.log(
+      `   ✅ ${deleteAsistenciasClaseGrupo.count} asistencias eliminadas\n`,
+    );
 
     // 3. Eliminar inscripciones a clases grupo
     console.log('🗑️  Eliminando inscripciones a clases grupo...');
-    const deleteInscripcionesClaseGrupo = await prisma.inscripcionClaseGrupo.deleteMany({});
-    console.log(`   ✅ ${deleteInscripcionesClaseGrupo.count} inscripciones eliminadas\n`);
+    const deleteInscripcionesClaseGrupo =
+      await prisma.inscripcionClaseGrupo.deleteMany({});
+    console.log(
+      `   ✅ ${deleteInscripcionesClaseGrupo.count} inscripciones eliminadas\n`,
+    );
 
     // 4. Eliminar asistencias
     console.log('🗑️  Eliminando asistencias...');
@@ -33,13 +39,21 @@ async function limpiarEstudiantesYTutores() {
 
     // 5. Eliminar inscripciones a clases
     console.log('🗑️  Eliminando inscripciones a clases...');
-    const deleteInscripcionesClase = await prisma.inscripcionClase.deleteMany({});
-    console.log(`   ✅ ${deleteInscripcionesClase.count} inscripciones eliminadas\n`);
+    const deleteInscripcionesClase = await prisma.inscripcionClase.deleteMany(
+      {},
+    );
+    console.log(
+      `   ✅ ${deleteInscripcionesClase.count} inscripciones eliminadas\n`,
+    );
 
     // 6. Eliminar inscripciones a cursos
     console.log('🗑️  Eliminando inscripciones a cursos...');
-    const deleteInscripcionesCurso = await prisma.inscripcionCurso.deleteMany({});
-    console.log(`   ✅ ${deleteInscripcionesCurso.count} inscripciones eliminadas\n`);
+    const deleteInscripcionesCurso = await prisma.inscripcionCurso.deleteMany(
+      {},
+    );
+    console.log(
+      `   ✅ ${deleteInscripcionesCurso.count} inscripciones eliminadas\n`,
+    );
 
     // 7. Eliminar alertas
     console.log('🗑️  Eliminando alertas...');
@@ -74,7 +88,6 @@ async function limpiarEstudiantesYTutores() {
     console.log('✅ LIMPIEZA COMPLETADA EXITOSAMENTE\n');
     console.log('🎯 Los docentes se mantuvieron intactos');
     console.log('🎯 Todos los estudiantes y tutores fueron eliminados');
-
   } catch (error) {
     console.error('❌ Error durante la limpieza:', error);
     throw error;

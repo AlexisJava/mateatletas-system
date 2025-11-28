@@ -24,14 +24,18 @@ interface EstudianteDuplicado {
 
 async function encontrarDuplicados(): Promise<EstudianteDuplicado[]> {
   // Encontrar todos los nombres duplicados
-  const duplicados = await prisma.$queryRaw<{ nombre: string; apellido: string }[]>`
+  const duplicados = await prisma.$queryRaw<
+    { nombre: string; apellido: string }[]
+  >`
     SELECT nombre, apellido
     FROM estudiantes
     GROUP BY nombre, apellido
     HAVING COUNT(*) > 1
   `;
 
-  console.log(`\n📊 Encontrados ${duplicados.length} estudiantes con registros duplicados\n`);
+  console.log(
+    `\n📊 Encontrados ${duplicados.length} estudiantes con registros duplicados\n`,
+  );
 
   // Para cada duplicado, obtener todos sus registros con sectores
   const resultado: EstudianteDuplicado[] = [];
@@ -81,8 +85,12 @@ async function consolidarEstudiante(duplicado: EstudianteDuplicado) {
   const registroPrincipal = duplicado.registros[0];
   const registrosAEliminar = duplicado.registros.slice(1);
 
-  console.log(`   ✅ Mantener: ID ${registroPrincipal.id} (PIN: ${registroPrincipal.password_temporal})`);
-  console.log(`   📍 Sectores actuales: ${registroPrincipal.sectores.map(s => s.nombre).join(', ')}`);
+  console.log(
+    `   ✅ Mantener: ID ${registroPrincipal.id} (PIN: ${registroPrincipal.password_temporal})`,
+  );
+  console.log(
+    `   📍 Sectores actuales: ${registroPrincipal.sectores.map((s) => s.nombre).join(', ')}`,
+  );
 
   // Recopilar todos los sectores únicos de todos los registros
   const todosLosSectores = new Set<string>();
@@ -115,7 +123,9 @@ async function consolidarEstudiante(duplicado: EstudianteDuplicado) {
 
   // Migrar relaciones de los duplicados al principal (asistencias, planificaciones, etc.)
   for (const regDup of registrosAEliminar) {
-    console.log(`   🔀 Migrando datos de ID ${regDup.id} (PIN: ${regDup.password_temporal})`);
+    console.log(
+      `   🔀 Migrando datos de ID ${regDup.id} (PIN: ${regDup.password_temporal})`,
+    );
 
     // Migrar asistencias
     const asistencias = await prisma.asistencia.count({
@@ -149,7 +159,9 @@ async function consolidarEstudiante(duplicado: EstudianteDuplicado) {
   }
 
   console.log(`   ✅ Consolidación completa`);
-  console.log(`   📍 Sectores finales: ${Array.from(todosLosSectores).length} sectores`);
+  console.log(
+    `   📍 Sectores finales: ${Array.from(todosLosSectores).length} sectores`,
+  );
 }
 
 async function main() {
@@ -160,7 +172,9 @@ async function main() {
     const duplicados = await encontrarDuplicados();
 
     if (duplicados.length === 0) {
-      console.log('✅ No hay estudiantes duplicados. Base de datos ya normalizada.\n');
+      console.log(
+        '✅ No hay estudiantes duplicados. Base de datos ya normalizada.\n',
+      );
       return;
     }
 
@@ -171,7 +185,9 @@ async function main() {
     duplicados.forEach((dup) => {
       console.log(`\n${dup.nombre} ${dup.apellido}:`);
       dup.registros.forEach((reg, idx) => {
-        console.log(`  ${idx + 1}. ID: ${reg.id} | PIN: ${reg.password_temporal} | Sectores: ${reg.sectores.map(s => s.nombre).join(', ')}`);
+        console.log(
+          `  ${idx + 1}. ID: ${reg.id} | PIN: ${reg.password_temporal} | Sectores: ${reg.sectores.map((s) => s.nombre).join(', ')}`,
+        );
       });
     });
     console.log('\n═══════════════════════════════════════════════════════\n');
@@ -198,7 +214,6 @@ async function main() {
     console.log(`Duplicados restantes: ${duplicadosRestantes[0].count}`);
     console.log(`Total de estudiantes procesados: ${duplicados.length}`);
     console.log('═══════════════════════════════════════════════════════\n');
-
   } catch (error) {
     console.error('❌ Error durante la normalización:', error);
     throw error;

@@ -20,7 +20,9 @@ async function main() {
     },
   });
 
-  console.log(`✅ Contraseña actualizada exitosamente para: ${admin.nombre} ${admin.apellido}`);
+  console.log(
+    `✅ Contraseña actualizada exitosamente para: ${admin.nombre} ${admin.apellido}`,
+  );
   console.log(`📧 Email: ${admin.email}`);
   console.log(`🔑 Nueva contraseña: ${newPassword}`);
 }

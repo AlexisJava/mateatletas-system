@@ -217,7 +217,10 @@ describe('AuditLogService', () => {
     mockPrisma.auditLog.findMany.mockResolvedValue(mockHistory);
 
     // Act: Obtener historial
-    const history = await service.getEntityHistory('inscripcion_2026', 'insc-789');
+    const history = await service.getEntityHistory(
+      'inscripcion_2026',
+      'insc-789',
+    );
 
     // Assert: Debe obtener logs ordenados (Prisma usa snake_case)
     expect(prisma.auditLog.findMany).toHaveBeenCalledWith({
@@ -423,9 +426,7 @@ describe('AuditLogService', () => {
     };
 
     // Act & Assert: Debe lanzar error
-    await expect(
-      service.logStateChange(invalidData as any),
-    ).rejects.toThrow();
+    await expect(service.logStateChange(invalidData as any)).rejects.toThrow();
   });
 
   /**

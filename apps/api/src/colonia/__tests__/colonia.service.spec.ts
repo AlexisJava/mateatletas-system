@@ -469,21 +469,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn().mockResolvedValue(mockEstudiante),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -581,12 +577,10 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
                 .mockResolvedValueOnce({ ...mockEstudiante, id: 'est-2' }),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
@@ -640,21 +634,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn().mockResolvedValue(mockEstudiante),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -704,21 +694,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn().mockResolvedValue(mockEstudiante),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -801,21 +787,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               }),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -862,21 +844,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn().mockResolvedValue(mockEstudiante),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -939,21 +917,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn().mockResolvedValue(mockEstudiante),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -1114,21 +1088,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
             tutor: { create: jest.fn().mockResolvedValue(mockTutor) },
             estudiante: { create: jest.fn().mockResolvedValue(mockEstudiante) },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0),
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -1211,21 +1181,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn().mockResolvedValue(mockEstudiante),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -1319,12 +1285,10 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
                 .mockResolvedValueOnce({ ...mockEstudiante, id: 'est-2' }),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
@@ -1416,21 +1380,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn().mockResolvedValue(mockEstudiante),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -1525,21 +1485,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn().mockResolvedValue(mockEstudiante),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -1670,21 +1626,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn().mockResolvedValue(mockEstudiante),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -1752,21 +1704,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn().mockResolvedValue(mockEstudiante),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),
@@ -1839,21 +1787,17 @@ describe.skip('ColoniaService - COMPREHENSIVE TESTS', () => {
               create: jest.fn().mockResolvedValue(mockEstudiante),
             },
             coloniaInscripcion: {
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'inscripcion-123',
-                  tutor_id: mockTutor.id,
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'inscripcion-123',
+                tutor_id: mockTutor.id,
+              }),
             },
             coloniaEstudiante: {
               count: jest.fn().mockResolvedValue(0), // PIN no existe
-              create: jest
-                .fn()
-                .mockResolvedValue({
-                  id: 'colonia-estudiante-123',
-                  pin: '1234',
-                }),
+              create: jest.fn().mockResolvedValue({
+                id: 'colonia-estudiante-123',
+                pin: '1234',
+              }),
             },
             coloniaEstudianteCurso: {
               create: jest.fn().mockResolvedValue({ id: 'curso-123' }),

@@ -656,7 +656,8 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
             {
               id: 'inscripcion-2026-colonia',
               title: 'Inscripción Colonia de Verano 2026',
-              description: 'Inscripción para 2 estudiantes - Colonia de Verano (Enero-Febrero 2026)',
+              description:
+                'Inscripción para 2 estudiantes - Colonia de Verano (Enero-Febrero 2026)',
               quantity: 1,
               unit_price: 25000,
               currency_id: 'ARS',
@@ -667,12 +668,17 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
             name: 'Juan',
             surname: 'Pérez',
           },
-          external_reference: 'inscripcion2026-insc-abc123-tutor-tutor-xyz789-tipo-COLONIA',
-          notification_url: 'http://localhost:3001/api/inscripciones-2026/webhook',
+          external_reference:
+            'inscripcion2026-insc-abc123-tutor-tutor-xyz789-tipo-COLONIA',
+          notification_url:
+            'http://localhost:3001/api/inscripciones-2026/webhook',
           back_urls: {
-            success: 'http://localhost:3000/inscripcion-2026/exito?inscripcionId=insc-abc123',
-            failure: 'http://localhost:3000/inscripcion-2026/error?inscripcionId=insc-abc123',
-            pending: 'http://localhost:3000/inscripcion-2026/pendiente?inscripcionId=insc-abc123',
+            success:
+              'http://localhost:3000/inscripcion-2026/exito?inscripcionId=insc-abc123',
+            failure:
+              'http://localhost:3000/inscripcion-2026/error?inscripcionId=insc-abc123',
+            pending:
+              'http://localhost:3000/inscripcion-2026/pendiente?inscripcionId=insc-abc123',
           },
           auto_return: 'approved',
           statement_descriptor: 'Mateatletas 2026',
@@ -732,13 +738,15 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
             {
               id: 'inscripcion-2026-ciclo_2026',
               title: 'Inscripción Ciclo Lectivo 2026 (Early Bird)',
-              description: 'Matrícula Early Bird para 1 estudiante - Ciclo Lectivo 2026',
+              description:
+                'Matrícula Early Bird para 1 estudiante - Ciclo Lectivo 2026',
               quantity: 1,
               unit_price: 50000,
               currency_id: 'ARS',
             },
           ],
-          external_reference: 'inscripcion2026-insc-def456-tutor-tutor-abc123-tipo-CICLO_2026',
+          external_reference:
+            'inscripcion2026-insc-def456-tutor-tutor-abc123-tipo-CICLO_2026',
         });
       });
     });
@@ -761,13 +769,15 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
             {
               id: 'inscripcion-2026-pack_completo',
               title: 'Inscripción Pack Completo 2026',
-              description: 'Pack Completo (Colonia + Ciclo 2026) para 2 estudiantes - Ahorro de $15,000',
+              description:
+                'Pack Completo (Colonia + Ciclo 2026) para 2 estudiantes - Ahorro de $15,000',
               quantity: 1,
               unit_price: 60000,
               currency_id: 'ARS',
             },
           ],
-          external_reference: 'inscripcion2026-insc-ghi789-tutor-tutor-def456-tipo-PACK_COMPLETO',
+          external_reference:
+            'inscripcion2026-insc-ghi789-tutor-tutor-def456-tipo-PACK_COMPLETO',
         });
       });
     });
@@ -786,7 +796,9 @@ describe('MercadoPagoService - COMPREHENSIVE TESTS', () => {
         );
 
         expect(result.items[0].title).toBe('Inscripción Mateatletas 2026');
-        expect(result.items[0].description).toBe('Inscripción para 1 estudiante');
+        expect(result.items[0].description).toBe(
+          'Inscripción para 1 estudiante',
+        );
       });
 
       it('should handle tutor with optional fields (nombre/apellido undefined)', () => {

@@ -47,9 +47,10 @@ async function main() {
     console.log('═══════════════════════════════════════════════════════');
     console.log('✅ LINKS DE MEET ASIGNADOS EXITOSAMENTE');
     console.log('═══════════════════════════════════════════════════════');
-    console.log(`Total de grupos actualizados: ${Object.keys(LINKS_MEET).length}`);
+    console.log(
+      `Total de grupos actualizados: ${Object.keys(LINKS_MEET).length}`,
+    );
     console.log('═══════════════════════════════════════════════════════\n');
-
   } catch (error) {
     console.error('❌ Error al asignar links de Meet:', error);
     throw error;

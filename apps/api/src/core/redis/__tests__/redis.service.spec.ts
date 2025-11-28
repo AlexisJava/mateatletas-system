@@ -4,7 +4,10 @@ import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 
 // In-memory store para simular Redis en tests
-const mockStore = new Map<string, { value: string; ttl: number; createdAt: number }>();
+const mockStore = new Map<
+  string,
+  { value: string; ttl: number; createdAt: number }
+>();
 
 // Mock de ioredis con in-memory store
 jest.mock('ioredis', () => {
@@ -12,10 +15,12 @@ jest.mock('ioredis', () => {
     connect: jest.fn().mockResolvedValue(undefined),
     quit: jest.fn().mockResolvedValue(undefined),
 
-    setex: jest.fn().mockImplementation((key: string, ttl: number, value: string) => {
-      mockStore.set(key, { value, ttl, createdAt: Date.now() });
-      return Promise.resolve('OK');
-    }),
+    setex: jest
+      .fn()
+      .mockImplementation((key: string, ttl: number, value: string) => {
+        mockStore.set(key, { value, ttl, createdAt: Date.now() });
+        return Promise.resolve('OK');
+      }),
 
     get: jest.fn().mockImplementation((key: string) => {
       const item = mockStore.get(key);

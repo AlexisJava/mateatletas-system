@@ -29,7 +29,7 @@ async function main() {
       apellido: 'Reniero',
       titulo: 'Profesora en Matemática',
       bio: 'Especialista en trabajo con niños y experta en Matific',
-    }
+    },
   });
   console.log(`  ✓ Gimena Reniero`);
 
@@ -43,7 +43,7 @@ async function main() {
       apellido: 'Yañez',
       titulo: 'Licenciada en Psicopedagogía',
       bio: 'Especialista en habilidades y dificultades del aprendizaje de matemáticas. Diplomada en dificultades y habilidades matemáticas',
-    }
+    },
   });
   console.log(`  ✓ Ayelen Yañez\n`);
 
@@ -61,7 +61,7 @@ async function main() {
       nombre: 'Laura',
       apellido: 'Hermoso',
       telefono: '29912345678',
-    }
+    },
   });
   console.log(`  ✓ Laura Hermoso`);
 
@@ -74,7 +74,7 @@ async function main() {
       nombre: 'Adriana',
       apellido: 'Lui',
       telefono: '29978945612',
-    }
+    },
   });
   console.log(`  ✓ Adriana Lui\n`);
 
@@ -96,7 +96,7 @@ async function main() {
       edad: 6,
       nivelEscolar: '2do Primaria',
       tutor_id: laura.id,
-    }
+    },
   });
   console.log(`  ✓ Dante Migani (2do grado)`);
 
@@ -113,7 +113,7 @@ async function main() {
       edad: 6,
       nivelEscolar: '3ro Primaria',
       tutor_id: adriana.id,
-    }
+    },
   });
   console.log(`  ✓ Nicolas Schenone (3ro grado)`);
 
@@ -130,7 +130,7 @@ async function main() {
       edad: 5,
       nivelEscolar: '2do Primaria',
       tutor_id: adriana.id,
-    }
+    },
   });
   console.log(`  ✓ Isabella Schenone (2do grado)`);
 
@@ -147,7 +147,7 @@ async function main() {
       edad: 8,
       nivelEscolar: '4to Primaria',
       tutor_id: adriana.id,
-    }
+    },
   });
   console.log(`  ✓ Giuliana Schenone (4to grado)`);
 
@@ -164,7 +164,7 @@ async function main() {
       edad: 6,
       nivelEscolar: '3ro Primaria',
       tutor_id: adriana.id,
-    }
+    },
   });
   console.log(`  ✓ Theo Ghesla (3ro grado)\n`);
 

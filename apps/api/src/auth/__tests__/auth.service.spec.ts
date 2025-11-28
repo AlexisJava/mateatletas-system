@@ -104,7 +104,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       apellido: 'Pérez',
       email: 'tutor@test.com',
     },
-    equipo: {
+    casa: {
       id: 'equipo-123',
       nombre: 'Quantum',
       color_primario: '#10B981',

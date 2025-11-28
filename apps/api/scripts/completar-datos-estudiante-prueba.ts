@@ -31,7 +31,9 @@ async function main() {
       throw new Error('❌ No se encontró el estudiante con username "prueba"');
     }
 
-    console.log(`✓ Estudiante encontrado: ${estudiante.nombre} ${estudiante.apellido}`);
+    console.log(
+      `✓ Estudiante encontrado: ${estudiante.nombre} ${estudiante.apellido}`,
+    );
 
     // 2. Crear recursos si no existen
     if (!estudiante.recursos) {
@@ -133,12 +135,16 @@ async function main() {
     console.log('═══════════════════════════════════════════════════════');
     console.log('📊 DATOS DEL ESTUDIANTE:');
     console.log('═══════════════════════════════════════════════════════');
-    console.log(`Nombre completo: ${estudianteCompleto?.nombre} ${estudianteCompleto?.apellido}`);
+    console.log(
+      `Nombre completo: ${estudianteCompleto?.nombre} ${estudianteCompleto?.apellido}`,
+    );
     console.log(`Nivel: ${estudianteCompleto?.nivel_actual}`);
     console.log(`Puntos: ${estudianteCompleto?.puntos_totales}`);
     console.log(`XP Total: ${estudianteCompleto?.recursos?.xp_total || 0}`);
     console.log(`Monedas: ${estudianteCompleto?.recursos?.monedas_total || 0}`);
-    console.log(`Racha: ${estudianteCompleto?.racha?.racha_actual || 0} días consecutivos`);
+    console.log(
+      `Racha: ${estudianteCompleto?.racha?.racha_actual || 0} días consecutivos`,
+    );
 
     if (estudianteCompleto?.inscripciones_clase_grupo.length) {
       const inscripcion = estudianteCompleto.inscripciones_clase_grupo[0];
@@ -149,7 +155,6 @@ async function main() {
       }
     }
     console.log('═══════════════════════════════════════════════════════\n');
-
   } catch (error) {
     console.error('❌ Error:', error);
     throw error;

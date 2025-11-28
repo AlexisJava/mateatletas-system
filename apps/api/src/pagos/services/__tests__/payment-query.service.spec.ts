@@ -82,12 +82,24 @@ describe('PaymentQueryService', () => {
           anio: 2025,
           mes: 1,
           estado_pago: EstadoPago.Pagado,
-          estudiante: { id: 'est-1', nombre: 'Juan', apellido: 'Pérez', email: 'juan@test.com' },
-          tutor: { id: 'tutor-1', nombre: 'Ana', apellido: 'García', email: 'ana@test.com' },
+          estudiante: {
+            id: 'est-1',
+            nombre: 'Juan',
+            apellido: 'Pérez',
+            email: 'juan@test.com',
+          },
+          tutor: {
+            id: 'tutor-1',
+            nombre: 'Ana',
+            apellido: 'García',
+            email: 'ana@test.com',
+          },
         },
       ];
 
-      prismaService.inscripcionMensual.findMany.mockResolvedValue(mockInscripciones);
+      prismaService.inscripcionMensual.findMany.mockResolvedValue(
+        mockInscripciones,
+      );
       prismaService.inscripcionMensual.count.mockResolvedValue(1);
 
       // Act
@@ -160,11 +172,23 @@ describe('PaymentQueryService', () => {
       const mockInscripcion = {
         id: 'inscripcion-1',
         estudiante_id: 'est-1',
-        estudiante: { id: 'est-1', nombre: 'Juan', apellido: 'Pérez', email: 'juan@test.com' },
-        tutor: { id: 'tutor-1', nombre: 'Ana', apellido: 'García', email: 'ana@test.com' },
+        estudiante: {
+          id: 'est-1',
+          nombre: 'Juan',
+          apellido: 'Pérez',
+          email: 'juan@test.com',
+        },
+        tutor: {
+          id: 'tutor-1',
+          nombre: 'Ana',
+          apellido: 'García',
+          email: 'ana@test.com',
+        },
       };
 
-      prismaService.inscripcionMensual.findUnique.mockResolvedValue(mockInscripcion as any);
+      prismaService.inscripcionMensual.findUnique.mockResolvedValue(
+        mockInscripcion as any,
+      );
 
       // Act
       const result = await service.findInscripcionById('inscripcion-1');
@@ -314,7 +338,9 @@ describe('PaymentQueryService', () => {
         tutor: { id: 'tutor-1', nombre: 'Ana', apellido: 'García' },
       };
 
-      prismaService.inscripcionMensual.findFirst.mockResolvedValue(mockInscripcion as any);
+      prismaService.inscripcionMensual.findFirst.mockResolvedValue(
+        mockInscripcion as any,
+      );
 
       // Act
       const result = await service.findInscripcionPorPeriodo('est-1', 2025, 1);
@@ -344,7 +370,9 @@ describe('PaymentQueryService', () => {
         descuentoHermanos: 0.1,
       };
 
-      configuracionRepo.obtenerConfiguracion.mockResolvedValue(mockConfig as any);
+      configuracionRepo.obtenerConfiguracion.mockResolvedValue(
+        mockConfig as any,
+      );
 
       // Act
       const result = await service.obtenerConfiguracion();
@@ -363,14 +391,18 @@ describe('PaymentQueryService', () => {
         { id: '2', cambio: 'Descuento modificado' },
       ];
 
-      configuracionRepo.obtenerHistorialCambios.mockResolvedValue(mockHistorial as any);
+      configuracionRepo.obtenerHistorialCambios.mockResolvedValue(
+        mockHistorial as any,
+      );
 
       // Act
       const result = await service.obtenerHistorialCambios();
 
       // Assert
       expect(result).toEqual(mockHistorial);
-      expect(configuracionRepo.obtenerHistorialCambios).toHaveBeenCalledWith(50);
+      expect(configuracionRepo.obtenerHistorialCambios).toHaveBeenCalledWith(
+        50,
+      );
     });
 
     it('should accept custom limit', async () => {
@@ -381,7 +413,9 @@ describe('PaymentQueryService', () => {
       await service.obtenerHistorialCambios(100);
 
       // Assert
-      expect(configuracionRepo.obtenerHistorialCambios).toHaveBeenCalledWith(100);
+      expect(configuracionRepo.obtenerHistorialCambios).toHaveBeenCalledWith(
+        100,
+      );
     });
   });
 
@@ -394,14 +428,18 @@ describe('PaymentQueryService', () => {
         { id: '3', estadoPago: EstadoPago.Pendiente },
       ];
 
-      inscripcionRepo.obtenerInscripcionesPorPeriodo.mockResolvedValue(mockInscripciones as any);
+      inscripcionRepo.obtenerInscripcionesPorPeriodo.mockResolvedValue(
+        mockInscripciones as any,
+      );
 
       // Act
       const result = await service.obtenerInscripcionesPendientes();
 
       // Assert
       expect(result).toHaveLength(2);
-      expect(result.every((i) => i.estadoPago === EstadoPago.Pendiente)).toBe(true);
+      expect(result.every((i) => i.estadoPago === EstadoPago.Pendiente)).toBe(
+        true,
+      );
     });
 
     it('should call repository with correct current period', async () => {
@@ -414,9 +452,9 @@ describe('PaymentQueryService', () => {
       await service.obtenerInscripcionesPendientes();
 
       // Assert
-      expect(inscripcionRepo.obtenerInscripcionesPorPeriodo).toHaveBeenCalledWith(
-        expectedPeriodo,
-      );
+      expect(
+        inscripcionRepo.obtenerInscripcionesPorPeriodo,
+      ).toHaveBeenCalledWith(expectedPeriodo);
     });
   });
 
@@ -428,7 +466,9 @@ describe('PaymentQueryService', () => {
         { estudianteId: 'est-2', descuentos: ['hermanos'] },
       ];
 
-      inscripcionRepo.obtenerEstudiantesConDescuentos.mockResolvedValue(mockEstudiantes as any);
+      inscripcionRepo.obtenerEstudiantesConDescuentos.mockResolvedValue(
+        mockEstudiantes as any,
+      );
 
       // Act
       const result = await service.obtenerEstudiantesConDescuentos();
@@ -452,10 +492,16 @@ describe('PaymentQueryService', () => {
         },
       ];
 
-      prismaService.inscripcionMensual.findMany.mockResolvedValue(mockInscripciones as any);
+      prismaService.inscripcionMensual.findMany.mockResolvedValue(
+        mockInscripciones as any,
+      );
 
       // Act
-      const result = await service.buscarInscripcionesPendientes('est-1', 'tutor-1', '2025-01');
+      const result = await service.buscarInscripcionesPendientes(
+        'est-1',
+        'tutor-1',
+        '2025-01',
+      );
 
       // Assert
       expect(result).toEqual(mockInscripciones);

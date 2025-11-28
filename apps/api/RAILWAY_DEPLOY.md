@@ -5,6 +5,7 @@ Esta guía detalla cómo configurar y deployar el backend de Mateatletas en Rail
 ## 🏗️ Arquitectura del Proyecto
 
 Este es un **monorepo** que contiene:
+
 - `apps/api` - Backend NestJS (se deploya en Railway)
 - `apps/web` - Frontend Next.js (se deploya en Vercel)
 - `packages/contracts` - Schemas compartidos (Zod) - paquete local
@@ -83,6 +84,7 @@ RATE_LIMIT_MAX=100
 Railway usa dos archivos de configuración:
 
 #### [nixpacks.toml](../../nixpacks.toml) - Configuración de Build
+
 ```toml
 # Maneja el monorepo y dependencias locales
 - Instala dependencias desde la raíz (npm workspaces)
@@ -93,6 +95,7 @@ Railway usa dos archivos de configuración:
 ```
 
 #### [railway.json](../../railway.json) - Configuración de Deploy
+
 ```json
 - Builder: Nixpacks
 - Watch Patterns: apps/api/**, packages/contracts/**
@@ -124,11 +127,13 @@ railway open
 ### Migraciones de Base de Datos
 
 Las migraciones se ejecutan automáticamente durante el deploy mediante:
+
 ```bash
 npx prisma migrate deploy
 ```
 
 Para ejecutar manualmente:
+
 ```bash
 railway run npx prisma migrate deploy
 ```
@@ -138,6 +143,7 @@ railway run npx prisma migrate deploy
 El seed se ejecuta automáticamente en el primer deploy si la base de datos está vacía.
 
 Para ejecutar manualmente:
+
 ```bash
 railway run npm run db:seed:prod
 ```
@@ -147,6 +153,7 @@ railway run npm run db:seed:prod
 ### Health Check
 
 La aplicación expone un endpoint de health check en:
+
 ```
 GET /api/health
 ```
@@ -156,6 +163,7 @@ Railway lo usa automáticamente para verificar que el servicio esté funcionando
 ### Logs
 
 Ver logs en tiempo real:
+
 ```bash
 railway logs
 ```
@@ -178,11 +186,13 @@ O desde el dashboard de Railway en la sección "Deployments".
 ### Variables Sensibles
 
 **NUNCA** commitear:
+
 - `.env`
 - `.env.production`
 - Archivos con credenciales reales
 
 Usar solo:
+
 - `.env.example`
 - `.env.production.template`
 
@@ -203,6 +213,7 @@ Usar solo:
 **Causa**: El servidor no está respondiendo en `/api/health`
 
 **Solución**:
+
 1. Verificar logs: `railway logs`
 2. Verificar que el puerto sea el correcto
 3. Verificar que todas las variables de entorno estén configuradas
@@ -218,6 +229,7 @@ Usar solo:
 **Causa**: Railway puede recrear la base de datos si el servicio se elimina
 
 **Solución**:
+
 - Hacer backups regulares
 - Usar el servicio de PostgreSQL de Railway (no SQLite)
 - Nunca eliminar el servicio de base de datos
@@ -227,12 +239,14 @@ Usar solo:
 ### Horizontal Scaling
 
 Railway soporta múltiples instancias:
+
 1. Ve a "Settings" en tu servicio
 2. Ajusta "Replicas" según necesidad
 
 ### Vertical Scaling
 
 Railway ajusta recursos automáticamente, pero puedes configurar límites en:
+
 1. "Settings" → "Resources"
 2. Configurar RAM y CPU según necesidad
 
@@ -268,6 +282,7 @@ Railway se integra automáticamente con GitHub:
 ## 📞 Soporte
 
 Si encuentras problemas:
+
 1. Revisar logs: `railway logs`
 2. Verificar variables de entorno
 3. Consultar esta documentación

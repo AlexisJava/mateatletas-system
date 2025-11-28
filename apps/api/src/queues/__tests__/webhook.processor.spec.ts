@@ -41,7 +41,10 @@ describe('WebhookProcessor - PASO 3.2', () => {
     user_id: 'user-999',
   };
 
-  const createMockJob = (data: MercadoPagoWebhookDto, attemptsMade: number = 0): Job<MercadoPagoWebhookDto> => {
+  const createMockJob = (
+    data: MercadoPagoWebhookDto,
+    attemptsMade: number = 0,
+  ): Job<MercadoPagoWebhookDto> => {
     return {
       id: 'job-123',
       data,
@@ -91,9 +94,9 @@ describe('WebhookProcessor - PASO 3.2', () => {
       message: 'Webhook procesado',
     });
 
-    expect(mockInscripciones2026Service.procesarWebhookMercadoPago).toHaveBeenCalledWith(
-      mockWebhookData,
-    );
+    expect(
+      mockInscripciones2026Service.procesarWebhookMercadoPago,
+    ).toHaveBeenCalledWith(mockWebhookData);
   });
 
   /**
@@ -104,10 +107,12 @@ describe('WebhookProcessor - PASO 3.2', () => {
 
     await processor.processWebhook(mockJob);
 
-    expect(mockInscripciones2026Service.procesarWebhookMercadoPago).toHaveBeenCalledTimes(1);
-    expect(mockInscripciones2026Service.procesarWebhookMercadoPago).toHaveBeenCalledWith(
-      mockWebhookData,
-    );
+    expect(
+      mockInscripciones2026Service.procesarWebhookMercadoPago,
+    ).toHaveBeenCalledTimes(1);
+    expect(
+      mockInscripciones2026Service.procesarWebhookMercadoPago,
+    ).toHaveBeenCalledWith(mockWebhookData);
   });
 
   /**
@@ -119,11 +124,17 @@ describe('WebhookProcessor - PASO 3.2', () => {
     const mockJob = createMockJob(mockWebhookData);
     const error = new Error('Database connection failed');
 
-    mockInscripciones2026Service.procesarWebhookMercadoPago = jest.fn().mockRejectedValue(error);
+    mockInscripciones2026Service.procesarWebhookMercadoPago = jest
+      .fn()
+      .mockRejectedValue(error);
 
-    await expect(processor.processWebhook(mockJob)).rejects.toThrow('Database connection failed');
+    await expect(processor.processWebhook(mockJob)).rejects.toThrow(
+      'Database connection failed',
+    );
 
-    expect(mockInscripciones2026Service.procesarWebhookMercadoPago).toHaveBeenCalled();
+    expect(
+      mockInscripciones2026Service.procesarWebhookMercadoPago,
+    ).toHaveBeenCalled();
   });
 
   /**
@@ -204,7 +215,9 @@ describe('WebhookProcessor - PASO 3.2', () => {
     // Debe intentar procesar de todas formas
     await processor.processWebhook(mockJob);
 
-    expect(mockInscripciones2026Service.procesarWebhookMercadoPago).toHaveBeenCalled();
+    expect(
+      mockInscripciones2026Service.procesarWebhookMercadoPago,
+    ).toHaveBeenCalled();
   });
 
   /**
@@ -218,7 +231,9 @@ describe('WebhookProcessor - PASO 3.2', () => {
       pagoId: 'pago-456',
     };
 
-    mockInscripciones2026Service.procesarWebhookMercadoPago = jest.fn().mockResolvedValue(expectedResult);
+    mockInscripciones2026Service.procesarWebhookMercadoPago = jest
+      .fn()
+      .mockResolvedValue(expectedResult);
 
     const result = await processor.processWebhook(mockJob);
 

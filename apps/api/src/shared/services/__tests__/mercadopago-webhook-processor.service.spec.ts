@@ -99,18 +99,26 @@ describe('MercadoPagoWebhookProcessorService', () => {
 
       expect(mercadoPagoService.getPayment).toHaveBeenCalledWith('123456789');
       expect(findPayment).toHaveBeenCalled();
-      expect(updatePayment).toHaveBeenCalledWith(mockPago, expect.objectContaining({
-        paymentId: '123456789',
-        paymentStatus: 'approved',
-        externalReference: 'pago-colonia-pago123-inscripcion-insc456',
-      }));
+      expect(updatePayment).toHaveBeenCalledWith(
+        mockPago,
+        expect.objectContaining({
+          paymentId: '123456789',
+          paymentStatus: 'approved',
+          externalReference: 'pago-colonia-pago123-inscripcion-insc456',
+        }),
+      );
       expect(result.success).toBe(true);
       expect(result.pagoId).toBe('pago123');
     });
 
     it('debe retornar error si el pago no tiene external_reference', async () => {
-      const paymentWithoutRef = { ...mockPaymentApproved, external_reference: null };
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentWithoutRef);
+      const paymentWithoutRef = {
+        ...mockPaymentApproved,
+        external_reference: null,
+      };
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(paymentWithoutRef);
 
       const result = await service.processWebhook(
         mockWebhookData,
@@ -130,7 +138,9 @@ describe('MercadoPagoWebhookProcessorService', () => {
         ...mockPaymentApproved,
         external_reference: '', // Empty string no es válido
       };
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentInvalidRef);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(paymentInvalidRef);
 
       const result = await service.processWebhook(
         mockWebhookData,
@@ -147,9 +157,12 @@ describe('MercadoPagoWebhookProcessorService', () => {
       // External reference de INSCRIPCION_2026 pero esperamos PAGO_COLONIA
       const paymentWrongType = {
         ...mockPaymentApproved,
-        external_reference: 'inscripcion2026-inscabc123-tutor-tutorxyz789-tipo-COLONIA',
+        external_reference:
+          'inscripcion2026-inscabc123-tutor-tutorxyz789-tipo-COLONIA',
       };
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentWrongType);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(paymentWrongType);
 
       const result = await service.processWebhook(
         mockWebhookData,
@@ -200,7 +213,9 @@ describe('MercadoPagoWebhookProcessorService', () => {
         .spyOn(mercadoPagoService, 'getPayment')
         .mockResolvedValue(mockPaymentApproved);
 
-      const findPayment = jest.fn().mockRejectedValue(new Error('Database error'));
+      const findPayment = jest
+        .fn()
+        .mockRejectedValue(new Error('Database error'));
 
       await expect(
         service.processWebhook(
@@ -218,7 +233,9 @@ describe('MercadoPagoWebhookProcessorService', () => {
         .mockResolvedValue(mockPaymentApproved);
 
       const findPayment = jest.fn().mockResolvedValue(mockPago);
-      const updatePayment = jest.fn().mockRejectedValue(new Error('Update error'));
+      const updatePayment = jest
+        .fn()
+        .mockRejectedValue(new Error('Update error'));
 
       await expect(
         service.processWebhook(

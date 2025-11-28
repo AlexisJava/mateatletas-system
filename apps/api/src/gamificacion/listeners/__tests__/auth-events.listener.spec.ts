@@ -240,9 +240,7 @@ describe('AuthEventsListener', () => {
         'juanito_perez',
       );
 
-      logrosService.desbloquearLogro.mockRejectedValue(
-        'String error' as never,
-      );
+      logrosService.desbloquearLogro.mockRejectedValue('String error' as never);
 
       const errorSpy = jest.spyOn(Logger.prototype, 'error');
 

@@ -34,7 +34,11 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Role, ROLE_HIERARCHY } from '../../domain/constants';
@@ -70,7 +74,10 @@ describe('Inscripciones2026 - PATCH /:id/estado Authorization', () => {
   /**
    * Helper para crear ExecutionContext mock
    */
-  const createMockExecutionContext = (user: AuthUser | undefined, requiredRoles: Role[]): ExecutionContext => {
+  const createMockExecutionContext = (
+    user: AuthUser | undefined,
+    requiredRoles: Role[],
+  ): ExecutionContext => {
     // Mock del reflector para retornar los roles requeridos
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(requiredRoles);
 
@@ -259,7 +266,9 @@ describe('Inscripciones2026 - PATCH /:id/estado Authorization', () => {
         roles: [],
       };
 
-      const context = createMockExecutionContext(userWithoutRoles, [Role.ADMIN]);
+      const context = createMockExecutionContext(userWithoutRoles, [
+        Role.ADMIN,
+      ]);
 
       // ACT
       const result = guard.canActivate(context);
@@ -353,10 +362,18 @@ describe('Inscripciones2026 - PATCH /:id/estado Authorization', () => {
      */
     it('debe tener jerarquía de roles correctamente configurada', () => {
       // ASSERT: Verificar orden jerárquico
-      expect(ROLE_HIERARCHY[Role.ESTUDIANTE]).toBeLessThan(ROLE_HIERARCHY[Role.TUTOR]);
-      expect(ROLE_HIERARCHY[Role.TUTOR]).toBeLessThan(ROLE_HIERARCHY[Role.DOCENTE]);
-      expect(ROLE_HIERARCHY[Role.DOCENTE]).toBeLessThan(ROLE_HIERARCHY[Role.ADMIN]);
-      expect(ROLE_HIERARCHY[Role.ADMIN]).toBeLessThan(ROLE_HIERARCHY[Role.SUPER_ADMIN]);
+      expect(ROLE_HIERARCHY[Role.ESTUDIANTE]).toBeLessThan(
+        ROLE_HIERARCHY[Role.TUTOR],
+      );
+      expect(ROLE_HIERARCHY[Role.TUTOR]).toBeLessThan(
+        ROLE_HIERARCHY[Role.DOCENTE],
+      );
+      expect(ROLE_HIERARCHY[Role.DOCENTE]).toBeLessThan(
+        ROLE_HIERARCHY[Role.ADMIN],
+      );
+      expect(ROLE_HIERARCHY[Role.ADMIN]).toBeLessThan(
+        ROLE_HIERARCHY[Role.SUPER_ADMIN],
+      );
 
       // ASSERT: Valores específicos
       expect(ROLE_HIERARCHY[Role.ESTUDIANTE]).toBe(1);

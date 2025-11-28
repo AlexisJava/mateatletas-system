@@ -49,7 +49,9 @@ export class TiendaService {
     nuevos?: boolean;
     nivelMaximo?: number;
   }) {
-    this.logger.log(`Obteniendo catálogo de cursos con filtros: ${JSON.stringify(filtros)}`);
+    this.logger.log(
+      `Obteniendo catálogo de cursos con filtros: ${JSON.stringify(filtros)}`,
+    );
 
     const cursos = await this.prisma.cursoCatalogo.findMany({
       where: {
@@ -114,7 +116,9 @@ export class TiendaService {
    * @throws BadRequestException si alguna validación falla
    */
   async solicitarCanje(estudianteId: string, cursoId: string) {
-    this.logger.log(`Solicitud de canje: estudiante=${estudianteId}, curso=${cursoId}`);
+    this.logger.log(
+      `Solicitud de canje: estudiante=${estudianteId}, curso=${cursoId}`,
+    );
 
     // Obtener curso y validar
     const curso = await this.obtenerCurso(cursoId);
@@ -160,7 +164,9 @@ export class TiendaService {
 
     if (yaCanjeado) {
       this.logger.warn(`❌ Curso ya canjeado: ${curso.titulo}`);
-      throw new ConflictException('Ya tienes este curso. ¡Ve a tu biblioteca para acceder!');
+      throw new ConflictException(
+        'Ya tienes este curso. ¡Ve a tu biblioteca para acceder!',
+      );
     }
 
     // VALIDACIÓN 4: Solicitud pendiente existente
@@ -173,7 +179,9 @@ export class TiendaService {
     });
 
     if (solicitudPendiente) {
-      this.logger.warn(`❌ Solicitud pendiente existente para curso: ${curso.titulo}`);
+      this.logger.warn(
+        `❌ Solicitud pendiente existente para curso: ${curso.titulo}`,
+      );
       throw new ConflictException(
         'Ya tienes una solicitud pendiente para este curso. Espera la respuesta de tu tutor.',
       );
@@ -254,7 +262,9 @@ export class TiendaService {
     opcionPago: 'padre_paga_todo' | 'hijo_paga_mitad' | 'hijo_paga_todo',
     mensajePadre?: string,
   ) {
-    this.logger.log(`Aprobando solicitud: ${solicitudId} por tutor: ${tutorId}`);
+    this.logger.log(
+      `Aprobando solicitud: ${solicitudId} por tutor: ${tutorId}`,
+    );
 
     // Obtener solicitud con relaciones
     const solicitud = await this.prisma.solicitudCanje.findUnique({
@@ -296,7 +306,10 @@ export class TiendaService {
     }
 
     // VALIDACIÓN: No expirada
-    if (solicitud.fecha_expiracion && new Date() > new Date(solicitud.fecha_expiracion)) {
+    if (
+      solicitud.fecha_expiracion &&
+      new Date() > new Date(solicitud.fecha_expiracion)
+    ) {
       this.logger.warn(`❌ Solicitud expirada: ${solicitudId}`);
       throw new BadRequestException(
         'Esta solicitud expiró. El estudiante debe crear una nueva solicitud.',
@@ -387,17 +400,14 @@ export class TiendaService {
       },
     });
 
-    this.logger.log(
-      `✅ Solicitud aprobada exitosamente`,
-      {
-        solicitud_id: solicitudId,
-        estudiante: solicitud.estudiante.username,
-        curso: solicitud.curso.titulo,
-        opcion_pago: opcionPago,
-        monedas_gastadas: monedasAGastar,
-        monto_padre: montoPadre,
-      },
-    );
+    this.logger.log(`✅ Solicitud aprobada exitosamente`, {
+      solicitud_id: solicitudId,
+      estudiante: solicitud.estudiante.username,
+      curso: solicitud.curso.titulo,
+      opcion_pago: opcionPago,
+      monedas_gastadas: monedasAGastar,
+      monto_padre: montoPadre,
+    });
 
     return solicitudAprobada;
   }
@@ -416,7 +426,9 @@ export class TiendaService {
     tutorId: string,
     mensajePadre?: string,
   ) {
-    this.logger.log(`Rechazando solicitud: ${solicitudId} por tutor: ${tutorId}`);
+    this.logger.log(
+      `Rechazando solicitud: ${solicitudId} por tutor: ${tutorId}`,
+    );
 
     const solicitud = await this.prisma.solicitudCanje.findUnique({
       where: { id: solicitudId },
@@ -476,15 +488,12 @@ export class TiendaService {
       },
     });
 
-    this.logger.log(
-      `✅ Solicitud rechazada`,
-      {
-        solicitud_id: solicitudId,
-        estudiante: solicitud.estudiante.username,
-        curso: solicitud.curso.titulo,
-        mensaje: mensajePadre,
-      },
-    );
+    this.logger.log(`✅ Solicitud rechazada`, {
+      solicitud_id: solicitudId,
+      estudiante: solicitud.estudiante.username,
+      curso: solicitud.curso.titulo,
+      mensaje: mensajePadre,
+    });
 
     return solicitudRechazada;
   }
@@ -521,7 +530,9 @@ export class TiendaService {
       orderBy: { fecha_solicitud: 'desc' },
     });
 
-    this.logger.log(`✅ Solicitudes pendientes encontradas: ${solicitudes.length}`);
+    this.logger.log(
+      `✅ Solicitudes pendientes encontradas: ${solicitudes.length}`,
+    );
 
     return solicitudes;
   }
@@ -533,7 +544,9 @@ export class TiendaService {
    * @returns Lista de todas las solicitudes
    */
   async obtenerHistorialSolicitudes(tutorId: string) {
-    this.logger.log(`Obteniendo historial de solicitudes del tutor: ${tutorId}`);
+    this.logger.log(
+      `Obteniendo historial de solicitudes del tutor: ${tutorId}`,
+    );
 
     return this.prisma.solicitudCanje.findMany({
       where: {

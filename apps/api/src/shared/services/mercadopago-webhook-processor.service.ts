@@ -128,7 +128,10 @@ export class MercadoPagoWebhookProcessorService {
 
       if (!externalRef) {
         this.logger.warn('Pago sin external_reference', { paymentId });
-        return { success: false, message: 'Payment without external_reference' };
+        return {
+          success: false,
+          message: 'Payment without external_reference',
+        };
       }
 
       // 4. Parsear external_reference usando parser centralizado
@@ -186,9 +189,7 @@ export class MercadoPagoWebhookProcessorService {
         stack,
       });
 
-      throw new BadRequestException(
-        `Error procesando webhook: ${message}`,
-      );
+      throw new BadRequestException(`Error procesando webhook: ${message}`);
     }
   }
 

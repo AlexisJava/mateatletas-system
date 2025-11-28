@@ -51,6 +51,7 @@ estudiantes/
 **Tests:** 75 tests | **Coverage:** >70%
 
 **Responsabilidades:**
+
 - `EstudianteQueryService`: Consultas y búsquedas
 - `EstudianteCommandService`: Creación, actualización, eliminación
 - `EstudianteCopyService`: Copia masiva de estudiantes
@@ -143,24 +144,28 @@ pagos/
 #### Arquitectura CQRS de Pagos
 
 **PaymentQueryService** (Solo lecturas):
+
 - `findAllInscripciones()` - Búsqueda con paginación
 - `findInscripcionById()` - Detalle completo
 - `findMembresiasDelTutor()` - Membresías activas
 - `tieneInscripcionPendiente()` - Validaciones
 
 **PaymentCommandService** (Solo escrituras):
+
 - `registrarPagoManual()` - Registro manual
 - `actualizarEstadoMembresia()` - Actualizar estado
 - `actualizarEstadoInscripcion()` - Actualizar estado
 - **Emite eventos:** `pago.registrado`, `membresia.estado_actualizado`
 
 **PaymentWebhookService** (Webhooks):
+
 - `procesarWebhook()` - Procesa webhooks de MercadoPago
 - `procesarWebhookInscripcion()` - Lógica de inscripciones
 - `procesarWebhookMembresia()` - Lógica de membresías
 - **Emite eventos:** `webhook.inscripcion.procesado`, `webhook.membresia.procesado`
 
 **PaymentStateMapperService** (Mapeo):
+
 - `mapearEstadoPago()` - MercadoPago → EstadoPago interno
 - `mapearEstadoMembresia()` - EstadoPago → EstadoMembresia (Prisma)
 - `mapearEstadoInscripcion()` - EstadoPago → EstadoPago (Prisma)
@@ -217,20 +222,23 @@ domain/constants/
 ### business-rules.constants.ts
 
 **Constantes:**
+
 ```typescript
-BUSINESS_RULES.ESTUDIANTE.EDAD_MINIMA    // 3
-BUSINESS_RULES.ESTUDIANTE.EDAD_MAXIMA    // 99
-BUSINESS_RULES.CLASE.DURACION_MINIMA_MINUTOS  // 30
-BUSINESS_RULES.CURSO.DURACION_MINIMA_MESES    // 1
+BUSINESS_RULES.ESTUDIANTE.EDAD_MINIMA; // 3
+BUSINESS_RULES.ESTUDIANTE.EDAD_MAXIMA; // 99
+BUSINESS_RULES.CLASE.DURACION_MINIMA_MINUTOS; // 30
+BUSINESS_RULES.CURSO.DURACION_MINIMA_MESES; // 1
 ```
 
 **Helpers:**
+
 ```typescript
 esEdadValida(edad: number): boolean
 getMensajeErrorEdad(): string
 ```
 
 **Uso:**
+
 ```typescript
 import { BUSINESS_RULES, esEdadValida } from '../domain/constants';
 
@@ -244,6 +252,7 @@ if (!esEdadValida(data.edad)) {
 ### payment.constants.ts
 
 **Enums:**
+
 ```typescript
 enum EstadoPago {
   PENDIENTE = 'PENDIENTE',
@@ -274,13 +283,15 @@ enum TipoExternalReference {
 ```
 
 **Mapeo de estados:**
-```typescript
-MERCADOPAGO_TO_ESTADO_PAGO: Record<EstadoMercadoPago, EstadoPago>
 
-function mapearEstadoMercadoPago(estadoMP: string): EstadoPago
+```typescript
+MERCADOPAGO_TO_ESTADO_PAGO: Record<EstadoMercadoPago, EstadoPago>;
+
+function mapearEstadoMercadoPago(estadoMP: string): EstadoPago;
 ```
 
 **External Reference Formats:**
+
 ```typescript
 EXTERNAL_REFERENCE_FORMATS = {
   membresia(membresiaId, tutorId, productoId): string,
@@ -297,6 +308,7 @@ function parseLegacyExternalReference(ref: string): {
 ```
 
 **Uso:**
+
 ```typescript
 import {
   EstadoPago,
@@ -326,6 +338,7 @@ const estadoInterno = mapearEstadoMercadoPago('approved');
 ### roles.constants.ts
 
 **Enum:**
+
 ```typescript
 enum Role {
   ESTUDIANTE = 'estudiante',
@@ -337,6 +350,7 @@ enum Role {
 ```
 
 **Jerarquía:**
+
 ```typescript
 ROLE_HIERARCHY: Record<Role, number> = {
   [Role.ESTUDIANTE]: 1,
@@ -344,10 +358,11 @@ ROLE_HIERARCHY: Record<Role, number> = {
   [Role.DOCENTE]: 3,
   [Role.ADMIN]: 4,
   [Role.SUPER_ADMIN]: 5,
-}
+};
 ```
 
 **Helpers:**
+
 ```typescript
 cumpleJerarquia(userRole: Role, minRole: Role): boolean
 tienePermiso(role: Role, permission: string): boolean
@@ -355,6 +370,7 @@ puedeActuarSobre(actorRole: Role, targetRole: Role): boolean
 ```
 
 **Uso en Controllers (futuro):**
+
 ```typescript
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../domain/constants';
@@ -374,6 +390,7 @@ export class AdminController {
 ### Servicios Actualizados con Constantes
 
 **✅ Completamente migrados:**
+
 - `admin-estudiantes.service.ts` - Usa `BUSINESS_RULES`
 - `estudiante-business.validator.ts` - Validaciones centralizadas
 - `pagos.service.ts` - Usa `EstadoPago` + mappers
@@ -381,6 +398,7 @@ export class AdminController {
 - `mercadopago.service.ts` - Usa `EXTERNAL_REFERENCE_FORMATS`
 
 **✅ Magic strings eliminados:**
+
 - 🔥 100% estados de pago hardcodeados
 - 🔥 100% external_reference en MercadoPago
 - 🔥 80% reglas de negocio hardcodeadas
@@ -389,16 +407,16 @@ export class AdminController {
 
 ## Métricas y Resultados
 
-| Métrica | Antes | Después | Mejora |
-|---------|-------|---------|--------|
-| **God Services** | 5 | 0 | -100% |
-| **Líneas promedio/servicio** | ~900 | ~250 | -72% |
-| **Tests totales** | ~850 | 1,253+ | +47% |
-| **Coverage promedio** | ~60% | >70% | +17% |
-| **Magic strings críticos** | ~180 | <20 | -89% |
-| **Dependencias circulares** | 0 | 0 | ✅ |
-| **Servicios especializados** | ~15 | 45+ | +200% |
-| **Tests de constantes** | 0 | 54 | +54 |
+| Métrica                      | Antes | Después | Mejora |
+| ---------------------------- | ----- | ------- | ------ |
+| **God Services**             | 5     | 0       | -100%  |
+| **Líneas promedio/servicio** | ~900  | ~250    | -72%   |
+| **Tests totales**            | ~850  | 1,253+  | +47%   |
+| **Coverage promedio**        | ~60%  | >70%    | +17%   |
+| **Magic strings críticos**   | ~180  | <20     | -89%   |
+| **Dependencias circulares**  | 0     | 0       | ✅     |
+| **Servicios especializados** | ~15   | 45+     | +200%  |
+| **Tests de constantes**      | 0     | 54      | +54    |
 
 ### Distribución de Tests
 
@@ -421,11 +439,13 @@ TOTAL:                      1,253+ tests ✅
 ## Anti-Patterns Eliminados
 
 ### ✅ God Service / God Object
+
 **Problema:** Servicios con >800 líneas manejando múltiples responsabilidades
 
 **Solución:** CQRS + Facade pattern → Servicios especializados de ~250 líneas
 
 **Archivos afectados:**
+
 - EstudiantesService (1,293 → 6 servicios)
 - ClasesService (849 → 7 servicios)
 - DocentesService (927 → 5 servicios)
@@ -435,6 +455,7 @@ TOTAL:                      1,253+ tests ✅
 ---
 
 ### ✅ Shotgun Surgery
+
 **Problema:** Cambiar un estado requiere modificar 10+ archivos
 
 **Solución:** Centralización en `domain/constants` + mappers únicos
@@ -444,16 +465,20 @@ TOTAL:                      1,253+ tests ✅
 ---
 
 ### ✅ Copy-Paste Programming
+
 **Problema:** Switches idénticos de mapeo de estados en 5+ lugares
 
 **Solución:** `PaymentStateMapperService` centraliza toda la lógica
 
 **Ejemplo:**
+
 ```typescript
 // ANTES: Duplicado en 5 lugares
 switch (estadoMP) {
-  case 'approved': return 'Pagado';
-  case 'rejected': return 'Rechazado';
+  case 'approved':
+    return 'Pagado';
+  case 'rejected':
+    return 'Rechazado';
   // ...
 }
 
@@ -464,11 +489,13 @@ return this.stateMapper.mapearEstadoPago(estadoMP);
 ---
 
 ### ✅ Magic Strings / Magic Values
+
 **Problema:** ~180 strings hardcodeados sin type-safety
 
 **Solución:** Enums type-safe en `domain/constants`
 
 **Ejemplos:**
+
 ```typescript
 // ANTES
 if (pago.estado === 'Pagado') { ... }
@@ -482,6 +509,7 @@ const ref = EXTERNAL_REFERENCE_FORMATS.inscripcionMensual(id, estId, prodId);
 ---
 
 ### ✅ Lava Flow
+
 **Problema:** 308 líneas comentadas + 64 TODOs desorganizados
 
 **Solución:** Código limpiado + TODOs catalogados en `TODO-BACKLOG.md`
@@ -489,6 +517,7 @@ const ref = EXTERNAL_REFERENCE_FORMATS.inscripcionMensual(id, estId, prodId);
 ---
 
 ### ✅ Big Ball of Mud (AppModule)
+
 **Problema:** AppModule con 18 imports + 4 guards globales
 
 **Solución:** 4 módulos especializados (Core, Security, Observability, Infrastructure)
@@ -536,11 +565,13 @@ const ref = EXTERNAL_REFERENCE_FORMATS.inscripcionMensual(id, estId, prodId);
 ## Documentación
 
 ### Actualizada ✅
+
 - ✅ `REFACTOR-SUMMARY.md` - Este documento
 - ✅ `TODO-BACKLOG.md` - Backlog catalogado y priorizado
 - ✅ JSDoc en todos los servicios nuevos
 
 ### Pendiente de Actualizar
+
 - ⏭️ `ARCHITECTURE.md` - Agregar sección de módulo de pagos
 - ⏭️ `ARCHITECTURE.md` - Agregar sección de domain/constants
 

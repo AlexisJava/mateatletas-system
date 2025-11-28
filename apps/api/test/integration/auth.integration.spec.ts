@@ -103,7 +103,9 @@ describe('[INTEGRATION] Auth Module', () => {
         .expect(200);
 
       expect(loginResponse.body).toHaveProperty('access_token');
-      expect(loginResponse.body.user.email).toBe('integration-test@example.com');
+      expect(loginResponse.body.user.email).toBe(
+        'integration-test@example.com',
+      );
     });
 
     it('should reject duplicate email (unique constraint)', async () => {
@@ -146,15 +148,13 @@ describe('[INTEGRATION] Auth Module', () => {
   describe('POST /auth/login (invalid credentials)', () => {
     it('should reject wrong password', async () => {
       // Setup: Crear tutor
-      await request(app.getHttpServer())
-        .post('/api/auth/register')
-        .send({
-          email: 'valid@example.com',
-          password: 'CorrectPassword123!',
-          nombre: 'Valid',
-          apellido: 'User',
-          role: 'tutor',
-        });
+      await request(app.getHttpServer()).post('/api/auth/register').send({
+        email: 'valid@example.com',
+        password: 'CorrectPassword123!',
+        nombre: 'Valid',
+        apellido: 'User',
+        role: 'tutor',
+      });
 
       // Test: Login con password incorrecta
       await request(app.getHttpServer())
@@ -205,9 +205,7 @@ describe('[INTEGRATION] Auth Module', () => {
     });
 
     it('should reject protected endpoint without token', async () => {
-      await request(app.getHttpServer())
-        .get('/api/auth/profile')
-        .expect(401);
+      await request(app.getHttpServer()).get('/api/auth/profile').expect(401);
     });
 
     it('should reject protected endpoint with invalid token', async () => {

@@ -58,6 +58,7 @@ npx prisma format
 ### Modo DEVELOPMENT (por defecto)
 
 Crea datos de prueba completos:
+
 - ✅ Admin de prueba (`admin@mateatletas.com`)
 - ✅ Docente de prueba (`docente@test.com`)
 - ✅ Tutor de prueba (`tutor@test.com`)
@@ -69,6 +70,7 @@ Crea datos de prueba completos:
 - ✅ Inscripción de prueba
 
 **Uso:**
+
 ```bash
 npm run db:seed
 # o
@@ -78,6 +80,7 @@ NODE_ENV=development npx prisma db seed
 ### Modo PRODUCTION
 
 Crea solo datos esenciales:
+
 - ✅ Admin (desde variables de entorno)
 - ✅ 6 Rutas Curriculares (necesarias para el sistema)
 - ✅ Productos del catálogo (pueden ser reales)
@@ -87,6 +90,7 @@ Crea solo datos esenciales:
 - ❌ NO crea datos ficticios
 
 **Uso:**
+
 ```bash
 npm run db:seed:prod
 # o
@@ -110,6 +114,7 @@ ADMIN_APELLIDO=Sistema
 ```
 
 Si no se configuran, se usarán valores por defecto:
+
 - Email: `admin@mateatletas.com`
 - Password: `Admin123!`
 
@@ -312,6 +317,7 @@ Mantén esta organización al agregar nuevos modelos.
 ## ⚠️ IMPORTANTE: Producción
 
 ### ✅ DO:
+
 - Siempre haz **backup** antes de migrar en producción
 - Prueba migrations en **staging** primero
 - Usa `npm run db:migrate` (NO `db:migrate:dev` en producción)
@@ -319,6 +325,7 @@ Mantén esta organización al agregar nuevos modelos.
 - Ten un plan de rollback
 
 ### ❌ DON'T:
+
 - NO uses `db:reset` en producción (borra todo)
 - NO modifiques migrations ya aplicadas en producción
 - NO apliques migrations sin revisar el SQL primero
@@ -329,6 +336,7 @@ Mantén esta organización al agregar nuevos modelos.
 ## 📞 Soporte
 
 Para problemas con migrations o seeds:
+
 1. Revisa logs: `cat prisma/migrations/.../migration.sql`
 2. Valida schema: `npx prisma validate`
 3. Consulta Prisma docs: https://www.prisma.io/docs/

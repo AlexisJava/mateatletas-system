@@ -39,8 +39,9 @@ export class DocenteCommandService {
     await this.validator.validarEmailUnico(createDto.email);
 
     // Generar o usar la contraseña proporcionada
-    const { password, wasGenerated } =
-      this.generarYValidarPassword(createDto.password);
+    const { password, wasGenerated } = this.generarYValidarPassword(
+      createDto.password,
+    );
 
     // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
@@ -156,10 +157,7 @@ export class DocenteCommandService {
    */
   async reasignarClases(fromDocenteId: string, toDocenteId: string) {
     // Validar reasignación
-    await this.validator.validarReasignacionValida(
-      fromDocenteId,
-      toDocenteId,
-    );
+    await this.validator.validarReasignacionValida(fromDocenteId, toDocenteId);
 
     // Obtener docentes para incluir en la respuesta
     const [fromDocente, toDocente] = await Promise.all([

@@ -42,14 +42,20 @@ async function exportEstudiantes() {
     }));
 
     const outputPath = join(process.cwd(), 'estudiantes-por-grupo.json');
-    writeFileSync(outputPath, JSON.stringify(estudiantesPorGrupo, null, 2), 'utf-8');
+    writeFileSync(
+      outputPath,
+      JSON.stringify(estudiantesPorGrupo, null, 2),
+      'utf-8',
+    );
 
     const totalEstudiantes = estudiantesPorGrupo.reduce(
       (sum, g) => sum + g.estudiantes.length,
-      0
+      0,
     );
 
-    console.log(`✅ Exportados ${totalEstudiantes} estudiantes en ${grupos.length} grupos`);
+    console.log(
+      `✅ Exportados ${totalEstudiantes} estudiantes en ${grupos.length} grupos`,
+    );
     console.log(`📁 Archivo: ${outputPath}`);
   } catch (error) {
     console.error('❌ Error al exportar estudiantes:', error);

@@ -115,7 +115,9 @@ describe('PaymentAmountValidatorService - Redis Caching (PASO 3.1.B)', () => {
     );
 
     // NO consultó DB
-    expect(mockPrismaService.inscripcionMensual.findUnique).not.toHaveBeenCalled();
+    expect(
+      mockPrismaService.inscripcionMensual.findUnique,
+    ).not.toHaveBeenCalled();
   });
 
   /**
@@ -156,12 +158,12 @@ describe('PaymentAmountValidatorService - Redis Caching (PASO 3.1.B)', () => {
     );
 
     // 2. Consultó DB
-    expect(mockPrismaService.inscripcionMensual.findUnique).toHaveBeenCalledWith(
-      {
-        where: { id: inscripcionId },
-        select: { precio_final: true },
-      },
-    );
+    expect(
+      mockPrismaService.inscripcionMensual.findUnique,
+    ).toHaveBeenCalledWith({
+      where: { id: inscripcionId },
+      select: { precio_final: true },
+    });
 
     // 3. Guardó en cache con TTL 120s
     expect(mockRedisService.set).toHaveBeenCalledWith(
@@ -393,9 +395,7 @@ describe('PaymentAmountValidatorService - Redis Caching (PASO 3.1.B)', () => {
     const receivedAmount = 4000;
 
     // Arrange: Redis falla
-    mockRedisService.get.mockRejectedValue(
-      new Error('Redis connection error'),
-    );
+    mockRedisService.get.mockRejectedValue(new Error('Redis connection error'));
 
     // DB funciona correctamente
     mockPrismaService.inscripcionMensual.findUnique.mockResolvedValue({

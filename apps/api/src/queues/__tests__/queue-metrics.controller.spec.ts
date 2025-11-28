@@ -41,7 +41,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -67,7 +69,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -83,7 +87,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -99,7 +105,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -115,7 +123,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -133,7 +143,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -149,7 +161,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -165,7 +179,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -182,7 +198,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -198,7 +216,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -215,7 +235,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -231,7 +253,9 @@ describe('QueueMetricsController', () => {
         delayed: 0,
       };
 
-      mockWebhookQueueService.getQueueStats = jest.fn().mockResolvedValue(mockStats);
+      mockWebhookQueueService.getQueueStats = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
@@ -251,7 +275,10 @@ describe('QueueMetricsController', () => {
           failedReason: 'Connection timeout',
           attemptsMade: 3,
           timestamp: 1700000000000,
-          stacktrace: ['Error: Connection timeout', 'at processWebhook (webhook.ts:42)'],
+          stacktrace: [
+            'Error: Connection timeout',
+            'at processWebhook (webhook.ts:42)',
+          ],
         } as any,
         {
           id: '456',
@@ -266,7 +293,9 @@ describe('QueueMetricsController', () => {
         } as any,
       ];
 
-      mockWebhookQueueService.getFailedJobs = jest.fn().mockResolvedValue(mockFailedJobs);
+      mockWebhookQueueService.getFailedJobs = jest
+        .fn()
+        .mockResolvedValue(mockFailedJobs);
 
       const result = await controller.getFailedJobs();
 
@@ -281,7 +310,9 @@ describe('QueueMetricsController', () => {
         attemptsMade: 3,
         stacktrace: 'Error: Connection timeout',
       });
-      expect(result[0].timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+      expect(result[0].timestamp).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
+      );
     });
 
     it('should request last 50 failed jobs from service', async () => {
@@ -304,7 +335,9 @@ describe('QueueMetricsController', () => {
         } as any,
       ];
 
-      mockWebhookQueueService.getFailedJobs = jest.fn().mockResolvedValue(mockFailedJobs);
+      mockWebhookQueueService.getFailedJobs = jest
+        .fn()
+        .mockResolvedValue(mockFailedJobs);
 
       const result = await controller.getFailedJobs();
 
@@ -323,7 +356,9 @@ describe('QueueMetricsController', () => {
         } as any,
       ];
 
-      mockWebhookQueueService.getFailedJobs = jest.fn().mockResolvedValue(mockFailedJobs);
+      mockWebhookQueueService.getFailedJobs = jest
+        .fn()
+        .mockResolvedValue(mockFailedJobs);
 
       const result = await controller.getFailedJobs();
 
@@ -346,7 +381,9 @@ describe('QueueMetricsController', () => {
         } as any,
       ];
 
-      mockWebhookQueueService.getFailedJobs = jest.fn().mockResolvedValue(mockFailedJobs);
+      mockWebhookQueueService.getFailedJobs = jest
+        .fn()
+        .mockResolvedValue(mockFailedJobs);
 
       const result = await controller.getFailedJobs();
 
@@ -373,7 +410,9 @@ describe('QueueMetricsController', () => {
         } as any,
       ];
 
-      mockWebhookQueueService.getFailedJobs = jest.fn().mockResolvedValue(mockFailedJobs);
+      mockWebhookQueueService.getFailedJobs = jest
+        .fn()
+        .mockResolvedValue(mockFailedJobs);
 
       const result = await controller.getFailedJobs();
 
@@ -383,7 +422,10 @@ describe('QueueMetricsController', () => {
 
   describe('API Documentation', () => {
     it('should have @ApiTags decorator', () => {
-      const metadata = Reflect.getMetadata('swagger/apiUseTags', QueueMetricsController);
+      const metadata = Reflect.getMetadata(
+        'swagger/apiUseTags',
+        QueueMetricsController,
+      );
       expect(metadata).toEqual(['Queue Metrics']);
     });
 

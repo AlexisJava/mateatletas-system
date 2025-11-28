@@ -75,8 +75,11 @@ export class WebhookIdempotencyService {
       this.logger.debug(`❌ Cache MISS: ${cacheKey} - consultando DB`);
     } catch (error) {
       // Fallback silencioso si Redis falla
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`⚠️ Redis error en wasProcessed: ${errorMessage} - fallback a DB`);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      this.logger.warn(
+        `⚠️ Redis error en wasProcessed: ${errorMessage} - fallback a DB`,
+      );
     }
 
     // 3. Consultar DB
@@ -91,10 +94,13 @@ export class WebhookIdempotencyService {
         existing ? 'true' : 'false',
         this.CACHE_TTL,
       );
-      this.logger.debug(`💾 Guardado en cache: ${cacheKey} = ${existing ? 'true' : 'false'}`);
+      this.logger.debug(
+        `💾 Guardado en cache: ${cacheKey} = ${existing ? 'true' : 'false'}`,
+      );
     } catch (error) {
       // Fallback silencioso
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.warn(`⚠️ Error guardando en cache: ${errorMessage}`);
     }
 
@@ -144,13 +150,19 @@ export class WebhookIdempotencyService {
         await this.redis.set(cacheKey, 'true', this.CACHE_TTL);
         this.logger.debug(`💾 Cache actualizado: ${cacheKey} = true`);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         this.logger.warn(`⚠️ Error actualizando cache: ${errorMessage}`);
       }
     } catch (error: unknown) {
       // Si falla por unique constraint, significa que otro proceso ya lo guardó (race condition)
       // Esto es OK, simplemente logueamos
-      if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'P2002'
+      ) {
         this.logger.warn(
           `⚠️ Race condition detectada al marcar webhook: payment_id=${data.paymentId}. Otro proceso ya lo procesó.`,
         );
@@ -163,7 +175,8 @@ export class WebhookIdempotencyService {
         }
       } else {
         // Otros errores sí son problemáticos
-        const message = error instanceof Error ? error.message : 'Unknown error';
+        const message =
+          error instanceof Error ? error.message : 'Unknown error';
         const stack = error instanceof Error ? error.stack : undefined;
         this.logger.error(
           `❌ Error al marcar webhook como procesado: ${message}`,

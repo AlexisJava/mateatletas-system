@@ -55,7 +55,8 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
   const mockPaymentApproved = {
     id: 123456789,
     status: 'approved',
-    external_reference: 'inscripcion2026-inscabc123-tutor-tutorxyz789-tipo-COLONIA',
+    external_reference:
+      'inscripcion2026-inscabc123-tutor-tutorxyz789-tipo-COLONIA',
     transaction_amount: 25000,
     date_approved: '2024-01-15T10:30:00Z',
   };
@@ -63,7 +64,8 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
   const mockPaymentRejected = {
     id: 123456789,
     status: 'rejected',
-    external_reference: 'inscripcion2026-inscabc123-tutor-tutorxyz789-tipo-COLONIA',
+    external_reference:
+      'inscripcion2026-inscabc123-tutor-tutorxyz789-tipo-COLONIA',
     transaction_amount: 25000,
   };
 
@@ -151,16 +153,20 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
           provide: PricingCalculatorService,
           useValue: {
             calcularTarifaInscripcion: jest.fn().mockReturnValue(25000),
-            calcularTotalInscripcion2026: jest.fn().mockReturnValue({ total: 158400, descuento: 12 }),
+            calcularTotalInscripcion2026: jest
+              .fn()
+              .mockReturnValue({ total: 158400, descuento: 12 }),
             aplicarDescuento: jest.fn((base, desc) => base * (1 - desc / 100)),
           },
         },
         {
           provide: PinGeneratorService,
           useValue: {
-            generateUniquePin: jest.fn().mockImplementation(async () =>
-              Math.floor(1000 + Math.random() * 9000).toString()
-            ),
+            generateUniquePin: jest
+              .fn()
+              .mockImplementation(async () =>
+                Math.floor(1000 + Math.random() * 9000).toString(),
+              ),
           },
         },
         {
@@ -210,17 +216,32 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
 
       const result = await service.procesarWebhookMercadoPago(webhookData);
 
-      expect(result).toEqual({ success: false, message: 'Webhook type not handled' });
+      expect(result).toEqual({
+        success: false,
+        message: 'Webhook type not handled',
+      });
       expect(mercadoPagoService.getPayment).not.toHaveBeenCalled();
     });
 
     it('should process payment webhooks', async () => {
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.inscripcion2026, 'findUnique').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest.spyOn(prismaService.inscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest.spyOn(prismaService.historialEstadoInscripcion2026, 'create').mockResolvedValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPaymentApproved);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.inscripcion2026, 'findUnique')
+        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+      jest
+        .spyOn(prismaService.inscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+      jest
+        .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
+        .mockResolvedValue({} as any);
 
       await service.procesarWebhookMercadoPago(mockWebhookData);
 
@@ -230,12 +251,24 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
 
   describe('External Reference Parsing', () => {
     it('should correctly parse inscripcion2026 external reference', async () => {
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.inscripcion2026, 'findUnique').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest.spyOn(prismaService.inscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest.spyOn(prismaService.historialEstadoInscripcion2026, 'create').mockResolvedValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPaymentApproved);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.inscripcion2026, 'findUnique')
+        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+      jest
+        .spyOn(prismaService.inscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+      jest
+        .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
+        .mockResolvedValue({} as any);
 
       await service.procesarWebhookMercadoPago(mockWebhookData);
 
@@ -256,12 +289,19 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
         external_reference: 'membresia-123-tutor-456',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentInvalidRef);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(paymentInvalidRef);
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ success: false, message: 'Invalid external_reference format' });
-      expect(prismaService.pagoInscripcion2026.findFirst).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        success: false,
+        message: 'Invalid external_reference format',
+      });
+      expect(
+        prismaService.pagoInscripcion2026.findFirst,
+      ).not.toHaveBeenCalled();
     });
 
     it('should handle null external reference', async () => {
@@ -270,11 +310,16 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
         external_reference: null,
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentNullRef);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(paymentNullRef);
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ success: false, message: 'Payment without external_reference' });
+      expect(result).toEqual({
+        success: false,
+        message: 'Payment without external_reference',
+      });
     });
 
     it('should handle malformed external reference', async () => {
@@ -283,22 +328,39 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
         external_reference: 'inscripcion2026-', // Sin ID
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentMalformedRef);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(paymentMalformedRef);
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ success: false, message: 'Invalid external_reference format' });
+      expect(result).toEqual({
+        success: false,
+        message: 'Invalid external_reference format',
+      });
     });
   });
 
   describe('Payment Status Processing - APPROVED', () => {
     beforeEach(() => {
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.inscripcion2026, 'findUnique').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest.spyOn(prismaService.inscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest.spyOn(prismaService.historialEstadoInscripcion2026, 'create').mockResolvedValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPaymentApproved);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.inscripcion2026, 'findUnique')
+        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+      jest
+        .spyOn(prismaService.inscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+      jest
+        .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
+        .mockResolvedValue({} as any);
     });
 
     it('should update pago to "paid" when payment is approved', async () => {
@@ -326,7 +388,9 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
     it('should create historial entry when payment is approved', async () => {
       await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(prismaService.historialEstadoInscripcion2026.create).toHaveBeenCalledWith({
+      expect(
+        prismaService.historialEstadoInscripcion2026.create,
+      ).toHaveBeenCalledWith({
         data: {
           inscripcion_id: 'inscabc123',
           estado_anterior: 'pending',
@@ -351,12 +415,24 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
 
   describe('Payment Status Processing - REJECTED', () => {
     beforeEach(() => {
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentRejected);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.inscripcion2026, 'findUnique').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest.spyOn(prismaService.inscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest.spyOn(prismaService.historialEstadoInscripcion2026, 'create').mockResolvedValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPaymentRejected);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.inscripcion2026, 'findUnique')
+        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+      jest
+        .spyOn(prismaService.inscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+      jest
+        .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
+        .mockResolvedValue({} as any);
     });
 
     it('should update pago to "failed" when payment is rejected', async () => {
@@ -389,12 +465,24 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
         status: 'cancelled',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentCancelled);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.inscripcion2026, 'findUnique').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest.spyOn(prismaService.inscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest.spyOn(prismaService.historialEstadoInscripcion2026, 'create').mockResolvedValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(paymentCancelled);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.inscripcion2026, 'findUnique')
+        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+      jest
+        .spyOn(prismaService.inscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+      jest
+        .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
+        .mockResolvedValue({} as any);
 
       await service.procesarWebhookMercadoPago(mockWebhookData);
 
@@ -416,9 +504,15 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
         status: 'pending',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentPending);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(paymentPending);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion as any);
 
       // Estado ya es pending, no debería actualizar inscripcion
       await service.procesarWebhookMercadoPago(mockWebhookData);
@@ -442,9 +536,15 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
         status: 'in_process',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentInProcess);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(paymentInProcess);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion as any);
 
       await service.procesarWebhookMercadoPago(mockWebhookData);
 
@@ -460,25 +560,42 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
 
   describe('Error Handling', () => {
     it('should throw BadRequestException when pago not found', async () => {
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(null);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPaymentApproved);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+        .mockResolvedValue(null);
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({ success: false, message: 'Payment not found in database' });
+      expect(result).toEqual({
+        success: false,
+        message: 'Payment not found in database',
+      });
     });
 
     it('should handle MercadoPago API errors', async () => {
-      jest.spyOn(mercadoPagoService, 'getPayment').mockRejectedValue(new Error('API Error'));
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockRejectedValue(new Error('API Error'));
 
-      await expect(service.procesarWebhookMercadoPago(mockWebhookData)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.procesarWebhookMercadoPago(mockWebhookData),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should handle database errors gracefully', async () => {
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockRejectedValue(new Error('DB Error'));
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPaymentApproved);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+        .mockRejectedValue(new Error('DB Error'));
 
-      await expect(service.procesarWebhookMercadoPago(mockWebhookData)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.procesarWebhookMercadoPago(mockWebhookData),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should handle unknown payment status', async () => {
@@ -487,9 +604,15 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
         status: 'unknown_status',
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(paymentUnknown);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(mockPagoInscripcion as any);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(paymentUnknown);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+        .mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion as any);
 
       await service.procesarWebhookMercadoPago(mockWebhookData);
 
@@ -513,20 +636,34 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
       ];
 
       for (const externalRef of testCases) {
-        const payment = { ...mockPaymentApproved, external_reference: externalRef };
+        const payment = {
+          ...mockPaymentApproved,
+          external_reference: externalRef,
+        };
         const inscripcionId = externalRef.split('-')[1];
 
         jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(payment);
-        jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue({
-          ...mockPagoInscripcion,
-          inscripcion_id: inscripcionId,
-        } as any);
-        jest.spyOn(prismaService.pagoInscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion as any);
-        jest.spyOn(prismaService.inscripcion2026, 'findUnique').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-        jest.spyOn(prismaService.inscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-        jest.spyOn(prismaService.historialEstadoInscripcion2026, 'create').mockResolvedValue({} as any);
+        jest
+          .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+          .mockResolvedValue({
+            ...mockPagoInscripcion,
+            inscripcion_id: inscripcionId,
+          } as any);
+        jest
+          .spyOn(prismaService.pagoInscripcion2026, 'update')
+          .mockResolvedValue(mockPagoInscripcion as any);
+        jest
+          .spyOn(prismaService.inscripcion2026, 'findUnique')
+          .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+        jest
+          .spyOn(prismaService.inscripcion2026, 'update')
+          .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
+        jest
+          .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
+          .mockResolvedValue({} as any);
 
-        const result = await service.procesarWebhookMercadoPago(mockWebhookData);
+        const result =
+          await service.procesarWebhookMercadoPago(mockWebhookData);
 
         expect(result.inscripcionId).toBe(inscripcionId);
       }
@@ -541,15 +678,23 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
         },
       };
 
-      jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(mockPaymentApproved);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'findFirst').mockResolvedValue(pagoConEstadoActivo as any);
-      jest.spyOn(prismaService.pagoInscripcion2026, 'update').mockResolvedValue(mockPagoInscripcion as any);
+      jest
+        .spyOn(mercadoPagoService, 'getPayment')
+        .mockResolvedValue(mockPaymentApproved);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
+        .mockResolvedValue(pagoConEstadoActivo as any);
+      jest
+        .spyOn(prismaService.pagoInscripcion2026, 'update')
+        .mockResolvedValue(mockPagoInscripcion as any);
 
       await service.procesarWebhookMercadoPago(mockWebhookData);
 
       // No debe actualizar inscripcion si el estado ya es correcto
       expect(prismaService.inscripcion2026.update).not.toHaveBeenCalled();
-      expect(prismaService.historialEstadoInscripcion2026.create).not.toHaveBeenCalled();
+      expect(
+        prismaService.historialEstadoInscripcion2026.create,
+      ).not.toHaveBeenCalled();
     });
   });
 });

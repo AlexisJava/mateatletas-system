@@ -145,7 +145,9 @@ export const PricingHelpers = {
    */
   aplicarDescuento(precioBase: number, descuentoPorcentaje: number): number {
     if (descuentoPorcentaje < 0 || descuentoPorcentaje > 100) {
-      throw new Error(`Descuento inválido: ${descuentoPorcentaje}%. Debe estar entre 0 y 100.`);
+      throw new Error(
+        `Descuento inválido: ${descuentoPorcentaje}%. Debe estar entre 0 y 100.`,
+      );
     }
     const descuento = precioBase * (descuentoPorcentaje / 100);
     return Math.round(precioBase - descuento);
@@ -157,9 +159,14 @@ export const PricingHelpers = {
    * @param descuentoPorcentaje - Porcentaje de descuento (0-100)
    * @returns Monto del descuento en pesos, redondeado
    */
-  calcularMontoDescuento(precioBase: number, descuentoPorcentaje: number): number {
+  calcularMontoDescuento(
+    precioBase: number,
+    descuentoPorcentaje: number,
+  ): number {
     if (descuentoPorcentaje < 0 || descuentoPorcentaje > 100) {
-      throw new Error(`Descuento inválido: ${descuentoPorcentaje}%. Debe estar entre 0 y 100.`);
+      throw new Error(
+        `Descuento inválido: ${descuentoPorcentaje}%. Debe estar entre 0 y 100.`,
+      );
     }
     return Math.round(precioBase * (descuentoPorcentaje / 100));
   },
@@ -170,9 +177,14 @@ export const PricingHelpers = {
    * @param totalCursos - Total de cursos entre todos los hermanos
    * @returns Porcentaje de descuento a aplicar
    */
-  calcularDescuentoColonia(cantidadEstudiantes: number, totalCursos: number): number {
-    if (cantidadEstudiantes >= REGLAS_PRICING.MIN_HERMANOS_DESCUENTO &&
-        totalCursos >= REGLAS_PRICING.MIN_CURSOS_DESCUENTO) {
+  calcularDescuentoColonia(
+    cantidadEstudiantes: number,
+    totalCursos: number,
+  ): number {
+    if (
+      cantidadEstudiantes >= REGLAS_PRICING.MIN_HERMANOS_DESCUENTO &&
+      totalCursos >= REGLAS_PRICING.MIN_CURSOS_DESCUENTO
+    ) {
       return DESCUENTOS.COLONIA.HERMANOS_Y_CURSOS;
     } else if (cantidadEstudiantes >= REGLAS_PRICING.MIN_HERMANOS_DESCUENTO) {
       return DESCUENTOS.COLONIA.DOS_HERMANOS;
@@ -202,5 +214,6 @@ export const PricingHelpers = {
  */
 export const PRECIO_BASE_CURSO_COLONIA = PRECIOS.COLONIA_CURSO_BASE;
 export const PRECIO_INSCRIPCION_COLONIA = PRECIOS.INSCRIPCION_2026.COLONIA;
-export const PRECIO_INSCRIPCION_CICLO_2026 = PRECIOS.INSCRIPCION_2026.CICLO_2026;
+export const PRECIO_INSCRIPCION_CICLO_2026 =
+  PRECIOS.INSCRIPCION_2026.CICLO_2026;
 export const PRECIO_PACK_COMPLETO = PRECIOS.INSCRIPCION_2026.PACK_COMPLETO;

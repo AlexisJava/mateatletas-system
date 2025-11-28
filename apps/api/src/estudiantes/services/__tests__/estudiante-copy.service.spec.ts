@@ -60,7 +60,7 @@ describe('EstudianteCopyService', () => {
         nivel_actual: 5,
         puntos_totales: 100,
         avatar_gradient: 1,
-        equipoId: null,
+        casaId: null,
         tutor: { id: 'tutor-1', nombre: 'Pedro', apellido: 'López' },
       };
 
@@ -77,17 +77,22 @@ describe('EstudianteCopyService', () => {
         nivel_actual: 5,
         puntos_totales: 100,
         avatar_gradient: 1,
-        equipoId: null,
+        casaId: null,
         sector: { id: 'sector-2', nombre: 'Matemática' },
         tutor: { id: 'tutor-1', nombre: 'Pedro', apellido: 'López' },
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique')
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
         .mockResolvedValueOnce(mockEstudiante as any) // Estudiante original (findUnique inicial)
         .mockResolvedValueOnce(null); // Username nuevo no existe (generarUsernameUnico)
-      jest.spyOn(validator, 'validateSectorExists').mockResolvedValue(undefined);
+      jest
+        .spyOn(validator, 'validateSectorExists')
+        .mockResolvedValue(undefined);
       jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(null); // No existe duplicado
-      jest.spyOn(prisma.estudiante, 'create').mockResolvedValue(mockEstudianteDuplicado as any);
+      jest
+        .spyOn(prisma.estudiante, 'create')
+        .mockResolvedValue(mockEstudianteDuplicado as any);
 
       const result = await service.copiarEstudianteASector('est-1', 'sector-2');
 
@@ -99,12 +104,12 @@ describe('EstudianteCopyService', () => {
     it('debe lanzar error si el estudiante no existe', async () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
-      await expect(service.copiarEstudianteASector('est-inexistente', 'sector-2')).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.copiarEstudianteASector('est-inexistente', 'sector-2')).rejects.toThrow(
-        'El estudiante no existe',
-      );
+      await expect(
+        service.copiarEstudianteASector('est-inexistente', 'sector-2'),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.copiarEstudianteASector('est-inexistente', 'sector-2'),
+      ).rejects.toThrow('El estudiante no existe');
     });
 
     it('debe lanzar error si ya existe duplicado en el sector destino', async () => {
@@ -125,14 +130,22 @@ describe('EstudianteCopyService', () => {
         sector_id: 'sector-2',
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(validator, 'validateSectorExists').mockResolvedValue(undefined);
-      jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(mockDuplicado as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(validator, 'validateSectorExists')
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(prisma.estudiante, 'findFirst')
+        .mockResolvedValue(mockDuplicado as any);
 
-      await expect(service.copiarEstudianteASector('est-1', 'sector-2')).rejects.toThrow(
-        ConflictException,
-      );
-      await expect(service.copiarEstudianteASector('est-1', 'sector-2')).rejects.toThrow(
+      await expect(
+        service.copiarEstudianteASector('est-1', 'sector-2'),
+      ).rejects.toThrow(ConflictException);
+      await expect(
+        service.copiarEstudianteASector('est-1', 'sector-2'),
+      ).rejects.toThrow(
         'Este estudiante ya está inscrito en el sector destino',
       );
     });
@@ -150,16 +163,21 @@ describe('EstudianteCopyService', () => {
         nivel_actual: 1,
         puntos_totales: 0,
         avatar_gradient: 1,
-        equipoId: null,
+        casaId: null,
         tutor: {},
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique')
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
         .mockResolvedValueOnce(mockEstudiante as any) // Estudiante original
         .mockResolvedValueOnce(null); // Username nuevo no existe
-      jest.spyOn(validator, 'validateSectorExists').mockResolvedValue(undefined);
+      jest
+        .spyOn(validator, 'validateSectorExists')
+        .mockResolvedValue(undefined);
       jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(null);
-      jest.spyOn(prisma.estudiante, 'create').mockResolvedValue({ id: 'est-nuevo' } as any);
+      jest
+        .spyOn(prisma.estudiante, 'create')
+        .mockResolvedValue({ id: 'est-nuevo' } as any);
 
       await service.copiarEstudianteASector('est-1', 'sector-abcd-1234');
 
@@ -185,16 +203,21 @@ describe('EstudianteCopyService', () => {
         nivel_actual: 8,
         puntos_totales: 500,
         avatar_gradient: 3,
-        equipoId: 'equipo-1',
+        casaId: 'equipo-1',
         tutor: {},
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique')
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
         .mockResolvedValueOnce(mockEstudiante as any)
         .mockResolvedValueOnce(null);
-      jest.spyOn(validator, 'validateSectorExists').mockResolvedValue(undefined);
+      jest
+        .spyOn(validator, 'validateSectorExists')
+        .mockResolvedValue(undefined);
       jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(null);
-      jest.spyOn(prisma.estudiante, 'create').mockResolvedValue({ id: 'est-nuevo' } as any);
+      jest
+        .spyOn(prisma.estudiante, 'create')
+        .mockResolvedValue({ id: 'est-nuevo' } as any);
 
       await service.copiarEstudianteASector('est-1', 'sector-2');
 
@@ -204,7 +227,7 @@ describe('EstudianteCopyService', () => {
             nivel_actual: 8,
             puntos_totales: 500,
             avatar_gradient: 3,
-            equipoId: 'equipo-1',
+            casaId: 'equipo-1',
           }),
         }),
       );
@@ -223,26 +246,33 @@ describe('EstudianteCopyService', () => {
         nivel_actual: 5,
         puntos_totales: 100,
         avatar_gradient: 1,
-        equipoId: null,
+        casaId: null,
         edad: 10,
         nivelEscolar: 'Primaria',
         sector: {},
         tutor: {},
       };
 
-      jest.spyOn(prisma.estudiante, 'findFirst')
+      jest
+        .spyOn(prisma.estudiante, 'findFirst')
         .mockResolvedValueOnce(mockEstudiante as any) // Para findFirst en copiarEstudiantePorDNIASector
         .mockResolvedValueOnce(null); // Para findFirst en copiarEstudianteASector (verificar duplicado)
-      jest.spyOn(prisma.estudiante, 'findUnique')
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
         .mockResolvedValueOnce(mockEstudiante as any) // Para findUnique en copiarEstudianteASector (estudiante original)
         .mockResolvedValueOnce(null); // Para generarUsernameUnico
-      jest.spyOn(validator, 'validateSectorExists').mockResolvedValue(undefined);
+      jest
+        .spyOn(validator, 'validateSectorExists')
+        .mockResolvedValue(undefined);
       jest.spyOn(prisma.estudiante, 'create').mockResolvedValue({
         id: 'est-nuevo',
         sector_id: 'sector-2',
       } as any);
 
-      const result = await service.copiarEstudiantePorDNIASector('juan@test.com', 'sector-2');
+      const result = await service.copiarEstudiantePorDNIASector(
+        'juan@test.com',
+        'sector-2',
+      );
 
       expect(prisma.estudiante.findFirst).toHaveBeenCalledWith({
         where: { email: 'juan@test.com' },
@@ -254,10 +284,18 @@ describe('EstudianteCopyService', () => {
     it('debe lanzar error si no encuentra estudiante con el email', async () => {
       jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(null);
 
-      await expect(service.copiarEstudiantePorDNIASector('inexistente@test.com', 'sector-2')).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.copiarEstudiantePorDNIASector('inexistente@test.com', 'sector-2')).rejects.toThrow(
+      await expect(
+        service.copiarEstudiantePorDNIASector(
+          'inexistente@test.com',
+          'sector-2',
+        ),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.copiarEstudiantePorDNIASector(
+          'inexistente@test.com',
+          'sector-2',
+        ),
+      ).rejects.toThrow(
         'No se encontró un estudiante con email inexistente@test.com',
       );
     });
@@ -277,17 +315,22 @@ describe('EstudianteCopyService', () => {
         nivel_actual: 1,
         puntos_totales: 0,
         avatar_gradient: 1,
-        equipoId: null,
+        casaId: null,
         tutor: {},
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique')
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
         .mockResolvedValueOnce(mockEstudiante as any) // Estudiante original
         .mockResolvedValueOnce({ username: 'juan.perez.sect' } as any) // Ya existe
         .mockResolvedValueOnce(null); // juan.perez.sect1 no existe
-      jest.spyOn(validator, 'validateSectorExists').mockResolvedValue(undefined);
+      jest
+        .spyOn(validator, 'validateSectorExists')
+        .mockResolvedValue(undefined);
       jest.spyOn(prisma.estudiante, 'findFirst').mockResolvedValue(null);
-      jest.spyOn(prisma.estudiante, 'create').mockResolvedValue({ id: 'est-nuevo' } as any);
+      jest
+        .spyOn(prisma.estudiante, 'create')
+        .mockResolvedValue({ id: 'est-nuevo' } as any);
 
       await service.copiarEstudianteASector('est-1', 'sector-abcd-1234');
 

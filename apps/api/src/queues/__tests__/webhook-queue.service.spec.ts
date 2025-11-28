@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getQueueToken } from '@nestjs/bull';
-import { WebhookQueueService, MercadoPagoWebhookDto } from '../webhook-queue.service';
+import {
+  WebhookQueueService,
+  MercadoPagoWebhookDto,
+} from '../webhook-queue.service';
 import { Queue } from 'bull';
 
 /**

@@ -12,7 +12,7 @@ describe('EstudianteBusinessValidator', () => {
       tutor: {
         findUnique: jest.fn(),
       },
-      equipo: {
+      casa: {
         findUnique: jest.fn(),
       },
       estudiante: {
@@ -72,29 +72,29 @@ describe('EstudianteBusinessValidator', () => {
     });
   });
 
-  describe('validateEquipoExists', () => {
+  describe('validateCasaExists', () => {
     it('no debe lanzar error si el equipo existe', async () => {
-      jest.spyOn(prisma.equipo, 'findUnique').mockResolvedValue({
-        id: 'equipo-123',
+      jest.spyOn(prisma.casa, 'findUnique').mockResolvedValue({
+        id: 'casa-123',
       } as any);
 
       await expect(
-        validator.validateEquipoExists('equipo-123'),
+        validator.validateCasaExists('casa-123'),
       ).resolves.not.toThrow();
-      expect(prisma.equipo.findUnique).toHaveBeenCalledWith({
-        where: { id: 'equipo-123' },
+      expect(prisma.casa.findUnique).toHaveBeenCalledWith({
+        where: { id: 'casa-123' },
       });
     });
 
     it('debe lanzar NotFoundException si el equipo no existe', async () => {
-      jest.spyOn(prisma.equipo, 'findUnique').mockResolvedValue(null);
+      jest.spyOn(prisma.casa, 'findUnique').mockResolvedValue(null);
 
       await expect(
-        validator.validateEquipoExists('equipo-inexistente'),
+        validator.validateCasaExists('casa-inexistente'),
       ).rejects.toThrow(NotFoundException);
       await expect(
-        validator.validateEquipoExists('equipo-inexistente'),
-      ).rejects.toThrow('Equipo no encontrado');
+        validator.validateCasaExists('casa-inexistente'),
+      ).rejects.toThrow('Casa no encontrada');
     });
   });
 

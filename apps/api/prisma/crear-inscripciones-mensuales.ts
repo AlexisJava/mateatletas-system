@@ -8,14 +8,16 @@ import { PrismaClient, EstadoPago } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('💳 Creando inscripciones mensuales para todos los estudiantes...\n');
+  console.log(
+    '💳 Creando inscripciones mensuales para todos los estudiantes...\n',
+  );
 
   // Obtener el producto Club Matemáticas
   const productoMensual = await prisma.producto.findFirst({
     where: {
       nombre: { contains: 'Club' },
-      activo: true
-    }
+      activo: true,
+    },
   });
 
   if (!productoMensual) {
@@ -23,7 +25,9 @@ async function main() {
     return;
   }
 
-  console.log(`📦 Producto: ${productoMensual.nombre} - $${productoMensual.precio}\n`);
+  console.log(
+    `📦 Producto: ${productoMensual.nombre} - $${productoMensual.precio}\n`,
+  );
 
   // Obtener todos los estudiantes con sus tutores
   const estudiantes = await prisma.estudiante.findMany({
@@ -32,7 +36,7 @@ async function main() {
       nombre: true,
       apellido: true,
       tutor_id: true,
-    }
+    },
   });
 
   console.log(`👶 Total estudiantes: ${estudiantes.length}\n`);
@@ -53,8 +57,8 @@ async function main() {
             estudiante_id: estudiante.id,
             producto_id: productoMensual.id,
             periodo: periodo,
-          }
-        }
+          },
+        },
       });
 
       if (existente) {
@@ -79,14 +83,17 @@ async function main() {
           tipo_descuento: 'NINGUNO',
           estado_pago: 'Pendiente',
           detalle_calculo: `Inscripción mensual - ${productoMensual.nombre}`,
-        }
+        },
       });
 
       creadas++;
-      console.log(`  ✓ ${estudiante.nombre} ${estudiante.apellido} - ${periodo}`);
-
+      console.log(
+        `  ✓ ${estudiante.nombre} ${estudiante.apellido} - ${periodo}`,
+      );
     } catch (error: any) {
-      console.log(`  ✗ Error con ${estudiante.nombre} ${estudiante.apellido}: ${error.message}`);
+      console.log(
+        `  ✗ Error con ${estudiante.nombre} ${estudiante.apellido}: ${error.message}`,
+      );
     }
   }
 
@@ -97,7 +104,9 @@ async function main() {
   console.log(`⚠️  Ya existentes: ${yaExistentes}`);
   console.log(`📅 Periodo: ${periodo}`);
   console.log(`💰 Monto por estudiante: $${productoMensual.precio}`);
-  console.log(`💵 Total a cobrar: $${creadas * Number(productoMensual.precio)}\n`);
+  console.log(
+    `💵 Total a cobrar: $${creadas * Number(productoMensual.precio)}\n`,
+  );
 }
 
 main()

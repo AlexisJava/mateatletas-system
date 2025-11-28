@@ -69,7 +69,9 @@ import { createClient } from 'redis';
             };
           } catch (error) {
             logger.warn('⚠️  Redis no disponible, usando cache en memoria');
-            logger.error(error instanceof Error ? error.message : String(error));
+            logger.error(
+              error instanceof Error ? error.message : String(error),
+            );
             // Fallback a memoria
           }
         }

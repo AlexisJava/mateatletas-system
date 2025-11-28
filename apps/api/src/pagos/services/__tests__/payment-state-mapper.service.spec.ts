@@ -10,9 +10,7 @@ describe('PaymentStateMapperService', () => {
       providers: [PaymentStateMapperService],
     }).compile();
 
-    service = module.get<PaymentStateMapperService>(
-      PaymentStateMapperService,
-    );
+    service = module.get<PaymentStateMapperService>(PaymentStateMapperService);
   });
 
   it('should be defined', () => {
@@ -47,9 +45,7 @@ describe('PaymentStateMapperService', () => {
     });
 
     it('debe mapear refunded a REEMBOLSADO', () => {
-      expect(service.mapearEstadoPago('refunded')).toBe(
-        EstadoPago.REEMBOLSADO,
-      );
+      expect(service.mapearEstadoPago('refunded')).toBe(EstadoPago.REEMBOLSADO);
     });
   });
 
@@ -91,9 +87,7 @@ describe('PaymentStateMapperService', () => {
 
   describe('mapearEstadoInscripcion', () => {
     it('debe mapear PAGADO a Pagado', () => {
-      expect(service.mapearEstadoInscripcion(EstadoPago.PAGADO)).toBe(
-        'Pagado',
-      );
+      expect(service.mapearEstadoInscripcion(EstadoPago.PAGADO)).toBe('Pagado');
     });
 
     it('debe mapear RECHAZADO a Pendiente', () => {

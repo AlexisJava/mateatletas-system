@@ -24,7 +24,11 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MercadoPagoWebhookGuard } from '../mercadopago-webhook.guard';
 import { MercadoPagoIpWhitelistService } from '../../services/mercadopago-ip-whitelist.service';
@@ -52,7 +56,10 @@ describe('MercadoPagoWebhookGuard - live_mode Validation', () => {
       providers: [
         MercadoPagoWebhookGuard,
         { provide: ConfigService, useValue: mockConfigService },
-        { provide: MercadoPagoIpWhitelistService, useValue: mockIpWhitelistService },
+        {
+          provide: MercadoPagoIpWhitelistService,
+          useValue: mockIpWhitelistService,
+        },
       ],
     }).compile();
 
@@ -73,7 +80,10 @@ describe('MercadoPagoWebhookGuard - live_mode Validation', () => {
   /**
    * Helper para crear ExecutionContext mock
    */
-  const createMockExecutionContext = (body: unknown, headers: Record<string, string> = {}): ExecutionContext => {
+  const createMockExecutionContext = (
+    body: unknown,
+    headers: Record<string, string> = {},
+  ): ExecutionContext => {
     return {
       switchToHttp: () => ({
         getRequest: () => ({
@@ -222,25 +232,20 @@ describe('MercadoPagoWebhookGuard - live_mode Validation', () => {
       });
 
       // Recrear guard con nueva configuración
-      guard = new MercadoPagoWebhookGuard(
-        configService,
-        ipWhitelistService,
-      );
+      guard = new MercadoPagoWebhookGuard(configService, ipWhitelistService);
     });
 
     afterEach(() => {
       // Restaurar modo producción para tests siguientes
       mockConfigService.get.mockImplementation((key: string) => {
         if (key === 'NODE_ENV') return 'production';
-        if (key === 'MERCADOPAGO_WEBHOOK_SECRET') return 'test-secret-key-12345';
+        if (key === 'MERCADOPAGO_WEBHOOK_SECRET')
+          return 'test-secret-key-12345';
         return null;
       });
 
       // Recrear guard en modo producción
-      guard = new MercadoPagoWebhookGuard(
-        configService,
-        ipWhitelistService,
-      );
+      guard = new MercadoPagoWebhookGuard(configService, ipWhitelistService);
     });
 
     /**
@@ -342,7 +347,10 @@ describe('MercadoPagoWebhookGuard - live_mode Validation', () => {
         'x-signature': 'ts=123,v1=INVALID_SIGNATURE',
       });
 
-      const validateSignatureSpy = jest.spyOn(guard as any, 'validateSignature');
+      const validateSignatureSpy = jest.spyOn(
+        guard as any,
+        'validateSignature',
+      );
 
       // ACT & ASSERT
       expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);

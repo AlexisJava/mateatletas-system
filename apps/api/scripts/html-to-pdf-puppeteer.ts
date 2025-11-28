@@ -671,7 +671,9 @@ async function generarPDF() {
     console.log('✅ PDF GENERADO EXITOSAMENTE');
     console.log('═══════════════════════════════════════════════════════');
     console.log(`📄 Archivo: ${outputPath}`);
-    console.log(`📏 Tamaño: ${(fs.statSync(outputPath).size / 1024).toFixed(2)} KB`);
+    console.log(
+      `📏 Tamaño: ${(fs.statSync(outputPath).size / 1024).toFixed(2)} KB`,
+    );
     console.log('═══════════════════════════════════════════════════════\n');
     console.log('💡 Para descargar el archivo:');
     console.log(`   ${outputPath}`);

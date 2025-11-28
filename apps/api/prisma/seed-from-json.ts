@@ -1,4 +1,13 @@
-import { PrismaClient, TipoProducto, EstadoMembresia, EstadoInscripcionCurso, EstadoClase, EstadoAsistencia, TipoNotificacion, TipoEvento } from '@prisma/client';
+import {
+  PrismaClient,
+  TipoProducto,
+  EstadoMembresia,
+  EstadoInscripcionCurso,
+  EstadoClase,
+  EstadoAsistencia,
+  TipoNotificacion,
+  TipoEvento,
+} from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -62,13 +71,16 @@ async function loadFromJSON() {
       console.log(`🛡️  Creando ${data.equipos.length} equipos...`);
       for (const equipo of data.equipos) {
         const colores = {
-          'rojo': { primario: '#FF6B35', secundario: '#F7B801' },
-          'azul': { primario: '#2196F3', secundario: '#00BCD4' },
-          'naranja': { primario: '#FF9800', secundario: '#FFC107' },
-          'verde': { primario: '#4CAF50', secundario: '#8BC34A' },
+          rojo: { primario: '#FF6B35', secundario: '#F7B801' },
+          azul: { primario: '#2196F3', secundario: '#00BCD4' },
+          naranja: { primario: '#FF9800', secundario: '#FFC107' },
+          verde: { primario: '#4CAF50', secundario: '#8BC34A' },
         };
 
-        const colorData = colores[equipo.color as keyof typeof colores] || { primario: '#000000', secundario: '#FFFFFF' };
+        const colorData = colores[equipo.color as keyof typeof colores] || {
+          primario: '#000000',
+          secundario: '#FFFFFF',
+        };
 
         const equipoCreado = await prisma.equipo.create({
           data: {
@@ -85,22 +97,26 @@ async function loadFromJSON() {
 
     // PASO 2: Rutas Curriculares
     if (data.rutasCurriculares && data.rutasCurriculares.length > 0) {
-      console.log(`\n🧭 Creando ${data.rutasCurriculares.length} rutas curriculares...`);
+      console.log(
+        `\n🧭 Creando ${data.rutasCurriculares.length} rutas curriculares...`,
+      );
 
       const coloresRutas = {
-        'Álgebra': '#3B82F6',
-        'Geometría': '#10B981',
-        'Lógica': '#8B5CF6',
-        'Trigonometría': '#F59E0B',
-        'Cálculo': '#6366F1',
-        'Estadística': '#EF4444',
+        Álgebra: '#3B82F6',
+        Geometría: '#10B981',
+        Lógica: '#8B5CF6',
+        Trigonometría: '#F59E0B',
+        Cálculo: '#6366F1',
+        Estadística: '#EF4444',
       };
 
       for (const nombreRuta of data.rutasCurriculares) {
         const rutaCreada = await prisma.rutaCurricular.create({
           data: {
             nombre: nombreRuta,
-            color: coloresRutas[nombreRuta as keyof typeof coloresRutas] || '#000000',
+            color:
+              coloresRutas[nombreRuta as keyof typeof coloresRutas] ||
+              '#000000',
             descripcion: `Ruta curricular de ${nombreRuta}`,
           },
         });
@@ -115,9 +131,9 @@ async function loadFromJSON() {
       console.log(`\n🛒 Creando ${data.productos.length} productos...`);
       for (const producto of data.productos) {
         const tipoMap = {
-          'membresía': TipoProducto.Suscripcion,
-          'curso': TipoProducto.Curso,
-          'recurso': TipoProducto.RecursoDigital,
+          membresía: TipoProducto.Suscripcion,
+          curso: TipoProducto.Curso,
+          recurso: TipoProducto.RecursoDigital,
         };
 
         const productoData: any = {
@@ -130,7 +146,9 @@ async function loadFromJSON() {
 
         // Si es suscripción, agregar duración
         if (producto.tipo === 'membresía') {
-          productoData.duracion_meses = producto.nombre.includes('Anual') ? 12 : 1;
+          productoData.duracion_meses = producto.nombre.includes('Anual')
+            ? 12
+            : 1;
         }
 
         // Si es curso, agregar fechas y cupo
@@ -252,10 +270,10 @@ async function loadFromJSON() {
       console.log(`\n💰 Creando ${data.membresias.length} membresías...`);
       for (const membresia of data.membresias) {
         const estadoMap = {
-          'activa': EstadoMembresia.Activa,
-          'atrasada': EstadoMembresia.Atrasada,
-          'pendiente': EstadoMembresia.Pendiente,
-          'cancelada': EstadoMembresia.Cancelada,
+          activa: EstadoMembresia.Activa,
+          atrasada: EstadoMembresia.Atrasada,
+          pendiente: EstadoMembresia.Pendiente,
+          cancelada: EstadoMembresia.Cancelada,
         };
 
         await prisma.membresia.create({
@@ -275,12 +293,14 @@ async function loadFromJSON() {
 
     // PASO 9: Inscripciones a Cursos
     if (data.inscripciones_cursos && data.inscripciones_cursos.length > 0) {
-      console.log(`\n🎓 Creando ${data.inscripciones_cursos.length} inscripciones a cursos...`);
+      console.log(
+        `\n🎓 Creando ${data.inscripciones_cursos.length} inscripciones a cursos...`,
+      );
       for (const inscripcion of data.inscripciones_cursos) {
         const estadoMap = {
-          'activo': EstadoInscripcionCurso.Activo,
-          'finalizado': EstadoInscripcionCurso.Finalizado,
-          'preinscrito': EstadoInscripcionCurso.PreInscrito,
+          activo: EstadoInscripcionCurso.Activo,
+          finalizado: EstadoInscripcionCurso.Finalizado,
+          preinscrito: EstadoInscripcionCurso.PreInscrito,
         };
 
         await prisma.inscripcionCurso.create({
@@ -292,7 +312,9 @@ async function loadFromJSON() {
           },
         });
 
-        console.log(`   • Estudiante ${inscripcion.estudiante_id} → Curso ${inscripcion.curso_id}`);
+        console.log(
+          `   • Estudiante ${inscripcion.estudiante_id} → Curso ${inscripcion.curso_id}`,
+        );
       }
     }
 
@@ -302,7 +324,8 @@ async function loadFromJSON() {
       for (const clase of data.clases) {
         // Extraer ruta del título (primera palabra)
         const rutaNombre = clase.titulo.split(' ')[0];
-        const rutaId = idMaps.rutas.get(rutaNombre) || idMaps.rutas.get('Álgebra')!;
+        const rutaId =
+          idMaps.rutas.get(rutaNombre) || idMaps.rutas.get('Álgebra')!;
 
         // Crear fecha y hora (10:00 AM por defecto)
         const fechaClase = new Date(clase.fecha);
@@ -322,13 +345,17 @@ async function loadFromJSON() {
         });
 
         idMaps.clases.set(clase.id, claseCreada.id);
-        console.log(`   • ${clase.titulo} (${clase.fecha}) → ${claseCreada.id}`);
+        console.log(
+          `   • ${clase.titulo} (${clase.fecha}) → ${claseCreada.id}`,
+        );
       }
     }
 
     // PASO 11: Inscripciones a Clases
     if (data.inscripciones_clases && data.inscripciones_clases.length > 0) {
-      console.log(`\n🎫 Creando ${data.inscripciones_clases.length} inscripciones a clases...`);
+      console.log(
+        `\n🎫 Creando ${data.inscripciones_clases.length} inscripciones a clases...`,
+      );
       for (const inscripcion of data.inscripciones_clases) {
         const estudianteId = idMaps.estudiantes.get(inscripcion.estudiante_id)!;
         const claseId = idMaps.clases.get(inscripcion.clase_id)!;
@@ -347,18 +374,22 @@ async function loadFromJSON() {
           },
         });
 
-        console.log(`   • Estudiante ${inscripcion.estudiante_id} → Clase ${inscripcion.clase_id}`);
+        console.log(
+          `   • Estudiante ${inscripcion.estudiante_id} → Clase ${inscripcion.clase_id}`,
+        );
       }
     }
 
     // PASO 12: Asistencias
     if (data.asistencias && data.asistencias.length > 0) {
-      console.log(`\n📝 Creando ${data.asistencias.length} registros de asistencia...`);
+      console.log(
+        `\n📝 Creando ${data.asistencias.length} registros de asistencia...`,
+      );
       for (const asistencia of data.asistencias) {
         const estadoMap = {
-          'Presente': EstadoAsistencia.Presente,
-          'Ausente': EstadoAsistencia.Ausente,
-          'Justificado': EstadoAsistencia.Justificado,
+          Presente: EstadoAsistencia.Presente,
+          Ausente: EstadoAsistencia.Ausente,
+          Justificado: EstadoAsistencia.Justificado,
         };
 
         await prisma.asistencia.create({
@@ -372,22 +403,30 @@ async function loadFromJSON() {
           },
         });
 
-        console.log(`   • Clase ${asistencia.clase_id} - Estudiante ${asistencia.estudiante_id} - ${asistencia.estado}`);
+        console.log(
+          `   • Clase ${asistencia.clase_id} - Estudiante ${asistencia.estudiante_id} - ${asistencia.estado}`,
+        );
       }
     }
 
     // PASO 13: Pagos (OMITIDO - El modelo Pago no existe aún en el schema)
     if (data.pagos && data.pagos.length > 0) {
-      console.log(`\n💳 Omitiendo ${data.pagos.length} pagos (modelo Pago no implementado)...`);
+      console.log(
+        `\n💳 Omitiendo ${data.pagos.length} pagos (modelo Pago no implementado)...`,
+      );
     }
 
     // PASO 14: Notificaciones
     if (data.notificaciones && data.notificaciones.length > 0) {
-      console.log(`\n🔔 Creando ${data.notificaciones.length} notificaciones...`);
+      console.log(
+        `\n🔔 Creando ${data.notificaciones.length} notificaciones...`,
+      );
       for (const notif of data.notificaciones) {
         const docenteId = idMaps.docentes.get(notif.docente_id);
         if (!docenteId) {
-          console.log(`   ⚠️  Advertencia: Docente ${notif.docente_id} no encontrado, omitiendo notificación`);
+          console.log(
+            `   ⚠️  Advertencia: Docente ${notif.docente_id} no encontrado, omitiendo notificación`,
+          );
           continue;
         }
 
@@ -411,7 +450,9 @@ async function loadFromJSON() {
       for (const evento of data.eventos) {
         const docenteId = idMaps.docentes.get(evento.docente_id);
         if (!docenteId) {
-          console.log(`   ⚠️  Advertencia: Docente ${evento.docente_id} no encontrado, omitiendo evento`);
+          console.log(
+            `   ⚠️  Advertencia: Docente ${evento.docente_id} no encontrado, omitiendo evento`,
+          );
           continue;
         }
 
@@ -446,11 +487,12 @@ async function loadFromJSON() {
     console.log(`   • ${idMaps.productos.size} productos`);
     console.log(`   • ${idMaps.clases.size} clases`);
     console.log(`   • ${data.membresias?.length || 0} membresías`);
-    console.log(`   • ${data.inscripciones_clases?.length || 0} inscripciones a clases`);
+    console.log(
+      `   • ${data.inscripciones_clases?.length || 0} inscripciones a clases`,
+    );
     console.log(`   • ${data.asistencias?.length || 0} asistencias`);
     console.log(`   • ${data.notificaciones?.length || 0} notificaciones`);
     console.log(`   • ${data.eventos?.length || 0} eventos\n`);
-
   } catch (error) {
     console.error('\n❌ Error cargando datos:', error);
     throw error;

@@ -9,7 +9,11 @@ import { TutorCreationService } from '../../shared/services/tutor-creation.servi
 import { MercadoPagoWebhookProcessorService } from '../../shared/services/mercadopago-webhook-processor.service';
 import { WebhookIdempotencyService } from '../../pagos/services/webhook-idempotency.service';
 import { PaymentAmountValidatorService } from '../../pagos/services/payment-amount-validator.service';
-import { BadRequestException, InternalServerErrorException, ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  ConflictException,
+} from '@nestjs/common';
 import { TipoInscripcion2026 } from '../dto/create-inscripcion-2026.dto';
 
 /**
@@ -272,16 +276,20 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
           provide: PricingCalculatorService,
           useValue: {
             calcularTarifaInscripcion: jest.fn().mockReturnValue(25000),
-            calcularTotalInscripcion2026: jest.fn().mockReturnValue({ total: 158400, descuento: 12 }),
+            calcularTotalInscripcion2026: jest
+              .fn()
+              .mockReturnValue({ total: 158400, descuento: 12 }),
             aplicarDescuento: jest.fn((base, desc) => base * (1 - desc / 100)),
           },
         },
         {
           provide: PinGeneratorService,
           useValue: {
-            generateUniquePin: jest.fn().mockImplementation(async () =>
-              Math.floor(1000 + Math.random() * 9000).toString()
-            ),
+            generateUniquePin: jest
+              .fn()
+              .mockImplementation(async () =>
+                Math.floor(1000 + Math.random() * 9000).toString(),
+              ),
           },
         },
         {
@@ -294,14 +302,18 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
         {
           provide: WebhookIdempotencyService,
           useValue: {
-            checkIdempotency: jest.fn().mockResolvedValue({ isProcessed: false }),
+            checkIdempotency: jest
+              .fn()
+              .mockResolvedValue({ isProcessed: false }),
             markAsProcessed: jest.fn().mockResolvedValue(undefined),
           },
         },
         {
           provide: PaymentAmountValidatorService,
           useValue: {
-            validatePaymentAmount: jest.fn().mockResolvedValue({ isValid: true }),
+            validatePaymentAmount: jest
+              .fn()
+              .mockResolvedValue({ isValid: true }),
           },
         },
         MercadoPagoWebhookProcessorService,
@@ -312,7 +324,9 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
     prismaService = module.get<PrismaService>(PrismaService);
     mercadoPagoService = module.get<MercadoPagoService>(MercadoPagoService);
     configService = module.get<ConfigService>(ConfigService);
-    pricingCalculatorService = module.get<PricingCalculatorService>(PricingCalculatorService);
+    pricingCalculatorService = module.get<PricingCalculatorService>(
+      PricingCalculatorService,
+    );
 
     // Reset mocks
     jest.clearAllMocks();
@@ -322,8 +336,12 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
     it('debe crear inscripción completa con MercadoPago preference ANTES de transacción', async () => {
       // Arrange
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockMercadoPagoPreference);
+      jest
+        .spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockMercadoPagoPreference);
 
       // Mock transaction - Retornar estructura esperada por el servicio
       jest.spyOn(prismaService, '$transaction').mockResolvedValue({
@@ -334,14 +352,16 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
             estudiante: mockEstudiante1,
             estudianteInscripcion: mockEstudianteInscripcion1,
             pin: '1234',
-            cursosSeleccionados: mockCreateDto.estudiantes[0].cursos_seleccionados,
+            cursosSeleccionados:
+              mockCreateDto.estudiantes[0].cursos_seleccionados,
             mundoSeleccionado: undefined,
           },
           {
             estudiante: mockEstudiante2,
             estudianteInscripcion: mockEstudianteInscripcion2,
             pin: '5678',
-            cursosSeleccionados: mockCreateDto.estudiantes[1].cursos_seleccionados,
+            cursosSeleccionados:
+              mockCreateDto.estudiantes[1].cursos_seleccionados,
             mundoSeleccionado: undefined,
           },
         ],
@@ -368,7 +388,8 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
           monto_total: 25000,
           descuento_aplicado: 12,
           mercadopago_preference_id: 'pref-123456',
-          mercadopago_init_point: 'https://mercadopago.com/checkout/pref-123456',
+          mercadopago_init_point:
+            'https://mercadopago.com/checkout/pref-123456',
         },
       });
     });
@@ -378,15 +399,23 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
     it('debe lanzar BadRequestException sin crear registros en DB si MercadoPago falla', async () => {
       // Arrange
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockRejectedValue(new Error('MercadoPago API error'));
+      jest
+        .spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockRejectedValue(new Error('MercadoPago API error'));
 
       const transactionSpy = jest.spyOn(prismaService, '$transaction');
 
       // Act & Assert
-      await expect(service.createInscripcion2026(mockCreateDto)).rejects.toThrow(BadRequestException);
-      await expect(service.createInscripcion2026(mockCreateDto)).rejects.toThrow(
-        'No se pudo crear la preferencia de pago. Intente nuevamente.'
+      await expect(
+        service.createInscripcion2026(mockCreateDto),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.createInscripcion2026(mockCreateDto),
+      ).rejects.toThrow(
+        'No se pudo crear la preferencia de pago. Intente nuevamente.',
       );
 
       // Verificar que $transaction NUNCA fue llamado
@@ -398,28 +427,40 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
     it('debe hacer rollback automático y lanzar InternalServerErrorException si falla operación dentro de transacción', async () => {
       // Arrange
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockMercadoPagoPreference);
+      jest
+        .spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockMercadoPagoPreference);
 
       // Simular fallo al crear inscripción
-      jest.spyOn(prismaService, '$transaction').mockImplementation(async (callback: any) => {
-        const txContext = {
-          ...mockTx,
-          tutor: {
-            findUnique: jest.fn().mockResolvedValue(mockTutor),
-          },
-          inscripcion2026: {
-            create: jest.fn().mockRejectedValue(new Error('Database connection lost')),
-          },
-        };
+      jest
+        .spyOn(prismaService, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          const txContext = {
+            ...mockTx,
+            tutor: {
+              findUnique: jest.fn().mockResolvedValue(mockTutor),
+            },
+            inscripcion2026: {
+              create: jest
+                .fn()
+                .mockRejectedValue(new Error('Database connection lost')),
+            },
+          };
 
-        return await callback(txContext);
-      });
+          return await callback(txContext);
+        });
 
       // Act & Assert
-      await expect(service.createInscripcion2026(mockCreateDto)).rejects.toThrow(InternalServerErrorException);
-      await expect(service.createInscripcion2026(mockCreateDto)).rejects.toThrow(
-        'Error al crear la inscripción. No se realizaron cambios en la base de datos.'
+      await expect(
+        service.createInscripcion2026(mockCreateDto),
+      ).rejects.toThrow(InternalServerErrorException);
+      await expect(
+        service.createInscripcion2026(mockCreateDto),
+      ).rejects.toThrow(
+        'Error al crear la inscripción. No se realizaron cambios en la base de datos.',
       );
 
       // MercadoPago preference fue creada (no se puede revertir)
@@ -434,8 +475,12 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
     it('debe reutilizar tutor existente sin crear uno nuevo', async () => {
       // Arrange
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockMercadoPagoPreference);
+      jest
+        .spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockMercadoPagoPreference);
 
       // Mock transaction con tutor existente
       jest.spyOn(prismaService, '$transaction').mockResolvedValue({
@@ -467,8 +512,12 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
     it('debe generar PINs únicos de 4 dígitos para cada estudiante', async () => {
       // Arrange
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockMercadoPagoPreference);
+      jest
+        .spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockMercadoPagoPreference);
 
       // Mock transaction con PINs únicos
       jest.spyOn(prismaService, '$transaction').mockResolvedValue({
@@ -502,7 +551,9 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
       expect(result.estudiantes_creados).toHaveLength(2);
       expect(result.estudiantes_creados[0].pin).toMatch(/^\d{4}$/);
       expect(result.estudiantes_creados[1].pin).toMatch(/^\d{4}$/);
-      expect(result.estudiantes_creados[0].pin).not.toBe(result.estudiantes_creados[1].pin);
+      expect(result.estudiantes_creados[0].pin).not.toBe(
+        result.estudiantes_creados[1].pin,
+      );
     });
   });
 
@@ -510,8 +561,12 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
     it('debe crear todos los cursos en batch con Promise.all', async () => {
       // Arrange
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockMercadoPagoPreference);
+      jest
+        .spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockMercadoPagoPreference);
 
       // Mock transaction - Retornar estructura esperada con cursosCount = 3
       jest.spyOn(prismaService, '$transaction').mockResolvedValue({
@@ -522,14 +577,16 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
             estudiante: mockEstudiante1,
             estudianteInscripcion: mockEstudianteInscripcion1,
             pin: '1234',
-            cursosSeleccionados: mockCreateDto.estudiantes[0].cursos_seleccionados,
+            cursosSeleccionados:
+              mockCreateDto.estudiantes[0].cursos_seleccionados,
             mundoSeleccionado: undefined,
           },
           {
             estudiante: mockEstudiante2,
             estudianteInscripcion: mockEstudianteInscripcion2,
             pin: '5678',
-            cursosSeleccionados: mockCreateDto.estudiantes[1].cursos_seleccionados,
+            cursosSeleccionados:
+              mockCreateDto.estudiantes[1].cursos_seleccionados,
             mundoSeleccionado: undefined,
           },
         ],
@@ -568,8 +625,12 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
       };
 
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockMercadoPagoPreference);
+      jest
+        .spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockMercadoPagoPreference);
 
       // Mock transaction - Retornar estructura esperada con mundosCount = 2
       jest.spyOn(prismaService, '$transaction').mockResolvedValue({
@@ -610,8 +671,12 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
     it('debe crear historial con estado_anterior=none y estado_nuevo=pending', async () => {
       // Arrange
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockMercadoPagoPreference);
+      jest
+        .spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockMercadoPagoPreference);
 
       // Mock transaction - Retornar estructura esperada
       jest.spyOn(prismaService, '$transaction').mockResolvedValue({
@@ -644,8 +709,12 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
     it('debe guardar mercadopago_preference_id en el registro de pago', async () => {
       // Arrange
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockMercadoPagoPreference);
+      jest
+        .spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockMercadoPagoPreference);
 
       // Mock transaction - Retornar estructura esperada
       jest.spyOn(prismaService, '$transaction').mockResolvedValue({
@@ -677,16 +746,26 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
     it('debe lanzar ConflictException si no puede generar PIN único después de 10 intentos', async () => {
       // Arrange
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockMercadoPagoPreference);
+      jest
+        .spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockMercadoPagoPreference);
 
       // Simular que todos los PINs generados ya existen - la transacción fallará
-      jest.spyOn(prismaService, '$transaction').mockRejectedValue(
-        new InternalServerErrorException('No se pudo generar un PIN único después de 10 intentos')
-      );
+      jest
+        .spyOn(prismaService, '$transaction')
+        .mockRejectedValue(
+          new InternalServerErrorException(
+            'No se pudo generar un PIN único después de 10 intentos',
+          ),
+        );
 
       // Act & Assert
-      await expect(service.createInscripcion2026(mockCreateDto)).rejects.toThrow(InternalServerErrorException);
+      await expect(
+        service.createInscripcion2026(mockCreateDto),
+      ).rejects.toThrow(InternalServerErrorException);
     });
   });
 
@@ -700,14 +779,19 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
             nombre: 'José María Fernández',
             edad: 10,
             dni: '12345678',
-            cursos_seleccionados: mockCreateDto.estudiantes[0].cursos_seleccionados,
+            cursos_seleccionados:
+              mockCreateDto.estudiantes[0].cursos_seleccionados,
           },
         ],
       };
 
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(false);
-      jest.spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData').mockReturnValue({} as any);
-      jest.spyOn(mercadoPagoService, 'createPreference').mockResolvedValue(mockMercadoPagoPreference);
+      jest
+        .spyOn(mercadoPagoService, 'buildInscripcion2026PreferenceData')
+        .mockReturnValue({} as any);
+      jest
+        .spyOn(mercadoPagoService, 'createPreference')
+        .mockResolvedValue(mockMercadoPagoPreference);
 
       const mockEstudianteNormalizado = {
         ...mockEstudiante1,
@@ -745,7 +829,10 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
     it('debe usar placeholder en modo mock sin llamar a MercadoPago API', async () => {
       // Arrange
       jest.spyOn(mercadoPagoService, 'isMockMode').mockReturnValue(true);
-      const createPreferenceSpy = jest.spyOn(mercadoPagoService, 'createPreference');
+      const createPreferenceSpy = jest.spyOn(
+        mercadoPagoService,
+        'createPreference',
+      );
 
       const mockPagoMock = {
         ...mockPago,
@@ -776,7 +863,9 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
       // Assert
       expect(createPreferenceSpy).not.toHaveBeenCalled();
       expect(result.pago_info.mercadopago_preference_id).toBe('MP-MOCK-TEMP');
-      expect(result.pago_info.mercadopago_init_point).toContain('mock-checkout');
+      expect(result.pago_info.mercadopago_init_point).toContain(
+        'mock-checkout',
+      );
     });
   });
 });

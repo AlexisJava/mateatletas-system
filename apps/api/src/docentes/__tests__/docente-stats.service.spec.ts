@@ -53,9 +53,7 @@ describe('DocenteStatsService', () => {
 
     service = module.get<DocenteStatsService>(DocenteStatsService);
     prisma = module.get<PrismaService>(PrismaService);
-    validator = module.get<DocenteBusinessValidator>(
-      DocenteBusinessValidator,
-    );
+    validator = module.get<DocenteBusinessValidator>(DocenteBusinessValidator);
   });
 
   describe('getDashboard', () => {
@@ -63,7 +61,9 @@ describe('DocenteStatsService', () => {
       jest.spyOn(validator, 'validarDocenteExiste').mockResolvedValue();
       jest.spyOn(prisma.claseGrupo, 'findMany').mockResolvedValue([]);
       jest.spyOn(prisma.claseGrupo, 'count').mockResolvedValue(0);
-      jest.spyOn(prisma.inscripcionClaseGrupo, 'findMany').mockResolvedValue([]);
+      jest
+        .spyOn(prisma.inscripcionClaseGrupo, 'findMany')
+        .mockResolvedValue([]);
       jest.spyOn(prisma.asistenciaClaseGrupo, 'findMany').mockResolvedValue([]);
       (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
@@ -81,7 +81,9 @@ describe('DocenteStatsService', () => {
       jest.spyOn(validator, 'validarDocenteExiste').mockResolvedValue();
       jest.spyOn(prisma.claseGrupo, 'findMany').mockResolvedValue([]);
       jest.spyOn(prisma.claseGrupo, 'count').mockResolvedValue(0);
-      jest.spyOn(prisma.inscripcionClaseGrupo, 'findMany').mockResolvedValue([]);
+      jest
+        .spyOn(prisma.inscripcionClaseGrupo, 'findMany')
+        .mockResolvedValue([]);
       jest.spyOn(prisma.asistenciaClaseGrupo, 'findMany').mockResolvedValue([]);
       (prisma.$queryRaw as jest.Mock).mockResolvedValue([]);
 
@@ -93,15 +95,19 @@ describe('DocenteStatsService', () => {
     it('should calculate stats correctly', async () => {
       jest.spyOn(validator, 'validarDocenteExiste').mockResolvedValue();
       jest.spyOn(prisma.claseGrupo, 'findMany').mockResolvedValue([]);
-      jest.spyOn(prisma.claseGrupo, 'count')
+      jest
+        .spyOn(prisma.claseGrupo, 'count')
         .mockResolvedValueOnce(2) // clasesHoy
         .mockResolvedValueOnce(5); // clasesEstaSemana
-      jest.spyOn(prisma.inscripcionClaseGrupo, 'findMany').mockResolvedValue([
-        { estudiante_id: 'est-1' },
-        { estudiante_id: 'est-2' },
-        { estudiante_id: 'est-3' },
-      ] as any);
-      jest.spyOn(prisma.asistenciaClaseGrupo, 'findMany')
+      jest
+        .spyOn(prisma.inscripcionClaseGrupo, 'findMany')
+        .mockResolvedValue([
+          { estudiante_id: 'est-1' },
+          { estudiante_id: 'est-2' },
+          { estudiante_id: 'est-3' },
+        ] as any);
+      jest
+        .spyOn(prisma.asistenciaClaseGrupo, 'findMany')
         .mockResolvedValueOnce([
           { estado: 'Presente' },
           { estado: 'Presente' },
@@ -136,7 +142,9 @@ describe('DocenteStatsService', () => {
   describe('getEstadisticasCompletas', () => {
     it('should return complete statistics structure', async () => {
       jest.spyOn(validator, 'validarDocenteExiste').mockResolvedValue();
-      jest.spyOn(prisma.inscripcionClaseGrupo, 'findMany').mockResolvedValue([]);
+      jest
+        .spyOn(prisma.inscripcionClaseGrupo, 'findMany')
+        .mockResolvedValue([]);
       jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue([]);
       jest.spyOn(prisma.claseGrupo, 'findMany').mockResolvedValue([]);
       jest.spyOn(prisma.puntoObtenido, 'findMany').mockResolvedValue([]);
@@ -163,9 +171,11 @@ describe('DocenteStatsService', () => {
         { id: 'est-1', nombre: 'Juan', apellido: 'Perez', fotoUrl: null },
         { id: 'est-2', nombre: 'Maria', apellido: 'Gomez', fotoUrl: null },
       ] as any);
-      jest.spyOn(prisma.claseGrupo, 'findMany').mockResolvedValue([
-        { id: 'grupo-1', nombre: 'Grupo A', codigo: 'GA', cupo_maximo: 10 },
-      ] as any);
+      jest
+        .spyOn(prisma.claseGrupo, 'findMany')
+        .mockResolvedValue([
+          { id: 'grupo-1', nombre: 'Grupo A', codigo: 'GA', cupo_maximo: 10 },
+        ] as any);
       jest.spyOn(prisma.puntoObtenido, 'findMany').mockResolvedValue([
         { estudiante_id: 'est-1', puntos: 100 },
         { estudiante_id: 'est-1', puntos: 50 },
@@ -197,9 +207,11 @@ describe('DocenteStatsService', () => {
         { id: 'est-1', nombre: 'Juan', apellido: 'Perez', fotoUrl: null },
         { id: 'est-2', nombre: 'Maria', apellido: 'Gomez', fotoUrl: null },
       ] as any);
-      jest.spyOn(prisma.claseGrupo, 'findMany').mockResolvedValue([
-        { id: 'grupo-1', nombre: 'Grupo A', codigo: 'GA', cupo_maximo: 10 },
-      ] as any);
+      jest
+        .spyOn(prisma.claseGrupo, 'findMany')
+        .mockResolvedValue([
+          { id: 'grupo-1', nombre: 'Grupo A', codigo: 'GA', cupo_maximo: 10 },
+        ] as any);
       jest.spyOn(prisma.puntoObtenido, 'findMany').mockResolvedValue([]);
       jest.spyOn(prisma.asistenciaClaseGrupo, 'findMany').mockResolvedValue([]);
       // ProgresoEstudiantePlanificacion será implementado en FASE 2

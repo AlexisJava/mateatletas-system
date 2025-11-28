@@ -16,21 +16,27 @@ async function main() {
   const tutor = await prisma.tutor.findUnique({
     where: { email },
   });
-  console.log(`   ${tutor ? '✅' : '❌'} Tutor: ${tutor ? 'ENCONTRADO' : 'No encontrado'}`);
+  console.log(
+    `   ${tutor ? '✅' : '❌'} Tutor: ${tutor ? 'ENCONTRADO' : 'No encontrado'}`,
+  );
 
   // 2. Buscar como docente
   console.log('\n2️⃣ Buscando en tabla Docente...');
   const docente = await prisma.docente.findUnique({
     where: { email },
   });
-  console.log(`   ${docente ? '✅' : '❌'} Docente: ${docente ? 'ENCONTRADO' : 'No encontrado'}`);
+  console.log(
+    `   ${docente ? '✅' : '❌'} Docente: ${docente ? 'ENCONTRADO' : 'No encontrado'}`,
+  );
 
   // 3. Buscar como admin
   console.log('\n3️⃣ Buscando en tabla Admin...');
   const admin = await prisma.admin.findUnique({
     where: { email },
   });
-  console.log(`   ${admin ? '✅' : '❌'} Admin: ${admin ? 'ENCONTRADO' : 'No encontrado'}`);
+  console.log(
+    `   ${admin ? '✅' : '❌'} Admin: ${admin ? 'ENCONTRADO' : 'No encontrado'}`,
+  );
 
   if (!admin) {
     console.log('\n❌ No se encontró el admin con ese email');
@@ -43,7 +49,9 @@ async function main() {
 
   const isPasswordValid = await bcrypt.compare(password, admin.password_hash);
 
-  console.log(`\n${isPasswordValid ? '✅' : '❌'} Resultado: ${isPasswordValid ? 'CONTRASEÑA VÁLIDA' : 'CONTRASEÑA INVÁLIDA'}`);
+  console.log(
+    `\n${isPasswordValid ? '✅' : '❌'} Resultado: ${isPasswordValid ? 'CONTRASEÑA VÁLIDA' : 'CONTRASEÑA INVÁLIDA'}`,
+  );
 
   if (isPasswordValid) {
     console.log('\n🎉 ¡LOGIN EXITOSO! El email y contraseña son correctos.');

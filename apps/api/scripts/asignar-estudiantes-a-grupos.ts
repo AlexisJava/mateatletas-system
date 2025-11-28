@@ -51,19 +51,27 @@ async function main() {
         });
 
         if (grupoExiste) {
-          console.log(`✅ ${estudiante.nombre} ${estudiante.apellido} - Ya asignado a grupo: ${grupoExiste.nombre}`);
+          console.log(
+            `✅ ${estudiante.nombre} ${estudiante.apellido} - Ya asignado a grupo: ${grupoExiste.nombre}`,
+          );
           yaTienenGrupo++;
           continue;
         } else {
-          console.log(`⚠️  ${estudiante.nombre} ${estudiante.apellido} - Tiene equipo_id inválido, reasignando...`);
+          console.log(
+            `⚠️  ${estudiante.nombre} ${estudiante.apellido} - Tiene equipo_id inválido, reasignando...`,
+          );
         }
       }
 
       // Obtener el sector principal (o el primero si no hay principal)
-      const sectorPrincipal = estudiante.sectores.find((s) => s.es_principal) || estudiante.sectores[0];
+      const sectorPrincipal =
+        estudiante.sectores.find((s) => s.es_principal) ||
+        estudiante.sectores[0];
 
       if (!sectorPrincipal) {
-        console.log(`⚠️  ${estudiante.nombre} ${estudiante.apellido} - Sin sectores asignados`);
+        console.log(
+          `⚠️  ${estudiante.nombre} ${estudiante.apellido} - Sin sectores asignados`,
+        );
         sinGrupo++;
         continue;
       }
@@ -72,7 +80,9 @@ async function main() {
       const grupos = sectorPrincipal.sector.grupos;
 
       if (grupos.length === 0) {
-        console.log(`⚠️  ${estudiante.nombre} ${estudiante.apellido} - Sector "${sectorPrincipal.sector.nombre}" sin grupos activos`);
+        console.log(
+          `⚠️  ${estudiante.nombre} ${estudiante.apellido} - Sector "${sectorPrincipal.sector.nombre}" sin grupos activos`,
+        );
         sinGrupo++;
         continue;
       }
@@ -85,7 +95,9 @@ async function main() {
         data: { equipo_id: grupoAsignado.id },
       });
 
-      console.log(`✅ ${estudiante.nombre} ${estudiante.apellido} → Grupo: ${grupoAsignado.nombre} (${sectorPrincipal.sector.nombre})`);
+      console.log(
+        `✅ ${estudiante.nombre} ${estudiante.apellido} → Grupo: ${grupoAsignado.nombre} (${sectorPrincipal.sector.nombre})`,
+      );
       asignados++;
     }
 
@@ -125,7 +137,6 @@ async function main() {
       }
     }
     console.log('═══════════════════════════════════════════════════════\n');
-
   } catch (error) {
     console.error('❌ Error durante la asignación:', error);
     throw error;

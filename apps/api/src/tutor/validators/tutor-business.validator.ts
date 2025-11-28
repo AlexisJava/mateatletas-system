@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
 
 /**
@@ -45,9 +49,7 @@ export class TutorBusinessValidator {
     });
 
     if (count === 0) {
-      throw new NotFoundException(
-        'El tutor no tiene estudiantes registrados',
-      );
+      throw new NotFoundException('El tutor no tiene estudiantes registrados');
     }
   }
 

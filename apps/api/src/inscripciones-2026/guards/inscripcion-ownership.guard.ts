@@ -96,7 +96,7 @@ export class InscripcionOwnershipGuard implements CanActivate {
     if (!inscripcion) {
       this.logger.warn(
         `⚠️  INTENTO DE ACCESO A INSCRIPCIÓN INEXISTENTE: ` +
-        `user=${user.id}, inscripcionId=${inscripcionId}`,
+          `user=${user.id}, inscripcionId=${inscripcionId}`,
       );
       throw new ForbiddenException(
         'You are not authorized to access this inscripción',
@@ -109,8 +109,8 @@ export class InscripcionOwnershipGuard implements CanActivate {
     if (!isOwner) {
       this.logger.error(
         `🚨 VIOLACIÓN DE OWNERSHIP: ` +
-        `user=${user.id} intentó acceder a inscripción de tutor=${inscripcion.tutor_id}, ` +
-        `inscripcionId=${inscripcionId}`,
+          `user=${user.id} intentó acceder a inscripción de tutor=${inscripcion.tutor_id}, ` +
+          `inscripcionId=${inscripcionId}`,
       );
       throw new ForbiddenException(
         'You are not authorized to access this inscripción',

@@ -9,7 +9,12 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
@@ -45,9 +50,7 @@ import { CompleteMfaLoginDto } from './dto/complete-mfa-login.dto';
 export class MfaController {
   private readonly logger = new Logger(MfaController.name);
 
-  constructor(
-    private readonly mfaService: MfaService,
-  ) {}
+  constructor(private readonly mfaService: MfaService) {}
 
   /**
    * Inicia el setup de MFA
@@ -69,7 +72,8 @@ export class MfaController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Iniciar configuración de MFA',
-    description: 'Genera QR code y backup codes para configurar MFA con Google Authenticator',
+    description:
+      'Genera QR code y backup codes para configurar MFA con Google Authenticator',
   })
   @ApiResponse({
     status: 200,
@@ -82,7 +86,8 @@ export class MfaController {
           'IJKL-9012-MNOP-3456',
           // ... 6 códigos más
         ],
-        message: 'Escanea el QR code con tu app authenticator y guarda los backup codes',
+        message:
+          'Escanea el QR code con tu app authenticator y guarda los backup codes',
       },
     },
   })
@@ -128,7 +133,8 @@ export class MfaController {
     schema: {
       example: {
         success: true,
-        message: 'MFA habilitado exitosamente. Ahora necesitarás un código adicional al iniciar sesión.',
+        message:
+          'MFA habilitado exitosamente. Ahora necesitarás un código adicional al iniciar sesión.',
       },
     },
   })
@@ -183,7 +189,8 @@ export class MfaController {
     schema: {
       example: {
         success: true,
-        message: 'MFA deshabilitado. Ya no necesitarás códigos adicionales al iniciar sesión.',
+        message:
+          'MFA deshabilitado. Ya no necesitarás códigos adicionales al iniciar sesión.',
       },
     },
   })
@@ -255,7 +262,10 @@ export class MfaController {
 
     // Caso 2: Verificar backup code
     if (backupCode) {
-      const isValid = await this.mfaService.verifyBackupCode(userId, backupCode);
+      const isValid = await this.mfaService.verifyBackupCode(
+        userId,
+        backupCode,
+      );
 
       return { valid: isValid };
     }

@@ -25,7 +25,7 @@ async function main() {
       password_hash: hashedPassword,
       nombre: 'Alexis',
       apellido: 'Figueroa',
-    }
+    },
   });
 
   console.log('✅ Admin creado exitosamente!\n');

@@ -9,12 +9,7 @@ import { PagosModule } from '../pagos/pagos.module';
 @Module({
   imports: [PagosModule], // Importar PagosModule para MercadoPagoIpWhitelistService
   controllers: [ColoniaController],
-  providers: [
-    ColoniaService,
-    MercadoPagoService,
-    PrismaClient,
-    ConfigService,
-  ],
+  providers: [ColoniaService, MercadoPagoService, PrismaClient, ConfigService],
   exports: [ColoniaService],
 })
 export class ColoniaModule {}

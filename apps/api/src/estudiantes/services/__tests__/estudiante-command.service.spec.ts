@@ -47,7 +47,7 @@ describe('EstudianteCommandService', () => {
 
     const mockValidator = {
       validateTutorExists: jest.fn(),
-      validateEquipoExists: jest.fn(),
+      validateCasaExists: jest.fn(),
       validateEdad: jest.fn(),
       validateOwnership: jest.fn(),
       validateEstudianteExists: jest.fn(),
@@ -98,13 +98,15 @@ describe('EstudianteCommandService', () => {
         ...createDto,
         username: 'juan.perez',
         tutor_id: 'tutor-1',
-        equipo: null,
+        casa: null,
       };
 
       jest.spyOn(validator, 'validateTutorExists').mockResolvedValue(undefined);
       jest.spyOn(validator, 'validateEdad').mockReturnValue(undefined);
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.estudiante, 'create').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'create')
+        .mockResolvedValue(mockEstudiante as any);
 
       const result = await service.create('tutor-1', createDto as any);
 
@@ -124,18 +126,20 @@ describe('EstudianteCommandService', () => {
         edad: 10,
         nivelEscolar: 'Primaria',
         email: 'juan@test.com',
-        equipoId: 'equipo-1',
+        casaId: 'casa-1',
       };
 
       jest.spyOn(validator, 'validateTutorExists').mockResolvedValue(undefined);
-      jest.spyOn(validator, 'validateEquipoExists').mockResolvedValue(undefined);
+      jest.spyOn(validator, 'validateCasaExists').mockResolvedValue(undefined);
       jest.spyOn(validator, 'validateEdad').mockReturnValue(undefined);
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.estudiante, 'create').mockResolvedValue({ id: 'est-1' } as any);
+      jest
+        .spyOn(prisma.estudiante, 'create')
+        .mockResolvedValue({ id: 'est-1' } as any);
 
       await service.create('tutor-1', createDto as any);
 
-      expect(validator.validateEquipoExists).toHaveBeenCalledWith('equipo-1');
+      expect(validator.validateCasaExists).toHaveBeenCalledWith('casa-1');
     });
 
     it('debe generar username único si ya existe', async () => {
@@ -176,17 +180,22 @@ describe('EstudianteCommandService', () => {
         nombre: 'Juan Carlos',
         edad: 11,
         tutor_id: 'tutor-1',
-        equipo: null,
+        casa: null,
       };
 
       jest.spyOn(validator, 'validateOwnership').mockResolvedValue(undefined);
       jest.spyOn(validator, 'validateEdad').mockReturnValue(undefined);
-      jest.spyOn(prisma.estudiante, 'update').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'update')
+        .mockResolvedValue(mockEstudiante as any);
 
       const result = await service.update('est-1', 'tutor-1', updateDto as any);
 
       expect(result).toEqual(mockEstudiante);
-      expect(validator.validateOwnership).toHaveBeenCalledWith('est-1', 'tutor-1');
+      expect(validator.validateOwnership).toHaveBeenCalledWith(
+        'est-1',
+        'tutor-1',
+      );
       expect(validator.validateEdad).toHaveBeenCalledWith(11);
       expect(eventEmitter.emit).toHaveBeenCalledWith('estudiante.updated', {
         estudianteId: 'est-1',
@@ -197,29 +206,38 @@ describe('EstudianteCommandService', () => {
 
     it('debe validar equipo si se actualiza', async () => {
       const updateDto = {
-        equipoId: 'equipo-nuevo',
+        casaId: 'casa-nueva',
       };
 
       jest.spyOn(validator, 'validateOwnership').mockResolvedValue(undefined);
-      jest.spyOn(validator, 'validateEquipoExists').mockResolvedValue(undefined);
-      jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({ id: 'est-1' } as any);
+      jest.spyOn(validator, 'validateCasaExists').mockResolvedValue(undefined);
+      jest
+        .spyOn(prisma.estudiante, 'update')
+        .mockResolvedValue({ id: 'est-1' } as any);
 
       await service.update('est-1', 'tutor-1', updateDto as any);
 
-      expect(validator.validateEquipoExists).toHaveBeenCalledWith('equipo-nuevo');
+      expect(validator.validateCasaExists).toHaveBeenCalledWith('casa-nueva');
     });
   });
 
   describe('remove', () => {
     it('debe eliminar un estudiante y emitir evento', async () => {
       jest.spyOn(validator, 'validateOwnership').mockResolvedValue(undefined);
-      jest.spyOn(prisma.estudiante, 'delete').mockResolvedValue({ id: 'est-1' } as any);
+      jest
+        .spyOn(prisma.estudiante, 'delete')
+        .mockResolvedValue({ id: 'est-1' } as any);
 
       const result = await service.remove('est-1', 'tutor-1');
 
       expect(result).toEqual({ message: 'Estudiante eliminado correctamente' });
-      expect(validator.validateOwnership).toHaveBeenCalledWith('est-1', 'tutor-1');
-      expect(prisma.estudiante.delete).toHaveBeenCalledWith({ where: { id: 'est-1' } });
+      expect(validator.validateOwnership).toHaveBeenCalledWith(
+        'est-1',
+        'tutor-1',
+      );
+      expect(prisma.estudiante.delete).toHaveBeenCalledWith({
+        where: { id: 'est-1' },
+      });
       expect(eventEmitter.emit).toHaveBeenCalledWith('estudiante.deleted', {
         estudianteId: 'est-1',
         tutorId: 'tutor-1',
@@ -233,14 +251,26 @@ describe('EstudianteCommandService', () => {
         id: 'est-1',
         nombre: 'Juan',
         animacion_idle_url: 'https://example.com/anim.gif',
-        equipo: null,
-        tutor: { id: 'tutor-1', nombre: 'Pedro', apellido: 'López', email: 'pedro@test.com' },
+        casa: null,
+        tutor: {
+          id: 'tutor-1',
+          nombre: 'Pedro',
+          apellido: 'López',
+          email: 'pedro@test.com',
+        },
       };
 
-      jest.spyOn(validator, 'validateEstudianteExists').mockResolvedValue(undefined);
-      jest.spyOn(prisma.estudiante, 'update').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(validator, 'validateEstudianteExists')
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(prisma.estudiante, 'update')
+        .mockResolvedValue(mockEstudiante as any);
 
-      const result = await service.updateAnimacionIdle('est-1', 'https://example.com/anim.gif');
+      const result = await service.updateAnimacionIdle(
+        'est-1',
+        'https://example.com/anim.gif',
+      );
 
       expect(result).toEqual(mockEstudiante);
       expect(validator.validateEstudianteExists).toHaveBeenCalledWith('est-1');
@@ -256,8 +286,12 @@ describe('EstudianteCommandService', () => {
         avatar_gradient: 5,
       };
 
-      jest.spyOn(validator, 'validateEstudianteExists').mockResolvedValue(undefined);
-      jest.spyOn(prisma.estudiante, 'update').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(validator, 'validateEstudianteExists')
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(prisma.estudiante, 'update')
+        .mockResolvedValue(mockEstudiante as any);
 
       const result = await service.updateAvatarGradient('est-1', 5);
 
@@ -296,14 +330,18 @@ describe('EstudianteCommandService', () => {
         tutor_id: 'tutor-1',
       };
 
-      jest.spyOn(validator, 'validateSectorExists').mockResolvedValue(undefined);
+      jest
+        .spyOn(validator, 'validateSectorExists')
+        .mockResolvedValue(undefined);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(mockTutor as any);
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null); // Para generarUsername
       (prisma.$transaction as jest.Mock).mockImplementation((callback: any) => {
         return callback(prisma);
       });
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.estudiante, 'create').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'create')
+        .mockResolvedValue(mockEstudiante as any);
 
       const result = await service.crearEstudiantesConTutor(dto as any);
 
@@ -335,7 +373,9 @@ describe('EstudianteCommandService', () => {
 
       const mockTutor = { id: 'tutor-nuevo', email: 'nuevo@test.com' };
 
-      jest.spyOn(validator, 'validateSectorExists').mockResolvedValue(undefined);
+      jest
+        .spyOn(validator, 'validateSectorExists')
+        .mockResolvedValue(undefined);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null);
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null); // Para generarUsername
       jest.spyOn(prisma.tutor, 'create').mockResolvedValue(mockTutor as any);
@@ -343,7 +383,9 @@ describe('EstudianteCommandService', () => {
         return callback(prisma);
       });
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.estudiante, 'create').mockResolvedValue({ id: 'est-1' } as any);
+      jest
+        .spyOn(prisma.estudiante, 'create')
+        .mockResolvedValue({ id: 'est-1' } as any);
 
       const result = await service.crearEstudiantesConTutor(dto as any);
 
@@ -372,11 +414,17 @@ describe('EstudianteCommandService', () => {
         tutor_id: 'tutor-1',
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(validator, 'validateClaseExists').mockResolvedValue(undefined);
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClase as any);
       jest.spyOn(prisma.inscripcionClase, 'findFirst').mockResolvedValue(null);
-      jest.spyOn(prisma.inscripcionClase, 'create').mockResolvedValue(mockInscripcion as any);
+      jest
+        .spyOn(prisma.inscripcionClase, 'create')
+        .mockResolvedValue(mockInscripcion as any);
       jest.spyOn(prisma.clase, 'update').mockResolvedValue(mockClase as any);
 
       const result = await service.asignarClaseAEstudiante('est-1', 'clase-1');
@@ -391,9 +439,9 @@ describe('EstudianteCommandService', () => {
     it('debe lanzar error si estudiante no existe', async () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
 
-      await expect(service.asignarClaseAEstudiante('est-inexistente', 'clase-1')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.asignarClaseAEstudiante('est-inexistente', 'clase-1'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('debe lanzar error si clase no pertenece al sector del estudiante', async () => {
@@ -409,13 +457,17 @@ describe('EstudianteCommandService', () => {
         cupos_maximo: 10,
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(validator, 'validateClaseExists').mockResolvedValue(undefined);
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClase as any);
 
-      await expect(service.asignarClaseAEstudiante('est-1', 'clase-1')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.asignarClaseAEstudiante('est-1', 'clase-1'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('debe lanzar error si no hay cupos disponibles', async () => {
@@ -431,13 +483,17 @@ describe('EstudianteCommandService', () => {
         cupos_maximo: 10,
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(validator, 'validateClaseExists').mockResolvedValue(undefined);
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClase as any);
 
-      await expect(service.asignarClaseAEstudiante('est-1', 'clase-1')).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        service.asignarClaseAEstudiante('est-1', 'clase-1'),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('debe lanzar error si estudiante ya está inscrito', async () => {
@@ -453,14 +509,20 @@ describe('EstudianteCommandService', () => {
         cupos_maximo: 10,
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(validator, 'validateClaseExists').mockResolvedValue(undefined);
-      jest.spyOn(prisma.clase, 'findUnique').mockResolvedValue(mockClase as any);
-      jest.spyOn(prisma.inscripcionClase, 'findFirst').mockResolvedValue({ id: 'insc-1' } as any);
+      jest
+        .spyOn(prisma.clase, 'findUnique')
+        .mockResolvedValue(mockClase as any);
+      jest
+        .spyOn(prisma.inscripcionClase, 'findFirst')
+        .mockResolvedValue({ id: 'insc-1' } as any);
 
-      await expect(service.asignarClaseAEstudiante('est-1', 'clase-1')).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        service.asignarClaseAEstudiante('est-1', 'clase-1'),
+      ).rejects.toThrow(ConflictException);
     });
   });
 
@@ -472,20 +534,39 @@ describe('EstudianteCommandService', () => {
         tutor_id: 'tutor-1',
       };
       const mockClases = [
-        { id: 'clase-1', nombre: 'Clase A', sector_id: 'sector-1', cupos_ocupados: 5, cupos_maximo: 10 },
-        { id: 'clase-2', nombre: 'Clase B', sector_id: 'sector-1', cupos_ocupados: 3, cupos_maximo: 10 },
+        {
+          id: 'clase-1',
+          nombre: 'Clase A',
+          sector_id: 'sector-1',
+          cupos_ocupados: 5,
+          cupos_maximo: 10,
+        },
+        {
+          id: 'clase-2',
+          nombre: 'Clase B',
+          sector_id: 'sector-1',
+          cupos_ocupados: 3,
+          cupos_maximo: 10,
+        },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
       jest.spyOn(prisma.clase, 'findMany').mockResolvedValue(mockClases as any);
       (prisma.$transaction as jest.Mock).mockImplementation((callback: any) => {
         return callback(prisma);
       });
       jest.spyOn(prisma.inscripcionClase, 'findFirst').mockResolvedValue(null);
-      jest.spyOn(prisma.inscripcionClase, 'create').mockResolvedValue({ id: 'insc-1' } as any);
+      jest
+        .spyOn(prisma.inscripcionClase, 'create')
+        .mockResolvedValue({ id: 'insc-1' } as any);
       jest.spyOn(prisma.clase, 'update').mockResolvedValue({} as any);
 
-      const result = await service.asignarClasesAEstudiante('est-1', ['clase-1', 'clase-2']);
+      const result = await service.asignarClasesAEstudiante('est-1', [
+        'clase-1',
+        'clase-2',
+      ]);
 
       expect(result).toHaveLength(2);
     });
@@ -497,11 +578,18 @@ describe('EstudianteCommandService', () => {
         tutor_id: 'tutor-1',
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as any);
-      jest.spyOn(prisma.clase, 'findMany').mockResolvedValue([{ id: 'clase-1' }] as any);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as any);
+      jest
+        .spyOn(prisma.clase, 'findMany')
+        .mockResolvedValue([{ id: 'clase-1' }] as any);
 
       await expect(
-        service.asignarClasesAEstudiante('est-1', ['clase-1', 'clase-inexistente']),
+        service.asignarClasesAEstudiante('est-1', [
+          'clase-1',
+          'clase-inexistente',
+        ]),
       ).rejects.toThrow(BadRequestException);
     });
   });

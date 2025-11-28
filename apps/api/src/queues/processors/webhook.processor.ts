@@ -1,4 +1,10 @@
-import { Processor, Process, OnQueueActive, OnQueueCompleted, OnQueueFailed } from '@nestjs/bull';
+import {
+  Processor,
+  Process,
+  OnQueueActive,
+  OnQueueCompleted,
+  OnQueueFailed,
+} from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { MercadoPagoWebhookDto } from '../../pagos/dto/mercadopago-webhook.dto';
@@ -56,9 +62,10 @@ export class WebhookProcessor {
 
     try {
       // Procesar webhook usando el servicio existente
-      const result = await this.inscripciones2026Service.procesarWebhookMercadoPago(
-        webhookData,
-      );
+      const result =
+        await this.inscripciones2026Service.procesarWebhookMercadoPago(
+          webhookData,
+        );
 
       this.logger.log(
         `✅ Webhook procesado exitosamente: payment_id=${paymentId}`,
@@ -66,7 +73,8 @@ export class WebhookProcessor {
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       const stack = error instanceof Error ? error.stack : undefined;
 
       this.logger.error(

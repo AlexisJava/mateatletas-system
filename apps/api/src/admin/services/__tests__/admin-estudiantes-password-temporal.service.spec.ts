@@ -15,7 +15,7 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
           provide: PrismaService,
           useValue: {
             sector: { findUnique: jest.fn() },
-            equipo: { findUnique: jest.fn() },
+            casa: { findUnique: jest.fn() },
             tutor: {
               findFirst: jest.fn(),
               findMany: jest.fn(),
@@ -348,7 +348,9 @@ describe('AdminEstudiantesService - Passwords Temporales (TDD RED)', () => {
       expect(resultado[0].nombreCompleto).toBe('Juan Pérez');
       expect(resultado[0].sector).toBe('Matemática');
       expect(resultado[0].rol).toBe('ESTUDIANTE');
-      expect(resultado[0].passwordTemporal).toBe('[NO DISPONIBLE - Ver respuesta de creación]');
+      expect(resultado[0].passwordTemporal).toBe(
+        '[NO DISPONIBLE - Ver respuesta de creación]',
+      );
     });
   });
 });

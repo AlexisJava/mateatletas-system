@@ -20,18 +20,26 @@ export class VerificadorLogrosService {
   /**
    * Verificar logros después de completar un ejercicio
    */
-  async verificarLogrosEjercicio(estudianteId: string, datos: {
-    precision?: number;
-    tiempo?: number; // en segundos
-  }) {
+  async verificarLogrosEjercicio(
+    estudianteId: string,
+    datos: {
+      precision?: number;
+      tiempo?: number; // en segundos
+    },
+  ) {
     const logrosDesbloqueados: string[] = [];
 
     // Contar ejercicios completados
-    const totalEjercicios = await this.contarEjerciciosCompletados(estudianteId);
+    const totalEjercicios =
+      await this.contarEjerciciosCompletados(estudianteId);
 
     // Logro: Primer Paso (1 ejercicio)
     if (totalEjercicios === 1) {
-      await this.intentarDesbloquear(estudianteId, 'primer_paso', logrosDesbloqueados);
+      await this.intentarDesbloquear(
+        estudianteId,
+        'primer_paso',
+        logrosDesbloqueados,
+      );
     }
 
     // Verificar precisión 100%
@@ -66,7 +74,11 @@ export class VerificadorLogrosService {
 
     for (const logro of logros) {
       if (perfectos === logro.cantidad) {
-        await this.intentarDesbloquear(estudianteId, logro.codigo, logrosDesbloqueados);
+        await this.intentarDesbloquear(
+          estudianteId,
+          logro.codigo,
+          logrosDesbloqueados,
+        );
       }
     }
   }
@@ -90,7 +102,11 @@ export class VerificadorLogrosService {
 
     for (const logro of logros) {
       if (rapidos === logro.cantidad) {
-        await this.intentarDesbloquear(estudianteId, logro.codigo, logrosDesbloqueados);
+        await this.intentarDesbloquear(
+          estudianteId,
+          logro.codigo,
+          logrosDesbloqueados,
+        );
       }
     }
   }
@@ -115,7 +131,11 @@ export class VerificadorLogrosService {
 
     for (const logro of logros) {
       if (racha.racha_actual === logro.dias) {
-        await this.intentarDesbloquear(estudianteId, logro.codigo, logrosDesbloqueados);
+        await this.intentarDesbloquear(
+          estudianteId,
+          logro.codigo,
+          logrosDesbloqueados,
+        );
       }
     }
 
@@ -128,7 +148,11 @@ export class VerificadorLogrosService {
 
     for (const logro of logrosDiasActivos) {
       if (diasActivos === logro.dias) {
-        await this.intentarDesbloquear(estudianteId, logro.codigo, logrosDesbloqueados);
+        await this.intentarDesbloquear(
+          estudianteId,
+          logro.codigo,
+          logrosDesbloqueados,
+        );
       }
     }
 
@@ -150,7 +174,11 @@ export class VerificadorLogrosService {
 
     for (const logro of logros) {
       if (nivelNuevo === logro.nivel) {
-        await this.intentarDesbloquear(estudianteId, logro.codigo, logrosDesbloqueados);
+        await this.intentarDesbloquear(
+          estudianteId,
+          logro.codigo,
+          logrosDesbloqueados,
+        );
       }
     }
 
@@ -176,7 +204,11 @@ export class VerificadorLogrosService {
 
     for (const logro of logros) {
       if (temasCompletados === logro.cantidad) {
-        await this.intentarDesbloquear(estudianteId, logro.codigo, logrosDesbloqueados);
+        await this.intentarDesbloquear(
+          estudianteId,
+          logro.codigo,
+          logrosDesbloqueados,
+        );
       }
     }
 
@@ -198,7 +230,11 @@ export class VerificadorLogrosService {
 
     for (const logro of logros) {
       if (clasesAsistidas === logro.cantidad) {
-        await this.intentarDesbloquear(estudianteId, logro.codigo, logrosDesbloqueados);
+        await this.intentarDesbloquear(
+          estudianteId,
+          logro.codigo,
+          logrosDesbloqueados,
+        );
       }
     }
 
@@ -214,7 +250,10 @@ export class VerificadorLogrosService {
     logrosDesbloqueados: string[],
   ) {
     try {
-      const resultado = await this.logrosService.desbloquearLogro(estudianteId, codigoLogro);
+      const resultado = await this.logrosService.desbloquearLogro(
+        estudianteId,
+        codigoLogro,
+      );
 
       if (!resultado.ya_desbloqueado) {
         logrosDesbloqueados.push(codigoLogro);
@@ -234,13 +273,17 @@ export class VerificadorLogrosService {
   // MÉTODOS AUXILIARES DE CONTEO
   // ==========================================
 
-  private async contarEjerciciosCompletados(estudianteId: string): Promise<number> {
+  private async contarEjerciciosCompletados(
+    estudianteId: string,
+  ): Promise<number> {
     // TODO: Implementar con el sistema de ejercicios real
     // Por ahora retorna mock
     return 0;
   }
 
-  private async contarEjerciciosPerfectos(estudianteId: string): Promise<number> {
+  private async contarEjerciciosPerfectos(
+    estudianteId: string,
+  ): Promise<number> {
     // TODO: Implementar con el sistema de ejercicios real
     return 0;
   }

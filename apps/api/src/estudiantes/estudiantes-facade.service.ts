@@ -74,7 +74,9 @@ export class EstudiantesFacadeService {
    * Obtiene clases disponibles para un estudiante
    */
   async obtenerClasesDisponiblesParaEstudiante(estudianteId: string) {
-    return this.queryService.obtenerClasesDisponiblesParaEstudiante(estudianteId);
+    return this.queryService.obtenerClasesDisponiblesParaEstudiante(
+      estudianteId,
+    );
   }
 
   /**
@@ -160,7 +162,10 @@ export class EstudiantesFacadeService {
    * TDD: Asignar múltiples clases a un estudiante
    */
   async asignarClasesAEstudiante(estudianteId: string, clasesIds: string[]) {
-    return this.commandService.asignarClasesAEstudiante(estudianteId, clasesIds);
+    return this.commandService.asignarClasesAEstudiante(
+      estudianteId,
+      clasesIds,
+    );
   }
 
   // ==================== COPY OPERATIONS (Delegadas a CopyService) ====================
@@ -169,7 +174,10 @@ export class EstudiantesFacadeService {
    * TDD: Copiar estudiante existente a otro sector
    */
   async copiarEstudianteASector(estudianteId: string, nuevoSectorId: string) {
-    return this.copyService.copiarEstudianteASector(estudianteId, nuevoSectorId);
+    return this.copyService.copiarEstudianteASector(
+      estudianteId,
+      nuevoSectorId,
+    );
   }
 
   /**

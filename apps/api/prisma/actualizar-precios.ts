@@ -35,16 +35,22 @@ async function main() {
       descuento_aacrea_activo: true,
       dia_vencimiento: 15,
       notificaciones_activas: true,
-    }
+    },
   });
 
   console.log('✅ Configuración general actualizada:');
   console.log(`   • Club Matemáticas: $${config.precio_club_matematicas}`);
-  console.log(`   • Cursos Especializados: $${config.precio_cursos_especializados}`);
-  console.log(`   • Múltiples actividades: $${config.precio_multiple_actividades}`);
+  console.log(
+    `   • Cursos Especializados: $${config.precio_cursos_especializados}`,
+  );
+  console.log(
+    `   • Múltiples actividades: $${config.precio_multiple_actividades}`,
+  );
   console.log(`   • Hermanos básico: $${config.precio_hermanos_basico}`);
   console.log(`   • Hermanos múltiple: $${config.precio_hermanos_multiple}`);
-  console.log(`   • Descuento altas capacidades (AACREA): ${config.descuento_aacrea_porcentaje}%`);
+  console.log(
+    `   • Descuento altas capacidades (AACREA): ${config.descuento_aacrea_porcentaje}%`,
+  );
   console.log(`   • Día de vencimiento: ${config.dia_vencimiento}\n`);
 
   // 2. ACTUALIZAR PRODUCTOS
@@ -52,13 +58,13 @@ async function main() {
 
   // Producto principal: Club Matemáticas
   const clubMate = await prisma.producto.findFirst({
-    where: { nombre: { contains: 'Club' } }
+    where: { nombre: { contains: 'Club' } },
   });
 
   if (clubMate) {
     await prisma.producto.update({
       where: { id: clubMate.id },
-      data: { precio: 50000 }
+      data: { precio: 50000 },
     });
     console.log('   ✓ Club Matemáticas: $50,000');
   }
@@ -66,14 +72,14 @@ async function main() {
   // Cursos especializados
   await prisma.producto.updateMany({
     where: { tipo: 'Curso' },
-    data: { precio: 55000 }
+    data: { precio: 55000 },
   });
   console.log('   ✓ Cursos especializados: $55,000');
 
   // Eliminar o actualizar producto de suscripción mensual viejo
   await prisma.producto.updateMany({
     where: { nombre: 'Suscripción Mensual Mateatletas' },
-    data: { activo: false } // Lo desactivamos
+    data: { activo: false }, // Lo desactivamos
   });
 
   console.log('\n========================================');

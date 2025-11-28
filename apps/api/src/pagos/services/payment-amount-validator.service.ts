@@ -90,7 +90,8 @@ export class PaymentAmountValidatorService {
       }
       this.logger.debug(`❌ Cache MISS: ${cacheKey}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.warn(`⚠️ Redis error: ${errorMessage} - fallback a DB`);
     }
 
@@ -155,7 +156,8 @@ export class PaymentAmountValidatorService {
       }
       this.logger.debug(`❌ Cache MISS: ${cacheKey}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.warn(`⚠️ Redis error: ${errorMessage} - fallback a DB`);
     }
 
@@ -168,9 +170,7 @@ export class PaymentAmountValidatorService {
     });
 
     if (!membresia) {
-      throw new BadRequestException(
-        `Membresía ${membresiaId} no encontrada`,
-      );
+      throw new BadRequestException(`Membresía ${membresiaId} no encontrada`);
     }
 
     expectedAmount = Number(membresia.producto.precio);
@@ -220,7 +220,8 @@ export class PaymentAmountValidatorService {
       }
       this.logger.debug(`❌ Cache MISS: ${cacheKey}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.warn(`⚠️ Redis error: ${errorMessage} - fallback a DB`);
     }
 
@@ -285,7 +286,8 @@ export class PaymentAmountValidatorService {
       }
       this.logger.debug(`❌ Cache MISS: ${cacheKey}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.warn(`⚠️ Redis error: ${errorMessage} - fallback a DB`);
     }
 
@@ -351,7 +353,8 @@ export class PaymentAmountValidatorService {
       }
       this.logger.debug(`❌ Cache MISS: ${cacheKey}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.warn(`⚠️ Redis error: ${errorMessage} - fallback a DB`);
     }
 
@@ -364,9 +367,7 @@ export class PaymentAmountValidatorService {
     });
 
     if (!pago) {
-      throw new BadRequestException(
-        `Pago de colonia ${pagoId} no encontrado`,
-      );
+      throw new BadRequestException(`Pago de colonia ${pagoId} no encontrado`);
     }
 
     expectedAmount = Number(pago.monto);

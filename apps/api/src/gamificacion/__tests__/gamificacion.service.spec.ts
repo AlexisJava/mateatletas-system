@@ -39,11 +39,11 @@ describe('GamificacionService', () => {
     fotoUrl: 'https://example.com/foto.jpg', // camelCase para coincidir con servicio
     avatar_gradient: 1,
     puntos_totales: 350,
-    equipoId: 'equipo-1', // camelCase para coincidir con servicio
-    equipo: {
-      id: 'equipo-1',
+    casaId: 'equipo-1', // camelCase para coincidir con servicio
+    casa: {
+      id: 'casa-1',
       nombre: 'Los Números',
-      color_primario: '#FF0000',
+      colorPrimary: '#FF0000',
     },
     tutor: {
       nombre: 'Juan',
@@ -202,7 +202,7 @@ describe('GamificacionService', () => {
           provide: RankingService,
           useValue: {
             getRankingEstudiante: jest.fn(),
-            getEquipoRanking: jest.fn(),
+            getCasaRanking: jest.fn(),
           },
         },
       ],
@@ -243,7 +243,7 @@ describe('GamificacionService', () => {
         .mockResolvedValueOnce(mockSiguienteNivel as any); // siguienteNivel
       jest.spyOn(logrosService, 'calcularRacha').mockResolvedValue(mockRacha);
       jest
-        .spyOn(rankingService, 'getEquipoRanking')
+        .spyOn(rankingService, 'getCasaRanking')
         .mockResolvedValue(mockEquipoRanking as any);
 
       // Act
@@ -254,14 +254,14 @@ describe('GamificacionService', () => {
       expect(result).toHaveProperty('stats');
       expect(result).toHaveProperty('nivel');
       expect(result).toHaveProperty('proximasClases');
-      expect(result).toHaveProperty('equipoRanking');
+      expect(result).toHaveProperty('casaRanking');
       expect(result).toHaveProperty('ultimasAsistencias');
 
       // Verify estudiante data
       expect(result.estudiante.id).toBe('estudiante-123');
       expect(result.estudiante.nombre).toBe('María');
-      expect(result.estudiante.equipo).toEqual({
-        id: 'equipo-1',
+      expect(result.estudiante.casa).toEqual({
+        id: 'casa-1',
         nombre: 'Los Números',
         color: '#FF0000', // Servicio mapea color_primario -> color
       });
@@ -281,8 +281,8 @@ describe('GamificacionService', () => {
       expect(result.proximasClases[0].nombre).toBe('Matemáticas Avanzadas');
 
       // Verify equipo ranking
-      expect(result.equipoRanking).toHaveLength(2);
-      expect(result.equipoRanking[0].nombre).toBe('María');
+      expect(result.casaRanking).toHaveLength(2);
+      expect(result.casaRanking[0].nombre).toBe('María');
 
       // Verify ultimas asistencias
       expect(result.ultimasAsistencias).toHaveLength(3); // Limited to 5, but only 3 available
@@ -305,8 +305,8 @@ describe('GamificacionService', () => {
       // Arrange
       const estudianteSinEquipo = {
         ...mockEstudiante,
-        equipoId: null,
-        equipo: null,
+        casaId: null,
+        casa: null,
       };
 
       jest
@@ -325,8 +325,8 @@ describe('GamificacionService', () => {
       const result = await service.getDashboardEstudiante('estudiante-123');
 
       // Assert
-      expect(result.equipoRanking).toEqual([]); // Empty array, not null
-      expect(rankingService.getEquipoRanking).not.toHaveBeenCalled(); // Should not fetch equipo ranking
+      expect(result.casaRanking).toEqual([]); // Empty array, not null
+      expect(rankingService.getCasaRanking).not.toHaveBeenCalled(); // Should not fetch equipo ranking
     });
 
     it('should calculate clasesAsistidas correctly (only Presente status)', async () => {
@@ -340,7 +340,7 @@ describe('GamificacionService', () => {
         .mockResolvedValueOnce(mockNivelActual as any)
         .mockResolvedValueOnce(mockSiguienteNivel as any);
       jest.spyOn(logrosService, 'calcularRacha').mockResolvedValue(0);
-      jest.spyOn(rankingService, 'getEquipoRanking').mockResolvedValue([]);
+      jest.spyOn(rankingService, 'getCasaRanking').mockResolvedValue([]);
 
       // Act
       const result = await service.getDashboardEstudiante('estudiante-123');
@@ -362,7 +362,7 @@ describe('GamificacionService', () => {
         .mockResolvedValueOnce(mockNivelActual as any)
         .mockResolvedValueOnce(mockSiguienteNivel as any);
       jest.spyOn(logrosService, 'calcularRacha').mockResolvedValue(0);
-      jest.spyOn(rankingService, 'getEquipoRanking').mockResolvedValue([]);
+      jest.spyOn(rankingService, 'getCasaRanking').mockResolvedValue([]);
 
       // Act
       await service.getDashboardEstudiante('estudiante-123');
@@ -399,7 +399,7 @@ describe('GamificacionService', () => {
         .mockResolvedValueOnce(mockNivelActual as any)
         .mockResolvedValueOnce(mockSiguienteNivel as any);
       jest.spyOn(logrosService, 'calcularRacha').mockResolvedValue(0);
-      jest.spyOn(rankingService, 'getEquipoRanking').mockResolvedValue([]);
+      jest.spyOn(rankingService, 'getCasaRanking').mockResolvedValue([]);
 
       // Act
       const result = await service.getDashboardEstudiante('estudiante-123');

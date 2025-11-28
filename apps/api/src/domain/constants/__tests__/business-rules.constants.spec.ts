@@ -116,7 +116,9 @@ describe('Business Rules Constants', () => {
       const minima = BUSINESS_RULES.ESTUDIANTE.EDAD_MINIMA;
       const maxima = BUSINESS_RULES.ESTUDIANTE.EDAD_MAXIMA;
 
-      expect(mensaje).toBe(`La edad debe estar entre ${minima} y ${maxima} años`);
+      expect(mensaje).toBe(
+        `La edad debe estar entre ${minima} y ${maxima} años`,
+      );
     });
   });
 

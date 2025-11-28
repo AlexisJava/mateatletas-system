@@ -26,7 +26,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
     updatedAt: new Date(),
   };
 
-  const mockEquipo = {
+  const mockCasa = {
     id: 'equipo-quantum-id',
     nombre: 'Quantum',
     color_primario: '#10B981',
@@ -82,7 +82,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
             sector: {
               findUnique: jest.fn(),
             },
-            equipo: {
+            casa: {
               findUnique: jest.fn(),
             },
             tutor: {
@@ -115,7 +115,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
       sectorId: 'sector-matematica-id',
       puntosIniciales: 100,
       nivelInicial: 2,
-      equipoId: 'equipo-fenix-id',
+      casaId: 'equipo-fenix-id',
       nombreTutor: 'Carlos',
       apellidoTutor: 'Pérez',
       emailTutor: 'carlos@test.com',
@@ -140,14 +140,14 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
     it('debería lanzar NotFoundException si el equipo no existe (cuando se proporciona)', async () => {
       // Arrange
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector);
-      jest.spyOn(prisma.equipo, 'findUnique').mockResolvedValue(null);
+      jest.spyOn(prisma.casa, 'findUnique').mockResolvedValue(null);
 
       // Act & Assert
       await expect(
         service.crearEstudianteConCredenciales(validDto),
       ).rejects.toThrow(NotFoundException);
 
-      expect(prisma.equipo.findUnique).toHaveBeenCalledWith({
+      expect(prisma.casa.findUnique).toHaveBeenCalledWith({
         where: { id: 'equipo-fenix-id' },
       });
     });
@@ -155,7 +155,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
     it('debería crear estudiante con tutor EXISTENTE y NO generar credenciales de tutor', async () => {
       // Arrange
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector);
-      jest.spyOn(prisma.equipo, 'findUnique').mockResolvedValue(mockEquipo);
+      jest.spyOn(prisma.casa, 'findUnique').mockResolvedValue(mockCasa);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(mockTutor as any);
 
       jest
@@ -184,7 +184,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
     it('debería crear estudiante con tutor NUEVO y generar credenciales para ambos', async () => {
       // Arrange
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector);
-      jest.spyOn(prisma.equipo, 'findUnique').mockResolvedValue(mockEquipo);
+      jest.spyOn(prisma.casa, 'findUnique').mockResolvedValue(mockCasa);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null); // Tutor NO existe
 
       jest
@@ -213,13 +213,13 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
 
     it('debería crear estudiante SIN equipoId cuando no se proporciona', async () => {
       // Arrange
-      const dtoSinEquipo = { ...validDto, equipoId: undefined };
+      const dtoSinEquipo = { ...validDto, casaId: undefined };
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(null);
 
       const mockEstudianteCreate = jest.fn().mockResolvedValue({
         ...mockEstudiante,
-        equipoId: null,
+        casaId: null,
       });
 
       jest
@@ -235,11 +235,11 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
       const result = await service.crearEstudianteConCredenciales(dtoSinEquipo);
 
       // Assert
-      expect(result.estudiante.equipoId).toBeNull();
+      expect(result.estudiante.casaId).toBeNull();
       expect(mockEstudianteCreate).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            equipoId: null,
+            casaId: null,
           }),
         }),
       );
@@ -287,7 +287,7 @@ describe('AdminEstudiantesService - crearEstudianteConCredenciales', () => {
 
     it('debería hashear el PIN del estudiante antes de guardarlo', async () => {
       // Arrange
-      const dtoSinEquipo = { ...validDto, equipoId: undefined };
+      const dtoSinEquipo = { ...validDto, casaId: undefined };
       jest.spyOn(prisma.sector, 'findUnique').mockResolvedValue(mockSector);
       jest.spyOn(prisma.tutor, 'findFirst').mockResolvedValue(mockTutor as any);
 

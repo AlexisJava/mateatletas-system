@@ -181,7 +181,8 @@ export class Inscripciones2026Controller {
     );
 
     // 1. Verificación rápida de idempotencia en cache (<5ms)
-    const wasProcessed = await this.webhookIdempotencyService.wasProcessed(paymentId);
+    const wasProcessed =
+      await this.webhookIdempotencyService.wasProcessed(paymentId);
 
     if (wasProcessed) {
       this.logger.log(

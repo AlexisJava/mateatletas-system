@@ -68,9 +68,7 @@ describe('DocenteCommandService', () => {
 
     service = module.get<DocenteCommandService>(DocenteCommandService);
     prisma = module.get<PrismaService>(PrismaService);
-    validator = module.get<DocenteBusinessValidator>(
-      DocenteBusinessValidator,
-    );
+    validator = module.get<DocenteBusinessValidator>(DocenteBusinessValidator);
 
     // Mock de bcrypt.hash
     (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
@@ -256,7 +254,10 @@ describe('DocenteCommandService', () => {
 
       await service.update('docente-123', updateDto);
 
-      expect(bcrypt.hash).toHaveBeenCalledWith('NewPass123!', expect.any(Number));
+      expect(bcrypt.hash).toHaveBeenCalledWith(
+        'NewPass123!',
+        expect.any(Number),
+      );
       expect(prisma.docente.update).toHaveBeenCalledWith({
         where: { id: 'docente-123' },
         data: expect.objectContaining({
@@ -272,24 +273,22 @@ describe('DocenteCommandService', () => {
 
       const updateDto = { nombre: 'Juan' };
 
-      await expect(
-        service.update('docente-999', updateDto),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.update('docente-999', updateDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw ConflictException if new email is already in use', async () => {
       jest.spyOn(validator, 'validarDocenteExiste').mockResolvedValue();
       jest
         .spyOn(validator, 'validarEmailUnico')
-        .mockRejectedValue(
-          new ConflictException('El email ya está en uso'),
-        );
+        .mockRejectedValue(new ConflictException('El email ya está en uso'));
 
       const updateDto = { email: 'existente@example.com' };
 
-      await expect(
-        service.update('docente-123', updateDto),
-      ).rejects.toThrow(ConflictException);
+      await expect(service.update('docente-123', updateDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it('should exclude password_hash from response', async () => {
@@ -388,7 +387,9 @@ describe('DocenteCommandService', () => {
       jest
         .spyOn(validator, 'validarReasignacionValida')
         .mockRejectedValue(
-          new ConflictException('No se puede reasignar clases al mismo docente'),
+          new ConflictException(
+            'No se puede reasignar clases al mismo docente',
+          ),
         );
 
       await expect(

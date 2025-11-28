@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { HealthIndicator, HealthIndicatorResult, HealthCheckError } from '@nestjs/terminus';
+import {
+  HealthIndicator,
+  HealthIndicatorResult,
+  HealthCheckError,
+} from '@nestjs/terminus';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 
@@ -71,7 +75,12 @@ export class QueueHealthIndicator extends HealthIndicator {
       const failedRate = total > 0 ? (failed / total) * 100 : 0;
 
       // 4. Evaluar salud según thresholds
-      const isHealthy = this.evaluateHealth(waiting, active, failed, failedRate);
+      const isHealthy = this.evaluateHealth(
+        waiting,
+        active,
+        failed,
+        failedRate,
+      );
 
       const result = {
         redis: 'connected',
@@ -92,7 +101,8 @@ export class QueueHealthIndicator extends HealthIndicator {
 
       return this.getStatus(key, true, result);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       throw new HealthCheckError(
         `Queue health check failed: ${errorMessage}`,
         this.getStatus(key, false, { error: errorMessage }),

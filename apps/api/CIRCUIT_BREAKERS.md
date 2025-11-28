@@ -10,11 +10,13 @@
 Un Circuit Breaker es un patrón de diseño que **previene fallos en cascada** cuando un servicio dependiente falla repetidamente.
 
 **Analogía:** Como el interruptor automático de tu casa:
+
 - Si hay sobrecarga eléctrica → El interruptor se "abre" (corta la corriente)
 - Proteges tu casa de quemarse
 - Después de un tiempo, intentas cerrar el interruptor de nuevo
 
 **En software:**
+
 - Si un servicio falla 5+ veces → Circuit se "abre" (deja de llamarlo)
 - Protege el sistema de seguir intentando operaciones que fallarán
 - Después de 60 segundos, intenta de nuevo
@@ -43,25 +45,28 @@ Usuario → AdminService → ❌ Circuit OPEN → Retorna fallback
 ```
 
 **Cuándo se abre:**
+
 - Después de 5 fallos consecutivos
 - O si falla en estado HALF_OPEN
 
 **Qué pasa:**
+
 - NO se llama al servicio delegado
 - Se retorna valor fallback inmediatamente
 - Se evita sobrecarga del servicio fallido
 
 **Ejemplo:**
+
 ```typescript
 // AdminStatsService falla 5 veces
-getDashboardStats() // Fallo 1
-getDashboardStats() // Fallo 2
-getDashboardStats() // Fallo 3
-getDashboardStats() // Fallo 4
-getDashboardStats() // Fallo 5 → Circuit OPEN
+getDashboardStats(); // Fallo 1
+getDashboardStats(); // Fallo 2
+getDashboardStats(); // Fallo 3
+getDashboardStats(); // Fallo 4
+getDashboardStats(); // Fallo 5 → Circuit OPEN
 
 // Ahora el circuit está OPEN
-getDashboardStats() // Retorna fallback inmediatamente:
+getDashboardStats(); // Retorna fallback inmediatamente:
 // { totalEstudiantes: 0, totalDocentes: 0, ... }
 ```
 
@@ -104,13 +109,13 @@ private readonly statsCircuit = new CircuitBreaker({
 
 ### Tabla de Circuit Breakers
 
-| Circuit | Fallback | ¿Por qué? |
-|---------|----------|-----------|
-| **AdminStatsService** | Stats en 0 | Stats son informativos, no críticos |
-| **AdminAlertasService** | Array vacío `[]` | Alertas son informativas |
-| **AdminUsuariosService** | Array vacío `[]` | Listar usuarios puede fallar, pero admin sigue funcionando |
-| **AdminEstudiantesService** | Array vacío `[]` | Listar estudiantes puede fallar |
-| **AdminRolesService** | **SIN fallback** | Cambiar roles es CRÍTICO, debe fallar explícitamente |
+| Circuit                     | Fallback         | ¿Por qué?                                                  |
+| --------------------------- | ---------------- | ---------------------------------------------------------- |
+| **AdminStatsService**       | Stats en 0       | Stats son informativos, no críticos                        |
+| **AdminAlertasService**     | Array vacío `[]` | Alertas son informativas                                   |
+| **AdminUsuariosService**    | Array vacío `[]` | Listar usuarios puede fallar, pero admin sigue funcionando |
+| **AdminEstudiantesService** | Array vacío `[]` | Listar estudiantes puede fallar                            |
+| **AdminRolesService**       | **SIN fallback** | Cambiar roles es CRÍTICO, debe fallar explícitamente       |
 
 ---
 
@@ -119,6 +124,7 @@ private readonly statsCircuit = new CircuitBreaker({
 ### Caso 1: Base de Datos Lenta (Timeout)
 
 **Escenario:**
+
 ```
 AdminStatsService consulta la BD
 → Query toma 30+ segundos (timeout)
@@ -127,6 +133,7 @@ AdminStatsService consulta la BD
 ```
 
 **Sin Circuit Breaker:**
+
 ```
 GET /admin/dashboard
 → Espera 30 segundos
@@ -137,6 +144,7 @@ GET /admin/dashboard
 ```
 
 **Con Circuit Breaker:**
+
 ```
 GET /admin/dashboard (primeras 5 veces)
 → Espera 30 segundos cada una
@@ -152,6 +160,7 @@ GET /admin/dashboard (a partir de la 6ta vez)
 ```
 
 **Beneficio:**
+
 - ✅ Dashboard parcialmente funcional
 - ✅ Admin puede seguir trabajando
 - ✅ No sobrecarga la BD con más queries fallidas
@@ -162,6 +171,7 @@ GET /admin/dashboard (a partir de la 6ta vez)
 ### Caso 2: Servicio de Alertas Caído
 
 **Escenario:**
+
 ```
 AdminAlertasService.listarAlertas() crashea
 → Código con bug, lanza NullPointerException
@@ -169,6 +179,7 @@ AdminAlertasService.listarAlertas() crashea
 ```
 
 **Sin Circuit Breaker:**
+
 ```
 GET /admin/dashboard
 → Llama a getDashboardStats() ✅
@@ -178,6 +189,7 @@ GET /admin/dashboard
 ```
 
 **Con Circuit Breaker:**
+
 ```
 GET /admin/dashboard
 → Llama a statsCircuit.execute() ✅
@@ -190,6 +202,7 @@ GET /admin/dashboard
 ```
 
 **Beneficio:**
+
 - ✅ Degradación elegante
 - ✅ Usuario ve que hay 0 alertas (en lugar de error completo)
 - ✅ Resto del admin funciona
@@ -199,6 +212,7 @@ GET /admin/dashboard
 ### Caso 3: Operaciones Críticas (Sin Fallback)
 
 **Escenario:**
+
 ```
 POST /admin/usuarios/123/role
 → Cambiar rol de usuario a "Admin"
@@ -206,6 +220,7 @@ POST /admin/usuarios/123/role
 ```
 
 **Con Circuit Breaker (SIN fallback):**
+
 ```
 rolesCircuit.execute(() => changeUserRole(id, role))
 → Si circuit OPEN: Lanza CircuitBreakerOpenError
@@ -214,6 +229,7 @@ rolesCircuit.execute(() => changeUserRole(id, role))
 ```
 
 **Por qué NO tiene fallback:**
+
 - Cambiar roles es una operación **crítica**
 - NO podemos retornar "success" si realmente falló
 - Mejor fallar explícitamente que dar falsa confirmación
@@ -230,6 +246,7 @@ Authorization: Bearer <token-admin>
 ```
 
 **Response:**
+
 ```json
 {
   "stats": {
@@ -268,19 +285,23 @@ Authorization: Bearer <token-admin>
 ### Interpretación
 
 **state: "CLOSED"**
+
 - ✅ Servicio funcionando normalmente
 - Requests pasan sin problemas
 
 **state: "OPEN"**
+
 - ❌ Servicio ha fallado 5+ veces
 - Usando fallback
 - Check `nextAttempt` para ver cuándo reintentará
 
 **state: "HALF_OPEN"**
+
 - ⚠️ Intentando recovery
 - Próximo request determinará si cierra o reabre
 
 **failureCount > 0 pero < 5**
+
 - ⚠️ Servicio teniendo problemas intermitentes
 - No ha llegado al threshold todavía
 
@@ -335,6 +356,7 @@ async getDashboardStats() {
 ### Verificar Comportamiento
 
 1. **Hacer 5 requests que fallen:**
+
    ```bash
    for i in {1..5}; do
      curl http://localhost:3000/admin/dashboard
@@ -342,12 +364,14 @@ async getDashboardStats() {
    ```
 
 2. **Ver que circuit se abre:**
+
    ```bash
    curl http://localhost:3000/admin/circuit-metrics | jq '.stats.state'
    # Debe retornar: "OPEN"
    ```
 
 3. **Verificar fallback:**
+
    ```bash
    curl http://localhost:3000/admin/dashboard
    # Debe retornar stats en 0 inmediatamente (no esperar timeout)
@@ -369,14 +393,14 @@ async getDashboardStats() {
 ```typescript
 // Más permisivo (para servicios con fallos transitorios)
 new CircuitBreaker({
-  failureThreshold: 10,  // Permite 10 fallos antes de abrir
-  resetTimeout: 30000,   // Intenta recovery cada 30s
+  failureThreshold: 10, // Permite 10 fallos antes de abrir
+  resetTimeout: 30000, // Intenta recovery cada 30s
 });
 
 // Más estricto (para servicios críticos)
 new CircuitBreaker({
-  failureThreshold: 3,   // Abre después de solo 3 fallos
-  resetTimeout: 120000,  // Espera 2 minutos antes de reintentar
+  failureThreshold: 3, // Abre después de solo 3 fallos
+  resetTimeout: 120000, // Espera 2 minutos antes de reintentar
 });
 ```
 
@@ -439,30 +463,33 @@ class AdminService {
 ### ❌ DON'T
 
 1. **No uses fallback que mienta al usuario**
+
    ```typescript
    // ❌ MAL
-   fallback: () => ({ success: true })  // Miente que tuvo éxito
+   fallback: () => ({ success: true }); // Miente que tuvo éxito
 
    // ✅ BIEN
-   fallback: () => []  // Claramente vacío
+   fallback: () => []; // Claramente vacío
    ```
 
 2. **No pongas threshold demasiado alto**
+
    ```typescript
    // ❌ MAL
-   failureThreshold: 100  // Permitirá 100 fallos antes de proteger
+   failureThreshold: 100; // Permitirá 100 fallos antes de proteger
 
    // ✅ BIEN
-   failureThreshold: 5  // Detecta problemas rápido
+   failureThreshold: 5; // Detecta problemas rápido
    ```
 
 3. **No uses timeout demasiado corto**
+
    ```typescript
    // ❌ MAL
-   resetTimeout: 1000  // Intenta recovery cada segundo (sobrecarga)
+   resetTimeout: 1000; // Intenta recovery cada segundo (sobrecarga)
 
    // ✅ BIEN
-   resetTimeout: 60000  // Da tiempo al servicio de recuperarse
+   resetTimeout: 60000; // Da tiempo al servicio de recuperarse
    ```
 
 ---
@@ -474,6 +501,7 @@ class AdminService {
 **Causa:** Servicio delegado realmente tiene problemas
 
 **Solución:**
+
 1. Revisar logs del servicio delegado
 2. Verificar conexión a BD
 3. Verificar que el servicio exista
@@ -483,9 +511,10 @@ class AdminService {
 **Causa:** Circuit no tiene fallback configurado
 
 **Solución:**
+
 ```typescript
 new CircuitBreaker({
-  fallback: () => valorPorDefecto,  // ← Agregar esto
+  fallback: () => valorPorDefecto, // ← Agregar esto
 });
 ```
 
@@ -494,6 +523,7 @@ new CircuitBreaker({
 **Causa:** Servicio sigue fallando en HALF_OPEN
 
 **Solución:**
+
 - Arreglar el servicio primero
 - O aumentar `resetTimeout` para dar más tiempo
 
@@ -502,6 +532,7 @@ new CircuitBreaker({
 ## Próximos Pasos
 
 🔜 **Futuras mejoras:**
+
 - [ ] Circuit breakers en otros servicios (Clases, Estudiantes, Pagos)
 - [ ] Dashboard visual de métricas (Grafana)
 - [ ] Alertas automáticas cuando circuit se abre

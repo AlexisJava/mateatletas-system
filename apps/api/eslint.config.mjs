@@ -36,27 +36,36 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-argument': 'error',
 
       // ===== PROHIBIR ts-ignore y ts-nocheck =====
-      '@typescript-eslint/ban-ts-comment': ['error', {
-        'ts-ignore': true,
-        'ts-nocheck': true,
-        'ts-expect-error': 'allow-with-description',
-      }],
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        {
+          'ts-ignore': true,
+          'ts-nocheck': true,
+          'ts-expect-error': 'allow-with-description',
+        },
+      ],
 
       // ===== TIPOS EXPLICITOS =====
-      '@typescript-eslint/explicit-function-return-type': ['error', {
-        allowExpressions: true,
-        allowTypedFunctionExpressions: true,
-        allowHigherOrderFunctions: true,
-      }],
+      '@typescript-eslint/explicit-function-return-type': [
+        'error',
+        {
+          allowExpressions: true,
+          allowTypedFunctionExpressions: true,
+          allowHigherOrderFunctions: true,
+        },
+      ],
       '@typescript-eslint/explicit-module-boundary-types': 'error',
 
       // ===== OTRAS REGLAS ESTRICTAS =====
       '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
 
       // ===== PREVENIR DEBUG CODE =====
       'no-console': ['error', { allow: [] }],

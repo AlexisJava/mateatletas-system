@@ -20,8 +20,8 @@ import { RedisModule } from './redis/redis.module';
 @Module({
   imports: [
     AppConfigModule, // Variables de entorno
-    DatabaseModule,  // Prisma + PostgreSQL
-    RedisModule,     // Redis para caching (Sprint 3 - PASO 3.1)
+    DatabaseModule, // Prisma + PostgreSQL
+    RedisModule, // Redis para caching (Sprint 3 - PASO 3.1)
   ],
   exports: [AppConfigModule, DatabaseModule, RedisModule],
 })

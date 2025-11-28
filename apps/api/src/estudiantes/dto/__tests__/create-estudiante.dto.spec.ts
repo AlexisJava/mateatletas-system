@@ -15,7 +15,7 @@ describe('CreateEstudianteDto - Validation Tests', () => {
         nivelEscolar: 'Primaria',
         fotoUrl: 'https://cloudinary.com/photos/student.jpg',
         avatarUrl: 'https://models.readyplayer.me/abc123.glb',
-        equipoId: '550e8400-e29b-41d4-a716-446655440000',
+        casaId: '550e8400-e29b-41d4-a716-446655440000',
       });
 
       const errors = await validate(dto);
@@ -314,12 +314,12 @@ describe('CreateEstudianteDto - Validation Tests', () => {
         apellido: 'Pérez',
         edad: 10,
         nivelEscolar: 'Primaria',
-        equipoId: 'not-a-uuid',
+        casaId: 'not-a-uuid',
       });
 
       const errors = await validate(dto);
       expect(errors.length).toBeGreaterThan(0);
-      expect(errors.some((e) => e.property === 'equipoId')).toBe(true);
+      expect(errors.some((e) => e.property === 'casaId')).toBe(true);
     });
 
     it('debe aceptar equipoId con UUID válido', async () => {
@@ -328,7 +328,7 @@ describe('CreateEstudianteDto - Validation Tests', () => {
         apellido: 'Pérez',
         edad: 10,
         nivelEscolar: 'Primaria',
-        equipoId: '550e8400-e29b-41d4-a716-446655440000',
+        casaId: '550e8400-e29b-41d4-a716-446655440000',
       });
 
       const errors = await validate(dto);

@@ -7,12 +7,12 @@
  * Estado de un pago en MercadoPago
  */
 export type MercadoPagoPaymentStatus =
-  | 'approved'      // Pago aprobado
-  | 'pending'       // Esperando procesamiento
-  | 'in_process'    // En proceso
-  | 'rejected'      // Rechazado
-  | 'cancelled'     // Cancelado
-  | 'refunded'      // Devuelto
+  | 'approved' // Pago aprobado
+  | 'pending' // Esperando procesamiento
+  | 'in_process' // En proceso
+  | 'rejected' // Rechazado
+  | 'cancelled' // Cancelado
+  | 'refunded' // Devuelto
   | 'charged_back'; // Contracargo
 
 /**
@@ -98,7 +98,13 @@ export interface CreateMercadoPagoPreferenceDto {
  * Payload recibido en webhook de MercadoPago
  */
 export interface MercadoPagoWebhookPayload {
-  type: 'payment' | 'merchant_order' | 'plan' | 'subscription' | 'invoice' | 'point_integration_wh';
+  type:
+    | 'payment'
+    | 'merchant_order'
+    | 'plan'
+    | 'subscription'
+    | 'invoice'
+    | 'point_integration_wh';
   action: string;
   data: {
     id: string;

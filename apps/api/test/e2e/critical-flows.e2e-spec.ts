@@ -92,7 +92,9 @@ describe('[E2E] Critical Business Flows', () => {
         .expect(201);
 
       expect(registerResponse.body).toHaveProperty('access_token');
-      expect(registerResponse.body.user.email).toBe('tutor-gamificacion@example.com');
+      expect(registerResponse.body.user.email).toBe(
+        'tutor-gamificacion@example.com',
+      );
 
       const tutorId = registerResponse.body.user.tutorId;
       const token = registerResponse.body.access_token;
@@ -453,15 +455,13 @@ describe('[E2E] Critical Business Flows', () => {
   describe('Flujo: CSRF Protection (Opt-In)', () => {
     it('should allow login from web origin', async () => {
       // Crear tutor primero
-      await request(app.getHttpServer())
-        .post('/api/auth/register')
-        .send({
-          email: 'csrf-test@example.com',
-          password: 'Password123!',
-          nombre: 'CSRF',
-          apellido: 'Test',
-          role: 'tutor',
-        });
+      await request(app.getHttpServer()).post('/api/auth/register').send({
+        email: 'csrf-test@example.com',
+        password: 'Password123!',
+        nombre: 'CSRF',
+        apellido: 'Test',
+        role: 'tutor',
+      });
 
       // Login con Origin header válido
       const response = await request(app.getHttpServer())
@@ -478,15 +478,13 @@ describe('[E2E] Critical Business Flows', () => {
 
     it('should reject login without Origin header (CSRF protection)', async () => {
       // Crear tutor primero
-      await request(app.getHttpServer())
-        .post('/api/auth/register')
-        .send({
-          email: 'csrf-test2@example.com',
-          password: 'Password123!',
-          nombre: 'CSRF',
-          apellido: 'Test2',
-          role: 'tutor',
-        });
+      await request(app.getHttpServer()).post('/api/auth/register').send({
+        email: 'csrf-test2@example.com',
+        password: 'Password123!',
+        nombre: 'CSRF',
+        apellido: 'Test2',
+        role: 'tutor',
+      });
 
       // Login SIN Origin header (debe fallar si CSRF está activo)
       // Nota: En testing, CSRF puede estar deshabilitado

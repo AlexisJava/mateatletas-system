@@ -159,7 +159,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const lowerKey = key.toLowerCase();
 
       // Si el campo es sensible, redactarlo
-      if (sensitiveFields.some((field) => lowerKey.includes(field.toLowerCase()))) {
+      if (
+        sensitiveFields.some((field) => lowerKey.includes(field.toLowerCase()))
+      ) {
         redacted[key] = '[REDACTED]';
       }
       // Si el valor es un objeto, redactar recursivamente
@@ -203,7 +205,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
       userAgent: headers['user-agent'],
       // ✅ SECURITY FIX: Redactar datos sensibles antes de loggear
       body: this.redactSensitive(body),
-      query: this.redactSensitive(query) as string | Record<string, unknown> | undefined,
+      query: this.redactSensitive(query) as
+        | string
+        | Record<string, unknown>
+        | undefined,
       params: this.redactSensitive(params),
       exceptionType: exception instanceof Error ? exception.name : undefined,
     };

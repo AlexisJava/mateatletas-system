@@ -39,35 +39,37 @@ describe('EstudianteStatsService', () => {
           nombre: 'Juan',
           nivelEscolar: 'Primaria',
           puntos_totales: 100,
-          equipo: { id: 'eq-1', nombre: 'Equipo Rojo' },
+          casa: { id: 'eq-1', nombre: 'Equipo Rojo' },
         },
         {
           id: 'est-2',
           nombre: 'María',
           nivelEscolar: 'Primaria',
           puntos_totales: 150,
-          equipo: { id: 'eq-1', nombre: 'Equipo Rojo' },
+          casa: { id: 'eq-1', nombre: 'Equipo Rojo' },
         },
         {
           id: 'est-3',
           nombre: 'Pedro',
           nivelEscolar: 'Secundaria',
           puntos_totales: 200,
-          equipo: { id: 'eq-2', nombre: 'Equipo Azul' },
+          casa: { id: 'eq-2', nombre: 'Equipo Azul' },
         },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
 
       const result = await service.getEstadisticas('tutor-1');
 
       expect(result).toEqual({
         total: 3,
         por_nivel: {
-          'Primaria': 2,
-          'Secundaria': 1,
+          Primaria: 2,
+          Secundaria: 1,
         },
-        por_equipo: {
+        por_casa: {
           'Equipo Rojo': 2,
           'Equipo Azul': 1,
         },
@@ -82,31 +84,33 @@ describe('EstudianteStatsService', () => {
           nombre: 'Juan',
           nivelEscolar: 'Primaria',
           puntos_totales: 100,
-          equipo: { id: 'eq-1', nombre: 'Equipo Rojo' },
+          casa: { id: 'eq-1', nombre: 'Equipo Rojo' },
         },
         {
           id: 'est-2',
           nombre: 'María',
           nivelEscolar: 'Primaria',
           puntos_totales: 50,
-          equipo: null,
+          casa: null,
         },
         {
           id: 'est-3',
           nombre: 'Pedro',
           nivelEscolar: 'Secundaria',
           puntos_totales: 75,
-          equipo: null,
+          casa: null,
         },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
 
       const result = await service.getEstadisticas('tutor-1');
 
-      expect(result.por_equipo).toEqual({
+      expect(result.por_casa).toEqual({
         'Equipo Rojo': 1,
-        'Sin equipo': 2,
+        'Sin casa': 2,
       });
     });
 
@@ -118,7 +122,7 @@ describe('EstudianteStatsService', () => {
       expect(result).toEqual({
         total: 0,
         por_nivel: {},
-        por_equipo: {},
+        por_casa: {},
         puntos_totales: 0,
       });
     });
@@ -130,25 +134,27 @@ describe('EstudianteStatsService', () => {
           nombre: 'Juan',
           nivelEscolar: 'Primaria',
           puntos_totales: 123,
-          equipo: null,
+          casa: null,
         },
         {
           id: 'est-2',
           nombre: 'María',
           nivelEscolar: 'Primaria',
           puntos_totales: 456,
-          equipo: null,
+          casa: null,
         },
         {
           id: 'est-3',
           nombre: 'Pedro',
           nivelEscolar: 'Secundaria',
           puntos_totales: 789,
-          equipo: null,
+          casa: null,
         },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
 
       const result = await service.getEstadisticas('tutor-1');
 
@@ -157,42 +163,111 @@ describe('EstudianteStatsService', () => {
 
     it('debe agrupar correctamente múltiples niveles escolares', async () => {
       const mockEstudiantes = [
-        { id: 'est-1', nivelEscolar: 'Preescolar', puntos_totales: 10, equipo: null },
-        { id: 'est-2', nivelEscolar: 'Primaria', puntos_totales: 20, equipo: null },
-        { id: 'est-3', nivelEscolar: 'Primaria', puntos_totales: 30, equipo: null },
-        { id: 'est-4', nivelEscolar: 'Secundaria', puntos_totales: 40, equipo: null },
-        { id: 'est-5', nivelEscolar: 'Secundaria', puntos_totales: 50, equipo: null },
-        { id: 'est-6', nivelEscolar: 'Secundaria', puntos_totales: 60, equipo: null },
-        { id: 'est-7', nivelEscolar: 'Universitario', puntos_totales: 70, equipo: null },
+        {
+          id: 'est-1',
+          nivelEscolar: 'Preescolar',
+          puntos_totales: 10,
+          casa: null,
+        },
+        {
+          id: 'est-2',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 20,
+          casa: null,
+        },
+        {
+          id: 'est-3',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 30,
+          casa: null,
+        },
+        {
+          id: 'est-4',
+          nivelEscolar: 'Secundaria',
+          puntos_totales: 40,
+          casa: null,
+        },
+        {
+          id: 'est-5',
+          nivelEscolar: 'Secundaria',
+          puntos_totales: 50,
+          casa: null,
+        },
+        {
+          id: 'est-6',
+          nivelEscolar: 'Secundaria',
+          puntos_totales: 60,
+          casa: null,
+        },
+        {
+          id: 'est-7',
+          nivelEscolar: 'Universitario',
+          puntos_totales: 70,
+          casa: null,
+        },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
 
       const result = await service.getEstadisticas('tutor-1');
 
       expect(result.por_nivel).toEqual({
-        'Preescolar': 1,
-        'Primaria': 2,
-        'Secundaria': 3,
-        'Universitario': 1,
+        Preescolar: 1,
+        Primaria: 2,
+        Secundaria: 3,
+        Universitario: 1,
       });
     });
 
     it('debe agrupar correctamente múltiples equipos', async () => {
       const mockEstudiantes = [
-        { id: 'est-1', nivelEscolar: 'Primaria', puntos_totales: 10, equipo: { nombre: 'Equipo A' } },
-        { id: 'est-2', nivelEscolar: 'Primaria', puntos_totales: 20, equipo: { nombre: 'Equipo A' } },
-        { id: 'est-3', nivelEscolar: 'Primaria', puntos_totales: 30, equipo: { nombre: 'Equipo B' } },
-        { id: 'est-4', nivelEscolar: 'Primaria', puntos_totales: 40, equipo: { nombre: 'Equipo C' } },
-        { id: 'est-5', nivelEscolar: 'Primaria', puntos_totales: 50, equipo: { nombre: 'Equipo C' } },
-        { id: 'est-6', nivelEscolar: 'Primaria', puntos_totales: 60, equipo: { nombre: 'Equipo C' } },
+        {
+          id: 'est-1',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 10,
+          casa: { nombre: 'Equipo A' },
+        },
+        {
+          id: 'est-2',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 20,
+          casa: { nombre: 'Equipo A' },
+        },
+        {
+          id: 'est-3',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 30,
+          casa: { nombre: 'Equipo B' },
+        },
+        {
+          id: 'est-4',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 40,
+          casa: { nombre: 'Equipo C' },
+        },
+        {
+          id: 'est-5',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 50,
+          casa: { nombre: 'Equipo C' },
+        },
+        {
+          id: 'est-6',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 60,
+          casa: { nombre: 'Equipo C' },
+        },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
 
       const result = await service.getEstadisticas('tutor-1');
 
-      expect(result.por_equipo).toEqual({
+      expect(result.por_casa).toEqual({
         'Equipo A': 2,
         'Equipo B': 1,
         'Equipo C': 3,
@@ -206,18 +281,35 @@ describe('EstudianteStatsService', () => {
 
       expect(prisma.estudiante.findMany).toHaveBeenCalledWith({
         where: { tutor_id: 'tutor-123' },
-        include: { equipo: true },
+        include: { casa: true },
       });
     });
 
     it('debe manejar estudiantes con puntos_totales en cero', async () => {
       const mockEstudiantes = [
-        { id: 'est-1', nivelEscolar: 'Primaria', puntos_totales: 0, equipo: null },
-        { id: 'est-2', nivelEscolar: 'Primaria', puntos_totales: 0, equipo: null },
-        { id: 'est-3', nivelEscolar: 'Primaria', puntos_totales: 100, equipo: null },
+        {
+          id: 'est-1',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 0,
+          casa: null,
+        },
+        {
+          id: 'est-2',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 0,
+          casa: null,
+        },
+        {
+          id: 'est-3',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 100,
+          casa: null,
+        },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
 
       const result = await service.getEstadisticas('tutor-1');
 
@@ -227,21 +319,48 @@ describe('EstudianteStatsService', () => {
 
     it('debe manejar mezcla de estudiantes con y sin equipo', async () => {
       const mockEstudiantes = [
-        { id: 'est-1', nivelEscolar: 'Primaria', puntos_totales: 10, equipo: { nombre: 'Equipo Rojo' } },
-        { id: 'est-2', nivelEscolar: 'Primaria', puntos_totales: 20, equipo: null },
-        { id: 'est-3', nivelEscolar: 'Primaria', puntos_totales: 30, equipo: { nombre: 'Equipo Azul' } },
-        { id: 'est-4', nivelEscolar: 'Primaria', puntos_totales: 40, equipo: null },
-        { id: 'est-5', nivelEscolar: 'Primaria', puntos_totales: 50, equipo: { nombre: 'Equipo Rojo' } },
+        {
+          id: 'est-1',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 10,
+          casa: { nombre: 'Equipo Rojo' },
+        },
+        {
+          id: 'est-2',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 20,
+          casa: null,
+        },
+        {
+          id: 'est-3',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 30,
+          casa: { nombre: 'Equipo Azul' },
+        },
+        {
+          id: 'est-4',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 40,
+          casa: null,
+        },
+        {
+          id: 'est-5',
+          nivelEscolar: 'Primaria',
+          puntos_totales: 50,
+          casa: { nombre: 'Equipo Rojo' },
+        },
       ];
 
-      jest.spyOn(prisma.estudiante, 'findMany').mockResolvedValue(mockEstudiantes as any);
+      jest
+        .spyOn(prisma.estudiante, 'findMany')
+        .mockResolvedValue(mockEstudiantes as any);
 
       const result = await service.getEstadisticas('tutor-1');
 
-      expect(result.por_equipo).toEqual({
+      expect(result.por_casa).toEqual({
         'Equipo Rojo': 2,
         'Equipo Azul': 1,
-        'Sin equipo': 2,
+        'Sin casa': 2,
       });
     });
   });

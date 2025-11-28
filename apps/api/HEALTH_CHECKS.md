@@ -10,6 +10,7 @@
 Los health checks son endpoints que permiten monitorear la salud del sistema en tiempo real.
 
 **Casos de uso:**
+
 - ✅ Verificar que el servidor está funcionando
 - ✅ Detectar problemas de base de datos antes de que afecten usuarios
 - ✅ Kubernetes/Docker puede reiniciar contenedores automáticamente si fallan
@@ -25,11 +26,13 @@ Los health checks son endpoints que permiten monitorear la salud del sistema en 
 **Uso:** Verificación completa del sistema
 
 **Request:**
+
 ```bash
 GET http://localhost:3000/health
 ```
 
 **Response (Success):**
+
 ```json
 {
   "status": "ok",
@@ -48,6 +51,7 @@ GET http://localhost:3000/health
 ```
 
 **Response (Error - BD Caída):**
+
 ```json
 {
   "status": "error",
@@ -68,6 +72,7 @@ GET http://localhost:3000/health
 ```
 
 **HTTP Status:**
+
 - `200 OK` - Todo funciona
 - `503 Service Unavailable` - Algún componente crítico falló
 
@@ -78,11 +83,13 @@ GET http://localhost:3000/health
 **Uso:** ¿Está el sistema listo para recibir tráfico?
 
 **Cuándo usar:**
+
 - Kubernetes readiness probe
 - Load balancer health check
 - Antes de enviar tráfico a una nueva instancia
 
 **Request:**
+
 ```bash
 GET http://localhost:3000/health/ready
 ```
@@ -90,6 +97,7 @@ GET http://localhost:3000/health/ready
 **Response:** Igual que `/health`
 
 **Diferencia con `/health`:**
+
 - `/health` es para monitoreo general
 - `/health/ready` es para decidir si enviar tráfico
 
@@ -100,16 +108,19 @@ GET http://localhost:3000/health/ready
 **Uso:** ¿Está el proceso vivo (no colgado)?
 
 **Cuándo usar:**
+
 - Kubernetes liveness probe
 - Verificar que el proceso Node.js no está colgado
 - Monitoreo simple sin verificar dependencias
 
 **Request:**
+
 ```bash
 GET http://localhost:3000/health/live
 ```
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -119,11 +130,13 @@ GET http://localhost:3000/health/live
 ```
 
 **Campos:**
+
 - `status`: Siempre "ok" si el endpoint responde
 - `timestamp`: Timestamp actual en ISO 8601
 - `uptime`: Segundos que lleva corriendo el proceso
 
 **HTTP Status:**
+
 - `200 OK` - Proceso vivo
 - Si no responde → Proceso muerto/colgado
 
@@ -141,6 +154,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 ```
 
 **Parámetros:**
+
 - `--interval=30s` - Verificar cada 30 segundos
 - `--timeout=3s` - Esperar máximo 3 segundos
 - `--start-period=40s` - Dar 40 segundos para que la app arranque
@@ -161,33 +175,34 @@ spec:
   template:
     spec:
       containers:
-      - name: api
-        image: mateatletas-api:latest
-        ports:
-        - containerPort: 3000
+        - name: api
+          image: mateatletas-api:latest
+          ports:
+            - containerPort: 3000
 
-        # Liveness Probe: Reinicia el pod si falla
-        livenessProbe:
-          httpGet:
-            path: /health/live
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 3
-          failureThreshold: 3
+          # Liveness Probe: Reinicia el pod si falla
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
 
-        # Readiness Probe: Deja de enviar tráfico si falla
-        readinessProbe:
-          httpGet:
-            path: /health/ready
-            port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 2
+          # Readiness Probe: Deja de enviar tráfico si falla
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
 ```
 
 **Diferencia:**
+
 - `livenessProbe` → Si falla 3 veces, Kubernetes **reinicia el pod**
 - `readinessProbe` → Si falla 2 veces, Kubernetes **deja de enviar tráfico** (pero no reinicia)
 
@@ -234,6 +249,7 @@ done
 ```
 
 **Uso:**
+
 ```bash
 chmod +x monitor-health.sh
 ./monitor-health.sh
@@ -304,29 +320,37 @@ async check(): Promise<HealthCheckResult> {
 ## Interpretando los Resultados
 
 ### Status: "ok"
+
 ✅ **Todo funciona correctamente**
+
 - Base de datos conectada
 - Sistema listo para recibir tráfico
 - No se requiere acción
 
 ### Status: "error"
+
 ❌ **Problema crítico detectado**
+
 - Base de datos desconectada
 - Servicio externo caído
 - Sistema NO debe recibir tráfico
 
 **Acciones:**
+
 1. Revisar logs: `tail -f logs/error.log`
 2. Verificar conexión a BD: `npx prisma db push`
 3. Reiniciar servidor si es necesario
 
 ### Status: No responde
+
 💀 **Proceso muerto o colgado**
+
 - Node.js crasheó
 - Proceso colgado en operación infinita
 - Puerto bloqueado
 
 **Acciones:**
+
 1. Reiniciar proceso: `pm2 restart api`
 2. Revisar logs de crash
 3. Verificar memoria: `free -m`
@@ -356,11 +380,12 @@ curl http://localhost:3000/health
 ```typescript
 // Agregar temporalmente en main.ts (NO EN PRODUCCIÓN)
 setTimeout(() => {
-  while(true) {} // Infinite loop - cuelga el proceso
+  while (true) {} // Infinite loop - cuelga el proceso
 }, 5000);
 ```
 
 Después de 5 segundos:
+
 - `/health` no responde
 - Liveness probe falla
 - Kubernetes reinicia el pod automáticamente
@@ -431,6 +456,7 @@ Los health checks generan logs automáticamente:
 ## Checklist de Implementación
 
 ✅ **Completado:**
+
 - [x] Health check endpoint creado
 - [x] Readiness probe implementado
 - [x] Liveness probe implementado
@@ -439,6 +465,7 @@ Los health checks generan logs automáticamente:
 - [x] Importado en AppModule
 
 🔜 **Próximos pasos (opcional):**
+
 - [ ] Configurar Docker healthcheck
 - [ ] Configurar Kubernetes probes
 - [ ] Agregar Redis health indicator

@@ -41,12 +41,16 @@ export async function seedClaseGrupos(prisma: PrismaClient) {
   });
 
   if (!grupoPedagogicoB1) {
-    throw new Error('Grupo pedagógico B1 no encontrado. Ejecutar migración primero.');
+    throw new Error(
+      'Grupo pedagógico B1 no encontrado. Ejecutar migración primero.',
+    );
   }
 
   // Grupo B1 - Lunes 19:30
   const grupoB1 = await prisma.claseGrupo.upsert({
-    where: { nombre: 'GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO (6 y 7 años)' },
+    where: {
+      nombre: 'GRUPO B1 - MATEMÁTICA - PERFIL BASE PROGRESIVO (6 y 7 años)',
+    },
     update: {},
     create: {
       codigo: 'B1',
@@ -68,7 +72,9 @@ export async function seedClaseGrupos(prisma: PrismaClient) {
   });
 
   console.log(`   ✅ ${grupoB1.codigo} - ${grupoB1.nombre}`);
-  console.log(`      ${grupoB1.dia_semana} ${grupoB1.hora_inicio} - ${grupoB1.hora_fin}`);
+  console.log(
+    `      ${grupoB1.dia_semana} ${grupoB1.hora_inicio} - ${grupoB1.hora_fin}`,
+  );
 
   // Inscribir estudiantes al grupo
   for (const estudiante of estudiantes) {
@@ -88,7 +94,9 @@ export async function seedClaseGrupos(prisma: PrismaClient) {
       },
     });
 
-    console.log(`      📝 ${estudiante.nombre} ${estudiante.apellido} inscrito`);
+    console.log(
+      `      📝 ${estudiante.nombre} ${estudiante.apellido} inscrito`,
+    );
   }
 
   // Obtener grupo pedagógico B2
@@ -97,7 +105,9 @@ export async function seedClaseGrupos(prisma: PrismaClient) {
   });
 
   if (!grupoPedagogicoB2) {
-    throw new Error('Grupo pedagógico B2 no encontrado. Ejecutar migración primero.');
+    throw new Error(
+      'Grupo pedagógico B2 no encontrado. Ejecutar migración primero.',
+    );
   }
 
   // Grupo B2 - Miércoles 18:00 (ejemplo de curso temporal)
@@ -124,8 +134,12 @@ export async function seedClaseGrupos(prisma: PrismaClient) {
   });
 
   console.log(`   ✅ ${grupoB2.codigo} - ${grupoB2.nombre}`);
-  console.log(`      ${grupoB2.dia_semana} ${grupoB2.hora_inicio} - ${grupoB2.hora_fin}`);
-  console.log(`      Finaliza: ${grupoB2.fecha_fin.toISOString().split('T')[0]}`);
+  console.log(
+    `      ${grupoB2.dia_semana} ${grupoB2.hora_inicio} - ${grupoB2.hora_fin}`,
+  );
+  console.log(
+    `      Finaliza: ${grupoB2.fecha_fin.toISOString().split('T')[0]}`,
+  );
 
   console.log('✅ Grupos de clases creados\n');
 }

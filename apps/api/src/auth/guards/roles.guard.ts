@@ -55,7 +55,7 @@ export class RolesGuard implements CanActivate {
 
     // Normalizar roles del usuario a strings uppercase
     const normalizedUserRoles = userRoles
-      .map(r => typeof r === 'string' ? r.toUpperCase() : r)
+      .map((r) => (typeof r === 'string' ? r.toUpperCase() : r))
       .filter(esRoleValido);
 
     if (normalizedUserRoles.length === 0) {
@@ -66,7 +66,7 @@ export class RolesGuard implements CanActivate {
     // Un usuario con rol superior (ej: ADMIN) puede acceder a endpoints que requieren roles inferiores (ej: DOCENTE)
     return requiredRoles.some((requiredRole: Role) =>
       normalizedUserRoles.some((userRole: Role) =>
-        cumpleJerarquia(userRole, requiredRole)
+        cumpleJerarquia(userRole, requiredRole),
       ),
     );
   }

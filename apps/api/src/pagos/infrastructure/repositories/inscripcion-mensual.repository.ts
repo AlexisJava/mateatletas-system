@@ -387,7 +387,9 @@ export class InscripcionMensualRepository
    * Convierte de tipos de Prisma a tipos del Domain
    * IMPORTANTE: Convierte Prisma.Decimal a Decimal de decimal.js
    */
-  private mapearPrismaADomain(inscripcion: Prisma.InscripcionMensualGetPayload<object>): InscripcionMensual {
+  private mapearPrismaADomain(
+    inscripcion: Prisma.InscripcionMensualGetPayload<object>,
+  ): InscripcionMensual {
     return {
       id: inscripcion.id,
       estudianteId: inscripcion.estudiante_id,

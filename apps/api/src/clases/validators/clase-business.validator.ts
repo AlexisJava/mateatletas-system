@@ -48,9 +48,7 @@ export class ClaseBusinessValidator {
     });
 
     if (!docente) {
-      throw new NotFoundException(
-        `Docente con ID ${docenteId} no encontrado`,
-      );
+      throw new NotFoundException(`Docente con ID ${docenteId} no encontrado`);
     }
   }
 
@@ -165,10 +163,7 @@ export class ClaseBusinessValidator {
    * Validar que hay cupos disponibles
    * @throws BadRequestException si no hay cupos suficientes
    */
-  validarCuposDisponibles(
-    clase: Clase,
-    cantidadEstudiantes: number,
-  ): void {
+  validarCuposDisponibles(clase: Clase, cantidadEstudiantes: number): void {
     const cuposDisponibles = clase.cupos_maximo - clase.cupos_ocupados;
 
     if (cantidadEstudiantes > cuposDisponibles) {

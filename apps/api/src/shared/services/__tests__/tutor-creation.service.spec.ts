@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException } from '@nestjs/common';
-import { TutorCreationService, CreateTutorData } from '../tutor-creation.service';
+import {
+  TutorCreationService,
+  CreateTutorData,
+} from '../tutor-creation.service';
 import { PrismaService } from '../../../core/database/prisma.service';
 import * as bcrypt from 'bcrypt';
 
@@ -55,7 +58,9 @@ describe('TutorCreationService', () => {
         nombre: 'Juan Pérez',
       };
 
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(existingTutor as any);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(existingTutor as any);
 
       await expect(
         service.validateUniqueEmail('existente@example.com'),
@@ -69,11 +74,15 @@ describe('TutorCreationService', () => {
 
   describe('generateUsername', () => {
     it('debe generar username desde email (lowercase)', () => {
-      expect(service.generateUsername('Juan.Perez@Example.com')).toBe('juan.perez');
+      expect(service.generateUsername('Juan.Perez@Example.com')).toBe(
+        'juan.perez',
+      );
     });
 
     it('debe extraer la parte local del email', () => {
-      expect(service.generateUsername('usuario123@dominio.com')).toBe('usuario123');
+      expect(service.generateUsername('usuario123@dominio.com')).toBe(
+        'usuario123',
+      );
     });
 
     it('debe convertir a lowercase', () => {
@@ -81,7 +90,9 @@ describe('TutorCreationService', () => {
     });
 
     it('debe manejar emails con múltiples puntos', () => {
-      expect(service.generateUsername('juan.carlos.perez@example.com')).toBe('juan.carlos.perez');
+      expect(service.generateUsername('juan.carlos.perez@example.com')).toBe(
+        'juan.carlos.perez',
+      );
     });
   });
 

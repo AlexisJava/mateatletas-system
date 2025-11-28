@@ -11,7 +11,9 @@ async function createTestStudent() {
   const equipo = await prisma.equipo.findFirst();
 
   if (!tutor || !equipo) {
-    console.error('❌ Error: No se encontró tutor o equipo. Ejecuta el seed primero.');
+    console.error(
+      '❌ Error: No se encontró tutor o equipo. Ejecuta el seed primero.',
+    );
     return;
   }
 

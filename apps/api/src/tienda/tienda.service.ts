@@ -43,18 +43,18 @@ export class TiendaService {
   // ============================================================================
 
   async obtenerCategorias(): Promise<CategoriaItem[]> {
-    return await this.prisma.categoriaItem.findMany({
+    return (await this.prisma.categoriaItem.findMany({
       where: { activa: true },
       orderBy: { orden: 'asc' },
-    }) as CategoriaItem[];
+    })) as CategoriaItem[];
   }
 
   async crearCategoria(data: CreateCategoriaItem): Promise<CategoriaItem> {
     this.logger.log(`Creando categoría: ${data.nombre}`);
 
-    return await this.prisma.categoriaItem.create({
+    return (await this.prisma.categoriaItem.create({
       data,
-    }) as CategoriaItem;
+    })) as CategoriaItem;
   }
 
   async actualizarCategoria(
@@ -71,10 +71,10 @@ export class TiendaService {
       throw new NotFoundException(`Categoría con ID ${id} no encontrada`);
     }
 
-    return await this.prisma.categoriaItem.update({
+    return (await this.prisma.categoriaItem.update({
       where: { id },
       data,
-    }) as CategoriaItem;
+    })) as CategoriaItem;
   }
 
   // ============================================================================
@@ -149,7 +149,11 @@ export class TiendaService {
       this.prisma.itemTienda.findMany({
         where: whereClause,
         include: { categoria: true },
-        orderBy: [{ categoria_id: 'asc' }, { rareza: 'desc' }, { nombre: 'asc' }],
+        orderBy: [
+          { categoria_id: 'asc' },
+          { rareza: 'desc' },
+          { nombre: 'asc' },
+        ],
       }),
       this.prisma.itemTienda.count({ where: whereClause }),
       this.obtenerCategorias(),
@@ -195,18 +199,21 @@ export class TiendaService {
       );
     }
 
-    return await this.prisma.itemTienda.create({
+    return (await this.prisma.itemTienda.create({
       data: {
         ...data,
         metadata: data.metadata as never,
       },
-    }) as ItemTienda;
+    })) as ItemTienda;
   }
 
   /**
    * Actualiza un item de la tienda (ADMIN)
    */
-  async actualizarItem(id: string, data: UpdateItemTienda): Promise<ItemTienda> {
+  async actualizarItem(
+    id: string,
+    data: UpdateItemTienda,
+  ): Promise<ItemTienda> {
     this.logger.log(`Actualizando item: ${id}`);
 
     const itemExiste = await this.prisma.itemTienda.findUnique({
@@ -217,13 +224,13 @@ export class TiendaService {
       throw new NotFoundException(`Item con ID ${id} no encontrado`);
     }
 
-    return await this.prisma.itemTienda.update({
+    return (await this.prisma.itemTienda.update({
       where: { id },
       data: {
         ...data,
         metadata: data.metadata as never,
       },
-    }) as ItemTienda;
+    })) as ItemTienda;
   }
 
   // ============================================================================
@@ -280,7 +287,10 @@ export class TiendaService {
   /**
    * Equipa un item en el estudiante
    */
-  async equiparItem(estudianteId: string, itemId: string): Promise<ItemObtenido> {
+  async equiparItem(
+    estudianteId: string,
+    itemId: string,
+  ): Promise<ItemObtenido> {
     this.logger.log(
       `Equipando item ${itemId} para estudiante: ${estudianteId}`,
     );
@@ -373,17 +383,19 @@ export class TiendaService {
     }
 
     // 5. Verificar que tenga recursos suficientes
-    const verificacion = await this.recursosService.verificarRecursosSuficientes(
-      estudiante_id,
-      item.precio_monedas,
-    );
+    const verificacion =
+      await this.recursosService.verificarRecursosSuficientes(
+        estudiante_id,
+        item.precio_monedas,
+      );
 
     if (!verificacion.suficientes) {
       throw new BadRequestException(verificacion.mensaje);
     }
 
     // 6. Obtener recursos para crear compra
-    const recursos = await this.recursosService.obtenerOCrearRecursos(estudiante_id);
+    const recursos =
+      await this.recursosService.obtenerOCrearRecursos(estudiante_id);
 
     // 7. Usar transacción de Prisma para atomicidad
     const resultado = await this.prisma.$transaction(async (tx) => {
@@ -452,8 +464,11 @@ export class TiendaService {
   /**
    * Obtiene el historial de compras de un estudiante
    */
-  async obtenerHistorialCompras(estudianteId: string): Promise<CompraResponse[]> {
-    const recursos = await this.recursosService.obtenerOCrearRecursos(estudianteId);
+  async obtenerHistorialCompras(
+    estudianteId: string,
+  ): Promise<CompraResponse[]> {
+    const recursos =
+      await this.recursosService.obtenerOCrearRecursos(estudianteId);
 
     const compras = await this.prisma.compraItem.findMany({
       where: { recursos_estudiante_id: recursos.id },

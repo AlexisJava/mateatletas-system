@@ -20,16 +20,16 @@ export async function seedConfiguracionPrecios(prisma: PrismaClient) {
       id: 'singleton',
 
       // Precios base por tipo de producto
-      precio_club_matematicas: 50000.00,
-      precio_cursos_especializados: 55000.00,
+      precio_club_matematicas: 50000.0,
+      precio_cursos_especializados: 55000.0,
 
       // Precios con descuentos configurables
-      precio_multiple_actividades: 44000.00,
-      precio_hermanos_basico: 44000.00,
-      precio_hermanos_multiple: 38000.00,
+      precio_multiple_actividades: 44000.0,
+      precio_hermanos_basico: 44000.0,
+      precio_hermanos_multiple: 38000.0,
 
       // Descuento AACREA
-      descuento_aacrea_porcentaje: 20.00,
+      descuento_aacrea_porcentaje: 20.0,
       descuento_aacrea_activo: true,
 
       // Configuración de notificaciones
@@ -40,12 +40,28 @@ export async function seedConfiguracionPrecios(prisma: PrismaClient) {
   });
 
   console.log('   ✅ Configuración de precios inicializada:');
-  console.log(`      - Club Matemáticas: $${configuracion.precio_club_matematicas.toNumber().toLocaleString('es-AR')}`);
-  console.log(`      - Cursos Especializados: $${configuracion.precio_cursos_especializados.toNumber().toLocaleString('es-AR')}`);
-  console.log(`      - Múltiples actividades: $${configuracion.precio_multiple_actividades.toNumber().toLocaleString('es-AR')}`);
-  console.log(`      - Hermanos básico: $${configuracion.precio_hermanos_basico.toNumber().toLocaleString('es-AR')}`);
-  console.log(`      - Hermanos múltiple: $${configuracion.precio_hermanos_multiple.toNumber().toLocaleString('es-AR')}`);
-  console.log(`      - Descuento AACREA: ${configuracion.descuento_aacrea_porcentaje.toNumber()}%`);
-  console.log(`      - Día de vencimiento: ${configuracion.dia_vencimiento} de cada mes`);
-  console.log(`      - Notificaciones: ${configuracion.notificaciones_activas ? 'Activas' : 'Inactivas'}\n`);
+  console.log(
+    `      - Club Matemáticas: $${configuracion.precio_club_matematicas.toNumber().toLocaleString('es-AR')}`,
+  );
+  console.log(
+    `      - Cursos Especializados: $${configuracion.precio_cursos_especializados.toNumber().toLocaleString('es-AR')}`,
+  );
+  console.log(
+    `      - Múltiples actividades: $${configuracion.precio_multiple_actividades.toNumber().toLocaleString('es-AR')}`,
+  );
+  console.log(
+    `      - Hermanos básico: $${configuracion.precio_hermanos_basico.toNumber().toLocaleString('es-AR')}`,
+  );
+  console.log(
+    `      - Hermanos múltiple: $${configuracion.precio_hermanos_multiple.toNumber().toLocaleString('es-AR')}`,
+  );
+  console.log(
+    `      - Descuento AACREA: ${configuracion.descuento_aacrea_porcentaje.toNumber()}%`,
+  );
+  console.log(
+    `      - Día de vencimiento: ${configuracion.dia_vencimiento} de cada mes`,
+  );
+  console.log(
+    `      - Notificaciones: ${configuracion.notificaciones_activas ? 'Activas' : 'Inactivas'}\n`,
+  );
 }

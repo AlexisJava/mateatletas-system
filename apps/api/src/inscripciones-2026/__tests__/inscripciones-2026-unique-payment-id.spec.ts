@@ -61,7 +61,12 @@ describe('Inscripciones2026 - Unique Constraint mercadopago_payment_id', () => {
     await prisma.pagoInscripcion2026.deleteMany({
       where: {
         mercadopago_payment_id: {
-          in: ['TEST_PAYMENT_123', 'TEST_PAYMENT_456', 'TEST_PAYMENT_789', 'TEST_PAYMENT_UNIQUE'],
+          in: [
+            'TEST_PAYMENT_123',
+            'TEST_PAYMENT_456',
+            'TEST_PAYMENT_789',
+            'TEST_PAYMENT_UNIQUE',
+          ],
         },
       },
     });

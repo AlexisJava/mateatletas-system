@@ -68,7 +68,9 @@ async function main() {
   });
 
   if (docenteUpdated) {
-    console.log(`   Docente: ${docenteUpdated.nombre} ${docenteUpdated.apellido}`);
+    console.log(
+      `   Docente: ${docenteUpdated.nombre} ${docenteUpdated.apellido}`,
+    );
     console.log(`   Roles nuevos: ${JSON.stringify(docenteUpdated.roles)}`);
   }
 

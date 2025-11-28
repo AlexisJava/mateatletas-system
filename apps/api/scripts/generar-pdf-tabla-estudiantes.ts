@@ -31,10 +31,7 @@ async function obtenerTodosLosEstudiantes(): Promise<EstudianteCredencial[]> {
       apellido: true,
       password_temporal: true,
     },
-    orderBy: [
-      { apellido: 'asc' },
-      { nombre: 'asc' },
-    ],
+    orderBy: [{ apellido: 'asc' }, { nombre: 'asc' }],
   });
 
   return estudiantes.map((est) => {
@@ -66,7 +63,10 @@ async function obtenerTodosLosEstudiantes(): Promise<EstudianteCredencial[]> {
   });
 }
 
-function generarPDFTabla(estudiantes: EstudianteCredencial[], outputPath: string): Promise<void> {
+function generarPDFTabla(
+  estudiantes: EstudianteCredencial[],
+  outputPath: string,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     try {
       // Crear documento PDF en formato LANDSCAPE (horizontal)
@@ -88,9 +88,7 @@ function generarPDFTabla(estudiantes: EstudianteCredencial[], outputPath: string
       // ═══════════════════════════════════════════════════════
       // HEADER
       // ═══════════════════════════════════════════════════════
-      doc
-        .rect(0, 0, doc.page.width, 70)
-        .fill(primaryColor);
+      doc.rect(0, 0, doc.page.width, 70).fill(primaryColor);
 
       doc
         .fontSize(24)
@@ -127,19 +125,30 @@ function generarPDFTabla(estudiantes: EstudianteCredencial[], outputPath: string
         doc.fontSize(9).fillColor(textColor).font('Helvetica-Bold');
 
         let xPos = startX;
-        doc.text('N°', xPos + 8, yPos + 6, { width: cols.num - 10, align: 'center' });
+        doc.text('N°', xPos + 8, yPos + 6, {
+          width: cols.num - 10,
+          align: 'center',
+        });
         xPos += cols.num;
-        doc.text('NOMBRE COMPLETO', xPos + 5, yPos + 6, { width: cols.nombre - 10 });
+        doc.text('NOMBRE COMPLETO', xPos + 5, yPos + 6, {
+          width: cols.nombre - 10,
+        });
         xPos += cols.nombre;
         doc.text('USUARIO', xPos + 5, yPos + 6, { width: cols.usuario - 10 });
         xPos += cols.usuario;
-        doc.text('PIN', xPos + 5, yPos + 6, { width: cols.pin - 10, align: 'center' });
+        doc.text('PIN', xPos + 5, yPos + 6, {
+          width: cols.pin - 10,
+          align: 'center',
+        });
 
         yPos += 22;
 
         // Línea separadora
         doc.strokeColor(primaryColor).lineWidth(1.5);
-        doc.moveTo(startX, yPos).lineTo(startX + totalWidth, yPos).stroke();
+        doc
+          .moveTo(startX, yPos)
+          .lineTo(startX + totalWidth, yPos)
+          .stroke();
 
         yPos += 3;
       }
@@ -180,7 +189,7 @@ function generarPDFTabla(estudiantes: EstudianteCredencial[], outputPath: string
           `${estudiante.apellido}, ${estudiante.nombre}`,
           xPos + 5,
           yPos + 5,
-          { width: cols.nombre - 10, ellipsis: true }
+          { width: cols.nombre - 10, ellipsis: true },
         );
         xPos += cols.nombre;
 
@@ -215,7 +224,7 @@ function generarPDFTabla(estudiantes: EstudianteCredencial[], outputPath: string
           'Instrucciones: Ingresar a https://app.mateatletas.com → Seleccionar "Estudiante" → Ingresar USUARIO y PIN',
           40,
           footerY,
-          { width: doc.page.width - 80, align: 'center' }
+          { width: doc.page.width - 80, align: 'center' },
         );
 
       // Finalizar documento

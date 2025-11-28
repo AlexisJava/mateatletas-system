@@ -116,7 +116,9 @@ export class TiendaController {
    */
   @Get('items/:id')
   @Roles(Role.ESTUDIANTE, Role.TUTOR, Role.DOCENTE, Role.ADMIN)
-  async obtenerItemPorId(@Param('id') id: string): Promise<ItemTiendaConCategoria> {
+  async obtenerItemPorId(
+    @Param('id') id: string,
+  ): Promise<ItemTiendaConCategoria> {
     return await this.tiendaService.obtenerItemPorId(id);
   }
 

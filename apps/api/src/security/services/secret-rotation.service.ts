@@ -74,9 +74,7 @@ export class SecretRotationService {
     const webhookCheck = await this.checkSecretStatus('WEBHOOK_SECRET');
 
     if (jwtCheck.needsRotation || webhookCheck.needsRotation) {
-      this.logger.warn(
-        '⚠️ ATENCIÓN: Hay secrets que necesitan rotación',
-      );
+      this.logger.warn('⚠️ ATENCIÓN: Hay secrets que necesitan rotación');
     } else {
       this.logger.log('✅ Todos los secrets están actualizados');
     }
@@ -116,9 +114,7 @@ export class SecretRotationService {
 
     if (!existingWebhook) {
       await this.registerNewSecret('WEBHOOK_SECRET', webhookSecret, 1);
-      this.logger.log(
-        '✅ WEBHOOK_SECRET registrado en sistema de rotación',
-      );
+      this.logger.log('✅ WEBHOOK_SECRET registrado en sistema de rotación');
     }
   }
 
@@ -164,9 +160,7 @@ export class SecretRotationService {
    * @param type - Tipo de secret a verificar
    * @returns Estado del secret con información de rotación
    */
-  async checkSecretStatus(
-    type: string,
-  ): Promise<{
+  async checkSecretStatus(type: string): Promise<{
     needsRotation: boolean;
     daysUntilExpiration: number;
     currentVersion: number;
@@ -270,9 +264,7 @@ export class SecretRotationService {
       this.logger.error(
         `🚨 CRITICAL: El ${type} en variables de entorno NO coincide con el hash en BD`,
       );
-      this.logger.error(
-        `Expected hash: ${activeSecret.secret_hash}`,
-      );
+      this.logger.error(`Expected hash: ${activeSecret.secret_hash}`);
       this.logger.error(`Actual hash: ${currentHash}`);
     }
 

@@ -179,7 +179,9 @@ describe('Inscripciones2026 - GET /:id Ownership Validation', () => {
       const context = createMockExecutionContext(tutorB, inscripcionId);
 
       // ACT & ASSERT: Debe rechazar con 403
-      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        ForbiddenException,
+      );
       await expect(guard.canActivate(context)).rejects.toThrow(
         /not authorized.*inscripción/i,
       );
@@ -214,7 +216,9 @@ describe('Inscripciones2026 - GET /:id Ownership Validation', () => {
       const context = createMockExecutionContext(tutorUser, inscripcionId);
 
       // ACT & ASSERT: Debe rechazar
-      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -330,7 +334,9 @@ describe('Inscripciones2026 - GET /:id Ownership Validation', () => {
       const context = createMockExecutionContext(docenteUser, inscripcionId);
 
       // ACT & ASSERT: Docente no puede ver inscripción ajena
-      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -351,7 +357,9 @@ describe('Inscripciones2026 - GET /:id Ownership Validation', () => {
       const context = createMockExecutionContext(undefined, 'insc-abc-123');
 
       // ACT & ASSERT: Debe rechazar
-      await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     /**
