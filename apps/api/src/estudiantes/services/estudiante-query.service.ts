@@ -5,6 +5,10 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service';
+import {
+  parseHorario,
+  calcularDuracionMinutos,
+} from '../../common/utils/time.utils';
 import { QueryEstudiantesDto } from '../dto/query-estudiantes.dto';
 
 /**
@@ -374,10 +378,8 @@ export class EstudianteQueryService {
       const diaActual = ahora.getDay();
       const diaClase = diasSemanaMap[proximaClaseGrupo.dia_semana] ?? -1;
 
-      // Parsear hora (formato "HH:MM")
-      const [horas, minutos] = proximaClaseGrupo.hora_inicio
-        .split(':')
-        .map(Number);
+      // Parsear hora usando utilidad robusta
+      const { horas, minutos } = parseHorario(proximaClaseGrupo.hora_inicio);
 
       let diasHasta = diaClase - diaActual;
 
@@ -398,11 +400,11 @@ export class EstudianteQueryService {
       fechaProxima.setDate(ahora.getDate() + diasHasta);
       fechaProxima.setHours(horas, minutos, 0, 0);
 
-      // Calcular duración en minutos desde hora_inicio y hora_fin
-      const [horaFinH, horaFinM] = proximaClaseGrupo.hora_fin
-        .split(':')
-        .map(Number);
-      const duracionMinutos = horaFinH * 60 + horaFinM - (horas * 60 + minutos);
+      // Calcular duración usando utilidad robusta
+      const duracionMinutos = calcularDuracionMinutos(
+        proximaClaseGrupo.hora_inicio,
+        proximaClaseGrupo.hora_fin,
+      );
 
       return {
         tipo: 'grupo' as const,

@@ -70,13 +70,17 @@ export const CompletarActividadSchema = z.object({
   porcentaje_aciertos: z.number().min(0).max(100),
 
   // Detalles opcionales
-  respuestas_detalle: z.array(z.object({
-    pregunta_id: z.string().or(z.number()).optional(),
-    correcta: z.boolean(),
-    tiempo_segundos: z.number().optional(),
-    respuesta_usuario: z.string().or(z.number()).or(z.boolean()).optional(),
-    respuesta_correcta: z.string().or(z.number()).or(z.boolean()).optional(),
-  })).optional(),
+  respuestas_detalle: z
+    .array(
+      z.object({
+        pregunta_id: z.string().or(z.number()).optional(),
+        correcta: z.boolean(),
+        tiempo_segundos: z.number().optional(),
+        respuesta_usuario: z.string().or(z.number()).or(z.boolean()).optional(),
+        respuesta_correcta: z.string().or(z.number()).or(z.boolean()).optional(),
+      }),
+    )
+    .optional(),
 
   // Estado final del juego (para continuar después)
   estado_juego: z.record(z.string(), z.unknown()).optional(),
@@ -110,19 +114,23 @@ export const ProgresoActualizadoResponseSchema = z.object({
   progreso: ProgresoEstudianteActividadSchema,
 
   // Si se completó, incluir recompensas
-  recompensas: z.object({
-    xp_ganado: z.number().int().nonnegative(),
-    monedas_ganadas: z.number().int().nonnegative(),
-    gemas_ganadas: z.number().int().nonnegative().optional(),
-    nivel_subido: z.boolean(),
-    nivel_actual: z.number().int().positive(),
-    logros_desbloqueados: z.array(z.object({
-      id: z.string().cuid(),
-      nombre: z.string(),
-      descripcion: z.string(),
-      puntos: z.number().int().nonnegative(),
-    })),
-  }).optional(),
+  recompensas: z
+    .object({
+      xp_ganado: z.number().int().nonnegative(),
+      monedas_ganadas: z.number().int().nonnegative(),
+      gemas_ganadas: z.number().int().nonnegative().optional(),
+      nivel_subido: z.boolean(),
+      nivel_actual: z.number().int().positive(),
+      logros_desbloqueados: z.array(
+        z.object({
+          id: z.string().cuid(),
+          nombre: z.string(),
+          descripcion: z.string(),
+          puntos: z.number().int().nonnegative(),
+        }),
+      ),
+    })
+    .optional(),
 
   mensaje: z.string(),
 });
@@ -142,14 +150,16 @@ export const HistorialProgresoEstudianteSchema = z.object({
   mejor_racha: z.number().int().nonnegative(), // Días consecutivos
 
   // Últimas actividades
-  ultimas_actividades: z.array(z.object({
-    id: z.string().cuid(),
-    actividad_titulo: z.string(),
-    completado: z.boolean(),
-    fecha: z.date(),
-    puntos: z.number().int().nonnegative(),
-    estrellas: z.number().int().min(0).max(3).optional(),
-  })),
+  ultimas_actividades: z.array(
+    z.object({
+      id: z.string().cuid(),
+      actividad_titulo: z.string(),
+      completado: z.boolean(),
+      fecha: z.date(),
+      puntos: z.number().int().nonnegative(),
+      estrellas: z.number().int().min(0).max(3).optional(),
+    }),
+  ),
 });
 
 export type HistorialProgresoEstudiante = z.infer<typeof HistorialProgresoEstudianteSchema>;

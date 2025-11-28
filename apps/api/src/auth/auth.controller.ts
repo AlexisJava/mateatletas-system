@@ -9,6 +9,7 @@ import {
   Res,
   Req,
   Ip,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import {
@@ -148,7 +149,10 @@ export class AuthController {
 
     const result = await this.authService.login(loginDto, ip);
     console.log('✅ [LOGIN] Login exitoso para usuario ID:', result.user.id);
-    console.log('🎫 [LOGIN] Token generado (primeros 20 chars):', result.access_token?.substring(0, 20) + '...');
+    console.log(
+      '🎫 [LOGIN] Token generado (primeros 20 chars):',
+      result.access_token?.substring(0, 20) + '...',
+    );
 
     const cookieConfig = {
       httpOnly: true, // No accesible desde JavaScript
@@ -215,7 +219,10 @@ export class AuthController {
     // ✅ SECURITY FIX: Removido logging de credenciales
     // El logger global con redaction ya maneja el logging seguro
 
-    const result = await this.authService.loginEstudiante(loginEstudianteDto, ip);
+    const result = await this.authService.loginEstudiante(
+      loginEstudianteDto,
+      ip,
+    );
 
     // Configurar cookie httpOnly
     res.cookie('auth-token', result.access_token, {
@@ -277,11 +284,22 @@ export class AuthController {
   async getProfile(@GetUser() user: AuthUser, @Req() req: Request) {
     console.log('👤 [PROFILE] Request recibido');
     console.log('🍪 [PROFILE] Cookies recibidas:', req.cookies);
-    console.log('🔑 [PROFILE] Header Authorization:', req.headers.authorization ? 'Presente' : 'Ausente');
-    console.log('✅ [PROFILE] Usuario autenticado:', { id: user.id, email: user.email, role: user.role });
+    console.log(
+      '🔑 [PROFILE] Header Authorization:',
+      req.headers.authorization ? 'Presente' : 'Ausente',
+    );
+    console.log('✅ [PROFILE] Usuario autenticado:', {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     // Usar roles[0] como fallback si role está undefined (multi-role scenario)
-    const role = user.role || user.roles[0];
+    const role =
+      user.role || (user.roles.length > 0 ? user.roles[0] : undefined);
+    if (!role) {
+      throw new UnauthorizedException('Usuario sin rol asignado');
+    }
     const profile = await this.authService.getProfile(user.id, role);
     console.log('✅ [PROFILE] Perfil obtenido exitosamente');
     return profile;
@@ -379,7 +397,8 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Token MFA inválido/expirado o código de verificación incorrecto',
+    description:
+      'Token MFA inválido/expirado o código de verificación incorrecto',
   })
   @ApiBody({ type: CompleteMfaLoginDto })
   @Post('complete-mfa-login')

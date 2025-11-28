@@ -185,8 +185,13 @@ export class TutorQueryService {
     const manana = new Date(hoy);
     manana.setDate(manana.getDate() + 1);
 
-    const clasesProximas: ClaseProxima[] = clases.map((clase) => {
+    // Usar flatMap para filtrar y mapear en un paso (narrowing correcto)
+    const clasesProximas: ClaseProxima[] = clases.flatMap((clase) => {
       const inscripcion = clase.inscripciones[0];
+      // Skip clases sin inscripciones
+      if (!inscripcion) {
+        return [];
+      }
       const fechaHoraInicio = new Date(clase.fecha_hora_inicio);
       const fechaHoraFin = new Date(
         fechaHoraInicio.getTime() + clase.duracion_minutos * 60 * 1000,
@@ -220,33 +225,35 @@ export class TutorQueryService {
       const puedeUnirse =
         diffMinutos <= 10 && diffMinutos >= -clase.duracion_minutos;
 
-      return {
-        id: clase.id,
-        fechaHoraInicio,
-        fechaHoraFin,
-        duracionMinutos: clase.duracion_minutos,
-        rutaCurricular: {
-          id: clase.rutaCurricular?.id || '',
-          nombre: clase.rutaCurricular?.nombre || 'Clase sin ruta',
-          color: clase.rutaCurricular?.color || undefined,
+      return [
+        {
+          id: clase.id,
+          fechaHoraInicio,
+          fechaHoraFin,
+          duracionMinutos: clase.duracion_minutos,
+          rutaCurricular: {
+            id: clase.rutaCurricular?.id || '',
+            nombre: clase.rutaCurricular?.nombre || 'Clase sin ruta',
+            color: clase.rutaCurricular?.color || undefined,
+          },
+          docente: {
+            id: clase.docente.id,
+            nombre: clase.docente.nombre,
+            apellido: clase.docente.apellido,
+          },
+          estudiante: {
+            id: inscripcion.estudiante.id,
+            nombre: inscripcion.estudiante.nombre,
+            apellido: inscripcion.estudiante.apellido,
+          },
+          estado: clase.estado,
+          urlReunion: undefined, // TODO: agregar campo en BD si existe
+          puedeUnirse,
+          esHoy,
+          esManana,
+          labelFecha,
         },
-        docente: {
-          id: clase.docente.id,
-          nombre: clase.docente.nombre,
-          apellido: clase.docente.apellido,
-        },
-        estudiante: {
-          id: inscripcion.estudiante.id,
-          nombre: inscripcion.estudiante.nombre,
-          apellido: inscripcion.estudiante.apellido,
-        },
-        estado: clase.estado,
-        urlReunion: undefined, // TODO: agregar campo en BD si existe
-        puedeUnirse,
-        esHoy,
-        esManana,
-        labelFecha,
-      };
+      ];
     });
 
     return {

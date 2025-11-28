@@ -171,7 +171,7 @@ export class PaymentWebhookService {
       return {
         success: false,
         message: 'Unknown external_reference format',
-        type: 'unknown'
+        type: 'unknown',
       };
     }
   }
@@ -193,6 +193,12 @@ export class PaymentWebhookService {
     const externalRef = payment.external_reference;
     const parts = externalRef.split('-');
     const membresiaId = parts[1]; // "membresia-{ID}-tutor-..."
+
+    if (!membresiaId) {
+      throw new Error(
+        `external_reference inválido para membresía: "${externalRef}" - formato esperado: membresia-{ID}-...`,
+      );
+    }
 
     this.logger.log(`🎫 Procesando pago de membresía ID: ${membresiaId}`);
 
@@ -280,6 +286,12 @@ export class PaymentWebhookService {
     const externalRef = payment.external_reference;
     const parts = externalRef.split('-');
     const inscripcionId = parts[1]; // "inscripcion-{ID}-estudiante-..."
+
+    if (!inscripcionId) {
+      throw new Error(
+        `external_reference inválido para inscripción: "${externalRef}" - formato esperado: inscripcion-{ID}-...`,
+      );
+    }
 
     this.logger.log(`📚 Procesando pago de inscripción ID: ${inscripcionId}`);
 

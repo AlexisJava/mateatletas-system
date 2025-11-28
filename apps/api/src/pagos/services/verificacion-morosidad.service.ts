@@ -432,7 +432,8 @@ export class VerificacionMorosidadService {
         fechaVencimiento < hoy,
     );
 
-    if (deudasVencidas.length === 0) {
+    const primeraDeudaVencida = deudasVencidas[0];
+    if (!primeraDeudaVencida) {
       return {
         permitirAcceso: true,
         mensaje: 'Estudiante al día con los pagos',
@@ -455,7 +456,7 @@ export class VerificacionMorosidadService {
     );
 
     const primeraDeuda = periodos[0];
-    const fechaVencimientoMasAntigua = deudasVencidas[0].fechaVencimiento;
+    const fechaVencimientoMasAntigua = primeraDeudaVencida.fechaVencimiento;
 
     return {
       permitirAcceso: false,

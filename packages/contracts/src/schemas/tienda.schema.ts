@@ -139,28 +139,27 @@ export const ItemTiendaConCategoriaSchema = ItemTiendaSchema.extend({
 export type ItemTiendaConCategoria = z.infer<typeof ItemTiendaConCategoriaSchema>;
 
 // DTO para crear item
-export const CreateItemTiendaSchema = z.object({
-  nombre: z.string().min(1).max(100),
-  descripcion: z.string().max(500).optional(),
-  categoria_id: z.string().cuid(),
-  tipo_item: TipoItemSchema,
-  precio_monedas: z.number().int().nonnegative().default(0),
-  precio_gemas: z.number().int().nonnegative().default(0),
-  imagen_url: z.string().url().optional(),
-  rareza: RarezaItemSchema.default('COMUN'),
-  edicion_limitada: z.boolean().default(false),
-  fecha_inicio: z.coerce.date().optional(),
-  fecha_fin: z.coerce.date().optional(),
-  nivel_minimo_requerido: z.number().int().positive().default(1),
-  disponible: z.boolean().default(true),
-  metadata: z.record(z.unknown()).optional(),
-}).refine(
-  (data) => data.precio_monedas > 0 || data.precio_gemas > 0,
-  {
+export const CreateItemTiendaSchema = z
+  .object({
+    nombre: z.string().min(1).max(100),
+    descripcion: z.string().max(500).optional(),
+    categoria_id: z.string().cuid(),
+    tipo_item: TipoItemSchema,
+    precio_monedas: z.number().int().nonnegative().default(0),
+    precio_gemas: z.number().int().nonnegative().default(0),
+    imagen_url: z.string().url().optional(),
+    rareza: RarezaItemSchema.default('COMUN'),
+    edicion_limitada: z.boolean().default(false),
+    fecha_inicio: z.coerce.date().optional(),
+    fecha_fin: z.coerce.date().optional(),
+    nivel_minimo_requerido: z.number().int().positive().default(1),
+    disponible: z.boolean().default(true),
+    metadata: z.record(z.unknown()).optional(),
+  })
+  .refine((data) => data.precio_monedas > 0 || data.precio_gemas > 0, {
     message: 'El item debe tener al menos un precio (monedas o gemas)',
     path: ['precio_monedas'],
-  }
-);
+  });
 export type CreateItemTienda = z.infer<typeof CreateItemTiendaSchema>;
 
 // DTO para actualizar item

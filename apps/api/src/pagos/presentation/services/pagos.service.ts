@@ -272,7 +272,8 @@ export class PagosService {
         return { message: 'Unknown external_reference format' };
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(
         `❌ Error procesando webhook: ${errorMessage}`,
@@ -286,7 +287,11 @@ export class PagosService {
    * Procesa pago de membresía
    * external_reference format: "membresia-{membresiaId}-tutor-{tutorId}-producto-{productoId}"
    */
-  private async procesarPagoMembresia(payment: { external_reference: string; id: string; status: string }) {
+  private async procesarPagoMembresia(payment: {
+    external_reference: string;
+    id: string;
+    status: string;
+  }) {
     const externalRef = payment.external_reference;
     const parts = externalRef.split('-');
     const membresiaId = parts[1]; // "membresia-{ID}-tutor-..."
@@ -343,7 +348,11 @@ export class PagosService {
    * Procesa pago de inscripción a curso
    * external_reference format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
    */
-  private async procesarPagoInscripcion(payment: { external_reference: string; id: string; status: string }) {
+  private async procesarPagoInscripcion(payment: {
+    external_reference: string;
+    id: string;
+    status: string;
+  }) {
     const externalRef = payment.external_reference;
     const parts = externalRef.split('-');
     const inscripcionId = parts[1]; // "inscripcion-{ID}-estudiante-..."
@@ -395,33 +404,41 @@ export class PagosService {
    * Detecta automáticamente inscripciones pendientes del periodo actual y las marca como pagadas
    */
   async registrarPagoManual(estudianteId: string, tutorId: string) {
-    this.logger.log(`💵 Registrando pago manual para estudiante: ${estudianteId}`);
+    this.logger.log(
+      `💵 Registrando pago manual para estudiante: ${estudianteId}`,
+    );
 
     // Obtener periodo actual
     const now = new Date();
     const periodo = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
     // Buscar inscripciones pendientes del estudiante en el periodo actual
-    const inscripcionesPendientes = await this.prisma.inscripcionMensual.findMany({
-      where: {
-        estudiante_id: estudianteId,
-        tutor_id: tutorId,
-        periodo,
-        estado_pago: 'Pendiente',
-      },
-      include: {
-        estudiante: {
-          select: {
-            nombre: true,
-            apellido: true,
+    const inscripcionesPendientes =
+      await this.prisma.inscripcionMensual.findMany({
+        where: {
+          estudiante_id: estudianteId,
+          tutor_id: tutorId,
+          periodo,
+          estado_pago: 'Pendiente',
+        },
+        include: {
+          estudiante: {
+            select: {
+              nombre: true,
+              apellido: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (inscripcionesPendientes.length === 0) {
-      this.logger.warn(`⚠️ No se encontraron inscripciones pendientes para estudiante ${estudianteId} en periodo ${periodo}`);
-      throw new Error('No se encontraron inscripciones pendientes para este estudiante');
+    const primeraInscripcion = inscripcionesPendientes[0];
+    if (!primeraInscripcion) {
+      this.logger.warn(
+        `⚠️ No se encontraron inscripciones pendientes para estudiante ${estudianteId} en periodo ${periodo}`,
+      );
+      throw new Error(
+        'No se encontraron inscripciones pendientes para este estudiante',
+      );
     }
 
     // Calcular total adeudado
@@ -447,11 +464,13 @@ export class PagosService {
       },
     });
 
-    this.logger.log(`✅ Pago manual registrado: ${inscripcionesPendientes.length} inscripciones - Total: $${totalAdeudado}`);
+    this.logger.log(
+      `✅ Pago manual registrado: ${inscripcionesPendientes.length} inscripciones - Total: $${totalAdeudado}`,
+    );
 
     return {
       success: true,
-      estudianteNombre: `${inscripcionesPendientes[0].estudiante.nombre} ${inscripcionesPendientes[0].estudiante.apellido}`,
+      estudianteNombre: `${primeraInscripcion.estudiante.nombre} ${primeraInscripcion.estudiante.apellido}`,
       periodo,
       cantidadInscripciones: inscripcionesPendientes.length,
       montoTotal: totalAdeudado,

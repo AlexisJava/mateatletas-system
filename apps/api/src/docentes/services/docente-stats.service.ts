@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, DiaSemana } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service';
+import {
+  parseHorario,
+  calcularDuracionMinutos,
+} from '../../common/utils/time.utils';
 import { DocenteBusinessValidator } from '../validators/docente-business.validator';
 import {
   DashboardDocenteResponse,
@@ -72,12 +76,22 @@ export class DocenteStatsService {
     await this.validator.validarDocenteExiste(docenteId);
 
     const now = new Date();
-    const inicioDia = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const inicioDia = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
     const finDia = new Date(inicioDia);
     finDia.setDate(finDia.getDate() + 1);
 
     // Ejecutar todos los cálculos en paralelo
-    const [claseInminente, clasesDelDiaData, misGruposData, estudiantesConFaltasFormatted, stats] = await Promise.all([
+    const [
+      claseInminente,
+      clasesDelDiaData,
+      misGruposData,
+      estudiantesConFaltasFormatted,
+      stats,
+    ] = await Promise.all([
       this.calcularClaseInminente(docenteId, now),
       this.obtenerClasesDelDia(docenteId, now),
       this.obtenerMisGrupos(docenteId),
@@ -173,10 +187,18 @@ export class DocenteStatsService {
     const estudiantesUnicos = Array.from(estudiantesUnicosMap.values());
 
     // Ejecutar cálculos en paralelo
-    const [topEstudiantesCompleto, estudiantesAsistenciaPerfecta, estudiantesSinTareas, rankingGrupos] = await Promise.all([
+    const [
+      topEstudiantesCompleto,
+      estudiantesAsistenciaPerfecta,
+      estudiantesSinTareas,
+      rankingGrupos,
+    ] = await Promise.all([
       this.calcularTopEstudiantesPorPuntos(estudiantesUnicos, estudiantes),
       this.calcularAsistenciaPerfecta(estudiantesUnicos, docenteId),
-      this.calcularEstudiantesSinTareas(estudiantesUnicos, estudiantesIdsUnicos),
+      this.calcularEstudiantesSinTareas(
+        estudiantesUnicos,
+        estudiantesIdsUnicos,
+      ),
       this.calcularRankingGrupos(docenteId, inscripciones, gruposIds),
     ]);
 
@@ -220,7 +242,7 @@ export class DocenteStatsService {
 
     // Buscar la clase más próxima de hoy
     for (const claseGrupo of clasesGrupo) {
-      const [horas, minutos] = claseGrupo.hora_inicio.split(':').map(Number);
+      const { horas, minutos } = parseHorario(claseGrupo.hora_inicio);
       const fechaHoraClase = new Date(now);
       fechaHoraClase.setHours(horas, minutos, 0, 0);
 
@@ -230,8 +252,10 @@ export class DocenteStatsService {
 
       // Solo considerar si falta menos de 60 minutos o empezó hace menos de 10 minutos
       if (minutosParaEmpezar <= 60 && minutosParaEmpezar >= -10) {
-        const [horaFin, minFin] = claseGrupo.hora_fin.split(':').map(Number);
-        const duracion = horaFin * 60 + minFin - (horas * 60 + minutos);
+        const duracion = calcularDuracionMinutos(
+          claseGrupo.hora_inicio,
+          claseGrupo.hora_fin,
+        );
 
         return {
           id: claseGrupo.id,
@@ -497,9 +521,7 @@ export class DocenteStatsService {
     };
   }
 
-  private generarAlertas(
-    estudiantesConFaltas: EstudianteConFalta[],
-  ): Alerta[] {
+  private generarAlertas(estudiantesConFaltas: EstudianteConFalta[]): Alerta[] {
     const alertas: Alerta[] = [];
 
     if (estudiantesConFaltas.length > 0) {
@@ -540,7 +562,10 @@ export class DocenteStatsService {
     const puntosPorEstudiante = new Map<string, number>();
     puntosObtenidosRaw.forEach((punto) => {
       const currentPuntos = puntosPorEstudiante.get(punto.estudiante_id) || 0;
-      puntosPorEstudiante.set(punto.estudiante_id, currentPuntos + punto.puntos);
+      puntosPorEstudiante.set(
+        punto.estudiante_id,
+        currentPuntos + punto.puntos,
+      );
     });
 
     const topEstudiantesPorPuntos = Array.from(puntosPorEstudiante.entries())
@@ -604,7 +629,8 @@ export class DocenteStatsService {
         const presentes = asistencias.filter(
           (a) => a.estado === 'Presente',
         ).length;
-        const porcentaje = total > 0 ? Math.round((presentes / total) * 100) : 0;
+        const porcentaje =
+          total > 0 ? Math.round((presentes / total) * 100) : 0;
 
         return {
           estudiante_id: est.id,
@@ -671,7 +697,10 @@ export class DocenteStatsService {
     const puntosPorEstudiante = new Map<string, number>();
     puntosObtenidosRaw.forEach((punto) => {
       const currentPuntos = puntosPorEstudiante.get(punto.estudiante_id) || 0;
-      puntosPorEstudiante.set(punto.estudiante_id, currentPuntos + punto.puntos);
+      puntosPorEstudiante.set(
+        punto.estudiante_id,
+        currentPuntos + punto.puntos,
+      );
     });
 
     // Obtener inscripciones por grupo
@@ -750,7 +779,8 @@ export class DocenteStatsService {
         const presentes = asistencias.filter(
           (a) => a.estado === 'Presente',
         ).length;
-        const porcentaje = total > 0 ? Math.round((presentes / total) * 100) : 0;
+        const porcentaje =
+          total > 0 ? Math.round((presentes / total) * 100) : 0;
 
         return {
           estudiante_id: est.id,

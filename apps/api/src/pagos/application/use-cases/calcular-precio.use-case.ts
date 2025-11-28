@@ -19,7 +19,10 @@ import {
   calcularPrecioActividad,
   CalculoPrecioInput,
 } from '../../domain/rules/precio.rules';
-import { TipoDescuento, ConfiguracionPrecios } from '../../domain/types/pagos.types';
+import {
+  TipoDescuento,
+  ConfiguracionPrecios,
+} from '../../domain/types/pagos.types';
 
 /**
  * Use Case: Calcular Precio de Actividades
@@ -176,6 +179,14 @@ export class CalcularPrecioUseCase {
     for (const estudianteId of input.estudiantesIds) {
       const estudiante = estudiantes.get(estudianteId)!;
       const productosIds = input.productosIdsPorEstudiante[estudianteId];
+
+      // Validación ya hecha en validarInput(), pero TypeScript necesita el guard aquí
+      if (!productosIds || productosIds.length === 0) {
+        throw new Error(
+          `El estudiante ${estudianteId} no tiene productos asignados`,
+        );
+      }
+
       const actividadesPorEstudiante = productosIds.length;
 
       for (const productoId of productosIds) {

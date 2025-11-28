@@ -3,7 +3,10 @@ import { PrismaService } from '../../core/database/prisma.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EstadoPago } from '../../domain/constants';
 import { PaymentStateMapperService } from './payment-state-mapper.service';
-import { EstadoPago as EstadoPagoPrisma, EstadoMembresia } from '@prisma/client';
+import {
+  EstadoPago as EstadoPagoPrisma,
+  EstadoMembresia,
+} from '@prisma/client';
 
 /**
  * DTO para registrar pago manual
@@ -49,7 +52,13 @@ export class PaymentCommandService {
    * @throws BadRequestException si no hay inscripciones pendientes
    */
   async registrarPagoManual(dto: RegistrarPagoManualDto) {
-    const { estudianteId, tutorId, metodoPago = 'Manual', comprobanteUrl, notas } = dto;
+    const {
+      estudianteId,
+      tutorId,
+      metodoPago = 'Manual',
+      comprobanteUrl,
+      notas,
+    } = dto;
 
     this.logger.log(
       `💵 Registrando pago manual para estudiante: ${estudianteId}`,
@@ -78,7 +87,8 @@ export class PaymentCommandService {
         },
       });
 
-    if (inscripcionesPendientes.length === 0) {
+    const primeraInscripcion = inscripcionesPendientes[0];
+    if (!primeraInscripcion) {
       this.logger.warn(
         `⚠️ No se encontraron inscripciones pendientes para estudiante ${estudianteId} en periodo ${periodo}`,
       );
@@ -95,7 +105,9 @@ export class PaymentCommandService {
 
     // Marcar todas las inscripciones como pagadas
     const fechaPago = new Date();
-    const observaciones = notas || `Pago registrado manualmente el ${fechaPago.toLocaleDateString('es-AR')}`;
+    const observaciones =
+      notas ||
+      `Pago registrado manualmente el ${fechaPago.toLocaleDateString('es-AR')}`;
 
     await this.prisma.inscripcionMensual.updateMany({
       where: {
@@ -130,7 +142,7 @@ export class PaymentCommandService {
 
     return {
       success: true,
-      estudianteNombre: `${inscripcionesPendientes[0].estudiante.nombre} ${inscripcionesPendientes[0].estudiante.apellido}`,
+      estudianteNombre: `${primeraInscripcion.estudiante.nombre} ${primeraInscripcion.estudiante.apellido}`,
       periodo,
       cantidadInscripciones: inscripcionesPendientes.length,
       montoTotal: totalAdeudado,
@@ -164,7 +176,9 @@ export class PaymentCommandService {
         fecha_inicio:
           estadoMembresia === EstadoMembresia.Activa ? new Date() : undefined,
         fecha_proximo_pago:
-          estadoMembresia === EstadoMembresia.Activa ? this.calcularProximoPago() : null,
+          estadoMembresia === EstadoMembresia.Activa
+            ? this.calcularProximoPago()
+            : null,
         // ✅ SEGURIDAD: Persistir payment_id para auditoría y soporte
         mercadopago_payment_id: paymentId || undefined,
       },

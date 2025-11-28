@@ -89,7 +89,13 @@ export class TutorCreationService {
    * ```
    */
   generateUsername(email: string): string {
-    return email.split('@')[0].toLowerCase();
+    const localPart = email.split('@')[0];
+    if (!localPart) {
+      throw new Error(
+        `Email inválido: "${email}" - no contiene parte local antes de @`,
+      );
+    }
+    return localPart.toLowerCase();
   }
 
   /**
@@ -135,7 +141,10 @@ export class TutorCreationService {
    * });
    * ```
    */
-  async createTutor(tx: Prisma.TransactionClient, data: CreateTutorData): Promise<Tutor> {
+  async createTutor(
+    tx: Prisma.TransactionClient,
+    data: CreateTutorData,
+  ): Promise<Tutor> {
     const passwordHash = await this.hashPassword(data.password);
     const username = this.generateUsername(data.email);
 
@@ -180,7 +189,10 @@ export class TutorCreationService {
    * // Si no existe, lo crea y luego lo retorna
    * ```
    */
-  async findOrCreateTutor(tx: Prisma.TransactionClient, data: CreateTutorData): Promise<Tutor> {
+  async findOrCreateTutor(
+    tx: Prisma.TransactionClient,
+    data: CreateTutorData,
+  ): Promise<Tutor> {
     const existingTutor = await tx.tutor.findUnique({
       where: { email: data.email.toLowerCase() },
     });

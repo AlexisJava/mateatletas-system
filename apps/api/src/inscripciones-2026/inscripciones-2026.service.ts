@@ -1,7 +1,20 @@
-import { Injectable, BadRequestException, ConflictException, Logger, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  ConflictException,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { Prisma, Tutor, Estudiante, Inscripcion2026, PagoInscripcion2026, EstudianteInscripcion2026 } from '@prisma/client';
+import {
+  Prisma,
+  Tutor,
+  Estudiante,
+  Inscripcion2026,
+  PagoInscripcion2026,
+  EstudianteInscripcion2026,
+} from '@prisma/client';
 import { PrismaService } from '../core/database/prisma.service';
 import { MercadoPagoService } from '../pagos/mercadopago.service';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
@@ -79,7 +92,10 @@ export class Inscripciones2026Service {
   private async generateUniquePin(): Promise<string> {
     return await this.pinGenerator.generateUniquePin(
       'estudianteInscripcion2026',
-      async (pin) => await this.prisma.estudianteInscripcion2026.findFirst({ where: { pin } })
+      async (pin) =>
+        await this.prisma.estudianteInscripcion2026.findFirst({
+          where: { pin },
+        }),
     );
   }
 
@@ -108,7 +124,9 @@ export class Inscripciones2026Service {
   /**
    * Convierte TipoInscripcion2026 a tipo esperado por PricingCalculator
    */
-  private mapTipoToPricing(tipo: TipoInscripcion2026): 'COLONIA' | 'CICLO_2026' | 'PACK_COMPLETO' {
+  private mapTipoToPricing(
+    tipo: TipoInscripcion2026,
+  ): 'COLONIA' | 'CICLO_2026' | 'PACK_COMPLETO' {
     switch (tipo) {
       case TipoInscripcion2026.COLONIA:
         return 'COLONIA';
@@ -125,7 +143,9 @@ export class Inscripciones2026Service {
    * Calcula el monto de inscripción según el tipo
    */
   private calculateInscriptionFee(tipo: TipoInscripcion2026): number {
-    return this.pricingCalculator.calcularTarifaInscripcion(this.mapTipoToPricing(tipo));
+    return this.pricingCalculator.calcularTarifaInscripcion(
+      this.mapTipoToPricing(tipo),
+    );
   }
 
   /**
@@ -136,7 +156,9 @@ export class Inscripciones2026Service {
    * @deprecated Usar pricingCalculator.calcularDescuentoInscripcion2026()
    */
   private calculateSiblingDiscount(numEstudiantes: number): number {
-    return this.pricingCalculator.calcularDescuentoInscripcion2026(numEstudiantes);
+    return this.pricingCalculator.calcularDescuentoInscripcion2026(
+      numEstudiantes,
+    );
   }
 
   /**
@@ -161,7 +183,7 @@ export class Inscripciones2026Service {
     return this.pricingCalculator.calcularTotalInscripcion2026(
       this.mapTipoToPricing(tipo),
       numEstudiantes,
-      cursosPerStudent
+      cursosPerStudent,
     );
   }
 
@@ -172,19 +194,21 @@ export class Inscripciones2026Service {
     const { tipo_inscripcion, estudiantes } = dto;
 
     estudiantes.forEach((estudiante, index) => {
-      const hasCursos = estudiante.cursos_seleccionados && estudiante.cursos_seleccionados.length > 0;
+      const hasCursos =
+        estudiante.cursos_seleccionados &&
+        estudiante.cursos_seleccionados.length > 0;
       const hasMundo = !!estudiante.mundo_seleccionado;
 
       switch (tipo_inscripcion) {
         case TipoInscripcion2026.COLONIA:
           if (!hasCursos) {
             throw new BadRequestException(
-              `Estudiante ${index + 1}: Debe seleccionar al menos 1 curso de Colonia`
+              `Estudiante ${index + 1}: Debe seleccionar al menos 1 curso de Colonia`,
             );
           }
           if (hasMundo) {
             throw new BadRequestException(
-              `Estudiante ${index + 1}: No debe seleccionar mundo STEAM para Colonia`
+              `Estudiante ${index + 1}: No debe seleccionar mundo STEAM para Colonia`,
             );
           }
           break;
@@ -192,12 +216,12 @@ export class Inscripciones2026Service {
         case TipoInscripcion2026.CICLO_2026:
           if (!hasMundo) {
             throw new BadRequestException(
-              `Estudiante ${index + 1}: Debe seleccionar un mundo STEAM para Ciclo 2026`
+              `Estudiante ${index + 1}: Debe seleccionar un mundo STEAM para Ciclo 2026`,
             );
           }
           if (hasCursos) {
             throw new BadRequestException(
-              `Estudiante ${index + 1}: No debe seleccionar cursos de Colonia para Ciclo 2026`
+              `Estudiante ${index + 1}: No debe seleccionar cursos de Colonia para Ciclo 2026`,
             );
           }
           break;
@@ -205,12 +229,12 @@ export class Inscripciones2026Service {
         case TipoInscripcion2026.PACK_COMPLETO:
           if (!hasCursos) {
             throw new BadRequestException(
-              `Estudiante ${index + 1}: Debe seleccionar al menos 1 curso de Colonia para Pack Completo`
+              `Estudiante ${index + 1}: Debe seleccionar al menos 1 curso de Colonia para Pack Completo`,
             );
           }
           if (!hasMundo) {
             throw new BadRequestException(
-              `Estudiante ${index + 1}: Debe seleccionar un mundo STEAM para Pack Completo`
+              `Estudiante ${index + 1}: Debe seleccionar un mundo STEAM para Pack Completo`,
             );
           }
           break;
@@ -227,7 +251,9 @@ export class Inscripciones2026Service {
     inscripcionFee: number,
     backendUrl: string,
     frontendUrl: string,
-  ): ReturnType<typeof this.mercadoPagoService.buildInscripcion2026PreferenceData> {
+  ): ReturnType<
+    typeof this.mercadoPagoService.buildInscripcion2026PreferenceData
+  > {
     return this.mercadoPagoService.buildInscripcion2026PreferenceData(
       dto.tipo_inscripcion,
       inscripcionFee,
@@ -253,10 +279,15 @@ export class Inscripciones2026Service {
     inscripcionFee: number,
     backendUrl: string,
     frontendUrl: string,
-  ): Promise<{ mercadopagoPreferenceId: string; mercadopagoInitPoint: string }> {
+  ): Promise<{
+    mercadopagoPreferenceId: string;
+    mercadopagoInitPoint: string;
+  }> {
     // Verificar si MercadoPago está en modo mock
     if (this.mercadoPagoService.isMockMode()) {
-      this.logger.warn('MercadoPago en modo MOCK - Generando preferencia placeholder');
+      this.logger.warn(
+        'MercadoPago en modo MOCK - Generando preferencia placeholder',
+      );
       return {
         mercadopagoPreferenceId: 'MP-MOCK-TEMP',
         mercadopagoInitPoint: `${frontendUrl}/inscripcion-2026/mock-checkout`,
@@ -272,7 +303,8 @@ export class Inscripciones2026Service {
     );
 
     try {
-      const preference = await this.mercadoPagoService.createPreference(preferenceData);
+      const preference =
+        await this.mercadoPagoService.createPreference(preferenceData);
       const mercadopagoPreferenceId = preference.id || '';
       const mercadopagoInitPoint = preference.init_point || '';
 
@@ -284,7 +316,8 @@ export class Inscripciones2026Service {
 
       return { mercadopagoPreferenceId, mercadopagoInitPoint };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       const errorStack = error instanceof Error ? error.stack : undefined;
 
       this.logger.error('Failed to create MercadoPago preference', {
@@ -297,7 +330,7 @@ export class Inscripciones2026Service {
       });
 
       throw new BadRequestException(
-        'No se pudo crear la preferencia de pago. Intente nuevamente.'
+        'No se pudo crear la preferencia de pago. Intente nuevamente.',
       );
     }
   }
@@ -311,14 +344,16 @@ export class Inscripciones2026Service {
    */
   private async findOrCreateTutor(
     tx: Prisma.TransactionClient,
-    tutorDto: TutorDataDto
+    tutorDto: TutorDataDto,
   ): Promise<Tutor> {
     let tutor = await tx.tutor.findUnique({
       where: { email: tutorDto.email },
     });
 
     if (!tutor) {
-      const hashedPassword = await this.tutorCreation.hashPassword(tutorDto.password);
+      const hashedPassword = await this.tutorCreation.hashPassword(
+        tutorDto.password,
+      );
       tutor = await tx.tutor.create({
         data: {
           nombre: tutorDto.nombre,
@@ -427,30 +462,38 @@ export class Inscripciones2026Service {
    * Prepara datos de cursos de Colonia para creación en batch
    * @private
    */
-  private prepareCursosData(estudiantesCreados: EstudianteCreado[]): Prisma.ColoniaCursoSeleccionado2026CreateManyInput[] {
+  private prepareCursosData(
+    estudiantesCreados: EstudianteCreado[],
+  ): Prisma.ColoniaCursoSeleccionado2026CreateManyInput[] {
     const cursosData: Prisma.ColoniaCursoSeleccionado2026CreateManyInput[] = [];
 
-    estudiantesCreados.forEach(({ estudianteInscripcion, cursosSeleccionados }) => {
-      if (cursosSeleccionados && cursosSeleccionados.length > 0) {
-        cursosSeleccionados.forEach((curso, cursoIdx) => {
-          const precioBase = PRECIOS.COLONIA_CURSO_BASE;
-          const descuentoCurso = cursoIdx === 1 ? DESCUENTOS.COLONIA.SEGUNDO_CURSO : 0;
-          const precioConDescuento = this.pricingCalculator.aplicarDescuento(precioBase, descuentoCurso);
+    estudiantesCreados.forEach(
+      ({ estudianteInscripcion, cursosSeleccionados }) => {
+        if (cursosSeleccionados && cursosSeleccionados.length > 0) {
+          cursosSeleccionados.forEach((curso, cursoIdx) => {
+            const precioBase = PRECIOS.COLONIA_CURSO_BASE;
+            const descuentoCurso =
+              cursoIdx === 1 ? DESCUENTOS.COLONIA.SEGUNDO_CURSO : 0;
+            const precioConDescuento = this.pricingCalculator.aplicarDescuento(
+              precioBase,
+              descuentoCurso,
+            );
 
-          cursosData.push({
-            estudiante_inscripcion_id: estudianteInscripcion.id,
-            course_id: curso.course_id,
-            course_name: curso.course_name,
-            course_area: curso.course_area,
-            instructor: curso.instructor,
-            day_of_week: curso.day_of_week,
-            time_slot: curso.time_slot,
-            precio_base: precioBase,
-            precio_con_descuento: precioConDescuento,
+            cursosData.push({
+              estudiante_inscripcion_id: estudianteInscripcion.id,
+              course_id: curso.course_id,
+              course_name: curso.course_name,
+              course_area: curso.course_area,
+              instructor: curso.instructor,
+              day_of_week: curso.day_of_week,
+              time_slot: curso.time_slot,
+              precio_base: precioBase,
+              precio_con_descuento: precioConDescuento,
+            });
           });
-        });
-      }
-    });
+        }
+      },
+    );
 
     return cursosData;
   }
@@ -459,17 +502,21 @@ export class Inscripciones2026Service {
    * Prepara datos de mundos STEAM para creación en batch
    * @private
    */
-  private prepareMundosData(estudiantesCreados: EstudianteCreado[]): Prisma.CicloMundoSeleccionado2026CreateManyInput[] {
+  private prepareMundosData(
+    estudiantesCreados: EstudianteCreado[],
+  ): Prisma.CicloMundoSeleccionado2026CreateManyInput[] {
     const mundosData: Prisma.CicloMundoSeleccionado2026CreateManyInput[] = [];
 
-    estudiantesCreados.forEach(({ estudianteInscripcion, mundoSeleccionado }) => {
-      if (mundoSeleccionado) {
-        mundosData.push({
-          estudiante_inscripcion_id: estudianteInscripcion.id,
-          mundo: mundoSeleccionado,
-        });
-      }
-    });
+    estudiantesCreados.forEach(
+      ({ estudianteInscripcion, mundoSeleccionado }) => {
+        if (mundoSeleccionado) {
+          mundosData.push({
+            estudiante_inscripcion_id: estudianteInscripcion.id,
+            mundo: mundoSeleccionado,
+          });
+        }
+      },
+    );
 
     return mundosData;
   }
@@ -481,14 +528,14 @@ export class Inscripciones2026Service {
   private async createCursosAndMundos(
     tx: Prisma.TransactionClient,
     cursosData: Prisma.ColoniaCursoSeleccionado2026CreateManyInput[],
-    mundosData: Prisma.CicloMundoSeleccionado2026CreateManyInput[]
+    mundosData: Prisma.CicloMundoSeleccionado2026CreateManyInput[],
   ): Promise<void> {
-    const cursosPromises = cursosData.map(data =>
-      tx.coloniaCursoSeleccionado2026.create({ data })
+    const cursosPromises = cursosData.map((data) =>
+      tx.coloniaCursoSeleccionado2026.create({ data }),
     );
 
-    const mundosPromises = mundosData.map(data =>
-      tx.cicloMundoSeleccionado2026.create({ data })
+    const mundosPromises = mundosData.map((data) =>
+      tx.cicloMundoSeleccionado2026.create({ data }),
     );
 
     const allPromises = [...cursosPromises, ...mundosPromises];
@@ -525,7 +572,7 @@ export class Inscripciones2026Service {
    */
   private async createHistorial(
     tx: Prisma.TransactionClient,
-    inscripcionId: string
+    inscripcionId: string,
   ): Promise<void> {
     await tx.historialEstadoInscripcion2026.create({
       data: {
@@ -553,7 +600,7 @@ export class Inscripciones2026Service {
       success: true,
       inscripcionId: result.inscripcion.id,
       tutorId: result.tutor.id,
-      estudiantes_creados: result.estudiantes.map(e => ({
+      estudiantes_creados: result.estudiantes.map((e) => ({
         id: e.estudiante.id,
         nombre: e.estudiante.nombre,
         pin: e.pin,
@@ -567,109 +614,134 @@ export class Inscripciones2026Service {
     };
   }
 
-/**
- * Crea una nueva inscripción 2026 con transacción atómica completa
- *
- * Flujo:
- * 1. Validaciones (sin DB)
- * 2. Cálculos (sin DB)
- * 3. MercadoPago.createPreference() ← PRIMERO (fail-fast)
- * 4. $transaction con timeout y isolation level
- * 5. Retornar respuesta
- */
-async createInscripcion2026(
-  dto: CreateInscripcion2026Dto,
-): Promise<CreateInscripcion2026Response> {
-  // 1️⃣ Validaciones (sin DB)
-  this.validateInscriptionData(dto);
+  /**
+   * Crea una nueva inscripción 2026 con transacción atómica completa
+   *
+   * Flujo:
+   * 1. Validaciones (sin DB)
+   * 2. Cálculos (sin DB)
+   * 3. MercadoPago.createPreference() ← PRIMERO (fail-fast)
+   * 4. $transaction con timeout y isolation level
+   * 5. Retornar respuesta
+   */
+  async createInscripcion2026(
+    dto: CreateInscripcion2026Dto,
+  ): Promise<CreateInscripcion2026Response> {
+    // 1️⃣ Validaciones (sin DB)
+    this.validateInscriptionData(dto);
 
-  // 2️⃣ Cálculos (sin DB)
-  const inscripcionFee = this.calculateInscriptionFee(dto.tipo_inscripcion);
-  const cursosPerStudent = dto.estudiantes.map(
-    (e) => e.cursos_seleccionados?.length || 0
-  );
-  const { total: monthlyTotal, descuento: siblingDiscount } =
-    this.calculateMonthlyTotal(
-      dto.tipo_inscripcion,
-      dto.estudiantes.length,
-      cursosPerStudent,
+    // 2️⃣ Cálculos (sin DB)
+    const inscripcionFee = this.calculateInscriptionFee(dto.tipo_inscripcion);
+    const cursosPerStudent = dto.estudiantes.map(
+      (e) => e.cursos_seleccionados?.length || 0,
     );
+    const { total: monthlyTotal, descuento: siblingDiscount } =
+      this.calculateMonthlyTotal(
+        dto.tipo_inscripcion,
+        dto.estudiantes.length,
+        cursosPerStudent,
+      );
 
-  // 3️⃣ CRÍTICO: Crear preferencia MercadoPago PRIMERO (fail-fast)
-  const backendUrl = this.configService.get<string>('BACKEND_URL') || 'http://localhost:3001';
-  const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    // 3️⃣ CRÍTICO: Crear preferencia MercadoPago PRIMERO (fail-fast)
+    const backendUrl =
+      this.configService.get<string>('BACKEND_URL') || 'http://localhost:3001';
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
 
-  const { mercadopagoPreferenceId, mercadopagoInitPoint } = await this.createMercadoPagoPreference(
-    dto,
-    inscripcionFee,
-    backendUrl,
-    frontendUrl
-  );
+    const { mercadopagoPreferenceId, mercadopagoInitPoint } =
+      await this.createMercadoPagoPreference(
+        dto,
+        inscripcionFee,
+        backendUrl,
+        frontendUrl,
+      );
 
-  // 4️⃣ TODO lo demás en transacción atómica
-  const startTime = Date.now();
-  let result: TransactionResult;
+    // 4️⃣ TODO lo demás en transacción atómica
+    const startTime = Date.now();
+    let result: TransactionResult;
 
-  try {
-    result = await this.prisma.$transaction(async (tx) => {
-      const tutor = await this.findOrCreateTutor(tx, dto.tutor);
-      const inscripcion = await this.createInscripcion(tx, tutor.id, dto, inscripcionFee, siblingDiscount, monthlyTotal);
-      const estudiantesCreados = await this.createEstudiantesConInscripciones(tx, inscripcion.id, dto.estudiantes, tutor.id);
+    try {
+      result = await this.prisma.$transaction(
+        async (tx) => {
+          const tutor = await this.findOrCreateTutor(tx, dto.tutor);
+          const inscripcion = await this.createInscripcion(
+            tx,
+            tutor.id,
+            dto,
+            inscripcionFee,
+            siblingDiscount,
+            monthlyTotal,
+          );
+          const estudiantesCreados =
+            await this.createEstudiantesConInscripciones(
+              tx,
+              inscripcion.id,
+              dto.estudiantes,
+              tutor.id,
+            );
 
-      const cursosData = this.prepareCursosData(estudiantesCreados);
-      const mundosData = this.prepareMundosData(estudiantesCreados);
-      await this.createCursosAndMundos(tx, cursosData, mundosData);
+          const cursosData = this.prepareCursosData(estudiantesCreados);
+          const mundosData = this.prepareMundosData(estudiantesCreados);
+          await this.createCursosAndMundos(tx, cursosData, mundosData);
 
-      const pago = await this.createPago(tx, inscripcion.id, inscripcionFee, mercadopagoPreferenceId);
-      await this.createHistorial(tx, inscripcion.id);
+          const pago = await this.createPago(
+            tx,
+            inscripcion.id,
+            inscripcionFee,
+            mercadopagoPreferenceId,
+          );
+          await this.createHistorial(tx, inscripcion.id);
 
-      return {
-        inscripcion,
-        tutor,
-        estudiantes: estudiantesCreados,
-        pago,
-        cursosCount: cursosData.length,
-        mundosCount: mundosData.length,
-      };
-    }, {
-      timeout: 30000,
-      isolationLevel: 'ReadCommitted',
+          return {
+            inscripcion,
+            tutor,
+            estudiantes: estudiantesCreados,
+            pago,
+            cursosCount: cursosData.length,
+            mundosCount: mundosData.length,
+          };
+        },
+        {
+          timeout: 30000,
+          isolationLevel: 'ReadCommitted',
+        },
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+
+      this.logger.error('Transaction failed, all changes rolled back', {
+        error: errorMessage,
+        stack: errorStack,
+        preferenceId: mercadopagoPreferenceId,
+      });
+
+      throw new InternalServerErrorException(
+        'Error al crear la inscripción. No se realizaron cambios en la base de datos.',
+      );
+    }
+
+    // Log de performance
+    const duration = Date.now() - startTime;
+    this.logger.log('Transaction completed successfully', {
+      durationMs: duration,
+      inscripcionId: result.inscripcion.id,
+      tutorId: result.tutor.id,
+      numEstudiantes: dto.estudiantes.length,
+      numCursos: result.cursosCount,
+      numMundos: result.mundosCount,
     });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorStack = error instanceof Error ? error.stack : undefined;
 
-    this.logger.error('Transaction failed, all changes rolled back', {
-      error: errorMessage,
-      stack: errorStack,
-      preferenceId: mercadopagoPreferenceId,
-    });
-
-    throw new InternalServerErrorException(
-      'Error al crear la inscripción. No se realizaron cambios en la base de datos.'
+    // 5️⃣ Construir respuesta
+    return this.buildInscripcionResponse(
+      result,
+      inscripcionFee,
+      siblingDiscount,
+      mercadopagoPreferenceId,
+      mercadopagoInitPoint,
     );
   }
-
-  // Log de performance
-  const duration = Date.now() - startTime;
-  this.logger.log('Transaction completed successfully', {
-    durationMs: duration,
-    inscripcionId: result.inscripcion.id,
-    tutorId: result.tutor.id,
-    numEstudiantes: dto.estudiantes.length,
-    numCursos: result.cursosCount,
-    numMundos: result.mundosCount,
-  });
-
-  // 5️⃣ Construir respuesta
-  return this.buildInscripcionResponse(
-    result,
-    inscripcionFee,
-    siblingDiscount,
-    mercadopagoPreferenceId,
-    mercadopagoInitPoint
-  );
-}
 
   /**
    * Obtiene una inscripción por ID
@@ -768,7 +840,8 @@ async createInscripcion2026(
 
     // ✅ SEGURIDAD: Verificar idempotencia (prevenir procesamiento duplicado)
     // OWASP A04:2021 - Insecure Design
-    const alreadyProcessed: boolean = await this.webhookIdempotency.wasProcessed(paymentId);
+    const alreadyProcessed: boolean =
+      await this.webhookIdempotency.wasProcessed(paymentId);
 
     if (alreadyProcessed) {
       this.logger.warn(
@@ -803,7 +876,9 @@ async createInscripcion2026(
         });
 
         if (!pago) {
-          this.logger.error(`❌ No se encontró el pago para inscripción ${inscripcionId}`);
+          this.logger.error(
+            `❌ No se encontró el pago para inscripción ${inscripcionId}`,
+          );
         }
 
         return pago;
@@ -813,29 +888,40 @@ async createInscripcion2026(
         if (!context.parsedReference) {
           throw new Error('Invalid parsed reference');
         }
-        const { inscripcionId } = context.parsedReference.ids;
+        const inscripcionId = context.parsedReference.ids.inscripcionId;
+        if (!inscripcionId) {
+          throw new Error('inscripcionId no encontrado en parsed reference');
+        }
 
         // Mapear estado de MercadoPago a estado interno
-        const nuevoEstadoPago = this.webhookProcessor.mapPaymentStatus(context.paymentStatus);
+        const nuevoEstadoPago = this.webhookProcessor.mapPaymentStatus(
+          context.paymentStatus,
+        );
 
         // ✅ SEGURIDAD: Validar monto del pago ANTES de aprobar
         // OWASP A04:2021 - Insecure Design
         // PCI DSS Req 6.5.10 - Broken Authentication
-        if (context.paymentStatus === 'approved' && context.payment.transaction_amount !== undefined) {
-          const receivedAmount: number = Number(context.payment.transaction_amount);
-
-          const validation = await this.amountValidator.validatePagoInscripcion2026(
-            pago.id,
-            receivedAmount,
+        if (
+          context.paymentStatus === 'approved' &&
+          context.payment.transaction_amount !== undefined
+        ) {
+          const receivedAmount: number = Number(
+            context.payment.transaction_amount,
           );
+
+          const validation =
+            await this.amountValidator.validatePagoInscripcion2026(
+              pago.id,
+              receivedAmount,
+            );
 
           if (!validation.isValid) {
             this.logger.error(
               `🚨 FRAUDE DETECTADO - Monto inválido en pago ${pago.id}\n` +
-              `  Esperado: $${validation.expectedAmount.toFixed(2)}\n` +
-              `  Recibido: $${validation.receivedAmount.toFixed(2)}\n` +
-              `  Diferencia: $${validation.difference?.toFixed(2)}\n` +
-              `  Razón: ${validation.reason}`,
+                `  Esperado: $${validation.expectedAmount.toFixed(2)}\n` +
+                `  Recibido: $${validation.receivedAmount.toFixed(2)}\n` +
+                `  Diferencia: $${validation.difference?.toFixed(2)}\n` +
+                `  Razón: ${validation.reason}`,
             );
 
             throw new BadRequestException(
@@ -845,8 +931,8 @@ async createInscripcion2026(
 
           this.logger.log(
             `✅ Validación de monto exitosa: pago_id=${pago.id}, ` +
-            `esperado=$${validation.expectedAmount.toFixed(2)}, ` +
-            `recibido=$${validation.receivedAmount.toFixed(2)}`,
+              `esperado=$${validation.expectedAmount.toFixed(2)}, ` +
+              `recibido=$${validation.receivedAmount.toFixed(2)}`,
           );
         }
 
@@ -875,7 +961,8 @@ async createInscripcion2026(
             data: {
               estado: nuevoEstadoPago,
               mercadopago_payment_id: context.payment.id?.toString(),
-              fecha_pago: context.paymentStatus === 'approved' ? new Date() : undefined,
+              fecha_pago:
+                context.paymentStatus === 'approved' ? new Date() : undefined,
             },
           });
 
@@ -924,10 +1011,16 @@ async createInscripcion2026(
 
     // ✅ SEGURIDAD: Marcar webhook como procesado (solo si fue exitoso)
     // OWASP A04:2021 - Insecure Design
-    if (result && typeof result === 'object' && 'success' in result && result.success !== false) {
+    if (
+      result &&
+      typeof result === 'object' &&
+      'success' in result &&
+      result.success !== false
+    ) {
       // Extraer externalReference del resultado si está disponible
       const externalRef: string =
-        ('externalReference' in result && typeof result.externalReference === 'string')
+        'externalReference' in result &&
+        typeof result.externalReference === 'string'
           ? result.externalReference
           : paymentId;
 
@@ -945,13 +1038,19 @@ async createInscripcion2026(
       } catch (error: unknown) {
         // Si falla por unique constraint (P2002), significa que otro proceso ya lo marcó (race condition)
         // Esto es OK, simplemente logueamos y continuamos
-        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+        if (
+          error &&
+          typeof error === 'object' &&
+          'code' in error &&
+          error.code === 'P2002'
+        ) {
           this.logger.warn(
             `⚠️ Race condition al marcar webhook: payment_id=${paymentId}. Otro proceso ya lo procesó.`,
           );
         } else {
           // Otros errores sí son problemáticos, pero no detenemos el flujo
-          const message = error instanceof Error ? error.message : 'Unknown error';
+          const message =
+            error instanceof Error ? error.message : 'Unknown error';
           this.logger.error(
             `❌ Error al marcar webhook como procesado: ${message}, payment_id=${paymentId}`,
           );

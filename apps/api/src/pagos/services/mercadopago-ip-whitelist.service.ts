@@ -46,15 +46,15 @@ export class MercadoPagoIpWhitelistService {
    * Última actualización: Enero 2025
    */
   private readonly officialIpRanges: string[] = [
-    '209.225.49.0/24',  // MercadoPago primary range
-    '216.33.197.0/24',  // MercadoPago secondary range
-    '216.33.196.0/24',  // MercadoPago tertiary range
-    '63.128.82.0/24',   // MercadoPago additional range (testing/sandbox)
-    '63.128.83.0/24',   // MercadoPago additional range (testing/sandbox)
-    '63.128.94.0/24',   // MercadoPago additional range (testing/sandbox)
-    '35.186.0.0/16',    // Google Cloud Platform (usado por MercadoPago webhooks)
-    '35.245.0.0/16',    // Google Cloud Platform - us-central1 (webhooks reales)
-    '186.139.0.0/16',   // TEMPORAL: Para testing desde dashboard MP (REMOVER en producción)
+    '209.225.49.0/24', // MercadoPago primary range
+    '216.33.197.0/24', // MercadoPago secondary range
+    '216.33.196.0/24', // MercadoPago tertiary range
+    '63.128.82.0/24', // MercadoPago additional range (testing/sandbox)
+    '63.128.83.0/24', // MercadoPago additional range (testing/sandbox)
+    '63.128.94.0/24', // MercadoPago additional range (testing/sandbox)
+    '35.186.0.0/16', // Google Cloud Platform (usado por MercadoPago webhooks)
+    '35.245.0.0/16', // Google Cloud Platform - us-central1 (webhooks reales)
+    '186.139.0.0/16', // TEMPORAL: Para testing desde dashboard MP (REMOVER en producción)
   ];
 
   /**
@@ -94,15 +94,15 @@ export class MercadoPagoIpWhitelistService {
     // Validar contra rangos oficiales de MercadoPago
     for (const range of this.officialIpRanges) {
       if (this.isIpInRange(ip, range)) {
-        this.logger.log(`✅ IP autorizada (MercadoPago): ${ip} (rango: ${range})`);
+        this.logger.log(
+          `✅ IP autorizada (MercadoPago): ${ip} (rango: ${range})`,
+        );
         return true;
       }
     }
 
     // IP no autorizada
-    this.logger.warn(
-      `🚨 IP NO AUTORIZADA intentando enviar webhook: ${ip}`,
-    );
+    this.logger.warn(`🚨 IP NO AUTORIZADA intentando enviar webhook: ${ip}`);
     return false;
   }
 
@@ -116,6 +116,15 @@ export class MercadoPagoIpWhitelistService {
   private isIpInRange(ip: string, cidr: string): boolean {
     try {
       const [range, bits] = cidr.split('/');
+
+      // Validar formato CIDR
+      if (!range || !bits) {
+        this.logger.error(
+          `CIDR inválido: "${cidr}" - formato esperado: "ip/bits"`,
+        );
+        return false;
+      }
+
       const mask = ~(2 ** (32 - parseInt(bits, 10)) - 1);
 
       const ipNum = this.ipToNumber(ip);
@@ -137,9 +146,11 @@ export class MercadoPagoIpWhitelistService {
    * @returns Número representando la IP
    */
   private ipToNumber(ip: string): number {
-    return ip.split('.').reduce((acc, octet) => {
-      return (acc << 8) + parseInt(octet, 10);
-    }, 0) >>> 0;
+    return (
+      ip.split('.').reduce((acc, octet) => {
+        return (acc << 8) + parseInt(octet, 10);
+      }, 0) >>> 0
+    );
   }
 
   /**
@@ -163,12 +174,13 @@ export class MercadoPagoIpWhitelistService {
       const ips = Array.isArray(xForwardedFor)
         ? xForwardedFor[0]
         : xForwardedFor;
-      const firstIp = ips.split(',')[0].trim();
-      if (firstIp) {
-        this.logger.debug(
-          `IP extraída de X-Forwarded-For: ${firstIp}`,
-        );
-        return firstIp;
+
+      if (ips) {
+        const firstIp = ips.split(',')[0]?.trim();
+        if (firstIp) {
+          this.logger.debug(`IP extraída de X-Forwarded-For: ${firstIp}`);
+          return firstIp;
+        }
       }
     }
 

@@ -143,9 +143,15 @@ export class LogrosService {
 
     let racha = 1;
     for (let i = 1; i < asistencias.length; i++) {
+      const asistenciaAnterior = asistencias[i - 1];
+      const asistenciaActual = asistencias[i];
+
+      // Safety check: si por alguna razón los indices no existen, salir
+      if (!asistenciaAnterior || !asistenciaActual) break;
+
       const diff =
-        asistencias[i - 1].createdAt.getTime() -
-        asistencias[i].createdAt.getTime();
+        asistenciaAnterior.createdAt.getTime() -
+        asistenciaActual.createdAt.getTime();
       const days = diff / (1000 * 60 * 60 * 24);
 
       if (days <= 1.5) {
@@ -172,16 +178,24 @@ export class LogrosService {
       tiempo_minutos: number;
       primer_intento: boolean;
     },
-  ): Promise<Array<{ id: string; nombre: string; descripcion: string; puntos: number }>> {
-    const logrosDesbloqueados: Array<{ id: string; nombre: string; descripcion: string; puntos: number }> = [];
+  ): Promise<
+    Array<{ id: string; nombre: string; descripcion: string; puntos: number }>
+  > {
+    const logrosDesbloqueados: Array<{
+      id: string;
+      nombre: string;
+      descripcion: string;
+      puntos: number;
+    }> = [];
 
     // Verificar actividades completadas
-    const actividadesCompletadas = await this.prisma.progresoEstudianteActividad.count({
-      where: {
-        estudiante_id: estudianteId,
-        completado: true,
-      },
-    });
+    const actividadesCompletadas =
+      await this.prisma.progresoEstudianteActividad.count({
+        where: {
+          estudiante_id: estudianteId,
+          completado: true,
+        },
+      });
 
     // Primera actividad completada
     if (actividadesCompletadas === 1) {

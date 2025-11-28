@@ -113,15 +113,16 @@ export class EstudiantesController {
   ) {
     const estudianteId = req.user.id;
 
-
     // Validar que sea URL válida de Ready Player Me
     if (!body.avatarUrl || !body.avatarUrl.includes('readyplayer.me')) {
       throw new BadRequestException('URL de avatar inválida');
     }
 
     // Actualizar avatar 3D sin validación de ownership (el estudiante actualiza su propio avatar)
-    const resultado = await this.estudiantesService.updateAvatar3D(estudianteId, body.avatarUrl);
-
+    const resultado = await this.estudiantesService.updateAvatar3D(
+      estudianteId,
+      body.avatarUrl,
+    );
 
     return resultado;
   }
@@ -141,7 +142,6 @@ export class EstudiantesController {
   ) {
     const estudianteId = req.user.id;
 
-
     // Validar que sea URL válida
     if (!body.animacion_idle_url || !body.animacion_idle_url.includes('.glb')) {
       throw new BadRequestException('URL de animación inválida');
@@ -152,7 +152,6 @@ export class EstudiantesController {
       estudianteId,
       body.animacion_idle_url,
     );
-
 
     return resultado;
   }
@@ -168,10 +167,8 @@ export class EstudiantesController {
   async obtenerMiAvatar(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
 
-
     // Buscar directamente sin ownership check (el estudiante accede a sus propios datos)
     const estudiante = await this.estudiantesService.findOneById(estudianteId);
-
 
     if (estudiante.avatarUrl) {
     }
@@ -180,7 +177,6 @@ export class EstudiantesController {
       avatarUrl: estudiante.avatarUrl,
       tiene_avatar: !!estudiante.avatarUrl,
     };
-
 
     return resultado;
   }
@@ -196,7 +192,8 @@ export class EstudiantesController {
   async obtenerMiProximaClase(@Request() req: RequestWithAuthUser) {
     const estudianteId = req.user.id;
 
-    const resultado = await this.estudiantesService.obtenerProximaClase(estudianteId);
+    const resultado =
+      await this.estudiantesService.obtenerProximaClase(estudianteId);
 
     if (resultado) {
     }
@@ -301,7 +298,10 @@ export class EstudiantesController {
   ) {
     // Nota: No necesitamos usar '_user' aquí porque el guard ya validó ownership
     // El guard se ejecuta ANTES de este método y rechaza requests no autorizados
-    return this.estudiantesService.updateAvatarGradient(id, body.avatar_gradient);
+    return this.estudiantesService.updateAvatarGradient(
+      id,
+      body.avatar_gradient,
+    );
   }
 
   /**
@@ -375,11 +375,12 @@ export class EstudiantesController {
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   async asignarClases(@Param('id') id: string, @Body() dto: AsignarClasesDto) {
-    if (dto.clasesIds.length === 1) {
+    const primeraClaseId = dto.clasesIds[0];
+    if (dto.clasesIds.length === 1 && primeraClaseId) {
       return [
         await this.estudiantesService.asignarClaseAEstudiante(
           id,
-          dto.clasesIds[0],
+          primeraClaseId,
         ),
       ];
     }

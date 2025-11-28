@@ -38,17 +38,18 @@ export enum EstadoMercadoPago {
 /**
  * Mapeo de estados MercadoPago → Estados internos
  */
-export const MERCADOPAGO_TO_ESTADO_PAGO: Record<EstadoMercadoPago, EstadoPago> = {
-  [EstadoMercadoPago.PENDING]: EstadoPago.PENDIENTE,
-  [EstadoMercadoPago.APPROVED]: EstadoPago.PAGADO,
-  [EstadoMercadoPago.AUTHORIZED]: EstadoPago.PAGADO,
-  [EstadoMercadoPago.IN_PROCESS]: EstadoPago.PENDIENTE,
-  [EstadoMercadoPago.IN_MEDIATION]: EstadoPago.PENDIENTE,
-  [EstadoMercadoPago.REJECTED]: EstadoPago.RECHAZADO,
-  [EstadoMercadoPago.CANCELLED]: EstadoPago.CANCELADO,
-  [EstadoMercadoPago.REFUNDED]: EstadoPago.REEMBOLSADO,
-  [EstadoMercadoPago.CHARGED_BACK]: EstadoPago.REEMBOLSADO,
-};
+export const MERCADOPAGO_TO_ESTADO_PAGO: Record<EstadoMercadoPago, EstadoPago> =
+  {
+    [EstadoMercadoPago.PENDING]: EstadoPago.PENDIENTE,
+    [EstadoMercadoPago.APPROVED]: EstadoPago.PAGADO,
+    [EstadoMercadoPago.AUTHORIZED]: EstadoPago.PAGADO,
+    [EstadoMercadoPago.IN_PROCESS]: EstadoPago.PENDIENTE,
+    [EstadoMercadoPago.IN_MEDIATION]: EstadoPago.PENDIENTE,
+    [EstadoMercadoPago.REJECTED]: EstadoPago.RECHAZADO,
+    [EstadoMercadoPago.CANCELLED]: EstadoPago.CANCELADO,
+    [EstadoMercadoPago.REFUNDED]: EstadoPago.REEMBOLSADO,
+    [EstadoMercadoPago.CHARGED_BACK]: EstadoPago.REEMBOLSADO,
+  };
 
 /**
  * Mapear estado de MercadoPago a estado interno
@@ -116,7 +117,11 @@ export const EXTERNAL_REFERENCE_FORMATS = {
   /**
    * Crear external_reference para inscripción a clase
    */
-  claseInscripcion(claseId: string, estudianteId: string, fechaInicio: string): string {
+  claseInscripcion(
+    claseId: string,
+    estudianteId: string,
+    fechaInicio: string,
+  ): string {
     return `${TipoExternalReference.CLASE_INSCRIPCION}:${claseId}:${estudianteId}:${fechaInicio}`;
   },
 
@@ -146,7 +151,11 @@ export const EXTERNAL_REFERENCE_FORMATS = {
    * Crear external_reference para inscripción mensual (Legacy)
    * Format: "inscripcion-{inscripcionId}-estudiante-{estudianteId}-producto-{productoId}"
    */
-  inscripcionMensual(inscripcionId: string, estudianteId: string, productoId: string): string {
+  inscripcionMensual(
+    inscripcionId: string,
+    estudianteId: string,
+    productoId: string,
+  ): string {
     return `inscripcion-${inscripcionId}-estudiante-${estudianteId}-producto-${productoId}`;
   },
 
@@ -154,7 +163,11 @@ export const EXTERNAL_REFERENCE_FORMATS = {
    * Crear external_reference para inscripción 2026
    * Format: "inscripcion2026-{inscripcionId}-tutor-{tutorId}-tipo-{tipoInscripcion}"
    */
-  inscripcion2026(inscripcionId: string, tutorId: string, tipoInscripcion: string): string {
+  inscripcion2026(
+    inscripcionId: string,
+    tutorId: string,
+    tipoInscripcion: string,
+  ): string {
     return `inscripcion2026-${inscripcionId}-tutor-${tutorId}-tipo-${tipoInscripcion}`;
   },
 };
@@ -172,35 +185,46 @@ export interface LegacyExternalReferenceResult {
  * @param externalReference - String en formato "TIPO:param1:param2:..."
  * @returns Objeto parseado o null si formato inválido
  */
-export function parseExternalReference(externalReference: string): ExternalReference | null {
+export function parseExternalReference(
+  externalReference: string,
+): ExternalReference | null {
   const parts = externalReference.split(':');
   const tipo = parts[0] as TipoExternalReference;
 
   switch (tipo) {
-    case TipoExternalReference.CLASE_INSCRIPCION:
+    case TipoExternalReference.CLASE_INSCRIPCION: {
       if (parts.length !== 4) return null;
+      const [, claseId, estudianteId, fecha] = parts;
+      if (!claseId || !estudianteId || !fecha) return null;
       return {
         tipo: TipoExternalReference.CLASE_INSCRIPCION,
-        claseId: parts[1],
-        estudianteId: parts[2],
-        fecha: parts[3],
+        claseId,
+        estudianteId,
+        fecha,
       };
+    }
 
-    case TipoExternalReference.CURSO_INSCRIPCION:
+    case TipoExternalReference.CURSO_INSCRIPCION: {
       if (parts.length !== 3) return null;
+      const [, cursoId, estudianteId] = parts;
+      if (!cursoId || !estudianteId) return null;
       return {
         tipo: TipoExternalReference.CURSO_INSCRIPCION,
-        cursoId: parts[1],
-        estudianteId: parts[2],
+        cursoId,
+        estudianteId,
       };
+    }
 
-    case TipoExternalReference.ESTUDIANTE_RECARGA:
+    case TipoExternalReference.ESTUDIANTE_RECARGA: {
       if (parts.length !== 3) return null;
+      const [, estudianteId, montoStr] = parts;
+      if (!estudianteId || !montoStr) return null;
       return {
         tipo: TipoExternalReference.ESTUDIANTE_RECARGA,
-        estudianteId: parts[1],
-        monto: parseFloat(parts[2]),
+        estudianteId,
+        monto: parseFloat(montoStr),
       };
+    }
 
     default:
       return null;
@@ -227,12 +251,14 @@ export function parseLegacyExternalReference(
       /^membresia-(.+?)-tutor-(.+?)-producto-(.+)$/,
     );
     if (!match) return null;
+    const [, membresiaId, tutorId, productoId] = match;
+    if (!membresiaId || !tutorId || !productoId) return null;
     return {
       tipo: TipoExternalReference.MEMBRESIA,
       ids: {
-        membresiaId: match[1],
-        tutorId: match[2],
-        productoId: match[3],
+        membresiaId,
+        tutorId,
+        productoId,
       },
     };
   }
@@ -243,12 +269,14 @@ export function parseLegacyExternalReference(
       /^inscripcion-(.+?)-estudiante-(.+?)-producto-(.+)$/,
     );
     if (!match) return null;
+    const [, inscripcionId, estudianteId, productoId] = match;
+    if (!inscripcionId || !estudianteId || !productoId) return null;
     return {
       tipo: TipoExternalReference.INSCRIPCION_MENSUAL,
       ids: {
-        inscripcionId: match[1],
-        estudianteId: match[2],
-        productoId: match[3],
+        inscripcionId,
+        estudianteId,
+        productoId,
       },
     };
   }
@@ -259,12 +287,14 @@ export function parseLegacyExternalReference(
       /^inscripcion2026-(.+?)-tutor-(.+?)-tipo-(.+)$/,
     );
     if (!match) return null;
+    const [, inscripcionId, tutorId, tipoInscripcion] = match;
+    if (!inscripcionId || !tutorId || !tipoInscripcion) return null;
     return {
       tipo: TipoExternalReference.INSCRIPCION_2026,
       ids: {
-        inscripcionId: match[1],
-        tutorId: match[2],
-        tipoInscripcion: match[3],
+        inscripcionId,
+        tutorId,
+        tipoInscripcion,
       },
     };
   }
@@ -294,7 +324,9 @@ export function esExternalReferenceValido(externalReference: string): boolean {
  * @param externalReference - String en formato "TIPO:..."
  * @returns Tipo o null si inválido
  */
-export function getTipoExternalReference(externalReference: string): TipoExternalReference | null {
+export function getTipoExternalReference(
+  externalReference: string,
+): TipoExternalReference | null {
   const tipo = externalReference.split(':')[0] as TipoExternalReference;
   return Object.values(TipoExternalReference).includes(tipo) ? tipo : null;
 }

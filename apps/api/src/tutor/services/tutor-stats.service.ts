@@ -140,9 +140,7 @@ export class TutorStatsService {
    * @param tutorId - ID del tutor
    * @returns Métricas: totalHijos, clasesDelMes, totalPagadoAnio, asistenciaPromedio
    */
-  async calcularMetricasDashboard(
-    tutorId: string,
-  ): Promise<MetricasDashboard> {
+  async calcularMetricasDashboard(tutorId: string): Promise<MetricasDashboard> {
     const ahora = new Date();
     const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
     const finMes = new Date(
@@ -270,7 +268,16 @@ export class TutorStatsService {
 
     return inscripcionesPendientes.map((inscripcion) => {
       // Calcular fecha de vencimiento (último día del mes del período)
-      const [anio, mes] = inscripcion.periodo.split('-').map(Number);
+      const periodoParts = inscripcion.periodo.split('-');
+      const anioStr = periodoParts[0];
+      const mesStr = periodoParts[1];
+      if (!anioStr || !mesStr) {
+        throw new Error(
+          `Periodo inválido: "${inscripcion.periodo}" - formato esperado: YYYY-MM`,
+        );
+      }
+      const anio = Number(anioStr);
+      const mes = Number(mesStr);
       const fechaVencimiento = new Date(anio, mes, 0); // Último día del mes
 
       // Calcular días para vencer (negativo si ya venció)
@@ -365,8 +372,13 @@ export class TutorStatsService {
 
     const ahora = new Date();
 
-    return clasesHoy.map((clase) => {
+    // Usar flatMap para filtrar y mapear (narrowing correcto)
+    return clasesHoy.flatMap((clase) => {
       const inscripcion = clase.inscripciones[0];
+      // Skip clases sin inscripciones
+      if (!inscripcion) {
+        return [];
+      }
       const fechaHoraInicio = new Date(clase.fecha_hora_inicio);
 
       // Puede unirse si faltan menos de 10 minutos
@@ -375,22 +387,24 @@ export class TutorStatsService {
       const puedeUnirse =
         diffMinutos <= 10 && diffMinutos >= -clase.duracion_minutos;
 
-      return {
-        id: clase.id,
-        hora: fechaHoraInicio.toLocaleTimeString('es-AR', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false,
-        }),
-        nombreRuta: clase.rutaCurricular?.nombre || 'Clase sin ruta',
-        colorRuta: clase.rutaCurricular?.color || undefined,
-        estudianteId: inscripcion.estudiante.id,
-        estudianteNombre: `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`,
-        docenteNombre: `${clase.docente.nombre} ${clase.docente.apellido}`,
-        fechaHoraInicio,
-        urlReunion: undefined, // TODO: agregar campo en BD si existe
-        puedeUnirse,
-      };
+      return [
+        {
+          id: clase.id,
+          hora: fechaHoraInicio.toLocaleTimeString('es-AR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          }),
+          nombreRuta: clase.rutaCurricular?.nombre || 'Clase sin ruta',
+          colorRuta: clase.rutaCurricular?.color || undefined,
+          estudianteId: inscripcion.estudiante.id,
+          estudianteNombre: `${inscripcion.estudiante.nombre} ${inscripcion.estudiante.apellido}`,
+          docenteNombre: `${clase.docente.nombre} ${clase.docente.apellido}`,
+          fechaHoraInicio,
+          urlReunion: undefined, // TODO: agregar campo en BD si existe
+          puedeUnirse,
+        },
+      ];
     });
   }
 

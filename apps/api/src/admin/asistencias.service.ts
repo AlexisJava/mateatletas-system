@@ -197,7 +197,7 @@ export class AsistenciasService {
     // Agrupar por fecha
     const porFecha = asistencias.reduce(
       (acc: Record<string, typeof asistencias>, asistencia) => {
-        const fecha = asistencia.fecha.toISOString().split('T')[0];
+        const fecha = asistencia.fecha.toISOString().split('T')[0] || 'unknown';
         if (!acc[fecha]) {
           acc[fecha] = [];
         }

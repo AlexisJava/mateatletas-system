@@ -311,13 +311,15 @@ export class PagosTutorService {
 
     const suscripciones = await this.productosService.findSuscripciones();
 
-    if (!suscripciones || suscripciones.length === 0) {
+    const primeraSuscripcion = suscripciones?.[0];
+
+    if (!primeraSuscripcion) {
       throw new NotFoundException(
         'No hay productos de suscripción disponibles',
       );
     }
 
-    return suscripciones[0];
+    return primeraSuscripcion;
   }
 
   private async obtenerTutorBasico(tutorId: string) {

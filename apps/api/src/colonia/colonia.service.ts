@@ -1,9 +1,17 @@
-import { Injectable, Logger, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaClient, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { MercadoPagoService } from '../pagos/mercadopago.service';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
-import { MercadoPagoPayment, MercadoPagoWebhookPayload } from '../pagos/types/mercadopago.types';
+import {
+  MercadoPagoPayment,
+  MercadoPagoWebhookPayload,
+} from '../pagos/types/mercadopago.types';
 import {
   parseLegacyExternalReference,
   TipoExternalReference,
@@ -38,7 +46,9 @@ type EstudianteFromDB = Prisma.EstudianteGetPayload<Record<string, never>>;
 /**
  * Tipo de ColoniaEstudiante retornado por Prisma
  */
-type ColoniaEstudianteFromDB = Prisma.ColoniaEstudianteGetPayload<Record<string, never>>;
+type ColoniaEstudianteFromDB = Prisma.ColoniaEstudianteGetPayload<
+  Record<string, never>
+>;
 
 /**
  * Datos preparados de un estudiante antes de crear
@@ -115,7 +125,8 @@ export class ColoniaService {
   private async generateUniquePin(): Promise<string> {
     return await this.pinGenerator.generateUniquePin(
       'coloniaEstudiante',
-      async (pin) => await this.prisma.coloniaEstudiante.findFirst({ where: { pin } })
+      async (pin) =>
+        await this.prisma.coloniaEstudiante.findFirst({ where: { pin } }),
     );
   }
 
@@ -133,7 +144,7 @@ export class ColoniaService {
   private async updatePreferenceIdWithRetry(
     pagoId: string,
     preferenceId: string,
-    maxRetries: number = 3
+    maxRetries: number = 3,
   ): Promise<void> {
     let lastError: Error | undefined;
 
@@ -155,7 +166,8 @@ export class ColoniaService {
 
         return;
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
+        const message =
+          error instanceof Error ? error.message : 'Unknown error';
         const stack = error instanceof Error ? error.stack : undefined;
         lastError = error instanceof Error ? error : new Error(String(error));
 
@@ -174,7 +186,7 @@ export class ColoniaService {
           });
 
           // Esperar antes del siguiente reintento
-          await new Promise(resolve => setTimeout(resolve, delayMs));
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
         }
       }
     }
@@ -182,16 +194,19 @@ export class ColoniaService {
     // Si llegamos aquí, fallaron todos los reintentos
     const finalMessage = lastError?.message ?? 'Unknown error';
     const finalStack = lastError?.stack;
-    this.logger.error('Fallo al actualizar preference ID después de todos los reintentos', {
-      pagoId,
-      preferenceId,
-      maxRetries,
-      error: finalMessage,
-      stack: finalStack,
-    });
+    this.logger.error(
+      'Fallo al actualizar preference ID después de todos los reintentos',
+      {
+        pagoId,
+        preferenceId,
+        maxRetries,
+        error: finalMessage,
+        stack: finalStack,
+      },
+    );
 
     throw new BadRequestException(
-      `No se pudo actualizar el preference ID después de ${maxRetries} reintentos. Por favor contacte a soporte.`
+      `No se pudo actualizar el preference ID después de ${maxRetries} reintentos. Por favor contacte a soporte.`,
     );
   }
 
@@ -213,8 +228,13 @@ export class ColoniaService {
    * @param estudiantes - Lista de estudiantes con cursos seleccionados
    * @throws BadRequestException si no hay cursos seleccionados
    */
-  private validateCourseSelection(estudiantes: CreateInscriptionDto['estudiantes']): void {
-    const totalCursos = estudiantes.reduce((sum, est) => sum + est.cursosSeleccionados.length, 0);
+  private validateCourseSelection(
+    estudiantes: CreateInscriptionDto['estudiantes'],
+  ): void {
+    const totalCursos = estudiantes.reduce(
+      (sum, est) => sum + est.cursosSeleccionados.length,
+      0,
+    );
 
     if (totalCursos === 0) {
       throw new BadRequestException('Debe seleccionar al menos un curso');
@@ -229,14 +249,27 @@ export class ColoniaService {
    */
   private calculatePricing(dto: CreateInscriptionDto): PricingResult {
     const cantidadEstudiantes = dto.estudiantes.length;
-    const totalCursos = dto.estudiantes.reduce((sum, est) => sum + est.cursosSeleccionados.length, 0);
+    const totalCursos = dto.estudiantes.reduce(
+      (sum, est) => sum + est.cursosSeleccionados.length,
+      0,
+    );
 
     // Usar PricingCalculatorService para calcular descuentos y totales
-    const descuentoPorcentaje = this.pricingCalculator.calcularDescuentoColonia(cantidadEstudiantes, totalCursos);
-    const cursosPerStudent = dto.estudiantes.map(est => est.cursosSeleccionados.length);
-    const totalMensual = this.pricingCalculator.calcularTotalColonia(cursosPerStudent, descuentoPorcentaje);
+    const descuentoPorcentaje = this.pricingCalculator.calcularDescuentoColonia(
+      cantidadEstudiantes,
+      totalCursos,
+    );
+    const cursosPerStudent = dto.estudiantes.map(
+      (est) => est.cursosSeleccionados.length,
+    );
+    const totalMensual = this.pricingCalculator.calcularTotalColonia(
+      cursosPerStudent,
+      descuentoPorcentaje,
+    );
 
-    this.logger.log(`Cálculo: ${totalCursos} cursos, ${cantidadEstudiantes} estudiantes, descuento ${descuentoPorcentaje}%, total mensual: $${totalMensual}`);
+    this.logger.log(
+      `Cálculo: ${totalCursos} cursos, ${cantidadEstudiantes} estudiantes, descuento ${descuentoPorcentaje}%, total mensual: $${totalMensual}`,
+    );
 
     return {
       cantidadEstudiantes,
@@ -254,7 +287,10 @@ export class ColoniaService {
    * @param tx - Cliente de transacción de Prisma
    * @returns Username único en formato {nombre}{random4digits}
    */
-  private async generateUniqueUsername(nombre: string, tx: Prisma.TransactionClient): Promise<string> {
+  private async generateUniqueUsername(
+    nombre: string,
+    tx: Prisma.TransactionClient,
+  ): Promise<string> {
     let username: string;
     let attempts = 0;
     const maxAttempts = 10;
@@ -285,32 +321,44 @@ export class ColoniaService {
   private async createEstudiantesConPins(
     tx: Prisma.TransactionClient,
     dto: CreateInscriptionDto,
-    tutorId: string
-  ): Promise<{ estudiantesFromDB: EstudianteFromDB[]; estudiantesData: EstudianteData[]; pins: string[] }> {
+    tutorId: string,
+  ): Promise<{
+    estudiantesFromDB: EstudianteFromDB[];
+    estudiantesData: EstudianteData[];
+    pins: string[];
+  }> {
     // Preparar datos de estudiantes y generar usernames únicos
     const estudiantesData = await Promise.all(
       dto.estudiantes.map(async (estudianteDto) => {
-        const username = await this.generateUniqueUsername(estudianteDto.nombre, tx);
+        const username = await this.generateUniqueUsername(
+          estudianteDto.nombre,
+          tx,
+        );
 
         return {
           username,
           nombre: estudianteDto.nombre,
           apellido: '',
           edad: estudianteDto.edad,
-          nivelEscolar: estudianteDto.edad <= 7 ? 'Primaria' : estudianteDto.edad <= 12 ? 'Primaria' : 'Secundaria',
+          nivelEscolar:
+            estudianteDto.edad <= 7
+              ? 'Primaria'
+              : estudianteDto.edad <= 12
+                ? 'Primaria'
+                : 'Secundaria',
           tutor_id: tutorId,
         };
-      })
+      }),
     );
 
     // Crear todos los estudiantes en paralelo
     const estudiantesFromDB = await Promise.all(
-      estudiantesData.map(data => tx.estudiante.create({ data }))
+      estudiantesData.map((data) => tx.estudiante.create({ data })),
     );
 
     // Generar todos los PINs en paralelo
     const pins = await Promise.all(
-      estudiantesFromDB.map(() => this.generateUniquePin())
+      estudiantesFromDB.map(() => this.generateUniquePin()),
     );
 
     return { estudiantesFromDB, estudiantesData, pins };
@@ -329,20 +377,26 @@ export class ColoniaService {
     tx: Prisma.TransactionClient,
     inscriptionId: string,
     estudiantesFromDB: EstudianteFromDB[],
-    pins: string[]
+    pins: string[],
   ): Promise<ColoniaEstudianteFromDB[]> {
     return Promise.all(
       estudiantesFromDB.map(async (estudiante, idx) => {
+        const pin = pins[idx];
+        if (!pin) {
+          throw new Error(
+            `PIN no generado para estudiante ${estudiante.nombre}`,
+          );
+        }
         return await tx.coloniaEstudiante.create({
           data: {
             inscripcion_id: inscriptionId,
             estudiante_id: estudiante.id,
             nombre: estudiante.nombre,
             edad: estudiante.edad,
-            pin: pins[idx],
+            pin,
           },
         });
-      })
+      }),
     );
   }
 
@@ -357,15 +411,19 @@ export class ColoniaService {
   private prepareCursosData(
     dto: CreateInscriptionDto,
     coloniaEstudiantesCreados: ColoniaEstudianteFromDB[],
-    descuentoPorcentaje: number
+    descuentoPorcentaje: number,
   ): CursoData[] {
     const cursosData: CursoData[] = [];
 
     dto.estudiantes.forEach((estudianteDto, idx) => {
-      const coloniaEstudianteId = coloniaEstudiantesCreados[idx].id;
+      const coloniaEstudiante = coloniaEstudiantesCreados[idx];
+      if (!coloniaEstudiante) {
+        throw new Error(`ColoniaEstudiante no encontrado para índice ${idx}`);
+      }
+      const coloniaEstudianteId = coloniaEstudiante.id;
       const precioConDescuento = this.pricingCalculator.aplicarDescuento(
         PRECIOS.COLONIA_CURSO_BASE,
-        descuentoPorcentaje
+        descuentoPorcentaje,
       );
 
       estudianteDto.cursosSeleccionados.forEach((curso) => {
@@ -393,9 +451,12 @@ export class ColoniaService {
    * @param cursosData - Array de datos de cursos a crear
    * @returns Promesa que se resuelve cuando todos los cursos están creados
    */
-  private async createCursos(tx: Prisma.TransactionClient, cursosData: CursoData[]): Promise<void> {
+  private async createCursos(
+    tx: Prisma.TransactionClient,
+    cursosData: CursoData[],
+  ): Promise<void> {
     const cursosPromises = cursosData.map((cursoData) =>
-      tx.coloniaEstudianteCurso.create({ data: cursoData })
+      tx.coloniaEstudianteCurso.create({ data: cursoData }),
     );
 
     await Promise.all(cursosPromises);
@@ -414,7 +475,7 @@ export class ColoniaService {
       inscriptionId: string;
       pagoEneroId: string;
     },
-    pricing: PricingResult
+    pricing: PricingResult,
   ): Parameters<typeof this.mercadoPagoService.createPreference>[0] {
     return {
       items: [
@@ -452,8 +513,12 @@ export class ColoniaService {
       inscriptionId: string;
       estudiantes: Array<{ nombre: string; username: string; pin: string }>;
     },
-    preference: ReturnType<typeof this.mercadoPagoService.createPreference> extends Promise<infer T> ? T : never,
-    pricing: PricingResult
+    preference: ReturnType<
+      typeof this.mercadoPagoService.createPreference
+    > extends Promise<infer T>
+      ? T
+      : never,
+    pricing: PricingResult,
   ): InscriptionResponse {
     return {
       message: 'Inscripción creada exitosamente',
@@ -526,15 +591,20 @@ export class ColoniaService {
 
       this.logger.log(`Inscripción creada: ${inscripcion.id}`);
 
-      const { estudiantesFromDB, estudiantesData, pins } = await this.createEstudiantesConPins(tx, dto, tutor.id);
+      const { estudiantesFromDB, estudiantesData, pins } =
+        await this.createEstudiantesConPins(tx, dto, tutor.id);
       const coloniaEstudiantesCreados = await this.createColoniaEstudiantes(
         tx,
         inscripcion.id,
         estudiantesFromDB,
-        pins
+        pins,
       );
 
-      const cursosData = this.prepareCursosData(dto, coloniaEstudiantesCreados, pricing.descuentoPorcentaje);
+      const cursosData = this.prepareCursosData(
+        dto,
+        coloniaEstudiantesCreados,
+        pricing.descuentoPorcentaje,
+      );
       await this.createCursos(tx, cursosData);
 
       const pagoEnero = await tx.coloniaPago.create({
@@ -555,21 +625,29 @@ export class ColoniaService {
         tutorId: tutor.id,
         inscriptionId: inscripcion.id,
         pagoEneroId: pagoEnero.id,
-        estudiantes: estudiantesData.map((data, idx) => ({
-          nombre: data.nombre,
-          username: data.username,
-          pin: pins[idx],
-        })),
+        estudiantes: estudiantesData.map((data, idx) => {
+          const pin = pins[idx];
+          if (!pin) {
+            throw new Error(`PIN no generado para estudiante ${data.nombre}`);
+          }
+          return {
+            nombre: data.nombre,
+            username: data.username,
+            pin,
+          };
+        }),
       };
     });
 
     // 4. MercadoPago
     const preference = await this.mercadoPagoService.createPreference(
-      this.buildMercadoPagoPreference(result, pricing)
+      this.buildMercadoPagoPreference(result, pricing),
     );
 
     if (!preference.id) {
-      throw new BadRequestException('MercadoPago no retornó un ID de preferencia válido');
+      throw new BadRequestException(
+        'MercadoPago no retornó un ID de preferencia válido',
+      );
     }
 
     await this.updatePreferenceIdWithRetry(result.pagoEneroId, preference.id);
@@ -639,14 +717,22 @@ export class ColoniaService {
 
       // Fallback: si no se encuentra por ID, intentar buscar por inscripcion_id
       if (!pago) {
-        this.logger.warn('Pago no encontrado por ID, intentando fallback', { pagoId });
+        this.logger.warn('Pago no encontrado por ID, intentando fallback', {
+          pagoId,
+        });
 
         // Extraer inscripcion_id de payment.additional_info.items[0].id
         // Formato esperado: "colonia-{inscriptionId}"
         const itemId = payment.additional_info?.items?.[0]?.id;
-        if (itemId && typeof itemId === 'string' && itemId.startsWith('colonia-')) {
+        if (
+          itemId &&
+          typeof itemId === 'string' &&
+          itemId.startsWith('colonia-')
+        ) {
           const inscripcionId = itemId.replace('colonia-', '');
-          this.logger.log('Buscando pago pendiente por inscripción', { inscripcionId });
+          this.logger.log('Buscando pago pendiente por inscripción', {
+            inscripcionId,
+          });
 
           // Buscar primer pago pendiente de esta inscripción
           pago = await this.prisma.coloniaPago.findFirst({
@@ -666,7 +752,10 @@ export class ColoniaService {
       }
 
       if (!pago) {
-        this.logger.error('No se encontró pago de Colonia', { pagoId, paymentId });
+        this.logger.error('No se encontró pago de Colonia', {
+          pagoId,
+          paymentId,
+        });
         return { message: 'No pending payments found' };
       }
 
@@ -700,7 +789,10 @@ export class ColoniaService {
    * Actualiza el estado de un pago de Colonia según respuesta de MercadoPago
    * FIX CRÍTICO: Valida que el monto pagado coincida con el esperado (anti-fraude)
    */
-  private async actualizarPagoColonia(pagoId: string, payment: MercadoPagoPayment) {
+  private async actualizarPagoColonia(
+    pagoId: string,
+    payment: MercadoPagoPayment,
+  ) {
     // Obtener el pago esperado de la BD
     const pagoEsperado = await this.prisma.coloniaPago.findUnique({
       where: { id: pagoId },

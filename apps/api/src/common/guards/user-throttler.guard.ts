@@ -22,7 +22,9 @@ export class UserThrottlerGuard extends ThrottlerGuard {
    * @param context - Contexto de ejecución de NestJS
    * @returns Identificador único (user.id o IP)
    */
-  protected async getTracker(req: Record<string, unknown>): Promise<string> {
+  protected override async getTracker(
+    req: Record<string, unknown>,
+  ): Promise<string> {
     const request = req as unknown as Request & { user?: { id: string } };
 
     const identifier = this.resolveIdentifier(request);

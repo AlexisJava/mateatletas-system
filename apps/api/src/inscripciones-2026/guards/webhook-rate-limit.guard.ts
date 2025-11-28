@@ -61,7 +61,7 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
    * - 100 req/min permite manejar ~30 pagos simultáneos con reintentos
    * - Cualquier IP que exceda 100 req/min es claramente maliciosa
    */
-  protected readonly throttlers: Array<{
+  protected override readonly throttlers: Array<{
     name: string;
     ttl: number;
     limit: number;
@@ -79,7 +79,7 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
    * @param context - Contexto de ejecución de NestJS
    * @returns true si está dentro del límite, lanza ThrottlerException si excede
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  override async canActivate(context: ExecutionContext): Promise<boolean> {
     // Verificar si estamos en contexto de test (supertest no tiene switchToHttp)
     try {
       const request = context.switchToHttp().getRequest<{
@@ -97,10 +97,10 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
         if (error instanceof ThrottlerException) {
           this.logger.warn(
             `🚨 RATE LIMIT EXCEDIDO: ` +
-            `IP=${request.ip}, ` +
-            `URL=${request.url}, ` +
-            `Method=${request.method}, ` +
-            `Límite=100 req/min`,
+              `IP=${request.ip}, ` +
+              `URL=${request.url}, ` +
+              `Method=${request.method}, ` +
+              `Límite=100 req/min`,
           );
         }
 
@@ -109,8 +109,13 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
       }
     } catch (error) {
       // Si switchToHttp() falla, estamos en test environment
-      if (error instanceof TypeError && error.message.includes('switchToHttp')) {
-        this.logger.debug('⚠️ Rate limit guard en test environment - skipping rate limiting');
+      if (
+        error instanceof TypeError &&
+        error.message.includes('switchToHttp')
+      ) {
+        this.logger.debug(
+          '⚠️ Rate limit guard en test environment - skipping rate limiting',
+        );
         return true; // Permitir pasar en tests
       }
       throw error;
@@ -128,7 +133,9 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
    * @param context - Contexto de ejecución
    * @returns IP del cliente
    */
-  protected async getTracker(context: ExecutionContext): Promise<string> {
+  protected override async getTracker(
+    context: ExecutionContext,
+  ): Promise<string> {
     try {
       const request = context.switchToHttp().getRequest<{
         ip: string;
@@ -145,22 +152,26 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
       // Prioridad 2: Primer IP de X-Forwarded-For
       const xForwardedFor = request.headers['x-forwarded-for'];
       if (xForwardedFor && typeof xForwardedFor === 'string') {
-        const firstIp = xForwardedFor.split(',')[0].trim();
+        const firstIp = xForwardedFor.split(',')[0]?.trim();
         if (firstIp) {
           return firstIp;
         }
       }
 
       // Prioridad 3: req.ips (Express popula esto automáticamente)
-      if (request.ips && request.ips.length > 0) {
-        return request.ips[0];
+      const firstIps = request.ips?.[0];
+      if (firstIps) {
+        return firstIps;
       }
 
       // Fallback: req.ip
-      return request.ip;
+      return request.ip || 'unknown';
     } catch (error) {
       // Si switchToHttp() falla (test environment), retornar IP por defecto
-      if (error instanceof TypeError && error.message.includes('switchToHttp')) {
+      if (
+        error instanceof TypeError &&
+        error.message.includes('switchToHttp')
+      ) {
         return 'test-client';
       }
       throw error;
@@ -174,7 +185,7 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
    * @param throttlerLimitDetail - Detalles del límite excedido
    * @returns Mensaje de error descriptivo
    */
-  protected async getErrorMessage(
+  protected override async getErrorMessage(
     context: ExecutionContext,
     throttlerLimitDetail: ThrottlerLimitDetail,
   ): Promise<string> {
@@ -191,7 +202,10 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
       );
     } catch (error) {
       // Si switchToHttp() falla (test environment), retornar mensaje genérico
-      if (error instanceof TypeError && error.message.includes('switchToHttp')) {
+      if (
+        error instanceof TypeError &&
+        error.message.includes('switchToHttp')
+      ) {
         return (
           `Rate limit exceeded for webhook endpoint. ` +
           `Limit: ${throttlerLimitDetail.limit} requests per ${throttlerLimitDetail.ttl / 1000} seconds. ` +

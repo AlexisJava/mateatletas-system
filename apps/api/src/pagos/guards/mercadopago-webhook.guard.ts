@@ -100,7 +100,9 @@ export class MercadoPagoWebhookGuard implements CanActivate {
         );
       }
     } else {
-      this.logger.log('✅ Validación de firma de webhook habilitada (formato 2025)');
+      this.logger.log(
+        '✅ Validación de firma de webhook habilitada (formato 2025)',
+      );
     }
   }
 
@@ -108,12 +110,16 @@ export class MercadoPagoWebhookGuard implements CanActivate {
     // Verificar si estamos en contexto de test (supertest no tiene switchToHttp)
     try {
       if (typeof context.switchToHttp !== 'function') {
-        this.logger.debug('⚠️ Webhook guard en test environment - skipping validation');
+        this.logger.debug(
+          '⚠️ Webhook guard en test environment - skipping validation',
+        );
         return true;
       }
     } catch (error) {
       if (error instanceof TypeError) {
-        this.logger.debug('⚠️ Webhook guard en test environment - skipping validation');
+        this.logger.debug(
+          '⚠️ Webhook guard en test environment - skipping validation',
+        );
         return true;
       }
       throw error;
@@ -155,7 +161,9 @@ export class MercadoPagoWebhookGuard implements CanActivate {
     }
 
     // Si está habilitado DISABLE_WEBHOOK_SIGNATURE_VALIDATION (solo para tests)
-    const disableValidation = this.configService.get<string>('DISABLE_WEBHOOK_SIGNATURE_VALIDATION') === 'true';
+    const disableValidation =
+      this.configService.get<string>('DISABLE_WEBHOOK_SIGNATURE_VALIDATION') ===
+      'true';
     if (disableValidation && isDevelopment) {
       this.logger.warn(
         `⚠️ Webhook signature validation DISABLED (test mode): IP=${clientIp}`,
@@ -179,9 +187,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       );
 
       if (!validationResult.isValid) {
-        this.logger.error(
-          `❌ Firma inválida: ${validationResult.reason}`,
-        );
+        this.logger.error(`❌ Firma inválida: ${validationResult.reason}`);
         throw new UnauthorizedException('Invalid webhook signature');
       }
 
@@ -193,7 +199,10 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       );
       return true;
     } catch (error) {
-      if (error instanceof UnauthorizedException || error instanceof ForbiddenException) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
       const errorMessage =
@@ -213,36 +222,55 @@ export class MercadoPagoWebhookGuard implements CanActivate {
     }
 
     // Validar campos obligatorios
-    const requiredFields = ['action', 'api_version', 'data', 'date_created', 'id', 'live_mode', 'type', 'user_id'];
-    const missingFields = requiredFields.filter(field => !(field in body));
+    const requiredFields = [
+      'action',
+      'api_version',
+      'data',
+      'date_created',
+      'id',
+      'live_mode',
+      'type',
+      'user_id',
+    ];
+    const missingFields = requiredFields.filter((field) => !(field in body));
 
     if (missingFields.length > 0) {
       throw new UnauthorizedException(
-        `Invalid webhook body: missing fields ${missingFields.join(', ')}`
+        `Invalid webhook body: missing fields ${missingFields.join(', ')}`,
       );
     }
 
     // Validar estructura de data
     if (!body.data || typeof body.data !== 'object') {
-      throw new UnauthorizedException('Invalid webhook body: data must be an object');
+      throw new UnauthorizedException(
+        'Invalid webhook body: data must be an object',
+      );
     }
 
     const data = body.data as Record<string, unknown>;
     if (!data.id || typeof data.id !== 'string') {
-      throw new UnauthorizedException('Invalid webhook body: data.id must be a string');
+      throw new UnauthorizedException(
+        'Invalid webhook body: data.id must be a string',
+      );
     }
 
     // Validar tipos
     if (typeof body.type !== 'string' || body.type.length === 0) {
-      throw new UnauthorizedException('Invalid webhook body: type must be a non-empty string');
+      throw new UnauthorizedException(
+        'Invalid webhook body: type must be a non-empty string',
+      );
     }
 
     if (typeof body.user_id !== 'string' && typeof body.user_id !== 'number') {
-      throw new UnauthorizedException('Invalid webhook body: user_id must be a string or number');
+      throw new UnauthorizedException(
+        'Invalid webhook body: user_id must be a string or number',
+      );
     }
 
     if (typeof body.live_mode !== 'boolean') {
-      throw new UnauthorizedException('Invalid webhook body: live_mode must be a boolean');
+      throw new UnauthorizedException(
+        'Invalid webhook body: live_mode must be a boolean',
+      );
     }
   }
 
@@ -277,7 +305,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
     if (!liveMode) {
       this.logger.error(
         '🚨 WEBHOOK DE PRUEBA RECHAZADO - live_mode=false en producción. ' +
-        'Posible intento de fraude usando credenciales sandbox.',
+          'Posible intento de fraude usando credenciales sandbox.',
       );
       throw new UnauthorizedException(
         'Test mode webhooks (live_mode=false) are not allowed in production',
@@ -308,9 +336,9 @@ export class MercadoPagoWebhookGuard implements CanActivate {
     }
 
     // Parsear header: "ts=1234567890,v1=abcdef..."
-    const parts = signatureHeader.split(',').map(part => part.trim());
-    const tsPart = parts.find(p => p.startsWith('ts='));
-    const v1Part = parts.find(p => p.startsWith('v1='));
+    const parts = signatureHeader.split(',').map((part) => part.trim());
+    const tsPart = parts.find((p) => p.startsWith('ts='));
+    const v1Part = parts.find((p) => p.startsWith('v1='));
 
     if (!tsPart || !v1Part) {
       return {
@@ -321,14 +349,25 @@ export class MercadoPagoWebhookGuard implements CanActivate {
       };
     }
 
-    const timestamp = parseInt(tsPart.split('=')[1], 10);
+    const tsValue = tsPart.split('=')[1];
     const receivedSignature = v1Part.split('=')[1];
+
+    if (!tsValue) {
+      return {
+        isValid: false,
+        timestamp: 0,
+        signature: '',
+        reason: 'Invalid x-signature format: missing timestamp value',
+      };
+    }
+
+    const timestamp = parseInt(tsValue, 10);
 
     if (isNaN(timestamp) || timestamp <= 0) {
       return {
         isValid: false,
         timestamp: 0,
-        signature: receivedSignature,
+        signature: receivedSignature || '',
         reason: 'Invalid timestamp in signature',
       };
     }
@@ -350,10 +389,16 @@ export class MercadoPagoWebhookGuard implements CanActivate {
     // DEBUG: Log para ver qué estamos calculando
     this.logger.debug(`🔍 DEBUG Webhook Signature Validation:`);
     this.logger.debug(`  - Timestamp: ${timestamp}`);
-    this.logger.debug(`  - Using raw body: ${rawBody ? 'YES ✅' : 'NO ❌ (fallback to JSON.stringify)'}`);
-    this.logger.debug(`  - Body string (first 200 chars): ${bodyString.substring(0, 200)}...`);
+    this.logger.debug(
+      `  - Using raw body: ${rawBody ? 'YES ✅' : 'NO ❌ (fallback to JSON.stringify)'}`,
+    );
+    this.logger.debug(
+      `  - Body string (first 200 chars): ${bodyString.substring(0, 200)}...`,
+    );
     this.logger.debug(`  - Payload: ${payload.substring(0, 200)}...`);
-    this.logger.debug(`  - Secret (primeros 10 chars): ${(this.webhookSecret as string).substring(0, 10)}...`);
+    this.logger.debug(
+      `  - Secret (primeros 10 chars): ${(this.webhookSecret as string).substring(0, 10)}...`,
+    );
     this.logger.debug(`  - Received signature: ${receivedSignature}`);
 
     // Calcular HMAC-SHA256
@@ -400,7 +445,7 @@ export class MercadoPagoWebhookGuard implements CanActivate {
 
     if (diff > this.maxTimestampDiffSeconds) {
       throw new UnauthorizedException(
-        `Timestamp expired: diff=${diff}s, max=${this.maxTimestampDiffSeconds}s`
+        `Timestamp expired: diff=${diff}s, max=${this.maxTimestampDiffSeconds}s`,
       );
     }
   }

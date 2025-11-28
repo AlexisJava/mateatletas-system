@@ -479,13 +479,14 @@ export class AuthService {
   private getRoundsFromHash(hash: string): number {
     try {
       const parts = hash.split('$');
-      if (parts.length < 3) {
+      const roundsPart = parts[2];
+      if (!roundsPart) {
         this.logger.warn(
           `Invalid bcrypt hash format: ${hash.substring(0, 10)}...`,
         );
         return 0;
       }
-      return parseInt(parts[2], 10);
+      return parseInt(roundsPart, 10);
     } catch (error) {
       this.logger.error(
         'Error extracting rounds from hash',

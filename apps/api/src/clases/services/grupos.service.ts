@@ -4,6 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../core/database/prisma.service';
+import { parseHorario } from '../../common/utils/time.utils';
 import {
   GrupoDetalleCompletoDto,
   EstudianteConStatsDto,
@@ -280,7 +281,8 @@ export class GruposService {
     }
     if (diasHasta === 0) {
       // Si es hoy, verificar si ya pasó la hora
-      const [horaClase, minutoClase] = hora_inicio.split(':').map(Number);
+      const { horas: horaClase, minutos: minutoClase } =
+        parseHorario(hora_inicio);
       const horaActual = now.getHours();
       const minutoActual = now.getMinutes();
 
@@ -299,7 +301,8 @@ export class GruposService {
     // Calcular minutos para empezar (solo si es hoy)
     let minutosParaEmpezar: number | null = null;
     if (diasHasta === 0) {
-      const [horaClase, minutoClase] = hora_inicio.split(':').map(Number);
+      const { horas: horaClase, minutos: minutoClase } =
+        parseHorario(hora_inicio);
       const fechaClase = new Date(now);
       fechaClase.setHours(horaClase, minutoClase, 0, 0);
       minutosParaEmpezar = Math.floor(
@@ -308,7 +311,7 @@ export class GruposService {
     }
 
     return {
-      fecha: proximaFecha.toISOString().split('T')[0], // YYYY-MM-DD
+      fecha: proximaFecha.toISOString().split('T')[0] || '', // YYYY-MM-DD
       hora: hora_inicio,
       minutosParaEmpezar,
     };

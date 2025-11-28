@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
   Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ClasesService } from './clases.service';
 import { CrearClaseDto } from './dto/crear-clase.dto';
@@ -72,7 +73,12 @@ export class ClasesController {
     // 📌 Decisión 2025-01: mantenemos PATCH /clases/:id/cancelar como endpoint oficial
     // para que admin y docentes puedan cancelar sin eliminar el registro.
     const userId = req.user.id;
-    const userRole = req.user.role || req.user.roles[0];
+    const userRole =
+      req.user.role ||
+      (req.user.roles.length > 0 ? req.user.roles[0] : undefined);
+    if (!userRole) {
+      throw new ForbiddenException('Usuario sin rol asignado');
+    }
     return this.clasesService.cancelarClase(id, userId, userRole);
   }
 
