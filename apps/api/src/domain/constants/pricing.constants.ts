@@ -101,8 +101,9 @@ export const DESCUENTOS = {
 
     /**
      * Descuento por inscribir 3 o más hermanos
+     * Actualizado: 24% → 20% (decisión de negocio 2024-11-28)
      */
-    TRES_O_MAS_HERMANOS: 24,
+    TRES_O_MAS_HERMANOS: 20,
   },
 } as const;
 

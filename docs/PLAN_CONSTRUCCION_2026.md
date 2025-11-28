@@ -30,6 +30,8 @@
 - `pre-refactor-2026` (tag) - Estado antes de cualquier cambio
 - FASE 1 completada - Limpieza de modelos legacy (LogroCurso, LogroDesbloqueado, Nexus)
 - FASE 1.5 completada - Estabilizacion de tests
+- `8e9fe2d` - SLICE 1: CASAS completado
+- `27a3714` - SLICE 2: MUNDOS completado
 
 ---
 

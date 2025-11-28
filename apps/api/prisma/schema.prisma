@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 /// Modelo principal para tutores/docentes de la plataforma
 /// Representa a los usuarios educadores que crean y gestionan contenido educativo
 model Tutor {
@@ -74,43 +73,43 @@ model Tutor {
 /// Representa a los alumnos que utilizarán la plataforma
 model Estudiante {
   /// Identificador único del estudiante
-  id                        String                            @id @default(cuid())
+  id                        String                        @id @default(cuid())
   /// Username único del estudiante - usado para autenticación (OBLIGATORIO)
-  username                  String                            @unique
+  username                  String                        @unique
   /// Nombre del estudiante
   nombre                    String
   /// Apellido del estudiante
   apellido                  String
   /// Nivel escolar del estudiante: Primaria, Secundaria, Universidad
-  nivelEscolar              String                            @map("nivel_escolar")
+  nivelEscolar              String                        @map("nivel_escolar")
   /// URL del avatar 3D de Ready Player Me
   /// Ejemplo: https://models.readyplayer.me/abc123.glb
-  avatarUrl                 String?                           @map("avatar_url") @db.Text
+  avatarUrl                 String?                       @map("avatar_url") @db.Text
   /// URL de la animación idle seleccionada por el estudiante
   /// Ejemplo: https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb
-  animacion_idle_url        String?                           @db.Text
+  animacion_idle_url        String?                       @db.Text
   /// DEPRECADO: URL de la foto de perfil del estudiante (mantener por compatibilidad)
-  fotoUrl                   String?                           @map("foto_url")
+  fotoUrl                   String?                       @map("foto_url")
   /// ID del tutor que gestiona este estudiante
   tutor_id                  String
   /// ID de la casa a la que pertenece el estudiante (sistema 2026)
-  casaId                    String?                           @map("casa_id")
+  casaId                    String?                       @map("casa_id")
   /// Puntos totales acumulados por el estudiante (gamificación)
-  puntos_totales            Int                               @default(0)
+  puntos_totales            Int                           @default(0)
   /// Nivel actual del estudiante en el sistema de gamificación
-  nivel_actual              Int                               @default(1)
+  nivel_actual              Int                           @default(1)
   /// Timestamp de creación del registro
-  createdAt                 DateTime                          @default(now())
+  createdAt                 DateTime                      @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt                 DateTime                          @updatedAt
+  updatedAt                 DateTime                      @updatedAt
   /// ID del gradiente del avatar (0-9)
   /// Corresponde a uno de los 10 gradientes predefinidos del sistema
-  avatar_gradient           Int                               @default(0)
+  avatar_gradient           Int                           @default(0)
   /// Edad del estudiante en años
   edad                      Int
   /// Email único del estudiante - usado para autenticación propia
   /// IMPORTANTE: Debe estar indexado para búsquedas rápidas en login
-  email                     String?                           @unique
+  email                     String?                       @unique
   /// Hash bcrypt de la contraseña - NUNCA se envía al frontend
   /// Permite que el estudiante acceda al portal con sus propias credenciales
   password_hash             String?
@@ -118,23 +117,23 @@ model Estudiante {
   /// Se borra después del primer cambio de contraseña
   password_temporal         String?
   /// Indica si el estudiante debe cambiar su PIN en el próximo login
-  debe_cambiar_password     Boolean                           @default(true)
+  debe_cambiar_password     Boolean                       @default(true)
   /// Fecha del último cambio de contraseña
   fecha_ultimo_cambio       DateTime?
   /// Roles asignados al estudiante (normalmente solo ["estudiante"])
   /// Ejemplo: ["estudiante"]
-  roles                     Json                              @default("[\"estudiante\"]")
+  roles                     Json                          @default("[\"estudiante\"]")
   /// DEPRECADO: ID del sector al que pertenece el estudiante (usar sectores[] en su lugar)
   /// Mantener temporalmente para migración gradual
   sector_id                 String?
   alertas                   Alerta[]
   asistencias               Asistencia[]
-  casa                      Casa?                             @relation(fields: [casaId], references: [id])
+  casa                      Casa?                         @relation(fields: [casaId], references: [id])
   /// DEPRECADO: Relación uno-a-uno con sector (usar sectores[] en su lugar)
-  sector                    Sector?                           @relation("EstudianteSectorLegacy", fields: [sector_id], references: [id])
+  sector                    Sector?                       @relation("EstudianteSectorLegacy", fields: [sector_id], references: [id])
   /// NUEVO: Relación muchos-a-muchos con sectores a través de EstudianteSector
   sectores                  EstudianteSector[]
-  tutor                     Tutor                             @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  tutor                     Tutor                         @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
   inscripciones_clase       InscripcionClase[]
   inscripciones_clase_grupo InscripcionClaseGrupo[]
   asistencias_clase_grupo   AsistenciaClaseGrupo[]
@@ -197,42 +196,42 @@ model EstudianteSector {
 /// Reemplaza el modelo Equipo anterior
 model Casa {
   /// Identificador único de la casa
-  id               String       @id @default(cuid())
+  id     String   @id @default(cuid())
   /// Tipo de casa (QUANTUM, VERTEX, PULSAR) - único
-  tipo             CasaTipo     @unique
+  tipo   CasaTipo @unique
   /// Nombre de la casa para mostrar
-  nombre           String       @unique
+  nombre String   @unique
   /// Emoji representativo de la casa
-  emoji            String
+  emoji  String
   /// Slogan o lema de la casa
-  slogan           String?
+  slogan String?
 
   /// Edad mínima para pertenecer a esta casa
-  edadMinima       Int          @map("edad_minima")
+  edadMinima Int @map("edad_minima")
   /// Edad máxima para pertenecer a esta casa
-  edadMaxima       Int          @map("edad_maxima")
+  edadMaxima Int @map("edad_maxima")
 
   /// Color primario en formato hexadecimal (Design System 2026)
-  colorPrimary     String       @map("color_primary")
+  colorPrimary   String @map("color_primary")
   /// Color secundario en formato hexadecimal
-  colorSecondary   String       @map("color_secondary")
+  colorSecondary String @map("color_secondary")
   /// Color de acento en formato hexadecimal
-  colorAccent      String       @map("color_accent")
+  colorAccent    String @map("color_accent")
   /// Color oscuro en formato hexadecimal
-  colorDark        String       @map("color_dark")
+  colorDark      String @map("color_dark")
   /// Gradiente CSS para backgrounds
-  gradiente        String
+  gradiente      String
 
   /// Puntos totales acumulados por todos los estudiantes de la casa
-  puntosTotales    Int          @default(0) @map("puntos_totales")
+  puntosTotales Int @default(0) @map("puntos_totales")
 
   /// Timestamp de creación del registro
-  createdAt        DateTime     @default(now())
+  createdAt DateTime @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt        DateTime     @updatedAt
+  updatedAt DateTime @updatedAt
 
   /// Estudiantes que pertenecen a esta casa
-  estudiantes      Estudiante[]
+  estudiantes Estudiante[]
 
   @@map("casas")
 }
@@ -241,95 +240,189 @@ model Casa {
 /// Representa las 3 áreas de conocimiento: Matemática, Programación, Ciencias
 model Mundo {
   /// Identificador único del mundo
-  id             String    @id @default(cuid())
+  id          String    @id @default(cuid())
   /// Tipo de mundo (MATEMATICA, PROGRAMACION, CIENCIAS) - único
-  tipo           MundoTipo @unique
+  tipo        MundoTipo @unique
   /// Nombre del mundo para mostrar
-  nombre         String    @unique
+  nombre      String    @unique
   /// Descripción del mundo
-  descripcion    String?
+  descripcion String?
   /// Icono del mundo (emoji o nombre de icono)
-  icono          String
+  icono       String
 
   /// Color primario en formato hexadecimal
-  colorPrimary   String    @map("color_primary")
+  colorPrimary   String @map("color_primary")
   /// Color secundario en formato hexadecimal
-  colorSecondary String    @map("color_secondary")
+  colorSecondary String @map("color_secondary")
   /// Color de acento en formato hexadecimal
-  colorAccent    String    @map("color_accent")
+  colorAccent    String @map("color_accent")
   /// Gradiente CSS para backgrounds
   gradiente      String
 
   /// Indica si el mundo está activo
-  activo         Boolean   @default(true)
+  activo Boolean @default(true)
   /// Orden de visualización
-  orden          Int       @default(0)
+  orden  Int     @default(0)
 
   /// Timestamp de creación del registro
-  createdAt      DateTime  @default(now())
+  createdAt DateTime @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt      DateTime  @updatedAt
+  updatedAt DateTime @updatedAt
 
   // Nota: Relación con planificaciones se agregará en SLICE 5
 
   @@map("mundos")
 }
 
+/// Modelo para Tiers de suscripción - Sistema Mateatletas 2026
+///
+/// Sistema de 3 tiers:
+/// - ARCADE: $30k - 1 mundo async, sin docente (entry-level)
+/// - ARCADE_PLUS: $60k - 3 mundos async, sin docente (amplitud)
+/// - PRO: $75k - 1 mundo async + 1 mundo sync con docente (profundidad)
+///
+/// Reglas de negocio:
+/// - El tier es por estudiante, no por familia
+/// - Los descuentos familiares (12%/20%) aplican al total
+/// - PRO requiere que mundo async ≠ mundo sync
+model Tier {
+  /// Identificador único del tier
+  id             String     @id @default(cuid())
+  /// Nombre del tier (ARCADE, ARCADE_PLUS, PRO) - único
+  nombre         TierNombre @unique
+  /// Precio mensual en pesos
+  precio_mensual Int
+  /// Cantidad de mundos async incluidos
+  mundos_async   Int
+  /// Cantidad de mundos sync (con docente) incluidos
+  mundos_sync    Int
+  /// Indica si incluye acceso a docente
+  tiene_docente  Boolean    @default(false)
+  /// Descripción del tier para UI
+  descripcion    String?
+  /// Indica si el tier está activo para nuevas inscripciones
+  activo         Boolean    @default(true)
+  /// Orden de visualización (para pricing page)
+  orden          Int        @default(0)
+
+  /// Timestamp de creación del registro
+  createdAt DateTime @default(now())
+  /// Timestamp de última actualización del registro
+  updatedAt DateTime @updatedAt
+
+  /// Relación con estudiantes inscritos en este tier
+  estudiantes_inscripcion EstudianteInscripcion2026[]
+
+  /// Relaciones con cambios de tier
+  cambios_como_actual CambioTierPendiente[] @relation("CambioTierActual")
+  cambios_como_nuevo  CambioTierPendiente[] @relation("CambioTierNuevo")
+
+  @@map("tiers")
+}
+
+/// Modelo para cambios de tier pendientes o históricos
+/// Registra upgrades (aplicación diferida) y downgrades (aplicación inmediata)
+model CambioTierPendiente {
+  /// Identificador único del cambio
+  id String @id @default(cuid())
+
+  /// ID del estudiante-inscripción afectado
+  estudiante_inscripcion_id String
+
+  /// ID del tier actual al momento de solicitar el cambio
+  tier_actual_id String
+
+  /// ID del tier nuevo solicitado
+  tier_nuevo_id String
+
+  /// Tipo de cambio: upgrade o downgrade
+  tipo_cambio String // "upgrade" | "downgrade"
+
+  /// Fecha efectiva del cambio (1ro del próximo mes para upgrades)
+  fecha_efectiva DateTime
+
+  /// Estado del cambio: pendiente, aplicado, cancelado
+  estado String @default("pendiente") // "pendiente" | "aplicado" | "cancelado"
+
+  /// Si el cambio fue aplicado de forma inmediata
+  aplicacion_inmediata Boolean @default(false)
+
+  /// Fecha en que se aplicó el cambio (si estado = aplicado)
+  aplicado_en DateTime?
+
+  /// Fecha en que se canceló el cambio (si estado = cancelado)
+  cancelado_en DateTime?
+
+  /// Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  estudiante_inscripcion EstudianteInscripcion2026 @relation(fields: [estudiante_inscripcion_id], references: [id], onDelete: Cascade)
+  tier_actual            Tier                      @relation("CambioTierActual", fields: [tier_actual_id], references: [id])
+  tier_nuevo             Tier                      @relation("CambioTierNuevo", fields: [tier_nuevo_id], references: [id])
+
+  @@index([estudiante_inscripcion_id])
+  @@index([estado])
+  @@index([fecha_efectiva])
+  @@map("cambios_tier_pendientes")
+}
+
 /// Modelo para docentes (profesores) de la plataforma
 /// Representa a los usuarios educadores que dictan clases
 model Docente {
   /// Identificador único del docente
-  id                                 String                    @id @default(cuid())
+  id                          String              @id @default(cuid())
   /// Email único del docente - usado para autenticación
-  email                              String                    @unique
+  email                       String              @unique
   /// Hash bcrypt de la contraseña
-  password_hash                      String
+  password_hash               String
   /// Password temporal en texto plano - se muestra al admin al crear el docente
   /// Se borra después del primer cambio de contraseña
-  password_temporal                  String?
+  password_temporal           String?
   /// Nombre del docente
-  nombre                             String
+  nombre                      String
   /// Apellido del docente
-  apellido                           String
+  apellido                    String
   /// Título profesional (ej: "Profesor de Matemática", "Licenciado en Física")
-  titulo                             String?
+  titulo                      String?
   /// Biografía o descripción del docente
-  bio                                String?
+  bio                         String?
   /// Timestamp de creación del registro
-  createdAt                          DateTime                  @default(now())
+  createdAt                   DateTime            @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt                          DateTime                  @updatedAt
+  updatedAt                   DateTime            @updatedAt
   /// Disponibilidad horaria del docente (ej: {"lunes": ["09:00-12:00", "14:00-18:00"], "martes": ["10:00-13:00"]})
   /// Se almacena como JSON object con días de la semana como keys
-  disponibilidad_horaria             Json?
+  disponibilidad_horaria      Json?
   /// Especialidades del docente (ej: ["Álgebra", "Geometría", "Trigonometría"])
   /// Se almacena como JSON array de strings
-  especialidades                     Json?
+  especialidades              Json?
   /// Estado del docente (activo, inactivo, vacaciones)
-  estado                             String                    @default("activo")
+  estado                      String              @default("activo")
   /// Años de experiencia docente
-  experiencia_anos                   Int?
+  experiencia_anos            Int?
   /// Nivel educativo que el docente puede impartir (ej: ["Primaria", "Secundaria", "Universidad"])
   /// Se almacena como JSON array de strings
-  nivel_educativo                    Json?
+  nivel_educativo             Json?
   /// Roles asignados al docente (puede ser docente y admin simultáneamente)
   /// Ejemplo: ["docente", "admin"]
-  roles                              Json                      @default("[\"docente\"]")
+  roles                       Json                @default("[\"docente\"]")
   /// Teléfono de contacto (opcional)
-  telefono                           String?
+  telefono                    String?
   /// Indica si el docente debe cambiar su contraseña en el próximo login
   /// true = contraseña temporal (generada por admin)
   /// false = contraseña elegida por el docente
-  debe_cambiar_password              Boolean                   @default(true)
+  debe_cambiar_password       Boolean             @default(true)
   /// Fecha del último cambio de contraseña
-  fecha_ultimo_cambio                DateTime?
-  clases                             Clase[]
-  claseGrupos                        ClaseGrupo[]
-  rutasEspecialidad                  DocenteRuta[]
-  eventos                            Evento[]
-  notificaciones                     Notificacion[]
-  puntosOtorgados                    PuntoObtenido[]           @relation("PuntosOtorgados")
-  asignacionesPlanificaciones        AsignacionDocente[]
+  fecha_ultimo_cambio         DateTime?
+  clases                      Clase[]
+  claseGrupos                 ClaseGrupo[]
+  rutasEspecialidad           DocenteRuta[]
+  eventos                     Evento[]
+  notificaciones              Notificacion[]
+  puntosOtorgados             PuntoObtenido[]     @relation("PuntosOtorgados")
+  asignacionesPlanificaciones AsignacionDocente[]
 
   @@map("docentes")
 }
@@ -419,27 +512,27 @@ model Producto {
 /// Vincula un tutor con un producto de tipo Suscripcion
 model Membresia {
   /// Identificador único de la membresía
-  id                 String          @id @default(cuid())
+  id                     String          @id @default(cuid())
   /// ID del tutor propietario de la membresía
-  tutor_id           String
+  tutor_id               String
   /// ID del producto de suscripción
-  producto_id        String
+  producto_id            String
   /// Estado actual de la membresía
-  estado             EstadoMembresia @default(Pendiente)
+  estado                 EstadoMembresia @default(Pendiente)
   /// Fecha de inicio de la membresía (se llena cuando webhook confirma)
-  fecha_inicio       DateTime?
+  fecha_inicio           DateTime?
   /// Fecha del próximo pago (se calcula cuando webhook confirma)
-  fecha_proximo_pago DateTime?
+  fecha_proximo_pago     DateTime?
   /// ID de preferencia de MercadoPago (para tracking)
-  preferencia_id          String?
+  preferencia_id         String?
   /// ID del pago confirmado de MercadoPago (para auditoría y soporte)
-  mercadopago_payment_id  String?
+  mercadopago_payment_id String?
   /// Timestamp de creación del registro
-  createdAt               DateTime        @default(now())
+  createdAt              DateTime        @default(now())
   /// Timestamp de última actualización del registro
-  updatedAt               DateTime        @updatedAt
-  producto           Producto        @relation(fields: [producto_id], references: [id])
-  tutor              Tutor           @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
+  updatedAt              DateTime        @updatedAt
+  producto               Producto        @relation(fields: [producto_id], references: [id])
+  tutor                  Tutor           @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
 
   @@index([tutor_id, estado])
   @@index([preferencia_id])
@@ -911,7 +1004,6 @@ model PuntoObtenido {
   @@map("puntos_obtenidos")
 }
 
-
 /// Módulo dentro de un curso
 /// Agrupa lecciones relacionadas temáticamente
 /// Ejemplo: "Módulo 1: Variables y Expresiones"
@@ -1320,8 +1412,8 @@ enum TipoProducto {
 /// Las casas agrupan estudiantes por rango de edad
 enum CasaTipo {
   QUANTUM // 6-9 años - Exploradores
-  VERTEX  // 10-12 años - Constructores
-  PULSAR  // 13-17 años - Dominadores
+  VERTEX // 10-12 años - Constructores
+  PULSAR // 13-17 años - Dominadores
 
   @@map("casa_tipo")
 }
@@ -1329,9 +1421,9 @@ enum CasaTipo {
 /// Enum para tipos de mundo STEAM (2026)
 /// Los mundos representan las 3 áreas de conocimiento principales
 enum MundoTipo {
-  MATEMATICA   // Mundo de matemáticas - naranja
+  MATEMATICA // Mundo de matemáticas - naranja
   PROGRAMACION // Mundo de programación - verde
-  CIENCIAS     // Mundo de ciencias - azul
+  CIENCIAS // Mundo de ciencias - azul
 
   @@map("mundo_tipo")
 }
@@ -1339,12 +1431,22 @@ enum MundoTipo {
 /// Enum para niveles internos por mundo (2026)
 /// Define la progresión dentro de cada mundo según la casa
 enum NivelInterno {
-  BASICO      // Nivel inicial
-  INTERMEDIO  // Nivel medio
-  AVANZADO    // Nivel avanzado
-  OLIMPICO    // Nivel olímpico (solo Vertex y Pulsar en Mat/Prog)
+  BASICO // Nivel inicial
+  INTERMEDIO // Nivel medio
+  AVANZADO // Nivel avanzado
+  OLIMPICO // Nivel olímpico (solo Vertex y Pulsar en Mat/Prog)
 
   @@map("nivel_interno")
+}
+
+/// Enum para tipos de tier de suscripción (2026)
+/// Define los niveles de acceso a mundos y docentes
+enum TierNombre {
+  ARCADE // $30k - 1 mundo async, sin docente
+  ARCADE_PLUS // $60k - 3 mundos async, sin docente
+  PRO // $75k - 1 mundo async + 1 mundo sync con docente
+
+  @@map("tier_nombre")
 }
 
 /// Enum para estados de membresía
@@ -2795,6 +2897,10 @@ model EstudianteInscripcion2026 {
   /// Generado automáticamente al crear la inscripción
   pin String
 
+  /// ID del tier de suscripción (ARCADE, ARCADE_PLUS, PRO)
+  /// Nullable para inscripciones legacy y migraciones
+  tier_id String?
+
   /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2802,13 +2908,16 @@ model EstudianteInscripcion2026 {
   /// Relaciones
   inscripcion    Inscripcion2026                @relation(fields: [inscripcion_id], references: [id], onDelete: Cascade)
   estudiante     Estudiante                     @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  tier           Tier?                          @relation(fields: [tier_id], references: [id])
   cursos_colonia ColoniaCursoSeleccionado2026[]
   mundos_ciclo   CicloMundoSeleccionado2026[]
+  cambios_tier   CambioTierPendiente[]
 
   @@unique([inscripcion_id, estudiante_id])
   @@index([inscripcion_id])
   @@index([estudiante_id])
   @@index([pin])
+  @@index([tier_id])
   @@map("estudiantes_inscripciones_2026")
 }
 
@@ -3172,11 +3281,11 @@ model SecretRotation {
   /// Puede incluir: razón de rotación, IP de quien lo rotó, etc.
   metadata Json?
 
+  @@unique([secret_type, version])
   /// Índices para queries eficientes
   @@index([secret_type])
   @@index([status])
   @@index([expires_at])
   @@index([version])
-  @@unique([secret_type, version])
   @@map("secret_rotations")
 }
