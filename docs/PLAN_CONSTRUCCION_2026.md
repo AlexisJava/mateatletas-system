@@ -16,6 +16,15 @@
 | Coverage actual   | 40.78%                      |
 | Coverage objetivo | 80% en codigo nuevo         |
 
+## ESTADO ACTUAL (Post-SLICE 2)
+
+| Metrica        | Valor                       |
+| -------------- | --------------------------- |
+| Tests pasando  | 1404                        |
+| Tests fallando | 0 (6 Redis solo localmente) |
+| Tests skipped  | 157                         |
+| Errores TS     | 0                           |
+
 **Commits de referencia:**
 
 - `pre-refactor-2026` (tag) - Estado antes de cualquier cambio
@@ -48,18 +57,18 @@ Cada slice incluye:
 
 ## ORDEN DE SLICES
 
-| #   | Slice           | Prioridad  | Dependencias         | Estado    |
-| --- | --------------- | ---------- | -------------------- | --------- |
-| 1   | CASAS           | Critico    | Ninguna              | Pendiente |
-| 2   | MUNDOS          | Critico    | Casas                | Pendiente |
-| 3   | TIERS           | Critico    | Mundos               | Pendiente |
-| 4   | ONBOARDING      | Critico    | Casas, Mundos, Tiers | Pendiente |
-| 5   | PLANIFICACIONES | Critico    | Mundos               | Pendiente |
-| 6   | GAMIFICACION    | Importante | Casas                | Pendiente |
-| 7   | CAMPUS VIRTUAL  | Importante | Casas, Gamificacion  | Pendiente |
-| 8   | ARENA DIARIA    | Importante | Mundos               | Pendiente |
-| 9   | PORTAL TUTOR    | Deseable   | Tiers                | Pendiente |
-| 10  | PORTAL DOCENTE  | Deseable   | Tiers                | Pendiente |
+| #   | Slice           | Prioridad  | Dependencias         | Estado        |
+| --- | --------------- | ---------- | -------------------- | ------------- |
+| 1   | CASAS           | Critico    | Ninguna              | ✅ COMPLETADO |
+| 2   | MUNDOS          | Critico    | Casas                | ✅ COMPLETADO |
+| 3   | TIERS           | Critico    | Mundos               | Pendiente     |
+| 4   | ONBOARDING      | Critico    | Casas, Mundos, Tiers | Pendiente     |
+| 5   | PLANIFICACIONES | Critico    | Mundos               | Pendiente     |
+| 6   | GAMIFICACION    | Importante | Casas                | Pendiente     |
+| 7   | CAMPUS VIRTUAL  | Importante | Casas, Gamificacion  | Pendiente     |
+| 8   | ARENA DIARIA    | Importante | Mundos               | Pendiente     |
+| 9   | PORTAL TUTOR    | Deseable   | Tiers                | Pendiente     |
+| 10  | PORTAL DOCENTE  | Deseable   | Tiers                | Pendiente     |
 
 ---
 
@@ -250,18 +259,20 @@ Sistema de 3 tiers: ARCADE ($30k), ARCADE+ ($60k), PRO ($75k).
 
 ### Semana 1 (27 Nov - 3 Dic)
 
-| Fecha | Slice | Avance                   | Bloqueantes |
-| ----- | ----- | ------------------------ | ----------- |
-| 27/11 | Setup | FASE 1 y 1.5 completadas | -           |
-|       |       |                          |             |
+| Fecha | Slice  | Avance                                          | Bloqueantes |
+| ----- | ------ | ----------------------------------------------- | ----------- |
+| 27/11 | Setup  | FASE 1 y 1.5 completadas                        | -           |
+| 28/11 | CASAS  | Rename equipo→casa, fix 83 errores TS, 41 tests | -           |
+| 28/11 | CASAS  | ✅ COMPLETADO - Indice pin, tests verdes        | -           |
+| 28/11 | MUNDOS | ✅ COMPLETADO - Modelo, Service, Controller     | -           |
 
 ### Metricas por Slice Completado
 
-| Slice     | Tests Agregados | Coverage Slice | Fecha Completado |
-| --------- | --------------- | -------------- | ---------------- |
-| 1. Casas  | -               | -              | -                |
-| 2. Mundos | -               | -              | -                |
-| 3. Tiers  | -               | -              | -                |
+| Slice     | Tests Agregados | Errores TS Resueltos | Fecha Completado |
+| --------- | --------------- | -------------------- | ---------------- |
+| 1. Casas  | 41              | 83                   | 28/11/2025       |
+| 2. Mundos | 21              | 0                    | 28/11/2025       |
+| 3. Tiers  | -               | -                    | -                |
 
 ---
 
@@ -305,5 +316,5 @@ git reset --hard <commit-hash>
 
 ---
 
-**Ultima actualizacion:** 2025-11-27
-**Proximo slice:** 1. CASAS
+**Ultima actualizacion:** 2025-11-28
+**Proximo slice:** 3. TIERS

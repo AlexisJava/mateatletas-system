@@ -237,6 +237,44 @@ model Casa {
   @@map("casas")
 }
 
+/// Modelo para Mundos STEAM (2026)
+/// Representa las 3 áreas de conocimiento: Matemática, Programación, Ciencias
+model Mundo {
+  /// Identificador único del mundo
+  id             String    @id @default(cuid())
+  /// Tipo de mundo (MATEMATICA, PROGRAMACION, CIENCIAS) - único
+  tipo           MundoTipo @unique
+  /// Nombre del mundo para mostrar
+  nombre         String    @unique
+  /// Descripción del mundo
+  descripcion    String?
+  /// Icono del mundo (emoji o nombre de icono)
+  icono          String
+
+  /// Color primario en formato hexadecimal
+  colorPrimary   String    @map("color_primary")
+  /// Color secundario en formato hexadecimal
+  colorSecondary String    @map("color_secondary")
+  /// Color de acento en formato hexadecimal
+  colorAccent    String    @map("color_accent")
+  /// Gradiente CSS para backgrounds
+  gradiente      String
+
+  /// Indica si el mundo está activo
+  activo         Boolean   @default(true)
+  /// Orden de visualización
+  orden          Int       @default(0)
+
+  /// Timestamp de creación del registro
+  createdAt      DateTime  @default(now())
+  /// Timestamp de última actualización del registro
+  updatedAt      DateTime  @updatedAt
+
+  // Nota: Relación con planificaciones se agregará en SLICE 5
+
+  @@map("mundos")
+}
+
 /// Modelo para docentes (profesores) de la plataforma
 /// Representa a los usuarios educadores que dictan clases
 model Docente {
@@ -1286,6 +1324,27 @@ enum CasaTipo {
   PULSAR  // 13-17 años - Dominadores
 
   @@map("casa_tipo")
+}
+
+/// Enum para tipos de mundo STEAM (2026)
+/// Los mundos representan las 3 áreas de conocimiento principales
+enum MundoTipo {
+  MATEMATICA   // Mundo de matemáticas - naranja
+  PROGRAMACION // Mundo de programación - verde
+  CIENCIAS     // Mundo de ciencias - azul
+
+  @@map("mundo_tipo")
+}
+
+/// Enum para niveles internos por mundo (2026)
+/// Define la progresión dentro de cada mundo según la casa
+enum NivelInterno {
+  BASICO      // Nivel inicial
+  INTERMEDIO  // Nivel medio
+  AVANZADO    // Nivel avanzado
+  OLIMPICO    // Nivel olímpico (solo Vertex y Pulsar en Mat/Prog)
+
+  @@map("nivel_interno")
 }
 
 /// Enum para estados de membresía
@@ -2797,11 +2856,8 @@ model CicloMundoSeleccionado2026 {
   /// ID del estudiante-inscripción
   estudiante_inscripcion_id String
 
-  /// Mundo STEAM elegido por el estudiante
-  /// - "matematica": Mundo de matemáticas
-  /// - "programacion": Mundo de programación
-  /// - "ciencias": Mundo de ciencias
-  mundo String // "matematica" | "programacion" | "ciencias"
+  /// Mundo STEAM elegido por el estudiante (enum tipado)
+  mundo MundoTipo
 
   /// Horario asignado (se define después, antes del 20 feb 2026)
   dia_semana String? // "lunes", "martes", etc.

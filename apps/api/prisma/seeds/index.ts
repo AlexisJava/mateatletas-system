@@ -3,6 +3,7 @@ import { seedAdmin } from './admin.seed';
 import { seedDocente } from './docente.seed';
 import { seedTutor } from './tutor.seed';
 import { seedCasas } from './casas.seed';
+import { seedMundos } from './mundos.seed';
 import { seedRutasCurriculares } from './rutas-curriculares.seed';
 import { seedProductos } from './productos.seed';
 import { seedAccionesPuntuables } from './acciones-puntuables.seed';
@@ -28,6 +29,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedConfiguracionPrecios(prisma); // ESENCIAL: Configuración de precios
     await seedSectores(prisma); // Sectores base (Matemática y Programación)
     await seedCasas(prisma); // ESENCIAL: Casas 2026 (Quantum, Vertex, Pulsar)
+    await seedMundos(prisma); // ESENCIAL: Mundos STEAM 2026 (Mat, Prog, Ciencias)
     await seedRutasCurriculares(prisma); // Las rutas son necesarias para el sistema
     await seedProductos(prisma); // Productos del catálogo (pueden ser reales)
     await seedAccionesPuntuables(prisma); // Configuración de gamificación
@@ -42,6 +44,7 @@ export async function runAllSeeds(prisma: PrismaClient) {
     await seedDocente(prisma);
     await seedTutor(prisma);
     await seedCasas(prisma);
+    await seedMundos(prisma); // Mundos STEAM 2026
     await seedRutasCurriculares(prisma);
     await seedProductos(prisma);
     await seedAccionesPuntuables(prisma);
@@ -62,6 +65,7 @@ export {
   seedDocente,
   seedTutor,
   seedCasas,
+  seedMundos,
   seedRutasCurriculares,
   seedProductos,
   seedAccionesPuntuables,

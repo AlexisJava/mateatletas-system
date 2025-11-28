@@ -14,6 +14,7 @@ import { SharedModule } from './shared/shared.module';
 import { AuthModule } from './auth/auth.module';
 import { EstudiantesModule } from './estudiantes/estudiantes.module';
 import { CasasModule } from './casas/casas.module';
+import { MundosModule } from './mundos/mundos.module';
 import { DocentesModule } from './docentes/docentes.module';
 import { CatalogoModule } from './catalogo/catalogo.module';
 import { PagosModule } from './pagos/pagos.module';
@@ -66,6 +67,7 @@ import { AuditModule } from './audit/audit.module';
     AuthModule,
     EstudiantesModule,
     CasasModule,
+    MundosModule,
     DocentesModule,
     CatalogoModule,
     PagosModule,

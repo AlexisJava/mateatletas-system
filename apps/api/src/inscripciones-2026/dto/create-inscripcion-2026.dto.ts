@@ -27,11 +27,12 @@ export enum TipoInscripcion2026 {
 
 /**
  * Mundos STEAM disponibles para Ciclo 2026
+ * Nota: Los valores deben coincidir con MundoTipo en Prisma (MAYÚSCULAS)
  */
 export enum MundoSTEAM {
-  MATEMATICA = 'matematica',
-  PROGRAMACION = 'programacion',
-  CIENCIAS = 'ciencias',
+  MATEMATICA = 'MATEMATICA',
+  PROGRAMACION = 'PROGRAMACION',
+  CIENCIAS = 'CIENCIAS',
 }
 
 /**

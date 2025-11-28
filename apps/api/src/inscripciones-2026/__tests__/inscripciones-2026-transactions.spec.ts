@@ -14,7 +14,10 @@ import {
   InternalServerErrorException,
   ConflictException,
 } from '@nestjs/common';
-import { TipoInscripcion2026 } from '../dto/create-inscripcion-2026.dto';
+import {
+  TipoInscripcion2026,
+  MundoSTEAM,
+} from '../dto/create-inscripcion-2026.dto';
 
 /**
  * TESTS PARA TRANSACCIONES ATÓMICAS - INSCRIPCIONES 2026
@@ -615,11 +618,11 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
         estudiantes: [
           {
             ...mockCreateDto.estudiantes[0],
-            mundo_seleccionado: 'matematica' as any,
+            mundo_seleccionado: MundoSTEAM.MATEMATICA,
           },
           {
             ...mockCreateDto.estudiantes[1],
-            mundo_seleccionado: 'programacion' as any,
+            mundo_seleccionado: MundoSTEAM.PROGRAMACION,
           },
         ],
       };
@@ -642,14 +645,14 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
             estudianteInscripcion: mockEstudianteInscripcion1,
             pin: '1234',
             cursosSeleccionados: [],
-            mundoSeleccionado: 'matematica',
+            mundoSeleccionado: MundoSTEAM.MATEMATICA,
           },
           {
             estudiante: mockEstudiante2,
             estudianteInscripcion: mockEstudianteInscripcion2,
             pin: '5678',
             cursosSeleccionados: [],
-            mundoSeleccionado: 'programacion',
+            mundoSeleccionado: MundoSTEAM.PROGRAMACION,
           },
         ],
         pago: mockPago,
