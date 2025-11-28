@@ -9,3 +9,6 @@ export type { LoginEstudianteResult } from './login-estudiante.use-case';
 
 export { CompleteMfaLoginUseCase } from './complete-mfa-login.use-case';
 export type { CompleteMfaLoginResult } from './complete-mfa-login.use-case';
+
+export { CambiarPasswordUseCase } from './cambiar-password.use-case';
+export type { CambiarPasswordResult } from './cambiar-password.use-case';
