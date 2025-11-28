@@ -67,7 +67,7 @@ interface AsistenciaStore {
   marcarAsistencia: (
     claseId: string,
     estudianteId: string,
-    data: MarcarAsistenciaDto
+    data: MarcarAsistenciaDto,
   ) => Promise<boolean>;
 
   /**
@@ -149,7 +149,7 @@ export const useAsistenciaStore = create<AsistenciaStore>((set, get) => ({
   marcarAsistencia: async (
     claseId: string,
     estudianteId: string,
-    data: MarcarAsistenciaDto
+    data: MarcarAsistenciaDto,
   ): Promise<boolean> => {
     set({ isLoadingMarcacion: true, error: null });
     try {

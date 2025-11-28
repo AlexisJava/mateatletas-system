@@ -26,8 +26,7 @@ import type {
 export const estudiantesKeys = {
   all: ['estudiantes'] as const,
   lists: () => [...estudiantesKeys.all, 'list'] as const,
-  list: (params?: QueryEstudiantesParams) =>
-    [...estudiantesKeys.lists(), params] as const,
+  list: (params?: QueryEstudiantesParams) => [...estudiantesKeys.lists(), params] as const,
   detail: (id: string) => [...estudiantesKeys.all, 'detail', id] as const,
   equipos: () => [...estudiantesKeys.all, 'equipos'] as const,
 };
@@ -62,10 +61,7 @@ export function useEstudiantes(params?: QueryEstudiantesParams) {
  * @example
  * const { data: estudiante } = useEstudiante('123');
  */
-export function useEstudiante(
-  id: string,
-  options?: { enabled?: boolean }
-) {
+export function useEstudiante(id: string, options?: { enabled?: boolean }) {
   return useQuery<Estudiante, Error>({
     queryKey: estudiantesKeys.detail(id),
     queryFn: () => estudiantesApi.getById(id),
@@ -115,9 +111,12 @@ export function useCrearEstudiante() {
       await queryClient.cancelQueries({ queryKey: estudiantesKeys.lists() });
 
       // Snapshot para rollback
-      const previousLists = queryClient.getQueriesData<EstudiantesResponse>({
-        queryKey: estudiantesKeys.lists(),
-      }).map(([, data]) => data).filter((data): data is EstudiantesResponse => data !== undefined);
+      const previousLists = queryClient
+        .getQueriesData<EstudiantesResponse>({
+          queryKey: estudiantesKeys.lists(),
+        })
+        .map(([, data]) => data)
+        .filter((data): data is EstudiantesResponse => data !== undefined);
 
       // Optimistic update: agregar al inicio de todas las listas
       queryClient.setQueriesData<EstudiantesResponse>(
@@ -140,7 +139,7 @@ export function useCrearEstudiante() {
               total: (old.metadata?.total ?? 0) + 1,
             },
           };
-        }
+        },
       );
 
       return { previousLists };
@@ -194,13 +193,14 @@ export function useActualizarEstudiante() {
       await queryClient.cancelQueries({ queryKey: estudiantesKeys.all });
 
       // Snapshot
-      const previousLists = queryClient.getQueriesData<EstudiantesResponse>({
-        queryKey: estudiantesKeys.lists(),
-      }).map(([, listData]) => listData).filter((listData): listData is EstudiantesResponse => listData !== undefined);
+      const previousLists = queryClient
+        .getQueriesData<EstudiantesResponse>({
+          queryKey: estudiantesKeys.lists(),
+        })
+        .map(([, listData]) => listData)
+        .filter((listData): listData is EstudiantesResponse => listData !== undefined);
 
-      const previousDetail = queryClient.getQueryData<Estudiante>(
-        estudiantesKeys.detail(id)
-      );
+      const previousDetail = queryClient.getQueryData<Estudiante>(estudiantesKeys.detail(id));
 
       // Optimistic update en listas
       queryClient.setQueriesData<EstudiantesResponse>(
@@ -209,18 +209,15 @@ export function useActualizarEstudiante() {
           if (!old) return old;
           return {
             ...old,
-            data: old.data.map((e) =>
-              e.id === id ? { ...e, ...data } : e
-            ),
+            data: old.data.map((e) => (e.id === id ? { ...e, ...data } : e)),
           };
-        }
+        },
       );
 
       // Optimistic update en detalle
       if (previousDetail) {
-        queryClient.setQueryData<Estudiante>(
-          estudiantesKeys.detail(id),
-          (old) => (old ? { ...old, ...data } : old)
+        queryClient.setQueryData<Estudiante>(estudiantesKeys.detail(id), (old) =>
+          old ? { ...old, ...data } : old,
         );
       }
 
@@ -239,10 +236,7 @@ export function useActualizarEstudiante() {
         });
       }
       if (context?.previousDetail) {
-        queryClient.setQueryData(
-          estudiantesKeys.detail(id),
-          context.previousDetail
-        );
+        queryClient.setQueryData(estudiantesKeys.detail(id), context.previousDetail);
       }
     },
 
@@ -273,9 +267,12 @@ export function useEliminarEstudiante() {
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: estudiantesKeys.all });
 
-      const previousLists = queryClient.getQueriesData<EstudiantesResponse>({
-        queryKey: estudiantesKeys.lists(),
-      }).map(([, data]) => data).filter((data): data is EstudiantesResponse => data !== undefined);
+      const previousLists = queryClient
+        .getQueriesData<EstudiantesResponse>({
+          queryKey: estudiantesKeys.lists(),
+        })
+        .map(([, data]) => data)
+        .filter((data): data is EstudiantesResponse => data !== undefined);
 
       // Optimistic update: remover de listas
       queryClient.setQueriesData<EstudiantesResponse>(
@@ -290,7 +287,7 @@ export function useEliminarEstudiante() {
               total: Math.max(0, (old.metadata?.total ?? 1) - 1),
             },
           };
-        }
+        },
       );
 
       // Remover query de detalle
@@ -338,11 +335,7 @@ export function useEliminarEstudiante() {
  * } = useEstudiantesCompleto({ page: 1 });
  */
 export function useEstudiantesCompleto(params?: QueryEstudiantesParams) {
-  const {
-    data: response,
-    isLoading,
-    error,
-  } = useEstudiantes(params);
+  const { data: response, isLoading, error } = useEstudiantes(params);
 
   const { data: equipos = [] } = useEquipos();
 
@@ -359,8 +352,7 @@ export function useEstudiantesCompleto(params?: QueryEstudiantesParams) {
     isLoading,
     error: error?.message ?? null,
     crear: (data: CreateEstudianteData) => crear.mutateAsync(data),
-    actualizar: (id: string, data: UpdateEstudianteData) =>
-      actualizar.mutateAsync({ id, data }),
+    actualizar: (id: string, data: UpdateEstudianteData) => actualizar.mutateAsync({ id, data }),
     eliminar: (id: string) => eliminar.mutateAsync(id),
     isCreating: crear.isPending,
     isUpdating: actualizar.isPending,

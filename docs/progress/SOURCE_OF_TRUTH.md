@@ -23,6 +23,7 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 ## Stack Tecnológico Confirmado
 
 ### Backend (`/apps/api`)
+
 - **Framework:** NestJS 10.x
 - **Base de datos:** PostgreSQL con Prisma ORM
 - **Autenticación:** JWT con guards de roles (cookies httpOnly)
@@ -31,6 +32,7 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 - **Testing:** 99 tests unitarios passing
 
 ### Frontend (`/apps/web`)
+
 - **Framework:** Next.js 15 (App Router)
 - **Runtime:** React 19
 - **Estilos:** Tailwind CSS v4
@@ -40,6 +42,7 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 - **Fetching:** React Query (TanStack Query) ✅
 
 ### Infraestructura
+
 - **Monorepo:** Turborepo
 - **Package Manager:** npm
 - **Database Migrations:** Prisma Migrate
@@ -53,14 +56,15 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 
 ### ❌ NO IMPLEMENTADO (10%)
 
-| Tarea | ID | Estado | Notas |
-|-------|-----|--------|-------|
-| Landing Page Pública | T001 | ⚠️ 10% | Existe `/apps/web/src/app/page.tsx` pero es básico |
-| Formulario Inscripción Público | T002 | ❌ 0% | No existe `/inscripcion` |
+| Tarea                          | ID   | Estado | Notas                                              |
+| ------------------------------ | ---- | ------ | -------------------------------------------------- |
+| Landing Page Pública           | T001 | ⚠️ 10% | Existe `/apps/web/src/app/page.tsx` pero es básico |
+| Formulario Inscripción Público | T002 | ❌ 0%  | No existe `/inscripcion`                           |
 
 ### ⚠️ PARCIALMENTE IMPLEMENTADO
 
 **`/apps/web/src/app/page.tsx`** (Home)
+
 - ✅ Existe pero es placeholder
 - ❌ No tiene información del club
 - ❌ No tiene CTA de inscripción
@@ -68,6 +72,7 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 - ❌ No tiene pricing visible
 
 **`/apps/web/src/app/login/page.tsx`**
+
 - ✅ Login funcional con JWT
 - ✅ Cookies httpOnly ✅
 - ✅ Validación de roles
@@ -98,12 +103,14 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 ### ✅ IMPLEMENTADO (70%)
 
 **Portal Base:**
+
 - ✅ Layout: `/apps/web/src/app/tutor/layout.tsx`
 - ✅ Dashboard: `/apps/web/src/app/tutor/dashboard/page.tsx`
 - ✅ Autenticación con rol `tutor`
 - ✅ Sidebar navigation
 
 **Funcionalidades:**
+
 - ✅ Ver estudiantes: `/apps/web/src/app/tutor/estudiantes/page.tsx`
 - ✅ Ver clases disponibles: `/apps/web/src/app/tutor/clases/page.tsx`
 - ✅ Ver agenda: `/apps/web/src/app/tutor/agenda/page.tsx`
@@ -124,12 +131,14 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 ### ✅ IMPLEMENTADO (95%)
 
 **Portal Base:**
+
 - ✅ Layout: `/apps/web/src/app/estudiante/layout.tsx`
 - ✅ Dashboard: `/apps/web/src/app/estudiante/dashboard/page.tsx` ✅
 - ✅ Autenticación con rol `estudiante`
 - ✅ Sidebar responsive con modo mobile
 
 **Funcionalidades:**
+
 - ✅ Dashboard con 4 cards (sin scroll) ✅
 - ✅ Ver cursos/estudiar: `/apps/web/src/app/estudiante/cursos/page.tsx` (paginación 2x2) ✅
 - ✅ Juego Cálculo Mental: `/apps/web/src/app/estudiante/cursos/calculo-mental/page.tsx` ✅
@@ -143,6 +152,7 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 - ✅ Confetti en logros ✅
 
 **Estado del Portal Estudiante:**
+
 - ✅ **100% funcional y aprobado para producción**
 - ✅ Sin scroll en todas las páginas
 - ✅ Contenido grande y legible (child-friendly)
@@ -163,12 +173,14 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 ### ✅ IMPLEMENTADO (80%)
 
 **Portal Base:**
+
 - ✅ Layout: `/apps/web/src/app/docente/layout.tsx` (Purple Glassmorphism) ✅
 - ✅ Dashboard: `/apps/web/src/app/docente/dashboard/page.tsx`
 - ✅ Autenticación con rol `docente`
 - ✅ Navigation moderna con glassmorphism
 
 **Funcionalidades:**
+
 - ✅ Dashboard con estadísticas
 - ✅ Mis clases: `/apps/web/src/app/docente/mis-clases/page.tsx`
 - ✅ Calendario: `/apps/web/src/app/docente/calendario/page.tsx`
@@ -195,11 +207,13 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 ### ✅ IMPLEMENTADO (75%)
 
 **Portal Base:**
+
 - ✅ Layout: `/apps/web/src/app/admin/layout.tsx`
 - ✅ Dashboard: `/apps/web/src/app/admin/dashboard/page.tsx`
 - ✅ Autenticación con rol `admin`
 
 **Funcionalidades:**
+
 - ✅ Dashboard con KPIs
 - ✅ Gestión usuarios: `/apps/web/src/app/admin/usuarios/page.tsx`
 - ✅ Gestión estudiantes: `/apps/web/src/app/admin/estudiantes/page.tsx`
@@ -222,17 +236,20 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 ### ✅ MÓDULOS IMPLEMENTADOS (80%)
 
 **Core:**
+
 - ✅ **PrismaService** - Conexión DB
 - ✅ **AuthModule** - JWT, Guards, Strategies
 - ✅ **CommonModule** - Utilities compartidas
 
 **Entidades Principales:**
+
 - ✅ **TutorModule** - Registro, perfil
 - ✅ **EstudiantesModule** - CRUD completo
 - ✅ **DocentesModule** - CRUD + endpoint público
 - ✅ **EquiposModule** - Gestión de equipos
 
 **Funcionalidades:**
+
 - ✅ **ClasesModule** - CRUD clases (refactorizado) ✅
 - ✅ **AsistenciaModule** - Registro asistencia + reportes
 - ✅ **CatalogoModule** - Productos educativos
@@ -244,6 +261,7 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 - ✅ **AdminModule** - Endpoints admin (refactorizado) ✅
 
 **Testing:**
+
 - ✅ **99 tests unitarios** passing ✅
 - ✅ Coverage ~90% en servicios refactorizados
 - ✅ AdminStatsService (9 tests)
@@ -255,18 +273,19 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 
 ### ❌ MÓDULOS NO IMPLEMENTADOS (20%)
 
-| Módulo | Funcionalidad | Estado |
-|--------|---------------|--------|
-| **MensajeriaModule** | ❌ NO EXISTE | Chat tutor-docente |
-| **WebSocketModule** | ❌ NO EXISTE | Socket.io gateway |
-| **EmailModule** | ❌ NO EXISTE | Nodemailer service |
-| **CronModule** | ❌ NO EXISTE | Scheduled tasks |
+| Módulo               | Funcionalidad | Estado             |
+| -------------------- | ------------- | ------------------ |
+| **MensajeriaModule** | ❌ NO EXISTE  | Chat tutor-docente |
+| **WebSocketModule**  | ❌ NO EXISTE  | Socket.io gateway  |
+| **EmailModule**      | ❌ NO EXISTE  | Nodemailer service |
+| **CronModule**       | ❌ NO EXISTE  | Scheduled tasks    |
 
 ---
 
 # 🗄️ SCHEMA PRISMA - MODELOS IMPLEMENTADOS
 
 **✅ Modelos Existentes:**
+
 ```prisma
 - Tutor
 - Estudiante
@@ -298,12 +317,14 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 # 📡 ENDPOINTS IMPLEMENTADOS (Resumen)
 
 **Auth:**
+
 - ✅ POST `/api/auth/register` - Registro tutor
 - ✅ POST `/api/auth/login` - Login universal (cookies httpOnly)
 - ✅ GET `/api/auth/me` - Usuario actual
 - ✅ POST `/api/auth/logout` - Logout
 
 **Estudiantes:**
+
 - ✅ GET `/api/estudiantes` - Listar
 - ✅ POST `/api/estudiantes` - Crear
 - ✅ GET `/api/estudiantes/:id` - Detalle
@@ -311,11 +332,13 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 - ✅ DELETE `/api/estudiantes/:id` - Eliminar
 
 **Docentes:**
+
 - ✅ GET `/api/docentes` - Listar (admin)
 - ✅ POST `/api/docentes` - Crear (admin)
 - ✅ GET `/api/docentes/public` - Lista pública
 
 **Clases:**
+
 - ✅ GET `/api/clases` - Listar todas
 - ✅ POST `/api/clases` - Crear clase
 - ✅ GET `/api/clases/:id` - Detalle
@@ -323,48 +346,57 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 - ✅ DELETE `/api/clases/:id` - Cancelar
 
 **Asistencia:**
+
 - ✅ POST `/api/asistencia` - Registrar
 - ✅ GET `/api/asistencia/clase/:claseId` - Por clase
 - ✅ GET `/api/asistencia/estudiante/:estudianteId` - Por estudiante
 
 **Pagos:**
+
 - ✅ POST `/api/pagos/preference/suscripcion`
 - ✅ POST `/api/pagos/preference/curso`
 - ✅ POST `/api/pagos/webhook` - Webhook MercadoPago
 - ✅ POST `/api/pagos/activar-demo` - Activar (dev)
 
 **Gamificación:**
+
 - ✅ POST `/api/gamificacion/puntos` - Asignar puntos
 - ✅ GET `/api/gamificacion/ranking` - Ranking global
 - ✅ POST `/api/gamificacion/insignias` - Otorgar insignia
 - ✅ GET `/api/gamificacion/logros/:estudianteId`
 
 **Notificaciones:**
+
 - ✅ GET `/api/notificaciones` - Listar
 - ✅ PUT `/api/notificaciones/:id/leer` - Marcar leída
 - ✅ POST `/api/notificaciones` - Crear (interno)
 
 **Eventos:**
+
 - ✅ GET `/api/eventos` - Listar eventos
 - ✅ POST `/api/eventos` - Crear evento
 - ✅ PUT `/api/eventos/:id` - Actualizar
 - ✅ DELETE `/api/eventos/:id` - Eliminar
 
 **Catálogo:**
+
 - ✅ GET `/api/productos` - Listar productos
 - ✅ GET `/api/productos/:id` - Detalle producto
 
 **Admin:**
+
 - ✅ GET `/api/admin/usuarios` - Listar usuarios
 - ✅ POST `/api/admin/usuarios` - Crear usuario
 - ✅ GET `/api/admin/stats` - Estadísticas globales
 - ✅ GET `/api/admin/alertas` - Alertas activas
 
 **Equipos:**
+
 - ✅ GET `/api/equipos` - Listar equipos
 - ✅ GET `/api/equipos/:id` - Detalle equipo
 
 **Cursos:**
+
 - ✅ GET `/api/cursos` - Listar cursos
 - ✅ POST `/api/cursos` - Crear curso
 - ✅ GET `/api/cursos/:id` - Detalle curso
@@ -376,18 +408,21 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 ## ✅ IMPLEMENTADAS
 
 ### MercadoPago
+
 - ✅ SDK instalado
 - ✅ Creación de preferencias de pago
 - ✅ Webhook configurado
 - ✅ Modo sandbox para dev
 
 ### Prisma ORM
+
 - ✅ Schema completo
 - ✅ Migraciones aplicadas
 - ✅ Seeds básicos
 - ✅ Cliente generado
 
 ### React Query (TanStack Query)
+
 - ✅ Migrando desde Zustand ✅
 - ✅ useEstudiantes hook
 - ✅ useGamificacion hook
@@ -396,16 +431,17 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 - ✅ useEventos hook
 
 ### Dicebear
+
 - ✅ Avatares personalizables
 - ✅ Integrado en Portal Estudiante
 
 ## ❌ NO IMPLEMENTADAS
 
-| Integración | Propósito | Prioridad |
-|-------------|-----------|-----------|
-| **Jitsi Meet** | Videollamadas | 🔴 CRÍTICA |
-| **SendGrid/Resend** | Email service | 🟡 ALTA |
-| **Socket.io** | WebSockets | 🟠 MEDIA |
+| Integración         | Propósito     | Prioridad  |
+| ------------------- | ------------- | ---------- |
+| **Jitsi Meet**      | Videollamadas | 🔴 CRÍTICA |
+| **SendGrid/Resend** | Email service | 🟡 ALTA    |
+| **Socket.io**       | WebSockets    | 🟠 MEDIA   |
 
 ---
 
@@ -452,13 +488,14 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 ## Portal Estudiante (95/5 Rule)
 
 **95% Emerald/Teal + 5% Orange:**
+
 ```css
---emerald-primary: #10b981 (emerald-500)
---teal-primary: #14b8a6 (teal-500)
---orange-accent: #f97316 (orange-500)
+--emerald-primary: #10b981 (emerald-500) --teal-primary: #14b8a6 (teal-500) --orange-accent: #f97316
+  (orange-500);
 ```
 
 **Glassmorphism:**
+
 ```css
 .glass-card {
   backdrop-blur-xl;
@@ -472,13 +509,14 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 ## Portal Docente (Purple Theme)
 
 **Colors:**
+
 ```css
---violet-primary: #8b5cf6 (violet-500)
---purple-primary: #a855f7 (purple-500)
---indigo-dark: #4f46e5 (indigo-600)
+--violet-primary: #8b5cf6 (violet-500) --purple-primary: #a855f7 (purple-500) --indigo-dark: #4f46e5
+  (indigo-600);
 ```
 
 **Glassmorphism:**
+
 ```css
 .glass-card {
   backdrop-blur-xl;
@@ -496,11 +534,13 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 ## ✅ Tests Implementados
 
 **Backend:**
+
 - ✅ **99 tests unitarios** passing
 - ✅ Coverage ~90% en servicios refactorizados
 - ✅ Patrones establecidos (AAA, Mocking, Edge Cases)
 
 **Frontend:**
+
 - ✅ **150+ tests manuales** ejecutados
 - ✅ Portal Estudiante 100% probado
 - ✅ 0 errores TypeScript
@@ -510,12 +550,14 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 # 📊 CALIDAD DEL CÓDIGO
 
 ## Backend
+
 - **Score**: 8.5/10 ✅
 - **TypeScript Errors**: 0
 - **Tests**: 99 passing
 - **Coverage**: ~90%
 
 ## Frontend
+
 - **Score**: 9.8/10 ✅
 - **TypeScript Errors**: 0
 - **Portal Estudiante**: 100% aprobado
@@ -528,12 +570,14 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 ## ✅ Sprint 1-7 COMPLETADOS
 
 **Sprint 7: Cleanup & Polish** ✅
+
 - Limpieza de código
 - Documentación completa
 - Testing comprehensivo
 - Backend: 8.2 → 8.5/10
 
 **Sprint 6: React Query Migration** ✅
+
 - Migración Fase 1: Notificaciones
 - Migración Fase 2: 5 stores adicionales
 - Hooks optimizados
@@ -571,16 +615,19 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 # 🚀 PRÓXIMOS PASOS PRIORITARIOS
 
 ## 1. Resolver Vulnerabilidades de Seguridad (URGENTE)
+
 - [ ] Proteger/eliminar mock payment endpoint
 - [ ] Configurar CORS restrictivo
 - [ ] Implementar rate limiting
 
 ## 2. Completar Portal Estudiante
+
 - [ ] Conectar juegos con backend (registrar puntos)
 - [ ] Implementar 4 juegos adicionales
 - [ ] Sistema de tareas asignadas
 
 ## 3. Landing Page
+
 - [ ] Rediseñar página principal
 - [ ] Formulario de inscripción
 - [ ] Sistema de pagos público
@@ -590,6 +637,7 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 # 📝 DOCUMENTACIÓN CLAVE
 
 **Esenciales:**
+
 - ✅ `README.md` - Índice maestro
 - ✅ `LECCIONES_APRENDIDAS_DEUDA_TECNICA.md` - Errores a evitar
 - ✅ `AUDITORIA_2025-10-17_PLAN_MITIGACION.md` - Plan de seguridad
@@ -598,6 +646,7 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 - ✅ `testing/CREDENCIALES_TEST.md` - Usuarios de prueba
 
 **Arquitectura:**
+
 - ✅ `architecture/context.md`
 - ✅ `architecture/design-system.md`
 - ✅ `architecture/documento-tecnico-del-backend.md`
@@ -611,17 +660,20 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 # 🎯 CHECKLIST DE USO
 
 ## Antes de Implementar:
+
 - [ ] Leo SOURCE_OF_TRUTH para verificar qué existe
 - [ ] Reviso componentes reutilizables
 - [ ] Chequeo endpoints disponibles
 - [ ] Confirmo dependencias necesarias
 
 ## Durante Desarrollo:
+
 - [ ] Uso componentes/hooks existentes
 - [ ] No duplico funcionalidad
 - [ ] Sigo design system establecido
 
 ## Después de Implementar:
+
 - [ ] ✅ **ACTUALIZO SOURCE_OF_TRUTH**
 - [ ] Marco tareas como completadas
 - [ ] Documento nuevos endpoints/componentes
@@ -633,5 +685,5 @@ Este es el **documento de verdad absoluta** del proyecto. Antes de implementar c
 
 ---
 
-*Última actualización: 17 de Octubre de 2025*
-*Mantenido por: Equipo de Desarrollo Mateatletas*
+_Última actualización: 17 de Octubre de 2025_
+_Mantenido por: Equipo de Desarrollo Mateatletas_

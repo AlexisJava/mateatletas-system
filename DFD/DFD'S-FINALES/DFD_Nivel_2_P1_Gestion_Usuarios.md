@@ -1,4 +1,5 @@
 # DFD NIVEL 2 - P1: GESTIÓN DE USUARIOS
+
 ## Ecosistema Mateatletas
 
 **Versión:** 1.0  
@@ -16,7 +17,7 @@ flowchart TB
     DOCENTE[👨‍🏫 DOCENTE]
     TUTOR[👨‍👩‍👧 TUTOR]
     ESTUDIANTE[🎓 ESTUDIANTE]
-    
+
     %% Subprocesos de P1
     P1_1[P1.1<br/>CREAR<br/>USUARIO]
     P1_2[P1.2<br/>AUTENTICAR<br/>USUARIO]
@@ -24,51 +25,51 @@ flowchart TB
     P1_4[P1.4<br/>GESTIONAR<br/>ACCESO]
     P1_5[P1.5<br/>CONSULTAR<br/>USUARIOS]
     P1_6[P1.6<br/>GESTIONAR<br/>RELACIONES]
-    
+
     %% Almacenes de Datos
     D1[(D1<br/>USUARIOS)]
-    
+
     %% Procesos Externos
     P4[P4<br/>PAGOS]
     P6[P6<br/>NOTIFICACIONES]
-    
+
     %% === FLUJOS DESDE ENTIDADES EXTERNAS ===
-    
+
     ADMIN -->|Crear usuarios| P1_1
     ADMIN -->|Consultar usuarios| P1_5
     ADMIN -->|Gestionar acceso| P1_4
-    
+
     DOCENTE -->|Login| P1_2
     DOCENTE -->|Actualizar perfil| P1_3
-    
+
     TUTOR -->|Login| P1_2
     TUTOR -->|Actualizar perfil| P1_3
     TUTOR -->|Ver estudiantes| P1_5
-    
+
     ESTUDIANTE -->|Login| P1_2
     ESTUDIANTE -->|Actualizar perfil| P1_3
-    
+
     %% === FLUJOS HACIA ENTIDADES EXTERNAS ===
-    
+
     P1_2 -->|Token JWT| ADMIN
     P1_2 -->|Token JWT| DOCENTE
     P1_2 -->|Token JWT| TUTOR
     P1_2 -->|Token JWT| ESTUDIANTE
-    
+
     P1_5 -->|Lista usuarios| ADMIN
     P1_5 -->|Lista estudiantes| TUTOR
-    
+
     %% === FLUJOS DESDE PROCESOS EXTERNOS ===
-    
+
     P4 -->|Evento: Pago realizado| P1_4
-    
+
     %% === FLUJOS HACIA PROCESOS EXTERNOS ===
-    
+
     P1_1 -->|Evento: Usuario creado| P6
     P1_4 -->|Evento: Acceso modificado| P6
-    
+
     %% === FLUJOS CON ALMACENES ===
-    
+
     P1_1 -->|Crear registro| D1
     P1_2 -->|Validar credenciales| D1
     D1 -->|Datos usuario| P1_2
@@ -77,13 +78,13 @@ flowchart TB
     P1_5 -->|Leer usuarios| D1
     D1 -->|Lista usuarios| P1_5
     P1_6 -->|Gestionar tutor-estudiante| D1
-    
+
     %% Estilos
     classDef userExternal fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
     classDef subprocess fill:#50C878,stroke:#2E8A57,stroke-width:2px,color:#fff
     classDef datastore fill:#FFB84D,stroke:#CC8A3D,stroke-width:2px,color:#000
     classDef externalProcess fill:#9B59B6,stroke:#6C3483,stroke-width:2px,color:#fff
-    
+
     class ADMIN,DOCENTE,TUTOR,ESTUDIANTE userExternal
     class P1_1,P1_2,P1_3,P1_4,P1_5,P1_6 subprocess
     class D1 datastore
@@ -95,11 +96,13 @@ flowchart TB
 ## SUBPROCESO P1.1: CREAR USUARIO
 
 ### Descripción
+
 Permite al ADMIN crear nuevos usuarios del sistema (Admins, Docentes, Tutores, Estudiantes).
 
 ### Entradas
 
 **Crear Admin:**
+
 ```typescript
 POST /api/admins
 {
@@ -111,6 +114,7 @@ POST /api/admins
 ```
 
 **Crear Docente:**
+
 ```typescript
 POST /api/docentes
 {
@@ -124,6 +128,7 @@ POST /api/docentes
 ```
 
 **Crear Tutor:**
+
 ```typescript
 POST /api/tutores
 {
@@ -137,6 +142,7 @@ POST /api/tutores
 ```
 
 **Crear Estudiante:**
+
 ```typescript
 POST /api/estudiantes
 {
@@ -157,6 +163,7 @@ POST /api/estudiantes
 #### Paso 1: Validar Datos de Entrada
 
 **Validaciones comunes:**
+
 ```typescript
 // Usando Zod
 const schema = z.object({
@@ -165,13 +172,13 @@ const schema = z.object({
   nombre: z.string().min(2),
   apellido: z.string().min(2),
   // ... otros campos según tipo
-})
+});
 ```
 
 **Validaciones especiales por tipo:**
 
 - **Admin/Docente/Tutor:** Email obligatorio y único
-- **Estudiante:** 
+- **Estudiante:**
   - Email opcional (menores pueden no tener)
   - `tutor_id` OBLIGATORIO
   - Validar fecha_nacimiento (entre 5-18 años típicamente)
@@ -194,8 +201,9 @@ SELECT 'estudiantes', id FROM estudiantes WHERE email = ?
 **Validación:** COUNT = 0 (email no existe en ninguna tabla)
 
 Si existe:
+
 ```typescript
-throw new ConflictException('El email ya está registrado')
+throw new ConflictException('El email ya está registrado');
 ```
 
 ---
@@ -203,10 +211,10 @@ throw new ConflictException('El email ya está registrado')
 #### Paso 3: Hash de Contraseña
 
 ```typescript
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 
-const SALT_ROUNDS = 10
-const password_hash = await bcrypt.hash(password, SALT_ROUNDS)
+const SALT_ROUNDS = 10;
+const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
 ```
 
 **Nota:** Si es estudiante menor sin email/password, este paso se omite.
@@ -235,6 +243,7 @@ SELECT id, nombre FROM equipos WHERE id = ?
 #### Paso 5: Crear Registro en Base de Datos
 
 **Para Admin:**
+
 ```sql
 INSERT INTO admins (
   id,
@@ -258,6 +267,7 @@ INSERT INTO admins (
 ```
 
 **Para Docente:**
+
 ```sql
 INSERT INTO docentes (
   id,
@@ -276,6 +286,7 @@ INSERT INTO docentes (
 ```
 
 **Para Tutor:**
+
 ```sql
 INSERT INTO tutores (
   id,
@@ -294,6 +305,7 @@ INSERT INTO tutores (
 ```
 
 **Para Estudiante:**
+
 ```sql
 INSERT INTO estudiantes (
   id,
@@ -371,6 +383,7 @@ Si el sistema tiene configurado envío de emails:
 ### Salidas
 
 **Respuesta al ADMIN:**
+
 ```typescript
 {
   id: string,
@@ -391,6 +404,7 @@ Si el sistema tiene configurado envío de emails:
 ```
 
 **Efectos en BD:**
+
 - D1: INSERT en tabla correspondiente (admins/docentes/tutores/estudiantes)
 - Eventos a P6
 
@@ -454,6 +468,7 @@ INSERT INTO usuarios VALUES (
 ## SUBPROCESO P1.2: AUTENTICAR USUARIO
 
 ### Descripción
+
 Valida credenciales y genera JWT token con roles para acceso al sistema.
 
 ### Entradas
@@ -489,8 +504,9 @@ LIMIT 1
 **Validación:** Usuario encontrado
 
 Si no se encuentra:
+
 ```typescript
-throw new UnauthorizedException('Credenciales inválidas')
+throw new UnauthorizedException('Credenciales inválidas');
 ```
 
 ---
@@ -499,7 +515,7 @@ throw new UnauthorizedException('Credenciales inválidas')
 
 ```typescript
 if (!usuario.activo) {
-  throw new ForbiddenException('Usuario desactivado')
+  throw new ForbiddenException('Usuario desactivado');
 }
 ```
 
@@ -508,16 +524,17 @@ if (!usuario.activo) {
 #### Paso 3: Validar Contraseña
 
 ```typescript
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 
-const passwordValido = await bcrypt.compare(password, usuario.password_hash)
+const passwordValido = await bcrypt.compare(password, usuario.password_hash);
 
 if (!passwordValido) {
-  throw new UnauthorizedException('Credenciales inválidas')
+  throw new UnauthorizedException('Credenciales inválidas');
 }
 ```
 
-**Nota de Seguridad:** 
+**Nota de Seguridad:**
+
 - Mismo mensaje de error para "usuario no existe" y "contraseña incorrecta"
 - Evita dar información sobre qué emails están registrados
 
@@ -533,7 +550,7 @@ SELECT acceso_activo FROM estudiantes WHERE id = ?
 
 ```typescript
 if (rol === 'ESTUDIANTE' && !estudiante.acceso_activo) {
-  throw new ForbiddenException('Acceso inactivo - Contacta a tu tutor')
+  throw new ForbiddenException('Acceso inactivo - Contacta a tu tutor');
 }
 ```
 
@@ -542,22 +559,23 @@ if (rol === 'ESTUDIANTE' && !estudiante.acceso_activo) {
 #### Paso 5: Generar JWT Token
 
 ```typescript
-import { JwtService } from '@nestjs/jwt'
+import { JwtService } from '@nestjs/jwt';
 
 const payload = {
   sub: usuario.id, // Subject: ID del usuario
   email: usuario.email,
   role: usuario.rol, // 'ADMIN' | 'DOCENTE' | 'TUTOR' | 'ESTUDIANTE'
-  nombre: usuario.nombre
-}
+  nombre: usuario.nombre,
+};
 
 const token = await jwtService.sign(payload, {
   secret: process.env.JWT_SECRET,
-  expiresIn: '7d' // Token válido por 7 días
-})
+  expiresIn: '7d', // Token válido por 7 días
+});
 ```
 
 **Estructura del Token JWT:**
+
 ```
 Header: { alg: "HS256", typ: "JWT" }
 Payload: {
@@ -594,8 +612,9 @@ INSERT INTO logs_login (
 Según el rol, obtener información adicional:
 
 **Para Estudiante:**
+
 ```sql
-SELECT 
+SELECT
   e.*,
   t.nombre as tutor_nombre,
   t.email as tutor_email,
@@ -608,6 +627,7 @@ WHERE e.id = ?
 ```
 
 **Para Tutor:**
+
 ```sql
 -- Obtener cantidad de estudiantes
 SELECT COUNT(*) as cantidad_hijos
@@ -616,6 +636,7 @@ WHERE tutor_id = ? AND activo = true
 ```
 
 **Para Docente:**
+
 ```sql
 -- Obtener próximas clases
 SELECT COUNT(*) as clases_proximas
@@ -630,6 +651,7 @@ WHERE docente_id = ?
 ### Salidas
 
 **Respuesta:**
+
 ```typescript
 {
   access_token: string, // JWT
@@ -639,19 +661,19 @@ WHERE docente_id = ?
     nombre: string,
     apellido: string,
     rol: 'ADMIN' | 'DOCENTE' | 'TUTOR' | 'ESTUDIANTE',
-    
+
     // Datos adicionales según rol:
-    
+
     // Si es ESTUDIANTE:
     puntos_totales?: number,
     nivel_actual?: number,
     acceso_activo?: boolean,
     tutor?: { nombre, email },
     equipo?: { nombre, icono },
-    
+
     // Si es TUTOR:
     cantidad_hijos?: number,
-    
+
     // Si es DOCENTE:
     especialidades?: string[],
     clases_proximas?: number
@@ -674,6 +696,7 @@ WHERE docente_id = ?
 ### Seguridad
 
 **Rate Limiting:**
+
 ```typescript
 // Limitar intentos de login por IP
 // Ej: 5 intentos por minuto
@@ -682,14 +705,15 @@ WHERE docente_id = ?
 ```
 
 **Protección contra Brute Force:**
+
 ```typescript
 // Bloquear cuenta después de 10 intentos fallidos
 if (intentos_fallidos >= 10) {
   await prisma.usuario.update({
     where: { id },
-    data: { bloqueado_hasta: addMinutes(new Date(), 30) }
-  })
-  throw new ForbiddenException('Cuenta bloqueada temporalmente')
+    data: { bloqueado_hasta: addMinutes(new Date(), 30) },
+  });
+  throw new ForbiddenException('Cuenta bloqueada temporalmente');
 }
 ```
 
@@ -723,11 +747,13 @@ async miEndpoint(@GetUser() user: User) {
 ## SUBPROCESO P1.3: ACTUALIZAR PERFIL
 
 ### Descripción
+
 Permite a usuarios actualizar su información de perfil.
 
 ### Entradas
 
 **Actualizar Admin/Docente/Tutor:**
+
 ```typescript
 PATCH /api/mi-perfil
 {
@@ -742,6 +768,7 @@ PATCH /api/mi-perfil
 ```
 
 **Actualizar Estudiante:**
+
 ```typescript
 PATCH /api/estudiantes/:id
 {
@@ -765,16 +792,16 @@ PATCH /api/estudiantes/:id
 if (user.rol !== 'ADMIN') {
   // Si es estudiante, validar que el ID coincida
   if (user.rol === 'ESTUDIANTE' && user.id !== estudiante_id) {
-    throw new ForbiddenException('No puedes modificar este perfil')
+    throw new ForbiddenException('No puedes modificar este perfil');
   }
-  
+
   // Si es tutor, validar que el estudiante le pertenece
   if (user.rol === 'TUTOR') {
     const estudiante = await prisma.estudiante.findUnique({
-      where: { id: estudiante_id }
-    })
+      where: { id: estudiante_id },
+    });
     if (estudiante.tutor_id !== user.id) {
-      throw new ForbiddenException('No puedes modificar este estudiante')
+      throw new ForbiddenException('No puedes modificar este estudiante');
     }
   }
 }
@@ -789,17 +816,17 @@ if (user.rol !== 'ADMIN') {
 
 if (email && email !== usuario_actual.email) {
   // Verificar que el nuevo email no exista
-  const existe = await buscarEmailEnTodasTablas(email)
+  const existe = await buscarEmailEnTodasTablas(email);
   if (existe) {
-    throw new ConflictException('Email ya registrado')
+    throw new ConflictException('Email ya registrado');
   }
 }
 
 if (fecha_nacimiento) {
   // Validar rango de edad
-  const edad = calcularEdad(fecha_nacimiento)
+  const edad = calcularEdad(fecha_nacimiento);
   if (edad < 5 || edad > 18) {
-    throw new BadRequestException('Edad fuera de rango permitido')
+    throw new BadRequestException('Edad fuera de rango permitido');
   }
 }
 ```
@@ -809,9 +836,10 @@ if (fecha_nacimiento) {
 #### Paso 3: Actualizar en Base de Datos
 
 **Para Admin:**
+
 ```sql
 UPDATE admins
-SET 
+SET
   nombre = COALESCE(?, nombre),
   apellido = COALESCE(?, apellido),
   updatedAt = NOW()
@@ -819,9 +847,10 @@ WHERE id = ?
 ```
 
 **Para Docente:**
+
 ```sql
 UPDATE docentes
-SET 
+SET
   nombre = COALESCE(?, nombre),
   apellido = COALESCE(?, apellido),
   telefono = COALESCE(?, telefono),
@@ -831,9 +860,10 @@ WHERE id = ?
 ```
 
 **Para Tutor:**
+
 ```sql
 UPDATE tutores
-SET 
+SET
   nombre = COALESCE(?, nombre),
   apellido = COALESCE(?, apellido),
   telefono = COALESCE(?, telefono),
@@ -843,9 +873,10 @@ WHERE id = ?
 ```
 
 **Para Estudiante:**
+
 ```sql
 UPDATE estudiantes
-SET 
+SET
   nombre = COALESCE(?, nombre),
   apellido = COALESCE(?, apellido),
   email = COALESCE(?, email),
@@ -870,6 +901,7 @@ WHERE id = ?
 ### Salidas
 
 **Respuesta:**
+
 ```typescript
 {
   id: string,
@@ -896,6 +928,7 @@ WHERE id = ?
 ### Cambio de Contraseña (Suboperación)
 
 **Endpoint separado:**
+
 ```typescript
 POST /api/auth/cambiar-password
 {
@@ -905,6 +938,7 @@ POST /api/auth/cambiar-password
 ```
 
 **Proceso:**
+
 1. Validar password_actual con hash guardado
 2. Validar password_nuevo >= 8 caracteres
 3. Hash de password_nuevo
@@ -923,11 +957,13 @@ POST /api/auth/cambiar-password
 ## SUBPROCESO P1.4: GESTIONAR ACCESO
 
 ### Descripción
+
 Controla el estado `acceso_activo` de estudiantes (activar/desactivar acceso al sistema).
 
 ### Entradas
 
 **Entrada desde ADMIN (Manual):**
+
 ```typescript
 PATCH /api/estudiantes/:id/acceso
 {
@@ -937,6 +973,7 @@ PATCH /api/estudiantes/:id/acceso
 ```
 
 **Entrada desde P4 (Automático - Pago):**
+
 ```typescript
 {
   tipo: 'PagoRealizado',
@@ -946,6 +983,7 @@ PATCH /api/estudiantes/:id/acceso
 ```
 
 **Entrada desde P4 (Automático - Expiración):**
+
 ```typescript
 {
   tipo: 'MembresiaExpirada',
@@ -973,7 +1011,7 @@ WHERE id = ?
 ```typescript
 if (estudiante.acceso_activo === nuevo_estado_acceso) {
   // No hay cambio, retornar sin hacer nada
-  return { mensaje: 'Sin cambios' }
+  return { mensaje: 'Sin cambios' };
 }
 ```
 
@@ -983,7 +1021,7 @@ if (estudiante.acceso_activo === nuevo_estado_acceso) {
 
 ```sql
 UPDATE estudiantes
-SET 
+SET
   acceso_activo = ?,
   fecha_ultimo_cambio_acceso = NOW(),
   updatedAt = NOW()
@@ -1012,6 +1050,7 @@ INSERT INTO logs_cambio_acceso (
 Enviar evento a **P6**:
 
 **Si se ACTIVA el acceso:**
+
 ```typescript
 // A estudiante:
 {
@@ -1035,6 +1074,7 @@ Enviar evento a **P6**:
 ```
 
 **Si se DESACTIVA el acceso:**
+
 ```typescript
 // A tutor:
 {
@@ -1053,6 +1093,7 @@ Enviar evento a **P6**:
 ### Salidas
 
 **Respuesta:**
+
 ```typescript
 {
   estudiante_id: string,
@@ -1067,11 +1108,13 @@ Enviar evento a **P6**:
 ### Efectos en Sistema
 
 **Si acceso_activo = false:**
+
 - Estudiante NO puede hacer login
 - Estudiante NO puede acceder a cursos/actividades
 - Estudiante NO aparece en clases (inscripciones futuras se mantienen pero no puede asistir)
 
 **Si acceso_activo = true:**
+
 - Estudiante puede hacer login
 - Estudiante puede acceder a todo su contenido
 - Estudiante puede participar en clases
@@ -1097,21 +1140,25 @@ Enviar evento a **P6**:
 ## SUBPROCESO P1.5: CONSULTAR USUARIOS
 
 ### Descripción
+
 Permite consultar listados de usuarios según rol y permisos.
 
 ### Entradas
 
 **Consultar Todos los Usuarios (Solo ADMIN):**
+
 ```typescript
 GET /api/usuarios?tipo=ADMIN|DOCENTE|TUTOR|ESTUDIANTE&limite=20&pagina=1
 ```
 
 **Consultar Estudiantes por Tutor:**
+
 ```typescript
-GET /api/tutores/mis-estudiantes
+GET / api / tutores / mis - estudiantes;
 ```
 
 **Consultar Estudiantes por Docente:**
+
 ```typescript
 GET /api/docentes/mis-estudiantes?clase_id=opcional
 ```
@@ -1123,6 +1170,7 @@ GET /api/docentes/mis-estudiantes?clase_id=opcional
 #### OPERACIÓN 1: Consultar Todos (ADMIN)
 
 ##### Paso 1: Validar Permisos
+
 ```typescript
 @UseGuards(RolesGuard)
 @Roles('ADMIN')
@@ -1131,6 +1179,7 @@ GET /api/docentes/mis-estudiantes?clase_id=opcional
 ##### Paso 2: Consultar Según Tipo
 
 **Admins:**
+
 ```sql
 SELECT id, email, nombre, apellido, activo, createdAt
 FROM admins
@@ -1139,6 +1188,7 @@ LIMIT ? OFFSET ?
 ```
 
 **Docentes:**
+
 ```sql
 SELECT id, email, nombre, apellido, especialidades, telefono, activo
 FROM docentes
@@ -1147,8 +1197,9 @@ LIMIT ? OFFSET ?
 ```
 
 **Tutores:**
+
 ```sql
-SELECT 
+SELECT
   t.id, t.email, t.nombre, t.apellido, t.telefono,
   COUNT(e.id) as cantidad_estudiantes
 FROM tutores t
@@ -1159,8 +1210,9 @@ LIMIT ? OFFSET ?
 ```
 
 **Estudiantes:**
+
 ```sql
-SELECT 
+SELECT
   e.id, e.nombre, e.apellido, e.email,
   e.puntos_totales, e.nivel_actual, e.acceso_activo,
   t.nombre as tutor_nombre,
@@ -1178,7 +1230,7 @@ LIMIT ? OFFSET ?
 #### OPERACIÓN 2: Mis Estudiantes (TUTOR)
 
 ```sql
-SELECT 
+SELECT
   e.id, e.nombre, e.apellido, e.email,
   e.fecha_nacimiento, e.puntos_totales, e.nivel_actual,
   e.acceso_activo,
@@ -1195,8 +1247,9 @@ ORDER BY e.nombre ASC
 #### OPERACIÓN 3: Estudiantes de Docente
 
 **Si se proporciona clase_id:**
+
 ```sql
-SELECT 
+SELECT
   e.id, e.nombre, e.apellido,
   e.puntos_totales, e.nivel_actual,
   ic.fecha_inscripcion
@@ -1209,6 +1262,7 @@ ORDER BY e.nombre ASC
 ```
 
 **Si NO se proporciona clase_id (todos los estudiantes del docente):**
+
 ```sql
 SELECT DISTINCT
   e.id, e.nombre, e.apellido,
@@ -1226,6 +1280,7 @@ ORDER BY e.nombre ASC
 ### Salidas
 
 **Lista de Usuarios:**
+
 ```typescript
 {
   data: Array<{
@@ -1265,11 +1320,13 @@ ORDER BY e.nombre ASC
 ## SUBPROCESO P1.6: GESTIONAR RELACIONES
 
 ### Descripción
+
 Gestiona relaciones entre usuarios (principalmente Tutor-Estudiante).
 
 ### Operaciones
 
 **1. Asignar Tutor a Estudiante:**
+
 ```typescript
 PATCH /api/estudiantes/:id/tutor
 {
@@ -1278,6 +1335,7 @@ PATCH /api/estudiantes/:id/tutor
 ```
 
 **2. Asignar Equipo a Estudiante:**
+
 ```typescript
 PATCH /api/estudiantes/:id/equipo
 {
@@ -1292,21 +1350,24 @@ PATCH /api/estudiantes/:id/equipo
 #### OPERACIÓN 1: Cambiar Tutor
 
 ##### Paso 1: Validar Nuevo Tutor Existe
+
 ```sql
 SELECT id, nombre, email FROM tutores
 WHERE id = ? AND activo = true
 ```
 
 ##### Paso 2: Actualizar Relación
+
 ```sql
 UPDATE estudiantes
-SET 
+SET
   tutor_id = ?,
   updatedAt = NOW()
 WHERE id = ?
 ```
 
 ##### Paso 3: Notificar Tutores
+
 ```typescript
 // Notificar al tutor anterior (si aplica)
 {
@@ -1328,20 +1389,23 @@ WHERE id = ?
 #### OPERACIÓN 2: Asignar Equipo
 
 ##### Paso 1: Validar Equipo Existe
+
 ```sql
 SELECT id, nombre, icono FROM equipos WHERE id = ?
 ```
 
 ##### Paso 2: Actualizar Relación
+
 ```sql
 UPDATE estudiantes
-SET 
+SET
   equipo_id = ?,
   updatedAt = NOW()
 WHERE id = ?
 ```
 
 ##### Paso 3: Recalcular Puntos del Equipo (Si Cambia)
+
 ```typescript
 // Si tenía equipo anterior:
 if (equipo_anterior_id) {
@@ -1362,6 +1426,7 @@ WHERE id = equipo_nuevo_id
 ### Salidas
 
 **Respuesta:**
+
 ```typescript
 {
   estudiante_id: string,
@@ -1391,6 +1456,7 @@ WHERE id = equipo_nuevo_id
 ## ESTRUCTURA DE DATOS EN D1 (USUARIOS)
 
 ### Tabla: admins
+
 ```sql
 CREATE TABLE admins (
   id TEXT PRIMARY KEY,
@@ -1409,6 +1475,7 @@ CREATE INDEX idx_admins_email ON admins(email)
 ---
 
 ### Tabla: docentes
+
 ```sql
 CREATE TABLE docentes (
   id TEXT PRIMARY KEY,
@@ -1429,6 +1496,7 @@ CREATE INDEX idx_docentes_email ON docentes(email)
 ---
 
 ### Tabla: tutores
+
 ```sql
 CREATE TABLE tutores (
   id TEXT PRIMARY KEY,
@@ -1449,6 +1517,7 @@ CREATE INDEX idx_tutores_email ON tutores(email)
 ---
 
 ### Tabla: estudiantes
+
 ```sql
 CREATE TABLE estudiantes (
   id TEXT PRIMARY KEY,
@@ -1532,22 +1601,12 @@ const PERMISOS = {
     'ver_todos_usuarios',
     'modificar_usuarios',
     'gestionar_acceso',
-    'cambiar_relaciones'
+    'cambiar_relaciones',
   ],
-  DOCENTE: [
-    'ver_mis_estudiantes',
-    'actualizar_mi_perfil'
-  ],
-  TUTOR: [
-    'ver_mis_estudiantes',
-    'actualizar_perfil_estudiantes',
-    'actualizar_mi_perfil'
-  ],
-  ESTUDIANTE: [
-    'ver_mi_perfil',
-    'actualizar_mi_perfil'
-  ]
-}
+  DOCENTE: ['ver_mis_estudiantes', 'actualizar_mi_perfil'],
+  TUTOR: ['ver_mis_estudiantes', 'actualizar_perfil_estudiantes', 'actualizar_mi_perfil'],
+  ESTUDIANTE: ['ver_mi_perfil', 'actualizar_mi_perfil'],
+};
 ```
 
 ---
@@ -1580,42 +1639,47 @@ async miEndpoint() {}
 ## CASOS DE ERROR Y MANEJO
 
 ### Error 1: Email Duplicado
+
 ```typescript
-throw new ConflictException('El email ya está registrado')
+throw new ConflictException('El email ya está registrado');
 ```
 
 ### Error 2: Credenciales Inválidas
+
 ```typescript
-throw new UnauthorizedException('Credenciales inválidas')
+throw new UnauthorizedException('Credenciales inválidas');
 ```
 
 ### Error 3: Usuario Inactivo
+
 ```typescript
-throw new ForbiddenException('Usuario desactivado')
+throw new ForbiddenException('Usuario desactivado');
 ```
 
 ### Error 4: Sin Permisos
+
 ```typescript
-throw new ForbiddenException('No tienes permisos para esta acción')
+throw new ForbiddenException('No tienes permisos para esta acción');
 ```
 
 ### Error 5: Tutor No Existe
+
 ```typescript
-throw new NotFoundException('Tutor no encontrado')
+throw new NotFoundException('Tutor no encontrado');
 ```
 
 ---
 
 ## RESUMEN DE ESTADO DE IMPLEMENTACIÓN
 
-| Subproceso | Backend | Frontend |
-|------------|---------|----------|
-| P1.1 Crear Usuario | ✅ 100% | ✅ 100% |
-| P1.2 Autenticar | ✅ 100% | ✅ 100% |
-| P1.3 Actualizar Perfil | ✅ 100% | ✅ 95% |
-| P1.4 Gestionar Acceso | ✅ 100% | ⚠️ 85% |
-| P1.5 Consultar Usuarios | ✅ 100% | ✅ 95% |
-| P1.6 Gestionar Relaciones | ✅ 100% | ⚠️ 70% |
+| Subproceso                | Backend | Frontend |
+| ------------------------- | ------- | -------- |
+| P1.1 Crear Usuario        | ✅ 100% | ✅ 100%  |
+| P1.2 Autenticar           | ✅ 100% | ✅ 100%  |
+| P1.3 Actualizar Perfil    | ✅ 100% | ✅ 95%   |
+| P1.4 Gestionar Acceso     | ✅ 100% | ⚠️ 85%   |
+| P1.5 Consultar Usuarios   | ✅ 100% | ✅ 95%   |
+| P1.6 Gestionar Relaciones | ✅ 100% | ⚠️ 70%   |
 
 **Promedio:** Backend 100%, Frontend 91%
 
@@ -1624,11 +1688,13 @@ throw new NotFoundException('Tutor no encontrado')
 ## PRÓXIMOS PASOS
 
 ### Para MVP (26 de Octubre)
+
 1. ✅ Sistema de autenticación completo
 2. ⚠️ Mejorar UI de gestión de relaciones tutor-estudiante
 3. ⚠️ Panel de administración de usuarios mejorado
 
 ### Post-Lanzamiento
+
 1. Autenticación con Google OAuth
 2. Two-Factor Authentication (2FA)
 3. Sistema de recuperación de contraseña

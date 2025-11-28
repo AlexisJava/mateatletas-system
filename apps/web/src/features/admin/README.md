@@ -21,13 +21,16 @@ features/admin/
 ## 🎯 Principios de Arquitectura
 
 ### 1. **Separación por Features**
+
 Cada feature es independiente y contiene todo lo necesario:
+
 - **Store**: Estado global con Zustand
 - **Hooks**: Selectores optimizados para prevenir re-renders
 - **Types**: Schemas Zod + TypeScript types
 - **Index**: Exportaciones públicas controladas
 
 ### 2. **Type-Safety con Zod**
+
 Todas las respuestas de API se validan con Zod:
 
 ```typescript
@@ -41,6 +44,7 @@ const stats = parseSystemStats(rawStats); // Validado y type-safe
 ```
 
 ### 3. **Manejo de Errores Type-Safe**
+
 Sistema de errores unificado con tipos específicos:
 
 ```typescript
@@ -140,13 +144,14 @@ fetchUsers: async () => {
     const users = parseAdminUsers(rawUsers); // Validado
     set({ users, isLoading: false });
   } catch (error) {
-    const appError = error instanceof z.ZodError
-      ? ErrorFactory.fromZodError(error)
-      : ErrorFactory.fromAxiosError(error);
+    const appError =
+      error instanceof z.ZodError
+        ? ErrorFactory.fromZodError(error)
+        : ErrorFactory.fromAxiosError(error);
 
     set({ error: appError, isLoading: false });
   }
-}
+};
 ```
 
 ## 🛡️ Manejo de Errores
@@ -171,7 +176,11 @@ const zodErr = ErrorFactory.fromZodError(zodError);
 ### Type Guards
 
 ```typescript
-import { isNetworkError, isValidationError, isAuthError } from '@/features/admin/shared/types/errors.types';
+import {
+  isNetworkError,
+  isValidationError,
+  isAuthError,
+} from '@/features/admin/shared/types/errors.types';
 
 if (isNetworkError(error)) {
   // error es NetworkError
@@ -214,33 +223,32 @@ export const useDeleteUser = () => useUsersStore((state) => state.deleteUser);
 ```typescript
 // Solo exportar API pública
 export { useStatsStore } from './store/stats.store';
-export {
-  useStats,
-  useStatsLoading,
-  useStatsError,
-  useFetchStats,
-} from './hooks/useStats';
+export { useStats, useStatsLoading, useStatsError, useFetchStats } from './hooks/useStats';
 export type { SystemStats } from './types/stats.schema';
 ```
 
 ## 🚀 Beneficios
 
 ### 1. **Type-Safety Total**
+
 - Zod valida datos en runtime
 - TypeScript valida en compile-time
 - Errores detectados antes de llegar al usuario
 
 ### 2. **Performance Optimizada**
+
 - Hooks selectores previenen re-renders
 - Solo componentes afectados se actualizan
 - Mejor UX y menor uso de recursos
 
 ### 3. **Mantenibilidad**
+
 - Features aisladas y cohesivas
 - Cambios localizados
 - Testing más fácil
 
 ### 4. **Developer Experience**
+
 - Autocompletado preciso
 - Errores claros y type-safe
 - Documentación integrada con tipos

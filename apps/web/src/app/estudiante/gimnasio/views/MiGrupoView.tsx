@@ -15,7 +15,9 @@ interface MiGrupoViewProps {
 
 export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
-  const [companeros, setCompaneros] = useState<Array<{ id: string; nombre: string; apellido: string; puntos: number }>>([]);
+  const [companeros, setCompaneros] = useState<
+    Array<{ id: string; nombre: string; apellido: string; puntos: number }>
+  >([]);
   const [loading, setLoading] = useState(true);
 
   // Cargar datos del dashboard y compañeros
@@ -87,7 +89,8 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
                 {companeros.length > 0 ? nombreGrupo.toUpperCase() : 'SIN GRUPO'}
               </h2>
               <p className="text-cyan-300 text-sm font-bold">
-                {companeros.length} {companeros.length === 1 ? 'compañero' : 'compañeros'} en tu grupo
+                {companeros.length} {companeros.length === 1 ? 'compañero' : 'compañeros'} en tu
+                grupo
               </p>
             </div>
           </div>
@@ -98,41 +101,44 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
               <div className="flex flex-col gap-3">
                 {/* Mostrar TODOS los compañeros */}
                 {companeros.map((companero) => {
-                const esTu = companero.id === estudiante.id;
-                return (
-                  <div
-                    key={companero.id}
-                    className={`
+                  const esTu = companero.id === estudiante.id;
+                  return (
+                    <div
+                      key={companero.id}
+                      className={`
                       rounded-2xl p-4 border-2 flex items-center gap-4
-                      ${esTu
-                        ? 'bg-yellow-400/20 border-yellow-400/60 shadow-lg'
-                        : 'bg-white/5 border-white/10'
+                      ${
+                        esTu
+                          ? 'bg-yellow-400/20 border-yellow-400/60 shadow-lg'
+                          : 'bg-white/5 border-white/10'
                       }
                     `}
-                  >
-                    {/* Avatar */}
-                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-2xl">
-                      👤
-                    </div>
-
-                    {/* Info del compañero */}
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-black text-lg ${esTu ? 'text-yellow-300' : 'text-white'} truncate`}>
-                        {companero.nombre} {companero.apellido}
-                      </p>
-                      <p className="text-cyan-400 text-xs font-medium">
-                        {companero.puntos.toLocaleString()} puntos
-                      </p>
-                    </div>
-
-                    {/* Badge "TÚ" */}
-                    {esTu && (
-                      <div className="flex-shrink-0 px-3 py-1 bg-yellow-400/40 text-yellow-200 text-xs font-black rounded-full">
-                        TÚ
+                    >
+                      {/* Avatar */}
+                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-2xl">
+                        👤
                       </div>
-                    )}
-                  </div>
-                );
+
+                      {/* Info del compañero */}
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={`font-black text-lg ${esTu ? 'text-yellow-300' : 'text-white'} truncate`}
+                        >
+                          {companero.nombre} {companero.apellido}
+                        </p>
+                        <p className="text-cyan-400 text-xs font-medium">
+                          {companero.puntos.toLocaleString()} puntos
+                        </p>
+                      </div>
+
+                      {/* Badge "TÚ" */}
+                      {esTu && (
+                        <div className="flex-shrink-0 px-3 py-1 bg-yellow-400/40 text-yellow-200 text-xs font-black rounded-full">
+                          TÚ
+                        </div>
+                      )}
+                    </div>
+                  );
                 })}
               </div>
             </div>
@@ -155,9 +161,11 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
           className="flex-[2] flex flex-col gap-4"
         >
           {/* Card: Puntos del grupo */}
-          <div className="flex-1 bg-gradient-to-br from-purple-900/60 to-pink-900/60
+          <div
+            className="flex-1 bg-gradient-to-br from-purple-900/60 to-pink-900/60
                           backdrop-blur-xl rounded-3xl p-4
-                          border-2 border-white/20 flex flex-col items-center justify-center gap-2">
+                          border-2 border-white/20 flex flex-col items-center justify-center gap-2"
+          >
             <div className="text-4xl">💎</div>
             <div className="text-center">
               <h3 className="text-3xl font-black text-white mb-1">
@@ -169,9 +177,11 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
           </div>
 
           {/* Card: Tus puntos */}
-          <div className="flex-1 bg-gradient-to-br from-yellow-500/20 to-orange-600/20
+          <div
+            className="flex-1 bg-gradient-to-br from-yellow-500/20 to-orange-600/20
                           backdrop-blur-xl rounded-3xl p-4
-                          border-2 border-yellow-400/40 flex flex-col items-center justify-center gap-2">
+                          border-2 border-yellow-400/40 flex flex-col items-center justify-center gap-2"
+          >
             <div className="text-4xl">🎯</div>
             <div className="text-center">
               <h3 className="text-3xl font-black text-yellow-400 mb-1">
@@ -183,14 +193,14 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
           </div>
 
           {/* Card: Tu racha */}
-          <div className="flex-1 bg-gradient-to-br from-orange-600/20 to-red-700/20
+          <div
+            className="flex-1 bg-gradient-to-br from-orange-600/20 to-red-700/20
                           backdrop-blur-xl rounded-3xl p-4
-                          border-2 border-orange-500/40 flex flex-col items-center justify-center gap-2">
+                          border-2 border-orange-500/40 flex flex-col items-center justify-center gap-2"
+          >
             <div className="text-4xl">🔥</div>
             <div className="text-center">
-              <h3 className="text-3xl font-black text-orange-400 mb-1">
-                {rachaActual}
-              </h3>
+              <h3 className="text-3xl font-black text-orange-400 mb-1">{rachaActual}</h3>
               <p className="text-orange-300 text-sm font-bold">
                 {rachaActual === 1 ? 'DÍA' : 'DÍAS'}
               </p>

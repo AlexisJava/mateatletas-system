@@ -1,16 +1,18 @@
 ## Admin (Copiloto)
+
 - **Propósito:** Proveer herramientas al administrador para monitorear la "salud" del sistema: clases, pagos, alertas derivadas de feedback de docentes, etc., y realizar gestión global (crear docentes, productos, etc. ya cubierto en slices anteriores).
 - **Subslices:**
   - **Dashboard Admin:** vista general con indicadores clave (suscripciones activas, próximas clases, alertas pendientes).
   - **Alertas Proactivas:** listado de alertas generadas a partir de observaciones docentes (p.ej., estudiantes con posibles problemas) y herramientas para resolverlas con ayuda de IA.
   - **Gestión de Rutas Curriculares:** CRUD para crear y editar las materias/temáticas de las clases (ej: Lógica, Álgebra).
-- **Relación con otros módulos:** 
+- **Relación con otros módulos:**
   - Muestra datos de **Pagos** (estado de membresías), **Clases** (asistencia, próximas clases), **Usuarios** (estadísticas), y consume las **Alertas** generadas en Asistencia. Integra con **Tutor IA** para sugerir soluciones a alertas.
 
 ### Dashboard Admin e Indicadores
 
 #### Prompt de desarrollo
-```text
+
+````text
 Implement the **Admin Dashboard** and **Alertas** features.
 
 **Backend (NestJS)**:
@@ -309,7 +311,7 @@ Implement **Rutas Curriculares Management** for Admin.
     nombre String @unique
     clases Clase[]
   }
-  ```
+````
 
 - **RutasCurricularesService**:
   - `listarTodas()`: Return all rutas (prisma.rutaCurricular.findMany()).
@@ -328,6 +330,7 @@ Implement **Rutas Curriculares Management** for Admin.
   - On delete, check if clase.rutaCurricularId references this ruta; if yes, throw error ("Cannot delete ruta with existing clases").
 
 **Frontend (Next.js)**:
+
 - **Admin Rutas Page** (`/admin/rutas-curriculares`):
   - List all rutas in a table (nombre).
   - Button "Nueva Ruta" -> opens modal or navigates to form.
@@ -348,11 +351,13 @@ Implement **Rutas Curriculares Management** for Admin.
   - If error (409 Conflict), show message.
 
 **Types**:
+
 - `RutaCurricular`: { id: number; nombre: string }
 - `CrearRutaDto`: { nombre: string }
 - `ActualizarRutaDto`: { nombre: string }
 
 **Orden de implementación**:
+
 1. Backend: RutasCurricularesService with CRUD methods.
 2. Backend: AdminController endpoints (or separate controller).
 3. Frontend: Admin page with list, create/edit/delete UI.
@@ -361,7 +366,8 @@ Implement **Rutas Curriculares Management** for Admin.
    - Edit "Lógica" to "Lógica Avanzada".
    - Try deleting ruta with associated clases (should fail).
    - Delete ruta without clases (should succeed).
-```
+
+````
 
 #### Backend (Rutas Curriculares)
 
@@ -482,7 +488,7 @@ export class AdminController {
     return this.rutasService.eliminar(id);
   }
 }
-```
+````
 
 #### Frontend (Rutas Curriculares)
 
@@ -684,6 +690,7 @@ export interface ActualizarRutaDto {
 ```
 
 #### Testing
+
 1. Admin accede a `/admin/rutas-curriculares`
 2. Crea nueva ruta "Trigonometría"
 3. Edita "Lógica" → "Lógica Matemática"

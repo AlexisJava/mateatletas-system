@@ -23,11 +23,7 @@ export function ClasesTable({
   onManageStudents,
 }: ClasesTableProps) {
   if (clases.length === 0) {
-    return (
-      <div className="text-center py-12 text-gray-500">
-        No hay clases para mostrar
-      </div>
-    );
+    return <div className="text-center py-12 text-gray-500">No hay clases para mostrar</div>;
   }
 
   return (
@@ -62,9 +58,7 @@ export function ClasesTable({
           {clases.map((clase) => (
             <tr key={clase.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">
-                  {clase.nombre}
-                </div>
+                <div className="text-sm font-medium text-gray-900">{clase.nombre}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">

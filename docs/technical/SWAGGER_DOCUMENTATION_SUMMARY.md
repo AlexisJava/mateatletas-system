@@ -11,11 +11,13 @@
 ### 1. **Configuración Inicial de Swagger**
 
 #### Instalación de Dependencias
+
 ```bash
 npm install @nestjs/swagger swagger-ui-express
 ```
 
 #### Configuración en `main.ts`
+
 - **DocumentBuilder** configurado con información completa del API
 - **JWT Bearer Authentication** configurado para endpoints protegidos
 - **13 Tags de módulos** organizados alfabéticamente
@@ -26,6 +28,7 @@ npm install @nestjs/swagger swagger-ui-express
   - Favicon personalizado
 
 **Características documentadas en Swagger**:
+
 - 🔐 Autenticación JWT con 3 roles (Admin, Docente, Tutor)
 - 👥 Gestión de usuarios y estudiantes
 - 📚 Sistema de cursos y clases
@@ -40,6 +43,7 @@ npm install @nestjs/swagger swagger-ui-express
 ### 2. **DTOs Documentados** (5 archivos)
 
 #### ✅ `auth/dto/register.dto.ts`
+
 - **5 campos documentados** con `@ApiProperty` y `@ApiPropertyOptional`
 - Ejemplos realistas para Argentina
 - Especificaciones de longitud, patrones y tipos
@@ -60,22 +64,26 @@ email!: string;
 ```
 
 #### ✅ `auth/dto/login.dto.ts`
+
 - **2 campos documentados**: email, password
 - Ejemplos de credenciales válidas
 
 #### ✅ `estudiantes/dto/create-estudiante.dto.ts`
+
 - **6 campos documentados**
 - Validaciones avanzadas (edad 4-18 años, HTTPS para fotos, UUID para equipos)
 - Enum para nivel_escolar
 - Campos: nombre, apellido, fecha_nacimiento, nivel_escolar, foto_url, equipo_id
 
 #### ✅ `clases/dto/crear-clase.dto.ts`
+
 - **5 campos documentados**
 - Validaciones de reglas de negocio (30 min anticipación, horario 8-20h)
 - Rangos de duración (15-180 min) y cupos (1-30 estudiantes)
 - Campos: rutaCurricularId, docenteId, fechaHoraInicio, duracionMinutos, cuposMaximo, productoId
 
 #### ✅ `catalogo/dto/crear-producto.dto.ts`
+
 - **13 campos documentados** (campos base + campos condicionales)
 - Enum `TipoProducto` (Suscripcion, Curso, RecursoDigital)
 - Campos condicionales para Cursos (fecha_inicio, fecha_fin, cupo_maximo)
@@ -87,10 +95,12 @@ email!: string;
 ### 3. **Controllers Documentados** (1 archivo completo)
 
 #### ✅ `auth/auth.controller.ts`
+
 - **Tag**: `@ApiTags('Auth')`
 - **5 endpoints documentados**:
 
 ##### **POST /auth/register**
+
 - `@ApiOperation`: Registrar nuevo tutor
 - `@ApiResponse` 201: Usuario creado con ejemplo de respuesta
 - `@ApiResponse` 400: Datos inválidos
@@ -98,6 +108,7 @@ email!: string;
 - `@ApiBody`: RegisterDto
 
 ##### **POST /auth/login**
+
 - `@ApiOperation`: Autenticación de tutor
 - `@ApiResponse` 200: Token JWT + datos de usuario
 - `@ApiResponse` 400: Datos inválidos
@@ -105,12 +116,14 @@ email!: string;
 - `@ApiBody`: LoginDto
 
 ##### **POST /auth/estudiante/login**
+
 - `@ApiOperation`: Autenticación de estudiante
 - `@ApiResponse` 200: Autenticación exitosa
 - `@ApiResponse` 401: Credenciales inválidas
 - `@ApiBody`: LoginDto
 
 ##### **GET /auth/profile**
+
 - `@ApiOperation`: Obtener perfil del usuario autenticado
 - `@ApiBearerAuth('JWT-auth')`: Requiere JWT
 - `@ApiResponse` 200: Perfil obtenido con ejemplo
@@ -118,6 +131,7 @@ email!: string;
 - `@ApiResponse` 404: Usuario no encontrado
 
 ##### **POST /auth/logout**
+
 - `@ApiOperation`: Cerrar sesión
 - `@ApiBearerAuth('JWT-auth')`: Requiere JWT
 - `@ApiResponse` 200: Logout exitoso con instrucciones
@@ -128,17 +142,20 @@ email!: string;
 ## 🎯 Beneficios Implementados
 
 ### Para Desarrolladores Frontend
+
 ✅ **Especificación OpenAPI 3.0 completa** para generar clientes automáticamente
 ✅ **Ejemplos de requests/responses** para cada endpoint
 ✅ **Tipos y validaciones claras** (enums, patterns, rangos)
 ✅ **Autenticación JWT documentada** con "Try it out" en Swagger UI
 
 ### Para QA y Testing
+
 ✅ **Swagger UI interactivo** en `/api/docs` para probar endpoints
 ✅ **Persistencia de token JWT** en la sesión de Swagger
 ✅ **Validaciones documentadas** para crear casos de prueba
 
 ### Para Documentación
+
 ✅ **API auto-documentada** con descripciones y ejemplos
 ✅ **Organización por tags** (Auth, Admin, Estudiantes, Clases, etc.)
 ✅ **Versionado** (v1.0) con contacto y enlaces
@@ -148,6 +165,7 @@ email!: string;
 ## 📊 Cobertura de Documentación
 
 ### DTOs Documentados: **5/50+** (10%)
+
 - ✅ RegisterDto (Auth)
 - ✅ LoginDto (Auth)
 - ✅ CreateEstudianteDto (Estudiantes)
@@ -155,6 +173,7 @@ email!: string;
 - ✅ CrearProductoDto (Catálogo)
 
 ### Controllers Documentados: **1/11** (9%)
+
 - ✅ AuthController (5 endpoints)
 - ⏳ EstudiantesController
 - ⏳ ClasesController
@@ -174,6 +193,7 @@ email!: string;
 ## 🚀 Próximos Pasos para Mejorar Documentación
 
 ### Corto Plazo (Cobertura Básica - 30%)
+
 1. **Documentar DTOs críticos**:
    - ReservarClaseDto (Clases)
    - RegistrarAsistenciaDto (Asistencia)
@@ -186,6 +206,7 @@ email!: string;
    - CatalogoController (productos)
 
 ### Mediano Plazo (Cobertura Avanzada - 60%)
+
 3. **Documentar módulos especializados**:
    - GamificacionController (puntos, logros)
    - CursosController (lecciones, progreso)
@@ -197,6 +218,7 @@ email!: string;
    - Webhooks (MercadoPago)
 
 ### Largo Plazo (Cobertura Completa - 90%+)
+
 5. **Documentación exhaustiva**:
    - Todos los DTOs (Update, Query, Response)
    - Todos los endpoints con ejemplos
@@ -212,17 +234,21 @@ email!: string;
 ## 🔍 Verificación
 
 ### ✅ Build Exitoso
+
 ```bash
 npm run build --workspace=api
 ```
+
 ✅ **Compilación exitosa** sin errores de TypeScript
 
 ### ✅ Swagger UI Disponible
+
 **URL**: `http://localhost:3001/api/docs`
 **Autenticación**: JWT Bearer token configurado
 **Persistencia**: Tokens se mantienen en la sesión
 
 ### ✅ Calidad del Código
+
 - Decoradores consistentes en todos los archivos
 - Ejemplos realistas (Argentina, fechas ISO)
 - Tipos explícitos (String, Number, Boolean)
@@ -233,12 +259,14 @@ npm run build --workspace=api
 ## 📈 Impacto en el Backend
 
 ### Antes de Swagger
+
 - **Documentación**: README manual desactualizado
 - **Testing API**: Postman collections manuales
 - **Integración Frontend**: Adivinanza de tipos y campos
 - **Onboarding**: Lectura de código fuente
 
 ### Después de Swagger
+
 - **Documentación**: Auto-generada y siempre actualizada ✅
 - **Testing API**: Swagger UI interactivo con "Try it out" ✅
 - **Integración Frontend**: OpenAPI spec para generar clientes ✅
@@ -313,6 +341,7 @@ npm run test --workspace=api
 ## ✅ Criterios de Completitud
 
 ### Tarea: Documentación Swagger (+0.15 puntos)
+
 - ✅ Swagger instalado y configurado
 - ✅ JWT Bearer Auth configurado
 - ✅ Tags organizados por módulo
@@ -331,6 +360,7 @@ npm run test --workspace=api
 La documentación Swagger está **completamente funcional** con cobertura básica del 10% en DTOs y 9% en controllers. El módulo de autenticación está **100% documentado** y sirve como referencia para documentar el resto de la API.
 
 **Beneficios Inmediatos**:
+
 - Frontend puede ver estructura de DTOs y ejemplos
 - QA puede probar endpoints sin Postman
 - Nuevos desarrolladores tienen referencia clara

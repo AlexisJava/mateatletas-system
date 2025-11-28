@@ -14,12 +14,14 @@ async function checkAndCleanMigrations() {
     console.log(`Total de registros: ${migrations.length}\n`);
 
     if (migrations.length > 0) {
-      console.table(migrations.map(m => ({
-        nombre: m.migration_name,
-        inicio: m.started_at?.toISOString(),
-        fin: m.finished_at?.toISOString() || 'NO FINALIZADA',
-        pasos: m.applied_steps_count,
-      })));
+      console.table(
+        migrations.map((m) => ({
+          nombre: m.migration_name,
+          inicio: m.started_at?.toISOString(),
+          fin: m.finished_at?.toISOString() || 'NO FINALIZADA',
+          pasos: m.applied_steps_count,
+        })),
+      );
 
       console.log('\n❌ La tabla NO está vacía. Limpiando...\n');
 
@@ -42,7 +44,6 @@ async function checkAndCleanMigrations() {
     } else {
       console.log('✅ La tabla _prisma_migrations ya está vacía');
     }
-
   } catch (error) {
     console.error('❌ ERROR:', error);
     throw error;
@@ -51,8 +52,7 @@ async function checkAndCleanMigrations() {
   }
 }
 
-checkAndCleanMigrations()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+checkAndCleanMigrations().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

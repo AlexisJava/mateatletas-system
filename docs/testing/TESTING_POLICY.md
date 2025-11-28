@@ -17,6 +17,7 @@
 ### Proceso TDD Requerido
 
 1. **Escribir test que falla** (Red)
+
    ```bash
    npm test -- mi-feature.spec.ts
    # Debe fallar con razón clara
@@ -45,11 +46,13 @@ Antes de crear PR, verificar:
 ### Tipos de Tests Requeridos
 
 #### 1. Unit Tests (OBLIGATORIO)
+
 - Servicios: `*.service.spec.ts`
 - Controladores: `*.controller.spec.ts`
 - Utilities: `*.utils.spec.ts`
 
 **Ejemplo:**
+
 ```typescript
 describe('MiNuevoService', () => {
   it('should do something', () => {
@@ -66,11 +69,13 @@ describe('MiNuevoService', () => {
 ```
 
 #### 2. Integration Tests (RECOMENDADO)
+
 - Flujos completos con DB
 - Webhooks externos
 - Autenticación end-to-end
 
 #### 3. E2E Tests (Para features críticas de UI)
+
 - Playwright
 - Flujos críticos: login, pago, clase
 
@@ -81,10 +86,12 @@ describe('MiNuevoService', () => {
 Estos tests NUNCA deben romperse:
 
 ### Auth (30 tests)
+
 - `apps/api/src/auth/__tests__/auth.service.spec.ts`
 - Cubre: registro, login, validación, perfiles, security
 
 ### Pagos (35 tests)
+
 - `apps/api/src/pagos/__tests__/pagos.service.spec.ts`
 - Cubre: webhooks, procesamiento, membresías, historial
 
@@ -95,6 +102,7 @@ Estos tests NUNCA deben romperse:
 ## Tests Legacy (No Bloqueantes)
 
 Tests con errores existentes:
+
 - `admin-estudiantes.service.spec.ts`
 - `auth-cambiar-password.service.spec.ts`
 - `roles.guard.spec.ts`
@@ -106,6 +114,7 @@ Tests con errores existentes:
 **NO es necesario arreglarlos INMEDIATAMENTE.**
 
 **SÍ es obligatorio arreglarlos cuando:**
+
 - Modificas el código que testean
 - Agregas feature relacionada
 - Tienes tiempo en sprint de refactor
@@ -199,20 +208,24 @@ Developer → PR → CI runs → ✅ Merge | ❌ Fix
 ### Prioridad de Arreglo
 
 **Alta (próximas 2 semanas):**
+
 - Tests de gamificación (20 tests)
 - Tests de clases/asistencia (15 tests)
 
 **Media (próximo sprint):**
+
 - Tests de admin services
 - Tests de estudiantes
 
 **Baja (backlog):**
+
 - Tests de guards
 - Tests de validators
 
 ### Cómo Arreglar un Test Legacy
 
 1. **Leer el error TypeScript**
+
    ```bash
    npx tsc --noEmit | grep nombre-del-test.spec.ts
    ```
@@ -224,6 +237,7 @@ Developer → PR → CI runs → ✅ Merge | ❌ Fix
    - DTO changed → actualizar DTO test data
 
 3. **Arreglar y verificar:**
+
    ```bash
    npm test -- nombre-del-test.spec.ts
    ```
@@ -260,6 +274,7 @@ Developer → PR → CI runs → ✅ Merge | ❌ Fix
 ## Contacto
 
 Preguntas sobre testing:
+
 - Slack: #testing
 - Issues: Etiquetar con `testing`
 - Code review: Pedir feedback sobre tests

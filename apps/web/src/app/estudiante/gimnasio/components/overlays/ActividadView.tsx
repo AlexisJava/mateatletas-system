@@ -108,7 +108,9 @@ export function ActividadView({ config, estudiante: _estudiante }: ActividadView
         <div className="flex-1 ml-4 sm:ml-6 flex items-center justify-between">
           {/* Título + Emoji */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <span className="text-4xl sm:text-5xl drop-shadow-[0_4px_0_rgba(0,0,0,0.3)]">{metadata.emoji}</span>
+            <span className="text-4xl sm:text-5xl drop-shadow-[0_4px_0_rgba(0,0,0,0.3)]">
+              {metadata.emoji}
+            </span>
             <div>
               <h1
                 className="

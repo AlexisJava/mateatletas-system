@@ -21,6 +21,7 @@
 ### Usando @mateatletas/contracts (4 archivos)
 
 #### 1. estudiantes.api.ts ✅
+
 - **Tamaño:** 2.9K
 - **Estado:** ✅ Validación completa
 - **Schemas usados:**
@@ -39,6 +40,7 @@
   - getEquipos()
 
 #### 2. equipos.api.ts ✅
+
 - **Tamaño:** 3.0K
 - **Estado:** ✅ Validación completa
 - **Schemas usados:**
@@ -56,6 +58,7 @@
   - recalcularPuntos()
 
 #### 3. catalogo.api.ts ✅
+
 - **Tamaño:** 1.9K
 - **Estado:** ✅ Validación completa
 - **Schemas usados:**
@@ -69,6 +72,7 @@
   - getProductosPorTipo()
 
 #### 4. notificaciones.api.ts ✅
+
 - **Tamaño:** 5.1K
 - **Estado:** ✅ Validación completa (asumido por presencia de contracts)
 - **Schemas usados:** (de @mateatletas/contracts)
@@ -78,6 +82,7 @@
 ### Usando Schemas Locales (1 archivo)
 
 #### 5. admin.api.ts ✅
+
 - **Tamaño:** 3.6K
 - **Estado:** ✅ Validación parcial (4 funciones)
 - **Schemas usados:**
@@ -98,6 +103,7 @@
 ### Archivos que usan response.data directamente (5 archivos)
 
 #### 1. pagos.api.ts ❌
+
 - **Tamaño:** 2.4K
 - **Estado:** ❌ Sin validación
 - **Funciones sin validar:** 6
@@ -113,16 +119,19 @@
 - **Prioridad:** ALTA (usa response.data sin validación)
 
 #### 2. asistencia.api.ts ❌
+
 - **Tamaño:** 4.3K
 - **Estado:** ❌ Sin validación
 - **Prioridad:** MEDIA
 
 #### 3. calendario.api.ts ❌
+
 - **Tamaño:** 4.8K
 - **Estado:** ❌ Sin validación
 - **Prioridad:** MEDIA
 
 #### 4. clases.api.ts ❌
+
 - **Tamaño:** 2.9K
 - **Estado:** ❌ Sin validación
 - **Nota:** Diferente de admin.api.ts que ya tiene getAllClasses validado
@@ -133,27 +142,32 @@
 ### Otros Archivos API (sin análisis detallado aún)
 
 #### 5. auth.api.ts
+
 - **Tamaño:** 3.0K
 - **Estado:** ❓ No analizado
 - **Prioridad:** BAJA (auth generalmente tiene validación propia)
 
 #### 6. cursos.api.ts
+
 - **Tamaño:** 7.6K
 - **Estado:** ❓ No analizado
 - **Prioridad:** MEDIA
 
 #### 7. docentes.api.ts
+
 - **Tamaño:** 2.7K
 - **Estado:** ❓ No analizado
 - **Nota:** admin.api.ts ya valida getDocentes()
 - **Prioridad:** BAJA
 
 #### 8. gamificacion.api.ts
+
 - **Tamaño:** 4.2K
 - **Estado:** ❓ No analizado
 - **Prioridad:** MEDIA
 
 #### 9. sectores.api.ts
+
 - **Tamaño:** 3.1K
 - **Estado:** ❓ No analizado
 - **Nota:** admin.api.ts ya valida getSectores()
@@ -164,6 +178,7 @@
 ## 3. ESTADÍSTICAS
 
 ### Por Estado de Validación
+
 ```
 ✅ Con validación completa: 4 archivos (28%)
 ✅ Con validación parcial: 1 archivo (7%)
@@ -173,6 +188,7 @@ Total archivos API: 14
 ```
 
 ### Por Origen de Schemas
+
 ```
 @mateatletas/contracts: 4 archivos
 Schemas locales:        1 archivo
@@ -180,6 +196,7 @@ Sin schemas:           9 archivos
 ```
 
 ### Funciones API Validadas
+
 ```
 Funciones con validación: ~29
 Funciones sin validación: ~50+ (estimado)
@@ -192,6 +209,7 @@ Cobertura estimada: ~37% de funciones
 ## 4. PATRONES DETECTADOS
 
 ### Patrón 1: Usando @mateatletas/contracts ✅
+
 ```typescript
 import { estudianteSchema } from '@mateatletas/contracts';
 
@@ -200,9 +218,11 @@ export const getAll = async (): Promise<EstudiantesResponse> => {
   return estudiantesResponseSchema.parse(response);
 };
 ```
+
 **Beneficio:** Schemas compartidos entre frontend y backend
 
 ### Patrón 2: Usando Schemas Locales ✅
+
 ```typescript
 import { clasesListSchema } from '@/lib/schemas/clase.schema';
 
@@ -211,15 +231,18 @@ export const getAllClasses = async () => {
   return clasesListSchema.parse(response);
 };
 ```
+
 **Beneficio:** Control total sobre schemas en frontend
 
 ### Patrón 3: Sin Validación ❌
+
 ```typescript
 export const getMembresiaActual = async (): Promise<Membresia | null> => {
   const response = await axios.get<Membresia>('/pagos/membresia');
   return response.data; // ❌ No validado
 };
 ```
+
 **Problema:** No hay garantía de estructura en runtime
 
 ---
@@ -227,11 +250,13 @@ export const getMembresiaActual = async (): Promise<Membresia | null> => {
 ## 5. IMPACTO EN ERRORES TYPESCRIPT
 
 ### Antes de Todo el Trabajo (Inicio)
+
 ```
 Errores TypeScript: 262
 ```
 
 ### Después de Crear Schemas + Integrar admin.api.ts
+
 ```
 Errores TypeScript: 194
 ─────────────────────────────
@@ -239,6 +264,7 @@ Eliminados: 68 errores (26% reducción) 🔥
 ```
 
 ### Proyección al Completar Todos los API Files
+
 ```
 Errores estimados al completar: ~150-160
 ─────────────────────────────────────────
@@ -253,6 +279,7 @@ Reducción total esperada: ~100 errores (38%)
 ### Paso 1: Completar Schemas Faltantes (ALTA PRIORIDAD)
 
 Crear los 2 schemas restantes:
+
 - ✅ `membresia.schema.ts` - Para pagos.api.ts
 - ✅ `pago.schema.ts` - Para pagos.api.ts
 
@@ -277,6 +304,7 @@ export const getMembresiaActual = async (): Promise<Membresia | null> => {
 ### Paso 3: Analizar Archivos Restantes (MEDIA PRIORIDAD)
 
 Analizar en detalle:
+
 - cursos.api.ts (7.6K - el más grande)
 - gamificacion.api.ts (4.2K)
 - asistencia.api.ts (4.3K)
@@ -287,6 +315,7 @@ Analizar en detalle:
 ### Paso 4: Migrar a @mateatletas/contracts (BAJA PRIORIDAD)
 
 Si existe un paquete contracts compartido, migrar schemas locales allá:
+
 - clase.schema.ts → @mateatletas/contracts
 - docente.schema.ts → @mateatletas/contracts
 - sector.schema.ts → @mateatletas/contracts
@@ -299,25 +328,31 @@ Si existe un paquete contracts compartido, migrar schemas locales allá:
 ## 7. COMPARACIÓN: CONTRACTS vs SCHEMAS LOCALES
 
 ### @mateatletas/contracts
+
 **Ventajas:**
+
 - ✅ Compartido entre frontend y backend
 - ✅ Single source of truth
 - ✅ Cambios sincronizados
 - ✅ Menos duplicación de código
 
 **Desventajas:**
+
 - ❌ Requiere actualizar paquete para cambios
 - ❌ Menos flexibilidad en frontend
 - ❌ Dependencia externa
 
 ### Schemas Locales (src/lib/schemas/)
+
 **Ventajas:**
+
 - ✅ Control total en frontend
 - ✅ Cambios inmediatos
 - ✅ No depende de paquete externo
 - ✅ Más fácil de modificar
 
 **Desventajas:**
+
 - ❌ Duplicación con backend
 - ❌ Puede desincronizarse
 - ❌ Más código que mantener
@@ -327,6 +362,7 @@ Si existe un paquete contracts compartido, migrar schemas locales allá:
 ## 8. RECOMENDACIÓN ESTRATÉGICA
 
 ### Opción A: Migrar Todo a @mateatletas/contracts
+
 ```
 Schemas locales → contracts
 ├─ clase.schema.ts
@@ -336,22 +372,26 @@ Schemas locales → contracts
 ├─ membresia.schema.ts
 └─ pago.schema.ts
 ```
+
 **Beneficio:** Consistencia con estudiantes, equipos, productos
 **Tiempo:** 2-3 horas
 
 ### Opción B: Mantener Schemas Locales
+
 ```
 Completar cobertura con schemas locales
 ├─ membresia.schema.ts ✅
 ├─ pago.schema.ts ✅
 └─ Integrar en APIs pendientes
 ```
+
 **Beneficio:** Flexibilidad y control
 **Tiempo:** 1-2 horas
 
 ### 🎯 **RECOMENDACIÓN:** Opción B primero, luego evaluar migración
 
 **Razón:**
+
 1. Más rápido para completar validación (objetivo inmediato)
 2. Permite iterar rápido sin depender de contracts
 3. Después se puede migrar a contracts si se desea consistencia
@@ -361,6 +401,7 @@ Completar cobertura con schemas locales
 ## 9. PROGRESO ACTUAL
 
 ### Schemas Completados: 9/11 (82%)
+
 ```
 ✅ estudiante.schema.ts (en contracts)
 ✅ equipo.schema.ts (en contracts)
@@ -376,6 +417,7 @@ Completar cobertura con schemas locales
 ```
 
 ### Archivos API Validados: 5/14 (36%)
+
 ```
 ✅ estudiantes.api.ts (contracts)
 ✅ equipos.api.ts (contracts)
@@ -400,13 +442,16 @@ Completar cobertura con schemas locales
 ### 🎯 Crear Schemas de Membresía y Pago
 
 **Archivos a crear:**
+
 1. `apps/web/src/lib/schemas/membresia.schema.ts`
 2. `apps/web/src/lib/schemas/pago.schema.ts`
 
 **Luego integrar en:**
+
 - `apps/web/src/lib/api/pagos.api.ts` (6 funciones)
 
 **Impacto esperado:**
+
 - Schemas completados: 11/11 (100%) ✅
 - Funciones API validadas: +6
 - Errores TypeScript eliminados: ~5-8

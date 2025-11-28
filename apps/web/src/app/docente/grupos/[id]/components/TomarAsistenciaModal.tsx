@@ -2,14 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  X,
-  UserCheck,
-  UserX,
-  UserMinus,
-  CheckCircle,
-  Loader2,
-} from 'lucide-react';
+import { X, UserCheck, UserX, UserMinus, CheckCircle, Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/Toast';
 import { StudentAvatar } from '@/components/ui/StudentAvatar';
 import {
@@ -41,14 +34,12 @@ export default function TomarAsistenciaModal({
   estudiantes,
   onSuccess,
 }: TomarAsistenciaModalProps) {
-  const [estadosEstudiantes, setEstadosEstudiantes] = useState<
-    EstadoEstudiante[]
-  >(
+  const [estadosEstudiantes, setEstadosEstudiantes] = useState<EstadoEstudiante[]>(
     estudiantes.map((est) => ({
       estudiante: est,
       estado: null,
       observaciones: '',
-    }))
+    })),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -73,7 +64,7 @@ export default function TomarAsistenciaModal({
       estadosEstudiantes.map((est) => ({
         ...est,
         estado,
-      }))
+      })),
     );
   };
 
@@ -82,7 +73,7 @@ export default function TomarAsistenciaModal({
     const sinEstado = estadosEstudiantes.filter((est) => !est.estado);
     if (sinEstado.length > 0) {
       toast.error(
-        `Debes marcar asistencia para todos los estudiantes (${sinEstado.length} pendientes)`
+        `Debes marcar asistencia para todos los estudiantes (${sinEstado.length} pendientes)`,
       );
       return;
     }
@@ -90,13 +81,11 @@ export default function TomarAsistenciaModal({
     try {
       setIsSubmitting(true);
 
-      const asistencias: AsistenciaEstudianteItem[] = estadosEstudiantes.map(
-        (est) => ({
-          estudiante_id: est.estudiante.id,
-          estado: est.estado!,
-          observaciones: est.observaciones || undefined,
-        })
-      );
+      const asistencias: AsistenciaEstudianteItem[] = estadosEstudiantes.map((est) => ({
+        estudiante_id: est.estudiante.id,
+        estado: est.estado!,
+        observaciones: est.observaciones || undefined,
+      }));
 
       const fechaHoy = new Date().toISOString().split('T')[0] as string; // YYYY-MM-DD
 
@@ -107,7 +96,7 @@ export default function TomarAsistenciaModal({
       });
 
       toast.success(
-        `✅ ${response?.mensaje ?? "Asistencia registrada"} (${response?.registrosCreados ?? 0} nuevos, ${response?.registrosActualizados ?? 0} actualizados)`
+        `✅ ${response?.mensaje ?? 'Asistencia registrada'} (${response?.registrosCreados ?? 0} nuevos, ${response?.registrosActualizados ?? 0} actualizados)`,
       );
 
       onSuccess();
@@ -116,8 +105,7 @@ export default function TomarAsistenciaModal({
       console.error('Error al tomar asistencia:', error);
       if (isAxiosError(error)) {
         toast.error(
-          error.response?.data?.message ||
-            'Error al guardar asistencia. Intenta nuevamente.'
+          error.response?.data?.message || 'Error al guardar asistencia. Intenta nuevamente.',
         );
       } else {
         toast.error('Error al guardar asistencia. Intenta nuevamente.');
@@ -128,15 +116,9 @@ export default function TomarAsistenciaModal({
   };
 
   const totalMarcados = estadosEstudiantes.filter((est) => est.estado).length;
-  const totalPresentes = estadosEstudiantes.filter(
-    (est) => est.estado === 'Presente'
-  ).length;
-  const totalAusentes = estadosEstudiantes.filter(
-    (est) => est.estado === 'Ausente'
-  ).length;
-  const totalJustificados = estadosEstudiantes.filter(
-    (est) => est.estado === 'Justificado'
-  ).length;
+  const totalPresentes = estadosEstudiantes.filter((est) => est.estado === 'Presente').length;
+  const totalAusentes = estadosEstudiantes.filter((est) => est.estado === 'Ausente').length;
+  const totalJustificados = estadosEstudiantes.filter((est) => est.estado === 'Justificado').length;
 
   return (
     <AnimatePresence>
@@ -166,9 +148,7 @@ export default function TomarAsistenciaModal({
                     <UserCheck className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-white">
-                      TOMAR ASISTENCIA
-                    </h2>
+                    <h2 className="text-2xl font-black text-white">TOMAR ASISTENCIA</h2>
                     <p className="text-green-100 font-semibold">
                       {new Date().toLocaleDateString('es-ES', {
                         weekday: 'long',
@@ -212,26 +192,16 @@ export default function TomarAsistenciaModal({
 
                 <div className="grid grid-cols-3 gap-3">
                   <div className="bg-green-600/20 border border-green-500/50 rounded-lg p-3 text-center">
-                    <p className="text-green-400 font-black text-2xl">
-                      {totalPresentes}
-                    </p>
-                    <p className="text-green-300 font-bold text-sm">
-                      Presentes
-                    </p>
+                    <p className="text-green-400 font-black text-2xl">{totalPresentes}</p>
+                    <p className="text-green-300 font-bold text-sm">Presentes</p>
                   </div>
                   <div className="bg-red-600/20 border border-red-500/50 rounded-lg p-3 text-center">
-                    <p className="text-red-400 font-black text-2xl">
-                      {totalAusentes}
-                    </p>
+                    <p className="text-red-400 font-black text-2xl">{totalAusentes}</p>
                     <p className="text-red-300 font-bold text-sm">Ausentes</p>
                   </div>
                   <div className="bg-yellow-600/20 border border-yellow-500/50 rounded-lg p-3 text-center">
-                    <p className="text-yellow-400 font-black text-2xl">
-                      {totalJustificados}
-                    </p>
-                    <p className="text-yellow-300 font-bold text-sm">
-                      Justificados
-                    </p>
+                    <p className="text-yellow-400 font-black text-2xl">{totalJustificados}</p>
+                    <p className="text-yellow-300 font-bold text-sm">Justificados</p>
                   </div>
                 </div>
               </div>
@@ -286,9 +256,7 @@ export default function TomarAsistenciaModal({
                           </button>
 
                           <button
-                            onClick={() =>
-                              handleEstadoChange(index, 'Justificado')
-                            }
+                            onClick={() => handleEstadoChange(index, 'Justificado')}
                             className={`flex-1 py-2 rounded-lg font-bold transition-all flex items-center justify-center gap-2 ${
                               item.estado === 'Justificado'
                                 ? 'bg-yellow-600 text-white shadow-lg shadow-yellow-600/50'
@@ -305,9 +273,7 @@ export default function TomarAsistenciaModal({
                           type="text"
                           placeholder="Observaciones (opcional)..."
                           value={item.observaciones}
-                          onChange={(e) =>
-                            handleObservacionChange(index, e.target.value)
-                          }
+                          onChange={(e) => handleObservacionChange(index, e.target.value)}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500"
                         />
                       </div>

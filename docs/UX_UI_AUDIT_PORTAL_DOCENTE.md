@@ -1,4 +1,5 @@
 # 🎨 Auditoría UX/UI - Portal Docente Mateatletas
+
 ## Análisis Senior por Experto en EdTech (10+ años)
 
 **Fecha:** 27 de Octubre, 2025
@@ -13,12 +14,14 @@
 ### 🎯 Calificación General: **6.5/10**
 
 **Fortalezas:**
+
 - ✅ Diseño visual moderno con glassmorphism bien ejecutado
 - ✅ Arquitectura de información clara (sidebar navigation)
 - ✅ Estados de loading y error considerados
 - ✅ Responsive design implementado
 
 **Problemas Críticos:**
+
 - ❌ **Datos mock ocultan problemas reales de UX**
 - ❌ **Falta de endpoints dashboard críticos**
 - ❌ **Information overload en algunas vistas**
@@ -32,9 +35,11 @@
 ### ¿Qué "trabajos" viene a hacer un docente al portal?
 
 #### **Job #1: "Prepararme para mi próxima clase"** 🔥 CRÍTICO
+
 **Frecuencia:** Varias veces al día
 **Contexto:** 15-30 minutos antes de clase
 **Necesita:**
+
 - ✅ Ver cuándo es la próxima clase (fecha/hora)
 - ✅ Ver cuántos estudiantes vienen
 - ❌ **FALTA:** Materiales de la clase
@@ -43,6 +48,7 @@
 - ❌ **FALTA:** Notas sobre estudiantes específicos
 
 **Endpoint faltante:** `GET /api/docentes/me/dashboard`
+
 ```typescript
 interface DashboardDocente {
   claseInminente: {
@@ -52,7 +58,7 @@ interface DashboardDocente {
     duracion: number;
     estudiantes_inscritos: number;
     grupo: { nombre: string; id: string };
-    materiales: Material[];  // PDFs, videos, enlaces
+    materiales: Material[]; // PDFs, videos, enlaces
     objetivos: string[];
     nota_clase_anterior?: string;
   } | null;
@@ -68,6 +74,7 @@ interface DashboardDocente {
 ```
 
 **🎨 Recomendación UX:**
+
 - Pantalla dashboard debe priorizar **clase inminente** con countdown visual
 - Usar progressive disclosure: mostrar info básica primero, expandir si necesita más
 - Agregar quick actions contextuales (ver materiales, tomar asistencia, etc.)
@@ -75,9 +82,11 @@ interface DashboardDocente {
 ---
 
 #### **Job #2: "Tomar asistencia de mi clase"** 🔥 CRÍTICO
+
 **Frecuencia:** Al inicio de cada clase
 **Contexto:** Primer 5-10 minutos de clase
 **Necesita:**
+
 - ✅ Lista de estudiantes esperados
 - ✅ Marcar presente/ausente/justificado rápidamente
 - ❌ **FALTA:** Historial de asistencia del estudiante (racha, % asistencia)
@@ -101,7 +110,7 @@ interface EstudianteContexto {
     racha_actual: number;
     faltas_consecutivas: number;
   };
-  alertas: string[];  // "2+ faltas consecutivas", "Bajo rendimiento"
+  alertas: string[]; // "2+ faltas consecutivas", "Bajo rendimiento"
   ultima_observacion?: {
     texto: string;
     fecha: string;
@@ -110,6 +119,7 @@ interface EstudianteContexto {
 ```
 
 **🎨 Recomendación UX:**
+
 - **ELIMINAR** flujo multi-step para asistencia
 - Usar vista single-screen con checkboxes grandes
 - Mostrar indicadores visuales de riesgo (🔴 alerta, 🟡 atención, 🟢 ok)
@@ -118,14 +128,17 @@ interface EstudianteContexto {
 ---
 
 #### **Job #3: "Ver el progreso de mis estudiantes"** 🟡 IMPORTANTE
+
 **Frecuencia:** Semanal
 **Contexto:** Planning de próximas clases
 **Necesita:**
+
 - ❌ **FALTA:** Vista consolidada por grupo
 - ❌ **FALTA:** Métricas de progreso (no solo asistencia)
 - ❌ **FALTA:** Comparación con objetivos
 
 **Endpoint faltante:** `GET /api/grupos/:id/progreso`
+
 ```typescript
 interface GrupoProgreso {
   id: string;
@@ -158,6 +171,7 @@ interface GrupoProgreso {
 ```
 
 **🎨 Recomendación UX:**
+
 - Vista debe ser **scannable** - el docente debe entender en 3 segundos quién necesita atención
 - Usar color coding consistente (verde/amarillo/rojo)
 - Permitir ordenamiento por diferentes métricas
@@ -166,9 +180,11 @@ interface GrupoProgreso {
 ---
 
 #### **Job #4: "Escribir observaciones sobre un estudiante"** 🟡 IMPORTANTE
+
 **Frecuencia:** Durante/después de clase
 **Contexto:** Algo notable ocurrió (positivo o negativo)
 **Necesita:**
+
 - ✅ Form rápido para escribir nota
 - ❌ **FALTA:** Contexto de observaciones anteriores
 - ❌ **FALTA:** Templates pre-escritos
@@ -178,6 +194,7 @@ interface GrupoProgreso {
 **Endpoint recomendado mejorar:** Agregar templates y auto-notificación
 
 **🎨 Recomendación UX:**
+
 - Agregar modal flotante accesible desde anywhere (Ctrl+N)
 - Ofrecer templates: "Excelente participación", "Necesita refuerzo en X", etc.
 - Auto-completar estudiante si se está en contexto de clase
@@ -186,9 +203,11 @@ interface GrupoProgreso {
 ---
 
 #### **Job #5: "Planificar mis próximas clases"** 🟢 OPCIONAL
+
 **Frecuencia:** Semanal
 **Contexto:** Fin de semana o inicio de semana
 **Necesita:**
+
 - ✅ Ver calendario de clases
 - ❌ **FALTA:** Crear materiales (implementado en planificador pero desconectado)
 - ❌ **FALTA:** Reutilizar materiales de clases anteriores
@@ -198,6 +217,7 @@ interface GrupoProgreso {
 **Problema:** Está **desconectado** del flujo principal - se siente como feature aparte
 
 **🎨 Recomendación UX:**
+
 - **INTEGRAR** planificador en vista de clase
 - Permitir "Guardar como template" desde clase completada
 - Mostrar materiales usados previamente en clases similares
@@ -209,10 +229,12 @@ interface GrupoProgreso {
 ### 🔴 Problemas Identificados:
 
 #### **1. Dashboard Vacío = Experiencia Rota**
+
 **Problema:** Sin datos mock, el dashboard no muestra NADA útil.
 **Impacto:** Docente entra → pantalla vacía → frustración → abandono
 
 **Solución:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │  🔥 PRÓXIMA CLASE                           │
@@ -236,20 +258,24 @@ interface GrupoProgreso {
 ---
 
 #### **2. Vista Grupo sin Contexto Accionable**
+
 **Problema:** Muestra datos (puntos, racha) pero no ayuda a DECIDIR qué hacer
 
 **🗑️ ELIMINAR:**
+
 - ❌ `puntosToales` (typo + no accionable sin contexto)
 - ❌ `nivelActual` (gamificación es secundaria para docente)
 - ❌ Badges decorativos sin significado
 
 **✅ MANTENER/AGREGAR:**
+
 - ✅ Asistencia % (crítico)
 - ✅ Participación % (importante)
 - ✅ Alertas visibles (faltas consecutivas, bajo rendimiento)
 - ➕ Agregar: "Última clase asistida", "Trend (↑↓)"
 
 **🎨 Jerarquía Visual:**
+
 ```
 Estudiante [Avatar]
 ├─ Nombre + Equipo
@@ -261,9 +287,11 @@ Estudiante [Avatar]
 ---
 
 #### **3. Navegación: Demasiadas Opciones**
+
 **Problema:** 6 items en sidebar - información overload
 
 **Actual:**
+
 1. Dashboard
 2. Mis Clases
 3. Calendario
@@ -294,16 +322,20 @@ Nivel 2 (Menos frecuente - dropdown "Más"):
 ### ✅ MANTENER (están bien diseñados)
 
 #### 1. `GET /api/clases/docente/mis-clases`
+
 **Por qué:** Core job del docente
 **Mejora sugerida:** Agregar query param `?proximas=true` para dashboard
 
 #### 2. `PATCH /api/clases/:id/cancelar`
+
 **Por qué:** Acción necesaria con validación correcta
 
 #### 3. `POST /api/clases/:id/asistencia`
+
 **Por qué:** Flujo crítico bien implementado
 
 #### 4. `GET /api/asistencia/docente/observaciones`
+
 **Por qué:** Permite tracking de feedback
 
 ---
@@ -311,8 +343,10 @@ Nivel 2 (Menos frecuente - dropdown "Más"):
 ### 🔄 MEJORAR (funcionan pero incompletos)
 
 #### 1. `GET /api/docentes/me`
+
 **Problema:** Solo datos básicos de perfil
 **Mejora:** Agregar:
+
 ```typescript
 {
   ...perfil_basico,
@@ -324,8 +358,10 @@ Nivel 2 (Menos frecuente - dropdown "Más"):
 ```
 
 #### 2. `GET /api/clases/:id`
+
 **Problema:** Falta contexto para el docente
 **Mejora:** Cuando es docente autenticado, agregar:
+
 ```typescript
 {
   ...clase_basica,
@@ -340,10 +376,12 @@ Nivel 2 (Menos frecuente - dropdown "Más"):
 ### ❌ ELIMINAR/REEMPLAZAR
 
 #### 1. `POST /api/docentes/:id/reasignar-clases`
+
 **Por qué:** Es función de ADMIN, no debe estar en módulo docentes
 **Acción:** Mover a `AdminController`
 
 #### 2. Notificaciones hardcodeadas (`count={3}`)
+
 **Por qué:** No es dato real, confunde al docente
 **Acción:** Implementar `GET /api/notificaciones/docente/count` o eliminar bell icon
 
@@ -352,8 +390,10 @@ Nivel 2 (Menos frecuente - dropdown "Más"):
 ### ➕ AGREGAR (endpoints faltantes críticos)
 
 #### 1. **`GET /api/docentes/me/dashboard`** 🔥 CRÍTICO
+
 **Justificación:** Sin este endpoint, dashboard está roto
 **Respuesta:**
+
 ```typescript
 {
   clase_inminente: ClaseInminente | null,
@@ -364,12 +404,15 @@ Nivel 2 (Menos frecuente - dropdown "Más"):
 ```
 
 #### 2. **`GET /api/grupos/:id/estudiantes/contexto`** 🔥 CRÍTICO
+
 **Justificación:** Vista grupo sin este endpoint es solo decorativa
 **Respuesta:** Array de `EstudianteContexto` (definido arriba)
 
 #### 3. **`GET /api/clases/:id/materiales`** 🟡 IMPORTANTE
+
 **Justificación:** Docente necesita acceso rápido a materiales
 **Respuesta:**
+
 ```typescript
 {
   materiales_clase: Material[],
@@ -379,8 +422,10 @@ Nivel 2 (Menos frecuente - dropdown "Más"):
 ```
 
 #### 4. **`POST /api/asistencia/batch`** 🟡 IMPORTANTE
+
 **Justificación:** Tomar asistencia estudiante por estudiante es lento
 **Request:**
+
 ```typescript
 {
   clase_id: string,
@@ -393,6 +438,7 @@ Nivel 2 (Menos frecuente - dropdown "Más"):
 ```
 
 #### 5. **`GET /api/docentes/me/estadisticas/semanal`** 🟢 NICE-TO-HAVE
+
 **Justificación:** Para reportes tab
 **Respuesta:** Trends semanales/mensuales
 
@@ -401,6 +447,7 @@ Nivel 2 (Menos frecuente - dropdown "Más"):
 ## 🎨 Principios de Diseño Recomendados
 
 ### 1. **Progressive Disclosure**
+
 No mostrar todo a la vez. Ejemplo:
 
 ```
@@ -423,15 +470,18 @@ Al expandir [▼]:
 ```
 
 ### 2. **Action-Oriented UI**
+
 Cada pantalla debe tener CTA claro. Ejemplo:
 
 **❌ Mal:**
+
 ```
 Dashboard
   Clase inminente: Álgebra Básica en 15 min
 ```
 
 **✅ Bien:**
+
 ```
 Dashboard
   🔥 Clase inminente: Álgebra Básica en 15 min
@@ -439,9 +489,11 @@ Dashboard
 ```
 
 ### 3. **Cognitive Load Reduction**
+
 Docente está ocupado - reducir decisiones.
 
 **Ejemplo:** Observaciones
+
 ```
 ❌ Mal: Textarea vacío - docente debe pensar qué escribir
 
@@ -454,6 +506,7 @@ Docente está ocupado - reducir decisiones.
 ```
 
 ### 4. **Consistent Visual Language**
+
 ```
 🔴 Rojo = Requiere atención URGENTE (>3 faltas)
 🟡 Amarillo = Monitorear (asistencia <80%)
@@ -465,18 +518,21 @@ Docente está ocupado - reducir decisiones.
 ## 📊 Priorización de Cambios
 
 ### 🔥 CRÍTICO (Implementar primero - Portal NO funciona sin esto)
+
 1. **Implementar** `GET /api/docentes/me/dashboard`
 2. **Implementar** `GET /api/grupos/:id/estudiantes/contexto`
 3. **Eliminar** todos los datos mock y conectar con APIs reales
 4. **Mejorar** vista de asistencia (bulk actions, contexto estudiante)
 
 ### 🟡 IMPORTANTE (Implementar segundo - Mejora significativa UX)
+
 1. **Implementar** `POST /api/asistencia/batch`
 2. **Reorganizar** navegación (dashboard como hub central)
 3. **Integrar** planificador en flujo de clases
 4. **Agregar** templates de observaciones
 
 ### 🟢 NICE-TO-HAVE (Implementar tercero - Polish)
+
 1. **Implementar** `GET /api/clases/:id/materiales`
 2. **Agregar** estadísticas semanales
 3. **Mejorar** animaciones y transitions
@@ -487,21 +543,25 @@ Docente está ocupado - reducir decisiones.
 ## 🚀 Roadmap Sugerido
 
 ### Sprint 1 (1-2 semanas): Funcionalidad Core
+
 - [ ] Backend: Implementar endpoints dashboard + grupo contexto
 - [ ] Frontend: Conectar dashboard y grupos con APIs reales
 - [ ] Testing: Probar con docente real (no mock)
 
 ### Sprint 2 (1 semana): Asistencia Workflow
+
 - [ ] Backend: Endpoint batch asistencia
 - [ ] Frontend: Rediseñar UI de asistencia (bulk actions)
 - [ ] UX: Agregar alertas visuales de estudiantes en riesgo
 
 ### Sprint 3 (1 semana): Observaciones & Integration
+
 - [ ] Frontend: Templates de observaciones
 - [ ] Backend: Auto-notificación a tutores
 - [ ] UX: Integrar planificador en flujo de clases
 
 ### Sprint 4 (1 semana): Polish & Optimization
+
 - [ ] Performance: Lazy loading, code splitting
 - [ ] UX: Keyboard shortcuts, quick actions
 - [ ] Analytics: Tracking de uso real
@@ -511,18 +571,22 @@ Docente está ocupado - reducir decisiones.
 ## 📝 Conclusiones
 
 ### ✅ Lo que está bien:
+
 - Arquitectura backend sólida (NestJS + Prisma)
 - Diseño visual moderno y consistente
 - Estructura de rutas clara
 
 ### ❌ Lo que debe cambiar:
+
 - **Eliminar** datos mock completamente
 - **Implementar** endpoints dashboard críticos
 - **Reducir** cognitive load (menos clicks, más contexto)
 - **Priorizar** información accionable sobre decorativa
 
 ### 🎯 Objetivo Final:
+
 **Un docente debe poder:**
+
 1. Entrar al portal
 2. Ver su próxima clase en <2 segundos
 3. Iniciar clase en <3 clicks

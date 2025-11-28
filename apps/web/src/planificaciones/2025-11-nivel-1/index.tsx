@@ -51,12 +51,11 @@ export default function PlanificacionNoviembre2025Nivel1() {
           </h1>
 
           <div className="bg-white rounded-3xl p-10 shadow-2xl">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
-              ⚠️ Planificación por armar
-            </h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">⚠️ Planificación por armar</h2>
 
             <p className="text-xl text-gray-600 mb-6">
-              Esta es una plantilla base. Reemplazá todo este contenido con tu aplicación React personalizada.
+              Esta es una plantilla base. Reemplazá todo este contenido con tu aplicación React
+              personalizada.
             </p>
 
             <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6">

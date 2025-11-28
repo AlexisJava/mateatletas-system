@@ -119,25 +119,25 @@ Basado en el schema.prisma actual, estas tablas **deberían** existir pero **NO 
 
 ## 🔍 Estado de Migraciones en `_prisma_migrations` (17 registros)
 
-| # | Migration Name | Finished At | Applied Steps | Estado |
-|---|----------------|-------------|---------------|--------|
-| 1 | `20251012132133_init` | 2025-11-02 21:48:02 | 1 | ✅ OK |
-| 2 | `20251012134731_create_tutor_model` | 2025-11-02 21:48:02 | 1 | ✅ OK |
-| 3 | `20251012173206_create_estudiante_equipo` | 2025-11-02 21:48:03 | 1 | ✅ OK |
-| 4 | `20251012231854_add_docente_model` | 2025-11-02 21:48:03 | 1 | ✅ OK |
-| 5 | `20251012233723_create_productos` | 2025-11-02 21:48:04 | 1 | ✅ OK |
-| 6 | `20251012234351_create_membresias_inscripciones` | 2025-11-02 21:48:04 | 1 | ✅ OK |
-| 7 | `20251013002021_create_clases_inscripciones_asistencia` | 2025-11-02 21:48:05 | 1 | ✅ OK |
-| 8 | `20251013121713_add_alertas_model` | 2025-11-02 21:48:05 | 1 | ✅ OK |
-| 9 | `20251013122322_add_admin_model` | 2025-11-02 21:48:05 | 1 | ✅ OK |
-| 10 | `20251013215600_add_gamification_tables` | 2025-11-02 21:48:06 | 1 | ✅ OK |
-| 11 | `20250110_add_colonia_verano_2026` | 2025-11-21 04:35:56 | 1 | ✅ OK |
-| 12 | `20251104151500_add_pagos_inscripciones_configuracion` | 2025-11-21 04:42:53 | **0** | ⚠️ MARCADA COMO APLICADA MANUALMENTE |
-| 13 | `20251108000000_add_username_to_tutor` | 2025-11-21 04:44:09 | **0** | ⚠️ MARCADA COMO APLICADA MANUALMENTE |
-| 14 | `20251112172254_remove_test_model` | 2025-11-21 04:45:12 | 1 | ✅ OK |
-| 15 | `20251118132555_add_processed_at_to_pagos` | **NULL** | **0** | ❌ PENDIENTE / FALLIDA |
-| 16 | `20251108000000_add_username_to_tutor` | **NULL** | **0** | ❌ DUPLICADO |
-| 17 | `20251104151500_add_pagos_inscripciones_configuracion` | **NULL** | **0** | ❌ DUPLICADO |
+| #   | Migration Name                                          | Finished At         | Applied Steps | Estado                               |
+| --- | ------------------------------------------------------- | ------------------- | ------------- | ------------------------------------ |
+| 1   | `20251012132133_init`                                   | 2025-11-02 21:48:02 | 1             | ✅ OK                                |
+| 2   | `20251012134731_create_tutor_model`                     | 2025-11-02 21:48:02 | 1             | ✅ OK                                |
+| 3   | `20251012173206_create_estudiante_equipo`               | 2025-11-02 21:48:03 | 1             | ✅ OK                                |
+| 4   | `20251012231854_add_docente_model`                      | 2025-11-02 21:48:03 | 1             | ✅ OK                                |
+| 5   | `20251012233723_create_productos`                       | 2025-11-02 21:48:04 | 1             | ✅ OK                                |
+| 6   | `20251012234351_create_membresias_inscripciones`        | 2025-11-02 21:48:04 | 1             | ✅ OK                                |
+| 7   | `20251013002021_create_clases_inscripciones_asistencia` | 2025-11-02 21:48:05 | 1             | ✅ OK                                |
+| 8   | `20251013121713_add_alertas_model`                      | 2025-11-02 21:48:05 | 1             | ✅ OK                                |
+| 9   | `20251013122322_add_admin_model`                        | 2025-11-02 21:48:05 | 1             | ✅ OK                                |
+| 10  | `20251013215600_add_gamification_tables`                | 2025-11-02 21:48:06 | 1             | ✅ OK                                |
+| 11  | `20250110_add_colonia_verano_2026`                      | 2025-11-21 04:35:56 | 1             | ✅ OK                                |
+| 12  | `20251104151500_add_pagos_inscripciones_configuracion`  | 2025-11-21 04:42:53 | **0**         | ⚠️ MARCADA COMO APLICADA MANUALMENTE |
+| 13  | `20251108000000_add_username_to_tutor`                  | 2025-11-21 04:44:09 | **0**         | ⚠️ MARCADA COMO APLICADA MANUALMENTE |
+| 14  | `20251112172254_remove_test_model`                      | 2025-11-21 04:45:12 | 1             | ✅ OK                                |
+| 15  | `20251118132555_add_processed_at_to_pagos`              | **NULL**            | **0**         | ❌ PENDIENTE / FALLIDA               |
+| 16  | `20251108000000_add_username_to_tutor`                  | **NULL**            | **0**         | ❌ DUPLICADO                         |
+| 17  | `20251104151500_add_pagos_inscripciones_configuracion`  | **NULL**            | **0**         | ❌ DUPLICADO                         |
 
 ---
 
@@ -222,16 +222,19 @@ WHERE migration_name = '20251104151500_add_pagos_inscripciones_configuracion'
 La migración `20251118132555_add_processed_at_to_pagos` fue modificada para solo afectar `colonia_pagos`.
 
 **Opción A - Aplicar la migración modificada**:
+
 ```bash
 DATABASE_URL="<url>" prisma migrate deploy --schema apps/api/prisma/schema.prisma
 ```
 
 **Opción B - Si falla, marcar como aplicada**:
+
 ```bash
 DATABASE_URL="<url>" prisma migrate resolve --applied 20251118132555_add_processed_at_to_pagos --schema apps/api/prisma/schema.prisma
 ```
 
 Luego aplicar manualmente:
+
 ```sql
 ALTER TABLE "colonia_pagos" ADD COLUMN "processed_at" TIMESTAMP(3);
 CREATE INDEX "colonia_pagos_processed_at_idx" ON "colonia_pagos"("processed_at");
@@ -253,6 +256,7 @@ DATABASE_URL="<url>" prisma migrate deploy --schema apps/api/prisma/schema.prism
 ```
 
 Esto aplicará:
+
 - `20251121002735_add_security_tables` (crea `audit_logs` y `secret_rotations`)
 
 ### Fase 5: Verificación Final
@@ -290,12 +294,14 @@ psql "<url>" -c "\dt colonia_pagos" | grep processed_at
 **Propósito**: Registro de auditoría para cumplimiento y seguridad.
 
 **Campos clave**:
+
 - `timestamp`, `user_id`, `action`, `entity_type`, `entity_id`
 - `changes` (JSONB) - Cambios realizados
 - `metadata` (JSONB) - Información adicional
 - `severity`, `category`
 
 **Índices**:
+
 - timestamp, user_id, action, entity_type, entity_id, category, severity
 
 ### `secret_rotations`
@@ -303,11 +309,13 @@ psql "<url>" -c "\dt colonia_pagos" | grep processed_at
 **Propósito**: Rotación de secretos (API keys, tokens) para seguridad.
 
 **Campos clave**:
+
 - `secret_type`, `version`, `secret_hash`
 - `status` (active/rotated/revoked)
 - `created_at`, `expires_at`, `rotated_at`
 
 **Índices**:
+
 - secret_type, status
 - Unique constraint en (secret_type, version)
 

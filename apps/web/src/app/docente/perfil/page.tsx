@@ -10,7 +10,7 @@ import { LoadingSpinner } from '@/components/effects';
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4 }
+  transition: { duration: 0.4 },
 };
 
 export default function DocentePerfilPage() {
@@ -54,9 +54,7 @@ export default function DocentePerfilPage() {
     fetchProfile();
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -105,9 +103,7 @@ export default function DocentePerfilPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Mi Perfil</h1>
-          <p className="text-gray-600 mt-2">
-            Gestiona tu información personal y profesional
-          </p>
+          <p className="text-gray-600 mt-2">Gestiona tu información personal y profesional</p>
         </div>
 
         {/* Success/Error Messages */}
@@ -135,16 +131,12 @@ export default function DocentePerfilPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Información Personal */}
           <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Información Personal
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Información Personal</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Nombre */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
                 <input
                   type="text"
                   name="nombre"
@@ -157,9 +149,7 @@ export default function DocentePerfilPage() {
 
               {/* Apellido */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Apellido
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Apellido</label>
                 <input
                   type="text"
                   name="apellido"
@@ -172,9 +162,7 @@ export default function DocentePerfilPage() {
 
               {/* Email (readonly) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                 <input
                   type="email"
                   value={docente.email}
@@ -185,9 +173,7 @@ export default function DocentePerfilPage() {
 
               {/* Teléfono */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Teléfono
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
                 <input
                   type="tel"
                   name="telefono"
@@ -202,9 +188,7 @@ export default function DocentePerfilPage() {
 
           {/* Información Profesional */}
           <div className="bg-white shadow-md rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Información Profesional
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Información Profesional</h2>
 
             {/* Título Profesional */}
             <div className="mb-4">
@@ -223,9 +207,7 @@ export default function DocentePerfilPage() {
 
             {/* Biografía */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Biografía
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Biografía</label>
               <textarea
                 name="biografia"
                 value={formData.biografia}
@@ -281,9 +263,7 @@ export default function DocentePerfilPage() {
 
         {/* Información de la cuenta */}
         <div className="mt-8 bg-gray-50 rounded-lg p-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">
-            Información de la Cuenta
-          </h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Información de la Cuenta</h3>
           <div className="text-sm text-gray-600 space-y-1">
             <p>
               <span className="font-medium">Fecha de registro:</span>{' '}

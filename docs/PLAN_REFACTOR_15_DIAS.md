@@ -8,14 +8,14 @@
 
 ## RESUMEN EJECUTIVO
 
-| Fase | Días | Foco Principal |
-|------|------|----------------|
-| **1. Fundamentos** | 1-3 | Schema, Tiers, Casas |
-| **2. Gamificación** | 4-5 | Casas ranking, Onboarding |
-| **3. Planificaciones** | 6-9 | Backend + Frontend completo |
-| **4. Arena** | 10-12 | Diaria + Multijugador |
-| **5. PRO Features** | 13-14 | Telemetría + Reportes |
-| **6. Integración** | 15 | Testing E2E, Deploy |
+| Fase                   | Días  | Foco Principal              |
+| ---------------------- | ----- | --------------------------- |
+| **1. Fundamentos**     | 1-3   | Schema, Tiers, Casas        |
+| **2. Gamificación**    | 4-5   | Casas ranking, Onboarding   |
+| **3. Planificaciones** | 6-9   | Backend + Frontend completo |
+| **4. Arena**           | 10-12 | Diaria + Multijugador       |
+| **5. PRO Features**    | 13-14 | Telemetría + Reportes       |
+| **6. Integración**     | 15    | Testing E2E, Deploy         |
 
 ---
 
@@ -26,19 +26,23 @@
 ## DÍA 1: SCHEMA PRISMA - MIGRACIONES BASE
 
 ### Objetivo
+
 Tener el schema Prisma actualizado con todos los nuevos modelos y enums necesarios para el modelo 2026.
 
 ### Pre-requisitos
+
 - Branch `feature/planificaciones-v2` actualizado
 - Base de datos de desarrollo limpia o con backup
 
 ### Tareas (en orden)
 
 #### Tarea 1.1: Crear enums Tier y Mundo
+
 - **Tipo:** Schema
 - **Archivos a modificar:**
   - `apps/api/prisma/schema.prisma` - Agregar después de línea ~1600 (antes de planificaciones)
 - **Código a agregar:**
+
 ```prisma
 /// Tiers de suscripción disponibles
 enum Tier {
@@ -58,9 +62,11 @@ enum Mundo {
   @@map("mundo")
 }
 ```
+
 - **Criterio de éxito:** `npx prisma validate` sin errores
 
 #### Tarea 1.2: Agregar campos Tier a modelos existentes
+
 - **Tipo:** Schema
 - **Archivos a modificar:**
   - `apps/api/prisma/schema.prisma` - Modelo `Tutor` (~línea 13)
@@ -69,6 +75,7 @@ enum Mundo {
 - **Cambios específicos:**
 
 **En modelo Tutor (después de `roles`):**
+
 ```prisma
   /// Tier de suscripción actual del tutor
   tier                      Tier?
@@ -81,6 +88,7 @@ enum Mundo {
 ```
 
 **En modelo Membresia (después de `estado`):**
+
 ```prisma
   /// Tier de la membresía
   tier               Tier?
@@ -89,17 +97,21 @@ enum Mundo {
 ```
 
 **En modelo ClaseGrupo (después de `activo`):**
+
 ```prisma
   /// Tier mínimo requerido para acceder a este grupo (null = cualquier tier)
   tier_requerido     Tier?
 ```
+
 - **Criterio de éxito:** `npx prisma validate` sin errores
 
 #### Tarea 1.3: Crear modelo Casa (reemplaza Equipo conceptualmente)
+
 - **Tipo:** Schema
 - **Archivos a modificar:**
   - `apps/api/prisma/schema.prisma` - Agregar después del modelo `Equipo` (~línea 218)
 - **Código a agregar:**
+
 ```prisma
 /// Modelo para las 4 Casas de gamificación
 /// Reemplaza conceptualmente a "Equipo" con identidad más fuerte
@@ -146,13 +158,16 @@ model Casa {
   @@map("casas")
 }
 ```
+
 - **Criterio de éxito:** `npx prisma validate` sin errores
 
 #### Tarea 1.4: Agregar relación Casa a Estudiante
+
 - **Tipo:** Schema
 - **Archivos a modificar:**
   - `apps/api/prisma/schema.prisma` - Modelo `Estudiante` (~línea 75)
 - **Cambios específicos (después de `equipoId`):**
+
 ```prisma
   /// ID de la casa a la que pertenece el estudiante (gamificación 2026)
   casa_id                   String?
@@ -166,21 +181,28 @@ model Casa {
   /// Fecha en que completó el onboarding
   fecha_onboarding          DateTime?
 ```
+
 - **Agregar relación (en la sección de relaciones del modelo):**
+
 ```prisma
   casa                      Casa?                             @relation("EstudianteCasa", fields: [casa_id], references: [id])
 ```
+
 - **Agregar índice:**
+
 ```prisma
   @@index([casa_id])
 ```
+
 - **Criterio de éxito:** `npx prisma validate` sin errores
 
 #### Tarea 1.5: Crear modelo TestUbicacion
+
 - **Tipo:** Schema
 - **Archivos a modificar:**
   - `apps/api/prisma/schema.prisma` - Agregar después del modelo `Casa`
 - **Código a agregar:**
+
 ```prisma
 /// Test de ubicación para determinar nivel del estudiante
 model TestUbicacion {
@@ -236,17 +258,22 @@ model TestUbicacion {
   @@map("tests_ubicacion")
 }
 ```
+
 - **Agregar relación en Estudiante:**
+
 ```prisma
   tests_ubicacion           TestUbicacion[]
 ```
+
 - **Criterio de éxito:** `npx prisma validate` sin errores
 
 #### Tarea 1.6: Actualizar ConfiguracionPrecios con tiers
+
 - **Tipo:** Schema
 - **Archivos a modificar:**
   - `apps/api/prisma/schema.prisma` - Modelo `ConfiguracionPrecios` (~línea 1413)
 - **Agregar campos (después de `descuento_aacrea_activo`):**
+
 ```prisma
   /// Precios por tier (pesos argentinos)
   precio_tier_arcade        Decimal @default(30000) @db.Decimal(10, 2)
@@ -256,22 +283,27 @@ model TestUbicacion {
   /// Descuento por pago anual (porcentaje)
   descuento_pago_anual      Decimal @default(15) @db.Decimal(5, 2)
 ```
+
 - **Criterio de éxito:** `npx prisma validate` sin errores
 
 #### Tarea 1.7: Generar y aplicar migración
+
 - **Tipo:** Schema
 - **Comandos:**
+
 ```bash
 cd apps/api
 npx prisma migrate dev --name add_tiers_casas_onboarding
 npx prisma generate
 ```
+
 - **Tests requeridos:**
   - Verificar que las tablas se crearon en la BD
   - Verificar que PrismaClient tiene los nuevos tipos
 - **Criterio de éxito:** Migración aplicada sin errores, `npx prisma studio` muestra nuevas tablas
 
 ### Entregables del día
+
 - [ ] Enums `Tier` y `Mundo` creados
 - [ ] Campos tier agregados a `Tutor`, `Membresia`, `ClaseGrupo`
 - [ ] Modelo `Casa` creado con 4 casas conceptuales
@@ -282,6 +314,7 @@ npx prisma generate
 - [ ] `npx prisma generate` ejecutado
 
 ### Validación
+
 ```bash
 # 1. Validar schema
 npx prisma validate
@@ -301,17 +334,21 @@ npx prisma studio
 ## DÍA 2: MÓDULO TIERS - BACKEND COMPLETO
 
 ### Objetivo
+
 Tener el módulo de Tiers funcionando con CRUD completo, verificación de acceso y endpoints REST.
 
 ### Pre-requisitos
+
 - Día 1 completado (schema con Tier enum)
 - Migración aplicada
 
 ### Tareas (en orden)
 
 #### Tarea 2.1: Crear estructura de carpetas del módulo Tiers
+
 - **Tipo:** Backend
 - **Archivos a crear:**
+
 ```
 apps/api/src/tiers/
 ├── tiers.module.ts
@@ -324,12 +361,15 @@ apps/api/src/tiers/
 └── guards/
     └── tier-access.guard.ts
 ```
+
 - **Criterio de éxito:** Estructura de carpetas creada
 
 #### Tarea 2.2: Crear DTOs de Tiers
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/tiers/dto/update-tier.dto.ts`
+
 ```typescript
 import { IsEnum, IsOptional, IsArray } from 'class-validator';
 import { Tier, Mundo } from '@prisma/client';
@@ -344,7 +384,9 @@ export class UpdateTierDto {
   mundos_activos?: Mundo[];
 }
 ```
-  - `apps/api/src/tiers/dto/tier-response.dto.ts`
+
+- `apps/api/src/tiers/dto/tier-response.dto.ts`
+
 ```typescript
 import { Tier, Mundo } from '@prisma/client';
 
@@ -393,17 +435,22 @@ export const TIER_FEATURES: Record<Tier, TierFeatures> = {
   },
 };
 ```
-  - `apps/api/src/tiers/dto/index.ts`
+
+- `apps/api/src/tiers/dto/index.ts`
+
 ```typescript
 export * from './update-tier.dto';
 export * from './tier-response.dto';
 ```
+
 - **Criterio de éxito:** DTOs creados con validaciones
 
 #### Tarea 2.3: Crear TiersService
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/tiers/tiers.service.ts`
+
 ```typescript
 import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
@@ -455,7 +502,7 @@ export class TiersService {
     // Validar que los mundos activos no excedan el límite del tier
     if (dto.mundos_activos && dto.mundos_activos.length > features.mundos_disponibles) {
       throw new BadRequestException(
-        `El tier ${dto.tier} solo permite ${features.mundos_disponibles} mundo(s)`
+        `El tier ${dto.tier} solo permite ${features.mundos_disponibles} mundo(s)`,
       );
     }
 
@@ -501,10 +548,7 @@ export class TiersService {
   /**
    * Verifica si un tutor tiene acceso a una feature específica
    */
-  async verificarAccesoFeature(
-    tutorId: string,
-    feature: keyof TierFeatures
-  ): Promise<boolean> {
+  async verificarAccesoFeature(tutorId: string, feature: keyof TierFeatures): Promise<boolean> {
     const tutor = await this.prisma.tutor.findUnique({
       where: { id: tutorId },
       select: { tier: true },
@@ -569,26 +613,23 @@ export class TiersService {
   }
 }
 ```
+
 - **Criterio de éxito:** Servicio compila sin errores
 
 #### Tarea 2.4: Crear TierAccessGuard
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/tiers/guards/tier-access.guard.ts`
+
 ```typescript
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { TiersService } from '../tiers.service';
 import { Tier } from '@prisma/client';
 
 export const REQUIRED_TIER_KEY = 'required_tier';
-export const RequiredTier = (tier: Tier) =>
-  Reflect.metadata(REQUIRED_TIER_KEY, tier);
+export const RequiredTier = (tier: Tier) => Reflect.metadata(REQUIRED_TIER_KEY, tier);
 
 @Injectable()
 export class TierAccessGuard implements CanActivate {
@@ -598,10 +639,10 @@ export class TierAccessGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredTier = this.reflector.getAllAndOverride<Tier>(
-      REQUIRED_TIER_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const requiredTier = this.reflector.getAllAndOverride<Tier>(REQUIRED_TIER_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (!requiredTier) {
       return true; // No tier requirement
@@ -626,7 +667,7 @@ export class TierAccessGuard implements CanActivate {
 
     if (userTierLevel < requiredTierLevel) {
       throw new ForbiddenException(
-        `Esta función requiere tier ${requiredTier} o superior. Tu tier actual es ${tierInfo.tier}`
+        `Esta función requiere tier ${requiredTier} o superior. Tu tier actual es ${tierInfo.tier}`,
       );
     }
 
@@ -634,22 +675,17 @@ export class TierAccessGuard implements CanActivate {
   }
 }
 ```
+
 - **Criterio de éxito:** Guard compila sin errores
 
 #### Tarea 2.5: Crear TiersController
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/tiers/tiers.controller.ts`
+
 ```typescript
-import {
-  Controller,
-  Get,
-  Patch,
-  Body,
-  Param,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Get, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { TiersService } from './tiers.service';
 import { UpdateTierDto, TierResponseDto, TIER_FEATURES } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -679,9 +715,7 @@ export class TiersController {
    */
   @Get('tutor/:tutorId')
   @Roles(Role.ADMIN)
-  async obtenerTierTutor(
-    @Param('tutorId') tutorId: string,
-  ): Promise<TierResponseDto> {
+  async obtenerTierTutor(@Param('tutorId') tutorId: string): Promise<TierResponseDto> {
     return this.tiersService.obtenerTierTutor(tutorId);
   }
 
@@ -731,12 +765,15 @@ export class TiersController {
   }
 }
 ```
+
 - **Criterio de éxito:** Controller compila sin errores
 
 #### Tarea 2.6: Crear TiersModule
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/tiers/tiers.module.ts`
+
 ```typescript
 import { Module } from '@nestjs/common';
 import { TiersController } from './tiers.controller';
@@ -751,13 +788,16 @@ import { PrismaService } from '../core/database/prisma.service';
 })
 export class TiersModule {}
 ```
+
 - **Criterio de éxito:** Módulo compila sin errores
 
 #### Tarea 2.7: Registrar TiersModule en AppModule
+
 - **Tipo:** Backend
 - **Archivos a modificar:**
   - `apps/api/src/app.module.ts`
 - **Cambios:**
+
 ```typescript
 // Agregar import
 import { TiersModule } from './tiers/tiers.module';
@@ -765,12 +805,15 @@ import { TiersModule } from './tiers/tiers.module';
 // Agregar al array de imports (después de AuthModule)
 TiersModule,
 ```
+
 - **Criterio de éxito:** Aplicación inicia sin errores
 
 #### Tarea 2.8: Crear tests unitarios para TiersService
+
 - **Tipo:** Backend - Tests
 - **Archivos a crear:**
   - `apps/api/src/tiers/__tests__/tiers.service.spec.ts`
+
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
 import { TiersService } from '../tiers.service';
@@ -793,10 +836,7 @@ describe('TiersService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        TiersService,
-        { provide: PrismaService, useValue: mockPrisma },
-      ],
+      providers: [TiersService, { provide: PrismaService, useValue: mockPrisma }],
     }).compile();
 
     service = module.get<TiersService>(TiersService);
@@ -826,9 +866,7 @@ describe('TiersService', () => {
     it('debe lanzar error si el tutor no existe', async () => {
       mockPrisma.tutor.findUnique.mockResolvedValue(null);
 
-      await expect(service.obtenerTierTutor('no-existe')).rejects.toThrow(
-        'Tutor no encontrado',
-      );
+      await expect(service.obtenerTierTutor('no-existe')).rejects.toThrow('Tutor no encontrado');
     });
   });
 
@@ -838,10 +876,7 @@ describe('TiersService', () => {
         mundos_activos: [Mundo.MATEMATICA],
       });
 
-      const result = await service.verificarAccesoMundo(
-        'tutor-123',
-        Mundo.MATEMATICA,
-      );
+      const result = await service.verificarAccesoMundo('tutor-123', Mundo.MATEMATICA);
 
       expect(result).toBe(true);
     });
@@ -851,10 +886,7 @@ describe('TiersService', () => {
         mundos_activos: [Mundo.MATEMATICA],
       });
 
-      const result = await service.verificarAccesoMundo(
-        'tutor-123',
-        Mundo.PROGRAMACION,
-      );
+      const result = await service.verificarAccesoMundo('tutor-123', Mundo.PROGRAMACION);
 
       expect(result).toBe(false);
     });
@@ -880,9 +912,11 @@ describe('TiersService', () => {
   });
 });
 ```
+
 - **Criterio de éxito:** Tests pasan con `npm run test -- tiers.service`
 
 ### Entregables del día
+
 - [ ] Carpeta `apps/api/src/tiers/` completa
 - [ ] DTOs con validaciones
 - [ ] TiersService con todos los métodos
@@ -892,6 +926,7 @@ describe('TiersService', () => {
 - [ ] Tests unitarios pasando
 
 ### Validación
+
 ```bash
 # 1. Compilar proyecto
 npm run build
@@ -912,18 +947,22 @@ curl http://localhost:3001/api/tiers/precios
 ## DÍA 3: REFACTOR EQUIPOS → CASAS
 
 ### Objetivo
+
 Migrar el sistema de "Equipos" a "Casas" manteniendo compatibilidad hacia atrás, y poblar las 4 casas iniciales.
 
 ### Pre-requisitos
+
 - Día 1 y 2 completados
 - Modelo Casa existente en schema
 
 ### Tareas (en orden)
 
 #### Tarea 3.1: Crear script de seed para las 4 Casas
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/prisma/seeds/casas.seed.ts`
+
 ```typescript
 import { PrismaClient } from '@prisma/client';
 
@@ -936,7 +975,8 @@ const CASAS_DATA = [
     color_primario: '#FF6B35',
     color_secundario: '#FFD700',
     lema: 'De las cenizas, renacemos más fuertes',
-    descripcion: 'La Casa Phoenix representa la resiliencia, la creatividad y el renacimiento. Sus miembros nunca se rinden ante los desafíos.',
+    descripcion:
+      'La Casa Phoenix representa la resiliencia, la creatividad y el renacimiento. Sus miembros nunca se rinden ante los desafíos.',
     emblema_url: '/images/casas/phoenix.svg',
   },
   {
@@ -945,7 +985,8 @@ const CASAS_DATA = [
     color_primario: '#8B0000',
     color_secundario: '#1C1C1C',
     lema: 'Con sabiduría y poder, conquistamos',
-    descripcion: 'La Casa Dragon simboliza la sabiduría ancestral y el poder. Sus miembros son estrategas y pensadores profundos.',
+    descripcion:
+      'La Casa Dragon simboliza la sabiduría ancestral y el poder. Sus miembros son estrategas y pensadores profundos.',
     emblema_url: '/images/casas/dragon.svg',
   },
   {
@@ -954,7 +995,8 @@ const CASAS_DATA = [
     color_primario: '#FF8C00',
     color_secundario: '#000000',
     lema: 'Velocidad, fuerza, precisión',
-    descripcion: 'La Casa Tiger encarna la agilidad mental y la determinación. Sus miembros son rápidos, decididos y competitivos.',
+    descripcion:
+      'La Casa Tiger encarna la agilidad mental y la determinación. Sus miembros son rápidos, decididos y competitivos.',
     emblema_url: '/images/casas/tiger.svg',
   },
   {
@@ -963,7 +1005,8 @@ const CASAS_DATA = [
     color_primario: '#1E90FF',
     color_secundario: '#FFFFFF',
     lema: 'Desde las alturas, vemos más lejos',
-    descripcion: 'La Casa Eagle representa la visión, la libertad y la excelencia. Sus miembros tienen una perspectiva amplia y metas elevadas.',
+    descripcion:
+      'La Casa Eagle representa la visión, la libertad y la excelencia. Sus miembros tienen una perspectiva amplia y metas elevadas.',
     emblema_url: '/images/casas/eagle.svg',
   },
 ];
@@ -990,12 +1033,15 @@ if (require.main === module) {
     .finally(() => prisma.$disconnect());
 }
 ```
+
 - **Criterio de éxito:** Script ejecuta sin errores
 
 #### Tarea 3.2: Actualizar seed principal
+
 - **Tipo:** Backend
 - **Archivos a modificar:**
   - `apps/api/prisma/seed.ts` (o crear si no existe)
+
 ```typescript
 import { PrismaClient } from '@prisma/client';
 import { seedCasas } from './seeds/casas.seed';
@@ -1020,16 +1066,21 @@ main()
     await prisma.$disconnect();
   });
 ```
+
 - **Agregar script en package.json:**
+
 ```json
 "db:seed": "ts-node prisma/seed.ts"
 ```
+
 - **Criterio de éxito:** `npm run db:seed` crea las 4 casas
 
 #### Tarea 3.3: Crear CasasService
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/casas/casas.service.ts`
+
 ```typescript
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
@@ -1261,12 +1312,15 @@ export class CasasService {
   }
 }
 ```
+
 - **Criterio de éxito:** Servicio compila sin errores
 
 #### Tarea 3.4: Crear CasasController
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/casas/casas.controller.ts`
+
 ```typescript
 import {
   Controller,
@@ -1359,10 +1413,7 @@ export class CasasController {
    */
   @Post(':id/puntos')
   @Roles(Role.ADMIN, Role.DOCENTE)
-  async agregarPuntos(
-    @Param('id') id: string,
-    @Body('puntos') puntos: number,
-  ) {
+  async agregarPuntos(@Param('id') id: string, @Body('puntos') puntos: number) {
     return this.casasService.agregarPuntos(id, puntos);
   }
 
@@ -1378,12 +1429,15 @@ export class CasasController {
   }
 }
 ```
+
 - **Criterio de éxito:** Controller compila sin errores
 
 #### Tarea 3.5: Crear CasasModule
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/casas/casas.module.ts`
+
 ```typescript
 import { Module } from '@nestjs/common';
 import { CasasController } from './casas.controller';
@@ -1397,34 +1451,44 @@ import { PrismaService } from '../core/database/prisma.service';
 })
 export class CasasModule {}
 ```
+
 - **Archivos a modificar:**
   - `apps/api/src/app.module.ts` - Agregar CasasModule
+
 ```typescript
 import { CasasModule } from './casas/casas.module';
 
 // En imports:
 CasasModule,
 ```
+
 - **Criterio de éxito:** Módulo registrado y funcionando
 
 #### Tarea 3.6: Ejecutar seed y verificar
+
 - **Tipo:** Backend
 - **Comandos:**
+
 ```bash
 cd apps/api
 npm run db:seed
 ```
+
 - **Verificación:**
+
 ```bash
 npx prisma studio
 # Verificar tabla "casas" tiene 4 registros
 ```
+
 - **Criterio de éxito:** 4 casas creadas en la BD
 
 #### Tarea 3.7: Crear tests para CasasService
+
 - **Tipo:** Backend - Tests
 - **Archivos a crear:**
   - `apps/api/src/casas/__tests__/casas.service.spec.ts`
+
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
 import { CasasService } from '../casas.service';
@@ -1451,10 +1515,7 @@ describe('CasasService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CasasService,
-        { provide: PrismaService, useValue: mockPrisma },
-      ],
+      providers: [CasasService, { provide: PrismaService, useValue: mockPrisma }],
     }).compile();
 
     service = module.get<CasasService>(CasasService);
@@ -1467,7 +1528,13 @@ describe('CasasService', () => {
   describe('obtenerTodas', () => {
     it('debe retornar todas las casas ordenadas por ranking', async () => {
       const mockCasas = [
-        { id: '1', nombre: 'Phoenix', codigo: 'PHX', ranking_actual: 1, _count: { estudiantes: 10 } },
+        {
+          id: '1',
+          nombre: 'Phoenix',
+          codigo: 'PHX',
+          ranking_actual: 1,
+          _count: { estudiantes: 10 },
+        },
         { id: '2', nombre: 'Dragon', codigo: 'DRG', ranking_actual: 2, _count: { estudiantes: 8 } },
       ];
       mockPrisma.casa.findMany.mockResolvedValue(mockCasas);
@@ -1516,9 +1583,11 @@ describe('CasasService', () => {
   });
 });
 ```
+
 - **Criterio de éxito:** Tests pasan
 
 ### Entregables del día
+
 - [ ] Script de seed para 4 casas
 - [ ] CasasService completo
 - [ ] CasasController con 8 endpoints
@@ -1527,6 +1596,7 @@ describe('CasasService', () => {
 - [ ] Tests pasando
 
 ### Validación
+
 ```bash
 # 1. Ejecutar seed
 npm run db:seed
@@ -1552,9 +1622,11 @@ curl http://localhost:3001/api/casas/codigo/PHX
 ## DÍA 4: MÓDULO CASAS - INTEGRACIÓN GAMIFICACIÓN
 
 ### Objetivo
+
 Integrar el sistema de Casas con la gamificación existente: cuando un estudiante gana puntos, su casa también los gana.
 
 ### Pre-requisitos
+
 - Días 1-3 completados
 - CasasService funcionando
 - 4 casas en BD
@@ -1562,10 +1634,12 @@ Integrar el sistema de Casas con la gamificación existente: cuando un estudiant
 ### Tareas (en orden)
 
 #### Tarea 4.1: Modificar PuntosService para actualizar puntos de Casa
+
 - **Tipo:** Backend
 - **Archivos a modificar:**
   - `apps/api/src/gamificacion/puntos.service.ts`
 - **Agregar inyección de CasasService y modificar método de otorgar puntos:**
+
 ```typescript
 // Agregar import
 import { CasasService } from '../casas/casas.service';
@@ -1594,12 +1668,15 @@ async otorgarPuntos(estudianteId: string, puntos: number, ...args) {
   // ... resto del código ...
 }
 ```
+
 - **Criterio de éxito:** Al otorgar puntos, la casa también recibe puntos
 
 #### Tarea 4.2: Modificar GamificacionModule para importar CasasModule
+
 - **Tipo:** Backend
 - **Archivos a modificar:**
   - `apps/api/src/gamificacion/gamificacion.module.ts`
+
 ```typescript
 // Agregar import
 import { CasasModule } from '../casas/casas.module';
@@ -1610,13 +1687,16 @@ import { CasasModule } from '../casas/casas.module';
   // ... resto
 })
 ```
+
 - **Criterio de éxito:** Módulo compila sin errores de dependencias circulares
 
 #### Tarea 4.3: Crear endpoint para obtener estadísticas de casa del estudiante
+
 - **Tipo:** Backend
 - **Archivos a modificar:**
   - `apps/api/src/estudiantes/estudiantes.controller.ts`
 - **Agregar endpoint:**
+
 ```typescript
 /**
  * GET /estudiantes/mi-casa
@@ -1646,13 +1726,16 @@ async obtenerMiCasa(@Request() req) {
   };
 }
 ```
+
 - **Criterio de éxito:** Endpoint funcionando
 
 #### Tarea 4.4: Agregar lógica de asignación automática de casa (balanceada)
+
 - **Tipo:** Backend
 - **Archivos a modificar:**
   - `apps/api/src/casas/casas.service.ts`
 - **Agregar método:**
+
 ```typescript
 /**
  * Asigna automáticamente una casa al estudiante basándose en balanceo
@@ -1664,12 +1747,15 @@ async asignarCasaAutomatica(estudianteId: string): Promise<Casa> {
   return casaMenosEstudiantes;
 }
 ```
+
 - **Criterio de éxito:** Método disponible para onboarding
 
 #### Tarea 4.5: Crear componente frontend CasaCard
+
 - **Tipo:** Frontend
 - **Archivos a crear:**
   - `apps/web/src/components/gamificacion/CasaCard.tsx`
+
 ```typescript
 'use client';
 
@@ -1779,12 +1865,15 @@ export function CasaCard({ casa, isUserCasa = false, showRanking = true, onClick
   );
 }
 ```
+
 - **Criterio de éxito:** Componente renderiza correctamente
 
 #### Tarea 4.6: Crear componente RankingCasas
+
 - **Tipo:** Frontend
 - **Archivos a crear:**
   - `apps/web/src/components/gamificacion/RankingCasas.tsx`
+
 ```typescript
 'use client';
 
@@ -1871,13 +1960,16 @@ export function RankingCasas({ userCasaId }: RankingCasasProps) {
   );
 }
 ```
+
 - **Criterio de éxito:** Componente muestra ranking de casas
 
 #### Tarea 4.7: Agregar RankingCasas a página de gamificación del estudiante
+
 - **Tipo:** Frontend
 - **Archivos a modificar:**
   - `apps/web/src/app/estudiante/gamificacion/page.tsx`
 - **Agregar import y componente:**
+
 ```typescript
 import { RankingCasas } from '@/components/gamificacion/RankingCasas';
 
@@ -1886,9 +1978,11 @@ import { RankingCasas } from '@/components/gamificacion/RankingCasas';
   <RankingCasas userCasaId={estudiante?.casa_id} />
 </section>
 ```
+
 - **Criterio de éxito:** Ranking visible en página de gamificación
 
 ### Entregables del día
+
 - [ ] PuntosService actualiza puntos de casa
 - [ ] GamificacionModule importa CasasModule
 - [ ] Endpoint `/estudiantes/mi-casa` funcionando
@@ -1898,6 +1992,7 @@ import { RankingCasas } from '@/components/gamificacion/RankingCasas';
 - [ ] Ranking visible en gamificación
 
 ### Validación
+
 ```bash
 # 1. Verificar que al otorgar puntos se actualiza la casa
 # (crear test manual o usar endpoint existente)
@@ -1914,9 +2009,11 @@ curl http://localhost:3001/api/casas/ranking
 ## DÍA 5: ONBOARDING - TEST UBICACIÓN + QUIZ CASA
 
 ### Objetivo
+
 Crear el flujo completo de onboarding para estudiantes nuevos: test de ubicación + quiz de personalidad para casa + creación de avatar.
 
 ### Pre-requisitos
+
 - Días 1-4 completados
 - Modelo TestUbicacion en schema
 - CasasService con asignación automática
@@ -1924,9 +2021,11 @@ Crear el flujo completo de onboarding para estudiantes nuevos: test de ubicació
 ### Tareas (en orden)
 
 #### Tarea 5.1: Crear OnboardingService
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/onboarding/onboarding.service.ts`
+
 ```typescript
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../core/database/prisma.service';
@@ -2031,7 +2130,7 @@ export class OnboardingService {
     }
 
     const preguntas = this.generarPreguntasTest(test.mundo);
-    const pregunta = preguntas.find(p => p.id === preguntaId);
+    const pregunta = preguntas.find((p) => p.id === preguntaId);
 
     if (!pregunta) {
       throw new BadRequestException('Pregunta no encontrada');
@@ -2244,16 +2343,76 @@ export class OnboardingService {
     // En producción, esto vendría de una base de datos de preguntas
     // Por ahora, preguntas de ejemplo
     const preguntasMatematica: PreguntaTest[] = [
-      { id: 'm1', pregunta: '¿Cuánto es 7 + 5?', opciones: ['10', '11', '12', '13'], respuesta_correcta: 2, dificultad: 1 },
-      { id: 'm2', pregunta: '¿Cuánto es 15 - 8?', opciones: ['5', '6', '7', '8'], respuesta_correcta: 2, dificultad: 1 },
-      { id: 'm3', pregunta: '¿Cuánto es 6 x 4?', opciones: ['20', '22', '24', '26'], respuesta_correcta: 2, dificultad: 2 },
-      { id: 'm4', pregunta: '¿Cuánto es 36 ÷ 6?', opciones: ['4', '5', '6', '7'], respuesta_correcta: 2, dificultad: 2 },
-      { id: 'm5', pregunta: '¿Cuál es el siguiente número primo después de 7?', opciones: ['8', '9', '10', '11'], respuesta_correcta: 3, dificultad: 3 },
-      { id: 'm6', pregunta: '¿Cuánto es 3²?', opciones: ['6', '8', '9', '12'], respuesta_correcta: 2, dificultad: 3 },
-      { id: 'm7', pregunta: '¿Cuánto es 25% de 80?', opciones: ['15', '20', '25', '30'], respuesta_correcta: 1, dificultad: 4 },
-      { id: 'm8', pregunta: '¿Cuánto es √64?', opciones: ['6', '7', '8', '9'], respuesta_correcta: 2, dificultad: 4 },
-      { id: 'm9', pregunta: 'Si x + 5 = 12, ¿cuánto es x?', opciones: ['5', '6', '7', '8'], respuesta_correcta: 2, dificultad: 5 },
-      { id: 'm10', pregunta: '¿Cuál es el MCD de 12 y 18?', opciones: ['2', '3', '6', '9'], respuesta_correcta: 2, dificultad: 5 },
+      {
+        id: 'm1',
+        pregunta: '¿Cuánto es 7 + 5?',
+        opciones: ['10', '11', '12', '13'],
+        respuesta_correcta: 2,
+        dificultad: 1,
+      },
+      {
+        id: 'm2',
+        pregunta: '¿Cuánto es 15 - 8?',
+        opciones: ['5', '6', '7', '8'],
+        respuesta_correcta: 2,
+        dificultad: 1,
+      },
+      {
+        id: 'm3',
+        pregunta: '¿Cuánto es 6 x 4?',
+        opciones: ['20', '22', '24', '26'],
+        respuesta_correcta: 2,
+        dificultad: 2,
+      },
+      {
+        id: 'm4',
+        pregunta: '¿Cuánto es 36 ÷ 6?',
+        opciones: ['4', '5', '6', '7'],
+        respuesta_correcta: 2,
+        dificultad: 2,
+      },
+      {
+        id: 'm5',
+        pregunta: '¿Cuál es el siguiente número primo después de 7?',
+        opciones: ['8', '9', '10', '11'],
+        respuesta_correcta: 3,
+        dificultad: 3,
+      },
+      {
+        id: 'm6',
+        pregunta: '¿Cuánto es 3²?',
+        opciones: ['6', '8', '9', '12'],
+        respuesta_correcta: 2,
+        dificultad: 3,
+      },
+      {
+        id: 'm7',
+        pregunta: '¿Cuánto es 25% de 80?',
+        opciones: ['15', '20', '25', '30'],
+        respuesta_correcta: 1,
+        dificultad: 4,
+      },
+      {
+        id: 'm8',
+        pregunta: '¿Cuánto es √64?',
+        opciones: ['6', '7', '8', '9'],
+        respuesta_correcta: 2,
+        dificultad: 4,
+      },
+      {
+        id: 'm9',
+        pregunta: 'Si x + 5 = 12, ¿cuánto es x?',
+        opciones: ['5', '6', '7', '8'],
+        respuesta_correcta: 2,
+        dificultad: 5,
+      },
+      {
+        id: 'm10',
+        pregunta: '¿Cuál es el MCD de 12 y 18?',
+        opciones: ['2', '3', '6', '9'],
+        respuesta_correcta: 2,
+        dificultad: 5,
+      },
     ];
 
     // Retornar según el mundo
@@ -2296,22 +2455,17 @@ export class OnboardingService {
   }
 }
 ```
+
 - **Criterio de éxito:** Servicio compila sin errores
 
 #### Tarea 5.2: Crear OnboardingController
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/onboarding/onboarding.controller.ts`
+
 ```typescript
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
 import { OnboardingService } from './onboarding.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -2340,10 +2494,7 @@ export class OnboardingController {
    */
   @Post('test-ubicacion/iniciar')
   @Roles(Role.ESTUDIANTE)
-  async iniciarTest(
-    @Request() req,
-    @Body('mundo') mundo: Mundo,
-  ) {
+  async iniciarTest(@Request() req, @Body('mundo') mundo: Mundo) {
     return this.onboardingService.iniciarTestUbicacion(req.user.estudianteId, mundo);
   }
 
@@ -2409,12 +2560,15 @@ export class OnboardingController {
   }
 }
 ```
+
 - **Criterio de éxito:** Controller compila sin errores
 
 #### Tarea 5.3: Crear OnboardingModule
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/onboarding/onboarding.module.ts`
+
 ```typescript
 import { Module } from '@nestjs/common';
 import { OnboardingController } from './onboarding.controller';
@@ -2430,19 +2584,24 @@ import { PrismaService } from '../core/database/prisma.service';
 })
 export class OnboardingModule {}
 ```
+
 - **Registrar en AppModule:**
+
 ```typescript
 import { OnboardingModule } from './onboarding/onboarding.module';
 
 // En imports:
 OnboardingModule,
 ```
+
 - **Criterio de éxito:** Módulo registrado y funcionando
 
 #### Tarea 5.4: Crear página de onboarding en frontend
+
 - **Tipo:** Frontend
 - **Archivos a crear:**
   - `apps/web/src/app/estudiante/onboarding/page.tsx`
+
 ```typescript
 'use client';
 
@@ -2584,9 +2743,11 @@ export default function OnboardingPage() {
   );
 }
 ```
+
 - **Criterio de éxito:** Página renderiza correctamente
 
 #### Tarea 5.5: Crear componentes de pasos del onboarding
+
 - **Tipo:** Frontend
 - **Archivos a crear:**
   - `apps/web/src/app/estudiante/onboarding/components/TestUbicacionStep.tsx`
@@ -2743,9 +2904,11 @@ export function TestUbicacionStep({ onComplete }: TestUbicacionStepProps) {
   );
 }
 ```
+
 - **Criterio de éxito:** Componentes funcionan en el wizard
 
 #### Tarea 5.6: Agregar redirección a onboarding si no completado
+
 - **Tipo:** Frontend
 - **Archivos a modificar:**
   - `apps/web/src/middleware.ts` (o crear)
@@ -2765,9 +2928,11 @@ useEffect(() => {
   verificarOnboarding();
 }, [user, pathname]);
 ```
+
 - **Criterio de éxito:** Estudiantes nuevos son redirigidos al onboarding
 
 ### Entregables del día
+
 - [ ] OnboardingService con test + quiz
 - [ ] OnboardingController con 7 endpoints
 - [ ] OnboardingModule registrado
@@ -2776,6 +2941,7 @@ useEffect(() => {
 - [ ] Redirección automática para nuevos estudiantes
 
 ### Validación
+
 ```bash
 # 1. Probar endpoints
 curl -X POST http://localhost:3001/api/onboarding/test-ubicacion/iniciar \
@@ -2800,17 +2966,21 @@ curl http://localhost:3001/api/onboarding/quiz-casa/preguntas \
 ## DÍA 6: BACKEND PLANIFICACIONES - SERVICIOS
 
 ### Objetivo
+
 Crear el servicio de planificaciones con todas las operaciones CRUD y lógica de negocio.
 
 ### Pre-requisitos
+
 - Días 1-5 completados
 - Modelos de planificaciones en schema (ya existen)
 
 ### Tareas (en orden)
 
 #### Tarea 6.1: Crear estructura de carpetas
+
 - **Tipo:** Backend
 - **Archivos a crear:**
+
 ```
 apps/api/src/planificaciones/
 ├── planificaciones.module.ts
@@ -2831,9 +3001,11 @@ apps/api/src/planificaciones/
 ```
 
 #### Tarea 6.2: Crear DTOs
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/planificaciones/dto/create-planificacion.dto.ts`
+
 ```typescript
 import { IsString, IsInt, IsArray, IsOptional, IsEnum, Min, Max } from 'class-validator';
 import { EstadoPlanificacion, NivelDificultad } from '@prisma/client';
@@ -2911,7 +3083,9 @@ export class CreateActividadDto {
   recursos_url?: { tipo: string; titulo: string; url: string }[];
 }
 ```
-  - `apps/api/src/planificaciones/dto/filtros-planificaciones.dto.ts`
+
+- `apps/api/src/planificaciones/dto/filtros-planificaciones.dto.ts`
+
 ```typescript
 import { IsOptional, IsString, IsInt, IsEnum } from 'class-validator';
 import { Transform } from 'class-transformer';
@@ -2949,6 +3123,7 @@ export class FiltrosPlanificacionesDto {
 ```
 
 #### Tarea 6.3: Crear PlanificacionesService
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/planificaciones/services/planificaciones.service.ts`
@@ -2956,19 +3131,23 @@ export class FiltrosPlanificacionesDto {
 (Servicio completo con CRUD - similar a lo que documentamos en auditoría)
 
 #### Tarea 6.4: Crear ActividadesService
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/planificaciones/services/actividades.service.ts`
 
 #### Tarea 6.5: Crear AsignacionesService
+
 - **Tipo:** Backend
 - **Archivos a crear:**
   - `apps/api/src/planificaciones/services/asignaciones.service.ts`
 
 #### Tarea 6.6: Crear tests unitarios
+
 - **Tipo:** Backend - Tests
 
 ### Entregables del día
+
 - [ ] DTOs con validaciones
 - [ ] PlanificacionesService completo
 - [ ] ActividadesService completo
@@ -2980,12 +3159,15 @@ export class FiltrosPlanificacionesDto {
 ## DÍA 7: BACKEND PLANIFICACIONES - CONTROLLER
 
 ### Objetivo
+
 Crear el controller con todos los endpoints REST para planificaciones.
 
 ### Pre-requisitos
+
 - Día 6 completado
 
 ### Tareas
+
 - Crear PlanificacionesController con ~15 endpoints
 - Crear PlanificacionesModule
 - Registrar en AppModule
@@ -2996,12 +3178,15 @@ Crear el controller con todos los endpoints REST para planificaciones.
 ## DÍA 8: FRONTEND ADMIN PLANIFICACIONES
 
 ### Objetivo
+
 Conectar el frontend existente de admin con el backend de planificaciones.
 
 ### Pre-requisitos
+
 - Días 6-7 completados
 
 ### Tareas
+
 - Actualizar `planificaciones.api.ts` para usar endpoints reales
 - Actualizar `planificaciones.store.ts`
 - Verificar que la UI existente funciona
@@ -3012,12 +3197,15 @@ Conectar el frontend existente de admin con el backend de planificaciones.
 ## DÍA 9: FRONTEND ESTUDIANTE + DOCENTE PLANIFICACIONES
 
 ### Objetivo
+
 Conectar las vistas de estudiante y docente con el backend.
 
 ### Pre-requisitos
+
 - Día 8 completado
 
 ### Tareas
+
 - Actualizar vista del gimnasio para cargar planificaciones reales
 - Crear endpoints de progreso para estudiantes
 - Conectar vista de docente
@@ -3027,12 +3215,15 @@ Conectar las vistas de estudiante y docente con el backend.
 # FASE 4: ARENA (Días 10-12)
 
 ## DÍA 10: ARENA DIARIA - BACKEND
+
 (Crear modelo, servicio, controller para cápsulas diarias)
 
 ## DÍA 11: ARENA DIARIA - FRONTEND
+
 (Crear componentes y página de arena diaria)
 
 ## DÍA 12: ARENA MULTIJUGADOR - ESTRUCTURA BASE
+
 (Crear estructura base sin WebSockets completos)
 
 ---
@@ -3040,9 +3231,11 @@ Conectar las vistas de estudiante y docente con el backend.
 # FASE 5: PRO FEATURES (Días 13-14)
 
 ## DÍA 13: TELEMETRÍA BÁSICA
+
 (Sistema básico de tracking de eventos)
 
 ## DÍA 14: REPORTES AUTOMÁTICOS
+
 (Estructura de reportes semanales)
 
 ---
@@ -3052,11 +3245,13 @@ Conectar las vistas de estudiante y docente con el backend.
 ## DÍA 15: TESTING E2E Y DEPLOY
 
 ### Objetivo
+
 Verificar que todo funciona end-to-end, corregir bugs, preparar para deploy.
 
 ### Tareas
 
 #### Tarea 15.1: Suite de tests E2E
+
 - **Tipo:** Tests
 - **Tests a ejecutar:**
   - Flujo completo de onboarding
@@ -3066,6 +3261,7 @@ Verificar que todo funciona end-to-end, corregir bugs, preparar para deploy.
   - Ranking de casas actualizado
 
 #### Tarea 15.2: Verificación de migraciones
+
 - **Tipo:** DevOps
 - **Verificar:**
   - Migraciones listas para producción
@@ -3073,6 +3269,7 @@ Verificar que todo funciona end-to-end, corregir bugs, preparar para deploy.
   - Configuración de precios con tiers
 
 #### Tarea 15.3: Documentación actualizada
+
 - **Tipo:** Documentación
 - **Actualizar:**
   - README con nuevas features
@@ -3080,6 +3277,7 @@ Verificar que todo funciona end-to-end, corregir bugs, preparar para deploy.
   - Variables de entorno necesarias
 
 #### Tarea 15.4: Fix de bugs encontrados
+
 - **Tipo:** Backend/Frontend
 - **Reservar tiempo para:**
   - Bugs de integración
@@ -3087,6 +3285,7 @@ Verificar que todo funciona end-to-end, corregir bugs, preparar para deploy.
   - Edge cases no contemplados
 
 ### Entregables del día
+
 - [ ] Tests E2E pasando
 - [ ] Migraciones verificadas
 - [ ] Documentación actualizada
@@ -3098,6 +3297,7 @@ Verificar que todo funciona end-to-end, corregir bugs, preparar para deploy.
 # CHECKLIST GENERAL DE ENTREGABLES
 
 ## Fase 1: Fundamentos ✅
+
 - [ ] Schema Prisma actualizado con Tiers, Casas, TestUbicacion
 - [ ] TiersModule funcionando (service + controller + guard)
 - [ ] CasasModule funcionando (service + controller)
@@ -3105,6 +3305,7 @@ Verificar que todo funciona end-to-end, corregir bugs, preparar para deploy.
 - [ ] Tests unitarios de servicios nuevos
 
 ## Fase 2: Gamificación ✅
+
 - [ ] Integración Casas con sistema de puntos existente
 - [ ] OnboardingModule completo (test + quiz + avatar)
 - [ ] Componentes frontend (CasaCard, RankingCasas)
@@ -3112,6 +3313,7 @@ Verificar que todo funciona end-to-end, corregir bugs, preparar para deploy.
 - [ ] Redirección automática para nuevos estudiantes
 
 ## Fase 3: Planificaciones ✅
+
 - [ ] PlanificacionesModule backend completo
 - [ ] Frontend admin conectado
 - [ ] Frontend estudiante conectado
@@ -3119,20 +3321,23 @@ Verificar que todo funciona end-to-end, corregir bugs, preparar para deploy.
 - [ ] Sistema de progreso funcionando
 
 ## Fase 4: Arena ✅
+
 - [ ] ArenaDiariaModule funcionando
 - [ ] Frontend de arena diaria
 - [ ] Estructura base de multijugador
 
 ## Fase 5: PRO Features ✅
+
 - [ ] Sistema básico de telemetría
 - [ ] Estructura de reportes automáticos
 
 ## Fase 6: Integración ✅
+
 - [ ] Tests E2E pasando
 - [ ] Documentación actualizada
 - [ ] Branch lista para deploy
 
 ---
 
-*Plan generado: 2025-11-26*
-*Basado en: AUDITORIA_COMPLETA_2026.md*
+_Plan generado: 2025-11-26_
+_Basado en: AUDITORIA_COMPLETA_2026.md_

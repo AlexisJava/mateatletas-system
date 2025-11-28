@@ -7,6 +7,7 @@ Este documento detalla cómo testear manualmente todos los fixes de seguridad ap
 ## 📋 RESUMEN DE FIXES
 
 ### Módulo AUTH (7 fixes)
+
 1. ✅ Password MaxLength (DoS Prevention)
 2. ✅ Rate Limiting en Login (5/min)
 3. ✅ Redis Fail-Secure (throw UnauthorizedException)
@@ -16,6 +17,7 @@ Este documento detalla cómo testear manualmente todos los fixes de seguridad ap
 7. ✅ Login Attempt Tracking (5 intentos/15min)
 
 ### Módulo COLONIA (4 fixes)
+
 1. ✅ Password MaxLength (DoS Prevention)
 2. ✅ Payment Amount Validation (Anti-Fraude)
 3. ✅ Rate Limiting Inscripción (5/hora)
@@ -36,6 +38,7 @@ npm run start:dev
 ```
 
 El script valida:
+
 - ✅ Password MaxLength (Auth y Colonia)
 - ✅ Rate Limiting (Login y Colonia)
 - ✅ Login Attempt Tracking
@@ -49,6 +52,7 @@ El script valida:
 **Objetivo**: Verificar que cuando Redis falla, el sistema rechaza tokens (fail-secure).
 
 **Pasos**:
+
 1. Iniciar sesión y obtener un token válido
 2. Detener Redis: `docker stop redis` o `sudo systemctl stop redis`
 3. Intentar acceder a un endpoint protegido con el token
@@ -79,6 +83,7 @@ curl -X GET http://localhost:3001/api/auth/profile \
 **Objetivo**: Verificar que el tiempo de respuesta es constante para usuarios existentes y no existentes.
 
 **Pasos**:
+
 1. Medir tiempo de login con usuario **inexistente**
 2. Medir tiempo de login con usuario **existente** pero password incorrecta
 3. **Resultado esperado**: Tiempos similares (diferencia < 100ms)
@@ -105,6 +110,7 @@ time curl -X POST http://localhost:3001/api/auth/login \
 **Objetivo**: Verificar que no se puede distinguir entre email registrado y no registrado.
 
 **Pasos**:
+
 1. Intentar registrar un email **ya registrado**
 2. Intentar registrar un email **nuevo**
 3. **Resultado esperado**: Ambos retornan `400 Bad Request` con mensaje genérico
@@ -141,6 +147,7 @@ curl -X POST http://localhost:3001/api/auth/register \
 **Objetivo**: Verificar que la cookie expira en 1 hora (sincronizada con JWT).
 
 **Pasos**:
+
 1. Hacer login y capturar la cookie `auth-token`
 2. Inspeccionar el header `Set-Cookie`
 3. **Resultado esperado**: `Max-Age=3600` (1 hora)
@@ -236,6 +243,7 @@ curl -X POST http://localhost:3001/api/colonia/webhook \
 **Testing con MercadoPago Sandbox**:
 
 Para testear esto realmente, necesitas:
+
 1. Configurar MercadoPago en modo test
 2. Crear preferencia de pago
 3. Ir al checkout y pagar **un monto diferente** (no es posible en sandbox)
@@ -295,10 +303,12 @@ psql -U postgres -d mateatletas -c "
 ## 📊 CHECKLIST DE VERIFICACIÓN
 
 ### Compilación
+
 - [ ] `npx tsc --noEmit` retorna 0 errores
 - [ ] `npm run build` exitoso
 
 ### Tests Automatizados
+
 - [ ] `./test-security-fixes.sh` todos los tests pasan
 - [ ] Password MaxLength (Auth) ✓
 - [ ] Password MaxLength (Colonia) ✓
@@ -307,6 +317,7 @@ psql -U postgres -d mateatletas -c "
 - [ ] Login Attempt Tracking ✓
 
 ### Tests Manuales
+
 - [ ] Redis Fail-Secure (detener Redis → 401)
 - [ ] Timing Attack Prevention (tiempos similares)
 - [ ] Email Enumeration Prevention (error genérico)
@@ -315,6 +326,7 @@ psql -U postgres -d mateatletas -c "
 - [ ] Username Uniqueness (inscripciones simultáneas sin duplicados)
 
 ### Verificación en Logs
+
 - [ ] Login fallido → IP logueada
 - [ ] 5 intentos fallidos → "Demasiados intentos"
 - [ ] Monto incorrecto → "🚨 INTENTO DE FRAUDE"
@@ -325,24 +337,32 @@ psql -U postgres -d mateatletas -c "
 ## 🎯 CASOS DE USO REALES
 
 ### Escenario 1: Brute Force Attack
+
 **Ataque**: Un bot intenta 1000 logins/segundo
 **Protección activa**:
+
 - Rate Limiting (5/min) → 429 después de 5 requests
 - Login Attempt Tracking → Cuenta bloqueada después de 5 intentos fallidos
 
 ### Escenario 2: DoS via bcrypt
+
 **Ataque**: Enviar passwords de 10MB para saturar CPU
 **Protección activa**:
+
 - MaxLength(128) → Request rechazado en validación (antes de bcrypt)
 
 ### Escenario 3: Payment Fraud
+
 **Ataque**: Pagar $1 con external_reference de inscripción de $50,000
 **Protección activa**:
+
 - Payment Amount Validation → 400 Bad Request, pago NO acreditado
 
 ### Escenario 4: Email Enumeration
+
 **Ataque**: Probar emails para saber quién está registrado
 **Protección activa**:
+
 - Generic error → Mismo mensaje para email existente y no existente
 
 ---
@@ -350,12 +370,14 @@ psql -U postgres -d mateatletas -c "
 ## 📝 NOTAS IMPORTANTES
 
 1. **Redis**: Algunos tests requieren tener Redis corriendo. Instalar con:
+
    ```bash
    sudo apt install redis-server
    sudo systemctl start redis
    ```
 
 2. **Base de Datos**: Los tests crean datos de prueba. Limpiar después:
+
    ```sql
    DELETE FROM login_attempts WHERE email LIKE '%test%';
    DELETE FROM tutor WHERE email LIKE '%test%';

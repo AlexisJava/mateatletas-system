@@ -10,6 +10,7 @@
 ## Resumen Ejecutivo
 
 ### Estado P1 Completado ✅
+
 - ✅ Console.log eliminados (20 removidos)
 - ✅ Tipos `any` resueltos (38/48 = 79%)
 - ✅ npm audit ejecutado y documentado
@@ -17,12 +18,12 @@
 
 ### TODOs Clasificados por Prioridad
 
-| Prioridad | Cantidad | Acción |
-|-----------|----------|--------|
-| **P0 - CRÍTICO** | 2 | Resolver ANTES del lanzamiento |
-| **P1 - ALTA** | 4 | Resolver en Sprint 1 post-lanzamiento |
-| **P2 - MEDIA** | 8 | Planificar para Q1 2026 |
-| **P3 - BAJA** | 15 | Backlog técnico |
+| Prioridad        | Cantidad | Acción                                |
+| ---------------- | -------- | ------------------------------------- |
+| **P0 - CRÍTICO** | 2        | Resolver ANTES del lanzamiento        |
+| **P1 - ALTA**    | 4        | Resolver en Sprint 1 post-lanzamiento |
+| **P2 - MEDIA**   | 8        | Planificar para Q1 2026               |
+| **P3 - BAJA**    | 15       | Backlog técnico                       |
 
 ---
 
@@ -43,15 +44,18 @@ ThrottlerModule.forRoot([
 ```
 
 **Problema**:
+
 - Rate limiting hardcodeado a 100 req/min en producción
 - No hay flexibilidad para ajustar sin rebuild
 - `NODE_ENV` puede no estar seteado correctamente en todos los entornos
 
 **Impacto**: ALTO
+
 - Si hay pico de tráfico legítimo, usuarios serán bloqueados
 - No podemos ajustar límites sin redeploy
 
 **Solución Propuesta**:
+
 ```typescript
 // apps/api/src/app.module.ts
 ThrottlerModule.forRoot([
@@ -90,14 +94,17 @@ private readonly allowedOrigins = [
 ```
 
 **Problema**:
+
 - Si `process.env.FRONTEND_URL` no está seteado en producción, el guard bloqueará TODOS los requests del frontend
 - No hay validación ni log de warning si la variable no existe
 
 **Impacto**: CRÍTICO
+
 - Frontend de producción será bloqueado por CSRF
 - Ningún POST/PUT/PATCH/DELETE funcionará
 
 **Solución Propuesta**:
+
 ```typescript
 // apps/api/src/common/guards/csrf-protection.guard.ts
 constructor(private reflector: Reflector) {
@@ -128,6 +135,7 @@ FRONTEND_URL=https://mateatletas.com
 ### 3. URL de Reunión Virtual Faltante en BD
 
 **Archivos**:
+
 - [apps/api/src/tutor/tutor.service.ts:385](apps/api/src/tutor/tutor.service.ts#L385)
 - [apps/api/src/tutor/tutor.service.ts:522](apps/api/src/tutor/tutor.service.ts#L522)
 
@@ -136,17 +144,20 @@ urlReunion: undefined, // TODO: agregar campo en BD si existe
 ```
 
 **Problema**:
+
 - El schema de `Clase` no tiene campo `url_reunion`
 - Tutores y estudiantes no pueden acceder a links de Zoom/Google Meet
 - Se retorna `undefined` siempre
 
 **Impacto**: MEDIO-ALTO
+
 - Feature de clases virtuales está incompleta
 - Usuarios deben recibir link por otro canal (WhatsApp, email)
 
 **Solución Propuesta**:
 
 1. **Migración Prisma**:
+
 ```prisma
 // prisma/schema.prisma
 model Clase {
@@ -157,17 +168,20 @@ model Clase {
 ```
 
 2. **Migration SQL**:
+
 ```bash
 npx prisma migrate dev --name add-url-reunion-to-clase
 ```
 
 3. **Actualizar servicios**:
+
 ```typescript
 // apps/api/src/tutor/tutor.service.ts
 urlReunion: clase.url_reunion || undefined,
 ```
 
 4. **Frontend**:
+
 - Agregar input en formulario de creación de clase
 - Mostrar botón "Unirse a clase virtual" si `urlReunion` existe
 
@@ -179,6 +193,7 @@ urlReunion: clase.url_reunion || undefined,
 ### 4. Integración con OpenAI para Sugerencias de Alertas
 
 **Archivos**:
+
 - [apps/api/src/admin/services/admin-alertas.service.ts:90](apps/api/src/admin/services/admin-alertas.service.ts#L90)
 - [apps/api/src/admin/services/admin-alertas.service.ts:119](apps/api/src/admin/services/admin-alertas.service.ts#L119)
 
@@ -196,21 +211,25 @@ async sugerirSolucion(alertaId: string) {
 ```
 
 **Problema**:
+
 - Sugerencias de alertas son estáticas y poco útiles
 - No aprovecha contexto del estudiante/docente
 
 **Impacto**: MEDIO
+
 - Feature de alertas funciona pero con bajo valor agregado
 - Admins tienen que pensar soluciones manualmente
 
 **Solución Propuesta**:
 
 1. **Agregar OpenAI SDK**:
+
 ```bash
 npm install openai
 ```
 
 2. **Crear servicio de AI**:
+
 ```typescript
 // apps/api/src/common/ai/openai.service.ts
 @Injectable()
@@ -242,6 +261,7 @@ export class OpenAIService {
 ```
 
 3. **Actualizar admin-alertas.service.ts**:
+
 ```typescript
 async sugerirSolucion(alertaId: string) {
   const alerta = await this.prisma.alerta.findUnique({
@@ -278,6 +298,7 @@ async sugerirSolucion(alertaId: string) {
 ### 5. Integración de Puntos con GamificacionService
 
 **Archivos**:
+
 - [apps/api/src/cursos/progreso.service.ts:132](apps/api/src/cursos/progreso.service.ts#L132)
 - [apps/api/src/cursos/progreso.service.ts:167](apps/api/src/cursos/progreso.service.ts#L167)
 
@@ -307,12 +328,14 @@ if (leccion.logro && leccion.logro.puntos > 0) {
 ```
 
 **Problema**:
+
 - Los puntos se incrementan directamente en `estudiante.puntos`
 - NO se crea registro en `PuntoObtenido` (tabla de auditoría)
 - No hay historial de por qué se ganaron puntos
 - No se puede rastrear si los puntos vinieron de lecciones, logros, docentes, etc.
 
 **Impacto**: MEDIO
+
 - Sistema de gamificación funciona pero sin trazabilidad
 - Admins no pueden auditar puntos
 
@@ -373,17 +396,20 @@ const observacionesPendientes = 0;
 ```
 
 **Problema**:
+
 - El modelo `Observacion` no tiene campo para trackear si fue respondida
 - Dashboard de docente siempre muestra `0` observaciones pendientes
 - No hay forma de saber si un tutor ya leyó/respondió la observación
 
 **Impacto**: MEDIO
+
 - Feature de observaciones está incompleta
 - Docentes no pueden ver si tutores respondieron
 
 **Solución Propuesta**:
 
 1. **Migración Prisma**:
+
 ```prisma
 // prisma/schema.prisma
 model Observacion {
@@ -395,11 +421,13 @@ model Observacion {
 ```
 
 2. **Migration**:
+
 ```bash
 npx prisma migrate dev --name add-observacion-respondida
 ```
 
 3. **Actualizar servicio**:
+
 ```typescript
 // apps/api/src/docentes/docentes.service.ts
 const observacionesPendientes = await this.prisma.observacion.count({
@@ -414,6 +442,7 @@ const observacionesPendientes = await this.prisma.observacion.count({
 ```
 
 4. **Agregar endpoint para marcar como respondida**:
+
 ```typescript
 // apps/api/src/tutor/tutor.controller.ts
 @Patch('observaciones/:id/responder')
@@ -436,6 +465,7 @@ async responderObservacion(
 ### 7. Sistema de Tareas - No Implementado
 
 **Archivos**:
+
 - [apps/api/src/planificaciones/infrastructure/grupos.service.ts:149](apps/api/src/planificaciones/infrastructure/grupos.service.ts#L149)
 - [apps/api/src/planificaciones/infrastructure/grupos.service.ts:241](apps/api/src/planificaciones/infrastructure/grupos.service.ts#L241)
 
@@ -445,14 +475,17 @@ tareasTotal: 0,
 ```
 
 **Problema**:
+
 - No existe modelo ni lógica para tareas/homework
 - Dashboard de grupos siempre muestra `0/0` tareas
 
 **Impacto**: BAJO-MEDIO
+
 - Feature no es crítica para MVP
 - Puede agregarse en futuras iteraciones
 
 **Solución Propuesta**:
+
 - Crear modelo `Tarea` relacionado con `Clase` o `Planificacion`
 - Crear modelo `TareaEstudiante` para tracking de completitud
 - Agregar endpoints CRUD para tareas
@@ -476,14 +509,17 @@ private mapearTipoProducto(_tipo: string): TipoProducto {
 ```
 
 **Problema**:
+
 - Sistema de pagos solo soporta un tipo de producto
 - No hay flexibilidad para agregar nuevos productos (cursos, materiales, etc.)
 
 **Impacto**: BAJO
+
 - Funciona para MVP actual
 - Limitará expansión futura de catálogo
 
 **Solución Propuesta**:
+
 ```typescript
 private mapearTipoProducto(tipo: string): TipoProducto {
   const mapping: Record<string, TipoProducto> = {
@@ -567,12 +603,12 @@ Estos TODOs son comentarios de documentación o mejoras no críticas:
 
 ## Métricas Finales
 
-| Categoría | Antes | Después | Mejora |
-|-----------|-------|---------|--------|
-| TODOs críticos sin documentar | 29 | 0 | 100% |
-| TODOs P0 sin resolver | 2 | - | Pendiente |
-| TODOs con plan de acción | 0 | 14 | 100% |
-| TODOs con estimación | 0 | 14 | 100% |
+| Categoría                     | Antes | Después | Mejora    |
+| ----------------------------- | ----- | ------- | --------- |
+| TODOs críticos sin documentar | 29    | 0       | 100%      |
+| TODOs P0 sin resolver         | 2     | -       | Pendiente |
+| TODOs con plan de acción      | 0     | 14      | 100%      |
+| TODOs con estimación          | 0     | 14      | 100%      |
 
 ---
 
@@ -581,11 +617,13 @@ Estos TODOs son comentarios de documentación o mejoras no críticas:
 ### RIESGO: MEDIO (con P0 resueltos → BAJO)
 
 **Estado Actual**:
+
 - ✅ P1 Actions completadas (console.log, any types, npm audit)
 - ⚠️ 2 TODOs P0 críticos pendientes (25 minutos de trabajo)
 - ✅ Todos los TODOs documentados y priorizados
 
 **LISTO PARA LANZAR SI**:
+
 - Se resuelven P0.1 (rate limiting) y P0.2 (CSRF FRONTEND_URL)
 - Se verifica que .env.production tenga todas las variables necesarias
 
@@ -593,4 +631,4 @@ Estos TODOs son comentarios de documentación o mejoras no críticas:
 
 ---
 
-*Generado por Claude Code - 27 de Octubre 2025*
+_Generado por Claude Code - 27 de Octubre 2025_

@@ -30,8 +30,7 @@ export function PlanificacionClient({
   estudiante: estudianteProp,
 }: PlanificacionClientProps) {
   // Determinar código: desde prop o desde config
-  const codigoDesdeConfig =
-    config?.type === 'planificacion' ? config.codigo : undefined;
+  const codigoDesdeConfig = config?.type === 'planificacion' ? config.codigo : undefined;
   const codigo = codigoProp ?? codigoDesdeConfig;
 
   // Obtener usuario del store (fallback si no viene desde overlay)
@@ -49,11 +48,7 @@ export function PlanificacionClient({
   }
 
   // Cargar planificación dinámicamente
-  const {
-    isLoading,
-    error,
-    component: PlanificacionComponent,
-  } = usePlanificacionLoader(codigo);
+  const { isLoading, error, component: PlanificacionComponent } = usePlanificacionLoader(codigo);
 
   // Loading state
   if (isLoading) {
@@ -102,9 +97,11 @@ export function PlanificacionClient({
   if (!tieneAcceso) {
     return (
       <ErrorPlanificacion
-        error={new Error(
-          `Esta planificación requiere un nivel diferente. Tu nivel actual: ${adaptacion.nivelActual}`
-        )}
+        error={
+          new Error(
+            `Esta planificación requiere un nivel diferente. Tu nivel actual: ${adaptacion.nivelActual}`,
+          )
+        }
         codigo={codigo}
       />
     );
@@ -114,7 +111,8 @@ export function PlanificacionClient({
   // Nota: El wrapper con gradient y BackButton ya no es necesario cuando se usa en overlay
   // El OverlayRenderer maneja esos aspectos
   return (
-    <div className="w-full h-full">{/* Sin gradient aquí - lo maneja OverlayRenderer */}
+    <div className="w-full h-full">
+      {/* Sin gradient aquí - lo maneja OverlayRenderer */}
 
       {/* Badge de nivel */}
       <div className="absolute top-6 right-20 z-10 bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl px-4 py-2">

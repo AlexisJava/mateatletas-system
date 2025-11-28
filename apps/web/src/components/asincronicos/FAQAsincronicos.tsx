@@ -7,44 +7,54 @@ import { ChevronDown } from 'lucide-react';
 const faqs = [
   {
     pregunta: '¿Mi hijo realmente aprende solo viendo videos?',
-    respuesta: 'No son solo videos. Cada clase incluye ejercicios prácticos, proyectos hands-on, y desafíos que debe completar para avanzar. Además, tiene acceso a un foro donde puede hacer preguntas y ver las dudas de otros estudiantes. Es aprendizaje activo, no pasivo.'
+    respuesta:
+      'No son solo videos. Cada clase incluye ejercicios prácticos, proyectos hands-on, y desafíos que debe completar para avanzar. Además, tiene acceso a un foro donde puede hacer preguntas y ver las dudas de otros estudiantes. Es aprendizaje activo, no pasivo.',
   },
   {
     pregunta: '¿Cómo sé si mi hijo está avanzando?',
-    respuesta: 'Tenés acceso a un panel de padre/tutor donde ves en tiempo real: qué clases completó, qué proyectos entregó, cuánto tiempo está dedicando, y su progreso general. Recibís reportes semanales automáticos por email.'
+    respuesta:
+      'Tenés acceso a un panel de padre/tutor donde ves en tiempo real: qué clases completó, qué proyectos entregó, cuánto tiempo está dedicando, y su progreso general. Recibís reportes semanales automáticos por email.',
   },
   {
     pregunta: '¿Cuánto tiempo por semana necesita dedicar?',
-    respuesta: 'Depende del curso, pero en promedio 2-4 horas semanales. Lo bueno es que puede dividirlo como quiera: 30 minutos por día, o 2 horas el sábado. Total flexibilidad.'
+    respuesta:
+      'Depende del curso, pero en promedio 2-4 horas semanales. Lo bueno es que puede dividirlo como quiera: 30 minutos por día, o 2 horas el sábado. Total flexibilidad.',
   },
   {
     pregunta: '¿Hasta cuándo tiene acceso al curso?',
-    respuesta: 'Acceso DE POR VIDA. No hay vencimientos. Si necesita pausar 3 meses porque tiene exámenes en la escuela, puede volver cuando quiera. El contenido siempre estará ahí.'
+    respuesta:
+      'Acceso DE POR VIDA. No hay vencimientos. Si necesita pausar 3 meses porque tiene exámenes en la escuela, puede volver cuando quiera. El contenido siempre estará ahí.',
   },
   {
     pregunta: '¿Tiene soporte si se traba?',
-    respuesta: 'Sí. Aunque no tiene un profe en vivo, puede hacer preguntas en el foro del curso y un docente le responde en menos de 24hs. También tenemos tutoriales extra y material de apoyo.'
+    respuesta:
+      'Sí. Aunque no tiene un profe en vivo, puede hacer preguntas en el foro del curso y un docente le responde en menos de 24hs. También tenemos tutoriales extra y material de apoyo.',
   },
   {
     pregunta: '¿Es más barato que los cursos en vivo?',
-    respuesta: 'Sí. Los cursos asincrónicos cuestan aproximadamente 40% menos que los sincrónicos, porque no hay costo de coordinación de horarios ni salas virtuales. Mismo contenido, menor precio.'
+    respuesta:
+      'Sí. Los cursos asincrónicos cuestan aproximadamente 40% menos que los sincrónicos, porque no hay costo de coordinación de horarios ni salas virtuales. Mismo contenido, menor precio.',
   },
   {
     pregunta: '¿Recibe un certificado al finalizar?',
-    respuesta: 'Sí. Al completar el 100% del curso (todas las clases + proyectos), recibe un certificado digital verificable que puede compartir o agregar a su portfolio.'
+    respuesta:
+      'Sí. Al completar el 100% del curso (todas las clases + proyectos), recibe un certificado digital verificable que puede compartir o agregar a su portfolio.',
   },
   {
     pregunta: '¿Puede hacer el curso con un amigo/hermano?',
-    respuesta: 'Cada estudiante necesita su propia cuenta para que trackeemos su progreso individual. Pero sí pueden avanzar juntos, comparar proyectos, y ayudarse mutuamente.'
+    respuesta:
+      'Cada estudiante necesita su propia cuenta para que trackeemos su progreso individual. Pero sí pueden avanzar juntos, comparar proyectos, y ayudarse mutuamente.',
   },
   {
     pregunta: '¿Qué pasa si no le gusta el curso?',
-    respuesta: 'Tenés 7 días desde la compra para pedir reembolso completo si no te convence. Sin preguntas, sin vueltas. Queremos que estés 100% seguro de tu inversión.'
+    respuesta:
+      'Tenés 7 días desde la compra para pedir reembolso completo si no te convence. Sin preguntas, sin vueltas. Queremos que estés 100% seguro de tu inversión.',
   },
   {
     pregunta: '¿Son los mismos profes que los cursos en vivo?',
-    respuesta: 'Sí! Los videos están grabados por los mismos docentes que dan las clases sincrónicas. Mismo nivel de enseñanza, misma calidad, solo que pregrabado para que puedas verlo cuando quieras.'
-  }
+    respuesta:
+      'Sí! Los videos están grabados por los mismos docentes que dan las clases sincrónicas. Mismo nivel de enseñanza, misma calidad, solo que pregrabado para que puedas verlo cuando quieras.',
+  },
 ];
 
 export default function FAQAsincronicos() {
@@ -89,11 +99,13 @@ export default function FAQAsincronicos() {
               <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-white/0 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-all" />
 
               {/* Card */}
-              <div className={`relative bg-black/60 backdrop-blur-xl border-2 rounded-2xl overflow-hidden transition-all ${
-                openIndex === index
-                  ? 'border-[#0ea5e9]/50'
-                  : 'border-white/10 hover:border-white/20'
-              }`}>
+              <div
+                className={`relative bg-black/60 backdrop-blur-xl border-2 rounded-2xl overflow-hidden transition-all ${
+                  openIndex === index
+                    ? 'border-[#0ea5e9]/50'
+                    : 'border-white/10 hover:border-white/20'
+                }`}
+              >
                 {/* Pregunta - Clickeable */}
                 <button
                   onClick={() => setOpenIndex(openIndex === index ? null : index)}
@@ -122,9 +134,7 @@ export default function FAQAsincronicos() {
                       className="overflow-hidden"
                     >
                       <div className="px-6 pb-6 border-t border-white/10">
-                        <p className="text-white/70 leading-relaxed pt-4">
-                          {faq.respuesta}
-                        </p>
+                        <p className="text-white/70 leading-relaxed pt-4">{faq.respuesta}</p>
                       </div>
                     </motion.div>
                   )}
@@ -142,9 +152,7 @@ export default function FAQAsincronicos() {
           transition={{ delay: 0.5 }}
           className="mt-16 text-center"
         >
-          <p className="text-white/60 text-lg mb-4">
-            ¿Tenés otra pregunta?
-          </p>
+          <p className="text-white/60 text-lg mb-4">¿Tenés otra pregunta?</p>
           <a
             href="https://wa.me/5491234567890"
             target="_blank"

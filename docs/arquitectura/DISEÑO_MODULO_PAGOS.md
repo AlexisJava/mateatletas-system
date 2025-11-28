@@ -52,19 +52,21 @@ Dashboard financiero completo para gestionar TODA la contabilidad del club, con 
 
 **Vista de Tabla Completa:**
 
-| Tutor | Estudiantes | Actividades | Total Mes | Pagado | Pendiente | Estado | Acciones |
-|-------|-------------|-------------|-----------|--------|-----------|--------|----------|
-| Juan Pérez | 2 (Hermanos) | 4 total | $152.000 | $152.000 | $0 | ✅ Pagado | Ver detalle |
-| María López | 1 | 2 | $88.000 | $44.000 | $44.000 | ⚠️ Parcial | Registrar pago |
-| Carlos Gómez | 1 (AACREA) | 1 | $40.000 | $0 | $40.000 | 🔴 Vencido | Enviar recordatorio |
+| Tutor        | Estudiantes  | Actividades | Total Mes | Pagado   | Pendiente | Estado     | Acciones            |
+| ------------ | ------------ | ----------- | --------- | -------- | --------- | ---------- | ------------------- |
+| Juan Pérez   | 2 (Hermanos) | 4 total     | $152.000  | $152.000 | $0        | ✅ Pagado  | Ver detalle         |
+| María López  | 1            | 2           | $88.000   | $44.000  | $44.000   | ⚠️ Parcial | Registrar pago      |
+| Carlos Gómez | 1 (AACREA)   | 1           | $40.000   | $0       | $40.000   | 🔴 Vencido | Enviar recordatorio |
 
 **Filtros:**
+
 - Por mes/año
 - Por estado (Todos, Pagados, Pendientes, Vencidos, Becados)
 - Por tutor (búsqueda)
 - Por producto
 
 **Acciones masivas:**
+
 - Enviar recordatorios seleccionados
 - Marcar como pagado
 - Generar reporte Excel/PDF
@@ -99,6 +101,7 @@ Dashboard financiero completo para gestionar TODA la contabilidad del club, con 
 ```
 
 **Simulador de Precios:**
+
 - Selector: Cantidad de hermanos
 - Selector: Actividades por hermano
 - Checkbox: Tiene AACREA
@@ -150,6 +153,7 @@ Dashboard financiero completo para gestionar TODA la contabilidad del club, con 
 **Sistema Automatizado:**
 
 **Triggers:**
+
 1. **Inicio de mes**: "Tu cuota de [mes] está disponible"
 2. **Día 10**: "Recordatorio: Tu cuota vence en 5 días"
 3. **Día 15**: "⚠️ Tu cuota vence hoy"
@@ -157,6 +161,7 @@ Dashboard financiero completo para gestionar TODA la contabilidad del club, con 
 5. **Pago recibido**: "✅ Pago confirmado. Gracias!"
 
 **Configuración:**
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │ Configuración de Notificaciones                    │
@@ -195,6 +200,7 @@ Dashboard financiero completo para gestionar TODA la contabilidad del club, con 
 **Reportes Disponibles:**
 
 **A. Reporte Mensual:**
+
 - Total facturado
 - Total cobrado
 - Total pendiente
@@ -203,24 +209,28 @@ Dashboard financiero completo para gestionar TODA la contabilidad del club, con 
 - Exportar: Excel, PDF
 
 **B. Reporte Anual:**
+
 - Ingresos por mes
 - Comparativa año anterior
 - Proyección próximos meses
 - Gráficos de tendencia
 
 **C. Reporte de Morosidad:**
+
 - Tutores con pagos vencidos
 - Días de atraso
 - Monto total adeudado
 - Historial de pagos
 
 **D. Reporte de Descuentos:**
+
 - Total de descuentos aplicados
 - Por tipo (hermanos, múltiples, AACREA)
 - Impacto en ingresos
 - Estudiantes beneficiados
 
 **E. Reporte por Producto:**
+
 - Ingresos por Club Matemáticas
 - Ingresos por Cursos
 - Estudiantes por producto
@@ -285,12 +295,13 @@ Dashboard financiero completo para gestionar TODA la contabilidad del club, con 
 
 **Gestión de Becas:**
 
-| Estudiante | Tipo Beca | Descuento | Producto | Fecha Inicio | Fecha Fin | Estado |
-|------------|-----------|-----------|----------|--------------|-----------|--------|
-| Ana García | Mérito Académico | 100% | Club Mat | 01/01/2025 | 31/12/2025 | ✅ Activa |
-| Luis Torres | Beca Social | 50% | Robótica | 01/09/2024 | 31/08/2025 | ✅ Activa |
+| Estudiante  | Tipo Beca        | Descuento | Producto | Fecha Inicio | Fecha Fin  | Estado    |
+| ----------- | ---------------- | --------- | -------- | ------------ | ---------- | --------- |
+| Ana García  | Mérito Académico | 100%      | Club Mat | 01/01/2025   | 31/12/2025 | ✅ Activa |
+| Luis Torres | Beca Social      | 50%       | Robótica | 01/09/2024   | 31/08/2025 | ✅ Activa |
 
 **Crear Nueva Beca:**
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │ Crear Beca Especial                                │
@@ -313,21 +324,25 @@ Dashboard financiero completo para gestionar TODA la contabilidad del club, con 
 **Dashboards Adicionales:**
 
 **A. Tasa de Retención:**
+
 - % de estudiantes que renuevan mes a mes
 - Estudiantes que abandonaron
 - Motivos de abandono
 
 **B. Valor de Vida del Cliente (LTV):**
+
 - Promedio de meses que permanece un estudiante
 - Ingreso total promedio por estudiante
 - Productos más rentables
 
 **C. Análisis de Descuentos:**
+
 - Impacto de descuentos en ingresos
 - Descuentos más utilizados
 - Eficiencia de convenios (AACREA)
 
 **D. Comparativa Temporal:**
+
 - Mes vs mes anterior
 - Año vs año anterior
 - Tendencias estacionales
@@ -337,6 +352,7 @@ Dashboard financiero completo para gestionar TODA la contabilidad del club, con 
 ## 🎨 Diseño Visual - Mateatletas OS
 
 **Paleta de Colores:**
+
 - 💰 Verde: Pagos confirmados, ingresos positivos
 - ⚠️ Amarillo: Pagos pendientes, recordatorios
 - 🔴 Rojo: Pagos vencidos, morosidad
@@ -344,6 +360,7 @@ Dashboard financiero completo para gestionar TODA la contabilidad del club, con 
 - 🔵 Índigo: Proyecciones, estimados
 
 **Componentes Reutilizables:**
+
 - Cards con glassmorphism
 - Tablas con paginación y búsqueda
 - Gráficos con Chart.js
@@ -422,6 +439,7 @@ GET    /admin/pagos/proyecciones/anual
 ## 🚀 Fases de Implementación
 
 ### **Fase 1: Core (Esencial para v1)** ⭐
+
 1. Schema de precios configurables
 2. Cálculo automático de precios
 3. Dashboard principal con métricas
@@ -430,12 +448,14 @@ GET    /admin/pagos/proyecciones/anual
 6. Registro manual de pagos
 
 ### **Fase 2: Automatización** ⭐⭐
+
 7. Sistema de notificaciones automáticas
 8. Reportes básicos (mensual, anual)
 9. Exportación Excel/PDF
 10. Comprobantes de pago
 
 ### **Fase 3: Análisis Avanzado** ⭐⭐⭐
+
 11. Proyecciones e ingresos estimados
 12. Análisis de retención
 13. Gestión de becas

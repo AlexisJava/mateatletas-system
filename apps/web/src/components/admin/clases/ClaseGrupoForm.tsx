@@ -62,7 +62,7 @@ export function ClaseGrupoForm({
   isLoading = false,
 }: ClaseGrupoFormProps) {
   const [selectedEstudiantes, setSelectedEstudiantes] = useState<string[]>(
-    formData.estudiantesIds || []
+    formData.estudiantesIds || [],
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -88,9 +88,7 @@ export function ClaseGrupoForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Tipo */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Tipo de Grupo *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Tipo de Grupo *</label>
           <select
             value={formData.tipo}
             onChange={(e) => onFieldChange('tipo', e.target.value as TipoClaseGrupo)}
@@ -113,9 +111,7 @@ export function ClaseGrupoForm({
 
         {/* Código */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Código del Grupo *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Código del Grupo *</label>
           <input
             type="text"
             value={formData.codigo}
@@ -132,9 +128,7 @@ export function ClaseGrupoForm({
 
       {/* Nombre del Grupo */}
       <div>
-        <label className="block text-sm font-medium text-white/90 mb-1">
-          Nombre del Grupo *
-        </label>
+        <label className="block text-sm font-medium text-white/90 mb-1">Nombre del Grupo *</label>
         <input
           type="text"
           value={formData.nombre}
@@ -150,9 +144,7 @@ export function ClaseGrupoForm({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Día de la Semana */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Día de la Semana *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Día de la Semana *</label>
           <select
             value={formData.diaSemana}
             onChange={(e) => onFieldChange('diaSemana', e.target.value as DiaSemana)}
@@ -170,9 +162,7 @@ export function ClaseGrupoForm({
 
         {/* Hora Inicio */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Hora Inicio *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Hora Inicio *</label>
           <input
             type="time"
             value={formData.horaInicio}
@@ -185,9 +175,7 @@ export function ClaseGrupoForm({
 
         {/* Hora Fin */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Hora Fin *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Hora Fin *</label>
           <input
             type="time"
             value={formData.horaFin}
@@ -203,9 +191,7 @@ export function ClaseGrupoForm({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Fecha Inicio */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Fecha de Inicio *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Fecha de Inicio *</label>
           <input
             type="date"
             value={formData.fechaInicio}
@@ -219,9 +205,7 @@ export function ClaseGrupoForm({
         {/* Fecha Fin (solo para CURSO_TEMPORAL) */}
         {shouldShowFechaFin && (
           <div>
-            <label className="block text-sm font-medium text-white/90 mb-1">
-              Fecha de Fin *
-            </label>
+            <label className="block text-sm font-medium text-white/90 mb-1">Fecha de Fin *</label>
             <input
               type="date"
               value={formData.fechaFin || ''}
@@ -235,9 +219,7 @@ export function ClaseGrupoForm({
 
         {/* Año Lectivo */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Año Lectivo *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Año Lectivo *</label>
           <input
             type="number"
             value={formData.anioLectivo}
@@ -255,9 +237,7 @@ export function ClaseGrupoForm({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Docente */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Docente *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Docente *</label>
           <select
             value={formData.docenteId}
             onChange={(e) => onFieldChange('docenteId', e.target.value)}
@@ -278,9 +258,7 @@ export function ClaseGrupoForm({
 
         {/* Ruta Curricular */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Ruta Curricular
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Ruta Curricular</label>
           <select
             value={formData.rutaCurricularId || ''}
             onChange={(e) => onFieldChange('rutaCurricularId', e.target.value || undefined)}
@@ -300,9 +278,7 @@ export function ClaseGrupoForm({
 
         {/* Sector */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Sector
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Sector</label>
           <select
             value={formData.sectorId || ''}
             onChange={(e) => onFieldChange('sectorId', e.target.value || undefined)}
@@ -316,9 +292,7 @@ export function ClaseGrupoForm({
               <option key={sector.id} value={sector.id} className="bg-gray-900">
                 {sector.nombre === 'Matemática' && '🧮'}
                 {sector.nombre === 'Programación' && '💻'}
-                {sector.nombre === 'Ciencias' && '🔬'}
-                {' '}
-                {sector.nombre}
+                {sector.nombre === 'Ciencias' && '🔬'} {sector.nombre}
               </option>
             ))}
           </select>
@@ -329,9 +303,7 @@ export function ClaseGrupoForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Cupo Máximo */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Cupo Máximo *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Cupo Máximo *</label>
           <input
             type="number"
             value={formData.cupoMaximo}
@@ -346,9 +318,7 @@ export function ClaseGrupoForm({
 
         {/* Nivel */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Nivel Escolar
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Nivel Escolar</label>
           <input
             type="text"
             value={formData.nivel || ''}
@@ -367,9 +337,7 @@ export function ClaseGrupoForm({
         </label>
         <div className="max-h-48 overflow-y-auto space-y-2 p-3 bg-black/20 rounded-lg border border-emerald-500/20">
           {estudiantes.length === 0 ? (
-            <p className="text-white/50 text-sm text-center py-4">
-              No hay estudiantes disponibles
-            </p>
+            <p className="text-white/50 text-sm text-center py-4">No hay estudiantes disponibles</p>
           ) : (
             estudiantes.map((estudiante) => (
               <label

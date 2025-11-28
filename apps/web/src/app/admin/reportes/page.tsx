@@ -11,7 +11,7 @@ import {
   exportToPDF,
   formatUsersForExport,
   formatClassesForExport,
-  generateSystemReport
+  generateSystemReport,
 } from '@/lib/utils/export.utils';
 import {
   PieChart,
@@ -43,7 +43,9 @@ export default function AdminReportesPage() {
   const isLoading = useStatsLoading();
   const formatDateInput = (date: Date) => date.toISOString().substring(0, 10);
   const now = new Date();
-  const [exportStatus, setExportStatus] = useState<{ success: boolean; message: string } | null>(null);
+  const [exportStatus, setExportStatus] = useState<{ success: boolean; message: string } | null>(
+    null,
+  );
   const [dateRange, setDateRange] = useState<{ start: string; end: string }>({
     start: formatDateInput(new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())),
     end: formatDateInput(now),
@@ -75,18 +77,13 @@ export default function AdminReportesPage() {
     } else if (format === 'csv') {
       result = exportToCSV(formattedData, `usuarios-${timestamp}`);
     } else {
-      result = exportToPDF(
-        formattedData,
-        `usuarios-${timestamp}`,
-        'Listado de Usuarios',
-        [
-          { header: 'Nombre', dataKey: 'Nombre' },
-          { header: 'Email', dataKey: 'Email' },
-          { header: 'Rol', dataKey: 'Rol' },
-          { header: 'Registro', dataKey: 'Fecha de Registro' },
-          { header: 'Estado', dataKey: 'Estado' }
-        ]
-      );
+      result = exportToPDF(formattedData, `usuarios-${timestamp}`, 'Listado de Usuarios', [
+        { header: 'Nombre', dataKey: 'Nombre' },
+        { header: 'Email', dataKey: 'Email' },
+        { header: 'Rol', dataKey: 'Rol' },
+        { header: 'Registro', dataKey: 'Fecha de Registro' },
+        { header: 'Estado', dataKey: 'Estado' },
+      ]);
     }
 
     setExportStatus(result);
@@ -102,19 +99,14 @@ export default function AdminReportesPage() {
     } else if (format === 'csv') {
       result = exportToCSV(formattedData, `clases-${timestamp}`);
     } else {
-      result = exportToPDF(
-        formattedData,
-        `clases-${timestamp}`,
-        'Listado de Clases',
-        [
-          { header: 'Ruta', dataKey: 'Ruta Curricular' },
-          { header: 'Docente', dataKey: 'Docente' },
-          { header: 'Fecha', dataKey: 'Fecha' },
-          { header: 'Hora', dataKey: 'Hora' },
-          { header: 'Cupos', dataKey: 'Cupos Ocupados' },
-          { header: 'Estado', dataKey: 'Estado' }
-        ]
-      );
+      result = exportToPDF(formattedData, `clases-${timestamp}`, 'Listado de Clases', [
+        { header: 'Ruta', dataKey: 'Ruta Curricular' },
+        { header: 'Docente', dataKey: 'Docente' },
+        { header: 'Fecha', dataKey: 'Fecha' },
+        { header: 'Hora', dataKey: 'Hora' },
+        { header: 'Cupos', dataKey: 'Cupos Ocupados' },
+        { header: 'Estado', dataKey: 'Estado' },
+      ]);
     }
 
     setExportStatus(result);
@@ -150,7 +142,7 @@ export default function AdminReportesPage() {
   }
 
   // Filter data based on date range
-  const filteredUsers = users.filter(u => {
+  const filteredUsers = users.filter((u) => {
     const userDate = new Date(u.createdAt);
     const startDate = new Date(dateRange.start);
     const endDate = new Date(dateRange.end);
@@ -167,9 +159,9 @@ export default function AdminReportesPage() {
   });
 
   const usersByRole = {
-    tutores: filteredUsers.filter(u => u.role === 'tutor').length,
-    docentes: filteredUsers.filter(u => u.role === 'docente').length,
-    admins: filteredUsers.filter(u => u.role === 'admin').length,
+    tutores: filteredUsers.filter((u) => u.role === 'tutor').length,
+    docentes: filteredUsers.filter((u) => u.role === 'docente').length,
+    admins: filteredUsers.filter((u) => u.role === 'admin').length,
   };
 
   const classesByStatus = {
@@ -181,12 +173,12 @@ export default function AdminReportesPage() {
   const roleDistributionData = [
     { name: 'Tutores', value: usersByRole.tutores, color: '#3b82f6' },
     { name: 'Docentes', value: usersByRole.docentes, color: '#a855f7' },
-    { name: 'Administradores', value: usersByRole.admins, color: '#ef4444' }
+    { name: 'Administradores', value: usersByRole.admins, color: '#ef4444' },
   ];
 
   const classStatusData = [
     { name: 'Programadas', value: classesByStatus.programadas, color: '#10b981' },
-    { name: 'Canceladas', value: classesByStatus.canceladas, color: '#ef4444' }
+    { name: 'Canceladas', value: classesByStatus.canceladas, color: '#ef4444' },
   ];
 
   // Simulate user growth over last 6 months (in production, this would come from backend)
@@ -196,22 +188,22 @@ export default function AdminReportesPage() {
     { month: 'Mar', usuarios: Math.max(0, filteredUsers.length - 30) },
     { month: 'Abr', usuarios: Math.max(0, filteredUsers.length - 20) },
     { month: 'May', usuarios: Math.max(0, filteredUsers.length - 10) },
-    { month: 'Jun', usuarios: filteredUsers.length }
+    { month: 'Jun', usuarios: filteredUsers.length },
   ];
 
   // Classes by curriculum route (filtered)
-  const classesByRoute = filteredClasses.reduce((acc, clase) => {
-    const route =
-      clase.ruta_curricular?.nombre ??
-      clase.rutaCurricular?.nombre ??
-      'Sin Ruta';
-    acc[route] = (acc[route] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const classesByRoute = filteredClasses.reduce(
+    (acc, clase) => {
+      const route = clase.ruta_curricular?.nombre ?? clase.rutaCurricular?.nombre ?? 'Sin Ruta';
+      acc[route] = (acc[route] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   const routeData = Object.entries(classesByRoute).map(([name, value]) => ({
     name,
-    clases: value
+    clases: value,
   }));
 
   // Custom tooltip for charts
@@ -231,7 +223,7 @@ export default function AdminReportesPage() {
       return null;
     }
 
-    const itemLabel = label ?? (item.name ?? '');
+    const itemLabel = label ?? item.name ?? '';
 
     return (
       <div className="bg-emerald-500/[0.05] p-3 rounded-lg shadow-lg border border-gray-200">
@@ -265,9 +257,7 @@ export default function AdminReportesPage() {
           <h3 className="text-lg font-bold text-[#2a1a5e] mb-4">Rango de Fechas</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha Inicio
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Inicio</label>
               <input
                 type="date"
                 value={dateRange.start}
@@ -276,9 +266,7 @@ export default function AdminReportesPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha Fin
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Fin</label>
               <input
                 type="date"
                 value={dateRange.end}
@@ -315,7 +303,8 @@ export default function AdminReportesPage() {
           </div>
           <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-800">
-              <strong>Mostrando:</strong> {filteredUsers.length} usuarios y {filteredClasses.length} clases en el rango seleccionado
+              <strong>Mostrando:</strong> {filteredUsers.length} usuarios y {filteredClasses.length}{' '}
+              clases en el rango seleccionado
             </p>
           </div>
         </div>
@@ -352,7 +341,9 @@ export default function AdminReportesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Users Distribution - Pie Chart */}
         <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">Distribución de Usuarios por Rol</h3>
+          <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">
+            Distribución de Usuarios por Rol
+          </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -425,11 +416,15 @@ export default function AdminReportesPage() {
           <div className="mt-4 flex justify-center gap-6">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-green-500"></div>
-              <span className="text-sm text-gray-600">Programadas: {classesByStatus.programadas}</span>
+              <span className="text-sm text-gray-600">
+                Programadas: {classesByStatus.programadas}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-red-500"></div>
-              <span className="text-sm text-gray-600">Canceladas: {classesByStatus.canceladas}</span>
+              <span className="text-sm text-gray-600">
+                Canceladas: {classesByStatus.canceladas}
+              </span>
             </div>
           </div>
         </div>
@@ -437,24 +432,16 @@ export default function AdminReportesPage() {
 
       {/* User Growth Trend - Line Chart */}
       <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
-        <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">Crecimiento de Usuarios (Últimos 6 Meses)</h3>
+        <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">
+          Crecimiento de Usuarios (Últimos 6 Meses)
+        </h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={userGrowthData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis
-              dataKey="month"
-              stroke="#6b7280"
-              style={{ fontSize: '12px' }}
-            />
-            <YAxis
-              stroke="#6b7280"
-              style={{ fontSize: '12px' }}
-            />
+            <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '12px' }} />
+            <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
             <Tooltip content={<CustomTooltip />} />
-            <Legend
-              wrapperStyle={{ fontSize: '14px' }}
-              iconType="line"
-            />
+            <Legend wrapperStyle={{ fontSize: '14px' }} iconType="line" />
             <Line
               type="monotone"
               dataKey="usuarios"
@@ -485,14 +472,9 @@ export default function AdminReportesPage() {
                 textAnchor="end"
                 height={100}
               />
-              <YAxis
-                stroke="#6b7280"
-                style={{ fontSize: '12px' }}
-              />
+              <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend
-                wrapperStyle={{ fontSize: '14px' }}
-              />
+              <Legend wrapperStyle={{ fontSize: '14px' }} />
               <Bar
                 dataKey="clases"
                 fill="#8b5cf6"
@@ -508,7 +490,9 @@ export default function AdminReportesPage() {
 
       {/* Quick Stats Grid */}
       <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
-        <h3 className="text-xl font-bold text-[#2a1a5e] mb-6">Resumen Ejecutivo (Rango Seleccionado)</h3>
+        <h3 className="text-xl font-bold text-[#2a1a5e] mb-6">
+          Resumen Ejecutivo (Rango Seleccionado)
+        </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="text-center p-4 bg-gray-50 rounded-lg">
             <div className="text-3xl font-bold text-[#2a1a5e]">{classesByStatus.programadas}</div>
@@ -527,7 +511,10 @@ export default function AdminReportesPage() {
 
           <div className="text-center p-4 bg-gray-50 rounded-lg">
             <div className="text-3xl font-bold text-[#2a1a5e]">
-              {filteredClasses.length > 0 ? ((classesByStatus.programadas / filteredClasses.length) * 100).toFixed(0) : 0}%
+              {filteredClasses.length > 0
+                ? ((classesByStatus.programadas / filteredClasses.length) * 100).toFixed(0)
+                : 0}
+              %
             </div>
             <div className="text-sm text-gray-600 mt-1">Tasa de Clases Activas</div>
           </div>
@@ -608,17 +595,17 @@ export default function AdminReportesPage() {
               >
                 🎯 Generar PDF Completo
               </button>
-              <p className="text-xs opacity-75 mt-2">
-                Incluye todos los datos del sistema
-              </p>
+              <p className="text-xs opacity-75 mt-2">Incluye todos los datos del sistema</p>
             </div>
           </div>
         </div>
 
         {exportStatus && (
-          <div className={`mt-4 p-3 rounded-lg ${
-            exportStatus.success ? 'bg-green-500/20' : 'bg-red-500/20'
-          }`}>
+          <div
+            className={`mt-4 p-3 rounded-lg ${
+              exportStatus.success ? 'bg-green-500/20' : 'bg-red-500/20'
+            }`}
+          >
             <p className="text-sm font-semibold">
               {exportStatus.success ? '✅' : '❌'} {exportStatus.message}
             </p>

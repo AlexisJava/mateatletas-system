@@ -7,9 +7,11 @@
 **Estado**: ✅ **COMPLETADO - 100% Exitoso**
 
 ### Objetivo del Sprint
+
 Implementar capas adicionales de seguridad para detectar y prevenir ataques proactivamente, cumplir con estándares de compliance (GDPR, ISO 27001), y generar visibilidad completa de eventos de seguridad.
 
 ### Resultados
+
 - ✅ **4 Pasos Completados**: PASO 2.1, 2.2, 2.3, 2.4
 - ✅ **41 Tests Nuevos**: 100% pasando (6 + 10 + 12 + 13)
 - ✅ **6 Commits Atómicos**: Con documentación detallada
@@ -22,7 +24,9 @@ Implementar capas adicionales de seguridad para detectar y prevenir ataques proa
 ## 🎯 Contexto del Sprint
 
 ### Estado Pre-Sprint 2
+
 Después del Sprint 1, habíamos resuelto **7 vulnerabilidades críticas**:
+
 1. ✅ Webhooks duplicados (idempotencia)
 2. ✅ Fraude por manipulación de montos
 3. ✅ Webhooks de testing en producción
@@ -32,7 +36,9 @@ Después del Sprint 1, habíamos resuelto **7 vulnerabilidades críticas**:
 7. ✅ Inconsistencia de base de datos
 
 ### Necesidades Identificadas
+
 Sin embargo, aún necesitábamos:
+
 - 🔴 **Detección proactiva de fraude**: Múltiples pagos desde misma IP, patrones sospechosos
 - 🔴 **Rate limiting en webhooks**: Protección contra ataques DoS/DDoS
 - 🔴 **Auditoría completa**: Logs de QUIÉN hizo QUÉ y CUÁNDO (compliance GDPR)
@@ -49,25 +55,31 @@ Sin embargo, aún necesitábamos:
 **Tests**: 6/6 pasando
 
 #### Problema Resuelto
+
 Sin rate limiting, un atacante podía enviar **10,000 webhooks/segundo** provocando:
+
 - CPU al 100%
 - Base de datos saturada (5000 conexiones)
 - Usuarios legítimos recibiendo timeouts
 - Costos de cloud auto-scaling descontrolados
 
 #### Solución Implementada
+
 ```typescript
 // WebhookRateLimitGuard
 export class WebhookRateLimitGuard extends ThrottlerGuard {
-  protected readonly throttlers = [{
-    name: 'webhook',
-    ttl: 60000,      // 60 segundos
-    limit: 100,      // 100 requests por minuto por IP
-  }];
+  protected readonly throttlers = [
+    {
+      name: 'webhook',
+      ttl: 60000, // 60 segundos
+      limit: 100, // 100 requests por minuto por IP
+    },
+  ];
 }
 ```
 
 #### Características
+
 - ✅ **Límite**: 100 requests/min por IP
 - ✅ **Respuesta**: HTTP 429 (Too Many Requests)
 - ✅ **Logging**: Registra IP, timestamp, intentos bloqueados
@@ -75,6 +87,7 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
 - ✅ **Tracking por IP**: Maneja proxies (X-Forwarded-For, X-Real-IP)
 
 #### Tests Implementados
+
 1. ✅ Guard definido correctamente
 2. ✅ Configuración de throttlers presente
 3. ✅ Límite de 100 req/min configurado
@@ -83,6 +96,7 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
 6. ✅ Método getErrorMessage personalizado
 
 #### Estándares Cumplidos
+
 - **OWASP A05:2021**: Security Misconfiguration
 - **ISO 27001 A.14.2.8**: System security testing
 - **NIST 800-53 SC-5**: Denial of Service Protection
@@ -97,12 +111,15 @@ export class WebhookRateLimitGuard extends ThrottlerGuard {
 **Tests**: 10/10 pasando
 
 #### Problema Resuelto
+
 No había registro de **QUIÉN cambió QUÉ y CUÁNDO**:
+
 - Imposible rastrear origen de problemas
 - Incumplimiento de GDPR Art. 30 (Records of processing)
 - Sin trazabilidad para auditorías de compliance
 
 #### Solución Implementada
+
 ```typescript
 // Modelo AuditLog en Prisma
 model AuditLog {
@@ -123,6 +140,7 @@ model AuditLog {
 ```
 
 #### Características del AuditLogService
+
 - ✅ **Registro automático** de todos los cambios críticos
 - ✅ **Metadata JSON** para contexto adicional
 - ✅ **Queries optimizadas**: Por entidad, usuario, rango de fechas
@@ -131,6 +149,7 @@ model AuditLog {
 - ✅ **Método especial**: `logSecurityEvent()` para alertas
 
 #### Tests Implementados
+
 1. ✅ Servicio definido
 2. ✅ Registro de cambio de estado completo
 3. ✅ Registro de webhook con performedByType=SYSTEM
@@ -143,18 +162,22 @@ model AuditLog {
 10. ✅ Métodos con tipos explícitos
 
 #### Estándares Cumplidos
+
 - **GDPR Art. 30**: Records of processing activities
 - **ISO 27001 A.12.4.1**: Event logging
 - **ISO 27001 A.12.4.3**: Administrator and operator logs
 - **SOC 2 Type II**: Monitoring and alerting
 
 #### Errores Corregidos (Commit `9084e4a`)
+
 Durante auditoría encontramos **3 errores** en el PASO 2.2:
+
 1. ❌ Faltaba método `logSecurityEvent()` en AuditLogService
 2. ❌ Faltaba enum `EntityType.SYSTEM`
 3. ❌ Tests no cubrían escenario de eventos de seguridad
 
 **Solución aplicada**:
+
 ```typescript
 // Agregado en AuditLogService
 async logSecurityEvent(
@@ -182,17 +205,20 @@ async logSecurityEvent(
 **Tests**: 12/12 pasando
 
 #### Problema Resuelto
+
 Fraudes podían acumularse **sin detección inmediata**:
+
 - Múltiples pagos desde misma IP (botnet)
 - Reutilización de payment_ids
 - Inscripciones duplicadas
 - Montos incorrectos
 
 #### Solución Implementada: Score Multi-Factor
+
 ```typescript
 interface FraudRiskScore {
-  score: number;                        // 0-100
-  factors: string[];                    // Factores detectados
+  score: number; // 0-100
+  factors: string[]; // Factores detectados
   recommendation: 'ALLOW' | 'REVIEW' | 'BLOCK';
 }
 
@@ -210,12 +236,13 @@ if (amountMismatch) score += 50;
 if (duplicatePaymentId) score += 30;
 
 // Recomendación basada en score
-if (score >= 70) return 'BLOCK';    // Alto riesgo
-if (score >= 40) return 'REVIEW';   // Riesgo medio
-return 'ALLOW';                      // Bajo riesgo
+if (score >= 70) return 'BLOCK'; // Alto riesgo
+if (score >= 40) return 'REVIEW'; // Riesgo medio
+return 'ALLOW'; // Bajo riesgo
 ```
 
 #### Detecciones Implementadas
+
 1. ✅ **Múltiples pagos desde misma IP**: Detecta >10 pagos en 5 minutos
 2. ✅ **Validación de montos**: Compara contra pricing calculator
 3. ✅ **Payment ID único**: Verifica no reutilización
@@ -223,6 +250,7 @@ return 'ALLOW';                      // Bajo riesgo
 5. ✅ **Score de riesgo**: Algoritmo multi-factor (0-100)
 
 #### Tests Implementados
+
 1. ✅ Servicio definido
 2. ✅ Detectar múltiples pagos desde misma IP
 3. ✅ NO detectar fraude si pagos dentro del umbral
@@ -237,6 +265,7 @@ return 'ALLOW';                      // Bajo riesgo
 12. ✅ Métodos con tipos explícitos
 
 #### Logging Automático
+
 ```typescript
 // Cada fraude detectado se loguea automáticamente
 await this.auditLog.logFraudDetected(
@@ -249,6 +278,7 @@ await this.auditLog.logFraudDetected(
 ```
 
 #### Estándares Cumplidos
+
 - **PCI DSS 11.4**: Intrusion detection techniques
 - **OWASP A04:2021**: Insecure Design
 - **ISO 27001 A.12.2.1**: Controls against malware
@@ -263,24 +293,27 @@ await this.auditLog.logFraudDetected(
 **Tests**: 13/13 pasando
 
 #### Problema Resuelto
+
 Sin visibilidad de **qué está pasando en el sistema**:
+
 - No sabemos cuántos webhooks se rechazan
 - No detectamos patrones de ataque
 - No hay métricas de seguridad
 - No hay health checks
 
 #### Solución Implementada: Dashboard Completo
+
 ```typescript
 interface SecurityMetrics {
-  fraudsDetected: number;           // Fraudes en última hora
-  rateLimitHits: number;            // Rate limits alcanzados
-  criticalEvents: number;           // Eventos críticos
+  fraudsDetected: number; // Fraudes en última hora
+  rateLimitHits: number; // Rate limits alcanzados
+  criticalEvents: number; // Eventos críticos
   timestamp: Date;
 }
 
 interface SecurityHealth {
   status: 'healthy' | 'degraded' | 'critical';
-  score: number;                    // 0-100
+  score: number; // 0-100
   alerts: SecurityAlert[];
   lastChecked: Date;
   recommendation: string;
@@ -288,6 +321,7 @@ interface SecurityHealth {
 ```
 
 #### Métricas Implementadas
+
 1. ✅ **Fraudes detectados** (última hora)
 2. ✅ **Rate limit hits** (última hora)
 3. ✅ **Eventos críticos** (última hora)
@@ -297,6 +331,7 @@ interface SecurityHealth {
 7. ✅ **Health score** (0-100)
 
 #### Algoritmo de Health Scoring
+
 ```typescript
 let score = 100;
 
@@ -317,6 +352,7 @@ return 'critical';
 ```
 
 #### Alertas Automáticas
+
 ```typescript
 // Alerta cuando hay spike de fraudes
 async checkFraudSpike(): Promise<SecurityAlert> {
@@ -340,6 +376,7 @@ async checkFraudSpike(): Promise<SecurityAlert> {
 ```
 
 #### Tests Implementados
+
 1. ✅ Servicio definido
 2. ✅ Obtener métricas en tiempo real
 3. ✅ Detectar spike de fraudes y generar alerta crítica
@@ -355,6 +392,7 @@ async checkFraudSpike(): Promise<SecurityAlert> {
 13. ✅ Métodos con tipos explícitos
 
 #### Estándares Cumplidos
+
 - **PCI DSS 11.4**: Intrusion detection
 - **OWASP A04:2021**: Insecure Design
 - **ISO 27001 A.12.2.1**: Controls against malware
@@ -369,23 +407,27 @@ async checkFraudSpike(): Promise<SecurityAlert> {
 ## 🔧 Correcciones Post-Implementación
 
 ### Auditoría Exhaustiva (Commit `5179d36`)
+
 Después de completar los 4 pasos, realizamos una **auditoría exhaustiva** buscando errores ocultos:
 
 #### Errores Encontrados y Corregidos
 
 **Error 1: TypeScript Compilation Error**
+
 - **Archivo**: `webhook-rate-limit.guard.ts:159`
 - **Problema**: Método `getErrorMessage()` incompatible con clase base
 - **Causa**: Base class esperaba `Promise<string>`, implementación retornaba `string`
 - **Solución**: Agregado `async` y cambiado return type a `Promise<string>`
 
 **Error 2: Test Failing - Mocks Faltantes**
+
 - **Archivo**: `inscripciones-2026-transactions.spec.ts`
 - **Problema**: 12 tests fallando por dependencias no resueltas
 - **Causa**: Faltaban mocks de `WebhookIdempotencyService` y `PaymentAmountValidatorService`
 - **Solución**: Agregados imports y mocks con métodos `checkIdempotency`, `markAsProcessed`, `validatePaymentAmount`
 
 #### Resultado Final de Auditoría
+
 - ✅ **0 errores de TypeScript** (antes: 1)
 - ✅ **0 tests fallando** (antes: 12)
 - ✅ **0 usos de `any`** en código de producción
@@ -396,26 +438,30 @@ Después de completar los 4 pasos, realizamos una **auditoría exhaustiva** busc
 ## 📈 Métricas del Sprint 2
 
 ### Código Creado
-| Componente | Archivos | Líneas de Código | Tests |
-|------------|----------|------------------|-------|
-| Rate Limiting | 2 | ~350 | 6 |
-| Audit Logs | 3 | ~450 | 10 |
-| Fraud Detection | 2 | ~650 | 12 |
-| Security Monitoring | 2 | ~1100 | 13 |
-| **TOTAL** | **9** | **~2550** | **41** |
+
+| Componente          | Archivos | Líneas de Código | Tests  |
+| ------------------- | -------- | ---------------- | ------ |
+| Rate Limiting       | 2        | ~350             | 6      |
+| Audit Logs          | 3        | ~450             | 10     |
+| Fraud Detection     | 2        | ~650             | 12     |
+| Security Monitoring | 2        | ~1100            | 13     |
+| **TOTAL**           | **9**    | **~2550**        | **41** |
 
 ### Tests
+
 - **Total Tests Sprint 2**: 41/41 pasando (100%)
 - **Total Tests Proyecto**: 73 (Sprint 1) + 41 (Sprint 2) = **114 tests**
 - **Cobertura**: 100% de funcionalidad crítica de seguridad
 
 ### Commits
+
 - **Total Commits**: 6
 - **Commits de Features**: 4 (PASO 2.1, 2.2, 2.3, 2.4)
 - **Commits de Fixes**: 2 (auditoría PASO 2.2, auditoría final)
 - **Formato**: Todos con mensajes descriptivos y estándares de seguridad
 
 ### Tiempo de Desarrollo
+
 - **Inicio**: 2025-01-22
 - **Finalización**: 2025-01-22
 - **Duración**: 1 día
@@ -426,10 +472,12 @@ Después de completar los 4 pasos, realizamos una **auditoría exhaustiva** busc
 ## 🛡️ Estándares de Seguridad Cumplidos
 
 ### OWASP Top 10 (2021)
+
 - ✅ **A04:2021 - Insecure Design**: Fraud detection y security monitoring
 - ✅ **A05:2021 - Security Misconfiguration**: Rate limiting configurado
 
 ### ISO 27001
+
 - ✅ **A.12.2.1**: Controls against malware (fraud detection)
 - ✅ **A.12.4.1**: Event logging (audit logs)
 - ✅ **A.12.4.3**: Administrator and operator logs (audit logs)
@@ -437,17 +485,21 @@ Después de completar los 4 pasos, realizamos una **auditoría exhaustiva** busc
 - ✅ **A.16.1.2**: Reporting information security events (monitoring)
 
 ### PCI DSS
+
 - ✅ **Req 10.6**: Review logs and security events (monitoring)
 - ✅ **Req 11.4**: Intrusion detection (fraud detection)
 
 ### NIST 800-53
+
 - ✅ **SC-5**: Denial of Service Protection (rate limiting)
 - ✅ **SI-4**: Information System Monitoring (monitoring)
 
 ### GDPR
+
 - ✅ **Art. 30**: Records of processing activities (audit logs)
 
 ### Otros
+
 - ✅ **SOC 2 Type II**: Monitoring and alerting
 - ✅ **CWE-770**: Allocation of Resources Without Limits (rate limiting)
 
@@ -523,6 +575,7 @@ Después de completar los 4 pasos, realizamos una **auditoría exhaustiva** busc
 ## 📦 Archivos Creados/Modificados
 
 ### Archivos Nuevos (9)
+
 ```
 src/inscripciones-2026/guards/
   ├── webhook-rate-limit.guard.ts              (PASO 2.1)
@@ -547,6 +600,7 @@ src/security/__tests__/
 ```
 
 ### Archivos Modificados (4)
+
 ```
 src/security/
   ├── security.module.ts                       (Exports de servicios)
@@ -562,6 +616,7 @@ src/inscripciones-2026/__tests__/
 ```
 
 ### Migraciones Prisma (1)
+
 ```
 prisma/migrations/
   └── 20250122_create_audit_logs/              (Tabla audit_log)

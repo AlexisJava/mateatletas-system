@@ -15,8 +15,6 @@ export const getTimePartFromISO = (isoString: string, fallback = '00:00') => {
   return timePart.slice(0, 5) || fallback;
 };
 
-export const buildISODateTime = (date: string, time: string) =>
-  `${date}T${time}:00.000Z`;
+export const buildISODateTime = (date: string, time: string) => `${date}T${time}:00.000Z`;
 
-export const buildEndOfDayISO = (date: string) =>
-  `${date}T23:59:59.999Z`;
+export const buildEndOfDayISO = (date: string) => `${date}T23:59:59.999Z`;

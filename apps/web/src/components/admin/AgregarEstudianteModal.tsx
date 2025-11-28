@@ -51,16 +51,22 @@ interface Props {
   sectorNombre: string;
 }
 
-export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sectorId, sectorNombre }: Props) {
+export default function AgregarEstudianteModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  sectorId,
+  sectorNombre,
+}: Props) {
   const [estudiantes, setEstudiantes] = useState<EstudianteForm[]>([
-    { nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '', sectoresAdicionales: [] }
+    { nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '', sectoresAdicionales: [] },
   ]);
   const [tutor, setTutor] = useState<TutorForm>({
     nombre: '',
     apellido: '',
     email: '',
     telefono: '',
-    dni: ''
+    dni: '',
   });
   const [sectoresDisponibles, setSectoresDisponibles] = useState<Sector[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,7 +92,10 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
   }, [isOpen, loadSectores]);
 
   const handleAgregarEstudiante = () => {
-    setEstudiantes([...estudiantes, { nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '', sectoresAdicionales: [] }]);
+    setEstudiantes([
+      ...estudiantes,
+      { nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '', sectoresAdicionales: [] },
+    ]);
   };
 
   const handleEliminarEstudiante = (index: number) => {
@@ -117,7 +126,7 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
 
     let nuevosSectores: string[];
     if (sectoresActuales.includes(sectorIdToggle)) {
-      nuevosSectores = sectoresActuales.filter(id => id !== sectorIdToggle);
+      nuevosSectores = sectoresActuales.filter((id) => id !== sectorIdToggle);
     } else {
       nuevosSectores = [...sectoresActuales, sectorIdToggle];
     }
@@ -136,7 +145,9 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
 
     try {
       // Validar que al menos un estudiante tenga datos
-      const estudiantesValidos = estudiantes.filter(est => est.nombre && est.apellido && est.edad && est.nivel_escolar);
+      const estudiantesValidos = estudiantes.filter(
+        (est) => est.nombre && est.apellido && est.edad && est.nivel_escolar,
+      );
 
       if (estudiantesValidos.length === 0) {
         setError('Debes agregar al menos un estudiante con todos los campos requeridos');
@@ -189,7 +200,10 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
                 sectorId: sectorDestino,
               });
             } catch (err) {
-              console.error(`Error al copiar estudiante ${estudiante.id} a sector ${sectorDestino}:`, err);
+              console.error(
+                `Error al copiar estudiante ${estudiante.id} a sector ${sectorDestino}:`,
+                err,
+              );
             }
           }
         }
@@ -206,7 +220,9 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
 
   const handleFinalizar = () => {
     setCredenciales(null);
-    setEstudiantes([{ nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '', sectoresAdicionales: [] }]);
+    setEstudiantes([
+      { nombre: '', apellido: '', edad: '', nivel_escolar: '', email: '', sectoresAdicionales: [] },
+    ]);
     setTutor({ nombre: '', apellido: '', email: '', telefono: '', dni: '' });
     setError(null);
     setIsSubmitting(false);
@@ -281,7 +297,10 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
                 Credenciales de Estudiante(s)
               </h3>
               {credenciales.estudiantes.map((est, index) => (
-                <div key={index} className="backdrop-blur-xl bg-blue-500/[0.08] border border-blue-500/20 rounded-xl p-6">
+                <div
+                  key={index}
+                  className="backdrop-blur-xl bg-blue-500/[0.08] border border-blue-500/20 rounded-xl p-6"
+                >
                   <h4 className="text-md font-bold text-blue-300 mb-4">{est.nombre}</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -291,7 +310,9 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
                       </div>
                     </div>
                     <div>
-                      <label className="text-white/60 text-sm mb-1 block">Contraseña Temporal</label>
+                      <label className="text-white/60 text-sm mb-1 block">
+                        Contraseña Temporal
+                      </label>
                       <div className="px-4 py-3 bg-black/30 rounded-lg border border-blue-500/20 font-mono text-blue-300 font-semibold">
                         {est.password}
                       </div>
@@ -363,7 +384,10 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
             </div>
 
             {estudiantes.map((estudiante, index) => (
-              <div key={index} className="backdrop-blur-xl bg-blue-500/[0.08] border border-blue-500/20 rounded-xl p-6 space-y-4">
+              <div
+                key={index}
+                className="backdrop-blur-xl bg-blue-500/[0.08] border border-blue-500/20 rounded-xl p-6 space-y-4"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-md font-bold text-blue-300">Estudiante {index + 1}</h4>
                   {estudiantes.length > 1 && (
@@ -413,7 +437,13 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
                     <input
                       type="number"
                       value={estudiante.edad}
-                      onChange={(e) => handleEstudianteChange(index, 'edad', e.target.value ? parseInt(e.target.value) : '')}
+                      onChange={(e) =>
+                        handleEstudianteChange(
+                          index,
+                          'edad',
+                          e.target.value ? parseInt(e.target.value) : '',
+                        )
+                      }
                       className="w-full px-4 py-3 bg-black/30 border border-blue-500/20 rounded-lg text-white placeholder-white/40 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
                       placeholder="10"
                       min="3"
@@ -429,7 +459,9 @@ export default function AgregarEstudianteModal({ isOpen, onClose, onSuccess, sec
                     <input
                       type="text"
                       value={estudiante.nivel_escolar}
-                      onChange={(e) => handleEstudianteChange(index, 'nivel_escolar', e.target.value)}
+                      onChange={(e) =>
+                        handleEstudianteChange(index, 'nivel_escolar', e.target.value)
+                      }
                       className="w-full px-4 py-3 bg-black/30 border border-blue-500/20 rounded-lg text-white placeholder-white/40 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
                       placeholder="5to grado"
                       required

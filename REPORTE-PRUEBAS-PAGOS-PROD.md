@@ -22,9 +22,11 @@
 ## 🎯 PRUEBAS REALIZADAS
 
 ### 1️⃣ INSCRIPCIÓN 2026 (CICLO STEAM)
+
 **Estado: ✅ ÉXITO TOTAL**
 
 **Request:**
+
 ```json
 POST /api/inscripciones-2026
 {
@@ -47,16 +49,19 @@ POST /api/inscripciones-2026
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
   "inscripcionId": "cmic7o7b60002n001ophc5lxe",
   "tutorId": "cmic7o77k0000n0018474od9l",
-  "estudiantes_creados": [{
-    "id": "cmic7o8260004n0017eqm7boh",
-    "nombre": "Estudiante MP Test",
-    "pin": "1602"
-  }],
+  "estudiantes_creados": [
+    {
+      "id": "cmic7o8260004n0017eqm7boh",
+      "nombre": "Estudiante MP Test",
+      "pin": "1602"
+    }
+  ],
   "pago_info": {
     "monto_total": 50000,
     "descuento_aplicado": 0,
@@ -67,6 +72,7 @@ POST /api/inscripciones-2026
 ```
 
 **Validaciones:**
+
 - ✅ Tutor creado en BD
 - ✅ Estudiante creado con PIN
 - ✅ Inscripción registrada
@@ -77,9 +83,11 @@ POST /api/inscripciones-2026
 ---
 
 ### 2️⃣ COLONIA DE VERANO 2026
+
 **Estado: ✅ ÉXITO TOTAL**
 
 **Request:**
+
 ```json
 POST /api/colonia/inscripcion
 {
@@ -117,16 +125,19 @@ POST /api/colonia/inscripcion
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Inscripción creada exitosamente",
   "tutorId": "cmic7x7tl000dn00143fbdsca",
   "inscriptionId": "cmic7x7x3000fn001yidskmgq",
-  "estudiantes": [{
-    "nombre": "Niño Matemático",
-    "username": "niñomatemático4296",
-    "pin": "2742"
-  }],
+  "estudiantes": [
+    {
+      "nombre": "Niño Matemático",
+      "username": "niñomatemático4296",
+      "pin": "2742"
+    }
+  ],
   "pago": {
     "mes": "enero",
     "monto": 90992,
@@ -137,6 +148,7 @@ POST /api/colonia/inscripcion
 ```
 
 **Validaciones:**
+
 - ✅ Tutor creado
 - ✅ Estudiante creado con username y PIN
 - ✅ 2 cursos seleccionados (Matemática + Programación)
@@ -148,6 +160,7 @@ POST /api/colonia/inscripcion
 ---
 
 ### 3️⃣ MEMBRESÍA
+
 **Estado: ⚠️ NO PROBADO**
 
 **Razón:** Requiere autenticación JWT con cookies HTTP-only.
@@ -159,6 +172,7 @@ POST /api/colonia/inscripcion
 ---
 
 ### 4️⃣ CURSO/INSCRIPCIÓN MENSUAL
+
 **Estado: ⚠️ NO PROBADO**
 
 **Razón:** Requiere autenticación JWT.
@@ -172,24 +186,28 @@ POST /api/colonia/inscripcion
 ## 🔧 PROBLEMAS ENCONTRADOS Y SOLUCIONADOS
 
 ### Problema 1: BUG CRÍTICO - Doble descuento en cálculo de precios
+
 **Severidad:** 🔴 CRÍTICA - Pérdida de ingresos
 **Error:** Sistema aplicaba doble descuento en Colonia de Verano
 
 **Impacto financiero:**
+
 - Ejemplo: 1 estudiante, 2 cursos
 - Precio esperado: $96,800 (2 × $55,000 - 12%)
 - Precio cobrado: $90,992 (doble descuento del 12%)
 - **Pérdida por inscripción: $5,808 (17.28% descuento en lugar de 12%)**
 
 **Causa raíz:**
+
 ```typescript
 // ANTES (BUGUEADO):
-subtotal += PRECIOS.COLONIA_CURSO_BASE;           // $55,000
+subtotal += PRECIOS.COLONIA_CURSO_BASE; // $55,000
 subtotal += PRECIOS.COLONIA_SEGUNDO_CURSO * (numCursos - 1); // $48,400 (YA con 12% desc)
 // Luego aplicaba OTRO 12% sobre el subtotal → doble descuento
 ```
 
 **Solución aplicada:**
+
 ```typescript
 // DESPUÉS (CORRECTO):
 cursosPerStudent.forEach((numCursos) => {
@@ -199,6 +217,7 @@ cursosPerStudent.forEach((numCursos) => {
 ```
 
 **Archivos modificados:**
+
 - `apps/api/src/domain/services/pricing-calculator.service.ts:77-96`
 - `apps/api/src/domain/constants/pricing.constants.ts:51-55` (deprecado COLONIA_SEGUNDO_CURSO)
 
@@ -208,14 +227,17 @@ cursosPerStudent.forEach((numCursos) => {
 ---
 
 ### Problema 2: Prisma CLI no disponible en producción
+
 **Error:** `Cannot find module '@prisma/engines'`
 
 **Causa raíz:**
+
 - `prisma` estaba en `devDependencies`
 - `yarn workspaces focus --production` NO instalaba devDependencies
 - Al copiar manualmente el binario faltaban sus dependencias
 
 **Solución aplicada:**
+
 ```json
 // apps/api/package.json
 "dependencies": {
@@ -225,6 +247,7 @@ cursosPerStudent.forEach((numCursos) => {
 ```
 
 **Dockerfile simplificado:**
+
 ```dockerfile
 # Ya no necesita COPY manual de prisma
 RUN yarn workspaces focus api --production
@@ -236,11 +259,13 @@ RUN yarn workspaces focus api --production
 ---
 
 ### Problema 2: Token de MercadoPago con salto de línea
+
 **Error:** `Bearer APP_USR-xxx\n is not a legal HTTP header value`
 
 **Causa:** Variable de entorno en Railway tenía un `\n` al final
 
 **Solución:**
+
 1. Actualizar token sin salto de línea
 2. Forzar redeploy: `railway up --detach`
 
@@ -251,21 +276,24 @@ RUN yarn workspaces focus api --production
 ## 💰 TABLA DE PRECIOS CORRECTA (POST-FIX)
 
 ### Colonia de Verano 2026
-| Escenario | Subtotal | Descuento | Total | Regla |
-|-----------|----------|-----------|-------|-------|
-| 1 estudiante, 1 curso | $55,000 | 0% | **$55,000** | Sin descuento |
-| 1 estudiante, 2 cursos | $110,000 | 12% | **$96,800** | 2+ cursos |
-| 2 hermanos, 1 curso c/u | $110,000 | 12% | **$96,800** | 2+ hermanos |
-| 2 hermanos, 2 cursos c/u | $220,000 | 20% | **$176,000** | 2+ hermanos Y 2+ cursos |
+
+| Escenario                | Subtotal | Descuento | Total        | Regla                   |
+| ------------------------ | -------- | --------- | ------------ | ----------------------- |
+| 1 estudiante, 1 curso    | $55,000  | 0%        | **$55,000**  | Sin descuento           |
+| 1 estudiante, 2 cursos   | $110,000 | 12%       | **$96,800**  | 2+ cursos               |
+| 2 hermanos, 1 curso c/u  | $110,000 | 12%       | **$96,800**  | 2+ hermanos             |
+| 2 hermanos, 2 cursos c/u | $220,000 | 20%       | **$176,000** | 2+ hermanos Y 2+ cursos |
 
 ### Inscripción 2026 (Ciclo STEAM)
-| Hermanos | Precio/mes c/u | Subtotal | Descuento | Total/mes |
-|----------|---------------|----------|-----------|-----------|
-| 1 estudiante | $60,000 | $60,000 | 0% | **$60,000** |
-| 2 hermanos | $60,000 | $120,000 | 12% | **$105,600** |
-| 3+ hermanos | $60,000 | $180,000 | 24% | **$136,800** |
+
+| Hermanos     | Precio/mes c/u | Subtotal | Descuento | Total/mes    |
+| ------------ | -------------- | -------- | --------- | ------------ |
+| 1 estudiante | $60,000        | $60,000  | 0%        | **$60,000**  |
+| 2 hermanos   | $60,000        | $120,000 | 12%       | **$105,600** |
+| 3+ hermanos  | $60,000        | $180,000 | 24%       | **$136,800** |
 
 ### Tarifas de Inscripción (One-time)
+
 - Solo Colonia: **$25,000**
 - Solo Ciclo 2026: **$50,000**
 - Pack Completo (Colonia + Ciclo): **$60,000** (descuento ya incluido)
@@ -275,6 +303,7 @@ RUN yarn workspaces focus api --production
 ## 📊 CONFIGURACIÓN DE MERCADOPAGO
 
 ### Credenciales utilizadas (TEST)
+
 ```
 MERCADOPAGO_ACCESS_TOKEN=APP_USR-6184663949520525-110200-***
 Tipo: TEST (sandbox)
@@ -282,6 +311,7 @@ Cuenta: 2903097924
 ```
 
 ### Endpoints de Webhook configurados
+
 ```
 ✅ /api/pagos/webhook
 ✅ /api/inscripciones-2026/webhook
@@ -289,6 +319,7 @@ Cuenta: 2903097924
 ```
 
 ### Tarjetas de prueba disponibles
+
 ```
 Mastercard APROBADA: 5031 7557 3453 0604 | CVV: 123 | Venc: 11/25
 Visa APROBADA:       4509 9535 6623 3704 | CVV: 123 | Venc: 11/25
@@ -300,11 +331,13 @@ Visa RECHAZADA:      4507 3896 6823 8709 | CVV: 123 | Venc: 11/25
 ## 💳 URLS DE PAGO GENERADAS
 
 ### Inscripción 2026
+
 ```
 https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=2903097924-20a62448-ee83-4bca-b711-44598ad4fc44
 ```
 
 ### Colonia de Verano
+
 ```
 https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=2903097924-948c5b26-21a9-47ff-bd5a-9f186dddb546
 ```
@@ -316,19 +349,23 @@ https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=2903097924-948c5b26-
 ## 🗄️ DATOS CREADOS EN BD (Railway)
 
 ### Tutores de prueba
+
 1. `test-pagos@mateatletas.com` - Usuario manual (id: cmic62bdt0000qo01b4zdziay)
 2. `juan.mp.final@test.com` - Inscripción 2026 (id: cmic7o77k0000n0018474od9l)
 3. `maria.colonia.real@test.com` - Colonia (id: cmic7x7tl000dn00143fbdsca)
 
 ### Estudiantes creados
+
 1. "Estudiante MP Test" - PIN: 1602
 2. "Niño Matemático" - Username: niñomatemático4296 - PIN: 2742
 
 ### Inscripciones
+
 1. Inscripción 2026: `cmic7o7b60002n001ophc5lxe` - Estado: PENDIENTE - Monto: $50,000
 2. Colonia: `cmic7x7x3000fn001yidskmgq` - Estado: PENDIENTE - Monto: $90,992
 
 ### Productos disponibles
+
 ```
 - Suscripción Anual: $24,000
 - Club Matemáticas: $50,000
@@ -342,17 +379,20 @@ https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=2903097924-948c5b26-
 ## ✅ VERIFICACIONES DE SEGURIDAD
 
 ### 1. Validación de entrada
+
 - ✅ DTOs con class-validator funcionando
 - ✅ Validación de edad (6-17 años para Colonia, 5-17 para Inscripción 2026)
 - ✅ Validación de email, teléfono, DNI, CUIL
 - ✅ Validación de contraseña (mínimo 8 chars, mayúscula, número)
 
 ### 2. Guards de autenticación
+
 - ✅ JWT Guard activo en endpoints privados
 - ✅ CSRF Guard activo en login
 - ✅ Webhook Guard con validación HMAC
 
 ### 3. Circuit Breaker
+
 - ✅ Activo para llamadas a MercadoPago
 - ✅ 3 intentos antes de abrir circuito
 - ✅ Logs detallados de fallos
@@ -362,6 +402,7 @@ https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=2903097924-948c5b26-
 ## 🎯 PRÓXIMOS PASOS RECOMENDADOS
 
 ### Pruebas pendientes
+
 1. ☐ Simular pago completo con tarjeta de prueba
 2. ☐ Verificar llegada de webhook de pago aprobado
 3. ☐ Confirmar actualización de estado en BD (PENDIENTE → CONFIRMADA)
@@ -369,6 +410,7 @@ https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=2903097924-948c5b26-
 5. ☐ Probar endpoints autenticados (Membresía, Curso)
 
 ### Mejoras sugeridas
+
 1. ☐ Endpoint de admin para generar JWT tokens de prueba
 2. ☐ Dashboard de métricas de pagos
 3. ☐ Logs más detallados de webhooks
@@ -393,6 +435,7 @@ https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=2903097924-948c5b26-
 ## 🎓 CURSOS REALES DE COLONIA VERIFICADOS
 
 ### Matemática (6 cursos)
+
 - mat-juegos-desafios - Matemática con Juegos y Desafíos (8-9 años)
 - mat-proyectos-reales - Matemática en Acción (10-12 años)
 - mat-superheroes - Superhéroes de los Números (6-7 años)
@@ -401,12 +444,14 @@ https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=2903097924-948c5b26-
 - mat-dominio-operaciones - Dominio de Operaciones (8-9 años)
 
 ### Programación (4 cursos)
+
 - prog-scratch - Videojuegos con Scratch (8-9 años)
 - prog-robotica - Robótica con Arduino (10-12 años)
 - prog-roblox - Roblox Studio (10-12 años)
 - prog-godot - Godot Engine (13-17 años)
 
 ### Ciencias (2 cursos)
+
 - cienc-dinosaurios - Paleontología (8-12 años)
 - cienc-tierra - Expedición Tierra (8-12 años)
 
@@ -417,6 +462,7 @@ https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=2903097924-948c5b26-
 **⚠️ IMPORTANTE:** Este reporte contiene información de prueba. Las credenciales de MercadoPago son de TEST/sandbox y NO funcionan para pagos reales.
 
 Para producción real:
+
 1. Reemplazar `MERCADOPAGO_ACCESS_TOKEN` con token de producción
 2. Cambiar `MERCADOPAGO_PUBLIC_KEY` a producción
 3. Verificar que los webhooks apunten a la URL de producción
@@ -442,6 +488,7 @@ El sistema tenía un error que causaba **pérdida de ingresos del 5.28%** en ins
 ⚠️ **Endpoints autenticados:** No probados (requieren JWT manual)
 
 **Acciones requeridas antes de producción:**
+
 1. 🔴 **CRÍTICO:** Hacer commit y deploy del fix de pricing
 2. 🟡 Realizar una prueba de pago real en sandbox
 3. 🟡 Verificar webhook de pago aprobado

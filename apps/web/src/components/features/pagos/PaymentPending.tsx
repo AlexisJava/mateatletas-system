@@ -18,10 +18,7 @@ interface PaymentPendingProps {
   onVolverInicio?: () => void;
 }
 
-export function PaymentPending({
-  onVerEstado,
-  onVolverInicio,
-}: PaymentPendingProps) {
+export function PaymentPending({ onVerEstado, onVolverInicio }: PaymentPendingProps) {
   return (
     <Card className="max-w-2xl mx-auto text-center space-y-6 py-12 border-4 border-[#f7b801] shadow-[8px_8px_0px_rgba(0,0,0,1)]">
       {/* Ícono de reloj */}
@@ -42,9 +39,7 @@ export function PaymentPending({
       </div>
 
       {/* Título */}
-      <h1 className="font-[family-name:var(--font-fredoka)] text-4xl text-dark">
-        Pago en proceso
-      </h1>
+      <h1 className="font-[family-name:var(--font-fredoka)] text-4xl text-dark">Pago en proceso</h1>
 
       {/* Mensaje */}
       <p className="text-lg text-gray-700 px-6">
@@ -68,21 +63,15 @@ export function PaymentPending({
         <ul className="space-y-2 text-sm text-gray-700">
           <li className="flex items-start gap-2">
             <span className="text-[#f7b801] mt-0.5">•</span>
-            <span>
-              Te notificaremos por correo cuando se complete el pago
-            </span>
+            <span>Te notificaremos por correo cuando se complete el pago</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-[#f7b801] mt-0.5">•</span>
-            <span>
-              Puedes cerrar esta página de forma segura
-            </span>
+            <span>Puedes cerrar esta página de forma segura</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-[#f7b801] mt-0.5">•</span>
-            <span>
-              El proceso puede tardar hasta 48 horas
-            </span>
+            <span>El proceso puede tardar hasta 48 horas</span>
           </li>
         </ul>
       </div>

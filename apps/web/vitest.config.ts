@@ -42,9 +42,7 @@ export default defineConfig({
       },
 
       // Incluir
-      include: [
-        'src/**/*.{ts,tsx}',
-      ],
+      include: ['src/**/*.{ts,tsx}'],
 
       // Excluir de coverage
       exclude: [

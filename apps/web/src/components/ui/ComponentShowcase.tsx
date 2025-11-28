@@ -46,12 +46,9 @@ export default function ComponentShowcase() {
       <div className="max-w-6xl mx-auto space-y-12">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-5xl font-bold text-[#2a1a5e]">
-            🎮 UI Components Showcase
-          </h1>
+          <h1 className="text-5xl font-bold text-[#2a1a5e]">🎮 UI Components Showcase</h1>
           <p className="text-xl text-[#2a1a5e]/70">
-            Componentes con estilo Crash Bandicoot - Chunky, vibrante y
-            divertido
+            Componentes con estilo Crash Bandicoot - Chunky, vibrante y divertido
           </p>
         </div>
 
@@ -60,9 +57,7 @@ export default function ComponentShowcase() {
           <div className="space-y-8">
             {/* Button Variants */}
             <div>
-              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">
-                Variantes
-              </h4>
+              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">Variantes</h4>
               <div className="flex flex-wrap gap-4">
                 <Button variant="primary" onClick={handleButtonClick}>
                   Primary Button
@@ -81,9 +76,7 @@ export default function ComponentShowcase() {
 
             {/* Button Sizes */}
             <div>
-              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">
-                Tamaños
-              </h4>
+              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">Tamaños</h4>
               <div className="flex flex-wrap items-center gap-4">
                 <Button variant="primary" size="sm">
                   Small
@@ -99,9 +92,7 @@ export default function ComponentShowcase() {
 
             {/* Button States */}
             <div>
-              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">
-                Estados
-              </h4>
+              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">Estados</h4>
               <div className="flex flex-wrap gap-4">
                 <Button variant="primary" disabled>
                   Disabled
@@ -119,21 +110,13 @@ export default function ComponentShowcase() {
           <div className="space-y-6">
             {/* Basic Input */}
             <div>
-              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">
-                Input básico
-              </h4>
-              <Input
-                label="Nombre de usuario"
-                placeholder="Ingresa tu nombre"
-                required
-              />
+              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">Input básico</h4>
+              <Input label="Nombre de usuario" placeholder="Ingresa tu nombre" required />
             </div>
 
             {/* Input with validation */}
             <div>
-              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">
-                Input con validación
-              </h4>
+              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">Input con validación</h4>
               <Input
                 label="Email"
                 type="email"
@@ -150,28 +133,16 @@ export default function ComponentShowcase() {
 
             {/* Disabled Input */}
             <div>
-              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">
-                Input deshabilitado
-              </h4>
-              <Input
-                label="Campo bloqueado"
-                value="No editable"
-                disabled
-              />
+              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">Input deshabilitado</h4>
+              <Input label="Campo bloqueado" value="No editable" disabled />
             </div>
 
             {/* Input types */}
             <div>
-              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">
-                Tipos de input
-              </h4>
+              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">Tipos de input</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input label="Text" type="text" placeholder="Texto normal" />
-                <Input
-                  label="Password"
-                  type="password"
-                  placeholder="••••••••"
-                />
+                <Input label="Password" type="password" placeholder="••••••••" />
                 <Input label="Email" type="email" placeholder="email@example.com" />
                 <Input label="Number" type="number" placeholder="123" />
                 <Input label="Date" type="date" />
@@ -186,48 +157,37 @@ export default function ComponentShowcase() {
           <div className="space-y-6">
             {/* Basic Card */}
             <div>
-              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">
-                Card básica
-              </h4>
+              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">Card básica</h4>
               <Card>
-                <p>
-                  Esta es una card básica sin título. Ideal para agrupar
-                  contenido relacionado.
-                </p>
+                <p>Esta es una card básica sin título. Ideal para agrupar contenido relacionado.</p>
               </Card>
             </div>
 
             {/* Card with title */}
             <div>
-              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">
-                Card con título
-              </h4>
+              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">Card con título</h4>
               <Card title="Título de la Card">
                 <p>
-                  Esta card tiene un título con estilo Crash Bandicoot. El
-                  título tiene un borde inferior naranja.
+                  Esta card tiene un título con estilo Crash Bandicoot. El título tiene un borde
+                  inferior naranja.
                 </p>
               </Card>
             </div>
 
             {/* Hoverable Card */}
             <div>
-              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">
-                Card interactiva (hover)
-              </h4>
+              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">Card interactiva (hover)</h4>
               <Card title="Card con Hover" hoverable>
                 <p>
-                  Pasa el mouse sobre esta card para ver el efecto lift. Ideal
-                  para cards clickeables o navegables.
+                  Pasa el mouse sobre esta card para ver el efecto lift. Ideal para cards
+                  clickeables o navegables.
                 </p>
               </Card>
             </div>
 
             {/* Grid of cards */}
             <div>
-              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">
-                Grid de cards
-              </h4>
+              <h4 className="text-lg font-bold text-[#2a1a5e] mb-4">Grid de cards</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card title="Card 1" hoverable>
                   <p>Contenido de la primera card</p>
@@ -246,18 +206,8 @@ export default function ComponentShowcase() {
         {/* Combined Example */}
         <Card title="🎨 Ejemplo Combinado: Formulario de Login">
           <div className="max-w-md mx-auto space-y-6">
-            <Input
-              label="Email"
-              type="email"
-              placeholder="tu@email.com"
-              required
-            />
-            <Input
-              label="Contraseña"
-              type="password"
-              placeholder="••••••••"
-              required
-            />
+            <Input label="Email" type="email" placeholder="tu@email.com" required />
+            <Input label="Contraseña" type="password" placeholder="••••••••" required />
             <div className="flex gap-4">
               <Button variant="primary" size="lg" className="flex-1">
                 Iniciar Sesión

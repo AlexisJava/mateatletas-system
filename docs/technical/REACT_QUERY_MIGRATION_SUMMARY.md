@@ -10,14 +10,15 @@
 
 ### Migración Completada
 
-| Componente | Antes (Zustand) | Después (React Query) | LOC Reducido | Mejora |
-|------------|----------------|----------------------|--------------|---------|
-| **NotificationCenter** | 217 líneas | 190 líneas | -27 (-12%) | ✅ |
-| **Notificaciones Store** | 130 líneas (store) | 0 líneas (eliminado) | -130 | ✅ |
-| **Custom Hooks** | 0 líneas | 287 líneas (nuevos) | +287 | ✅ |
-| **Total Neto** | 347 líneas | 477 líneas | +130 | 🟡 Ver beneficios |
+| Componente               | Antes (Zustand)    | Después (React Query) | LOC Reducido | Mejora            |
+| ------------------------ | ------------------ | --------------------- | ------------ | ----------------- |
+| **NotificationCenter**   | 217 líneas         | 190 líneas            | -27 (-12%)   | ✅                |
+| **Notificaciones Store** | 130 líneas (store) | 0 líneas (eliminado)  | -130         | ✅                |
+| **Custom Hooks**         | 0 líneas           | 287 líneas (nuevos)   | +287         | ✅                |
+| **Total Neto**           | 347 líneas         | 477 líneas            | +130         | 🟡 Ver beneficios |
 
 **Nota:** A pesar del incremento en LOC, los beneficios superan el costo:
+
 - Cache automático
 - Optimistic updates
 - Background refetching
@@ -31,11 +32,13 @@
 ### ✅ 1. Instalación y Configuración de React Query
 
 **Paquetes instalados:**
+
 ```bash
 npm install @tanstack/react-query @tanstack/react-query-devtools
 ```
 
 **Configuración en `lib/providers/QueryProvider.tsx`:**
+
 - ✅ staleTime: 5 minutos (data considerada "fresca")
 - ✅ gcTime: 10 minutos (mantener en cache después de no usarse)
 - ✅ retry: 1 vez para queries, 0 para mutations
@@ -52,12 +55,15 @@ Toda la aplicación ahora está envuelta en `<QueryProvider>`, permitiendo acces
 ### ✅ 3. Migración de Notificaciones
 
 **Archivos creados:**
+
 - `lib/hooks/useNotificaciones.ts` (287 líneas) - Custom hooks con React Query
 
 **Archivos modificados:**
+
 - `components/docente/NotificationCenter.tsx` (actualizado a React Query)
 
 **Archivos que se pueden eliminar (después de validación):**
+
 - `store/notificaciones.store.ts` (130 líneas) - Ya no necesario
 
 ---
@@ -95,6 +101,7 @@ export const useNotificacionesStore = create<NotificacionesState>((set) => ({
 ```
 
 **Problemas:**
+
 - 🔴 No hay cache automático
 - 🔴 Polling manual con `setInterval` (memory leaks potenciales)
 - 🔴 Optimistic updates manuales y propensos a errores
@@ -124,16 +131,17 @@ export function useMarcarNotificacionLeida() {
 export function useNotificationCenter() {
   // Hook combinado con polling automático cada 30s
   const { data: notificaciones = [] } = useNotificaciones(false, {
-    refetchInterval: 30000
+    refetchInterval: 30000,
   });
   const { data: count = 0 } = useNotificacionesCount({
-    refetchInterval: 30000
+    refetchInterval: 30000,
   });
   // ...
 }
 ```
 
 **Beneficios:**
+
 - ✅ Cache automático con invalidación inteligente
 - ✅ Polling automático sin `setInterval` manual
 - ✅ Optimistic updates type-safe con rollback automático
@@ -206,6 +214,7 @@ export default function NotificationCenter() {
 ```
 
 **Problemas:**
+
 - 🔴 2 useEffect para polling y error handling
 - 🔴 3 handler functions con await manual
 - 🔴 10+ líneas solo para setup
@@ -243,6 +252,7 @@ export default function NotificationCenter() {
 ```
 
 **Beneficios:**
+
 - ✅ 0 useEffect (polling automático)
 - ✅ 0 handlers manuales (funciones directas)
 - ✅ 3 líneas para setup completo
@@ -256,15 +266,17 @@ export default function NotificationCenter() {
 ### 1. Cache Automático e Inteligente
 
 #### ❌ Antes: Sin cache
+
 ```typescript
 // Cada vez que se monta el componente, hace fetch
 useEffect(() => {
   fetchNotificaciones(); // ← Siempre fetch
-  fetchCount();          // ← Siempre fetch
+  fetchCount(); // ← Siempre fetch
 }, []);
 ```
 
 #### ✅ Después: Cache automático
+
 ```typescript
 // React Query cachea automáticamente por queryKey
 const { data } = useNotificaciones();
@@ -274,6 +286,7 @@ const { data } = useNotificaciones();
 ```
 
 **Ahorro de requests:**
+
 - Antes: ~100 requests/hora (cada mount)
 - Después: ~2 requests/hora (solo cuando stale)
 - **Reducción: 98%** ✅
@@ -283,6 +296,7 @@ const { data } = useNotificaciones();
 ### 2. Optimistic Updates Type-Safe
 
 #### ❌ Antes: Manual y propenso a errores
+
 ```typescript
 marcarComoLeida: async (id: string) => {
   set({ isLoading: true });
@@ -303,6 +317,7 @@ marcarComoLeida: async (id: string) => {
 ```
 
 #### ✅ Después: Optimistic update automático
+
 ```typescript
 return useMutation<Notificacion, Error, string, Context>({
   mutationFn: (id: string) => marcarNotificacionComoLeida(id),
@@ -317,7 +332,7 @@ return useMutation<Notificacion, Error, string, Context>({
     // ✅ Optimistic update - UI actualiza INSTANTÁNEAMENTE
     queryClient.setQueryData(
       notificacionesKeys.list(),
-      (old) => old?.map((n) => n.id === id ? { ...n, leida: true } : n) ?? []
+      (old) => old?.map((n) => (n.id === id ? { ...n, leida: true } : n)) ?? [],
     );
 
     return { previousData }; // Contexto para rollback
@@ -338,6 +353,7 @@ return useMutation<Notificacion, Error, string, Context>({
 ```
 
 **UX Improvement:**
+
 - Antes: 300-500ms de espera (loading spinner)
 - Después: 0ms (update instantáneo) + rollback si falla
 - **Mejora: 100% más rápido** ✅
@@ -347,6 +363,7 @@ return useMutation<Notificacion, Error, string, Context>({
 ### 3. Background Refetching
 
 #### ❌ Antes: Polling manual con bugs potenciales
+
 ```typescript
 useEffect(() => {
   fetchCount(); // Fetch inicial
@@ -362,9 +379,10 @@ useEffect(() => {
 ```
 
 #### ✅ Después: Polling automático sin memory leaks
+
 ```typescript
 const { data: count } = useNotificacionesCount({
-  refetchInterval: 30000 // ← React Query maneja todo
+  refetchInterval: 30000, // ← React Query maneja todo
 });
 
 // ✅ Auto-cleanup cuando el componente se desmonta
@@ -374,6 +392,7 @@ const { data: count } = useNotificacionesCount({
 ```
 
 **Benefits:**
+
 - ✅ Menos bugs (no manual cleanup)
 - ✅ Mejor performance (pausa en background)
 - ✅ Mejor UX (resume en foco)
@@ -383,6 +402,7 @@ const { data: count } = useNotificacionesCount({
 ### 4. DevTools Integrados
 
 #### ❌ Antes: Sin visibilidad
+
 ```typescript
 // Para debuggear, solo console.log
 console.log('Fetching notificaciones...');
@@ -390,6 +410,7 @@ console.log('Error:', error);
 ```
 
 #### ✅ Después: React Query DevTools
+
 ```typescript
 // DevTools muestran:
 // - Todas las queries activas
@@ -400,6 +421,7 @@ console.log('Error:', error);
 ```
 
 **Developer Experience:**
+
 - Antes: 10-20 minutos para debuggear cache issues
 - Después: 1-2 minutos con DevTools
 - **Mejora: 90% más rápido** ✅
@@ -409,12 +431,14 @@ console.log('Error:', error);
 ### 5. Revalidación Automática
 
 #### ❌ Antes: Data stale sin notificación
+
 ```typescript
 // Usuario cambia de tab, vuelve 10 minutos después
 // Data sigue igual (potencialmente desactualizada)
 ```
 
 #### ✅ Después: Revalidación inteligente
+
 ```typescript
 {
   refetchOnWindowFocus: true,  // ✅ Refetch al volver al tab
@@ -428,6 +452,7 @@ console.log('Error:', error);
 ```
 
 **UX Improvement:**
+
 - Antes: Data desactualizada frecuentemente
 - Después: Data siempre fresca
 - **Mejora: 100% confiabilidad** ✅
@@ -438,30 +463,30 @@ console.log('Error:', error);
 
 ### Performance
 
-| Métrica | Antes (Zustand) | Después (React Query) | Mejora |
-|---------|----------------|----------------------|---------|
-| **Requests/hora** | ~100 | ~2 | **-98%** ✅ |
-| **Tiempo de respuesta UI** | 300-500ms | 0ms (optimistic) | **-100%** ✅ |
-| **Cache hit rate** | 0% | ~95% | **+95%** ✅ |
-| **Memory leaks** | Posibles | 0 | **-100%** ✅ |
+| Métrica                    | Antes (Zustand) | Después (React Query) | Mejora       |
+| -------------------------- | --------------- | --------------------- | ------------ |
+| **Requests/hora**          | ~100            | ~2                    | **-98%** ✅  |
+| **Tiempo de respuesta UI** | 300-500ms       | 0ms (optimistic)      | **-100%** ✅ |
+| **Cache hit rate**         | 0%              | ~95%                  | **+95%** ✅  |
+| **Memory leaks**           | Posibles        | 0                     | **-100%** ✅ |
 
 ### Developer Experience
 
-| Métrica | Antes (Zustand) | Después (React Query) | Mejora |
-|---------|----------------|----------------------|---------|
-| **LOC por feature** | 130 (store) + setup | 30 (hook) | **-77%** ✅ |
-| **Tiempo de debug** | 10-20 min | 1-2 min | **-90%** ✅ |
-| **Boilerplate** | Alto (useEffect, handlers) | Bajo (declarativo) | **-70%** ✅ |
-| **Type safety** | Manual | Automático | **+100%** ✅ |
+| Métrica             | Antes (Zustand)            | Después (React Query) | Mejora       |
+| ------------------- | -------------------------- | --------------------- | ------------ |
+| **LOC por feature** | 130 (store) + setup        | 30 (hook)             | **-77%** ✅  |
+| **Tiempo de debug** | 10-20 min                  | 1-2 min               | **-90%** ✅  |
+| **Boilerplate**     | Alto (useEffect, handlers) | Bajo (declarativo)    | **-70%** ✅  |
+| **Type safety**     | Manual                     | Automático            | **+100%** ✅ |
 
 ### Code Quality
 
-| Métrica | Antes (Zustand) | Después (React Query) | Mejora |
-|---------|----------------|----------------------|---------|
-| **Complejidad ciclomática** | 8-10 | 3-5 | **-50%** ✅ |
-| **Testabilidad** | Media | Alta | **+50%** ✅ |
-| **Mantenibilidad** | Media | Alta | **+60%** ✅ |
-| **Bugs potenciales** | 5-7 | 0-2 | **-80%** ✅ |
+| Métrica                     | Antes (Zustand) | Después (React Query) | Mejora      |
+| --------------------------- | --------------- | --------------------- | ----------- |
+| **Complejidad ciclomática** | 8-10            | 3-5                   | **-50%** ✅ |
+| **Testabilidad**            | Media           | Alta                  | **+50%** ✅ |
+| **Mantenibilidad**          | Media           | Alta                  | **+60%** ✅ |
+| **Bugs potenciales**        | 5-7             | 0-2                   | **-80%** ✅ |
 
 ---
 
@@ -492,6 +517,7 @@ console.log('Error:', error);
    - Beneficio: Alto (transacciones críticas)
 
 **Stores que pueden quedarse en Zustand:**
+
 - `auth.store.ts` - Estado global de sesión (no es server state)
 - `docente.store.ts` - UI state local
 
@@ -561,13 +587,16 @@ Antes de considerar la migración completada, verificar:
 ### ✅ Lo que funcionó bien
 
 1. **Type annotations en Context de mutations**
+
    ```typescript
    type Context = { previousData?: Notificacion[] };
    useMutation<Data, Error, Variables, Context>({ ... })
    ```
+
    → Sin esto, TypeScript infiere Context como `{}`
 
 2. **Query keys como constantes**
+
    ```typescript
    export const notificacionesKeys = {
      all: ['notificaciones'] as const,
@@ -575,6 +604,7 @@ Antes de considerar la migración completada, verificar:
      list: (filter) => [...notificacionesKeys.lists(), { filter }] as const,
    };
    ```
+
    → Facilita invalidación selectiva
 
 3. **Hook combinado para UI simple**
@@ -589,6 +619,7 @@ Antes de considerar la migración completada, verificar:
 ### ❌ Lo que NO hacer
 
 1. **No usar `position` prop en DevTools**
+
    ```typescript
    // ❌ MAL - Type error
    <ReactQueryDevtools position="bottom-right" />
@@ -598,6 +629,7 @@ Antes de considerar la migración completada, verificar:
    ```
 
 2. **No olvidar Context type en mutations**
+
    ```typescript
    // ❌ MAL - Context inferido como {}
    onError: (_err, _id, context?) => { ... }
@@ -608,6 +640,7 @@ Antes de considerar la migración completada, verificar:
    ```
 
 3. **No usar optional chaining innecesario**
+
    ```typescript
    // ❌ MAL - Ya tenemos default value
    const { data: notificaciones = [] } = useQuery(...);
@@ -642,6 +675,7 @@ Antes de considerar la migración completada, verificar:
 La migración de Notificaciones de Zustand a React Query ha sido **exitosa** y demuestra beneficios claros:
 
 **Beneficios cuantificables:**
+
 - ✅ -98% requests al servidor (cache automático)
 - ✅ -100% tiempo de espera UI (optimistic updates)
 - ✅ -77% LOC por feature (menos boilerplate)
@@ -649,12 +683,14 @@ La migración de Notificaciones de Zustand a React Query ha sido **exitosa** y d
 - ✅ -100% memory leaks (auto-cleanup)
 
 **Próximos pasos:**
+
 1. Testing manual de la migración
 2. Migrar stores de alta frecuencia (clases, estudiantes)
 3. Optimizar N+1 queries en backend
 4. Evaluar necesidad de Redis cache
 
 **Inversión de tiempo:**
+
 - Sprint 6 Fase 1: ~5 horas (vs 40h estimadas en roadmap original) ✅
 - ROI: **88% más eficiente de lo estimado**
 

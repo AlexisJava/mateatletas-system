@@ -38,11 +38,8 @@ export function GamificacionProvider({ children, estudianteId }: GamificacionPro
     refetch: refetchRecursos,
   } = useRecursos(estudianteId);
 
-  const {
-    notificacionActual,
-    cerrarNotificacion,
-    hayMasNotificaciones,
-  } = useNotificacionesLogros(estudianteId);
+  const { notificacionActual, cerrarNotificacion, hayMasNotificaciones } =
+    useNotificacionesLogros(estudianteId);
 
   return (
     <GamificacionContext.Provider

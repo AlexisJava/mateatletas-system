@@ -42,10 +42,7 @@ export function mapLogroToLogroEstudiante(
 /**
  * Convierte una lista de logros a LogroEstudiante filtrando los que no están desbloqueados.
  */
-export function mapLogrosToEstudiante(
-  estudianteId: string,
-  logros: Logro[],
-): LogroEstudiante[] {
+export function mapLogrosToEstudiante(estudianteId: string, logros: Logro[]): LogroEstudiante[] {
   return logros.reduce<LogroEstudiante[]>((acc, logroActual) => {
     const normalizado = mapLogroToLogroEstudiante(estudianteId, logroActual);
     if (normalizado) {
@@ -198,10 +195,7 @@ export function formatearTiempoRacha(ultimaActividad: Date | null): {
 /**
  * Calcular porcentaje de progreso de logros
  */
-export function calcularProgresoLogros(
-  totalLogros: number,
-  logrosDesbloqueados: number
-): number {
+export function calcularProgresoLogros(totalLogros: number, logrosDesbloqueados: number): number {
   if (totalLogros === 0) return 0;
   return Math.round((logrosDesbloqueados / totalLogros) * 100);
 }

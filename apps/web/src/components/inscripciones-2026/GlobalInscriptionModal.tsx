@@ -158,24 +158,14 @@ export default function GlobalInscriptionModal({
         );
       case 3:
         if (needsCourseSelection) {
-          return (
-            <StepCourseSelection
-              estudiantes={estudiantes}
-              onChange={setEstudiantes}
-            />
-          );
+          return <StepCourseSelection estudiantes={estudiantes} onChange={setEstudiantes} />;
         }
         // Skip to next step
         setCurrentStep(4);
         return null;
       case 4:
         if (needsMundoSelection) {
-          return (
-            <StepMundoSelection
-              estudiantes={estudiantes}
-              onChange={setEstudiantes}
-            />
-          );
+          return <StepMundoSelection estudiantes={estudiantes} onChange={setEstudiantes} />;
         }
         // Skip to next step
         setCurrentStep(5);
@@ -205,15 +195,15 @@ export default function GlobalInscriptionModal({
           ciudad.trim().length > 0
         );
       case 2:
-        return estudiantes.every(e => e.nombre && e.edad >= 5 && e.edad <= 17);
+        return estudiantes.every((e) => e.nombre && e.edad >= 5 && e.edad <= 17);
       case 3:
         if (!needsCourseSelection) return true;
-        return estudiantes.every(e =>
-          e.cursos_seleccionados && e.cursos_seleccionados.length >= 1
+        return estudiantes.every(
+          (e) => e.cursos_seleccionados && e.cursos_seleccionados.length >= 1,
         );
       case 4:
         if (!needsMundoSelection) return true;
-        return estudiantes.every(e => e.mundo_seleccionado);
+        return estudiantes.every((e) => e.mundo_seleccionado);
       case 5:
         return true;
       default:
@@ -251,9 +241,7 @@ export default function GlobalInscriptionModal({
       <div className="relative w-full max-w-4xl max-h-[90vh] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-gradient-to-r from-[#fbbf24] to-[#f97316] px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-black text-white">
-            {getTitleByType()}
-          </h2>
+          <h2 className="text-2xl font-black text-white">{getTitleByType()}</h2>
           <button
             onClick={onClose}
             className="text-white hover:bg-white/20 rounded-full p-2 transition-colors"
@@ -269,7 +257,9 @@ export default function GlobalInscriptionModal({
               const isActive = step === currentStep;
               const isCompleted = step < currentStep;
               const shouldShow =
-                step === 1 || step === 2 || step === 5 ||
+                step === 1 ||
+                step === 2 ||
+                step === 5 ||
                 (step === 3 && needsCourseSelection) ||
                 (step === 4 && needsMundoSelection);
 
@@ -282,8 +272,8 @@ export default function GlobalInscriptionModal({
                     isCompleted
                       ? 'bg-green-500'
                       : isActive
-                      ? 'bg-[#fbbf24]'
-                      : 'bg-gray-300 dark:bg-gray-600'
+                        ? 'bg-[#fbbf24]'
+                        : 'bg-gray-300 dark:bg-gray-600'
                   }`}
                 />
               );
@@ -496,11 +486,11 @@ function StepTutorData({
               {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
             </button>
           </div>
-          {tutorData.password && tutorData.confirmPassword && tutorData.password !== tutorData.confirmPassword && (
-            <p className="text-xs text-red-500 mt-1">
-              Las contraseñas no coinciden
-            </p>
-          )}
+          {tutorData.password &&
+            tutorData.confirmPassword &&
+            tutorData.password !== tutorData.confirmPassword && (
+              <p className="text-xs text-red-500 mt-1">Las contraseñas no coinciden</p>
+            )}
         </div>
       </div>
 
@@ -568,9 +558,7 @@ function StepEstudiantes({
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
           Estudiantes a Inscribir
         </h3>
-        <p className="text-gray-600 dark:text-gray-400">
-          Ingresá los datos de cada estudiante
-        </p>
+        <p className="text-gray-600 dark:text-gray-400">Ingresá los datos de cada estudiante</p>
       </div>
 
       {estudiantes.map((estudiante, index) => (
@@ -579,9 +567,7 @@ function StepEstudiantes({
           className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg relative"
         >
           <div className="flex items-center justify-between mb-4">
-            <h4 className="font-bold text-gray-900 dark:text-white">
-              Estudiante {index + 1}
-            </h4>
+            <h4 className="font-bold text-gray-900 dark:text-white">Estudiante {index + 1}</h4>
             {estudiantes.length > 1 && (
               <button
                 onClick={() => onRemove(index)}
@@ -625,15 +611,13 @@ function StepEstudiantes({
                   // Asegurar que siempre sea un número válido entre 5 y 17
                   updated[index] = {
                     ...estudiante,
-                    edad: isNaN(newAge) ? 5 : Math.max(5, Math.min(17, newAge))
+                    edad: isNaN(newAge) ? 5 : Math.max(5, Math.min(17, newAge)),
                   };
                   onChange(updated);
                 }}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Entre 5 y 17 años
-              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Entre 5 y 17 años</p>
             </div>
 
             <div>
@@ -682,11 +666,13 @@ function StepCourseSelection({
   estudiantes: EstudianteInscripcion[];
   onChange: (estudiantes: EstudianteInscripcion[]) => void;
 }) {
-  const [selectedCourseSchedules, setSelectedCourseSchedules] = useState<Record<string, string>>({});
+  const [selectedCourseSchedules, setSelectedCourseSchedules] = useState<Record<string, string>>(
+    {},
+  );
 
   // Helper: Check if student age matches course age range
   const matchesAgeRange = (edad: number, ageRange: string): boolean => {
-    const [min, max] = ageRange.split('-').map(n => parseInt(n));
+    const [min, max] = ageRange.split('-').map((n) => parseInt(n));
     return edad >= min && edad <= max;
   };
 
@@ -703,24 +689,28 @@ function StepCourseSelection({
 
       {estudiantes.map((estudiante, estIndex) => {
         // Filtrar cursos según edad del estudiante
-        const availableCourses = COURSES.filter(course =>
-          matchesAgeRange(estudiante.edad, course.ageRange)
+        const availableCourses = COURSES.filter((course) =>
+          matchesAgeRange(estudiante.edad, course.ageRange),
         );
 
         return (
-          <div key={estIndex} className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg">
+          <div
+            key={estIndex}
+            className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg"
+          >
             <h4 className="font-bold text-gray-900 dark:text-white mb-4">
               {estudiante.nombre} ({estudiante.edad} años)
             </h4>
 
             <div className="space-y-3">
               {availableCourses.map((course) => {
-                const isSelected = estudiante.cursos_seleccionados?.some(
-                  c => c.course_id.startsWith(course.id)
+                const isSelected = estudiante.cursos_seleccionados?.some((c) =>
+                  c.course_id.startsWith(course.id),
                 );
                 const canSelect = !isSelected && (estudiante.cursos_seleccionados?.length || 0) < 2;
                 const scheduleKey = `${estIndex}-${course.id}`;
-                const selectedScheduleId = selectedCourseSchedules[scheduleKey] || course.schedules[0].id;
+                const selectedScheduleId =
+                  selectedCourseSchedules[scheduleKey] || course.schedules[0].id;
 
                 return (
                   <div key={course.id} className="space-y-2">
@@ -736,7 +726,7 @@ function StepCourseSelection({
                           if (isSelected) {
                             // Remove course
                             updated[estIndex].cursos_seleccionados = currentCourses.filter(
-                              c => !c.course_id.startsWith(course.id)
+                              (c) => !c.course_id.startsWith(course.id),
                             );
                           } else if (canSelect) {
                             // Add course
@@ -748,7 +738,10 @@ function StepCourseSelection({
                               day_of_week: schedule.dayOfWeek,
                               time_slot: schedule.timeSlot,
                             };
-                            updated[estIndex].cursos_seleccionados = [...currentCourses, courseSelection];
+                            updated[estIndex].cursos_seleccionados = [
+                              ...currentCourses,
+                              courseSelection,
+                            ];
                           }
 
                           onChange(updated);
@@ -760,21 +753,20 @@ function StepCourseSelection({
                         isSelected
                           ? 'border-[#fbbf24] bg-[#fbbf24]/10'
                           : canSelect
-                          ? 'border-gray-300 dark:border-gray-600 hover:border-[#fbbf24]'
-                          : 'border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed'
+                            ? 'border-gray-300 dark:border-gray-600 hover:border-[#fbbf24]'
+                            : 'border-gray-200 dark:border-gray-700 opacity-50 cursor-not-allowed'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <p className="font-bold text-gray-900 dark:text-white">
-                            {course.name}
-                          </p>
+                          <p className="font-bold text-gray-900 dark:text-white">{course.name}</p>
                           <p className="text-xs text-gray-500 dark:text-gray-500 mb-1">
                             {course.area}
                           </p>
                           {course.schedules.length === 1 ? (
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {course.schedules[0].dayOfWeek} • {course.schedules[0].timeSlot} • Profe {course.schedules[0].instructor}
+                              {course.schedules[0].dayOfWeek} • {course.schedules[0].timeSlot} •
+                              Profe {course.schedules[0].instructor}
                             </p>
                           ) : (
                             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -782,9 +774,7 @@ function StepCourseSelection({
                             </p>
                           )}
                         </div>
-                        {isSelected && (
-                          <span className="text-[#fbbf24] font-bold text-xl">✓</span>
-                        )}
+                        {isSelected && <span className="text-[#fbbf24] font-bold text-xl">✓</span>}
                       </div>
                     </button>
 
@@ -819,8 +809,10 @@ function StepCourseSelection({
                                 };
 
                                 updated[estIndex].cursos_seleccionados = [
-                                  ...currentCourses.filter(c => !c.course_id.startsWith(course.id)),
-                                  courseSelection
+                                  ...currentCourses.filter(
+                                    (c) => !c.course_id.startsWith(course.id),
+                                  ),
+                                  courseSelection,
                                 ];
 
                                 onChange(updated);
@@ -838,7 +830,10 @@ function StepCourseSelection({
                                   time_slot: schedule.timeSlot,
                                 };
 
-                                updated[estIndex].cursos_seleccionados = [...currentCourses, courseSelection];
+                                updated[estIndex].cursos_seleccionados = [
+                                  ...currentCourses,
+                                  courseSelection,
+                                ];
                                 onChange(updated);
                               }
                             }}
@@ -847,13 +842,19 @@ function StepCourseSelection({
                               selectedScheduleId === schedule.id
                                 ? 'border-[#fbbf24] bg-[#fbbf24]/5'
                                 : 'border-gray-300 dark:border-gray-600 hover:border-[#fbbf24]/50'
-                            } ${(!canSelect && !isSelected) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            } ${!canSelect && !isSelected ? 'opacity-50 cursor-not-allowed' : ''}`}
                           >
-                            <span className="font-semibold text-gray-900 dark:text-white">{schedule.dayOfWeek}</span>
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {schedule.dayOfWeek}
+                            </span>
                             {' • '}
-                            <span className="text-gray-600 dark:text-gray-400">{schedule.timeSlot}</span>
+                            <span className="text-gray-600 dark:text-gray-400">
+                              {schedule.timeSlot}
+                            </span>
                             {' • '}
-                            <span className="text-gray-600 dark:text-gray-400">Profe {schedule.instructor}</span>
+                            <span className="text-gray-600 dark:text-gray-400">
+                              Profe {schedule.instructor}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -878,9 +879,21 @@ function StepMundoSelection({
   onChange: (estudiantes: EstudianteInscripcion[]) => void;
 }) {
   const mundos = [
-    { value: MundoSTEAM.MATEMATICA, label: '🔢 Matemática', description: 'Lógica y resolución de problemas' },
-    { value: MundoSTEAM.PROGRAMACION, label: '💻 Programación', description: 'Código y desarrollo' },
-    { value: MundoSTEAM.CIENCIAS, label: '🔬 Ciencias', description: 'Experimentos y descubrimiento' },
+    {
+      value: MundoSTEAM.MATEMATICA,
+      label: '🔢 Matemática',
+      description: 'Lógica y resolución de problemas',
+    },
+    {
+      value: MundoSTEAM.PROGRAMACION,
+      label: '💻 Programación',
+      description: 'Código y desarrollo',
+    },
+    {
+      value: MundoSTEAM.CIENCIAS,
+      label: '🔬 Ciencias',
+      description: 'Experimentos y descubrimiento',
+    },
   ];
 
   return (
@@ -895,10 +908,11 @@ function StepMundoSelection({
       </div>
 
       {estudiantes.map((estudiante, estIndex) => (
-        <div key={estIndex} className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg">
-          <h4 className="font-bold text-gray-900 dark:text-white mb-4">
-            {estudiante.nombre}
-          </h4>
+        <div
+          key={estIndex}
+          className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg"
+        >
+          <h4 className="font-bold text-gray-900 dark:text-white mb-4">{estudiante.nombre}</h4>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {mundos.map((mundo) => (
@@ -916,9 +930,7 @@ function StepMundoSelection({
                 }`}
               >
                 <p className="text-2xl mb-2">{mundo.label}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {mundo.description}
-                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{mundo.description}</p>
               </button>
             ))}
           </div>
@@ -938,11 +950,11 @@ function StepResumen({
   tutorData: TutorData;
   estudiantes: EstudianteInscripcion[];
 }) {
-  const cursosPerEstudiante = estudiantes.map(e => e.cursos_seleccionados?.length || 0);
+  const cursosPerEstudiante = estudiantes.map((e) => e.cursos_seleccionados?.length || 0);
   const { inscripcion, mensual, descuento } = calcularTotalEstimado(
     tipoInscripcion,
     estudiantes.length,
-    cursosPerEstudiante
+    cursosPerEstudiante,
   );
 
   return (
@@ -974,7 +986,7 @@ function StepResumen({
             </p>
             {est.cursos_seleccionados && est.cursos_seleccionados.length > 0 && (
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Cursos: {est.cursos_seleccionados.map(c => c.course_name).join(', ')}
+                Cursos: {est.cursos_seleccionados.map((c) => c.course_name).join(', ')}
               </p>
             )}
             {est.mundo_seleccionado && (

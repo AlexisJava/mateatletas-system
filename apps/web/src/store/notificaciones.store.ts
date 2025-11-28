@@ -56,7 +56,7 @@ export const useNotificacionesStore = create<NotificacionesState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const notificaciones = await getNotificaciones(soloNoLeidas);
-      const countNoLeidas = notificaciones.filter(n => !n.leida).length;
+      const countNoLeidas = notificaciones.filter((n) => !n.leida).length;
 
       set({
         notificaciones,
@@ -93,9 +93,7 @@ export const useNotificacionesStore = create<NotificacionesState>((set) => ({
 
       // Actualizar estado local
       set((state) => ({
-        notificaciones: state.notificaciones.map((n) =>
-          n.id === id ? { ...n, leida: true } : n
-        ),
+        notificaciones: state.notificaciones.map((n) => (n.id === id ? { ...n, leida: true } : n)),
         countNoLeidas: Math.max(0, state.countNoLeidas - 1),
       }));
     } catch (error: unknown) {
@@ -133,7 +131,7 @@ export const useNotificacionesStore = create<NotificacionesState>((set) => ({
 
       // Actualizar estado local
       set((state) => {
-        const notificacionEliminada = state.notificaciones.find(n => n.id === id);
+        const notificacionEliminada = state.notificaciones.find((n) => n.id === id);
         const esNoLeida = notificacionEliminada && !notificacionEliminada.leida;
 
         return {

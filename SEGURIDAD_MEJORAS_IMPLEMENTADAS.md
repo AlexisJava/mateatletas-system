@@ -13,6 +13,7 @@ Se implementaron 4 mejoras críticas de seguridad en el sistema Mateatletas, tod
 ## 1. Multi-Factor Authentication (MFA)
 
 ### Ubicación
+
 - Módulo: `apps/api/src/mfa/`
 - Servicios principales:
   - [MfaService](apps/api/src/mfa/services/mfa.service.ts)
@@ -20,6 +21,7 @@ Se implementaron 4 mejoras críticas de seguridad en el sistema Mateatletas, tod
   - [MfaBackupCodesService](apps/api/src/mfa/services/mfa-backup-codes.service.ts)
 
 ### Características
+
 - TOTP (Time-based One-Time Password) con códigos de 30 segundos
 - Generación de QR codes para apps autenticadoras (Google Authenticator, Authy, etc.)
 - 8 códigos de recuperación (backup codes) con hash bcrypt
@@ -28,12 +30,14 @@ Se implementaron 4 mejoras críticas de seguridad en el sistema Mateatletas, tod
   2. Verificación de TOTP/backup code → Token JWT final
 
 ### Endpoints
+
 - `POST /api/auth/mfa/setup` - Iniciar configuración MFA (genera QR)
 - `POST /api/auth/mfa/verify-setup` - Verificar y activar MFA
 - `POST /api/auth/mfa/disable` - Desactivar MFA
 - `POST /api/auth/login/complete-mfa` - Completar login con MFA
 
 ### Seguridad
+
 - Secret TOTP único por usuario (32 bytes aleatorios)
 - Backup codes hasheados con bcrypt (factor 10)
 - Validación con ventana de 1 paso (±30 segundos)
@@ -44,16 +48,19 @@ Se implementaron 4 mejoras críticas de seguridad en el sistema Mateatletas, tod
 ## 2. Sistema de Audit Logs
 
 ### Ubicación
+
 - Módulo: `apps/api/src/audit/`
 - Servicio: [AuditLogService](apps/api/src/audit/audit-log.service.ts)
 
 ### Características
+
 - Registro completo de acciones sensibles
 - 4 niveles de severidad: INFO, WARNING, ERROR, CRITICAL
 - Tracking de cambios con diff antes/después
 - Metadata contextual (IP, user agent, request ID)
 
 ### Categorías de Eventos
+
 - `auth` - Login, logout, cambios de contraseña
 - `user_management` - Creación, edición, eliminación usuarios
 - `payment` - Transacciones, webhooks, cambios de estado
@@ -62,6 +69,7 @@ Se implementaron 4 mejoras críticas de seguridad en el sistema Mateatletas, tod
 - `data_export` - Exportación de datos sensibles
 
 ### Uso
+
 ```typescript
 await this.auditLogService.log({
   userId: user.id,
@@ -79,6 +87,7 @@ await this.auditLogService.log({
 ```
 
 ### Type Safety
+
 - JSON fields con `Prisma.InputJsonValue` y `Prisma.JsonNull`
 - Tipos estrictos para cambios y metadata
 
@@ -87,34 +96,35 @@ await this.auditLogService.log({
 ## 3. IP Whitelisting para Webhooks de MercadoPago
 
 ### Ubicación
+
 - Servicio: [MercadoPagoIpWhitelistService](apps/api/src/pagos/services/mercadopago-ip-whitelist.service.ts)
 
 ### Características
+
 - Validación CIDR de rangos oficiales de MercadoPago
 - Extracción de IP real (X-Forwarded-For, X-Real-IP)
 - Logging de intentos no autorizados
 
 ### Rangos de IP Autorizados
+
 ```typescript
 const officialIpRanges = [
-  '209.225.49.0/24',   // MercadoPago primary
-  '216.33.197.0/24',   // MercadoPago secondary
-  '216.33.196.0/24',   // MercadoPago tertiary
+  '209.225.49.0/24', // MercadoPago primary
+  '216.33.197.0/24', // MercadoPago secondary
+  '216.33.196.0/24', // MercadoPago tertiary
 ];
 ```
 
 **Fuente**: [MercadoPago Docs](https://www.mercadopago.com.ar/developers/es/docs/your-integrations/notifications/webhooks)
 
 ### Uso
+
 ```typescript
-const clientIp = this.ipWhitelistService.extractRealIp(
-  req.headers,
-  req.socket.remoteAddress
-);
+const clientIp = this.ipWhitelistService.extractRealIp(req.headers, req.socket.remoteAddress);
 
 const isAllowed = this.ipWhitelistService.isIpAllowed(
   clientIp,
-  process.env.NODE_ENV === 'development'
+  process.env.NODE_ENV === 'development',
 );
 
 if (!isAllowed) {
@@ -123,6 +133,7 @@ if (!isAllowed) {
 ```
 
 ### Mantenimiento
+
 - Verificar rangos cada 6 meses en docs oficiales
 - Variable de entorno `MERCADOPAGO_ALLOWED_IPS` para override de emergencia
 
@@ -131,25 +142,30 @@ if (!isAllowed) {
 ## 4. Sistema de Rotación de Secrets
 
 ### Ubicación
+
 - Servicio: [SecretRotationService](apps/api/src/security/services/secret-rotation.service.ts)
 - Módulo: [SecurityModule](apps/api/src/security/security.module.ts)
 
 ### Características
+
 - Monitoreo automático de secrets críticos
 - Cronjob diario a las 9:00 AM
 - Alertas 7 días antes de expiración
 - Historial completo de rotaciones
 
 ### Secrets Monitoreados
+
 1. `JWT_SECRET` - Firma de tokens de autenticación
 2. `MERCADOPAGO_WEBHOOK_SECRET` - Validación de webhooks
 
 ### Configuración
+
 - Rotación cada 90 días
 - Warning 7 días antes de expiración
 - Período de gracia de 7 días (ambos secrets válidos)
 
 ### Flujo de Rotación (Manual)
+
 1. Cronjob detecta secret próximo a expirar (83+ días)
 2. Sistema crea alerta CRITICAL en audit logs
 3. Admin genera nuevo secret: `service.generateNewSecret()`
@@ -157,11 +173,13 @@ if (!isAllowed) {
 5. Sistema marca secret anterior como "expired"
 
 ### Seguridad
+
 - NO almacena secrets reales (solo hash SHA-256)
 - Secrets solo en variables de entorno
 - Hash permite verificar coincidencia
 
 ### Endpoints de Admin
+
 ```typescript
 // Verificar estado de secrets
 GET /api/security/health
@@ -187,6 +205,7 @@ GET /api/security/health
 ## Variables de Entorno Requeridas
 
 ### Nuevas Variables
+
 ```bash
 # MFA (generado automáticamente por el sistema)
 # No requiere configuración manual
@@ -201,6 +220,7 @@ MERCADOPAGO_WEBHOOK_SECRET=<secret-de-mercadopago>
 ```
 
 ### Configuración en Railway
+
 ```bash
 railway variables --set RATE_LIMIT_TTL=60000
 railway variables --set RATE_LIMIT_MAX=100
@@ -212,6 +232,7 @@ railway variables --set JWT_SECRET="$(openssl rand -base64 64)"
 ## Fixes de Arquitectura
 
 ### Dependencias Circulares Resueltas
+
 1. **SharedModule → PagosModule**
    - Fix: `forwardRef(() => PagosModule)` en SharedModule.imports
    - Razón: MercadoPagoWebhookProcessorService necesita MercadoPagoService
@@ -225,6 +246,7 @@ railway variables --set JWT_SECRET="$(openssl rand -base64 64)"
 ## Impacto en Seguridad
 
 ### Amenazas Mitigadas
+
 1. **Compromiso de credenciales** → MFA agrega segunda capa
 2. **Ataques de fuerza bruta** → Rate limiting mejorado
 3. **Webhooks falsos** → IP whitelisting + HMAC signature
@@ -232,6 +254,7 @@ railway variables --set JWT_SECRET="$(openssl rand -base64 64)"
 5. **Falta de trazabilidad** → Audit logs completos
 
 ### Compliance
+
 - ✅ OWASP Top 10 (A07:2021 - Identification and Authentication Failures)
 - ✅ PCI DSS 3.2 (Requirement 8 - MFA para acceso administrativo)
 - ✅ GDPR Article 32 (Security of Processing - Audit trails)
@@ -241,6 +264,7 @@ railway variables --set JWT_SECRET="$(openssl rand -base64 64)"
 ## Testing
 
 ### Endpoints para Probar
+
 ```bash
 # 1. MFA Setup
 curl -X POST https://mateatletas-system.up.railway.app/api/auth/mfa/setup \
@@ -262,6 +286,7 @@ done
 ## Monitoreo Recomendado
 
 ### Métricas Clave
+
 1. **MFA Adoption Rate**: % de admins con MFA habilitado
 2. **Failed MFA Attempts**: Intentos fallidos de TOTP/backup codes
 3. **Blocked IPs**: IPs bloqueadas por whitelist
@@ -269,6 +294,7 @@ done
 5. **Audit Log Volume**: Eventos por categoría/severidad
 
 ### Alertas Sugeridas
+
 - 🚨 CRITICAL: Secret expira en < 7 días
 - ⚠️ WARNING: 3+ intentos fallidos de MFA en 5 minutos
 - ⚠️ WARNING: IP no autorizada intentando webhook
@@ -279,11 +305,13 @@ done
 ## Mantenimiento
 
 ### Cada 6 Meses
+
 - [ ] Verificar rangos de IP de MercadoPago
 - [ ] Revisar logs de audit para patrones sospechosos
 - [ ] Actualizar dependencias de seguridad (otplib, bcrypt)
 
 ### Cada 90 Días (Automático)
+
 - [x] Secret rotation alerts (cronjob diario)
 - [x] Verificación de hash de secrets
 

@@ -10,6 +10,7 @@
 ## 📊 ESTADO ACTUAL (6.0/10)
 
 ### ✅ Lo que está bien
+
 - Arquitectura Next.js 15 con App Router
 - Zustand para state management (10 stores)
 - Tailwind CSS para styling
@@ -17,6 +18,7 @@
 - Playwright configurado para E2E
 
 ### ❌ Problemas Críticos
+
 - **185 usos de `any`** - TypeScript sin type safety
 - **0 tests unitarios** - Sin testing de componentes
 - **JWT en localStorage** - Vulnerabilidad XSS
@@ -29,10 +31,12 @@
 ## 🎯 PLAN DE REFACTORIZACIÓN (6 Fases)
 
 ### FASE 1: TYPE SAFETY (+0.8 puntos)
+
 **Objetivo**: Eliminar todos los `any`, tipar correctamente
 **Impacto**: 6.0 → 6.8
 
 #### 1.1 Crear Types Centralizados
+
 ```typescript
 // types/api.types.ts
 export interface User {
@@ -58,6 +62,7 @@ export interface Estudiante {
 ```
 
 #### 1.2 Tipar Zustand Stores
+
 ```typescript
 // store/auth.store.ts
 interface AuthState {
@@ -75,6 +80,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 ```
 
 #### 1.3 Tipar API Calls
+
 ```typescript
 // lib/api/estudiantes.api.ts
 export const estudiantesApi = {
@@ -101,10 +107,12 @@ export const estudiantesApi = {
 ---
 
 ### FASE 2: SEGURIDAD (+0.7 puntos)
+
 **Objetivo**: Migrar JWT a httpOnly cookies, CORS correcto
 **Impacto**: 6.8 → 7.5
 
 #### 2.1 Backend: Configurar Cookies
+
 ```typescript
 // apps/api/src/auth/auth.service.ts
 async login(loginDto: LoginDto, response: Response) {
@@ -123,6 +131,7 @@ async login(loginDto: LoginDto, response: Response) {
 ```
 
 #### 2.2 Frontend: Eliminar localStorage
+
 ```typescript
 // apps/web/src/lib/axios.ts
 const api = axios.create({
@@ -136,14 +145,13 @@ const api = axios.create({
 ```
 
 #### 2.3 CORS Restrictivo
+
 ```typescript
 // apps/api/src/main.ts
 app.enableCors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3002',
-    process.env.FRONTEND_URL,
-  ].filter(Boolean),
+  origin: ['http://localhost:3000', 'http://localhost:3002', process.env.FRONTEND_URL].filter(
+    Boolean,
+  ),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -156,10 +164,12 @@ app.enableCors({
 ---
 
 ### FASE 3: ERROR HANDLING & UX (+0.6 puntos)
+
 **Objetivo**: Manejo global de errores, toast notifications
 **Impacto**: 7.5 → 8.1
 
 #### 3.1 Error Boundary Global
+
 ```typescript
 // components/ErrorBoundary.tsx
 'use client';
@@ -217,6 +227,7 @@ export class ErrorBoundary extends Component<Props, State> {
 ```
 
 #### 3.2 Axios Interceptor para Errores
+
 ```typescript
 // lib/axios.ts
 api.interceptors.response.use(
@@ -248,11 +259,12 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 ```
 
 #### 3.3 Loading States Consistentes
+
 ```typescript
 // components/ui/LoadingSpinner.tsx
 export const LoadingSpinner = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => (
@@ -278,10 +290,12 @@ export const SkeletonCard = () => (
 ---
 
 ### FASE 4: TESTING (+0.6 puntos)
+
 **Objetivo**: Implementar tests unitarios con Jest + React Testing Library
 **Impacto**: 8.1 → 8.7
 
 #### 4.1 Configurar Jest
+
 ```bash
 npm install --save-dev jest @testing-library/react @testing-library/jest-dom @testing-library/user-event
 ```
@@ -299,6 +313,7 @@ module.exports = {
 ```
 
 #### 4.2 Tests de Componentes
+
 ```typescript
 // components/EstudianteCard.test.tsx
 import { render, screen } from '@testing-library/react';
@@ -325,6 +340,7 @@ describe('EstudianteCard', () => {
 ```
 
 #### 4.3 Tests de Stores
+
 ```typescript
 // store/auth.store.test.ts
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -350,33 +366,38 @@ describe('useAuthStore', () => {
 ---
 
 ### FASE 5: PERFORMANCE (+0.5 puntos)
+
 **Objetivo**: Optimizar renders, lazy loading, memoization
 **Impacto**: 8.7 → 9.2
 
 #### 5.1 React.memo para Componentes Pesados
+
 ```typescript
 // components/EstudiantesList.tsx
 import { memo } from 'react';
 
-export const EstudianteCard = memo(({ estudiante }: Props) => {
-  // Component implementation
-}, (prevProps, nextProps) => {
-  // Custom comparison
-  return prevProps.estudiante.id === nextProps.estudiante.id;
-});
+export const EstudianteCard = memo(
+  ({ estudiante }: Props) => {
+    // Component implementation
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison
+    return prevProps.estudiante.id === nextProps.estudiante.id;
+  },
+);
 ```
 
 #### 5.2 useMemo para Cálculos Pesados
+
 ```typescript
 // pages/dashboard.tsx
 const sortedEstudiantes = useMemo(() => {
-  return estudiantes.sort((a, b) =>
-    a.nombre.localeCompare(b.nombre)
-  );
+  return estudiantes.sort((a, b) => a.nombre.localeCompare(b.nombre));
 }, [estudiantes]);
 ```
 
 #### 5.3 Lazy Loading de Rutas
+
 ```typescript
 // app/layout.tsx
 import dynamic from 'next/dynamic';
@@ -387,6 +408,7 @@ const DashboardView = dynamic(() => import('./components/DashboardView'), {
 ```
 
 #### 5.4 Image Optimization
+
 ```typescript
 import Image from 'next/image';
 
@@ -406,34 +428,38 @@ import Image from 'next/image';
 ---
 
 ### FASE 6: VALIDACIÓN & FORMS (+0.3 puntos)
+
 **Objetivo**: React Hook Form + Zod validation
 **Impacto**: 9.2 → 9.5
 
 #### 6.1 Configurar React Hook Form + Zod
+
 ```bash
 npm install react-hook-form zod @hookform/resolvers
 ```
 
 #### 6.2 Schema de Validación
+
 ```typescript
 // schemas/estudiante.schema.ts
 import { z } from 'zod';
 
 export const estudianteSchema = z.object({
-  nombre: z.string()
+  nombre: z
+    .string()
     .min(2, 'El nombre debe tener al menos 2 caracteres')
     .max(100, 'El nombre no puede superar los 100 caracteres')
     .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, 'Solo letras y espacios'),
 
-  apellido: z.string()
+  apellido: z
+    .string()
     .min(2, 'El apellido debe tener al menos 2 caracteres')
     .max(100, 'El apellido no puede superar los 100 caracteres'),
 
-  fecha_nacimiento: z.string()
-    .refine((date) => {
-      const age = calculateAge(new Date(date));
-      return age >= 4 && age <= 18;
-    }, 'El estudiante debe tener entre 4 y 18 años'),
+  fecha_nacimiento: z.string().refine((date) => {
+    const age = calculateAge(new Date(date));
+    return age >= 4 && age <= 18;
+  }, 'El estudiante debe tener entre 4 y 18 años'),
 
   nivel_escolar: z.enum(['Primaria', 'Secundaria', 'Universidad']),
 
@@ -444,6 +470,7 @@ export type EstudianteFormData = z.infer<typeof estudianteSchema>;
 ```
 
 #### 6.3 Formulario con Validación
+
 ```typescript
 // components/FormEstudiante.tsx
 import { useForm } from 'react-hook-form';
@@ -486,33 +513,36 @@ export const FormEstudiante = ({ onSubmit }: Props) => {
 
 ## 📊 RESUMEN: ROADMAP A 9.5/10
 
-| Fase | Objetivo | Puntos | Esfuerzo | Prioridad |
-|------|----------|--------|----------|-----------|
-| 1. Type Safety | Eliminar `any`, tipar todo | +0.8 | 2-3 días | 🔴 CRÍTICA |
-| 2. Seguridad | httpOnly cookies + CORS | +0.7 | 1 día | 🔴 CRÍTICA |
-| 3. Error Handling | Toast + ErrorBoundary | +0.6 | 2 días | 🟠 ALTA |
-| 4. Testing | Jest + RTL (50+ tests) | +0.6 | 3 días | 🟠 ALTA |
-| 5. Performance | Memoization + Lazy | +0.5 | 2 días | 🟡 MEDIA |
-| 6. Validación | React Hook Form + Zod | +0.3 | 2 días | 🟡 MEDIA |
-| **TOTAL** | **6.0 → 9.5** | **+3.5** | **12-14 días** | |
+| Fase              | Objetivo                   | Puntos   | Esfuerzo       | Prioridad  |
+| ----------------- | -------------------------- | -------- | -------------- | ---------- |
+| 1. Type Safety    | Eliminar `any`, tipar todo | +0.8     | 2-3 días       | 🔴 CRÍTICA |
+| 2. Seguridad      | httpOnly cookies + CORS    | +0.7     | 1 día          | 🔴 CRÍTICA |
+| 3. Error Handling | Toast + ErrorBoundary      | +0.6     | 2 días         | 🟠 ALTA    |
+| 4. Testing        | Jest + RTL (50+ tests)     | +0.6     | 3 días         | 🟠 ALTA    |
+| 5. Performance    | Memoization + Lazy         | +0.5     | 2 días         | 🟡 MEDIA   |
+| 6. Validación     | React Hook Form + Zod      | +0.3     | 2 días         | 🟡 MEDIA   |
+| **TOTAL**         | **6.0 → 9.5**              | **+3.5** | **12-14 días** |            |
 
 ---
 
 ## 🎯 PLAN DE IMPLEMENTACIÓN
 
 ### Sprint 1 (4-5 días): FUNDAMENTOS
+
 - ✅ FASE 1: Type Safety (eliminar 185 `any`)
 - ✅ FASE 2: Seguridad (httpOnly cookies)
 
 **Resultado**: Frontend pasa de 6.0 → 7.5
 
 ### Sprint 2 (5-6 días): CALIDAD
+
 - ✅ FASE 3: Error Handling & UX
 - ✅ FASE 4: Testing (50+ tests)
 
 **Resultado**: Frontend pasa de 7.5 → 8.7
 
 ### Sprint 3 (3-4 días): OPTIMIZACIÓN
+
 - ✅ FASE 5: Performance
 - ✅ FASE 6: Validación
 
@@ -523,6 +553,7 @@ export const FormEstudiante = ({ onSubmit }: Props) => {
 ## 🚀 BENEFICIOS DE LLEGAR A 9.5/10
 
 ### Técnicos
+
 - ✅ **Type Safety**: 0 errores de tipos en runtime
 - ✅ **Seguridad**: Tokens protegidos de XSS
 - ✅ **UX Consistente**: Errores manejados uniformemente
@@ -530,6 +561,7 @@ export const FormEstudiante = ({ onSubmit }: Props) => {
 - ✅ **Performance**: Renders optimizados
 
 ### Negocio
+
 - ✅ **Menos bugs**: Testing reduce bugs 80%
 - ✅ **Desarrollo más rápido**: Types = autocomplete
 - ✅ **Mejor UX**: Loading + error states
@@ -541,16 +573,13 @@ export const FormEstudiante = ({ onSubmit }: Props) => {
 ## 💡 RECOMENDACIÓN
 
 **Prioridad 1** (Crítica - Empezar YA):
+
 1. FASE 2: Seguridad (httpOnly cookies) - **1 DÍA**
 2. FASE 1: Type Safety (eliminar any) - **2-3 DÍAS**
 
-**Prioridad 2** (Alta - Siguiente semana):
-3. FASE 3: Error Handling - **2 DÍAS**
-4. FASE 4: Testing - **3 DÍAS**
+**Prioridad 2** (Alta - Siguiente semana): 3. FASE 3: Error Handling - **2 DÍAS** 4. FASE 4: Testing - **3 DÍAS**
 
-**Prioridad 3** (Media - Cuando tengas tiempo):
-5. FASE 5: Performance - **2 DÍAS**
-6. FASE 6: Validación - **2 DÍAS**
+**Prioridad 3** (Media - Cuando tengas tiempo): 5. FASE 5: Performance - **2 DÍAS** 6. FASE 6: Validación - **2 DÍAS**
 
 ---
 

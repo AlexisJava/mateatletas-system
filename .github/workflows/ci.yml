@@ -5,7 +5,7 @@ on:
     branches: [main, develop]
   push:
     branches: [main, develop]
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch: # Manual trigger
 
 # Cancelar runs anteriores si hay nuevo push (ahorro de CI minutes)
 concurrency:

@@ -119,9 +119,7 @@ export async function listarPlanificaciones(
 /**
  * Obtener detalle completo de una planificación (Admin)
  */
-export async function obtenerDetallePlanificacion(
-  codigo: string,
-): Promise<DetallePlanificacion> {
+export async function obtenerDetallePlanificacion(codigo: string): Promise<DetallePlanificacion> {
   try {
     const response = await apiClient.get<DetallePlanificacion>(
       `/planificaciones/${codigo}/detalle`,
@@ -352,7 +350,9 @@ export interface ProgresoAsignacionResponse {
   progresos: ProgresoEstudiante[];
 }
 
-export async function verProgresoEstudiantes(asignacionId: string): Promise<ProgresoAsignacionResponse> {
+export async function verProgresoEstudiantes(
+  asignacionId: string,
+): Promise<ProgresoAsignacionResponse> {
   try {
     const response = await apiClient.get<ProgresoAsignacionResponse>(
       `/planificaciones/asignacion/${asignacionId}/progreso`,

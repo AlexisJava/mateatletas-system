@@ -12,7 +12,7 @@ export function trackResultadoPageView(rutaId: string, rutaNombre: string) {
       page_title: 'Resultado Quiz',
       page_path: '/cursos-online/asincronicos/resultado',
       ruta_id: rutaId,
-      ruta_nombre: rutaNombre
+      ruta_nombre: rutaNombre,
     });
   }
 
@@ -20,7 +20,7 @@ export function trackResultadoPageView(rutaId: string, rutaNombre: string) {
   if (process.env.NODE_ENV === 'development') {
     console.log('[Analytics] Resultado Page View:', {
       rutaId,
-      rutaNombre
+      rutaNombre,
     });
   }
 }
@@ -31,7 +31,7 @@ export function trackResultadoPageView(rutaId: string, rutaNombre: string) {
 export function trackComprarClick(
   opcion: 'ruta_completa' | 'individual',
   precio: number,
-  moneda: 'USD' | 'ARS'
+  moneda: 'USD' | 'ARS',
 ) {
   if (typeof window !== 'undefined' && (window as any).gtag) {
     (window as any).gtag('event', 'click_comprar', {
@@ -39,7 +39,7 @@ export function trackComprarClick(
       precio: precio,
       moneda: moneda,
       event_category: 'conversion',
-      event_label: `${opcion} - ${moneda} ${precio}`
+      event_label: `${opcion} - ${moneda} ${precio}`,
     });
   }
 
@@ -48,7 +48,7 @@ export function trackComprarClick(
     console.log('[Analytics] Click Comprar:', {
       opcion,
       precio,
-      moneda
+      moneda,
     });
   }
 }
@@ -60,7 +60,7 @@ export function trackScrollDepth(percentage: number) {
   if (typeof window !== 'undefined' && (window as any).gtag) {
     (window as any).gtag('event', 'scroll', {
       scroll_depth: percentage,
-      event_category: 'engagement'
+      event_category: 'engagement',
     });
   }
 
@@ -78,7 +78,7 @@ export function trackCursoExpand(cursoId: string, cursoNombre: string) {
     (window as any).gtag('event', 'curso_expand', {
       curso_id: cursoId,
       curso_nombre: cursoNombre,
-      event_category: 'engagement'
+      event_category: 'engagement',
     });
   }
 
@@ -86,7 +86,7 @@ export function trackCursoExpand(cursoId: string, cursoNombre: string) {
   if (process.env.NODE_ENV === 'development') {
     console.log('[Analytics] Curso Expandido:', {
       cursoId,
-      cursoNombre
+      cursoNombre,
     });
   }
 }
@@ -99,7 +99,7 @@ export function trackMultipleHijoChange(cantidad: number, precioTotal: number) {
     (window as any).gtag('event', 'multiple_hijo_change', {
       cantidad_hijos: cantidad,
       precio_total: precioTotal,
-      event_category: 'engagement'
+      event_category: 'engagement',
     });
   }
 
@@ -107,7 +107,7 @@ export function trackMultipleHijoChange(cantidad: number, precioTotal: number) {
   if (process.env.NODE_ENV === 'development') {
     console.log('[Analytics] Múltiple Hijo:', {
       cantidad,
-      precioTotal
+      precioTotal,
     });
   }
 }
@@ -120,7 +120,7 @@ export function trackFAQExpand(pregunta: string, index: number) {
     (window as any).gtag('event', 'faq_expand', {
       pregunta: pregunta,
       index: index,
-      event_category: 'engagement'
+      event_category: 'engagement',
     });
   }
 
@@ -128,7 +128,7 @@ export function trackFAQExpand(pregunta: string, index: number) {
   if (process.env.NODE_ENV === 'development') {
     console.log('[Analytics] FAQ Expandido:', {
       pregunta,
-      index
+      index,
     });
   }
 }
@@ -141,7 +141,7 @@ export function trackRutaAlternativaClick(rutaId: string, rutaNombre: string) {
     (window as any).gtag('event', 'ruta_alternativa_click', {
       ruta_id: rutaId,
       ruta_nombre: rutaNombre,
-      event_category: 'engagement'
+      event_category: 'engagement',
     });
   }
 
@@ -149,7 +149,7 @@ export function trackRutaAlternativaClick(rutaId: string, rutaNombre: string) {
   if (process.env.NODE_ENV === 'development') {
     console.log('[Analytics] Ruta Alternativa Click:', {
       rutaId,
-      rutaNombre
+      rutaNombre,
     });
   }
 }
@@ -161,7 +161,7 @@ export function trackMonedaChange(moneda: 'USD' | 'ARS') {
   if (typeof window !== 'undefined' && (window as any).gtag) {
     (window as any).gtag('event', 'moneda_change', {
       moneda: moneda,
-      event_category: 'engagement'
+      event_category: 'engagement',
     });
   }
 

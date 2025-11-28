@@ -17,10 +17,12 @@ export const sectorSchema = z.object({
 
   // Relaciones opcionales
   rutas: z.array(z.lazy(() => z.unknown())).optional(), // RutaEspecialidad[] - lazy to avoid circular dependency
-  _count: z.object({
-    rutas: z.number(),
-    docentes: z.number(),
-  }).optional(),
+  _count: z
+    .object({
+      rutas: z.number(),
+      docentes: z.number(),
+    })
+    .optional(),
 });
 
 /**
@@ -33,12 +35,14 @@ export const sectoresListSchema = z.array(sectorSchema);
  */
 export const sectoresResponseSchema = z.object({
   data: z.array(sectorSchema),
-  metadata: z.object({
-    total: z.number(),
-    page: z.number(),
-    limit: z.number(),
-    totalPages: z.number(),
-  }).optional(),
+  metadata: z
+    .object({
+      total: z.number(),
+      page: z.number(),
+      limit: z.number(),
+      totalPages: z.number(),
+    })
+    .optional(),
 });
 
 /**

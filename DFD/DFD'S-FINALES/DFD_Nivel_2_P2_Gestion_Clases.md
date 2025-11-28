@@ -1,4 +1,5 @@
 # DFD NIVEL 2 - P2: GESTIÓN DE CLASES
+
 ## Ecosistema Mateatletas
 
 **Versión:** 1.0  
@@ -17,7 +18,7 @@ flowchart TB
     TUTOR[👨‍👩‍👧 TUTOR]
     ESTUDIANTE[🎓 ESTUDIANTE]
     GOOGLE[📧 Google Calendar]
-    
+
     %% Subprocesos de P2
     P2_1[P2.1<br/>CREAR CLASE<br/>INDIVIDUAL]
     P2_2[P2.2<br/>CREAR GRUPO<br/>RECURRENTE]
@@ -25,19 +26,19 @@ flowchart TB
     P2_4[P2.4<br/>REGISTRAR<br/>ASISTENCIA]
     P2_5[P2.5<br/>CONSULTAR<br/>CLASES]
     P2_6[P2.6<br/>SINCRONIZAR<br/>CALENDARIO]
-    
+
     %% Almacenes de Datos
     D1[(D1<br/>USUARIOS)]
     D2[(D2<br/>CLASES Y<br/>GRUPOS)]
     D3[(D3<br/>INSCRIPCIONES)]
     D4[(D4<br/>ASISTENCIAS)]
-    
+
     %% Procesos Externos
     P3[P3<br/>GAMIFICACIÓN]
     P6[P6<br/>NOTIFICACIONES]
-    
+
     %% === FLUJOS DESDE ENTIDADES EXTERNAS ===
-    
+
     ADMIN -->|Datos nueva clase| P2_1
     ADMIN -->|Datos nuevo grupo| P2_2
     DOCENTE -->|Consulta clases asignadas| P2_5
@@ -46,16 +47,16 @@ flowchart TB
     TUTOR -->|Solicitud de cancelación| P2_3
     TUTOR -->|Consulta calendario hijos| P2_5
     ESTUDIANTE -->|Consulta calendario personal| P2_5
-    
+
     %% === FLUJOS HACIA ENTIDADES EXTERNAS ===
-    
+
     P2_5 -->|Lista de clases| DOCENTE
     P2_5 -->|Calendario| TUTOR
     P2_5 -->|Calendario| ESTUDIANTE
     P2_6 -->|Eventos| GOOGLE
-    
+
     %% === P2.1: CREAR CLASE INDIVIDUAL ===
-    
+
     P2_1 -->|Validar docente| D1
     D1 -->|Datos docente| P2_1
     P2_1 -->|Verificar disponibilidad| D2
@@ -63,17 +64,17 @@ flowchart TB
     P2_1 -->|Crear clase| D2
     P2_1 -->|Evento: Clase creada| P6
     P2_1 -->|Evento: Sincronizar| P2_6
-    
+
     %% === P2.2: CREAR GRUPO RECURRENTE ===
-    
+
     P2_2 -->|Validar docente(s)| D1
     D1 -->|Datos docente| P2_2
     P2_2 -->|Crear grupo| D2
     P2_2 -->|Evento: Grupo creado| P6
     P2_2 -->|Evento: Sincronizar| P2_6
-    
+
     %% === P2.3: GESTIONAR INSCRIPCIONES ===
-    
+
     P2_3 -->|Validar estudiante-tutor| D1
     D1 -->|Datos estudiante/tutor| P2_3
     P2_3 -->|Verificar cupos| D2
@@ -85,9 +86,9 @@ flowchart TB
     P2_3 -->|Eliminar inscripción| D3
     P2_3 -->|Evento: Inscripción creada| P6
     P2_3 -->|Evento: Inscripción cancelada| P6
-    
+
     %% === P2.4: REGISTRAR ASISTENCIA ===
-    
+
     P2_4 -->|Validar clase| D2
     D2 -->|Datos clase| P2_4
     P2_4 -->|Validar inscripciones| D3
@@ -95,9 +96,9 @@ flowchart TB
     P2_4 -->|Crear registros asistencia| D4
     P2_4 -->|Evento: Asistencia registrada| P3
     P2_4 -->|Evento: Notificar tutores| P6
-    
+
     %% === P2.5: CONSULTAR CLASES ===
-    
+
     P2_5 -->|Leer clases por docente| D2
     P2_5 -->|Leer clases por estudiante| D3
     P2_5 -->|Leer grupos| D2
@@ -105,23 +106,23 @@ flowchart TB
     D3 -->|Inscripciones| P2_5
     P2_5 -->|Leer estudiantes| D1
     D1 -->|Datos estudiantes| P2_5
-    
+
     %% === P2.6: SINCRONIZAR CALENDARIO ===
-    
+
     P2_6 -->|Leer clases| D2
     D2 -->|Datos clases| P2_6
     P2_6 -->|Leer inscripciones| D3
     D3 -->|Lista participantes| P2_6
     P2_6 -->|Leer usuarios| D1
     D1 -->|Emails usuarios| P2_6
-    
+
     %% Estilos
     classDef userExternal fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
     classDef systemExternal fill:#E24A4A,stroke:#8A2E2E,stroke-width:2px,color:#fff
     classDef subprocess fill:#50C878,stroke:#2E8A57,stroke-width:2px,color:#fff
     classDef datastore fill:#FFB84D,stroke:#CC8A3D,stroke-width:2px,color:#000
     classDef externalProcess fill:#9B59B6,stroke:#6C3483,stroke-width:2px,color:#fff
-    
+
     class ADMIN,DOCENTE,TUTOR,ESTUDIANTE userExternal
     class GOOGLE systemExternal
     class P2_1,P2_2,P2_3,P2_4,P2_5,P2_6 subprocess
@@ -134,10 +135,13 @@ flowchart TB
 ## SUBPROCESO P2.1: CREAR CLASE INDIVIDUAL
 
 ### Descripción
+
 Permite al Admin crear una clase individual (one-off) con un docente específico, fecha/hora, duración y cupos.
 
 ### Entradas
+
 **Desde ADMIN:**
+
 ```typescript
 {
   docente_id: string
@@ -156,20 +160,22 @@ Permite al Admin crear una clase individual (one-off) con un docente específico
 ### Proceso Detallado
 
 #### Paso 1: Validar Docente
+
 ```
 Entrada: docente_id
 Acción: SELECT * FROM docentes WHERE id = docente_id AND activo = true
-Validación: 
+Validación:
   - Docente existe
   - Docente está activo
 Salida: Datos del docente
 ```
 
 #### Paso 2: Verificar Disponibilidad (Opcional)
+
 ```
 Entrada: docente_id, fecha_hora_inicio, duracion_minutos
-Acción: SELECT * FROM clases 
-        WHERE docente_id = docente_id 
+Acción: SELECT * FROM clases
+        WHERE docente_id = docente_id
         AND estado != 'Cancelada'
         AND (
           (fecha_hora_inicio BETWEEN ? AND ?) OR
@@ -180,6 +186,7 @@ Salida: true/false
 ```
 
 #### Paso 3: Validar Fecha
+
 ```
 Validación:
   - fecha_hora_inicio > NOW()
@@ -188,6 +195,7 @@ Validación:
 ```
 
 #### Paso 4: Crear Registro de Clase
+
 ```sql
 INSERT INTO clases (
   id,
@@ -225,6 +233,7 @@ INSERT INTO clases (
 ```
 
 #### Paso 5: Enviar Evento a P6 (Notificaciones)
+
 ```typescript
 {
   tipo: 'ClaseCreada',
@@ -240,6 +249,7 @@ INSERT INTO clases (
 ```
 
 #### Paso 6: Enviar Evento a P2.6 (Sincronizar Calendario)
+
 ```typescript
 {
   tipo: 'SincronizarClase',
@@ -249,7 +259,9 @@ INSERT INTO clases (
 ```
 
 ### Salidas
+
 **A ADMIN:**
+
 ```typescript
 {
   id: string
@@ -270,6 +282,7 @@ INSERT INTO clases (
 **A P2.6:** Evento de sincronización
 
 ### Validaciones Críticas
+
 1. ✅ Docente existe y está activo
 2. ✅ Fecha es futura
 3. ✅ Duracion > 0
@@ -277,6 +290,7 @@ INSERT INTO clases (
 5. ⚠️ No hay clases conflictivas (opcional)
 
 ### Estado Implementación
+
 - Backend: ✅ 100%
 - Frontend: ✅ 100%
 
@@ -285,10 +299,13 @@ INSERT INTO clases (
 ## SUBPROCESO P2.2: CREAR GRUPO RECURRENTE
 
 ### Descripción
+
 Permite al Admin crear un grupo de clases recurrentes (semanales) con uno o más docentes.
 
 ### Entradas
+
 **Desde ADMIN:**
+
 ```typescript
 {
   nombre: string
@@ -309,6 +326,7 @@ Permite al Admin crear un grupo de clases recurrentes (semanales) con uno o más
 ### Proceso Detallado
 
 #### Paso 1: Validar Docente Principal
+
 ```
 Entrada: docente_id
 Acción: SELECT * FROM docentes WHERE id = docente_id AND activo = true
@@ -316,6 +334,7 @@ Validación: Docente existe y está activo
 ```
 
 #### Paso 2: Validar Docentes Secundarios (si aplica)
+
 ```
 Entrada: docentes_secundarios[]
 Acción: SELECT * FROM docentes WHERE id IN (?) AND activo = true
@@ -323,6 +342,7 @@ Validación: Todos los docentes existen
 ```
 
 #### Paso 3: Validar Horarios
+
 ```
 Validación:
   - dia_semana BETWEEN 0 AND 6
@@ -332,6 +352,7 @@ Validación:
 ```
 
 #### Paso 4: Crear Registro de Grupo
+
 ```sql
 INSERT INTO clase_grupos (
   id,
@@ -367,6 +388,7 @@ INSERT INTO clase_grupos (
 ```
 
 #### Paso 5: Asociar Docentes Secundarios (si aplica)
+
 ```sql
 INSERT INTO clase_grupo_docentes (
   clase_grupo_id,
@@ -376,6 +398,7 @@ INSERT INTO clase_grupo_docentes (
 ```
 
 #### Paso 6: Enviar Evento a P6 (Notificaciones)
+
 ```typescript
 {
   tipo: 'GrupoCreado',
@@ -391,6 +414,7 @@ INSERT INTO clase_grupo_docentes (
 ```
 
 #### Paso 7: Enviar Evento a P2.6 (Sincronizar Calendario)
+
 ```typescript
 {
   tipo: 'SincronizarGrupo',
@@ -400,7 +424,9 @@ INSERT INTO clase_grupo_docentes (
 ```
 
 ### Salidas
+
 **A ADMIN:**
+
 ```typescript
 {
   id: string
@@ -421,6 +447,7 @@ INSERT INTO clase_grupo_docentes (
 **A P2.6:** Evento de sincronización
 
 ### Validaciones Críticas
+
 1. ✅ Docente principal existe
 2. ✅ Docentes secundarios existen (si aplica)
 3. ✅ Día de semana válido (0-6)
@@ -428,6 +455,7 @@ INSERT INTO clase_grupo_docentes (
 5. ✅ Duración > 0, Cupos > 0
 
 ### Estado Implementación
+
 - Backend: ✅ 100%
 - Frontend: ⚠️ 50%
 
@@ -436,9 +464,11 @@ INSERT INTO clase_grupo_docentes (
 ## SUBPROCESO P2.3: GESTIONAR INSCRIPCIONES
 
 ### Descripción
+
 Permite a Tutores reservar/cancelar clases para sus estudiantes. También permite al Admin hacer inscripciones masivas.
 
 ### Operaciones
+
 1. **Reservar Clase Individual**
 2. **Cancelar Reserva de Clase Individual**
 3. **Inscribir a Grupo Recurrente**
@@ -449,27 +479,31 @@ Permite a Tutores reservar/cancelar clases para sus estudiantes. También permit
 ### OPERACIÓN 1: Reservar Clase Individual
 
 #### Entradas
+
 **Desde TUTOR o ADMIN:**
+
 ```typescript
 {
-  clase_id: string
-  estudiante_id: string
-  reservada_por: 'TUTOR' | 'ADMIN'
+  clase_id: string;
+  estudiante_id: string;
+  reservada_por: 'TUTOR' | 'ADMIN';
 }
 ```
 
 #### Proceso Detallado
 
 ##### Paso 1: Validar Ownership (si es TUTOR)
+
 ```
 Si actor = TUTOR:
-  SELECT * FROM estudiantes 
+  SELECT * FROM estudiantes
   WHERE id = estudiante_id AND tutor_id = user.id
-  
+
   Validación: Estudiante pertenece al tutor
 ```
 
 ##### Paso 2: Verificar Clase Existe y Tiene Cupos
+
 ```sql
 SELECT id, cupos_maximo, cupos_ocupados, estado, fecha_hora_inicio
 FROM clases
@@ -477,12 +511,14 @@ WHERE id = clase_id
 ```
 
 Validaciones:
+
 - Clase existe
 - estado = "Programada"
 - cupos_ocupados < cupos_maximo
 - fecha_hora_inicio > NOW()
 
 ##### Paso 3: Verificar No Está Inscrito
+
 ```sql
 SELECT COUNT(*) FROM inscripciones_clase
 WHERE clase_id = ? AND estudiante_id = ?
@@ -491,6 +527,7 @@ WHERE clase_id = ? AND estudiante_id = ?
 Validación: COUNT = 0 (no existe inscripción previa)
 
 ##### Paso 4: Crear Inscripción
+
 ```sql
 INSERT INTO inscripciones_clase (
   id,
@@ -510,6 +547,7 @@ INSERT INTO inscripciones_clase (
 ```
 
 ##### Paso 5: Actualizar Cupos de Clase
+
 ```sql
 UPDATE clases
 SET cupos_ocupados = cupos_ocupados + 1,
@@ -518,6 +556,7 @@ WHERE id = clase_id
 ```
 
 ##### Paso 6: Enviar Evento a P6 (Notificar Docente)
+
 ```typescript
 {
   tipo: 'NuevaInscripcion',
@@ -533,6 +572,7 @@ WHERE id = clase_id
 ```
 
 ##### Paso 7: Enviar Confirmación a TUTOR
+
 ```typescript
 {
   tipo: 'ReservaConfirmada',
@@ -547,7 +587,9 @@ WHERE id = clase_id
 ```
 
 #### Salidas
+
 **A TUTOR:**
+
 ```typescript
 {
   inscripcion_id: string
@@ -567,16 +609,19 @@ WHERE id = clase_id
 ### OPERACIÓN 2: Cancelar Reserva de Clase Individual
 
 #### Entradas
+
 **Desde TUTOR o ADMIN:**
+
 ```typescript
 {
-  inscripcion_id: string
+  inscripcion_id: string;
 }
 ```
 
 #### Proceso Detallado
 
 ##### Paso 1: Validar Inscripción Existe
+
 ```sql
 SELECT inscripciones_clase.*, clases.estado, clases.fecha_hora_inicio, estudiantes.tutor_id
 FROM inscripciones_clase
@@ -586,12 +631,14 @@ WHERE inscripciones_clase.id = ?
 ```
 
 ##### Paso 2: Validar Ownership (si es TUTOR)
+
 ```
 Si actor = TUTOR:
   Validación: estudiantes.tutor_id = user.id
 ```
 
 ##### Paso 3: Validar Cancelación Permitida
+
 ```
 Validaciones:
   - clases.estado = "Programada"
@@ -600,12 +647,14 @@ Validaciones:
 ```
 
 ##### Paso 4: Eliminar Inscripción
+
 ```sql
 DELETE FROM inscripciones_clase
 WHERE id = inscripcion_id
 ```
 
 ##### Paso 5: Actualizar Cupos de Clase
+
 ```sql
 UPDATE clases
 SET cupos_ocupados = cupos_ocupados - 1,
@@ -614,6 +663,7 @@ WHERE id = clase_id
 ```
 
 ##### Paso 6: Enviar Evento a P6 (Notificar Docente)
+
 ```typescript
 {
   tipo: 'InscripcionCancelada',
@@ -627,10 +677,12 @@ WHERE id = clase_id
 ```
 
 #### Salidas
+
 **A TUTOR:**
+
 ```typescript
 {
-  mensaje: "Reserva cancelada exitosamente"
+  mensaje: 'Reserva cancelada exitosamente';
 }
 ```
 
@@ -643,34 +695,40 @@ WHERE id = clase_id
 ### OPERACIÓN 3: Inscribir a Grupo Recurrente
 
 #### Entradas
+
 **Desde ADMIN o TUTOR:**
+
 ```typescript
 {
-  clase_grupo_id: string
-  estudiante_id: string
+  clase_grupo_id: string;
+  estudiante_id: string;
 }
 ```
 
 #### Proceso Detallado
 
 ##### Paso 1: Validar Ownership
+
 ```
 (Igual que en reserva de clase individual)
 ```
 
 ##### Paso 2: Verificar Grupo Existe y Está Activo
+
 ```sql
 SELECT * FROM clase_grupos
 WHERE id = clase_grupo_id AND activo = true
 ```
 
 ##### Paso 3: Verificar No Está Inscrito
+
 ```sql
 SELECT COUNT(*) FROM inscripciones_clase_grupo
 WHERE clase_grupo_id = ? AND estudiante_id = ? AND activo = true
 ```
 
 ##### Paso 4: Crear Inscripción a Grupo
+
 ```sql
 INSERT INTO inscripciones_clase_grupo (
   id,
@@ -690,6 +748,7 @@ INSERT INTO inscripciones_clase_grupo (
 ```
 
 ##### Paso 5: Notificar Docente(s)
+
 ```typescript
 {
   tipo: 'NuevaInscripcionGrupo',
@@ -704,12 +763,18 @@ INSERT INTO inscripciones_clase_grupo (
 ```
 
 #### Salidas
+
 **A TUTOR/ADMIN:**
+
 ```typescript
 {
-  inscripcion_id: string
-  grupo: { id, nombre, dia_semana, hora_inicio }
-  estudiante: { id, nombre }
+  inscripcion_id: string;
+  grupo: {
+    (id, nombre, dia_semana, hora_inicio);
+  }
+  estudiante: {
+    (id, nombre);
+  }
 }
 ```
 
@@ -721,18 +786,21 @@ INSERT INTO inscripciones_clase_grupo (
 ### OPERACIÓN 4: Desinscribir de Grupo Recurrente
 
 #### Entradas
+
 ```typescript
 {
-  inscripcion_grupo_id: string
+  inscripcion_grupo_id: string;
 }
 ```
 
 #### Proceso Detallado
 
 ##### Paso 1-2: Validar y Verificar Ownership
+
 (Similar a cancelar reserva individual)
 
 ##### Paso 3: Desactivar Inscripción
+
 ```sql
 UPDATE inscripciones_clase_grupo
 SET activo = false,
@@ -742,6 +810,7 @@ WHERE id = inscripcion_grupo_id
 ```
 
 ##### Paso 4: Notificar Docente(s)
+
 ```typescript
 {
   tipo: 'InscripcionGrupoCancelada',
@@ -755,10 +824,12 @@ WHERE id = inscripcion_grupo_id
 ```
 
 #### Salidas
+
 **A TUTOR/ADMIN:**
+
 ```typescript
 {
-  mensaje: "Desinscripción exitosa"
+  mensaje: 'Desinscripción exitosa';
 }
 ```
 
@@ -766,6 +837,7 @@ WHERE id = inscripcion_grupo_id
 **A P6:** Evento de notificación
 
 ### Estado Implementación
+
 - Backend: ✅ 100%
 - Frontend: ✅ 95%
 
@@ -774,9 +846,11 @@ WHERE id = inscripcion_grupo_id
 ## SUBPROCESO P2.4: REGISTRAR ASISTENCIA
 
 ### Descripción
+
 Permite a Docentes registrar asistencia de estudiantes en clases individuales o grupos.
 
 ### Operaciones
+
 1. **Registrar Asistencia de Clase Individual**
 2. **Registrar Asistencia de Clase Grupo**
 
@@ -785,21 +859,24 @@ Permite a Docentes registrar asistencia de estudiantes en clases individuales o 
 ### OPERACIÓN 1: Registrar Asistencia Clase Individual
 
 #### Entradas
+
 **Desde DOCENTE:**
+
 ```typescript
 {
-  clase_id: string
+  clase_id: string;
   asistencias: Array<{
-    estudiante_id: string
-    estado: 'Presente' | 'Ausente' | 'Justificado'
-    observaciones?: string
-  }>
+    estudiante_id: string;
+    estado: 'Presente' | 'Ausente' | 'Justificado';
+    observaciones?: string;
+  }>;
 }
 ```
 
 #### Proceso Detallado
 
 ##### Paso 1: Validar Clase Existe
+
 ```sql
 SELECT * FROM clases
 WHERE id = clase_id
@@ -808,6 +885,7 @@ WHERE id = clase_id
 Validación: Clase existe
 
 ##### Paso 2: Validar Docente Tiene Permisos
+
 ```sql
 SELECT docente_id FROM clases WHERE id = clase_id
 ```
@@ -815,18 +893,21 @@ SELECT docente_id FROM clases WHERE id = clase_id
 Validación: docente_id = user.id
 
 ##### Paso 3: Obtener Lista de Estudiantes Inscritos
+
 ```sql
 SELECT estudiante_id FROM inscripciones_clase
 WHERE clase_id = ?
 ```
 
 ##### Paso 4: Validar Todos los Estudiantes Están Inscritos
+
 ```
 Para cada estudiante en asistencias:
   Validar: estudiante_id IN lista_inscritos
 ```
 
 ##### Paso 5: Crear Registros de Asistencia
+
 ```sql
 INSERT INTO asistencias (
   id,
@@ -842,6 +923,7 @@ INSERT INTO asistencias (
 ```
 
 ##### Paso 6: Actualizar Estado de Clase
+
 ```sql
 UPDATE clases
 SET estado = 'Finalizada',
@@ -850,6 +932,7 @@ WHERE id = clase_id
 ```
 
 ##### Paso 7: Enviar Evento a P3 (Gamificación)
+
 ```typescript
 Para cada asistencia con estado = 'Presente':
 {
@@ -862,6 +945,7 @@ Para cada asistencia con estado = 'Presente':
 ```
 
 ##### Paso 8: Enviar Evento a P6 (Notificar Tutores)
+
 ```typescript
 Para cada estudiante:
 {
@@ -877,17 +961,19 @@ Para cada estudiante:
 ```
 
 #### Salidas
+
 **A DOCENTE:**
+
 ```typescript
 {
-  clase_id: string
-  asistencias_registradas: number
+  clase_id: string;
+  asistencias_registradas: number;
   estudiantes: Array<{
-    estudiante_id,
-    nombre,
-    estado,
-    puntos_otorgados?: number
-  }>
+    estudiante_id;
+    nombre;
+    estado;
+    puntos_otorgados?: number;
+  }>;
 }
 ```
 
@@ -901,28 +987,32 @@ Para cada estudiante:
 ### OPERACIÓN 2: Registrar Asistencia Clase Grupo
 
 #### Entradas
+
 **Desde DOCENTE:**
+
 ```typescript
 {
-  clase_grupo_id: string
-  fecha: Date // Fecha específica de la clase
+  clase_grupo_id: string;
+  fecha: Date; // Fecha específica de la clase
   asistencias: Array<{
-    estudiante_id: string
-    estado: 'Presente' | 'Ausente' | 'Justificado'
-    observaciones?: string
-  }>
+    estudiante_id: string;
+    estado: 'Presente' | 'Ausente' | 'Justificado';
+    observaciones?: string;
+  }>;
 }
 ```
 
 #### Proceso Detallado
 
 ##### Paso 1: Validar Grupo Existe
+
 ```sql
 SELECT * FROM clase_grupos
 WHERE id = clase_grupo_id
 ```
 
 ##### Paso 2: Validar Docente Tiene Permisos
+
 ```sql
 SELECT docente_id FROM clase_grupos WHERE id = clase_grupo_id
 
@@ -932,15 +1022,18 @@ WHERE clase_grupo_id = ? AND docente_id = user.id
 ```
 
 ##### Paso 3: Obtener Estudiantes Inscritos al Grupo
+
 ```sql
 SELECT estudiante_id FROM inscripciones_clase_grupo
 WHERE clase_grupo_id = ? AND activo = true
 ```
 
 ##### Paso 4: Validar Todos los Estudiantes Están Inscritos
+
 (Igual que en clase individual)
 
 ##### Paso 5: Verificar No Existe Asistencia Previa para Esta Fecha
+
 ```sql
 SELECT COUNT(*) FROM asistencias_clase_grupo
 WHERE clase_grupo_id = ? AND fecha = ?
@@ -949,6 +1042,7 @@ WHERE clase_grupo_id = ? AND fecha = ?
 Validación: COUNT = 0 (evitar duplicados)
 
 ##### Paso 6: Crear Registros de Asistencia
+
 ```sql
 INSERT INTO asistencias_clase_grupo (
   id,
@@ -964,6 +1058,7 @@ INSERT INTO asistencias_clase_grupo (
 ```
 
 ##### Paso 7: Enviar Evento a P3 (Gamificación)
+
 ```typescript
 Para cada asistencia con estado = 'Presente':
 {
@@ -976,10 +1071,13 @@ Para cada asistencia con estado = 'Presente':
 ```
 
 ##### Paso 8: Enviar Evento a P6 (Notificar Tutores)
+
 (Igual que en clase individual, pero con metadata de grupo)
 
 #### Salidas
+
 **A DOCENTE:**
+
 ```typescript
 {
   clase_grupo_id: string
@@ -994,6 +1092,7 @@ Para cada asistencia con estado = 'Presente':
 **A P6:** Eventos de notificación
 
 ### Estado Implementación
+
 - Backend: ✅ 100%
 - Frontend: ✅ 90% (clase individual), ⚠️ 50% (grupos)
 
@@ -1002,9 +1101,11 @@ Para cada asistencia con estado = 'Presente':
 ## SUBPROCESO P2.5: CONSULTAR CLASES
 
 ### Descripción
+
 Permite a usuarios consultar clases según su rol y permisos.
 
 ### Operaciones
+
 1. **Consultar Clases como DOCENTE**
 2. **Consultar Clases como TUTOR**
 3. **Consultar Clases como ESTUDIANTE**
@@ -1015,7 +1116,9 @@ Permite a usuarios consultar clases según su rol y permisos.
 ### OPERACIÓN 1: Consultar Clases como DOCENTE
 
 #### Entradas
+
 **Desde DOCENTE:**
+
 ```typescript
 {
   filtros?: {
@@ -1029,8 +1132,9 @@ Permite a usuarios consultar clases según su rol y permisos.
 #### Proceso
 
 ##### Paso 1: Obtener Clases Asignadas
+
 ```sql
-SELECT 
+SELECT
   c.id,
   c.nombre,
   c.fecha_hora_inicio,
@@ -1048,8 +1152,9 @@ ORDER BY c.fecha_hora_inicio ASC
 ```
 
 ##### Paso 2: Para Cada Clase, Obtener Estudiantes Inscritos
+
 ```sql
-SELECT 
+SELECT
   e.id,
   e.nombre,
   e.apellido,
@@ -1062,29 +1167,34 @@ WHERE ic.clase_id = ?
 ```
 
 ##### Paso 3: Verificar Si Tiene Asistencia Registrada
+
 ```sql
 SELECT COUNT(*) FROM asistencias
 WHERE clase_id = ?
 ```
 
 #### Salidas
+
 **A DOCENTE:**
+
 ```typescript
 Array<{
-  id: string
-  nombre: string
-  fecha_hora_inicio: DateTime
-  duracion_minutos: number
-  cupos_maximo: number
-  cupos_ocupados: number
-  estado: string
-  link_reunion?: string
+  id: string;
+  nombre: string;
+  fecha_hora_inicio: DateTime;
+  duracion_minutos: number;
+  cupos_maximo: number;
+  cupos_ocupados: number;
+  estado: string;
+  link_reunion?: string;
   estudiantes: Array<{
-    id, nombre, apellido,
-    tutor: { nombre, email }
-  }>
-  asistencia_registrada: boolean
-}>
+    id;
+    nombre;
+    apellido;
+    tutor: { nombre; email };
+  }>;
+  asistencia_registrada: boolean;
+}>;
 ```
 
 ---
@@ -1092,7 +1202,9 @@ Array<{
 ### OPERACIÓN 2: Consultar Clases como TUTOR
 
 #### Entradas
+
 **Desde TUTOR:**
+
 ```typescript
 {
   estudiante_id?: string // Si no se proporciona, todas sus hijos
@@ -1104,6 +1216,7 @@ Array<{
 #### Proceso
 
 ##### Paso 1: Obtener Estudiantes del Tutor
+
 ```sql
 SELECT id FROM estudiantes
 WHERE tutor_id = user.id
@@ -1111,8 +1224,9 @@ WHERE tutor_id = user.id
 ```
 
 ##### Paso 2: Obtener Clases Inscritas
+
 ```sql
-SELECT 
+SELECT
   c.id,
   c.nombre,
   c.fecha_hora_inicio,
@@ -1133,22 +1247,29 @@ ORDER BY c.fecha_hora_inicio ASC
 ```
 
 ##### Paso 3: Verificar Asistencia (si clase ya pasó)
+
 ```sql
 SELECT estado FROM asistencias
 WHERE clase_id = ? AND estudiante_id = ?
 ```
 
 #### Salidas
+
 **A TUTOR:**
+
 ```typescript
 Array<{
   clase: {
-    id, nombre, fecha_hora_inicio, duracion_minutos, link_reunion
-  },
-  docente: { nombre },
-  estudiante: { id, nombre },
-  asistencia?: 'Presente' | 'Ausente' | 'Justificado'
-}>
+    id;
+    nombre;
+    fecha_hora_inicio;
+    duracion_minutos;
+    link_reunion;
+  };
+  docente: { nombre };
+  estudiante: { id; nombre };
+  asistencia?: 'Presente' | 'Ausente' | 'Justificado';
+}>;
 ```
 
 ---
@@ -1156,7 +1277,9 @@ Array<{
 ### OPERACIÓN 3: Consultar Clases como ESTUDIANTE
 
 #### Entradas
+
 **Desde ESTUDIANTE:**
+
 ```typescript
 {
   fecha_desde?: Date
@@ -1167,8 +1290,9 @@ Array<{
 #### Proceso
 
 ##### Paso 1: Obtener Clases Inscritas
+
 ```sql
-SELECT 
+SELECT
   c.id,
   c.nombre,
   c.fecha_hora_inicio,
@@ -1186,23 +1310,26 @@ ORDER BY c.fecha_hora_inicio ASC
 ```
 
 ##### Paso 2: Verificar Asistencia
+
 ```sql
 SELECT estado FROM asistencias
 WHERE clase_id = ? AND estudiante_id = user.id
 ```
 
 #### Salidas
+
 **A ESTUDIANTE:**
+
 ```typescript
 Array<{
-  id: string
-  nombre: string
-  fecha_hora_inicio: DateTime
-  duracion_minutos: number
-  link_reunion?: string
-  docente: { nombre }
-  asistencia?: 'Presente' | 'Ausente' | 'Justificado'
-}>
+  id: string;
+  nombre: string;
+  fecha_hora_inicio: DateTime;
+  duracion_minutos: number;
+  link_reunion?: string;
+  docente: { nombre };
+  asistencia?: 'Presente' | 'Ausente' | 'Justificado';
+}>;
 ```
 
 ---
@@ -1210,17 +1337,22 @@ Array<{
 ### OPERACIÓN 4: Consultar Grupos Recurrentes
 
 #### Proceso
+
 Similar a consultar clases, pero consultando:
+
 - `clase_grupos` en lugar de `clases`
 - `inscripciones_clase_grupo` en lugar de `inscripciones_clase`
 - `asistencias_clase_grupo` en lugar de `asistencias`
 
 #### Salidas
+
 Incluyen:
+
 - `dia_semana` y `hora_inicio` en lugar de `fecha_hora_inicio`
 - `activo` (boolean) del grupo
 
 ### Estado Implementación
+
 - Backend: ✅ 100%
 - Frontend: ✅ 95%
 
@@ -1229,23 +1361,27 @@ Incluyen:
 ## SUBPROCESO P2.6: SINCRONIZAR CALENDARIO
 
 ### Descripción
+
 Sincroniza clases y grupos con Google Calendar, enviando invitaciones a participantes.
 
 ### Entradas
+
 **Desde P2.1, P2.2:**
+
 ```typescript
 {
-  tipo: 'SincronizarClase' | 'SincronizarGrupo'
-  entidad_id: string
-  accion: 'crear' | 'actualizar' | 'eliminar'
+  tipo: 'SincronizarClase' | 'SincronizarGrupo';
+  entidad_id: string;
+  accion: 'crear' | 'actualizar' | 'eliminar';
 }
 ```
 
 ### Proceso Detallado (Sincronizar Clase)
 
 #### Paso 1: Obtener Datos de la Clase
+
 ```sql
-SELECT 
+SELECT
   c.*,
   d.email as docente_email,
   d.nombre as docente_nombre
@@ -1255,8 +1391,9 @@ WHERE c.id = ?
 ```
 
 #### Paso 2: Obtener Participantes (Estudiantes + Tutores)
+
 ```sql
-SELECT 
+SELECT
   e.email as estudiante_email,
   e.nombre as estudiante_nombre,
   t.email as tutor_email,
@@ -1268,6 +1405,7 @@ WHERE ic.clase_id = ?
 ```
 
 #### Paso 3: Crear Evento en Google Calendar
+
 ```javascript
 // Usando Google Calendar API
 const event = {
@@ -1275,34 +1413,35 @@ const event = {
   description: clase.descripcion,
   start: {
     dateTime: clase.fecha_hora_inicio,
-    timeZone: 'America/Argentina/Buenos_Aires'
+    timeZone: 'America/Argentina/Buenos_Aires',
   },
   end: {
     dateTime: fecha_hora_inicio + duracion_minutos,
-    timeZone: 'America/Argentina/Buenos_Aires'
+    timeZone: 'America/Argentina/Buenos_Aires',
   },
   attendees: [
     { email: docente_email },
-    ...estudiantes.map(e => ({ email: e.email })),
-    ...tutores.map(t => ({ email: t.email }))
+    ...estudiantes.map((e) => ({ email: e.email })),
+    ...tutores.map((t) => ({ email: t.email })),
   ],
   conferenceData: {
     createRequest: {
       requestId: `clase-${clase.id}`,
-      conferenceSolutionKey: { type: 'hangoutsMeet' }
-    }
-  }
-}
+      conferenceSolutionKey: { type: 'hangoutsMeet' },
+    },
+  },
+};
 
 const response = await calendar.events.insert({
   calendarId: 'primary',
   resource: event,
   conferenceDataVersion: 1,
-  sendUpdates: 'all' // Enviar invitaciones por email
-})
+  sendUpdates: 'all', // Enviar invitaciones por email
+});
 ```
 
 #### Paso 4: Guardar Google Event ID (Opcional)
+
 ```sql
 UPDATE clases
 SET google_event_id = ?,
@@ -1312,16 +1451,19 @@ WHERE id = clase_id
 ```
 
 ### Salidas
+
 **A GOOGLE:** Evento de calendario creado
 **A D2 (CLASES):** UPDATE con google_event_id y link_reunion
 
 ### Notas Importantes
+
 - La sincronización con Google Calendar es **opcional**
 - Si falla, no debe bloquear la creación de la clase
 - Se usa circuit breaker para evitar fallos en cascada
 - Los links de Google Meet se generan automáticamente si se usa `conferenceData`
 
 ### Estado Implementación
+
 - Backend: ⚠️ 75% (funcionalidad básica, sin error handling robusto)
 - Frontend: N/A (transparente para el usuario)
 
@@ -1329,21 +1471,22 @@ WHERE id = clase_id
 
 ## MATRIZ DE TRANSACCIONES
 
-| Subproceso | Operación | Tablas Afectadas | Tipo | Atomicidad |
-|------------|-----------|------------------|------|------------|
-| P2.1 | Crear Clase | D2 (clases) | INSERT | ✅ |
-| P2.2 | Crear Grupo | D2 (clase_grupos) | INSERT | ✅ |
-| P2.3 | Reservar Clase | D3 (inscripciones), D2 (cupos) | INSERT, UPDATE | ✅ Transacción |
-| P2.3 | Cancelar Reserva | D3 (inscripciones), D2 (cupos) | DELETE, UPDATE | ✅ Transacción |
-| P2.4 | Registrar Asistencia | D4 (asistencias), D2 (estado clase) | INSERT, UPDATE | ✅ Transacción |
-| P2.5 | Consultar | Todas | SELECT | N/A |
-| P2.6 | Sincronizar | D2 (google_event_id) | UPDATE | ⚠️ Eventual |
+| Subproceso | Operación            | Tablas Afectadas                    | Tipo           | Atomicidad     |
+| ---------- | -------------------- | ----------------------------------- | -------------- | -------------- |
+| P2.1       | Crear Clase          | D2 (clases)                         | INSERT         | ✅             |
+| P2.2       | Crear Grupo          | D2 (clase_grupos)                   | INSERT         | ✅             |
+| P2.3       | Reservar Clase       | D3 (inscripciones), D2 (cupos)      | INSERT, UPDATE | ✅ Transacción |
+| P2.3       | Cancelar Reserva     | D3 (inscripciones), D2 (cupos)      | DELETE, UPDATE | ✅ Transacción |
+| P2.4       | Registrar Asistencia | D4 (asistencias), D2 (estado clase) | INSERT, UPDATE | ✅ Transacción |
+| P2.5       | Consultar            | Todas                               | SELECT         | N/A            |
+| P2.6       | Sincronizar          | D2 (google_event_id)                | UPDATE         | ⚠️ Eventual    |
 
 ---
 
 ## VALIDACIONES CRÍTICAS DE INTEGRIDAD
 
 ### 1. Cupos de Clases
+
 ```sql
 -- Constraint a nivel de aplicación
 ASSERT: cupos_ocupados <= cupos_maximo
@@ -1353,13 +1496,15 @@ SELECT cupos_ocupados < cupos_maximo FROM clases WHERE id = ?
 ```
 
 ### 2. No Inscripciones Duplicadas
+
 ```sql
 -- Constraint único en BD:
-UNIQUE INDEX idx_inscripciones_clase_unique 
+UNIQUE INDEX idx_inscripciones_clase_unique
 ON inscripciones_clase(clase_id, estudiante_id)
 ```
 
 ### 3. Ownership de Estudiantes (TUTOR)
+
 ```sql
 -- Validación en cada operación:
 SELECT COUNT(*) FROM estudiantes
@@ -1367,6 +1512,7 @@ WHERE id = estudiante_id AND tutor_id = user.id
 ```
 
 ### 4. Asistencia Solo para Inscritos
+
 ```sql
 -- Validación antes de registrar asistencia:
 SELECT estudiante_id FROM inscripciones_clase
@@ -1374,6 +1520,7 @@ WHERE clase_id = ? AND estudiante_id IN (lista_estudiantes)
 ```
 
 ### 5. No Asistencia Duplicada (Grupos)
+
 ```sql
 UNIQUE INDEX idx_asistencias_grupo_unique
 ON asistencias_clase_grupo(clase_grupo_id, estudiante_id, fecha)
@@ -1412,6 +1559,7 @@ CREATE INDEX idx_asistencias_fecha ON asistencias(fecha);
 ## EVENTOS EMITIDOS A OTROS PROCESOS
 
 ### A P3 (Gamificación)
+
 ```typescript
 {
   tipo: 'AsistenciaRegistrada',
@@ -1423,6 +1571,7 @@ CREATE INDEX idx_asistencias_fecha ON asistencias(fecha);
 ```
 
 ### A P6 (Notificaciones)
+
 ```typescript
 // Clase creada
 { tipo: 'ClaseCreada', destinatario_id, metadata }
@@ -1445,48 +1594,53 @@ CREATE INDEX idx_asistencias_fecha ON asistencias(fecha);
 ## CASOS DE ERROR Y MANEJO
 
 ### Error 1: Clase Sin Cupos
+
 ```typescript
 if (cupos_ocupados >= cupos_maximo) {
-  throw new BadRequestException('No hay cupos disponibles')
+  throw new BadRequestException('No hay cupos disponibles');
 }
 ```
 
 ### Error 2: Inscripción Duplicada
+
 ```typescript
 const existe = await prisma.inscripcionClase.findFirst({
-  where: { clase_id, estudiante_id }
-})
+  where: { clase_id, estudiante_id },
+});
 if (existe) {
-  throw new ConflictException('El estudiante ya está inscrito')
+  throw new ConflictException('El estudiante ya está inscrito');
 }
 ```
 
 ### Error 3: Estudiante No Pertenece al Tutor
+
 ```typescript
 if (actor === 'TUTOR') {
   const estudiante = await prisma.estudiante.findUnique({
-    where: { id: estudiante_id }
-  })
+    where: { id: estudiante_id },
+  });
   if (estudiante.tutor_id !== user.id) {
-    throw new ForbiddenException('No tienes permisos para inscribir a este estudiante')
+    throw new ForbiddenException('No tienes permisos para inscribir a este estudiante');
   }
 }
 ```
 
 ### Error 4: Clase Ya Finalizada
+
 ```typescript
 if (clase.estado === 'Finalizada') {
-  throw new BadRequestException('No se puede modificar una clase finalizada')
+  throw new BadRequestException('No se puede modificar una clase finalizada');
 }
 ```
 
 ### Error 5: Asistencia Ya Registrada
+
 ```typescript
 const asistencias = await prisma.asistencia.findMany({
-  where: { clase_id }
-})
+  where: { clase_id },
+});
 if (asistencias.length > 0) {
-  throw new ConflictException('La asistencia ya fue registrada para esta clase')
+  throw new ConflictException('La asistencia ya fue registrada para esta clase');
 }
 ```
 
@@ -1494,25 +1648,27 @@ if (asistencias.length > 0) {
 
 ## RESUMEN DE ESTADO DE IMPLEMENTACIÓN
 
-| Subproceso | Backend | Frontend | Notas |
-|------------|---------|----------|-------|
-| P2.1 Crear Clase | ✅ 100% | ✅ 100% | Funcional end-to-end |
-| P2.2 Crear Grupo | ✅ 100% | ⚠️ 50% | Backend listo, UI básica |
-| P2.3 Gestionar Inscripciones | ✅ 100% | ✅ 95% | Casi completo |
-| P2.4 Registrar Asistencia | ✅ 100% | ✅ 90% (Individual), ⚠️ 50% (Grupos) | Clase individual completo |
-| P2.5 Consultar Clases | ✅ 100% | ✅ 95% | Funcional |
-| P2.6 Sincronizar Calendario | ⚠️ 75% | N/A | Funcionalidad básica, mejorar error handling |
+| Subproceso                   | Backend | Frontend                             | Notas                                        |
+| ---------------------------- | ------- | ------------------------------------ | -------------------------------------------- |
+| P2.1 Crear Clase             | ✅ 100% | ✅ 100%                              | Funcional end-to-end                         |
+| P2.2 Crear Grupo             | ✅ 100% | ⚠️ 50%                               | Backend listo, UI básica                     |
+| P2.3 Gestionar Inscripciones | ✅ 100% | ✅ 95%                               | Casi completo                                |
+| P2.4 Registrar Asistencia    | ✅ 100% | ✅ 90% (Individual), ⚠️ 50% (Grupos) | Clase individual completo                    |
+| P2.5 Consultar Clases        | ✅ 100% | ✅ 95%                               | Funcional                                    |
+| P2.6 Sincronizar Calendario  | ⚠️ 75%  | N/A                                  | Funcionalidad básica, mejorar error handling |
 
 ---
 
 ## PRÓXIMOS PASOS
 
 ### Para MVP (26 de Octubre)
+
 1. ✅ Completar UI de grupos recurrentes en Portal Admin
 2. ⚠️ Completar registro de asistencia grupos en Portal Docente
 3. ⚠️ Mejorar manejo de errores en P2.6
 
 ### Post-Lanzamiento
+
 1. Implementar políticas de cancelación avanzadas (24h, 48h)
 2. Sistema de lista de espera para clases llenas
 3. Reprogramación automática de clases canceladas

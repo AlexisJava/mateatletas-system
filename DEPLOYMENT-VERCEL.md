@@ -42,6 +42,7 @@ El proyecto ya tiene [vercel.json](vercel.json) configurado correctamente:
 ```
 
 **Características clave:**
+
 - ✅ Fuerza uso de Yarn 4.10.3
 - ✅ Buildea contracts antes de web (respeta dependencias)
 - ✅ 4GB de memoria para builds grandes
@@ -79,6 +80,7 @@ NODE_ENV=production
 ### Opción A: Deploy Automático (Recomendado)
 
 1. **Conectar repositorio a Vercel:**
+
    ```bash
    vercel link
    ```
@@ -130,12 +132,14 @@ git push origin main
 ```
 
 **Espera a que termine y obtén la URL:**
+
 - URL interna: `https://mateatletas-system.railway.internal`
 - URL pública: `https://mateatletas-system-production.up.railway.app`
 
 ### 2. Configurar Variables en Vercel
 
 Usa la URL pública de Railway para configurar:
+
 ```bash
 NEXT_PUBLIC_API_URL=https://mateatletas-system-production.up.railway.app/api
 ```
@@ -171,14 +175,15 @@ railway variables set FRONTEND_URL="https://mateatletas.vercel.app"
 
 ### Variables Críticas
 
-| Variable | Requerido | Scope | Descripción |
-|----------|-----------|-------|-------------|
-| `NEXT_PUBLIC_API_URL` | ✅ Sí | Producción | URL de la API en Railway |
-| `BLOB_READ_WRITE_TOKEN` | ⚠️ Opcional | Producción | Para Vercel Blob (animaciones) |
-| `NEXT_PUBLIC_RPM_APP_ID` | ⚠️ Opcional | Producción | ReadyPlayerMe (avatares 3D) |
-| `NEXT_PUBLIC_RPM_SUBDOMAIN` | ⚠️ Opcional | Producción | ReadyPlayerMe subdomain |
+| Variable                    | Requerido   | Scope      | Descripción                    |
+| --------------------------- | ----------- | ---------- | ------------------------------ |
+| `NEXT_PUBLIC_API_URL`       | ✅ Sí       | Producción | URL de la API en Railway       |
+| `BLOB_READ_WRITE_TOKEN`     | ⚠️ Opcional | Producción | Para Vercel Blob (animaciones) |
+| `NEXT_PUBLIC_RPM_APP_ID`    | ⚠️ Opcional | Producción | ReadyPlayerMe (avatares 3D)    |
+| `NEXT_PUBLIC_RPM_SUBDOMAIN` | ⚠️ Opcional | Producción | ReadyPlayerMe subdomain        |
 
 **Nota sobre variables opcionales:**
+
 - `BLOB_READ_WRITE_TOKEN`: Solo necesario si usas Vercel Blob Storage
 - RPM variables: Solo necesarias si usas avatares 3D de ReadyPlayerMe
 
@@ -189,16 +194,19 @@ railway variables set FRONTEND_URL="https://mateatletas.vercel.app"
 Después de desplegar, verifica:
 
 ### 1. Build Logs
+
 ```bash
 vercel logs --follow
 ```
 
 Busca:
+
 - ✅ "Build completed successfully"
 - ✅ No hay errores de TypeScript
 - ✅ Todas las páginas se generan correctamente
 
 ### 2. Runtime
+
 Visita tu sitio y verifica:
 
 ```bash
@@ -207,6 +215,7 @@ vercel open
 ```
 
 Prueba:
+
 - ✅ La página de login funciona
 - ✅ Las llamadas a la API funcionan (verifica Network tab)
 - ✅ No hay errores 500 en la consola
@@ -215,6 +224,7 @@ Prueba:
 ### 3. API Connectivity
 
 Abre DevTools → Network y verifica:
+
 ```
 Request URL: https://mateatletas-system-production.up.railway.app/api/...
 Status: 200 OK
@@ -231,6 +241,7 @@ Si ves errores CORS, verifica que `FRONTEND_URL` en Railway incluya tu URL de Ve
 **Causa:** Vercel no buildeó el package contracts antes de web.
 
 **Solución:**
+
 1. Verifica que [vercel.json](vercel.json) tenga:
    ```json
    "buildCommand": "yarn workspace @mateatletas/contracts build && yarn workspace web build"
@@ -247,10 +258,12 @@ Si ves errores CORS, verifica que `FRONTEND_URL` en Railway incluya tu URL de Ve
 **Causa:** `NEXT_PUBLIC_API_URL` no está configurada o es incorrecta.
 
 **Síntomas:**
+
 - Console muestra: `POST https://undefined/api/auth/login failed`
 - O muestra URL incorrecta
 
 **Solución:**
+
 1. Verifica variables en Vercel:
    ```bash
    vercel env ls
@@ -274,6 +287,7 @@ Si ves errores CORS, verifica que `FRONTEND_URL` en Railway incluya tu URL de Ve
 ### Error: CORS al llamar API
 
 **Síntomas:**
+
 ```
 Access to fetch at 'https://railway.app/api/...' from origin 'https://vercel.app'
 has been blocked by CORS policy
@@ -282,6 +296,7 @@ has been blocked by CORS policy
 **Causa:** Railway no tiene tu URL de Vercel en `FRONTEND_URL`.
 
 **Solución:**
+
 1. Obtén tu URL de Vercel:
    ```bash
    vercel inspect
@@ -297,18 +312,22 @@ has been blocked by CORS policy
 ### Build Timeout en Vercel
 
 **Síntomas:**
+
 - Build cancela después de 45 minutos (plan Hobby)
 - Mensaje: "Build exceeded maximum time"
 
 **Causas comunes:**
+
 1. Yarn reinstala todo en cada build (no hay cache)
 2. Build de contracts + web toma mucho tiempo
 
 **Solución temporal (Hobby plan):**
+
 1. Considera separar contracts en un package npm publicado
 2. O usa Vercel Pro (builds más rápidos)
 
 **Solución actual funciona porque:**
+
 - Build time actual: ~3-5 minutos
 - Dentro del límite de Hobby plan
 
@@ -317,6 +336,7 @@ has been blocked by CORS policy
 ### Yarn Version Mismatch
 
 **Síntomas:**
+
 ```
 error This project's package.json defines "packageManager": "yarn@4.10.3"
 ```
@@ -325,11 +345,13 @@ error This project's package.json defines "packageManager": "yarn@4.10.3"
 
 **Solución:**
 Verifica que [vercel.json](vercel.json) tenga:
+
 ```json
 "installCommand": "corepack enable && corepack prepare yarn@4.10.3 --activate && yarn set version 4.10.3 && yarn install"
 ```
 
 Si el problema persiste:
+
 ```bash
 vercel --prod --force
 ```
@@ -339,17 +361,20 @@ vercel --prod --force
 ### Out of Memory durante Build
 
 **Síntomas:**
+
 ```
 FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
 ```
 
 **Solución:**
 Ya está configurado en [vercel.json](vercel.json):
+
 ```json
 "NODE_OPTIONS": "--max-old-space-size=4096"
 ```
 
 Si persiste, considera:
+
 1. Reducir tamaño de pages/components
 2. Usar dynamic imports para código pesado (Three.js, Chart.js, etc.)
 
@@ -378,6 +403,7 @@ Vercel genera estas rutas:
 - **Dynamic (ƒ):** Server-rendered on demand
 
 Ejemplos del output:
+
 ```
 ○  /login                   8.03 kB   180 kB  (Static)
 ƒ  /dashboard              13.2 kB   154 kB  (Dynamic)
@@ -393,16 +419,19 @@ Total: **~68 rutas** generadas.
 ### Para Features Nuevos
 
 1. **Crear branch:**
+
    ```bash
    git checkout -b feature/nueva-funcionalidad
    ```
 
 2. **Desarrollar localmente:**
+
    ```bash
    yarn workspace web dev
    ```
 
 3. **Commit y push:**
+
    ```bash
    git add .
    git commit -m "feat: nueva funcionalidad"
@@ -415,6 +444,7 @@ Total: **~68 rutas** generadas.
    - URL: `https://mateatletas-git-feature-nueva-fun-team.vercel.app`
 
 5. **Merge a main:**
+
    ```bash
    git checkout main
    git merge feature/nueva-funcionalidad
@@ -499,6 +529,7 @@ Antes de hacer tu primer deploy a producción:
      ```
 
 3. **Actualizar Railway:**
+
    ```bash
    railway variables set FRONTEND_URL="https://www.mateatletasclub.com.ar,https://mateatletas.vercel.app"
    ```
@@ -526,6 +557,7 @@ Antes de hacer tu primer deploy a producción:
 ### Performance
 
 1. **Usa Vercel Analytics** (gratis en Hobby plan)
+
    ```bash
    # Agregar en apps/web/app/layout.tsx
    import { Analytics } from '@vercel/analytics/react'

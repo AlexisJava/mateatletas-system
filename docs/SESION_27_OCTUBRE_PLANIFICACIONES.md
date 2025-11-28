@@ -8,9 +8,11 @@
 ### 1. Infraestructura Backend
 
 #### API Endpoint para Estudiantes
+
 **Archivo:** `apps/api/src/planificaciones-simples/planificaciones-simples.controller.ts`
 
 Agregado nuevo endpoint:
+
 ```typescript
 GET /api/planificaciones/mis-planificaciones
 @Roles(Role.Estudiante)
@@ -19,14 +21,17 @@ GET /api/planificaciones/mis-planificaciones
 Este endpoint retorna todas las planificaciones del estudiante autenticado con su progreso.
 
 #### Service Layer
+
 **Archivo:** `apps/api/src/planificaciones-simples/planificaciones-simples.service.ts`
 
 Agregado método:
+
 ```typescript
 obtenerPlanificacionesEstudiante(estudianteId: string)
 ```
 
 Retorna array con:
+
 - código, título, grupo_codigo, mes, anio, semanas_total
 - progreso: semana_actual, puntos_totales, tiempo_total_minutos, ultima_actividad
 
@@ -35,6 +40,7 @@ Retorna array con:
 **Archivo:** `apps/web/src/lib/api/planificaciones-simples.api.ts`
 
 Agregada función:
+
 ```typescript
 misPlanificaciones(): Promise<Array<PlanificacionEstudiante>>
 ```
@@ -44,6 +50,7 @@ misPlanificaciones(): Promise<Array<PlanificacionEstudiante>>
 **Archivo:** `apps/web/src/app/estudiante/planificaciones/page.tsx`
 
 Completamente reescrito (330 líneas) con:
+
 - ✅ Integración con API real (reemplaza demo hardcodeado)
 - ✅ Estados de loading, error y empty
 - ✅ Hero section con planificación destacada
@@ -56,65 +63,77 @@ Completamente reescrito (330 líneas) con:
 ### 4. Planificaciones Creadas
 
 #### Semana 1: Química
+
 **Archivo:** `apps/web/src/planificaciones/2025-11-mes-ciencia-quimica/index.tsx`
 
 **Tema:** "El Laboratorio de Mezclas Mágicas"
 
 **Actividades:**
+
 1. ACERTIJOS QUÍMICOS (20 min, 100 pts)
 2. SIMULADOR DE CONCENTRACIONES (20 min, 150 pts)
 3. OLIMPIADA MATEMÁTICA (25 min, 200 pts)
 4. PROYECTO: REACCIÓN EN CADENA (30 min, 250 pts)
 
 **Diferenciación:**
+
 - Grupo 1 (6-7): Sumas/restas hasta 1,000, multiplicación básica, proporciones simples
 - Grupo 2 (8-9): Operaciones hasta 10,000, fracciones, regla de 3 simple
 - Grupo 3 (10-12): Ecuaciones, porcentajes, balanceo de ecuaciones
 
 #### Semana 2: Astronomía
+
 **Archivo:** `apps/web/src/planificaciones/2025-11-mes-ciencia-astronomia/index.tsx`
 
 **Tema:** "El Observatorio Galáctico"
 
 **Actividades:**
+
 1. EXPLORACIÓN ESPACIAL (20 min, 100 pts)
 2. SIMULADOR DE ÓRBITAS (20 min, 150 pts)
 3. OLIMPIADA ASTRONÓMICA (25 min, 200 pts)
 4. PROYECTO: MISIÓN AL PLANETA X (30 min, 250 pts)
 
 **Diferenciación:**
+
 - Grupo 1 (6-7): Distancias simples, multiplicación por potencias de 10
 - Grupo 2 (8-9): Escalas del sistema solar, conversiones km/UA, velocidad=d/t
 - Grupo 3 (10-12): Notación científica, años luz, ecuaciones de movimiento orbital
 
 #### Semana 3: Física
+
 **Archivo:** `apps/web/src/planificaciones/2025-11-mes-ciencia-fisica/index.tsx`
 
 **Tema:** "El Laboratorio de Fuerzas y Movimiento"
 
 **Actividades:**
+
 1. DESAFÍO DE VELOCIDADES (20 min, 100 pts)
 2. SIMULADOR DE MÁQUINAS SIMPLES (20 min, 150 pts)
 3. OLIMPIADA FÍSICA (25 min, 200 pts)
 4. PROYECTO: MONTAÑA RUSA (30 min, 250 pts)
 
 **Diferenciación:**
+
 - Grupo 1 (6-7): Velocidad simple (d=v×t), sumas de fuerzas
 - Grupo 2 (8-9): Aceleración básica, trabajo=fuerza×distancia
 - Grupo 3 (10-12): Ecuaciones de movimiento, conservación de energía
 
 #### Semana 4: Informática
+
 **Archivo:** `apps/web/src/planificaciones/2025-11-mes-ciencia-informatica/index.tsx`
 
 **Tema:** "El Centro de Ciberseguridad"
 
 **Actividades:**
+
 1. CÓDIGOS SECRETOS (20 min, 100 pts)
 2. SIMULADOR DE ALGORITMOS (20 min, 150 pts)
 3. OLIMPIADA COMPUTACIONAL (25 min, 200 pts)
 4. PROYECTO: SISTEMA DE SEGURIDAD (30 min, 250 pts)
 
 **Diferenciación:**
+
 - Grupo 1 (6-7): Patrones simples, secuencias, códigos César básicos
 - Grupo 2 (8-9): Algoritmos de búsqueda, ordenamiento burbuja
 - Grupo 3 (10-12): Optimización, complejidad O(n), grafos básicos
@@ -122,6 +141,7 @@ Completamente reescrito (330 líneas) con:
 ### 5. Base de Datos
 
 #### Planificaciones Registradas
+
 ```sql
 INSERT INTO planificaciones_simples (...)
 -- 4 planificaciones creadas con códigos:
@@ -132,6 +152,7 @@ INSERT INTO planificaciones_simples (...)
 ```
 
 #### Progreso Inicial para Estudiante Emmita
+
 ```sql
 INSERT INTO progreso_estudiante_planificacion (...)
 -- 4 progresos creados para estudiante: emmita-figueroa-demo
@@ -141,6 +162,7 @@ INSERT INTO progreso_estudiante_planificacion (...)
 ## 📋 Características de la Infraestructura
 
 ### Estructura de Archivos
+
 ```
 apps/web/src/planificaciones/
 ├── 2025-11-mes-ciencia-quimica/
@@ -172,6 +194,7 @@ Todas las planificaciones siguen el mismo patrón:
 ### Sistema de Estado
 
 Cada planificación maneja:
+
 ```typescript
 interface Estado {
   actividadActual: number;
@@ -188,6 +211,7 @@ El estado se guarda en `progreso_estudiante_planificacion.estado_guardado` como 
 ### Diseño Visual
 
 Todos los componentes usan:
+
 - Fondo: `bg-slate-950`
 - Cards: Border 2-4px con `border-slate-700/50`
 - Grid Pattern: 32px backgrounds con opacidad 30%
@@ -211,17 +235,20 @@ Todos los componentes usan:
 ## ⏭️ Próximos Pasos (NO IMPLEMENTADOS AÚN)
 
 ### Actividades Dinámicas (ÚLTIMA PRIORIDAD)
+
 - Implementar contenido interactivo de las 16 actividades (4 por semana)
 - Juegos, simuladores, problemas matemáticos
 - Sistema de validación de respuestas
 - Feedback visual inmediato
 
 ### Sistema de Auto-detección
+
 - Scanner automático de `/planificaciones/`
 - Registro automático en DB al detectar nuevos archivos
 - Validación de `PLANIFICACION_CONFIG`
 
 ### Dashboard de Docentes
+
 - Interfaz para asignar planificaciones a grupos
 - Vista de progreso de estudiantes
 - Reportes y analytics
@@ -229,14 +256,17 @@ Todos los componentes usan:
 ## 🐛 Problemas Conocidos
 
 ### Error de Autenticación (Forbidden)
+
 Al intentar acceder a `/api/planificaciones/mis-planificaciones` desde el frontend, se recibe error 403 Forbidden.
 
 **Posibles causas:**
+
 1. El JWT no contiene el rol 'estudiante' correcto
 2. El guard RolesGuard está rechazando el acceso
 3. Problema en la generación del token en el login
 
 **Investigación necesaria:**
+
 - Verificar cómo se genera el JWT en el login de estudiantes
 - Revisar logs del backend para entender por qué se rechaza
 - Testear endpoint directamente con curl y token válido
@@ -259,6 +289,7 @@ Ninguno. Este error bloquea la visualización de planificaciones en el frontend.
 ## 🎯 Cumplimiento del Objetivo
 
 ✅ **"Toda la infraestructura primero"** - COMPLETADO
+
 - Backend: API endpoints funcionando
 - Frontend: UI integrada con API real
 - Base de datos: Todos los registros creados
@@ -266,6 +297,7 @@ Ninguno. Este error bloquea la visualización de planificaciones en el frontend.
 - Estado: Hooks y wrappers implementados
 
 ❌ **"Actividades dinámicas al final"** - PENDIENTE (como se solicitó)
+
 - Placeholders en su lugar
 - Estructura lista para recibir contenido
 - Se implementarán en fase posterior

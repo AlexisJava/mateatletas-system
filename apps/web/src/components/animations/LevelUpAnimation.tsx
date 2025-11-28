@@ -37,11 +37,7 @@ interface LevelUpAnimationProps {
   onComplete: () => void;
 }
 
-export function LevelUpAnimation({
-  nivelAnterior,
-  nivelNuevo,
-  onComplete,
-}: LevelUpAnimationProps) {
+export function LevelUpAnimation({ nivelAnterior, nivelNuevo, onComplete }: LevelUpAnimationProps) {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
@@ -153,7 +149,9 @@ export function LevelUpAnimation({
                   }}
                 >
                   <div className="text-5xl mb-2">{nivelAnterior.icono}</div>
-                  <div className="text-white/50 text-sm font-bold">NIVEL {nivelAnterior.numero}</div>
+                  <div className="text-white/50 text-sm font-bold">
+                    NIVEL {nivelAnterior.numero}
+                  </div>
                   <div className="text-white/50 text-lg font-bold">{nivelAnterior.nombre}</div>
                 </div>
               </motion.div>
@@ -173,7 +171,7 @@ export function LevelUpAnimation({
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{
                   scale: [0, 1.3, 1],
-                  rotate: [- 180, 10, -10, 0],
+                  rotate: [-180, 10, -10, 0],
                 }}
                 transition={{
                   delay: 1,
@@ -260,12 +258,8 @@ export function LevelUpAnimation({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.5, duration: 0.5 }}
             >
-              <p className="text-3xl font-bold text-white mb-2">
-                ¡FELICITACIONES!
-              </p>
-              <p className="text-xl text-white/80">
-                Seguí así y alcanzarás la cima 🚀
-              </p>
+              <p className="text-3xl font-bold text-white mb-2">¡FELICITACIONES!</p>
+              <p className="text-xl text-white/80">Seguí así y alcanzarás la cima 🚀</p>
             </motion.div>
 
             {/* Barra de progreso de cierre */}

@@ -21,12 +21,14 @@ const rutaCurricularEnClaseSchema = z.object({
 /**
  * Schema de Sector simplificado (para relación en Clase)
  */
-const sectorEnClaseSchema = z.object({
-  id: z.string(),
-  nombre: z.string(),
-  icono: z.string(),
-  color: z.string(),
-}).nullish();
+const sectorEnClaseSchema = z
+  .object({
+    id: z.string(),
+    nombre: z.string(),
+    icono: z.string(),
+    color: z.string(),
+  })
+  .nullish();
 
 /**
  * Schema de Docente simplificado (para relación en Clase)
@@ -105,13 +107,17 @@ export const claseSchema = z.object({
   rutaCurricular: rutaCurricularEnClaseSchema.nullish(),
   sector: sectorEnClaseSchema,
   inscripciones: z.array(inscripcionClaseSchema).nullish(),
-  producto: z.object({
-    nombre: z.string(),
-    tipo: z.string(),
-  }).nullish(),
-  _count: z.object({
-    inscripciones: z.number(),
-  }).nullish(),
+  producto: z
+    .object({
+      nombre: z.string(),
+      tipo: z.string(),
+    })
+    .nullish(),
+  _count: z
+    .object({
+      inscripciones: z.number(),
+    })
+    .nullish(),
 });
 
 /**
@@ -163,16 +169,18 @@ export const calendarioResponseSchema = z
 /**
  * Schema para crear una clase (sin id, sin timestamps)
  */
-export const createClaseSchema = claseSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  docente: true,
-  ruta_curricular: true,
-  inscripciones: true,
-}).extend({
-  cupo_disponible: z.number().int().nonnegative().optional(),
-});
+export const createClaseSchema = claseSchema
+  .omit({
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+    docente: true,
+    ruta_curricular: true,
+    inscripciones: true,
+  })
+  .extend({
+    cupo_disponible: z.number().int().nonnegative().optional(),
+  });
 
 /**
  * Schema para actualizar una clase (todos los campos opcionales excepto id)

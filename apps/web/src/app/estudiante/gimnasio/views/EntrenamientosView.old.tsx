@@ -140,9 +140,7 @@ export function EntrenamientosView({ estudiante }: EntrenamientosViewProps) {
               <span className="text-2xl">🏆</span>
               <span className="text-white/70 text-sm font-bold">Puntos Ganados</span>
             </div>
-            <p className="text-yellow-400 text-3xl font-black">
-              {estadisticas.totalPuntosGanados}
-            </p>
+            <p className="text-yellow-400 text-3xl font-black">{estadisticas.totalPuntosGanados}</p>
           </div>
 
           {/* Tiempo invertido */}
@@ -163,9 +161,7 @@ export function EntrenamientosView({ estudiante }: EntrenamientosViewProps) {
               <span className="text-2xl">⭐</span>
               <span className="text-white/70 text-sm font-bold">Estrellas</span>
             </div>
-            <p className="text-white text-3xl font-black">
-              {estadisticas.estrellasGanadas}/16
-            </p>
+            <p className="text-white text-3xl font-black">{estadisticas.estrellasGanadas}/16</p>
           </div>
         </div>
 

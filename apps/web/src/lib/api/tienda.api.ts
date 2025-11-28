@@ -64,14 +64,11 @@ export const recursosApi = {
     metadata?: Record<string, JsonValue>,
   ): Promise<RecursosActualizadosResponse> => {
     try {
-      return await apiClient.post<RecursosActualizadosResponse>(
-        `/recursos/${estudianteId}/gemas`,
-        {
-          cantidad,
-          razon,
-          metadata,
-        },
-      );
+      return await apiClient.post<RecursosActualizadosResponse>(`/recursos/${estudianteId}/gemas`, {
+        cantidad,
+        razon,
+        metadata,
+      });
     } catch (error) {
       console.error('Error al agregar gemas:', error);
       throw error;
@@ -91,9 +88,9 @@ export const recursosApi = {
       if (tipo) params.append('tipo', tipo);
       if (limit) params.append('limit', limit.toString());
 
-      const response = await apiClient.get<
-        TransaccionRecurso[] | { data?: TransaccionRecurso[] }
-      >(`/recursos/${estudianteId}/historial?${params.toString()}`);
+      const response = await apiClient.get<TransaccionRecurso[] | { data?: TransaccionRecurso[] }>(
+        `/recursos/${estudianteId}/historial?${params.toString()}`,
+      );
 
       if (Array.isArray(response)) {
         return response;
@@ -152,9 +149,9 @@ export const tiendaApi = {
         params.append('incluir_edicion_limitada', filtros.incluir_edicion_limitada.toString());
       }
 
-      const response = await apiClient.get<
-        ItemsTiendaResponse | { data?: ItemsTiendaResponse }
-      >(`/tienda/items?${params.toString()}`);
+      const response = await apiClient.get<ItemsTiendaResponse | { data?: ItemsTiendaResponse }>(
+        `/tienda/items?${params.toString()}`,
+      );
 
       if (response && 'data' in response && response.data) {
         return response.data;

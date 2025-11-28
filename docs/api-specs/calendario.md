@@ -9,16 +9,19 @@
 ## Decisiones de Diseño Confirmadas
 
 ### ✅ Vistas
+
 1. **Vista Agenda** (principal - más usada)
 2. **Vista Semana** (alternativa - planning semanal)
 
 ### ✅ Tipos de Eventos
+
 1. **Clases** (del sistema - recuperar clases)
 2. **Tareas** (sistema robusto y complejo)
 3. **Recordatorios** (simples)
 4. **Notas** (simples)
 
 ### ✅ Funcionalidades Core
+
 - Eventos con duración (hora inicio + fin)
 - Eventos de todo el día
 - Drag & Drop (mover entre días/horas)
@@ -32,6 +35,7 @@
 ### Vista Agenda (Principal)
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ 📅 Calendario                                    [Semana][Agenda]│
@@ -74,6 +78,7 @@
 ```
 
 **Características:**
+
 - Agrupación inteligente: Hoy, Mañana, Próximos 7 días, Más adelante
 - Cada grupo muestra contador de eventos
 - Eventos expandibles (click para ver detalles completos)
@@ -84,6 +89,7 @@
 **Estados de Visualización por Tipo:**
 
 **Tarea:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ 08:00 - 09:00  │ 📝 Preparar materiales Álgebra          │ │
@@ -94,6 +100,7 @@
 ```
 
 **Clase:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ 10:00 - 11:30  │ 🎓 Álgebra Lineal - Grupo A            │ │
@@ -103,6 +110,7 @@
 ```
 
 **Recordatorio:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ 15:00          │ 🔔 Enviar recordatorio Grupo B          │ │
@@ -111,6 +119,7 @@
 ```
 
 **Nota:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Todo el día    │ 📝 Reunión con padres de Juan          │ │
@@ -123,6 +132,7 @@
 ### Vista Semana
 
 **Layout:**
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ 📅 Calendario                                    [Semana][Agenda]│
@@ -146,6 +156,7 @@
 ```
 
 **Características:**
+
 - Timeline vertical (00:00 - 23:59) en intervalos de 1 hora
 - 7 columnas (Lunes - Domingo)
 - Eventos como bloques de color
@@ -382,11 +393,13 @@ Cuando haces click en una tarea en la agenda:
 ### Quick Actions en Tareas
 
 **En Vista Agenda (sin expandir):**
+
 - Checkbox rápido para marcar completada
 - Checkbox en subtareas visibles
 - Indicador de progreso (barra de porcentaje)
 
 **Estados Visuales:**
+
 ```
 Pendiente:    ⏸️ + Borde gris
 En Progreso:  ⏳ + Borde amarillo + Barra de progreso
@@ -395,6 +408,7 @@ Cancelada:    ❌ + Borde rojo + Opacity 50%
 ```
 
 **Prioridades Visuales:**
+
 ```
 Baja:     🟢 Verde
 Media:    🟡 Amarillo
@@ -532,6 +546,7 @@ interface Nota {
 Las **Clases del sistema** se muestran automáticamente en el calendario:
 
 **En Vista Agenda:**
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ 10:00 - 11:30  │ 🎓 Álgebra Lineal - Grupo A                │ │
@@ -543,6 +558,7 @@ Las **Clases del sistema** se muestran automáticamente en el calendario:
 ```
 
 **En Vista Semana:**
+
 ```
 Bloque de color según ruta curricular
 Icono 🎓
@@ -581,6 +597,7 @@ Cuando haces click en **[Reprogramar]**:
 ```
 
 **Efecto:**
+
 1. Clase original: Estado cambia a "Reprogramada"
 2. Nueva clase: Se crea en nueva fecha (mismos estudiantes, misma ruta)
 3. Ambas aparecen en calendario con indicador de relación
@@ -601,6 +618,7 @@ Cuando haces click en **[Reprogramar]**:
 ### Comportamiento
 
 **En Vista Semana:**
+
 1. **Arrastrar evento entre días:**
    - Grab evento → Arrastrar a otra columna (día)
    - Al soltar: Evento se mueve a ese día (misma hora)
@@ -616,6 +634,7 @@ Cuando haces click en **[Reprogramar]**:
    - Duración mínima: 15 minutos
 
 **En Vista Agenda:**
+
 - Drag handle (⋮⋮) a la izquierda de cada evento
 - Arrastrar hacia arriba/abajo para reordenar visualmente
 - Al soltar: Modal rápido "Mover a otra fecha?" con selector de día
@@ -623,11 +642,13 @@ Cuando haces click en **[Reprogramar]**:
 ### Restricciones
 
 **Clases del sistema:**
+
 - ❌ NO se pueden mover con drag & drop (solo con "Reprogramar")
 - Icono de candado 🔒 al intentar arrastrar
 - Tooltip: "Usa el botón Reprogramar para mover esta clase"
 
 **Tareas/Recordatorios/Notas:**
+
 - ✅ Se pueden mover libremente con drag & drop
 
 ### Feedback Visual
@@ -715,6 +736,7 @@ Al soltar:
 ```
 
 **Comportamiento:**
+
 - **[←]** Vista Agenda: Retrocede 1 día | Vista Semana: Retrocede 1 semana
 - **[→]** Vista Agenda: Avanza 1 día | Vista Semana: Avanza 1 semana
 - **[Hoy]** Vuelve a la fecha actual
@@ -738,6 +760,7 @@ F:                     Focus en búsqueda
 ### Exportar Calendario
 
 **Opciones:**
+
 1. **PDF** - Vista imprimible del calendario
    - Seleccionar rango de fechas
    - Incluir/excluir tipos de eventos
@@ -1038,8 +1061,13 @@ interface CalendarioStore {
 }
 
 @keyframes pulse-red {
-  0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
-  50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+  }
 }
 ```
 
@@ -1055,9 +1083,9 @@ const eventoVariants = {
     transition: {
       delay: i * 0.05,
       duration: 0.3,
-      ease: 'easeOut'
-    }
-  })
+      ease: 'easeOut',
+    },
+  }),
 };
 
 // Drag & Drop
@@ -1065,7 +1093,7 @@ const dragConstraints = {
   top: 0,
   bottom: 0,
   left: 0,
-  right: 0
+  right: 0,
 };
 
 // Modal de evento
@@ -1074,13 +1102,13 @@ const modalVariants = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.2 }
+    transition: { duration: 0.2 },
   },
   exit: {
     opacity: 0,
     scale: 0.95,
-    transition: { duration: 0.15 }
-  }
+    transition: { duration: 0.15 },
+  },
 };
 ```
 
@@ -1091,6 +1119,7 @@ const modalVariants = {
 ### ✅ Implementar
 
 **Core:**
+
 - [x] Vista Agenda (principal)
 - [x] Vista Semana (alternativa)
 - [x] Crear/Editar/Eliminar eventos (todos los tipos)
@@ -1099,6 +1128,7 @@ const modalVariants = {
 - [x] Búsqueda en tiempo real
 
 **Tareas (Ultra Robusto):**
+
 - [x] Estados (Pendiente, En Progreso, Completada, Cancelada)
 - [x] Prioridades (Baja, Media, Alta, Urgente)
 - [x] Subtareas con checkbox
@@ -1111,6 +1141,7 @@ const modalVariants = {
 - [x] Progreso visual (barra de porcentaje)
 
 **Clases:**
+
 - [x] Visualización automática desde sistema
 - [x] Quick actions (Iniciar, Ver Grupo, Asistencia)
 - [x] Reprogramar clase (crear recuperación)
@@ -1118,23 +1149,27 @@ const modalVariants = {
 - [x] No drag & drop (solo con botón Reprogramar)
 
 **Recordatorios:**
+
 - [x] Crear/Editar/Eliminar
 - [x] Todo el día o con hora específica
 - [x] Marcar como completado
 - [x] Color personalizado
 
 **Notas:**
+
 - [x] Crear/Editar/Eliminar
 - [x] Contenido largo (markdown opcional)
 - [x] Categorías
 - [x] Color personalizado
 
 **Exportación:**
+
 - [x] PDF (vista imprimible)
 - [x] CSV (análisis)
 - [x] .ics (importar a otros calendarios)
 
 **UX Premium:**
+
 - [x] Glassmorphism design
 - [x] Framer Motion animations
 - [x] Breadcrumbs
@@ -1147,18 +1182,18 @@ const modalVariants = {
 
 ## Tiempo Estimado de Desarrollo
 
-| Componente | Estimación |
-|------------|-----------|
-| Base del calendario (vistas, navegación) | 1 día |
-| Sistema de tareas completo | 2 días |
-| Drag & Drop | 1 día |
-| Clases (reprogramar, quick actions) | 0.5 días |
-| Recordatorios y Notas | 0.5 días |
-| Filtros y búsqueda | 0.5 días |
-| Exportación (PDF, CSV, .ics) | 0.5 días |
-| UI/UX polish + animaciones | 0.5 días |
-| Testing y ajustes | 0.5 días |
-| **TOTAL** | **7-8 días** |
+| Componente                               | Estimación   |
+| ---------------------------------------- | ------------ |
+| Base del calendario (vistas, navegación) | 1 día        |
+| Sistema de tareas completo               | 2 días       |
+| Drag & Drop                              | 1 día        |
+| Clases (reprogramar, quick actions)      | 0.5 días     |
+| Recordatorios y Notas                    | 0.5 días     |
+| Filtros y búsqueda                       | 0.5 días     |
+| Exportación (PDF, CSV, .ics)             | 0.5 días     |
+| UI/UX polish + animaciones               | 0.5 días     |
+| Testing y ajustes                        | 0.5 días     |
+| **TOTAL**                                | **7-8 días** |
 
 ---
 

@@ -48,9 +48,7 @@ export function ClaseForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Nombre */}
       <div>
-        <label className="block text-sm font-medium text-white/90 mb-1">
-          Nombre de la Clase *
-        </label>
+        <label className="block text-sm font-medium text-white/90 mb-1">Nombre de la Clase *</label>
         <input
           type="text"
           value={formData.nombre}
@@ -66,9 +64,7 @@ export function ClaseForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Docente */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Docente *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Docente *</label>
           <select
             value={formData.docente_id}
             onChange={(e) => onFieldChange('docente_id', e.target.value)}
@@ -76,7 +72,9 @@ export function ClaseForm({
             required
             disabled={isLoading}
           >
-            <option value="" className="bg-gray-900">Seleccionar docente...</option>
+            <option value="" className="bg-gray-900">
+              Seleccionar docente...
+            </option>
             {docentes.map((docente) => (
               <option key={docente.id} value={docente.id} className="bg-gray-900">
                 {docente.nombre} {docente.apellido}
@@ -87,22 +85,21 @@ export function ClaseForm({
 
         {/* Sector */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Sector (Opcional)
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Sector (Opcional)</label>
           <select
             value={formData.sector_id}
             onChange={(e) => onFieldChange('sector_id', e.target.value)}
             className="w-full px-3 py-2 bg-black/30 border border-emerald-500/30 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-white"
             disabled={isLoading}
           >
-            <option value="" className="bg-gray-900">Sin sector</option>
+            <option value="" className="bg-gray-900">
+              Sin sector
+            </option>
             {sectores.map((sector) => (
               <option key={sector.id} value={sector.id} className="bg-gray-900">
                 {sector.nombre === 'Matemática' && '🧮'}
                 {sector.nombre === 'Programación' && '💻'}
-                {sector.nombre === 'Ciencias' && '🔬'}
-                {' '}{sector.nombre}
+                {sector.nombre === 'Ciencias' && '🔬'} {sector.nombre}
               </option>
             ))}
           </select>
@@ -113,9 +110,7 @@ export function ClaseForm({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Fecha y Hora */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Fecha y Hora *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Fecha y Hora *</label>
           <input
             type="datetime-local"
             value={formData.fecha_hora_inicio}
@@ -128,9 +123,7 @@ export function ClaseForm({
 
         {/* Duración */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Duración (min) *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Duración (min) *</label>
           <input
             type="number"
             value={formData.duracion_minutos}
@@ -145,9 +138,7 @@ export function ClaseForm({
 
         {/* Cupo */}
         <div>
-          <label className="block text-sm font-medium text-white/90 mb-1">
-            Cupo Máximo *
-          </label>
+          <label className="block text-sm font-medium text-white/90 mb-1">Cupo Máximo *</label>
           <input
             type="number"
             value={formData.cupo_maximo}

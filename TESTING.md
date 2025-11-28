@@ -42,6 +42,7 @@ Este documento describe la estrategia completa de testing para el proyecto Matea
 ```
 
 **Distribución:**
+
 - **Unit Tests:** 90% del coverage (458 tests)
 - **Integration Tests:** 5% (5 tests contra DB real)
 - **E2E Tests:** 5% (13 critical path tests)
@@ -106,6 +107,7 @@ artillery run artillery.yml
 **Location:** `apps/api/src/**/*.spec.ts`
 
 **Run:**
+
 ```bash
 cd apps/api
 
@@ -123,12 +125,14 @@ npm test -- auth.service.spec.ts
 ```
 
 **Coverage Thresholds:**
+
 - Lines: 70%
 - Functions: 65%
 - Branches: 60%
 - Statements: 70%
 
 **Ejemplo:**
+
 ```typescript
 // apps/api/src/auth/__tests__/auth.service.spec.ts
 describe('AuthService', () => {
@@ -150,6 +154,7 @@ describe('AuthService', () => {
 **Location:** `apps/web/src/**/*.{test,spec}.{ts,tsx}`
 
 **Run:**
+
 ```bash
 cd apps/web
 
@@ -164,6 +169,7 @@ npm run test:ui
 ```
 
 **Coverage Thresholds:**
+
 - Lines: 80%
 - Functions: 80%
 - Branches: 80%
@@ -178,6 +184,7 @@ Tests que verifican la integración entre módulos y la base de datos REAL.
 **Location:** `apps/api/test/integration/**/*.spec.ts`
 
 **Setup:**
+
 ```bash
 # 1. Levantar PostgreSQL de test
 docker-compose -f docker-compose.test.yml up -d postgres-test
@@ -191,6 +198,7 @@ npm run test:integration
 ```
 
 **Ejemplo:**
+
 ```typescript
 // test/integration/auth.integration.spec.ts
 describe('[INTEGRATION] Auth Module', () => {
@@ -226,6 +234,7 @@ describe('[INTEGRATION] Auth Module', () => {
 ```
 
 **Best Practices:**
+
 - Limpiar DB antes de cada test (`beforeEach`)
 - No compartir estado entre tests
 - Probar constraints de DB (unique, foreign keys, etc.)
@@ -241,16 +250,19 @@ Tests end-to-end con Playwright que simulan usuarios reales.
 ### Environments
 
 **Local:**
+
 ```bash
 npx playwright test
 ```
 
 **Staging:**
+
 ```bash
 E2E_ENV=staging npx playwright test
 ```
 
 **Production (smoke tests only):**
+
 ```bash
 E2E_ENV=production npx playwright test --grep @smoke
 ```
@@ -333,6 +345,7 @@ artillery report report.json
 **File:** `.github/workflows/ci.yml`
 
 **Jobs:**
+
 1. **Lint & Type Check** (2 min) - ESLint + TypeScript
 2. **Unit Tests - API** (5 min) - Jest con PostgreSQL + Redis
 3. **Unit Tests - Web** (3 min) - Vitest
@@ -351,6 +364,7 @@ artillery report report.json
 ### Quality Gate
 
 El merge solo se permite si:
+
 - ✅ Todos los tests pasan
 - ✅ Coverage >= thresholds
 - ✅ No errores de lint/type check
@@ -360,6 +374,7 @@ El merge solo se permite si:
 ### PR Comments
 
 El pipeline comenta automáticamente en PRs con:
+
 - ✅ Coverage reports
 - ✅ Test results summary
 - ✅ Build artifacts links
@@ -384,6 +399,7 @@ El pipeline comenta automáticamente en PRs con:
 ```
 
 **Excluido de coverage:**
+
 - `*.spec.ts` (tests)
 - `*.interface.ts` (interfaces)
 - `*.dto.ts` (DTOs)
@@ -403,6 +419,7 @@ El pipeline comenta automáticamente en PRs con:
 ```
 
 **Excluido de coverage:**
+
 - `*.test.ts`
 - `*.config.ts`
 - `*.stories.tsx`
@@ -455,7 +472,7 @@ it('creates user', async () => {
 });
 
 it('updates user', async () => {
-  await updateUser(userId);  // Falla si test anterior falla
+  await updateUser(userId); // Falla si test anterior falla
 });
 
 // ✅ GOOD - Tests independientes
@@ -465,7 +482,7 @@ it('creates user', async () => {
 });
 
 it('updates user', async () => {
-  const userId = await createUser();  // Setup propio
+  const userId = await createUser(); // Setup propio
   await updateUser(userId);
   expect(await getUser(userId)).toHaveProperty('updated', true);
 });
@@ -496,6 +513,7 @@ it('sends welcome email on registration', async () => {
 **Causa:** Diferencias de environment (DB, timing, parallelización)
 
 **Solución:**
+
 ```bash
 # Ejecutar tests en modo CI localmente
 CI=true npm test
@@ -509,6 +527,7 @@ npm test -- --runInBand
 **Causa:** App no levanta a tiempo en CI
 
 **Solución:** Aumentar timeout en `playwright.config.ts`:
+
 ```typescript
 webServer: {
   timeout: 180000,  // 3 minutos
@@ -520,6 +539,7 @@ webServer: {
 **Causa:** Archivos nuevos sin tests
 
 **Solución:**
+
 ```bash
 # Ver archivos sin coverage
 npm run test:cov -- --verbose
@@ -533,6 +553,7 @@ open apps/api/coverage/lcov-report/index.html
 **Causa:** Puerto ya en uso
 
 **Solución:**
+
 ```bash
 # Liberar puerto 5433
 lsof -ti:5433 | xargs kill -9

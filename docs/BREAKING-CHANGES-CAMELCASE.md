@@ -24,36 +24,36 @@ Se normalizó la nomenclatura de campos en DTOs y modelos de Prisma de **snake_c
 
 ### Estudiantes (Crítico - Completado 100%)
 
-| Campo Anterior | Campo Nuevo | Ubicación |
-|----------------|-------------|-----------|
+| Campo Anterior  | Campo Nuevo    | Ubicación                                                 |
+| --------------- | -------------- | --------------------------------------------------------- |
 | `nivel_escolar` | `nivelEscolar` | CreateEstudianteDto, QueryEstudiantesDto, Entity, Service |
-| `foto_url` | `fotoUrl` | CreateEstudianteDto, Entity |
-| `avatar_url` | `avatarUrl` | CreateEstudianteDto, Entity, Service, Controller |
-| `equipo_id` | `equipoId` | CreateEstudianteDto, QueryEstudiantesDto, Entity, Service |
+| `foto_url`      | `fotoUrl`      | CreateEstudianteDto, Entity                               |
+| `avatar_url`    | `avatarUrl`    | CreateEstudianteDto, Entity, Service, Controller          |
+| `equipo_id`     | `equipoId`     | CreateEstudianteDto, QueryEstudiantesDto, Entity, Service |
 
 ### DTOs Generales (Completado en 69 archivos)
 
-| Patrón Anterior | Patrón Nuevo | Archivos Afectados |
-|-----------------|--------------|-------------------|
-| `estudiante_id:` | `estudianteId:` | Asistencia, Admin, Clases |
-| `docente_id:` | `docenteId:` | Admin, Clases, Docentes |
-| `clase_id:` | `claseId:` | Asistencia, Eventos |
-| `grupo_id:` | `grupoId:` | Admin, Clases |
-| `sector_id:` | `sectorId:` | Admin, Estudiantes |
-| `tutor_id:` | `tutorId:` | DTOs generales |
-| `inscripcion_id:` | `inscripcionId:` | Inscripciones 2026 |
-| `curso_id:` | `cursoId:` | Cursos, Pagos |
-| `course_id:` | `courseId:` | Inscripciones 2026 |
-| `icono_url:` | `iconoUrl:` | Equipos |
-| `tutor_nombre:` | `tutorNombre:` | Admin |
-| `ruta_curricular_id:` | `rutaCurricularId:` | Admin |
-| `logro_desbloqueable_id:` | `logroDesbloqueableId:` | Cursos |
-| `leccion_prerequisito_id:` | `leccionPrerrequisitoId:` | Cursos |
-| `clase_relacionada_id:` | `claseRelacionadaId:` | Eventos |
-| `estudiante_relacionado_id:` | `estudianteRelacionadoId:` | Eventos |
-| `producto_id:` | `productoId:` | Pagos, Clases |
-| `user_id:` | `userId:` | Pagos (MercadoPago) |
-| `mercadopago_preference_id:` | `mercadopagoPreferenceId:` | Inscripciones 2026 |
+| Patrón Anterior              | Patrón Nuevo               | Archivos Afectados        |
+| ---------------------------- | -------------------------- | ------------------------- |
+| `estudiante_id:`             | `estudianteId:`            | Asistencia, Admin, Clases |
+| `docente_id:`                | `docenteId:`               | Admin, Clases, Docentes   |
+| `clase_id:`                  | `claseId:`                 | Asistencia, Eventos       |
+| `grupo_id:`                  | `grupoId:`                 | Admin, Clases             |
+| `sector_id:`                 | `sectorId:`                | Admin, Estudiantes        |
+| `tutor_id:`                  | `tutorId:`                 | DTOs generales            |
+| `inscripcion_id:`            | `inscripcionId:`           | Inscripciones 2026        |
+| `curso_id:`                  | `cursoId:`                 | Cursos, Pagos             |
+| `course_id:`                 | `courseId:`                | Inscripciones 2026        |
+| `icono_url:`                 | `iconoUrl:`                | Equipos                   |
+| `tutor_nombre:`              | `tutorNombre:`             | Admin                     |
+| `ruta_curricular_id:`        | `rutaCurricularId:`        | Admin                     |
+| `logro_desbloqueable_id:`    | `logroDesbloqueableId:`    | Cursos                    |
+| `leccion_prerequisito_id:`   | `leccionPrerrequisitoId:`  | Cursos                    |
+| `clase_relacionada_id:`      | `claseRelacionadaId:`      | Eventos                   |
+| `estudiante_relacionado_id:` | `estudianteRelacionadoId:` | Eventos                   |
+| `producto_id:`               | `productoId:`              | Pagos, Clases             |
+| `user_id:`                   | `userId:`                  | Pagos (MercadoPago)       |
+| `mercadopago_preference_id:` | `mercadopagoPreferenceId:` | Inscripciones 2026        |
 
 ---
 
@@ -93,16 +93,16 @@ const estudiante = {
   nombre: 'Juan',
   apellido: 'Pérez',
   edad: 10,
-  nivel_escolar: 'Primaria',  // ❌
-  foto_url: 'https://...',     // ❌
-  avatar_url: 'https://...',   // ❌
-  equipo_id: 'uuid-123'        // ❌
-}
+  nivel_escolar: 'Primaria', // ❌
+  foto_url: 'https://...', // ❌
+  avatar_url: 'https://...', // ❌
+  equipo_id: 'uuid-123', // ❌
+};
 
 const query = {
-  equipo_id: 'uuid-123',       // ❌
-  nivel_escolar: 'Primaria'    // ❌
-}
+  equipo_id: 'uuid-123', // ❌
+  nivel_escolar: 'Primaria', // ❌
+};
 ```
 
 ### Después (camelCase)
@@ -113,16 +113,16 @@ const estudiante = {
   nombre: 'Juan',
   apellido: 'Pérez',
   edad: 10,
-  nivelEscolar: 'Primaria',    // ✅
-  fotoUrl: 'https://...',      // ✅
-  avatarUrl: 'https://...',    // ✅
-  equipoId: 'uuid-123'         // ✅
-}
+  nivelEscolar: 'Primaria', // ✅
+  fotoUrl: 'https://...', // ✅
+  avatarUrl: 'https://...', // ✅
+  equipoId: 'uuid-123', // ✅
+};
 
 const query = {
-  equipoId: 'uuid-123',        // ✅
-  nivelEscolar: 'Primaria'     // ✅
-}
+  equipoId: 'uuid-123', // ✅
+  nivelEscolar: 'Primaria', // ✅
+};
 ```
 
 ---
@@ -150,20 +150,20 @@ const query = {
 // src/types/estudiante.ts
 
 export interface CreateEstudianteRequest {
-  nombre: string
-  apellido: string
-  edad: number
-  nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad'  // ✅ Actualizado
-  fotoUrl?: string          // ✅ Actualizado
-  avatarUrl?: string        // ✅ Actualizado
-  equipoId?: string         // ✅ Actualizado
+  nombre: string;
+  apellido: string;
+  edad: number;
+  nivelEscolar: 'Primaria' | 'Secundaria' | 'Universidad'; // ✅ Actualizado
+  fotoUrl?: string; // ✅ Actualizado
+  avatarUrl?: string; // ✅ Actualizado
+  equipoId?: string; // ✅ Actualizado
 }
 
 export interface QueryEstudiantesParams {
-  equipoId?: string         // ✅ Actualizado
-  nivelEscolar?: string     // ✅ Actualizado
-  page?: number
-  limit?: number
+  equipoId?: string; // ✅ Actualizado
+  nivelEscolar?: string; // ✅ Actualizado
+  page?: number;
+  limit?: number;
 }
 ```
 
@@ -173,16 +173,16 @@ export interface QueryEstudiantesParams {
 // ANTES
 const response = await axios.post('/api/estudiantes', {
   nombre: 'Juan',
-  nivel_escolar: 'Primaria',  // ❌
-  equipo_id: equipoId         // ❌
-})
+  nivel_escolar: 'Primaria', // ❌
+  equipo_id: equipoId, // ❌
+});
 
 // DESPUÉS
 const response = await axios.post('/api/estudiantes', {
   nombre: 'Juan',
-  nivelEscolar: 'Primaria',   // ✅
-  equipoId: equipoId          // ✅
-})
+  nivelEscolar: 'Primaria', // ✅
+  equipoId: equipoId, // ✅
+});
 ```
 
 ### Paso 3: Actualizar Query Params
@@ -190,15 +190,15 @@ const response = await axios.post('/api/estudiantes', {
 ```typescript
 // ANTES
 const params = new URLSearchParams({
-  equipo_id: equipoId,       // ❌
-  nivel_escolar: 'Primaria'  // ❌
-})
+  equipo_id: equipoId, // ❌
+  nivel_escolar: 'Primaria', // ❌
+});
 
 // DESPUÉS
 const params = new URLSearchParams({
-  equipoId: equipoId,        // ✅
-  nivelEscolar: 'Primaria'   // ✅
-})
+  equipoId: equipoId, // ✅
+  nivelEscolar: 'Primaria', // ✅
+});
 ```
 
 ### Paso 4: Actualizar Respuestas del Backend
@@ -206,16 +206,16 @@ const params = new URLSearchParams({
 ```typescript
 // Las respuestas del backend ahora devuelven camelCase
 interface EstudianteResponse {
-  id: string
-  nombre: string
-  apellido: string
-  edad: number
-  nivelEscolar: string       // ✅ Cambió de nivel_escolar
-  fotoUrl?: string           // ✅ Cambió de foto_url
-  avatarUrl?: string         // ✅ Cambió de avatar_url
-  equipoId?: string          // ✅ Cambió de equipo_id
-  createdAt: string
-  updatedAt: string
+  id: string;
+  nombre: string;
+  apellido: string;
+  edad: number;
+  nivelEscolar: string; // ✅ Cambió de nivel_escolar
+  fotoUrl?: string; // ✅ Cambió de foto_url
+  avatarUrl?: string; // ✅ Cambió de avatar_url
+  equipoId?: string; // ✅ Cambió de equipo_id
+  createdAt: string;
+  updatedAt: string;
 }
 ```
 
@@ -281,6 +281,7 @@ Todos los endpoints que aceptan o devuelven estos campos:
 ### Tests Manuales
 
 1. **Crear estudiante nuevo**:
+
    ```bash
    curl -X POST https://api.mateatletas.com/api/estudiantes \
      -H "Content-Type: application/json" \
@@ -295,6 +296,7 @@ Todos los endpoints que aceptan o devuelven estos campos:
    ```
 
 2. **Listar con filtros**:
+
    ```bash
    curl "https://api.mateatletas.com/api/estudiantes?nivelEscolar=Primaria&equipoId=uuid-123" \
      -H "Authorization: Bearer $TOKEN"

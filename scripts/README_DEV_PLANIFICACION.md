@@ -19,6 +19,7 @@ El comando `npm run dev:planificacion` hace **TODO automáticamente**:
 ## 📖 Cómo Usar
 
 ### Comando Principal:
+
 ```bash
 npm run dev:planificacion
 ```
@@ -30,6 +31,7 @@ Eso es TODO lo que necesitás. El script hace el resto.
 ## 🖥️ Qué Vas a Ver
 
 ### En la Terminal:
+
 ```
 🚀 Iniciando entorno de desarrollo - Planificaciones
 
@@ -82,6 +84,7 @@ Eso es TODO lo que necesitás. El script hace el resto.
 ```
 
 ### En tu Navegador:
+
 Se abrirán **3 pestañas automáticamente**:
 
 1. **Admin:** `http://localhost:3000/admin/planificaciones`
@@ -95,6 +98,7 @@ Se abrirán **3 pestañas automáticamente**:
 Cuando yo (Claude) edite cualquier archivo `.tsx`, **vas a ver los cambios INSTANTÁNEAMENTE** en tu navegador sin refrescar.
 
 ### Ejemplo:
+
 ```
 1. Yo edito: apps/web/src/app/admin/planificaciones/crear/page.tsx
 2. Agrego un botón: <button>Hola</button>
@@ -108,11 +112,13 @@ Cuando yo (Claude) edite cualquier archivo `.tsx`, **vas a ver los cambios INSTA
 ## 🛑 Cómo Detener los Servidores
 
 ### Opción 1: Desde la terminal donde corriste el script
+
 ```bash
 Ctrl + C
 ```
 
 ### Opción 2: Comando manual
+
 ```bash
 npm run stop:all
 ```
@@ -130,6 +136,7 @@ tail -f /tmp/dev-planificacion.log
 ```
 
 O abrir el archivo completo:
+
 ```bash
 cat /tmp/dev-planificacion.log
 ```
@@ -139,20 +146,26 @@ cat /tmp/dev-planificacion.log
 ## 🐛 Troubleshooting
 
 ### Problema: "Puerto 3000 ocupado"
+
 **Solución:** El script lo limpia automáticamente, pero si no funciona:
+
 ```bash
 npm run stop:all
 npm run dev:planificacion
 ```
 
 ### Problema: "No se abrió el navegador"
+
 **Solución:** Abrí manualmente las URLs que muestra el script en tu navegador favorito.
 
 ### Problema: "Páginas muestran 404"
+
 **Solución:** Espera 10-20 segundos más. Next.js está compilando las páginas por primera vez.
 
 ### Problema: "API no responde"
+
 **Solución:** Verificá los logs:
+
 ```bash
 tail -f /tmp/dev-planificacion.log | grep "ERROR"
 ```
@@ -162,6 +175,7 @@ tail -f /tmp/dev-planificacion.log | grep "ERROR"
 ## 🎯 Workflow Recomendado
 
 ### Para Desarrollo Solo:
+
 ```bash
 # 1. Arrancás el script
 npm run dev:planificacion
@@ -174,6 +188,7 @@ npm run dev:planificacion
 ```
 
 ### Para Testing con Otra Persona:
+
 ```bash
 # 1. Vos corrés:
 npm run dev:planificacion
@@ -191,13 +206,13 @@ npm run dev:planificacion
 
 ## 🚀 URLs Rápidas
 
-| Portal | URL |
-|--------|-----|
-| **Admin - Planificaciones** | http://localhost:3000/admin/planificaciones |
-| **Docente - Planificaciones** | http://localhost:3000/docente/planificaciones |
+| Portal                           | URL                                              |
+| -------------------------------- | ------------------------------------------------ |
+| **Admin - Planificaciones**      | http://localhost:3000/admin/planificaciones      |
+| **Docente - Planificaciones**    | http://localhost:3000/docente/planificaciones    |
 | **Estudiante - Planificaciones** | http://localhost:3000/estudiante/planificaciones |
-| **API Backend** | http://localhost:3001/api |
-| **API Docs (Swagger)** | http://localhost:3001/api/docs |
+| **API Backend**                  | http://localhost:3001/api                        |
+| **API Docs (Swagger)**           | http://localhost:3001/api/docs                   |
 
 ---
 

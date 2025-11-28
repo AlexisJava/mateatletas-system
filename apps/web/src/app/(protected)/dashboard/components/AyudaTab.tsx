@@ -1,6 +1,15 @@
 'use client';
 
-import { Mail, Phone, MessageCircle, HelpCircle, FileText, Video, Users, BookOpen } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  MessageCircle,
+  HelpCircle,
+  FileText,
+  Video,
+  Users,
+  BookOpen,
+} from 'lucide-react';
 
 export default function AyudaTab() {
   return (
@@ -22,7 +31,9 @@ export default function AyudaTab() {
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-white mb-1">WhatsApp</h3>
-                <p className="text-sm text-gray-300 mb-2">Comunícate con nosotros directamente por WhatsApp</p>
+                <p className="text-sm text-gray-300 mb-2">
+                  Comunícate con nosotros directamente por WhatsApp
+                </p>
                 <a
                   href="https://wa.me/5491234567890"
                   target="_blank"
@@ -62,7 +73,9 @@ export default function AyudaTab() {
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-white mb-1">Teléfono</h3>
-                <p className="text-sm text-gray-300 mb-2">Llamanos de lunes a viernes de 9:00 a 18:00</p>
+                <p className="text-sm text-gray-300 mb-2">
+                  Llamanos de lunes a viernes de 9:00 a 18:00
+                </p>
                 <a
                   href="tel:+5491234567890"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-600 transition-colors"
@@ -92,8 +105,9 @@ export default function AyudaTab() {
               ¿Cómo funcionan las clases virtuales?
             </summary>
             <p className="text-sm text-gray-300 mt-3 pl-6">
-              Las clases son 100% en vivo a través de nuestra plataforma. Recibirás un enlace antes de cada clase para
-              conectarte. Las clases duran 60 minutos y son interactivas con tu hijo/a y el profesor.
+              Las clases son 100% en vivo a través de nuestra plataforma. Recibirás un enlace antes
+              de cada clase para conectarte. Las clases duran 60 minutos y son interactivas con tu
+              hijo/a y el profesor.
             </p>
           </details>
 
@@ -103,8 +117,9 @@ export default function AyudaTab() {
               ¿Puedo cambiar el horario de las clases?
             </summary>
             <p className="text-sm text-gray-300 mt-3 pl-6">
-              Sí, puedes cambiar el horario contactándonos por WhatsApp o email con al menos 24 horas de anticipación.
-              Te ayudaremos a encontrar un horario que se ajuste mejor a tu agenda.
+              Sí, puedes cambiar el horario contactándonos por WhatsApp o email con al menos 24
+              horas de anticipación. Te ayudaremos a encontrar un horario que se ajuste mejor a tu
+              agenda.
             </p>
           </details>
 
@@ -114,8 +129,8 @@ export default function AyudaTab() {
               ¿Qué pasa si mi hijo/a falta a una clase?
             </summary>
             <p className="text-sm text-gray-300 mt-3 pl-6">
-              Si avisas con anticipación, puedes recuperar la clase en otro horario disponible. El profesor también
-              puede enviarte material de la clase para que tu hijo/a no se atrase.
+              Si avisas con anticipación, puedes recuperar la clase en otro horario disponible. El
+              profesor también puede enviarte material de la clase para que tu hijo/a no se atrase.
             </p>
           </details>
 
@@ -125,8 +140,9 @@ export default function AyudaTab() {
               ¿Cómo funciona la membresía CLUB?
             </summary>
             <p className="text-sm text-gray-300 mt-3 pl-6">
-              La membresía CLUB te da acceso ilimitado a todas nuestras clases virtuales durante todo el año escolar
-              (marzo a diciembre). Pagas una cuota mensual fija y tu hijo/a puede asistir a todas las clases que desee.
+              La membresía CLUB te da acceso ilimitado a todas nuestras clases virtuales durante
+              todo el año escolar (marzo a diciembre). Pagas una cuota mensual fija y tu hijo/a
+              puede asistir a todas las clases que desee.
             </p>
           </details>
 
@@ -136,9 +152,9 @@ export default function AyudaTab() {
               ¿Qué diferencia hay entre CLUB y Cursos?
             </summary>
             <p className="text-sm text-gray-300 mt-3 pl-6">
-              El CLUB es una membresía anual con acceso a todas las clases. Los Cursos son programas específicos de 2-3
-              meses con temáticas puntuales (ej: Exploradores Matemáticos, Desafío Álgebra, etc.) que se pagan por
-              única vez.
+              El CLUB es una membresía anual con acceso a todas las clases. Los Cursos son programas
+              específicos de 2-3 meses con temáticas puntuales (ej: Exploradores Matemáticos,
+              Desafío Álgebra, etc.) que se pagan por única vez.
             </p>
           </details>
         </div>

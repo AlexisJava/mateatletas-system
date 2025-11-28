@@ -34,10 +34,10 @@ async function contarTodosDatos() {
           nombre: true,
           apellido: true,
           username: true,
-        }
+        },
       });
       console.log('ESTUDIANTES:');
-      estudiantes.forEach(e => console.log(`  - ${e.nombre} ${e.apellido} (${e.username})`));
+      estudiantes.forEach((e) => console.log(`  - ${e.nombre} ${e.apellido} (${e.username})`));
     }
 
     // Ver inscripciones
@@ -50,11 +50,12 @@ async function contarTodosDatos() {
         },
         take: 10,
       });
-      inscripciones.forEach(i => {
-        console.log(`  - ${i.estudiante.nombre} ${i.estudiante.apellido} -> ${i.claseGrupo.nombre}`);
+      inscripciones.forEach((i) => {
+        console.log(
+          `  - ${i.estudiante.nombre} ${i.estudiante.apellido} -> ${i.claseGrupo.nombre}`,
+        );
       });
     }
-
   } catch (error) {
     console.error('Error:', error.message);
   } finally {

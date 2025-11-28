@@ -75,8 +75,7 @@ export function ProximaClaseCard({ clase, onIrAClase, delay = 0 }: ProximaClaseC
 
   const esHoy = format(fechaClase, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
   const esMañana =
-    format(fechaClase, 'yyyy-MM-dd') ===
-    format(new Date(Date.now() + 86400000), 'yyyy-MM-dd');
+    format(fechaClase, 'yyyy-MM-dd') === format(new Date(Date.now() + 86400000), 'yyyy-MM-dd');
 
   // Mostrar día de la semana + hora
   const diaYHora = format(fechaClase, "EEEE HH:mm 'hs'", { locale: es });

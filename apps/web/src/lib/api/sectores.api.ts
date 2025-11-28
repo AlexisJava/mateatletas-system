@@ -19,7 +19,7 @@ import type {
 // ============================================================================
 
 export const listarSectores = async (): Promise<Sector[]> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<Sector[]>('/admin/sectores');
     return response;
@@ -30,7 +30,7 @@ export const listarSectores = async (): Promise<Sector[]> => {
 };
 
 export const obtenerSector = async (id: string): Promise<Sector> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<Sector>(`/admin/sectores/${id}`);
     return response;
@@ -41,7 +41,7 @@ export const obtenerSector = async (id: string): Promise<Sector> => {
 };
 
 export const crearSector = async (data: CreateSectorDto): Promise<Sector> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.post<Sector>('/admin/sectores', data);
     return response;
@@ -51,11 +51,8 @@ export const crearSector = async (data: CreateSectorDto): Promise<Sector> => {
   }
 };
 
-export const actualizarSector = async (
-  id: string,
-  data: UpdateSectorDto
-): Promise<Sector> => {
-    // El interceptor ya retorna response.data directamente
+export const actualizarSector = async (id: string, data: UpdateSectorDto): Promise<Sector> => {
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.put<Sector>(`/admin/sectores/${id}`, data);
     return response;
@@ -66,7 +63,7 @@ export const actualizarSector = async (
 };
 
 export const eliminarSector = async (id: string): Promise<void> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     await axios.delete(`/admin/sectores/${id}`);
   } catch (error) {
@@ -79,15 +76,11 @@ export const eliminarSector = async (id: string): Promise<void> => {
 // RUTAS DE ESPECIALIDAD
 // ============================================================================
 
-export const listarRutasEspecialidad = async (
-  sectorId?: string
-): Promise<RutaEspecialidad[]> => {
+export const listarRutasEspecialidad = async (sectorId?: string): Promise<RutaEspecialidad[]> => {
   const params = sectorId ? `?sectorId=${sectorId}` : '';
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<RutaEspecialidad[]>(
-      `/admin/rutas-especialidad${params}`
-    );
+    const response = await axios.get<RutaEspecialidad[]>(`/admin/rutas-especialidad${params}`);
     return response;
   } catch (error) {
     console.error('Error al listar las rutas de especialidad:', error);
@@ -95,14 +88,10 @@ export const listarRutasEspecialidad = async (
   }
 };
 
-export const obtenerRutaEspecialidad = async (
-  id: string
-): Promise<RutaEspecialidad> => {
-    // El interceptor ya retorna response.data directamente
+export const obtenerRutaEspecialidad = async (id: string): Promise<RutaEspecialidad> => {
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<RutaEspecialidad>(
-      `/admin/rutas-especialidad/${id}`
-    );
+    const response = await axios.get<RutaEspecialidad>(`/admin/rutas-especialidad/${id}`);
     return response;
   } catch (error) {
     console.error('Error al obtener la ruta de especialidad:', error);
@@ -111,14 +100,11 @@ export const obtenerRutaEspecialidad = async (
 };
 
 export const crearRutaEspecialidad = async (
-  data: CreateRutaEspecialidadDto
+  data: CreateRutaEspecialidadDto,
 ): Promise<RutaEspecialidad> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.post<RutaEspecialidad>(
-      '/admin/rutas-especialidad',
-      data
-    );
+    const response = await axios.post<RutaEspecialidad>('/admin/rutas-especialidad', data);
     return response;
   } catch (error) {
     console.error('Error al crear la ruta de especialidad:', error);
@@ -128,14 +114,11 @@ export const crearRutaEspecialidad = async (
 
 export const actualizarRutaEspecialidad = async (
   id: string,
-  data: UpdateRutaEspecialidadDto
+  data: UpdateRutaEspecialidadDto,
 ): Promise<RutaEspecialidad> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.put<RutaEspecialidad>(
-      `/admin/rutas-especialidad/${id}`,
-      data
-    );
+    const response = await axios.put<RutaEspecialidad>(`/admin/rutas-especialidad/${id}`, data);
     return response;
   } catch (error) {
     console.error('Error al actualizar la ruta de especialidad:', error);
@@ -144,7 +127,7 @@ export const actualizarRutaEspecialidad = async (
 };
 
 export const eliminarRutaEspecialidad = async (id: string): Promise<void> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     await axios.delete(`/admin/rutas-especialidad/${id}`);
   } catch (error) {
@@ -157,14 +140,10 @@ export const eliminarRutaEspecialidad = async (id: string): Promise<void> => {
 // ASIGNACIÓN DE RUTAS A DOCENTES
 // ============================================================================
 
-export const obtenerRutasDocente = async (
-  docenteId: string
-): Promise<DocenteRuta[]> => {
-    // El interceptor ya retorna response.data directamente
+export const obtenerRutasDocente = async (docenteId: string): Promise<DocenteRuta[]> => {
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<DocenteRuta[]>(
-      `/admin/docentes/${docenteId}/rutas`
-    );
+    const response = await axios.get<DocenteRuta[]>(`/admin/docentes/${docenteId}/rutas`);
     return response;
   } catch (error) {
     console.error('Error al obtener las rutas del docente:', error);
@@ -174,14 +153,11 @@ export const obtenerRutasDocente = async (
 
 export const asignarRutasDocente = async (
   docenteId: string,
-  data: AsignarRutasDocenteDto
+  data: AsignarRutasDocenteDto,
 ): Promise<DocenteRuta[]> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.put<DocenteRuta[]>(
-      `/admin/docentes/${docenteId}/rutas`,
-      data
-    );
+    const response = await axios.put<DocenteRuta[]>(`/admin/docentes/${docenteId}/rutas`, data);
     return response;
   } catch (error) {
     console.error('Error al asignar las rutas al docente:', error);
@@ -191,13 +167,11 @@ export const asignarRutasDocente = async (
 
 export const agregarRutaDocente = async (
   docenteId: string,
-  rutaId: string
+  rutaId: string,
 ): Promise<DocenteRuta> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.post<DocenteRuta>(
-      `/admin/docentes/${docenteId}/rutas/${rutaId}`
-    );
+    const response = await axios.post<DocenteRuta>(`/admin/docentes/${docenteId}/rutas/${rutaId}`);
     return response;
   } catch (error) {
     console.error('Error al agregar la ruta al docente:', error);
@@ -207,12 +181,12 @@ export const agregarRutaDocente = async (
 
 export const eliminarRutaDocente = async (
   docenteId: string,
-  rutaId: string
+  rutaId: string,
 ): Promise<{ message: string }> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.delete<{ message: string }>(
-      `/admin/docentes/${docenteId}/rutas/${rutaId}`
+      `/admin/docentes/${docenteId}/rutas/${rutaId}`,
     );
     return response;
   } catch (error) {

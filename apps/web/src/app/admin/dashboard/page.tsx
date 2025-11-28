@@ -31,15 +31,7 @@ import {
 import { Bar, Doughnut } from 'react-chartjs-2';
 
 // Registrar componentes de Chart.js
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 /**
  * 🚀 MATEATLETAS OS - Dashboard Administrativo
@@ -73,7 +65,11 @@ export default function AdminDashboard() {
   const [greeting, setGreeting] = useState('Bienvenido');
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [selectedStat, setSelectedStat] = useState<{label: string; value: string | number; fullValue: number} | null>(null);
+  const [selectedStat, setSelectedStat] = useState<{
+    label: string;
+    value: string | number;
+    fullValue: number;
+  } | null>(null);
   const [regionFilter, setRegionFilter] = useState<'argentina' | 'latinoamerica'>('argentina');
 
   useEffect(() => {
@@ -228,17 +224,17 @@ export default function AdminDashboard() {
 
   // Configuración del gráfico de barras - Cursos Más Elegidos
   const coursesChartData = {
-    labels: topCourses.map(c => c.name),
+    labels: topCourses.map((c) => c.name),
     datasets: [
       {
         label: 'Estudiantes',
-        data: topCourses.map(c => c.students),
+        data: topCourses.map((c) => c.students),
         backgroundColor: [
-          'rgba(139, 92, 246, 0.8)',  // Violet
-          'rgba(59, 130, 246, 0.8)',  // Blue
-          'rgba(16, 185, 129, 0.8)',  // Emerald
-          'rgba(251, 191, 36, 0.8)',  // Amber
-          'rgba(249, 115, 22, 0.8)',  // Orange
+          'rgba(139, 92, 246, 0.8)', // Violet
+          'rgba(59, 130, 246, 0.8)', // Blue
+          'rgba(16, 185, 129, 0.8)', // Emerald
+          'rgba(251, 191, 36, 0.8)', // Amber
+          'rgba(249, 115, 22, 0.8)', // Orange
         ],
         borderColor: [
           'rgba(139, 92, 246, 1)',
@@ -269,10 +265,10 @@ export default function AdminDashboard() {
         borderWidth: 1,
         displayColors: true,
         callbacks: {
-          label: function(context: TooltipItem<'bar'>) {
+          label: function (context: TooltipItem<'bar'>) {
             return `${context.parsed.y} estudiantes`;
-          }
-        }
+          },
+        },
       },
     },
     scales: {
@@ -286,7 +282,7 @@ export default function AdminDashboard() {
           font: {
             size: 12,
             weight: 'bold' as const,
-          }
+          },
         },
       },
       x: {
@@ -302,11 +298,11 @@ export default function AdminDashboard() {
 
   // Configuración del gráfico de dona - Provincias/Países
   const locationsChartData = {
-    labels: topLocations.map(l => l.name),
+    labels: topLocations.map((l) => l.name),
     datasets: [
       {
         label: 'Estudiantes',
-        data: topLocations.map(l => l.students),
+        data: topLocations.map((l) => l.students),
         backgroundColor: [
           'rgba(139, 92, 246, 0.8)',
           'rgba(59, 130, 246, 0.8)',
@@ -399,10 +395,18 @@ export default function AdminDashboard() {
           <div className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-500/10 via-blue-500/10 to-emerald-500/10 backdrop-blur-xl border border-white/20 shadow-xl">
             <div className="text-right">
               <div className="text-xs text-slate-400 font-medium">
-                {currentTime.toLocaleDateString('es-AR', { weekday: 'short', day: '2-digit', month: 'short' })}
+                {currentTime.toLocaleDateString('es-AR', {
+                  weekday: 'short',
+                  day: '2-digit',
+                  month: 'short',
+                })}
               </div>
               <div className="text-xs text-white font-bold tabular-nums">
-                {currentTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                {currentTime.toLocaleTimeString('es-AR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })}
               </div>
             </div>
           </div>
@@ -411,7 +415,6 @@ export default function AdminDashboard() {
 
       {/* Contenedor principal */}
       <div className="flex flex-col gap-6 relative z-10">
-
         {/* Stats Grid - SUPER COLORIDAS CON ORGANIZACIÓN PERFECTA */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {mainStats.map((stat, index) => {
@@ -419,34 +422,49 @@ export default function AdminDashboard() {
             return (
               <div
                 key={stat.label}
-                onClick={() => setSelectedStat({
-                  label: stat.label,
-                  value: stat.displayValue,
-                  fullValue: stat.fullValue
-                })}
+                onClick={() =>
+                  setSelectedStat({
+                    label: stat.label,
+                    value: stat.displayValue,
+                    fullValue: stat.fullValue,
+                  })
+                }
                 className="group relative rounded-2xl transition-all duration-300 cursor-pointer"
                 style={{
                   animationDelay: `${index * 100}ms`,
                 }}
               >
                 {/* Fondo con gradiente colorido */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${stat.cardBg} backdrop-blur-xl rounded-2xl`} />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${stat.cardBg} backdrop-blur-xl rounded-2xl`}
+                />
 
                 {/* Borde brillante */}
-                <div className={`absolute inset-0 rounded-2xl border-2 ${stat.borderColor} transition-all duration-300 group-hover:shadow-xl ${stat.shadowColor}`} />
+                <div
+                  className={`absolute inset-0 rounded-2xl border-2 ${stat.borderColor} transition-all duration-300 group-hover:shadow-xl ${stat.shadowColor}`}
+                />
 
                 {/* Contenido */}
                 <div className="relative p-5">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-white/60 mb-2.5 font-bold uppercase tracking-wide">{stat.label}</p>
+                      <p className="text-xs text-white/60 mb-2.5 font-bold uppercase tracking-wide">
+                        {stat.label}
+                      </p>
                       <p className="text-4xl font-black text-white mb-3 drop-shadow-lg leading-none">
                         {stat.displayValue}
                       </p>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full ${stat.trendUp ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
-                          <ArrowUpRight className={`w-3.5 h-3.5 ${stat.trendUp ? 'text-emerald-300' : 'text-red-300 rotate-90'}`} strokeWidth={2.5} />
-                          <span className={`text-xs font-bold ${stat.trendUp ? 'text-emerald-300' : 'text-red-300'}`}>
+                        <div
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full ${stat.trendUp ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}
+                        >
+                          <ArrowUpRight
+                            className={`w-3.5 h-3.5 ${stat.trendUp ? 'text-emerald-300' : 'text-red-300 rotate-90'}`}
+                            strokeWidth={2.5}
+                          />
+                          <span
+                            className={`text-xs font-bold ${stat.trendUp ? 'text-emerald-300' : 'text-red-300'}`}
+                          >
                             {stat.trend}
                           </span>
                         </div>
@@ -456,7 +474,9 @@ export default function AdminDashboard() {
 
                     {/* Icono */}
                     <div className="relative flex-shrink-0 ml-3">
-                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${stat.iconBg} flex items-center justify-center shadow-lg ${stat.shadowColor}`}>
+                      <div
+                        className={`w-14 h-14 rounded-xl bg-gradient-to-br ${stat.iconBg} flex items-center justify-center shadow-lg ${stat.shadowColor}`}
+                      >
                         <Icon className="w-7 h-7 text-white" strokeWidth={2.5} />
                       </div>
                     </div>
@@ -469,7 +489,6 @@ export default function AdminDashboard() {
 
         {/* Grid asimétrico: Cursos (2/3) y Provincias (1/3) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
           {/* Cursos Más Elegidos - Gráfico de Barras CON CHART.JS (2/3 del espacio) */}
           <div className="lg:col-span-2 relative overflow-hidden rounded-2xl flex flex-col min-h-[400px]">
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-2xl" />
@@ -480,9 +499,7 @@ export default function AdminDashboard() {
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
                   <BarChart3 className="w-5 h-5 text-white" strokeWidth={2.5} />
                 </div>
-                <h2 className="text-xl font-black text-white">
-                  Cursos Más Elegidos
-                </h2>
+                <h2 className="text-xl font-black text-white">Cursos Más Elegidos</h2>
                 <div className="ml-auto text-xs text-white/50 font-bold">
                   {topCourses.reduce((acc, c) => acc + c.students, 0)} estudiantes
                 </div>
@@ -544,7 +561,6 @@ export default function AdminDashboard() {
 
         {/* Grid de 2 columnas: Próximos Inicios y Novedades Docentes */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-
           {/* Próximos Inicios de Cursos */}
           <div className="relative overflow-hidden rounded-2xl">
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-2xl" />
@@ -555,9 +571,7 @@ export default function AdminDashboard() {
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
                   <Calendar className="w-5 h-5 text-white" strokeWidth={2.5} />
                 </div>
-                <h2 className="text-xl font-black text-white">
-                  Próximos Inicios
-                </h2>
+                <h2 className="text-xl font-black text-white">Próximos Inicios</h2>
                 <div className="ml-auto text-xs text-white/50 font-bold">
                   {upcomingStarts.length} cursos
                 </div>
@@ -577,12 +591,18 @@ export default function AdminDashboard() {
 
                       <div className="relative p-3.5">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${start.gradient} flex items-center justify-center flex-shrink-0 shadow-md`}>
+                          <div
+                            className={`w-10 h-10 rounded-lg bg-gradient-to-br ${start.gradient} flex items-center justify-center flex-shrink-0 shadow-md`}
+                          >
                             <Icon className="w-5 h-5 text-white" strokeWidth={2.5} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-white leading-tight">{start.course}</p>
-                            <p className="text-xs text-white/60 mt-0.5">{start.students} estudiantes inscritos</p>
+                            <p className="text-sm font-bold text-white leading-tight">
+                              {start.course}
+                            </p>
+                            <p className="text-xs text-white/60 mt-0.5">
+                              {start.students} estudiantes inscritos
+                            </p>
                           </div>
                           <div className="text-right flex-shrink-0">
                             <p className="text-xs font-bold text-emerald-400">{start.date}</p>
@@ -606,9 +626,7 @@ export default function AdminDashboard() {
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
                   <Award className="w-5 h-5 text-white" strokeWidth={2.5} />
                 </div>
-                <h2 className="text-xl font-black text-white">
-                  Novedades Docentes
-                </h2>
+                <h2 className="text-xl font-black text-white">Novedades Docentes</h2>
                 <div className="ml-auto text-xs text-white/50 font-bold">
                   Últimas {teacherUpdates.length}
                 </div>
@@ -628,11 +646,15 @@ export default function AdminDashboard() {
 
                       <div className="relative p-3.5">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${update.gradient} flex items-center justify-center flex-shrink-0 shadow-md`}>
+                          <div
+                            className={`w-10 h-10 rounded-lg bg-gradient-to-br ${update.gradient} flex items-center justify-center flex-shrink-0 shadow-md`}
+                          >
                             <Icon className="w-5 h-5 text-white" strokeWidth={2.5} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-white leading-tight">{update.title}</p>
+                            <p className="text-sm font-bold text-white leading-tight">
+                              {update.title}
+                            </p>
                             <p className="text-xs text-white/60 mt-0.5">{update.name}</p>
                             <p className="text-xs text-white/40 mt-0.5">{update.specialty}</p>
                           </div>
@@ -660,9 +682,7 @@ export default function AdminDashboard() {
               <div className="absolute inset-0 rounded-2xl border-2 border-white/30" />
 
               <div className="relative p-8">
-                <h3 className="text-xl font-black text-white mb-2">
-                  {selectedStat.label}
-                </h3>
+                <h3 className="text-xl font-black text-white mb-2">{selectedStat.label}</h3>
                 <p className="text-sm text-white/60 mb-6">Valor completo</p>
 
                 <div className="bg-white/5 rounded-xl p-6 border border-white/20 mb-6">
@@ -671,8 +691,7 @@ export default function AdminDashboard() {
                       ? selectedStat.label.includes('Ingreso')
                         ? `$${selectedStat.fullValue.toLocaleString('es-AR')}`
                         : selectedStat.fullValue.toLocaleString('es-AR')
-                      : selectedStat.fullValue
-                    }
+                      : selectedStat.fullValue}
                   </p>
                 </div>
 

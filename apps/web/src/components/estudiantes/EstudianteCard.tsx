@@ -16,12 +16,7 @@ interface EstudianteCardProps {
  * Card para mostrar información de un estudiante
  * Con acciones de ver, editar y eliminar
  */
-export function EstudianteCard({
-  estudiante,
-  onEdit,
-  onDelete,
-  onView,
-}: EstudianteCardProps) {
+export function EstudianteCard({ estudiante, onEdit, onDelete, onView }: EstudianteCardProps) {
   const edad = estudiante.edad;
 
   const initials = `${estudiante.nombre.charAt(0)}${estudiante.apellido.charAt(0)}`.toUpperCase();
@@ -90,9 +85,7 @@ export function EstudianteCard({
 
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-600">Puntos:</span>
-          <span className="font-bold text-amber-600">
-            {estudiante.puntos_totales} pts
-          </span>
+          <span className="font-bold text-amber-600">{estudiante.puntos_totales} pts</span>
         </div>
       </div>
 

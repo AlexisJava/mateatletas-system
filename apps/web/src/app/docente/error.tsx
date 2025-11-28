@@ -28,9 +28,7 @@ export default function DocenteError({
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-white text-center mb-4">
-          Error en Portal Docente
-        </h1>
+        <h1 className="text-2xl font-bold text-white text-center mb-4">Error en Portal Docente</h1>
 
         <p className="text-purple-200 text-center mb-6">
           Ocurrió un error al cargar esta página. Por favor, intenta nuevamente.

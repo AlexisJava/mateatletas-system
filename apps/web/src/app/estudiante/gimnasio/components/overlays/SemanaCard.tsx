@@ -108,9 +108,7 @@ export function SemanaCard({ semana, onClick }: SemanaCardProps) {
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         border: `2px solid ${esBloqueada ? 'rgba(255, 255, 255, 0.1)' : colors.border}33`,
-        boxShadow: esBloqueada
-          ? '0 8px 32px rgba(0, 0, 0, 0.1)'
-          : '0 8px 32px rgba(0, 0, 0, 0.2)',
+        boxShadow: esBloqueada ? '0 8px 32px rgba(0, 0, 0, 0.1)' : '0 8px 32px rgba(0, 0, 0, 0.2)',
         transition: 'all 200ms ease-out',
       }}
     >
@@ -190,7 +188,11 @@ export function SemanaCard({ semana, onClick }: SemanaCardProps) {
       {/* Estrellas - GYMNASIUM STYLE */}
       <div className="flex items-center justify-center gap-1 mb-4">
         {Array.from({ length: semana.estrellas }).map((_, i) => (
-          <span key={`filled-${i}`} className="text-2xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))' }}>
+          <span
+            key={`filled-${i}`}
+            className="text-2xl"
+            style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))' }}
+          >
             ⭐
           </span>
         ))}
@@ -213,7 +215,10 @@ export function SemanaCard({ semana, onClick }: SemanaCardProps) {
       <div className="flex items-center justify-around mb-6 gap-4">
         {/* Puntos */}
         <div className="flex items-center gap-2">
-          <span className="text-2xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))' }}>
+          <span
+            className="text-2xl"
+            style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))' }}
+          >
             🏆
           </span>
           <span
@@ -228,7 +233,10 @@ export function SemanaCard({ semana, onClick }: SemanaCardProps) {
 
         {/* Tiempo */}
         <div className="flex items-center gap-2">
-          <span className="text-2xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))' }}>
+          <span
+            className="text-2xl"
+            style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))' }}
+          >
             🕐
           </span>
           <span

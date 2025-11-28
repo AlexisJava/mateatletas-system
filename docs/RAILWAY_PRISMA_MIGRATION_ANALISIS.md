@@ -15,6 +15,7 @@
 ### 1. Arquitectura del Proyecto
 
 #### Estructura del Monorepo
+
 ```
 Mateatletas-Ecosystem/
 ├── .env                          ← DATABASE_URL local (localhost)
@@ -31,6 +32,7 @@ Mateatletas-Ecosystem/
 #### Configuración de Railway
 
 **Servicios en el proyecto**:
+
 1. **`Postgres-yuMB`** - Servicio de base de datos PostgreSQL
    - Host interno: `postgres-yumb.railway.internal:5432`
    - Estado: `SUCCESS`
@@ -41,6 +43,7 @@ Mateatletas-Ecosystem/
    - Healthcheck: `/api/health`
 
 **Variables de entorno**:
+
 - Railway tiene configurado `DATABASE_URL` con la URL interna correcta
 - La variable es accesible por el servicio `mateatletas-system`
 
@@ -51,6 +54,7 @@ Mateatletas-Ecosystem/
 Según la investigación en la documentación oficial y GitHub discussions:
 
 **Orden de precedencia** (de mayor a menor):
+
 1. **Variables de entorno del sistema** (`process.env`)
 2. **Archivos `.env` cargados por Prisma**
    - Ubicación 1: Raíz del proyecto (`./.env`)
@@ -59,11 +63,13 @@ Según la investigación en la documentación oficial y GitHub discussions:
    - Ubicación 4: `./prisma/`
 
 **Biblioteca subyacente**: Prisma usa `dotenv` internamente, que:
+
 - Carga `.env` automáticamente
 - **NO sobrescribe** variables que ya existen en `process.env`
 - **NO reconoce** `.env.local` nativamente
 
 **Fuentes**:
+
 - [Prisma Discussions #21207](https://github.com/prisma/prisma/discussions/21207)
 - [Prisma Documentation - Environment Variables](https://www.prisma.io/docs/orm/more/development-environment/environment-variables)
 
@@ -74,6 +80,7 @@ Según la documentación de Railway CLI:
 **Función**: Ejecuta comandos localmente inyectando variables de entorno de Railway.
 
 **Cómo funciona**:
+
 ```bash
 railway run <comando>
 ```
@@ -83,16 +90,19 @@ railway run <comando>
 3. Ejecuta el comando especificado
 
 **El problema crítico**:
+
 - Railway inyecta las variables en `process.env`
 - PERO Prisma CLI internamente usa `dotenv` que carga `.env`
 - `dotenv` **NO sobrescribe** variables existentes en `process.env`
 
 **Sin embargo**, hay un comportamiento no documentado:
+
 - Si Prisma carga `.env` ANTES de que `dotenv` procese las variables de Railway
 - O si el orden de carga no es garantizado
 - El archivo local puede tener precedencia
 
 **Fuentes**:
+
 - [Railway Documentation - CLI Guide](https://docs.railway.com/guides/cli)
 - [Railway GitHub CLI](https://github.com/railwayapp/cli)
 
@@ -109,6 +119,7 @@ Error: P1001: Can't reach database server at `postgres-yumb.railway.internal:543
 ```
 
 **Observaciones críticas**:
+
 1. ✅ Prisma detecta correctamente el host: `postgres-yumb.railway.internal:5432`
 2. ❌ Pero no puede conectarse porque **la red interna de Railway no es accesible localmente**
 
@@ -117,6 +128,7 @@ Error: P1001: Can't reach database server at `postgres-yumb.railway.internal:543
 El mensaje "Environment variables loaded from .env" es **MISLEADING**.
 
 Prisma muestra este mensaje incluso cuando:
+
 - Usa `.env.local` con `dotenv-cli`
 - Usa variables del sistema exclusivamente
 - Hay un [issue abierto](https://github.com/prisma/prisma/issues/10104) documentando esto
@@ -156,6 +168,7 @@ Prisma muestra este mensaje incluso cuando:
 `postgres-yumb.railway.internal:5432` es un **DNS privado de Railway**.
 
 **Solo es accesible**:
+
 - ✅ Desde otros servicios en el mismo proyecto Railway
 - ✅ Desde el proceso que se ejecuta EN Railway (deploy)
 - ❌ Desde tu máquina local (incluso con `railway run`)
@@ -173,22 +186,26 @@ Prisma muestra este mensaje incluso cuando:
 Configurar Railway para ejecutar migraciones automáticamente antes de cada deploy.
 
 **En el dashboard de Railway**:
+
 1. Ve a tu servicio `mateatletas-system`
 2. Settings → Deploy
 3. Configura **"Build & Deploy"**:
    - Pre Deploy Command: `npx prisma migrate deploy --schema apps/api/prisma/schema.prisma`
 
 **Ventajas**:
+
 - ✅ Automático en cada deploy
 - ✅ Se ejecuta EN Railway (tiene acceso a la red interna)
 - ✅ Falla el deploy si la migración falla (seguridad)
 - ✅ No requiere intervención manual
 
 **Desventajas**:
+
 - ⚠️ Incrementa el tiempo de deploy
 - ⚠️ Si falla la migración, el deploy completo falla
 
 **Implementación**:
+
 ```json
 // Railway Service Settings (via dashboard o railway.toml)
 {
@@ -205,6 +222,7 @@ Modificar `apps/api/package.json` para ejecutar migraciones en el hook `postinst
 **Implementación**:
 
 Archivo: `apps/api/package.json`
+
 ```json
 {
   "scripts": {
@@ -214,15 +232,18 @@ Archivo: `apps/api/package.json`
 ```
 
 **Ventajas**:
+
 - ✅ Se ejecuta automáticamente después de `yarn install`
 - ✅ Funciona en Railway sin configuración adicional
 - ✅ Ya tienes `npx prisma generate` aquí
 
 **Desventajas**:
+
 - ⚠️ Se ejecuta TAMBIÉN en desarrollo local (puede ser indeseado)
 - ⚠️ Requiere modificar package.json
 
 **Mitigación para desarrollo local**:
+
 ```json
 {
   "scripts": {
@@ -236,6 +257,7 @@ Archivo: `apps/api/package.json`
 Usar `railway up` para deployar, que ejecutará las migraciones en el entorno de Railway.
 
 **Implementación**:
+
 ```bash
 # 1. Asegurarse de estar en el servicio correcto
 railway service mateatletas-system
@@ -248,10 +270,12 @@ railway up
 ```
 
 **Ventajas**:
+
 - ✅ Se ejecuta en el entorno de Railway
 - ✅ Usa las configuraciones existentes
 
 **Desventajas**:
+
 - ⚠️ Requiere push a git
 - ⚠️ Depende del hook `postinstall`
 
@@ -262,17 +286,20 @@ Si necesitas ejecutar migraciones manualmente desde tu máquina (debugging, roll
 **Pasos**:
 
 #### 1. Crear túnel a la base de datos
+
 ```bash
 railway connect Postgres-yuMB
 ```
 
 Esto abrirá un túnel local, por ejemplo:
+
 ```
 Connecting to Postgres-yuMB...
 Connected to PostgreSQL at localhost:54321
 ```
 
 #### 2. Ejecutar migración usando el túnel
+
 ```bash
 # En otra terminal, con el túnel activo
 DATABASE_URL="postgresql://postgres:miHOtpDWkXWPoipkGXqPPbDQQiYifpfe@localhost:54321/railway" \
@@ -280,11 +307,13 @@ npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
 ```
 
 **Ventajas**:
+
 - ✅ Útil para debugging
 - ✅ Permite rollbacks manuales
 - ✅ Control total sobre cuándo se ejecutan
 
 **Desventajas**:
+
 - ⚠️ Requiere intervención manual
 - ⚠️ No automatizable
 - ⚠️ Requiere mantener el túnel activo
@@ -294,6 +323,7 @@ npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
 Crear un servicio dedicado en Railway solo para ejecutar migraciones.
 
 **Estructura**:
+
 ```yaml
 # railway-migration-service.yml
 services:
@@ -301,15 +331,17 @@ services:
     build:
       dockerfile: Dockerfile
     command: npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
-    restartPolicy: never  # Solo ejecutar una vez
+    restartPolicy: never # Solo ejecutar una vez
 ```
 
 **Ventajas**:
+
 - ✅ Separación de responsabilidades
 - ✅ Puede ejecutarse on-demand
 - ✅ Logs independientes
 
 **Desventajas**:
+
 - ⚠️ Requiere configuración adicional
 - ⚠️ Costo adicional en Railway (si supera free tier)
 
@@ -339,11 +371,13 @@ git push origin main
 ```
 
 Monitorea los logs:
+
 ```bash
 railway logs
 ```
 
 Deberías ver:
+
 ```
 [Build] ...
 [Deploy] Running pre-deploy command: cd apps/api && npx prisma migrate deploy
@@ -364,6 +398,7 @@ Si algo falla:
    - Redeploy
 
 2. **Rollback de migración** (si es necesario):
+
    ```bash
    # Conectarse a la base de datos
    railway connect Postgres-yuMB
@@ -381,11 +416,13 @@ Si algo falla:
 **Fecha**: 2025-11-21 00:27:35
 
 **Contenido**:
+
 - Crear tabla `audit_logs` con índices en timestamp, user_id, action, entity_type, etc.
 - Crear tabla `secret_rotations` con índices en secret_type, status
 - Constraint único en `secret_type` + `version`
 
 **Impacto**:
+
 - ✅ Sin cambios destructivos
 - ✅ Tablas nuevas (no afecta datos existentes)
 - ⚠️ Requiere espacio adicional en DB (mínimo)
@@ -440,16 +477,19 @@ Si algo falla:
 ## Estado Actual del Sistema
 
 ### Railway Service: mateatletas-system
+
 - **Estado**: `FAILED` (último deploy)
 - **Builder**: `DOCKERFILE`
 - **Health check**: `/api/health`
 
 ### Railway Service: Postgres-yuMB
+
 - **Estado**: `SUCCESS`
 - **Versión**: PostgreSQL 17
 - **Volume**: 118.73 MB / 500 MB
 
 ### Migraciones
+
 - **Pendientes**: 1 (`20251121002735_add_security_tables`)
 - **Aplicadas**: 15+ migraciones anteriores
 

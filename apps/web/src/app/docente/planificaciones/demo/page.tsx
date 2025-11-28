@@ -24,13 +24,9 @@ export default function DocentePlanificacionesDemoPage() {
             Portal Docente
           </h1>
 
-          <p className="text-2xl text-blue-300 font-bold mb-2">
-            Gestión de Planificaciones
-          </p>
+          <p className="text-2xl text-blue-300 font-bold mb-2">Gestión de Planificaciones</p>
 
-          <p className="text-slate-400 text-lg">
-            👨‍🏫 Dashboard en tiempo real
-          </p>
+          <p className="text-slate-400 text-lg">👨‍🏫 Dashboard en tiempo real</p>
         </div>
 
         {/* Stats Cards */}
@@ -56,14 +52,10 @@ export default function DocentePlanificacionesDemoPage() {
 
         {/* Interactive Section */}
         <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-blue-500/50 rounded-2xl p-8">
-          <h2 className="text-3xl font-bold text-white mb-6 text-center">
-            Mensaje del Día
-          </h2>
+          <h2 className="text-3xl font-bold text-white mb-6 text-center">Mensaje del Día</h2>
 
           <div className="bg-slate-700/50 rounded-xl p-6 mb-6 min-h-[100px] flex items-center justify-center">
-            <p className="text-2xl font-bold text-blue-300 text-center">
-              {mensaje}
-            </p>
+            <p className="text-2xl font-bold text-blue-300 text-center">{mensaje}</p>
           </div>
 
           <div className="flex gap-4 justify-center flex-wrap">
@@ -92,8 +84,15 @@ export default function DocentePlanificacionesDemoPage() {
 
         {/* Footer */}
         <div className="mt-12 text-center text-slate-500 text-sm">
-          <p>📍 Ubicación: <code className="text-blue-400">/docente/planificaciones/demo</code></p>
-          <p className="mt-2">🔧 Archivo: <code className="text-blue-400">apps/web/src/app/docente/planificaciones/demo/page.tsx</code></p>
+          <p>
+            📍 Ubicación: <code className="text-blue-400">/docente/planificaciones/demo</code>
+          </p>
+          <p className="mt-2">
+            🔧 Archivo:{' '}
+            <code className="text-blue-400">
+              apps/web/src/app/docente/planificaciones/demo/page.tsx
+            </code>
+          </p>
         </div>
       </div>
     </div>

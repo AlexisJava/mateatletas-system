@@ -11,27 +11,33 @@
 ## EXECUTIVE SUMMARY: Top 5 Problemas Críticos
 
 ### 1. USO MASIVO DE RAW SQL EN LUGAR DE PRISMA CLIENT ⚠️ CRITICAL
+
 **Impacto:** Alto | **Esfuerzo:** Medio | **Testability:** Muy bajo
 
 El servicio usa `$executeRaw` en 6 lugares diferentes (líneas 123-129, 182-188, 218-224, 240-246, 283-287) en lugar de usar el Prisma Client typesafe. Esto causa:
+
 - **Type safety perdida:** Errores de tipos no detectados hasta runtime
 - **SQL injection risk:** Aunque usa template literals, sigue siendo más propenso a errores
 - **Testing nightmare:** Imposible mockear operaciones específicas, solo el raw executor completo
 - **Mantenibilidad horrible:** Cambios en schema requieren actualizar SQL manualmente
 
 ### 2. GENERACIÓN MANUAL DE UUIDs CON crypto.randomUUID() ⚠️ CRITICAL
+
 **Impacto:** Medio | **Esfuerzo:** Bajo | **Testability:** Bajo
 
 El servicio genera UUIDs manualmente en 4 lugares (líneas 122, 174, 202, 237) en lugar de dejar que Prisma lo maneje con `@default(cuid())`. Esto causa:
+
 - **Tests no determinísticos:** Cada ejecución genera IDs diferentes, imposible hacer assertions
 - **Código innecesario:** Prisma ya hace esto automáticamente
 - **Inconsistencia:** Algunas tablas usan cuid(), otras usan UUIDs manuales
 - **Race conditions potenciales:** No hay garantía de unicidad en ambientes concurrentes
 
 ### 3. GOD SERVICE - VIOLACIÓN MASIVA DE SRP ⚠️ HIGH
+
 **Impacto:** Alto | **Esfuerzo:** Alto | **Testability:** Muy bajo
 
 El servicio hace TODO:
+
 - Creación de usuarios (líneas 104-117)
 - Hashing de passwords (línea 99)
 - Generación de PINs (líneas 27-43)
@@ -42,15 +48,18 @@ El servicio hace TODO:
 - Cálculos de pricing (líneas 92-94)
 
 **Responsabilidades que debería delegar:**
+
 - UserCreationService (tutor + estudiante)
 - PinGenerationService
 - ColoniaInscriptionRepository
 - MercadoPagoIntegrationService
 
 ### 4. TRANSACTION BOUNDARY INCORRECTO ⚠️ HIGH
+
 **Impacto:** Alto | **Esfuerzo:** Medio | **Testability:** Medio
 
 La transacción (líneas 102-258) incluye TODO, incluso operaciones que NO deberían ser atómicas:
+
 - **MercadoPago API call FUERA de la transacción** (línea 261-280) - CORRECTO
 - **Update del preference ID FUERA de la transacción** (líneas 283-287) - INCORRECTO
 
@@ -59,6 +68,7 @@ La transacción (líneas 102-258) incluye TODO, incluso operaciones que NO deber
 **Solución:** El update debería estar dentro de la transacción O ser idempotente con retry logic.
 
 ### 5. MÉTODO createInscription TIENE 233 LÍNEAS ⚠️ HIGH
+
 **Impacto:** Alto | **Esfuerzo:** Alto | **Testability:** Muy bajo
 
 El método `createInscription` (líneas 71-304) tiene 233 líneas de código. Debería ser < 50 líneas.
@@ -71,19 +81,19 @@ El método `createInscription` (líneas 71-304) tiene 233 líneas de código. De
 
 ## MÉTRICAS DEL SERVICIO
 
-| Métrica | Valor | Ideal | Estado |
-|---------|-------|-------|--------|
-| **LOC (Lines of Code)** | 439 | < 200 | ❌ 219% sobre límite |
-| **Número de métodos** | 5 | 5-10 | ✅ OK |
-| **Métodos públicos** | 2 | 2-5 | ✅ OK |
-| **Métodos privados** | 3 | < 10 | ✅ OK |
-| **Dependencias inyectadas** | 3 | < 5 | ✅ OK |
-| **Complejidad ciclomática total** | ~40 | < 50 | ⚠️ Límite |
-| **Método más largo** | 233 líneas | < 50 | ❌ 466% sobre límite |
-| **Uso de raw SQL** | 6 lugares | 0 | ❌ Crítico |
-| **Generación manual de IDs** | 4 lugares | 0 | ❌ Alto |
-| **Tests que fallan** | 0/18 (webhook) | 0 | ✅ Arreglado |
-| **Cobertura estimada** | 60-70% | > 80% | ⚠️ Bajo |
+| Métrica                           | Valor          | Ideal | Estado               |
+| --------------------------------- | -------------- | ----- | -------------------- |
+| **LOC (Lines of Code)**           | 439            | < 200 | ❌ 219% sobre límite |
+| **Número de métodos**             | 5              | 5-10  | ✅ OK                |
+| **Métodos públicos**              | 2              | 2-5   | ✅ OK                |
+| **Métodos privados**              | 3              | < 10  | ✅ OK                |
+| **Dependencias inyectadas**       | 3              | < 5   | ✅ OK                |
+| **Complejidad ciclomática total** | ~40            | < 50  | ⚠️ Límite            |
+| **Método más largo**              | 233 líneas     | < 50  | ❌ 466% sobre límite |
+| **Uso de raw SQL**                | 6 lugares      | 0     | ❌ Crítico           |
+| **Generación manual de IDs**      | 4 lugares      | 0     | ❌ Alto              |
+| **Tests que fallan**              | 0/18 (webhook) | 0     | ✅ Arreglado         |
+| **Cobertura estimada**            | 60-70%         | > 80% | ⚠️ Bajo              |
 
 ---
 
@@ -176,7 +186,7 @@ const inscripcion = await tx.coloniaInscripcion.create({
 
 // 2. Colonia estudiantes (batch insert)
 await tx.coloniaEstudiante.createMany({
-  data: coloniaEstudiantesData.map(data => ({
+  data: coloniaEstudiantesData.map((data) => ({
     inscripcion_id: inscripcion.id,
     estudiante_id: data.estudiante_id,
     nombre: data.nombre,
@@ -303,7 +313,7 @@ const coloniaEstudiantes = await Promise.all(
         pin: pins[idx],
       },
     });
-  })
+  }),
 );
 // Ahora tenemos los IDs en coloniaEstudiantes[i].id
 
@@ -444,7 +454,7 @@ export class UserCreationService {
 
   async createTutorWithStudents(
     tutorData: CreateTutorDto,
-    studentsData: CreateStudentDto[]
+    studentsData: CreateStudentDto[],
   ): Promise<TutorWithStudents> {
     // Lógica de creación de usuarios
   }
@@ -463,7 +473,7 @@ export class UserCreationService {
 export class MercadoPagoWebhookService {
   constructor(
     private mercadoPagoService: MercadoPagoService,
-    private inscriptionRepo: ColoniaInscriptionRepository
+    private inscriptionRepo: ColoniaInscriptionRepository,
   ) {}
 
   async processWebhook(webhookData: MercadoPagoWebhookDto): Promise<any> {
@@ -497,13 +507,11 @@ export class ColoniaService {
     const hashedPassword = await this.userService.hashPassword(dto.password);
     const tutor = await this.userService.createTutorWithStudents(
       { ...dto, password: hashedPassword },
-      dto.estudiantes
+      dto.estudiantes,
     );
 
     // 4. Generate PINs
-    const pins = await Promise.all(
-      dto.estudiantes.map(() => this.pinService.generateUniquePin())
-    );
+    const pins = await Promise.all(dto.estudiantes.map(() => this.pinService.generateUniquePin()));
 
     // 5. Create inscription
     const inscription = await this.inscriptionRepo.createInscription({
@@ -519,10 +527,7 @@ export class ColoniaService {
     });
 
     // 7. Update preference ID
-    await this.inscriptionRepo.updatePaymentPreference(
-      inscription.pagoId,
-      preference.id
-    );
+    await this.inscriptionRepo.updatePaymentPreference(inscription.pagoId, preference.id);
 
     // 8. Return result
     return this.buildResponse(inscription, preference);
@@ -729,14 +734,14 @@ async createInscription(dto: CreateInscriptionDto) {
 
 #### Métrica de Complejidad:
 
-| Métrica | Valor Actual | Ideal | Estado |
-|---------|-------------|-------|--------|
-| **LOC** | 233 | < 50 | ❌ 466% |
-| **Complejidad Ciclomática** | ~18 | < 10 | ❌ 180% |
-| **Niveles de Indentación** | 5 | < 3 | ❌ 167% |
-| **Bloques condicionales** | 3 | < 5 | ✅ OK |
-| **Loops** | 2 | < 3 | ✅ OK |
-| **Responsabilidades** | 8 | 1 | ❌ 800% |
+| Métrica                     | Valor Actual | Ideal | Estado  |
+| --------------------------- | ------------ | ----- | ------- |
+| **LOC**                     | 233          | < 50  | ❌ 466% |
+| **Complejidad Ciclomática** | ~18          | < 10  | ❌ 180% |
+| **Niveles de Indentación**  | 5            | < 3   | ❌ 167% |
+| **Bloques condicionales**   | 3            | < 5   | ✅ OK   |
+| **Loops**                   | 2            | < 3   | ✅ OK   |
+| **Responsabilidades**       | 8            | 1     | ❌ 800% |
 
 #### Estructura Actual (233 líneas):
 
@@ -947,7 +952,7 @@ private calculateDiscount(cantidadEstudiantes: number, totalCursos: number): num
 // ✅ Usar directamente pricingCalculator en su lugar
 const descuentoPorcentaje = this.pricingCalculator.calcularDescuentoColonia(
   cantidadEstudiantes,
-  totalCursos
+  totalCursos,
 );
 ```
 
@@ -1166,7 +1171,10 @@ this.logger.error(`❌ No se encontró pago de Colonia con ID ${pagoId}`);
 this.logger.log('Inscription completed successfully', { preferenceId: preference.id });
 this.logger.log('Webhook received', { type: webhookData.type, action: webhookData.action });
 this.logger.log('Processing payment', { paymentId });
-this.logger.log('Payment consulted', { status: payment.status, externalRef: payment.external_reference });
+this.logger.log('Payment consulted', {
+  status: payment.status,
+  externalRef: payment.external_reference,
+});
 this.logger.warn('Invalid external reference format', { externalRef });
 this.logger.error('Payment not found', { pagoId });
 
@@ -1378,13 +1386,13 @@ it('should create inscription', async () => {
 
 ### RESUMEN DEL PLAN
 
-| Fase | Descripción | Esfuerzo | Impacto | Prioridad |
-|------|-------------|----------|---------|-----------|
-| **Fase 1** | Quick Wins | 1.5 horas | Medio | ⭐⭐⭐⭐⭐ |
-| **Fase 2** | Raw SQL + UUIDs | 6-9 horas | Alto | ⭐⭐⭐⭐⭐ |
-| **Fase 3** | Transaction Boundary | 6 horas | Alto | ⭐⭐⭐⭐ |
-| **Fase 4** | Extraer Métodos | 12 horas | Medio | ⭐⭐⭐⭐ |
-| **Fase 5** | Separar Servicios | 20 horas | Muy Alto | ⭐⭐⭐ |
+| Fase       | Descripción          | Esfuerzo  | Impacto  | Prioridad  |
+| ---------- | -------------------- | --------- | -------- | ---------- |
+| **Fase 1** | Quick Wins           | 1.5 horas | Medio    | ⭐⭐⭐⭐⭐ |
+| **Fase 2** | Raw SQL + UUIDs      | 6-9 horas | Alto     | ⭐⭐⭐⭐⭐ |
+| **Fase 3** | Transaction Boundary | 6 horas   | Alto     | ⭐⭐⭐⭐   |
+| **Fase 4** | Extraer Métodos      | 12 horas  | Medio    | ⭐⭐⭐⭐   |
+| **Fase 5** | Separar Servicios    | 20 horas  | Muy Alto | ⭐⭐⭐     |
 
 **Total:** 45.5 - 48.5 horas (~6-7 días de trabajo)
 
@@ -1501,6 +1509,7 @@ El `ColoniaService` es un **God Service clásico** con múltiples violaciones de
 ### Impacto en Testing
 
 Los tests fallan por:
+
 - UUIDs no determinísticos
 - Raw SQL difícil de mockear
 - Dependencias mezcladas
@@ -1513,6 +1522,7 @@ Los tests fallan por:
 Seguir el plan de 5 fases, comenzando con Quick Wins (Fase 1) para obtener mejoras inmediatas.
 
 **Prioridad:**
+
 1. ⭐⭐⭐⭐⭐ Fase 1: Quick Wins (1.5 horas)
 2. ⭐⭐⭐⭐⭐ Fase 2: Raw SQL + UUIDs (6-9 horas)
 3. ⭐⭐⭐⭐ Fase 3: Transaction Boundary (6 horas)
@@ -1522,6 +1532,7 @@ Seguir el plan de 5 fases, comenzando con Quick Wins (Fase 1) para obtener mejor
 **Esfuerzo total:** 45.5 - 48.5 horas (~6-7 días)
 
 **ROI esperado:**
+
 - ✅ Tests 100% confiables (no más fallos intermitentes)
 - ✅ Cobertura > 80%
 - ✅ Mantenibilidad 10x mejor

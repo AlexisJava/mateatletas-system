@@ -11,7 +11,9 @@
 Estos 3 documentos son la **única fuente de verdad verificada contra código real**.
 
 ### 1. [ESTADO_ACTUAL.md](ESTADO_ACTUAL.md) ⭐
+
 **LEE ESTE PRIMERO**
+
 - Estado verificado del sistema contra código fuente
 - Métricas reales: 7.5/10, 16 tests, 30 servicios con Prisma
 - Qué está implementado vs qué falta
@@ -19,14 +21,18 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 - Verificación de "9.5/10" → 7.5/10 real
 
 ### 2. [PLAN_ACCION.md](PLAN_ACCION.md) ⭐
+
 **LEE ESTE SEGUNDO**
+
 - Qué hacer y en qué orden
 - 4 tareas priorizadas con tiempo estimado (11-15h total)
 - Roadmap para pasar de 7.5/10 a 9.0/10
 - Cronograma de 4 días
 
 ### 3. [DECISIONES.md](DECISIONES.md) ⭐
+
 **LEE ESTE PARA CONTEXTO**
+
 - Por qué se tomaron decisiones (ADRs)
 - Historia de decisiones arquitectónicas
 - ADR-001: Limpieza de documentación
@@ -39,9 +45,10 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 
 ## 📊 MÉTRICAS REALES DEL SISTEMA
 
-*(Verificadas contra código - 2025-10-18)*
+_(Verificadas contra código - 2025-10-18)_
 
 ### Backend: 7.5/10 Production-Ready
+
 - **Puerto:** 3001 ✅
 - **Tests:** 16 archivos de test ✅
 - **Circuit Breakers:** 5 implementados ✅
@@ -52,15 +59,18 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 - **AdminService:** 237 líneas, 6 servicios delegados ✅
 
 ### Base de Datos: 10/10
+
 - **PostgreSQL:** Puerto 5432 ✅
 - **Migraciones:** 11 aplicadas ✅
 - **Estado:** Sincronizado ✅
 
 ### Frontend: 5/10 Mejorable
+
 - **Type casts inseguros:** 17 ocurrencias ⚠️
 - **Contratos compartidos:** No implementados ❌
 
 ### Scripts: 9/10
+
 - **dev-clean-restart.sh:** Robusto con health checks ✅
 - **wait_for_port():** Implementado ✅
 - **wait_for_backend_health():** Implementado ✅
@@ -70,6 +80,7 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 ## 📖 DOCUMENTACIÓN POR CATEGORÍA
 
 ### 📁 API Specifications - [api-specs/](api-specs/)
+
 **12 archivos** - Documentación de endpoints RESTful
 
 - [admin_copiloto.md](api-specs/admin_copiloto.md) - Endpoints admin
@@ -90,6 +101,7 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 ---
 
 ### 📁 Architecture - [architecture/](architecture/)
+
 **4 archivos** - Decisiones arquitectónicas
 
 - [context.md](architecture/context.md) - Contexto del sistema
@@ -102,6 +114,7 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 ---
 
 ### 📁 Database - [database/](database/)
+
 **1 archivo** - Estrategia de base de datos
 
 - [PRISMA_MIGRATIONS_STRATEGY.md](database/PRISMA_MIGRATIONS_STRATEGY.md) - Estrategia de migraciones Prisma
@@ -111,6 +124,7 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 ---
 
 ### 📁 Development - [development/](development/)
+
 **5 archivos** - Guías de desarrollo
 
 - [CONTRIBUTING.md](development/CONTRIBUTING.md) - Cómo contribuir
@@ -124,6 +138,7 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 ---
 
 ### 📁 Frontend - [frontend/](frontend/)
+
 **3 archivos** - Documentación de frontend
 
 - [DESIGN_SYSTEM_EVOLVED.md](frontend/DESIGN_SYSTEM_EVOLVED.md) - Sistema de diseño evolucionado
@@ -135,6 +150,7 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 ---
 
 ### 📁 Planning - [planning/](planning/)
+
 **6 archivos** - Planificación y roadmaps
 
 - [DATOS_REALES_NECESARIOS.md](planning/DATOS_REALES_NECESARIOS.md) - Datos reales necesarios
@@ -149,6 +165,7 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 ---
 
 ### 📁 Progress - [progress/](progress/)
+
 **1 archivo** - Estado del proyecto
 
 - [SOURCE_OF_TRUTH.md](progress/SOURCE_OF_TRUTH.md) - Source of truth (⚠️ Actualizar métricas)
@@ -158,6 +175,7 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 ---
 
 ### 📁 Technical - [technical/](technical/)
+
 **4 archivos** - Documentación técnica
 
 - [ARQUITECTURA_POR_INSTANCIAS.md](technical/ARQUITECTURA_POR_INSTANCIAS.md) - Arquitectura por instancias
@@ -170,6 +188,7 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 ---
 
 ### 📁 Testing - [testing/](testing/)
+
 **4 archivos** - Documentación de testing
 
 - [CREDENCIALES_TEST.md](testing/CREDENCIALES_TEST.md) - Credenciales de prueba
@@ -182,6 +201,7 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 ---
 
 ### 📁 Archive - [archive/](archive/)
+
 **16 archivos históricos** - Documentación obsoleta preservada
 
 - [2025-10-18-cleanup/](archive/2025-10-18-cleanup/) (12 archivos) - Docs obsoletos con claims inflados
@@ -194,6 +214,7 @@ Estos 3 documentos son la **única fuente de verdad verificada contra código re
 ## 🚀 QUICK START
 
 ### Para Desarrolladores Nuevos
+
 ```bash
 # 1. Lee los 3 documentos core
 cat docs/ESTADO_ACTUAL.md
@@ -211,6 +232,7 @@ curl http://localhost:3001/api/health
 ```
 
 ### Para Desarrollo de Features
+
 ```bash
 # 1. Consulta API specs
 ls docs/api-specs/
@@ -229,6 +251,7 @@ cat docs/architecture/documento-tecnico-del-backend.md
 ## ⚠️ REGLAS DE DOCUMENTACIÓN
 
 ### ✅ SÍ Hacer
+
 - ✅ Actualizar ESTADO_ACTUAL.md al cambiar features importantes
 - ✅ Actualizar PLAN_ACCION.md al completar tareas
 - ✅ Agregar ADRs a DECISIONES.md para decisiones arquitectónicas
@@ -236,6 +259,7 @@ cat docs/architecture/documento-tecnico-del-backend.md
 - ✅ Usar métricas reales (no infladas)
 
 ### ❌ NO Hacer
+
 - ❌ Crear nuevas auditorías (actualizar ESTADO_ACTUAL.md en su lugar)
 - ❌ Documentos con fechas en nombre (ej: `*_2025-10-17.md`)
 - ❌ Claims sin verificar código (ej: "99 tests" cuando son 16)
@@ -247,6 +271,7 @@ cat docs/architecture/documento-tecnico-del-backend.md
 ## 📋 COMANDOS ÚTILES
 
 ### Verificar Estado Real
+
 ```bash
 # Backend funcionando
 curl http://localhost:3001/api/health
@@ -269,6 +294,7 @@ grep -r "as unknown as" apps/web/src/lib/api/ | wc -l
 ```
 
 ### Verificar Documentación
+
 ```bash
 # Listar docs core
 ls -1 docs/*.md
@@ -300,12 +326,15 @@ ls docs/archive/slices/ | wc -l
 ## 📚 HISTORIA DE LIMPIEZA
 
 ### Limpieza 2025-10-18
+
 **Problema encontrado:**
+
 - 57 archivos de documentación
 - 11 docs con claims inflados ("99 tests", "9.5/10")
 - Múltiples auditorías contradictorias
 
 **Acción tomada:**
+
 - Movidos 11 archivos obsoletos a archive/2025-10-18-cleanup/
 - Movidos 5 slices históricos a archive/slices/
 - Movido README antiguo a archive/2025-10-18-cleanup/README_OLD.md
@@ -313,6 +342,7 @@ ls docs/archive/slices/ | wc -l
 - Creados 3 docs core verificados contra código real
 
 **Resultado:**
+
 - 57 → 46 archivos activos
 - Documentación refleja estado real
 - 3 documentos maestros como única fuente de verdad
@@ -324,12 +354,14 @@ ls docs/archive/slices/ | wc -l
 ## 🤝 CONTRIBUIR
 
 ### Antes de Hacer un PR
+
 1. Lee [development/CONTRIBUTING.md](development/CONTRIBUTING.md)
 2. Verifica que tus cambios no rompen tests
 3. Actualiza ESTADO_ACTUAL.md si cambias features
 4. Agrega ADR a DECISIONES.md si es decisión arquitectónica
 
 ### Formato de Commits
+
 ```
 feat: add new feature
 fix: resolve bug

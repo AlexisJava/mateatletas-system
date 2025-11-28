@@ -93,17 +93,13 @@ export function RachaWidget({ estudianteId }: RachaWidgetProps) {
 
           {/* Racha máxima */}
           <div className="text-center border-x border-white/20">
-            <div className="text-3xl font-bold text-white mb-1">
-              {racha.racha_maxima}
-            </div>
+            <div className="text-3xl font-bold text-white mb-1">{racha.racha_maxima}</div>
             <p className="text-white/80 text-sm font-medium">Récord</p>
           </div>
 
           {/* Total días */}
           <div className="text-center">
-            <div className="text-3xl font-bold text-white mb-1">
-              {racha.total_dias_activos}
-            </div>
+            <div className="text-3xl font-bold text-white mb-1">{racha.total_dias_activos}</div>
             <p className="text-white/80 text-sm font-medium">Total días</p>
           </div>
         </div>

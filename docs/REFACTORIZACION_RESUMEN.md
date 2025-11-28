@@ -5,16 +5,19 @@
 ### gamificacion.api.ts - COMPLETAMENTE REPARADO
 
 **Problema encontrado:**
+
 - Durante el PR #28, se eliminaron accidentalmente las URLs de los endpoints
 - Reemplazadas con `&`, causando 32 errores de sintaxis TypeScript
 
 **Correcciones aplicadas:**
+
 - ✅ Restauradas todas las URLs de endpoints
 - ✅ Eliminado uso de `.data` (manejado por interceptor)
 - ✅ Reemplazados tipos `any`/`unknown` con tipos de contracts
 - ✅ Agregados 3 tipos nuevos para endpoints V2
 
 **Métricas:**
+
 ```
 Referencias .data:    17 → 0   (100% eliminadas)
 Tipos 'any':         ~10 → 0   (100% eliminados)
@@ -22,6 +25,7 @@ Errores TypeScript:   32 → 0   (100% resuelto)
 ```
 
 **Commits:**
+
 - `8d53689` - fix(web): restaurar URLs y tipos en gamificacion.api.ts
 - `5927f48` - docs: agregar catálogo completo de errores TypeScript legacy
 
@@ -31,11 +35,11 @@ Errores TypeScript:   32 → 0   (100% resuelto)
 
 ### Estado Actual del Proyecto
 
-| Componente | Errores | Estado |
-|------------|---------|--------|
-| API (Backend) | 0 | ✅ Perfecto |
-| gamificacion.api.ts | 0 | ✅ Recién corregido |
-| Otros archivos frontend | ~550 | ⚠️ Legacy |
+| Componente              | Errores | Estado              |
+| ----------------------- | ------- | ------------------- |
+| API (Backend)           | 0       | ✅ Perfecto         |
+| gamificacion.api.ts     | 0       | ✅ Recién corregido |
+| Otros archivos frontend | ~550    | ⚠️ Legacy           |
 
 ### Top 5 Archivos Más Críticos
 
@@ -71,16 +75,19 @@ Si tienes poco tiempo, empieza por aquí:
 ## 📋 Plan Completo (15 horas)
 
 ### Fase 1: CRÍTICOS (4 horas)
+
 - Corregir hooks sin tipos
 - Validar APIs con Zod schemas
 - **Resultado:** -70 errores
 
 ### Fase 2: IMPORTANTES (7 horas)
+
 - Actualizar componentes de gamificación
 - Corregir propiedades incorrectas
 - **Resultado:** -80 errores
 
 ### Fase 3: MENORES (3 horas)
+
 - Props opcionales
 - Cleanup de código
 - **Resultado:** -40 errores
@@ -94,6 +101,7 @@ Si tienes poco tiempo, empieza por aquí:
 Ver detalles en: **[docs/ERRORES_LEGACY_PENDIENTES.md](./ERRORES_LEGACY_PENDIENTES.md)**
 
 Incluye:
+
 - ✅ Análisis detallado de cada categoría
 - ✅ Ejemplos de código con problema y solución
 - ✅ Estimaciones de tiempo por archivo
@@ -140,5 +148,6 @@ Progreso: ████░░░░░░░░░░░░░░░░ 5.6%
 
 **Última actualización:** 31 de Octubre de 2025
 **Commits relacionados:**
+
 - `8d53689` - Corrección gamificacion.api.ts
 - `5927f48` - Documentación errores legacy

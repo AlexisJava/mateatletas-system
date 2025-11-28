@@ -63,7 +63,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
 );
 
 /**
@@ -83,7 +83,9 @@ export default function PagosDashboard() {
   const [metricsData, setMetricsData] = useState<MetricasDashboardResponse | null>(null);
   const [configuracion, setConfiguracion] = useState<ConfiguracionPrecios | null>(null);
   const [historialCambios, setHistorialCambios] = useState<HistorialCambioPrecios[]>([]);
-  const [inscripcionesPendientes, setInscripcionesPendientes] = useState<InscripcionMensualConRelaciones[]>([]);
+  const [inscripcionesPendientes, setInscripcionesPendientes] = useState<
+    InscripcionMensualConRelaciones[]
+  >([]);
   const [estudiantesDescuentos, setEstudiantesDescuentos] = useState<EstudianteConDescuento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -303,9 +305,10 @@ export default function PagosDashboard() {
     {
       label: 'Inscripciones Activas',
       value: metricas.inscripcionesActivas.toString(),
-      change: metricas.comparacionMesAnterior.inscripcionesCambio >= 0
-        ? `+${metricas.comparacionMesAnterior.inscripcionesCambio}`
-        : metricas.comparacionMesAnterior.inscripcionesCambio.toString(),
+      change:
+        metricas.comparacionMesAnterior.inscripcionesCambio >= 0
+          ? `+${metricas.comparacionMesAnterior.inscripcionesCambio}`
+          : metricas.comparacionMesAnterior.inscripcionesCambio.toString(),
       trend: metricas.comparacionMesAnterior.inscripcionesCambio >= 0 ? 'up' : 'down',
       icon: Users,
       gradient: 'from-violet-500 to-purple-500',
@@ -357,11 +360,7 @@ export default function PagosDashboard() {
           'rgba(251, 191, 36, 0.8)', // Amarillo para Pendiente
           'rgba(239, 68, 68, 0.8)', // Rojo para Vencido
         ],
-        borderColor: [
-          'rgba(16, 185, 129, 1)',
-          'rgba(251, 191, 36, 1)',
-          'rgba(239, 68, 68, 1)',
-        ],
+        borderColor: ['rgba(16, 185, 129, 1)', 'rgba(251, 191, 36, 1)', 'rgba(239, 68, 68, 1)'],
         borderWidth: 2,
       },
     ],
@@ -451,9 +450,7 @@ export default function PagosDashboard() {
               </div>
               💰 Sistema de Pagos
             </h1>
-            <p className="text-gray-300 text-lg">
-              Panel de Gestión Financiera · Mateatletas OS
-            </p>
+            <p className="text-gray-300 text-lg">Panel de Gestión Financiera · Mateatletas OS</p>
           </div>
           <div className="text-right">
             <div className="text-2xl font-mono text-white mb-1">
@@ -477,9 +474,7 @@ export default function PagosDashboard() {
               key={index}
               className="group relative overflow-hidden rounded-2xl backdrop-blur-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
             >
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${stat.bgGradient} opacity-50`}
-              />
+              <div className={`absolute inset-0 bg-gradient-to-br ${stat.bgGradient} opacity-50`} />
               <div className="relative p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div
@@ -556,28 +551,41 @@ export default function PagosDashboard() {
               <div className="space-y-3">
                 <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                   <span className="text-gray-300">Club Matemáticas</span>
-                  <span className="text-white font-semibold">{formatCurrency(configuracion.precioClubMatematicas)}</span>
+                  <span className="text-white font-semibold">
+                    {formatCurrency(configuracion.precioClubMatematicas)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                   <span className="text-gray-300">Cursos Especializados</span>
-                  <span className="text-white font-semibold">{formatCurrency(configuracion.precioCursosEspecializados)}</span>
+                  <span className="text-white font-semibold">
+                    {formatCurrency(configuracion.precioCursosEspecializados)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                   <span className="text-gray-300">Múltiples Actividades</span>
-                  <span className="text-white font-semibold">{formatCurrency(configuracion.precioMultipleActividades)}</span>
+                  <span className="text-white font-semibold">
+                    {formatCurrency(configuracion.precioMultipleActividades)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                   <span className="text-gray-300">Hermanos Básico</span>
-                  <span className="text-white font-semibold">{formatCurrency(configuracion.precioHermanosBasico)}</span>
+                  <span className="text-white font-semibold">
+                    {formatCurrency(configuracion.precioHermanosBasico)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                   <span className="text-gray-300">Hermanos Múltiple</span>
-                  <span className="text-white font-semibold">{formatCurrency(configuracion.precioHermanosMultiple)}</span>
+                  <span className="text-white font-semibold">
+                    {formatCurrency(configuracion.precioHermanosMultiple)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                   <span className="text-gray-300">Descuento AACREA</span>
-                  <span className={`font-semibold ${configuracion.descuentoAacreaActivo ? 'text-emerald-400' : 'text-gray-500'}`}>
-                    {parseFloat(configuracion.descuentoAacreaPorcentaje).toFixed(1)}% {configuracion.descuentoAacreaActivo ? '(Activo)' : '(Inactivo)'}
+                  <span
+                    className={`font-semibold ${configuracion.descuentoAacreaActivo ? 'text-emerald-400' : 'text-gray-500'}`}
+                  >
+                    {parseFloat(configuracion.descuentoAacreaPorcentaje).toFixed(1)}%{' '}
+                    {configuracion.descuentoAacreaActivo ? '(Activo)' : '(Inactivo)'}
                   </span>
                 </div>
               </div>
@@ -598,7 +606,10 @@ export default function PagosDashboard() {
                 </div>
               ) : (
                 inscripcionesPendientes.slice(0, 10).map((inscripcion) => (
-                  <div key={inscripcion.id} className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
+                  <div
+                    key={inscripcion.id}
+                    className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                  >
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="text-white font-semibold">
@@ -606,7 +617,9 @@ export default function PagosDashboard() {
                         </p>
                         <p className="text-gray-400 text-sm">{inscripcion.producto.nombre}</p>
                       </div>
-                      <span className="text-emerald-400 font-semibold">{formatCurrency(inscripcion.precioFinal)}</span>
+                      <span className="text-emerald-400 font-semibold">
+                        {formatCurrency(inscripcion.precioFinal)}
+                      </span>
                     </div>
                   </div>
                 ))
@@ -633,12 +646,17 @@ export default function PagosDashboard() {
               </div>
             ) : (
               estudiantesDescuentos.map((estudiante) => (
-                <div key={estudiante.estudianteId} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                <div
+                  key={estudiante.estudianteId}
+                  className="p-4 bg-white/5 rounded-lg border border-white/10"
+                >
                   <p className="text-white font-semibold mb-2">{estudiante.estudianteNombre}</p>
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-400">Tipo:</span>
-                      <span className="text-violet-400 font-semibold">{estudiante.tipoDescuento}</span>
+                      <span className="text-violet-400 font-semibold">
+                        {estudiante.tipoDescuento}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">Inscripciones:</span>
@@ -646,15 +664,21 @@ export default function PagosDashboard() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">Original:</span>
-                      <span className="text-gray-300 line-through">{formatCurrency(estudiante.precioOriginal)}</span>
+                      <span className="text-gray-300 line-through">
+                        {formatCurrency(estudiante.precioOriginal)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">Descuento:</span>
-                      <span className="text-emerald-400 font-semibold">-{formatCurrency(estudiante.totalDescuento)}</span>
+                      <span className="text-emerald-400 font-semibold">
+                        -{formatCurrency(estudiante.totalDescuento)}
+                      </span>
                     </div>
                     <div className="flex justify-between pt-2 border-t border-white/10">
                       <span className="text-gray-400 font-semibold">Final:</span>
-                      <span className="text-white font-bold">{formatCurrency(estudiante.precioFinal)}</span>
+                      <span className="text-white font-bold">
+                        {formatCurrency(estudiante.precioFinal)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -676,7 +700,10 @@ export default function PagosDashboard() {
               </div>
             ) : (
               historialCambios.slice(0, 5).map((cambio) => (
-                <div key={cambio.id} className="p-4 bg-white/5 rounded-lg border-l-4 border-cyan-400">
+                <div
+                  key={cambio.id}
+                  className="p-4 bg-white/5 rounded-lg border-l-4 border-cyan-400"
+                >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-gray-400" />
@@ -693,7 +720,9 @@ export default function PagosDashboard() {
                     <span className="text-xs text-gray-500">Admin: {cambio.adminId}</span>
                   </div>
                   {cambio.motivoCambio && (
-                    <p className="text-white text-sm mb-2 italic">&ldquo;{cambio.motivoCambio}&rdquo;</p>
+                    <p className="text-white text-sm mb-2 italic">
+                      &ldquo;{cambio.motivoCambio}&rdquo;
+                    </p>
                   )}
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     {Object.entries(cambio.valoresNuevos).map(([key, value]) => (
@@ -768,7 +797,12 @@ export default function PagosDashboard() {
                   <div>
                     <p className="text-white font-semibold text-sm">Próximo cierre</p>
                     <p className="text-gray-300 text-sm">
-                      Fin de mes: {new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toLocaleDateString('es-AR')}
+                      Fin de mes:{' '}
+                      {new Date(
+                        new Date().getFullYear(),
+                        new Date().getMonth() + 1,
+                        0,
+                      ).toLocaleDateString('es-AR')}
                     </p>
                   </div>
                 </div>
@@ -805,11 +839,15 @@ export default function PagosDashboard() {
                       Precio Club Matemáticas
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        $
+                      </span>
                       <input
                         type="number"
                         value={formData.precioClubMatematicas}
-                        onChange={(e) => setFormData({ ...formData, precioClubMatematicas: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, precioClubMatematicas: e.target.value })
+                        }
                         className="w-full pl-8 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                         placeholder="52000"
                       />
@@ -822,11 +860,15 @@ export default function PagosDashboard() {
                       Precio Cursos Especializados
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        $
+                      </span>
                       <input
                         type="number"
                         value={formData.precioCursosEspecializados}
-                        onChange={(e) => setFormData({ ...formData, precioCursosEspecializados: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, precioCursosEspecializados: e.target.value })
+                        }
                         className="w-full pl-8 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                         placeholder="57000"
                       />
@@ -842,8 +884,9 @@ export default function PagosDashboard() {
                           ℹ️ Precios calculados automáticamente
                         </p>
                         <p className="text-xs text-gray-300">
-                          Los precios con descuento (Múltiples Actividades, Hermanos Básico, Hermanos Múltiple)
-                          se calculan automáticamente cuando modificás el precio base de Club Matemáticas:
+                          Los precios con descuento (Múltiples Actividades, Hermanos Básico,
+                          Hermanos Múltiple) se calculan automáticamente cuando modificás el precio
+                          base de Club Matemáticas:
                         </p>
                         <ul className="text-xs text-gray-400 mt-2 space-y-1 ml-4">
                           <li>• Múltiples Actividades = Club Mat - 12%</li>
@@ -863,13 +906,17 @@ export default function PagosDashboard() {
                       <input
                         type="number"
                         value={formData.descuentoAacreaPorcentaje}
-                        onChange={(e) => setFormData({ ...formData, descuentoAacreaPorcentaje: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, descuentoAacreaPorcentaje: e.target.value })
+                        }
                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                         placeholder="25"
                         min="0"
                         max="100"
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        %
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -878,10 +925,17 @@ export default function PagosDashboard() {
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
                   <div>
                     <p className="text-white font-semibold">Descuento AACREA Activo</p>
-                    <p className="text-gray-400 text-sm">Activar o desactivar el descuento AACREA</p>
+                    <p className="text-gray-400 text-sm">
+                      Activar o desactivar el descuento AACREA
+                    </p>
                   </div>
                   <button
-                    onClick={() => setFormData({ ...formData, descuentoAacreaActivo: !formData.descuentoAacreaActivo })}
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        descuentoAacreaActivo: !formData.descuentoAacreaActivo,
+                      })
+                    }
                     className={`relative w-16 h-8 rounded-full transition-colors ${
                       formData.descuentoAacreaActivo ? 'bg-emerald-500' : 'bg-gray-600'
                     }`}

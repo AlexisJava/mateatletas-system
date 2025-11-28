@@ -67,12 +67,11 @@ export default function PlanificacionNoviembre2025Nivel3() {
           </h1>
 
           <div className="bg-gray-800 bg-opacity-80 backdrop-blur-lg rounded-3xl p-10 shadow-2xl border border-purple-500">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              ⚠️ Planificación por armar
-            </h2>
+            <h2 className="text-3xl font-bold text-white mb-4">⚠️ Planificación por armar</h2>
 
             <p className="text-xl text-gray-300 mb-6">
-              Esta es una plantilla base. Reemplazá todo este contenido con tu aplicación React personalizada de nivel avanzado.
+              Esta es una plantilla base. Reemplazá todo este contenido con tu aplicación React
+              personalizada de nivel avanzado.
             </p>
 
             <div className="bg-yellow-900 bg-opacity-50 border-l-4 border-yellow-500 p-4 mb-6 rounded">
@@ -132,7 +131,9 @@ export default function PlanificacionNoviembre2025Nivel3() {
 
             <div className="mt-6 p-4 bg-gray-900 bg-opacity-50 rounded-lg border border-gray-700">
               <p className="text-gray-400 text-sm">
-                💡 <strong>Tip:</strong> Para este nivel, considerá usar visualizaciones interactivas, gráficos en tiempo real, o incluso elementos 3D para hacer la experiencia más inmersiva y desafiante.
+                💡 <strong>Tip:</strong> Para este nivel, considerá usar visualizaciones
+                interactivas, gráficos en tiempo real, o incluso elementos 3D para hacer la
+                experiencia más inmersiva y desafiante.
               </p>
             </div>
           </div>

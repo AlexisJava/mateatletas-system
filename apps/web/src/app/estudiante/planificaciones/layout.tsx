@@ -12,9 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function PlanificacionesLayout({ children }: PlanificacionesLayoutProps) {
-  return (
-    <div className="min-h-screen overflow-x-hidden">
-      {children}
-    </div>
-  );
+  return <div className="min-h-screen overflow-x-hidden">{children}</div>;
 }

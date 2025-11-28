@@ -1,14 +1,17 @@
 # Gamificación (Puntos y Logros)
 
 ## Propósito
+
 Implementar el sistema de gamificación que motiva a los estudiantes mediante puntos, logros y competencia por equipos. Incluye otorgamiento de puntos por docentes, sistema de logros desbloqueables, leaderboard por equipos y ranking individual.
 
 ## Subslices
+
 - **Puntos**: Otorgamiento y gestión de puntos para estudiantes
 - **Logros**: Sistema de badges/achievements desbloqueables
 - **Leaderboards**: Rankings individuales y por equipos
 
 ## Relación con otros módulos
+
 - **Estudiantes**: Cada estudiante acumula puntos y logros
 - **Equipos**: Los puntos se suman al equipo (Slice #3 ya implementado)
 - **Asistencia**: Docentes otorgan puntos después de marcar asistencia
@@ -151,6 +154,7 @@ Implement the **Gamificación** vertical slice with Puntos, Logros and Leaderboa
 ## Backend (NestJS)
 
 ### Estructura
+
 ```
 src/modules/gamificacion/
 ├── gamificacion.module.ts
@@ -227,7 +231,7 @@ export class PuntosService {
     // 1. Validar que el estudiante existe
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: dto.estudianteId },
-      include: { equipo: true }
+      include: { equipo: true },
     });
 
     if (!estudiante) {
@@ -237,7 +241,7 @@ export class PuntosService {
     // 2. Si se especifica claseId, validar que el docente dicta esa clase
     if (dto.claseId) {
       const clase = await this.prisma.clase.findFirst({
-        where: { id: dto.claseId, docenteId }
+        where: { id: dto.claseId, docenteId },
       });
 
       if (!clase) {
@@ -256,8 +260,8 @@ export class PuntosService {
       },
       include: {
         estudiante: { select: { nombre: true, apellido: true } },
-        docente: { select: { nombre: true, apellido: true } }
-      }
+        docente: { select: { nombre: true, apellido: true } },
+      },
     });
 
     // 4. Verificar si se desbloquearon nuevos logros
@@ -269,7 +273,7 @@ export class PuntosService {
   async obtenerPuntosEstudiante(estudianteId: number): Promise<number> {
     const result = await this.prisma.punto.aggregate({
       where: { estudianteId },
-      _sum: { cantidad: true }
+      _sum: { cantidad: true },
     });
 
     return result._sum.cantidad || 0;
@@ -280,18 +284,18 @@ export class PuntosService {
       where: { estudianteId },
       include: {
         clase: { select: { fechaHoraInicio: true, rutaCurricular: { select: { nombre: true } } } },
-        docente: { select: { nombre: true, apellido: true } }
+        docente: { select: { nombre: true, apellido: true } },
       },
-      orderBy: { fecha: 'desc' }
+      orderBy: { fecha: 'desc' },
     });
   }
 
   async obtenerPuntosPorEquipo(equipoId: number): Promise<number> {
     const result = await this.prisma.punto.aggregate({
       where: {
-        estudiante: { equipoId }
+        estudiante: { equipoId },
       },
-      _sum: { cantidad: true }
+      _sum: { cantidad: true },
     });
 
     return result._sum.cantidad || 0;
@@ -310,7 +314,7 @@ export class LogrosService {
     // 1. Obtener puntos totales del estudiante
     const totalPuntos = await this.prisma.punto.aggregate({
       where: { estudianteId },
-      _sum: { cantidad: true }
+      _sum: { cantidad: true },
     });
 
     const puntos = totalPuntos._sum.cantidad || 0;
@@ -318,17 +322,17 @@ export class LogrosService {
     // 2. Obtener logros ya obtenidos
     const logrosObtenidos = await this.prisma.estudianteLogro.findMany({
       where: { estudianteId },
-      select: { logroId: true }
+      select: { logroId: true },
     });
 
-    const idsObtenidos = logrosObtenidos.map(el => el.logroId);
+    const idsObtenidos = logrosObtenidos.map((el) => el.logroId);
 
     // 3. Encontrar logros desbloqueables
     const logrosDesbloqueables = await this.prisma.logro.findMany({
       where: {
         puntosRequeridos: { lte: puntos },
-        id: { notIn: idsObtenidos }
-      }
+        id: { notIn: idsObtenidos },
+      },
     });
 
     // 4. Asignar nuevos logros
@@ -338,8 +342,8 @@ export class LogrosService {
       await this.prisma.estudianteLogro.create({
         data: {
           estudianteId,
-          logroId: logro.id
-        }
+          logroId: logro.id,
+        },
       });
 
       nuevosLogros.push(logro);
@@ -352,19 +356,19 @@ export class LogrosService {
     return this.prisma.estudianteLogro.findMany({
       where: { estudianteId },
       include: { logro: true },
-      orderBy: { fechaObtenido: 'desc' }
+      orderBy: { fechaObtenido: 'desc' },
     });
   }
 
   async listarTodosLogros() {
     return this.prisma.logro.findMany({
-      orderBy: { puntosRequeridos: 'asc' }
+      orderBy: { puntosRequeridos: 'asc' },
     });
   }
 
   async crearLogro(dto: CrearLogroDto) {
     return this.prisma.logro.create({
-      data: dto
+      data: dto,
     });
   }
 }
@@ -383,18 +387,12 @@ export class GamificacionController {
 
   @Post('puntos')
   @Roles('Docente')
-  async otorgarPuntos(
-    @Body() dto: OtorgarPuntosDto,
-    @GetUser() docente: Docente
-  ) {
+  async otorgarPuntos(@Body() dto: OtorgarPuntosDto, @GetUser() docente: Docente) {
     return this.puntosService.otorgarPuntos(dto, docente.id);
   }
 
   @Get('estudiante/:id/puntos')
-  async obtenerPuntos(
-    @Param('id', ParseIntPipe) estudianteId: number,
-    @GetUser() user: any
-  ) {
+  async obtenerPuntos(@Param('id', ParseIntPipe) estudianteId: number, @GetUser() user: any) {
     // Validar autorización (simplificado)
     // TODO: Implementar lógica completa de ownership
 
@@ -429,19 +427,20 @@ export class GamificacionController {
     const estudiantes = await this.prisma.estudiante.findMany({
       include: {
         equipo: { select: { nombre: true, color: true } },
-        puntos: true
-      }
+        puntos: true,
+      },
     });
 
-    const ranking = estudiantes.map(est => ({
-      estudianteId: est.id,
-      nombre: `${est.nombre} ${est.apellido}`,
-      equipo: est.equipo,
-      totalPuntos: est.puntos.reduce((sum, p) => sum + p.cantidad, 0)
-    }))
-    .sort((a, b) => b.totalPuntos - a.totalPuntos)
-    .slice(0, 10) // Top 10
-    .map((entry, index) => ({ ...entry, posicion: index + 1 }));
+    const ranking = estudiantes
+      .map((est) => ({
+        estudianteId: est.id,
+        nombre: `${est.nombre} ${est.apellido}`,
+        equipo: est.equipo,
+        totalPuntos: est.puntos.reduce((sum, p) => sum + p.cantidad, 0),
+      }))
+      .sort((a, b) => b.totalPuntos - a.totalPuntos)
+      .slice(0, 10) // Top 10
+      .map((entry, index) => ({ ...entry, posicion: index + 1 }));
 
     return ranking;
   }
@@ -450,26 +449,28 @@ export class GamificacionController {
     const equipos = await this.prisma.equipo.findMany({
       include: {
         estudiantes: {
-          include: { puntos: true }
-        }
-      }
+          include: { puntos: true },
+        },
+      },
     });
 
-    const ranking = equipos.map(equipo => {
-      const totalPuntos = equipo.estudiantes.reduce((sum, est) =>
-        sum + est.puntos.reduce((pSum, p) => pSum + p.cantidad, 0), 0
-      );
+    const ranking = equipos
+      .map((equipo) => {
+        const totalPuntos = equipo.estudiantes.reduce(
+          (sum, est) => sum + est.puntos.reduce((pSum, p) => pSum + p.cantidad, 0),
+          0,
+        );
 
-      return {
-        equipoId: equipo.id,
-        nombre: equipo.nombre,
-        color: equipo.color,
-        totalPuntos,
-        cantidadEstudiantes: equipo.estudiantes.length
-      };
-    })
-    .sort((a, b) => b.totalPuntos - a.totalPuntos)
-    .map((entry, index) => ({ ...entry, posicion: index + 1 }));
+        return {
+          equipoId: equipo.id,
+          nombre: equipo.nombre,
+          color: equipo.color,
+          totalPuntos,
+          cantidadEstudiantes: equipo.estudiantes.length,
+        };
+      })
+      .sort((a, b) => b.totalPuntos - a.totalPuntos)
+      .map((entry, index) => ({ ...entry, posicion: index + 1 }));
 
     return ranking;
   }
@@ -731,54 +732,54 @@ export default function LeaderboardPage() {
 // prisma/seeds/logros.seed.ts
 const logrosIniciales = [
   {
-    nombre: "Primer Paso",
-    descripcion: "Obtén tus primeros 10 puntos",
-    icono: "🌟",
+    nombre: 'Primer Paso',
+    descripcion: 'Obtén tus primeros 10 puntos',
+    icono: '🌟',
     puntosRequeridos: 10,
-    categoria: "Participacion"
+    categoria: 'Participacion',
   },
   {
-    nombre: "Participante Activo",
-    descripcion: "Acumula 50 puntos",
-    icono: "⭐",
+    nombre: 'Participante Activo',
+    descripcion: 'Acumula 50 puntos',
+    icono: '⭐',
     puntosRequeridos: 50,
-    categoria: "Participacion"
+    categoria: 'Participacion',
   },
   {
-    nombre: "Matemático Junior",
-    descripcion: "Alcanza los 100 puntos",
-    icono: "🎯",
+    nombre: 'Matemático Junior',
+    descripcion: 'Alcanza los 100 puntos',
+    icono: '🎯',
     puntosRequeridos: 100,
-    categoria: "Desafios"
+    categoria: 'Desafios',
   },
   {
-    nombre: "Asistencia Perfecta",
-    descripcion: "Asiste a 10 clases seguidas",
-    icono: "📚",
+    nombre: 'Asistencia Perfecta',
+    descripcion: 'Asiste a 10 clases seguidas',
+    icono: '📚',
     puntosRequeridos: 150,
-    categoria: "Asistencia"
+    categoria: 'Asistencia',
   },
   {
-    nombre: "Genio en Entrenamiento",
-    descripcion: "Consigue 200 puntos",
-    icono: "🧠",
+    nombre: 'Genio en Entrenamiento',
+    descripcion: 'Consigue 200 puntos',
+    icono: '🧠',
     puntosRequeridos: 200,
-    categoria: "Desafios"
+    categoria: 'Desafios',
   },
   {
-    nombre: "Maestro de la Lógica",
-    descripcion: "Alcanza los 500 puntos",
-    icono: "🏆",
+    nombre: 'Maestro de la Lógica',
+    descripcion: 'Alcanza los 500 puntos',
+    icono: '🏆',
     puntosRequeridos: 500,
-    categoria: "Desafios"
+    categoria: 'Desafios',
   },
   {
-    nombre: "Leyenda Matemática",
-    descripcion: "Supera los 1000 puntos",
-    icono: "👑",
+    nombre: 'Leyenda Matemática',
+    descripcion: 'Supera los 1000 puntos',
+    icono: '👑',
     puntosRequeridos: 1000,
-    categoria: "Especial"
-  }
+    categoria: 'Especial',
+  },
 ];
 
 export async function seedLogros(prisma: PrismaClient) {
@@ -786,7 +787,7 @@ export async function seedLogros(prisma: PrismaClient) {
     await prisma.logro.upsert({
       where: { nombre: logro.nombre },
       update: {},
-      create: logro
+      create: logro,
     });
   }
 

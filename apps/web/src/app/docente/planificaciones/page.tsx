@@ -47,7 +47,11 @@ export default function DocentePlanificacionesPage() {
     }
   };
 
-  const handleToggleSemana = async (asignacionId: string, semanaNumero: number, activa: boolean) => {
+  const handleToggleSemana = async (
+    asignacionId: string,
+    semanaNumero: number,
+    activa: boolean,
+  ) => {
     try {
       if (activa) {
         await desactivarSemana(asignacionId, semanaNumero);
@@ -166,32 +170,33 @@ export default function DocentePlanificacionesPage() {
 
                 {/* Semanas */}
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                  {Array.from({ length: asignacion.planificacion.semanas_total }, (_, i) => i + 1).map(
-                    (semana) => {
-                      const activa = semanasActivasNums.includes(semana);
-                      return (
-                        <button
-                          key={semana}
-                          onClick={() => handleToggleSemana(asignacion.id, semana, activa)}
-                          className={`p-4 rounded-xl border-2 font-bold transition-all ${
-                            activa
-                              ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-300 hover:bg-emerald-500/30'
-                              : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-600/30'
-                          }`}
-                        >
-                          <div className="flex items-center justify-center gap-2 mb-1">
-                            {activa ? (
-                              <CheckCircle className="w-4 h-4" />
-                            ) : (
-                              <XCircle className="w-4 h-4" />
-                            )}
-                            <span className="text-xs">Semana</span>
-                          </div>
-                          <p className="text-2xl">{semana}</p>
-                        </button>
-                      );
-                    },
-                  )}
+                  {Array.from(
+                    { length: asignacion.planificacion.semanas_total },
+                    (_, i) => i + 1,
+                  ).map((semana) => {
+                    const activa = semanasActivasNums.includes(semana);
+                    return (
+                      <button
+                        key={semana}
+                        onClick={() => handleToggleSemana(asignacion.id, semana, activa)}
+                        className={`p-4 rounded-xl border-2 font-bold transition-all ${
+                          activa
+                            ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-300 hover:bg-emerald-500/30'
+                            : 'bg-slate-700/30 border-slate-600 text-slate-400 hover:bg-slate-600/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          {activa ? (
+                            <CheckCircle className="w-4 h-4" />
+                          ) : (
+                            <XCircle className="w-4 h-4" />
+                          )}
+                          <span className="text-xs">Semana</span>
+                        </div>
+                        <p className="text-2xl">{semana}</p>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             );

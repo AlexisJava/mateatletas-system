@@ -54,11 +54,13 @@ export default function MiPlanificacion() {
 ```
 
 **Props:**
+
 - `codigo`: ID único de la planificación (ej: "2025-11-nivel-1")
 - `titulo`: Título de la planificación
 - `descripcion` (opcional): Descripción breve
 
 **Qué hace automáticamente:**
+
 - Registra inicio de sesión
 - Trackea tiempo de actividad
 - Auto-guarda cada 5 minutos
@@ -85,6 +87,7 @@ function MiJuego() {
 ```
 
 **Props:**
+
 - `puntos`: Puntaje actual (número)
 - `className` (opcional): Clases CSS adicionales
 
@@ -102,7 +105,7 @@ function MiJuego() {
 
   useEffect(() => {
     if (tiempoRestante > 0) {
-      const timer = setTimeout(() => setTiempoRestante(t => t - 1), 1000);
+      const timer = setTimeout(() => setTiempoRestante((t) => t - 1), 1000);
       return () => clearTimeout(timer);
     }
   }, [tiempoRestante]);
@@ -120,6 +123,7 @@ function MiJuego() {
 ```
 
 **Props:**
+
 - `tiempoRestante`: Tiempo restante en segundos
 - `tiempoTotal` (opcional): Tiempo total (default: 60)
 - `onTimeout` (opcional): Callback cuando llega a 0
@@ -139,16 +143,14 @@ function MiActividad() {
 
   return (
     <div>
-      <ProgressTracker
-        progreso={progreso}
-        label="Progreso de la semana"
-      />
+      <ProgressTracker progreso={progreso} label="Progreso de la semana" />
     </div>
   );
 }
 ```
 
 **Props:**
+
 - `progreso`: Porcentaje de progreso (0-100)
 - `label` (opcional): Texto descriptivo
 - `className` (opcional): Clases CSS adicionales
@@ -171,9 +173,7 @@ function MiJuego() {
 
   return (
     <div>
-      <button onClick={desbloquearLogro}>
-        Completar misión
-      </button>
+      <button onClick={desbloquearLogro}>Completar misión</button>
 
       <AchievementPopup
         visible={mostrarLogro}
@@ -191,6 +191,7 @@ function MiJuego() {
 ```
 
 **Props:**
+
 - `visible`: Booleano para mostrar/ocultar
 - `onClose`: Callback al cerrar
 - `achievement`: Objeto con datos del logro
@@ -211,13 +212,8 @@ Hook para tracking manual de progreso.
 import { usePlanificacionTracking } from '@/planificaciones/shared';
 
 function MiJuego() {
-  const {
-    registrarInicio,
-    registrarProgreso,
-    guardarEstado,
-    cargarEstado,
-    registrarCompletado,
-  } = usePlanificacionTracking('2025-11-nivel-1');
+  const { registrarInicio, registrarProgreso, guardarEstado, cargarEstado, registrarCompletado } =
+    usePlanificacionTracking('2025-11-nivel-1');
 
   useEffect(() => {
     registrarInicio();
@@ -250,6 +246,7 @@ function MiJuego() {
 ```
 
 **Métodos:**
+
 - `registrarInicio()`: Registra inicio de actividad
 - `registrarProgreso(data)`: Actualiza progreso
 - `guardarEstado(estado)`: Guarda estado del juego
@@ -304,7 +301,7 @@ export default function MiPlanificacion() {
   // Timer countdown
   useEffect(() => {
     if (tiempoRestante > 0) {
-      const timer = setTimeout(() => setTiempoRestante(t => t - 1), 1000);
+      const timer = setTimeout(() => setTiempoRestante((t) => t - 1), 1000);
       return () => clearTimeout(timer);
     }
   }, [tiempoRestante]);
@@ -318,7 +315,7 @@ export default function MiPlanificacion() {
     if (correcta) {
       const nuevosPuntos = puntos + 10;
       setPuntos(nuevosPuntos);
-      setProgreso(prev => Math.min(100, prev + 10));
+      setProgreso((prev) => Math.min(100, prev + 10));
 
       if (nuevosPuntos === 100) {
         setLogro({
@@ -336,10 +333,7 @@ export default function MiPlanificacion() {
   };
 
   return (
-    <PlanificacionApp
-      codigo="2025-11-nivel-1"
-      titulo="Mi Planificación Increíble"
-    >
+    <PlanificacionApp codigo="2025-11-nivel-1" titulo="Mi Planificación Increíble">
       <div className="min-h-screen bg-gradient-to-b from-blue-500 to-purple-600 p-8">
         {/* Header con Score y Timer */}
         <div className="flex justify-between items-center mb-8">
@@ -352,11 +346,7 @@ export default function MiPlanificacion() {
         </div>
 
         {/* Barra de progreso */}
-        <ProgressTracker
-          progreso={progreso}
-          label="Progreso de la misión"
-          className="mb-8"
-        />
+        <ProgressTracker progreso={progreso} label="Progreso de la misión" className="mb-8" />
 
         {/* Tu juego aquí */}
         <div className="bg-white rounded-3xl p-10">

@@ -81,10 +81,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
       set((state) => {
         const nextLoading = { ...state.loading, dashboard: false };
         return {
-          error: getErrorMessage(
-            toErrorLike(error),
-            'Error al cargar dashboard',
-          ),
+          error: getErrorMessage(toErrorLike(error), 'Error al cargar dashboard'),
           loading: nextLoading,
           isLoading: Object.values(nextLoading).some(Boolean),
         };
@@ -164,10 +161,7 @@ export const useGamificacionStore = create<GamificacionState>((set, get) => ({
       set((state) => {
         const nextLoading = { ...state.loading, ranking: false };
         return {
-          error: getErrorMessage(
-            toErrorLike(error),
-            'Error al cargar ranking',
-          ),
+          error: getErrorMessage(toErrorLike(error), 'Error al cargar ranking'),
           loading: nextLoading,
           isLoading: Object.values(nextLoading).some(Boolean),
         };

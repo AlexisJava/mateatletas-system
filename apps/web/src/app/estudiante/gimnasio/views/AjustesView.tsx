@@ -22,7 +22,6 @@ export function AjustesView() {
   };
   return (
     <div className="min-h-full p-8 space-y-12">
-
       {/* HERO */}
       <div className="text-center">
         <motion.div
@@ -35,20 +34,22 @@ export function AjustesView() {
         <h1 className="text-6xl font-black text-white font-[family-name:var(--font-lilita)]">
           TU LABORATORIO
         </h1>
-        <p className="text-2xl text-white/70 font-bold mt-2">
-          Personaliza tu experiencia 🎨
-        </p>
+        <p className="text-2xl text-white/70 font-bold mt-2">Personaliza tu experiencia 🎨</p>
       </div>
 
       {/* SECCIÓN 1: TU AVATAR */}
       <section>
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-purple-500 to-pink-600
+          <div
+            className="w-16 h-16 rounded-3xl bg-gradient-to-br from-purple-500 to-pink-600
                          flex items-center justify-center text-4xl
-                         shadow-xl">
+                         shadow-xl"
+          >
             👤
           </div>
-          <h2 className="text-4xl font-black text-white font-[family-name:var(--font-lilita)]">TU AVATAR</h2>
+          <h2 className="text-4xl font-black text-white font-[family-name:var(--font-lilita)]">
+            TU AVATAR
+          </h2>
         </div>
 
         <motion.div
@@ -59,9 +60,11 @@ export function AjustesView() {
         >
           <div className="flex items-center gap-8">
             {/* Preview del avatar */}
-            <div className="w-48 h-48 rounded-3xl bg-gradient-to-br from-cyan-400 to-blue-600
+            <div
+              className="w-48 h-48 rounded-3xl bg-gradient-to-br from-cyan-400 to-blue-600
                            flex items-center justify-center
-                           shadow-2xl shadow-cyan-500/50 relative overflow-hidden">
+                           shadow-2xl shadow-cyan-500/50 relative overflow-hidden"
+            >
               {/* Avatar real aquí */}
               <span className="text-8xl">🧑</span>
 
@@ -73,12 +76,12 @@ export function AjustesView() {
                   animate={{
                     x: [0, Math.random() * 40 - 20],
                     y: [0, Math.random() * 40 - 20],
-                    opacity: [0, 1, 0]
+                    opacity: [0, 1, 0],
                   }}
                   transition={{
                     duration: 2,
                     repeat: Infinity,
-                    delay: i * 0.3
+                    delay: i * 0.3,
                   }}
                 >
                   ✨
@@ -115,12 +118,16 @@ export function AjustesView() {
       {/* SECCIÓN 2: SONIDO Y MÚSICA */}
       <section>
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-green-500 to-emerald-600
+          <div
+            className="w-16 h-16 rounded-3xl bg-gradient-to-br from-green-500 to-emerald-600
                          flex items-center justify-center text-4xl
-                         shadow-xl">
+                         shadow-xl"
+          >
             🎵
           </div>
-          <h2 className="text-4xl font-black text-white font-[family-name:var(--font-lilita)]">SONIDO</h2>
+          <h2 className="text-4xl font-black text-white font-[family-name:var(--font-lilita)]">
+            SONIDO
+          </h2>
         </div>
 
         <div className="space-y-4">
@@ -140,9 +147,7 @@ export function AjustesView() {
             >
               <div className="flex items-center gap-4">
                 <span className="text-5xl">{config.emoji}</span>
-                <span className="text-white text-2xl font-black">
-                  {config.label}
-                </span>
+                <span className="text-white text-2xl font-black">{config.label}</span>
               </div>
 
               {/* Toggle switch */}
@@ -168,12 +173,16 @@ export function AjustesView() {
       {/* SECCIÓN 3: NOTIFICACIONES */}
       <section>
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-orange-500 to-red-600
+          <div
+            className="w-16 h-16 rounded-3xl bg-gradient-to-br from-orange-500 to-red-600
                          flex items-center justify-center text-4xl
-                         shadow-xl">
+                         shadow-xl"
+          >
             🔔
           </div>
-          <h2 className="text-4xl font-black text-white font-[family-name:var(--font-lilita)]">ALERTAS</h2>
+          <h2 className="text-4xl font-black text-white font-[family-name:var(--font-lilita)]">
+            ALERTAS
+          </h2>
         </div>
 
         <div className="space-y-4">
@@ -191,9 +200,7 @@ export function AjustesView() {
                          border-2 border-white/20
                          flex items-center justify-between"
             >
-              <span className="text-white text-xl font-bold">
-                {config.label}
-              </span>
+              <span className="text-white text-xl font-bold">{config.label}</span>
 
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -229,7 +236,6 @@ export function AjustesView() {
       >
         {cerrando ? '⏳ CERRANDO...' : '🚪 CERRAR SESIÓN'}
       </motion.button>
-
     </div>
   );
 }

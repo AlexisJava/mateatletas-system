@@ -148,7 +148,9 @@ export function CursosView({ estudiante }: CursosViewProps) {
         {/* Monedas (debajo del título) */}
         <div className="flex items-center gap-2 bg-black/40 backdrop-blur px-4 py-2 rounded-xl border border-yellow-500/30 w-fit mb-4">
           <Trophy className="w-5 h-5 text-yellow-400" />
-          <span className="text-xl font-black text-yellow-400">{monedas.toLocaleString('es-AR')} monedas</span>
+          <span className="text-xl font-black text-yellow-400">
+            {monedas.toLocaleString('es-AR')} monedas
+          </span>
         </div>
 
         {/* Barra de búsqueda */}
@@ -224,7 +226,9 @@ export function CursosView({ estudiante }: CursosViewProps) {
                   </div>
 
                   {/* Título */}
-                  <h3 className="text-white font-black text-lg mb-2 line-clamp-2">{curso.titulo}</h3>
+                  <h3 className="text-white font-black text-lg mb-2 line-clamp-2">
+                    {curso.titulo}
+                  </h3>
 
                   {/* Info */}
                   <div className="flex items-center gap-3 mb-3 text-xs text-gray-400">
@@ -258,7 +262,8 @@ export function CursosView({ estudiante }: CursosViewProps) {
                         <p className="text-white font-bold text-sm">
                           {bloqueadoPorNivel && `Nivel ${curso.nivel_requerido} requerido`}
                           {bloqueadoPorNivel && bloqueadoPorMonedas && ' • '}
-                          {bloqueadoPorMonedas && `${(curso.precio_monedas - monedas).toLocaleString('es-AR')} monedas más`}
+                          {bloqueadoPorMonedas &&
+                            `${(curso.precio_monedas - monedas).toLocaleString('es-AR')} monedas más`}
                         </p>
                       </div>
                     </div>

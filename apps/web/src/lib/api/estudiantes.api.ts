@@ -55,10 +55,12 @@ const proximaClaseSchema = z.union([
       nombre: z.string(),
       apellido: z.string(),
     }),
-    ruta_curricular: z.object({
-      nombre: z.string(),
-      descripcion: z.string().optional(),
-    }).optional(),
+    ruta_curricular: z
+      .object({
+        nombre: z.string(),
+        descripcion: z.string().optional(),
+      })
+      .optional(),
     link_meet: z.string().optional(),
   }),
   z.null(),
@@ -91,7 +93,7 @@ const sectorSchema = z.object({
       codigo: z.string(),
       nombre: z.string(),
       link_meet: z.string().nullable(),
-    })
+    }),
   ),
 });
 
@@ -131,9 +133,7 @@ export const estudiantesApi = {
    * @param params - Filtros y paginación
    * @returns Lista de estudiantes con metadata
    */
-  getAll: async (
-    params?: QueryEstudiantesParams,
-  ): Promise<EstudiantesResponse> => {
+  getAll: async (params?: QueryEstudiantesParams): Promise<EstudiantesResponse> => {
     try {
       const response = await apiClient.get<EstudiantesResponse>('/estudiantes', { params });
       // Validar estructura de respuesta paginada
@@ -171,10 +171,7 @@ export const estudiantesApi = {
    * @param data - Datos a actualizar
    * @returns Estudiante actualizado
    */
-  update: async (
-    id: string,
-    data: UpdateEstudianteDto,
-  ): Promise<Estudiante> => {
+  update: async (id: string, data: UpdateEstudianteDto): Promise<Estudiante> => {
     try {
       const response = await apiClient.patch<Estudiante>(`/estudiantes/${id}`, data);
       const validado = estudianteSchema.parse(response);

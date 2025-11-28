@@ -9,6 +9,7 @@
 **Resultado**: ✅ **39/39 tests pasando**
 
 **Cobertura**:
+
 - ✅ Generación de PIN único (1000-9999)
 - ✅ Cálculo de descuentos (0%, 12%, 20%)
 - ✅ Creación de inscripción completa
@@ -37,6 +38,7 @@ npm run start:dev
 **Endpoint**: `POST /api/colonia/inscripcion`
 
 **Payload**:
+
 ```json
 {
   "nombre": "María González TEST",
@@ -66,6 +68,7 @@ npm run start:dev
 ```
 
 **Con curl**:
+
 ```bash
 curl -X POST http://localhost:3001/api/colonia/inscripcion \
   -H "Content-Type: application/json" \
@@ -97,6 +100,7 @@ curl -X POST http://localhost:3001/api/colonia/inscripcion \
 ```
 
 **Response esperada**:
+
 ```json
 {
   "success": true,
@@ -117,6 +121,7 @@ curl -X POST http://localhost:3001/api/colonia/inscripcion \
 ```
 
 **Validaciones**:
+
 - ✅ Status code: 201 Created
 - ✅ `success: true`
 - ✅ `inscriptionId` es un UUID válido
@@ -147,6 +152,7 @@ SELECT * FROM "ColoniaPago" WHERE inscripcion_id = '[inscriptionId]';
 ```
 
 **Validaciones en BD**:
+
 - ✅ Tutor existe con `email = 'maria.test.e2e@example.com'`
 - ✅ `password_hash` es un hash bcrypt (empieza con `$2a$` o `$2b$`)
 - ✅ `roles` contiene `["tutor"]`
@@ -168,6 +174,7 @@ SELECT * FROM "ColoniaPago" WHERE inscripcion_id = '[inscriptionId]';
 ## 🧪 ESCENARIO 2: Un estudiante, dos cursos (12% descuento)
 
 **Payload**:
+
 ```json
 {
   "nombre": "Carlos Rodríguez TEST",
@@ -206,6 +213,7 @@ SELECT * FROM "ColoniaPago" WHERE inscripcion_id = '[inscriptionId]';
 ```
 
 **Validaciones esperadas**:
+
 - ✅ `precio_base = 110000` (2 × $55,000)
 - ✅ `descuento_porcentaje = 12`
 - ✅ `total_mensual = 96800` ($110,000 - 12%)
@@ -217,6 +225,7 @@ SELECT * FROM "ColoniaPago" WHERE inscripcion_id = '[inscriptionId]';
 ## 🧪 ESCENARIO 3: Dos hermanos, un curso cada uno (12% descuento)
 
 **Payload**:
+
 ```json
 {
   "nombre": "Ana Fernández TEST",
@@ -261,6 +270,7 @@ SELECT * FROM "ColoniaPago" WHERE inscripcion_id = '[inscriptionId]';
 ```
 
 **Validaciones esperadas**:
+
 - ✅ `precio_base = 110000` (2 hermanos × $55,000)
 - ✅ `descuento_porcentaje = 12`
 - ✅ `total_mensual = 96800`
@@ -272,6 +282,7 @@ SELECT * FROM "ColoniaPago" WHERE inscripcion_id = '[inscriptionId]';
 ## 🧪 ESCENARIO 4: Dos hermanos, dos cursos cada uno (20% descuento MÁXIMO)
 
 **Payload**:
+
 ```json
 {
   "nombre": "Roberto Silva TEST",
@@ -336,6 +347,7 @@ SELECT * FROM "ColoniaPago" WHERE inscripcion_id = '[inscriptionId]';
 ```
 
 **Validaciones esperadas**:
+
 - ✅ `precio_base = 220000` (4 cursos × $55,000)
 - ✅ `descuento_porcentaje = 20` (MÁXIMO)
 - ✅ `total_mensual = 176000` ($220,000 - 20%)
@@ -438,6 +450,7 @@ SELECT password_hash FROM "Tutor" WHERE email = 'maria.test.e2e@example.com';
 ```
 
 **Validaciones**:
+
 - ✅ Empieza con `$2a$12$` o `$2b$12$` (bcrypt con 12 salt rounds)
 - ✅ Tiene 60 caracteres
 - ✅ NO es la password en texto plano
@@ -475,6 +488,7 @@ curl -X GET \
 ```
 
 **Validaciones en MercadoPago**:
+
 - ✅ `items[0].title` contiene "Colonia STEAM"
 - ✅ `items[0].unit_price` = precio correcto
 - ✅ `items[0].quantity` = 1
@@ -497,16 +511,16 @@ npm test -- colonia.service.spec.ts
 
 ### Cobertura Total
 
-| Área | Tests Automatizados | Tests Manuales E2E |
-|------|---------------------|-------------------|
-| Generación de PIN | ✅ 8 tests | - |
-| Cálculo de descuentos | ✅ 12 tests | ✅ 4 escenarios |
-| Creación de inscripción | ✅ 7 tests | ✅ 4 escenarios |
-| Validaciones | ✅ 3 tests | ✅ 5 escenarios |
-| Pricing | ✅ 4 tests | ✅ 4 escenarios |
-| Transacciones | ✅ 3 tests | ✅ Validado en BD |
-| Security | ✅ 2 tests | ✅ 3 validaciones |
-| **TOTAL** | **✅ 39 tests** | **✅ 20 escenarios** |
+| Área                    | Tests Automatizados | Tests Manuales E2E   |
+| ----------------------- | ------------------- | -------------------- |
+| Generación de PIN       | ✅ 8 tests          | -                    |
+| Cálculo de descuentos   | ✅ 12 tests         | ✅ 4 escenarios      |
+| Creación de inscripción | ✅ 7 tests          | ✅ 4 escenarios      |
+| Validaciones            | ✅ 3 tests          | ✅ 5 escenarios      |
+| Pricing                 | ✅ 4 tests          | ✅ 4 escenarios      |
+| Transacciones           | ✅ 3 tests          | ✅ Validado en BD    |
+| Security                | ✅ 2 tests          | ✅ 3 validaciones    |
+| **TOTAL**               | **✅ 39 tests**     | **✅ 20 escenarios** |
 
 ---
 

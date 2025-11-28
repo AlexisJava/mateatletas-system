@@ -25,12 +25,10 @@ import * as calendarioApi from '@/lib/api/calendario.api';
 
 export const calendarioKeys = {
   all: ['calendario'] as const,
-  eventos: (filtros?: FiltrosCalendario) =>
-    [...calendarioKeys.all, 'eventos', filtros] as const,
+  eventos: (filtros?: FiltrosCalendario) => [...calendarioKeys.all, 'eventos', filtros] as const,
   evento: (id: string) => [...calendarioKeys.all, 'evento', id] as const,
   vistaAgenda: () => [...calendarioKeys.all, 'vista-agenda'] as const,
-  vistaSemana: (fecha?: string) =>
-    [...calendarioKeys.all, 'vista-semana', fecha] as const,
+  vistaSemana: (fecha?: string) => [...calendarioKeys.all, 'vista-semana', fecha] as const,
   estadisticas: () => [...calendarioKeys.all, 'estadisticas'] as const,
 };
 
@@ -203,15 +201,13 @@ export function useEliminarEvento() {
  */
 export function useCalendarioCompleto(
   vista: 'agenda' | 'semana' = 'agenda',
-  filtros?: FiltrosCalendario
+  filtros?: FiltrosCalendario,
 ) {
-  const { data: eventos = [], isLoading: isLoadingEventos } =
-    useEventos(filtros);
+  const { data: eventos = [], isLoading: isLoadingEventos } = useEventos(filtros);
 
   const { data: vistaAgenda, isLoading: isLoadingAgenda } = useVistaAgenda();
 
-  const { data: vistaSemana = [], isLoading: isLoadingSemana } =
-    useVistaSemana();
+  const { data: vistaSemana = [], isLoading: isLoadingSemana } = useVistaSemana();
 
   const { data: estadisticas } = useEstadisticasCalendario();
 
@@ -230,14 +226,10 @@ export function useCalendarioCompleto(
         ? isLoadingEventos || isLoadingAgenda
         : isLoadingEventos || isLoadingSemana,
     crearTarea: (data: CreateTareaDto) => crearTarea.mutateAsync(data),
-    crearRecordatorio: (data: CreateRecordatorioDto) =>
-      crearRecordatorio.mutateAsync(data),
+    crearRecordatorio: (data: CreateRecordatorioDto) => crearRecordatorio.mutateAsync(data),
     crearNota: (data: CreateNotaDto) => crearNota.mutateAsync(data),
     eliminar: (id: string) => eliminar.mutateAsync(id),
-    isCreating:
-      crearTarea.isPending ||
-      crearRecordatorio.isPending ||
-      crearNota.isPending,
+    isCreating: crearTarea.isPending || crearRecordatorio.isPending || crearNota.isPending,
     isDeleting: eliminar.isPending,
   };
 }

@@ -28,7 +28,9 @@ test.describe('Creación de Docente Mejorada - E2E', () => {
     await expect(page).toHaveURL(/\/admin\/usuarios/);
   });
 
-  test('Flujo completo: crear docente con password auto-generado en sector Matemática', async ({ page }) => {
+  test('Flujo completo: crear docente con password auto-generado en sector Matemática', async ({
+    page,
+  }) => {
     // Paso 1: Click en "Crear nuevo"
     await page.click('button:has-text("Crear nuevo")');
 
@@ -166,7 +168,10 @@ test.describe('Creación de Docente Mejorada - E2E', () => {
     await expect(docenteRow.locator('text=💻')).toBeVisible();
   });
 
-  test('Verificación: debe_cambiar_password se establece correctamente en DB', async ({ page, request }) => {
+  test('Verificación: debe_cambiar_password se establece correctamente en DB', async ({
+    page,
+    request,
+  }) => {
     // Crear docente con password auto-generado
     await page.click('button:has-text("Crear nuevo")');
 
@@ -186,9 +191,10 @@ test.describe('Creación de Docente Mejorada - E2E', () => {
     // Hacer request al API para verificar el campo
     const response = await request.get(`/api/admin/docentes/${docenteId}`, {
       headers: {
-        'Cookie': await page.context().cookies().then(cookies =>
-          cookies.map(c => `${c.name}=${c.value}`).join('; ')
-        ),
+        Cookie: await page
+          .context()
+          .cookies()
+          .then((cookies) => cookies.map((c) => `${c.name}=${c.value}`).join('; ')),
       },
     });
 
@@ -218,7 +224,9 @@ test.describe('Creación de Docente Mejorada - E2E', () => {
     await expect(page.locator('text=Contraseña generada:')).toBeVisible({ timeout: 5000 });
 
     // Copiar contraseña generada
-    const generatedPassword = await page.locator('[data-testid="generated-password"]').textContent();
+    const generatedPassword = await page
+      .locator('[data-testid="generated-password"]')
+      .textContent();
 
     // Logout del admin
     await page.click('button[aria-label="Logout"]');
@@ -245,7 +253,9 @@ test.describe('Creación de Docente Mejorada - E2E', () => {
 
     // Verificar que HTML5 validation previene submit
     const nombreInput = page.locator('input[name="nombre"]');
-    const validationMessage = await nombreInput.evaluate((el: HTMLInputElement) => el.validationMessage);
+    const validationMessage = await nombreInput.evaluate(
+      (el: HTMLInputElement) => el.validationMessage,
+    );
     expect(validationMessage).toBeTruthy();
   });
 

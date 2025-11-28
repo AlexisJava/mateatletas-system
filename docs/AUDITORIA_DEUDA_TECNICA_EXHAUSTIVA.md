@@ -1,4 +1,5 @@
 # 🔍 AUDITORÍA EXHAUSTIVA DE DEUDA TÉCNICA
+
 ## Mateatletas Ecosystem - Análisis Completo
 
 **Fecha:** 2025-10-17
@@ -14,26 +15,26 @@
 
 **Score Global:** 6.5/10
 
-| Área | Score | Estado | Cambio vs Anterior |
-|------|-------|--------|-------------------|
-| **Backend (API)** | 7.0/10 | 🟢 | +0.3 |
-| **Frontend (Web)** | 6.0/10 | 🟡 | +1.2 |
-| **Seguridad** | 4.0/10 | 🔴 | Sin cambios |
-| **Performance** | 7.0/10 | 🟢 | +1.0 |
-| **Testing** | 2.0/10 | 🔴 | Sin cambios |
-| **Documentación** | 8.0/10 | 🟢 | +1.0 |
+| Área               | Score  | Estado | Cambio vs Anterior |
+| ------------------ | ------ | ------ | ------------------ |
+| **Backend (API)**  | 7.0/10 | 🟢     | +0.3               |
+| **Frontend (Web)** | 6.0/10 | 🟡     | +1.2               |
+| **Seguridad**      | 4.0/10 | 🔴     | Sin cambios        |
+| **Performance**    | 7.0/10 | 🟢     | +1.0               |
+| **Testing**        | 2.0/10 | 🔴     | Sin cambios        |
+| **Documentación**  | 8.0/10 | 🟢     | +1.0               |
 
 ### Indicadores Clave
 
-| Métrica | Valor Actual | Objetivo | Estado |
-|---------|--------------|----------|--------|
-| **TypeScript Errors** | 0 | 0 | ✅ 100% |
-| **Test Coverage** | ~30% | 80% | 🔴 38% |
-| **Archivos >500 líneas** | 18 | 0 | 🔴 |
-| **Funciones >100 líneas** | 200+ | 0 | 🔴 |
-| **Vulnerabilidades Críticas** | 4 | 0 | 🔴 |
-| **TODO Comments** | 6+ | 0 | 🟡 |
-| **@ts-ignore/@ts-nocheck** | 3 | 0 | 🟡 |
+| Métrica                       | Valor Actual | Objetivo | Estado  |
+| ----------------------------- | ------------ | -------- | ------- |
+| **TypeScript Errors**         | 0            | 0        | ✅ 100% |
+| **Test Coverage**             | ~30%         | 80%      | 🔴 38%  |
+| **Archivos >500 líneas**      | 18           | 0        | 🔴      |
+| **Funciones >100 líneas**     | 200+         | 0        | 🔴      |
+| **Vulnerabilidades Críticas** | 4            | 0        | 🔴      |
+| **TODO Comments**             | 6+           | 0        | 🟡      |
+| **@ts-ignore/@ts-nocheck**    | 3            | 0        | 🟡      |
 
 ---
 
@@ -54,6 +55,7 @@ async activarMembresiaMock(@Param('id') membresiaId: string) {
 ```
 
 **Problema:**
+
 - ❌ Sin autenticación (`@UseGuards`)
 - ❌ Sin autorización (`@Roles`)
 - ❌ Activo en producción
@@ -62,6 +64,7 @@ async activarMembresiaMock(@Param('id') membresiaId: string) {
 **Impacto:** 🔴 **CRÍTICO** - Pérdida directa de ingresos
 
 **Mitigación (15 minutos):**
+
 ```typescript
 @Post('mock/activar-membresia/:id')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -86,6 +89,7 @@ app.enableCors(); // Acepta CUALQUIER origen
 ```
 
 **Problema:**
+
 - ❌ Acepta requests desde cualquier dominio
 - ❌ Vulnerable a CSRF (Cross-Site Request Forgery)
 - ❌ Vulnerable a XSS cross-site
@@ -93,6 +97,7 @@ app.enableCors(); // Acepta CUALQUIER origen
 **Impacto:** 🔴 **CRÍTICO** - Robo de datos, CSRF attacks
 
 **Mitigación (10 minutos):**
+
 ```typescript
 app.enableCors({
   origin: [
@@ -120,6 +125,7 @@ const token = localStorage.getItem('auth-token');
 ```
 
 **Problema:**
+
 - ❌ Tokens accesibles via JavaScript
 - ❌ Robables si hay XSS
 - ❌ No hay protección httpOnly
@@ -135,6 +141,7 @@ const token = localStorage.getItem('auth-token');
 **Ubicación:** `/apps/api/src/auth/auth.controller.ts`
 
 **Problema:**
+
 - ❌ No hay límite de intentos en `/auth/login`
 - ❌ Vulnerable a brute force
 - ❌ Vulnerable a DDoS
@@ -142,6 +149,7 @@ const token = localStorage.getItem('auth-token');
 **Impacto:** 🔴 **CRÍTICO** - Ataques de fuerza bruta
 
 **Mitigación (1 hora):**
+
 ```bash
 npm install @nestjs/throttler
 ```
@@ -175,6 +183,7 @@ async login(@Body() loginDto: LoginDto) {
 #### Backend (6 archivos críticos)
 
 **2.1 Seed File - 1,183 líneas** 🔴
+
 - **Archivo:** `/apps/api/prisma/seed.ts`
 - **Problema:** Mezcla todos los seeds (usuarios, equipos, clases, rutas, etc.)
 - **Impacto:** Difícil de mantener, debug imposible
@@ -191,6 +200,7 @@ async login(@Body() loginDto: LoginDto) {
   ```
 
 **2.2 PagosService - 706 líneas** 🔴
+
 - **Archivo:** `/apps/api/src/pagos/pagos.service.ts`
 - **Problema:** Mezcla MercadoPago, webhooks, mock mode
 - **Impacto:** Testing difícil, SRP violation
@@ -200,11 +210,13 @@ async login(@Body() loginDto: LoginDto) {
   - `MockPagosService` (testing)
 
 **2.3 AsistenciaService - 655 líneas** 🔴
+
 - **Archivo:** `/apps/api/src/asistencia/asistencia.service.ts`
 - **Problema:** CRUD + reportes + estadísticas
 - **Refactor:** Extraer `AsistenciaReportesService`
 
 **2.4 GamificacionService - 643 líneas** 🔴
+
 - **Archivo:** `/apps/api/src/gamificacion/gamificacion.service.ts`
 - **Problema:** Puntos + logros + ranking + nivel
 - **Refactor:** Dividir en:
@@ -213,11 +225,13 @@ async login(@Body() loginDto: LoginDto) {
   - `RankingService`
 
 **2.5 CursosService - 639 líneas** 🔴
+
 - **Archivo:** `/apps/api/src/cursos/cursos.service.ts`
 - **Problema:** Cursos + módulos + lecciones + progreso
 - **Refactor:** Extraer `ModulosService` y `ProgresoService`
 
 **2.6 EventosService - 532 líneas** 🟡
+
 - **Archivo:** `/apps/api/src/eventos/eventos.service.ts`
 - **Problema:** Múltiples tipos de eventos mezclados
 - **Refactor:** Strategy pattern para event types
@@ -227,6 +241,7 @@ async login(@Body() loginDto: LoginDto) {
 #### Frontend (12 archivos críticos)
 
 **2.7 Planificador Docente - 969 líneas** 🔴 **PEOR**
+
 - **Archivo:** `/apps/web/src/app/docente/planificador/page.tsx`
 - **Problema:**
   - 15+ funciones >50 líneas
@@ -248,18 +263,22 @@ async login(@Body() loginDto: LoginDto) {
   ```
 
 **2.8 Mis Clases Docente - 822 líneas** 🔴
+
 - **Archivo:** `/apps/web/src/app/docente/mis-clases/page.tsx`
 - **Refactor:** Extraer filtros, lista, modals
 
 **2.9 Landing Page - 819 líneas** 🔴
+
 - **Archivo:** `/apps/web/src/app/page.tsx`
 - **Refactor:** Dividir en sections
 
 **2.10 Admin Productos - 703 líneas** 🔴
+
 - **Archivo:** `/apps/web/src/app/admin/productos/page.tsx`
 - **Refactor:** Hooks para lógica + componentes pequeños
 
 **Otros archivos >500 líneas:**
+
 - `evaluacion/page.tsx` - 655 líneas
 - `login/page.tsx` - 595 líneas
 - `admin/reportes/page.tsx` - 575 líneas
@@ -272,11 +291,13 @@ async login(@Body() loginDto: LoginDto) {
 **Encontradas:** 200+ funciones
 
 **Top Offenders:**
+
 - `generateMockContent` (planificador) - **189 líneas**
 - Multiple render functions en admin pages - **100-150 líneas**
 - Seed functions - **100-200 líneas**
 
 **Impacto:**
+
 - Code duplication
 - Difícil de testear
 - Cognitive overhead
@@ -367,6 +388,7 @@ const progresoPorRuta = await Promise.all(
 #### 🟡 5.3 Falta Paginación
 
 **Endpoints sin paginación:**
+
 - `gamificacion.service.ts:598` - `findMany()` sin take/skip
 - `equipos.service.ts:625` - Ranking global sin límite
 - `estudiantes.service.ts` - Varias queries
@@ -412,6 +434,7 @@ model Asistencia {
 #### 🔴 6.1 Console.log en Producción
 
 **Encontrados:**
+
 - `/apps/api/src/main.ts:189-190`
 - `/apps/api/src/auth/auth.service.ts:279`
 - `/apps/api/src/common/cache/cache.module.ts:41,55-56`
@@ -436,6 +459,7 @@ this.logger.error('Error al procesar pago', {
 #### 🟡 6.2 Falta Validación de Input
 
 **Ejemplo:**
+
 ```typescript
 // apps/web/src/app/docente/planificador/page.tsx:116-127
 // No validation antes de API call simulation
@@ -463,9 +487,7 @@ const ResourceSchema = z.object({
 throw new NotFoundException('Estudiante no encontrado');
 
 // ✅ BIEN
-throw new NotFoundException(
-  `Estudiante con ID ${estudianteId} no encontrado`
-);
+throw new NotFoundException(`Estudiante con ID ${estudianteId} no encontrado`);
 ```
 
 **Encontrado en:** gamificacion, cursos, eventos services
@@ -477,6 +499,7 @@ throw new NotFoundException(
 #### 🔴 7.1 @ts-ignore en Código
 
 **Encontrado:**
+
 ```typescript
 // apps/web/src/app/docente/calendario/page.tsx:328,375
 // @ts-ignore - incomplete component
@@ -491,6 +514,7 @@ throw new NotFoundException(
 #### 🟡 7.2 Archivos Backup en Source Control
 
 **Encontrados:**
+
 - `/apps/api/src/clases/clases.service.ts.backup`
 - `/apps/api/src/admin/admin.service.ts.backup`
 
@@ -504,21 +528,25 @@ throw new NotFoundException(
 **Todos encontrados:**
 
 1. `/apps/api/src/cursos/cursos.service.ts:429`
+
    ```typescript
    // TODO: Integrar con GamificacionService
    ```
 
 2. `/apps/api/src/cursos/cursos.service.ts:464`
+
    ```typescript
    // TODO: Integrar con GamificacionService para otorgar puntos
    ```
 
 3. `/apps/api/src/admin/services/admin-alertas.service.ts:90,119`
+
    ```typescript
    // TODO: Integrar con OpenAI para sugerencias inteligentes
    ```
 
 4. `/apps/api/src/catalogo/productos.controller.ts:80,93,110`
+
    ```typescript
    // TODO: Agregar guard de rol Admin
    ```
@@ -536,6 +564,7 @@ throw new NotFoundException(
 #### 🟡 7.4 Valores Hardcodeados
 
 **Problemas:**
+
 - Límites de paginación hardcoded (20, 50, 100)
 - Colores default en UI components
 - Magic strings y números
@@ -564,15 +593,15 @@ export const COLORS = {
 
 ### Distribución de Deuda Técnica
 
-| Categoría | Crítico | Alto | Medio | Bajo | Total |
-|-----------|---------|------|-------|------|-------|
-| **Code Smells** | 2 | 6 | 4 | 0 | 12 |
-| **Arquitectura** | 1 | 2 | 0 | 0 | 3 |
-| **Performance** | 1 | 0 | 3 | 0 | 4 |
-| **Best Practices** | 1 | 3 | 0 | 0 | 4 |
-| **Seguridad** | 4 | 0 | 0 | 0 | 4 |
-| **Código Deprecated** | 1 | 0 | 3 | 0 | 4 |
-| **TOTAL** | **10** | **11** | **10** | **0** | **31** |
+| Categoría             | Crítico | Alto   | Medio  | Bajo  | Total  |
+| --------------------- | ------- | ------ | ------ | ----- | ------ |
+| **Code Smells**       | 2       | 6      | 4      | 0     | 12     |
+| **Arquitectura**      | 1       | 2      | 0      | 0     | 3      |
+| **Performance**       | 1       | 0      | 3      | 0     | 4      |
+| **Best Practices**    | 1       | 3      | 0      | 0     | 4      |
+| **Seguridad**         | 4       | 0      | 0      | 0     | 4      |
+| **Código Deprecated** | 1       | 0      | 3      | 0     | 4      |
+| **TOTAL**             | **10**  | **11** | **10** | **0** | **31** |
 
 ---
 
@@ -581,6 +610,7 @@ export const COLORS = {
 **Score:** 6/10 (MEDIUM)
 
 **Patrones duplicados encontrados:**
+
 - Error handling pattern: 50+ veces
 - Prisma query patterns: 30+ veces
 - Form validation logic: 20+ veces
@@ -594,6 +624,7 @@ export const COLORS = {
 **Estimado:** 20-30%
 
 **Coverage por Módulo:**
+
 - Admin services: ~90% ✅ (99 tests passing)
 - Clases services: ~90% ✅
 - Resto de backend: ~10% 🔴
@@ -682,13 +713,13 @@ export const COLORS = {
 
 ## 📈 ESTIMACIÓN DE ESFUERZO
 
-| Fase | Duración | Esfuerzo (hrs) | Prioridad |
-|------|----------|----------------|-----------|
-| **FASE 0: Seguridad** | 1 día | 4 | 🔴 CRÍTICO |
-| **FASE 1: Code Smells** | 1 semana | 40 | 🟠 ALTO |
-| **FASE 2: Performance** | 1 semana | 40 | 🟡 MEDIO |
-| **FASE 3: Limpieza** | 1 semana | 40 | 🟢 BAJO |
-| **TOTAL** | 3-4 semanas | 124 hrs | - |
+| Fase                    | Duración    | Esfuerzo (hrs) | Prioridad  |
+| ----------------------- | ----------- | -------------- | ---------- |
+| **FASE 0: Seguridad**   | 1 día       | 4              | 🔴 CRÍTICO |
+| **FASE 1: Code Smells** | 1 semana    | 40             | 🟠 ALTO    |
+| **FASE 2: Performance** | 1 semana    | 40             | 🟡 MEDIO   |
+| **FASE 3: Limpieza**    | 1 semana    | 40             | 🟢 BAJO    |
+| **TOTAL**               | 3-4 semanas | 124 hrs        | -          |
 
 **Con 1 desarrollador:** 4 semanas
 **Con 2 desarrolladores:** 2 semanas
@@ -725,10 +756,7 @@ npm install husky lint-staged -D
 ```json
 // .husky/pre-commit
 {
-  "*.{ts,tsx}": [
-    "eslint --fix",
-    "prettier --write"
-  ]
+  "*.{ts,tsx}": ["eslint --fix", "prettier --write"]
 }
 ```
 
@@ -745,6 +773,7 @@ if (featureFlags.GAMIFICACION_INTEGRATION) {
 ### 5. Agregar Monitoring
 
 **Opciones:**
+
 - Sentry (error tracking)
 - LogRocket (session replay)
 - New Relic (APM)
@@ -752,6 +781,7 @@ if (featureFlags.GAMIFICACION_INTEGRATION) {
 ### 6. Crear Coding Standards Document
 
 Documentar:
+
 - Naming conventions (snake_case en datos)
 - File structure
 - Component patterns
@@ -785,6 +815,7 @@ Documentar:
 ### Estado Actual del Proyecto
 
 **Positivo:**
+
 - ✅ Código TypeScript sin errores
 - ✅ Backend con buena arquitectura
 - ✅ Testing en servicios críticos (90%)
@@ -792,6 +823,7 @@ Documentar:
 - ✅ Design system sólido
 
 **Crítico:**
+
 - 🔴 4 vulnerabilidades de seguridad
 - 🔴 18 archivos >500 líneas
 - 🔴 200+ funciones >100 líneas
@@ -829,21 +861,25 @@ Documentar:
 ### A. Herramientas Recomendadas
 
 **Linting & Formatting:**
+
 - ESLint (configurado)
 - Prettier (configurado)
 - Husky (pre-commit hooks)
 
 **Testing:**
+
 - Jest (backend)
 - Playwright (E2E frontend)
 - Coverage: Istanbul
 
 **Monitoring:**
+
 - Sentry (error tracking)
 - LogRocket (session replay)
 - Winston (logging actual)
 
 **Performance:**
+
 - Lighthouse (frontend)
 - k6 (load testing backend)
 

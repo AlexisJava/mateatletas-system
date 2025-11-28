@@ -11,6 +11,7 @@ Prompt de desarrollo
 Implement the **Estudiantes** vertical slice within Usuarios.
 
 **Backend (NestJS)**:
+
 - Extend `UsuariosModule` with an `EstudiantesModule` (controller, service). Ensure `UsuariosModule` imports/exports it as needed.
 - **Prisma Schema**: Add `Estudiante` model if not exists. Fields: `id (PK)`, `nombre`, `apellido`, `fechaNacimiento (Date)`, `email` (unique, for student’s login), `password` (hashed), and `tutorId` (Int, FK to Tutor). Also any gamification fields like `equipoId` (team assignment, can be null initially).
 - **EstudianteService**:
@@ -21,26 +22,28 @@ Implement the **Estudiantes** vertical slice within Usuarios.
 - **EstudianteController**:
   - `GET /api/estudiantes` – Lista los estudiantes del tutor logueado. Use `JwtAuthGuard` + `Roles('Tutor')`. The tutorId is derived from token; service returns an array of Estudiantes.
   - `POST /api/estudiantes` – Crea un nuevo estudiante vinculado al tutor logueado. Body includes nombre, apellido, fechaNacimiento, email (optional if student will login) y contraseña (opcional). Use Tutor from token for tutorId.
-  - `PATCH /api/estudiantes/:id` – Actualiza datos de un estudiante específico. Only allowed for the tutor who owns the student. 
+  - `PATCH /api/estudiantes/:id` – Actualiza datos de un estudiante específico. Only allowed for the tutor who owns the student.
   - (Optional) `DELETE /api/estudiantes/:id` – Elimina un estudiante (if needed).
 - In service methods, enforce that the student’s `tutorId` matches the requesting tutor (to prevent one tutor accessing another’s child). This can be done by checking the `tutorId` from token against the student record’s tutorId.
 - Ensure to exclude or nullify `password` field when returning student(s) to the client.
 - If **Team assignment** exists (from Gamificación), include `equipoId` or team name in response (can join on Team model if needed).
 
 **Frontend (Next.js)**:
-- **Página Listado de Estudiantes** (`/tutor/estudiantes`): 
+
+- **Página Listado de Estudiantes** (`/tutor/estudiantes`):
   - Display tutor’s children in a list/table with basic info (nombre, edad o fecha nacimiento).
   - Provide a button "Agregar Estudiante".
   - Each list item could have an "Editar" button to edit details if needed (and possibly "Eliminar").
 - **Página Nuevo Estudiante** (`/tutor/estudiantes/nuevo`):
   - Form to add a student: nombre, apellido, fecha de nacimiento, email (or username) and password (if the student will log in; could also auto-generate password and send by email in future).
   - On submit, calls POST `/api/estudiantes`. After creation, navigate back to list.
-- **Página Editar Estudiante** (`/tutor/estudiantes/[id]/editar`): 
+- **Página Editar Estudiante** (`/tutor/estudiantes/[id]/editar`):
   - Similar form pre-filled, allow editing nombre, fechaNacimiento, maybe email.
   - Submit via PATCH `/api/estudiantes/:id`.
 - Navigation: add link from Tutor Dashboard or menu to "Mis Estudiantes" page.
 
 **API Integration**:
+
 - Use React Query:
   - `useQuery('estudiantes', fetchEstudiantes)` – GET lista de estudiantes.
   - `useMutation(crearEstudiante)` – POST nuevo estudiante (invalidate 'estudiantes' on success).
@@ -49,20 +52,22 @@ Implement the **Estudiantes** vertical slice within Usuarios.
 - If delete functionality is allowed, similar useMutation for delete.
 
 **Types**:
+
 - `Estudiante` interface: { id, nombre, apellido, fechaNacimiento: string|Date, email?: string, tutorId: number, equipoId?: number }.
-- DTOs/Forms: 
+- DTOs/Forms:
   - `CreateEstudianteDto` / `UpdateEstudianteDto` to mirror backend. Perhaps password optional on create (if not setting, could generate).
   - If Gamificación assigns team on creation, the backend might do that – include `equipoId` in model (optional).
 - Possibly define a lighter type for listing (excluding sensitive info).
 - Place these types in usuarios or estudiantes types file.
 
 **Orden de implementación**:
+
 1. **Prisma**: Añadir modelo Estudiante (si no existe) con relación tutorId. Ejecutar migración.
 2. **Backend**: Crear `EstudiantesService` y `EstudiantesController` bajo `UsuariosModule`. Implementar métodos listar (por tutor), crear (link al tutor), actualizar.
 3. **Seguridad**: En controller, usar guard de JWT + Roles('Tutor'). En service, validar propiedad (e.g., check tutorId en `findByTutor` y en `update` comparando con ID del contexto).
 4. **Frontend**: Implementar páginas `/tutor/estudiantes` (lista), `/tutor/estudiantes/nuevo`, `/tutor/estudiantes/[id]/editar`. Reutilizar componentes de formulario. Manejar la navegación de vuelta tras crear/editar.
 5. **Integración**: Probar end-to-end: Tutor logueado crea un Estudiante, verifica en listado. Editar un estudiante y comprobar cambios. Asegurar que no puede editar uno que no es suyo (probando manualmente con IDs manipulados via devtools or unit tests).
-6. **Relación con demás**: Una vez estudiantes existen, integrar su uso en Clases (reservar clase para un estudiante) y Gamificación (ver puntos de cada estudiante). 
+6. **Relación con demás**: Una vez estudiantes existen, integrar su uso en Clases (reservar clase para un estudiante) y Gamificación (ver puntos de cada estudiante).
 
 Backend (NestJS)
 
@@ -86,7 +91,7 @@ Backend (NestJS)
       tutorId    Int
       tutor      Tutor    @relation(fields: [tutorId], references: [id])
       // Gamificación
-      equipoId   Int?     
+      equipoId   Int?
       equipo     Equipo?  @relation(fields: [equipoId], references: [id])
       // Inscripciones a clases
       inscripciones Inscripcion[]

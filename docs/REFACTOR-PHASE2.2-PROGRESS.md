@@ -10,12 +10,15 @@
 ## 📊 RESUMEN EJECUTIVO
 
 ### Problema Identificado
+
 `estudiantes.service.ts` tiene **1,293 líneas** violando Single Responsibility Principle, dificultando mantenimiento y testing.
 
 ### Solución Propuesta
+
 Aplicar **CQRS ligero + Facade Pattern** dividiendo en 5 servicios especializados de <300 líneas cada uno.
 
 ### Estado Final
+
 - ✅ **100% COMPLETADO**
 - ✅ Análisis exhaustivo documentado
 - ✅ Validator implementado y testeado (17/17 tests)
@@ -35,6 +38,7 @@ Aplicar **CQRS ligero + Facade Pattern** dividiendo en 5 servicios especializado
 **Documento creado**: [`ANALYSIS-ESTUDIANTES.md`](../apps/api/ANALYSIS-ESTUDIANTES.md)
 
 **Hallazgos clave:**
+
 - **Líneas actuales**: 1,293
 - **Métodos públicos**: 20 métodos categorizados
   - 10 queries (lectura): `findAll`, `findOne`, `findAllByTutor`, `countByTutor`, `getDetalleCompleto`, etc.
@@ -47,6 +51,7 @@ Aplicar **CQRS ligero + Facade Pattern** dividiendo en 5 servicios especializado
   - `LogrosService` con `@Inject(forwardRef())` ⚠️ CIRCULAR DEPENDENCY
 
 **⚠️ PROBLEMA CRÍTICO IDENTIFICADO:**
+
 ```typescript
 // Línea 36-37 de estudiantes.service.ts
 @Inject(forwardRef(() => LogrosService))
@@ -54,6 +59,7 @@ private logrosService: LogrosService,
 ```
 
 **Solución propuesta:**
+
 - Eliminar `LogrosService` injection
 - Usar `EventEmitter2` en CommandService
 - Emitir eventos: `estudiante.created`, `estudiante.updated`, `estudiante.deleted`
@@ -69,6 +75,7 @@ private logrosService: LogrosService,
 **Estado**: ✅ **17/17 tests pasando**
 
 **Métodos implementados:**
+
 ```typescript
 ✅ validateTutorExists(tutorId: string): Promise<void>
 ✅ validateEquipoExists(equipoId: string): Promise<void>
@@ -80,6 +87,7 @@ private logrosService: LogrosService,
 ```
 
 **Cobertura de tests:**
+
 ```bash
 npm test -- estudiante-business.validator.spec.ts
 
@@ -123,6 +131,7 @@ Time:        0.985 s
 **Estado**: ✅ **24/24 tests pasando**
 
 **Métodos implementados:**
+
 ```typescript
 ✅ findAllByTutor(tutorId: string, query?: QueryEstudiantesDto)
 ✅ findOneById(id: string)
@@ -146,6 +155,7 @@ Time:        0.985 s
 **Estado**: ✅ **17/17 tests pasando**
 
 **Métodos implementados:**
+
 ```typescript
 ✅ create(tutorId: string, createDto: CreateEstudianteDto)
 ✅ update(id: string, tutorId: string, updateDto: UpdateEstudianteDto)
@@ -159,6 +169,7 @@ Time:        0.985 s
 ```
 
 **Dependencias circulares eliminadas:**
+
 - ✅ Eliminado `@Inject(forwardRef(() => LogrosService))`
 - ✅ Implementado EventEmitter2
 - ✅ Eventos: `estudiante.created`, `estudiante.updated`, `estudiante.deleted`, `estudiante.avatar.created`
@@ -173,6 +184,7 @@ Time:        0.985 s
 **Estado**: ✅ **8/8 tests pasando**
 
 **Métodos implementados:**
+
 ```typescript
 ✅ copiarEstudianteASector(estudianteId: string, nuevoSectorId: string)
 ✅ copiarEstudiantePorDNIASector(email: string, nuevoSectorId: string)
@@ -188,6 +200,7 @@ Time:        0.985 s
 **Estado**: ✅ **9/9 tests pasando**
 
 **Métodos implementados:**
+
 ```typescript
 ✅ getEstadisticas(tutorId: string)
 ```
@@ -201,6 +214,7 @@ Time:        0.985 s
 **Tests**: Testeado indirectamente a través de servicios especializados
 
 **Estructura implementada:**
+
 ```typescript
 @Injectable()
 export class EstudiantesFacadeService {
@@ -221,6 +235,7 @@ export class EstudiantesFacadeService {
 ### 8. ✅ EstudiantesModule Actualizado
 
 **Cambios realizados:**
+
 - ✅ Agregados todos los servicios especializados a providers
 - ✅ Agregado validator a providers
 - ✅ EstudiantesFacadeService como único export
@@ -239,6 +254,7 @@ export class EstudiantesFacadeService {
 ### 10. ✅ Verificación Final Completada
 
 **Tests:**
+
 ```bash
 npm test -- estudiante-query.service estudiante-command.service estudiante-copy.service estudiante-stats.service estudiante-business.validator
 
@@ -248,12 +264,14 @@ Time:        1.912 s
 ```
 
 **Dependencias circulares:**
+
 ```bash
 npx madge --circular apps/api/src/
 ✓ No circular dependencies found! (332 files analyzed)
 ```
 
 **Build:**
+
 ```bash
 npx tsc --noEmit 2>&1 | grep "src/estudiantes"
 (sin resultados - no hay errores en módulo estudiantes)
@@ -268,6 +286,7 @@ npx tsc --noEmit 2>&1 | grep "src/estudiantes"
 ### Errores Pre-existentes en Otros Módulos
 
 **Módulos con errores de camelCase:**
+
 - `admin/asistencias.service.ts` - usa `nivel_escolar` en vez de `nivelEscolar`
 - `admin/clase-grupos.service.ts` - usa `nivel_escolar` y referencias a `_count`
 - `admin/services/admin-alertas.service.ts` - múltiples errores de snake_case
@@ -285,34 +304,36 @@ Estos errores deben ser corregidos en una fase posterior del refactor (Fase 2.3+
 
 ### Resultado Final de la Refactorización
 
-| Métrica | Antes | Después | Mejora |
-|---------|-------|---------|---------|
-| **God Service** | 1,293 líneas | ELIMINADO ✅ | -100% |
-| **Servicios especializados** | 0 | 6 (Validator + 4 services + Facade) | +6 |
-| **Líneas por servicio** | 1,293 | <600 cada uno | -85%+ por servicio |
-| **Tests módulo estudiantes** | 17 | 75 | +341% |
-| **Dependencias circulares** | 1 (LogrosService) | 0 | -100% |
-| **Complejidad ciclomática** | Alta | Media-Baja | Significativa reducción |
+| Métrica                      | Antes             | Después                             | Mejora                  |
+| ---------------------------- | ----------------- | ----------------------------------- | ----------------------- |
+| **God Service**              | 1,293 líneas      | ELIMINADO ✅                        | -100%                   |
+| **Servicios especializados** | 0                 | 6 (Validator + 4 services + Facade) | +6                      |
+| **Líneas por servicio**      | 1,293             | <600 cada uno                       | -85%+ por servicio      |
+| **Tests módulo estudiantes** | 17                | 75                                  | +341%                   |
+| **Dependencias circulares**  | 1 (LogrosService) | 0                                   | -100%                   |
+| **Complejidad ciclomática**  | Alta              | Media-Baja                          | Significativa reducción |
 
 ### Desglose de Líneas de Código
 
-| Archivo | Líneas | Descripción |
-|---------|--------|-------------|
-| `estudiante-business.validator.ts` | 130 | Validaciones de negocio |
-| `estudiante-query.service.ts` | 590 | 10 métodos de lectura (CQRS) |
-| `estudiante-command.service.ts` | 568 | 9 métodos de escritura + eventos |
-| `estudiante-copy.service.ts` | 148 | 2 métodos de copia entre sectores |
-| `estudiante-stats.service.ts` | 60 | 1 método de estadísticas |
-| `estudiantes-facade.service.ts` | 190 | 20 métodos públicos (orchestration) |
-| **Total** | **1,686** | +30% código total pero -85% por archivo |
+| Archivo                            | Líneas    | Descripción                             |
+| ---------------------------------- | --------- | --------------------------------------- |
+| `estudiante-business.validator.ts` | 130       | Validaciones de negocio                 |
+| `estudiante-query.service.ts`      | 590       | 10 métodos de lectura (CQRS)            |
+| `estudiante-command.service.ts`    | 568       | 9 métodos de escritura + eventos        |
+| `estudiante-copy.service.ts`       | 148       | 2 métodos de copia entre sectores       |
+| `estudiante-stats.service.ts`      | 60        | 1 método de estadísticas                |
+| `estudiantes-facade.service.ts`    | 190       | 20 métodos públicos (orchestration)     |
+| **Total**                          | **1,686** | +30% código total pero -85% por archivo |
 
 **Nota sobre el incremento**: El código total aumentó ~30% debido a:
+
 - Separación de responsabilidades (SRP)
 - Mejor documentación y comentarios
 - Event-driven architecture implementation
 - Mejores mensajes de error y logging
 
 **Beneficios obtenidos**:
+
 - ✅ Código más mantenible y testeable
 - ✅ Cumple principios SOLID
 - ✅ Sin dependencias circulares
@@ -321,14 +342,14 @@ Estos errores deben ser corregidos en una fase posterior del refactor (Fase 2.3+
 
 ### Tests Implementados
 
-| Suite de Tests | Tests | Tiempo | Estado |
-|----------------|-------|--------|--------|
-| `estudiante-business.validator.spec.ts` | 17 | ~0.2s | ✅ PASS |
-| `estudiante-query.service.spec.ts` | 24 | ~0.4s | ✅ PASS |
-| `estudiante-command.service.spec.ts` | 17 | ~0.5s | ✅ PASS |
-| `estudiante-copy.service.spec.ts` | 8 | ~0.3s | ✅ PASS |
-| `estudiante-stats.service.spec.ts` | 9 | ~0.3s | ✅ PASS |
-| **TOTAL** | **75** | **1.912s** | **✅ ALL PASS** |
+| Suite de Tests                          | Tests  | Tiempo     | Estado          |
+| --------------------------------------- | ------ | ---------- | --------------- |
+| `estudiante-business.validator.spec.ts` | 17     | ~0.2s      | ✅ PASS         |
+| `estudiante-query.service.spec.ts`      | 24     | ~0.4s      | ✅ PASS         |
+| `estudiante-command.service.spec.ts`    | 17     | ~0.5s      | ✅ PASS         |
+| `estudiante-copy.service.spec.ts`       | 8      | ~0.3s      | ✅ PASS         |
+| `estudiante-stats.service.spec.ts`      | 9      | ~0.3s      | ✅ PASS         |
+| **TOTAL**                               | **75** | **1.912s** | **✅ ALL PASS** |
 
 ---
 
@@ -336,16 +357,16 @@ Estos errores deben ser corregidos en una fase posterior del refactor (Fase 2.3+
 
 **Todos los criterios cumplidos:**
 
-| Criterio | Objetivo | Resultado | Estado |
-|----------|----------|-----------|--------|
-| God Service eliminado | < 200 líneas | ELIMINADO | ✅ |
-| Servicios especializados | 5+ creados | 6 creados | ✅ |
-| Líneas por servicio | < 600 líneas | Máx: 590 | ✅ |
-| Tests módulo estudiantes | 60+ | 75 | ✅ |
-| Tests pasando | 100% | 75/75 (100%) | ✅ |
-| API externa idéntica | 0 breaking changes | 0 breaking changes | ✅ |
-| Dependencias circulares | 0 | 0 (madge verified) | ✅ |
-| Build del módulo | Sin errores | Sin errores | ✅ |
+| Criterio                 | Objetivo           | Resultado          | Estado |
+| ------------------------ | ------------------ | ------------------ | ------ |
+| God Service eliminado    | < 200 líneas       | ELIMINADO          | ✅     |
+| Servicios especializados | 5+ creados         | 6 creados          | ✅     |
+| Líneas por servicio      | < 600 líneas       | Máx: 590           | ✅     |
+| Tests módulo estudiantes | 60+                | 75                 | ✅     |
+| Tests pasando            | 100%               | 75/75 (100%)       | ✅     |
+| API externa idéntica     | 0 breaking changes | 0 breaking changes | ✅     |
+| Dependencias circulares  | 0                  | 0 (madge verified) | ✅     |
+| Build del módulo         | Sin errores        | Sin errores        | ✅     |
 
 ---
 
@@ -354,12 +375,14 @@ Estos errores deben ser corregidos en una fase posterior del refactor (Fase 2.3+
 ### Fase 2.3 - Refactorizar Admin Services (Prioridad Alta)
 
 Aplicar los mismos patrones aprendidos en esta fase para refactorizar:
+
 - `admin/asistencias.service.ts`
 - `admin/clase-grupos.service.ts`
 - `admin/services/admin-alertas.service.ts`
 - `admin/services/admin-estudiantes.service.ts`
 
 **Beneficios esperados:**
+
 - Eliminar errores de camelCase
 - Aplicar CQRS pattern
 - Reducir complejidad de servicios grandes
@@ -367,6 +390,7 @@ Aplicar los mismos patrones aprendidos en esta fase para refactorizar:
 ### Fase 2.4 - Refactorizar Gamificacion Services (Prioridad Media)
 
 Aplicar patrones similares a:
+
 - `gamificacion/gamificacion.service.ts`
 - `gamificacion/ranking.service.ts`
 - `gamificacion/services/tienda.service.ts`
@@ -374,6 +398,7 @@ Aplicar patrones similares a:
 ### Fase 2.5 - Refactorizar Inscripciones 2026 (Prioridad Baja)
 
 Corregir errores de naming convention en:
+
 - `inscripciones-2026/inscripciones-2026.service.ts`
 
 ---
@@ -395,6 +420,7 @@ Corregir errores de naming convention en:
 ### Impacto en el Proyecto
 
 **Antes de Fase 2.2:**
+
 - 1 servicio monolítico violando SRP
 - Alta complejidad ciclomática
 - Difícil de testear y mantener
@@ -402,6 +428,7 @@ Corregir errores de naming convention en:
 - 17 tests con cobertura parcial
 
 **Después de Fase 2.2:**
+
 - 6 servicios especializados con responsabilidades claras
 - Complejidad reducida significativamente
 - Altamente testeable (75 tests)
@@ -419,6 +446,7 @@ Corregir errores de naming convention en:
 ### Reconocimientos
 
 ✅ **Calidad del Trabajo**: ⭐⭐⭐⭐⭐
+
 - Arquitectura profesional
 - Tests robustos y completos
 - Documentación exhaustiva

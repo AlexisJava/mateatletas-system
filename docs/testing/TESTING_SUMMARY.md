@@ -9,15 +9,15 @@
 
 Se han implementado y probado **7 Vertical Slices** completas del sistema Mateatletas:
 
-| Slice | Módulo | Estado | Tests |
-|-------|--------|--------|-------|
-| #1 | Auth (Autenticación) | ✅ Completado | ✅ Pasando |
-| #2 | Estudiantes | ✅ Completado | ✅ Pasando |
-| #3 | Equipos | ✅ Completado | ✅ Pasando |
-| #4 | Docentes | ✅ Completado | ✅ Pasando |
-| #5 | Catálogo | ✅ Completado | ✅ Pasando |
-| #6 | Pagos (MercadoPago) | ✅ Completado | ✅ Pasando |
-| #7 | Clases | ✅ Completado | ✅ Pasando |
+| Slice | Módulo               | Estado        | Tests      |
+| ----- | -------------------- | ------------- | ---------- |
+| #1    | Auth (Autenticación) | ✅ Completado | ✅ Pasando |
+| #2    | Estudiantes          | ✅ Completado | ✅ Pasando |
+| #3    | Equipos              | ✅ Completado | ✅ Pasando |
+| #4    | Docentes             | ✅ Completado | ✅ Pasando |
+| #5    | Catálogo             | ✅ Completado | ✅ Pasando |
+| #6    | Pagos (MercadoPago)  | ✅ Completado | ✅ Pasando |
+| #7    | Clases               | ✅ Completado | ✅ Pasando |
 
 **Tests Totales Ejecutados:** 8 scripts de testing
 **Integración End-to-End:** ✅ Verificada
@@ -31,12 +31,14 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 **Script:** `test-estudiantes.sh` (incluye auth)
 
 **Funcionalidades Probadas:**
+
 - ✅ Registro de tutor
 - ✅ Login y generación de JWT token
 - ✅ Protección de rutas con guards
 - ✅ Decorador @GetUser para obtener usuario autenticado
 
 **Endpoints Verificados:**
+
 - `POST /api/auth/register` - Registro de tutores
 - `POST /api/auth/login` - Login con email/password
 
@@ -49,6 +51,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 **Script:** `test-estudiantes.sh`
 
 **Funcionalidades Probadas:**
+
 - ✅ Crear estudiante (asociado a tutor autenticado)
 - ✅ Listar estudiantes del tutor
 - ✅ Obtener estudiante por ID
@@ -57,6 +60,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 - ✅ Ownership validation (solo el tutor dueño puede modificar)
 
 **Endpoints Verificados:**
+
 - `POST /api/estudiantes` - Crear estudiante
 - `GET /api/estudiantes` - Listar con paginación
 - `GET /api/estudiantes/:id` - Obtener uno
@@ -64,6 +68,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 - `DELETE /api/estudiantes/:id` - Eliminar
 
 **Resultado del Test:**
+
 ```
 ✓ Tutor registrado correctamente
 ✓ Login exitoso
@@ -84,6 +89,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 **Script:** `test-equipos.sh`
 
 **Funcionalidades Probadas:**
+
 - ✅ Crear equipo
 - ✅ Listar equipos
 - ✅ Actualizar equipo
@@ -91,11 +97,13 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 - ✅ Rankings y puntos por equipo
 
 **Endpoints Verificados:**
+
 - `POST /api/equipos` - Crear equipo
 - `GET /api/equipos` - Listar todos
 - `PATCH /api/equipos/:id` - Actualizar
 
 **Resultado del Test:**
+
 ```
 ✅ Tutor registrado correctamente
 ✅ Token obtenido correctamente
@@ -112,6 +120,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 **Script:** `test-docentes.sh`
 
 **Funcionalidades Probadas:**
+
 - ✅ Registro público de docentes
 - ✅ Login de docentes (role: docente)
 - ✅ Ver perfil propio
@@ -120,6 +129,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 - ✅ Ver detalles de docente específico
 
 **Endpoints Verificados:**
+
 - `POST /api/docentes-public` - Registro público
 - `POST /api/auth/login` - Login docente
 - `GET /api/docentes/me` - Perfil propio
@@ -128,6 +138,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 - `GET /api/docentes/:id` - Ver detalles
 
 **Resultado del Test:**
+
 ```
 ✅ Docente creado - ID: cmgoef4bg000exwbliwe2r33s
 ✅ Login de docente exitoso
@@ -146,6 +157,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 **Script:** `test-catalogo.sh`
 
 **Funcionalidades Probadas:**
+
 - ✅ Listar productos (suscripciones, cursos, recursos)
 - ✅ Crear producto de suscripción
 - ✅ Filtrar por tipo de producto
@@ -153,6 +165,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 - ✅ Obtener producto específico
 
 **Endpoints Verificados:**
+
 - `GET /api/productos` - Listar todos
 - `GET /api/productos?tipo=Suscripcion` - Filtrar por tipo
 - `GET /api/productos?tipo=Curso` - Filtrar cursos
@@ -161,6 +174,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 - `GET /api/productos/:id` - Obtener uno
 
 **Resultado del Test:**
+
 ```
 ✅ Productos listados: 5 productos encontrados
 ✅ Suscripción creada correctamente
@@ -168,6 +182,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 ```
 
 **Productos Seeded:**
+
 - Suscripción Mensual ($2500)
 - Suscripción Anual ($24000)
 - Curso Álgebra Básica ($3500)
@@ -185,6 +200,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 **Script:** `test-pagos-simple.sh`
 
 **Funcionalidades Probadas:**
+
 - ✅ Ver estado de membresía del tutor
 - ✅ Crear preferencia de pago para suscripción
 - ✅ Crear preferencia de pago para curso
@@ -192,6 +208,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 - ✅ Webhook para procesar pagos (mock en desarrollo)
 
 **Endpoints Verificados:**
+
 - `GET /api/pagos/membresia` - Ver estado de membresía
 - `POST /api/pagos/suscripcion` - Iniciar suscripción
 - `POST /api/pagos/curso` - Comprar curso
@@ -200,6 +217,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 - `GET /api/pagos/membresia/:id/estado` - Verificar estado
 
 **Resultado del Test:**
+
 ```
 ✅ Token obtenido
 ✅ Estado membresía consultado: SinMembresia
@@ -210,6 +228,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 ```
 
 **Flujo de Pago:**
+
 1. Tutor solicita suscripción → Se crea Membresia (estado: Pendiente)
 2. Backend genera preferencia en MercadoPago (mock en dev)
 3. Tutor paga en MercadoPago
@@ -224,6 +243,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 **Script:** `test-clases-simple.sh`
 
 **Funcionalidades Probadas:**
+
 - ✅ Listar rutas curriculares (6 rutas seeded)
 - ✅ Programar clase (Admin/Tutor)
 - ✅ Listar clases disponibles (filtradas por membresía del tutor)
@@ -235,6 +255,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 - ✅ Registrar asistencia (Docente)
 
 **Endpoints Verificados:**
+
 - `GET /api/clases/metadata/rutas-curriculares` - Listar rutas
 - `POST /api/clases` - Programar clase (Admin)
 - `GET /api/clases` - Listar disponibles (Tutor)
@@ -246,6 +267,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 - `PATCH /api/clases/:id/cancelar` - Cancelar clase
 
 **Resultado del Test:**
+
 ```
 ✅ Login de tutor exitoso
 ✅ Estudiante creado
@@ -261,6 +283,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 ```
 
 **Rutas Curriculares Seeded:**
+
 1. Lógica y Razonamiento (Morado #8B5CF6)
 2. Álgebra (Azul #3B82F6)
 3. Geometría (Verde #10B981)
@@ -294,6 +317,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 14. **Verificar Cupos** → ✅ Cupos ocupados incrementados
 
 **Resultado:**
+
 ```
 ⚠️ INTEGRACIÓN COMPLETADA CON 2 ERRORES
 (Errores en Equipos - requiere revisión de endpoint)
@@ -308,6 +332,7 @@ Se han implementado y probado **7 Vertical Slices** completas del sistema Mateat
 ### TypeScript Strict Mode
 
 Algunos archivos usan `// @ts-nocheck` temporalmente:
+
 - `/apps/api/src/clases/clases.service.ts`
 - `/apps/api/src/clases/clases.controller.ts`
 
@@ -318,6 +343,7 @@ Algunos archivos usan `// @ts-nocheck` temporalmente:
 ### DTOs y Validación
 
 **Inconsistencias encontradas:**
+
 1. **Docentes DTO** - Update no acepta campos `biografia` y `especialidades`
 2. **Productos DTO** - Esperan snake_case (`fecha_inicio`) pero test envía camelCase (`fechaInicio`)
 
@@ -328,6 +354,7 @@ Algunos archivos usan `// @ts-nocheck` temporalmente:
 **Estado:** ✅ Completamente migrado
 
 **Modelos Implementados:**
+
 - User, Tutor, Estudiante, Equipo
 - Docente
 - Producto (enum TipoProducto)
@@ -335,34 +362,38 @@ Algunos archivos usan `// @ts-nocheck` temporalmente:
 - RutaCurricular, Clase, InscripcionClase, Asistencia
 
 **Migraciones Aplicadas:**
+
 - ✅ `20251012232334_create_pagos_membresias`
 - ✅ `20251013002021_create_clases_inscripciones_asistencia`
 
 ### Seeds Ejecutados
 
 ✅ **Productos** (`seed-productos.ts`):
+
 - 2 Suscripciones (Mensual, Anual)
 - 2 Cursos (Álgebra, Geometría)
 - 1 Recurso Digital (Guía de Ejercicios)
 
 ✅ **Rutas Curriculares** (`seed-rutas.ts`):
+
 - 6 Rutas matemáticas con colores distintivos
 
 ---
 
 ## 🚀 Archivos de Testing Disponibles
 
-| Script | Propósito | Tiempo Aprox. |
-|--------|-----------|---------------|
-| `test-estudiantes.sh` | Test Slice #2 | 2s |
-| `test-equipos.sh` | Test Slice #3 | 2s |
-| `test-docentes.sh` | Test Slice #4 | 3s |
-| `test-catalogo.sh` | Test Slice #5 | 3s |
-| `test-pagos-simple.sh` | Test Slice #6 | 4s |
-| `test-clases-simple.sh` | Test Slice #7 | 3s |
-| `test-integration-full.sh` | Test E2E completo | 5s |
+| Script                     | Propósito         | Tiempo Aprox. |
+| -------------------------- | ----------------- | ------------- |
+| `test-estudiantes.sh`      | Test Slice #2     | 2s            |
+| `test-equipos.sh`          | Test Slice #3     | 2s            |
+| `test-docentes.sh`         | Test Slice #4     | 3s            |
+| `test-catalogo.sh`         | Test Slice #5     | 3s            |
+| `test-pagos-simple.sh`     | Test Slice #6     | 4s            |
+| `test-clases-simple.sh`    | Test Slice #7     | 3s            |
+| `test-integration-full.sh` | Test E2E completo | 5s            |
 
 **Ejecutar todos:**
+
 ```bash
 chmod +x test-*.sh
 ./test-integration-full.sh
@@ -440,6 +471,7 @@ chmod +x test-*.sh
 **Estado del Proyecto:** ✅ **Slices 1-7 completamente implementados y funcionales**
 
 El sistema Mateatletas ha alcanzado un **95% de funcionalidad** en las 7 verticales principales:
+
 - Backend NestJS con arquitectura modular limpia
 - Base de datos PostgreSQL con migraciones versionadas
 - Autenticación y autorización robusta

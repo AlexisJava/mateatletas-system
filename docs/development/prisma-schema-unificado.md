@@ -364,26 +364,26 @@ model Alerta {
 
 ### Relaciones One-to-Many (1:N)
 
-| Modelo Padre | Modelo Hijo | Campo FK |
-|--------------|-------------|----------|
-| **Tutor** | Estudiante | tutorId |
-| **Tutor** | Membresia | tutorId |
-| **Equipo** | Estudiante | equipoId |
-| **Producto** | Membresia | productoId |
-| **Producto** | InscripcionCurso | productoId |
-| **Producto** | Clase | productoId |
-| **RutaCurricular** | Clase | rutaCurricularId |
-| **Docente** | Clase | docenteId |
-| **Docente** | Punto | docenteId |
-| **Clase** | Inscripcion | claseId |
-| **Clase** | Alerta | claseId |
-| **Clase** | Punto | claseId |
-| **Estudiante** | Inscripcion | estudianteId |
-| **Estudiante** | InscripcionCurso | estudianteId |
-| **Estudiante** | Punto | estudianteId |
-| **Estudiante** | EstudianteLogro | estudianteId |
-| **Estudiante** | Alerta | estudianteId |
-| **Logro** | EstudianteLogro | logroId |
+| Modelo Padre       | Modelo Hijo      | Campo FK         |
+| ------------------ | ---------------- | ---------------- |
+| **Tutor**          | Estudiante       | tutorId          |
+| **Tutor**          | Membresia        | tutorId          |
+| **Equipo**         | Estudiante       | equipoId         |
+| **Producto**       | Membresia        | productoId       |
+| **Producto**       | InscripcionCurso | productoId       |
+| **Producto**       | Clase            | productoId       |
+| **RutaCurricular** | Clase            | rutaCurricularId |
+| **Docente**        | Clase            | docenteId        |
+| **Docente**        | Punto            | docenteId        |
+| **Clase**          | Inscripcion      | claseId          |
+| **Clase**          | Alerta           | claseId          |
+| **Clase**          | Punto            | claseId          |
+| **Estudiante**     | Inscripcion      | estudianteId     |
+| **Estudiante**     | InscripcionCurso | estudianteId     |
+| **Estudiante**     | Punto            | estudianteId     |
+| **Estudiante**     | EstudianteLogro  | estudianteId     |
+| **Estudiante**     | Alerta           | estudianteId     |
+| **Logro**          | EstudianteLogro  | logroId          |
 
 ### Relaciones Many-to-Many (M:N)
 
@@ -524,6 +524,7 @@ Orden sugerido para crear migraciones (evitar dependencias rotas):
 16. **Alerta** (depende de Estudiante y Clase)
 
 Comando para crear migración única con todo:
+
 ```bash
 npx prisma migrate dev --name initial_setup
 ```
@@ -533,6 +534,7 @@ npx prisma migrate dev --name initial_setup
 ## Notas de Implementación
 
 ### Passwords
+
 Todos los campos `password` deben hashearse con **bcrypt** (salt rounds: 10) antes de guardar en DB.
 
 ```typescript
@@ -542,15 +544,19 @@ const hashedPassword = await bcrypt.hash(plainPassword, 10);
 ```
 
 ### Decimales
+
 El campo `Producto.precio` usa `Decimal` para evitar errores de punto flotante en cálculos monetarios.
 
 ### Timestamps
+
 Todos los modelos principales tienen `creadoEn` y `actualizadoEn` para auditoría.
 
 ### Soft Deletes
+
 Actualmente no implementado. Si se necesita, agregar campo `deletedAt DateTime?` y filtrar en queries.
 
 ### Email Únicos Globales
+
 Los emails son únicos **por tabla**, no globalmente. Esto permite que un Tutor y un Docente tengan el mismo email (aunque no es recomendado en producción).
 
 ---

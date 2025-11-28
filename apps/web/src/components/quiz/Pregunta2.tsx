@@ -22,12 +22,12 @@ export default function Pregunta2({ respuestas, setRespuestas }: Pregunta2Props)
     const yaSeleccionado = actividadesActuales.includes(actividad);
 
     const nuevasActividades = yaSeleccionado
-      ? actividadesActuales.filter(a => a !== actividad)
+      ? actividadesActuales.filter((a) => a !== actividad)
       : [...actividadesActuales, actividad];
 
     setRespuestas({
       ...respuestas,
-      actividades_tiempo_libre: nuevasActividades
+      actividades_tiempo_libre: nuevasActividades,
     });
   };
 
@@ -57,9 +57,7 @@ export default function Pregunta2({ respuestas, setRespuestas }: Pregunta2Props)
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
                 ¿Cómo reacciona cuando enfrenta un problema difícil?
               </h2>
-              <p className="text-slate-400 text-lg">
-                Seleccioná la opción que más se acerque
-              </p>
+              <p className="text-slate-400 text-lg">Seleccioná la opción que más se acerque</p>
             </div>
 
             <div className="grid gap-4 max-w-4xl mx-auto w-full">
@@ -72,7 +70,7 @@ export default function Pregunta2({ respuestas, setRespuestas }: Pregunta2Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        personalidad_problema: opcion.value as any
+                        personalidad_problema: opcion.value as any,
                       });
                       // Auto-avanzar después de 300ms
                       setTimeout(() => handlePersonalidadNext(), 300);
@@ -80,9 +78,10 @@ export default function Pregunta2({ respuestas, setRespuestas }: Pregunta2Props)
                     className={`
                       px-8 py-6 rounded-2xl font-semibold text-left transition-all duration-200
                       border-2 flex items-center gap-4
-                      ${isSelected
-                        ? 'bg-gradient-to-r from-cyan-500/30 to-purple-500/30 border-cyan-400 scale-[1.02]'
-                        : 'bg-slate-800/50 border-slate-700 hover:border-slate-600 hover:bg-slate-800'
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-cyan-500/30 to-purple-500/30 border-cyan-400 scale-[1.02]'
+                          : 'bg-slate-800/50 border-slate-700 hover:border-slate-600 hover:bg-slate-800'
                       }
                     `}
                     whileHover={{ scale: 1.01 }}
@@ -128,9 +127,10 @@ export default function Pregunta2({ respuestas, setRespuestas }: Pregunta2Props)
                     className={`
                       px-4 py-6 rounded-xl font-semibold text-center transition-all
                       border-2 flex flex-col items-center gap-2
-                      ${isSelected
-                        ? 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border-emerald-400 shadow-lg'
-                        : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border-emerald-400 shadow-lg'
+                          : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
                       }
                     `}
                     whileHover={{ scale: 1.05 }}
@@ -152,11 +152,12 @@ export default function Pregunta2({ respuestas, setRespuestas }: Pregunta2Props)
               >
                 ← Volver
               </button>
-              {respuestas.actividades_tiempo_libre && respuestas.actividades_tiempo_libre.length > 0 && (
-                <div className="text-slate-400 text-sm">
-                  {respuestas.actividades_tiempo_libre.length} seleccionadas
-                </div>
-              )}
+              {respuestas.actividades_tiempo_libre &&
+                respuestas.actividades_tiempo_libre.length > 0 && (
+                  <div className="text-slate-400 text-sm">
+                    {respuestas.actividades_tiempo_libre.length} seleccionadas
+                  </div>
+                )}
             </div>
           </motion.div>
         )}

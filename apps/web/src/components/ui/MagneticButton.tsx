@@ -10,11 +10,7 @@ interface MagneticButtonProps {
   href?: string;
 }
 
-export function MagneticButton({
-  children,
-  className = '',
-  href,
-}: MagneticButtonProps) {
+export function MagneticButton({ children, className = '', href }: MagneticButtonProps) {
   const ref = useRef<HTMLButtonElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);

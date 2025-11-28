@@ -26,14 +26,10 @@ export const gamificacionKeys = {
   all: ['gamificacion'] as const,
   dashboard: (estudianteId: string) =>
     [...gamificacionKeys.all, 'dashboard', estudianteId] as const,
-  logros: (estudianteId: string) =>
-    [...gamificacionKeys.all, 'logros', estudianteId] as const,
-  puntos: (estudianteId: string) =>
-    [...gamificacionKeys.all, 'puntos', estudianteId] as const,
-  ranking: (estudianteId: string) =>
-    [...gamificacionKeys.all, 'ranking', estudianteId] as const,
-  progreso: (estudianteId: string) =>
-    [...gamificacionKeys.all, 'progreso', estudianteId] as const,
+  logros: (estudianteId: string) => [...gamificacionKeys.all, 'logros', estudianteId] as const,
+  puntos: (estudianteId: string) => [...gamificacionKeys.all, 'puntos', estudianteId] as const,
+  ranking: (estudianteId: string) => [...gamificacionKeys.all, 'ranking', estudianteId] as const,
+  progreso: (estudianteId: string) => [...gamificacionKeys.all, 'progreso', estudianteId] as const,
 };
 
 // ============================================================================
@@ -49,10 +45,7 @@ export const gamificacionKeys = {
  * @example
  * const { data: dashboard } = useDashboardGamificacion('123');
  */
-export function useDashboardGamificacion(
-  estudianteId: string,
-  options?: { enabled?: boolean }
-) {
+export function useDashboardGamificacion(estudianteId: string, options?: { enabled?: boolean }) {
   return useQuery<DashboardData, Error>({
     queryKey: gamificacionKeys.dashboard(estudianteId),
     queryFn: () => gamificacionApi.getDashboard(estudianteId),
@@ -70,10 +63,7 @@ export function useDashboardGamificacion(
  * @example
  * const { data: logros } = useLogros('123');
  */
-export function useLogros(
-  estudianteId: string,
-  options?: { enabled?: boolean }
-) {
+export function useLogros(estudianteId: string, options?: { enabled?: boolean }) {
   return useQuery<Logro[], Error>({
     queryKey: gamificacionKeys.logros(estudianteId),
     queryFn: () => gamificacionApi.getLogros(estudianteId),
@@ -93,7 +83,7 @@ export function useLogros(
  */
 export function usePuntos(
   estudianteId: string,
-  options?: { enabled?: boolean; refetchInterval?: number | false }
+  options?: { enabled?: boolean; refetchInterval?: number | false },
 ) {
   return useQuery<Puntos, Error>({
     queryKey: gamificacionKeys.puntos(estudianteId),
@@ -116,7 +106,7 @@ export function usePuntos(
  */
 export function useRanking(
   estudianteId: string,
-  options?: { enabled?: boolean; refetchInterval?: number | false }
+  options?: { enabled?: boolean; refetchInterval?: number | false },
 ) {
   return useQuery<Ranking, Error>({
     queryKey: gamificacionKeys.ranking(estudianteId),
@@ -136,10 +126,7 @@ export function useRanking(
  * @example
  * const { data: progreso } = useProgreso('123');
  */
-export function useProgreso(
-  estudianteId: string,
-  options?: { enabled?: boolean }
-) {
+export function useProgreso(estudianteId: string, options?: { enabled?: boolean }) {
   return useQuery<Progreso[], Error>({
     queryKey: gamificacionKeys.progreso(estudianteId),
     queryFn: () => gamificacionApi.getProgreso(estudianteId),
@@ -165,8 +152,7 @@ export function useDesbloquearLogro(estudianteId: string) {
   const queryClient = useQueryClient();
 
   return useMutation<DesbloquearLogroResponse, Error, string>({
-    mutationFn: (logroId: string) =>
-      gamificacionApi.desbloquearLogro(logroId),
+    mutationFn: (logroId: string) => gamificacionApi.desbloquearLogro(logroId),
 
     onSuccess: (logroDesbloqueado) => {
       // Invalidar queries relacionadas para refetch
@@ -188,10 +174,8 @@ export function useDesbloquearLogro(estudianteId: string) {
         gamificacionKeys.logros(estudianteId),
         (old) =>
           old?.map((logro) =>
-            logro.id === logroDesbloqueado.logro
-              ? { ...logro, desbloqueado: true }
-              : logro
-          ) ?? []
+            logro.id === logroDesbloqueado.logro ? { ...logro, desbloqueado: true } : logro,
+          ) ?? [],
       );
     },
   });
@@ -223,7 +207,7 @@ export function useGamificacionCompleto(
   options?: {
     enabled?: boolean;
     pollingRanking?: boolean; // Si true, polling cada 30s en ranking
-  }
+  },
 ) {
   const {
     data: dashboard,
@@ -231,28 +215,22 @@ export function useGamificacionCompleto(
     error: errorDashboard,
   } = useDashboardGamificacion(estudianteId, { enabled: options?.enabled });
 
-  const { data: logros = [], isLoading: isLoadingLogros } = useLogros(
-    estudianteId,
-    { enabled: options?.enabled }
-  );
+  const { data: logros = [], isLoading: isLoadingLogros } = useLogros(estudianteId, {
+    enabled: options?.enabled,
+  });
 
-  const { data: puntos, isLoading: isLoadingPuntos } = usePuntos(
-    estudianteId,
-    { enabled: options?.enabled }
-  );
+  const { data: puntos, isLoading: isLoadingPuntos } = usePuntos(estudianteId, {
+    enabled: options?.enabled,
+  });
 
-  const { data: ranking, isLoading: isLoadingRanking } = useRanking(
-    estudianteId,
-    {
-      enabled: options?.enabled,
-      refetchInterval: options?.pollingRanking ? 30000 : false,
-    }
-  );
+  const { data: ranking, isLoading: isLoadingRanking } = useRanking(estudianteId, {
+    enabled: options?.enabled,
+    refetchInterval: options?.pollingRanking ? 30000 : false,
+  });
 
-  const { data: progreso = [], isLoading: isLoadingProgreso } = useProgreso(
-    estudianteId,
-    { enabled: options?.enabled }
-  );
+  const { data: progreso = [], isLoading: isLoadingProgreso } = useProgreso(estudianteId, {
+    enabled: options?.enabled,
+  });
 
   const desbloquear = useDesbloquearLogro(estudianteId);
 

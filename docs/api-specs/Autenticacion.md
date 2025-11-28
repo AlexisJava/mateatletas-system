@@ -11,6 +11,7 @@ Prompt de desarrollo
 Implement the **Auth** vertical slice. Use NestJS (with Passport JWT) and Next.js 15 conventions. Use Spanish for domain naming (e.g., `Tutor`, `Estudiante`). Include:
 
 **Backend (NestJS)**:
+
 - Create an `AuthModule` with `AuthController` and `AuthService`. The module should import the `UsuariosModule` to use user services.
 - **AuthController**:
   - `POST /api/auth/register`: Register a new Tutor account. Accept tutor data (nombre, apellido, email, contraseña, etc.), create a Tutor via UsuariosModule service, and return a JWT.
@@ -26,10 +27,12 @@ Implement the **Auth** vertical slice. Use NestJS (with Passport JWT) and Next.j
 - Hash passwords with bcrypt on save, and compare on login.
 
 **Prisma**:
+
 - No new models; reuse `Tutor`, `Estudiante`, `Docente` models from Usuarios slice for login. Ensure unique email per table.
 - In JWT payload, include role so we know which table to query for user.
 
 **Frontend (Next.js 15)**:
+
 - Create pages for authentication:
   - `/login`: Form for email & password. On submit, call POST `/api/auth/login`.
   - `/register`: Form for tutor registration (nombre, apellido, email, contraseña, teléfono, etc.). On submit, call POST `/api/auth/register`.
@@ -38,11 +41,13 @@ Implement the **Auth** vertical slice. Use NestJS (with Passport JWT) and Next.j
 - Protect client-side routes based on role (e.g., a route group or conditional rendering if user role matches).
 
 **Zustand Store**:
+
 - Implement an auth store to keep `token` and `user` profile (id, nombre, rol). Provide actions to `setSession(token, user)` on login and `clearSession()` on logout or 401.
 - After login API call, decode or use response user info to set the logged-in user and token in the store.
 - Persist token in memory (or localStorage if needed for refresh across tabs).
 
 **Types**:
+
 - Define TypeScript interfaces for Auth:
   - `LoginDto` / `RegisterDto` (frontend) matching backend DTOs.
   - `AuthResponse` containing `accessToken: string` and `user: { id: number; role: 'Tutor'|'Docente'|'Estudiante'; nombre: string; ... }`.
@@ -50,6 +55,7 @@ Implement the **Auth** vertical slice. Use NestJS (with Passport JWT) and Next.j
 - If using class-validator on backend DTOs, mirror the shape in front-end types.
 
 **Orden de implementación**:
+
 1. **Backend**: Crear AuthModule, controller, service. Configurar JWT strategy y Guards en core/security. Probar registro de tutor y login obteniendo token.
 2. **Frontend**: Implementar páginas `/login` y `/register` con formularios. Configurar Axios interceptors y Zustand auth store para manejar la sesión.
 3. Asegurar que las rutas protegidas (dashboard, etc.) solo sean accesibles si el usuario está logueado (puede hacerse en componentes o en server-side rendering con token).
@@ -170,4 +176,3 @@ Orden sugerido de implementación
     Protección de rutas: Implementar redirección en frontend según estado auth (p.ej., si no autenticado y navega a ruta protegida, llevar a /login). Opcional: implementar guard lado servidor en Next (middleware) para rutas /tutor, /docente, etc.
 
     Una vez autenticación funcionando, continuar con siguientes slices (Usuarios, Pagos, etc.), utilizando el token en llamadas API.
-

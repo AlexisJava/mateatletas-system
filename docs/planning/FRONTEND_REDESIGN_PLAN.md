@@ -11,12 +11,14 @@
 ### Por Qué Ahora
 
 ✅ **Momento perfecto después de:**
+
 - Sprint 6: React Query migration (98% menos requests, 0ms UI)
 - Sprint 7: Cleanup completo (0 errores TypeScript)
 - Backend optimizado (0 N+1 queries)
 - Code quality excelente
 
 ✅ **Bases sólidas:**
+
 - Design system completo creado
 - 5 componentes reutilizables listos
 - 5 temas definidos (estudiante, tutor, docente, admin, landing)
@@ -56,13 +58,13 @@
 
 ### Priorización
 
-| Portal | Páginas | Complejidad | Prioridad | Tiempo Est. |
-|--------|---------|-------------|-----------|-------------|
-| **Estudiante** | ~8 | Media | 🔴 Alta | 4h |
-| **Tutor** | ~6 | Baja | 🟠 Media | 2h |
-| **Docente** | ~10 | Alta | 🟡 Media | 5h |
-| **Admin** | ~8 | Media | 🟢 Baja | 3h |
-| **TOTAL** | ~32 | - | - | **14h** |
+| Portal         | Páginas | Complejidad | Prioridad | Tiempo Est. |
+| -------------- | ------- | ----------- | --------- | ----------- |
+| **Estudiante** | ~8      | Media       | 🔴 Alta   | 4h          |
+| **Tutor**      | ~6      | Baja        | 🟠 Media  | 2h          |
+| **Docente**    | ~10     | Alta        | 🟡 Media  | 5h          |
+| **Admin**      | ~8      | Media       | 🟢 Baja   | 3h          |
+| **TOTAL**      | ~32     | -           | -         | **14h**     |
 
 ---
 
@@ -73,11 +75,13 @@
 #### 1. Dashboard (`/estudiante/dashboard/page.tsx`)
 
 **Antes:**
+
 - Cards sin glass-morphism
 - Colores inconsistentes
 - Sin animaciones
 
 **Después:**
+
 ```tsx
 import { PageLayout, StatCard, GradientCard, ProgressBar } from '@/design-system/components';
 import { Trophy, Target, Zap, Book } from 'lucide-react';
@@ -127,10 +131,11 @@ import { Grid2 as Grid } from '@mui/material';
       </GradientCard>
     </Grid>
   </Grid>
-</PageLayout>
+</PageLayout>;
 ```
 
 **Mejoras:**
+
 - ✅ Glass-morphism en todas las cards
 - ✅ StatCards animados con CountUp
 - ✅ ProgressBar animada con gradiente
@@ -142,6 +147,7 @@ import { Grid2 as Grid } from '@mui/material';
 #### 2. Cursos (`/estudiante/cursos/page.tsx`)
 
 **Rediseño:**
+
 - GradientCard para cada curso
 - Hover effects con scale (Framer Motion)
 - ProgressBar para progreso del curso
@@ -150,6 +156,7 @@ import { Grid2 as Grid } from '@mui/material';
 #### 3. Logros (`/estudiante/logros/page.tsx`)
 
 **Rediseño:**
+
 - StatCard para stats generales
 - GradientCard variant="solid" para logros desbloqueados
 - GradientCard variant="glass" opacidad baja para bloqueados
@@ -158,6 +165,7 @@ import { Grid2 as Grid } from '@mui/material';
 #### 4. Ranking (`/estudiante/ranking/page.tsx`)
 
 **Rediseño:**
+
 - Top 3 con GradientCard variant="solid" (oro, plata, bronce)
 - Lista con GradientCard variant="glass"
 - Badges animados con Framer Motion
@@ -172,6 +180,7 @@ import { Grid2 as Grid } from '@mui/material';
 #### 1. Dashboard (`/dashboard/page.tsx` o `/tutor/dashboard`)
 
 **Rediseño:**
+
 ```tsx
 <PageLayout
   title="Panel de Control"
@@ -194,7 +203,7 @@ import { Grid2 as Grid } from '@mui/material';
     <Grid size={{ xs: 12 }}>
       <GradientCard>
         <h3 className="text-2xl font-bold mb-4">Mis Hijos</h3>
-        {estudiantes.map(est => (
+        {estudiantes.map((est) => (
           <EstudianteCard key={est.id} estudiante={est} />
         ))}
       </GradientCard>
@@ -206,6 +215,7 @@ import { Grid2 as Grid } from '@mui/material';
 #### 2. Estudiantes (`/estudiantes/page.tsx`)
 
 **Rediseño:**
+
 - Grid de cards (xs: 12, md: 6, lg: 4)
 - GradientCard por estudiante con foto
 - GradientButton para agregar nuevo
@@ -214,6 +224,7 @@ import { Grid2 as Grid } from '@mui/material';
 #### 3. Clases (`/clases/page.tsx`)
 
 **Rediseño:**
+
 - Filtros con GradientButton variant="outline"
 - Lista de clases con GradientCard variant="glass"
 - Calendar view con tema tutor (blue)
@@ -227,11 +238,9 @@ import { Grid2 as Grid } from '@mui/material';
 #### 1. Dashboard (`/docente/dashboard/page.tsx`)
 
 **Rediseño:**
+
 ```tsx
-<PageLayout
-  title="Dashboard Docente"
-  subtitle="Gestiona tus clases y estudiantes"
->
+<PageLayout title="Dashboard Docente" subtitle="Gestiona tus clases y estudiantes">
   <Grid container spacing={3}>
     {/* Stats */}
     <Grid size={{ xs: 6, md: 3 }}>
@@ -273,6 +282,7 @@ import { Grid2 as Grid } from '@mui/material';
 #### 2. Mis Clases (`/docente/mis-clases/page.tsx`)
 
 **Rediseño:**
+
 - Tabs con GradientButton variant="outline"
 - Cards con GradientCard variant="glass"
 - Asistencia con ProgressBar
@@ -281,6 +291,7 @@ import { Grid2 as Grid } from '@mui/material';
 #### 3. Planificador (`/docente/planificador/page.tsx`)
 
 **Rediseño:**
+
 - Drag & drop con GradientCard
 - Timeline con gradientes temáticos
 - Modals para crear clases
@@ -294,6 +305,7 @@ import { Grid2 as Grid } from '@mui/material';
 #### 1. Dashboard (`/admin/page.tsx`)
 
 **Rediseño:**
+
 - StatCards para métricas clave
 - GradientCard con charts (Recharts)
 - Tema admin (red-orange-amber)
@@ -301,6 +313,7 @@ import { Grid2 as Grid } from '@mui/material';
 #### 2. Gestión de Usuarios/Productos/etc
 
 **Rediseño:**
+
 - Tables con GradientCard background
 - GradientButton para acciones
 - Modals con tema admin
@@ -312,6 +325,7 @@ import { Grid2 as Grid } from '@mui/material';
 ### Fase 1: Setup (1h)
 
 1. **Verificar imports del design system**
+
    ```bash
    # Verificar que los componentes funcionen
    grep -r "design-system" apps/web/src
@@ -325,6 +339,7 @@ import { Grid2 as Grid } from '@mui/material';
 ### Fase 2: Portal por Portal (14h)
 
 **Orden sugerido:**
+
 1. Estudiante (4h) - Más visual, mayor impacto
 2. Tutor (2h) - Más simple, validar patrón
 3. Docente (5h) - Más complejo, consolidar
@@ -378,6 +393,7 @@ import { Grid2 as Grid } from '@mui/material';
 ### Dashboard Estudiante
 
 **Antes (actual):**
+
 ```tsx
 // ~200 líneas de HTML/CSS custom
 <div className="min-h-screen bg-gradient-to-br from-slate-900...">
@@ -394,6 +410,7 @@ import { Grid2 as Grid } from '@mui/material';
 ```
 
 **Después (con design system):**
+
 ```tsx
 // ~80 líneas con componentes
 <PageLayout title="Mi Dashboard" subtitle="¡Sigue aprendiendo!">
@@ -407,6 +424,7 @@ import { Grid2 as Grid } from '@mui/material';
 ```
 
 **Mejoras:**
+
 - 60% menos código
 - Animaciones automáticas
 - Responsive automático
@@ -436,15 +454,15 @@ import { Grid2 as Grid } from '@mui/material';
 
 ## ⏱️ Estimación Total
 
-| Fase | Tiempo | Descripción |
-|------|--------|-------------|
-| Setup | 1h | Preparación y componentes auxiliares |
-| Estudiante | 4h | 8 páginas, alta prioridad |
-| Tutor | 2h | 6 páginas, media complejidad |
-| Docente | 5h | 10 páginas, alta complejidad |
-| Admin | 3h | 8 páginas, baja prioridad |
-| Testing | 2h | Responsividad + animaciones |
-| **TOTAL** | **17h** | ~2 días de trabajo |
+| Fase       | Tiempo  | Descripción                          |
+| ---------- | ------- | ------------------------------------ |
+| Setup      | 1h      | Preparación y componentes auxiliares |
+| Estudiante | 4h      | 8 páginas, alta prioridad            |
+| Tutor      | 2h      | 6 páginas, media complejidad         |
+| Docente    | 5h      | 10 páginas, alta complejidad         |
+| Admin      | 3h      | 8 páginas, baja prioridad            |
+| Testing    | 2h      | Responsividad + animaciones          |
+| **TOTAL**  | **17h** | ~2 días de trabajo                   |
 
 ---
 

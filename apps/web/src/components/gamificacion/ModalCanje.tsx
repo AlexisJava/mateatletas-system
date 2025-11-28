@@ -82,9 +82,7 @@ export function ModalCanje({
                 <div className="flex items-center gap-4">
                   <div className="text-6xl">{getCategoriaEmoji(curso.categoria)}</div>
                   <div>
-                    <h2 className="text-white font-black text-3xl mb-1">
-                      {curso.titulo}
-                    </h2>
+                    <h2 className="text-white font-black text-3xl mb-1">{curso.titulo}</h2>
                     <p className="text-gray-400 text-sm">
                       {curso.categoria.charAt(0).toUpperCase() + curso.categoria.slice(1)} •{' '}
                       {curso.duracion_clases} clases
@@ -121,7 +119,8 @@ export function ModalCanje({
                     </p>
                     <p className={`text-sm ${cumpleNivel ? 'text-green-400' : 'text-red-400'}`}>
                       Tu nivel actual: {nivelActual}
-                      {!cumpleNivel && ` (Te faltan ${curso.nivel_requerido - nivelActual} niveles)`}
+                      {!cumpleNivel &&
+                        ` (Te faltan ${curso.nivel_requerido - nivelActual} niveles)`}
                     </p>
                   </div>
                 </div>
@@ -151,9 +150,7 @@ export function ModalCanje({
               <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl p-6 mb-6 border border-purple-500/30">
                 <div className="flex items-center gap-2 mb-4">
                   <Sparkles className="w-5 h-5 text-purple-400" />
-                  <h3 className="text-white font-bold text-lg">
-                    Sistema de Pago Flexible
-                  </h3>
+                  <h3 className="text-white font-bold text-lg">Sistema de Pago Flexible</h3>
                 </div>
 
                 <p className="text-gray-300 text-sm mb-4">
@@ -180,8 +177,8 @@ export function ModalCanje({
                     </div>
                     <div>
                       <p className="text-white font-semibold text-sm">
-                        Mitad y mitad ({(curso.precio_monedas / 2).toLocaleString('es-AR')}{' '}
-                        monedas + ${curso.precio_usd / 2} USD)
+                        Mitad y mitad ({(curso.precio_monedas / 2).toLocaleString('es-AR')} monedas
+                        + ${curso.precio_usd / 2} USD)
                       </p>
                       <p className="text-gray-400 text-xs">
                         Gastas el 50% en monedas, tu padre/madre paga el 50% en USD
@@ -206,9 +203,9 @@ export function ModalCanje({
                   <div className="flex items-start gap-2">
                     <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                     <p className="text-blue-300 text-xs">
-                      <strong>Importante:</strong> Al confirmar, enviarás una solicitud de canje
-                      a tu tutor/padre. Ellos decidirán la opción de pago y aprobarán o
-                      rechazarán la solicitud. ¡No gastas monedas hasta que sea aprobado!
+                      <strong>Importante:</strong> Al confirmar, enviarás una solicitud de canje a
+                      tu tutor/padre. Ellos decidirán la opción de pago y aprobarán o rechazarán la
+                      solicitud. ¡No gastas monedas hasta que sea aprobado!
                     </p>
                   </div>
                 </div>

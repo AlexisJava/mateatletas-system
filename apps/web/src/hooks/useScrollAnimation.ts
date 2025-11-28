@@ -13,7 +13,7 @@ export function useScrollAnimation(threshold = 0.1) {
           setIsVisible(true);
         }
       },
-      { threshold }
+      { threshold },
     );
 
     const currentElement = elementRef.current;

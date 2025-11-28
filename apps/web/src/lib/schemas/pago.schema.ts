@@ -5,11 +5,7 @@ import { membresiaSchema } from './membresia.schema';
  * Schema de estado de inscripción a curso
  * Coincide con EstadoInscripcion enum en types/pago.types.ts
  */
-export const estadoInscripcionSchema = z.enum([
-  'PreInscrito',
-  'Activo',
-  'Finalizado',
-]);
+export const estadoInscripcionSchema = z.enum(['PreInscrito', 'Activo', 'Finalizado']);
 
 /**
  * Schema de Producto simplificado (para relaciones)

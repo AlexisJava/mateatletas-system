@@ -52,7 +52,9 @@ export interface ProgresoLogroV2 {
     {
       total: number;
       desbloqueados: number;
-      logros?: Array<Logro & { desbloqueado: boolean; fecha_desbloqueo: string | null; secreto?: boolean }>;
+      logros?: Array<
+        Logro & { desbloqueado: boolean; fecha_desbloqueo: string | null; secreto?: boolean }
+      >;
     }
   >;
 }
@@ -81,7 +83,7 @@ export const gamificacionApi = {
    * Obtener dashboard completo del estudiante
    * NOTA: Este endpoint aún no está implementado en el backend
    * Retorna datos mock por ahora
-  */
+   */
   getDashboard: async (estudianteId: string): Promise<DashboardData> => {
     try {
       const response = await apiClient.get(`/gamificacion/dashboard/${estudianteId}`);
@@ -96,7 +98,7 @@ export const gamificacionApi = {
             nombre: 'Estudiante',
             apellido: 'Test',
             avatar_gradient: 0,
-            equipo: { id: '', nombre: 'Sin equipo', color: '#cccccc' }
+            equipo: { id: '', nombre: 'Sin equipo', color: '#cccccc' },
           },
           stats: { puntosToales: 0, clasesAsistidas: 0, clasesTotales: 0, racha: 0 },
           nivel: {
@@ -127,7 +129,9 @@ export const gamificacionApi = {
    */
   getLogros: async (estudianteId: string): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get<Logro[]>(`/gamificacion/logros/estudiante/${estudianteId}`);
+      const response = await apiClient.get<Logro[]>(
+        `/gamificacion/logros/estudiante/${estudianteId}`,
+      );
       const validados = logrosListSchema.parse(response);
       return normalizarLogros(validados);
     } catch (error) {
@@ -251,7 +255,9 @@ export const gamificacionApi = {
    */
   obtenerMisLogrosV2: async (estudianteId: string): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get<Logro[]>(`/gamificacion/logros/estudiante/${estudianteId}`);
+      const response = await apiClient.get<Logro[]>(
+        `/gamificacion/logros/estudiante/${estudianteId}`,
+      );
       const validados = logrosListSchema.parse(response);
       return normalizarLogros(validados);
     } catch (error) {
@@ -265,7 +271,9 @@ export const gamificacionApi = {
    */
   obtenerLogrosNoVistos: async (estudianteId: string): Promise<Logro[]> => {
     try {
-      const response = await apiClient.get<Logro[]>(`/gamificacion/logros/estudiante/${estudianteId}/no-vistos`);
+      const response = await apiClient.get<Logro[]>(
+        `/gamificacion/logros/estudiante/${estudianteId}/no-vistos`,
+      );
       const validados = logrosListSchema.parse(response);
       return normalizarLogros(validados);
     } catch (error) {
@@ -308,18 +316,17 @@ export const gamificacionApi = {
 
       const data = response as ProgresoLogroV2;
 
-      const porCategoria = Object.entries(data.categorias ?? {}).reduce<ProgresoLogros['por_categoria']>(
-        (acc, [categoria, valores]) => {
-          const logrosNormalizados = normalizarLogros(valores.logros ?? []);
-          acc[categoria] = {
-            total: valores.total ?? 0,
-            desbloqueados: valores.desbloqueados ?? 0,
-            logros: mapLogrosToEstudiante(estudianteId, logrosNormalizados),
-          };
-          return acc;
-        },
-        {},
-      );
+      const porCategoria = Object.entries(data.categorias ?? {}).reduce<
+        ProgresoLogros['por_categoria']
+      >((acc, [categoria, valores]) => {
+        const logrosNormalizados = normalizarLogros(valores.logros ?? []);
+        acc[categoria] = {
+          total: valores.total ?? 0,
+          desbloqueados: valores.desbloqueados ?? 0,
+          logros: mapLogrosToEstudiante(estudianteId, logrosNormalizados),
+        };
+        return acc;
+      }, {});
 
       const total = data.total ?? 0;
       const desbloqueados = data.desbloqueados ?? 0;
@@ -341,7 +348,9 @@ export const gamificacionApi = {
   /**
    * Obtener recursos del estudiante (XP + Monedas + Nivel)
    */
-  obtenerRecursos: async (estudianteId: string): Promise<RecursosEstudiante & { racha: RachaEstudiante }> => {
+  obtenerRecursos: async (
+    estudianteId: string,
+  ): Promise<RecursosEstudiante & { racha: RachaEstudiante }> => {
     try {
       const response = await apiClient.get<RecursosEstudiante & { racha: RachaEstudiante }>(
         `/gamificacion/recursos/${estudianteId}`,
@@ -375,7 +384,9 @@ export const gamificacionApi = {
    */
   obtenerRacha: async (estudianteId: string): Promise<RachaEstudiante> => {
     try {
-      const response = await apiClient.get<RachaEstudiante>(`/gamificacion/recursos/${estudianteId}/racha`);
+      const response = await apiClient.get<RachaEstudiante>(
+        `/gamificacion/recursos/${estudianteId}/racha`,
+      );
       // TODO: Crear schema Zod en contracts para validar esta respuesta
       return response;
     } catch (error) {
@@ -389,7 +400,9 @@ export const gamificacionApi = {
    */
   registrarActividad: async (estudianteId: string): Promise<RachaEstudiante> => {
     try {
-      const response = await apiClient.post<RachaEstudiante>(`/gamificacion/recursos/${estudianteId}/racha`);
+      const response = await apiClient.post<RachaEstudiante>(
+        `/gamificacion/recursos/${estudianteId}/racha`,
+      );
       // TODO: Crear schema Zod en contracts para validar esta respuesta
       return response;
     } catch (error) {

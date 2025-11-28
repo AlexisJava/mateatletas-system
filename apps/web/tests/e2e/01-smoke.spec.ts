@@ -38,9 +38,8 @@ test.describe('Smoke Tests - Aplicación Básica', () => {
     await page.goto('/');
 
     // Filtrar errores conocidos/ignorables
-    const criticalErrors = errors.filter(error =>
-      !error.includes('favicon') &&
-      !error.includes('manifest')
+    const criticalErrors = errors.filter(
+      (error) => !error.includes('favicon') && !error.includes('manifest'),
     );
 
     expect(criticalErrors.length).toBe(0);

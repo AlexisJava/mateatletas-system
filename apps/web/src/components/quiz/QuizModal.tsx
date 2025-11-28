@@ -73,18 +73,20 @@ export default function QuizModal({ isOpen, onClose }: QuizModalProps) {
       }
 
       // 3. Guardar en sessionStorage para la página de resultados
-      sessionStorage.setItem('quiz_resultado', JSON.stringify({
-        respuestas,
-        recomendacion,
-        timestamp: new Date().toISOString()
-      }));
+      sessionStorage.setItem(
+        'quiz_resultado',
+        JSON.stringify({
+          respuestas,
+          recomendacion,
+          timestamp: new Date().toISOString(),
+        }),
+      );
 
       // 4. Cerrar modal
       onClose();
 
       // 5. Redirigir a página de resultados
       router.push('/cursos-online/asincronicos/resultado');
-
     } catch (error) {
       console.error('Error al completar quiz:', error);
       alert('Hubo un error al procesar el quiz. Por favor intentá de nuevo.');
@@ -122,15 +124,10 @@ export default function QuizModal({ isOpen, onClose }: QuizModalProps) {
               {/* Header con botón cerrar */}
               <div className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 p-4 flex items-center justify-between">
                 <div>
-                  <h2
-                    id="quiz-modal-title"
-                    className="text-xl font-bold text-white"
-                  >
+                  <h2 id="quiz-modal-title" className="text-xl font-bold text-white">
                     Descubrí la Ruta Perfecta
                   </h2>
-                  <p className="text-sm text-slate-400">
-                    Solo 5 preguntas • 2 minutos
-                  </p>
+                  <p className="text-sm text-slate-400">Solo 5 preguntas • 2 minutos</p>
                 </div>
 
                 {/* Botón Cerrar */}

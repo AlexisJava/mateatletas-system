@@ -9,6 +9,7 @@
 ## 📊 RESUMEN EJECUTIVO
 
 ### Estado Final
+
 - ✅ Frontend desplegado exitosamente en Vercel
 - ✅ Build compilado sin errores
 - ✅ 44 rutas generadas correctamente
@@ -16,6 +17,7 @@
 - ✅ Monorepo configurado correctamente
 
 ### URLs
+
 - **Producción:** `https://mateatletas-kir91kez1-alexis-figueroas-projects-d4fb75f1.vercel.app`
 - **Inspect:** `https://vercel.com/alexis-figueroas-projects-d4fb75f1/mateatletas-web/68GFCL1SHXddU7se2WUbgAiqyrTv`
 
@@ -26,6 +28,7 @@
 ### Error Original: Module not found
 
 **Error:**
+
 ```
 Error: Turbopack build failed with 64 errors:
 ./apps/web/src/lib/api/catalogo.api.ts:7:1
@@ -33,6 +36,7 @@ Module not found: Can't resolve '@mateatletas/contracts'
 ```
 
 **Causa Raíz:**
+
 - `vercel.json` configurado para instalar solo `apps/web`
 - No instalaba el workspace `packages/contracts`
 - Frontend depende de tipos compartidos en `@mateatletas/contracts`
@@ -56,6 +60,7 @@ Module not found: Can't resolve '@mateatletas/contracts'
 ```
 
 **Commits:**
+
 - `6960005` - fix(vercel): configurar build para monorepo con packages/contracts
 
 ---
@@ -163,6 +168,7 @@ vercel --prod --yes
 **Problema:** El sitio requiere autenticación SSO de Vercel
 
 **Solución:**
+
 1. Ve a Vercel Dashboard → Tu Proyecto
 2. Settings → Deployment Protection
 3. Desactiva "Vercel Authentication" para producción
@@ -239,23 +245,28 @@ Mateatletas-Ecosystem/
 ### Dependencias del Frontend
 
 **Framework:**
+
 - Next.js 15.5.4 (Turbopack)
 - React 19.1.0
 - TypeScript 5.3.3
 
 **UI:**
+
 - Material-UI (@mui/material)
 - Framer Motion
 - Lucide React (iconos)
 
 **Data Fetching:**
+
 - Axios
 - TanStack React Query
 
 **State Management:**
+
 - Zustand
 
 **Formularios y Validación:**
+
 - Zod
 - @mateatletas/contracts (schemas compartidos)
 
@@ -268,6 +279,7 @@ Mateatletas-Ecosystem/
 **Causa:** Deployment Protection habilitado
 
 **Solución:**
+
 1. Dashboard → Settings → Deployment Protection
 2. Desactivar para producción
 3. O usar bypass token: `?x-vercel-set-bypass-cookie=true&x-vercel-protection-bypass=TOKEN`
@@ -275,6 +287,7 @@ Mateatletas-Ecosystem/
 ### Si la API no responde
 
 **Verificar:**
+
 1. CORS configurado en backend (FRONTEND_URL)
 2. Variable `NEXT_PUBLIC_API_URL` correcta
 3. Railway backend está corriendo
@@ -283,6 +296,7 @@ Mateatletas-Ecosystem/
 ### Si el build falla con "Module not found"
 
 **Verificar:**
+
 1. `vercel.json` tiene `installCommand` correcto
 2. Todos los workspaces se instalan (`npm install --legacy-peer-deps`)
 3. `packages/contracts` se compila antes de `apps/web`
@@ -292,17 +306,20 @@ Mateatletas-Ecosystem/
 ## 📈 MÉTRICAS DE DEPLOYMENT
 
 ### Tiempos
+
 - **Install time:** ~30 segundos
 - **Build time:** ~2 minutos
 - **Deploy time:** ~10 segundos
 - **Total:** ~2.5 minutos
 
 ### Recursos
+
 - **Build RAM:** 8 GB
 - **Build CPU:** 2 cores
 - **Region:** Washington, D.C. (iad1)
 
 ### Archivos
+
 - **Deployment files:** 2,414
 - **Static files:** Páginas + assets
 - **Serverless functions:** 44 rutas
@@ -314,6 +331,7 @@ Mateatletas-Ecosystem/
 ### Estado Final: ✅ PRODUCCIÓN
 
 **Logros:**
+
 - ✅ Frontend desplegado en Vercel
 - ✅ Monorepo configurado correctamente
 - ✅ Build exitoso con Turbopack
@@ -321,18 +339,21 @@ Mateatletas-Ecosystem/
 - ✅ Variables de entorno configuradas
 
 **Completado:**
+
 - ✅ Generar URL pública de Railway (`mateatletas-system-production.up.railway.app`)
 - ✅ Actualizar `NEXT_PUBLIC_API_URL` en Vercel
 - ✅ Configurar `FRONTEND_URL` en Railway para CORS
 - ✅ Frontend y Backend comunicándose correctamente
 
 **Pendiente:**
+
 - ⚠️ Desactivar Deployment Protection en Vercel (requiere autenticación actualmente)
 - ⚠️ Opcional: Configurar dominio personalizado
 
 **Tiempo Total:** ~30 minutos
 
 **Método Aplicado:**
+
 - ✅ Diagnóstico del error (Module not found)
 - ✅ Solución limpia (actualizar vercel.json)
 - ✅ Verificación completa
@@ -352,5 +373,5 @@ Mateatletas-Ecosystem/
 
 **FIN DEL REPORTE**
 
-*Generado automáticamente - 2025-11-02*
-*Vercel Deployment: SUCCESSFUL ✅*
+_Generado automáticamente - 2025-11-02_
+_Vercel Deployment: SUCCESSFUL ✅_

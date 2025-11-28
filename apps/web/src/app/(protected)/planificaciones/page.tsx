@@ -4,10 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePlanificaciones } from '@/hooks/usePlanificaciones';
 import { PlanificacionFilters as FiltersType } from '@/types/planificacion.types';
 import { PlanificacionFilters } from '@/app/admin/planificaciones/components/PlanificacionFilters';
-import {
-  PlanificacionesList,
-  PlanificacionDetailPanel,
-} from './components';
+import { PlanificacionesList, PlanificacionDetailPanel } from './components';
 
 export default function PlanificacionesPage() {
   const {
@@ -44,12 +41,11 @@ export default function PlanificacionesPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">
           Planificaciones
         </p>
-        <h1 className="text-3xl font-semibold text-white">
-          Gestión de planificaciones mensuales
-        </h1>
+        <h1 className="text-3xl font-semibold text-white">Gestión de planificaciones mensuales</h1>
         <p className="max-w-2xl text-sm text-white/60">
           Revisa, actualiza y gestiona las planificaciones disponibles para los distintos grupos.
-          Puedes filtrar por periodo, estado y grupo para encontrar rápidamente la planificación que necesitas.
+          Puedes filtrar por periodo, estado y grupo para encontrar rápidamente la planificación que
+          necesitas.
         </p>
       </header>
 

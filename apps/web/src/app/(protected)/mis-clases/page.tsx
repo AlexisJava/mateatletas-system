@@ -13,13 +13,7 @@ import { InscripcionClase } from '@/types/clases.types';
  * Permite cancelar reservas futuras.
  */
 export default function MisClasesPage() {
-  const {
-    misReservas,
-    isLoading,
-    error,
-    fetchMisReservas,
-    cancelarReserva,
-  } = useClasesStore();
+  const { misReservas, isLoading, error, fetchMisReservas, cancelarReserva } = useClasesStore();
 
   const [cancelando, setCancelando] = useState<string | null>(null);
 
@@ -41,9 +35,7 @@ export default function MisClasesPage() {
 
   // Handler para cancelar reserva
   const handleCancelar = async (inscripcionId: string) => {
-    const confirmar = window.confirm(
-      '¿Estás seguro de que deseas cancelar esta reserva?'
-    );
+    const confirmar = window.confirm('¿Estás seguro de que deseas cancelar esta reserva?');
     if (!confirmar) return;
 
     setCancelando(inscripcionId);
@@ -88,10 +80,7 @@ export default function MisClasesPage() {
         className="border-3 border-black shadow-[5px_5px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_rgba(0,0,0,1)] transition-all"
       >
         {/* Header con ruta curricular */}
-        <div
-          className="h-2 rounded-t-lg"
-          style={{ backgroundColor: colorRuta }}
-        ></div>
+        <div className="h-2 rounded-t-lg" style={{ backgroundColor: colorRuta }}></div>
 
         <div className="p-5 space-y-4">
           {/* Header: Ruta + Badge de estado */}
@@ -145,9 +134,7 @@ export default function MisClasesPage() {
               <span className="text-xl">📅</span>
               <div>
                 <p className="text-xs text-gray-500">Fecha y hora</p>
-                <p className="font-bold text-dark capitalize">
-                  {fechaFormateada}
-                </p>
+                <p className="font-bold text-dark capitalize">{fechaFormateada}</p>
                 <p className="text-sm text-gray-600">
                   {horaFormateada} • {clase.duracion_minutos} min
                 </p>
@@ -160,9 +147,7 @@ export default function MisClasesPage() {
                 <span className="text-xl">👨‍🏫</span>
                 <div>
                   <p className="text-xs text-gray-500">Docente</p>
-                  <p className="font-bold text-dark">
-                    Docente
-                  </p>
+                  <p className="font-bold text-dark">Docente</p>
                 </div>
               </div>
             )}
@@ -172,9 +157,7 @@ export default function MisClasesPage() {
               <span className="text-xl">🎫</span>
               <div>
                 <p className="text-xs text-gray-500">ID de reserva</p>
-                <p className="font-mono text-sm text-gray-700">
-                  {reserva.id.slice(0, 8)}...
-                </p>
+                <p className="font-mono text-sm text-gray-700">{reserva.id.slice(0, 8)}...</p>
               </div>
             </div>
           </div>
@@ -205,7 +188,9 @@ export default function MisClasesPage() {
         <div className="flex items-center justify-center gap-3">
           <span className="text-6xl">🎫</span>
         </div>
-        <h1 className="font-[family-name:var(--font-fredoka)] text-5xl text-[#2a1a5e]">Mis Clases</h1>
+        <h1 className="font-[family-name:var(--font-fredoka)] text-5xl text-[#2a1a5e]">
+          Mis Clases
+        </h1>
         <p className="text-gray-600 text-lg max-w-2xl mx-auto">
           Gestiona las clases reservadas para tus estudiantes
         </p>
@@ -286,11 +271,7 @@ export default function MisClasesPage() {
                 Explora las clases disponibles y reserva una para tus estudiantes
               </p>
             </div>
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => (window.location.href = '/clases')}
-            >
+            <Button variant="primary" size="lg" onClick={() => (window.location.href = '/clases')}>
               📚 Ver clases disponibles
             </Button>
           </div>

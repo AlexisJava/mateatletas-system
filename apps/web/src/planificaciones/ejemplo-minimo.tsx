@@ -39,13 +39,8 @@ export default function EjemploMinimo() {
 // ============================================================================
 function ContenidoPlanificacion() {
   // Acceso a todos los datos y funciones de la planificación
-  const {
-    progreso,
-    semanasInfo,
-    guardarEstado,
-    avanzarSemana,
-    completarSemana,
-  } = usePlanificacion();
+  const { progreso, semanasInfo, guardarEstado, avanzarSemana, completarSemana } =
+    usePlanificacion();
 
   const [estadoLocal, setEstadoLocal] = useState({
     nivel: 1,
@@ -81,9 +76,7 @@ function ContenidoPlanificacion() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-6xl font-bold text-white mb-4">
-            {PLANIFICACION_CONFIG.titulo}
-          </h1>
+          <h1 className="text-6xl font-bold text-white mb-4">{PLANIFICACION_CONFIG.titulo}</h1>
           <p className="text-2xl text-white/80">
             Semana {semanaActual} de {PLANIFICACION_CONFIG.semanas}
           </p>
@@ -101,27 +94,21 @@ function ContenidoPlanificacion() {
             </div>
             <div className="text-center p-4 bg-purple-50 rounded-xl">
               <p className="text-sm text-gray-600">Puntos</p>
-              <p className="text-3xl font-bold text-purple-600">
-                {progreso?.puntosTotales || 0}
-              </p>
+              <p className="text-3xl font-bold text-purple-600">{progreso?.puntosTotales || 0}</p>
             </div>
             <div className="text-center p-4 bg-green-50 rounded-xl">
               <p className="text-sm text-gray-600">Nivel</p>
-              <p className="text-3xl font-bold text-green-600">
-                {estadoLocal.nivel}
-              </p>
+              <p className="text-3xl font-bold text-green-600">{estadoLocal.nivel}</p>
             </div>
           </div>
 
           {/* Contenido por semana */}
           {semanaActual === 1 && (
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                Semana 1: Introducción
-              </h2>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Semana 1: Introducción</h2>
               <p className="text-gray-600 mb-6">
-                Bienvenido a la planificación de ejemplo. Aquí puedes poner cualquier
-                contenido React que quieras.
+                Bienvenido a la planificación de ejemplo. Aquí puedes poner cualquier contenido
+                React que quieras.
               </p>
 
               {/* Ejemplo de juego simple */}
@@ -152,9 +139,7 @@ function ContenidoPlanificacion() {
 
           {semanaActual === 2 && (
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                Semana 2: Desafío Final
-              </h2>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Semana 2: Desafío Final</h2>
               <p className="text-gray-600 mb-6">
                 ¡Llegaste a la segunda semana! Aquí pondría el contenido avanzado.
               </p>
@@ -199,8 +184,16 @@ function ContenidoPlanificacion() {
         <div className="mt-8 p-4 bg-black/20 backdrop-blur-lg rounded-xl text-white text-sm font-mono">
           <p>Debug Info:</p>
           <p>• Semanas activas: {semanasInfo.semanasActivas.join(', ')}</p>
-          <p>• Puede acceder a semana {semanaActual}: {semanasInfo.puedeAcceder(semanaActual) ? '✅' : '❌'}</p>
-          <p>• Estado guardado: {progreso?.estadoGuardado ? JSON.stringify(progreso.estadoGuardado).substring(0, 50) + '...' : 'null'}</p>
+          <p>
+            • Puede acceder a semana {semanaActual}:{' '}
+            {semanasInfo.puedeAcceder(semanaActual) ? '✅' : '❌'}
+          </p>
+          <p>
+            • Estado guardado:{' '}
+            {progreso?.estadoGuardado
+              ? JSON.stringify(progreso.estadoGuardado).substring(0, 50) + '...'
+              : 'null'}
+          </p>
         </div>
       </div>
     </div>

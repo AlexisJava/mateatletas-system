@@ -11,13 +11,13 @@
 
 ### Estado Actual: 🟡 MODERADO - Backend OK, Frontend bloqueado
 
-| Componente | Estado | Detalles |
-|------------|--------|----------|
-| **Backend (apps/api)** | ✅ **FUNCIONAL** | Build OK, 455/465 tests ✅ (97.8%) |
-| **Frontend (apps/web)** | ❌ **NO COMPILA** | 1 error TypeScript bloqueante |
-| **Packages (shared, contracts)** | ✅ **OK** | Build exitoso (cached) |
-| **Documentación** | ✅ **SINCRONIZADA** | README actualizado |
-| **Dependencias** | ⚠️ **1 vuln HIGH** | xlsx package vulnerable |
+| Componente                       | Estado              | Detalles                           |
+| -------------------------------- | ------------------- | ---------------------------------- |
+| **Backend (apps/api)**           | ✅ **FUNCIONAL**    | Build OK, 455/465 tests ✅ (97.8%) |
+| **Frontend (apps/web)**          | ❌ **NO COMPILA**   | 1 error TypeScript bloqueante      |
+| **Packages (shared, contracts)** | ✅ **OK**           | Build exitoso (cached)             |
+| **Documentación**                | ✅ **SINCRONIZADA** | README actualizado                 |
+| **Dependencias**                 | ⚠️ **1 vuln HIGH**  | xlsx package vulnerable            |
 
 **DIAGNÓSTICO PRINCIPAL:**
 El proyecto está **97% funcional**. El backend está en excelente estado con 455 tests pasando. El único bloqueante es **1 error TypeScript en el frontend** que impide el build de producción.
@@ -47,39 +47,47 @@ Time:        ~45s
 ### Tests Exitosos por Módulo
 
 ✅ **Auth Module (Autenticación):**
+
 - auth.service.spec.ts - ✅ PASS
 - roles.guard.spec.ts - ✅ PASS
 - token-blacklist.spec.ts - ✅ PASS
 
 ✅ **Estudiantes Module:**
+
 - estudiantes.service.spec.ts - ✅ PASS (28 tests)
 - estudiantes-avatar-security.spec.ts - ✅ PASS
 - estudiante-ownership.guard.spec.ts - ✅ PASS
 
 ✅ **Gamificación Module:**
+
 - gamificacion.service.spec.ts - ✅ PASS (20 tests)
 - puntos-transaction-security.spec.ts - ✅ PASS
 - ranking-pagination.spec.ts - ✅ PASS
 
 ✅ **Docentes Module:**
+
 - docentes.service.spec.ts - ✅ PASS (24 tests)
 
 ✅ **Pagos Module:**
+
 - pagos.service.spec.ts - ✅ PASS
 - mercadopago.service.spec.ts - ✅ PASS
 - mercadopago-circuit-breaker.spec.ts - ✅ PASS
 
 ✅ **Clases Module:**
+
 - clases-management.service.spec.ts - ✅ PASS
 - clases-reservas.service.spec.ts - ✅ PASS
 - asistencia-batch-upsert.spec.ts - ✅ PASS
 - clases-cancelar-security.spec.ts - ✅ PASS
 
 ✅ **Admin Module:**
+
 - admin-stats.service.spec.ts - ✅ PASS
 - admin-usuarios.service.spec.ts - ✅ PASS
 
 ✅ **Common/Infrastructure:**
+
 - circuit-breaker.spec.ts - ✅ PASS
 - csrf-protection.guard.spec.ts - ✅ PASS
 - user-throttler.guard.spec.ts - ✅ PASS
@@ -89,16 +97,19 @@ Time:        ~45s
 ### ❌ Tests Fallidos (3 suites, 10 tests)
 
 **1. auth-cambiar-password.service.spec.ts**
+
 - Estado: ❌ FAIL
 - Tests afectados: ~3-4 tests
 - Causa probable: Cambios en API de cambio de password no sincronizados con tests
 
 **2. admin-estudiantes-password-temporal.service.spec.ts**
+
 - Estado: ❌ FAIL
 - Tests afectados: ~3-4 tests
 - Causa probable: Feature de password temporal sin tests actualizados
 
 **3. admin-estudiantes.service.spec.ts**
+
 - Estado: ❌ FAIL
 - Tests afectados: ~2-3 tests
 - Causa probable: Cambios en DTOs o validaciones
@@ -108,6 +119,7 @@ Time:        ~45s
 ### Características del Backend
 
 ✅ **Arquitectura:**
+
 - NestJS con TypeScript
 - Prisma ORM + PostgreSQL
 - 13 módulos funcionales
@@ -115,12 +127,14 @@ Time:        ~45s
 - Circuit Breakers para servicios externos
 
 ✅ **Performance & Optimización:**
+
 - Batch upsert en asistencia (85-90% reducción de queries)
 - Circuit Breaker en MercadoPago (resilencia)
 - N+1 queries optimizadas
 - Logging estructurado con Winston
 
 ✅ **Seguridad:**
+
 - JWT con blacklist
 - CSRF Protection
 - Ownership Guards
@@ -143,9 +157,10 @@ may be a mistake because neither type sufficiently overlaps with the other.
 Next.js build worker exited with code: 1
 ```
 
-**Archivo Problemático:** [apps/web/src/app/(protected)/dashboard/page.tsx:99](apps/web/src/app/(protected)/dashboard/page.tsx#L99)
+**Archivo Problemático:** [apps/web/src/app/(protected)/dashboard/page.tsx:99](<apps/web/src/app/(protected)/dashboard/page.tsx#L99>)
 
 **Código Problemático:**
+
 ```typescript
 // Línea 99
 setMembresia(((membresiaRes as Record<string, unknown>)?.membresia || null) as Membresia | null);
@@ -156,6 +171,7 @@ setMembresia(((membresiaRes as Record<string, unknown>)?.membresia || null) as M
 `membresiaRes` es de tipo `AxiosResponse<any, any, {}>`, no `Record<string, unknown>`. El casting es incorrecto.
 
 **Solución Inmediata:**
+
 ```typescript
 // ANTES (INCORRECTO):
 setMembresia(((membresiaRes as Record<string, unknown>)?.membresia || null) as Membresia | null);
@@ -168,15 +184,16 @@ setMembresia((membresiaRes?.data?.membresia || null) as Membresia | null);
 
 ### ⚠️ Warnings ESLint: 67 warnings (NO bloqueantes)
 
-| Categoría | Cantidad | Severidad |
-|-----------|----------|-----------|
-| Variables no usadas (`error` en catch) | 34 | Baja |
-| React Hooks exhaustive-deps | 22 | Media |
-| `<img>` sin optimizar (Next.js) | 11 | Baja |
+| Categoría                              | Cantidad | Severidad |
+| -------------------------------------- | -------- | --------- |
+| Variables no usadas (`error` en catch) | 34       | Baja      |
+| React Hooks exhaustive-deps            | 22       | Media     |
+| `<img>` sin optimizar (Next.js)        | 11       | Baja      |
 
 **Impacto:** 🟡 **MODERADO** - No bloquean build pero reducen calidad de código.
 
 **Ejemplo de warnings:**
+
 ```
 ./src/app/(protected)/dashboard/components/CalendarioTab.tsx
 65:6  Warning: React Hook useEffect has a missing dependency: 'loadCalendario'
@@ -201,6 +218,7 @@ Branch: main
 ```
 
 **EVIDENCIAS DE ESTABILIDAD:**
+
 - ✅ Merge de rama con 3 semanas de desarrollo probado
 - ✅ Commit previo (`7db38bb`) resolvió errores TypeScript
 - ✅ Incluye mejoras de performance, resiliencia y testing
@@ -223,6 +241,7 @@ b4c666d ← Docs resumen 3 semanas
 ```
 
 **COMMITS NO MERGEADOS (ramas separadas):**
+
 - `34e4ace` (fix/typescript-errors) - Intento de corrección masiva, NO aplicar
 - `d03dee5` (bugfix/student-creation-fix) - Fix de campos opcionales
 - `77e6590` (bugfix/student-creation-fix) - Update interface createClass
@@ -262,10 +281,12 @@ Razón: El commit actual `cf141f9` es estable. Solo necesita 1 fix de 1 línea e
 ```
 
 **Paquetes Totales:** 1,430
+
 - Producción: 497
 - Desarrollo: 853
 
 **Recomendación:**
+
 ```bash
 # Opción 1: Actualizar xlsx
 npm install xlsx@latest
@@ -307,6 +328,7 @@ Mateatletas-Ecosystem/
 ### Stack Tecnológico (Verificado)
 
 **Backend:**
+
 - ✅ NestJS 10.x + TypeScript 5.3
 - ✅ Prisma ORM 5.x
 - ✅ PostgreSQL
@@ -316,6 +338,7 @@ Mateatletas-Ecosystem/
 - ✅ Jest (Testing)
 
 **Frontend:**
+
 - ✅ Next.js 15.5 (App Router)
 - ✅ React 19.x + TypeScript
 - ✅ Tailwind CSS
@@ -324,6 +347,7 @@ Mateatletas-Ecosystem/
 - ✅ Axios (HTTP)
 
 **Infrastructure:**
+
 - ✅ Turborepo 2.5
 - ✅ NPM Workspaces
 - ✅ Docker (dev)
@@ -334,30 +358,31 @@ Mateatletas-Ecosystem/
 
 ### Salud del Código
 
-| Métrica | Backend | Frontend | Objetivo | Estado |
-|---------|---------|----------|----------|--------|
-| **Build Status** | ✅ Pasa | ❌ Falla | ✅ | 🟡 |
-| **Tests Coverage** | 97.8% (455/465) | N/A | >80% | ✅ |
-| **TS Errors Bloqueantes** | 0 | 1 | 0 | 🔴 |
-| **Warnings ESLint** | 0 | 67 | <10 | 🟡 |
-| **Vulnerabilidades HIGH** | 0 | 1 (xlsx) | 0 | 🟡 |
+| Métrica                   | Backend         | Frontend | Objetivo | Estado |
+| ------------------------- | --------------- | -------- | -------- | ------ |
+| **Build Status**          | ✅ Pasa         | ❌ Falla | ✅       | 🟡     |
+| **Tests Coverage**        | 97.8% (455/465) | N/A      | >80%     | ✅     |
+| **TS Errors Bloqueantes** | 0               | 1        | 0        | 🔴     |
+| **Warnings ESLint**       | 0               | 67       | <10      | 🟡     |
+| **Vulnerabilidades HIGH** | 0               | 1 (xlsx) | 0        | 🟡     |
 
 ### Salud por Módulo Backend
 
-| Módulo | Tests | Estado | Notas |
-|--------|-------|--------|-------|
-| Auth | 15+ | ✅ 93% | 1 suite fallando (cambiar password) |
-| Estudiantes | 28+ | ✅ 100% | Todos pasando |
-| Gamificación | 20+ | ✅ 100% | Todos pasando |
-| Docentes | 24+ | ✅ 100% | Todos pasando |
-| Pagos | 30+ | ✅ 100% | Circuit breaker funcionando |
-| Clases | 40+ | ✅ 100% | Batch upsert OK |
-| Admin | 20+ | ✅ 90% | 2 suites fallando (estudiantes) |
-| Security Guards | 15+ | ✅ 100% | CSRF, Ownership, Throttling OK |
+| Módulo          | Tests | Estado  | Notas                               |
+| --------------- | ----- | ------- | ----------------------------------- |
+| Auth            | 15+   | ✅ 93%  | 1 suite fallando (cambiar password) |
+| Estudiantes     | 28+   | ✅ 100% | Todos pasando                       |
+| Gamificación    | 20+   | ✅ 100% | Todos pasando                       |
+| Docentes        | 24+   | ✅ 100% | Todos pasando                       |
+| Pagos           | 30+   | ✅ 100% | Circuit breaker funcionando         |
+| Clases          | 40+   | ✅ 100% | Batch upsert OK                     |
+| Admin           | 20+   | ✅ 90%  | 2 suites fallando (estudiantes)     |
+| Security Guards | 15+   | ✅ 100% | CSRF, Ownership, Throttling OK      |
 
 ### Métricas de Performance
 
 **Backend:**
+
 - ✅ N+1 queries eliminadas (eager loading)
 - ✅ Batch operations implementadas (85-90% reducción)
 - ✅ Circuit breakers activos (MercadoPago)
@@ -365,6 +390,7 @@ Mateatletas-Ecosystem/
 - ✅ Health checks implementados
 
 **Frontend:**
+
 - ⚠️ React Query parcial (6/6 stores según docs)
 - ⚠️ 11 componentes usan `<img>` sin optimizar
 - ⚠️ 22 useEffect con dependencias faltantes
@@ -383,6 +409,7 @@ Mateatletas-Ecosystem/
 ```
 
 **Cambio requerido:**
+
 ```typescript
 // ANTES:
 setMembresia(((membresiaRes as Record<string, unknown>)?.membresia || null) as Membresia | null);
@@ -392,6 +419,7 @@ setMembresia((membresiaRes?.data?.membresia || null) as Membresia | null);
 ```
 
 **Validación:**
+
 ```bash
 cd /home/alexis/Documentos/Mateatletas-Ecosystem
 npm run build
@@ -407,16 +435,19 @@ npm run build
 **2. Corregir 10 Tests Fallidos en Backend**
 
 **Tests a corregir:**
+
 - [ ] auth-cambiar-password.service.spec.ts (3-4 tests)
 - [ ] admin-estudiantes-password-temporal.service.spec.ts (3-4 tests)
 - [ ] admin-estudiantes.service.spec.ts (2-3 tests)
 
 **Estrategia:**
+
 1. Ejecutar tests individuales para ver errores específicos
 2. Actualizar mocks/stubs según cambios en DTOs
 3. Verificar lógica de password temporal
 
 **Comando:**
+
 ```bash
 cd apps/api
 npm test -- auth-cambiar-password.service.spec.ts --verbose
@@ -427,12 +458,14 @@ npm test -- auth-cambiar-password.service.spec.ts --verbose
 **3. Resolver Vulnerabilidad xlsx (HIGH)**
 
 **Opción A - Actualizar:**
+
 ```bash
 npm install xlsx@latest
 npm audit fix
 ```
 
 **Opción B - Reemplazar (Recomendado):**
+
 ```bash
 npm uninstall xlsx
 npm install exceljs
@@ -448,6 +481,7 @@ npm install exceljs
 **4. Limpiar Warnings ESLint (67 warnings)**
 
 **Batch 1: Variables no usadas (34 warnings) - 1 hora**
+
 ```bash
 # Buscar y reemplazar:
 } catch (error) {  →  } catch {
@@ -459,10 +493,12 @@ npm install exceljs
 ```
 
 **Batch 2: React Hooks deps (22 warnings) - 1.5 horas**
+
 - Agregar funciones faltantes a arrays de dependencias
 - O usar `useCallback` para estabilizar referencias
 
 **Batch 3: `<img>` sin optimizar (11 warnings) - 1 hora**
+
 ```typescript
 // ANTES:
 <img src="/avatar.png" alt="Avatar" />
@@ -513,10 +549,12 @@ import Image from 'next/image';
 ### Mejoras de Calidad
 
 1. **Pre-commit Hooks**
+
    ```bash
    npm install --save-dev husky lint-staged
    npx husky install
    ```
+
    - Ejecutar linting automático
    - Bloquear commits con errores TS
 
@@ -568,6 +606,7 @@ import Image from 'next/image';
 ### Estado Real del Proyecto: 🟢 EXCELENTE (con 1 fix pendiente)
 
 **Lo que ESTÁ BIEN (95%):**
+
 - ✅ Backend NestJS completamente funcional
 - ✅ 455/465 tests pasando (97.8%)
 - ✅ Arquitectura monorepo bien estructurada
@@ -578,6 +617,7 @@ import Image from 'next/image';
 - ✅ 4 portales frontend desarrollados
 
 **Lo que NECESITA FIX INMEDIATO (5%):**
+
 - ❌ 1 error TypeScript en frontend (30 min fix)
 - ⚠️ 10 tests fallidos en backend (4-6h fix)
 - ⚠️ 1 vulnerabilidad HIGH en xlsx (2h fix)
@@ -585,11 +625,11 @@ import Image from 'next/image';
 
 ### Tiempo Total de Recuperación
 
-| Prioridad | Tareas | Tiempo |
-|-----------|--------|--------|
-| 🔴 Crítica | Fix TS error | **30 minutos** |
-| 🟡 Alta | Tests + vuln + warnings | **10-12 horas** |
-| 🟢 Media | Mejoras calidad | **24-34 horas** |
+| Prioridad  | Tareas                  | Tiempo          |
+| ---------- | ----------------------- | --------------- |
+| 🔴 Crítica | Fix TS error            | **30 minutos**  |
+| 🟡 Alta    | Tests + vuln + warnings | **10-12 horas** |
+| 🟢 Media   | Mejoras calidad         | **24-34 horas** |
 
 **Total para producción:** ~11 horas
 **Total para calidad world-class:** ~35 horas
@@ -609,6 +649,7 @@ import Image from 'next/image';
 El commit actual (`cf141f9`) es estable y representa 3 semanas de trabajo probado. El problema es trivial (1 línea) y no justifica rollback. Los 10 tests fallidos son de features específicas y no afectan el core.
 
 **Plan:**
+
 1. Fix inmediato del error TS
 2. Commit y push a main
 3. Corregir tests gradualmente
@@ -673,4 +714,4 @@ NO REQUIERE ROLLBACK - Fix forward recomendado
 **Fecha:** 20 de Octubre de 2025, 18:52 UTC-3
 **Versión:** 2.0.0 (Corregido y Completo)
 **Estado:** 🟢 LISTO PARA ACCIÓN
-**Siguiente paso:** Fix de 30 minutos en [dashboard/page.tsx:99](apps/web/src/app/(protected)/dashboard/page.tsx#L99)
+**Siguiente paso:** Fix de 30 minutos en [dashboard/page.tsx:99](<apps/web/src/app/(protected)/dashboard/page.tsx#L99>)

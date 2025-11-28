@@ -41,11 +41,7 @@ const ROLE_CONFIG = {
   },
 } as const;
 
-export default function ModalSelectorRol({
-  isOpen,
-  roles,
-  onSelectRole,
-}: ModalSelectorRolProps) {
+export default function ModalSelectorRol({ isOpen, roles, onSelectRole }: ModalSelectorRolProps) {
   if (!isOpen || roles.length <= 1) return null;
 
   return (
@@ -57,9 +53,7 @@ export default function ModalSelectorRol({
       >
         {/* Header */}
         <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold text-white">
-            Selecciona tu Rol
-          </h2>
+          <h2 className="text-3xl font-bold text-white">Selecciona tu Rol</h2>
           <p className="mt-2 text-slate-400">
             Tienes múltiples roles disponibles. ¿Cómo querés ingresar?
           </p>
@@ -89,12 +83,8 @@ export default function ModalSelectorRol({
                   <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
                     <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-white">
-                    {config.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-white/80">
-                    {config.description}
-                  </p>
+                  <h3 className="text-xl font-bold text-white">{config.title}</h3>
+                  <p className="mt-1 text-sm text-white/80">{config.description}</p>
                 </div>
 
                 {/* Arrow indicator */}

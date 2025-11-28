@@ -43,9 +43,8 @@ export function MisLogrosView({ estudiante }: MisLogrosViewProps) {
   });
 
   const totalDesbloqueados = logros.filter((l) => l.desbloqueado).length;
-  const porcentajeCompletitud = logros.length > 0
-    ? Math.round((totalDesbloqueados / logros.length) * 100)
-    : 0;
+  const porcentajeCompletitud =
+    logros.length > 0 ? Math.round((totalDesbloqueados / logros.length) * 100) : 0;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-purple-900 via-blue-900 to-cyan-900">
@@ -98,11 +97,7 @@ export function MisLogrosView({ estudiante }: MisLogrosViewProps) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-20">
             {logrosFiltrados.map((logro) => (
-              <LogroCard
-                key={logro.id}
-                logro={logro}
-                onClick={() => setLogroSeleccionado(logro)}
-              />
+              <LogroCard key={logro.id} logro={logro} onClick={() => setLogroSeleccionado(logro)} />
             ))}
           </div>
         )}
@@ -133,7 +128,9 @@ export function MisLogrosView({ estudiante }: MisLogrosViewProps) {
               </button>
 
               <div className="text-center space-y-4">
-                <div className={`text-7xl ${logroSeleccionado.desbloqueado ? '' : 'opacity-40 grayscale'}`}>
+                <div
+                  className={`text-7xl ${logroSeleccionado.desbloqueado ? '' : 'opacity-40 grayscale'}`}
+                >
                   {logroSeleccionado.icono}
                 </div>
 
@@ -141,21 +138,18 @@ export function MisLogrosView({ estudiante }: MisLogrosViewProps) {
                   <h2 className="text-2xl font-black text-white mb-2">
                     {logroSeleccionado.nombre}
                   </h2>
-                  <p className="text-white/70">
-                    {logroSeleccionado.descripcion}
-                  </p>
+                  <p className="text-white/70">{logroSeleccionado.descripcion}</p>
                 </div>
 
                 <div className="flex items-center justify-center gap-2 p-3 bg-white/10 rounded-xl">
                   <Trophy className="w-5 h-5 text-yellow-400" />
-                  <span className="font-bold text-white">
-                    {logroSeleccionado.puntos} puntos
-                  </span>
+                  <span className="font-bold text-white">{logroSeleccionado.puntos} puntos</span>
                 </div>
 
                 {logroSeleccionado.desbloqueado && logroSeleccionado.fecha_desbloqueo && (
                   <div className="text-sm text-white/60">
-                    Desbloqueado el {new Date(logroSeleccionado.fecha_desbloqueo).toLocaleDateString('es-ES')}
+                    Desbloqueado el{' '}
+                    {new Date(logroSeleccionado.fecha_desbloqueo).toLocaleDateString('es-ES')}
                   </div>
                 )}
 
@@ -210,12 +204,8 @@ function LogroCard({ logro, onClick }: LogroCardProps) {
       <div className="text-center space-y-2">
         <div className="text-5xl">{logro.icono}</div>
         <div>
-          <h3 className="font-black text-white text-lg leading-tight">
-            {logro.nombre}
-          </h3>
-          <p className="text-xs text-white/70 mt-1 line-clamp-2">
-            {logro.descripcion}
-          </p>
+          <h3 className="font-black text-white text-lg leading-tight">{logro.nombre}</h3>
+          <p className="text-xs text-white/70 mt-1 line-clamp-2">{logro.descripcion}</p>
         </div>
         <div className="flex items-center justify-center gap-1 text-sm">
           <Trophy className="w-4 h-4 text-yellow-300" />

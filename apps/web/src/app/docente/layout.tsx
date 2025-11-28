@@ -64,9 +64,11 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
       // Si el usuario tiene otro rol ACTIVO, redirigir al dashboard apropiado
       if (user && activeRole && activeRole !== 'docente') {
         const redirectPath =
-          activeRole === 'admin' ? '/admin/dashboard' :
-          activeRole === 'estudiante' ? '/estudiante/gimnasio' :
-          '/dashboard';
+          activeRole === 'admin'
+            ? '/admin/dashboard'
+            : activeRole === 'estudiante'
+              ? '/estudiante/gimnasio'
+              : '/dashboard';
         router.replace(redirectPath);
         return;
       }
@@ -88,9 +90,11 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
 
           if (currentActiveRole !== 'docente') {
             const redirectPath =
-              currentActiveRole === 'admin' ? '/admin/dashboard' :
-              currentActiveRole === 'estudiante' ? '/estudiante/gimnasio' :
-              '/dashboard';
+              currentActiveRole === 'admin'
+                ? '/admin/dashboard'
+                : currentActiveRole === 'estudiante'
+                  ? '/estudiante/gimnasio'
+                  : '/dashboard';
             router.replace(redirectPath);
             return;
           }
@@ -167,7 +171,9 @@ export default function DocenteLayout({ children }: { children: React.ReactNode 
                           }
                         `}
                       >
-                        <Icon className={`w-[18px] h-[18px] ${isActive ? '' : 'group-hover:text-indigo-600 dark:group-hover:text-indigo-400'}`} />
+                        <Icon
+                          className={`w-[18px] h-[18px] ${isActive ? '' : 'group-hover:text-indigo-600 dark:group-hover:text-indigo-400'}`}
+                        />
                         {item.label}
                       </a>
                     );
@@ -336,7 +342,9 @@ function LoadingScreen() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50/60 to-pink-50/50 dark:from-[#0f0a1f] dark:via-indigo-950 dark:to-indigo-900">
       <div className="text-center backdrop-blur-xl bg-white/65 dark:bg-indigo-950/60 p-12 rounded-3xl shadow-2xl shadow-purple-200/20 dark:shadow-purple-900/30 border border-purple-200/30 dark:border-purple-700/30">
         <div className="w-16 h-16 border-4 border-purple-100 dark:border-purple-900/50 border-t-purple-600 rounded-full animate-spin mx-auto mb-6" />
-        <p className="text-sm font-semibold text-indigo-900 dark:text-purple-100">Cargando Portal Docente...</p>
+        <p className="text-sm font-semibold text-indigo-900 dark:text-purple-100">
+          Cargando Portal Docente...
+        </p>
       </div>
     </div>
   );

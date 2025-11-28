@@ -14,11 +14,10 @@ interface CaminoAprendizajeProps {
 }
 
 export default function CaminoAprendizaje({ cursos }: CaminoAprendizajeProps) {
-
   // Calcular métricas totales
   const totalSemanas = cursos.reduce((sum, c) => sum + c.duracion_semanas, 0);
   const totalClases = cursos.reduce((sum, c) => sum + c.total_clases, 0);
-  const allSkills = cursos.flatMap(c => c.skills_principales);
+  const allSkills = cursos.flatMap((c) => c.skills_principales);
 
   return (
     <section className="mb-24">
@@ -62,8 +61,8 @@ export default function CaminoAprendizaje({ cursos }: CaminoAprendizajeProps) {
           transition={{ delay: 0.3 }}
           className="text-slate-400 text-xl max-w-3xl mx-auto mb-10"
         >
-          Esta no es una lista de cursos. Es la ruta exacta que transformará a tu hijo
-          de consumidor de tecnología a <strong className="text-white">creador de tecnología</strong>.
+          Esta no es una lista de cursos. Es la ruta exacta que transformará a tu hijo de consumidor
+          de tecnología a <strong className="text-white">creador de tecnología</strong>.
         </motion.p>
 
         {/* Stats rápidas */}
@@ -115,14 +114,14 @@ export default function CaminoAprendizaje({ cursos }: CaminoAprendizajeProps) {
             'from-cyan-500/10 to-blue-500/10 border-cyan-500/30',
             'from-purple-500/10 to-pink-500/10 border-purple-500/30',
             'from-orange-500/10 to-red-500/10 border-orange-500/30',
-            'from-emerald-500/10 to-teal-500/10 border-emerald-500/30'
+            'from-emerald-500/10 to-teal-500/10 border-emerald-500/30',
           ];
 
           const iconColors = [
             'text-cyan-400 bg-cyan-500/20',
             'text-purple-400 bg-purple-500/20',
             'text-orange-400 bg-orange-500/20',
-            'text-emerald-400 bg-emerald-500/20'
+            'text-emerald-400 bg-emerald-500/20',
           ];
 
           return (
@@ -133,14 +132,18 @@ export default function CaminoAprendizaje({ cursos }: CaminoAprendizajeProps) {
               viewport={{ once: true, margin: '-100px' }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <div className={`bg-gradient-to-br ${gradients[index % 4]} border-2 rounded-3xl p-8 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300`}>
+              <div
+                className={`bg-gradient-to-br ${gradients[index % 4]} border-2 rounded-3xl p-8 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300`}
+              >
                 {/* Background decoration */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-3xl -z-10" />
 
                 <div className="relative z-10">
                   {/* Header con número */}
                   <div className="flex items-start gap-6 mb-6">
-                    <div className={`flex-shrink-0 w-16 h-16 ${iconColors[index % 4]} rounded-2xl flex items-center justify-center font-black text-3xl`}>
+                    <div
+                      className={`flex-shrink-0 w-16 h-16 ${iconColors[index % 4]} rounded-2xl flex items-center justify-center font-black text-3xl`}
+                    >
                       {index + 1}
                     </div>
 
@@ -148,22 +151,22 @@ export default function CaminoAprendizaje({ cursos }: CaminoAprendizajeProps) {
                       <div className="flex items-center gap-3 mb-2">
                         <span className="text-5xl">{curso.emoji}</span>
                         <div>
-                          <div className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-2 ${
-                            curso.nivel === 'Principiante' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                            curso.nivel === 'Intermedio' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                            'bg-red-500/20 text-red-400 border border-red-500/30'
-                          }`}>
+                          <div
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-2 ${
+                              curso.nivel === 'Principiante'
+                                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                : curso.nivel === 'Intermedio'
+                                  ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                                  : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                            }`}
+                          >
                             {curso.nivel}
                           </div>
-                          <h3 className="text-3xl font-black text-white">
-                            {curso.nombre}
-                          </h3>
+                          <h3 className="text-3xl font-black text-white">{curso.nombre}</h3>
                         </div>
                       </div>
 
-                      <p className="text-slate-300 text-lg mb-4">
-                        {curso.descripcion}
-                      </p>
+                      <p className="text-slate-300 text-lg mb-4">{curso.descripcion}</p>
 
                       {/* Metadata */}
                       <div className="flex flex-wrap gap-4 text-sm">
@@ -206,9 +209,7 @@ export default function CaminoAprendizaje({ cursos }: CaminoAprendizajeProps) {
                             <h5 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">
                               Proyecto Final
                             </h5>
-                            <p className="text-white font-semibold">
-                              {curso.proyecto_final}
-                            </p>
+                            <p className="text-white font-semibold">{curso.proyecto_final}</p>
                           </div>
                         </div>
                       </div>
@@ -282,7 +283,8 @@ export default function CaminoAprendizaje({ cursos }: CaminoAprendizajeProps) {
 
             <div className="inline-block bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-2 border-emerald-400/50 rounded-2xl px-6 py-4">
               <p className="text-lg text-slate-200">
-                <span className="font-black text-emerald-400">Certificado oficial</span> al completar la ruta completa
+                <span className="font-black text-emerald-400">Certificado oficial</span> al
+                completar la ruta completa
               </p>
             </div>
           </div>

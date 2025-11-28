@@ -2,7 +2,17 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowRight, ArrowLeft, Check, AlertCircle, Trash2, Plus, Eye, EyeOff } from 'lucide-react';
+import {
+  X,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  AlertCircle,
+  Trash2,
+  Plus,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import { COURSES } from '@/data/colonia-courses';
 import type { Course } from '@/types/colonia';
 
@@ -65,7 +75,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
     const totalCursos = estudiantes.reduce((sum, est) => sum + est.cursosSeleccionados.length, 0);
 
     if (cantidadEstudiantes >= 2 && totalCursos >= 2) {
-      return 0.20; // 20% máximo
+      return 0.2; // 20% máximo
     } else if (cantidadEstudiantes >= 2 || totalCursos >= 2) {
       return 0.12; // 12%
     }
@@ -140,10 +150,11 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
       }
 
       // Check for schedule conflicts
-      const horarios = estudiante.cursosSeleccionados.map(c => `${c.dayOfWeek}-${c.timeSlot}`);
+      const horarios = estudiante.cursosSeleccionados.map((c) => `${c.dayOfWeek}-${c.timeSlot}`);
       const horariosUnicos = new Set(horarios);
       if (horarios.length !== horariosUnicos.size) {
-        newErrors[`estudiante_${index}_cursos`] = 'No puede seleccionar cursos con el mismo horario';
+        newErrors[`estudiante_${index}_cursos`] =
+          'No puede seleccionar cursos con el mismo horario';
       }
     });
 
@@ -168,36 +179,38 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
   // Remove student
   const removeEstudiante = (id: string) => {
     if (estudiantes.length > 1) {
-      setEstudiantes(estudiantes.filter(e => e.id !== id));
+      setEstudiantes(estudiantes.filter((e) => e.id !== id));
     }
   };
 
   // Toggle course selection
   const toggleCurso = (estudianteId: string, curso: Course) => {
-    setEstudiantes(estudiantes.map(est => {
-      if (est.id !== estudianteId) return est;
+    setEstudiantes(
+      estudiantes.map((est) => {
+        if (est.id !== estudianteId) return est;
 
-      const yaSeleccionado = est.cursosSeleccionados.find(c => c.id === curso.id);
-      if (yaSeleccionado) {
-        return {
-          ...est,
-          cursosSeleccionados: est.cursosSeleccionados.filter(c => c.id !== curso.id),
-        };
-      } else if (est.cursosSeleccionados.length < 2) {
-        return {
-          ...est,
-          cursosSeleccionados: [...est.cursosSeleccionados, curso],
-        };
-      }
-      return est;
-    }));
+        const yaSeleccionado = est.cursosSeleccionados.find((c) => c.id === curso.id);
+        if (yaSeleccionado) {
+          return {
+            ...est,
+            cursosSeleccionados: est.cursosSeleccionados.filter((c) => c.id !== curso.id),
+          };
+        } else if (est.cursosSeleccionados.length < 2) {
+          return {
+            ...est,
+            cursosSeleccionados: [...est.cursosSeleccionados, curso],
+          };
+        }
+        return est;
+      }),
+    );
   };
 
   // Get available courses for student by age
   const getAvailableCourses = (edad: number | '') => {
     if (!edad) return [];
 
-    return COURSES.filter(course => {
+    return COURSES.filter((course) => {
       const [min, max] = course.ageRange.split('-').map(Number);
       return edad >= min && edad <= max;
     });
@@ -220,14 +233,14 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
     // TODO: Implement API call to backend
     console.log('Submitting:', {
       tutor: tutorData,
-      estudiantes: estudiantes.map(e => ({
+      estudiantes: estudiantes.map((e) => ({
         ...e,
-        cursosIds: e.cursosSeleccionados.map(c => c.id),
+        cursosIds: e.cursosSeleccionados.map((c) => c.id),
       })),
     });
 
     // Simulate processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // TODO: Redirect to MercadoPago
     alert('Inscripción procesada! Redirigiendo a pago...');
@@ -298,9 +311,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <h2 className="text-4xl font-black text-white mb-2">
-                Primero, hablemos de vos 👋
-              </h2>
+              <h2 className="text-4xl font-black text-white mb-2">Primero, hablemos de vos 👋</h2>
               <p className="text-white/60 mb-8">
                 Necesitamos tus datos para crear tu cuenta de tutor
               </p>
@@ -327,9 +338,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-bold text-white mb-2">
-                    Email *
-                  </label>
+                  <label className="block text-sm font-bold text-white mb-2">Email *</label>
                   <input
                     type="email"
                     value={tutorData.email}
@@ -346,9 +355,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
 
                 {/* Teléfono */}
                 <div>
-                  <label className="block text-sm font-bold text-white mb-2">
-                    Teléfono *
-                  </label>
+                  <label className="block text-sm font-bold text-white mb-2">Teléfono *</label>
                   <input
                     type="tel"
                     value={tutorData.telefono}
@@ -365,9 +372,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
 
                 {/* DNI (opcional) */}
                 <div>
-                  <label className="block text-sm font-bold text-white mb-2">
-                    DNI (opcional)
-                  </label>
+                  <label className="block text-sm font-bold text-white mb-2">DNI (opcional)</label>
                   <input
                     type="text"
                     value={tutorData.dni}
@@ -379,9 +384,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
 
                 {/* Password */}
                 <div>
-                  <label className="block text-sm font-bold text-white mb-2">
-                    Contraseña *
-                  </label>
+                  <label className="block text-sm font-bold text-white mb-2">Contraseña *</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -417,7 +420,9 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={tutorData.confirmPassword}
-                      onChange={(e) => setTutorData({ ...tutorData, confirmPassword: e.target.value })}
+                      onChange={(e) =>
+                        setTutorData({ ...tutorData, confirmPassword: e.target.value })
+                      }
                       className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors pr-12"
                       placeholder="Repite tu contraseña"
                     />
@@ -426,7 +431,11 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
                     >
-                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                   {errors.confirmPassword && (
@@ -459,9 +468,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
               transition={{ duration: 0.3 }}
               className="max-h-[70vh] overflow-y-auto pr-2"
             >
-              <h2 className="text-4xl font-black text-white mb-2">
-                ¿Quiénes se inscriben? 🎓
-              </h2>
+              <h2 className="text-4xl font-black text-white mb-2">¿Quiénes se inscriben? 🎓</h2>
               <p className="text-white/60 mb-8">
                 Agrega los datos de los estudiantes y selecciona sus cursos
               </p>
@@ -484,9 +491,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                       className="p-6 rounded-2xl bg-white/5 border-2 border-white/10"
                     >
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-black text-white">
-                          Estudiante {index + 1}
-                        </h3>
+                        <h3 className="text-xl font-black text-white">Estudiante {index + 1}</h3>
                         {estudiantes.length > 1 && (
                           <button
                             onClick={() => removeEstudiante(estudiante.id)}
@@ -507,11 +512,13 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                             type="text"
                             value={estudiante.nombre}
                             onChange={(e) => {
-                              setEstudiantes(estudiantes.map(est =>
-                                est.id === estudiante.id
-                                  ? { ...est, nombre: e.target.value }
-                                  : est
-                              ));
+                              setEstudiantes(
+                                estudiantes.map((est) =>
+                                  est.id === estudiante.id
+                                    ? { ...est, nombre: e.target.value }
+                                    : est,
+                                ),
+                              );
                             }}
                             className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors"
                             placeholder="María Pérez"
@@ -525,9 +532,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
 
                         {/* Edad */}
                         <div>
-                          <label className="block text-sm font-bold text-white mb-2">
-                            Edad *
-                          </label>
+                          <label className="block text-sm font-bold text-white mb-2">Edad *</label>
                           <input
                             type="number"
                             min="6"
@@ -535,11 +540,13 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                             value={estudiante.edad}
                             onChange={(e) => {
                               const edad = e.target.value ? Number(e.target.value) : '';
-                              setEstudiantes(estudiantes.map(est =>
-                                est.id === estudiante.id
-                                  ? { ...est, edad, cursosSeleccionados: [] }
-                                  : est
-                              ));
+                              setEstudiantes(
+                                estudiantes.map((est) =>
+                                  est.id === estudiante.id
+                                    ? { ...est, edad, cursosSeleccionados: [] }
+                                    : est,
+                                ),
+                              );
                             }}
                             className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors"
                             placeholder="8"
@@ -560,11 +567,11 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                             type="text"
                             value={estudiante.dni}
                             onChange={(e) => {
-                              setEstudiantes(estudiantes.map(est =>
-                                est.id === estudiante.id
-                                  ? { ...est, dni: e.target.value }
-                                  : est
-                              ));
+                              setEstudiantes(
+                                estudiantes.map((est) =>
+                                  est.id === estudiante.id ? { ...est, dni: e.target.value } : est,
+                                ),
+                              );
                             }}
                             className="w-full px-4 py-3 rounded-xl bg-white/5 border-2 border-white/10 text-white placeholder-white/40 focus:border-[#fbbf24] focus:outline-none transition-colors"
                             placeholder="12345678"
@@ -586,8 +593,11 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-2">
                             {cursosDisponibles.map((curso) => {
-                              const isSelected = estudiante.cursosSeleccionados.find(c => c.id === curso.id);
-                              const isDisabled = !isSelected && estudiante.cursosSeleccionados.length >= 2;
+                              const isSelected = estudiante.cursosSeleccionados.find(
+                                (c) => c.id === curso.id,
+                              );
+                              const isDisabled =
+                                !isSelected && estudiante.cursosSeleccionados.length >= 2;
 
                               return (
                                 <button
@@ -599,8 +609,8 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                                     isSelected
                                       ? 'border-[#fbbf24] bg-[#fbbf24]/10'
                                       : isDisabled
-                                      ? 'border-white/5 bg-white/5 opacity-50 cursor-not-allowed'
-                                      : 'border-white/10 bg-white/5 hover:border-white/30'
+                                        ? 'border-white/5 bg-white/5 opacity-50 cursor-not-allowed'
+                                        : 'border-white/10 bg-white/5 hover:border-white/30'
                                   }`}
                                 >
                                   <div className="flex items-start gap-3">
@@ -627,7 +637,9 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                                         {curso.name}
                                       </h4>
                                       <div className="text-xs text-white/60 space-y-0.5">
-                                        <div>{curso.dayOfWeek} • {curso.timeSlot}</div>
+                                        <div>
+                                          {curso.dayOfWeek} • {curso.timeSlot}
+                                        </div>
                                         <div>Profe {curso.instructor}</div>
                                       </div>
                                     </div>
@@ -639,7 +651,8 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
 
                           {errors[`estudiante_${index}_cursos`] && (
                             <p className="text-red-400 text-sm mt-2 flex items-center gap-1">
-                              <AlertCircle className="w-4 h-4" /> {errors[`estudiante_${index}_cursos`]}
+                              <AlertCircle className="w-4 h-4" />{' '}
+                              {errors[`estudiante_${index}_cursos`]}
                             </p>
                           )}
                         </div>
@@ -693,9 +706,7 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
               transition={{ duration: 0.3 }}
               className="max-h-[70vh] overflow-y-auto pr-2"
             >
-              <h2 className="text-4xl font-black text-white mb-2">
-                Revisá tu inscripción 📋
-              </h2>
+              <h2 className="text-4xl font-black text-white mb-2">Revisá tu inscripción 📋</h2>
               <p className="text-white/60 mb-8">
                 Verificá que todo esté correcto antes de continuar al pago
               </p>
@@ -712,10 +723,20 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                   </button>
                 </div>
                 <div className="space-y-2 text-white/80">
-                  <p><strong>Nombre:</strong> {tutorData.nombre}</p>
-                  <p><strong>Email:</strong> {tutorData.email}</p>
-                  <p><strong>Teléfono:</strong> {tutorData.telefono}</p>
-                  {tutorData.dni && <p><strong>DNI:</strong> {tutorData.dni}</p>}
+                  <p>
+                    <strong>Nombre:</strong> {tutorData.nombre}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {tutorData.email}
+                  </p>
+                  <p>
+                    <strong>Teléfono:</strong> {tutorData.telefono}
+                  </p>
+                  {tutorData.dni && (
+                    <p>
+                      <strong>DNI:</strong> {tutorData.dni}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -763,7 +784,12 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                         ))}
                         <div className="pt-2 border-t border-white/10 flex justify-between text-white font-bold">
                           <span>Subtotal {estudiante.nombre}:</span>
-                          <span>${(estudiante.cursosSeleccionados.length * 55000).toLocaleString('es-AR')}</span>
+                          <span>
+                            $
+                            {(estudiante.cursosSeleccionados.length * 55000).toLocaleString(
+                              'es-AR',
+                            )}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -789,7 +815,9 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                     <>
                       <div className="flex justify-between text-[#10b981]">
                         <span>Descuento aplicado ({descuento}%):</span>
-                        <span className="font-bold">-${descuentoMonto.toLocaleString('es-AR')}</span>
+                        <span className="font-bold">
+                          -${descuentoMonto.toLocaleString('es-AR')}
+                        </span>
                       </div>
 
                       {descuento === 20 && (
@@ -811,7 +839,8 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                             Descuento Aplicado 🎉
                           </p>
                           <p className="text-white/80 text-xs mt-1">
-                            {estudiantes.length >= 2 ? '2+ hermanos' : '2+ cursos'} = 12% OFF por curso
+                            {estudiantes.length >= 2 ? '2+ hermanos' : '2+ cursos'} = 12% OFF por
+                            curso
                           </p>
                         </div>
                       )}
@@ -831,10 +860,12 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                 {/* Monthly Payment Notice */}
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10">
                   <p className="text-white/70 text-sm leading-relaxed">
-                    💳 <strong className="text-white">Pago mensual:</strong> Se cobrará automáticamente el mismo monto el 1° de Febrero y el 1° de Marzo 2026.
+                    💳 <strong className="text-white">Pago mensual:</strong> Se cobrará
+                    automáticamente el mismo monto el 1° de Febrero y el 1° de Marzo 2026.
                   </p>
                   <p className="text-white/60 text-xs mt-2">
-                    Si no se completa el pago antes del día 5, el acceso a las clases será bloqueado hasta regularizar.
+                    Si no se completa el pago antes del día 5, el acceso a las clases será bloqueado
+                    hasta regularizar.
                   </p>
                 </div>
               </div>
@@ -854,11 +885,19 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
                   </div>
                   <span className="text-white/80 text-sm">
                     Acepto los{' '}
-                    <a href="/legal/terminos" target="_blank" className="text-[#fbbf24] hover:text-[#f97316] font-bold">
+                    <a
+                      href="/legal/terminos"
+                      target="_blank"
+                      className="text-[#fbbf24] hover:text-[#f97316] font-bold"
+                    >
                       Términos y Condiciones
-                    </a>
-                    {' '}y la{' '}
-                    <a href="/legal/privacidad" target="_blank" className="text-[#fbbf24] hover:text-[#f97316] font-bold">
+                    </a>{' '}
+                    y la{' '}
+                    <a
+                      href="/legal/privacidad"
+                      target="_blank"
+                      className="text-[#fbbf24] hover:text-[#f97316] font-bold"
+                    >
                       Política de Privacidad
                     </a>
                   </span>

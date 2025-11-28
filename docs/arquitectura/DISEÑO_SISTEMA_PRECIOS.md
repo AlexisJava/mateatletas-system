@@ -4,14 +4,14 @@
 
 ### **Precios Base Configurables:**
 
-| Configuración | Valor Inicial | Descripción |
-|---------------|---------------|-------------|
-| `precio_club_matematicas` | $50.000 | Precio base Club de Matemáticas |
-| `precio_cursos_especializados` | $55.000 | Precio base Cursos (Robótica, Programación, etc) |
-| `descuento_multiple_actividades` | $44.000 | Precio por actividad cuando estudiante tiene 2+ |
-| `descuento_hermanos_basico` | $44.000 | Precio por actividad con 2+ hermanos, 1 act c/u |
-| `descuento_hermanos_multiple` | $38.000 | Precio por actividad con 2+ hermanos, 2+ act c/u |
-| `descuento_aacrea_porcentaje` | 20% | Descuento AACREA (sobre precio base) |
+| Configuración                    | Valor Inicial | Descripción                                      |
+| -------------------------------- | ------------- | ------------------------------------------------ |
+| `precio_club_matematicas`        | $50.000       | Precio base Club de Matemáticas                  |
+| `precio_cursos_especializados`   | $55.000       | Precio base Cursos (Robótica, Programación, etc) |
+| `descuento_multiple_actividades` | $44.000       | Precio por actividad cuando estudiante tiene 2+  |
+| `descuento_hermanos_basico`      | $44.000       | Precio por actividad con 2+ hermanos, 1 act c/u  |
+| `descuento_hermanos_multiple`    | $38.000       | Precio por actividad con 2+ hermanos, 2+ act c/u |
+| `descuento_aacrea_porcentaje`    | 20%           | Descuento AACREA (sobre precio base)             |
 
 ---
 
@@ -172,6 +172,7 @@ model Estudiante {
 ## 🧪 Tests (TDD)
 
 ### **Test 1: Cálculo de Precio - 1 estudiante, 1 actividad**
+
 ```typescript
 describe('PreciosService.calcularPrecio', () => {
   it('debe calcular precio base para 1 estudiante, 1 actividad', () => {
@@ -179,7 +180,7 @@ describe('PreciosService.calcularPrecio', () => {
       cantidadHermanos: 1,
       actividadesPorEstudiante: 1,
       tipoProducto: 'CLUB_MATEMATICAS',
-      tieneAACREA: false
+      tieneAACREA: false,
     });
 
     expect(precio).toBe(50000);
@@ -188,13 +189,14 @@ describe('PreciosService.calcularPrecio', () => {
 ```
 
 ### **Test 2: Descuento por múltiples actividades**
+
 ```typescript
 it('debe aplicar descuento por múltiples actividades', () => {
   const precio = calcularPrecio({
     cantidadHermanos: 1,
     actividadesPorEstudiante: 2,
     tipoProducto: 'CLUB_MATEMATICAS',
-    tieneAACREA: false
+    tieneAACREA: false,
   });
 
   expect(precio).toBe(44000);
@@ -202,13 +204,14 @@ it('debe aplicar descuento por múltiples actividades', () => {
 ```
 
 ### **Test 3: Descuento por hermanos básico**
+
 ```typescript
 it('debe aplicar descuento hermanos básico', () => {
   const precio = calcularPrecio({
     cantidadHermanos: 2,
     actividadesPorEstudiante: 1,
     tipoProducto: 'CLUB_MATEMATICAS',
-    tieneAACREA: false
+    tieneAACREA: false,
   });
 
   expect(precio).toBe(44000);
@@ -216,13 +219,14 @@ it('debe aplicar descuento hermanos básico', () => {
 ```
 
 ### **Test 4: Descuento por hermanos con múltiples actividades**
+
 ```typescript
 it('debe aplicar descuento hermanos múltiple', () => {
   const precio = calcularPrecio({
     cantidadHermanos: 2,
     actividadesPorEstudiante: 2,
     tipoProducto: 'CLUB_MATEMATICAS',
-    tieneAACREA: false
+    tieneAACREA: false,
   });
 
   expect(precio).toBe(38000);
@@ -230,13 +234,14 @@ it('debe aplicar descuento hermanos múltiple', () => {
 ```
 
 ### **Test 5: Descuento AACREA**
+
 ```typescript
 it('debe aplicar descuento AACREA 20%', () => {
   const precio = calcularPrecio({
     cantidadHermanos: 1,
     actividadesPorEstudiante: 1,
     tipoProducto: 'CLUB_MATEMATICAS',
-    tieneAACREA: true
+    tieneAACREA: true,
   });
 
   expect(precio).toBe(40000); // 50000 - 20%
@@ -244,13 +249,14 @@ it('debe aplicar descuento AACREA 20%', () => {
 ```
 
 ### **Test 6: AACREA no aplica con múltiples actividades**
+
 ```typescript
 it('NO debe aplicar AACREA con múltiples actividades', () => {
   const precio = calcularPrecio({
     cantidadHermanos: 1,
     actividadesPorEstudiante: 2,
     tipoProducto: 'CLUB_MATEMATICAS',
-    tieneAACREA: true
+    tieneAACREA: true,
   });
 
   expect(precio).toBe(44000); // Descuento múltiples, NO AACREA
@@ -293,6 +299,7 @@ it('NO debe aplicar AACREA con múltiples actividades', () => {
 ## 📊 Endpoints API
 
 ### **GET /admin/configuracion/precios**
+
 ```typescript
 Response: {
   precio_club_matematicas: 50000,
@@ -307,6 +314,7 @@ Response: {
 ```
 
 ### **PUT /admin/configuracion/precios**
+
 ```typescript
 Request: {
   precio_club_matematicas?: number,
@@ -323,6 +331,7 @@ Response: {
 ```
 
 ### **POST /admin/calcular-precio**
+
 ```typescript
 Request: {
   tutor_id: string,

@@ -38,7 +38,7 @@ interface QuizSubmissionPayload {
  */
 export async function enviarQuizAlBackend(
   respuestas: QuizResponses,
-  resultado: ResultadoRecomendacion
+  resultado: ResultadoRecomendacion,
 ): Promise<QuizBackendResponse> {
   try {
     const payload: QuizSubmissionPayload = {
@@ -51,10 +51,10 @@ export async function enviarQuizAlBackend(
       ruta_recomendada_id: resultado.ruta_principal.id,
       ruta_recomendada_nombre: resultado.ruta_principal.nombre,
       score_match: resultado.score_match,
-      alternativas_ids: resultado.alternativas.map(r => r.id),
+      alternativas_ids: resultado.alternativas.map((r) => r.id),
       parent_email: respuestas.parent_email,
       parent_name: respuestas.parent_name,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     const response = await fetch(`${BACKEND_URL}/api/quiz/submit`, {
@@ -62,7 +62,7 @@ export async function enviarQuizAlBackend(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -75,16 +75,15 @@ export async function enviarQuizAlBackend(
     return {
       success: true,
       quiz_id: data.id || data.quiz_id,
-      message: data.message || 'Quiz enviado correctamente'
+      message: data.message || 'Quiz enviado correctamente',
     };
-
   } catch (error) {
     console.error('Error enviando quiz al backend:', error);
 
     // No fallar silenciosamente, pero tampoco bloquear la UX
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Error desconocido al enviar el quiz'
+      message: error instanceof Error ? error.message : 'Error desconocido al enviar el quiz',
     };
   }
 }
@@ -103,7 +102,7 @@ export async function obtenerEstadisticasQuiz(): Promise<{
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
     });
 
     if (!response.ok) {

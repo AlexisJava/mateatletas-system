@@ -152,14 +152,16 @@ async function probarPreferenciaMembresia(testData: TestData) {
     log('POST /api/pagos/suscripcion');
     log(`Body: { "productoId": "${testData.productoMembresiaId}" }`);
     logWarning('Requiere JWT token válido - ejecutar manualmente:');
-    console.log(`
+    console.log(
+      `
 curl -X POST ${BACKEND_URL}/api/pagos/suscripcion \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
   -d '{
     "productoId": "${testData.productoMembresiaId}"
   }'
-    `.trim());
+    `.trim(),
+    );
 
     logSuccess('Comando curl generado (ejecutar manualmente con token real)');
   } catch (error) {
@@ -175,9 +177,12 @@ async function probarPreferenciaCurso(testData: TestData) {
 
   try {
     log('POST /api/pagos/curso');
-    log(`Body: { "estudianteId": "${testData.estudianteId}", "productoId": "${testData.productoCursoId}" }`);
+    log(
+      `Body: { "estudianteId": "${testData.estudianteId}", "productoId": "${testData.productoCursoId}" }`,
+    );
     logWarning('Requiere JWT token válido - ejecutar manualmente:');
-    console.log(`
+    console.log(
+      `
 curl -X POST ${BACKEND_URL}/api/pagos/curso \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
@@ -185,7 +190,8 @@ curl -X POST ${BACKEND_URL}/api/pagos/curso \\
     "estudianteId": "${testData.estudianteId}",
     "productoId": "${testData.productoCursoId}"
   }'
-    `.trim());
+    `.trim(),
+    );
 
     logSuccess('Comando curl generado (ejecutar manualmente con token real)');
   } catch (error) {
@@ -224,11 +230,13 @@ async function probarInscripcion2026(testData: TestData) {
     };
 
     logWarning('Ejecutar manualmente (NO requiere autenticación):');
-    console.log(`
+    console.log(
+      `
 curl -X POST ${BACKEND_URL}/api/inscripciones-2026 \\
   -H "Content-Type: application/json" \\
   -d '${JSON.stringify(body, null, 2)}'
-    `.trim());
+    `.trim(),
+    );
 
     logSuccess('Comando curl generado');
   } catch (error) {
@@ -270,11 +278,13 @@ async function probarInscripcionColonia() {
     };
 
     logWarning('Ejecutar manualmente (NO requiere autenticación):');
-    console.log(`
+    console.log(
+      `
 curl -X POST ${BACKEND_URL}/api/colonia/inscripcion \\
   -H "Content-Type: application/json" \\
   -d '${JSON.stringify(body, null, 2)}'
-    `.trim());
+    `.trim(),
+    );
 
     logSuccess('Comando curl generado');
   } catch (error) {
@@ -305,11 +315,13 @@ async function simularWebhooks() {
   };
 
   logWarning('Ejecutar manualmente (requiere firma HMAC válida o desactivar guard):');
-  console.log(`
+  console.log(
+    `
 curl -X POST ${BACKEND_URL}/api/pagos/webhook \\
   -H "Content-Type: application/json" \\
   -d '${JSON.stringify(webhookApproved, null, 2)}'
-  `.trim());
+  `.trim(),
+  );
 
   // Webhook de pago rechazado
   log('\n6.2. Webhook - Pago RECHAZADO');
@@ -358,7 +370,9 @@ async function verificarEstados(testData: TestData) {
   if (inscripciones.length > 0) {
     logSuccess(`Encontradas ${inscripciones.length} inscripciones`);
     inscripciones.forEach((i, idx) => {
-      console.log(`  ${idx + 1}. Estado Pago: ${i.estadoPago}, Monto: $${i.monto}, Fecha: ${i.fechaInscripcion}`);
+      console.log(
+        `  ${idx + 1}. Estado Pago: ${i.estadoPago}, Monto: $${i.monto}, Fecha: ${i.fechaInscripcion}`,
+      );
     });
   } else {
     logWarning('No se encontraron inscripciones');
@@ -374,7 +388,9 @@ async function verificarEstados(testData: TestData) {
   if (pagos.length > 0) {
     logSuccess(`Encontrados ${pagos.length} registros de pago`);
     pagos.forEach((p, i) => {
-      console.log(`  ${i + 1}. Estado: ${p.estado}, Monto: $${p.monto}, MP ID: ${p.mercadoPagoPaymentId || 'N/A'}`);
+      console.log(
+        `  ${i + 1}. Estado: ${p.estado}, Monto: $${p.monto}, MP ID: ${p.mercadoPagoPaymentId || 'N/A'}`,
+      );
     });
   } else {
     logWarning('No se encontraron registros de pago');

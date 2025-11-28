@@ -28,21 +28,12 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
  * </Card>
  * ```
  */
-export function Card({
-  children,
-  title,
-  className = '',
-  hoverable = false,
-  ...rest
-}: CardProps) {
+export function Card({ children, title, className = '', hoverable = false, ...rest }: CardProps) {
   // Estilos base: fondo, bordes, sombra, padding
-  const baseStyles =
-    'bg-[#fff9e6] rounded-xl shadow-md p-6 transition-all duration-200';
+  const baseStyles = 'bg-[#fff9e6] rounded-xl shadow-md p-6 transition-all duration-200';
 
   // Efecto hover si es hoverable
-  const hoverStyles = hoverable
-    ? 'hover:shadow-xl hover:-translate-y-1 cursor-pointer'
-    : '';
+  const hoverStyles = hoverable ? 'hover:shadow-xl hover:-translate-y-1 cursor-pointer' : '';
 
   const composedClasses = `${baseStyles} ${hoverStyles} ${className}`.trim();
 

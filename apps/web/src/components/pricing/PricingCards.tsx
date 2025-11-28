@@ -31,8 +31,8 @@ const PRICING_PLANS: PricingPlan[] = [
       'Acceso completo a plataforma gamificada',
       'Grupos reducidos (máx. 10 estudiantes)',
       'Progreso guardado para continuar en 2026',
-      'Inscripción: $25.000 (única vez)'
-    ]
+      'Inscripción: $25.000 (única vez)',
+    ],
   },
   {
     id: 'ciclo2026',
@@ -49,8 +49,8 @@ const PRICING_PLANS: PricingPlan[] = [
       'Grupos reducidos (máx. 10 estudiantes)',
       'Tu personaje 3D + sistema de recompensas',
       'Matrícula EARLY BIRD: $50.000 (Nov-Dic)',
-      '📅 Horarios confirmados antes del 20 feb'
-    ]
+      '📅 Horarios confirmados antes del 20 feb',
+    ],
   },
   {
     id: 'pack-completo',
@@ -66,9 +66,9 @@ const PRICING_PLANS: PricingPlan[] = [
       'Enero: $55.000/mes • Marzo: $60.000/mes',
       'Prioridad ABSOLUTA en elección de horarios',
       'Continuidad del progreso (XP, avatar, casa)',
-      'Sin interrupciones en el aprendizaje'
-    ]
-  }
+      'Sin interrupciones en el aprendizaje',
+    ],
+  },
 ];
 
 export default function PricingCards() {
@@ -110,11 +110,8 @@ export default function PricingCards() {
     <>
       {/* Grid de 2 cards pequeñas arriba */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-[900px] mx-auto mb-6">
-        {PRICING_PLANS.filter(p => p.id !== 'pack-completo').map((plan) => (
-          <div
-            key={plan.id}
-            className="compact-card"
-          >
+        {PRICING_PLANS.filter((p) => p.id !== 'pack-completo').map((plan) => (
+          <div key={plan.id} className="compact-card">
             <div className="flex items-start justify-between mb-3">
               <div>
                 <h3 className="text-xl font-black text-white mb-1">{plan.name}</h3>
@@ -126,9 +123,7 @@ export default function PricingCards() {
             {plan.id === 'colonia' && (
               <div className="mb-3">
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-3xl font-black text-white">
-                    $25.000
-                  </span>
+                  <span className="text-3xl font-black text-white">$25.000</span>
                   <span className="text-gray-500 text-sm">inscripción</span>
                 </div>
                 <p className="text-sm text-gray-400">Luego $55.000/mes (3 meses)</p>
@@ -137,9 +132,7 @@ export default function PricingCards() {
             {plan.id === 'ciclo2026' && (
               <div className="mb-3">
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-3xl font-black text-white">
-                    $50.000
-                  </span>
+                  <span className="text-3xl font-black text-white">$50.000</span>
                   <span className="text-gray-500 text-sm">matrícula EARLY BIRD</span>
                 </div>
                 <p className="text-sm text-gray-400">Luego $60.000/mes</p>
@@ -155,10 +148,7 @@ export default function PricingCards() {
               ))}
             </ul>
 
-            <button
-              onClick={() => handleSubscribe(plan.id)}
-              className="compact-button"
-            >
+            <button onClick={() => handleSubscribe(plan.id)} className="compact-button">
               Inscribirme
             </button>
           </div>
@@ -166,14 +156,9 @@ export default function PricingCards() {
       </div>
 
       {/* Pack Completo destacado - Card grande */}
-      {PRICING_PLANS.filter(p => p.id === 'pack-completo').map((plan) => (
-        <div
-          key={plan.id}
-          className="featured-card"
-        >
-          <div className="featured-badge">
-            🔥 MEJOR OFERTA
-          </div>
+      {PRICING_PLANS.filter((p) => p.id === 'pack-completo').map((plan) => (
+        <div key={plan.id} className="featured-card">
+          <div className="featured-badge">🔥 MEJOR OFERTA</div>
 
           <div className="grid md:grid-cols-2 gap-8">
             <div>
@@ -186,20 +171,21 @@ export default function PricingCards() {
                 </span>
                 <span className="text-gray-400">inscripción total</span>
               </div>
-              <p className="text-sm text-[#10b981] font-bold mb-3">💰 Ahorrás $15.000 en matrícula</p>
+              <p className="text-sm text-[#10b981] font-bold mb-3">
+                💰 Ahorrás $15.000 en matrícula
+              </p>
 
               <div className="bg-white/5 rounded-lg p-3 mb-6 border border-white/10">
                 <p className="text-xs text-gray-400 mb-2">Cuotas mensuales:</p>
                 <p className="text-sm text-white font-bold">📅 Enero-Febrero: $55.000/mes</p>
                 <p className="text-xs text-gray-400 mb-1">(Durante la Colonia)</p>
-                <p className="text-sm text-white font-bold mt-2">📅 Marzo en adelante: $60.000/mes</p>
+                <p className="text-sm text-white font-bold mt-2">
+                  📅 Marzo en adelante: $60.000/mes
+                </p>
                 <p className="text-xs text-gray-400">(Durante el Ciclo 2026)</p>
               </div>
 
-              <button
-                onClick={() => handleSubscribe(plan.id)}
-                className="featured-button"
-              >
+              <button onClick={() => handleSubscribe(plan.id)} className="featured-button">
                 Inscribirme al Pack Completo →
               </button>
             </div>
@@ -223,7 +209,9 @@ export default function PricingCards() {
         <div className="async-card">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex-1">
-              <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Modalidad Asincrónica</div>
+              <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">
+                Modalidad Asincrónica
+              </div>
               <h3 className="text-2xl font-black text-white mb-1">📚 EXPLORADOR</h3>
               <p className="text-sm text-gray-400 mb-3">
                 Para que aprendan a su ritmo, cuando quieran. Sin clases en vivo.
@@ -235,10 +223,7 @@ export default function PricingCards() {
               <p className="text-xs text-[#10b981]">✨ Sin inscripción</p>
             </div>
 
-            <button
-              onClick={() => handleSubscribe('asincronica')}
-              className="async-button"
-            >
+            <button onClick={() => handleSubscribe('asincronica')} className="async-button">
               Ver Cursos Online →
             </button>
           </div>
@@ -256,7 +241,6 @@ export default function PricingCards() {
           tipoInscripcion={selectedPlan}
         />
       )}
-
 
       <style jsx>{`
         /* Compact Card - Cards pequeñas arriba */
@@ -317,7 +301,7 @@ export default function PricingCards() {
           position: absolute;
           top: -12px;
           left: 32px;
-          background: linear-gradient(135deg, #FF6B35, #fbbf24);
+          background: linear-gradient(135deg, #ff6b35, #fbbf24);
           color: white;
           padding: 6px 16px;
           border-radius: 20px;
@@ -402,8 +386,13 @@ export default function PricingCards() {
         }
 
         @keyframes floatCard {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-15px); }
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-15px);
+          }
         }
 
         .popular-card:hover {
@@ -429,14 +418,18 @@ export default function PricingCards() {
         .top-bar-animated {
           height: 6px;
           opacity: 1 !important;
-          background: linear-gradient(90deg, #FF6B35, #fbbf24, #0ea5e9);
+          background: linear-gradient(90deg, #ff6b35, #fbbf24, #0ea5e9);
           background-size: 200% 100%;
           animation: barShift 2s linear infinite;
         }
 
         @keyframes barShift {
-          0% { background-position: 0% 50%; }
-          100% { background-position: 200% 50%; }
+          0% {
+            background-position: 0% 50%;
+          }
+          100% {
+            background-position: 200% 50%;
+          }
         }
 
         /* Particles */
@@ -450,17 +443,37 @@ export default function PricingCards() {
           z-index: 1;
         }
 
-        .particle-1 { background: #0ea5e9; }
-        .particle-2 { background: #FF6B35; }
-        .particle-3 { background: #fbbf24; }
-        .particle-4 { background: #0ea5e9; }
-        .particle-5 { background: #FF6B35; }
+        .particle-1 {
+          background: #0ea5e9;
+        }
+        .particle-2 {
+          background: #ff6b35;
+        }
+        .particle-3 {
+          background: #fbbf24;
+        }
+        .particle-4 {
+          background: #0ea5e9;
+        }
+        .particle-5 {
+          background: #ff6b35;
+        }
 
         @keyframes particleFloat {
-          0% { transform: translateY(100%) translateX(0); opacity: 0; }
-          10% { opacity: 0.6; }
-          90% { opacity: 0.6; }
-          100% { transform: translateY(-100%) translateX(20px); opacity: 0; }
+          0% {
+            transform: translateY(100%) translateX(0);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.6;
+          }
+          90% {
+            opacity: 0.6;
+          }
+          100% {
+            transform: translateY(-100%) translateX(20px);
+            opacity: 0;
+          }
         }
 
         /* Tags */
@@ -481,15 +494,20 @@ export default function PricingCards() {
         }
 
         .tag-popular {
-          background: linear-gradient(135deg, #FF6B35, #fbbf24);
+          background: linear-gradient(135deg, #ff6b35, #fbbf24);
           color: #fff;
           border: none;
           animation: tagWiggle 1s ease-in-out infinite;
         }
 
         @keyframes tagWiggle {
-          0%, 100% { transform: rotate(-3deg) scale(1); }
-          50% { transform: rotate(3deg) scale(1.1); }
+          0%,
+          100% {
+            transform: rotate(-3deg) scale(1);
+          }
+          50% {
+            transform: rotate(3deg) scale(1.1);
+          }
         }
 
         /* Plan Name */
@@ -528,7 +546,7 @@ export default function PricingCards() {
         }
 
         .price-gradient {
-          background: linear-gradient(135deg, #FF6B35, #fbbf24);
+          background: linear-gradient(135deg, #ff6b35, #fbbf24);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -539,7 +557,8 @@ export default function PricingCards() {
         }
 
         @keyframes priceGlow {
-          0%, 100% {
+          0%,
+          100% {
             filter: brightness(1) drop-shadow(0 0 0px rgba(255, 107, 53, 0));
           }
           50% {
@@ -665,7 +684,7 @@ export default function PricingCards() {
         }
 
         .cta-gradient {
-          background: linear-gradient(135deg, #FF6B35, #fbbf24);
+          background: linear-gradient(135deg, #ff6b35, #fbbf24);
         }
 
         .cta-gradient:hover {
@@ -685,8 +704,12 @@ export default function PricingCards() {
         }
 
         @keyframes ctaSweep {
-          0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-          100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+          0% {
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+          }
+          100% {
+            transform: translateX(100%) translateY(100%) rotate(45deg);
+          }
         }
 
         .cta-button:active {

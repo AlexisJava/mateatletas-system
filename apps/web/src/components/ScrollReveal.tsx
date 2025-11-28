@@ -13,7 +13,7 @@ export default function ScrollReveal({
   children,
   animation = 'fade-up',
   delay = 0,
-  className = ''
+  className = '',
 }: ScrollRevealProps) {
   const { elementRef, isVisible } = useScrollAnimation(0.1);
 
@@ -23,7 +23,7 @@ export default function ScrollReveal({
     'fade-left': 'translate-x-12 opacity-0',
     'fade-right': '-translate-x-12 opacity-0',
     'zoom-in': 'scale-95 opacity-0',
-    'fade-in': 'opacity-0'
+    'fade-in': 'opacity-0',
   };
 
   const visibleClasses = 'translate-y-0 translate-x-0 scale-100 opacity-100';

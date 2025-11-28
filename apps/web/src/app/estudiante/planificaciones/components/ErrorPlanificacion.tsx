@@ -50,9 +50,7 @@ export function ErrorPlanificacion({ error, codigo, onRetry }: ErrorPlanificacio
 
         {/* Mensaje de error */}
         <div className="bg-black/30 rounded-2xl p-4 mb-6 border border-red-500/30">
-          <p className="text-red-300 text-sm font-mono">
-            {error.message}
-          </p>
+          <p className="text-red-300 text-sm font-mono">{error.message}</p>
           <p className="text-white/50 text-xs mt-2">
             Código: <code className="bg-white/10 px-2 py-1 rounded">{codigo}</code>
           </p>
@@ -60,9 +58,7 @@ export function ErrorPlanificacion({ error, codigo, onRetry }: ErrorPlanificacio
 
         {/* Sugerencias */}
         <div className="bg-white/5 rounded-2xl p-4 mb-6">
-          <p className="text-white text-sm font-bold mb-2">
-            Posibles soluciones:
-          </p>
+          <p className="text-white text-sm font-bold mb-2">Posibles soluciones:</p>
           <ul className="text-white/80 text-sm space-y-1 list-disc list-inside">
             <li>Verifica que el código de la planificación sea correcto</li>
             <li>Intenta recargar la página</li>
@@ -83,7 +79,7 @@ export function ErrorPlanificacion({ error, codigo, onRetry }: ErrorPlanificacio
             </motion.button>
           )}
           <motion.button
-            onClick={() => window.location.href = '/estudiante/gimnasio'}
+            onClick={() => (window.location.href = '/estudiante/gimnasio')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3 rounded-2xl transition-colors"

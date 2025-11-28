@@ -31,14 +31,14 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
         id: 'inicio',
         emoji: '🚀',
         text: 'Iniciando análisis del perfil...',
-        duration: 800
+        duration: 800,
       },
       {
         id: 'personalidad',
         emoji: '💪',
         text: `Analizando estilo de aprendizaje (${getPersonalidadText()})`,
-        duration: 1200
-      }
+        duration: 1200,
+      },
     ];
 
     // Si juega videojuegos, analizar eso
@@ -47,17 +47,21 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
         id: 'juegos',
         emoji: '🎮',
         text: `Evaluando preferencias de juegos (${respuestas.juegos_favoritos?.length || 0} seleccionados)`,
-        duration: 1000
+        duration: 1000,
       });
     }
 
     // Si mira videos educativos
-    if (respuestas?.contenido_consume?.some(c => ['ciencia', 'matematica', 'programacion'].includes(c))) {
+    if (
+      respuestas?.contenido_consume?.some((c) =>
+        ['ciencia', 'matematica', 'programacion'].includes(c),
+      )
+    ) {
       steps.push({
         id: 'contenido',
         emoji: '🔬',
         text: 'Detectando intereses en contenido educativo...',
-        duration: 1000
+        duration: 1000,
       });
     }
 
@@ -66,26 +70,26 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
         id: 'habilidades',
         emoji: '🧮',
         text: `Evaluando nivel actual (Programación: ${getNivelProgramacionText()})`,
-        duration: 1200
+        duration: 1200,
       },
       {
         id: 'objetivos',
         emoji: '🎯',
         text: `Procesando objetivo principal: "${getObjetivoText()}"`,
-        duration: 1400
+        duration: 1400,
       },
       {
         id: 'matching',
         emoji: '🔍',
         text: 'Buscando la ruta perfecta entre 10 opciones...',
-        duration: 1500
+        duration: 1500,
       },
       {
         id: 'final',
         emoji: '✨',
         text: '¡Ruta encontrada! Preparando resultados...',
-        duration: 1000
-      }
+        duration: 1000,
+      },
     );
 
     return steps;
@@ -96,35 +100,45 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
   // Helpers para texto personalizado
   function getPersonalidadText() {
     switch (respuestas?.personalidad_problema) {
-      case 'insiste_solo': return 'Perseverante';
-      case 'pide_ayuda': return 'Colaborativo';
-      case 'busca_alternativa': return 'Creativo';
-      case 'se_frustra': return 'Necesita apoyo';
-      default: return 'En análisis';
+      case 'insiste_solo':
+        return 'Perseverante';
+      case 'pide_ayuda':
+        return 'Colaborativo';
+      case 'busca_alternativa':
+        return 'Creativo';
+      case 'se_frustra':
+        return 'Necesita apoyo';
+      default:
+        return 'En análisis';
     }
   }
 
   function getNivelProgramacionText() {
     switch (respuestas?.nivel_programacion) {
-      case 'nunca': return 'Principiante';
-      case 'scratch_basico': return 'Básico';
-      case 'scratch_avanzado': return 'Avanzado';
-      case 'otro_lenguaje': return 'Experto';
-      default: return 'Evaluando';
+      case 'nunca':
+        return 'Principiante';
+      case 'scratch_basico':
+        return 'Básico';
+      case 'scratch_avanzado':
+        return 'Avanzado';
+      case 'otro_lenguaje':
+        return 'Experto';
+      default:
+        return 'Evaluando';
     }
   }
 
   function getObjetivoText() {
     const objetivos: Record<string, string> = {
-      'crear_su_propio_juego': 'Crear su propio juego',
-      'publicar_juego_roblox': 'Publicar en Roblox',
-      'ganar_olimpiada': 'Ganar olimpiada',
-      'hacer_web_propia': 'Hacer su web',
-      'entender_como_funcionan_juegos': 'Entender juegos',
-      'mejorar_en_mate': 'Mejorar en mate',
-      'aprender_ia': 'Aprender IA',
-      'crear_app': 'Crear app',
-      'explorar_ciencia': 'Explorar ciencia'
+      crear_su_propio_juego: 'Crear su propio juego',
+      publicar_juego_roblox: 'Publicar en Roblox',
+      ganar_olimpiada: 'Ganar olimpiada',
+      hacer_web_propia: 'Hacer su web',
+      entender_como_funcionan_juegos: 'Entender juegos',
+      mejorar_en_mate: 'Mejorar en mate',
+      aprender_ia: 'Aprender IA',
+      crear_app: 'Crear app',
+      explorar_ciencia: 'Explorar ciencia',
     };
     return objetivos[respuestas?.objetivo_principal || ''] || 'Definiendo...';
   }
@@ -133,15 +147,15 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
   useEffect(() => {
     if (currentStep < steps.length) {
       const timer = setTimeout(() => {
-        setCompletedSteps(prev => [...prev, steps[currentStep].id]);
-        setCurrentStep(prev => prev + 1);
+        setCompletedSteps((prev) => [...prev, steps[currentStep].id]);
+        setCurrentStep((prev) => prev + 1);
       }, steps[currentStep].duration);
 
       return () => clearTimeout(timer);
     }
   }, [currentStep, steps]);
 
-  const progress = ((currentStep / steps.length) * 100);
+  const progress = (currentStep / steps.length) * 100;
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
@@ -151,38 +165,38 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
           className="absolute top-20 left-20 w-96 h-96 bg-[#0ea5e9]/30 rounded-full blur-[120px]"
           animate={{
             scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3]
+            opacity: [0.3, 0.5, 0.3],
           }}
           transition={{
             duration: 4,
             repeat: Infinity,
-            ease: 'easeInOut'
+            ease: 'easeInOut',
           }}
         />
         <motion.div
           className="absolute bottom-20 right-20 w-96 h-96 bg-[#8b5cf6]/30 rounded-full blur-[120px]"
           animate={{
             scale: [1, 1.3, 1],
-            opacity: [0.3, 0.5, 0.3]
+            opacity: [0.3, 0.5, 0.3],
           }}
           transition={{
             duration: 5,
             repeat: Infinity,
             ease: 'easeInOut',
-            delay: 1
+            delay: 1,
           }}
         />
         <motion.div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#10b981]/20 rounded-full blur-[120px]"
           animate={{
             scale: [1, 1.4, 1],
-            opacity: [0.2, 0.4, 0.2]
+            opacity: [0.2, 0.4, 0.2],
           }}
           transition={{
             duration: 6,
             repeat: Infinity,
             ease: 'easeInOut',
-            delay: 2
+            delay: 2,
           }}
         />
       </div>
@@ -200,18 +214,19 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
             className="text-8xl mb-6"
             animate={{
               rotate: [0, 10, -10, 0],
-              scale: [1, 1.1, 1]
+              scale: [1, 1.1, 1],
             }}
             transition={{
               duration: 2,
               repeat: Infinity,
-              ease: 'easeInOut'
+              ease: 'easeInOut',
             }}
           >
             🧠
           </motion.div>
           <h1 className="text-4xl md:text-5xl font-black text-white mb-4">
-            Analizando el perfil de <span className="title-gradient">{respuestas?.nombre_estudiante}</span>
+            Analizando el perfil de{' '}
+            <span className="title-gradient">{respuestas?.nombre_estudiante}</span>
           </h1>
           <p className="text-xl text-white/70">
             Procesando {steps.length} variables para encontrar la ruta perfecta
@@ -232,7 +247,7 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
               animate={{ width: `${progress}%` }}
               transition={{
                 duration: 0.5,
-                ease: 'easeOut'
+                ease: 'easeOut',
               }}
             />
           </div>
@@ -258,11 +273,12 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   className={`
                     relative px-6 py-4 rounded-2xl border-2 transition-all
-                    ${isCompleted
-                      ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-emerald-400/50'
-                      : isCurrent
-                        ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border-cyan-400 shadow-lg shadow-cyan-500/20'
-                        : 'bg-slate-900/40 border-slate-800'
+                    ${
+                      isCompleted
+                        ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-emerald-400/50'
+                        : isCurrent
+                          ? 'bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border-cyan-400 shadow-lg shadow-cyan-500/20'
+                          : 'bg-slate-900/40 border-slate-800'
                     }
                   `}
                 >
@@ -270,14 +286,18 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
                     {/* Emoji/Icon */}
                     <motion.div
                       className="text-4xl flex-shrink-0"
-                      animate={isCurrent ? {
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 5, -5, 0]
-                      } : {}}
+                      animate={
+                        isCurrent
+                          ? {
+                              scale: [1, 1.2, 1],
+                              rotate: [0, 5, -5, 0],
+                            }
+                          : {}
+                      }
                       transition={{
                         duration: 1,
                         repeat: isCurrent ? Infinity : 0,
-                        ease: 'easeInOut'
+                        ease: 'easeInOut',
                       }}
                     >
                       {step.emoji}
@@ -285,11 +305,15 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
 
                     {/* Text */}
                     <div className="flex-1">
-                      <p className={`font-semibold text-lg ${
-                        isCompleted ? 'text-emerald-400'
-                        : isCurrent ? 'text-cyan-400'
-                        : 'text-slate-500'
-                      }`}>
+                      <p
+                        className={`font-semibold text-lg ${
+                          isCompleted
+                            ? 'text-emerald-400'
+                            : isCurrent
+                              ? 'text-cyan-400'
+                              : 'text-slate-500'
+                        }`}
+                      >
                         {step.text}
                       </p>
                     </div>
@@ -333,7 +357,8 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
           className="mt-8 text-center"
         >
           <p className="text-slate-500 text-sm">
-            💡 Nuestro algoritmo está evaluando más de 50 puntos de datos para personalizar tu recomendación
+            💡 Nuestro algoritmo está evaluando más de 50 puntos de datos para personalizar tu
+            recomendación
           </p>
         </motion.div>
       </div>

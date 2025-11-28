@@ -51,7 +51,7 @@ export default function AsistenciaPage() {
    */
   const handleMarcarAsistencia = async (
     estudiante_id: string,
-    data: MarcarAsistenciaDto
+    data: MarcarAsistenciaDto,
   ): Promise<boolean> => {
     const success = await marcarAsistencia(claseId, estudiante_id, data);
 
@@ -110,57 +110,55 @@ export default function AsistenciaPage() {
           const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);
 
           return (
-        <div
-          className="bg-white rounded-lg shadow-md p-6 border-l-4"
-          style={{
-            borderLeftColor: rutaCurricular?.color || '#ff6b35',
-          }}
-        >
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-[#2a1a5e]">
-                {claseActual.nombre}
-              </h1>
-              {claseActual.descripcion && (
-                <p className="text-gray-600 mt-2">{claseActual.descripcion}</p>
-              )}
-              <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-gray-600">
-                <span className="flex items-center gap-2">
-                  <span>📅</span>
-                  {formatFecha(claseActual.fecha_hora_inicio)}
-                </span>
-                <span className="flex items-center gap-2">
-                  <span>⏱️</span>
-                  {claseActual.duracion_minutos} minutos
-                </span>
-                <span className="flex items-center gap-2">
-                  <span>👥</span>
-                  {cuposOcupados}/{cupoMaximo} inscritos
-                  {` (${cuposDisponibles} disponibles)`}
-                </span>
-                {rutaCurricular && (
-                  <span
-                    className="px-3 py-1 rounded-full text-xs font-semibold"
-                    style={{
-                      backgroundColor: `${rutaCurricular.color}20`,
-                      color: rutaCurricular.color,
-                    }}
-                  >
-                    {rutaCurricular.nombre}
-                  </span>
-                )}
+            <div
+              className="bg-white rounded-lg shadow-md p-6 border-l-4"
+              style={{
+                borderLeftColor: rutaCurricular?.color || '#ff6b35',
+              }}
+            >
+              <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-[#2a1a5e]">{claseActual.nombre}</h1>
+                  {claseActual.descripcion && (
+                    <p className="text-gray-600 mt-2">{claseActual.descripcion}</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-gray-600">
+                    <span className="flex items-center gap-2">
+                      <span>📅</span>
+                      {formatFecha(claseActual.fecha_hora_inicio)}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span>⏱️</span>
+                      {claseActual.duracion_minutos} minutos
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span>👥</span>
+                      {cuposOcupados}/{cupoMaximo} inscritos
+                      {` (${cuposDisponibles} disponibles)`}
+                    </span>
+                    {rutaCurricular && (
+                      <span
+                        className="px-3 py-1 rounded-full text-xs font-semibold"
+                        style={{
+                          backgroundColor: `${rutaCurricular.color}20`,
+                          color: rutaCurricular.color,
+                        }}
+                      >
+                        {rutaCurricular.nombre}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push('/docente/mis-clases')}
+                >
+                  ← Volver a Mis Clases
+                </Button>
               </div>
             </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/docente/mis-clases')}
-            >
-              ← Volver a Mis Clases
-            </Button>
-          </div>
-        </div>
           );
         })()
       ) : null}
@@ -169,9 +167,7 @@ export default function AsistenciaPage() {
       {showSuccessMessage && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg flex items-center gap-3 animate-fade-in">
           <span className="text-2xl">✅</span>
-          <span className="font-semibold">
-            Asistencia guardada correctamente
-          </span>
+          <span className="font-semibold">Asistencia guardada correctamente</span>
         </div>
       )}
 
@@ -213,17 +209,12 @@ export default function AsistenciaPage() {
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div>
-            <h3 className="text-lg font-bold text-[#2a1a5e]">
-              ¿Terminaste de registrar?
-            </h3>
+            <h3 className="text-lg font-bold text-[#2a1a5e]">¿Terminaste de registrar?</h3>
             <p className="text-sm text-gray-600 mt-1">
               Puedes volver a editar la asistencia en cualquier momento
             </p>
           </div>
-          <Button
-            variant="primary"
-            onClick={() => router.push('/docente/mis-clases')}
-          >
+          <Button variant="primary" onClick={() => router.push('/docente/mis-clases')}>
             Finalizar y Volver
           </Button>
         </div>

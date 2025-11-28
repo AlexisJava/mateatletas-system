@@ -180,7 +180,9 @@ test.describe('Colonia Course Catalog - Course Cards', () => {
 
   test('Course cards están visibles', async ({ page }) => {
     // Debe haber al menos un curso visible - buscar elementos motion.div que contienen cursos
-    const courseCards = page.locator('div').filter({ hasText: /Matemática|Programación|Ciencias/i });
+    const courseCards = page
+      .locator('div')
+      .filter({ hasText: /Matemática|Programación|Ciencias/i });
     const cardCount = await courseCards.count();
     expect(cardCount).toBeGreaterThan(0);
   });
@@ -201,7 +203,9 @@ test.describe('Colonia Course Catalog - Course Cards', () => {
     // ya que los CourseCards pueden tener diferentes comportamientos
 
     // Simplemente verificamos que los cards existen
-    const courseCards = page.locator('div').filter({ hasText: /Matemática|Programación|Ciencias/i });
+    const courseCards = page
+      .locator('div')
+      .filter({ hasText: /Matemática|Programación|Ciencias/i });
     const count = await courseCards.count();
     expect(count).toBeGreaterThan(0);
   });

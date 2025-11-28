@@ -72,8 +72,8 @@ export default function TiendaPage() {
     },
     onError: (error: Error) => {
       const mensaje =
-        (error as Error & { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        'Error al solicitar canje. Intenta nuevamente.';
+        (error as Error & { response?: { data?: { message?: string } } })?.response?.data
+          ?.message || 'Error al solicitar canje. Intenta nuevamente.';
       toast.error(mensaje);
     },
   });
@@ -91,7 +91,7 @@ export default function TiendaPage() {
   const cursosFiltrados = cursos.filter(
     (curso) =>
       curso.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
-      curso.descripcion.toLowerCase().includes(busqueda.toLowerCase())
+      curso.descripcion.toLowerCase().includes(busqueda.toLowerCase()),
   );
 
   const handleClickCurso = (curso: CursoCatalogo) => {

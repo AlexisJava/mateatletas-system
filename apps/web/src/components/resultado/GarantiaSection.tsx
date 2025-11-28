@@ -61,8 +61,10 @@ export default function GarantiaSection() {
 
               <p className="text-2xl md:text-3xl text-white font-bold mb-8 leading-relaxed max-w-3xl mx-auto">
                 Si en <span className="text-emerald-400">7 días</span> no estás{' '}
-                <span className="underline decoration-emerald-400 decoration-4">completamente satisfecho</span>,
-                te devolvemos TODO.
+                <span className="underline decoration-emerald-400 decoration-4">
+                  completamente satisfecho
+                </span>
+                , te devolvemos TODO.
               </p>
 
               <div className="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto mb-8">
@@ -106,9 +108,9 @@ export default function GarantiaSection() {
             ¿Por qué podemos ofrecer esta garantía?
           </h3>
           <p className="text-slate-300 text-xl leading-relaxed">
-            Porque <strong className="text-white">sabemos que funciona</strong>. Más del 95% de las familias
-            que arrancan con nosotros completan toda la ruta y piden más cursos.
-            La tasa de devolución es <strong className="text-emerald-400">menor al 2%</strong>.
+            Porque <strong className="text-white">sabemos que funciona</strong>. Más del 95% de las
+            familias que arrancan con nosotros completan toda la ruta y piden más cursos. La tasa de
+            devolución es <strong className="text-emerald-400">menor al 2%</strong>.
           </p>
         </div>
       </motion.div>
@@ -125,11 +127,13 @@ export default function GarantiaSection() {
       >
         <div className="text-center mb-12">
           <h3 className="text-4xl md:text-5xl font-black text-white mb-4">
-            Los <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">números</span> hablan
+            Los{' '}
+            <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+              números
+            </span>{' '}
+            hablan
           </h3>
-          <p className="text-slate-400 text-lg">
-            Resultados reales de familias reales
-          </p>
+          <p className="text-slate-400 text-lg">Resultados reales de familias reales</p>
         </div>
 
         <div className="grid md:grid-cols-4 gap-6">
@@ -147,12 +151,8 @@ export default function GarantiaSection() {
             <div className="text-6xl font-black bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-3">
               +120
             </div>
-            <div className="text-white font-bold text-lg mb-2">
-              Estudiantes activos
-            </div>
-            <div className="text-slate-400 text-sm">
-              Aprendiendo cada semana
-            </div>
+            <div className="text-white font-bold text-lg mb-2">Estudiantes activos</div>
+            <div className="text-slate-400 text-sm">Aprendiendo cada semana</div>
           </motion.div>
 
           {/* Métrica 2: Rating promedio */}
@@ -169,12 +169,8 @@ export default function GarantiaSection() {
             <div className="text-6xl font-black bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-3">
               4.9/5
             </div>
-            <div className="text-white font-bold text-lg mb-2">
-              Rating promedio
-            </div>
-            <div className="text-slate-400 text-sm">
-              Basado en 24 familias
-            </div>
+            <div className="text-white font-bold text-lg mb-2">Rating promedio</div>
+            <div className="text-slate-400 text-sm">Basado en 24 familias</div>
           </motion.div>
 
           {/* Métrica 3: Tasa de finalización */}
@@ -191,12 +187,8 @@ export default function GarantiaSection() {
             <div className="text-6xl font-black bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent mb-3">
               95%
             </div>
-            <div className="text-white font-bold text-lg mb-2">
-              Completan su ruta
-            </div>
-            <div className="text-slate-400 text-sm">
-              Terminan los 4 cursos
-            </div>
+            <div className="text-white font-bold text-lg mb-2">Completan su ruta</div>
+            <div className="text-slate-400 text-sm">Terminan los 4 cursos</div>
           </motion.div>
 
           {/* Métrica 4: Mejora académica */}
@@ -213,12 +205,8 @@ export default function GarantiaSection() {
             <div className="text-6xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-3">
               87%
             </div>
-            <div className="text-white font-bold text-lg mb-2">
-              Mejoran en mate
-            </div>
-            <div className="text-slate-400 text-sm">
-              Según padres encuestados
-            </div>
+            <div className="text-white font-bold text-lg mb-2">Mejoran en mate</div>
+            <div className="text-slate-400 text-sm">Según padres encuestados</div>
           </motion.div>
         </div>
       </motion.div>
@@ -235,11 +223,12 @@ export default function GarantiaSection() {
       >
         <div className="text-center mb-12">
           <h3 className="text-4xl md:text-5xl font-black text-white mb-4">
-            Lo que dicen las <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">familias</span>
+            Lo que dicen las{' '}
+            <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+              familias
+            </span>
           </h3>
-          <p className="text-slate-400 text-lg">
-            Padres e hijos que ya transformaron su futuro
-          </p>
+          <p className="text-slate-400 text-lg">Padres e hijos que ya transformaron su futuro</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -262,8 +251,10 @@ export default function GarantiaSection() {
               </div>
             </div>
             <p className="text-slate-200 text-lg leading-relaxed mb-4">
-              "Lucas completó la ruta Game Maker y <strong className="text-cyan-400">ahora está creando sus propios juegos</strong>.
-              No solo aprendió programación, también <strong className="text-white">mejoró en matemática</strong>.
+              "Lucas completó la ruta Game Maker y{' '}
+              <strong className="text-cyan-400">ahora está creando sus propios juegos</strong>. No
+              solo aprendió programación, también{' '}
+              <strong className="text-white">mejoró en matemática</strong>.
             </p>
             <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4">
               <div className="flex items-center gap-2 text-cyan-400 font-bold">
@@ -292,8 +283,9 @@ export default function GarantiaSection() {
               </div>
             </div>
             <p className="text-slate-200 text-lg leading-relaxed mb-4">
-              "Inscribimos a nuestros <strong className="text-emerald-400">3 hijos</strong> en diferentes rutas.
-              El descuento familiar nos ayudó muchísimo. Los chicos están <strong className="text-white">motivados</strong> y aprenden a su ritmo."
+              "Inscribimos a nuestros <strong className="text-emerald-400">3 hijos</strong> en
+              diferentes rutas. El descuento familiar nos ayudó muchísimo. Los chicos están{' '}
+              <strong className="text-white">motivados</strong> y aprenden a su ritmo."
             </p>
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
               <div className="flex items-center gap-2 text-emerald-400 font-bold">
@@ -322,8 +314,10 @@ export default function GarantiaSection() {
               </div>
             </div>
             <p className="text-slate-200 text-lg leading-relaxed mb-4">
-              "Mateo <strong className="text-purple-400">nunca había programado</strong>. Empezó con Python Dev y ahora está
-              haciendo <strong className="text-white">proyectos increíbles</strong>. El soporte de los profes es excelente."
+              "Mateo <strong className="text-purple-400">nunca había programado</strong>. Empezó con
+              Python Dev y ahora está haciendo{' '}
+              <strong className="text-white">proyectos increíbles</strong>. El soporte de los profes
+              es excelente."
             </p>
             <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
               <div className="flex items-center gap-2 text-purple-400 font-bold">
@@ -352,8 +346,9 @@ export default function GarantiaSection() {
               </div>
             </div>
             <p className="text-slate-200 text-lg leading-relaxed mb-4">
-              "La plataforma es <strong className="text-pink-400">súper intuitiva</strong>. Emma puede seguir las clases sola
-              y yo veo su progreso desde el panel. Es una <strong className="text-white">inversión en su futuro</strong>."
+              "La plataforma es <strong className="text-pink-400">súper intuitiva</strong>. Emma
+              puede seguir las clases sola y yo veo su progreso desde el panel. Es una{' '}
+              <strong className="text-white">inversión en su futuro</strong>."
             </p>
             <div className="bg-pink-500/10 border border-pink-500/30 rounded-xl p-4">
               <div className="flex items-center gap-2 text-pink-400 font-bold">

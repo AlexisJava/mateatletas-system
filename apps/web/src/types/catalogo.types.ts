@@ -1,8 +1,4 @@
-import {
-  productoSchema,
-  productosResponseSchema,
-  tipoProductoEnum,
-} from '@mateatletas/contracts';
+import { productoSchema, productosResponseSchema, tipoProductoEnum } from '@mateatletas/contracts';
 import type { z } from 'zod';
 
 /**

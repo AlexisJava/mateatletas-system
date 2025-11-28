@@ -53,10 +53,7 @@ export default function EstudianteProfilePage() {
           Volver
         </Button>
         <div className="flex gap-3">
-          <Button
-            variant="secondary"
-            onClick={() => router.push(`/estudiantes?edit=${id}`)}
-          >
+          <Button variant="secondary" onClick={() => router.push(`/estudiantes?edit=${id}`)}>
             <Edit className="w-5 h-5 mr-2" />
             Editar
           </Button>
@@ -101,9 +98,7 @@ export default function EstudianteProfilePage() {
               <Award className="w-6 h-6 text-[#f7b801]" />
               <h3 className="font-bold text-[#2a1a5e]">Puntos Totales</h3>
             </div>
-            <p className="text-4xl font-bold text-[#f7b801]">
-              {estudianteActual.puntos_totales}
-            </p>
+            <p className="text-4xl font-bold text-[#f7b801]">{estudianteActual.puntos_totales}</p>
           </div>
 
           <div className="bg-gradient-to-br from-[#00d9ff]/10 to-[#2a1a5e]/10 p-6 rounded-xl border-4 border-black">
@@ -111,9 +106,7 @@ export default function EstudianteProfilePage() {
               <TrendingUp className="w-6 h-6 text-[#00d9ff]" />
               <h3 className="font-bold text-[#2a1a5e]">Nivel Actual</h3>
             </div>
-            <p className="text-4xl font-bold text-[#00d9ff]">
-              {estudianteActual.nivel_actual}
-            </p>
+            <p className="text-4xl font-bold text-[#00d9ff]">{estudianteActual.nivel_actual}</p>
           </div>
         </div>
       </Card>

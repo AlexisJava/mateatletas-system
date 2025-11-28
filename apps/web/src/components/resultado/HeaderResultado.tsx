@@ -20,66 +20,73 @@ export default function HeaderResultado({
   nombreEstudiante,
   edad,
   respuestas,
-  mensaje
+  mensaje,
 }: HeaderResultadoProps) {
-
   // ═══════════════════════════════════════════════════════════════════════════
   // MAPEAR CAMPOS A TEXTOS ULTRA PERSUASIVOS
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Objetivo principal - ESTO ES LO MÁS IMPORTANTE
   const objetivoMap: Record<string, { texto: string; impacto: string; emoji: string }> = {
-    'crear_su_propio_juego': {
+    crear_su_propio_juego: {
       texto: 'crear su propio videojuego',
-      impacto: 'De jugador a creador: Transformará su pasión por los juegos en una habilidad del futuro',
-      emoji: '🎮'
+      impacto:
+        'De jugador a creador: Transformará su pasión por los juegos en una habilidad del futuro',
+      emoji: '🎮',
     },
-    'publicar_juego_roblox': {
+    publicar_juego_roblox: {
       texto: 'publicar un juego en Roblox',
-      impacto: 'Millones de jugadores podrían jugar su creación. Algunos niños ganan $1000+ USD/mes con sus juegos',
-      emoji: '🎨'
+      impacto:
+        'Millones de jugadores podrían jugar su creación. Algunos niños ganan $1000+ USD/mes con sus juegos',
+      emoji: '🎨',
     },
-    'ganar_olimpiada': {
+    ganar_olimpiada: {
       texto: 'destacarse en olimpiadas',
-      impacto: 'Las olimpiadas abren puertas a becas universitarias y oportunidades internacionales',
-      emoji: '🏆'
+      impacto:
+        'Las olimpiadas abren puertas a becas universitarias y oportunidades internacionales',
+      emoji: '🏆',
     },
-    'hacer_web_propia': {
+    hacer_web_propia: {
       texto: 'crear su propia página web',
-      impacto: 'A los 15 años podría estar ganando dinero como freelancer. El desarrollo web es la skill más demandada',
-      emoji: '🌐'
+      impacto:
+        'A los 15 años podría estar ganando dinero como freelancer. El desarrollo web es la skill más demandada',
+      emoji: '🌐',
     },
-    'entender_como_funcionan_juegos': {
+    entender_como_funcionan_juegos: {
       texto: 'entender cómo funcionan los juegos',
-      impacto: 'La industria de videojuegos mueve más de $180 mil millones al año - más que cine y música juntos',
-      emoji: '🔍'
+      impacto:
+        'La industria de videojuegos mueve más de $180 mil millones al año - más que cine y música juntos',
+      emoji: '🔍',
     },
-    'mejorar_en_mate': {
+    mejorar_en_mate: {
       texto: 'mejorar en matemáticas',
       impacto: 'La matemática abre TODAS las puertas: ingeniería, medicina, economía, tecnología',
-      emoji: '📈'
+      emoji: '📈',
     },
-    'aprender_ia': {
+    aprender_ia: {
       texto: 'aprender sobre Inteligencia Artificial',
-      impacto: 'La IA está transformando el mundo. Los expertos en IA son los profesionales más buscados del 2025',
-      emoji: '🤖'
+      impacto:
+        'La IA está transformando el mundo. Los expertos en IA son los profesionales más buscados del 2025',
+      emoji: '🤖',
     },
-    'crear_app': {
+    crear_app: {
       texto: 'crear su propia app',
-      impacto: 'Mark Zuckerberg creó Facebook a los 19. Muchas apps exitosas fueron creadas por adolescentes',
-      emoji: '📱'
+      impacto:
+        'Mark Zuckerberg creó Facebook a los 19. Muchas apps exitosas fueron creadas por adolescentes',
+      emoji: '📱',
     },
-    'explorar_ciencia': {
+    explorar_ciencia: {
       texto: 'explorar experimentos científicos',
-      impacto: 'La curiosidad científica es el primer paso hacia descubrimientos que cambien el mundo',
-      emoji: '🔬'
-    }
+      impacto:
+        'La curiosidad científica es el primer paso hacia descubrimientos que cambien el mundo',
+      emoji: '🔬',
+    },
   };
 
   const objetivo = objetivoMap[respuestas.objetivo_principal] || {
     texto: 'desarrollar nuevas habilidades',
     impacto: 'Las habilidades tecnológicas son el pasaporte al futuro',
-    emoji: '🚀'
+    emoji: '🚀',
   };
 
   // Nivel de motivación - usado para el tono del mensaje
@@ -87,10 +94,13 @@ export default function HeaderResultado({
 
   // Personalidad - para mostrar el approach correcto
   const personalidadInsights: Record<string, string> = {
-    'insiste_solo': 'Su perseverancia es oro puro. Los estudiantes que insisten solos logran resultados extraordinarios.',
-    'pide_ayuda': 'Saber pedir ayuda es señal de inteligencia emocional. Los mejores profesionales colaboran.',
-    'busca_alternativa': 'Los creativos que buscan alternativas son los innovadores del futuro.',
-    'se_frustra': 'Con el apoyo adecuado, la frustración se transforma en motivación. Lo hemos visto mil veces.'
+    insiste_solo:
+      'Su perseverancia es oro puro. Los estudiantes que insisten solos logran resultados extraordinarios.',
+    pide_ayuda:
+      'Saber pedir ayuda es señal de inteligencia emocional. Los mejores profesionales colaboran.',
+    busca_alternativa: 'Los creativos que buscan alternativas son los innovadores del futuro.',
+    se_frustra:
+      'Con el apoyo adecuado, la frustración se transforma en motivación. Lo hemos visto mil veces.',
   };
 
   return (
@@ -193,8 +203,8 @@ export default function HeaderResultado({
       >
         <div className="text-center mb-10">
           <h3 className="text-3xl md:text-4xl font-black text-white mb-3">
-            ¿Por qué esta ruta es{' '}
-            <span className="text-cyan-400">perfecta</span> para {nombreEstudiante}?
+            ¿Por qué esta ruta es <span className="text-cyan-400">perfecta</span> para{' '}
+            {nombreEstudiante}?
           </h3>
           <p className="text-slate-400 text-lg">
             Nuestro algoritmo analizó {edad} años, personalidad, intereses y objetivos
@@ -212,9 +222,7 @@ export default function HeaderResultado({
             <div className="w-14 h-14 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-4">
               <Target className="w-7 h-7 text-cyan-400" />
             </div>
-            <h4 className="text-xl font-bold text-white mb-3">
-              Objetivo claro
-            </h4>
+            <h4 className="text-xl font-bold text-white mb-3">Objetivo claro</h4>
             <p className="text-slate-300 leading-relaxed">
               Quiere <strong className="text-cyan-400">{objetivo.texto}</strong> y esta ruta está
               diseñada específicamente para lograrlo.
@@ -231,9 +239,7 @@ export default function HeaderResultado({
             <div className="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4">
               <TrendingUp className="w-7 h-7 text-purple-400" />
             </div>
-            <h4 className="text-xl font-bold text-white mb-3">
-              Nivel perfecto
-            </h4>
+            <h4 className="text-xl font-bold text-white mb-3">Nivel perfecto</h4>
             <p className="text-slate-300 leading-relaxed">
               {respuestas.nivel_programacion === 'nunca' &&
                 'Arranca desde cero con bases sólidas. No necesita experiencia previa.'}
@@ -256,9 +262,7 @@ export default function HeaderResultado({
             <div className="w-14 h-14 bg-emerald-500/20 rounded-xl flex items-center justify-center mb-4">
               <Sparkles className="w-7 h-7 text-emerald-400" />
             </div>
-            <h4 className="text-xl font-bold text-white mb-3">
-              Se adapta a su forma de aprender
-            </h4>
+            <h4 className="text-xl font-bold text-white mb-3">Se adapta a su forma de aprender</h4>
             <p className="text-slate-300 leading-relaxed">
               {personalidadInsights[respuestas.personalidad_problema] ||
                 'El formato asincrónico le permite avanzar a su propio ritmo.'}
@@ -293,9 +297,7 @@ export default function HeaderResultado({
               </div>
             </div>
 
-            <p className="text-xl md:text-2xl text-white leading-relaxed font-medium">
-              {mensaje}
-            </p>
+            <p className="text-xl md:text-2xl text-white leading-relaxed font-medium">{mensaje}</p>
           </div>
         </div>
       </motion.div>

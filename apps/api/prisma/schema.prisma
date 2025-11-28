@@ -2749,6 +2749,7 @@ model EstudianteInscripcion2026 {
   @@unique([inscripcion_id, estudiante_id])
   @@index([inscripcion_id])
   @@index([estudiante_id])
+  @@index([pin])
   @@map("estudiantes_inscripciones_2026")
 }
 

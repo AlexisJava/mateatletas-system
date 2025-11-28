@@ -124,7 +124,8 @@ export function useEntrenamientos(estudianteId: string): UseEntrenamientosReturn
       setCiencias(cienciasCompletas);
       setEstadisticas(mockData.estadisticas);
     } catch (err) {
-      const errorObj = err instanceof Error ? err : new Error('Error desconocido al cargar progreso');
+      const errorObj =
+        err instanceof Error ? err : new Error('Error desconocido al cargar progreso');
       setError(errorObj);
       console.error('Error al obtener progreso del Mes de la Ciencia:', errorObj);
     } finally {

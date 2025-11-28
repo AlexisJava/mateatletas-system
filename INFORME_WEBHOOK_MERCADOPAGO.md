@@ -10,10 +10,12 @@
 
 **Síntoma Inicial**:
 Usuario intentando testear webhook de MercadoPago desde el dashboard, obteniendo errores:
+
 - **403 Forbidden** - "Access denied: IP 186.139.250.106 is not authorized"
 - Después de cambios: **404 Not Found**
 
 **URL del webhook**:
+
 - `https://mateatletas-system-production.up.railway.app/api/colonia/webhook`
 - `https://mateatletas-system-production.up.railway.app/api/inscripciones-2026/webhook`
 
@@ -29,6 +31,7 @@ El servicio `MercadoPagoIpWhitelistService` estaba bloqueando IPs que no estaban
 **Archivo**: `apps/api/src/pagos/services/mercadopago-ip-whitelist.service.ts`
 
 **Rangos originales (6 rangos)**:
+
 ```typescript
 '209.225.49.0/24',  // MercadoPago primary range
 '216.33.197.0/24',  // MercadoPago secondary range
@@ -49,6 +52,7 @@ El servicio `MercadoPagoIpWhitelistService` estaba bloqueando IPs que no estaban
 **Commit**: e3c0534 (2025-11-21)
 
 **Cambios aplicados**:
+
 ```typescript
 private readonly officialIpRanges: string[] = [
   '209.225.49.0/24',  // MercadoPago primary
@@ -67,11 +71,13 @@ private readonly officialIpRanges: string[] = [
 ### 3.2 Intento de Deploy en Railway
 
 **Acciones tomadas**:
+
 1. ✅ Commit y push del código actualizado (commit e3c0534)
 2. ✅ Forzar rebuild con commit vacío (commit b2629e7)
 3. ⏳ Railway debería hacer auto-deploy
 
 **Estado actual**:
+
 - ✅ Health endpoint responde: `{"status":"ok"}`
 - ❌ Logs siguen mostrando "6 rangos oficiales" en lugar de "8 rangos"
 - ❌ Webhook sigue fallando con 404
@@ -85,24 +91,28 @@ private readonly officialIpRanges: string[] = [
 **URL**: https://mateatletas-system-production.up.railway.app
 
 **Health Check**: ✅ OK
+
 ```json
 {
   "status": "ok",
-  "database": {"status": "up"}
+  "database": { "status": "up" }
 }
 ```
 
 **Último deployment**:
+
 - Commit en GitHub: b2629e7 (commit vacío para forzar rebuild)
 - Commit anterior con cambios: e3c0534
 
 ### 4.2 Código Local vs Railway
 
 **Local** (workspace):
+
 - ✅ Archivo `mercadopago-ip-whitelist.service.ts` tiene 8 rangos
 - ✅ Commit e3c0534 pusheado a GitHub
 
 **Railway** (producción):
+
 - ❌ Logs muestran "6 rangos oficiales de MercadoPago"
 - ❌ Código viejo sigue deployado
 
@@ -115,6 +125,7 @@ private readonly officialIpRanges: string[] = [
 ### 🚨 Railway no está reconstruyendo el código
 
 **Evidencia**:
+
 ```
 [LOG] ✅ IP Whitelist inicializado con 6 rangos oficiales de MercadoPago
 ```
@@ -122,6 +133,7 @@ private readonly officialIpRanges: string[] = [
 Debería decir **"8 rangos"** después del commit e3c0534.
 
 **Posibles causas**:
+
 1. Railway cacheó el build anterior
 2. Auto-deploy no está configurado correctamente
 3. Railway no detectó cambios significativos en el código
@@ -131,13 +143,13 @@ Debería decir **"8 rangos"** después del commit e3c0534.
 
 ## 6. Commits Realizados (Cronología)
 
-| Commit | Fecha | Descripción | Estado |
-|--------|-------|-------------|--------|
-| `b401b61` | 2025-11-21 | Fix metadata column en secret_rotations | ✅ Deployado |
-| `9b42e44` | 2025-11-21 | Agregar rangos IP iniciales | ✅ Deployado |
-| `2623240` | 2025-11-21 | Agregar rango GCP 35.186.0.0/16 | ❌ NO deployado |
-| `e3c0534` | 2025-11-21 | Agregar rango temporal 186.139.0.0/16 | ❌ NO deployado |
-| `b2629e7` | 2025-11-21 | Force rebuild (commit vacío) | ⏳ Esperando deploy |
+| Commit    | Fecha      | Descripción                             | Estado              |
+| --------- | ---------- | --------------------------------------- | ------------------- |
+| `b401b61` | 2025-11-21 | Fix metadata column en secret_rotations | ✅ Deployado        |
+| `9b42e44` | 2025-11-21 | Agregar rangos IP iniciales             | ✅ Deployado        |
+| `2623240` | 2025-11-21 | Agregar rango GCP 35.186.0.0/16         | ❌ NO deployado     |
+| `e3c0534` | 2025-11-21 | Agregar rango temporal 186.139.0.0/16   | ❌ NO deployado     |
+| `b2629e7` | 2025-11-21 | Force rebuild (commit vacío)            | ⏳ Esperando deploy |
 
 ---
 
@@ -146,6 +158,7 @@ Debería decir **"8 rangos"** después del commit e3c0534.
 ### Opción 1: Forzar Redeploy desde Railway Dashboard (RECOMENDADO)
 
 **Pasos**:
+
 1. Ir a https://railway.app/
 2. Proyecto: "Mateatletas-System"
 3. Servicio: "mateatletas-system"
@@ -153,6 +166,7 @@ Debería decir **"8 rangos"** después del commit e3c0534.
 5. **"Redeploy"**
 
 **Ventajas**:
+
 - ✅ Garantiza rebuild completo
 - ✅ Limpia caché de Railway
 - ✅ Aplica cambios inmediatamente
@@ -160,6 +174,7 @@ Debería decir **"8 rangos"** después del commit e3c0534.
 ### Opción 2: Verificar Configuración de Auto-Deploy
 
 **Revisar**:
+
 1. Railway → Settings → Deploy
 2. Verificar que "Auto Deploy" esté habilitado
 3. Verificar que esté conectado al branch correcto (`main`)
@@ -167,6 +182,7 @@ Debería decir **"8 rangos"** después del commit e3c0534.
 ### Opción 3: Trigger Manual con Cambio Real
 
 **Alternativa si Opción 1 falla**:
+
 ```bash
 # Hacer cambio visible para Railway
 echo "# Force rebuild $(date)" >> README.md
@@ -180,18 +196,24 @@ git push origin main
 ## 8. Archivos Modificados (Resumen)
 
 ### IP Whitelist Service
+
 **Archivo**: `apps/api/src/pagos/services/mercadopago-ip-whitelist.service.ts`
+
 - Líneas 48-57: Array `officialIpRanges`
 - Cambio: 6 → 8 rangos
 - Estado: ✅ Commiteado, ❌ NO deployado
 
 ### Migraciones de Seguridad
+
 **Archivo**: `apps/api/prisma/migrations/20251121002735_add_security_tables/migration.sql`
+
 - Línea 35: Agregada columna `metadata JSONB`
 - Estado: ✅ Deployado y aplicado en DB
 
 ### Migración de Pagos
+
 **Archivo**: `apps/api/prisma/migrations/20251118132555_add_processed_at_to_pagos/migration.sql`
+
 - Modificado para solo afectar `colonia_pagos`
 - Estado: ✅ Deployado y aplicado en DB
 
@@ -202,6 +224,7 @@ git push origin main
 **Última ejecución**: Durante troubleshooting
 
 **Resultados**:
+
 - ✅ 1112 tests pasando (88%)
 - ❌ 85 tests fallando (6.7%)
   - Mayormente en `colonia/*` y `pagos/webhook*`
@@ -215,16 +238,19 @@ git push origin main
 ## 10. Próximos Pasos (ACCIÓN REQUERIDA)
 
 ### Inmediato (CRÍTICO)
+
 1. 🔴 **Forzar redeploy desde Railway dashboard** (Opción 1)
 2. 🔴 **Verificar logs muestren "8 rangos oficiales"**
 3. 🔴 **Testear webhook desde MercadoPago dashboard**
 
 ### Post-Deploy
+
 4. ⚠️ **Verificar que webhook responde correctamente** (no más 403/404)
 5. ⚠️ **Crear issue en GitHub para 85 tests fallidos**
 6. ⚠️ **Remover rango temporal `186.139.0.0/16` después de testing**
 
 ### Documentación
+
 7. ✅ Documento creado: `INFORME_WEBHOOK_MERCADOPAGO.md`
 8. ⏳ Actualizar `SEGURIDAD_MEJORAS_IMPLEMENTADAS.md` post-fix
 
@@ -233,11 +259,13 @@ git push origin main
 ## 11. Contacto y Referencias
 
 **Documentación relevante**:
+
 - `docs/AUDITORIA_MIGRACIONES_DB.md` - Estado completo de DB
 - `docs/RAILWAY_PRISMA_MIGRATION_ANALISIS.md` - Análisis de Railway/Prisma
 - `SEGURIDAD_MEJORAS_IMPLEMENTADAS.md` - Cambios de seguridad aplicados
 
 **URLs importantes**:
+
 - Railway Dashboard: https://railway.app/
 - Health Endpoint: https://mateatletas-system-production.up.railway.app/api/health
 - MercadoPago Docs: https://www.mercadopago.com.ar/developers/es/docs/your-integrations/notifications/webhooks

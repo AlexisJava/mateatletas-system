@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { ISODateSchema, UUIDSchema, EmailSchema, RoleSchema, NonNegativeNumberSchema } from '../../shared/schemas/common.schema';
+import {
+  ISODateSchema,
+  UUIDSchema,
+  EmailSchema,
+  RoleSchema,
+  NonNegativeNumberSchema,
+} from '../../shared/schemas/common.schema';
 
 /**
  * Schema para AdminUser
@@ -14,11 +20,13 @@ export const AdminUserSchema = z.object({
   activo: z.boolean(),
   createdAt: ISODateSchema,
   updatedAt: ISODateSchema,
-  _count: z.object({
-    estudiantes: NonNegativeNumberSchema.optional(),
-    equipos: NonNegativeNumberSchema.optional(),
-    clases: NonNegativeNumberSchema.optional(),
-  }).optional(),
+  _count: z
+    .object({
+      estudiantes: NonNegativeNumberSchema.optional(),
+      equipos: NonNegativeNumberSchema.optional(),
+      clases: NonNegativeNumberSchema.optional(),
+    })
+    .optional(),
 });
 
 export type AdminUser = z.infer<typeof AdminUserSchema>;

@@ -8,10 +8,10 @@ async function verificarDatos() {
     const totalGrupos = await prisma.claseGrupo.count();
     const totalInscripciones = await prisma.inscripcionClaseGrupo.count();
     const inscripcionesActivas = await prisma.inscripcionClaseGrupo.count({
-      where: { fecha_baja: null }
+      where: { fecha_baja: null },
     });
     const inscripcionesConBaja = await prisma.inscripcionClaseGrupo.count({
-      where: { fecha_baja: { not: null } }
+      where: { fecha_baja: { not: null } },
     });
 
     console.log('=== RESUMEN DE DATOS ===');
@@ -28,16 +28,19 @@ async function verificarDatos() {
         take: 5,
         include: {
           estudiante: { select: { nombre: true, apellido: true } },
-          claseGrupo: { select: { nombre: true, codigo: true, dia_semana: true, hora_inicio: true } },
+          claseGrupo: {
+            select: { nombre: true, codigo: true, dia_semana: true, hora_inicio: true },
+          },
         },
       });
 
-      muestraInscripciones.forEach(i => {
-        console.log(`- ${i.estudiante.nombre} ${i.estudiante.apellido} -> ${i.claseGrupo.nombre} (${i.claseGrupo.dia_semana} ${i.claseGrupo.hora_inicio})`);
+      muestraInscripciones.forEach((i) => {
+        console.log(
+          `- ${i.estudiante.nombre} ${i.estudiante.apellido} -> ${i.claseGrupo.nombre} (${i.claseGrupo.dia_semana} ${i.claseGrupo.hora_inicio})`,
+        );
         console.log(`  fecha_baja: ${i.fecha_baja || 'null (activa)'}`);
       });
     }
-
   } catch (error) {
     console.error('Error:', error);
   } finally {

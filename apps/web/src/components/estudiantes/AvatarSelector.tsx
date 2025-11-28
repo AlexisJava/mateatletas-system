@@ -76,12 +76,8 @@ export default function AvatarSelector({
           {/* Header */}
           <div className="px-6 sm:px-8 py-5 border-b border-gray-100 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900">
-                Elegí tu avatar
-              </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Seleccioná un color que te represente
-              </p>
+              <h2 className="text-2xl font-semibold text-gray-900">Elegí tu avatar</h2>
+              <p className="text-sm text-gray-500 mt-0.5">Seleccioná un color que te represente</p>
             </div>
             <button
               onClick={onClose}
@@ -94,7 +90,6 @@ export default function AvatarSelector({
           {/* Content Area */}
           <div className="flex-1 overflow-y-auto">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 p-6 sm:p-8">
-
               {/* Left Panel - Preview grande */}
               <div className="lg:col-span-2 space-y-4">
                 {/* Preview Card */}
@@ -110,9 +105,7 @@ export default function AvatarSelector({
                       color: previewGradient.textColor,
                     }}
                   >
-                    <div className="text-6xl font-bold">
-                      {initials}
-                    </div>
+                    <div className="text-6xl font-bold">{initials}</div>
                   </motion.div>
                 </div>
 
@@ -130,9 +123,7 @@ export default function AvatarSelector({
                 {/* Nombre del gradiente */}
                 <div className="text-center">
                   <p className="text-sm text-gray-500">Estilo actual</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {previewGradient.name}
-                  </p>
+                  <p className="text-lg font-semibold text-gray-900">{previewGradient.name}</p>
                 </div>
               </div>
 
@@ -153,9 +144,10 @@ export default function AvatarSelector({
                         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                         className={`
                           relative p-3 rounded-xl border-2 transition-all
-                          ${isSelected
-                            ? 'border-blue-500 shadow-md'
-                            : 'border-gray-200 hover:border-gray-300'
+                          ${
+                            isSelected
+                              ? 'border-blue-500 shadow-md'
+                              : 'border-gray-200 hover:border-gray-300'
                           }
                         `}
                       >

@@ -24,9 +24,7 @@ export default function AdminPlanificacionesDemoPage() {
             ¡Hola Mundo!
           </h1>
 
-          <p className="text-2xl text-purple-300 font-bold mb-2">
-            Portal Admin - Planificaciones
-          </p>
+          <p className="text-2xl text-purple-300 font-bold mb-2">Portal Admin - Planificaciones</p>
 
           <p className="text-slate-400 text-lg">
             🔥 Hot Reload Activado - Los cambios se ven en tiempo real
@@ -37,9 +35,7 @@ export default function AdminPlanificacionesDemoPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border-2 border-purple-500/30 rounded-2xl p-6 hover:border-purple-400/50 transition-all">
             <Sparkles className="w-8 h-8 text-purple-400 mb-3" />
-            <h3 className="text-xl font-bold text-white mb-2">
-              Edita el código
-            </h3>
+            <h3 className="text-xl font-bold text-white mb-2">Edita el código</h3>
             <p className="text-slate-400 text-sm">
               Cambia cualquier texto en este archivo y verás el resultado instantáneamente
             </p>
@@ -47,9 +43,7 @@ export default function AdminPlanificacionesDemoPage() {
 
           <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border-2 border-pink-500/30 rounded-2xl p-6 hover:border-pink-400/50 transition-all">
             <Zap className="w-8 h-8 text-pink-400 mb-3" />
-            <h3 className="text-xl font-bold text-white mb-2">
-              Sin refrescar
-            </h3>
+            <h3 className="text-xl font-bold text-white mb-2">Sin refrescar</h3>
             <p className="text-slate-400 text-sm">
               No necesitás refrescar el navegador, los cambios aparecen solos
             </p>
@@ -57,9 +51,7 @@ export default function AdminPlanificacionesDemoPage() {
 
           <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border-2 border-blue-500/30 rounded-2xl p-6 hover:border-blue-400/50 transition-all">
             <Rocket className="w-8 h-8 text-blue-400 mb-3" />
-            <h3 className="text-xl font-bold text-white mb-2">
-              Desarrollo rápido
-            </h3>
+            <h3 className="text-xl font-bold text-white mb-2">Desarrollo rápido</h3>
             <p className="text-slate-400 text-sm">
               Iteración súper rápida: código → guardar → ver resultado
             </p>
@@ -68,17 +60,11 @@ export default function AdminPlanificacionesDemoPage() {
 
         {/* Interactive Demo */}
         <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-purple-500/50 rounded-2xl p-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">
-            Demo Interactiva
-          </h2>
+          <h2 className="text-3xl font-bold text-white mb-6">Demo Interactiva</h2>
 
           <div className="mb-6">
-            <div className="text-6xl font-black text-purple-400 mb-2">
-              {clicks}
-            </div>
-            <p className="text-slate-400">
-              Clicks registrados
-            </p>
+            <div className="text-6xl font-black text-purple-400 mb-2">{clicks}</div>
+            <p className="text-slate-400">Clicks registrados</p>
           </div>
 
           <button
@@ -98,8 +84,15 @@ export default function AdminPlanificacionesDemoPage() {
 
         {/* Footer */}
         <div className="mt-12 text-center text-slate-500 text-sm">
-          <p>📍 Ubicación: <code className="text-purple-400">/admin/planificaciones/demo</code></p>
-          <p className="mt-2">🔧 Archivo: <code className="text-purple-400">apps/web/src/app/admin/planificaciones/demo/page.tsx</code></p>
+          <p>
+            📍 Ubicación: <code className="text-purple-400">/admin/planificaciones/demo</code>
+          </p>
+          <p className="mt-2">
+            🔧 Archivo:{' '}
+            <code className="text-purple-400">
+              apps/web/src/app/admin/planificaciones/demo/page.tsx
+            </code>
+          </p>
         </div>
       </div>
     </div>

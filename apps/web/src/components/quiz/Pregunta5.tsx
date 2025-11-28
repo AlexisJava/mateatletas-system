@@ -35,7 +35,8 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                 ¡Última pregunta! ¿Qué quiere lograr?
               </h2>
               <p className="text-slate-400 text-lg">
-                Esta es la <span className="text-yellow-400 font-semibold">más importante</span> para recomendar el curso perfecto
+                Esta es la <span className="text-yellow-400 font-semibold">más importante</span>{' '}
+                para recomendar el curso perfecto
               </p>
             </div>
 
@@ -49,16 +50,17 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        objetivo_principal: opcion.value
+                        objetivo_principal: opcion.value,
                       });
                       setTimeout(() => setSubStep(2), 300);
                     }}
                     className={`
                       px-4 py-5 rounded-2xl font-semibold transition-all duration-200
                       border-2 flex flex-col items-center gap-2 text-center
-                      ${isSelected
-                        ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-400 text-white shadow-2xl shadow-yellow-500/30 scale-[1.05]'
-                        : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600 hover:text-white'
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-400 text-white shadow-2xl shadow-yellow-500/30 scale-[1.05]'
+                          : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600 hover:text-white'
                       }
                     `}
                     whileHover={{ scale: isSelected ? 1.05 : 1.02 }}
@@ -66,9 +68,7 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                   >
                     <span className="text-4xl">{opcion.emoji}</span>
                     <span className="text-sm leading-tight">{opcion.label}</span>
-                    {isSelected && (
-                      <span className="text-2xl text-yellow-400">→</span>
-                    )}
+                    {isSelected && <span className="text-2xl text-yellow-400">→</span>}
                   </motion.button>
                 );
               })}
@@ -88,7 +88,8 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                 ¿Qué tan motivado/a está?
               </h2>
               <p className="text-slate-400 text-lg">
-                Esto nos ayuda a saber el <span className="text-emerald-400 font-semibold">ritmo ideal</span>
+                Esto nos ayuda a saber el{' '}
+                <span className="text-emerald-400 font-semibold">ritmo ideal</span>
               </p>
             </div>
 
@@ -102,16 +103,17 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        nivel_motivacion: opcion.value as any
+                        nivel_motivacion: opcion.value as any,
                       });
                       setTimeout(() => setSubStep(3), 300);
                     }}
                     className={`
                       w-full px-6 py-5 rounded-2xl font-semibold text-left transition-all duration-200
                       border-2 flex items-center gap-4
-                      ${isSelected
-                        ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-emerald-400 text-white shadow-xl shadow-emerald-500/20 scale-[1.02]'
-                        : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600 hover:text-white'
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-emerald-400 text-white shadow-xl shadow-emerald-500/20 scale-[1.02]'
+                          : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600 hover:text-white'
                       }
                     `}
                     whileHover={{ scale: isSelected ? 1.02 : 1.01 }}
@@ -121,9 +123,7 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                     <div className="flex-1">
                       <span className="text-lg">{opcion.label}</span>
                     </div>
-                    {isSelected && (
-                      <span className="text-3xl text-emerald-400">→</span>
-                    )}
+                    {isSelected && <span className="text-3xl text-emerald-400">→</span>}
                   </motion.button>
                 );
               })}
@@ -152,7 +152,8 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                 ¿Cuánto tiempo puede dedicar por semana?
               </h2>
               <p className="text-slate-400 text-lg">
-                Para que el ritmo sea <span className="text-purple-400 font-semibold">sostenible</span>
+                Para que el ritmo sea{' '}
+                <span className="text-purple-400 font-semibold">sostenible</span>
               </p>
             </div>
 
@@ -163,16 +164,19 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                 return (
                   <motion.button
                     key={opcion.value}
-                    onClick={() => setRespuestas({
-                      ...respuestas,
-                      tiempo_disponible: opcion.value as any
-                    })}
+                    onClick={() =>
+                      setRespuestas({
+                        ...respuestas,
+                        tiempo_disponible: opcion.value as any,
+                      })
+                    }
                     className={`
                       px-6 py-6 rounded-2xl font-semibold transition-all duration-200
                       border-2 flex flex-col items-center gap-3
-                      ${isSelected
-                        ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-400 text-white shadow-xl shadow-purple-500/20 scale-[1.05]'
-                        : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600 hover:text-white'
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-400 text-white shadow-xl shadow-purple-500/20 scale-[1.05]'
+                          : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:bg-slate-800 hover:border-slate-600 hover:text-white'
                       }
                     `}
                     whileHover={{ scale: isSelected ? 1.05 : 1.02 }}
@@ -180,9 +184,7 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                   >
                     <span className="text-4xl">{opcion.emoji}</span>
                     <span className="text-lg">{opcion.label}</span>
-                    {isSelected && (
-                      <span className="text-2xl text-purple-400">✓</span>
-                    )}
+                    {isSelected && <span className="text-2xl text-purple-400">✓</span>}
                   </motion.button>
                 );
               })}
@@ -201,20 +203,24 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                 <input
                   type="email"
                   value={respuestas.parent_email || ''}
-                  onChange={(e) => setRespuestas({
-                    ...respuestas,
-                    parent_email: e.target.value
-                  })}
+                  onChange={(e) =>
+                    setRespuestas({
+                      ...respuestas,
+                      parent_email: e.target.value,
+                    })
+                  }
                   placeholder="Tu email"
                   className="px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all text-sm"
                 />
                 <input
                   type="text"
                   value={respuestas.parent_name || ''}
-                  onChange={(e) => setRespuestas({
-                    ...respuestas,
-                    parent_name: e.target.value
-                  })}
+                  onChange={(e) =>
+                    setRespuestas({
+                      ...respuestas,
+                      parent_name: e.target.value,
+                    })
+                  }
                   placeholder="Tu nombre"
                   className="px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all text-sm"
                 />

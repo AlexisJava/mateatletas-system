@@ -45,25 +45,28 @@ export async function loginAsDocente(page: Page): Promise<string> {
   await page.goto('/');
 
   // Setear el token y el store de Zustand con los datos del usuario
-  await page.evaluate(({ tokenValue, userData }) => {
-    // Token (ambas versiones por compatibilidad)
-    localStorage.setItem('token', tokenValue);
-    localStorage.setItem('auth-token', tokenValue);
+  await page.evaluate(
+    ({ tokenValue, userData }) => {
+      // Token (ambas versiones por compatibilidad)
+      localStorage.setItem('token', tokenValue);
+      localStorage.setItem('auth-token', tokenValue);
 
-    // Zustand store con el usuario completo
-    // Esto evita que el layout tenga que hacer checkAuth()
-    const authStore = JSON.stringify({
-      state: {
-        user: userData,
-        token: tokenValue,
-        isAuthenticated: true,
-        isLoading: false,
-      },
-      version: 0,
-    });
+      // Zustand store con el usuario completo
+      // Esto evita que el layout tenga que hacer checkAuth()
+      const authStore = JSON.stringify({
+        state: {
+          user: userData,
+          token: tokenValue,
+          isAuthenticated: true,
+          isLoading: false,
+        },
+        version: 0,
+      });
 
-    localStorage.setItem('auth-storage', authStore);
-  }, { tokenValue: token, userData: user });
+      localStorage.setItem('auth-storage', authStore);
+    },
+    { tokenValue: token, userData: user },
+  );
 
   // Pequeña espera para asegurar que el localStorage se escribió
   await page.waitForTimeout(100);

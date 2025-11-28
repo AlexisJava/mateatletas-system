@@ -15,7 +15,11 @@ interface DescuentoMultipleHijoProps {
   nombreEstudiante: string;
 }
 
-export default function DescuentoMultipleHijo({ precioBase, moneda, nombreEstudiante }: DescuentoMultipleHijoProps) {
+export default function DescuentoMultipleHijo({
+  precioBase,
+  moneda,
+  nombreEstudiante,
+}: DescuentoMultipleHijoProps) {
   const [cantidadHijos, setCantidadHijos] = useState(1);
 
   // Calcular precio total con descuentos
@@ -42,9 +46,8 @@ export default function DescuentoMultipleHijo({ precioBase, moneda, nombreEstudi
   const precioTotal = calcularPrecioTotal();
   const precioSinDescuento = precioBase * cantidadHijos;
   const ahorroTotal = precioSinDescuento - precioTotal;
-  const porcentajeAhorro = cantidadHijos > 1
-    ? Math.round((ahorroTotal / precioSinDescuento) * 100)
-    : 0;
+  const porcentajeAhorro =
+    cantidadHijos > 1 ? Math.round((ahorroTotal / precioSinDescuento) * 100) : 0;
 
   // Precio por hijo promedio
   const precioPorHijo = cantidadHijos > 1 ? Math.round(precioTotal / cantidadHijos) : precioBase;
@@ -89,7 +92,8 @@ export default function DescuentoMultipleHijo({ precioBase, moneda, nombreEstudi
             transition={{ delay: 0.3 }}
             className="text-2xl text-slate-300 mb-6"
           >
-            <span className="text-yellow-400 font-bold">Ahorrá hasta 50%</span> inscribiendo a tus hijos juntos
+            <span className="text-yellow-400 font-bold">Ahorrá hasta 50%</span> inscribiendo a tus
+            hijos juntos
           </motion.p>
 
           <motion.div
@@ -102,9 +106,7 @@ export default function DescuentoMultipleHijo({ precioBase, moneda, nombreEstudi
             <div className="bg-gradient-to-r from-orange-500/10 via-yellow-500/10 to-orange-500/10 border-2 border-orange-400/30 rounded-2xl p-6">
               <div className="flex items-center justify-center gap-3 mb-3">
                 <Users className="w-8 h-8 text-orange-400" />
-                <h3 className="text-xl font-black text-white">
-                  Descuento Familiar Automático
-                </h3>
+                <h3 className="text-xl font-black text-white">Descuento Familiar Automático</h3>
               </div>
               <div className="grid md:grid-cols-2 gap-3 text-left">
                 <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-800">
@@ -256,7 +258,9 @@ export default function DescuentoMultipleHijo({ precioBase, moneda, nombreEstudi
                             ${precioBase.toLocaleString()}
                           </div>
                         )}
-                        <div className={`font-black text-2xl ${numeroHijo === 1 ? 'text-white' : 'text-emerald-400'}`}>
+                        <div
+                          className={`font-black text-2xl ${numeroHijo === 1 ? 'text-white' : 'text-emerald-400'}`}
+                        >
                           ${Math.round(precioHijo).toLocaleString()}
                         </div>
                       </div>
@@ -358,9 +362,9 @@ export default function DescuentoMultipleHijo({ precioBase, moneda, nombreEstudi
               Familias que aprenden juntas, crecen juntas
             </h3>
             <p className="text-slate-300 text-lg leading-relaxed">
-              Cuando hermanos hacen cursos juntos, se apoyan mutuamente, compiten sanamente
-              y <strong className="text-white">aprenden más rápido</strong>. Es una inversión
-              en el futuro de toda tu familia.
+              Cuando hermanos hacen cursos juntos, se apoyan mutuamente, compiten sanamente y{' '}
+              <strong className="text-white">aprenden más rápido</strong>. Es una inversión en el
+              futuro de toda tu familia.
             </p>
           </div>
         </motion.div>

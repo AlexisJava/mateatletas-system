@@ -28,7 +28,7 @@ export function ListaLogros({ estudianteId }: ListaLogrosProps) {
   const categoriasMap = progreso.por_categoria ?? {};
   const categorias = Object.keys(categoriasMap);
   const logrosAMostrar = categoriaActiva
-    ? categoriasMap[categoriaActiva]?.logros ?? []
+    ? (categoriasMap[categoriaActiva]?.logros ?? [])
     : Object.values(categoriasMap).flatMap((cat) => cat.logros ?? []);
 
   const logrosFiltrados = soloDesbloqueados
@@ -62,8 +62,7 @@ export function ListaLogros({ estudianteId }: ListaLogrosProps) {
           >
             {getEmojiCategoria(categoria)}{' '}
             {categoria.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())} (
-            {categoriasMap[categoria]?.desbloqueados ?? 0}/
-            {categoriasMap[categoria]?.total ?? 0})
+            {categoriasMap[categoria]?.desbloqueados ?? 0}/{categoriasMap[categoria]?.total ?? 0})
           </button>
         ))}
 
@@ -85,8 +84,7 @@ export function ListaLogros({ estudianteId }: ListaLogrosProps) {
           <div>
             <h3 className="text-2xl font-bold mb-1">Tu Progreso</h3>
             <p className="text-white/80">
-              Has desbloqueado {progreso.logros_desbloqueados} de{' '}
-              {progreso.total_logros} logros
+              Has desbloqueado {progreso.logros_desbloqueados} de {progreso.total_logros} logros
             </p>
           </div>
           <div className="text-6xl font-black">{progreso.porcentaje}%</div>
@@ -102,10 +100,7 @@ export function ListaLogros({ estudianteId }: ListaLogrosProps) {
       </div>
 
       {/* Grid de logros */}
-      <motion.div
-        layout
-        className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4"
-      >
+      <motion.div layout className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {logrosFiltrados.map((logro) => (
           <motion.div key={logro.id} layout>
             <LogroCard
@@ -119,9 +114,7 @@ export function ListaLogros({ estudianteId }: ListaLogrosProps) {
 
       {logrosFiltrados.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-400 text-lg">
-            No hay logros para mostrar con estos filtros
-          </p>
+          <p className="text-gray-400 text-lg">No hay logros para mostrar con estos filtros</p>
         </div>
       )}
     </div>

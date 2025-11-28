@@ -30,6 +30,7 @@ Esta carpeta contiene la planificación de **Noviembre 2025 para Nivel 3 (Grupos
 ## 🎨 Ideas de Narrativa (Ejemplos)
 
 Para este nivel podés crear narrativas más sofisticadas:
+
 - 🧬 "La Misión de los Científicos del Futuro"
 - 🏙️ "Arquitectos de la Ciudad Matemática"
 - 🌍 "Expedición a los Enigmas del Mundo"
@@ -75,6 +76,7 @@ Para este nivel podés crear narrativas más sofisticadas:
 ### 1. Editar `metadata.json`
 
 Define los datos de tu planificación:
+
 - Título
 - Descripción
 - Objetivos de aprendizaje
@@ -139,12 +141,12 @@ Si querés usar componentes pre-construidos:
 
 ```tsx
 import {
-  ProgressTracker,    // Barra de progreso
-  GameScore,          // Sistema de puntaje
-  ActivityTimer,      // Temporizador
-  AchievementPopup,   // Notificaciones de logros
-  WeekNavigation,     // Navegación entre semanas
-  StudentProfile,     // Perfil del estudiante
+  ProgressTracker, // Barra de progreso
+  GameScore, // Sistema de puntaje
+  ActivityTimer, // Temporizador
+  AchievementPopup, // Notificaciones de logros
+  WeekNavigation, // Navegación entre semanas
+  StudentProfile, // Perfil del estudiante
 } from '@/planificaciones/shared';
 ```
 
@@ -187,32 +189,33 @@ export default function PlanificacionNoviembre2025Nivel3() {
 
   const calcularSuma = (): Fraccion => {
     // Algoritmo de suma de fracciones
-    const mcm = (fraccion1.denominador * fraccion2.denominador) /
-                 gcd(fraccion1.denominador, fraccion2.denominador);
+    const mcm =
+      (fraccion1.denominador * fraccion2.denominador) /
+      gcd(fraccion1.denominador, fraccion2.denominador);
 
     const num1 = fraccion1.numerador * (mcm / fraccion1.denominador);
     const num2 = fraccion2.numerador * (mcm / fraccion2.denominador);
 
     return simplificar({
       numerador: num1 + num2,
-      denominador: mcm
+      denominador: mcm,
     });
   };
 
-  const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b);
+  const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
 
   const simplificar = (f: Fraccion): Fraccion => {
     const divisor = gcd(f.numerador, f.denominador);
     return {
       numerador: f.numerador / divisor,
-      denominador: f.denominador / divisor
+      denominador: f.denominador / divisor,
     };
   };
 
   const verificarRespuesta = (num: number, den: number) => {
     const resultado = calcularSuma();
     if (num === resultado.numerador && den === resultado.denominador) {
-      setPuntos(prev => prev + 20);
+      setPuntos((prev) => prev + 20);
       // Generar nuevas fracciones
       generarNuevasFracciones();
     }
@@ -221,19 +224,16 @@ export default function PlanificacionNoviembre2025Nivel3() {
   const generarNuevasFracciones = () => {
     setFraccion1({
       numerador: Math.floor(Math.random() * 9) + 1,
-      denominador: Math.floor(Math.random() * 9) + 2
+      denominador: Math.floor(Math.random() * 9) + 2,
     });
     setFraccion2({
       numerador: Math.floor(Math.random() * 9) + 1,
-      denominador: Math.floor(Math.random() * 9) + 2
+      denominador: Math.floor(Math.random() * 9) + 2,
     });
   };
 
   return (
-    <PlanificacionApp
-      codigo="2025-11-nivel-3"
-      titulo="Laboratorio de Fracciones"
-    >
+    <PlanificacionApp codigo="2025-11-nivel-3" titulo="Laboratorio de Fracciones">
       <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700 p-8">
         <GameScore puntos={puntos} />
 
@@ -246,25 +246,17 @@ export default function PlanificacionNoviembre2025Nivel3() {
             {/* Visualización de fracciones */}
             <div className="flex justify-center items-center gap-8 mb-8">
               <div className="text-center">
-                <div className="text-6xl font-bold text-purple-600">
-                  {fraccion1.numerador}
-                </div>
+                <div className="text-6xl font-bold text-purple-600">{fraccion1.numerador}</div>
                 <div className="border-t-4 border-purple-600 w-24 mx-auto my-2"></div>
-                <div className="text-6xl font-bold text-purple-600">
-                  {fraccion1.denominador}
-                </div>
+                <div className="text-6xl font-bold text-purple-600">{fraccion1.denominador}</div>
               </div>
 
               <div className="text-6xl font-bold text-gray-600">+</div>
 
               <div className="text-center">
-                <div className="text-6xl font-bold text-pink-600">
-                  {fraccion2.numerador}
-                </div>
+                <div className="text-6xl font-bold text-pink-600">{fraccion2.numerador}</div>
                 <div className="border-t-4 border-pink-600 w-24 mx-auto my-2"></div>
-                <div className="text-6xl font-bold text-pink-600">
-                  {fraccion2.denominador}
-                </div>
+                <div className="text-6xl font-bold text-pink-600">{fraccion2.denominador}</div>
               </div>
 
               <div className="text-6xl font-bold text-gray-600">=</div>
@@ -287,8 +279,12 @@ export default function PlanificacionNoviembre2025Nivel3() {
             <button
               className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-2xl font-bold py-4 rounded-xl hover:scale-105 transition-transform"
               onClick={() => {
-                const num = parseInt((document.querySelectorAll('input[type="number"]')[0] as HTMLInputElement).value);
-                const den = parseInt((document.querySelectorAll('input[type="number"]')[1] as HTMLInputElement).value);
+                const num = parseInt(
+                  (document.querySelectorAll('input[type="number"]')[0] as HTMLInputElement).value,
+                );
+                const den = parseInt(
+                  (document.querySelectorAll('input[type="number"]')[1] as HTMLInputElement).value,
+                );
                 verificarRespuesta(num, den);
               }}
             >
@@ -321,6 +317,7 @@ Para este nivel avanzado, considerá usar:
 ## 🎨 Libertad Creativa Total
 
 Recordá que podés:
+
 - Usar cualquier librería de React
 - Crear visualizaciones complejas
 - Implementar simulaciones científicas
@@ -353,6 +350,7 @@ Recordá que podés:
 ## 🆘 Ayuda
 
 Si tenés dudas sobre cómo integrar algo específico, consultá:
+
 - `/planificaciones/shared/README.md` - Componentes disponibles
 - `/planificaciones/README.md` - Guía general del sistema
 

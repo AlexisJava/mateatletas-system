@@ -41,14 +41,20 @@ test.describe('Calendario de Clases', () => {
     await page.waitForTimeout(1000);
 
     // Click en mes siguiente
-    const nextButton = page.locator('button').filter({ hasText: /siguiente|→|>/i }).first();
+    const nextButton = page
+      .locator('button')
+      .filter({ hasText: /siguiente|→|>/i })
+      .first();
     if (await nextButton.isVisible()) {
       await nextButton.click();
       await page.waitForTimeout(500);
     }
 
     // Click en mes anterior
-    const prevButton = page.locator('button').filter({ hasText: /anterior|←|</i }).first();
+    const prevButton = page
+      .locator('button')
+      .filter({ hasText: /anterior|←|</i })
+      .first();
     if (await prevButton.isVisible()) {
       await prevButton.click();
       await page.waitForTimeout(500);

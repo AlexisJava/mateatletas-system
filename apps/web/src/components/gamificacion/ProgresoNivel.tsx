@@ -14,11 +14,10 @@ export function ProgresoNivel({ recursos }: ProgresoNivelProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-white text-sm">
-        <span className="font-medium">
-          Nivel {recursos.nivel}
-        </span>
+        <span className="font-medium">Nivel {recursos.nivel}</span>
         <span className="font-bold">
-          {formatearNumero(recursos.xp_progreso || 0)} / {formatearNumero(recursos.xp_necesario || 0)} XP
+          {formatearNumero(recursos.xp_progreso || 0)} /{' '}
+          {formatearNumero(recursos.xp_necesario || 0)} XP
         </span>
       </div>
 
@@ -39,14 +38,13 @@ export function ProgresoNivel({ recursos }: ProgresoNivelProps) {
 
         {/* Etiqueta de porcentaje */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-white text-xs font-bold drop-shadow-lg">
-            {porcentaje}%
-          </span>
+          <span className="text-white text-xs font-bold drop-shadow-lg">{porcentaje}%</span>
         </div>
       </div>
 
       <p className="text-white/70 text-xs text-center">
-        {(recursos.xp_necesario || 0) - (recursos.xp_progreso || 0)} XP para nivel {recursos.nivel + 1}
+        {(recursos.xp_necesario || 0) - (recursos.xp_progreso || 0)} XP para nivel{' '}
+        {recursos.nivel + 1}
       </p>
     </div>
   );

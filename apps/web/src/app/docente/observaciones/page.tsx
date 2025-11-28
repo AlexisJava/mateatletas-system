@@ -46,7 +46,9 @@ export default function DocenteObservacionesPage() {
 
   // DATOS REALES del nuevo endpoint
   const [topEstudiantes, setTopEstudiantes] = useState<EstudianteTopPuntos[]>([]);
-  const [estudiantesAsistenciaPerfecta, setEstudiantesAsistenciaPerfecta] = useState<EstudianteAsistenciaPerfecta[]>([]);
+  const [estudiantesAsistenciaPerfecta, setEstudiantesAsistenciaPerfecta] = useState<
+    EstudianteAsistenciaPerfecta[]
+  >([]);
   const [estudiantesSinTareas, setEstudiantesSinTareas] = useState<EstudianteSinTareas[]>([]);
   const [rankingGrupos, setRankingGrupos] = useState<GrupoRanking[]>([]);
 
@@ -78,8 +80,8 @@ export default function DocenteObservacionesPage() {
       setEstudiantesConFaltas(dashboardData.estudiantesConFaltas || []);
 
       // Calcular stats de asistencia
-      const presentes = obsData.filter(o => o.estado === 'Presente').length;
-      const ausentes = obsData.filter(o => o.estado === 'Ausente').length;
+      const presentes = obsData.filter((o) => o.estado === 'Presente').length;
+      const ausentes = obsData.filter((o) => o.estado === 'Ausente').length;
       const total = obsData.length;
 
       setTotalObservaciones(total);
@@ -93,7 +95,6 @@ export default function DocenteObservacionesPage() {
       setEstudiantesAsistenciaPerfecta(estadisticasCompletas.estudiantesAsistenciaPerfecta);
       setEstudiantesSinTareas(estadisticasCompletas.estudiantesSinTareas);
       setRankingGrupos(estadisticasCompletas.rankingGruposPorPuntos);
-
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -109,15 +110,13 @@ export default function DocenteObservacionesPage() {
     const search = searchTerm.toLowerCase();
 
     const matchSearch =
-      nombreCompleto.includes(search) || observacion.includes(search) || rutaNombre.includes(search);
+      nombreCompleto.includes(search) ||
+      observacion.includes(search) ||
+      rutaNombre.includes(search);
 
     const fechaClase = parseISO(obs.clase.fecha_hora_inicio);
-    const matchFechaDesde = filtroFechaDesde
-      ? fechaClase >= parseISO(filtroFechaDesde)
-      : true;
-    const matchFechaHasta = filtroFechaHasta
-      ? fechaClase <= parseISO(filtroFechaHasta)
-      : true;
+    const matchFechaDesde = filtroFechaDesde ? fechaClase >= parseISO(filtroFechaDesde) : true;
+    const matchFechaHasta = filtroFechaHasta ? fechaClase <= parseISO(filtroFechaHasta) : true;
 
     return matchSearch && matchFechaDesde && matchFechaHasta;
   });
@@ -233,7 +232,9 @@ export default function DocenteObservacionesPage() {
                     </div>
                     <div className="flex items-center justify-center gap-1 text-xs">
                       <CheckCircle className="w-4 h-4 text-green-300" />
-                      <span className="text-white font-semibold">{est.porcentaje_asistencia}% asist.</span>
+                      <span className="text-white font-semibold">
+                        {est.porcentaje_asistencia}% asist.
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -250,8 +251,8 @@ export default function DocenteObservacionesPage() {
             transition={{ delay: 0.15 }}
           >
             <h2 className="text-xl font-black text-white mb-4 flex items-center gap-2">
-              <Award className="w-6 h-6 text-green-400" />
-              ✅ ESTUDIANTES CON ASISTENCIA PERFECTA (100%)
+              <Award className="w-6 h-6 text-green-400" />✅ ESTUDIANTES CON ASISTENCIA PERFECTA
+              (100%)
             </h2>
 
             <div className="grid grid-cols-5 gap-4">
@@ -274,10 +275,12 @@ export default function DocenteObservacionesPage() {
                   <div className="space-y-1">
                     <div className="flex items-center justify-center gap-1 text-xs">
                       <CheckCircle className="w-4 h-4 text-green-300" />
-                      <span className="text-white font-semibold">{est.presentes}/{est.total_asistencias} clases</span>
+                      <span className="text-white font-semibold">
+                        {est.presentes}/{est.total_asistencias} clases
+                      </span>
                     </div>
                     <div className="text-xs text-purple-300">
-                      {est.grupos.map(g => g.nombre).join(', ')}
+                      {est.grupos.map((g) => g.nombre).join(', ')}
                     </div>
                   </div>
                 </div>
@@ -338,9 +341,15 @@ export default function DocenteObservacionesPage() {
                   <tr>
                     <th className="px-4 py-3 text-left text-white font-bold text-sm">#</th>
                     <th className="px-4 py-3 text-left text-white font-bold text-sm">GRUPO</th>
-                    <th className="px-4 py-3 text-center text-white font-bold text-sm">ESTUDIANTES</th>
-                    <th className="px-4 py-3 text-center text-white font-bold text-sm">PUNTOS TOTALES</th>
-                    <th className="px-4 py-3 text-center text-white font-bold text-sm">ASISTENCIA %</th>
+                    <th className="px-4 py-3 text-center text-white font-bold text-sm">
+                      ESTUDIANTES
+                    </th>
+                    <th className="px-4 py-3 text-center text-white font-bold text-sm">
+                      PUNTOS TOTALES
+                    </th>
+                    <th className="px-4 py-3 text-center text-white font-bold text-sm">
+                      ASISTENCIA %
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -350,7 +359,9 @@ export default function DocenteObservacionesPage() {
                       className="border-t border-white/10 hover:bg-white/5 transition-colors"
                     >
                       <td className="px-4 py-3">
-                        <span className={`font-black text-lg ${idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-gray-300' : idx === 2 ? 'text-orange-400' : 'text-white'}`}>
+                        <span
+                          className={`font-black text-lg ${idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-gray-300' : idx === 2 ? 'text-orange-400' : 'text-white'}`}
+                        >
                           #{idx + 1}
                         </span>
                       </td>
@@ -371,11 +382,15 @@ export default function DocenteObservacionesPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`px-3 py-1 rounded-full font-bold text-sm ${
-                          grupo.asistencia_promedio >= 80 ? 'bg-green-600 text-white' :
-                          grupo.asistencia_promedio >= 60 ? 'bg-yellow-600 text-white' :
-                          'bg-red-600 text-white'
-                        }`}>
+                        <span
+                          className={`px-3 py-1 rounded-full font-bold text-sm ${
+                            grupo.asistencia_promedio >= 80
+                              ? 'bg-green-600 text-white'
+                              : grupo.asistencia_promedio >= 60
+                                ? 'bg-yellow-600 text-white'
+                                : 'bg-red-600 text-white'
+                          }`}
+                        >
                           {grupo.asistencia_promedio}%
                         </span>
                       </td>
@@ -404,7 +419,9 @@ export default function DocenteObservacionesPage() {
                 <table className="w-full">
                   <thead className="bg-white/5 backdrop-blur-xl">
                     <tr>
-                      <th className="px-4 py-3 text-left text-white font-bold text-sm">ESTUDIANTE</th>
+                      <th className="px-4 py-3 text-left text-white font-bold text-sm">
+                        ESTUDIANTE
+                      </th>
                       <th className="px-4 py-3 text-left text-white font-bold text-sm">GRUPO</th>
                       <th className="px-4 py-3 text-left text-white font-bold text-sm">FALTAS</th>
                       <th className="px-4 py-3 text-left text-white font-bold text-sm">TUTOR</th>
@@ -605,10 +622,10 @@ export default function DocenteObservacionesPage() {
                           obs.estado === 'Presente'
                             ? 'bg-green-500 text-white'
                             : obs.estado === 'Ausente'
-                            ? 'bg-red-500 text-white'
-                            : obs.estado === 'Justificado'
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-yellow-500 text-black'
+                              ? 'bg-red-500 text-white'
+                              : obs.estado === 'Justificado'
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-yellow-500 text-black'
                         }`}
                       >
                         {obs.estado}

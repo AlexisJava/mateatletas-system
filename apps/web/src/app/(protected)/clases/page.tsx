@@ -3,11 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useClasesStore } from '@/store/clases.store';
 import { useEstudiantesStore } from '@/store/estudiantes.store';
-import {
-  ClassCard,
-  RutaFilter,
-  ClassReservationModal,
-} from '@/components/features/clases';
+import { ClassCard, RutaFilter, ClassReservationModal } from '@/components/features/clases';
 import { Card } from '@/components/ui';
 import { Clase } from '@/types/clases.types';
 
@@ -35,9 +31,7 @@ export default function ClasesPage() {
   const { estudiantes, fetchEstudiantes } = useEstudiantesStore();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [claseParaReservar, setClaseParaReservar] = useState<Clase | null>(
-    null
-  );
+  const [claseParaReservar, setClaseParaReservar] = useState<Clase | null>(null);
   const [isReserving, setIsReserving] = useState(false);
 
   // Cargar datos al montar
@@ -57,8 +51,7 @@ export default function ClasesPage() {
     const counts: Record<string, number> = {};
     clases.forEach((clase) => {
       if (clase.ruta_curricular_id) {
-        counts[clase.ruta_curricular_id] =
-          (counts[clase.ruta_curricular_id] || 0) + 1;
+        counts[clase.ruta_curricular_id] = (counts[clase.ruta_curricular_id] || 0) + 1;
       }
     });
     return counts;
@@ -72,10 +65,7 @@ export default function ClasesPage() {
   };
 
   // Handler para confirmar reserva
-  const handleConfirmReserva = async (
-    claseId: string,
-    estudianteId: string
-  ) => {
+  const handleConfirmReserva = async (claseId: string, estudianteId: string) => {
     setIsReserving(true);
     const success = await reservarClase(claseId, { estudianteId });
 
@@ -230,9 +220,7 @@ export default function ClasesPage() {
               <div className="flex gap-3">
                 <span className="text-3xl">2️⃣</span>
                 <div>
-                  <p className="font-bold text-dark mb-1">
-                    Selecciona estudiante
-                  </p>
+                  <p className="font-bold text-dark mb-1">Selecciona estudiante</p>
                   <p className="text-sm text-gray-600">
                     Elige para cuál de tus estudiantes es la reserva
                   </p>

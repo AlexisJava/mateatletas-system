@@ -98,12 +98,8 @@ export function CursoCard({ curso, nivelActual, monedasActuales, onClick }: Curs
       </div>
 
       {/* Título y descripción */}
-      <h3 className="text-white font-black text-xl mb-2 line-clamp-2">
-        {curso.titulo}
-      </h3>
-      <p className="text-gray-300 text-sm mb-4 line-clamp-3">
-        {curso.descripcion}
-      </p>
+      <h3 className="text-white font-black text-xl mb-2 line-clamp-2">{curso.titulo}</h3>
+      <p className="text-gray-300 text-sm mb-4 line-clamp-3">{curso.descripcion}</p>
 
       {/* Información del curso */}
       <div className="space-y-2 mb-4">
@@ -125,9 +121,7 @@ export function CursoCard({ curso, nivelActual, monedasActuales, onClick }: Curs
               💰 {curso.precio_monedas.toLocaleString('es-AR')}
             </span>
           </div>
-          <div className="text-gray-400 text-xs mt-1">
-            o ${curso.precio_usd} USD con tu tutor
-          </div>
+          <div className="text-gray-400 text-xs mt-1">o ${curso.precio_usd} USD con tu tutor</div>
         </div>
       </div>
 
@@ -139,11 +133,7 @@ export function CursoCard({ curso, nivelActual, monedasActuales, onClick }: Curs
             <p className="text-white font-bold text-sm">
               {bloqueadoPorNivel && `Necesitas nivel ${curso.nivel_requerido}`}
               {bloqueadoPorNivel && bloqueadoPorMonedas && ' y '}
-              {bloqueadoPorMonedas && (
-                <>
-                  {curso.precio_monedas - monedasActuales} monedas más
-                </>
-              )}
+              {bloqueadoPorMonedas && <>{curso.precio_monedas - monedasActuales} monedas más</>}
             </p>
           </div>
         </div>

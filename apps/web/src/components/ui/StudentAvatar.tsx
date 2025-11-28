@@ -60,9 +60,7 @@ export function StudentAvatar({
   const showFallback = !avatar_url || imageError;
 
   return (
-    <div
-      className={`${sizeClasses[size]} rounded-full overflow-hidden flex-shrink-0 ${className}`}
-    >
+    <div className={`${sizeClasses[size]} rounded-full overflow-hidden flex-shrink-0 ${className}`}>
       {showFallback ? (
         <div
           className={`w-full h-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-black`}

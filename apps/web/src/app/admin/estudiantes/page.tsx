@@ -64,7 +64,9 @@ export default function AdminEstudiantesPage() {
   const [sectores, setSectores] = useState<Sector[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sectorActivo, setSectorActivo] = useState<'Programación' | 'Matemática' | 'Ciencias' | 'Preinscriptos'>('Matemática');
+  const [sectorActivo, setSectorActivo] = useState<
+    'Programación' | 'Matemática' | 'Ciencias' | 'Preinscriptos'
+  >('Matemática');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sectorIdParaModal, setSectorIdParaModal] = useState<string>('');
 
@@ -78,12 +80,16 @@ export default function AdminEstudiantesPage() {
       setIsLoading(true);
       setError(null);
       // Endpoint para admin que trae TODOS los estudiantes SIN límite
-      const response = await apiClient.get<{ data?: Estudiante[] } | Estudiante[]>('/admin/estudiantes');
+      const response = await apiClient.get<{ data?: Estudiante[] } | Estudiante[]>(
+        '/admin/estudiantes',
+      );
       console.log('📊 Respuesta del servidor:', response);
       // El backend devuelve { data: [], metadata: {} }
       const estudiantes = (response as { data?: Estudiante[] })?.data
         ? (response as { data: Estudiante[] }).data
-        : (Array.isArray(response) ? response : []);
+        : Array.isArray(response)
+          ? response
+          : [];
       console.log('👥 Estudiantes procesados:', estudiantes.length);
       setEstudiantes(estudiantes as Estudiante[]);
     } catch (err) {
@@ -117,13 +123,16 @@ export default function AdminEstudiantesPage() {
   const handleAbrirModal = (nombreSector: string) => {
     // Mapear nombre de botón a nombre real del sector
     const nombreSectorReal = nombreSector === 'Ciencias' ? 'Divulgación Científica' : nombreSector;
-    const sector = sectores.find(s => s.nombre === nombreSectorReal);
+    const sector = sectores.find((s) => s.nombre === nombreSectorReal);
     if (sector) {
       console.log(`[DEBUG] Abriendo modal para sector: ${nombreSectorReal} con ID: ${sector.id}`);
       setSectorIdParaModal(sector.id);
       setIsModalOpen(true);
     } else {
-      console.error(`[ERROR] No se encontró el sector: ${nombreSectorReal}. Sectores disponibles:`, sectores);
+      console.error(
+        `[ERROR] No se encontró el sector: ${nombreSectorReal}. Sectores disponibles:`,
+        sectores,
+      );
       setError(`No se pudo abrir el modal: sector "${nombreSectorReal}" no encontrado`);
     }
   };
@@ -147,12 +156,20 @@ export default function AdminEstudiantesPage() {
   }
 
   // Separar estudiantes por sector
-  const estudiantesProgramacion = estudiantes.filter(est => est.sector?.nombre === 'Programación');
-  const estudiantesMatematica = estudiantes.filter(est => est.sector?.nombre === 'Matemática');
-  const estudiantesCiencias = estudiantes.filter(est => est.sector?.nombre === 'Divulgación Científica' || est.sector?.nombre === 'Ciencias');
-  const estudiantesSinSector = estudiantes.filter(est => !est.sector);
+  const estudiantesProgramacion = estudiantes.filter(
+    (est) => est.sector?.nombre === 'Programación',
+  );
+  const estudiantesMatematica = estudiantes.filter((est) => est.sector?.nombre === 'Matemática');
+  const estudiantesCiencias = estudiantes.filter(
+    (est) => est.sector?.nombre === 'Divulgación Científica' || est.sector?.nombre === 'Ciencias',
+  );
+  const estudiantesSinSector = estudiantes.filter((est) => !est.sector);
 
-  const renderTablaEstudiantes = (listaEstudiantes: Estudiante[], titulo: string, icono: string) => {
+  const renderTablaEstudiantes = (
+    listaEstudiantes: Estudiante[],
+    titulo: string,
+    icono: string,
+  ) => {
     if (listaEstudiantes.length === 0) {
       return (
         <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl border border-emerald-500/20 shadow-2xl shadow-emerald-500/10 p-8 text-center">
@@ -193,7 +210,8 @@ export default function AdminEstudiantesPage() {
             </thead>
             <tbody className="divide-y divide-emerald-500/10">
               {listaEstudiantes.map((estudiante) => {
-                const initials = `${estudiante.nombre.charAt(0)}${estudiante.apellido.charAt(0)}`.toUpperCase();
+                const initials =
+                  `${estudiante.nombre.charAt(0)}${estudiante.apellido.charAt(0)}`.toUpperCase();
                 return (
                   <tr key={estudiante.id} className="hover:bg-emerald-500/[0.08] transition-all">
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -243,7 +261,8 @@ export default function AdminEstudiantesPage() {
                       {estudiante.edad} años
                     </td>
                     <td className="px-6 py-4">
-                      {estudiante.inscripciones_grupos && estudiante.inscripciones_grupos.length > 0 ? (
+                      {estudiante.inscripciones_grupos &&
+                      estudiante.inscripciones_grupos.length > 0 ? (
                         <div className="flex flex-col gap-1">
                           {estudiante.inscripciones_grupos.map((insc) => (
                             <span
@@ -259,7 +278,8 @@ export default function AdminEstudiantesPage() {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      {estudiante.inscripciones_grupos && estudiante.inscripciones_grupos.length > 0 ? (
+                      {estudiante.inscripciones_grupos &&
+                      estudiante.inscripciones_grupos.length > 0 ? (
                         <div className="flex flex-col gap-1">
                           {estudiante.inscripciones_grupos.map((insc) => (
                             <span key={insc.id} className="text-xs text-white/60">
@@ -289,24 +309,29 @@ export default function AdminEstudiantesPage() {
 
   // Obtener estudiantes del sector activo
   const estudiantesActivos =
-    sectorActivo === 'Programación' ? estudiantesProgramacion :
-    sectorActivo === 'Matemática' ? estudiantesMatematica :
-    sectorActivo === 'Ciencias' ? estudiantesCiencias :
-    estudiantesSinSector;
+    sectorActivo === 'Programación'
+      ? estudiantesProgramacion
+      : sectorActivo === 'Matemática'
+        ? estudiantesMatematica
+        : sectorActivo === 'Ciencias'
+          ? estudiantesCiencias
+          : estudiantesSinSector;
 
   const iconoActivo =
-    sectorActivo === 'Programación' ? '💻' :
-    sectorActivo === 'Matemática' ? '🧮' :
-    sectorActivo === 'Ciencias' ? '🔬' : '📝';
+    sectorActivo === 'Programación'
+      ? '💻'
+      : sectorActivo === 'Matemática'
+        ? '🧮'
+        : sectorActivo === 'Ciencias'
+          ? '🔬'
+          : '📝';
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">
-            Todos los Estudiantes
-          </h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-white">Todos los Estudiantes</h1>
           <p className="text-white/60 mt-1 text-sm">
             Gestión completa de estudiantes de la plataforma ({estudiantes.length} total)
           </p>
@@ -393,9 +418,7 @@ export default function AdminEstudiantesPage() {
       )}
 
       {/* Tabla de estudiantes del sector activo */}
-      <div>
-        {renderTablaEstudiantes(estudiantesActivos, sectorActivo, iconoActivo)}
-      </div>
+      <div>{renderTablaEstudiantes(estudiantesActivos, sectorActivo, iconoActivo)}</div>
 
       {/* Modal Agregar Estudiante */}
       <AgregarEstudianteModal

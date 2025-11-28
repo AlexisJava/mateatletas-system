@@ -30,9 +30,11 @@ railway variables --json
 ```
 
 - [ ] **FRONTEND_URL** (⚠️ MUY IMPORTANTE)
+
   ```
   Valor correcto: https://www.dominio.com,https://dominio-preview.vercel.app
   ```
+
   - ✅ Debe incluir TODOS los dominios (custom domain + preview URLs)
   - ✅ Separados por coma (sin espacios)
   - ✅ **Incluir https://** (no olvidar el protocolo)
@@ -40,6 +42,7 @@ railway variables --json
   - ❌ NO truncar URLs (verificar con `railway variables --json`)
 
 - [ ] **DATABASE_URL**
+
   ```
   postgresql://usuario:password@host:5432/dbname
   ```
@@ -50,6 +53,7 @@ railway variables --json
   - ✅ Generado aleatoriamente (no usar valores predecibles)
 
 - [ ] **NODE_ENV**
+
   ```
   production
   ```
@@ -85,18 +89,16 @@ Ubicación: `apps/api/src/main.ts` (líneas 65-104)
 const isProduction = process.env.NODE_ENV === 'production';
 
 const frontendUrls = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(',').map((url) => url.trim()).filter(Boolean)
+  ? process.env.FRONTEND_URL.split(',')
+      .map((url) => url.trim())
+      .filter(Boolean)
   : [];
 
 const allowedOrigins = isProduction
   ? frontendUrls.length > 0
     ? frontendUrls
     : ['*'] // Fallback temporal (⚠️ cambiar después)
-  : [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      ...frontendUrls,
-    ].filter(Boolean);
+  : ['http://localhost:3000', 'http://localhost:3001', ...frontendUrls].filter(Boolean);
 
 app.enableCors({
   origin: (origin, callback) => {
@@ -204,9 +206,11 @@ curl https://tu-backend.railway.app/api
 #### Variables requeridas:
 
 - [ ] **NEXT_PUBLIC_API_URL**
+
   ```
   https://mateatletas-system-production.up.railway.app/api
   ```
+
   - ✅ Debe apuntar a Railway (NO a localhost)
   - ✅ Incluir `/api` al final
   - ✅ Usar `https://` (no `http://`)
@@ -214,6 +218,7 @@ curl https://tu-backend.railway.app/api
   - ✅ También agregar en "Preview" y "Development" si es necesario
 
 - [ ] **NEXT_PUBLIC_RPM_SUBDOMAIN** (Ready Player Me)
+
   ```
   demo
   ```
@@ -320,7 +325,7 @@ const response = await fetch('/api/productos?tipo=Curso&soloActivos=true');
 import { apiClient } from '@/lib/axios';
 
 const data = await apiClient.get<Producto[]>('/productos', {
-  params: { tipo: 'Curso', soloActivos: true }
+  params: { tipo: 'Curso', soloActivos: true },
 });
 ```
 
@@ -412,6 +417,7 @@ Causa: Frontend usa https pero backend http
 ### 🔴 Error 1: CORS Bloqueado
 
 **Síntoma:**
+
 ```
 Access to XMLHttpRequest at 'https://backend.railway.app/api/auth/login'
 from origin 'https://frontend.vercel.app' has been blocked by CORS policy
@@ -420,6 +426,7 @@ from origin 'https://frontend.vercel.app' has been blocked by CORS policy
 **Causas posibles:**
 
 1. **FRONTEND_URL no incluye el dominio del frontend**
+
    ```bash
    # Verificar
    railway variables --json | grep FRONTEND_URL
@@ -430,12 +437,14 @@ from origin 'https://frontend.vercel.app' has been blocked by CORS policy
    ```
 
 2. **FRONTEND_URL está truncada**
+
    ```bash
    # Verificar en JSON (no en tabla que trunca)
    railway variables --json | jq '.FRONTEND_URL'
    ```
 
 3. **Falta el protocolo https://**
+
    ```bash
    # ❌ INCORRECTO
    FRONTEND_URL=www.mateatletasclub.com.ar
@@ -449,6 +458,7 @@ from origin 'https://frontend.vercel.app' has been blocked by CORS policy
 ### 🔴 Error 2: Request va a Vercel en lugar de Railway (405)
 
 **Síntoma:**
+
 ```
 POST https://www.mateatletasclub.com.ar/api/auth/login 405 (Method Not Allowed)
 ```
@@ -461,6 +471,7 @@ POST https://www.mateatletasclub.com.ar/api/auth/login 405 (Method Not Allowed)
    - Redeploy
 
 2. **Código usa fetch() relativo en lugar de apiClient**
+
    ```typescript
    // ❌ INCORRECTO
    fetch('/api/auth/login', {...})
@@ -480,6 +491,7 @@ POST https://www.mateatletasclub.com.ar/api/auth/login 405 (Method Not Allowed)
 ### 🔴 Error 3: Error 401 en endpoints públicos
 
 **Síntoma:**
+
 ```
 POST /api/auth/login 401 Unauthorized
 ```
@@ -491,6 +503,7 @@ POST /api/auth/login 401 Unauthorized
    - Si hay guards globales, usar `@Public()` decorator
 
 2. **CSRF protection bloqueando requests**
+
    ```typescript
    // Verificar en logs de Railway:
    // "CSRF: Request sin Origin/Referer"
@@ -503,6 +516,7 @@ POST /api/auth/login 401 Unauthorized
 ### 🔴 Error 4: Error 400 en login de estudiante
 
 **Síntoma:**
+
 ```
 POST /api/auth/estudiante/login 400 Bad Request
 ```
@@ -510,6 +524,7 @@ POST /api/auth/estudiante/login 400 Bad Request
 **Causas:**
 
 1. **Campos faltantes o inválidos en request**
+
    ```json
    // LoginEstudianteDto requiere:
    {
@@ -519,12 +534,13 @@ POST /api/auth/estudiante/login 400 Bad Request
    ```
 
 2. **Propiedades extra (forbidNonWhitelisted)**
+
    ```json
    // ❌ INCORRECTO
    {
      "username": "juan123",
      "password": "password123",
-     "rememberMe": true  // ← No permitido en DTO
+     "rememberMe": true // ← No permitido en DTO
    }
    ```
 
@@ -537,12 +553,14 @@ POST /api/auth/estudiante/login 400 Bad Request
 ### 🔴 Error 5: Mixed Content (HTTPS → HTTP)
 
 **Síntoma:**
+
 ```
 Mixed Content: The page at 'https://frontend.vercel.app' was loaded over HTTPS,
 but requested an insecure resource 'http://backend.railway.app/api'
 ```
 
 **Fix:**
+
 ```bash
 # Cambiar NEXT_PUBLIC_API_URL de http:// a https://
 # En Vercel → Environment Variables
@@ -710,4 +728,4 @@ grep -n "@UseGuards" apps/api/src/auth/auth.controller.ts
 
 ---
 
-*Generado por Claude Code - 2025-11-02*
+_Generado por Claude Code - 2025-11-02_

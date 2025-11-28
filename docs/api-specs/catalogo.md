@@ -11,6 +11,7 @@ Prompt de desarrollo
 Implement the **Catálogo de Productos** vertical slice.
 
 **Backend (NestJS)**:
+
 - Create a `CatalogoModule` with `ProductosController` and `ProductosService`.
 - **Prisma Schema**: Add `Producto` model. Fields:
   - `id` (PK), `nombre` (String), `descripcion` (String?), `precio` (Decimal or Int in cents), `tipo` (enum: 'Suscripcion' | 'Curso' | 'RecursoDigital', etc.).
@@ -29,14 +30,15 @@ Implement the **Catálogo de Productos** vertical slice.
   - `POST /api/productos` – Create new product (Admin only).
   - `PATCH /api/productos/:id` – Update product (Admin only).
   - (Optional) `GET /api/productos/:id` – details of a product (could be same as findAll and filter client-side).
-- **Security**: 
+- **Security**:
   - Admin role for mutating endpoints (create/update/delete).
   - GET listing can be open to authenticated users (or even public if needed to show pricing on marketing site).
 - Seed initial products: e.g., one subscription plan (monthly subscription) and maybe no courses initially (courses can be added later by admin).
 - The service might include logic: e.g., if subscription product is unique or some business rules (like not allowing multiple active subscription products for now).
 
 **Frontend (Next.js)**:
-- **Página de Precios/Suscripción** (`/suscripcion`): 
+
+- **Página de Precios/Suscripción** (`/suscripcion`):
   - Display available subscription plans (likely one plan, e.g., "Membresía Mensual"). Show price and description.
   - "Suscribirse" button -> triggers purchase flow (in Pagos slice).
 - **Página de Cursos** (`/cursos`):
@@ -51,6 +53,7 @@ Implement the **Catálogo de Productos** vertical slice.
 - Note: It's possible to combine with Pagos admin UI, but separate module for clarity.
 
 **API Integration**:
+
 - Client:
   - `useQuery('productos', fetchProductos)` – to get list of all products (for prices page or admin list).
   - `useMutation(createProducto)` – for admin to create (invalidate list).
@@ -58,6 +61,7 @@ Implement the **Catálogo de Productos** vertical slice.
 - If filtering by type, can either filter on frontend or have separate queries (e.g., `useQuery('cursos', ()=>fetchProductos('Curso'))`).
 
 **Types**:
+
 - `Producto`: { id: number; nombre: string; descripcion?: string; precio: number; tipo: 'Suscripcion'|'Curso'|'...'; fechaInicio?: string; fechaFin?: string; cupoMaximo?: number }.
 - `CrearProductoDto`: separate DTOs per type or a unified one with optional fields depending on type.
 - Could use a union type or interface inheritance: e.g., `ProductoBase` and extend for Curso vs Suscripcion.
@@ -65,15 +69,16 @@ Implement the **Catálogo de Productos** vertical slice.
 - For front, mirror these types for type safety.
 
 **Orden de implementación**:
+
 1. **Prisma**: Añadir modelo Producto con enum TipoProducto. Migrar DB.
 2. **Backend**: Crear CatalogoModule, ProductosService, ProductosController. Implement GET all (public) and Admin-only create/update. Seed a default subscription product (either via migration seed or manually).
 3. **Frontend Usuario**: Implementar página `/suscripcion` para mostrar plan(es). Use GET /productos to retrieve. If multiple plans, allow selection.
 4. **Frontend Usuario**: Página `/cursos` (si hay cursos disponibles) similar approach.
 5. **Frontend Admin**: Implementar `/admin/productos` lista y `/admin/productos/nuevo`. Form should toggle fields based on type (e.g., show date fields if type=Curso). Submit to create product.
-6. **Integración con Pagos**: En Pagos slice, use Producto info: 
+6. **Integración con Pagos**: En Pagos slice, use Producto info:
    - For subscribing, likely the tutor selects the subscription product (if only one, it's implicit).
    - For courses, the tutor selects a course product to purchase for a student.
-   Ensure Pagos slice can lookup Product by id to know price and type.
+     Ensure Pagos slice can lookup Product by id to know price and type.
 7. **Testing**: Verify GET /productos returns expected items. Create a new course via admin form, verify it appears in /cursos page.
 8. Continue to **Pagos** slice to implement the purchase flows using these products.
 
@@ -274,7 +279,7 @@ Types
 
             Could make it discriminated union:
 
-            type CrearProductoDto = 
+            type CrearProductoDto =
               | { tipo: 'Suscripcion'; nombre: string; descripcion?: string; precio: number; /* campos de suscripcion, e.g. duracionMeses? */ }
               | { tipo: 'Curso'; nombre: string; descripcion?: string; precio: number; fechaInicio: string; fechaFin: string; cupoMaximo: number; };
 

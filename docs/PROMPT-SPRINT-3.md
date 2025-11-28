@@ -8,10 +8,12 @@ Soy desarrollador del proyecto **Mateatletas Ecosystem**, una plataforma educati
 - **Sprint 2:** Mejoras de Seguridad Adicionales (rate limiting, auditoría, alertas, monitoreo)
 
 **IMPORTANTE:** Antes de comenzar, lee la documentación de sprints anteriores:
+
 1. `docs/SPRINT-1-CORRECCIONES-CRITICAS.md` - Vulnerabilidades resueltas, errores cometidos
 2. `docs/SPRINT-2-MEJORAS-SEGURIDAD.md` - Mejoras de seguridad implementadas
 
 Esta documentación contiene:
+
 - Estado actual del sistema
 - Soluciones implementadas
 - **Errores cometidos y lecciones aprendidas** (MUY IMPORTANTE)
@@ -23,6 +25,7 @@ Esta documentación contiene:
 ## Contexto del Proyecto
 
 ### Arquitectura
+
 - **Monorepo:** TurboRepo con workspaces
 - **Backend:** NestJS + Prisma ORM + PostgreSQL
 - **Frontend:** Next.js (no modificaremos en este sprint)
@@ -31,6 +34,7 @@ Esta documentación contiene:
 - **Ubicación del código:** `apps/api/src/`
 
 ### Módulos Principales
+
 - `inscripciones-2026/` - Sistema de inscripciones (optimizaremos)
 - `pagos/` - Integración con MercadoPago (optimizaremos)
 - `auth/` - Autenticación y autorización
@@ -40,6 +44,7 @@ Esta documentación contiene:
 - `security-metrics/` - Monitoreo de seguridad (Sprint 2)
 
 ### Tecnologías Clave
+
 - NestJS 10.x
 - Prisma ORM 5.x
 - PostgreSQL 15
@@ -52,6 +57,7 @@ Esta documentación contiene:
 ## Estado Actual (Post Sprint 1 y 2)
 
 ### Sprint 1: Vulnerabilidades Resueltas
+
 ✅ Webhooks duplicados (idempotencia)
 ✅ Fraude por manipulación de montos
 ✅ Webhooks de testing en producción
@@ -61,12 +67,14 @@ Esta documentación contiene:
 ✅ Inconsistencia de base de datos
 
 ### Sprint 2: Mejoras de Seguridad
+
 ✅ Rate limiting en webhooks (100 req/min por IP)
 ✅ Sistema de auditoría completo (tabla audit_logs)
 ✅ Alertas automáticas de fraude (emails a admins)
 ✅ Dashboard de métricas de seguridad
 
 ### Tests Actuales
+
 - **Total:** ~93-100 tests (dependiendo de Sprint 2)
 - **Cobertura:** 100% de vulnerabilidades críticas
 - **Estado:** Todos pasando
@@ -74,16 +82,19 @@ Esta documentación contiene:
 ### Problemas de Performance Detectados
 
 **Problema #1: Latencia Alta en Webhooks**
+
 - Tiempo de respuesta actual: 800-1200ms
 - Queries a DB: 5-7 por webhook
 - Sin caching → cada request golpea la DB
 
 **Problema #2: Picos de Tráfico**
+
 - MercadoPago puede enviar 100+ webhooks simultáneos
 - Procesamiento síncrono → timeout si hay pico
 - Riesgo: perder webhooks importantes
 
 **Problema #3: Queries Lentas**
+
 - Queries sin índices: 200-500ms
 - Full table scans en tablas grandes
 - Reportes lentos (> 5 segundos)
@@ -100,6 +111,7 @@ Ahora que el sistema es **seguro y auditable**, necesitamos hacerlo **rápido y 
 4. **Preparar para escala** (10,000+ inscripciones)
 
 **Métricas objetivo:**
+
 - Latencia webhooks: < 200ms (actualmente ~1000ms)
 - Throughput: 1000+ webhooks/min (actualmente ~100/min)
 - Query time: < 100ms (actualmente 200-500ms)
@@ -112,11 +124,13 @@ Ahora que el sistema es **seguro y auditable**, necesitamos hacerlo **rápido y 
 ### PASO 3.1: Caching de Validaciones con Redis
 
 **Problema a resolver:**
+
 - `wasProcessed()` consulta DB en CADA webhook → 50-100ms
 - Validación de montos consulta pago en DB → 100-200ms
 - Mismo payment_id se valida múltiples veces (reintentos de MP)
 
 **Solución esperada:**
+
 ```typescript
 // ❌ ANTES: Sin caching (lento)
 async wasProcessed(paymentId: string): Promise<boolean> {
@@ -151,6 +165,7 @@ async wasProcessed(paymentId: string): Promise<boolean> {
 ```
 
 **Implementación:**
+
 - Instalar Redis: `npm install ioredis @nestjs/cache-manager cache-manager-ioredis-yet`
 - Crear módulo `RedisModule` con configuración
 - Cachear: `wasProcessed()`, validación de montos, datos de inscripciones
@@ -158,17 +173,20 @@ async wasProcessed(paymentId: string): Promise<boolean> {
 - Invalidación de cache cuando cambia el estado
 
 **Archivos a crear:**
+
 - `apps/api/src/core/redis/redis.module.ts`
 - `apps/api/src/core/redis/redis.service.ts`
 - Tests: `apps/api/src/core/redis/__tests__/redis.service.spec.ts`
 
 **Archivos a modificar:**
+
 - `apps/api/src/pagos/services/webhook-idempotency.service.ts`
 - `apps/api/src/pagos/services/payment-amount-validator.service.ts`
 - `apps/api/src/inscripciones-2026/inscripciones-2026.service.ts`
 - `apps/api/package.json` (agregar dependencias de Redis)
 
 **Tests:**
+
 - Cache hit retorna valor cacheado (< 10ms)
 - Cache miss consulta DB y guarda en cache
 - TTL expira correctamente después de 5 minutos
@@ -176,6 +194,7 @@ async wasProcessed(paymentId: string): Promise<boolean> {
 - Manejo de errores si Redis no está disponible (fallback a DB)
 
 **Métricas esperadas:**
+
 - Latencia de `wasProcessed()`: 50-100ms → **< 5ms** (mejora 95%)
 - Latencia de webhooks: 800-1200ms → **200-400ms** (mejora 60-70%)
 
@@ -184,11 +203,13 @@ async wasProcessed(paymentId: string): Promise<boolean> {
 ### PASO 3.2: Batch Processing de Webhooks con Bull
 
 **Problema a resolver:**
+
 - MercadoPago envía 100+ webhooks simultáneos durante picos
 - Procesamiento síncrono → servidor se satura → timeouts
 - Webhooks perdidos → pagos no procesados → clientes sin acceso
 
 **Solución esperada:**
+
 ```typescript
 // ❌ ANTES: Procesamiento síncrono (se satura en picos)
 @Post('webhook/mercadopago')
@@ -232,6 +253,7 @@ class WebhookProcessor {
 ```
 
 **Implementación:**
+
 - Instalar Bull: `npm install @nestjs/bull bull`
 - Crear `WebhookQueue` con Bull
 - Procesamiento en batches de 10-20 webhooks concurrentes
@@ -240,6 +262,7 @@ class WebhookProcessor {
 - Dashboard de Bull para monitoreo (opcional)
 
 **Archivos a crear:**
+
 - `apps/api/src/queues/webhook-queue.module.ts`
 - `apps/api/src/queues/processors/webhook.processor.ts`
 - `apps/api/src/queues/webhook-queue.service.ts`
@@ -247,12 +270,14 @@ class WebhookProcessor {
 - Tests: `apps/api/src/queues/__tests__/webhook.processor.spec.ts`
 
 **Archivos a modificar:**
+
 - `apps/api/src/inscripciones-2026/inscripciones-2026.controller.ts`
 - `apps/api/src/inscripciones-2026/inscripciones-2026.module.ts`
 - `apps/api/package.json` (agregar dependencias de Bull)
 - `docker-compose.yml` (agregar servicio de Redis si no existe)
 
 **Tests:**
+
 - Webhook se agrega a queue correctamente
 - Worker procesa webhook en background
 - Retry funciona después de fallo (exponential backoff)
@@ -261,6 +286,7 @@ class WebhookProcessor {
 - Latencia de endpoint < 50ms (solo agregar a queue)
 
 **Métricas esperadas:**
+
 - Latencia de endpoint: 800-1200ms → **< 50ms** (mejora 95%)
 - Throughput: 100 webhooks/min → **1000+ webhooks/min** (mejora 10x)
 - Uptime durante picos: 90% → **99.9%**
@@ -270,6 +296,7 @@ class WebhookProcessor {
 ### PASO 3.3: Optimización de Queries con Índices
 
 **Problema a resolver:**
+
 - Query `findFirst({ where: { inscripcion_id } })` → 200-500ms (full table scan)
 - Query `findUnique({ where: { mercadopago_payment_id } })` → 100-200ms (sin índice)
 - Reportes de inscripciones → > 5 segundos (sin paginación)
@@ -277,6 +304,7 @@ class WebhookProcessor {
 **Solución esperada:**
 
 **3.3.1 Agregar Índices en Prisma:**
+
 ```prisma
 // schema.prisma
 
@@ -349,6 +377,7 @@ model AuditLog {
 ```
 
 **3.3.2 Optimizar Queries con Select Específicos:**
+
 ```typescript
 // ❌ ANTES: Trae TODO (lento)
 const inscripcion = await this.prisma.inscripcion2026.findUnique({
@@ -364,11 +393,12 @@ const inscripcion = await this.prisma.inscripcion2026.findUnique({
     estado: true,
     tutor_id: true,
     // Solo las columnas necesarias
-  }
+  },
 });
 ```
 
 **3.3.3 Implementar Paginación:**
+
 ```typescript
 // ❌ ANTES: Sin paginación (lento con 10k+ registros)
 @Get()
@@ -413,24 +443,28 @@ async findAll(
 ```
 
 **Implementación:**
+
 - Crear migración Prisma: `npx prisma migrate dev --name add_performance_indexes`
 - Modificar queries en servicios para usar `select` específicos
 - Agregar paginación en endpoints de listado
 - Agregar DTOs de paginación
 
 **Archivos a crear:**
+
 - Migración: `prisma/migrations/XXX_add_performance_indexes.sql`
 - `apps/api/src/common/dto/pagination.dto.ts`
 - `apps/api/src/common/dto/paginated-response.dto.ts`
 - Tests: `apps/api/src/inscripciones-2026/__tests__/inscripciones-2026-pagination.spec.ts`
 
 **Archivos a modificar:**
+
 - `apps/api/prisma/schema.prisma` (agregar índices)
 - `apps/api/src/inscripciones-2026/inscripciones-2026.service.ts` (optimizar queries)
 - `apps/api/src/inscripciones-2026/inscripciones-2026.controller.ts` (agregar paginación)
 - `apps/api/src/pagos/services/webhook-idempotency.service.ts` (select específicos)
 
 **Tests:**
+
 - Query con índice es < 50ms (vs 200-500ms sin índice)
 - Paginación retorna solo el límite especificado
 - Paginación funciona correctamente con 10,000+ registros
@@ -438,6 +472,7 @@ async findAll(
 - Count total es correcto
 
 **Métricas esperadas:**
+
 - Query time: 200-500ms → **< 50ms** (mejora 80-90%)
 - Reportes: > 5s → **< 500ms** (mejora 90%)
 - Memoria: Full load → **Paginado (constante)**
@@ -447,6 +482,7 @@ async findAll(
 ### PASO 3.4: Monitoreo de Performance
 
 **Problema a resolver:**
+
 - No sabemos la latencia real de webhooks en producción
 - No sabemos qué queries son lentas
 - No sabemos cuándo hay picos de tráfico
@@ -454,6 +490,7 @@ async findAll(
 **Solución esperada:**
 
 **3.4.1 Logger de Performance:**
+
 ```typescript
 @Injectable()
 export class PerformanceLoggerService {
@@ -463,8 +500,8 @@ export class PerformanceLoggerService {
         metric_type: 'webhook_latency',
         entity_id: paymentId,
         value: latency,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
 
     // Si latencia > 1000ms, alertar
@@ -479,23 +516,24 @@ export class PerformanceLoggerService {
     const metrics = await this.prisma.performanceMetrics.aggregate({
       where: {
         metric_type: 'webhook_latency',
-        timestamp: { gte: since }
+        timestamp: { gte: since },
       },
       _avg: { value: true },
       _max: { value: true },
-      _min: { value: true }
+      _min: { value: true },
     });
 
     return {
       avg: metrics._avg.value,
       max: metrics._max.value,
-      min: metrics._min.value
+      min: metrics._min.value,
     };
   }
 }
 ```
 
 **3.4.2 Endpoint de Métricas:**
+
 ```typescript
 @Get('performance/metrics')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -511,12 +549,14 @@ async getPerformanceMetrics(@Query('hours') hours: number = 24) {
 ```
 
 **Implementación:**
+
 - Crear tabla `performance_metrics` en Prisma
 - Logger de latencia en cada operación crítica
 - Dashboard endpoint (solo admin)
 - Integración opcional con Prometheus/Grafana
 
 **Archivos a crear:**
+
 - Migración: `prisma/migrations/XXX_create_performance_metrics.sql`
 - `apps/api/src/performance/performance-logger.service.ts`
 - `apps/api/src/performance/performance.controller.ts`
@@ -524,10 +564,12 @@ async getPerformanceMetrics(@Query('hours') hours: number = 24) {
 - Tests: `apps/api/src/performance/__tests__/performance-logger.spec.ts`
 
 **Archivos a modificar:**
+
 - `apps/api/src/inscripciones-2026/inscripciones-2026.service.ts` (agregar logging)
 - `apps/api/prisma/schema.prisma` (agregar modelo PerformanceMetric)
 
 **Tests:**
+
 - Logger registra latencia correctamente
 - Latencia > 1000ms genera warning
 - Agregación calcula avg/max/min correctamente
@@ -535,6 +577,7 @@ async getPerformanceMetrics(@Query('hours') hours: number = 24) {
 - Cache hit rate se calcula correctamente
 
 **Métricas a trackear:**
+
 - Latencia promedio de webhooks (últimas 24h)
 - Cache hit rate (últimas 24h)
 - Longitud de queue (actual)
@@ -546,7 +589,9 @@ async getPerformanceMetrics(@Query('hours') hours: number = 24) {
 ## Lineamientos de Trabajo (MUY IMPORTANTE)
 
 ### 1. Metodología TDD Estricta
+
 **APRENDIMOS EN SPRINT 1 Y 2 QUE:**
+
 - NO se implementa código sin tests primero
 - El ciclo es: **RED → GREEN → REFACTOR**
   1. Escribir test que falle (RED)
@@ -554,6 +599,7 @@ async getPerformanceMetrics(@Query('hours') hours: number = 24) {
   3. Refactorizar (REFACTOR)
 
 **Proceso para cada PASO:**
+
 1. Crear archivo de tests con todos los casos (RED phase)
 2. Ejecutar tests y verificar que fallan
 3. Implementar código de producción
@@ -563,27 +609,34 @@ async getPerformanceMetrics(@Query('hours') hours: number = 24) {
 7. Crear commit atómico
 
 ### 2. Benchmarking Obligatorio
+
 **NUEVO EN SPRINT 3:**
+
 - Medir performance ANTES de optimizar (baseline)
 - Medir performance DESPUÉS de optimizar
 - Documentar mejora en % en el commit
 - Ejemplo: "Latencia: 800ms → 150ms (mejora 81%)"
 
 ### 3. Tests de Performance
+
 **Además de tests funcionales, crear:**
+
 - Tests de latencia (< Xms)
 - Tests de throughput (> Y req/min)
 - Tests de carga (simular 100+ webhooks simultáneos)
 - Tests de cache hit rate (> 80%)
 
 ### 4. Tipos Explícitos (No any/unknown)
+
 - **NUNCA usar `any` en código de producción**
 - **NUNCA usar `unknown` sin type guards**
 - Todos los parámetros, retornos y variables deben tener tipos explícitos
 - TypeScript en modo estricto
 
 ### 5. Commits Atómicos y Descriptivos
+
 Formato de commits:
+
 ```
 tipo(scope): descripción corta
 
@@ -616,13 +669,16 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ### 6. Zero Regresión
+
 - Antes de cada commit, ejecutar **TODA** la suite de tests
 - Verificar que todos los tests del Sprint 1 y 2 sigan pasando
 - Si se rompe algo, arreglarlo antes de hacer commit
 - Las optimizaciones NO deben cambiar el comportamiento
 
 ### 7. Documentación de Errores
+
 **SI COMETES UN ERROR:**
+
 1. Admítelo inmediatamente
 2. Documenta el error en el commit de corrección
 3. Incluye la lección aprendida
@@ -635,30 +691,35 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ### Al Final del Sprint 3 Deberíamos Tener:
 
 **Código:**
+
 - ✅ Caching con Redis (PASO 3.1)
 - ✅ Queue de webhooks con Bull (PASO 3.2)
 - ✅ Índices en DB + paginación (PASO 3.3)
 - ✅ Sistema de monitoreo de performance (PASO 3.4)
 
 **Performance:**
+
 - ✅ Latencia de webhooks: < 200ms (mejora 80%)
 - ✅ Throughput: 1000+ webhooks/min (mejora 10x)
 - ✅ Query time: < 50ms (mejora 80-90%)
 - ✅ Uptime: 99.9% durante picos
 
 **Tests:**
+
 - ✅ ~20-30 tests nuevos (funcionales)
 - ✅ ~10-15 tests de performance (benchmarks)
 - ✅ 100% de tests pasando (sin regresión)
 - ✅ Cobertura de casos críticos de performance
 
 **Infraestructura:**
+
 - ✅ Redis corriendo en Docker
 - ✅ Bull dashboard para monitoreo de queue
 - ✅ Índices en PostgreSQL
 - ✅ Tabla de métricas de performance
 
 **Documentación:**
+
 - ✅ `docs/SPRINT-3-OPTIMIZACION-PERFORMANCE.md` con:
   - Problemas de performance resueltos
   - Soluciones implementadas
@@ -667,6 +728,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
   - Métricas de mejora
 
 **Compliance:**
+
 - ✅ Best practices de performance (NestJS)
 - ✅ Scalability patterns (caching, queueing, indexing)
 - ✅ Resilience patterns (retry, fallback)
@@ -676,6 +738,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ## Instrucciones para el Asistente
 
 ### Al Comenzar:
+
 1. **LEE** `docs/SPRINT-1-CORRECCIONES-CRITICAS.md` completo
 2. **LEE** `docs/SPRINT-2-MEJORAS-SEGURIDAD.md` completo
 3. **LEE** `docs/PROMPT-SPRINT-3.md` (este archivo)
@@ -684,6 +747,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 6. **PREGUNTA** si algo no está claro ANTES de empezar a codear
 
 ### Durante el Sprint:
+
 1. **TDD ESTRICTO:** Tests primero, código después
 2. **BENCHMARK:** Medir antes y después de cada optimización
 3. **UN PASO A LA VEZ:** No saltes pasos
@@ -693,6 +757,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 7. **ZERO REGRESIÓN:** Todos los tests de Sprint 1 y 2 deben pasar
 
 ### Al Terminar:
+
 1. Verificar que todos los tests de Sprint 1, 2 y 3 pasen
 2. Ejecutar benchmarks finales
 3. Crear documentación completa del Sprint 3
@@ -706,12 +771,13 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 **P: ¿Necesito instalar Redis y Bull localmente?**
 R: Sí. Usa Docker Compose para levantar Redis. Ejemplo:
+
 ```yaml
 services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
 ```
 
 **P: ¿Cómo mido la mejora de performance?**
@@ -764,19 +830,23 @@ IMPORTANTE:
 ## Archivos de Referencia
 
 **Documentación:**
+
 - `docs/SPRINT-1-CORRECCIONES-CRITICAS.md` - Vulnerabilidades y errores del Sprint 1
 - `docs/SPRINT-2-MEJORAS-SEGURIDAD.md` - Mejoras de seguridad del Sprint 2
 
 **Código de referencia:**
+
 - `apps/api/src/inscripciones-2026/inscripciones-2026.service.ts` - Servicio a optimizar
 - `apps/api/src/pagos/services/webhook-idempotency.service.ts` - Servicio a cachear
 - `apps/api/src/pagos/services/payment-amount-validator.service.ts` - Servicio a cachear
 
 **Tests de referencia:**
+
 - `apps/api/src/inscripciones-2026/__tests__/inscripciones-2026-idempotency.spec.ts`
 - `apps/api/src/inscripciones-2026/__tests__/inscripciones-2026-atomic-rollback.spec.ts`
 
 **Configuración:**
+
 - `apps/api/package.json` - Agregar dependencias de Redis y Bull
 - `docker-compose.yml` - Agregar servicio de Redis
 - `apps/api/prisma/schema.prisma` - Agregar índices

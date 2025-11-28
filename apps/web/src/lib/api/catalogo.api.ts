@@ -21,7 +21,7 @@ export type ActualizarProductoDto = UpdateProductoDto;
  * Obtener todos los productos
  */
 export const getProductos = async (): Promise<Producto[]> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<Producto[]>('/productos');
     return productosListSchema.parse(response);
@@ -35,7 +35,7 @@ export const getProductos = async (): Promise<Producto[]> => {
  * Obtener producto por ID
  */
 export const getProductoPorId = async (id: string): Promise<Producto> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<Producto>(`/productos/${id}`);
     return productoSchema.parse(response);
@@ -49,7 +49,7 @@ export const getProductoPorId = async (id: string): Promise<Producto> => {
  * Obtener solo cursos
  */
 export const getCursos = async (): Promise<Producto[]> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<Producto[]>('/productos/cursos');
     return productosListSchema.parse(response);
@@ -63,11 +63,9 @@ export const getCursos = async (): Promise<Producto[]> => {
  * Obtener solo suscripciones
  */
 export const getSuscripciones = async (): Promise<Producto[]> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<Producto[]>(
-      '/productos/suscripciones'
-    );
+    const response = await axios.get<Producto[]>('/productos/suscripciones');
     return productosListSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener las suscripciones del catálogo:', error);
@@ -78,9 +76,7 @@ export const getSuscripciones = async (): Promise<Producto[]> => {
 /**
  * Filtrar productos por tipo
  */
-export const getProductosPorTipo = async (
-  tipo: TipoProducto
-): Promise<Producto[]> => {
+export const getProductosPorTipo = async (tipo: TipoProducto): Promise<Producto[]> => {
   if (tipo === TipoProducto.Curso) return getCursos();
   if (tipo === TipoProducto.Suscripcion) return getSuscripciones();
   return getProductos();

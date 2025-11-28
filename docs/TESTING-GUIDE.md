@@ -31,6 +31,7 @@ curl https://mateatletas-system-production.up.railway.app/api
 ```
 
 **Si falla:**
+
 - Verificar que Railway deployment está completo
 - Ver logs: `railway logs --deployment | tail -50`
 - Buscar: "Nest application successfully started"
@@ -57,6 +58,7 @@ curl -X OPTIONS \
 ```
 
 **Si falla:**
+
 - Verificar `FRONTEND_URL` en Railway: `railway variables --json | jq '.FRONTEND_URL'`
 - Debe incluir exactamente tu dominio (sin trailing slash)
 - Ver logs de CORS: `railway logs --deployment | grep CORS`
@@ -155,6 +157,7 @@ LIMIT 5;
 5. Observar en Network:
 
 **✅ Request exitoso:**
+
 ```
 Request URL: https://mateatletas-system-production.up.railway.app/api/auth/estudiante/login
 Method: POST
@@ -185,13 +188,13 @@ Response:
 
 **❌ Errores posibles:**
 
-| Error | Causa | Solución |
-|-------|-------|----------|
-| **405 Method Not Allowed** | Frontend va a Vercel, no a Railway | Redeploy Vercel después de configurar vars |
-| **401 Unauthorized** | Credenciales incorrectas (esperado si son fake) | Usar credenciales reales de BD |
-| **400 Bad Request** | Datos inválidos (falta username o password) | Ver logs de Railway para detalles |
-| **403 Forbidden** | CSRF bloqueando request | Verificar que request tenga Origin header |
-| **500 CORS Error** | Origin no permitido en FRONTEND_URL | Agregar dominio a FRONTEND_URL en Railway |
+| Error                      | Causa                                           | Solución                                   |
+| -------------------------- | ----------------------------------------------- | ------------------------------------------ |
+| **405 Method Not Allowed** | Frontend va a Vercel, no a Railway              | Redeploy Vercel después de configurar vars |
+| **401 Unauthorized**       | Credenciales incorrectas (esperado si son fake) | Usar credenciales reales de BD             |
+| **400 Bad Request**        | Datos inválidos (falta username o password)     | Ver logs de Railway para detalles          |
+| **403 Forbidden**          | CSRF bloqueando request                         | Verificar que request tenga Origin header  |
+| **500 CORS Error**         | Origin no permitido en FRONTEND_URL             | Agregar dominio a FRONTEND_URL en Railway  |
 
 ---
 
@@ -206,6 +209,7 @@ Después de un login exitoso, verificar que la cookie se estableció correctamen
 3. Buscar cookie: `auth-token`
 
 **✅ Cookie correcta:**
+
 ```
 Name: auth-token
 Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -224,10 +228,10 @@ Después del login, hacer otro request protegido:
 ```javascript
 // En DevTools Console:
 fetch('https://mateatletas-system-production.up.railway.app/api/auth/profile', {
-  credentials: 'include'
+  credentials: 'include',
 })
-.then(r => r.json())
-.then(console.log)
+  .then((r) => r.json())
+  .then(console.log);
 
 // Esperado:
 // { id: "...", nombre: "...", ... }
@@ -254,6 +258,7 @@ railway logs --deployment | grep -E "LOGIN ESTUDIANTE|VALIDATION ERROR"
 **Errores comunes:**
 
 1. **Username demasiado corto:**
+
 ```json
 {
   "property": "username",
@@ -264,6 +269,7 @@ railway logs --deployment | grep -E "LOGIN ESTUDIANTE|VALIDATION ERROR"
 ```
 
 2. **Password demasiado corto:**
+
 ```json
 {
   "property": "password",
@@ -274,6 +280,7 @@ railway logs --deployment | grep -E "LOGIN ESTUDIANTE|VALIDATION ERROR"
 ```
 
 3. **Propiedades extra (forbidNonWhitelisted):**
+
 ```json
 {
   "property": "rememberMe",
@@ -414,6 +421,7 @@ Después de completar todos los tests, deberías poder:
 **Problema:** Network tab muestra `https://www.mateatletasclub.com.ar/api/...`
 
 **Solución:**
+
 1. Verificar que `NEXT_PUBLIC_API_URL` esté en Vercel: `vercel env ls`
 2. Si está, hacer redeploy: `vercel --prod` (sin usar cache)
 3. Esperar 3-5 minutos y probar de nuevo
@@ -423,6 +431,7 @@ Después de completar todos los tests, deberías poder:
 **Problema:** Console muestra "CORS policy blocked..."
 
 **Solución:**
+
 1. Verificar `FRONTEND_URL` en Railway: `railway variables --json | jq '.FRONTEND_URL'`
 2. Debe incluir tu dominio exacto (https://www.mateatletasclub.com.ar)
 3. Si falta, agregar: `railway variables --set "FRONTEND_URL=https://www.mateatletasclub.com.ar,..."`
@@ -433,6 +442,7 @@ Después de completar todos los tests, deberías poder:
 **Problema:** Login responde 400 Bad Request
 
 **Solución:**
+
 1. Ver logs: `railway logs --deployment | grep "VALIDATION ERROR"`
 2. Verificar que username ≥ 3 chars y password ≥ 8 chars
 3. Verificar que no haya campos extra en el request body
@@ -442,10 +452,11 @@ Después de completar todos los tests, deberías poder:
 **Problema:** Login exitoso pero cookie no aparece
 
 **Solución:**
+
 1. Verificar que el dominio use **https** (no http)
 2. En development, cambiar `SameSite` de `strict` a `lax`
 3. Verificar en DevTools → Application → Cookies
 
 ---
 
-*Generado por Claude Code - 2025-11-02*
+_Generado por Claude Code - 2025-11-02_

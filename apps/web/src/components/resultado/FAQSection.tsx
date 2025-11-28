@@ -20,63 +20,73 @@ const faqs: FAQ[] = [
   {
     emoji: '⏱️',
     pregunta: '¿Cuánto tiempo tiene mi hijo para completar los cursos?',
-    respuesta: 'Tenés acceso DE POR VIDA a todos los cursos. Tu hijo puede avanzar a su propio ritmo sin presiones ni fechas límite. La mayoría completa cada curso en 6-8 semanas dedicando 2-3 horas semanales, pero puede ir más rápido o más lento según su ritmo.',
-    highlight: 'ACCESO DE POR VIDA - Pagás una vez, aprendés para siempre'
+    respuesta:
+      'Tenés acceso DE POR VIDA a todos los cursos. Tu hijo puede avanzar a su propio ritmo sin presiones ni fechas límite. La mayoría completa cada curso en 6-8 semanas dedicando 2-3 horas semanales, pero puede ir más rápido o más lento según su ritmo.',
+    highlight: 'ACCESO DE POR VIDA - Pagás una vez, aprendés para siempre',
   },
   {
     emoji: '💻',
     pregunta: '¿Qué necesita mi hijo para empezar?',
-    respuesta: 'Solo una computadora con acceso a internet. No se necesitan programas especiales ni conocimientos previos. Todo el material, las herramientas y el software están INCLUIDOS en la plataforma. Puede empezar hoy mismo.',
-    highlight: 'TODO INCLUIDO - Cero inversión adicional'
+    respuesta:
+      'Solo una computadora con acceso a internet. No se necesitan programas especiales ni conocimientos previos. Todo el material, las herramientas y el software están INCLUIDOS en la plataforma. Puede empezar hoy mismo.',
+    highlight: 'TODO INCLUIDO - Cero inversión adicional',
   },
   {
     emoji: '👨‍🏫',
     pregunta: '¿Mi hijo va a tener apoyo si se traba?',
-    respuesta: 'SÍ! Aunque los cursos son asincrónicos para que aprenda a su ritmo, incluyen SOPORTE PRIORITARIO por WhatsApp. Nuestro equipo docente responde en menos de 24hs. Además, la comunidad de estudiantes se apoya entre sí.',
-    highlight: 'SOPORTE ILIMITADO - Nunca está solo'
+    respuesta:
+      'SÍ! Aunque los cursos son asincrónicos para que aprenda a su ritmo, incluyen SOPORTE PRIORITARIO por WhatsApp. Nuestro equipo docente responde en menos de 24hs. Además, la comunidad de estudiantes se apoya entre sí.',
+    highlight: 'SOPORTE ILIMITADO - Nunca está solo',
   },
   {
     emoji: '🎯',
     pregunta: '¿Qué pasa si mi hijo no tiene experiencia previa?',
-    respuesta: 'MEJOR AÚN! Cada ruta está diseñada específicamente para arrancar desde CERO en el primer curso. Los mejores resultados los vemos justamente con chicos que nunca programaron antes, porque aprenden las bases correctas desde el principio.',
-    highlight: 'PERFECTO PARA PRINCIPIANTES - Empezar bien es clave'
+    respuesta:
+      'MEJOR AÚN! Cada ruta está diseñada específicamente para arrancar desde CERO en el primer curso. Los mejores resultados los vemos justamente con chicos que nunca programaron antes, porque aprenden las bases correctas desde el principio.',
+    highlight: 'PERFECTO PARA PRINCIPIANTES - Empezar bien es clave',
   },
   {
     emoji: '💰',
     pregunta: '¿Puedo pagar en cuotas?',
-    respuesta: 'SÍ! Aceptamos pagos en cuotas con tarjeta de crédito (3, 6 y 12 cuotas sin interés). También podés pagar en un solo pago con transferencia bancaria, débito o MercadoPago. Facilitamos todas las opciones para que puedas arrancar HOY.',
-    highlight: 'HASTA 12 CUOTAS SIN INTERÉS - Empezá con menos de $XX por mes'
+    respuesta:
+      'SÍ! Aceptamos pagos en cuotas con tarjeta de crédito (3, 6 y 12 cuotas sin interés). También podés pagar en un solo pago con transferencia bancaria, débito o MercadoPago. Facilitamos todas las opciones para que puedas arrancar HOY.',
+    highlight: 'HASTA 12 CUOTAS SIN INTERÉS - Empezá con menos de $XX por mes',
   },
   {
     emoji: '🎓',
     pregunta: '¿Mi hijo recibe un certificado al finalizar?',
-    respuesta: 'SÍ! Al completar cada curso recibe un certificado digital verificable. Al finalizar los 4 cursos de la ruta completa obtiene un CERTIFICADO OFICIAL de Mateatletas que puede incluir en su portfolio, CV o solicitudes universitarias.',
-    highlight: 'CERTIFICACIÓN OFICIAL - Acredita su conocimiento'
+    respuesta:
+      'SÍ! Al completar cada curso recibe un certificado digital verificable. Al finalizar los 4 cursos de la ruta completa obtiene un CERTIFICADO OFICIAL de Mateatletas que puede incluir en su portfolio, CV o solicitudes universitarias.',
+    highlight: 'CERTIFICACIÓN OFICIAL - Acredita su conocimiento',
   },
   {
     emoji: '🔄',
     pregunta: '¿Qué pasa si no le gusta o no es para él?',
-    respuesta: 'CERO RIESGO. En los primeros 7 días, si tu hijo no está satisfecho, te devolvemos el 100% de tu inversión. Sin preguntas, sin complicaciones, sin letra chica. Probalo sin ningún riesgo y después decidís.',
-    highlight: 'GARANTÍA 100% - No tenés nada que perder'
+    respuesta:
+      'CERO RIESGO. En los primeros 7 días, si tu hijo no está satisfecho, te devolvemos el 100% de tu inversión. Sin preguntas, sin complicaciones, sin letra chica. Probalo sin ningún riesgo y después decidís.',
+    highlight: 'GARANTÍA 100% - No tenés nada que perder',
   },
   {
     emoji: '👨‍👩‍👧‍👦',
     pregunta: '¿Cómo funcionan los descuentos por múltiples hijos?',
-    respuesta: 'SÚPER SIMPLE: Primer hijo precio completo. Segundo hijo 30% OFF. Tercero en adelante 50% OFF. Si tenés 3 hijos, el promedio es casi MITAD DE PRECIO por hijo. Los descuentos se aplican AUTOMÁTICAMENTE al checkout.',
-    highlight: 'HASTA 50% OFF POR HIJO - Familia numerosa = más ahorro'
+    respuesta:
+      'SÚPER SIMPLE: Primer hijo precio completo. Segundo hijo 30% OFF. Tercero en adelante 50% OFF. Si tenés 3 hijos, el promedio es casi MITAD DE PRECIO por hijo. Los descuentos se aplican AUTOMÁTICAMENTE al checkout.',
+    highlight: 'HASTA 50% OFF POR HIJO - Familia numerosa = más ahorro',
   },
   {
     emoji: '📱',
     pregunta: '¿Puedo hacer seguimiento del progreso de mi hijo?',
-    respuesta: 'ABSOLUTAMENTE! Tenés acceso a un panel donde ves en TIEMPO REAL: qué clases completó, qué proyectos hizo, qué skills está desarrollando y cuánto tiempo dedica. Transparencia total para que estés tranquilo.',
-    highlight: 'PANEL DE SEGUIMIENTO - Ves todo su progreso'
+    respuesta:
+      'ABSOLUTAMENTE! Tenés acceso a un panel donde ves en TIEMPO REAL: qué clases completó, qué proyectos hizo, qué skills está desarrollando y cuánto tiempo dedica. Transparencia total para que estés tranquilo.',
+    highlight: 'PANEL DE SEGUIMIENTO - Ves todo su progreso',
   },
   {
     emoji: '🚀',
     pregunta: '¿Cuándo puede empezar mi hijo?',
-    respuesta: 'HOY MISMO! Apenas completes la inscripción, tu hijo recibe acceso instantáneo a todo el material. Puede empezar la primera clase en los próximos 5 minutos. No hay fechas de inicio ni esperas.',
-    highlight: 'ACCESO INMEDIATO - Empieza en 5 minutos'
-  }
+    respuesta:
+      'HOY MISMO! Apenas completes la inscripción, tu hijo recibe acceso instantáneo a todo el material. Puede empezar la primera clase en los próximos 5 minutos. No hay fechas de inicio ni esperas.',
+    highlight: 'ACCESO INMEDIATO - Empieza en 5 minutos',
+  },
 ];
 
 export default function FAQSection() {
@@ -106,7 +116,8 @@ export default function FAQSection() {
           </span>
         </h2>
         <p className="text-slate-300 text-xl max-w-3xl mx-auto">
-          Cada pregunta tiene una respuesta que te va a dejar <strong className="text-white">más tranquilo</strong>
+          Cada pregunta tiene una respuesta que te va a dejar{' '}
+          <strong className="text-white">más tranquilo</strong>
         </p>
       </motion.div>
 
@@ -137,9 +148,7 @@ export default function FAQSection() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
                     <span className="text-4xl flex-shrink-0">{faq.emoji}</span>
-                    <span className="text-lg md:text-xl font-bold text-white">
-                      {faq.pregunta}
-                    </span>
+                    <span className="text-lg md:text-xl font-bold text-white">{faq.pregunta}</span>
                   </div>
 
                   {/* Icono expandir/colapsar */}
@@ -206,9 +215,7 @@ export default function FAQSection() {
 
           <div className="relative bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10 border-2 border-green-500/40 rounded-3xl p-10 text-center">
             <div className="text-5xl mb-4">💬</div>
-            <h3 className="text-3xl font-black text-white mb-3">
-              ¿Todavía tenés dudas?
-            </h3>
+            <h3 className="text-3xl font-black text-white mb-3">¿Todavía tenés dudas?</h3>
             <p className="text-slate-300 text-lg mb-6">
               Hablá directamente con nosotros. Te respondemos{' '}
               <strong className="text-white">en minutos</strong>.
@@ -224,9 +231,7 @@ export default function FAQSection() {
               Escribinos por WhatsApp
             </a>
 
-            <p className="text-slate-500 text-sm mt-6">
-              Respondemos todos los días de 9 AM a 9 PM
-            </p>
+            <p className="text-slate-500 text-sm mt-6">Respondemos todos los días de 9 AM a 9 PM</p>
           </div>
         </div>
       </motion.div>

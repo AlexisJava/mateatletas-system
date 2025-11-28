@@ -48,27 +48,15 @@ export function LogroCard({ logro, desbloqueado, fecha_desbloqueo }: LogroCardPr
         <div className="mb-3">
           <motion.div
             className={`text-6xl ${desbloqueado ? '' : 'grayscale'}`}
-            animate={
-              desbloqueado
-                ? { rotate: [0, -10, 10, -10, 0] }
-                : {}
-            }
-            transition={
-              desbloqueado
-                ? { repeat: Infinity, duration: 3, repeatDelay: 2 }
-                : {}
-            }
+            animate={desbloqueado ? { rotate: [0, -10, 10, -10, 0] } : {}}
+            transition={desbloqueado ? { repeat: Infinity, duration: 3, repeatDelay: 2 } : {}}
           >
             {desbloqueado ? logro.icono : '🔒'}
           </motion.div>
         </div>
 
         {/* Nombre */}
-        <h3
-          className={`font-bold text-lg mb-2 ${
-            desbloqueado ? 'text-white' : 'text-gray-400'
-          }`}
-        >
+        <h3 className={`font-bold text-lg mb-2 ${desbloqueado ? 'text-white' : 'text-gray-400'}`}>
           {esSecreto && !desbloqueado ? '???' : logro.nombre}
         </h3>
 
@@ -78,9 +66,7 @@ export function LogroCard({ logro, desbloqueado, fecha_desbloqueo }: LogroCardPr
             desbloqueado ? 'text-white/90' : 'text-gray-500'
           }`}
         >
-          {esSecreto && !desbloqueado
-            ? 'Logro secreto. ¡Descúbrelo jugando!'
-            : logro.descripcion}
+          {esSecreto && !desbloqueado ? 'Logro secreto. ¡Descúbrelo jugando!' : logro.descripcion}
         </p>
 
         {/* Recompensas */}

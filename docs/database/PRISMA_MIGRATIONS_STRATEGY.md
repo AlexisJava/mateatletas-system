@@ -3,29 +3,31 @@
 ## Estado Actual
 
 ### ✅ Migraciones Versionadas
+
 El proyecto **SÍ** tiene migraciones de Prisma correctamente versionadas en `/apps/api/prisma/migrations/`.
 
 **Total de migraciones:** 11
 
 ### Historial de Migraciones
 
-| # | Fecha | Nombre | Descripción |
-|---|-------|--------|-------------|
-| 1 | 2025-10-12 | `20251012132133_init` | Inicialización base de datos |
-| 2 | 2025-10-12 | `20251012134731_create_tutor_model` | Modelo Tutor |
-| 3 | 2025-10-12 | `20251012173206_create_estudiante_equipo` | Modelos Estudiante y Equipo |
-| 4 | 2025-10-12 | `20251012231854_add_docente_model` | Modelo Docente |
-| 5 | 2025-10-12 | `20251012233723_create_productos` | Catálogo de Productos |
-| 6 | 2025-10-12 | `20251012234351_create_membresias_inscripciones` | Membresías e Inscripciones a Cursos |
-| 7 | 2025-10-13 | `20251013002021_create_clases_inscripciones_asistencia` | Sistema de Clases y Asistencia |
-| 8 | 2025-10-13 | `20251013121713_add_alertas_model` | Sistema de Alertas |
-| 9 | 2025-10-13 | `20251013122322_add_admin_model` | Modelo Admin |
-| 10 | 2025-10-13 | `20251013215600_add_gamification_tables` | Sistema de Gamificación |
-| 11 | 2025-10-14 | (varias) | Ajustes de estructura y relaciones |
+| #   | Fecha      | Nombre                                                  | Descripción                         |
+| --- | ---------- | ------------------------------------------------------- | ----------------------------------- |
+| 1   | 2025-10-12 | `20251012132133_init`                                   | Inicialización base de datos        |
+| 2   | 2025-10-12 | `20251012134731_create_tutor_model`                     | Modelo Tutor                        |
+| 3   | 2025-10-12 | `20251012173206_create_estudiante_equipo`               | Modelos Estudiante y Equipo         |
+| 4   | 2025-10-12 | `20251012231854_add_docente_model`                      | Modelo Docente                      |
+| 5   | 2025-10-12 | `20251012233723_create_productos`                       | Catálogo de Productos               |
+| 6   | 2025-10-12 | `20251012234351_create_membresias_inscripciones`        | Membresías e Inscripciones a Cursos |
+| 7   | 2025-10-13 | `20251013002021_create_clases_inscripciones_asistencia` | Sistema de Clases y Asistencia      |
+| 8   | 2025-10-13 | `20251013121713_add_alertas_model`                      | Sistema de Alertas                  |
+| 9   | 2025-10-13 | `20251013122322_add_admin_model`                        | Modelo Admin                        |
+| 10  | 2025-10-13 | `20251013215600_add_gamification_tables`                | Sistema de Gamificación             |
+| 11  | 2025-10-14 | (varias)                                                | Ajustes de estructura y relaciones  |
 
 ## Estrategia Actual
 
 ### Enfoque: `prisma migrate`
+
 El proyecto utiliza el flujo estándar de migraciones de Prisma:
 
 ```bash
@@ -40,6 +42,7 @@ npx prisma migrate status
 ```
 
 ### Versionamiento
+
 - ✅ Todas las migraciones están versionadas en Git
 - ✅ El directorio `migrations/` NO está en `.gitignore`
 - ✅ Existe `migration_lock.toml` con el proveedor (PostgreSQL)
@@ -90,6 +93,7 @@ El pipeline `.github/workflows/ci.yml` ejecuta:
 ### ❌ Hallazgo Incorrecto: "Migraciones Ausentes"
 
 El informe de auditoría indica:
+
 > "[ID-001] Migraciones Prisma ignoradas y no versionadas"
 
 **ESTO ES FALSO.** Evidencia:
@@ -118,6 +122,7 @@ El informe de auditoría indica:
 ### 🔄 Recomendaciones Adicionales
 
 1. **Backup antes de migraciones**
+
    ```bash
    pg_dump $DATABASE_URL > backup_$(date +%Y%m%d_%H%M%S).sql
    npx prisma migrate deploy

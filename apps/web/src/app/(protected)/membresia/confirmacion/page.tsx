@@ -97,10 +97,7 @@ export default function ConfirmacionPage() {
   if (status === 'pending') {
     return (
       <div className="animate-fadeIn py-12">
-        <PaymentPending
-          onVerEstado={handleVerEstado}
-          onVolverInicio={handleVolverInicio}
-        />
+        <PaymentPending onVerEstado={handleVerEstado} onVolverInicio={handleVolverInicio} />
       </div>
     );
   }
@@ -126,12 +123,13 @@ export default function ConfirmacionPage() {
         </div>
 
         {/* Título */}
-        <h1 className="font-[family-name:var(--font-fredoka)] text-4xl text-dark">Pago rechazado</h1>
+        <h1 className="font-[family-name:var(--font-fredoka)] text-4xl text-dark">
+          Pago rechazado
+        </h1>
 
         {/* Mensaje */}
         <p className="text-lg text-gray-700">
-          Tu pago no pudo ser procesado. Por favor, intenta nuevamente o
-          contacta a tu banco.
+          Tu pago no pudo ser procesado. Por favor, intenta nuevamente o contacta a tu banco.
         </p>
 
         {/* Razones comunes */}
@@ -147,9 +145,7 @@ export default function ConfirmacionPage() {
             text-left
           "
         >
-          <p className="font-bold text-dark mb-3">
-            Razones comunes de rechazo:
-          </p>
+          <p className="font-bold text-dark mb-3">Razones comunes de rechazo:</p>
           <ul className="space-y-2 text-sm text-gray-700">
             <li className="flex items-start gap-2">
               <span className="text-[#f44336] mt-0.5">•</span>

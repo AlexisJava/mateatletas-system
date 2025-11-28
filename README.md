@@ -35,6 +35,7 @@ railway variables set FRONTEND_URL="https://tu-vercel-url.app"
 ### ⚠️ Archivos Críticos
 
 **Antes de modificar estos archivos, ejecutar `npm run verify:deploy`:**
+
 - [Dockerfile](Dockerfile)
 - [apps/api/nest-cli.json](apps/api/nest-cli.json)
 - [apps/api/tsconfig.json](apps/api/tsconfig.json)
@@ -47,6 +48,7 @@ railway variables set FRONTEND_URL="https://tu-vercel-url.app"
 ## 🌟 Estado del Proyecto
 
 **Backend API**: ✅ **9.5/10 - WORLD-CLASS** ([Ver detalle](WORLD_CLASS_BACKEND_SUMMARY.md))
+
 - 99 tests passing con ~90% cobertura
 - Logging estructurado con Winston
 - Cache con Redis (fallback a memoria)
@@ -56,6 +58,7 @@ railway variables set FRONTEND_URL="https://tu-vercel-url.app"
 - **0 N+1 queries** (eager loading optimizado)
 
 **Frontend**: ✅ **9/10 - PRODUCTION READY** ([Ver Sprint 6](docs/SPRINT_6_COMPLETO.md))
+
 - **React Query** para server state (6 stores migrados)
 - **98% menos requests** al servidor (cache automático)
 - **0ms UI response** (optimistic updates)
@@ -68,6 +71,7 @@ railway variables set FRONTEND_URL="https://tu-vercel-url.app"
 ## 🚀 Quick Start
 
 ### Acceso Rápido (Desarrollo)
+
 ```bash
 # Instalar dependencias
 npm install
@@ -80,6 +84,7 @@ http://localhost:3000
 ```
 
 **Home incluye links a:**
+
 - 👨‍👩‍👧‍👦 Portal Tutor
 - 🎮 Portal Estudiante
 - 👨‍🏫 Portal Docente
@@ -95,15 +100,15 @@ http://localhost:3000
 
 ### Resumen Ejecutivo
 
-| Área | Completado | Estado |
-|------|-----------|--------|
-| **Backend Slices** | 17/20 | 85% ✅ |
-| **Backend Modules** | 13/13 | 100% ✅ |
-| **Frontend Portals** | 4/4 | 100% ✅ |
-| **React Query Migration** | 6/6 | 100% ✅ |
-| **TypeScript Errors** | 0 | 100% ✅ |
-| **Testing Scripts** | 18 | ✅ |
-| **Tests E2E** | ~245 | ✅ |
+| Área                      | Completado | Estado  |
+| ------------------------- | ---------- | ------- |
+| **Backend Slices**        | 17/20      | 85% ✅  |
+| **Backend Modules**       | 13/13      | 100% ✅ |
+| **Frontend Portals**      | 4/4        | 100% ✅ |
+| **React Query Migration** | 6/6        | 100% ✅ |
+| **TypeScript Errors**     | 0          | 100% ✅ |
+| **Testing Scripts**       | 18         | ✅      |
+| **Tests E2E**             | ~245       | ✅      |
 
 ### Métricas de Performance
 
@@ -130,6 +135,7 @@ http://localhost:3000
 **Documentos clave actualizados (17 Oct 2025):**
 
 ### 🔥 Refactoring Session (NEW)
+
 1. **[docs/SESION_REFACTORING_COMPLETA_2025-10-17.md](docs/SESION_REFACTORING_COMPLETA_2025-10-17.md)** ⭐⭐⭐
    - **11 archivos monolíticos refactorizados** (9,345 líneas → 40+ módulos)
    - **67% reducción** promedio por archivo
@@ -144,6 +150,7 @@ http://localhost:3000
    - Facade pattern aplicado
 
 ### Backend
+
 3. **[WORLD_CLASS_BACKEND_SUMMARY.md](WORLD_CLASS_BACKEND_SUMMARY.md)** ⭐
    - Backend 9.5/10 world-class
    - 99 tests, 90% cobertura
@@ -154,6 +161,7 @@ http://localhost:3000
    - Métricas verificadas
 
 ### Frontend
+
 5. **[docs/SPRINT_6_COMPLETO.md](docs/SPRINT_6_COMPLETO.md)** ⭐⭐⭐
    - React Query migration completa
    - 98% menos requests, 0ms UI
@@ -164,6 +172,7 @@ http://localhost:3000
    - Patrones y best practices
 
 ### Planning
+
 7. **[docs/ROADMAP_SLICES_COMPLETO.md](docs/ROADMAP_SLICES_COMPLETO.md)**
    - Arquitectura completa (22 slices)
    - Guía de desarrollo futuro
@@ -187,6 +196,7 @@ Mateatletas-Ecosystem/
 ### Stack Tecnológico
 
 **Backend:**
+
 - NestJS + TypeScript
 - Prisma ORM
 - PostgreSQL
@@ -194,6 +204,7 @@ Mateatletas-Ecosystem/
 - MercadoPago SDK
 
 **Frontend:**
+
 - Next.js 15 (App Router)
 - React 18 + TypeScript
 - Tailwind CSS
@@ -223,13 +234,16 @@ Mateatletas-Ecosystem/
 ## 🎨 Portales Frontend (4)
 
 ### 1. Portal Tutor 👨‍👩‍👧‍👦
+
 - Dashboard con resumen
 - Gestión de estudiantes
 - Catálogo y pagos
 - Reserva de clases
 
 ### 2. Portal Estudiante 🎮
+
 **Estado:** ✅ 100% COMPLETADO
+
 - Dashboard gamificado con animaciones
 - Sistema de logros (8 badges)
 - Rankings competitivos (equipo + global)
@@ -237,7 +251,9 @@ Mateatletas-Ecosystem/
 - 7 componentes de efectos especiales
 
 ### 3. Portal Docente 👨‍🏫
+
 **Estado:** ✅ 100% COMPLETADO
+
 - Dashboard con KPIs
 - Calendario mensual de clases
 - Gestión de observaciones
@@ -245,7 +261,9 @@ Mateatletas-Ecosystem/
 - Toma de asistencia mejorada
 
 ### 4. Portal Admin ⚙️
+
 **Estado:** ✅ 100% COMPLETADO
+
 - Dashboard con estadísticas
 - Gestión de usuarios (todos los roles)
 - Gestión de productos (CRUD)
@@ -257,6 +275,7 @@ Mateatletas-Ecosystem/
 ## 🎮 Gamificación
 
 ### Features Épicas ⭐
+
 - 💫 30 partículas flotantes
 - 🎉 Confetti (500 piezas)
 - ⭐ CountUp en stats
@@ -267,6 +286,7 @@ Mateatletas-Ecosystem/
 - 🌊 Transiciones Framer Motion
 
 ### Ed-Tech Best Practices (Slice #16 - Cursos)
+
 1. ✅ **Chunking**: Producto → Módulo → Lección
 2. ✅ **Microlearning**: Lecciones 5-15 min
 3. ✅ **Progressive Disclosure**: Prerequisites
@@ -280,6 +300,7 @@ Mateatletas-Ecosystem/
 ## 🗄️ Base de Datos
 
 **22 Modelos Prisma:**
+
 - Usuarios (4 roles: Tutor, Estudiante, Docente, Admin)
 - Equipos y Gamificación
 - Productos, Pagos y Membresías
@@ -288,6 +309,7 @@ Mateatletas-Ecosystem/
 - Logros y Puntos
 
 **Seeds incluidos:**
+
 - 4 Equipos gamificados
 - 6 Rutas curriculares de matemáticas
 - 5 Productos (subscripciones y cursos)
@@ -301,6 +323,7 @@ Mateatletas-Ecosystem/
 ## 🧪 Testing
 
 **18 scripts automatizados:**
+
 ```bash
 # Integration tests completo
 ./tests/scripts/test-integration-full.sh
@@ -341,6 +364,7 @@ npm test -- pagos.service.spec.ts   # 35 tests ✅
 Ver documentación completa: **[TESTING_POLICY.md](./TESTING_POLICY.md)**
 
 **Incluye:**
+
 - ✅ Proceso TDD obligatorio (Red → Green → Refactor)
 - ✅ Checklist de PR con tests
 - ✅ Standards de coverage (80% nuevas features, 90% críticas)
@@ -348,6 +372,7 @@ Ver documentación completa: **[TESTING_POLICY.md](./TESTING_POLICY.md)**
 - ✅ CI/CD automático que bloquea PRs sin tests
 
 **Git Hooks configurados:**
+
 - Pre-commit: lint-staged (ESLint + Prettier auto-fix)
 - CI ejecuta tests críticos en cada PR
 
@@ -423,16 +448,19 @@ Ver documentación completa: **[TESTING_POLICY.md](./TESTING_POLICY.md)**
 **Tema:** Crash Bandicoot Inspired
 
 **Colores:**
+
 - Primary: `#ff6b35` (Naranja)
 - Secondary: `#f7b801` (Amarillo)
 - Accent: `#00d9ff` (Cyan)
 
 **Sombras Chunky:**
+
 - `3px 3px 0px rgba(0,0,0,1)`
 - `5px 5px 0px rgba(0,0,0,1)`
 - `8px 8px 0px rgba(0,0,0,1)`
 
 **Fuentes:**
+
 - Lilita One (Títulos)
 - Fredoka (Cuerpo)
 
@@ -441,6 +469,7 @@ Ver documentación completa: **[TESTING_POLICY.md](./TESTING_POLICY.md)**
 ## 🚦 Comandos
 
 ### Desarrollo
+
 ```bash
 # Instalar dependencias
 npm install
@@ -459,6 +488,7 @@ npm run build
 ```
 
 ### Base de Datos
+
 ```bash
 cd apps/api
 
@@ -476,6 +506,7 @@ npx prisma studio
 ```
 
 ### Testing
+
 ```bash
 # Backend integration tests
 ./tests/scripts/test-integration-full.sh
@@ -492,11 +523,13 @@ ls tests/scripts/
 ## 🌐 URLs
 
 **Desarrollo:**
+
 - Backend API: `http://localhost:3001/api`
 - Frontend: `http://localhost:3000`
 - Prisma Studio: `http://localhost:5555`
 
 **Portales:**
+
 - `/login` - Login tutores
 - `/estudiante/dashboard` - Portal estudiante
 - `/docente/dashboard` - Portal docente
@@ -509,16 +542,19 @@ ls tests/scripts/
 ## 🎯 Próximos Pasos
 
 ### MVP 1.1 (1-2 semanas)
+
 1. ✅ Slice #16 Backend completado
 2. ⏳ Slice #16 Frontend (18-24 horas)
 3. ⏳ Slice #17 Jitsi Meet (3-4 horas)
 
 ### Version 2.0 (1-2 meses)
+
 1. ⏳ Slice #18: Alertas IA (8-10 horas)
 2. ⏳ Slice #19: Chatbot IA (10-15 horas)
 3. ⏳ Slice #20: Juegos (15-20 horas)
 
 ### Mejoras de Calidad
+
 1. Fix TypeScript `any` types (~50 ocurrencias)
 2. Implementar Swagger/OpenAPI docs
 3. Testing unitario (Jest)
@@ -531,7 +567,9 @@ ls tests/scripts/
 ## ⚠️ Notas Importantes
 
 ### Auth de Estudiantes
+
 **Estado:** ✅ IMPLEMENTADO (Slice #11)
+
 - Estudiantes pueden hacer login con email/password
 - 5 estudiantes de prueba en seeds:
   - `estudiante1@test.com` / `estudiante123`
@@ -539,11 +577,14 @@ ls tests/scripts/
   - ... hasta estudiante5
 
 ### MercadoPago
+
 **Estado:** ⚠️ Mock Mode
+
 - SDK en modo mock para desarrollo
 - ⚠️ Agregar credenciales reales antes de producción
 
 ### Deuda Técnica
+
 - ✅ Archivos monolíticos: RESUELTOS (0 archivos >500 líneas)
 - ✅ Seeds refactorizados: Modularizados en 9 archivos
 - ✅ Servicios backend: 4 servicios refactorizados en 11 módulos

@@ -11,10 +11,10 @@ interface SoundEffectProps {
 // Frecuencias para sonidos sintéticos
 const soundFrequencies = {
   achievement: [523.25, 659.25, 783.99], // C5, E5, G5 (acorde C mayor)
-  levelup: [261.63, 329.63, 392.00, 523.25, 659.25], // C4, E4, G4, C5, E5 (escalando)
+  levelup: [261.63, 329.63, 392.0, 523.25, 659.25], // C4, E4, G4, C5, E5 (escalando)
   click: [800], // Click simple
   success: [523.25, 659.25], // C5, E5
-  error: [392.00, 329.63], // G4, E4 (descendente)
+  error: [392.0, 329.63], // G4, E4 (descendente)
 };
 
 export function SoundEffect({ sound, play = false, volume = 0.3 }: SoundEffectProps) {
@@ -22,7 +22,9 @@ export function SoundEffect({ sound, play = false, volume = 0.3 }: SoundEffectPr
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !audioContextRef.current) {
-      const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       audioContextRef.current = new AudioContextClass();
     }
   }, []);
@@ -70,7 +72,9 @@ export function useSoundEffect() {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !audioContextRef.current) {
-      const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       audioContextRef.current = new AudioContextClass();
     }
   }, []);

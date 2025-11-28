@@ -2,15 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  X,
-  MessageSquare,
-  CheckCircle,
-  Loader2,
-  Smile,
-  Meh,
-  Frown,
-} from 'lucide-react';
+import { X, MessageSquare, CheckCircle, Loader2, Smile, Meh, Frown } from 'lucide-react';
 import { toast } from '@/components/ui/Toast';
 import { StudentAvatar } from '@/components/ui/StudentAvatar';
 import type { EstudianteConStatsDto } from '@/lib/api/clase-grupos.api';
@@ -34,11 +26,8 @@ export default function AgregarObservacionModal({
   estudiantes,
   onSuccess,
 }: AgregarObservacionModalProps) {
-  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<
-    string | null
-  >(null);
-  const [tipoObservacion, setTipoObservacion] =
-    useState<TipoObservacion>('neutral');
+  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<string | null>(null);
+  const [tipoObservacion, setTipoObservacion] = useState<TipoObservacion>('neutral');
   const [observaciones, setObservaciones] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -86,8 +75,7 @@ export default function AgregarObservacionModal({
       console.error('Error al agregar observación:', error);
       if (isAxiosError(error)) {
         toast.error(
-          error.response?.data?.message ||
-            'Error al guardar observación. Intenta nuevamente.'
+          error.response?.data?.message || 'Error al guardar observación. Intenta nuevamente.',
         );
       } else {
         toast.error('Error al guardar observación. Intenta nuevamente.');
@@ -97,9 +85,7 @@ export default function AgregarObservacionModal({
     }
   };
 
-  const estudianteSelected = estudiantes.find(
-    (e) => e.id === estudianteSeleccionado
-  );
+  const estudianteSelected = estudiantes.find((e) => e.id === estudianteSeleccionado);
 
   const getTipoIcon = (tipo: TipoObservacion) => {
     switch (tipo) {
@@ -153,9 +139,7 @@ export default function AgregarObservacionModal({
                     <MessageSquare className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-white">
-                      AGREGAR OBSERVACIÓN
-                    </h2>
+                    <h2 className="text-2xl font-black text-white">AGREGAR OBSERVACIÓN</h2>
                     <p className="text-white/90 font-semibold">
                       {new Date().toLocaleDateString('es-ES', {
                         weekday: 'long',
@@ -178,9 +162,7 @@ export default function AgregarObservacionModal({
               <div className="overflow-y-auto max-h-[70vh] p-6 space-y-6">
                 {/* Tipo de observación */}
                 <div>
-                  <label className="block text-white font-bold mb-3">
-                    Tipo de Observación
-                  </label>
+                  <label className="block text-white font-bold mb-3">Tipo de Observación</label>
                   <div className="grid grid-cols-3 gap-3">
                     <button
                       onClick={() => setTipoObservacion('positiva')}
@@ -222,9 +204,7 @@ export default function AgregarObservacionModal({
 
                 {/* Selección de estudiante */}
                 <div>
-                  <label className="block text-white font-bold mb-3">
-                    Seleccionar Estudiante
-                  </label>
+                  <label className="block text-white font-bold mb-3">Seleccionar Estudiante</label>
                   <div className="max-h-64 overflow-y-auto space-y-2 bg-white/5 rounded-xl p-3 border border-white/10">
                     {estudiantes.map((estudiante) => (
                       <button
@@ -266,9 +246,7 @@ export default function AgregarObservacionModal({
 
                 {/* Campo de observación */}
                 <div>
-                  <label className="block text-white font-bold mb-3">
-                    Observación
-                  </label>
+                  <label className="block text-white font-bold mb-3">Observación</label>
                   <textarea
                     value={observaciones}
                     onChange={(e) => setObservaciones(e.target.value)}
@@ -282,17 +260,13 @@ export default function AgregarObservacionModal({
                     rows={5}
                     className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 resize-none"
                   />
-                  <p className="text-gray-400 text-sm mt-2">
-                    {observaciones.length} caracteres
-                  </p>
+                  <p className="text-gray-400 text-sm mt-2">{observaciones.length} caracteres</p>
                 </div>
 
                 {/* Preview */}
                 {estudianteSelected && observaciones && (
                   <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                    <p className="text-gray-400 text-sm font-bold mb-2">
-                      Vista Previa:
-                    </p>
+                    <p className="text-gray-400 text-sm font-bold mb-2">Vista Previa:</p>
                     <div className="flex items-start gap-3">
                       <StudentAvatar
                         nombre={estudianteSelected.nombre}
@@ -303,12 +277,9 @@ export default function AgregarObservacionModal({
                       />
                       <div className="flex-1">
                         <p className="text-white font-bold">
-                          {estudianteSelected.nombre}{' '}
-                          {estudianteSelected.apellido}
+                          {estudianteSelected.nombre} {estudianteSelected.apellido}
                         </p>
-                        <p className="text-gray-300 text-sm mt-1">
-                          {observaciones}
-                        </p>
+                        <p className="text-gray-300 text-sm mt-1">{observaciones}</p>
                         <div className="flex items-center gap-2 mt-2">
                           {getTipoIcon(tipoObservacion)}
                           <span className="text-xs text-gray-400 capitalize">
@@ -333,11 +304,7 @@ export default function AgregarObservacionModal({
 
                 <button
                   onClick={handleSubmit}
-                  disabled={
-                    isSubmitting ||
-                    !estudianteSeleccionado ||
-                    !observaciones.trim()
-                  }
+                  disabled={isSubmitting || !estudianteSeleccionado || !observaciones.trim()}
                   className={`px-8 py-3 bg-gradient-to-r ${getTipoColor(tipoObservacion)} hover:opacity-90 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-black rounded-xl transition-all shadow-lg flex items-center gap-2`}
                 >
                   {isSubmitting ? (

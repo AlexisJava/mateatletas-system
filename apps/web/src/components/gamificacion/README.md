@@ -5,18 +5,21 @@ Sistema completo de gamificación para Mateatletas con logros, niveles, racha y 
 ## 📦 Componentes Disponibles
 
 ### RecursosBar
+
 Barra superior que muestra nivel, XP, monedas y progreso de nivel del estudiante.
 
 ```tsx
 import { RecursosBar } from '@/components/gamificacion';
 
-<RecursosBar estudianteId="abc123" />
+<RecursosBar estudianteId="abc123" />;
 ```
 
 **Props:**
+
 - `estudianteId: string` - ID del estudiante
 
 **Features:**
+
 - Muestra nivel actual con badge animado
 - Progreso de XP con barra animada
 - Total de monedas y XP
@@ -26,18 +29,21 @@ import { RecursosBar } from '@/components/gamificacion';
 ---
 
 ### ProgresoNivel
+
 Barra de progreso del nivel actual con XP restante.
 
 ```tsx
 import { ProgresoNivel } from '@/components/gamificacion';
 
-<ProgresoNivel recursos={recursos} />
+<ProgresoNivel recursos={recursos} />;
 ```
 
 **Props:**
+
 - `recursos: RecursosEstudiante & { racha: RachaEstudiante }` - Datos de recursos
 
 **Features:**
+
 - Barra de progreso animada
 - Etiqueta de porcentaje
 - XP necesario para siguiente nivel
@@ -46,18 +52,21 @@ import { ProgresoNivel } from '@/components/gamificacion';
 ---
 
 ### RachaWidget
+
 Widget de racha de días consecutivos con animaciones de fuego.
 
 ```tsx
 import { RachaWidget } from '@/components/gamificacion';
 
-<RachaWidget estudianteId="abc123" />
+<RachaWidget estudianteId="abc123" />;
 ```
 
 **Props:**
+
 - `estudianteId: string` - ID del estudiante
 
 **Features:**
+
 - Racha actual, récord y total de días
 - Llamas animadas de fondo
 - Alerta si la racha está en riesgo (últimas 4 horas)
@@ -67,24 +76,23 @@ import { RachaWidget } from '@/components/gamificacion';
 ---
 
 ### LogroCard
+
 Card individual de logro con modal de detalles.
 
 ```tsx
 import { LogroCard } from '@/components/gamificacion';
 
-<LogroCard
-  logro={logro}
-  desbloqueado={true}
-  fecha_desbloqueo={new Date()}
-/>
+<LogroCard logro={logro} desbloqueado={true} fecha_desbloqueo={new Date()} />;
 ```
 
 **Props:**
+
 - `logro: Logro` - Datos del logro
 - `desbloqueado: boolean` - Si está desbloqueado
 - `fecha_desbloqueo?: Date | null` - Fecha de desbloqueo
 
 **Features:**
+
 - Badge de rareza (común, raro, épico, legendario)
 - Gradiente según rareza
 - Icono animado si está desbloqueado
@@ -96,6 +104,7 @@ import { LogroCard } from '@/components/gamificacion';
 ---
 
 ### LogroModal
+
 Modal con detalles completos del logro.
 
 ```tsx
@@ -107,10 +116,11 @@ import { LogroModal } from '@/components/gamificacion';
   fecha_desbloqueo={new Date()}
   isOpen={isOpen}
   onClose={() => setIsOpen(false)}
-/>
+/>;
 ```
 
 **Props:**
+
 - `logro: Logro` - Datos del logro
 - `desbloqueado: boolean` - Si está desbloqueado
 - `fecha_desbloqueo?: Date | null` - Fecha de desbloqueo
@@ -118,6 +128,7 @@ import { LogroModal } from '@/components/gamificacion';
 - `onClose: () => void` - Callback al cerrar
 
 **Features:**
+
 - Header con gradiente según rareza
 - Icono animado (rotación continua)
 - Descripción completa
@@ -130,18 +141,21 @@ import { LogroModal } from '@/components/gamificacion';
 ---
 
 ### ListaLogros
+
 Grid completo de logros con filtros por categoría.
 
 ```tsx
 import { ListaLogros } from '@/components/gamificacion';
 
-<ListaLogros estudianteId="abc123" />
+<ListaLogros estudianteId="abc123" />;
 ```
 
 **Props:**
+
 - `estudianteId: string` - ID del estudiante
 
 **Features:**
+
 - Filtros por categoría (consistencia, maestría, precisión, etc.)
 - Toggle "Solo desbloqueados"
 - Card de estadísticas globales con porcentaje
@@ -156,6 +170,7 @@ import { ListaLogros } from '@/components/gamificacion';
 ## 🎨 Estilos
 
 Todos los componentes usan:
+
 - **Tailwind CSS** para estilos
 - **Framer Motion** para animaciones
 - **Gradientes vibrantes** según rareza/tipo
@@ -221,11 +236,7 @@ const { data: progreso } = useProgresoLogros(estudianteId);
 ```tsx
 'use client';
 
-import {
-  RecursosBar,
-  RachaWidget,
-  ListaLogros,
-} from '@/components/gamificacion';
+import { RecursosBar, RachaWidget, ListaLogros } from '@/components/gamificacion';
 
 export default function GamificacionPage() {
   const estudianteId = 'abc123'; // Obtener del contexto/auth
@@ -266,12 +277,12 @@ export default function GamificacionPage() {
 
 ## 🎨 Rareza de Logros
 
-| Rareza | Color | Gradiente |
-|--------|-------|-----------|
-| Común | Slate | `from-slate-400 to-slate-600` |
-| Raro | Blue | `from-blue-400 to-blue-600` |
-| Épico | Purple | `from-purple-400 to-purple-600` |
-| Legendario | Amber | `from-amber-400 to-amber-600` |
+| Rareza     | Color  | Gradiente                       |
+| ---------- | ------ | ------------------------------- |
+| Común      | Slate  | `from-slate-400 to-slate-600`   |
+| Raro       | Blue   | `from-blue-400 to-blue-600`     |
+| Épico      | Purple | `from-purple-400 to-purple-600` |
+| Legendario | Amber  | `from-amber-400 to-amber-600`   |
 
 ## ⚙️ Configuración
 

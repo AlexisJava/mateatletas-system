@@ -8,9 +8,11 @@ interface PricingSectionProps {
 }
 
 export default function PricingSection({ onInscribe }: PricingSectionProps) {
-
   return (
-    <section id="precios" className="relative py-32 bg-gradient-to-b from-black via-[#0f0f1a] to-black overflow-hidden">
+    <section
+      id="precios"
+      className="relative py-32 bg-gradient-to-b from-black via-[#0f0f1a] to-black overflow-hidden"
+    >
       {/* Background Effects */}
       <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#fbbf24]/10 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#0ea5e9]/10 rounded-full blur-[150px] pointer-events-none" />
@@ -25,9 +27,7 @@ export default function PricingSection({ onInscribe }: PricingSectionProps) {
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#fbbf24]/20 to-[#f97316]/20 border border-[#fbbf24]/30 mb-6"
           >
             <Sparkles className="w-5 h-5 text-[#fbbf24]" />
-            <span className="text-sm font-black text-white uppercase tracking-widest">
-              Precios
-            </span>
+            <span className="text-sm font-black text-white uppercase tracking-widest">Precios</span>
           </motion.div>
 
           <motion.h2
@@ -79,7 +79,8 @@ export default function PricingSection({ onInscribe }: PricingSectionProps) {
                   <span className="text-2xl text-white/50">por hijo</span>
                 </div>
                 <p className="text-white/70 text-lg">
-                  <strong className="text-[#fbbf24]">Precio fijo por hijo.</strong> Sin descuentos. Pagás una sola vez por cada hijo que inscribís.
+                  <strong className="text-[#fbbf24]">Precio fijo por hijo.</strong> Sin descuentos.
+                  Pagás una sola vez por cada hijo que inscribís.
                 </p>
               </div>
 
@@ -239,7 +240,8 @@ export default function PricingSection({ onInscribe }: PricingSectionProps) {
 
               <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10 text-center">
                 <p className="text-white/70 text-sm">
-                  <strong className="text-white">Recordá:</strong> La inscripción siempre es $25.000 por hijo (sin descuento). Los descuentos solo aplican a las cuotas mensuales.
+                  <strong className="text-white">Recordá:</strong> La inscripción siempre es $25.000
+                  por hijo (sin descuento). Los descuentos solo aplican a las cuotas mensuales.
                 </p>
               </div>
             </div>

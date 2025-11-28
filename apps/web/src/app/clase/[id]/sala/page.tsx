@@ -55,7 +55,9 @@ export default function SalaClasePage() {
   useEffect(() => {
     const fetchClase = async () => {
       try {
-        const response = await apiClient.get<ClaseData | { data?: ClaseData }>(`/clases/${claseId}`);
+        const response = await apiClient.get<ClaseData | { data?: ClaseData }>(
+          `/clases/${claseId}`,
+        );
 
         let claseData: ClaseData | null = null;
         if (isClaseData(response)) {
@@ -101,8 +103,7 @@ export default function SalaClasePage() {
   const handleSalir = async () => {
     // Simular finalización de clase con datos de ejemplo
     const resumen: ResumenClase = {
-      claseNombre:
-        (clase?.ruta_curricular ?? clase?.ruta_curricular)?.nombre || 'Clase',
+      claseNombre: (clase?.ruta_curricular ?? clase?.ruta_curricular)?.nombre || 'Clase',
       duracionMinutos: clase?.duracion_minutos || 60,
       puntosGanados: 10,
       insigniasDesbloqueadas: [],
@@ -135,9 +136,7 @@ export default function SalaClasePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Clase no encontrada
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Clase no encontrada</h2>
           <button
             onClick={() => router.push('/estudiante/gimnasio')}
             className="text-blue-600 hover:text-blue-700"
@@ -195,26 +194,20 @@ export default function SalaClasePage() {
             </p>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <h3 className="font-semibold text-blue-900 mb-2">
-                Información de la Clase
-              </h3>
+              <h3 className="font-semibold text-blue-900 mb-2">Información de la Clase</h3>
               <div className="text-left space-y-2 text-sm">
                 <p>
-                  <span className="font-medium">Curso:</span>{' '}
-                  {clase.ruta_curricular.nombre}
+                  <span className="font-medium">Curso:</span> {clase.ruta_curricular.nombre}
                 </p>
                 <p>
-                  <span className="font-medium">Docente:</span>{' '}
-                  {clase.docente.nombre} {clase.docente.apellido}
+                  <span className="font-medium">Docente:</span> {clase.docente.nombre}{' '}
+                  {clase.docente.apellido}
                 </p>
                 <p>
-                  <span className="font-medium">Duración:</span>{' '}
-                  {clase.duracion_minutos} minutos
+                  <span className="font-medium">Duración:</span> {clase.duracion_minutos} minutos
                 </p>
                 {asistenciaRegistrada && (
-                  <p className="text-green-600 font-medium">
-                    ✓ Tu asistencia ha sido registrada
-                  </p>
+                  <p className="text-green-600 font-medium">✓ Tu asistencia ha sido registrada</p>
                 )}
               </div>
             </div>
@@ -231,10 +224,7 @@ export default function SalaClasePage() {
 
       {/* Modal Resumen */}
       {showResumen && resumenData && (
-        <ModalResumenClase
-          resumen={resumenData}
-          onClose={handleCerrarResumen}
-        />
+        <ModalResumenClase resumen={resumenData} onClose={handleCerrarResumen} />
       )}
     </div>
   );

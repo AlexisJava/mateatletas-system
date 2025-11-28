@@ -1,4 +1,5 @@
 # ANÁLISIS ULTRA DETALLADO DE FLUJOS DE DATOS END-TO-END
+
 ## Ecosistema Mateatletas - Documento para DFD Extendido
 
 **Versión:** 1.0  
@@ -58,11 +59,13 @@
 ### Flujo de Autenticación y Autorización
 
 **Todos los endpoints requieren:**
+
 1. JWT Token (contiene: id, role/roles, sub)
 2. RolesGuard valida permisos
 3. Datos del usuario inyectados vía @GetUser()
 
 **Roles Soportados:**
+
 - `ADMIN`: Acceso total al sistema
 - `DOCENTE`: Gestión de clases, asistencia, gamificación
 - `TUTOR`: Gestión de estudiantes, pagos, inscripciones
@@ -138,9 +141,11 @@ NOTIFICACIONES
 ## FLUJO 1: Creación de Clase Individual
 
 ### Actor Inicial
+
 **ADMIN**
 
 ### Trigger
+
 ```
 POST /api/clases
 Body: {
@@ -157,21 +162,23 @@ Body: {
 ```
 
 ### Entrada (DTO)
+
 ```typescript
 interface CrearClaseDto {
-  docente_id: string
-  fecha_hora_inicio: DateTime
-  duracion_minutos: number
-  cupos_maximo: number
-  nombre: string
-  descripcion?: string
-  ruta_curricular_id?: string
-  sector_id?: string
-  producto_id?: string
+  docente_id: string;
+  fecha_hora_inicio: DateTime;
+  duracion_minutos: number;
+  cupos_maximo: number;
+  nombre: string;
+  descripcion?: string;
+  ruta_curricular_id?: string;
+  sector_id?: string;
+  producto_id?: string;
 }
 ```
 
 ### Proceso Paso a Paso
+
 1. **Validación de Entrada**
    - Valida que docente_id existe y está activo
    - Valida fecha_hora_inicio es futura
@@ -214,13 +221,15 @@ interface CrearClaseDto {
    - Index: estado
 
 ### Entidades Afectadas
-| Tabla | Operación | Descripción |
-|-------|-----------|-------------|
-| clases | INSERT | Nuevo registro con estado "Programada" |
-| notificaciones | INSERT | Notificación para docente |
-| docentes | SELECT | Validación que existe |
+
+| Tabla          | Operación | Descripción                            |
+| -------------- | --------- | -------------------------------------- |
+| clases         | INSERT    | Nuevo registro con estado "Programada" |
+| notificaciones | INSERT    | Notificación para docente              |
+| docentes       | SELECT    | Validación que existe                  |
 
 ### Salidas
+
 ```typescript
 {
   id: string
@@ -238,22 +247,25 @@ interface CrearClaseDto {
 ```
 
 ### Efectos Secundarios
+
 - Notificación enviada a docente (tipo: ClaseProxima)
 - Métrica en admin dashboard se actualiza (total de clases)
 - Cache de clases del docente se invalida
 - Evento del sistema se registra (para auditoría)
 
 ### Actores Impactados
-| Actor | Qué ve | Cuándo |
-|-------|--------|--------|
-| ADMIN | Nueva clase en listado | Inmediato |
-| ADMIN | Métrica: Total clases +1 | En siguiente refresh |
-| DOCENTE | Notificación de clase nueva | Inmediato (si conectado) |
-| DOCENTE | Clase en "Mis Clases" | En próximo refresh |
-| TUTOR | Nada aún (a menos que su estudiante esté inscrito) | - |
-| ESTUDIANTE | Nada aún | - |
+
+| Actor      | Qué ve                                             | Cuándo                   |
+| ---------- | -------------------------------------------------- | ------------------------ |
+| ADMIN      | Nueva clase en listado                             | Inmediato                |
+| ADMIN      | Métrica: Total clases +1                           | En siguiente refresh     |
+| DOCENTE    | Notificación de clase nueva                        | Inmediato (si conectado) |
+| DOCENTE    | Clase en "Mis Clases"                              | En próximo refresh       |
+| TUTOR      | Nada aún (a menos que su estudiante esté inscrito) | -                        |
+| ESTUDIANTE | Nada aún                                           | -                        |
 
 ### Estado Actual
+
 ✅ **Backend:** Completo - Endpoint POST /api/clases  
 ✅ **Frontend:** Completo - Portal Admin puede crear clases  
 ⚠️ **Notificaciones:** Registradas en BD pero no enviadas real-time (WebSocket pendiente)
@@ -263,9 +275,11 @@ interface CrearClaseDto {
 ## FLUJO 2: Asignación Masiva de Estudiantes a Clase
 
 ### Actor Inicial
+
 **ADMIN**
 
 ### Trigger
+
 ```
 POST /api/clases/:id/asignar-estudiantes
 Params: { id: clase_id }
@@ -273,15 +287,17 @@ Body: { estudianteIds: string[] }
 ```
 
 ### Entrada (DTO)
+
 ```typescript
 interface AsignarEstudiantesDto {
-  estudianteIds: string[]
+  estudianteIds: string[];
 }
 ```
 
 ### Proceso
+
 1. **Validar clase existe**
-   - SELECT * FROM clases WHERE id = clase_id
+   - SELECT \* FROM clases WHERE id = clase_id
    - Valida estado != "Cancelada"
 
 2. **Para cada estudiante:**
@@ -297,29 +313,36 @@ interface AsignarEstudiantesDto {
    - INSERT INTO notificaciones para tutor de cada estudiante
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| inscripciones_clase | INSERT (N registros) |
-| clases | UPDATE (cupos_ocupados) |
-| notificaciones | INSERT (N registros para tutores) |
-| estudiantes | SELECT |
+
+| Tabla               | Operación                         |
+| ------------------- | --------------------------------- |
+| inscripciones_clase | INSERT (N registros)              |
+| clases              | UPDATE (cupos_ocupados)           |
+| notificaciones      | INSERT (N registros para tutores) |
+| estudiantes         | SELECT                            |
 
 ### Salidas
+
 ```typescript
 {
-  clase_id: string
-  estudiantesAsignados: number
-  cuposDisponibles: number
-  inscripciones: { id, estudiante_id, fecha_inscripcion }[]
+  clase_id: string;
+  estudiantesAsignados: number;
+  cuposDisponibles: number;
+  inscripciones: {
+    (id, estudiante_id, fecha_inscripcion);
+  }
+  [];
 }
 ```
 
 ### Actores Impactados
+
 - TUTOR: Notificación que su estudiante fue inscrito
 - ESTUDIANTE: Si tiene portal, ve nueva inscripción
 - ADMIN: Ve metricade clases llenas
 
 ### Estado Actual
+
 ✅ Completo
 
 ---
@@ -327,9 +350,11 @@ interface AsignarEstudiantesDto {
 ## FLUJO 3: Reserva de Clase por Tutor
 
 ### Actor Inicial
+
 **TUTOR** (para su estudiante)
 
 ### Trigger
+
 ```
 POST /api/clases/:id/reservar
 Params: { id: clase_id }
@@ -337,17 +362,18 @@ Body: { estudianteId: string, observaciones?: string }
 ```
 
 ### Proceso
+
 1. **Obtener clase**
-   - SELECT * FROM clases WHERE id = clase_id
+   - SELECT \* FROM clases WHERE id = clase_id
    - Validar estado = "Programada"
    - Validar cupos_ocupados < cupos_maximo
 
 2. **Validar estudiante pertenece al tutor**
-   - SELECT * FROM estudiantes WHERE id = estudianteId AND tutor_id = req.user.id
+   - SELECT \* FROM estudiantes WHERE id = estudianteId AND tutor_id = req.user.id
    - Valida ownership (seguridad)
 
 3. **Validar no existe inscripción duplicada**
-   - SELECT * FROM inscripciones_clase WHERE clase_id = clase_id AND estudiante_id = estudianteId
+   - SELECT \* FROM inscripciones_clase WHERE clase_id = clase_id AND estudiante_id = estudianteId
    - Si existe: error 400 "Ya está inscrito"
 
 4. **Si clase es de curso (producto_id != null):**
@@ -365,15 +391,17 @@ Body: { estudianteId: string, observaciones?: string }
    - SELECT docente FROM clases WHERE id = clase_id
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| inscripciones_clase | INSERT |
-| clases | UPDATE (cupos_ocupados) |
-| notificaciones | INSERT (para docente) |
-| inscripciones_curso | SELECT (validación) |
-| estudiantes | SELECT |
+
+| Tabla               | Operación               |
+| ------------------- | ----------------------- |
+| inscripciones_clase | INSERT                  |
+| clases              | UPDATE (cupos_ocupados) |
+| notificaciones      | INSERT (para docente)   |
+| inscripciones_curso | SELECT (validación)     |
+| estudiantes         | SELECT                  |
 
 ### Salidas
+
 ```typescript
 {
   inscripcionClase: {
@@ -394,19 +422,22 @@ Body: { estudianteId: string, observaciones?: string }
 ```
 
 ### Efectos Secundarios
+
 - Notificación a docente (estudiante nuevo en clase)
 - Métrica en dashboard del tutor actualizada
 - Si estudiante tiene equipo: posible impacto en gamificación (si asiste)
 
 ### Actores Impactados
-| Actor | Qué ve |
-|-------|--------|
-| TUTOR | Confirmación de reserva, cupos actualizados |
-| DOCENTE | Notificación de estudiante nuevo |
-| ESTUDIANTE | Si tiene portal, ve clase en su calendario |
-| ADMIN | Métrica de inscripciones actualizada |
+
+| Actor      | Qué ve                                      |
+| ---------- | ------------------------------------------- |
+| TUTOR      | Confirmación de reserva, cupos actualizados |
+| DOCENTE    | Notificación de estudiante nuevo            |
+| ESTUDIANTE | Si tiene portal, ve clase en su calendario  |
+| ADMIN      | Métrica de inscripciones actualizada        |
 
 ### Estado Actual
+
 ✅ Completo
 
 ---
@@ -414,23 +445,25 @@ Body: { estudianteId: string, observaciones?: string }
 ## FLUJO 4: Cancelación de Reserva
 
 ### Actor Inicial
+
 **TUTOR** (para su estudiante)
 
 ### Trigger
+
 ```
 DELETE /api/clases/reservas/:id
 Params: { id: inscripcion_id }
 ```
 
 ### Proceso
+
 1. **Obtener inscripción**
-   - SELECT * FROM inscripciones_clase WHERE id = inscripcionId
-   
+   - SELECT \* FROM inscripciones_clase WHERE id = inscripcionId
 2. **Validar ownership**
    - Verifica tutor_id = req.user.id
 
 3. **Obtener clase**
-   - SELECT * FROM clases WHERE id = clase_id
+   - SELECT \* FROM clases WHERE id = clase_id
 
 4. **Eliminar inscripción**
    - DELETE FROM inscripciones_clase WHERE id = inscripcionId
@@ -442,12 +475,14 @@ Params: { id: inscripcion_id }
    - Notificar que estudiante se dio de baja
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| inscripciones_clase | DELETE |
-| clases | UPDATE (cupos_ocupados -1) |
+
+| Tabla               | Operación                  |
+| ------------------- | -------------------------- |
+| inscripciones_clase | DELETE                     |
+| clases              | UPDATE (cupos_ocupados -1) |
 
 ### Estado Actual
+
 ✅ Completo
 
 ---
@@ -457,9 +492,11 @@ Params: { id: inscripcion_id }
 ## FLUJO 5: Creación de ClaseGrupo (Grupo Semanal)
 
 ### Actor Inicial
+
 **ADMIN**
 
 ### Trigger
+
 ```
 POST /api/admin/clase-grupos
 Body: {
@@ -482,8 +519,9 @@ Body: {
 ```
 
 ### Proceso
+
 1. **Validar docente existe y está activo**
-   - SELECT * FROM docentes WHERE id = docente_id
+   - SELECT \* FROM docentes WHERE id = docente_id
 
 2. **Validar no existe código duplicado**
    - SELECT COUNT FROM clase_grupos WHERE codigo = codigo
@@ -520,43 +558,52 @@ Body: {
    - Confirmar grupo creado
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| clase_grupos | INSERT |
-| inscripciones_clase_grupo | INSERT (N registros) |
-| docentes | SELECT |
-| estudiantes | SELECT |
-| tutores | SELECT (para validar ownership) |
-| notificaciones | INSERT |
+
+| Tabla                     | Operación                       |
+| ------------------------- | ------------------------------- |
+| clase_grupos              | INSERT                          |
+| inscripciones_clase_grupo | INSERT (N registros)            |
+| docentes                  | SELECT                          |
+| estudiantes               | SELECT                          |
+| tutores                   | SELECT (para validar ownership) |
+| notificaciones            | INSERT                          |
 
 ### Salidas
+
 ```typescript
 {
   claseGrupo: {
-    id: string
-    codigo: string
-    nombre: string
-    tipo: string
-    dia_semana: string
-    hora_inicio: string
-    hora_fin: string
-    fecha_inicio: DateTime
-    fecha_fin: DateTime
-    anio_lectivo: number
-    cupo_maximo: number
-    docente: { id, nombre, apellido }
-    estudiantes: { id, nombre, apellido }[]
+    id: string;
+    codigo: string;
+    nombre: string;
+    tipo: string;
+    dia_semana: string;
+    hora_inicio: string;
+    hora_fin: string;
+    fecha_inicio: DateTime;
+    fecha_fin: DateTime;
+    anio_lectivo: number;
+    cupo_maximo: number;
+    docente: {
+      (id, nombre, apellido);
+    }
+    estudiantes: {
+      (id, nombre, apellido);
+    }
+    [];
   }
-  inscripcionesCreadas: number
+  inscripcionesCreadas: number;
 }
 ```
 
 ### Efectos Secundarios
+
 - Grupo disponible para que docente asigne planificaciones mensuales
 - Estudiantes pueden ver grupo en su horario (si tienen portal)
 - Docente puede empezar a tomar asistencia
 
 ### Estado Actual
+
 ✅ Backend: Completo (Endpoints POST, GET, LIST)  
 ⚠️ Frontend: En desarrollo (Portal Admin puede crear grupos)
 
@@ -565,24 +612,27 @@ Body: {
 ## FLUJO 6: Inscripción de Estudiante a ClaseGrupo
 
 ### Actor Inicial
+
 **ADMIN** O **TUTOR**
 
 ### Trigger
+
 ```
 POST /api/admin/clase-grupos/:id/inscribir
 Body: { estudiante_id: string, tutor_id: string }
 ```
 
 ### Proceso
+
 1. **Validar grupo existe y está activo**
-   - SELECT * FROM clase_grupos WHERE id = claseGrupoId AND activo = true
+   - SELECT \* FROM clase_grupos WHERE id = claseGrupoId AND activo = true
 
 2. **Validar grupo no está lleno**
    - SELECT cupo_maximo, COUNT(inscripciones) FROM clase_grupos
    - Si COUNT >= cupo_maximo: error "Grupo lleno"
 
 3. **Validar estudiante existe y pertenece al tutor**
-   - SELECT * FROM estudiantes WHERE id = estudianteId AND tutor_id = tutorId
+   - SELECT \* FROM estudiantes WHERE id = estudianteId AND tutor_id = tutorId
 
 4. **Validar no existe inscripción duplicada**
    - SELECT FROM inscripciones_clase_grupo WHERE clase_grupo_id = id AND estudiante_id = estudianteId
@@ -595,31 +645,38 @@ Body: { estudiante_id: string, tutor_id: string }
    - Confirmar inscripción
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| inscripciones_clase_grupo | INSERT |
-| clase_grupos | SELECT |
-| estudiantes | SELECT |
+
+| Tabla                     | Operación |
+| ------------------------- | --------- |
+| inscripciones_clase_grupo | INSERT    |
+| clase_grupos              | SELECT    |
+| estudiantes               | SELECT    |
 
 ### Salidas
+
 ```typescript
 {
   inscripcion: {
-    id: string
-    clase_grupo_id: string
-    estudiante: { id, nombre }
-    tutor: { id, nombre }
-    fecha_inscripcion: DateTime
+    id: string;
+    clase_grupo_id: string;
+    estudiante: {
+      (id, nombre);
+    }
+    tutor: {
+      (id, nombre);
+    }
+    fecha_inscripcion: DateTime;
   }
   grupoActualizado: {
-    codigo: string
-    inscritos: number
-    cupoMaximo: number
+    codigo: string;
+    inscritos: number;
+    cupoMaximo: number;
   }
 }
 ```
 
 ### Estado Actual
+
 ✅ Completo
 
 ---
@@ -629,9 +686,11 @@ Body: { estudiante_id: string, tutor_id: string }
 ## FLUJO 7: Registro de Asistencia a Clase Individual (Docente)
 
 ### Actor Inicial
+
 **DOCENTE**
 
 ### Trigger
+
 ```
 POST /api/clases/:id/asistencia
 Params: { id: clase_id }
@@ -643,56 +702,60 @@ Body: {
 ```
 
 ### Entrada (DTO)
+
 ```typescript
 interface RegistrarAsistenciaDto {
   asistencias: {
-    estudianteId: string
-    estado: EstadoAsistencia
-    observaciones?: string
-    puntos_otorgados?: number
-  }[]
+    estudianteId: string;
+    estado: EstadoAsistencia;
+    observaciones?: string;
+    puntos_otorgados?: number;
+  }[];
 }
 ```
 
 ### Proceso
+
 1. **Obtener clase**
-   - SELECT * FROM clases WHERE id = claseId
+   - SELECT \* FROM clases WHERE id = claseId
    - Validar docente_id = req.user.id (solo el docente titular)
 
 2. **Para cada asistencia:**
    a. **Obtener inscripción**
-      - SELECT * FROM inscripciones_clase WHERE clase_id = claseId AND estudiante_id = estudianteId
-      - Validar que estudiante está inscrito
+   - SELECT \* FROM inscripciones_clase WHERE clase_id = claseId AND estudiante_id = estudianteId
+   - Validar que estudiante está inscrito
 
    b. **Crear registro de asistencia**
-      - INSERT INTO asistencias (clase_id, estudiante_id, estado, observaciones, puntos_otorgados, fecha_registro)
-      - Unique constraint: (clase_id, estudiante_id)
+   - INSERT INTO asistencias (clase_id, estudiante_id, estado, observaciones, puntos_otorgados, fecha_registro)
+   - Unique constraint: (clase_id, estudiante_id)
 
    c. **Si estado = "Presente":**
-      - Si clase tiene puntos configurados:
-        - INSERT INTO puntos_obtenidos (estudiante_id, docente_id, accion_id, clase_id, puntos, fecha_otorgado)
-      - UPDATE estudiante SET puntos_totales = puntos_totales + puntos
+   - Si clase tiene puntos configurados:
+     - INSERT INTO puntos_obtenidos (estudiante_id, docente_id, accion_id, clase_id, puntos, fecha_otorgado)
+   - UPDATE estudiante SET puntos_totales = puntos_totales + puntos
 
    d. **Si observaciones contienen contenido crítico:**
-      - INSERT INTO alertas (estudiante_id, clase_id, descripcion, resuelta = false)
-      - Notificación a admin
+   - INSERT INTO alertas (estudiante_id, clase_id, descripcion, resuelta = false)
+   - Notificación a admin
 
 3. **Actualizar métricas de clase**
    - Contar presentes/ausentes
    - Calcular tasa de asistencia
 
 ### Entidades Afectadas
-| Tabla | Operación | Descripción |
-|-------|-----------|-------------|
-| asistencias | INSERT | Registro de asistencia |
-| puntos_obtenidos | INSERT | Si asiste y hay puntos |
-| estudiantes | UPDATE | Si puntos otorgados (puntos_totales, nivel_actual) |
-| alertas | INSERT | Si observación crítica |
-| notificaciones | INSERT | Notificación a admin si hay alerta |
-| clases | SELECT | Validación |
-| inscripciones_clase | SELECT | Validación que está inscrito |
+
+| Tabla               | Operación | Descripción                                        |
+| ------------------- | --------- | -------------------------------------------------- |
+| asistencias         | INSERT    | Registro de asistencia                             |
+| puntos_obtenidos    | INSERT    | Si asiste y hay puntos                             |
+| estudiantes         | UPDATE    | Si puntos otorgados (puntos_totales, nivel_actual) |
+| alertas             | INSERT    | Si observación crítica                             |
+| notificaciones      | INSERT    | Notificación a admin si hay alerta                 |
+| clases              | SELECT    | Validación                                         |
+| inscripciones_clase | SELECT    | Validación que está inscrito                       |
 
 ### Salidas
+
 ```typescript
 {
   clase: {
@@ -719,6 +782,7 @@ interface RegistrarAsistenciaDto {
 ```
 
 ### Efectos Secundarios
+
 - **Para Estudiante:**
   - Puntos totales se actualiza (si Presente)
   - Nivel puede cambiar si alcanza nuevo umbral
@@ -737,14 +801,16 @@ interface RegistrarAsistenciaDto {
   - Métrica de clase completada
 
 ### Actores Impactados
-| Actor | Qué ve | Cuándo |
-|-------|--------|--------|
-| DOCENTE | Confirmación registro | Inmediato |
-| ESTUDIANTE | Puntos +X | En próximo refresh |
-| TUTOR | Métrica asistencia actualizada | En próximo refresh |
-| ADMIN | Alerta si hay (observación crítica) | Inmediato |
+
+| Actor      | Qué ve                              | Cuándo             |
+| ---------- | ----------------------------------- | ------------------ |
+| DOCENTE    | Confirmación registro               | Inmediato          |
+| ESTUDIANTE | Puntos +X                           | En próximo refresh |
+| TUTOR      | Métrica asistencia actualizada      | En próximo refresh |
+| ADMIN      | Alerta si hay (observación crítica) | Inmediato          |
 
 ### Estado Actual
+
 ✅ Backend: Completo  
 ✅ Frontend: Docente portal puede registrar asistencia
 
@@ -753,9 +819,11 @@ interface RegistrarAsistenciaDto {
 ## FLUJO 8: Registro de Asistencia a ClaseGrupo (Docente)
 
 ### Actor Inicial
+
 **DOCENTE**
 
 ### Trigger
+
 ```
 POST /api/asistencia/clase-grupos/:grupoId/fecha/:fecha
 Body: {
@@ -766,8 +834,9 @@ Body: {
 ```
 
 ### Proceso
+
 1. **Obtener grupo**
-   - SELECT * FROM clase_grupos WHERE id = grupoId
+   - SELECT \* FROM clase_grupos WHERE id = grupoId
    - Validar docente_id = req.user.id
 
 2. **Para cada asistencia:**
@@ -779,13 +848,15 @@ Body: {
    - UPDATE estudiante SET puntos_totales
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| asistencias_clase_grupo | INSERT |
-| puntos_obtenidos | INSERT |
-| estudiantes | UPDATE |
+
+| Tabla                   | Operación |
+| ----------------------- | --------- |
+| asistencias_clase_grupo | INSERT    |
+| puntos_obtenidos        | INSERT    |
+| estudiantes             | UPDATE    |
 
 ### Estado Actual
+
 ✅ Completo
 
 ---
@@ -795,9 +866,11 @@ Body: {
 ## FLUJO 9: Otorgamiento de Puntos por Acción
 
 ### Actor Inicial
+
 **DOCENTE** O **ADMIN**
 
 ### Trigger
+
 ```
 POST /api/gamificacion/puntos
 Body: {
@@ -809,28 +882,30 @@ Body: {
 ```
 
 ### Entrada (DTO)
+
 ```typescript
 interface OtorgarPuntosDto {
-  estudianteId: string
-  accionId: string
-  claseId?: string
-  contexto?: string
+  estudianteId: string;
+  accionId: string;
+  claseId?: string;
+  contexto?: string;
 }
 ```
 
 ### Proceso
+
 1. **Obtener acción puntuable**
-   - SELECT * FROM acciones_puntuables WHERE id = accionId
+   - SELECT \* FROM acciones_puntuables WHERE id = accionId
    - Validar activo = true
    - Obtener cantidad de puntos
 
 2. **Obtener estudiante**
-   - SELECT * FROM estudiantes WHERE id = estudianteId
+   - SELECT \* FROM estudiantes WHERE id = estudianteId
    - Obtener puntos_totales, nivel_actual, equipo_id
 
 3. **Validar docente puede otorgar puntos**
    - Si claseId se proporciona:
-     - SELECT * FROM clases WHERE id = claseId
+     - SELECT \* FROM clases WHERE id = claseId
      - Validar docente_id = req.user.id
 
 4. **Insertar registro de puntos**
@@ -841,7 +916,7 @@ interface OtorgarPuntosDto {
    - UPDATE estudiantes SET puntos_totales = nuevos_puntos, fecha_ultimo_cambio = NOW()
 
 6. **Calcular nuevo nivel**
-   - SELECT * FROM niveles_config WHERE puntos_minimos <= nuevos_puntos AND puntos_maximos >= nuevos_puntos
+   - SELECT \* FROM niveles_config WHERE puntos_minimos <= nuevos_puntos AND puntos_maximos >= nuevos_puntos
    - Si nivel_actual < nuevo_nivel:
      - UPDATE estudiante SET nivel_actual = nuevo_nivel
      - Crear notificación: "Subiste de nivel!"
@@ -858,16 +933,18 @@ interface OtorgarPuntosDto {
    - Notificación: "¡Ganaste X puntos!"
 
 ### Entidades Afectadas
-| Tabla | Operación | Descripción |
-|-------|-----------|-------------|
-| puntos_obtenidos | INSERT | Registro transaccional |
-| estudiantes | UPDATE | puntos_totales, nivel_actual |
-| niveles_config | SELECT | Cálculo de nuevo nivel |
-| equipos | UPDATE | Actualizar puntos del equipo |
-| logros_desbloqueados | INSERT | Si se desbloquea logro |
-| notificaciones | INSERT | Notificaciones a estudiante |
+
+| Tabla                | Operación | Descripción                  |
+| -------------------- | --------- | ---------------------------- |
+| puntos_obtenidos     | INSERT    | Registro transaccional       |
+| estudiantes          | UPDATE    | puntos_totales, nivel_actual |
+| niveles_config       | SELECT    | Cálculo de nuevo nivel       |
+| equipos              | UPDATE    | Actualizar puntos del equipo |
+| logros_desbloqueados | INSERT    | Si se desbloquea logro       |
+| notificaciones       | INSERT    | Notificaciones a estudiante  |
 
 ### Salidas
+
 ```typescript
 {
   puntos: {
@@ -892,21 +969,24 @@ interface OtorgarPuntosDto {
 ```
 
 ### Efectos Secundarios
+
 - Ranking actualizado (si sistema de ranking real-time)
 - Dashboard del estudiante refrescado automáticamente
 - Posible cambio en clasificación de equipos
 - Notificaciones en cascada
 
 ### Actores Impactados
-| Actor | Qué ve | Cuándo |
-|-------|--------|--------|
-| ESTUDIANTE | +X puntos, posible "Subiste de nivel" | Inmediato (si conectado) |
-| TUTOR | Métrica de puntos/gamificación actualizada | En próximo refresh |
-| DOCENTE | Confirmación de puntos otorgados | Inmediato |
-| ADMIN | Métrica de gamificación | En próximo refresh |
-| OTROS ESTUDIANTES (equipo) | Puntos del equipo +X | En próximo refresh |
+
+| Actor                      | Qué ve                                     | Cuándo                   |
+| -------------------------- | ------------------------------------------ | ------------------------ |
+| ESTUDIANTE                 | +X puntos, posible "Subiste de nivel"      | Inmediato (si conectado) |
+| TUTOR                      | Métrica de puntos/gamificación actualizada | En próximo refresh       |
+| DOCENTE                    | Confirmación de puntos otorgados           | Inmediato                |
+| ADMIN                      | Métrica de gamificación                    | En próximo refresh       |
+| OTROS ESTUDIANTES (equipo) | Puntos del equipo +X                       | En próximo refresh       |
 
 ### Estado Actual
+
 ✅ Backend: Completo  
 ✅ Frontend: Docente portal puede otorgar puntos
 
@@ -915,15 +995,18 @@ interface OtorgarPuntosDto {
 ## FLUJO 10: Desbloqueo de Logro
 
 ### Actor Inicial
+
 **DOCENTE** O **SISTEMA** (automático)
 
 ### Trigger
+
 - Manual: POST /api/gamificacion/logros/:logroId/desbloquear
 - Automático: Cuando se cumplen condiciones (ej: 100% asistencia)
 
 ### Proceso
+
 1. **Obtener logro**
-   - SELECT * FROM logros WHERE id = logroId AND activo = true
+   - SELECT \* FROM logros WHERE id = logroId AND activo = true
 
 2. **Validar estudiante no lo tenga desbloqueado**
    - SELECT FROM logros_desbloqueados WHERE estudiante_id = estudianteId AND logro_id = logroId
@@ -939,30 +1022,33 @@ interface OtorgarPuntosDto {
    - "¡Desbloqueaste el logro: X!"
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| logros_desbloqueados | INSERT |
-| puntos_obtenidos | INSERT (si logro.puntos > 0) |
-| estudiantes | UPDATE (si puntos) |
+
+| Tabla                | Operación                    |
+| -------------------- | ---------------------------- |
+| logros_desbloqueados | INSERT                       |
+| puntos_obtenidos     | INSERT (si logro.puntos > 0) |
+| estudiantes          | UPDATE (si puntos)           |
 
 ### Salidas
+
 ```typescript
 {
   logro: {
-    id: string
-    nombre: string
-    icono: string
-    puntos: number
+    id: string;
+    nombre: string;
+    icono: string;
+    puntos: number;
   }
   estudiante: {
-    id: string
-    puntosAhora: number
-    nivelAhora: number
+    id: string;
+    puntosAhora: number;
+    nivelAhora: number;
   }
 }
 ```
 
 ### Estado Actual
+
 ✅ Completo
 
 ---
@@ -972,9 +1058,11 @@ interface OtorgarPuntosDto {
 ## FLUJO 11: Cálculo de Precio de Actividades
 
 ### Actor Inicial
+
 **TUTOR** O **ADMIN** (desde portal de pagos)
 
 ### Trigger
+
 ```
 POST /api/pagos/calcular-precio
 Body: {
@@ -988,25 +1076,27 @@ Body: {
 ```
 
 ### Proceso
+
 1. **Obtener configuración de precios**
-   - SELECT * FROM configuracion_precios WHERE id = "singleton"
+   - SELECT \* FROM configuracion_precios WHERE id = "singleton"
    - Extraer: precio_club_matematicas, precio_cursos_especializados, descuentos
 
 2. **Para cada estudiante:**
    a. **Contar productos únicos:**
-      - Si 1 producto: precio_base = precio_club_matematicas
-      - Si 2+ productos: aplica DESCUENTO_MULTIPLE_ACTIVIDADES
-      
+   - Si 1 producto: precio_base = precio_club_matematicas
+   - Si 2+ productos: aplica DESCUENTO_MULTIPLE_ACTIVIDADES
+
    b. **Contar hermanos:**
-      - SELECT COUNT FROM estudiantes WHERE tutor_id = tutorId
-      - Si 2 hermanos: aplica DESCUENTO_HERMANOS_BASICO (precio_hermanos_basico)
-      - Si 3+ hermanos: aplica DESCUENTO_HERMANOS_MULTIPLE (precio_hermanos_multiple)
+   - SELECT COUNT FROM estudiantes WHERE tutor_id = tutorId
+   - Si 2 hermanos: aplica DESCUENTO_HERMANOS_BASICO (precio_hermanos_basico)
+   - Si 3+ hermanos: aplica DESCUENTO_HERMANOS_MULTIPLE (precio_hermanos_multiple)
 
    c. **Verificar becas activas:**
-      - SELECT FROM becas WHERE estudiante_id = estudianteId AND activa = true AND fecha_inicio <= NOW() AND fecha_fin >= NOW()
-      - Si existe: aplicar descuento de beca
+   - SELECT FROM becas WHERE estudiante_id = estudianteId AND activa = true AND fecha_inicio <= NOW() AND fecha_fin >= NOW()
+   - Si existe: aplicar descuento de beca
 
 3. **Aplicar regla de descuentos:**
+
    ```
    Prioridad (de mayor a menor):
    1. HERMANOS_MULTIPLE > todos los demás
@@ -1022,16 +1112,18 @@ Body: {
 
 5. **Calcular total:**
    - Para cada estudiante: precio_final = precio_base - descuento_aplicado
-   - Total = SUM(precio_final * cantidad_productos)
+   - Total = SUM(precio_final \* cantidad_productos)
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| configuracion_precios | SELECT |
-| becas | SELECT |
-| estudiantes | SELECT |
+
+| Tabla                 | Operación |
+| --------------------- | --------- |
+| configuracion_precios | SELECT    |
+| becas                 | SELECT    |
+| estudiantes           | SELECT    |
 
 ### Salidas
+
 ```typescript
 {
   desglose: [
@@ -1062,10 +1154,12 @@ Body: {
 ```
 
 ### Efectos Secundarios
+
 - Cálculo solo consultivo (no genera registros)
 - Puede usarse para "preview" de precio al tutor
 
 ### Estado Actual
+
 ✅ Backend: Completo (Use Case: CalcularPrecioUseCase)  
 ✅ Frontend: Portal Tutor muestra desglose de precios
 
@@ -1074,9 +1168,11 @@ Body: {
 ## FLUJO 12: Creación de Inscripciones Mensuales
 
 ### Actor Inicial
+
 **ADMIN** (masivamente) O **TUTOR** (self-service, futuro)
 
 ### Trigger
+
 ```
 POST /api/pagos/inscripciones/crear
 Body: {
@@ -1090,6 +1186,7 @@ Body: {
 ```
 
 ### Proceso
+
 1. **Validar periodo único**
    - Formato: "YYYY-MM" (ej: "2025-10")
    - Validar mes 1-12, año >= 2025
@@ -1100,38 +1197,40 @@ Body: {
 
 3. **Para cada estudiante-producto:**
    a. **Validar no existe inscripción duplicada**
-      - SELECT FROM inscripciones_mensuales WHERE estudiante_id = estId AND producto_id = prodId AND periodo = "2025-10"
-      - Si existe: error o skip
+   - SELECT FROM inscripciones_mensuales WHERE estudiante_id = estId AND producto_id = prodId AND periodo = "2025-10"
+   - Si existe: error o skip
 
    b. **Crear inscripción mensual**
-      - INSERT INTO inscripciones_mensuales:
-        - estudiante_id
-        - producto_id
-        - tutor_id
-        - anio: 2025
-        - mes: 10
-        - periodo: "2025-10"
-        - precio_base: Decimal
-        - descuento_aplicado: Decimal
-        - precio_final: Decimal
-        - tipo_descuento: "HERMANOS_BASICO" | "AACREA" | etc
-        - detalle_calculo: "2 hermanos: descuento X%, 2 productos: descuento Y%"
-        - estado_pago: "Pendiente"
-        - fecha_pago: null
-        - metodo_pago: null
-        - createdAt: NOW()
+   - INSERT INTO inscripciones_mensuales:
+     - estudiante_id
+     - producto_id
+     - tutor_id
+     - anio: 2025
+     - mes: 10
+     - periodo: "2025-10"
+     - precio_base: Decimal
+     - descuento_aplicado: Decimal
+     - precio_final: Decimal
+     - tipo_descuento: "HERMANOS_BASICO" | "AACREA" | etc
+     - detalle_calculo: "2 hermanos: descuento X%, 2 productos: descuento Y%"
+     - estado_pago: "Pendiente"
+     - fecha_pago: null
+     - metodo_pago: null
+     - createdAt: NOW()
 
 4. **Crear notificación para tutor**
    - "Inscripciones mensuales creadas para octubre 2025"
    - Detalles: cantidad, total
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| inscripciones_mensuales | INSERT (N * M registros) |
-| notificaciones | INSERT |
+
+| Tabla                   | Operación                 |
+| ----------------------- | ------------------------- |
+| inscripciones_mensuales | INSERT (N \* M registros) |
+| notificaciones          | INSERT                    |
 
 ### Salidas
+
 ```typescript
 {
   periodo: "2025-10"
@@ -1159,20 +1258,23 @@ Body: {
 ```
 
 ### Efectos Secundarios
+
 - Inscripciones en estado "Pendiente"
 - Tutor debe pagar para activar acceso
 - Notificación al tutor de nuevas facturas
 - Si Inscripcion tiene estado "Pendiente" > X días: posible alerta de vencimiento
 
 ### Actores Impactados
-| Actor | Qué ve | Cuándo |
-|-------|--------|--------|
-| TUTOR | Nuevas inscripciones pendientes | Inmediato |
-| ADMIN | Inscripciones creadas | En dashboard de pagos |
-| ESTUDIANTE | Si acceso ya pagado: permanece activo | - |
-| ESTUDIANTE | Si no pagado: acceso restringido | Según regla de negocio |
+
+| Actor      | Qué ve                                | Cuándo                 |
+| ---------- | ------------------------------------- | ---------------------- |
+| TUTOR      | Nuevas inscripciones pendientes       | Inmediato              |
+| ADMIN      | Inscripciones creadas                 | En dashboard de pagos  |
+| ESTUDIANTE | Si acceso ya pagado: permanece activo | -                      |
+| ESTUDIANTE | Si no pagado: acceso restringido      | Según regla de negocio |
 
 ### Estado Actual
+
 ✅ Backend: Completo (Use Case: CrearInscripcionMensualUseCase)  
 ⚠️ Frontend: En desarrollo (Portal Admin puede crear en bulk, Portal Tutor eventual)
 
@@ -1181,10 +1283,13 @@ Body: {
 ## FLUJO 13: Pago de Inscripción Mensual
 
 ### Actor Inicial
+
 **TUTOR** (vía MercadoPago, Transferencia, Efectivo)
 
 ### Trigger (3 métodos)
+
 1. **MercadoPago:**
+
    ```
    POST /api/pagos/mercadopago/crear-preferencia
    Body: { inscripcionMensualId: string }
@@ -1199,7 +1304,7 @@ Body: {
 ### Proceso (Método 1: MercadoPago)
 
 1. **Obtener inscripción**
-   - SELECT * FROM inscripciones_mensuales WHERE id = inscripcionId
+   - SELECT \* FROM inscripciones_mensuales WHERE id = inscripcionId
    - Validar estado_pago = "Pendiente"
 
 2. **Crear preferencia en MercadoPago**
@@ -1213,6 +1318,7 @@ Body: {
    - UPDATE inscripciones_mensuales SET preferencia_id = mp_preferencia_id
 
 4. **Retornar URL de checkout**
+
    ```
    {
      checkout_url: "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=xyz",
@@ -1228,7 +1334,7 @@ Body: {
 ### Proceso (Método 2: Transferencia/Efectivo)
 
 1. **Obtener inscripción**
-   - SELECT * FROM inscripciones_mensuales WHERE id = inscripcionId
+   - SELECT \* FROM inscripciones_mensuales WHERE id = inscripcionId
 
 2. **Validar autorización**
    - Solo tutor dueño de la inscripción O admin
@@ -1248,34 +1354,40 @@ Body: {
    - "Pago registrado. Acceso activado."
 
 ### Entidades Afectadas (Post-Pago Completado)
-| Tabla | Operación |
-|-------|-----------|
-| inscripciones_mensuales | UPDATE (estado, fecha_pago, metodo_pago) |
-| notificaciones | INSERT (para tutor, admin) |
-| estudiantes | Posible UPDATE (si hay cambios de acceso) |
-| configuracion_precios | SELECT (historial) |
+
+| Tabla                   | Operación                                 |
+| ----------------------- | ----------------------------------------- |
+| inscripciones_mensuales | UPDATE (estado, fecha_pago, metodo_pago)  |
+| notificaciones          | INSERT (para tutor, admin)                |
+| estudiantes             | Posible UPDATE (si hay cambios de acceso) |
+| configuracion_precios   | SELECT (historial)                        |
 
 ### Salidas
+
 ```typescript
 {
   inscripcion: {
-    id: string
-    periodo: "2025-10"
-    estadoPago: "Pagado"
-    fechaPago: DateTime
-    metodoPago: "MercadoPago" | "Transferencia" | "Efectivo"
-    montoTotal: Decimal
+    id: string;
+    periodo: '2025-10';
+    estadoPago: 'Pagado';
+    fechaPago: DateTime;
+    metodoPago: 'MercadoPago' | 'Transferencia' | 'Efectivo';
+    montoTotal: Decimal;
   }
   estudiante: {
-    id: string
-    nombre: string
-    accesoActivado: boolean
-    productos: { id, nombre }[]
+    id: string;
+    nombre: string;
+    accesoActivado: boolean;
+    productos: {
+      (id, nombre);
+    }
+    [];
   }
 }
 ```
 
 ### Efectos Secundarios
+
 - **Acceso del estudiante:**
   - Si estudiante tiene Portal y acceso está basado en pago: se activa
   - Puede empezar a ver cursos, clases, etc.
@@ -1291,14 +1403,16 @@ Body: {
   - Tasa de cobranza: aumenta
 
 ### Actores Impactados
-| Actor | Qué ve | Cuándo |
-|-------|--------|--------|
-| TUTOR | Pago marcado como "Pagado" ✓ | Inmediato |
-| ESTUDIANTE | Acceso a productos activado | Inmediato (si conectado) |
-| ADMIN | Métrica de ingresos +X | En próximo refresh |
-| DOCENTE | Estudiante accesible | Inmediato |
+
+| Actor      | Qué ve                       | Cuándo                   |
+| ---------- | ---------------------------- | ------------------------ |
+| TUTOR      | Pago marcado como "Pagado" ✓ | Inmediato                |
+| ESTUDIANTE | Acceso a productos activado  | Inmediato (si conectado) |
+| ADMIN      | Métrica de ingresos +X       | En próximo refresh       |
+| DOCENTE    | Estudiante accesible         | Inmediato                |
 
 ### Estado Actual
+
 ✅ Backend: Completo (Endpoints para MercadoPago y manual)  
 ⚠️ Frontend: Integración MercadoPago en Portal Tutor (en desarrollo)
 
@@ -1307,14 +1421,17 @@ Body: {
 ## FLUJO 14: Generación de Métricas de Dashboard de Pagos
 
 ### Actor Inicial
+
 **ADMIN** (acceso automático en dashboard)
 
 ### Trigger
+
 ```
 GET /api/pagos/dashboard/metricas?anio=2025&mes=10&tutorId=optional
 ```
 
 ### Proceso
+
 1. **Obtener período a analizar**
    - mes: 1-12
    - anio: desde query params
@@ -1322,23 +1439,23 @@ GET /api/pagos/dashboard/metricas?anio=2025&mes=10&tutorId=optional
 
 2. **Calcular métricas del mes actual**
    a. **Ingresos totales**
-      - SELECT SUM(precio_final) FROM inscripciones_mensuales WHERE periodo = "2025-10" AND estado_pago = "Pagado"
-   
+   - SELECT SUM(precio_final) FROM inscripciones_mensuales WHERE periodo = "2025-10" AND estado_pago = "Pagado"
+
    b. **Ingresos pendientes**
-      - SELECT SUM(precio_final) FROM inscripciones_mensuales WHERE periodo = "2025-10" AND estado_pago IN ("Pendiente", "Vencido")
-   
+   - SELECT SUM(precio_final) FROM inscripciones_mensuales WHERE periodo = "2025-10" AND estado_pago IN ("Pendiente", "Vencido")
+
    c. **Cantidad de inscripciones**
-      - SELECT COUNT(*) FROM inscripciones_mensuales WHERE periodo = "2025-10"
-   
+   - SELECT COUNT(\*) FROM inscripciones_mensuales WHERE periodo = "2025-10"
+
    d. **Tasa de cobranza**
-      - pagados_count / total_count * 100
-   
+   - pagados_count / total_count \* 100
+
    e. **Estudiantes únicos**
-      - SELECT COUNT(DISTINCT estudiante_id) FROM inscripciones_mensuales WHERE periodo = "2025-10"
+   - SELECT COUNT(DISTINCT estudiante_id) FROM inscripciones_mensuales WHERE periodo = "2025-10"
 
 3. **Comparar con mes anterior**
    - Calcular mismo para mes anterior (2025-09)
-   - Cambios porcentuales: ((actual - anterior) / anterior) * 100
+   - Cambios porcentuales: ((actual - anterior) / anterior) \* 100
 
 4. **Obtener evolución de últimos 6 meses**
    - SELECT mes, SUM(precio_final) FROM inscripciones_mensuales GROUP BY periodo
@@ -1351,12 +1468,14 @@ GET /api/pagos/dashboard/metricas?anio=2025&mes=10&tutorId=optional
    - Becado: X cantidad, Y monto
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
+
+| Tabla                   | Operación                         |
+| ----------------------- | --------------------------------- |
 | inscripciones_mensuales | SELECT (varias queries agregadas) |
-| estudiantes | SELECT COUNT DISTINCT |
+| estudiantes             | SELECT COUNT DISTINCT             |
 
 ### Salidas
+
 ```typescript
 {
   periodo: "2025-10"
@@ -1392,6 +1511,7 @@ GET /api/pagos/dashboard/metricas?anio=2025&mes=10&tutorId=optional
 ```
 
 ### Estado Actual
+
 ✅ Backend: Completo (Use Case: ObtenerMetricasDashboardUseCase)  
 ✅ Frontend: Portal Admin puede ver gráficos de métricas
 
@@ -1402,9 +1522,11 @@ GET /api/pagos/dashboard/metricas?anio=2025&mes=10&tutorId=optional
 ## FLUJO 15: Creación de Planificación Mensual
 
 ### Actor Inicial
+
 **ADMIN**
 
 ### Trigger
+
 ```
 POST /api/planificaciones
 Body: {
@@ -1420,6 +1542,7 @@ Body: {
 ```
 
 ### Proceso
+
 1. **Validar período único**
    - SELECT FROM planificaciones_mensuales WHERE codigo_grupo = codigo_grupo AND mes = mes AND anio = anio
    - Si existe: error "Ya existe planificación para este grupo/mes/año"
@@ -1446,27 +1569,30 @@ Body: {
    - "Planificación creada en borrador"
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| planificaciones_mensuales | INSERT |
-| notificaciones | INSERT |
+
+| Tabla                     | Operación |
+| ------------------------- | --------- |
+| planificaciones_mensuales | INSERT    |
+| notificaciones            | INSERT    |
 
 ### Salidas
+
 ```typescript
 {
   planificacion: {
-    id: string
-    codigo_grupo: string
-    mes: number
-    anio: number
-    titulo: string
-    estado: "BORRADOR"
-    createdAt: DateTime
+    id: string;
+    codigo_grupo: string;
+    mes: number;
+    anio: number;
+    titulo: string;
+    estado: 'BORRADOR';
+    createdAt: DateTime;
   }
 }
 ```
 
 ### Estado Actual
+
 ✅ Backend: Completo  
 ⚠️ Frontend: En desarrollo
 
@@ -1475,9 +1601,11 @@ Body: {
 ## FLUJO 16: Creación de Actividad Semanal
 
 ### Actor Inicial
+
 **ADMIN**
 
 ### Trigger
+
 ```
 POST /api/planificaciones/actividades
 Body: {
@@ -1499,8 +1627,9 @@ Body: {
 ```
 
 ### Proceso
+
 1. **Obtener planificación**
-   - SELECT * FROM planificaciones_mensuales WHERE id = planificacion_id
+   - SELECT \* FROM planificaciones_mensuales WHERE id = planificacion_id
    - Validar estado IN ("BORRADOR", "PUBLICADA")
 
 2. **Validar semana**
@@ -1528,26 +1657,29 @@ Body: {
      - created_at: NOW()
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| actividades_semanales | INSERT |
+
+| Tabla                 | Operación |
+| --------------------- | --------- |
+| actividades_semanales | INSERT    |
 
 ### Salidas
+
 ```typescript
 {
   actividad: {
-    id: string
-    planificacion_id: string
-    semana_numero: number
-    titulo: string
-    componente_nombre: string
-    nivel_dificultad: string
-    puntos_gamificacion: number
+    id: string;
+    planificacion_id: string;
+    semana_numero: number;
+    titulo: string;
+    componente_nombre: string;
+    nivel_dificultad: string;
+    puntos_gamificacion: number;
   }
 }
 ```
 
 ### Estado Actual
+
 ✅ Backend: Completo  
 ⚠️ Frontend: En desarrollo
 
@@ -1556,20 +1688,23 @@ Body: {
 ## FLUJO 17: Publicación de Planificación
 
 ### Actor Inicial
+
 **ADMIN**
 
 ### Trigger
+
 ```
 PUT /api/planificaciones/:id/publicar
 ```
 
 ### Proceso
+
 1. **Obtener planificación**
-   - SELECT * FROM planificaciones_mensuales WHERE id = id
+   - SELECT \* FROM planificaciones_mensuales WHERE id = id
    - Validar estado = "BORRADOR"
 
 2. **Validar tiene actividades**
-   - SELECT COUNT(*) FROM actividades_semanales WHERE planificacion_id = id
+   - SELECT COUNT(\*) FROM actividades_semanales WHERE planificacion_id = id
    - Si count = 0: error "Debe crear actividades primero"
 
 3. **Actualizar estado**
@@ -1587,24 +1722,27 @@ PUT /api/planificaciones/:id/publicar
        - metadata: { planificacion_id }
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| planificaciones_mensuales | UPDATE (estado) |
-| notificaciones | INSERT (N para docentes) |
+
+| Tabla                     | Operación                |
+| ------------------------- | ------------------------ |
+| planificaciones_mensuales | UPDATE (estado)          |
+| notificaciones            | INSERT (N para docentes) |
 
 ### Salidas
+
 ```typescript
 {
   planificacion: {
-    id: string
-    estado: "PUBLICADA"
-    fecha_publicacion: DateTime
+    id: string;
+    estado: 'PUBLICADA';
+    fecha_publicacion: DateTime;
   }
-  docentesNotificados: number
+  docentesNotificados: number;
 }
 ```
 
 ### Estado Actual
+
 ✅ Completo
 
 ---
@@ -1612,9 +1750,11 @@ PUT /api/planificaciones/:id/publicar
 ## FLUJO 18: Asignación de Planificación a Grupo
 
 ### Actor Inicial
+
 **DOCENTE**
 
 ### Trigger
+
 ```
 POST /api/planificaciones/asignar
 Body: {
@@ -1626,12 +1766,13 @@ Body: {
 ```
 
 ### Proceso
+
 1. **Obtener planificación**
-   - SELECT * FROM planificaciones_mensuales WHERE id = planificacion_id
+   - SELECT \* FROM planificaciones_mensuales WHERE id = planificacion_id
    - Validar estado = "PUBLICADA"
 
 2. **Obtener grupo**
-   - SELECT * FROM clase_grupos WHERE id = clase_grupo_id
+   - SELECT \* FROM clase_grupos WHERE id = clase_grupo_id
    - Validar docente_id = req.user.id (solo docente titular)
    - Validar código_grupo de grupo coincide con codigo_grupo de planificación
 
@@ -1655,28 +1796,29 @@ Body: {
      - INSERT INTO notificaciones (si estudiante tiene portal)
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| asignaciones_docente | INSERT |
-| notificaciones | INSERT (N para estudiantes) |
+
+| Tabla                | Operación                   |
+| -------------------- | --------------------------- |
+| asignaciones_docente | INSERT                      |
+| notificaciones       | INSERT (N para estudiantes) |
 
 ### Salidas
+
 ```typescript
 {
   asignacion: {
-    id: string
-    planificacion_id: string
-    clase_grupo_id: string
-    fecha_asignacion: DateTime
-    activo: true
+    id: string;
+    planificacion_id: string;
+    clase_grupo_id: string;
+    fecha_asignacion: DateTime;
+    activo: true;
   }
-  actividades: [
-    { id, semana_numero, titulo, componente_nombre }
-  ]
+  actividades: [{ id, semana_numero, titulo, componente_nombre }];
 }
 ```
 
 ### Estado Actual
+
 ✅ Completo
 
 ---
@@ -1684,9 +1826,11 @@ Body: {
 ## FLUJO 19: Asignación de Actividad Individual a Estudiantes
 
 ### Actor Inicial
+
 **DOCENTE**
 
 ### Trigger
+
 ```
 POST /api/planificaciones/asignaciones-actividad
 Body: {
@@ -1699,12 +1843,13 @@ Body: {
 ```
 
 ### Proceso
+
 1. **Obtener asignación padre**
-   - SELECT * FROM asignaciones_docente WHERE id = asignacion_docente_id
+   - SELECT \* FROM asignaciones_docente WHERE id = asignacion_docente_id
    - Validar docente_id = req.user.id
 
 2. **Obtener actividad**
-   - SELECT * FROM actividades_semanales WHERE id = actividad_id
+   - SELECT \* FROM actividades_semanales WHERE id = actividad_id
 
 3. **Obtener estudiantes del grupo**
    - SELECT estudiante_id FROM inscripciones_clase_grupo WHERE clase_grupo_id = grupo_id AND fecha_baja IS NULL
@@ -1742,28 +1887,33 @@ Body: {
    - UPDATE asignacion: notificado_estudiantes = true, notificado_tutores = true
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| asignaciones_actividad_estudiante | INSERT |
-| progreso_estudiante_actividad | INSERT (N registros) |
-| notificaciones | INSERT (N for estudiantes + tutores) |
+
+| Tabla                             | Operación                            |
+| --------------------------------- | ------------------------------------ |
+| asignaciones_actividad_estudiante | INSERT                               |
+| progreso_estudiante_actividad     | INSERT (N registros)                 |
+| notificaciones                    | INSERT (N for estudiantes + tutores) |
 
 ### Salidas
+
 ```typescript
 {
   asignacion: {
-    id: string
-    actividad: { titulo, componente_nombre, puntos_gamificacion }
-    fecha_inicio: DateTime
-    fecha_fin: DateTime
-    estado: "ACTIVA"
+    id: string;
+    actividad: {
+      (titulo, componente_nombre, puntos_gamificacion);
+    }
+    fecha_inicio: DateTime;
+    fecha_fin: DateTime;
+    estado: 'ACTIVA';
   }
-  estudiantesAsignados: number
-  notificacionesEnviadas: number
+  estudiantesAsignados: number;
+  notificacionesEnviadas: number;
 }
 ```
 
 ### Estado Actual
+
 ⚠️ Backend: Parcial (estructura definida, endpoints en desarrollo)
 
 ---
@@ -1771,9 +1921,11 @@ Body: {
 ## FLUJO 20: Actualización de Progreso de Actividad por Estudiante
 
 ### Actor Inicial
+
 **ESTUDIANTE** (jugando el componente)
 
 ### Trigger
+
 ```
 POST /api/planificaciones/progreso
 Body: {
@@ -1788,11 +1940,12 @@ Body: {
 ```
 
 ### Proceso
+
 1. **Validar estudiante autenticado**
    - req.user.id = estudiante_id (del JWT)
 
 2. **Obtener progreso existente**
-   - SELECT * FROM progreso_estudiante_actividad WHERE estudiante_id = id AND actividad_id = act_id AND asignacion_id = asig_id
+   - SELECT \* FROM progreso_estudiante_actividad WHERE estudiante_id = id AND actividad_id = act_id AND asignacion_id = asig_id
 
 3. **Actualizar progreso**
    - UPDATE progreso_estudiante_actividad:
@@ -1823,16 +1976,18 @@ Body: {
      - Incluir puntos obtenidos
 
 ### Entidades Afectadas
-| Tabla | Operación |
-|-------|-----------|
-| progreso_estudiante_actividad | UPDATE |
-| puntos_obtenidos | INSERT (si completado) |
-| estudiantes | UPDATE (puntos_totales) |
-| equipos | UPDATE (si completado) |
-| logros_desbloqueados | INSERT (si aplica) |
-| notificaciones | INSERT (para tutor) |
+
+| Tabla                         | Operación               |
+| ----------------------------- | ----------------------- |
+| progreso_estudiante_actividad | UPDATE                  |
+| puntos_obtenidos              | INSERT (si completado)  |
+| estudiantes                   | UPDATE (puntos_totales) |
+| equipos                       | UPDATE (si completado)  |
+| logros_desbloqueados          | INSERT (si aplica)      |
+| notificaciones                | INSERT (para tutor)     |
 
 ### Salidas
+
 ```typescript
 {
   progreso: {
@@ -1853,20 +2008,23 @@ Body: {
 ```
 
 ### Efectos Secundarios
+
 - Dashboard del estudiante actualizado
 - Métrica de progreso en portal tutor actualizada
 - Posible cambio de nivel en gamificación
 - Ranking actualizado
 
 ### Actores Impactados
-| Actor | Qué ve | Cuándo |
-|-------|--------|--------|
-| ESTUDIANTE | Puntaje actualizado, progreso guardado | Inmediato |
-| TUTOR | Notificación: hijo completó actividad | Inmediato |
-| DOCENTE | Progreso del grupo en actividad | En próximo refresh |
-| ADMIN | Métrica de completación | En próximo refresh |
+
+| Actor      | Qué ve                                 | Cuándo             |
+| ---------- | -------------------------------------- | ------------------ |
+| ESTUDIANTE | Puntaje actualizado, progreso guardado | Inmediato          |
+| TUTOR      | Notificación: hijo completó actividad  | Inmediato          |
+| DOCENTE    | Progreso del grupo en actividad        | En próximo refresh |
+| ADMIN      | Métrica de completación                | En próximo refresh |
 
 ### Estado Actual
+
 ⚠️ Backend: Estructura definida, parte de implementación pendiente
 
 ---
@@ -1876,6 +2034,7 @@ Body: {
 ## FLUJO 21: Sistema de Notificaciones
 
 ### Actores Generadores de Notificaciones
+
 - Sistema (automático)
 - Docente
 - Admin
@@ -1883,17 +2042,18 @@ Body: {
 
 ### Tipos de Notificaciones
 
-| Tipo | Disparador | Destinatario | Urgencia |
-|------|-----------|--------------|----------|
-| ClaseProxima | Nueva clase creada | Docente | Media |
-| AsistenciaPendiente | Docente no registró asistencia | Docente | Media |
-| EstudianteAlerta | Observación crítica en asistencia | Admin | Alta |
-| ClaseCancelada | Clase cancelada | Docente, Tutor, Estudiante | Alta |
-| LogroEstudiante | Logro desbloqueado | Estudiante, Tutor | Baja |
-| Recordatorio | Actividad semanal asignada | Estudiante, Tutor | Media |
-| General | Planificación publicada | Docente | Baja |
+| Tipo                | Disparador                        | Destinatario               | Urgencia |
+| ------------------- | --------------------------------- | -------------------------- | -------- |
+| ClaseProxima        | Nueva clase creada                | Docente                    | Media    |
+| AsistenciaPendiente | Docente no registró asistencia    | Docente                    | Media    |
+| EstudianteAlerta    | Observación crítica en asistencia | Admin                      | Alta     |
+| ClaseCancelada      | Clase cancelada                   | Docente, Tutor, Estudiante | Alta     |
+| LogroEstudiante     | Logro desbloqueado                | Estudiante, Tutor          | Baja     |
+| Recordatorio        | Actividad semanal asignada        | Estudiante, Tutor          | Media    |
+| General             | Planificación publicada           | Docente                    | Baja     |
 
 ### Proceso General de Creación de Notificación
+
 ```typescript
 INSERT INTO notificaciones (
   tipo,
@@ -1907,6 +2067,7 @@ INSERT INTO notificaciones (
 ```
 
 ### Lectura de Notificaciones
+
 ```
 GET /api/notificaciones
 Body: (todas las del docente autenticado)
@@ -1916,6 +2077,7 @@ Body: (marca individual como leída)
 ```
 
 ### Estado Actual
+
 ✅ Modelo: Completo  
 ⚠️ Backend: Endpoints básicos completos, real-time (WebSocket) pendiente  
 ⚠️ Frontend: Notificaciones visibles pero no real-time
@@ -1971,52 +2133,56 @@ ESTUDIANTE (Portal Estudiante)
 
 ## TABLA DE FLUJOS CRÍTICOS RESUMIDA
 
-| # | Flujo | Actor | Entrada | Salida | Afecta a | Estado |
-|---|-------|-------|---------|--------|----------|--------|
-| 1 | Creación Clase | ADMIN | DTO Clase | Clase creada | Docente (notif) | ✅ |
-| 2 | Asignación Masiva | ADMIN | IDs estudiantes | Inscripciones | Tutores (notif) | ✅ |
-| 3 | Reserva Clase | TUTOR | Clase ID | Inscripción | Docente (notif) | ✅ |
-| 4 | Cancelar Reserva | TUTOR | Inscripción ID | Borrada | Docente | ✅ |
-| 5 | Crear Grupo | ADMIN | DTO Grupo | Grupo creado | Docentes | ✅ |
-| 6 | Inscribir a Grupo | ADMIN/TUTOR | Grupo ID | Inscripción | - | ✅ |
-| 7 | Registrar Asistencia | DOCENTE | Array asistencias | Registrada | Estudiante (puntos) | ✅ |
-| 8 | Asist. ClaseGrupo | DOCENTE | Array asistencias | Registrada | Estudiante (puntos) | ✅ |
-| 9 | Otorgar Puntos | DOCENTE | Acción, Est. | Puntos +X | Estudiante, Equipo | ✅ |
-| 10 | Desbloquear Logro | DOCENTE | Logro ID | Logro desbloqueado | Estudiante (notif) | ✅ |
-| 11 | Calcular Precio | TUTOR/ADMIN | Estudiantes, Productos | Desglose precio | - (consultivo) | ✅ |
-| 12 | Crear Inscr. Mensual | ADMIN | Lista estudiantes | Inscripciones | Tutor (notif) | ✅ |
-| 13 | Pago Inscripción | TUTOR | Método pago | Pagado | Estudiante (acceso), Admin (métrica) | ✅ |
-| 14 | Métricas Pagos | ADMIN | Período | Dashboard | - (consultivo) | ✅ |
-| 15 | Crear Planificación | ADMIN | DTO Planificación | Plan creada | - | ✅ |
-| 16 | Crear Actividad | ADMIN | DTO Actividad | Actividad creada | - | ✅ |
-| 17 | Publicar Planificación | ADMIN | Plan ID | Publicada | Docentes (notif) | ✅ |
-| 18 | Asignar Planif. | DOCENTE | Plan ID, Grupo ID | Asignada | Estudiantes (notif), Tutores (notif) | ✅ |
-| 19 | Asignar Actividad | DOCENTE | Actividad ID | Asignada | Estudiantes, Tutores (notif) | ⚠️ |
-| 20 | Progreso Actividad | ESTUDIANTE | Datos progreso | Actualizado | Estudiante (puntos), Tutor (notif) | ⚠️ |
-| 21 | Notificaciones | SISTEMA | Evento | Notificación | Destinatario | ✅ |
+| #   | Flujo                  | Actor       | Entrada                | Salida             | Afecta a                             | Estado |
+| --- | ---------------------- | ----------- | ---------------------- | ------------------ | ------------------------------------ | ------ |
+| 1   | Creación Clase         | ADMIN       | DTO Clase              | Clase creada       | Docente (notif)                      | ✅     |
+| 2   | Asignación Masiva      | ADMIN       | IDs estudiantes        | Inscripciones      | Tutores (notif)                      | ✅     |
+| 3   | Reserva Clase          | TUTOR       | Clase ID               | Inscripción        | Docente (notif)                      | ✅     |
+| 4   | Cancelar Reserva       | TUTOR       | Inscripción ID         | Borrada            | Docente                              | ✅     |
+| 5   | Crear Grupo            | ADMIN       | DTO Grupo              | Grupo creado       | Docentes                             | ✅     |
+| 6   | Inscribir a Grupo      | ADMIN/TUTOR | Grupo ID               | Inscripción        | -                                    | ✅     |
+| 7   | Registrar Asistencia   | DOCENTE     | Array asistencias      | Registrada         | Estudiante (puntos)                  | ✅     |
+| 8   | Asist. ClaseGrupo      | DOCENTE     | Array asistencias      | Registrada         | Estudiante (puntos)                  | ✅     |
+| 9   | Otorgar Puntos         | DOCENTE     | Acción, Est.           | Puntos +X          | Estudiante, Equipo                   | ✅     |
+| 10  | Desbloquear Logro      | DOCENTE     | Logro ID               | Logro desbloqueado | Estudiante (notif)                   | ✅     |
+| 11  | Calcular Precio        | TUTOR/ADMIN | Estudiantes, Productos | Desglose precio    | - (consultivo)                       | ✅     |
+| 12  | Crear Inscr. Mensual   | ADMIN       | Lista estudiantes      | Inscripciones      | Tutor (notif)                        | ✅     |
+| 13  | Pago Inscripción       | TUTOR       | Método pago            | Pagado             | Estudiante (acceso), Admin (métrica) | ✅     |
+| 14  | Métricas Pagos         | ADMIN       | Período                | Dashboard          | - (consultivo)                       | ✅     |
+| 15  | Crear Planificación    | ADMIN       | DTO Planificación      | Plan creada        | -                                    | ✅     |
+| 16  | Crear Actividad        | ADMIN       | DTO Actividad          | Actividad creada   | -                                    | ✅     |
+| 17  | Publicar Planificación | ADMIN       | Plan ID                | Publicada          | Docentes (notif)                     | ✅     |
+| 18  | Asignar Planif.        | DOCENTE     | Plan ID, Grupo ID      | Asignada           | Estudiantes (notif), Tutores (notif) | ✅     |
+| 19  | Asignar Actividad      | DOCENTE     | Actividad ID           | Asignada           | Estudiantes, Tutores (notif)         | ⚠️     |
+| 20  | Progreso Actividad     | ESTUDIANTE  | Datos progreso         | Actualizado        | Estudiante (puntos), Tutor (notif)   | ⚠️     |
+| 21  | Notificaciones         | SISTEMA     | Evento                 | Notificación       | Destinatario                         | ✅     |
 
 ---
 
 ## RESUMEN DE IMPACTOS POR ROL
 
 ### ADMIN
+
 - **Crea:** Clases, Grupos, Planificaciones, Inscripciones mensuales, Estudiantes
 - **Ve:** Dashboard con todas las métricas, Alertas de estudiantes
 - **Actualiza:** Configuración de precios, Rutas curriculares, Sectores
 
 ### DOCENTE
+
 - **Asignado a:** Clases, Grupos
 - **Realiza:** Toma asistencia, Otorga puntos, Desbloquea logros
 - **Asigna:** Planificaciones a grupos, Actividades a estudiantes
 - **Ve:** Lista de estudiantes, Progreso en actividades
 
 ### TUTOR
+
 - **Tiene:** Estudiantes (hijos)
 - **Realiza:** Reservas de clases, Pagos de inscripciones
 - **Ve:** Dashboard con gamificación, Asistencia, Próximas clases, Alertas de pagos
 - **Recibe:** Notificaciones de actividades completadas
 
 ### ESTUDIANTE
+
 - **Pertenece a:** Tutor, Clases, Grupos, Equipos
 - **Realiza:** Completa actividades, Ve calendario
 - **Ve:** Gamificación personal, Actividades asignadas, Cursos
@@ -2027,6 +2193,7 @@ ESTUDIANTE (Portal Estudiante)
 ## FLUJOS DE DATOS CRÍTICOS (Cascadas de Cambios)
 
 ### Cascada 1: Asistencia → Gamificación → Notificaciones
+
 ```
 Docente registra asistencia
   ├─ Estudiante marcado como "Presente"
@@ -2039,6 +2206,7 @@ Docente registra asistencia
 ```
 
 ### Cascada 2: Pago → Acceso → Notificaciones
+
 ```
 Tutor paga inscripción mensual
   ├─ UPDATE inscripciones_mensuales.estado_pago = "Pagado"
@@ -2049,6 +2217,7 @@ Tutor paga inscripción mensual
 ```
 
 ### Cascada 3: Actividad Completada → Puntos → Nivel → Logro
+
 ```
 Estudiante completa actividad semanal
   ├─ UPDATE progreso_estudiante_actividad.completado = true
@@ -2066,18 +2235,21 @@ Estudiante completa actividad semanal
 ## TRANSACCIONALIDAD Y INTEGRIDAD
 
 ### Operaciones Atómicas (Todo o Nada)
+
 - Creación de Clase + Notificación
 - Inscripción Mensual + Validaciones
 - Registro de Asistencia + Puntos + Notificaciones
 - Completación de Actividad + Puntos + Logros
 
 ### Validaciones Críticas
+
 1. **Ownership:** Tutor solo ve/modifica sus estudiantes
 2. **Disponibilidad:** Clases con cupos disponibles
 3. **Duplicación:** Inscripciones únicas por clase-estudiante
 4. **Período:** Inscripciones mensuales únicas por estudiante-producto-mes
 
 ### Índices para Performance
+
 - `docentes.id`, `estudiantes.tutor_id`, `clases.docente_id`
 - `clases.fecha_hora_inicio`, `clases.estado`
 - `inscripciones_clase.clase_id`, `inscripciones_clase.estudiante_id`
@@ -2089,18 +2261,18 @@ Estudiante completa actividad semanal
 
 ## TABLA COMPARATIVA: ESTADO DE IMPLEMENTACIÓN
 
-| Flujo | Backend | Frontend | Consideraciones |
-|-------|---------|----------|-----------------|
-| Clases Individuales | ✅ 100% | ✅ 100% | Funcional end-to-end |
-| Grupos Recurrentes | ✅ 100% | ⚠️ 50% | Falta UI en portales |
-| Asistencia Individual | ✅ 100% | ✅ 100% | Docente puede registrar |
-| Asistencia Grupos | ✅ 100% | ⚠️ 25% | Endpoints listos, UI mínima |
-| Gamificación Puntos | ✅ 100% | ✅ 100% | Totalmente funcional |
-| Gamificación Logros | ✅ 95% | ⚠️ 50% | Desbloqueos automáticos en desarrollo |
-| Sistema Pagos | ✅ 100% | ⚠️ 75% | MercadoPago integrado, manual en desarrollo |
-| Planificaciones | ✅ 100% | ⚠️ 50% | Estructura lista, UI en desarrollo |
-| Actividades Semanales | ✅ 100% | ⚠️ 25% | Asignación parcial implementada |
-| Notificaciones | ✅ 75% | ⚠️ 50% | Real-time (WebSocket) pendiente |
+| Flujo                 | Backend | Frontend | Consideraciones                             |
+| --------------------- | ------- | -------- | ------------------------------------------- |
+| Clases Individuales   | ✅ 100% | ✅ 100%  | Funcional end-to-end                        |
+| Grupos Recurrentes    | ✅ 100% | ⚠️ 50%   | Falta UI en portales                        |
+| Asistencia Individual | ✅ 100% | ✅ 100%  | Docente puede registrar                     |
+| Asistencia Grupos     | ✅ 100% | ⚠️ 25%   | Endpoints listos, UI mínima                 |
+| Gamificación Puntos   | ✅ 100% | ✅ 100%  | Totalmente funcional                        |
+| Gamificación Logros   | ✅ 95%  | ⚠️ 50%   | Desbloqueos automáticos en desarrollo       |
+| Sistema Pagos         | ✅ 100% | ⚠️ 75%   | MercadoPago integrado, manual en desarrollo |
+| Planificaciones       | ✅ 100% | ⚠️ 50%   | Estructura lista, UI en desarrollo          |
+| Actividades Semanales | ✅ 100% | ⚠️ 25%   | Asignación parcial implementada             |
+| Notificaciones        | ✅ 75%  | ⚠️ 50%   | Real-time (WebSocket) pendiente             |
 
 ---
 
@@ -2147,4 +2319,3 @@ El ecosistema Mateatletas implementa un sistema complejo pero bien estructurado 
 5. **Extensible:** Arquitectura modular (CQRS, Use Cases, Repositories)
 
 Los flujos principales están 85-95% implementados en backend, con frontend en 50-75% de completitud. Las áreas pendientes son principalmente UI y optimizaciones real-time.
-

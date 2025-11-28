@@ -11,7 +11,7 @@ interface ClasesCardsProps {
 
 // Configuración de colores por sector - Mateatletas OS
 const SECTOR_COLORS = {
-  'Matemática': {
+  Matemática: {
     gradient: 'from-blue-500 to-cyan-500',
     bg: 'bg-blue-500/[0.08]',
     border: 'border-blue-500/30',
@@ -19,7 +19,7 @@ const SECTOR_COLORS = {
     shadow: 'shadow-blue-500/20',
     icon: '🧮',
   },
-  'Programación': {
+  Programación: {
     gradient: 'from-purple-500 to-indigo-500',
     bg: 'bg-purple-500/[0.08]',
     border: 'border-purple-500/30',
@@ -27,7 +27,7 @@ const SECTOR_COLORS = {
     shadow: 'shadow-purple-500/20',
     icon: '💻',
   },
-  'Ciencias': {
+  Ciencias: {
     gradient: 'from-green-500 to-emerald-500',
     bg: 'bg-green-500/[0.08]',
     border: 'border-green-500/30',
@@ -36,7 +36,6 @@ const SECTOR_COLORS = {
     icon: '🔬',
   },
 } as const;
-
 
 /**
  * Componente de cards para mostrar clases
@@ -69,10 +68,7 @@ export function ClasesCards({ clases }: ClasesCardsProps) {
             ? clase.cupo_maximo
             : (clase as { cupos_maximo?: number }).cupos_maximo) ?? 0;
         const cupoMaximo = capacidadReportada > 0 ? capacidadReportada : 1;
-        const porcentajeOcupacion = Math.min(
-          (inscripciones / cupoMaximo) * 100,
-          100,
-        );
+        const porcentajeOcupacion = Math.min((inscripciones / cupoMaximo) * 100, 100);
 
         return (
           <div
@@ -81,7 +77,9 @@ export function ClasesCards({ clases }: ClasesCardsProps) {
             className={`group backdrop-blur-xl bg-white/[0.03] rounded-2xl border ${sectorConfig.border} shadow-xl ${sectorConfig.shadow} hover:shadow-2xl hover:bg-white/[0.06] hover:scale-[1.02] transition-all duration-300 overflow-hidden flex flex-col cursor-pointer`}
           >
             {/* Header con gradiente del sector */}
-            <div className={`bg-gradient-to-r ${sectorConfig.gradient} p-5 relative overflow-hidden`}>
+            <div
+              className={`bg-gradient-to-r ${sectorConfig.gradient} p-5 relative overflow-hidden`}
+            >
               <div className="absolute top-0 right-0 text-8xl opacity-5 select-none -mt-4 -mr-4">
                 {sectorConfig.icon}
               </div>
@@ -95,9 +93,7 @@ export function ClasesCards({ clases }: ClasesCardsProps) {
                       <h3 className="text-xl font-black text-white mb-1 line-clamp-2 group-hover:text-white/90 transition-colors">
                         {clase.nombre}
                       </h3>
-                      <p className="text-white/80 text-sm font-semibold">
-                        {sectorNombre}
-                      </p>
+                      <p className="text-white/80 text-sm font-semibold">{sectorNombre}</p>
                     </div>
                   </div>
                   <ChevronRight className="w-6 h-6 text-white/60 group-hover:text-white group-hover:translate-x-1 transition-all flex-shrink-0" />
@@ -109,7 +105,9 @@ export function ClasesCards({ clases }: ClasesCardsProps) {
             <div className="p-5 space-y-4 flex-1 flex flex-col">
               {/* Docente */}
               <div className="flex items-center gap-3">
-                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${sectorConfig.gradient} flex items-center justify-center shadow-lg ${sectorConfig.shadow} flex-shrink-0`}>
+                <div
+                  className={`w-11 h-11 rounded-xl bg-gradient-to-br ${sectorConfig.gradient} flex items-center justify-center shadow-lg ${sectorConfig.shadow} flex-shrink-0`}
+                >
                   <User className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -153,8 +151,8 @@ export function ClasesCards({ clases }: ClasesCardsProps) {
                       porcentajeOcupacion >= 90
                         ? 'from-red-500 to-rose-500'
                         : porcentajeOcupacion >= 75
-                        ? 'from-orange-500 to-amber-500'
-                        : 'from-green-500 to-emerald-500'
+                          ? 'from-orange-500 to-amber-500'
+                          : 'from-green-500 to-emerald-500'
                     } transition-all duration-500`}
                     style={{ width: `${porcentajeOcupacion}%` }}
                   />

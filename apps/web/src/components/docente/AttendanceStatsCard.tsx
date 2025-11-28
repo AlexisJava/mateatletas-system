@@ -106,12 +106,8 @@ export default function AttendanceStatsCard({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-bold text-[#2a1a5e]">
-            Estadísticas de Asistencia
-          </h3>
-          <p className="text-sm text-gray-600 mt-1">
-            Total de estudiantes: {total}
-          </p>
+          <h3 className="text-xl font-bold text-[#2a1a5e]">Estadísticas de Asistencia</h3>
+          <p className="text-sm text-gray-600 mt-1">Total de estudiantes: {total}</p>
         </div>
 
         {/* Porcentaje grande */}
@@ -138,9 +134,7 @@ export default function AttendanceStatsCard({
             <div className="text-2xl font-bold" style={{ color: stat.color }}>
               {stat.value}
             </div>
-            <div className="text-xs text-gray-600 mt-1 text-center">
-              {stat.label}
-            </div>
+            <div className="text-xs text-gray-600 mt-1 text-center">{stat.label}</div>
           </div>
         ))}
       </div>

@@ -52,7 +52,6 @@ export function MenuModal({ isOpen, onClose, navButtons, onNavigate }: MenuModal
           >
             {/* Card principal FULLSCREEN */}
             <div className="relative w-full h-full sm:h-[95vh] sm:max-w-[1600px] overflow-hidden sm:rounded-3xl bg-black shadow-[0_0_100px_rgba(139,92,246,0.5)]">
-
               {/* Botón cerrar - Flotante arriba derecha */}
               <motion.button
                 whileHover={{ scale: 1.1, rotate: 90 }}
@@ -65,10 +64,8 @@ export function MenuModal({ isOpen, onClose, navButtons, onNavigate }: MenuModal
 
               {/* Layout 50/50 - Responsive: columna en mobile, fila en desktop */}
               <div className="flex flex-col md:flex-row w-full h-full">
-
                 {/* ========== COLUMNA IZQUIERDA: BOTONES DEL MENÚ ========== */}
                 <div className="w-full md:w-1/2 h-1/2 md:h-full bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900 border-b md:border-b-0 md:border-r border-white/10 relative overflow-hidden">
-
                   {/* Partículas de fondo */}
                   <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
                     {[...Array(40)].map((_, i) => (
@@ -135,9 +132,10 @@ export function MenuModal({ isOpen, onClose, navButtons, onNavigate }: MenuModal
                         >
                           {/* Card container */}
                           <div className="relative h-full min-h-[100px] sm:min-h-[120px] overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-slate-800/70 via-slate-700/70 to-slate-800/70 backdrop-blur-xl border-2 border-white/10 hover:border-white/30 transition-all p-3 sm:p-4">
-
                             {/* Glow effect on hover */}
-                            <div className={`absolute inset-0 bg-gradient-to-br ${button.gradient} opacity-0 group-hover:opacity-20 transition-opacity blur-xl`} />
+                            <div
+                              className={`absolute inset-0 bg-gradient-to-br ${button.gradient} opacity-0 group-hover:opacity-20 transition-opacity blur-xl`}
+                            />
 
                             {/* Badge si hay notificaciones */}
                             {button.badge && button.badge > 0 && (
@@ -164,7 +162,9 @@ export function MenuModal({ isOpen, onClose, navButtons, onNavigate }: MenuModal
                             {/* Content */}
                             <div className="relative z-10 flex flex-col items-center text-center gap-2 sm:gap-3 h-full justify-center">
                               {/* Icon */}
-                              <div className={`w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br ${button.gradient} flex items-center justify-center shadow-lg`}>
+                              <div
+                                className={`w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br ${button.gradient} flex items-center justify-center shadow-lg`}
+                              >
                                 <div className="text-white scale-75 sm:scale-90 md:scale-100">
                                   {button.icon}
                                 </div>
@@ -189,7 +189,6 @@ export function MenuModal({ isOpen, onClose, navButtons, onNavigate }: MenuModal
 
                 {/* ========== COLUMNA DERECHA: LOGO MATEATLETAS ULTRA PREMIUM ========== */}
                 <div className="w-full md:w-1/2 h-1/2 md:h-full bg-black relative overflow-hidden flex items-center justify-center">
-
                   {/* Grid pattern de fondo */}
                   <div
                     className="absolute inset-0 opacity-10"
@@ -218,7 +217,8 @@ export function MenuModal({ isOpen, onClose, navButtons, onNavigate }: MenuModal
                     <div
                       className="w-[600px] h-[600px] rounded-full blur-[120px]"
                       style={{
-                        background: 'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)',
+                        background:
+                          'radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)',
                       }}
                     />
                   </motion.div>
@@ -252,7 +252,8 @@ export function MenuModal({ isOpen, onClose, navButtons, onNavigate }: MenuModal
                         className="h-1 mx-auto rounded-full"
                         style={{
                           width: '60%',
-                          background: 'linear-gradient(90deg, transparent, rgba(139,92,246,1), transparent)',
+                          background:
+                            'linear-gradient(90deg, transparent, rgba(139,92,246,1), transparent)',
                           boxShadow: '0 0 20px rgba(139,92,246,1)',
                         }}
                         animate={{
@@ -330,7 +331,6 @@ export function MenuModal({ isOpen, onClose, navButtons, onNavigate }: MenuModal
                     </motion.p>
                   </div>
                 </div>
-
               </div>
             </div>
           </motion.div>

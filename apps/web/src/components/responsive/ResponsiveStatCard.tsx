@@ -143,7 +143,9 @@ export function ResponsiveStatCard({
         <div className={`text-white ${config.valueSize} font-black leading-none`}>{value}</div>
 
         {/* Label */}
-        <div className={`text-white/90 ${config.labelSize} font-bold uppercase tracking-wider mt-1`}>
+        <div
+          className={`text-white/90 ${config.labelSize} font-bold uppercase tracking-wider mt-1`}
+        >
           {label}
         </div>
 
@@ -162,7 +164,13 @@ export function ResponsiveStatCard({
 /**
  * Grid de stats responsivo (3 columnas adaptativas)
  */
-export function StatGrid({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+export function StatGrid({
+  children,
+  className = '',
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div
       className={`

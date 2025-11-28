@@ -88,10 +88,7 @@ async function getById(id: string): Promise<Equipo> {
  * Actualizar un equipo existente
  * PATCH /api/equipos/:id
  */
-async function update(
-  id: string,
-  data: UpdateEquipoDto,
-): Promise<Equipo> {
+async function update(id: string, data: UpdateEquipoDto): Promise<Equipo> {
   try {
     const response = await apiClient.patch<Equipo>(`/equipos/${id}`, data);
     const validado = equipoSchema.parse(response);

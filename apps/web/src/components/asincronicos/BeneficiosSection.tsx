@@ -7,45 +7,51 @@ const beneficios = [
   {
     icon: Clock,
     titulo: 'Sin horarios fijos',
-    descripcion: '¿Tu hijo tiene fútbol los martes? ¿Prefiere estudiar los fines de semana? No hay problema. Accede cuando quiera, 24/7.',
+    descripcion:
+      '¿Tu hijo tiene fútbol los martes? ¿Prefiere estudiar los fines de semana? No hay problema. Accede cuando quiera, 24/7.',
     color: '#0ea5e9',
-    gradient: 'from-[#0ea5e9]/20 to-[#0ea5e9]/5'
+    gradient: 'from-[#0ea5e9]/20 to-[#0ea5e9]/5',
   },
   {
     icon: Target,
     titulo: 'Aprende a SU ritmo',
-    descripcion: '¿Quiere avanzar más rápido? Puede. ¿Necesita repetir un tema? También. Sin presión, sin compararse con otros.',
+    descripcion:
+      '¿Quiere avanzar más rápido? Puede. ¿Necesita repetir un tema? También. Sin presión, sin compararse con otros.',
     color: '#10b981',
-    gradient: 'from-[#10b981]/20 to-[#10b981]/5'
+    gradient: 'from-[#10b981]/20 to-[#10b981]/5',
   },
   {
     icon: Repeat,
     titulo: 'Repite cuantas veces quieras',
-    descripcion: 'Acceso permanente a TODO el contenido. No hay vencimientos. Puede volver a ver las clases cuando necesite.',
+    descripcion:
+      'Acceso permanente a TODO el contenido. No hay vencimientos. Puede volver a ver las clases cuando necesite.',
     color: '#fbbf24',
-    gradient: 'from-[#fbbf24]/20 to-[#fbbf24]/5'
+    gradient: 'from-[#fbbf24]/20 to-[#fbbf24]/5',
   },
   {
     icon: Shield,
     titulo: 'Cero estrés para la familia',
-    descripcion: 'No más carreras para llegar a clase a las 18hs. No más reorganizar toda la agenda. Se adapta a ustedes.',
+    descripcion:
+      'No más carreras para llegar a clase a las 18hs. No más reorganizar toda la agenda. Se adapta a ustedes.',
     color: '#8b5cf6',
-    gradient: 'from-[#8b5cf6]/20 to-[#8b5cf6]/5'
+    gradient: 'from-[#8b5cf6]/20 to-[#8b5cf6]/5',
   },
   {
     icon: TrendingUp,
     titulo: 'Progreso visible en tiempo real',
-    descripcion: 'Ves exactamente qué está aprendiendo, qué proyectos está haciendo, y cómo está avanzando.',
+    descripcion:
+      'Ves exactamente qué está aprendiendo, qué proyectos está haciendo, y cómo está avanzando.',
     color: '#f43f5e',
-    gradient: 'from-[#f43f5e]/20 to-[#f43f5e]/5'
+    gradient: 'from-[#f43f5e]/20 to-[#f43f5e]/5',
   },
   {
     icon: Users,
     titulo: 'Mismo contenido de calidad',
-    descripcion: 'Los mismos profes, los mismos proyectos, la misma gamificación. Solo que en video y a demanda.',
+    descripcion:
+      'Los mismos profes, los mismos proyectos, la misma gamificación. Solo que en video y a demanda.',
     color: '#FF6B35',
-    gradient: 'from-[#FF6B35]/20 to-[#FF6B35]/5'
-  }
+    gradient: 'from-[#FF6B35]/20 to-[#FF6B35]/5',
+  },
 ];
 
 export default function BeneficiosSection() {
@@ -70,7 +76,8 @@ export default function BeneficiosSection() {
             ¿Por qué <span className="title-gradient">asincrónico</span>?
           </h2>
           <p className="text-2xl text-white/70 max-w-3xl mx-auto">
-            Porque <strong className="text-white">la vida de las familias</strong> no siempre encaja en un horario fijo
+            Porque <strong className="text-white">la vida de las familias</strong> no siempre encaja
+            en un horario fijo
           </p>
         </motion.div>
 
@@ -98,22 +105,15 @@ export default function BeneficiosSection() {
                   <div
                     className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
                     style={{
-                      background: `linear-gradient(135deg, ${beneficio.color}20, ${beneficio.color}10)`
+                      background: `linear-gradient(135deg, ${beneficio.color}20, ${beneficio.color}10)`,
                     }}
                   >
-                    <Icon
-                      className="w-8 h-8"
-                      style={{ color: beneficio.color }}
-                    />
+                    <Icon className="w-8 h-8" style={{ color: beneficio.color }} />
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-2xl font-black text-white mb-4">
-                    {beneficio.titulo}
-                  </h3>
-                  <p className="text-white/70 leading-relaxed">
-                    {beneficio.descripcion}
-                  </p>
+                  <h3 className="text-2xl font-black text-white mb-4">{beneficio.titulo}</h3>
+                  <p className="text-white/70 leading-relaxed">{beneficio.descripcion}</p>
                 </div>
               </motion.div>
             );
@@ -132,10 +132,13 @@ export default function BeneficiosSection() {
             <div className="absolute inset-0 bg-gradient-to-r from-[#0ea5e9]/20 via-[#10b981]/20 to-[#fbbf24]/20 rounded-3xl blur-2xl" />
             <div className="relative bg-black/60 backdrop-blur-xl border border-white/20 rounded-3xl p-10 text-center">
               <p className="text-2xl md:text-3xl text-white font-bold leading-relaxed mb-4">
-                "Los cursos asincrónicos no son <em className="text-[#0ea5e9]">menos</em> que los sincrónicos"
+                "Los cursos asincrónicos no son <em className="text-[#0ea5e9]">menos</em> que los
+                sincrónicos"
               </p>
               <p className="text-xl text-white/70 leading-relaxed">
-                Son <strong className="text-[#10b981]">DIFERENTES</strong>. Diseñados para familias que valoran la <strong className="text-[#fbbf24]">flexibilidad</strong> sin sacrificar la <strong className="text-[#f43f5e]">calidad</strong>.
+                Son <strong className="text-[#10b981]">DIFERENTES</strong>. Diseñados para familias
+                que valoran la <strong className="text-[#fbbf24]">flexibilidad</strong> sin
+                sacrificar la <strong className="text-[#f43f5e]">calidad</strong>.
               </p>
             </div>
           </div>

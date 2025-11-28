@@ -1,7 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Edit2, Save, Calendar, Clock, MapPin, Award, BookOpen, GraduationCap, User, Mail, Phone, Trash2, Plus } from 'lucide-react';
+import {
+  X,
+  Edit2,
+  Save,
+  Calendar,
+  Clock,
+  MapPin,
+  Award,
+  BookOpen,
+  GraduationCap,
+  User,
+  Mail,
+  Phone,
+  Trash2,
+  Plus,
+} from 'lucide-react';
 
 interface Docente {
   id: string;
@@ -158,10 +173,7 @@ export default function ViewEditDocenteModal({
                 <Edit2 className="w-6 h-6 text-blue-400 group-hover:text-blue-300" />
               </button>
             )}
-            <button
-              onClick={onClose}
-              className="p-3 hover:bg-white/10 rounded-2xl transition-all"
-            >
+            <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all">
               <X className="w-6 h-6 text-white/70" />
             </button>
           </div>
@@ -272,14 +284,20 @@ export default function ViewEditDocenteModal({
                     <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2 flex items-center gap-2">
                       <MapPin className="w-4 h-4" /> Estado
                     </div>
-                    <span className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-black shadow-lg ${
-                      docente.estado === 'activo'
-                        ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
+                    <span
+                      className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-black shadow-lg ${
+                        docente.estado === 'activo'
+                          ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white'
+                          : docente.estado === 'vacaciones'
+                            ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white'
+                            : 'bg-gradient-to-r from-red-600 to-rose-600 text-white'
+                      }`}
+                    >
+                      {docente.estado === 'activo'
+                        ? '✓ Activo'
                         : docente.estado === 'vacaciones'
-                        ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white'
-                        : 'bg-gradient-to-r from-red-600 to-rose-600 text-white'
-                    }`}>
-                      {docente.estado === 'activo' ? '✓ Activo' : docente.estado === 'vacaciones' ? '🏖️ Vacaciones' : '✗ Inactivo'}
+                          ? '🏖️ Vacaciones'
+                          : '✗ Inactivo'}
                     </span>
                   </div>
                 </div>
@@ -544,7 +562,8 @@ export default function ViewEditDocenteModal({
                 </div>
               ) : (
                 <div>
-                  {docente.disponibilidad_horaria && Object.keys(docente.disponibilidad_horaria).length > 0 ? (
+                  {docente.disponibilidad_horaria &&
+                  Object.keys(docente.disponibilidad_horaria).length > 0 ? (
                     <div className="space-y-3">
                       {Object.entries(docente.disponibilidad_horaria).map(([dia, horarios]) => (
                         <div

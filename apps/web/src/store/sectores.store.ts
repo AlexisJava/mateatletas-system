@@ -62,11 +62,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       set({ sectores, isLoading: false });
     } catch (error: unknown) {
       set({
-        error: handleStoreError(
-          'SectoresStore.fetchSectores',
-          error,
-          'Error fetching sectores',
-        ),
+        error: handleStoreError('SectoresStore.fetchSectores', error, 'Error fetching sectores'),
         isLoading: false,
       });
     }
@@ -83,11 +79,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       return sector;
     } catch (error: unknown) {
       set({
-        error: handleStoreError(
-          'SectoresStore.crearSector',
-          error,
-          'Error creating sector',
-        ),
+        error: handleStoreError('SectoresStore.crearSector', error, 'Error creating sector'),
         isLoading: false,
       });
       return null;
@@ -105,11 +97,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       return sector;
     } catch (error: unknown) {
       set({
-        error: handleStoreError(
-          'SectoresStore.actualizarSector',
-          error,
-          'Error updating sector',
-        ),
+        error: handleStoreError('SectoresStore.actualizarSector', error, 'Error updating sector'),
         isLoading: false,
       });
       return null;
@@ -127,11 +115,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       return true;
     } catch (error: unknown) {
       set({
-        error: handleStoreError(
-          'SectoresStore.eliminarSector',
-          error,
-          'Error deleting sector',
-        ),
+        error: handleStoreError('SectoresStore.eliminarSector', error, 'Error deleting sector'),
         isLoading: false,
       });
       return false;
@@ -149,11 +133,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       set({ rutas, isLoading: false });
     } catch (error: unknown) {
       set({
-        error: handleStoreError(
-          'SectoresStore.fetchRutas',
-          error,
-          'Error fetching rutas',
-        ),
+        error: handleStoreError('SectoresStore.fetchRutas', error, 'Error fetching rutas'),
         isLoading: false,
       });
     }
@@ -174,11 +154,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       return ruta;
     } catch (error: unknown) {
       set({
-        error: handleStoreError(
-          'SectoresStore.crearRuta',
-          error,
-          'Error creating ruta',
-        ),
+        error: handleStoreError('SectoresStore.crearRuta', error, 'Error creating ruta'),
         isLoading: false,
       });
       return null;
@@ -196,11 +172,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       return ruta;
     } catch (error: unknown) {
       set({
-        error: handleStoreError(
-          'SectoresStore.actualizarRuta',
-          error,
-          'Error updating ruta',
-        ),
+        error: handleStoreError('SectoresStore.actualizarRuta', error, 'Error updating ruta'),
         isLoading: false,
       });
       return null;
@@ -222,11 +194,7 @@ export const useSectoresStore = create<SectoresState>((set, get) => ({
       return true;
     } catch (error: unknown) {
       set({
-        error: handleStoreError(
-          'SectoresStore.eliminarRuta',
-          error,
-          'Error deleting ruta',
-        ),
+        error: handleStoreError('SectoresStore.eliminarRuta', error, 'Error deleting ruta'),
         isLoading: false,
       });
       return false;

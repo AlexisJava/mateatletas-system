@@ -2,7 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, ChevronDown, ChevronUp, Calendar, Users, Clock, Edit, Trash2, BookOpen, Archive, RotateCcw } from 'lucide-react';
+import {
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  Calendar,
+  Users,
+  Clock,
+  Edit,
+  Trash2,
+  BookOpen,
+  Archive,
+  RotateCcw,
+} from 'lucide-react';
 import axios from '@/lib/axios';
 import { isAxiosError } from 'axios';
 import { CreateGrupoModal } from '@/components/admin/grupos/CreateGrupoModal';
@@ -63,8 +75,18 @@ const DIA_SEMANA_LABELS: Record<string, string> = {
 };
 
 const MESES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
 ];
 
 /**
@@ -146,9 +168,12 @@ export default function AdminGruposClasesPage() {
             // Obtener clases del grupo
             // El endpoint devuelve { success: true, data: [...], total: ... }
             // El interceptor de axios extrae el primer .data, pero necesitamos extraer .data nuevamente
-            const response = await axios.get<ClaseGrupoLocal[] | { data?: ClaseGrupoLocal[] }>(`/admin/clase-grupos`, {
-              params: { grupo_id: grupo.id },
-            });
+            const response = await axios.get<ClaseGrupoLocal[] | { data?: ClaseGrupoLocal[] }>(
+              `/admin/clase-grupos`,
+              {
+                params: { grupo_id: grupo.id },
+              },
+            );
 
             console.log(`📋 Response RAW para ${grupo.codigo}:`, response);
             console.log(`   Tipo de respuesta:`, typeof response);
@@ -264,9 +289,7 @@ export default function AdminGruposClasesPage() {
           <h1 className="text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 bg-clip-text text-transparent">
             📚 Clubes y Cursos
           </h1>
-          <p className="text-white/60 mt-1">
-            Gestiona clubes, cursos y sus horarios
-          </p>
+          <p className="text-white/60 mt-1">Gestiona clubes, cursos y sus horarios</p>
         </div>
 
         <button
@@ -336,7 +359,10 @@ export default function AdminGruposClasesPage() {
             const isExpanded = expandedGrupos.has(grupo.id);
             const clasesArray = Array.isArray(grupo.clases) ? grupo.clases : [];
             const totalClases = clasesArray.length;
-            const totalInscriptos = clasesArray.reduce((sum, clase) => sum + (clase.total_inscriptos || 0), 0);
+            const totalInscriptos = clasesArray.reduce(
+              (sum, clase) => sum + (clase.total_inscriptos || 0),
+              0,
+            );
 
             return (
               <div
@@ -356,11 +382,13 @@ export default function AdminGruposClasesPage() {
                     {/* Left: Info del Grupo */}
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
-                          grupo.activo
-                            ? 'bg-purple-500/20 text-purple-300'
-                            : 'bg-gray-500/20 text-gray-400'
-                        }`}>
+                        <span
+                          className={`px-3 py-1 rounded-lg text-sm font-bold ${
+                            grupo.activo
+                              ? 'bg-purple-500/20 text-purple-300'
+                              : 'bg-gray-500/20 text-gray-400'
+                          }`}
+                        >
                           {grupo.codigo}
                         </span>
                         {!grupo.activo && (
@@ -385,11 +413,10 @@ export default function AdminGruposClasesPage() {
                         <div className="flex items-center gap-2 text-sm">
                           <BookOpen className="w-4 h-4 text-emerald-400" />
                           <span className="text-emerald-400 font-semibold">
-                            Planificación {MESES[grupo.planificacionActual.mes - 1]} {grupo.planificacionActual.anio}:
+                            Planificación {MESES[grupo.planificacionActual.mes - 1]}{' '}
+                            {grupo.planificacionActual.anio}:
                           </span>
-                          <span className="text-white/70">
-                            {grupo.planificacionActual.titulo}
-                          </span>
+                          <span className="text-white/70">{grupo.planificacionActual.titulo}</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 text-sm text-white/40">
@@ -490,7 +517,8 @@ export default function AdminGruposClasesPage() {
 
                               {/* Docente */}
                               <div className="text-xs text-white/60 mb-2">
-                                👨‍🏫 {clase.docente
+                                👨‍🏫{' '}
+                                {clase.docente
                                   ? `${clase.docente.nombre} ${clase.docente.apellido}`
                                   : 'Docente no asignado'}
                               </div>
@@ -606,17 +634,15 @@ export default function AdminGruposClasesPage() {
             </h3>
 
             {/* Descripción */}
-            <p className="text-white/60 text-center mb-1">
-              Estás por archivar el grupo:
-            </p>
+            <p className="text-white/60 text-center mb-1">Estás por archivar el grupo:</p>
             <p className="text-lg font-bold text-white text-center mb-4">
               {grupoToDelete.codigo} - {grupoToDelete.nombre}
             </p>
 
             <div className="backdrop-blur-xl bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-6">
               <p className="text-yellow-200 text-sm text-center">
-                ⚠️ El grupo será marcado como inactivo y dejará de aparecer en la lista.
-                Podrás reactivarlo desde la base de datos si es necesario.
+                ⚠️ El grupo será marcado como inactivo y dejará de aparecer en la lista. Podrás
+                reactivarlo desde la base de datos si es necesario.
               </p>
             </div>
 
@@ -682,16 +708,15 @@ export default function AdminGruposClasesPage() {
             </h3>
 
             {/* Descripción */}
-            <p className="text-white/60 text-center mb-1">
-              Estás por eliminar el horario:
-            </p>
+            <p className="text-white/60 text-center mb-1">Estás por eliminar el horario:</p>
             <p className="text-lg font-bold text-white text-center mb-4">
               {horarioParaEliminar.nombre}
             </p>
 
             <div className="backdrop-blur-xl bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-6">
               <p className="text-yellow-200 text-sm text-center">
-                ⚠️ El horario será desactivado. {horarioParaEliminar.total_inscriptos || 0} estudiantes inscritos quedarán sin este horario.
+                ⚠️ El horario será desactivado. {horarioParaEliminar.total_inscriptos || 0}{' '}
+                estudiantes inscritos quedarán sin este horario.
               </p>
             </div>
 

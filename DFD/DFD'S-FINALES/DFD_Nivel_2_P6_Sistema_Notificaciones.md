@@ -1,4 +1,5 @@
 # DFD NIVEL 2 - P6: SISTEMA DE NOTIFICACIONES
+
 ## Ecosistema Mateatletas
 
 **Versión:** 1.0  
@@ -17,7 +18,7 @@ flowchart TB
     TUTOR[👨‍👩‍👧 TUTOR]
     ESTUDIANTE[🎓 ESTUDIANTE]
     GOOGLE[📧 Google]
-    
+
     %% Subprocesos de P6
     P6_1[P6.1<br/>CREAR<br/>NOTIFICACIÓN]
     P6_2[P6.2<br/>DISTRIBUIR<br/>NOTIFICACIONES]
@@ -25,20 +26,20 @@ flowchart TB
     P6_4[P6.4<br/>MARCAR<br/>COMO LEÍDA]
     P6_5[P6.5<br/>ENVIAR<br/>EMAIL]
     P6_6[P6.6<br/>GESTIONAR<br/>PREFERENCIAS]
-    
+
     %% Almacenes de Datos
     D1[(D1<br/>USUARIOS)]
     D8[(D8<br/>NOTIFICACIONES)]
-    
+
     %% Procesos Externos
     P1[P1<br/>USUARIOS]
     P2[P2<br/>CLASES]
     P3[P3<br/>GAMIFICACIÓN]
     P4[P4<br/>PAGOS]
     P5[P5<br/>PLANIFICACIONES]
-    
+
     %% === FLUJOS DESDE PROCESOS EXTERNOS ===
-    
+
     P1 -->|Evento: Usuario creado| P6_1
     P1 -->|Evento: Acceso modificado| P6_1
     P2 -->|Evento: Clase creada| P6_1
@@ -51,55 +52,55 @@ flowchart TB
     P4 -->|Evento: Membresía vencida| P6_1
     P5 -->|Evento: Actividad asignada| P6_1
     P5 -->|Evento: Actividad completada| P6_1
-    
+
     %% === FLUJOS HACIA ENTIDADES EXTERNAS ===
-    
+
     P6_3 -->|Notificaciones| ADMIN
     P6_3 -->|Notificaciones| DOCENTE
     P6_3 -->|Notificaciones| TUTOR
     P6_3 -->|Notificaciones| ESTUDIANTE
-    
+
     P6_5 -->|Enviar email| GOOGLE
-    
+
     %% === FLUJOS INTERNOS ENTRE SUBPROCESOS ===
-    
+
     P6_1 -->|Notificación creada| P6_2
     P6_2 -->|Determinar destinatarios| D1
     D1 -->|Datos usuarios| P6_2
     P6_2 -->|Guardar notificaciones| D8
     P6_2 -->|Trigger email| P6_5
-    
+
     P6_3 -->|Leer notificaciones| D8
     D8 -->|Lista notificaciones| P6_3
-    
+
     P6_4 -->|Actualizar estado| D8
-    
+
     P6_5 -->|Leer preferencias| D8
     P6_5 -->|Leer datos usuario| D1
-    
+
     P6_6 -->|Guardar preferencias| D8
-    
+
     %% === CONSULTAS DESDE USUARIOS ===
-    
+
     ADMIN -->|Ver notificaciones| P6_3
     DOCENTE -->|Ver notificaciones| P6_3
     TUTOR -->|Ver notificaciones| P6_3
     ESTUDIANTE -->|Ver notificaciones| P6_3
-    
+
     ADMIN -->|Marcar leída| P6_4
     DOCENTE -->|Marcar leída| P6_4
     TUTOR -->|Marcar leída| P6_4
     ESTUDIANTE -->|Marcar leída| P6_4
-    
+
     TUTOR -->|Configurar preferencias| P6_6
-    
+
     %% Estilos
     classDef userExternal fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
     classDef systemExternal fill:#E24A4A,stroke:#8A2E2E,stroke-width:2px,color:#fff
     classDef subprocess fill:#50C878,stroke:#2E8A57,stroke-width:2px,color:#fff
     classDef datastore fill:#FFB84D,stroke:#CC8A3D,stroke-width:2px,color:#000
     classDef externalProcess fill:#9B59B6,stroke:#6C3483,stroke-width:2px,color:#fff
-    
+
     class ADMIN,DOCENTE,TUTOR,ESTUDIANTE userExternal
     class GOOGLE systemExternal
     class P6_1,P6_2,P6_3,P6_4,P6_5,P6_6 subprocess
@@ -112,6 +113,7 @@ flowchart TB
 ## SUBPROCESO P6.1: CREAR NOTIFICACIÓN
 
 ### Descripción
+
 Recibe eventos de otros procesos y crea registros de notificaciones en formato estandarizado.
 
 ### Entradas
@@ -119,6 +121,7 @@ Recibe eventos de otros procesos y crea registros de notificaciones en formato e
 Eventos de diversos procesos del sistema:
 
 **Desde P1 (Usuarios):**
+
 ```typescript
 {
   tipo: 'UsuarioCreado',
@@ -129,6 +132,7 @@ Eventos de diversos procesos del sistema:
 ```
 
 **Desde P2 (Clases):**
+
 ```typescript
 {
   tipo: 'ClaseCreada',
@@ -161,6 +165,7 @@ Eventos de diversos procesos del sistema:
 ```
 
 **Desde P3 (Gamificación):**
+
 ```typescript
 {
   tipo: 'PuntosObtenidos',
@@ -198,6 +203,7 @@ Eventos de diversos procesos del sistema:
 ```
 
 **Desde P4 (Pagos):**
+
 ```typescript
 {
   tipo: 'PagoRealizado',
@@ -223,6 +229,7 @@ Eventos de diversos procesos del sistema:
 ```
 
 **Desde P5 (Planificaciones):**
+
 ```typescript
 {
   tipo: 'ActividadAsignada',
@@ -259,10 +266,10 @@ const EventoSchema = z.object({
   destinatario_id: z.string().optional(),
   destinatarios: z.array(z.string()).optional(),
   destinatario_tipo: z.enum(['ADMIN', 'DOCENTE', 'TUTOR', 'ESTUDIANTE']).optional(),
-  metadata: z.record(z.any())
-})
+  metadata: z.record(z.any()),
+});
 
-const evento = EventoSchema.parse(eventoRecibido)
+const evento = EventoSchema.parse(eventoRecibido);
 ```
 
 **Validación:** Al menos uno de `destinatario_id` o `destinatarios[]` debe existir
@@ -274,57 +281,58 @@ const evento = EventoSchema.parse(eventoRecibido)
 Según el tipo de evento, generar título y mensaje personalizados:
 
 ```typescript
-function generarContenido(tipo: string, metadata: any): { titulo: string, mensaje: string } {
-  switch(tipo) {
+function generarContenido(tipo: string, metadata: any): { titulo: string; mensaje: string } {
+  switch (tipo) {
     case 'ClaseCreada':
       return {
         titulo: 'Nueva clase asignada',
-        mensaje: `Se te asignó la clase "${metadata.nombre}" para el ${formatearFecha(metadata.fecha_hora_inicio)}`
-      }
-    
+        mensaje: `Se te asignó la clase "${metadata.nombre}" para el ${formatearFecha(metadata.fecha_hora_inicio)}`,
+      };
+
     case 'PuntosObtenidos':
       return {
         titulo: '¡Ganaste puntos!',
-        mensaje: `Ganaste ${metadata.puntos_otorgados} puntos por ${metadata.accion}. Total: ${metadata.puntos_totales}`
-      }
-    
+        mensaje: `Ganaste ${metadata.puntos_otorgados} puntos por ${metadata.accion}. Total: ${metadata.puntos_totales}`,
+      };
+
     case 'NivelSubido':
       return {
         titulo: '🎉 ¡Subiste de nivel!',
-        mensaje: `¡Felicidades! Ahora eres ${metadata.nombre_nivel} (Nivel ${metadata.nivel_nuevo})`
-      }
-    
+        mensaje: `¡Felicidades! Ahora eres ${metadata.nombre_nivel} (Nivel ${metadata.nivel_nuevo})`,
+      };
+
     case 'LogroDesbloqueado':
       return {
         titulo: `🏆 Logro desbloqueado: ${metadata.logro.nombre}`,
-        mensaje: metadata.logro.descripcion
-      }
-    
+        mensaje: metadata.logro.descripcion,
+      };
+
     case 'PagoRealizado':
       return {
         titulo: '✅ Pago confirmado',
-        mensaje: `Tu pago de $${metadata.monto} fue confirmado. Acceso activado para ${metadata.estudiante.nombre}`
-      }
-    
+        mensaje: `Tu pago de $${metadata.monto} fue confirmado. Acceso activado para ${metadata.estudiante.nombre}`,
+      };
+
     case 'ActividadAsignada':
       return {
         titulo: 'Nueva actividad asignada',
-        mensaje: `Tienes una nueva actividad: ${metadata.actividad.nombre}. Fecha límite: ${formatearFecha(metadata.fecha_limite)}`
-      }
-    
+        mensaje: `Tienes una nueva actividad: ${metadata.actividad.nombre}. Fecha límite: ${formatearFecha(metadata.fecha_limite)}`,
+      };
+
     case 'AsistenciaRegistrada':
       return {
-        titulo: metadata.estado === 'Presente' ? '✅ Asistencia registrada' : '❌ Ausencia registrada',
-        mensaje: `${metadata.estudiante.nombre} ${metadata.estado === 'Presente' ? 'asistió a' : 'faltó a'} ${metadata.clase.nombre}`
-      }
-    
+        titulo:
+          metadata.estado === 'Presente' ? '✅ Asistencia registrada' : '❌ Ausencia registrada',
+        mensaje: `${metadata.estudiante.nombre} ${metadata.estado === 'Presente' ? 'asistió a' : 'faltó a'} ${metadata.clase.nombre}`,
+      };
+
     // ... más casos
-    
+
     default:
       return {
         titulo: 'Notificación',
-        mensaje: 'Tienes una nueva notificación'
-      }
+        mensaje: 'Tienes una nueva notificación',
+      };
   }
 }
 ```
@@ -336,22 +344,17 @@ function generarContenido(tipo: string, metadata: any): { titulo: string, mensaj
 ```typescript
 function determinarPrioridad(tipo: string): 'ALTA' | 'MEDIA' | 'BAJA' {
   const prioridadAlta = [
-    'PagoRealizado', 
-    'MembresiaPorVencer', 
+    'PagoRealizado',
+    'MembresiaPorVencer',
     'AccesoDesactivado',
-    'AlertaAsistencia'
-  ]
-  
-  const prioridadMedia = [
-    'ClaseCreada',
-    'NivelSubido',
-    'LogroDesbloqueado',
-    'ActividadAsignada'
-  ]
-  
-  if (prioridadAlta.includes(tipo)) return 'ALTA'
-  if (prioridadMedia.includes(tipo)) return 'MEDIA'
-  return 'BAJA'
+    'AlertaAsistencia',
+  ];
+
+  const prioridadMedia = ['ClaseCreada', 'NivelSubido', 'LogroDesbloqueado', 'ActividadAsignada'];
+
+  if (prioridadAlta.includes(tipo)) return 'ALTA';
+  if (prioridadMedia.includes(tipo)) return 'MEDIA';
+  return 'BAJA';
 }
 ```
 
@@ -366,10 +369,10 @@ function requiereEmail(tipo: string): boolean {
     'PagoRealizado',
     'MembresiaPorVencer',
     'AccesoDesactivado',
-    'ClaseCreada' // Clases próximas (24h antes)
-  ]
-  
-  return tiposConEmail.includes(tipo)
+    'ClaseCreada', // Clases próximas (24h antes)
+  ];
+
+  return tiposConEmail.includes(tipo);
 }
 ```
 
@@ -386,8 +389,8 @@ const notificacion = {
   metadata: evento.metadata, // JSON completo
   requiere_email: requiereEmail(evento.tipo),
   leida: false,
-  fecha_creacion: new Date()
-}
+  fecha_creacion: new Date(),
+};
 ```
 
 ---
@@ -395,6 +398,7 @@ const notificacion = {
 ### Salidas
 
 **A P6.2 (Distribuir):**
+
 ```typescript
 {
   notificacion: {
@@ -425,11 +429,13 @@ const notificacion = {
 ## SUBPROCESO P6.2: DISTRIBUIR NOTIFICACIONES
 
 ### Descripción
+
 Toma la notificación creada y la distribuye a todos los destinatarios, creando registros individuales.
 
 ### Entradas
 
 Desde **P6.1**:
+
 ```typescript
 {
   notificacion: {
@@ -456,19 +462,19 @@ Desde **P6.1**:
 ```typescript
 // Para cada destinatario, validar que existe
 for (const dest of destinatarios) {
-  const tabla = dest.tipo.toLowerCase() + 's' // 'estudiantes', 'tutores', etc.
-  
+  const tabla = dest.tipo.toLowerCase() + 's'; // 'estudiantes', 'tutores', etc.
+
   const usuario = await prisma[tabla].findUnique({
     where: { id: dest.id },
-    select: { id: true, activo: true, email: true }
-  })
-  
+    select: { id: true, activo: true, email: true },
+  });
+
   if (!usuario || !usuario.activo) {
-    console.warn(`Destinatario ${dest.id} no existe o está inactivo`)
-    continue // Saltar este destinatario
+    console.warn(`Destinatario ${dest.id} no existe o está inactivo`);
+    continue; // Saltar este destinatario
   }
-  
-  destinatariosValidos.push({ ...dest, email: usuario.email })
+
+  destinatariosValidos.push({ ...dest, email: usuario.email });
 }
 ```
 
@@ -515,7 +521,7 @@ INSERT INTO notificaciones (
 Si `requiere_email = true`, verificar preferencias del usuario:
 
 ```sql
-SELECT 
+SELECT
   notificaciones_email,
   frecuencia_email -- 'INMEDIATA', 'DIARIA', 'SEMANAL', 'NUNCA'
 FROM preferencias_notificaciones
@@ -523,19 +529,20 @@ WHERE usuario_id = ? AND usuario_tipo = ?
 ```
 
 **Lógica:**
+
 ```typescript
 if (notificacion.requiere_email) {
-  const pref = await getPreferencias(dest.id, dest.tipo)
-  
+  const pref = await getPreferencias(dest.id, dest.tipo);
+
   if (pref.notificaciones_email && pref.frecuencia_email === 'INMEDIATA') {
     // Enviar email ahora
     await P6_5.enviarEmail({
       destinatario: dest,
-      notificacion
-    })
+      notificacion,
+    });
   } else if (pref.frecuencia_email === 'DIARIA' || pref.frecuencia_email === 'SEMANAL') {
     // Encolar para resumen posterior
-    await encolarParaResumen(dest.id, notificacion)
+    await encolarParaResumen(dest.id, notificacion);
   }
   // Si es 'NUNCA', no enviar email
 }
@@ -547,7 +554,7 @@ if (notificacion.requiere_email) {
 
 ```typescript
 // Opcional: mantener contador en cache (Redis)
-await redis.incr(`notificaciones_no_leidas:${dest.tipo}:${dest.id}`)
+await redis.incr(`notificaciones_no_leidas:${dest.tipo}:${dest.id}`);
 ```
 
 ---
@@ -561,8 +568,8 @@ if (websocketServer) {
     id: notificacion.id,
     tipo: notificacion.tipo,
     titulo: notificacion.titulo,
-    prioridad: notificacion.prioridad
-  })
+    prioridad: notificacion.prioridad,
+  });
 }
 ```
 
@@ -573,9 +580,11 @@ if (websocketServer) {
 ### Salidas
 
 **Registros creados en D8:**
+
 - Múltiples registros en `notificaciones` (uno por destinatario)
 
 **Eventos a P6.5:**
+
 - Solicitudes de envío de email (si aplica)
 
 ---
@@ -598,6 +607,7 @@ if (websocketServer) {
 ## SUBPROCESO P6.3: CONSULTAR NOTIFICACIONES
 
 ### Descripción
+
 Permite a usuarios consultar sus notificaciones, con filtros y paginación.
 
 ### Entradas
@@ -619,7 +629,7 @@ GET /api/notificaciones?
 #### Paso 1: Obtener Usuario del JWT
 
 ```typescript
-const { id: usuario_id, role: usuario_tipo } = req.user // Del JWT
+const { id: usuario_id, role: usuario_tipo } = req.user; // Del JWT
 ```
 
 ---
@@ -627,7 +637,7 @@ const { id: usuario_id, role: usuario_tipo } = req.user // Del JWT
 #### Paso 2: Construir Query con Filtros
 
 ```sql
-SELECT 
+SELECT
   n.id,
   n.tipo,
   n.titulo,
@@ -664,7 +674,7 @@ WHERE destinatario_id = ?
 #### Paso 4: Formatear Respuesta
 
 ```typescript
-const notificaciones = results.map(n => ({
+const notificaciones = results.map((n) => ({
   id: n.id,
   tipo: n.tipo,
   titulo: n.titulo,
@@ -673,8 +683,8 @@ const notificaciones = results.map(n => ({
   metadata: JSON.parse(n.metadata),
   leida: n.leida,
   fecha_creacion: n.fecha_creacion,
-  tiempo_relativo: calcularTiempoRelativo(n.fecha_creacion) // "Hace 2 horas"
-}))
+  tiempo_relativo: calcularTiempoRelativo(n.fecha_creacion), // "Hace 2 horas"
+}));
 ```
 
 ---
@@ -682,6 +692,7 @@ const notificaciones = results.map(n => ({
 ### Salidas
 
 **Respuesta:**
+
 ```typescript
 {
   notificaciones: Array<{
@@ -720,13 +731,13 @@ if (auto_marcar_leidas) {
     where: {
       destinatario_id: usuario_id,
       destinatario_tipo: usuario_tipo,
-      leida: false
+      leida: false,
     },
     data: {
       leida: true,
-      fecha_lectura: new Date()
-    }
-  })
+      fecha_lectura: new Date(),
+    },
+  });
 }
 ```
 
@@ -750,21 +761,25 @@ if (auto_marcar_leidas) {
 ## SUBPROCESO P6.4: MARCAR COMO LEÍDA
 
 ### Descripción
+
 Marca una o varias notificaciones como leídas.
 
 ### Entradas
 
 **Marcar Una:**
+
 ```typescript
 PATCH /api/notificaciones/:id/leer
 ```
 
 **Marcar Todas:**
+
 ```typescript
-POST /api/notificaciones/marcar-todas-leidas
+POST / api / notificaciones / marcar - todas - leidas;
 ```
 
 **Marcar Múltiples:**
+
 ```typescript
 POST /api/notificaciones/marcar-leidas
 {
@@ -781,15 +796,15 @@ POST /api/notificaciones/marcar-leidas
 ```typescript
 // Verificar que la notificación pertenece al usuario
 const notificacion = await prisma.notificacion.findUnique({
-  where: { id }
-})
+  where: { id },
+});
 
 if (!notificacion) {
-  throw new NotFoundException('Notificación no encontrada')
+  throw new NotFoundException('Notificación no encontrada');
 }
 
 if (notificacion.destinatario_id !== req.user.id) {
-  throw new ForbiddenException('No puedes modificar esta notificación')
+  throw new ForbiddenException('No puedes modificar esta notificación');
 }
 ```
 
@@ -798,9 +813,10 @@ if (notificacion.destinatario_id !== req.user.id) {
 #### Paso 2: Actualizar Estado
 
 **Una notificación:**
+
 ```sql
 UPDATE notificaciones
-SET 
+SET
   leida = true,
   fecha_lectura = NOW()
 WHERE id = ?
@@ -808,9 +824,10 @@ WHERE id = ?
 ```
 
 **Todas las notificaciones:**
+
 ```sql
 UPDATE notificaciones
-SET 
+SET
   leida = true,
   fecha_lectura = NOW()
 WHERE destinatario_id = ?
@@ -819,9 +836,10 @@ WHERE destinatario_id = ?
 ```
 
 **Múltiples específicas:**
+
 ```sql
 UPDATE notificaciones
-SET 
+SET
   leida = true,
   fecha_lectura = NOW()
 WHERE id IN (?)
@@ -838,11 +856,11 @@ const no_leidas = await prisma.notificacion.count({
   where: {
     destinatario_id: req.user.id,
     destinatario_tipo: req.user.role,
-    leida: false
-  }
-})
+    leida: false,
+  },
+});
 
-await redis.set(`notificaciones_no_leidas:${req.user.role}:${req.user.id}`, no_leidas)
+await redis.set(`notificaciones_no_leidas:${req.user.role}:${req.user.id}`, no_leidas);
 ```
 
 ---
@@ -850,6 +868,7 @@ await redis.set(`notificaciones_no_leidas:${req.user.role}:${req.user.id}`, no_l
 ### Salidas
 
 **Respuesta:**
+
 ```typescript
 {
   mensaje: 'Notificación(es) marcada(s) como leída(s)',
@@ -878,11 +897,13 @@ await redis.set(`notificaciones_no_leidas:${req.user.role}:${req.user.id}`, no_l
 ## SUBPROCESO P6.5: ENVIAR EMAIL
 
 ### Descripción
+
 Envía emails usando Google Workspace para notificaciones críticas.
 
 ### Entradas
 
 Desde **P6.2** o trigger manual:
+
 ```typescript
 {
   destinatario: {
@@ -908,14 +929,14 @@ Desde **P6.2** o trigger manual:
 ```typescript
 function getTemplateEmail(tipo: string): string {
   const templates = {
-    'UsuarioCreado': 'bienvenida',
-    'PagoRealizado': 'confirmacion_pago',
-    'MembresiaPorVencer': 'recordatorio_pago',
-    'ClaseCreada': 'nueva_clase',
-    'ActividadAsignada': 'nueva_actividad'
-  }
-  
-  return templates[tipo] || 'notificacion_generica'
+    UsuarioCreado: 'bienvenida',
+    PagoRealizado: 'confirmacion_pago',
+    MembresiaPorVencer: 'recordatorio_pago',
+    ClaseCreada: 'nueva_clase',
+    ActividadAsignada: 'nueva_actividad',
+  };
+
+  return templates[tipo] || 'notificacion_generica';
 }
 ```
 
@@ -924,10 +945,10 @@ function getTemplateEmail(tipo: string): string {
 #### Paso 2: Renderizar Template con Datos
 
 ```typescript
-import Handlebars from 'handlebars'
+import Handlebars from 'handlebars';
 
-const templateHTML = await fs.readFile(`templates/${templateName}.hbs`, 'utf-8')
-const template = Handlebars.compile(templateHTML)
+const templateHTML = await fs.readFile(`templates/${templateName}.hbs`, 'utf-8');
+const template = Handlebars.compile(templateHTML);
 
 const html = template({
   titulo: notificacion.titulo,
@@ -937,8 +958,8 @@ const html = template({
   // Variables globales:
   logo_url: 'https://mateatletas.com/logo.png',
   año_actual: new Date().getFullYear(),
-  link_dashboard: `https://mateatletas.com/${destinatario.tipo.toLowerCase()}`
-})
+  link_dashboard: `https://mateatletas.com/${destinatario.tipo.toLowerCase()}`,
+});
 ```
 
 ---
@@ -946,9 +967,9 @@ const html = template({
 #### Paso 3: Enviar Email via Google Workspace
 
 ```typescript
-import { google } from 'googleapis'
+import { google } from 'googleapis';
 
-const gmail = google.gmail({ version: 'v1', auth: oauth2Client })
+const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
 const message = [
   `To: ${destinatario.email}`,
@@ -956,17 +977,20 @@ const message = [
   `Subject: ${notificacion.titulo}`,
   `Content-Type: text/html; charset=utf-8`,
   '',
-  html
-].join('\n')
+  html,
+].join('\n');
 
-const encodedMessage = Buffer.from(message).toString('base64').replace(/\+/g, '-').replace(/\//g, '_')
+const encodedMessage = Buffer.from(message)
+  .toString('base64')
+  .replace(/\+/g, '-')
+  .replace(/\//g, '_');
 
 await gmail.users.messages.send({
   userId: 'me',
   requestBody: {
-    raw: encodedMessage
-  }
-})
+    raw: encodedMessage,
+  },
+});
 ```
 
 ---
@@ -996,7 +1020,7 @@ try {
   await enviarEmail(...)
 } catch (error) {
   console.error('Error enviando email:', error)
-  
+
   // Registrar error
   await prisma.emailEnviado.create({
     data: {
@@ -1006,7 +1030,7 @@ try {
       error_mensaje: error.message
     }
   })
-  
+
   // Reintentar después (opcional)
   await encolarReintento(notificacion, destinatario)
 }
@@ -1017,6 +1041,7 @@ try {
 ### Salidas
 
 **Registro en D8:**
+
 - INSERT en `emails_enviados`
 
 **Email enviado a destinatario**
@@ -1026,58 +1051,63 @@ try {
 ### Templates de Email
 
 #### Template: bienvenida.hbs
+
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-</head>
-<body style="font-family: Arial, sans-serif;">
-  <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <img src="{{logo_url}}" alt="Mateatletas" style="width: 150px;">
-    
-    <h1>¡Bienvenido a Mateatletas, {{destinatario_nombre}}!</h1>
-    
-    <p>{{mensaje}}</p>
-    
-    <p>Tu email: <strong>{{email}}</strong></p>
-    <p>Tu rol: <strong>{{rol}}</strong></p>
-    
-    <a href="{{link_dashboard}}" style="display: inline-block; padding: 10px 20px; background: #4A90E2; color: white; text-decoration: none; border-radius: 5px;">
-      Ir a mi portal
-    </a>
-    
-    <p style="margin-top: 40px; color: #666; font-size: 12px;">
-      © {{año_actual}} Mateatletas. Todos los derechos reservados.
-    </p>
-  </div>
-</body>
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body style="font-family: Arial, sans-serif;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+      <img src="{{logo_url}}" alt="Mateatletas" style="width: 150px;" />
+
+      <h1>¡Bienvenido a Mateatletas, {{destinatario_nombre}}!</h1>
+
+      <p>{{mensaje}}</p>
+
+      <p>Tu email: <strong>{{email}}</strong></p>
+      <p>Tu rol: <strong>{{rol}}</strong></p>
+
+      <a
+        href="{{link_dashboard}}"
+        style="display: inline-block; padding: 10px 20px; background: #4A90E2; color: white; text-decoration: none; border-radius: 5px;"
+      >
+        Ir a mi portal
+      </a>
+
+      <p style="margin-top: 40px; color: #666; font-size: 12px;">
+        © {{año_actual}} Mateatletas. Todos los derechos reservados.
+      </p>
+    </div>
+  </body>
 </html>
 ```
 
 #### Template: confirmacion_pago.hbs
+
 ```html
 <!DOCTYPE html>
 <html>
-<body>
-  <h1>✅ Pago Confirmado</h1>
-  
-  <p>Hola {{destinatario_nombre}},</p>
-  
-  <p>Tu pago de <strong>${{monto}}</strong> ha sido confirmado exitosamente.</p>
-  
-  <h3>Detalles:</h3>
-  <ul>
-    <li>Estudiante: {{estudiante.nombre}}</li>
-    <li>Producto: {{producto.nombre}}</li>
-    <li>Período: {{periodo}}</li>
-    <li>Fecha: {{fecha_pago}}</li>
-  </ul>
-  
-  <p>El acceso para {{estudiante.nombre}} ha sido activado.</p>
-  
-  <a href="{{link_dashboard}}">Ver mi dashboard</a>
-</body>
+  <body>
+    <h1>✅ Pago Confirmado</h1>
+
+    <p>Hola {{destinatario_nombre}},</p>
+
+    <p>Tu pago de <strong>${{monto}}</strong> ha sido confirmado exitosamente.</p>
+
+    <h3>Detalles:</h3>
+    <ul>
+      <li>Estudiante: {{estudiante.nombre}}</li>
+      <li>Producto: {{producto.nombre}}</li>
+      <li>Período: {{periodo}}</li>
+      <li>Fecha: {{fecha_pago}}</li>
+    </ul>
+
+    <p>El acceso para {{estudiante.nombre}} ha sido activado.</p>
+
+    <a href="{{link_dashboard}}">Ver mi dashboard</a>
+  </body>
 </html>
 ```
 
@@ -1102,6 +1132,7 @@ try {
 ## SUBPROCESO P6.6: GESTIONAR PREFERENCIAS
 
 ### Descripción
+
 Permite a usuarios configurar sus preferencias de notificaciones.
 
 ### Entradas
@@ -1128,7 +1159,7 @@ PATCH /api/notificaciones/preferencias
 #### Paso 1: Obtener Usuario
 
 ```typescript
-const { id: usuario_id, role: usuario_tipo } = req.user
+const { id: usuario_id, role: usuario_tipo } = req.user;
 ```
 
 ---
@@ -1157,7 +1188,7 @@ INSERT INTO preferencias_notificaciones (
 
 ```sql
 UPDATE preferencias_notificaciones
-SET 
+SET
   notificaciones_email = COALESCE(?, notificaciones_email),
   frecuencia_email = COALESCE(?, frecuencia_email),
   notificaciones_push = COALESCE(?, notificaciones_push),
@@ -1171,6 +1202,7 @@ WHERE usuario_id = ? AND usuario_tipo = ?
 ### Salidas
 
 **Respuesta:**
+
 ```typescript
 {
   preferencias: {
@@ -1193,38 +1225,38 @@ const PREFERENCIAS_DEFAULT = {
     notificaciones_email: true,
     frecuencia_email: 'INMEDIATA',
     tipos_notificaciones: {
-      'PagoRealizado': { email: true, push: true },
-      'UsuarioCreado': { email: true, push: false }
-    }
+      PagoRealizado: { email: true, push: true },
+      UsuarioCreado: { email: true, push: false },
+    },
   },
   DOCENTE: {
     notificaciones_email: true,
     frecuencia_email: 'DIARIA',
     tipos_notificaciones: {
-      'ClaseCreada': { email: true, push: true },
-      'NuevaInscripcion': { email: false, push: true }
-    }
+      ClaseCreada: { email: true, push: true },
+      NuevaInscripcion: { email: false, push: true },
+    },
   },
   TUTOR: {
     notificaciones_email: true,
     frecuencia_email: 'INMEDIATA',
     tipos_notificaciones: {
-      'PagoRealizado': { email: true, push: true },
-      'AsistenciaRegistrada': { email: false, push: true },
-      'ActividadCompletada': { email: false, push: true },
-      'MembresiaPorVencer': { email: true, push: true }
-    }
+      PagoRealizado: { email: true, push: true },
+      AsistenciaRegistrada: { email: false, push: true },
+      ActividadCompletada: { email: false, push: true },
+      MembresiaPorVencer: { email: true, push: true },
+    },
   },
   ESTUDIANTE: {
     notificaciones_email: false, // Menores sin email
     frecuencia_email: 'NUNCA',
     tipos_notificaciones: {
-      'PuntosObtenidos': { email: false, push: true },
-      'NivelSubido': { email: false, push: true },
-      'LogroDesbloqueado': { email: false, push: true }
-    }
-  }
-}
+      PuntosObtenidos: { email: false, push: true },
+      NivelSubido: { email: false, push: true },
+      LogroDesbloqueado: { email: false, push: true },
+    },
+  },
+};
 ```
 
 ---
@@ -1247,6 +1279,7 @@ const PREFERENCIAS_DEFAULT = {
 ## ESTRUCTURA DE DATOS EN D8 (NOTIFICACIONES)
 
 ### Tabla: notificaciones
+
 ```sql
 CREATE TABLE notificaciones (
   id TEXT PRIMARY KEY,
@@ -1272,6 +1305,7 @@ CREATE INDEX idx_notif_prioridad ON notificaciones(prioridad)
 ---
 
 ### Tabla: preferencias_notificaciones
+
 ```sql
 CREATE TABLE preferencias_notificaciones (
   id TEXT PRIMARY KEY,
@@ -1283,7 +1317,7 @@ CREATE TABLE preferencias_notificaciones (
   tipos_notificaciones JSON, -- Config específica por tipo
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
   updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-  
+
   UNIQUE(usuario_id, usuario_tipo)
 )
 
@@ -1293,6 +1327,7 @@ CREATE INDEX idx_pref_usuario ON preferencias_notificaciones(usuario_id, usuario
 ---
 
 ### Tabla: emails_enviados
+
 ```sql
 CREATE TABLE emails_enviados (
   id TEXT PRIMARY KEY,
@@ -1322,33 +1357,33 @@ enum TipoNotificacion {
   UsuarioCreado = 'UsuarioCreado',
   AccesoActivado = 'AccesoActivado',
   AccesoDesactivado = 'AccesoDesactivado',
-  
+
   // Clases
   ClaseCreada = 'ClaseCreada',
   NuevaInscripcion = 'NuevaInscripcion',
   InscripcionCancelada = 'InscripcionCancelada',
   ClaseProxima = 'ClaseProxima', // 24h antes
   AsistenciaRegistrada = 'AsistenciaRegistrada',
-  
+
   // Gamificación
   PuntosObtenidos = 'PuntosObtenidos',
   NivelSubido = 'NivelSubido',
   LogroDesbloqueado = 'LogroDesbloqueado',
-  
+
   // Pagos
   PagoRealizado = 'PagoRealizado',
   MembresiaPorVencer = 'MembresiaPorVencer', // 7 días antes
   MembresiaVencida = 'MembresiaVencida',
-  
+
   // Planificaciones
   PlanificacionPublicada = 'PlanificacionPublicada',
   ActividadAsignada = 'ActividadAsignada',
   ActividadCompletada = 'ActividadCompletada',
   ActividadProximaVencer = 'ActividadProximaVencer', // 2 días antes
-  
+
   // Alertas
   AlertaAsistenciaBaja = 'AlertaAsistenciaBaja',
-  AlertaPagoPendiente = 'AlertaPagoPendiente'
+  AlertaPagoPendiente = 'AlertaPagoPendiente',
 }
 ```
 
@@ -1357,6 +1392,7 @@ enum TipoNotificacion {
 ## CRON JOBS Y TAREAS PROGRAMADAS
 
 ### Job 1: Enviar Resúmenes Diarios
+
 ```typescript
 // Ejecutar a las 8:00 AM todos los días
 @Cron('0 8 * * *')
@@ -1365,7 +1401,7 @@ async enviarResumenesDiarios() {
   const usuarios = await prisma.preferenciasNotificaciones.findMany({
     where: { frecuencia_email: 'DIARIA' }
   })
-  
+
   for (const usuario of usuarios) {
     // Obtener notificaciones no enviadas por email del día anterior
     const notificaciones = await prisma.notificacion.findMany({
@@ -1376,7 +1412,7 @@ async enviarResumenesDiarios() {
         }
       }
     })
-    
+
     if (notificaciones.length > 0) {
       await enviarEmailResumen(usuario, notificaciones)
     }
@@ -1387,6 +1423,7 @@ async enviarResumenesDiarios() {
 ---
 
 ### Job 2: Enviar Resúmenes Semanales
+
 ```typescript
 // Ejecutar los domingos a las 10:00 AM
 @Cron('0 10 * * 0')
@@ -1398,6 +1435,7 @@ async enviarResumenesSemanales() {
 ---
 
 ### Job 3: Notificar Clases Próximas
+
 ```typescript
 // Ejecutar cada hora
 @Cron('0 * * * *')
@@ -1422,7 +1460,7 @@ async notificarClasesProximas() {
       }
     }
   })
-  
+
   for (const clase of clasesProximas) {
     // Notificar docente
     await P6_1.crearNotificacion({
@@ -1431,7 +1469,7 @@ async notificarClasesProximas() {
       destinatario_tipo: 'DOCENTE',
       metadata: { clase }
     })
-    
+
     // Notificar estudiantes y tutores
     for (const inscripcion of clase.inscripciones) {
       await P6_1.crearNotificacion({
@@ -1450,6 +1488,7 @@ async notificarClasesProximas() {
 ---
 
 ### Job 4: Alertar Membresías por Vencer
+
 ```typescript
 // Ejecutar diariamente a las 9:00 AM
 @Cron('0 9 * * *')
@@ -1469,7 +1508,7 @@ async alertarMembresiasProximasVencer() {
       }
     }
   })
-  
+
   for (const membresia of membresias) {
     await P6_1.crearNotificacion({
       tipo: 'MembresiaPorVencer',
@@ -1495,15 +1534,15 @@ async alertarMembresiasProximasVencer() {
 // En el frontend, cada 30 segundos
 useEffect(() => {
   const interval = setInterval(async () => {
-    const response = await fetch('/api/notificaciones?leida=false&limite=10')
-    const data = await response.json()
-    
-    setNotificaciones(data.notificaciones)
-    setBadgeCount(data.contador.no_leidas)
-  }, 30000) // 30 segundos
-  
-  return () => clearInterval(interval)
-}, [])
+    const response = await fetch('/api/notificaciones?leida=false&limite=10');
+    const data = await response.json();
+
+    setNotificaciones(data.notificaciones);
+    setBadgeCount(data.contador.no_leidas);
+  }, 30000); // 30 segundos
+
+  return () => clearInterval(interval);
+}, []);
 ```
 
 **Nota:** En el futuro se migrará a WebSocket para notificaciones real-time.
@@ -1512,14 +1551,14 @@ useEffect(() => {
 
 ## RESUMEN DE ESTADO DE IMPLEMENTACIÓN
 
-| Subproceso | Backend | Frontend |
-|------------|---------|----------|
-| P6.1 Crear Notificación | ✅ 90% | N/A |
-| P6.2 Distribuir | ✅ 85% | N/A |
-| P6.3 Consultar | ✅ 90% | ✅ 85% |
-| P6.4 Marcar Leída | ✅ 95% | ✅ 90% |
-| P6.5 Enviar Email | ⚠️ 70% | N/A |
-| P6.6 Preferencias | ⚠️ 60% | ⚠️ 40% |
+| Subproceso              | Backend | Frontend |
+| ----------------------- | ------- | -------- |
+| P6.1 Crear Notificación | ✅ 90%  | N/A      |
+| P6.2 Distribuir         | ✅ 85%  | N/A      |
+| P6.3 Consultar          | ✅ 90%  | ✅ 85%   |
+| P6.4 Marcar Leída       | ✅ 95%  | ✅ 90%   |
+| P6.5 Enviar Email       | ⚠️ 70%  | N/A      |
+| P6.6 Preferencias       | ⚠️ 60%  | ⚠️ 40%   |
 
 **Promedio:** Backend 82%, Frontend 72%
 
@@ -1528,11 +1567,13 @@ useEffect(() => {
 ## PRÓXIMOS PASOS
 
 ### Para MVP (26 de Octubre)
+
 1. ⚠️ Completar templates de email básicos
 2. ⚠️ Implementar polling optimizado (30s)
 3. ⚠️ Mejorar UI de notificaciones en todos los portales
 
 ### Post-Lanzamiento
+
 1. WebSocket para notificaciones real-time
 2. Push notifications (PWA)
 3. Más templates de email personalizados

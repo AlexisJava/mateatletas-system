@@ -13,8 +13,11 @@ import { dirname as pathDirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = pathDirname(__filename);
 
-const ANIMATIONS_SOURCE = process.env.ANIMATIONS_SOURCE || `${process.env.HOME}/rpm-animations/animation-library`;
-const SELECTED_FILE = process.env.SELECTED_FILE || `${process.env.HOME}/rpm-animations/animation-library/selected-animations.txt`;
+const ANIMATIONS_SOURCE =
+  process.env.ANIMATIONS_SOURCE || `${process.env.HOME}/rpm-animations/animation-library`;
+const SELECTED_FILE =
+  process.env.SELECTED_FILE ||
+  `${process.env.HOME}/rpm-animations/animation-library/selected-animations.txt`;
 const OUTPUT_JSON = resolve(__dirname, '../apps/web/public/animations-config.json');
 
 // Mapeo de nombres de categorías para mostrar nombres más amigables
@@ -22,7 +25,7 @@ const categoryNames = {
   dance: 'Bailes',
   expression: 'Expresiones',
   idle: 'Espera',
-  locomotion: 'Movimiento'
+  locomotion: 'Movimiento',
 };
 
 // Descripciones por categoría
@@ -30,7 +33,7 @@ const categoryDescriptions = {
   dance: 'Baile celebratorio',
   expression: 'Expresión facial',
   idle: 'Animación de espera',
-  locomotion: 'Movimiento de locomoción'
+  locomotion: 'Movimiento de locomoción',
 };
 
 async function uploadAnimations() {
@@ -48,7 +51,7 @@ async function uploadAnimations() {
   try {
     selectedPaths = readFileSync(SELECTED_FILE, 'utf-8')
       .split('\n')
-      .filter(line => line.trim() && !line.startsWith('#') && line.endsWith('.glb'));
+      .filter((line) => line.trim() && !line.startsWith('#') && line.endsWith('.glb'));
   } catch (error) {
     console.error(`❌ Error leyendo ${SELECTED_FILE}:`, error.message);
     process.exit(1);
@@ -70,7 +73,9 @@ async function uploadAnimations() {
       // Crear ID único
       const animationId = `${gender}-${category}-${fileName.replace('.glb', '')}`.toLowerCase();
 
-      console.log(`📤 [${uploadCount + 1}/${selectedPaths.length}] Subiendo: ${fileName} (${category})...`);
+      console.log(
+        `📤 [${uploadCount + 1}/${selectedPaths.length}] Subiendo: ${fileName} (${category})...`,
+      );
 
       // Leer archivo
       const fileBuffer = await readFile(fullPath);
@@ -79,7 +84,7 @@ async function uploadAnimations() {
       const blob = await put(`animations/${gender}/${category}/${fileName}`, fileBuffer, {
         access: 'public',
         addRandomSuffix: false,
-        token: process.env.BLOB_READ_WRITE_TOKEN
+        token: process.env.BLOB_READ_WRITE_TOKEN,
       });
 
       console.log(`   ✅ URL: ${blob.url}\n`);
@@ -102,11 +107,10 @@ async function uploadAnimations() {
         url: blob.url,
         requiredPoints: requiredPoints,
         description: `${categoryDescriptions[category] || 'Animación'} para avatar ${gender === 'masculine' ? 'masculino' : 'femenino'}`,
-        unlocked: category === 'idle' // Las animaciones idle vienen desbloqueadas por defecto
+        unlocked: category === 'idle', // Las animaciones idle vienen desbloqueadas por defecto
       });
 
       uploadCount++;
-
     } catch (error) {
       console.error(`   ❌ Error subiendo ${relativePath}:`, error.message);
       errorCount++;
@@ -126,16 +130,16 @@ async function uploadAnimations() {
     lastUpdate: new Date().toISOString(),
     totalAnimations: animations.length,
     categories: {
-      dance: animations.filter(a => a.category === 'dance').length,
-      expression: animations.filter(a => a.category === 'expression').length,
-      idle: animations.filter(a => a.category === 'idle').length,
-      locomotion: animations.filter(a => a.category === 'locomotion').length
+      dance: animations.filter((a) => a.category === 'dance').length,
+      expression: animations.filter((a) => a.category === 'expression').length,
+      idle: animations.filter((a) => a.category === 'idle').length,
+      locomotion: animations.filter((a) => a.category === 'locomotion').length,
     },
     genders: {
-      masculine: animations.filter(a => a.gender === 'masculine').length,
-      feminine: animations.filter(a => a.gender === 'feminine').length
+      masculine: animations.filter((a) => a.gender === 'masculine').length,
+      feminine: animations.filter((a) => a.gender === 'feminine').length,
     },
-    animations: animations
+    animations: animations,
   };
 
   writeFileSync(OUTPUT_JSON, JSON.stringify(config, null, 2));
@@ -161,7 +165,7 @@ async function uploadAnimations() {
 }
 
 // Ejecutar
-uploadAnimations().catch(error => {
+uploadAnimations().catch((error) => {
   console.error('\n❌ Error fatal:', error);
   process.exit(1);
 });

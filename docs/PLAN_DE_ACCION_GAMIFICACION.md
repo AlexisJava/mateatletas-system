@@ -21,9 +21,11 @@
 ## 🎯 Resumen Ejecutivo
 
 ### Objetivo
+
 Implementar sistema completo de gamificación para estudiantes y padres en 4 semanas.
 
 ### Scope
+
 - ✅ Sistema de monedas/puntos completo
 - ✅ Catálogo de 50+ cursos canjeables
 - ✅ Sistema de logros (30+)
@@ -33,6 +35,7 @@ Implementar sistema completo de gamificación para estudiantes y padres en 4 sem
 - ✅ Flujos de canje completos
 
 ### Fuera de Scope (Fase 2)
+
 - ❌ Sistema de equipos (Fénix, Dragón, etc.)
 - ❌ Rankings públicos entre estudiantes
 - ❌ Items cosméticos (avatares, animaciones)
@@ -44,13 +47,16 @@ Implementar sistema completo de gamificación para estudiantes y padres en 4 sem
 ## 🏗️ Arquitectura de Implementación
 
 ### Stack Actual
+
 - **Backend:** NestJS + PostgreSQL + Prisma
 - **Frontend:** Next.js 15 + React + TypeScript
 - **Estado:** React Query + Zustand
 - **UI:** Tailwind CSS + Framer Motion
 
 ### Estado Actual del Sistema (según documento)
+
 ✅ **YA IMPLEMENTADO (Backend 95%):**
+
 - Modelo `RecursosEstudiante` (XP, Monedas, Gemas)
 - Modelo `TransaccionRecurso` (historial)
 - `RecursosService` completo
@@ -59,11 +65,13 @@ Implementar sistema completo de gamificación para estudiantes y padres en 4 sem
 - Endpoints básicos funcionando
 
 ⚠️ **PARCIALMENTE (Frontend 60%):**
+
 - HubView lee recursos
 - Cálculo de nivel funcional
 - Display de monedas/XP
 
 ❌ **NO IMPLEMENTADO:**
+
 - Sistema de logros
 - Sistema de niveles estructurado
 - Catálogo de cursos
@@ -77,6 +85,7 @@ Implementar sistema completo de gamificación para estudiantes y padres en 4 sem
 ## 📅 FASE 1: Backend Core (Semana 1-2)
 
 ### Objetivos
+
 - ✅ Modelos de datos completos
 - ✅ Lógica de negocio core
 - ✅ Endpoints funcionales
@@ -92,51 +101,51 @@ Implementar sistema completo de gamificación para estudiantes y padres en 4 sem
 // Definición de logros disponibles
 model Logro {
   id String @id @default(cuid())
-  
+
   // Identificación
   codigo String @unique // "racha_7_dias", "completista", etc
   nombre String // "Racha de Fuego"
   descripcion String
   categoria String // "consistencia", "maestria", "social", "velocidad"
-  
+
   // Recompensas
   monedas_recompensa Int
   xp_recompensa Int
   animacion_desbloqueada String? // ID de animación (Fase 2)
-  
+
   // Requisitos
   criterio_tipo String // "racha_dias", "temas_completados", "ejercicios_perfectos"
   criterio_valor Int // Valor umbral
-  
+
   // Metadata
   icono String
   rareza String // "comun", "raro", "epico", "legendario"
   activo Boolean @default(true)
   orden Int @default(0)
-  
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  
+
   // Relaciones
   logros_estudiantes LogroEstudiante[]
-  
+
   @@map("logros")
 }
 
 // Logros desbloqueados por estudiantes
 model LogroEstudiante {
   id String @id @default(cuid())
-  
+
   estudiante_id String
   logro_id String
-  
+
   fecha_desbloqueo DateTime @default(now())
   visto Boolean @default(false) // Para notificaciones
-  
+
   // Relaciones
   estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
   logro Logro @relation(fields: [logro_id], references: [id])
-  
+
   @@unique([estudiante_id, logro_id])
   @@map("logros_estudiantes")
 }
@@ -147,43 +156,43 @@ model LogroEstudiante {
 ```prisma
 model CursoCatalogo {
   id String @id @default(cuid())
-  
+
   // Información básica
   codigo String @unique // "quimica_explosiva"
   titulo String
   descripcion Text
   categoria String // "ciencia", "programacion", "robotica", "diseno"
   subcategoria String?
-  
+
   // Detalles académicos
   duracion_clases Int
   nivel_requerido Int @default(1) // Nivel mínimo estudiante
   contenido Json? // Syllabus, módulos, etc
-  
+
   // Pricing
   precio_usd Decimal @db.Decimal(10,2)
   precio_monedas Int // precio_usd * 20
-  
+
   // Media
   imagen_url String?
   video_preview_url String?
-  
+
   // Metadata
   destacado Boolean @default(false)
   nuevo Boolean @default(false)
   activo Boolean @default(true)
   orden Int @default(0)
-  
+
   // Stats
   total_canjes Int @default(0)
   rating Decimal @db.Decimal(3,2) @default(0)
-  
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  
+
   // Relaciones
   solicitudes_canje SolicitudCanje[]
-  
+
   @@map("cursos_catalogo")
 }
 ```
@@ -193,31 +202,31 @@ model CursoCatalogo {
 ```prisma
 model SolicitudCanje {
   id String @id @default(cuid())
-  
+
   // Partes involucradas
   estudiante_id String
   tutor_id String
   curso_id String
-  
+
   // Detalles del canje
   monedas_usadas Int
   estado String // "pendiente", "aprobada", "rechazada", "cancelada"
-  
+
   // Decisión del padre
   fecha_decision DateTime?
   opcion_pago String? // "padre_paga_todo", "hijo_paga_mitad", "hijo_paga_todo", null
   monto_padre Decimal? @db.Decimal(10,2) // Cuánto pagó el padre
   mensaje_padre Text?
-  
+
   // Metadata
   fecha_solicitud DateTime @default(now())
   fecha_expiracion DateTime? // Opcional: expira en 7 días
-  
+
   // Relaciones
   estudiante Estudiante @relation(fields: [estudiante_id], references: [id])
   tutor Tutor @relation(fields: [tutor_id], references: [id])
   curso CursoCatalogo @relation(fields: [curso_id], references: [id])
-  
+
   @@map("solicitudes_canje")
 }
 ```
@@ -228,23 +237,23 @@ model SolicitudCanje {
 model RachaEstudiante {
   id String @id @default(cuid())
   estudiante_id String @unique
-  
+
   // Estado actual
   racha_actual Int @default(0)
   racha_maxima Int @default(0)
-  
+
   // Fechas
   ultima_actividad Date?
   inicio_racha_actual Date?
-  
+
   // Metadata
   total_dias_activos Int @default(0)
-  
+
   updated_at DateTime @updatedAt
-  
+
   // Relaciones
   estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
-  
+
   @@map("rachas_estudiantes")
 }
 ```
@@ -255,38 +264,38 @@ model RachaEstudiante {
 model PuntosPadre {
   id String @id @default(cuid())
   tutor_id String @unique
-  
+
   // Recursos
   puntos_total Int @default(0)
   xp_total Int @default(0)
-  
+
   // Stats
   pagos_puntuales_consecutivos Int @default(0)
   total_referidos_activos Int @default(0)
-  
+
   updated_at DateTime @updatedAt
-  
+
   // Relaciones
   tutor Tutor @relation(fields: [tutor_id], references: [id], onDelete: Cascade)
   transacciones TransaccionPuntosPadre[]
   canjes_padre CanjePadre[]
-  
+
   @@map("puntos_padres")
 }
 
 model TransaccionPuntosPadre {
   id String @id @default(cuid())
   puntos_padre_id String
-  
+
   tipo_recurso String // "PUNTOS", "XP"
   cantidad Int
   razon String // "pago_puntual", "referido", "engagement"
-  
+
   metadata Json?
   fecha DateTime @default(now())
-  
+
   puntos_padre PuntosPadre @relation(fields: [puntos_padre_id], references: [id], onDelete: Cascade)
-  
+
   @@map("transacciones_puntos_padres")
 }
 ```
@@ -296,46 +305,46 @@ model TransaccionPuntosPadre {
 ```prisma
 model PremioPadre {
   id String @id @default(cuid())
-  
+
   // Información
   codigo String @unique
   titulo String
   descripcion Text
   categoria String // "digital", "acceso", "premium", "epico"
-  
+
   // Costo
   puntos_requeridos Int
   costo_real_usd Decimal? @db.Decimal(10,2)
-  
+
   // Metadata
   icono String
   activo Boolean @default(true)
   orden Int @default(0)
-  
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  
+
   canjes CanjePadre[]
-  
+
   @@map("premios_padres")
 }
 
 model CanjePadre {
   id String @id @default(cuid())
-  
+
   tutor_id String
   premio_id String
   puntos_padre_id String
-  
+
   puntos_usados Int
   estado String @default("completado")
-  
+
   fecha_canje DateTime @default(now())
-  
+
   tutor Tutor @relation(fields: [tutor_id], references: [id])
   premio PremioPadre @relation(fields: [premio_id], references: [id])
   puntos_padre PuntosPadre @relation(fields: [puntos_padre_id], references: [id])
-  
+
   @@map("canjes_padres")
 }
 ```
@@ -362,7 +371,7 @@ const logros = [
     criterio_valor: 1,
     icono: '🎯',
     rareza: 'comun',
-    orden: 1
+    orden: 1,
   },
   {
     codigo: 'racha_3_dias',
@@ -375,7 +384,7 @@ const logros = [
     criterio_valor: 3,
     icono: '🔥',
     rareza: 'comun',
-    orden: 2
+    orden: 2,
   },
   {
     codigo: 'racha_7_dias',
@@ -388,7 +397,7 @@ const logros = [
     criterio_valor: 7,
     icono: '🔥',
     rareza: 'raro',
-    orden: 3
+    orden: 3,
   },
   {
     codigo: 'racha_30_dias',
@@ -401,7 +410,7 @@ const logros = [
     criterio_valor: 30,
     icono: '🔥',
     rareza: 'epico',
-    orden: 4
+    orden: 4,
   },
   {
     codigo: 'racha_60_dias',
@@ -414,7 +423,7 @@ const logros = [
     criterio_valor: 60,
     icono: '🔥',
     rareza: 'epico',
-    orden: 5
+    orden: 5,
   },
   {
     codigo: 'racha_90_dias',
@@ -427,9 +436,9 @@ const logros = [
     criterio_valor: 90,
     icono: '👑',
     rareza: 'legendario',
-    orden: 6
+    orden: 6,
   },
-  
+
   // MAESTRÍA (8 logros)
   {
     codigo: 'completista',
@@ -442,7 +451,7 @@ const logros = [
     criterio_valor: 1,
     icono: '🎓',
     rareza: 'raro',
-    orden: 10
+    orden: 10,
   },
   {
     codigo: 'maestro_algebra',
@@ -455,7 +464,7 @@ const logros = [
     criterio_valor: 1, // ID módulo álgebra
     icono: '🧮',
     rareza: 'epico',
-    orden: 11
+    orden: 11,
   },
   {
     codigo: 'polimata',
@@ -468,9 +477,9 @@ const logros = [
     criterio_valor: 5,
     icono: '📚',
     rareza: 'epico',
-    orden: 12
+    orden: 12,
   },
-  
+
   // SOCIAL (6 logros)
   {
     codigo: 'buen_companero',
@@ -483,7 +492,7 @@ const logros = [
     criterio_valor: 5,
     icono: '🤝',
     rareza: 'raro',
-    orden: 20
+    orden: 20,
   },
   {
     codigo: 'mentor',
@@ -496,7 +505,7 @@ const logros = [
     criterio_valor: 25,
     icono: '👨‍🏫',
     rareza: 'epico',
-    orden: 21
+    orden: 21,
   },
   {
     codigo: 'embajador',
@@ -509,9 +518,9 @@ const logros = [
     criterio_valor: 3,
     icono: '📣',
     rareza: 'epico',
-    orden: 22
+    orden: 22,
   },
-  
+
   // PRECISIÓN (4 logros)
   {
     codigo: 'perfeccionista',
@@ -524,7 +533,7 @@ const logros = [
     criterio_valor: 10,
     icono: '💯',
     rareza: 'raro',
-    orden: 30
+    orden: 30,
   },
   {
     codigo: 'francotirador',
@@ -537,9 +546,9 @@ const logros = [
     criterio_valor: 50,
     icono: '🎯',
     rareza: 'epico',
-    orden: 31
+    orden: 31,
   },
-  
+
   // VELOCIDAD (2 logros)
   {
     codigo: 'rapido_furioso',
@@ -552,7 +561,7 @@ const logros = [
     criterio_valor: 30,
     icono: '⚡',
     rareza: 'raro',
-    orden: 40
+    orden: 40,
   },
   {
     codigo: 'velocista',
@@ -565,9 +574,9 @@ const logros = [
     criterio_valor: 10,
     icono: '🏃',
     rareza: 'epico',
-    orden: 41
+    orden: 41,
   },
-  
+
   // ASISTENCIA (2 logros)
   {
     codigo: 'alumno_presente',
@@ -580,7 +589,7 @@ const logros = [
     criterio_valor: 4,
     icono: '✅',
     rareza: 'raro',
-    orden: 50
+    orden: 50,
   },
   {
     codigo: 'asistencia_perfecta',
@@ -593,13 +602,13 @@ const logros = [
     criterio_valor: 12,
     icono: '🏆',
     rareza: 'epico',
-    orden: 51
+    orden: 51,
   },
 ];
 
 export async function seedLogros(prisma: PrismaClient) {
   console.log('🏆 Seeding logros...');
-  
+
   for (const logro of logros) {
     await prisma.logro.upsert({
       where: { codigo: logro.codigo },
@@ -607,7 +616,7 @@ export async function seedLogros(prisma: PrismaClient) {
       create: logro,
     });
   }
-  
+
   console.log(`✅ Seeded ${logros.length} logros`);
 }
 ```
@@ -633,7 +642,7 @@ const cursos = [
     destacado: true,
     nuevo: false,
     activo: true,
-    orden: 1
+    orden: 1,
   },
   {
     codigo: 'laboratorio_quimico_avanzado',
@@ -646,7 +655,7 @@ const cursos = [
     precio_usd: 50,
     precio_monedas: 1000,
     imagen_url: '/cursos/lab-quimico.jpg',
-    orden: 2
+    orden: 2,
   },
   {
     codigo: 'astronomia_interactiva',
@@ -659,10 +668,10 @@ const cursos = [
     precio_usd: 30,
     precio_monedas: 600,
     destacado: true,
-    orden: 3
+    orden: 3,
   },
   // ... más cursos de ciencia
-  
+
   // PROGRAMACIÓN (10 cursos)
   {
     codigo: 'videojuegos_scratch',
@@ -675,7 +684,7 @@ const cursos = [
     precio_usd: 25,
     precio_monedas: 500,
     nuevo: true,
-    orden: 10
+    orden: 10,
   },
   {
     codigo: 'python_desde_cero',
@@ -688,7 +697,7 @@ const cursos = [
     precio_usd: 50,
     precio_monedas: 1000,
     destacado: true,
-    orden: 11
+    orden: 11,
   },
   {
     codigo: 'nextjs_fullstack',
@@ -701,10 +710,10 @@ const cursos = [
     precio_usd: 150,
     precio_monedas: 3000,
     destacado: true,
-    orden: 12
+    orden: 12,
   },
   // ... más cursos de programación
-  
+
   // ROBÓTICA (7 cursos)
   {
     codigo: 'arduino_desde_cero',
@@ -717,10 +726,10 @@ const cursos = [
     precio_usd: 35,
     precio_monedas: 700,
     destacado: true,
-    orden: 20
+    orden: 20,
   },
   // ... más cursos de robótica
-  
+
   // DISEÑO (6 cursos)
   {
     codigo: 'blender_modelado',
@@ -732,10 +741,10 @@ const cursos = [
     nivel_requerido: 3,
     precio_usd: 50,
     precio_monedas: 1000,
-    orden: 30
+    orden: 30,
   },
   // ... más cursos de diseño
-  
+
   // MAESTRÍAS (6 programas)
   {
     codigo: 'fullstack_developer',
@@ -749,7 +758,7 @@ const cursos = [
     precio_monedas: 4000,
     destacado: true,
     nuevo: true,
-    orden: 100
+    orden: 100,
   },
   {
     codigo: 'ia_aplicada',
@@ -762,14 +771,14 @@ const cursos = [
     precio_usd: 300,
     precio_monedas: 6000,
     destacado: true,
-    orden: 101
+    orden: 101,
   },
   // ... más maestrías
 ];
 
 export async function seedCursosCatalogo(prisma: PrismaClient) {
   console.log('📚 Seeding cursos catálogo...');
-  
+
   for (const curso of cursos) {
     await prisma.cursoCatalogo.upsert({
       where: { codigo: curso.codigo },
@@ -777,7 +786,7 @@ export async function seedCursosCatalogo(prisma: PrismaClient) {
       create: curso,
     });
   }
-  
+
   console.log(`✅ Seeded ${cursos.length} cursos`);
 }
 ```
@@ -797,7 +806,7 @@ const premios = [
     puntos_requeridos: 200,
     costo_real_usd: 0,
     icono: '💰',
-    orden: 1
+    orden: 1,
   },
   {
     codigo: 'monedas_300_hijo',
@@ -807,7 +816,7 @@ const premios = [
     puntos_requeridos: 500,
     costo_real_usd: 0,
     icono: '💰',
-    orden: 2
+    orden: 2,
   },
   {
     codigo: 'badge_padre_mes',
@@ -817,10 +826,10 @@ const premios = [
     puntos_requeridos: 300,
     costo_real_usd: 0,
     icono: '🏅',
-    orden: 3
+    orden: 3,
   },
   // ... más premios digitales
-  
+
   // ACCESO (9 premios - costo bajo)
   {
     codigo: 'webinar_crianza_digital',
@@ -830,7 +839,7 @@ const premios = [
     puntos_requeridos: 200,
     costo_real_usd: 0,
     icono: '🎓',
-    orden: 20
+    orden: 20,
   },
   {
     codigo: 'sesion_docente',
@@ -840,10 +849,10 @@ const premios = [
     puntos_requeridos: 800,
     costo_real_usd: 15,
     icono: '💬',
-    orden: 21
+    orden: 21,
   },
   // ... más premios de acceso
-  
+
   // PREMIUM (9 premios - para logros épicos)
   {
     codigo: 'curso_gratis_50',
@@ -853,7 +862,7 @@ const premios = [
     puntos_requeridos: 2000,
     costo_real_usd: 50,
     icono: '🎓',
-    orden: 30
+    orden: 30,
   },
   {
     codigo: 'mes_gratis',
@@ -863,10 +872,10 @@ const premios = [
     puntos_requeridos: 3000,
     costo_real_usd: 30,
     icono: '💳',
-    orden: 31
+    orden: 31,
   },
   // ... más premios premium
-  
+
   // ÉPICOS (5 premios - logros anuales)
   {
     codigo: 'familia_del_anio',
@@ -876,14 +885,14 @@ const premios = [
     puntos_requeridos: 10000,
     costo_real_usd: 90,
     icono: '👑',
-    orden: 40
+    orden: 40,
   },
   // ... más premios épicos
 ];
 
 export async function seedPremiosPadres(prisma: PrismaClient) {
   console.log('🎁 Seeding premios padres...');
-  
+
   for (const premio of premios) {
     await prisma.premioPadre.upsert({
       where: { codigo: premio.codigo },
@@ -891,7 +900,7 @@ export async function seedPremiosPadres(prisma: PrismaClient) {
       create: premio,
     });
   }
-  
+
   console.log(`✅ Seeded ${premios.length} premios`);
 }
 ```
@@ -915,25 +924,25 @@ export class LogrosService {
   async verificarLogros(estudiante_id: string): Promise<LogroEstudiante[]> {
     // 1. Obtener todos los logros activos
     const logros = await this.prisma.logro.findMany({
-      where: { activo: true }
+      where: { activo: true },
     });
 
     // 2. Obtener logros ya desbloqueados
     const logrosDesbloqueados = await this.prisma.logroEstudiante.findMany({
       where: { estudiante_id },
-      select: { logro_id: true }
+      select: { logro_id: true },
     });
-    const idsDesbloqueados = new Set(logrosDesbloqueados.map(l => l.logro_id));
+    const idsDesbloqueados = new Set(logrosDesbloqueados.map((l) => l.logro_id));
 
     // 3. Filtrar logros pendientes
-    const logrosPendientes = logros.filter(l => !idsDesbloqueados.has(l.id));
+    const logrosPendientes = logros.filter((l) => !idsDesbloqueados.has(l.id));
 
     // 4. Verificar cada logro pendiente
     const nuevosLogros: LogroEstudiante[] = [];
-    
+
     for (const logro of logrosPendientes) {
       const cumple = await this.verificarCriterio(estudiante_id, logro);
-      
+
       if (cumple) {
         // Desbloquear logro
         const logroDesbloqueado = await this.desbloquearLogro(estudiante_id, logro);
@@ -947,14 +956,11 @@ export class LogrosService {
   /**
    * Verifica si un estudiante cumple el criterio de un logro
    */
-  private async verificarCriterio(
-    estudiante_id: string,
-    logro: Logro
-  ): Promise<boolean> {
+  private async verificarCriterio(estudiante_id: string, logro: Logro): Promise<boolean> {
     switch (logro.criterio_tipo) {
       case 'racha_dias':
         const racha = await this.prisma.rachaEstudiante.findUnique({
-          where: { estudiante_id }
+          where: { estudiante_id },
         });
         return racha?.racha_actual >= logro.criterio_valor;
 
@@ -962,14 +968,14 @@ export class LogrosService {
         const temas = await this.prisma.progresoTema.count({
           where: {
             estudiante_id,
-            progreso: 100
-          }
+            progreso: 100,
+          },
         });
         return temas >= logro.criterio_valor;
 
       case 'ejercicios_completados':
         const ejercicios = await this.prisma.actividadCompletada.count({
-          where: { estudiante_id }
+          where: { estudiante_id },
         });
         return ejercicios >= logro.criterio_valor;
 
@@ -977,8 +983,8 @@ export class LogrosService {
         const perfectos = await this.prisma.actividadCompletada.count({
           where: {
             estudiante_id,
-            nota: 100
-          }
+            nota: 100,
+          },
         });
         return perfectos >= logro.criterio_valor;
 
@@ -986,13 +992,13 @@ export class LogrosService {
         const inicioMes = new Date();
         inicioMes.setDate(1);
         inicioMes.setHours(0, 0, 0, 0);
-        
+
         const asistencias = await this.prisma.asistencia.count({
           where: {
             estudiante_id,
             presente: true,
-            fecha: { gte: inicioMes }
-          }
+            fecha: { gte: inicioMes },
+          },
         });
         return asistencias >= logro.criterio_valor;
 
@@ -1000,8 +1006,8 @@ export class LogrosService {
         const ayudas = await this.prisma.transaccionRecurso.count({
           where: {
             recursos_estudiante: { estudiante_id },
-            razon: 'ayudar_companero'
-          }
+            razon: 'ayudar_companero',
+          },
         });
         return ayudas >= logro.criterio_valor;
 
@@ -1015,26 +1021,23 @@ export class LogrosService {
   /**
    * Desbloquea un logro y otorga recompensas
    */
-  private async desbloquearLogro(
-    estudiante_id: string,
-    logro: Logro
-  ): Promise<LogroEstudiante> {
+  private async desbloquearLogro(estudiante_id: string, logro: Logro): Promise<LogroEstudiante> {
     return await this.prisma.$transaction(async (tx) => {
       // 1. Crear registro de logro desbloqueado
       const logroDesbloqueado = await tx.logroEstudiante.create({
         data: {
           estudiante_id,
           logro_id: logro.id,
-          visto: false
+          visto: false,
         },
         include: {
-          logro: true
-        }
+          logro: true,
+        },
       });
 
       // 2. Otorgar recompensas
       const recursos = await tx.recursosEstudiante.findUnique({
-        where: { estudiante_id }
+        where: { estudiante_id },
       });
 
       if (!recursos) {
@@ -1046,8 +1049,8 @@ export class LogrosService {
         where: { estudiante_id },
         data: {
           monedas_total: { increment: logro.monedas_recompensa },
-          xp_total: { increment: logro.xp_recompensa }
-        }
+          xp_total: { increment: logro.xp_recompensa },
+        },
       });
 
       // Crear transacciones
@@ -1058,16 +1061,16 @@ export class LogrosService {
             tipo_recurso: 'MONEDAS',
             cantidad: logro.monedas_recompensa,
             razon: 'logro_desbloqueado',
-            metadata: { logro_id: logro.id, logro_codigo: logro.codigo }
+            metadata: { logro_id: logro.id, logro_codigo: logro.codigo },
           },
           {
             recursos_estudiante_id: recursos.id,
             tipo_recurso: 'XP',
             cantidad: logro.xp_recompensa,
             razon: 'logro_desbloqueado',
-            metadata: { logro_id: logro.id, logro_codigo: logro.codigo }
-          }
-        ]
+            metadata: { logro_id: logro.id, logro_codigo: logro.codigo },
+          },
+        ],
       });
 
       return logroDesbloqueado;
@@ -1081,25 +1084,25 @@ export class LogrosService {
     const [desbloqueados, todosLogros] = await Promise.all([
       this.prisma.logroEstudiante.findMany({
         where: { estudiante_id },
-        include: { logro: true }
+        include: { logro: true },
       }),
       this.prisma.logro.findMany({
         where: { activo: true },
-        orderBy: { orden: 'asc' }
-      })
+        orderBy: { orden: 'asc' },
+      }),
     ]);
 
-    const idsDesbloqueados = new Set(desbloqueados.map(l => l.logro_id));
+    const idsDesbloqueados = new Set(desbloqueados.map((l) => l.logro_id));
 
     return {
-      desbloqueados: desbloqueados.map(l => ({
+      desbloqueados: desbloqueados.map((l) => ({
         ...l.logro,
         fecha_desbloqueo: l.fecha_desbloqueo,
-        visto: l.visto
+        visto: l.visto,
       })),
-      bloqueados: todosLogros.filter(l => !idsDesbloqueados.has(l.id)),
+      bloqueados: todosLogros.filter((l) => !idsDesbloqueados.has(l.id)),
       total: todosLogros.length,
-      completados: desbloqueados.length
+      completados: desbloqueados.length,
     };
   }
 
@@ -1111,9 +1114,9 @@ export class LogrosService {
       where: {
         estudiante_id,
         logro_id: { in: logros_ids },
-        visto: false
+        visto: false,
       },
-      data: { visto: true }
+      data: { visto: true },
     });
   }
 }
@@ -1137,7 +1140,7 @@ export class RachaService {
     hoy.setHours(0, 0, 0, 0);
 
     const racha = await this.prisma.rachaEstudiante.findUnique({
-      where: { estudiante_id }
+      where: { estudiante_id },
     });
 
     if (!racha) {
@@ -1149,8 +1152,8 @@ export class RachaService {
           racha_maxima: 1,
           ultima_actividad: hoy,
           inicio_racha_actual: hoy,
-          total_dias_activos: 1
-        }
+          total_dias_activos: 1,
+        },
       });
     }
 
@@ -1175,8 +1178,8 @@ export class RachaService {
           racha_actual: nuevaRacha,
           racha_maxima: nuevaMaxima,
           ultima_actividad: hoy,
-          total_dias_activos: { increment: 1 }
-        }
+          total_dias_activos: { increment: 1 },
+        },
       });
 
       // Verificar logros de racha
@@ -1191,8 +1194,8 @@ export class RachaService {
           racha_actual: 1,
           ultima_actividad: hoy,
           inicio_racha_actual: hoy,
-          total_dias_activos: { increment: 1 }
-        }
+          total_dias_activos: { increment: 1 },
+        },
       });
     }
   }
@@ -1202,23 +1205,23 @@ export class RachaService {
    */
   private async verificarLogrosRacha(estudiante_id: string, racha: number) {
     const hitos = [3, 7, 14, 30, 60, 90];
-    
+
     for (const hito of hitos) {
       if (racha === hito) {
         // Otorgar recompensas según hito
         const recompensas = this.getRecompensasRacha(hito);
-        
+
         await this.prisma.recursosEstudiante.update({
           where: { estudiante_id },
           data: {
             monedas_total: { increment: recompensas.monedas },
-            xp_total: { increment: recompensas.xp }
-          }
+            xp_total: { increment: recompensas.xp },
+          },
         });
 
         // Registrar transacciones
         const recursos = await this.prisma.recursosEstudiante.findUnique({
-          where: { estudiante_id }
+          where: { estudiante_id },
         });
 
         if (recursos) {
@@ -1229,16 +1232,16 @@ export class RachaService {
                 tipo_recurso: 'MONEDAS',
                 cantidad: recompensas.monedas,
                 razon: `racha_${hito}_dias`,
-                metadata: { racha_dias: hito }
+                metadata: { racha_dias: hito },
               },
               {
                 recursos_estudiante_id: recursos.id,
                 tipo_recurso: 'XP',
                 cantidad: recompensas.xp,
                 razon: `racha_${hito}_dias`,
-                metadata: { racha_dias: hito }
-              }
-            ]
+                metadata: { racha_dias: hito },
+              },
+            ],
           });
         }
       }
@@ -1252,7 +1255,7 @@ export class RachaService {
       14: { monedas: 30, xp: 200 },
       30: { monedas: 100, xp: 500 },
       60: { monedas: 250, xp: 1000 },
-      90: { monedas: 500, xp: 2000 }
+      90: { monedas: 500, xp: 2000 },
     };
     return recompensas[dias] || { monedas: 0, xp: 0 };
   }
@@ -1262,7 +1265,7 @@ export class RachaService {
    */
   async obtenerRacha(estudiante_id: string): Promise<RachaEstudiante | null> {
     return await this.prisma.rachaEstudiante.findUnique({
-      where: { estudiante_id }
+      where: { estudiante_id },
     });
   }
 }
@@ -1298,21 +1301,18 @@ export class CatalogoService {
     if (params.busqueda) {
       where.OR = [
         { titulo: { contains: params.busqueda, mode: 'insensitive' } },
-        { descripcion: { contains: params.busqueda, mode: 'insensitive' } }
+        { descripcion: { contains: params.busqueda, mode: 'insensitive' } },
       ];
     }
 
     const [cursos, total] = await Promise.all([
       this.prisma.cursoCatalogo.findMany({
         where,
-        orderBy: [
-          { destacado: 'desc' },
-          { orden: 'asc' }
-        ],
+        orderBy: [{ destacado: 'desc' }, { orden: 'asc' }],
         take: params.limit || 20,
-        skip: params.offset || 0
+        skip: params.offset || 0,
       }),
-      this.prisma.cursoCatalogo.count({ where })
+      this.prisma.cursoCatalogo.count({ where }),
     ]);
 
     return { cursos, total };
@@ -1323,7 +1323,7 @@ export class CatalogoService {
    */
   async obtenerCurso(id: string) {
     return await this.prisma.cursoCatalogo.findUnique({
-      where: { id }
+      where: { id },
     });
   }
 
@@ -1334,31 +1334,31 @@ export class CatalogoService {
     const [curso, recursos, nivel] = await Promise.all([
       this.prisma.cursoCatalogo.findUnique({ where: { id: curso_id } }),
       this.prisma.recursosEstudiante.findUnique({ where: { estudiante_id } }),
-      this.calcularNivel(estudiante_id)
+      this.calcularNivel(estudiante_id),
     ]);
 
     if (!curso) throw new Error('Curso no encontrado');
     if (!recursos) throw new Error('Recursos no encontrados');
 
     return {
-      elegible: recursos.monedas_total >= curso.precio_monedas &&
-                nivel >= curso.nivel_requerido,
-      razon: recursos.monedas_total < curso.precio_monedas
-        ? 'monedas_insuficientes'
-        : nivel < curso.nivel_requerido
-        ? 'nivel_insuficiente'
-        : 'elegible',
+      elegible: recursos.monedas_total >= curso.precio_monedas && nivel >= curso.nivel_requerido,
+      razon:
+        recursos.monedas_total < curso.precio_monedas
+          ? 'monedas_insuficientes'
+          : nivel < curso.nivel_requerido
+            ? 'nivel_insuficiente'
+            : 'elegible',
       monedas_faltantes: Math.max(0, curso.precio_monedas - recursos.monedas_total),
-      niveles_faltantes: Math.max(0, curso.nivel_requerido - nivel)
+      niveles_faltantes: Math.max(0, curso.nivel_requerido - nivel),
     };
   }
 
   private async calcularNivel(estudiante_id: string): Promise<number> {
     const recursos = await this.prisma.recursosEstudiante.findUnique({
       where: { estudiante_id },
-      select: { xp_total: true }
+      select: { xp_total: true },
     });
-    
+
     if (!recursos) return 1;
     return Math.floor(Math.sqrt(recursos.xp_total / 100)) + 1;
   }
@@ -1374,16 +1374,13 @@ export class CatalogoService {
 export class CanjeService {
   constructor(
     private prisma: PrismaService,
-    private notificacionesService: NotificacionesService
+    private notificacionesService: NotificacionesService,
   ) {}
 
   /**
    * Estudiante solicita canjear curso
    */
-  async solicitarCanje(data: {
-    estudiante_id: string;
-    curso_id: string;
-  }) {
+  async solicitarCanje(data: { estudiante_id: string; curso_id: string }) {
     return await this.prisma.$transaction(async (tx) => {
       // 1. Validar elegibilidad
       const [curso, recursos, estudiante] = await Promise.all([
@@ -1391,8 +1388,8 @@ export class CanjeService {
         tx.recursosEstudiante.findUnique({ where: { estudiante_id: data.estudiante_id } }),
         tx.estudiante.findUnique({
           where: { id: data.estudiante_id },
-          include: { grupo: { include: { tutor: true } } }
-        })
+          include: { grupo: { include: { tutor: true } } },
+        }),
       ]);
 
       if (!curso) throw new Error('Curso no encontrado');
@@ -1407,8 +1404,8 @@ export class CanjeService {
       await tx.recursosEstudiante.update({
         where: { estudiante_id: data.estudiante_id },
         data: {
-          monedas_total: { decrement: curso.precio_monedas }
-        }
+          monedas_total: { decrement: curso.precio_monedas },
+        },
       });
 
       // 3. Crear solicitud
@@ -1419,12 +1416,12 @@ export class CanjeService {
           curso_id: data.curso_id,
           monedas_usadas: curso.precio_monedas,
           estado: 'pendiente',
-          fecha_expiracion: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 días
+          fecha_expiracion: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
         },
         include: {
           curso: true,
-          estudiante: true
-        }
+          estudiante: true,
+        },
       });
 
       // 4. Notificar al padre
@@ -1434,7 +1431,7 @@ export class CanjeService {
         titulo: `${estudiante.nombre} quiere canjear un curso`,
         mensaje: `${estudiante.nombre} ha solicitado canjear ${curso.titulo} (${curso.precio_monedas} monedas = $${curso.precio_usd})`,
         link: `/tutor/solicitudes/${solicitud.id}`,
-        metadata: { solicitud_id: solicitud.id }
+        metadata: { solicitud_id: solicitud.id },
       });
 
       return solicitud;
@@ -1454,7 +1451,7 @@ export class CanjeService {
     return await this.prisma.$transaction(async (tx) => {
       const solicitud = await tx.solicitudCanje.findUnique({
         where: { id: data.solicitud_id },
-        include: { curso: true, estudiante: true }
+        include: { curso: true, estudiante: true },
       });
 
       if (!solicitud) throw new Error('Solicitud no encontrada');
@@ -1470,13 +1467,13 @@ export class CanjeService {
             fecha_decision: new Date(),
             opcion_pago: data.opcion_pago,
             monto_padre: this.calcularMontoPadre(solicitud.curso.precio_usd, data.opcion_pago),
-            mensaje_padre: data.mensaje
-          }
+            mensaje_padre: data.mensaje,
+          },
         });
 
         // Registrar transacción de gasto
         const recursos = await tx.recursosEstudiante.findUnique({
-          where: { estudiante_id: solicitud.estudiante_id }
+          where: { estudiante_id: solicitud.estudiante_id },
         });
 
         if (recursos) {
@@ -1489,9 +1486,9 @@ export class CanjeService {
               metadata: {
                 solicitud_id: solicitud.id,
                 curso_id: solicitud.curso_id,
-                curso_titulo: solicitud.curso.titulo
-              }
-            }
+                curso_titulo: solicitud.curso.titulo,
+              },
+            },
           });
         }
 
@@ -1500,7 +1497,7 @@ export class CanjeService {
         // Incrementar contador del curso
         await tx.cursoCatalogo.update({
           where: { id: solicitud.curso_id },
-          data: { total_canjes: { increment: 1 } }
+          data: { total_canjes: { increment: 1 } },
         });
 
         // Notificar al estudiante
@@ -1509,7 +1506,7 @@ export class CanjeService {
           tipo: 'canje_aprobado',
           titulo: '¡Tu curso fue aprobado! 🎉',
           mensaje: `Tu solicitud de ${solicitud.curso.titulo} ha sido aprobada. Ya puedes empezar.`,
-          link: `/estudiante/mis-cursos/${solicitud.curso_id}`
+          link: `/estudiante/mis-cursos/${solicitud.curso_id}`,
         });
 
         return solicitudActualizada;
@@ -1520,16 +1517,16 @@ export class CanjeService {
           data: {
             estado: 'rechazada',
             fecha_decision: new Date(),
-            mensaje_padre: data.mensaje
-          }
+            mensaje_padre: data.mensaje,
+          },
         });
 
         // Devolver monedas
         await tx.recursosEstudiante.update({
           where: { estudiante_id: solicitud.estudiante_id },
           data: {
-            monedas_total: { increment: solicitud.monedas_usadas }
-          }
+            monedas_total: { increment: solicitud.monedas_usadas },
+          },
         });
 
         // Notificar al estudiante
@@ -1538,7 +1535,7 @@ export class CanjeService {
           tipo: 'canje_rechazado',
           titulo: 'Solicitud no aprobada',
           mensaje: data.mensaje || `Tu solicitud de ${solicitud.curso.titulo} no fue aprobada.`,
-          link: `/estudiante/tienda`
+          link: `/estudiante/tienda`,
         });
 
         return solicitudActualizada;
@@ -1546,16 +1543,17 @@ export class CanjeService {
     });
   }
 
-  private calcularMontoPadre(
-    precio_usd: any,
-    opcion_pago?: string
-  ): number {
+  private calcularMontoPadre(precio_usd: any, opcion_pago?: string): number {
     const precio = Number(precio_usd);
     switch (opcion_pago) {
-      case 'padre_paga_todo': return 0;
-      case 'hijo_paga_mitad': return precio / 2;
-      case 'hijo_paga_todo': return precio;
-      default: return 0;
+      case 'padre_paga_todo':
+        return 0;
+      case 'hijo_paga_mitad':
+        return precio / 2;
+      case 'hijo_paga_todo':
+        return precio;
+      default:
+        return 0;
     }
   }
 
@@ -1570,9 +1568,9 @@ export class CanjeService {
       where,
       include: {
         curso: true,
-        estudiante: true
+        estudiante: true,
       },
-      orderBy: { fecha_solicitud: 'desc' }
+      orderBy: { fecha_solicitud: 'desc' },
     });
   }
 
@@ -1583,13 +1581,13 @@ export class CanjeService {
     return await this.prisma.solicitudCanje.findMany({
       where: { estudiante_id },
       include: { curso: true },
-      orderBy: { fecha_solicitud: 'desc' }
+      orderBy: { fecha_solicitud: 'desc' },
     });
   }
 }
 ```
 
-*(Continuará con más servicios...)*
+_(Continuará con más servicios...)_
 
 ---
 
@@ -1625,7 +1623,7 @@ export class LogrosController {
   async obtenerCatalogo() {
     return await this.prisma.logro.findMany({
       where: { activo: true },
-      orderBy: [{ categoria: 'asc' }, { orden: 'asc' }]
+      orderBy: [{ categoria: 'asc' }, { orden: 'asc' }],
     });
   }
 }
@@ -1654,7 +1652,7 @@ export class CatalogoController {
   @UseGuards(JwtAuthGuard)
   async verificarElegibilidad(
     @Param('estudiante_id') estudiante_id: string,
-    @Param('curso_id') curso_id: string
+    @Param('curso_id') curso_id: string,
   ) {
     return await this.catalogoService.verificarElegibilidad(estudiante_id, curso_id);
   }
@@ -1664,7 +1662,7 @@ export class CatalogoController {
     const categorias = await this.prisma.cursoCatalogo.groupBy({
       by: ['categoria'],
       where: { activo: true },
-      _count: { id: true }
+      _count: { id: true },
     });
     return categorias;
   }
@@ -1694,7 +1692,7 @@ export class CanjeController {
   @Get('solicitudes/padre/:tutor_id')
   async obtenerSolicitudesPadre(
     @Param('tutor_id') tutor_id: string,
-    @Query('estado') estado?: string
+    @Query('estado') estado?: string,
   ) {
     return await this.canjeService.obtenerSolicitudesPadre(tutor_id, estado);
   }
@@ -1730,7 +1728,7 @@ describe('LogrosService', () => {
     it('debe desbloquear logro cuando se cumple criterio', async () => {
       // Mock data
       const estudiante_id = 'test-estudiante';
-      
+
       // Mock racha de 7 días
       jest.spyOn(prisma.rachaEstudiante, 'findUnique').mockResolvedValue({
         id: '1',
@@ -1741,7 +1739,7 @@ describe('LogrosService', () => {
       });
 
       const nuevosLogros = await service.verificarLogros(estudiante_id);
-      
+
       expect(nuevosLogros.length).toBeGreaterThan(0);
       expect(nuevosLogros[0].logro.codigo).toBe('racha_7_dias');
     });
@@ -1753,19 +1751,19 @@ describe('LogrosService', () => {
 
 ## 📅 FASE 2: Frontend Estudiantes (Semana 2-3)
 
-*(Se desarrollará en el siguiente prompt)*
+_(Se desarrollará en el siguiente prompt)_
 
 ---
 
 ## 📅 FASE 3: Frontend Padres (Semana 3-4)
 
-*(Se desarrollará en el siguiente prompt)*
+_(Se desarrollará en el siguiente prompt)_
 
 ---
 
 ## 📅 FASE 4: Testing y Launch (Semana 4)
 
-*(Se desarrollará en el siguiente prompt)*
+_(Se desarrollará en el siguiente prompt)_
 
 ---
 
@@ -1773,6 +1771,6 @@ describe('LogrosService', () => {
 
 ---
 
-*Última actualización: 30 de Octubre 2025*  
-*Versión: 1.0 - DRAFT*  
-*Autor: Alexis - Founder Mateatletas*
+_Última actualización: 30 de Octubre 2025_  
+_Versión: 1.0 - DRAFT_  
+_Autor: Alexis - Founder Mateatletas_

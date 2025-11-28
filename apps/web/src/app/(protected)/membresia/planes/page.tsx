@@ -22,9 +22,7 @@ export default function PlanesPage() {
     error: pagoError,
   } = usePagosStore();
 
-  const [productoSeleccionado, setProductoSeleccionado] = useState<
-    string | null
-  >(null);
+  const [productoSeleccionado, setProductoSeleccionado] = useState<string | null>(null);
 
   // Cargar productos al montar
   useEffect(() => {
@@ -32,14 +30,10 @@ export default function PlanesPage() {
   }, [fetchProductos]);
 
   // Filtrar solo suscripciones
-  const suscripciones = productos.filter(
-    (p) => p.tipo === TipoProducto.Suscripcion
-  );
+  const suscripciones = productos.filter((p) => p.tipo === TipoProducto.Suscripcion);
 
   // Ordenar por precio (asumiendo que hay básico, estándar, premium)
-  const suscripcionesOrdenadas = [...suscripciones].sort(
-    (a, b) => a.precio - b.precio
-  );
+  const suscripcionesOrdenadas = [...suscripciones].sort((a, b) => a.precio - b.precio);
 
   // Determinar cuál está destacado (el del medio)
   const indexDestacado = Math.floor(suscripcionesOrdenadas.length / 2);
@@ -130,10 +124,7 @@ export default function PlanesPage() {
                 <div className="h-12 bg-gray-200 rounded w-1/2 mx-auto"></div>
                 <div className="space-y-2">
                   {[1, 2, 3, 4].map((j) => (
-                    <div
-                      key={j}
-                      className="h-4 bg-gray-200 rounded"
-                    ></div>
+                    <div key={j} className="h-4 bg-gray-200 rounded"></div>
                   ))}
                 </div>
                 <div className="h-12 bg-gray-200 rounded mt-6"></div>
@@ -170,9 +161,7 @@ export default function PlanesPage() {
                 producto={suscripcion}
                 destacado={index === indexDestacado}
                 onComprar={handleComprar}
-                isLoading={
-                  isPagoLoading && productoSeleccionado === suscripcion.id
-                }
+                isLoading={isPagoLoading && productoSeleccionado === suscripcion.id}
               />
             ))}
           </div>
@@ -184,30 +173,23 @@ export default function PlanesPage() {
             </h3>
             <div className="space-y-4">
               <div>
-                <p className="font-bold text-dark mb-1">
-                  ¿Puedo cancelar en cualquier momento?
-                </p>
+                <p className="font-bold text-dark mb-1">¿Puedo cancelar en cualquier momento?</p>
                 <p className="text-sm text-gray-600">
-                  Sí, puedes cancelar tu suscripción cuando quieras desde tu
-                  panel de control. No hay penalizaciones.
+                  Sí, puedes cancelar tu suscripción cuando quieras desde tu panel de control. No
+                  hay penalizaciones.
                 </p>
               </div>
               <div>
-                <p className="font-bold text-dark mb-1">
-                  ¿Cómo funciona el pago?
-                </p>
+                <p className="font-bold text-dark mb-1">¿Cómo funciona el pago?</p>
                 <p className="text-sm text-gray-600">
-                  El pago se procesa de forma segura a través de MercadoPago.
-                  Tu suscripción se activa inmediatamente después del pago.
+                  El pago se procesa de forma segura a través de MercadoPago. Tu suscripción se
+                  activa inmediatamente después del pago.
                 </p>
               </div>
               <div>
-                <p className="font-bold text-dark mb-1">
-                  ¿Puedo cambiar de plan?
-                </p>
+                <p className="font-bold text-dark mb-1">¿Puedo cambiar de plan?</p>
                 <p className="text-sm text-gray-600">
-                  Sí, puedes actualizar o cambiar tu plan en cualquier momento
-                  desde tu dashboard.
+                  Sí, puedes actualizar o cambiar tu plan en cualquier momento desde tu dashboard.
                 </p>
               </div>
             </div>

@@ -50,8 +50,7 @@ beforeAll(() => {
   console.error = (...args: LoggableValue[]) => {
     if (
       typeof args[0] === 'string' &&
-      (args[0].includes('Warning: ReactDOM.render') ||
-        args[0].includes('Warning: useLayoutEffect'))
+      (args[0].includes('Warning: ReactDOM.render') || args[0].includes('Warning: useLayoutEffect'))
     ) {
       return;
     }
@@ -59,10 +58,7 @@ beforeAll(() => {
   };
 
   console.warn = (...args: LoggableValue[]) => {
-    if (
-      typeof args[0] === 'string' &&
-      args[0].includes('componentWillReceiveProps')
-    ) {
+    if (typeof args[0] === 'string' && args[0].includes('componentWillReceiveProps')) {
       return;
     }
     originalWarn.call(console, ...args);

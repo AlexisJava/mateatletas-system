@@ -11,11 +11,13 @@
 ### 1. **CRÍTICO: Múltiples Procesos en Background**
 
 **Síntoma:**
+
 - Errores aleatorios de "network error" y "credenciales inválidas"
 - Imposibilidad de reiniciar servidores correctamente
 - Puertos 3000, 3001, 3002 ocupados por procesos zombies
 
 **Diagnóstico:**
+
 ```bash
 # Se encontraron 2 instancias del backend corriendo simultáneamente:
 - PID 573258 (nest start --watch) - iniciado 11:29
@@ -32,11 +34,13 @@
 ```
 
 **Causa Raíz:**
+
 - Los comandos `npm run start:dev` se ejecutaban sin verificar si ya había una instancia corriendo
 - Los procesos `nest start --watch` no se cerraban correctamente al hacer cambios
 - Falta de scripts para limpieza de procesos
 
 **Impacto:**
+
 - **Alto:** Bloqueo completo del desarrollo
 - **Medio:** Errores de autenticación por conflictos de sesiones
 - **Alto:** Confusión sobre qué servidor está activo
@@ -45,12 +49,14 @@
 ✅ Creados 2 scripts de gestión:
 
 1. **`dev-stop.sh`** - Detiene todos los servidores
+
    ```bash
    # Uso:
    ./dev-stop.sh
    ```
 
 2. **`dev-clean-restart.sh`** - Limpieza + reinicio limpio
+
    ```bash
    # Uso:
    ./dev-clean-restart.sh
@@ -65,6 +71,7 @@
    ```
 
 **Logs de desarrollo:**
+
 - Backend: `/tmp/mateatletas-backend.log`
 - Frontend: `/tmp/mateatletas-frontend.log`
 
@@ -77,6 +84,7 @@
 ✅ Bien configurado en frontend
 
 **Verificación Backend ([auth.controller.ts:134-140](../apps/api/src/auth/auth.controller.ts#L134-L140)):**
+
 ```typescript
 res.cookie('auth-token', result.access_token, {
   httpOnly: true, // ✅ No accesible desde JavaScript
@@ -88,6 +96,7 @@ res.cookie('auth-token', result.access_token, {
 ```
 
 **Verificación Frontend ([axios.ts:19](../apps/web/src/lib/axios.ts#L19)):**
+
 ```typescript
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
@@ -97,6 +106,7 @@ const apiClient = axios.create({
 ```
 
 **Verificación JWT Strategy ([jwt.strategy.ts:42-52](../apps/api/src/auth/strategies/jwt.strategy.ts#L42-L52)):**
+
 ```typescript
 jwtFromRequest: ExtractJwt.fromExtractors([
   (request: Request) => {
@@ -107,15 +117,17 @@ jwtFromRequest: ExtractJwt.fromExtractors([
     // Prioridad 2: Bearer header (Swagger y tests)
     return ExtractJwt.fromAuthHeaderAsBearerToken()(request);
   },
-])
+]);
 ```
 
 **Hallazgos:**
+
 - ✅ Sistema de cookies correctamente implementado
 - ✅ Fallback a Bearer token para Swagger
 - ✅ CORS configurado con `credentials: true`
 
 **Recomendación:**
+
 - Ninguna acción requerida
 - Sistema funciona correctamente
 
@@ -124,6 +136,7 @@ jwtFromRequest: ExtractJwt.fromExtractors([
 ### 3. **BAJO: Configuración CORS**
 
 **Configuración Actual ([main.ts:65-76](../apps/api/src/main.ts#L65-L76)):**
+
 ```typescript
 app.enableCors({
   origin: [
@@ -140,12 +153,14 @@ app.enableCors({
 ```
 
 **Hallazgos:**
+
 - ✅ Orígenes permitidos correctamente
 - ✅ `credentials: true` habilitado
 - ✅ Métodos HTTP completos
 - ✅ Headers necesarios permitidos
 
 **Recomendación:**
+
 - Ninguna acción requerida
 
 ---
@@ -155,6 +170,7 @@ app.enableCors({
 **Implementación Actual:**
 
 **Base de Datos:**
+
 ```prisma
 model Admin {
   roles String[] @default(["admin"]) // ✅ Array de roles
@@ -170,16 +186,18 @@ model Tutor {
 ```
 
 **JWT Payload ([auth.service.ts:433-440](../apps/api/src/auth/auth.service.ts#L433-L440)):**
+
 ```typescript
 const payload = {
   sub: userId,
   email: email,
   role: rolesArray[0], // ✅ Rol principal (backward compatibility)
-  roles: rolesArray,   // ✅ Array completo de roles
+  roles: rolesArray, // ✅ Array completo de roles
 };
 ```
 
 **Validación ([jwt.strategy.ts:66-156](../apps/api/src/auth/strategies/jwt.strategy.ts#L66-L156)):**
+
 ```typescript
 async validate(payload: JwtPayload) {
   const { sub: userId, role } = payload;
@@ -200,6 +218,7 @@ async validate(payload: JwtPayload) {
 ```
 
 **Hallazgos:**
+
 - ✅ Sistema multi-rol implementado correctamente
 - ✅ Backward compatibility con rol único
 - ✅ Array de roles en BD y JWT
@@ -209,16 +228,16 @@ async validate(payload: JwtPayload) {
 ⚠️ El campo `roles` en la BD es `String[]` pero en algunos servicios se parsea como JSON:
 
 **Archivo:** [admin-usuarios.service.ts:44-49](../apps/api/src/admin/services/admin-usuarios.service.ts#L44-L49)
+
 ```typescript
 let userRoles: string[] = [];
 if (tutor.roles) {
-  userRoles = Array.isArray(tutor.roles)
-    ? tutor.roles
-    : JSON.parse(tutor.roles as string); // ⚠️ Esto no debería ser necesario
+  userRoles = Array.isArray(tutor.roles) ? tutor.roles : JSON.parse(tutor.roles as string); // ⚠️ Esto no debería ser necesario
 }
 ```
 
 **Problema:**
+
 - Prisma ya retorna `roles` como `string[]`
 - El `JSON.parse` es innecesario y puede causar errores
 
@@ -237,6 +256,7 @@ if (tutor.roles) {
 ### 5. **BAJO: Manejo de Errores en Login**
 
 **Código Actual ([login/page.tsx:154-193](../apps/web/src/app/login/page.tsx#L154-L193)):**
+
 ```typescript
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -256,7 +276,11 @@ const handleSubmit = async (e: React.FormEvent) => {
       if ('response' in err && err.response && typeof err.response === 'object') {
         if ('status' in err.response && err.response.status === 401) {
           errorMessage = 'Email o contraseña incorrectos';
-        } else if ('data' in err.response && err.response.data && typeof err.response.data === 'object') {
+        } else if (
+          'data' in err.response &&
+          err.response.data &&
+          typeof err.response.data === 'object'
+        ) {
           if ('message' in err.response.data && typeof err.response.data.message === 'string') {
             errorMessage = err.response.data.message;
           }
@@ -272,12 +296,14 @@ const handleSubmit = async (e: React.FormEvent) => {
 ```
 
 **Hallazgos:**
+
 - ✅ Manejo exhaustivo de errores
 - ✅ Mensajes específicos por código de error
 - ✅ Fallback a mensaje genérico
 - ✅ Type-safe con `unknown`
 
 **Recomendación:**
+
 - Ninguna acción requerida
 
 ---
@@ -285,6 +311,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 ### 6. **BAJO: Interceptor de Axios - Redirección en 401**
 
 **Código Actual ([axios.ts:55-72](../apps/web/src/lib/axios.ts#L55-L72)):**
+
 ```typescript
 apiClient.interceptors.response.use(
   (response) => response.data,
@@ -308,31 +335,33 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 ```
 
 **Hallazgos:**
+
 - ✅ Redirección automática en 401
 - ✅ Guarda URL para redirección post-login
 - ✅ No redirige si ya está en página de auth
 - ✅ Solo ejecuta en navegador (`typeof window !== 'undefined'`)
 
 **Recomendación:**
+
 - Ninguna acción requerida
 
 ---
 
 ## 📊 RESUMEN DE HALLAZGOS
 
-| Categoría | Crítico | Medio | Bajo | Total |
-|-----------|---------|-------|------|-------|
-| **Procesos en Background** | 1 | 0 | 0 | 1 |
-| **Autenticación** | 0 | 1 | 1 | 2 |
-| **CORS** | 0 | 0 | 1 | 1 |
-| **Multi-Rol** | 0 | 1 | 0 | 1 |
-| **Manejo de Errores** | 0 | 0 | 1 | 1 |
-| **TOTAL** | **1** | **2** | **3** | **6** |
+| Categoría                  | Crítico | Medio | Bajo  | Total |
+| -------------------------- | ------- | ----- | ----- | ----- |
+| **Procesos en Background** | 1       | 0     | 0     | 1     |
+| **Autenticación**          | 0       | 1     | 1     | 2     |
+| **CORS**                   | 0       | 0     | 1     | 1     |
+| **Multi-Rol**              | 0       | 1     | 0     | 1     |
+| **Manejo de Errores**      | 0       | 0     | 1     | 1     |
+| **TOTAL**                  | **1**   | **2** | **3** | **6** |
 
 ---
 
@@ -368,9 +397,7 @@ apiClient.interceptors.response.use(
 // ❌ ANTES (líneas 44-49, 72-77, 100-105)
 let userRoles: string[] = [];
 if (tutor.roles) {
-  userRoles = Array.isArray(tutor.roles)
-    ? tutor.roles
-    : JSON.parse(tutor.roles as string);
+  userRoles = Array.isArray(tutor.roles) ? tutor.roles : JSON.parse(tutor.roles as string);
 }
 
 // ✅ DESPUÉS
@@ -433,6 +460,7 @@ lsof -ti:3000,3001,3002 | xargs kill -9
 ## 🔐 CREDENCIALES DE PRUEBA
 
 ### Admin
+
 ```
 Email: admin@mateatletas.com
 Password: Admin123!
@@ -440,6 +468,7 @@ Portal: /admin/dashboard
 ```
 
 ### Docente
+
 ```
 Email: carlos.rodriguez@docente.com
 Password: Test123!
@@ -447,6 +476,7 @@ Portal: /docente/dashboard
 ```
 
 ### Estudiante
+
 ```
 Email: ana.gonzalez@estudiante.com
 Password: Test123!
@@ -454,6 +484,7 @@ Portal: /estudiante/dashboard
 ```
 
 ### Tutor
+
 ```
 Email: juan.perez@example.com
 Password: Test123!
@@ -465,12 +496,15 @@ Portal: /dashboard
 ## 📝 NOTAS IMPORTANTES
 
 ### 1. **Cookies httpOnly**
+
 - El token JWT se envía automáticamente en las cookies
 - No es necesario manejarlo manualmente en el frontend
 - `withCredentials: true` en axios es **OBLIGATORIO**
 
 ### 2. **Desarrollo en Puerto Alternativo**
+
 Si necesitas usar puerto alternativo (ej: 3002):
+
 ```bash
 # Frontend
 PORT=3002 npm run dev
@@ -479,6 +513,7 @@ PORT=3002 npm run dev
 ```
 
 ### 3. **Base de Datos**
+
 ```bash
 # Reset completo
 npx prisma migrate reset --force
@@ -491,13 +526,15 @@ npx prisma studio --port 5555
 ```
 
 ### 4. **Roles en JWT**
+
 El token contiene:
+
 ```json
 {
   "sub": "user-id",
   "email": "user@example.com",
-  "role": "admin",        // ← Rol principal (backward compatibility)
-  "roles": ["admin"],     // ← Array completo de roles
+  "role": "admin", // ← Rol principal (backward compatibility)
+  "roles": ["admin"], // ← Array completo de roles
   "iat": 1234567890,
   "exp": 1234567890
 }
@@ -510,6 +547,7 @@ El token contiene:
 **Estado Final:** ✅ **SISTEMA OPERATIVO Y LISTO PARA DESARROLLO**
 
 ### Problemas Resueltos:
+
 - ✅ Procesos zombies eliminados
 - ✅ Scripts de gestión creados
 - ✅ Puertos liberados
@@ -518,12 +556,14 @@ El token contiene:
 - ✅ Multi-rol funcionando
 
 ### Sistema de Autenticación:
+
 - ✅ Cookies httpOnly correctamente implementadas
 - ✅ JWT con multi-rol funcionando
 - ✅ Redirección automática en 401
 - ✅ Manejo de errores exhaustivo
 
 ### Próximos Pasos:
+
 1. Usar `./dev-clean-restart.sh` para iniciar el desarrollo
 2. Verificar login en `/login` con credenciales de prueba
 3. Continuar con desarrollo del portal de administración

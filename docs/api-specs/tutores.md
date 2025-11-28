@@ -11,6 +11,7 @@ Prompt de desarrollo
 Implement the **Tutores** vertical slice within the Usuarios domain.
 
 **Backend (NestJS)**:
+
 - Create a `UsuariosModule` to group user-related submodules (Tutores, Estudiantes, Docentes). Inside, implement a `TutoresModule` with controller and service.
 - **Prisma Schema**: Add a `Tutor` model if not present. Fields: `id (Int, PK)`, `nombre`, `apellido`, `email` (String, unique), `password` (String, hashed), `telefono` (String), and timestamps. This represents the parent/guardian account.
 - **TutorService**:
@@ -24,12 +25,14 @@ Implement the **Tutores** vertical slice within the Usuarios domain.
 - The TutorService will also be used by AuthService for registration, so ensure it’s accessible (e.g., UsuariosModule exports TutorService).
 
 **Frontend (Next.js)**:
+
 - Create a **Tutor Dashboard** page (`/tutor/dashboard`): welcome the tutor and show summary (e.g., active subscription status, list of their estudiantes, upcoming classes).
 - Create a **Profile Settings** page or section (`/tutor/perfil`): form to edit tutor’s info (nombre, teléfono, etc.). Use `GET /tutores/me` to preload data and `PATCH /tutores/me` to submit changes.
 - In the dashboard, display the tutor’s **Membresía** status (from Pagos slice via separate API) and maybe a link to manage subscription if inactive.
 - Also include a quick view of **Estudiantes** (children) on the dashboard (names, maybe points – can reuse Estudiantes slice API to fetch them).
 
 **API Integration**:
+
 - Use React Query:
   - `useQuery('tutor', fetchTutorProfile)` to GET tutor profile on dashboard load.
   - `useMutation(updateTutorProfile)` for profile updates, with invalidation of 'tutor' query on success.
@@ -37,12 +40,14 @@ Implement the **Tutores** vertical slice within the Usuarios domain.
 - Ensure to handle 401 (unauthenticated) globally (redirect to /login if needed).
 
 **Types**:
+
 - `Tutor` interface (id, nombre, apellido, email, telefono, etc.). Align with Prisma model.
 - `UpdateTutorDto` for PATCH (possibly partial fields).
 - If membership info is returned with tutor (optional), define e.g. `TutorProfile` including membership: e.g., `{ tutor: Tutor; membresia?: { estado: string; proximoPago: Date; } }`.
 - Place these in a `usuarios.types.ts` or similar file.
 
 **Orden de implementación**:
+
 1. **Prisma**: Añadir modelo Tutor (si aún no existe). Ejecutar migración.
 2. **Backend**: Crear `UsuariosModule` (si no existe) con submódulo `TutoresModule`. Implementar `tutores.service.ts` (métodos crear, actualizar, obtener) y `tutores.controller.ts` (rutas GET/PATCH perfil).
 3. **Integración Auth**: Usar `TutorService.crearTutor` dentro de AuthService register (con la lógica ya implementada).

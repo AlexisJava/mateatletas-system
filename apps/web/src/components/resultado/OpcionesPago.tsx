@@ -20,9 +20,7 @@ export default function OpcionesPago({ ruta, nombreEstudiante }: OpcionesPagoPro
 
   // Calcular precios con lógica real
   const precioRutaCompleta = moneda === 'USD' ? ruta.precio_usd : ruta.precio_ars;
-  const precioCursosIndividuales = moneda === 'USD'
-    ? ruta.precio_usd * 4
-    : ruta.precio_ars * 4;
+  const precioCursosIndividuales = moneda === 'USD' ? ruta.precio_usd * 4 : ruta.precio_ars * 4;
   const ahorro = precioCursosIndividuales - precioRutaCompleta;
   const porcentajeAhorro = Math.round((ahorro / precioCursosIndividuales) * 100);
 
@@ -125,9 +123,7 @@ export default function OpcionesPago({ ruta, nombreEstudiante }: OpcionesPagoPro
           <div className="grid md:grid-cols-2 gap-12 mt-8">
             {/* IZQUIERDA: Precio y ahorro */}
             <div>
-              <h3 className="text-3xl font-black text-white mb-6">
-                Los 4 Cursos Completos
-              </h3>
+              <h3 className="text-3xl font-black text-white mb-6">Los 4 Cursos Completos</h3>
 
               {/* Precio tachado */}
               <div className="mb-4">
@@ -137,9 +133,7 @@ export default function OpcionesPago({ ruta, nombreEstudiante }: OpcionesPagoPro
                 <div className="text-7xl font-black bg-gradient-to-r from-emerald-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent mb-4">
                   ${precioRutaCompleta.toLocaleString()}
                 </div>
-                <div className="text-slate-400 text-lg mb-6">
-                  {moneda} • Pago único
-                </div>
+                <div className="text-slate-400 text-lg mb-6">{moneda} • Pago único</div>
               </div>
 
               {/* Ahorro destacado */}
@@ -155,9 +149,7 @@ export default function OpcionesPago({ ruta, nombreEstudiante }: OpcionesPagoPro
                     </div>
                   </div>
                 </div>
-                <div className="text-slate-400 text-sm">
-                  vs. comprar los cursos por separado
-                </div>
+                <div className="text-slate-400 text-sm">vs. comprar los cursos por separado</div>
               </div>
 
               {/* Botón gigante */}
@@ -200,9 +192,7 @@ export default function OpcionesPago({ ruta, nombreEstudiante }: OpcionesPagoPro
                   </div>
                   <div>
                     <div className="text-white font-bold mb-1">Acceso de por vida</div>
-                    <div className="text-slate-400 text-sm">
-                      Sin vencimientos. Para siempre.
-                    </div>
+                    <div className="text-slate-400 text-sm">Sin vencimientos. Para siempre.</div>
                   </div>
                 </div>
 
@@ -224,9 +214,7 @@ export default function OpcionesPago({ ruta, nombreEstudiante }: OpcionesPagoPro
                   </div>
                   <div>
                     <div className="text-white font-bold mb-1">Certificado Oficial</div>
-                    <div className="text-slate-400 text-sm">
-                      Al completar la ruta completa
-                    </div>
+                    <div className="text-slate-400 text-sm">Al completar la ruta completa</div>
                   </div>
                 </div>
 
@@ -259,35 +247,23 @@ export default function OpcionesPago({ ruta, nombreEstudiante }: OpcionesPagoPro
       >
         <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-6 text-center">
           <div className="text-5xl mb-4">💰</div>
-          <div className="text-2xl font-black text-white mb-2">
-            ${precioPorDia}
-          </div>
+          <div className="text-2xl font-black text-white mb-2">${precioPorDia}</div>
           <div className="text-purple-400 font-semibold mb-1">por día</div>
-          <div className="text-slate-400 text-sm">
-            durante {diasTotales} días
-          </div>
+          <div className="text-slate-400 text-sm">durante {diasTotales} días</div>
         </div>
 
         <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-400/30 rounded-2xl p-6 text-center">
           <div className="text-5xl mb-4">📚</div>
-          <div className="text-2xl font-black text-white mb-2">
-            {ruta.cursos.length * 12}+
-          </div>
+          <div className="text-2xl font-black text-white mb-2">{ruta.cursos.length * 12}+</div>
           <div className="text-cyan-400 font-semibold mb-1">clases en total</div>
-          <div className="text-slate-400 text-sm">
-            contenido de calidad premium
-          </div>
+          <div className="text-slate-400 text-sm">contenido de calidad premium</div>
         </div>
 
         <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-400/30 rounded-2xl p-6 text-center">
           <div className="text-5xl mb-4">♾️</div>
-          <div className="text-2xl font-black text-white mb-2">
-            Para siempre
-          </div>
+          <div className="text-2xl font-black text-white mb-2">Para siempre</div>
           <div className="text-emerald-400 font-semibold mb-1">sin vencimiento</div>
-          <div className="text-slate-400 text-sm">
-            acceso de por vida
-          </div>
+          <div className="text-slate-400 text-sm">acceso de por vida</div>
         </div>
       </motion.div>
 
@@ -305,9 +281,9 @@ export default function OpcionesPago({ ruta, nombreEstudiante }: OpcionesPagoPro
             La motivación de {nombreEstudiante} es HOY
           </h4>
           <p className="text-slate-300 text-lg leading-relaxed mb-6">
-            Los padres que toman acción cuando sus hijos muestran interés
-            ven los <strong className="text-white">mejores resultados</strong>.
-            La ventana de oportunidad es ahora.
+            Los padres que toman acción cuando sus hijos muestran interés ven los{' '}
+            <strong className="text-white">mejores resultados</strong>. La ventana de oportunidad es
+            ahora.
           </p>
           <p className="text-slate-400 text-sm">
             Más de 5,000 familias ya confiaron en Mateatletas

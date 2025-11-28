@@ -8,11 +8,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Membresia,
-  InscripcionCurso,
-  PreferenciaPago,
-} from '@/types/pago.types';
+import { Membresia, InscripcionCurso, PreferenciaPago } from '@/types/pago.types';
 import * as pagosApi from '@/lib/api/pagos.api';
 
 // ============================================================================
@@ -72,8 +68,7 @@ export function useInscripciones() {
  */
 export function useCrearPreferenciaSuscripcion() {
   return useMutation<PreferenciaPago, Error, string>({
-    mutationFn: (productoId: string) =>
-      pagosApi.crearPreferenciaSuscripcion(productoId),
+    mutationFn: (productoId: string) => pagosApi.crearPreferenciaSuscripcion(productoId),
   });
 }
 
@@ -107,8 +102,7 @@ export function useActivarMembresiaManual() {
   const queryClient = useQueryClient();
 
   return useMutation<Membresia, Error, string>({
-    mutationFn: (membresiaId: string) =>
-      pagosApi.activarMembresiaManual(membresiaId),
+    mutationFn: (membresiaId: string) => pagosApi.activarMembresiaManual(membresiaId),
 
     onSuccess: () => {
       // Refetch membresía actual
@@ -140,10 +134,7 @@ export function usePagosCompleto() {
     error: errorMembresia,
   } = useMembresiaActual();
 
-  const {
-    data: inscripciones = [],
-    isLoading: isLoadingInscripciones,
-  } = useInscripciones();
+  const { data: inscripciones = [], isLoading: isLoadingInscripciones } = useInscripciones();
 
   const preferenciaSuscripcion = useCrearPreferenciaSuscripcion();
   const preferenciaCurso = useCrearPreferenciaCurso();
@@ -158,10 +149,7 @@ export function usePagosCompleto() {
       const preferencia = await preferenciaSuscripcion.mutateAsync(productoId);
       return preferencia.init_point;
     },
-    crearPreferenciaCurso: async (
-      productoId: string,
-      estudianteId: string
-    ) => {
+    crearPreferenciaCurso: async (productoId: string, estudianteId: string) => {
       const preferencia = await preferenciaCurso.mutateAsync({
         productoId,
         estudianteId,
@@ -169,8 +157,7 @@ export function usePagosCompleto() {
       return preferencia.init_point;
     },
     activarManual: (membresiaId: string) => activarManual.mutate(membresiaId),
-    isCreatingPreferencia:
-      preferenciaSuscripcion.isPending || preferenciaCurso.isPending,
+    isCreatingPreferencia: preferenciaSuscripcion.isPending || preferenciaCurso.isPending,
     isActivating: activarManual.isPending,
   };
 }

@@ -51,8 +51,7 @@ export function useMarcarLogroVisto(estudianteId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (logroId: string) =>
-      gamificacionApi.marcarLogroVisto(estudianteId, logroId),
+    mutationFn: (logroId: string) => gamificacionApi.marcarLogroVisto(estudianteId, logroId),
     onSuccess: () => {
       // Invalidar logros no vistos para refetch
       queryClient.invalidateQueries({ queryKey: ['logros-no-vistos', estudianteId] });

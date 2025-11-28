@@ -33,9 +33,7 @@ export default function Pregunta4({ respuestas, setRespuestas }: Pregunta4Props)
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
                 ¿Ha programado o usado código antes?
               </h2>
-              <p className="text-slate-400 text-lg">
-                Esto nos ayuda a elegir el nivel adecuado
-              </p>
+              <p className="text-slate-400 text-lg">Esto nos ayuda a elegir el nivel adecuado</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto w-full">
@@ -48,16 +46,17 @@ export default function Pregunta4({ respuestas, setRespuestas }: Pregunta4Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        nivel_programacion: opcion.value as any
+                        nivel_programacion: opcion.value as any,
                       });
                       setTimeout(() => setSubStep(2), 300);
                     }}
                     className={`
                       px-8 py-6 rounded-2xl font-semibold transition-all
                       border-2 flex items-center gap-4
-                      ${isSelected
-                        ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-400 scale-[1.02]'
-                        : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-400 scale-[1.02]'
+                          : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
                       }
                     `}
                     whileHover={{ scale: 1.01 }}
@@ -84,9 +83,7 @@ export default function Pregunta4({ respuestas, setRespuestas }: Pregunta4Props)
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
                 ¿Cómo le va en matemáticas en la escuela?
               </h2>
-              <p className="text-slate-400 text-lg">
-                Solo queremos saber el punto de partida
-              </p>
+              <p className="text-slate-400 text-lg">Solo queremos saber el punto de partida</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto w-full">
@@ -99,16 +96,17 @@ export default function Pregunta4({ respuestas, setRespuestas }: Pregunta4Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        nivel_mate_escuela: opcion.value as any
+                        nivel_mate_escuela: opcion.value as any,
                       });
                       setTimeout(() => setSubStep(3), 300);
                     }}
                     className={`
                       px-8 py-6 rounded-2xl font-semibold transition-all
                       border-2 flex items-center gap-4
-                      ${isSelected
-                        ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400 scale-[1.02]'
-                        : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400 scale-[1.02]'
+                          : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
                       }
                     `}
                     whileHover={{ scale: 1.01 }}
@@ -144,9 +142,7 @@ export default function Pregunta4({ respuestas, setRespuestas }: Pregunta4Props)
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
                 ¿Le gustan los desafíos matemáticos o lógicos?
               </h2>
-              <p className="text-slate-400 text-lg">
-                Acertijos, puzzles, problemas para pensar
-              </p>
+              <p className="text-slate-400 text-lg">Acertijos, puzzles, problemas para pensar</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto w-full">
@@ -159,15 +155,16 @@ export default function Pregunta4({ respuestas, setRespuestas }: Pregunta4Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        disfruta_desafios: opcion.value as any
+                        disfruta_desafios: opcion.value as any,
                       });
                     }}
                     className={`
                       px-8 py-6 rounded-2xl font-semibold transition-all
                       border-2 flex items-center gap-4
-                      ${isSelected
-                        ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 scale-[1.02]'
-                        : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-purple-400 scale-[1.02]'
+                          : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
                       }
                     `}
                     whileHover={{ scale: 1.01 }}

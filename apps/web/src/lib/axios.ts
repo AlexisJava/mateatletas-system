@@ -18,10 +18,7 @@ import type { JsonValue, RequestData } from '@/types/common';
  */
 
 type ApiClient = Omit<AxiosInstance, 'get' | 'post' | 'put' | 'patch' | 'delete'> & {
-  get<T = JsonValue, D = RequestData>(
-    url: string,
-    config?: AxiosRequestConfig<D>,
-  ): Promise<T>;
+  get<T = JsonValue, D = RequestData>(url: string, config?: AxiosRequestConfig<D>): Promise<T>;
   post<T = JsonValue, D = RequestData>(
     url: string,
     data?: D,
@@ -37,10 +34,7 @@ type ApiClient = Omit<AxiosInstance, 'get' | 'post' | 'put' | 'patch' | 'delete'
     data?: D,
     config?: AxiosRequestConfig<D>,
   ): Promise<T>;
-  delete<T = JsonValue, D = RequestData>(
-    url: string,
-    config?: AxiosRequestConfig<D>,
-  ): Promise<T>;
+  delete<T = JsonValue, D = RequestData>(url: string, config?: AxiosRequestConfig<D>): Promise<T>;
 };
 
 const apiClient: ApiClient = axios.create({
@@ -85,7 +79,8 @@ apiClient.interceptors.response.use(
     if (typeof window !== 'undefined') {
       const status = error.response?.status ?? 0;
       const currentPath = window.location.pathname;
-      const isAuthPage = currentPath === '/login' || currentPath === '/register' || currentPath === '/docente-login';
+      const isAuthPage =
+        currentPath === '/login' || currentPath === '/register' || currentPath === '/docente-login';
 
       switch (status) {
         case 401: {

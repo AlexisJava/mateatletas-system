@@ -57,6 +57,7 @@ planificaciones/
 ### Base de Datos
 
 Ya existe en Prisma desde sesión anterior:
+
 - `PlanificacionMensual`
 - `ActividadSemanal`
 - `AsignacionDocente`
@@ -68,18 +69,21 @@ Ya existe en Prisma desde sesión anterior:
 ## 🎯 Las 3 Planificaciones de Noviembre
 
 ### Nivel 1 (6-7 años)
+
 - **Ubicación**: `apps/web/src/planificaciones/2025-11-nivel-1/`
 - **Grupos**: B1
 - **Duración por sesión**: 75 minutos
 - **Estado**: ⚠️ **PENDIENTE - ARMAR TU APLICACIÓN REACT AQUÍ**
 
 ### Nivel 2 (8-9 años)
+
 - **Ubicación**: `apps/web/src/planificaciones/2025-11-nivel-2/`
 - **Grupos**: B2, B3
 - **Duración por sesión**: 90 minutos
 - **Estado**: ⚠️ **PENDIENTE - ARMAR TU APLICACIÓN REACT AQUÍ**
 
 ### Nivel 3 (10-12 años)
+
 - **Ubicación**: `apps/web/src/planificaciones/2025-11-nivel-3/`
 - **Grupos**: B4, L1, L2
 - **Duración por sesión**: 120 minutos
@@ -94,16 +98,14 @@ Ya existe en Prisma desde sesión anterior:
 Para cada nivel (1, 2, 3):
 
 #### a) Completar `metadata.json`
+
 ```json
 {
   "titulo": "TU TÍTULO AQUÍ",
   "descripcion": "TU DESCRIPCIÓN",
   "tematica_principal": "Ej: Suma y resta",
   "narrativa": "Ej: El Reino de los Números",
-  "objetivos_aprendizaje": [
-    "Objetivo 1",
-    "Objetivo 2"
-  ],
+  "objetivos_aprendizaje": ["Objetivo 1", "Objetivo 2"],
   "semanas": [
     {
       "numero": 1,
@@ -126,11 +128,7 @@ import { PlanificacionApp } from '@/planificaciones/shared';
 
 export default function PlanificacionNoviembre2025NivelX() {
   return (
-    <PlanificacionApp
-      codigo="2025-11-nivel-X"
-      titulo="Tu Título"
-      descripcion="Tu Descripción"
-    >
+    <PlanificacionApp codigo="2025-11-nivel-X" titulo="Tu Título" descripcion="Tu Descripción">
       {/* TU APLICACIÓN REACT AQUÍ */}
       {/* Podés crear juegos, animaciones, narrativas, etc. */}
       {/* Libertad TOTAL de diseño */}
@@ -140,6 +138,7 @@ export default function PlanificacionNoviembre2025NivelX() {
 ```
 
 #### c) Crear assets si necesitas
+
 - Crear carpeta `assets/` dentro de cada planificación
 - Guardar imágenes, sonidos, videos que uses
 
@@ -169,21 +168,27 @@ export default function PlanificacionNoviembre2025NivelX() {
 Podés usar estos componentes para acelerar el desarrollo (o ignorarlos y crear todo desde cero):
 
 ### `<PlanificacionApp>` (OBLIGATORIO)
+
 Wrapper principal que maneja tracking automático.
 
 ### `<GameScore puntos={100} />`
+
 Muestra puntaje del juego.
 
 ### `<ActivityTimer tiempoRestante={60} />`
+
 Temporizador con barra de progreso.
 
 ### `<ProgressTracker progreso={75} />`
+
 Barra de progreso general.
 
 ### `<AchievementPopup achievement={...} />`
+
 Popup de logro desbloqueado.
 
 ### `usePlanificacionTracking(codigo)`
+
 Hook para tracking manual de progreso.
 
 ---
@@ -191,6 +196,7 @@ Hook para tracking manual de progreso.
 ## 🔗 API Endpoints Disponibles
 
 ### Admin
+
 - `POST /api/planificaciones` - Crear planificación
 - `GET /api/planificaciones` - Listar planificaciones
 - `GET /api/planificaciones/:id` - Detalle de planificación
@@ -198,10 +204,12 @@ Hook para tracking manual de progreso.
 - `POST /api/planificaciones/actividades` - Crear actividad semanal
 
 ### Docente
+
 - `POST /api/planificaciones/asignar` - Asignar a grupo
 - `GET /api/planificaciones/docente/mis-planificaciones` - Mis planificaciones
 
 ### Estudiante
+
 - `GET /api/planificaciones/estudiante/mis-planificaciones` - Planificaciones disponibles
 - `POST /api/planificaciones/progreso` - Actualizar progreso
 - `GET /api/planificaciones/estudiante/:planificacionId/progreso` - Ver progreso
@@ -234,18 +242,21 @@ Hook para tracking manual de progreso.
 ## 💡 Ejemplos de lo que podés hacer
 
 ### Nivel 1 (6-7 años)
+
 - Juego de arrastrar y soltar números
 - Aventura animada con personajes
 - Ejercicios gamificados simples
 - Feedback visual inmediato
 
 ### Nivel 2 (8-9 años)
+
 - Juegos con tiempo límite
 - Sistema de niveles progresivos
 - Desafíos matemáticos contextualizados
 - Estadísticas y progreso visible
 
 ### Nivel 3 (10-12 años)
+
 - Simuladores interactivos
 - Visualizaciones de datos (gráficos)
 - Problemas complejos multi-paso
@@ -256,12 +267,14 @@ Hook para tracking manual de progreso.
 ## 🛠️ Tecnologías que podés usar
 
 ### Incluidas en el proyecto
+
 - React
 - TypeScript
 - Tailwind CSS
 - Next.js
 
 ### Que podrías agregar
+
 - Chart.js / Recharts (gráficos)
 - Framer Motion (animaciones)
 - Three.js (3D)

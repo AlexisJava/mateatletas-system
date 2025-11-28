@@ -34,7 +34,7 @@ export function AnimatedCounter({ value, suffix = '' }: AnimatedCounterProps) {
           return () => clearInterval(timer);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     if (ref.current) observer.observe(ref.current);

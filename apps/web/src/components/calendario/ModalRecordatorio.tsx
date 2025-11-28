@@ -106,7 +106,7 @@ export function ModalRecordatorio({
       if (recordatorioExistente) {
         await actualizarRecordatorio(
           recordatorioExistente.id,
-          recordatorioData as UpdateRecordatorioDto
+          recordatorioData as UpdateRecordatorioDto,
         );
       } else {
         await crearRecordatorio(recordatorioData as CreateRecordatorioDto);
@@ -138,10 +138,7 @@ export function ModalRecordatorio({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
       <motion.div
@@ -153,7 +150,9 @@ export function ModalRecordatorio({
         {/* Header with dynamic gradient based on selected color */}
         <div
           className={`p-6 flex items-center justify-between bg-gradient-to-r ${
-            colorSeleccionado ? `${colorSeleccionado.from} ${colorSeleccionado.to}` : 'from-indigo-500 to-indigo-600'
+            colorSeleccionado
+              ? `${colorSeleccionado.from} ${colorSeleccionado.to}`
+              : 'from-indigo-500 to-indigo-600'
           }`}
         >
           <div className="flex items-center gap-3">
@@ -319,7 +318,9 @@ export function ModalRecordatorio({
             <button
               type="submit"
               className={`px-6 py-3 text-white rounded-xl font-bold hover-lift shadow-lg bg-gradient-to-r ${
-                colorSeleccionado ? `${colorSeleccionado.from} ${colorSeleccionado.to}` : 'from-indigo-500 to-indigo-600'
+                colorSeleccionado
+                  ? `${colorSeleccionado.from} ${colorSeleccionado.to}`
+                  : 'from-indigo-500 to-indigo-600'
               }`}
               style={{
                 boxShadow: `0 10px 25px -5px ${color}40`,

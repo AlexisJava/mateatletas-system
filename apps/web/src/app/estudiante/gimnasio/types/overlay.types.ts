@@ -25,7 +25,12 @@ export type OverlayConfig =
   | { type: 'entrenamientos' }
   | { type: 'planificacion'; codigo?: string; tema?: PlanificacionTema }
   | { type: 'tareas-asignadas' } // Vista de tareas asignadas con estado bloqueado/desbloqueado
-  | { type: 'planificaciones-sector'; sectorNombre: string; sectorColor: string; sectorEmoji: string } // Planificaciones de un sector específico
+  | {
+      type: 'planificaciones-sector';
+      sectorNombre: string;
+      sectorColor: string;
+      sectorEmoji: string;
+    } // Planificaciones de un sector específico
   | { type: 'actividad'; semanaId?: string } // Grid 2×2 de las 4 actividades de una semana
   | { type: 'laboratorio-ecosistema'; semanaId?: string } // Ecosistema LearnDash para Laboratorio Mágico
   | { type: 'ejecutar-actividad'; actividadId?: string; semanaId?: string } // Ejecución individual
@@ -151,10 +156,11 @@ export type ExtractOverlayType<T extends OverlayConfig['type']> = Extract<
 /**
  * Helper type: Verificar si overlay requiere datos adicionales
  */
-export type OverlayRequiresData<T extends OverlayConfig['type']> = ExtractOverlayType<T> extends {
-  type: T;
-}
-  ? keyof Omit<ExtractOverlayType<T>, 'type'> extends never
-    ? false
-    : true
-  : false;
+export type OverlayRequiresData<T extends OverlayConfig['type']> =
+  ExtractOverlayType<T> extends {
+    type: T;
+  }
+    ? keyof Omit<ExtractOverlayType<T>, 'type'> extends never
+      ? false
+      : true
+    : false;

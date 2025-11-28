@@ -64,6 +64,7 @@ npm run dev
 ### Opción 2: Ejecutar Individual
 
 #### API (Backend)
+
 ```bash
 cd apps/api
 npm run start:dev
@@ -73,6 +74,7 @@ npm run start:dev
 ```
 
 #### Web (Frontend)
+
 ```bash
 cd apps/web
 npm run dev
@@ -87,6 +89,7 @@ npm run dev
 ### 1. Ver Componentes UI
 
 Abre tu navegador en:
+
 ```
 http://localhost:3000/showcase
 ```
@@ -96,6 +99,7 @@ Aquí verás todos los componentes UI con ejemplos interactivos.
 ### 2. Probar API con cURL
 
 #### Registrar un Tutor
+
 ```bash
 curl -X POST http://localhost:3001/api/auth/register \
   -H "Content-Type: application/json" \
@@ -110,6 +114,7 @@ curl -X POST http://localhost:3001/api/auth/register \
 ```
 
 #### Hacer Login
+
 ```bash
 curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
@@ -122,6 +127,7 @@ curl -X POST http://localhost:3001/api/auth/login \
 ```
 
 #### Obtener Perfil (requiere token)
+
 ```bash
 curl -X GET http://localhost:3001/api/auth/profile \
   -H "Authorization: Bearer TU_TOKEN_AQUI"
@@ -151,6 +157,7 @@ apps/api/src/
 ```
 
 **Archivos clave:**
+
 - [apps/api/src/auth/auth.service.ts](apps/api/src/auth/auth.service.ts) - Lógica de negocio
 - [apps/api/src/auth/auth.controller.ts](apps/api/src/auth/auth.controller.ts) - Endpoints REST
 - [apps/api/prisma/schema.prisma](apps/api/prisma/schema.prisma) - Modelo de datos
@@ -174,6 +181,7 @@ apps/web/src/
 ```
 
 **Archivos clave:**
+
 - [apps/web/src/store/auth.store.ts](apps/web/src/store/auth.store.ts) - Store de autenticación
 - [apps/web/src/lib/axios.ts](apps/web/src/lib/axios.ts) - Configuración de Axios
 - [apps/web/src/components/ui/](apps/web/src/components/ui/) - Componentes UI
@@ -417,18 +425,22 @@ Pega tu token para ver el payload (sin revelar el secret).
 ### Errores Comunes
 
 **Error: "Cannot connect to database"**
+
 - Verifica que PostgreSQL esté corriendo: `docker ps`
 - Revisa las credenciales en `apps/api/.env`
 
 **Error: "JWT_SECRET not configured"**
+
 - Asegúrate de que `apps/api/.env` tenga `JWT_SECRET`
 - Reinicia el servidor después de cambiar .env
 
 **Error: "Module not found"**
+
 - Ejecuta `npm install` en la raíz del proyecto
 - Verifica que estés usando Node 18+
 
 **Error de CORS en el frontend**
+
 - Verifica que `NEXT_PUBLIC_API_URL` en `apps/web/.env.local` sea correcto
 - Asegúrate de que la API tenga CORS habilitado
 

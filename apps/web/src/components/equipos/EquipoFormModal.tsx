@@ -258,17 +258,8 @@ export default function EquipoFormModal({
             >
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              className="flex-1"
-              disabled={isSubmitting}
-            >
-              {isSubmitting
-                ? 'Guardando...'
-                : equipoToEdit
-                  ? 'Actualizar'
-                  : 'Crear equipo'}
+            <Button type="submit" variant="primary" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? 'Guardando...' : equipoToEdit ? 'Actualizar' : 'Crear equipo'}
             </Button>
           </div>
         </form>

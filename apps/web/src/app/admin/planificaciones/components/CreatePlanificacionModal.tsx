@@ -184,7 +184,9 @@ export const CreatePlanificacionModal: React.FC<CreatePlanificacionModalProps> =
                 <h2 className="text-2xl font-black bg-gradient-to-r from-white via-pink-200 to-rose-200 bg-clip-text text-transparent">
                   Nueva Planificación
                 </h2>
-                <p className="text-sm text-white/60 font-medium">Crear planificación mensual inmersiva</p>
+                <p className="text-sm text-white/60 font-medium">
+                  Crear planificación mensual inmersiva
+                </p>
               </div>
             </div>
 
@@ -223,7 +225,9 @@ export const CreatePlanificacionModal: React.FC<CreatePlanificacionModalProps> =
                   {grupos.map((grupo) => (
                     <option key={grupo.id} value={grupo.id}>
                       {grupo.codigo} - {grupo.nombre}
-                      {grupo.edad_minima && grupo.edad_maxima && ` (${grupo.edad_minima}-${grupo.edad_maxima} años)`}
+                      {grupo.edad_minima &&
+                        grupo.edad_maxima &&
+                        ` (${grupo.edad_minima}-${grupo.edad_maxima} años)`}
                     </option>
                   ))}
                 </select>

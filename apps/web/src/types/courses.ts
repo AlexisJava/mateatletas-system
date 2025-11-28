@@ -169,10 +169,30 @@ export const OPCIONES_QUIZ = {
   ],
 
   personalidad_problema: [
-    { value: 'insiste_solo', label: 'Insiste solo hasta resolverlo', emoji: '💪', descripcion: 'Perseverante, le gusta superar desafíos' },
-    { value: 'pide_ayuda', label: 'Pide ayuda cuando se traba', emoji: '🙋', descripcion: 'Colaborativo, sabe cuándo necesita apoyo' },
-    { value: 'busca_alternativa', label: 'Busca otra forma de hacerlo', emoji: '🔄', descripcion: 'Creativo, encuentra soluciones alternativas' },
-    { value: 'se_frustra', label: 'Se frustra y deja', emoji: '😤', descripcion: 'Necesita apoyo adicional y motivación' },
+    {
+      value: 'insiste_solo',
+      label: 'Insiste solo hasta resolverlo',
+      emoji: '💪',
+      descripcion: 'Perseverante, le gusta superar desafíos',
+    },
+    {
+      value: 'pide_ayuda',
+      label: 'Pide ayuda cuando se traba',
+      emoji: '🙋',
+      descripcion: 'Colaborativo, sabe cuándo necesita apoyo',
+    },
+    {
+      value: 'busca_alternativa',
+      label: 'Busca otra forma de hacerlo',
+      emoji: '🔄',
+      descripcion: 'Creativo, encuentra soluciones alternativas',
+    },
+    {
+      value: 'se_frustra',
+      label: 'Se frustra y deja',
+      emoji: '😤',
+      descripcion: 'Necesita apoyo adicional y motivación',
+    },
   ],
 
   actividades_tiempo_libre: [
@@ -188,7 +208,12 @@ export const OPCIONES_QUIZ = {
   ],
 
   juegos_favoritos: [
-    { value: 'minecraft', label: 'Minecraft', emoji: '⛏️', match: ['programacion', 'creatividad', 'construccion'] },
+    {
+      value: 'minecraft',
+      label: 'Minecraft',
+      emoji: '⛏️',
+      match: ['programacion', 'creatividad', 'construccion'],
+    },
     { value: 'roblox', label: 'Roblox', emoji: '🎮', match: ['programacion', 'game_dev', '3d'] },
     { value: 'fortnite', label: 'Fortnite', emoji: '🔫', match: ['estrategia', 'competitivo'] },
     { value: 'pokemon', label: 'Pokémon', emoji: '⚡', match: ['estrategia', 'coleccionismo'] },
@@ -201,24 +226,84 @@ export const OPCIONES_QUIZ = {
   ],
 
   contenido_consume: [
-    { value: 'tutoriales_juegos', label: 'Tutoriales de juegos', emoji: '📖', match: ['aprendizaje', 'game_dev'] },
+    {
+      value: 'tutoriales_juegos',
+      label: 'Tutoriales de juegos',
+      emoji: '📖',
+      match: ['aprendizaje', 'game_dev'],
+    },
     { value: 'gameplays', label: 'Gameplays/Streams', emoji: '🎬', match: ['entretenimiento'] },
-    { value: 'ciencia', label: 'Videos de ciencia', emoji: '🔬', match: ['ciencias', 'experimentos'] },
-    { value: 'matematica', label: 'Videos de matemática', emoji: '🧮', match: ['matematica', 'logica'] },
-    { value: 'construcciones_minecraft', label: 'Construcciones Minecraft', emoji: '🏗️', match: ['programacion', 'creatividad'] },
-    { value: 'experimentos', label: 'Experimentos caseros', emoji: '⚗️', match: ['ciencias', 'hands_on'] },
-    { value: 'animales', label: 'Animales/Naturaleza', emoji: '🦕', match: ['ciencias', 'biologia'] },
-    { value: 'astronomia', label: 'Astronomía/Espacio', emoji: '🌌', match: ['ciencias', 'astronomia'] },
-    { value: 'programacion', label: 'Programación/Coding', emoji: '💻', match: ['programacion', 'tech'] },
+    {
+      value: 'ciencia',
+      label: 'Videos de ciencia',
+      emoji: '🔬',
+      match: ['ciencias', 'experimentos'],
+    },
+    {
+      value: 'matematica',
+      label: 'Videos de matemática',
+      emoji: '🧮',
+      match: ['matematica', 'logica'],
+    },
+    {
+      value: 'construcciones_minecraft',
+      label: 'Construcciones Minecraft',
+      emoji: '🏗️',
+      match: ['programacion', 'creatividad'],
+    },
+    {
+      value: 'experimentos',
+      label: 'Experimentos caseros',
+      emoji: '⚗️',
+      match: ['ciencias', 'hands_on'],
+    },
+    {
+      value: 'animales',
+      label: 'Animales/Naturaleza',
+      emoji: '🦕',
+      match: ['ciencias', 'biologia'],
+    },
+    {
+      value: 'astronomia',
+      label: 'Astronomía/Espacio',
+      emoji: '🌌',
+      match: ['ciencias', 'astronomia'],
+    },
+    {
+      value: 'programacion',
+      label: 'Programación/Coding',
+      emoji: '💻',
+      match: ['programacion', 'tech'],
+    },
     { value: 'arte_digital', label: 'Arte digital', emoji: '🎨', match: ['creatividad', 'diseño'] },
     { value: 'no_mira_mucho', label: 'No mira mucho', emoji: '📵', match: [] },
   ],
 
   estilo_creativo: [
-    { value: 'planifica_primero', label: 'Planifica todo antes de empezar', emoji: '📋', descripcion: 'Metódico, le gusta tener un plan' },
-    { value: 'improvisa', label: 'Improvisa y ve qué sale', emoji: '🎭', descripcion: 'Espontáneo, prefiere experimentar' },
-    { value: 'copia_tutoriales', label: 'Sigue tutoriales paso a paso', emoji: '📺', descripcion: 'Aprende mejor con guías estructuradas' },
-    { value: 'mezcla_todo', label: 'Mezcla: planifica, improvisa y copia', emoji: '🔀', descripcion: 'Flexible, adapta según la situación' },
+    {
+      value: 'planifica_primero',
+      label: 'Planifica todo antes de empezar',
+      emoji: '📋',
+      descripcion: 'Metódico, le gusta tener un plan',
+    },
+    {
+      value: 'improvisa',
+      label: 'Improvisa y ve qué sale',
+      emoji: '🎭',
+      descripcion: 'Espontáneo, prefiere experimentar',
+    },
+    {
+      value: 'copia_tutoriales',
+      label: 'Sigue tutoriales paso a paso',
+      emoji: '📺',
+      descripcion: 'Aprende mejor con guías estructuradas',
+    },
+    {
+      value: 'mezcla_todo',
+      label: 'Mezcla: planifica, improvisa y copia',
+      emoji: '🔀',
+      descripcion: 'Flexible, adapta según la situación',
+    },
   ],
 
   nivel_programacion: [
@@ -243,15 +328,45 @@ export const OPCIONES_QUIZ = {
   ],
 
   objetivo_principal: [
-    { value: 'crear_su_propio_juego', label: 'Crear su propio videojuego', emoji: '🎮', area: 'programacion' },
-    { value: 'publicar_juego_roblox', label: 'Publicar un juego en Roblox', emoji: '🎨', area: 'programacion' },
-    { value: 'ganar_olimpiada', label: 'Ganar una olimpiada de matemática', emoji: '🏆', area: 'matematica' },
-    { value: 'hacer_web_propia', label: 'Hacer su propia página web', emoji: '🌐', area: 'programacion' },
-    { value: 'entender_como_funcionan_juegos', label: 'Entender cómo funcionan los juegos', emoji: '🔍', area: 'programacion' },
+    {
+      value: 'crear_su_propio_juego',
+      label: 'Crear su propio videojuego',
+      emoji: '🎮',
+      area: 'programacion',
+    },
+    {
+      value: 'publicar_juego_roblox',
+      label: 'Publicar un juego en Roblox',
+      emoji: '🎨',
+      area: 'programacion',
+    },
+    {
+      value: 'ganar_olimpiada',
+      label: 'Ganar una olimpiada de matemática',
+      emoji: '🏆',
+      area: 'matematica',
+    },
+    {
+      value: 'hacer_web_propia',
+      label: 'Hacer su propia página web',
+      emoji: '🌐',
+      area: 'programacion',
+    },
+    {
+      value: 'entender_como_funcionan_juegos',
+      label: 'Entender cómo funcionan los juegos',
+      emoji: '🔍',
+      area: 'programacion',
+    },
     { value: 'mejorar_en_mate', label: 'Mejorar en matemáticas', emoji: '📈', area: 'matematica' },
     { value: 'aprender_ia', label: 'Aprender sobre IA', emoji: '🤖', area: 'programacion' },
     { value: 'crear_app', label: 'Crear una app móvil', emoji: '📱', area: 'programacion' },
-    { value: 'explorar_ciencia', label: 'Explorar experimentos científicos', emoji: '🔬', area: 'ciencias' },
+    {
+      value: 'explorar_ciencia',
+      label: 'Explorar experimentos científicos',
+      emoji: '🔬',
+      area: 'ciencias',
+    },
   ],
 
   nivel_motivacion: [

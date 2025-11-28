@@ -41,7 +41,7 @@ export interface CountResponse {
  */
 export const getNotificaciones = async (soloNoLeidas?: boolean): Promise<Notificacion[]> => {
   const params = soloNoLeidas ? { soloNoLeidas: 'true' } : {};
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get('/notificaciones', { params });
     return notificacionesListSchema.parse(response);
@@ -55,7 +55,7 @@ export const getNotificaciones = async (soloNoLeidas?: boolean): Promise<Notific
  * Obtener contador de notificaciones no leídas
  */
 export const getNotificacionesCount = async (): Promise<number> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<CountResponse>('/notificaciones/count');
     const validated = countResponseSchema.parse(response);
@@ -71,7 +71,7 @@ export const getNotificacionesCount = async (): Promise<number> => {
  * @param id - ID de la notificación
  */
 export const marcarNotificacionComoLeida = async (id: string): Promise<Notificacion> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.patch(`/notificaciones/${id}/leer`);
     return notificacionSchema.parse(response);
@@ -85,7 +85,7 @@ export const marcarNotificacionComoLeida = async (id: string): Promise<Notificac
  * Marcar todas las notificaciones como leídas
  */
 export const marcarTodasComoLeidas = async (): Promise<{ message: string; count: number }> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.patch('/notificaciones/leer-todas');
     return marcarLeidaResponseSchema.parse(response);
@@ -100,7 +100,7 @@ export const marcarTodasComoLeidas = async (): Promise<{ message: string; count:
  * @param id - ID de la notificación a eliminar
  */
 export const eliminarNotificacion = async (id: string): Promise<{ message: string }> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.delete(`/notificaciones/${id}`);
     return eliminarNotificacionResponseSchema.parse(response);
@@ -188,6 +188,6 @@ export const formatearTiempoRelativo = (fecha: string): string => {
 
   return fechaNotif.toLocaleDateString('es-ES', {
     day: 'numeric',
-    month: 'short'
+    month: 'short',
   });
 };

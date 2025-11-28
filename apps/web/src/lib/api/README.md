@@ -35,11 +35,13 @@ El cliente está preconfigurado con:
 #### Interceptores
 
 **Request Interceptor:**
+
 - Lee el token JWT de `localStorage` (key: `'auth-token'`)
 - Adjunta automáticamente el header `Authorization: Bearer <token>` si existe
 - Solo funciona en el navegador (Next.js puede renderizar en servidor)
 
 **Response Interceptor:**
+
 - Extrae `response.data` automáticamente para simplificar el uso
 - Si recibe un **401 Unauthorized**:
   - Elimina el token de `localStorage`
@@ -343,6 +345,7 @@ interface LogoutResponse {
 ### HTTPS
 
 En producción, **siempre** usa HTTPS para:
+
 - Proteger el token JWT en tránsito
 - Prevenir ataques man-in-the-middle
 - Cumplir con mejores prácticas de seguridad
@@ -350,6 +353,7 @@ En producción, **siempre** usa HTTPS para:
 ## Próximos Pasos
 
 Este cliente Axios se usará en:
+
 1. **Zustand Store** - Para manejo de estado global de autenticación
 2. **React Query** - Para caché y sincronización de datos del servidor (opcional)
 3. **Componentes de UI** - Formularios de login/register, dashboard, etc.

@@ -1,4 +1,5 @@
 # PLAN DE ACCIÓN ÚNICO - MATEATLETAS ECOSYSTEM
+
 **Fecha:** 2025-10-18
 **Basado en:** [ESTADO_REAL_VERIFICADO.md](ESTADO_REAL_VERIFICADO.md)
 **Calificación actual:** 7.5/10
@@ -18,6 +19,7 @@
 ## FILOSOFÍA DE ESTE PLAN
 
 Este plan se basa en **EVIDENCIA VERIFICADA** contra el código fuente real.
+
 - ✅ NO incluye "bugs fantasma" de documentos contradictorios
 - ✅ NO incluye tareas ya completadas
 - ✅ SOLO incluye mejoras verificadas como necesarias
@@ -27,6 +29,7 @@ Este plan se basa en **EVIDENCIA VERIFICADA** contra el código fuente real.
 ## PRIORIDADES
 
 ### 🔴 Prioridad 1: CRÍTICO (Blockers para producción)
+
 **Estado:** ✅ Ningún problema crítico encontrado
 
 El sistema está production-ready. Las siguientes son MEJORAS, no BLOCKERS.
@@ -36,9 +39,11 @@ El sistema está production-ready. Las siguientes son MEJORAS, no BLOCKERS.
 ### 🟠 Prioridad 2: ALTO (Mejoras importantes)
 
 #### Tarea #1: Implementar Contratos Compartidos Frontend-Backend
+
 **Problema verificado:** [ESTADO_REAL_VERIFICADO.md - Problema #2](ESTADO_REAL_VERIFICADO.md#-problema-2-contratos-frontend-backend-no-implementados)
 
 **Evidencia:**
+
 - ❌ No existe `packages/contracts/`
 - ❌ No se usa Zod en DTOs
 - ⚠️ 17 type casts inseguros (`as unknown as`)
@@ -49,6 +54,7 @@ Crear package compartido con Zod schemas para validación runtime en frontend y 
 **Pasos:**
 
 1. **Crear estructura de package contracts** (30 min)
+
    ```bash
    mkdir -p packages/contracts/src
    cd packages/contracts
@@ -64,6 +70,7 @@ Crear package compartido con Zod schemas para validación runtime en frontend y 
 
 3. **Migrar DTOs de backend a schemas** (1 hora)
    Ejemplo:
+
    ```typescript
    // packages/contracts/src/schemas/auth.schema.ts
    import { z } from 'zod';
@@ -95,6 +102,7 @@ Crear package compartido con Zod schemas para validación runtime en frontend y 
    - Test: Invalid response lanza ZodError
 
 **Archivos a modificar:**
+
 - `apps/web/src/lib/api/estudiantes.api.ts` (1 type cast)
 - `apps/web/src/lib/api/notificaciones.api.ts` (5 type casts)
 - `apps/web/src/lib/api/equipos.api.ts` (7 type casts)
@@ -104,6 +112,7 @@ Crear package compartido con Zod schemas para validación runtime en frontend y 
 **Impacto:** +1.5 puntos en calificación (Type Safety: 5/10 → 9/10)
 
 **Comandos de verificación:**
+
 ```bash
 # Verificar que contracts existe
 ls packages/contracts/src/schemas/
@@ -121,9 +130,11 @@ grep -r "as unknown as" apps/web/src/lib/api/
 ### 🟡 Prioridad 3: MEDIO (Mejoras de calidad)
 
 #### Tarea #2: Eliminar Type Casts Inseguros en Frontend
+
 **Problema verificado:** [ESTADO_REAL_VERIFICADO.md - Problema #1](ESTADO_REAL_VERIFICADO.md#-problema-1-type-casts-en-frontend)
 
 **Evidencia:**
+
 - 17 ocurrencias de `as unknown as` en 4 archivos
 
 **Objetivo:**
@@ -153,6 +164,7 @@ Eliminar todos los type casts inseguros usando schemas validados.
 **Impacto:** +0.5 puntos en calificación (consolidar Type Safety)
 
 **Comandos de verificación:**
+
 ```bash
 # Verificar eliminación completa
 grep -r "as unknown as" apps/web/src/lib/api/
@@ -166,9 +178,11 @@ grep -r "\.parse\(" apps/web/src/lib/api/
 ---
 
 #### Tarea #3: Aumentar Cobertura de Tests
+
 **Problema verificado:** [ESTADO_REAL_VERIFICADO.md - Problema #3](ESTADO_REAL_VERIFICADO.md#-problema-3-cobertura-de-tests-limitada)
 
 **Evidencia:**
+
 - Solo ~16 archivos de test encontrados
 - Cobertura real: DESCONOCIDA
 
@@ -178,6 +192,7 @@ Alcanzar >70% de cobertura en servicios críticos.
 **Pasos:**
 
 1. **Medir cobertura actual** (15 min)
+
    ```bash
    cd apps/api
    npm run test:cov
@@ -208,6 +223,7 @@ Alcanzar >70% de cobertura en servicios críticos.
 **Impacto:** +1.0 punto en calificación (Testing: 4/10 → 8/10)
 
 **Comandos de verificación:**
+
 ```bash
 # Ejecutar tests
 npm run test
@@ -226,6 +242,7 @@ find apps -name "*.spec.ts" | grep -E "^apps/" | wc -l
 ### 🟢 Prioridad 4: BAJO (Optimizaciones)
 
 #### Tarea #4: Dashboard de Observabilidad para Circuit Breakers
+
 **Problema:** Circuit Breakers implementados pero métricas no expuestas
 
 **Objetivo:**
@@ -234,6 +251,7 @@ Exponer métricas de Circuit Breakers para monitoring.
 **Pasos:**
 
 1. **Crear endpoint de métricas** (30 min)
+
    ```typescript
    // apps/api/src/admin/admin.controller.ts
    @Get('metrics/circuits')
@@ -253,6 +271,7 @@ Exponer métricas de Circuit Breakers para monitoring.
 **Impacto:** +0.5 puntos en calificación (Observabilidad)
 
 **Comandos de verificación:**
+
 ```bash
 # Verificar endpoint
 curl -H "Authorization: Bearer $TOKEN" http://localhost:3001/api/admin/metrics/circuits
@@ -264,15 +283,19 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:3001/api/admin/metrics/c
 ## CRONOGRAMA RECOMENDADO
 
 ### Día 1 (4.5 horas)
+
 - ✅ Tarea #1: Implementar Contratos Compartidos (4.5h)
 
 ### Día 2 (3 horas)
+
 - ✅ Tarea #2: Eliminar Type Casts Inseguros (3h)
 
 ### Día 3 (6 horas)
+
 - ✅ Tarea #3: Aumentar Cobertura de Tests (6h)
 
 ### Día 4 (1.5 horas) - OPCIONAL
+
 - 🟢 Tarea #4: Dashboard de Observabilidad (1.5h)
 
 **Tiempo total:** 15 horas (11-13.5h sin opcional)
@@ -281,19 +304,20 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:3001/api/admin/metrics/c
 
 ## MÉTRICAS DE ÉXITO
 
-| Métrica | Actual | Objetivo | Verificación |
-|---------|--------|----------|--------------|
-| **Contratos Compartidos** | ❌ 0 schemas | ✅ 15+ schemas | `ls packages/contracts/src/schemas/` |
-| **Type Casts Inseguros** | ⚠️ 17 | ✅ 0 | `grep -r "as unknown as" apps/web/src/lib/api/` |
-| **Cobertura de Tests** | ⚠️ ~16 tests | ✅ >70% statements | `npm run test:cov` |
-| **Circuit Breakers Observables** | ⚠️ No expuestos | ✅ Endpoint + Dashboard | `curl /api/admin/metrics/circuits` |
-| **Calificación General** | 7.5/10 | 9.0/10 | Re-ejecutar auditoría |
+| Métrica                          | Actual          | Objetivo                | Verificación                                    |
+| -------------------------------- | --------------- | ----------------------- | ----------------------------------------------- |
+| **Contratos Compartidos**        | ❌ 0 schemas    | ✅ 15+ schemas          | `ls packages/contracts/src/schemas/`            |
+| **Type Casts Inseguros**         | ⚠️ 17           | ✅ 0                    | `grep -r "as unknown as" apps/web/src/lib/api/` |
+| **Cobertura de Tests**           | ⚠️ ~16 tests    | ✅ >70% statements      | `npm run test:cov`                              |
+| **Circuit Breakers Observables** | ⚠️ No expuestos | ✅ Endpoint + Dashboard | `curl /api/admin/metrics/circuits`              |
+| **Calificación General**         | 7.5/10          | 9.0/10                  | Re-ejecutar auditoría                           |
 
 ---
 
 ## COMANDOS RÁPIDOS DE VERIFICACIÓN
 
 ### Después de completar TODO
+
 ```bash
 # 1. Verificar contratos existen
 ls packages/contracts/src/schemas/
@@ -348,17 +372,17 @@ Estas tareas NO son necesarias para alcanzar 9.0/10, pero sumarían puntos extra
 
 ## CALIFICACIÓN ESPERADA DESPUÉS DEL PLAN
 
-| Aspecto | Actual | Después del Plan |
-|---------|--------|------------------|
-| **Backend Arquitectura** | 9/10 | 9/10 |
-| **Base de Datos** | 10/10 | 10/10 |
-| **Seguridad** | 8/10 | 8/10 |
-| **Health Checks** | 10/10 | 10/10 |
-| **Circuit Breakers** | 9/10 | 10/10 (+1 por observabilidad) |
-| **Frontend Type Safety** | 5/10 | 9/10 (+4 por contracts) |
-| **Contratos Compartidos** | 0/10 | 9/10 (+9) |
-| **Testing** | 4/10 | 8/10 (+4 por cobertura) |
-| **Scripts DevOps** | 9/10 | 9/10 |
+| Aspecto                   | Actual | Después del Plan              |
+| ------------------------- | ------ | ----------------------------- |
+| **Backend Arquitectura**  | 9/10   | 9/10                          |
+| **Base de Datos**         | 10/10  | 10/10                         |
+| **Seguridad**             | 8/10   | 8/10                          |
+| **Health Checks**         | 10/10  | 10/10                         |
+| **Circuit Breakers**      | 9/10   | 10/10 (+1 por observabilidad) |
+| **Frontend Type Safety**  | 5/10   | 9/10 (+4 por contracts)       |
+| **Contratos Compartidos** | 0/10   | 9/10 (+9)                     |
+| **Testing**               | 4/10   | 8/10 (+4 por cobertura)       |
+| **Scripts DevOps**        | 9/10   | 9/10                          |
 
 **PROMEDIO ACTUAL:** 7.5/10
 **PROMEDIO ESPERADO:** 9.0/10

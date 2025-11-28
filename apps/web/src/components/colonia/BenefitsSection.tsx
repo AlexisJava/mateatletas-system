@@ -8,13 +8,15 @@ export default function BenefitsSection() {
     {
       icon: Gamepad2,
       title: 'Sistema de Gamificación',
-      description: 'XP doble de verano, insignias exclusivas, rankings semanales y avatares especiales.',
+      description:
+        'XP doble de verano, insignias exclusivas, rankings semanales y avatares especiales.',
       color: '#f43f5e',
     },
     {
       icon: Award,
       title: 'Certificados Digitales',
-      description: 'Cada estudiante recibe un certificado digital verificable al completar el curso.',
+      description:
+        'Cada estudiante recibe un certificado digital verificable al completar el curso.',
       color: '#fbbf24',
     },
     {
@@ -115,21 +117,14 @@ export default function BenefitsSection() {
                   border: `2px solid ${benefit.color}40`,
                 }}
               >
-                <benefit.icon
-                  className="w-8 h-8"
-                  style={{ color: benefit.color }}
-                />
+                <benefit.icon className="w-8 h-8" style={{ color: benefit.color }} />
               </div>
 
               {/* Title */}
-              <h3 className="text-xl font-black text-white mb-3 leading-tight">
-                {benefit.title}
-              </h3>
+              <h3 className="text-xl font-black text-white mb-3 leading-tight">{benefit.title}</h3>
 
               {/* Description */}
-              <p className="text-white/70 text-sm leading-relaxed">
-                {benefit.description}
-              </p>
+              <p className="text-white/70 text-sm leading-relaxed">{benefit.description}</p>
 
               {/* Glow effect on hover */}
               <div
@@ -160,12 +155,8 @@ export default function BenefitsSection() {
                 <div className="text-5xl md:text-6xl font-black text-white mb-2 title-gradient">
                   {stat.number}
                 </div>
-                <div className="text-lg font-bold text-white mb-1">
-                  {stat.label}
-                </div>
-                <div className="text-sm text-white/50">
-                  {stat.sublabel}
-                </div>
+                <div className="text-lg font-bold text-white mb-1">{stat.label}</div>
+                <div className="text-sm text-white/50">{stat.sublabel}</div>
               </div>
             ))}
           </div>

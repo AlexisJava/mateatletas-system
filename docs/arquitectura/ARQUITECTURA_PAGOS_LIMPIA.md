@@ -3,16 +3,19 @@
 ## 🎯 Principios de Diseño
 
 ### **1. DRY (Don't Repeat Yourself)**
+
 - Una sola fuente de verdad para reglas de negocio
 - Funciones puras y reutilizables
 - Abstracciones genéricas
 
 ### **2. SOLID**
+
 - Single Responsibility
 - Open/Closed Principle
 - Dependency Inversion
 
 ### **3. Clean Architecture**
+
 - Core Business Logic independiente
 - Capas bien definidas
 - Testeable al 100%
@@ -148,21 +151,15 @@ export interface CalculoPrecioOutput {
  * Calcula el precio de una actividad según las reglas de negocio
  * Función PURA - sin efectos secundarios
  */
-export function calcularPrecioActividad(
-  input: CalculoPrecioInput
-): CalculoPrecioOutput {
-  const {
-    cantidadHermanos,
-    actividadesPorEstudiante,
-    tipoProducto,
-    tieneAACREA,
-    configuracion
-  } = input;
+export function calcularPrecioActividad(input: CalculoPrecioInput): CalculoPrecioOutput {
+  const { cantidadHermanos, actividadesPorEstudiante, tipoProducto, tieneAACREA, configuracion } =
+    input;
 
   // 1. Obtener precio base
-  const precioBase = tipoProducto === 'CLUB_MATEMATICAS'
-    ? configuracion.precioClubMatematicas
-    : configuracion.precioCursosEspecializados;
+  const precioBase =
+    tipoProducto === 'CLUB_MATEMATICAS'
+      ? configuracion.precioClubMatematicas
+      : configuracion.precioCursosEspecializados;
 
   // 2. Aplicar reglas en orden de prioridad
   const resultado = aplicarReglasDescuento({
@@ -186,13 +183,8 @@ function aplicarReglasDescuento(params: {
   tieneAACREA: boolean;
   configuracion: ConfiguracionPrecios;
 }): CalculoPrecioOutput {
-  const {
-    precioBase,
-    cantidadHermanos,
-    actividadesPorEstudiante,
-    tieneAACREA,
-    configuracion,
-  } = params;
+  const { precioBase, cantidadHermanos, actividadesPorEstudiante, tieneAACREA, configuracion } =
+    params;
 
   // REGLA 1: Hermanos con múltiples actividades (mayor descuento)
   if (cantidadHermanos >= 2 && actividadesPorEstudiante >= 2) {
@@ -200,7 +192,7 @@ function aplicarReglasDescuento(params: {
       precioBase,
       configuracion.precioHermanosMultiple,
       TipoDescuento.HERMANOS_MULTIPLE,
-      `${cantidadHermanos} hermanos, ${actividadesPorEstudiante} actividades c/u`
+      `${cantidadHermanos} hermanos, ${actividadesPorEstudiante} actividades c/u`,
     );
   }
 
@@ -210,7 +202,7 @@ function aplicarReglasDescuento(params: {
       precioBase,
       configuracion.precioHermanosBasico,
       TipoDescuento.HERMANOS_BASICO,
-      `${cantidadHermanos} hermanos, 1 actividad c/u`
+      `${cantidadHermanos} hermanos, 1 actividad c/u`,
     );
   }
 
@@ -220,7 +212,7 @@ function aplicarReglasDescuento(params: {
       precioBase,
       configuracion.precioMultipleActividades,
       TipoDescuento.MULTIPLE_ACTIVIDADES,
-      `1 estudiante, ${actividadesPorEstudiante} actividades`
+      `1 estudiante, ${actividadesPorEstudiante} actividades`,
     );
   }
 
@@ -231,9 +223,7 @@ function aplicarReglasDescuento(params: {
     actividadesPorEstudiante === 1 &&
     configuracion.descuentoAacreaActivo
   ) {
-    const descuento = precioBase
-      .mul(configuracion.descuentoAacreaPorcentaje)
-      .div(100);
+    const descuento = precioBase.mul(configuracion.descuentoAacreaPorcentaje).div(100);
     const precioFinal = precioBase.sub(descuento);
 
     return {
@@ -250,7 +240,7 @@ function aplicarReglasDescuento(params: {
     precioBase,
     precioBase,
     TipoDescuento.NINGUNO,
-    'Precio base sin descuentos'
+    'Precio base sin descuentos',
   );
 }
 
@@ -261,7 +251,7 @@ function crearResultado(
   precioBase: Decimal,
   precioFinal: Decimal,
   tipoDescuento: TipoDescuento,
-  detalle: string
+  detalle: string,
 ): CalculoPrecioOutput {
   return {
     precioBase,
@@ -275,22 +265,14 @@ function crearResultado(
 /**
  * Calcula el total mensual para un tutor
  */
-export function calcularTotalMensual(
-  inscripciones: CalculoPrecioOutput[]
-): {
+export function calcularTotalMensual(inscripciones: CalculoPrecioOutput[]): {
   total: Decimal;
   subtotal: Decimal;
   descuentoTotal: Decimal;
 } {
-  const total = inscripciones.reduce(
-    (acc, ins) => acc.add(ins.precioFinal),
-    new Decimal(0)
-  );
+  const total = inscripciones.reduce((acc, ins) => acc.add(ins.precioFinal), new Decimal(0));
 
-  const subtotal = inscripciones.reduce(
-    (acc, ins) => acc.add(ins.precioBase),
-    new Decimal(0)
-  );
+  const subtotal = inscripciones.reduce((acc, ins) => acc.add(ins.precioBase), new Decimal(0));
 
   const descuentoTotal = subtotal.sub(total);
 
@@ -321,15 +303,13 @@ export class CalcularPrecioUseCase {
     const configuracion = await this.repository.obtenerConfiguracion();
 
     // 2. Obtener datos del tutor y estudiantes
-    const { tutor, estudiantes } = await this.repository.obtenerDatosTutor(
-      dto.tutorId
-    );
+    const { tutor, estudiantes } = await this.repository.obtenerDatosTutor(dto.tutorId);
 
     // 3. Calcular precio para cada inscripción
     const inscripciones = dto.inscripciones.map((ins) => {
       const estudiante = estudiantes.find((e) => e.id === ins.estudianteId);
       const actividadesEstudiante = dto.inscripciones.filter(
-        (i) => i.estudianteId === ins.estudianteId
+        (i) => i.estudianteId === ins.estudianteId,
       ).length;
 
       return calcularPrecioActividad({

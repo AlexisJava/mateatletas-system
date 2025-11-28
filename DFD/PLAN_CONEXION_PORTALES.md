@@ -11,12 +11,12 @@
 
 ### Estado de Conectividad por Portal
 
-| Portal | Conectividad | Backend Listo | Frontend Listo | Gap Principal |
-|--------|-------------|---------------|----------------|---------------|
-| **Admin** | 60% | ✅ 100% | ⚠️ 60% | CRUD Cursos, Sectores, Reportes |
-| **Docente** | 55% | ✅ 95% | ⚠️ 55% | Planificador completo, Reportes |
-| **Tutor** | 15% | ✅ 100% | ❌ 15% | **Portal completo inexistente** |
-| **Estudiante** | 70% | ✅ 90% | ⚠️ 70% | Cursos completos, Evaluaciones |
+| Portal         | Conectividad | Backend Listo | Frontend Listo | Gap Principal                   |
+| -------------- | ------------ | ------------- | -------------- | ------------------------------- |
+| **Admin**      | 60%          | ✅ 100%       | ⚠️ 60%         | CRUD Cursos, Sectores, Reportes |
+| **Docente**    | 55%          | ✅ 95%        | ⚠️ 55%         | Planificador completo, Reportes |
+| **Tutor**      | 15%          | ✅ 100%       | ❌ 15%         | **Portal completo inexistente** |
+| **Estudiante** | 70%          | ✅ 90%        | ⚠️ 70%         | Cursos completos, Evaluaciones  |
 
 ### Estadísticas Globales
 
@@ -34,15 +34,18 @@
 ## 🎯 PLAN DE ACCIÓN - 4 FASES
 
 ### **FASE 1: CRÍTICO - MVP BLOCKER** ⚠️
+
 **Duración:** 5-7 días
 **Objetivo:** Resolver elementos que bloquean el lanzamiento MVP
 
 #### 1.1 Portal Tutor - CREAR DESDE CERO 🚨
+
 **Prioridad:** MÁXIMA | **Tiempo:** 3 días | **Complejidad:** Alta
 
 **Situación:** El backend está 100% listo pero NO existe frontend
 
 **Tareas:**
+
 - [ ] Crear estructura base portal tutor (`apps/web/src/tutor/`)
 - [ ] Implementar Dashboard con métricas:
   - Estudiantes activos/total
@@ -68,6 +71,7 @@
   - Reportes de progreso por estudiante
 
 **Backend ya disponible:**
+
 - ✅ `/tutores` - CRUD completo
 - ✅ `/tutores/:id/estudiantes` - Lista estudiantes
 - ✅ `/tutores/:id/ingresos` - Métricas financieras
@@ -75,6 +79,7 @@
 - ✅ `/clase-grupos` - CRUD completo
 
 **Archivos a crear:**
+
 ```
 apps/web/src/tutor/
 ├── dashboard/
@@ -94,25 +99,28 @@ apps/web/src/tutor/
 ```
 
 **Servicio API a crear:**
+
 ```typescript
 // apps/web/src/lib/api/tutores.api.ts
-- getTutorDashboard()
-- getTutorEstudiantes()
-- getTutorIngresos()
-- getTutorClasesGrupales()
-- createClaseGrupo()
-- updateClaseGrupo()
-- deleteClaseGrupo()
+-getTutorDashboard() -
+  getTutorEstudiantes() -
+  getTutorIngresos() -
+  getTutorClasesGrupales() -
+  createClaseGrupo() -
+  updateClaseGrupo() -
+  deleteClaseGrupo();
 ```
 
 ---
 
 #### 1.2 CRUD de Cursos en Admin 📚
+
 **Prioridad:** ALTA | **Tiempo:** 2 días | **Complejidad:** Media
 
 **Situación:** Backend 100% listo, NO existe UI en admin
 
 **Tareas:**
+
 - [ ] Crear página lista de cursos (`apps/web/src/admin/cursos/page.tsx`)
 - [ ] Crear página crear curso (`apps/web/src/admin/cursos/crear/page.tsx`)
 - [ ] Crear página editar curso (`apps/web/src/admin/cursos/[id]/editar/page.tsx`)
@@ -126,6 +134,7 @@ apps/web/src/tutor/
 - [ ] Filtros por sector, modalidad, estado
 
 **Backend ya disponible:**
+
 - ✅ `GET /cursos` - Lista paginada
 - ✅ `POST /cursos` - Crear
 - ✅ `PUT /cursos/:id` - Actualizar
@@ -133,6 +142,7 @@ apps/web/src/tutor/
 - ✅ `GET /cursos/:id/estudiantes` - Estudiantes inscritos
 
 **Servicio API a crear:**
+
 ```typescript
 // apps/web/src/lib/api/cursos.api.ts (ya existe parcialmente)
 - getAllCursos() ✅
@@ -145,11 +155,13 @@ apps/web/src/tutor/
 ---
 
 #### 1.3 Sistema de Notificaciones 🔔
+
 **Prioridad:** ALTA | **Tiempo:** 2 días | **Complejidad:** Media
 
 **Situación:** Backend completo, frontend NO consume las notificaciones
 
 **Tareas:**
+
 - [ ] Crear hook `useNotificaciones()` para polling o WebSocket
 - [ ] Componente `NotificationBell` en navbar (badge con contador)
 - [ ] Dropdown de notificaciones con:
@@ -161,6 +173,7 @@ apps/web/src/tutor/
 - [ ] Integrar en los 4 portales
 
 **Backend ya disponible:**
+
 - ✅ `GET /notificaciones` - Lista paginada
 - ✅ `GET /notificaciones/no-leidas` - Contador
 - ✅ `PUT /notificaciones/:id/leer` - Marcar leída
@@ -168,6 +181,7 @@ apps/web/src/tutor/
 - ✅ Creación automática de notificaciones en eventos
 
 **Componentes a crear:**
+
 ```typescript
 // apps/web/src/components/notifications/
 ├── NotificationBell.tsx
@@ -185,16 +199,20 @@ apps/web/src/tutor/
 ---
 
 ### **FASE 2: ALTA PRIORIDAD - FUNCIONALIDADES CORE** 📈
+
 **Duración:** 2 semanas
 **Objetivo:** Completar funcionalidades principales de cada portal
 
 #### 2.1 Completar Portal Docente
+
 **Tiempo:** 5 días | **Complejidad:** Alta
 
 ##### 2.1.1 Planificador Completo
+
 **Situación:** Existe estructura básica pero falta integración completa
 
 **Tareas:**
+
 - [ ] Conectar creación de planificaciones con backend
 - [ ] Implementar asignación de actividades a planificación
 - [ ] Sistema de drag-and-drop para organizar actividades
@@ -203,6 +221,7 @@ apps/web/src/tutor/
 - [ ] Reportes de cumplimiento
 
 **Backend disponible:**
+
 - ✅ `POST /planificaciones` - Crear
 - ✅ `PUT /planificaciones/:id` - Actualizar
 - ✅ `GET /planificaciones/:id/actividades` - Actividades
@@ -210,6 +229,7 @@ apps/web/src/tutor/
 - ⚠️ Módulo completo implementado pero sin usar
 
 **Archivos a completar:**
+
 ```
 apps/web/src/planificaciones/ (ya existe)
 ├── components/
@@ -223,22 +243,28 @@ apps/web/src/planificaciones/ (ya existe)
 ```
 
 ##### 2.1.2 Reportes de Docente
+
 **Tareas:**
+
 - [ ] Reporte de asistencia por clase
 - [ ] Reporte de progreso de estudiantes
 - [ ] Reporte de actividades completadas
 - [ ] Exportar reportes a PDF/Excel
 
 **Backend:**
+
 - ⚠️ Endpoints parciales, necesita expansión
 
 ---
 
 #### 2.2 Completar Portal Admin
+
 **Tiempo:** 4 días | **Complejidad:** Media
 
 ##### 2.2.1 CRUD de Sectores
+
 **Tareas:**
+
 - [ ] Página lista de sectores
 - [ ] Crear/editar sector
 - [ ] Asignar rutas a sector
@@ -246,6 +272,7 @@ apps/web/src/planificaciones/ (ya existe)
 - [ ] Ver cursos por sector
 
 **Backend disponible:**
+
 - ✅ `GET /sectores`
 - ✅ `POST /sectores`
 - ✅ `PUT /sectores/:id`
@@ -253,17 +280,22 @@ apps/web/src/planificaciones/ (ya existe)
 - ✅ `GET /sectores/:id/rutas`
 
 ##### 2.2.2 Gestión de Rutas
+
 **Tareas:**
+
 - [ ] Página lista de rutas
 - [ ] Crear/editar ruta
 - [ ] Asignar provincias a ruta
 - [ ] Ver estudiantes por ruta
 
 **Backend disponible:**
+
 - ✅ CRUD completo en `/sectores`
 
 ##### 2.2.3 Reportes Administrativos
+
 **Tareas:**
+
 - [ ] Dashboard con métricas globales
 - [ ] Reporte de ingresos consolidado
 - [ ] Reporte de crecimiento (nuevos usuarios)
@@ -273,12 +305,15 @@ apps/web/src/planificaciones/ (ya existe)
 ---
 
 #### 2.3 Completar Portal Estudiante
+
 **Tiempo:** 3 días | **Complejidad:** Media
 
 ##### 2.3.1 Página de Cursos Completa
+
 **Situación:** Lista básica existe, falta detalle y inscripción
 
 **Tareas:**
+
 - [ ] Vista detallada de curso
 - [ ] Proceso de inscripción a curso
 - [ ] Ver docente asignado
@@ -287,45 +322,56 @@ apps/web/src/planificaciones/ (ya existe)
 - [ ] Materiales del curso
 
 ##### 2.3.2 Evaluaciones
+
 **Tareas:**
+
 - [ ] Lista de evaluaciones disponibles
 - [ ] Realizar evaluación
 - [ ] Ver resultados de evaluaciones
 - [ ] Historial de evaluaciones
 
 **Backend:**
+
 - ⚠️ No implementado, necesita crearse
 
 ---
 
 ### **FASE 3: MEDIA PRIORIDAD - FEATURES ADICIONALES** 🔧
+
 **Duración:** 2 semanas
 **Objetivo:** Agregar funcionalidades complementarias
 
 #### 3.1 Sistema de Eventos
+
 **Tiempo:** 2 días
 
 **Backend disponible:**
+
 - ✅ CRUD completo de eventos
 - ✅ Log de eventos del sistema
 
 **Tareas:**
+
 - [ ] Página de eventos en admin
 - [ ] Log de actividad del sistema
 - [ ] Auditoría de cambios
 
 #### 3.2 Gestión de Equipos
+
 **Tiempo:** 3 días
 
 **Tareas:**
+
 - [ ] CRUD completo de equipos
 - [ ] Asignar miembros a equipo
 - [ ] Actividades grupales de equipo
 
 #### 3.3 Calendario Global
+
 **Tiempo:** 2 días
 
 **Tareas:**
+
 - [ ] Vista de calendario integrada
 - [ ] Mostrar clases, eventos, actividades
 - [ ] Sincronización entre portales
@@ -333,9 +379,11 @@ apps/web/src/planificaciones/ (ya existe)
 ---
 
 ### **FASE 4: BAJA PRIORIDAD - MEJORAS POST-MVP** ✨
+
 **Duración:** Según roadmap post-lanzamiento
 
 #### 4.1 Features Avanzadas
+
 - [ ] Videollamadas integradas
 - [ ] Chat en tiempo real
 - [ ] Notificaciones push (móvil)
@@ -343,6 +391,7 @@ apps/web/src/planificaciones/ (ya existe)
 - [ ] Integración con plataformas externas
 
 #### 4.2 Optimizaciones
+
 - [ ] Cache avanzado
 - [ ] Optimización de queries
 - [ ] CDN para assets
@@ -355,21 +404,25 @@ apps/web/src/planificaciones/ (ya existe)
 ### Por Categoría
 
 #### 🚨 CRÍTICOS (Bloquean MVP)
+
 1. ❌ **Portal Tutor completo** - 3 días
 2. ❌ **CRUD Cursos en Admin** - 2 días
 3. ❌ **Sistema de Notificaciones** - 2 días
 
 #### ⚠️ ALTOS (Importantes para MVP)
+
 4. ⚠️ **Planificador Docente completo** - 3 días
 5. ⚠️ **CRUD Sectores/Rutas** - 2 días
 6. ⚠️ **Cursos completos en Estudiante** - 2 días
 
 #### 📌 MEDIOS (Deseables para MVP)
+
 7. ⚠️ **Reportes Admin/Docente** - 3 días
 8. ⚠️ **Evaluaciones Estudiante** - 2 días
 9. ⚠️ **Eventos y Log** - 2 días
 
 #### 🔧 BAJOS (Post-MVP)
+
 10. Equipos completos
 11. Calendario global
 12. Features avanzadas
@@ -379,6 +432,7 @@ apps/web/src/planificaciones/ (ya existe)
 ## 🎯 PRIORIZACIÓN RECOMENDADA
 
 ### Sprint 1 (Semana 1) - CRÍTICOS
+
 **Objetivo:** MVP funcional para los 4 roles
 
 ```
@@ -401,6 +455,7 @@ Día 6-7: Notificaciones
 ---
 
 ### Sprint 2 (Semana 2) - ALTOS
+
 **Objetivo:** Completar funcionalidades principales
 
 ```
@@ -423,6 +478,7 @@ Día 6-7: Cursos Estudiante
 ---
 
 ### Sprint 3 (Semana 3) - MEDIOS
+
 **Objetivo:** Features adicionales y pulido
 
 ```
@@ -458,13 +514,13 @@ Evaluaciones ───────→ Cursos Estudiante
 
 ## ⏱️ ESTIMACIÓN TOTAL
 
-| Fase | Duración | Esfuerzo (hrs) | Prioridad |
-|------|----------|----------------|-----------|
-| **Fase 1** | 5-7 días | 56 hrs | 🚨 CRÍTICA |
-| **Fase 2** | 10 días | 96 hrs | ⚠️ ALTA |
-| **Fase 3** | 10 días | 80 hrs | 📌 MEDIA |
-| **Fase 4** | Post-MVP | TBD | 🔧 BAJA |
-| **TOTAL MVP** | **3-4 semanas** | **~230 hrs** | |
+| Fase          | Duración        | Esfuerzo (hrs) | Prioridad  |
+| ------------- | --------------- | -------------- | ---------- |
+| **Fase 1**    | 5-7 días        | 56 hrs         | 🚨 CRÍTICA |
+| **Fase 2**    | 10 días         | 96 hrs         | ⚠️ ALTA    |
+| **Fase 3**    | 10 días         | 80 hrs         | 📌 MEDIA   |
+| **Fase 4**    | Post-MVP        | TBD            | 🔧 BAJA    |
+| **TOTAL MVP** | **3-4 semanas** | **~230 hrs**   |            |
 
 ---
 
@@ -473,6 +529,7 @@ Evaluaciones ───────→ Cursos Estudiante
 ### Para considerar un portal "100% conectado":
 
 #### ✅ Portal Admin
+
 - [ ] Dashboard con métricas reales
 - [ ] CRUD Docentes ✅
 - [ ] CRUD Cursos ❌
@@ -482,6 +539,7 @@ Evaluaciones ───────→ Cursos Estudiante
 - [ ] Notificaciones ❌
 
 #### ✅ Portal Docente
+
 - [ ] Dashboard con clases ✅
 - [ ] Planificador completo ⚠️
 - [ ] Gestión de asistencia ✅
@@ -490,6 +548,7 @@ Evaluaciones ───────→ Cursos Estudiante
 - [ ] Notificaciones ❌
 
 #### ✅ Portal Tutor
+
 - [ ] Dashboard con métricas ❌
 - [ ] Gestión de estudiantes ❌
 - [ ] Clases grupales ❌
@@ -498,6 +557,7 @@ Evaluaciones ───────→ Cursos Estudiante
 - [ ] Notificaciones ❌
 
 #### ✅ Portal Estudiante
+
 - [ ] Dashboard gamificación ✅
 - [ ] Cursos inscritos ⚠️
 - [ ] Calendario de clases ⚠️
@@ -518,6 +578,7 @@ Evaluaciones ───────→ Cursos Estudiante
 **Go-Live:** Semana 4 (Soft launch con monitoreo)
 
 ### Métricas de Éxito
+
 - ✅ 4 portales 100% funcionales
 - ✅ 95%+ endpoints en uso
 - ✅ 0 features críticas faltantes
@@ -525,11 +586,13 @@ Evaluaciones ───────→ Cursos Estudiante
 - ✅ Reportes básicos implementados
 
 ### Equipo Recomendado
+
 - **1 Developer Full-time** (Alexis)
 - **1 AI Assistant** (Claude - yo)
 - **1 QA part-time** (para testing en Semana 2-3)
 
 ### Riesgos
+
 1. **Portal Tutor:** Más complejo de lo estimado (+1-2 días)
 2. **Planificador:** Lógica de negocio compleja (+1 día)
 3. **Testing:** Bugs no anticipados (+2-3 días)
@@ -541,6 +604,7 @@ Evaluaciones ───────→ Cursos Estudiante
 ## 📞 PRÓXIMOS PASOS INMEDIATOS
 
 ### Hoy (Día 1)
+
 1. ✅ Aprobar este plan
 2. 🔧 Comenzar Portal Tutor:
    - Crear estructura de carpetas
@@ -548,11 +612,13 @@ Evaluaciones ───────→ Cursos Estudiante
    - Dashboard básico
 
 ### Mañana (Día 2)
+
 3. Continuar Portal Tutor:
    - Página de estudiantes
    - Página de clases grupales
 
 ### Resto de la semana
+
 4. Completar Portal Tutor
 5. Iniciar CRUD Cursos
 6. Iniciar Notificaciones

@@ -3,14 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import {
-  Clock,
-  Users,
-  BookOpen,
-  TrendingUp,
-  Calendar,
-  GraduationCap,
-} from 'lucide-react';
+import { Clock, Users, BookOpen, TrendingUp, Calendar, GraduationCap } from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { toast } from '@/components/ui/Toast';
 import { LoadingSpinner } from '@/components/effects';
@@ -100,10 +93,7 @@ export default function DocenteDashboardBrutal() {
         <Breadcrumbs items={[{ label: 'Dashboard' }]} />
 
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-3xl font-black text-white mb-2">
             {greeting}, {user?.nombre || 'Docente'}! 👋
           </h1>
@@ -142,7 +132,9 @@ export default function DocenteDashboardBrutal() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-black text-yellow-300">{clase.estudiantes.length}</p>
+                    <p className="text-3xl font-black text-yellow-300">
+                      {clase.estudiantes.length}
+                    </p>
                     <p className="text-purple-200 font-bold text-sm">estudiantes</p>
                   </div>
                 </div>
@@ -210,7 +202,6 @@ export default function DocenteDashboardBrutal() {
             </div>
           </motion.div>
         )}
-
 
         {/* STATS BRUTALES */}
         {stats && (

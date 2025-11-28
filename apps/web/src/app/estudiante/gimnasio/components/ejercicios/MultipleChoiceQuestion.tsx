@@ -45,11 +45,7 @@ export function MultipleChoiceQuestion({
   return (
     <div className="w-full max-w-4xl mx-auto">
       {/* Enunciado */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <h3
           className="
             font-[family-name:var(--font-lilita)]
@@ -121,14 +117,8 @@ export function MultipleChoiceQuestion({
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              whileHover={
-                !disabled && !respondida
-                  ? { scale: 1.02, x: 8 }
-                  : undefined
-              }
-              whileTap={
-                !disabled && !respondida ? { scale: 0.98 } : undefined
-              }
+              whileHover={!disabled && !respondida ? { scale: 1.02, x: 8 } : undefined}
+              whileTap={!disabled && !respondida ? { scale: 0.98 } : undefined}
               onClick={() => handleSeleccion(opcion.id)}
               disabled={disabled || respondida}
               className={`

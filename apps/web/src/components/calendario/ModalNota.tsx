@@ -11,11 +11,7 @@ import {
   buildISODateTime,
   buildEndOfDayISO,
 } from './helpers';
-import type {
-  CreateNotaDto,
-  UpdateNotaDto,
-  Evento,
-} from '@/types/calendario.types';
+import type { CreateNotaDto, UpdateNotaDto, Evento } from '@/types/calendario.types';
 import { TipoEvento } from '@/types/calendario.types';
 
 interface ModalNotaProps {
@@ -120,10 +116,7 @@ export function ModalNota({ isOpen, onClose, notaExistente }: ModalNotaProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
       <motion.div
@@ -135,7 +128,9 @@ export function ModalNota({ isOpen, onClose, notaExistente }: ModalNotaProps) {
         {/* Header with dynamic gradient */}
         <div
           className={`p-6 flex items-center justify-between bg-gradient-to-r ${
-            colorSeleccionado ? `${colorSeleccionado.from} ${colorSeleccionado.to}` : 'from-purple-500 to-purple-600'
+            colorSeleccionado
+              ? `${colorSeleccionado.from} ${colorSeleccionado.to}`
+              : 'from-purple-500 to-purple-600'
           }`}
         >
           <div className="flex items-center gap-3">
@@ -313,7 +308,9 @@ export function ModalNota({ isOpen, onClose, notaExistente }: ModalNotaProps) {
             <button
               type="submit"
               className={`px-6 py-3 text-white rounded-xl font-bold hover-lift shadow-lg bg-gradient-to-r ${
-                colorSeleccionado ? `${colorSeleccionado.from} ${colorSeleccionado.to}` : 'from-purple-500 to-purple-600'
+                colorSeleccionado
+                  ? `${colorSeleccionado.from} ${colorSeleccionado.to}`
+                  : 'from-purple-500 to-purple-600'
               }`}
               style={{
                 boxShadow: `0 10px 25px -5px ${color}40`,

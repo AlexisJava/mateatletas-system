@@ -46,9 +46,7 @@ test.describe('Accessibility - Landing Page', () => {
     // Scroll a catálogo para cargarlo
     await page.locator('#cursos').scrollIntoViewIfNeeded();
 
-    const accessibilityScanResults = await new AxeBuilder({ page })
-      .include('#cursos')
-      .analyze();
+    const accessibilityScanResults = await new AxeBuilder({ page }).include('#cursos').analyze();
 
     expect(accessibilityScanResults.violations).toEqual([]);
   });
@@ -58,9 +56,7 @@ test.describe('Accessibility - Landing Page', () => {
 
     await page.locator('#precios').scrollIntoViewIfNeeded();
 
-    const accessibilityScanResults = await new AxeBuilder({ page })
-      .include('#precios')
-      .analyze();
+    const accessibilityScanResults = await new AxeBuilder({ page }).include('#precios').analyze();
 
     expect(accessibilityScanResults.violations).toEqual([]);
   });
@@ -131,9 +127,11 @@ test.describe('Accessibility - Navegación por Teclado', () => {
     await page.goto('/colonia-verano-2025');
 
     // Contar elementos focuseables antes de empezar
-    const focusableElements = await page.locator(
-      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    ).count();
+    const focusableElements = await page
+      .locator(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )
+      .count();
 
     expect(focusableElements).toBeGreaterThan(0);
 
@@ -211,7 +209,7 @@ test.describe('Accessibility - Color Contrast', () => {
       .analyze();
 
     const contrastViolations = accessibilityScanResults.violations.filter(
-      (v) => v.id === 'color-contrast'
+      (v) => v.id === 'color-contrast',
     );
 
     expect(contrastViolations).toEqual([]);
@@ -227,7 +225,7 @@ test.describe('Accessibility - Color Contrast', () => {
       .analyze();
 
     const contrastViolations = accessibilityScanResults.violations.filter(
-      (v) => v.id === 'color-contrast'
+      (v) => v.id === 'color-contrast',
     );
 
     expect(contrastViolations).toEqual([]);
@@ -300,7 +298,7 @@ test.describe('Accessibility - Mobile', () => {
     // Solo verificar si existen violaciones
     if (accessibilityScanResults.violations.length > 0) {
       const targetSizeViolations = accessibilityScanResults.violations.filter(
-        (v) => v.id === 'target-size'
+        (v) => v.id === 'target-size',
       );
       expect(targetSizeViolations).toEqual([]);
     }

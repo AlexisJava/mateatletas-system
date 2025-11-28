@@ -1,6 +1,7 @@
 ### Asistencia (Registro de Asistencia y Feedback)
 
 #### Prompt de desarrollo
+
 ```text
 Implement the **Asistencia** sub-slice (marking attendance and feedback by Docente).
 
@@ -267,8 +268,10 @@ Centralizar la lógica de detección de keywords y creación de alertas para man
 
 ### Ubicación
 ```
+
 src/modules/admin/alertas.service.ts
-```
+
+````
 
 ### Implementación
 
@@ -350,7 +353,7 @@ export class AlertasService {
     this.keywords.push(...newKeywords);
   }
 }
-```
+````
 
 ### Uso en InscripcionesModule
 
@@ -366,8 +369,8 @@ import { AlertasService } from '../admin/alertas.service'; // <-- Importar
   controllers: [InscripcionesController],
   providers: [
     InscripcionesService,
-    AlertasService // <-- Agregar como provider
-  ]
+    AlertasService, // <-- Agregar como provider
+  ],
 })
 export class InscripcionesModule {}
 ```
@@ -381,7 +384,7 @@ import { AlertasService } from '../admin/alertas.service';
 export class InscripcionesService {
   constructor(
     private prisma: PrismaService,
-    private alertasService: AlertasService // <-- Inyectar
+    private alertasService: AlertasService, // <-- Inyectar
   ) {}
 
   async marcarAsistencia(inscripcionId, dto, docenteId) {
@@ -391,8 +394,8 @@ export class InscripcionesService {
       where: { id: inscripcionId },
       data: {
         estadoAsistencia: dto.estadoAsistencia,
-        observacionesDocente: dto.observacionesDocente
-      }
+        observacionesDocente: dto.observacionesDocente,
+      },
     });
 
     // Delegar detección de alertas
@@ -401,7 +404,7 @@ export class InscripcionesService {
         observacion: dto.observacionesDocente,
         estudianteId: inscripcion.estudianteId,
         claseId: inscripcion.claseId,
-        docenteId
+        docenteId,
       });
     }
 

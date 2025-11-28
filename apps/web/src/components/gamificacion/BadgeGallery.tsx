@@ -191,9 +191,7 @@ export function BadgeGallery({ badges, isOpen, onClose }: BadgeGalleryProps) {
               <div className="p-8">
                 {badgesFiltrados.length === 0 ? (
                   <div className="text-center py-12">
-                    <p className="text-white/70 text-lg">
-                      No hay logros en esta categoría
-                    </p>
+                    <p className="text-white/70 text-lg">No hay logros en esta categoría</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -237,9 +235,7 @@ export function BadgeGallery({ badges, isOpen, onClose }: BadgeGalleryProps) {
                 >
                   {badgeSeleccionado.nombre}
                 </h3>
-                <p className="text-white/90 text-lg mb-4">
-                  {badgeSeleccionado.descripcion}
-                </p>
+                <p className="text-white/90 text-lg mb-4">{badgeSeleccionado.descripcion}</p>
                 <div
                   className="inline-block px-6 py-3 rounded-full text-lg font-bold text-white mb-4"
                   style={{

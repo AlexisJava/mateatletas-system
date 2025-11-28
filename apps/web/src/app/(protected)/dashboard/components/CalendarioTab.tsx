@@ -2,11 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import apiClient from '@/lib/axios';
-import { Calendar, ChevronLeft, CheckCircle, XCircle, Clock, User, ChevronRight } from 'lucide-react';
 import {
-  calendarioResponseSchema,
-  type CalendarioResponse,
-} from '@/lib/schemas/clase.schema';
+  Calendar,
+  ChevronLeft,
+  CheckCircle,
+  XCircle,
+  Clock,
+  User,
+  ChevronRight,
+} from 'lucide-react';
+import { calendarioResponseSchema, type CalendarioResponse } from '@/lib/schemas/clase.schema';
 
 const MESES = [
   'Enero',
@@ -99,7 +104,8 @@ export default function CalendarioTab() {
             <div>
               <h2 className="text-xl font-bold text-white">Calendario de Clases</h2>
               <p className="text-sm text-gray-300">
-                {calendarioData?.total || 0} clases en {MESES[mesSeleccionado - 1]} {anioSeleccionado}
+                {calendarioData?.total || 0} clases en {MESES[mesSeleccionado - 1]}{' '}
+                {anioSeleccionado}
               </p>
             </div>
           </div>
@@ -173,7 +179,9 @@ export default function CalendarioTab() {
                           month: 'long',
                         })}
                       </h3>
-                      <p className="text-sm text-gray-400">{clasesDelDia?.length || 0} clases programadas</p>
+                      <p className="text-sm text-gray-400">
+                        {clasesDelDia?.length || 0} clases programadas
+                      </p>
                     </div>
                   </div>
 
@@ -197,19 +205,24 @@ export default function CalendarioTab() {
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
                                   <h4 className="font-bold text-white">
-                                    {(clase.ruta_curricular ?? clase.rutaCurricular)?.nombre ?? 'Sin asignar'}
+                                    {(clase.ruta_curricular ?? clase.rutaCurricular)?.nombre ??
+                                      'Sin asignar'}
                                   </h4>
                                   <span
                                     className="w-3 h-3 rounded-full"
                                     style={{
                                       backgroundColor:
-                                        (clase.ruta_curricular ?? clase.rutaCurricular)?.color || '#6366F1',
+                                        (clase.ruta_curricular ?? clase.rutaCurricular)?.color ||
+                                        '#6366F1',
                                     }}
                                   ></span>
                                 </div>
                                 <p className="text-sm text-gray-300 mb-2">
-                                  {fechaClase.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })} •{' '}
-                                  {clase.duracion_minutos} min
+                                  {fechaClase.toLocaleTimeString('es-AR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}{' '}
+                                  • {clase.duracion_minutos} min
                                 </p>
                                 <div className="flex items-center gap-2 text-sm text-gray-400">
                                   <User className="w-4 h-4" />
@@ -221,9 +234,13 @@ export default function CalendarioTab() {
                                 {/* Estudiantes Inscritos */}
                                 <div className="mt-2 flex flex-wrap gap-2">
                                   {clase.inscripciones?.map((insc) => {
-                                    const asistencias = ('asistencias' in clase && Array.isArray(clase.asistencias)) ? clase.asistencias : [];
+                                    const asistencias =
+                                      'asistencias' in clase && Array.isArray(clase.asistencias)
+                                        ? clase.asistencias
+                                        : [];
                                     const asistencia = asistencias.find(
-                                      (a: { estudiante_id: string }) => a.estudiante_id === insc.estudiante?.id
+                                      (a: { estudiante_id: string }) =>
+                                        a.estudiante_id === insc.estudiante?.id,
                                     );
                                     return (
                                       <span

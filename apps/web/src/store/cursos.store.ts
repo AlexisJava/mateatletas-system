@@ -28,7 +28,10 @@ interface CursosStore {
   fetchMisCursos: () => Promise<void>;
   fetchProgresoCurso: (productoId: string) => Promise<void>;
   fetchSiguienteLeccion: (productoId: string) => Promise<void>;
-  completarLeccion: (leccionId: string, data?: cursosApi.CompletarLeccionDto) => Promise<{ success: boolean; puntos?: number; logro?: Logro }>;
+  completarLeccion: (
+    leccionId: string,
+    data?: cursosApi.CompletarLeccionDto,
+  ) => Promise<{ success: boolean; puntos?: number; logro?: Logro }>;
 
   // Actions - General
   fetchModulosByCurso: (productoId: string) => Promise<void>;
@@ -64,14 +67,14 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
       const data = await apiClient.get<Producto[]>('/productos', {
         params: {
           tipo: 'Curso',
-          soloActivos: 'true'
-        }
+          soloActivos: 'true',
+        },
       });
       set({ misCursos: data, isLoading: false });
     } catch (error: unknown) {
       set({
         error: getErrorMessage(error, 'Error al cargar cursos'),
-        isLoading: false
+        isLoading: false,
       });
     }
   },
@@ -85,7 +88,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
       set({
         error: getErrorMessage(error, 'Error al cargar progreso'),
         isLoading: false,
-        progreso: null
+        progreso: null,
       });
     }
   },
@@ -101,7 +104,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
 
   completarLeccion: async (
     leccionId: string,
-    data: cursosApi.CompletarLeccionDto = {}
+    data: cursosApi.CompletarLeccionDto = {},
   ): Promise<{ success: boolean; puntos?: number; logro?: Logro }> => {
     try {
       const result = await cursosApi.completarLeccion(leccionId, data);
@@ -117,7 +120,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
       return {
         success: true,
         puntos: result.puntos_ganados,
-        logro: logroDesbloqueado
+        logro: logroDesbloqueado,
       };
     } catch (error: unknown) {
       set({ error: getErrorMessage(error, 'Error al completar lección') });
@@ -138,7 +141,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
       set({
         error: getErrorMessage(error, 'Error al cargar módulos'),
         isLoading: false,
-        modulos: []
+        modulos: [],
       });
     }
   },
@@ -152,7 +155,7 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
       set({
         error: getErrorMessage(error, 'Error al cargar lección'),
         isLoading: false,
-        leccionActual: null
+        leccionActual: null,
       });
     }
   },
@@ -172,14 +175,15 @@ export const useCursosStore = create<CursosStore>((set, get) => ({
 
   clearError: () => set({ error: null }),
 
-  reset: () => set({
-    misCursos: [],
-    cursoActual: null,
-    modulos: [],
-    lecciones: [],
-    leccionActual: null,
-    progreso: null,
-    isLoading: false,
-    error: null,
-  }),
+  reset: () =>
+    set({
+      misCursos: [],
+      cursoActual: null,
+      modulos: [],
+      lecciones: [],
+      leccionActual: null,
+      progreso: null,
+      isLoading: false,
+      error: null,
+    }),
 }));

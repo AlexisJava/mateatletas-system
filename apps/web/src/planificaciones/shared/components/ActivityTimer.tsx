@@ -29,20 +29,15 @@ export function ActivityTimer({
   };
 
   return (
-    <div className={`inline-flex items-center gap-3 ${esUrgente ? 'bg-red-500' : 'bg-blue-500'} text-white font-bold px-6 py-3 rounded-full shadow-lg ${className}`}>
+    <div
+      className={`inline-flex items-center gap-3 ${esUrgente ? 'bg-red-500' : 'bg-blue-500'} text-white font-bold px-6 py-3 rounded-full shadow-lg ${className}`}
+    >
       <span className="text-2xl">⏱️</span>
       <span className="text-xl tabular-nums">{formatearTiempo(tiempoRestante)}</span>
 
       {/* Barra de progreso circular */}
       <svg className="w-8 h-8 -rotate-90" viewBox="0 0 32 32">
-        <circle
-          cx="16"
-          cy="16"
-          r="14"
-          fill="none"
-          stroke="rgba(255,255,255,0.3)"
-          strokeWidth="3"
-        />
+        <circle cx="16" cy="16" r="14" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="3" />
         <circle
           cx="16"
           cy="16"

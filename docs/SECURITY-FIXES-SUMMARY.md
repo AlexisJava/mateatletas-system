@@ -1,4 +1,5 @@
 # Security Fixes - Resumen Final Exhaustivo
+
 ## Mateatletas Ecosystem API
 
 **RAMA DE TRABAJO:** `security-fixes-all`
@@ -55,6 +56,7 @@ Si 2 tutores intentan reservar la última cupo al mismo tiempo, ambos leen "hay 
 **Impacto:** Solo admin y docentes pueden cancelar clases
 
 **Roles permitidos:**
+
 - Admin: Puede cancelar cualquier clase
 - Docente: Solo SUS clases
 - Tutor/Estudiante: ❌ Prohibido
@@ -83,11 +85,13 @@ Si se crea el registro de `PuntoObtenido` pero falla la actualización de `estud
 **Impacto:** Previene uso de tokens robados/comprometidos
 
 **¿Cómo funciona?**
+
 - Usuario hace logout → Token se agrega a Redis con TTL = tiempo restante de expiración
 - Cada request verifica primero: ¿está el token en blacklist? → Si sí, rechazar
 - Cuando el token expiraría naturalmente, Redis lo elimina automáticamente (optimización de memoria)
 
 **Casos de uso:**
+
 1. Logout normal
 2. Usuario sospecha robo de token → logout para invalidarlo inmediatamente
 3. Cambio de contraseña → invalidar TODOS los tokens del usuario
@@ -107,16 +111,16 @@ Si se crea el registro de `PuntoObtenido` pero falla la actualización de `estud
 
 ## ESTADÍSTICAS
 
-| Métrica | Valor |
-|---------|-------|
-| **Tests Iniciales** | 161 passing |
-| **Tests Finales** | 212 passing |
-| **Tests Nuevos** | +51 tests |
-| **Incremento** | +31.7% |
-| **Archivos Creados** | 10 |
-| **Archivos Modificados** | 9 |
-| **Líneas Agregadas** | ~2,500 |
-| **Líneas Eliminadas** | ~100 |
+| Métrica                  | Valor       |
+| ------------------------ | ----------- |
+| **Tests Iniciales**      | 161 passing |
+| **Tests Finales**        | 212 passing |
+| **Tests Nuevos**         | +51 tests   |
+| **Incremento**           | +31.7%      |
+| **Archivos Creados**     | 10          |
+| **Archivos Modificados** | 9           |
+| **Líneas Agregadas**     | ~2,500      |
+| **Líneas Eliminadas**    | ~100        |
 
 ---
 
@@ -156,31 +160,34 @@ Backend (apps/api/src/):
 
 ## VERIFICACIONES DE INTEGRIDAD
 
-| Verificación | Estado |
-|--------------|--------|
-| **Suite Completa de Tests** | ✅ 212/212 passing (100%) |
-| **Git Status** | ✅ Limpio (all changes committed) |
-| **Breaking Changes** | ✅ 0 (CERO) |
-| **TypeScript Compilation** | ⚠️ Solo errores pre-existentes |
-| **Frontend Compatibility** | ✅ Sin cambios requeridos |
-| **Database Migrations** | ✅ No requeridas |
-| **Environment Variables** | ✅ No nuevas (usa existentes) |
+| Verificación                | Estado                            |
+| --------------------------- | --------------------------------- |
+| **Suite Completa de Tests** | ✅ 212/212 passing (100%)         |
+| **Git Status**              | ✅ Limpio (all changes committed) |
+| **Breaking Changes**        | ✅ 0 (CERO)                       |
+| **TypeScript Compilation**  | ⚠️ Solo errores pre-existentes    |
+| **Frontend Compatibility**  | ✅ Sin cambios requeridos         |
+| **Database Migrations**     | ✅ No requeridas                  |
+| **Environment Variables**   | ✅ No nuevas (usa existentes)     |
 
 ---
 
 ## PRÓXIMOS PASOS
 
 ### 1. ✅ REVISIÓN DE CÓDIGO
+
 - [ ] Revisar cada commit individualmente
 - [ ] Verificar que los mensajes de commit sean claros
 - [ ] Confirmar que entiendes cada cambio
 
 ### 2. ⏳ MERGE A MAIN
+
 - **Opción 1:** Merge directo (recomendado - ya testeado)
 - **Opción 2:** Pull Request para documentación
 - **Comando:** `git checkout main && git merge security-fixes-all`
 
 ### 3. ⏳ DEPLOYMENT
+
 - [ ] Verificar que Redis esté corriendo
 - [ ] Configurar `FRONTEND_URL` en producción
 - [ ] Deploy a staging primero
@@ -188,6 +195,7 @@ Backend (apps/api/src/):
 - [ ] Deploy a production
 
 ### 4. ⏳ MONITOREO
+
 - [ ] Revisar logs de "CSRF BLOCKED" (si hay ataques)
 - [ ] Monitorear uso de Redis (blacklist)
 - [ ] Verificar métricas de concurrencia (race conditions)
@@ -198,6 +206,7 @@ Backend (apps/api/src/):
 ## NOTAS FINALES
 
 ### 🎉 LOGROS
+
 - 6 vulnerabilidades de seguridad corregidas
 - 51 tests nuevos agregados
 - 100% de tests pasando
@@ -205,11 +214,13 @@ Backend (apps/api/src/):
 - Código bien documentado con explicaciones didácticas
 
 ### ⚠️ ADVERTENCIAS
+
 - **Fix #2 (CSRF)** requiere que el frontend envíe Origin header (ya lo hace)
 - **Fix #6 (Token Blacklist)** requiere Redis corriendo
 - Algunos errores de TypeScript pre-existentes (no críticos)
 
 ### 📚 APRENDIZAJES
+
 - TDD (Test-Driven Development) funciona excelente
 - Transacciones de base de datos son críticas para integridad
 - Guards de NestJS son poderosos para seguridad
@@ -217,6 +228,7 @@ Backend (apps/api/src/):
 - Mocks complejos requieren simular comportamiento de DB
 
 ### 🚀 IMPACTO
+
 - Seguridad mejorada significativamente
 - Mejor protección contra ataques comunes
 - Datos más consistentes e íntegros

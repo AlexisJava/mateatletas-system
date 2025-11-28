@@ -1,6 +1,7 @@
 # 🎯 Configurar Vercel Blob Storage para Mateatletas Ecosystem
 
 ## ✅ Lo que ya está hecho:
+
 - ✅ Proyecto `mateatletas-ecosystem` creado en Vercel
 - ✅ Directorio vinculado al proyecto
 - ✅ Script de subida listo en `scripts/upload-animations.mjs`
@@ -31,11 +32,13 @@
 ## 📋 Paso 2: Agregar el token localmente
 
 Opción A (manual):
+
 ```bash
 echo "BLOB_READ_WRITE_TOKEN=vercel_blob_rw_AQUI_TU_TOKEN" >> .env.local
 ```
 
 Opción B (automático - solo si la variable ya está en Vercel):
+
 ```bash
 vercel env pull .env.local
 ```
@@ -48,6 +51,7 @@ bash scripts/check-vercel-setup.sh
 ```
 
 Deberías ver:
+
 ```
 ✅ Archivo .env.local encontrado
 ✅ BLOB_READ_WRITE_TOKEN configurado
@@ -62,6 +66,7 @@ npm run upload-animations
 ```
 
 Esto va a:
+
 1. Leer las 30 animaciones seleccionadas
 2. Subirlas a Vercel Blob con estructura organizada
 3. Generar `apps/web/public/animations-config.json` con todas las URLs
@@ -98,6 +103,7 @@ Esto va a:
 ## 🔗 URLs generadas
 
 Las URLs tendrán este formato:
+
 ```
 https://[hash].public.blob.vercel-storage.com/animations/masculine/dance/M_Dances_001.glb
 ```

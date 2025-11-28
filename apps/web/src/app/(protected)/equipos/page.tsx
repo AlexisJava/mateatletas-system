@@ -136,9 +136,7 @@ export default function EquiposPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold text-[#2a1a5e]">Equipos</h1>
-          <p className="text-gray-600 mt-1">
-            Gestiona los equipos de gamificación
-          </p>
+          <p className="text-gray-600 mt-1">Gestiona los equipos de gamificación</p>
         </div>
         <Button variant="primary" size="lg" onClick={handleOpenCreate}>
           ➕ Crear equipo
@@ -149,23 +147,14 @@ export default function EquiposPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="text-center">
           <div className="text-5xl mb-2">🏆</div>
-          <p className="text-3xl font-bold text-[#2a1a5e]">
-            {isLoading ? '...' : total}
-          </p>
-          <p className="text-sm text-gray-600">
-            {total === 1 ? 'Equipo' : 'Equipos'}
-          </p>
+          <p className="text-3xl font-bold text-[#2a1a5e]">{isLoading ? '...' : total}</p>
+          <p className="text-sm text-gray-600">{total === 1 ? 'Equipo' : 'Equipos'}</p>
         </Card>
 
         <Card className="text-center">
           <div className="text-5xl mb-2">👥</div>
           <p className="text-3xl font-bold text-[#2a1a5e]">
-            {isLoading
-              ? '...'
-              : equipos.reduce(
-                  (sum, e) => sum + (e.estudiantes?.length || 0),
-                  0,
-                )}
+            {isLoading ? '...' : equipos.reduce((sum, e) => sum + (e.estudiantes?.length || 0), 0)}
           </p>
           <p className="text-sm text-gray-600">Estudiantes totales</p>
         </Card>
@@ -175,9 +164,7 @@ export default function EquiposPage() {
           <p className="text-3xl font-bold text-[#2a1a5e]">
             {isLoading
               ? '...'
-              : equipos
-                  .reduce((sum, e) => sum + e.puntos_totales, 0)
-                  .toLocaleString()}
+              : equipos.reduce((sum, e) => sum + e.puntos_totales, 0).toLocaleString()}
           </p>
           <p className="text-sm text-gray-600">Puntos totales</p>
         </Card>
@@ -241,10 +228,7 @@ export default function EquiposPage() {
             <span className="text-2xl">⚠️</span>
             <p className="text-red-800 font-semibold">{error}</p>
           </div>
-          <button
-            onClick={clearError}
-            className="text-red-600 hover:text-red-800 font-bold"
-          >
+          <button onClick={clearError} className="text-red-600 hover:text-red-800 font-bold">
             ✕
           </button>
         </div>
@@ -259,9 +243,7 @@ export default function EquiposPage() {
       ) : equiposFiltrados.length === 0 ? (
         <Card className="text-center py-12">
           <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-2xl font-bold text-[#2a1a5e] mb-2">
-            No se encontraron equipos
-          </h3>
+          <h3 className="text-2xl font-bold text-[#2a1a5e] mb-2">No se encontraron equipos</h3>
           <p className="text-gray-600 mb-6">
             {searchTerm
               ? 'Intenta con otro término de búsqueda'

@@ -27,9 +27,9 @@ test.describe('Observaciones del Docente', () => {
     await page.waitForTimeout(1000);
 
     // Buscar el input de búsqueda
-    const searchInput = page.locator('input[placeholder*="Buscar"]').or(
-      page.locator('input[type="text"]').first()
-    );
+    const searchInput = page
+      .locator('input[placeholder*="Buscar"]')
+      .or(page.locator('input[type="text"]').first());
 
     await expect(searchInput).toBeVisible();
 
@@ -81,7 +81,7 @@ test.describe('Observaciones del Docente', () => {
     await page.waitForTimeout(1500);
 
     // Puede mostrar observaciones o un mensaje de "no hay observaciones"
-    const hasObservations = await page.locator('text=/observación/i').count() > 1;
+    const hasObservations = (await page.locator('text=/observación/i').count()) > 1;
     const hasEmptyMessage = await page.locator('text=/no hay|sin observaciones/i').isVisible();
 
     // Debe haber uno u otro
@@ -111,9 +111,12 @@ test.describe('Observaciones del Docente', () => {
     await page.waitForTimeout(1500);
 
     // Buscar el primer item clickeable
-    const firstItem = page.locator('button, [role="button"], [onClick]').filter({
-      hasText: /ver|detalles|📋/i,
-    }).first();
+    const firstItem = page
+      .locator('button, [role="button"], [onClick]')
+      .filter({
+        hasText: /ver|detalles|📋/i,
+      })
+      .first();
 
     if (await firstItem.isVisible()) {
       await firstItem.click();

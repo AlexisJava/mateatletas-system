@@ -45,9 +45,7 @@ export function ClassReservationModal({
   onConfirm,
   isLoading = false,
 }: ClassReservationModalProps) {
-  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<
-    string | null
-  >(null);
+  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<string | null>(null);
 
   if (!clase) return null;
 
@@ -69,9 +67,7 @@ export function ClassReservationModal({
       ? (clase as { cupo_maximo?: number }).cupo_maximo
       : (clase as { cupos_maximo?: number }).cupos_maximo) ?? 0;
   const cuposOcupados =
-    (clase as { cupos_ocupados?: number }).cupos_ocupados ??
-    clase._count?.inscripciones ??
-    0;
+    (clase as { cupos_ocupados?: number }).cupos_ocupados ?? clase._count?.inscripciones ?? 0;
   const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);
   const tituloClase =
     (clase as { titulo?: string; nombre?: string }).titulo ??
@@ -96,17 +92,14 @@ export function ClassReservationModal({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="Reservar clase"
-      size="md"
-    >
+    <Modal isOpen={isOpen} onClose={handleClose} title="Reservar clase" size="md">
       <div className="bg-white rounded-lg p-8 border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] max-w-2xl w-full">
         {/* Header */}
         <div className="text-center space-y-4 mb-6">
           <div className="text-6xl">🎫</div>
-          <h2 className="font-[family-name:var(--font-fredoka)] text-4xl text-dark">Reservar clase</h2>
+          <h2 className="font-[family-name:var(--font-fredoka)] text-4xl text-dark">
+            Reservar clase
+          </h2>
         </div>
 
         {/* Detalles de la clase */}
@@ -120,9 +113,7 @@ export function ClassReservationModal({
           <div className="space-y-3">
             {/* Título */}
             <div>
-              <p className="text-xs font-bold text-gray-500 uppercase">
-                Clase
-              </p>
+              <p className="text-xs font-bold text-gray-500 uppercase">Clase</p>
               <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark">
                 {tituloClase}
               </h3>
@@ -142,9 +133,7 @@ export function ClassReservationModal({
               <span className="text-xl">📅</span>
               <div>
                 <p className="text-xs text-gray-500">Fecha y hora</p>
-                <p className="font-bold text-dark capitalize">
-                  {fechaFormateada}
-                </p>
+                <p className="font-bold text-dark capitalize">{fechaFormateada}</p>
               </div>
             </div>
 
@@ -176,15 +165,11 @@ export function ClassReservationModal({
 
         {/* Selección de estudiante */}
         <div className="mb-6">
-          <label className="block font-bold text-dark mb-3">
-            👦 Selecciona el estudiante:
-          </label>
+          <label className="block font-bold text-dark mb-3">👦 Selecciona el estudiante:</label>
 
           {estudiantes.length === 0 ? (
             <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-gray-300">
-              <p className="text-gray-600 mb-4">
-                No tienes estudiantes registrados
-              </p>
+              <p className="text-gray-600 mb-4">No tienes estudiantes registrados</p>
               <Button variant="secondary" onClick={handleClose}>
                 Agregar estudiante
               </Button>
@@ -234,9 +219,7 @@ export function ClassReservationModal({
                       {estudiante.nombre} {estudiante.apellido}
                     </p>
                     {estudiante.edad && (
-                      <p className="text-sm text-gray-600">
-                        {estudiante.edad} años
-                      </p>
+                      <p className="text-sm text-gray-600">{estudiante.edad} años</p>
                     )}
                   </div>
 

@@ -58,9 +58,7 @@ test.describe('Perfil del Docente', () => {
     await page.click('button[type="submit"]');
 
     // Debería mostrar error de validación (HTML5 validation)
-    const isInvalid = await nombreInput.evaluate(
-      (el: HTMLInputElement) => !el.validity.valid
-    );
+    const isInvalid = await nombreInput.evaluate((el: HTMLInputElement) => !el.validity.valid);
     expect(isInvalid).toBeTruthy();
   });
 
@@ -72,7 +70,9 @@ test.describe('Perfil del Docente', () => {
 
     // Actualizar biografía
     const biografiaTextarea = page.locator('textarea[name="biografia"]');
-    await biografiaTextarea.fill('Docente apasionado por las matemáticas y la educación. Test E2E.');
+    await biografiaTextarea.fill(
+      'Docente apasionado por las matemáticas y la educación. Test E2E.',
+    );
 
     // Guardar
     await page.click('button[type="submit"]');

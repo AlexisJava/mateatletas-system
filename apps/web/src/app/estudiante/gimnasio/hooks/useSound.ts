@@ -96,7 +96,7 @@ export function useSound() {
     const ctx = getAudioContext();
 
     // Música ambiente científica - acordes sutiles
-    const frequencies = [261.63, 329.63, 392.00]; // Do, Mi, Sol (acorde C mayor)
+    const frequencies = [261.63, 329.63, 392.0]; // Do, Mi, Sol (acorde C mayor)
 
     frequencies.forEach((freq, index) => {
       const oscillator = ctx.createOscillator();

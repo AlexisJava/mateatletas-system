@@ -31,10 +31,7 @@ export function RutaFilter({
   claseCounts = {},
 }: RutaFilterProps) {
   // Calcular total de clases
-  const totalClases = Object.values(claseCounts).reduce(
-    (sum, count) => sum + count,
-    0
-  );
+  const totalClases = Object.values(claseCounts).reduce((sum, count) => sum + count, 0);
 
   return (
     <div className="space-y-3">
@@ -64,11 +61,7 @@ export function RutaFilter({
             <span
               className={`
                 ml-2 px-2 py-0.5 rounded-full text-xs
-                ${
-                  !rutaActiva
-                    ? 'bg-white/20 text-white'
-                    : 'bg-gray-200 text-gray-700'
-                }
+                ${!rutaActiva ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-700'}
               `}
             >
               {totalClases}
@@ -110,16 +103,10 @@ export function RutaFilter({
                 <span
                   className={`
                     ml-2 px-2 py-0.5 rounded-full text-xs
-                    ${
-                      isActive
-                        ? 'bg-white/20 text-white'
-                        : 'text-gray-700'
-                    }
+                    ${isActive ? 'bg-white/20 text-white' : 'text-gray-700'}
                   `}
                   style={{
-                    backgroundColor: isActive
-                      ? 'rgba(255,255,255,0.2)'
-                      : 'rgba(0,0,0,0.1)',
+                    backgroundColor: isActive ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
                   }}
                 >
                   {count}
@@ -143,9 +130,7 @@ export function RutaFilter({
             </div>
           ))}
           {rutasCurriculares.length > 3 && (
-            <span className="text-gray-400">
-              +{rutasCurriculares.length - 3} más
-            </span>
+            <span className="text-gray-400">+{rutasCurriculares.length - 3} más</span>
           )}
         </div>
       )}

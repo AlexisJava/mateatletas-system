@@ -2,15 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  X,
-  Star,
-  Trophy,
-  CheckCircle,
-  Loader2,
-  Sparkles,
-  Award,
-} from 'lucide-react';
+import { X, Star, Trophy, CheckCircle, Loader2, Sparkles, Award } from 'lucide-react';
 import { toast } from '@/components/ui/Toast';
 import { StudentAvatar } from '@/components/ui/StudentAvatar';
 import { gamificacionApi, type AccionPuntuable } from '@/lib/api/gamificacion.api';
@@ -32,12 +24,8 @@ export default function AsignarPuntosModal({
   estudiantes,
   onSuccess,
 }: AsignarPuntosModalProps) {
-  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<
-    string | null
-  >(null);
-  const [accionSeleccionada, setAccionSeleccionada] = useState<string | null>(
-    null
-  );
+  const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<string | null>(null);
+  const [accionSeleccionada, setAccionSeleccionada] = useState<string | null>(null);
   const [acciones, setAcciones] = useState<AccionPuntuable[]>([]);
   const [contexto, setContexto] = useState('');
   const [isLoadingAcciones, setIsLoadingAcciones] = useState(false);
@@ -86,9 +74,7 @@ export default function AsignarPuntosModal({
       });
 
       const accion = acciones.find((a) => a.id === accionSeleccionada);
-      toast.success(
-        `✅ ${accion?.puntos || 0} puntos asignados exitosamente`
-      );
+      toast.success(`✅ ${accion?.puntos || 0} puntos asignados exitosamente`);
 
       // Reset form
       setEstudianteSeleccionado(null);
@@ -101,8 +87,7 @@ export default function AsignarPuntosModal({
       console.error('Error al asignar puntos:', error);
       if (isAxiosError(error)) {
         toast.error(
-          error.response?.data?.message ||
-            'Error al asignar puntos. Intenta nuevamente.'
+          error.response?.data?.message || 'Error al asignar puntos. Intenta nuevamente.',
         );
       } else {
         toast.error('Error al asignar puntos. Intenta nuevamente.');
@@ -112,9 +97,7 @@ export default function AsignarPuntosModal({
     }
   };
 
-  const estudianteSelected = estudiantes.find(
-    (e) => e.id === estudianteSeleccionado
-  );
+  const estudianteSelected = estudiantes.find((e) => e.id === estudianteSeleccionado);
   const accionSelected = acciones.find((a) => a.id === accionSeleccionada);
 
   const getAccionIcon = (codigo: string | undefined) => {
@@ -171,9 +154,7 @@ export default function AsignarPuntosModal({
                     <Star className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-white">
-                      ASIGNAR PUNTOS
-                    </h2>
+                    <h2 className="text-2xl font-black text-white">ASIGNAR PUNTOS</h2>
                     <p className="text-yellow-100 font-semibold">
                       Recompensar logros y participación
                     </p>
@@ -192,9 +173,7 @@ export default function AsignarPuntosModal({
               <div className="overflow-y-auto max-h-[70vh] p-6 space-y-6">
                 {/* Selección de estudiante */}
                 <div>
-                  <label className="block text-white font-bold mb-3">
-                    Seleccionar Estudiante
-                  </label>
+                  <label className="block text-white font-bold mb-3">Seleccionar Estudiante</label>
                   <div className="max-h-48 overflow-y-auto space-y-2 bg-white/5 rounded-xl p-3 border border-white/10">
                     {estudiantes.map((estudiante) => (
                       <button
@@ -261,19 +240,13 @@ export default function AsignarPuntosModal({
                           </div>
 
                           <div className="flex-1 text-left">
-                            <p className="text-white font-bold">
-                              {accion.nombre}
-                            </p>
-                            <p className="text-xs text-gray-400">
-                              {accion.descripcion}
-                            </p>
+                            <p className="text-white font-bold">{accion.nombre}</p>
+                            <p className="text-xs text-gray-400">{accion.descripcion}</p>
                           </div>
 
                           <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-lg">
                             <Star className="w-4 h-4 text-yellow-300" />
-                            <span className="text-white font-black">
-                              +{accion.puntos}
-                            </span>
+                            <span className="text-white font-black">+{accion.puntos}</span>
                           </div>
 
                           {accionSeleccionada === accion.id && (
@@ -287,9 +260,7 @@ export default function AsignarPuntosModal({
 
                 {/* Campo de contexto opcional */}
                 <div>
-                  <label className="block text-white font-bold mb-3">
-                    Contexto (opcional)
-                  </label>
+                  <label className="block text-white font-bold mb-3">Contexto (opcional)</label>
                   <textarea
                     value={contexto}
                     onChange={(e) => setContexto(e.target.value)}
@@ -319,24 +290,17 @@ export default function AsignarPuntosModal({
                       />
                       <div className="flex-1">
                         <p className="text-white font-bold">
-                          {estudianteSelected.nombre}{' '}
-                          {estudianteSelected.apellido}
+                          {estudianteSelected.nombre} {estudianteSelected.apellido}
                         </p>
                         <p className="text-yellow-300 font-bold mt-1">
-                          +{accionSelected.puntos} puntos por "
-                          {accionSelected.nombre}"
+                          +{accionSelected.puntos} puntos por "{accionSelected.nombre}"
                         </p>
-                        {contexto && (
-                          <p className="text-gray-300 text-sm mt-2">
-                            {contexto}
-                          </p>
-                        )}
+                        {contexto && <p className="text-gray-300 text-sm mt-2">{contexto}</p>}
                         <div className="flex items-center gap-2 mt-3 bg-white/10 rounded-lg px-3 py-2 w-fit">
                           <Star className="w-5 h-5 text-yellow-400" />
                           <span className="text-white font-black">
                             Nuevo total:{' '}
-                            {(estudianteSelected.stats?.puntosTotal || 0) +
-                              accionSelected.puntos}{' '}
+                            {(estudianteSelected.stats?.puntosTotal || 0) + accionSelected.puntos}{' '}
                             puntos
                           </span>
                         </div>

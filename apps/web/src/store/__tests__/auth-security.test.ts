@@ -30,9 +30,7 @@ describe('Security: Autenticación sin localStorage', () => {
 
       // Simular que alguien intenta guardar un token
       // Esto NO debería ocurrir en el código real
-      const attemptedCalls = setItemSpy.mock.calls.filter(
-        (call) => call[0] === 'access_token'
-      );
+      const attemptedCalls = setItemSpy.mock.calls.filter((call) => call[0] === 'access_token');
 
       expect(attemptedCalls.length).toBe(0);
     });
@@ -43,8 +41,8 @@ describe('Security: Autenticación sin localStorage', () => {
 
       // Verificar que no hay ninguna key relacionada con tokens
       const keys = Object.keys(localStorage);
-      const tokenKeys = keys.filter((key) =>
-        key.toLowerCase().includes('token') || key.toLowerCase().includes('jwt')
+      const tokenKeys = keys.filter(
+        (key) => key.toLowerCase().includes('token') || key.toLowerCase().includes('jwt'),
       );
 
       expect(tokenKeys).toEqual([]);
@@ -82,7 +80,7 @@ describe('Security: Autenticación sin localStorage', () => {
       // porque nunca lo guardamos ahí
 
       const attemptedRemovals = removeItemSpy.mock.calls.filter(
-        (call) => call[0] === 'access_token'
+        (call) => call[0] === 'access_token',
       );
 
       expect(attemptedRemovals.length).toBe(0);

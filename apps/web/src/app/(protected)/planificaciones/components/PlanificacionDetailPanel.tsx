@@ -1,22 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  usePlanificacionesStore,
-} from '@/stores/planificaciones.store';
+import { usePlanificacionesStore } from '@/stores/planificaciones.store';
 import {
   ComponenteActividad,
   CreateActividadRequest,
   EstadoPlanificacion,
 } from '@/types/planificacion.types';
-import {
-  X,
-  Loader2,
-  Trash2,
-  PlusCircle,
-  CheckCircle2,
-  Send,
-} from 'lucide-react';
+import { X, Loader2, Trash2, PlusCircle, CheckCircle2, Send } from 'lucide-react';
 
 interface PlanificacionDetailPanelProps {
   planificacionId: string | null;
@@ -131,8 +122,12 @@ export const PlanificacionDetailPanel: React.FC<PlanificacionDetailPanelProps> =
       <div className="relative h-full w-full max-w-2xl overflow-y-auto border-l border-white/10 bg-slate-950/95 p-6">
         <div className="flex items-center justify-between gap-4 mb-6">
           <div>
-            <p className="text-xs uppercase tracking-wider text-white/50 font-semibold">Detalle de planificación</p>
-            <h2 className="text-2xl font-semibold text-white">{detalle?.titulo || 'Planificación'}</h2>
+            <p className="text-xs uppercase tracking-wider text-white/50 font-semibold">
+              Detalle de planificación
+            </p>
+            <h2 className="text-2xl font-semibold text-white">
+              {detalle?.titulo || 'Planificación'}
+            </h2>
           </div>
           <button
             onClick={handleClose}
@@ -179,7 +174,9 @@ export const PlanificacionDetailPanel: React.FC<PlanificacionDetailPanelProps> =
                 <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-white/80">
                   <div>
                     <p className="text-white/50 text-xs uppercase">Grupo</p>
-                    <p className="font-semibold text-white">{detalle.grupo?.codigo || detalle.codigo_grupo}</p>
+                    <p className="font-semibold text-white">
+                      {detalle.grupo?.codigo || detalle.codigo_grupo}
+                    </p>
                   </div>
                   <div>
                     <p className="text-white/50 text-xs uppercase">Período</p>
@@ -233,7 +230,9 @@ export const PlanificacionDetailPanel: React.FC<PlanificacionDetailPanelProps> =
 
             <section className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-white/80">Actividades ({detalle.actividades.length})</h3>
+                <h3 className="text-sm font-semibold text-white/80">
+                  Actividades ({detalle.actividades.length})
+                </h3>
               </div>
 
               <form
@@ -250,7 +249,10 @@ export const PlanificacionDetailPanel: React.FC<PlanificacionDetailPanelProps> =
                       max={4}
                       value={actividadForm.semana}
                       onChange={(event) =>
-                        setActividadForm((prev) => ({ ...prev, semana: Number(event.target.value) }))
+                        setActividadForm((prev) => ({
+                          ...prev,
+                          semana: Number(event.target.value),
+                        }))
                       }
                       className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-pink-400 focus:outline-none"
                     />

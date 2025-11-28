@@ -66,7 +66,8 @@ export default function MisHijosTab({ estudiantes }: Props) {
         <h2 className="text-lg font-bold text-white mb-4">Mis Hijos ({estudiantes.length})</h2>
         <div className="space-y-2">
           {estudiantes.map((estudiante) => {
-            const initials = `${estudiante.nombre.charAt(0)}${estudiante.apellido.charAt(0)}`.toUpperCase();
+            const initials =
+              `${estudiante.nombre.charAt(0)}${estudiante.apellido.charAt(0)}`.toUpperCase();
             const isSelected = selectedStudent === estudiante.id;
 
             return (
@@ -89,8 +90,12 @@ export default function MisHijosTab({ estudiantes }: Props) {
                     {initials}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-white truncate">{estudiante.nombre} {estudiante.apellido}</h3>
-                    <p className="text-sm text-gray-300">{estudiante.nivel_escolar || 'Sin nivel'}</p>
+                    <h3 className="font-bold text-white truncate">
+                      {estudiante.nombre} {estudiante.apellido}
+                    </h3>
+                    <p className="text-sm text-gray-300">
+                      {estudiante.nivel_escolar || 'Sin nivel'}
+                    </p>
                   </div>
                 </div>
               </button>
@@ -113,14 +118,16 @@ export default function MisHijosTab({ estudiantes }: Props) {
             {/* Header del Estudiante */}
             <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg">
               <div className="flex items-center gap-4">
-                <div
-                  className="w-20 h-20 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg bg-white/20"
-                >
+                <div className="w-20 h-20 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg bg-white/20">
                   {`${studentDetail.nombre.charAt(0)}${studentDetail.apellido.charAt(0)}`.toUpperCase()}
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold">{studentDetail.nombre} {studentDetail.apellido}</h2>
-                  <p className="text-indigo-100">{studentDetail.edad} años • {studentDetail.nivel_escolar || 'Sin nivel'}</p>
+                  <h2 className="text-2xl font-bold">
+                    {studentDetail.nombre} {studentDetail.apellido}
+                  </h2>
+                  <p className="text-indigo-100">
+                    {studentDetail.edad} años • {studentDetail.nivel_escolar || 'Sin nivel'}
+                  </p>
                 </div>
               </div>
             </div>
@@ -143,7 +150,9 @@ export default function MisHijosTab({ estudiantes }: Props) {
 
                 <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white shadow-lg">
                   <CheckCircle className="w-8 h-8 mb-2 opacity-80" />
-                  <p className="text-2xl font-bold">{studentDetail.estadisticas.tasa_asistencia}%</p>
+                  <p className="text-2xl font-bold">
+                    {studentDetail.estadisticas.tasa_asistencia}%
+                  </p>
                   <p className="text-sm opacity-90">Asistencia</p>
                 </div>
 
@@ -161,16 +170,21 @@ export default function MisHijosTab({ estudiantes }: Props) {
               <div className="bg-gray-800 rounded-xl p-4 border-2 border-gray-700">
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <p className="text-3xl font-bold text-indigo-400">{studentDetail.estadisticas.total_clases}</p>
+                    <p className="text-3xl font-bold text-indigo-400">
+                      {studentDetail.estadisticas.total_clases}
+                    </p>
                     <p className="text-sm text-gray-400">Total Clases</p>
                   </div>
                   <div>
-                    <p className="text-3xl font-bold text-green-400">{studentDetail.estadisticas.clases_presente}</p>
+                    <p className="text-3xl font-bold text-green-400">
+                      {studentDetail.estadisticas.clases_presente}
+                    </p>
                     <p className="text-sm text-gray-400">Asistió</p>
                   </div>
                   <div>
                     <p className="text-3xl font-bold text-red-400">
-                      {studentDetail.estadisticas.total_clases - studentDetail.estadisticas.clases_presente}
+                      {studentDetail.estadisticas.total_clases -
+                        studentDetail.estadisticas.clases_presente}
                     </p>
                     <p className="text-sm text-gray-400">Faltó</p>
                   </div>
@@ -208,7 +222,11 @@ export default function MisHijosTab({ estudiantes }: Props) {
                                   month: 'long',
                                   day: 'numeric',
                                 })}{' '}
-                                • {fechaClase.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                                •{' '}
+                                {fechaClase.toLocaleTimeString('es-AR', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
                               </p>
                               <p className="text-xs text-gray-400">
                                 Prof. {clase.docente?.nombre} {clase.docente?.apellido}
@@ -244,7 +262,9 @@ export default function MisHijosTab({ estudiantes }: Props) {
             <div className="text-center">
               <Users className="w-16 h-16 mx-auto mb-4 text-gray-600" />
               <p className="text-xl font-bold text-white mb-2">Selecciona un hijo</p>
-              <p className="text-gray-400">Elige un estudiante de la lista para ver su información</p>
+              <p className="text-gray-400">
+                Elige un estudiante de la lista para ver su información
+              </p>
             </div>
           </div>
         )}

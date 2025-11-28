@@ -9,10 +9,12 @@ Se ha mejorado la configuración de Playwright de un nivel básico a **producci�
 ## ✅ Mejoras Implementadas
 
 ### 1. Multi-Browser Testing
+
 **Estado**: ✅ COMPLETADO
 
 **Antes**: Solo Chromium
 **Ahora**:
+
 - ✅ Chromium (Desktop Chrome 1920x1080)
 - ✅ Firefox (Desktop Firefox 1920x1080)
 - ✅ WebKit (Desktop Safari 1920x1080)
@@ -22,10 +24,12 @@ Se ha mejorado la configuración de Playwright de un nivel básico a **producci�
 ---
 
 ### 2. Mobile & Tablet Testing
+
 **Estado**: ✅ COMPLETADO
 
 **Antes**: Sin tests mobile
 **Ahora**:
+
 - ✅ Mobile Chrome (Pixel 5)
 - ✅ Mobile Safari (iPhone 13)
 - ✅ iPad (iPad Pro)
@@ -35,6 +39,7 @@ Se ha mejorado la configuración de Playwright de un nivel básico a **producci�
 ---
 
 ### 3. Video Recording
+
 **Estado**: ✅ COMPLETADO
 
 **Configuración**: `video: 'retain-on-failure'`
@@ -45,9 +50,11 @@ Se ha mejorado la configuración de Playwright de un nivel básico a **producci�
 ---
 
 ### 4. HAR Recording (Network Debugging)
+
 **Estado**: ✅ COMPLETADO
 
 **Configuración**:
+
 ```typescript
 recordHar: {
   mode: 'minimal',
@@ -60,10 +67,12 @@ recordHar: {
 ---
 
 ### 5. Multiple Reporters
+
 **Estado**: ✅ COMPLETADO
 
 **Antes**: Solo HTML
 **Ahora**:
+
 - ✅ HTML (reporte visual interactivo)
 - ✅ JSON (análisis programático)
 - ✅ JUnit (integración CI/CD)
@@ -71,6 +80,7 @@ recordHar: {
 - ✅ List (output en consola para dev)
 
 **Ubicación**:
+
 - `test-results/html-report/`
 - `test-results/results.json`
 - `test-results/junit.xml`
@@ -78,9 +88,11 @@ recordHar: {
 ---
 
 ### 6. Variables de Entorno
+
 **Estado**: ✅ COMPLETADO
 
 **Configuración**:
+
 ```bash
 PLAYWRIGHT_BASE_URL=http://localhost:3000
 PLAYWRIGHT_WORKERS=4
@@ -94,13 +106,16 @@ CI=1
 ---
 
 ### 7. Global Setup & Teardown
+
 **Estado**: ✅ COMPLETADO
 
 **Archivos**:
+
 - `tests/e2e/global-setup.ts`
 - `tests/e2e/global-teardown.ts`
 
 **Funcionalidades**:
+
 - Verificación de disponibilidad de app
 - Preparación de BD de prueba (ready to implement)
 - Autenticación global (ready to implement)
@@ -109,11 +124,13 @@ CI=1
 ---
 
 ### 8. Accessibility Testing
+
 **Estado**: ✅ COMPLETADO
 
 **Nueva suite**: `06-accessibility.spec.ts` (19 tests)
 
 **Coverage**:
+
 - ✅ WCAG 2.1 Level A
 - ✅ WCAG 2.1 Level AA
 - ✅ Color contrast (4.5:1)
@@ -129,9 +146,11 @@ CI=1
 ---
 
 ### 9. Scripts de Package.json
+
 **Estado**: ✅ COMPLETADO
 
 **Nuevos comandos**:
+
 ```bash
 # Debug
 yarn workspace web test:e2e:debug
@@ -159,9 +178,11 @@ yarn workspace web test:e2e:install
 ---
 
 ### 10. Documentación
+
 **Estado**: ✅ COMPLETADO
 
 **Archivos actualizados**:
+
 - ✅ `tests/README.md` (completamente reescrito)
 - ✅ `playwright.config.ts` (comentarios detallados)
 - ✅ `.env.playwright.example` (ejemplo de configuración)
@@ -173,12 +194,14 @@ yarn workspace web test:e2e:install
 ## 📊 Estadísticas
 
 ### Tests
+
 - **Antes**: 52 tests
 - **Ahora**: 71 tests (+19 accessibility tests)
 - **Browsers**: 6 projects (3 desktop + 2 mobile + 1 tablet)
 - **Archivos de spec**: 6 archivos
 
 ### Cobertura
+
 - ✅ Smoke tests (3 tests)
 - ✅ Landing page (11 tests)
 - ✅ Catálogo (13 tests)
@@ -187,6 +210,7 @@ yarn workspace web test:e2e:install
 - ✅ Accessibility (19 tests)
 
 ### Tiempo de Ejecución Estimado
+
 - **Smoke tests**: ~20s
 - **Suite completa (1 browser)**: ~3-5 min
 - **Suite completa (todos browsers)**: ~15-20 min (paralelo)
@@ -197,6 +221,7 @@ yarn workspace web test:e2e:install
 ## 🎯 Configuración por Ambiente
 
 ### Desarrollo Local
+
 ```typescript
 {
   reporters: ['html', 'list'],
@@ -208,6 +233,7 @@ yarn workspace web test:e2e:install
 ```
 
 ### CI/CD
+
 ```typescript
 {
   reporters: ['html', 'json', 'junit', 'github'],
@@ -224,9 +250,11 @@ yarn workspace web test:e2e:install
 ## 🚀 CI/CD Integration
 
 ### GitHub Actions
+
 **Archivo**: `.github/workflows/playwright.yml.example`
 
 **Estrategia**:
+
 - Matrix paralela por browser
 - Job separado para mobile
 - Job separado para accessibility
@@ -234,6 +262,7 @@ yarn workspace web test:e2e:install
 - Annotations automáticas en PRs
 
 ### GitLab CI
+
 **Ready to use** con reportes JUnit
 
 ---
@@ -254,18 +283,21 @@ yarn workspace web test:e2e:install
 ## 🎨 Features Destacadas
 
 ### 1. Smart Debugging
+
 - Videos solo en fallos (ahorra espacio)
 - HAR files en desarrollo
 - Traces en primer retry
 - Screenshots automáticos
 
 ### 2. Performance Optimizations
+
 - Parallel execution (workers configurables)
 - Server reuse en desarrollo
 - Timeouts optimizados
 - Reporters condicionales (dev vs CI)
 
 ### 3. Production Ready
+
 - Multi-browser coverage
 - Mobile-first testing
 - Accessibility compliance
@@ -277,16 +309,19 @@ yarn workspace web test:e2e:install
 ## 📝 Próximos Pasos Sugeridos
 
 ### Corto Plazo
+
 1. ⏳ Ejecutar suite completa para verificar estabilidad
 2. ⏳ Configurar GitHub Actions en el repo
 3. ⏳ Implementar seed de BD en global-setup (si necesario)
 
 ### Mediano Plazo
+
 1. ⏳ Agregar visual regression testing (screenshot comparison)
 2. ⏳ Implementar Page Object Model para tests más complejos
 3. ⏳ Agregar tests de performance con Lighthouse
 
 ### Largo Plazo
+
 1. ⏳ Integrar con herramientas de monitoring (Sentry, DataDog)
 2. ⏳ Implementar A/B testing con Playwright
 3. ⏳ Tests de carga con k6 + Playwright
@@ -296,12 +331,14 @@ yarn workspace web test:e2e:install
 ## 🎓 Recursos
 
 ### Documentación
+
 - [Playwright Official Docs](https://playwright.dev)
 - [Best Practices](https://playwright.dev/docs/best-practices)
 - [Accessibility Testing](https://playwright.dev/docs/accessibility-testing)
 - [CI/CD Setup](https://playwright.dev/docs/ci)
 
 ### Tools
+
 - [Playwright Inspector](https://playwright.dev/docs/inspector)
 - [Trace Viewer](https://playwright.dev/docs/trace-viewer)
 - [axe DevTools](https://www.deque.com/axe/devtools/)
@@ -311,20 +348,20 @@ yarn workspace web test:e2e:install
 
 ## 📊 Comparación: Antes vs Después
 
-| Feature | Antes | Después |
-|---------|-------|---------|
-| Browsers | 1 (Chromium) | 6 (3 desktop + 3 mobile) |
-| Tests | 52 | 71 |
-| Reporters | 1 (HTML) | 5 (HTML, JSON, JUnit, GitHub, List) |
-| Video Recording | ❌ | ✅ |
-| HAR Recording | ❌ | ✅ |
-| Accessibility | ❌ | ✅ (19 tests WCAG 2.1 AA) |
-| Global Setup | ❌ | ✅ |
-| CI/CD Ready | Parcial | ✅ Completo |
-| Env Vars | Hardcoded | ✅ Configurable |
-| Mobile Testing | ❌ | ✅ (3 devices) |
-| Scripts npm | 4 | 17 |
-| Docs | Básica | Completa |
+| Feature         | Antes        | Después                             |
+| --------------- | ------------ | ----------------------------------- |
+| Browsers        | 1 (Chromium) | 6 (3 desktop + 3 mobile)            |
+| Tests           | 52           | 71                                  |
+| Reporters       | 1 (HTML)     | 5 (HTML, JSON, JUnit, GitHub, List) |
+| Video Recording | ❌           | ✅                                  |
+| HAR Recording   | ❌           | ✅                                  |
+| Accessibility   | ❌           | ✅ (19 tests WCAG 2.1 AA)           |
+| Global Setup    | ❌           | ✅                                  |
+| CI/CD Ready     | Parcial      | ✅ Completo                         |
+| Env Vars        | Hardcoded    | ✅ Configurable                     |
+| Mobile Testing  | ❌           | ✅ (3 devices)                      |
+| Scripts npm     | 4            | 17                                  |
+| Docs            | Básica       | Completa                            |
 
 ---
 

@@ -19,14 +19,14 @@
 
 ### Métricas del Refactor
 
-| Métrica | Antes | Después | Mejora |
-|---------|-------|---------|--------|
-| **DTOs con validación completa** | ~70% | **100%** (críticos) | +30% |
-| **DTOs con @ApiProperty** | ~60% | **100%** (críticos) | +40% |
-| **Tests de validación** | 0 | **70** ✅ | +70 |
-| **DTOs mejorados** | - | **6** | - |
-| **DTOs normalizados camelCase** | 0 | **69** | +69 |
-| **Nivel de Seguridad** | Medio | **Alto** | ✅ |
+| Métrica                          | Antes | Después             | Mejora |
+| -------------------------------- | ----- | ------------------- | ------ |
+| **DTOs con validación completa** | ~70%  | **100%** (críticos) | +30%   |
+| **DTOs con @ApiProperty**        | ~60%  | **100%** (críticos) | +40%   |
+| **Tests de validación**          | 0     | **70** ✅           | +70    |
+| **DTOs mejorados**               | -     | **6**               | -      |
+| **DTOs normalizados camelCase**  | 0     | **69**              | +69    |
+| **Nivel de Seguridad**           | Medio | **Alto**            | ✅     |
 
 ---
 
@@ -35,21 +35,25 @@
 ### 1. DTOs de Autenticación ✅ (YA ESTABAN EXCELENTES)
 
 #### LoginDto
+
 **Archivo**: `apps/api/src/auth/dto/login.dto.ts`
 
 **Estado**: ✅ PERFECTO - No requirió cambios
 
 **Validaciones Existentes**:
+
 - ✅ Email válido con `@IsEmail()`
 - ✅ Password mínimo 8 caracteres con `@MinLength(8)`
 - ✅ Documentación Swagger completa
 
 #### RegisterDto
+
 **Archivo**: `apps/api/src/auth/dto/register.dto.ts`
 
 **Estado**: ✅ PERFECTO - No requirió cambios
 
 **Validaciones Existentes**:
+
 - ✅ Email único, validado, convertido a minúsculas automáticamente
 - ✅ Password segura (min 8 chars, mayúscula, minúscula, número, carácter especial)
 - ✅ Nombre y apellido validados (solo letras, 2-100 chars)
@@ -59,6 +63,7 @@
 - ✅ Documentación Swagger completa con ejemplos
 
 **Ejemplo de uso**:
+
 ```typescript
 {
   "email": "juan.perez@example.com",
@@ -71,11 +76,13 @@
 ```
 
 #### ChangePasswordDto
+
 **Archivo**: `apps/api/src/auth/dto/change-password.dto.ts`
 
 **Estado**: ✅ PERFECTO - No requirió cambios
 
 **Validaciones Existentes**:
+
 - ✅ `passwordActual` mínimo 4 caracteres (permite contraseñas temporales)
 - ✅ `nuevaPassword` segura (min 8 chars, mayúscula, minúscula, número, símbolo)
 - ✅ Documentación Swagger completa
@@ -85,11 +92,13 @@
 ### 2. DTOs de Estudiantes ✅ (YA ESTABAN EXCELENTES)
 
 #### CreateEstudianteDto
+
 **Archivo**: `apps/api/src/estudiantes/dto/create-estudiante.dto.ts`
 
 **Estado**: ✅ PERFECTO - No requirió cambios
 
 **Validaciones Existentes**:
+
 - ✅ Nombre y apellido (solo letras con tildes y ñ, 2-100 chars)
 - ✅ Edad (entero entre 3 y 99)
 - ✅ Nivel escolar enum (`Primaria`, `Secundaria`, `Universidad`)
@@ -100,19 +109,23 @@
 - ✅ Documentación Swagger completa
 
 #### UpdateEstudianteDto
+
 **Archivo**: `apps/api/src/estudiantes/dto/update-estudiante.dto.ts`
 
 **Estado**: ✅ PERFECTO - Usa `PartialType(CreateEstudianteDto)`
 
 **Comportamiento**:
+
 - ✅ Todos los campos del CreateDto son opcionales
 - ✅ Hereda todas las validaciones
 - ✅ Pattern correcto de NestJS
 
 #### QueryEstudiantesDto ✅ MEJORADO
+
 **Archivo**: `apps/api/src/estudiantes/dto/query-estudiantes.dto.ts`
 
 **Cambios Aplicados**:
+
 - ✅ **AGREGADO**: `@ApiPropertyOptional()` a todos los campos
 - ✅ **AGREGADO**: `@IsUUID()` para validar `equipo_id`
 - ✅ **AGREGADO**: `@IsIn()` para validar `nivel_escolar` (enum)
@@ -120,6 +133,7 @@
 - ✅ **AGREGADO**: Transformación `@Trim()` para strings
 
 **ANTES**:
+
 ```typescript
 @IsOptional()
 @IsString()
@@ -127,6 +141,7 @@ equipo_id?: string;
 ```
 
 **DESPUÉS**:
+
 ```typescript
 @ApiPropertyOptional({
   description: 'Filtrar por ID de equipo (casa)',
@@ -146,11 +161,13 @@ equipo_id?: string;
 ### 3. DTOs de Clases
 
 #### CrearClaseDto
+
 **Archivo**: `apps/api/src/clases/dto/crear-clase.dto.ts`
 
 **Estado**: ✅ PERFECTO - Ya estaba excelente
 
 **Validaciones Existentes**:
+
 - ✅ Custom validators: `@IsFutureDate()`, `@IsBusinessHours()`
 - ✅ Fecha en futuro (mínimo 30 min anticipación)
 - ✅ Horario laboral (8:00-20:00)
@@ -159,9 +176,11 @@ equipo_id?: string;
 - ✅ Documentación Swagger completa con ejemplos
 
 #### ReservarClaseDto ✅ MEJORADO
+
 **Archivo**: `apps/api/src/clases/dto/reservar-clase.dto.ts`
 
 **Cambios Aplicados**:
+
 - ✅ **AGREGADO**: `@ApiProperty()` y `@ApiPropertyOptional()`
 - ✅ **AGREGADO**: `@IsUUID()` para validar `estudianteId`
 - ✅ **AGREGADO**: `@MaxLength(500)` para `observaciones`
@@ -170,6 +189,7 @@ equipo_id?: string;
 - ✅ **AGREGADO**: Comentarios de documentación
 
 **ANTES**:
+
 ```typescript
 export class ReservarClaseDto {
   @IsString()
@@ -182,6 +202,7 @@ export class ReservarClaseDto {
 ```
 
 **DESPUÉS**:
+
 ```typescript
 export class ReservarClaseDto {
   @ApiProperty({
@@ -212,9 +233,11 @@ export class ReservarClaseDto {
 ```
 
 #### RegistrarAsistenciaDto ✅ MEJORADO
+
 **Archivo**: `apps/api/src/clases/dto/registrar-asistencia.dto.ts`
 
 **Cambios Aplicados**:
+
 - ✅ **AGREGADO**: `@ApiProperty()` a `AsistenciaEstudianteDto` y `RegistrarAsistenciaDto`
 - ✅ **AGREGADO**: `@IsUUID()` para validar `estudianteId`
 - ✅ **AGREGADO**: `@Max(100)` para limitar `puntosOtorgados` a 100
@@ -223,6 +246,7 @@ export class ReservarClaseDto {
 - ✅ **AGREGADO**: Transformación `@Trim()` y `@Type(() => Number)`
 
 **Validaciones Agregadas**:
+
 ```typescript
 export class AsistenciaEstudianteDto {
   @IsUUID('4', { message: 'El ID del estudiante debe ser un UUID válido' })
@@ -248,9 +272,11 @@ export class AsistenciaEstudianteDto {
 ## 🧪 Tests de Validación Creados
 
 ### Suite 1: CreateEstudianteDto Tests
+
 **Archivo**: `apps/api/src/estudiantes/dto/__tests__/create-estudiante.dto.spec.ts`
 
 **25 tests** ✅ (Todos pasando) cubriendo:
+
 - ✅ Validación exitosa con datos completos
 - ✅ Validación exitosa con campos opcionales omitidos
 - ✅ Validación de nombres con tildes y ñ
@@ -265,6 +291,7 @@ export class AsistenciaEstudianteDto {
 - ✅ Detección de múltiples errores simultáneos
 
 **Ejemplo de test**:
+
 ```typescript
 it('debe fallar con edad menor a 3', async () => {
   const dto = plainToClass(CreateEstudianteDto, {
@@ -281,9 +308,11 @@ it('debe fallar con edad menor a 3', async () => {
 ```
 
 ### Suite 2: RegisterDto Tests
+
 **Archivo**: `apps/api/src/auth/dto/__tests__/register.dto.spec.ts`
 
 **29 tests** ✅ (Todos pasando) cubriendo:
+
 - ✅ Validación de email (formato, longitud, subdominios)
 - ✅ Validación de contraseña segura (8+ chars, mayúscula, minúscula, número, símbolo)
 - ✅ Rechazo de contraseñas débiles (sin mayúscula, sin minúscula, sin número, sin símbolo)
@@ -294,6 +323,7 @@ it('debe fallar con edad menor a 3', async () => {
 - ✅ Edge cases (email con mayúsculas, trimming automático)
 
 **Ejemplo de test de seguridad**:
+
 ```typescript
 it('debe fallar con contraseña sin carácter especial', async () => {
   const dto = plainToClass(RegisterDto, {
@@ -310,9 +340,11 @@ it('debe fallar con contraseña sin carácter especial', async () => {
 ```
 
 ### Suite 3: ChangePasswordDto Tests
+
 **Archivo**: `apps/api/src/auth/dto/__tests__/change-password.dto.spec.ts`
 
 **16 tests** ✅ (Todos pasando) cubriendo:
+
 - ✅ Validación de `passwordActual` (mínimo 4 chars para contraseñas temporales)
 - ✅ Validación de `nuevaPassword` (requisitos de seguridad completos)
 - ✅ Validación de diferentes caracteres especiales permitidos
@@ -328,6 +360,7 @@ it('debe fallar con contraseña sin carácter especial', async () => {
 ### 1. Prevención de Mass Assignment Attacks
 
 **Problema Anterior**:
+
 ```typescript
 // Sin validación, un atacante podría enviar:
 {
@@ -338,26 +371,29 @@ it('debe fallar con contraseña sin carácter especial', async () => {
 ```
 
 **Solución Implementada**:
+
 ```typescript
 // ValidationPipe configurado en main.ts:
 app.useGlobalPipes(
   new ValidationPipe({
-    whitelist: true,              // ✅ Remueve campos no definidos
-    forbidNonWhitelisted: true,   // ✅ Arroja error si hay campos extra
-    transform: true,               // ✅ Transforma a tipo correcto
-  })
+    whitelist: true, // ✅ Remueve campos no definidos
+    forbidNonWhitelisted: true, // ✅ Arroja error si hay campos extra
+    transform: true, // ✅ Transforma a tipo correcto
+  }),
 );
 ```
 
 ### 2. Validación de UUIDs
 
 **ANTES** (vulnerable a SQL injection si se usa directamente):
+
 ```typescript
 @IsString()
 equipo_id?: string;
 ```
 
 **DESPUÉS** (seguro):
+
 ```typescript
 @IsUUID('4', { message: 'El ID del equipo debe ser un UUID válido' })
 equipo_id?: string;
@@ -366,6 +402,7 @@ equipo_id?: string;
 ### 3. URLs Solo HTTPS
 
 **Seguridad mejorada para imágenes**:
+
 ```typescript
 @IsUrl(
   { require_protocol: true, protocols: ['https'] },
@@ -377,6 +414,7 @@ foto_url?: string;
 ### 4. Límites de Longitud
 
 **Prevención de DoS attacks**:
+
 ```typescript
 @MaxLength(500, {
   message: 'Las observaciones no pueden superar los 500 caracteres',
@@ -426,6 +464,7 @@ export class ReservarClaseDto {
 ```
 
 **Resultado en Swagger UI**:
+
 - ✅ Descripción clara de cada campo
 - ✅ Ejemplos de uso
 - ✅ Tipo y formato especificado
@@ -438,14 +477,15 @@ export class ReservarClaseDto {
 
 ### Decoradores Custom Usados
 
-| Decorador | Función | Ejemplo |
-|-----------|---------|---------|
-| `@Trim()` | Remueve espacios al inicio/fin | `"  Juan  "` → `"Juan"` |
-| `@Capitalize()` | Primera letra en mayúscula | `"juan"` → `"Juan"` |
-| `@Lowercase()` | Convierte a minúsculas | `"JUAN@EMAIL.COM"` → `"juan@email.com"` |
-| `@Type(() => Number)` | Convierte string a número | `"10"` → `10` |
+| Decorador             | Función                        | Ejemplo                                 |
+| --------------------- | ------------------------------ | --------------------------------------- |
+| `@Trim()`             | Remueve espacios al inicio/fin | `"  Juan  "` → `"Juan"`                 |
+| `@Capitalize()`       | Primera letra en mayúscula     | `"juan"` → `"Juan"`                     |
+| `@Lowercase()`        | Convierte a minúsculas         | `"JUAN@EMAIL.COM"` → `"juan@email.com"` |
+| `@Type(() => Number)` | Convierte string a número      | `"10"` → `10`                           |
 
 **Ventajas**:
+
 - ✅ Normalización automática de datos
 - ✅ Evita errores de formato
 - ✅ Consistencia en la base de datos
@@ -459,13 +499,13 @@ export class ReservarClaseDto {
 
 **Fecha de completación**: 2025-11-12
 
-| DTO | Campo Anterior | Campo Nuevo | Estado |
-|-----|---------------|-------------|--------|
+| DTO                 | Campo Anterior  | Campo Nuevo    | Estado        |
+| ------------------- | --------------- | -------------- | ------------- |
 | CreateEstudianteDto | `nivel_escolar` | `nivelEscolar` | ✅ Completado |
-| CreateEstudianteDto | `foto_url` | `fotoUrl` | ✅ Completado |
-| CreateEstudianteDto | `avatar_url` | `avatarUrl` | ✅ Completado |
-| CreateEstudianteDto | `equipo_id` | `equipoId` | ✅ Completado |
-| QueryEstudiantesDto | `equipo_id` | `equipoId` | ✅ Completado |
+| CreateEstudianteDto | `foto_url`      | `fotoUrl`      | ✅ Completado |
+| CreateEstudianteDto | `avatar_url`    | `avatarUrl`    | ✅ Completado |
+| CreateEstudianteDto | `equipo_id`     | `equipoId`     | ✅ Completado |
+| QueryEstudiantesDto | `equipo_id`     | `equipoId`     | ✅ Completado |
 | QueryEstudiantesDto | `nivel_escolar` | `nivelEscolar` | ✅ Completado |
 
 **Alcance total**: 69 archivos DTO normalizados + Schema de Prisma actualizado
@@ -489,6 +529,7 @@ model Estudiante {
 **Documentación completa**: Ver [BREAKING-CHANGES-CAMELCASE.md](./BREAKING-CHANGES-CAMELCASE.md)
 
 **Resumen**:
+
 - Frontend debe actualizar todos los requests de snake_case a camelCase
 - Las respuestas del backend ahora usan camelCase
 - No hay compatibilidad hacia atrás
@@ -499,6 +540,7 @@ model Estudiante {
 ## ✅ Checklist de Validaciones Implementadas
 
 ### Validaciones Básicas
+
 - ✅ `@IsString()` - Validar que sea string
 - ✅ `@IsInt()` - Validar que sea entero
 - ✅ `@IsEmail()` - Validar formato de email
@@ -507,11 +549,13 @@ model Estudiante {
 - ✅ `@IsNotEmpty()` - Campos requeridos no vacíos
 
 ### Validaciones de Rango
+
 - ✅ `@Min()`, `@Max()` - Límites numéricos
 - ✅ `@MinLength()`, `@MaxLength()` - Límites de texto
 - ✅ `@IsIn()` - Enum values
 
 ### Validaciones Avanzadas
+
 - ✅ `@Matches()` - Regex patterns (passwords, DNI, nombres)
 - ✅ `@IsUrl()` - URLs con protocolo HTTPS
 - ✅ `@IsEnum()` - Enum de Prisma (EstadoAsistencia)
@@ -519,6 +563,7 @@ model Estudiante {
 - ✅ `@IsArray()` - Validación de arrays
 
 ### Custom Validators
+
 - ✅ `@IsFutureDate()` - Fecha en el futuro
 - ✅ `@IsBusinessHours()` - Horario laboral
 - ✅ `@IsPhoneNumberAR()` - Teléfono argentino
@@ -556,16 +601,16 @@ model Estudiante {
 
 ### Cobertura de Tests de Validación
 
-| DTO | Tests | Coverage | Estado |
-|-----|-------|----------|--------|
-| CreateEstudianteDto | 25 ✅ | 100% | ✅ Excelente |
-| UpdateEstudianteDto | 0 (hereda) | 100% | ✅ OK (PartialType) |
-| QueryEstudiantesDto | 0 | - | ⚠️ Pendiente |
-| RegisterDto | 29 ✅ | 100% | ✅ Excelente |
-| LoginDto | 0 | - | ⚠️ Pendiente |
-| ChangePasswordDto | 16 ✅ | 100% | ✅ Excelente |
-| ReservarClaseDto | 0 | - | ⚠️ Pendiente |
-| RegistrarAsistenciaDto | 0 | - | ⚠️ Pendiente |
+| DTO                    | Tests      | Coverage | Estado              |
+| ---------------------- | ---------- | -------- | ------------------- |
+| CreateEstudianteDto    | 25 ✅      | 100%     | ✅ Excelente        |
+| UpdateEstudianteDto    | 0 (hereda) | 100%     | ✅ OK (PartialType) |
+| QueryEstudiantesDto    | 0          | -        | ⚠️ Pendiente        |
+| RegisterDto            | 29 ✅      | 100%     | ✅ Excelente        |
+| LoginDto               | 0          | -        | ⚠️ Pendiente        |
+| ChangePasswordDto      | 16 ✅      | 100%     | ✅ Excelente        |
+| ReservarClaseDto       | 0          | -        | ⚠️ Pendiente        |
+| RegistrarAsistenciaDto | 0          | -        | ⚠️ Pendiente        |
 
 **Total Tests Creados**: 70 tests ✅ (Todos pasando)
 **Coverage Objetivo**: 80% de DTOs críticos (✅ Alcanzado)

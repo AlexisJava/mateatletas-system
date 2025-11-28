@@ -19,7 +19,9 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000';
 const CI = !!process.env.CI;
 const WORKERS = process.env.PLAYWRIGHT_WORKERS
   ? parseInt(process.env.PLAYWRIGHT_WORKERS, 10)
-  : CI ? 1 : undefined;
+  : CI
+    ? 1
+    : undefined;
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -31,7 +33,7 @@ export default defineConfig({
   /* Timeout para cada test */
   timeout: 60 * 1000,
   expect: {
-    timeout: 10000
+    timeout: 10000,
   },
 
   /* Run tests in files in parallel */
@@ -61,10 +63,7 @@ export default defineConfig({
         ['junit', { outputFile: 'test-results/junit.xml' }],
         ['github'],
       ]
-    : [
-        ['html', { open: 'on-failure' }],
-        ['list'],
-      ],
+    : [['html', { open: 'on-failure' }], ['list']],
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -81,10 +80,12 @@ export default defineConfig({
     video: 'retain-on-failure',
 
     /* HAR recording - captura requests/responses para debugging */
-    recordHar: CI ? undefined : {
-      mode: 'minimal',
-      path: 'test-results/hars/',
-    },
+    recordHar: CI
+      ? undefined
+      : {
+          mode: 'minimal',
+          path: 'test-results/hars/',
+        },
 
     /* Configuraciones adicionales */
     actionTimeout: 10000, // Timeout para acciones individuales

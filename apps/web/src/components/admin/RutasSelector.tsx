@@ -22,7 +22,11 @@ interface RutasSelectorProps {
  * Componente para seleccionar sectores y escribir nombres de rutas
  * Permite crear rutas dinámicamente sin tener una lista predefinida
  */
-export default function RutasSelector({ selectedRutas, onChange, className = '' }: RutasSelectorProps) {
+export default function RutasSelector({
+  selectedRutas,
+  onChange,
+  className = '',
+}: RutasSelectorProps) {
   const { sectores, fetchSectores } = useSectoresStore();
   const [selectedSectorId, setSelectedSectorId] = useState<string>('');
   const [rutaNombre, setRutaNombre] = useState<string>('');
@@ -39,7 +43,8 @@ export default function RutasSelector({ selectedRutas, onChange, className = '' 
 
     // Verificar que no exista ya la misma combinación
     const exists = selectedRutas.some(
-      (r) => r.sectorId === selectedSectorId && r.rutaNombre.toLowerCase() === rutaNombre.toLowerCase()
+      (r) =>
+        r.sectorId === selectedSectorId && r.rutaNombre.toLowerCase() === rutaNombre.toLowerCase(),
     );
 
     if (exists) {
@@ -77,9 +82,7 @@ export default function RutasSelector({ selectedRutas, onChange, className = '' 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* Selector de Sector */}
           <div>
-            <label className="block text-xs font-semibold text-emerald-100 mb-1.5">
-              Sector *
-            </label>
+            <label className="block text-xs font-semibold text-emerald-100 mb-1.5">Sector *</label>
             <select
               value={selectedSectorId}
               onChange={(e) => setSelectedSectorId(e.target.value)}
@@ -125,7 +128,11 @@ export default function RutasSelector({ selectedRutas, onChange, className = '' 
           <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
             <p className="text-sm text-yellow-300">
               ⚠️ No hay sectores disponibles. Por favor, crea al menos un sector primero en{' '}
-              <a href="/admin/sectores-rutas" target="_blank" className="underline font-semibold hover:text-yellow-200">
+              <a
+                href="/admin/sectores-rutas"
+                target="_blank"
+                className="underline font-semibold hover:text-yellow-200"
+              >
                 Sectores y Rutas
               </a>
             </p>
@@ -153,13 +160,8 @@ export default function RutasSelector({ selectedRutas, onChange, className = '' 
                     {ruta.sectorIcono}
                   </span>
                   <div>
-                    <p className="text-sm font-bold text-white">
-                      {ruta.rutaNombre}
-                    </p>
-                    <p
-                      className="text-xs font-medium"
-                      style={{ color: ruta.sectorColor }}
-                    >
+                    <p className="text-sm font-bold text-white">{ruta.rutaNombre}</p>
+                    <p className="text-xs font-medium" style={{ color: ruta.sectorColor }}>
                       {ruta.sectorNombre}
                     </p>
                   </div>

@@ -11,25 +11,30 @@
 ## 🎭 INSTANCIAS DEL SISTEMA
 
 ### 1. **PÚBLICO/LANDING** (Visitante sin autenticación)
+
 ### 2. **TUTOR/PADRE** (Usuario autenticado - rol: tutor)
+
 ### 3. **ESTUDIANTE** (Usuario autenticado - rol: estudiante)
+
 ### 4. **DOCENTE** (Usuario autenticado - rol: docente)
+
 ### 5. **ADMINISTRADOR** (Usuario autenticado - rol: admin)
+
 ### 6. **SISTEMA/BACKEND** (Infraestructura, automatización, IA)
 
 ---
 
 ## 📊 DISTRIBUCIÓN DE TAREAS POR INSTANCIA
 
-| Instancia | Tareas | Porcentaje |
-|-----------|--------|------------|
-| **PÚBLICO/LANDING** | 2 | 2.4% |
-| **TUTOR/PADRE** | 13 | 15.9% |
-| **ESTUDIANTE** | 18 | 22.0% |
-| **DOCENTE** | 14 | 17.1% |
-| **ADMINISTRADOR** | 10 | 12.2% |
-| **SISTEMA/BACKEND** | 25 | 30.5% |
-| **TOTAL** | 82 | 100% |
+| Instancia           | Tareas | Porcentaje |
+| ------------------- | ------ | ---------- |
+| **PÚBLICO/LANDING** | 2      | 2.4%       |
+| **TUTOR/PADRE**     | 13     | 15.9%      |
+| **ESTUDIANTE**      | 18     | 22.0%      |
+| **DOCENTE**         | 14     | 17.1%      |
+| **ADMINISTRADOR**   | 10     | 12.2%      |
+| **SISTEMA/BACKEND** | 25     | 30.5%      |
+| **TOTAL**           | 82     | 100%       |
 
 ---
 
@@ -40,6 +45,7 @@
 ## Tareas (2)
 
 ### 📍 T001 - Landing Page Pública
+
 - **Flujo:** FLUJO 1
 - **Descripción:** Página de aterrizaje con información del club, beneficios, testimonios, precios
 - **Componentes:**
@@ -55,6 +61,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T002 - Formulario de Registro/Inscripción Público
+
 - **Flujo:** FLUJO 1
 - **Descripción:** Formulario multi-step para inscripción de nuevos estudiantes
 - **Componentes:**
@@ -77,6 +84,7 @@
 ## Tareas (13)
 
 ### 📍 T003 - Widget de Bienvenida Personalizado
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Card de bienvenida con resumen de última actividad del hijo
 - **Datos mostrados:**
@@ -88,6 +96,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T004 - Panel de Progreso Detallado del Hijo
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Vista completa del progreso del estudiante
 - **Componentes:**
@@ -100,6 +109,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T005 - Vista de Suscripción y Pagos
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Gestión completa de membresía y pagos
 - **Componentes:**
@@ -113,6 +123,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T006 - Comentarios de Docente Visibles para Tutor
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Acceso a observaciones que escribió el docente sobre el estudiante
 - **Componentes:**
@@ -125,6 +136,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T007 - Sistema de Mensajería Interna Tutor ↔ Docente
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Chat/mensajería bidireccional entre tutor y docente del grupo
 - **Componentes:**
@@ -138,6 +150,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T008 - Gráficas de Progreso por Competencias
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Visualización del crecimiento en áreas matemáticas
 - **Competencias:**
@@ -151,6 +164,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T009 - Sistema de Recompensas Familiares
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Logros compartidos entre tutor e hijo
 - **Componentes:**
@@ -163,6 +177,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T010 - Compartir Logros (Tarjetas Visuales)
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Generador de imágenes de logros para compartir en redes
 - **Componentes:**
@@ -175,6 +190,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T011 - Notificaciones Push (PWA/Firebase)
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Push notifications para eventos importantes
 - **Eventos:**
@@ -187,6 +203,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T012 - Vista Parental en Vivo Durante Clase
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Observar participación del hijo en tiempo real (modo espectador)
 - **Componentes:**
@@ -199,6 +216,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T013 - Resumen Automático Post-Clase para Tutor
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Notificación y vista de resumen al finalizar clase
 - **Datos:**
@@ -211,6 +229,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T014 - Tracking Tiempo de Práctica Semanal
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Contador de minutos de práctica/estudio semanal
 - **Componentes:**
@@ -223,6 +242,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T015 - Visualización de Insignias y Gamificación
+
 - **Flujo:** FLUJO 1 (compartido con ESTUDIANTE)
 - **Descripción:** Galería visual de insignias obtenidas por el hijo
 - **Componentes:**
@@ -242,6 +262,7 @@
 ## Tareas (18)
 
 ### 📍 T016 - Portal Completo del Estudiante
+
 - **Flujo:** FLUJO 4 + FLUJO 1
 - **Descripción:** Dashboard principal del estudiante
 - **Componentes:**
@@ -254,6 +275,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T017 - Sistema de Avatares Personalizables
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Avatar que representa al estudiante
 - **Opciones:**
@@ -265,6 +287,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T018 - Tablero de Actividades con Cards
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Cards principales de navegación
 - **Cards:**
@@ -276,6 +299,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T019 - Animación de Bienvenida Personalizada
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Saludo animado al entrar
 - **Componente:**
@@ -286,6 +310,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T020 - Módulo de Evaluación Diagnóstica Gamificada
+
 - **Flujo:** FLUJO 4 + FLUJO 1
 - **Descripción:** Test inicial para detectar fortalezas/debilidades
 - **Características:**
@@ -297,6 +322,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T021 - Algoritmo Adaptativo de Dificultad
+
 - **Flujo:** FLUJO 4 + FLUJO 1
 - **Descripción:** Ajusta dificultad según respuestas
 - **Lógica:**
@@ -307,6 +333,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T022 - Análisis Automático de Resultados + Envío
+
 - **Flujo:** FLUJO 4 + FLUJO 1
 - **Descripción:** Procesa resultados y los distribuye
 - **Proceso:**
@@ -321,6 +348,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T023 - Widget Próxima Clase con Countdown
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Contador regresivo hasta próxima clase
 - **Estados:**
@@ -332,6 +360,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T024 - Botón Dinámico Entrar a Clase
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Botón que se activa a la hora de clase
 - **Comportamiento:**
@@ -343,6 +372,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T025 - Integración Videollamada con Auto-Join
+
 - **Flujo:** FLUJO 4 + FLUJO 1 + FLUJO 2
 - **Descripción:** Abre sala de videollamada desde dashboard
 - **Stack sugerido:** Jitsi Meet (open source, embebible)
@@ -355,6 +385,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T026 - Tablero de Desafíos en Vivo (WebSockets)
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Interfaz de juegos durante la clase
 - **Componentes:**
@@ -367,6 +398,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T027 - Animaciones en Tiempo Real (Celebraciones)
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Efectos visuales al obtener logros
 - **Animaciones:**
@@ -378,6 +410,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T028 - Barra de Puntos en Vivo Durante Clase
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Widget visible que muestra puntos acumulados
 - **Componente:**
@@ -388,6 +421,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T029 - Leaderboard de Equipos en Tiempo Real
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Tabla de posiciones durante clase
 - **Componentes:**
@@ -399,6 +433,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T030 - Modal Resumen Post-Clase
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Pantalla de cierre al terminar clase
 - **Datos mostrados:**
@@ -411,6 +446,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T031 - Sistema de Métricas por Sesión
+
 - **Flujo:** FLUJO 4 + FLUJO 3
 - **Descripción:** Tracking granular de participación en clase
 - **Métricas:**
@@ -422,6 +458,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T032 - Buzón de Mensajes (Recibir de Tutor)
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Inbox simple para mensajes de su tutor/madre
 - **Componentes:**
@@ -433,6 +470,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T033 - Sistema de Niveles con Nombres Creativos
+
 - **Flujo:** FLUJO 4 + FLUJO 3
 - **Descripción:** Niveles de progreso con nombres atractivos
 - **Ejemplos:**
@@ -445,6 +483,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T034 - Notificación y Animación de Level-Up
+
 - **Flujo:** FLUJO 4
 - **Descripción:** Celebración especial al subir de nivel
 - **Componente:**
@@ -465,6 +504,7 @@
 ## Tareas (14)
 
 ### 📍 T035 - Panel Detallado de Grupo
+
 - **Flujo:** FLUJO 2
 - **Descripción:** Vista completa de un grupo/clase
 - **Componentes:**
@@ -478,6 +518,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T036 - Enriquecer Notificaciones
+
 - **Flujo:** FLUJO 2
 - **Descripción:** Mejorar payload de notificaciones existentes
 - **Mejoras:**
@@ -488,6 +529,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T037 - Dashboard Estadísticas Docente Funcional
+
 - **Flujo:** FLUJO 2
 - **Descripción:** Completar página de reportes con métricas reales
 - **Métricas:**
@@ -501,6 +543,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T038 - Test de Rendimiento Inicial (Vista Docente)
+
 - **Flujo:** FLUJO 2 + FLUJO 1
 - **Descripción:** Ver resultados de evaluaciones diagnósticas
 - **Componente:**
@@ -512,6 +555,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T039 - Gráficos de Fortalezas/Debilidades
+
 - **Flujo:** FLUJO 2
 - **Descripción:** Visualización de perfil del estudiante
 - **Componentes:**
@@ -523,6 +567,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T040 - Perfil Detallado del Estudiante
+
 - **Flujo:** FLUJO 2
 - **Descripción:** Vista 360° del estudiante
 - **Componentes:**
@@ -536,6 +581,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T041 - Integración Videollamadas + Tracking Conectados
+
 - **Flujo:** FLUJO 2 + FLUJO 1
 - **Descripción:** Iniciar clase y ver quién está conectado
 - **Componentes:**
@@ -548,6 +594,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T042 - Sistema de Gamificación en Vivo
+
 - **Flujo:** FLUJO 2
 - **Descripción:** Lanzar actividades interactivas durante clase
 - **Componentes:**
@@ -560,6 +607,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T043 - Contador Grupal y Puntos de Equipo
+
 - **Flujo:** FLUJO 2
 - **Descripción:** Sistema de puntos colectivos
 - **Componentes:**
@@ -571,6 +619,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T044 - Asignación Rápida de Insignias Durante Clase
+
 - **Flujo:** FLUJO 2
 - **Descripción:** Modal rápido para otorgar insignias
 - **Componentes:**
@@ -583,6 +632,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T045 - Animaciones en Tiempo Real (Vista Docente)
+
 - **Flujo:** FLUJO 2
 - **Descripción:** Ver celebraciones sincronizadas del grupo
 - **Componente:**
@@ -592,6 +642,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T046 - Modal de Cierre de Clase + Observaciones para IA
+
 - **Flujo:** FLUJO 2
 - **Descripción:** Prompt automático al finalizar clase
 - **Componentes:**
@@ -604,6 +655,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T047 - Dashboard Resultados Diagnósticos
+
 - **Flujo:** FLUJO 1
 - **Descripción:** Vista consolidada de resultados de evaluaciones
 - **Componentes:**
@@ -615,6 +667,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T048 - Juegos Educativos Interactivos (Gestión)
+
 - **Flujo:** FLUJO 1
 - **Descripción:** Biblioteca de actividades/juegos para usar en clase
 - **Componentes:**
@@ -634,6 +687,7 @@
 ## Tareas (10)
 
 ### 📍 T049 - Dashboard Global de KPIs
+
 - **Flujo:** FLUJO 5
 - **Descripción:** Vista panorámica del estado del sistema
 - **KPIs mostrados:**
@@ -648,6 +702,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T050 - Tracking de Aciertos por Clase/Estudiante
+
 - **Flujo:** FLUJO 5 + FLUJO 3
 - **Descripción:** Registro granular de respuestas en actividades
 - **Backend:**
@@ -657,6 +712,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T051 - Índices de Compromiso (ICD, ICE)
+
 - **Flujo:** FLUJO 5
 - **Descripción:** Métricas de engagement
 - **Índices:**
@@ -667,6 +723,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T052 - Gráficas Temporales de Crecimiento
+
 - **Flujo:** FLUJO 5 + FLUJO 6
 - **Descripción:** Series temporales de métricas clave
 - **Gráficos:**
@@ -679,6 +736,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T053 - Generación Automática de Reportes PDF
+
 - **Flujo:** FLUJO 5
 - **Descripción:** Exportar reportes en PDF
 - **Tipos de reportes:**
@@ -691,6 +749,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T054 - Email Service para Envíos Automáticos
+
 - **Flujo:** FLUJO 5
 - **Descripción:** Servicio de emails transaccionales y automáticos
 - **Casos de uso:**
@@ -704,6 +763,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T055 - Sistema de Proyecciones Financieras
+
 - **Flujo:** FLUJO 6
 - **Descripción:** Forecasting de ingresos
 - **Componentes:**
@@ -716,6 +776,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T056 - Cálculo de Retención Histórica
+
 - **Flujo:** FLUJO 6
 - **Descripción:** Métrica de retención mensual
 - **Fórmula:**
@@ -730,6 +791,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T057 - Gestión Automatizada de Cobranza (Dunning)
+
 - **Flujo:** FLUJO 6
 - **Descripción:** Sistema de recordatorios escalonados
 - **Políticas:**
@@ -740,6 +802,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T058 - Métricas de Morosidad y Liquidez
+
 - **Flujo:** FLUJO 6
 - **Descripción:** Indicadores financieros de salud
 - **Métricas:**
@@ -761,6 +824,7 @@
 ## 🔧 Infraestructura y Automatización (10)
 
 ### 📍 T059 - Sistema de Cron Jobs / Scheduled Tasks
+
 - **Flujo:** FLUJO 5
 - **Descripción:** Infraestructura para tareas programadas
 - **Stack:** `@nestjs/schedule` con decorador `@Cron()`
@@ -773,6 +837,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T060 - Backups Automáticos de Base de Datos
+
 - **Flujo:** FLUJO 5
 - **Descripción:** Respaldos periódicos de PostgreSQL
 - **Estrategia:**
@@ -783,6 +848,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T061 - APM y Monitoring de Sistema
+
 - **Flujo:** FLUJO 5
 - **Descripción:** Monitoreo de performance y errores
 - **Métricas:**
@@ -795,6 +861,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T062 - Limpieza Automática de Datos Huérfanos
+
 - **Flujo:** FLUJO 5
 - **Descripción:** Script de mantenimiento semanal
 - **Acciones:**
@@ -806,6 +873,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T063 - Detección de Suscripciones por Vencer
+
 - **Flujo:** FLUJO 6
 - **Descripción:** Identificar membresías próximas a expirar
 - **Lógica:**
@@ -817,6 +885,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T064 - Recordatorios Escalonados de Pago
+
 - **Flujo:** FLUJO 6
 - **Descripción:** Implementar políticas de dunning
 - **Lógica:**
@@ -828,6 +897,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T065 - Resumen Semanal Automático a Familias
+
 - **Flujo:** FLUJO 5
 - **Descripción:** Email semanal con progreso del hijo
 - **Contenido:**
@@ -840,6 +910,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T066 - Notificaciones Proactivas del Sistema
+
 - **Flujo:** FLUJO 5
 - **Descripción:** Alertas automáticas de eventos
 - **Eventos:**
@@ -853,6 +924,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T067 - Integración Pago → Activación Automática
+
 - **Flujo:** FLUJO 1
 - **Descripción:** Pipeline automático post-pago
 - **Proceso:**
@@ -866,6 +938,7 @@
 - **Prioridad:** 🔴 CRÍTICA
 
 ### 📍 T068 - Mostrar Cupos Disponibles en Frontend
+
 - **Flujo:** FLUJO 1
 - **Descripción:** Visualizar cupos en tiempo real
 - **Componente:**
@@ -878,6 +951,7 @@
 ## 🤖 Inteligencia Artificial y Machine Learning (8)
 
 ### 📍 T069 - Pipeline de Ingesta de Datos para AI
+
 - **Flujo:** FLUJO 5 + FLUJO 6
 - **Descripción:** Sistema de recolección de datos para entrenar IA
 - **Datos a ingestar:**
@@ -891,6 +965,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T070 - Modelo de Análisis de Debilidades
+
 - **Flujo:** FLUJO 5
 - **Descripción:** IA que identifica áreas de mejora por estudiante
 - **Input:** Historial de respuestas, evaluaciones
@@ -899,6 +974,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T071 - Motor de Correlaciones
+
 - **Flujo:** FLUJO 5 + FLUJO 6
 - **Descripción:** Descubrir patrones entre variables
 - **Correlaciones objetivo:**
@@ -909,6 +985,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T072 - Segmentación Inteligente de Usuarios
+
 - **Flujo:** FLUJO 6
 - **Descripción:** Clustering de usuarios por comportamiento
 - **Segmentos:**
@@ -919,6 +996,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T073 - Recomendaciones Automáticas Operativas
+
 - **Flujo:** FLUJO 5
 - **Descripción:** IA sugiere acciones al admin
 - **Ejemplos:**
@@ -929,6 +1007,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T074 - Forecasting con Machine Learning
+
 - **Flujo:** FLUJO 6
 - **Descripción:** Predicción de ingresos con ML
 - **Modelos:** ARIMA, Prophet (Facebook), o LSTM
@@ -936,6 +1015,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T075 - AI con Contexto Personalizado por Alumno
+
 - **Flujo:** FLUJO 1 + FLUJO 2
 - **Descripción:** Sistema que adapta contenido según perfil
 - **Funcionalidad:**
@@ -946,6 +1026,7 @@
 - **Prioridad:** 🟢 BAJA
 
 ### 📍 T076 - Feed Interno de Recomendaciones AI
+
 - **Flujo:** FLUJO 5
 - **Descripción:** Timeline de insights automáticos
 - **Contenido:**
@@ -959,6 +1040,7 @@
 ## 🌐 WebSockets y Tiempo Real (2)
 
 ### 📍 T077 - WebSockets para Eventos en Tiempo Real
+
 - **Flujo:** FLUJO 2 + FLUJO 4
 - **Descripción:** Infraestructura de comunicación bidireccional
 - **Stack:** Socket.io
@@ -972,6 +1054,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T078 - Módulo IA Adaptativa + Perfil Acumulativo
+
 - **Flujo:** FLUJO 2
 - **Descripción:** Sistema que aprende y se adapta por estudiante
 - **Componentes:**
@@ -985,6 +1068,7 @@
 ## 📊 Analytics y Métricas (5)
 
 ### 📍 T079 - Sistema de Métricas por Clase
+
 - **Flujo:** FLUJO 3
 - **Descripción:** Analytics granular de cada sesión
 - **Métricas:**
@@ -996,6 +1080,7 @@
 - **Prioridad:** 🟠 MEDIA
 
 ### 📍 T080 - Registro Automático de Asistencia
+
 - **Flujo:** FLUJO 2 + FLUJO 5
 - **Descripción:** Detectar asistencia automáticamente
 - **Método:**
@@ -1005,6 +1090,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T081 - Generación Automática de Resumen de Clase
+
 - **Flujo:** FLUJO 2 + FLUJO 5
 - **Descripción:** Pipeline post-clase
 - **Proceso:**
@@ -1017,6 +1103,7 @@
 - **Prioridad:** 🟡 ALTA
 
 ### 📍 T082 - Informe Automático AI sobre Debilidades
+
 - **Flujo:** FLUJO 5
 - **Descripción:** IA genera reporte semanal
 - **Contenido:**
@@ -1031,15 +1118,15 @@
 
 ## 📈 RESUMEN FINAL POR INSTANCIA
 
-| Instancia | Tareas | IDs |
-|-----------|--------|-----|
-| **PÚBLICO/LANDING** | 2 | T001-T002 |
-| **TUTOR/PADRE** | 13 | T003-T015 |
-| **ESTUDIANTE** | 18 | T016-T034 |
-| **DOCENTE** | 14 | T035-T048 |
-| **ADMINISTRADOR** | 10 | T049-T058 |
-| **SISTEMA/BACKEND** | 25 | T059-T082 |
-| **TOTAL** | **82** | - |
+| Instancia           | Tareas | IDs       |
+| ------------------- | ------ | --------- |
+| **PÚBLICO/LANDING** | 2      | T001-T002 |
+| **TUTOR/PADRE**     | 13     | T003-T015 |
+| **ESTUDIANTE**      | 18     | T016-T034 |
+| **DOCENTE**         | 14     | T035-T048 |
+| **ADMINISTRADOR**   | 10     | T049-T058 |
+| **SISTEMA/BACKEND** | 25     | T059-T082 |
+| **TOTAL**           | **82** | -         |
 
 ---
 

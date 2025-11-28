@@ -39,11 +39,7 @@ export function VerdaderoFalsoQuestion({
   return (
     <div className="w-full max-w-4xl mx-auto">
       {/* Enunciado */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <h3
           className="
             font-[family-name:var(--font-lilita)]
@@ -125,14 +121,8 @@ export function VerdaderoFalsoQuestion({
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: opcion.valor ? 0 : 0.1 }}
-              whileHover={
-                !disabled && !respondida
-                  ? { scale: 1.05, y: -8 }
-                  : undefined
-              }
-              whileTap={
-                !disabled && !respondida ? { scale: 0.95 } : undefined
-              }
+              whileHover={!disabled && !respondida ? { scale: 1.05, y: -8 } : undefined}
+              whileTap={!disabled && !respondida ? { scale: 0.95 } : undefined}
               onClick={() => handleSeleccion(opcion.valor)}
               disabled={disabled || respondida}
               className={`

@@ -110,7 +110,9 @@ test.describe('Colonia Landing Page - Smoke Tests', () => {
 
   test('ScrollToTop aparece después de hacer scroll', async ({ page }) => {
     // Al inicio no debe estar visible (o no debe ser clickeable)
-    const scrollBtn = page.locator('button:has-text("⬆")').or(page.locator('[aria-label="Scroll to top"]'));
+    const scrollBtn = page
+      .locator('button:has-text("⬆")')
+      .or(page.locator('[aria-label="Scroll to top"]'));
 
     // Hacer scroll hacia abajo
     await page.evaluate(() => window.scrollTo(0, 1000));
@@ -123,7 +125,7 @@ test.describe('Colonia Landing Page - Smoke Tests', () => {
   test('No hay errores en consola', async ({ page }) => {
     const errors: string[] = [];
 
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.type() === 'error') {
         errors.push(msg.text());
       }
@@ -133,10 +135,8 @@ test.describe('Colonia Landing Page - Smoke Tests', () => {
     await page.waitForLoadState('networkidle');
 
     // No debe haber errores críticos
-    const criticalErrors = errors.filter(err =>
-      !err.includes('favicon') &&
-      !err.includes('Extension') &&
-      !err.includes('DevTools')
+    const criticalErrors = errors.filter(
+      (err) => !err.includes('favicon') && !err.includes('Extension') && !err.includes('DevTools'),
     );
 
     expect(criticalErrors).toHaveLength(0);

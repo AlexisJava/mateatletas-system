@@ -63,9 +63,7 @@ export default function EquipoCard({
           background: `linear-gradient(135deg, ${equipo.color_primario} 0%, ${equipo.color_secundario} 100%)`,
         }}
       >
-        <h3 className="text-3xl font-bold text-white drop-shadow-lg">
-          {equipo.nombre}
-        </h3>
+        <h3 className="text-3xl font-bold text-white drop-shadow-lg">{equipo.nombre}</h3>
 
         {/* Ícono si existe */}
         {equipo.icono_url && (
@@ -95,9 +93,7 @@ export default function EquipoCard({
           {/* Estudiantes */}
           <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
             <p className="text-sm text-gray-600 mb-1">Estudiantes</p>
-            <p className="text-3xl font-bold text-[#00d9ff]">
-              {cantidadEstudiantes}
-            </p>
+            <p className="text-3xl font-bold text-[#00d9ff]">{cantidadEstudiantes}</p>
           </div>
         </div>
 
@@ -110,18 +106,14 @@ export default function EquipoCard({
                 className="h-12 rounded-lg border-2 border-white shadow-md"
                 style={{ backgroundColor: equipo.color_primario }}
               />
-              <p className="text-xs font-mono text-gray-600 mt-1">
-                {equipo.color_primario}
-              </p>
+              <p className="text-xs font-mono text-gray-600 mt-1">{equipo.color_primario}</p>
             </div>
             <div className="flex-1 text-center">
               <div
                 className="h-12 rounded-lg border-2 border-white shadow-md"
                 style={{ backgroundColor: equipo.color_secundario }}
               />
-              <p className="text-xs font-mono text-gray-600 mt-1">
-                {equipo.color_secundario}
-              </p>
+              <p className="text-xs font-mono text-gray-600 mt-1">{equipo.color_secundario}</p>
             </div>
           </div>
         </div>
@@ -129,12 +121,7 @@ export default function EquipoCard({
         {/* Acciones */}
         <div className="flex gap-2 pt-2">
           {/* Botón editar */}
-          <Button
-            variant="primary"
-            size="sm"
-            className="flex-1"
-            onClick={() => onEdit(equipo)}
-          >
+          <Button variant="primary" size="sm" className="flex-1" onClick={() => onEdit(equipo)}>
             ✏️ Editar
           </Button>
 
@@ -168,9 +155,7 @@ export default function EquipoCard({
           <Card className="max-w-md w-full">
             <div className="text-center mb-4">
               <div className="text-6xl mb-4">⚠️</div>
-              <h3 className="text-2xl font-bold text-[#2a1a5e] mb-2">
-                ¿Eliminar equipo?
-              </h3>
+              <h3 className="text-2xl font-bold text-[#2a1a5e] mb-2">¿Eliminar equipo?</h3>
               <p className="text-gray-600">
                 ¿Estás seguro de que deseas eliminar el equipo{' '}
                 <strong className="text-[#2a1a5e]">&quot;{equipo.nombre}&quot;</strong>?
@@ -180,10 +165,8 @@ export default function EquipoCard({
                   <p className="text-sm text-blue-800">
                     <strong>{cantidadEstudiantes}</strong>{' '}
                     {cantidadEstudiantes === 1 ? 'estudiante' : 'estudiantes'}{' '}
-                    {cantidadEstudiantes === 1
-                      ? 'será desvinculado'
-                      : 'serán desvinculados'}{' '}
-                    del equipo (pero no eliminados).
+                    {cantidadEstudiantes === 1 ? 'será desvinculado' : 'serán desvinculados'} del
+                    equipo (pero no eliminados).
                   </p>
                 </div>
               )}

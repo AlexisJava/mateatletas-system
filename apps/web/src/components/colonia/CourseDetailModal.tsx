@@ -75,9 +75,7 @@ export default function CourseDetailModal({ course, onClose, onInscribe }: Cours
                 >
                   {course.area}
                 </div>
-                <h2 className="text-4xl font-black text-white leading-tight">
-                  {course.name}
-                </h2>
+                <h2 className="text-4xl font-black text-white leading-tight">{course.name}</h2>
               </div>
             </div>
 
@@ -95,10 +93,7 @@ export default function CourseDetailModal({ course, onClose, onInscribe }: Cours
           {/* Horarios Disponibles */}
           {course.schedules.length > 1 ? (
             <div className="mb-8">
-              <h3
-                className="text-2xl font-black mb-4"
-                style={{ color: course.color }}
-              >
+              <h3 className="text-2xl font-black mb-4" style={{ color: course.color }}>
                 Horarios Disponibles
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -169,17 +164,12 @@ export default function CourseDetailModal({ course, onClose, onInscribe }: Cours
 
           {/* Descripción */}
           <div className="mb-8">
-            <p className="text-white/80 text-lg leading-relaxed">
-              {course.description}
-            </p>
+            <p className="text-white/80 text-lg leading-relaxed">{course.description}</p>
           </div>
 
           {/* Temario */}
           <div className="mb-8">
-            <h3
-              className="text-2xl font-black mb-4"
-              style={{ color: course.color }}
-            >
+            <h3 className="text-2xl font-black mb-4" style={{ color: course.color }}>
               ¿Qué vas a aprender?
             </h3>
             <div className="space-y-3">
@@ -205,10 +195,7 @@ export default function CourseDetailModal({ course, onClose, onInscribe }: Cours
 
           {/* Objetivos */}
           <div className="mb-8">
-            <h3
-              className="text-2xl font-black mb-4"
-              style={{ color: course.color }}
-            >
+            <h3 className="text-2xl font-black mb-4" style={{ color: course.color }}>
               Objetivos del Curso
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -229,25 +216,17 @@ export default function CourseDetailModal({ course, onClose, onInscribe }: Cours
 
           {/* Metodología */}
           <div className="mb-8">
-            <h3
-              className="text-2xl font-black mb-4"
-              style={{ color: course.color }}
-            >
+            <h3 className="text-2xl font-black mb-4" style={{ color: course.color }}>
               Metodología
             </h3>
             <div className="p-6 rounded-xl bg-white/5 border border-white/10">
-              <p className="text-white/80 leading-relaxed text-lg">
-                {details.metodologia}
-              </p>
+              <p className="text-white/80 leading-relaxed text-lg">{details.metodologia}</p>
             </div>
           </div>
 
           {/* Requisitos */}
           <div className="mb-8">
-            <h3
-              className="text-2xl font-black mb-4"
-              style={{ color: course.color }}
-            >
+            <h3 className="text-2xl font-black mb-4" style={{ color: course.color }}>
               Requisitos
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ============================================
    CRITICAL: FORCE DARK BACKGROUND EVERYWHERE
@@ -32,25 +32,25 @@ main {
 
 :root {
   /* Ecosistema del Tutor - MODO OSCURO POR DEFECTO */
-  --background: #000000;          /* Negro puro */
-  --foreground: #f1f5f9;          /* Texto claro */
-  --background-card: #1e293b;     /* Cards oscuros */
-  --border-subtle: #334155;       /* Bordes en oscuro */
+  --background: #000000; /* Negro puro */
+  --foreground: #f1f5f9; /* Texto claro */
+  --background-card: #1e293b; /* Cards oscuros */
+  --border-subtle: #334155; /* Bordes en oscuro */
 
   /* Portal Docente - Modo Claro con Purple Gradients */
-  --docente-bg-gradient-start: #f0f4ff;    /* Azul muy claro */
-  --docente-bg-gradient-mid: #f5f3ff;      /* Púrpura muy claro */
-  --docente-bg-gradient-end: #fdf4ff;      /* Rosa muy claro */
-  --docente-bg-card: #ffffff;              /* Cards blancos */
-  --docente-bg-hover: #f8f9fc;             /* Hover state */
-  --docente-border: #e5e7eb;               /* Bordes sutiles */
-  --docente-text: #1e1b4b;                 /* Texto principal (indigo oscuro) */
-  --docente-text-muted: #6b7280;           /* Texto secundario */
+  --docente-bg-gradient-start: #f0f4ff; /* Azul muy claro */
+  --docente-bg-gradient-mid: #f5f3ff; /* Púrpura muy claro */
+  --docente-bg-gradient-end: #fdf4ff; /* Rosa muy claro */
+  --docente-bg-card: #ffffff; /* Cards blancos */
+  --docente-bg-hover: #f8f9fc; /* Hover state */
+  --docente-border: #e5e7eb; /* Bordes sutiles */
+  --docente-text: #1e1b4b; /* Texto principal (indigo oscuro) */
+  --docente-text-muted: #6b7280; /* Texto secundario */
   --docente-shadow: rgba(99, 102, 241, 0.1);
   --docente-glass-bg: rgba(255, 255, 255, 0.65);
   --docente-glass-border: rgba(139, 92, 246, 0.15);
-  --docente-accent: #8b5cf6;               /* Púrpura vibrante */
-  --docente-accent-hover: #7c3aed;         /* Púrpura oscuro */
+  --docente-accent: #8b5cf6; /* Púrpura vibrante */
+  --docente-accent-hover: #7c3aed; /* Púrpura oscuro */
 
   /* Portal Admin - Verde Esmeralda (Matching Landing) */
   --admin-bg-gradient-start: #000000;
@@ -68,42 +68,42 @@ main {
   --admin-accent-hover: #059669;
 
   /* Portal Estudiante - Modo Claro con Turquoise Gradients */
-  --estudiante-bg-gradient-start: #ecfeff;    /* Cyan muy claro */
-  --estudiante-bg-gradient-mid: #f0fdfa;      /* Teal muy claro */
-  --estudiante-bg-gradient-end: #f0f9ff;      /* Sky muy claro */
-  --estudiante-bg-card: #ffffff;              /* Cards blancos */
-  --estudiante-bg-hover: #f0fdf9;             /* Hover state */
-  --estudiante-border: #e5e7eb;               /* Bordes sutiles */
-  --estudiante-text: #134e4a;                 /* Texto principal (teal oscuro) */
-  --estudiante-text-muted: #6b7280;           /* Texto secundario */
+  --estudiante-bg-gradient-start: #ecfeff; /* Cyan muy claro */
+  --estudiante-bg-gradient-mid: #f0fdfa; /* Teal muy claro */
+  --estudiante-bg-gradient-end: #f0f9ff; /* Sky muy claro */
+  --estudiante-bg-card: #ffffff; /* Cards blancos */
+  --estudiante-bg-hover: #f0fdf9; /* Hover state */
+  --estudiante-border: #e5e7eb; /* Bordes sutiles */
+  --estudiante-text: #134e4a; /* Texto principal (teal oscuro) */
+  --estudiante-text-muted: #6b7280; /* Texto secundario */
   --estudiante-shadow: rgba(20, 184, 166, 0.1);
   --estudiante-glass-bg: rgba(255, 255, 255, 0.65);
   --estudiante-glass-border: rgba(20, 184, 166, 0.15);
-  --estudiante-accent: #14b8a6;               /* Turquesa vibrante */
-  --estudiante-accent-hover: #0d9488;         /* Turquesa oscuro */
+  --estudiante-accent: #14b8a6; /* Turquesa vibrante */
+  --estudiante-accent-hover: #0d9488; /* Turquesa oscuro */
 }
 
 .dark {
   /* Modo Oscuro - Purple/Violet Theme */
-  --background: #0f0a1f;                   /* Casi negro con tinte púrpura */
-  --foreground: #f1f5f9;                   /* Texto claro */
-  --background-card: #1e293b;              /* Cards oscuros */
-  --border-subtle: #334155;                /* Bordes en oscuro */
+  --background: #0f0a1f; /* Casi negro con tinte púrpura */
+  --foreground: #f1f5f9; /* Texto claro */
+  --background-card: #1e293b; /* Cards oscuros */
+  --border-subtle: #334155; /* Bordes en oscuro */
 
   /* Portal Docente - Modo Oscuro Purple Dream */
-  --docente-bg-gradient-start: #0f0a1f;    /* Púrpura muy oscuro */
-  --docente-bg-gradient-mid: #1e1b4b;      /* Indigo oscuro */
-  --docente-bg-gradient-end: #312e81;      /* Indigo medio */
-  --docente-bg-card: #1e1b4b;              /* Cards con tinte púrpura */
-  --docente-bg-hover: #2e2a5f;             /* Hover state */
-  --docente-border: #3730a3;               /* Bordes púrpura */
-  --docente-text: #f1f5f9;                 /* Texto claro */
-  --docente-text-muted: #a5b4fc;           /* Texto secundario indigo claro */
+  --docente-bg-gradient-start: #0f0a1f; /* Púrpura muy oscuro */
+  --docente-bg-gradient-mid: #1e1b4b; /* Indigo oscuro */
+  --docente-bg-gradient-end: #312e81; /* Indigo medio */
+  --docente-bg-card: #1e1b4b; /* Cards con tinte púrpura */
+  --docente-bg-hover: #2e2a5f; /* Hover state */
+  --docente-border: #3730a3; /* Bordes púrpura */
+  --docente-text: #f1f5f9; /* Texto claro */
+  --docente-text-muted: #a5b4fc; /* Texto secundario indigo claro */
   --docente-shadow: rgba(139, 92, 246, 0.25);
   --docente-glass-bg: rgba(30, 27, 75, 0.6);
   --docente-glass-border: rgba(167, 139, 250, 0.2);
-  --docente-accent: #a78bfa;               /* Púrpura claro */
-  --docente-accent-hover: #8b5cf6;         /* Púrpura vibrante */
+  --docente-accent: #a78bfa; /* Púrpura claro */
+  --docente-accent-hover: #8b5cf6; /* Púrpura vibrante */
 
   /* Portal Admin - Verde Esmeralda Oscuro (Dark Mode) */
   --admin-bg-gradient-start: #000000;
@@ -121,29 +121,34 @@ main {
   --admin-accent-hover: #10b981;
 
   /* Portal Estudiante - Modo Oscuro Turquoise Dream */
-  --estudiante-bg-gradient-start: #042f2e;    /* Teal muy oscuro */
-  --estudiante-bg-gradient-mid: #134e4a;      /* Teal oscuro */
-  --estudiante-bg-gradient-end: #115e59;      /* Teal medio */
-  --estudiante-bg-card: #134e4a;              /* Cards con tinte teal */
-  --estudiante-bg-hover: #1e5e5b;             /* Hover state */
-  --estudiante-border: #0f766e;               /* Bordes teal */
-  --estudiante-text: #f1f5f9;                 /* Texto claro */
-  --estudiante-text-muted: #5eead4;           /* Texto secundario teal claro */
+  --estudiante-bg-gradient-start: #042f2e; /* Teal muy oscuro */
+  --estudiante-bg-gradient-mid: #134e4a; /* Teal oscuro */
+  --estudiante-bg-gradient-end: #115e59; /* Teal medio */
+  --estudiante-bg-card: #134e4a; /* Cards con tinte teal */
+  --estudiante-bg-hover: #1e5e5b; /* Hover state */
+  --estudiante-border: #0f766e; /* Bordes teal */
+  --estudiante-text: #f1f5f9; /* Texto claro */
+  --estudiante-text-muted: #5eead4; /* Texto secundario teal claro */
   --estudiante-shadow: rgba(20, 184, 166, 0.25);
   --estudiante-glass-bg: rgba(19, 78, 74, 0.6);
   --estudiante-glass-border: rgba(94, 234, 212, 0.2);
-  --estudiante-accent: #2dd4bf;               /* Turquesa claro */
-  --estudiante-accent-hover: #14b8a6;         /* Turquesa vibrante */
+  --estudiante-accent: #2dd4bf; /* Turquesa claro */
+  --estudiante-accent-hover: #14b8a6; /* Turquesa vibrante */
 }
 
 body {
   /* Background ahora se maneja con CosmosBackground component */
   color: var(--foreground);
   font-family: var(--font-nunito);
-  font-weight: 400;               /* Peso normal por defecto */
+  font-weight: 400; /* Peso normal por defecto */
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-nunito);
 }
 

@@ -18,42 +18,42 @@ Este sistema de diseño responsive ha sido creado específicamente para el **Por
 
 ### 📚 Documentación (`docs/diseño/`)
 
-| Archivo                                    | Descripción                                                     |
-| ------------------------------------------ | --------------------------------------------------------------- |
-| **`README.md`**                            | Este archivo - Índice general del sistema de diseño            |
-| **`SISTEMA_RESPONSIVE_LANDSCAPE.md`**      | Sistema completo de breakpoints, layouts y componentes          |
-| **`WIREFRAMES_RESPONSIVE.md`**             | Wireframes ASCII detallados por breakpoint (Mobile/Tablet/Desktop) |
-| **`GUIA_IMPLEMENTACION_RESPONSIVE.md`**    | Guía paso a paso de implementación con código completo         |
+| Archivo                                 | Descripción                                                        |
+| --------------------------------------- | ------------------------------------------------------------------ |
+| **`README.md`**                         | Este archivo - Índice general del sistema de diseño                |
+| **`SISTEMA_RESPONSIVE_LANDSCAPE.md`**   | Sistema completo de breakpoints, layouts y componentes             |
+| **`WIREFRAMES_RESPONSIVE.md`**          | Wireframes ASCII detallados por breakpoint (Mobile/Tablet/Desktop) |
+| **`GUIA_IMPLEMENTACION_RESPONSIVE.md`** | Guía paso a paso de implementación con código completo             |
 
 ### 💻 Código (`apps/web/src/`)
 
 #### Constantes y Configuración
 
-| Archivo                                | Descripción                                            |
-| -------------------------------------- | ------------------------------------------------------ |
-| **`lib/constants/responsive.ts`**      | Breakpoints, aspect ratios, layout heights, max widths |
-| **`lib/constants/typography.ts`**      | Escalas de fuente, pesos, familias, estilos de texto  |
+| Archivo                           | Descripción                                            |
+| --------------------------------- | ------------------------------------------------------ |
+| **`lib/constants/responsive.ts`** | Breakpoints, aspect ratios, layout heights, max widths |
+| **`lib/constants/typography.ts`** | Escalas de fuente, pesos, familias, estilos de texto   |
 
 #### Hooks
 
-| Archivo                         | Descripción                                               |
-| ------------------------------- | --------------------------------------------------------- |
-| **`hooks/useDeviceType.ts`**    | Detección de dispositivo y orientación (mobile/tablet/desktop) |
+| Archivo                      | Descripción                                                    |
+| ---------------------------- | -------------------------------------------------------------- |
+| **`hooks/useDeviceType.ts`** | Detección de dispositivo y orientación (mobile/tablet/desktop) |
 
 #### Componentes Responsivos
 
-| Archivo                                                | Descripción                                                  |
-| ------------------------------------------------------ | ------------------------------------------------------------ |
-| **`components/responsive/ResponsiveNavButton.tsx`**     | Botón de navegación adaptativo (sidebar/dock/menu)           |
-| **`components/responsive/ResponsiveStatCard.tsx`**      | Tarjeta de estadísticas con tamaño automático               |
-| **`components/responsive/ResponsiveProximaClaseCard.tsx`** | Tarjeta de próxima clase (compact/expanded)                 |
+| Archivo                                                    | Descripción                                        |
+| ---------------------------------------------------------- | -------------------------------------------------- |
+| **`components/responsive/ResponsiveNavButton.tsx`**        | Botón de navegación adaptativo (sidebar/dock/menu) |
+| **`components/responsive/ResponsiveStatCard.tsx`**         | Tarjeta de estadísticas con tamaño automático      |
+| **`components/responsive/ResponsiveProximaClaseCard.tsx`** | Tarjeta de próxima clase (compact/expanded)        |
 
 #### Componentes Existentes Mejorados
 
-| Archivo                                                        | Cambios Sugeridos                                        |
-| -------------------------------------------------------------- | -------------------------------------------------------- |
-| **`app/estudiante/gimnasio/components/LandscapeOnlyGuard.tsx`** | ✅ Ya implementado - Se puede mejorar con diseño mejorado |
-| **`app/estudiante/gimnasio/views/HubView.tsx`**                | ⚠️ Refactorizar con código de `GUIA_IMPLEMENTACION_RESPONSIVE.md` |
+| Archivo                                                         | Cambios Sugeridos                                                 |
+| --------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **`app/estudiante/gimnasio/components/LandscapeOnlyGuard.tsx`** | ✅ Ya implementado - Se puede mejorar con diseño mejorado         |
+| **`app/estudiante/gimnasio/views/HubView.tsx`**                 | ⚠️ Refactorizar con código de `GUIA_IMPLEMENTACION_RESPONSIVE.md` |
 
 ---
 
@@ -66,8 +66,8 @@ export const BREAKPOINTS = {
   xs: { min: 480, max: 667, name: 'Mobile Landscape' },
   md: { min: 768, max: 1024, name: 'Tablet Landscape' },
   lg: { min: 1280, max: 1920, name: 'Desktop' },
-  xl: { min: 1920, max: Infinity, name: 'Ultra-Wide' }
-}
+  xl: { min: 1920, max: Infinity, name: 'Ultra-Wide' },
+};
 ```
 
 ### Layouts por Breakpoint
@@ -119,6 +119,7 @@ Botón de navegación que cambia su apariencia según el dispositivo:
 ```
 
 **Variantes:**
+
 - `sidebar` (Desktop) - Botón circular 80x80px con tooltip expandido
 - `dock` (Tablet) - Botón compacto 56x56px con label inferior
 - `menu` (Mobile) - Item de lista full-width en modal
@@ -142,6 +143,7 @@ Tarjeta de estadísticas con tamaño automático:
 ```
 
 **Tamaños:**
+
 - `sm` (Mobile) - p-3, text-lg
 - `md` (Tablet) - p-4, text-2xl
 - `lg` (Desktop) - p-6, text-4xl
@@ -151,13 +153,11 @@ Tarjeta de estadísticas con tamaño automático:
 Tarjeta de próxima clase con dos variantes:
 
 ```tsx
-<ResponsiveProximaClaseCard
-  clase={proximaClase}
-  onClick={() => navigate('/clase')}
-/>
+<ResponsiveProximaClaseCard clase={proximaClase} onClick={() => navigate('/clase')} />
 ```
 
 **Variantes:**
+
 - `compact` (Mobile) - Info horizontal mínima
 - `expanded` (Tablet/Desktop) - Tarjeta completa con metadata
 
@@ -185,6 +185,7 @@ touch apps/web/src/components/responsive/ResponsiveProximaClaseCard.tsx
 ### Paso 2: Copiar Código
 
 Copiar el código completo de los archivos ya creados en:
+
 - `apps/web/src/lib/constants/responsive.ts`
 - `apps/web/src/lib/constants/typography.ts`
 - `apps/web/src/hooks/useDeviceType.ts`
@@ -231,13 +232,13 @@ lighthouse http://localhost:3000/estudiante/gimnasio --view
 
 ### Métricas Lighthouse
 
-| Métrica                  | Target Mobile | Target Tablet | Target Desktop |
-| ------------------------ | ------------- | ------------- | -------------- |
-| **Performance Score**    | > 90          | > 95          | > 98           |
-| **First Contentful Paint** | < 1.5s        | < 1.0s        | < 0.8s         |
+| Métrica                      | Target Mobile | Target Tablet | Target Desktop |
+| ---------------------------- | ------------- | ------------- | -------------- |
+| **Performance Score**        | > 90          | > 95          | > 98           |
+| **First Contentful Paint**   | < 1.5s        | < 1.0s        | < 0.8s         |
 | **Largest Contentful Paint** | < 2.5s        | < 2.0s        | < 1.5s         |
-| **Time to Interactive**  | < 3.5s        | < 2.5s        | < 2.0s         |
-| **Cumulative Layout Shift** | < 0.1         | < 0.1         | < 0.1          |
+| **Time to Interactive**      | < 3.5s        | < 2.5s        | < 2.0s         |
+| **Cumulative Layout Shift**  | < 0.1         | < 0.1         | < 0.1          |
 
 ### Optimizaciones Implementadas
 
@@ -254,16 +255,16 @@ lighthouse http://localhost:3000/estudiante/gimnasio --view
 
 ### Gradientes de Componentes
 
-| Componente           | Gradiente                                        | Uso                  |
-| -------------------- | ------------------------------------------------ | -------------------- |
-| **HUB**              | `from-blue-500 via-cyan-500 to-blue-600`         | Botón principal      |
-| **Entrenamientos**   | `from-pink-500 via-rose-500 to-red-500`          | Juegos mentales      |
-| **Tareas Asignadas** | `from-purple-500 via-violet-500 to-indigo-600`   | Actividades          |
-| **Mis Logros**       | `from-yellow-400 via-amber-500 to-orange-600`    | Achievements         |
-| **Tienda**           | `from-green-500 via-emerald-500 to-teal-600`     | Shop                 |
-| **Racha**            | `from-orange-500 to-red-600`                     | Stat card            |
-| **Próxima Clase**    | `from-green-400 via-emerald-500 to-teal-500`     | Card info            |
-| **CTA Principal**    | `from-yellow-400 via-orange-500 to-red-500`      | Botón gigante        |
+| Componente           | Gradiente                                      | Uso             |
+| -------------------- | ---------------------------------------------- | --------------- |
+| **HUB**              | `from-blue-500 via-cyan-500 to-blue-600`       | Botón principal |
+| **Entrenamientos**   | `from-pink-500 via-rose-500 to-red-500`        | Juegos mentales |
+| **Tareas Asignadas** | `from-purple-500 via-violet-500 to-indigo-600` | Actividades     |
+| **Mis Logros**       | `from-yellow-400 via-amber-500 to-orange-600`  | Achievements    |
+| **Tienda**           | `from-green-500 via-emerald-500 to-teal-600`   | Shop            |
+| **Racha**            | `from-orange-500 to-red-600`                   | Stat card       |
+| **Próxima Clase**    | `from-green-400 via-emerald-500 to-teal-500`   | Card info       |
+| **CTA Principal**    | `from-yellow-400 via-orange-500 to-red-500`    | Botón gigante   |
 
 ---
 
@@ -334,6 +335,7 @@ lighthouse http://localhost:3000/estudiante/gimnasio --view
 ### Problema: "Hook useDeviceType no detecta cambios de orientación"
 
 **Solución:**
+
 ```typescript
 // Asegurarse de escuchar ambos eventos
 window.addEventListener('resize', checkOrientation);
@@ -343,6 +345,7 @@ window.addEventListener('orientationchange', checkOrientation);
 ### Problema: "Tailwind classes no aplican en mobile"
 
 **Solución:**
+
 ```css
 /* Verificar que @custom-media esté definido en globals.css */
 @custom-media --mobile-l (min-width: 480px) and (max-width: 767px) and (orientation: landscape);
@@ -351,13 +354,14 @@ window.addEventListener('orientationchange', checkOrientation);
 ### Problema: "Avatar 3D no carga en mobile"
 
 **Solución:**
+
 ```tsx
 // Usar lazy loading con Suspense
 const AnimatedAvatar3D = lazy(() => import('@/components/3d/AnimatedAvatar3D'));
 
 <Suspense fallback={<AvatarSkeleton />}>
   <AnimatedAvatar3D {...props} />
-</Suspense>
+</Suspense>;
 ```
 
 ---
@@ -378,6 +382,7 @@ Para dudas sobre la implementación:
 ### v1.0.0 - 2025-10-31
 
 **Creado:**
+
 - ✅ Sistema completo de breakpoints landscape-only
 - ✅ Hook `useDeviceType` para detección de dispositivo
 - ✅ 3 componentes responsivos adaptativos
@@ -387,6 +392,7 @@ Para dudas sobre la implementación:
 - ✅ LandscapeOnlyGuard mejorado
 
 **Por Implementar:**
+
 - ⚠️ Refactorización completa de HubView
 - ⚠️ Testing exhaustivo en dispositivos reales
 - ⚠️ Optimización de performance

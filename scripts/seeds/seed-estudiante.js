@@ -5,9 +5,9 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('🔄 Creando estudiante...');
-  
+
   const hashedPassword = await bcrypt.hash('Estudiante123!', 10);
-  
+
   // Crear usuario
   const user = await prisma.user.upsert({
     where: { email: 'juan@estudiante.com' },
@@ -21,7 +21,7 @@ async function main() {
       ha_completado_onboarding: true,
     },
   });
-  
+
   // Crear estudiante
   const estudiante = await prisma.estudiante.upsert({
     where: { user_id: user.id },
@@ -32,7 +32,7 @@ async function main() {
       fecha_nacimiento: new Date('2010-01-15'),
     },
   });
-  
+
   console.log('');
   console.log('==========================================');
   console.log('✅ ESTUDIANTE CREADO EXITOSAMENTE!');

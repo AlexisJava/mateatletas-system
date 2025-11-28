@@ -25,16 +25,14 @@ const SALUDOS_EPICOS = [
   { texto: '¡SIN FRENOS!', emoji: '💥', color: 'from-red-600 to-pink-700' },
 ];
 
-export function DailyWelcomeModal({
-  estudiante,
-  racha,
-  onClose,
-}: DailyWelcomeModalProps) {
+export function DailyWelcomeModal({ estudiante, racha, onClose }: DailyWelcomeModalProps) {
   const [saludoEpico] = useState<{ texto: string; emoji: string; color: string }>(() => {
     const index = Math.floor(Math.random() * SALUDOS_EPICOS.length);
     return SALUDOS_EPICOS[index]!;
   });
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
+  const [particles, setParticles] = useState<
+    Array<{ id: number; x: number; y: number; delay: number }>
+  >([]);
 
   const esPrimerDia = racha.racha_actual === 1;
   const esRecordNuevo = racha.racha_actual > racha.racha_maxima;
@@ -115,11 +113,12 @@ export function DailyWelcomeModal({
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 rounded-3xl blur-3xl" />
 
           {/* Card principal */}
-          <div className="relative bg-gradient-to-br from-slate-900/95 via-purple-900/95 to-slate-900/95
+          <div
+            className="relative bg-gradient-to-br from-slate-900/95 via-purple-900/95 to-slate-900/95
                           backdrop-blur-2xl rounded-3xl
                           border-4 border-white/20
-                          shadow-2xl overflow-hidden">
-
+                          shadow-2xl overflow-hidden"
+          >
             {/* Botón cerrar - RESPONSIVE */}
             <button
               onClick={onClose}
@@ -156,10 +155,12 @@ export function DailyWelcomeModal({
               </motion.div>
 
               {/* Saludo épico - RESPONSIVE */}
-              <h1 className={`text-4xl sm:text-6xl md:text-7xl font-black text-center mb-2 sm:mb-4
+              <h1
+                className={`text-4xl sm:text-6xl md:text-7xl font-black text-center mb-2 sm:mb-4
                            font-[family-name:var(--font-lilita)]
                            bg-gradient-to-r ${saludoEpico.color} bg-clip-text text-transparent
-                           drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]`}>
+                           drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]`}
+              >
                 {saludoEpico.texto}
               </h1>
 
@@ -171,7 +172,6 @@ export function DailyWelcomeModal({
 
             {/* Contenedor principal con 2 columnas - RESPONSIVE */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 px-4 sm:px-8 pb-4 sm:pb-8">
-
               {/* COLUMNA IZQUIERDA: Racha gigante - RESPONSIVE */}
               <motion.div
                 initial={{ x: -100, opacity: 0 }}
@@ -215,7 +215,9 @@ export function DailyWelcomeModal({
                   <p className="text-2xl sm:text-4xl font-black text-orange-400 mt-1 sm:mt-2">
                     {racha.racha_actual === 1 ? 'DÍA' : 'DÍAS'}
                   </p>
-                  <p className="text-base sm:text-xl font-bold text-orange-300 mt-0.5 sm:mt-1">DE RACHA</p>
+                  <p className="text-base sm:text-xl font-bold text-orange-300 mt-0.5 sm:mt-1">
+                    DE RACHA
+                  </p>
                 </div>
 
                 {/* Badge de récord si aplica - RESPONSIVE */}
@@ -245,9 +247,11 @@ export function DailyWelcomeModal({
                 className="flex flex-col gap-3 sm:gap-6"
               >
                 {/* Card: Mensaje motivacional - RESPONSIVE */}
-                <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20
+                <div
+                  className="bg-gradient-to-br from-purple-600/20 to-pink-600/20
                                backdrop-blur-xl rounded-xl sm:rounded-2xl p-4 sm:p-6
-                               border-2 border-purple-500/40">
+                               border-2 border-purple-500/40"
+                >
                   <div className="flex items-start gap-2 sm:gap-4">
                     <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-yellow-400 flex-shrink-0" />
                     <div>
@@ -257,7 +261,8 @@ export function DailyWelcomeModal({
                             ¡ARRANCASTE UNA RACHA!
                           </h3>
                           <p className="text-sm sm:text-lg text-purple-200">
-                            Cada día cuenta. Volvé mañana para mantenerla viva y desbloquear recompensas.
+                            Cada día cuenta. Volvé mañana para mantenerla viva y desbloquear
+                            recompensas.
                           </p>
                         </>
                       ) : esRecordNuevo ? (
@@ -266,8 +271,9 @@ export function DailyWelcomeModal({
                             ¡SUPERASTE TU RÉCORD!
                           </h3>
                           <p className="text-sm sm:text-lg text-white">
-                            Antes tu mejor era {racha.racha_maxima} {racha.racha_maxima === 1 ? 'día' : 'días'}.
-                            ¡Ahora vas por {racha.racha_actual}! 🚀
+                            Antes tu mejor era {racha.racha_maxima}{' '}
+                            {racha.racha_maxima === 1 ? 'día' : 'días'}. ¡Ahora vas por{' '}
+                            {racha.racha_actual}! 🚀
                           </p>
                         </>
                       ) : (
@@ -276,10 +282,13 @@ export function DailyWelcomeModal({
                             ¡SEGUÍ ASÍ, CRACK!
                           </h3>
                           <p className="text-sm sm:text-lg text-purple-200">
-                            Tu récord es de <span className="font-black text-yellow-400">{racha.racha_maxima}</span> días.
+                            Tu récord es de{' '}
+                            <span className="font-black text-yellow-400">{racha.racha_maxima}</span>{' '}
+                            días.
                             {diasParaMilestone > 0 && (
                               <span className="block mt-1 sm:mt-2 text-cyan-300">
-                                Te faltan <span className="font-black">{diasParaMilestone}</span> días para {proximoMilestone} días 🎯
+                                Te faltan <span className="font-black">{diasParaMilestone}</span>{' '}
+                                días para {proximoMilestone} días 🎯
                               </span>
                             )}
                           </p>
@@ -290,9 +299,11 @@ export function DailyWelcomeModal({
                 </div>
 
                 {/* Card: Bonificaciones activas - RESPONSIVE */}
-                <div className="bg-gradient-to-br from-cyan-600/20 to-blue-700/20
+                <div
+                  className="bg-gradient-to-br from-cyan-600/20 to-blue-700/20
                                backdrop-blur-xl rounded-xl sm:rounded-2xl p-4 sm:p-6
-                               border-2 border-cyan-500/40">
+                               border-2 border-cyan-500/40"
+                >
                   <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                     <Star className="w-6 h-6 sm:w-8 sm:h-8 text-cyan-400" />
                     <h3 className="text-lg sm:text-xl font-black text-white">BONIFICACIONES</h3>
@@ -303,7 +314,9 @@ export function DailyWelcomeModal({
                     <div className="flex items-center justify-between p-2 sm:p-3 bg-white/5 rounded-xl">
                       <div className="flex items-center gap-1.5 sm:gap-2">
                         <Target className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
-                        <span className="text-xs sm:text-sm font-bold text-white">Login Diario</span>
+                        <span className="text-xs sm:text-sm font-bold text-white">
+                          Login Diario
+                        </span>
                       </div>
                       <span className="text-xs sm:text-sm font-black text-green-400">+50 PTS</span>
                     </div>
@@ -313,9 +326,13 @@ export function DailyWelcomeModal({
                       <div className="flex items-center justify-between p-2 sm:p-3 bg-orange-500/20 rounded-xl border border-orange-500/40">
                         <div className="flex items-center gap-1.5 sm:gap-2">
                           <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
-                          <span className="text-xs sm:text-sm font-bold text-white">Racha de 7+ días</span>
+                          <span className="text-xs sm:text-sm font-bold text-white">
+                            Racha de 7+ días
+                          </span>
                         </div>
-                        <span className="text-xs sm:text-sm font-black text-orange-400">+100 PTS</span>
+                        <span className="text-xs sm:text-sm font-black text-orange-400">
+                          +100 PTS
+                        </span>
                       </div>
                     )}
 
@@ -324,9 +341,13 @@ export function DailyWelcomeModal({
                       <div className="flex items-center justify-between p-2 sm:p-3 bg-yellow-500/20 rounded-xl border border-yellow-500/40">
                         <div className="flex items-center gap-1.5 sm:gap-2">
                           <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
-                          <span className="text-xs sm:text-sm font-bold text-white">Racha Imparable 30+</span>
+                          <span className="text-xs sm:text-sm font-bold text-white">
+                            Racha Imparable 30+
+                          </span>
                         </div>
-                        <span className="text-xs sm:text-sm font-black text-yellow-400">+300 PTS</span>
+                        <span className="text-xs sm:text-sm font-black text-yellow-400">
+                          +300 PTS
+                        </span>
                       </div>
                     )}
 
@@ -335,9 +356,13 @@ export function DailyWelcomeModal({
                       <div className="flex items-center justify-between p-2 sm:p-3 bg-pink-500/20 rounded-xl border border-pink-500/40">
                         <div className="flex items-center gap-1.5 sm:gap-2">
                           <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-pink-400" />
-                          <span className="text-xs sm:text-sm font-bold text-white">¡Nuevo Récord!</span>
+                          <span className="text-xs sm:text-sm font-bold text-white">
+                            ¡Nuevo Récord!
+                          </span>
                         </div>
-                        <span className="text-xs sm:text-sm font-black text-pink-400">+200 PTS</span>
+                        <span className="text-xs sm:text-sm font-black text-pink-400">
+                          +200 PTS
+                        </span>
                       </div>
                     )}
                   </div>
@@ -363,8 +388,10 @@ export function DailyWelcomeModal({
                          relative overflow-hidden"
               >
                 {/* Efecto de brillo */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent
-                               translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
+                <div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent
+                               translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"
+                />
                 <span className="relative">¡A ENTRENAR! 💪</span>
               </button>
             </motion.div>

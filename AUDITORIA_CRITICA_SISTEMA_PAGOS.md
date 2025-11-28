@@ -23,6 +23,7 @@ MERCADOPAGO_ACCESS_TOKEN="TEST-XXXXXXXX-XXXXXX-XXXXXX-XXXXXX"
 ```
 
 **Impacto:**
+
 - ❌ El servicio detecta tokens inválidos y activa `mockMode = true`
 - ❌ Cualquier intento de crear una preferencia de pago lanzará un error:
   ```
@@ -32,6 +33,7 @@ MERCADOPAGO_ACCESS_TOKEN="TEST-XXXXXXXX-XXXXXX-XXXXXX-XXXXXX"
 - ❌ **Los usuarios NO pueden completar inscripciones**
 
 **Código afectado:** `apps/api/src/pagos/mercadopago.service.ts:64-68`
+
 ```typescript
 if (!accessToken || accessToken.includes('XXXXXXXX')) {
   this.logger.warn('⚠️  MercadoPago en MODO MOCK...');
@@ -44,6 +46,7 @@ if (!accessToken || accessToken.includes('XXXXXXXX')) {
 ### 2. **Flujo de inscripción expuesto públicamente**
 
 **URLs en producción:**
+
 - Landing page: `https://www.mateatletasclub.com.ar/`
 - Endpoint de inscripción: `POST /api/inscripciones-2026` ✅ (funcional)
 - Endpoint de webhook: `POST /api/inscripciones-2026/webhook` ✅ (funcional)
@@ -70,11 +73,11 @@ Usuario → Landing Page → Modal de Inscripción
 
 ### 3. **Variables faltantes o con valores mock**
 
-| Variable | Estado Actual | Valor Esperado | Severidad |
-|----------|---------------|----------------|-----------|
-| `MERCADOPAGO_ACCESS_TOKEN` | `TEST-XXXXXXXX...` | Token real de producción | 🔴 CRÍTICO |
-| `MERCADOPAGO_WEBHOOK_SECRET` | `VALUE or ${(REF)}` | Secret real para validar webhooks | 🟠 ALTO |
-| `MERCADOPAGO_PUBLIC_KEY` | ❌ No definida | Clave pública (frontend) | 🟡 MEDIO |
+| Variable                     | Estado Actual       | Valor Esperado                    | Severidad  |
+| ---------------------------- | ------------------- | --------------------------------- | ---------- |
+| `MERCADOPAGO_ACCESS_TOKEN`   | `TEST-XXXXXXXX...`  | Token real de producción          | 🔴 CRÍTICO |
+| `MERCADOPAGO_WEBHOOK_SECRET` | `VALUE or ${(REF)}` | Secret real para validar webhooks | 🟠 ALTO    |
+| `MERCADOPAGO_PUBLIC_KEY`     | ❌ No definida      | Clave pública (frontend)          | 🟡 MEDIO   |
 
 ---
 
@@ -120,12 +123,12 @@ Usuario → Landing Page → Modal de Inscripción
 
 ### **Si el sistema queda así:**
 
-| Escenario | Probabilidad | Impacto | Consecuencia |
-|-----------|--------------|---------|--------------|
-| Usuario intenta inscribirse | 🔴 ALTA | 🔴 CRÍTICO | Error 500, pérdida de conversión |
-| Usuario abandona el proceso | 🔴 ALTA | 🔴 ALTO | Pérdida de ingresos |
-| Reputación dañada | 🟠 MEDIA | 🟠 ALTO | "La página no funciona" |
-| Múltiples intentos fallidos | 🟠 MEDIA | 🟡 MEDIO | Saturación de logs con errores |
+| Escenario                   | Probabilidad | Impacto    | Consecuencia                     |
+| --------------------------- | ------------ | ---------- | -------------------------------- |
+| Usuario intenta inscribirse | 🔴 ALTA      | 🔴 CRÍTICO | Error 500, pérdida de conversión |
+| Usuario abandona el proceso | 🔴 ALTA      | 🔴 ALTO    | Pérdida de ingresos              |
+| Reputación dañada           | 🟠 MEDIA     | 🟠 ALTO    | "La página no funciona"          |
+| Múltiples intentos fallidos | 🟠 MEDIA     | 🟡 MEDIO   | Saturación de logs con errores   |
 
 ### **Estimación de pérdidas:**
 
@@ -159,12 +162,14 @@ const handleSubscribe = (planId: string) => {
    - Configurar webhook secret en MercadoPago
 
 2. **Actualizar variables en Railway:**
+
    ```bash
    railway variables set MERCADOPAGO_ACCESS_TOKEN="APP-XXXXXXXXXXXXXXXX"
    railway variables set MERCADOPAGO_WEBHOOK_SECRET="tu-secret-generado"
    ```
 
 3. **Actualizar variables en Vercel:**
+
    ```bash
    vercel env add MERCADOPAGO_ACCESS_TOKEN production
    # Pegar el token real cuando lo pida
@@ -190,6 +195,7 @@ const handleSubscribe = (planId: string) => {
 ### **Tests manuales:**
 
 1. **Verificar que MercadoPago salió de modo mock:**
+
    ```bash
    curl https://mateatletas-system-production.up.railway.app/api/health
    # Buscar en logs: "✅ MercadoPago SDK initialized successfully"
@@ -236,6 +242,7 @@ const handleSubscribe = (planId: string) => {
 ## 📞 CONTACTO
 
 Si necesitás ayuda con la configuración:
+
 1. Revisar docs de MercadoPago: https://www.mercadopago.com.ar/developers/
 2. Contactar soporte de MercadoPago para credenciales
 3. Verificar que la cuenta de MP esté activa y aprobada
@@ -249,6 +256,7 @@ Si necesitás ayuda con la configuración:
 **Acción requerida:** INMEDIATA
 
 **Próximos pasos:**
+
 1. Decidir si deshabilitar temporalmente o configurar MercadoPago YA
 2. Obtener credenciales reales de MercadoPago
 3. Configurar variables de entorno

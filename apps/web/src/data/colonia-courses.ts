@@ -10,7 +10,8 @@ export const COURSES: Course[] = [
     name: 'Matemática con Juegos y Desafíos',
     area: 'Matemática',
     ageRange: '8-9',
-    description: 'Escape rooms matemáticos, batallas de matehéroes, construcción de imperio y desafíos finales. Aprende matemática jugando sin darte cuenta.',
+    description:
+      'Escape rooms matemáticos, batallas de matehéroes, construcción de imperio y desafíos finales. Aprende matemática jugando sin darte cuenta.',
     color: '#10b981',
     icon: '🎯',
     schedules: [
@@ -27,7 +28,8 @@ export const COURSES: Course[] = [
     name: 'Matemática en Acción: Proyectos Reales',
     area: 'Matemática',
     ageRange: '10-12',
-    description: 'Organiza tu fiesta épica, diseña tu cuarto ideal, planifica tu viaje soñado. Matemática aplicada a proyectos que te importan.',
+    description:
+      'Organiza tu fiesta épica, diseña tu cuarto ideal, planifica tu viaje soñado. Matemática aplicada a proyectos que te importan.',
     color: '#10b981',
     icon: '🎨',
     schedules: [
@@ -44,7 +46,8 @@ export const COURSES: Course[] = [
     name: 'Superhéroes de los Números',
     area: 'Matemática',
     ageRange: '6-7',
-    description: 'Aprende las 4 operaciones básicas (suma, resta, multiplicación, división) convirtiéndote en un superhéroe matemático.',
+    description:
+      'Aprende las 4 operaciones básicas (suma, resta, multiplicación, división) convirtiéndote en un superhéroe matemático.',
     color: '#10b981',
     icon: '🦸',
     schedules: [
@@ -61,7 +64,8 @@ export const COURSES: Course[] = [
     name: 'Iniciación a las Olimpiadas de Matemática',
     area: 'Matemática',
     ageRange: '10-12',
-    description: 'Problemas de lógica y razonamiento estilo Olimpiadas de Matemática (OMA). Desarrolla tu pensamiento crítico.',
+    description:
+      'Problemas de lógica y razonamiento estilo Olimpiadas de Matemática (OMA). Desarrolla tu pensamiento crítico.',
     color: '#10b981',
     icon: '🏆',
     schedules: [
@@ -78,7 +82,8 @@ export const COURSES: Course[] = [
     name: 'Iniciación de las Matemáticas',
     area: 'Didáctica de la Matemática',
     ageRange: '5-6',
-    description: 'Introducción amigable al mundo de los números. Aprende a contar, reconocer formas y desarrollar pensamiento lógico temprano. Ideal para prepararse para primer grado.',
+    description:
+      'Introducción amigable al mundo de los números. Aprende a contar, reconocer formas y desarrollar pensamiento lógico temprano. Ideal para prepararse para primer grado.',
     color: '#10b981',
     icon: '🌟',
     schedules: [
@@ -101,7 +106,8 @@ export const COURSES: Course[] = [
     name: 'Dominio de las Operaciones Básicas',
     area: 'Didáctica de la Matemática',
     ageRange: '8-9',
-    description: 'Domina suma, resta, multiplicación y división con técnicas didácticas probadas. Refuerza las bases matemáticas para destacarte en la escuela.',
+    description:
+      'Domina suma, resta, multiplicación y división con técnicas didácticas probadas. Refuerza las bases matemáticas para destacarte en la escuela.',
     color: '#10b981',
     icon: '➕',
     schedules: [
@@ -126,7 +132,8 @@ export const COURSES: Course[] = [
     name: 'Crea tu Videojuego con Scratch',
     area: 'Programación',
     ageRange: '8-9',
-    description: 'Programa tu primer videojuego desde cero. Aprende movimiento, enemigos, puntos y vidas. ¡Tu juego completo en 8 semanas!',
+    description:
+      'Programa tu primer videojuego desde cero. Aprende movimiento, enemigos, puntos y vidas. ¡Tu juego completo en 8 semanas!',
     color: '#f43f5e',
     icon: '🎮',
     schedules: [
@@ -143,7 +150,8 @@ export const COURSES: Course[] = [
     name: 'Robótica Virtual con Arduino y Tinkercad',
     area: 'Programación',
     ageRange: '10-12',
-    description: 'Diseña circuitos, programa LEDs, botones, sensores y motores. Construye tu robot virtual sin necesidad de hardware.',
+    description:
+      'Diseña circuitos, programa LEDs, botones, sensores y motores. Construye tu robot virtual sin necesidad de hardware.',
     color: '#f43f5e',
     icon: '🤖',
     schedules: [
@@ -160,7 +168,8 @@ export const COURSES: Course[] = [
     name: 'Roblox Studio: Crea y Publica tu Juego',
     area: 'Programación',
     ageRange: '10-12',
-    description: 'Diseña mundos 3D, programa con Lua, crea mecánicas de juego y publica en la plataforma Roblox. ¡Millones pueden jugar tu creación!',
+    description:
+      'Diseña mundos 3D, programa con Lua, crea mecánicas de juego y publica en la plataforma Roblox. ¡Millones pueden jugar tu creación!',
     color: '#f43f5e',
     icon: '🌍',
     schedules: [
@@ -177,7 +186,8 @@ export const COURSES: Course[] = [
     name: 'Desarrollo de Videojuegos con Godot Engine',
     area: 'Programación',
     ageRange: '13-17',
-    description: 'Motor profesional de desarrollo de juegos. Aprende escenas, nodos, scripting y física. Crea tu juego 2D como un desarrollador real.',
+    description:
+      'Motor profesional de desarrollo de juegos. Aprende escenas, nodos, scripting y física. Crea tu juego 2D como un desarrollador real.',
     color: '#f43f5e',
     icon: '🕹️',
     schedules: [
@@ -196,7 +206,8 @@ export const COURSES: Course[] = [
     name: 'Científicos de Dinosaurios: Paleontología',
     area: 'Ciencias',
     ageRange: '8-12',
-    description: 'Explora la era de los dinosaurios: fósiles, evolución, extinción y recreación de especies. ¡Conviértete en paleontólogo!',
+    description:
+      'Explora la era de los dinosaurios: fósiles, evolución, extinción y recreación de especies. ¡Conviértete en paleontólogo!',
     color: '#0ea5e9',
     icon: '🦕',
     schedules: [
@@ -213,7 +224,8 @@ export const COURSES: Course[] = [
     name: 'Expedición Tierra: Misterios del Planeta',
     area: 'Ciencias',
     ageRange: '8-12',
-    description: 'Volcanes, terremotos, océanos misteriosos, atmósfera extrema. Descubre los secretos más increíbles de nuestro planeta.',
+    description:
+      'Volcanes, terremotos, océanos misteriosos, atmósfera extrema. Descubre los secretos más increíbles de nuestro planeta.',
     color: '#0ea5e9',
     icon: '🌋',
     schedules: [
@@ -248,7 +260,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Resolver problemas matemáticos con confianza',
       'Aplicar matemática en situaciones de juego',
     ],
-    metodologia: 'Aprendizaje basado en juegos. Cada clase es una nueva aventura donde los conceptos matemáticos se presentan como desafíos a resolver. Los estudiantes trabajan en equipos, compiten sanamente y ganan puntos por cada logro.',
+    metodologia:
+      'Aprendizaje basado en juegos. Cada clase es una nueva aventura donde los conceptos matemáticos se presentan como desafíos a resolver. Los estudiantes trabajan en equipos, compiten sanamente y ganan puntos por cada logro.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -273,7 +286,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Desarrollar pensamiento crítico y toma de decisiones',
       'Crear un proyecto final presentable',
     ],
-    metodologia: 'Metodología de proyectos. Cada semana trabajamos en un proyecto diferente que requiere aplicar conceptos matemáticos para resolver problemas reales. Los estudiantes toman decisiones, calculan, diseñan y presentan sus resultados.',
+    metodologia:
+      'Metodología de proyectos. Cada semana trabajamos en un proyecto diferente que requiere aplicar conceptos matemáticos para resolver problemas reales. Los estudiantes toman decisiones, calculan, diseñan y presentan sus resultados.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -299,7 +313,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Ganar confianza en matemática',
       'Prepararse para primer grado',
     ],
-    metodologia: 'Narrativa inmersiva de superhéroes. Cada concepto matemático es un "superpoder" que los niños desbloquean. Usamos juegos, desafíos y misiones para practicar. Refuerzo positivo constante y celebración de logros.',
+    metodologia:
+      'Narrativa inmersiva de superhéroes. Cada concepto matemático es un "superpoder" que los niños desbloquean. Usamos juegos, desafíos y misiones para practicar. Refuerzo positivo constante y celebración de logros.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -325,7 +340,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Prepararse para competencias matemáticas',
       'Disfrutar los desafíos matemáticos complejos',
     ],
-    metodologia: 'Entrenamiento estilo Olimpiadas. Trabajamos con problemas desafiantes que requieren creatividad y pensamiento lateral. Los estudiantes aprenden técnicas específicas de resolución y practican en un ambiente colaborativo. Feedback personalizado constante.',
+    metodologia:
+      'Entrenamiento estilo Olimpiadas. Trabajamos con problemas desafiantes que requieren creatividad y pensamiento lateral. Los estudiantes aprenden técnicas específicas de resolución y practican en un ambiente colaborativo. Feedback personalizado constante.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -351,7 +367,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Desarrollar lógica y pensamiento computacional',
       'Publicar tu juego en la comunidad Scratch',
     ],
-    metodologia: 'Aprendizaje por proyectos. Desde el día 1 empezamos a construir un juego. Cada semana agregamos una nueva mecánica. Los estudiantes siguen tutoriales paso a paso y luego personalizan con su creatividad. Al final tienen un juego completo.',
+    metodologia:
+      'Aprendizaje por proyectos. Desde el día 1 empezamos a construir un juego. Cada semana agregamos una nueva mecánica. Los estudiantes siguen tutoriales paso a paso y luego personalizan con su creatividad. Al final tienen un juego completo.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -377,7 +394,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Diseñar y simular robots virtuales',
       'Integrar sensores, motores y lógica de control',
     ],
-    metodologia: 'Robótica virtual en Tinkercad. Usamos simuladores online para diseñar circuitos reales sin necesidad de hardware físico. Los estudiantes arrastran componentes, los conectan y los programan. Ven los resultados en tiempo real. Es como tener un laboratorio completo en casa.',
+    metodologia:
+      'Robótica virtual en Tinkercad. Usamos simuladores online para diseñar circuitos reales sin necesidad de hardware físico. Los estudiantes arrastran componentes, los conectan y los programan. Ven los resultados en tiempo real. Es como tener un laboratorio completo en casa.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -403,7 +421,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Diseñar mecánicas de juego funcionales',
       'Publicar un juego jugable por otros',
     ],
-    metodologia: 'Creación de juegos en Roblox Studio. Los estudiantes aprenden diseño 3D y programación Lua al mismo tiempo. Cada clase construye sobre la anterior para crear un juego completo. Al final lo publican y sus amigos pueden jugarlo. Es motivador ver tu creación cobrar vida.',
+    metodologia:
+      'Creación de juegos en Roblox Studio. Los estudiantes aprenden diseño 3D y programación Lua al mismo tiempo. Cada clase construye sobre la anterior para crear un juego completo. Al final lo publican y sus amigos pueden jugarlo. Es motivador ver tu creación cobrar vida.',
     requisitos: [
       'Computadora con conexión a internet (Windows o Mac)',
       'Google Meet (acceso desde el navegador)',
@@ -430,7 +449,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Aprender GDScript (similar a Python)',
       'Exportar tu juego como ejecutable',
     ],
-    metodologia: 'Desarrollo profesional con Godot Engine. Trabajamos con el mismo motor que usan estudios indie reales. Los estudiantes aprenden arquitectura de escenas, programación orientada a objetos y diseño de juegos. Es un paso más allá de Scratch, para quienes quieren crear juegos más complejos.',
+    metodologia:
+      'Desarrollo profesional con Godot Engine. Trabajamos con el mismo motor que usan estudios indie reales. Los estudiantes aprenden arquitectura de escenas, programación orientada a objetos y diseño de juegos. Es un paso más allá de Scratch, para quienes quieren crear juegos más complejos.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -456,7 +476,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Desarrollar pensamiento crítico sobre evidencia científica',
       'Diferenciar mitos de realidad científica',
     ],
-    metodologia: 'Ciencia basada en evidencia. Analizamos fósiles reales (en imágenes), estudiamos papers científicos adaptados para niños, vemos recreaciones 3D modernas y comparamos con películas. Los estudiantes aprenden a pensar como científicos: observar, hipotetizar, buscar evidencia.',
+    metodologia:
+      'Ciencia basada en evidencia. Analizamos fósiles reales (en imágenes), estudiamos papers científicos adaptados para niños, vemos recreaciones 3D modernas y comparamos con películas. Los estudiantes aprenden a pensar como científicos: observar, hipotetizar, buscar evidencia.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -482,7 +503,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Desarrollar conciencia ambiental',
       'Aplicar método científico a la geología',
     ],
-    metodologia: 'Expediciones virtuales. Cada clase es una expedición a un lugar extremo de la Tierra: el volcán más activo, la fosa más profunda, el desierto más seco. Usamos Google Earth, videos científicos, simulaciones y datos reales de la NASA. Los estudiantes se convierten en exploradores.',
+    metodologia:
+      'Expediciones virtuales. Cada clase es una expedición a un lugar extremo de la Tierra: el volcán más activo, la fosa más profunda, el desierto más seco. Usamos Google Earth, videos científicos, simulaciones y datos reales de la NASA. Los estudiantes se convierten en exploradores.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -508,7 +530,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Reconocer formas geométricas básicas',
       'Prepararse para el ingreso a primer grado',
     ],
-    metodologia: 'Didáctica de la matemática temprana. Trabajo con material concreto, juegos manipulativos, canciones matemáticas y cuentos numéricos. Respetamos el ritmo de cada niño y celebramos cada pequeño logro. Metodología lúdica adaptada a 5-6 años.',
+    metodologia:
+      'Didáctica de la matemática temprana. Trabajo con material concreto, juegos manipulativos, canciones matemáticas y cuentos numéricos. Respetamos el ritmo de cada niño y celebramos cada pequeño logro. Metodología lúdica adaptada a 5-6 años.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -535,7 +558,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Reconocer formas geométricas básicas',
       'Prepararse para el ingreso a primer grado',
     ],
-    metodologia: 'Didáctica de la matemática temprana. Trabajo con material concreto, juegos manipulativos, canciones matemáticas y cuentos numéricos. Respetamos el ritmo de cada niño y celebramos cada pequeño logro. Metodología lúdica adaptada a 5-6 años.',
+    metodologia:
+      'Didáctica de la matemática temprana. Trabajo con material concreto, juegos manipulativos, canciones matemáticas y cuentos numéricos. Respetamos el ritmo de cada niño y celebramos cada pequeño logro. Metodología lúdica adaptada a 5-6 años.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -562,7 +586,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Resolver problemas aplicando la operación correcta',
       'Desarrollar cálculo mental ágil',
     ],
-    metodologia: 'Práctica sistemática y estratégica. Cada operación se trabaja con múltiples estrategias (descomposición, recta numérica, algoritmos). Incluye juegos de cálculo mental, desafíos cronometrados y problemas contextualizados. Metodología de dominio progresivo adaptada a 8-9 años.',
+    metodologia:
+      'Práctica sistemática y estratégica. Cada operación se trabaja con múltiples estrategias (descomposición, recta numérica, algoritmos). Incluye juegos de cálculo mental, desafíos cronometrados y problemas contextualizados. Metodología de dominio progresivo adaptada a 8-9 años.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -589,7 +614,8 @@ export const COURSE_DETAILS_MAP: Record<string, CourseDetails> = {
       'Resolver problemas aplicando la operación correcta',
       'Desarrollar cálculo mental ágil',
     ],
-    metodologia: 'Práctica sistemática y estratégica. Cada operación se trabaja con múltiples estrategias (descomposición, recta numérica, algoritmos). Incluye juegos de cálculo mental, desafíos cronometrados y problemas contextualizados. Metodología de dominio progresivo adaptada a 8-9 años.',
+    metodologia:
+      'Práctica sistemática y estratégica. Cada operación se trabaja con múltiples estrategias (descomposición, recta numérica, algoritmos). Incluye juegos de cálculo mental, desafíos cronometrados y problemas contextualizados. Metodología de dominio progresivo adaptada a 8-9 años.',
     requisitos: [
       'Computadora con conexión a internet',
       'Google Meet (acceso desde el navegador)',
@@ -642,38 +668,47 @@ export const PRICING_OPTIONS: PricingOption[] = [
 export const FAQS: FAQ[] = [
   {
     question: '¿Qué pasa si mi hijo falta a una clase?',
-    answer: 'Todas las clases quedan grabadas y disponibles en la plataforma durante todo el verano. Tu hijo puede verla cuando quiera y al ritmo que prefiera.',
+    answer:
+      'Todas las clases quedan grabadas y disponibles en la plataforma durante todo el verano. Tu hijo puede verla cuando quiera y al ritmo que prefiera.',
   },
   {
     question: '¿Necesita conocimientos previos?',
-    answer: 'No! Cada curso está diseñado para que pueda empezar desde cero. Los cursos están organizados por edad para asegurar que el contenido sea apropiado.',
+    answer:
+      'No! Cada curso está diseñado para que pueda empezar desde cero. Los cursos están organizados por edad para asegurar que el contenido sea apropiado.',
   },
   {
     question: '¿Qué materiales necesita?',
-    answer: 'Solo una computadora con conexión a internet y muchas ganas de aprender. Todas las herramientas que usamos son gratuitas y te damos las instrucciones de instalación.',
+    answer:
+      'Solo una computadora con conexión a internet y muchas ganas de aprender. Todas las herramientas que usamos son gratuitas y te damos las instrucciones de instalación.',
   },
   {
     question: '¿Cómo son las clases?',
-    answer: 'Son 100% en vivo por Google Meet. El profe explica, los chicos participan, hacen actividades prácticas y se divierten. Nada de videos pregrabados aburridos.',
+    answer:
+      'Son 100% en vivo por Google Meet. El profe explica, los chicos participan, hacen actividades prácticas y se divierten. Nada de videos pregrabados aburridos.',
   },
   {
     question: '¿Hay límite de cupos?',
-    answer: 'Sí, cada curso tiene un máximo de 10 estudiantes para asegurar atención personalizada. Las vacantes se asignan por orden de inscripción.',
+    answer:
+      'Sí, cada curso tiene un máximo de 10 estudiantes para asegurar atención personalizada. Las vacantes se asignan por orden de inscripción.',
   },
   {
     question: '¿Qué incluye el sistema de gamificación?',
-    answer: 'Los estudiantes ganan XP (experiencia) doble durante el verano, desbloquean insignias exclusivas, suben en el ranking semanal y obtienen avatares especiales de verano.',
+    answer:
+      'Los estudiantes ganan XP (experiencia) doble durante el verano, desbloquean insignias exclusivas, suben en el ranking semanal y obtienen avatares especiales de verano.',
   },
   {
     question: '¿Cómo funcionan los descuentos?',
-    answer: 'Si inscribís 2+ hermanos O eligen 2+ cursos en total: 12% de descuento por curso. Si inscribís 2+ hermanos Y eligen 2+ cursos en total: 20% de descuento por curso (máximo). Los descuentos se aplican automáticamente.',
+    answer:
+      'Si inscribís 2+ hermanos O eligen 2+ cursos en total: 12% de descuento por curso. Si inscribís 2+ hermanos Y eligen 2+ cursos en total: 20% de descuento por curso (máximo). Los descuentos se aplican automáticamente.',
   },
   {
     question: '¿Trabajan el feriado de carnaval?',
-    answer: 'No, respetamos el feriado de carnaval. Las fechas están planificadas para garantizar que todos tengan las 8 semanas completas de clases sin superponerse con el feriado.',
+    answer:
+      'No, respetamos el feriado de carnaval. Las fechas están planificadas para garantizar que todos tengan las 8 semanas completas de clases sin superponerse con el feriado.',
   },
   {
     question: '¿Puedo cambiar de curso una vez inscripto?',
-    answer: 'Sí, durante la primera semana podés cambiar de curso sin costo adicional si sentís que no era el indicado.',
+    answer:
+      'Sí, durante la primera semana podés cambiar de curso sin costo adicional si sentís que no era el indicado.',
   },
 ];

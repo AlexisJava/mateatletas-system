@@ -63,7 +63,7 @@ export const FONT_FAMILIES = {
 export function responsiveText(
   level: keyof typeof FONT_SCALE.mobile,
   weight: keyof typeof FONT_WEIGHTS = 'normal',
-  family: keyof typeof FONT_FAMILIES = 'primary'
+  family: keyof typeof FONT_FAMILIES = 'primary',
 ): string {
   return `
     ${FONT_SCALE.mobile[level]}
@@ -71,7 +71,9 @@ export function responsiveText(
     lg:${FONT_SCALE.desktop[level]}
     ${FONT_WEIGHTS[weight]}
     ${FONT_FAMILIES[family]}
-  `.trim().replace(/\s+/g, ' ');
+  `
+    .trim()
+    .replace(/\s+/g, ' ');
 }
 
 /**
@@ -117,31 +119,41 @@ export const TEXT_STYLES = {
     ${responsiveText('h2', 'black', 'display')}
     ${LETTER_SPACING.wide}
     uppercase
-  `.trim().replace(/\s+/g, ' '),
+  `
+    .trim()
+    .replace(/\s+/g, ' '),
 
   // Subtítulos
   subtitle: `
     ${responsiveText('h4', 'semibold', 'primary')}
     ${LINE_HEIGHTS.snug}
-  `.trim().replace(/\s+/g, ' '),
+  `
+    .trim()
+    .replace(/\s+/g, ' '),
 
   // Cuerpo de texto
   body: `
     ${responsiveText('body', 'normal', 'primary')}
     ${LINE_HEIGHTS.normal}
-  `.trim().replace(/\s+/g, ' '),
+  `
+    .trim()
+    .replace(/\s+/g, ' '),
 
   // Textos pequeños (labels, metadata)
   label: `
     ${responsiveText('small', 'bold', 'primary')}
     ${LETTER_SPACING.wide}
     uppercase
-  `.trim().replace(/\s+/g, ' '),
+  `
+    .trim()
+    .replace(/\s+/g, ' '),
 
   // Botones
   button: `
     ${responsiveText('body', 'black', 'primary')}
     ${LETTER_SPACING.wide}
     uppercase
-  `.trim().replace(/\s+/g, ' '),
+  `
+    .trim()
+    .replace(/\s+/g, ' '),
 } as const;

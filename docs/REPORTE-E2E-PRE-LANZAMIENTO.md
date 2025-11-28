@@ -40,17 +40,20 @@ Se implementó una suite completa de tests End-to-End con Playwright para verifi
 **Problema**: La página `/login` no muestra los campos de email y password dentro del timeout de 10 segundos.
 
 **Evidencia**:
+
 ```
 ✓ Home page carga: 5.0s ✅
 ✗ Login page timeout: 39.1s ❌
 ```
 
 **Impacto**:
+
 - ❌ Estudiantes NO pueden hacer login
 - ❌ Docentes NO pueden hacer login
 - ❌ Todos los flujos críticos fallan
 
 **Tests afectados**:
+
 - `00-critical-launch.spec.ts` → 4 de 5 tests fallan
 - `estudiante-critical.spec.ts` → Todos fallan (8 tests)
 - `docente-critical.spec.ts` → Todos fallan (10 tests)
@@ -67,11 +70,11 @@ npx playwright test 00-diagnostico.spec.ts
 
 **Resultados**:
 
-| Test | Resultado | Tiempo | Notas |
-|------|-----------|--------|-------|
-| Servidor responde | ✅ PASS | 5.0s | Home page OK |
-| Login carga | ❌ FAIL | 39.1s | Timeout esperando inputs |
-| Estructura login | ⏱️ TIMEOUT | 60s | No completó |
+| Test              | Resultado  | Tiempo | Notas                    |
+| ----------------- | ---------- | ------ | ------------------------ |
+| Servidor responde | ✅ PASS    | 5.0s   | Home page OK             |
+| Login carga       | ❌ FAIL    | 39.1s  | Timeout esperando inputs |
+| Estructura login  | ⏱️ TIMEOUT | 60s    | No completó              |
 
 ### Causas Posibles:
 
@@ -103,6 +106,7 @@ npm run dev
 ```
 
 **Checklist**:
+
 - [ ] La página carga visualmente
 - [ ] Se ven los campos de email y password
 - [ ] El botón de submit está presente
@@ -114,10 +118,10 @@ Abrir DevTools y verificar:
 
 ```javascript
 // ¿Existen los inputs?
-document.querySelector('input[type="email"]')
-document.querySelector('input[name="email"]')
-document.querySelector('input[type="password"]')
-document.querySelector('button[type="submit"]')
+document.querySelector('input[type="email"]');
+document.querySelector('input[name="email"]');
+document.querySelector('input[type="password"]');
+document.querySelector('button[type="submit"]');
 ```
 
 ### 3. Ajustar Tests con Selectores Correctos
@@ -134,6 +138,7 @@ tail -f logs/server.log
 ```
 
 Buscar:
+
 - Errores 500
 - Requests fallidos
 - Tiempos de respuesta lentos
@@ -144,14 +149,14 @@ Buscar:
 
 ### Suite Completa:
 
-| Archivo | Tests | Pasan | Fallan | Skip | Estado |
-|---------|-------|-------|--------|------|--------|
-| `00-critical-launch.spec.ts` | 5 | 1 | 4 | 0 | 🔴 CRÍTICO |
-| `estudiante-critical.spec.ts` | 8 | 0 | 8 | 0 | 🔴 CRÍTICO |
-| `docente-critical.spec.ts` | 10 | 0 | 10 | 0 | 🔴 CRÍTICO |
-| `tutor-basic.spec.ts` | 6 | 0 | 0 | 6 | ⚪ SKIP |
-| `00-diagnostico.spec.ts` | 3 | 1 | 2 | 0 | 🟡 PARCIAL |
-| **TOTAL** | **32** | **2** | **24** | **6** | **6.25% passing** |
+| Archivo                       | Tests  | Pasan | Fallan | Skip  | Estado            |
+| ----------------------------- | ------ | ----- | ------ | ----- | ----------------- |
+| `00-critical-launch.spec.ts`  | 5      | 1     | 4      | 0     | 🔴 CRÍTICO        |
+| `estudiante-critical.spec.ts` | 8      | 0     | 8      | 0     | 🔴 CRÍTICO        |
+| `docente-critical.spec.ts`    | 10     | 0     | 10     | 0     | 🔴 CRÍTICO        |
+| `tutor-basic.spec.ts`         | 6      | 0     | 0      | 6     | ⚪ SKIP           |
+| `00-diagnostico.spec.ts`      | 3      | 1     | 2      | 0     | 🟡 PARCIAL        |
+| **TOTAL**                     | **32** | **2** | **24** | **6** | **6.25% passing** |
 
 ### Desglose por Portal:
 
@@ -199,6 +204,7 @@ Buscar:
 ### 🔴 POSPONER LANZAMIENTO
 
 **Justificación**:
+
 - El login es el punto de entrada crítico
 - Sin login funcional, ningún usuario puede acceder
 - 94% de los tests fallan (24 de 32)
@@ -207,6 +213,7 @@ Buscar:
 **Tiempo estimado de corrección**: 1-2 horas
 
 **Plan sugerido**:
+
 1. Debuggear página de login (30 min)
 2. Ajustar selectores en tests (15 min)
 3. Re-ejecutar tests (10 min)
@@ -284,6 +291,7 @@ npx playwright test --grep "Páginas críticas"
 **Deadline**: 2 horas antes del lanzamiento reprogramado
 
 **Próximos pasos**:
+
 1. ✅ Suite E2E completa implementada
 2. 🔴 Debuggear página de login (AHORA)
 3. 🟡 Ajustar selectores de tests
@@ -343,5 +351,5 @@ GET  /api/auth/profile                ✅ Endpoint existe
 
 ---
 
-*Generado automáticamente por Claude Code*
-*Fecha: 31 de octubre de 2025*
+_Generado automáticamente por Claude Code_
+_Fecha: 31 de octubre de 2025_

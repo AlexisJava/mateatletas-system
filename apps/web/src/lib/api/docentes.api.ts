@@ -209,7 +209,9 @@ export const docentesApi = {
    */
   getEstadisticasCompletas: async (): Promise<EstadisticasCompletasResponse> => {
     try {
-      return await apiClient.get<EstadisticasCompletasResponse>('/docentes/me/estadisticas-completas');
+      return await apiClient.get<EstadisticasCompletasResponse>(
+        '/docentes/me/estadisticas-completas',
+      );
     } catch (error) {
       console.error('Error al obtener las estadísticas completas:', error);
       throw error;
@@ -307,12 +309,12 @@ export const docentesApi = {
    */
   reassignClasses: async (
     fromDocenteId: string,
-    toDocenteId: string
+    toDocenteId: string,
   ): Promise<{ clasesReasignadas: number }> => {
     try {
       return await apiClient.post<{ clasesReasignadas: number }>(
         `/docentes/${fromDocenteId}/reasignar-clases`,
-        { toDocenteId }
+        { toDocenteId },
       );
     } catch (error) {
       console.error('Error al reasignar las clases del docente:', error);

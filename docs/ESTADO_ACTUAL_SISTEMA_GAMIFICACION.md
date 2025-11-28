@@ -15,22 +15,22 @@
 
 ### ✅ Completamente Implementado (Backend)
 
-| Recurso | Estado | Propósito | Dónde está |
-|---------|--------|-----------|------------|
-| **Puntos XP** | ✅ Funcional | Subir de nivel | `RecursosEstudiante.xp_total` |
-| **Monedas** | ✅ Funcional | Comprar en tienda | `RecursosEstudiante.monedas_total` |
-| **Gemas** | ✅ Funcional | Logros especiales/eventos | `RecursosEstudiante.gemas_total` |
-| **TransaccionRecurso** | ✅ Funcional | Historial completo de cambios | `TransaccionRecurso` table |
-| **AccionesPuntuables** | ✅ Funcional | 8 acciones predefinidas | Seed en DB |
+| Recurso                | Estado       | Propósito                     | Dónde está                         |
+| ---------------------- | ------------ | ----------------------------- | ---------------------------------- |
+| **Puntos XP**          | ✅ Funcional | Subir de nivel                | `RecursosEstudiante.xp_total`      |
+| **Monedas**            | ✅ Funcional | Comprar en tienda             | `RecursosEstudiante.monedas_total` |
+| **Gemas**              | ✅ Funcional | Logros especiales/eventos     | `RecursosEstudiante.gemas_total`   |
+| **TransaccionRecurso** | ✅ Funcional | Historial completo de cambios | `TransaccionRecurso` table         |
+| **AccionesPuntuables** | ✅ Funcional | 8 acciones predefinidas       | Seed en DB                         |
 
 ### ⚠️ Parcialmente Implementado (Frontend)
 
-| Componente | Estado | Ubicación | Problema |
-|------------|--------|-----------|----------|
-| **HubView (Gimnasio)** | ⚠️ Conectado | `apps/web/src/app/estudiante/gimnasio/views/HubView.tsx:230-244` | Usa React Query pero valores pueden ser fallback |
-| **Cálculo de Nivel** | ✅ Funcional | `HubView.tsx:238` | Fórmula: `nivel = floor(sqrt(XP / 100)) + 1` |
-| **Barra de Progreso XP** | ✅ Funcional | `HubView.tsx:241-244` | Calcula % hasta siguiente nivel |
-| **Display Monedas/Gemas** | ⚠️ Mostrado | `HubView.tsx:231-232` | Lee del backend pero puede usar fallback (0) |
+| Componente                | Estado       | Ubicación                                                        | Problema                                         |
+| ------------------------- | ------------ | ---------------------------------------------------------------- | ------------------------------------------------ |
+| **HubView (Gimnasio)**    | ⚠️ Conectado | `apps/web/src/app/estudiante/gimnasio/views/HubView.tsx:230-244` | Usa React Query pero valores pueden ser fallback |
+| **Cálculo de Nivel**      | ✅ Funcional | `HubView.tsx:238`                                                | Fórmula: `nivel = floor(sqrt(XP / 100)) + 1`     |
+| **Barra de Progreso XP**  | ✅ Funcional | `HubView.tsx:241-244`                                            | Calcula % hasta siguiente nivel                  |
+| **Display Monedas/Gemas** | ⚠️ Mostrado  | `HubView.tsx:231-232`                                            | Lee del backend pero puede usar fallback (0)     |
 
 ### ❌ NO Implementado
 
@@ -63,11 +63,11 @@ model RecursosEstudiante {
 
 ### Diferencias Clave:
 
-| Moneda | Símbolo | Propósito | Rareza | Conversión |
-|--------|---------|-----------|--------|------------|
-| **Puntos XP** | ⭐ | Solo para subir de nivel | Común | NO se pueden gastar |
-| **Monedas** | 💰 | Comprar items en tienda | Común | Sí, 1 moneda = 1 item |
-| **Gemas** | 💎 | Items premium/eventos | Raro | Sí, 1 gema = items especiales |
+| Moneda        | Símbolo | Propósito                | Rareza | Conversión                    |
+| ------------- | ------- | ------------------------ | ------ | ----------------------------- |
+| **Puntos XP** | ⭐      | Solo para subir de nivel | Común  | NO se pueden gastar           |
+| **Monedas**   | 💰      | Comprar items en tienda  | Común  | Sí, 1 moneda = 1 item         |
+| **Gemas**     | 💎      | Items premium/eventos    | Raro   | Sí, 1 gema = items especiales |
 
 ### ¿Por qué 3 monedas?
 
@@ -99,16 +99,16 @@ model RecursosEstudiante {
 
 El docente otorga puntos manualmente a través de 8 acciones predefinidas:
 
-| Acción | Puntos | Descripción |
-|--------|--------|-------------|
-| 🏫 **Asistencia a clase** | 10 pts | Por presentarse a clase |
-| 💬 **Participación activa** | 15 pts | Por participar en debates o responder preguntas |
-| ✅ **Ejercicios completados** | 20 pts | Por completar tareas asignadas |
-| 🤝 **Ayudó a un compañero** | 25 pts | Por colaborar con otro estudiante |
+| Acción                          | Puntos | Descripción                                       |
+| ------------------------------- | ------ | ------------------------------------------------- |
+| 🏫 **Asistencia a clase**       | 10 pts | Por presentarse a clase                           |
+| 💬 **Participación activa**     | 15 pts | Por participar en debates o responder preguntas   |
+| ✅ **Ejercicios completados**   | 20 pts | Por completar tareas asignadas                    |
+| 🤝 **Ayudó a un compañero**     | 25 pts | Por colaborar con otro estudiante                 |
 | 🌟 **Excelencia en ejercicios** | 30 pts | Por resolver ejercicios con calificación perfecta |
-| 🔥 **Racha semanal** | 50 pts | Por mantener actividad durante 7 días seguidos |
-| 🎯 **Desafío superado** | 40 pts | Por completar un desafío especial |
-| 📈 **Mejora destacada** | 35 pts | Por mostrar progreso significativo |
+| 🔥 **Racha semanal**            | 50 pts | Por mantener actividad durante 7 días seguidos    |
+| 🎯 **Desafío superado**         | 40 pts | Por completar un desafío especial                 |
+| 📈 **Mejora destacada**         | 35 pts | Por mostrar progreso significativo                |
 
 **Cómo funciona:**
 
@@ -248,28 +248,28 @@ graph LR
 
 ### Backend (NestJS) - ✅ 95% Completo
 
-| Módulo | Status | Archivo | Funcionalidad |
-|--------|--------|---------|---------------|
-| RecursosService | ✅ | `recursos.service.ts` | Gestión completa de XP/Monedas/Gemas |
-| GamificacionService | ✅ | `gamificacion.service.ts` | Registro de acciones puntuables |
-| PuntosService | ✅ | `puntos.service.ts` | Cálculo y otorgamiento de puntos |
-| TiendaController | ✅ | `tienda.controller.ts` | Compra de items con monedas/gemas |
-| RecursosEstudiante Model | ✅ | `schema.prisma:2089-2124` | Modelo de datos completo |
-| TransaccionRecurso Model | ✅ | `schema.prisma:2126-2148` | Historial transaccional |
-| AccionesPuntuables Seed | ✅ | `acciones-puntuables.seed.ts` | 8 acciones predefinidas |
+| Módulo                   | Status | Archivo                       | Funcionalidad                        |
+| ------------------------ | ------ | ----------------------------- | ------------------------------------ |
+| RecursosService          | ✅     | `recursos.service.ts`         | Gestión completa de XP/Monedas/Gemas |
+| GamificacionService      | ✅     | `gamificacion.service.ts`     | Registro de acciones puntuables      |
+| PuntosService            | ✅     | `puntos.service.ts`           | Cálculo y otorgamiento de puntos     |
+| TiendaController         | ✅     | `tienda.controller.ts`        | Compra de items con monedas/gemas    |
+| RecursosEstudiante Model | ✅     | `schema.prisma:2089-2124`     | Modelo de datos completo             |
+| TransaccionRecurso Model | ✅     | `schema.prisma:2126-2148`     | Historial transaccional              |
+| AccionesPuntuables Seed  | ✅     | `acciones-puntuables.seed.ts` | 8 acciones predefinidas              |
 
 ### Frontend (Next.js 15) - ⚠️ 60% Completo
 
-| Componente | Status | Archivo | Problema |
-|------------|--------|---------|----------|
-| HubView | ⚠️ | `HubView.tsx:230-244` | Lee recursos pero puede usar fallback |
-| useRecursosEstudiante | ✅ | (hook personalizado?) | React Query para fetch |
-| Cálculo de Nivel | ✅ | `HubView.tsx:238` | Fórmula correcta |
-| Barra de Progreso XP | ✅ | `HubView.tsx:241-244` | Animación funcional |
-| Display Monedas | ⚠️ | `HubView.tsx:231` | Muestra pero puede ser 0 si no hay data |
-| Display Gemas | ⚠️ | `HubView.tsx:232` | Muestra pero puede ser 0 si no hay data |
-| Notificación "+25 XP" | ❌ | No existe | No hay toast/modal al ganar recursos |
-| Historial Transacciones | ❌ | No existe | No se muestra historial al estudiante |
+| Componente              | Status | Archivo               | Problema                                |
+| ----------------------- | ------ | --------------------- | --------------------------------------- |
+| HubView                 | ⚠️     | `HubView.tsx:230-244` | Lee recursos pero puede usar fallback   |
+| useRecursosEstudiante   | ✅     | (hook personalizado?) | React Query para fetch                  |
+| Cálculo de Nivel        | ✅     | `HubView.tsx:238`     | Fórmula correcta                        |
+| Barra de Progreso XP    | ✅     | `HubView.tsx:241-244` | Animación funcional                     |
+| Display Monedas         | ⚠️     | `HubView.tsx:231`     | Muestra pero puede ser 0 si no hay data |
+| Display Gemas           | ⚠️     | `HubView.tsx:232`     | Muestra pero puede ser 0 si no hay data |
+| Notificación "+25 XP"   | ❌     | No existe             | No hay toast/modal al ganar recursos    |
+| Historial Transacciones | ❌     | No existe             | No se muestra historial al estudiante   |
 
 ---
 
@@ -352,14 +352,14 @@ Gemas: 5 💎
 
 ### 1. ¿Qué está implementado HOY?
 
-| Feature | Status |
-|---------|--------|
-| Puntos XP (para subir de nivel) | ✅ Backend completo, frontend lee valores |
-| Monedas (para descuentos) | ✅ Backend completo, frontend muestra pero no hay tienda funcional |
-| Gemas (¿para qué?) | ✅ Backend completo, **son para items premium/eventos** |
-| Racha de días consecutivos | ❌ Solo hardcoded `racha_dias = 3`, no hay lógica real |
-| Sistema de logros | ❌ No existe modelo `Logros` en DB |
-| 4 Equipos (Fénix, Dragón, Tigre, Águila) | ❌ No existe en DB ni frontend |
+| Feature                                  | Status                                                             |
+| ---------------------------------------- | ------------------------------------------------------------------ |
+| Puntos XP (para subir de nivel)          | ✅ Backend completo, frontend lee valores                          |
+| Monedas (para descuentos)                | ✅ Backend completo, frontend muestra pero no hay tienda funcional |
+| Gemas (¿para qué?)                       | ✅ Backend completo, **son para items premium/eventos**            |
+| Racha de días consecutivos               | ❌ Solo hardcoded `racha_dias = 3`, no hay lógica real             |
+| Sistema de logros                        | ❌ No existe modelo `Logros` en DB                                 |
+| 4 Equipos (Fénix, Dragón, Tigre, Águila) | ❌ No existe en DB ni frontend                                     |
 
 ### 2. ¿Son 3 monedas diferentes o es lo mismo?
 
@@ -371,12 +371,12 @@ Gemas: 5 💎
 
 ### 3. ¿Cómo ganan puntos/monedas actualmente?
 
-| Recurso | Método de Obtención | Status |
-|---------|---------------------|--------|
-| **XP** | Docente otorga manualmente (8 acciones predefinidas) | ✅ Funcional |
-| **XP** | Automático al completar actividades | ⚠️ Backend ready, no integrado |
-| **Monedas** | Automático al completar actividades | ⚠️ Backend ready, no integrado |
-| **Gemas** | Logros especiales, rachas largas, eventos | ⚠️ Backend ready, no hay lógica de otorgamiento automático |
+| Recurso     | Método de Obtención                                  | Status                                                     |
+| ----------- | ---------------------------------------------------- | ---------------------------------------------------------- |
+| **XP**      | Docente otorga manualmente (8 acciones predefinidas) | ✅ Funcional                                               |
+| **XP**      | Automático al completar actividades                  | ⚠️ Backend ready, no integrado                             |
+| **Monedas** | Automático al completar actividades                  | ⚠️ Backend ready, no integrado                             |
+| **Gemas**   | Logros especiales, rachas largas, eventos            | ⚠️ Backend ready, no hay lógica de otorgamiento automático |
 
 ### 4. ¿Hay algún sistema ya funcionando o empezamos de cero?
 
@@ -400,6 +400,7 @@ Gemas: 5 💎
 ## 📁 Archivos Clave para Revisar
 
 ### Backend:
+
 1. **`apps/api/prisma/schema.prisma:2089-2148`** - Modelos RecursosEstudiante + TransaccionRecurso
 2. **`apps/api/src/tienda/recursos.service.ts`** - Lógica principal de recursos
 3. **`apps/api/src/gamificacion/services/gamificacion.service.ts`** - Registro de acciones
@@ -407,6 +408,7 @@ Gemas: 5 💎
 5. **`apps/api/prisma/seeds/acciones-puntuables.seed.ts`** - 8 acciones predefinidas
 
 ### Frontend:
+
 1. **`apps/web/src/app/estudiante/gimnasio/views/HubView.tsx:230-244`** - Display de recursos
 2. **`apps/web/src/lib/api/recursos.api.ts`** (si existe) - API calls
 3. **`apps/web/src/hooks/useRecursosEstudiante.ts`** (si existe) - React Query hook

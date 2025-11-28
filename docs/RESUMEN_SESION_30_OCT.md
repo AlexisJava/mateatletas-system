@@ -1,6 +1,7 @@
 # 📊 Resumen de Sesión - 30 Octubre 2025
 
 ## 🎯 Objetivo de la Sesión
+
 **Implementar absolutamente TODO para terminar el portal del estudiante**
 
 ---
@@ -10,6 +11,7 @@
 ### **Backend Implementado:**
 
 #### 1. Sistema Completo de Progreso de Actividades
+
 - ✅ **Schema Zod** (`progreso-actividad.schema.ts`) - 150 líneas
   - DTOs: IniciarActividad, CompletarActividad, GuardarProgresoActividad
   - Response types con recompensas detalladas
@@ -37,6 +39,7 @@
   - Importa GamificacionModule (LogrosService)
 
 #### 2. Sistema de Tienda y Recursos (Sesión anterior + extensiones)
+
 - ✅ **TiendaModule completo**
   - RecursosService para XP/Monedas/Gemas
   - TiendaService para compras e inventario
@@ -44,6 +47,7 @@
   - **Agregado:** Campo `gemas_ganadas` a ActualizarRecursosPorActividad
 
 #### 3. Extensión del Sistema de Gamificación
+
 - ✅ **LogrosService.verificarLogrosActividad()**
   - Primera actividad completada (50 pts)
   - 10 actividades completadas (150 pts)
@@ -56,9 +60,11 @@
 ### **Frontend Implementado:**
 
 #### 4. MisLogrosView - 250 líneas
+
 **Ubicación:** `apps/web/src/app/estudiante/gimnasio/views/MisLogrosView.tsx`
 
 **Características:**
+
 - 🏆 Grid responsive con diseño Brawl Stars
 - 🔍 Filtros: Todos / Desbloqueados / Bloqueados
 - 🎨 Modal de detalle con animaciones Framer Motion
@@ -74,15 +80,18 @@
 - 🔒 Icono de candado para bloqueados (con grayscale)
 
 **Integración:**
+
 - Usa `gamificacionApi.getLogros(estudianteId)`
 - Integrado en OverlayStackManager
 
 ---
 
 #### 5. RankingView - 230 líneas
+
 **Ubicación:** `apps/web/src/app/estudiante/gimnasio/views/RankingView.tsx`
 
 **Características:**
+
 - 👥 Tabs: **Mi Equipo** / **Global**
 - 🥇 Medallas visuales para top 3:
   - 1° Oro (Crown icon)
@@ -93,15 +102,18 @@
 - 📊 Muestra puntos totales y nombre de equipo (en global)
 
 **Integración:**
+
 - Usa `gamificacionApi.getRanking(estudianteId)`
 - Integrado en OverlayStackManager
 
 ---
 
 #### 6. CalendarioView - 280 líneas
+
 **Ubicación:** `apps/web/src/app/estudiante/gimnasio/views/CalendarioView.tsx`
 
 **Características:**
+
 - 📅 Vista mensual con grid de 7×5 días
 - 🔄 Navegación entre meses (botones prev/next)
 - 📌 Indicadores visuales:
@@ -116,15 +128,18 @@
   - 🎨 Nombre de ruta curricular
 
 **Integración:**
+
 - Usa `getClases(filtros)` de clases.api.ts
 - Integrado en OverlayStackManager
 
 ---
 
 #### 7. TiendaView - 650 líneas (Sesión anterior)
+
 **Ubicación:** `apps/web/src/app/estudiante/gimnasio/views/TiendaView.tsx`
 
 **Características:**
+
 - 🛒 Catálogo de items con rareza (COMUN, RARO, EPICO, LEGENDARIO)
 - 💰 Sistema de compra con monedas/gemas
 - 📦 Tabs: Tienda / Inventario
@@ -136,6 +151,7 @@
 ## 📁 Archivos Creados/Modificados
 
 ### Backend (7 archivos)
+
 ```
 ✅ packages/contracts/src/schemas/progreso-actividad.schema.ts (NUEVO)
 ✅ packages/contracts/src/schemas/tienda.schema.ts (MODIFICADO - gemas_ganadas)
@@ -147,6 +163,7 @@
 ```
 
 ### Frontend (4 archivos)
+
 ```
 ✅ apps/web/src/app/estudiante/gimnasio/views/MisLogrosView.tsx (NUEVO)
 ✅ apps/web/src/app/estudiante/gimnasio/views/RankingView.tsx (NUEVO)
@@ -232,20 +249,24 @@ Eliminaciones: -280 líneas
 ## 🔧 Endpoints Backend Disponibles (No usados aún)
 
 ### Gamificación:
+
 - ✅ `GET /gamificacion/dashboard/:estudianteId`
 - ✅ `GET /gamificacion/puntos/:estudianteId`
 - ✅ `GET /gamificacion/historial/:estudianteId` **← USAR MAÑANA**
 - ✅ `GET /gamificacion/progreso/:estudianteId`
 
 ### Tienda:
+
 - ✅ `GET /tienda/inventario/:estudianteId` **← USAR MAÑANA**
 - ✅ `POST /tienda/items/:itemId/equipar`
 
 ### Recursos:
+
 - ✅ `GET /recursos/:estudianteId` **← USAR MAÑANA EN HUBVIEW**
 - ✅ `GET /recursos/historial/:estudianteId`
 
 ### Progreso Actividades (NUEVOS):
+
 - ✅ `POST /progreso-actividad/iniciar`
 - ✅ `POST /progreso-actividad/guardar`
 - ✅ `POST /progreso-actividad/completar`
@@ -257,6 +278,7 @@ Eliminaciones: -280 líneas
 ## 💡 Notas Importantes
 
 ### Flujo de Completar Actividad (P5→P3):
+
 1. Usuario completa actividad en frontend (ResultsView)
 2. Frontend llama a `POST /progreso-actividad/completar`
 3. Backend ejecuta cascada:
@@ -269,6 +291,7 @@ Eliminaciones: -280 líneas
 4. Frontend muestra recompensas en ResultsView
 
 ### Integración ResultsView (Ya implementado):
+
 ```typescript
 // ResultsView ya llama a recursosApi.actualizarPorActividad
 // Pero NO usa el nuevo endpoint /progreso-actividad/completar
@@ -276,6 +299,7 @@ Eliminaciones: -280 líneas
 ```
 
 ### Arquitectura de Overlays:
+
 - Todos los overlays usan `useOverlayStack()` para navegación
 - Reciben props: `{ estudiante, config }`
 - Integrados en OverlayStackManager con metadata (gradient, renderType)

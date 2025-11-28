@@ -25,12 +25,8 @@ export function LoadingPlanificacion() {
         </div>
 
         {/* Texto */}
-        <h2 className="text-white text-2xl font-black mb-2">
-          Cargando aventura científica...
-        </h2>
-        <p className="text-white/70 text-lg font-medium">
-          Preparando experimentos y actividades
-        </p>
+        <h2 className="text-white text-2xl font-black mb-2">Cargando aventura científica...</h2>
+        <p className="text-white/70 text-lg font-medium">Preparando experimentos y actividades</p>
 
         {/* Puntos animados */}
         <div className="flex items-center justify-center gap-2 mt-6">

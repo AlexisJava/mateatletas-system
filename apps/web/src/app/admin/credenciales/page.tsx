@@ -4,11 +4,7 @@ import { useEffect, useState } from 'react';
 import { Download, Search, Key, Eye, EyeOff, Copy, Check, RefreshCw, Loader2 } from 'lucide-react';
 import apiClient from '@/lib/axios';
 import { getErrorMessage } from '@/lib/utils/error-handler';
-import {
-  exportToExcel,
-  exportToCSV,
-  exportToPDF,
-} from '@/lib/utils/export.utils';
+import { exportToExcel, exportToCSV, exportToPDF } from '@/lib/utils/export.utils';
 
 interface CredencialUsuario {
   id: string;
@@ -84,10 +80,7 @@ export default function CredencialesPage() {
       const searchLower = searchTerm.toLowerCase();
       const nombreCompleto = `${usuario.nombre} ${usuario.apellido}`.toLowerCase();
       const usuarioLower = usuario.usuario.toLowerCase();
-      if (
-        !nombreCompleto.includes(searchLower) &&
-        !usuarioLower.includes(searchLower)
-      ) {
+      if (!nombreCompleto.includes(searchLower) && !usuarioLower.includes(searchLower)) {
         return false;
       }
     }
@@ -102,7 +95,11 @@ export default function CredencialesPage() {
   };
 
   const handleResetPassword = async (usuarioId: string, rol: string) => {
-    if (!confirm('¿Estás seguro de resetear la contraseña de este usuario? Se generará una nueva contraseña temporal.')) {
+    if (
+      !confirm(
+        '¿Estás seguro de resetear la contraseña de este usuario? Se generará una nueva contraseña temporal.',
+      )
+    ) {
       return;
     }
 
@@ -246,8 +243,9 @@ export default function CredencialesPage() {
           <div>
             <h3 className="text-amber-200 font-bold mb-1">Advertencia de Seguridad</h3>
             <p className="text-amber-200/80 text-sm">
-              Esta planilla muestra contraseñas temporales en texto plano para facilitar el primer ingreso.
-              Las contraseñas se eliminan automáticamente cuando el usuario cambia su contraseña.
+              Esta planilla muestra contraseñas temporales en texto plano para facilitar el primer
+              ingreso. Las contraseñas se eliminan automáticamente cuando el usuario cambia su
+              contraseña.
             </p>
           </div>
         </div>
@@ -306,7 +304,9 @@ export default function CredencialesPage() {
 
           {/* Filtro por Estado */}
           <div>
-            <label className="text-white/60 text-sm font-medium mb-2 block">Filtrar por Estado</label>
+            <label className="text-white/60 text-sm font-medium mb-2 block">
+              Filtrar por Estado
+            </label>
             <div className="flex gap-2 flex-wrap">
               {(['Todos', 'Pendiente', 'Contraseña Cambiada'] as FilterStatus[]).map((estado) => (
                 <button
@@ -391,7 +391,9 @@ export default function CredencialesPage() {
                 {usuariosFiltrados.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-12 text-center">
-                      <p className="text-white/40">No se encontraron usuarios con los filtros seleccionados</p>
+                      <p className="text-white/40">
+                        No se encontraron usuarios con los filtros seleccionados
+                      </p>
                     </td>
                   </tr>
                 ) : (
@@ -403,8 +405,8 @@ export default function CredencialesPage() {
                             usuario.rol === 'Tutor'
                               ? 'bg-purple-500/20 border border-purple-500/30 text-purple-300'
                               : usuario.rol === 'Estudiante'
-                              ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-300'
-                              : 'bg-orange-500/20 border border-orange-500/30 text-orange-300'
+                                ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-300'
+                                : 'bg-orange-500/20 border border-orange-500/30 text-orange-300'
                           }`}
                         >
                           {usuario.rol}
@@ -415,9 +417,7 @@ export default function CredencialesPage() {
                           {usuario.nombre} {usuario.apellido}
                         </div>
                         {usuario.tutor && (
-                          <div className="text-xs text-white/50 mt-1">
-                            Tutor: {usuario.tutor}
-                          </div>
+                          <div className="text-xs text-white/50 mt-1">Tutor: {usuario.tutor}</div>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70 font-mono">
@@ -430,7 +430,9 @@ export default function CredencialesPage() {
                               {showPasswords ? usuario.password_temporal : '••••••••'}
                             </code>
                             <button
-                              onClick={() => handleCopyPassword(usuario.password_temporal!, usuario.id)}
+                              onClick={() =>
+                                handleCopyPassword(usuario.password_temporal!, usuario.id)
+                              }
                               className="p-1.5 hover:bg-emerald-500/20 rounded-lg transition-all"
                               title="Copiar contraseña"
                             >

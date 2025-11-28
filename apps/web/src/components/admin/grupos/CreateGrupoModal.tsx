@@ -149,7 +149,8 @@ export function CreateGrupoModal({ isOpen, onClose, onSuccess }: CreateGrupoModa
               maxLength={20}
             />
             <p className="text-xs text-white/40 mt-1">
-              Identificador corto único (ej: &quot;B2&quot; para Básico 2, &quot;ROBLOX&quot; para curso de Roblox)
+              Identificador corto único (ej: &quot;B2&quot; para Básico 2, &quot;ROBLOX&quot; para
+              curso de Roblox)
             </p>
           </div>
 
@@ -166,16 +167,12 @@ export function CreateGrupoModal({ isOpen, onClose, onSuccess }: CreateGrupoModa
               disabled={isSubmitting}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             />
-            <p className="text-xs text-white/40 mt-1">
-              Nombre descriptivo completo del grupo
-            </p>
+            <p className="text-xs text-white/40 mt-1">Nombre descriptivo completo del grupo</p>
           </div>
 
           {/* Descripción */}
           <div>
-            <label className="block text-sm font-semibold text-white/90 mb-2">
-              Descripción
-            </label>
+            <label className="block text-sm font-semibold text-white/90 mb-2">Descripción</label>
             <textarea
               value={formData.descripcion}
               onChange={(e) => handleChange('descripcion', e.target.value)}
@@ -189,9 +186,7 @@ export function CreateGrupoModal({ isOpen, onClose, onSuccess }: CreateGrupoModa
           {/* Rango de Edades */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-white/90 mb-2">
-                Edad Mínima
-              </label>
+              <label className="block text-sm font-semibold text-white/90 mb-2">Edad Mínima</label>
               <input
                 type="number"
                 value={formData.edad_minima}
@@ -204,9 +199,7 @@ export function CreateGrupoModal({ isOpen, onClose, onSuccess }: CreateGrupoModa
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-white/90 mb-2">
-                Edad Máxima
-              </label>
+              <label className="block text-sm font-semibold text-white/90 mb-2">Edad Máxima</label>
               <input
                 type="number"
                 value={formData.edad_maxima}
@@ -219,9 +212,7 @@ export function CreateGrupoModal({ isOpen, onClose, onSuccess }: CreateGrupoModa
               />
             </div>
           </div>
-          <p className="text-xs text-white/40 -mt-2">
-            Rango de edades sugerido (opcional)
-          </p>
+          <p className="text-xs text-white/40 -mt-2">Rango de edades sugerido (opcional)</p>
 
           {/* Buttons */}
           <div className="flex gap-3 pt-4">

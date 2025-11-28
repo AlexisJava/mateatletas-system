@@ -21,12 +21,7 @@ import {
   getTimePartFromISO,
   buildISODateTime,
 } from './helpers';
-import type {
-  CreateTareaDto,
-  UpdateTareaDto,
-  Subtarea,
-  Evento,
-} from '@/types/calendario.types';
+import type { CreateTareaDto, UpdateTareaDto, Subtarea, Evento } from '@/types/calendario.types';
 import { TipoEvento, EstadoTarea, PrioridadTarea } from '@/types/calendario.types';
 
 interface ModalTareaProps {
@@ -162,9 +157,7 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
 
   const toggleSubtarea = (id: string) => {
     setSubtareas(
-      subtareas.map((st) =>
-        st.id === id ? { ...st, completada: !st.completada } : st
-      )
+      subtareas.map((st) => (st.id === id ? { ...st, completada: !st.completada } : st)),
     );
   };
 
@@ -216,10 +209,7 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
       <motion.div
@@ -289,7 +279,7 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
                   value={estado}
                   onChange={(e) => setEstado(e.target.value as EstadoTarea)}
                   className={`w-full px-4 py-3 rounded-xl font-bold text-white bg-gradient-to-r ${getEstadoColor(
-                    estado
+                    estado,
                   )} shadow-lg focus:ring-2 focus:ring-purple-500 cursor-pointer`}
                 >
                   <option value={EstadoTarea.PENDIENTE}>⏸️ Pendiente</option>
@@ -307,13 +297,21 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
                   value={prioridad}
                   onChange={(e) => setPrioridad(e.target.value as PrioridadTarea)}
                   className={`w-full px-4 py-3 rounded-xl font-bold text-white bg-gradient-to-r ${getPrioridadColor(
-                    prioridad
+                    prioridad,
                   )} shadow-lg focus:ring-2 focus:ring-purple-500 cursor-pointer`}
                 >
-                  <option value={PrioridadTarea.BAJA}>{getPrioridadIcon(PrioridadTarea.BAJA)} Baja</option>
-                  <option value={PrioridadTarea.MEDIA}>{getPrioridadIcon(PrioridadTarea.MEDIA)} Media</option>
-                  <option value={PrioridadTarea.ALTA}>{getPrioridadIcon(PrioridadTarea.ALTA)} Alta</option>
-                  <option value={PrioridadTarea.URGENTE}>{getPrioridadIcon(PrioridadTarea.URGENTE)} Urgente</option>
+                  <option value={PrioridadTarea.BAJA}>
+                    {getPrioridadIcon(PrioridadTarea.BAJA)} Baja
+                  </option>
+                  <option value={PrioridadTarea.MEDIA}>
+                    {getPrioridadIcon(PrioridadTarea.MEDIA)} Media
+                  </option>
+                  <option value={PrioridadTarea.ALTA}>
+                    {getPrioridadIcon(PrioridadTarea.ALTA)} Alta
+                  </option>
+                  <option value={PrioridadTarea.URGENTE}>
+                    {getPrioridadIcon(PrioridadTarea.URGENTE)} Urgente
+                  </option>
                 </select>
               </div>
             </div>
@@ -385,7 +383,9 @@ export function ModalTarea({ isOpen, onClose, tareaExistente }: ModalTareaProps)
                 <input
                   type="number"
                   value={tiempoEstimado || ''}
-                  onChange={(e) => setTiempoEstimado(e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    setTiempoEstimado(e.target.value ? Number(e.target.value) : undefined)
+                  }
                   min="0"
                   placeholder="60"
                   className="w-full px-4 py-3 glass-card focus:ring-2 focus:ring-purple-500 rounded-xl font-semibold text-indigo-900 dark:text-white"

@@ -23,12 +23,14 @@ tests/
 Antes de ejecutar los tests, asegúrate de:
 
 1. **Servidor corriendo**
+
    ```bash
    cd apps/api
    npm run start:dev
    ```
 
 2. **PostgreSQL activo**
+
    ```bash
    docker start mateatletas-postgres
    ```
@@ -51,6 +53,7 @@ cd /home/alexis/Documentos/Mateatletas-Ecosystem
 ```
 
 **Flujo del test:**
+
 1. Registro de tutor
 2. Autenticación y obtención de token
 3. Creación de 2 estudiantes
@@ -69,26 +72,32 @@ cd /home/alexis/Documentos/Mateatletas-Ecosystem
 ### Tests Individuales
 
 #### Slice #2: Estudiantes
+
 ```bash
 ./tests/scripts/test-estudiantes.sh
 ```
+
 - Registro de tutor
 - CRUD completo de estudiantes
 - Ownership validation
 - Paginación
 
 #### Slice #3: Equipos
+
 ```bash
 ./tests/scripts/test-equipos.sh
 ```
+
 - Creación de equipos
 - Asignación de estudiantes
 - Sistema de gamificación
 
 #### Slice #4: Docentes
+
 ```bash
 ./tests/scripts/test-docentes.sh
 ```
+
 - Registro público de docente
 - Login con role "docente"
 - Consulta de perfil
@@ -96,18 +105,22 @@ cd /home/alexis/Documentos/Mateatletas-Ecosystem
 - Lista pública
 
 #### Slice #5: Catálogo
+
 ```bash
 ./tests/scripts/test-catalogo.sh
 ```
+
 - Listado de productos
 - Filtros por tipo (Suscripción, Curso, Recurso)
 - Creación de productos
 - Actualización
 
 #### Slice #6: Pagos (MercadoPago)
+
 ```bash
 ./tests/scripts/test-pagos-simple.sh
 ```
+
 - Consulta de estado de membresía
 - Creación de preferencias de pago
 - Activación de membresía (mock)
@@ -115,9 +128,11 @@ cd /home/alexis/Documentos/Mateatletas-Ecosystem
 - Webhook de MercadoPago
 
 #### Slice #7: Clases
+
 ```bash
 ./tests/scripts/test-clases-simple.sh
 ```
+
 - Listado de rutas curriculares (6 rutas)
 - Programación de clases
 - Reserva de cupos
@@ -126,9 +141,11 @@ cd /home/alexis/Documentos/Mateatletas-Ecosystem
 - Registro de asistencia
 
 ### Test de Manejo de Errores
+
 ```bash
 ./tests/scripts/test-error-handling.sh
 ```
+
 - Validación de DTOs
 - Manejo de recursos no encontrados
 - Validación de ownership
@@ -151,31 +168,39 @@ O para tests individuales:
 ## 🐛 Troubleshooting
 
 ### Error: "Connection refused"
+
 **Causa:** El servidor no está corriendo
 **Solución:**
+
 ```bash
 cd apps/api
 npm run start:dev
 ```
 
 ### Error: "Can't reach database"
+
 **Causa:** PostgreSQL no está activo
 **Solución:**
+
 ```bash
 docker start mateatletas-postgres
 ```
 
 ### Error: "Producto no encontrado"
+
 **Causa:** Los seeds no se han ejecutado
 **Solución:**
+
 ```bash
 cd apps/api
 npx prisma db seed
 ```
 
 ### Tests fallan intermitentemente
+
 **Causa:** Race conditions o estado de DB inconsistente
 **Solución:**
+
 ```bash
 cd apps/api
 npx prisma migrate reset
@@ -256,15 +281,15 @@ npm run start:dev
 
 ## 📈 Métricas de Cobertura
 
-| Slice | Tests | Cobertura | Estado |
-|-------|-------|-----------|--------|
-| #1 Auth | 4 endpoints | 100% | ✅ |
-| #2 Estudiantes | 7 endpoints | 100% | ✅ |
-| #3 Equipos | 7 endpoints | 100% | ✅ |
-| #4 Docentes | 7 endpoints | 100% | ✅ |
-| #5 Catálogo | 7 endpoints | 100% | ✅ |
-| #6 Pagos | 7 endpoints | 100% | ✅ |
-| #7 Clases | 9 endpoints | 100% | ✅ |
+| Slice          | Tests       | Cobertura | Estado |
+| -------------- | ----------- | --------- | ------ |
+| #1 Auth        | 4 endpoints | 100%      | ✅     |
+| #2 Estudiantes | 7 endpoints | 100%      | ✅     |
+| #3 Equipos     | 7 endpoints | 100%      | ✅     |
+| #4 Docentes    | 7 endpoints | 100%      | ✅     |
+| #5 Catálogo    | 7 endpoints | 100%      | ✅     |
+| #6 Pagos       | 7 endpoints | 100%      | ✅     |
+| #7 Clases      | 9 endpoints | 100%      | ✅     |
 
 **Total:** 48 endpoints testeados
 

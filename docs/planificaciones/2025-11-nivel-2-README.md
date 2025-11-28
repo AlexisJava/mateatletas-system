@@ -30,6 +30,7 @@ Esta carpeta contiene la planificación de **Noviembre 2025 para Nivel 2 (Grupos
 ## 🎨 Ideas de Narrativa (Ejemplos)
 
 Podés crear una narrativa inmersiva como:
+
 - 🏴‍☠️ "La Expedición de los Piratas Matemáticos"
 - 🔬 "Laboratorio Secreto de Experimentos Numéricos"
 - 🌌 "Guardianes de la Galaxia Matemática"
@@ -72,6 +73,7 @@ Podés crear una narrativa inmersiva como:
 ### 1. Editar `metadata.json`
 
 Define los datos de tu planificación:
+
 - Título
 - Descripción
 - Objetivos de aprendizaje
@@ -134,11 +136,11 @@ Si querés usar componentes pre-construidos:
 
 ```tsx
 import {
-  ProgressTracker,    // Barra de progreso
-  GameScore,          // Sistema de puntaje
-  ActivityTimer,      // Temporizador
-  AchievementPopup,   // Notificaciones de logros
-  WeekNavigation,     // Navegación entre semanas
+  ProgressTracker, // Barra de progreso
+  GameScore, // Sistema de puntaje
+  ActivityTimer, // Temporizador
+  AchievementPopup, // Notificaciones de logros
+  WeekNavigation, // Navegación entre semanas
 } from '@/planificaciones/shared';
 ```
 
@@ -174,14 +176,14 @@ export default function PlanificacionNoviembre2025Nivel2() {
 
   useEffect(() => {
     if (tiempoRestante > 0) {
-      const timer = setTimeout(() => setTiempoRestante(t => t - 1), 1000);
+      const timer = setTimeout(() => setTiempoRestante((t) => t - 1), 1000);
       return () => clearTimeout(timer);
     }
   }, [tiempoRestante]);
 
   const verificarRespuesta = (respuesta: number) => {
     if (respuesta === preguntaActual.a * preguntaActual.b) {
-      setPuntos(prev => prev + 10);
+      setPuntos((prev) => prev + 10);
       // Generar nueva pregunta
       setPreguntaActual({
         a: Math.floor(Math.random() * 10) + 1,
@@ -191,10 +193,7 @@ export default function PlanificacionNoviembre2025Nivel2() {
   };
 
   return (
-    <PlanificacionApp
-      codigo="2025-11-nivel-2"
-      titulo="Carrera de Multiplicaciones"
-    >
+    <PlanificacionApp codigo="2025-11-nivel-2" titulo="Carrera de Multiplicaciones">
       <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-700 p-8">
         <div className="flex justify-between items-center mb-8">
           <GameScore puntos={puntos} />
@@ -230,6 +229,7 @@ export default function PlanificacionNoviembre2025Nivel2() {
 ## 🎨 Libertad Creativa Total
 
 Recordá que podés:
+
 - Usar cualquier librería de React
 - Crear animaciones con CSS, Framer Motion, GSAP
 - Usar Canvas, SVG, WebGL
@@ -260,6 +260,7 @@ Recordá que podés:
 ## 🆘 Ayuda
 
 Si tenés dudas sobre cómo integrar algo específico, consultá:
+
 - `/planificaciones/shared/README.md` - Componentes disponibles
 - `/planificaciones/README.md` - Guía general del sistema
 

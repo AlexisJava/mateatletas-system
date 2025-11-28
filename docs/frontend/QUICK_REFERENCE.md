@@ -78,6 +78,7 @@ export default function Page() {
 ## 🎯 Componentes Copy-Paste
 
 ### Botón CTA Principal (Orange)
+
 ```typescript
 <MagneticButton
   href="/action"
@@ -89,6 +90,7 @@ export default function Page() {
 ```
 
 ### Botón Secundario (Emerald)
+
 ```typescript
 <MagneticButton
   href="/secondary"
@@ -99,6 +101,7 @@ export default function Page() {
 ```
 
 ### Input con Icono
+
 ```typescript
 <div className="relative group">
   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -113,6 +116,7 @@ export default function Page() {
 ```
 
 ### Glassmorphism Card
+
 ```typescript
 <div className="relative bg-gradient-to-br from-zinc-900/90 via-zinc-900/70 to-zinc-900/90 backdrop-blur-2xl rounded-3xl border border-white/[0.08] shadow-2xl shadow-emerald-500/10 overflow-hidden">
   <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
@@ -123,6 +127,7 @@ export default function Page() {
 ```
 
 ### Badge
+
 ```typescript
 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
   <Sparkles className="w-4 h-4 text-emerald-400" />
@@ -131,6 +136,7 @@ export default function Page() {
 ```
 
 ### Feature Card
+
 ```typescript
 <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-emerald-500/30 transition-all group">
   <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">

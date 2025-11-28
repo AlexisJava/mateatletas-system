@@ -9,6 +9,7 @@
 ## 📊 RESUMEN EJECUTIVO
 
 ### Estado Final
+
 - ✅ API desplegada exitosamente en Railway
 - ✅ Base de datos PostgreSQL conectada
 - ✅ Prisma migrations ejecutadas
@@ -16,6 +17,7 @@
 - ✅ Swagger UI disponible en `/api/docs`
 
 ### URLs
+
 - **Interna:** `https://mateatletas-system.railway.internal`
 - **Pública:** Ver en Railway Dashboard → Settings → Domains
 
@@ -26,6 +28,7 @@
 ### Problema 1: Conflicto de Versiones rxjs ❌ → ✅
 
 **Error Original:**
+
 ```
 error TS2416: Property 'canActivate' in type 'JwtAuthGuard' is not assignable...
 Type 'Observable<boolean>' (from rxjs@7.8.1)
@@ -34,6 +37,7 @@ Type 'Observable<boolean>' (from rxjs@7.8.2)
 ```
 
 **Causa Raíz:**
+
 - `@angular-devkit/*` (usado por `@nestjs/cli`) requería exactamente `rxjs@7.8.1`
 - npm instalaba `rxjs@7.8.2` en raíz (compatible con `^7.8.1`)
 - Resultado: DOS instalaciones de rxjs con tipos incompatibles
@@ -47,7 +51,7 @@ Type 'Observable<boolean>' (from rxjs@7.8.2)
    // package.json
    {
      "dependencies": {
-       "rxjs": "7.8.1"  // Sin ^ para versión exacta
+       "rxjs": "7.8.1" // Sin ^ para versión exacta
      }
    }
    ```
@@ -56,6 +60,7 @@ Type 'Observable<boolean>' (from rxjs@7.8.2)
    - Build exitoso sin errores de tipos
 
 **Commits:**
+
 - `2c30b75` - fix(deps): resolver conflicto de versiones rxjs en monorepo
 
 ---
@@ -63,11 +68,13 @@ Type 'Observable<boolean>' (from rxjs@7.8.2)
 ### Problema 2: Permisos en Directorio logs/ ❌ → ✅
 
 **Error Original:**
+
 ```
 Error: EACCES: permission denied, mkdir 'logs/'
 ```
 
 **Causa Raíz:**
+
 - Dockerfile cambiaba a `USER nestjs` antes de crear directorio `logs/`
 - Winston intentaba crear `logs/` pero no tenía permisos de escritura
 
@@ -81,11 +88,13 @@ USER nestjs
 ```
 
 **Orden correcto:**
+
 1. Crear directorio como root
 2. Asignar permisos a nestjs:nodejs
 3. Cambiar a usuario nestjs
 
 **Commits:**
+
 - `47ba9ea` - fix(docker): crear directorio logs con permisos correctos
 
 ---
@@ -93,6 +102,7 @@ USER nestjs
 ## ✅ VERIFICACIONES COMPLETADAS
 
 ### Build Stage
+
 ```
 ✅ npm ci --legacy-peer-deps → Instalación exitosa
 ✅ npm run build --workspace=packages/contracts → OK
@@ -101,6 +111,7 @@ USER nestjs
 ```
 
 ### Runtime Stage
+
 ```
 ✅ npx prisma migrate deploy → Migrations aplicadas
 ✅ NestJS application started → Todos los módulos cargados
@@ -109,6 +120,7 @@ USER nestjs
 ```
 
 ### Módulos Verificados
+
 - ✅ AuthModule
 - ✅ EstudiantesModule
 - ✅ GamificacionModule
@@ -130,6 +142,7 @@ USER nestjs
 ### Variables de Entorno Configuradas
 
 **Críticas (Funcionando):**
+
 - ✅ `DATABASE_URL` - Provisioned por Railway PostgreSQL
 - ✅ `JWT_SECRET` - Configurado
 - ✅ `JWT_EXPIRES_IN` - 7d
@@ -137,16 +150,19 @@ USER nestjs
 - ✅ `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NOMBRE`, `ADMIN_APELLIDO` - Configurados
 
 **Correctas:**
+
 - ✅ `BACKEND_URL` - URL de la API
 - ✅ `LOG_LEVEL` - info
 - ✅ `ENABLE_SWAGGER` - true
 - ✅ `BLOB_READ_WRITE_TOKEN` - Vercel Blob Storage
 
 **Pendiente de Actualización:**
+
 - ⚠️ `FRONTEND_URL` - Actualmente: `http://localhost:3000`
   - **Cambiar a:** URL de producción del frontend en Vercel
 
 **Opcionales (Modo MOCK):**
+
 - ⚠️ `MERCADOPAGO_ACCESS_TOKEN` - No configurado (usando MOCK)
 - ⚠️ `MERCADOPAGO_WEBHOOK_SECRET` - No configurado
 
@@ -157,6 +173,7 @@ USER nestjs
 ### Multi-stage Build Optimizado
 
 **Stage 1: Builder**
+
 ```dockerfile
 FROM node:20.19.0-alpine AS builder
 WORKDIR /monorepo
@@ -177,6 +194,7 @@ RUN npm run build --workspace=apps/api
 ```
 
 **Stage 2: Runner**
+
 ```dockerfile
 FROM node:20.19.0-alpine AS runner
 
@@ -207,6 +225,7 @@ CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
 ### Endpoints a Verificar
 
 **1. Health Check**
+
 ```bash
 curl https://TU-URL.railway.app/api/health
 
@@ -221,6 +240,7 @@ curl https://TU-URL.railway.app/api/health
 ```
 
 **2. API Root**
+
 ```bash
 curl https://TU-URL.railway.app/api
 
@@ -233,11 +253,13 @@ curl https://TU-URL.railway.app/api
 ```
 
 **3. Swagger UI**
+
 ```
 https://TU-URL.railway.app/api/docs
 ```
 
 **4. Database Test**
+
 ```bash
 curl https://TU-URL.railway.app/api/db-test
 
@@ -253,17 +275,20 @@ curl https://TU-URL.railway.app/api/db-test
 ## 📈 MÉTRICAS DE DEPLOYMENT
 
 ### Tiempos
+
 - **Build time:** ~2-3 minutos
 - **Start time:** ~5-10 segundos
 - **Total deployment:** ~3 minutos
 
 ### Recursos
+
 - **CPU:** 2 vCPU
 - **Memory:** 1 GB
 - **Retry window:** 5 minutos
 - **Health check:** 30s interval
 
 ### Build Output
+
 - **Dockerfile stages:** 2 (builder, runner)
 - **Final image size:** ~500MB (estimado)
 - **Node modules:** ~1,658 packages
@@ -273,6 +298,7 @@ curl https://TU-URL.railway.app/api/db-test
 ## 🔐 SEGURIDAD
 
 ### Implementado
+
 - ✅ Usuario no-root (nestjs:nodejs)
 - ✅ CORS configurado para dominios específicos
 - ✅ CSRF Protection habilitado
@@ -283,6 +309,7 @@ curl https://TU-URL.railway.app/api/db-test
 - ✅ Variables de entorno separadas
 
 ### Pendiente
+
 - ⚠️ Configurar MercadoPago real (actualmente MOCK)
 - ⚠️ Configurar Redis para cache (actualmente en memoria)
 - ⚠️ SSL/TLS (Railway lo maneja automáticamente)
@@ -292,16 +319,19 @@ curl https://TU-URL.railway.app/api/db-test
 ## 📝 LECCIONES APRENDIDAS
 
 ### 1. Gestión de Dependencias en Monorepos
+
 - **Problema:** npm con workspaces puede crear node_modules locales si hay conflictos
 - **Solución:** Fijar versiones exactas cuando sea necesario
 - **Best Practice:** Usar `npm why` para analizar árbol de dependencias
 
 ### 2. Permisos en Docker
+
 - **Problema:** Crear directorios después de cambiar usuario
 - **Solución:** Orden correcto: crear → asignar permisos → cambiar usuario
 - **Best Practice:** Siempre usar usuarios no-root en producción
 
 ### 3. TypeScript Type Incompatibility
+
 - **Problema:** Múltiples versiones de librería = tipos incompatibles
 - **Solución:** Deduplicar dependencias
 - **Best Practice:** Mantener versiones consistentes en monorepo
@@ -311,18 +341,21 @@ curl https://TU-URL.railway.app/api/db-test
 ## 🚀 PRÓXIMOS PASOS
 
 ### Inmediato (Hoy)
+
 1. ✅ Copiar URL pública de Railway
 2. ✅ Actualizar `FRONTEND_URL` en variables de entorno
 3. ✅ Verificar endpoints críticos (health, swagger, auth)
 4. ✅ Conectar frontend de Vercel con backend de Railway
 
 ### Corto Plazo (Esta Semana)
+
 1. Configurar MercadoPago real (producción)
 2. Configurar dominio personalizado (opcional)
 3. Setup monitoring y alertas
 4. Configurar Redis para cache (Railway addon)
 
 ### Mediano Plazo (Próximas Semanas)
+
 1. CI/CD pipeline con GitHub Actions
 2. Staging environment en Railway
 3. Automated testing en PRs
@@ -344,6 +377,7 @@ curl https://TU-URL.railway.app/api/db-test
 ### Estado Final: ✅ PRODUCCIÓN
 
 **Logros:**
+
 - ✅ Deployment exitoso en Railway
 - ✅ 2 problemas críticos resueltos con soluciones profesionales
 - ✅ 0 hacks o workarounds
@@ -351,12 +385,14 @@ curl https://TU-URL.railway.app/api/db-test
 - ✅ Documentación completa del proceso
 
 **Tiempo Total:**
+
 - Diagnóstico: ~2 horas
 - Solución: ~30 minutos
 - Verificación: ~15 minutos
 - **Total: ~2.75 horas**
 
 **Método Aplicado:**
+
 - ✅ Método de Pólya (Entender → Planificar → Ejecutar → Verificar)
 - ✅ Análisis root cause exhaustivo
 - ✅ Soluciones basadas en ingeniería, no hacks
@@ -366,5 +402,5 @@ curl https://TU-URL.railway.app/api/db-test
 
 **FIN DEL REPORTE**
 
-*Generado automáticamente - 2025-11-02*
-*Railway Deployment: SUCCESSFUL ✅*
+_Generado automáticamente - 2025-11-02_
+_Railway Deployment: SUCCESSFUL ✅_

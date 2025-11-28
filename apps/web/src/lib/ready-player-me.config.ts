@@ -18,18 +18,18 @@ export const RPM_CONFIG = {
    * @returns URL completa del viewer con frameApi
    */
   getViewerUrl: (avatarUrl: string, animation?: string) => {
-    const baseUrl = `https://${RPM_CONFIG.subdomain}.readyplayer.me/avatar`
+    const baseUrl = `https://${RPM_CONFIG.subdomain}.readyplayer.me/avatar`;
     const params = new URLSearchParams({
       frameApi: 'true',
       clearCache: 'true',
       url: avatarUrl,
-    })
+    });
 
     if (animation) {
-      params.append('animationSrc', animation)
+      params.append('animationSrc', animation);
     }
 
-    return `${baseUrl}?${params.toString()}`
+    return `${baseUrl}?${params.toString()}`;
   },
 
   /**
@@ -40,9 +40,9 @@ export const RPM_CONFIG = {
    * @returns URL directa para renderizado rápido
    */
   getQuickViewUrl: (avatarUrl: string, scene: 'halfbody' | 'fullbody' = 'halfbody') => {
-    const sceneParam = scene === 'halfbody' ? 'halfbody-portrait-v1' : 'fullbody-portrait-v1'
-    const avatarId = avatarUrl.split('/').pop()?.replace('.glb', '')
-    return `https://models.readyplayer.me/${avatarId}?scene=${sceneParam}&meshLod=1`
+    const sceneParam = scene === 'halfbody' ? 'halfbody-portrait-v1' : 'fullbody-portrait-v1';
+    const avatarId = avatarUrl.split('/').pop()?.replace('.glb', '');
+    return `https://models.readyplayer.me/${avatarId}?scene=${sceneParam}&meshLod=1`;
   },
 
   /**
@@ -56,5 +56,5 @@ export const RPM_CONFIG = {
     clapping: 'https://models.readyplayer.me/animations/clapping.glb',
     victory: 'https://models.readyplayer.me/animations/victory-dance.glb',
     celebration: 'https://models.readyplayer.me/animations/celebrate.glb',
-  }
-}
+  },
+};

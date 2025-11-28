@@ -177,7 +177,7 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
             return { ...item, equipado: false };
           }
           return item;
-        })
+        }),
       );
 
       alert(itemObtenido.equipado ? 'Item desequipado' : '¡Item equipado! ✨');
@@ -198,7 +198,10 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <ShoppingCart className="w-8 h-8 text-yellow-400" />
-            <h1 className="text-3xl font-black text-white" style={{ textShadow: '0 3px 0 rgba(0,0,0,0.5)' }}>
+            <h1
+              className="text-3xl font-black text-white"
+              style={{ textShadow: '0 3px 0 rgba(0,0,0,0.5)' }}
+            >
               TIENDA
             </h1>
           </div>
@@ -209,19 +212,25 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
               {/* XP */}
               <div className="bg-cyan-500/20 border-2 border-cyan-400 rounded-xl px-4 py-2 flex items-center gap-2">
                 <span className="text-2xl">⭐</span>
-                <span className="text-white font-black text-lg">{recursos.xp_total.toLocaleString()}</span>
+                <span className="text-white font-black text-lg">
+                  {recursos.xp_total.toLocaleString()}
+                </span>
               </div>
 
               {/* Monedas */}
               <div className="bg-yellow-500/20 border-2 border-yellow-400 rounded-xl px-4 py-2 flex items-center gap-2">
                 <span className="text-2xl">🪙</span>
-                <span className="text-white font-black text-lg">{recursos.monedas_total.toLocaleString()}</span>
+                <span className="text-white font-black text-lg">
+                  {recursos.monedas_total.toLocaleString()}
+                </span>
               </div>
 
               {/* Gemas */}
               <div className="bg-purple-500/20 border-2 border-purple-400 rounded-xl px-4 py-2 flex items-center gap-2">
                 <span className="text-2xl">💎</span>
-                <span className="text-white font-black text-lg">{recursos.gemas_total.toLocaleString()}</span>
+                <span className="text-white font-black text-lg">
+                  {recursos.gemas_total.toLocaleString()}
+                </span>
               </div>
             </div>
           )}
@@ -233,9 +242,10 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
             onClick={() => setTab('tienda')}
             className={`
               px-6 py-3 rounded-xl font-black text-sm transition-all
-              ${tab === 'tienda'
-                ? 'bg-white text-purple-900 shadow-[0_4px_0_rgba(0,0,0,0.4)]'
-                : 'bg-white/10 text-white/60 hover:bg-white/20'
+              ${
+                tab === 'tienda'
+                  ? 'bg-white text-purple-900 shadow-[0_4px_0_rgba(0,0,0,0.4)]'
+                  : 'bg-white/10 text-white/60 hover:bg-white/20'
               }
             `}
           >
@@ -245,9 +255,10 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
             onClick={() => setTab('inventario')}
             className={`
               px-6 py-3 rounded-xl font-black text-sm transition-all
-              ${tab === 'inventario'
-                ? 'bg-white text-purple-900 shadow-[0_4px_0_rgba(0,0,0,0.4)]'
-                : 'bg-white/10 text-white/60 hover:bg-white/20'
+              ${
+                tab === 'inventario'
+                  ? 'bg-white text-purple-900 shadow-[0_4px_0_rgba(0,0,0,0.4)]'
+                  : 'bg-white/10 text-white/60 hover:bg-white/20'
               }
             `}
           >
@@ -274,9 +285,10 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
                     onClick={() => setCategoriaActiva(null)}
                     className={`
                       px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-all
-                      ${categoriaActiva === null
-                        ? 'bg-white/20 text-white'
-                        : 'bg-white/5 text-white/60 hover:bg-white/10'
+                      ${
+                        categoriaActiva === null
+                          ? 'bg-white/20 text-white'
+                          : 'bg-white/5 text-white/60 hover:bg-white/10'
                       }
                     `}
                   >
@@ -288,9 +300,10 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
                       onClick={() => setCategoriaActiva(cat.id)}
                       className={`
                         px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-all
-                        ${categoriaActiva === cat.id
-                          ? 'bg-white/20 text-white'
-                          : 'bg-white/5 text-white/60 hover:bg-white/10'
+                        ${
+                          categoriaActiva === cat.id
+                            ? 'bg-white/20 text-white'
+                            : 'bg-white/5 text-white/60 hover:bg-white/10'
                         }
                       `}
                     >
@@ -346,9 +359,7 @@ export function TiendaView({ estudiante }: TiendaViewProps) {
               ) : inventario.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <span className="text-6xl mb-4">📦</span>
-                  <p className="text-white/60 text-lg font-bold">
-                    Tu inventario está vacío
-                  </p>
+                  <p className="text-white/60 text-lg font-bold">Tu inventario está vacío</p>
                   <p className="text-white/40 text-sm mt-2">
                     ¡Compra items en la tienda para empezar tu colección!
                   </p>
@@ -432,7 +443,11 @@ function InventarioItemCard({ itemObtenido, delay, onEquipar }: InventarioItemCa
       {/* Icono/Imagen */}
       <div className="text-6xl mb-3 text-center">
         {item.imagen_url ? (
-          <img src={item.imagen_url} alt={item.nombre} className="w-20 h-20 mx-auto object-cover rounded-xl" />
+          <img
+            src={item.imagen_url}
+            alt={item.nombre}
+            className="w-20 h-20 mx-auto object-cover rounded-xl"
+          />
         ) : (
           <span>🎁</span>
         )}
@@ -448,9 +463,7 @@ function InventarioItemCard({ itemObtenido, delay, onEquipar }: InventarioItemCa
 
       {/* Descripción */}
       {item.descripcion && (
-        <p className="text-white/80 text-xs mb-3 line-clamp-2 text-center">
-          {item.descripcion}
-        </p>
+        <p className="text-white/80 text-xs mb-3 line-clamp-2 text-center">{item.descripcion}</p>
       )}
 
       {/* Cantidad (si aplica) */}
@@ -471,9 +484,10 @@ function InventarioItemCard({ itemObtenido, delay, onEquipar }: InventarioItemCa
           font-black text-sm uppercase
           border-4 border-black
           transition-all
-          ${itemObtenido.equipado
-            ? 'bg-gradient-to-b from-gray-400 to-gray-600 hover:from-gray-500 hover:to-gray-700 text-white'
-            : 'bg-gradient-to-b from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white'
+          ${
+            itemObtenido.equipado
+              ? 'bg-gradient-to-b from-gray-400 to-gray-600 hover:from-gray-500 hover:to-gray-700 text-white'
+              : 'bg-gradient-to-b from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white'
           }
           shadow-[0_4px_0_rgba(0,0,0,0.6)] hover:shadow-[0_6px_0_rgba(0,0,0,0.6)]
           active:shadow-[0_2px_0_rgba(0,0,0,0.6)] active:translate-y-1
@@ -530,7 +544,11 @@ function ItemCard({ item, delay, onClick }: ItemCardProps) {
       {/* Icono/Imagen */}
       <div className="text-6xl mb-3 text-center">
         {item.imagen_url ? (
-          <img src={item.imagen_url} alt={item.nombre} className="w-20 h-20 mx-auto object-cover rounded-xl" />
+          <img
+            src={item.imagen_url}
+            alt={item.nombre}
+            className="w-20 h-20 mx-auto object-cover rounded-xl"
+          />
         ) : (
           <span>🎁</span>
         )}
@@ -546,9 +564,7 @@ function ItemCard({ item, delay, onClick }: ItemCardProps) {
 
       {/* Descripción */}
       {item.descripcion && (
-        <p className="text-white/80 text-xs mb-3 line-clamp-2 text-center">
-          {item.descripcion}
-        </p>
+        <p className="text-white/80 text-xs mb-3 line-clamp-2 text-center">{item.descripcion}</p>
       )}
 
       {/* Precio */}
@@ -639,7 +655,11 @@ function ModalCompra({ item, recursos, comprando, onComprar, onCerrar }: ModalCo
         <div className="text-center mb-4">
           <div className="text-8xl mb-2">
             {item.imagen_url ? (
-              <img src={item.imagen_url} alt={item.nombre} className="w-32 h-32 mx-auto object-cover rounded-xl" />
+              <img
+                src={item.imagen_url}
+                alt={item.nombre}
+                className="w-32 h-32 mx-auto object-cover rounded-xl"
+              />
             ) : (
               <span>🎁</span>
             )}
@@ -658,9 +678,7 @@ function ModalCompra({ item, recursos, comprando, onComprar, onCerrar }: ModalCo
         </h2>
 
         {/* Descripción */}
-        {item.descripcion && (
-          <p className="text-white/90 text-center mb-6">{item.descripcion}</p>
-        )}
+        {item.descripcion && <p className="text-white/90 text-center mb-6">{item.descripcion}</p>}
 
         {/* Precio */}
         <div className="bg-black/40 rounded-2xl p-4 mb-6">
@@ -691,9 +709,10 @@ function ModalCompra({ item, recursos, comprando, onComprar, onCerrar }: ModalCo
             font-black text-xl uppercase
             border-[6px] border-black
             transition-all
-            ${tieneSuficiente && !comprando
-              ? 'bg-gradient-to-b from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white shadow-[0_6px_0_rgba(0,0,0,0.6)] hover:shadow-[0_8px_0_rgba(0,0,0,0.6)]'
-              : 'bg-gray-600 text-white/50 cursor-not-allowed'
+            ${
+              tieneSuficiente && !comprando
+                ? 'bg-gradient-to-b from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white shadow-[0_6px_0_rgba(0,0,0,0.6)] hover:shadow-[0_8px_0_rgba(0,0,0,0.6)]'
+                : 'bg-gray-600 text-white/50 cursor-not-allowed'
             }
           `}
         >

@@ -73,9 +73,7 @@ export default function ModalCambioPasswordObligatorio({
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-orange-500/20">
             <Lock className="h-8 w-8 text-orange-400" />
           </div>
-          <h2 className="text-2xl font-bold text-white">
-            Cambio de Contraseña Obligatorio
-          </h2>
+          <h2 className="text-2xl font-bold text-white">Cambio de Contraseña Obligatorio</h2>
           <p className="mt-2 text-sm text-slate-400">
             Por seguridad, debes cambiar tu contraseña antes de continuar
           </p>
@@ -110,11 +108,7 @@ export default function ModalCambioPasswordObligatorio({
                 onClick={() => setShowPasswordActual(!showPasswordActual)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
               >
-                {showPasswordActual ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
+                {showPasswordActual ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
           </div>
@@ -138,11 +132,7 @@ export default function ModalCambioPasswordObligatorio({
                 onClick={() => setShowNuevaPassword(!showNuevaPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
               >
-                {showNuevaPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
+                {showNuevaPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
           </div>

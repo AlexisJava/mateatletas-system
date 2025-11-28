@@ -10,23 +10,23 @@
 
 ### Backend (Railway) ✅ MAYORMENTE CORRECTO
 
-| Componente | Estado | Detalles |
-|------------|--------|----------|
-| **CORS Configuración** | ✅ | Implementado correctamente en [main.ts:65-104](apps/api/src/main.ts#L65-L104) |
-| **Variables de Entorno** | ✅ | 6/6 variables críticas configuradas |
-| **Endpoints Públicos** | ✅ | Login y registro accesibles sin guards |
-| **Logging Temporal** | ✅ | Agregado para diagnosticar error 400 |
-| **Deployment** | ✅ | Corriendo en Railway (último deploy: 2025-11-02 13:05) |
+| Componente               | Estado | Detalles                                                                      |
+| ------------------------ | ------ | ----------------------------------------------------------------------------- |
+| **CORS Configuración**   | ✅     | Implementado correctamente en [main.ts:65-104](apps/api/src/main.ts#L65-L104) |
+| **Variables de Entorno** | ✅     | 6/6 variables críticas configuradas                                           |
+| **Endpoints Públicos**   | ✅     | Login y registro accesibles sin guards                                        |
+| **Logging Temporal**     | ✅     | Agregado para diagnosticar error 400                                          |
+| **Deployment**           | ✅     | Corriendo en Railway (último deploy: 2025-11-02 13:05)                        |
 
 ### Frontend (Vercel) ⚠️ CON PROBLEMAS
 
-| Componente | Estado | Detalles |
-|------------|--------|----------|
-| **Axios Configuración** | ✅ | [axios.ts](apps/web/src/lib/axios.ts) correctamente configurado |
-| **Variables de Entorno** | ⚠️ | No verificable (vercel CLI no linked) |
-| **Uso de apiClient** | ❌ | **PROBLEMA CRÍTICO:** fetch() relativo en cursos.store.ts |
-| **Custom Domain** | ✅ | `www.mateatletasclub.com.ar` configurado |
-| **Deployment** | ✅ | Auto-deploy desde GitHub |
+| Componente               | Estado | Detalles                                                        |
+| ------------------------ | ------ | --------------------------------------------------------------- |
+| **Axios Configuración**  | ✅     | [axios.ts](apps/web/src/lib/axios.ts) correctamente configurado |
+| **Variables de Entorno** | ⚠️     | No verificable (vercel CLI no linked)                           |
+| **Uso de apiClient**     | ❌     | **PROBLEMA CRÍTICO:** fetch() relativo en cursos.store.ts       |
+| **Custom Domain**        | ✅     | `www.mateatletasclub.com.ar` configurado                        |
+| **Deployment**           | ✅     | Auto-deploy desde GitHub                                        |
 
 ---
 
@@ -37,23 +37,26 @@
 **Ubicación:** [apps/web/src/store/cursos.store.ts:63](apps/web/src/store/cursos.store.ts#L63)
 
 **Código problemático:**
+
 ```typescript
 // ❌ INCORRECTO: Usa ruta relativa, irá a Vercel en lugar de Railway
 const response = await fetch('/api/productos?tipo=Curso&soloActivos=true');
 ```
 
 **Impacto:**
+
 - El request va a `https://www.mateatletasclub.com.ar/api/productos` (Vercel)
 - En lugar de ir a `https://backend.railway.app/api/productos` (Railway)
 - Resulta en **405 Method Not Allowed** porque Vercel no tiene ese endpoint
 
 **Fix requerido:**
+
 ```typescript
 // ✅ CORRECTO: Usar apiClient
 import { apiClient } from '@/lib/axios';
 
 const data = await apiClient.get<Producto[]>('/productos', {
-  params: { tipo: 'Curso', soloActivos: true }
+  params: { tipo: 'Curso', soloActivos: true },
 });
 set({ misCursos: data, isLoading: false });
 ```
@@ -67,6 +70,7 @@ set({ misCursos: data, isLoading: false });
 **Ubicación:** [apps/api/src/main.ts:76](apps/api/src/main.ts#L76)
 
 **Código actual:**
+
 ```typescript
 const allowedOrigins = isProduction
   ? frontendUrls.length > 0
@@ -76,10 +80,12 @@ const allowedOrigins = isProduction
 ```
 
 **Impacto:**
+
 - Si `FRONTEND_URL` está vacía en producción, CORS permitirá **cualquier origen** (`*`)
 - Esto es un **riesgo de seguridad**
 
 **Recomendación:**
+
 ```typescript
 const allowedOrigins = isProduction
   ? frontendUrls.length > 0
@@ -95,20 +101,24 @@ const allowedOrigins = isProduction
 ### 3. ℹ️ INFO: FRONTEND_URL incluye 2 dominios
 
 **Variable actual:**
+
 ```bash
 FRONTEND_URL=https://www.mateatletasclub.com.ar,https://mateatletas-fybnyracj-alexis-figueroas-projects-d4fb75f1.vercel.app
 ```
 
 **Nota:**
+
 - ✅ Custom domain incluido
 - ✅ Preview URL incluida
 - ⚠️ Si Vercel genera nuevas preview URLs, deberán agregarse manualmente
 
 **Recomendación:** Considerar usar wildcard para previews de Vercel (si Railway lo soporta):
+
 ```
 FRONTEND_URL=https://www.mateatletasclub.com.ar,https://*.vercel.app
 ```
-*(Verificar si Railway CORS soporta wildcards)*
+
+_(Verificar si Railway CORS soporta wildcards)_
 
 ---
 
@@ -137,6 +147,7 @@ FRONTEND_URL=https://www.mateatletasclub.com.ar,https://*.vercel.app
 #### 2. Configuración CORS ✅
 
 **Características:**
+
 - ✅ Lee `FRONTEND_URL` correctamente
 - ✅ Soporta múltiples URLs separadas por coma
 - ✅ `split(',').map(url => url.trim()).filter(Boolean)` - Limpia espacios
@@ -154,14 +165,14 @@ FRONTEND_URL=https://www.mateatletasclub.com.ar,https://*.vercel.app
 
 Los siguientes endpoints están **correctamente configurados sin guards**:
 
-| Endpoint | Método | Guard | Estado |
-|----------|--------|-------|--------|
-| `/api` | GET | ❌ No | ✅ Público |
-| `/api/health` | GET | ❌ No | ✅ Público |
-| `/api/auth/register` | POST | ❌ No | ✅ Público |
-| `/api/auth/login` | POST | ❌ No | ✅ Público |
-| `/api/auth/estudiante/login` | POST | ❌ No | ✅ Público |
-| `/api/auth/profile` | GET | ✅ Sí | ✅ Protegido (correcto) |
+| Endpoint                     | Método | Guard | Estado                  |
+| ---------------------------- | ------ | ----- | ----------------------- |
+| `/api`                       | GET    | ❌ No | ✅ Público              |
+| `/api/health`                | GET    | ❌ No | ✅ Público              |
+| `/api/auth/register`         | POST   | ❌ No | ✅ Público              |
+| `/api/auth/login`            | POST   | ❌ No | ✅ Público              |
+| `/api/auth/estudiante/login` | POST   | ❌ No | ✅ Público              |
+| `/api/auth/profile`          | GET    | ✅ Sí | ✅ Protegido (correcto) |
 
 **Verificado en:** [auth.controller.ts](apps/api/src/auth/auth.controller.ts)
 
@@ -172,6 +183,7 @@ Los siguientes endpoints están **correctamente configurados sin guards**:
 Para diagnosticar el error 400 en login de estudiante, se agregaron logs en:
 
 **1. auth.controller.ts (líneas 185-190):**
+
 ```typescript
 console.log('📥 [LOGIN ESTUDIANTE] Request recibido:', {
   username: loginEstudianteDto.username,
@@ -181,6 +193,7 @@ console.log('📥 [LOGIN ESTUDIANTE] Request recibido:', {
 ```
 
 **2. main.ts (líneas 124-134):**
+
 ```typescript
 exceptionFactory: (errors) => {
   console.error('❌ [VALIDATION ERROR] Detalles completos:', JSON.stringify(errors, null, 2));
@@ -206,6 +219,7 @@ exceptionFactory: (errors) => {
 **Ubicación:** [apps/web/src/lib/axios.ts](apps/web/src/lib/axios.ts)
 
 **Configuración:**
+
 ```typescript
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
@@ -218,6 +232,7 @@ const apiClient = axios.create({
 ```
 
 **Interceptores:**
+
 - ✅ **Request interceptor:** No agrega token (cookies enviadas automáticamente)
 - ✅ **Response interceptor:** Maneja 401 (redirect a /login), 403, 404, 422, 500
 - ✅ **Data extraction:** Retorna `response.data` directamente
@@ -244,11 +259,13 @@ NEXT_PUBLIC_RPM_APP_ID=6901874930e533f99f442a89
 #### 3. Usos Incorrectos de Fetch ❌
 
 **Búsqueda realizada:**
+
 ```bash
 grep -r "fetch(" apps/web/src --include="*.ts" --include="*.tsx"
 ```
 
 **Resultado:**
+
 - **1 uso incorrecto encontrado:** `apps/web/src/store/cursos.store.ts:63`
 - **Otros usos:** Son nombres de funciones (`fetchEquipos`, `fetchEstudiantes`, etc.), **NO son llamadas a fetch()**
 
@@ -260,28 +277,31 @@ grep -r "fetch(" apps/web/src --include="*.ts" --include="*.tsx"
 
 ### URLs del Sistema
 
-| Componente | URL Actual | Trailing Slash | Protocolo | Estado |
-|------------|------------|----------------|-----------|--------|
-| **Backend (Railway)** | `https://mateatletas-system-production.up.railway.app` | ❌ No | ✅ HTTPS | ✅ OK |
-| **Frontend Custom Domain** | `https://www.mateatletasclub.com.ar` | ❌ No | ✅ HTTPS | ✅ OK |
-| **Frontend Preview** | `https://mateatletas-fybnyracj-...vercel.app` | ❌ No | ✅ HTTPS | ✅ OK |
+| Componente                 | URL Actual                                             | Trailing Slash | Protocolo | Estado |
+| -------------------------- | ------------------------------------------------------ | -------------- | --------- | ------ |
+| **Backend (Railway)**      | `https://mateatletas-system-production.up.railway.app` | ❌ No          | ✅ HTTPS  | ✅ OK  |
+| **Frontend Custom Domain** | `https://www.mateatletasclub.com.ar`                   | ❌ No          | ✅ HTTPS  | ✅ OK  |
+| **Frontend Preview**       | `https://mateatletas-fybnyracj-...vercel.app`          | ❌ No          | ✅ HTTPS  | ✅ OK  |
 
 ### Configuración de baseURL
 
 **axios.ts:**
+
 ```typescript
-baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
+baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 //                                                                   ^^^
 //                                                                   SIN trailing slash
 ```
 
 **Endpoints llamados:**
+
 ```typescript
 apiClient.post('/auth/login', ...)
 //             ^ CON slash inicial
 ```
 
 **Resultado final:**
+
 ```
 https://backend.railway.app/api + /auth/login
 = https://backend.railway.app/api/auth/login ✅ CORRECTO
@@ -294,16 +314,19 @@ https://backend.railway.app/api + /auth/login
 ### Verificación de Typos en Dominios
 
 **FRONTEND_URL en Railway:**
+
 ```
 https://www.mateatletasclub.com.ar,https://mateatletas-fybnyracj-alexis-figueroas-projects-d4fb75f1.vercel.app
 ```
 
 **Custom domain en Vercel:**
+
 ```
 www.mateatletasclub.com.ar
 ```
 
 **Comparación:**
+
 - ✅ Coinciden exactamente
 - ✅ No hay typos
 - ✅ Ambos usan `https://`
@@ -398,6 +421,7 @@ www.mateatletasclub.com.ar
 ### Paso 2: Verificar variables en Vercel ⚠️ IMPORTANTE
 
 **Método 1: Vercel Dashboard**
+
 1. Ir a https://vercel.com/dashboard
 2. Seleccionar proyecto "Mateatletas"
 3. Settings → Environment Variables
@@ -409,6 +433,7 @@ www.mateatletasclub.com.ar
 6. **Después de agregar:** Redeploy (Deployments → Redeploy)
 
 **Método 2: Vercel CLI**
+
 ```bash
 cd apps/web
 vercel link  # Conectar proyecto local
@@ -423,12 +448,14 @@ vercel env pull  # Descargar .env.local con valores de producción
 Una vez completados los pasos 1 y 2, realizar testing completo:
 
 **1. Test de Backend:**
+
 ```bash
 curl https://mateatletas-system-production.up.railway.app/api
 # Esperado: "Hello World!" (200 OK)
 ```
 
 **2. Test de CORS:**
+
 ```bash
 curl -X OPTIONS \
   -H "Origin: https://www.mateatletasclub.com.ar" \
@@ -439,6 +466,7 @@ curl -X OPTIONS \
 ```
 
 **3. Test de Login desde Frontend:**
+
 1. Abrir https://www.mateatletasclub.com.ar
 2. Abrir DevTools (F12) → Network
 3. Intentar login de estudiante
@@ -455,6 +483,7 @@ curl -X OPTIONS \
 **Después de resolver el error 400**, remover logs sensibles:
 
 **Archivos a limpiar:**
+
 - `apps/api/src/auth/auth.controller.ts` (líneas 185-190)
 - `apps/api/src/main.ts` (líneas 124-134)
 
@@ -480,6 +509,7 @@ curl -X OPTIONS \
 ```
 
 **Agregar validación adicional:**
+
 ```typescript
 if (isProduction && frontendUrls.length === 0) {
   logger.error('🚨 CRITICAL: FRONTEND_URL no configurada en producción!');
@@ -493,13 +523,13 @@ if (isProduction && frontendUrls.length === 0) {
 
 ### Estado General: ⚠️ CASI LISTO (1 problema crítico pendiente)
 
-| Categoría | Puntuación | Comentarios |
-|-----------|------------|-------------|
-| **Backend Configuración** | 95/100 | ✅ Excelente, solo mejorar fallback CORS |
-| **Backend Deployment** | 100/100 | ✅ Corriendo sin errores |
-| **Frontend Configuración** | 70/100 | ❌ Problema crítico en cursos.store.ts |
-| **Frontend Deployment** | 90/100 | ⚠️ Variables no verificadas |
-| **Testing** | 0/100 | ⏳ Pendiente hasta resolver problema crítico |
+| Categoría                  | Puntuación | Comentarios                                  |
+| -------------------------- | ---------- | -------------------------------------------- |
+| **Backend Configuración**  | 95/100     | ✅ Excelente, solo mejorar fallback CORS     |
+| **Backend Deployment**     | 100/100    | ✅ Corriendo sin errores                     |
+| **Frontend Configuración** | 70/100     | ❌ Problema crítico en cursos.store.ts       |
+| **Frontend Deployment**    | 90/100     | ⚠️ Variables no verificadas                  |
+| **Testing**                | 0/100      | ⏳ Pendiente hasta resolver problema crítico |
 
 ### Bloqueos Actuales:
 
@@ -536,5 +566,5 @@ if (isProduction && frontendUrls.length === 0) {
 
 ---
 
-*Generado por Claude Code - 2025-11-02 10:07 AM*
-*Tiempo de análisis: 2+ horas*
+_Generado por Claude Code - 2025-11-02 10:07 AM_
+_Tiempo de análisis: 2+ horas_

@@ -5,9 +5,11 @@ Documentación completa del sistema de diseño y construcción frontend para Mat
 ## 📚 Índice de Documentos
 
 ### 1. [DESIGN_SYSTEM_EVOLVED.md](./DESIGN_SYSTEM_EVOLVED.md)
+
 **Guía completa del Design System v2.0**
 
 Incluye:
+
 - 🎨 Paleta de colores (Emerald/Orange 95/5)
 - 🏗️ Componentes base reutilizables (MagneticButton, FloatingParticle, AnimatedCounter)
 - 🎭 Patrones de layout (Split-screen, Glassmorphism, Backgrounds)
@@ -23,9 +25,11 @@ Incluye:
 ---
 
 ### 2. [design-system.css](./design-system.css)
+
 **CSS con variables y utility classes**
 
 Incluye:
+
 - CSS Custom Properties (variables)
 - Utility classes listas para usar
 - Glassmorphism presets
@@ -92,6 +96,7 @@ import '@/docs/frontend/design-system.css';
 ## ✅ Checklist Antes de Crear Nueva Página
 
 ### Visual
+
 - [ ] Background negro con grid pattern emerald
 - [ ] Floating particles (15 partículas)
 - [ ] Radial gradient spotlight con pulse
@@ -100,18 +105,21 @@ import '@/docs/frontend/design-system.css';
 - [ ] Orange SOLO en CTA principal
 
 ### Componentes
+
 - [ ] MagneticButton implementado
 - [ ] FloatingParticle en background
 - [ ] Glassmorphism cards con border glow
 - [ ] Iconos de lucide-react
 
 ### Animaciones
+
 - [ ] Entry animations (fade + slide)
 - [ ] Hover states en elementos interactivos
 - [ ] Loading states con spinner
 - [ ] Transitions suaves (0.3s-0.8s)
 
 ### Responsive
+
 - [ ] Mobile (< 768px) probado
 - [ ] Tablet (768px - 1024px) probado
 - [ ] Desktop (> 1024px) probado
@@ -122,9 +130,11 @@ import '@/docs/frontend/design-system.css';
 ## 🎯 Componentes Esenciales
 
 ### MagneticButton
+
 Botón con efecto magnético que sigue el cursor.
 
 **Usos**:
+
 - CTAs principales (orange)
 - Botones secundarios (emerald)
 - Navigation links
@@ -134,9 +144,11 @@ Botón con efecto magnético que sigue el cursor.
 ---
 
 ### FloatingParticle
+
 Partículas animadas para backgrounds.
 
 **Usos**:
+
 - Todas las páginas (15 partículas)
 - Efectos ambientales
 
@@ -145,9 +157,11 @@ Partículas animadas para backgrounds.
 ---
 
 ### AnimatedCounter
+
 Contador animado con Intersection Observer.
 
 **Usos**:
+
 - Estadísticas
 - Métricas
 - Números destacados
@@ -159,15 +173,18 @@ Contador animado con Intersection Observer.
 ## 📐 Layouts Recomendados
 
 ### 1. Split-Screen (Login, Auth, Features)
+
 - Izquierda: Branding, info, features
 - Derecha: Formulario, acción principal
 
 ### 2. Hero + Sections (Landing Pages)
+
 - Hero con 2 columnas (texto + visual)
 - Secciones apiladas
 - CTAs estratégicos
 
 ### 3. Dashboard (Portal Interno)
+
 - Sidebar navigation
 - Main content area
 - Cards con glassmorphism
@@ -177,7 +194,9 @@ Contador animado con Intersection Observer.
 ## 🎨 Patrones de Uso
 
 ### Background Standard
+
 Usa en TODAS las páginas:
+
 ```css
 .bg-mateatletas
 .bg-grid-emerald
@@ -186,12 +205,15 @@ FloatingParticles (15x)
 ```
 
 ### Glassmorphism Card
+
 Usa para: modales, forms, feature cards
+
 ```css
 .glass-card
 ```
 
 ### Buttons
+
 ```css
 .btn-cta-primary     /* Orange - Solo CTAs principales */
 .btn-secondary       /* Emerald - Acciones secundarias */
@@ -203,21 +225,25 @@ Usa para: modales, forms, feature cards
 ## ⚠️ Anti-Patterns (NO HACER)
 
 ### Colores
+
 - ❌ Orange en más del 5% del diseño
 - ❌ Múltiples colores primarios
 - ❌ Fondos de colores brillantes
 
 ### Lenguaje
+
 - ❌ "Gratis" en cualquier parte
 - ❌ Tech buzzwords ("revolucionario", "disruptivo")
 - ❌ Emojis excesivos
 
 ### Layout
+
 - ❌ Sections de más de 100vh
 - ❌ Más de 3 CTAs en misma pantalla
 - ❌ Carrusels automáticos
 
 ### Animaciones
+
 - ❌ Animaciones de más de 1s
 - ❌ Demasiados elementos animados simultáneamente
 - ❌ Parallax extremo
@@ -227,14 +253,17 @@ Usa para: modales, forms, feature cards
 ## 🔗 Referencias Externas
 
 ### Framer Motion
+
 - Docs: https://www.framer.com/motion/
 - Focus: motion.div, useMotionValue, useSpring
 
 ### Lucide React
+
 - Docs: https://lucide.dev
 - Uso: `strokeWidth={2}` o `strokeWidth={2.5}`
 
 ### Tailwind CSS
+
 - Docs: https://tailwindcss.com
 - Custom config ya configurado
 
@@ -243,6 +272,7 @@ Usa para: modales, forms, feature cards
 ## 📝 Ejemplos Completos
 
 ### Páginas de Referencia
+
 1. **Landing Page**: `/apps/web/src/app/page.tsx`
    - Hero con terminal animado
    - Photon effect SVG
@@ -278,6 +308,7 @@ npm run type-check
 ## 📞 Soporte
 
 Para preguntas o mejoras al design system:
+
 1. Consulta primero DESIGN_SYSTEM_EVOLVED.md
 2. Revisa las páginas de ejemplo
 3. Abre un issue en el repo

@@ -4,12 +4,7 @@ import { z } from 'zod';
  * Schema de estado de membresía
  * Coincide con EstadoMembresia enum en types/pago.types.ts
  */
-export const estadoMembresiaSchema = z.enum([
-  'Pendiente',
-  'Activa',
-  'Atrasada',
-  'Cancelada',
-]);
+export const estadoMembresiaSchema = z.enum(['Pendiente', 'Activa', 'Atrasada', 'Cancelada']);
 
 /**
  * Schema de Producto simplificado (para relación en Membresía)

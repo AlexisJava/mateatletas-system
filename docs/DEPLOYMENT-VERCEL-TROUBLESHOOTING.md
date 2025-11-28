@@ -13,11 +13,13 @@ Error: No Output Directory named "public" found after the Build completed.
 ### Paso 1: Configurar Root Directory
 
 Ve a tu proyecto en Vercel:
+
 ```
 https://vercel.com/[tu-team]/mateatletas-ecosystem/settings
 ```
 
 **Settings > General > Root Directory**:
+
 - ✅ **Override**: Activar el toggle
 - ✅ **Root Directory**: `apps/web`
 - ✅ **Save**
@@ -25,11 +27,13 @@ https://vercel.com/[tu-team]/mateatletas-ecosystem/settings
 ### Paso 2: Verificar Framework Preset
 
 **Settings > General > Framework Preset**:
+
 - ✅ Debe estar en: `Next.js`
 
 ### Paso 3: Build & Development Settings
 
 **Settings > General > Build & Development Settings**:
+
 - **Build Command**: (dejar en blanco, usa `vercel.json`)
 - **Output Directory**: (dejar en blanco, usa default `.next`)
 - **Install Command**: (dejar en blanco, usa `vercel.json`)
@@ -39,6 +43,7 @@ https://vercel.com/[tu-team]/mateatletas-ecosystem/settings
 **Settings > Environment Variables**:
 
 Para que `detect-planificaciones` funcione durante build (opcional):
+
 ```
 DATABASE_URL=postgresql://...
 ```
@@ -56,6 +61,7 @@ Después de configurar el Root Directory:
 ## 🎯 Configuración Actual del Proyecto
 
 ### Archivos Corregidos:
+
 - ✅ `vercel.json` - Configuración optimizada
 - ✅ `package.json` - Node version `20.x`
 - ✅ `apps/web/tsconfig.json` - Paths corregidos
@@ -63,6 +69,7 @@ Después de configurar el Root Directory:
 - ✅ `packages/shared/tsconfig.json` - Paths corregidos
 
 ### Build Verificado:
+
 ```
 ✅ @mateatletas/contracts: compiled
 ✅ @mateatletas/shared: compiled
@@ -95,14 +102,17 @@ Estos son warnings que **NO bloquean el deployment**.
 ## 📝 Resumen de Cambios
 
 ### Commit 1: `fix(deploy): resolver errores de deployment en Vercel`
+
 - Eliminados path mappings relativos en tsconfig
 - Node.js version específica `20.x`
 - Agregado `vercel.json` optimizado
 
 ### Commit 2: `fix(tsconfig): cambiar lib 'esnext' a 'ES2020'`
+
 - Corregido error de validación TypeScript
 
 ### Commit 3 (pendiente): `fix(vercel): simplificar configuración para monorepo`
+
 - Removido `outputDirectory` y `buildCommand` custom
 - Delega configuración a Vercel Dashboard
 

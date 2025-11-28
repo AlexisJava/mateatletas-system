@@ -234,9 +234,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
     // 2. localStorage (selección temporal)
     // 3. default idle animation
     const storedAnimation =
-      typeof window !== 'undefined'
-        ? window.localStorage.getItem('selected_idle_animation')
-        : null;
+      typeof window !== 'undefined' ? window.localStorage.getItem('selected_idle_animation') : null;
     const animacionInicial =
       estudiante.animacion_idle_url ?? storedAnimation ?? defaultIdleAnimationUrl;
 
@@ -1132,10 +1130,12 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 <ProximaClaseCard
                   clase={{
                     ...proximaClase,
-                    ruta_curricular: proximaClase.ruta_curricular ? {
-                      nombre: proximaClase.ruta_curricular.nombre,
-                      color: '#3B82F6' // Color por defecto azul
-                    } : undefined
+                    ruta_curricular: proximaClase.ruta_curricular
+                      ? {
+                          nombre: proximaClase.ruta_curricular.nombre,
+                          color: '#3B82F6', // Color por defecto azul
+                        }
+                      : undefined,
                   }}
                   delay={0.42}
                 />

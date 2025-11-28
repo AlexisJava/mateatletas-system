@@ -71,8 +71,8 @@ export default function InfoSection() {
               className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed"
             >
               No es la escuela. No son deberes. Es{' '}
-              <strong className="text-white font-black">aprendizaje real</strong>{' '}
-              mientras se divierten. Matemática, programación y ciencias como nunca antes.
+              <strong className="text-white font-black">aprendizaje real</strong> mientras se
+              divierten. Matemática, programación y ciencias como nunca antes.
             </motion.p>
           </div>
 
@@ -92,12 +92,8 @@ export default function InfoSection() {
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#0ea5e9] to-[#06b6d4] flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
                     <feature.icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-black text-white mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-white/70 leading-relaxed">
-                    {feature.description}
-                  </p>
+                  <h3 className="text-xl font-black text-white mb-3">{feature.title}</h3>
+                  <p className="text-white/70 leading-relaxed">{feature.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -116,12 +112,8 @@ export default function InfoSection() {
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#0ea5e9] to-[#06b6d4] flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
                     <feature.icon className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="text-xl font-black text-white mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-white/70 leading-relaxed">
-                    {feature.description}
-                  </p>
+                  <h3 className="text-xl font-black text-white mb-3">{feature.title}</h3>
+                  <p className="text-white/70 leading-relaxed">{feature.description}</p>
                 </motion.div>
               ))}
             </div>

@@ -43,10 +43,7 @@ export const clasesKeys = {
  * @example
  * const { data: clases, isLoading } = useClases({ soloDisponibles: true });
  */
-export function useClases(
-  filtros?: FiltroClases,
-  options?: { enabled?: boolean }
-) {
+export function useClases(filtros?: FiltroClases, options?: { enabled?: boolean }) {
   return useQuery<ClaseConRelaciones[], Error>({
     queryKey: clasesKeys.list(filtros),
     queryFn: () => clasesApi.getClases(filtros),
@@ -118,12 +115,8 @@ export function useReservarClase() {
       await queryClient.cancelQueries({ queryKey: clasesKeys.all });
 
       // Snapshot para rollback
-      const previousClases = queryClient.getQueryData<ClaseConRelaciones[]>(
-        clasesKeys.lists()
-      );
-      const previousReservas = queryClient.getQueryData<InscripcionClase[]>(
-        clasesKeys.reservas()
-      );
+      const previousClases = queryClient.getQueryData<ClaseConRelaciones[]>(clasesKeys.lists());
+      const previousReservas = queryClient.getQueryData<InscripcionClase[]>(clasesKeys.reservas());
 
       // Optimistic update: incrementar cupos ocupados
       queryClient.setQueriesData<ClaseConRelaciones[]>(
@@ -133,18 +126,16 @@ export function useReservarClase() {
             clase.id === claseId
               ? {
                   ...clase,
-                  cupos_ocupados:
-                    (clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0) + 1,
+                  cupos_ocupados: (clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0) + 1,
                   _count: clase._count
                     ? {
                         ...clase._count,
-                        inscripciones:
-                          (clase._count.inscripciones ?? 0) + 1,
+                        inscripciones: (clase._count.inscripciones ?? 0) + 1,
                       }
                     : clase._count,
                 }
-              : clase
-          ) ?? []
+              : clase,
+          ) ?? [],
       );
 
       return { previousClases, previousReservas };
@@ -153,26 +144,20 @@ export function useReservarClase() {
     // Si falla, revertir
     onError: (_err, _variables, context) => {
       if (context?.previousClases) {
-        queryClient.setQueriesData(
-          { queryKey: clasesKeys.lists() },
-          context.previousClases
-        );
+        queryClient.setQueriesData({ queryKey: clasesKeys.lists() }, context.previousClases);
       }
       if (context?.previousReservas) {
-        queryClient.setQueryData(
-          clasesKeys.reservas(),
-          context.previousReservas
-        );
+        queryClient.setQueryData(clasesKeys.reservas(), context.previousReservas);
       }
     },
 
     // Siempre refetch después de error o éxito
     onSuccess: (nuevaReserva) => {
       // Agregar nueva reserva al cache optimísticamente
-      queryClient.setQueryData<InscripcionClase[]>(
-        clasesKeys.reservas(),
-        (old) => [...(old ?? []), nuevaReserva]
-      );
+      queryClient.setQueryData<InscripcionClase[]>(clasesKeys.reservas(), (old) => [
+        ...(old ?? []),
+        nuevaReserva,
+      ]);
     },
 
     onSettled: () => {
@@ -198,29 +183,22 @@ export function useCancelarReserva() {
   };
 
   return useMutation<void, Error, string, Context>({
-    mutationFn: (inscripcionId: string) =>
-      clasesApi.cancelarReserva(inscripcionId),
+    mutationFn: (inscripcionId: string) => clasesApi.cancelarReserva(inscripcionId),
 
     // Optimistic update
     onMutate: async (inscripcionId) => {
       await queryClient.cancelQueries({ queryKey: clasesKeys.all });
 
-      const previousReservas = queryClient.getQueryData<InscripcionClase[]>(
-        clasesKeys.reservas()
-      );
-      const previousClases = queryClient.getQueryData<ClaseConRelaciones[]>(
-        clasesKeys.lists()
-      );
+      const previousReservas = queryClient.getQueryData<InscripcionClase[]>(clasesKeys.reservas());
+      const previousClases = queryClient.getQueryData<ClaseConRelaciones[]>(clasesKeys.lists());
 
       // Encontrar la reserva cancelada para saber qué clase liberar
-      const reservaCancelada = previousReservas?.find(
-        (r) => r.id === inscripcionId
-      );
+      const reservaCancelada = previousReservas?.find((r) => r.id === inscripcionId);
 
       // Optimistic update: remover reserva
       queryClient.setQueryData<InscripcionClase[]>(
         clasesKeys.reservas(),
-        (old) => old?.filter((r) => r.id !== inscripcionId) ?? []
+        (old) => old?.filter((r) => r.id !== inscripcionId) ?? [],
       );
 
       // Optimistic update: reducir cupos ocupados
@@ -239,15 +217,12 @@ export function useCancelarReserva() {
                     _count: clase._count
                       ? {
                           ...clase._count,
-                          inscripciones: Math.max(
-                            (clase._count.inscripciones ?? 0) - 1,
-                            0,
-                          ),
+                          inscripciones: Math.max((clase._count.inscripciones ?? 0) - 1, 0),
                         }
                       : clase._count,
                   }
-                : clase
-            ) ?? []
+                : clase,
+            ) ?? [],
         );
       }
 
@@ -256,16 +231,10 @@ export function useCancelarReserva() {
 
     onError: (_err, _inscripcionId, context) => {
       if (context?.previousClases) {
-        queryClient.setQueriesData(
-          { queryKey: clasesKeys.lists() },
-          context.previousClases
-        );
+        queryClient.setQueriesData({ queryKey: clasesKeys.lists() }, context.previousClases);
       }
       if (context?.previousReservas) {
-        queryClient.setQueryData(
-          clasesKeys.reservas(),
-          context.previousReservas
-        );
+        queryClient.setQueryData(clasesKeys.reservas(), context.previousReservas);
       }
     },
 
@@ -297,16 +266,9 @@ export function useCancelarReserva() {
  * } = useClasesCompleto({ soloDisponibles: true });
  */
 export function useClasesCompleto(filtros?: FiltroClases) {
-  const {
-    data: clases = [],
-    isLoading: isLoadingClases,
-    error: errorClases,
-  } = useClases(filtros);
+  const { data: clases = [], isLoading: isLoadingClases, error: errorClases } = useClases(filtros);
 
-  const {
-    data: misReservas = [],
-    isLoading: isLoadingReservas,
-  } = useMisReservas();
+  const { data: misReservas = [], isLoading: isLoadingReservas } = useMisReservas();
 
   const { data: rutas = [] } = useRutasCurriculares();
 
@@ -319,8 +281,7 @@ export function useClasesCompleto(filtros?: FiltroClases) {
     rutas,
     isLoading: isLoadingClases || isLoadingReservas,
     error: errorClases?.message ?? null,
-    reservar: (claseId: string, data: CrearReservaDto) =>
-      reservar.mutate({ claseId, data }),
+    reservar: (claseId: string, data: CrearReservaDto) => reservar.mutate({ claseId, data }),
     cancelar: (inscripcionId: string) => cancelar.mutate(inscripcionId),
     isReservando: reservar.isPending,
     isCancelando: cancelar.isPending,

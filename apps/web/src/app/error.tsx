@@ -33,9 +33,7 @@ export default function GlobalError({
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-white text-center mb-4">
-          ¡Algo salió mal!
-        </h1>
+        <h1 className="text-2xl font-bold text-white text-center mb-4">¡Algo salió mal!</h1>
 
         {/* Message */}
         <p className="text-gray-300 text-center mb-6">
@@ -45,14 +43,8 @@ export default function GlobalError({
         {/* Error Details (only in development) */}
         {process.env.NODE_ENV === 'development' && (
           <div className="bg-black/30 rounded-lg p-4 mb-6 max-h-40 overflow-auto">
-            <p className="text-red-400 text-xs font-mono">
-              {error.message}
-            </p>
-            {error.digest && (
-              <p className="text-gray-500 text-xs mt-2">
-                Digest: {error.digest}
-              </p>
-            )}
+            <p className="text-red-400 text-xs font-mono">{error.message}</p>
+            {error.digest && <p className="text-gray-500 text-xs mt-2">Digest: {error.digest}</p>}
           </div>
         )}
 

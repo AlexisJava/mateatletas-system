@@ -13,7 +13,8 @@ export default function HowToEnrollSection({ onInscribe }: HowToEnrollSectionPro
       number: 1,
       icon: Calendar,
       title: 'Explorá los Cursos',
-      description: 'Mirá el calendario arriba y elegí los horarios que mejor se adapten a tu familia.',
+      description:
+        'Mirá el calendario arriba y elegí los horarios que mejor se adapten a tu familia.',
       color: '#10b981',
     },
     {
@@ -27,14 +28,16 @@ export default function HowToEnrollSection({ onInscribe }: HowToEnrollSectionPro
       number: 3,
       icon: CheckCircle,
       title: 'Seleccioná Cursos',
-      description: 'Para cada hijo, elegí todos los cursos que quieras. Sin límites, sin restricciones.',
+      description:
+        'Para cada hijo, elegí todos los cursos que quieras. Sin límites, sin restricciones.',
       color: '#fbbf24',
     },
     {
       number: 4,
       icon: CreditCard,
       title: 'Pagá con MercadoPago',
-      description: 'Recibís un link de pago seguro. Una vez pagado, la inscripción queda confirmada automáticamente.',
+      description:
+        'Recibís un link de pago seguro. Una vez pagado, la inscripción queda confirmada automáticamente.',
       color: '#f43f5e',
     },
   ];
@@ -77,7 +80,8 @@ export default function HowToEnrollSection({ onInscribe }: HowToEnrollSectionPro
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto"
             >
-              En 4 pasos simples tenés asegurado el lugar de tus hijos en la mejor colonia de verano.
+              En 4 pasos simples tenés asegurado el lugar de tus hijos en la mejor colonia de
+              verano.
             </motion.p>
           </div>
 
@@ -115,20 +119,13 @@ export default function HowToEnrollSection({ onInscribe }: HowToEnrollSectionPro
                       className="flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center"
                       style={{ backgroundColor: `${step.color}20` }}
                     >
-                      <step.icon
-                        className="w-7 h-7"
-                        style={{ color: step.color }}
-                      />
+                      <step.icon className="w-7 h-7" style={{ color: step.color }} />
                     </div>
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-2xl font-black text-white mb-3">
-                    {step.title}
-                  </h3>
-                  <p className="text-white/70 leading-relaxed">
-                    {step.description}
-                  </p>
+                  <h3 className="text-2xl font-black text-white mb-3">{step.title}</h3>
+                  <p className="text-white/70 leading-relaxed">{step.description}</p>
 
                   {/* Glow effect */}
                   <div

@@ -250,7 +250,9 @@ export const usePlanificacionesStore = create<PlanificacionesState>((set, get) =
           state.detalle && state.detalle.id === planificacionId
             ? {
                 ...state.detalle,
-                actividades: state.detalle.actividades.filter((actividad) => actividad.id !== actividadId),
+                actividades: state.detalle.actividades.filter(
+                  (actividad) => actividad.id !== actividadId,
+                ),
               }
             : state.detalle,
         success: 'Actividad eliminada correctamente.',

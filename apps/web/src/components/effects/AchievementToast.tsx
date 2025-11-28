@@ -70,7 +70,9 @@ export function AchievementToast({
 
           {/* Content */}
           <div className="flex-1">
-            <h3 className="font-[family-name:var(--font-fredoka)] text-lg text-white mb-1">{title}</h3>
+            <h3 className="font-[family-name:var(--font-fredoka)] text-lg text-white mb-1">
+              {title}
+            </h3>
             <p className="font-fredoka text-sm text-gray-300">{description}</p>
             {points && (
               <motion.p

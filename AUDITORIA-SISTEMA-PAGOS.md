@@ -1,4 +1,5 @@
 # 🚨 AUDITORÍA CRÍTICA: SISTEMA DE PAGOS MATEATLETAS
+
 **Fecha**: 22 de noviembre de 2025
 **Autor**: Claude Code (Stress Testing & Performance Audit)
 **Branch**: `testing-de-pagos`
@@ -10,6 +11,7 @@
 **Veredicto**: ❌ **EL SISTEMA NO ESTÁ LISTO PARA PRODUCCIÓN**
 
 El sistema de pagos presenta **fallos críticos** que causan:
+
 - ✅ **0% de success rate** bajo carga (1000 webhooks simultáneos)
 - ✅ **Server crash** después de procesar solo 3 webhooks
 - ✅ **100% de pérdida de datos** en condiciones de carga real
@@ -25,6 +27,7 @@ El sistema de pagos presenta **fallos críticos** que causan:
 ### 1. ❌ SERVER CRASH BAJO CARGA MÍNIMA (CRÍTICO - P0)
 
 **Evidencia del Stress Test**:
+
 ```
 📊 RESULTADOS BOMBARDEO:
    ✅ Exitosos: 0/1000 (0.00%)
@@ -38,12 +41,14 @@ El sistema de pagos presenta **fallos críticos** que causan:
 ```
 
 **¿Qué significa esto?**
+
 - El servidor recibe **solo 3 webhooks**
 - Los 3 webhooks causan **error 500** (Internal Server Error)
 - Después el servidor **se cae completamente**
 - Las otras 997 requests reciben **ECONNRESET** (conexión cerrada)
 
 **Impacto en Producción**:
+
 - MercadoPago envía **100+ webhooks simultáneos** durante picos
 - El servidor **se caería instantáneamente**
 - Usuarios que pagaron **NO tendrían acceso** al sistema
@@ -56,24 +61,28 @@ El sistema de pagos presenta **fallos críticos** que causan:
 ### 2. ❌ REDIS COMPLETAMENTE INOPERATIVO (CRÍTICO - P0)
 
 **Evidencia**:
+
 ```
 [Nest] ERROR [RedisService] ❌ No se pudo conectar a Redis: Connection is closed.
 La aplicación funcionará sin caching.
 ```
 
 **¿Qué significa esto?**
+
 - Redis **no está corriendo** en el ambiente de desarrollo
 - El sistema de **caching NO funciona**
 - BullQueue **NO puede funcionar** sin Redis
 - Las validaciones de idempotencia **probablemente fallan**
 
 **Impacto en Producción**:
+
 - Webhooks duplicados de MercadoPago **no se detectarán**
 - Mismo pago podría procesarse **múltiples veces**
 - Rate limiting **no funciona**
 - Performance **extremadamente degradada** (sin cache)
 
 **Código Afectado**:
+
 - `apps/api/src/core/redis/redis.service.ts` - NO puede conectarse
 - `apps/api/src/queues/webhook-queue.module.ts` - BullQueue requiere Redis
 - `apps/api/src/pagos/services/webhook-idempotency.service.ts` - Depende de Redis
@@ -85,23 +94,27 @@ La aplicación funcionará sin caching.
 ### 3. ❌ BULL QUEUE PROBABLEMENTE NO FUNCIONAL (CRÍTICO - P0)
 
 **Evidencia Circunstancial**:
+
 - Redis no está disponible
 - BullQueue **requiere Redis** para funcionar
 - Server crash bajo carga mínima sugiere **procesamiento síncrono**
 
 **¿Qué significa esto?**
+
 - Webhooks se procesan **síncronamente** en lugar de asincrónicamente
 - Cada webhook **bloquea el event loop** de Node.js
 - No hay **retry automático** cuando fallan
 - No hay **backoff exponencial**
 
 **Impacto en Producción**:
+
 - Sistema **se satura** con 10-20 webhooks simultáneos
 - Timeouts constantes de MercadoPago
 - MercadoPago marca nuestro endpoint como **"unhealthy"**
 - Webhooks **dejan de llegar** completamente
 
 **Código Afectado**:
+
 - `apps/api/src/queues/webhook-queue.service.ts` - No puede agregar jobs
 - `apps/api/src/queues/processors/webhook.processor.ts` - Worker no corre
 - `apps/api/src/inscripciones-2026/inscripciones-2026.controller.ts:173` - Procesamiento síncrono
@@ -113,6 +126,7 @@ La aplicación funcionará sin caching.
 ### 4. ⚠️ ENDPOINTS DE MONITOREO INEXISTENTES (HIGH - P1)
 
 **Evidencia del Stress Test**:
+
 ```
 Test 6: Health Check
    expected 200 "OK", got 404 "Not Found"
@@ -124,11 +138,13 @@ Test 7: Metrics
 ```
 
 **¿Qué significa esto?**
+
 - No hay **health check** endpoint funcional
 - No hay **métricas** de queue disponibles
 - Imposible **monitorear** el sistema en producción
 
 **Impacto en Producción**:
+
 - No podemos saber si el sistema está **vivo o muerto**
 - No podemos ver cuántos webhooks están **pendientes**
 - No podemos detectar **cuellos de botella**
@@ -141,6 +157,7 @@ Test 7: Metrics
 ### 5. ⚠️ RACE CONDITIONS EN GENERACIÓN DE PINs (MEDIUM - P2)
 
 **Evidencia del Stress Test**:
+
 ```
 Test 3: Race Conditions (100 threads, mismo PIN)
    ✅ PINs únicos generados: 3
@@ -149,11 +166,13 @@ Test 3: Race Conditions (100 threads, mismo PIN)
 ```
 
 **¿Qué significa esto?**
+
 - De 100 inscripciones concurrentes, **solo 3 se crearon exitosamente**
 - Las otras 97 **colisionaron** (probablemente mismo PIN o DB constraint)
 - El sistema NO puede manejar **requests concurrentes**
 
 **Impacto en Producción**:
+
 - Durante picos (ej: apertura de inscripciones), **97% de usuarios fallarían**
 - Frustración masiva de usuarios
 - Pérdida de inscripciones
@@ -165,6 +184,7 @@ Test 3: Race Conditions (100 threads, mismo PIN)
 ## 📊 RESULTADOS COMPLETOS DE STRESS TESTS
 
 ### Test 1: Bombardeo de 1000 Webhooks Simultáneos
+
 ```
 Objetivo: Simular pico de carga de MercadoPago
 Resultado: ❌ FALLO TOTAL
@@ -176,6 +196,7 @@ Resultado: ❌ FALLO TOTAL
 ```
 
 ### Test 2: Webhooks Duplicados (500 duplicados)
+
 ```
 Objetivo: Validar idempotencia anti-duplicados
 Resultado: ❌ NO EJECUTADO (server caído en Test 1)
@@ -185,6 +206,7 @@ Resultado: ❌ NO EJECUTADO (server caído en Test 1)
 ```
 
 ### Test 3: Race Conditions (100 threads)
+
 ```
 Objetivo: Validar concurrencia en creación de inscripciones
 Resultado: ❌ FALLO MASIVO
@@ -194,6 +216,7 @@ Resultado: ❌ FALLO MASIVO
 ```
 
 ### Test 4: Fraude Masivo (200 montos incorrectos)
+
 ```
 Objetivo: Validar anti-fraude con montos incorrectos
 Resultado: ❌ NO EJECUTADO (server caído en Test 1)
@@ -203,6 +226,7 @@ Resultado: ❌ NO EJECUTADO (server caído en Test 1)
 ```
 
 ### Test 5: Queue Overflow (10000 webhooks)
+
 ```
 Objetivo: Validar capacidad de queue bajo carga extrema
 Resultado: ❌ PÉRDIDA MASIVA
@@ -212,6 +236,7 @@ Resultado: ❌ PÉRDIDA MASIVA
 ```
 
 ### Test 6: Health Check Bajo Carga
+
 ```
 Objetivo: Verificar que health check responde bajo carga
 Resultado: ❌ ENDPOINT NO EXISTE
@@ -221,6 +246,7 @@ Resultado: ❌ ENDPOINT NO EXISTE
 ```
 
 ### Test 7: Métricas de Queue Bajo Carga
+
 ```
 Objetivo: Verificar métricas de queue durante carga
 Resultado: ❌ ENDPOINT NO EXISTE
@@ -236,6 +262,7 @@ Resultado: ❌ ENDPOINT NO EXISTE
 ### ¿Por qué se cae el servidor?
 
 **Hipótesis más probable**:
+
 1. Redis no está corriendo → BullQueue NO puede inicializar
 2. `WebhookQueueService.addWebhookToQueue()` **falla**
 3. El error NO está siendo manejado correctamente
@@ -245,6 +272,7 @@ Resultado: ❌ ENDPOINT NO EXISTE
 7. Sistema **colapsa completamente**
 
 **Código sospechoso**:
+
 ```typescript
 // inscripciones-2026.controller.ts:173
 @Post('webhook')
@@ -259,6 +287,7 @@ async handleMercadoPagoWebhook(@Body() webhookDto: MercadoPagoWebhookDto) {
 ### ¿Por qué Redis no funciona?
 
 **Posibles causas**:
+
 1. ✅ Redis **no está instalado** en ambiente de desarrollo
 2. ✅ Redis está instalado pero **no está corriendo** (`redis-server` no ejecutado)
 3. ✅ Configuración incorrecta de `REDIS_HOST` o `REDIS_PORT`
@@ -269,6 +298,7 @@ async handleMercadoPagoWebhook(@Body() webhookDto: MercadoPagoWebhookDto) {
 ## 🔧 INFRAESTRUCTURA FALTANTE
 
 ### Redis (CRÍTICO)
+
 ```bash
 # Estado actual: ❌ NO DISPONIBLE
 # Necesario para:
@@ -284,6 +314,7 @@ REDIS_PASSWORD=<opcional en dev, requerido en prod>
 ```
 
 ### Health Check Endpoint (HIGH)
+
 ```typescript
 // Faltante: apps/api/src/health/health.controller.ts
 // Endpoint: GET /api/health
@@ -291,6 +322,7 @@ REDIS_PASSWORD=<opcional en dev, requerido en prod>
 ```
 
 ### Metrics Endpoint (HIGH)
+
 ```typescript
 // Faltante: apps/api/src/queues/queue-metrics.controller.ts
 // Endpoint: GET /api/queues/metrics/stats
@@ -301,14 +333,14 @@ REDIS_PASSWORD=<opcional en dev, requerido en prod>
 
 ## 📈 MÉTRICAS DE PERFORMANCE ESPERADAS vs REALES
 
-| Métrica | Objetivo (Sprint 3) | Real (Stress Test) | Delta |
-|---------|---------------------|-------------------|-------|
-| **Latencia endpoint webhook** | <50ms | N/A (crash) | ❌ Infinito |
-| **Throughput webhooks** | 1000+ webhooks/min | 0 webhooks/min | ❌ -100% |
-| **Success rate bajo carga** | >95% | 0% | ❌ -95% |
-| **Uptime en picos** | 99.9% | 0% | ❌ -99.9% |
-| **Queue capacity** | 10000 jobs | 3 jobs | ❌ -99.97% |
-| **Anti-duplicados** | 100% bloqueados | N/A | ❌ Desconocido |
+| Métrica                       | Objetivo (Sprint 3) | Real (Stress Test) | Delta          |
+| ----------------------------- | ------------------- | ------------------ | -------------- |
+| **Latencia endpoint webhook** | <50ms               | N/A (crash)        | ❌ Infinito    |
+| **Throughput webhooks**       | 1000+ webhooks/min  | 0 webhooks/min     | ❌ -100%       |
+| **Success rate bajo carga**   | >95%                | 0%                 | ❌ -95%        |
+| **Uptime en picos**           | 99.9%               | 0%                 | ❌ -99.9%      |
+| **Queue capacity**            | 10000 jobs          | 3 jobs             | ❌ -99.97%     |
+| **Anti-duplicados**           | 100% bloqueados     | N/A                | ❌ Desconocido |
 
 **Conclusión**: **0/6 métricas cumplidas**
 
@@ -317,15 +349,18 @@ REDIS_PASSWORD=<opcional en dev, requerido en prod>
 ## 🚦 PRIORIZACIÓN DE PROBLEMAS
 
 ### 🔴 BLOCKER (P0) - Imposible ir a producción
+
 1. **Server crash bajo carga** (Test 1)
 2. **Redis completamente inoperativo** (Todos los tests)
 3. **BullQueue no funcional** (Test 5)
 
 ### 🟡 HIGH (P1) - Crítico para operación
+
 4. **Health check endpoint faltante** (Test 6)
 5. **Metrics endpoint faltante** (Test 7)
 
 ### 🟠 MEDIUM (P2) - Importante pero no bloqueante
+
 6. **Race conditions en PINs** (Test 3)
 
 ---
@@ -335,6 +370,7 @@ REDIS_PASSWORD=<opcional en dev, requerido en prod>
 ### Fase 1: Hacer que el sistema **no se caiga** (P0)
 
 **Paso 1.1: Instalar y configurar Redis**
+
 ```bash
 # Desarrollo local
 brew install redis  # macOS
@@ -348,6 +384,7 @@ redis-cli ping  # Debe retornar "PONG"
 ```
 
 **Paso 1.2: Configurar Redis en Railway**
+
 ```bash
 # En Railway dashboard:
 1. Add service → Redis
@@ -359,6 +396,7 @@ redis-cli ping  # Debe retornar "PONG"
 ```
 
 **Paso 1.3: Agregar error handling robusto**
+
 ```typescript
 // inscripciones-2026.controller.ts
 @Post('webhook')
@@ -376,11 +414,13 @@ async handleMercadoPagoWebhook(@Body() webhookDto: MercadoPagoWebhookDto) {
 ```
 
 **Paso 1.4: Re-ejecutar stress tests**
+
 ```bash
 npm test -- stress-test-pagos.spec.ts --testTimeout=300000
 ```
 
 **Criterio de éxito**:
+
 - ✅ Success rate >90%
 - ✅ Ningún ECONNRESET
 - ✅ Redis conectado sin errores
@@ -390,6 +430,7 @@ npm test -- stress-test-pagos.spec.ts --testTimeout=300000
 ### Fase 2: Agregar observabilidad (P1)
 
 **Paso 2.1: Implementar Health Check**
+
 ```typescript
 // apps/api/src/health/health.controller.ts
 import { Controller, Get } from '@nestjs/common';
@@ -416,6 +457,7 @@ export class HealthController {
 ```
 
 **Paso 2.2: Implementar Metrics Endpoint**
+
 ```typescript
 // apps/api/src/queues/queue-metrics.controller.ts
 @Get('metrics/stats')
@@ -444,6 +486,7 @@ async getQueueStats() {
 ### Fase 3: Arreglar race conditions (P2)
 
 **Paso 3.1: Usar transacciones atómicas para PINs**
+
 ```typescript
 // Agregar constraint único en Prisma schema
 model Inscripcion2026 {
@@ -488,13 +531,13 @@ async function generateUniquePin(maxRetries = 5) {
 
 ## 🔮 ESTIMACIÓN DE TIEMPO PARA FIX
 
-| Fase | Tareas | Tiempo Estimado |
-|------|--------|-----------------|
-| **Fase 1** | Redis + Error handling + Re-test | 2-3 horas |
-| **Fase 2** | Health checks + Metrics | 1-2 horas |
-| **Fase 3** | Race condition fix | 1 hora |
-| **Testing** | Validar todos los stress tests | 1 hora |
-| **TOTAL** | | **5-7 horas** |
+| Fase        | Tareas                           | Tiempo Estimado |
+| ----------- | -------------------------------- | --------------- |
+| **Fase 1**  | Redis + Error handling + Re-test | 2-3 horas       |
+| **Fase 2**  | Health checks + Metrics          | 1-2 horas       |
+| **Fase 3**  | Race condition fix               | 1 hora          |
+| **Testing** | Validar todos los stress tests   | 1 hora          |
+| **TOTAL**   |                                  | **5-7 horas**   |
 
 ---
 
@@ -507,6 +550,7 @@ El stress test hizo **exactamente** lo que tenía que hacer: **exponer que el si
 **Problemas críticos**: 3 BLOCKERS que causan crash total del sistema
 
 **Siguiente paso recomendado**:
+
 1. Instalar Redis localmente
 2. Configurar Redis en Railway
 3. Re-ejecutar stress tests

@@ -65,11 +65,7 @@ export function FillBlankQuestion({
   return (
     <div className="w-full max-w-4xl mx-auto">
       {/* Enunciado */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <h3
           className="
             font-[family-name:var(--font-lilita)]

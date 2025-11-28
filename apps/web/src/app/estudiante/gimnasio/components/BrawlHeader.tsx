@@ -1,40 +1,42 @@
-'use client'
+'use client';
 
-import { Trophy, Coins, Gem, Flame } from 'lucide-react'
-import { CompactAvatar3D } from '@/components/3d/CompactAvatar3D'
-import { useStudentAnimations } from '@/hooks/useStudentAnimations'
+import { Trophy, Coins, Gem, Flame } from 'lucide-react';
+import { CompactAvatar3D } from '@/components/3d/CompactAvatar3D';
+import { useStudentAnimations } from '@/hooks/useStudentAnimations';
 
 interface BrawlHeaderProps {
-  nombre: string
-  nivel: number
-  trofeos: number
-  monedas: number
-  gemas: number
-  racha: number
-  avatarUrl?: string | null
-  puntos?: number
+  nombre: string;
+  nivel: number;
+  trofeos: number;
+  monedas: number;
+  gemas: number;
+  racha: number;
+  avatarUrl?: string | null;
+  puntos?: number;
 }
 
-export function BrawlHeader({ nombre, trofeos, monedas, gemas, racha, avatarUrl, puntos = 0 }: BrawlHeaderProps) {
+export function BrawlHeader({
+  nombre,
+  trofeos,
+  monedas,
+  gemas,
+  racha,
+  avatarUrl,
+  puntos = 0,
+}: BrawlHeaderProps) {
   // Hook para obtener animación idle por defecto
-  const { getDefaultIdleAnimation } = useStudentAnimations({ studentPoints: puntos })
-  const defaultAnimation = getDefaultIdleAnimation()
+  const { getDefaultIdleAnimation } = useStudentAnimations({ studentPoints: puntos });
+  const defaultAnimation = getDefaultIdleAnimation();
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 p-4">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
-
         {/* Lado izquierdo: Avatar + nombre */}
         <div className="flex items-center gap-3">
           {/* Avatar 3D animado o placeholder */}
-          <div
-            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 border-2 border-black flex items-center justify-center shadow-[2px_3px_0_rgba(0,0,0,0.4),4px_6px_12px_rgba(0,0,0,0.2)] overflow-hidden"
-          >
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 border-2 border-black flex items-center justify-center shadow-[2px_3px_0_rgba(0,0,0,0.4),4px_6px_12px_rgba(0,0,0,0.2)] overflow-hidden">
             {avatarUrl ? (
-              <CompactAvatar3D
-                avatarUrl={avatarUrl}
-                animationUrl={defaultAnimation?.url}
-              />
+              <CompactAvatar3D avatarUrl={avatarUrl} animationUrl={defaultAnimation?.url} />
             ) : (
               <span className="text-2xl font-black text-white">
                 {nombre.charAt(0).toUpperCase()}
@@ -48,7 +50,7 @@ export function BrawlHeader({ nombre, trofeos, monedas, gemas, racha, avatarUrl,
               className="text-white font-black text-sm uppercase tracking-wide"
               style={{
                 textShadow: '1px 1px 0px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3)',
-                fontFamily: '"Lilita One", cursive'
+                fontFamily: '"Lilita One", cursive',
               }}
             >
               {nombre}
@@ -62,7 +64,6 @@ export function BrawlHeader({ nombre, trofeos, monedas, gemas, racha, avatarUrl,
 
         {/* Lado derecho: Stats */}
         <div className="flex items-center gap-3">
-
           {/* Monedas */}
           <StatBadge
             icon={<Coins className="w-5 h-5" />}
@@ -85,9 +86,7 @@ export function BrawlHeader({ nombre, trofeos, monedas, gemas, racha, avatarUrl,
           />
 
           {/* Menú hamburguesa */}
-          <button
-            className="w-14 h-14 bg-gray-800/90 rounded-xl border-2 border-black shadow-[2px_3px_0_rgba(0,0,0,0.4),4px_6px_12px_rgba(0,0,0,0.2)] hover:translate-y-1 hover:shadow-[2px_2px_0_rgba(0,0,0,0.4),3px_4px_8px_rgba(0,0,0,0.15)] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center"
-          >
+          <button className="w-14 h-14 bg-gray-800/90 rounded-xl border-2 border-black shadow-[2px_3px_0_rgba(0,0,0,0.4),4px_6px_12px_rgba(0,0,0,0.2)] hover:translate-y-1 hover:shadow-[2px_2px_0_rgba(0,0,0,0.4),3px_4px_8px_rgba(0,0,0,0.15)] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center">
             <div className="space-y-1.5">
               <div className="w-6 h-1 bg-white rounded"></div>
               <div className="w-6 h-1 bg-white rounded"></div>
@@ -97,23 +96,33 @@ export function BrawlHeader({ nombre, trofeos, monedas, gemas, racha, avatarUrl,
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Componente auxiliar para badges de stats
-function StatBadge({ icon, value, color }: { icon: React.ReactNode; value: number | string; color: string }) {
+function StatBadge({
+  icon,
+  value,
+  color,
+}: {
+  icon: React.ReactNode;
+  value: number | string;
+  color: string;
+}) {
   return (
-    <div className={`${color} rounded-xl px-4 py-2 border-2 border-black shadow-[2px_3px_0_rgba(0,0,0,0.4),4px_6px_12px_rgba(0,0,0,0.2)] flex items-center gap-2`}>
+    <div
+      className={`${color} rounded-xl px-4 py-2 border-2 border-black shadow-[2px_3px_0_rgba(0,0,0,0.4),4px_6px_12px_rgba(0,0,0,0.2)] flex items-center gap-2`}
+    >
       <div className="text-white">{icon}</div>
       <span
         className="text-white font-black text-lg"
         style={{
           textShadow: '1px 1px 0px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3)',
-          fontFamily: '"Lilita One", cursive'
+          fontFamily: '"Lilita One", cursive',
         }}
       >
         {value}
       </span>
     </div>
-  )
+  );
 }

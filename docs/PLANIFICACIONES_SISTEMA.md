@@ -22,12 +22,12 @@ import { useState } from 'react';
 // CONFIGURACIÓN (solo estas 6 líneas)
 // ============================================================================
 export const PLANIFICACION_CONFIG = {
-  codigo: '2025-03-multiplicaciones-b1',  // Debe coincidir con el nombre del archivo
+  codigo: '2025-03-multiplicaciones-b1', // Debe coincidir con el nombre del archivo
   titulo: 'Multiplicaciones - Marzo 2025',
   grupo: 'B1',
   mes: 3,
   anio: 2025,
-  semanas: 4
+  semanas: 4,
 };
 
 // ============================================================================
@@ -63,10 +63,10 @@ export default function Multiplicaciones2025Marzo() {
 
         {/* Navegación */}
         <div className="flex gap-4 justify-center mt-8">
-          <button onClick={() => setSemanaActual(prev => Math.max(1, prev - 1))}>
+          <button onClick={() => setSemanaActual((prev) => Math.max(1, prev - 1))}>
             ← Semana Anterior
           </button>
-          <button onClick={() => setSemanaActual(prev => Math.min(4, prev + 1))}>
+          <button onClick={() => setSemanaActual((prev) => Math.min(4, prev + 1))}>
             Siguiente Semana →
           </button>
         </div>
@@ -118,7 +118,7 @@ export const PLANIFICACION_CONFIG = {
   grupo: 'B1',
   mes: 3,
   anio: 2025,
-  semanas: 4
+  semanas: 4,
 };
 
 // ============================================================================
@@ -134,7 +134,6 @@ export default function Multiplicaciones2025Marzo() {
   return (
     <PlanificacionWrapper config={PLANIFICACION_CONFIG}>
       <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-500">
-
         {/* Renderizar semana actual */}
         {semanaActual === 1 && <Semana1 onComplete={() => setSemanaActual(2)} />}
         {semanaActual === 2 && <Semana2 onComplete={() => setSemanaActual(3)} />}
@@ -144,7 +143,7 @@ export default function Multiplicaciones2025Marzo() {
         {/* Navegación */}
         <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex gap-4">
           <button
-            onClick={() => setSemanaActual(prev => Math.max(1, prev - 1))}
+            onClick={() => setSemanaActual((prev) => Math.max(1, prev - 1))}
             disabled={semanaActual === 1}
             className="px-6 py-3 bg-white/20 backdrop-blur-lg rounded-xl"
           >
@@ -154,7 +153,7 @@ export default function Multiplicaciones2025Marzo() {
             Semana {semanaActual} / 4
           </span>
           <button
-            onClick={() => setSemanaActual(prev => Math.min(4, prev + 1))}
+            onClick={() => setSemanaActual((prev) => Math.min(4, prev + 1))}
             disabled={semanaActual === 4}
             className="px-6 py-3 bg-white/20 backdrop-blur-lg rounded-xl"
           >
@@ -178,9 +177,7 @@ import QuizMultiplicacion from './components/QuizMultiplicacion';
 export default function Semana1({ onComplete }: { onComplete: () => void }) {
   return (
     <div className="p-8">
-      <h2 className="text-4xl font-bold text-white mb-6">
-        Semana 1: Tablas del 1 al 3
-      </h2>
+      <h2 className="text-4xl font-bold text-white mb-6">Semana 1: Tablas del 1 al 3</h2>
 
       {/* Día 1: Clase Online */}
       <section className="mb-8">
@@ -188,9 +185,7 @@ export default function Semana1({ onComplete }: { onComplete: () => void }) {
           📅 Día 1: Introducción (Clase Online)
         </h3>
         <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6">
-          <p className="text-white mb-4">
-            Clase sincrónica: Lunes 18:00 - 19:30
-          </p>
+          <p className="text-white mb-4">Clase sincrónica: Lunes 18:00 - 19:30</p>
           <a
             href="https://meet.google.com/abc-defg-hij"
             target="_blank"
@@ -203,37 +198,26 @@ export default function Semana1({ onComplete }: { onComplete: () => void }) {
 
       {/* Día 2: Juego Tabla del 1 */}
       <section className="mb-8">
-        <h3 className="text-2xl font-bold text-white mb-4">
-          🎮 Día 2: Juego - Tabla del 1
-        </h3>
+        <h3 className="text-2xl font-bold text-white mb-4">🎮 Día 2: Juego - Tabla del 1</h3>
         <JuegoTabla tabla={1} />
       </section>
 
       {/* Día 3: Juego Tabla del 2 */}
       <section className="mb-8">
-        <h3 className="text-2xl font-bold text-white mb-4">
-          🎮 Día 3: Juego - Tabla del 2
-        </h3>
+        <h3 className="text-2xl font-bold text-white mb-4">🎮 Día 3: Juego - Tabla del 2</h3>
         <JuegoTabla tabla={2} />
       </section>
 
       {/* Día 4: Juego Tabla del 3 */}
       <section className="mb-8">
-        <h3 className="text-2xl font-bold text-white mb-4">
-          🎮 Día 4: Juego - Tabla del 3
-        </h3>
+        <h3 className="text-2xl font-bold text-white mb-4">🎮 Día 4: Juego - Tabla del 3</h3>
         <JuegoTabla tabla={3} />
       </section>
 
       {/* Día 5: Quiz Semanal */}
       <section className="mb-8">
-        <h3 className="text-2xl font-bold text-white mb-4">
-          📝 Día 5: Quiz Semanal
-        </h3>
-        <QuizMultiplicacion
-          tablas={[1, 2, 3]}
-          onComplete={onComplete}
-        />
+        <h3 className="text-2xl font-bold text-white mb-4">📝 Día 5: Quiz Semanal</h3>
+        <QuizMultiplicacion tablas={[1, 2, 3]} onComplete={onComplete} />
       </section>
     </div>
   );
@@ -252,8 +236,8 @@ export const PLANIFICACION_CONFIG = {
   titulo: 'AstroExploradores - Viaje por el Cosmos',
   grupo: 'B1',
   anio: 2025,
-  semanas: 8,  // Curso de 8 semanas
-  mes: null    // No tiene mes específico (curso anual)
+  semanas: 8, // Curso de 8 semanas
+  mes: null, // No tiene mes específico (curso anual)
 };
 
 export default function AstroExploradores() {
@@ -470,30 +454,26 @@ import { usePlanificacionProgress } from '@/planificaciones/shared';
 export default function MiPlanificacion() {
   const {
     // Estado
-    progreso,           // { semana_actual, tiempo_total_minutos, puntos_totales }
+    progreso, // { semana_actual, tiempo_total_minutos, puntos_totales }
 
     // Acciones
-    guardarEstado,      // (estado: any) => Promise<void>
-    avanzarSemana,      // () => Promise<void>
-    completarSemana,    // (puntos: number) => Promise<void>
+    guardarEstado, // (estado: any) => Promise<void>
+    avanzarSemana, // () => Promise<void>
+    completarSemana, // (puntos: number) => Promise<void>
 
     // Info
-    semanaActual,       // 1-4
-    semanasActivas,     // [1, 2] (qué semanas activó la docente)
-    puedeAcceder,       // (semana: number) => boolean
+    semanaActual, // 1-4
+    semanasActivas, // [1, 2] (qué semanas activó la docente)
+    puedeAcceder, // (semana: number) => boolean
   } = usePlanificacionProgress();
 
   return (
     <div>
       {/* Tu contenido */}
 
-      <button onClick={() => guardarEstado({ nivel: 3, vidas: 2 })}>
-        Guardar Progreso
-      </button>
+      <button onClick={() => guardarEstado({ nivel: 3, vidas: 2 })}>Guardar Progreso</button>
 
-      <button onClick={() => completarSemana(100)}>
-        Completar Semana (100 puntos)
-      </button>
+      <button onClick={() => completarSemana(100)}>Completar Semana (100 puntos)</button>
     </div>
   );
 }
@@ -506,6 +486,7 @@ export default function MiPlanificacion() {
 ### Tablas Principales
 
 **`planificaciones_simples`**
+
 - `codigo` (único)
 - `titulo`
 - `grupo_codigo`
@@ -515,18 +496,21 @@ export default function MiPlanificacion() {
 - `estado` (DETECTADA | ASIGNADA | ARCHIVADA)
 
 **`asignaciones_planificacion`**
+
 - `planificacion_id`
 - `docente_id`
 - `clase_grupo_id`
 - `activa`
 
 **`semanas_activas`**
+
 - `asignacion_id`
 - `numero_semana` (1-12)
 - `activa` (true/false)
 - `fecha_activacion`
 
 **`progreso_estudiante_planificacion`**
+
 - `estudiante_id`
 - `planificacion_id`
 - `semana_actual`
@@ -578,6 +562,7 @@ npm run dev
 - [ ] Estudiantes acceden
 
 **NO necesitás:**
+
 - ❌ Llenar JSONs de metadata
 - ❌ Correr comandos manualmente
 - ❌ Registrar en base de datos
@@ -641,7 +626,7 @@ export const PLANIFICACION_CONFIG = {
   grupo: 'B1',
   mes: 3,
   anio: 2025,
-  semanas: 2
+  semanas: 2,
 };
 
 export default function EjemploMinimo() {
@@ -676,15 +661,18 @@ export default function EjemploMinimo() {
 ## 🆘 Troubleshooting
 
 **"Mi planificación no aparece en el admin"**
+
 - ¿Exportaste `PLANIFICACION_CONFIG`?
 - ¿El `codigo` es único?
 - ¿Corriste `npm run build`?
 
 **"El estudiante no puede acceder"**
+
 - ¿La docente activó la semana?
 - ¿El estudiante pertenece al grupo correcto?
 
 **"El progreso no se guarda"**
+
 - ¿Usaste `PlanificacionWrapper`?
 - ¿Llamaste a `guardarEstado()`?
 

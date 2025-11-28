@@ -79,8 +79,8 @@ export function ResponsiveProximaClaseCard({
               {clase.titulo || 'Próxima Clase'}
             </div>
             <div className="text-white/90 text-xs font-bold">
-              {esHoy ? '🔴 HOY' : format(fecha, 'dd/MM', { locale: es })} •{' '}
-              {format(fecha, 'HH:mm')} hs
+              {esHoy ? '🔴 HOY' : format(fecha, 'dd/MM', { locale: es })} • {format(fecha, 'HH:mm')}{' '}
+              hs
             </div>
           </div>
 
@@ -146,9 +146,7 @@ export function ResponsiveProximaClaseCard({
             {/* Fecha */}
             <div className="flex items-center gap-2 text-white/90 text-sm font-bold">
               <Clock className="w-4 h-4" />
-              {esHoy
-                ? '🔴 HOY'
-                : format(fecha, "EEEE d 'de' MMMM", { locale: es }).toUpperCase()}
+              {esHoy ? '🔴 HOY' : format(fecha, "EEEE d 'de' MMMM", { locale: es }).toUpperCase()}
             </div>
 
             {/* Hora */}

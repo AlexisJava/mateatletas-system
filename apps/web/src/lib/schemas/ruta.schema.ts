@@ -15,12 +15,14 @@ export const docenteRutaSchema = z.object({
   // Relaciones opcionales
   ruta: z.lazy(() => z.unknown()).optional(), // RutaEspecialidad - lazy to avoid circular dependency
   sector: sectorSchema.optional(),
-  docente: z.object({
-    id: z.string(),
-    nombre: z.string(),
-    apellido: z.string(),
-    email: z.string(),
-  }).optional(),
+  docente: z
+    .object({
+      id: z.string(),
+      nombre: z.string(),
+      apellido: z.string(),
+      email: z.string(),
+    })
+    .optional(),
 });
 
 /**
@@ -41,9 +43,11 @@ export const rutaEspecialidadSchema = z.object({
   // Relaciones opcionales
   sector: sectorSchema.optional(),
   docentes: z.array(docenteRutaSchema).optional(),
-  _count: z.object({
-    docentes: z.number(),
-  }).optional(),
+  _count: z
+    .object({
+      docentes: z.number(),
+    })
+    .optional(),
 });
 
 /**
@@ -61,12 +65,14 @@ export const rutasListSchema = z.array(rutaEspecialidadSchema);
  */
 export const rutasResponseSchema = z.object({
   data: z.array(rutaEspecialidadSchema),
-  metadata: z.object({
-    total: z.number(),
-    page: z.number(),
-    limit: z.number(),
-    totalPages: z.number(),
-  }).optional(),
+  metadata: z
+    .object({
+      total: z.number(),
+      page: z.number(),
+      limit: z.number(),
+      totalPages: z.number(),
+    })
+    .optional(),
 });
 
 /**

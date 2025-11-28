@@ -141,11 +141,7 @@ export function BadgeCard({ badge, index = 0, onClick }: BadgeCardProps) {
         </h3>
 
         {/* Descripción */}
-        <p
-          className={`text-sm text-center mb-3 ${
-            isLocked ? 'text-gray-600' : 'text-white/90'
-          }`}
-        >
+        <p className={`text-sm text-center mb-3 ${isLocked ? 'text-gray-600' : 'text-white/90'}`}>
           {isLocked ? 'Logro bloqueado' : badge.descripcion}
         </p>
 

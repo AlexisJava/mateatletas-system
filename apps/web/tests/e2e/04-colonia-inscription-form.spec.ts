@@ -60,7 +60,10 @@ test.describe('Colonia Inscription Form - Modal', () => {
       await inscriptionBtn.click();
 
       // Buscar botón de cerrar
-      const closeBtn = page.locator('button').filter({ has: page.locator('svg') }).filter({ hasText: '' });
+      const closeBtn = page
+        .locator('button')
+        .filter({ has: page.locator('svg') })
+        .filter({ hasText: '' });
       const closeBtnVisible = await closeBtn.count();
 
       expect(closeBtnVisible).toBeGreaterThan(0);
@@ -81,9 +84,10 @@ test.describe('Colonia Inscription Form - Modal', () => {
       await expect(modalTitle).toBeVisible();
 
       // Cerrar modal (buscar X) - buscar específicamente en el header del modal
-      const closeBtn = page.getByRole('button', { name: /close/i }).or(
-        page.locator('button').filter({ hasText: '×' })
-      ).first();
+      const closeBtn = page
+        .getByRole('button', { name: /close/i })
+        .or(page.locator('button').filter({ hasText: '×' }))
+        .first();
 
       // Usar force click si el botón está siendo interceptado por overlay
       await closeBtn.click({ force: true });
@@ -147,7 +151,6 @@ test.describe('Colonia Inscription Form - Step 1: Tutor Data', () => {
     await passwordInputs.nth(0).fill('Password123');
     await passwordInputs.nth(1).fill('DifferentPass456');
 
-
     // Verificar mensaje de error
     const errorMsg = page.locator('text=Las contraseñas no coinciden').first();
     await expect(errorMsg).toBeVisible();
@@ -170,7 +173,6 @@ test.describe('Colonia Inscription Form - Step 1: Tutor Data', () => {
 
     await page.locator('input[placeholder*="Ciudad"]').fill('Buenos Aires');
 
-
     // Botón "Siguiente" debería estar habilitado
     const nextBtn = page.locator('button:has-text("Siguiente")').first();
     await expect(nextBtn).toBeEnabled();
@@ -188,7 +190,6 @@ test.describe('Colonia Inscription Form - Step 1: Tutor Data', () => {
     await passwordInputs.nth(1).fill('Password123');
 
     await page.locator('input[placeholder*="Ciudad"]').fill('Buenos Aires');
-
 
     // Click en Siguiente - usar el botón del modal (no el de la grilla de horarios)
     const nextBtn = page.locator('button:has-text("Siguiente")').last();
@@ -348,14 +349,19 @@ test.describe('Colonia Inscription Form - Step 3: Course Selection', () => {
     await expect(studentName).toBeVisible();
 
     // Debería haber botones de curso disponibles
-    const courseButtons = page.locator('button').filter({ hasText: /Matemática|Programación|Ciencias/i });
+    const courseButtons = page
+      .locator('button')
+      .filter({ hasText: /Matemática|Programación|Ciencias/i });
     const count = await courseButtons.count();
     expect(count).toBeGreaterThan(0);
   });
 
   test('Se puede seleccionar un curso', async ({ page }) => {
     // Seleccionar primer curso disponible
-    const firstCourseBtn = page.locator('button').filter({ hasText: /Matemática|Programación/i }).first();
+    const firstCourseBtn = page
+      .locator('button')
+      .filter({ hasText: /Matemática|Programación/i })
+      .first();
     await firstCourseBtn.click();
 
     // Debería mostrar un check o cambiar de estilo
@@ -366,9 +372,11 @@ test.describe('Colonia Inscription Form - Step 3: Course Selection', () => {
 
   test('Se pueden seleccionar hasta 2 cursos', async ({ page }) => {
     // Obtener los primeros 2 cursos
-    const courseButtons = page.locator('button').filter({ hasText: /Matemática|Programación|Ciencias/i });
+    const courseButtons = page
+      .locator('button')
+      .filter({ hasText: /Matemática|Programación|Ciencias/i });
 
-    if (await courseButtons.count() >= 2) {
+    if ((await courseButtons.count()) >= 2) {
       await courseButtons.nth(0).click();
       await page.waitForTimeout(200);
       await courseButtons.nth(1).click();
@@ -379,7 +387,7 @@ test.describe('Colonia Inscription Form - Step 3: Course Selection', () => {
       expect(count).toBe(2);
 
       // El tercer curso no debería ser seleccionable (botón disabled)
-      if (await courseButtons.count() >= 3) {
+      if ((await courseButtons.count()) >= 3) {
         const thirdCourse = courseButtons.nth(2);
         const isDisabled = await thirdCourse.isDisabled();
         expect(isDisabled).toBe(true);
@@ -389,7 +397,10 @@ test.describe('Colonia Inscription Form - Step 3: Course Selection', () => {
 
   test('Con al menos 1 curso seleccionado, se puede avanzar', async ({ page }) => {
     // Seleccionar un curso
-    const firstCourseBtn = page.locator('button').filter({ hasText: /Matemática|Programación/i }).first();
+    const firstCourseBtn = page
+      .locator('button')
+      .filter({ hasText: /Matemática|Programación/i })
+      .first();
     await firstCourseBtn.click();
 
     // Botón siguiente debería estar habilitado

@@ -11,20 +11,24 @@
 ### 1. Prohibido usar `any`
 
 ❌ **MAL:**
+
 ```typescript
-function procesarDatos(data: any) {  // ❌ BLOQUEADO en commit
+function procesarDatos(data: any) {
+  // ❌ BLOQUEADO en commit
   return data.algo;
 }
 ```
 
 ✅ **BIEN:**
+
 ```typescript
 interface DatosUsuario {
   id: string;
   nombre: string;
 }
 
-function procesarDatos(data: DatosUsuario) {  // ✅ OK
+function procesarDatos(data: DatosUsuario) {
+  // ✅ OK
   return data.nombre;
 }
 ```
@@ -32,21 +36,26 @@ function procesarDatos(data: DatosUsuario) {  // ✅ OK
 ### 2. Prohibido variables no usadas
 
 ❌ **MAL:**
+
 ```typescript
-function calcular(x: number, y: number) {  // ❌ 'y' no usado
+function calcular(x: number, y: number) {
+  // ❌ 'y' no usado
   return x * 2;
 }
 ```
 
 ✅ **BIEN:**
+
 ```typescript
 // Si no vas a usar el parámetro, prefix con '_'
-function calcular(x: number, _y: number) {  // ✅ OK
+function calcular(x: number, _y: number) {
+  // ✅ OK
   return x * 2;
 }
 
 // O elimínalo
-function calcular(x: number) {  // ✅ OK
+function calcular(x: number) {
+  // ✅ OK
   return x * 2;
 }
 ```
@@ -54,19 +63,21 @@ function calcular(x: number) {  // ✅ OK
 ### 3. Prohibido `any` implícito en operaciones
 
 ❌ **MAL:**
+
 ```typescript
 const data: any = await fetch('/api');
-data.map(item => item.name);  // ❌ BLOQUEADO (any implícito)
+data.map((item) => item.name); // ❌ BLOQUEADO (any implícito)
 ```
 
 ✅ **BIEN:**
+
 ```typescript
 interface Item {
   name: string;
 }
 
 const data: Item[] = await fetch('/api');
-data.map(item => item.name);  // ✅ OK (typed)
+data.map((item) => item.name); // ✅ OK (typed)
 ```
 
 ---
@@ -76,6 +87,7 @@ data.map(item => item.name);  // ✅ OK (typed)
 ### Para Código Legacy (Existente)
 
 **ESLint en modo permisivo:**
+
 ```bash
 npm run lint  # Solo warnings, NO bloquea
 ```
@@ -83,6 +95,7 @@ npm run lint  # Solo warnings, NO bloquea
 ### Para Código Nuevo (Modificado/Staged)
 
 **Git hook con reglas ESTRICTAS:**
+
 ```bash
 git add mi-nuevo-archivo.ts
 git commit -m "feat: nueva feature"
@@ -99,6 +112,7 @@ git commit -m "feat: nueva feature"
 ### 1. ESLint Global (apps/api/eslint.config.mjs)
 
 **Permisivo para no romper legacy:**
+
 ```javascript
 rules: {
   '@typescript-eslint/no-explicit-any': 'warn',  // Solo advertencia
@@ -109,6 +123,7 @@ rules: {
 ### 2. lint-staged (package.json)
 
 **Estricto SOLO en archivos staged:**
+
 ```json
 "lint-staged": {
   "apps/**/*.{ts,tsx}": [
@@ -118,6 +133,7 @@ rules: {
 ```
 
 **Esto significa:**
+
 - Código existente: warnings (no bloquea)
 - Código nuevo/modificado: errors (SÍ bloquea commit)
 
@@ -176,7 +192,7 @@ const legacyData: any = oldFunction();
 ```typescript
 // Si librería externa no tiene types
 import externalLib from 'no-types-library';
-const result: any = externalLib.method();  // Temporal
+const result: any = externalLib.method(); // Temporal
 ```
 
 **PERO:** Documentar con comentario `// TODO: Add types`
@@ -209,7 +225,7 @@ function getUser(id: string): Promise<User | null> {
 
 ```typescript
 // ✅ BIEN - TypeScript infiere el tipo
-const users = await prisma.user.findMany();  // User[]
+const users = await prisma.user.findMany(); // User[]
 
 // ❌ INNECESARIO
 const users: any = await prisma.user.findMany();
@@ -220,13 +236,13 @@ const users: any = await prisma.user.findMany();
 ```typescript
 // ❌ MAL - 'any' permite cualquier cosa
 function procesarError(error: any) {
-  console.log(error.message);  // No type checking
+  console.log(error.message); // No type checking
 }
 
 // ✅ BIEN - 'unknown' requiere type guard
 function procesarError(error: unknown) {
   if (error instanceof Error) {
-    console.log(error.message);  // ✅ Type-safe
+    console.log(error.message); // ✅ Type-safe
   }
 }
 ```
@@ -261,6 +277,7 @@ git commit --no-verify -m "hotfix crítico"
 ```
 
 **⚠️ SOLO usar en:**
+
 - Hotfix de producción urgente
 - Deploy bloqueado por regla falsa positiva
 
@@ -272,6 +289,7 @@ const urgentFix: any = externalBrokenLibrary();
 ```
 
 **⚠️ DEBE incluir:**
+
 - Comentario explicando por qué
 - Issue/ticket para arreglarlo después
 

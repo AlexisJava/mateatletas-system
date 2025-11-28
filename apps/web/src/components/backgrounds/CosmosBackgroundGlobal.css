@@ -80,7 +80,8 @@
 }
 
 @keyframes orbFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.4;
   }
@@ -125,23 +126,30 @@
 .cosmos-star-small {
   width: 3px;
   height: 3px;
-  box-shadow: 0 0 4px rgba(255, 255, 255, 1), 0 0 2px white;
+  box-shadow:
+    0 0 4px rgba(255, 255, 255, 1),
+    0 0 2px white;
 }
 
 .cosmos-star-medium {
   width: 4px;
   height: 4px;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 1), 0 0 3px white;
+  box-shadow:
+    0 0 6px rgba(255, 255, 255, 1),
+    0 0 3px white;
 }
 
 .cosmos-star-large {
   width: 5px;
   height: 5px;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 1), 0 0 4px white;
+  box-shadow:
+    0 0 8px rgba(255, 255, 255, 1),
+    0 0 4px white;
 }
 
 @keyframes starTwinkle {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.8;
   }
   50% {
@@ -177,7 +185,8 @@
 }
 
 @keyframes nebulaFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.5;
   }

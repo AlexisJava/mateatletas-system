@@ -1,4 +1,5 @@
 # PLAN DE IMPLEMENTACIÓN - MÓDULO QUÍMICA
+
 ## Mes de la Ciencia - Semana 1: "El Laboratorio de Mezclas Mágicas"
 
 **Fecha**: 2025-10-29
@@ -9,6 +10,7 @@
 ## 📊 ESTADO ACTUAL
 
 ### ✅ Ya implementado:
+
 - Interfaz del átomo interactivo ([LaboratorioEcosistema.tsx](apps/web/src/app/estudiante/gimnasio/components/overlays/LaboratorioEcosistema.tsx))
 - 6 electrones orbitando con datos hardcodeados
 - Sistema de navegación (4 cards → átomo → detalles)
@@ -17,6 +19,7 @@
 - Sistema de tracking de progreso (16% energía = 3/18 actividades)
 
 ### ❌ Falta implementar:
+
 - **Contenido real** de las actividades de química
 - **Simuladores interactivos** (concentraciones, laboratorio, olimpiada, reacción en cadena)
 - **Adaptación por grupo etario** (6-7, 8-9, 10-12 años)
@@ -28,14 +31,17 @@
 ## 🎯 OBJETIVOS SEGÚN PDF
 
 ### Narrativa
+
 > "Los estudiantes son aprendices de un laboratorio secreto. Deben aprender a crear compuestos siguiendo recetas exactas, balanceando proporciones y gestionando inventarios para salvar a la ciudad de una crisis química."
 
 ### Conceptos matemáticos por grupo
+
 - **Grupo 1 (6-7 años)**: Sumas/restas hasta 1,000, multiplicación básica, proporciones simples (2:3)
 - **Grupo 2 (8-9 años)**: Operaciones hasta 10,000, proporciones más complejas, fracciones básicas, regla de 3 simple
 - **Grupo 3 (10-12 años)**: Ecuaciones simples, porcentajes, balanceo de ecuaciones, optimización
 
 ### Contenido científico
+
 - Mezclas de colores (primarios → secundarios)
 - Concentraciones (soluto + solvente)
 - Proporciones en recetas químicas
@@ -43,6 +49,7 @@
 - Balanceo básico de reacciones
 
 ### 4 Actividades asincrónicas
+
 1. **Desafío de acertijos matemáticos** con temática química (historia interactiva)
 2. **Simulador de concentraciones** (8-10 niveles de dificultad creciente)
 3. **Olimpiada de problemas** (15-20 ejercicios progresivos)
@@ -84,10 +91,12 @@ apps/web/src/app/estudiante/gimnasio/
 ## 🚀 PLAN DE IMPLEMENTACIÓN (11 PASOS)
 
 ### **PASO 1: Actualizar data de electrones en el átomo**
+
 **Archivo**: `LaboratorioEcosistema.tsx`
 **Qué hacer**: Reemplazar los datos hardcodeados de los 6 electrones con contenido real de química
 
 **Electrones actuales** (placeholder):
+
 - intro: Ciencia Básica 📚
 - tabla: Átomos ⚛️
 - acidos: Ácidos 🧪
@@ -96,6 +105,7 @@ apps/web/src/app/estudiante/gimnasio/
 - estados: Estados ❄️
 
 **Nuevos electrones** (basados en PDF + creatividad):
+
 1. **Introducción** 🧪: "¿Qué es la Química?" (Video + quiz rápido)
 2. **Mezclas de Colores** 🎨: Aprender colores primarios → secundarios
 3. **Concentraciones** ⚗️: Soluto + solvente, proporciones
@@ -104,6 +114,7 @@ apps/web/src/app/estudiante/gimnasio/
 6. **Laboratorio Final** 🔬: Proyecto integrador
 
 **Actividades por electrón** (3 por cada uno = 18 total):
+
 - Video introductorio (3-5 min)
 - Ejercicio interactivo (10-15 min)
 - Desafío práctico (5-10 min)
@@ -111,6 +122,7 @@ apps/web/src/app/estudiante/gimnasio/
 ---
 
 ### **PASO 2: Crear tipos TypeScript**
+
 **Archivo**: `apps/web/src/app/estudiante/gimnasio/types/quimica.types.ts`
 
 ```typescript
@@ -204,16 +216,19 @@ export interface ResultadoActividad {
 ---
 
 ### **PASO 3: Crear data de acertijos matemáticos**
+
 **Archivo**: `apps/web/src/app/estudiante/gimnasio/data/quimica/acertijos-por-grupo.ts`
 
 **Contenido**: 20-30 acertijos matemáticos con temática química, adaptados por grupo etario
 
 Ejemplo:
+
 ```typescript
 export const ACERTIJOS_QUIMICA_6_7: ProblemaMatematico[] = [
   {
     id: 'acertijo-1-facil',
-    enunciado: 'El científico tiene 5 tubos de ensayo rojos y 3 azules. ¿Cuántos tubos tiene en total?',
+    enunciado:
+      'El científico tiene 5 tubos de ensayo rojos y 3 azules. ¿Cuántos tubos tiene en total?',
     respuestaCorrecta: 8,
     explicacion: '5 + 3 = 8 tubos de ensayo',
     puntos: 10,
@@ -227,7 +242,8 @@ export const ACERTIJOS_QUIMICA_6_7: ProblemaMatematico[] = [
 export const ACERTIJOS_QUIMICA_8_9: ProblemaMatematico[] = [
   {
     id: 'acertijo-1-medio',
-    enunciado: 'Una reacción química necesita 150ml de agua y 50ml de ácido. ¿Cuál es la proporción agua:ácido?',
+    enunciado:
+      'Una reacción química necesita 150ml de agua y 50ml de ácido. ¿Cuál es la proporción agua:ácido?',
     opciones: ['3:1', '2:1', '1:3', '1:2'],
     respuestaCorrecta: '3:1',
     explicacion: '150÷50 = 3, por lo tanto la proporción es 3:1',
@@ -242,7 +258,8 @@ export const ACERTIJOS_QUIMICA_8_9: ProblemaMatematico[] = [
 export const ACERTIJOS_QUIMICA_10_12: ProblemaMatematico[] = [
   {
     id: 'acertijo-1-dificil',
-    enunciado: 'Para balancear la ecuación H₂ + O₂ → H₂O, ¿cuántas moléculas de H₂ necesitas por cada O₂?',
+    enunciado:
+      'Para balancear la ecuación H₂ + O₂ → H₂O, ¿cuántas moléculas de H₂ necesitas por cada O₂?',
     opciones: ['1', '2', '3', '4'],
     respuestaCorrecta: '2',
     explicacion: '2H₂ + O₂ → 2H₂O es la ecuación balanceada',
@@ -258,6 +275,7 @@ export const ACERTIJOS_QUIMICA_10_12: ProblemaMatematico[] = [
 ---
 
 ### **PASO 4: Crear data de simulador de concentraciones**
+
 **Archivo**: `apps/web/src/app/estudiante/gimnasio/data/quimica/niveles-concentraciones.ts`
 
 **Contenido**: 10 niveles progresivos donde el estudiante debe mezclar soluto y solvente para lograr una concentración objetivo
@@ -284,7 +302,7 @@ export const NIVELES_CONCENTRACIONES: NivelConcentracion[] = [
     titulo: 'Proporción 1:3',
     objetivo: 'Crea una mezcla con proporción 1:3 de colorante:agua (total: 200ml)',
     solucion: {
-      soluto: 50,   // 1 parte
+      soluto: 50, // 1 parte
       solvente: 150, // 3 partes
       concentracionObjetivo: 25,
     },
@@ -313,6 +331,7 @@ export const NIVELES_CONCENTRACIONES: NivelConcentracion[] = [
 ---
 
 ### **PASO 5: Crear data de olimpiada de problemas**
+
 **Archivo**: `apps/web/src/app/estudiante/gimnasio/data/quimica/problemas-olimpiada.ts`
 
 **Contenido**: 15-20 problemas matemáticos progresivos (fácil → difícil), temática química
@@ -322,7 +341,8 @@ export const PROBLEMAS_OLIMPIADA: ProblemaMatematico[] = [
   // Problemas 1-5: Fáciles (6-7 años)
   {
     id: 'olimp-1',
-    enunciado: 'Un laboratorio compró 8 cajas de tubos. Cada caja tiene 12 tubos. ¿Cuántos tubos hay en total?',
+    enunciado:
+      'Un laboratorio compró 8 cajas de tubos. Cada caja tiene 12 tubos. ¿Cuántos tubos hay en total?',
     respuestaCorrecta: 96,
     explicacion: '8 × 12 = 96 tubos',
     puntos: 20,
@@ -333,7 +353,8 @@ export const PROBLEMAS_OLIMPIADA: ProblemaMatematico[] = [
   // Problemas 6-12: Medios (8-9 años)
   {
     id: 'olimp-7',
-    enunciado: 'Una solución tiene 240ml de agua y 60ml de sal. ¿Qué porcentaje de la mezcla es sal?',
+    enunciado:
+      'Una solución tiene 240ml de agua y 60ml de sal. ¿Qué porcentaje de la mezcla es sal?',
     opciones: ['20%', '25%', '30%', '40%'],
     respuestaCorrecta: '20%',
     explicacion: 'Total = 300ml. Sal = 60ml. Porcentaje = (60÷300)×100 = 20%',
@@ -345,7 +366,8 @@ export const PROBLEMAS_OLIMPIADA: ProblemaMatematico[] = [
   // Problemas 13-20: Difíciles (10-12 años)
   {
     id: 'olimp-15',
-    enunciado: 'Para producir 500g de un compuesto se necesita 2 partes de A y 3 partes de B. ¿Cuántos gramos de B se requieren?',
+    enunciado:
+      'Para producir 500g de un compuesto se necesita 2 partes de A y 3 partes de B. ¿Cuántos gramos de B se requieren?',
     respuestaCorrecta: 300,
     explicacion: 'Total = 2+3 = 5 partes. B = 3 partes. 500g ÷ 5 × 3 = 300g',
     puntos: 80,
@@ -360,6 +382,7 @@ export const PROBLEMAS_OLIMPIADA: ProblemaMatematico[] = [
 ---
 
 ### **PASO 6: Crear data de reacciones en cadena**
+
 **Archivo**: `apps/web/src/app/estudiante/gimnasio/data/quimica/reactivos-reacciones.ts`
 
 **Contenido**: Experimentos de reacción en cadena con múltiples variables
@@ -398,9 +421,11 @@ export const REACCIONES_CADENA: ReaccionCadena[] = [
 ---
 
 ### **PASO 7: Implementar componente AcertijosQuimicos.tsx**
+
 **Archivo**: `apps/web/src/app/estudiante/gimnasio/components/overlays/quimica/AcertijosQuimicos.tsx`
 
 **Funcionalidad**:
+
 - Historia interactiva con narración
 - Presentar acertijos uno por uno
 - Input para respuesta (numérica o multiple choice)
@@ -409,6 +434,7 @@ export const REACCIONES_CADENA: ReaccionCadena[] = [
 - Sistema de estrellas basado en % de aciertos
 
 **Interfaz visual**:
+
 - Tema laboratorio (tubos de ensayo, burbujas, colores químicos)
 - Animaciones de reacción al acertar/fallar
 - Contador de puntos en tiempo real
@@ -417,9 +443,11 @@ export const REACCIONES_CADENA: ReaccionCadena[] = [
 ---
 
 ### **PASO 8: Implementar componente SimuladorConcentraciones.tsx**
+
 **Archivo**: `apps/web/src/app/estudiante/gimnasio/components/overlays/quimica/SimuladorConcentraciones.tsx`
 
 **Funcionalidad**:
+
 - Tubo de ensayo visual grande
 - 2 sliders o input numéricos:
   - Soluto (ml)
@@ -433,6 +461,7 @@ export const REACCIONES_CADENA: ReaccionCadena[] = [
 - 10 niveles desbloqueables
 
 **Interfaz visual**:
+
 - Tubo de ensayo SVG animado
 - Líquidos con efecto de burbujeo
 - Partículas flotantes
@@ -441,9 +470,11 @@ export const REACCIONES_CADENA: ReaccionCadena[] = [
 ---
 
 ### **PASO 9: Implementar componente OlimpiadaProblemas.tsx**
+
 **Archivo**: `apps/web/src/app/estudiante/gimnasio/components/overlays/quimica/OlimpiadaProblemas.tsx`
 
 **Funcionalidad**:
+
 - Lista de 15-20 problemas matemáticos
 - Cada problema muestra:
   - Enunciado claro con contexto químico
@@ -458,6 +489,7 @@ export const REACCIONES_CADENA: ReaccionCadena[] = [
 - Ranking de estrellas al final (1-3 según % de aciertos)
 
 **Interfaz visual**:
+
 - Grid de problemas con estado (pendiente/correcto/incorrecto)
 - Tema científico (iconos de química)
 - Modal de resultado final con estadísticas
@@ -465,9 +497,11 @@ export const REACCIONES_CADENA: ReaccionCadena[] = [
 ---
 
 ### **PASO 10: Implementar componente ReaccionEnCadena.tsx**
+
 **Archivo**: `apps/web/src/app/estudiante/gimnasio/components/overlays/quimica/ReaccionEnCadena.tsx`
 
 **Funcionalidad** (proyecto final más complejo):
+
 - Vista de laboratorio virtual 3D o isométrico
 - Panel de reactivos disponibles (arrastrar o clickear)
 - Panel de variables con sliders:
@@ -484,6 +518,7 @@ export const REACCIONES_CADENA: ReaccionCadena[] = [
 - Resultado: éxito/fallo con retroalimentación detallada
 
 **Interfaz visual**:
+
 - Estética de laboratorio moderno
 - Matraz Erlenmeyer animado
 - Partículas de reacción con canvas/WebGL
@@ -492,9 +527,11 @@ export const REACCIONES_CADENA: ReaccionCadena[] = [
 ---
 
 ### **PASO 11: Integrar actividades en el átomo de química**
+
 **Archivo**: `apps/web/src/app/estudiante/gimnasio/components/overlays/LaboratorioEcosistema.tsx`
 
 **Cambios**:
+
 1. Actualizar array `ELECTRONES` con contenido real
 2. Reemplazar las 3 actividades placeholder de cada electrón con:
    - Video/lectura intro
@@ -504,6 +541,7 @@ export const REACCIONES_CADENA: ReaccionCadena[] = [
 4. Integrar los 4 componentes nuevos en el flujo de navegación
 
 **Ejemplo de integración**:
+
 ```typescript
 const ELECTRONES: Electron[] = [
   {
@@ -517,9 +555,27 @@ const ELECTRONES: Electron[] = [
     completado: false,
     bloqueado: false,
     actividades: [
-      { id: 'video-intro', titulo: 'Video: ¿Qué es la Química?', emoji: '🎬', duracion: '3 min', completada: false },
-      { id: 'quiz-intro', titulo: 'Quiz Rápido', emoji: '✅', duracion: '2 min', completada: false },
-      { id: 'lab-intro', titulo: 'Primera Mezcla', emoji: '⚗️', duracion: '5 min', completada: false },
+      {
+        id: 'video-intro',
+        titulo: 'Video: ¿Qué es la Química?',
+        emoji: '🎬',
+        duracion: '3 min',
+        completada: false,
+      },
+      {
+        id: 'quiz-intro',
+        titulo: 'Quiz Rápido',
+        emoji: '✅',
+        duracion: '2 min',
+        completada: false,
+      },
+      {
+        id: 'lab-intro',
+        titulo: 'Primera Mezcla',
+        emoji: '⚗️',
+        duracion: '5 min',
+        completada: false,
+      },
     ],
   },
   {
@@ -533,9 +589,29 @@ const ELECTRONES: Electron[] = [
     completado: false,
     bloqueado: false,
     actividades: [
-      { id: 'acertijos-colores', titulo: 'Acertijos de Colores', emoji: '🧩', duracion: '8 min', completada: false, componente: 'AcertijosQuimicos' },
-      { id: 'mezclar-colores', titulo: 'Laboratorio de Colores', emoji: '🌈', duracion: '10 min', completada: false, componente: 'SimuladorConcentraciones' },
-      { id: 'quiz-colores', titulo: 'Evaluación', emoji: '📝', duracion: '5 min', completada: false },
+      {
+        id: 'acertijos-colores',
+        titulo: 'Acertijos de Colores',
+        emoji: '🧩',
+        duracion: '8 min',
+        completada: false,
+        componente: 'AcertijosQuimicos',
+      },
+      {
+        id: 'mezclar-colores',
+        titulo: 'Laboratorio de Colores',
+        emoji: '🌈',
+        duracion: '10 min',
+        completada: false,
+        componente: 'SimuladorConcentraciones',
+      },
+      {
+        id: 'quiz-colores',
+        titulo: 'Evaluación',
+        emoji: '📝',
+        duracion: '5 min',
+        completada: false,
+      },
     ],
   },
   // ... resto de electrones
@@ -547,37 +623,49 @@ const ELECTRONES: Electron[] = [
 ## 🧪 DETALLE DE LOS 6 ELECTRONES
 
 ### **Electrón 1: Introducción a la Química** 🧪
+
 **Actividades**:
+
 1. Video: "¿Qué es la Química?" (3 min) - Intro animada
 2. Quiz: 5 preguntas básicas de comprensión
 3. Primera mezcla: Simulador simple (agua + colorante)
 
 ### **Electrón 2: Mezclas y Colores** 🎨
+
 **Actividades**:
+
 1. Acertijos matemáticos: Problemas de sumas/proporciones con colores
 2. Simulador: Mezclar colores primarios → secundarios
 3. Desafío: Crear 6 colores diferentes (progresivo)
 
 ### **Electrón 3: Concentraciones** ⚗️
+
 **Actividades**:
+
 1. Video: "Soluto y Solvente" (4 min) - Explicación con animaciones
 2. Simulador de concentraciones: Niveles 1-10
 3. Olimpiada: Problemas de porcentajes/proporciones (subset)
 
 ### **Electrón 4: Tabla Periódica** ⚛️
+
 **Actividades**:
+
 1. Tabla Periódica interactiva: Clickear elementos y ver info
 2. Memorización: Juego de memoria con símbolos químicos
 3. Quiz: Identificar elementos por símbolo/nombre
 
 ### **Electrón 5: Reacciones Químicas** 💥
+
 **Actividades**:
+
 1. Video: "Qué es una Reacción Química" (5 min)
 2. Balanceo simple: Ecuaciones visuales (H₂ + O₂ → H₂O)
 3. Olimpiada de problemas: Subset de problemas matemáticos
 
 ### **Electrón 6: Laboratorio Final** 🔬
+
 **Actividades**:
+
 1. Acertijos finales: Problemas integradores
 2. Proyecto: Reacción en cadena (actividad más compleja)
 3. Evaluación: Quiz final de 10 preguntas
@@ -587,6 +675,7 @@ const ELECTRONES: Electron[] = [
 ## 🗂️ BACKEND Y PERSISTENCIA
 
 ### **Endpoints necesarios** (API):
+
 ```
 GET  /api/estudiante/progreso-quimica
 POST /api/estudiante/completar-actividad
@@ -594,7 +683,9 @@ GET  /api/estudiante/estadisticas-mes-ciencia
 ```
 
 ### **Modelo de datos** (Prisma):
+
 Ya existe el modelo `Planificacion` y `AsignacionPlanificacion`. Se debe:
+
 1. Verificar que soporte tracking de progreso por actividad individual
 2. Agregar campo `actividadCompletada: boolean[]` (18 elementos, uno por actividad)
 3. Endpoint para actualizar progreso cuando el estudiante completa una actividad
@@ -604,6 +695,7 @@ Ya existe el modelo `Planificacion` y `AsignacionPlanificacion`. Se debe:
 ## 📊 CRITERIOS DE ÉXITO
 
 ### **Funcional**:
+
 - ✅ Las 4 actividades asincrónicas funcionan end-to-end
 - ✅ Progreso se guarda en backend y persiste entre sesiones
 - ✅ Contenido adaptado por grupo etario (6-7, 8-9, 10-12)
@@ -612,6 +704,7 @@ Ya existe el modelo `Planificacion` y `AsignacionPlanificacion`. Se debe:
 - ✅ Animaciones suaves y sin bugs visuales
 
 ### **Pedagógico**:
+
 - ✅ Los problemas matemáticos son apropiados para cada edad
 - ✅ La narrativa de "laboratorio secreto" se mantiene consistente
 - ✅ Feedback educativo en cada respuesta incorrecta
@@ -619,6 +712,7 @@ Ya existe el modelo `Planificacion` y `AsignacionPlanificacion`. Se debe:
 - ✅ Gamificación motivante (puntos, estrellas, desbloqueables)
 
 ### **Técnico**:
+
 - ✅ TypeScript strict mode sin errores
 - ✅ Componentes reutilizables y bien estructurados
 - ✅ Performance: 60fps en animaciones
@@ -629,21 +723,21 @@ Ya existe el modelo `Planificacion` y `AsignacionPlanificacion`. Se debe:
 
 ## 📅 ESTIMACIÓN DE TIEMPO
 
-| Tarea | Tiempo estimado |
-|-------|----------------|
-| PASO 1: Actualizar electrones | 30 min |
-| PASO 2: Crear tipos TypeScript | 20 min |
-| PASO 3: Data acertijos | 1 hora |
-| PASO 4: Data concentraciones | 45 min |
-| PASO 5: Data olimpiada | 1 hora |
-| PASO 6: Data reacciones | 1 hora |
-| PASO 7: AcertijosQuimicos.tsx | 2 horas |
-| PASO 8: SimuladorConcentraciones.tsx | 3 horas |
-| PASO 9: OlimpiadaProblemas.tsx | 2 horas |
-| PASO 10: ReaccionEnCadena.tsx | 4 horas |
-| PASO 11: Integración en átomo | 1 hora |
-| Testing y ajustes | 2 horas |
-| **TOTAL** | **~18 horas** |
+| Tarea                                | Tiempo estimado |
+| ------------------------------------ | --------------- |
+| PASO 1: Actualizar electrones        | 30 min          |
+| PASO 2: Crear tipos TypeScript       | 20 min          |
+| PASO 3: Data acertijos               | 1 hora          |
+| PASO 4: Data concentraciones         | 45 min          |
+| PASO 5: Data olimpiada               | 1 hora          |
+| PASO 6: Data reacciones              | 1 hora          |
+| PASO 7: AcertijosQuimicos.tsx        | 2 horas         |
+| PASO 8: SimuladorConcentraciones.tsx | 3 horas         |
+| PASO 9: OlimpiadaProblemas.tsx       | 2 horas         |
+| PASO 10: ReaccionEnCadena.tsx        | 4 horas         |
+| PASO 11: Integración en átomo        | 1 hora          |
+| Testing y ajustes                    | 2 horas         |
+| **TOTAL**                            | **~18 horas**   |
 
 ---
 
@@ -670,6 +764,7 @@ Ya existe el modelo `Planificacion` y `AsignacionPlanificacion`. Se debe:
 ## 🔄 PRÓXIMOS PASOS (después de Química)
 
 Una vez completada la Semana 1 (Química), replicar el mismo patrón para:
+
 - **Semana 2**: Astronomía 🔭 (Observatorio Galáctico)
 - **Semana 3**: Física 🎢 (Parque de Diversiones)
 - **Semana 4**: Informática 💻 (Academia de Programadores)

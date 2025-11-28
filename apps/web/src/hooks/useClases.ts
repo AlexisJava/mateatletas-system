@@ -1,5 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useClasses as useAdminClasses, useClassesLoading, useClassesError, useFetchClasses, useCreateClass, useCancelClass } from '@/features/admin/classes';
+import {
+  useClasses as useAdminClasses,
+  useClassesLoading,
+  useClassesError,
+  useFetchClasses,
+  useCreateClass,
+  useCancelClass,
+} from '@/features/admin/classes';
 import * as adminApi from '@/lib/api/admin.api';
 import type { ClaseListado } from '@/types/admin-clases.types';
 import type { RutaEspecialidadFromSchema } from '@/lib/schemas/ruta.schema';
@@ -85,7 +92,9 @@ export function useClasesFormData() {
  */
 export function useClasesFilter(clases: ClaseListado[]) {
   const [filter, setFilter] = useState<'all' | 'Programada' | 'Cancelada' | 'Activa'>('all');
-  const [sectorFilter, setSectorFilter] = useState<'all' | 'Matemática' | 'Programación' | 'Ciencias'>('all');
+  const [sectorFilter, setSectorFilter] = useState<
+    'all' | 'Matemática' | 'Programación' | 'Ciencias'
+  >('all');
 
   const filteredClases = clases.filter((clase) => {
     // Filtro por estado

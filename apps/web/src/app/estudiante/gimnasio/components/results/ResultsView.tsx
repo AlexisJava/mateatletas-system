@@ -22,7 +22,14 @@ export interface ResultsViewProps {
   actividadId?: string;
 }
 
-export function ResultsView({ resultado, onVolver, onReintentar, onSiguiente, estudianteId, actividadId }: ResultsViewProps) {
+export function ResultsView({
+  resultado,
+  onVolver,
+  onReintentar,
+  onSiguiente,
+  estudianteId,
+  actividadId,
+}: ResultsViewProps) {
   const [mostrarEstrellas, setMostrarEstrellas] = useState(false);
   const [mostrarStats, setMostrarStats] = useState(false);
   const [mostrarRecompensas, setMostrarRecompensas] = useState(false);
@@ -176,9 +183,7 @@ export function ResultsView({ resultado, onVolver, onReintentar, onSiguiente, es
                         shadow-[0_8px_0_rgba(0,0,0,0.6)]
                       `}
                     >
-                      <span className="text-6xl">
-                        {index < resultado.estrellas ? '⭐' : '☆'}
-                      </span>
+                      <span className="text-6xl">{index < resultado.estrellas ? '⭐' : '☆'}</span>
                     </div>
                   </motion.div>
                 ))}

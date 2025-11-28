@@ -11,6 +11,7 @@
 Se planifica la implementación del "Mes de Matemática Aplicada", un programa educativo de 4 semanas donde los estudiantes (6-12 años) aprenden matemáticas aplicadas a contextos científicos mediante narrativas inmersivas.
 
 ### Características del Programa:
+
 - **Duración:** 4 semanas (1 mes)
 - **Formato:** 1 clase sincrónica de 90 min + 4 actividades asincrónicas (~20 min c/u)
 - **Público:** 3 grupos etarios (6-7, 8-9, 10-12 años)
@@ -41,6 +42,7 @@ Se planifica la implementación del "Mes de Matemática Aplicada", un programa e
 ### 3 Portales Integrados:
 
 #### 1️⃣ **Portal Admin** (`/admin/planificaciones`)
+
 - Crear/editar "Mes de Matemática Aplicada"
 - Configurar narrativas por semana
 - Asignar componentes React a cada actividad
@@ -48,6 +50,7 @@ Se planifica la implementación del "Mes de Matemática Aplicada", un programa e
 - Establecer objetivos y métricas
 
 #### 2️⃣ **Portal Docente** (`/docente/planificaciones`)
+
 - Ver planificaciones disponibles (creadas por admin)
 - Asignar planificación a SUS grupos
 - Dashboard de progreso de estudiantes
@@ -56,6 +59,7 @@ Se planifica la implementación del "Mes de Matemática Aplicada", un programa e
 - Ver reportes individuales
 
 #### 3️⃣ **Portal Estudiante** (`/estudiante/planificaciones`)
+
 - Ver planificaciones asignadas
 - Acceder a actividades (narrativas + simuladores)
 - Hacer quizzes, simuladores, proyectos
@@ -69,6 +73,7 @@ Se planifica la implementación del "Mes de Matemática Aplicada", un programa e
 ### Backend (NestJS + Prisma)
 
 **Modelos existentes:**
+
 ```prisma
 model PlanificacionMensual {
   id                    String
@@ -122,6 +127,7 @@ model PlanificacionSimple {
 ```
 
 **Endpoints existentes:**
+
 - ✅ `GET /api/planificaciones` - Listar planificaciones
 - ✅ `GET /api/planificaciones/:id` - Detalle de planificación
 - ✅ `GET /api/docentes/me/dashboard` - Dashboard docente
@@ -132,6 +138,7 @@ model PlanificacionSimple {
 **Portales existentes:**
 
 **Portal Estudiante** (`apps/web/src/app/estudiante/`):
+
 - ✅ Layout con sidebar + navegación
 - ✅ Dashboard (`/dashboard`)
 - ✅ Cursos con lecciones (`/cursos/[cursoId]`)
@@ -141,6 +148,7 @@ model PlanificacionSimple {
 - ✅ Ruta dinámica: `/planificaciones/[codigo]` - Detalle de planificación
 
 **Portal Docente** (`apps/web/src/app/docente/`):
+
 - ✅ Dashboard con estadísticas
 - ✅ Página de observaciones (recién completada con datos reales)
 - ✅ Grupos (`/grupos/[id]`)
@@ -148,6 +156,7 @@ model PlanificacionSimple {
 - ❌ Planificaciones (NO EXISTE AÚN)
 
 **Portal Admin** (`apps/web/src/app/admin/`):
+
 - ✅ Gestión de estudiantes, docentes, grupos
 - ✅ Credenciales
 - ✅ Reportes
@@ -158,6 +167,7 @@ model PlanificacionSimple {
 ## 🚀 Plan de Implementación MVP
 
 ### **Estrategia: MVP Incremental**
+
 Implementar UNA semana temática completa (Química) funcionando en los 3 portales antes de escalar.
 
 ---
@@ -170,6 +180,7 @@ Implementar UNA semana temática completa (Química) funcionando en los 3 portal
 ### **1. BACKEND** (1-2 semanas)
 
 #### Modificaciones al Schema:
+
 ```prisma
 // Agregar campos a PlanificacionMensual
 model PlanificacionMensual {
@@ -184,6 +195,7 @@ model PlanificacionMensual {
 ```
 
 #### Endpoints Nuevos:
+
 ```typescript
 // Estudiante - Progreso de planificaciones
 POST /api/estudiantes/me/planificaciones/:codigo/progreso
@@ -232,6 +244,7 @@ GET /api/docentes/me/planificaciones/:codigo/progreso
 ```
 
 #### Servicios a Crear:
+
 - `apps/api/src/planificaciones/planificaciones-narrativas.service.ts`
 - `apps/api/src/planificaciones/progreso.service.ts`
 
@@ -242,6 +255,7 @@ GET /api/docentes/me/planificaciones/:codigo/progreso
 #### Página: `/admin/planificaciones/crear`
 
 **Funcionalidades:**
+
 - Formulario para crear planificación mensual
 - Configurar narrativa (rol, misión, contexto, intro)
 - Agregar actividades por semana
@@ -249,6 +263,7 @@ GET /api/docentes/me/planificaciones/:codigo/progreso
 - Configurar props del componente (JSON editor)
 
 **Componentes a Crear:**
+
 ```
 apps/web/src/app/admin/planificaciones/
 ├── crear/
@@ -260,6 +275,7 @@ apps/web/src/app/admin/planificaciones/
 ```
 
 **UI Básica:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │ Crear Planificación Mensual                │
@@ -296,12 +312,14 @@ apps/web/src/app/admin/planificaciones/
 #### Página 1: `/docente/planificaciones`
 
 **Funcionalidades:**
+
 - Listar planificaciones disponibles (creadas por admin)
 - Botón "Asignar a mis grupos"
 - Ver planificaciones ya asignadas
 - Dashboard básico de progreso
 
 **Componentes a Crear:**
+
 ```
 apps/web/src/app/docente/planificaciones/
 ├── page.tsx                           // Lista de planificaciones
@@ -315,6 +333,7 @@ apps/web/src/app/docente/planificaciones/
 ```
 
 **UI:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │ Planificaciones                             │
@@ -344,6 +363,7 @@ apps/web/src/app/docente/planificaciones/
 #### Página 2: `/docente/planificaciones/[codigo]/progreso`
 
 **Reutilizar componentes de `/docente/observaciones`:**
+
 - Tabla con estudiantes en filas
 - Actividades en columnas
 - Check/X según completitud
@@ -356,6 +376,7 @@ apps/web/src/app/docente/planificaciones/
 #### Página 1: `/estudiante/planificaciones` (ya existe)
 
 **Modificaciones:**
+
 - Conectar con endpoint real: `GET /api/estudiantes/me/planificaciones`
 - Mostrar narrativa en cada card de planificación
 - Indicador visual de progreso por semana
@@ -365,6 +386,7 @@ apps/web/src/app/docente/planificaciones/
 **Esta es LA PÁGINA CLAVE del MVP.**
 
 **Estructura:**
+
 ```tsx
 <div className="planificacion-container">
   {/* Header con narrativa */}
@@ -403,6 +425,7 @@ apps/web/src/app/docente/planificaciones/
 ```
 
 **Componentes a Crear:**
+
 ```
 apps/web/src/app/estudiante/planificaciones/
 ├── [codigo]/
@@ -453,6 +476,7 @@ Estos componentes se renderizan dinámicamente dentro de la página de actividad
 #### Componente 1: **QuizInteractivo.tsx** (2-3 días)
 
 **Props:**
+
 ```typescript
 interface QuizInteractivoProps {
   nivel: number;
@@ -462,11 +486,12 @@ interface QuizInteractivoProps {
     respuestaCorrecta: number;
     explicacion: string;
   }[];
-  onCompletar: (datos: { puntaje: number, respuestas: any[] }) => void;
+  onCompletar: (datos: { puntaje: number; respuestas: any[] }) => void;
 }
 ```
 
 **Funcionalidades:**
+
 - Preguntas con opciones múltiples (radio buttons)
 - Feedback inmediato al responder (✅ correcto / ❌ incorrecto + explicación)
 - Barra de progreso (pregunta 3/10)
@@ -474,6 +499,7 @@ interface QuizInteractivoProps {
 - Botón "Guardar progreso" → llama `onCompletar()`
 
 **UI:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │ Quiz: Proporciones Químicas                 │
@@ -500,22 +526,24 @@ interface QuizInteractivoProps {
 #### Componente 2: **EjerciciosProgresivos.tsx** (3-4 días)
 
 **Props:**
+
 ```typescript
 interface EjerciciosProgresivosProps {
   nivel: number;
   ejercicios: {
     enunciado: string;
     respuestaCorrecta: number;
-    tolerancia?: number;  // Para respuestas aproximadas
+    tolerancia?: number; // Para respuestas aproximadas
     pista1: string;
     pista2: string;
     pista3: string;
   }[];
-  onCompletar: (datos: { correctas: number, intentos: number }) => void;
+  onCompletar: (datos: { correctas: number; intentos: number }) => void;
 }
 ```
 
 **Funcionalidades:**
+
 - Lista de 15-20 ejercicios que van subiendo dificultad
 - Input numérico + botón "Verificar"
 - Sistema de intentos (máximo 3 por ejercicio)
@@ -523,6 +551,7 @@ interface EjerciciosProgresivosProps {
 - Al completar todos: resumen + puntaje
 
 **UI:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │ Olimpiada Química                           │
@@ -548,6 +577,7 @@ interface EjerciciosProgresivosProps {
 #### Componente 3: **ProyectoFinal.tsx** (2-3 días)
 
 **Props:**
+
 ```typescript
 interface ProyectoFinalProps {
   titulo: string;
@@ -556,13 +586,14 @@ interface ProyectoFinalProps {
     label: string;
     tipo: 'text' | 'number' | 'textarea' | 'select';
     requerido: boolean;
-    opciones?: string[];  // Para selects
+    opciones?: string[]; // Para selects
   }[];
   onCompletar: (datos: { respuestas: Record<string, any> }) => void;
 }
 ```
 
 **Funcionalidades:**
+
 - Formulario donde el estudiante "diseña" su proyecto
 - Inputs variados: texto, números, áreas de texto, selects
 - Validación básica (campos requeridos)
@@ -570,6 +601,7 @@ interface ProyectoFinalProps {
 - Confirmación antes de enviar
 
 **UI:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │ Proyecto Final: Diseña tu Experimento       │
@@ -603,6 +635,7 @@ interface ProyectoFinalProps {
 #### Componente 4 (OPCIONAL): **SimuladorQuimicaBasico.tsx** (5-7 días)
 
 **Props:**
+
 ```typescript
 interface SimuladorQuimicaProps {
   nivel: number;
@@ -625,6 +658,7 @@ interface SimuladorQuimicaProps {
 ```
 
 **Funcionalidades:**
+
 - Canvas/SVG con tubos de ensayo
 - Sliders para ajustar cantidad de cada reactivo
 - Botón "Mezclar"
@@ -633,6 +667,7 @@ interface SimuladorQuimicaProps {
 - Feedback visual si la mezcla es exitosa o fallida
 
 **UI:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │ Laboratorio Virtual                         │
@@ -655,6 +690,7 @@ interface SimuladorQuimicaProps {
 `apps/web/src/components/actividades/SimuladorQuimicaBasico.tsx`
 
 **Librerías sugeridas:**
+
 - `react-konva` o `react-canvas` para el canvas
 - `framer-motion` para animaciones
 - SVG custom para los tubos de ensayo
@@ -663,20 +699,20 @@ interface SimuladorQuimicaProps {
 
 ## 📊 Timeline del MVP
 
-| Tarea | Duración | Responsable | Bloqueantes |
-|-------|----------|-------------|-------------|
-| **Backend: Schema + Endpoints** | 5-7 días | Backend | - |
-| **Admin: Crear planificación** | 5-7 días | Fullstack | Backend listo |
-| **Docente: Lista + Asignar** | 3-4 días | Frontend | Backend listo |
-| **Docente: Dashboard progreso** | 4-5 días | Frontend | Backend + Componentes |
-| **Estudiante: Lista planificaciones** | 1-2 días | Frontend | Backend listo |
-| **Estudiante: Página planificación** | 3-4 días | Frontend | Backend listo |
-| **Actividad: QuizInteractivo** | 2-3 días | Frontend | Página planificación |
-| **Actividad: EjerciciosProgresivos** | 3-4 días | Frontend | Página planificación |
-| **Actividad: ProyectoFinal** | 2-3 días | Frontend | Página planificación |
-| **Actividad: Simulador (opcional)** | 5-7 días | Frontend | Página planificación |
-| **Testing E2E** | 3-5 días | QA | Todo lo anterior |
-| **Deploy + Ajustes** | 2-3 días | DevOps | Testing aprobado |
+| Tarea                                 | Duración | Responsable | Bloqueantes           |
+| ------------------------------------- | -------- | ----------- | --------------------- |
+| **Backend: Schema + Endpoints**       | 5-7 días | Backend     | -                     |
+| **Admin: Crear planificación**        | 5-7 días | Fullstack   | Backend listo         |
+| **Docente: Lista + Asignar**          | 3-4 días | Frontend    | Backend listo         |
+| **Docente: Dashboard progreso**       | 4-5 días | Frontend    | Backend + Componentes |
+| **Estudiante: Lista planificaciones** | 1-2 días | Frontend    | Backend listo         |
+| **Estudiante: Página planificación**  | 3-4 días | Frontend    | Backend listo         |
+| **Actividad: QuizInteractivo**        | 2-3 días | Frontend    | Página planificación  |
+| **Actividad: EjerciciosProgresivos**  | 3-4 días | Frontend    | Página planificación  |
+| **Actividad: ProyectoFinal**          | 2-3 días | Frontend    | Página planificación  |
+| **Actividad: Simulador (opcional)**   | 5-7 días | Frontend    | Página planificación  |
+| **Testing E2E**                       | 3-5 días | QA          | Todo lo anterior      |
+| **Deploy + Ajustes**                  | 2-3 días | DevOps      | Testing aprobado      |
 
 **Total: 4-6 semanas** para MVP completo de Semana 1
 
@@ -687,17 +723,20 @@ interface SimuladorQuimicaProps {
 Al finalizar el MVP tendremos:
 
 **Portal Admin:**
+
 - ✅ Crear "Mes de Matemática Aplicada - Semana 1: Química"
 - ✅ Configurar narrativa (rol, misión, contexto)
 - ✅ Asignar 3 actividades con sus componentes
 
 **Portal Docente:**
+
 - ✅ Ver planificación disponible
 - ✅ Asignar a grupo B1
 - ✅ Ver progreso de 15 estudiantes en tiempo real
 - ✅ Identificar quién completó qué actividad
 
 **Portal Estudiante:**
+
 - ✅ Ver planificación asignada con narrativa inmersiva
 - ✅ Hacer Quiz interactivo (10 preguntas)
 - ✅ Resolver Ejercicios progresivos (15 problemas)
@@ -714,10 +753,10 @@ Al finalizar el MVP tendremos:
 
 ```typescript
 // .env
-FEATURE_PLANIFICACIONES_NARRATIVAS=true
-FEATURE_ACTIVIDADES_INTERACTIVAS=false
-FEATURE_SIMULADORES=false
-FEATURE_CLASES_SINCRONICAS=false
+FEATURE_PLANIFICACIONES_NARRATIVAS = true;
+FEATURE_ACTIVIDADES_INTERACTIVAS = false;
+FEATURE_SIMULADORES = false;
+FEATURE_CLASES_SINCRONICAS = false;
 ```
 
 ### 2. Testing Incremental
@@ -742,6 +781,7 @@ main (producción estable)
 ### 4. Métricas de Éxito
 
 **MVP aprobado si:**
+
 - ✅ Admin puede crear 1 planificación completa en <10 minutos
 - ✅ Docente puede asignarla a su grupo sin errores
 - ✅ 80%+ de estudiantes completan al menos 1 actividad
@@ -758,18 +798,21 @@ main (producción estable)
 Una vez que funcione la Semana 1, **replicar** para:
 
 **Semana 2: Astronomía** (2-3 semanas)
+
 - Simulador de viaje espacial
 - Quiz sobre sistema solar
 - Ejercicios de escalas y distancias
 - Proyecto: Diseñar misión a Marte
 
 **Semana 3: Física** (2-3 semanas)
+
 - Simulador de montañas rusas
 - Quiz sobre energía y movimiento
 - Ejercicios de velocidad/aceleración
 - Proyecto: Diseñar parque de diversiones
 
 **Semana 4: Informática** (2-3 semanas)
+
 - Simulador de programación visual (Blockly)
 - Quiz de algoritmos
 - Ejercicios de lógica
@@ -782,18 +825,21 @@ Una vez que funcione la Semana 1, **replicar** para:
 ### Fase 3: Funcionalidades Avanzadas (4-6 semanas)
 
 **Dashboard Docente Avanzado:**
+
 - Métricas en tiempo real con WebSockets
 - Exportar reportes a PDF/Excel
 - Notificaciones automáticas a tutores
 - Sistema de alertas (estudiante atrasado, muchos fallos)
 
 **Clases Sincrónicas:**
+
 - Integración con Google Meet
 - Quizzes en tiempo real (tipo Kahoot)
 - Simulador compartido (docente controla)
 - Sistema de respuestas en vivo
 
 **Gamificación:**
+
 - Sistema de puntos y logros
 - Rankings semanales del grupo
 - Badges/medallas por completar semanas
@@ -873,12 +919,14 @@ apps/
 ## 🎓 Tecnologías y Librerías
 
 ### Backend
+
 - **NestJS** - Framework
 - **Prisma** - ORM
 - **PostgreSQL** - Base de datos
 - **class-validator** - Validación de DTOs
 
 ### Frontend
+
 - **Next.js 15** - Framework React con App Router
 - **Turbopack** - Bundler
 - **TypeScript** - Tipado estático
@@ -888,6 +936,7 @@ apps/
 - **Axios** - HTTP client
 
 ### Actividades (opcional)
+
 - **react-konva** o **react-canvas** - Canvas para simuladores
 - **react-blockly** - Programación visual (Semana 4)
 - **recharts** o **chart.js** - Gráficos (si se necesitan)

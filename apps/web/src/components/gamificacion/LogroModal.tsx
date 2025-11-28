@@ -78,9 +78,7 @@ export function LogroModal({
                   </motion.div>
 
                   <div className="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-3">
-                    <span className="text-white font-bold uppercase text-sm">
-                      {rareza}
-                    </span>
+                    <span className="text-white font-bold uppercase text-sm">{rareza}</span>
                   </div>
 
                   <h2 className="text-white font-black text-3xl mb-2">
@@ -115,18 +113,14 @@ export function LogroModal({
                       {monedas > 0 && (
                         <div className="flex-1 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl p-4 text-center">
                           <div className="text-3xl mb-1">💰</div>
-                          <p className="text-white font-bold text-xl">
-                            +{monedas}
-                          </p>
+                          <p className="text-white font-bold text-xl">+{monedas}</p>
                           <p className="text-white/80 text-sm">Monedas</p>
                         </div>
                       )}
                       {xp > 0 && (
                         <div className="flex-1 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl p-4 text-center">
                           <div className="text-3xl mb-1">⚡</div>
-                          <p className="text-white font-bold text-xl">
-                            +{xp}
-                          </p>
+                          <p className="text-white font-bold text-xl">+{xp}</p>
                           <p className="text-white/80 text-sm">XP</p>
                         </div>
                       )}
@@ -140,10 +134,7 @@ export function LogroModal({
                     <h3 className="text-white font-semibold mb-2">Extras</h3>
                     <ul className="space-y-2">
                       {Object.entries(logro.extras).map(([key, value], index) => (
-                        <li
-                          key={index}
-                          className="flex items-start gap-2 text-gray-300"
-                        >
+                        <li key={index} className="flex items-start gap-2 text-gray-300">
                           <span className="text-green-400 mt-1">✓</span>
                           <span>
                             <strong>{key}:</strong> {JSON.stringify(value)}

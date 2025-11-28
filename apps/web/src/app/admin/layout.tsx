@@ -36,14 +36,62 @@ import {
  */
 
 const navItems = [
-  { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, color: 'from-violet-500 to-purple-500', badge: null },
-  { href: '/admin/usuarios', label: 'Usuarios', icon: Users, color: 'from-blue-500 to-cyan-500', badge: null },
-  { href: '/admin/credenciales', label: 'Credenciales', icon: Key, color: 'from-amber-500 to-orange-500', badge: null },
-  { href: '/admin/clases', label: 'Clubes y Cursos', icon: BookOpen, color: 'from-emerald-500 to-teal-500', badge: null },
-  { href: '/admin/estudiantes', label: 'Estudiantes', icon: GraduationCap, color: 'from-teal-500 to-cyan-500', badge: null },
-  { href: '/admin/planificaciones', label: 'Planificaciones', icon: Calendar, color: 'from-pink-500 to-rose-500', badge: null },
-  { href: '/admin/pagos', label: 'Pagos', icon: CreditCard, color: 'from-green-500 to-emerald-500', badge: null },
-  { href: '/admin/reportes', label: 'Reportes', icon: BarChart3, color: 'from-orange-500 to-red-500', badge: null },
+  {
+    href: '/admin/dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    color: 'from-violet-500 to-purple-500',
+    badge: null,
+  },
+  {
+    href: '/admin/usuarios',
+    label: 'Usuarios',
+    icon: Users,
+    color: 'from-blue-500 to-cyan-500',
+    badge: null,
+  },
+  {
+    href: '/admin/credenciales',
+    label: 'Credenciales',
+    icon: Key,
+    color: 'from-amber-500 to-orange-500',
+    badge: null,
+  },
+  {
+    href: '/admin/clases',
+    label: 'Clubes y Cursos',
+    icon: BookOpen,
+    color: 'from-emerald-500 to-teal-500',
+    badge: null,
+  },
+  {
+    href: '/admin/estudiantes',
+    label: 'Estudiantes',
+    icon: GraduationCap,
+    color: 'from-teal-500 to-cyan-500',
+    badge: null,
+  },
+  {
+    href: '/admin/planificaciones',
+    label: 'Planificaciones',
+    icon: Calendar,
+    color: 'from-pink-500 to-rose-500',
+    badge: null,
+  },
+  {
+    href: '/admin/pagos',
+    label: 'Pagos',
+    icon: CreditCard,
+    color: 'from-green-500 to-emerald-500',
+    badge: null,
+  },
+  {
+    href: '/admin/reportes',
+    label: 'Reportes',
+    icon: BarChart3,
+    color: 'from-orange-500 to-red-500',
+    badge: null,
+  },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -77,9 +125,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       // Si el usuario tiene otro rol ACTIVO, redirigir al dashboard apropiado
       if (user && activeRole && activeRole !== 'admin') {
         const redirectPath =
-          activeRole === 'docente' ? '/docente/dashboard' :
-          activeRole === 'estudiante' ? '/estudiante/gimnasio' :
-          '/dashboard';
+          activeRole === 'docente'
+            ? '/docente/dashboard'
+            : activeRole === 'estudiante'
+              ? '/estudiante/gimnasio'
+              : '/dashboard';
         router.replace(redirectPath);
         return;
       }
@@ -101,9 +151,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           if (currentActiveRole !== 'admin') {
             const redirectPath =
-              currentActiveRole === 'docente' ? '/docente/dashboard' :
-              currentActiveRole === 'estudiante' ? '/estudiante/gimnasio' :
-              '/dashboard';
+              currentActiveRole === 'docente'
+                ? '/docente/dashboard'
+                : currentActiveRole === 'estudiante'
+                  ? '/estudiante/gimnasio'
+                  : '/dashboard';
             router.replace(redirectPath);
             return;
           }
@@ -136,42 +188,41 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="h-screen relative overflow-hidden">
+      {/* FONDO TIPO SISTEMA OPERATIVO */}
+      {/* Gradiente base oscuro elegante */}
+      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-black" />
 
-        {/* FONDO TIPO SISTEMA OPERATIVO */}
-        {/* Gradiente base oscuro elegante */}
-        <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-black" />
+      {/* Gradientes de colores dinámicos */}
+      <div className="fixed inset-0 bg-gradient-to-tr from-violet-900/20 via-transparent to-blue-900/20" />
+      <div className="fixed inset-0 bg-gradient-to-bl from-emerald-900/10 via-transparent to-transparent" />
 
-        {/* Gradientes de colores dinámicos */}
-        <div className="fixed inset-0 bg-gradient-to-tr from-violet-900/20 via-transparent to-blue-900/20" />
-        <div className="fixed inset-0 bg-gradient-to-bl from-emerald-900/10 via-transparent to-transparent" />
-
-        {/* Grid sutil de fondo */}
-        <div
-          className="fixed inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `
+      {/* Grid sutil de fondo */}
+      <div
+        className="fixed inset-0 opacity-[0.02]"
+        style={{
+          backgroundImage: `
               linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
               linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
             `,
-            backgroundSize: '50px 50px',
-          }}
-        />
+          backgroundSize: '50px 50px',
+        }}
+      />
 
-        {/* Orbes de luz flotantes */}
-        <div className="fixed top-0 right-0 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="fixed bottom-0 left-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse animation-delay-2000" />
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse animation-delay-4000" />
+      {/* Orbes de luz flotantes */}
+      <div className="fixed top-0 right-0 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-pulse" />
+      <div className="fixed bottom-0 left-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse animation-delay-2000" />
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse animation-delay-4000" />
 
-        <div className="relative z-10 h-full">
+      <div className="relative z-10 h-full">
         {isValidating ? (
           <LoadingScreen />
         ) : (
           <div className="flex h-full overflow-hidden">
-
             {/* SIDEBAR ESTILO macOS */}
             <aside className="hidden md:flex md:flex-shrink-0">
-              <div className={`flex flex-col ${sidebarCollapsed ? 'w-20' : 'w-72'} backdrop-blur-2xl bg-white/5 border-r border-white/10 shadow-2xl transition-all duration-300`}>
-
+              <div
+                className={`flex flex-col ${sidebarCollapsed ? 'w-20' : 'w-72'} backdrop-blur-2xl bg-white/5 border-r border-white/10 shadow-2xl transition-all duration-300`}
+              >
                 {/* Logo y Branding */}
                 <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
                   {!sidebarCollapsed ? (
@@ -223,24 +274,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           group relative flex items-center rounded-xl
                           transition-all duration-300
                           ${sidebarCollapsed ? 'justify-center px-2 py-3.5' : 'gap-4 px-4 py-3.5'}
-                          ${
-                            isActive
-                              ? 'bg-white/10 shadow-lg'
-                              : 'hover:bg-white/5'
-                          }
+                          ${isActive ? 'bg-white/10 shadow-lg' : 'hover:bg-white/5'}
                         `}
                       >
                         {/* Barra lateral de color cuando está activo - solo en modo expandido */}
                         {isActive && !sidebarCollapsed && (
-                          <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b ${item.color} rounded-r-full`} />
+                          <div
+                            className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b ${item.color} rounded-r-full`}
+                          />
                         )}
 
                         {/* Icono con gradiente */}
                         <div className="relative flex-shrink-0">
                           {isActive && (
-                            <div className={`absolute inset-0 bg-gradient-to-br ${item.color} blur-md opacity-50`} />
+                            <div
+                              className={`absolute inset-0 bg-gradient-to-br ${item.color} blur-md opacity-50`}
+                            />
                           )}
-                          <div className={`relative w-10 h-10 rounded-lg ${isActive ? `bg-gradient-to-br ${item.color}` : 'bg-white/5'} flex items-center justify-center transition-all duration-300 group-hover:scale-110`}>
+                          <div
+                            className={`relative w-10 h-10 rounded-lg ${isActive ? `bg-gradient-to-br ${item.color}` : 'bg-white/5'} flex items-center justify-center transition-all duration-300 group-hover:scale-110`}
+                          >
                             <Icon className="w-5 h-5 text-white" strokeWidth={2.5} />
                           </div>
                         </div>
@@ -248,7 +301,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         {/* Label - Solo visible cuando no está colapsado */}
                         {!sidebarCollapsed && (
                           <>
-                            <span className={`text-base font-bold ${isActive ? 'text-white' : 'text-white/60 group-hover:text-white'} transition-colors`}>
+                            <span
+                              className={`text-base font-bold ${isActive ? 'text-white' : 'text-white/60 group-hover:text-white'} transition-colors`}
+                            >
                               {item.label}
                             </span>
 
@@ -286,9 +341,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           <p className="text-sm font-bold text-white truncate">
                             {user?.nombre} {user?.apellido}
                           </p>
-                          <p className="text-xs text-white/50 font-medium">
-                            Administrador
-                          </p>
+                          <p className="text-xs text-white/50 font-medium">Administrador</p>
                         </div>
                         <Zap className="w-4 h-4 text-amber-400" />
                       </div>
@@ -298,7 +351,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         onClick={handleLogout}
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-white/70 hover:text-white bg-white/5 hover:bg-red-500/20 rounded-xl transition-all duration-200 border border-white/10 hover:border-red-500/50 group"
                       >
-                        <LogOut className="w-5 h-5 group-hover:text-red-400 transition-colors" strokeWidth={2.5} />
+                        <LogOut
+                          className="w-5 h-5 group-hover:text-red-400 transition-colors"
+                          strokeWidth={2.5}
+                        />
                         Cerrar sesión
                       </button>
                     </>
@@ -320,7 +376,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         className="w-full flex items-center justify-center p-3 text-white/70 hover:text-white bg-white/5 hover:bg-red-500/20 rounded-xl transition-all duration-200 border border-white/10 hover:border-red-500/50 group"
                         title="Cerrar sesión"
                       >
-                        <LogOut className="w-5 h-5 group-hover:text-red-400 transition-colors" strokeWidth={2.5} />
+                        <LogOut
+                          className="w-5 h-5 group-hover:text-red-400 transition-colors"
+                          strokeWidth={2.5}
+                        />
                       </button>
                     </>
                   )}
@@ -330,11 +389,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
-
               {/* Top Bar estilo OS */}
               <header className="h-16 backdrop-blur-2xl bg-white/5 border-b border-white/10 shadow-lg">
                 <div className="h-full px-6 flex items-center justify-between">
-
                   {/* Mobile Menu Button */}
                   <button
                     onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -347,10 +404,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <div className="hidden md:flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
                       {navItems.find((item) => isActiveRoute(item.href))?.icon && (
-                        <>{(() => {
-                          const ActiveIcon = navItems.find((item) => isActiveRoute(item.href))!.icon;
-                          return <ActiveIcon className="w-5 h-5 text-white" strokeWidth={2.5} />;
-                        })()}</>
+                        <>
+                          {(() => {
+                            const ActiveIcon = navItems.find((item) =>
+                              isActiveRoute(item.href),
+                            )!.icon;
+                            return <ActiveIcon className="w-5 h-5 text-white" strokeWidth={2.5} />;
+                          })()}
+                        </>
                       )}
                     </div>
                     <h2 className="text-lg font-black text-white">
@@ -360,16 +421,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                   {/* Actions */}
                   <div className="flex items-center gap-3">
-                    <NotificationButton count={3} onClick={() => setNotificationsOpen(!notificationsOpen)} />
+                    <NotificationButton
+                      count={3}
+                      onClick={() => setNotificationsOpen(!notificationsOpen)}
+                    />
                   </div>
                 </div>
               </header>
 
               {/* Page Content - CON SCROLL */}
               <main className="flex-1 overflow-y-auto relative">
-                <div className="min-h-full w-full p-6">
-                  {children}
-                </div>
+                <div className="min-h-full w-full p-6">{children}</div>
 
                 {/* Panel de Notificaciones */}
                 {notificationsOpen && (
@@ -392,7 +454,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                               <AlertCircle className="w-5 h-5 text-white" strokeWidth={2.5} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-bold text-white mb-1">3 clases sin docente</p>
+                              <p className="text-sm font-bold text-white mb-1">
+                                3 clases sin docente
+                              </p>
                               <p className="text-xs text-white/60">Programadas para esta semana</p>
                               <p className="text-xs text-white/40 mt-1">Hace 5 minutos</p>
                             </div>
@@ -406,7 +470,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                               <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2.5} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-bold text-white mb-1">15 nuevos estudiantes</p>
+                              <p className="text-sm font-bold text-white mb-1">
+                                15 nuevos estudiantes
+                              </p>
                               <p className="text-xs text-white/60">Registrados este mes</p>
                               <p className="text-xs text-white/40 mt-1">Hace 1 hora</p>
                             </div>
@@ -420,8 +486,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                               <Info className="w-5 h-5 text-white" strokeWidth={2.5} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-bold text-white mb-1">Actualización disponible</p>
-                              <p className="text-xs text-white/60">Nueva versión de Mateatletas OS</p>
+                              <p className="text-sm font-bold text-white mb-1">
+                                Actualización disponible
+                              </p>
+                              <p className="text-xs text-white/60">
+                                Nueva versión de Mateatletas OS
+                              </p>
                               <p className="text-xs text-white/40 mt-1">Hace 2 horas</p>
                             </div>
                           </div>
@@ -478,10 +548,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             onClick={() => setSidebarOpen(false)}
                             className={`flex items-center gap-4 px-4 py-3 rounded-xl ${isActive ? 'bg-white/10' : 'hover:bg-white/5'}`}
                           >
-                            <div className={`w-10 h-10 rounded-lg ${isActive ? `bg-gradient-to-br ${item.color}` : 'bg-white/5'} flex items-center justify-center`}>
+                            <div
+                              className={`w-10 h-10 rounded-lg ${isActive ? `bg-gradient-to-br ${item.color}` : 'bg-white/5'} flex items-center justify-center`}
+                            >
                               <Icon className="w-5 h-5 text-white" />
                             </div>
-                            <span className={`text-base font-bold ${isActive ? 'text-white' : 'text-white/60'}`}>
+                            <span
+                              className={`text-base font-bold ${isActive ? 'text-white' : 'text-white/60'}`}
+                            >
                               {item.label}
                             </span>
                             {item.badge && (
@@ -499,7 +573,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             )}
           </div>
         )}
-        </div>
+      </div>
     </div>
   );
 }
@@ -526,7 +600,10 @@ function NotificationButton({ count, onClick }: { count: number; onClick?: () =>
       onClick={onClick}
       className="relative p-3 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-200 group"
     >
-      <Bell className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300" strokeWidth={2.5} />
+      <Bell
+        className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300"
+        strokeWidth={2.5}
+      />
       {count > 0 && (
         <span className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-red-500 to-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg shadow-red-500/50 animate-pulse">
           {count}

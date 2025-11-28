@@ -26,7 +26,7 @@ export default function QuizAsincronico({ onComplete }: QuizAsincronicoProps) {
   const [respuestas, setRespuestas] = useState<Partial<QuizResponses>>({
     actividades_tiempo_libre: [],
     juegos_favoritos: [],
-    contenido_consume: []
+    contenido_consume: [],
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -74,7 +74,8 @@ export default function QuizAsincronico({ onComplete }: QuizAsincronicoProps) {
 
         return !!(
           (needsJuegos ? hasJuegos : true) &&
-          respuestas.contenido_consume && respuestas.contenido_consume.length > 0 &&
+          respuestas.contenido_consume &&
+          respuestas.contenido_consume.length > 0 &&
           respuestas.estilo_creativo
         );
       case 4:
@@ -152,12 +153,12 @@ export default function QuizAsincronico({ onComplete }: QuizAsincronicoProps) {
     exit: {
       opacity: 0,
       y: -20,
-    }
+    },
   };
 
   const pageTransition = {
     duration: 0.3,
-    ease: 'easeOut'
+    ease: 'easeOut',
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -186,7 +187,7 @@ export default function QuizAsincronico({ onComplete }: QuizAsincronicoProps) {
               animate={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
               transition={{
                 duration: 0.5,
-                ease: 'easeInOut'
+                ease: 'easeInOut',
               }}
             />
           </div>
@@ -240,9 +241,10 @@ export default function QuizAsincronico({ onComplete }: QuizAsincronicoProps) {
               disabled={!canAdvance()}
               className={`
                 px-8 py-3 rounded-xl font-semibold transition-all
-                ${canAdvance()
-                  ? 'bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white shadow-lg shadow-cyan-500/30'
-                  : 'bg-slate-800/50 text-slate-500 cursor-not-allowed border border-slate-700'
+                ${
+                  canAdvance()
+                    ? 'bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-400 hover:to-purple-400 text-white shadow-lg shadow-cyan-500/30'
+                    : 'bg-slate-800/50 text-slate-500 cursor-not-allowed border border-slate-700'
                 }
               `}
               whileHover={canAdvance() ? { scale: 1.02 } : {}}
@@ -256,12 +258,17 @@ export default function QuizAsincronico({ onComplete }: QuizAsincronicoProps) {
               disabled={!canAdvance()}
               className={`
                 px-10 py-4 rounded-xl font-bold text-lg transition-all flex items-center gap-2
-                ${canAdvance()
-                  ? 'bg-gradient-to-r from-emerald-500 via-cyan-500 to-purple-500 hover:from-emerald-400 hover:via-cyan-400 hover:to-purple-400 text-white shadow-2xl shadow-cyan-500/40'
-                  : 'bg-slate-800/50 text-slate-500 cursor-not-allowed border border-slate-700'
+                ${
+                  canAdvance()
+                    ? 'bg-gradient-to-r from-emerald-500 via-cyan-500 to-purple-500 hover:from-emerald-400 hover:via-cyan-400 hover:to-purple-400 text-white shadow-2xl shadow-cyan-500/40'
+                    : 'bg-slate-800/50 text-slate-500 cursor-not-allowed border border-slate-700'
                 }
               `}
-              whileHover={canAdvance() ? { scale: 1.05, boxShadow: '0 25px 50px -12px rgba(6, 182, 212, 0.5)' } : {}}
+              whileHover={
+                canAdvance()
+                  ? { scale: 1.05, boxShadow: '0 25px 50px -12px rgba(6, 182, 212, 0.5)' }
+                  : {}
+              }
               whileTap={canAdvance() ? { scale: 0.98 } : {}}
             >
               Ver Mi Ruta Perfecta
@@ -278,7 +285,11 @@ export default function QuizAsincronico({ onComplete }: QuizAsincronicoProps) {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            Presioná <kbd className="px-2 py-1 bg-slate-800 rounded border border-slate-700 text-slate-400">Enter</kbd> para continuar
+            Presioná{' '}
+            <kbd className="px-2 py-1 bg-slate-800 rounded border border-slate-700 text-slate-400">
+              Enter
+            </kbd>{' '}
+            para continuar
           </motion.div>
         )}
       </div>

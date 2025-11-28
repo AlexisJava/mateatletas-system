@@ -22,11 +22,7 @@ interface ClassCardProps {
   showReserveButton?: boolean;
 }
 
-export function ClassCard({
-  clase,
-  onClick,
-  showReserveButton = true,
-}: ClassCardProps) {
+export function ClassCard({ clase, onClick, showReserveButton = true }: ClassCardProps) {
   // Formatear fecha y hora
   const fecha = new Date(clase.fecha_hora_inicio);
   const fechaFormateada = new Intl.DateTimeFormat('es-ES', {
@@ -48,9 +44,7 @@ export function ClassCard({
       ? (clase as { cupo_maximo?: number }).cupo_maximo
       : (clase as { cupos_maximo?: number }).cupos_maximo) ?? 0;
   const cuposOcupados =
-    (clase as { cupos_ocupados?: number }).cupos_ocupados ??
-    clase._count?.inscripciones ??
-    0;
+    (clase as { cupos_ocupados?: number }).cupos_ocupados ?? clase._count?.inscripciones ?? 0;
   const cuposDisponibles = Math.max(cupoMaximo - cuposOcupados, 0);
   const duracionMinutos = (clase as { duracion_minutos?: number }).duracion_minutos ?? 0;
 
@@ -83,10 +77,7 @@ export function ClassCard({
       }}
     >
       {/* Header con ruta curricular */}
-      <div
-        className="h-2 rounded-t-lg"
-        style={{ backgroundColor: colorRuta }}
-      ></div>
+      <div className="h-2 rounded-t-lg" style={{ backgroundColor: colorRuta }}></div>
 
       <div className="space-y-4 p-5">
         {/* Ruta curricular y estado */}
@@ -155,9 +146,7 @@ export function ClassCard({
               ${cupoColor}
             `}
             >
-              {sinCupos
-                ? 'Sin cupos'
-                : `${cuposDisponibles}/${cupoMaximo} disponibles`}
+              {sinCupos ? 'Sin cupos' : `${cuposDisponibles}/${cupoMaximo} disponibles`}
             </div>
           </div>
         </div>

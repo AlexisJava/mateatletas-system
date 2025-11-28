@@ -1,10 +1,12 @@
 ## Pagos (Membresías y Pagos)
+
 - **Propósito:** Implementar la lógica de pagos: creación de **Membresías** de suscripción, inscripción a cursos de pago único, e integración con la pasarela de pago (MercadoPago). Permite a los tutores comprar una suscripción y mantener el estado de pago, y comprar cursos individuales para sus hijos.
-- **Subslices:** *No aplica.* (Incluye tanto suscripciones como pagos individuales.)
+- **Subslices:** _No aplica._ (Incluye tanto suscripciones como pagos individuales.)
 - **Relación con otros módulos:** Usa **Productos** del Catálogo (suscripción o curso). Crea **Membresía** para un Tutor al suscribirse. Crea **InscripciónCurso** para un Estudiante al comprar un curso. Interactúa con **MercadoPago** (o API externa) para procesar pagos. **Clases** y **Reservas** verifican la membresía activa. **Admin** monitorea estados de pago.
 
 ### Prompt de desarrollo
-```text
+
+````text
 Implement the **Pagos** vertical slice for subscriptions and one-time purchases.
 
 **Backend (NestJS)**:
@@ -41,7 +43,7 @@ Implement the **Pagos** vertical slice for subscriptions and one-time purchases.
     * notification_url: URL of /api/pagos/webhook (publicly accessible) for MP to POST status updates.
     * success/failure URLs for front-end redirect (not strictly needed if using webhooks).
   - Possibly save the preference ID in a temp table or log (not necessary, can trust MP to call webhook).
-- **Membresía logic**: 
+- **Membresía logic**:
   - A tutor can have at most one active Membresía. If a payment is missed (fechaProximoPago passed without renewal), could mark 'Atrasada' via a cron job or next login check.
   - For simplicity, marking 'Atrasada' can be manual or future work. For now, focus on setting 'Activa' on purchase and perhaps updating estado to 'Cancelada' on explicit cancel (not implemented).
 - **InscripcionCurso**:
@@ -61,7 +63,7 @@ Implement the **Pagos** vertical slice for subscriptions and one-time purchases.
     * Alternatively, if using MP checkout widget, use preferenceId with their script to open modal (advanced).
   - After payment:
     * User is redirected to a return URL (could be our `/suscripcion/exito` or `/suscripcion/error` depending).
-    * Implement pages: 
+    * Implement pages:
       - `/suscripcion/exito`: show "¡Pago recibido! Su suscripción está activa." (But rely on webhook to actually activate).
       - `/suscripcion/error`: show error message.
     * In `exito` page, we can call `GET /api/membresia` to confirm status. Or just instruct user that it may take a moment.
@@ -108,7 +110,7 @@ Implement the **Pagos** vertical slice for subscriptions and one-time purchases.
 7. **Backend Integration**: Update InscripcionesService (from Clases slice) to:
    - Check tutor’s Membresia.estado === 'Activa' before allowing class reservation.
    - If Clase.productoId is not null (means it's a course class), check InscripcionCurso exists for that student+producto (estado Activo).
-8. **Frontend**: 
+8. **Frontend**:
    - On Suscripcion page, integrate mutation to get checkout URL and redirect.
    - Create success/cancel pages to handle MP return (these pages mainly for user feedback; the actual activation is via webhook).
    - On Cursos page, integrate purchase flow similarly.
@@ -485,13 +487,15 @@ const membresia = await prisma.membresia.create({
 
 // Redirige a MercadoPago con membresiaId en el external_reference
 return { init_point, membresiaId };
-```
+````
 
 **2. Usuario completa pago en MercadoPago**:
+
 - Usuario es redirigido a `/suscripcion/exito?membresiaId=123`
 - Frontend puede mostrar: "Procesando pago..." y polling del estado
 
 **3. Webhook llega (asyncrono, 1-60 segundos después)**:
+
 ```typescript
 // Webhook actualiza la membresía de Pendiente → Activa
 await prisma.membresia.update({
@@ -499,21 +503,22 @@ await prisma.membresia.update({
   data: {
     estado: 'Activa',
     fechaInicio: new Date(),
-    fechaProximoPago: addMonths(new Date(), 1)
-  }
+    fechaProximoPago: addMonths(new Date(), 1),
+  },
 });
 ```
 
 **4. Frontend verifica estado**:
+
 ```typescript
 // Página de éxito hace polling cada 2 segundos
 const { data: membresia } = useQuery(
   ['membresia', membresiaId],
   () => api.getMembresia(membresiaId),
   {
-    refetchInterval: (data) => data?.estado === 'Pendiente' ? 2000 : false,
-    refetchIntervalInBackground: true
-  }
+    refetchInterval: (data) => (data?.estado === 'Pendiente' ? 2000 : false),
+    refetchIntervalInBackground: true,
+  },
 );
 
 if (membresia.estado === 'Activa') {
@@ -525,9 +530,10 @@ if (membresia.estado === 'Activa') {
 ### Validación en Reservas
 
 **Antes** (solo permitía 'Activa'):
+
 ```typescript
 const membresia = await prisma.membresia.findFirst({
-  where: { tutorId, estado: 'Activa' }
+  where: { tutorId, estado: 'Activa' },
 });
 
 if (!membresia) {
@@ -536,9 +542,10 @@ if (!membresia) {
 ```
 
 **Ahora** (permite 'Pendiente' con advertencia):
+
 ```typescript
 const membresia = await prisma.membresia.findFirst({
-  where: { tutorId, estado: { in: ['Activa', 'Pendiente'] } }
+  where: { tutorId, estado: { in: ['Activa', 'Pendiente'] } },
 });
 
 if (!membresia) {
@@ -546,20 +553,18 @@ if (!membresia) {
 }
 
 if (membresia.estado === 'Pendiente') {
-  throw new ConflictException(
-    'Tu pago está siendo procesado. Intentá reservar en 1-2 minutos.'
-  );
+  throw new ConflictException('Tu pago está siendo procesado. Intentá reservar en 1-2 minutos.');
 }
 ```
 
 ### Estados de Membresía
 
-| Estado | Descripción | Permite Reservar Clases |
-|--------|-------------|-------------------------|
-| **Pendiente** | Pago iniciado, esperando webhook | ❌ No (mostrar mensaje "procesando") |
-| **Activa** | Pago confirmado | ✅ Sí |
-| **Atrasada** | Pago vencido | ❌ No |
-| **Cancelada** | Cancelada manualmente o pago rechazado | ❌ No |
+| Estado        | Descripción                            | Permite Reservar Clases              |
+| ------------- | -------------------------------------- | ------------------------------------ |
+| **Pendiente** | Pago iniciado, esperando webhook       | ❌ No (mostrar mensaje "procesando") |
+| **Activa**    | Pago confirmado                        | ✅ Sí                                |
+| **Atrasada**  | Pago vencido                           | ❌ No                                |
+| **Cancelada** | Cancelada manualmente o pago rechazado | ❌ No                                |
 
 ### Endpoint Adicional para Polling
 
@@ -587,13 +592,14 @@ async getEstadoMembresia(
 
 ### Tiempo Esperado de Webhooks
 
-| Ambiente | Tiempo Típico |
-|----------|---------------|
-| **Sandbox (Test)** | 5-30 segundos |
-| **Producción** | 1-10 segundos |
+| Ambiente                 | Tiempo Típico     |
+| ------------------------ | ----------------- |
+| **Sandbox (Test)**       | 5-30 segundos     |
+| **Producción**           | 1-10 segundos     |
 | **Con problemas de red** | Hasta 60 segundos |
 
 **Timeout**: Si después de 2 minutos sigue en 'Pendiente', mostrar:
+
 > "El pago está demorando más de lo esperado. Contactá a soporte con el código: MEMB-123"
 
 Orden sugerido de implementación

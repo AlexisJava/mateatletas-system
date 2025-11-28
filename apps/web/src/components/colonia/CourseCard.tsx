@@ -56,14 +56,10 @@ export default function CourseCard({ course, index, onInscribe }: CourseCardProp
         </div>
 
         {/* Course Name */}
-        <h3 className="text-2xl font-black text-white mb-3 leading-tight">
-          {course.name}
-        </h3>
+        <h3 className="text-2xl font-black text-white mb-3 leading-tight">{course.name}</h3>
 
         {/* Description */}
-        <p className="text-white/70 text-sm leading-relaxed mb-6">
-          {course.description}
-        </p>
+        <p className="text-white/70 text-sm leading-relaxed mb-6">{course.description}</p>
 
         {/* Meta Info */}
         <div className="space-y-3 mb-6">
@@ -102,7 +98,9 @@ export default function CourseCard({ course, index, onInscribe }: CourseCardProp
           </div>
           <div>
             <div className="text-xs text-white/50">Instructor</div>
-            <div className="text-sm font-bold text-white">Profe {course.schedules[0].instructor}</div>
+            <div className="text-sm font-bold text-white">
+              Profe {course.schedules[0].instructor}
+            </div>
           </div>
         </div>
 

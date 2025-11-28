@@ -17,6 +17,7 @@ Cada planificación sigue esta convención de nomenclatura:
 ```
 
 Ejemplos:
+
 - `2025-11-nivel-1/` → Noviembre 2025, Nivel 1 (6-7 años)
 - `2025-11-nivel-2/` → Noviembre 2025, Nivel 2 (8-9 años)
 - `2025-11-nivel-3/` → Noviembre 2025, Nivel 3 (10-12 años)
@@ -26,18 +27,21 @@ Ejemplos:
 ## 🎮 Niveles
 
 ### Nivel 1 (6-7 años)
+
 - **Grupos**: B1
 - **Enfoque**: Introducción lúdica a conceptos matemáticos básicos
 - **Duración por sesión**: 60-75 minutos
 - **Carpeta**: `2025-11-nivel-1/`
 
 ### Nivel 2 (8-9 años)
+
 - **Grupos**: B2, B3
 - **Enfoque**: Consolidación de operaciones y resolución de problemas
 - **Duración por sesión**: 75-90 minutos
 - **Carpeta**: `2025-11-nivel-2/`
 
 ### Nivel 3 (10-12 años)
+
 - **Grupos**: B4, L1, L2
 - **Enfoque**: Matemática avanzada y pensamiento crítico
 - **Duración por sesión**: 90-120 minutos
@@ -77,6 +81,7 @@ Dentro de cada carpeta encontrarás:
 ### 1️⃣ Diseña la Experiencia
 
 En el `README.md` de cada planificación, documentá:
+
 - **Narrativa principal** (tema, misión, personajes)
 - **Objetivos pedagógicos** por semana
 - **Progresión de dificultad**
@@ -142,13 +147,13 @@ El sistema provee componentes base que podés usar (o no):
 
 ```tsx
 import {
-  PlanificacionApp,      // Wrapper principal con tracking automático
-  ProgressTracker,       // Barra de progreso del estudiante
-  GameScore,             // Sistema de puntaje
-  WeekNavigation,        // Navegación entre semanas
-  StudentProfile,        // Perfil y avatar del estudiante
-  ActivityTimer,         // Temporizador de actividad
-  AchievementPopup,      // Notificación de logros
+  PlanificacionApp, // Wrapper principal con tracking automático
+  ProgressTracker, // Barra de progreso del estudiante
+  GameScore, // Sistema de puntaje
+  WeekNavigation, // Navegación entre semanas
+  StudentProfile, // Perfil y avatar del estudiante
+  ActivityTimer, // Temporizador de actividad
+  AchievementPopup, // Notificación de logros
 } from '@/planificaciones/shared';
 ```
 
@@ -159,6 +164,7 @@ import {
 ## 🔗 Integración con el Sistema
 
 ### Automático:
+
 - ✅ Autenticación de estudiantes
 - ✅ Tracking de progreso
 - ✅ Guardado automático de estado
@@ -166,6 +172,7 @@ import {
 - ✅ Visibilidad para docentes
 
 ### Manual (vos decidís):
+
 - 🎮 Lógica de juegos
 - 🎨 Diseño visual
 - 📖 Narrativa
@@ -177,6 +184,7 @@ import {
 ## 📊 Dashboard de Docentes
 
 Los docentes podrán:
+
 1. Ver todas las planificaciones disponibles
 2. Revisar el contenido completo
 3. Asignar a sus grupos
@@ -188,6 +196,7 @@ Los docentes podrán:
 ## 🎯 Vista de Estudiantes
 
 Los estudiantes verán:
+
 1. Planificaciones asignadas por su docente
 2. Progreso semanal
 3. Actividades desbloqueadas
@@ -208,6 +217,7 @@ Los estudiantes verán:
 ## 🆘 Soporte Técnico
 
 Si necesitás ayuda con:
+
 - Persistencia de estado → Usá `usePlanificacionState()`
 - Tracking de progreso → Usá `useProgressTracker()`
 - Puntos y gamificación → Usá `useGameScore()`
@@ -222,6 +232,7 @@ Ver documentación en: `apps/web/src/planificaciones/shared/README.md`
 **CADA PLANIFICACIÓN ES ÚNICA**
 
 No estás limitado por templates ni componentes. Podés crear:
+
 - Juegos 2D con canvas
 - Animaciones con Three.js
 - Drag & drop personalizado

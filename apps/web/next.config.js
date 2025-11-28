@@ -56,20 +56,18 @@ const nextConfig = {
 
   // Experimental: mejorar tree-shaking
   experimental: {
-    optimizePackageImports: [
-      'lucide-react',
-      'framer-motion',
-      'react-chartjs-2',
-      'recharts',
-    ],
+    optimizePackageImports: ['lucide-react', 'framer-motion', 'react-chartjs-2', 'recharts'],
   },
 
   // Compiler optimizations
   compiler: {
     // Remover console.log en producción
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'],
-    } : false,
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? {
+            exclude: ['error', 'warn'],
+          }
+        : false,
   },
 
   // Webpack optimizations

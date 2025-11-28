@@ -21,12 +21,7 @@ interface PlanificacionAppProps {
   children: ReactNode;
 }
 
-export function PlanificacionApp({
-  codigo,
-  titulo,
-  descripcion,
-  children,
-}: PlanificacionAppProps) {
+export function PlanificacionApp({ codigo, titulo, descripcion, children }: PlanificacionAppProps) {
   const [tiempoInicio] = useState<Date>(new Date());
   const [, setTiempoActual] = useState<number>(0);
 
@@ -58,9 +53,12 @@ export function PlanificacionApp({
 
   // Auto-guardado cada 5 minutos
   useEffect(() => {
-    const interval = setInterval(() => {
-      guardarEstado();
-    }, 5 * 60 * 1000); // Cada 5 minutos
+    const interval = setInterval(
+      () => {
+        guardarEstado();
+      },
+      5 * 60 * 1000,
+    ); // Cada 5 minutos
 
     return () => clearInterval(interval);
   }, []);

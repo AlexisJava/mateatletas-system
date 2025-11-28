@@ -2,17 +2,18 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { InscripcionConAsistencia, EstadoAsistencia, MarcarAsistenciaDto } from '@/types/asistencia.types';
+import {
+  InscripcionConAsistencia,
+  EstadoAsistencia,
+  MarcarAsistenciaDto,
+} from '@/types/asistencia.types';
 import AttendanceStatusButton from './AttendanceStatusButton';
 
 interface AttendanceListProps {
   /** Lista de inscripciones con asistencia */
   inscripciones: InscripcionConAsistencia[];
   /** Callback para marcar asistencia */
-  onMarcarAsistencia: (
-    _estudianteId: string,
-    _data: MarcarAsistenciaDto
-  ) => Promise<boolean>;
+  onMarcarAsistencia: (_estudianteId: string, _data: MarcarAsistenciaDto) => Promise<boolean>;
   /** Si está guardando */
   isLoading?: boolean;
 }
@@ -50,10 +51,7 @@ export default function AttendanceList({
   /**
    * Manejar cambio de estado de asistencia
    */
-  const handleStatusChange = async (
-    estudianteId: string,
-    estado: EstadoAsistencia
-  ) => {
+  const handleStatusChange = async (estudianteId: string, estado: EstadoAsistencia) => {
     // Determinar puntos por defecto según el estado
     let puntosDefault = 0;
     switch (estado) {
@@ -106,7 +104,11 @@ export default function AttendanceList({
     if (isMarkingAll || isLoading) return;
 
     // Confirmar acción
-    if (!window.confirm(`¿Estás seguro de marcar a todos los ${inscripciones.length} estudiantes como presentes?`)) {
+    if (
+      !window.confirm(
+        `¿Estás seguro de marcar a todos los ${inscripciones.length} estudiantes como presentes?`,
+      )
+    ) {
       return;
     }
 
@@ -172,11 +174,7 @@ export default function AttendanceList({
    * Obtener valor de observaciones (del estado o del registro existente)
    */
   const getObservaciones = (inscripcion: InscripcionConAsistencia) => {
-    return (
-      observaciones[inscripcion.estudiante.id] ??
-      inscripcion.asistencia?.observaciones ??
-      ''
-    );
+    return observaciones[inscripcion.estudiante.id] ?? inscripcion.asistencia?.observaciones ?? '';
   };
 
   /**
@@ -190,12 +188,8 @@ export default function AttendanceList({
     return (
       <div className="bg-white rounded-lg shadow-md p-12 text-center">
         <span className="text-6xl">👥</span>
-        <h3 className="text-xl font-bold text-[#2a1a5e] mt-4">
-          No hay estudiantes inscritos
-        </h3>
-        <p className="text-gray-600 mt-2">
-          Esta clase no tiene estudiantes inscritos aún.
-        </p>
+        <h3 className="text-xl font-bold text-[#2a1a5e] mt-4">No hay estudiantes inscritos</h3>
+        <p className="text-gray-600 mt-2">Esta clase no tiene estudiantes inscritos aún.</p>
       </div>
     );
   }
@@ -294,10 +288,7 @@ export default function AttendanceList({
           const isExpanded = expandedId === estudiante.id;
 
           return (
-            <div
-              key={inscripcion.id}
-              className="p-6 hover:bg-gray-50 transition-colors"
-            >
+            <div key={inscripcion.id} className="p-6 hover:bg-gray-50 transition-colors">
               {/* Fila principal */}
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 {/* Número, foto y nombre */}
@@ -336,9 +327,7 @@ export default function AttendanceList({
                 <div className="flex-shrink-0">
                   <AttendanceStatusButton
                     currentStatus={asistencia?.estado || null}
-                    onStatusChange={(estado) =>
-                      handleStatusChange(estudiante.id, estado)
-                    }
+                    onStatusChange={(estado) => handleStatusChange(estudiante.id, estado)}
                     disabled={isLoading}
                   />
                 </div>
@@ -355,9 +344,7 @@ export default function AttendanceList({
                     viewBox="0 0 24 24"
                     strokeWidth={2}
                     stroke="currentColor"
-                    className={`w-6 h-6 transition-transform ${
-                      isExpanded ? 'rotate-180' : ''
-                    }`}
+                    className={`w-6 h-6 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                   >
                     <path
                       strokeLinecap="round"

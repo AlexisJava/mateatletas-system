@@ -9,7 +9,8 @@ export type GrupoEtario = '6-7' | '8-9' | '10-12';
  */
 export function calcularEdad(fechaNacimiento: string | Date): number {
   const hoy = new Date();
-  const nacimiento = typeof fechaNacimiento === 'string' ? new Date(fechaNacimiento) : fechaNacimiento;
+  const nacimiento =
+    typeof fechaNacimiento === 'string' ? new Date(fechaNacimiento) : fechaNacimiento;
 
   let edad = hoy.getFullYear() - nacimiento.getFullYear();
   const mes = hoy.getMonth() - nacimiento.getMonth();

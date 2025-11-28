@@ -72,7 +72,8 @@ export function MisCursosView({ estudiante: _estudiante }: MisCursosViewProps) {
           <h2 className="text-4xl font-black text-white">MIS CURSOS</h2>
         </div>
         <p className="text-gray-400">
-          Tienes {cursos?.length || 0} curso{(cursos?.length || 0) !== 1 ? 's' : ''} activo{(cursos?.length || 0) !== 1 ? 's' : ''}
+          Tienes {cursos?.length || 0} curso{(cursos?.length || 0) !== 1 ? 's' : ''} activo
+          {(cursos?.length || 0) !== 1 ? 's' : ''}
         </p>
       </div>
 

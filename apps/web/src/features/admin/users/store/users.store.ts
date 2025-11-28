@@ -10,7 +10,10 @@ interface UsersStore {
 
   fetchUsers: () => Promise<void>;
   changeUserRole: (userId: string, role: 'tutor' | 'docente' | 'admin') => Promise<boolean>;
-  updateUserRoles: (userId: string, roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[]) => Promise<boolean>;
+  updateUserRoles: (
+    userId: string,
+    roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[],
+  ) => Promise<boolean>;
   deleteUser: (userId: string) => Promise<boolean>;
   clearError: () => void;
   reset: () => void;
@@ -42,7 +45,10 @@ export const useUsersStore = create<UsersStore>((set, get) => ({
     }
   },
 
-  updateUserRoles: async (userId: string, roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[]): Promise<boolean> => {
+  updateUserRoles: async (
+    userId: string,
+    roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[],
+  ): Promise<boolean> => {
     try {
       await adminApi.updateUserRoles(userId, { roles });
       await get().fetchUsers();

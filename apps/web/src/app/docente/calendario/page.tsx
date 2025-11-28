@@ -2,9 +2,28 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameMonth,
+  addMonths,
+  subMonths,
+  startOfWeek,
+  endOfWeek,
+  isToday,
+} from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Clock, Users, BookOpen } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Calendar as CalendarIcon,
+  Clock,
+  Users,
+  BookOpen,
+} from 'lucide-react';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { LoadingSpinner } from '@/components/effects';
 
@@ -108,7 +127,7 @@ export default function DocenteCalendarioPage() {
               CALENDARIO
             </h1>
             <p className="text-purple-300 text-base font-bold">
-              {format(currentDate, "MMMM yyyy", { locale: es }).toUpperCase()}
+              {format(currentDate, 'MMMM yyyy', { locale: es }).toUpperCase()}
             </p>
           </div>
 
@@ -120,9 +139,7 @@ export default function DocenteCalendarioPage() {
             >
               HOY
             </button>
-            <button
-              className="px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-purple-900 font-black rounded-xl transition-all hover:scale-105 shadow-lg flex items-center gap-2"
-            >
+            <button className="px-6 py-3 bg-yellow-500 hover:bg-yellow-400 text-purple-900 font-black rounded-xl transition-all hover:scale-105 shadow-lg flex items-center gap-2">
               <Plus className="w-5 h-5" />
               NUEVO EVENTO
             </button>
@@ -183,7 +200,7 @@ export default function DocenteCalendarioPage() {
             </button>
 
             <h2 className="text-2xl font-black text-white">
-              {format(currentDate, "MMMM yyyy", { locale: es }).toUpperCase()}
+              {format(currentDate, 'MMMM yyyy', { locale: es }).toUpperCase()}
             </h2>
 
             <button
@@ -198,10 +215,7 @@ export default function DocenteCalendarioPage() {
           <div className="grid grid-cols-7 gap-2">
             {/* Días de la semana */}
             {diasSemana.map((dia) => (
-              <div
-                key={dia}
-                className="text-center py-3 text-purple-300 font-black text-sm"
-              >
+              <div key={dia} className="text-center py-3 text-purple-300 font-black text-sm">
                 {dia}
               </div>
             ))}
@@ -219,21 +233,26 @@ export default function DocenteCalendarioPage() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.01 }}
-                  onClick={() => {/* TODO: mostrar modal con clases del día */}}
+                  onClick={() => {
+                    /* TODO: mostrar modal con clases del día */
+                  }}
                   className={`
                     relative min-h-[100px] p-2 rounded-xl cursor-pointer transition-all
-                    ${esMesActual
-                      ? 'bg-white/10 hover:bg-white/20 border border-white/10 hover:border-purple-400/50'
-                      : 'bg-white/5 opacity-40'
+                    ${
+                      esMesActual
+                        ? 'bg-white/10 hover:bg-white/20 border border-white/10 hover:border-purple-400/50'
+                        : 'bg-white/5 opacity-40'
                     }
                     ${esHoy ? 'ring-2 ring-yellow-400 bg-yellow-500/20' : ''}
                   `}
                 >
                   <div className="flex flex-col h-full">
-                    <span className={`
+                    <span
+                      className={`
                       text-sm font-bold mb-1
                       ${esHoy ? 'text-yellow-400' : 'text-white'}
-                    `}>
+                    `}
+                    >
                       {format(day, 'd')}
                     </span>
 
@@ -246,8 +265,8 @@ export default function DocenteCalendarioPage() {
                             evento.tipo === 'clase'
                               ? 'bg-purple-600 text-white'
                               : evento.tipo === 'tarea'
-                              ? 'bg-yellow-500 text-black'
-                              : 'bg-blue-500 text-white'
+                                ? 'bg-yellow-500 text-black'
+                                : 'bg-blue-500 text-white'
                           }`}
                         >
                           {evento.hora && `${evento.hora} `}

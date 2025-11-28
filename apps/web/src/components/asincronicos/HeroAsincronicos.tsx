@@ -158,7 +158,7 @@ export default function HeroAsincronicos({ onExplorarCursos }: HeroAsincronicosP
                 transition={{
                   duration: 2,
                   repeat: Infinity,
-                  ease: 'easeInOut'
+                  ease: 'easeInOut',
                 }}
               />
               <span className="relative flex items-center gap-3">
@@ -205,7 +205,7 @@ export default function HeroAsincronicos({ onExplorarCursos }: HeroAsincronicosP
         onClick={() => {
           window.scrollTo({
             top: window.innerHeight,
-            behavior: 'smooth'
+            behavior: 'smooth',
           });
         }}
       >

@@ -18,10 +18,20 @@ const AVAILABLE_ROLES = [
   { value: 'admin', label: 'Administrador', icon: Shield, color: 'from-purple-600 to-violet-600' },
   { value: 'docente', label: 'Docente', icon: GraduationCap, color: 'from-blue-600 to-cyan-600' },
   { value: 'tutor', label: 'Tutor', icon: Users, color: 'from-green-600 to-emerald-600' },
-  { value: 'estudiante', label: 'Estudiante', icon: BookOpen, color: 'from-amber-600 to-orange-600' },
+  {
+    value: 'estudiante',
+    label: 'Estudiante',
+    icon: BookOpen,
+    color: 'from-amber-600 to-orange-600',
+  },
 ] as const;
 
-export default function MultiRoleModal({ user, onClose, onSave, isLoading = false }: MultiRoleModalProps) {
+export default function MultiRoleModal({
+  user,
+  onClose,
+  onSave,
+  isLoading = false,
+}: MultiRoleModalProps) {
   // Inicializar con los roles actuales del usuario
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
@@ -52,7 +62,10 @@ export default function MultiRoleModal({ user, onClose, onSave, isLoading = fals
     if (selectedRoles.length === 0) {
       return; // No permitir guardar sin roles
     }
-    const success = await onSave(user.id, selectedRoles as ('tutor' | 'docente' | 'admin' | 'estudiante')[]);
+    const success = await onSave(
+      user.id,
+      selectedRoles as ('tutor' | 'docente' | 'admin' | 'estudiante')[],
+    );
     if (success) {
       onClose();
     }
@@ -76,10 +89,7 @@ export default function MultiRoleModal({ user, onClose, onSave, isLoading = fals
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-3 hover:bg-white/10 rounded-2xl transition-all"
-          >
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all">
             <X className="w-6 h-6 text-white/70" />
           </button>
         </div>
@@ -113,21 +123,13 @@ export default function MultiRoleModal({ user, onClose, onSave, isLoading = fals
                 >
                   <div className="flex items-center gap-4">
                     <div
-                      className={`p-3 rounded-2xl ${
-                        isSelected ? 'bg-white/20' : 'bg-white/10'
-                      }`}
+                      className={`p-3 rounded-2xl ${isSelected ? 'bg-white/20' : 'bg-white/10'}`}
                     >
-                      <Icon
-                        className={`w-7 h-7 ${
-                          isSelected ? 'text-white' : 'text-white/70'
-                        }`}
-                      />
+                      <Icon className={`w-7 h-7 ${isSelected ? 'text-white' : 'text-white/70'}`} />
                     </div>
                     <div className="flex-1 text-left">
                       <div
-                        className={`text-lg font-black ${
-                          isSelected ? 'text-white' : 'text-white'
-                        }`}
+                        className={`text-lg font-black ${isSelected ? 'text-white' : 'text-white'}`}
                       >
                         {role.label}
                       </div>
@@ -137,9 +139,7 @@ export default function MultiRoleModal({ user, onClose, onSave, isLoading = fals
                     </div>
                     <div
                       className={`w-7 h-7 rounded-xl border-2 flex items-center justify-center ${
-                        isSelected
-                          ? 'bg-white/20 border-white'
-                          : 'border-white/30'
+                        isSelected ? 'bg-white/20 border-white' : 'border-white/30'
                       }`}
                     >
                       {isSelected && <div className="w-4 h-4 bg-white rounded-lg" />}

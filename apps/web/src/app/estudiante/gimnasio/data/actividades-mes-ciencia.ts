@@ -15,7 +15,8 @@ const ACTIVIDADES_QUIMICA: readonly Actividad[] = [
     semanaId: 'quimica',
     numero: 0, // Clase principal
     titulo: 'Clase Virtual: Laboratorio Mágico',
-    descripcion: 'Experiencia sincrónica de 90 minutos con tu docente. Simulador interactivo, quizzes en vivo y trabajo en equipos.',
+    descripcion:
+      'Experiencia sincrónica de 90 minutos con tu docente. Simulador interactivo, quizzes en vivo y trabajo en equipos.',
     emoji: '🎬',
     tipo: 'juego', // Tipo especial para clase sincrónica
     dificultad: 'medio',
@@ -29,7 +30,8 @@ const ACTIVIDADES_QUIMICA: readonly Actividad[] = [
     contenido: {
       tipo: 'juego',
       juegoId: 'clase-sincronica-quimica-v1',
-      instrucciones: 'Únete a la clase virtual con tu docente y grupo. Necesitarás un link de Google Meet.',
+      instrucciones:
+        'Únete a la clase virtual con tu docente y grupo. Necesitarás un link de Google Meet.',
       objetivo: 'Completar la experiencia de laboratorio químico en 90 minutos',
       config: {
         duracion: 90,
@@ -109,7 +111,8 @@ const ACTIVIDADES_QUIMICA: readonly Actividad[] = [
             { id: 'c', texto: 'Og', esCorrecta: false },
             { id: 'd', texto: 'H₂O', esCorrecta: false },
           ],
-          explicacion: 'El oxígeno es el elemento químico con número atómico 8 y se representa con la letra O.',
+          explicacion:
+            'El oxígeno es el elemento químico con número atómico 8 y se representa con la letra O.',
           puntaje: 25,
         },
         {
@@ -289,7 +292,8 @@ const ACTIVIDADES_QUIMICA: readonly Actividad[] = [
     contenido: {
       tipo: 'juego',
       juegoId: 'concentraciones-v1',
-      instrucciones: 'Ajusta las cantidades de soluto y solvente para alcanzar la concentración objetivo',
+      instrucciones:
+        'Ajusta las cantidades de soluto y solvente para alcanzar la concentración objetivo',
       objetivo: 'Completar 10 niveles de dificultad creciente',
       config: {
         nivel: 1,
@@ -317,7 +321,8 @@ const ACTIVIDADES_QUIMICA: readonly Actividad[] = [
     contenido: {
       tipo: 'juego',
       juegoId: 'reacciones-cadena-v1',
-      instrucciones: 'Controla temperatura, pH y cantidades de reactivos para lograr la reacción ideal',
+      instrucciones:
+        'Controla temperatura, pH y cantidades de reactivos para lograr la reacción ideal',
       objetivo: 'Neutralizar ácidos y bases para crear compuestos estables',
       config: {
         nivel: 1,

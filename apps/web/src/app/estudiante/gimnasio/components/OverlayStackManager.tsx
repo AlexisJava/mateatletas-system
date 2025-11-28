@@ -46,15 +46,15 @@ const OVERLAY_METADATA: Record<OverlayConfig['type'], OverlayMetadata> = {
     gradient: 'from-yellow-600 via-amber-600 to-orange-700',
     renderType: 'modal',
   },
-  'ranking': {
+  ranking: {
     gradient: 'from-indigo-600 via-purple-600 to-pink-700',
     renderType: 'modal',
   },
-  'entrenamientos': {
+  entrenamientos: {
     gradient: 'from-indigo-900 via-purple-900 to-pink-900',
     renderType: 'modal',
   },
-  'planificacion': {
+  planificacion: {
     gradient: 'from-indigo-900 via-purple-900 to-pink-900',
     renderType: 'fullscreen',
   },
@@ -66,7 +66,7 @@ const OVERLAY_METADATA: Record<OverlayConfig['type'], OverlayMetadata> = {
     gradient: 'from-slate-900 via-purple-900 to-slate-900',
     renderType: 'modal',
   },
-  'actividad': {
+  actividad: {
     gradient: 'from-emerald-900 via-teal-900 to-cyan-900',
     renderType: 'fullscreen',
   },
@@ -82,19 +82,19 @@ const OVERLAY_METADATA: Record<OverlayConfig['type'], OverlayMetadata> = {
     gradient: 'from-purple-600 via-violet-600 to-indigo-700',
     renderType: 'modal',
   },
-  'tienda': {
+  tienda: {
     gradient: 'from-pink-600 via-rose-600 to-red-700',
     renderType: 'modal',
   },
-  'notificaciones': {
+  notificaciones: {
     gradient: 'from-slate-800 via-gray-800 to-zinc-900',
     renderType: 'sidebar',
   },
-  'ajustes': {
+  ajustes: {
     gradient: 'from-slate-700 via-gray-700 to-zinc-800',
     renderType: 'modal',
   },
-  'animaciones': {
+  animaciones: {
     gradient: 'from-purple-900 via-indigo-900 to-blue-900',
     renderType: 'fullscreen',
   },
@@ -177,7 +177,9 @@ const AnimacionesOverlay: OverlayComponent = ({ estudiante }) => (
 const AjustesOverlay: OverlayComponent = () => <AjustesView />;
 const PlanificacionOverlay: OverlayComponent = (props) => <PlanificacionView {...props} />;
 const PlanificacionesSectorComponent: OverlayComponent = ({ config }) => (
-  <PlanificacionesSectorOverlay config={config?.type === 'planificaciones-sector' ? config : undefined} />
+  <PlanificacionesSectorOverlay
+    config={config?.type === 'planificaciones-sector' ? config : undefined}
+  />
 );
 const ActividadOverlay: OverlayComponent = ({ estudiante, config }) => {
   if (!config || config.type !== 'actividad' || !config.semanaId) {
@@ -185,10 +187,7 @@ const ActividadOverlay: OverlayComponent = ({ estudiante, config }) => {
     return null;
   }
   return (
-    <ActividadView
-      estudiante={estudiante}
-      config={{ ...config, semanaId: config.semanaId }}
-    />
+    <ActividadView estudiante={estudiante} config={{ ...config, semanaId: config.semanaId }} />
   );
 };
 const LaboratorioOverlay: OverlayComponent = ({ config }) => {
@@ -200,7 +199,9 @@ const LaboratorioOverlay: OverlayComponent = ({ config }) => {
 };
 const EjecutarActividadOverlay: OverlayComponent = ({ estudiante, config }) => {
   if (!config || config.type !== 'ejecutar-actividad' || !config.actividadId || !config.semanaId) {
-    console.warn('EjecutarActividadOverlay requiere config.type "ejecutar-actividad" con actividadId y semanaId');
+    console.warn(
+      'EjecutarActividadOverlay requiere config.type "ejecutar-actividad" con actividadId y semanaId',
+    );
     return null;
   }
   return (
@@ -258,15 +259,15 @@ const PlaceholderView: OverlayComponent = ({ config }) => {
   const emojiMap: Record<string, string> = {
     'mis-logros': '🏆',
     'mis-cursos': '📚',
-    'tienda': '🛒',
-    'actividad': '🎯',
+    tienda: '🛒',
+    actividad: '🎯',
   };
 
   const titleMap: Record<string, string> = {
     'mis-logros': 'MIS LOGROS',
     'mis-cursos': 'MIS CURSOS',
-    'tienda': 'TIENDA',
-    'actividad': 'ACTIVIDAD',
+    tienda: 'TIENDA',
+    actividad: 'ACTIVIDAD',
   };
 
   const emoji = config ? emojiMap[config.type] || '🚀' : '🚀';
@@ -314,15 +315,16 @@ export function OverlayStackManager() {
   const component = getOverlayComponent(currentView);
 
   // Key único para AnimatePresence (basado en tipo + params)
-  const key = currentView.type === 'planificacion' && 'codigo' in currentView
-    ? `${currentView.type}-${currentView.codigo}`
-    : currentView.type === 'actividad' && 'semanaId' in currentView
-    ? `${currentView.type}-${currentView.semanaId}`
-    : currentView.type === 'ejecutar-actividad' && 'actividadId' in currentView
-    ? `${currentView.type}-${currentView.actividadId}`
-    : currentView.type === 'planificaciones-sector' && 'sectorNombre' in currentView
-    ? `${currentView.type}-${currentView.sectorNombre}`
-    : currentView.type;
+  const key =
+    currentView.type === 'planificacion' && 'codigo' in currentView
+      ? `${currentView.type}-${currentView.codigo}`
+      : currentView.type === 'actividad' && 'semanaId' in currentView
+        ? `${currentView.type}-${currentView.semanaId}`
+        : currentView.type === 'ejecutar-actividad' && 'actividadId' in currentView
+          ? `${currentView.type}-${currentView.actividadId}`
+          : currentView.type === 'planificaciones-sector' && 'sectorNombre' in currentView
+            ? `${currentView.type}-${currentView.sectorNombre}`
+            : currentView.type;
 
   return (
     <AnimatePresence mode="wait">

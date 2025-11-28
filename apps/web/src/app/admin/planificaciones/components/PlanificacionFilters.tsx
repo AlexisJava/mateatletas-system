@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { PlanificacionFilters as Filters, CodigoGrupo, EstadoPlanificacion } from '@/types/planificacion.types';
+import {
+  PlanificacionFilters as Filters,
+  CodigoGrupo,
+  EstadoPlanificacion,
+} from '@/types/planificacion.types';
 
 interface PlanificacionFiltersProps {
   onFilterChange: (filters: Filters) => void;
@@ -84,7 +88,10 @@ export const PlanificacionFilters: React.FC<PlanificacionFiltersProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Grupo */}
             <div>
-              <label htmlFor="filter-grupo" className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2">
+              <label
+                htmlFor="filter-grupo"
+                className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2"
+              >
                 Grupo
               </label>
               <select
@@ -105,13 +112,18 @@ export const PlanificacionFilters: React.FC<PlanificacionFiltersProps> = ({
 
             {/* Mes */}
             <div>
-              <label htmlFor="filter-mes" className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2">
+              <label
+                htmlFor="filter-mes"
+                className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2"
+              >
                 Mes
               </label>
               <select
                 id="filter-mes"
                 value={filters.mes || ''}
-                onChange={(e) => handleFilterChange('mes', e.target.value ? parseInt(e.target.value) : undefined)}
+                onChange={(e) =>
+                  handleFilterChange('mes', e.target.value ? parseInt(e.target.value) : undefined)
+                }
                 disabled={isLoading}
                 className="w-full px-3 py-2.5 bg-white/5 border border-white/20 rounded-xl text-white font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:opacity-50 transition-all"
               >
@@ -126,14 +138,22 @@ export const PlanificacionFilters: React.FC<PlanificacionFiltersProps> = ({
 
             {/* Año */}
             <div>
-              <label htmlFor="filter-anio" className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2">
+              <label
+                htmlFor="filter-anio"
+                className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2"
+              >
                 Año
               </label>
               <input
                 id="filter-anio"
                 type="number"
                 value={filters.anio || currentYear}
-                onChange={(e) => handleFilterChange('anio', e.target.value ? parseInt(e.target.value) : currentYear)}
+                onChange={(e) =>
+                  handleFilterChange(
+                    'anio',
+                    e.target.value ? parseInt(e.target.value) : currentYear,
+                  )
+                }
                 disabled={isLoading}
                 min={2020}
                 max={2030}
@@ -143,13 +163,18 @@ export const PlanificacionFilters: React.FC<PlanificacionFiltersProps> = ({
 
             {/* Estado */}
             <div>
-              <label htmlFor="filter-estado" className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2">
+              <label
+                htmlFor="filter-estado"
+                className="block text-xs font-bold uppercase tracking-wide text-white/60 mb-2"
+              >
                 Estado
               </label>
               <select
                 id="filter-estado"
                 value={filters.estado || ''}
-                onChange={(e) => handleFilterChange('estado', e.target.value as EstadoPlanificacion)}
+                onChange={(e) =>
+                  handleFilterChange('estado', e.target.value as EstadoPlanificacion)
+                }
                 disabled={isLoading}
                 className="w-full px-3 py-2.5 bg-white/5 border border-white/20 rounded-xl text-white font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:opacity-50 transition-all"
               >
@@ -197,7 +222,7 @@ export const PlanificacionFilters: React.FC<PlanificacionFiltersProps> = ({
                 )}
                 {filters.mes && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-300 border border-green-400/30">
-                    {MESES.find(m => m.value === filters.mes)?.label}
+                    {MESES.find((m) => m.value === filters.mes)?.label}
                   </span>
                 )}
                 {filters.anio && filters.anio !== currentYear && (

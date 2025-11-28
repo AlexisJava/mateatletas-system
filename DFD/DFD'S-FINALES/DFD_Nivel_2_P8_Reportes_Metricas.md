@@ -1,4 +1,5 @@
 # DFD NIVEL 2 - P8: REPORTES Y MÉTRICAS
+
 ## Ecosistema Mateatletas
 
 **Versión:** 1.0  
@@ -15,7 +16,7 @@ flowchart TB
     ADMIN[👤 ADMIN]
     DOCENTE[👨‍🏫 DOCENTE]
     TUTOR[👨‍👩‍👧 TUTOR]
-    
+
     %% Subprocesos de P8
     P8_1[P8.1<br/>DASHBOARD<br/>ADMIN]
     P8_2[P8.2<br/>DASHBOARD<br/>DOCENTE]
@@ -23,7 +24,7 @@ flowchart TB
     P8_4[P8.4<br/>REPORTES<br/>ACADÉMICOS]
     P8_5[P8.5<br/>REPORTES<br/>FINANCIEROS]
     P8_6[P8.6<br/>MÉTRICAS<br/>OPERACIONALES]
-    
+
     %% Almacenes de Datos
     D1[(D1<br/>USUARIOS)]
     D2[(D2<br/>CLASES)]
@@ -31,22 +32,22 @@ flowchart TB
     D4[(D4<br/>PAGOS)]
     D5[(D5<br/>GAMIFICACIÓN)]
     D6[(D6<br/>PLANIFICACIONES)]
-    
+
     %% === FLUJOS DESDE ENTIDADES EXTERNAS ===
-    
+
     ADMIN -->|Ver dashboard| P8_1
     ADMIN -->|Generar reportes| P8_4
     ADMIN -->|Generar reportes| P8_5
     ADMIN -->|Ver métricas| P8_6
-    
+
     DOCENTE -->|Ver dashboard| P8_2
     DOCENTE -->|Ver reportes alumnos| P8_4
-    
+
     TUTOR -->|Ver dashboard| P8_3
     TUTOR -->|Ver reportes hijos| P8_4
-    
+
     %% === FLUJOS HACIA ENTIDADES EXTERNAS ===
-    
+
     P8_1 -->|Dashboard data| ADMIN
     P8_2 -->|Dashboard data| DOCENTE
     P8_3 -->|Dashboard data| TUTOR
@@ -55,9 +56,9 @@ flowchart TB
     P8_4 -->|Reporte PDF/Excel| TUTOR
     P8_5 -->|Reporte financiero| ADMIN
     P8_6 -->|Métricas| ADMIN
-    
+
     %% === FLUJOS CON ALMACENES (P8.1 - Dashboard Admin) ===
-    
+
     P8_1 -->|Leer estudiantes| D1
     D1 -->|Total estudiantes| P8_1
     P8_1 -->|Leer clases| D2
@@ -68,18 +69,18 @@ flowchart TB
     D4 -->|Ingresos mensuales| P8_1
     P8_1 -->|Leer gamificación| D5
     D5 -->|Puntos totales| P8_1
-    
+
     %% === FLUJOS CON ALMACENES (P8.2 - Dashboard Docente) ===
-    
+
     P8_2 -->|Leer mis clases| D2
     D2 -->|Próximas clases| P8_2
     P8_2 -->|Leer asistencias| D3
     D3 -->|Asistencia por clase| P8_2
     P8_2 -->|Leer estudiantes| D1
     D1 -->|Mis estudiantes| P8_2
-    
+
     %% === FLUJOS CON ALMACENES (P8.3 - Dashboard Tutor) ===
-    
+
     P8_3 -->|Leer mis hijos| D1
     D1 -->|Datos estudiantes| P8_3
     P8_3 -->|Leer gamificación| D5
@@ -90,35 +91,35 @@ flowchart TB
     D4 -->|Estado pagos| P8_3
     P8_3 -->|Leer clases| D2
     D2 -->|Próximas clases| P8_3
-    
+
     %% === FLUJOS CON ALMACENES (P8.4 - Reportes Académicos) ===
-    
+
     P8_4 -->|Leer estudiantes| D1
     P8_4 -->|Leer asistencias| D3
     P8_4 -->|Leer gamificación| D5
     P8_4 -->|Leer progreso| D6
-    
+
     %% === FLUJOS CON ALMACENES (P8.5 - Reportes Financieros) ===
-    
+
     P8_5 -->|Leer pagos| D4
     P8_5 -->|Leer inscripciones| D4
     P8_5 -->|Leer becas| D4
     P8_5 -->|Leer estudiantes| D1
-    
+
     %% === FLUJOS CON ALMACENES (P8.6 - Métricas Operacionales) ===
-    
+
     P8_6 -->|Leer todas las tablas| D1
     P8_6 -->|Leer todas las tablas| D2
     P8_6 -->|Leer todas las tablas| D3
     P8_6 -->|Leer todas las tablas| D4
     P8_6 -->|Leer todas las tablas| D5
     P8_6 -->|Leer todas las tablas| D6
-    
+
     %% Estilos
     classDef userExternal fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
     classDef subprocess fill:#50C878,stroke:#2E8A57,stroke-width:2px,color:#fff
     classDef datastore fill:#FFB84D,stroke:#CC8A3D,stroke-width:2px,color:#000
-    
+
     class ADMIN,DOCENTE,TUTOR userExternal
     class P8_1,P8_2,P8_3,P8_4,P8_5,P8_6 subprocess
     class D1,D2,D3,D4,D5,D6 datastore
@@ -129,6 +130,7 @@ flowchart TB
 ## SUBPROCESO P8.1: DASHBOARD ADMIN
 
 ### Descripción
+
 Dashboard principal del ADMIN con métricas clave del ecosistema.
 
 ### Entradas
@@ -150,17 +152,19 @@ WHERE activo = true AND acceso_activo = true
 ```
 
 **Comparación mes anterior:**
+
 ```sql
 SELECT COUNT(*) as total_mes_anterior
 FROM estudiantes
-WHERE activo = true 
+WHERE activo = true
   AND acceso_activo = true
   AND createdAt < DATE_SUB(NOW(), INTERVAL 1 MONTH)
 ```
 
 **Cálculo:**
+
 ```typescript
-const crecimiento_porcentaje = ((total_activos - total_mes_anterior) / total_mes_anterior) * 100
+const crecimiento_porcentaje = ((total_activos - total_mes_anterior) / total_mes_anterior) * 100;
 ```
 
 ---
@@ -168,7 +172,7 @@ const crecimiento_porcentaje = ((total_activos - total_mes_anterior) / total_mes
 #### KPI 2: Ingresos Mensuales
 
 ```sql
-SELECT 
+SELECT
   SUM(monto_pagado) as ingresos_mes,
   COUNT(*) as cantidad_pagos
 FROM inscripciones_mensuales
@@ -178,6 +182,7 @@ WHERE estado_pago = 'Pagado'
 ```
 
 **Comparación mes anterior:**
+
 ```sql
 SELECT SUM(monto_pagado) as ingresos_mes_anterior
 FROM inscripciones_mensuales
@@ -191,7 +196,7 @@ WHERE estado_pago = 'Pagado'
 #### KPI 3: Tasa de Asistencia Global
 
 ```sql
-SELECT 
+SELECT
   COUNT(CASE WHEN estado = 'Presente' THEN 1 END) as presentes,
   COUNT(*) as total_registros,
   (COUNT(CASE WHEN estado = 'Presente' THEN 1 END) * 100.0 / COUNT(*)) as tasa_asistencia
@@ -205,7 +210,7 @@ WHERE MONTH(fecha) = MONTH(NOW())
 #### KPI 4: Clases Programadas (Próximos 7 días)
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as clases_proximas,
   SUM(cupos_maximo) as cupos_totales,
   SUM(cupos_ocupados) as cupos_ocupados
@@ -219,7 +224,7 @@ WHERE fecha_hora_inicio BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY)
 #### KPI 5: Pagos Pendientes
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as cantidad_pendientes,
   SUM(monto_pendiente) as monto_total_pendiente
 FROM inscripciones_mensuales
@@ -227,8 +232,9 @@ WHERE estado_pago IN ('Pendiente', 'Vencido')
 ```
 
 **Desglose por estado:**
+
 ```sql
-SELECT 
+SELECT
   estado_pago,
   COUNT(*) as cantidad,
   SUM(monto_pendiente) as monto
@@ -253,7 +259,7 @@ WHERE estado = 'Activa'
 #### Métrica 7: Distribución de Estudiantes por Nivel
 
 ```sql
-SELECT 
+SELECT
   nivel_actual,
   COUNT(*) as cantidad_estudiantes,
   (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM estudiantes WHERE activo = true)) as porcentaje
@@ -268,7 +274,7 @@ ORDER BY nivel_actual ASC
 #### Métrica 8: Top 5 Docentes por Clases Impartidas
 
 ```sql
-SELECT 
+SELECT
   d.nombre,
   d.apellido,
   COUNT(DISTINCT c.id) as clases_impartidas,
@@ -288,7 +294,7 @@ LIMIT 5
 #### Métrica 9: Gráfico de Ingresos (Últimos 6 meses)
 
 ```sql
-SELECT 
+SELECT
   YEAR(fecha_pago) as anio,
   MONTH(fecha_pago) as mes,
   SUM(monto_pagado) as ingresos,
@@ -323,6 +329,7 @@ WHERE createdAt < DATE_SUB(NOW(), INTERVAL 1 MONTH)
 ### Salidas
 
 **Dashboard Admin:**
+
 ```typescript
 {
   resumen: {
@@ -403,12 +410,13 @@ WHERE createdAt < DATE_SUB(NOW(), INTERVAL 1 MONTH)
 ## SUBPROCESO P8.2: DASHBOARD DOCENTE
 
 ### Descripción
+
 Dashboard personalizado para DOCENTES con sus clases y estudiantes.
 
 ### Entradas
 
 ```typescript
-GET /api/dashboard/docente
+GET / api / dashboard / docente;
 // user.id extraído del JWT
 ```
 
@@ -419,7 +427,7 @@ GET /api/dashboard/docente
 #### KPI 1: Mis Clases Próximas (7 días)
 
 ```sql
-SELECT 
+SELECT
   c.id,
   c.nombre,
   c.fecha_hora_inicio,
@@ -453,7 +461,7 @@ WHERE c.docente_id = ?
 #### KPI 3: Tasa de Asistencia de Mis Clases
 
 ```sql
-SELECT 
+SELECT
   COUNT(CASE WHEN a.estado = 'Presente' THEN 1 END) as presentes,
   COUNT(*) as total,
   (COUNT(CASE WHEN a.estado = 'Presente' THEN 1 END) * 100.0 / COUNT(*)) as tasa_asistencia
@@ -480,7 +488,7 @@ WHERE docente_id = ?
 #### Métrica 5: Próximas Clases con Detalle
 
 ```sql
-SELECT 
+SELECT
   c.id,
   c.nombre,
   c.fecha_hora_inicio,
@@ -505,7 +513,7 @@ LIMIT 5
 #### Métrica 6: Estudiantes con Baja Asistencia
 
 ```sql
-SELECT 
+SELECT
   e.id,
   e.nombre,
   e.apellido,
@@ -528,7 +536,7 @@ ORDER BY tasa_asistencia ASC
 #### Métrica 7: Puntos Otorgados por Mí
 
 ```sql
-SELECT 
+SELECT
   SUM(puntos) as puntos_totales_otorgados,
   COUNT(*) as veces_otorgados,
   COUNT(DISTINCT estudiante_id) as estudiantes_beneficiados
@@ -542,6 +550,7 @@ WHERE docente_id = ?
 ### Salidas
 
 **Dashboard Docente:**
+
 ```typescript
 {
   resumen: {
@@ -562,7 +571,7 @@ WHERE docente_id = ?
   ],
   alertas: {
     estudiantes_baja_asistencia: [
-      { 
+      {
         id, nombre: 'Juan Pérez',
         tasa_asistencia: 55,
         total_clases: 20,
@@ -597,12 +606,13 @@ WHERE docente_id = ?
 ## SUBPROCESO P8.3: DASHBOARD TUTOR
 
 ### Descripción
+
 Dashboard personalizado para TUTORES con información de sus hijos.
 
 ### Entradas
 
 ```typescript
-GET /api/dashboard/tutor
+GET / api / dashboard / tutor;
 // user.id extraído del JWT
 ```
 
@@ -613,7 +623,7 @@ GET /api/dashboard/tutor
 #### KPI 1: Mis Hijos (Resumen)
 
 ```sql
-SELECT 
+SELECT
   e.id,
   e.nombre,
   e.apellido,
@@ -630,6 +640,7 @@ ORDER BY e.nombre ASC
 ```
 
 **Para cada hijo, calcular:**
+
 - Tasa de asistencia del mes
 - Próximas clases
 - Actividades pendientes
@@ -639,7 +650,7 @@ ORDER BY e.nombre ASC
 #### KPI 2: Próximas Clases de Mis Hijos
 
 ```sql
-SELECT 
+SELECT
   c.id,
   c.nombre,
   c.fecha_hora_inicio,
@@ -663,7 +674,7 @@ LIMIT 10
 #### KPI 3: Estado de Pagos
 
 ```sql
-SELECT 
+SELECT
   im.id,
   im.periodo,
   im.monto_pendiente,
@@ -687,7 +698,7 @@ Para cada hijo:
 
 ```sql
 -- Puntos ganados este mes
-SELECT 
+SELECT
   SUM(puntos) as puntos_mes,
   COUNT(*) as acciones_mes
 FROM puntos_obtenidos
@@ -701,7 +712,7 @@ WHERE estudiante_id = ?
   AND MONTH(fecha_desbloqueo) = MONTH(NOW())
 
 -- Progreso al siguiente nivel
-SELECT 
+SELECT
   nivel_actual,
   puntos_totales
 FROM estudiantes WHERE id = ?
@@ -717,7 +728,7 @@ WHERE nivel = (SELECT nivel_actual + 1 FROM estudiantes WHERE id = ?)
 #### Métrica 5: Asistencia por Hijo
 
 ```sql
-SELECT 
+SELECT
   e.id,
   e.nombre,
   COUNT(a.id) as total_clases,
@@ -736,7 +747,7 @@ GROUP BY e.id
 #### Métrica 6: Actividades Pendientes
 
 ```sql
-SELECT 
+SELECT
   aa.id,
   a.nombre as actividad_nombre,
   a.duracion_estimada_minutos,
@@ -759,6 +770,7 @@ ORDER BY aa.fecha_limite ASC
 ### Salidas
 
 **Dashboard Tutor:**
+
 ```typescript
 {
   mis_hijos: [
@@ -833,11 +845,13 @@ ORDER BY aa.fecha_limite ASC
 ## SUBPROCESO P8.4: REPORTES ACADÉMICOS
 
 ### Descripción
+
 Genera reportes académicos en PDF o Excel.
 
 ### Entradas
 
 **Reporte Individual de Estudiante:**
+
 ```typescript
 POST /api/reportes/academico/estudiante
 {
@@ -849,6 +863,7 @@ POST /api/reportes/academico/estudiante
 ```
 
 **Reporte Grupal:**
+
 ```typescript
 POST /api/reportes/academico/grupo
 {
@@ -872,18 +887,18 @@ POST /api/reportes/academico/grupo
 // Si es tutor, validar que es su hijo
 if (user.role === 'TUTOR') {
   const estudiante = await prisma.estudiante.findUnique({
-    where: { id: estudiante_id }
-  })
+    where: { id: estudiante_id },
+  });
   if (estudiante.tutor_id !== user.id) {
-    throw new ForbiddenException()
+    throw new ForbiddenException();
   }
 }
 
 // Si es docente, validar que es su estudiante
 if (user.role === 'DOCENTE') {
-  const esEstudianteDelDocente = await verificarEstudianteDocente(estudiante_id, user.id)
+  const esEstudianteDelDocente = await verificarEstudianteDocente(estudiante_id, user.id);
   if (!esEstudianteDelDocente) {
-    throw new ForbiddenException()
+    throw new ForbiddenException();
   }
 }
 ```
@@ -893,7 +908,7 @@ if (user.role === 'DOCENTE') {
 ##### Paso 2: Obtener Datos del Estudiante
 
 ```sql
-SELECT 
+SELECT
   e.nombre,
   e.apellido,
   e.fecha_nacimiento,
@@ -913,7 +928,7 @@ WHERE e.id = ?
 ##### Paso 3: Obtener Asistencias del Período
 
 ```sql
-SELECT 
+SELECT
   a.fecha,
   a.estado,
   c.nombre as clase_nombre,
@@ -927,11 +942,12 @@ ORDER BY a.fecha ASC
 ```
 
 **Calcular estadísticas:**
+
 ```typescript
-const total_clases = asistencias.length
-const presentes = asistencias.filter(a => a.estado === 'Presente').length
-const ausentes = asistencias.filter(a => a.estado === 'Ausente').length
-const tasa_asistencia = (presentes / total_clases) * 100
+const total_clases = asistencias.length;
+const presentes = asistencias.filter((a) => a.estado === 'Presente').length;
+const ausentes = asistencias.filter((a) => a.estado === 'Ausente').length;
+const tasa_asistencia = (presentes / total_clases) * 100;
 ```
 
 ---
@@ -940,7 +956,7 @@ const tasa_asistencia = (presentes / total_clases) * 100
 
 ```sql
 -- Puntos obtenidos en el período
-SELECT 
+SELECT
   po.fecha_otorgado,
   po.puntos,
   ap.nombre as accion,
@@ -953,7 +969,7 @@ WHERE po.estudiante_id = ?
 ORDER BY po.fecha_otorgado DESC
 
 -- Logros desbloqueados en el período
-SELECT 
+SELECT
   l.nombre,
   l.descripcion,
   l.icono,
@@ -970,7 +986,7 @@ ORDER BY ld.fecha_desbloqueo DESC
 ##### Paso 5: Obtener Actividades Completadas
 
 ```sql
-SELECT 
+SELECT
   a.nombre as actividad_nombre,
   pa.fecha_completado,
   pa.tiempo_invertido_minutos,
@@ -978,7 +994,7 @@ SELECT
 FROM progreso_estudiante_actividad pa
 JOIN asignaciones_actividad_estudiante aa ON pa.asignacion_id = aa.id
 JOIN actividades_semanales a ON aa.actividad_id = a.id
-LEFT JOIN puntos_obtenidos po ON po.estudiante_id = pa.estudiante_id 
+LEFT JOIN puntos_obtenidos po ON po.estudiante_id = pa.estudiante_id
   AND po.contexto LIKE CONCAT('%', a.id, '%')
 WHERE pa.estudiante_id = ?
   AND pa.completado = true
@@ -991,57 +1007,59 @@ ORDER BY pa.fecha_completado DESC
 ##### Paso 6: Generar Reporte PDF
 
 ```typescript
-import PDFDocument from 'pdfkit'
+import PDFDocument from 'pdfkit';
 
-const doc = new PDFDocument()
+const doc = new PDFDocument();
 
 // Encabezado
-doc.fontSize(20).text('Reporte Académico', { align: 'center' })
-doc.fontSize(12).text(`Estudiante: ${estudiante.nombre} ${estudiante.apellido}`)
-doc.text(`Período: ${formatearFecha(periodo_inicio)} - ${formatearFecha(periodo_fin)}`)
-doc.moveDown()
+doc.fontSize(20).text('Reporte Académico', { align: 'center' });
+doc.fontSize(12).text(`Estudiante: ${estudiante.nombre} ${estudiante.apellido}`);
+doc.text(`Período: ${formatearFecha(periodo_inicio)} - ${formatearFecha(periodo_fin)}`);
+doc.moveDown();
 
 // Sección 1: Datos Generales
-doc.fontSize(16).text('Datos Generales')
-doc.fontSize(10)
+doc.fontSize(16).text('Datos Generales');
+doc
+  .fontSize(10)
   .text(`Nivel Actual: ${estudiante.nivel_actual}`)
   .text(`Puntos Totales: ${estudiante.puntos_totales}`)
-  .text(`Equipo: ${estudiante.equipo_nombre || 'Sin equipo'}`)
-doc.moveDown()
+  .text(`Equipo: ${estudiante.equipo_nombre || 'Sin equipo'}`);
+doc.moveDown();
 
 // Sección 2: Asistencia
-doc.fontSize(16).text('Asistencia')
-doc.fontSize(10)
+doc.fontSize(16).text('Asistencia');
+doc
+  .fontSize(10)
   .text(`Total de clases: ${total_clases}`)
   .text(`Presentes: ${presentes}`)
   .text(`Ausentes: ${ausentes}`)
-  .text(`Tasa de asistencia: ${tasa_asistencia.toFixed(1)}%`)
-doc.moveDown()
+  .text(`Tasa de asistencia: ${tasa_asistencia.toFixed(1)}%`);
+doc.moveDown();
 
 // Sección 3: Gamificación
-doc.fontSize(16).text('Gamificación')
-doc.fontSize(10)
+doc.fontSize(16).text('Gamificación');
+doc
+  .fontSize(10)
   .text(`Puntos ganados en el período: ${puntos_periodo}`)
-  .text(`Logros desbloqueados: ${logros.length}`)
+  .text(`Logros desbloqueados: ${logros.length}`);
 
 if (logros.length > 0) {
-  logros.forEach(logro => {
-    doc.text(`  - ${logro.nombre} (${formatearFecha(logro.fecha_desbloqueo)})`)
-  })
+  logros.forEach((logro) => {
+    doc.text(`  - ${logro.nombre} (${formatearFecha(logro.fecha_desbloqueo)})`);
+  });
 }
-doc.moveDown()
+doc.moveDown();
 
 // Sección 4: Actividades
-doc.fontSize(16).text('Actividades Completadas')
-doc.fontSize(10)
-  .text(`Total completadas: ${actividades_completadas.length}`)
+doc.fontSize(16).text('Actividades Completadas');
+doc.fontSize(10).text(`Total completadas: ${actividades_completadas.length}`);
 
-actividades_completadas.forEach(act => {
-  doc.text(`  - ${act.actividad_nombre} (${formatearFecha(act.fecha_completado)})`)
-})
+actividades_completadas.forEach((act) => {
+  doc.text(`  - ${act.actividad_nombre} (${formatearFecha(act.fecha_completado)})`);
+});
 
 // Finalizar
-doc.end()
+doc.end();
 ```
 
 ---
@@ -1049,39 +1067,30 @@ doc.end()
 ##### Paso 7: Generar Reporte Excel (Alternativa)
 
 ```typescript
-import * as ExcelJS from 'exceljs'
+import * as ExcelJS from 'exceljs';
 
-const workbook = new ExcelJS.Workbook()
-const worksheet = workbook.addWorksheet('Reporte Académico')
+const workbook = new ExcelJS.Workbook();
+const worksheet = workbook.addWorksheet('Reporte Académico');
 
 // Encabezado
-worksheet.getCell('A1').value = 'Reporte Académico'
-worksheet.getCell('A2').value = `Estudiante: ${estudiante.nombre} ${estudiante.apellido}`
+worksheet.getCell('A1').value = 'Reporte Académico';
+worksheet.getCell('A2').value = `Estudiante: ${estudiante.nombre} ${estudiante.apellido}`;
 
 // Tabla de Asistencias
-worksheet.addRow(['Fecha', 'Clase', 'Estado', 'Docente'])
-asistencias.forEach(a => {
-  worksheet.addRow([
-    formatearFecha(a.fecha),
-    a.clase_nombre,
-    a.estado,
-    a.docente_nombre
-  ])
-})
+worksheet.addRow(['Fecha', 'Clase', 'Estado', 'Docente']);
+asistencias.forEach((a) => {
+  worksheet.addRow([formatearFecha(a.fecha), a.clase_nombre, a.estado, a.docente_nombre]);
+});
 
 // Tabla de Gamificación
-worksheet.addRow([]) // Separador
-worksheet.addRow(['Fecha', 'Acción', 'Puntos'])
-puntos.forEach(p => {
-  worksheet.addRow([
-    formatearFecha(p.fecha_otorgado),
-    p.accion,
-    p.puntos
-  ])
-})
+worksheet.addRow([]); // Separador
+worksheet.addRow(['Fecha', 'Acción', 'Puntos']);
+puntos.forEach((p) => {
+  worksheet.addRow([formatearFecha(p.fecha_otorgado), p.accion, p.puntos]);
+});
 
 // Guardar
-await workbook.xlsx.writeFile(`reporte_${estudiante.id}.xlsx`)
+await workbook.xlsx.writeFile(`reporte_${estudiante.id}.xlsx`);
 ```
 
 ---
@@ -1089,10 +1098,12 @@ await workbook.xlsx.writeFile(`reporte_${estudiante.id}.xlsx`)
 ### Salidas
 
 **Archivo generado:**
+
 - PDF: `reporte_academico_Juan_Perez_Oct2025.pdf`
 - Excel: `reporte_academico_Juan_Perez_Oct2025.xlsx`
 
 **Respuesta API:**
+
 ```typescript
 {
   mensaje: 'Reporte generado exitosamente',
@@ -1123,11 +1134,13 @@ await workbook.xlsx.writeFile(`reporte_${estudiante.id}.xlsx`)
 ## SUBPROCESO P8.5: REPORTES FINANCIEROS
 
 ### Descripción
+
 Genera reportes financieros detallados (solo ADMIN).
 
 ### Entradas
 
 **Reporte de Ingresos:**
+
 ```typescript
 POST /api/reportes/financiero/ingresos
 {
@@ -1139,10 +1152,11 @@ POST /api/reportes/financiero/ingresos
 ```
 
 **Reporte de Pagos Pendientes:**
+
 ```typescript
-POST /api/reportes/financiero/pendientes
+POST / api / reportes / financiero / pendientes;
 {
-  formato: 'PDF' | 'EXCEL'
+  formato: 'PDF' | 'EXCEL';
 }
 ```
 
@@ -1155,7 +1169,7 @@ POST /api/reportes/financiero/pendientes
 ##### Paso 1: Obtener Pagos del Período
 
 ```sql
-SELECT 
+SELECT
   im.id,
   im.periodo,
   im.monto_pagado,
@@ -1180,27 +1194,27 @@ ORDER BY im.fecha_pago ASC
 ##### Paso 2: Calcular Totales
 
 ```typescript
-const total_ingresos = pagos.reduce((sum, p) => sum + p.monto_pagado, 0)
-const total_pagos = pagos.length
-const promedio_pago = total_ingresos / total_pagos
+const total_ingresos = pagos.reduce((sum, p) => sum + p.monto_pagado, 0);
+const total_pagos = pagos.length;
+const promedio_pago = total_ingresos / total_pagos;
 
 // Agrupar por mes
 const por_mes = pagos.reduce((acc, p) => {
-  const mes = formatearMes(p.fecha_pago)
-  if (!acc[mes]) acc[mes] = { total: 0, cantidad: 0 }
-  acc[mes].total += p.monto_pagado
-  acc[mes].cantidad++
-  return acc
-}, {})
+  const mes = formatearMes(p.fecha_pago);
+  if (!acc[mes]) acc[mes] = { total: 0, cantidad: 0 };
+  acc[mes].total += p.monto_pagado;
+  acc[mes].cantidad++;
+  return acc;
+}, {});
 
 // Agrupar por producto
 const por_producto = pagos.reduce((acc, p) => {
-  const prod = p.producto_nombre
-  if (!acc[prod]) acc[prod] = { total: 0, cantidad: 0 }
-  acc[prod].total += p.monto_pagado
-  acc[prod].cantidad++
-  return acc
-}, {})
+  const prod = p.producto_nombre;
+  if (!acc[prod]) acc[prod] = { total: 0, cantidad: 0 };
+  acc[prod].total += p.monto_pagado;
+  acc[prod].cantidad++;
+  return acc;
+}, {});
 ```
 
 ---
@@ -1208,43 +1222,46 @@ const por_producto = pagos.reduce((acc, p) => {
 ##### Paso 3: Generar PDF
 
 ```typescript
-const doc = new PDFDocument()
+const doc = new PDFDocument();
 
-doc.fontSize(20).text('Reporte de Ingresos', { align: 'center' })
-doc.fontSize(12).text(`Período: ${periodo_inicio} - ${periodo_fin}`)
-doc.moveDown()
+doc.fontSize(20).text('Reporte de Ingresos', { align: 'center' });
+doc.fontSize(12).text(`Período: ${periodo_inicio} - ${periodo_fin}`);
+doc.moveDown();
 
 // Resumen
-doc.fontSize(16).text('Resumen')
-doc.fontSize(10)
+doc.fontSize(16).text('Resumen');
+doc
+  .fontSize(10)
   .text(`Total de ingresos: $${total_ingresos.toLocaleString()}`)
   .text(`Cantidad de pagos: ${total_pagos}`)
-  .text(`Promedio por pago: $${promedio_pago.toFixed(2)}`)
-doc.moveDown()
+  .text(`Promedio por pago: $${promedio_pago.toFixed(2)}`);
+doc.moveDown();
 
 // Por mes
-doc.fontSize(16).text('Ingresos por Mes')
+doc.fontSize(16).text('Ingresos por Mes');
 Object.entries(por_mes).forEach(([mes, datos]) => {
-  doc.fontSize(10).text(`${mes}: $${datos.total.toLocaleString()} (${datos.cantidad} pagos)`)
-})
-doc.moveDown()
+  doc.fontSize(10).text(`${mes}: $${datos.total.toLocaleString()} (${datos.cantidad} pagos)`);
+});
+doc.moveDown();
 
 // Por producto
-doc.fontSize(16).text('Ingresos por Producto')
+doc.fontSize(16).text('Ingresos por Producto');
 Object.entries(por_producto).forEach(([producto, datos]) => {
-  doc.fontSize(10).text(`${producto}: $${datos.total.toLocaleString()} (${datos.cantidad} pagos)`)
-})
-doc.moveDown()
+  doc.fontSize(10).text(`${producto}: $${datos.total.toLocaleString()} (${datos.cantidad} pagos)`);
+});
+doc.moveDown();
 
 // Tabla detallada
-doc.fontSize(16).text('Detalle de Pagos')
-doc.fontSize(8)
-doc.text('Fecha | Estudiante | Producto | Monto')
-pagos.forEach(p => {
-  doc.text(`${formatearFecha(p.fecha_pago)} | ${p.estudiante_nombre} | ${p.producto_nombre} | $${p.monto_pagado}`)
-})
+doc.fontSize(16).text('Detalle de Pagos');
+doc.fontSize(8);
+doc.text('Fecha | Estudiante | Producto | Monto');
+pagos.forEach((p) => {
+  doc.text(
+    `${formatearFecha(p.fecha_pago)} | ${p.estudiante_nombre} | ${p.producto_nombre} | $${p.monto_pagado}`,
+  );
+});
 
-doc.end()
+doc.end();
 ```
 
 ---
@@ -1254,7 +1271,7 @@ doc.end()
 ##### Paso 1: Obtener Pagos Pendientes
 
 ```sql
-SELECT 
+SELECT
   im.id,
   im.periodo,
   im.monto_pendiente,
@@ -1279,9 +1296,9 @@ ORDER BY im.fecha_vencimiento ASC
 ##### Paso 2: Clasificar por Urgencia
 
 ```typescript
-const urgente = pendientes.filter(p => p.dias_restantes <= 3)
-const proximo_vencer = pendientes.filter(p => p.dias_restantes > 3 && p.dias_restantes <= 7)
-const vencidos = pendientes.filter(p => p.estado_pago === 'Vencido')
+const urgente = pendientes.filter((p) => p.dias_restantes <= 3);
+const proximo_vencer = pendientes.filter((p) => p.dias_restantes > 3 && p.dias_restantes <= 7);
+const vencidos = pendientes.filter((p) => p.estado_pago === 'Vencido');
 ```
 
 ---
@@ -1289,40 +1306,43 @@ const vencidos = pendientes.filter(p => p.estado_pago === 'Vencido')
 ##### Paso 3: Generar Reporte
 
 ```typescript
-doc.fontSize(20).text('Reporte de Pagos Pendientes')
-doc.fontSize(12).text(`Fecha: ${new Date().toLocaleDateString()}`)
-doc.moveDown()
+doc.fontSize(20).text('Reporte de Pagos Pendientes');
+doc.fontSize(12).text(`Fecha: ${new Date().toLocaleDateString()}`);
+doc.moveDown();
 
 // Resumen
-doc.fontSize(16).text('Resumen')
-doc.fontSize(10)
+doc.fontSize(16).text('Resumen');
+doc
+  .fontSize(10)
   .text(`Total pendiente: $${total_pendiente.toLocaleString()}`)
   .text(`Cantidad de pagos pendientes: ${pendientes.length}`)
   .text(`  - Vencidos: ${vencidos.length}`)
   .text(`  - Urgentes (≤3 días): ${urgente.length}`)
-  .text(`  - Próximos a vencer (4-7 días): ${proximo_vencer.length}`)
-doc.moveDown()
+  .text(`  - Próximos a vencer (4-7 días): ${proximo_vencer.length}`);
+doc.moveDown();
 
 // Vencidos (crítico)
 if (vencidos.length > 0) {
-  doc.fontSize(16).fillColor('red').text('⚠️ PAGOS VENCIDOS')
-  doc.fillColor('black').fontSize(8)
-  vencidos.forEach(p => {
-    doc.text(`${p.estudiante_nombre} - ${p.tutor_nombre} (${p.tutor_telefono}) - $${p.monto_pendiente} - Vencido`)
-  })
-  doc.moveDown()
+  doc.fontSize(16).fillColor('red').text('⚠️ PAGOS VENCIDOS');
+  doc.fillColor('black').fontSize(8);
+  vencidos.forEach((p) => {
+    doc.text(
+      `${p.estudiante_nombre} - ${p.tutor_nombre} (${p.tutor_telefono}) - $${p.monto_pendiente} - Vencido`,
+    );
+  });
+  doc.moveDown();
 }
 
 // Urgentes
 if (urgente.length > 0) {
-  doc.fontSize(16).fillColor('orange').text('⚡ PAGOS URGENTES')
-  doc.fillColor('black').fontSize(8)
-  urgente.forEach(p => {
-    doc.text(`${p.estudiante_nombre} - Vence en ${p.dias_restantes} días - $${p.monto_pendiente}`)
-  })
+  doc.fontSize(16).fillColor('orange').text('⚡ PAGOS URGENTES');
+  doc.fillColor('black').fontSize(8);
+  urgente.forEach((p) => {
+    doc.text(`${p.estudiante_nombre} - Vence en ${p.dias_restantes} días - $${p.monto_pendiente}`);
+  });
 }
 
-doc.end()
+doc.end();
 ```
 
 ---
@@ -1330,6 +1350,7 @@ doc.end()
 ### Salidas
 
 **Reportes generados:**
+
 - `reporte_ingresos_Oct2025.pdf`
 - `reporte_pagos_pendientes_2025-10-24.pdf`
 
@@ -1353,12 +1374,13 @@ doc.end()
 ## SUBPROCESO P8.6: MÉTRICAS OPERACIONALES
 
 ### Descripción
+
 Métricas técnicas y operacionales del sistema (solo ADMIN).
 
 ### Entradas
 
 ```typescript
-GET /api/metricas/operacionales
+GET / api / metricas / operacionales;
 ```
 
 ---
@@ -1368,7 +1390,7 @@ GET /api/metricas/operacionales
 #### 1. Crecimiento de Usuarios
 
 ```sql
-SELECT 
+SELECT
   DATE(createdAt) as fecha,
   COUNT(*) as nuevos_usuarios
 FROM (
@@ -1389,7 +1411,7 @@ ORDER BY fecha ASC
 
 ```sql
 -- Simulado (requeriría logs)
-SELECT 
+SELECT
   DATE(fecha) as dia,
   COUNT(DISTINCT estudiante_id) as estudiantes_activos,
   COUNT(*) as acciones_totales
@@ -1403,7 +1425,7 @@ GROUP BY DATE(fecha)
 #### 3. Clases por Estado
 
 ```sql
-SELECT 
+SELECT
   estado,
   COUNT(*) as cantidad
 FROM clases
@@ -1416,7 +1438,7 @@ GROUP BY estado
 #### 4. Tasa de Completitud de Actividades
 
 ```sql
-SELECT 
+SELECT
   COUNT(*) as total_asignaciones,
   COUNT(CASE WHEN completado = true THEN 1 END) as completadas,
   (COUNT(CASE WHEN completado = true THEN 1 END) * 100.0 / COUNT(*)) as tasa_completitud
@@ -1430,7 +1452,7 @@ WHERE aa.fecha_asignacion >= DATE_SUB(NOW(), INTERVAL 30 DAY)
 #### 5. Top 10 Actividades Más Populares
 
 ```sql
-SELECT 
+SELECT
   a.nombre,
   COUNT(DISTINCT aa.estudiante_id) as estudiantes_asignados,
   COUNT(CASE WHEN pa.completado = true THEN 1 END) as veces_completada,
@@ -1448,7 +1470,7 @@ LIMIT 10
 #### 6. Distribución de Estudiantes por Equipo
 
 ```sql
-SELECT 
+SELECT
   eq.nombre,
   eq.icono,
   COUNT(e.id) as cantidad_estudiantes,
@@ -1464,7 +1486,7 @@ ORDER BY puntos_totales_equipo DESC
 #### 7. Eficiencia de Docentes
 
 ```sql
-SELECT 
+SELECT
   d.nombre,
   d.apellido,
   COUNT(DISTINCT c.id) as clases_impartidas,
@@ -1484,6 +1506,7 @@ ORDER BY clases_impartidas DESC
 ### Salidas
 
 **Métricas Operacionales:**
+
 ```typescript
 {
   crecimiento: {
@@ -1519,7 +1542,7 @@ ORDER BY clases_impartidas DESC
   },
   docentes: {
     eficiencia: [
-      { 
+      {
         nombre: 'Carlos Pérez',
         clases: 42,
         tasa_ocupacion: 85.5,
@@ -1550,14 +1573,14 @@ ORDER BY clases_impartidas DESC
 
 ## RESUMEN DE ESTADO DE IMPLEMENTACIÓN
 
-| Subproceso | Backend | Frontend |
-|------------|---------|----------|
-| P8.1 Dashboard Admin | ✅ 90% | ⚠️ 75% |
-| P8.2 Dashboard Docente | ✅ 95% | ✅ 85% |
-| P8.3 Dashboard Tutor | ✅ 90% | ✅ 85% |
-| P8.4 Reportes Académicos | ⚠️ 70% | ⚠️ 60% |
-| P8.5 Reportes Financieros | ⚠️ 65% | ⚠️ 55% |
-| P8.6 Métricas Operacionales | ⚠️ 60% | ⚠️ 50% |
+| Subproceso                  | Backend | Frontend |
+| --------------------------- | ------- | -------- |
+| P8.1 Dashboard Admin        | ✅ 90%  | ⚠️ 75%   |
+| P8.2 Dashboard Docente      | ✅ 95%  | ✅ 85%   |
+| P8.3 Dashboard Tutor        | ✅ 90%  | ✅ 85%   |
+| P8.4 Reportes Académicos    | ⚠️ 70%  | ⚠️ 60%   |
+| P8.5 Reportes Financieros   | ⚠️ 65%  | ⚠️ 55%   |
+| P8.6 Métricas Operacionales | ⚠️ 60%  | ⚠️ 50%   |
 
 **Promedio:** Backend 78%, Frontend 68%
 
@@ -1586,9 +1609,9 @@ CREATE INDEX idx_progreso_completado ON progreso_estudiante_actividad(completado
 ```sql
 -- Vista para dashboard admin (actualización cada hora)
 CREATE MATERIALIZED VIEW dashboard_admin_kpis AS
-SELECT 
+SELECT
   (SELECT COUNT(*) FROM estudiantes WHERE activo = true AND acceso_activo = true) as estudiantes_activos,
-  (SELECT SUM(monto_pagado) FROM inscripciones_mensuales 
+  (SELECT SUM(monto_pagado) FROM inscripciones_mensuales
    WHERE estado_pago = 'Pagado' AND MONTH(fecha_pago) = MONTH(NOW())) as ingresos_mes,
   (SELECT COUNT(CASE WHEN estado = 'Presente' THEN 1 END) * 100.0 / COUNT(*)
    FROM asistencias WHERE MONTH(fecha) = MONTH(NOW())) as tasa_asistencia_mes
@@ -1613,11 +1636,13 @@ async getDashboardAdmin() {
 ## PRÓXIMOS PASOS
 
 ### Para MVP (26 de Octubre)
+
 1. ✅ Dashboards funcionales para todos los roles
 2. ⚠️ Implementar cache en queries pesadas
 3. ⚠️ Mejorar UI de dashboards
 
 ### Post-Lanzamiento
+
 1. Reportes automatizados (envío semanal/mensual por email)
 2. Gráficos interactivos avanzados (Chart.js/Recharts)
 3. Exportación a más formatos (CSV, JSON)

@@ -28,15 +28,10 @@ export function RecursosBar({ estudianteId }: RecursosBarProps) {
     >
       <div className="flex items-center justify-between gap-6">
         {/* NIVEL */}
-        <motion.div
-          className="flex items-center gap-3"
-          whileHover={{ scale: 1.05 }}
-        >
+        <motion.div className="flex items-center gap-3" whileHover={{ scale: 1.05 }}>
           <div className="relative">
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg border-4 border-white">
-              <span className="text-2xl font-black text-white">
-                {recursos.nivel}
-              </span>
+              <span className="text-2xl font-black text-white">{recursos.nivel}</span>
             </div>
             <motion.div
               className="absolute -top-1 -right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-white flex items-center justify-center"
@@ -79,9 +74,7 @@ export function RecursosBar({ estudianteId }: RecursosBarProps) {
           <div className="text-3xl">⚡</div>
           <div>
             <p className="text-white/80 text-sm font-medium">XP Total</p>
-            <p className="text-white text-xl font-bold">
-              {formatearNumero(recursos.xp_total)}
-            </p>
+            <p className="text-white text-xl font-bold">{formatearNumero(recursos.xp_total)}</p>
           </div>
         </motion.div>
       </div>

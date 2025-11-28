@@ -164,12 +164,14 @@ export function NotificacionesView({ estudiante }: NotificacionesViewProps) {
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
           <span className="text-3xl">🔔</span>
-          <h2 className="text-2xl font-black text-white">
-            Notificaciones
-          </h2>
+          <h2 className="text-2xl font-black text-white">Notificaciones</h2>
         </div>
         <p className="text-white/60 text-sm font-medium pl-12">
-          {loading ? 'Cargando...' : notificacionesNuevas > 0 ? `${notificacionesNuevas} nuevas` : 'Sin notificaciones nuevas'}
+          {loading
+            ? 'Cargando...'
+            : notificacionesNuevas > 0
+              ? `${notificacionesNuevas} nuevas`
+              : 'Sin notificaciones nuevas'}
         </p>
       </div>
 
@@ -182,9 +184,10 @@ export function NotificacionesView({ estudiante }: NotificacionesViewProps) {
             className={`
               px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap
               transition-all duration-150
-              ${activeFilter === filtro
-                ? 'bg-white/20 text-white'
-                : 'bg-white/5 text-white/60 hover:bg-white/10'
+              ${
+                activeFilter === filtro
+                  ? 'bg-white/20 text-white'
+                  : 'bg-white/5 text-white/60 hover:bg-white/10'
               }
             `}
           >
@@ -203,17 +206,19 @@ export function NotificacionesView({ estudiante }: NotificacionesViewProps) {
           <div className="text-center py-12">
             <span className="text-6xl mb-4 block">🔔</span>
             <p className="text-white/60 text-lg font-bold">
-              {activeFilter === 'Todas' ? 'No tienes notificaciones' : `No tienes notificaciones de ${activeFilter.toLowerCase()}`}
+              {activeFilter === 'Todas'
+                ? 'No tienes notificaciones'
+                : `No tienes notificaciones de ${activeFilter.toLowerCase()}`}
             </p>
           </div>
         ) : (
           notificacionesFiltradas.map((notif, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className={`
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className={`
               w-full text-left
               bg-white/5 hover:bg-white/10
               rounded-2xl p-4
@@ -222,49 +227,41 @@ export function NotificacionesView({ estudiante }: NotificacionesViewProps) {
               cursor-pointer
               ${notif.nuevo ? 'border-l-4 border-l-blue-400' : ''}
             `}
-          >
-            <div className="flex items-start gap-3">
-              {/* Emoji */}
-              <div className="text-3xl flex-shrink-0">
-                {notif.emoji}
-              </div>
+            >
+              <div className="flex items-start gap-3">
+                {/* Emoji */}
+                <div className="text-3xl flex-shrink-0">{notif.emoji}</div>
 
-              {/* Contenido */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <h3 className="text-white font-bold text-sm">
-                    {notif.titulo}
-                  </h3>
-                  {notif.nuevo && (
-                    <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold flex-shrink-0">
-                      NUEVO
-                    </span>
-                  )}
+                {/* Contenido */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <h3 className="text-white font-bold text-sm">{notif.titulo}</h3>
+                    {notif.nuevo && (
+                      <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold flex-shrink-0">
+                        NUEVO
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-white/70 text-xs font-medium mb-1">{notif.descripcion}</p>
+                  <p className="text-white/40 text-xs">{notif.tiempo}</p>
                 </div>
-                <p className="text-white/70 text-xs font-medium mb-1">
-                  {notif.descripcion}
-                </p>
-                <p className="text-white/40 text-xs">
-                  {notif.tiempo}
-                </p>
               </div>
-            </div>
 
-            {/* Acción para clases */}
-            {notif.tipo === 'clase' && notif.nuevo && (
-              <div className="mt-3 pt-3 border-t border-white/10">
-                <button
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-bold text-xs transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Acción para unirse a la clase
-                  }}
-                >
-                  Unirse ahora
-                </button>
-              </div>
-            )}
-          </motion.div>
+              {/* Acción para clases */}
+              {notif.tipo === 'clase' && notif.nuevo && (
+                <div className="mt-3 pt-3 border-t border-white/10">
+                  <button
+                    className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-bold text-xs transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Acción para unirse a la clase
+                    }}
+                  >
+                    Unirse ahora
+                  </button>
+                </div>
+              )}
+            </motion.div>
           ))
         )}
       </div>

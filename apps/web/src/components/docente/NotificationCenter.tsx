@@ -51,9 +51,11 @@ export default function NotificationCenter() {
 
         {/* Unread Badge */}
         {countNoLeidas > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs
+          <span
+            className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs
                          rounded-full flex items-center justify-center font-bold
-                         animate-pulse">
+                         animate-pulse"
+          >
             {countNoLeidas > 9 ? '9+' : countNoLeidas}
           </span>
         )}
@@ -63,10 +65,7 @@ export default function NotificationCenter() {
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
 
           {/* Panel */}
           <div className="absolute right-0 mt-2 w-96 z-50 animate-slide-in">
@@ -125,7 +124,9 @@ export default function NotificationCenter() {
                         >
                           <div className="flex gap-3">
                             {/* Icon */}
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${colorClass}`}>
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${colorClass}`}
+                            >
                               <span className="text-xl">{icon}</span>
                             </div>
 
@@ -184,7 +185,8 @@ export default function NotificationCenter() {
               {notificaciones.length > 0 && (
                 <div className="p-3 border-t border-[var(--docente-border)] bg-gray-50 dark:bg-gray-900/20">
                   <p className="text-xs text-center text-[var(--docente-text-muted)]">
-                    {notificaciones.length} notificación{notificaciones.length !== 1 ? 'es' : ''} total{notificaciones.length !== 1 ? 'es' : ''}
+                    {notificaciones.length} notificación{notificaciones.length !== 1 ? 'es' : ''}{' '}
+                    total{notificaciones.length !== 1 ? 'es' : ''}
                   </p>
                 </div>
               )}

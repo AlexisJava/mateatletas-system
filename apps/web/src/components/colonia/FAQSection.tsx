@@ -71,9 +71,7 @@ export default function FAQSection() {
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   className="w-full px-8 py-6 flex items-center justify-between text-left"
                 >
-                  <h3 className="text-xl font-black text-white pr-8">
-                    {faq.question}
-                  </h3>
+                  <h3 className="text-xl font-black text-white pr-8">{faq.question}</h3>
                   <motion.div
                     animate={{ rotate: isOpen ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
@@ -97,9 +95,7 @@ export default function FAQSection() {
                       className="overflow-hidden"
                     >
                       <div className="px-8 pb-6 pt-2">
-                        <p className="text-white/70 leading-relaxed">
-                          {faq.answer}
-                        </p>
+                        <p className="text-white/70 leading-relaxed">{faq.answer}</p>
                       </div>
                     </motion.div>
                   )}
@@ -117,9 +113,7 @@ export default function FAQSection() {
           transition={{ duration: 0.6 }}
           className="mt-16 text-center"
         >
-          <p className="text-white/60 mb-4">
-            ¿No encontraste lo que buscabas?
-          </p>
+          <p className="text-white/60 mb-4">¿No encontraste lo que buscabas?</p>
           <a
             href="mailto:info@mateatletas.com"
             className="inline-flex items-center gap-2 px-8 py-4 bg-white/5 border-2 border-white/20 rounded-2xl text-white font-bold transition-all hover:bg-white/10 hover:border-white/40"

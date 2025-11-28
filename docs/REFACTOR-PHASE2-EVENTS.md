@@ -13,13 +13,13 @@ Se eliminó la dependencia circular entre **AuthModule** y **GamificacionModule*
 
 ### Métricas de Refactorización
 
-| Métrica | Antes | Después | Mejora |
-|---------|-------|---------|--------|
-| **Dependencias circulares** | 1 crítica | **0** | ✅ -100% |
-| **forwardRef() usados** | 1 | **0** | ✅ -100% |
-| **Módulos acoplados** | Auth ↔ Gamificación | **Desacoplados** | ✅ 100% |
-| **Tests de eventos** | 0 | **14** | ✅ +14 |
-| **Verificación madge** | No existía | **✅ 0 circulares** | ✅ Implementado |
+| Métrica                     | Antes                | Después             | Mejora          |
+| --------------------------- | -------------------- | ------------------- | --------------- |
+| **Dependencias circulares** | 1 crítica            | **0**               | ✅ -100%        |
+| **forwardRef() usados**     | 1                    | **0**               | ✅ -100%        |
+| **Módulos acoplados**       | Auth ↔ Gamificación | **Desacoplados**    | ✅ 100%         |
+| **Tests de eventos**        | 0                    | **14**              | ✅ +14          |
+| **Verificación madge**      | No existía           | **✅ 0 circulares** | ✅ Implementado |
 
 ---
 
@@ -55,6 +55,7 @@ async loginWithUsername(username: string, password: string) {
 ```
 
 **Problemas causados:**
+
 - ⚠️ Riesgo de errores de inicialización circular
 - ⚠️ Tests complicados (necesitan mockear módulos completos)
 - ⚠️ Difícil agregar nuevos listeners sin modificar AuthModule
@@ -83,6 +84,7 @@ AuthModule                GamificacionModule
 ```
 
 **Beneficios:**
+
 - ✅ Cero dependencias circulares
 - ✅ Módulos desacoplados (pueden evolucionar independientemente)
 - ✅ Fácil agregar nuevos listeners sin tocar AuthModule
@@ -100,6 +102,7 @@ yarn workspace api add @nestjs/event-emitter
 ```
 
 **Resultado:**
+
 ```json
 // apps/api/package.json
 {
@@ -139,6 +142,7 @@ export class AppModule {}
 ```
 
 **Configuración:**
+
 - `wildcard: false` - No usar patrones tipo `user.*` (mayor performance)
 - `delimiter: '.'` - Separador para nombres de eventos (`user.logged-in`)
 - `maxListeners: 10` - Límite de listeners por evento (previene memory leaks)
@@ -153,6 +157,7 @@ export class AppModule {}
 Se crearon 8 eventos de dominio:
 
 #### UserRegisteredEvent
+
 ```typescript
 export class UserRegisteredEvent {
   constructor(
@@ -171,6 +176,7 @@ export class UserRegisteredEvent {
 ---
 
 #### UserLoggedInEvent
+
 ```typescript
 export class UserLoggedInEvent {
   constructor(
@@ -188,6 +194,7 @@ export class UserLoggedInEvent {
 ---
 
 #### EstudiantePrimerLoginEvent
+
 ```typescript
 export class EstudiantePrimerLoginEvent {
   constructor(
@@ -203,6 +210,7 @@ export class EstudiantePrimerLoginEvent {
 ---
 
 **Otros eventos creados** (para futuro uso):
+
 - `EstudianteActividadCompletadaEvent` - Cuando completa quiz/ejercicio/lección
 - `XpGainedEvent` - Cuando recibe XP
 - `EstudianteNivelUpEvent` - Cuando sube de nivel
@@ -218,6 +226,7 @@ export class EstudiantePrimerLoginEvent {
 #### Cambio 1: Eliminar imports circulares
 
 **ANTES:**
+
 ```typescript
 import { Inject, forwardRef } from '@nestjs/common';
 import { LogrosService } from '../gamificacion/services/logros.service';
@@ -231,6 +240,7 @@ constructor(
 ```
 
 **DESPUÉS:**
+
 ```typescript
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EstudiantePrimerLoginEvent, UserLoggedInEvent, UserRegisteredEvent } from '../common/events';
@@ -304,11 +314,13 @@ async login(loginDto: LoginDto) {
 **Archivo**: [apps/api/src/auth/auth.service.ts:637-667](apps/api/src/auth/auth.service.ts#L637-L667)
 
 **ANTES:**
+
 ```typescript
 // Otorgar logro de primer ingreso
 if (esPrimerLogin) {
   try {
-    await this.logrosService.desbloquearLogro( // ⚠️ Acoplamiento directo
+    await this.logrosService.desbloquearLogro(
+      // ⚠️ Acoplamiento directo
       estudiante.id,
       'PRIMER_INGRESO',
     );
@@ -320,6 +332,7 @@ if (esPrimerLogin) {
 ```
 
 **DESPUÉS:**
+
 ```typescript
 // Verificar si es el primer login (no tiene logros desbloqueados)
 const logrosDesbloqueados = await this.prisma.logroEstudiante.count({
@@ -343,10 +356,7 @@ this.eventEmitter.emit(
 if (esPrimerLogin) {
   this.eventEmitter.emit(
     'estudiante.primer-login',
-    new EstudiantePrimerLoginEvent(
-      estudiante.id,
-      estudiante.username || estudiante.id,
-    ),
+    new EstudiantePrimerLoginEvent(estudiante.id, estudiante.username || estudiante.id),
   );
   this.logger.log(`Primer login detectado para estudiante ${estudiante.id}`);
 }
@@ -376,17 +386,13 @@ export class AuthEventsListener {
 
   @OnEvent('user.registered')
   async handleUserRegistered(event: UserRegisteredEvent) {
-    this.logger.log(
-      `Usuario registrado: ${event.userId} (${event.userType}) - ${event.email}`,
-    );
+    this.logger.log(`Usuario registrado: ${event.userId} (${event.userType}) - ${event.email}`);
     // TODO: Implementar lógica de bienvenida para tutores
   }
 
   @OnEvent('user.logged-in')
   async handleUserLoggedIn(event: UserLoggedInEvent) {
-    this.logger.log(
-      `Usuario ${event.userType} hizo login: ${event.userId} (${event.email})`,
-    );
+    this.logger.log(`Usuario ${event.userType} hizo login: ${event.userId} (${event.email})`);
 
     // Solo ejecutar lógica de gamificación para estudiantes
     if (event.userType !== 'estudiante') {
@@ -403,13 +409,8 @@ export class AuthEventsListener {
     );
 
     try {
-      await this.logrosService.desbloquearLogro(
-        event.estudianteId,
-        'PRIMER_INGRESO',
-      );
-      this.logger.log(
-        `Logro PRIMER_INGRESO otorgado a estudiante ${event.estudianteId}`,
-      );
+      await this.logrosService.desbloquearLogro(event.estudianteId, 'PRIMER_INGRESO');
+      this.logger.log(`Logro PRIMER_INGRESO otorgado a estudiante ${event.estudianteId}`);
     } catch (error) {
       // Log del error pero no fallar la operación de login
       this.logger.error(
@@ -422,6 +423,7 @@ export class AuthEventsListener {
 ```
 
 **Beneficios del Listener:**
+
 - ✅ GamificacionModule escucha eventos sin que AuthModule lo sepa
 - ✅ Fácil agregar más listeners sin modificar AuthModule
 - ✅ Errores en gamificación no afectan el login (try-catch)
@@ -450,13 +452,7 @@ import { AuthEventsListener } from './listeners/auth-events.listener';
     // Event Listeners
     AuthEventsListener, // ✅ Registrado como provider
   ],
-  exports: [
-    LogrosService,
-    RecursosService,
-    RachaService,
-    VerificadorLogrosService,
-    TiendaService,
-  ],
+  exports: [LogrosService, RecursosService, RachaService, VerificadorLogrosService, TiendaService],
 })
 export class GamificacionModule {}
 ```
@@ -468,6 +464,7 @@ export class GamificacionModule {}
 **Archivo**: [apps/api/src/auth/auth.module.ts](apps/api/src/auth/auth.module.ts)
 
 **ANTES:**
+
 ```typescript
 import { Module, forwardRef } from '@nestjs/common'; // ⚠️
 import { GamificacionModule } from '../gamificacion/gamificacion.module'; // ⚠️
@@ -477,7 +474,9 @@ import { GamificacionModule } from '../gamificacion/gamificacion.module'; // ⚠
     DatabaseModule,
     forwardRef(() => GamificacionModule), // ⚠️ Circular dependency!
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({ /* ... */ }),
+    JwtModule.registerAsync({
+      /* ... */
+    }),
   ],
   // ...
 })
@@ -485,6 +484,7 @@ export class AuthModule {}
 ```
 
 **DESPUÉS:**
+
 ```typescript
 import { Module } from '@nestjs/common'; // ✅ No más forwardRef
 
@@ -493,7 +493,9 @@ import { Module } from '@nestjs/common'; // ✅ No más forwardRef
     DatabaseModule,
     // ✅ GamificacionModule YA NO está importado!
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({ /* ... */ }),
+    JwtModule.registerAsync({
+      /* ... */
+    }),
   ],
   // ...
 })
@@ -501,6 +503,7 @@ export class AuthModule {}
 ```
 
 **Comentarios agregados:**
+
 ```typescript
 /**
  * Dependencias circulares resueltas:
@@ -516,11 +519,12 @@ export class AuthModule {}
 
 ### Tests de AuthEventsListener
 
-**Archivo**: [apps/api/src/gamificacion/listeners/__tests__/auth-events.listener.spec.ts](apps/api/src/gamificacion/listeners/__tests__/auth-events.listener.spec.ts)
+**Archivo**: [apps/api/src/gamificacion/listeners/**tests**/auth-events.listener.spec.ts](apps/api/src/gamificacion/listeners/__tests__/auth-events.listener.spec.ts)
 
 Se crearon **14 tests** cubriendo:
 
 #### 1. Tests de `handleUserRegistered` (3 tests)
+
 ```typescript
 ✓ debe loggear el evento de registro de tutor
 ✓ debe loggear el evento de registro de docente
@@ -528,6 +532,7 @@ Se crearon **14 tests** cubriendo:
 ```
 
 #### 2. Tests de `handleUserLoggedIn` (5 tests)
+
 ```typescript
 ✓ debe loggear login de tutor sin ejecutar gamificación
 ✓ debe loggear login de docente sin ejecutar gamificación
@@ -537,6 +542,7 @@ Se crearon **14 tests** cubriendo:
 ```
 
 #### 3. Tests de `handleEstudiantePrimerLogin` (3 tests)
+
 ```typescript
 ✓ debe otorgar logro PRIMER_INGRESO en primer login
 ✓ debe loggear error si falla desbloquear logro pero no debe fallar
@@ -544,6 +550,7 @@ Se crearon **14 tests** cubriendo:
 ```
 
 #### 4. Integration scenarios (3 tests)
+
 ```typescript
 ✓ debe manejar múltiples eventos de registro en secuencia
 ✓ debe manejar múltiples eventos de login en secuencia
@@ -597,6 +604,7 @@ yarn workspace api add -D madge
 ```
 
 **Resultado:**
+
 ```json
 // apps/api/package.json
 {
@@ -615,6 +623,7 @@ npx madge --circular --extensions ts src/
 ```
 
 **Resultado:**
+
 ```
 Processed 322 files (4.2s) (2 warnings)
 - Finding files
@@ -627,13 +636,13 @@ Processed 322 files (4.2s) (2 warnings)
 
 ## 📋 Archivos Creados
 
-| Archivo | Descripción | Líneas |
-|---------|-------------|--------|
-| `src/common/events/domain-events.ts` | Definición de 8 eventos de dominio | 161 |
-| `src/common/events/index.ts` | Barrel file para exports | 7 |
-| `src/gamificacion/listeners/auth-events.listener.ts` | Listener de eventos de auth | 115 |
-| `src/gamificacion/listeners/__tests__/auth-events.listener.spec.ts` | Tests del listener (14 tests) | 351 |
-| `docs/REFACTOR-PHASE2-EVENTS.md` | Esta documentación | 1000+ |
+| Archivo                                                             | Descripción                        | Líneas |
+| ------------------------------------------------------------------- | ---------------------------------- | ------ |
+| `src/common/events/domain-events.ts`                                | Definición de 8 eventos de dominio | 161    |
+| `src/common/events/index.ts`                                        | Barrel file para exports           | 7      |
+| `src/gamificacion/listeners/auth-events.listener.ts`                | Listener de eventos de auth        | 115    |
+| `src/gamificacion/listeners/__tests__/auth-events.listener.spec.ts` | Tests del listener (14 tests)      | 351    |
+| `docs/REFACTOR-PHASE2-EVENTS.md`                                    | Esta documentación                 | 1000+  |
 
 **Total**: 5 archivos nuevos, ~1634 líneas de código
 
@@ -641,13 +650,13 @@ Processed 322 files (4.2s) (2 warnings)
 
 ## 📋 Archivos Modificados
 
-| Archivo | Cambio | Líneas |
-|---------|--------|--------|
-| `apps/api/package.json` | + @nestjs/event-emitter, + madge | 2 |
-| `src/app.module.ts` | + EventEmitterModule.forRoot() | +13 |
-| `src/auth/auth.service.ts` | - LogrosService, + EventEmitter2, + emit() calls | -8 / +42 |
-| `src/auth/auth.module.ts` | - forwardRef, - GamificacionModule import | -3 |
-| `src/gamificacion/gamificacion.module.ts` | + AuthEventsListener provider | +2 |
+| Archivo                                   | Cambio                                           | Líneas   |
+| ----------------------------------------- | ------------------------------------------------ | -------- |
+| `apps/api/package.json`                   | + @nestjs/event-emitter, + madge                 | 2        |
+| `src/app.module.ts`                       | + EventEmitterModule.forRoot()                   | +13      |
+| `src/auth/auth.service.ts`                | - LogrosService, + EventEmitter2, + emit() calls | -8 / +42 |
+| `src/auth/auth.module.ts`                 | - forwardRef, - GamificacionModule import        | -3       |
+| `src/gamificacion/gamificacion.module.ts` | + AuthEventsListener provider                    | +2       |
 
 **Total**: 5 archivos modificados, ~46 líneas modificadas
 
@@ -673,6 +682,7 @@ Processed 322 files (4.2s) (2 warnings)
    - GamificacionModule puede cambiar sin afectar AuthModule
 
 3. **Testability**: Mockear eventos es más fácil que mockear servicios
+
    ```typescript
    // Fácil de testear
    await authService.login(loginDto); // Emite evento
@@ -803,6 +813,7 @@ export class EventStoreService {
 ```
 
 **Beneficios:**
+
 - Auditoría completa de todos los eventos
 - Replay de eventos históricos
 - Debugging de producción
@@ -822,7 +833,7 @@ export class EventMetricsInterceptor {
     const start = Date.now();
 
     // Esperar a que todos los listeners terminen
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     const duration = Date.now() - start;
 
@@ -836,17 +847,17 @@ export class EventMetricsInterceptor {
 
 ## 📊 Métricas Finales
 
-| Métrica | Valor |
-|---------|-------|
-| **Dependencias circulares eliminadas** | 1 → 0 ✅ |
-| **forwardRef() eliminados** | 1 → 0 ✅ |
-| **Eventos de dominio creados** | 8 |
-| **Event Listeners creados** | 1 (3 handlers) |
-| **Tests de eventos** | 14 ✅ |
-| **Archivos nuevos** | 5 |
-| **Archivos modificados** | 5 |
-| **Verificación madge** | ✅ 0 circulares |
-| **Build exitoso** | ✅ |
+| Métrica                                | Valor           |
+| -------------------------------------- | --------------- |
+| **Dependencias circulares eliminadas** | 1 → 0 ✅        |
+| **forwardRef() eliminados**            | 1 → 0 ✅        |
+| **Eventos de dominio creados**         | 8               |
+| **Event Listeners creados**            | 1 (3 handlers)  |
+| **Tests de eventos**                   | 14 ✅           |
+| **Archivos nuevos**                    | 5               |
+| **Archivos modificados**               | 5               |
+| **Verificación madge**                 | ✅ 0 circulares |
+| **Build exitoso**                      | ✅              |
 
 ---
 
@@ -908,10 +919,7 @@ export class MiService {
     // ... lógica de negocio ...
 
     // Emitir evento
-    this.eventEmitter.emit(
-      'algo.sucedio',
-      new AlgoSucedioEvent(data),
-    );
+    this.eventEmitter.emit('algo.sucedio', new AlgoSucedioEvent(data));
   }
 }
 
@@ -939,15 +947,15 @@ export class AlgoSucedioEvent {
 
 ### Cuándo Usar Eventos vs. Imports Directos
 
-| Escenario | Usar Eventos | Usar Import Directo |
-|-----------|--------------|---------------------|
-| **Módulos de diferente dominio** | ✅ Sí | ❌ No |
-| **Lógica asíncrona opcional** | ✅ Sí | ❌ No |
-| **Múltiples consumidores** | ✅ Sí | ⚠️ Depende |
-| **Auditoría/Logging** | ✅ Sí | ❌ No |
-| **Utilities/Helpers** | ❌ No | ✅ Sí |
-| **Database/Config** | ❌ No | ✅ Sí |
-| **Guards/Interceptors** | ❌ No | ✅ Sí |
+| Escenario                        | Usar Eventos | Usar Import Directo |
+| -------------------------------- | ------------ | ------------------- |
+| **Módulos de diferente dominio** | ✅ Sí        | ❌ No               |
+| **Lógica asíncrona opcional**    | ✅ Sí        | ❌ No               |
+| **Múltiples consumidores**       | ✅ Sí        | ⚠️ Depende          |
+| **Auditoría/Logging**            | ✅ Sí        | ❌ No               |
+| **Utilities/Helpers**            | ❌ No        | ✅ Sí               |
+| **Database/Config**              | ❌ No        | ✅ Sí               |
+| **Guards/Interceptors**          | ❌ No        | ✅ Sí               |
 
 ---
 
@@ -955,23 +963,23 @@ export class AlgoSucedioEvent {
 
 ```typescript
 // ✅ BUENO: Verbos en pasado (algo YA sucedió)
-UserRegisteredEvent
-UserLoggedInEvent
-EstudiantePrimerLoginEvent
-XpGainedEvent
-LogroDesbloqueadoEvent
+UserRegisteredEvent;
+UserLoggedInEvent;
+EstudiantePrimerLoginEvent;
+XpGainedEvent;
+LogroDesbloqueadoEvent;
 
 // ❌ MALO: Verbos en presente/futuro
-UserRegisteringEvent // ⚠️ No, usar pasado
-UserWillLoginEvent   // ⚠️ No, usar pasado
-GainXpEvent          // ⚠️ No, usar pasado
+UserRegisteringEvent; // ⚠️ No, usar pasado
+UserWillLoginEvent; // ⚠️ No, usar pasado
+GainXpEvent; // ⚠️ No, usar pasado
 
 // ✅ BUENO: Nombres descriptivos
-EstudianteActividadCompletadaEvent
+EstudianteActividadCompletadaEvent;
 
 // ❌ MALO: Nombres genéricos
-DataChangedEvent // ⚠️ Muy genérico
-UpdateEvent      // ⚠️ Muy genérico
+DataChangedEvent; // ⚠️ Muy genérico
+UpdateEvent; // ⚠️ Muy genérico
 ```
 
 ---

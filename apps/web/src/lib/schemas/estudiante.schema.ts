@@ -165,9 +165,7 @@ export const estudianteDetalleSchema = estudianteSchema
       clase: {
         ...inscripcion.clase,
         ruta_curricular:
-          inscripcion.clase.ruta_curricular ??
-          inscripcion.clase.rutaCurricular ??
-          null,
+          inscripcion.clase.ruta_curricular ?? inscripcion.clase.rutaCurricular ?? null,
       },
     })),
     asistencias: value.asistencias.map((asistencia) => ({
@@ -176,9 +174,7 @@ export const estudianteDetalleSchema = estudianteSchema
         ? {
             ...asistencia.clase,
             rutaCurricular:
-              asistencia.clase.rutaCurricular ??
-              asistencia.clase.ruta_curricular ??
-              undefined,
+              asistencia.clase.rutaCurricular ?? asistencia.clase.ruta_curricular ?? undefined,
           }
         : undefined,
     })),

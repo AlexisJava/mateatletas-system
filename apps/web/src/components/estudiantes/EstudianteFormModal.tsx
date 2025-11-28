@@ -84,9 +84,7 @@ export function EstudianteFormModal({
     setErrors({});
   }, [estudiante, isOpen]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Limpiar error del campo
@@ -137,7 +135,6 @@ export function EstudianteFormModal({
         foto_url: formData.foto_url.trim() || undefined,
         equipo_id: formData.equipo_id || undefined,
       };
-
 
       if (isEdit) {
         await updateEstudiante(estudiante.id, data);
@@ -215,9 +212,7 @@ export function EstudianteFormModal({
               className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
-            {errors.edad && (
-              <p className="mt-1 text-sm text-red-400">{errors.edad}</p>
-            )}
+            {errors.edad && <p className="mt-1 text-sm text-red-400">{errors.edad}</p>}
           </div>
 
           <Select
@@ -297,8 +292,10 @@ export function EstudianteFormModal({
                 </svg>
                 Guardando...
               </>
+            ) : isEdit ? (
+              'Guardar Cambios'
             ) : (
-              isEdit ? 'Guardar Cambios' : 'Agregar Estudiante'
+              'Agregar Estudiante'
             )}
           </button>
         </div>

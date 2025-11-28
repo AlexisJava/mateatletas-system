@@ -3,11 +3,7 @@
  */
 
 import axios from '@/lib/axios';
-import type {
-  ClaseGrupo,
-  CrearClaseGrupoDto,
-  ListarClaseGruposParams,
-} from '@/types/clase-grupo';
+import type { ClaseGrupo, CrearClaseGrupoDto, ListarClaseGruposParams } from '@/types/clase-grupo';
 
 // Re-exportar tipos para uso en otros módulos
 export type { ClaseGrupo, CrearClaseGrupoDto, ListarClaseGruposParams };
@@ -16,7 +12,7 @@ export type { ClaseGrupo, CrearClaseGrupoDto, ListarClaseGruposParams };
  * Crear un nuevo ClaseGrupo
  */
 export async function crearClaseGrupo(data: CrearClaseGrupoDto): Promise<ClaseGrupo> {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.post<ClaseGrupo>('/admin/clase-grupos', data);
     return response;
@@ -29,9 +25,7 @@ export async function crearClaseGrupo(data: CrearClaseGrupoDto): Promise<ClaseGr
 /**
  * Listar ClaseGrupos con filtros opcionales
  */
-export async function listarClaseGrupos(
-  params?: ListarClaseGruposParams
-): Promise<{
+export async function listarClaseGrupos(params?: ListarClaseGruposParams): Promise<{
   success: boolean;
   data: ClaseGrupo[];
   total: number;
@@ -54,7 +48,7 @@ export async function listarClaseGrupos(
   const queryString = queryParams.toString();
   const url = `/admin/clase-grupos${queryString ? `?${queryString}` : ''}`;
 
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<{
       success: boolean;
@@ -76,7 +70,7 @@ export async function obtenerClaseGrupo(id: string): Promise<{
   success: boolean;
   data: ClaseGrupo;
 }> {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<{
       success: boolean;

@@ -40,7 +40,10 @@ export function obtenerRutaModulo(codigo: CodigoPlanificacionValido): string {
 /**
  * Verifica si un estudiante puede acceder a una planificación según su nivel
  */
-export function puedeAccederPorNivel(nivelEstudiante: number, _codigo: CodigoPlanificacionValido): boolean {
+export function puedeAccederPorNivel(
+  nivelEstudiante: number,
+  _codigo: CodigoPlanificacionValido,
+): boolean {
   // Por ahora todas las ciencias son accesibles para todos los niveles
   // TODO: usar codigo para agregar lógica específica si alguna ciencia requiere nivel mínimo
   return nivelEstudiante >= 1 && nivelEstudiante <= 10;

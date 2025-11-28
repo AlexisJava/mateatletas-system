@@ -19,18 +19,14 @@ export default function ThemeToggle() {
       {/* Sol (Modo Claro) */}
       <Sun
         className={`absolute w-5 h-5 text-orange-500 transition-all duration-500 ${
-          theme === 'light'
-            ? 'rotate-0 scale-100 opacity-100'
-            : 'rotate-90 scale-0 opacity-0'
+          theme === 'light' ? 'rotate-0 scale-100 opacity-100' : 'rotate-90 scale-0 opacity-0'
         }`}
       />
 
       {/* Luna (Modo Oscuro) */}
       <Moon
         className={`absolute w-5 h-5 text-indigo-400 transition-all duration-500 ${
-          theme === 'dark'
-            ? 'rotate-0 scale-100 opacity-100'
-            : '-rotate-90 scale-0 opacity-0'
+          theme === 'dark' ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'
         }`}
       />
     </button>

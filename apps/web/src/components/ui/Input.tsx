@@ -3,8 +3,7 @@ import React, { useId } from 'react';
 /**
  * Props del componente Input
  */
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   className?: string;
@@ -62,10 +61,7 @@ export function Input({
     <div className={`w-full ${className}`}>
       {/* Label */}
       {label && (
-        <label
-          htmlFor={inputId}
-          className="block text-sm font-bold text-[#2a1a5e] mb-2"
-        >
+        <label htmlFor={inputId} className="block text-sm font-bold text-[#2a1a5e] mb-2">
           {label}
           {required && <span className="text-[#f44336] ml-1">*</span>}
         </label>

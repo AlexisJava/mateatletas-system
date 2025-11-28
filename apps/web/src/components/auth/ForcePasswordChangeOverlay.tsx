@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useMemo } from 'react';
 import { authApi } from '@/lib/api/auth.api';
@@ -17,9 +17,7 @@ interface ForcePasswordChangeOverlayProps {
  * Modal forzado para cambio de contraseña en primer ingreso
  * NO se muestra para estudiantes (usan PIN de 4 dígitos)
  */
-export function ForcePasswordChangeOverlay({
-  onSuccess,
-}: ForcePasswordChangeOverlayProps) {
+export function ForcePasswordChangeOverlay({ onSuccess }: ForcePasswordChangeOverlayProps) {
   const user = useAuthStore((state) => state.user);
 
   const [passwordActual, setPasswordActual] = useState('');
@@ -75,7 +73,9 @@ export function ForcePasswordChangeOverlay({
       setPasswordActual('');
       setNuevaPassword('');
       setConfirmPassword('');
-      setSuccessMessage('✅ Contraseña actualizada exitosamente. Por favor, iniciá sesión nuevamente con tu nueva contraseña.');
+      setSuccessMessage(
+        '✅ Contraseña actualizada exitosamente. Por favor, iniciá sesión nuevamente con tu nueva contraseña.',
+      );
 
       // Esperar 2 segundos para que el usuario lea el mensaje, luego hacer logout
       setTimeout(async () => {
@@ -101,7 +101,8 @@ export function ForcePasswordChangeOverlay({
           <header className="space-y-2 text-center">
             <h2 className="text-2xl font-bold text-gray-900">Actualiza tu contraseña</h2>
             <p className="text-gray-600">
-              Por seguridad, necesitas crear una contraseña nueva antes de continuar usando la plataforma.
+              Por seguridad, necesitas crear una contraseña nueva antes de continuar usando la
+              plataforma.
             </p>
           </header>
 
@@ -146,9 +147,7 @@ export function ForcePasswordChangeOverlay({
                 autoComplete="new-password"
               />
               {nuevaPassword && (
-                <p className="mt-1 text-xs text-gray-500">
-                  {passwordStrengthMessage}
-                </p>
+                <p className="mt-1 text-xs text-gray-500">{passwordStrengthMessage}</p>
               )}
             </div>
 

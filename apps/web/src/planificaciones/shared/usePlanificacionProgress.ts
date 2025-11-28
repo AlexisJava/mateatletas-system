@@ -28,7 +28,7 @@ interface ProgresoApiResponse {
 }
 
 export function usePlanificacionProgress(
-  config: PlanificacionConfig
+  config: PlanificacionConfig,
 ): UsePlanificacionProgressReturn {
   const [progreso, setProgreso] = useState<ProgresoEstudiante | null>(null);
   const [semanasActivas, setSemanasActivas] = useState<number[]>([]);
@@ -45,12 +45,9 @@ export function usePlanificacionProgress(
         setError(null);
 
         // Llamar API para obtener progreso
-        const response = await fetch(
-          `/api/planificaciones/${config.codigo}/progreso`,
-          {
-            credentials: 'include',
-          }
-        );
+        const response = await fetch(`/api/planificaciones/${config.codigo}/progreso`, {
+          credentials: 'include',
+        });
 
         if (!response.ok) {
           throw new Error('Error al cargar progreso');
@@ -96,19 +93,16 @@ export function usePlanificacionProgress(
   const guardarEstado = useCallback(
     async (estado: JsonValue) => {
       try {
-        const response = await fetch(
-          `/api/planificaciones/${config.codigo}/progreso`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              estado_guardado: estado,
-            }),
-          }
-        );
+        const response = await fetch(`/api/planificaciones/${config.codigo}/progreso`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            estado_guardado: estado,
+          }),
+        });
 
         if (!response.ok) {
           throw new Error('Error al guardar estado');
@@ -122,14 +116,14 @@ export function usePlanificacionProgress(
                 estadoGuardado: estado,
                 ultimaActividad: new Date(),
               }
-            : null
+            : null,
         );
       } catch (err) {
         console.error('Error guardando estado:', err);
         throw err;
       }
     },
-    [config.codigo]
+    [config.codigo],
   );
 
   // ============================================================================
@@ -147,13 +141,10 @@ export function usePlanificacionProgress(
     }
 
     try {
-      const response = await fetch(
-        `/api/planificaciones/${config.codigo}/progreso/avanzar`,
-        {
-          method: 'POST',
-          credentials: 'include',
-        }
-      );
+      const response = await fetch(`/api/planificaciones/${config.codigo}/progreso/avanzar`, {
+        method: 'POST',
+        credentials: 'include',
+      });
 
       if (!response.ok) {
         throw new Error('Error al avanzar semana');
@@ -167,7 +158,7 @@ export function usePlanificacionProgress(
               semanaActual: nuevaSemana,
               ultimaActividad: new Date(),
             }
-          : null
+          : null,
       );
     } catch (err) {
       console.error('Error avanzando semana:', err);
@@ -195,7 +186,7 @@ export function usePlanificacionProgress(
               semana: progreso.semanaActual,
               puntos,
             }),
-          }
+          },
         );
 
         if (!response.ok) {
@@ -210,7 +201,7 @@ export function usePlanificacionProgress(
                 puntosTotales: prev.puntosTotales + puntos,
                 ultimaActividad: new Date(),
               }
-            : null
+            : null,
         );
 
         // Auto-avanzar a siguiente semana
@@ -222,7 +213,7 @@ export function usePlanificacionProgress(
         throw err;
       }
     },
-    [config.codigo, config.semanas, progreso, avanzarSemana]
+    [config.codigo, config.semanas, progreso, avanzarSemana],
   );
 
   // ============================================================================
@@ -231,19 +222,16 @@ export function usePlanificacionProgress(
   const registrarTiempo = useCallback(
     async (minutos: number) => {
       try {
-        const response = await fetch(
-          `/api/planificaciones/${config.codigo}/progreso/tiempo`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              minutos,
-            }),
-          }
-        );
+        const response = await fetch(`/api/planificaciones/${config.codigo}/progreso/tiempo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            minutos,
+          }),
+        });
 
         if (!response.ok) {
           throw new Error('Error al registrar tiempo');
@@ -256,14 +244,14 @@ export function usePlanificacionProgress(
                 ...prev,
                 tiempoTotalMinutos: prev.tiempoTotalMinutos + minutos,
               }
-            : null
+            : null,
         );
       } catch (err) {
         console.error('Error registrando tiempo:', err);
         // No lanzar error, el tracking de tiempo es secundario
       }
     },
-    [config.codigo]
+    [config.codigo],
   );
 
   // ============================================================================
@@ -273,7 +261,7 @@ export function usePlanificacionProgress(
     (semana: number): boolean => {
       return semanasActivas.includes(semana);
     },
-    [semanasActivas]
+    [semanasActivas],
   );
 
   // ============================================================================

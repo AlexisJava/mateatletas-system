@@ -98,7 +98,7 @@ export function EditClaseGrupoModal({
   const [docentesDisponibles, setDocentesDisponibles] = useState<Docente[]>([]);
   const [estudiantesDisponibles, setEstudiantesDisponibles] = useState<Estudiante[]>([]);
   const [estudiantesSeleccionados, setEstudiantesSeleccionados] = useState<string[]>(
-    claseGrupo.inscripciones?.map((insc) => insc.estudiante.id) || []
+    claseGrupo.inscripciones?.map((insc) => insc.estudiante.id) || [],
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +120,7 @@ export function EditClaseGrupoModal({
         nivel: claseGrupo.nivel || '',
       });
       setEstudiantesSeleccionados(
-        claseGrupo.inscripciones?.map((insc) => insc.estudiante.id) || []
+        claseGrupo.inscripciones?.map((insc) => insc.estudiante.id) || [],
       );
       fetchDocentes();
       fetchEstudiantes();
@@ -231,8 +231,8 @@ export function EditClaseGrupoModal({
         typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message ===
           'string'
       ) {
-        const mensaje =
-          (err as { response?: { data?: { message?: string } } }).response?.data?.message;
+        const mensaje = (err as { response?: { data?: { message?: string } } }).response?.data
+          ?.message;
         setError(mensaje ?? 'Error al actualizar el horario');
       } else {
         setError('Error al actualizar el horario');
@@ -312,9 +312,7 @@ export function EditClaseGrupoModal({
           {/* Tipo y Día */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-white/80 mb-2">
-                Tipo *
-              </label>
+              <label className="block text-sm font-semibold text-white/80 mb-2">Tipo *</label>
               <select
                 value={formData.tipo}
                 onChange={(e) => handleChange('tipo', e.target.value)}
@@ -460,7 +458,9 @@ export function EditClaseGrupoModal({
                 onChange={(e) => handleChange('docente_id', e.target.value)}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-purple-500/50 focus:bg-white/10"
               >
-                <option value="" className="bg-gray-900">Selecciona un docente...</option>
+                <option value="" className="bg-gray-900">
+                  Selecciona un docente...
+                </option>
                 {docentesDisponibles.map((docente) => (
                   <option key={docente.id} value={docente.id} className="bg-gray-900">
                     {docente.nombre} {docente.apellido} ({docente.email})
@@ -491,7 +491,9 @@ export function EditClaseGrupoModal({
             </label>
             <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-lg p-4 max-h-60 overflow-y-auto">
               {estudiantesDisponibles.length === 0 ? (
-                <p className="text-white/40 text-sm text-center py-4">No hay estudiantes disponibles</p>
+                <p className="text-white/40 text-sm text-center py-4">
+                  No hay estudiantes disponibles
+                </p>
               ) : (
                 <div className="space-y-2">
                   {estudiantesDisponibles.map((estudiante) => (

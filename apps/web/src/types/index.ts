@@ -12,11 +12,7 @@ export type { AuthUser, AuthRole, RegisterData, LoginData } from '@/lib/api/auth
 export type { Estudiante, CreateEstudianteData as CrearEstudianteDto } from './estudiante';
 
 // Clases types - import from types files
-export type {
-  Clase,
-  InscripcionClase,
-  RutaCurricular,
-} from './clases.types';
+export type { Clase, InscripcionClase, RutaCurricular } from './clases.types';
 
 // Catálogo types
 export type { Producto, TipoProducto, CrearProductoDto } from '@/lib/api/catalogo.api';
@@ -62,12 +58,7 @@ export interface ApiError {
  * Helper to check if an error is an ApiError
  */
 export function isApiError(error: unknown): error is ApiError {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'statusCode' in error &&
-    'message' in error
-  );
+  return typeof error === 'object' && error !== null && 'statusCode' in error && 'message' in error;
 }
 
 /**

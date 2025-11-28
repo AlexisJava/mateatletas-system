@@ -62,7 +62,10 @@ export function TypingCode({ codeLines }: TypingCodeProps) {
             const keyword = line.substring(0, lineData.text.length);
             const rest = line.substring(lineData.text.length);
             return (
-              <div key={index} className="min-h-[27px] hover:bg-emerald-500/[0.02] transition-colors">
+              <div
+                key={index}
+                className="min-h-[27px] hover:bg-emerald-500/[0.02] transition-colors"
+              >
                 <code>
                   <span className={lineData.color + ' font-extrabold'}>{keyword}</span>
                   <span className={lineData.restColor || 'text-white/85'}>{rest}</span>
@@ -74,7 +77,10 @@ export function TypingCode({ codeLines }: TypingCodeProps) {
           // Si tiene dos colores (texto + rest)
           if (lineData.rest && lineData.restColor) {
             return (
-              <div key={index} className="min-h-[27px] hover:bg-emerald-500/[0.02] transition-colors">
+              <div
+                key={index}
+                className="min-h-[27px] hover:bg-emerald-500/[0.02] transition-colors"
+              >
                 <code>
                   <span className={lineData.color}>{line}</span>
                   <span className={lineData.restColor + ' font-medium'}>{lineData.rest}</span>
@@ -86,9 +92,7 @@ export function TypingCode({ codeLines }: TypingCodeProps) {
           // Línea normal
           return (
             <div key={index} className="min-h-[27px] hover:bg-emerald-500/[0.02] transition-colors">
-              <code className={lineData.color}>
-                {line}
-              </code>
+              <code className={lineData.color}>{line}</code>
             </div>
           );
         })}

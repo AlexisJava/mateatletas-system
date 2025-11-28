@@ -53,7 +53,10 @@ test.describe('Colonia E2E - User Journey Completo', () => {
       await verMasBtn.click();
 
       // Cerrar modal de detalles si se abrió
-      const closeBtn = page.locator('button').filter({ has: page.locator('svg') }).first();
+      const closeBtn = page
+        .locator('button')
+        .filter({ has: page.locator('svg') })
+        .first();
       const closeBtnExists = await closeBtn.isVisible().catch(() => false);
       if (closeBtnExists) {
         await closeBtn.click();
@@ -91,7 +94,6 @@ test.describe('Colonia E2E - User Journey Completo', () => {
       await origenSelect.selectOption('Instagram');
     }
 
-
     // Click en Siguiente
     await page.locator('button:has-text("Siguiente")').first().click();
 
@@ -112,7 +114,6 @@ test.describe('Colonia E2E - User Journey Completo', () => {
     const ageInputs = page.locator('input[type="number"]');
     await ageInputs.nth(1).fill('7');
 
-
     // Click en Siguiente
     await page.locator('button:has-text("Siguiente")').first().click();
 
@@ -121,13 +122,14 @@ test.describe('Colonia E2E - User Journey Completo', () => {
 
     // Seleccionar cursos para cada estudiante
     // Estudiante 1: Sofía (9 años)
-    const courseButtons = page.locator('button').filter({ hasText: /Matemática|Programación|Ciencias/i });
+    const courseButtons = page
+      .locator('button')
+      .filter({ hasText: /Matemática|Programación|Ciencias/i });
 
-    if (await courseButtons.count() >= 2) {
+    if ((await courseButtons.count()) >= 2) {
       // Seleccionar primer curso para Sofía
       await courseButtons.nth(0).click();
     }
-
 
     // Click en Siguiente
     await page.locator('button:has-text("Siguiente")').first().click();
@@ -207,7 +209,10 @@ test.describe('Colonia E2E - User Journey Completo', () => {
     await page.locator('button:has-text("Siguiente")').click();
 
     // Paso 3: Seleccionar 1 curso
-    const courseBtn = page.locator('button').filter({ hasText: /Matemática|Programación/i }).first();
+    const courseBtn = page
+      .locator('button')
+      .filter({ hasText: /Matemática|Programación/i })
+      .first();
     await courseBtn.click();
 
     await page.locator('button:has-text("Siguiente")').click();
@@ -293,7 +298,10 @@ test.describe('Colonia E2E - Edge Cases', () => {
     await page.locator('input[type="email"]').fill('usuario@test.com');
 
     // Cerrar modal
-    const closeBtn = page.locator('button').filter({ has: page.locator('svg') }).first();
+    const closeBtn = page
+      .locator('button')
+      .filter({ has: page.locator('svg') })
+      .first();
     await closeBtn.click();
 
     // Reabrir modal
@@ -310,7 +318,9 @@ test.describe('Colonia E2E - Edge Cases', () => {
     expect(currentValue).toBeDefined();
   });
 
-  test('Intentar avanzar sin llenar campos requeridos mantiene botón deshabilitado', async ({ page }) => {
+  test('Intentar avanzar sin llenar campos requeridos mantiene botón deshabilitado', async ({
+    page,
+  }) => {
     await page.goto('/colonia-verano-2025');
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
 
@@ -371,7 +381,10 @@ test.describe('Colonia E2E - Performance', () => {
     await page.locator('button:has-text("Siguiente")').click();
 
     // Paso 3
-    const courseBtn = page.locator('button').filter({ hasText: /Matemática|Programación/i }).first();
+    const courseBtn = page
+      .locator('button')
+      .filter({ hasText: /Matemática|Programación/i })
+      .first();
     await courseBtn.click();
     await page.locator('button:has-text("Siguiente")').click();
 

@@ -20,7 +20,7 @@ export default function StickyCTAMobile({
   nombreEstudiante,
   precio,
   moneda,
-  onCTAClick
+  onCTAClick,
 }: StickyCTAMobileProps) {
   const [isVisible, setIsVisible] = useState(false);
   const { scrollY } = useScroll();
@@ -53,7 +53,7 @@ export default function StickyCTAMobile({
       initial={{ y: 100, opacity: 0 }}
       animate={{
         y: isVisible ? 0 : 100,
-        opacity: isVisible ? 1 : 0
+        opacity: isVisible ? 1 : 0,
       }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
@@ -77,13 +77,9 @@ export default function StickyCTAMobile({
             </div>
             <div className="font-black text-white text-xl">
               ${precio.toLocaleString()}{' '}
-              <span className="text-sm text-slate-400 font-normal">
-                {moneda}
-              </span>
+              <span className="text-sm text-slate-400 font-normal">{moneda}</span>
             </div>
-            <div className="text-xs text-slate-400">
-              Ruta completa • {nombreEstudiante}
-            </div>
+            <div className="text-xs text-slate-400">Ruta completa • {nombreEstudiante}</div>
           </div>
 
           {/* Botón CTA - MÁS GRANDE Y LLAMATIVO */}
@@ -95,14 +91,14 @@ export default function StickyCTAMobile({
                 '0 0 20px rgba(16, 185, 129, 0.4)',
                 '0 0 40px rgba(16, 185, 129, 0.6)',
                 '0 0 20px rgba(16, 185, 129, 0.4)',
-              ]
+              ],
             }}
             transition={{
               boxShadow: {
                 duration: 2,
                 repeat: Infinity,
-                ease: 'easeInOut'
-              }
+                ease: 'easeInOut',
+              },
             }}
             className="flex-shrink-0 px-6 py-4 bg-gradient-to-r from-emerald-500 via-cyan-500 to-purple-500 text-white font-black text-base rounded-2xl shadow-2xl flex flex-col items-center gap-1"
           >

@@ -52,7 +52,13 @@ const ELECTRONES: Electron[] = [
     completado: false,
     bloqueado: false,
     actividades: [
-      { id: 'quimica-clase-sincronica', titulo: 'Clase Virtual 90min', emoji: '🔴', duracion: '90 min', completada: false },
+      {
+        id: 'quimica-clase-sincronica',
+        titulo: 'Clase Virtual 90min',
+        emoji: '🔴',
+        duracion: '90 min',
+        completada: false,
+      },
     ],
   },
   {
@@ -66,7 +72,13 @@ const ELECTRONES: Electron[] = [
     completado: false,
     bloqueado: false,
     actividades: [
-      { id: 'quimica-01', titulo: 'Video: ¿Qué son los átomos?', emoji: '🎬', duracion: '10 min', completada: false },
+      {
+        id: 'quimica-01',
+        titulo: 'Video: ¿Qué son los átomos?',
+        emoji: '🎬',
+        duracion: '10 min',
+        completada: false,
+      },
     ],
   },
   {
@@ -80,7 +92,13 @@ const ELECTRONES: Electron[] = [
     completado: false,
     bloqueado: false,
     actividades: [
-      { id: 'quimica-02', titulo: 'Tabla Periódica Interactiva', emoji: '📊', duracion: '15 min', completada: false },
+      {
+        id: 'quimica-02',
+        titulo: 'Tabla Periódica Interactiva',
+        emoji: '📊',
+        duracion: '15 min',
+        completada: false,
+      },
     ],
   },
   {
@@ -94,7 +112,13 @@ const ELECTRONES: Electron[] = [
     completado: false,
     bloqueado: false,
     actividades: [
-      { id: 'quimica-03', titulo: 'Laboratorio Virtual', emoji: '⚗️', duracion: '20 min', completada: false },
+      {
+        id: 'quimica-03',
+        titulo: 'Laboratorio Virtual',
+        emoji: '⚗️',
+        duracion: '20 min',
+        completada: false,
+      },
     ],
   },
   {
@@ -108,7 +132,13 @@ const ELECTRONES: Electron[] = [
     completado: false,
     bloqueado: false,
     actividades: [
-      { id: 'quimica-concentraciones', titulo: 'Simulador de Mezclas', emoji: '🧬', duracion: '15 min', completada: false },
+      {
+        id: 'quimica-concentraciones',
+        titulo: 'Simulador de Mezclas',
+        emoji: '🧬',
+        duracion: '15 min',
+        completada: false,
+      },
     ],
   },
   {
@@ -122,7 +152,13 @@ const ELECTRONES: Electron[] = [
     completado: false,
     bloqueado: false,
     actividades: [
-      { id: 'quimica-reacciones-cadena', titulo: 'Reacción en Cadena', emoji: '⚡', duracion: '20 min', completada: false },
+      {
+        id: 'quimica-reacciones-cadena',
+        titulo: 'Reacción en Cadena',
+        emoji: '⚡',
+        duracion: '20 min',
+        completada: false,
+      },
     ],
   },
 ];
@@ -133,7 +169,11 @@ export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosis
   const [reaccionando, setReaccionando] = useState(false);
   const [electronHovered, setElectronHovered] = useState<string | null>(null);
   const [electronSplitActivo, setElectronSplitActivo] = useState<string | null>(null);
-  const [explosionActiva, setExplosionActiva] = useState<{ x: number; y: number; color: string } | null>(null);
+  const [explosionActiva, setExplosionActiva] = useState<{
+    x: number;
+    y: number;
+    color: string;
+  } | null>(null);
 
   const { playHoverSound, playClickSound, playWhooshSound, playAmbientLoop } = useSound();
 
@@ -219,7 +259,7 @@ export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosis
   // Calcular energía acumulada (6 actividades totales, una por electrón)
   const actividadesCompletadasTotal = ELECTRONES.reduce(
     (total, electron) => total + electron.actividades.filter((a) => a.completada).length,
-    0
+    0,
   );
   const actividadesTotales = ELECTRONES.length; // 6 electrones = 6 actividades
   const energiaAcumulada = Math.floor((actividadesCompletadasTotal / actividadesTotales) * 100);
@@ -281,8 +321,12 @@ export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosis
             <div className="flex items-center gap-3">
               <Zap className="w-4 h-4 text-yellow-400" fill="currentColor" />
               <div>
-                <div className="text-purple-100 font-black text-lg leading-none">{energiaAcumulada}%</div>
-                <div className="text-purple-200/70 text-[10px] font-semibold uppercase tracking-wide">Energía</div>
+                <div className="text-purple-100 font-black text-lg leading-none">
+                  {energiaAcumulada}%
+                </div>
+                <div className="text-purple-200/70 text-[10px] font-semibold uppercase tracking-wide">
+                  Energía
+                </div>
               </div>
             </div>
 
@@ -302,7 +346,9 @@ export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosis
               <div className="text-purple-100 font-black text-lg leading-none">
                 {completados}/{ELECTRONES.length}
               </div>
-              <div className="text-purple-200/70 text-[10px] font-semibold uppercase tracking-wide">Electrones</div>
+              <div className="text-purple-200/70 text-[10px] font-semibold uppercase tracking-wide">
+                Electrones
+              </div>
             </div>
           </div>
         </div>
@@ -402,9 +448,11 @@ export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosis
                   style={{
                     width: electron.orbitRadius * 2,
                     height: electron.orbitRadius * 2,
-                    borderColor: electronHovered === electron.id ? electron.color : 'rgba(139, 92, 246, 0.3)',
+                    borderColor:
+                      electronHovered === electron.id ? electron.color : 'rgba(139, 92, 246, 0.3)',
                     opacity: electronHovered === electron.id ? 1 : 0.4,
-                    boxShadow: electronHovered === electron.id ? `0 0 20px ${electron.color}` : 'none',
+                    boxShadow:
+                      electronHovered === electron.id ? `0 0 20px ${electron.color}` : 'none',
                     transition: 'all 0.3s ease',
                   }}
                 />
@@ -422,88 +470,91 @@ export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosis
                     ease: 'easeInOut',
                   }}
                 >
-                {/* Glow del núcleo */}
-                <motion.div
-                  className="absolute inset-0 rounded-full blur-3xl"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(139, 92, 246, 0.7) 0%, rgba(251, 191, 36, 0.4) 50%, transparent 70%)',
-                    width: '280px',
-                    height: '280px',
-                    left: '50%',
-                    top: '50%',
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                  animate={{
-                    scale: [1, 1.3, 1],
-                    opacity: [0.7, 0.9, 0.7],
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                  }}
-                />
-
-                {/* Núcleo - Protones y Neutrones */}
-                <div className="relative">
-                  <div
-                    className="w-32 h-32 rounded-full flex items-center justify-center relative z-10"
+                  {/* Glow del núcleo */}
+                  <motion.div
+                    className="absolute inset-0 rounded-full blur-3xl"
                     style={{
-                      background: 'radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.7))',
-                      boxShadow: '0 0 80px rgba(139, 92, 246, 0.9), 0 0 40px rgba(251, 191, 36, 0.6), inset -10px -10px 25px rgba(0, 0, 0, 0.4)',
-                      border: '3px solid rgba(255, 255, 255, 0.3)',
+                      background:
+                        'radial-gradient(circle, rgba(139, 92, 246, 0.7) 0%, rgba(251, 191, 36, 0.4) 50%, transparent 70%)',
+                      width: '280px',
+                      height: '280px',
+                      left: '50%',
+                      top: '50%',
+                      transform: 'translate(-50%, -50%)',
                     }}
-                  >
-                    {/* Partículas del núcleo */}
-                    <div className="grid grid-cols-3 gap-1">
-                      {[...Array(9)].map((_, i) => (
-                        <motion.div
-                          key={i}
-                          className="w-2.5 h-2.5 rounded-full"
-                          style={{
-                            background: i % 2 === 0 ? '#fbbf24' : '#8b5cf6',
-                            boxShadow: i % 2 === 0
-                              ? '0 0 8px rgba(251, 191, 36, 0.8)'
-                              : '0 0 8px rgba(139, 92, 246, 0.8)',
-                          }}
-                          animate={{
-                            scale: [1, 1.2, 1],
-                            opacity: [0.8, 1, 0.8],
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            delay: i * 0.1,
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                    animate={{
+                      scale: [1, 1.3, 1],
+                      opacity: [0.7, 0.9, 0.7],
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                    }}
+                  />
 
-                  {/* Anillos de energía del núcleo */}
-                  {[0, 1, 2].map((ring) => (
-                    <motion.div
-                      key={ring}
-                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2"
+                  {/* Núcleo - Protones y Neutrones */}
+                  <div className="relative">
+                    <div
+                      className="w-32 h-32 rounded-full flex items-center justify-center relative z-10"
                       style={{
-                        width: `${140 + ring * 20}px`,
-                        height: `${140 + ring * 20}px`,
-                        borderColor: 'rgba(139, 92, 246, 0.2)',
+                        background:
+                          'radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.7))',
+                        boxShadow:
+                          '0 0 80px rgba(139, 92, 246, 0.9), 0 0 40px rgba(251, 191, 36, 0.6), inset -10px -10px 25px rgba(0, 0, 0, 0.4)',
+                        border: '3px solid rgba(255, 255, 255, 0.3)',
                       }}
-                      animate={{
-                        scale: [1, 1.1, 1],
-                        opacity: [0.3, 0.6, 0.3],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        delay: ring * 0.5,
-                      }}
-                    />
-                  ))}
-                </div>
-              </motion.div>
-              </div>
+                    >
+                      {/* Partículas del núcleo */}
+                      <div className="grid grid-cols-3 gap-1">
+                        {[...Array(9)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className="w-2.5 h-2.5 rounded-full"
+                            style={{
+                              background: i % 2 === 0 ? '#fbbf24' : '#8b5cf6',
+                              boxShadow:
+                                i % 2 === 0
+                                  ? '0 0 8px rgba(251, 191, 36, 0.8)'
+                                  : '0 0 8px rgba(139, 92, 246, 0.8)',
+                            }}
+                            animate={{
+                              scale: [1, 1.2, 1],
+                              opacity: [0.8, 1, 0.8],
+                            }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              delay: i * 0.1,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
 
+                    {/* Anillos de energía del núcleo */}
+                    {[0, 1, 2].map((ring) => (
+                      <motion.div
+                        key={ring}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2"
+                        style={{
+                          width: `${140 + ring * 20}px`,
+                          height: `${140 + ring * 20}px`,
+                          borderColor: 'rgba(139, 92, 246, 0.2)',
+                        }}
+                        animate={{
+                          scale: [1, 1.1, 1],
+                          opacity: [0.3, 0.6, 0.3],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          delay: ring * 0.5,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              </div>
 
               {/* Electrones girando como un CD - TODOS a la misma velocidad */}
               <motion.div
@@ -528,159 +579,170 @@ export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosis
                   const y = Math.sin(angleRad) * electron.orbitRadius;
 
                   return (
-                  <motion.div
-                    key={electron.id}
-                    className="absolute cursor-pointer pointer-events-auto"
-                    style={{
-                      left: `calc(50% + ${x}px)`,
-                      top: `calc(50% + ${y}px)`,
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                    onClick={(e) => !electron.bloqueado && handleElectronClickSplit(electron.id, e)}
-                    onHoverStart={() => handleElectronHover(electron.id)}
-                    whileHover={{ scale: 1.3 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{
-                      opacity: 1,
-                      scale: 1,
-                    }}
-                    transition={{
-                      opacity: { delay: index * 0.15, duration: 0.3 },
-                      scale: { delay: index * 0.15, type: 'spring', stiffness: 300, damping: 20 },
-                    }}
-                  >
-                  {/* Glow sutil del electrón en hover */}
-                  <AnimatePresence>
-                    {electronHovered === electron.id && (
-                      <>
-                        {/* Glow intenso */}
-                        <motion.div
-                          className="absolute inset-0 rounded-full blur-2xl"
-                          style={{
-                            background: electron.color,
-                            scale: 2.5,
-                          }}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 0.9 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        />
-                      </>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Cuerpo del electrón */}
-                  <div className="relative">
-                    {/* Anillo de progreso */}
-                    {!electron.completado && !electron.bloqueado && (() => {
-                      const actividadesCompletadas = electron.actividades.filter((a) => a.completada).length;
-                      const totalActividades = electron.actividades.length;
-                      const progreso = (actividadesCompletadas / totalActividades) * 100;
-
-                      return progreso > 0 ? (
-                        <svg
-                          className="absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)]"
-                          style={{ transform: 'rotate(-90deg)' }}
-                        >
-                          {/* Círculo de fondo */}
-                          <circle
-                            cx="50%"
-                            cy="50%"
-                            r="40%"
-                            fill="none"
-                            stroke="rgba(255,255,255,0.2)"
-                            strokeWidth="3"
-                          />
-                          {/* Círculo de progreso */}
-                          <motion.circle
-                            cx="50%"
-                            cy="50%"
-                            r="40%"
-                            fill="none"
-                            stroke={electron.color}
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            strokeDasharray={`${2 * Math.PI * 40}`}
-                            initial={{ strokeDashoffset: 2 * Math.PI * 40 }}
-                            animate={{
-                              strokeDashoffset: 2 * Math.PI * 40 * (1 - progreso / 100),
-                            }}
-                            style={{
-                              filter: `drop-shadow(0 0 6px ${electron.color})`,
-                            }}
-                            transition={{ duration: 0.8, ease: 'easeOut' }}
-                          />
-                        </svg>
-                      ) : null;
-                    })()}
-
-                    <div
-                      className="relative rounded-full flex items-center justify-center border-4"
+                    <motion.div
+                      key={electron.id}
+                      className="absolute cursor-pointer pointer-events-auto"
                       style={{
-                        width: electron.size,
-                        height: electron.size,
-                        background: electronHovered === electron.id
-                          ? `radial-gradient(circle at 30% 30%, ${electron.color}, ${electron.color}dd)`
-                          : `radial-gradient(circle at 30% 30%, ${electron.color}ee, ${electron.color}99)`,
-                        borderColor: electron.bloqueado ? '#666' : electron.color,
-                        boxShadow: electronHovered === electron.id
-                          ? `0 0 60px ${electron.color}, 0 0 30px ${electron.color}, inset -6px -6px 15px rgba(0, 0, 0, 0.4)`
-                          : electron.completado
-                          ? `0 0 40px ${electron.color}, inset -6px -6px 15px rgba(0, 0, 0, 0.4)`
-                          : `0 0 20px ${electron.color}aa, inset -6px -6px 15px rgba(0, 0, 0, 0.4)`,
-                        filter: electron.bloqueado ? 'grayscale(100%) brightness(0.5)' : 'none',
-                        transition: 'all 0.3s ease',
+                        left: `calc(50% + ${x}px)`,
+                        top: `calc(50% + ${y}px)`,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                      onClick={(e) =>
+                        !electron.bloqueado && handleElectronClickSplit(electron.id, e)
+                      }
+                      onHoverStart={() => handleElectronHover(electron.id)}
+                      whileHover={{ scale: 1.3 }}
+                      whileTap={{ scale: 0.95 }}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{
+                        opacity: 1,
+                        scale: 1,
+                      }}
+                      transition={{
+                        opacity: { delay: index * 0.15, duration: 0.3 },
+                        scale: { delay: index * 0.15, type: 'spring', stiffness: 300, damping: 20 },
                       }}
                     >
-                      <span
-                        className="text-3xl"
-                        style={{
-                          filter: `drop-shadow(0 2px 8px ${electron.color})`,
-                          fontSize: electronHovered === electron.id ? '2.5rem' : '1.875rem',
-                          transition: 'font-size 0.2s ease',
-                        }}
-                      >
-                        {electron.bloqueado ? '🔒' : electron.emoji}
-                      </span>
+                      {/* Glow sutil del electrón en hover */}
+                      <AnimatePresence>
+                        {electronHovered === electron.id && (
+                          <>
+                            {/* Glow intenso */}
+                            <motion.div
+                              className="absolute inset-0 rounded-full blur-2xl"
+                              style={{
+                                background: electron.color,
+                                scale: 2.5,
+                              }}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 0.9 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                            />
+                          </>
+                        )}
+                      </AnimatePresence>
 
-                      {/* Badge de progreso con contador */}
-                      {!electron.completado && !electron.bloqueado && (() => {
-                        const actividadesCompletadas = electron.actividades.filter((a) => a.completada).length;
-                        const totalActividades = electron.actividades.length;
+                      {/* Cuerpo del electrón */}
+                      <div className="relative">
+                        {/* Anillo de progreso */}
+                        {!electron.completado &&
+                          !electron.bloqueado &&
+                          (() => {
+                            const actividadesCompletadas = electron.actividades.filter(
+                              (a) => a.completada,
+                            ).length;
+                            const totalActividades = electron.actividades.length;
+                            const progreso = (actividadesCompletadas / totalActividades) * 100;
 
-                        return actividadesCompletadas > 0 ? (
-                          <motion.div
-                            className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full border-2 border-white flex items-center justify-center shadow-lg font-bold text-xs"
-                            style={{
-                              background: `linear-gradient(135deg, ${electron.color} 0%, ${electron.color}dd 100%)`,
-                              color: 'white',
-                            }}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                          >
-                            {actividadesCompletadas}/{totalActividades}
-                          </motion.div>
-                        ) : null;
-                      })()}
+                            return progreso > 0 ? (
+                              <svg
+                                className="absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)]"
+                                style={{ transform: 'rotate(-90deg)' }}
+                              >
+                                {/* Círculo de fondo */}
+                                <circle
+                                  cx="50%"
+                                  cy="50%"
+                                  r="40%"
+                                  fill="none"
+                                  stroke="rgba(255,255,255,0.2)"
+                                  strokeWidth="3"
+                                />
+                                {/* Círculo de progreso */}
+                                <motion.circle
+                                  cx="50%"
+                                  cy="50%"
+                                  r="40%"
+                                  fill="none"
+                                  stroke={electron.color}
+                                  strokeWidth="3"
+                                  strokeLinecap="round"
+                                  strokeDasharray={`${2 * Math.PI * 40}`}
+                                  initial={{ strokeDashoffset: 2 * Math.PI * 40 }}
+                                  animate={{
+                                    strokeDashoffset: 2 * Math.PI * 40 * (1 - progreso / 100),
+                                  }}
+                                  style={{
+                                    filter: `drop-shadow(0 0 6px ${electron.color})`,
+                                  }}
+                                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                                />
+                              </svg>
+                            ) : null;
+                          })()}
 
-                      {/* Badge completado */}
-                      {electron.completado && (
-                        <motion.div
-                          className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full border-2 border-white flex items-center justify-center shadow-xl"
-                          initial={{ scale: 0, rotate: -180 }}
-                          animate={{ scale: 1, rotate: 0 }}
+                        <div
+                          className="relative rounded-full flex items-center justify-center border-4"
+                          style={{
+                            width: electron.size,
+                            height: electron.size,
+                            background:
+                              electronHovered === electron.id
+                                ? `radial-gradient(circle at 30% 30%, ${electron.color}, ${electron.color}dd)`
+                                : `radial-gradient(circle at 30% 30%, ${electron.color}ee, ${electron.color}99)`,
+                            borderColor: electron.bloqueado ? '#666' : electron.color,
+                            boxShadow:
+                              electronHovered === electron.id
+                                ? `0 0 60px ${electron.color}, 0 0 30px ${electron.color}, inset -6px -6px 15px rgba(0, 0, 0, 0.4)`
+                                : electron.completado
+                                  ? `0 0 40px ${electron.color}, inset -6px -6px 15px rgba(0, 0, 0, 0.4)`
+                                  : `0 0 20px ${electron.color}aa, inset -6px -6px 15px rgba(0, 0, 0, 0.4)`,
+                            filter: electron.bloqueado ? 'grayscale(100%) brightness(0.5)' : 'none',
+                            transition: 'all 0.3s ease',
+                          }}
                         >
-                          <span className="text-sm">✓</span>
-                        </motion.div>
-                      )}
-                    </div>
-                  </div>
+                          <span
+                            className="text-3xl"
+                            style={{
+                              filter: `drop-shadow(0 2px 8px ${electron.color})`,
+                              fontSize: electronHovered === electron.id ? '2.5rem' : '1.875rem',
+                              transition: 'font-size 0.2s ease',
+                            }}
+                          >
+                            {electron.bloqueado ? '🔒' : electron.emoji}
+                          </span>
 
-                </motion.div>
-                );
-              })}
+                          {/* Badge de progreso con contador */}
+                          {!electron.completado &&
+                            !electron.bloqueado &&
+                            (() => {
+                              const actividadesCompletadas = electron.actividades.filter(
+                                (a) => a.completada,
+                              ).length;
+                              const totalActividades = electron.actividades.length;
+
+                              return actividadesCompletadas > 0 ? (
+                                <motion.div
+                                  className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full border-2 border-white flex items-center justify-center shadow-lg font-bold text-xs"
+                                  style={{
+                                    background: `linear-gradient(135deg, ${electron.color} 0%, ${electron.color}dd 100%)`,
+                                    color: 'white',
+                                  }}
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                                >
+                                  {actividadesCompletadas}/{totalActividades}
+                                </motion.div>
+                              ) : null;
+                            })()}
+
+                          {/* Badge completado */}
+                          {electron.completado && (
+                            <motion.div
+                              className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full border-2 border-white flex items-center justify-center shadow-xl"
+                              initial={{ scale: 0, rotate: -180 }}
+                              animate={{ scale: 1, rotate: 0 }}
+                            >
+                              <span className="text-sm">✓</span>
+                            </motion.div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             </motion.div>
 
@@ -748,8 +810,12 @@ export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosis
                         {electronActual.emoji}
                       </div>
                       <div>
-                        <h2 className="text-white font-display text-4xl mb-1">{electronActual.nombre}</h2>
-                        <p className="text-white/70 font-semibold">{electronActual.actividades.length} experimentos</p>
+                        <h2 className="text-white font-display text-4xl mb-1">
+                          {electronActual.nombre}
+                        </h2>
+                        <p className="text-white/70 font-semibold">
+                          {electronActual.actividades.length} experimentos
+                        </p>
                       </div>
                     </div>
                     <motion.button
@@ -779,7 +845,9 @@ export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosis
                           <h4 className="text-white font-bold text-lg mb-1">{actividad.titulo}</h4>
                           <div className="flex items-center gap-3">
                             <span className="text-white/60 text-sm">⏱️ {actividad.duracion}</span>
-                            {actividad.completada && <span className="text-green-400 text-sm font-bold">✓ Completada</span>}
+                            {actividad.completada && (
+                              <span className="text-green-400 text-sm font-bold">✓ Completada</span>
+                            )}
                           </div>
                         </div>
                         <div className="w-12 h-12 bg-white/10 group-hover:bg-white/20 rounded-full flex items-center justify-center transition-all">
@@ -903,7 +971,8 @@ export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosis
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center"
             style={{
-              background: 'radial-gradient(ellipse at center, #1e1b4b 0%, #0f0a1e 50%, #000000 100%)',
+              background:
+                'radial-gradient(ellipse at center, #1e1b4b 0%, #0f0a1e 50%, #000000 100%)',
             }}
           >
             {/* Logo Mateatletas */}
@@ -920,7 +989,8 @@ export function LaboratorioEcosistema({ semanaId: _semanaId }: LaboratorioEcosis
               <h1
                 className="font-display text-9xl text-white tracking-wider"
                 style={{
-                  textShadow: '0 0 60px rgba(139, 92, 246, 0.9), 0 0 30px rgba(139, 92, 246, 0.7), 0 4px 30px rgba(0, 0, 0, 0.8)',
+                  textShadow:
+                    '0 0 60px rgba(139, 92, 246, 0.9), 0 0 30px rgba(139, 92, 246, 0.7), 0 4px 30px rgba(0, 0, 0, 0.8)',
                   WebkitTextStroke: '2px rgba(139, 92, 246, 0.6)',
                 }}
               >

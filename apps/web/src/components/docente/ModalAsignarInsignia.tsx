@@ -40,7 +40,7 @@ const INSIGNIAS_PREDEFINIDAS: Insignia[] = [
     icono: '🎤',
     descripcion: 'Por participar activamente en clase',
     puntos: 20,
-    color: 'from-blue-500 to-cyan-500'
+    color: 'from-blue-500 to-cyan-500',
   },
   {
     id: 'respuesta-correcta',
@@ -48,7 +48,7 @@ const INSIGNIAS_PREDEFINIDAS: Insignia[] = [
     icono: '💡',
     descripcion: 'Por dar una respuesta correcta',
     puntos: 15,
-    color: 'from-yellow-500 to-orange-500'
+    color: 'from-yellow-500 to-orange-500',
   },
   {
     id: 'ayuda-companero',
@@ -56,7 +56,7 @@ const INSIGNIAS_PREDEFINIDAS: Insignia[] = [
     icono: '🤝',
     descripcion: 'Por ayudar a un compañero',
     puntos: 25,
-    color: 'from-green-500 to-emerald-500'
+    color: 'from-green-500 to-emerald-500',
   },
   {
     id: 'creatividad',
@@ -64,7 +64,7 @@ const INSIGNIAS_PREDEFINIDAS: Insignia[] = [
     icono: '🎨',
     descripcion: 'Por una solución creativa',
     puntos: 30,
-    color: 'from-purple-500 to-pink-500'
+    color: 'from-purple-500 to-pink-500',
   },
   {
     id: 'perseverancia',
@@ -72,7 +72,7 @@ const INSIGNIAS_PREDEFINIDAS: Insignia[] = [
     icono: '💪',
     descripcion: 'Por no rendirse ante un problema difícil',
     puntos: 25,
-    color: 'from-orange-500 to-red-500'
+    color: 'from-orange-500 to-red-500',
   },
   {
     id: 'trabajo-equipo',
@@ -80,7 +80,7 @@ const INSIGNIAS_PREDEFINIDAS: Insignia[] = [
     icono: '⭐',
     descripcion: 'Por excelente trabajo en equipo',
     puntos: 35,
-    color: 'from-indigo-500 to-purple-500'
+    color: 'from-indigo-500 to-purple-500',
   },
   {
     id: 'pregunta-inteligente',
@@ -88,7 +88,7 @@ const INSIGNIAS_PREDEFINIDAS: Insignia[] = [
     icono: '❓',
     descripcion: 'Por hacer una pregunta muy acertada',
     puntos: 15,
-    color: 'from-cyan-500 to-blue-500'
+    color: 'from-cyan-500 to-blue-500',
   },
   {
     id: 'mejora',
@@ -96,7 +96,7 @@ const INSIGNIAS_PREDEFINIDAS: Insignia[] = [
     icono: '📈',
     descripcion: 'Por mostrar gran mejora',
     puntos: 40,
-    color: 'from-pink-500 to-rose-500'
+    color: 'from-pink-500 to-rose-500',
   },
   {
     id: 'esfuerzo',
@@ -104,8 +104,8 @@ const INSIGNIAS_PREDEFINIDAS: Insignia[] = [
     icono: '🌟',
     descripcion: 'Por el esfuerzo demostrado',
     puntos: 20,
-    color: 'from-amber-500 to-yellow-500'
-  }
+    color: 'from-amber-500 to-yellow-500',
+  },
 ];
 
 interface ModalAsignarInsigniaProps {
@@ -119,9 +119,11 @@ export function ModalAsignarInsignia({
   estudiantes,
   claseId,
   onClose,
-  onInsigniaAsignada
+  onInsigniaAsignada,
 }: ModalAsignarInsigniaProps) {
-  const [paso, setPaso] = useState<'seleccionar-estudiante' | 'seleccionar-insignia'>('seleccionar-estudiante');
+  const [paso, setPaso] = useState<'seleccionar-estudiante' | 'seleccionar-insignia'>(
+    'seleccionar-estudiante',
+  );
   const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<Estudiante | null>(null);
   const [insigniaSeleccionada, setInsigniaSeleccionada] = useState<Insignia | null>(null);
   const [asignando, setAsignando] = useState(false);
@@ -144,7 +146,7 @@ export function ModalAsignarInsignia({
         insigniaId: insignia.id,
         nombre: insignia.nombre,
         descripcion: insignia.descripcion,
-        puntos: insignia.puntos
+        puntos: insignia.puntos,
       });
 
       setExitoMostrado(true);
@@ -195,9 +197,7 @@ export function ModalAsignarInsignia({
             <div className="flex items-center gap-4">
               <Award className="w-10 h-10 text-white" />
               <div>
-                <h2 className="text-3xl font-black text-white">
-                  Asignar Insignia
-                </h2>
+                <h2 className="text-3xl font-black text-white">Asignar Insignia</h2>
                 <p className="text-white/90 text-sm font-semibold">
                   {paso === 'seleccionar-estudiante'
                     ? 'Selecciona un estudiante'
@@ -208,8 +208,12 @@ export function ModalAsignarInsignia({
 
             {/* Progress Indicator */}
             <div className="flex items-center gap-2 mt-4">
-              <div className={`flex-1 h-2 rounded-full ${paso === 'seleccionar-estudiante' || paso === 'seleccionar-insignia' ? 'bg-white' : 'bg-white/30'}`} />
-              <div className={`flex-1 h-2 rounded-full ${paso === 'seleccionar-insignia' ? 'bg-white' : 'bg-white/30'}`} />
+              <div
+                className={`flex-1 h-2 rounded-full ${paso === 'seleccionar-estudiante' || paso === 'seleccionar-insignia' ? 'bg-white' : 'bg-white/30'}`}
+              />
+              <div
+                className={`flex-1 h-2 rounded-full ${paso === 'seleccionar-insignia' ? 'bg-white' : 'bg-white/30'}`}
+              />
             </div>
           </div>
 
@@ -251,9 +255,7 @@ export function ModalAsignarInsignia({
                         <h4 className="text-lg font-bold text-white">
                           {estudiante.nombre} {estudiante.apellido}
                         </h4>
-                        <p className="text-sm text-gray-400">
-                          Click para asignar insignia
-                        </p>
+                        <p className="text-sm text-gray-400">Click para asignar insignia</p>
                       </div>
                       <Award className="w-6 h-6 text-purple-400" />
                     </motion.button>
@@ -301,9 +303,7 @@ export function ModalAsignarInsignia({
 
                 <div className="flex items-center gap-2 mb-4">
                   <Trophy className="w-6 h-6 text-yellow-400" />
-                  <h3 className="text-xl font-bold text-white">
-                    Selecciona una Insignia
-                  </h3>
+                  <h3 className="text-xl font-bold text-white">Selecciona una Insignia</h3>
                 </div>
 
                 {/* Grid de Insignias */}
@@ -318,16 +318,12 @@ export function ModalAsignarInsignia({
                       className={`relative bg-gradient-to-br ${insignia.color} rounded-2xl p-6 border-2 border-white/20 hover:border-white/40 transition-all text-center disabled:opacity-50 disabled:cursor-not-allowed shadow-lg`}
                     >
                       <div className="text-5xl mb-3">{insignia.icono}</div>
-                      <h4 className="text-lg font-black text-white mb-2">
-                        {insignia.nombre}
-                      </h4>
+                      <h4 className="text-lg font-black text-white mb-2">{insignia.nombre}</h4>
                       <p className="text-xs text-white/80 mb-3 line-clamp-2">
                         {insignia.descripcion}
                       </p>
                       <div className="inline-block bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
-                        <span className="text-sm font-bold text-white">
-                          +{insignia.puntos} pts
-                        </span>
+                        <span className="text-sm font-bold text-white">+{insignia.puntos} pts</span>
                       </div>
                     </motion.button>
                   ))}
@@ -351,14 +347,14 @@ export function ModalAsignarInsignia({
                 </motion.div>
                 <div className="flex items-center justify-center gap-3 mb-4">
                   <CheckCircle className="w-10 h-10 text-green-400" />
-                  <h3 className="text-3xl font-black text-white">
-                    ¡Insignia Asignada!
-                  </h3>
+                  <h3 className="text-3xl font-black text-white">¡Insignia Asignada!</h3>
                 </div>
                 <p className="text-xl text-gray-300 mb-2">
                   {estudianteSeleccionado!.nombre} recibió:
                 </p>
-                <div className={`inline-block bg-gradient-to-r ${insigniaSeleccionada!.color} rounded-2xl px-6 py-4 border-2 border-white/20`}>
+                <div
+                  className={`inline-block bg-gradient-to-r ${insigniaSeleccionada!.color} rounded-2xl px-6 py-4 border-2 border-white/20`}
+                >
                   <div className="text-5xl mb-2">{insigniaSeleccionada!.icono}</div>
                   <div className="text-2xl font-black text-white">
                     {insigniaSeleccionada!.nombre}

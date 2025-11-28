@@ -20,11 +20,7 @@ import ForcePasswordChangeOverlay from '@/components/auth/ForcePasswordChangeOve
  * 3. Redirige a /login si no está autenticado
  * 4. Muestra loading mientras valida
  */
-export default function ProtectedLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { checkAuth, isAuthenticated } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
@@ -81,9 +77,7 @@ export default function ProtectedLayout({
         <div className="text-center">
           {/* Spinner */}
           <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-white mb-4"></div>
-          <p className="text-white text-lg font-semibold">
-            Verificando autenticación...
-          </p>
+          <p className="text-white text-lg font-semibold">Verificando autenticación...</p>
         </div>
       </div>
     );

@@ -147,7 +147,8 @@ export function PlanificacionesSectorOverlay({ config }: PlanificacionesSectorPr
                   {sectorNombre.toUpperCase()}
                 </h1>
                 <p className="text-cyan-300 text-xs sm:text-sm font-bold mt-1">
-                  {planificaciones.filter(p => p.estado === 'bloqueada').length} planificaciones bloqueadas
+                  {planificaciones.filter((p) => p.estado === 'bloqueada').length} planificaciones
+                  bloqueadas
                 </p>
               </div>
             </div>
@@ -158,14 +159,16 @@ export function PlanificacionesSectorOverlay({ config }: PlanificacionesSectorPr
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {loading ? (
             <div className="flex items-center justify-center h-full">
-              <div className="text-white/60 text-lg sm:text-xl font-bold">Cargando planificaciones...</div>
+              <div className="text-white/60 text-lg sm:text-xl font-bold">
+                Cargando planificaciones...
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {planificaciones.map((planificacion, index) => {
                 const esBloqueada = planificacion.estado === 'bloqueada';
                 const progreso = Math.round(
-                  (planificacion.actividades_completadas / planificacion.total_actividades) * 100
+                  (planificacion.actividades_completadas / planificacion.total_actividades) * 100,
                 );
 
                 return (
@@ -176,26 +179,29 @@ export function PlanificacionesSectorOverlay({ config }: PlanificacionesSectorPr
                     transition={{ delay: index * 0.1 }}
                     className={`
                       relative rounded-xl sm:rounded-2xl p-4 sm:p-6 border-2
-                      ${esBloqueada
-                        ? 'bg-slate-800/40 border-slate-700/40 cursor-not-allowed'
-                        : 'bg-gradient-to-br from-green-500 to-emerald-600 border-green-500/40 cursor-pointer hover:scale-[1.02]'
+                      ${
+                        esBloqueada
+                          ? 'bg-slate-800/40 border-slate-700/40 cursor-not-allowed'
+                          : 'bg-gradient-to-br from-green-500 to-emerald-600 border-green-500/40 cursor-pointer hover:scale-[1.02]'
                       }
                       transition-all duration-200 min-h-[200px] sm:min-h-[220px]
                     `}
                   >
                     {/* Badge de estado */}
                     <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
-                      <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1
-                                    bg-slate-900/60 border border-slate-700 rounded-md sm:rounded-lg">
+                      <div
+                        className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1
+                                    bg-slate-900/60 border border-slate-700 rounded-md sm:rounded-lg"
+                      >
                         <Lock className="w-2.5 sm:w-3 h-2.5 sm:h-3 text-slate-400" />
-                        <span className="text-[10px] sm:text-xs font-bold text-slate-400">BLOQUEADA</span>
+                        <span className="text-[10px] sm:text-xs font-bold text-slate-400">
+                          BLOQUEADA
+                        </span>
                       </div>
                     </div>
 
                     {/* Emoji/Icono */}
-                    <div className="text-4xl sm:text-5xl mb-2 sm:mb-3 opacity-40 grayscale">
-                      🔬
-                    </div>
+                    <div className="text-4xl sm:text-5xl mb-2 sm:mb-3 opacity-40 grayscale">🔬</div>
 
                     {/* Título */}
                     <h3 className="text-lg sm:text-xl font-black mb-2 text-slate-500">
@@ -222,10 +228,11 @@ export function PlanificacionesSectorOverlay({ config }: PlanificacionesSectorPr
                         <div className="flex items-center gap-2">
                           <Clock className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-slate-600" />
                           <span className="text-[11px] sm:text-xs font-bold text-slate-600">
-                            Disponible: {new Date(planificacion.fecha_disponible).toLocaleDateString('es-AR', {
+                            Disponible:{' '}
+                            {new Date(planificacion.fecha_disponible).toLocaleDateString('es-AR', {
                               day: '2-digit',
                               month: 'long',
-                              year: 'numeric'
+                              year: 'numeric',
                             })}
                           </span>
                         </div>
@@ -235,21 +242,25 @@ export function PlanificacionesSectorOverlay({ config }: PlanificacionesSectorPr
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-slate-600" />
                         <span className="text-[11px] sm:text-xs font-bold text-slate-600">
-                          {planificacion.actividades_completadas}/{planificacion.total_actividades} actividades
+                          {planificacion.actividades_completadas}/{planificacion.total_actividades}{' '}
+                          actividades
                         </span>
                       </div>
                     </div>
 
                     {/* Overlay de bloqueo */}
-                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] rounded-xl sm:rounded-2xl
-                                  flex items-center justify-center">
+                    <div
+                      className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] rounded-xl sm:rounded-2xl
+                                  flex items-center justify-center"
+                    >
                       <div className="text-center px-4">
                         <Lock className="w-10 sm:w-12 h-10 sm:h-12 text-slate-500 mx-auto mb-2" />
                         <p className="text-slate-400 text-xs sm:text-sm font-bold">
-                          Disponible el {planificacion.fecha_disponible &&
+                          Disponible el{' '}
+                          {planificacion.fecha_disponible &&
                             new Date(planificacion.fecha_disponible).toLocaleDateString('es-AR', {
                               day: 'numeric',
-                              month: 'long'
+                              month: 'long',
                             })}
                         </p>
                       </div>

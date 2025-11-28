@@ -20,7 +20,9 @@
 ## 🎯 RESUMEN EJECUTIVO
 
 ### Objetivo
+
 Crear un sistema COMPLETO y ROBUSTO para que los docentes puedan:
+
 1. Ver detalles completos de sus grupos
 2. Tomar asistencia en tiempo real durante la clase
 3. Agregar observaciones (grupo e individuales)
@@ -29,6 +31,7 @@ Crear un sistema COMPLETO y ROBUSTO para que los docentes puedan:
 6. Gestionar todo el ciclo de vida de una clase
 
 ### Principios de Diseño
+
 - ✅ **NO `any` NI `unknown`**: TypeScript estricto
 - ✅ **BRUTAL**: Información concreta, no ambigua
 - ✅ **DRY**: No duplicar código
@@ -42,6 +45,7 @@ Crear un sistema COMPLETO y ROBUSTO para que los docentes puedan:
 ### Modelos Clave para el Flujo Docente
 
 #### 1. **ClaseGrupo** (`clase_grupos`)
+
 ```prisma
 model ClaseGrupo {
   id                  String     @id @default(cuid())
@@ -66,6 +70,7 @@ model ClaseGrupo {
 ```
 
 #### 2. **InscripcionClaseGrupo** (`inscripciones_clase_grupo`)
+
 ```prisma
 model InscripcionClaseGrupo {
   id                String      @id @default(cuid())
@@ -83,6 +88,7 @@ model InscripcionClaseGrupo {
 ```
 
 #### 3. **AsistenciaClaseGrupo** (`asistencias_clase_grupo`)
+
 ```prisma
 model AsistenciaClaseGrupo {
   id                String            @id @default(cuid())
@@ -98,6 +104,7 @@ model AsistenciaClaseGrupo {
 ```
 
 #### 4. **PuntoObtenido** (`puntos_obtenidos`)
+
 ```prisma
 model PuntoObtenido {
   id             String   @id @default(cuid())
@@ -116,6 +123,7 @@ model PuntoObtenido {
 ```
 
 #### 5. **AccionPuntuable** (`acciones_puntuables`)
+
 ```prisma
 model AccionPuntuable {
   id          String  @id @default(cuid())
@@ -127,6 +135,7 @@ model AccionPuntuable {
 ```
 
 #### 6. **Tarea** (`tareas`)
+
 ```prisma
 model Tarea {
   id                        String      @id @default(cuid())
@@ -145,6 +154,7 @@ model Tarea {
 ## ✅ ENDPOINTS EXISTENTES
 
 ### 1. **Grupos** (`/api/grupos`)
+
 - ✅ `GET /grupos` - Listar todos los grupos
 - ✅ `GET /grupos/:id` - Obtener un grupo específico
 - ✅ `POST /grupos` - Crear grupo (Admin)
@@ -152,6 +162,7 @@ model Tarea {
 - ✅ `DELETE /grupos/:id` - Eliminar grupo (Admin)
 
 ### 2. **Asistencia** (`/api/asistencia`)
+
 - ✅ `POST /asistencia/clases/:claseId/estudiantes/:estudianteId` - Marcar asistencia individual
 - ✅ `GET /asistencia/clases/:claseId` - Obtener roster de asistencia
 - ✅ `GET /asistencia/clases/:claseId/estadisticas` - Estadísticas de clase
@@ -161,6 +172,7 @@ model Tarea {
 - ✅ `GET /asistencia/docente/reportes` - Reportes del docente
 
 ### 3. **Gamificación** (`/api/gamificacion`)
+
 - ✅ `GET /gamificacion/acciones` - Lista de acciones puntuables
 - ✅ `POST /gamificacion/puntos` - Otorgar puntos a estudiante
 - ✅ `GET /gamificacion/dashboard/:estudianteId` - Dashboard del estudiante
@@ -168,6 +180,7 @@ model Tarea {
 - ✅ `GET /gamificacion/historial/:estudianteId` - Historial de puntos
 
 ### 4. **Docentes** (`/api/docentes`)
+
 - ✅ `GET /docentes/me/dashboard` - Dashboard BRUTAL con datos concretos
 - ✅ `GET /docentes/me` - Perfil del docente
 - ✅ `PATCH /docentes/me` - Actualizar perfil
@@ -177,9 +190,11 @@ model Tarea {
 ## 🚀 ENDPOINTS A CREAR
 
 ### 1. **GET `/api/clase-grupos/:id/detalle-completo`**
+
 **Descripción**: Obtiene TODA la información necesaria para la vista de detalles del grupo
 
 **Response**:
+
 ```typescript
 interface GrupoDetalleCompleto {
   // Info básica del grupo
@@ -258,9 +273,11 @@ interface GrupoDetalleCompleto {
 ```
 
 ### 2. **POST `/api/asistencia/clase-grupo/batch`**
+
 **Descripción**: Tomar asistencia de múltiples estudiantes en una sola request (para modo "En Vivo")
 
 **Body**:
+
 ```typescript
 interface TomarAsistenciaBatchDto {
   clase_grupo_id: string;
@@ -274,6 +291,7 @@ interface TomarAsistenciaBatchDto {
 ```
 
 **Response**:
+
 ```typescript
 interface AsistenciaBatchResponse {
   success: true;
@@ -288,9 +306,11 @@ interface AsistenciaBatchResponse {
 ```
 
 ### 3. **POST `/api/clase-grupos/:id/observacion-grupo`**
+
 **Descripción**: Agregar observación general del grupo (no de estudiante individual)
 
 **Body**:
+
 ```typescript
 interface ObservacionGrupoDto {
   fecha: string; // ISO date
@@ -300,9 +320,11 @@ interface ObservacionGrupoDto {
 ```
 
 ### 4. **GET `/api/clase-grupos/:id/proxima-clase`**
+
 **Descripción**: Obtener información sobre la próxima clase del grupo
 
 **Response**:
+
 ```typescript
 interface ProximaClaseInfo {
   grupoId: string;
@@ -361,6 +383,7 @@ graph TD
 ### FASE 1: BACKEND - Endpoints Nuevos (1-2 horas)
 
 #### Paso 1.1: Crear endpoint `GET /clase-grupos/:id/detalle-completo`
+
 **Archivo**: `apps/api/src/planificaciones/infrastructure/grupos.controller.ts`
 
 ```typescript
@@ -377,6 +400,7 @@ async getDetalleCompleto(
 ```
 
 #### Paso 1.2: Crear endpoint `POST /asistencia/clase-grupo/batch`
+
 **Archivo**: `apps/api/src/asistencia/asistencia.controller.ts`
 
 ```typescript
@@ -393,6 +417,7 @@ async tomarAsistenciaBatch(
 ```
 
 #### Paso 1.3: Crear DTOs TypeScript
+
 **Archivo**: `apps/api/src/asistencia/dto/tomar-asistencia-batch.dto.ts`
 
 ```typescript
@@ -431,6 +456,7 @@ export class TomarAsistenciaBatchDto {
 ### FASE 2: FRONTEND - API Client (30 min)
 
 #### Paso 2.1: Crear tipos TypeScript
+
 **Archivo**: `apps/web/src/lib/api/grupos.api.ts`
 
 ```typescript
@@ -505,13 +531,16 @@ export interface GrupoDetalleCompleto {
 // Funciones API
 export const gruposApi = {
   getDetalleCompleto: async (id: string): Promise<GrupoDetalleCompleto> => {
-    const response = await apiClient.get<GrupoDetalleCompleto>(`/clase-grupos/${id}/detalle-completo`);
+    const response = await apiClient.get<GrupoDetalleCompleto>(
+      `/clase-grupos/${id}/detalle-completo`,
+    );
     return response;
   },
 };
 ```
 
 #### Paso 2.2: Crear API de asistencia batch
+
 **Archivo**: `apps/web/src/lib/api/asistencia.api.ts` (agregar)
 
 ```typescript
@@ -528,7 +557,7 @@ export interface TomarAsistenciaBatchRequest {
 }
 
 export const tomarAsistenciaBatch = async (
-  data: TomarAsistenciaBatchRequest
+  data: TomarAsistenciaBatchRequest,
 ): Promise<{ success: boolean; registrosCreados: number }> => {
   const response = await apiClient.post('/asistencia/clase-grupo/batch', data);
   return response;
@@ -540,9 +569,11 @@ export const tomarAsistenciaBatch = async (
 ### FASE 3: FRONTEND - Página de Detalles BRUTAL (2-3 horas)
 
 #### Paso 3.1: Crear página de detalles
+
 **Archivo**: `apps/web/src/app/docente/grupos/[id]/page.tsx` (reescribir completa)
 
 **Estructura**:
+
 1. **Header BRUTAL**: Nombre del grupo, código, día/hora
 2. **Stats Cards**: 4 cards con totales (estudiantes, asistencia, puntos, tareas)
 3. **Botón INICIAR CLASE HOY**: Solo visible si hay clase hoy
@@ -553,9 +584,11 @@ export const tomarAsistenciaBatch = async (
    - Tab 4: **ESTADÍSTICAS** (gráficos y reportes)
 
 #### Paso 3.2: Crear modal de asistencia en vivo
+
 **Archivo**: `apps/web/src/components/docente/ModalAsistenciaEnVivo.tsx`
 
 **Funcionalidades**:
+
 - Lista de estudiantes con avatares
 - Botones rápidos: Presente / Ausente / Justificado
 - Campo de observación por estudiante
@@ -576,19 +609,20 @@ export const tomarAsistenciaBatch = async (
 
 ## 📊 ESTIMACIÓN DE TIEMPO
 
-| Fase | Descripción | Tiempo Estimado |
-|------|-------------|-----------------|
-| Fase 1 | Backend - Endpoints nuevos | 1-2 horas |
-| Fase 2 | Frontend - API Client | 30 min |
-| Fase 3 | Frontend - UI/UX BRUTAL | 2-3 horas |
-| Fase 4 | Testing & Refinamiento | 1 hora |
-| **TOTAL** | **Implementación completa** | **4-6 horas** |
+| Fase      | Descripción                 | Tiempo Estimado |
+| --------- | --------------------------- | --------------- |
+| Fase 1    | Backend - Endpoints nuevos  | 1-2 horas       |
+| Fase 2    | Frontend - API Client       | 30 min          |
+| Fase 3    | Frontend - UI/UX BRUTAL     | 2-3 horas       |
+| Fase 4    | Testing & Refinamiento      | 1 hora          |
+| **TOTAL** | **Implementación completa** | **4-6 horas**   |
 
 ---
 
 ## ✅ CHECKLIST DE IMPLEMENTACIÓN
 
 ### Backend
+
 - [ ] Crear endpoint `GET /clase-grupos/:id/detalle-completo`
 - [ ] Crear endpoint `POST /asistencia/clase-grupo/batch`
 - [ ] Crear DTOs con class-validator
@@ -596,6 +630,7 @@ export const tomarAsistenciaBatch = async (
 - [ ] Verificar performance de queries (índices Prisma)
 
 ### Frontend
+
 - [ ] Crear tipos TypeScript (NO `any`, NO `unknown`)
 - [ ] Crear funciones API client
 - [ ] Reescribir página de detalles de grupo
@@ -604,6 +639,7 @@ export const tomarAsistenciaBatch = async (
 - [ ] Integrar con diseño BRUTAL (purple, yellow, glassmorphism)
 
 ### Testing
+
 - [ ] Probar flujo: Dashboard → Detalles → Iniciar Clase → Tomar Asistencia
 - [ ] Verificar que stats se actualizan en tiempo real
 - [ ] Probar con datos reales (tus 6 grupos)
@@ -651,6 +687,7 @@ export const tomarAsistenciaBatch = async (
 ## 🔐 SEGURIDAD Y VALIDACIONES
 
 ### Backend
+
 1. ✅ Verificar que el docente autenticado sea el titular del grupo
 2. ✅ Validar que la fecha de asistencia sea válida (no futuro lejano)
 3. ✅ Validar que los estudiantes pertenezcan al grupo
@@ -658,6 +695,7 @@ export const tomarAsistenciaBatch = async (
 5. ✅ Rate limiting en endpoints sensibles
 
 ### Frontend
+
 1. ✅ Validar inputs antes de enviar
 2. ✅ Mostrar loaders mientras se guarda
 3. ✅ Mostrar mensajes de error claros
@@ -690,6 +728,7 @@ export const tomarAsistenciaBatch = async (
 ## 🎉 RESULTADO FINAL
 
 Un sistema COMPLETO, ROBUSTO y BRUTAL que permite a los docentes:
+
 - ✅ Ver detalles completos de sus grupos
 - ✅ Tomar asistencia rápida durante la clase
 - ✅ Agregar observaciones individuales y de grupo

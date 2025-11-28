@@ -122,11 +122,7 @@ export function EjecutarActividadView({ config, estudiante }: EjecutarActividadV
         const pregunta = contenidoEjercicio.preguntas[preguntaActual];
 
         if (!pregunta) {
-          return (
-            <div className="text-center text-white text-2xl">
-              ⚠️ Pregunta no disponible
-            </div>
-          );
+          return <div className="text-center text-white text-2xl">⚠️ Pregunta no disponible</div>;
         }
 
         return (

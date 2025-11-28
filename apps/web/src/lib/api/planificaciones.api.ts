@@ -108,9 +108,7 @@ const mapActividad = (actividad: ActividadApi): Actividad => ({
   updatedAt: actividad.updatedAt,
 });
 
-const mapPlanificacionDetalle = (
-  data: PlanificacionDetalleApi,
-): PlanificacionDetalle => ({
+const mapPlanificacionDetalle = (data: PlanificacionDetalleApi): PlanificacionDetalle => ({
   ...mapPlanificacionListItem(data),
   actividades: data.actividades?.map(mapActividad) ?? [],
 });
@@ -158,14 +156,10 @@ export const getPlanificaciones = async (
  * Obtener una planificación por ID con sus actividades
  * GET /api/planificaciones/:id
  */
-export const getPlanificacionById = async (
-  id: string,
-): Promise<PlanificacionDetalle> => {
+export const getPlanificacionById = async (id: string): Promise<PlanificacionDetalle> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.get<PlanificacionDetalleApi>(
-      `/planificaciones/${id}`,
-    );
+    const response = await axios.get<PlanificacionDetalleApi>(`/planificaciones/${id}`);
     return mapPlanificacionDetalle(response);
   } catch (error) {
     console.error('Error al obtener la planificación por ID:', error);
@@ -182,10 +176,7 @@ export const createPlanificacion = async (
 ): Promise<PlanificacionDetalle> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.post<PlanificacionDetalleApi>(
-      '/planificaciones',
-      data,
-    );
+    const response = await axios.post<PlanificacionDetalleApi>('/planificaciones', data);
     return mapPlanificacionDetalle(response);
   } catch (error) {
     console.error('Error al crear la planificación:', error);
@@ -203,10 +194,7 @@ export const updatePlanificacion = async (
 ): Promise<PlanificacionDetalle> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.patch<PlanificacionDetalleApi>(
-      `/planificaciones/${id}`,
-      data,
-    );
+    const response = await axios.patch<PlanificacionDetalleApi>(`/planificaciones/${id}`, data);
     return mapPlanificacionDetalle(response);
   } catch (error) {
     console.error('Error al actualizar la planificación:', error);
@@ -276,7 +264,7 @@ export const updateActividad = async (
  */
 export const deleteActividad = async (
   planificacionId: string,
-  actividadId: string
+  actividadId: string,
 ): Promise<void> => {
   try {
     await axios.delete(`/planificaciones/${planificacionId}/actividades/${actividadId}`);

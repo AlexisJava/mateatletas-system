@@ -101,9 +101,7 @@ export default function HeroSection({ onInscribe }: HeroSectionProps) {
             className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm mb-12"
           >
             <Calendar className="w-6 h-6 text-[#fbbf24]" />
-            <span className="text-xl md:text-2xl font-bold text-white">
-              5 Enero - 3 Marzo 2026
-            </span>
+            <span className="text-xl md:text-2xl font-bold text-white">5 Enero - 3 Marzo 2026</span>
           </motion.div>
 
           {/* Stats Grid */}

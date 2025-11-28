@@ -4,7 +4,12 @@ import { useEffect, useState } from 'react';
 import { useSectoresStore } from '@/store/sectores.store';
 import { Button } from '@/components/ui';
 import { Plus, Edit, Trash2, X, Save } from 'lucide-react';
-import type { Sector, RutaEspecialidad, CreateSectorDto, CreateRutaEspecialidadDto } from '@/types/sectores.types';
+import type {
+  Sector,
+  RutaEspecialidad,
+  CreateSectorDto,
+  CreateRutaEspecialidadDto,
+} from '@/types/sectores.types';
 
 type TabType = 'sectores' | 'rutas';
 type ModalType = 'createSector' | 'editSector' | 'createRuta' | 'editRuta' | null;
@@ -106,7 +111,7 @@ export default function SectoresRutasPage() {
     setRutaForm({
       nombre: '',
       descripcion: '',
-      sectorId: filterSectorId || (sectores[0]?.id || ''),
+      sectorId: filterSectorId || sectores[0]?.id || '',
     });
     setModalType('createRuta');
   };
@@ -152,9 +157,7 @@ export default function SectoresRutasPage() {
   };
 
   // Filtrar rutas por sector seleccionado
-  const filteredRutas = filterSectorId
-    ? rutas.filter((r) => r.sectorId === filterSectorId)
-    : rutas;
+  const filteredRutas = filterSectorId ? rutas.filter((r) => r.sectorId === filterSectorId) : rutas;
 
   // ============================================================================
   // RENDER
@@ -165,9 +168,7 @@ export default function SectoresRutasPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Sectores y Rutas de Especialidad
-          </h1>
+          <h1 className="text-4xl font-bold text-white mb-2">Sectores y Rutas de Especialidad</h1>
           <p className="text-indigo-600 dark:text-indigo-300">
             Gestiona los sectores y sus rutas personalizadas
           </p>
@@ -211,9 +212,7 @@ export default function SectoresRutasPage() {
           <div>
             {/* Header con botón crear */}
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">
-                Sectores
-              </h2>
+              <h2 className="text-2xl font-bold text-white">Sectores</h2>
               <Button onClick={openCreateSector} className="flex items-center gap-2">
                 <Plus size={20} /> Crear Sector
               </Button>
@@ -235,9 +234,7 @@ export default function SectoresRutasPage() {
                         {sector.icono}
                       </span>
                       <div>
-                        <h3 className="text-xl font-bold text-white">
-                          {sector.nombre}
-                        </h3>
+                        <h3 className="text-xl font-bold text-white">{sector.nombre}</h3>
                         <p className="text-sm text-indigo-600 dark:text-indigo-300">
                           {sector._count?.rutas || 0} rutas
                         </p>
@@ -259,9 +256,7 @@ export default function SectoresRutasPage() {
                     </div>
                   </div>
                   {sector.descripcion && (
-                    <p className="text-gray-700 dark:text-gray-300 text-sm">
-                      {sector.descripcion}
-                    </p>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm">{sector.descripcion}</p>
                   )}
                 </div>
               ))}
@@ -302,7 +297,10 @@ export default function SectoresRutasPage() {
                   ))}
                 </select>
               </div>
-              <Button onClick={openCreateRuta} className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700">
+              <Button
+                onClick={openCreateRuta}
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
+              >
                 <Plus size={20} /> Crear Ruta
               </Button>
             </div>

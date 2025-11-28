@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useCatalogoStore } from '@/store/catalogo.store';
-import {
-  ProductCard,
-  ProductFilter,
-  ProductModal,
-} from '@/components/features/catalogo';
+import { ProductCard, ProductFilter, ProductModal } from '@/components/features/catalogo';
 import { Card } from '@/components/ui';
 import { Producto, TipoProducto } from '@/types/catalogo.types';
 
@@ -29,8 +25,7 @@ export default function CatalogoPage() {
   } = useCatalogoStore();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [productoSeleccionado, setProductoSeleccionado] =
-    useState<Producto | null>(null);
+  const [productoSeleccionado, setProductoSeleccionado] = useState<Producto | null>(null);
 
   // Cargar productos al montar
   useEffect(() => {

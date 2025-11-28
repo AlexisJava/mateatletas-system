@@ -29,7 +29,7 @@ export default function QuizCard({ onOpenQuiz }: QuizCardProps) {
               transition={{
                 duration: 3,
                 repeat: Infinity,
-                ease: 'easeInOut'
+                ease: 'easeInOut',
               }}
             />
 
@@ -42,12 +42,12 @@ export default function QuizCard({ onOpenQuiz }: QuizCardProps) {
                     className="absolute inset-0 bg-gradient-to-r from-[#8b5cf6] to-[#f43f5e] rounded-full blur-xl"
                     animate={{
                       scale: [1, 1.2, 1],
-                      opacity: [0.5, 0.8, 0.5]
+                      opacity: [0.5, 0.8, 0.5],
                     }}
                     transition={{
                       duration: 2,
                       repeat: Infinity,
-                      ease: 'easeInOut'
+                      ease: 'easeInOut',
                     }}
                   />
                   <div className="relative bg-gradient-to-br from-[#8b5cf6] to-[#f43f5e] w-20 h-20 rounded-full flex items-center justify-center">
@@ -62,7 +62,8 @@ export default function QuizCard({ onOpenQuiz }: QuizCardProps) {
                   ¿No sabés cuál elegir?
                 </h3>
                 <p className="text-xl text-white/70 mb-2">
-                  Respondé <strong className="text-white">5 preguntas rápidas</strong> y te recomendamos
+                  Respondé <strong className="text-white">5 preguntas rápidas</strong> y te
+                  recomendamos
                 </p>
                 <p className="text-lg text-white/60">
                   el curso perfecto para tu hijo en base a su edad, intereses y experiencia
@@ -107,7 +108,7 @@ export default function QuizCard({ onOpenQuiz }: QuizCardProps) {
                   transition={{
                     duration: 2,
                     repeat: Infinity,
-                    ease: 'easeInOut'
+                    ease: 'easeInOut',
                   }}
                 />
                 <span className="relative flex items-center justify-center gap-3">

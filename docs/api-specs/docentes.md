@@ -11,6 +11,7 @@ Prompt de desarrollo
 Implement the **Docentes** vertical slice within Usuarios.
 
 **Backend (NestJS)**:
+
 - Extend `UsuariosModule` with a `DocentesModule` (controller, service).
 - **Prisma Schema**: Add `Docente` model if not exists. Fields: `id (PK)`, `nombre`, `apellido`, `email` (unique), `password` (hashed), plus any extra fields (e.g., tituloProfesional, bio, etc., optional). A Docente is essentially a user account similar to Tutor but with different role.
 - **DocenteService**:
@@ -30,6 +31,7 @@ Implement the **Docentes** vertical slice within Usuarios.
 - The service methods should ensure uniqueness of email on create. If additional fields (bio, etc.) included, handle accordingly.
 
 **Frontend (Next.js)**:
+
 - Likely an **Admin Panel** will manage docentes:
   - **Página Lista de Docentes** (`/admin/docentes`): Shows all teachers with basic info (nombre, email, etc.). Provide a button to "Agregar Docente".
   - **Página Nuevo Docente** (`/admin/docentes/nuevo`): Form for admin to input teacher’s nombre, apellido, email, password (or generate one) and any other details. Submit calls POST /docentes. On success, navigate back to list.
@@ -41,6 +43,7 @@ Implement the **Docentes** vertical slice within Usuarios.
 - Note: Admin interface is considered in Admin slice, but basic pages for teacher management are included here for completeness.
 
 **API Integration**:
+
 - Admin side:
   - `useQuery('docentes', fetchDocentes)` – GET all teachers.
   - `useMutation(createDocente)` – POST new teacher (invalidar lista on success).
@@ -50,6 +53,7 @@ Implement the **Docentes** vertical slice within Usuarios.
   - Their class list will use Clases slice endpoints.
 
 **Types**:
+
 - `Docente` interface: { id, nombre, apellido, email, password?: string (only for create), ... }.
 - Possibly include fields like `titulo` (degree) or `bio` if needed, else just basic info.
 - `CreateDocenteDto` / `UpdateDocenteDto` align with the above.
@@ -57,6 +61,7 @@ Implement the **Docentes** vertical slice within Usuarios.
 - Could define separate types for Admin view (without password) vs create payload.
 
 **Orden de implementación**:
+
 1. **Prisma**: Añadir modelo Docente (similar to Tutor). Migrar.
 2. **Backend**: Crear DocentesService (create, findAll, findByEmail). Integrar en AuthService (check docente login).
 3. **Controller**: Implementar POST /docentes y GET /docentes con guard Admin. (If admin user exists; assume an 'Admin' role user or define in RolesGuard).

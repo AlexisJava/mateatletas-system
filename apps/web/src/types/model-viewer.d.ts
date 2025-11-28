@@ -1,6 +1,7 @@
 declare namespace JSX {
   interface IntrinsicElements {
-    'model-viewer': ModelViewerElement & React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+    'model-viewer': ModelViewerElement &
+      React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   }
 }
 
@@ -16,7 +17,7 @@ interface ModelViewerElement {
   'max-camera-orbit'?: string;
   'shadow-intensity'?: string;
   'shadow-softness'?: string;
-  'exposure'?: string;
+  exposure?: string;
   'environment-image'?: string;
   'skybox-image'?: string;
   poster?: string;

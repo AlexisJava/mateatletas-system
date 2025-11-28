@@ -4,14 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import apiClient from '@/lib/axios';
 import { LoadingSpinner } from '@/components/effects';
-import {
-  ArrowLeft,
-  Users,
-  Clock,
-  Video,
-  CheckCircle,
-  Calendar,
-} from 'lucide-react';
+import { ArrowLeft, Users, Clock, Video, CheckCircle, Calendar } from 'lucide-react';
 
 /**
  * Sala de Clase - Vista del Docente
@@ -61,9 +54,7 @@ export default function SalaClaseDocentePage() {
         setClase(claseData);
 
         // Cargar estudiantes inscritos
-        const estudiantesData = await apiClient.get<Estudiante[]>(
-          `/clases/${claseId}/estudiantes`,
-        );
+        const estudiantesData = await apiClient.get<Estudiante[]>(`/clases/${claseId}/estudiantes`);
         setEstudiantes(estudiantesData);
       } catch {
         // Error loading class
@@ -93,9 +84,7 @@ export default function SalaClaseDocentePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Clase no encontrada
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Clase no encontrada</h2>
           <button
             onClick={() => router.push('/docente/dashboard')}
             className="text-blue-600 hover:text-blue-700"
@@ -162,21 +151,18 @@ export default function SalaClaseDocentePage() {
                 </p>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <h3 className="font-semibold text-blue-900 mb-2">
-                    Información de la Clase
-                  </h3>
+                  <h3 className="font-semibold text-blue-900 mb-2">Información de la Clase</h3>
                   <div className="text-left space-y-2 text-sm">
                     <p>
-                      <span className="font-medium">Curso:</span>{' '}
-                      {rutaNombre}
+                      <span className="font-medium">Curso:</span> {rutaNombre}
                     </p>
                     <p>
-                      <span className="font-medium">Duración:</span>{' '}
-                      {clase.duracion_minutos} minutos
+                      <span className="font-medium">Duración:</span> {clase.duracion_minutos}{' '}
+                      minutos
                     </p>
                     <p>
-                      <span className="font-medium">Estudiantes:</span>{' '}
-                      {clase.cupos_ocupados} inscritos
+                      <span className="font-medium">Estudiantes:</span> {clase.cupos_ocupados}{' '}
+                      inscritos
                     </p>
                   </div>
                 </div>
@@ -231,14 +217,10 @@ export default function SalaClaseDocentePage() {
 
             {/* Acciones Rápidas */}
             <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                Acciones Rápidas
-              </h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Acciones Rápidas</h3>
               <div className="space-y-2">
                 <button
-                  onClick={() =>
-                    router.push(`/docente/clases/${claseId}/asistencia`)
-                  }
+                  onClick={() => router.push(`/docente/clases/${claseId}/asistencia`)}
                   className="w-full flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-left"
                 >
                   <Calendar className="w-5 h-5 mr-3 text-gray-600" />

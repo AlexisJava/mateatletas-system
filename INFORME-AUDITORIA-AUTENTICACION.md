@@ -13,15 +13,15 @@ El sistema de autenticación actual presenta **fragmentación severa, redundanci
 
 ### Métricas del Sistema Actual
 
-| Métrica | Valor | Estado |
-|---------|-------|--------|
-| **Entidades con Login** | 4 (Tutor, Estudiante, Docente, Admin) | 🟡 Alto |
-| **Rutas Frontend** | 3 (`/login`, `/estudiante-login`, `/docente-login`) | 🟢 Aceptable |
-| **Endpoints Backend** | 2 (`/api/auth/login`, `/api/auth/estudiante/login`) | 🔴 Insuficiente |
-| **Tablas de BD** | 4 (`tutores`, `estudiantes`, `docentes`, `admins`) | 🔴 Fragmentado |
-| **Problemas Críticos** | 7 | 🔴 Crítico |
-| **Código Duplicado** | ~40% en lógica de auth | 🔴 Alto |
-| **Complejidad Ciclomática** | 18 (método `login()`) | 🔴 Muy Alto |
+| Métrica                     | Valor                                               | Estado          |
+| --------------------------- | --------------------------------------------------- | --------------- |
+| **Entidades con Login**     | 4 (Tutor, Estudiante, Docente, Admin)               | 🟡 Alto         |
+| **Rutas Frontend**          | 3 (`/login`, `/estudiante-login`, `/docente-login`) | 🟢 Aceptable    |
+| **Endpoints Backend**       | 2 (`/api/auth/login`, `/api/auth/estudiante/login`) | 🔴 Insuficiente |
+| **Tablas de BD**            | 4 (`tutores`, `estudiantes`, `docentes`, `admins`)  | 🔴 Fragmentado  |
+| **Problemas Críticos**      | 7                                                   | 🔴 Crítico      |
+| **Código Duplicado**        | ~40% en lógica de auth                              | 🔴 Alto         |
+| **Complejidad Ciclomática** | 18 (método `login()`)                               | 🔴 Muy Alto     |
 
 ### Impacto en el Negocio
 
@@ -219,6 +219,7 @@ Un docente puede tener roles `["docente", "admin"]`:
 ```
 
 **Comportamiento actual**:
+
 1. Login exitoso
 2. Frontend detecta múltiples roles
 3. Muestra modal: "¿Ingresar como ADMIN o DOCENTE?"
@@ -257,7 +258,7 @@ Un docente puede tener roles `["docente", "admin"]`:
   apellido: string
   dni?: string
   telefono?: string
-  
+
   // ✨ ÚNICO CON MFA (Multi-Factor Authentication)
   mfa_enabled: boolean (default: false)
   mfa_secret?: string      // TOTP secret (encriptado)
@@ -307,6 +308,7 @@ graph LR
 ```
 
 **Comportamiento**:
+
 - Login con password + MFA code
 - Modal de selección de rol
 - Si elige "ADMIN" → `/admin/dashboard` (gestión completa)
@@ -325,11 +327,11 @@ graph LR
 
 ### Inventario Completo
 
-| Ruta | Entidad(es) | Campos | Endpoint Backend | Dashboard Destino |
-|------|-------------|--------|------------------|-------------------|
-| `/login` | Tutor | Email + Password | `POST /api/auth/login` | `/dashboard` |
-| `/estudiante-login` | Estudiante | Username + Password | `POST /api/auth/estudiante/login` | `/estudiante/dashboard` |
-| `/docente-login` | Docente + Admin | Email + Password | `POST /api/auth/login` | `/docente/dashboard` o `/admin/dashboard` |
+| Ruta                | Entidad(es)     | Campos              | Endpoint Backend                  | Dashboard Destino                         |
+| ------------------- | --------------- | ------------------- | --------------------------------- | ----------------------------------------- |
+| `/login`            | Tutor           | Email + Password    | `POST /api/auth/login`            | `/dashboard`                              |
+| `/estudiante-login` | Estudiante      | Username + Password | `POST /api/auth/estudiante/login` | `/estudiante/dashboard`                   |
+| `/docente-login`    | Docente + Admin | Email + Password    | `POST /api/auth/login`            | `/docente/dashboard` o `/admin/dashboard` |
 
 ### Análisis Detallado por Ruta
 
@@ -353,12 +355,14 @@ const handleLogin = async (e: React.FormEvent) => {
 ```
 
 **Características**:
+
 - ✅ UI específica para padres/tutores
 - ✅ Links a "Soy Docente" y "Soy Estudiante"
 - ✅ Opción "¿Olvidaste tu contraseña?"
 - ✅ Link a registro `/register`
 
 **Problemas**:
+
 - 🟡 No valida formato de email en frontend (solo required)
 - 🟡 Error genérico "Credenciales inválidas" no ayuda al debug
 
@@ -384,12 +388,14 @@ const handleLogin = async (e: React.FormEvent) => {
 ```
 
 **Características**:
+
 - ✅ UI gamificada para niños (diseño cosmos)
 - ✅ Campo `username` en lugar de email
 - ✅ Placeholder: "tu.nombre" (ejemplo visual)
 - ✅ Links a otros tipos de login
 
 **Problemas**:
+
 - 🟡 No hay "¿Olvidaste tu contraseña?" (los estudiantes dependen del tutor)
 - ⚠️ Username case-sensitive puede causar confusión
 
@@ -410,17 +416,18 @@ const handleLogin = async (e: React.FormEvent) => {
   try {
     const user = await login(email, password);
     const roles = user.roles || [user.role];
-    
+
     // Detectar multi-rol
-    const hasMultipleRoles = roles.length > 1 &&
-      roles.some(r => r.toLowerCase() === 'admin') &&
-      roles.some(r => r.toLowerCase() === 'docente');
-    
+    const hasMultipleRoles =
+      roles.length > 1 &&
+      roles.some((r) => r.toLowerCase() === 'admin') &&
+      roles.some((r) => r.toLowerCase() === 'docente');
+
     if (hasMultipleRoles) {
       setShowRoleSelector(true); // Mostrar modal
       return;
     }
-    
+
     // Single role: redirect directo
     const path = user.role === 'admin' ? '/admin/dashboard' : '/docente/dashboard';
     router.push(path);
@@ -437,16 +444,19 @@ const handleRoleSelection = (role: 'admin' | 'docente') => {
 ```
 
 **Características**:
+
 - ✅ Toggle visual "DOCENTE" / "ADMIN"
 - ✅ UI premium (cosmos design)
 - ✅ **NUEVO**: Modal de selección de rol para multi-rol
 - ✅ Links a otros tipos de login
 
 **Problemas RESUELTOS en esta sesión**:
+
 - ✅ ~~Toggle era puramente cosmético~~ → Ahora muestra modal si multi-rol
 - ✅ ~~Redirección incorrecta para multi-rol~~ → Ahora permite elegir
 
 **Problemas PENDIENTES**:
+
 - 🔴 **Toggle aún no hace nada** (backend ignora el valor)
 - 🔴 Endpoint sigue siendo el mismo para ambos tipos
 - 🟡 `selectedRole` no se persiste (se pierde al refresh)
@@ -457,13 +467,13 @@ const handleRoleSelection = (role: 'admin' | 'docente') => {
 
 ### Inventario Completo
 
-| Endpoint | Método | Entidad(es) | Controller | Service Method |
-|----------|--------|-------------|------------|----------------|
-| `/api/auth/login` | POST | Tutor, Docente, Admin | `auth.controller.ts` | `authService.login()` |
-| `/api/auth/estudiante/login` | POST | Estudiante | `auth.controller.ts` | `authService.loginEstudiante()` |
-| `/api/auth/profile` | GET | Todas | `auth.controller.ts` | `authService.getProfile()` |
-| `/api/auth/logout` | POST | Todas | `auth.controller.ts` | Limpia cookie + blacklist token |
-| `/api/auth/mfa/complete` | POST | Admin (solo si MFA) | `auth.controller.ts` | `authService.completeMfaLogin()` |
+| Endpoint                     | Método | Entidad(es)           | Controller           | Service Method                   |
+| ---------------------------- | ------ | --------------------- | -------------------- | -------------------------------- |
+| `/api/auth/login`            | POST   | Tutor, Docente, Admin | `auth.controller.ts` | `authService.login()`            |
+| `/api/auth/estudiante/login` | POST   | Estudiante            | `auth.controller.ts` | `authService.loginEstudiante()`  |
+| `/api/auth/profile`          | GET    | Todas                 | `auth.controller.ts` | `authService.getProfile()`       |
+| `/api/auth/logout`           | POST   | Todas                 | `auth.controller.ts` | Limpia cookie + blacklist token  |
+| `/api/auth/mfa/complete`     | POST   | Admin (solo si MFA)   | `auth.controller.ts` | `authService.completeMfaLogin()` |
 
 ---
 
@@ -556,7 +566,7 @@ async login(loginDto: LoginDto, ip: string = 'unknown') {
   // ========================================
   // PASO 1: Buscar usuario en 3 tablas
   // ========================================
-  
+
   // 1.1. Buscar como tutor
   let user: AuthenticatedUser | null = await this.prisma.tutor.findUnique({
     where: { email }
@@ -581,7 +591,7 @@ async login(loginDto: LoginDto, ip: string = 'unknown') {
   // ========================================
   // PASO 2: Validar password (con timing attack protection)
   // ========================================
-  
+
   const dummyHash = '$2b$12$dummyhashforunknownusers1234567890ab';
   const hashToCompare = user?.password_hash || dummyHash;
   const isPasswordValid = await bcrypt.compare(password, hashToCompare);
@@ -598,7 +608,7 @@ async login(loginDto: LoginDto, ip: string = 'unknown') {
   // ========================================
   // PASO 3: Verificar MFA (solo para admins)
   // ========================================
-  
+
   if (adminUser && isAdminUser(user) && adminUser.mfa_enabled) {
     const mfaToken = this.generateMfaToken(user.id, user.email);
     return {
@@ -617,17 +627,17 @@ async login(loginDto: LoginDto, ip: string = 'unknown') {
   // ========================================
   // PASO 4: Obtener roles del usuario
   // ========================================
-  
+
   const userRoles = parseUserRoles(user.roles); // Parsear JSON
-  const detectedRole = isTutorUser(user) ? Role.TUTOR 
-                     : isDocenteUser(user) ? Role.DOCENTE 
+  const detectedRole = isTutorUser(user) ? Role.TUTOR
+                     : isDocenteUser(user) ? Role.DOCENTE
                      : Role.ADMIN;
   const finalUserRoles = userRoles.length > 0 ? userRoles : [detectedRole];
 
   // ========================================
   // PASO 5: Generar JWT
   // ========================================
-  
+
   const accessToken = this.generateJwtToken(
     user.id,
     user.email,
@@ -637,18 +647,18 @@ async login(loginDto: LoginDto, ip: string = 'unknown') {
   // ========================================
   // PASO 6: Emitir evento de auditoría
   // ========================================
-  
-  const userType = isTutorUser(user) ? 'tutor' 
-                 : isDocenteUser(user) ? 'docente' 
+
+  const userType = isTutorUser(user) ? 'tutor'
+                 : isDocenteUser(user) ? 'docente'
                  : 'admin';
-  this.eventEmitter.emit('user.logged-in', 
+  this.eventEmitter.emit('user.logged-in',
     new UserLoggedInEvent(user.id, userType, user.email, false)
   );
 
   // ========================================
   // PASO 7: Retornar response según tipo
   // ========================================
-  
+
   if (isTutorUser(user)) {
     return {
       access_token: accessToken,
@@ -706,14 +716,14 @@ async login(loginDto: LoginDto, ip: string = 'unknown') {
 
 #### Problemas Identificados en esta Lógica
 
-| Línea | Problema | Severidad | Impacto |
-|-------|----------|-----------|---------|
-| 236-252 | **3 queries secuenciales** | 🔴 Crítico | +300-600ms por login fallido |
-| 236-252 | **Timing attack vulnerable** | 🔴 Crítico | Permite enumerar emails válidos |
-| 257 | Dummy hash ejecuta bcrypt inútilmente | 🟡 Medio | +100ms por login fallido |
-| 291-295 | **Type guards frágiles** | 🟡 Medio | Dificulta mantenimiento |
-| 322-375 | **3 estructuras de response diferentes** | 🟡 Medio | Dificulta tipado TypeScript |
-| 289-296 | Lógica de roles duplicada | 🟡 Medio | DRY violation |
+| Línea   | Problema                                 | Severidad  | Impacto                         |
+| ------- | ---------------------------------------- | ---------- | ------------------------------- |
+| 236-252 | **3 queries secuenciales**               | 🔴 Crítico | +300-600ms por login fallido    |
+| 236-252 | **Timing attack vulnerable**             | 🔴 Crítico | Permite enumerar emails válidos |
+| 257     | Dummy hash ejecuta bcrypt inútilmente    | 🟡 Medio   | +100ms por login fallido        |
+| 291-295 | **Type guards frágiles**                 | 🟡 Medio   | Dificulta mantenimiento         |
+| 322-375 | **3 estructuras de response diferentes** | 🟡 Medio   | Dificulta tipado TypeScript     |
+| 289-296 | Lógica de roles duplicada                | 🟡 Medio   | DRY violation                   |
 
 ---
 
@@ -724,11 +734,13 @@ async login(loginDto: LoginDto, ip: string = 'unknown') {
 #### Diferencias con `/api/auth/login`
 
 ✅ **VENTAJAS**:
+
 - Una sola query a BD (`estudiantes`)
 - Lógica más simple (no hay type guards)
 - Endpoint dedicado (no confusión)
 
 ⚠️ **CONSISTENCIA**:
+
 - Usa `username` en lugar de `email`
 - Retorna datos del `tutor` asociado
 - No soporta MFA (los estudiantes no lo necesitan)
@@ -772,7 +784,7 @@ async loginEstudiante(loginEstudianteDto: LoginEstudianteDto, ip: string) {
   );
 
   // 5. Emitir evento
-  this.eventEmitter.emit('user.logged-in', 
+  this.eventEmitter.emit('user.logged-in',
     new UserLoggedInEvent(estudiante.id, 'estudiante', estudiante.email || estudiante.username, false)
   );
 
@@ -842,18 +854,16 @@ roles: Json @default("[\"admin\"]")  // Para admins
 ```typescript
 export function parseUserRoles(rolesJson: unknown): Role[] {
   if (!rolesJson) return [];
-  
+
   try {
-    const parsed = typeof rolesJson === 'string' 
-      ? JSON.parse(rolesJson) 
-      : rolesJson;
-    
+    const parsed = typeof rolesJson === 'string' ? JSON.parse(rolesJson) : rolesJson;
+
     if (Array.isArray(parsed)) {
       return parsed
-        .map(r => String(r).toUpperCase())
-        .filter(r => Object.values(Role).includes(r as Role)) as Role[];
+        .map((r) => String(r).toUpperCase())
+        .filter((r) => Object.values(Role).includes(r as Role)) as Role[];
     }
-    
+
     return [];
   } catch {
     return [];
@@ -909,15 +919,13 @@ export class RolesGuard implements CanActivate {
     }
 
     // Normalizar roles del usuario
-    const normalizedUserRoles = user.roles.map(r => 
-      typeof r === 'string' ? r.toUpperCase() as Role : r
+    const normalizedUserRoles = user.roles.map((r) =>
+      typeof r === 'string' ? (r.toUpperCase() as Role) : r,
     );
 
     // Verificar si cumple con jerarquía
     return requiredRoles.some((requiredRole: Role) =>
-      normalizedUserRoles.some((userRole: Role) =>
-        cumpleJerarquia(userRole, requiredRole)
-      )
+      normalizedUserRoles.some((userRole: Role) => cumpleJerarquia(userRole, requiredRole)),
     );
   }
 }
@@ -927,7 +935,7 @@ export class RolesGuard implements CanActivate {
 
 ```typescript
 const ROLE_HIERARCHY = {
-  [Role.ADMIN]: 4,      // Máximo acceso
+  [Role.ADMIN]: 4, // Máximo acceso
   [Role.DOCENTE]: 3,
   [Role.TUTOR]: 2,
   [Role.ESTUDIANTE]: 1, // Mínimo acceso
@@ -939,6 +947,7 @@ function cumpleJerarquia(userRole: Role, requiredRole: Role): boolean {
 ```
 
 **Ejemplo**:
+
 - Endpoint requiere `@Roles(Role.DOCENTE)`
 - Usuario tiene rol `ADMIN`
 - `ROLE_HIERARCHY[ADMIN] (4) >= ROLE_HIERARCHY[DOCENTE] (3)` ✅ Permitido
@@ -966,13 +975,13 @@ admins
 
 #### Impacto
 
-| Aspecto | Impacto |
-|---------|---------|
-| **Código duplicado** | ~40% de lógica auth repetida 4 veces |
-| **Queries cross-entity** | Imposibles sin UNION o múltiples queries |
-| **Mantenimiento** | Cambio en auth = modificar 4 lugares |
-| **Testing** | 4 suites de tests separadas |
-| **Migrations** | Cambios de schema requieren 4 migraciones |
+| Aspecto                  | Impacto                                   |
+| ------------------------ | ----------------------------------------- |
+| **Código duplicado**     | ~40% de lógica auth repetida 4 veces      |
+| **Queries cross-entity** | Imposibles sin UNION o múltiples queries  |
+| **Mantenimiento**        | Cambio en auth = modificar 4 lugares      |
+| **Testing**              | 4 suites de tests separadas               |
+| **Migrations**           | Cambios de schema requieren 4 migraciones |
 
 #### Ejemplo de Query Cross-Entity (Actual - IMPOSIBLE)
 
@@ -1008,21 +1017,22 @@ async login(email, password) {
   let user = await prisma.tutor.findUnique({ where: { email } });     // Query 1
   if (!user) user = await prisma.docente.findUnique({ where: { email } }); // Query 2
   if (!user) user = await prisma.admin.findUnique({ where: { email } });   // Query 3
-  
+
   // ... validación ...
 }
 ```
 
 #### Métricas de Performance
 
-| Escenario | Queries | Tiempo Promedio | Impacto |
-|-----------|---------|-----------------|---------|
-| Login exitoso (tutor) | 1 | ~50ms | ✅ Óptimo |
-| Login exitoso (docente) | 2 | ~150ms | 🟡 Aceptable |
-| Login exitoso (admin) | 3 | ~250ms | 🟡 Aceptable |
-| **Login fallido** | **3** | **~600ms** | 🔴 **Crítico** |
+| Escenario               | Queries | Tiempo Promedio | Impacto        |
+| ----------------------- | ------- | --------------- | -------------- |
+| Login exitoso (tutor)   | 1       | ~50ms           | ✅ Óptimo      |
+| Login exitoso (docente) | 2       | ~150ms          | 🟡 Aceptable   |
+| Login exitoso (admin)   | 3       | ~250ms          | 🟡 Aceptable   |
+| **Login fallido**       | **3**   | **~600ms**      | 🔴 **Crítico** |
 
 **Análisis**:
+
 - Login fallido ejecuta 3 queries + 3 bcrypt compares (dummy hash)
 - bcrypt con 12 rounds = ~100ms por compare
 - Total: 3 × (50ms query + 100ms bcrypt) = **450-600ms**
@@ -1050,6 +1060,7 @@ time curl -X POST /api/auth/login -d '{"email":"noexiste@example.com","password"
 ```
 
 **Explotación**:
+
 1. Atacante hace requests con emails conocidos
 2. Mide tiempos de respuesta
 3. Deduce en qué tabla existe cada email
@@ -1057,6 +1068,7 @@ time curl -X POST /api/auth/login -d '{"email":"noexiste@example.com","password"
 5. Facilita ataques dirigidos (phishing, social engineering)
 
 **Mitigación Actual (Insuficiente)**:
+
 - Dummy hash para emails inexistentes (evita que 0 queries = email no existe)
 - ❌ NO evita diferencias entre 1, 2 y 3 queries
 
@@ -1068,12 +1080,12 @@ time curl -X POST /api/auth/login -d '{"email":"noexiste@example.com","password"
 
 Cada tipo de usuario usa diferentes campos para autenticación:
 
-| Entidad | Campo Login | Obligatorio | Único | Validación |
-|---------|-------------|-------------|-------|------------|
-| Tutor | `email` o `username` | Email SÍ, Username NO | Ambos | Email format |
-| Estudiante | `username` | SÍ | SÍ | Alfanumérico |
-| Docente | `email` | SÍ | SÍ | Email format |
-| Admin | `email` | SÍ | SÍ | Email format |
+| Entidad    | Campo Login          | Obligatorio           | Único | Validación   |
+| ---------- | -------------------- | --------------------- | ----- | ------------ |
+| Tutor      | `email` o `username` | Email SÍ, Username NO | Ambos | Email format |
+| Estudiante | `username`           | SÍ                    | SÍ    | Alfanumérico |
+| Docente    | `email`              | SÍ                    | SÍ    | Email format |
+| Admin      | `email`              | SÍ                    | SÍ    | Email format |
 
 #### Confusión para Usuarios
 
@@ -1083,7 +1095,7 @@ Cada tipo de usuario usa diferentes campos para autenticación:
 // Usuario: estudiante con email "juan@gmail.com" y username "juan.perez"
 // Intenta login con email en /estudiante-login
 
-await loginEstudiante("juan@gmail.com", "password123");
+await loginEstudiante('juan@gmail.com', 'password123');
 // ❌ Error: "Credenciales inválidas"
 // Razón: endpoint busca por username, no por email
 ```
@@ -1094,7 +1106,7 @@ await loginEstudiante("juan@gmail.com", "password123");
 // Usuario: tutor con username "laura.gomez" y email "laura@gmail.com"
 // Intenta login con username en /login
 
-await login("laura.gomez", "password123");
+await login('laura.gomez', 'password123');
 // ❌ Error: "Credenciales inválidas"
 // Razón: endpoint busca por email, no por username
 ```
@@ -1125,14 +1137,15 @@ await login(email, password); // userType NO se usa
 
 #### Comportamiento Actual
 
-| Caso | Toggle UI | Email en BD | Resultado |
-|------|-----------|-------------|-----------|
-| 1 | Docente | `docentes` table | ✅ Login como docente |
-| 2 | Admin | `admins` table | ✅ Login como admin |
-| 3 | **Docente** | **`admins` table** | ❌ Login como admin (ignora toggle) |
-| 4 | **Admin** | **`docentes` table** | ❌ Login como docente (ignora toggle) |
+| Caso | Toggle UI   | Email en BD          | Resultado                             |
+| ---- | ----------- | -------------------- | ------------------------------------- |
+| 1    | Docente     | `docentes` table     | ✅ Login como docente                 |
+| 2    | Admin       | `admins` table       | ✅ Login como admin                   |
+| 3    | **Docente** | **`admins` table**   | ❌ Login como admin (ignora toggle)   |
+| 4    | **Admin**   | **`docentes` table** | ❌ Login como docente (ignora toggle) |
 
 **Confusión del Usuario**:
+
 1. Usuario selecciona "DOCENTE" en toggle
 2. Email existe en `admins` table
 3. Backend autentica como admin
@@ -1154,6 +1167,7 @@ if (hasMultipleRoles) {
 ```
 
 **Problemas PENDIENTES**:
+
 - 🟡 Toggle sigue sin hacer nada para usuarios de un solo rol
 - 🟡 No hay feedback visual cuando toggle no coincide con rol real
 
@@ -1171,19 +1185,22 @@ Sistema multi-rol existe pero tiene issues críticos:
 // auth.store.ts
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({ /* ... */ }),
+    (set, get) => ({
+      /* ... */
+    }),
     {
       partialize: (state) => ({
         user: state.user,
         token: state.token,
         // ❌ selectedRole NO se persiste
-      })
-    }
-  )
+      }),
+    },
+  ),
 );
 ```
 
 **Impacto**:
+
 - Usuario selecciona rol "DOCENTE"
 - Navega a dashboard
 - Refresca página (F5)
@@ -1207,6 +1224,7 @@ const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/docente/dash
 ```
 
 **Problema**:
+
 - No hay consistency entre frontend y backend
 - Frontend no puede verificar permisos correctamente
 - Requiere mantener ambos campos sincronizados
@@ -1274,11 +1292,11 @@ CREATE INDEX idx_admin_roles ON admins(roles);
 
 #### Impacto en Queries
 
-| Query | Complejidad | Performance |
-|-------|-------------|-------------|
-| "Usuarios con rol X" | O(n) scan completo | 🔴 Lento |
-| "Usuarios con múltiples roles" | O(n) + parse JSON | 🔴 Muy lento |
-| "Jerarquía de roles" | Imposible en SQL | 🔴 Solo en app |
+| Query                          | Complejidad        | Performance    |
+| ------------------------------ | ------------------ | -------------- |
+| "Usuarios con rol X"           | O(n) scan completo | 🔴 Lento       |
+| "Usuarios con múltiples roles" | O(n) + parse JSON  | 🔴 Muy lento   |
+| "Jerarquía de roles"           | Imposible en SQL   | 🔴 Solo en app |
 
 ---
 
@@ -1409,6 +1427,7 @@ Evitar "big bang rewrite" → Implementar cambios incrementales sin romper funci
 ### Objetivo
 
 Separar endpoint `/api/auth/login` en 3 endpoints específicos:
+
 - `POST /api/auth/login/tutor`
 - `POST /api/auth/login/docente`
 - `POST /api/auth/login/admin`
@@ -1455,12 +1474,12 @@ async loginAdmin(
   @Ip() ip: string,
 ) {
   const result = await this.authService.loginAdmin(loginDto, ip);
-  
+
   // Verificar MFA
   if (result.requires_mfa) {
     return result; // No set cookie todavía
   }
-  
+
   res.cookie('auth-token', result.access_token, cookieConfig);
   return { user: result.user };
 }
@@ -1471,35 +1490,35 @@ async loginAdmin(
 ```typescript
 async loginTutor(loginDto: LoginDto, ip: string) {
   const { email, password } = loginDto;
-  
+
   // Una sola query
   const tutor = await this.prisma.tutor.findUnique({ where: { email } });
-  
+
   // Validar
   const dummyHash = '$2b$12$...';
   const hash = tutor?.password_hash || dummyHash;
   const isValid = await bcrypt.compare(password, hash);
-  
+
   if (!tutor || !isValid) {
     await this.loginAttemptService.checkAndRecordAttempt(email, ip, false);
     throw new UnauthorizedException('Credenciales inválidas');
   }
-  
+
   // Registrar intento exitoso
   await this.loginAttemptService.checkAndRecordAttempt(email, ip, true);
-  
+
   // Roles
   const roles = parseUserRoles(tutor.roles);
   const finalRoles = roles.length > 0 ? roles : [Role.TUTOR];
-  
+
   // JWT
   const accessToken = this.generateJwtToken(tutor.id, tutor.email, finalRoles);
-  
+
   // Evento
-  this.eventEmitter.emit('user.logged-in', 
+  this.eventEmitter.emit('user.logged-in',
     new UserLoggedInEvent(tutor.id, 'tutor', tutor.email, false)
   );
-  
+
   return {
     access_token: accessToken,
     user: { /* ... tutor fields ... */ }
@@ -1534,17 +1553,17 @@ export const authApi = {
   loginTutor: async (data: LoginData): Promise<LoginResponse> => {
     return await apiClient.post<LoginResponse>('/auth/login/tutor', data);
   },
-  
+
   // NUEVO: Login específico de docentes
   loginDocente: async (data: LoginData): Promise<LoginResponse> => {
     return await apiClient.post<LoginResponse>('/auth/login/docente', data);
   },
-  
+
   // NUEVO: Login específico de admins
   loginAdmin: async (data: LoginData): Promise<LoginResponse> => {
     return await apiClient.post<LoginResponse>('/auth/login/admin', data);
   },
-  
+
   // DEPRECATED: Mantener por backward compatibility
   login: async (data: LoginData): Promise<LoginResponse> => {
     console.warn('auth.login() is deprecated, use loginTutor/loginDocente/loginAdmin');
@@ -1557,67 +1576,65 @@ export const authApi = {
 
 ```typescript
 export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      // ...
-      
-      // ACTUALIZADO: Login de tutores
-      loginTutor: async (email: string, password: string) => {
-        set({ isLoading: true });
-        try {
-          const response = await authApi.loginTutor({ email, password });
-          const user = response.user as User;
-          set({ user, isAuthenticated: true, isLoading: false });
-          return user;
-        } catch (error) {
+  persist((set, get) => ({
+    // ...
+
+    // ACTUALIZADO: Login de tutores
+    loginTutor: async (email: string, password: string) => {
+      set({ isLoading: true });
+      try {
+        const response = await authApi.loginTutor({ email, password });
+        const user = response.user as User;
+        set({ user, isAuthenticated: true, isLoading: false });
+        return user;
+      } catch (error) {
+        set({ isLoading: false });
+        throw error;
+      }
+    },
+
+    // NUEVO: Login de docentes
+    loginDocente: async (email: string, password: string) => {
+      set({ isLoading: true });
+      try {
+        const response = await authApi.loginDocente({ email, password });
+        const user = response.user as User;
+        set({ user, isAuthenticated: true, isLoading: false });
+        return user;
+      } catch (error) {
+        set({ isLoading: false });
+        throw error;
+      }
+    },
+
+    // NUEVO: Login de admins
+    loginAdmin: async (email: string, password: string) => {
+      set({ isLoading: true });
+      try {
+        const response = await authApi.loginAdmin({ email, password });
+
+        // Verificar MFA
+        if (response.requires_mfa) {
+          // Retornar para que componente maneje MFA
           set({ isLoading: false });
-          throw error;
+          return response;
         }
-      },
-      
-      // NUEVO: Login de docentes
-      loginDocente: async (email: string, password: string) => {
-        set({ isLoading: true });
-        try {
-          const response = await authApi.loginDocente({ email, password });
-          const user = response.user as User;
-          set({ user, isAuthenticated: true, isLoading: false });
-          return user;
-        } catch (error) {
-          set({ isLoading: false });
-          throw error;
-        }
-      },
-      
-      // NUEVO: Login de admins
-      loginAdmin: async (email: string, password: string) => {
-        set({ isLoading: true });
-        try {
-          const response = await authApi.loginAdmin({ email, password });
-          
-          // Verificar MFA
-          if (response.requires_mfa) {
-            // Retornar para que componente maneje MFA
-            set({ isLoading: false });
-            return response;
-          }
-          
-          const user = response.user as User;
-          set({ user, isAuthenticated: true, isLoading: false });
-          return user;
-        } catch (error) {
-          set({ isLoading: false });
-          throw error;
-        }
-      },
-      
-      // DEPRECATED
-      login: async (email: string, password: string) => {
-        console.warn('login() is deprecated, use loginTutor/loginDocente/loginAdmin');
-        return get().loginTutor(email, password);
-      },
-    })
-  )
+
+        const user = response.user as User;
+        set({ user, isAuthenticated: true, isLoading: false });
+        return user;
+      } catch (error) {
+        set({ isLoading: false });
+        throw error;
+      }
+    },
+
+    // DEPRECATED
+    login: async (email: string, password: string) => {
+      console.warn('login() is deprecated, use loginTutor/loginDocente/loginAdmin');
+      return get().loginTutor(email, password);
+    },
+  })),
 );
 ```
 
@@ -1634,13 +1651,14 @@ const [userType, setUserType] = useState<'docente' | 'admin'>('docente');
 
 const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
-  
+
   try {
     // Ahora el toggle SÍ hace algo
-    const user = userType === 'admin' 
-      ? await loginAdmin(email, password)
-      : await loginDocente(email, password);
-    
+    const user =
+      userType === 'admin'
+        ? await loginAdmin(email, password)
+        : await loginDocente(email, password);
+
     // ... resto de lógica ...
   } catch (error) {
     setError(error.message);
@@ -1650,13 +1668,13 @@ const handleLogin = async (e: React.FormEvent) => {
 
 ### Beneficios
 
-| Beneficio | Antes | Después | Mejora |
-|-----------|-------|---------|--------|
-| **Queries por login** | 3 | 1 | 🟢 -66% |
-| **Tiempo login fallido** | 600ms | 200ms | 🟢 -66% |
-| **Timing attack** | Vulnerable | ✅ Mitigado | 🟢 100% |
-| **Claridad de código** | 🔴 Confuso | 🟢 Claro | 🟢 +100% |
-| **Error messages** | Genéricos | Específicos | 🟢 Mejor UX |
+| Beneficio                | Antes      | Después     | Mejora      |
+| ------------------------ | ---------- | ----------- | ----------- |
+| **Queries por login**    | 3          | 1           | 🟢 -66%     |
+| **Tiempo login fallido** | 600ms      | 200ms       | 🟢 -66%     |
+| **Timing attack**        | Vulnerable | ✅ Mitigado | 🟢 100%     |
+| **Claridad de código**   | 🔴 Confuso | 🟢 Claro    | 🟢 +100%    |
+| **Error messages**       | Genéricos  | Específicos | 🟢 Mejor UX |
 
 ### Testing
 
@@ -1668,10 +1686,10 @@ describe('POST /auth/login/tutor', () => {
       .post('/auth/login/tutor')
       .send({ email: 'tutor@test.com', password: 'valid' })
       .expect(200);
-    
+
     expect(response.body.user.role).toBe('TUTOR');
   });
-  
+
   it('should not login docente on tutor endpoint', async () => {
     await request(app.getHttpServer())
       .post('/auth/login/tutor')
@@ -1711,7 +1729,7 @@ model UserRole {
   is_primary  Boolean  @default(false) // Rol principal del usuario
   assigned_at DateTime @default(now())
   assigned_by String?  // ID del admin que asignó (opcional)
-  
+
   @@unique([entity_type, entity_id, role]) // No duplicados
   @@index([entity_type, entity_id])
   @@index([role])
@@ -1747,7 +1765,7 @@ CREATE INDEX idx_user_roles_role ON user_roles(role);
 
 -- 2. Migrar datos existentes de tutores
 INSERT INTO user_roles (entity_type, entity_id, role, is_primary)
-SELECT 
+SELECT
   'tutor' AS entity_type,
   id AS entity_id,
   jsonb_array_elements_text(roles::jsonb) AS role,
@@ -1756,7 +1774,7 @@ FROM tutores;
 
 -- 3. Migrar estudiantes
 INSERT INTO user_roles (entity_type, entity_id, role, is_primary)
-SELECT 
+SELECT
   'estudiante',
   id,
   jsonb_array_elements_text(roles::jsonb),
@@ -1765,7 +1783,7 @@ FROM estudiantes;
 
 -- 4. Migrar docentes
 INSERT INTO user_roles (entity_type, entity_id, role, is_primary)
-SELECT 
+SELECT
   'docente',
   id,
   jsonb_array_elements_text(roles::jsonb),
@@ -1774,7 +1792,7 @@ FROM docentes;
 
 -- 5. Migrar admins
 INSERT INTO user_roles (entity_type, entity_id, role, is_primary)
-SELECT 
+SELECT
   'admin',
   id,
   jsonb_array_elements_text(roles::jsonb),
@@ -1782,8 +1800,8 @@ SELECT
 FROM admins;
 
 -- 6. Verificar migración
-SELECT entity_type, COUNT(*) 
-FROM user_roles 
+SELECT entity_type, COUNT(*)
+FROM user_roles
 GROUP BY entity_type;
 
 -- 7. (Opcional) Deprecar campo roles en tablas originales
@@ -1800,21 +1818,21 @@ GROUP BY entity_type;
 @Injectable()
 export class UserRolesService {
   constructor(private prisma: PrismaService) {}
-  
+
   async getRoles(entityType: string, entityId: string): Promise<Role[]> {
     const roles = await this.prisma.userRole.findMany({
       where: { entity_type: entityType, entity_id: entityId },
-      orderBy: { is_primary: 'desc' } // Primary first
+      orderBy: { is_primary: 'desc' }, // Primary first
     });
-    
-    return roles.map(r => r.role as Role);
+
+    return roles.map((r) => r.role as Role);
   }
-  
+
   async addRole(
-    entityType: string, 
-    entityId: string, 
-    role: Role, 
-    assignedBy?: string
+    entityType: string,
+    entityId: string,
+    role: Role,
+    assignedBy?: string,
   ): Promise<void> {
     await this.prisma.userRole.create({
       data: {
@@ -1822,47 +1840,39 @@ export class UserRolesService {
         entity_id: entityId,
         role,
         assigned_by: assignedBy,
-      }
+      },
     });
   }
-  
-  async removeRole(
-    entityType: string, 
-    entityId: string, 
-    role: Role
-  ): Promise<void> {
+
+  async removeRole(entityType: string, entityId: string, role: Role): Promise<void> {
     await this.prisma.userRole.delete({
       where: {
         entity_type_entity_id_role: {
           entity_type: entityType,
           entity_id: entityId,
-          role
-        }
-      }
+          role,
+        },
+      },
     });
   }
-  
-  async setPrimaryRole(
-    entityType: string, 
-    entityId: string, 
-    role: Role
-  ): Promise<void> {
+
+  async setPrimaryRole(entityType: string, entityId: string, role: Role): Promise<void> {
     // Transacción: quitar primary a todos, asignar a uno
     await this.prisma.$transaction([
       this.prisma.userRole.updateMany({
         where: { entity_type: entityType, entity_id: entityId },
-        data: { is_primary: false }
+        data: { is_primary: false },
       }),
       this.prisma.userRole.update({
         where: {
           entity_type_entity_id_role: {
             entity_type: entityType,
             entity_id: entityId,
-            role
-          }
+            role,
+          },
         },
-        data: { is_primary: true }
-      })
+        data: { is_primary: true },
+      }),
     ]);
   }
 }
@@ -1880,12 +1890,12 @@ const userRoles = await this.userRolesService.getRoles('tutor', user.id);
 
 ### Beneficios
 
-| Aspecto | Antes (JSON) | Después (Tabla) | Mejora |
-|---------|-------------|-----------------|--------|
-| **Query roles** | O(n) scan + parse | O(1) index | 🟢 +1000% |
-| **Agregar rol** | Parse JSON + modify + save | INSERT | 🟢 +50% |
-| **Validar rol** | Parse JSON cada vez | Cache-friendly | 🟢 +200% |
-| **Reportes** | Imposible en SQL | SQL nativo | 🟢 100% |
+| Aspecto         | Antes (JSON)               | Después (Tabla) | Mejora    |
+| --------------- | -------------------------- | --------------- | --------- |
+| **Query roles** | O(n) scan + parse          | O(1) index      | 🟢 +1000% |
+| **Agregar rol** | Parse JSON + modify + save | INSERT          | 🟢 +50%   |
+| **Validar rol** | Parse JSON cada vez        | Cache-friendly  | 🟢 +200%  |
+| **Reportes**    | Imposible en SQL           | SQL nativo      | 🟢 100%   |
 
 ### Queries Nuevas Posibles
 
@@ -1900,8 +1910,8 @@ GROUP BY entity_type, entity_id
 HAVING COUNT(*) > 1;
 
 -- Usuarios con rol admin Y docente
-SELECT entity_id 
-FROM user_roles 
+SELECT entity_id
+FROM user_roles
 WHERE role IN ('ADMIN', 'DOCENTE')
 GROUP BY entity_id
 HAVING COUNT(DISTINCT role) = 2;
@@ -1932,14 +1942,14 @@ model User {
   mfa_backup_codes      String[]  @default([])
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
-  
+
   // Relaciones
   roles         UserRole[]
   tutorProfile  TutorProfile?
   estudianteProfile EstudianteProfile?
   docenteProfile DocenteProfile?
   adminProfile  AdminProfile?
-  
+
   @@index([email])
   @@index([username])
   @@map("users")
@@ -1952,9 +1962,9 @@ model TutorProfile {
   telefono                  String?
   fecha_registro            DateTime @default(now())
   ha_completado_onboarding  Boolean  @default(false)
-  
+
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  
+
   @@map("tutor_profiles")
 }
 
@@ -1977,6 +1987,7 @@ model TutorProfile {
 ### Recomendación
 
 **NO implementar en corto plazo.** Solo si:
+
 1. Fase 1 y 2 están completamente estables
 2. Hay tiempo dedicado (2-3 semanas)
 3. Hay cobertura de tests >80%
@@ -2048,33 +2059,33 @@ model TutorProfile {
 
 ### KPIs a Monitorear
 
-| Métrica | Baseline | Target Post-Fase 1 | Target Post-Fase 2 |
-|---------|----------|--------------------|--------------------|
-| **Tiempo login exitoso** | 200ms | 150ms (-25%) | 100ms (-50%) |
-| **Tiempo login fallido** | 600ms | 200ms (-66%) | 150ms (-75%) |
-| **Queries por login** | 3 | 1 (-66%) | 1 (=) |
-| **Errores login** | 5% | 2% (-60%) | 1% (-80%) |
-| **Tickets soporte auth** | 10/mes | 5/mes (-50%) | 2/mes (-80%) |
+| Métrica                  | Baseline | Target Post-Fase 1 | Target Post-Fase 2 |
+| ------------------------ | -------- | ------------------ | ------------------ |
+| **Tiempo login exitoso** | 200ms    | 150ms (-25%)       | 100ms (-50%)       |
+| **Tiempo login fallido** | 600ms    | 200ms (-66%)       | 150ms (-75%)       |
+| **Queries por login**    | 3        | 1 (-66%)           | 1 (=)              |
+| **Errores login**        | 5%       | 2% (-60%)          | 1% (-80%)          |
+| **Tickets soporte auth** | 10/mes   | 5/mes (-50%)       | 2/mes (-80%)       |
 
 ### Alertas a Configurar
 
 ```yaml
 # New Relic / Datadog
 alerts:
-  - name: "Login Failure Rate High"
-    condition: "error_rate > 10%"
-    window: "5 minutes"
-    action: "notify slack #alerts"
-  
-  - name: "Login Response Time Slow"
-    condition: "p95 > 500ms"
-    window: "10 minutes"
-    action: "notify slack #performance"
-  
-  - name: "Multiple Failed Attempts"
-    condition: "failed_attempts > 5 per user per minute"
-    window: "1 minute"
-    action: "rate limit + notify"
+  - name: 'Login Failure Rate High'
+    condition: 'error_rate > 10%'
+    window: '5 minutes'
+    action: 'notify slack #alerts'
+
+  - name: 'Login Response Time Slow'
+    condition: 'p95 > 500ms'
+    window: '10 minutes'
+    action: 'notify slack #performance'
+
+  - name: 'Multiple Failed Attempts'
+    condition: 'failed_attempts > 5 per user per minute'
+    window: '1 minute'
+    action: 'rate limit + notify'
 ```
 
 ---
@@ -2083,13 +2094,13 @@ alerts:
 
 ### Issues Actuales
 
-| Issue | Severidad | Mitigación Actual | Fix Recomendado |
-|-------|-----------|-------------------|-----------------|
-| **Timing Attack** | 🔴 Alto | Dummy hash (insuficiente) | Fase 1 (endpoints específicos) |
-| **Email Enumeration** | 🟡 Medio | Ninguna | Rate limiting agresivo |
-| **MFA solo en admins** | 🟡 Medio | Ninguna | Implementar para docentes |
-| **CSRF en login** | 🟢 Bajo | `@RequireCsrf()` decorator | ✅ OK |
-| **Rate Limiting** | 🟢 Bajo | `@Throttle()` 5 req/min | ✅ OK |
+| Issue                  | Severidad | Mitigación Actual          | Fix Recomendado                |
+| ---------------------- | --------- | -------------------------- | ------------------------------ |
+| **Timing Attack**      | 🔴 Alto   | Dummy hash (insuficiente)  | Fase 1 (endpoints específicos) |
+| **Email Enumeration**  | 🟡 Medio  | Ninguna                    | Rate limiting agresivo         |
+| **MFA solo en admins** | 🟡 Medio  | Ninguna                    | Implementar para docentes      |
+| **CSRF en login**      | 🟢 Bajo   | `@RequireCsrf()` decorator | ✅ OK                          |
+| **Rate Limiting**      | 🟢 Bajo   | `@Throttle()` 5 req/min    | ✅ OK                          |
 
 ### Recomendaciones Adicionales
 
@@ -2128,7 +2139,8 @@ El sistema de autenticación actual funciona pero tiene **deuda técnica signifi
 2. **Mejora estructural** (Fase 2): Roles normalizados, queries SQL
 3. **Mejora arquitectónica** (Fase 3): Tabla unificada (opcional)
 
-**Recomendación Final**: 
+**Recomendación Final**:
+
 - ✅ **Implementar Fase 1 AHORA** (2 días, alto impacto, bajo riesgo)
 - ✅ **Planificar Fase 2** para próximo sprint (5 días)
 - ⚠️ **Evaluar Fase 3** después de Fase 2 (solo si realmente necesario)
@@ -2145,5 +2157,5 @@ El sistema de autenticación actual funciona pero tiene **deuda técnica signifi
 
 ---
 
-*Documento generado por Claude Code*  
-*Última actualización: 2025-01-24*
+_Documento generado por Claude Code_  
+_Última actualización: 2025-01-24_

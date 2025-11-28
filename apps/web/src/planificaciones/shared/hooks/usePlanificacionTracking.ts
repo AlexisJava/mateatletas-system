@@ -26,35 +26,41 @@ export function usePlanificacionTracking(codigoPlanificacion: string) {
     localStorage.setItem(key, new Date().toISOString());
   }, [codigoPlanificacion]);
 
-  const registrarProgreso = useCallback((data: ProgresoData) => {
-    // TODO: Llamar al API para actualizar progreso
-    console.log(`[Tracking] Progreso actualizado:`, data);
+  const registrarProgreso = useCallback(
+    (data: ProgresoData) => {
+      // TODO: Llamar al API para actualizar progreso
+      console.log(`[Tracking] Progreso actualizado:`, data);
 
-    // Por ahora guardamos en localStorage
-    const key = `planificacion_${codigoPlanificacion}_progreso`;
-    const progresoActualRaw = localStorage.getItem(key);
-    let progresoActual: Partial<ProgresoData> = {};
+      // Por ahora guardamos en localStorage
+      const key = `planificacion_${codigoPlanificacion}_progreso`;
+      const progresoActualRaw = localStorage.getItem(key);
+      let progresoActual: Partial<ProgresoData> = {};
 
-    if (progresoActualRaw) {
-      try {
-        progresoActual = JSON.parse(progresoActualRaw) as Partial<ProgresoData>;
-      } catch (error) {
-        console.error('[Tracking] Error al parsear progreso guardado:', error);
+      if (progresoActualRaw) {
+        try {
+          progresoActual = JSON.parse(progresoActualRaw) as Partial<ProgresoData>;
+        } catch (error) {
+          console.error('[Tracking] Error al parsear progreso guardado:', error);
+        }
       }
-    }
 
-    localStorage.setItem(key, JSON.stringify({ ...progresoActual, ...data }));
-  }, [codigoPlanificacion]);
+      localStorage.setItem(key, JSON.stringify({ ...progresoActual, ...data }));
+    },
+    [codigoPlanificacion],
+  );
 
-  const guardarEstado = useCallback((estadoJuego?: Record<string, JsonValue>) => {
-    // TODO: Llamar al API para guardar estado
-    console.log(`[Tracking] Estado guardado automáticamente`);
+  const guardarEstado = useCallback(
+    (estadoJuego?: Record<string, JsonValue>) => {
+      // TODO: Llamar al API para guardar estado
+      console.log(`[Tracking] Estado guardado automáticamente`);
 
-    if (estadoJuego) {
-      const key = `planificacion_${codigoPlanificacion}_estado`;
-      localStorage.setItem(key, JSON.stringify(estadoJuego));
-    }
-  }, [codigoPlanificacion]);
+      if (estadoJuego) {
+        const key = `planificacion_${codigoPlanificacion}_estado`;
+        localStorage.setItem(key, JSON.stringify(estadoJuego));
+      }
+    },
+    [codigoPlanificacion],
+  );
 
   const cargarEstado = useCallback((): Record<string, JsonValue> | null => {
     // TODO: Llamar al API para cargar estado
@@ -73,15 +79,18 @@ export function usePlanificacionTracking(codigoPlanificacion: string) {
     return null;
   }, [codigoPlanificacion]);
 
-  const registrarCompletado = useCallback((puntosFinales: number) => {
-    // TODO: Llamar al API para marcar como completado
-    console.log(`[Tracking] Planificación completada con ${puntosFinales} puntos`);
+  const registrarCompletado = useCallback(
+    (puntosFinales: number) => {
+      // TODO: Llamar al API para marcar como completado
+      console.log(`[Tracking] Planificación completada con ${puntosFinales} puntos`);
 
-    registrarProgreso({
-      completado: true,
-      puntos_obtenidos: puntosFinales,
-    });
-  }, [registrarProgreso]);
+      registrarProgreso({
+        completado: true,
+        puntos_obtenidos: puntosFinales,
+      });
+    },
+    [registrarProgreso],
+  );
 
   return {
     registrarInicio,

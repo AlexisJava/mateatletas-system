@@ -179,11 +179,11 @@ export class AppModule {}
 
 **Archivo**: [`apps/api/src/auth/auth.controller.ts`](../apps/api/src/auth/auth.controller.ts)
 
-| Endpoint                      | Método | ¿Por qué?                             |
-| ----------------------------- | ------ | ------------------------------------- |
-| `/api/auth/login`             | POST   | Formulario web de autenticación       |
-| `/api/auth/logout`            | POST   | Cierre de sesión desde navegador      |
-| `/api/auth/change-password`   | POST   | Operación sensible desde frontend web |
+| Endpoint                    | Método | ¿Por qué?                             |
+| --------------------------- | ------ | ------------------------------------- |
+| `/api/auth/login`           | POST   | Formulario web de autenticación       |
+| `/api/auth/logout`          | POST   | Cierre de sesión desde navegador      |
+| `/api/auth/change-password` | POST   | Operación sensible desde frontend web |
 
 ```typescript
 @Controller('auth')
@@ -210,12 +210,12 @@ export class AuthController {
 
 ### Endpoints SIN `@RequireCsrf()` (Webhooks)
 
-| Endpoint                              | ¿Por qué NO tiene CSRF?                                   |
-| ------------------------------------- | --------------------------------------------------------- |
-| `/api/pagos/webhook`                  | MercadoPago no envía Origin/Referer (webhook externo)     |
-| `/api/colonia/webhook`                | MercadoPago no envía Origin/Referer (webhook externo)     |
-| `/api/inscripciones-2026/webhook`     | MercadoPago no envía Origin/Referer (webhook externo)     |
-| `/api/estudiantes` (y todos los CRUD) | API pura, llamadas programáticas sin navegador            |
+| Endpoint                              | ¿Por qué NO tiene CSRF?                               |
+| ------------------------------------- | ----------------------------------------------------- |
+| `/api/pagos/webhook`                  | MercadoPago no envía Origin/Referer (webhook externo) |
+| `/api/colonia/webhook`                | MercadoPago no envía Origin/Referer (webhook externo) |
+| `/api/inscripciones-2026/webhook`     | MercadoPago no envía Origin/Referer (webhook externo) |
+| `/api/estudiantes` (y todos los CRUD) | API pura, llamadas programáticas sin navegador        |
 
 **Ejemplo: Webhook de MercadoPago**
 
@@ -298,11 +298,11 @@ export class PagosController {
 
 ### Alternativas a CSRF
 
-| Caso de Uso     | Alternativa            | Ejemplo                       |
-| --------------- | ---------------------- | ----------------------------- |
-| Webhooks        | Firma HMAC             | `MercadoPagoWebhookGuard`     |
-| API REST        | JWT en Bearer header   | `@UseGuards(JwtAuthGuard)`    |
-| Operaciones GET | No necesita protección | Métodos seguros (solo lectura)|
+| Caso de Uso     | Alternativa            | Ejemplo                        |
+| --------------- | ---------------------- | ------------------------------ |
+| Webhooks        | Firma HMAC             | `MercadoPagoWebhookGuard`      |
+| API REST        | JWT en Bearer header   | `@UseGuards(JwtAuthGuard)`     |
+| Operaciones GET | No necesita protección | Métodos seguros (solo lectura) |
 
 ---
 
@@ -314,14 +314,14 @@ export class PagosController {
 
 ### Casos de Prueba
 
-| Test                                       | Descripción                                                    |
-| ------------------------------------------ | -------------------------------------------------------------- |
-| Endpoint SIN decorator permite sin Origin  | Webhooks funcionan sin Origin/Referer                          |
-| Endpoint CON decorator rechaza sin Origin  | Login rechaza requests sin Origin                              |
-| Endpoint CON decorator acepta Origin válido| Login acepta requests de localhost:3000                        |
-| Webhook desde MercadoPago                  | POST /pagos/webhook funciona sin Origin                        |
-| API call desde Postman                     | POST /api/estudiantes funciona sin Origin                      |
-| Ataque CSRF bloqueado                      | POST /auth/login desde sitio malicioso es rechazado            |
+| Test                                        | Descripción                                         |
+| ------------------------------------------- | --------------------------------------------------- |
+| Endpoint SIN decorator permite sin Origin   | Webhooks funcionan sin Origin/Referer               |
+| Endpoint CON decorator rechaza sin Origin   | Login rechaza requests sin Origin                   |
+| Endpoint CON decorator acepta Origin válido | Login acepta requests de localhost:3000             |
+| Webhook desde MercadoPago                   | POST /pagos/webhook funciona sin Origin             |
+| API call desde Postman                      | POST /api/estudiantes funciona sin Origin           |
+| Ataque CSRF bloqueado                       | POST /auth/login desde sitio malicioso es rechazado |
 
 ### Ejecutar Tests
 
@@ -386,14 +386,14 @@ normalizeOrigin(undefined) → Reject
 
 ## 📊 Comparación: Global vs Opt-In
 
-| Aspecto                   | CSRF Global (Antes)      | CSRF Opt-In (Ahora)          |
-| ------------------------- | ------------------------ | ---------------------------- |
-| Webhooks MercadoPago      | ❌ Bloqueados            | ✅ Funcionan                 |
-| API calls sin Origin      | ❌ Bloqueadas            | ✅ Funcionan                 |
-| Postman/Insomnia          | ❌ No funciona           | ✅ Funciona                  |
-| Login desde frontend      | ✅ Protegido             | ✅ Protegido                 |
-| Desarrolladores           | 😡 Frustrados            | 😊 Contentos                 |
-| Seguridad web             | ✅ Fuerte (demasiado)    | ✅ Fuerte (balanceado)       |
+| Aspecto              | CSRF Global (Antes)   | CSRF Opt-In (Ahora)    |
+| -------------------- | --------------------- | ---------------------- |
+| Webhooks MercadoPago | ❌ Bloqueados         | ✅ Funcionan           |
+| API calls sin Origin | ❌ Bloqueadas         | ✅ Funcionan           |
+| Postman/Insomnia     | ❌ No funciona        | ✅ Funciona            |
+| Login desde frontend | ✅ Protegido          | ✅ Protegido           |
+| Desarrolladores      | 😡 Frustrados         | 😊 Contentos           |
+| Seguridad web        | ✅ Fuerte (demasiado) | ✅ Fuerte (balanceado) |
 
 ---
 

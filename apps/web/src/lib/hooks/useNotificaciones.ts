@@ -23,8 +23,7 @@ import {
 export const notificacionesKeys = {
   all: ['notificaciones'] as const,
   lists: () => [...notificacionesKeys.all, 'list'] as const,
-  list: (soloNoLeidas?: boolean) =>
-    [...notificacionesKeys.lists(), { soloNoLeidas }] as const,
+  list: (soloNoLeidas?: boolean) => [...notificacionesKeys.lists(), { soloNoLeidas }] as const,
   count: () => [...notificacionesKeys.all, 'count'] as const,
 };
 
@@ -40,7 +39,7 @@ export const notificacionesKeys = {
  */
 export function useNotificaciones(
   soloNoLeidas?: boolean,
-  options?: { refetchInterval?: number | false }
+  options?: { refetchInterval?: number | false },
 ) {
   return useQuery<Notificacion[], Error>({
     queryKey: notificacionesKeys.list(soloNoLeidas),
@@ -58,9 +57,7 @@ export function useNotificaciones(
  * @example
  * const { data: count } = useNotificacionesCount({ refetchInterval: 30000 });
  */
-export function useNotificacionesCount(
-  options?: { refetchInterval?: number | false }
-) {
+export function useNotificacionesCount(options?: { refetchInterval?: number | false }) {
   return useQuery<number, Error>({
     queryKey: notificacionesKeys.count(),
     queryFn: getNotificacionesCount,
@@ -96,22 +93,19 @@ export function useMarcarNotificacionLeida() {
 
       // Snapshot del estado previo
       const previousNotificaciones = queryClient.getQueryData<Notificacion[]>(
-        notificacionesKeys.list()
+        notificacionesKeys.list(),
       );
-      const previousCount = queryClient.getQueryData<number>(
-        notificacionesKeys.count()
-      );
+      const previousCount = queryClient.getQueryData<number>(notificacionesKeys.count());
 
       // Optimistic update de la lista
       queryClient.setQueryData<Notificacion[]>(
         notificacionesKeys.list(),
-        (old) => old?.map((n) => (n.id === id ? { ...n, leida: true } : n)) ?? []
+        (old) => old?.map((n) => (n.id === id ? { ...n, leida: true } : n)) ?? [],
       );
 
       // Optimistic update del count
-      queryClient.setQueryData<number>(
-        notificacionesKeys.count(),
-        (old) => Math.max(0, (old ?? 1) - 1)
+      queryClient.setQueryData<number>(notificacionesKeys.count(), (old) =>
+        Math.max(0, (old ?? 1) - 1),
       );
 
       return { previousNotificaciones, previousCount };
@@ -120,16 +114,10 @@ export function useMarcarNotificacionLeida() {
     // Si falla, revertir
     onError: (_err, _id, context) => {
       if (context?.previousNotificaciones) {
-        queryClient.setQueryData(
-          notificacionesKeys.list(),
-          context.previousNotificaciones
-        );
+        queryClient.setQueryData(notificacionesKeys.list(), context.previousNotificaciones);
       }
       if (context?.previousCount !== undefined) {
-        queryClient.setQueryData(
-          notificacionesKeys.count(),
-          context.previousCount
-        );
+        queryClient.setQueryData(notificacionesKeys.count(), context.previousCount);
       }
     },
 
@@ -163,16 +151,14 @@ export function useMarcarTodasLeidas() {
       await queryClient.cancelQueries({ queryKey: notificacionesKeys.all });
 
       const previousNotificaciones = queryClient.getQueryData<Notificacion[]>(
-        notificacionesKeys.list()
+        notificacionesKeys.list(),
       );
-      const previousCount = queryClient.getQueryData<number>(
-        notificacionesKeys.count()
-      );
+      const previousCount = queryClient.getQueryData<number>(notificacionesKeys.count());
 
       // Marcar todas como leídas
       queryClient.setQueryData<Notificacion[]>(
         notificacionesKeys.list(),
-        (old) => old?.map((n) => ({ ...n, leida: true })) ?? []
+        (old) => old?.map((n) => ({ ...n, leida: true })) ?? [],
       );
 
       // Count = 0
@@ -183,16 +169,10 @@ export function useMarcarTodasLeidas() {
 
     onError: (_err, _variables, context) => {
       if (context?.previousNotificaciones) {
-        queryClient.setQueryData(
-          notificacionesKeys.list(),
-          context.previousNotificaciones
-        );
+        queryClient.setQueryData(notificacionesKeys.list(), context.previousNotificaciones);
       }
       if (context?.previousCount !== undefined) {
-        queryClient.setQueryData(
-          notificacionesKeys.count(),
-          context.previousCount
-        );
+        queryClient.setQueryData(notificacionesKeys.count(), context.previousCount);
       }
     },
 
@@ -225,11 +205,9 @@ export function useEliminarNotificacion() {
       await queryClient.cancelQueries({ queryKey: notificacionesKeys.all });
 
       const previousNotificaciones = queryClient.getQueryData<Notificacion[]>(
-        notificacionesKeys.list()
+        notificacionesKeys.list(),
       );
-      const previousCount = queryClient.getQueryData<number>(
-        notificacionesKeys.count()
-      );
+      const previousCount = queryClient.getQueryData<number>(notificacionesKeys.count());
 
       // Buscar si la notificación eliminada estaba no leída
       const notificacionEliminada = previousNotificaciones?.find((n) => n.id === id);
@@ -238,14 +216,13 @@ export function useEliminarNotificacion() {
       // Eliminar de la lista
       queryClient.setQueryData<Notificacion[]>(
         notificacionesKeys.list(),
-        (old) => old?.filter((n) => n.id !== id) ?? []
+        (old) => old?.filter((n) => n.id !== id) ?? [],
       );
 
       // Decrementar count si era no leída
       if (eraNoLeida) {
-        queryClient.setQueryData<number>(
-          notificacionesKeys.count(),
-          (old) => Math.max(0, (old ?? 1) - 1)
+        queryClient.setQueryData<number>(notificacionesKeys.count(), (old) =>
+          Math.max(0, (old ?? 1) - 1),
         );
       }
 
@@ -254,16 +231,10 @@ export function useEliminarNotificacion() {
 
     onError: (_err, _id, context) => {
       if (context?.previousNotificaciones) {
-        queryClient.setQueryData(
-          notificacionesKeys.list(),
-          context.previousNotificaciones
-        );
+        queryClient.setQueryData(notificacionesKeys.list(), context.previousNotificaciones);
       }
       if (context?.previousCount !== undefined) {
-        queryClient.setQueryData(
-          notificacionesKeys.count(),
-          context.previousCount
-        );
+        queryClient.setQueryData(notificacionesKeys.count(), context.previousCount);
       }
     },
 
@@ -295,10 +266,9 @@ export function useNotificationCenter() {
     error: errorNotificaciones,
   } = useNotificaciones(false, { refetchInterval: 30000 }); // Polling cada 30s
 
-  const {
-    data: count = 0,
-    isLoading: isLoadingCount,
-  } = useNotificacionesCount({ refetchInterval: 30000 });
+  const { data: count = 0, isLoading: isLoadingCount } = useNotificacionesCount({
+    refetchInterval: 30000,
+  });
 
   const marcarLeida = useMarcarNotificacionLeida();
   const marcarTodas = useMarcarTodasLeidas();

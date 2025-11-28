@@ -1,6 +1,7 @@
 # 📋 DATOS REALES NECESARIOS PARA MATEATLETAS
 
 ## OBJETIVO
+
 Poblar el sistema con datos reales del club para testing y desarrollo profesional.
 
 ---
@@ -10,6 +11,7 @@ Poblar el sistema con datos reales del club para testing y desarrollo profesiona
 **Cantidad sugerida:** 3-5 docentes
 
 **Datos necesarios por docente:**
+
 - ✅ Nombre completo
 - ✅ Email (será su usuario de login)
 - ✅ Título profesional (ej: "Licenciado en Matemáticas", "Profesor de Secundaria")
@@ -20,6 +22,7 @@ Poblar el sistema con datos reales del club para testing y desarrollo profesiona
 - ✅ Disponibilidad horaria general (ej: "Lunes a Viernes 14:00-19:00")
 
 **Ejemplo:**
+
 ```
 Docente 1:
 - Nombre: María González
@@ -37,6 +40,7 @@ Docente 1:
 **Cantidad sugerida:** 8-10 familias
 
 **Datos necesarios por tutor:**
+
 - ✅ Nombre completo
 - ✅ Email (será su usuario de login)
 - ✅ Teléfono
@@ -44,6 +48,7 @@ Docente 1:
 - ✅ Relación con estudiantes (padre, madre, tutor legal, abuelo/a)
 
 **Ejemplo:**
+
 ```
 Tutor 1:
 - Nombre: Carlos Rodríguez
@@ -59,6 +64,7 @@ Tutor 1:
 **Cantidad sugerida:** 15-20 estudiantes
 
 **Datos necesarios por estudiante:**
+
 - ✅ Nombre completo
 - ✅ Email (para login propio si tienen) - OPCIONAL
 - ✅ Fecha de nacimiento
@@ -70,6 +76,7 @@ Tutor 1:
 - ✅ Dificultades conocidas (opcional: ej: "le cuesta las fracciones")
 
 **Ejemplo:**
+
 ```
 Estudiante 1:
 - Nombre: Lucía Rodríguez
@@ -90,6 +97,7 @@ Estudiante 1:
 **Cantidad sugerida:** 3-4 planes
 
 **Datos necesarios por suscripción:**
+
 - ✅ Nombre del plan
 - ✅ Descripción detallada
 - ✅ Precio mensual (en pesos argentinos)
@@ -101,6 +109,7 @@ Estudiante 1:
 - ✅ Activo/Inactivo
 
 **Ejemplo:**
+
 ```
 Plan: Mateatletas Básico
 - Precio: $15,000/mes
@@ -120,6 +129,7 @@ Plan: Mateatletas Básico
 **Cantidad sugerida:** 4-6 cursos
 
 **Datos necesarios por curso:**
+
 - ✅ Nombre del curso
 - ✅ Descripción completa
 - ✅ Precio único
@@ -132,6 +142,7 @@ Plan: Mateatletas Básico
 - ✅ Fecha inicio (si está programado)
 
 **Ejemplo:**
+
 ```
 Curso: Fracciones Maestras
 - Precio: $25,000 (pago único)
@@ -152,6 +163,7 @@ Curso: Fracciones Maestras
 **Cantidad sugerida:** 3-5 recursos
 
 **Datos necesarios:**
+
 - ✅ Nombre del recurso
 - ✅ Descripción
 - ✅ Precio
@@ -159,6 +171,7 @@ Curso: Fracciones Maestras
 - ✅ Temática
 
 **Ejemplo:**
+
 ```
 Recurso: Guía de Geometría Interactiva
 - Precio: $5,000
@@ -171,6 +184,7 @@ Recurso: Guía de Geometría Interactiva
 ## 5️⃣ RUTAS CURRICULARES (Ya tenemos 6, pero podemos mejorar)
 
 **Rutas existentes:**
+
 1. Álgebra
 2. Geometría
 3. Lógica
@@ -179,6 +193,7 @@ Recurso: Guía de Geometría Interactiva
 6. Cálculo
 
 **Datos que podemos mejorar:**
+
 - ✅ Descripción detallada de cada ruta
 - ✅ Objetivos de aprendizaje
 - ✅ Nivel de dificultad (1-5 estrellas)
@@ -192,6 +207,7 @@ Recurso: Guía de Geometría Interactiva
 **Cantidad sugerida:** 10-15 clases en el calendario
 
 **Datos necesarios por clase:**
+
 - ✅ Título de la clase
 - ✅ Descripción breve
 - ✅ Ruta curricular (Álgebra, Geometría, etc.)
@@ -204,6 +220,7 @@ Recurso: Guía de Geometría Interactiva
 - ✅ Estado (Programada/Cancelada/Completada)
 
 **Ejemplo:**
+
 ```
 Clase: Introducción a las Ecuaciones Lineales
 - Descripción: Primera clase del módulo de álgebra, introducción a ecuaciones de primer grado
@@ -224,6 +241,7 @@ Clase: Introducción a las Ecuaciones Lineales
 **Cantidad sugerida:** 8-12 logros
 
 **Datos necesarios por logro:**
+
 - ✅ Nombre del logro
 - ✅ Descripción
 - ✅ Icono/Emoji
@@ -232,6 +250,7 @@ Clase: Introducción a las Ecuaciones Lineales
 - ✅ Rareza (Común/Raro/Épico/Legendario)
 
 **Ejemplo:**
+
 ```
 Logro: Primer Paso
 - Descripción: Has completado tu primera clase
@@ -257,6 +276,7 @@ Logro: Maestro del Álgebra
 **Tipos de eventos:**
 
 ### A) TAREAS
+
 ```
 Ejemplo:
 - Título: Preparar material para clase de fracciones
@@ -267,6 +287,7 @@ Ejemplo:
 ```
 
 ### B) RECORDATORIOS
+
 ```
 Ejemplo:
 - Título: Reunión de padres - Lucía Rodríguez
@@ -276,6 +297,7 @@ Ejemplo:
 ```
 
 ### C) NOTAS
+
 ```
 Ejemplo:
 - Título: Observaciones - Grupo 5to grado
@@ -291,6 +313,7 @@ Ejemplo:
 **Cantidad sugerida:** 5-8 pagos históricos
 
 **Datos necesarios:**
+
 - ✅ Tutor que pagó
 - ✅ Producto/Servicio adquirido
 - ✅ Monto
@@ -302,18 +325,18 @@ Ejemplo:
 
 ## 🎯 RESUMEN DE CANTIDADES SUGERIDAS
 
-| Entidad | Cantidad Mínima | Cantidad Óptima |
-|---------|----------------|-----------------|
-| Docentes | 2 | 5 |
-| Tutores/Padres | 5 | 10 |
-| Estudiantes | 10 | 20 |
-| Suscripciones | 2 | 4 |
-| Cursos | 3 | 6 |
-| Recursos Digitales | 2 | 5 |
-| Clases Programadas | 8 | 15 |
-| Logros | 6 | 12 |
-| Eventos (Tareas/Notas) | 10 | 20 |
-| Pagos de ejemplo | 5 | 10 |
+| Entidad                | Cantidad Mínima | Cantidad Óptima |
+| ---------------------- | --------------- | --------------- |
+| Docentes               | 2               | 5               |
+| Tutores/Padres         | 5               | 10              |
+| Estudiantes            | 10              | 20              |
+| Suscripciones          | 2               | 4               |
+| Cursos                 | 3               | 6               |
+| Recursos Digitales     | 2               | 5               |
+| Clases Programadas     | 8               | 15              |
+| Logros                 | 6               | 12              |
+| Eventos (Tareas/Notas) | 10              | 20              |
+| Pagos de ejemplo       | 5               | 10              |
 
 ---
 
@@ -333,17 +356,20 @@ Podés pasarme los datos en cualquier formato que te sea cómodo:
 Si querés arrancar gradualmente, este es el orden sugerido:
 
 ### FASE 1 - Datos Críticos (para testing básico)
+
 1. **3 Docentes** completos
 2. **5 Tutores** con datos reales
 3. **10 Estudiantes** vinculados a esos tutores
 4. **2 Suscripciones** + **2 Cursos**
 
 ### FASE 2 - Datos Operativos
+
 5. **10 Clases programadas**
 6. **8 Logros** para gamificación
 7. **5 Pagos** de ejemplo
 
 ### FASE 3 - Datos de Enriquecimiento
+
 8. **Recursos digitales**
 9. **Eventos de calendario**
 10. **Mejoras en descripciones de rutas**

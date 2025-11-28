@@ -59,7 +59,7 @@ describe('ErrorFactory', () => {
         'Usuario no encontrado',
         ErrorCode.NOT_FOUND,
         'User',
-        '123'
+        '123',
       );
 
       expect(error.code).toBe(ErrorCode.NOT_FOUND);
@@ -69,11 +69,7 @@ describe('ErrorFactory', () => {
     });
 
     it('debe crear BusinessError CONFLICT', () => {
-      const error = ErrorFactory.business(
-        'Email ya existe',
-        ErrorCode.CONFLICT,
-        'User'
-      );
+      const error = ErrorFactory.business('Email ya existe', ErrorCode.CONFLICT, 'User');
 
       expect(error.code).toBe(ErrorCode.CONFLICT);
       expect(error.message).toBe('Email ya existe');

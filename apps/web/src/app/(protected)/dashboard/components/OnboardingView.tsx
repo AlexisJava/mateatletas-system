@@ -67,7 +67,9 @@ export default function OnboardingView({ user }: OnboardingViewProps) {
               </div>
             </div>
             <div className="flex items-center gap-3 relative">
-              <span className="text-sm text-gray-600 hidden sm:block">{user?.nombre} {user?.apellido}</span>
+              <span className="text-sm text-gray-600 hidden sm:block">
+                {user?.nombre} {user?.apellido}
+              </span>
 
               {/* User Menu Button */}
               <button
@@ -77,17 +79,16 @@ export default function OnboardingView({ user }: OnboardingViewProps) {
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md">
                   {user?.nombre?.[0]?.toUpperCase() || 'T'}
                 </div>
-                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-500 transition-transform ${showUserMenu ? 'rotate-180' : ''}`}
+                />
               </button>
 
               {/* Dropdown Menu */}
               {showUserMenu && (
                 <>
                   {/* Backdrop para cerrar el menú */}
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setShowUserMenu(false)}
-                  />
+                  <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
 
                   {/* Menu */}
                   <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border-2 border-gray-200 z-20 overflow-hidden">
@@ -132,7 +133,8 @@ export default function OnboardingView({ user }: OnboardingViewProps) {
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            Estás a solo 3 pasos de darle a tu hijo acceso a clases en vivo, un tutor IA 24/7, y una comunidad de aprendizaje increíble.
+            Estás a solo 3 pasos de darle a tu hijo acceso a clases en vivo, un tutor IA 24/7, y una
+            comunidad de aprendizaje increíble.
           </p>
         </div>
 
@@ -145,7 +147,8 @@ export default function OnboardingView({ user }: OnboardingViewProps) {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Crea el perfil de tu hijo</h3>
               <p className="text-gray-600 mb-6">
-                Nombre, edad e intereses. Toma menos de 2 minutos y nos ayuda a personalizar su experiencia.
+                Nombre, edad e intereses. Toma menos de 2 minutos y nos ayuda a personalizar su
+                experiencia.
               </p>
               <Link href="/estudiantes">
                 <button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
@@ -164,9 +167,13 @@ export default function OnboardingView({ user }: OnboardingViewProps) {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3">Explora el catálogo</h3>
               <p className="text-gray-600 mb-6">
-                Descubre clases de matemáticas, ciencias, programación y más. Todas diseñadas para hacer que aprender sea divertido.
+                Descubre clases de matemáticas, ciencias, programación y más. Todas diseñadas para
+                hacer que aprender sea divertido.
               </p>
-              <button disabled className="w-full bg-gray-200 text-gray-400 font-bold py-4 px-6 rounded-xl cursor-not-allowed">
+              <button
+                disabled
+                className="w-full bg-gray-200 text-gray-400 font-bold py-4 px-6 rounded-xl cursor-not-allowed"
+              >
                 Próximamente
               </button>
             </div>
@@ -179,9 +186,13 @@ export default function OnboardingView({ user }: OnboardingViewProps) {
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3">Reserva la primera clase</h3>
             <p className="text-gray-600 mb-6">
-              Elige el horario que mejor funcione para tu familia. Clases en vivo con grupos pequeños y profesores expertos.
+              Elige el horario que mejor funcione para tu familia. Clases en vivo con grupos
+              pequeños y profesores expertos.
             </p>
-            <button disabled className="w-full bg-gray-200 text-gray-400 font-bold py-4 px-6 rounded-xl cursor-not-allowed">
+            <button
+              disabled
+              className="w-full bg-gray-200 text-gray-400 font-bold py-4 px-6 rounded-xl cursor-not-allowed"
+            >
               Próximamente
             </button>
           </div>
@@ -192,7 +203,9 @@ export default function OnboardingView({ user }: OnboardingViewProps) {
           <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full -mr-48 -mt-48" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full -ml-32 -mb-32" />
           <div className="relative z-10">
-            <h3 className="text-3xl font-bold text-white mb-8 text-center">¿Qué hace especial a Mateatletas?</h3>
+            <h3 className="text-3xl font-bold text-white mb-8 text-center">
+              ¿Qué hace especial a Mateatletas?
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
                 <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 text-4xl">
@@ -218,7 +231,8 @@ export default function OnboardingView({ user }: OnboardingViewProps) {
                 </div>
                 <h4 className="text-xl font-bold text-white mb-2">Comunidad Activa</h4>
                 <p className="text-blue-100">
-                  Eventos semanales, desafíos y una comunidad donde tu hijo hace amigos mientras aprende.
+                  Eventos semanales, desafíos y una comunidad donde tu hijo hace amigos mientras
+                  aprende.
                 </p>
               </div>
             </div>
@@ -227,7 +241,9 @@ export default function OnboardingView({ user }: OnboardingViewProps) {
 
         {/* Social Proof */}
         <div className="mb-16">
-          <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">Lo que dicen otros padres</h3>
+          <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            Lo que dicen otros padres
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, idx) => (
               <div key={idx} className="bg-white rounded-2xl p-6 shadow-lg">
@@ -253,7 +269,9 @@ export default function OnboardingView({ user }: OnboardingViewProps) {
 
         {/* Stats Preview */}
         <div className="bg-white rounded-3xl p-12 shadow-xl mb-16">
-          <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">Esto es lo que tu hijo logrará</h3>
+          <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            Esto es lo que tu hijo logrará
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-4 shadow-lg">

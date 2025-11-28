@@ -72,7 +72,7 @@ export function CalendarioView({ estudiante: _estudiante }: CalendarioViewProps)
   const primerDia = new Date(mesActual.getFullYear(), mesActual.getMonth(), 1).getDay();
   const ultimoDia = new Date(mesActual.getFullYear(), mesActual.getMonth() + 1, 0).getDate();
 
-  const dias: Array<number | null> = Array((primerDia === 0 ? 6 : primerDia - 1)).fill(null);
+  const dias: Array<number | null> = Array(primerDia === 0 ? 6 : primerDia - 1).fill(null);
   for (let i = 1; i <= ultimoDia; i++) {
     dias.push(i);
   }
@@ -143,14 +143,7 @@ export function CalendarioView({ estudiante: _estudiante }: CalendarioViewProps)
                 const clasesDelDia = clasesPorDia[fechaStr] || [];
                 const hoy = new Date().toISOString().split('T')[0] === fechaStr;
 
-                return (
-                  <DiaCard
-                    key={dia}
-                    dia={dia}
-                    clases={clasesDelDia}
-                    esHoy={hoy}
-                  />
-                );
+                return <DiaCard key={dia} dia={dia} clases={clasesDelDia} esHoy={hoy} />;
               })}
             </div>
           </>
@@ -179,8 +172,8 @@ function DiaCard({ dia, clases, esHoy }: DiaCardProps) {
           esHoy
             ? 'bg-gradient-to-br from-yellow-500/30 to-orange-500/30 border-2 border-yellow-400'
             : clases.length > 0
-            ? 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-2 border-blue-400/50 hover:border-blue-400'
-            : 'bg-white/5 border-2 border-white/10'
+              ? 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-2 border-blue-400/50 hover:border-blue-400'
+              : 'bg-white/5 border-2 border-white/10'
         }`}
       >
         <div className="text-sm font-bold text-white">{dia}</div>
@@ -212,9 +205,7 @@ function DiaCard({ dia, clases, esHoy }: DiaCardProps) {
               <X className="w-5 h-5 text-white" />
             </button>
 
-            <h3 className="text-2xl font-black text-white mb-4">
-              Clases del día {dia}
-            </h3>
+            <h3 className="text-2xl font-black text-white mb-4">Clases del día {dia}</h3>
 
             <div className="space-y-3">
               {clases.map((clase) => (
@@ -245,9 +236,7 @@ function ClaseCard({ clase }: ClaseCardProps) {
           <h4 className="font-bold text-white">{clase.nombre}</h4>
           <p className="text-sm text-white/60">{clase.ruta_curricular?.nombre || 'Sin ruta'}</p>
         </div>
-        {clase.modalidad === 'virtual' && (
-          <Video className="w-5 h-5 text-cyan-400" />
-        )}
+        {clase.modalidad === 'virtual' && <Video className="w-5 h-5 text-cyan-400" />}
       </div>
 
       <div className="space-y-1 text-sm">
@@ -259,7 +248,9 @@ function ClaseCard({ clase }: ClaseCardProps) {
         {clase.docente && (
           <div className="flex items-center gap-2 text-white/80">
             <Users className="w-4 h-4" />
-            <span>{clase.docente.nombre} {clase.docente.apellido}</span>
+            <span>
+              {clase.docente.nombre} {clase.docente.apellido}
+            </span>
           </div>
         )}
 

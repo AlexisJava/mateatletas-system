@@ -65,8 +65,7 @@ export function OverlayStackProvider({ children }: OverlayStackProviderProps) {
    * Computed values
    */
   const canGoBack = stack.length > 0;
-  const currentOverlay: OverlayConfig | null =
-    stack.length > 0 ? stack[stack.length - 1]! : null;
+  const currentOverlay: OverlayConfig | null = stack.length > 0 ? stack[stack.length - 1]! : null;
   const depth = stack.length;
 
   /**

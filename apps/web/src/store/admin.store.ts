@@ -38,7 +38,10 @@ interface AdminStore {
   updateProduct: (id: string, data: ActualizarProductoDto) => Promise<boolean>;
   deleteProduct: (id: string, hardDelete?: boolean) => Promise<boolean>;
   changeUserRole: (userId: string, role: 'tutor' | 'docente' | 'admin') => Promise<boolean>;
-  updateUserRoles: (userId: string, roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[]) => Promise<boolean>;
+  updateUserRoles: (
+    userId: string,
+    roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[],
+  ) => Promise<boolean>;
   deleteUser: (userId: string) => Promise<boolean>;
   clearError: () => void;
   reset: () => void;
@@ -94,7 +97,10 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
     }
   },
 
-  updateUserRoles: async (userId: string, roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[]): Promise<boolean> => {
+  updateUserRoles: async (
+    userId: string,
+    roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[],
+  ): Promise<boolean> => {
     try {
       await adminApi.updateUserRoles(userId, { roles });
       await get().fetchUsers();
@@ -123,7 +129,11 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
       const { data } = await adminApi.getAllClasses();
       set({ classes: data, isLoading: false });
     } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error loading classes'), classes: [], isLoading: false });
+      set({
+        error: getErrorMessage(error, 'Error loading classes'),
+        classes: [],
+        isLoading: false,
+      });
     }
   },
 
@@ -193,5 +203,14 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
-  reset: () => set({ dashboard: null, stats: null, users: [], classes: [], products: [], isLoading: false, error: null }),
+  reset: () =>
+    set({
+      dashboard: null,
+      stats: null,
+      users: [],
+      classes: [],
+      products: [],
+      isLoading: false,
+      error: null,
+    }),
 }));

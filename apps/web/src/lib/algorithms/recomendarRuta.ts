@@ -10,23 +10,19 @@ import { Ruta, QuizResponses, ResultadoRecomendacion } from '@/types/courses';
  */
 export function recomendarRuta(
   respuestas: QuizResponses,
-  todasLasRutas: Ruta[]
+  todasLasRutas: Ruta[],
 ): ResultadoRecomendacion {
-
   // ═══════════════════════════════════════════════════════════════════════════
   // PASO 1: FILTRADO DURO - Eliminar rutas incompatibles
   // ═══════════════════════════════════════════════════════════════════════════
-  const rutasCompatibles = todasLasRutas.filter(ruta => {
+  const rutasCompatibles = todasLasRutas.filter((ruta) => {
     // Edad dentro del rango
-    const dentroRangoEdad = (
-      respuestas.edad >= ruta.edad_minima &&
-      respuestas.edad <= ruta.edad_maxima
-    );
+    const dentroRangoEdad =
+      respuestas.edad >= ruta.edad_minima && respuestas.edad <= ruta.edad_maxima;
 
     // No recomendar rutas avanzadas a principiantes absolutos
     const nivelCompatible = !(
-      respuestas.nivel_programacion === 'nunca' &&
-      ruta.nivel_estudiante === 'avanzado'
+      respuestas.nivel_programacion === 'nunca' && ruta.nivel_estudiante === 'avanzado'
     );
 
     return dentroRangoEdad && nivelCompatible;
@@ -34,24 +30,24 @@ export function recomendarRuta(
 
   // Fallback si no hay rutas compatibles
   if (rutasCompatibles.length === 0) {
-    const fallback = todasLasRutas.find(r =>
-      respuestas.edad >= r.edad_minima && respuestas.edad <= r.edad_maxima
+    const fallback = todasLasRutas.find(
+      (r) => respuestas.edad >= r.edad_minima && respuestas.edad <= r.edad_maxima,
     );
 
     return {
       ruta_principal: fallback || todasLasRutas[0],
       score_match: 50,
       alternativas: [],
-      mensaje_personalizado: generarMensajeGenerico(respuestas, fallback || todasLasRutas[0])
+      mensaje_personalizado: generarMensajeGenerico(respuestas, fallback || todasLasRutas[0]),
     };
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PASO 2: SCORING - Calcular puntuación para cada ruta
   // ═══════════════════════════════════════════════════════════════════════════
-  const rutasConScore = rutasCompatibles.map(ruta => ({
+  const rutasConScore = rutasCompatibles.map((ruta) => ({
     ruta,
-    score: calcularScore(ruta, respuestas)
+    score: calcularScore(ruta, respuestas),
   }));
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -69,8 +65,8 @@ export function recomendarRuta(
   const principal = rutasConScore[0];
   const alternativas = rutasConScore
     .slice(1, 4) // Máximo 3 alternativas
-    .filter(r => r.score >= 60) // Solo alternativas con buen match
-    .map(r => r.ruta);
+    .filter((r) => r.score >= 60) // Solo alternativas con buen match
+    .map((r) => r.ruta);
 
   // ═══════════════════════════════════════════════════════════════════════════
   // PASO 5: GENERAR MENSAJE PERSONALIZADO
@@ -81,7 +77,7 @@ export function recomendarRuta(
     ruta_principal: principal.ruta,
     score_match: principal.score,
     alternativas,
-    mensaje_personalizado: mensaje
+    mensaje_personalizado: mensaje,
   };
 }
 
@@ -136,24 +132,24 @@ function calcularScore(ruta: Ruta, respuestas: QuizResponses): number {
  */
 function calcularScoreObjetivo(ruta: Ruta, objetivo: string): number {
   const matchesObjetivo: Record<string, string[]> = {
-    'crear_su_propio_juego': ['videojuegos', 'crear_cosas', 'programacion'],
-    'publicar_juego_roblox': ['videojuegos', 'crear_cosas'],
-    'ganar_olimpiada': ['matematica', 'competencias'],
-    'hacer_web_propia': ['programacion', 'crear_cosas'],
-    'entender_como_funcionan_juegos': ['videojuegos', 'programacion'],
-    'mejorar_en_mate': ['matematica'],
-    'aprender_ia': ['programacion', 'matematica', 'ciencias'],
-    'crear_app': ['programacion', 'crear_cosas'],
-    'explorar_ciencia': ['ciencias']
+    crear_su_propio_juego: ['videojuegos', 'crear_cosas', 'programacion'],
+    publicar_juego_roblox: ['videojuegos', 'crear_cosas'],
+    ganar_olimpiada: ['matematica', 'competencias'],
+    hacer_web_propia: ['programacion', 'crear_cosas'],
+    entender_como_funcionan_juegos: ['videojuegos', 'programacion'],
+    mejorar_en_mate: ['matematica'],
+    aprender_ia: ['programacion', 'matematica', 'ciencias'],
+    crear_app: ['programacion', 'crear_cosas'],
+    explorar_ciencia: ['ciencias'],
   };
 
   const objetivosRuta = matchesObjetivo[objetivo] || [];
-  const hayMatch = ruta.objetivos_match?.some(obj => objetivosRuta.includes(obj));
+  const hayMatch = ruta.objetivos_match?.some((obj) => objetivosRuta.includes(obj));
 
   if (hayMatch) return 25;
 
   // Match parcial: si el objetivo es compatible con intereses de la ruta
-  const matchParcial = ruta.intereses_requeridos?.some(int => objetivosRuta.includes(int));
+  const matchParcial = ruta.intereses_requeridos?.some((int) => objetivosRuta.includes(int));
   if (matchParcial) return 15;
 
   return 0;
@@ -216,31 +212,33 @@ function calcularScoreNivel(ruta: Ruta, respuestas: QuizResponses): number {
 
   // Mapeo de nivel de programación a nivel de estudiante
   const nivelMap: Record<string, string> = {
-    'nunca': 'principiante',
-    'scratch_basico': 'principiante',
-    'scratch_avanzado': 'intermedio',
-    'otro_lenguaje': 'avanzado'
+    nunca: 'principiante',
+    scratch_basico: 'principiante',
+    scratch_avanzado: 'intermedio',
+    otro_lenguaje: 'avanzado',
   };
 
   const nivelEstudiante = nivelMap[respuestas.nivel_programacion || 'nunca'];
 
   if (ruta.nivel_estudiante === nivelEstudiante) {
     score += 15; // Nivel perfecto
-  } else if (
-    nivelEstudiante === 'principiante' && ruta.nivel_estudiante === 'intermedio'
-  ) {
+  } else if (nivelEstudiante === 'principiante' && ruta.nivel_estudiante === 'intermedio') {
     score += 8; // Puede dar el salto
-  } else if (
-    nivelEstudiante === 'intermedio' && ruta.nivel_estudiante === 'principiante'
-  ) {
+  } else if (nivelEstudiante === 'intermedio' && ruta.nivel_estudiante === 'principiante') {
     score += 10; // Puede repasar
   }
 
   // Bonus por nivel de matemática
-  if (respuestas.nivel_mate_escuela === 'es_lo_mejor' && ruta.intereses_requeridos?.includes('matematica')) {
+  if (
+    respuestas.nivel_mate_escuela === 'es_lo_mejor' &&
+    ruta.intereses_requeridos?.includes('matematica')
+  ) {
     score += 3;
   }
-  if (respuestas.nivel_mate_escuela === 'muy_bien' && ruta.intereses_requeridos?.includes('matematica')) {
+  if (
+    respuestas.nivel_mate_escuela === 'muy_bien' &&
+    ruta.intereses_requeridos?.includes('matematica')
+  ) {
     score += 2;
   }
 
@@ -274,9 +272,15 @@ function calcularScorePersonalidad(ruta: Ruta, respuestas: QuizResponses): numbe
   }
 
   // Estilo creativo
-  if (respuestas.estilo_creativo === 'planifica_primero' && ruta.intereses_requeridos?.includes('programacion')) {
+  if (
+    respuestas.estilo_creativo === 'planifica_primero' &&
+    ruta.intereses_requeridos?.includes('programacion')
+  ) {
     score += 3; // Planificadores -> programación estructurada
-  } else if (respuestas.estilo_creativo === 'improvisa' && ruta.intereses_requeridos?.includes('crear_cosas')) {
+  } else if (
+    respuestas.estilo_creativo === 'improvisa' &&
+    ruta.intereses_requeridos?.includes('crear_cosas')
+  ) {
     score += 3; // Improvisadores -> proyectos creativos
   } else if (respuestas.estilo_creativo === 'copia_tutoriales') {
     score += 2; // Aprende bien con guías paso a paso
@@ -331,9 +335,9 @@ function calcularScoreEdad(ruta: Ruta, edad: number): number {
   const diferenciaEdad = Math.abs(edad - edadIdeal);
 
   if (diferenciaEdad <= 1) return 10; // Edad perfecta
-  if (diferenciaEdad <= 2) return 8;  // Muy buena edad
-  if (diferenciaEdad <= 3) return 6;  // Edad aceptable
-  if (diferenciaEdad <= 5) return 3;  // Edad marginal
+  if (diferenciaEdad <= 2) return 8; // Muy buena edad
+  if (diferenciaEdad <= 3) return 6; // Edad aceptable
+  if (diferenciaEdad <= 5) return 3; // Edad marginal
 
   return 0;
 }
@@ -341,10 +345,7 @@ function calcularScoreEdad(ruta: Ruta, edad: number): number {
 /**
  * Genera un mensaje personalizado basado en las respuestas y la ruta
  */
-function generarMensajePersonalizado(
-  respuestas: QuizResponses,
-  ruta: Ruta
-): string {
+function generarMensajePersonalizado(respuestas: QuizResponses, ruta: Ruta): string {
   const nombre = respuestas.nombre_estudiante;
   const partes: string[] = [];
 
@@ -379,15 +380,15 @@ function generarMensajePersonalizado(
   // OBJETIVO
   // ═══════════════════════════════════════════════════════════════════════════
   const objetivos: Record<string, string> = {
-    'crear_su_propio_juego': 'crear su propio juego',
-    'publicar_juego_roblox': 'publicar un juego en Roblox',
-    'ganar_olimpiada': 'destacarse en olimpiadas',
-    'hacer_web_propia': 'crear su propia web',
-    'entender_como_funcionan_juegos': 'entender cómo funcionan los juegos',
-    'mejorar_en_mate': 'mejorar en matemática',
-    'aprender_ia': 'aprender sobre IA',
-    'crear_app': 'crear su propia app',
-    'explorar_ciencia': 'explorar ciencia'
+    crear_su_propio_juego: 'crear su propio juego',
+    publicar_juego_roblox: 'publicar un juego en Roblox',
+    ganar_olimpiada: 'destacarse en olimpiadas',
+    hacer_web_propia: 'crear su propia web',
+    entender_como_funcionan_juegos: 'entender cómo funcionan los juegos',
+    mejorar_en_mate: 'mejorar en matemática',
+    aprender_ia: 'aprender sobre IA',
+    crear_app: 'crear su propia app',
+    explorar_ciencia: 'explorar ciencia',
   };
 
   const objetivoTexto = objetivos[respuestas.objetivo_principal];
@@ -399,10 +400,10 @@ function generarMensajePersonalizado(
   // NIVEL
   // ═══════════════════════════════════════════════════════════════════════════
   const nivelTexto: Record<string, string> = {
-    'nunca': 'Aunque no tiene experiencia previa',
-    'scratch_basico': 'Con su experiencia básica en Scratch',
-    'scratch_avanzado': 'Con su nivel avanzado en Scratch',
-    'otro_lenguaje': 'Con su experiencia en programación'
+    nunca: 'Aunque no tiene experiencia previa',
+    scratch_basico: 'Con su experiencia básica en Scratch',
+    scratch_avanzado: 'Con su nivel avanzado en Scratch',
+    otro_lenguaje: 'Con su experiencia en programación',
   };
 
   const nivel = nivelTexto[respuestas.nivel_programacion || 'nunca'];
@@ -426,7 +427,10 @@ function generarMensajeGenerico(respuestas: QuizResponses, ruta: Ruta): string {
 /**
  * Función auxiliar: explica por qué una ruta tiene cierto score (para debug)
  */
-export function explicarScore(ruta: Ruta, respuestas: QuizResponses): {
+export function explicarScore(
+  ruta: Ruta,
+  respuestas: QuizResponses,
+): {
   score_total: number;
   desglose: {
     objetivo: number;
@@ -443,7 +447,7 @@ export function explicarScore(ruta: Ruta, respuestas: QuizResponses): {
     nivel: calcularScoreNivel(ruta, respuestas),
     personalidad: calcularScorePersonalidad(ruta, respuestas),
     motivacion: calcularScoreMotivacion(ruta, respuestas),
-    edad: calcularScoreEdad(ruta, respuestas.edad)
+    edad: calcularScoreEdad(ruta, respuestas.edad),
   };
 
   const score_total = Object.values(desglose).reduce((a, b) => a + b, 0);

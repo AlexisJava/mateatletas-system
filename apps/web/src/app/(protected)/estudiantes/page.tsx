@@ -15,14 +15,8 @@ import type { Estudiante } from '@/types/estudiante';
  */
 export default function EstudiantesPage() {
   const router = useRouter();
-  const {
-    estudiantes,
-    isLoading,
-    equipos,
-    fetchEstudiantes,
-    fetchEquipos,
-    deleteEstudiante,
-  } = useEstudiantesStore();
+  const { estudiantes, isLoading, equipos, fetchEstudiantes, fetchEquipos, deleteEstudiante } =
+    useEstudiantesStore();
 
   const [filtroNivel, setFiltroNivel] = useState('');
   const [filtroEquipo, setFiltroEquipo] = useState('');
@@ -88,9 +82,7 @@ export default function EstudiantesPage() {
               <h1 className="text-4xl font-bold text-gray-900 font-[family-name:var(--font-fredoka)]">
                 Mis Estudiantes
               </h1>
-              <p className="text-gray-600 mt-2">
-                Gestiona a tus estudiantes y su progreso
-              </p>
+              <p className="text-gray-600 mt-2">Gestiona a tus estudiantes y su progreso</p>
             </div>
             <button
               onClick={handleAddNew}

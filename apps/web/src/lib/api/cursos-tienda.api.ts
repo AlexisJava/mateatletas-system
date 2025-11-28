@@ -142,12 +142,12 @@ export const cursosTiendaApi = {
   actualizarProgreso: async (
     cursoId: string,
     progreso: number,
-    completado?: boolean
+    completado?: boolean,
   ): Promise<CursoEstudiante> => {
     try {
       return await apiClient.patch<CursoEstudiante>(
         `/gamificacion/tienda/mis-cursos/${cursoId}/progreso`,
-        { progreso, completado }
+        { progreso, completado },
       );
     } catch (error) {
       console.error('Error al actualizar progreso:', error);
@@ -185,12 +185,12 @@ export const cursosTiendaApi = {
   aprobarSolicitud: async (
     solicitudId: string,
     opcionPago: 'padre_paga_todo' | 'hijo_paga_mitad' | 'hijo_paga_todo',
-    mensajePadre?: string
+    mensajePadre?: string,
   ): Promise<SolicitudCanje> => {
     try {
       return await apiClient.post<SolicitudCanje>(
         `/gamificacion/tienda/solicitudes/${solicitudId}/aprobar`,
-        { opcionPago, mensajePadre }
+        { opcionPago, mensajePadre },
       );
     } catch (error) {
       console.error('Error al aprobar solicitud:', error);
@@ -203,12 +203,12 @@ export const cursosTiendaApi = {
    */
   rechazarSolicitud: async (
     solicitudId: string,
-    mensajePadre?: string
+    mensajePadre?: string,
   ): Promise<SolicitudCanje> => {
     try {
       return await apiClient.post<SolicitudCanje>(
         `/gamificacion/tienda/solicitudes/${solicitudId}/rechazar`,
-        { mensajePadre }
+        { mensajePadre },
       );
     } catch (error) {
       console.error('Error al rechazar solicitud:', error);

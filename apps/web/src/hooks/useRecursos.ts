@@ -1,10 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { gamificacionApi } from '@/lib/api/gamificacion.api';
-import type {
-  RecursosEstudiante,
-  TransaccionRecurso,
-  RachaEstudiante,
-} from '@/types/gamificacion';
+import type { RecursosEstudiante, TransaccionRecurso, RachaEstudiante } from '@/types/gamificacion';
 
 /**
  * Hook para obtener recursos del estudiante (XP, Monedas, Nivel)

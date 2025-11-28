@@ -5,11 +5,13 @@ Este directorio contiene los stores de Zustand para el manejo de estado global d
 ## Store de Autenticación
 
 ### Archivo
+
 [auth.store.ts](./auth.store.ts)
 
 ### Descripción
 
 El store de autenticación maneja todo el estado relacionado con la autenticación del usuario:
+
 - Información del usuario autenticado
 - Token JWT
 - Estado de autenticación
@@ -20,10 +22,10 @@ El store de autenticación maneja todo el estado relacionado con la autenticaci�
 ```typescript
 interface AuthState {
   // Estado
-  user: User | null;              // Datos del usuario autenticado
-  token: string | null;           // Token JWT
-  isAuthenticated: boolean;       // Estado de autenticación
-  isLoading: boolean;             // Indicador de carga
+  user: User | null; // Datos del usuario autenticado
+  token: string | null; // Token JWT
+  isAuthenticated: boolean; // Estado de autenticación
+  isLoading: boolean; // Indicador de carga
 
   // Acciones
   login: (email, password) => Promise<void>;
@@ -85,10 +87,10 @@ Para evitar re-renders innecesarios, selecciona solo el estado que necesitas:
 const authStore = useAuthStore();
 
 // ✅ Bien: solo se re-renderiza si 'user' cambia
-const user = useAuthStore(state => state.user);
+const user = useAuthStore((state) => state.user);
 
 // ✅ Bien: múltiples valores
-const { user, isLoading } = useAuthStore(state => ({
+const { user, isLoading } = useAuthStore((state) => ({
   user: state.user,
   isLoading: state.isLoading,
 }));
@@ -456,17 +458,17 @@ export const useAuthStore = create<AuthState>()(
       (set, get) => ({
         // ... estado y acciones
       }),
-      { name: 'auth-storage' }
+      { name: 'auth-storage' },
     ),
-    { name: 'AuthStore' }
-  )
+    { name: 'AuthStore' },
+  ),
 );
 ```
 
 ### Logging manual
 
 ```typescript
-const user = useAuthStore(state => state.user);
+const user = useAuthStore((state) => state.user);
 
 useEffect(() => {
   console.log('Usuario actual:', user);

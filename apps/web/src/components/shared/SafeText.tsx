@@ -18,9 +18,7 @@ interface SafeTextProps {
  * ```
  */
 export function SafeText({ children, allowFormatting = false, className }: SafeTextProps) {
-  const sanitized = allowFormatting
-    ? sanitizeRichText(children)
-    : sanitizeHtml(children);
+  const sanitized = allowFormatting ? sanitizeRichText(children) : sanitizeHtml(children);
 
   return <span className={className}>{sanitized}</span>;
 }

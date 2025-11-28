@@ -15,7 +15,7 @@ for (let i = 0; i < lines.length; i++) {
   if (!line) continue;
 
   // Parsear CSV simple (dividir por ,,)
-  const campos = line.split(',,').map(c => c.trim());
+  const campos = line.split(',,').map((c) => c.trim());
 
   const rol = campos[0] || '';
   const nombreCompleto = campos[1] || '';
@@ -27,11 +27,17 @@ for (let i = 0; i < lines.length; i++) {
   const tutor = campos[7] || '';
 
   // Detectar líneas de encabezado de grupo
-  if (rol.includes('GRUPO') || rol.includes('CURSO') || rol.includes('Matemáticas Presencial') || rol.includes('Programación Presencial') || rol.includes('Curso')) {
+  if (
+    rol.includes('GRUPO') ||
+    rol.includes('CURSO') ||
+    rol.includes('Matemáticas Presencial') ||
+    rol.includes('Programación Presencial') ||
+    rol.includes('Curso')
+  ) {
     grupoActual = {
       nombre: rol,
       codigo: grupo || 'N/A',
-      perfil: perfil || 'N/A'
+      perfil: perfil || 'N/A',
     };
     continue;
   }
@@ -58,15 +64,13 @@ for (let i = 0; i < lines.length; i++) {
     }
 
     // Buscar si el estudiante ya existe
-    let estudiante = estudiantes.find(e =>
-      e.nombre === nombre && e.apellido === apellido
-    );
+    let estudiante = estudiantes.find((e) => e.nombre === nombre && e.apellido === apellido);
 
     if (!estudiante) {
       estudiante = {
         nombre: nombre,
         apellido: apellido,
-        grupos: []
+        grupos: [],
       };
       estudiantes.push(estudiante);
     }
@@ -79,7 +83,7 @@ for (let i = 0; i < lines.length; i++) {
         dia: dia,
         horario: horario,
         profesor: profesor,
-        perfil: perfil
+        perfil: perfil,
       });
     }
   }
@@ -104,8 +108,8 @@ console.log(`📊 Total inscripciones: ${estudiantes.reduce((sum, e) => sum + e.
 
 // Mostrar resumen por grupo
 const resumenGrupos = {};
-estudiantes.forEach(est => {
-  est.grupos.forEach(g => {
+estudiantes.forEach((est) => {
+  est.grupos.forEach((g) => {
     if (!resumenGrupos[g.codigo]) {
       resumenGrupos[g.codigo] = 0;
     }

@@ -15,72 +15,91 @@ El sistema está **100% configurado y listo para producción** en Railway. Todas
 ## ✅ VARIABLES DE ENTORNO EN RAILWAY (VERIFICADAS)
 
 ### Base de Datos
+
 ```bash
 DATABASE_URL=postgresql://postgres:***@postgres-yumb.railway.internal:5432/railway
 ```
+
 ✅ **CONFIGURADO** - PostgreSQL funcionando en Railway
 
 ### Autenticación JWT
+
 ```bash
 NODE_ENV=production
 JWT_SECRET=be56fe090e22886cb85970be4ea599b35b22c7082eb9a0dc243b6e4b2c84630ffc740f1dc3923f5ba9d4f0a5f0a468d695b31a0ff3d57a799eb354a3b7ec0b1e
 JWT_EXPIRES_IN=1h
 ```
+
 ✅ **CONFIGURADO**
+
 - Secret de 128 caracteres (seguro)
 - Expiración: 1 hora en producción (antes: 7 días)
 
 ### MercadoPago (PRODUCCIÓN)
+
 ```bash
 MERCADOPAGO_ACCESS_TOKEN=APP_USR-6411874486195582-010417-103a87f550fadf17bf184607f30e3d2f-166135502
 MERCADOPAGO_PUBLIC_KEY=APP_USR-933f287c-d84d-4dd2-ab85-dd29b2bfb61a
 MERCADOPAGO_WEBHOOK_SECRET=ee29e73dc6445dfe0e5b292a29ce81c958c90d960240795475891f04aafcbc76
 ```
+
 ✅ **CONFIGURADO** - Credenciales de PRODUCCIÓN (APP_USR-...)
 ⚠️ **IMPORTANTE**: Los pagos serán REALES
 
 ### Redis (Bull Queue)
+
 ```bash
 REDIS_URL=redis://default:***@redis.railway.internal:6379
 ```
+
 ✅ **CONFIGURADO** - Redis funcionando en Railway
 ✅ **CÓDIGO ACTUALIZADO** - Soporta `REDIS_URL` automáticamente
 
 ### URLs y Frontend
+
 ```bash
 FRONTEND_URL=https://www.mateatletasclub.com.ar,https://mateatletas-fybnyracj-alexis-figueroas-projects-d4fb75f1.vercel.app
 BACKEND_URL=https://mateatletas-system.railway.internal
 RAILWAY_PUBLIC_DOMAIN=mateatletas-system-production.up.railway.app
 ```
+
 ✅ **CONFIGURADO** - CORS y dominios configurados
 
 ### Rate Limiting
+
 ```bash
 RATE_LIMIT_TTL=60000
 RATE_LIMIT_MAX=100
 ```
+
 ✅ **CONFIGURADO** - 100 requests por minuto
 
 ### Seguridad
+
 ```bash
 DISABLE_WEBHOOK_SIGNATURE_VALIDATION=false
 ```
+
 ✅ **CONFIGURADO** - Validación de firma HABILITADA en producción
 
 ### Logging y Monitoring
+
 ```bash
 LOG_LEVEL=info
 ENABLE_SWAGGER=true
 ```
+
 ✅ **CONFIGURADO**
 
 ### Admin por defecto
+
 ```bash
 ADMIN_EMAIL=admin@mateatletas.com
 ADMIN_PASSWORD=Mateatletas2025!$
 ADMIN_NOMBRE=Alexis
 ADMIN_APELLIDO=Figueroa
 ```
+
 ✅ **CONFIGURADO**
 
 ---
@@ -92,6 +111,7 @@ ADMIN_APELLIDO=Figueroa
 **Archivo**: `apps/api/src/core/redis/redis.service.ts`
 
 **Cambio**:
+
 ```typescript
 // ANTES: Solo soportaba REDIS_HOST + REDIS_PORT
 const host = this.configService.get<string>('REDIS_HOST', 'localhost');
@@ -116,6 +136,7 @@ if (redisUrl) {
 **Archivo**: `apps/api/src/queues/webhook-queue.module.ts`
 
 **Cambio**:
+
 ```typescript
 // ANTES: Solo REDIS_HOST/PORT
 redis: {
@@ -136,12 +157,14 @@ redis: redisUrl
 ## 🎯 VERIFICACIÓN DE CONFIGURACIÓN
 
 ### Verificar MercadoPago
+
 ```bash
 cd apps/api
 node verify-mercadopago.js
 ```
 
 **Resultado esperado**:
+
 ```
 ✅ Credenciales configuradas: SÍ
 ✅ No está en modo MOCK: SÍ
@@ -156,6 +179,7 @@ node verify-mercadopago.js
 ## 📦 DEPLOYMENT A RAILWAY
 
 ### Opción 1: Push a main (Deploy automático)
+
 ```bash
 # Desde branch testing-de-pagos
 git add .
@@ -183,6 +207,7 @@ git push origin main
 Railway detectará el push y deployará automáticamente.
 
 ### Opción 2: Deploy manual (si prefieres)
+
 ```bash
 railway up
 ```
@@ -192,11 +217,13 @@ railway up
 ## 🔍 POST-DEPLOY: VERIFICACIONES
 
 ### 1. Health Check
+
 ```bash
 curl https://mateatletas-system-production.up.railway.app/api/health
 ```
 
 **Esperado**:
+
 ```json
 {
   "status": "ok",
@@ -207,11 +234,13 @@ curl https://mateatletas-system-production.up.railway.app/api/health
 ```
 
 ### 2. Metrics de Queue
+
 ```bash
 curl https://mateatletas-system-production.up.railway.app/api/queues/metrics/stats
 ```
 
 **Esperado**:
+
 ```json
 {
   "waiting": 0,
@@ -223,11 +252,13 @@ curl https://mateatletas-system-production.up.railway.app/api/queues/metrics/sta
 ```
 
 ### 3. Verificar Logs en Railway
+
 ```bash
 railway logs --service mateatletas-system
 ```
 
 **Buscar**:
+
 ```
 ✅ Conectado a Redis correctamente
 ✅ MercadoPago SDK initialized successfully
@@ -239,9 +270,11 @@ railway logs --service mateatletas-system
 ## 🔗 CONFIGURAR WEBHOOK EN MERCADOPAGO
 
 ### Paso 1: Ir al Dashboard de MercadoPago
+
 URL: https://www.mercadopago.com.ar/developers/panel/app
 
 ### Paso 2: Configurar Webhook
+
 1. Seleccionar tu aplicación
 2. Ir a "Webhooks" en el menú lateral
 3. Agregar nueva URL:
@@ -255,12 +288,15 @@ URL: https://www.mercadopago.com.ar/developers/panel/app
 5. Copiar el **Webhook Secret** generado
 
 ### Paso 3: Actualizar Variable en Railway
+
 ```bash
 railway variables --set MERCADOPAGO_WEBHOOK_SECRET="<secret-del-paso-2>"
 ```
 
 ### Paso 4: Verificar Webhook
+
 MercadoPago enviará un webhook de prueba. Verificar en logs:
+
 ```bash
 railway logs --service mateatletas-system | grep "Webhook recibido"
 ```
@@ -288,6 +324,7 @@ railway logs --service mateatletas-system | grep "Webhook recibido"
 ## 🎉 RESULTADO FINAL
 
 **Sistema 100% configurado para producción**:
+
 - ✅ Redis + BullQueue funcionando
 - ✅ MercadoPago en modo PRODUCCIÓN
 - ✅ Health checks y metrics implementados

@@ -74,21 +74,25 @@ apps/api/src/
 ### Capas de Arquitectura
 
 #### 1. Presentation Layer
+
 - **Responsabilidad**: Definir endpoints HTTP, validación de entrada
 - **Componentes**: Controllers, DTOs, Guards, Decorators
 - **Ejemplo**: `PagosController`, `AuthGuard`, `CreateInscripcionDto`
 
 #### 2. Application Layer (Service Layer)
+
 - **Responsabilidad**: Orquestar lógica de negocio, coordinar casos de uso
 - **Componentes**: Services principales, Facades
 - **Ejemplo**: `PagosService`, `PagosManagementFacadeService`
 
 #### 3. Domain Layer
+
 - **Responsabilidad**: Lógica de negocio pura, reglas de dominio
 - **Componentes**: Constantes, Enums, Validadores, Helpers
 - **Ejemplo**: `EstadoPago`, `Role`, `EXTERNAL_REFERENCE_FORMATS`
 
 #### 4. Infrastructure Layer
+
 - **Responsabilidad**: Acceso a datos, servicios externos
 - **Componentes**: Repositories, External Services
 - **Ejemplo**: `PrismaService`, `MercadoPagoService`
@@ -133,6 +137,7 @@ pagos/
 #### Servicios CQRS
 
 **1. PaymentCommandService** (Comandos - Solo Escrituras)
+
 ```typescript
 // Responsabilidades:
 - registrarPagoManual()
@@ -147,6 +152,7 @@ pagos/
 ```
 
 **2. PaymentQueryService** (Queries - Solo Lecturas)
+
 ```typescript
 // Responsabilidades:
 - findAllInscripciones()
@@ -163,6 +169,7 @@ pagos/
 ```
 
 **3. PaymentStateMapperService** (Mapeo de Estados)
+
 ```typescript
 // Responsabilidades:
 - mapearEstadoPago(estadoMercadoPago) → EstadoPago
@@ -177,6 +184,7 @@ pagos/
 ```
 
 **4. PaymentWebhookService** (Webhooks)
+
 ```typescript
 // Responsabilidades:
 - procesarWebhookMercadoPago()
@@ -190,6 +198,7 @@ pagos/
 ```
 
 **5. PagosManagementFacadeService** (Facade Pattern)
+
 ```typescript
 // Responsabilidades:
 - calcularPrecioFinal() → Orquesta PricingService
@@ -243,6 +252,7 @@ pagos/
 #### Guards
 
 **RolesGuard** (con jerarquía)
+
 ```typescript
 // Jerarquía de roles (menor a mayor privilegio):
 ESTUDIANTE (1) < TUTOR (2) < DOCENTE (3) < ADMIN (4) < SUPER_ADMIN (5)
@@ -256,6 +266,7 @@ async getDocentes() {
 ```
 
 **Características**:
+
 - Normaliza roles a uppercase automáticamente
 - Usa función `cumpleJerarquia()` de domain constants
 - Soporta arrays de roles (`roles` o `role`)
@@ -321,15 +332,17 @@ export enum EstadoMercadoPago {
    - ID numérico directo (colonia)
 
 **Builders**:
+
 ```typescript
 // Crear external_reference
-EXTERNAL_REFERENCE_FORMATS.membresia(membresiaId, tutorId, productoId)
-EXTERNAL_REFERENCE_FORMATS.inscripcionMensual(inscripcionId, estudianteId, productoId)
-EXTERNAL_REFERENCE_FORMATS.inscripcion2026(inscripcionId, tutorId, tipoInscripcion)
-EXTERNAL_REFERENCE_FORMATS.claseInscripcion(claseId, estudianteId, fechaInicio)
+EXTERNAL_REFERENCE_FORMATS.membresia(membresiaId, tutorId, productoId);
+EXTERNAL_REFERENCE_FORMATS.inscripcionMensual(inscripcionId, estudianteId, productoId);
+EXTERNAL_REFERENCE_FORMATS.inscripcion2026(inscripcionId, tutorId, tipoInscripcion);
+EXTERNAL_REFERENCE_FORMATS.claseInscripcion(claseId, estudianteId, fechaInicio);
 ```
 
 **Parsers**:
+
 ```typescript
 // Parsear nuevo formato
 const parsed = parseExternalReference('CLASE_INSCRIPCION:123:456:2025-01-15');
@@ -387,14 +400,14 @@ export const ROLE_HIERARCHY: Record<Role, number> = {
 ```typescript
 // Verificar jerarquía
 cumpleJerarquia(Role.ADMIN, Role.DOCENTE); // true (admin >= docente)
-cumpleJerarquia(Role.TUTOR, Role.ADMIN);   // false (tutor < admin)
+cumpleJerarquia(Role.TUTOR, Role.ADMIN); // false (tutor < admin)
 
 // Verificar permiso
 tienePermiso(Role.DOCENTE, 'crear:tarea'); // true
 
 // Verificar capacidad de acción
 puedeActuarSobre(Role.ADMIN, Role.DOCENTE); // true
-puedeActuarSobre(Role.TUTOR, Role.ADMIN);   // false
+puedeActuarSobre(Role.TUTOR, Role.ADMIN); // false
 
 // Obtener roles gestionables
 getRolesGestionables(Role.ADMIN);
@@ -412,37 +425,44 @@ esRoleValido('invalid'); // false
 ### SOLID
 
 #### Single Responsibility Principle (SRP)
+
 - ✅ Cada servicio tiene una responsabilidad única
 - ✅ `PaymentCommandService` solo para escrituras
 - ✅ `PaymentQueryService` solo para lecturas
 - ✅ `PaymentStateMapperService` solo para mapeo
 
 #### Open/Closed Principle (OCP)
+
 - ✅ Servicios abiertos a extensión (herencia, composición)
 - ✅ Cerrados a modificación (interfaces estables)
 
 #### Dependency Inversion Principle (DIP)
+
 - ✅ Dependencias inyectadas vía constructor (NestJS DI)
 - ✅ Servicios dependen de abstracciones (interfaces, contracts)
 
 ### Patrones de Diseño
 
 #### CQRS (Command Query Responsibility Segregation)
+
 - **Dónde**: Módulo de pagos
 - **Beneficio**: Separación clara de lecturas y escrituras
 - **Servicios**: `PaymentCommandService`, `PaymentQueryService`
 
 #### Facade Pattern
+
 - **Dónde**: `PagosManagementFacadeService`
 - **Beneficio**: Simplifica interfaz compleja
 - **Uso**: Orquesta múltiples servicios para operaciones complejas
 
 #### Repository Pattern
+
 - **Dónde**: `infrastructure/repositories/`
 - **Beneficio**: Abstrae acceso a datos
 - **Ejemplos**: `ConfiguracionPreciosRepository`, `InscripcionMensualRepository`
 
 #### Strategy Pattern
+
 - **Dónde**: `PaymentStateMapperService`
 - **Beneficio**: Encapsula algoritmos de mapeo de estados
 - **Uso**: Diferentes estrategias según tipo de pago
@@ -450,18 +470,22 @@ esRoleValido('invalid'); // false
 ### Anti-Patrones Eliminados
 
 #### God Object / God Service
+
 - ❌ **Antes**: `PagosService` con 50+ métodos
 - ✅ **Después**: 5 servicios especializados con responsabilidades claras
 
 #### Shotgun Surgery
+
 - ❌ **Antes**: Cambio en lógica de pagos requería modificar 10+ archivos
 - ✅ **Después**: Cambios aislados en servicios específicos
 
 #### Magic Strings
+
 - ❌ **Antes**: `if (estado === 'Pendiente')` hardcodeado
 - ✅ **Después**: `if (estado === EstadoPago.PENDIENTE)` con enum
 
 #### Copy-Paste Programming
+
 - ❌ **Antes**: Lógica de mapeo duplicada en 8 lugares
 - ✅ **Después**: `PaymentStateMapperService` centralizado
 
@@ -598,8 +622,10 @@ export enum Role {
 export type DetailedAuthUser = AuthEstudiante | AuthDocente | AuthTutor;
 
 // ❌ EVITAR string literals hardcodeados
-if (user.role === 'admin') {} // MAL
-if (user.role === Role.ADMIN) {} // BIEN
+if (user.role === 'admin') {
+} // MAL
+if (user.role === Role.ADMIN) {
+} // BIEN
 ```
 
 ### Manejo de Errores
@@ -623,6 +649,7 @@ this.eventEmitter.emit('pago.fallido', { paymentId, error });
 ### Estrategia de Testing
 
 #### Unit Tests
+
 - **Objetivo**: Probar lógica aislada
 - **Herramienta**: Jest
 - **Coverage**: Servicios, mappers, helpers
@@ -637,6 +664,7 @@ describe('PaymentCommandService', () => {
 ```
 
 #### Integration Tests
+
 - **Objetivo**: Probar integración entre módulos
 - **Herramienta**: Jest + Supertest
 - **Coverage**: Controllers, webhooks, flujos completos

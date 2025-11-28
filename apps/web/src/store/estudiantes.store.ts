@@ -139,20 +139,15 @@ export const useEstudiantesStore = create<EstudiantesState>((set) => ({
 
       // Actualizar en la lista local
       set((state) => ({
-        estudiantes: state.estudiantes.map((e) =>
-          e.id === id ? estudianteActualizado : e,
-        ),
+        estudiantes: state.estudiantes.map((e) => (e.id === id ? estudianteActualizado : e)),
         estudianteActual:
-          state.estudianteActual?.id === id
-            ? estudianteActualizado
-            : state.estudianteActual,
+          state.estudianteActual?.id === id ? estudianteActualizado : state.estudianteActual,
         isUpdating: false,
       }));
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       set({
-        error:
-          err.response?.data?.message || 'Error al actualizar estudiante',
+        error: err.response?.data?.message || 'Error al actualizar estudiante',
         isUpdating: false,
       });
       throw error;
@@ -171,8 +166,7 @@ export const useEstudiantesStore = create<EstudiantesState>((set) => ({
       set((state) => ({
         estudiantes: state.estudiantes.filter((e) => e.id !== id),
         total: state.total - 1,
-        estudianteActual:
-          state.estudianteActual?.id === id ? null : state.estudianteActual,
+        estudianteActual: state.estudianteActual?.id === id ? null : state.estudianteActual,
         isDeleting: false,
       }));
     } catch (error: unknown) {

@@ -48,10 +48,7 @@ interface AuthState {
   checkAuth: () => Promise<void>;
   setUser: (user: User) => void;
   setSelectedRole: (role: UserRole) => void;
-  cambiarPassword: (
-    passwordActual: string,
-    nuevaPassword: string,
-  ) => Promise<void>;
+  cambiarPassword: (passwordActual: string, nuevaPassword: string) => Promise<void>;
 }
 
 /**
@@ -239,10 +236,7 @@ export const useAuthStore = create<AuthState>()(
        * @param nuevaPassword - Nueva contraseña
        * @throws Error si la contraseña actual es incorrecta
        */
-      cambiarPassword: async (
-        passwordActual: string,
-        nuevaPassword: string,
-      ) => {
+      cambiarPassword: async (passwordActual: string, nuevaPassword: string) => {
         set({ isLoading: true });
 
         try {

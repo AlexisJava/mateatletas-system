@@ -132,8 +132,7 @@ export const useEquiposStore = create<EquiposState>((set) => ({
       return nuevoEquipo;
     } catch (error: unknown) {
       console.error('Error al crear equipo:', error);
-      const errorMessage =
-        getErrorMessage(error, 'Error al crear equipo');
+      const errorMessage = getErrorMessage(error, 'Error al crear equipo');
       set({
         error: errorMessage,
         isLoading: false,
@@ -153,21 +152,15 @@ export const useEquiposStore = create<EquiposState>((set) => ({
 
       // Actualizar en la lista local
       set((state) => ({
-        equipos: state.equipos.map((equipo) =>
-          equipo.id === id ? equipoActualizado : equipo,
-        ),
-        equipoActual:
-          state.equipoActual?.id === id
-            ? equipoActualizado
-            : state.equipoActual,
+        equipos: state.equipos.map((equipo) => (equipo.id === id ? equipoActualizado : equipo)),
+        equipoActual: state.equipoActual?.id === id ? equipoActualizado : state.equipoActual,
         isLoading: false,
       }));
 
       return equipoActualizado;
     } catch (error: unknown) {
       console.error(`Error al actualizar equipo ${id}:`, error);
-      const errorMessage =
-        getErrorMessage(error, 'Error al actualizar equipo');
+      const errorMessage = getErrorMessage(error, 'Error al actualizar equipo');
       set({
         error: errorMessage,
         isLoading: false,
@@ -194,8 +187,7 @@ export const useEquiposStore = create<EquiposState>((set) => ({
       }));
     } catch (error: unknown) {
       console.error(`Error al eliminar equipo ${id}:`, error);
-      const errorMessage =
-        getErrorMessage(error, 'Error al eliminar equipo');
+      const errorMessage = getErrorMessage(error, 'Error al eliminar equipo');
       set({
         error: errorMessage,
         isLoading: false,
@@ -221,8 +213,7 @@ export const useEquiposStore = create<EquiposState>((set) => ({
       console.error('Error al cargar estadísticas:', error);
       set({
         estadisticas: null,
-        error:
-          getErrorMessage(error, 'Error al cargar estadísticas'),
+        error: getErrorMessage(error, 'Error al cargar estadísticas'),
         isLoading: false,
       });
     }
@@ -239,21 +230,15 @@ export const useEquiposStore = create<EquiposState>((set) => ({
 
       // Actualizar en la lista local
       set((state) => ({
-        equipos: state.equipos.map((equipo) =>
-          equipo.id === id ? equipoActualizado : equipo,
-        ),
-        equipoActual:
-          state.equipoActual?.id === id
-            ? equipoActualizado
-            : state.equipoActual,
+        equipos: state.equipos.map((equipo) => (equipo.id === id ? equipoActualizado : equipo)),
+        equipoActual: state.equipoActual?.id === id ? equipoActualizado : state.equipoActual,
         isLoading: false,
       }));
 
       return equipoActualizado;
     } catch (error: unknown) {
       console.error(`Error al recalcular puntos del equipo ${id}:`, error);
-      const errorMessage =
-        getErrorMessage(error, 'Error al recalcular puntos');
+      const errorMessage = getErrorMessage(error, 'Error al recalcular puntos');
       set({
         error: errorMessage,
         isLoading: false,

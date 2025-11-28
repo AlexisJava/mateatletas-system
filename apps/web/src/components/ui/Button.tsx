@@ -3,8 +3,7 @@ import React from 'react';
 /**
  * Props del componente Button
  */
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
@@ -46,14 +45,11 @@ export function Button({
 
   // Variantes de color con efecto hover
   const variants = {
-    primary:
-      'bg-[#ff6b35] hover:bg-[#ff5722] text-white hover:scale-105 hover:shadow-xl',
-    secondary:
-      'bg-[#f7b801] hover:bg-[#ffc107] text-[#2a1a5e] hover:scale-105 hover:shadow-xl',
+    primary: 'bg-[#ff6b35] hover:bg-[#ff5722] text-white hover:scale-105 hover:shadow-xl',
+    secondary: 'bg-[#f7b801] hover:bg-[#ffc107] text-[#2a1a5e] hover:scale-105 hover:shadow-xl',
     outline:
       'border-2 border-[#ff6b35] text-[#ff6b35] bg-transparent hover:bg-[#ff6b35] hover:text-white hover:scale-105',
-    ghost:
-      'text-[#ff6b35] bg-transparent hover:bg-[#ff6b35]/10 shadow-none hover:shadow-lg',
+    ghost: 'text-[#ff6b35] bg-transparent hover:bg-[#ff6b35]/10 shadow-none hover:shadow-lg',
   };
 
   // Tamaños (padding y font-size)

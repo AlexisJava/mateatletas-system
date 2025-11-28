@@ -39,9 +39,7 @@ export default function AdminError({
         {process.env.NODE_ENV === 'development' && (
           <div className="bg-black/40 rounded-lg p-4 mb-6 max-h-40 overflow-auto border border-red-500/20">
             <p className="text-red-400 text-xs font-mono">{error.message}</p>
-            {error.digest && (
-              <p className="text-gray-500 text-xs mt-2">Digest: {error.digest}</p>
-            )}
+            {error.digest && <p className="text-gray-500 text-xs mt-2">Digest: {error.digest}</p>}
           </div>
         )}
 

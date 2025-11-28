@@ -79,9 +79,9 @@ export default function AdminPlanificacionesSimplesPage() {
   ).sort();
 
   // Años únicos
-  const aniosUnicos = Array.from(
-    new Set(planificaciones.map((p) => p.anio).filter(Boolean)),
-  ).sort((a, b) => b - a);
+  const aniosUnicos = Array.from(new Set(planificaciones.map((p) => p.anio).filter(Boolean))).sort(
+    (a, b) => b - a,
+  );
 
   return (
     <div className="flex flex-col relative">

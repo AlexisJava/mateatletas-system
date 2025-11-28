@@ -180,8 +180,8 @@ export function CreateClaseGrupoModal({
         typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message ===
           'string'
       ) {
-        const mensaje =
-          (err as { response?: { data?: { message?: string } } }).response?.data?.message;
+        const mensaje = (err as { response?: { data?: { message?: string } } }).response?.data
+          ?.message;
         setError(mensaje ?? 'Error al crear el horario');
       } else {
         setError('Error al crear el horario');
@@ -224,7 +224,8 @@ export function CreateClaseGrupoModal({
           <div>
             <h2 className="text-2xl font-black text-white">Agregar Horario</h2>
             <p className="text-white/60 text-sm mt-1">
-              Nuevo horario para el grupo <span className="text-purple-300 font-bold">{grupoCodigo}</span>
+              Nuevo horario para el grupo{' '}
+              <span className="text-purple-300 font-bold">{grupoCodigo}</span>
             </p>
           </div>
           <button
@@ -261,9 +262,7 @@ export function CreateClaseGrupoModal({
           {/* Tipo y Día */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-white/80 mb-2">
-                Tipo *
-              </label>
+              <label className="block text-sm font-semibold text-white/80 mb-2">Tipo *</label>
               <select
                 value={formData.tipo}
                 onChange={(e) => handleChange('tipo', e.target.value)}
@@ -379,7 +378,9 @@ export function CreateClaseGrupoModal({
                 min="2024"
                 max="2100"
                 value={formData.anio_lectivo}
-                onChange={(e) => handleChange('anio_lectivo', parseInt(e.target.value) || new Date().getFullYear())}
+                onChange={(e) =>
+                  handleChange('anio_lectivo', parseInt(e.target.value) || new Date().getFullYear())
+                }
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-purple-500/50 focus:bg-white/10"
               />
             </div>
@@ -409,7 +410,9 @@ export function CreateClaseGrupoModal({
                 onChange={(e) => handleChange('docente_id', e.target.value)}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-purple-500/50 focus:bg-white/10"
               >
-                <option value="" className="bg-gray-900">Selecciona un docente...</option>
+                <option value="" className="bg-gray-900">
+                  Selecciona un docente...
+                </option>
                 {docentesDisponibles.map((docente) => (
                   <option key={docente.id} value={docente.id} className="bg-gray-900">
                     {docente.nombre} {docente.apellido} ({docente.email})
@@ -440,7 +443,9 @@ export function CreateClaseGrupoModal({
             </label>
             <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-lg p-4 max-h-60 overflow-y-auto">
               {estudiantesDisponibles.length === 0 ? (
-                <p className="text-white/40 text-sm text-center py-4">No hay estudiantes disponibles</p>
+                <p className="text-white/40 text-sm text-center py-4">
+                  No hay estudiantes disponibles
+                </p>
               ) : (
                 <div className="space-y-2">
                   {estudiantesDisponibles.map((estudiante) => (

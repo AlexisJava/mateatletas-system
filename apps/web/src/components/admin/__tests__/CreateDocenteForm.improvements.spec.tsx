@@ -149,9 +149,11 @@ describe('CreateDocenteForm - Mejoras (TDD)', () => {
       expect(screen.getByLabelText(/programación/i)).toBeInTheDocument();
 
       // No debe haber otros sectores
-      const checkboxes = screen.getAllByRole('checkbox').filter((cb: HTMLElement) =>
-        cb.closest('div')?.textContent?.toLowerCase().includes('sector')
-      );
+      const checkboxes = screen
+        .getAllByRole('checkbox')
+        .filter((cb: HTMLElement) =>
+          cb.closest('div')?.textContent?.toLowerCase().includes('sector'),
+        );
       expect(checkboxes.length).toBeLessThanOrEqual(2);
     });
 
@@ -406,7 +408,10 @@ describe('CreateDocenteForm - Mejoras (TDD)', () => {
       await userEvent.type(screen.getByLabelText(/apellido/i), 'Fernández');
       await userEvent.type(screen.getByLabelText(/email/i), 'laura@example.com');
       await userEvent.type(screen.getByLabelText(/teléfono/i), '+54 9 11 1234-5678');
-      await userEvent.type(screen.getByLabelText(/título profesional/i), 'Licenciada en Matemática');
+      await userEvent.type(
+        screen.getByLabelText(/título profesional/i),
+        'Licenciada en Matemática',
+      );
 
       // Seleccionar Matemática
       await userEvent.click(screen.getByLabelText(/matemática/i));

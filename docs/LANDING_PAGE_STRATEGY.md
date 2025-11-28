@@ -28,6 +28,7 @@
 ### Propuesta de Valor Central
 
 **Mateatletas** es una plataforma EdTech revolucionaria que combina:
+
 - ✅ Educación STEAM de alta calidad (Matemática + Programación + Robótica + Ciencias)
 - ✅ Gamificación profunda estilo videojuegos AAA
 - ✅ Clases en vivo con profesores especializados + cursos auto-dirigidos
@@ -37,6 +38,7 @@
 ### Desafío de Marketing
 
 Con **más de 20 funcionalidades principales**, crear una landing page que:
+
 1. ❌ **NO** abrume al usuario con información excesiva
 2. ✅ **SÍ** capture atención en 60 segundos
 3. ✅ **SÍ** comunique valor claramente
@@ -45,6 +47,7 @@ Con **más de 20 funcionalidades principales**, crear una landing page que:
 ### Solución Propuesta
 
 **Arquitectura Híbrida:**
+
 - 🏠 **Landing Principal:** Breve, enfocada, persuasiva (5 secciones, 2-3 min lectura)
 - 📄 **Páginas Específicas:** Profundas, detalladas, por audiencia (9+ páginas)
 - 🎯 **User Journey:** Landing → Página específica → Registro
@@ -58,6 +61,7 @@ Con **más de 20 funcionalidades principales**, crear una landing page que:
 #### 1️⃣ **Sistema de Membresías y Precios**
 
 **Productos:**
+
 - **Club de Matemáticas:** $50,000 ARS/mes (~$50-60 USD)
   - Acceso a clases en vivo ilimitadas
   - Sistema de gamificación completo
@@ -70,15 +74,16 @@ Con **más de 20 funcionalidades principales**, crear una landing page que:
 
 **Sistema de Descuentos Automáticos:**
 
-| Escenario | Precio/Actividad | Descuento | Ejemplo |
-|-----------|------------------|-----------|---------|
-| 1 hijo, 1 actividad | $50,000 | 0% | $50,000/mes |
-| 1 hijo, 2+ actividades | $44,000 | 12% | $88,000/mes |
-| 2+ hermanos, 1 actividad | $44,000 | 12% | $88,000/mes |
-| **2+ hermanos, 2+ actividades** | **$38,000** | **24%** | **$152,000/mes** |
-| Socios AACREA | Base - 20% | 20% | $40,000/mes |
+| Escenario                       | Precio/Actividad | Descuento | Ejemplo          |
+| ------------------------------- | ---------------- | --------- | ---------------- |
+| 1 hijo, 1 actividad             | $50,000          | 0%        | $50,000/mes      |
+| 1 hijo, 2+ actividades          | $44,000          | 12%       | $88,000/mes      |
+| 2+ hermanos, 1 actividad        | $44,000          | 12%       | $88,000/mes      |
+| **2+ hermanos, 2+ actividades** | **$38,000**      | **24%**   | **$152,000/mes** |
+| Socios AACREA                   | Base - 20%       | 20%       | $40,000/mes      |
 
 **Valor Agregado:**
+
 - Sin permanencia mínima
 - Cancela cuando quieras
 - Débito automático disponible
@@ -89,6 +94,7 @@ Con **más de 20 funcionalidades principales**, crear una landing page que:
 #### 2️⃣ **Sistema de Clases en Vivo**
 
 **Características:**
+
 - **Flexibilidad Total:** Calendario semanal con múltiples horarios
 - **Grupos Reducidos:** Máximo 8-12 estudiantes por clase
 - **6 Rutas Curriculares:** Lógica, Álgebra, Geometría, Trigonometría, Programación, Robótica
@@ -105,42 +111,46 @@ Con **más de 20 funcionalidades principales**, crear una landing page que:
 
 **Recursos Duales:**
 
-| Recurso | Función | Cómo Ganar |
-|---------|---------|------------|
+| Recurso              | Función                             | Cómo Ganar                                 |
+| -------------------- | ----------------------------------- | ------------------------------------------ |
 | **XP (Experiencia)** | Sube niveles 1-10+ (nunca se gasta) | Asistir a clases, completar tareas, logros |
-| **Monedas** | Canjea cursos STEAM premium | 2-500 monedas por actividad |
-| **Gemas (Fase 2)** | Items legendarios exclusivos | Competencias especiales |
+| **Monedas**          | Canjea cursos STEAM premium         | 2-500 monedas por actividad                |
+| **Gemas (Fase 2)**   | Items legendarios exclusivos        | Competencias especiales                    |
 
 **Fórmula de Niveles:**
+
 - Nivel 1: 0 XP
 - Nivel 5: 2,500 XP
 - Nivel 10: 10,000 XP
 - Fórmula: `nivel = floor(sqrt(XP / 100)) + 1`
 
 **Sistema de Equipos Competitivos:**
+
 1. 🔥 **Equipo Fénix** (Naranja/Rojo) - "Renacemos del fracaso"
 2. 🐉 **Equipo Dragón** (Verde/Esmeralda) - "Sabiduría y poder"
 3. 🐅 **Equipo Tigre** (Amarillo/Oro) - "Velocidad y precisión"
 4. 🦅 **Equipo Águila** (Azul/Celeste) - "Visión y estrategia"
 
 **Competencias:**
+
 - Rankings semanales por equipo
 - Rankings individuales Top 10
 - Premios: Monedas bonus, logros exclusivos, items legendarios
 
 **Sistema de Logros (50+ Achievements):**
 
-| Categoría | Ejemplos | Recompensas |
-|-----------|----------|-------------|
-| **Consistencia** | Racha 7/30/90 días | 30-600 monedas + animaciones |
-| **Maestría** | Completar módulo 100% | 250-1,000 monedas + badges |
-| **Precisión** | 10/50/100 ejercicios perfectos | 80-500 monedas + efectos visuales |
-| **Social** | Ayudar 5/25 estudiantes | 60-400 monedas + títulos |
-| **Velocidad** | Resolver en <30s | 40-150 monedas + animaciones Flash |
+| Categoría        | Ejemplos                       | Recompensas                        |
+| ---------------- | ------------------------------ | ---------------------------------- |
+| **Consistencia** | Racha 7/30/90 días             | 30-600 monedas + animaciones       |
+| **Maestría**     | Completar módulo 100%          | 250-1,000 monedas + badges         |
+| **Precisión**    | 10/50/100 ejercicios perfectos | 80-500 monedas + efectos visuales  |
+| **Social**       | Ayudar 5/25 estudiantes        | 60-400 monedas + títulos           |
+| **Velocidad**    | Resolver en <30s               | 40-150 monedas + animaciones Flash |
 
 **Rareza:** Común (gris) → Raro (azul) → Épico (morado) → Legendario (dorado)
 
 **Tienda Virtual:**
+
 - Animaciones: "Victoria Épica", "Baile del Fuego" (80-150 monedas)
 - Skins de Avatar: "Científico Loco", "Hacker Elite" (120 monedas)
 - Efectos de Partículas: Estrellas, Código Matrix (60-80 monedas)
@@ -156,30 +166,36 @@ Con **más de 20 funcionalidades principales**, crear una landing page que:
 **Catálogo de +50 Cursos:**
 
 **Programación:**
+
 - Videojuegos con Scratch (6 clases) - 500 monedas ($25 USD)
 - Python desde Cero (12 clases) - 1,000 monedas ($50 USD)
 - React para Principiantes (15 clases) - 1,600 monedas ($80 USD)
 - Machine Learning con Python (20 clases) - 3,200 monedas ($160 USD)
 
 **Ciencias:**
+
 - Química Explosiva Virtual (8 clases) - 700 monedas ($35 USD)
 - Astronomía Interactiva (6 clases) - 600 monedas ($30 USD)
 - Física con Simuladores (8 clases) - 700 monedas ($35 USD)
 
 **Robótica:**
+
 - Arduino desde Cero (8 clases) - 700 monedas ($35 USD)
 - Robot Móvil con Arduino (10 clases) - 1,000 monedas ($50 USD)
 - Internet of Things (15 clases) - 1,800 monedas ($90 USD)
 
 **Diseño 3D:**
+
 - Blender 3D: Modelado Básico (10 clases) - 1,000 monedas ($50 USD)
 - Unity Básico: Juegos 3D (15 clases) - 2,000 monedas ($100 USD)
 
 **Maestrías Completas:**
+
 - Full Stack Web Developer (30 clases) - 4,000 monedas ($200 USD)
 - Inteligencia Artificial Aplicada (40 clases) - 6,000 monedas ($300 USD)
 
 **Sistema de Aprobación Padre:**
+
 1. Estudiante solicita canje con monedas
 2. Padre recibe notificación
 3. Padre elige opción de pago:
@@ -193,6 +209,7 @@ Con **más de 20 funcionalidades principales**, crear una landing page que:
 #### 5️⃣ **Plataforma de Cursos Auto-Dirigidos**
 
 **Estructura:**
+
 ```
 Producto (Curso)
 └── Módulos (3-10 por curso)
@@ -204,6 +221,7 @@ Producto (Curso)
 ```
 
 **Best Practices Ed-Tech:**
+
 - Chunking: Contenido en bloques digeribles
 - Microlearning: Lecciones 5-15 minutos
 - Progressive Disclosure: Lecciones se desbloquean secuencialmente
@@ -215,12 +233,14 @@ Producto (Curso)
 #### 6️⃣ **Avatares 3D y Personalización**
 
 **Ready Player Me Integration:**
+
 - Creación de avatar 3D personalizado
 - URL permanente del avatar
 - Animaciones idle personalizables
 - 10 gradientes de fondo predefinidos
 
 **Sistema de Animaciones:**
+
 - Animaciones base incluidas
 - Animaciones desbloqueables por logros
 - Animaciones premium en tienda
@@ -230,6 +250,7 @@ Producto (Curso)
 #### 7️⃣ **Dashboards Especializados**
 
 **Dashboard Tutor/Padre:**
+
 - Resumen Financiero: Inscripciones activas, próximo pago, descuentos
 - Progreso de Hijos: XP, nivel, monedas, logros por estudiante
 - Calendario de Clases: Próximas clases reservadas
@@ -238,6 +259,7 @@ Producto (Curso)
 - Puntos Padre: Balance y catálogo de premios
 
 **Dashboard Estudiante (Gimnasio Mental):**
+
 - Hub 3D Interactivo con avatar
 - Stats en Tiempo Real: XP, nivel, monedas, racha
 - Logros Recientes: Últimos 5 desbloqueados
@@ -248,6 +270,7 @@ Producto (Curso)
 - Acceso a Tienda y Catálogo
 
 **Dashboard Docente:**
+
 - KPIs: Clases dictadas, estudiantes activos, asistencia promedio
 - Calendario Mensual: Vista de todas las clases/eventos
 - Próximas Clases: Lista con cupos y estudiantes
@@ -260,6 +283,7 @@ Producto (Curso)
 #### 8️⃣ **Tecnología y Seguridad**
 
 **Frontend:**
+
 - Next.js 15.5 con App Router y Turbopack
 - React 19 + TypeScript estricto
 - Tailwind CSS 4.0 con design system custom
@@ -268,6 +292,7 @@ Producto (Curso)
 - Chart.js + Recharts para gráficos
 
 **Backend:**
+
 - NestJS 11 con arquitectura modular limpia
 - Prisma ORM con 22 modelos optimizados
 - PostgreSQL con índices estratégicos
@@ -277,6 +302,7 @@ Producto (Curso)
 - JWT en httpOnly cookies (máxima seguridad)
 
 **Calidad:**
+
 - 99 tests automatizados pasando
 - 0 errores TypeScript
 - 0 N+1 queries (eager loading optimizado)
@@ -290,6 +316,7 @@ Producto (Curso)
 **Concepto:** Los padres también ganan recompensas
 
 **Cómo Ganar Puntos:**
+
 - Pagar puntualmente
 - Revisar progreso de hijos regularmente
 - Referir amigos/familias
@@ -297,6 +324,7 @@ Producto (Curso)
 - Completar encuestas de satisfacción
 
 **Cómo Canjear:**
+
 - Monedas para regalar a hijos
 - Cursos STEAM gratis
 - Descuentos adicionales en suscripciones
@@ -307,18 +335,21 @@ Producto (Curso)
 ### Ventajas Competitivas
 
 **vs. Khan Academy:**
+
 - ✅ Clases EN VIVO con profesores reales
 - ✅ Gamificación 10x más profunda
 - ✅ Avatares 3D personalizables
 - ✅ Economía virtual con canjes tangibles
 
 **vs. IXL Learning:**
+
 - ✅ Flexibilidad total de horarios
 - ✅ Sistema de equipos competitivos
 - ✅ Marketplace de cursos STEAM premium
 - ✅ Descuentos familiares inteligentes
 
 **vs. Matific:**
+
 - ✅ Cubre hasta universidad (no solo primaria)
 - ✅ Multi-materia (matemática + programación + robótica + ciencias)
 - ✅ Sistema de recompensas dual (estudiantes + padres)
@@ -426,9 +457,11 @@ Producto (Curso)
 ## 🏠 LANDING PRINCIPAL (Diseño Detallado)
 
 ### Objetivo
+
 Capturar atención en **60 segundos** y generar conversión rápida.
 
 ### Características
+
 - ⚡ **Tiempo de lectura:** 2-3 minutos
 - 📱 **Mobile-first responsive**
 - 🎯 **5 secciones core**
@@ -478,6 +511,7 @@ Capturar atención en **60 segundos** y generar conversión rápida.
 #### Elementos Clave
 
 **Video/GIF (15 segundos):**
+
 - Niño usando la plataforma
 - Avatar 3D moviéndose
 - Logros desbloqueándose
@@ -485,21 +519,25 @@ Capturar atención en **60 segundos** y generar conversión rápida.
 - Ranking subiendo
 
 **Headline:**
+
 ```
 "Tus hijos aprenden jugando
 y ganan cursos STEAM gratis"
 ```
 
 **Subheadline:**
+
 ```
 Clases en vivo + Gamificación AAA + 50 cursos de Programación a IA
 ```
 
 **CTAs:**
+
 - 🟠 Primario: "Prueba 7 Días Gratis" → `/register`
 - ▶️ Secundario: "Ver Cómo Funciona" → Video modal o scroll a #como-funciona
 
 **Trust Badges:**
+
 - ⭐ 4.9/5 rating
 - 👥 500+ familias activas
 - 🔒 Sin tarjeta de crédito
@@ -543,11 +581,13 @@ Clases en vivo + Gamificación AAA + 50 cursos de Programación a IA
 #### Elementos Clave
 
 **Cards Interactivos:**
+
 - Hover effect: Elevación + sombra chunky
 - Click: Navega a página específica
 - Colores distintivos por audiencia
 
 **Navegación:**
+
 - [Explorar] → `/para-estudiantes`
 - [Explorar] → `/para-padres`
 - [Explorar] → `/para-docentes`
@@ -590,6 +630,7 @@ Clases en vivo + Gamificación AAA + 50 cursos de Programación a IA
 #### Elementos Clave
 
 **Video Demo (30 segundos):**
+
 - Registro rápido
 - Dashboard estudiante
 - Primera clase en vivo
@@ -597,6 +638,7 @@ Clases en vivo + Gamificación AAA + 50 cursos de Programación a IA
 - Canjear curso STEAM
 
 **CTA:**
+
 - "Empezar Ahora" → `/register`
 
 ---
@@ -650,18 +692,21 @@ Clases en vivo + Gamificación AAA + 50 cursos de Programación a IA
 #### Elementos Clave
 
 **Testimonios (3-4):**
+
 - Fotos reales de familias
 - Nombres completos + ciudad
 - Calificación 5 estrellas
 - Quote corto y específico
 
 **Estadísticas:**
+
 - 500+ familias activas
 - 15,000+ clases dictadas
 - 4.9/5 rating promedio
 - 99% satisfacción
 
 **CTA:**
+
 - "Ver Más Historias" → `/testimonios`
 
 ---
@@ -723,12 +768,14 @@ Clases en vivo + Gamificación AAA + 50 cursos de Programación a IA
 #### Elementos Clave
 
 **Banner CTA:**
+
 - Fondo degradado naranja-amarillo
 - Sombra chunky estilo Crash Bandicoot
 - Formulario de captura rápido (4 campos)
 - Botón grande naranja
 
 **Footer Completo:**
+
 - Logo + tagline
 - 4 columnas de links
 - Redes sociales
@@ -741,6 +788,7 @@ Clases en vivo + Gamificación AAA + 50 cursos de Programación a IA
 ### 1. PARA ESTUDIANTES (/para-estudiantes)
 
 #### Objetivo
+
 Mostrar TODO el sistema de gamificación y engagement.
 
 #### Secciones (Puede ser larga - ya capturaste su atención)
@@ -800,6 +848,7 @@ Mostrar TODO el sistema de gamificación y engagement.
 ### 2. PARA PADRES (/para-padres)
 
 #### Objetivo
+
 Convencer con transparencia, control y valor económico.
 
 #### Secciones
@@ -871,6 +920,7 @@ Convencer con transparencia, control y valor económico.
 ### 3. CURSOS STEAM (/cursos-steam)
 
 #### Objetivo
+
 Mostrar todo el catálogo como marketplace atractivo.
 
 #### Secciones
@@ -931,6 +981,7 @@ Mostrar todo el catálogo como marketplace atractivo.
 ### 4. PRECIOS (/precios)
 
 #### Objetivo
+
 Máxima claridad sobre planes, descuentos, métodos de pago.
 
 #### Secciones
@@ -1005,6 +1056,7 @@ Máxima claridad sobre planes, descuentos, métodos de pago.
 ### 5. CÓMO FUNCIONA (/como-funciona)
 
 #### Objetivo
+
 Tutorial completo paso a paso.
 
 #### Secciones
@@ -1061,6 +1113,7 @@ Tutorial completo paso a paso.
 ### 6. TECNOLOGÍA (/tecnologia)
 
 #### Objetivo
+
 Demostrar calidad técnica y seguridad.
 
 #### Secciones
@@ -1161,39 +1214,39 @@ Demostrar calidad técnica y seguridad.
 
 ```css
 /* Colores Principales */
---naranja-primary: #FF8C00;    /* CTAs, acciones */
---naranja-hover: #FF7700;      /* Hover state */
---naranja-light: #FFB347;      /* Fondos suaves */
+--naranja-primary: #ff8c00; /* CTAs, acciones */
+--naranja-hover: #ff7700; /* Hover state */
+--naranja-light: #ffb347; /* Fondos suaves */
 
---azul-info: #1E90FF;          /* Información, paneles */
---azul-dark: #1873CC;          /* Hover azul */
---azul-light: #4DA6FF;         /* Fondos azules */
+--azul-info: #1e90ff; /* Información, paneles */
+--azul-dark: #1873cc; /* Hover azul */
+--azul-light: #4da6ff; /* Fondos azules */
 
---amarillo-xp: #FFD700;        /* XP, monedas, progreso */
---amarillo-light: #FFED4E;     /* Highlights */
+--amarillo-xp: #ffd700; /* XP, monedas, progreso */
+--amarillo-light: #ffed4e; /* Highlights */
 
---verde-success: #00CC44;      /* Éxito, confirmaciones */
---verde-dark: #00A838;         /* Hover verde */
+--verde-success: #00cc44; /* Éxito, confirmaciones */
+--verde-dark: #00a838; /* Hover verde */
 
---morado-premium: #9933FF;     /* Premium, legendario */
---morado-dark: #7A29CC;        /* Hover morado */
+--morado-premium: #9933ff; /* Premium, legendario */
+--morado-dark: #7a29cc; /* Hover morado */
 
---rojo-error: #FF4444;         /* Errores, alertas */
---rojo-dark: #CC0000;          /* Hover rojo */
+--rojo-error: #ff4444; /* Errores, alertas */
+--rojo-dark: #cc0000; /* Hover rojo */
 
 /* Grises */
---gris-900: #1A1A1A;          /* Texto principal */
---gris-700: #4A4A4A;          /* Texto secundario */
---gris-500: #9E9E9E;          /* Texto deshabilitado */
---gris-300: #D4D4D4;          /* Bordes */
---gris-100: #F5F5F5;          /* Fondos claros */
---blanco: #FFFFFF;
+--gris-900: #1a1a1a; /* Texto principal */
+--gris-700: #4a4a4a; /* Texto secundario */
+--gris-500: #9e9e9e; /* Texto deshabilitado */
+--gris-300: #d4d4d4; /* Bordes */
+--gris-100: #f5f5f5; /* Fondos claros */
+--blanco: #ffffff;
 
 /* Colores de Equipos */
---equipo-fenix: #FF6B35;      /* Naranja/Rojo */
---equipo-dragon: #00D9A3;     /* Verde/Esmeralda */
---equipo-tigre: #FFD93D;      /* Amarillo/Oro */
---equipo-aguila: #4ECDC4;     /* Azul/Celeste */
+--equipo-fenix: #ff6b35; /* Naranja/Rojo */
+--equipo-dragon: #00d9a3; /* Verde/Esmeralda */
+--equipo-tigre: #ffd93d; /* Amarillo/Oro */
+--equipo-aguila: #4ecdc4; /* Azul/Celeste */
 ```
 
 #### Tipografía
@@ -1208,16 +1261,16 @@ Demostrar calidad técnica y seguridad.
 --font-code: 'JetBrains Mono', monospace;
 
 /* Tamaños */
---text-xs: 0.75rem;    /* 12px */
---text-sm: 0.875rem;   /* 14px */
---text-base: 1rem;     /* 16px */
---text-lg: 1.125rem;   /* 18px */
---text-xl: 1.25rem;    /* 20px */
---text-2xl: 1.5rem;    /* 24px */
---text-3xl: 1.875rem;  /* 30px */
---text-4xl: 2.25rem;   /* 36px */
---text-5xl: 3rem;      /* 48px */
---text-6xl: 3.75rem;   /* 60px */
+--text-xs: 0.75rem; /* 12px */
+--text-sm: 0.875rem; /* 14px */
+--text-base: 1rem; /* 16px */
+--text-lg: 1.125rem; /* 18px */
+--text-xl: 1.25rem; /* 20px */
+--text-2xl: 1.5rem; /* 24px */
+--text-3xl: 1.875rem; /* 30px */
+--text-4xl: 2.25rem; /* 36px */
+--text-5xl: 3rem; /* 48px */
+--text-6xl: 3.75rem; /* 60px */
 ```
 
 #### Elementos Característicos
@@ -1286,9 +1339,9 @@ const bounceVariants = {
   initial: { scale: 1 },
   hover: {
     scale: 1.05,
-    transition: { type: "spring", stiffness: 300, damping: 10 }
+    transition: { type: 'spring', stiffness: 300, damping: 10 },
   },
-  tap: { scale: 0.95 }
+  tap: { scale: 0.95 },
 };
 
 // Slide desde abajo
@@ -1297,8 +1350,8 @@ const slideUpVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: "easeOut" }
-  }
+    transition: { duration: 0.6, ease: 'easeOut' },
+  },
 };
 
 // Stagger para listas
@@ -1307,15 +1360,16 @@ const staggerContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 ```
 
 #### Componentes Visuales Únicos
 
 **Badge de Logro:**
+
 ```tsx
 <div className="relative">
   <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amarillo-xp to-naranja-primary border-chunky shadow-chunky flex items-center justify-center">
@@ -1328,13 +1382,14 @@ const staggerContainer = {
 ```
 
 **Progress Bar con XP:**
+
 ```tsx
 <div className="relative w-full h-8 bg-gris-300 rounded-full border-chunky overflow-hidden">
   <motion.div
     className="h-full bg-gradient-to-r from-amarillo-xp to-naranja-primary"
     initial={{ width: 0 }}
-    animate={{ width: "75%" }}
-    transition={{ duration: 1, ease: "easeOut" }}
+    animate={{ width: '75%' }}
+    transition={{ duration: 1, ease: 'easeOut' }}
   />
   <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-gris-900">
     4,280 / 5,000 XP
@@ -1357,32 +1412,38 @@ const staggerContainer = {
 ### Headlines Principales
 
 **Landing Hero:**
+
 ```
 "Tus hijos aprenden jugando y ganan cursos STEAM gratis"
 ```
 
 **Para Estudiantes:**
+
 ```
 "Tu Gimnasio Mental Épico: Aprende, Juega, Gana"
 ```
 
 **Para Padres:**
+
 ```
 "La Mejor Inversión en el Futuro de Tus Hijos"
 "Control Total, Transparencia Absoluta, Hasta 24% de Descuento"
 ```
 
 **Para Docentes:**
+
 ```
 "Enseña con la Mejor Tecnología EdTech de América Latina"
 ```
 
 **Cursos STEAM:**
+
 ```
 "De Scratch a Inteligencia Artificial: +50 Cursos Premium"
 ```
 
 **Precios:**
+
 ```
 "Planes Accesibles con Descuentos Inteligentes"
 "Paga Menos con Hermanos, Recibe Más Valor"
@@ -1391,16 +1452,19 @@ const staggerContainer = {
 ### Subheadlines
 
 **Landing:**
+
 ```
 "Clases en vivo + Gamificación AAA + 50 cursos de Programación a IA"
 ```
 
 **Para Estudiantes:**
+
 ```
 "Gana XP, sube niveles, desbloquea logros épicos y canjea cursos de Programación, Robótica e IA"
 ```
 
 **Para Padres:**
+
 ```
 "Dashboard con métricas en tiempo real, descuentos automáticos hasta 24% y control total de gastos"
 ```
@@ -1421,6 +1485,7 @@ const staggerContainer = {
 ### Microcopy Importante
 
 **Botones CTA:**
+
 - "Prueba 7 Días Gratis" (no "Registrarse")
 - "Empezar Mi Prueba Gratuita" (no "Sign up")
 - "Ver Cómo Funciona" (no "Learn more")
@@ -1428,6 +1493,7 @@ const staggerContainer = {
 - "Calcula Tu Descuento" (no "Ver precios")
 
 **Trust Elements:**
+
 - "Sin tarjeta de crédito"
 - "Cancela cuando quieras"
 - "500+ familias confían en nosotros"
@@ -1436,13 +1502,13 @@ const staggerContainer = {
 
 **Objeciones y Respuestas:**
 
-| Objeción | Respuesta en Copy |
-|----------|-------------------|
-| "Es caro" | "Hasta 24% descuento con hermanos - Paga $38,000 en vez de $50,000 por actividad" |
-| "No tengo tiempo" | "Flexibilidad total - Tus hijos eligen cuándo asistir" |
-| "¿Y si no les gusta?" | "7 días gratis, sin tarjeta, cancela cuando quieras" |
-| "¿Es seguro?" | "Seguridad bancaria: JWT, CSRF, encriptación end-to-end" |
-| "¿Realmente aprenden?" | "Dashboard con métricas reales: asistencia, progreso, observaciones de docentes" |
+| Objeción               | Respuesta en Copy                                                                 |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| "Es caro"              | "Hasta 24% descuento con hermanos - Paga $38,000 en vez de $50,000 por actividad" |
+| "No tengo tiempo"      | "Flexibilidad total - Tus hijos eligen cuándo asistir"                            |
+| "¿Y si no les gusta?"  | "7 días gratis, sin tarjeta, cancela cuando quieras"                              |
+| "¿Es seguro?"          | "Seguridad bancaria: JWT, CSRF, encriptación end-to-end"                          |
+| "¿Realmente aprenden?" | "Dashboard con métricas reales: asistencia, progreso, observaciones de docentes"  |
 
 ---
 
@@ -1451,6 +1517,7 @@ const staggerContainer = {
 ### Jerarquía de CTAs
 
 **CTA Primario (Naranja):**
+
 - "Prueba 7 Días Gratis"
 - "Empezar Mi Prueba Gratuita"
 - "Empezar Ahora"
@@ -1458,6 +1525,7 @@ const staggerContainer = {
 **Destino:** `/register`
 
 **CTA Secundario (Azul):**
+
 - "Ver Cómo Funciona"
 - "Explorar Cursos STEAM"
 - "Calcula Tu Descuento"
@@ -1466,6 +1534,7 @@ const staggerContainer = {
 **Destino:** Video modal, página específica, o calculadora
 
 **CTA Terciario (Texto con flecha):**
+
 - "Ver Más Historias →"
 - "Explorar →"
 - "Conoce Más →"
@@ -1475,6 +1544,7 @@ const staggerContainer = {
 ### Estrategia de Múltiples Puntos de Conversión
 
 **Landing Page:**
+
 - Hero: CTA primario visible inmediatamente
 - Propuesta de Valor: CTAs en cada card (explorar)
 - Cómo Funciona: CTA después del video
@@ -1486,6 +1556,7 @@ const staggerContainer = {
 ### Formulario de Registro Optimizado
 
 **Campos Mínimos (Captura Rápida):**
+
 ```
 1. Nombre completo
 2. Email
@@ -1494,12 +1565,14 @@ const staggerContainer = {
 ```
 
 **NO pedir:**
+
 - ❌ Contraseña en primer paso (crear después)
 - ❌ Tarjeta de crédito
 - ❌ Dirección completa
 - ❌ Documento de identidad
 
 **Flujo:**
+
 ```
 Landing → Formulario corto → Email verificación → Completar perfil → Dashboard
 ```
@@ -1507,6 +1580,7 @@ Landing → Formulario corto → Email verificación → Completar perfil → Da
 ### Calculadora de Descuentos (Widget Clave)
 
 **Inputs:**
+
 ```tsx
 <div className="calculator">
   <label>Número de hijos:</label>
@@ -1521,28 +1595,20 @@ Landing → Formulario corto → Email verificación → Completar perfil → Da
 ```
 
 **Output (Actualización en Tiempo Real):**
+
 ```tsx
 <div className="result">
-  <div className="line-through text-gris-500">
-    Precio sin descuento: $200,000/mes
-  </div>
-  <div className="text-4xl font-bold text-verde-success">
-    Tu precio: $152,000/mes
-  </div>
-  <div className="text-xl text-naranja-primary">
-    ⚡ Ahorras: $48,000/mes (24%)
-  </div>
-  <div className="text-base text-gris-700">
-    Ahorro anual: $576,000
-  </div>
+  <div className="line-through text-gris-500">Precio sin descuento: $200,000/mes</div>
+  <div className="text-4xl font-bold text-verde-success">Tu precio: $152,000/mes</div>
+  <div className="text-xl text-naranja-primary">⚡ Ahorras: $48,000/mes (24%)</div>
+  <div className="text-base text-gris-700">Ahorro anual: $576,000</div>
 
-  <button className="btn-primary mt-4">
-    Empezar con Este Descuento
-  </button>
+  <button className="btn-primary mt-4">Empezar con Este Descuento</button>
 </div>
 ```
 
 **Ubicación:**
+
 - `/para-padres` (prominente)
 - `/precios` (mega prominente)
 - Landing footer (opcional)
@@ -1552,6 +1618,7 @@ Landing → Formulario corto → Email verificación → Completar perfil → Da
 **Trigger:** Usuario mueve mouse hacia cerrar tab
 
 **Contenido:**
+
 ```
 ┌─────────────────────────────────────┐
 │   ⚠️ ¡Espera!                       │
@@ -1651,6 +1718,7 @@ apps/web/src/
 ### Componentes Clave a Crear
 
 **1. LandingNavbar.tsx**
+
 ```tsx
 'use client';
 
@@ -1686,6 +1754,7 @@ export function LandingNavbar() {
 ```
 
 **2. CalculadoraDescuentos.tsx**
+
 ```tsx
 'use client';
 
@@ -1709,7 +1778,7 @@ export function CalculadoraDescuentos() {
     }
 
     if (esAACREA) {
-      descuento = Math.max(descuento, 0.20);
+      descuento = Math.max(descuento, 0.2);
     }
 
     const totalActividades = numHijos * actividadesPorHijo;
@@ -1723,19 +1792,16 @@ export function CalculadoraDescuentos() {
       precioSinDescuento,
       ahorro,
       descuentoPorcentaje: descuento * 100,
-      ahorroAnual: ahorro * 12
+      ahorroAnual: ahorro * 12,
     };
   }, [numHijos, actividadesPorHijo, esAACREA]);
 
-  return (
-    <div className="card-chunky">
-      {/* Implementación completa */}
-    </div>
-  );
+  return <div className="card-chunky">{/* Implementación completa */}</div>;
 }
 ```
 
 **3. ScrollProgress.tsx**
+
 ```tsx
 'use client';
 
@@ -1747,7 +1813,7 @@ export function ScrollProgress() {
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
-    restDelta: 0.001
+    restDelta: 0.001,
   });
 
   return (
@@ -1762,13 +1828,15 @@ export function ScrollProgress() {
 ### SEO y Meta Tags
 
 **Layout principal:**
+
 ```tsx
 // apps/web/src/app/(marketing)/layout.tsx
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Mateatletas - Plataforma Educativa STEAM con Gamificación | Argentina',
-  description: 'La plataforma educativa que tus hijos amarán. Clases de matemática en vivo + cursos STEAM con gamificación AAA. Hasta 24% descuento con hermanos. Prueba 7 días gratis.',
+  description:
+    'La plataforma educativa que tus hijos amarán. Clases de matemática en vivo + cursos STEAM con gamificación AAA. Hasta 24% descuento con hermanos. Prueba 7 días gratis.',
   keywords: [
     'clases de matemática',
     'educación STEAM',
@@ -1777,7 +1845,7 @@ export const metadata: Metadata = {
     'robótica para niños',
     'clases online Argentina',
     'clases virtuales matemática',
-    'cursos STEM Argentina'
+    'cursos STEM Argentina',
   ],
   authors: [{ name: 'Mateatletas' }],
   openGraph: {
@@ -1790,17 +1858,17 @@ export const metadata: Metadata = {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Mateatletas Dashboard'
-      }
+        alt: 'Mateatletas Dashboard',
+      },
     ],
     locale: 'es_AR',
-    type: 'website'
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Mateatletas - Educación STEAM Gamificada',
     description: 'Clases en vivo + Gamificación AAA + 50 cursos premium',
-    images: ['/twitter-image.jpg']
+    images: ['/twitter-image.jpg'],
   },
   robots: {
     index: true,
@@ -1810,19 +1878,20 @@ export const metadata: Metadata = {
       follow: true,
       'max-video-preview': -1,
       'max-image-preview': 'large',
-      'max-snippet': -1
-    }
+      'max-snippet': -1,
+    },
   },
   verification: {
     google: 'GOOGLE_SITE_VERIFICATION_CODE',
-    yandex: 'YANDEX_VERIFICATION_CODE'
-  }
+    yandex: 'YANDEX_VERIFICATION_CODE',
+  },
 };
 ```
 
 ### Analytics y Tracking
 
 **Google Analytics 4:**
+
 ```tsx
 // apps/web/src/components/marketing/Analytics.tsx
 'use client';
@@ -1850,6 +1919,7 @@ export function Analytics() {
 ```
 
 **Eventos de Conversión:**
+
 ```tsx
 // lib/analytics.ts
 export const trackEvent = (eventName: string, eventParams?: object) => {
@@ -1876,6 +1946,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 ### Fase 1: Landing Principal + Infraestructura (Semana 1)
 
 **Días 1-2:**
+
 - ✅ Setup de carpetas y arquitectura
 - ✅ Configurar layout (marketing)
 - ✅ Crear sistema de diseño (CSS variables)
@@ -1883,12 +1954,14 @@ trackEvent('watch_video_demo', { duration: 30 });
 - ✅ Implementar ScrollProgress
 
 **Días 3-4:**
+
 - ✅ Implementar Hero Section
 - ✅ Implementar Propuesta de Valor Triple
 - ✅ Implementar Cómo Funciona Section
 - ✅ Implementar Social Proof Section
 
 **Días 5-7:**
+
 - ✅ Implementar Footer con CTA
 - ✅ Responsive design completo
 - ✅ Animaciones con Framer Motion
@@ -1902,6 +1975,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 ### Fase 2: Páginas Principales (Semana 2)
 
 **Días 1-2: /para-estudiantes**
+
 - ✅ Hero específico
 - ✅ Sección gamificación completa
 - ✅ Sistema de logros con cards
@@ -1911,6 +1985,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 - ✅ Dashboard demo
 
 **Días 3-4: /para-padres**
+
 - ✅ Hero específico
 - ✅ Dashboard con métricas
 - ✅ Sistema de descuentos explicado
@@ -1920,6 +1995,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 - ✅ Testimonios de padres
 
 **Días 5-7: /precios**
+
 - ✅ Hero
 - ✅ Tabla comparativa de planes
 - ✅ Tabla completa de descuentos
@@ -1935,6 +2011,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 ### Fase 3: Páginas Secundarias (Semana 3)
 
 **Días 1-2: /cursos-steam**
+
 - ✅ Hero con buscador
 - ✅ Categorías principales
 - ✅ Catálogo completo con filtros
@@ -1943,6 +2020,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 - ✅ Top 10 cursos más canjeados
 
 **Días 3-4: /clases-en-vivo**
+
 - ✅ Hero
 - ✅ Sistema de clases detallado
 - ✅ 6 rutas curriculares
@@ -1952,6 +2030,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 - ✅ Sistema de reservas explicado
 
 **Días 5-7: /como-funciona**
+
 - ✅ Hero con video tutorial
 - ✅ 5 pasos con screenshots
 - ✅ Flujos específicos con diagramas
@@ -1965,6 +2044,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 ### Fase 4: Páginas Complementarias (Semana 4)
 
 **Días 1-2: /para-docentes**
+
 - ✅ Hero específico
 - ✅ Herramientas de enseñanza
 - ✅ Calendario inteligente
@@ -1973,6 +2053,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 - ✅ Testimonios de docentes
 
 **Días 3-4: /tecnologia**
+
 - ✅ Hero
 - ✅ Stack técnico visual
 - ✅ Métricas de calidad (cards)
@@ -1982,6 +2063,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 - ✅ Certificaciones
 
 **Días 5-7: /testimonios**
+
 - ✅ Hero
 - ✅ Galería de testimonios
 - ✅ Videos testimoniales (embeds)
@@ -1996,6 +2078,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 ### Fase 5: Optimización y Testing (Semana 5)
 
 **Días 1-2: Performance**
+
 - ✅ Optimización de imágenes (Next.js Image)
 - ✅ Lazy loading de componentes pesados
 - ✅ Code splitting
@@ -2004,6 +2087,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 - ✅ Objetivo: Score 95+
 
 **Días 3-4: SEO**
+
 - ✅ Meta tags en todas las páginas
 - ✅ Structured data (JSON-LD)
 - ✅ Sitemap.xml
@@ -2012,6 +2096,7 @@ trackEvent('watch_video_demo', { duration: 30 });
 - ✅ Canonical URLs
 
 **Días 5-7: Analytics y Testing**
+
 - ✅ Google Analytics 4 setup
 - ✅ Eventos de conversión
 - ✅ Facebook Pixel (opcional)
@@ -2052,10 +2137,12 @@ TOTAL: 5 semanas (25 días laborables)
 ### Objetivos de Conversión
 
 **Conversión Principal:**
+
 - **Landing → Registro:** 5-8%
 - **Prueba Gratis → Pago:** 20-30%
 
 **Conversiones Secundarias:**
+
 - Landing → Página específica: 30-40%
 - Página específica → Registro: 10-15%
 - Calculadora usada → Registro: 15-20%
@@ -2064,23 +2151,27 @@ TOTAL: 5 semanas (25 días laborables)
 ### Métricas de Engagement
 
 **Landing Page:**
+
 - Time on page: 2-3 minutos (objetivo)
 - Bounce rate: <50%
 - Scroll depth: 70%+ de usuarios llegan a footer
 - CTA clicks: 3-5% por CTA
 
 **Páginas Específicas:**
+
 - Time on page: 4-6 minutos
 - Bounce rate: <30%
 - Página → Registro: 10-15%
 
 **Calculadora de Descuentos:**
+
 - Uso: 20-30% de visitantes de /precios
 - Calculadora → Registro: 15-20%
 
 ### Métricas Técnicas
 
 **Performance:**
+
 - Lighthouse Score: 95+ (objetivo)
 - Time to Interactive: <2s
 - First Contentful Paint: <1s
@@ -2088,6 +2179,7 @@ TOTAL: 5 semanas (25 días laborables)
 - Largest Contentful Paint: <2.5s
 
 **SEO:**
+
 - Core Web Vitals: Todos en verde
 - Mobile-friendly: 100%
 - Accesibilidad: 90+
@@ -2095,6 +2187,7 @@ TOTAL: 5 semanas (25 días laborables)
 ### Dashboard de Analytics (Google Analytics 4)
 
 **Eventos a Trackear:**
+
 ```javascript
 // Conversiones
 'start_registration'
@@ -2127,22 +2220,26 @@ TOTAL: 5 semanas (25 días laborables)
 ### A/B Testing Propuestos
 
 **Test 1: Hero Headline**
+
 - Variante A: "Tus hijos aprenden jugando y ganan cursos STEAM gratis"
 - Variante B: "La plataforma educativa que tus hijos amarán usar"
 - Métrica: Tasa de scroll / clicks en CTA
 
 **Test 2: CTA Button Color**
+
 - Variante A: Naranja (#FF8C00)
 - Variante B: Verde (#00CC44)
 - Métrica: Click-through rate
 
 **Test 3: Hero Media**
+
 - Variante A: Video 15 segundos
 - Variante B: GIF animado
 - Variante C: Imagen estática
 - Métrica: Time on page / CTA clicks
 
 **Test 4: Calculadora Position**
+
 - Variante A: Prominente arriba en /precios
 - Variante B: Después de tabla de planes
 - Métrica: Uso de calculadora / conversión
@@ -2172,6 +2269,7 @@ TOTAL: 5 semanas (25 días laborables)
 ### Recursos Necesarios
 
 **Contenido:**
+
 - ✅ 3-4 testimonios reales con fotos (padres + estudiantes)
 - ✅ 1 video demo de 30 segundos (dashboard estudiante)
 - ✅ 1 video demo de 15 segundos (hero)
@@ -2180,6 +2278,7 @@ TOTAL: 5 semanas (25 días laborables)
 - ✅ Imágenes de avatares 3D
 
 **Técnico:**
+
 - ✅ Dominio configurado (mateatletas.com)
 - ✅ Google Analytics 4 ID
 - ✅ Facebook Pixel (opcional)
@@ -2193,4 +2292,3 @@ TOTAL: 5 semanas (25 días laborables)
 **Próxima revisión:** Al finalizar Fase 1
 
 ---
-

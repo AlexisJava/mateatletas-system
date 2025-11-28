@@ -30,6 +30,7 @@ Esta carpeta contiene la planificación de **Noviembre 2025 para Nivel 1 (Grupo 
 ## 🎨 Ideas de Narrativa (Ejemplos)
 
 Podés crear una narrativa inmersiva como:
+
 - 🏰 "El Castillo de los Números Mágicos"
 - 🌳 "La Aventura en el Bosque Matemático"
 - 🚀 "Viaje a los Planetas de los Números"
@@ -72,6 +73,7 @@ Podés crear una narrativa inmersiva como:
 ### 1. Editar `metadata.json`
 
 Define los datos de tu planificación:
+
 - Título
 - Descripción
 - Objetivos de aprendizaje
@@ -135,10 +137,10 @@ Si querés usar componentes pre-construidos:
 
 ```tsx
 import {
-  ProgressTracker,    // Barra de progreso
-  GameScore,          // Sistema de puntaje
-  ActivityTimer,      // Temporizador
-  AchievementPopup,   // Notificaciones de logros
+  ProgressTracker, // Barra de progreso
+  GameScore, // Sistema de puntaje
+  ActivityTimer, // Temporizador
+  AchievementPopup, // Notificaciones de logros
 } from '@/planificaciones/shared';
 ```
 
@@ -149,6 +151,7 @@ import {
 ## 🎯 Tracking Automático
 
 El sistema automáticamente trackea:
+
 - ✅ Qué estudiante jugó
 - ✅ Cuánto tiempo estuvo
 - ✅ Qué actividades completó
@@ -171,22 +174,17 @@ export default function PlanificacionNoviembre2025Nivel1() {
 
   const handleRespuesta = (esCorrecta: boolean) => {
     if (esCorrecta) {
-      setPuntos(prev => prev + 10);
+      setPuntos((prev) => prev + 10);
     }
   };
 
   return (
-    <PlanificacionApp
-      codigo="2025-11-nivel-1"
-      titulo="El Reino de los Números"
-    >
+    <PlanificacionApp codigo="2025-11-nivel-1" titulo="El Reino de los Números">
       <div className="min-h-screen bg-blue-500 p-8">
         <GameScore puntos={puntos} />
 
         <div className="text-center mt-10">
-          <h2 className="text-3xl text-white mb-4">
-            ¿Cuánto es 5 + 3?
-          </h2>
+          <h2 className="text-3xl text-white mb-4">¿Cuánto es 5 + 3?</h2>
 
           <button
             onClick={() => handleRespuesta(false)}
@@ -220,6 +218,7 @@ export default function PlanificacionNoviembre2025Nivel1() {
 ## 🎨 Libertad Creativa Total
 
 Recordá que podés:
+
 - Usar cualquier librería de React
 - Crear animaciones con CSS, Framer Motion, GSAP
 - Usar Canvas, SVG, WebGL
@@ -247,6 +246,7 @@ Recordá que podés:
 ## 🆘 Ayuda
 
 Si tenés dudas sobre cómo integrar algo específico, consultá:
+
 - `/planificaciones/shared/README.md` - Componentes disponibles
 - `/planificaciones/README.md` - Guía general del sistema
 

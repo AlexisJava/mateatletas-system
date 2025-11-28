@@ -28,6 +28,7 @@ Prompt de desarrollo
 Implement the **Programación de Clases** sub-slice.
 
 **Backend (NestJS)**:
+
 - Use the Academico module (if exists) or create a `ClasesModule` within it.
 - **Prisma Schema**: Add `Clase` model:
   - Fields: `id (PK)`, `rutaCurricularId` (FK to RutaCurricular table), `docenteId` (FK to Docente), `fechaHoraInicio` (DateTime), `duracionMinutos` (Int), `estado` (enum: 'Programada','Cancelada'), `cuposMaximo` (Int), `cuposOcupados` (Int default 0), `productoId` (Int, FK to Producto, nullable).
@@ -35,23 +36,23 @@ Implement the **Programación de Clases** sub-slice.
   - Also define `RutaCurricular` model if not exists (id, nombre) for class category/topic.
 - **ClaseService**:
   - `programarClase(dto: CrearClaseDto)`: Admin schedules a new class. Create Clase record (estado 'Programada', cuposOcupados=0).
-    * Increase sequence if needed (not required).
+    - Increase sequence if needed (not required).
   - `cancelarClase(id)`: Mark clase.estado = 'Cancelada'.
-    * Optionally notify related reservations (not in scope, but set `cuposOcupados` to 0 or just keep record).
-  - `listarClases(params)`: 
-    * If admin: list all (optionally filter by upcoming).
-    * If tutor/estudiante: list upcoming classes with estado 'Programada' (and maybe not full). Possibly exclude course classes they can't attend (productId not null if they don't have InscripcionCurso).
-    * If docente: list classes where docenteId = logged teacher id (upcoming or all for their schedule).
-    * Implement logic: based on user role and maybe query filters (e.g., by date or route).
+    - Optionally notify related reservations (not in scope, but set `cuposOcupados` to 0 or just keep record).
+  - `listarClases(params)`:
+    - If admin: list all (optionally filter by upcoming).
+    - If tutor/estudiante: list upcoming classes with estado 'Programada' (and maybe not full). Possibly exclude course classes they can't attend (productId not null if they don't have InscripcionCurso).
+    - If docente: list classes where docenteId = logged teacher id (upcoming or all for their schedule).
+    - Implement logic: based on user role and maybe query filters (e.g., by date or route).
   - `incrementarCuposOcupados(claseId)`: helper to +1 cuposOcupados (ensuring not exceed cuposMaximo).
   - `decrementarCuposOcupados(claseId)`: (for cancellations of reservation, optional).
 - **ClaseController**:
   - `POST /api/clases` – Create class (Admin only). Body: { rutaCurricularId, docenteId, fechaHoraInicio, duracionMinutos, cuposMaximo, productoId? }. Returns class data.
   - `GET /api/clases` – List classes. Behavior depends on role:
-    * If Admin: all classes (maybe include past).
-    * If Tutor/Estudiante: upcoming classes (estado Programada, fecha >= now, not cancelled). Possibly filter out full classes (cuposOcupados >= cuposMaximo).
-    * If Docente: classes for that docente (their schedule).
-    * This can be handled by service based on user role from JWT.
+    - If Admin: all classes (maybe include past).
+    - If Tutor/Estudiante: upcoming classes (estado Programada, fecha >= now, not cancelled). Possibly filter out full classes (cuposOcupados >= cuposMaximo).
+    - If Docente: classes for that docente (their schedule).
+    - This can be handled by service based on user role from JWT.
   - `PATCH /api/clases/:id/cancelar` – Cancel class (Admin or Docente maybe). Sets estado='Cancelada'. If Docente cancels their class, possibly allowed with admin permission; we assume Admin triggers cancellations.
   - (Optional) `GET /api/clases/:id` – get details (maybe including enrolled students, handled in Asistencia subslice).
 - **RutaCurricular**:
@@ -64,6 +65,7 @@ Implement the **Programación de Clases** sub-slice.
   - Use roles guard accordingly.
 
 **Frontend (Next.js)**:
+
 - **Admin - Agenda de Clases** (`/admin/clases`):
   - Display calendar or list of all scheduled classes. Possibly group by date or filter by route/docente.
   - Show each class: route, fecha/hora, docente nombre, cupos (e.g., "5/10 inscritos").
@@ -87,6 +89,7 @@ Implement the **Programación de Clases** sub-slice.
   - If class canceled, front for tutor should hide or mark as cancelled.
 
 **API Integration**:
+
 - `useQuery('clases', fetchClases)` – will call GET /clases. The backend handles filtering by role.
 - Admin might use separate query or same with role check.
 - `useMutation(programarClase)` – POST /clases for admin.
@@ -94,16 +97,18 @@ Implement the **Programación de Clases** sub-slice.
 - Possibly `useQuery('rutasCurriculares', fetchRutas)` for dropdown options in form.
 
 **Types**:
+
 - `Clase`: { id, rutaCurricularId, docenteId, fechaHoraInicio, duracionMinutos, estado: 'Programada'|'Cancelada', cuposMaximo, cuposOcupados, productoId? }.
 - `CrearClaseDto`: { rutaCurricularId, docenteId, fechaHoraInicio (string or Date), duracionMinutos, cuposMaximo, productoId? }.
 - `ClaseDetails`: for GET listing, we want to include related info:
   - e.g., docente: { nombre, apellido }, ruta: { nombre } so we can display names without extra calls.
   - We can have service do Prisma include or separate API calls. Better include:
-    * Prisma query include: docente { nombre apellido }, rutaCurricular { nombre }.
+    - Prisma query include: docente { nombre apellido }, rutaCurricular { nombre }.
   - Define front type accordingly: e.g., `ClaseConInfo extends Clase { docente: { nombre, apellido }, ruta: { nombre } }`.
 - `RutaCurricular`: { id, nombre }.
 
 **Orden de implementación (Programación)**:
+
 1. **Prisma**: Add `RutaCurricular` model (id, nombre) and `Clase` model with fields and relations (docenteId->Docente, rutaCurricularId->RutaCurricular, productoId->Producto). Add enum for clase estado.
 2. **Backend**: Create ClasesModule within Academico (or as separate module imported in AppModule).
 3. Implement ClasesService.programarClase, listarClases, cancelarClase. Use logic per role:

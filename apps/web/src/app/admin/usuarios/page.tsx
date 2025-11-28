@@ -1,7 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUsers, useUsersLoading, useUsersError, useFetchUsers, useDeleteUser, useUsersStore } from '@/features/admin/users';
+import {
+  useUsers,
+  useUsersLoading,
+  useUsersError,
+  useFetchUsers,
+  useDeleteUser,
+  useUsersStore,
+} from '@/features/admin/users';
 import { AdminUser } from '@/types/admin.types';
 import { docentesApi, CreateDocenteData, Docente } from '@/lib/api/docentes.api';
 import { createAdmin, CreateAdminData } from '@/lib/api/admin.api';
@@ -9,7 +16,7 @@ import {
   exportToExcel,
   exportToCSV,
   exportToPDF,
-  formatUsersForExport
+  formatUsersForExport,
 } from '@/lib/utils/export.utils';
 import { getErrorMessage } from '@/lib/utils/error.utils';
 import { toErrorLike } from '@/types/common';
@@ -19,7 +26,15 @@ import ViewEditDocenteModal from '@/components/admin/ViewEditDocenteModal';
 import MultiRoleModal from '@/components/admin/MultiRoleModal';
 
 type TabType = 'tutores' | 'personal';
-type ModalType = 'delete' | 'roles' | 'view' | 'viewDocente' | 'createDocente' | 'createAdmin' | 'reassignClasses' | null;
+type ModalType =
+  | 'delete'
+  | 'roles'
+  | 'view'
+  | 'viewDocente'
+  | 'createDocente'
+  | 'createAdmin'
+  | 'reassignClasses'
+  | null;
 
 export default function UsuariosPage() {
   const users = useUsers();
@@ -56,8 +71,8 @@ export default function UsuariosPage() {
   }, [fetchUsers]);
 
   // Filtrar usuarios según el tab activo
-  const tutores = users.filter(u => u.role === 'tutor');
-  const personal = users.filter(u => u.role === 'docente' || u.role === 'admin');
+  const tutores = users.filter((u) => u.role === 'tutor');
+  const personal = users.filter((u) => u.role === 'docente' || u.role === 'admin');
 
   const displayedUsers = activeTab === 'tutores' ? tutores : personal;
 
@@ -88,9 +103,16 @@ export default function UsuariosPage() {
     } catch (error) {
       // Solo detectar error de clases asignadas si es DOCENTE
       if (selectedUser.role === 'docente') {
-        const axiosError = error as { response?: { data?: { errorMessage?: string; message?: string } }; message?: string };
+        const axiosError = error as {
+          response?: { data?: { errorMessage?: string; message?: string } };
+          message?: string;
+        };
 
-        const errorMsg = axiosError?.response?.data?.errorMessage || axiosError?.response?.data?.message || axiosError?.message || 'Error al eliminar usuario';
+        const errorMsg =
+          axiosError?.response?.data?.errorMessage ||
+          axiosError?.response?.data?.message ||
+          axiosError?.message ||
+          'Error al eliminar usuario';
 
         if (errorMsg.includes('clase(s) asignada(s)')) {
           // Extraer número de clases del mensaje
@@ -104,7 +126,9 @@ export default function UsuariosPage() {
           try {
             const response = await docentesApi.getAll();
             // El backend puede devolver { data: [...] } o directamente [...]
-            const docentes = Array.isArray(response) ? response : (response as { data?: Docente[] }).data || [];
+            const docentes = Array.isArray(response)
+              ? response
+              : (response as { data?: Docente[] }).data || [];
             setDocentesDisponibles(docentes.filter((d: Docente) => d.id !== selectedUser.id));
           } catch (err) {
             console.error('Error loading docentes:', err);
@@ -114,8 +138,15 @@ export default function UsuariosPage() {
         }
       } else {
         // Para tutores u otros roles, mostrar error directamente pero NO bloquear
-        const axiosError = error as { response?: { data?: { errorMessage?: string; message?: string } }; message?: string };
-        const errorMsg = axiosError?.response?.data?.errorMessage || axiosError?.response?.data?.message || axiosError?.message || 'Error al eliminar usuario';
+        const axiosError = error as {
+          response?: { data?: { errorMessage?: string; message?: string } };
+          message?: string;
+        };
+        const errorMsg =
+          axiosError?.response?.data?.errorMessage ||
+          axiosError?.response?.data?.message ||
+          axiosError?.message ||
+          'Error al eliminar usuario';
         setDeleteError(errorMsg);
         setNeedsReassignment(false); // NO necesita reasignación
       }
@@ -161,10 +192,10 @@ export default function UsuariosPage() {
       if (newDocente?.generatedPassword) {
         alert(
           `✅ Docente creado exitosamente!\n\n` +
-          `Contraseña temporal generada:\n${newDocente.generatedPassword}\n\n` +
-          `⚠️ Importante: Compartí esta contraseña con el docente. ` +
-          `El docente deberá cambiarla en su primer inicio de sesión.\n\n` +
-          `Esta contraseña no se volverá a mostrar.`
+            `Contraseña temporal generada:\n${newDocente.generatedPassword}\n\n` +
+            `⚠️ Importante: Compartí esta contraseña con el docente. ` +
+            `El docente deberá cambiarla en su primer inicio de sesión.\n\n` +
+            `Esta contraseña no se volverá a mostrar.`,
         );
       }
 
@@ -263,13 +294,16 @@ export default function UsuariosPage() {
     try {
       // ✅ SECURITY FIX: NO usar localStorage ni Authorization header
       // El token viaja automáticamente en httpOnly cookie con credentials: 'include'
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pagos/registrar-pago-manual/${tutorId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/pagos/registrar-pago-manual/${tutorId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include', // ✅ Envía cookies automáticamente
         },
-        credentials: 'include', // ✅ Envía cookies automáticamente
-      });
+      );
 
       const data = await response.json();
 
@@ -277,8 +311,9 @@ export default function UsuariosPage() {
         throw new Error(data.message || 'Error al registrar el pago');
       }
 
-      alert(`✅ Pago registrado exitosamente\n\nEstudiante: ${data.estudianteNombre}\nPeríodo: ${data.periodo}\nMonto: $${data.montoTotal.toLocaleString()}\nInscripciones: ${data.cantidadInscripciones}`);
-
+      alert(
+        `✅ Pago registrado exitosamente\n\nEstudiante: ${data.estudianteNombre}\nPeríodo: ${data.periodo}\nMonto: $${data.montoTotal.toLocaleString()}\nInscripciones: ${data.cantidadInscripciones}`,
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al registrar el pago';
       alert(`❌ ${errorMessage}`);
@@ -305,8 +340,8 @@ export default function UsuariosPage() {
           { header: 'Nombre', dataKey: 'Nombre' },
           { header: 'Email', dataKey: 'Email' },
           { header: 'Rol', dataKey: 'Rol' },
-          { header: 'Registro', dataKey: 'Fecha de Registro' }
-        ]
+          { header: 'Registro', dataKey: 'Fecha de Registro' },
+        ],
       );
     }
 
@@ -324,7 +359,9 @@ export default function UsuariosPage() {
               <h1 className="text-4xl font-black bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent mb-3">
                 Gestión de Usuarios
               </h1>
-              <p className="text-white/70 text-lg font-medium">Administrá la comunidad completa de Mateatletas</p>
+              <p className="text-white/70 text-lg font-medium">
+                Administrá la comunidad completa de Mateatletas
+              </p>
             </div>
 
             <div className="flex gap-3 items-center">
@@ -390,11 +427,15 @@ export default function UsuariosPage() {
           {activeTab === 'tutores' && (
             <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent animate-pulse"></div>
           )}
-          <Users className={`${activeTab === 'tutores' ? 'w-6 h-6' : 'w-5 h-5'} relative z-10 transition-all`} />
+          <Users
+            className={`${activeTab === 'tutores' ? 'w-6 h-6' : 'w-5 h-5'} relative z-10 transition-all`}
+          />
           <span className="relative z-10">Tutores</span>
-          <span className={`relative z-10 px-3 py-1 rounded-xl text-sm font-black ${
-            activeTab === 'tutores' ? 'bg-white/25' : 'bg-white/10'
-          }`}>
+          <span
+            className={`relative z-10 px-3 py-1 rounded-xl text-sm font-black ${
+              activeTab === 'tutores' ? 'bg-white/25' : 'bg-white/10'
+            }`}
+          >
             {tutores.length}
           </span>
         </button>
@@ -410,11 +451,15 @@ export default function UsuariosPage() {
           {activeTab === 'personal' && (
             <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-transparent animate-pulse"></div>
           )}
-          <Crown className={`${activeTab === 'personal' ? 'w-6 h-6' : 'w-5 h-5'} relative z-10 transition-all`} />
+          <Crown
+            className={`${activeTab === 'personal' ? 'w-6 h-6' : 'w-5 h-5'} relative z-10 transition-all`}
+          />
           <span className="relative z-10">Personal del Club</span>
-          <span className={`relative z-10 px-3 py-1 rounded-xl text-sm font-black ${
-            activeTab === 'personal' ? 'bg-white/25' : 'bg-white/10'
-          }`}>
+          <span
+            className={`relative z-10 px-3 py-1 rounded-xl text-sm font-black ${
+              activeTab === 'personal' ? 'bg-white/25' : 'bg-white/10'
+            }`}
+          >
             {personal.length}
           </span>
         </button>
@@ -436,9 +481,7 @@ export default function UsuariosPage() {
       ) : displayedUsers.length === 0 ? (
         <div className="backdrop-blur-xl bg-white/5 rounded-3xl shadow-2xl border border-white/10 p-20 text-center">
           <div className="text-6xl mb-4">👥</div>
-          <p className="text-white/60 text-xl font-bold">
-            No hay usuarios en esta categoría
-          </p>
+          <p className="text-white/60 text-xl font-bold">No hay usuarios en esta categoría</p>
         </div>
       ) : (
         <div className="backdrop-blur-xl bg-white/5 rounded-3xl shadow-2xl border border-white/10 overflow-hidden">
@@ -482,7 +525,8 @@ export default function UsuariosPage() {
                     </td>
                     <td className="px-8 py-5 whitespace-nowrap">
                       <div className="text-sm text-cyan-400 font-mono font-bold">
-                        {user.username || `${user.nombre.toLowerCase()}.${user.apellido.toLowerCase()}`}
+                        {user.username ||
+                          `${user.nombre.toLowerCase()}.${user.apellido.toLowerCase()}`}
                       </div>
                     </td>
                     {activeTab === 'tutores' && (
@@ -561,7 +605,10 @@ export default function UsuariosPage() {
               </div>
               <h3 className="text-2xl font-black text-white mb-2">¿Eliminar usuario?</h3>
               <p className="text-white/70 text-base">
-                Estás por eliminar a <span className="font-bold text-white">{selectedUser.nombre} {selectedUser.apellido}</span>
+                Estás por eliminar a{' '}
+                <span className="font-bold text-white">
+                  {selectedUser.nombre} {selectedUser.apellido}
+                </span>
               </p>
             </div>
 
@@ -608,7 +655,9 @@ export default function UsuariosPage() {
               </div>
             ) : (
               <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 mb-6">
-                <p className="text-sm text-red-400 font-bold text-center">⚠️ Esta acción no se puede deshacer</p>
+                <p className="text-sm text-red-400 font-bold text-center">
+                  ⚠️ Esta acción no se puede deshacer
+                </p>
               </div>
             )}
 
@@ -672,7 +721,9 @@ export default function UsuariosPage() {
                   <div className="text-2xl font-black text-white mb-2">
                     {selectedUser.nombre} {selectedUser.apellido}
                   </div>
-                  <span className={`inline-block px-4 py-2 text-sm font-black rounded-xl shadow-lg ${roleColors[selectedUser.role]}`}>
+                  <span
+                    className={`inline-block px-4 py-2 text-sm font-black rounded-xl shadow-lg ${roleColors[selectedUser.role]}`}
+                  >
                     {roleLabels[selectedUser.role]}
                   </span>
                 </div>
@@ -680,26 +731,40 @@ export default function UsuariosPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-5 border border-white/10">
-                  <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2">Email</div>
-                  <div className="text-base font-bold text-white break-all">{selectedUser.email}</div>
+                  <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2">
+                    Email
+                  </div>
+                  <div className="text-base font-bold text-white break-all">
+                    {selectedUser.email}
+                  </div>
                 </div>
                 <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-5 border border-white/10">
-                  <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2">ID de Usuario</div>
-                  <div className="text-base font-bold text-white font-mono">{selectedUser.id.slice(0, 16)}...</div>
+                  <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2">
+                    ID de Usuario
+                  </div>
+                  <div className="text-base font-bold text-white font-mono">
+                    {selectedUser.id.slice(0, 16)}...
+                  </div>
                 </div>
                 <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-5 border border-white/10">
-                  <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2">Fecha de Registro</div>
+                  <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2">
+                    Fecha de Registro
+                  </div>
                   <div className="text-base font-bold text-white">
                     {new Date(selectedUser.createdAt).toLocaleDateString('es-ES', {
                       year: 'numeric',
                       month: 'long',
-                      day: 'numeric'
+                      day: 'numeric',
                     })}
                   </div>
                 </div>
                 <div className="backdrop-blur-xl bg-white/5 rounded-2xl p-5 border border-white/10">
-                  <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2">Rol Actual</div>
-                  <div className="text-base font-bold text-white">{roleLabels[selectedUser.role]}</div>
+                  <div className="text-xs font-black text-white/50 uppercase tracking-wider mb-2">
+                    Rol Actual
+                  </div>
+                  <div className="text-base font-bold text-white">
+                    {roleLabels[selectedUser.role]}
+                  </div>
                 </div>
               </div>
             </div>

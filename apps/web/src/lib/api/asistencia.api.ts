@@ -19,13 +19,13 @@ import {
 export const marcarAsistencia = async (
   claseId: string,
   estudianteId: string,
-  data: MarcarAsistenciaDto
+  data: MarcarAsistenciaDto,
 ): Promise<Asistencia> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.post<Asistencia>(
       `/asistencia/clases/${claseId}/estudiantes/${estudianteId}`,
-      data
+      data,
     );
     return response;
   } catch (error) {
@@ -38,14 +38,10 @@ export const marcarAsistencia = async (
  * Obtener lista de asistencia de una clase (roster completo)
  * GET /api/asistencia/clases/:claseId
  */
-export const getAsistenciaClase = async (
-  claseId: string
-): Promise<ListaAsistencia> => {
-    // El interceptor ya retorna response.data directamente
+export const getAsistenciaClase = async (claseId: string): Promise<ListaAsistencia> => {
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<ListaAsistencia>(
-      `/asistencia/clases/${claseId}`
-    );
+    const response = await axios.get<ListaAsistencia>(`/asistencia/clases/${claseId}`);
     return response;
   } catch (error) {
     console.error('Error al obtener la asistencia de la clase:', error);
@@ -57,13 +53,11 @@ export const getAsistenciaClase = async (
  * Obtener estadísticas de asistencia de una clase
  * GET /api/asistencia/clases/:claseId/estadisticas
  */
-export const getEstadisticasClase = async (
-  claseId: string
-): Promise<EstadisticasClase> => {
-    // El interceptor ya retorna response.data directamente
+export const getEstadisticasClase = async (claseId: string): Promise<EstadisticasClase> => {
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<EstadisticasClase>(
-      `/asistencia/clases/${claseId}/estadisticas`
+      `/asistencia/clases/${claseId}/estadisticas`,
     );
     return response;
   } catch (error) {
@@ -82,7 +76,7 @@ export const getHistorialEstudiante = async (
     fechaDesde?: string;
     fechaHasta?: string;
     rutaCurricularId?: string;
-  }
+  },
 ): Promise<HistorialAsistencia> => {
   const params = new URLSearchParams();
 
@@ -96,10 +90,10 @@ export const getHistorialEstudiante = async (
     params.append('rutaCurricularId', filtros.rutaCurricularId);
   }
 
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<HistorialAsistencia>(
-      `/asistencia/estudiantes/${estudianteId}?${params.toString()}`
+      `/asistencia/estudiantes/${estudianteId}?${params.toString()}`,
     );
     return response;
   } catch (error) {
@@ -113,11 +107,9 @@ export const getHistorialEstudiante = async (
  * GET /api/asistencia/docente/resumen
  */
 export const getResumenDocente = async (): Promise<ResumenDocenteAsistencia> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<ResumenDocenteAsistencia>(
-      '/asistencia/docente/resumen'
-    );
+    const response = await axios.get<ResumenDocenteAsistencia>('/asistencia/docente/resumen');
     return response;
   } catch (error) {
     console.error('Error al obtener el resumen de asistencia del docente:', error);
@@ -173,10 +165,10 @@ export const getObservacionesDocente = async (filtros?: {
     params.append('limit', filtros.limit.toString());
   }
 
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     const response = await axios.get<Observacion[]>(
-      `/asistencia/docente/observaciones?${params.toString()}`
+      `/asistencia/docente/observaciones?${params.toString()}`,
     );
     return response;
   } catch (error) {
@@ -213,11 +205,9 @@ export interface ReportesDocente {
 }
 
 export const getReportesDocente = async (): Promise<ReportesDocente> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
-    const response = await axios.get<ReportesDocente>(
-      '/asistencia/docente/reportes'
-    );
+    const response = await axios.get<ReportesDocente>('/asistencia/docente/reportes');
     return response;
   } catch (error) {
     console.error('Error al obtener los reportes de asistencia del docente:', error);
@@ -264,12 +254,12 @@ export interface AsistenciaBatchResponse {
  * POST /api/asistencia/clase-grupo/batch
  */
 export const tomarAsistenciaBatch = async (
-  data: TomarAsistenciaBatchDto
+  data: TomarAsistenciaBatchDto,
 ): Promise<AsistenciaBatchResponse> => {
   try {
     const response = await axios.post<AsistenciaBatchResponse>(
       '/asistencia/clase-grupo/batch',
-      data
+      data,
     );
     return response;
   } catch (error) {

@@ -11,15 +11,15 @@
 
 ### Estadísticas Generales
 
-| Métrica | Cantidad |
-|---------|----------|
-| **Controladores** | 27 |
-| **Servicios** | 51 |
-| **Modelos Prisma** | 77 |
-| **DTOs** | 69 |
-| **Guards** | 8 |
-| **Interceptors** | 2 |
-| **Módulos** | 24 |
+| Métrica            | Cantidad |
+| ------------------ | -------- |
+| **Controladores**  | 27       |
+| **Servicios**      | 51       |
+| **Modelos Prisma** | 77       |
+| **DTOs**           | 69       |
+| **Guards**         | 8        |
+| **Interceptors**   | 2        |
+| **Módulos**        | 24       |
 | **Líneas Totales** | ~50,000+ |
 
 ### 🔴 Top 5 Problemas Críticos
@@ -51,14 +51,14 @@
 
 ### 💰 Complejidad Estimada del Refactor
 
-| Fase | Esfuerzo | Riesgo | Prioridad |
-|------|----------|--------|-----------|
-| **Fase 1**: Cleanup y Code Smells | 2-3 semanas | 🟢 BAJO | ⚡ ALTA |
-| **Fase 2**: Normalizar DTOs y Validaciones | 1-2 semanas | 🟢 BAJO | ⚡ ALTA |
-| **Fase 3**: Refactor de God Services | 4-6 semanas | 🟡 MEDIO | 🔵 MEDIA |
-| **Fase 4**: Resolver Circular Dependencies | 2-3 semanas | 🟡 MEDIO | 🔵 MEDIA |
-| **Fase 5**: Normalización de Schema DB | 6-8 semanas | 🔴 ALTO | 🟣 BAJA |
-| **TOTAL** | **15-22 semanas** | - | - |
+| Fase                                       | Esfuerzo          | Riesgo   | Prioridad |
+| ------------------------------------------ | ----------------- | -------- | --------- |
+| **Fase 1**: Cleanup y Code Smells          | 2-3 semanas       | 🟢 BAJO  | ⚡ ALTA   |
+| **Fase 2**: Normalizar DTOs y Validaciones | 1-2 semanas       | 🟢 BAJO  | ⚡ ALTA   |
+| **Fase 3**: Refactor de God Services       | 4-6 semanas       | 🟡 MEDIO | 🔵 MEDIA  |
+| **Fase 4**: Resolver Circular Dependencies | 2-3 semanas       | 🟡 MEDIO | 🔵 MEDIA  |
+| **Fase 5**: Normalización de Schema DB     | 6-8 semanas       | 🔴 ALTO  | 🟣 BAJA   |
+| **TOTAL**                                  | **15-22 semanas** | -        | -         |
 
 **⚠️ Recomendación**: Priorizar Fases 1 y 2 (bajo riesgo, alto impacto). Postponer Fase 5 hasta tener >80% de cobertura de tests.
 
@@ -69,52 +69,55 @@
 ### Resumen por Complejidad
 
 | Complejidad | Cantidad | Porcentaje |
-|-------------|----------|------------|
-| 🔴 HIGH | 7 | 26% |
-| 🟡 MEDIUM | 12 | 44% |
-| 🟢 LOW | 8 | 30% |
+| ----------- | -------- | ---------- |
+| 🔴 HIGH     | 7        | 26%        |
+| 🟡 MEDIUM   | 12       | 44%        |
+| 🟢 LOW      | 8        | 30%        |
 
 ### Tabla Completa de Controladores
 
-| # | Controlador | Endpoints | Complejidad | Líneas | Problemas Identificados |
-|---|-------------|-----------|-------------|--------|-------------------------|
-| 1 | `admin.controller.ts` | 15+ | 🔴 HIGH | ~400 | God Object, múltiples responsabilidades (usuarios, estudiantes, pagos, stats) |
-| 2 | `estudiantes.controller.ts` | 12 | 🔴 HIGH | ~350 | console.log en línea 89, mezcla CRUD con lógica de negocio |
-| 3 | `clases.controller.ts` | 10 | 🔴 HIGH | ~320 | Endpoints complejos (reservas, asistencia, validaciones) |
-| 4 | `inscripciones-2026.controller.ts` | 8 | 🔴 HIGH | ~280 | Lógica de workflow compleja, estados múltiples |
-| 5 | `pagos.controller.ts` | 9 | 🔴 HIGH | ~300 | Webhooks MercadoPago, manejo de estados de pago |
-| 6 | `cursos.controller.ts` | 11 | 🔴 HIGH | ~290 | CRUD + progreso + certificados, múltiples responsabilidades |
-| 7 | `gamificacion.controller.ts` | 7 | 🔴 HIGH | ~250 | Lógica de puntos, logros, ranking |
-| 8 | `docentes.controller.ts` | 8 | 🟡 MEDIUM | ~200 | CRUD + disponibilidad, relativamente limpio |
-| 9 | `asistencia.controller.ts` | 6 | 🟡 MEDIUM | ~180 | Registro de asistencias, validaciones de horarios |
-| 10 | `auth.controller.ts` | 8 | 🟡 MEDIUM | ~350 | Login, registro, 2FA, recuperación contraseña |
-| 11 | `calendario.controller.ts` | 5 | 🟡 MEDIUM | ~150 | Eventos, disponibilidad |
-| 12 | `catalogo.controller.ts` | 6 | 🟡 MEDIUM | ~170 | Productos, suscripciones |
-| 13 | `colonia.controller.ts` | 7 | 🟡 MEDIUM | ~190 | Inscripciones colonia, webhooks |
-| 14 | `comunicacion.controller.ts` | 4 | 🟡 MEDIUM | ~140 | Notificaciones, mensajes |
-| 15 | `equipos.controller.ts` | 5 | 🟡 MEDIUM | ~130 | Gestión de equipos |
-| 16 | `eventos.controller.ts` | 4 | 🟡 MEDIUM | ~120 | Calendario de eventos |
-| 17 | `lecciones.controller.ts` | 6 | 🟡 MEDIUM | ~160 | CRUD lecciones |
-| 18 | `niveles.controller.ts` | 5 | 🟡 MEDIUM | ~140 | Niveles de estudiantes |
-| 19 | `recursos-compartidos.controller.ts` | 4 | 🟡 MEDIUM | ~110 | Compartir recursos |
-| 20 | `app.controller.ts` | 1 | 🟢 LOW | ~30 | ✅ Limpio después de refactor |
-| 21 | `health.controller.ts` | 3 | 🟢 LOW | ~80 | Health checks estándar |
-| 22 | `logros.controller.ts` | 4 | 🟢 LOW | ~100 | CRUD logros |
-| 23 | `notificaciones.controller.ts` | 3 | 🟢 LOW | ~90 | Notificaciones básicas |
-| 24 | `progreso.controller.ts` | 3 | 🟢 LOW | ~85 | Consulta de progreso |
-| 25 | `puntos.controller.ts` | 3 | 🟢 LOW | ~75 | Consulta de puntos |
-| 26 | `ranking.controller.ts` | 2 | 🟢 LOW | ~60 | Consulta de ranking |
-| 27 | `tutores.controller.ts` | 5 | 🟢 LOW | ~120 | CRUD tutores |
+| #   | Controlador                          | Endpoints | Complejidad | Líneas | Problemas Identificados                                                       |
+| --- | ------------------------------------ | --------- | ----------- | ------ | ----------------------------------------------------------------------------- |
+| 1   | `admin.controller.ts`                | 15+       | 🔴 HIGH     | ~400   | God Object, múltiples responsabilidades (usuarios, estudiantes, pagos, stats) |
+| 2   | `estudiantes.controller.ts`          | 12        | 🔴 HIGH     | ~350   | console.log en línea 89, mezcla CRUD con lógica de negocio                    |
+| 3   | `clases.controller.ts`               | 10        | 🔴 HIGH     | ~320   | Endpoints complejos (reservas, asistencia, validaciones)                      |
+| 4   | `inscripciones-2026.controller.ts`   | 8         | 🔴 HIGH     | ~280   | Lógica de workflow compleja, estados múltiples                                |
+| 5   | `pagos.controller.ts`                | 9         | 🔴 HIGH     | ~300   | Webhooks MercadoPago, manejo de estados de pago                               |
+| 6   | `cursos.controller.ts`               | 11        | 🔴 HIGH     | ~290   | CRUD + progreso + certificados, múltiples responsabilidades                   |
+| 7   | `gamificacion.controller.ts`         | 7         | 🔴 HIGH     | ~250   | Lógica de puntos, logros, ranking                                             |
+| 8   | `docentes.controller.ts`             | 8         | 🟡 MEDIUM   | ~200   | CRUD + disponibilidad, relativamente limpio                                   |
+| 9   | `asistencia.controller.ts`           | 6         | 🟡 MEDIUM   | ~180   | Registro de asistencias, validaciones de horarios                             |
+| 10  | `auth.controller.ts`                 | 8         | 🟡 MEDIUM   | ~350   | Login, registro, 2FA, recuperación contraseña                                 |
+| 11  | `calendario.controller.ts`           | 5         | 🟡 MEDIUM   | ~150   | Eventos, disponibilidad                                                       |
+| 12  | `catalogo.controller.ts`             | 6         | 🟡 MEDIUM   | ~170   | Productos, suscripciones                                                      |
+| 13  | `colonia.controller.ts`              | 7         | 🟡 MEDIUM   | ~190   | Inscripciones colonia, webhooks                                               |
+| 14  | `comunicacion.controller.ts`         | 4         | 🟡 MEDIUM   | ~140   | Notificaciones, mensajes                                                      |
+| 15  | `equipos.controller.ts`              | 5         | 🟡 MEDIUM   | ~130   | Gestión de equipos                                                            |
+| 16  | `eventos.controller.ts`              | 4         | 🟡 MEDIUM   | ~120   | Calendario de eventos                                                         |
+| 17  | `lecciones.controller.ts`            | 6         | 🟡 MEDIUM   | ~160   | CRUD lecciones                                                                |
+| 18  | `niveles.controller.ts`              | 5         | 🟡 MEDIUM   | ~140   | Niveles de estudiantes                                                        |
+| 19  | `recursos-compartidos.controller.ts` | 4         | 🟡 MEDIUM   | ~110   | Compartir recursos                                                            |
+| 20  | `app.controller.ts`                  | 1         | 🟢 LOW      | ~30    | ✅ Limpio después de refactor                                                 |
+| 21  | `health.controller.ts`               | 3         | 🟢 LOW      | ~80    | Health checks estándar                                                        |
+| 22  | `logros.controller.ts`               | 4         | 🟢 LOW      | ~100   | CRUD logros                                                                   |
+| 23  | `notificaciones.controller.ts`       | 3         | 🟢 LOW      | ~90    | Notificaciones básicas                                                        |
+| 24  | `progreso.controller.ts`             | 3         | 🟢 LOW      | ~85    | Consulta de progreso                                                          |
+| 25  | `puntos.controller.ts`               | 3         | 🟢 LOW      | ~75    | Consulta de puntos                                                            |
+| 26  | `ranking.controller.ts`              | 2         | 🟢 LOW      | ~60    | Consulta de ranking                                                           |
+| 27  | `tutores.controller.ts`              | 5         | 🟢 LOW      | ~120   | CRUD tutores                                                                  |
 
 ### 🔍 Análisis por Controlador de Alta Complejidad
 
 #### 1. AdminController (🔴 HIGH)
+
 **Problemas**:
+
 - **God Object**: Gestiona usuarios, estudiantes, pagos, estadísticas, configuración
 - **Violación SRP**: 15+ responsabilidades en un solo controlador
 - **Hard to Test**: Dependencias de 10+ servicios
 
 **Recomendación**:
+
 ```
 Split into:
 - AdminUsuariosController
@@ -125,12 +128,15 @@ Split into:
 ```
 
 #### 2. EstudiantesController (🔴 HIGH)
+
 **Problemas**:
+
 - **console.log** en línea 89 (código de debug en producción)
 - Endpoints que mezclan CRUD con lógica de negocio (calcular progreso, asignar logros)
 - Falta documentación Swagger en algunos endpoints
 
 **Recomendación**:
+
 ```typescript
 // Eliminar console.log
 // Mover lógica de negocio a servicios especializados
@@ -138,12 +144,15 @@ Split into:
 ```
 
 #### 3. ClasesController (🔴 HIGH)
+
 **Problemas**:
+
 - Endpoints complejos con múltiples validaciones anidadas
 - Lógica de reservas mezclada con CRUD de clases
 - Falta separación entre comandos y queries
 
 **Recomendación**:
+
 ```
 Split into:
 - ClasesController (CRUD)
@@ -157,33 +166,33 @@ Split into:
 
 ### Resumen por Acoplamiento
 
-| Categoría | Cantidad | Descripción |
-|-----------|----------|-------------|
-| 🔴 God Services | 8 | >500 líneas, alta complejidad ciclomática |
-| 🟡 Facade Services | 12 | Orquestan múltiples servicios |
-| 🟢 Domain Services | 31 | Lógica de dominio específica |
+| Categoría          | Cantidad | Descripción                               |
+| ------------------ | -------- | ----------------------------------------- |
+| 🔴 God Services    | 8        | >500 líneas, alta complejidad ciclomática |
+| 🟡 Facade Services | 12       | Orquestan múltiples servicios             |
+| 🟢 Domain Services | 31       | Lógica de dominio específica              |
 
 ### God Services (🔴 CRÍTICO)
 
-| # | Servicio | Líneas | Responsabilidades | Dependencias | Acciones Requeridas |
-|---|----------|--------|-------------------|--------------|---------------------|
-| 1 | `estudiantes.service.ts` | 1,293 | CRUD, progreso, logros, inscripciones, notificaciones, stats | 15+ | **URGENTE**: Split en 5+ servicios |
-| 2 | `clases.service.ts` | 1,145 | CRUD, reservas, asistencia, validaciones, notificaciones | 12+ | Split en ClasesService, ReservasService, AsistenciaService |
-| 3 | `admin.service.ts` | 878 | Users, estudiantes, pagos, stats, config, backups | 10+ | Split por dominio (AdminUsuariosService, etc.) |
-| 4 | `auth.service.ts` | 756 | Login, registro, JWT, 2FA, recuperación, validaciones | 8+ | Extraer 2FAService, PasswordRecoveryService |
-| 5 | `pagos.service.ts` | 689 | MercadoPago, webhooks, suscripciones, validaciones | 7+ | Extraer MercadoPagoService, WebhookHandlerService |
-| 6 | `gamificacion.service.ts` | 623 | Puntos, logros, ranking, notificaciones | 6+ | Split en PuntosService, LogrosService, RankingService |
-| 7 | `cursos.service.ts` | 598 | CRUD, progreso, certificados, validaciones | 5+ | Extraer ProgresoService, CertificadosService |
-| 8 | `inscripciones-2026.service.ts` | 547 | Workflow, estados, pagos, validaciones, notificaciones | 8+ | Usar State Pattern para workflow |
+| #   | Servicio                        | Líneas | Responsabilidades                                            | Dependencias | Acciones Requeridas                                        |
+| --- | ------------------------------- | ------ | ------------------------------------------------------------ | ------------ | ---------------------------------------------------------- |
+| 1   | `estudiantes.service.ts`        | 1,293  | CRUD, progreso, logros, inscripciones, notificaciones, stats | 15+          | **URGENTE**: Split en 5+ servicios                         |
+| 2   | `clases.service.ts`             | 1,145  | CRUD, reservas, asistencia, validaciones, notificaciones     | 12+          | Split en ClasesService, ReservasService, AsistenciaService |
+| 3   | `admin.service.ts`              | 878    | Users, estudiantes, pagos, stats, config, backups            | 10+          | Split por dominio (AdminUsuariosService, etc.)             |
+| 4   | `auth.service.ts`               | 756    | Login, registro, JWT, 2FA, recuperación, validaciones        | 8+           | Extraer 2FAService, PasswordRecoveryService                |
+| 5   | `pagos.service.ts`              | 689    | MercadoPago, webhooks, suscripciones, validaciones           | 7+           | Extraer MercadoPagoService, WebhookHandlerService          |
+| 6   | `gamificacion.service.ts`       | 623    | Puntos, logros, ranking, notificaciones                      | 6+           | Split en PuntosService, LogrosService, RankingService      |
+| 7   | `cursos.service.ts`             | 598    | CRUD, progreso, certificados, validaciones                   | 5+           | Extraer ProgresoService, CertificadosService               |
+| 8   | `inscripciones-2026.service.ts` | 547    | Workflow, estados, pagos, validaciones, notificaciones       | 8+           | Usar State Pattern para workflow                           |
 
 ### Facade Services (🟡 MEJORA)
 
-| # | Servicio | Líneas | Patrón | Recomendación |
-|---|----------|--------|--------|---------------|
-| 1 | `docentes.service.ts` | 423 | Facade | ✅ Aceptable, delega correctamente |
-| 2 | `calendario.service.ts` | 389 | Facade | ✅ Aceptable |
-| 3 | `notificaciones.service.ts` | 367 | Facade | Considerar extraer EmailService, PushService |
-| 4 | `colonia.service.ts` | 345 | Facade | Split en CampamentoService, InscripcionesService |
+| #   | Servicio                    | Líneas | Patrón | Recomendación                                    |
+| --- | --------------------------- | ------ | ------ | ------------------------------------------------ |
+| 1   | `docentes.service.ts`       | 423    | Facade | ✅ Aceptable, delega correctamente               |
+| 2   | `calendario.service.ts`     | 389    | Facade | ✅ Aceptable                                     |
+| 3   | `notificaciones.service.ts` | 367    | Facade | Considerar extraer EmailService, PushService     |
+| 4   | `colonia.service.ts`        | 345    | Facade | Split en CampamentoService, InscripcionesService |
 
 ### Circular Dependencies Detectadas (🔴 CRÍTICO)
 
@@ -197,11 +206,13 @@ graph TD
 ```
 
 **Impacto**:
+
 - Dificulta testing unitario
 - Problemas de inicialización en algunos casos
 - Aumenta acoplamiento entre módulos
 
 **Solución Recomendada**:
+
 ```typescript
 // Opción 1: Event-Driven Architecture
 // GamificacionModule emite eventos → EstudiantesModule los consume
@@ -218,29 +229,30 @@ graph TD
 
 ### Resumen
 
-| Métrica | Cantidad |
-|---------|----------|
-| **Modelos Totales** | 77 |
-| **Relaciones** | 150+ |
-| **Campos JSON** | 25 (⚠️ problemas de normalización) |
-| **Índices Faltantes** | ~30 |
-| **Circular References** | 5 |
+| Métrica                 | Cantidad                           |
+| ----------------------- | ---------------------------------- |
+| **Modelos Totales**     | 77                                 |
+| **Relaciones**          | 150+                               |
+| **Campos JSON**         | 25 (⚠️ problemas de normalización) |
+| **Índices Faltantes**   | ~30                                |
+| **Circular References** | 5                                  |
 
 ### 🔴 Problemas Críticos en Schema
 
 #### 1. JSON Fields que Deberían ser Relaciones
 
-| Modelo | Campo | Problema | Solución Recomendada |
-|--------|-------|----------|----------------------|
-| `Docente` | `disponibilidad_horaria` | JSON con horarios → difícil consultar/filtrar | Tabla `DocenteDisponibilidad` (1:N) |
-| `Usuario` | `roles` | Array JSON → no se pueden hacer JOINs por rol | Tabla `UsuarioRol` (N:M) |
-| `Clase` | `requisitos` | JSON con prerequisitos → no hay validaciones | Tabla `ClaseRequisito` (1:N) |
-| `Estudiante` | `preferencias` | JSON genérico → no se puede indexar | Tabla `EstudiantePreferencia` (1:N) |
-| `Curso` | `metadata` | JSON con datos estructurados | Normalizar campos relevantes |
-| `Inscripcion` | `datos_adicionales` | JSON con datos de formulario | Tabla `InscripcionDato` (1:N) |
-| `Pago` | `metadata_mercadopago` | JSON gigante → dificulta auditoría | Tabla `PagoMetadata` (1:1) + índices |
+| Modelo        | Campo                    | Problema                                      | Solución Recomendada                 |
+| ------------- | ------------------------ | --------------------------------------------- | ------------------------------------ |
+| `Docente`     | `disponibilidad_horaria` | JSON con horarios → difícil consultar/filtrar | Tabla `DocenteDisponibilidad` (1:N)  |
+| `Usuario`     | `roles`                  | Array JSON → no se pueden hacer JOINs por rol | Tabla `UsuarioRol` (N:M)             |
+| `Clase`       | `requisitos`             | JSON con prerequisitos → no hay validaciones  | Tabla `ClaseRequisito` (1:N)         |
+| `Estudiante`  | `preferencias`           | JSON genérico → no se puede indexar           | Tabla `EstudiantePreferencia` (1:N)  |
+| `Curso`       | `metadata`               | JSON con datos estructurados                  | Normalizar campos relevantes         |
+| `Inscripcion` | `datos_adicionales`      | JSON con datos de formulario                  | Tabla `InscripcionDato` (1:N)        |
+| `Pago`        | `metadata_mercadopago`   | JSON gigante → dificulta auditoría            | Tabla `PagoMetadata` (1:1) + índices |
 
 **Impacto**:
+
 - ❌ No se pueden hacer búsquedas eficientes
 - ❌ No hay validación de estructura
 - ❌ Dificulta migraciones y refactors
@@ -294,6 +306,7 @@ model Usuario {
 ```
 
 **Problemas Detectados**:
+
 1. `Estudiante` ↔ `Usuario` (tutor relationship)
 2. `Clase` ↔ `Docente` ↔ `Usuario`
 3. `Inscripcion` ↔ `Estudiante` ↔ `Tutor` ↔ `Pago`
@@ -324,31 +337,33 @@ model Estudiante {
 
 ### Resumen
 
-| Métrica | Cantidad |
-|---------|----------|
-| **DTOs Totales** | 69 |
-| **Con Validación Completa** | 45 (65%) |
-| **Sin Validación** | 24 (35%) ⚠️ |
-| **Con Docs Swagger** | 38 (55%) |
-| **Inconsistencias Naming** | 18 (26%) ⚠️ |
+| Métrica                     | Cantidad    |
+| --------------------------- | ----------- |
+| **DTOs Totales**            | 69          |
+| **Con Validación Completa** | 45 (65%)    |
+| **Sin Validación**          | 24 (35%) ⚠️ |
+| **Con Docs Swagger**        | 38 (55%)    |
+| **Inconsistencias Naming**  | 18 (26%) ⚠️ |
 
 ### 🔴 Problemas Críticos en DTOs
 
 #### 1. Inconsistencias de Naming (snake_case vs camelCase)
 
-| DTO | Campos Inconsistentes | Problema |
-|-----|----------------------|----------|
-| `CreateDocenteDto` | `disponibilidad_horaria` | Snake_case en DTO, camelCase en entity |
-| `CreateEstudianteDto` | `tutor_id` | Inconsistente con `tutorId` en modelo |
-| `UpdateUsuarioDto` | `fecha_nacimiento` | Mezcla de convenciones |
-| `CreateClaseDto` | `fecha_inicio`, `fecha_fin` | Debería ser `fechaInicio`, `fechaFin` |
+| DTO                   | Campos Inconsistentes       | Problema                               |
+| --------------------- | --------------------------- | -------------------------------------- |
+| `CreateDocenteDto`    | `disponibilidad_horaria`    | Snake_case en DTO, camelCase en entity |
+| `CreateEstudianteDto` | `tutor_id`                  | Inconsistente con `tutorId` en modelo  |
+| `UpdateUsuarioDto`    | `fecha_nacimiento`          | Mezcla de convenciones                 |
+| `CreateClaseDto`      | `fecha_inicio`, `fecha_fin` | Debería ser `fechaInicio`, `fechaFin`  |
 
 **Impacto**:
+
 - Frontend debe hacer conversiones manuales
 - Errores sutiles en transformación de datos
 - Confusión en equipo de desarrollo
 
 **Solución Recomendada**:
+
 ```typescript
 // ESTANDARIZAR TODO A camelCase
 // Usar @Transform() si la DB usa snake_case
@@ -365,14 +380,15 @@ export class CreateDocenteDto {
 
 #### 2. DTOs sin Validación (⚠️ Security Risk)
 
-| DTO | Problema | Riesgo |
-|-----|----------|--------|
-| `UpdateMetadataDto` | Sin decoradores `@Is*` | Mass assignment attack |
-| `ConfiguracionDto` | Sin `@ValidateNested` | Datos anidados sin validar |
-| `FiltrosAvanzadosDto` | Sin `@IsOptional` | Campos opcionales no marcados |
-| `BulkOperationDto` | Sin `@IsArray` | Inyección de datos maliciosos |
+| DTO                   | Problema               | Riesgo                        |
+| --------------------- | ---------------------- | ----------------------------- |
+| `UpdateMetadataDto`   | Sin decoradores `@Is*` | Mass assignment attack        |
+| `ConfiguracionDto`    | Sin `@ValidateNested`  | Datos anidados sin validar    |
+| `FiltrosAvanzadosDto` | Sin `@IsOptional`      | Campos opcionales no marcados |
+| `BulkOperationDto`    | Sin `@IsArray`         | Inyección de datos maliciosos |
 
 **Recomendación**:
+
 ```typescript
 // ANTES (vulnerable)
 export class UpdateMetadataDto {
@@ -399,11 +415,13 @@ export class UpdateMetadataDto {
 **DTOs sin `@ApiProperty()`**: 31/69 (45%)
 
 **Impacto**:
+
 - Documentación incompleta en Swagger UI
 - Desarrolladores frontend deben adivinar tipos
 - Dificulta integración con otras APIs
 
 **Solución**:
+
 ```typescript
 // Agregar @ApiProperty() a TODOS los DTOs
 export class CreateEstudianteDto {
@@ -424,31 +442,31 @@ export class CreateEstudianteDto {
 
 ### Guards (8 totales)
 
-| # | Guard | Propósito | Estado | Problemas |
-|---|-------|-----------|--------|-----------|
-| 1 | `JwtAuthGuard` | Autenticación JWT | ✅ Activo | Ninguno |
-| 2 | `RolesGuard` | Autorización por roles | ✅ Activo | Ninguno |
-| 3 | `CsrfProtectionGuard` | Protección CSRF | ✅ Activo (opt-in) | ✅ Refactorizado recientemente |
-| 4 | `EstudianteOwnershipGuard` | Verificar propiedad estudiante | ✅ Activo | ⚠️ console.log en línea 45 (debug) |
-| 5 | `DocenteOwnershipGuard` | Verificar propiedad docente | ✅ Activo | Ninguno |
-| 6 | `ClaseOwnershipGuard` | Verificar propiedad clase | ✅ Activo | Ninguno |
-| 7 | `ThrottlerGuard` | Rate limiting | ✅ Activo | Configurado en app.module.ts |
-| 8 | `PagoAlDiaGuard` | Verificar pago al día | ❌ NO USADO | **🔴 ELIMINAR** - No referenciado |
+| #   | Guard                      | Propósito                      | Estado             | Problemas                          |
+| --- | -------------------------- | ------------------------------ | ------------------ | ---------------------------------- |
+| 1   | `JwtAuthGuard`             | Autenticación JWT              | ✅ Activo          | Ninguno                            |
+| 2   | `RolesGuard`               | Autorización por roles         | ✅ Activo          | Ninguno                            |
+| 3   | `CsrfProtectionGuard`      | Protección CSRF                | ✅ Activo (opt-in) | ✅ Refactorizado recientemente     |
+| 4   | `EstudianteOwnershipGuard` | Verificar propiedad estudiante | ✅ Activo          | ⚠️ console.log en línea 45 (debug) |
+| 5   | `DocenteOwnershipGuard`    | Verificar propiedad docente    | ✅ Activo          | Ninguno                            |
+| 6   | `ClaseOwnershipGuard`      | Verificar propiedad clase      | ✅ Activo          | Ninguno                            |
+| 7   | `ThrottlerGuard`           | Rate limiting                  | ✅ Activo          | Configurado en app.module.ts       |
+| 8   | `PagoAlDiaGuard`           | Verificar pago al día          | ❌ NO USADO        | **🔴 ELIMINAR** - No referenciado  |
 
 ### Interceptors (2 totales)
 
-| # | Interceptor | Propósito | Estado | Problemas |
-|---|-------------|-----------|--------|-----------|
-| 1 | `TransformResponseInterceptor` | Estandarizar respuestas | ✅ Global | ✅ Implementado recientemente |
-| 2 | `LoggingInterceptor` | Log de requests/responses | ✅ Global | Ninguno |
+| #   | Interceptor                    | Propósito                 | Estado    | Problemas                     |
+| --- | ------------------------------ | ------------------------- | --------- | ----------------------------- |
+| 1   | `TransformResponseInterceptor` | Estandarizar respuestas   | ✅ Global | ✅ Implementado recientemente |
+| 2   | `LoggingInterceptor`           | Log de requests/responses | ✅ Global | Ninguno                       |
 
 ### Middlewares (Configurados en main.ts)
 
-| # | Middleware | Propósito | Estado |
-|---|------------|-----------|--------|
-| 1 | `helmet` | Security headers | ✅ Activo |
-| 2 | `cookieParser` | Parse cookies | ✅ Activo |
-| 3 | `cors` | CORS policy | ✅ Activo |
+| #   | Middleware     | Propósito        | Estado    |
+| --- | -------------- | ---------------- | --------- |
+| 1   | `helmet`       | Security headers | ✅ Activo |
+| 2   | `cookieParser` | Parse cookies    | ✅ Activo |
+| 3   | `cors`         | CORS policy      | ✅ Activo |
 
 ### 🔴 Acciones Requeridas
 
@@ -478,12 +496,12 @@ console.log('Debug:', estudianteId, userId); // ❌ Debug code
 
 ### Resumen
 
-| Métrica | Cantidad |
-|---------|----------|
-| **Módulos Totales** | 24 |
-| **God Module** | 1 (AppModule) 🔴 |
-| **Circular Dependencies** | 2 pares 🔴 |
-| **Módulos bien diseñados** | 19 ✅ |
+| Métrica                    | Cantidad         |
+| -------------------------- | ---------------- |
+| **Módulos Totales**        | 24               |
+| **God Module**             | 1 (AppModule) 🔴 |
+| **Circular Dependencies**  | 2 pares 🔴       |
+| **Módulos bien diseñados** | 19 ✅            |
 
 ### Estructura de Módulos
 
@@ -519,6 +537,7 @@ AppModule (GOD MODULE - 20+ imports)
 ### 🔴 God Module: AppModule
 
 **Problema**:
+
 ```typescript
 // apps/api/src/app.module.ts
 @Module({
@@ -541,6 +560,7 @@ export class AppModule {}
 ```
 
 **Por qué es un problema**:
+
 - ❌ AppModule conoce TODOS los módulos del sistema
 - ❌ Dificulta lazy loading
 - ❌ Aumenta tiempo de compilación
@@ -627,10 +647,12 @@ export class GamificacionModule {}
 ```
 
 **Por qué existe**:
+
 - AuthModule necesita otorgar puntos al registrarse
 - GamificacionModule necesita verificar usuario autenticado
 
 **Solución Recomendada**:
+
 ```typescript
 // Opción 1: Event-Driven
 // AuthModule emite evento "usuario_registrado"
@@ -649,6 +671,7 @@ export class SharedEventsModule {}
 #### 2. EstudiantesModule → LogrosService → GamificacionModule → EstudiantesModule
 
 **Cadena de dependencias**:
+
 ```
 EstudiantesModule
   → imports GamificacionModule
@@ -658,6 +681,7 @@ EstudiantesModule
 ```
 
 **Solución**:
+
 ```typescript
 // Extraer lógica compartida a nuevo módulo
 @Module({
@@ -676,33 +700,33 @@ export class EstudianteLogroModule {}
 
 ### 🔴 CRÍTICO (Resolver en Sprint 1-2)
 
-| # | Problema | Impacto | Esfuerzo | Archivos Afectados |
-|---|----------|---------|----------|-------------------|
-| 1 | God Service: `estudiantes.service.ts` (1,293 líneas) | Alto acoplamiento, difícil testing | 2 semanas | 1 servicio → 5 servicios |
-| 2 | God Service: `clases.service.ts` (1,145 líneas) | Múltiples responsabilidades | 2 semanas | 1 servicio → 3 servicios |
-| 3 | Circular Dependency: AuthModule ↔ GamificacionModule | Problemas de inicialización | 3 días | 2 módulos |
-| 4 | console.log en producción | Debug code en producción | 1 hora | 2 archivos |
-| 5 | PagoAlDiaGuard sin usar | Dead code | 10 min | 2 archivos |
+| #   | Problema                                              | Impacto                            | Esfuerzo  | Archivos Afectados       |
+| --- | ----------------------------------------------------- | ---------------------------------- | --------- | ------------------------ |
+| 1   | God Service: `estudiantes.service.ts` (1,293 líneas)  | Alto acoplamiento, difícil testing | 2 semanas | 1 servicio → 5 servicios |
+| 2   | God Service: `clases.service.ts` (1,145 líneas)       | Múltiples responsabilidades        | 2 semanas | 1 servicio → 3 servicios |
+| 3   | Circular Dependency: AuthModule ↔ GamificacionModule | Problemas de inicialización        | 3 días    | 2 módulos                |
+| 4   | console.log en producción                             | Debug code en producción           | 1 hora    | 2 archivos               |
+| 5   | PagoAlDiaGuard sin usar                               | Dead code                          | 10 min    | 2 archivos               |
 
 ### 🟡 IMPORTANTE (Resolver en Sprint 3-4)
 
-| # | Problema | Impacto | Esfuerzo | Archivos Afectados |
-|---|----------|---------|----------|-------------------|
-| 6 | DTOs sin validación (24 DTOs) | Security risk (mass assignment) | 1 semana | 24 archivos |
-| 7 | Naming inconsistente (snake_case vs camelCase) | Confusión en desarrollo | 3 días | 18 DTOs |
-| 8 | God Module: AppModule (20+ imports) | Dificulta lazy loading | 1 semana | 1 módulo → 4 módulos |
-| 9 | Falta docs Swagger (31 DTOs) | Documentación incompleta | 2 días | 31 archivos |
-| 10 | AdminController (God Object) | Múltiples responsabilidades | 1 semana | 1 controlador → 5 controladores |
+| #   | Problema                                       | Impacto                         | Esfuerzo | Archivos Afectados              |
+| --- | ---------------------------------------------- | ------------------------------- | -------- | ------------------------------- |
+| 6   | DTOs sin validación (24 DTOs)                  | Security risk (mass assignment) | 1 semana | 24 archivos                     |
+| 7   | Naming inconsistente (snake_case vs camelCase) | Confusión en desarrollo         | 3 días   | 18 DTOs                         |
+| 8   | God Module: AppModule (20+ imports)            | Dificulta lazy loading          | 1 semana | 1 módulo → 4 módulos            |
+| 9   | Falta docs Swagger (31 DTOs)                   | Documentación incompleta        | 2 días   | 31 archivos                     |
+| 10  | AdminController (God Object)                   | Múltiples responsabilidades     | 1 semana | 1 controlador → 5 controladores |
 
 ### 🟣 MEJORA (Backlog)
 
-| # | Problema | Impacto | Esfuerzo | Archivos Afectados |
-|---|----------|---------|----------|-------------------|
-| 11 | JSON fields en DB (25 campos) | Dificulta queries | 4-6 semanas | Schema + migraciones |
-| 12 | Índices faltantes (30 índices) | Performance en queries | 1 semana | Schema + migraciones |
-| 13 | God Services restantes (6 servicios) | Acoplamiento medio | 3-4 semanas | 6 servicios |
-| 14 | Circular refs en schema (5 ciclos) | Cuidado en queries | 2 semanas | Schema (refactor relaciones) |
-| 15 | Facades services (12 servicios) | Acoplamiento leve | 2 semanas | 12 servicios |
+| #   | Problema                             | Impacto                | Esfuerzo    | Archivos Afectados           |
+| --- | ------------------------------------ | ---------------------- | ----------- | ---------------------------- |
+| 11  | JSON fields en DB (25 campos)        | Dificulta queries      | 4-6 semanas | Schema + migraciones         |
+| 12  | Índices faltantes (30 índices)       | Performance en queries | 1 semana    | Schema + migraciones         |
+| 13  | God Services restantes (6 servicios) | Acoplamiento medio     | 3-4 semanas | 6 servicios                  |
+| 14  | Circular refs en schema (5 ciclos)   | Cuidado en queries     | 2 semanas   | Schema (refactor relaciones) |
+| 15  | Facades services (12 servicios)      | Acoplamiento leve      | 2 semanas   | 12 servicios                 |
 
 ---
 
@@ -742,17 +766,20 @@ export class EstudianteLogroModule {}
 **Objetivo**: Dividir servicios gigantes en servicios especializados
 
 #### Sprint 3: EstudiantesService
+
 - [ ] Extraer `EstudiantesProgresoService`
 - [ ] Extraer `EstudiantesLogrosService`
 - [ ] Extraer `EstudiantesNotificacionesService`
 - [ ] Mantener `EstudiantesService` solo para CRUD
 
 #### Sprint 4: ClasesService
+
 - [ ] Extraer `ClasesReservasService`
 - [ ] Extraer `ClasesAsistenciaService`
 - [ ] Mantener `ClasesService` solo para CRUD
 
 #### Sprint 5: AdminService, AuthService
+
 - [ ] Split AdminService en 5 servicios por dominio
 - [ ] Extraer `TwoFactorAuthService` de AuthService
 - [ ] Extraer `PasswordRecoveryService` de AuthService
@@ -786,16 +813,19 @@ export class EstudianteLogroModule {}
 **Objetivo**: Normalizar JSON fields a tablas relacionales
 
 #### Sprint 7-8: Diseño y Migraciones
+
 - [ ] Diseñar schema normalizado (eliminar 25 JSON fields)
 - [ ] Crear migraciones incrementales
 - [ ] Configurar shadow database para staging
 
 #### Sprint 9: Migración de Datos
+
 - [ ] Migración de `Docente.disponibilidad_horaria` → `DocenteDisponibilidad`
 - [ ] Migración de `Usuario.roles` → `UsuarioRol`
 - [ ] Migración de `Clase.requisitos` → `ClaseRequisito`
 
 #### Sprint 10: Agregar Índices
+
 - [ ] Agregar 30 índices faltantes
 - [ ] Benchmark de queries antes/después
 - [ ] Optimizar queries lentas
@@ -810,27 +840,27 @@ export class EstudianteLogroModule {}
 
 ### Cobertura de Tests
 
-| Fase | Cobertura Esperada |
-|------|-------------------|
-| Inicio | ~45% |
-| Después Fase 1-2 | >60% |
-| Después Fase 3 | >75% |
-| Después Fase 4 | >80% |
-| Después Fase 5 | >85% |
+| Fase             | Cobertura Esperada |
+| ---------------- | ------------------ |
+| Inicio           | ~45%               |
+| Después Fase 1-2 | >60%               |
+| Después Fase 3   | >75%               |
+| Después Fase 4   | >80%               |
+| Después Fase 5   | >85%               |
 
 ### Complejidad Ciclomática
 
-| Categoría | Antes | Después Fase 3 |
-|-----------|-------|----------------|
-| Servicios >500 líneas | 8 | 0 |
-| Servicios 300-500 líneas | 12 | 6 |
-| Servicios <300 líneas | 31 | 45+ |
+| Categoría                | Antes | Después Fase 3 |
+| ------------------------ | ----- | -------------- |
+| Servicios >500 líneas    | 8     | 0              |
+| Servicios 300-500 líneas | 12    | 6              |
+| Servicios <300 líneas    | 31    | 45+            |
 
 ### Tiempo de Build
 
-| Fase | Tiempo Estimado |
-|------|-----------------|
-| Actual | ~45 segundos |
+| Fase                            | Tiempo Estimado     |
+| ------------------------------- | ------------------- |
+| Actual                          | ~45 segundos        |
 | Después Fase 4 (Domain Modules) | ~30 segundos (-33%) |
 
 ---
@@ -852,24 +882,27 @@ export class EstudianteLogroModule {}
 ### Priorización Recomendada
 
 **Hacer AHORA** (Fase 1-2):
+
 - ✅ Eliminar code smells (console.log, dead code)
 - ✅ Agregar validación a DTOs
 - ✅ Resolver circular dependencies
 
 **Hacer PRONTO** (Fase 3-4):
+
 - 🟡 Refactor God Services
 - 🟡 Reorganizar módulos
 
 **Hacer DESPUÉS** (Fase 5):
+
 - 🔴 Normalización de schema (requiere alta cobertura de tests)
 
 ### Riesgo Total del Refactor
 
-| Fase | Riesgo | Recomendación |
-|------|--------|---------------|
-| Fase 1-2 | 🟢 BAJO | ✅ Ejecutar inmediatamente |
-| Fase 3-4 | 🟡 MEDIO | ⚠️ Aumentar cobertura a >75% primero |
-| Fase 5 | 🔴 ALTO | ⛔ Solo con cobertura >80% + staging completo |
+| Fase     | Riesgo   | Recomendación                                 |
+| -------- | -------- | --------------------------------------------- |
+| Fase 1-2 | 🟢 BAJO  | ✅ Ejecutar inmediatamente                    |
+| Fase 3-4 | 🟡 MEDIO | ⚠️ Aumentar cobertura a >75% primero          |
+| Fase 5   | 🔴 ALTO  | ⛔ Solo con cobertura >80% + staging completo |
 
 ---
 

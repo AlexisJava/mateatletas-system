@@ -19,6 +19,7 @@ tests/e2e/
 ## 🎯 Cobertura de Tests
 
 ### 1. Perfil del Docente (6 tests)
+
 - ✅ Carga de página
 - ✅ Visualización de datos
 - ✅ Validación de campos
@@ -27,6 +28,7 @@ tests/e2e/
 - ✅ Navegación
 
 ### 2. Calendario de Clases (6 tests)
+
 - ✅ Carga de página
 - ✅ Grid del calendario
 - ✅ Navegación entre meses
@@ -35,6 +37,7 @@ tests/e2e/
 - ✅ Responsive design
 
 ### 3. Observaciones (9 tests)
+
 - ✅ Carga de página
 - ✅ Campo de búsqueda
 - ✅ Filtros de fecha
@@ -46,6 +49,7 @@ tests/e2e/
 - ✅ Responsive design
 
 ### 4. Reportes con Gráficos (11 tests)
+
 - ✅ Carga de página
 - ✅ 4 tarjetas de estadísticas
 - ✅ Gráfico de barras (semanal)
@@ -59,6 +63,7 @@ tests/e2e/
 - ✅ Carga de Chart.js
 
 ### 5. Integración (7 tests)
+
 - ✅ Flujo completo de navegación
 - ✅ Navegación consistente
 - ✅ Sin errores en consola
@@ -120,6 +125,7 @@ npx playwright show-report
 ```
 
 El reporte incluye:
+
 - Screenshots de fallos
 - Traces para debugging
 - Tiempos de ejecución

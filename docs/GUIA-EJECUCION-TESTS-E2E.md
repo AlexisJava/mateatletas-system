@@ -26,12 +26,12 @@ Esta suite de tests End-to-End verifica las funcionalidades críticas de los **4
 
 ### Cobertura Actual:
 
-| Portal | Tests | Estado | Prioridad |
-|--------|-------|--------|-----------|
-| Estudiante | 8 tests | ⚠️ Listo, requiere ajuste | 🔴 ALTA |
-| Docente | 10 tests | ⚠️ Listo, requiere ajuste | 🔴 ALTA |
-| Tutor | 6 tests | ⚪ Skip | 🟡 MEDIA |
-| Admin | 0 tests | ⚪ No implementado | 🟢 BAJA |
+| Portal     | Tests    | Estado                    | Prioridad |
+| ---------- | -------- | ------------------------- | --------- |
+| Estudiante | 8 tests  | ⚠️ Listo, requiere ajuste | 🔴 ALTA   |
+| Docente    | 10 tests | ⚠️ Listo, requiere ajuste | 🔴 ALTA   |
+| Tutor      | 6 tests  | ⚪ Skip                   | 🟡 MEDIA  |
+| Admin      | 0 tests  | ⚪ No implementado        | 🟢 BAJA   |
 
 ---
 
@@ -45,6 +45,7 @@ npm install
 ```
 
 Playwright ya está instalado en `package.json`:
+
 ```json
 "@playwright/test": "^1.56.0"
 ```
@@ -67,6 +68,7 @@ npm run seed
 ```
 
 **Usuarios esperados**:
+
 - `lucas.garcia@email.com / Student123!` (Estudiante)
 - `sofia.garcia@email.com / Student123!` (Estudiante)
 - `juan.perez@docente.com / Test123!` (Docente)
@@ -83,6 +85,7 @@ npm run start:dev
 API debería estar en: `http://localhost:4000`
 
 Verificar con:
+
 ```bash
 curl http://localhost:4000/api/health
 ```
@@ -109,6 +112,7 @@ apps/web/e2e/
 #### `helpers/portal-helpers.ts`
 
 Funciones compartidas:
+
 - `loginEstudiante()` - Login automatizado de estudiante
 - `loginDocente()` - Login automatizado de docente
 - `loginAdmin()` - Login automatizado de admin
@@ -120,6 +124,7 @@ Funciones compartidas:
 #### `00-critical-launch.spec.ts` ⭐ CRÍTICO
 
 5 tests que **DEBEN PASAR** antes del lanzamiento:
+
 1. ✅ Estudiante puede hacer login y ver hub
 2. ✅ Docente puede hacer login y ver dashboard
 3. ✅ Páginas críticas sin errores 500
@@ -127,6 +132,7 @@ Funciones compartidas:
 5. ✅ Múltiples usuarios pueden hacer login
 
 **Ejecutar con**:
+
 ```bash
 npx playwright test 00-critical-launch.spec.ts
 ```
@@ -134,11 +140,13 @@ npx playwright test 00-critical-launch.spec.ts
 #### `00-diagnostico.spec.ts` 🔍 DIAGNÓSTICO
 
 3 tests para verificar infraestructura:
+
 1. Servidor responde correctamente
 2. Página de login carga
 3. Estructura de login correcta
 
 **Ejecutar con**:
+
 ```bash
 npx playwright test 00-diagnostico.spec.ts
 ```
@@ -146,6 +154,7 @@ npx playwright test 00-diagnostico.spec.ts
 #### `estudiante-critical.spec.ts`
 
 8 tests para portal estudiante:
+
 - Login con credenciales válidas
 - Hub del gimnasio carga sin errores
 - Elementos principales visibles
@@ -158,6 +167,7 @@ npx playwright test 00-diagnostico.spec.ts
 #### `docente-critical.spec.ts`
 
 10 tests para portal docente:
+
 - Login con credenciales válidas
 - Dashboard carga sin errores
 - Elementos principales visibles
@@ -172,6 +182,7 @@ npx playwright test 00-diagnostico.spec.ts
 #### `tutor-basic.spec.ts` ⚪ SKIP
 
 6 tests básicos marcados como `.skip()` porque no son críticos para hoy:
+
 - Login tutor
 - Dashboard tutor
 - Ver estudiantes asignados
@@ -203,6 +214,7 @@ npx playwright test --ui
 ```
 
 Abre una interfaz gráfica donde puedes:
+
 - Ver tests en tiempo real
 - Debuggear paso a paso
 - Ver screenshots y videos
@@ -240,6 +252,7 @@ npx playwright show-report
 ```
 
 Genera un reporte HTML con:
+
 - ✅ Tests que pasaron
 - ❌ Tests que fallaron
 - 📸 Screenshots automáticos
@@ -253,6 +266,7 @@ Genera un reporte HTML con:
 ### ❌ Problema 1: "Página de login no carga"
 
 **Síntoma**:
+
 ```
 Error: Timeout waiting for input[type="email"] to be visible
 ```
@@ -288,6 +302,7 @@ await page.fill('input#email', email);
 ### ❌ Problema 2: "Backend no responde"
 
 **Síntoma**:
+
 ```
 Error: WebServer timed out after 120000ms
 ```
@@ -318,6 +333,7 @@ kill -9 $(lsof -t -i:4000)
 **Síntoma**: Tests pasan a veces y fallan otras veces (tests "flaky").
 
 **Causas comunes**:
+
 - Animaciones de UI
 - Requests HTTP lentos
 - Race conditions
@@ -333,6 +349,7 @@ retries: process.env.CI ? 2 : 1, // ya está configurado
 ### ❌ Problema 4: "No encuentra usuarios de prueba"
 
 **Síntoma**:
+
 ```
 Error: Email o contraseña incorrectos
 ```
@@ -353,6 +370,7 @@ npx prisma studio
 ```
 
 Ir a tabla `estudiantes` y verificar que existen:
+
 - `lucas.garcia@email.com`
 - `sofia.garcia@email.com`
 
@@ -671,5 +689,5 @@ npx playwright show-report
 
 ---
 
-*Última actualización: 31 de octubre de 2025*
-*Creado por: Claude Code*
+_Última actualización: 31 de octubre de 2025_
+_Creado por: Claude Code_

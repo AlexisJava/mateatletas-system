@@ -9,17 +9,19 @@
 ## ESTADO DEL PROYECTO
 
 ### Métricas Clave
-| Métrica | Valor |
-|---------|-------|
-| **Endpoints API** | 173 total (90 GET, 45 POST, 18 PATCH, 15 DELETE, 5 PUT) |
-| **Páginas Frontend** | 32 portales/páginas implementadas |
-| **Modelos Base de Datos** | 54 entidades Prisma |
-| **Servicios Backend** | 35+ servicios especializados |
-| **Componentes React** | 100+ componentes UI |
-| **Roles Soportados** | 4 (Admin, Docente, Tutor, Estudiante) |
-| **Líneas de Código** | 150K+ líneas (API + Frontend) |
+
+| Métrica                   | Valor                                                   |
+| ------------------------- | ------------------------------------------------------- |
+| **Endpoints API**         | 173 total (90 GET, 45 POST, 18 PATCH, 15 DELETE, 5 PUT) |
+| **Páginas Frontend**      | 32 portales/páginas implementadas                       |
+| **Modelos Base de Datos** | 54 entidades Prisma                                     |
+| **Servicios Backend**     | 35+ servicios especializados                            |
+| **Componentes React**     | 100+ componentes UI                                     |
+| **Roles Soportados**      | 4 (Admin, Docente, Tutor, Estudiante)                   |
+| **Líneas de Código**      | 150K+ líneas (API + Frontend)                           |
 
 ### Stack Tecnológico
+
 - **Backend:** NestJS + Prisma + PostgreSQL
 - **Frontend:** Next.js 15 + React 18 + TypeScript + Tailwind CSS
 - **Autenticación:** JWT + httpOnly cookies + Token Blacklist
@@ -33,6 +35,7 @@
 ### COMPLETAMENTE FUNCIONALES (MVP Ready)
 
 #### 1. Autenticación y Usuarios
+
 - [x] Registro de tutores
 - [x] Login tutor / estudiante / admin / docente
 - [x] Logout seguro con token blacklist
@@ -40,6 +43,7 @@
 - [x] CRUD de usuarios por rol
 
 #### 2. Gestión Educativa
+
 - [x] Crear/editar clases programadas
 - [x] Crear grupos recurrentes (semanales)
 - [x] Inscripción de estudiantes en clases
@@ -48,6 +52,7 @@
 - [x] Rutas curriculares y especialidades
 
 #### 3. Gamificación
+
 - [x] Sistema de puntos (otorgables por docentes)
 - [x] Sistema de logros/insignias desbloqueables
 - [x] Ranking de equipos y global
@@ -55,6 +60,7 @@
 - [x] Historial de puntos
 
 #### 4. Sistema de Pagos
+
 - [x] Integración MercadoPago
 - [x] Cálculo de precios con 6 tipos de descuentos
 - [x] Configuración de precios (admin)
@@ -63,12 +69,14 @@
 - [x] Historial de cambios de precios (auditoría)
 
 #### 5. Dashboards
+
 - [x] Dashboard tutor (métricas, alertas, clases, pagos)
 - [x] Dashboard docente (estadísticas, próximas clases)
 - [x] Dashboard estudiante (progreso, logros, ranking)
 - [x] Dashboard admin (usuarios, clases, ingresos)
 
 #### 6. Reportes y Análisis
+
 - [x] Asistencia por clase
 - [x] Observaciones de docentes
 - [x] Historial de estudiante
@@ -76,6 +84,7 @@
 - [x] Reportes financieros básicos
 
 #### 7. Cursos y Contenido
+
 - [x] Estructura módulo-lección-contenido
 - [x] Tipos de contenido: Video, Texto, Quiz, Tarea
 - [x] Progreso de lección por estudiante
@@ -83,12 +92,14 @@
 - [x] Requisitos/Prerequisites entre lecciones
 
 #### 8. Notificaciones
+
 - [x] Creación de notificaciones
 - [x] 7 tipos de notificaciones
 - [x] Marcar como leída/eliminada
 - [x] Sistema de alertas del tutor
 
 #### 9. Planificaciones Mensuales
+
 - [x] Crear planificaciones por grupo (B1, B2, etc.)
 - [x] Crear actividades semanales
 - [x] Asignación a docentes (estado: BORRADOR, PUBLICADA, ARCHIVADA)
@@ -96,6 +107,7 @@
 - [x] Componentes React renderizables
 
 #### 10. Eventos y Calendario
+
 - [x] Calendario de docentes
 - [x] Crear eventos (CLASE, TAREA, RECORDATORIO, NOTA)
 - [x] Tareas con subtareas, archivos, recurrencia
@@ -106,12 +118,12 @@
 
 ### PARCIALMENTE IMPLEMENTADAS (Necesitan refinamiento UI)
 
-| Funcionalidad | Backend | Frontend | Estado |
-|---------------|---------|----------|--------|
-| Asistencia de Grupos | ✓ Modelo completo | ◐ UI básica | Refinamiento |
-| Eventos Avanzados | ✓ Subtareas, recurrencia | ◐ Calendario básico | Mejora UI |
-| Reportes Avanzados | ✓ Datos existentes | ◐ Dashboard básico | Dashboards complejos |
-| Asignación de Actividades | ✓ Modelo completo | ◐ Interfaz incompleta | Docente UI |
+| Funcionalidad             | Backend                  | Frontend              | Estado               |
+| ------------------------- | ------------------------ | --------------------- | -------------------- |
+| Asistencia de Grupos      | ✓ Modelo completo        | ◐ UI básica           | Refinamiento         |
+| Eventos Avanzados         | ✓ Subtareas, recurrencia | ◐ Calendario básico   | Mejora UI            |
+| Reportes Avanzados        | ✓ Datos existentes       | ◐ Dashboard básico    | Dashboards complejos |
+| Asignación de Actividades | ✓ Modelo completo        | ◐ Interfaz incompleta | Docente UI           |
 
 ---
 
@@ -176,7 +188,9 @@
 ## FUNCIONALIDADES POR ROL
 
 ### ADMIN
+
 **Principales:**
+
 - Crear/editar usuarios (tutores, docentes, estudiantes)
 - Configurar rutas curriculares, sectores, especialidades
 - Crear clases y grupos recurrentes
@@ -188,7 +202,9 @@
 **Gaps:** No tiene página CRUD de docentes en UI
 
 ### TUTOR
+
 **Principales:**
+
 - Ver dashboard con métricas, alertas, próximas clases
 - Crear/editar estudiantes
 - Reservar clases para estudiantes
@@ -200,7 +216,9 @@
 **Gaps:** Ninguno crítico
 
 ### DOCENTE
+
 **Principales:**
+
 - Ver mis clases asignadas
 - Registrar asistencia y observaciones
 - Otorgar puntos y desbloquear logros
@@ -212,7 +230,9 @@
 **Gaps:** Asignación de actividades de planificaciones incompleta
 
 ### ESTUDIANTE
+
 **Principales:**
+
 - Ver mis cursos y lecciones
 - Completar lecciones y obtener puntos
 - Ver mi ranking y logros
@@ -267,23 +287,24 @@
 
 ## SCORE DE MADUREZ
 
-| Aspecto | Score | Notas |
-|---------|-------|-------|
-| **Funcionalidad Core** | 9/10 | Casi todo implementado |
-| **Integración Frontend-Backend** | 7/10 | Algunos gaps menores |
-| **Seguridad** | 8/10 | JWT, roles, guards implementados |
-| **Performance** | 7/10 | Índices OK, caching básico |
-| **UX/Design** | 7/10 | Funcional, podría pulirse |
-| **Testing** | 5/10 | Specs existen, cobertura limitada |
-| **Documentación** | 6/10 | Swagger parcial, README básico |
-| **Escalabilidad** | 8/10 | Arquitectura modular |
-| **OVERALL** | **7.5/10** | Listo para MVP con ajustes menores |
+| Aspecto                          | Score      | Notas                              |
+| -------------------------------- | ---------- | ---------------------------------- |
+| **Funcionalidad Core**           | 9/10       | Casi todo implementado             |
+| **Integración Frontend-Backend** | 7/10       | Algunos gaps menores               |
+| **Seguridad**                    | 8/10       | JWT, roles, guards implementados   |
+| **Performance**                  | 7/10       | Índices OK, caching básico         |
+| **UX/Design**                    | 7/10       | Funcional, podría pulirse          |
+| **Testing**                      | 5/10       | Specs existen, cobertura limitada  |
+| **Documentación**                | 6/10       | Swagger parcial, README básico     |
+| **Escalabilidad**                | 8/10       | Arquitectura modular               |
+| **OVERALL**                      | **7.5/10** | Listo para MVP con ajustes menores |
 
 ---
 
 ## CHECKLIST PRE-LAUNCH
 
 ### Semana 1 (Crítico)
+
 - [ ] Crear página CRUD de docentes en admin
 - [ ] Refinar flujo de asignación de actividades
 - [ ] Ejecutar security audit (OWASP top 10)
@@ -292,6 +313,7 @@
 - [ ] Plan de rollback
 
 ### Semana 2 (Importante)
+
 - [ ] Load testing (simular 100+ usuarios simultáneos)
 - [ ] Optimización de queries (N+1 queries)
 - [ ] Setup CI/CD robusto (GitHub Actions)
@@ -299,6 +321,7 @@
 - [ ] SLA y error handling para MercadoPago webhook
 
 ### Semana 3 (Post-Launch)
+
 - [ ] Feedback de usuarios
 - [ ] Bug fixes rápidos
 - [ ] Documentación de API (Swagger)
@@ -311,13 +334,15 @@
 **El ecosistema Mateatletas MVP v1 está en estado LISTO PARA LANZAMIENTO con pequeños ajustes.**
 
 ### Fortalezas
+
 ✓ Arquitectura sólida y modular  
 ✓ Funcionalidades core 95% implementadas  
 ✓ Seguridad de nivel empresarial  
 ✓ Base de datos bien diseñada  
-✓ Múltiples roles con restricciones de acceso  
+✓ Múltiples roles con restricciones de acceso
 
 ### Próximos Pasos
+
 1. Resolver gaps críticos (CRUD docentes, asignación actividades)
 2. Security & load testing exhaustivo
 3. Documentación para ops y support
@@ -329,4 +354,3 @@
 
 **Análisis completado por:** Sistema de Análisis Automático  
 **Confianza del análisis:** 95% (análisis de código real, no especulativo)
-

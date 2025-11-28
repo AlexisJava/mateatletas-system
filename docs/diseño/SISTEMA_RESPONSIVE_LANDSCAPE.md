@@ -5,6 +5,7 @@
 **Premisa fundamental:** El Portal Estudiante está optimizado EXCLUSIVAMENTE para uso en **orientación horizontal (landscape)** en todos los dispositivos.
 
 **Razón:** Maximizar el espacio horizontal para visualizar:
+
 - Avatar 3D interactivo a tamaño completo
 - Dashboard con múltiples tarjetas de información
 - Navegación visual sin scroll excesivo
@@ -29,14 +30,14 @@ export const BREAKPOINTS = {
   lg: { min: 1280, max: 1920, name: 'Desktop' },
 
   // Pantallas ultra-wide
-  xl: { min: 1920, max: Infinity, name: 'Ultra-Wide' }
+  xl: { min: 1920, max: Infinity, name: 'Ultra-Wide' },
 } as const;
 
 // Ratios de aspecto objetivo
 export const ASPECT_RATIOS = {
-  mobile: '16:9',   // iPhone landscape, Android landscape
-  tablet: '4:3',    // iPad landscape
-  desktop: '16:10'  // Laptops estándar
+  mobile: '16:9', // iPhone landscape, Android landscape
+  tablet: '4:3', // iPad landscape
+  desktop: '16:10', // Laptops estándar
 } as const;
 ```
 
@@ -50,25 +51,27 @@ module.exports = {
       screens: {
         // Landscape-first breakpoints
         'landscape-xs': {
-          raw: '(min-width: 480px) and (max-width: 667px) and (orientation: landscape)'
+          raw: '(min-width: 480px) and (max-width: 667px) and (orientation: landscape)',
         },
         'landscape-sm': {
-          raw: '(min-width: 668px) and (max-width: 767px) and (orientation: landscape)'
+          raw: '(min-width: 668px) and (max-width: 767px) and (orientation: landscape)',
         },
         'landscape-md': {
-          raw: '(min-width: 768px) and (max-width: 1024px) and (orientation: landscape)'
+          raw: '(min-width: 768px) and (max-width: 1024px) and (orientation: landscape)',
         },
         'landscape-lg': {
-          raw: '(min-width: 1025px) and (max-width: 1279px) and (orientation: landscape)'
+          raw: '(min-width: 1025px) and (max-width: 1279px) and (orientation: landscape)',
         },
         'landscape-xl': {
-          raw: '(min-width: 1280px) and (orientation: landscape)'
+          raw: '(min-width: 1280px) and (orientation: landscape)',
         },
 
         // Shortcuts para mobile/tablet/desktop
         'mobile-l': { raw: '(max-width: 767px) and (orientation: landscape)' },
-        'tablet-l': { raw: '(min-width: 768px) and (max-width: 1024px) and (orientation: landscape)' },
-        'desktop': { min: '1025px' },
+        'tablet-l': {
+          raw: '(min-width: 768px) and (max-width: 1024px) and (orientation: landscape)',
+        },
+        desktop: { min: '1025px' },
       },
 
       // Alturas viewport adaptativas
@@ -82,10 +85,10 @@ module.exports = {
         'avatar-section': '500px',
         'info-section': '600px',
         'dashboard-card': '350px',
-      }
-    }
-  }
-}
+      },
+    },
+  },
+};
 ```
 
 ---
@@ -159,10 +162,7 @@ module.exports = {
   <main className="mobile-l:flex-1 mobile-l:overflow-y-auto mobile-l:px-4 mobile-l:py-4">
     {/* Avatar 3D - Compacto */}
     <div className="mobile-l:h-[30vh] mobile-l:mb-4">
-      <AnimatedAvatar3D
-        scale={0.9}
-        cameraPosition={[0, 0.5, 2.2]}
-      />
+      <AnimatedAvatar3D scale={0.9} cameraPosition={[0, 0.5, 2.2]} />
     </div>
 
     {/* Nivel + XP */}
@@ -285,15 +285,9 @@ module.exports = {
   {/* Main Content - 50/50 Split */}
   <main className="tablet-l:flex-1 tablet-l:flex tablet-l:items-center tablet-l:px-8">
     <div className="tablet-l:flex tablet-l:w-full tablet-l:gap-8 tablet-l:h-full">
-
       {/* Columna Izquierda - AVATAR */}
       <div className="tablet-l:w-1/2 tablet-l:relative tablet-l:flex tablet-l:items-center tablet-l:justify-center">
-        <AnimatedAvatar3D
-          width="100%"
-          height="100%"
-          scale={1.1}
-          cameraPosition={[0, 0.6, 2.4]}
-        />
+        <AnimatedAvatar3D width="100%" height="100%" scale={1.1} cameraPosition={[0, 0.6, 2.4]} />
       </div>
 
       {/* Columna Derecha - INFO */}
@@ -314,16 +308,13 @@ module.exports = {
         </div>
 
         {/* Próxima Clase */}
-        {proximaClase && (
-          <ProximaClaseCard clase={proximaClase} />
-        )}
+        {proximaClase && <ProximaClaseCard clase={proximaClase} />}
 
         {/* CTA Gigante */}
         <button className="tablet-l:w-full tablet-l:h-20 tablet-l:text-3xl">
           ¡ENTRENAR MATEMÁTICAS!
         </button>
       </div>
-
     </div>
   </main>
 
@@ -521,20 +512,20 @@ export function StatCard({ icon, value, label, size = 'md' }: StatCardProps) {
       container: 'p-3 rounded-xl',
       icon: 'w-5 h-5',
       value: 'text-lg',
-      label: 'text-[10px]'
+      label: 'text-[10px]',
     },
     md: {
       container: 'p-4 rounded-2xl',
       icon: 'w-6 h-6',
       value: 'text-2xl',
-      label: 'text-xs'
+      label: 'text-xs',
     },
     lg: {
       container: 'p-6 rounded-3xl',
       icon: 'w-8 h-8',
       value: 'text-4xl',
-      label: 'text-sm'
-    }
+      label: 'text-sm',
+    },
   };
 
   const classes = sizeClasses[size];
@@ -553,9 +544,7 @@ export function StatCard({ icon, value, label, size = 'md' }: StatCardProps) {
       `}
     >
       <div className="text-center">
-        <div className={`flex items-center justify-center mb-2 ${classes.icon}`}>
-          {icon}
-        </div>
+        <div className={`flex items-center justify-center mb-2 ${classes.icon}`}>{icon}</div>
         <div className={`text-white font-black ${classes.value}`}>{value}</div>
         <div className={`text-white/80 font-bold uppercase ${classes.label}`}>{label}</div>
       </div>
@@ -564,22 +553,20 @@ export function StatCard({ icon, value, label, size = 'md' }: StatCardProps) {
 }
 
 // Uso adaptativo
-<div className="
+<div
+  className="
   mobile-l:grid mobile-l:grid-cols-3 mobile-l:gap-2
   tablet-l:grid tablet-l:grid-cols-3 tablet-l:gap-4
   lg:grid lg:grid-cols-3 lg:gap-6
-">
+"
+>
   <StatCard
     icon={<Zap />}
     value="7 días"
     label="RACHA"
-    size={
-      isMobile ? 'sm' :
-      isTablet ? 'md' :
-      'lg'
-    }
+    size={isMobile ? 'sm' : isTablet ? 'md' : 'lg'}
   />
-</div>
+</div>;
 ```
 
 ### 3. ProximaClaseCard - Tarjeta de Próxima Clase Responsiva
@@ -609,9 +596,7 @@ export function ProximaClaseCard({ clase, variant = 'expanded' }: ProximaClaseCa
               {esHoy ? 'HOY' : format(fecha, 'dd/MM')} • {format(fecha, 'HH:mm')}
             </div>
           </div>
-          {esHoy && (
-            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          )}
+          {esHoy && <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
         </div>
       </div>
     );
@@ -654,10 +639,7 @@ export function ProximaClaseCard({ clase, variant = 'expanded' }: ProximaClaseCa
 }
 
 // Uso adaptativo
-<ProximaClaseCard
-  clase={proximaClase}
-  variant={isMobile ? 'compact' : 'expanded'}
-/>
+<ProximaClaseCard clase={proximaClase} variant={isMobile ? 'compact' : 'expanded'} />;
 ```
 
 ---
@@ -840,18 +822,18 @@ export function LandscapeOnlyGuard({ children }: { children: React.ReactNode }) 
               </motion.h1>
 
               {/* SUBTÍTULO */}
-              <p className="text-xl text-cyan-300 font-bold mb-2">
-                El Gimnasio está diseñado para
-              </p>
-              <p className="text-xl text-cyan-300 font-bold mb-8">
-                jugarse en modo horizontal
-              </p>
+              <p className="text-xl text-cyan-300 font-bold mb-2">El Gimnasio está diseñado para</p>
+              <p className="text-xl text-cyan-300 font-bold mb-8">jugarse en modo horizontal</p>
 
               {/* INSTRUCCIÓN CON GLASSMORPHISM */}
               <motion.div
                 className="p-5 bg-white/10 backdrop-blur-md rounded-3xl border-2 border-cyan-400/40 shadow-[0_0_30px_rgba(34,211,238,0.3)]"
                 animate={{
-                  borderColor: ['rgba(34, 211, 238, 0.4)', 'rgba(34, 211, 238, 0.8)', 'rgba(34, 211, 238, 0.4)'],
+                  borderColor: [
+                    'rgba(34, 211, 238, 0.4)',
+                    'rgba(34, 211, 238, 0.8)',
+                    'rgba(34, 211, 238, 0.4)',
+                  ],
                 }}
                 transition={{
                   duration: 2,
@@ -1056,6 +1038,7 @@ function MyComponent() {
 ## 🎯 CHECKLIST DE IMPLEMENTACIÓN
 
 ### ✅ Desktop (1280px+)
+
 - [x] Navegación lateral fija (izquierda + derecha)
 - [x] Layout 50/50 (Avatar | Info)
 - [x] Header con logo central
@@ -1064,6 +1047,7 @@ function MyComponent() {
 - [x] Tipografía grande y legible
 
 ### ⚠️ Tablet Landscape (768px - 1024px)
+
 - [ ] Navegación inferior tipo dock bar
 - [x] Layout 50/50 adaptado
 - [ ] Header compacto
@@ -1072,6 +1056,7 @@ function MyComponent() {
 - [ ] Sin scroll vertical
 
 ### ⚠️ Mobile Landscape (480px - 667px)
+
 - [ ] Navegación inferior minimalista (1 botón MENÚ)
 - [ ] Layout vertical con scroll
 - [ ] Header ultra-compacto (8vh)
@@ -1081,6 +1066,7 @@ function MyComponent() {
 - [ ] Modal de menú full-screen
 
 ### ✅ Portrait Blocking
+
 - [x] LandscapeOnlyGuard implementado
 - [x] Mensaje visual elegante
 - [x] Animaciones de rotación
@@ -1093,6 +1079,7 @@ function MyComponent() {
 ### Patrones de Diseño Recomendados
 
 1. **Mobile-first con landscape-override:**
+
    ```tsx
    <div className="
      flex-col gap-2           /* Mobile portrait (fallback) */
@@ -1103,17 +1090,14 @@ function MyComponent() {
    ```
 
 2. **Conditional rendering basado en viewport:**
+
    ```tsx
-   <div className="mobile-l:hidden tablet-l:block">
-     Solo visible en tablet+
-   </div>
+   <div className="mobile-l:hidden tablet-l:block">Solo visible en tablet+</div>
    ```
 
 3. **Aspect ratio containers:**
    ```tsx
-   <div className="aspect-video w-full">
-     Contenido 16:9
-   </div>
+   <div className="aspect-video w-full">Contenido 16:9</div>
    ```
 
 ### Testing en Diferentes Dispositivos

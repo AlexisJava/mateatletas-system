@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Trophy, Medal, Crown, TrendingUp, Users } from 'lucide-react';
-import { gamificacionApi, type Ranking, type RankingEquipoEntry, type RankingGlobalEntry } from '@/lib/api/gamificacion.api';
+import {
+  gamificacionApi,
+  type Ranking,
+  type RankingEquipoEntry,
+  type RankingGlobalEntry,
+} from '@/lib/api/gamificacion.api';
 import { useOverlayStack } from '../contexts/OverlayStackProvider';
 
 interface RankingViewProps {
@@ -38,13 +43,15 @@ export function RankingView({ estudiante }: RankingViewProps) {
     cargarRanking();
   }, [estudiante.id]);
 
-  const miPosicionEquipo = ranking?.rankingEquipo?.findIndex(
-    (m) => (m as RankingEquipoEntry & { estudiante_id?: string }).estudiante_id === estudiante.id
-  ) ?? -1;
+  const miPosicionEquipo =
+    ranking?.rankingEquipo?.findIndex(
+      (m) => (m as RankingEquipoEntry & { estudiante_id?: string }).estudiante_id === estudiante.id,
+    ) ?? -1;
 
-  const miPosicionGlobal = ranking?.rankingGlobal?.findIndex(
-    (m) => (m as RankingGlobalEntry & { estudiante_id?: string }).estudiante_id === estudiante.id
-  ) ?? -1;
+  const miPosicionGlobal =
+    ranking?.rankingGlobal?.findIndex(
+      (m) => (m as RankingGlobalEntry & { estudiante_id?: string }).estudiante_id === estudiante.id,
+    ) ?? -1;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
@@ -57,7 +64,9 @@ export function RankingView({ estudiante }: RankingViewProps) {
           <div>
             <h1 className="text-2xl font-black text-white tracking-tight">RANKING</h1>
             <p className="text-sm text-white/60">
-              {tab === 'equipo' ? 'Compite con tu equipo' : 'Ranking global de todos los estudiantes'}
+              {tab === 'equipo'
+                ? 'Compite con tu equipo'
+                : 'Ranking global de todos los estudiantes'}
             </p>
           </div>
         </div>
@@ -108,9 +117,11 @@ export function RankingView({ estudiante }: RankingViewProps) {
             <div className="text-right">
               <p className="text-xs text-white/60 uppercase tracking-wide">Tus Puntos</p>
               <p className="text-2xl font-black text-white">
-                {String((tab === 'equipo'
-                  ? ranking.rankingEquipo?.[miPosicionEquipo]?.puntos_totales
-                  : ranking.rankingGlobal?.[miPosicionGlobal]?.puntos_totales) ?? 0)}
+                {String(
+                  (tab === 'equipo'
+                    ? ranking.rankingEquipo?.[miPosicionEquipo]?.puntos_totales
+                    : ranking.rankingGlobal?.[miPosicionGlobal]?.puntos_totales) ?? 0,
+                )}
               </p>
             </div>
           </div>
@@ -125,44 +136,46 @@ export function RankingView({ estudiante }: RankingViewProps) {
           </div>
         ) : (
           <div className="space-y-2 pb-20">
-            {tab === 'equipo' && ranking?.rankingEquipo?.map((entry, index: number) => {
-              const entryData = entry as RankingEquipoEntry & {
-                estudiante_id?: string;
-                estudiante_nombre?: string;
-                estudiante_apellido?: string;
-                puntos_totales?: number;
-              };
-              return (
-                <RankingCard
-                  key={entryData.estudiante_id || index}
-                  posicion={index + 1}
-                  nombre={entryData.estudiante_nombre || ''}
-                  apellido={entryData.estudiante_apellido}
-                  puntos={entryData.puntos_totales || 0}
-                  esYo={entryData.estudiante_id === estudiante.id}
-                />
-              );
-            })}
-            {tab === 'global' && ranking?.rankingGlobal?.map((entry, index: number) => {
-              const entryData = entry as RankingGlobalEntry & {
-                estudiante_id?: string;
-                estudiante_nombre?: string;
-                estudiante_apellido?: string;
-                puntos_totales?: number;
-                equipo_nombre?: string;
-              };
-              return (
-                <RankingCard
-                  key={entryData.estudiante_id || index}
-                  posicion={index + 1}
-                  nombre={entryData.estudiante_nombre || ''}
-                  apellido={entryData.estudiante_apellido}
-                  puntos={entryData.puntos_totales || 0}
-                  equipo={entryData.equipo_nombre}
-                  esYo={entryData.estudiante_id === estudiante.id}
-                />
-              );
-            })}
+            {tab === 'equipo' &&
+              ranking?.rankingEquipo?.map((entry, index: number) => {
+                const entryData = entry as RankingEquipoEntry & {
+                  estudiante_id?: string;
+                  estudiante_nombre?: string;
+                  estudiante_apellido?: string;
+                  puntos_totales?: number;
+                };
+                return (
+                  <RankingCard
+                    key={entryData.estudiante_id || index}
+                    posicion={index + 1}
+                    nombre={entryData.estudiante_nombre || ''}
+                    apellido={entryData.estudiante_apellido}
+                    puntos={entryData.puntos_totales || 0}
+                    esYo={entryData.estudiante_id === estudiante.id}
+                  />
+                );
+              })}
+            {tab === 'global' &&
+              ranking?.rankingGlobal?.map((entry, index: number) => {
+                const entryData = entry as RankingGlobalEntry & {
+                  estudiante_id?: string;
+                  estudiante_nombre?: string;
+                  estudiante_apellido?: string;
+                  puntos_totales?: number;
+                  equipo_nombre?: string;
+                };
+                return (
+                  <RankingCard
+                    key={entryData.estudiante_id || index}
+                    posicion={index + 1}
+                    nombre={entryData.estudiante_nombre || ''}
+                    apellido={entryData.estudiante_apellido}
+                    puntos={entryData.puntos_totales || 0}
+                    equipo={entryData.equipo_nombre}
+                    esYo={entryData.estudiante_id === estudiante.id}
+                  />
+                );
+              })}
           </div>
         )}
       </div>
@@ -224,9 +237,7 @@ function RankingCard({ posicion, nombre, apellido, puntos, equipo, esYo }: Ranki
                 </span>
               )}
             </div>
-            {equipo && (
-              <p className="text-sm text-white/60">Equipo: {equipo}</p>
-            )}
+            {equipo && <p className="text-sm text-white/60">Equipo: {equipo}</p>}
           </div>
         </div>
 

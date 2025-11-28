@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import { X, Brain, Gamepad2, Zap, Star, Trophy, Target, Sparkles } from 'lucide-react'
-import { useOverlayStack } from '../contexts/OverlayStackProvider'
+import { motion } from 'framer-motion';
+import { X, Brain, Gamepad2, Zap, Star, Trophy, Target, Sparkles } from 'lucide-react';
+import { useOverlayStack } from '../contexts/OverlayStackProvider';
 
 interface ProximamenteViewProps {
-  title?: string
-  description?: string
-  icon?: React.ReactNode
-  gradient?: string
+  title?: string;
+  description?: string;
+  icon?: React.ReactNode;
+  gradient?: string;
 }
 
 export function ProximamenteView({
@@ -17,7 +17,7 @@ export function ProximamenteView({
   icon = <Brain className="w-16 h-16" />,
   gradient = 'from-pink-500 via-rose-500 to-red-500',
 }: ProximamenteViewProps) {
-  const { pop } = useOverlayStack()
+  const { pop } = useOverlayStack();
 
   const features = [
     { icon: <Gamepad2 className="w-5 h-5" />, title: 'Juegos Interactivos' },
@@ -26,7 +26,7 @@ export function ProximamenteView({
     { icon: <Trophy className="w-5 h-5" />, title: 'Competencias' },
     { icon: <Target className="w-5 h-5" />, title: 'Objetivos Personalizados' },
     { icon: <Sparkles className="w-5 h-5" />, title: 'Recompensas' },
-  ]
+  ];
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-purple-900 to-black overflow-hidden flex flex-col">
@@ -34,13 +34,9 @@ export function ProximamenteView({
       <header className="relative z-10 px-6 py-3 bg-black/30 backdrop-blur-sm border-b-2 border-white/10 flex-shrink-0">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl bg-gradient-to-r ${gradient}`}>
-              {icon}
-            </div>
+            <div className={`p-2 rounded-xl bg-gradient-to-r ${gradient}`}>{icon}</div>
             <div>
-              <h1 className="text-white font-black text-xl uppercase tracking-wide">
-                {title}
-              </h1>
+              <h1 className="text-white font-black text-xl uppercase tracking-wide">{title}</h1>
               <p className="text-white/70 text-xs">Próximamente disponible</p>
             </div>
           </div>
@@ -105,12 +101,8 @@ export function ProximamenteView({
             </div>
 
             {/* Título - Más compacto */}
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">
-              PRÓXIMAMENTE
-            </h2>
-            <p className="text-xl text-purple-300 font-bold mb-3">
-              {description}
-            </p>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-3">PRÓXIMAMENTE</h2>
+            <p className="text-xl text-purple-300 font-bold mb-3">{description}</p>
             <div className="inline-block px-5 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-500/50 rounded-xl">
               <p className="text-purple-300 font-mono text-sm">
                 🚀 <span className="text-white font-black">200+ Juegos Matemáticos</span>
@@ -129,12 +121,12 @@ export function ProximamenteView({
                   transition={{ delay: index * 0.05 }}
                   className="bg-white/5 backdrop-blur-sm border-2 border-white/10 rounded-xl p-3 hover:border-purple-500/50 hover:bg-white/10 transition-all"
                 >
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${gradient} flex items-center justify-center mb-2 mx-auto`}>
+                  <div
+                    className={`w-8 h-8 rounded-lg bg-gradient-to-r ${gradient} flex items-center justify-center mb-2 mx-auto`}
+                  >
                     {feature.icon}
                   </div>
-                  <h4 className="text-white font-bold text-xs text-center">
-                    {feature.title}
-                  </h4>
+                  <h4 className="text-white font-bold text-xs text-center">{feature.title}</h4>
                 </motion.div>
               ))}
             </div>
@@ -147,12 +139,12 @@ export function ProximamenteView({
             transition={{ delay: 0.4 }}
             className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-2 border-purple-500/30 rounded-2xl p-6 text-center"
           >
-            <h3 className="text-xl font-black text-white mb-2">
-              ¡Mantente atento!
-            </h3>
+            <h3 className="text-xl font-black text-white mb-2">¡Mantente atento!</h3>
             <p className="text-white/80 text-sm mb-4 max-w-2xl mx-auto">
-              Estamos trabajando en crear la mejor experiencia de entrenamiento matemático.
-              Mientras tanto, seguí con el <span className="text-purple-300 font-bold">Mes de la Ciencia</span> y ganá más puntos.
+              Estamos trabajando en crear la mejor experiencia de entrenamiento matemático. Mientras
+              tanto, seguí con el{' '}
+              <span className="text-purple-300 font-bold">Mes de la Ciencia</span> y ganá más
+              puntos.
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
               <motion.div
@@ -178,5 +170,5 @@ export function ProximamenteView({
         </div>
       </div>
     </div>
-  )
+  );
 }

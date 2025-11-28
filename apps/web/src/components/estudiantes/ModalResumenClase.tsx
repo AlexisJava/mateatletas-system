@@ -2,17 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-confetti';
-import {
-  Trophy,
-  Star,
-  Target,
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  Award,
-  Zap,
-  X
-} from 'lucide-react';
+import { Trophy, Star, Target, TrendingUp, Clock, CheckCircle, Award, Zap, X } from 'lucide-react';
 
 /**
  * T030 - Modal Resumen Post-Clase (Vista Estudiante)
@@ -59,8 +49,8 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
     resumen.estadisticas.participacion >= 80
       ? 'text-green-400'
       : resumen.estadisticas.participacion >= 50
-      ? 'text-yellow-400'
-      : 'text-orange-400';
+        ? 'text-yellow-400'
+        : 'text-orange-400';
 
   const tasaAcierto =
     resumen.estadisticas.preguntasRespondidas > 0
@@ -105,14 +95,10 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
               <h2 className="text-3xl md:text-4xl font-black text-white mb-2">
                 ¡Clase Completada!
               </h2>
-              <p className="text-white/90 text-lg font-semibold">
-                {resumen.claseNombre}
-              </p>
+              <p className="text-white/90 text-lg font-semibold">{resumen.claseNombre}</p>
               <div className="flex items-center justify-center gap-2 mt-2 text-white/80">
                 <Clock className="w-5 h-5" />
-                <span className="text-sm font-semibold">
-                  {resumen.duracionMinutos} minutos
-                </span>
+                <span className="text-sm font-semibold">{resumen.duracionMinutos} minutos</span>
               </div>
             </div>
           </div>
@@ -127,9 +113,7 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
             >
               <div className="flex items-center justify-center gap-3 mb-2">
                 <Star className="w-8 h-8 text-yellow-400" />
-                <h3 className="text-2xl font-black text-white">
-                  +{resumen.puntosGanados} Puntos
-                </h3>
+                <h3 className="text-2xl font-black text-white">+{resumen.puntosGanados} Puntos</h3>
                 <Star className="w-8 h-8 text-yellow-400" />
               </div>
               <p className="text-yellow-400 text-sm font-semibold">
@@ -147,9 +131,7 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
               >
                 <div className="flex items-center gap-2">
                   <Trophy className="w-6 h-6 text-purple-400" />
-                  <h3 className="text-xl font-bold text-white">
-                    Insignias Desbloqueadas
-                  </h3>
+                  <h3 className="text-xl font-bold text-white">Insignias Desbloqueadas</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {resumen.insigniasDesbloqueadas.map((insignia, index) => (
@@ -165,9 +147,7 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
                         <h4 className="text-base font-bold text-white truncate">
                           {insignia.nombre}
                         </h4>
-                        <p className="text-xs text-gray-400 line-clamp-2">
-                          {insignia.descripcion}
-                        </p>
+                        <p className="text-xs text-gray-400 line-clamp-2">{insignia.descripcion}</p>
                       </div>
                       <Award className="w-6 h-6 text-pink-400 flex-shrink-0" />
                     </motion.div>
@@ -185,18 +165,14 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
             >
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-6 h-6 text-blue-400" />
-                <h3 className="text-xl font-bold text-white">
-                  Estadísticas de la Clase
-                </h3>
+                <h3 className="text-xl font-bold text-white">Estadísticas de la Clase</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Participación */}
                 <div className="bg-slate-700/50 rounded-xl p-4 border border-slate-600">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-400 text-sm font-semibold">
-                      Participación
-                    </span>
+                    <span className="text-gray-400 text-sm font-semibold">Participación</span>
                     <Target className={`w-5 h-5 ${participacionColor}`} />
                   </div>
                   <div className="text-3xl font-black text-white mb-1">
@@ -211,8 +187,8 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
                         resumen.estadisticas.participacion >= 80
                           ? 'from-green-500 to-emerald-500'
                           : resumen.estadisticas.participacion >= 50
-                          ? 'from-yellow-500 to-orange-500'
-                          : 'from-orange-500 to-red-500'
+                            ? 'from-yellow-500 to-orange-500'
+                            : 'from-orange-500 to-red-500'
                       }`}
                     />
                   </div>
@@ -221,9 +197,7 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
                 {/* Tiempo Activo */}
                 <div className="bg-slate-700/50 rounded-xl p-4 border border-slate-600">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-400 text-sm font-semibold">
-                      Tiempo Activo
-                    </span>
+                    <span className="text-gray-400 text-sm font-semibold">Tiempo Activo</span>
                     <Clock className="w-5 h-5 text-cyan-400" />
                   </div>
                   <div className="text-3xl font-black text-white">
@@ -237,9 +211,7 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
                 {/* Preguntas Respondidas */}
                 <div className="bg-slate-700/50 rounded-xl p-4 border border-slate-600">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-400 text-sm font-semibold">
-                      Preguntas
-                    </span>
+                    <span className="text-gray-400 text-sm font-semibold">Preguntas</span>
                     <CheckCircle className="w-5 h-5 text-purple-400" />
                   </div>
                   <div className="text-3xl font-black text-white mb-1">
@@ -254,9 +226,7 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
                 {/* Energía (Puntos/min) */}
                 <div className="bg-slate-700/50 rounded-xl p-4 border border-slate-600">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-400 text-sm font-semibold">
-                      Energía
-                    </span>
+                    <span className="text-gray-400 text-sm font-semibold">Energía</span>
                     <Zap className="w-5 h-5 text-yellow-400" />
                   </div>
                   <div className="text-3xl font-black text-white">
@@ -264,9 +234,7 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
                       ? (resumen.puntosGanados / resumen.estadisticas.tiempoActivo).toFixed(1)
                       : 0}
                   </div>
-                  <p className="text-xs text-yellow-400 font-semibold">
-                    puntos/minuto
-                  </p>
+                  <p className="text-xs text-yellow-400 font-semibold">puntos/minuto</p>
                 </div>
               </div>
             </motion.div>
@@ -287,9 +255,7 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
                     <p className="text-sm font-semibold text-blue-400 mb-1">
                       Mensaje de tu profesor/a
                     </p>
-                    <p className="text-white text-sm">
-                      {resumen.mensajeDocente}
-                    </p>
+                    <p className="text-white text-sm">{resumen.mensajeDocente}</p>
                   </div>
                 </div>
               </motion.div>
@@ -314,7 +280,9 @@ export function ModalResumenClase({ resumen, onClose }: ModalResumenClaseProps) 
                 <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(100, (resumen.puntosGanados / resumen.siguienteNivel.puntosParaSiguiente) * 100)}%` }}
+                    animate={{
+                      width: `${Math.min(100, (resumen.puntosGanados / resumen.siguienteNivel.puntosParaSiguiente) * 100)}%`,
+                    }}
                     transition={{ duration: 1.5, delay: 0.8 }}
                     className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
                   />

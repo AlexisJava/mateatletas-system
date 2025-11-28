@@ -1,4 +1,5 @@
 # 🔍 AUDITORÍA DE DEUDA TÉCNICA 2025-10-17
+
 ## Plan de Mitigación de Errores Críticos
 
 **Fecha:** 2025-10-17
@@ -12,15 +13,15 @@
 
 ### Estado Actual del Proyecto
 
-| Área | Estado | Score | Cambio vs Auditoría Ant |
-|------|--------|-------|------------------|
-| **TypeScript Errors** | ✅ | 0/0 (100%) | ✅ 0 (era 4) |
-| **Type Safety** | ✅ | 10/10 | Mantenido |
-| **Security** | 🔴 | 4/10 | Sin cambios |
-| **Performance** | 🟡 | 7/10 | +1 (React Query) |
-| **Testing** | 🔴 | 2/10 | Sin cambios |
-| **Code Quality** | 🟢 | 9/10 | +0.5 |
-| **Documentation** | 🟢 | 8/10 | Sin cambios |
+| Área                  | Estado | Score      | Cambio vs Auditoría Ant |
+| --------------------- | ------ | ---------- | ----------------------- |
+| **TypeScript Errors** | ✅     | 0/0 (100%) | ✅ 0 (era 4)            |
+| **Type Safety**       | ✅     | 10/10      | Mantenido               |
+| **Security**          | 🔴     | 4/10       | Sin cambios             |
+| **Performance**       | 🟡     | 7/10       | +1 (React Query)        |
+| **Testing**           | 🔴     | 2/10       | Sin cambios             |
+| **Code Quality**      | 🟢     | 9/10       | +0.5                    |
+| **Documentation**     | 🟢     | 8/10       | Sin cambios             |
 
 **SCORE GLOBAL:** 7.1/10 (vs 5.8/10 anterior) - **Mejora del 22%** ✅
 
@@ -33,6 +34,7 @@
 **Status:** 🔴 **NO MITIGADO** - BLOQUEANTE PARA PRODUCCIÓN
 
 #### 1.1 Endpoint Mock de Pagos Público
+
 ```typescript
 // apps/api/src/pagos/pagos.controller.ts:159
 @Post('mock/activar-membresia/:id')
@@ -42,6 +44,7 @@ async activarMembresiaMock(@Param('id') membresiaId: string) {
 ```
 
 **Problema:**
+
 - ❌ Sin `@UseGuards(JwtAuthGuard)`
 - ❌ Sin `@Roles(Role.Admin)`
 - ❌ Activo en producción
@@ -50,6 +53,7 @@ async activarMembresiaMock(@Param('id') membresiaId: string) {
 **Impacto:** 🔴 CRÍTICO - Pérdida de ingresos
 
 **Mitigación INMEDIATA (5 minutos):**
+
 ```typescript
 @Post('mock/activar-membresia/:id')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -65,12 +69,14 @@ async activarMembresiaMock(@Param('id') membresiaId: string) {
 ---
 
 #### 1.2 CORS Completamente Abierto
+
 ```typescript
 // apps/api/src/main.ts:13
 app.enableCors(); // ❌ VULNERABLE
 ```
 
 **Problema:**
+
 - ❌ Acepta requests desde CUALQUIER origen
 - ❌ Vulnerable a CSRF
 - ❌ Vulnerable a XSS cross-site
@@ -78,6 +84,7 @@ app.enableCors(); // ❌ VULNERABLE
 **Impacto:** 🔴 CRÍTICO - Ataques CSRF/XSS
 
 **Mitigación INMEDIATA (10 minutos):**
+
 ```typescript
 app.enableCors({
   origin: [
@@ -96,12 +103,14 @@ app.enableCors({
 ---
 
 #### 1.3 JWT en localStorage (XSS Vulnerability)
+
 ```typescript
 // apps/web/src/lib/axios.ts:29
 const token = localStorage.getItem('auth-token'); // ❌ VULNERABLE
 ```
 
 **Problema:**
+
 - ❌ Tokens accesibles via JavaScript
 - ❌ Robables si hay XSS
 - ❌ No hay protección httpOnly
@@ -111,6 +120,7 @@ const token = localStorage.getItem('auth-token'); // ❌ VULNERABLE
 **Mitigación (2 horas):**
 
 **Backend:**
+
 ```typescript
 // auth.controller.ts
 @Post('login')
@@ -130,6 +140,7 @@ async login(@Body() loginDto: LoginDto, @Res() response: Response) {
 ```
 
 **Frontend:**
+
 ```typescript
 // axios.ts
 axios.defaults.withCredentials = true;
@@ -141,7 +152,9 @@ axios.defaults.withCredentials = true;
 ---
 
 #### 1.4 Sin Rate Limiting
+
 **Problema:**
+
 - ❌ No hay @Throttle() en `/auth/login`
 - ❌ Vulnerable a brute force
 - ❌ No hay protección DDoS
@@ -149,6 +162,7 @@ axios.defaults.withCredentials = true;
 **Impacto:** 🟠 ALTO - Ataques de fuerza bruta
 
 **Mitigación (1 hora):**
+
 ```bash
 npm install @nestjs/throttler
 ```
@@ -194,6 +208,7 @@ async login(@Body() loginDto: LoginDto) {
 **Status:** 🟢 **PARCIALMENTE MITIGADO**
 
 **Hallazgos Actuales:**
+
 ```bash
 # Verificación realizada
 find . -path "./apps/web/src/**/*.{ts,tsx}" | xargs grep "console.log" | wc -l
@@ -209,12 +224,14 @@ find . -path "./apps/web/src/**/*.{ts,tsx}" | xargs grep "console.log" | wc -l
 **Status:** 🟡 **SIN CAMBIOS**
 
 **Archivos Problemáticos:**
+
 1. `apps/web/src/app/admin/productos/page.tsx` - **702 líneas**
 2. `apps/web/src/components/calendario/ModalTarea.tsx` - **568 líneas**
 3. `apps/web/src/app/estudiante/dashboard/page.tsx` - **550 líneas**
 4. `apps/web/src/app/docente/calendario/page.tsx` - **497 líneas**
 
 **Problema:**
+
 - ❌ Difíciles de mantener
 - ❌ Difíciles de testear
 - ❌ Difíciles de reutilizar
@@ -224,6 +241,7 @@ find . -path "./apps/web/src/**/*.{ts,tsx}" | xargs grep "console.log" | wc -l
 **Mitigación (4 horas):**
 
 **Plan de Refactor:**
+
 ```
 admin/productos/page.tsx (702 líneas)
   ↓ Dividir en:
@@ -243,21 +261,29 @@ admin/productos/page.tsx (702 líneas)
 **Status:** 🟡 **SIN CAMBIOS**
 
 #### 4.1 AdminService - 924 líneas
+
 ```typescript
 // apps/api/src/admin/admin.service.ts
 export class AdminService {
   // 400+ líneas duplicadas con AdminStatsService
-  getDashboardStats() { /* ... */ }
+  getDashboardStats() {
+    /* ... */
+  }
 
   // 650 líneas de strings hardcodeados
-  sugerirSolucion() { /* ... */ }
+  sugerirSolucion() {
+    /* ... */
+  }
 
   // Métodos que deberían estar en otros services
-  listarAlertas() { /* ... */ }
+  listarAlertas() {
+    /* ... */
+  }
 }
 ```
 
 **Problema:**
+
 - ❌ 400+ líneas duplicadas
 - ❌ Múltiples responsabilidades
 - ❌ Difícil de testear
@@ -275,6 +301,7 @@ export class AdminService {
 ---
 
 #### 4.2 ClasesService - 684 líneas
+
 ```typescript
 // apps/api/src/clases/clases.service.ts
 @ts-nocheck // ❌ MALA PRÁCTICA
@@ -284,6 +311,7 @@ export class ClasesService {
 ```
 
 **Problema:**
+
 - ❌ `@ts-nocheck` (deshabilita TypeScript)
 - ❌ Múltiples responsabilidades mezcladas
 - ❌ Queries sin paginación
@@ -304,6 +332,7 @@ export class ClasesService {
 **Status:** ✅ **COMPLETAMENTE MITIGADO**
 
 **Progreso:**
+
 ```
 Auditoría Original: 650+ errores
 Auditoría 16-Oct:   269 errores
@@ -312,12 +341,14 @@ Estado Actual:      0 errores ✅
 ```
 
 **Acciones Tomadas (Hoy):**
+
 1. ✅ Fixed `useEstudiantes.ts` - Type `{ message: string }` para delete mutation
 2. ✅ Fixed `useGamificacion.ts` - Type `unknown` para desbloquear logro
 3. ✅ Fixed `usePagos.ts` - Type `Membresia | null` para query
 4. ✅ Fixed `usePagos.ts` - Type `Membresia` para mutation
 
 **Verificación:**
+
 ```bash
 npx tsc --project apps/web/tsconfig.json --noEmit
 # Output: Sin errores ✅
@@ -333,6 +364,7 @@ npx tsc --project apps/web/tsconfig.json --noEmit
 **Bloqueante:** SÍ - No desplegar sin esto
 
 #### Tareas:
+
 - [ ] **30 min** - Proteger endpoint mock de pagos
 - [ ] **15 min** - Configurar CORS restrictivo
 - [ ] **2 horas** - Migrar JWT a httpOnly cookies
@@ -340,6 +372,7 @@ npx tsc --project apps/web/tsconfig.json --noEmit
 - [ ] **15 min** - Testing de seguridad
 
 **Criterios de Aceptación:**
+
 - ✅ Endpoint mock solo accesible por admin en dev
 - ✅ CORS solo acepta orígenes específicos
 - ✅ JWT en cookies httpOnly
@@ -353,11 +386,13 @@ npx tsc --project apps/web/tsconfig.json --noEmit
 **Bloqueante:** NO
 
 #### Sprint 1 (1 semana):
+
 - [ ] **Día 1-2** - Refactorizar AdminService
 - [ ] **Día 3-4** - Dividir ClasesService
 - [ ] **Día 5** - Tests unitarios
 
 #### Sprint 2 (1 semana):
+
 - [ ] **Día 1-2** - Agregar paginación (16 endpoints)
 - [ ] **Día 3-4** - Estandarizar manejo de errores
 - [ ] **Día 5** - Code review & documentación
@@ -370,6 +405,7 @@ npx tsc --project apps/web/tsconfig.json --noEmit
 **Bloqueante:** NO
 
 #### Tareas:
+
 - [ ] **Día 1-2** - Dividir 4 componentes gigantes
 - [ ] **Día 3** - Crear custom hooks para lógica
 - [ ] **Día 4** - Testing de componentes
@@ -383,6 +419,7 @@ npx tsc --project apps/web/tsconfig.json --noEmit
 **Bloqueante:** NO (pero recomendado)
 
 #### Objetivos:
+
 - [ ] Unit tests para services críticos (40 tests)
 - [ ] E2E tests para flujos principales (15 tests)
 - [ ] 60% code coverage
@@ -469,22 +506,24 @@ NODE_ENV=production
 - [ ] 🟡 Tests E2E pasando
 
 ### Estado Actual:
+
 **1/6 completado** (17%)
 
 ### Con FASE 1 completada:
+
 **6/6 completado** (100%) ✅ → **LISTO PARA PRODUCCIÓN**
 
 ---
 
 ## 📊 COMPARATIVA: Auditorías
 
-| Métrica | Oct 16 | Oct 17 | Cambio |
-|---------|--------|--------|--------|
-| **TS Errors** | 269 | 0 | **-100%** ✅ |
-| **Security Score** | 4/10 | 4/10 | Sin cambios 🔴 |
-| **Performance** | 6/10 | 7/10 | **+17%** ✅ |
-| **Code Quality** | 8.5/10 | 9/10 | **+6%** ✅ |
-| **Global Score** | 5.8/10 | 7.1/10 | **+22%** ✅ |
+| Métrica            | Oct 16 | Oct 17 | Cambio         |
+| ------------------ | ------ | ------ | -------------- |
+| **TS Errors**      | 269    | 0      | **-100%** ✅   |
+| **Security Score** | 4/10   | 4/10   | Sin cambios 🔴 |
+| **Performance**    | 6/10   | 7/10   | **+17%** ✅    |
+| **Code Quality**   | 8.5/10 | 9/10   | **+6%** ✅     |
+| **Global Score**   | 5.8/10 | 7.1/10 | **+22%** ✅    |
 
 **Conclusión:** Proyecto ha mejorado significativamente, pero SEGURIDAD es bloqueante para producción.
 

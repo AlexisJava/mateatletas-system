@@ -53,10 +53,7 @@ interface PlanificacionWrapperProps {
   children: ReactNode;
 }
 
-export function PlanificacionWrapper({
-  config,
-  children,
-}: PlanificacionWrapperProps) {
+export function PlanificacionWrapper({ config, children }: PlanificacionWrapperProps) {
   const progressData = usePlanificacionProgress(config);
   const [tiempoInicio] = useState<Date>(new Date());
   const [minutosJugados, setMinutosJugados] = useState(0);
@@ -85,7 +82,7 @@ export function PlanificacionWrapper({
   useEffect(() => {
     const interval = setInterval(() => {
       const minutosTranscurridos = Math.floor(
-        (new Date().getTime() - tiempoInicio.getTime()) / 1000 / 60
+        (new Date().getTime() - tiempoInicio.getTime()) / 1000 / 60,
       );
 
       if (minutosTranscurridos > minutosJugados) {
@@ -106,9 +103,7 @@ export function PlanificacionWrapper({
   useEffect(() => {
     return () => {
       // Registrar tiempo final al salir
-      const tiempoTotal = Math.floor(
-        (new Date().getTime() - tiempoInicio.getTime()) / 1000 / 60
-      );
+      const tiempoTotal = Math.floor((new Date().getTime() - tiempoInicio.getTime()) / 1000 / 60);
       if (tiempoTotal > minutosJugados) {
         const minutosFinales = tiempoTotal - minutosJugados;
         progressData.registrarTiempo(minutosFinales).catch(() => {
@@ -197,8 +192,8 @@ export function PlanificacionWrapper({
 
         {/* Indicador de auto-guardado (opcional, puedes quitarlo) */}
         <div className="fixed bottom-4 right-4 bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
-          ⏱️ {progressData.progreso?.tiempoTotalMinutos || 0} min •
-          🏆 {progressData.progreso?.puntosTotales || 0} pts
+          ⏱️ {progressData.progreso?.tiempoTotalMinutos || 0} min • 🏆{' '}
+          {progressData.progreso?.puntosTotales || 0} pts
         </div>
       </div>
     </PlanificacionContext.Provider>

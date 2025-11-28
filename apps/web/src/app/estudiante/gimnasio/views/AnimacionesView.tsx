@@ -1,55 +1,55 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Lock, Check, Play, Sparkles } from 'lucide-react'
-import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D'
-import { useStudentAnimations, type StudentAnimation, type AnimationCategory } from '@/hooks/useStudentAnimations'
-import { useOverlayStack } from '../contexts/OverlayStackProvider'
-import { toast } from 'sonner'
-import { estudiantesApi } from '@/lib/api/estudiantes.api'
-import { isAxiosError } from 'axios'
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Lock, Check, Play, Sparkles } from 'lucide-react';
+import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D';
+import {
+  useStudentAnimations,
+  type StudentAnimation,
+  type AnimationCategory,
+} from '@/hooks/useStudentAnimations';
+import { useOverlayStack } from '../contexts/OverlayStackProvider';
+import { toast } from 'sonner';
+import { estudiantesApi } from '@/lib/api/estudiantes.api';
+import { isAxiosError } from 'axios';
 
 interface AnimacionesViewProps {
   estudiante: {
-    id: string
-    nombre: string
-    puntos_totales: number
-    avatar_url?: string | null
-  }
+    id: string;
+    nombre: string;
+    puntos_totales: number;
+    avatar_url?: string | null;
+  };
 }
 
-const CATEGORY_LABELS: Record<AnimationCategory, { label: string; emoji: string; color: string }> = {
-  idle: { label: 'Espera', emoji: '🧍', color: 'from-blue-500 to-cyan-500' },
-  dance: { label: 'Bailes', emoji: '💃', color: 'from-pink-500 to-rose-500' },
-  expression: { label: 'Expresiones', emoji: '😊', color: 'from-purple-500 to-violet-500' },
-  locomotion: { label: 'Movimiento', emoji: '🏃', color: 'from-orange-500 to-amber-500' },
-} as const
+const CATEGORY_LABELS: Record<AnimationCategory, { label: string; emoji: string; color: string }> =
+  {
+    idle: { label: 'Espera', emoji: '🧍', color: 'from-blue-500 to-cyan-500' },
+    dance: { label: 'Bailes', emoji: '💃', color: 'from-pink-500 to-rose-500' },
+    expression: { label: 'Expresiones', emoji: '😊', color: 'from-purple-500 to-violet-500' },
+    locomotion: { label: 'Movimiento', emoji: '🏃', color: 'from-orange-500 to-amber-500' },
+  } as const;
 
 export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
-  const { pop } = useOverlayStack()
-  const [selectedCategory, setSelectedCategory] = useState<'all' | AnimationCategory>('all')
-  const [previewAnimation, setPreviewAnimation] = useState<StudentAnimation | null>(null)
-  const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
+  const { pop } = useOverlayStack();
+  const [selectedCategory, setSelectedCategory] = useState<'all' | AnimationCategory>('all');
+  const [previewAnimation, setPreviewAnimation] = useState<StudentAnimation | null>(null);
+  const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null);
 
-  const {
-    availableAnimations,
-    lockedAnimations,
-    animationsByCategory,
-    stats
-  } = useStudentAnimations({
-    studentPoints: estudiante.puntos_totales,
-    unlockedAnimationIds: [], // TODO: Obtener del backend
-  })
+  const { availableAnimations, lockedAnimations, animationsByCategory, stats } =
+    useStudentAnimations({
+      studentPoints: estudiante.puntos_totales,
+      unlockedAnimationIds: [], // TODO: Obtener del backend
+    });
 
   const handleClose = () => {
-    pop()
-  }
+    pop();
+  };
 
-  const categoryEntries = Object.entries(CATEGORY_LABELS) as Array<[
-    AnimationCategory,
-    { label: string; emoji: string; color: string }
-  ]>
+  const categoryEntries = Object.entries(CATEGORY_LABELS) as Array<
+    [AnimationCategory, { label: string; emoji: string; color: string }]
+  >;
 
   // Filtrar animaciones según categoría seleccionada
   const displayAnimations: StudentAnimation[] =
@@ -57,13 +57,13 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
       ? [...availableAnimations, ...lockedAnimations]
       : [
           ...(animationsByCategory[selectedCategory] ?? []),
-          ...lockedAnimations.filter(a => a.category === selectedCategory),
-        ]
+          ...lockedAnimations.filter((a) => a.category === selectedCategory),
+        ];
 
   const handleUnlockAnimation = async (animationId: string, cost: number) => {
     // TODO: Implementar llamada al backend para desbloquear animación
-    console.log(`Desbloqueando animación ${animationId} por ${cost} puntos`)
-  }
+    console.log(`Desbloqueando animación ${animationId} por ${cost} puntos`);
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900">
@@ -119,8 +119,8 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
       <div className="px-6 py-8 overflow-y-auto h-[calc(100vh-200px)]">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {displayAnimations.map((animation) => {
-            const isLocked = !availableAnimations.find(a => a.id === animation.id)
-            const isSelected = selectedAnimation === animation.id
+            const isLocked = !availableAnimations.find((a) => a.id === animation.id);
+            const isSelected = selectedAnimation === animation.id;
 
             return (
               <motion.div
@@ -133,18 +133,19 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
                 <button
                   onClick={() => {
                     if (!isLocked) {
-                      setSelectedAnimation(animation.id)
-                      setPreviewAnimation(animation)
+                      setSelectedAnimation(animation.id);
+                      setPreviewAnimation(animation);
                     }
                   }}
                   className={`
                     w-full aspect-square rounded-2xl border-2 p-3
                     transition-all overflow-hidden relative
-                    ${isLocked
-                      ? 'bg-gray-800/50 border-gray-700/50 cursor-not-allowed'
-                      : isSelected
-                        ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500'
-                        : 'bg-black/40 border-white/20 hover:border-white/40'
+                    ${
+                      isLocked
+                        ? 'bg-gray-800/50 border-gray-700/50 cursor-not-allowed'
+                        : isSelected
+                          ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-yellow-500'
+                          : 'bg-black/40 border-white/20 hover:border-white/40'
                     }
                   `}
                   disabled={isLocked}
@@ -197,20 +198,20 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
                     className={`
                       mt-2 w-full px-3 py-2 rounded-xl font-bold text-sm
                       transition-all border-2
-                      ${estudiante.puntos_totales >= animation.requiredPoints
-                        ? 'bg-yellow-500 border-yellow-600 text-black hover:bg-yellow-400'
-                        : 'bg-gray-700/50 border-gray-600 text-gray-400 cursor-not-allowed'
+                      ${
+                        estudiante.puntos_totales >= animation.requiredPoints
+                          ? 'bg-yellow-500 border-yellow-600 text-black hover:bg-yellow-400'
+                          : 'bg-gray-700/50 border-gray-600 text-gray-400 cursor-not-allowed'
                       }
                     `}
                   >
                     {estudiante.puntos_totales >= animation.requiredPoints
                       ? `Desbloquear (${animation.requiredPoints} pts)`
-                      : 'Puntos insuficientes'
-                    }
+                      : 'Puntos insuficientes'}
                   </button>
                 )}
               </motion.div>
-            )
+            );
           })}
         </div>
       </div>
@@ -234,9 +235,7 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-white font-black text-2xl">
-                    {previewAnimation.displayName}
-                  </h2>
+                  <h2 className="text-white font-black text-2xl">{previewAnimation.displayName}</h2>
                   <p className="text-white/70 text-sm">{previewAnimation.description}</p>
                 </div>
                 <button
@@ -261,16 +260,14 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
                   <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-8">
                     <div className="text-6xl">🎭</div>
                     <div className="text-center">
-                      <h3 className="text-white font-bold text-xl mb-2">
-                        Crea tu Avatar
-                      </h3>
+                      <h3 className="text-white font-bold text-xl mb-2">Crea tu Avatar</h3>
                       <p className="text-white/70 text-sm">
                         Necesitas un avatar para ver las animaciones en 3D
                       </p>
                     </div>
                     <button
                       onClick={() => {
-                        setPreviewAnimation(null)
+                        setPreviewAnimation(null);
                         // TODO: Navegar a creación de avatar
                       }}
                       className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold hover:from-blue-400 hover:to-cyan-400 transition-all"
@@ -285,33 +282,35 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
                 <button
                   onClick={async () => {
                     try {
-                      setSelectedAnimation(previewAnimation.id)
+                      setSelectedAnimation(previewAnimation.id);
 
                       // 1. Guardar en backend
-                      await estudiantesApi.updateAnimacion(previewAnimation.url)
+                      await estudiantesApi.updateAnimacion(previewAnimation.url);
 
                       // 2. Guardar en localStorage para que HubView la use
-                      localStorage.setItem('selected_idle_animation', previewAnimation.url)
+                      localStorage.setItem('selected_idle_animation', previewAnimation.url);
 
                       // 3. Disparar evento custom para que HubView se entere del cambio
-                      window.dispatchEvent(new CustomEvent('animation-selected', {
-                        detail: { animationUrl: previewAnimation.url }
-                      }))
+                      window.dispatchEvent(
+                        new CustomEvent('animation-selected', {
+                          detail: { animationUrl: previewAnimation.url },
+                        }),
+                      );
 
-                      setPreviewAnimation(null)
+                      setPreviewAnimation(null);
                       toast.success(`¡Animación "${previewAnimation.displayName}" seleccionada!`, {
                         description: 'Guardada en la base de datos',
                         duration: 3000,
-                      })
+                      });
                     } catch (error) {
-                      console.error('Error al guardar animación:', error)
+                      console.error('Error al guardar animación:', error);
                       const message = isAxiosError(error)
                         ? error.response?.data?.message || 'Error al guardar la animación'
-                        : 'Error al guardar la animación'
+                        : 'Error al guardar la animación';
                       toast.error(message, {
                         description: 'Intenta nuevamente',
                         duration: 3000,
-                      })
+                      });
                     }
                   }}
                   className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-black text-lg hover:from-green-400 hover:to-emerald-400 transition-all flex items-center justify-center gap-2"
@@ -325,7 +324,7 @@ export function AnimacionesView({ estudiante }: AnimacionesViewProps) {
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }
 
 // Componente auxiliar para tabs de categoría
@@ -335,14 +334,14 @@ function CategoryTab({
   label,
   emoji,
   count,
-  gradient
+  gradient,
 }: {
-  active: boolean
-  onClick: () => void
-  label: string
-  emoji: string
-  count: number
-  gradient?: string
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  emoji: string;
+  count: number;
+  gradient?: string;
 }) {
   return (
     <button
@@ -350,20 +349,23 @@ function CategoryTab({
       className={`
         px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap
         transition-all border-2 flex items-center gap-2
-        ${active
-          ? `bg-gradient-to-r ${gradient || 'from-blue-500 to-purple-500'} border-white/30 text-white`
-          : 'bg-black/30 border-white/10 text-white/70 hover:border-white/30'
+        ${
+          active
+            ? `bg-gradient-to-r ${gradient || 'from-blue-500 to-purple-500'} border-white/30 text-white`
+            : 'bg-black/30 border-white/10 text-white/70 hover:border-white/30'
         }
       `}
     >
       <span className="text-xl">{emoji}</span>
       <span>{label}</span>
-      <span className={`
+      <span
+        className={`
         px-2 py-0.5 rounded-full text-xs font-black
         ${active ? 'bg-black/30' : 'bg-white/10'}
-      `}>
+      `}
+      >
         {count}
       </span>
     </button>
-  )
+  );
 }

@@ -1,4 +1,5 @@
 # DFD NIVEL 2 - P3: SISTEMA DE GAMIFICACIÓN
+
 ## Ecosistema Mateatletas
 
 **Versión:** 1.0  
@@ -15,7 +16,7 @@ flowchart TB
     DOCENTE[👨‍🏫 DOCENTE]
     ESTUDIANTE[🎓 ESTUDIANTE]
     TUTOR[👨‍👩‍👧 TUTOR]
-    
+
     %% Subprocesos de P3
     P3_1[P3.1<br/>OTORGAR<br/>PUNTOS]
     P3_2[P3.2<br/>VERIFICAR Y<br/>ACTUALIZAR NIVEL]
@@ -23,41 +24,41 @@ flowchart TB
     P3_4[P3.4<br/>ACTUALIZAR<br/>EQUIPOS]
     P3_5[P3.5<br/>CALCULAR<br/>RANKINGS]
     P3_6[P3.6<br/>CONSULTAR<br/>GAMIFICACIÓN]
-    
+
     %% Almacenes de Datos
     D1[(D1<br/>USUARIOS)]
     D5[(D5<br/>GAMIFICACIÓN)]
-    
+
     %% Procesos Externos
     P2[P2<br/>CLASES]
     P5[P5<br/>PLANIFICACIONES]
     P6[P6<br/>NOTIFICACIONES]
-    
+
     %% === FLUJOS DESDE ENTIDADES EXTERNAS ===
-    
+
     DOCENTE -->|Otorgar puntos manuales| P3_1
     DOCENTE -->|Desbloquear logro manual| P3_3
     ESTUDIANTE -->|Consultar gamificación| P3_6
     TUTOR -->|Consultar gamificación hijos| P3_6
-    
+
     %% === FLUJOS DESDE PROCESOS EXTERNOS ===
-    
+
     P2 -->|Evento: Asistencia registrada| P3_1
     P5 -->|Evento: Actividad completada| P3_1
-    
+
     %% === FLUJOS HACIA ENTIDADES EXTERNAS ===
-    
+
     P3_6 -->|Datos gamificación| ESTUDIANTE
     P3_6 -->|Datos gamificación hijos| TUTOR
-    
+
     %% === FLUJOS HACIA PROCESOS EXTERNOS ===
-    
+
     P3_1 -->|Evento: Puntos otorgados| P6
     P3_2 -->|Evento: Nivel subido| P6
     P3_3 -->|Evento: Logro desbloqueado| P6
-    
+
     %% === P3.1: OTORGAR PUNTOS ===
-    
+
     P3_1 -->|Validar estudiante| D1
     D1 -->|Datos estudiante| P3_1
     P3_1 -->|Validar acción puntuable| D5
@@ -66,39 +67,39 @@ flowchart TB
     P3_1 -->|Actualizar puntos_totales| D1
     P3_1 -->|Trigger verificar nivel| P3_2
     P3_1 -->|Trigger actualizar equipo| P3_4
-    
+
     %% === P3.2: VERIFICAR Y ACTUALIZAR NIVEL ===
-    
+
     P3_2 -->|Leer puntos_totales| D1
     D1 -->|Puntos actuales| P3_2
     P3_2 -->|Consultar umbrales| D5
     D5 -->|Niveles config| P3_2
     P3_2 -->|Actualizar nivel_actual| D1
     P3_2 -->|Trigger logro automático| P3_3
-    
+
     %% === P3.3: GESTIONAR LOGROS ===
-    
+
     P3_3 -->|Validar logro| D5
     D5 -->|Datos logro| P3_3
     P3_3 -->|Verificar ya desbloqueado| D5
     D5 -->|Logros desbloqueados| P3_3
     P3_3 -->|Crear logro desbloqueado| D5
-    
+
     %% === P3.4: ACTUALIZAR EQUIPOS ===
-    
+
     P3_4 -->|Leer equipo estudiante| D1
     D1 -->|Equipo ID| P3_4
     P3_4 -->|Sumar puntos equipo| D5
-    
+
     %% === P3.5: CALCULAR RANKINGS ===
-    
+
     P3_5 -->|Leer todos estudiantes| D1
     D1 -->|Lista estudiantes| P3_5
     P3_5 -->|Leer equipos| D5
     D5 -->|Lista equipos| P3_5
-    
+
     %% === P3.6: CONSULTAR GAMIFICACIÓN ===
-    
+
     P3_6 -->|Leer puntos y nivel| D1
     D1 -->|Datos estudiante| P3_6
     P3_6 -->|Leer logros desbloqueados| D5
@@ -107,13 +108,13 @@ flowchart TB
     D5 -->|Historial puntos| P3_6
     P3_6 -->|Calcular ranking| P3_5
     P3_5 -->|Posición ranking| P3_6
-    
+
     %% Estilos
     classDef userExternal fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#fff
     classDef subprocess fill:#50C878,stroke:#2E8A57,stroke-width:2px,color:#fff
     classDef datastore fill:#FFB84D,stroke:#CC8A3D,stroke-width:2px,color:#000
     classDef externalProcess fill:#9B59B6,stroke:#6C3483,stroke-width:2px,color:#fff
-    
+
     class DOCENTE,ESTUDIANTE,TUTOR userExternal
     class P3_1,P3_2,P3_3,P3_4,P3_5,P3_6 subprocess
     class D1,D5 datastore
@@ -125,11 +126,13 @@ flowchart TB
 ## SUBPROCESO P3.1: OTORGAR PUNTOS
 
 ### Descripción
+
 Otorga puntos a estudiantes por diversas acciones (asistencia, actividades, otorgamiento manual).
 
 ### Entradas
 
 **Entrada Manual (desde DOCENTE):**
+
 ```typescript
 POST /api/gamificacion/puntos
 {
@@ -141,16 +144,18 @@ POST /api/gamificacion/puntos
 ```
 
 **Entrada Automática (desde P2 - Asistencia):**
+
 ```typescript
 {
-  tipo: 'AsistenciaRegistrada'
-  estudiante_id: string
-  clase_id: string
-  estado: 'Presente'
+  tipo: 'AsistenciaRegistrada';
+  estudiante_id: string;
+  clase_id: string;
+  estado: 'Presente';
 }
 ```
 
 **Entrada Automática (desde P5 - Actividad):**
+
 ```typescript
 {
   tipo: 'ActividadCompletada'
@@ -165,6 +170,7 @@ POST /api/gamificacion/puntos
 ### Proceso Detallado
 
 #### Paso 1: Obtener Acción Puntuable
+
 ```sql
 SELECT id, nombre, puntos, tipo, activo
 FROM acciones_puntuables
@@ -174,6 +180,7 @@ WHERE id = ? AND activo = true
 **Validación:** Acción existe y está activa
 
 **Datos comunes de AccionesPuntuables:**
+
 - "Asistencia a Clase" → 10 puntos
 - "Actividad Completada" → 15 puntos
 - "Participación Destacada" → 5 puntos
@@ -182,8 +189,9 @@ WHERE id = ? AND activo = true
 ---
 
 #### Paso 2: Obtener Estudiante
+
 ```sql
-SELECT 
+SELECT
   id, nombre, apellido,
   puntos_totales, nivel_actual, equipo_id,
   tutor_id
@@ -194,6 +202,7 @@ WHERE id = ?
 **Validación:** Estudiante existe
 
 **Datos iniciales del estudiante:**
+
 ```typescript
 {
   puntos_totales: 250, // Ejemplo
@@ -205,6 +214,7 @@ WHERE id = ?
 ---
 
 #### Paso 3: Validar Permisos (Si es Manual)
+
 Si el otorgamiento es manual por docente:
 
 ```sql
@@ -217,6 +227,7 @@ SELECT docente_id FROM clases WHERE id = ?
 ---
 
 #### Paso 4: Insertar Registro de Puntos Obtenidos
+
 ```sql
 INSERT INTO puntos_obtenidos (
   id,
@@ -246,9 +257,10 @@ INSERT INTO puntos_obtenidos (
 ---
 
 #### Paso 5: Actualizar Puntos Totales del Estudiante
+
 ```sql
 UPDATE estudiantes
-SET 
+SET
   puntos_totales = puntos_totales + ?,
   updatedAt = NOW()
 WHERE id = ?
@@ -256,6 +268,7 @@ RETURNING puntos_totales
 ```
 
 **Ejemplo:**
+
 - Puntos anteriores: 250
 - Puntos otorgados: 10
 - **Nuevos puntos totales: 260**
@@ -263,6 +276,7 @@ RETURNING puntos_totales
 ---
 
 #### Paso 6: Trigger - Verificar y Actualizar Nivel
+
 Enviar evento interno a **P3.2**:
 
 ```typescript
@@ -279,6 +293,7 @@ Este subproceso determinará si el estudiante subió de nivel.
 ---
 
 #### Paso 7: Trigger - Actualizar Equipo (Si Existe)
+
 Si `estudiante.equipo_id` existe:
 
 ```typescript
@@ -293,9 +308,11 @@ Si `estudiante.equipo_id` existe:
 ---
 
 #### Paso 8: Verificar Desbloqueo Automático de Logros
+
 Llamar función: `checkAutoUnlockLogros(estudiante_id)`
 
 Esta función verifica condiciones como:
+
 - "Primera Asistencia" → Si es la primera vez que asiste
 - "Racha de 7 días" → Si asistió 7 días consecutivos
 - "100 puntos acumulados" → Si alcanzó cierto umbral
@@ -312,6 +329,7 @@ Esta función verifica condiciones como:
 ---
 
 #### Paso 9: Crear Notificación para Estudiante
+
 Enviar evento a **P6**:
 
 ```typescript
@@ -333,6 +351,7 @@ Enviar evento a **P6**:
 ### Salidas
 
 **Respuesta al DOCENTE (si manual):**
+
 ```typescript
 {
   puntos: {
@@ -357,6 +376,7 @@ Enviar evento a **P6**:
 ```
 
 **Efectos en Base de Datos:**
+
 - D5 (GAMIFICACIÓN): INSERT en `puntos_obtenidos`
 - D1 (USUARIOS): UPDATE `puntos_totales` en `estudiantes`
 - Triggers a P3.2, P3.4, P3.3, P6
@@ -364,6 +384,7 @@ Enviar evento a **P6**:
 ---
 
 ### Validaciones Críticas
+
 1. ✅ Acción puntuable existe y está activa
 2. ✅ Estudiante existe
 3. ✅ Docente tiene permisos (si manual)
@@ -373,6 +394,7 @@ Enviar evento a **P6**:
 ---
 
 ### Estado de Implementación
+
 - Backend: ✅ 100%
 - Frontend: ✅ 100%
 
@@ -381,10 +403,13 @@ Enviar evento a **P6**:
 ## SUBPROCESO P3.2: VERIFICAR Y ACTUALIZAR NIVEL
 
 ### Descripción
+
 Verifica si el estudiante alcanzó el umbral de puntos para subir de nivel.
 
 ### Entradas
+
 Evento interno desde **P3.1**:
+
 ```typescript
 {
   tipo: 'VerificarNivel',
@@ -399,6 +424,7 @@ Evento interno desde **P3.1**:
 ### Proceso Detallado
 
 #### Paso 1: Consultar Configuración de Niveles
+
 ```sql
 SELECT nivel, puntos_minimos, puntos_maximos, nombre
 FROM niveles_config
@@ -407,6 +433,7 @@ ORDER BY nivel ASC
 ```
 
 **Ejemplo de tabla `niveles_config`:**
+
 ```
 nivel | puntos_minimos | puntos_maximos | nombre
 ------|----------------|----------------|------------
@@ -422,21 +449,23 @@ nivel | puntos_minimos | puntos_maximos | nombre
 ---
 
 #### Paso 2: Determinar Nuevo Nivel
+
 ```typescript
 // Buscar nivel correspondiente a puntos_totales_nuevo
-let nuevo_nivel = nivel_actual
+let nuevo_nivel = nivel_actual;
 
 for (const config of niveles_config) {
   if (puntos_totales_nuevo >= config.puntos_minimos) {
     if (config.puntos_maximos === null || puntos_totales_nuevo <= config.puntos_maximos) {
-      nuevo_nivel = config.nivel
-      break
+      nuevo_nivel = config.nivel;
+      break;
     }
   }
 }
 ```
 
 **Ejemplo:**
+
 - `puntos_totales_nuevo = 260`
 - Busca en niveles_config:
   - Nivel 1: 0-99 ❌
@@ -447,31 +476,34 @@ for (const config of niveles_config) {
 ---
 
 #### Paso 3: Verificar Si Hubo Cambio de Nivel
+
 ```typescript
 if (nuevo_nivel > nivel_actual) {
   // ¡Subió de nivel!
-  const cambio_nivel = true
-  const niveles_subidos = nuevo_nivel - nivel_actual
-  
+  const cambio_nivel = true;
+  const niveles_subidos = nuevo_nivel - nivel_actual;
+
   // Continuar al Paso 4
 } else {
   // No subió, terminar proceso
-  return { cambio: false }
+  return { cambio: false };
 }
 ```
 
 ---
 
 #### Paso 4: Actualizar Nivel del Estudiante
+
 ```sql
 UPDATE estudiantes
-SET 
+SET
   nivel_actual = ?,
   updatedAt = NOW()
 WHERE id = ?
 ```
 
 **Ejemplo:**
+
 - `nivel_anterior = 3`
 - `nuevo_nivel = 4`
 - Se actualiza en la base de datos
@@ -479,6 +511,7 @@ WHERE id = ?
 ---
 
 #### Paso 5: Desbloquear Logro Automático por Nivel
+
 Para **cada** nivel alcanzado, buscar si existe un logro asociado:
 
 ```sql
@@ -499,6 +532,7 @@ Si existe, enviar evento a **P3.3**:
 ```
 
 **Logros por nivel pre-creados:**
+
 ```sql
 INSERT INTO logros VALUES
   ('logro-nivel-2', 'Aprendiz', '...', '🎓', 'NivelAlcanzado', NULL, 2, ...),
@@ -509,6 +543,7 @@ INSERT INTO logros VALUES
 ---
 
 #### Paso 6: Enviar Notificación de Nivel Subido
+
 Enviar evento a **P6**:
 
 ```typescript
@@ -543,11 +578,13 @@ Enviar evento a **P6**:
 ### Salidas
 
 **Actualización en D1:**
+
 ```sql
 -- estudiantes.nivel_actual actualizado
 ```
 
 **Eventos emitidos:**
+
 - A **P3.3**: Desbloquear logros automáticos
 - A **P6**: Notificaciones a estudiante y tutor
 
@@ -559,28 +596,29 @@ Esta función se usa en consultas (P3.6) para mostrar al estudiante cuánto le f
 
 ```typescript
 function calcularProgreso(puntos_actuales: number, nivel_actual: number) {
-  const config_actual = niveles_config.find(c => c.nivel === nivel_actual)
-  const config_siguiente = niveles_config.find(c => c.nivel === nivel_actual + 1)
-  
+  const config_actual = niveles_config.find((c) => c.nivel === nivel_actual);
+  const config_siguiente = niveles_config.find((c) => c.nivel === nivel_actual + 1);
+
   if (!config_siguiente) {
     // Es nivel máximo
-    return { porcentaje: 100, puntos_faltantes: 0 }
+    return { porcentaje: 100, puntos_faltantes: 0 };
   }
-  
-  const puntos_desde_nivel = puntos_actuales - config_actual.puntos_minimos
-  const puntos_necesarios = config_siguiente.puntos_minimos - config_actual.puntos_minimos
-  const porcentaje = (puntos_desde_nivel / puntos_necesarios) * 100
-  const faltantes = config_siguiente.puntos_minimos - puntos_actuales
-  
+
+  const puntos_desde_nivel = puntos_actuales - config_actual.puntos_minimos;
+  const puntos_necesarios = config_siguiente.puntos_minimos - config_actual.puntos_minimos;
+  const porcentaje = (puntos_desde_nivel / puntos_necesarios) * 100;
+  const faltantes = config_siguiente.puntos_minimos - puntos_actuales;
+
   return {
     porcentaje: Math.min(100, Math.max(0, porcentaje)),
     puntos_faltantes: Math.max(0, faltantes),
-    puntos_siguiente_nivel: config_siguiente.puntos_minimos
-  }
+    puntos_siguiente_nivel: config_siguiente.puntos_minimos,
+  };
 }
 ```
 
 **Ejemplo:**
+
 - Estudiante con 260 puntos, nivel 3
 - Nivel 3: 250-499
 - Nivel 4: 500-999
@@ -590,6 +628,7 @@ function calcularProgreso(puntos_actuales: number, nivel_actual: number) {
 ---
 
 ### Validaciones Críticas
+
 1. ✅ Estudiante existe
 2. ✅ `nuevo_nivel >= nivel_actual` (nunca bajar)
 3. ✅ Niveles configurados correctamente
@@ -597,6 +636,7 @@ function calcularProgreso(puntos_actuales: number, nivel_actual: number) {
 ---
 
 ### Estado de Implementación
+
 - Backend: ✅ 95%
 - Frontend: ✅ 90%
 
@@ -605,20 +645,23 @@ function calcularProgreso(puntos_actuales: number, nivel_actual: number) {
 ## SUBPROCESO P3.3: GESTIONAR LOGROS
 
 ### Descripción
+
 Desbloquea logros para estudiantes (manual o automático).
 
 ### Entradas
 
 **Manual (desde DOCENTE):**
+
 ```typescript
-POST /api/gamificacion/logros/desbloquear
+POST / api / gamificacion / logros / desbloquear;
 {
-  estudiante_id: string
-  logro_id: string
+  estudiante_id: string;
+  logro_id: string;
 }
 ```
 
 **Automático (desde P3.2 - Nivel):**
+
 ```typescript
 {
   tipo: 'DesbloquearLogroAutomatico',
@@ -628,6 +671,7 @@ POST /api/gamificacion/logros/desbloquear
 ```
 
 **Automático (desde P3.1 - Condicional):**
+
 ```typescript
 {
   tipo: 'DesbloquearLogroCondicional',
@@ -641,8 +685,9 @@ POST /api/gamificacion/logros/desbloquear
 ### Proceso Detallado
 
 #### Paso 1: Validar Logro Existe
+
 ```sql
-SELECT 
+SELECT
   id, nombre, descripcion, icono, tipo,
   puntos_requeridos, nivel_requerido
 FROM logros
@@ -654,6 +699,7 @@ WHERE id = ?
 ---
 
 #### Paso 2: Verificar No Está Ya Desbloqueado
+
 ```sql
 SELECT COUNT(*) as existe
 FROM logros_desbloqueados
@@ -663,30 +709,33 @@ WHERE estudiante_id = ? AND logro_id = ?
 **Validación:** `existe = 0`
 
 Si `existe > 0`:
+
 ```typescript
-throw new ConflictException('El estudiante ya tiene este logro')
+throw new ConflictException('El estudiante ya tiene este logro');
 ```
 
 ---
 
 #### Paso 3: Verificar Requisitos del Logro (Opcional)
+
 Si el logro tiene requisitos:
 
 ```typescript
-const estudiante = await getEstudiante(estudiante_id)
+const estudiante = await getEstudiante(estudiante_id);
 
 if (logro.puntos_requeridos && estudiante.puntos_totales < logro.puntos_requeridos) {
-  throw new BadRequestException('No cumple requisito de puntos')
+  throw new BadRequestException('No cumple requisito de puntos');
 }
 
 if (logro.nivel_requerido && estudiante.nivel_actual < logro.nivel_requerido) {
-  throw new BadRequestException('No cumple requisito de nivel')
+  throw new BadRequestException('No cumple requisito de nivel');
 }
 ```
 
 ---
 
 #### Paso 4: Crear Registro de Logro Desbloqueado
+
 ```sql
 INSERT INTO logros_desbloqueados (
   id,
@@ -708,6 +757,7 @@ INSERT INTO logros_desbloqueados (
 ---
 
 #### Paso 5: Enviar Notificación
+
 Enviar evento a **P6**:
 
 ```typescript
@@ -741,6 +791,7 @@ Enviar evento a **P6**:
 ### Salidas
 
 **Respuesta (si manual):**
+
 ```typescript
 {
   estudiante: { id, nombre },
@@ -750,6 +801,7 @@ Enviar evento a **P6**:
 ```
 
 **Efectos en BD:**
+
 - D5: INSERT en `logros_desbloqueados`
 - Eventos a P6
 
@@ -758,6 +810,7 @@ Enviar evento a **P6**:
 ### Tipos de Logros
 
 #### 1. Logros por Nivel (Automáticos)
+
 Desbloqueados por **P3.2** al alcanzar cierto nivel:
 
 ```sql
@@ -770,6 +823,7 @@ INSERT INTO logros VALUES
 ---
 
 #### 2. Logros por Puntos (Condicionales)
+
 Desbloqueados al alcanzar X puntos totales:
 
 ```sql
@@ -783,6 +837,7 @@ Verificados en **P3.1** o **P3.2** después de actualizar puntos.
 ---
 
 #### 3. Logros por Acciones (Condicionales)
+
 Requieren lógica especial:
 
 ```sql
@@ -802,22 +857,22 @@ const ultimasSieteAsistencias = await prisma.asistencia.findMany({
     estudiante_id,
     estado: 'Presente',
     fecha: {
-      gte: subDays(new Date(), 7)
-    }
+      gte: subDays(new Date(), 7),
+    },
   },
-  orderBy: { fecha: 'desc' }
-})
+  orderBy: { fecha: 'desc' },
+});
 
 if (ultimasSieteAsistencias.length === 7) {
   // Verificar que sean días consecutivos
-  const consecutivos = verificarConsecutivos(ultimasSieteAsistencias)
-  
+  const consecutivos = verificarConsecutivos(ultimasSieteAsistencias);
+
   if (consecutivos) {
     // Desbloquear logro
     P3_3.desbloquear({
       estudiante_id,
-      logro_id: 'racha-7-dias'
-    })
+      logro_id: 'racha-7-dias',
+    });
   }
 }
 ```
@@ -825,6 +880,7 @@ if (ultimasSieteAsistencias.length === 7) {
 ---
 
 #### 4. Logros Especiales (Manuales)
+
 Otorgados solo por docentes:
 
 ```sql
@@ -837,6 +893,7 @@ INSERT INTO logros VALUES
 ---
 
 ### Validaciones Críticas
+
 1. ✅ Estudiante existe
 2. ✅ Logro existe
 3. ✅ Logro no está ya desbloqueado
@@ -845,6 +902,7 @@ INSERT INTO logros VALUES
 ---
 
 ### Estado de Implementación
+
 - Backend: ✅ 90% (básico completo, condicionales parcial)
 - Frontend: ⚠️ 70%
 
@@ -853,10 +911,13 @@ INSERT INTO logros VALUES
 ## SUBPROCESO P3.4: ACTUALIZAR EQUIPOS
 
 ### Descripción
+
 Actualiza puntos totales de equipos cuando un miembro gana puntos.
 
 ### Entradas
+
 Evento interno desde **P3.1**:
+
 ```typescript
 {
   tipo: 'ActualizarEquipo',
@@ -870,6 +931,7 @@ Evento interno desde **P3.1**:
 ### Proceso Detallado
 
 #### Paso 1: Validar Equipo Existe
+
 ```sql
 SELECT id, nombre, puntos_totales
 FROM equipos
@@ -879,9 +941,10 @@ WHERE id = ?
 ---
 
 #### Paso 2: Sumar Puntos al Equipo
+
 ```sql
 UPDATE equipos
-SET 
+SET
   puntos_totales = puntos_totales + ?,
   updatedAt = NOW()
 WHERE id = ?
@@ -889,6 +952,7 @@ RETURNING puntos_totales
 ```
 
 **Ejemplo:**
+
 - Equipo "Dragones Rojos" tenía 1240 puntos
 - Estudiante gana 10 puntos
 - **Nuevo total del equipo: 1250 puntos**
@@ -898,6 +962,7 @@ RETURNING puntos_totales
 ### Salidas
 
 **Actualización en BD:**
+
 - D5: UPDATE `equipos.puntos_totales`
 
 **No se emiten eventos** (el ranking se calcula bajo demanda en P3.5)
@@ -918,11 +983,12 @@ CREATE TABLE equipos (
 )
 
 -- Relación en estudiantes:
-ALTER TABLE estudiantes 
+ALTER TABLE estudiantes
 ADD COLUMN equipo_id TEXT REFERENCES equipos(id)
 ```
 
 **Ejemplos de equipos:**
+
 ```sql
 INSERT INTO equipos VALUES
   ('dragones', 'Dragones Rojos', '#FF5733', '🐉', 0),
@@ -934,12 +1000,14 @@ INSERT INTO equipos VALUES
 ---
 
 ### Validaciones Críticas
+
 1. ✅ Equipo existe
 2. ✅ Puntos adicionales > 0
 
 ---
 
 ### Estado de Implementación
+
 - Backend: ✅ 95%
 - Frontend: ⚠️ 60%
 
@@ -948,21 +1016,25 @@ INSERT INTO equipos VALUES
 ## SUBPROCESO P3.5: CALCULAR RANKINGS
 
 ### Descripción
+
 Calcula rankings de estudiantes y equipos ordenados por puntos.
 
 ### Entradas
 
 **1. Ranking Individual:**
+
 ```typescript
 GET /api/gamificacion/ranking/estudiantes?limite=10&grupo_id=opcional
 ```
 
 **2. Ranking de Equipos:**
+
 ```typescript
 GET /api/gamificacion/ranking/equipos?limite=5
 ```
 
 **3. Posición Individual:**
+
 ```typescript
 GET /api/gamificacion/ranking/posicion/:estudiante_id
 ```
@@ -974,8 +1046,9 @@ GET /api/gamificacion/ranking/posicion/:estudiante_id
 #### OPERACIÓN 1: Ranking Individual
 
 ##### Paso 1: Obtener Estudiantes Ordenados
+
 ```sql
-SELECT 
+SELECT
   e.id,
   e.nombre,
   e.apellido,
@@ -991,6 +1064,7 @@ LIMIT ?
 ```
 
 ##### Paso 2: Asignar Posiciones
+
 ```typescript
 const ranking = estudiantes.map((estudiante, index) => ({
   posicion: index + 1,
@@ -999,12 +1073,14 @@ const ranking = estudiantes.map((estudiante, index) => ({
     nombre: `${estudiante.nombre} ${estudiante.apellido}`,
     puntos_totales: estudiante.puntos_totales,
     nivel_actual: estudiante.nivel_actual,
-    equipo: estudiante.equipo_nombre ? {
-      nombre: estudiante.equipo_nombre,
-      icono: estudiante.equipo_icono
-    } : null
-  }
-}))
+    equipo: estudiante.equipo_nombre
+      ? {
+          nombre: estudiante.equipo_nombre,
+          icono: estudiante.equipo_icono,
+        }
+      : null,
+  },
+}));
 ```
 
 ---
@@ -1012,7 +1088,7 @@ const ranking = estudiantes.map((estudiante, index) => ({
 #### OPERACIÓN 2: Ranking de Equipos
 
 ```sql
-SELECT 
+SELECT
   eq.id,
   eq.nombre,
   eq.icono,
@@ -1040,6 +1116,7 @@ AND acceso_activo = true
 ```
 
 **Ejemplo:**
+
 - Estudiante X tiene 350 puntos
 - 15 estudiantes tienen más de 350 puntos
 - **Posición de X = 16**
@@ -1049,6 +1126,7 @@ AND acceso_activo = true
 ### Salidas
 
 **Ranking Individual:**
+
 ```typescript
 {
   ranking: [
@@ -1068,6 +1146,7 @@ AND acceso_activo = true
 ```
 
 **Ranking Equipos:**
+
 ```typescript
 {
   ranking: [
@@ -1087,6 +1166,7 @@ AND acceso_activo = true
 ```
 
 **Posición Individual:**
+
 ```typescript
 {
   estudiante_id: string,
@@ -1101,24 +1181,27 @@ AND acceso_activo = true
 ### Optimizaciones
 
 1. **Cacheo:** Rankings se cachean 5-10 minutos
-2. **Índices:** 
+2. **Índices:**
+
    ```sql
-   CREATE INDEX idx_estudiantes_puntos_desc 
+   CREATE INDEX idx_estudiantes_puntos_desc
    ON estudiantes(puntos_totales DESC)
-   
-   CREATE INDEX idx_equipos_puntos_desc 
+
+   CREATE INDEX idx_equipos_puntos_desc
    ON equipos(puntos_totales DESC)
    ```
 
 ---
 
 ### Validaciones Críticas
+
 1. ✅ Límite > 0 y <= 100
 2. ✅ Solo estudiantes con `acceso_activo = true`
 
 ---
 
 ### Estado de Implementación
+
 - Backend: ✅ 90%
 - Frontend: ✅ 85%
 
@@ -1127,17 +1210,20 @@ AND acceso_activo = true
 ## SUBPROCESO P3.6: CONSULTAR GAMIFICACIÓN
 
 ### Descripción
+
 Retorna datos completos de gamificación de un estudiante.
 
 ### Entradas
 
 **Desde ESTUDIANTE:**
+
 ```typescript
-GET /api/gamificacion/mi-gamificacion
+GET / api / gamificacion / mi - gamificacion;
 // user.id extraído del JWT
 ```
 
 **Desde TUTOR:**
+
 ```typescript
 GET /api/gamificacion/estudiante/:estudiante_id
 ```
@@ -1147,6 +1233,7 @@ GET /api/gamificacion/estudiante/:estudiante_id
 ### Proceso Detallado
 
 #### Paso 1: Validar Ownership (Si es TUTOR)
+
 ```sql
 SELECT * FROM estudiantes
 WHERE id = ? AND tutor_id = ?
@@ -1157,8 +1244,9 @@ WHERE id = ? AND tutor_id = ?
 ---
 
 #### Paso 2: Obtener Datos del Estudiante
+
 ```sql
-SELECT 
+SELECT
   e.id, e.nombre, e.apellido,
   e.puntos_totales, e.nivel_actual,
   e.equipo_id,
@@ -1173,6 +1261,7 @@ WHERE e.id = ?
 ---
 
 #### Paso 3: Calcular Progreso al Siguiente Nivel
+
 ```typescript
 const progreso = calcularProgreso(
   estudiante.puntos_totales,
@@ -1190,8 +1279,9 @@ const progreso = calcularProgreso(
 ---
 
 #### Paso 4: Obtener Logros Desbloqueados
+
 ```sql
-SELECT 
+SELECT
   ld.id,
   ld.fecha_desbloqueo,
   l.nombre,
@@ -1207,8 +1297,9 @@ ORDER BY ld.fecha_desbloqueo DESC
 ---
 
 #### Paso 5: Obtener Historial de Puntos (Últimos 30 días)
+
 ```sql
-SELECT 
+SELECT
   po.puntos,
   po.fecha_otorgado,
   ap.nombre as accion,
@@ -1224,19 +1315,21 @@ LIMIT 50
 ---
 
 #### Paso 6: Calcular Posición en Ranking
+
 Llamar a **P3.5**:
 
 ```typescript
 const { posicion, percentil } = await calcularPosicionIndividual({
-  estudiante_id
-})
+  estudiante_id,
+});
 ```
 
 ---
 
 #### Paso 7: Obtener Logros Disponibles (No Desbloqueados)
+
 ```sql
-SELECT 
+SELECT
   l.id, l.nombre, l.descripcion, l.icono,
   l.puntos_requeridos, l.nivel_requerido
 FROM logros l
@@ -1244,7 +1337,7 @@ WHERE l.id NOT IN (
   SELECT logro_id FROM logros_desbloqueados
   WHERE estudiante_id = ?
 )
-ORDER BY 
+ORDER BY
   COALESCE(l.puntos_requeridos, 999999) ASC,
   COALESCE(l.nivel_requerido, 999) ASC
 LIMIT 10
@@ -1255,6 +1348,7 @@ LIMIT 10
 ### Salidas
 
 **Respuesta Completa:**
+
 ```typescript
 {
   estudiante: {
@@ -1311,12 +1405,14 @@ LIMIT 10
 ---
 
 ### Validaciones Críticas
+
 1. ✅ Estudiante existe
 2. ✅ Tutor tiene ownership (si aplica)
 
 ---
 
 ### Estado de Implementación
+
 - Backend: ✅ 95%
 - Frontend: ✅ 90%
 
@@ -1325,6 +1421,7 @@ LIMIT 10
 ## ESTRUCTURA DE DATOS EN D5 (GAMIFICACIÓN)
 
 ### Tabla: acciones_puntuables
+
 ```sql
 CREATE TABLE acciones_puntuables (
   id TEXT PRIMARY KEY,
@@ -1346,6 +1443,7 @@ INSERT INTO acciones_puntuables VALUES
 ---
 
 ### Tabla: puntos_obtenidos
+
 ```sql
 CREATE TABLE puntos_obtenidos (
   id TEXT PRIMARY KEY,
@@ -1366,6 +1464,7 @@ CREATE INDEX idx_puntos_fecha ON puntos_obtenidos(fecha_otorgado DESC)
 ---
 
 ### Tabla: logros
+
 ```sql
 CREATE TABLE logros (
   id TEXT PRIMARY KEY,
@@ -1383,6 +1482,7 @@ CREATE TABLE logros (
 ---
 
 ### Tabla: logros_desbloqueados
+
 ```sql
 CREATE TABLE logros_desbloqueados (
   id TEXT PRIMARY KEY,
@@ -1391,7 +1491,7 @@ CREATE TABLE logros_desbloqueados (
   fecha_desbloqueo DATETIME DEFAULT CURRENT_TIMESTAMP,
   desbloqueado_por TEXT NOT NULL, -- 'DOCENTE' | 'SISTEMA'
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-  
+
   UNIQUE(estudiante_id, logro_id)
 )
 
@@ -1401,6 +1501,7 @@ CREATE INDEX idx_logros_estudiante ON logros_desbloqueados(estudiante_id)
 ---
 
 ### Tabla: equipos
+
 ```sql
 CREATE TABLE equipos (
   id TEXT PRIMARY KEY,
@@ -1418,6 +1519,7 @@ CREATE INDEX idx_equipos_puntos ON equipos(puntos_totales DESC)
 ---
 
 ### Tabla: niveles_config
+
 ```sql
 CREATE TABLE niveles_config (
   nivel INT PRIMARY KEY,
@@ -1483,14 +1585,14 @@ INSERT INTO niveles_config VALUES
 
 ## RESUMEN DE ESTADO DE IMPLEMENTACIÓN
 
-| Subproceso | Backend | Frontend |
-|------------|---------|----------|
-| P3.1 Otorgar Puntos | ✅ 100% | ✅ 100% |
-| P3.2 Verificar Nivel | ✅ 95% | ✅ 90% |
-| P3.3 Gestionar Logros | ✅ 90% | ⚠️ 70% |
-| P3.4 Actualizar Equipos | ✅ 95% | ⚠️ 60% |
-| P3.5 Calcular Rankings | ✅ 90% | ✅ 85% |
-| P3.6 Consultar Gamificación | ✅ 95% | ✅ 90% |
+| Subproceso                  | Backend | Frontend |
+| --------------------------- | ------- | -------- |
+| P3.1 Otorgar Puntos         | ✅ 100% | ✅ 100%  |
+| P3.2 Verificar Nivel        | ✅ 95%  | ✅ 90%   |
+| P3.3 Gestionar Logros       | ✅ 90%  | ⚠️ 70%   |
+| P3.4 Actualizar Equipos     | ✅ 95%  | ⚠️ 60%   |
+| P3.5 Calcular Rankings      | ✅ 90%  | ✅ 85%   |
+| P3.6 Consultar Gamificación | ✅ 95%  | ✅ 90%   |
 
 **Promedio:** Backend 94%, Frontend 82%
 
@@ -1499,11 +1601,13 @@ INSERT INTO niveles_config VALUES
 ## PRÓXIMOS PASOS
 
 ### Para MVP (26 de Octubre)
+
 1. ✅ Completar logros automáticos por nivel
 2. ⚠️ Mejorar UI de equipos en Portal Estudiante
 3. ⚠️ Cacheo de rankings (5-10 min)
 
 ### Post-Lanzamiento
+
 1. Logros condicionales avanzados (rachas, perfección mensual)
 2. Sistema de insignias adicionales
 3. Tabla de líderes por período (semanal, mensual)

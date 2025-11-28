@@ -44,7 +44,10 @@ export function calcularEstrellas(porcentaje: number): 0 | 1 | 2 | 3 {
 /**
  * Obtener mensaje motivacional según estrellas
  */
-export function getMensajePorEstrellas(estrellas: 0 | 1 | 2 | 3): { mensaje: string; emoji: string } {
+export function getMensajePorEstrellas(estrellas: 0 | 1 | 2 | 3): {
+  mensaje: string;
+  emoji: string;
+} {
   const mensajes = {
     0: {
       mensaje: '¡Sigue intentando! La práctica hace al maestro.',
@@ -92,11 +95,12 @@ export function getMultiplicadorRecompensas(estrellas: 0 | 1 | 2 | 3): number {
 export function calcularResultado(
   actividad: Actividad,
   respuestas: RespuestaRegistrada[],
-  tiempoEmpleadoSegundos: number
+  tiempoEmpleadoSegundos: number,
 ): ResultadoCalculado {
   const preguntasTotales = respuestas.length;
   const preguntasCorrectas = respuestas.filter((r) => r.esCorrecta).length;
-  const porcentaje = preguntasTotales > 0 ? Math.round((preguntasCorrectas / preguntasTotales) * 100) : 0;
+  const porcentaje =
+    preguntasTotales > 0 ? Math.round((preguntasCorrectas / preguntasTotales) * 100) : 0;
 
   const estrellas = calcularEstrellas(porcentaje);
   const multiplicador = getMultiplicadorRecompensas(estrellas);

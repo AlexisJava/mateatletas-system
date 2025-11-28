@@ -1,8 +1,8 @@
 declare module '@testing-library/dom' {
-export type Queries = Record<string, unknown>;
-export type BoundFunction<T> = (...args: unknown[]) => unknown;
-export type Config = Record<string, unknown>;
-export type ConfigFn = (existing: Config) => Partial<Config>;
+  export type Queries = Record<string, unknown>;
+  export type BoundFunction<T> = (...args: unknown[]) => unknown;
+  export type Config = Record<string, unknown>;
+  export type ConfigFn = (existing: Config) => Partial<Config>;
 
   export const screen: any;
   export const fireEvent: any;

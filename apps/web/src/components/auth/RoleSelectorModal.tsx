@@ -32,7 +32,7 @@ const ROLE_CONFIG = {
 export default function RoleSelectorModal({ roles, onSelectRole }: RoleSelectorModalProps) {
   // Filtrar solo roles válidos (admin y docente)
   const availableRoles = roles
-    .map(r => r.toLowerCase())
+    .map((r) => r.toLowerCase())
     .filter((r): r is 'admin' | 'docente' => r === 'admin' || r === 'docente');
 
   return (
@@ -82,9 +82,7 @@ export default function RoleSelectorModal({ roles, onSelectRole }: RoleSelectorM
                       <Icon className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1 text-left">
-                      <div className="text-2xl font-black text-white mb-1">
-                        {config.label}
-                      </div>
+                      <div className="text-2xl font-black text-white mb-1">{config.label}</div>
                       <div className="text-base text-white/90 font-medium">
                         {config.description}
                       </div>

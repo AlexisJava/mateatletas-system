@@ -1,4 +1,5 @@
 # Design System EVOLVED - Mateatletas
+
 ## Paleta Emerald/Orange Premium - Sistema de Construcción Frontend
 
 > **Fecha de establecimiento**: Octubre 2025
@@ -20,14 +21,14 @@ const colors = {
     50: 'rgb(236, 253, 245)',
     100: 'rgb(209, 250, 229)',
     200: 'rgb(167, 243, 208)',
-    300: 'rgb(110, 231, 183)',   // Gradientes de texto
-    400: 'rgb(52, 211, 153)',    // PRIMARY - Bordes, iconos, highlights
-    500: 'rgb(16, 185, 129)',    // Botones secundarios, links
+    300: 'rgb(110, 231, 183)', // Gradientes de texto
+    400: 'rgb(52, 211, 153)', // PRIMARY - Bordes, iconos, highlights
+    500: 'rgb(16, 185, 129)', // Botones secundarios, links
     600: 'rgb(5, 150, 105)',
     700: 'rgb(4, 120, 87)',
     800: 'rgb(6, 95, 70)',
     900: 'rgb(6, 78, 59)',
-    950: 'rgba(16, 185, 129, 0.05)',  // Backgrounds sutiles
+    950: 'rgba(16, 185, 129, 0.05)', // Backgrounds sutiles
   },
   teal: {
     400: 'rgb(45, 212, 191)',
@@ -37,16 +38,16 @@ const colors = {
 
   // Orange - SOLO para CTAs principales (5% del diseño)
   orange: {
-    500: 'rgb(255, 107, 53)',    // CTA principal
-    600: 'rgb(234, 88, 12)',     // CTA hover
+    500: 'rgb(255, 107, 53)', // CTA principal
+    600: 'rgb(234, 88, 12)', // CTA hover
     700: 'rgb(194, 65, 12)',
   },
 
   // Neutrales
-  black: 'rgb(0, 0, 0)',         // Background principal
+  black: 'rgb(0, 0, 0)', // Background principal
   zinc: {
-    900: 'rgb(24, 24, 27)',      // Cards, modales
-    950: 'rgb(9, 9, 11)',        // Variantes de background
+    900: 'rgb(24, 24, 27)', // Cards, modales
+    950: 'rgb(9, 9, 11)', // Variantes de background
   },
   white: {
     full: 'rgb(255, 255, 255)',
@@ -67,6 +68,7 @@ const colors = {
 ### Reglas de Uso de Color
 
 #### ✅ DO (Hacer):
+
 - **Emerald 95% / Orange 5%**: Mantener esta proporción estricta
 - **Orange SOLO para CTAs principales**: "Solicitar Información", "Ingresar al Portal", "Comenzar"
 - **Emerald para todo lo demás**: Bordes, iconos, links secundarios, badges, highlights
@@ -74,6 +76,7 @@ const colors = {
 - **Backgrounds negros**: `bg-black` como base principal
 
 #### ❌ DON'T (No hacer):
+
 - No uses orange en botones secundarios
 - No uses orange en iconos o badges
 - No mezcles orange y emerald en el mismo elemento (excepto hover states)
@@ -840,6 +843,7 @@ xl: '1280px'  // Desktop
 Antes de considerar una página "completa", verifica:
 
 ### Visual
+
 - [ ] Background negro con grid pattern emerald
 - [ ] Floating particles (15 partículas)
 - [ ] Radial gradient spotlight con pulse
@@ -850,6 +854,7 @@ Antes de considerar una página "completa", verifica:
 - [ ] Glassmorphism cards con border glow
 
 ### Animaciones
+
 - [ ] Entry animations (fade + slide)
 - [ ] Magnetic buttons funcionando
 - [ ] Loading states con spinner
@@ -857,12 +862,14 @@ Antes de considerar una página "completa", verifica:
 - [ ] Transitions suaves (0.3s-0.8s)
 
 ### Tipografía
+
 - [ ] Headings con gradiente emerald en palabras clave
 - [ ] Body text en white/60 o white/80
 - [ ] Font weights correctos (bold para headings, semibold para buttons)
 - [ ] Line-height adecuado (leading-relaxed para párrafos)
 
 ### Funcionalidad
+
 - [ ] Responsive (mobile + tablet + desktop)
 - [ ] Accesibilidad básica (labels, aria-labels)
 - [ ] Estados disabled en inputs/buttons
@@ -870,6 +877,7 @@ Antes de considerar una página "completa", verifica:
 - [ ] Loading states durante operaciones async
 
 ### Código
+
 - [ ] Componentes reutilizables extraídos
 - [ ] TypeScript types definidos
 - [ ] Imports organizados (React → Next → External → Internal → Icons)
@@ -1025,16 +1033,19 @@ export default function YourPage() {
 ## 📚 Referencias
 
 ### Iconos (Lucide React)
+
 - Documentación: https://lucide.dev
 - Instalación: `npm install lucide-react`
 - Uso: Siempre con `strokeWidth={2}` o `strokeWidth={2.5}`
 
 ### Framer Motion
+
 - Documentación: https://www.framer.com/motion/
 - Instalación: `npm install framer-motion`
 - Focus: `motion.div`, `useMotionValue`, `useSpring`, `animate`
 
 ### Tailwind CSS
+
 - Documentación: https://tailwindcss.com
 - Custom colors ya están en `tailwind.config.js`
 - Usa arbitrary values cuando necesites: `bg-[#10B981]`
@@ -1044,24 +1055,28 @@ export default function YourPage() {
 ## ⚠️ Anti-Patterns (NO HACER)
 
 ### ❌ Colores
+
 - No uses tech startup colors (azul, púrpura genérico)
 - No uses múltiples colores primarios
 - No uses orange en más del 5% del diseño
 - No uses gradientes de más de 2 colores (emerald → teal ok, emerald → teal → blue NO)
 
 ### ❌ Lenguaje
+
 - No uses "gratis" en ningún lugar
 - No uses tech buzzwords ("revolucionario", "disruptivo", "innovador")
 - No uses emojis excesivamente (solo cuando sea 100% natural)
 - SÍ usa lenguaje deportivo sutil ("entrenamiento", "progreso", "nivel")
 
 ### ❌ Layout
+
 - No hagas sections demasiado largas (max 100vh por sección)
 - No pongas más de 3 CTAs en la misma pantalla
 - No uses carrusels automáticos
 - No uses popups/modales agresivos
 
 ### ❌ Animaciones
+
 - No hagas animaciones de más de 1s de duración (excepto loops)
 - No animes demasiados elementos a la vez
 - No uses easing súper exagerados
@@ -1072,6 +1087,7 @@ export default function YourPage() {
 ## 🎯 Resumen Ejecutivo
 
 **La fórmula ganadora:**
+
 1. **95% Emerald + 5% Orange** estricto
 2. **Glassmorphism** en todos los cards
 3. **Magnetic buttons** en CTAs

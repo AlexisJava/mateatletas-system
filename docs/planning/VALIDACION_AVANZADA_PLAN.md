@@ -10,6 +10,7 @@
 ### ✅ Ya Implementado (Básico)
 
 Los DTOs actuales tienen validaciones básicas con `class-validator`:
+
 - `@IsEmail()`, `@IsString()`, `@IsNumber()`
 - `@MinLength()`, `@Min()`, `@Max()`
 - `@IsOptional()`, `@IsNotEmpty()`
@@ -37,6 +38,7 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 **Validadores necesarios**:
 
 #### `@IsFutureDate()` - Validar fechas futuras
+
 ```typescript
 // Casos de uso:
 // - CrearClaseDto.fechaHoraInicio
@@ -45,6 +47,7 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 ```
 
 #### `@IsDateRange()` - Validar rango de fechas
+
 ```typescript
 // Casos de uso:
 // - CrearProductoDto (fecha_inicio < fecha_fin)
@@ -52,12 +55,14 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 ```
 
 #### `@IsValidAge()` - Validar edad mínima/máxima
+
 ```typescript
 // Casos de uso:
 // - CreateEstudianteDto.fecha_nacimiento (4-18 años)
 ```
 
 #### `@IsValidPassword()` - Validación de contraseña robusta
+
 ```typescript
 // Casos de uso:
 // - RegisterDto.password
@@ -65,12 +70,14 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 ```
 
 #### `@IsUUID()` - Validar formato UUID
+
 ```typescript
 // Casos de uso:
 // - Todos los campos de ID (rutaCurricularId, docenteId, etc.)
 ```
 
 #### `@IsPhoneNumber()` - Validar teléfonos argentinos
+
 ```typescript
 // Casos de uso:
 // - RegisterDto.telefono
@@ -84,6 +91,7 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 **Transformadores necesarios**:
 
 #### `@Trim()` - Eliminar espacios en blanco
+
 ```typescript
 // Aplicar a:
 // - Todos los campos de texto (nombre, apellido, email)
@@ -91,18 +99,21 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 ```
 
 #### `@Lowercase()` - Convertir a minúsculas
+
 ```typescript
 // Aplicar a:
 // - email (evita duplicados por case sensitivity)
 ```
 
 #### `@Capitalize()` - Primera letra en mayúscula
+
 ```typescript
 // Aplicar a:
 // - nombre, apellido (consistencia en BD)
 ```
 
 #### `@SanitizeHTML()` - Eliminar tags HTML
+
 ```typescript
 // Aplicar a:
 // - descripcion (prevenir XSS)
@@ -114,6 +125,7 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 ### 3. Mejorar DTOs Críticos
 
 #### `RegisterDto` (Auth)
+
 ```typescript
 ✅ Ya tiene: email, password con regex, nombres
 ➕ Agregar:
@@ -125,6 +137,7 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 ```
 
 #### `CreateEstudianteDto`
+
 ```typescript
 ✅ Ya tiene: nombre, apellido, nivel_escolar
 ➕ Agregar:
@@ -135,6 +148,7 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 ```
 
 #### `CrearClaseDto`
+
 ```typescript
 ✅ Ya tiene: IDs, fechaHoraInicio, duracion, cupos
 ➕ Agregar:
@@ -146,6 +160,7 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 ```
 
 #### `CrearProductoDto`
+
 ```typescript
 ✅ Ya tiene: ValidateIf para campos condicionales
 ➕ Agregar:
@@ -158,6 +173,7 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 ```
 
 #### `RegistrarAsistenciaDto`
+
 ```typescript
 ✅ Actualmente muy básico
 ➕ Agregar:
@@ -181,9 +197,9 @@ Los DTOs actuales tienen validaciones básicas con `class-validator`:
 // main.ts
 app.useGlobalPipes(
   new ValidationPipe({
-    whitelist: true,           // Elimina propiedades no definidas
+    whitelist: true, // Elimina propiedades no definidas
     forbidNonWhitelisted: true, // Error si hay propiedades extra
-    transform: true,            // Transforma tipos automáticamente
+    transform: true, // Transforma tipos automáticamente
     transformOptions: {
       enableImplicitConversion: true,
     },
@@ -248,6 +264,7 @@ apps/api/src/
 ## 🎯 Priorización de Implementación
 
 ### Sprint 1: Validadores Custom (1 hora)
+
 1. ✅ Crear `@IsFutureDate()`
 2. ✅ Crear `@IsDateRange()`
 3. ✅ Crear `@IsValidAge()`
@@ -255,12 +272,14 @@ apps/api/src/
 5. ✅ Crear `@IsPhoneNumberAR()`
 
 ### Sprint 2: Sanitización (30 min)
+
 1. ✅ Crear `@Trim()`
 2. ✅ Crear `@Capitalize()`
 3. ✅ Crear `@Lowercase()`
 4. ✅ Crear `@SanitizeHTML()`
 
 ### Sprint 3: Aplicar a DTOs (45 min)
+
 1. ✅ Actualizar `RegisterDto`
 2. ✅ Actualizar `CreateEstudianteDto`
 3. ✅ Actualizar `CrearClaseDto`
@@ -268,6 +287,7 @@ apps/api/src/
 5. ✅ Actualizar `RegistrarAsistenciaDto`
 
 ### Sprint 4: Tests (30 min)
+
 1. ✅ Tests de validadores custom
 2. ✅ Tests de sanitización
 3. ✅ Tests de DTOs actualizados
@@ -277,12 +297,14 @@ apps/api/src/
 ## 📈 Impacto Esperado
 
 **Antes (8.5/10)**:
+
 - ✅ Validaciones básicas
 - ❌ Sin sanitización
 - ❌ Sin validación de reglas de negocio
 - ❌ Mensajes de error genéricos
 
 **Después (8.7/10)**:
+
 - ✅ Validaciones básicas
 - ✅ Validaciones avanzadas con reglas de negocio
 - ✅ Sanitización automática de inputs
@@ -298,6 +320,7 @@ apps/api/src/
 ## 🚀 Comenzar Implementación
 
 **Orden recomendado**:
+
 1. Crear validadores custom básicos
 2. Aplicar a DTOs críticos (Auth, Clases, Estudiantes)
 3. Agregar sanitización

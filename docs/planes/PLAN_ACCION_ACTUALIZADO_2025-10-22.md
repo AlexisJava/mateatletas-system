@@ -12,6 +12,7 @@
 **Estado actual:** Sistema production-ready con mejoras identificadas  
 **Problemas críticos detectados:** 4 vulnerabilidades de seguridad  
 **Trabajo completado desde última auditoría:**
+
 - ✅ Contratos compartidos (9 schemas Zod)
 - ✅ Type casts eliminados (0 inseguros)
 - ✅ Tests expandidos (475 tests, 34 suites)
@@ -29,11 +30,13 @@
 **Impacto:** CRÍTICO - Riesgo de pérdida de ingresos, robo de datos, DDoS
 
 #### Tarea #1.1: Proteger Endpoint Mock de Pagos
+
 **Archivo:** `apps/api/src/pagos/pagos.controller.ts:159`  
 **Tiempo:** 15 minutos  
 **Impacto:** Prevenir activación de membresías gratis
 
 **Acción:**
+
 ```typescript
 @Post('mock/activar-membresia/:id')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -47,11 +50,13 @@ async activarMembresiaMock(@Param('id') membresiaId: string) {
 ```
 
 #### Tarea #1.2: Configurar CORS Restrictivo
+
 **Archivo:** `apps/api/src/main.ts:13`  
 **Tiempo:** 10 minutos  
 **Impacto:** Prevenir CSRF y XSS cross-site
 
 **Acción:**
+
 ```typescript
 app.enableCors({
   origin: [
@@ -67,6 +72,7 @@ app.enableCors({
 ```
 
 #### Tarea #1.3: Verificar Migración JWT a httpOnly Cookies
+
 **Archivo:** `apps/web/src/lib/axios.ts:29`  
 **Tiempo:** 5 minutos (verificación)  
 **Estado:** Según auditoría dice "✅ RESUELTO" - VERIFICAR
@@ -74,11 +80,13 @@ app.enableCors({
 **Acción:** Confirmar que NO se usa `localStorage.getItem('auth-token')`
 
 #### Tarea #1.4: Implementar Rate Limiting
+
 **Archivo:** `apps/api/src/auth/auth.controller.ts`  
 **Tiempo:** 1 hora  
 **Impacto:** Prevenir brute force y DDoS
 
 **Acción:**
+
 ```bash
 npm install @nestjs/throttler
 ```
@@ -163,7 +171,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 #### Top 5 Archivos con Más Errores
 
-1. **components/admin/__tests__/CreateDocenteForm.improvements.spec.tsx** (37 errores)
+1. **components/admin/**tests**/CreateDocenteForm.improvements.spec.tsx** (37 errores)
    - Problema: Falta `@testing-library/react`
    - Solución: `npm install --save-dev @testing-library/react @testing-library/jest-dom`
    - Tiempo: 30 min
@@ -185,12 +193,14 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
    - Tiempo: 45 min
 
 **Categorías de Errores:**
+
 - Casting incorrecto: 45 errores (22%)
 - Unknown types: 68 errores (33%)
 - Null safety: 40 errores (19%)
 - Tests sin deps: 37 errores (18%)
 
 **Estrategia:**
+
 1. Fix testing library (37 errores) - 30 min
 2. Fix top 5 archivos (102 errores) - 5 horas
 3. Resto (67 errores) - 4 horas
@@ -203,15 +213,18 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 ### 🟢 Prioridad 4: MEJORAS OPCIONALES
 
 #### 4.1 Dashboard de Observabilidad para Circuit Breakers
+
 **Tiempo:** 1.5 horas  
 **Estado:** No implementado (verificado)
 
 #### 4.2 Aumentar Coverage de Tests
+
 **Estado actual:** 475 tests (excelente)  
 **Acción:** Medir coverage con `npm run test:cov`  
 **Tiempo:** 15 min verificación
 
 #### 4.3 Implementar Sentry para Error Tracking
+
 **Tiempo:** 2 horas  
 **Impacto:** Mejor observabilidad en producción
 
@@ -220,6 +233,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 ## 📅 CRONOGRAMA RECOMENDADO
 
 ### Día 1 (1.5 horas) - CRÍTICO
+
 - 🔴 Prioridad 1: Seguridad (4 vulnerabilidades)
   - Mock endpoint protection (15 min)
   - CORS restrictivo (10 min)
@@ -227,6 +241,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
   - Rate limiting (1 hora)
 
 ### Día 2 (4 horas) - ALTA
+
 - 🟠 Prioridad 2: Validación Zod (archivos alta prioridad)
   - pagos.api.ts (45 min)
   - asistencia.api.ts (1 hora)
@@ -234,6 +249,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
   - calendario.api.ts (1 hora)
 
 ### Día 3 (5.5 horas) - ALTA
+
 - 🟡 Prioridad 3: Errores TypeScript (top issues)
   - Fix testing library (30 min)
   - usuarios/page.tsx (1 hora)
@@ -243,6 +259,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
   - Validar build (30 min)
 
 ### Día 4+ (Opcional)
+
 - Completar validación Zod (3.5 horas)
 - Completar errores TypeScript (4 horas)
 - Dashboard observabilidad (1.5 horas)
@@ -254,20 +271,21 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 ## 🎯 MÉTRICAS DE ÉXITO
 
-| Métrica | Actual | Objetivo Día 1 | Objetivo Final |
-|---------|--------|----------------|----------------|
-| **Vulnerabilidades Críticas** | 4 | 0 ✅ | 0 ✅ |
-| **Archivos API con Validación** | 5/14 (36%) | 9/14 (64%) | 14/14 (100%) |
-| **Errores TypeScript (web)** | 206 | 169 | 0 |
-| **Build limpio** | ⚠️ Con warnings | ⚠️ Con warnings | ✅ Sin errores |
-| **Calificación Seguridad** | 4/10 | 8/10 | 9/10 |
-| **Calificación General** | 9.1/10 | 9.3/10 | 9.5/10 |
+| Métrica                         | Actual          | Objetivo Día 1  | Objetivo Final |
+| ------------------------------- | --------------- | --------------- | -------------- |
+| **Vulnerabilidades Críticas**   | 4               | 0 ✅            | 0 ✅           |
+| **Archivos API con Validación** | 5/14 (36%)      | 9/14 (64%)      | 14/14 (100%)   |
+| **Errores TypeScript (web)**    | 206             | 169             | 0              |
+| **Build limpio**                | ⚠️ Con warnings | ⚠️ Con warnings | ✅ Sin errores |
+| **Calificación Seguridad**      | 4/10            | 8/10            | 9/10           |
+| **Calificación General**        | 9.1/10          | 9.3/10          | 9.5/10         |
 
 ---
 
 ## ✅ COMANDOS DE VERIFICACIÓN
 
 ### Después de Día 1 (Seguridad)
+
 ```bash
 # Verificar guards en mock endpoint
 grep -A 5 "activarMembresiaMock" apps/api/src/pagos/pagos.controller.ts
@@ -283,6 +301,7 @@ grep -r "ThrottlerModule" apps/api/src/
 ```
 
 ### Después de Día 2 (Validación Zod)
+
 ```bash
 # Contar archivos con validación
 grep -r "\.parse\|\.safeParse" apps/web/src/lib/api/*.ts | wc -l
@@ -293,6 +312,7 @@ ls packages/contracts/src/schemas/ | grep -E "membresia|pago|asistencia|calendar
 ```
 
 ### Después de Día 3 (TypeScript)
+
 ```bash
 # Build sin errores
 cd apps/web && npm run build
@@ -313,21 +333,24 @@ npx tsc --noEmit 2>&1 | grep "error TS" | wc -l
 ✅ Contratos compartidos (9 schemas)  
 ✅ Type casts eliminados  
 ✅ 475 tests implementados  
-✅ Circuit breakers implementados  
+✅ Circuit breakers implementados
 
 ---
 
 ## 🚨 ALERTAS Y NOTAS
 
 ### CRÍTICO
+
 - **Mock endpoint de pagos está ACTIVO en producción sin protección**
 - Implementar Día 1 INMEDIATAMENTE
 
 ### IMPORTANTE
+
 - Las auditorías son de Oct 17-20, algunos issues pueden estar resueltos
 - Verificar estado antes de empezar cada tarea
 
 ### NICE TO HAVE
+
 - Dashboard de observabilidad
 - Sentry integration
 - Coverage reports

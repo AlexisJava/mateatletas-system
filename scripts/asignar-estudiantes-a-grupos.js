@@ -47,11 +47,11 @@ async function asignarEstudiantesAGrupos() {
       let grupoAsignado;
 
       if (estudiante.edad <= 7) {
-        grupoAsignado = grupos.find(g => g.codigo === 'B1');
+        grupoAsignado = grupos.find((g) => g.codigo === 'B1');
       } else if (estudiante.edad <= 10) {
-        grupoAsignado = grupos.find(g => g.codigo === 'B2');
+        grupoAsignado = grupos.find((g) => g.codigo === 'B2');
       } else {
-        grupoAsignado = grupos.find(g => g.codigo === 'B3');
+        grupoAsignado = grupos.find((g) => g.codigo === 'B3');
       }
 
       // Si no encontramos grupo específico, usar el primero disponible
@@ -75,11 +75,12 @@ async function asignarEstudiantesAGrupos() {
         grupo: `${grupoAsignado.codigo} - ${grupoAsignado.dia_semana} ${grupoAsignado.hora_inicio}`,
       });
 
-      console.log(`✅ ${estudiante.nombre} ${estudiante.apellido} (${estudiante.edad} años) -> ${grupoAsignado.codigo} - ${grupoAsignado.dia_semana} ${grupoAsignado.hora_inicio}`);
+      console.log(
+        `✅ ${estudiante.nombre} ${estudiante.apellido} (${estudiante.edad} años) -> ${grupoAsignado.codigo} - ${grupoAsignado.dia_semana} ${grupoAsignado.hora_inicio}`,
+      );
     }
 
     console.log(`\n✨ Total de asignaciones creadas: ${asignaciones.length}`);
-
   } catch (error) {
     console.error('❌ Error:', error);
   } finally {

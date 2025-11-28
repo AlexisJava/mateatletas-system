@@ -29,16 +29,9 @@ export default function PerfilPage() {
   return (
     <div className="min-h-screen bg-gray-950 p-6 space-y-8">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h1 className="text-4xl font-black text-white mb-2">
-          👤 Mi Perfil
-        </h1>
-        <p className="text-gray-400">
-          Revisa tu progreso, recursos y logros
-        </p>
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-4xl font-black text-white mb-2">👤 Mi Perfil</h1>
+        <p className="text-gray-400">Revisa tu progreso, recursos y logros</p>
       </motion.div>
 
       {/* Recursos */}
@@ -50,9 +43,7 @@ export default function PerfilPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Estadísticas rápidas */}
           <div className="bg-gray-900 rounded-2xl p-6">
-            <h2 className="text-white font-bold text-xl mb-4">
-              📊 Tus Estadísticas
-            </h2>
+            <h2 className="text-white font-bold text-xl mb-4">📊 Tus Estadísticas</h2>
 
             {recursos && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -74,9 +65,7 @@ export default function PerfilPage() {
 
                 <div className="text-center">
                   <div className="text-4xl mb-2">🎯</div>
-                  <div className="text-2xl font-bold text-white">
-                    {recursos?.nivel ?? 1}
-                  </div>
+                  <div className="text-2xl font-bold text-white">{recursos?.nivel ?? 1}</div>
                   <div className="text-gray-400 text-sm">Nivel</div>
                 </div>
 
@@ -93,9 +82,7 @@ export default function PerfilPage() {
 
           {/* Historial de transacciones */}
           <div className="bg-gray-900 rounded-2xl p-6">
-            <h2 className="text-white font-bold text-xl mb-4">
-              📜 Historial Reciente
-            </h2>
+            <h2 className="text-white font-bold text-xl mb-4">📜 Historial Reciente</h2>
 
             {historial && Array.isArray(historial) && historial.length > 0 ? (
               <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -121,9 +108,7 @@ export default function PerfilPage() {
                     </div>
                     <div
                       className={`font-bold text-lg ${
-                        transaccion.cantidad > 0
-                          ? 'text-green-400'
-                          : 'text-red-400'
+                        transaccion.cantidad > 0 ? 'text-green-400' : 'text-red-400'
                       }`}
                     >
                       {transaccion.cantidad > 0 ? '+' : ''}
@@ -133,9 +118,7 @@ export default function PerfilPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-400 text-center py-8">
-                No hay transacciones recientes
-              </p>
+              <p className="text-gray-400 text-center py-8">No hay transacciones recientes</p>
             )}
           </div>
         </div>
@@ -147,9 +130,7 @@ export default function PerfilPage() {
 
           {/* Logros recientes */}
           <div className="bg-gray-900 rounded-2xl p-6">
-            <h2 className="text-white font-bold text-xl mb-4">
-              🏆 Logros Recientes
-            </h2>
+            <h2 className="text-white font-bold text-xl mb-4">🏆 Logros Recientes</h2>
 
             {logrosRecientes && Array.isArray(logrosRecientes) && logrosRecientes.length > 0 ? (
               <div className="space-y-4">
@@ -172,9 +153,7 @@ export default function PerfilPage() {
                 })}
               </div>
             ) : (
-              <p className="text-gray-400 text-center py-8">
-                Sin logros aún
-              </p>
+              <p className="text-gray-400 text-center py-8">Sin logros aún</p>
             )}
           </div>
         </div>

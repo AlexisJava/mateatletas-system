@@ -38,11 +38,7 @@ interface DashboardViewProps {
 
 type TabType = 'dashboard' | 'hijos' | 'calendario' | 'pagos' | 'ayuda';
 
-export default function DashboardView({
-  user,
-  estudiantes,
-  dashboardData,
-}: DashboardViewProps) {
+export default function DashboardView({ user, estudiantes, dashboardData }: DashboardViewProps) {
   const router = useRouter();
   const { logout } = useAuthStore();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -70,7 +66,7 @@ export default function DashboardView({
   });
 
   // Alertas críticas (solo alta prioridad)
-  const alertasCriticas = dashboardData?.alertas.filter(a => a.prioridad === 'alta') || [];
+  const alertasCriticas = dashboardData?.alertas.filter((a) => a.prioridad === 'alta') || [];
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-950">
@@ -106,22 +102,23 @@ export default function DashboardView({
                 className="flex items-center gap-3 bg-gray-800 hover:bg-gray-750 rounded-xl px-4 py-2 transition-colors"
               >
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-semibold text-white">{user?.nombre} {user?.apellido}</p>
+                  <p className="text-sm font-semibold text-white">
+                    {user?.nombre} {user?.apellido}
+                  </p>
                   <p className="text-xs text-gray-400">Padre/Madre</p>
                 </div>
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-md">
                   {user?.nombre?.[0]?.toUpperCase() || 'T'}
                 </div>
-                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-gray-400 transition-transform ${showUserMenu ? 'rotate-180' : ''}`}
+                />
               </button>
 
               {/* Dropdown Menu */}
               {showUserMenu && (
                 <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setShowUserMenu(false)}
-                  />
+                  <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
                   <div className="absolute top-full right-0 mt-2 w-64 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 z-20 overflow-hidden">
                     <div className="p-4 border-b border-gray-700 bg-gray-850">
                       <p className="text-sm font-bold text-white">
@@ -174,9 +171,7 @@ export default function DashboardView({
             <div className="space-y-6">
               {/* Greeting */}
               <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-8 shadow-2xl">
-                <h2 className="text-3xl font-bold text-white mb-2">
-                  ¡Hola, {user?.nombre}! 👋
-                </h2>
+                <h2 className="text-3xl font-bold text-white mb-2">¡Hola, {user?.nombre}! 👋</h2>
                 <p className="text-indigo-100 text-lg capitalize">{fechaHoy}</p>
               </div>
 
@@ -246,7 +241,9 @@ export default function DashboardView({
                             </div>
                             {/* Info */}
                             <div className="flex-1">
-                              <h4 className="font-bold text-white text-xl mb-1">{clase.nombreRuta}</h4>
+                              <h4 className="font-bold text-white text-xl mb-1">
+                                {clase.nombreRuta}
+                              </h4>
                               <p className="text-gray-400 text-base">
                                 👤 {clase.estudianteNombre} • 👨‍🏫 Prof. {clase.docenteNombre}
                               </p>
@@ -304,13 +301,14 @@ export default function DashboardView({
                             </div>
                             <p className="text-gray-400 text-base mb-1">{pago.concepto}</p>
                             <p className="text-gray-500 text-sm">👤 {pago.estudianteNombre}</p>
-                            <p className={`text-sm font-semibold mt-2 ${
-                              pago.estaVencido ? 'text-red-400' : 'text-amber-400'
-                            }`}>
+                            <p
+                              className={`text-sm font-semibold mt-2 ${
+                                pago.estaVencido ? 'text-red-400' : 'text-amber-400'
+                              }`}
+                            >
                               {pago.estaVencido
                                 ? `⚠️ Vencido hace ${Math.abs(pago.diasParaVencer)} días`
-                                : `Vence en ${pago.diasParaVencer} ${pago.diasParaVencer === 1 ? 'día' : 'días'}`
-                              }
+                                : `Vence en ${pago.diasParaVencer} ${pago.diasParaVencer === 1 ? 'día' : 'días'}`}
                             </p>
                           </div>
                           <button
@@ -349,7 +347,8 @@ export default function DashboardView({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {estudiantes.map((hijo) => {
                     const edad = hijo.edad;
-                    const initials = `${hijo.nombre.charAt(0)}${hijo.apellido.charAt(0)}`.toUpperCase();
+                    const initials =
+                      `${hijo.nombre.charAt(0)}${hijo.apellido.charAt(0)}`.toUpperCase();
 
                     return (
                       <div
@@ -398,7 +397,9 @@ export default function DashboardView({
                 <div className="bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl p-6 shadow-xl">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-green-100 text-sm font-medium mb-1">Pagado en {new Date().getFullYear()}</p>
+                      <p className="text-green-100 text-sm font-medium mb-1">
+                        Pagado en {new Date().getFullYear()}
+                      </p>
                       <p className="text-white text-3xl font-bold">
                         ${dashboardData?.metricas.totalPagadoAnio.toLocaleString('es-AR') || 0}
                       </p>
@@ -427,12 +428,13 @@ export default function DashboardView({
               </div>
 
               {/* Sin alertas ni clases - Estado vacío */}
-              {(!dashboardData || (dashboardData.alertas.length === 0 && dashboardData.clasesHoy.length === 0 && dashboardData.pagosPendientes.length === 0)) && (
+              {(!dashboardData ||
+                (dashboardData.alertas.length === 0 &&
+                  dashboardData.clasesHoy.length === 0 &&
+                  dashboardData.pagosPendientes.length === 0)) && (
                 <div className="bg-gray-900 rounded-2xl p-12 shadow-xl border border-gray-800 text-center">
                   <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold text-white mb-2">
-                    ✅ Todo al día
-                  </h3>
+                  <h3 className="text-2xl font-bold text-white mb-2">✅ Todo al día</h3>
                   <p className="text-gray-400 text-lg">
                     No hay acciones pendientes por el momento. ¡Excelente!
                   </p>

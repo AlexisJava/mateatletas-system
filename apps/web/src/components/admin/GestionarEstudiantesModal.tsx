@@ -51,7 +51,12 @@ interface Props {
   onSuccess: () => void;
 }
 
-export default function GestionarEstudiantesModal({ claseId, claseNombre, onClose, onSuccess }: Props) {
+export default function GestionarEstudiantesModal({
+  claseId,
+  claseNombre,
+  onClose,
+  onSuccess,
+}: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [claseData, setClaseData] = useState<ClaseEstudiantes | null>(null);
@@ -83,9 +88,10 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
       const clase = (claseResponse as ClaseEstudiantes) ?? null;
       setClaseData(clase);
       // El backend devuelve { data: [], metadata: {} }
-      const estudiantes = (Array.isArray(estudiantesResponse)
-        ? estudiantesResponse
-        : (estudiantesResponse as { data?: Estudiante[] })?.data) ?? [];
+      const estudiantes =
+        (Array.isArray(estudiantesResponse)
+          ? estudiantesResponse
+          : (estudiantesResponse as { data?: Estudiante[] })?.data) ?? [];
       setTodosEstudiantes(estudiantes as Estudiante[]);
     } catch {
       setError('Error al cargar datos');
@@ -124,7 +130,7 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
     setSelectedEstudiantes((prev) =>
       prev.includes(estudianteId)
         ? prev.filter((id) => id !== estudianteId)
-        : [...prev, estudianteId]
+        : [...prev, estudianteId],
     );
   };
 
@@ -177,7 +183,7 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
 
   // Filtrar estudiantes que no están ya inscritos (con defensive check)
   const estudiantesDisponibles = (todosEstudiantes || []).filter(
-    (est) => !claseData?.estudiantes.some((inscrito) => inscrito.id === est.id)
+    (est) => !claseData?.estudiantes.some((inscrito) => inscrito.id === est.id),
   );
 
   // Filtrar por búsqueda (con defensive check)
@@ -186,7 +192,7 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
       est.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       est.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
       est.tutor.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      est.tutor.apellido.toLowerCase().includes(searchTerm.toLowerCase())
+      est.tutor.apellido.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   if (loading) {
@@ -234,7 +240,9 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
                 <h4 className="text-base sm:text-lg font-bold text-white">Estudiantes Inscritos</h4>
                 <div className="text-sm">
-                  <span className="text-emerald-400 font-bold">{claseData?.cuposOcupados || 0}</span>
+                  <span className="text-emerald-400 font-bold">
+                    {claseData?.cuposOcupados || 0}
+                  </span>
                   <span className="text-white/60"> / {claseData?.cuposMaximo || 0} cupos</span>
                 </div>
               </div>
@@ -253,7 +261,8 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-emerald-500/30">
-                          {estudiante.nombre.charAt(0)}{estudiante.apellido.charAt(0)}
+                          {estudiante.nombre.charAt(0)}
+                          {estudiante.apellido.charAt(0)}
                         </div>
                         <div>
                           <p className="text-sm font-bold text-white">
@@ -273,7 +282,9 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
             {/* Columna derecha: Asignar estudiantes */}
             <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl p-4 border border-emerald-500/20">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-                <h4 className="text-base sm:text-lg font-bold text-white">Asignar Nuevos Estudiantes</h4>
+                <h4 className="text-base sm:text-lg font-bold text-white">
+                  Asignar Nuevos Estudiantes
+                </h4>
                 <button
                   onClick={() => setShowCreateForm(!showCreateForm)}
                   className="px-3 py-1.5 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-lg font-semibold hover:from-teal-600 hover:to-emerald-600 transition-all shadow-lg shadow-teal-500/30 text-sm flex items-center justify-center gap-2 whitespace-nowrap"
@@ -285,25 +296,32 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
 
               {/* Formulario de creación */}
               {showCreateForm ? (
-                <form onSubmit={handleCrearEstudiante} className="space-y-3 mb-4 backdrop-blur-xl bg-black/30 p-4 rounded-lg border border-emerald-500/30">
+                <form
+                  onSubmit={handleCrearEstudiante}
+                  className="space-y-3 mb-4 backdrop-blur-xl bg-black/30 p-4 rounded-lg border border-emerald-500/30"
+                >
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-emerald-100 mb-1">Nombre *</label>
+                      <label className="block text-xs font-semibold text-emerald-100 mb-1">
+                        Nombre *
+                      </label>
                       <input
                         type="text"
                         required
                         value={createForm.nombre}
-                        onChange={(e) => setCreateForm({...createForm, nombre: e.target.value})}
+                        onChange={(e) => setCreateForm({ ...createForm, nombre: e.target.value })}
                         className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-emerald-100 mb-1">Apellido *</label>
+                      <label className="block text-xs font-semibold text-emerald-100 mb-1">
+                        Apellido *
+                      </label>
                       <input
                         type="text"
                         required
                         value={createForm.apellido}
-                        onChange={(e) => setCreateForm({...createForm, apellido: e.target.value})}
+                        onChange={(e) => setCreateForm({ ...createForm, apellido: e.target.value })}
                         className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
                       />
                     </div>
@@ -311,24 +329,36 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-emerald-100 mb-1">Edad *</label>
+                      <label className="block text-xs font-semibold text-emerald-100 mb-1">
+                        Edad *
+                      </label>
                       <input
                         type="number"
                         required
                         min="3"
                         max="99"
                         value={createForm.edad}
-                        onChange={(e) => setCreateForm({...createForm, edad: e.target.value})}
+                        onChange={(e) => setCreateForm({ ...createForm, edad: e.target.value })}
                         placeholder="ej: 8"
                         className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-emerald-100 mb-1">Nivel Escolar *</label>
+                      <label className="block text-xs font-semibold text-emerald-100 mb-1">
+                        Nivel Escolar *
+                      </label>
                       <select
                         required
                         value={createForm.nivel_escolar}
-                        onChange={(e) => setCreateForm({...createForm, nivel_escolar: e.target.value as 'Primaria' | 'Secundaria' | 'Universidad'})}
+                        onChange={(e) =>
+                          setCreateForm({
+                            ...createForm,
+                            nivel_escolar: e.target.value as
+                              | 'Primaria'
+                              | 'Secundaria'
+                              | 'Universidad',
+                          })
+                        }
                         className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
                       >
                         <option value="Primaria">Primaria</option>
@@ -342,20 +372,28 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
                     <p className="text-xs text-white/60 mb-2">Datos del Tutor (opcional)</p>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-emerald-100 mb-1">Nombre Tutor</label>
+                        <label className="block text-xs font-semibold text-emerald-100 mb-1">
+                          Nombre Tutor
+                        </label>
                         <input
                           type="text"
                           value={createForm.tutor_nombre}
-                          onChange={(e) => setCreateForm({...createForm, tutor_nombre: e.target.value})}
+                          onChange={(e) =>
+                            setCreateForm({ ...createForm, tutor_nombre: e.target.value })
+                          }
                           className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-emerald-100 mb-1">Apellido Tutor</label>
+                        <label className="block text-xs font-semibold text-emerald-100 mb-1">
+                          Apellido Tutor
+                        </label>
                         <input
                           type="text"
                           value={createForm.tutor_apellido}
-                          onChange={(e) => setCreateForm({...createForm, tutor_apellido: e.target.value})}
+                          onChange={(e) =>
+                            setCreateForm({ ...createForm, tutor_apellido: e.target.value })
+                          }
                           className="w-full px-3 py-2 bg-black/40 border border-emerald-500/30 text-white placeholder-white/30 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all text-sm"
                         />
                       </div>
@@ -399,44 +437,57 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
                   ) : estudiantesFiltrados.length === 0 ? (
                     <div className="text-center py-8 text-white/50 bg-black/30 rounded-lg border border-dashed border-emerald-500/20">
                       <p className="text-sm">
-                        {searchTerm ? 'No se encontraron estudiantes' : 'No hay más estudiantes disponibles'}
+                        {searchTerm
+                          ? 'No se encontraron estudiantes'
+                          : 'No hay más estudiantes disponibles'}
                       </p>
                     </div>
                   ) : (
-                <div className="space-y-2 max-h-72 overflow-y-auto mb-4">
-                  {estudiantesFiltrados.map((estudiante) => (
-                    <div
-                      key={estudiante.id}
-                      onClick={() => toggleEstudiante(estudiante.id)}
-                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
-                        selectedEstudiantes.includes(estudiante.id)
-                          ? 'bg-emerald-500/20 border-2 border-emerald-400'
-                          : 'backdrop-blur-xl bg-black/40 border border-emerald-500/20 hover:bg-emerald-500/10'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-emerald-500/30">
-                          {estudiante.nombre.charAt(0)}{estudiante.apellido.charAt(0)}
+                    <div className="space-y-2 max-h-72 overflow-y-auto mb-4">
+                      {estudiantesFiltrados.map((estudiante) => (
+                        <div
+                          key={estudiante.id}
+                          onClick={() => toggleEstudiante(estudiante.id)}
+                          className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
+                            selectedEstudiantes.includes(estudiante.id)
+                              ? 'bg-emerald-500/20 border-2 border-emerald-400'
+                              : 'backdrop-blur-xl bg-black/40 border border-emerald-500/20 hover:bg-emerald-500/10'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-emerald-500/30">
+                              {estudiante.nombre.charAt(0)}
+                              {estudiante.apellido.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-white">
+                                {estudiante.nombre} {estudiante.apellido}
+                              </p>
+                              <p className="text-xs text-white/60">
+                                {estudiante.nivelEscolar} • Tutor: {estudiante.tutor.nombre}
+                              </p>
+                            </div>
+                          </div>
+                          {selectedEstudiantes.includes(estudiante.id) && (
+                            <div className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-400 flex items-center justify-center">
+                              <svg
+                                className="w-3 h-3 text-white"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={3}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            </div>
+                          )}
                         </div>
-                        <div>
-                          <p className="text-sm font-bold text-white">
-                            {estudiante.nombre} {estudiante.apellido}
-                          </p>
-                          <p className="text-xs text-white/60">
-                            {estudiante.nivelEscolar} • Tutor: {estudiante.tutor.nombre}
-                          </p>
-                        </div>
-                      </div>
-                      {selectedEstudiantes.includes(estudiante.id) && (
-                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-400 flex items-center justify-center">
-                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
-                </div>
                   )}
                 </>
               )}
@@ -445,7 +496,9 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
               {!showCreateForm && selectedEstudiantes.length > 0 && (
                 <button
                   onClick={handleAsignarEstudiantes}
-                  disabled={submitting || (claseData?.cuposDisponibles || 0) < selectedEstudiantes.length}
+                  disabled={
+                    submitting || (claseData?.cuposDisponibles || 0) < selectedEstudiantes.length
+                  }
                   className="w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <UserPlus className="w-5 h-5" />
@@ -462,7 +515,8 @@ export default function GestionarEstudiantesModal({ claseId, claseNombre, onClos
         <div className="border-t border-emerald-500/20 p-4 sm:p-6 backdrop-blur-xl bg-emerald-500/[0.05]">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div className="text-xs sm:text-sm text-white/60 text-center sm:text-left">
-              Cupos disponibles: <span className="text-emerald-400 font-bold">{claseData?.cuposDisponibles || 0}</span>
+              Cupos disponibles:{' '}
+              <span className="text-emerald-400 font-bold">{claseData?.cuposDisponibles || 0}</span>
             </div>
             <button
               onClick={onClose}

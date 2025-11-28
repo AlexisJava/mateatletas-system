@@ -9,16 +9,16 @@
 
 ## 📊 Resumen Ejecutivo
 
-Se eliminó todo el debug code (console.*) y dead code del proyecto, mejorando la calidad del código y previniendo futuras regresiones con ESLint configurado estrictamente.
+Se eliminó todo el debug code (console.\*) y dead code del proyecto, mejorando la calidad del código y previniendo futuras regresiones con ESLint configurado estrictamente.
 
 ### Métricas de Limpieza
 
-| Métrica | Antes | Después | Mejora |
-|---------|-------|---------|--------|
-| **Console.* en producción** | 47 líneas | **0** | ✅ -100% |
-| **Dead code files** | 1 archivo | **0** | ✅ -100% |
-| **Logger pattern** | Inconsistente | **NestJS Logger** | ✅ Estandarizado |
-| **ESLint rules** | Permisivo | **Estricto** | ✅ Mejorado |
+| Métrica                      | Antes         | Después           | Mejora           |
+| ---------------------------- | ------------- | ----------------- | ---------------- |
+| **Console.\* en producción** | 47 líneas     | **0**             | ✅ -100%         |
+| **Dead code files**          | 1 archivo     | **0**             | ✅ -100%         |
+| **Logger pattern**           | Inconsistente | **NestJS Logger** | ✅ Estandarizado |
+| **ESLint rules**             | Permisivo     | **Estricto**      | ✅ Mejorado      |
 
 ---
 
@@ -31,6 +31,7 @@ Se eliminó todo el debug code (console.*) y dead code del proyecto, mejorando l
 **Cambios**: Reemplazados 5 console.log con NestJS Logger
 
 **ANTES**:
+
 ```typescript
 console.log('[Guard] userId:', user?.id, 'role:', user?.role);
 console.log('[Guard] ❌ No user');
@@ -38,6 +39,7 @@ console.log('[Guard] ✅ No estudianteId - allowing');
 ```
 
 **DESPUÉS**:
+
 ```typescript
 private readonly logger = new Logger(EstudianteOwnershipGuard.name);
 
@@ -47,6 +49,7 @@ this.logger.debug('No estudianteId in params - allowing access');
 ```
 
 **Beneficios**:
+
 - ✅ Logs estructurados con contexto
 - ✅ Niveles de log apropiados (debug/warn)
 - ✅ Compatible con sistemas de logging centralizados
@@ -59,11 +62,13 @@ this.logger.debug('No estudianteId in params - allowing access');
 **Cambios**: Eliminados 40 console.log de debugging temporal
 
 **Líneas eliminadas**:
+
 - 17 líneas de debugging del endpoint `/avatar`
 - 12 líneas de debugging del endpoint `/animacion`
 - 11 líneas de debugging de otros endpoints
 
 **ANTES**:
+
 ```typescript
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('🔧 [BACKEND] PATCH /estudiantes/avatar');
@@ -79,6 +84,7 @@ console.log('━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 **DESPUÉS**:
+
 ```typescript
 // Sin debugging innecesario
 // Si se requiere logging, usar Logger de NestJS
@@ -93,6 +99,7 @@ console.log('━━━━━━━━━━━━━━━━━━━━━━�
 **Cambios**: Reemplazado 1 console.log con Logger
 
 **ANTES**:
+
 ```typescript
 async onModuleInit(): Promise<void> {
   await this.$connect();
@@ -101,6 +108,7 @@ async onModuleInit(): Promise<void> {
 ```
 
 **DESPUÉS**:
+
 ```typescript
 private readonly logger = new Logger(PrismaService.name);
 
@@ -111,6 +119,7 @@ async onModuleInit(): Promise<void> {
 ```
 
 **Beneficios**:
+
 - ✅ Formato consistente con otros servicios
 - ✅ Aparece en logs de NestJS con timestamp
 - ✅ Se puede filtrar por servicio
@@ -126,6 +135,7 @@ async onModuleInit(): Promise<void> {
 **Razón**: No se encontraron referencias en el código. El guard nunca fue usado.
 
 **Verificación**:
+
 ```bash
 grep -r "PagoAlDiaGuard" src/ --include="*.ts"
 # Resultado: 0 coincidencias (excepto el propio archivo)
@@ -194,7 +204,7 @@ grep -rn "console\." src/ --include="*.ts" \
 # Resultado esperado: 0
 ```
 
-**Resultado actual**: ✅ 0 console.* en código de producción
+**Resultado actual**: ✅ 0 console.\* en código de producción
 
 ### Tests de Regresión
 
@@ -236,7 +246,7 @@ npm test -- create-estudiante.dto.spec.ts register.dto.spec.ts change-password.d
 
 1. **Código más limpio**: Sin debug statements olvidados
 2. **Logs estructurados**: Uso consistente de NestJS Logger
-3. **Prevención**: ESLint bloquea nuevos console.* en PRs
+3. **Prevención**: ESLint bloquea nuevos console.\* en PRs
 4. **Performance**: Menos código innecesario ejecutándose
 
 ### Beneficios a Largo Plazo
@@ -253,6 +263,7 @@ npm test -- create-estudiante.dto.spec.ts register.dto.spec.ts change-password.d
 ### 1. Configurar Logger Centralizado
 
 Considerar integrar con sistemas como:
+
 - **Winston**: Logger avanzado para Node.js
 - **Datadog**: APM y logging
 - **Sentry**: Error tracking
@@ -276,45 +287,45 @@ WinstonModule.forRoot({
 // Usar diferentes niveles según el ambiente
 const logLevel = process.env.NODE_ENV === 'production' ? 'warn' : 'debug';
 
-this.logger.debug('Solo en desarrollo');  // No aparece en prod
-this.logger.log('Info importante');        // Aparece siempre
-this.logger.warn('Advertencia');           // Aparece siempre
-this.logger.error('Error crítico');        // Aparece siempre
+this.logger.debug('Solo en desarrollo'); // No aparece en prod
+this.logger.log('Info importante'); // Aparece siempre
+this.logger.warn('Advertencia'); // Aparece siempre
+this.logger.error('Error crítico'); // Aparece siempre
 ```
 
 ### 3. Pre-commit Hooks
 
-Configurar Husky para bloquear commits con console.*:
+Configurar Husky para bloquear commits con console.\*:
 
 ```bash
 npx husky install
 npx husky add .husky/pre-commit "npm run lint"
 ```
 
-Esto previene que código con console.* llegue al repositorio.
+Esto previene que código con console.\* llegue al repositorio.
 
 ---
 
 ## 📊 Métricas Finales
 
-| Métrica | Valor |
-|---------|-------|
-| **Console.* eliminados** | 47 |
-| **Dead code eliminado** | 1 archivo |
-| **Logger agregados** | 3 archivos |
-| **Reglas ESLint nuevas** | 2 |
-| **Tests pasando** | 70/70 ✅ |
-| **Build exitoso** | ✅ |
-| **Lint pasando** | ✅ |
+| Métrica                   | Valor      |
+| ------------------------- | ---------- |
+| **Console.\* eliminados** | 47         |
+| **Dead code eliminado**   | 1 archivo  |
+| **Logger agregados**      | 3 archivos |
+| **Reglas ESLint nuevas**  | 2          |
+| **Tests pasando**         | 70/70 ✅   |
+| **Build exitoso**         | ✅         |
+| **Lint pasando**          | ✅         |
 
 ---
 
 ## ✅ Checklist Final
 
-- [x] Eliminados TODOS los console.* de producción
-- [x] Reemplazados console.* con Logger de NestJS donde apropiado
+- [x] Eliminados TODOS los console.\* de producción
+- [x] Reemplazados console.\* con Logger de NestJS donde apropiado
 - [x] Eliminado PagoAlDiaGuard (dead code)
-- [x] Configurado ESLint para prevenir console.*
+- [x] Configurado ESLint para prevenir console.\*
 - [x] Tests de validación pasando (70/70)
 - [x] Documentación completa creada
 
@@ -352,12 +363,12 @@ export class MiService {
 
 ### Niveles de Log Apropiados
 
-| Nivel | Cuándo Usar | Ejemplo |
-|-------|-------------|---------|
-| `debug()` | Información de debugging detallada | `this.logger.debug('Query ejecutada', { sql })` |
-| `log()` | Eventos importantes del flujo normal | `this.logger.log('Usuario creado', { id })` |
-| `warn()` | Situaciones inesperadas pero no críticas | `this.logger.warn('API lenta', { duration })` |
-| `error()` | Errores que requieren atención | `this.logger.error('Error BD', error.stack)` |
+| Nivel     | Cuándo Usar                              | Ejemplo                                         |
+| --------- | ---------------------------------------- | ----------------------------------------------- |
+| `debug()` | Información de debugging detallada       | `this.logger.debug('Query ejecutada', { sql })` |
+| `log()`   | Eventos importantes del flujo normal     | `this.logger.log('Usuario creado', { id })`     |
+| `warn()`  | Situaciones inesperadas pero no críticas | `this.logger.warn('API lenta', { duration })`   |
+| `error()` | Errores que requieren atención           | `this.logger.error('Error BD', error.stack)`    |
 
 ---
 

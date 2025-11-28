@@ -22,7 +22,7 @@
    - Estado: Validación completa
    - Schemas: estudianteSchema, estudiantesResponseSchema, etc.
 
-2. **equipos.api.ts** ✅  
+2. **equipos.api.ts** ✅
    - Estado: Validación completa
    - Schemas: equipoSchema, equiposResponseSchema, etc.
 
@@ -68,7 +68,7 @@
 
 2. **calendario.api.ts** ❌
    - Validaciones: 0
-   - Prioridad: ALTA  
+   - Prioridad: ALTA
    - Tiempo estimado: 1 hora
    - Schemas necesarios: eventoSchema, calendarioSchema
 
@@ -100,11 +100,11 @@
 
 ## 📈 Progreso vs Auditoría
 
-| Métrica | Auditoría (Oct 20) | Actual (Oct 22) | Delta |
-|---------|-------------------|-----------------|-------|
-| Archivos con validación | 5/14 (36%) | 8/14 (57%) | +3 (+21%) |
-| Archivos sin validación | 9/14 (64%) | 6/14 (43%) | -3 (-21%) |
-| Validaciones totales | ~29 | ~85+ | +56 (+193%) |
+| Métrica                 | Auditoría (Oct 20) | Actual (Oct 22) | Delta       |
+| ----------------------- | ------------------ | --------------- | ----------- |
+| Archivos con validación | 5/14 (36%)         | 8/14 (57%)      | +3 (+21%)   |
+| Archivos sin validación | 9/14 (64%)         | 6/14 (43%)      | -3 (-21%)   |
+| Validaciones totales    | ~29                | ~85+            | +56 (+193%) |
 
 ---
 
@@ -113,16 +113,18 @@
 ### Estimación de Tiempo
 
 **Alta Prioridad:**
+
 - asistencia.api.ts: 1 hora
-- calendario.api.ts: 1 hora  
+- calendario.api.ts: 1 hora
 - clases.api.ts: 45 min
 - auth.api.ts: 45 min
-**Subtotal:** 3.5 horas
+  **Subtotal:** 3.5 horas
 
 **Baja Prioridad:**
+
 - docentes.api.ts: 30 min
 - sectores.api.ts: 30 min
-**Subtotal:** 1 hora
+  **Subtotal:** 1 hora
 
 **TOTAL:** 4.5 horas para completar 100% validación
 
@@ -131,6 +133,7 @@
 ## ✅ Conclusión
 
 **Progreso significativo desde auditoría:**
+
 - 3 archivos críticos ya implementados (pagos, cursos, gamificacion)
 - Solo 4 archivos de alta prioridad pendientes
 - 57% de cobertura (vs 36% en auditoría)

@@ -8,6 +8,7 @@
 ## 📊 RESUMEN EJECUTIVO
 
 El proyecto tiene **5 archivos de schemas Zod** creados recientemente, pero:
+
 - ❌ **Zod NO está instalado** como dependencia
 - ❌ **Los schemas NO se usan** en ninguna parte del código
 - ⚠️ Son archivos "huérfanos" - código preparatorio sin integrar
@@ -16,12 +17,12 @@ El proyecto tiene **5 archivos de schemas Zod** creados recientemente, pero:
 
 ## 1. INSTALACIÓN ZOD
 
-| Aspecto | Estado |
-|---------|--------|
-| **Versión** | ❌ NO INSTALADO |
-| **En package.json** | ❌ NO |
-| **En node_modules** | ❌ NO |
-| **Estado** | Zod NO está instalado en el proyecto |
+| Aspecto             | Estado                               |
+| ------------------- | ------------------------------------ |
+| **Versión**         | ❌ NO INSTALADO                      |
+| **En package.json** | ❌ NO                                |
+| **En node_modules** | ❌ NO                                |
+| **Estado**          | Zod NO está instalado en el proyecto |
 
 ---
 
@@ -29,14 +30,14 @@ El proyecto tiene **5 archivos de schemas Zod** creados recientemente, pero:
 
 **Ubicación:** `apps/web/src/lib/schemas/`
 
-| Archivo | Líneas | Última Modificación | Estado |
-|---------|--------|---------------------|--------|
-| `producto.schema.ts` | 32 | oct 20 17:45 | ✓ Creado |
-| `estudiante.schema.ts` | 80 | oct 20 17:53 | ✓ Creado |
-| `logro.schema.ts` | 25 | oct 20 17:41 | ✓ Creado |
-| `equipo.schema.ts` | 78 | oct 20 17:41 | ✓ Creado |
-| `notificacion.schema.ts` | 52 | oct 20 17:54 | ✓ Creado |
-| **TOTAL** | **267 líneas** | **5 archivos** | - |
+| Archivo                  | Líneas         | Última Modificación | Estado   |
+| ------------------------ | -------------- | ------------------- | -------- |
+| `producto.schema.ts`     | 32             | oct 20 17:45        | ✓ Creado |
+| `estudiante.schema.ts`   | 80             | oct 20 17:53        | ✓ Creado |
+| `logro.schema.ts`        | 25             | oct 20 17:41        | ✓ Creado |
+| `equipo.schema.ts`       | 78             | oct 20 17:41        | ✓ Creado |
+| `notificacion.schema.ts` | 52             | oct 20 17:54        | ✓ Creado |
+| **TOTAL**                | **267 líneas** | **5 archivos**      | -        |
 
 ### Estructura de los Schemas
 
@@ -64,6 +65,7 @@ export type XxxSchemaType = z.infer<typeof xxxSchema>;
 ```
 
 **Nota:** Todos incluyen comentarios explícitos:
+
 ```typescript
 /**
  * Schema principal de Estudiante
@@ -109,6 +111,7 @@ Los siguientes schemas **NO existen** pero serían necesarios para completar la 
 ### Frontend (apps/web/package.json)
 
 **Dependencias principales:**
+
 - `axios`: ^1.12.2
 - `next`: 15.5.4
 - `react`: 19.1.0
@@ -134,6 +137,7 @@ Los siguientes schemas **NO existen** pero serían necesarios para completar la 
 Los schemas fueron creados como **preparación para una migración** a validación con Zod, pero la migración **nunca se completó**. Son "código preparatorio" que quedó sin integrar.
 
 **Posibles razones:**
+
 - Trabajo en progreso que se pausó
 - Experimento/POC que no se terminó de implementar
 - Preparación para refactor futuro
@@ -145,6 +149,7 @@ Los schemas fueron creados como **preparación para una migración** a validaci�
 ### Problema Actual: Record<string, unknown>
 
 En el análisis de errores TypeScript encontramos:
+
 - **42 errores** relacionados con `Record<string, unknown>`
 - Archivos como `useClases.ts` usan tipos genéricos en lugar de específicos
 - Dashboard tiene interfaces duplicadas
@@ -154,6 +159,7 @@ En el análisis de errores TypeScript encontramos:
 Si los schemas estuvieran integrados:
 
 **ANTES (actual):**
+
 ```typescript
 // useClases.ts
 export function useClasesFilter(clases: Record<string, unknown>[]) {
@@ -162,6 +168,7 @@ export function useClasesFilter(clases: Record<string, unknown>[]) {
 ```
 
 **DESPUÉS (con Zod):**
+
 ```typescript
 // useClases.ts
 import { claseSchema, type ClaseFromSchema } from '@/lib/schemas/clase.schema';
@@ -177,6 +184,7 @@ return validatedClases;
 ```
 
 **Beneficios:**
+
 1. ✅ **Validación en runtime** - detecta datos malformados del API
 2. ✅ **Single source of truth** - un schema define tipo Y validación
 3. ✅ **Type safety garantizado** - TypeScript infiere tipos del schema
@@ -189,13 +197,16 @@ return validatedClases;
 ### OPCIÓN A - Completar Migración a Zod (RECOMENDADO) ✅
 
 #### Paso 1: Instalar Zod
+
 ```bash
 cd apps/web
 npm install zod
 ```
 
 #### Paso 2: Crear Schemas Faltantes
+
 Crear los 6 schemas que faltan siguiendo el patrón existente:
+
 - `clase.schema.ts`
 - `docente.schema.ts`
 - `sector.schema.ts`
@@ -204,6 +215,7 @@ Crear los 6 schemas que faltan siguiendo el patrón existente:
 - `pago.schema.ts`
 
 #### Paso 3: Refactorizar Hooks
+
 ```typescript
 // ANTES - useClases.ts
 import { useState } from 'react';
@@ -229,6 +241,7 @@ export function useClases() {
 ```
 
 #### Paso 4: Refactorizar API Calls
+
 Envolver todas las llamadas al API con validación:
 
 ```typescript
@@ -242,6 +255,7 @@ export const getClases = async () => {
 ```
 
 #### Paso 5: Actualizar Stores (Zustand)
+
 ```typescript
 // store/admin.store.ts
 import { claseSchema, type ClaseFromSchema } from '@/lib/schemas/clase.schema';
@@ -253,6 +267,7 @@ interface AdminState {
 ```
 
 #### Estimación
+
 - **Tiempo:** 4-6 horas
 - **Complejidad:** MEDIA
 - **Beneficio:** Eliminar ~50% de errores TypeScript + validación runtime
@@ -266,6 +281,7 @@ rm -rf apps/web/src/lib/schemas/
 ```
 
 **Razones:**
+
 - ✅ Menos dependencias
 - ❌ Sin validación en runtime
 - ❌ Más errores TypeScript
@@ -298,6 +314,7 @@ De los **195 errores actuales**, aproximadamente **~50 errores** se eliminarían
 ## 10. EJEMPLO COMPLETO
 
 ### Antes (Estado Actual)
+
 ```typescript
 // types/clase.types.ts
 export interface Clase {
@@ -325,6 +342,7 @@ console.log(clase.nombre); // ❌ Error: Property 'nombre' does not exist on typ
 ```
 
 ### Después (Con Zod)
+
 ```typescript
 // lib/schemas/clase.schema.ts
 import { z } from 'zod';
@@ -365,6 +383,7 @@ console.log(clase.nombre); // ✅ TypeScript sabe que 'nombre' existe
 ```
 
 **Beneficios visibles:**
+
 1. ✅ TypeScript autocomplete funciona perfectamente
 2. ✅ Errores de API detectados en runtime antes de causar crashes
 3. ✅ No más `Record<string, unknown>` ni castings peligrosos
@@ -377,6 +396,7 @@ console.log(clase.nombre); // ✅ TypeScript sabe que 'nombre' existe
 ### ✅ COMPLETAR LA MIGRACIÓN A ZOD
 
 **Razones:**
+
 1. El trabajo ya está **50% hecho** (5 schemas creados)
 2. Resolvería **~26% de los errores TypeScript** actuales
 3. Prevendría **errores en runtime** por datos malformados del API
@@ -384,6 +404,7 @@ console.log(clase.nombre); // ✅ TypeScript sabe que 'nombre' existe
 5. Mejora **developer experience** (autocomplete, type safety)
 
 **Siguiente paso inmediato:**
+
 ```bash
 cd apps/web
 npm install zod

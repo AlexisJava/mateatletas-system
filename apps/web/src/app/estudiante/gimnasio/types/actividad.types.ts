@@ -177,7 +177,10 @@ export interface ActividadViewProps {
 /**
  * Configuración de colores por dificultad
  */
-export const DIFICULTAD_COLORS: Record<DificultadActividad, { gradient: string; border: string; emoji: string }> = {
+export const DIFICULTAD_COLORS: Record<
+  DificultadActividad,
+  { gradient: string; border: string; emoji: string }
+> = {
   facil: {
     gradient: 'from-green-500 to-emerald-600',
     border: '#10b981',
@@ -198,7 +201,10 @@ export const DIFICULTAD_COLORS: Record<DificultadActividad, { gradient: string; 
 /**
  * Configuración de colores por tipo de actividad
  */
-export const TIPO_ACTIVIDAD_COLORS: Record<TipoActividad, { gradient: string; border: string; emoji: string }> = {
+export const TIPO_ACTIVIDAD_COLORS: Record<
+  TipoActividad,
+  { gradient: string; border: string; emoji: string }
+> = {
   video: {
     gradient: 'from-blue-500 to-indigo-600',
     border: '#3b82f6',

@@ -85,8 +85,7 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
       set({ rutasCurriculares, isLoading: false });
     } catch (error: unknown) {
       set({
-        error:
-          getErrorMessage(error, 'Error al cargar rutas curriculares'),
+        error: getErrorMessage(error, 'Error al cargar rutas curriculares'),
         isLoading: false,
       });
     }
@@ -121,8 +120,7 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
         clase.id === claseId
           ? {
               ...clase,
-              cupos_ocupados:
-                (clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0) + 1,
+              cupos_ocupados: (clase.cupos_ocupados ?? clase._count?.inscripciones ?? 0) + 1,
               _count: clase._count
                 ? {
                     ...clase._count,
@@ -130,7 +128,7 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
                   }
                 : clase._count,
             }
-          : clase
+          : clase,
       );
 
       set({
@@ -162,9 +160,7 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
       const reservaCancelada = misReservas.find((r) => r.id === inscripcionId);
 
       // Remover de mis reservas
-      const reservasActualizadas = misReservas.filter(
-        (r) => r.id !== inscripcionId
-      );
+      const reservasActualizadas = misReservas.filter((r) => r.id !== inscripcionId);
 
       // Actualizar cupos ocupados en la clase
       const clasesActualizadas = clases.map((clase) =>
@@ -178,14 +174,11 @@ export const useClasesStore = create<ClasesStore>((set, get) => ({
               _count: clase._count
                 ? {
                     ...clase._count,
-                    inscripciones: Math.max(
-                      (clase._count.inscripciones ?? 0) - 1,
-                      0,
-                    ),
+                    inscripciones: Math.max((clase._count.inscripciones ?? 0) - 1, 0),
                   }
                 : clase._count,
             }
-          : clase
+          : clase,
       );
 
       set({

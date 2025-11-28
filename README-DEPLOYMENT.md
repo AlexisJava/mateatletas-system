@@ -28,6 +28,7 @@ Mateatletas-Ecosystem/
 ```
 
 **Stack Tecnológico:**
+
 - Node.js: ≥20.19.0 (requerido por Vite 7.x)
 - npm: ≥10.0.0
 - Framework Backend: NestJS + Prisma
@@ -101,6 +102,7 @@ RATE_LIMIT_MAX=100
 ```
 
 **Generar JWT_SECRET:**
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
@@ -123,6 +125,7 @@ curl https://tu-dominio.up.railway.app/api/health
 ```
 
 Debería retornar:
+
 ```json
 {
   "status": "ok",
@@ -151,21 +154,25 @@ Debería retornar:
 **Framework Preset**: Next.js
 
 **Root Directory**:
+
 ```
 apps/web
 ```
 
 **Build Command**:
+
 ```bash
 npm run build
 ```
 
 **Output Directory**:
+
 ```
 .next
 ```
 
 **Install Command**:
+
 ```bash
 npm install --legacy-peer-deps --workspace=apps/web --include-workspace-root
 ```
@@ -187,10 +194,12 @@ NEXT_PUBLIC_BACKEND_URL=https://tu-dominio-railway.up.railway.app
 En "Settings" → "General":
 
 **Node.js Version**:
+
 - Automático (lee de package.json engines)
 - O especificar: `20.x`
 
 **Build & Development Settings**:
+
 - Framework: Next.js
 - Output Directory: `.next`
 
@@ -202,6 +211,7 @@ En "Settings" → "General":
 ### Verificación
 
 Visita tu URL de Vercel y verifica que:
+
 - ✅ La aplicación carga
 - ✅ Puede conectarse al backend (check DevTools Network)
 
@@ -244,6 +254,7 @@ npm run dev:api
 ```
 
 **Puertos:**
+
 - Frontend: http://localhost:3000
 - Backend: http://localhost:3001
 - API Docs: http://localhost:3001/api
@@ -302,6 +313,7 @@ docker run mateatletas-api node -v
 **Causa**: package-lock.json desincronizado
 
 **Solución**:
+
 ```bash
 rm -rf node_modules package-lock.json
 npm install --legacy-peer-deps
@@ -315,14 +327,17 @@ git push
 **Causa**: Versión de Node incorrecta
 
 **Solución Railway**:
+
 - ✅ Usar Dockerfile (ya incluido)
 - ✅ Cambiar Builder a "Dockerfile" en Settings
 
 **Solución Vercel**:
+
 - ✅ Verificar package.json engines: `"node": ">=20.19.0"`
 - ✅ Vercel usará Node 20.x automáticamente
 
 **Solución Local**:
+
 ```bash
 # Usar nvm
 nvm install 20.19.0
@@ -334,6 +349,7 @@ nvm use 20.19.0
 **Causa**: Dockerfile no copia correctamente
 
 **Solución**:
+
 1. Verificar que `.dockerignore` no excluye package.json
 2. Verificar que `Dockerfile` copia todos los package.json de workspaces
 3. Push de nuevo
@@ -343,6 +359,7 @@ nvm use 20.19.0
 **Causa**: Build demasiado pesado
 
 **Solución**:
+
 1. Verificar que Install Command use `--workspace=apps/web`
 2. Aumentar timeout en Settings (Pro plan)
 3. Optimizar dependencias
@@ -352,6 +369,7 @@ nvm use 20.19.0
 **Causa**: `FRONTEND_URL` mal configurada en Railway
 
 **Solución**:
+
 1. Verificar que `FRONTEND_URL` en Railway sea EXACTAMENTE la URL de Vercel
 2. Sin trailing slash: ✅ `https://app.vercel.app`, ❌ `https://app.vercel.app/`
 3. Re-deploy Railway después de cambiar
@@ -361,6 +379,7 @@ nvm use 20.19.0
 **Causa**: DATABASE_URL no configurada
 
 **Solución**:
+
 1. Verificar que PostgreSQL service esté corriendo
 2. Verificar variable `DATABASE_URL` esté configurada
 3. En Railway logs, buscar errores de conexión a DB
@@ -392,6 +411,7 @@ cat package.json | grep -A 2 '"engines"'
 ### Checklist Post-Deploy
 
 **Railway:**
+
 - [ ] Builder configurado como "Dockerfile"
 - [ ] Build args incluyen `APP_NAME=api`
 - [ ] Todas las variables de entorno configuradas
@@ -400,6 +420,7 @@ cat package.json | grep -A 2 '"engines"'
 - [ ] Logs no muestran errores
 
 **Vercel:**
+
 - [ ] Root Directory: `apps/web`
 - [ ] Install Command correcto
 - [ ] Variables de entorno configuradas
@@ -412,10 +433,12 @@ cat package.json | grep -A 2 '"engines"'
 ## 📊 Métricas de Performance
 
 **Docker Image Size:**
+
 - Backend (API): ~150-200 MB
 - Frontend (Web): ~180-220 MB
 
 **Build Times (aprox):**
+
 - Railway (API): 4-6 minutos
 - Vercel (Web): 2-4 minutos
 - Local build: 1-2 minutos
@@ -435,6 +458,7 @@ cat package.json | grep -A 2 '"engines"'
 ## 📞 Soporte
 
 **Problemas con:**
+
 - Railway: [Railway Help](https://help.railway.app)
 - Vercel: [Vercel Support](https://vercel.com/support)
 - Docker: [Docker Docs](https://docs.docker.com)

@@ -12,6 +12,7 @@
 ### Nivel de Riesgo Global: 🟠 MEDIO-ALTO
 
 **Total de Hallazgos:**
+
 - 🔴 **CRÍTICO:** 5 hallazgos
 - 🟠 **ALTO:** 8 hallazgos
 - 🟡 **MEDIO:** 6 hallazgos
@@ -20,7 +21,9 @@
 **Calificación de Seguridad:** 6.5/10
 
 ### Estado del Sistema
+
 ✅ **Fortalezas Identificadas:**
+
 - Implementación sólida de CQRS en módulo de pagos
 - Validación de montos en webhooks (previene fraude)
 - Idempotencia de webhooks implementada correctamente
@@ -30,6 +33,7 @@
 - Guards con jerarquía de roles bien diseñada
 
 ❌ **Vulnerabilidades Críticas:**
+
 - Bcrypt con solo 10 rounds (INSUFICIENTE para 2025)
 - JWT sin expiración explícita en generación de tokens
 - CORS permite `['*']` como fallback en producción
@@ -44,10 +48,12 @@
 ## 1. AUTENTICACIÓN
 
 ### [🔴CRÍTICO] Bcrypt con Salt Rounds Insuficientes
+
 **Archivo:** [apps/api/src/auth/auth.service.ts:42](apps/api/src/auth/auth.service.ts#L42)
 **Categoría:** OWASP A02:2021 - Cryptographic Failures
 
 **Problema:**
+
 ```typescript
 private readonly BCRYPT_ROUNDS = 10; // ❌ INSUFICIENTE
 ```
@@ -55,12 +61,14 @@ private readonly BCRYPT_ROUNDS = 10; // ❌ INSUFICIENTE
 El sistema usa solo 10 rounds de bcrypt, lo cual es insuficiente para 2025. Con el poder de cómputo actual (GPUs, ASICs), un atacante puede probar ~100,000 hashes/segundo, haciendo vulnerable el sistema a ataques de fuerza bruta si se filtra la base de datos.
 
 **Impacto:**
+
 - **Severidad:** CRÍTICA
 - Si un atacante obtiene acceso al dump de la base de datos, puede crackear contraseñas débiles en horas
 - Afecta a TODOS los usuarios: tutores, estudiantes, docentes, admins
 - Incumple estándares NIST SP 800-63B (recomienda mín. 12 rounds)
 
 **Fix:**
+
 ```typescript
 // ✅ CORRECCIÓN RECOMENDADA
 private readonly BCRYPT_ROUNDS = 12; // Mínimo recomendado NIST 2025
@@ -101,10 +109,12 @@ private getRoundsFromHash(hash: string): number {
 ---
 
 ### [🔴CRÍTICO] JWT sin Expiración Configurada Explícitamente
+
 **Archivo:** [apps/api/src/auth/auth.service.ts:928](apps/api/src/auth/auth.service.ts#L928)
 **Categoría:** OWASP A07:2021 - Identification and Authentication Failures
 
 **Problema:**
+
 ```typescript
 private generateJwtToken(userId: string, email: string, roles: Role[] | Role = [Role.TUTOR]): string {
   const payload = {
@@ -121,12 +131,14 @@ private generateJwtToken(userId: string, email: string, roles: Role[] | Role = [
 El token JWT se genera SIN especificar `expiresIn`, dependiendo de la configuración global en `JwtModule.register()`. Si esa configuración está ausente o mal configurada, los tokens pueden NO expirar nunca.
 
 **Impacto:**
+
 - **Severidad:** CRÍTICA
 - Token robado puede ser válido indefinidamente
 - No hay forma de invalidar sesiones comprometidas
 - Incumple OWASP ASVS 3.2.3 (tokens deben expirar)
 
 **Fix:**
+
 ```typescript
 // ✅ CORRECCIÓN
 private generateJwtToken(
@@ -162,10 +174,12 @@ private generateJwtToken(
 ---
 
 ### [🔴CRÍTICO] Password Temporal Almacenado en Texto Plano
+
 **Archivo:** [apps/api/prisma/schema.prisma:24](apps/api/prisma/schema.prisma#L24-L26)
 **Categoría:** OWASP A02:2021 - Cryptographic Failures | PCI-DSS 3.4
 
 **Problema:**
+
 ```prisma
 model Tutor {
   // ...
@@ -179,12 +193,14 @@ model Tutor {
 El sistema almacena contraseñas temporales en TEXTO PLANO en la base de datos. Si un atacante obtiene acceso a la BD, puede ver todas las contraseñas temporales.
 
 **Impacto:**
+
 - **Severidad:** CRÍTICA
 - Violación directa de PCI-DSS 3.4 (nunca almacenar passwords en texto plano)
 - Si se filtra la BD, atacante tiene passwords de usuarios que no las cambiaron
 - Afecta compliance GDPR (datos personales sin encriptar)
 
 **Fix:**
+
 ```typescript
 // ✅ SOLUCIÓN 1: NO almacenar password temporal en BD
 // En lugar de guardar la password, generar un token de reset único
@@ -238,6 +254,7 @@ async crearUsuarioConPasswordEncriptada(email: string) {
 ```
 
 **Migration Required:**
+
 ```sql
 -- ✅ Eliminar passwords temporales existentes
 UPDATE tutores SET password_temporal = NULL;
@@ -251,10 +268,12 @@ UPDATE admins SET password_temporal = NULL;
 ---
 
 ### [🔴CRÍTICO] Falta Logout Server-Side
+
 **Archivo:** [apps/web/src/store/auth.store.ts:160](apps/web/src/store/auth.store.ts#L160-L179)
 **Categoría:** OWASP A07:2021 - Identification and Authentication Failures
 
 **Problema:**
+
 ```typescript
 logout: async () => {
   try {
@@ -271,18 +290,20 @@ logout: async () => {
       selectedRole: null,
     });
   }
-}
+};
 ```
 
 El logout funciona en el cliente, PERO no hay evidencia de blacklist de tokens en el backend. Si un atacante roba un token JWT antes del logout, puede seguir usándolo hasta que expire (potencialmente 7 días).
 
 **Impacto:**
+
 - **Severidad:** CRÍTICA
 - Token robado permanece válido después del logout
 - No hay forma de invalidar sesiones comprometidas
 - Incumple OWASP ASVS 3.3.2 (invalidación de sesiones)
 
 **Fix:**
+
 ```typescript
 // ✅ BACKEND: Implementar Token Blacklist (Redis)
 
@@ -360,6 +381,7 @@ async logout(@Request() req, @Res() res: Response) {
 ---
 
 ### [🟠ALTO] Falta Rate Limiting en Login Endpoints
+
 **Archivo:** [apps/api/src/auth/auth.controller.ts](apps/api/src/auth/auth.controller.ts) (archivo no revisado pero inferido)
 **Categoría:** OWASP A07:2021 - Identification and Authentication Failures
 
@@ -367,12 +389,14 @@ async logout(@Request() req, @Res() res: Response) {
 No hay evidencia de rate limiting específico en los endpoints de login (`/auth/login`, `/auth/login-estudiante`). Aunque hay Throttler global (100 req/min según Swagger docs), esto es INSUFICIENTE para login.
 
 **Impacto:**
+
 - **Severidad:** ALTA
 - Atacante puede hacer fuerza bruta de contraseñas (ej: 1000 intentos en 10 minutos)
 - Enumeración de usuarios válidos (timing attacks)
 - No cumple OWASP ASVS 2.2.1 (anti-automation en login)
 
 **Fix:**
+
 ```typescript
 // ✅ CORRECCIÓN
 // auth.controller.ts
@@ -417,6 +441,7 @@ async login(@Body() loginDto: LoginDto, @Ip() ip: string) {
 ## 2. AUTORIZACIÓN
 
 ### [🟡MEDIO] Falta Validación de Ownership en Algunos Endpoints
+
 **Archivo:** Inferido de arquitectura
 **Categoría:** OWASP A01:2021 - Broken Access Control
 
@@ -424,12 +449,14 @@ async login(@Body() loginDto: LoginDto, @Ip() ip: string) {
 Aunque existe `EstudianteOwnershipGuard`, no hay evidencia de su aplicación consistente en TODOS los endpoints que manejan recursos de estudiantes. Un tutor podría potencialmente acceder a estudiantes de otros tutores si el guard no está aplicado.
 
 **Impacto:**
+
 - **Severidad:** MEDIA
 - IDOR (Insecure Direct Object Reference)
 - Tutor puede ver/modificar estudiantes ajenos
 - Violación de privacidad de datos de menores
 
 **Fix:**
+
 ```typescript
 // ✅ Crear decorator personalizado para ownership automático
 // ownership.decorator.ts
@@ -479,10 +506,12 @@ async function auditOwnershipGuards() {
 ## 3. WEBHOOKS Y PAGOS
 
 ### [🟢BAJO] IP Whitelisting Incluye Rango Temporal Peligroso
+
 **Archivo:** [apps/api/src/pagos/services/mercadopago-ip-whitelist.service.ts:56](apps/api/src/pagos/services/mercadopago-ip-whitelist.service.ts#L56)
 **Categoría:** Best Practices
 
 **Problema:**
+
 ```typescript
 private readonly officialIpRanges: string[] = [
   '209.225.49.0/24',
@@ -499,11 +528,13 @@ private readonly officialIpRanges: string[] = [
 El rango `186.139.0.0/16` cubre 65,536 IPs (todo un ISP argentino). Esto permite que CUALQUIER usuario de ese ISP envíe webhooks falsos.
 
 **Impacto:**
+
 - **Severidad:** BAJA (solo si NO se valida signature HMAC)
 - Atacante argentino puede intentar replay attacks
 - Amplia superficie de ataque innecesaria
 
 **Fix:**
+
 ```typescript
 // ✅ CORRECCIÓN
 private readonly officialIpRanges: string[] = [
@@ -535,6 +566,7 @@ private get allowedRanges(): string[] {
 ---
 
 ### [🟢BAJO] Falta Validación de Signature HMAC en Webhooks
+
 **Archivo:** [apps/api/src/pagos/services/payment-webhook.service.ts](apps/api/src/pagos/services/payment-webhook.service.ts)
 **Categoría:** OWASP A02:2021 - Cryptographic Failures | PCI-DSS
 
@@ -542,11 +574,13 @@ private get allowedRanges(): string[] {
 Solo se valida IP whitelisting, pero NO se verifica la firma HMAC que MercadoPago envía en el header `x-signature`. Un atacante con acceso a una IP válida (ej: Google Cloud) podría enviar webhooks falsos.
 
 **Impacto:**
+
 - **Severidad:** BAJA (IP whitelisting + validación de montos mitiga)
 - Sin embargo, defensa en profundidad requiere AMBAS validaciones
 - PCI-DSS 6.5.9 requiere validación de integridad de mensajes
 
 **Fix:**
+
 ```typescript
 // ✅ AGREGAR validación de signature HMAC
 // mercadopago-webhook.controller.ts
@@ -607,27 +641,33 @@ validateSignature(
 ## 4. CORS Y CONFIGURACIÓN
 
 ### [🔴CRÍTICO] CORS Permite Wildcard en Producción (Fallback Peligroso)
+
 **Archivo:** [apps/api/src/main.ts:74-77](apps/api/src/main.ts#L74-L77)
 **Categoría:** OWASP A05:2021 - Security Misconfiguration
 
 **Problema:**
+
 ```typescript
 const allowedOrigins = isProduction
   ? frontendUrls.length > 0
     ? frontendUrls
     : ['*'] // ❌ FALLBACK PELIGROSO en producción
-  : [ /* desarrollo */ ];
+  : [
+      /* desarrollo */
+    ];
 ```
 
 Si la variable `FRONTEND_URL` NO está configurada en producción, el sistema permite `origin: '*'`, exponiendo la API a CUALQUIER sitio web.
 
 **Impacto:**
+
 - **Severidad:** CRÍTICA
 - CSRF attacks desde cualquier dominio
 - Data exfiltration a sitios maliciosos
 - Violación de Same-Origin Policy
 
 **Fix:**
+
 ```typescript
 // ✅ CORRECCIÓN: NUNCA permitir wildcard
 const allowedOrigins = isProduction
@@ -636,7 +676,7 @@ const allowedOrigins = isProduction
     : (() => {
         // ❌ NO PERMITIR WILDCARD - LANZAR ERROR
         logger.error(
-          '🚨 CRITICAL: FRONTEND_URL not configured in production. CORS will block all requests.'
+          '🚨 CRITICAL: FRONTEND_URL not configured in production. CORS will block all requests.',
         );
         // Opción 1: Bloquear todo (más seguro)
         return [];
@@ -644,11 +684,7 @@ const allowedOrigins = isProduction
         // Opción 2: Lanzar error y no iniciar
         // throw new Error('FRONTEND_URL must be configured in production');
       })()
-  : [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      ...frontendUrls,
-    ].filter(Boolean);
+  : ['http://localhost:3000', 'http://localhost:3001', ...frontendUrls].filter(Boolean);
 
 // ✅ Validar en startup
 async function bootstrap() {
@@ -659,9 +695,7 @@ async function bootstrap() {
   const frontendUrl = process.env.FRONTEND_URL;
 
   if (isProduction && (!frontendUrl || frontendUrl.trim().length === 0)) {
-    throw new Error(
-      '🚨 CRITICAL: FRONTEND_URL environment variable is required in production'
-    );
+    throw new Error('🚨 CRITICAL: FRONTEND_URL environment variable is required in production');
   }
 
   // ... resto del código
@@ -675,21 +709,26 @@ async function bootstrap() {
 ## 5. LOGGING Y AUDITORÍA
 
 ### [🟠ALTO] Datos Sensibles en Logs
+
 **Archivo:** Múltiples archivos (auth.service.ts, payment-webhook.service.ts, etc.)
 **Categoría:** OWASP A09:2021 - Security Logging Failures | GDPR
 
 **Problema:**
+
 ```typescript
 // auth.service.ts:130
 this.logger.log(`Tutor registrado exitosamente: ${tutor.id} (${tutor.email})`);
 
 // auth.service.ts:296
-this.eventEmitter.emit('user.logged-in', new UserLoggedInEvent(
-  user.id,
-  userType,
-  user.email, // ❌ Email en evento (puede loguearse)
-  false,
-));
+this.eventEmitter.emit(
+  'user.logged-in',
+  new UserLoggedInEvent(
+    user.id,
+    userType,
+    user.email, // ❌ Email en evento (puede loguearse)
+    false,
+  ),
+);
 
 // payment-webhook.service.ts:208
 this.logger.error(
@@ -700,12 +739,14 @@ this.logger.error(
 Se loguean emails, IDs de usuario, montos de pagos, etc. Si los logs se comprometen o se envían a servicios terceros (ej: Sentry, Datadog), se expone PII.
 
 **Impacto:**
+
 - **Severidad:** ALTA
 - Violación de GDPR Art. 5(1)(f) (datos seguros)
 - Si logs se filtran, exposición de información personal
 - PCI-DSS 3.4 prohíbe loguear datos sensibles
 
 **Fix:**
+
 ```typescript
 // ✅ SOLUCIÓN: Crear helper para sanitizar logs
 
@@ -755,7 +796,7 @@ await this.prisma.auditLog.create({
       paymentId: payment.id,
     },
     encrypted: true, // Flag para datos sensibles encriptados
-  }
+  },
 });
 ```
 
@@ -766,10 +807,12 @@ await this.prisma.auditLog.create({
 ## 6. FRONTEND
 
 ### [🟢BAJO] Console.log en Producción
+
 **Archivo:** [apps/web/src/store/auth.store.ts:167](apps/web/src/store/auth.store.ts#L167)
 **Categoría:** Best Practices
 
 **Problema:**
+
 ```typescript
 } catch (error: unknown) {
   // Ignorar errores del backend en logout
@@ -780,19 +823,22 @@ await this.prisma.auditLog.create({
 Los `console.log` y `console.error` se ejecutan en producción, exponiendo detalles de errores al usuario (y potencial atacante).
 
 **Impacto:**
+
 - **Severidad:** BAJA
 - Información técnica expuesta en consola del navegador
 - Puede revelar estructura de API, rutas, errores internos
 
 **Fix:**
+
 ```typescript
 // ✅ next.config.js - Eliminar console.log en producción
 const nextConfig = {
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production'
-      ? { exclude: ['error', 'warn'] } // ✅ Mantener error/warn para Sentry
-      : false
-  }
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? { exclude: ['error', 'warn'] } // ✅ Mantener error/warn para Sentry
+        : false,
+  },
 };
 
 // ✅ O usar logger custom
@@ -810,7 +856,7 @@ export const logger = {
       // ✅ Enviar a Sentry/servicio de logging
       // Sentry.captureException(args[0]);
     }
-  }
+  },
 };
 
 // Usar: logger.log() en lugar de console.log()
@@ -823,11 +869,13 @@ export const logger = {
 ## 7. BASE DE DATOS
 
 ### [🟠ALTO] Falta Encriptación de Datos Sensibles en Reposo
+
 **Archivo:** [apps/api/prisma/schema.prisma](apps/api/prisma/schema.prisma)
 **Categoría:** OWASP A02:2021 - Cryptographic Failures | GDPR | COPPA
 
 **Problema:**
 Los siguientes campos sensibles NO están encriptados en la base de datos:
+
 - `Tutor.email`
 - `Tutor.dni`
 - `Tutor.cuil`
@@ -837,12 +885,14 @@ Los siguientes campos sensibles NO están encriptados en la base de datos:
 - `Admin.mfa_secret` ❌ CRÍTICO
 
 **Impacto:**
+
 - **Severidad:** ALTA
 - Violación de GDPR Art. 32 (encriptación de datos)
 - Violación de COPPA (protección de datos de menores)
 - Si se filtra la BD, exposición de PII
 
 **Fix:**
+
 ```typescript
 // ✅ SOLUCIÓN: Implementar Field-Level Encryption
 
@@ -950,6 +1000,7 @@ async function main() {
 ```
 
 **Schema Migration:**
+
 ```prisma
 model Tutor {
   id String @id @default(cuid())
@@ -974,6 +1025,7 @@ model Admin {
 ---
 
 ### [🟡MEDIO] Falta Soft Delete para GDPR Compliance
+
 **Archivo:** [apps/api/prisma/schema.prisma](apps/api/prisma/schema.prisma)
 **Categoría:** GDPR Art. 17 (Right to be Forgotten)
 
@@ -981,12 +1033,14 @@ model Admin {
 Los modelos NO tienen `deleted_at` para soft delete. Cuando se elimina un usuario, se pierde la trazabilidad y se violan constraints de auditoría.
 
 **Impacto:**
+
 - **Severidad:** MEDIA
 - Violación de GDPR (derecho al olvido requiere anonimización, NO eliminación física)
 - Pérdida de datos de auditoría
 - Problemas con foreign keys en cascada
 
 **Fix:**
+
 ```prisma
 // ✅ Agregar a TODOS los modelos principales
 model Tutor {
@@ -1071,6 +1125,7 @@ async anonymizeUser(userId: string) {
 ## 8. PROTECCIÓN DE MENORES (COPPA)
 
 ### [🟠ALTO] Falta Validación de Consentimiento Parental
+
 **Archivo:** [apps/api/src/estudiantes/estudiantes.service.ts](apps/api/src/estudiantes/estudiantes.service.ts) (inferido)
 **Categoría:** COPPA | GDPR (menores)
 
@@ -1078,12 +1133,14 @@ async anonymizeUser(userId: string) {
 El sistema permite crear estudiantes menores de 13 años SIN validar que el tutor haya dado consentimiento parental explícito.
 
 **Impacto:**
+
 - **Severidad:** ALTA
 - Violación de COPPA (Children's Online Privacy Protection Act)
 - Violación de GDPR Art. 8 (consent for children)
 - Multas potenciales de hasta $43,000 USD por violación (FTC)
 
 **Fix:**
+
 ```typescript
 // ✅ Agregar a schema
 model Tutor {
@@ -1152,20 +1209,24 @@ async acceptChildTerms(@CurrentUser() user: AuthUser, @Ip() ip: string) {
 ---
 
 ### [🟡MEDIO] Avatar 3D de Ready Player Me Sin Validación de Edad
+
 **Archivo:** [apps/web/](apps/web/) (componentes de avatar)
 **Categoría:** COPPA | Child Safety
 
 **Problema:**
 El sistema usa Ready Player Me para avatares 3D personalizables, pero NO valida que:
+
 1. Menores de 13 años NO puedan usar avatares personalizados (COPPA)
 2. Los avatares NO contengan contenido inapropiado
 
 **Impacto:**
+
 - **Severidad:** MEDIA
 - Violación potencial de COPPA (recolección de datos biométricos de menores)
 - Riesgo de avatares inapropiados (bullying, contenido sexual, etc.)
 
 **Fix:**
+
 ```typescript
 // ✅ SOLUCIÓN 1: Deshabilitar avatares personalizados para menores de 13
 // estudiante-avatar.component.tsx
@@ -1226,18 +1287,21 @@ async saveAvatar(estudianteId: string, avatarUrl: string) {
 ## 9. DEPENDENCIAS
 
 ### [🟡MEDIO] Falta Análisis de Vulnerabilidades en Dependencias
+
 **Categoría:** OWASP A06:2021 - Vulnerable Components
 
 **Problema:**
 No se pudo ejecutar `npm audit` / `yarn audit` debido a la configuración del monorepo. Sin auditoría regular, dependencias vulnerables pueden permanecer sin detectar.
 
 **Impacto:**
+
 - **Severidad:** MEDIA
 - Posibles vulnerabilidades en dependencias de terceros
 - Supply chain attacks sin detectar
 - Incumple OWASP ASVS 14.2.1
 
 **Fix:**
+
 ```bash
 # ✅ SOLUCIÓN 1: Configurar auditoría en CI/CD
 # .github/workflows/security-audit.yml
@@ -1314,22 +1378,26 @@ jobs:
 ## 10. OTROS HALLAZGOS
 
 ### [🟡MEDIO] Falta Implementación de CAPTCHA en Formularios Públicos
-**Archivo:** [apps/web/src/app/(public)/register/page.tsx](apps/web/src/app/(public)/register/page.tsx) (inferido)
+
+**Archivo:** [apps/web/src/app/(public)/register/page.tsx](<apps/web/src/app/(public)/register/page.tsx>) (inferido)
 **Categoría:** OWASP A07:2021 - Bot/Automation Attacks
 
 **Problema:**
 Los formularios públicos (registro, login, contacto) NO tienen protección contra bots. Esto permite:
+
 - Spam de registros
 - Brute force automatizado
 - Scraping de datos
 
 **Impacto:**
+
 - **Severidad:** MEDIA
 - Spam en base de datos
 - Abuso de recursos (emails, storage)
 - DDoS de registro
 
 **Fix:**
+
 ```tsx
 // ✅ Implementar reCAPTCHA v3
 // components/captcha-provider.tsx
@@ -1402,26 +1470,31 @@ export class RecaptchaService {
 ## TOP 5 ISSUES QUE DEBEN ARREGLARSE ANTES DE PRODUCCIÓN
 
 ### 1. 🔴 [CRÍTICO] Bcrypt Salt Rounds Insuficientes
+
 **Riesgo:** Contraseñas vulnerables a cracking
 **Esfuerzo:** 2 horas
 **Prioridad:** URGENTE
 
 ### 2. 🔴 [CRÍTICO] Password Temporal en Texto Plano
+
 **Riesgo:** Filtración de credenciales si se compromete la BD
 **Esfuerzo:** 6 horas
 **Prioridad:** URGENTE
 
 ### 3. 🔴 [CRÍTICO] JWT sin Expiración + Falta Logout Server-Side
+
 **Riesgo:** Tokens robados válidos indefinidamente
 **Esfuerzo:** 12 horas (JWT expiry + Token blacklist + Refresh tokens)
 **Prioridad:** URGENTE
 
 ### 4. 🔴 [CRÍTICO] CORS Permite Wildcard en Producción
+
 **Riesgo:** CSRF desde cualquier dominio
 **Esfuerzo:** 30 minutos
 **Prioridad:** URGENTE
 
 ### 5. 🟠 [ALTO] Encriptación de Datos Sensibles en Reposo
+
 **Riesgo:** Exposición de PII de menores si se filtra la BD
 **Esfuerzo:** 16 horas
 **Prioridad:** ALTA
@@ -1431,27 +1504,30 @@ export class RecaptchaService {
 ## ESTIMACIÓN DE ESFUERZO TOTAL
 
 ### Issues Críticos (MUST FIX)
+
 - Bcrypt rounds: 2h
 - Password temporal: 6h
 - JWT + Logout: 12h
 - CORS wildcard: 0.5h
 - Encriptación DB: 16h
-**Subtotal Crítico:** **36.5 horas** (~5 días)
+  **Subtotal Crítico:** **36.5 horas** (~5 días)
 
 ### Issues Altos (SHOULD FIX)
+
 - Rate limiting login: 3h
 - Ownership guards audit: 4h
 - Datos sensibles en logs: 6h
 - Soft delete GDPR: 8h
 - Consentimiento parental: 6h
-**Subtotal Alto:** **27 horas** (~3.5 días)
+  **Subtotal Alto:** **27 horas** (~3.5 días)
 
 ### Issues Medios (NICE TO HAVE)
+
 - Signature webhooks: 2h
 - CAPTCHA: 3h
 - Avatar moderación: 8h
 - Audit CI/CD: 4h
-**Subtotal Medio:** **17 horas** (~2 días)
+  **Subtotal Medio:** **17 horas** (~2 días)
 
 ### TOTAL ESTIMADO: **80.5 horas** (~10-12 días de trabajo)
 
@@ -1460,27 +1536,30 @@ export class RecaptchaService {
 ## RECOMENDACIONES ADICIONALES
 
 ### 1. Implementar Security Headers Adicionales
+
 ```typescript
 // main.ts
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://www.google.com"], // reCAPTCHA
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", 'data:', 'https:', 'https://models.readyplayer.me'],
-      connectSrc: ["'self'", process.env.FRONTEND_URL],
-      fontSrc: ["'self'", 'data:'],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
-      upgradeInsecureRequests: [], // ✅ Forzar HTTPS
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://www.google.com'], // reCAPTCHA
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:', 'https://models.readyplayer.me'],
+        connectSrc: ["'self'", process.env.FRONTEND_URL],
+        fontSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+        upgradeInsecureRequests: [], // ✅ Forzar HTTPS
+      },
     },
-  },
-  // ✅ Agregar Permissions Policy
-  permittedCrossDomainPolicies: { permittedPolicies: 'none' },
-  // ✅ Agregar Feature Policy
-}));
+    // ✅ Agregar Permissions Policy
+    permittedCrossDomainPolicies: { permittedPolicies: 'none' },
+    // ✅ Agregar Feature Policy
+  }),
+);
 
 // ✅ Custom header middleware
 app.use((req, res, next) => {
@@ -1491,16 +1570,19 @@ app.use((req, res, next) => {
 ```
 
 ### 2. Implementar WAF (Web Application Firewall)
+
 - Cloudflare WAF (recomendado para aplicaciones con pagos)
 - AWS WAF
 - Configurar reglas OWASP ModSecurity CRS
 
 ### 3. Penetration Testing
+
 - Contratar pentest profesional antes de producción
 - Realizar pentests anuales
 - Bug bounty program (opcional)
 
 ### 4. Monitoreo de Seguridad
+
 ```typescript
 // Implementar Sentry para tracking de errores
 import * as Sentry from '@sentry/nestjs';
@@ -1516,19 +1598,20 @@ Sentry.init({
       delete event.user.ip_address;
     }
     return event;
-  }
+  },
 });
 
 // ✅ Alertas de seguridad críticas
 if (securityEvent.severity === 'critical') {
   await this.slackService.sendAlert({
     channel: '#security-alerts',
-    message: `🚨 SECURITY EVENT: ${securityEvent.type}`
+    message: `🚨 SECURITY EVENT: ${securityEvent.type}`,
   });
 }
 ```
 
 ### 5. Backup y Disaster Recovery
+
 ```bash
 # ✅ Backups automáticos de BD (diarios)
 # Railway/Vercel ya lo proveen, pero verificar:
@@ -1547,6 +1630,7 @@ if (securityEvent.severity === 'critical') {
 ## COMPLIANCE CHECKLIST
 
 ### GDPR (General Data Protection Regulation)
+
 - [ ] ✅ Implementar consentimiento explícito (cookies, términos)
 - [ ] ❌ Implementar "Right to be Forgotten" (soft delete + anonimización)
 - [ ] ❌ Encriptar PII en reposo
@@ -1557,6 +1641,7 @@ if (securityEvent.severity === 'critical') {
 - [ ] ❌ Cookie policy
 
 ### COPPA (Children's Online Privacy Protection Act)
+
 - [ ] ❌ Validar consentimiento parental para menores de 13
 - [ ] ❌ Limitar recolección de datos de menores
 - [ ] ❌ No permitir avatares personalizados para menores de 13
@@ -1564,6 +1649,7 @@ if (securityEvent.severity === 'critical') {
 - [ ] ❌ Privacy policy específica para menores
 
 ### PCI-DSS (Payment Card Industry)
+
 - [ ] ✅ NO almacenar tarjetas de crédito (MercadoPago lo maneja)
 - [ ] ✅ Validación de montos server-side
 - [ ] ❌ Logs sin datos de pago (PARCIAL - mejorar)
@@ -1572,6 +1658,7 @@ if (securityEvent.severity === 'critical') {
 - [ ] ❌ Segregación de ambientes (dev/staging/prod)
 
 ### OWASP Top 10 2021
+
 - [ ] ❌ A01 Broken Access Control - PARCIAL (falta ownership audit)
 - [ ] ❌ A02 Cryptographic Failures - PARCIAL (bcrypt débil, falta encriptación)
 - [ ] ✅ A03 Injection - OK (Prisma parametrizado)
@@ -1588,6 +1675,7 @@ if (securityEvent.severity === 'critical') {
 ## CONCLUSIÓN
 
 El sistema **Mateatletas** tiene una base arquitectónica **sólida** con implementaciones de seguridad **buenas** en áreas como:
+
 - Validación de entrada (DTOs, Zod)
 - Separación de responsabilidades (CQRS en pagos)
 - Idempotencia de webhooks
@@ -1596,6 +1684,7 @@ El sistema **Mateatletas** tiene una base arquitectónica **sólida** con implem
 Sin embargo, presenta **vulnerabilidades críticas** que deben ser corregidas **ANTES** de escalar a producción:
 
 ### Vulnerabilidades Críticas (5):
+
 1. Bcrypt con solo 10 rounds
 2. Password temporal en texto plano
 3. JWT sin expiración explícita
@@ -1603,11 +1692,13 @@ Sin embargo, presenta **vulnerabilidades críticas** que deben ser corregidas **
 5. CORS con fallback wildcard
 
 ### Recomendación Final:
+
 **NO LANZAR A PRODUCCIÓN** hasta corregir al menos los 5 issues críticos (estimado: **5 días de trabajo**).
 
 Para un sistema que maneja **datos de menores** y **pagos**, se requiere un nivel de seguridad **EXCELENTE**, no solo **BUENO**.
 
 ### Próximos Pasos:
+
 1. ✅ Corregir 5 issues críticos (5 días)
 2. ✅ Implementar issues altos (3.5 días)
 3. ✅ Contratar penetration testing externo

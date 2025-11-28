@@ -21,11 +21,7 @@ interface ProductFilterProps {
   productCount?: Record<string, number>;
 }
 
-export function ProductFilter({
-  filtroActivo,
-  onFiltroChange,
-  productCount,
-}: ProductFilterProps) {
+export function ProductFilter({ filtroActivo, onFiltroChange, productCount }: ProductFilterProps) {
   const filtros: Array<{
     value: FiltroProducto;
     label: string;
@@ -96,11 +92,7 @@ export function ProductFilter({
                   ml-1 px-2 py-0.5
                   rounded-full
                   text-xs
-                  ${
-                    isActivo
-                      ? 'bg-white/20 text-white'
-                      : 'bg-gray-200 text-gray-700'
-                  }
+                  ${isActivo ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-700'}
                 `}
               >
                 {count}

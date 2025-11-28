@@ -2,18 +2,18 @@
 const https = require('http');
 
 const data = JSON.stringify({
-  nombre: "Juan",
-  apellido: "Pérez",
-  email: "juan@estudiante.com",
-  password: "Estudiante123!",
-  telefono: "1234567890",
-  fecha_nacimiento: "2010-01-15"
+  nombre: 'Juan',
+  apellido: 'Pérez',
+  email: 'juan@estudiante.com',
+  password: 'Estudiante123!',
+  telefono: '1234567890',
+  fecha_nacimiento: '2010-01-15',
 });
 
 // Primero login como admin para obtener token
 const loginData = JSON.stringify({
-  email: "admin@mateatletas.com",
-  password: "admin123"
+  email: 'admin@mateatletas.com',
+  password: 'admin123',
 });
 
 const loginOptions = {
@@ -23,22 +23,22 @@ const loginOptions = {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Content-Length': loginData.length
-  }
+    'Content-Length': loginData.length,
+  },
 };
 
 console.log('🔑 Obteniendo token de admin...');
 
 const loginReq = https.request(loginOptions, (res) => {
   let body = '';
-  res.on('data', (chunk) => body += chunk);
+  res.on('data', (chunk) => (body += chunk));
   res.on('end', () => {
     const loginResponse = JSON.parse(body);
     const token = loginResponse.access_token;
-    
+
     console.log('✅ Token obtenido');
     console.log('👤 Creando estudiante...');
-    
+
     // Ahora crear estudiante
     const createOptions = {
       hostname: 'localhost',
@@ -48,13 +48,13 @@ const loginReq = https.request(loginOptions, (res) => {
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': data.length,
-        'Authorization': `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     };
-    
+
     const createReq = https.request(createOptions, (createRes) => {
       let createBody = '';
-      createRes.on('data', (chunk) => createBody += chunk);
+      createRes.on('data', (chunk) => (createBody += chunk));
       createRes.on('end', () => {
         console.log('');
         console.log('========================================');
@@ -76,11 +76,11 @@ const loginReq = https.request(loginOptions, (res) => {
         }
       });
     });
-    
+
     createReq.on('error', (e) => {
       console.error('❌ Error:', e.message);
     });
-    
+
     createReq.write(data);
     createReq.end();
   });

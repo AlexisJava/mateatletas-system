@@ -7,7 +7,11 @@
 
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import type { OverlayRendererProps, DepthTransform, OverlayComponentProps } from '../types/overlay.types';
+import type {
+  OverlayRendererProps,
+  DepthTransform,
+  OverlayComponentProps,
+} from '../types/overlay.types';
 
 /**
  * Calcular transformaciones visuales según profundidad

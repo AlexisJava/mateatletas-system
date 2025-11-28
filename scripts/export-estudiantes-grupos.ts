@@ -19,17 +19,14 @@ async function exportarEstudiantesConGrupos() {
           },
         },
       },
-      orderBy: [
-        { apellido: 'asc' },
-        { nombre: 'asc' },
-      ],
+      orderBy: [{ apellido: 'asc' }, { nombre: 'asc' }],
     });
 
     // Transformar los datos al formato solicitado
-    const resultado = estudiantes.map(estudiante => ({
+    const resultado = estudiantes.map((estudiante) => ({
       nombre: estudiante.nombre,
       apellido: estudiante.apellido,
-      grupos: estudiante.inscripciones_clase_grupo.map(inscripcion => ({
+      grupos: estudiante.inscripciones_clase_grupo.map((inscripcion) => ({
         nombre: inscripcion.claseGrupo.nombre,
         codigo: inscripcion.claseGrupo.codigo,
         dia: inscripcion.claseGrupo.dia_semana,
@@ -39,7 +36,7 @@ async function exportarEstudiantesConGrupos() {
     }));
 
     // Filtrar estudiantes sin grupos si es necesario
-    const estudiantesConGrupos = resultado.filter(e => e.grupos.length > 0);
+    const estudiantesConGrupos = resultado.filter((e) => e.grupos.length > 0);
 
     console.log(`Total de estudiantes: ${resultado.length}`);
     console.log(`Estudiantes con grupos activos: ${estudiantesConGrupos.length}`);
@@ -54,7 +51,6 @@ async function exportarEstudiantesConGrupos() {
     // Mostrar resumen de grupos
     const totalInscripciones = estudiantesConGrupos.reduce((acc, e) => acc + e.grupos.length, 0);
     console.log(`Total de inscripciones a grupos: ${totalInscripciones}`);
-
   } catch (error) {
     console.error('Error al exportar estudiantes:', error);
     throw error;

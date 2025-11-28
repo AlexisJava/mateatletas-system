@@ -77,12 +77,8 @@ export function LandscapeOnlyGuard({ children }: { children: React.ReactNode }) 
               </h1>
 
               {/* Subtítulo */}
-              <p className="text-xl text-cyan-300 font-bold mb-2">
-                El Gimnasio está diseñado para
-              </p>
-              <p className="text-xl text-cyan-300 font-bold">
-                jugarse en modo horizontal
-              </p>
+              <p className="text-xl text-cyan-300 font-bold mb-2">El Gimnasio está diseñado para</p>
+              <p className="text-xl text-cyan-300 font-bold">jugarse en modo horizontal</p>
 
               {/* Instrucción */}
               <div className="mt-8 p-4 bg-white/10 backdrop-blur-sm rounded-2xl border-2 border-cyan-400/40">

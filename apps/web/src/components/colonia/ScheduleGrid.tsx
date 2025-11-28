@@ -11,7 +11,7 @@ export default function ScheduleGrid() {
 
   // Helper function to calculate duration
   const calculateDuration = (timeSlot: string): number => {
-    const [start, end] = timeSlot.split('-').map(time => {
+    const [start, end] = timeSlot.split('-').map((time) => {
       const [hours, minutes] = time.split(':').map(Number);
       return hours * 60 + minutes;
     });
@@ -19,7 +19,9 @@ export default function ScheduleGrid() {
   };
 
   // Get ALL courses for a specific day (sorted by time)
-  const getAllCoursesForDay = (day: DayOfWeek): Array<{ course: Course; schedule: CourseSchedule }> => {
+  const getAllCoursesForDay = (
+    day: DayOfWeek,
+  ): Array<{ course: Course; schedule: CourseSchedule }> => {
     const results: Array<{ course: Course; schedule: CourseSchedule }> = [];
     for (const course of COURSES) {
       for (const schedule of course.schedules) {
@@ -77,9 +79,7 @@ export default function ScheduleGrid() {
           {/* Current Day Indicator */}
           <div className="text-center mb-8">
             <div className="inline-block card-glass rounded-2xl border-2 border-[#fbbf24]/30 px-8 py-4">
-              <h3 className="text-3xl md:text-4xl font-black text-white">
-                {days[activeDay]}
-              </h3>
+              <h3 className="text-3xl md:text-4xl font-black text-white">{days[activeDay]}</h3>
             </div>
           </div>
 
@@ -97,11 +97,7 @@ export default function ScheduleGrid() {
                 const coursesForDay = getAllCoursesForDay(day);
 
                 return (
-                  <div
-                    key={day}
-                    className="w-full flex-shrink-0 px-4"
-                    style={{ minWidth: '100%' }}
-                  >
+                  <div key={day} className="w-full flex-shrink-0 px-4" style={{ minWidth: '100%' }}>
                     {/* Courses List */}
                     <div className="space-y-3">
                       {coursesForDay.map(({ course, schedule }, index) => {
@@ -134,10 +130,7 @@ export default function ScheduleGrid() {
                                   borderColor: `${course.color}40`,
                                 }}
                               >
-                                <Clock
-                                  className="w-6 h-6"
-                                  style={{ color: course.color }}
-                                />
+                                <Clock className="w-6 h-6" style={{ color: course.color }} />
                                 <div className="text-center px-2">
                                   <div
                                     className="text-sm md:text-base font-black leading-tight"
@@ -292,7 +285,9 @@ export default function ScheduleGrid() {
         {/* Info Banner */}
         <div className="card-glass rounded-2xl md:rounded-3xl border-2 border-white/10 p-6 md:p-8 max-w-4xl mx-auto text-center mb-12">
           <div className="text-white/80 text-base md:text-lg leading-relaxed">
-            <strong className="text-white font-black">Podés tomar todos los cursos que quieras.</strong>
+            <strong className="text-white font-black">
+              Podés tomar todos los cursos que quieras.
+            </strong>
             <br />
             Elegí los horarios que mejor se adapten a tu rutina de verano.
           </div>

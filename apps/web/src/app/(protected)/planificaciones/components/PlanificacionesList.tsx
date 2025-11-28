@@ -12,7 +12,10 @@ interface PlanificacionesListProps {
   onViewPlanificacion: (id: string) => void;
 }
 
-const ESTADO_BADGES: Record<EstadoPlanificacion, { label: string; className: string; icon: string }> = {
+const ESTADO_BADGES: Record<
+  EstadoPlanificacion,
+  { label: string; className: string; icon: string }
+> = {
   BORRADOR: {
     label: 'Borrador',
     className: 'bg-yellow-500/20 text-yellow-200 border border-yellow-500/40',
@@ -72,9 +75,7 @@ export const PlanificacionesList: React.FC<PlanificacionesListProps> = ({
       <div className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-10 text-center space-y-3">
         <div className="text-5xl">📭</div>
         <h3 className="text-xl font-semibold text-white">No hay planificaciones disponibles</h3>
-        <p className="text-white/60 text-sm">
-          Ajusta los filtros o vuelve a intentarlo más tarde.
-        </p>
+        <p className="text-white/60 text-sm">Ajusta los filtros o vuelve a intentarlo más tarde.</p>
       </div>
     );
   }
@@ -94,7 +95,9 @@ export const PlanificacionesList: React.FC<PlanificacionesListProps> = ({
                   <span>🎯</span>
                   <span>{planificacion.grupo?.codigo || planificacion.codigo_grupo}</span>
                 </span>
-                <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold ${estadoConfig.className}`}>
+                <span
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold ${estadoConfig.className}`}
+                >
                   <span>{estadoConfig.icon}</span>
                   <span>{estadoConfig.label}</span>
                 </span>

@@ -20,17 +20,12 @@ export const RUTAS: Ruta[] = [
     intereses_requeridos: ['videojuegos', 'crear_cosas'],
     objetivos_match: ['diversion', 'proyecto'],
     nivel_estudiante: 'principiante',
-    cursos: [
-      'scratch-basico',
-      'scratch-juegos-avanzados',
-      'roblox-studio-intro',
-      'scripting-luau'
-    ],
+    cursos: ['scratch-basico', 'scratch-juegos-avanzados', 'roblox-studio-intro', 'scripting-luau'],
     duracion_total_meses: 8,
     total_clases: 58,
     resultado_final: 'Podrá crear y publicar juegos completos en Roblox con código Lua real',
     precio_usd: 30,
-    precio_ars: 45000
+    precio_ars: 45000,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -51,13 +46,13 @@ export const RUTAS: Ruta[] = [
       'html-css-fundamentos',
       'javascript-interactivo',
       'react-moderno',
-      'proyecto-web-fullstack'
+      'proyecto-web-fullstack',
     ],
     duracion_total_meses: 8,
     total_clases: 60,
     resultado_final: 'Creará sitios web modernos y apps interactivas con React',
     precio_usd: 30,
-    precio_ars: 45000
+    precio_ars: 45000,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -78,13 +73,13 @@ export const RUTAS: Ruta[] = [
       'python-ia-fundamentos',
       'machine-learning-intro',
       'redes-neuronales',
-      'proyecto-ia-aplicada'
+      'proyecto-ia-aplicada',
     ],
     duracion_total_meses: 9,
     total_clases: 64,
     resultado_final: 'Entrenará modelos de IA y creará proyectos con Machine Learning',
     precio_usd: 30,
-    precio_ars: 45000
+    precio_ars: 45000,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -101,17 +96,12 @@ export const RUTAS: Ruta[] = [
     intereses_requeridos: ['matematica', 'varios'],
     objetivos_match: ['academico', 'diversion'],
     nivel_estudiante: 'principiante',
-    cursos: [
-      'algebra-jugando',
-      'geometria-visual',
-      'logica-puzzles',
-      'matematica-aplicada'
-    ],
+    cursos: ['algebra-jugando', 'geometria-visual', 'logica-puzzles', 'matematica-aplicada'],
     duracion_total_meses: 7,
     total_clases: 52,
     resultado_final: 'Dominará álgebra, geometría y resolución de problemas complejos',
     precio_usd: 30,
-    precio_ars: 45000
+    precio_ars: 45000,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -132,13 +122,13 @@ export const RUTAS: Ruta[] = [
       'teoria-numeros',
       'combinatoria-avanzada',
       'problemas-olimpiadas',
-      'estrategias-competencia'
+      'estrategias-competencia',
     ],
     duracion_total_meses: 9,
     total_clases: 68,
     resultado_final: 'Estará preparado para competir en Olimpiadas Matemáticas',
     precio_usd: 30,
-    precio_ars: 45000
+    precio_ars: 45000,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -159,13 +149,13 @@ export const RUTAS: Ruta[] = [
       'matematica-financiera-basica',
       'inversiones-interes-compuesto',
       'economia-personal',
-      'proyecto-startup'
+      'proyecto-startup',
     ],
     duracion_total_meses: 7,
     total_clases: 50,
     resultado_final: 'Entenderá finanzas personales, inversiones y economía aplicada',
     precio_usd: 30,
-    precio_ars: 45000
+    precio_ars: 45000,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -182,17 +172,12 @@ export const RUTAS: Ruta[] = [
     intereses_requeridos: ['ciencias', 'varios'],
     objetivos_match: ['diversion', 'academico'],
     nivel_estudiante: 'principiante',
-    cursos: [
-      'sistema-solar',
-      'estrellas-galaxias',
-      'fisica-espacial',
-      'proyecto-mision-espacial'
-    ],
+    cursos: ['sistema-solar', 'estrellas-galaxias', 'fisica-espacial', 'proyecto-mision-espacial'],
     duracion_total_meses: 6,
     total_clases: 48,
     resultado_final: 'Comprenderá astronomía, física espacial y podrá diseñar misiones',
     precio_usd: 30,
-    precio_ars: 45000
+    precio_ars: 45000,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -209,17 +194,12 @@ export const RUTAS: Ruta[] = [
     intereses_requeridos: ['ciencias', 'crear_cosas'],
     objetivos_match: ['diversion', 'proyecto'],
     nivel_estudiante: 'principiante',
-    cursos: [
-      'quimica-experimental',
-      'fisica-divertida',
-      'biologia-makers',
-      'proyecto-cientifico'
-    ],
+    cursos: ['quimica-experimental', 'fisica-divertida', 'biologia-makers', 'proyecto-cientifico'],
     duracion_total_meses: 7,
     total_clases: 54,
     resultado_final: 'Realizará experimentos y proyectos científicos reales',
     precio_usd: 30,
-    precio_ars: 45000
+    precio_ars: 45000,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -240,13 +220,13 @@ export const RUTAS: Ruta[] = [
       'robotica-arduino',
       'simulaciones-python',
       'analisis-datos',
-      'proyecto-steam-integrado'
+      'proyecto-steam-integrado',
     ],
     duracion_total_meses: 8,
     total_clases: 62,
     resultado_final: 'Creará proyectos que integren código, mate y ciencias',
     precio_usd: 30,
-    precio_ars: 45000
+    precio_ars: 45000,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -267,13 +247,13 @@ export const RUTAS: Ruta[] = [
       'python-data-science',
       'estadistica-aplicada',
       'visualizacion-datos',
-      'proyecto-analytics'
+      'proyecto-analytics',
     ],
     duracion_total_meses: 9,
     total_clases: 66,
     resultado_final: 'Analizará datasets reales y creará dashboards interactivos',
     precio_usd: 30,
-    precio_ars: 45000
+    precio_ars: 45000,
   },
 ];
 
@@ -281,26 +261,28 @@ export const RUTAS: Ruta[] = [
  * Obtener ruta por ID
  */
 export function obtenerRutaPorId(id: string): Ruta | undefined {
-  return RUTAS.find(r => r.id === id);
+  return RUTAS.find((r) => r.id === id);
 }
 
 /**
  * Obtener rutas por área
  */
-export function obtenerRutasPorArea(area: 'matematica' | 'programacion' | 'ciencias' | 'mixto'): Ruta[] {
-  return RUTAS.filter(r => r.area_principal === area);
+export function obtenerRutasPorArea(
+  area: 'matematica' | 'programacion' | 'ciencias' | 'mixto',
+): Ruta[] {
+  return RUTAS.filter((r) => r.area_principal === area);
 }
 
 /**
  * Obtener rutas por edad
  */
 export function obtenerRutasPorEdad(edad: number): Ruta[] {
-  return RUTAS.filter(r => edad >= r.edad_minima && edad <= r.edad_maxima);
+  return RUTAS.filter((r) => edad >= r.edad_minima && edad <= r.edad_maxima);
 }
 
 /**
  * Obtener rutas por nivel
  */
 export function obtenerRutasPorNivel(nivel: 'principiante' | 'intermedio' | 'avanzado'): Ruta[] {
-  return RUTAS.filter(r => r.nivel_estudiante === nivel);
+  return RUTAS.filter((r) => r.nivel_estudiante === nivel);
 }

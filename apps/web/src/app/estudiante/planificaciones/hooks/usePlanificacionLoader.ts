@@ -45,10 +45,10 @@ export function usePlanificacionLoader(codigo: string): PlanificacionLoaderState
         const codigoValido: CodigoPlanificacionValido = validacion.codigo;
 
         // 2. Cargar módulo dinámicamente
-        const modulo = await import(
+        const modulo = (await import(
           /* webpackChunkName: "planificacion-[request]" */
           `@/planificaciones/${codigoValido}/index`
-        ) as PlanificacionModule;
+        )) as PlanificacionModule;
 
         // 3. Verificar que tenga el componente default
         if (!modulo.default) {
@@ -66,9 +66,10 @@ export function usePlanificacionLoader(codigo: string): PlanificacionLoaderState
         }
       } catch (error) {
         if (isMounted) {
-          const errorObj = error instanceof Error
-            ? error
-            : new Error('Error desconocido al cargar la planificación');
+          const errorObj =
+            error instanceof Error
+              ? error
+              : new Error('Error desconocido al cargar la planificación');
 
           setState({
             isLoading: false,

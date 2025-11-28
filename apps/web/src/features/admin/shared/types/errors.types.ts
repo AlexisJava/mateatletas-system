@@ -91,7 +91,7 @@ const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
     z.null(),
     z.array(jsonValueSchema),
     z.record(jsonValueSchema),
-  ])
+  ]),
 );
 
 export const ApiErrorSchema = z.object({
@@ -139,7 +139,7 @@ export class ErrorFactory {
     message: string,
     code: ErrorCode.NOT_FOUND | ErrorCode.ALREADY_EXISTS | ErrorCode.CONFLICT,
     resource?: string,
-    resourceId?: string
+    resourceId?: string,
   ): BusinessError {
     return {
       code,

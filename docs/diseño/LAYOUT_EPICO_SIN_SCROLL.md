@@ -5,6 +5,7 @@
 **"El avatar es el protagonista, todo lo demás es interfaz mínima"**
 
 ### Principios:
+
 1. ✅ **SIN SCROLL** - Todo visible en viewport (experiencia tipo videojuego)
 2. ✅ **AVATAR GIGANTE** - Ocupa 85vh, domina la pantalla
 3. ✅ **HEADER MINIMALISTA** - Solo nombre, recursos y nivel (5vh)
@@ -37,6 +38,7 @@
 ```
 
 ### Características Mobile:
+
 - **Header:** 5vh ultra-compacto
   - Avatar pequeño 👤
   - Nombre corto (solo primer nombre)
@@ -81,6 +83,7 @@
 ```
 
 ### Características Tablet:
+
 - **Header:** 5vh con logo central
   - Avatar + nombre (izquierda)
   - Logo MATEATLETAS (centro)
@@ -122,6 +125,7 @@
 ```
 
 ### Características Desktop:
+
 - **Header:** 5vh con todo visible
   - Avatar + nombre + nivel (izquierda)
   - Logo grande (centro)
@@ -150,6 +154,7 @@
 ### 1. BOTTOM BAR ÉPICO - XP + NAVEGACIÓN
 
 #### Mobile Version:
+
 ```tsx
 <div className="h-[10vh] flex items-center gap-3 px-4 bg-gradient-to-r from-slate-900/95 via-purple-900/95 to-slate-900/95 backdrop-blur-2xl border-t-2 border-white/30">
   {/* XP BAR - 70% */}
@@ -167,7 +172,7 @@
             '0 0 20px rgba(251, 191, 36, 0.6)',
             '0 0 40px rgba(251, 191, 36, 0.9)',
             '0 0 20px rgba(251, 191, 36, 0.6)',
-          ]
+          ],
         }}
         transition={{ duration: 2, repeat: Infinity }}
       />
@@ -186,6 +191,7 @@
 ```
 
 #### Tablet Version:
+
 ```tsx
 <div className="h-[10vh] flex items-center gap-4 px-6 bg-gradient-to-r from-slate-900/95 via-purple-900/95 to-slate-900/95 backdrop-blur-2xl border-t-2 border-white/30">
   {/* XP BAR - 60% */}
@@ -223,6 +229,7 @@
 ```
 
 #### Desktop Version:
+
 ```tsx
 <div className="h-[10vh] flex flex-col justify-center px-8 bg-gradient-to-r from-slate-900/95 via-purple-900/95 to-slate-900/95 backdrop-blur-2xl border-t-2 border-white/30">
   {/* Texto motivacional */}
@@ -242,7 +249,7 @@
           '0 0 30px rgba(251, 191, 36, 0.6), 0 0 60px rgba(251, 191, 36, 0.3)',
           '0 0 50px rgba(251, 191, 36, 0.9), 0 0 100px rgba(251, 191, 36, 0.5)',
           '0 0 30px rgba(251, 191, 36, 0.6), 0 0 60px rgba(251, 191, 36, 0.3)',
-        ]
+        ],
       }}
       transition={{ duration: 2, repeat: Infinity }}
     >
@@ -303,17 +310,16 @@ function NavIconButton({ icon, label, badge, isActive, isMenu, onClick }: NavIco
           w-14 h-14 rounded-2xl
           flex items-center justify-center
           border-2 transition-all
-          ${isActive
-            ? 'bg-gradient-to-br from-cyan-500 via-purple-600 to-pink-600 border-white shadow-[0_0_30px_rgba(139,92,246,0.8)]'
-            : isMenu
-              ? 'bg-gradient-to-br from-orange-500 via-red-600 to-pink-600 border-white/30 shadow-[0_0_20px_rgba(251,146,60,0.6)]'
-              : 'bg-gradient-to-br from-slate-700 to-slate-800 border-white/20'
+          ${
+            isActive
+              ? 'bg-gradient-to-br from-cyan-500 via-purple-600 to-pink-600 border-white shadow-[0_0_30px_rgba(139,92,246,0.8)]'
+              : isMenu
+                ? 'bg-gradient-to-br from-orange-500 via-red-600 to-pink-600 border-white/30 shadow-[0_0_20px_rgba(251,146,60,0.6)]'
+                : 'bg-gradient-to-br from-slate-700 to-slate-800 border-white/20'
           }
         `}
       >
-        <div className={`${isActive || isMenu ? 'text-white' : 'text-white/70'}`}>
-          {icon}
-        </div>
+        <div className={`${isActive || isMenu ? 'text-white' : 'text-white/70'}`}>{icon}</div>
       </div>
 
       {/* Label */}
@@ -520,6 +526,7 @@ function NavIconButton({ icon, label, badge, isActive, isMenu, onClick }: NavIco
 ```
 
 ### MenuCard Component:
+
 ```tsx
 interface MenuCardProps {
   icon: React.ReactNode;

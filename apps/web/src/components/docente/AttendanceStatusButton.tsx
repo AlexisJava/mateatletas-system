@@ -46,7 +46,8 @@ export default function AttendanceStatusButton({
       color: '#4caf50',
       bgColor: '#e8f5e9',
       activeClass: 'bg-[#4caf50] text-white border-[#4caf50]',
-      inactiveClass: 'bg-[#e8f5e9] text-[#4caf50] border-[#4caf50] hover:bg-[#4caf50] hover:text-white',
+      inactiveClass:
+        'bg-[#e8f5e9] text-[#4caf50] border-[#4caf50] hover:bg-[#4caf50] hover:text-white',
     },
     [EstadoAsistencia.Ausente]: {
       label: 'Ausente',
@@ -54,7 +55,8 @@ export default function AttendanceStatusButton({
       color: '#f44336',
       bgColor: '#ffebee',
       activeClass: 'bg-[#f44336] text-white border-[#f44336]',
-      inactiveClass: 'bg-[#ffebee] text-[#f44336] border-[#f44336] hover:bg-[#f44336] hover:text-white',
+      inactiveClass:
+        'bg-[#ffebee] text-[#f44336] border-[#f44336] hover:bg-[#f44336] hover:text-white',
     },
     [EstadoAsistencia.Justificado]: {
       label: 'Justificado',
@@ -62,7 +64,8 @@ export default function AttendanceStatusButton({
       color: '#2196f3',
       bgColor: '#e3f2fd',
       activeClass: 'bg-[#2196f3] text-white border-[#2196f3]',
-      inactiveClass: 'bg-[#e3f2fd] text-[#2196f3] border-[#2196f3] hover:bg-[#2196f3] hover:text-white',
+      inactiveClass:
+        'bg-[#e3f2fd] text-[#2196f3] border-[#2196f3] hover:bg-[#2196f3] hover:text-white',
     },
     [EstadoAsistencia.Tardanza]: {
       label: 'Tardanza',
@@ -70,7 +73,8 @@ export default function AttendanceStatusButton({
       color: '#ff9800',
       bgColor: '#fff3e0',
       activeClass: 'bg-[#ff9800] text-white border-[#ff9800]',
-      inactiveClass: 'bg-[#fff3e0] text-[#ff9800] border-[#ff9800] hover:bg-[#ff9800] hover:text-white',
+      inactiveClass:
+        'bg-[#fff3e0] text-[#ff9800] border-[#ff9800] hover:bg-[#ff9800] hover:text-white',
     },
   };
 

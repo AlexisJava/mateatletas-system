@@ -13,6 +13,7 @@ El portal tutor está **implementado y funcional** en la ruta `apps/web/src/app/
 **Rating General:** ⭐⭐⭐⭐ (7/10)
 
 ### Estado Actual
+
 - ✅ **Backend completo:** 4 endpoints funcionales
 - ✅ **Autenticación segura:** JWT con roles (tutor)
 - ✅ **Dashboard funcional:** Con 4 tabs principales
@@ -26,6 +27,7 @@ El portal tutor está **implementado y funcional** en la ruta `apps/web/src/app/
 ### **1. FRONTEND (Next.js 15 + TypeScript)**
 
 #### Estructura de rutas:
+
 ```
 apps/web/src/app/(protected)/
 ├── dashboard/               ⭐ Principal
@@ -57,12 +59,14 @@ apps/web/src/app/(protected)/
 #### Componentes principales:
 
 **DashboardView** (`dashboard/components/DashboardView.tsx`)
+
 - Sistema de tabs: Inicio, Mis Hijos, Calendario, Pagos, Ayuda
 - Header con user menu y logout
 - Alertas críticas en tiempo real
 - Diseño dark mode premium
 
 **MisHijosTab** (`dashboard/components/MisHijosTab.tsx`)
+
 - Lista lateral de todos los hijos
 - Panel de detalle con:
   - Información personal
@@ -71,11 +75,13 @@ apps/web/src/app/(protected)/
   - Historial de progreso
 
 **CalendarioTab** (`dashboard/components/CalendarioTab.tsx`)
+
 - Próximas N clases de todos los hijos
 - Vista temporal (HOY, MAÑANA, fecha)
 - Botón para unirse a Google Meet
 
 **PagosTab** (`dashboard/components/PagosTab.tsx`)
+
 - Historial de inscripciones mensuales
 - Filtros por periodo y estado
 - Resumen financiero
@@ -86,6 +92,7 @@ apps/web/src/app/(protected)/
 ### **2. BACKEND (NestJS + Prisma)**
 
 #### Módulo Tutor:
+
 ```
 apps/api/src/tutor/
 ├── tutor.controller.ts      ⭐ 4 endpoints
@@ -97,14 +104,15 @@ apps/api/src/tutor/
 
 #### Endpoints disponibles:
 
-| Endpoint | Método | Descripción | Estado |
-|----------|--------|-------------|--------|
-| `/tutor/dashboard-resumen` | GET | Resumen completo del dashboard | ✅ |
-| `/tutor/mis-inscripciones` | GET | Inscripciones mensuales + resumen financiero | ✅ |
-| `/tutor/proximas-clases` | GET | Próximas N clases de todos los hijos | ✅ |
-| `/tutor/alertas` | GET | Alertas activas (pagos, asistencia, clases hoy) | ✅ |
+| Endpoint                   | Método | Descripción                                     | Estado |
+| -------------------------- | ------ | ----------------------------------------------- | ------ |
+| `/tutor/dashboard-resumen` | GET    | Resumen completo del dashboard                  | ✅     |
+| `/tutor/mis-inscripciones` | GET    | Inscripciones mensuales + resumen financiero    | ✅     |
+| `/tutor/proximas-clases`   | GET    | Próximas N clases de todos los hijos            | ✅     |
+| `/tutor/alertas`           | GET    | Alertas activas (pagos, asistencia, clases hoy) | ✅     |
 
 #### Características de seguridad:
+
 - ✅ **JWT Auth Guard:** Requiere autenticación
 - ✅ **Roles Guard:** Solo rol `tutor`
 - ✅ **User ID from token:** TutorId extraído del JWT (no confiamos en cliente)
@@ -115,6 +123,7 @@ apps/api/src/tutor/
 ## 📊 FUNCIONALIDADES IMPLEMENTADAS
 
 ### ✅ Dashboard Principal
+
 - **Métricas generales:**
   - Total de hijos registrados
   - Clases del mes
@@ -138,6 +147,7 @@ apps/api/src/tutor/
   - Monto
 
 ### ✅ Gestión de Hijos
+
 - **Lista de estudiantes:**
   - Vista con todos los hijos
   - Filtros por nivel escolar y equipo
@@ -157,6 +167,7 @@ apps/api/src/tutor/
   - ✅ **Ver detalle:** Completo
 
 ### ✅ Calendario
+
 - Próximas clases de todos los hijos
 - Ordenadas cronológicamente
 - Labels temporales (HOY, MAÑANA, LUN 15/02)
@@ -164,6 +175,7 @@ apps/api/src/tutor/
 - Botón para unirse a Google Meet
 
 ### ✅ Pagos
+
 - Historial de inscripciones mensuales
 - Filtros por:
   - Periodo (YYYY-MM)
@@ -175,6 +187,7 @@ apps/api/src/tutor/
   - Estudiantes únicos
 
 ### ⚠️ Ayuda
+
 - Sección básica implementada
 - **Falta:** FAQs, tutoriales, contacto directo
 
@@ -185,11 +198,13 @@ apps/api/src/tutor/
 ### 🔴 **ALTA PRIORIDAD**
 
 #### 1. **Pagos en línea integrados**
+
 **Estado:** ❌ No implementado
 **Descripción:** El tutor no puede pagar desde el portal.
 **Impacto:** Alto - La experiencia está incompleta sin esto.
 
 **Tasks:**
+
 - [ ] Integración con Mercado Pago (ya existe en backend para admin)
 - [ ] Botón "Pagar ahora" en inscripciones pendientes
 - [ ] Flujo completo:
@@ -202,6 +217,7 @@ apps/api/src/tutor/
 - [ ] Descargar comprobantes (PDF)
 
 **Endpoints necesarios:**
+
 ```typescript
 POST /tutor/pagos/generar-preference
   Body: { inscripcionesIds: string[] }
@@ -218,11 +234,13 @@ GET /tutor/pagos/:pagoId/comprobante
 ---
 
 #### 2. **Notificaciones push/email**
+
 **Estado:** ❌ No implementado
 **Descripción:** No hay sistema de notificaciones.
 **Impacto:** Alto - Los tutores no reciben alertas fuera del portal.
 
 **Tasks:**
+
 - [ ] Sistema de notificaciones en backend:
   - Eventos: pago vencido, clase hoy, baja asistencia
   - Canales: email (nodemailer), push (web push), WhatsApp (Twilio)
@@ -236,6 +254,7 @@ GET /tutor/pagos/:pagoId/comprobante
   - Horarios (no molestar)
 
 **Endpoints necesarios:**
+
 ```typescript
 GET /tutor/notificaciones
   Query: { limite?, leidas? }
@@ -255,10 +274,12 @@ PUT /tutor/notificaciones/preferencias
 ---
 
 #### 3. **Perfil de tutor completo**
+
 **Estado:** ⚠️ Implementación parcial
 **Descripción:** Falta edición de perfil y gestión de cuenta.
 
 **Tasks:**
+
 - [ ] Ruta `/dashboard/perfil` o `/perfil`
 - [ ] Vista de perfil con:
   - Información personal (nombre, email, teléfono, dirección)
@@ -272,21 +293,28 @@ PUT /tutor/notificaciones/preferencias
   - Cambiar email (con verificación)
 
 **Endpoints necesarios:**
+
 ```typescript
-GET /tutor/perfil
-  Response: PerfilTutor
+GET / tutor / perfil;
+Response: PerfilTutor;
 
-PUT /tutor/perfil
-  Body: UpdatePerfilDto
-  Response: PerfilTutor
+PUT / tutor / perfil;
+Body: UpdatePerfilDto;
+Response: PerfilTutor;
 
-POST /tutor/perfil/avatar
-  Body: FormData (file)
-  Response: { avatar_url }
+POST / tutor / perfil / avatar;
+Body: FormData(file);
+Response: {
+  avatar_url;
+}
 
-PUT /tutor/perfil/password
-  Body: { password_actual, password_nueva }
-  Response: { success: boolean }
+PUT / tutor / perfil / password;
+Body: {
+  (password_actual, password_nueva);
+}
+Response: {
+  success: boolean;
+}
 ```
 
 ---
@@ -294,10 +322,12 @@ PUT /tutor/perfil/password
 ### 🟡 **MEDIA PRIORIDAD**
 
 #### 4. **Comunicación con docentes**
+
 **Estado:** ❌ No implementado
 **Descripción:** No hay forma de contactar a los docentes.
 
 **Tasks:**
+
 - [ ] Sistema de mensajería interna:
   - Chat 1:1 con docentes
   - Lista de conversaciones
@@ -309,10 +339,12 @@ PUT /tutor/perfil/password
 ---
 
 #### 5. **Progreso académico detallado**
+
 **Estado:** ⚠️ Muy básico
 **Descripción:** Solo muestra métricas de asistencia.
 
 **Tasks:**
+
 - [ ] Ampliar detalle de estudiante con:
   - Calificaciones por asignatura
   - Gráficos de evolución temporal
@@ -321,6 +353,7 @@ PUT /tutor/perfil/password
   - Logros/insignias
 
 **Endpoints necesarios:**
+
 ```typescript
 GET /estudiantes/:id/progreso-academico
   Query: { periodo? }
@@ -336,10 +369,12 @@ GET /estudiantes/:id/progreso-academico
 ---
 
 #### 6. **Reportes descargables**
+
 **Estado:** ❌ No implementado
 **Descripción:** No se pueden descargar reportes.
 
 **Tasks:**
+
 - [ ] Botón "Descargar reporte" en cada sección:
   - Reporte de asistencia (PDF)
   - Reporte de pagos (PDF/Excel)
@@ -352,10 +387,12 @@ GET /estudiantes/:id/progreso-academico
 ### 🟢 **BAJA PRIORIDAD (Nice to have)**
 
 #### 7. **Calendario integrado**
+
 **Estado:** ⚠️ Solo lista
 **Descripción:** No hay vista de calendario visual.
 
 **Tasks:**
+
 - [ ] Implementar calendario visual con librería (FullCalendar, react-big-calendar)
 - [ ] Vistas: mes, semana, día
 - [ ] Eventos: clases, evaluaciones, reuniones
@@ -364,10 +401,12 @@ GET /estudiantes/:id/progreso-academico
 ---
 
 #### 8. **Modo oscuro/claro**
+
 **Estado:** ⚠️ Solo dark
 **Descripción:** El dashboard solo está en modo oscuro.
 
 **Tasks:**
+
 - [ ] Toggle de modo claro/oscuro
 - [ ] Guardar preferencia en localStorage
 - [ ] Aplicar tema global con CSS variables
@@ -375,10 +414,12 @@ GET /estudiantes/:id/progreso-academico
 ---
 
 #### 9. **Onboarding interactivo**
+
 **Estado:** ⚠️ Comentado
 **Descripción:** Hay un `OnboardingView.tsx` pero está comentado.
 
 **Tasks:**
+
 - [ ] Reactivar OnboardingView para nuevos tutores
 - [ ] Wizard de 3-4 pasos:
   1. Bienvenida
@@ -390,10 +431,12 @@ GET /estudiantes/:id/progreso-academico
 ---
 
 #### 10. **Soporte multiidioma**
+
 **Estado:** ❌ Solo español
 **Descripción:** Todo el portal está en español.
 
 **Tasks:**
+
 - [ ] Implementar i18n (next-intl, react-i18next)
 - [ ] Traducir a inglés (mínimo)
 - [ ] Selector de idioma en header
@@ -405,8 +448,10 @@ GET /estudiantes/:id/progreso-academico
 ### 🔴 **ALTA PRIORIDAD**
 
 #### 1. **Diseño responsive mejorado**
+
 **Problema:** El diseño funciona en mobile pero tiene problemas.
 **Tasks:**
+
 - [ ] Revisar todos los breakpoints (sm, md, lg, xl)
 - [ ] Mejorar layout en tablets (768px-1024px)
 - [ ] Sidebar responsive en mobile (hamburger menu)
@@ -415,8 +460,10 @@ GET /estudiantes/:id/progreso-academico
 ---
 
 #### 2. **Estados de carga y errores**
+
 **Problema:** Algunos componentes no manejan bien el loading/error.
 **Tasks:**
+
 - [ ] Skeletons para carga inicial (react-loading-skeleton)
 - [ ] Mensajes de error amigables
 - [ ] Retry buttons cuando falla una request
@@ -425,8 +472,10 @@ GET /estudiantes/:id/progreso-academico
 ---
 
 #### 3. **Animaciones y transiciones**
+
 **Problema:** Las transiciones son abruptas.
 **Tasks:**
+
 - [ ] Usar Framer Motion para transiciones suaves
 - [ ] Animaciones de entrada/salida en modals
 - [ ] Hover states con micro-interacciones
@@ -437,8 +486,10 @@ GET /estudiantes/:id/progreso-academico
 ### 🟡 **MEDIA PRIORIDAD**
 
 #### 4. **Consistencia visual**
+
 **Problema:** Diferentes estilos en diferentes páginas.
 **Tasks:**
+
 - [ ] Design system unificado:
   - Paleta de colores consistente
   - Tipografía estándar (Fredoka, Lilita)
@@ -449,8 +500,10 @@ GET /estudiantes/:id/progreso-academico
 ---
 
 #### 5. **Accesibilidad (a11y)**
+
 **Problema:** No está optimizado para lectores de pantalla.
 **Tasks:**
+
 - [ ] Agregar aria-labels
 - [ ] Navegación con teclado (Tab, Enter, Esc)
 - [ ] Contraste de colores WCAG AA
@@ -463,8 +516,10 @@ GET /estudiantes/:id/progreso-academico
 ### 🔴 **ALTA PRIORIDAD**
 
 #### 1. **Testing**
+
 **Estado:** ⚠️ Sin tests
 **Tasks:**
+
 - [ ] Unit tests para componentes (Vitest + Testing Library)
 - [ ] Integration tests para flujos críticos
 - [ ] E2E tests para user journeys (Playwright)
@@ -473,8 +528,10 @@ GET /estudiantes/:id/progreso-academico
 ---
 
 #### 2. **Error handling robusto**
+
 **Problema:** Algunos errores solo hacen `console.error`.
 **Tasks:**
+
 - [ ] Implementar error boundaries (React)
 - [ ] Logger centralizado (Sentry, LogRocket)
 - [ ] Toast notifications para errores de usuario
@@ -485,7 +542,9 @@ GET /estudiantes/:id/progreso-academico
 ### 🟡 **MEDIA PRIORIDAD**
 
 #### 3. **Performance optimization**
+
 **Tasks:**
+
 - [ ] Code splitting por rutas (Next.js dynamic import)
 - [ ] Lazy loading de imágenes
 - [ ] Cache de requests con React Query
@@ -494,7 +553,9 @@ GET /estudiantes/:id/progreso-academico
 ---
 
 #### 4. **Documentación**
+
 **Tasks:**
+
 - [ ] README con setup instructions
 - [ ] Storybook para componentes
 - [ ] JSDoc comments en funciones complejas
@@ -505,6 +566,7 @@ GET /estudiantes/:id/progreso-academico
 ## 📦 COMPARACIÓN CON OTROS PORTALES
 
 ### ✅ **Portal Admin (Mateatletas OS)**
+
 - **Estado:** ⭐⭐⭐⭐⭐ (9/10) - Completísimo
 - **Features:** Dashboard avanzado, gráficos, gestión completa
 - **UX/UI:** Diseño profesional con Chart.js, sidebar colapsable
@@ -512,6 +574,7 @@ GET /estudiantes/:id/progreso-academico
 **Recomendación:** Reutilizar componentes del portal admin en tutor.
 
 ### ✅ **Portal Docente**
+
 - **Estado:** ⭐⭐⭐⭐ (8/10) - Muy completo
 - **Features:** Calendario, grupos, planificaciones, observaciones
 - **UX/UI:** Diseño limpio y funcional
@@ -519,6 +582,7 @@ GET /estudiantes/:id/progreso-academico
 **Recomendación:** Adaptar la vista de calendario del docente para tutor.
 
 ### ⚠️ **Portal Estudiante (Brawl Stars Gimnasio)**
+
 - **Estado:** ⭐⭐⭐⭐⭐ (10/10) - Innovador y completo
 - **Features:** Gamificación, overlay stack navigation, animaciones épicas
 - **UX/UI:** Diseño next-gen con Framer Motion, inspirado en videojuegos
@@ -530,6 +594,7 @@ GET /estudiantes/:id/progreso-academico
 ## 🎯 PLAN DE ACCIÓN RECOMENDADO
 
 ### **FASE 1: Mejoras Críticas (2-3 semanas)**
+
 ```
 ✅ Prioridad 1: Pagos en línea
   └─ Integración Mercado Pago
@@ -550,6 +615,7 @@ GET /estudiantes/:id/progreso-academico
 ```
 
 ### **FASE 2: UX/UI Polish (1-2 semanas)**
+
 ```
 ✅ Responsive mejorado
 ✅ Estados de carga (skeletons)
@@ -558,6 +624,7 @@ GET /estudiantes/:id/progreso-academico
 ```
 
 ### **FASE 3: Features Adicionales (2-3 semanas)**
+
 ```
 ✅ Comunicación con docentes (chat simple)
 ✅ Progreso académico detallado
@@ -566,6 +633,7 @@ GET /estudiantes/:id/progreso-academico
 ```
 
 ### **FASE 4: Testing y Documentación (1 semana)**
+
 ```
 ✅ Unit tests
 ✅ E2E tests
@@ -604,6 +672,7 @@ GET /estudiantes/:id/progreso-academico
 ## 🔗 RECURSOS Y REFERENCIAS
 
 ### Documentación útil:
+
 - Next.js 15: https://nextjs.org/docs
 - Tailwind CSS: https://tailwindcss.com/docs
 - Framer Motion: https://www.framer.com/motion/
@@ -611,6 +680,7 @@ GET /estudiantes/:id/progreso-academico
 - Mercado Pago SDK: https://www.mercadopago.com.ar/developers/es/docs
 
 ### Librerías recomendadas:
+
 ```json
 {
   "payments": "mercadopago",
@@ -631,6 +701,7 @@ GET /estudiantes/:id/progreso-academico
 El portal tutor tiene **una base sólida** con backend completo y frontend funcional, pero necesita **pulido y features adicionales** para estar al nivel del portal admin y estudiante.
 
 ### **Próximos pasos inmediatos:**
+
 1. ✅ **Implementar pagos en línea** (crítico para UX)
 2. ✅ **Sistema de notificaciones** (engagement)
 3. ✅ **Mejorar diseño responsive** (accesibilidad)

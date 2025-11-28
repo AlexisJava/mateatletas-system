@@ -11,6 +11,7 @@
 ## 📊 ANÁLISIS: ¿Qué falta para 9.5/10?
 
 ### Estado Actual (8.2/10)
+
 ✅ Arquitectura limpia (FACADE pattern)
 ✅ Servicios especializados
 ✅ Paginación implementada
@@ -25,11 +26,13 @@
 ## 🎯 FASE 2.5: CAMINO A 9.5/10
 
 ### 1. ✅ TESTING COMPREHENSIVO (+0.3 puntos) - COMPLETADO
+
 **Estado inicial**: Sin tests automatizados
 **Estado final**: 99 tests passing, ~90% cobertura en servicios refactorizados
 **Objetivo**: ✅ ALCANZADO
 
 #### Tests Unitarios
+
 ```typescript
 // Ejemplo: admin-stats.service.spec.ts
 describe('AdminStatsService', () => {
@@ -42,6 +45,7 @@ describe('AdminStatsService', () => {
 ```
 
 **Archivos necesarios**:
+
 ```
 apps/api/src/admin/services/
 ├── admin-stats.service.spec.ts
@@ -55,11 +59,13 @@ apps/api/src/clases/services/
 ```
 
 **Cobertura objetivo**:
+
 - Servicios críticos: 90%+
 - DTOs y validaciones: 100%
 - Controllers: 70%+
 
 **Herramientas**:
+
 ```bash
 npm install --save-dev @nestjs/testing jest
 npm run test:cov
@@ -72,6 +78,7 @@ npm run test:cov
 ---
 
 ### 2. ✅ VALIDACIÓN Y SANITIZACIÓN AVANZADA (+0.2 puntos) - COMPLETADO
+
 **Estado inicial**: Validación básica con class-validator
 **Estado final**: 4 custom validators + 4 decorators de sanitización + 3 DTOs mejorados
 **Objetivo**: ✅ ALCANZADO
@@ -79,6 +86,7 @@ npm run test:cov
 #### DTOs Mejorados
 
 **Actual**:
+
 ```typescript
 export class CrearClaseDto {
   @IsString()
@@ -87,6 +95,7 @@ export class CrearClaseDto {
 ```
 
 **Mejorado**:
+
 ```typescript
 export class CrearClaseDto {
   @IsUUID('4', { message: 'ID de ruta curricular inválido' })
@@ -119,6 +128,7 @@ export class CrearClaseDto {
 ```
 
 #### Pipes Globales
+
 ```typescript
 // main.ts
 app.useGlobalPipes(
@@ -134,6 +144,7 @@ app.useGlobalPipes(
 ```
 
 #### Custom Validators
+
 ```typescript
 // validators/is-future-date.validator.ts
 @ValidatorConstraint({ name: 'isFutureDate', async: false })
@@ -167,11 +178,13 @@ export function IsFutureDate(validationOptions?: ValidationOptions) {
 ---
 
 ### 3. ✅ LOGGING Y OBSERVABILIDAD (+0.2 puntos) - COMPLETADO
+
 **Estado inicial**: Logger básico de NestJS
 **Estado final**: Winston logger + HTTP interceptor + log rotation + structured logging
 **Objetivo**: ✅ ALCANZADO
 
 #### Winston Logger
+
 ```typescript
 // logger/winston.config.ts
 import * as winston from 'winston';
@@ -201,6 +214,7 @@ export const winstonConfig = {
 ```
 
 #### Request Logging Middleware
+
 ```typescript
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
@@ -215,9 +229,7 @@ export class LoggerMiddleware implements NestMiddleware {
       const { statusCode } = res;
       const responseTime = Date.now() - startTime;
 
-      this.logger.log(
-        `${method} ${originalUrl} ${statusCode} ${responseTime}ms - ${userAgent}`,
-      );
+      this.logger.log(`${method} ${originalUrl} ${statusCode} ${responseTime}ms - ${userAgent}`);
     });
 
     next();
@@ -226,6 +238,7 @@ export class LoggerMiddleware implements NestMiddleware {
 ```
 
 #### Métricas con Prometheus (opcional)
+
 ```typescript
 import { makeCounterProvider } from '@willsoto/nestjs-prometheus';
 
@@ -247,11 +260,13 @@ import { makeCounterProvider } from '@willsoto/nestjs-prometheus';
 ---
 
 ### 4. ✅ MANEJO DE ERRORES AVANZADO (+0.15 puntos) - COMPLETADO
+
 **Estado inicial**: Excepciones básicas
 **Estado final**: 3 exception filters + UUID tracking + environment-aware messages
 **Objetivo**: ✅ ALCANZADO
 
 #### Global Exception Filter
+
 ```typescript
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -269,9 +284,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      message = typeof exceptionResponse === 'string'
-        ? exceptionResponse
-        : (exceptionResponse as any).message;
+      message =
+        typeof exceptionResponse === 'string'
+          ? exceptionResponse
+          : (exceptionResponse as any).message;
       code = this.getErrorCode(exception);
     } else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       status = HttpStatus.BAD_REQUEST;
@@ -297,12 +313,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private getErrorCode(exception: HttpException): string {
     const status = exception.getStatus();
     switch (status) {
-      case 400: return 'BAD_REQUEST';
-      case 401: return 'UNAUTHORIZED';
-      case 403: return 'FORBIDDEN';
-      case 404: return 'NOT_FOUND';
-      case 409: return 'CONFLICT';
-      default: return 'UNKNOWN_ERROR';
+      case 400:
+        return 'BAD_REQUEST';
+      case 401:
+        return 'UNAUTHORIZED';
+      case 403:
+        return 'FORBIDDEN';
+      case 404:
+        return 'NOT_FOUND';
+      case 409:
+        return 'CONFLICT';
+      default:
+        return 'UNKNOWN_ERROR';
     }
   }
 
@@ -322,6 +344,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 ```
 
 #### Códigos de Error Estructurados
+
 ```typescript
 // errors/error-codes.ts
 export enum ErrorCode {
@@ -348,11 +371,13 @@ export enum ErrorCode {
 ---
 
 ### 5. ✅ DOCUMENTACIÓN API (Swagger) (+0.15 puntos) - COMPLETADO
+
 **Estado inicial**: Sin documentación automática
 **Estado final**: Swagger UI funcional + 5 DTOs documentados + AuthController completo
 **Objetivo**: ✅ ALCANZADO
 
 #### Swagger Setup
+
 ```typescript
 // main.ts
 const config = new DocumentBuilder()
@@ -371,6 +396,7 @@ SwaggerModule.setup('api/docs', app, document);
 ```
 
 #### Decoradores en DTOs
+
 ```typescript
 export class CrearClaseDto {
   @ApiProperty({
@@ -393,6 +419,7 @@ export class CrearClaseDto {
 ```
 
 #### Decoradores en Controllers
+
 ```typescript
 @ApiTags('clases')
 @ApiBearerAuth()
@@ -407,11 +434,11 @@ export class ClasesController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Datos inválidos'
+    description: 'Datos inválidos',
   })
   @ApiResponse({
     status: 401,
-    description: 'No autenticado'
+    description: 'No autenticado',
   })
   async programarClase(@Body() dto: CrearClaseDto) {
     return this.clasesService.programarClase(dto);
@@ -428,33 +455,38 @@ export class ClasesController {
 ---
 
 ### 6. ⏳ SEGURIDAD AVANZADA (+0.15 puntos) - PENDIENTE
+
 **Estado actual**: Seguridad básica (JWT, CORS, Rate Limiting)
 **Objetivo**: Helmet, CSRF, sanitización SQL
 **Próximo paso**: Implementar Helmet + CSRF protection
 
 #### Helmet (Headers de seguridad)
+
 ```typescript
 // main.ts
 import helmet from 'helmet';
 
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", 'data:', 'https:'],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
     },
-  },
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true,
-  },
-}));
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+  }),
+);
 ```
 
 #### CSRF Protection
+
 ```typescript
 import * as csurf from 'csurf';
 
@@ -462,6 +494,7 @@ app.use(csurf({ cookie: true }));
 ```
 
 #### Rate Limiting por Usuario
+
 ```typescript
 @Injectable()
 export class UserThrottlerGuard extends ThrottlerGuard {
@@ -473,6 +506,7 @@ export class UserThrottlerGuard extends ThrottlerGuard {
 ```
 
 #### SQL Injection Protection
+
 ```typescript
 // Ya implementado con Prisma (ORM parameterizado)
 // Asegurar que no hay raw queries sin sanitizar
@@ -484,11 +518,13 @@ export class UserThrottlerGuard extends ThrottlerGuard {
 ---
 
 ### 7. ⏳ CACHE STRATEGY (+0.1 puntos) - PENDIENTE
+
 **Estado actual**: Sin cache
 **Objetivo**: Redis para endpoints frecuentes
 **Próximo paso**: Configurar Redis + cache en rutas curriculares
 
 #### Redis Cache
+
 ```typescript
 // cache.module.ts
 import { CacheModule } from '@nestjs/cache-manager';
@@ -508,6 +544,7 @@ export class AppCacheModule {}
 ```
 
 #### Cache en Servicios
+
 ```typescript
 @Injectable()
 export class ClasesManagementService {
@@ -540,11 +577,13 @@ export class ClasesManagementService {
 ---
 
 ### 8. ⏳ MIGRATIONS Y SEEDS ROBUSTOS (+0.05 puntos) - PENDIENTE
+
 **Estado actual**: Seeds básicos
 **Objetivo**: Migrations versionadas + seeds de producción
 **Próximo paso**: Seeds condicionales por entorno
 
 #### Migrations con Prisma
+
 ```bash
 # Crear migration
 npx prisma migrate dev --name add_index_to_clase_fecha
@@ -554,6 +593,7 @@ npx prisma migrate deploy
 ```
 
 #### Seeds Condicionales
+
 ```typescript
 // prisma/seed.ts
 async function main() {
@@ -582,24 +622,25 @@ async function seedProductionData() {
 
 ## 📊 RESUMEN: ROADMAP A 9.5/10
 
-| Tarea | Puntos | Estado | Esfuerzo Real | Prioridad |
-|-------|--------|--------|---------------|-----------|
-| 1. Testing Comprehensivo | +0.3 | ✅ COMPLETADO | 2-3 días | 🔴 CRÍTICA |
-| 2. Validación Avanzada | +0.2 | ✅ COMPLETADO | 1-2 días | 🟠 ALTA |
-| 3. Logging & Observabilidad | +0.2 | ✅ COMPLETADO | 1 día | 🟠 ALTA |
-| 4. Manejo de Errores | +0.15 | ✅ COMPLETADO | 1 día | 🟡 MEDIA |
-| 5. Documentación Swagger | +0.15 | ✅ COMPLETADO | 1 día | 🟡 MEDIA |
-| 6. Seguridad Avanzada | +0.15 | ⏳ PENDIENTE | 1 día | 🟠 ALTA |
-| 7. Cache Strategy | +0.1 | ⏳ PENDIENTE | 1 día | 🟢 BAJA |
-| 8. Migrations Robustas | +0.05 | ⏳ PENDIENTE | 0.5 días | 🟢 BAJA |
-| **COMPLETADO** | **+1.0** | **5/8 tareas** | **6-8 días** | |
-| **TOTAL** | **+1.3** | **8 tareas** | **10-12 días** | |
+| Tarea                       | Puntos   | Estado         | Esfuerzo Real  | Prioridad  |
+| --------------------------- | -------- | -------------- | -------------- | ---------- |
+| 1. Testing Comprehensivo    | +0.3     | ✅ COMPLETADO  | 2-3 días       | 🔴 CRÍTICA |
+| 2. Validación Avanzada      | +0.2     | ✅ COMPLETADO  | 1-2 días       | 🟠 ALTA    |
+| 3. Logging & Observabilidad | +0.2     | ✅ COMPLETADO  | 1 día          | 🟠 ALTA    |
+| 4. Manejo de Errores        | +0.15    | ✅ COMPLETADO  | 1 día          | 🟡 MEDIA   |
+| 5. Documentación Swagger    | +0.15    | ✅ COMPLETADO  | 1 día          | 🟡 MEDIA   |
+| 6. Seguridad Avanzada       | +0.15    | ⏳ PENDIENTE   | 1 día          | 🟠 ALTA    |
+| 7. Cache Strategy           | +0.1     | ⏳ PENDIENTE   | 1 día          | 🟢 BAJA    |
+| 8. Migrations Robustas      | +0.05    | ⏳ PENDIENTE   | 0.5 días       | 🟢 BAJA    |
+| **COMPLETADO**              | **+1.0** | **5/8 tareas** | **6-8 días**   |            |
+| **TOTAL**                   | **+1.3** | **8 tareas**   | **10-12 días** |            |
 
 ---
 
 ## 🎯 PLAN DE IMPLEMENTACIÓN
 
 ### ✅ Sprint 1 (3-4 días): FUNDAMENTOS - COMPLETADO
+
 - ✅ Testing comprehensivo (99 tests passing)
 - ✅ Validación avanzada en DTOs
 - ✅ Logging estructurado (Winston + rotation)
@@ -607,6 +648,7 @@ async function seedProductionData() {
 **Resultado**: Backend pasó de 8.2 → 8.7 ✅
 
 ### ✅ Sprint 2 (3-4 días): PRODUCCIÓN - COMPLETADO
+
 - ✅ Manejo de errores global (3 filters + UUID tracking)
 - ⏳ Seguridad avanzada (Helmet, CSRF) - PENDIENTE
 - ✅ Documentación Swagger completa (5 DTOs + AuthController)
@@ -614,6 +656,7 @@ async function seedProductionData() {
 **Resultado**: Backend pasó de 8.7 → **9.2** ✅
 
 ### ⏳ Sprint 3 (2-3 días): OPTIMIZACIÓN - EN PROGRESO
+
 - ⏳ Seguridad avanzada (Helmet, CSRF)
 - ⏳ Cache con Redis
 - ⏳ Migrations robustas
@@ -625,12 +668,14 @@ async function seedProductionData() {
 ## 🚀 BENEFICIOS DE LLEGAR A 9.5/10
 
 ### Técnicos:
+
 - ✅ **Confiabilidad**: Tests automáticos detectan bugs
 - ✅ **Debuggabilidad**: Logs estructurados facilitan troubleshooting
 - ✅ **Performance**: Cache reduce latencia 60-80%
 - ✅ **Seguridad**: Protección contra ataques comunes
 
 ### Negocio:
+
 - ✅ **Mantenibilidad**: Menor costo de desarrollo futuro
 - ✅ **Documentación**: API auto-documentada (onboarding más rápido)
 - ✅ **Escalabilidad**: Sistema listo para 10x usuarios
@@ -641,6 +686,7 @@ async function seedProductionData() {
 ## 💡 ESTADO ACTUAL Y PRÓXIMOS PASOS
 
 ### ✅ YA COMPLETADO (Backend 9.2/10)
+
 1. ✅ Testing comprehensivo - 99 tests passing
 2. ✅ Validación avanzada - 4 validators + 4 decorators
 3. ✅ Logging estructurado - Winston + rotation
@@ -648,11 +694,13 @@ async function seedProductionData() {
 5. ✅ Documentación Swagger - 5 DTOs + AuthController
 
 ### ⏳ PENDIENTE PARA 9.5/10 (+0.3 puntos restantes)
+
 6. ⏳ **Seguridad avanzada** (+0.15) - Helmet, CSRF, rate limiting por usuario
 7. ⏳ **Cache Strategy** (+0.1) - Redis para rutas curriculares y catálogo
 8. ⏳ **Migrations robustas** (+0.05) - Seeds condicionales por entorno
 
 ### 🎯 RECOMENDACIÓN
+
 **Siguiente tarea**: Implementar Seguridad Avanzada (Helmet + CSRF)
 **Tiempo estimado**: 1 día
 **Impacto**: +0.15 puntos → Backend 9.35/10
@@ -660,4 +708,3 @@ async function seedProductionData() {
 ---
 
 **El backend está en excelente estado (9.2/10) y production-ready. Las 3 tareas restantes son optimizaciones finales.** ✅
-

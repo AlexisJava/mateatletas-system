@@ -32,11 +32,13 @@ tests/e2e/
 ## Tests Implementados
 
 ### 01-smoke.spec.ts (2 tests)
+
 - ✅ Verificación básica de que la aplicación carga
 - ✅ Página principal accesible
 - ✅ Página de colonia 2025 accesible
 
 ### 02-colonia-landing.spec.ts (11 tests)
+
 - ✅ Landing page carga correctamente
 - ✅ HeroSection - Elementos principales visibles
 - ✅ HeroSection - CTAs funcionales
@@ -45,12 +47,14 @@ tests/e2e/
 - ✅ Tests responsive (mobile, tablet)
 
 ### 03-colonia-catalog.spec.ts (13 tests)
+
 - ✅ Filtros de área y edad funcionales
 - ✅ Combinación de filtros
 - ✅ Course cards interactivas
 - ✅ Tests de performance
 
 ### 04-colonia-inscription-form.spec.ts (20 tests)
+
 - ✅ Modal de inscripción
 - ✅ Formulario multi-paso (5 pasos)
 - ✅ Validaciones de campos
@@ -58,11 +62,13 @@ tests/e2e/
 - ✅ Progress bar
 
 ### 05-colonia-e2e-flow.spec.ts (6 tests)
+
 - ✅ Journey completo de usuario
 - ✅ Journey alternativo
 - ✅ Edge cases
 
 ### 06-accessibility.spec.ts (19 tests) 🆕
+
 - ✅ WCAG 2.1 Level AA compliance
 - ✅ Navegación por teclado
 - ✅ Color contrast
@@ -160,13 +166,17 @@ CI=1
 ## 🎯 Global Setup & Teardown
 
 ### Global Setup
+
 Ejecuta UNA VEZ antes de todos los tests:
+
 - Verifica que la aplicación está disponible
 - Puede preparar BD de prueba
 - Valida variables de entorno críticas
 
 ### Global Teardown
+
 Ejecuta UNA VEZ después de todos los tests:
+
 - Limpia datos de prueba
 - Elimina archivos temporales
 - Genera reportes consolidados
@@ -174,17 +184,21 @@ Ejecuta UNA VEZ después de todos los tests:
 ## 📊 Reportes
 
 ### HTML Report
+
 ```bash
 yarn workspace web test:e2e:report
 ```
 
 ### JSON Report
+
 Ubicación: `test-results/results.json`
 
 ### JUnit Report
+
 Ubicación: `test-results/junit.xml` (para CI/CD)
 
 ### GitHub Actions
+
 Annotations automáticas en PRs
 
 ## 🎬 Videos y Screenshots
@@ -206,6 +220,7 @@ npx playwright show-trace test-results/.../trace.zip
 ## 🔒 Accessibility Testing
 
 Tests de accesibilidad con axe-core verifican:
+
 - WCAG 2.1 Level AA compliance
 - Color contrast (4.5:1 mínimo)
 - Keyboard navigation
@@ -250,14 +265,17 @@ e2e-tests:
 ## 🐛 Troubleshooting
 
 ### Tests fallan por timeout
+
 - Aumentar timeout: `timeout: 60000` en config
 - Marcar test lento: `test.slow()`
 
 ### Modal no se abre
+
 - Verificar scroll antes de clickear
 - Usar `{ force: true }` si necesario
 
 ### Browsers no instalados
+
 ```bash
 yarn workspace web test:e2e:install
 ```

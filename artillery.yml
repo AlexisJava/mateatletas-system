@@ -23,36 +23,36 @@
 #   artillery report report.json
 
 config:
-  target: "http://localhost:3001"
+  target: 'http://localhost:3001'
   phases:
     # Fase 1: Warmup (30s)
     - duration: 30
-      arrivalRate: 5  # 5 usuarios/segundo
-      name: "Warmup"
+      arrivalRate: 5 # 5 usuarios/segundo
+      name: 'Warmup'
 
     # Fase 2: Ramp up (60s)
     - duration: 60
       arrivalRate: 5
-      rampTo: 20  # Incrementar gradualmente a 20 usuarios/segundo
-      name: "Ramp up"
+      rampTo: 20 # Incrementar gradualmente a 20 usuarios/segundo
+      name: 'Ramp up'
 
     # Fase 3: Sustained load (120s)
     - duration: 120
-      arrivalRate: 20  # 20 usuarios/segundo sostenidos
-      name: "Sustained load"
+      arrivalRate: 20 # 20 usuarios/segundo sostenidos
+      name: 'Sustained load'
 
     # Fase 4: Spike (30s)
     - duration: 30
-      arrivalRate: 50  # Pico de 50 usuarios/segundo
-      name: "Spike test"
+      arrivalRate: 50 # Pico de 50 usuarios/segundo
+      name: 'Spike test'
 
   # Timeouts y configuración
   timeout: 10
 
   # Variables de entorno
   variables:
-    testEmail: "test@example.com"
-    testPassword: "wrongpassword123"
+    testEmail: 'test@example.com'
+    testPassword: 'wrongpassword123'
 
   # Plugins para métricas avanzadas
   plugins:
@@ -61,9 +61,9 @@ config:
 
   # Métricas a capturar
   ensure:
-    maxErrorRate: 1  # Máximo 1% de errores permitidos
-    p95: 2000        # 95% de requests deben responder en <2s
-    p99: 5000        # 99% de requests deben responder en <5s
+    maxErrorRate: 1 # Máximo 1% de errores permitidos
+    p95: 2000 # 95% de requests deben responder en <2s
+    p99: 5000 # 99% de requests deben responder en <5s
 
 # ============================================================================
 # Escenarios de carga
@@ -72,11 +72,11 @@ scenarios:
   # --------------------------------------------------------------------------
   # Escenario 1: Health Check (más liviano)
   # --------------------------------------------------------------------------
-  - name: "Health Check Monitoring"
-    weight: 20  # 20% del tráfico
+  - name: 'Health Check Monitoring'
+    weight: 20 # 20% del tráfico
     flow:
       - get:
-          url: "/api/health"
+          url: '/api/health'
           expect:
             - statusCode: 200
             - contentType: json
@@ -85,46 +85,46 @@ scenarios:
   # --------------------------------------------------------------------------
   # Escenario 2: Login attempts (carga media)
   # --------------------------------------------------------------------------
-  - name: "Auth - Login Attempts"
-    weight: 50  # 50% del tráfico
+  - name: 'Auth - Login Attempts'
+    weight: 50 # 50% del tráfico
     flow:
       - post:
-          url: "/api/auth/login"
+          url: '/api/auth/login'
           json:
-            email: "{{ testEmail }}"
-            password: "{{ testPassword }}"
+            email: '{{ testEmail }}'
+            password: '{{ testPassword }}'
           expect:
             - statusCode:
                 - 400
-                - 401  # Esperamos fallo de autenticación
+                - 401 # Esperamos fallo de autenticación
           capture:
-            - json: "$.message"
-              as: "errorMessage"
+            - json: '$.message'
+              as: 'errorMessage'
 
   # --------------------------------------------------------------------------
   # Escenario 3: API Docs access
   # --------------------------------------------------------------------------
-  - name: "Swagger Documentation"
-    weight: 10  # 10% del tráfico
+  - name: 'Swagger Documentation'
+    weight: 10 # 10% del tráfico
     flow:
       - get:
-          url: "/api/docs"
+          url: '/api/docs'
           expect:
             - statusCode: 200
 
   # --------------------------------------------------------------------------
   # Escenario 4: Frontend pages (más pesado)
   # --------------------------------------------------------------------------
-  - name: "Frontend Page Loads"
-    weight: 20  # 20% del tráfico
+  - name: 'Frontend Page Loads'
+    weight: 20 # 20% del tráfico
     flow:
       - get:
-          url: "/"
+          url: '/'
           expect:
             - statusCode: 200
-      - think: 2  # Simular 2 segundos de "pensamiento" del usuario
+      - think: 2 # Simular 2 segundos de "pensamiento" del usuario
       - get:
-          url: "/login"
+          url: '/login'
           expect:
             - statusCode: 200
 
@@ -134,14 +134,14 @@ scenarios:
 environments:
   # Local development
   local:
-    target: "http://localhost:3001"
+    target: 'http://localhost:3001'
     phases:
       - duration: 60
         arrivalRate: 10
 
   # Staging environment
   staging:
-    target: "https://mateatletas-system-staging.up.railway.app"
+    target: 'https://mateatletas-system-staging.up.railway.app'
     phases:
       - duration: 120
         arrivalRate: 20
@@ -152,10 +152,10 @@ environments:
 
   # Production smoke test (ligero)
   production-smoke:
-    target: "https://mateatletas-system-production.up.railway.app"
+    target: 'https://mateatletas-system-production.up.railway.app'
     phases:
       - duration: 60
-        arrivalRate: 5  # Solo 5 usuarios/seg para no sobrecargar
+        arrivalRate: 5 # Solo 5 usuarios/seg para no sobrecargar
     ensure:
       maxErrorRate: 0.5
       p95: 1500
@@ -163,13 +163,13 @@ environments:
 
   # Stress test (brutal)
   stress:
-    target: "http://localhost:3001"
+    target: 'http://localhost:3001'
     phases:
       - duration: 60
         arrivalRate: 50
-        rampTo: 100  # Rampa hasta 100 usuarios/segundo
+        rampTo: 100 # Rampa hasta 100 usuarios/segundo
       - duration: 120
-        arrivalRate: 100  # 100 usuarios/segundo sostenidos
+        arrivalRate: 100 # 100 usuarios/segundo sostenidos
     ensure:
       maxErrorRate: 5
       p95: 5000

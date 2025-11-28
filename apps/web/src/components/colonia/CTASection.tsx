@@ -147,12 +147,8 @@ export default function CTASection({ onInscribe }: CTASectionProps) {
                 <div className="text-5xl font-black text-white mb-2 title-gradient">
                   {stat.value}
                 </div>
-                <div className="text-lg font-bold text-white mb-1">
-                  {stat.label}
-                </div>
-                <div className="text-sm text-white/50">
-                  {stat.sublabel}
-                </div>
+                <div className="text-lg font-bold text-white mb-1">{stat.label}</div>
+                <div className="text-sm text-white/50">{stat.sublabel}</div>
               </motion.div>
             ))}
           </motion.div>

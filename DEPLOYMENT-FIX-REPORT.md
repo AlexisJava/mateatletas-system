@@ -5,6 +5,7 @@
 ## Resumen Ejecutivo
 
 Se identificaron y corrigieron problemas críticos en la configuración de deployment que impedían el correcto funcionamiento de la aplicación en producción:
+
 - **Vercel (Frontend)**: Configuración incorrecta de outputDirectory para Next.js standalone
 - **Railway (Backend)**: Cookies/JWT no se transmitían correctamente en requests cross-domain
 
@@ -15,6 +16,7 @@ Se identificaron y corrigieron problemas críticos en la configuración de deplo
 #### Archivo: `/vercel.json`
 
 **Cambios aplicados:**
+
 - ✅ `outputDirectory` actualizado de `apps/web/.next` → `apps/web/.next/standalone`
 - ✅ `buildCommand` simplificado de `cd apps/web && npm run build` → `npm run build:web`
 
@@ -23,6 +25,7 @@ Se identificaron y corrigieron problemas críticos en la configuración de deplo
 #### Archivo: `/package.json` (root)
 
 **Cambios aplicados:**
+
 - ✅ Script `build:web` actualizado para usar `cd apps/web && npm run build` (consistente con arquitectura de monorepo)
 
 **Razón:** Vercel ahora invoca este script centralizado que gestiona correctamente el build dentro del workspace.
@@ -34,16 +37,19 @@ Se identificaron y corrigieron problemas críticos en la configuración de deplo
 #### Archivo: `/apps/api/src/main.ts`
 
 **Cambios aplicados:**
+
 - ✅ Agregado `'X-Requested-With'` a `allowedHeaders` (línea 102)
 - ✅ Agregado `'set-cookie'` a `exposedHeaders` (línea 103)
 
 **Antes:**
+
 ```typescript
 allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
 exposedHeaders: ['Content-Disposition'],
 ```
 
 **Después:**
+
 ```typescript
 allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
 exposedHeaders: ['Content-Disposition', 'set-cookie'],
@@ -56,11 +62,13 @@ exposedHeaders: ['Content-Disposition', 'set-cookie'],
 #### Archivo: `/apps/api/src/auth/auth.controller.ts`
 
 **Cambios aplicados:**
+
 - ✅ Actualizada configuración de cookies en método `login()` (líneas 141-148)
 - ✅ Actualizada configuración de cookies en método `loginEstudiante()` (líneas 196-203)
 - ✅ Actualizada configuración de cookies en método `logout()` (líneas 299-305)
 
 **Antes:**
+
 ```typescript
 res.cookie('auth-token', result.access_token, {
   httpOnly: true,
@@ -72,6 +80,7 @@ res.cookie('auth-token', result.access_token, {
 ```
 
 **Después:**
+
 ```typescript
 res.cookie('auth-token', result.access_token, {
   httpOnly: true,
@@ -84,6 +93,7 @@ res.cookie('auth-token', result.access_token, {
 ```
 
 **Razón:**
+
 - `sameSite: 'strict'` bloquea cookies en requests cross-domain. Cambiar a `'none'` permite cross-domain cookies cuando se usa HTTPS (`secure: true`)
 - `domain: '.mateatletasclub.com.ar'` permite que la cookie sea compartida entre subdominios (api.mateatletasclub.com.ar y www.mateatletasclub.com.ar)
 
@@ -105,18 +115,19 @@ JWT_SECRET=[kHIL4UmYmRJO5TF+ffxWBJ4M+fx3TTmO4ukBrniSTfQ=]
 
 ## Resumen de Archivos Modificados
 
-| Archivo | Cambios | Motivo |
-|---------|---------|--------|
-| `/vercel.json` | outputDirectory, buildCommand | Corregir path de output para Next.js standalone |
-| `/package.json` | Script `build:web` | Consistencia con arquitectura de monorepo |
-| `/apps/api/src/main.ts` | CORS headers | Exponer `set-cookie` y permitir `X-Requested-With` |
-| `/apps/api/src/auth/auth.controller.ts` | Cookie configuration | sameSite='none' y domain compartido para cross-domain |
+| Archivo                                 | Cambios                       | Motivo                                                |
+| --------------------------------------- | ----------------------------- | ----------------------------------------------------- |
+| `/vercel.json`                          | outputDirectory, buildCommand | Corregir path de output para Next.js standalone       |
+| `/package.json`                         | Script `build:web`            | Consistencia con arquitectura de monorepo             |
+| `/apps/api/src/main.ts`                 | CORS headers                  | Exponer `set-cookie` y permitir `X-Requested-With`    |
+| `/apps/api/src/auth/auth.controller.ts` | Cookie configuration          | sameSite='none' y domain compartido para cross-domain |
 
 ---
 
 ## Próximos Pasos
 
 ### 1. Commit y Push de Cambios
+
 ```bash
 git add .
 git commit -m "fix(deploy): resolver errores de Vercel y cookies cross-domain
@@ -137,11 +148,13 @@ git push origin main
 ### 2. Verificar Deployments
 
 **Vercel (automático):**
+
 - Vercel detectará los cambios en `main` automáticamente
 - Nuevo deployment comenzará en ~30 segundos
 - Verificar en: https://vercel.com/alexis-figueroas-projects-d4fb75f1/mateatletas
 
 **Railway (automático):**
+
 - Railway detectará cambios en `apps/api/src/` automáticamente
 - Rebuild y redeploy comenzará en ~1 minuto
 - Verificar en: https://railway.app
@@ -178,6 +191,7 @@ curl https://mateatletas-system.railway.app/api/health
 ## Diagnóstico de Problemas Potenciales
 
 ### Si Vercel sigue fallando:
+
 ```bash
 # Verificar logs de build en Vercel
 vercel logs <deployment-url>
@@ -188,6 +202,7 @@ ls -la apps/web/.next/standalone
 ```
 
 ### Si Railway sigue retornando 401:
+
 ```bash
 # Verificar que FRONTEND_URL esté correctamente configurado
 railway variables | grep FRONTEND_URL
@@ -200,6 +215,7 @@ railway logs --tail
 ```
 
 ### Si hay problemas de CORS:
+
 ```bash
 # Verificar que el origin del frontend esté en FRONTEND_URL
 railway variables | grep FRONTEND_URL
@@ -241,10 +257,12 @@ npm run dev
 ### Por qué `sameSite: 'none'` es necesario
 
 Cuando el frontend (Vercel) y backend (Railway) están en dominios diferentes:
+
 - Frontend: `https://www.mateatletasclub.com.ar`
 - Backend: `https://mateatletas-system.railway.app`
 
 Esto se considera **cross-site**, no solo **cross-origin**. Para que las cookies funcionen en este escenario:
+
 1. `sameSite: 'none'` - permite cookies cross-site
 2. `secure: true` - obligatorio cuando se usa `sameSite: 'none'`
 3. `credentials: true` en CORS - permite envío de cookies
@@ -253,6 +271,7 @@ Esto se considera **cross-site**, no solo **cross-origin**. Para que las cookies
 ### Next.js Standalone Output
 
 Next.js genera tres directorios en `.next/`:
+
 - `.next/standalone` - Servidor Node.js minificado (usado en producción)
 - `.next/static` - Assets estáticos
 - `.next/cache` - Cache de build

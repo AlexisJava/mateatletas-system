@@ -18,8 +18,8 @@ export default function CourseCatalog({ onInscribe }: CourseCatalogProps) {
   // Helper: Check if a specific age falls within a course's age range
   const ageMatchesRange = (selectedRange: AgeRange, courseRange: AgeRange): boolean => {
     // Si seleccionaste un rango específico, necesitamos ver si hay solapamiento
-    const [selectedMin, selectedMax] = selectedRange.split('-').map(n => parseInt(n));
-    const [courseMin, courseMax] = courseRange.split('-').map(n => parseInt(n));
+    const [selectedMin, selectedMax] = selectedRange.split('-').map((n) => parseInt(n));
+    const [courseMin, courseMax] = courseRange.split('-').map((n) => parseInt(n));
 
     // Hay solapamiento si: el rango seleccionado y el rango del curso se tocan
     // Ejemplo: seleccionado 8-9, curso 8-12 → hay solapamiento
@@ -35,15 +35,21 @@ export default function CourseCatalog({ onInscribe }: CourseCatalogProps) {
     return matchesArea && matchesAge;
   });
 
-  const areas: Array<CourseArea | 'Todas'> = ['Todas', 'Matemática', 'Didáctica de la Matemática', 'Programación', 'Ciencias'];
+  const areas: Array<CourseArea | 'Todas'> = [
+    'Todas',
+    'Matemática',
+    'Didáctica de la Matemática',
+    'Programación',
+    'Ciencias',
+  ];
   const ages: Array<AgeRange | 'Todas'> = ['Todas', '5-6', '6-7', '8-9', '10-12', '13-17'];
 
   const areaColors: Record<CourseArea | 'Todas', string> = {
-    'Todas': '#8b5cf6',
-    'Matemática': '#10b981',
+    Todas: '#8b5cf6',
+    Matemática: '#10b981',
     'Didáctica de la Matemática': '#10b981',
-    'Programación': '#f43f5e',
-    'Ciencias': '#0ea5e9',
+    Programación: '#f43f5e',
+    Ciencias: '#0ea5e9',
   };
 
   return (
@@ -83,7 +89,8 @@ export default function CourseCatalog({ onInscribe }: CourseCatalogProps) {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-xl text-white/70 max-w-2xl mx-auto"
           >
-            11 cursos diseñados para que aprendan jugando. Matemática, programación y ciencias como nunca antes.
+            11 cursos diseñados para que aprendan jugando. Matemática, programación y ciencias como
+            nunca antes.
           </motion.p>
         </div>
 
@@ -100,9 +107,7 @@ export default function CourseCatalog({ onInscribe }: CourseCatalogProps) {
                   key={area}
                   onClick={() => setSelectedArea(area)}
                   className={`px-6 py-3 rounded-xl font-bold text-sm uppercase tracking-wide transition-all ${
-                    selectedArea === area
-                      ? 'scale-105 shadow-2xl'
-                      : 'opacity-60 hover:opacity-100'
+                    selectedArea === area ? 'scale-105 shadow-2xl' : 'opacity-60 hover:opacity-100'
                   }`}
                   style={{
                     backgroundColor: selectedArea === area ? areaColors[area] : 'transparent',
@@ -149,12 +154,7 @@ export default function CourseCatalog({ onInscribe }: CourseCatalogProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {filteredCourses.length > 0 ? (
             filteredCourses.map((course, index) => (
-              <CourseCard
-                key={course.id}
-                course={course}
-                index={index}
-                onInscribe={onInscribe}
-              />
+              <CourseCard key={course.id} course={course} index={index} onInscribe={onInscribe} />
             ))
           ) : (
             <div className="col-span-full text-center py-20">
@@ -162,9 +162,7 @@ export default function CourseCatalog({ onInscribe }: CourseCatalogProps) {
               <h3 className="text-2xl font-black text-white mb-2">
                 No hay cursos con esos filtros
               </h3>
-              <p className="text-white/60">
-                Prueba con otra combinación de área y edad
-              </p>
+              <p className="text-white/60">Prueba con otra combinación de área y edad</p>
             </div>
           )}
         </div>

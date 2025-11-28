@@ -26,9 +26,7 @@ export const crearTarea = async (data: CreateTareaDto): Promise<Evento> => {
   }
 };
 
-export const crearRecordatorio = async (
-  data: CreateRecordatorioDto
-): Promise<Evento> => {
+export const crearRecordatorio = async (data: CreateRecordatorioDto): Promise<Evento> => {
   // El interceptor ya retorna response.data directamente
   try {
     return await apiClient.post<Evento>('/eventos/recordatorios', data);
@@ -50,9 +48,7 @@ export const crearNota = async (data: CreateNotaDto): Promise<Evento> => {
 
 // ==================== LEER EVENTOS ====================
 
-export const obtenerEventos = async (
-  filtros?: FiltrosCalendario
-): Promise<Evento[]> => {
+export const obtenerEventos = async (filtros?: FiltrosCalendario): Promise<Evento[]> => {
   const params = new URLSearchParams();
 
   if (filtros?.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
@@ -114,7 +110,7 @@ export const obtenerEstadisticas = async (): Promise<EstadisticasCalendario> => 
 
 export const actualizarTarea = async (
   id: string,
-  data: Partial<CreateTareaDto>
+  data: Partial<CreateTareaDto>,
 ): Promise<Evento> => {
   // El interceptor ya retorna response.data directamente
   try {
@@ -127,7 +123,7 @@ export const actualizarTarea = async (
 
 export const actualizarRecordatorio = async (
   id: string,
-  data: Partial<CreateRecordatorioDto>
+  data: Partial<CreateRecordatorioDto>,
 ): Promise<Evento> => {
   // El interceptor ya retorna response.data directamente
   try {
@@ -138,10 +134,7 @@ export const actualizarRecordatorio = async (
   }
 };
 
-export const actualizarNota = async (
-  id: string,
-  data: Partial<CreateNotaDto>
-): Promise<Evento> => {
+export const actualizarNota = async (id: string, data: Partial<CreateNotaDto>): Promise<Evento> => {
   // El interceptor ya retorna response.data directamente
   try {
     return await apiClient.patch<Evento>(`/eventos/notas/${id}`, data);
@@ -154,7 +147,7 @@ export const actualizarNota = async (
 export const actualizarFechasEvento = async (
   id: string,
   fecha_inicio: string,
-  fecha_fin: string
+  fecha_fin: string,
 ): Promise<Evento> => {
   // El interceptor ya retorna response.data directamente
   try {
@@ -171,7 +164,7 @@ export const actualizarFechasEvento = async (
 // ==================== ELIMINAR EVENTOS ====================
 
 export const eliminarEvento = async (id: string): Promise<void> => {
-    // El interceptor ya retorna response.data directamente
+  // El interceptor ya retorna response.data directamente
   try {
     await apiClient.delete(`/eventos/${id}`);
   } catch (error) {

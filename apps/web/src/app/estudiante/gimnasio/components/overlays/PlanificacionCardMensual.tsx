@@ -47,7 +47,9 @@ const ESTADO_CONFIG: Record<EstadoPlanificacion, EstadoConfig> = {
  * Extrae el tema de una planificación basándose en su código
  * Códigos esperados: '2025-11-mes-ciencia', '2025-12-nivel-1', etc.
  */
-function extraerTema(codigo: string): 'astronomia' | 'fisica' | 'quimica' | 'informatica' | 'nivel-1' | 'nivel-2' | 'nivel-3' {
+function extraerTema(
+  codigo: string,
+): 'astronomia' | 'fisica' | 'quimica' | 'informatica' | 'nivel-1' | 'nivel-2' | 'nivel-3' {
   const codigoLower = codigo.toLowerCase();
 
   // Mapear códigos conocidos a temas

@@ -44,6 +44,7 @@ Tu Juego → POST /api/progreso-actividad/completar → Backend
 **Propósito**: Subir de nivel, progresión visual, status
 
 **Características**:
+
 - NO se gastan (acumulativos permanentes)
 - Determinan el nivel del estudiante
 - Se ganan por cualquier actividad educativa
@@ -115,6 +116,7 @@ LOGROS:
 **Propósito**: Moneda principal para canjear cursos STEAM reales
 
 **Características**:
+
 - SÍ se gastan al canjear
 - Se acumulan sin límite
 - NO expiran nunca
@@ -174,10 +176,10 @@ Estudiante_CASUAL (50% esfuerzo):
 
 ```typescript
 function calcularEstrellas(puntaje: number): number {
-  if (puntaje >= 90) return 3;  // ⭐⭐⭐
-  if (puntaje >= 75) return 2;  // ⭐⭐
-  if (puntaje >= 60) return 1;  // ⭐
-  return 0;                      // Sin estrellas
+  if (puntaje >= 90) return 3; // ⭐⭐⭐
+  if (puntaje >= 75) return 2; // ⭐⭐
+  if (puntaje >= 60) return 1; // ⭐
+  return 0; // Sin estrellas
 }
 ```
 
@@ -231,12 +233,14 @@ function calcularRecompensas(estrellas: number, porcentaje: number) {
 **Cuándo Llamar**: Cuando el estudiante empieza a jugar por primera vez
 
 **Headers**:
+
 ```http
 Authorization: Bearer <jwt_token>
 Content-Type: application/json
 ```
 
 **Body (DTO: IniciarActividad)**:
+
 ```typescript
 {
   estudiante_id: "cuid...",
@@ -246,6 +250,7 @@ Content-Type: application/json
 ```
 
 **Response**:
+
 ```typescript
 {
   progreso: {
@@ -266,12 +271,14 @@ Content-Type: application/json
 **Cuándo Llamar**: Durante el juego, cada 2-5 minutos, o cuando el estudiante sale sin terminar
 
 **Headers**:
+
 ```http
 Authorization: Bearer <jwt_token>
 Content-Type: application/json
 ```
 
 **Body (DTO: GuardarProgresoActividad)**:
+
 ```typescript
 {
   estudiante_id: "cuid...",
@@ -289,6 +296,7 @@ Content-Type: application/json
 ```
 
 **Response**:
+
 ```typescript
 {
   progreso: {
@@ -309,12 +317,14 @@ Content-Type: application/json
 **Cuándo Llamar**: Cuando el estudiante termina el juego/actividad
 
 **Headers**:
+
 ```http
 Authorization: Bearer <jwt_token>
 Content-Type: application/json
 ```
 
 **Body (DTO: CompletarActividad)**:
+
 ```typescript
 {
   estudiante_id: "cuid...",
@@ -345,6 +355,7 @@ Content-Type: application/json
 ```
 
 **Response (ProgresoActualizadoResponse)**:
+
 ```typescript
 {
   progreso: {
@@ -385,6 +396,7 @@ Content-Type: application/json
 **Validaciones Automáticas del Backend**:
 
 El backend automáticamente:
+
 1. ✅ Guarda el progreso de la actividad
 2. ✅ Calcula recompensas según fórmulas
 3. ✅ Actualiza XP y monedas del estudiante
@@ -403,11 +415,13 @@ El backend automáticamente:
 **Cuándo Llamar**: Al cargar el juego, para mostrar XP/monedas actuales
 
 **Headers**:
+
 ```http
 Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```typescript
 {
   id: "cuid...",
@@ -437,6 +451,7 @@ Authorization: Bearer <jwt_token>
 **Cuándo Llamar**: Automáticamente cuando completas una actividad, pero puedes llamarlo manualmente
 
 **Headers**:
+
 ```http
 Authorization: Bearer <jwt_token>
 ```
@@ -444,6 +459,7 @@ Authorization: Bearer <jwt_token>
 **Body**: (vacío)
 
 **Response**:
+
 ```typescript
 {
   racha_actual: 8,
@@ -486,70 +502,70 @@ CATEGORÍAS:
 
 ```yaml
 primera_perfeccion:
-  nombre: "Primera Perfección"
-  descripcion: "Completa 1 ejercicio con 100%"
-  icono: "🎯"
+  nombre: 'Primera Perfección'
+  descripcion: 'Completa 1 ejercicio con 100%'
+  icono: '🎯'
   monedas: 10
   xp: 30
-  criterio: "ejercicios_perfectos >= 1"
+  criterio: 'ejercicios_perfectos >= 1'
 
 perfeccionista:
-  nombre: "Perfeccionista"
-  descripcion: "Completa 10 ejercicios con 100%"
-  icono: "💯"
+  nombre: 'Perfeccionista'
+  descripcion: 'Completa 10 ejercicios con 100%'
+  icono: '💯'
   monedas: 50
   xp: 100
-  criterio: "ejercicios_perfectos >= 10"
+  criterio: 'ejercicios_perfectos >= 10'
 
 ojo_halcon:
-  nombre: "Ojo de Halcón"
-  descripcion: "Completa 25 ejercicios con 100%"
-  icono: "🦅"
+  nombre: 'Ojo de Halcón'
+  descripcion: 'Completa 25 ejercicios con 100%'
+  icono: '🦅'
   monedas: 100
   xp: 250
-  criterio: "ejercicios_perfectos >= 25"
+  criterio: 'ejercicios_perfectos >= 25'
 ```
 
 **VELOCIDAD** (Se verifican automáticamente):
 
 ```yaml
 rapido_como_rayo:
-  nombre: "Rápido como el Rayo"
-  descripcion: "Completa 1 ejercicio en menos de 30 segundos"
-  icono: "⚡"
+  nombre: 'Rápido como el Rayo'
+  descripcion: 'Completa 1 ejercicio en menos de 30 segundos'
+  icono: '⚡'
   monedas: 20
   xp: 50
-  criterio: "tiempo < 30s"
+  criterio: 'tiempo < 30s'
 
 velocista:
-  nombre: "Velocista"
-  descripcion: "Completa 10 ejercicios en menos de 30 segundos"
-  icono: "🏃"
+  nombre: 'Velocista'
+  descripcion: 'Completa 10 ejercicios en menos de 30 segundos'
+  icono: '🏃'
   monedas: 50
   xp: 100
-  criterio: "ejercicios_rapidos >= 10"
+  criterio: 'ejercicios_rapidos >= 10'
 ```
 
 **CONSISTENCIA** (Se verifican automáticamente):
 
 ```yaml
 racha_fuego:
-  nombre: "Racha de Fuego"
-  descripcion: "Mantén una racha de 7 días consecutivos"
-  icono: "🔥"
+  nombre: 'Racha de Fuego'
+  descripcion: 'Mantén una racha de 7 días consecutivos'
+  icono: '🔥'
   monedas: 50
   xp: 100
-  criterio: "racha_actual >= 7"
-  titulo: "Incansable"
+  criterio: 'racha_actual >= 7'
+  titulo: 'Incansable'
 
 imparable:
-  nombre: "Imparable"
-  descripcion: "Mantén una racha de 30 días"
-  icono: "💪"
+  nombre: 'Imparable'
+  descripcion: 'Mantén una racha de 30 días'
+  icono: '💪'
   monedas: 200
   xp: 500
-  criterio: "racha_actual >= 30"
-  titulo: "Leyenda"
+  criterio: 'racha_actual >= 30'
+  titulo: 'Leyenda'
 ```
 
 ### Verificación Automática de Logros
@@ -584,21 +600,21 @@ Obtener catálogo completo de logros:
 // Response: Array de Logro
 [
   {
-    id: "cuid...",
-    codigo: "racha_7_dias",
-    nombre: "Racha de Fuego",
-    descripcion: "Mantén una racha de 7 días",
-    categoria: "consistencia",
-    rareza: "raro",
-    icono: "🔥",
+    id: 'cuid...',
+    codigo: 'racha_7_dias',
+    nombre: 'Racha de Fuego',
+    descripcion: 'Mantén una racha de 7 días',
+    categoria: 'consistencia',
+    rareza: 'raro',
+    icono: '🔥',
     monedas_recompensa: 50,
     xp_recompensa: 100,
     secreto: false,
-    titulo: "Incansable",
-    badge: "badge_fuego.png",
-    activo: true
-  }
-]
+    titulo: 'Incansable',
+    badge: 'badge_fuego.png',
+    activo: true,
+  },
+];
 ```
 
 **GET /api/gamificacion/logros/:estudianteId**
@@ -649,25 +665,25 @@ Obtener logros desbloqueados del estudiante:
 ```typescript
 const equipos = [
   {
-    nombre: "Fénix",
-    color_primario: "#FF6B35",  // Naranja/rojo
-    icono_url: "fenix.svg"
+    nombre: 'Fénix',
+    color_primario: '#FF6B35', // Naranja/rojo
+    icono_url: 'fenix.svg',
   },
   {
-    nombre: "Dragón",
-    color_primario: "#3D5A80",  // Azul oscuro
-    icono_url: "dragon.svg"
+    nombre: 'Dragón',
+    color_primario: '#3D5A80', // Azul oscuro
+    icono_url: 'dragon.svg',
   },
   {
-    nombre: "Tigre",
-    color_primario: "#EE6C4D",  // Rojo coral
-    icono_url: "tigre.svg"
+    nombre: 'Tigre',
+    color_primario: '#EE6C4D', // Rojo coral
+    icono_url: 'tigre.svg',
   },
   {
-    nombre: "Águila",
-    color_primario: "#2A9D8F",  // Verde turquesa
-    icono_url: "aguila.svg"
-  }
+    nombre: 'Águila',
+    color_primario: '#2A9D8F', // Verde turquesa
+    icono_url: 'aguila.svg',
+  },
 ];
 ```
 
@@ -683,14 +699,14 @@ Ranking de equipos:
 {
   equipos: [
     {
-      equipo_id: "cuid...",
-      nombre: "Fénix",
-      color_primario: "#FF6B35",
+      equipo_id: 'cuid...',
+      nombre: 'Fénix',
+      color_primario: '#FF6B35',
       puntos_totales: 15420,
       cantidad_estudiantes: 12,
-      posicion: 1
-    }
-  ]
+      posicion: 1,
+    },
+  ];
 }
 ```
 
@@ -767,8 +783,8 @@ const asignacionId = 'cuid-asignacion-456';
 
 // Obtener recursos actuales para mostrar en UI
 const recursos = await fetch(`/api/gamificacion/recursos/${estudianteId}`, {
-  headers: { Authorization: `Bearer ${token}` }
-}).then(r => r.json());
+  headers: { Authorization: `Bearer ${token}` },
+}).then((r) => r.json());
 
 console.log(`XP: ${recursos.xp_total}, Nivel: ${recursos.nivel}`);
 console.log(`Monedas: ${recursos.monedas_total}`);
@@ -778,14 +794,14 @@ console.log(`Racha: ${recursos.racha.racha_actual} días`);
 await fetch('/api/progreso-actividad/iniciar', {
   method: 'POST',
   headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
     estudiante_id: estudianteId,
     actividad_id: actividadId,
-    asignacion_id: asignacionId
-  })
+    asignacion_id: asignacionId,
+  }),
 });
 ```
 
@@ -798,22 +814,22 @@ let estadoJuego = {
   vidas: 2,
   puntaje_parcial: 45,
   preguntas_respondidas: [1, 2, 3],
-  tiempo_transcurrido: 5
+  tiempo_transcurrido: 5,
 };
 
 await fetch('/api/progreso-actividad/guardar', {
   method: 'POST',
   headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
     estudiante_id: estudianteId,
     actividad_id: actividadId,
     asignacion_id: asignacionId,
     estado_juego: estadoJuego,
-    tiempo_minutos: 5
-  })
+    tiempo_minutos: 5,
+  }),
 });
 ```
 
@@ -826,7 +842,7 @@ const resultadoJuego = {
   correctas: 19,
   incorrectas: 1,
   tiempoTotal: 12, // minutos
-  puntajeFinal: 95 // 0-100
+  puntajeFinal: 95, // 0-100
 };
 
 // Calcular métricas
@@ -837,8 +853,8 @@ const estrellas = porcentajeAciertos >= 90 ? 3 : porcentajeAciertos >= 75 ? 2 : 
 const response = await fetch('/api/progreso-actividad/completar', {
   method: 'POST',
   headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
   },
   body: JSON.stringify({
     estudiante_id: estudianteId,
@@ -858,13 +874,13 @@ const response = await fetch('/api/progreso-actividad/completar', {
         { pregunta: 2, correcto: true, tiempo: 25 },
         { pregunta: 3, correcto: false, tiempo: 45 },
         // ... resto
-      ]
+      ],
     },
     estado_juego: {
       nivel_alcanzado: 5,
-      bonus_obtenidos: ["velocidad", "perfecto"]
-    }
-  })
+      bonus_obtenidos: ['velocidad', 'perfecto'],
+    },
+  }),
 });
 
 const data = await response.json();
@@ -1142,6 +1158,7 @@ Cada logro desbloqueado otorga monedas adicionales (10-250 según rareza). Estas
 ## CONTACTO Y SOPORTE
 
 Para dudas o problemas con la integración:
+
 - Revisar logs del backend en `/apps/api/logs/`
 - Verificar respuestas HTTP con status codes
 - Consultar código fuente en repositorio

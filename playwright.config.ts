@@ -23,20 +23,21 @@ const envConfig = {
   local: {
     baseURL: 'http://localhost:3000',
     apiURL: 'http://localhost:3001/api',
-    workers: undefined,  // Usar todos los cores disponibles
-    retries: 0,  // No retry en local para feedback rápido
+    workers: undefined, // Usar todos los cores disponibles
+    retries: 0, // No retry en local para feedback rápido
   },
   staging: {
     baseURL: process.env.STAGING_WEB_URL || 'https://staging.mateatletasclub.com.ar',
     apiURL: process.env.STAGING_API_URL || 'https://mateatletas-system-staging.up.railway.app/api',
-    workers: 2,  // Menos workers en staging para no sobrecargar
-    retries: 2,  // 2 retries por flakiness de red
+    workers: 2, // Menos workers en staging para no sobrecargar
+    retries: 2, // 2 retries por flakiness de red
   },
   production: {
     baseURL: process.env.PRODUCTION_WEB_URL || 'https://www.mateatletasclub.com.ar',
-    apiURL: process.env.PRODUCTION_API_URL || 'https://mateatletas-system-production.up.railway.app/api',
-    workers: 1,  // Solo 1 worker en producción (smoke tests ligeros)
-    retries: 3,  // 3 retries por seguridad
+    apiURL:
+      process.env.PRODUCTION_API_URL || 'https://mateatletas-system-production.up.railway.app/api',
+    workers: 1, // Solo 1 worker en producción (smoke tests ligeros)
+    retries: 3, // 3 retries por seguridad
   },
 };
 
@@ -63,9 +64,9 @@ export default defineConfig({
   workers: process.env.CI ? 1 : config.workers,
 
   // Timeouts
-  timeout: 30000,  // 30s por test
+  timeout: 30000, // 30s por test
   expect: {
-    timeout: 10000,  // 10s para assertions
+    timeout: 10000, // 10s para assertions
   },
 
   // Reporters
@@ -95,7 +96,7 @@ export default defineConfig({
 
     // Context options
     viewport: { width: 1280, height: 720 },
-    ignoreHTTPSErrors: environment === 'staging',  // Permitir SSL self-signed en staging
+    ignoreHTTPSErrors: environment === 'staging', // Permitir SSL self-signed en staging
 
     // Extra HTTP headers
     extraHTTPHeaders: {

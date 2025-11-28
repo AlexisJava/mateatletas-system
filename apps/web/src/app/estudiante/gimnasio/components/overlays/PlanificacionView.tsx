@@ -31,7 +31,11 @@ export interface PlanificacionViewProps {
 /**
  * Partículas de fondo temáticas sutiles
  */
-function ParticleBackground({ tema }: { tema: 'quimica' | 'astronomia' | 'fisica' | 'informatica' }) {
+function ParticleBackground({
+  tema,
+}: {
+  tema: 'quimica' | 'astronomia' | 'fisica' | 'informatica';
+}) {
   const particles = Array.from({ length: 20 });
 
   const config = {
@@ -159,7 +163,7 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
         type: 'spring',
         stiffness: 200,
         damping: 20,
-        opacity: { duration: 0.4 }
+        opacity: { duration: 0.4 },
       }}
       style={{
         perspective: 1000,
@@ -253,11 +257,17 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
                   style={{
                     background: 'rgba(251, 191, 36, 0.15)',
                     borderColor: 'rgba(251, 191, 36, 0.4)',
-                    boxShadow: '0 4px 20px rgba(251, 191, 36, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                    boxShadow:
+                      '0 4px 20px rgba(251, 191, 36, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
                   }}
                 >
-                  <Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-yellow-300" strokeWidth={2.5} />
-                  <span className="text-[10px] sm:text-xs font-bold text-yellow-100 uppercase tracking-wider">Nueva</span>
+                  <Sparkles
+                    className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-yellow-300"
+                    strokeWidth={2.5}
+                  />
+                  <span className="text-[10px] sm:text-xs font-bold text-yellow-100 uppercase tracking-wider">
+                    Nueva
+                  </span>
                 </div>
               </motion.div>
             </div>
@@ -291,7 +301,8 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
                   <div
                     className="absolute inset-0"
                     style={{
-                      background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+                      background:
+                        'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
                       filter: 'blur(10px)',
                     }}
                   />
@@ -453,11 +464,14 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
                   style={{
                     background: 'rgba(239, 68, 68, 0.15)',
                     borderColor: 'rgba(239, 68, 68, 0.3)',
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                    boxShadow:
+                      '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
                   }}
                 >
                   <Lock className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-red-300" strokeWidth={2.5} />
-                  <span className="text-red-200 font-bold text-xs sm:text-sm uppercase tracking-widest">Bloqueada</span>
+                  <span className="text-red-200 font-bold text-xs sm:text-sm uppercase tracking-widest">
+                    Bloqueada
+                  </span>
                 </div>
               )}
               {!esBloqueada && semana.estado === 'disponible' && (
@@ -470,7 +484,9 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
                   }}
                 >
                   <Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-white" strokeWidth={2.5} />
-                  <span className="text-white font-bold text-xs sm:text-sm uppercase tracking-widest">Disponible</span>
+                  <span className="text-white font-bold text-xs sm:text-sm uppercase tracking-widest">
+                    Disponible
+                  </span>
                 </div>
               )}
             </div>
@@ -481,9 +497,14 @@ function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {
   );
 }
 
-export function PlanificacionView({ config: _config, estudiante: _estudiante }: PlanificacionViewProps) {
+export function PlanificacionView({
+  config: _config,
+  estudiante: _estudiante,
+}: PlanificacionViewProps) {
   const { pop, push } = useOverlayStack();
-  const [hoveredTheme, setHoveredTheme] = useState<'quimica' | 'astronomia' | 'fisica' | 'informatica' | null>(null);
+  const [hoveredTheme, setHoveredTheme] = useState<
+    'quimica' | 'astronomia' | 'fisica' | 'informatica' | null
+  >(null);
 
   const handleSemanaClick = (semanaId: string) => {
     const semana = SEMANAS_MES_CIENCIA.find((s) => s.id === semanaId);
@@ -509,14 +530,20 @@ export function PlanificacionView({ config: _config, estudiante: _estudiante }: 
 
   // Backgrounds dinámicos según el tema hovereado - MUY SUTILES
   const backgroundsByTheme = {
-    quimica: 'linear-gradient(135deg, #0f172a 0%, #064e3b 25%, #065f46 50%, #064e3b 75%, #0f172a 100%)',
-    astronomia: 'linear-gradient(135deg, #0f172a 0%, #581c87 25%, #6b21a8 50%, #581c87 75%, #0f172a 100%)',
-    fisica: 'linear-gradient(135deg, #0f172a 0%, #7c2d12 25%, #9a3412 50%, #7c2d12 75%, #0f172a 100%)',
-    informatica: 'linear-gradient(135deg, #0f172a 0%, #164e63 25%, #0e7490 50%, #164e63 75%, #0f172a 100%)',
+    quimica:
+      'linear-gradient(135deg, #0f172a 0%, #064e3b 25%, #065f46 50%, #064e3b 75%, #0f172a 100%)',
+    astronomia:
+      'linear-gradient(135deg, #0f172a 0%, #581c87 25%, #6b21a8 50%, #581c87 75%, #0f172a 100%)',
+    fisica:
+      'linear-gradient(135deg, #0f172a 0%, #7c2d12 25%, #9a3412 50%, #7c2d12 75%, #0f172a 100%)',
+    informatica:
+      'linear-gradient(135deg, #0f172a 0%, #164e63 25%, #0e7490 50%, #164e63 75%, #0f172a 100%)',
     default: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
   };
 
-  const currentBackground = hoveredTheme ? backgroundsByTheme[hoveredTheme] : backgroundsByTheme.default;
+  const currentBackground = hoveredTheme
+    ? backgroundsByTheme[hoveredTheme]
+    : backgroundsByTheme.default;
 
   return (
     <div className="fixed inset-0 flex flex-col overflow-hidden bg-slate-950">
@@ -531,7 +558,7 @@ export function PlanificacionView({ config: _config, estudiante: _estudiante }: 
         }}
         transition={{
           duration: 1.2,
-          ease: [0.25, 0.1, 0.25, 1.0]
+          ease: [0.25, 0.1, 0.25, 1.0],
         }}
       />
 
@@ -544,15 +571,18 @@ export function PlanificacionView({ config: _config, estudiante: _estudiante }: 
         }}
         transition={{
           duration: 1.5,
-          ease: [0.25, 0.1, 0.25, 1.0]
+          ease: [0.25, 0.1, 0.25, 1.0],
         }}
         style={{
           background: hoveredTheme
             ? `radial-gradient(circle at 50% 50%, ${
-                hoveredTheme === 'quimica' ? '#10b981' :
-                hoveredTheme === 'astronomia' ? '#a855f7' :
-                hoveredTheme === 'fisica' ? '#f97316' :
-                '#06b6d4'
+                hoveredTheme === 'quimica'
+                  ? '#10b981'
+                  : hoveredTheme === 'astronomia'
+                    ? '#a855f7'
+                    : hoveredTheme === 'fisica'
+                      ? '#f97316'
+                      : '#06b6d4'
               } 0%, transparent 60%)`
             : 'transparent',
         }}
@@ -588,8 +618,13 @@ export function PlanificacionView({ config: _config, estudiante: _estudiante }: 
             boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
           }}
         >
-          <ArrowLeft className="w-4 sm:w-5 h-4 sm:h-5 text-white transition-transform group-hover:-translate-x-1" strokeWidth={2.5} />
-          <span className="font-bold text-white text-xs sm:text-sm uppercase tracking-wider">Volver</span>
+          <ArrowLeft
+            className="w-4 sm:w-5 h-4 sm:h-5 text-white transition-transform group-hover:-translate-x-1"
+            strokeWidth={2.5}
+          />
+          <span className="font-bold text-white text-xs sm:text-sm uppercase tracking-wider">
+            Volver
+          </span>
         </button>
 
         <div className="text-center">

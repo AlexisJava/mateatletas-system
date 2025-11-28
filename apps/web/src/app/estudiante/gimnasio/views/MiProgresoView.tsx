@@ -194,11 +194,12 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
 
   return (
     <div className="w-full h-full p-4 sm:p-8 flex flex-col">
-
       {/* Header fijo - RESPONSIVE */}
       <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
-        <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white/20
-                       flex items-center justify-center text-2xl sm:text-3xl">
+        <div
+          className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-white/20
+                       flex items-center justify-center text-2xl sm:text-3xl"
+        >
           📊
         </div>
         <h1 className="text-3xl sm:text-5xl font-black text-white font-[family-name:var(--font-lilita)]">
@@ -220,16 +221,15 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               border-2 sm:border-4
               hover:scale-[1.02] active:scale-[0.98]
               transition-transform duration-150
-              ${selectedCard === stat.id
-                ? 'border-white ring-2 sm:ring-4 ring-white/50'
-                : 'border-white/20'
+              ${
+                selectedCard === stat.id
+                  ? 'border-white ring-2 sm:ring-4 ring-white/50'
+                  : 'border-white/20'
               }
             `}
           >
             {/* Emoji - RESPONSIVE */}
-            <div className="text-4xl sm:text-6xl mb-2 sm:mb-4">
-              {stat.emoji}
-            </div>
+            <div className="text-4xl sm:text-6xl mb-2 sm:mb-4">{stat.emoji}</div>
 
             {/* Valor - RESPONSIVE */}
             <div className="text-3xl sm:text-5xl font-black text-white mb-1 sm:mb-2">
@@ -266,18 +266,22 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
               transition={{ duration: 0.15 }}
               className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8 pointer-events-none"
             >
-              <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl
+              <div
+                className="w-full max-w-2xl bg-white/10 backdrop-blur-xl
                            rounded-2xl sm:rounded-3xl p-4 sm:p-8 border-2 border-white/20
-                           pointer-events-auto">
+                           pointer-events-auto"
+              >
                 {/* Header del modal - RESPONSIVE */}
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <div className="flex items-center gap-2 sm:gap-4">
-                    <div className={`
+                    <div
+                      className={`
                       w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl
                       bg-gradient-to-br ${selectedData.gradient}
                       flex items-center justify-center text-2xl sm:text-4xl
                       shadow-xl
-                    `}>
+                    `}
+                    >
                       {selectedData.emoji}
                     </div>
                     <div>
@@ -311,9 +315,7 @@ export function MiProgresoView({ estudiante }: MiProgresoViewProps) {
                     >
                       <div className="flex items-center gap-2 sm:gap-3">
                         <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white/50 flex-shrink-0" />
-                        <p className="text-white text-sm sm:text-lg font-medium">
-                          {item}
-                        </p>
+                        <p className="text-white text-sm sm:text-lg font-medium">{item}</p>
                       </div>
                     </div>
                   ))}

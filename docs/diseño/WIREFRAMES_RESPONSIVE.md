@@ -231,27 +231,27 @@ CARACTERÍSTICAS:
 
 ### Escala de Tamaños por Breakpoint
 
-| Elemento             | Mobile        | Tablet        | Desktop       |
-| -------------------- | ------------- | ------------- | ------------- |
-| **Avatar 3D**        | 30vh          | 50% width     | 50% width     |
-| **Header**           | 8vh           | 10vh          | 10vh          |
-| **Bottom Nav**       | 8vh           | 10vh          | -             |
-| **Main Content**     | 84vh (scroll) | 80vh (fixed)  | 90vh (fixed)  |
-| **Stat Card**        | p-3 gap-2     | p-4 gap-2     | p-6 gap-3     |
-| **Nav Button**       | w-14 h-14     | w-14 h-14     | w-20 h-20     |
-| **CTA Button**       | h-16          | h-20          | h-24          |
-| **Grid Gaps**        | gap-2         | gap-4         | gap-6         |
-| **Padding**          | px-3 py-2     | px-6 py-4     | px-8 py-6     |
+| Elemento         | Mobile        | Tablet       | Desktop      |
+| ---------------- | ------------- | ------------ | ------------ |
+| **Avatar 3D**    | 30vh          | 50% width    | 50% width    |
+| **Header**       | 8vh           | 10vh         | 10vh         |
+| **Bottom Nav**   | 8vh           | 10vh         | -            |
+| **Main Content** | 84vh (scroll) | 80vh (fixed) | 90vh (fixed) |
+| **Stat Card**    | p-3 gap-2     | p-4 gap-2    | p-6 gap-3    |
+| **Nav Button**   | w-14 h-14     | w-14 h-14    | w-20 h-20    |
+| **CTA Button**   | h-16          | h-20         | h-24         |
+| **Grid Gaps**    | gap-2         | gap-4        | gap-6        |
+| **Padding**      | px-3 py-2     | px-6 py-4    | px-8 py-6    |
 
 ### Escala Tipográfica
 
-| Elemento             | Mobile        | Tablet        | Desktop       |
-| -------------------- | ------------- | ------------- | ------------- |
-| **H1 (Logo)**        | text-3xl      | text-4xl      | text-6xl      |
-| **H2 (Títulos)**     | text-2xl      | text-3xl      | text-5xl      |
-| **Body (Normal)**    | text-base     | text-lg       | text-xl       |
-| **Small (Labels)**   | text-sm       | text-base     | text-lg       |
-| **Tiny (Metadata)**  | text-xs       | text-sm       | text-base     |
+| Elemento            | Mobile    | Tablet    | Desktop   |
+| ------------------- | --------- | --------- | --------- |
+| **H1 (Logo)**       | text-3xl  | text-4xl  | text-6xl  |
+| **H2 (Títulos)**    | text-2xl  | text-3xl  | text-5xl  |
+| **Body (Normal)**   | text-base | text-lg   | text-xl   |
+| **Small (Labels)**  | text-sm   | text-base | text-lg   |
+| **Tiny (Metadata)** | text-xs   | text-sm   | text-base |
 
 ---
 
@@ -271,23 +271,24 @@ background: linear-gradient(
 );
 
 /* Acentos radiales neón */
-background: radial-gradient(ellipse at 25% 25%, rgba(6, 182, 212, 0.4) 0%, transparent 40%),
+background:
+  radial-gradient(ellipse at 25% 25%, rgba(6, 182, 212, 0.4) 0%, transparent 40%),
   radial-gradient(ellipse at 75% 75%, rgba(236, 72, 153, 0.35) 0%, transparent 40%);
 ```
 
 ### Gradientes de Componentes
 
-| Componente             | Gradiente                                            | Glow Color |
-| ---------------------- | ---------------------------------------------------- | ---------- |
-| **HUB (Nav)**          | from-blue-500 via-cyan-500 to-blue-600               | cyan       |
-| **Entrenamientos**     | from-pink-500 via-rose-500 to-red-500                | pink       |
-| **Tareas Asignadas**   | from-purple-500 via-violet-500 to-indigo-600         | purple     |
-| **Mis Logros**         | from-yellow-400 via-amber-500 to-orange-600          | yellow     |
-| **Tienda**             | from-green-500 via-emerald-500 to-teal-600           | green      |
-| **Racha (Stat)**       | from-orange-500 to-red-600                           | orange     |
-| **Próxima Clase**      | from-green-400 via-emerald-500 to-teal-500           | green      |
-| **CTA Principal**      | from-yellow-400 via-orange-500 to-red-500            | orange     |
-| **Modal Bloqueo**      | from-slate-900 via-purple-900 to-slate-900           | purple     |
+| Componente           | Gradiente                                    | Glow Color |
+| -------------------- | -------------------------------------------- | ---------- |
+| **HUB (Nav)**        | from-blue-500 via-cyan-500 to-blue-600       | cyan       |
+| **Entrenamientos**   | from-pink-500 via-rose-500 to-red-500        | pink       |
+| **Tareas Asignadas** | from-purple-500 via-violet-500 to-indigo-600 | purple     |
+| **Mis Logros**       | from-yellow-400 via-amber-500 to-orange-600  | yellow     |
+| **Tienda**           | from-green-500 via-emerald-500 to-teal-600   | green      |
+| **Racha (Stat)**     | from-orange-500 to-red-600                   | orange     |
+| **Próxima Clase**    | from-green-400 via-emerald-500 to-teal-500   | green      |
+| **CTA Principal**    | from-yellow-400 via-orange-500 to-red-500    | orange     |
+| **Modal Bloqueo**    | from-slate-900 via-purple-900 to-slate-900   | purple     |
 
 ---
 
@@ -295,17 +296,17 @@ background: radial-gradient(ellipse at 25% 25%, rgba(6, 182, 212, 0.4) 0%, trans
 
 ### Dispositivos de Prueba Recomendados
 
-| Dispositivo              | Resolución   | Orientación  | Breakpoint |
-| ------------------------ | ------------ | ------------ | ---------- |
-| **iPhone SE**            | 568 x 320    | Landscape    | Mobile XS  |
-| **iPhone 13 Mini**       | 812 x 375    | Landscape    | Mobile XS  |
-| **iPhone 13 Pro**        | 844 x 390    | Landscape    | Mobile SM  |
-| **iPad**                 | 1024 x 768   | Landscape    | Tablet MD  |
-| **iPad Pro 11"**         | 1194 x 834   | Landscape    | Tablet MD  |
-| **iPad Pro 12.9"**       | 1366 x 1024  | Landscape    | Desktop LG |
-| **Laptop 1080p**         | 1920 x 1080  | Landscape    | Desktop XL |
-| **Desktop 1440p**        | 2560 x 1440  | Landscape    | Desktop XL |
-| **Ultra-wide 4K**        | 3840 x 1600  | Landscape    | Desktop XL |
+| Dispositivo        | Resolución  | Orientación | Breakpoint |
+| ------------------ | ----------- | ----------- | ---------- |
+| **iPhone SE**      | 568 x 320   | Landscape   | Mobile XS  |
+| **iPhone 13 Mini** | 812 x 375   | Landscape   | Mobile XS  |
+| **iPhone 13 Pro**  | 844 x 390   | Landscape   | Mobile SM  |
+| **iPad**           | 1024 x 768  | Landscape   | Tablet MD  |
+| **iPad Pro 11"**   | 1194 x 834  | Landscape   | Tablet MD  |
+| **iPad Pro 12.9"** | 1366 x 1024 | Landscape   | Desktop LG |
+| **Laptop 1080p**   | 1920 x 1080 | Landscape   | Desktop XL |
+| **Desktop 1440p**  | 2560 x 1440 | Landscape   | Desktop XL |
+| **Ultra-wide 4K**  | 3840 x 1600 | Landscape   | Desktop XL |
 
 ### Checklist de Validación
 

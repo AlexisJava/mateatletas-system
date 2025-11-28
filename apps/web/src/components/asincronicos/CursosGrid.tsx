@@ -32,7 +32,7 @@ const cursos: Curso[] = [
     edadMinima: 7,
     edadMaxima: 11,
     precio: 25000,
-    popularidad: 5
+    popularidad: 5,
   },
   {
     id: 'python-kids',
@@ -46,7 +46,7 @@ const cursos: Curso[] = [
     edadMinima: 10,
     edadMaxima: 14,
     precio: 30000,
-    popularidad: 5
+    popularidad: 5,
   },
   {
     id: 'roblox-studio',
@@ -60,7 +60,7 @@ const cursos: Curso[] = [
     edadMinima: 10,
     edadMaxima: 15,
     precio: 35000,
-    popularidad: 5
+    popularidad: 5,
   },
   {
     id: 'web-dev-kids',
@@ -74,7 +74,7 @@ const cursos: Curso[] = [
     edadMinima: 12,
     edadMaxima: 16,
     precio: 35000,
-    popularidad: 4
+    popularidad: 4,
   },
   {
     id: 'matematica-olimpiadas',
@@ -88,7 +88,7 @@ const cursos: Curso[] = [
     edadMinima: 11,
     edadMaxima: 16,
     precio: 40000,
-    popularidad: 4
+    popularidad: 4,
   },
   {
     id: 'matematica-basica',
@@ -102,7 +102,7 @@ const cursos: Curso[] = [
     edadMinima: 8,
     edadMaxima: 12,
     precio: 25000,
-    popularidad: 4
+    popularidad: 4,
   },
   {
     id: 'fisica-experimentos',
@@ -116,7 +116,7 @@ const cursos: Curso[] = [
     edadMinima: 9,
     edadMaxima: 13,
     precio: 28000,
-    popularidad: 3
+    popularidad: 3,
   },
   {
     id: 'astronomia-kids',
@@ -130,7 +130,7 @@ const cursos: Curso[] = [
     edadMinima: 8,
     edadMaxima: 14,
     precio: 25000,
-    popularidad: 4
+    popularidad: 4,
   },
   {
     id: 'quimica-divertida',
@@ -144,8 +144,8 @@ const cursos: Curso[] = [
     edadMinima: 11,
     edadMaxima: 15,
     precio: 30000,
-    popularidad: 3
-  }
+    popularidad: 3,
+  },
 ];
 
 const areaColors = {
@@ -153,28 +153,27 @@ const areaColors = {
     bg: 'from-[#0ea5e9]/20 to-[#0ea5e9]/5',
     border: 'border-[#0ea5e9]/30',
     text: 'text-[#0ea5e9]',
-    badge: 'bg-[#0ea5e9]/20 border-[#0ea5e9]/30'
+    badge: 'bg-[#0ea5e9]/20 border-[#0ea5e9]/30',
   },
   matematica: {
     bg: 'from-[#fbbf24]/20 to-[#fbbf24]/5',
     border: 'border-[#fbbf24]/30',
     text: 'text-[#fbbf24]',
-    badge: 'bg-[#fbbf24]/20 border-[#fbbf24]/30'
+    badge: 'bg-[#fbbf24]/20 border-[#fbbf24]/30',
   },
   ciencias: {
     bg: 'from-[#10b981]/20 to-[#10b981]/5',
     border: 'border-[#10b981]/30',
     text: 'text-[#10b981]',
-    badge: 'bg-[#10b981]/20 border-[#10b981]/30'
-  }
+    badge: 'bg-[#10b981]/20 border-[#10b981]/30',
+  },
 };
 
 export default function CursosGrid() {
   const [filtroArea, setFiltroArea] = useState<string>('todos');
 
-  const cursosFiltrados = filtroArea === 'todos'
-    ? cursos
-    : cursos.filter(c => c.area === filtroArea);
+  const cursosFiltrados =
+    filtroArea === 'todos' ? cursos : cursos.filter((c) => c.area === filtroArea);
 
   return (
     <section className="relative py-32 bg-black">
@@ -199,7 +198,7 @@ export default function CursosGrid() {
               { id: 'todos', label: '✨ Todos', color: 'white' },
               { id: 'programacion', label: '💻 Programación', color: '#0ea5e9' },
               { id: 'matematica', label: '🧮 Matemática', color: '#fbbf24' },
-              { id: 'ciencias', label: '🔬 Ciencias', color: '#10b981' }
+              { id: 'ciencias', label: '🔬 Ciencias', color: '#10b981' },
             ].map((filtro) => (
               <button
                 key={filtro.id}
@@ -231,10 +230,14 @@ export default function CursosGrid() {
                 className="relative group"
               >
                 {/* Glow */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${colors.bg} rounded-3xl blur-xl group-hover:blur-2xl transition-all`} />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${colors.bg} rounded-3xl blur-xl group-hover:blur-2xl transition-all`}
+                />
 
                 {/* Card */}
-                <div className={`relative bg-black/60 backdrop-blur-xl border-2 ${colors.border} rounded-3xl p-6 hover:border-white/40 transition-all h-full flex flex-col`}>
+                <div
+                  className={`relative bg-black/60 backdrop-blur-xl border-2 ${colors.border} rounded-3xl p-6 hover:border-white/40 transition-all h-full flex flex-col`}
+                >
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="text-5xl">{curso.emoji}</div>
@@ -246,18 +249,16 @@ export default function CursosGrid() {
                   </div>
 
                   {/* Título */}
-                  <h3 className="text-2xl font-black text-white mb-2">
-                    {curso.nombre}
-                  </h3>
+                  <h3 className="text-2xl font-black text-white mb-2">{curso.nombre}</h3>
 
                   {/* Descripción */}
-                  <p className="text-white/70 mb-4 flex-grow">
-                    {curso.descripcion}
-                  </p>
+                  <p className="text-white/70 mb-4 flex-grow">{curso.descripcion}</p>
 
                   {/* Badges */}
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <span className={`px-3 py-1 ${colors.badge} border rounded-full text-xs font-bold ${colors.text}`}>
+                    <span
+                      className={`px-3 py-1 ${colors.badge} border rounded-full text-xs font-bold ${colors.text}`}
+                    >
                       {curso.nivel}
                     </span>
                     <span className="px-3 py-1 bg-white/10 border border-white/20 rounded-full text-xs font-bold text-white/70">
@@ -290,7 +291,9 @@ export default function CursosGrid() {
                           ${curso.precio.toLocaleString()}
                         </p>
                       </div>
-                      <button className={`px-5 py-3 bg-gradient-to-r ${colors.bg} border ${colors.border} rounded-xl font-bold ${colors.text} hover:scale-105 transition-all flex items-center gap-2`}>
+                      <button
+                        className={`px-5 py-3 bg-gradient-to-r ${colors.bg} border ${colors.border} rounded-xl font-bold ${colors.text} hover:scale-105 transition-all flex items-center gap-2`}
+                      >
                         Ver curso
                         <ChevronRight className="w-4 h-4" />
                       </button>

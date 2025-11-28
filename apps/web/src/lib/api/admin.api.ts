@@ -116,22 +116,22 @@ export const getAllEstudiantes = async (options?: {
 export const changeUserRole = async (userId: string, data: ChangeRoleDto): Promise<AdminUser> => {
   try {
     // El interceptor ya retorna response.data directamente
-    return await axios.post<AdminUser>(
-      `/admin/usuarios/${userId}/role`,
-      data
-    );
+    return await axios.post<AdminUser>(`/admin/usuarios/${userId}/role`, data);
   } catch (error) {
     console.error('Error al cambiar el rol del usuario:', error);
     throw error;
   }
 };
 
-export const updateUserRoles = async (userId: string, data: UpdateRolesDto): Promise<{ message: string; userId: string; roles: string[] }> => {
+export const updateUserRoles = async (
+  userId: string,
+  data: UpdateRolesDto,
+): Promise<{ message: string; userId: string; roles: string[] }> => {
   try {
     // El interceptor ya retorna response.data directamente
     return await axios.put<{ message: string; userId: string; roles: string[] }>(
       `/admin/usuarios/${userId}/roles`,
-      data
+      data,
     );
   } catch (error) {
     console.error('Error al actualizar los roles del usuario:', error);
@@ -346,7 +346,10 @@ export interface CreateAdminData {
 export const createAdmin = async (data: CreateAdminData): Promise<AdminUser> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.post<RegisterResponse>('/auth/register', data) as RegisterResponse;
+    const response = (await axios.post<RegisterResponse>(
+      '/auth/register',
+      data,
+    )) as RegisterResponse;
 
     // Luego cambiamos el rol a admin
     const adminUser = await changeUserRole(response.user.id, {

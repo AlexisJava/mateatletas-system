@@ -9,11 +9,7 @@ import {
   PlanificacionFilters as Filters,
   PaginationOptions,
 } from '@/types/planificacion.types';
-import {
-  PlanificacionFilters,
-  PlanificacionesTable,
-  CreatePlanificacionModal,
-} from './components';
+import { PlanificacionFilters, PlanificacionesTable, CreatePlanificacionModal } from './components';
 import { Plus, Calendar, TrendingUp, Activity } from 'lucide-react';
 
 export default function AdminPlanificacionesPage() {
@@ -118,7 +114,10 @@ export default function AdminPlanificacionesPage() {
           className="group relative px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500/20 via-rose-500/20 to-purple-500/20 backdrop-blur-xl border border-pink-400/50 hover:border-pink-400 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/50"
         >
           <div className="flex items-center gap-2">
-            <Plus className="w-5 h-5 text-pink-300 group-hover:text-pink-200 transition-colors" strokeWidth={2.5} />
+            <Plus
+              className="w-5 h-5 text-pink-300 group-hover:text-pink-200 transition-colors"
+              strokeWidth={2.5}
+            />
             <span className="text-sm font-bold text-white">Nueva Planificación</span>
           </div>
         </button>
@@ -134,8 +133,12 @@ export default function AdminPlanificacionesPage() {
             <div className="relative p-5">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-white/60 mb-2 font-bold uppercase tracking-wide">Total Planificaciones</p>
-                  <p className="text-4xl font-black text-white mb-2 drop-shadow-lg leading-none">{total}</p>
+                  <p className="text-xs text-white/60 mb-2 font-bold uppercase tracking-wide">
+                    Total Planificaciones
+                  </p>
+                  <p className="text-4xl font-black text-white mb-2 drop-shadow-lg leading-none">
+                    {total}
+                  </p>
                   <span className="text-xs text-white/40 font-medium">en el sistema</span>
                 </div>
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center shadow-lg shadow-pink-500/50">
@@ -152,8 +155,12 @@ export default function AdminPlanificacionesPage() {
             <div className="relative p-5">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-white/60 mb-2 font-bold uppercase tracking-wide">En Esta Página</p>
-                  <p className="text-4xl font-black text-white mb-2 drop-shadow-lg leading-none">{planificaciones?.length ?? 0}</p>
+                  <p className="text-xs text-white/60 mb-2 font-bold uppercase tracking-wide">
+                    En Esta Página
+                  </p>
+                  <p className="text-4xl font-black text-white mb-2 drop-shadow-lg leading-none">
+                    {planificaciones?.length ?? 0}
+                  </p>
                   <span className="text-xs text-white/40 font-medium">de {total}</span>
                 </div>
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center shadow-lg shadow-purple-500/50">
@@ -170,8 +177,12 @@ export default function AdminPlanificacionesPage() {
             <div className="relative p-5">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-white/60 mb-2 font-bold uppercase tracking-wide">Sistema</p>
-                  <p className="text-2xl font-black text-white mb-2 drop-shadow-lg leading-none">Operativo</p>
+                  <p className="text-xs text-white/60 mb-2 font-bold uppercase tracking-wide">
+                    Sistema
+                  </p>
+                  <p className="text-2xl font-black text-white mb-2 drop-shadow-lg leading-none">
+                    Operativo
+                  </p>
                   <span className="text-xs text-emerald-300 font-bold">✓ SLICE 1 Activo</span>
                 </div>
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-500/50">
@@ -185,10 +196,7 @@ export default function AdminPlanificacionesPage() {
 
       {/* Filters */}
       <div className="relative z-10 mb-6">
-        <PlanificacionFilters
-          onFilterChange={handleFilterChange}
-          isLoading={isLoading}
-        />
+        <PlanificacionFilters onFilterChange={handleFilterChange} isLoading={isLoading} />
       </div>
 
       {/* Error State - Estilo OS */}

@@ -11,15 +11,7 @@ import type { Docente } from '@/lib/api/docentes.api';
 import { docentesApi } from '@/lib/api/docentes.api';
 import { listarClaseGrupos, type ClaseGrupo } from '@/lib/api/clase-grupos.api';
 import { getErrorMessage } from '@/lib/utils/error-handler';
-import {
-  ArrowLeft,
-  Calendar,
-  Users,
-  Clock,
-  CheckCircle,
-  Plus,
-  User,
-} from 'lucide-react';
+import { ArrowLeft, Calendar, Users, Clock, CheckCircle, Plus, User } from 'lucide-react';
 
 export default function DetallePlanificacionPage() {
   const params = useParams();
@@ -366,7 +358,9 @@ export default function DetallePlanificacionPage() {
 
               {/* Grupo */}
               <div>
-                <label className="block text-sm text-slate-300 font-bold mb-2">Grupo/Comisión</label>
+                <label className="block text-sm text-slate-300 font-bold mb-2">
+                  Grupo/Comisión
+                </label>
                 <select
                   value={grupoSeleccionado}
                   onChange={(e) => setGrupoSeleccionado(e.target.value)}

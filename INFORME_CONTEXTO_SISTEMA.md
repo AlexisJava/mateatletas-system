@@ -28,6 +28,7 @@
 ### 1.1 Tipo de Proyecto
 
 **Monorepo Multi-Aplicación**
+
 - Gestor: Yarn 4.10.3 (Berry)
 - Build System: Turborepo 2.0.0
 - Node.js: 22.x
@@ -90,6 +91,7 @@
 ### 2.1 BACKEND (API)
 
 #### Framework Core
+
 - **NestJS:** 11.0.1 (Framework Node.js con arquitectura modular)
 - **Node.js:** 22.x
 - **TypeScript:** 5.7.3
@@ -97,6 +99,7 @@
 - **Reflect Metadata:** 0.2.2 (Decoradores TypeScript)
 
 #### Base de Datos y ORM
+
 - **PostgreSQL:** 16 (Relacional)
 - **Prisma ORM:** 6.18.0
   - Schema: 3,338 líneas
@@ -106,6 +109,7 @@
   - Archivo: [apps/api/prisma/schema.prisma](apps/api/prisma/schema.prisma)
 
 #### Autenticación y Seguridad
+
 - **Passport JWT:** 4.0.1 (Estrategia de autenticación)
 - **@nestjs/jwt:** 11.0.1
 - **@nestjs/passport:** 11.0.5
@@ -115,6 +119,7 @@
 - **otplib:** 12.0.1 (Autenticación 2FA)
 
 **Implementación de Seguridad:**
+
 - JWT con estrategia Bearer Token
 - Guards personalizados: JwtAuthGuard, RolesGuard, EstudianteOwnershipGuard
 - Validación de IP para webhooks de MercadoPago
@@ -123,6 +128,7 @@
 - Cookie-parser: 1.4.7
 
 #### Caching y Performance
+
 - **Redis:** 5.8.3 (Caché distribuido)
 - **@keyv/redis:** 5.1.3 (Adapter Redis para Keyv)
 - **keyv:** 5.5.3 (Key-value store)
@@ -131,12 +137,14 @@
 - Fallback automático a memoria si Redis no disponible
 
 #### Pagos e Integraciones
+
 - **mercadopago:** 2.9.0 (SDK oficial MercadoPago)
 - Webhooks con validación de IP
 - Guards específicos para seguridad de webhooks
 - Archivo clave: [apps/api/src/pagos/services/mercadopago-ip-whitelist.service.ts](apps/api/src/pagos/services/mercadopago-ip-whitelist.service.ts)
 
 #### Logging y Observabilidad
+
 - **winston:** 3.18.3 (Logging estructurado)
 - **winston-daily-rotate-file:** 5.0.0 (Rotación de logs)
 - **@nestjs/terminus:** 11.0.0 (Health checks)
@@ -145,16 +153,19 @@
 - Context por módulo
 
 #### Validación y Transformación
+
 - **class-validator:** 0.14.2 (Validación de DTOs)
 - **class-transformer:** 0.5.1 (Transformación de objetos)
 - **@nestjs/mapped-types:** 2.1.0 (DTOs parciales/pick/omit)
 - **zod:** (a través de @mateatletas/contracts)
 
 #### Documentación API
+
 - **@nestjs/swagger:** 11.2.1 (OpenAPI/Swagger)
 - **swagger-ui-express:** 5.0.1
 
 #### Otras Dependencias
+
 - **puppeteer:** 24.29.1 (Generación de PDFs)
 - **qrcode:** 1.5.4 (Generación de códigos QR)
 - **uuid:** 13.0.0 (IDs únicos)
@@ -165,6 +176,7 @@
 ### 2.2 FRONTEND (WEB)
 
 #### Framework Core
+
 - **Next.js:** 15.5.4 (App Router, React Server Components)
 - **React:** 19.1.0
 - **React DOM:** 19.1.0
@@ -172,6 +184,7 @@
 - Modo: Turbopack para desarrollo
 
 #### UI y Estilos
+
 - **Tailwind CSS:** 4 (Utility-first CSS)
 - **Material-UI (MUI):** 7.3.4
   - @mui/material
@@ -184,11 +197,13 @@
 - **clsx:** 2.1.1 (Utilidad para clases CSS)
 
 #### State Management
+
 - **Zustand:** 5.0.8 (Client state - 14 stores)
 - **@tanstack/react-query:** 5.90.5 (Server state, caché automático)
 - **@tanstack/react-query-devtools:** 5.90.2
 
 **Stores Zustand:**
+
 - auth.store.ts (Autenticación)
 - estudiantes.store.ts
 - catalogo.store.ts
@@ -205,6 +220,7 @@
 - sectores.store.ts
 
 #### Gamificación y 3D
+
 - **Three.js:** 0.180.0 (Biblioteca 3D)
 - **@react-three/fiber:** 9.4.0 (React renderer para Three.js)
 - **@react-three/drei:** 10.7.6 (Helpers para Three.js)
@@ -217,6 +233,7 @@
 - **suspend-react:** 0.1.3 (Suspense utilities)
 
 #### Efectos y Animaciones
+
 - **canvas-confetti:** 1.9.3
 - **react-confetti:** 6.4.0
 - **react-confetti-explosion:** 3.0.3
@@ -225,20 +242,24 @@
 - **howler:** 2.2.4 (Audio/efectos de sonido)
 
 #### Charts y Visualización
+
 - **chart.js:** 4.5.1
 - **react-chartjs-2:** 5.3.0 (Wrapper React para Chart.js)
 - **recharts:** 3.2.1 (Gráficos React)
 
 #### HTTP y Comunicación
+
 - **axios:** 1.12.2 (Cliente HTTP)
 - Configuración con interceptores
 - Base URL configurable por entorno
 
 #### Formularios y Validación
+
 - **zod:** 3.25.76 (Validación con @mateatletas/contracts)
 - **react-hook-form:** (implícito en uso)
 
 #### Utilidades
+
 - **date-fns:** 4.1.0 (Manipulación de fechas)
 - **jspdf:** 3.0.3 (Generación de PDFs)
 - **jspdf-autotable:** 5.0.2 (Tablas en PDF)
@@ -251,6 +272,7 @@
 - **isomorphic-dompurify:** 2.29.0 (Sanitización HTML)
 
 #### Storage
+
 - **@vercel/blob:** 2.0.0 (Almacenamiento de archivos)
 
 ### 2.3 SHARED (CONTRACTS)
@@ -260,10 +282,12 @@
 **Propósito:** Single Source of Truth para validación y tipos
 
 **Tecnologías:**
+
 - **zod:** 3.22.4 (Esquemas de validación)
 - **TypeScript:** 5.3.3
 
 **Esquemas Definidos (13):**
+
 - Estudiante schemas
 - Tutor schemas
 - Docente schemas
@@ -277,6 +301,7 @@
 - etc.
 
 **Beneficio:**
+
 - Tipos TypeScript generados automáticamente desde esquemas Zod
 - Validación compartida entre frontend y backend
 - Prevención de inconsistencias de tipos
@@ -293,11 +318,13 @@
 **ORM:** Prisma 6.18.0
 
 **Connection String:**
+
 ```
 postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 ```
 
 **Healthcheck:**
+
 - Comando: `pg_isready`
 - Intervalo: 10 segundos
 
@@ -311,6 +338,7 @@ postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 ### 3.3 Categorización de Modelos (75 tablas)
 
 #### 3.3.1 Usuarios y Autenticación (6 modelos)
+
 - `Tutor` - Padres/tutores de estudiantes
 - `Estudiante` - Estudiantes del sistema
 - `Docente` - Profesores
@@ -321,6 +349,7 @@ postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 **Roles del Sistema:** 4 roles (Tutor, Estudiante, Docente, Admin)
 
 #### 3.3.2 Gamificación (9 modelos)
+
 - `Equipo` - 4 equipos competitivos
 - `Logro` - Definición de logros/badges
 - `LogroEstudiante` - Relación estudiante-logro
@@ -332,6 +361,7 @@ postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 - `PuntosPadre`, `TransaccionPuntosPadre` - Sistema de recompensas padres
 
 #### 3.3.3 Productos y Pagos (9 modelos)
+
 - `Producto` - Catálogo de productos educativos
 - `Membresia` - Membresías de estudiantes
 - `InscripcionCurso` - Inscripciones a cursos
@@ -344,6 +374,7 @@ postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 **Integración:** MercadoPago para procesamiento de pagos
 
 #### 3.3.4 Clases y Asistencia (11 modelos)
+
 - `RutaCurricular` - 6 rutas de matemáticas
 - `Clase` - Clases individuales
 - `Grupo` - Grupos de clases
@@ -357,6 +388,7 @@ postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 - `DocenteRuta` - Asignación docente-ruta
 
 #### 3.3.5 Cursos E-Learning (5 modelos)
+
 - `CursoCatalogo` - Catálogo de cursos online
 - `Modulo` - Módulos de curso
 - `Leccion` - Lecciones individuales
@@ -365,6 +397,7 @@ postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 - `CursoEstudiante` - Relación estudiante-curso
 
 #### 3.3.6 Planificaciones (8 modelos)
+
 - `PlanificacionMensual` - Planificaciones mensuales
 - `ActividadSemanal` - Actividades semanales
 - `PlanificacionSimple` - Planificaciones simplificadas
@@ -375,6 +408,7 @@ postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 - `AsignacionDocente`, `AsignacionActividadEstudiante`
 
 #### 3.3.7 Tienda Virtual (6 modelos)
+
 - `RecursosEstudiante` - Recursos del estudiante (monedas virtuales)
 - `TransaccionRecurso` - Transacciones de recursos
 - `CategoriaItem` - Categorías de items
@@ -383,6 +417,7 @@ postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 - `CompraItem` - Historial de compras
 
 #### 3.3.8 Colonia de Verano 2026 (9 modelos)
+
 - `ColoniaInscripcion` - Inscripciones a colonia
 - `ColoniaEstudiante` - Estudiantes en colonia
 - `ColoniaEstudianteCurso` - Cursos de colonia
@@ -394,6 +429,7 @@ postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 - `PagoInscripcion2026`, `HistorialEstadoInscripcion2026`
 
 #### 3.3.9 Sistema y Utilidades (7 modelos)
+
 - `Notificacion` - Sistema de notificaciones
 - `Evento` - Eventos del sistema
 - `Tarea` - Sistema de tareas
@@ -408,6 +444,7 @@ postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 **Archivo:** [apps/api/prisma/seed.ts](apps/api/prisma/seed.ts)
 
 **Datos Precargados:**
+
 - 4 equipos de gamificación (Crash, Coco, Cortex, Aku Aku)
 - 6 rutas curriculares de matemáticas
 - 5 productos (membresías y cursos)
@@ -417,6 +454,7 @@ postgresql://mateatletas:mateatletas123@localhost:5433/mateatletas
 - Usuarios admin/docente de prueba
 
 **Comando:**
+
 ```bash
 npm run db:seed
 ```
@@ -432,6 +470,7 @@ npm run db:seed
 ### 4.2 Capas de la Aplicación
 
 #### Layer 1: Presentation Layer
+
 - **Controllers:** 29 controllers
 - **DTOs:** Validación con class-validator
 - **Guards:** JWT, Roles, Webhooks, EstudianteOwnership
@@ -439,6 +478,7 @@ npm run db:seed
 - **Interceptors:** Logging, Transform, Error handling
 
 #### Layer 2: Application Layer
+
 - **Services:** 81 services
 - **Facades:** PagosManagementFacadeService
 - **Command Services:** Escritura (CQRS en módulo pagos)
@@ -446,12 +486,14 @@ npm run db:seed
 - **Use Cases:** Lógica de negocio
 
 #### Layer 3: Domain Layer
+
 - **Constants:** [apps/api/src/domain/constants/](apps/api/src/domain/constants/)
 - **Enums:** Estados, tipos de entidad
 - **Validators:** Validadores de negocio
 - **Events:** Eventos de dominio con EventEmitter2
 
 #### Layer 4: Infrastructure Layer
+
 - **PrismaService:** Acceso a base de datos
 - **RedisService:** Caché distribuido
 - **MercadoPagoService:** Integración de pagos
@@ -461,6 +503,7 @@ npm run db:seed
 ### 4.3 Módulos NestJS (32 módulos)
 
 #### Core e Infraestructura
+
 - **CoreModule** - Configuración global + Database (Global module)
 - **SecurityModule** - Guards + Rate Limiting + Headers
 - **ObservabilityModule** - Logging + Metrics + Interceptors
@@ -471,6 +514,7 @@ npm run db:seed
 #### Feature Modules Principales
 
 **Autenticación y Usuarios:**
+
 - **AuthModule** - JWT + 4 estrategias de login (Tutor, Estudiante, Docente, Admin)
   - Controllers: auth.controller.ts
   - Services: auth.service.ts
@@ -478,12 +522,14 @@ npm run db:seed
   - Strategies: jwt.strategy.ts
 
 **Gestión de Usuarios:**
+
 - **EstudiantesModule** - CRUD estudiantes
 - **DocentesModule** - Gestión docentes
 - **TutorModule** - Gestión tutores/padres
 - **AdminModule** - Panel administrativo
 
 **Negocio Core:**
+
 - **CatalogoModule** - Productos educativos
 - **PagosModule** - **Implementa CQRS**
   - PaymentCommandService (escritura)
@@ -494,16 +540,19 @@ npm run db:seed
   - Archivos en [apps/api/src/pagos/](apps/api/src/pagos/)
 
 **Clases y Asistencia:**
+
 - **ClasesModule** - Gestión de 6 rutas curriculares
 - **AsistenciaModule** - Registro asistencia con observaciones
 - **GamificacionModule** - Logros, puntos, rankings, equipos
 - **EquiposModule** - 4 equipos competitivos
 
 **E-Learning:**
+
 - **CursosModule** - Cursos online con módulos y lecciones
 - **PlanificacionesSimplesModule** - Planificaciones de clase
 
 **Sistema:**
+
 - **EventosModule** - Sistema de eventos
 - **TiendaModule** - Tienda virtual gamificada
 - **ColoniaModule** - Gestión colonia de verano
@@ -513,6 +562,7 @@ npm run db:seed
 ### 4.4 Implementación de Seguridad
 
 #### Guards Implementados
+
 ```typescript
 // JWT Authentication
 JwtAuthGuard - Valida tokens JWT en rutas protegidas
@@ -528,6 +578,7 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 ```
 
 #### Configuración de Seguridad
+
 - **Helmet:** Headers de seguridad HTTP
 - **CORS:** Configurado por entorno (whitelist de orígenes)
 - **Rate Limiting:** Throttler con límites por endpoint
@@ -535,13 +586,16 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 - **Secret Rotation:** Sistema de rotación automática de secretos
 
 #### Archivo Crítico de Seguridad
+
 [apps/api/src/pagos/services/mercadopago-ip-whitelist.service.ts](apps/api/src/pagos/services/mercadopago-ip-whitelist.service.ts)
+
 - Validación de IPs de MercadoPago
 - Prevención de webhooks fraudulentos
 
 ### 4.5 Logging y Observabilidad
 
 **Winston Logger:**
+
 - Ubicación: [apps/api/src/common/logger/](apps/api/src/common/logger/)
 - Formato: Structured JSON logging
 - Niveles: error, warn, info, debug
@@ -552,6 +606,7 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
   - Error logs separados
 
 **Health Checks:**
+
 - Endpoint: `/health`
 - Checks: Database, Redis, Disk space
 - Implementación: @nestjs/terminus
@@ -567,9 +622,11 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 ### 5.2 Portales Implementados (4)
 
 #### Portal 1: Tutor/Padre
+
 **Ruta base:** `/app/(protected)/`
 
 **Funcionalidades:**
+
 - Dashboard con resumen de estudiantes
 - Gestión de estudiantes (CRUD)
 - Catálogo de productos (cursos, membresías)
@@ -579,6 +636,7 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 - Historial de pagos y transacciones
 
 **Rutas principales:**
+
 - `/dashboard`
 - `/estudiantes`
 - `/catalogo`
@@ -587,9 +645,11 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 - `/onboarding`
 
 #### Portal 2: Estudiante
+
 **Ruta base:** `/app/estudiante/`
 
 **Funcionalidades:**
+
 - Dashboard gamificado con animaciones
 - Sistema de logros/badges (8 logros)
 - Rankings (por equipo y global)
@@ -599,6 +659,7 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 - Cursos online con progreso
 
 **Componentes de Efectos (7):**
+
 - AchievementUnlock.tsx
 - ConfettiEffect.tsx
 - LevelUpAnimation.tsx
@@ -608,6 +669,7 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 - SoundManager.tsx
 
 **Rutas principales:**
+
 - `/estudiante/dashboard`
 - `/estudiante/logros`
 - `/estudiante/ranking`
@@ -616,9 +678,11 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 - `/estudiante/cursos`
 
 #### Portal 3: Docente
+
 **Ruta base:** `/app/docente/`
 
 **Funcionalidades:**
+
 - Dashboard con KPIs de clases
 - Calendario mensual de clases
 - Toma de asistencia por clase
@@ -629,15 +693,18 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
   - Estadísticas de estudiantes
 
 **Rutas principales:**
+
 - `/docente/dashboard`
 - `/docente/calendario`
 - `/docente/asistencia`
 - `/docente/reportes`
 
 #### Portal 4: Admin
+
 **Ruta base:** `/app/admin/`
 
 **Funcionalidades:**
+
 - Dashboard con estadísticas generales
 - Gestión de usuarios (todos los roles)
 - Gestión de productos (CRUD completo)
@@ -646,6 +713,7 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 - Configuración del sistema
 
 **Rutas principales:**
+
 - `/admin/dashboard`
 - `/admin/usuarios`
 - `/admin/productos`
@@ -686,6 +754,7 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 14. **sectores.store.ts** - Sectores/ubicaciones
 
 **Características:**
+
 - Persistencia con localStorage (stores seleccionados)
 - TypeScript completo con tipos inferidos
 - Devtools integrado
@@ -693,12 +762,14 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 #### React Query (Server State)
 
 **Configuración:**
+
 - Stale time: 5 minutos
 - Cache time: 10 minutos
 - Retry: 3 intentos
 - Refetch on window focus: true (en producción)
 
 **Queries configuradas:**
+
 - useEstudiantes()
 - useProductos()
 - useClases()
@@ -707,11 +778,13 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 - useAsistencias()
 
 **Mutations:**
+
 - Optimistic updates (0ms UI response)
 - Auto invalidación de queries relacionadas
 - Error handling centralizado
 
 **Beneficios:**
+
 - 98% reducción de requests redundantes
 - Sincronización automática entre tabs
 - Offline support con caché
@@ -721,6 +794,7 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 **Ubicación:** [apps/web/src/components/](apps/web/src/components/)
 
 **27 directorios de componentes:**
+
 - `/shared` - Componentes reutilizables (Button, Input, Modal, etc.)
 - `/dashboard` - Dashboard components
 - `/docente` - Componentes específicos docente
@@ -742,29 +816,31 @@ MercadoPagoWebhookGuard - Valida IP whitelisting para webhooks
 **Tema:** Crash Bandicoot Inspired
 
 **Colores principales:**
+
 ```css
---color-orange: #ff6b35
---color-yellow: #f7b801
---color-cyan: #00d9ff
---color-purple: #a855f7
---color-green: #10b981
+--color-orange: #ff6b35 --color-yellow: #f7b801 --color-cyan: #00d9ff --color-purple: #a855f7
+  --color-green: #10b981;
 ```
 
 **Tipografía:**
+
 - Títulos: Lilita One (Google Fonts)
 - Cuerpo: Fredoka (Google Fonts)
 - Código: Fira Code
 
 **Sombras:**
+
 - Chunky shadows: 3px, 5px, 8px
 - Estilo cartoon/videojuego
 
 **Sistema de Espaciado:**
+
 - Tailwind CSS spacing scale (4px base unit)
 
 ### 5.7 Performance y Optimización
 
 **Code Splitting:**
+
 ```javascript
 // next.config.js
 optimizePackageImports: [
@@ -772,23 +848,26 @@ optimizePackageImports: [
   '@mui/icons-material',
   'three',
   'framer-motion',
-  'chart.js'
-]
+  'chart.js',
+];
 ```
 
 **Chunks específicos:**
+
 - three.js (separado por tamaño)
 - MUI (separado)
 - Charts (separado)
 - Gamificación (lazy load)
 
 **Optimizaciones:**
+
 - Tree-shaking automático
 - Remove console.log en producción
 - Image optimization con Next.js Image
 - Font optimization con next/font
 
 **React Query:**
+
 - Optimistic updates (UX instantánea)
 - Background refetch
 - Auto garbage collection
@@ -826,6 +905,7 @@ optimizePackageImports: [
 ```
 
 **Beneficios:**
+
 - Caché de builds incrementales
 - Paralelización de tasks
 - Dependency graph automático
@@ -834,6 +914,7 @@ optimizePackageImports: [
 ### 6.2 Scripts NPM Principales
 
 #### Desarrollo
+
 ```bash
 npm run dev              # Inicia todo (web + api)
 npm run dev:web          # Solo frontend
@@ -844,6 +925,7 @@ npm run dev:stop         # Detener todos los servicios
 ```
 
 #### Build
+
 ```bash
 npm run build            # Build completo (contracts + apps)
 npm run build:web        # Build frontend
@@ -852,6 +934,7 @@ npm run verify:build     # Verificar build exitoso
 ```
 
 #### Testing
+
 ```bash
 npm run test             # Tests unitarios
 npm run test:integration # Tests de integración
@@ -863,6 +946,7 @@ npm run test:cov         # Coverage report
 ```
 
 #### Database
+
 ```bash
 cd apps/api
 npm run db:migrate       # Aplicar migraciones
@@ -872,6 +956,7 @@ npm run db:reset         # Reset completo (¡DESTRUCTIVO!)
 ```
 
 #### Linting y Formato
+
 ```bash
 npm run lint             # ESLint en todo el monorepo
 npm run format           # Prettier write
@@ -880,6 +965,7 @@ npm run type-check       # TypeScript en todos los workspaces
 ```
 
 #### Deploy
+
 ```bash
 npm run verify:deploy    # Verificaciones pre-deploy
 npm run deploy:safe      # Deploy seguro con verificaciones
@@ -889,16 +975,15 @@ npm run railway:logs     # Ver logs de Railway
 ### 6.3 Yarn 4 Workspaces
 
 **Configuración:**
+
 ```json
 {
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  "workspaces": ["apps/*", "packages/*"]
 }
 ```
 
 **Gestión de dependencias:**
+
 - Node modules tradicional (PnP disabled)
 - Hoisting automático de dependencias compartidas
 - Resolutions para conflictos:
@@ -917,6 +1002,7 @@ npm run railway:logs     # Ver logs de Railway
 **Framework:** Jest 30.0.0 + ts-jest 29.2.5
 
 **Coverage Thresholds:**
+
 ```javascript
 coverageThreshold: {
   global: {
@@ -929,12 +1015,14 @@ coverageThreshold: {
 ```
 
 **Tests implementados:**
+
 - 99+ tests unitarios
 - ~90% cobertura en servicios críticos
 - Tests de integración con base de datos de prueba
 - Mocks de servicios externos (MercadoPago, Redis)
 
 **Estructura:**
+
 ```
 apps/api/src/**/__tests__/
   ├── *.service.spec.ts
@@ -943,6 +1031,7 @@ apps/api/src/**/__tests__/
 ```
 
 **Comandos:**
+
 ```bash
 npm run test:unit         # Solo unitarios
 npm run test:integration  # Solo integración
@@ -954,18 +1043,21 @@ npm run test:cov          # Con coverage
 **Framework:** Vitest 4.0.3
 
 **Configuración:**
+
 - happy-dom 20.0.8 (environment)
 - @testing-library/react 16.3.0
 - @testing-library/user-event 14.6.1
 - @testing-library/jest-dom 6.9.1
 
 **Tests:**
+
 - Tests de componentes
 - Tests de stores Zustand
 - Tests de hooks
 - Tests de utilidades
 
 **Comandos:**
+
 ```bash
 npm run test              # Vitest watch mode
 npm run test:run          # Run once
@@ -980,6 +1072,7 @@ npm run test:ui           # Vitest UI
 **Archivos de test:** 245+ tests E2E en [tests/e2e/](tests/e2e/)
 
 **Browsers:**
+
 - Chromium
 - Firefox
 - WebKit (Safari)
@@ -987,6 +1080,7 @@ npm run test:ui           # Vitest UI
 - Mobile Safari
 
 **Test Suites:**
+
 ```
 tests/e2e/
 ├── 01-smoke.spec.ts           # Smoke tests críticos
@@ -999,6 +1093,7 @@ tests/e2e/
 ```
 
 **Características:**
+
 - Visual regression testing
 - Accessibility testing (@axe-core/playwright 4.11.0)
 - Multi-browser testing
@@ -1007,6 +1102,7 @@ tests/e2e/
 - Video recording en fallos
 
 **Comandos:**
+
 ```bash
 npm run test:e2e                  # Todos los browsers
 npm run test:e2e:ui               # Playwright UI
@@ -1025,12 +1121,14 @@ npm run test:e2e:production       # Smoke tests en prod
 **Configuración:** [artillery.yml](artillery.yml)
 
 **Escenarios:**
+
 - Login flow
 - Dashboard load
 - API endpoints
 - Stress testing
 
 **Comandos:**
+
 ```bash
 npm run test:load          # Load testing normal
 npm run test:load:staging  # Contra staging
@@ -1042,12 +1140,14 @@ npm run test:load:stress   # Stress testing
 **Script:** [scripts/smoke-test-production.sh](scripts/smoke-test-production.sh)
 
 **Checks:**
+
 - Health endpoint
 - Authentication
 - Critical user flows
 - API availability
 
 **Comando:**
+
 ```bash
 npm run test:smoke         # Producción
 npm run test:smoke:staging # Staging
@@ -1060,18 +1160,21 @@ npm run test:smoke:staging # Staging
 ### 8.1 Ambientes
 
 #### Development
+
 - Frontend: http://localhost:3000
 - Backend: http://localhost:3001
 - Database: localhost:5433
 - Redis: localhost:6379 (opcional)
 
 #### Staging
+
 - Frontend: (URL de staging)
 - Backend: (URL de staging)
 - Database: Railway PostgreSQL
 - Redis: Railway Redis
 
 #### Production
+
 - Frontend: Vercel (URL de producción)
 - Backend: Railway (URL de producción)
 - Database: Railway PostgreSQL
@@ -1080,6 +1183,7 @@ npm run test:smoke:staging # Staging
 ### 8.2 Infrastructure as Code
 
 **Backend (Railway):**
+
 - Auto-deploy desde branch `main`
 - Health checks configurados
 - Environment variables gestionadas
@@ -1087,6 +1191,7 @@ npm run test:smoke:staging # Staging
 - Redis managed instance
 
 **Frontend (Vercel):**
+
 - Auto-deploy desde branch `main`
 - Preview deployments en PRs
 - Edge Functions
@@ -1096,6 +1201,7 @@ npm run test:smoke:staging # Staging
 ### 8.3 Variables de Entorno
 
 #### Backend (.env)
+
 ```bash
 # Database
 DATABASE_URL=postgresql://...
@@ -1119,6 +1225,7 @@ PORT=3001
 ```
 
 #### Frontend (.env.local)
+
 ```bash
 # API
 NEXT_PUBLIC_API_URL=https://api.mateatletas.com
@@ -1133,6 +1240,7 @@ NODE_ENV=production
 ### 8.4 CI/CD
 
 **GitHub Actions:**
+
 - Linting en PRs
 - Type checking
 - Tests unitarios
@@ -1140,6 +1248,7 @@ NODE_ENV=production
 - Build verification
 
 **Deployment Flow:**
+
 ```
 1. Push to main
 2. GitHub Actions CI
@@ -1158,6 +1267,7 @@ NODE_ENV=production
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Implementación JWT: rotación de tokens, expiración, refresh tokens
 - [ ] Almacenamiento de secretos (JWT_SECRET, MERCADOPAGO_ACCESS_TOKEN)
 - [ ] Guards NestJS: JwtAuthGuard, RolesGuard
@@ -1170,6 +1280,7 @@ NODE_ENV=production
 - [ ] Password reset flow
 
 **ARCHIVOS CRÍTICOS:**
+
 - [apps/api/src/auth/](apps/api/src/auth/)
 - [apps/api/src/auth/guards/](apps/api/src/auth/guards/)
 - [apps/api/src/auth/strategies/jwt.strategy.ts](apps/api/src/auth/strategies/jwt.strategy.ts)
@@ -1179,6 +1290,7 @@ NODE_ENV=production
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] DTOs con class-validator: cobertura completa
 - [ ] Esquemas Zod en @mateatletas/contracts
 - [ ] Sanitización de HTML (isomorphic-dompurify en frontend)
@@ -1191,6 +1303,7 @@ NODE_ENV=production
 - [ ] Path parameter validation
 
 **ARCHIVOS CRÍTICOS:**
+
 - [apps/api/src/\*\*/dto/](apps/api/src/**/dto/)
 - [packages/contracts/src/](packages/contracts/src/)
 
@@ -1199,6 +1312,7 @@ NODE_ENV=production
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] IP Whitelisting implementation
 - [ ] Signature validation de webhooks
 - [ ] Idempotencia (WebhookProcessed model)
@@ -1210,6 +1324,7 @@ NODE_ENV=production
 - [ ] Estado de transacciones duplicadas
 
 **ARCHIVOS CRÍTICOS:**
+
 - [apps/api/src/pagos/services/mercadopago-ip-whitelist.service.ts](apps/api/src/pagos/services/mercadopago-ip-whitelist.service.ts)
 - [apps/api/src/pagos/services/payment-webhook.service.ts](apps/api/src/pagos/services/payment-webhook.service.ts)
 - [apps/api/src/pagos/controllers/mercadopago-webhook.controller.ts](apps/api/src/pagos/controllers/mercadopago-webhook.controller.ts)
@@ -1219,6 +1334,7 @@ NODE_ENV=production
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] CORS configuration: whitelist de orígenes
 - [ ] Helmet configuration (CSP, HSTS, X-Frame-Options, etc.)
 - [ ] Rate limiting por endpoint
@@ -1228,6 +1344,7 @@ NODE_ENV=production
 - [ ] Cookie configuration (httpOnly, secure, sameSite)
 
 **ARCHIVOS CRÍTICOS:**
+
 - [apps/api/src/main.ts](apps/api/src/main.ts)
 - Configuración de Helmet
 - Configuración de CORS
@@ -1237,6 +1354,7 @@ NODE_ENV=production
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Storage de secretos (¿environment variables? ¿vault?)
 - [ ] Rotación de secretos (SecretRotation model)
 - [ ] Secrets en código fuente (.env en .gitignore)
@@ -1246,6 +1364,7 @@ NODE_ENV=production
 - [ ] Encriptación de secretos en base de datos
 
 **ARCHIVOS CRÍTICOS:**
+
 - [apps/api/src/\*\*/.env](apps/api/src/**/.env) (NO debe existir en repo)
 - .gitignore
 - SecretRotation model
@@ -1255,6 +1374,7 @@ NODE_ENV=production
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] SQL Injection: verificar raw queries en Prisma
 - [ ] Permissions de usuario de base de datos
 - [ ] Encriptación de datos sensibles (PII)
@@ -1267,6 +1387,7 @@ NODE_ENV=production
 - [ ] GDPR compliance (derecho al olvido)
 
 **ARCHIVOS CRÍTICOS:**
+
 - [apps/api/prisma/schema.prisma](apps/api/prisma/schema.prisma)
 - [apps/api/src/prisma/prisma.service.ts](apps/api/src/prisma/prisma.service.ts)
 
@@ -1275,6 +1396,7 @@ NODE_ENV=production
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Logs de acciones sensibles (login, pagos, cambios de datos)
 - [ ] PII en logs (¿se filtra información sensible?)
 - [ ] Log rotation y retention
@@ -1285,6 +1407,7 @@ NODE_ENV=production
 - [ ] Compliance con regulaciones (GDPR, PCI-DSS)
 
 **ARCHIVOS CRÍTICOS:**
+
 - [apps/api/src/common/logger/](apps/api/src/common/logger/)
 - AuditLog model
 - Winston configuration
@@ -1294,6 +1417,7 @@ NODE_ENV=production
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] XSS prevention: sanitización con DOMPurify
 - [ ] CSRF protection
 - [ ] Secrets en código frontend (API keys expuestas)
@@ -1305,6 +1429,7 @@ NODE_ENV=production
 - [ ] Third-party scripts (analytics, ads)
 
 **ARCHIVOS CRÍTICOS:**
+
 - [apps/web/src/store/auth.store.ts](apps/web/src/store/auth.store.ts)
 - [apps/web/src/lib/axios.ts](apps/web/src/lib/axios.ts) (si existe)
 
@@ -1313,6 +1438,7 @@ NODE_ENV=production
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] npm audit (vulnerabilidades conocidas)
 - [ ] Dependencias desactualizadas
 - [ ] Dependencias no utilizadas
@@ -1322,6 +1448,7 @@ NODE_ENV=production
 - [ ] Automated dependency updates (Dependabot, Renovate)
 
 **COMANDOS:**
+
 ```bash
 npm audit                    # Auditoría de vulnerabilidades
 npm audit fix                # Auto-fix vulnerabilidades
@@ -1337,6 +1464,7 @@ npm outdated                 # Dependencias desactualizadas
 **ÁREAS DE REVISIÓN:**
 
 ✓ **Revisar:**
+
 - [ ] **N+1 Queries:** Verificar uso de `include` vs múltiples queries
 - [ ] **God Objects:** Servicios con demasiadas responsabilidades
 - [ ] **Circular Dependencies:** Módulos que se importan mutuamente
@@ -1349,6 +1477,7 @@ npm outdated                 # Dependencias desactualizadas
 - [ ] **Over-fetching:** Traer más datos de los necesarios
 
 **HERRAMIENTAS:**
+
 ```bash
 # Detectar dependencias circulares
 npx madge --circular apps/api/src
@@ -1362,6 +1491,7 @@ npx eslint apps/api/src --max-warnings 0
 **ÁREAS DE REVISIÓN:**
 
 ✓ **Revisar:**
+
 - [ ] **Prop Drilling:** Props pasadas a través de múltiples niveles
 - [ ] **Unnecessary Re-renders:** Componentes que re-renderizan sin cambios
 - [ ] **Missing Keys:** Arrays sin keys únicas
@@ -1374,6 +1504,7 @@ npx eslint apps/api/src --max-warnings 0
 - [ ] **Accessibility:** Falta de ARIA labels, semántica HTML
 
 **HERRAMIENTAS:**
+
 ```bash
 # ESLint
 npx eslint apps/web/src
@@ -1390,6 +1521,7 @@ npx lighthouse http://localhost:3000
 **ÁREAS DE REVISIÓN:**
 
 ✓ **Revisar:**
+
 - [ ] **Code Duplication:** Código duplicado entre módulos
 - [ ] **Poor Naming:** Variables/funciones mal nombradas
 - [ ] **Magic Strings:** Strings hardcodeados repetidos
@@ -1406,6 +1538,7 @@ npx lighthouse http://localhost:3000
 ### 11.1 Coverage Actual (Backend)
 
 **Thresholds configurados:**
+
 - Branches: 60%
 - Functions: 65%
 - Lines: 70%
@@ -1414,6 +1547,7 @@ npx lighthouse http://localhost:3000
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Coverage real vs thresholds (ejecutar `npm run test:cov`)
 - [ ] Módulos críticos sin tests (pagos, auth)
 - [ ] Controllers sin tests
@@ -1428,6 +1562,7 @@ npx lighthouse http://localhost:3000
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Componentes críticos sin tests
 - [ ] Stores Zustand sin tests
 - [ ] Hooks personalizados sin tests
@@ -1440,6 +1575,7 @@ npx lighthouse http://localhost:3000
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Tests de integración entre módulos
 - [ ] Tests con base de datos real (test database)
 - [ ] Tests de webhooks con mocks de MercadoPago
@@ -1450,6 +1586,7 @@ npx lighthouse http://localhost:3000
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Cobertura de user flows críticos
 - [ ] Tests en múltiples browsers
 - [ ] Tests mobile
@@ -1466,6 +1603,7 @@ npx lighthouse http://localhost:3000
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Query optimization (Prisma)
 - [ ] N+1 queries
 - [ ] Redis caching: hit rate
@@ -1476,6 +1614,7 @@ npx lighthouse http://localhost:3000
 - [ ] Event loop lag
 
 **HERRAMIENTAS:**
+
 ```bash
 # Load testing
 npm run test:load
@@ -1489,6 +1628,7 @@ node --inspect apps/api/dist/main.js
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Lighthouse scores (Performance, Accessibility, Best Practices, SEO)
 - [ ] Bundle size (ejecutar `npm run build`)
 - [ ] Code splitting effectiveness
@@ -1501,6 +1641,7 @@ node --inspect apps/api/dist/main.js
 - [ ] Cumulative Layout Shift (CLS)
 
 **HERRAMIENTAS:**
+
 ```bash
 # Lighthouse
 npx lighthouse http://localhost:3000 --view
@@ -1514,6 +1655,7 @@ npm run build && npx @next/bundle-analyzer
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Horizontal scaling capability (stateless backend?)
 - [ ] Database scaling strategy
 - [ ] Redis clustering
@@ -1532,6 +1674,7 @@ npm run build && npx @next/bundle-analyzer
 **Ubicación:** [docs/](docs/)
 
 **Categorías (47+ archivos):**
+
 - **Arquitectura:** Diagramas, decisiones de diseño
 - **API Specs:** Especificaciones de endpoints
 - **Database:** Schema, migraciones, seeds
@@ -1545,6 +1688,7 @@ npm run build && npx @next/bundle-analyzer
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] README.md actualizado y completo
 - [ ] Guía de onboarding para nuevos devs
 - [ ] Documentación de API (Swagger/OpenAPI)
@@ -1565,6 +1709,7 @@ npm run build && npx @next/bundle-analyzer
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Consentimiento de usuarios (cookies, datos)
 - [ ] Derecho al olvido (hard delete de usuarios)
 - [ ] Exportación de datos personales
@@ -1579,6 +1724,7 @@ npm run build && npx @next/bundle-analyzer
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Nunca almacenar tarjetas de crédito (MercadoPago lo maneja)
 - [ ] Logs de transacciones
 - [ ] Encriptación de datos de pago
@@ -1590,6 +1736,7 @@ npm run build && npx @next/bundle-analyzer
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Consentimiento parental
 - [ ] Restricciones de edad
 - [ ] Moderación de contenido
@@ -1604,6 +1751,7 @@ npm run build && npx @next/bundle-analyzer
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] APM (Application Performance Monitoring)
 - [ ] Error tracking (Sentry, Rollbar, etc.)
 - [ ] Uptime monitoring
@@ -1616,6 +1764,7 @@ npm run build && npx @next/bundle-analyzer
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Backup de base de datos (frecuencia, retención)
 - [ ] Backup testing (restore)
 - [ ] Disaster recovery plan
@@ -1627,6 +1776,7 @@ npm run build && npx @next/bundle-analyzer
 **RECOMENDACIONES DE AUDITORÍA:**
 
 ✓ **Revisar:**
+
 - [ ] Pipeline CI completo
 - [ ] Tests automáticos en PRs
 - [ ] Auto-deployment con verificaciones
@@ -1641,47 +1791,42 @@ npm run build && npx @next/bundle-analyzer
 ### 16.1 Prioridades
 
 **CRÍTICAS (Alta Prioridad):**
+
 1. Seguridad de autenticación y autorización
 2. Validación de webhooks MercadoPago
 3. Protección de datos personales (GDPR)
 4. SQL Injection y XSS prevention
 5. Gestión de secretos
 
-**ALTAS (Media-Alta Prioridad):**
-6. Coverage de tests en módulos críticos
-7. Performance y escalabilidad
-8. Logging y auditoría
-9. Error handling y observabilidad
-10. Dependency vulnerabilities
+**ALTAS (Media-Alta Prioridad):** 6. Coverage de tests en módulos críticos 7. Performance y escalabilidad 8. Logging y auditoría 9. Error handling y observabilidad 10. Dependency vulnerabilities
 
-**MEDIAS (Media Prioridad):**
-11. Anti-patterns y code quality
-12. Documentación
-13. Backup y disaster recovery
-14. CI/CD robustness
-15. Monitoring y alerting
+**MEDIAS (Media Prioridad):** 11. Anti-patterns y code quality 12. Documentación 13. Backup y disaster recovery 14. CI/CD robustness 15. Monitoring y alerting
 
 ### 16.2 Herramientas Recomendadas
 
 **Seguridad:**
+
 - OWASP ZAP (penetration testing)
 - Snyk (dependency scanning)
 - SonarQube (static analysis)
 - npm audit
 
 **Performance:**
+
 - Lighthouse
 - Artillery (load testing)
 - Clinic.js (Node.js profiling)
 - Chrome DevTools
 
 **Code Quality:**
+
 - ESLint
 - Madge (circular dependencies)
 - TypeScript strict mode
 - Prettier
 
 **Testing:**
+
 - Jest coverage reports
 - Playwright trace viewer
 - Vitest UI
@@ -1690,6 +1835,7 @@ npm run build && npx @next/bundle-analyzer
 
 ```markdown
 ## SEGURIDAD
+
 - [ ] Autenticación y autorización
 - [ ] Validación de entrada (DTOs, Zod)
 - [ ] Webhooks MercadoPago
@@ -1700,6 +1846,7 @@ npm run build && npx @next/bundle-analyzer
 - [ ] Dependencias (npm audit)
 
 ## CALIDAD DE CÓDIGO
+
 - [ ] Anti-patterns (N+1 queries, god objects, etc.)
 - [ ] Code duplication
 - [ ] Naming conventions
@@ -1707,6 +1854,7 @@ npm run build && npx @next/bundle-analyzer
 - [ ] Commented code y TODOs
 
 ## TESTING
+
 - [ ] Coverage backend (>70%)
 - [ ] Coverage frontend
 - [ ] Integration tests
@@ -1714,6 +1862,7 @@ npm run build && npx @next/bundle-analyzer
 - [ ] Load testing
 
 ## PERFORMANCE
+
 - [ ] Backend response times
 - [ ] Frontend Lighthouse scores
 - [ ] Bundle size
@@ -1721,11 +1870,13 @@ npm run build && npx @next/bundle-analyzer
 - [ ] Caching effectiveness
 
 ## COMPLIANCE
+
 - [ ] GDPR compliance
 - [ ] PCI-DSS compliance
 - [ ] Protección de menores
 
 ## INFRAESTRUCTURA
+
 - [ ] Monitoring y alerting
 - [ ] Backup strategy
 - [ ] Disaster recovery
@@ -1733,6 +1884,7 @@ npm run build && npx @next/bundle-analyzer
 - [ ] Secrets management
 
 ## DOCUMENTACIÓN
+
 - [ ] README completo
 - [ ] API documentation
 - [ ] Architecture docs
@@ -1766,6 +1918,7 @@ npm run build && npx @next/bundle-analyzer
 Mateatletas es un sistema educativo robusto y moderno con las siguientes características:
 
 **FORTALEZAS:**
+
 - Arquitectura modular bien diseñada (NestJS + Next.js)
 - Stack tecnológico actualizado (Node 22, React 19, Next.js 15)
 - Tipado fuerte con TypeScript en todo el stack
@@ -1775,6 +1928,7 @@ Mateatletas es un sistema educativo robusto y moderno con las siguientes caracte
 - Documentación extensa (47+ archivos)
 
 **ÁREAS DE MEJORA (para auditoría):**
+
 - Coverage de tests puede mejorarse (actual: 70% backend)
 - Seguridad de webhooks necesita revisión profunda
 - Anti-patterns y code quality requieren análisis detallado

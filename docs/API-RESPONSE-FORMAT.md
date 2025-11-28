@@ -17,6 +17,7 @@ Todas las respuestas de la API siguen un formato consistente para facilitar el m
 ### 1. Respuesta Simple (Objeto)
 
 **Formato:**
+
 ```json
 {
   "data": {
@@ -32,6 +33,7 @@ Todas las respuestas de la API siguen un formato consistente para facilitar el m
 ```
 
 **Uso:**
+
 - GET /api/estudiantes/:id
 - POST /api/auth/login
 - PUT /api/estudiantes/:id
@@ -39,6 +41,7 @@ Todas las respuestas de la API siguen un formato consistente para facilitar el m
 ### 2. Respuesta con Array
 
 **Formato:**
+
 ```json
 {
   "data": [
@@ -53,6 +56,7 @@ Todas las respuestas de la API siguen un formato consistente para facilitar el m
 ```
 
 **Uso:**
+
 - GET /api/estudiantes
 - GET /api/clases
 - GET /api/docentes
@@ -60,6 +64,7 @@ Todas las respuestas de la API siguen un formato consistente para facilitar el m
 ### 3. Respuesta Paginada
 
 **Formato:**
+
 ```json
 {
   "data": [
@@ -77,10 +82,12 @@ Todas las respuestas de la API siguen un formato consistente para facilitar el m
 ```
 
 **Uso:**
+
 - GET /api/estudiantes?page=1&limit=10
 - GET /api/clases?page=2&limit=20
 
 **Campos de metadata:**
+
 - `total`: Total de elementos disponibles en la base de datos
 - `page`: Página actual (1-indexed)
 - `limit`: Cantidad de elementos por página
@@ -90,6 +97,7 @@ Todas las respuestas de la API siguen un formato consistente para facilitar el m
 ### 4. Respuesta Vacía
 
 **Formato:**
+
 ```json
 {
   "data": null,
@@ -100,12 +108,14 @@ Todas las respuestas de la API siguen un formato consistente para facilitar el m
 ```
 
 **Uso:**
+
 - DELETE /api/estudiantes/:id (sin cuerpo de respuesta)
 - Operaciones que no retornan datos
 
 ### 5. Respuesta Primitiva
 
 **Formato:**
+
 ```json
 {
   "data": 42,
@@ -116,6 +126,7 @@ Todas las respuestas de la API siguen un formato consistente para facilitar el m
 ```
 
 **Uso:**
+
 - GET /api/estudiantes/count
 - GET /api/clases/:id/asistencias/count
 
@@ -134,10 +145,7 @@ Las respuestas de error **NO** siguen el formato `{ data, metadata }`. En su lug
   "path": "/api/estudiantes",
   "method": "POST",
   "errorId": "abc-123-def",
-  "message": [
-    "email: email must be a valid email",
-    "nombre: nombre should not be empty"
-  ],
+  "message": ["email: email must be a valid email", "nombre: nombre should not be empty"],
   "error": "Bad Request"
 }
 ```
@@ -204,11 +212,13 @@ Las respuestas de error **NO** siguen el formato `{ data, metadata }`. En su lug
 El interceptor global `TransformResponseInterceptor` procesa todas las respuestas exitosas (status 2xx) y las envuelve automáticamente en el formato estándar.
 
 **Lógica:**
+
 1. Si la respuesta ya tiene propiedad `data` → No re-envolver (ya está en formato correcto)
 2. Si no → Envolver en `{ data, metadata: { timestamp } }`
 3. Asegurar que siempre exista `metadata.timestamp`
 
 **Ventajas:**
+
 - ✅ Transformación automática, no requiere cambios en controladores
 - ✅ Respeta respuestas ya formateadas manualmente
 - ✅ No procesa respuestas de error (las maneja AllExceptionsFilter)
@@ -246,6 +256,7 @@ interface PaginatedResponse<T> extends ApiResponse<T[]> {
 ### Auth
 
 #### POST /api/auth/login
+
 ```json
 {
   "data": {
@@ -265,6 +276,7 @@ interface PaginatedResponse<T> extends ApiResponse<T[]> {
 ```
 
 #### GET /api/auth/profile
+
 ```json
 {
   "data": {
@@ -283,6 +295,7 @@ interface PaginatedResponse<T> extends ApiResponse<T[]> {
 ### Estudiantes
 
 #### GET /api/estudiantes
+
 ```json
 {
   "data": [
@@ -306,6 +319,7 @@ interface PaginatedResponse<T> extends ApiResponse<T[]> {
 ```
 
 #### GET /api/estudiantes?page=1&limit=10
+
 ```json
 {
   "data": [
@@ -323,6 +337,7 @@ interface PaginatedResponse<T> extends ApiResponse<T[]> {
 ```
 
 #### GET /api/estudiantes/:id
+
 ```json
 {
   "data": {
@@ -344,6 +359,7 @@ interface PaginatedResponse<T> extends ApiResponse<T[]> {
 ### Clases
 
 #### GET /api/clases
+
 ```json
 {
   "data": [
@@ -378,15 +394,15 @@ describe('TransformResponseInterceptor', () => {
     expect(output).toEqual({
       data: input,
       metadata: {
-        timestamp: expect.any(String)
-      }
+        timestamp: expect.any(String),
+      },
     });
   });
 
   it('debe dejar respuesta ya formateada', () => {
     const input = {
       data: { id: '123' },
-      metadata: { timestamp: '2025-11-12T10:30:00.000Z' }
+      metadata: { timestamp: '2025-11-12T10:30:00.000Z' },
     };
 
     const output = interceptor.transform(input);
@@ -460,9 +476,10 @@ async findAll(): Promise<ApiResponse<Estudiante[]>> {
 ### Frontend (React/Next.js)
 
 **Antes (formato inconsistente):**
+
 ```typescript
 // Tenías que adivinar el formato
-const estudiantes = await fetch('/api/estudiantes').then(r => r.json());
+const estudiantes = await fetch('/api/estudiantes').then((r) => r.json());
 // ¿Es array directo? ¿O { data: [] }? ¿O { estudiantes: [] }?
 const list = Array.isArray(estudiantes)
   ? estudiantes
@@ -470,12 +487,14 @@ const list = Array.isArray(estudiantes)
 ```
 
 **Ahora (formato consistente):**
+
 ```typescript
-const response = await fetch('/api/estudiantes').then(r => r.json());
+const response = await fetch('/api/estudiantes').then((r) => r.json());
 const estudiantes = response.data; // ✅ Siempre es response.data
 ```
 
 **Con TypeScript:**
+
 ```typescript
 interface ApiResponse<T> {
   data: T;
@@ -486,8 +505,7 @@ interface ApiResponse<T> {
   message?: string;
 }
 
-const response: ApiResponse<Estudiante[]> = await fetch('/api/estudiantes')
-  .then(r => r.json());
+const response: ApiResponse<Estudiante[]> = await fetch('/api/estudiantes').then((r) => r.json());
 
 const estudiantes = response.data; // ✅ Type-safe
 ```
@@ -519,13 +537,13 @@ El interceptor es **backward compatible**:
 
 ## 📊 Beneficios
 
-| Antes | Ahora |
-|-------|-------|
-| ❌ Formato inconsistente | ✅ Formato estándar `{ data, metadata }` |
-| ❌ Validaciones defensivas en frontend | ✅ Confianza en formato consistente |
-| ❌ Código duplicado para manejar formatos | ✅ Código limpio y simple |
-| ❌ Difícil de tipar con TypeScript | ✅ Type-safe con interfaces |
-| ❌ Confusión sobre estructura de respuesta | ✅ Documentación clara |
+| Antes                                      | Ahora                                    |
+| ------------------------------------------ | ---------------------------------------- |
+| ❌ Formato inconsistente                   | ✅ Formato estándar `{ data, metadata }` |
+| ❌ Validaciones defensivas en frontend     | ✅ Confianza en formato consistente      |
+| ❌ Código duplicado para manejar formatos  | ✅ Código limpio y simple                |
+| ❌ Difícil de tipar con TypeScript         | ✅ Type-safe con interfaces              |
+| ❌ Confusión sobre estructura de respuesta | ✅ Documentación clara                   |
 
 ---
 

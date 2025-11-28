@@ -33,13 +33,8 @@ export default function LogrosPage() {
       </Link>
 
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h1 className="text-4xl font-black text-white mb-2">
-          🏆 Colección de Logros
-        </h1>
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-4xl font-black text-white mb-2">🏆 Colección de Logros</h1>
         <p className="text-gray-400">
           Desbloquea todos los logros completando desafíos y entrenando
         </p>
@@ -55,9 +50,7 @@ export default function LogrosPage() {
             className="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl p-6 text-white"
           >
             <div className="text-4xl mb-2">🎯</div>
-            <div className="text-3xl font-bold mb-1">
-              {progreso.logros_desbloqueados}
-            </div>
+            <div className="text-3xl font-bold mb-1">{progreso.logros_desbloqueados}</div>
             <div className="text-white/80 text-sm">Logros Desbloqueados</div>
           </motion.div>
 
@@ -94,8 +87,9 @@ export default function LogrosPage() {
             <div className="text-4xl mb-2">🎭</div>
             <div className="text-3xl font-bold mb-1">
               {Object.values(progreso.por_categoria).reduce(
-                (acc, cat) => acc + cat.logros.filter((l) => l.logro.secreto && l.logro.desbloqueado).length,
-                0
+                (acc, cat) =>
+                  acc + cat.logros.filter((l) => l.logro.secreto && l.logro.desbloqueado).length,
+                0,
               )}
             </div>
             <div className="text-white/80 text-sm">Secretos Encontrados</div>

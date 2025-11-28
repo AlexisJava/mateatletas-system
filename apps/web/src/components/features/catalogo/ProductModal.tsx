@@ -25,12 +25,7 @@ interface ProductModalProps {
   onComprar?: (_producto: Producto) => void;
 }
 
-export function ProductModal({
-  producto,
-  isOpen,
-  onClose,
-  onComprar,
-}: ProductModalProps) {
+export function ProductModal({ producto, isOpen, onClose, onComprar }: ProductModalProps) {
   if (!producto) return null;
 
   // Configuración visual por tipo
@@ -115,9 +110,7 @@ export function ProductModal({
                   ${producto.precio}
                 </span>
                 {producto.duracion_dias && (
-                  <span className="text-lg text-gray-600">
-                    / {producto.duracion_dias} días
-                  </span>
+                  <span className="text-lg text-gray-600">/ {producto.duracion_dias} días</span>
                 )}
               </div>
             </div>
@@ -129,9 +122,7 @@ export function ProductModal({
           <h3 className="font-[family-name:var(--font-fredoka)] text-2xl text-dark mb-3">
             📝 Descripción
           </h3>
-          <p className="text-gray-700 leading-relaxed">
-            {producto.descripcion}
-          </p>
+          <p className="text-gray-700 leading-relaxed">{producto.descripcion}</p>
         </div>
 
         {/* Beneficios */}
@@ -141,10 +132,7 @@ export function ProductModal({
           </h3>
           <ul className="space-y-2">
             {config.beneficios.map((beneficio, index) => (
-              <li
-                key={index}
-                className="flex items-start gap-3 text-gray-700"
-              >
+              <li key={index} className="flex items-start gap-3 text-gray-700">
                 <span className="text-xl text-[#4caf50] mt-0.5">✓</span>
                 <span>{beneficio}</span>
               </li>
@@ -175,12 +163,7 @@ export function ProductModal({
 
         {/* Botones de acción */}
         <div className="flex gap-3 pt-4 border-t-2 border-gray-200">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="flex-1"
-            size="lg"
-          >
+          <Button variant="outline" onClick={onClose} className="flex-1" size="lg">
             Cancelar
           </Button>
           <Button

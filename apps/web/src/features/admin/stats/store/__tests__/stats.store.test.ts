@@ -73,7 +73,7 @@ describe('StatsStore', () => {
                 ingresosTotal: 50000,
               });
             }, 100);
-          })
+          }),
       );
 
       const { fetchStats } = useStatsStore.getState();

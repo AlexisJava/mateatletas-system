@@ -47,13 +47,15 @@ export const equiposEstadisticasSchema = z.object({
   totalEquipos: z.number(),
   totalEstudiantes: z.number(),
   promedioEstudiantesPorEquipo: z.number(),
-  ranking: z.array(z.object({
-    posicion: z.number(),
-    id: z.string(),
-    nombre: z.string(),
-    puntos_totales: z.number(),
-    cantidad_estudiantes: z.number(),
-  })),
+  ranking: z.array(
+    z.object({
+      posicion: z.number(),
+      id: z.string(),
+      nombre: z.string(),
+      puntos_totales: z.number(),
+      cantidad_estudiantes: z.number(),
+    }),
+  ),
 });
 
 /**

@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { ISODateSchema, SystemHealthStatusSchema, UUIDSchema, EmailSchema, RoleSchema, NonNegativeNumberSchema } from '../../shared/schemas/common.schema';
+import {
+  ISODateSchema,
+  SystemHealthStatusSchema,
+  UUIDSchema,
+  EmailSchema,
+  RoleSchema,
+  NonNegativeNumberSchema,
+} from '../../shared/schemas/common.schema';
 import { SystemStatsSchema } from '../../stats/types/stats.schema';
 
 /**

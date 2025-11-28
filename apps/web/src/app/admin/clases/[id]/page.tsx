@@ -17,7 +17,7 @@ import {
   XCircle,
   BookOpen,
   FileText,
-  MessageSquare
+  MessageSquare,
 } from 'lucide-react';
 import axios from '@/lib/axios';
 import { isAxiosError } from 'axios';
@@ -91,19 +91,19 @@ const DIA_SEMANA_LABELS: Record<string, string> = {
 };
 
 const SECTOR_COLORS = {
-  'Matemática': {
+  Matemática: {
     gradient: 'from-blue-500 to-cyan-500',
     bg: 'bg-blue-500/10',
     border: 'border-blue-500/30',
     icon: '🧮',
   },
-  'Programación': {
+  Programación: {
     gradient: 'from-purple-500 to-indigo-500',
     bg: 'bg-purple-500/10',
     border: 'border-purple-500/30',
     icon: '💻',
   },
-  'Ciencias': {
+  Ciencias: {
     gradient: 'from-green-500 to-emerald-500',
     bg: 'bg-green-500/10',
     border: 'border-green-500/30',
@@ -137,10 +137,18 @@ export default function ClaseAulaPage() {
   const [estudiantesDisponibles, setEstudiantesDisponibles] = useState<Estudiante[]>([]);
   const [estudiantesSeleccionados, setEstudiantesSeleccionados] = useState<string[]>([]);
   const [isLoadingEstudiantes, setIsLoadingEstudiantes] = useState(false);
-  const [estudianteParaRemover, setEstudianteParaRemover] = useState<{ id: string; nombre: string; apellido: string } | null>(null);
-  const [planificaciones, setPlanificaciones] = useState<Array<{ id: string; mes: number; anio: number; titulo: string; estado: string }>>([]);
+  const [estudianteParaRemover, setEstudianteParaRemover] = useState<{
+    id: string;
+    nombre: string;
+    apellido: string;
+  } | null>(null);
+  const [planificaciones, setPlanificaciones] = useState<
+    Array<{ id: string; mes: number; anio: number; titulo: string; estado: string }>
+  >([]);
   const [estudianteConObservaciones, setEstudianteConObservaciones] = useState<string | null>(null);
-  const [observacionesEstudiante, setObservacionesEstudiante] = useState<ObservacionHistorial[]>([]);
+  const [observacionesEstudiante, setObservacionesEstudiante] = useState<ObservacionHistorial[]>(
+    [],
+  );
 
   const extractEntity = <T,>(payload: T | { data?: T }): T => {
     if (payload && typeof payload === 'object' && 'data' in payload) {
@@ -194,9 +202,10 @@ export default function ClaseAulaPage() {
   const loadPlanificaciones = async (grupoId: string, anioLectivo: number) => {
     try {
       const payload = await axios.get<
-        Array<{ id: string; mes: number; anio: number; titulo: string; estado: string }> | {
-          data?: Array<{ id: string; mes: number; anio: number; titulo: string; estado: string }>;
-        }
+        | Array<{ id: string; mes: number; anio: number; titulo: string; estado: string }>
+        | {
+            data?: Array<{ id: string; mes: number; anio: number; titulo: string; estado: string }>;
+          }
       >(`/grupos/${grupoId}/planificaciones`, {
         params: {
           anio: anioLectivo,
@@ -214,14 +223,12 @@ export default function ClaseAulaPage() {
   const loadEstudiantesDisponibles = async () => {
     try {
       setIsLoadingEstudiantes(true);
-      const payload = await axios.get<Estudiante[] | { data?: Estudiante[] }>(
-        '/admin/estudiantes',
-      );
+      const payload = await axios.get<Estudiante[] | { data?: Estudiante[] }>('/admin/estudiantes');
       const estudiantes = extractList(payload);
 
       // Filtrar estudiantes que ya están inscritos
-      const estudiantesYaInscritos = clase?.inscripciones?.map(i => i.estudiante_id) || [];
-      const disponibles = estudiantes.filter(est => !estudiantesYaInscritos.includes(est.id));
+      const estudiantesYaInscritos = clase?.inscripciones?.map((i) => i.estudiante_id) || [];
+      const disponibles = estudiantes.filter((est) => !estudiantesYaInscritos.includes(est.id));
 
       setEstudiantesDisponibles(disponibles);
     } catch (error) {
@@ -277,19 +284,21 @@ export default function ClaseAulaPage() {
   };
 
   const toggleEstudiante = (estudianteId: string) => {
-    setEstudiantesSeleccionados(prev =>
+    setEstudiantesSeleccionados((prev) =>
       prev.includes(estudianteId)
-        ? prev.filter(id => id !== estudianteId)
-        : [...prev, estudianteId]
+        ? prev.filter((id) => id !== estudianteId)
+        : [...prev, estudianteId],
     );
   };
 
   const handleVerObservaciones = async (estudianteId: string) => {
     try {
       const payload = await axios.get<
-        ObservacionHistorial[] | { asistencias?: ObservacionHistorial[] } | {
-          data?: { asistencias?: ObservacionHistorial[] };
-        }
+        | ObservacionHistorial[]
+        | { asistencias?: ObservacionHistorial[] }
+        | {
+            data?: { asistencias?: ObservacionHistorial[] };
+          }
       >(`/admin/clase-grupos/${claseId}/asistencias/historial`, {
         params: { estudiante_id: estudianteId },
       });
@@ -299,13 +308,16 @@ export default function ClaseAulaPage() {
       if (Array.isArray(payload)) {
         observaciones = payload;
       } else if (payload && typeof payload === 'object') {
-        const asistenciasDirectas = (payload as { asistencias?: ObservacionHistorial[] }).asistencias;
+        const asistenciasDirectas = (payload as { asistencias?: ObservacionHistorial[] })
+          .asistencias;
         if (Array.isArray(asistenciasDirectas)) {
           observaciones = asistenciasDirectas;
         } else if ('data' in payload) {
-          const asistenciasAnidadas = (payload as {
-            data?: { asistencias?: ObservacionHistorial[] };
-          }).data?.asistencias;
+          const asistenciasAnidadas = (
+            payload as {
+              data?: { asistencias?: ObservacionHistorial[] };
+            }
+          ).data?.asistencias;
           if (Array.isArray(asistenciasAnidadas)) {
             observaciones = asistenciasAnidadas;
           }
@@ -338,12 +350,13 @@ export default function ClaseAulaPage() {
     return null;
   }
 
-  const sectorNombre = (clase.sector?.nombre || clase.rutaCurricular?.nombre || 'Matemática') as keyof typeof SECTOR_COLORS;
+  const sectorNombre = (clase.sector?.nombre ||
+    clase.rutaCurricular?.nombre ||
+    'Matemática') as keyof typeof SECTOR_COLORS;
   const sectorConfig = SECTOR_COLORS[sectorNombre] || SECTOR_COLORS['Matemática'];
   const totalInscritos = clase.total_inscriptos || clase.inscripciones?.length || 0;
-  const capacidadPorcentaje = clase.cupo_maximo > 0
-    ? (totalInscritos / clase.cupo_maximo) * 100
-    : 0;
+  const capacidadPorcentaje =
+    clase.cupo_maximo > 0 ? (totalInscritos / clase.cupo_maximo) * 100 : 0;
 
   // Total de asistencias registradas (no porcentaje, sino total de registros)
   const totalAsistenciasRegistradas = clase.total_asistencias || 0;
@@ -361,7 +374,9 @@ export default function ClaseAulaPage() {
         </button>
 
         {/* Info principal de la clase */}
-        <div className={`backdrop-blur-xl bg-gradient-to-r ${sectorConfig.gradient} rounded-2xl p-8 border border-white/20 shadow-2xl relative overflow-hidden`}>
+        <div
+          className={`backdrop-blur-xl bg-gradient-to-r ${sectorConfig.gradient} rounded-2xl p-8 border border-white/20 shadow-2xl relative overflow-hidden`}
+        >
           <div className="absolute top-0 right-0 text-9xl opacity-10 select-none -mt-8 -mr-8">
             {sectorConfig.icon}
           </div>
@@ -374,19 +389,13 @@ export default function ClaseAulaPage() {
                     {sectorConfig.icon}
                   </div>
                   <div>
-                    <h1 className="text-3xl font-black text-white mb-1">
-                      {clase.nombre}
-                    </h1>
-                    <p className="text-white/80 text-lg font-semibold">
-                      {sectorNombre}
-                    </p>
+                    <h1 className="text-3xl font-black text-white mb-1">{clase.nombre}</h1>
+                    <p className="text-white/80 text-lg font-semibold">{sectorNombre}</p>
                   </div>
                 </div>
 
                 {clase.descripcion && (
-                  <p className="text-white/90 text-base max-w-2xl mt-4">
-                    {clase.descripcion}
-                  </p>
+                  <p className="text-white/90 text-base max-w-2xl mt-4">{clase.descripcion}</p>
                 )}
               </div>
 
@@ -480,8 +489,11 @@ export default function ClaseAulaPage() {
                     className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/10 rounded-xl hover:bg-white/[0.04] transition-all"
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${sectorConfig.gradient} flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
-                        {inscripcion.estudiante.nombre[0]}{inscripcion.estudiante.apellido[0]}
+                      <div
+                        className={`w-12 h-12 rounded-full bg-gradient-to-br ${sectorConfig.gradient} flex items-center justify-center text-white font-bold text-lg shadow-lg`}
+                      >
+                        {inscripcion.estudiante.nombre[0]}
+                        {inscripcion.estudiante.apellido[0]}
                       </div>
                       <div>
                         <p className="text-white font-bold text-lg">
@@ -502,7 +514,8 @@ export default function ClaseAulaPage() {
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <span className="text-white/40 text-xs">
-                          Inscripto: {new Date(inscripcion.fecha_inscripcion).toLocaleDateString('es-AR')}
+                          Inscripto:{' '}
+                          {new Date(inscripcion.fecha_inscripcion).toLocaleDateString('es-AR')}
                         </span>
                       </div>
                       <button
@@ -513,11 +526,13 @@ export default function ClaseAulaPage() {
                         <MessageSquare className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => setEstudianteParaRemover({
-                          id: inscripcion.estudiante_id,
-                          nombre: inscripcion.estudiante.nombre,
-                          apellido: inscripcion.estudiante.apellido
-                        })}
+                        onClick={() =>
+                          setEstudianteParaRemover({
+                            id: inscripcion.estudiante_id,
+                            nombre: inscripcion.estudiante.nombre,
+                            apellido: inscripcion.estudiante.apellido,
+                          })
+                        }
                         className="p-2 bg-red-500/20 border border-red-500/30 hover:bg-red-500/30 text-red-300 rounded-lg transition-all"
                         title="Remover estudiante"
                       >
@@ -559,17 +574,15 @@ export default function ClaseAulaPage() {
                         {plan.mes}
                       </div>
                       <div className="flex-1">
-                        <p className="text-white font-bold text-sm">
-                          {plan.titulo}
-                        </p>
-                        <p className="text-white/50 text-xs mt-1">
-                          {plan.anio}
-                        </p>
-                        <span className={`inline-block mt-2 px-2 py-1 rounded text-xs font-semibold ${
-                          plan.estado === 'PUBLICADA'
-                            ? 'bg-green-500/20 text-green-300 border border-green-500/30'
-                            : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
-                        }`}>
+                        <p className="text-white font-bold text-sm">{plan.titulo}</p>
+                        <p className="text-white/50 text-xs mt-1">{plan.anio}</p>
+                        <span
+                          className={`inline-block mt-2 px-2 py-1 rounded text-xs font-semibold ${
+                            plan.estado === 'PUBLICADA'
+                              ? 'bg-green-500/20 text-green-300 border border-green-500/30'
+                              : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
+                          }`}
+                        >
                           {plan.estado === 'PUBLICADA' ? 'Publicada' : 'Borrador'}
                         </span>
                       </div>
@@ -603,8 +616,8 @@ export default function ClaseAulaPage() {
                       capacidadPorcentaje >= 90
                         ? 'from-red-500 to-rose-500'
                         : capacidadPorcentaje >= 75
-                        ? 'from-orange-500 to-amber-500'
-                        : 'from-green-500 to-emerald-500'
+                          ? 'from-orange-500 to-amber-500'
+                          : 'from-green-500 to-emerald-500'
                     } transition-all duration-500`}
                     style={{ width: `${capacidadPorcentaje}%` }}
                   />
@@ -620,9 +633,7 @@ export default function ClaseAulaPage() {
                   <span className="text-white/70 text-sm font-medium">Asistencias</span>
                   <span className="text-white font-bold">{totalAsistenciasRegistradas}</span>
                 </div>
-                <p className="text-white/50 text-xs mt-1">
-                  Registros totales de asistencia
-                </p>
+                <p className="text-white/50 text-xs mt-1">Registros totales de asistencia</p>
               </div>
             </div>
           </div>
@@ -685,12 +696,15 @@ export default function ClaseAulaPage() {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                          estudiantesSeleccionados.includes(estudiante.id)
-                            ? 'bg-emerald-500'
-                            : 'bg-white/10'
-                        }`}>
-                          {estudiante.nombre[0]}{estudiante.apellido[0]}
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                            estudiantesSeleccionados.includes(estudiante.id)
+                              ? 'bg-emerald-500'
+                              : 'bg-white/10'
+                          }`}
+                        >
+                          {estudiante.nombre[0]}
+                          {estudiante.apellido[0]}
                         </div>
                         <div>
                           <p className="text-white font-semibold">
@@ -727,7 +741,8 @@ export default function ClaseAulaPage() {
                   disabled={estudiantesSeleccionados.length === 0}
                   className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Agregar {estudiantesSeleccionados.length > 0 && `(${estudiantesSeleccionados.length})`}
+                  Agregar{' '}
+                  {estudiantesSeleccionados.length > 0 && `(${estudiantesSeleccionados.length})`}
                 </button>
               </div>
             </div>
@@ -794,14 +809,17 @@ export default function ClaseAulaPage() {
                   <XCircle className="w-6 h-6" />
                 </button>
               </div>
-              {clase?.inscripciones && (() => {
-                const estudiante = clase.inscripciones.find(i => i.estudiante_id === estudianteConObservaciones)?.estudiante;
-                return estudiante ? (
-                  <p className="text-white/70 mt-2">
-                    {estudiante.nombre} {estudiante.apellido}
-                  </p>
-                ) : null;
-              })()}
+              {clase?.inscripciones &&
+                (() => {
+                  const estudiante = clase.inscripciones.find(
+                    (i) => i.estudiante_id === estudianteConObservaciones,
+                  )?.estudiante;
+                  return estudiante ? (
+                    <p className="text-white/70 mt-2">
+                      {estudiante.nombre} {estudiante.apellido}
+                    </p>
+                  ) : null;
+                })()}
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
@@ -822,16 +840,18 @@ export default function ClaseAulaPage() {
                           {new Date(obs.fecha).toLocaleDateString('es-AR', {
                             day: 'numeric',
                             month: 'long',
-                            year: 'numeric'
+                            year: 'numeric',
                           })}
                         </span>
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                          obs.estado === 'Presente'
-                            ? 'bg-green-500/20 text-green-300'
-                            : obs.estado === 'Ausente'
-                            ? 'bg-red-500/20 text-red-300'
-                            : 'bg-yellow-500/20 text-yellow-300'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-semibold ${
+                            obs.estado === 'Presente'
+                              ? 'bg-green-500/20 text-green-300'
+                              : obs.estado === 'Ausente'
+                                ? 'bg-red-500/20 text-red-300'
+                                : 'bg-yellow-500/20 text-yellow-300'
+                          }`}
+                        >
                           {obs.estado}
                         </span>
                       </div>
@@ -848,7 +868,9 @@ export default function ClaseAulaPage() {
                         </div>
                       )}
                       {!obs.observaciones && !obs.feedback && (
-                        <p className="text-white/30 text-sm italic">Sin observaciones para esta fecha</p>
+                        <p className="text-white/30 text-sm italic">
+                          Sin observaciones para esta fecha
+                        </p>
                       )}
                     </div>
                   ))}
@@ -867,7 +889,6 @@ export default function ClaseAulaPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

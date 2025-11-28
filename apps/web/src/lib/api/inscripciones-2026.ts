@@ -25,7 +25,7 @@ interface ApiResponse<T> {
  * Crea una nueva inscripción 2026
  */
 export async function createInscripcion2026(
-  data: CreateInscripcion2026Request
+  data: CreateInscripcion2026Request,
 ): Promise<ApiResponse<CreateInscripcion2026Response>> {
   const response = await fetch(`${API_BASE_URL}/inscripciones-2026`, {
     method: 'POST',
@@ -46,10 +46,7 @@ export async function createInscripcion2026(
 /**
  * Obtiene una inscripción por ID
  */
-export async function getInscripcionById(
-  id: string,
-  token?: string
-): Promise<Inscripcion2026> {
+export async function getInscripcionById(id: string, token?: string): Promise<Inscripcion2026> {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
@@ -78,7 +75,7 @@ export async function getMisInscripciones(token: string): Promise<Inscripcion202
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -96,13 +93,13 @@ export async function updateEstadoInscripcion(
   id: string,
   estado: string,
   razon: string,
-  token: string
+  token: string,
 ): Promise<Inscripcion2026> {
   const response = await fetch(`${API_BASE_URL}/inscripciones-2026/${id}/estado`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ estado, razon }),
   });

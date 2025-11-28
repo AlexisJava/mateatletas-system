@@ -268,7 +268,7 @@ export function calcularTotalEstimado(
         } else if (numCursos === 2) {
           const segundoCurso = Math.floor(
             PRECIOS_2026.COLONIA.CURSO_BASE *
-              (1 - PRECIOS_2026.COLONIA.DESCUENTO_SEGUNDO_CURSO / 100)
+              (1 - PRECIOS_2026.COLONIA.DESCUENTO_SEGUNDO_CURSO / 100),
           );
           mensual += PRECIOS_2026.COLONIA.CURSO_BASE + segundoCurso;
         }
@@ -287,7 +287,7 @@ export function calcularTotalEstimado(
         } else if (numCursos === 2) {
           const segundoCurso = Math.floor(
             PRECIOS_2026.PACK_COMPLETO.MENSUALIDAD_COLONIA *
-              (1 - PRECIOS_2026.COLONIA.DESCUENTO_SEGUNDO_CURSO / 100)
+              (1 - PRECIOS_2026.COLONIA.DESCUENTO_SEGUNDO_CURSO / 100),
           );
           mensual += PRECIOS_2026.PACK_COMPLETO.MENSUALIDAD_COLONIA + segundoCurso;
         }

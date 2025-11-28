@@ -174,9 +174,7 @@ export const authApi = {
    * @param data - Contraseñas actual y nueva
    * @returns Mensaje de confirmación
    */
-  changePassword: async (
-    data: ChangePasswordPayload,
-  ): Promise<ChangePasswordResponse> => {
+  changePassword: async (data: ChangePasswordPayload): Promise<ChangePasswordResponse> => {
     try {
       // El interceptor ya retorna response.data directamente
       return await apiClient.post<ChangePasswordResponse>('/auth/change-password', data);

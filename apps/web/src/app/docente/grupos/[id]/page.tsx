@@ -47,9 +47,9 @@ export default function GrupoDetalleCompletoPage() {
   const router = useRouter();
   const [grupo, setGrupo] = useState<GrupoDetalleCompletoDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [ordenarPor, setOrdenarPor] = useState<
-    'nombre' | 'puntos' | 'asistencia' | 'clases'
-  >('nombre');
+  const [ordenarPor, setOrdenarPor] = useState<'nombre' | 'puntos' | 'asistencia' | 'clases'>(
+    'nombre',
+  );
   const [mostrarModalAsistencia, setMostrarModalAsistencia] = useState(false);
   const [mostrarModalObservacion, setMostrarModalObservacion] = useState(false);
   const [mostrarModalPuntos, setMostrarModalPuntos] = useState(false);
@@ -81,9 +81,7 @@ export default function GrupoDetalleCompletoPage() {
           case 'puntos':
             return b.stats.puntosTotal - a.stats.puntosTotal;
           case 'asistencia':
-            return (
-              b.stats.porcentajeAsistencia - a.stats.porcentajeAsistencia
-            );
+            return b.stats.porcentajeAsistencia - a.stats.porcentajeAsistencia;
           case 'clases':
             return b.stats.clasesAsistidas - a.stats.clasesAsistidas;
           case 'nombre':
@@ -114,9 +112,7 @@ export default function GrupoDetalleCompletoPage() {
       <div className="h-full flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-black text-white mb-4">
-            Grupo no encontrado
-          </h1>
+          <h1 className="text-2xl font-black text-white mb-4">Grupo no encontrado</h1>
           <button
             onClick={() => router.push('/docente/dashboard')}
             className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-6 rounded-xl transition-all"
@@ -133,10 +129,7 @@ export default function GrupoDetalleCompletoPage() {
       <div className="w-full px-8 h-full flex flex-col gap-6 overflow-y-auto pb-8">
         {/* Breadcrumbs */}
         <Breadcrumbs
-          items={[
-            { label: 'Dashboard', href: '/docente/dashboard' },
-            { label: grupo.nombre },
-          ]}
+          items={[{ label: 'Dashboard', href: '/docente/dashboard' }, { label: grupo.nombre }]}
         />
 
         {/* HEADER BRUTAL */}
@@ -157,9 +150,7 @@ export default function GrupoDetalleCompletoPage() {
           {/* Título + Info básica */}
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-black text-white mb-2">
-                {grupo.nombre}
-              </h1>
+              <h1 className="text-4xl font-black text-white mb-2">{grupo.nombre}</h1>
               <div className="flex items-center gap-4">
                 <p className="text-purple-300 font-bold text-lg">
                   {grupo.dia_semana} • {grupo.hora_inicio} - {grupo.hora_fin}
@@ -169,8 +160,7 @@ export default function GrupoDetalleCompletoPage() {
                     <div
                       className="w-3 h-3 rounded-full"
                       style={{
-                        backgroundColor:
-                          grupo.rutaCurricular.color || '#8B5CF6',
+                        backgroundColor: grupo.rutaCurricular.color || '#8B5CF6',
                       }}
                     />
                     <span className="text-purple-200 font-semibold">
@@ -185,15 +175,11 @@ export default function GrupoDetalleCompletoPage() {
             <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
               <div className="flex items-center gap-2 mb-1">
                 <Users className="w-5 h-5 text-purple-300" />
-                <span className="text-purple-300 font-bold text-sm">
-                  ESTUDIANTES
-                </span>
+                <span className="text-purple-300 font-bold text-sm">ESTUDIANTES</span>
               </div>
               <div className="text-4xl font-black text-white">
                 {grupo.estudiantes.length}
-                <span className="text-lg text-purple-400">
-                  /{grupo.cupo_maximo}
-                </span>
+                <span className="text-lg text-purple-400">/{grupo.cupo_maximo}</span>
               </div>
             </div>
           </div>
@@ -206,12 +192,8 @@ export default function GrupoDetalleCompletoPage() {
               className="bg-gradient-to-br from-purple-600/80 to-indigo-700/80 backdrop-blur-md rounded-xl p-4 border border-purple-400/50 shadow-lg"
             >
               <Users className="w-8 h-8 text-purple-200 mb-2" />
-              <p className="text-3xl font-black text-white">
-                {grupo.stats.totalEstudiantes}
-              </p>
-              <p className="text-purple-200 font-bold text-sm">
-                Total Estudiantes
-              </p>
+              <p className="text-3xl font-black text-white">{grupo.stats.totalEstudiantes}</p>
+              <p className="text-purple-200 font-bold text-sm">Total Estudiantes</p>
             </motion.div>
 
             {/* Asistencia Promedio */}
@@ -220,12 +202,8 @@ export default function GrupoDetalleCompletoPage() {
               className="bg-gradient-to-br from-green-600/80 to-emerald-700/80 backdrop-blur-md rounded-xl p-4 border border-green-400/50 shadow-lg"
             >
               <CheckCircle className="w-8 h-8 text-green-200 mb-2" />
-              <p className="text-3xl font-black text-white">
-                {grupo.stats.asistenciaPromedio}%
-              </p>
-              <p className="text-green-200 font-bold text-sm">
-                Asistencia Promedio
-              </p>
+              <p className="text-3xl font-black text-white">{grupo.stats.asistenciaPromedio}%</p>
+              <p className="text-green-200 font-bold text-sm">Asistencia Promedio</p>
             </motion.div>
 
             {/* Puntos Promedio */}
@@ -234,12 +212,8 @@ export default function GrupoDetalleCompletoPage() {
               className="bg-gradient-to-br from-yellow-600/80 to-orange-700/80 backdrop-blur-md rounded-xl p-4 border border-yellow-400/50 shadow-lg"
             >
               <Star className="w-8 h-8 text-yellow-200 mb-2" />
-              <p className="text-3xl font-black text-white">
-                {grupo.stats.puntosPromedio}
-              </p>
-              <p className="text-yellow-200 font-bold text-sm">
-                Puntos Promedio
-              </p>
+              <p className="text-3xl font-black text-white">{grupo.stats.puntosPromedio}</p>
+              <p className="text-yellow-200 font-bold text-sm">Puntos Promedio</p>
             </motion.div>
 
             {/* Próxima Clase */}
@@ -249,9 +223,7 @@ export default function GrupoDetalleCompletoPage() {
                 className="bg-gradient-to-br from-blue-600/80 to-cyan-700/80 backdrop-blur-md rounded-xl p-4 border border-blue-400/50 shadow-lg"
               >
                 <Clock className="w-8 h-8 text-blue-200 mb-2" />
-                <p className="text-xl font-black text-white">
-                  {grupo.proximaClase.fecha}
-                </p>
+                <p className="text-xl font-black text-white">{grupo.proximaClase.fecha}</p>
                 <p className="text-blue-200 font-bold text-sm">
                   {grupo.proximaClase.hora}
                   {grupo.proximaClase.minutosParaEmpezar !== null &&
@@ -333,9 +305,7 @@ export default function GrupoDetalleCompletoPage() {
                           <p className="text-white font-semibold text-sm mb-1">
                             {obs.estudiante.nombre} {obs.estudiante.apellido}
                           </p>
-                          <p className="text-green-200 text-xs">
-                            {obs.observacion}
-                          </p>
+                          <p className="text-green-200 text-xs">{obs.observacion}</p>
                         </div>
                       </div>
                     ))}
@@ -369,9 +339,7 @@ export default function GrupoDetalleCompletoPage() {
                           <p className="text-white font-semibold text-sm mb-1">
                             {obs.estudiante.nombre} {obs.estudiante.apellido}
                           </p>
-                          <p className="text-orange-200 text-xs">
-                            {obs.observacion}
-                          </p>
+                          <p className="text-orange-200 text-xs">{obs.observacion}</p>
                         </div>
                       </div>
                     ))}
@@ -453,10 +421,7 @@ export default function GrupoDetalleCompletoPage() {
                   whileHover={{ scale: 1.01, x: 4 }}
                   className="bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:border-purple-400/50 hover:bg-white/10 transition-all cursor-pointer shadow-lg"
                   onClick={() =>
-                    toast(
-                      `Detalles de ${estudiante.nombre} ${estudiante.apellido}`,
-                      { icon: '👤' }
-                    )
+                    toast(`Detalles de ${estudiante.nombre} ${estudiante.apellido}`, { icon: '👤' })
                   }
                 >
                   <div className="flex items-center justify-between">
@@ -502,9 +467,7 @@ export default function GrupoDetalleCompletoPage() {
                         <p className="text-2xl font-black text-white">
                           {estudiante.stats.puntosTotal}
                         </p>
-                        <p className="text-purple-300 font-bold text-xs">
-                          Puntos
-                        </p>
+                        <p className="text-purple-300 font-bold text-xs">Puntos</p>
                       </div>
 
                       {/* Asistencia */}
@@ -529,9 +492,7 @@ export default function GrupoDetalleCompletoPage() {
                         >
                           {estudiante.stats.porcentajeAsistencia}%
                         </p>
-                        <p className="text-purple-300 font-bold text-xs">
-                          Asistencia
-                        </p>
+                        <p className="text-purple-300 font-bold text-xs">Asistencia</p>
                       </div>
 
                       {/* Clases Asistidas */}
@@ -540,9 +501,7 @@ export default function GrupoDetalleCompletoPage() {
                         <p className="text-2xl font-black text-white">
                           {estudiante.stats.clasesAsistidas}
                         </p>
-                        <p className="text-purple-300 font-bold text-xs">
-                          Clases
-                        </p>
+                        <p className="text-purple-300 font-bold text-xs">Clases</p>
                       </div>
 
                       {/* Última Asistencia */}
@@ -550,16 +509,15 @@ export default function GrupoDetalleCompletoPage() {
                         <div className="text-center">
                           <Clock className="w-5 h-5 text-purple-400 mx-auto mb-1" />
                           <p className="text-sm font-bold text-white">
-                            {new Date(
-                              estudiante.stats.ultimaAsistencia,
-                            ).toLocaleDateString('es-ES', {
-                              day: '2-digit',
-                              month: 'short',
-                            })}
+                            {new Date(estudiante.stats.ultimaAsistencia).toLocaleDateString(
+                              'es-ES',
+                              {
+                                day: '2-digit',
+                                month: 'short',
+                              },
+                            )}
                           </p>
-                          <p className="text-purple-300 font-bold text-xs">
-                            Última clase
-                          </p>
+                          <p className="text-purple-300 font-bold text-xs">Última clase</p>
                         </div>
                       )}
                     </div>

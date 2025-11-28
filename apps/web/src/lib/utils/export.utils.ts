@@ -74,7 +74,7 @@ export const exportToPDF = (
   data: ExportableData[],
   filename: string,
   title: string,
-  columns: { header: string; dataKey: string }[]
+  columns: { header: string; dataKey: string }[],
 ) => {
   try {
     const doc = new jsPDF();
@@ -87,29 +87,33 @@ export const exportToPDF = (
     // Agregar fecha de generación
     doc.setFontSize(10);
     doc.setTextColor(100);
-    doc.text(`Generado: ${new Date().toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })}`, 14, 28);
+    doc.text(
+      `Generado: ${new Date().toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })}`,
+      14,
+      28,
+    );
 
     // Agregar tabla
     autoTable(doc, {
       startY: 35,
-      head: [columns.map(col => col.header)],
-      body: data.map(row => columns.map(col => row[col.dataKey] || '-')),
+      head: [columns.map((col) => col.header)],
+      body: data.map((row) => columns.map((col) => row[col.dataKey] || '-')),
       theme: 'grid',
       headStyles: {
         fillColor: [255, 107, 53], // Color #ff6b35
         textColor: 255,
-        fontStyle: 'bold'
+        fontStyle: 'bold',
       },
       alternateRowStyles: {
-        fillColor: [255, 249, 230] // Color #fff9e6
+        fillColor: [255, 249, 230], // Color #fff9e6
       },
-      margin: { top: 35 }
+      margin: { top: 35 },
     });
 
     // Guardar PDF
@@ -147,22 +151,24 @@ export const exportChartToPNG = (chartElement: HTMLElement, filename: string) =>
 /**
  * Formatea datos de usuarios para exportación
  */
-export const formatUsersForExport = (users: {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  role: string;
-  createdAt: string;
-  activo: boolean;
-}[]): ExportableData[] => {
+export const formatUsersForExport = (
+  users: {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+    role: string;
+    createdAt: string;
+    activo: boolean;
+  }[],
+): ExportableData[] => {
   return users.map((user) => ({
-    'ID': user.id,
-    'Nombre': `${user.nombre} ${user.apellido}`.trim(),
-    'Email': user.email,
-    'Rol': user.role,
+    ID: user.id,
+    Nombre: `${user.nombre} ${user.apellido}`.trim(),
+    Email: user.email,
+    Rol: user.role,
     'Fecha de Registro': new Date(user.createdAt).toLocaleDateString('es-ES'),
-    'Estado': user.activo ? 'Activo' : 'Inactivo'
+    Estado: user.activo ? 'Activo' : 'Inactivo',
   }));
 };
 
@@ -171,21 +177,19 @@ export const formatUsersForExport = (users: {
  */
 export const formatClassesForExport = (classes: ClaseListado[]) => {
   return classes.map((clase) => ({
-    'ID': clase.id,
-    'Ruta Curricular':
-      clase.ruta_curricular?.nombre ?? clase.rutaCurricular?.nombre ?? '-',
-    'Docente': `${clase.docente?.nombre || ''} ${clase.docente?.apellido || ''}`.trim() || '-',
-    'Fecha': new Date(clase.fecha_hora_inicio).toLocaleDateString('es-ES'),
-    'Hora': new Date(clase.fecha_hora_inicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+    ID: clase.id,
+    'Ruta Curricular': clase.ruta_curricular?.nombre ?? clase.rutaCurricular?.nombre ?? '-',
+    Docente: `${clase.docente?.nombre || ''} ${clase.docente?.apellido || ''}`.trim() || '-',
+    Fecha: new Date(clase.fecha_hora_inicio).toLocaleDateString('es-ES'),
+    Hora: new Date(clase.fecha_hora_inicio).toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
     'Duración (min)': clase.duracion_minutos,
     'Cupos Ocupados':
-      clase.cupos_ocupados ??
-      Math.max(
-        (clase.cupo_maximo ?? 0) - (clase.cupo_disponible ?? 0),
-        0,
-      ),
+      clase.cupos_ocupados ?? Math.max((clase.cupo_maximo ?? 0) - (clase.cupo_disponible ?? 0), 0),
     'Cupos Máximos': clase.cupo_maximo,
-    'Estado': clase.estado
+    Estado: clase.estado,
   }));
 };
 
@@ -193,17 +197,21 @@ export const formatClassesForExport = (classes: ClaseListado[]) => {
  * Formatea datos de productos para exportación
  */
 export const formatProductsForExport = (products: ExportableData[]) => {
-  return products.map(product => ({
-    'ID': product.id,
-    'Nombre': product.nombre,
-    'Tipo': product.tipo,
-    'Precio': `$${(product.precio || 0).toLocaleString()}`,
-    'Descripción': product.descripcion || '-',
-    'Estado': product.activo ? 'Activo' : 'Inactivo',
-    'Fecha Inicio': product.fecha_inicio ? new Date(String(product.fecha_inicio)).toLocaleDateString('es-ES') : '-',
-    'Fecha Fin': product.fecha_fin ? new Date(String(product.fecha_fin)).toLocaleDateString('es-ES') : '-',
+  return products.map((product) => ({
+    ID: product.id,
+    Nombre: product.nombre,
+    Tipo: product.tipo,
+    Precio: `$${(product.precio || 0).toLocaleString()}`,
+    Descripción: product.descripcion || '-',
+    Estado: product.activo ? 'Activo' : 'Inactivo',
+    'Fecha Inicio': product.fecha_inicio
+      ? new Date(String(product.fecha_inicio)).toLocaleDateString('es-ES')
+      : '-',
+    'Fecha Fin': product.fecha_fin
+      ? new Date(String(product.fecha_fin)).toLocaleDateString('es-ES')
+      : '-',
     'Cupo Máximo': product.cupo_maximo || '-',
-    'Duración (meses)': product.duracion_meses || '-'
+    'Duración (meses)': product.duracion_meses || '-',
   }));
 };
 
@@ -242,7 +250,9 @@ export const generateSystemReport = (data: {
 
     doc.setFontSize(12);
     doc.setTextColor(100);
-    doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 105, yPosition, { align: 'center' });
+    doc.text(`Generado: ${new Date().toLocaleString('es-ES')}`, 105, yPosition, {
+      align: 'center',
+    });
     yPosition += 20;
 
     // Resumen Ejecutivo
@@ -259,7 +269,11 @@ export const generateSystemReport = (data: {
     yPosition += 7;
     doc.text(`Total de Productos: ${data.products.length}`, 20, yPosition);
     yPosition += 7;
-    doc.text(`Clases Activas: ${data.classes.filter((c) => c.estado === 'Programada').length}`, 20, yPosition);
+    doc.text(
+      `Clases Activas: ${data.classes.filter((c) => c.estado === 'Programada').length}`,
+      20,
+      yPosition,
+    );
     yPosition += 7;
     doc.text(`Productos Activos: ${data.products.filter((p) => p.activo).length}`, 20, yPosition);
     yPosition += 15;
@@ -278,7 +292,7 @@ export const generateSystemReport = (data: {
     autoTable(doc, {
       startY: yPosition,
       head: [['Nombre', 'Email', 'Rol', 'Registro']],
-      body: usersData.map(u => [u.Nombre, u.Email, u.Rol, u['Fecha de Registro']]),
+      body: usersData.map((u) => [u.Nombre, u.Email, u.Rol, u['Fecha de Registro']]),
       theme: 'grid',
       headStyles: { fillColor: [255, 107, 53] },
     });
@@ -296,12 +310,12 @@ export const generateSystemReport = (data: {
     autoTable(doc, {
       startY: yPosition,
       head: [['Ruta', 'Docente', 'Fecha', 'Cupos', 'Estado']],
-      body: classesData.map(c => [
+      body: classesData.map((c) => [
         c['Ruta Curricular'],
         c.Docente,
         c.Fecha,
         `${c['Cupos Ocupados']}/${c['Cupos Máximos']}`,
-        c.Estado
+        c.Estado,
       ]),
       theme: 'grid',
       headStyles: { fillColor: [255, 107, 53] },

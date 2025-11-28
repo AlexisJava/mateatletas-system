@@ -132,6 +132,7 @@ http://localhost:3000/quiz-test
 ```
 
 Esta página incluye:
+
 - ✅ El quiz completo funcional
 - ✅ Vista de resultados con todos los datos
 - ✅ JSON completo para debugging
@@ -187,19 +188,20 @@ El algoritmo calcula un **score de 0-100** para cada ruta basándose en:
 
 ### Sistema de Puntuación
 
-| Factor | Puntos | Descripción |
-|--------|--------|-------------|
-| **Edad** | 20 pts | Qué tan cerca está de la edad ideal de la ruta |
-| **Interés** | 30 pts | **EL MÁS IMPORTANTE** - Si los intereses coinciden |
-| **Objetivo** | 25 pts | Si los objetivos del padre coinciden con la ruta |
-| **Nivel** | 15 pts | Si el nivel actual es compatible |
-| **Tiempo** | 10 pts | Si el tiempo disponible es adecuado para la duración |
+| Factor       | Puntos | Descripción                                          |
+| ------------ | ------ | ---------------------------------------------------- |
+| **Edad**     | 20 pts | Qué tan cerca está de la edad ideal de la ruta       |
+| **Interés**  | 30 pts | **EL MÁS IMPORTANTE** - Si los intereses coinciden   |
+| **Objetivo** | 25 pts | Si los objetivos del padre coinciden con la ruta     |
+| **Nivel**    | 15 pts | Si el nivel actual es compatible                     |
+| **Tiempo**   | 10 pts | Si el tiempo disponible es adecuado para la duración |
 
 ### Ejemplo de Cálculo
 
 Usuario: Mateo, 10 años, le gustan los videojuegos, nunca programó, quiere crear su propio proyecto, tiene 3-4hrs/semana.
 
 **Ruta "Game Maker"**:
+
 - Edad ideal: 10.5 años → ✅ 20 puntos (diferencia < 1 año)
 - Interés "videojuegos" coincide → ✅ 30 puntos
 - Objetivo "proyecto" coincide → ✅ 25 puntos
@@ -266,10 +268,10 @@ POST /api/quiz/submit
 
 ```typescript
 // Obtener estadísticas
-GET /api/quiz/stats
+GET / api / quiz / stats;
 
 // Verificar salud del backend
-GET /api/health
+GET / api / health;
 ```
 
 ### Variables de Entorno
@@ -309,12 +311,12 @@ pnpm test:e2e quiz
 
 ### Casos de Prueba Recomendados
 
-| Perfil | Edad | Intereses | Nivel | Objetivo | Ruta Esperada |
-|--------|------|-----------|-------|----------|---------------|
-| Gamer Principiante | 10 | Videojuegos | Nunca | Proyecto | Game Maker |
-| Matemático Competitivo | 12 | Matemática | Intermedio | Competencias | Olimpiadas Track |
-| Científico Curioso | 9 | Ciencias | Nunca | Diversión | Space Explorer |
-| Dev Avanzado | 16 | Varios | Intermedio | Futuro | AI Explorer / Data Wizard |
+| Perfil                 | Edad | Intereses   | Nivel      | Objetivo     | Ruta Esperada             |
+| ---------------------- | ---- | ----------- | ---------- | ------------ | ------------------------- |
+| Gamer Principiante     | 10   | Videojuegos | Nunca      | Proyecto     | Game Maker                |
+| Matemático Competitivo | 12   | Matemática  | Intermedio | Competencias | Olimpiadas Track          |
+| Científico Curioso     | 9    | Ciencias    | Nunca      | Diversión    | Space Explorer            |
+| Dev Avanzado           | 16   | Varios      | Intermedio | Futuro       | AI Explorer / Data Wizard |
 
 ---
 
@@ -343,8 +345,8 @@ export const RUTAS: Ruta[] = [
     total_clases: 60,
     resultado_final: 'Qué podrá hacer al terminar',
     precio_usd: 30,
-    precio_ars: 45000
-  }
+    precio_ars: 45000,
+  },
 ];
 ```
 
@@ -381,7 +383,7 @@ En cada componente de pregunta, modificar las clases de Tailwind:
 
 ```typescript
 // De cyan/purple a otro gradiente
-className="bg-gradient-to-r from-emerald-500 to-blue-500"
+className = 'bg-gradient-to-r from-emerald-500 to-blue-500';
 ```
 
 ---
@@ -468,11 +470,13 @@ pnpm add framer-motion
 ```
 
 Verificar variables de entorno en Vercel:
+
 - `NEXT_PUBLIC_BACKEND_URL`
 
 ### 2. Backend (Railway)
 
 Tu backend NestJS ya está en Railway. Asegúrate de que:
+
 - El endpoint `/api/quiz/submit` esté implementado
 - CORS permita requests desde tu dominio de Vercel
 - Las variables de entorno estén configuradas
@@ -510,6 +514,7 @@ Si encontrás algún issue o tenés preguntas:
 - [x] ✅ Documentación completa
 
 **NEXT STEPS (Prompt 2 y 3):**
+
 - [ ] 🔜 Página de resultados premium (mostrar ruta con pricing)
 - [ ] 🔜 CTA para checkout (MercadoPago)
 - [ ] 🔜 Email automation con los resultados
@@ -519,6 +524,7 @@ Si encontrás algún issue o tenés preguntas:
 ## 📝 Changelog
 
 ### v1.0.0 (2025-01-12)
+
 - ✨ Implementación inicial completa
 - ✨ 10 rutas pre-definidas
 - ✨ Algoritmo de scoring

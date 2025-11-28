@@ -59,7 +59,8 @@
 
 /* NumbersToGamification - Rayo pulsante */
 @keyframes beam-pulse {
-  0%, 100% {
+  0%,
+  100% {
     filter: drop-shadow(0 0 40px rgba(14, 165, 233, 0.8));
     height: 4px;
   }
@@ -75,7 +76,8 @@
 
 /* NumbersToGamification - Ícono flotante */
 @keyframes icon-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(-50%, -50%) scale(1);
     filter: drop-shadow(0 0 20px rgba(14, 165, 233, 0.8));
   }
@@ -91,7 +93,8 @@
 
 /* GamificationToMundos - Orbes flotantes */
 @keyframes orb-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) scale(1);
   }
   50% {
@@ -105,7 +108,8 @@
 
 /* MundosToTestimonials - Comillas pulsantes */
 @keyframes quote-fade {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
     transform: scale(0.8);
   }
@@ -121,7 +125,8 @@
 
 /* TestimonialsToComparison - VS brillante */
 @keyframes vs-glow {
-  0%, 100% {
+  0%,
+  100% {
     filter: drop-shadow(0 0 10px rgba(14, 165, 233, 0.5));
     transform: scale(1);
   }
@@ -151,7 +156,8 @@
 
 /* ComparisonToPricing - Flecha rebotando */
 @keyframes arrow-bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(-50%, -50%) translateY(0);
   }
   50% {
@@ -179,7 +185,8 @@
 
 /* PricingToFAQ - Signo de interrogación pulsante */
 @keyframes question-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1) rotate(0deg);
     opacity: 0.6;
   }
@@ -215,7 +222,8 @@
 
 /* Scroll to top button */
 @keyframes bounce-subtle {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {

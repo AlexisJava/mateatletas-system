@@ -51,7 +51,6 @@ async function main() {
     console.log('🔑 Password:', password);
     console.log('🆔 ID:', tutor.id);
     console.log('\n📝 Usa estas credenciales para hacer login y obtener el JWT token');
-
   } catch (error) {
     console.error('❌ Error:', error.message);
     throw error;

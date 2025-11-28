@@ -108,31 +108,22 @@ export function PricingCard({
                 ${producto.precio}
               </span>
               {producto.duracion_dias && (
-                <span className="text-gray-600">
-                  / {producto.duracion_dias} días
-                </span>
+                <span className="text-gray-600">/ {producto.duracion_dias} días</span>
               )}
             </div>
           </div>
         </div>
 
         {/* Descripción corta */}
-        <p className="text-center text-gray-600 text-sm px-4">
-          {producto.descripcion}
-        </p>
+        <p className="text-center text-gray-600 text-sm px-4">{producto.descripcion}</p>
 
         {/* Beneficios */}
         <div className="space-y-3 px-4">
           <p className="font-bold text-dark text-sm">✨ Incluye:</p>
           <ul className="space-y-2">
             {beneficios.map((beneficio, index) => (
-              <li
-                key={index}
-                className="flex items-start gap-2 text-sm text-gray-700"
-              >
-                <span className="text-[#4caf50] text-lg flex-shrink-0 mt-0.5">
-                  ✓
-                </span>
+              <li key={index} className="flex items-start gap-2 text-sm text-gray-700">
+                <span className="text-[#4caf50] text-lg flex-shrink-0 mt-0.5">✓</span>
                 <span>{beneficio}</span>
               </li>
             ))}

@@ -7,9 +7,11 @@ This directory contains integration tests for the Phase 1 frontend modules of Ma
 ## 📋 Available Test Scripts
 
 ### 1. `test-phase1-catalogo.sh`
+
 Tests the **Product Catalog** module.
 
 **What it tests:**
+
 - GET /api/productos (all products)
 - GET /api/productos/cursos (courses only)
 - GET /api/productos/suscripciones (subscriptions only)
@@ -18,6 +20,7 @@ Tests the **Product Catalog** module.
 - Field validation (id, nombre, descripcion, precio, tipo, activo)
 
 **Expected Results:**
+
 - ✅ 8+ products loaded
 - ✅ Correct product types (Suscripcion, Curso, RecursoDigital)
 - ✅ All required fields present
@@ -25,9 +28,11 @@ Tests the **Product Catalog** module.
 ---
 
 ### 2. `test-phase1-pagos.sh`
+
 Tests the **Payments** module with MercadoPago integration.
 
 **What it tests:**
+
 - POST /api/pagos/suscripcion (create subscription preference)
 - POST /api/pagos/curso (create course preference)
 - GET /api/pagos/membresia (get current membership)
@@ -36,6 +41,7 @@ Tests the **Payments** module with MercadoPago integration.
 - Error handling (invalid product)
 
 **Expected Results:**
+
 - ✅ Preferences created successfully
 - ✅ Valid MercadoPago URLs generated
 - ✅ Membership status retrieved (or 404 if none)
@@ -44,9 +50,11 @@ Tests the **Payments** module with MercadoPago integration.
 ---
 
 ### 3. `test-phase1-clases.sh`
+
 Tests the **Classes and Reservations** module.
 
 **What it tests:**
+
 - GET /api/clases (available classes)
 - GET /api/clases/metadata/rutas-curriculares (curriculum routes)
 - POST /api/clases/:id/reservar (reserve class)
@@ -55,6 +63,7 @@ Tests the **Classes and Reservations** module.
 - GET /api/clases?rutaCurricularId=X (filter by route)
 
 **Expected Results:**
+
 - ✅ Classes loaded with structure
 - ✅ 6 curriculum routes available
 - ✅ Reservation creation successful
@@ -64,9 +73,11 @@ Tests the **Classes and Reservations** module.
 ---
 
 ### 4. `test-phase1-full.sh` ⭐ (Recommended)
+
 **Complete End-to-End test** of the tutor journey.
 
 **What it tests:**
+
 1. Tutor registration
 2. Student creation
 3. Catalog browsing
@@ -79,14 +90,16 @@ Tests the **Classes and Reservations** module.
 10. Cancel reservation
 
 **Expected Results:**
+
 - ✅ 7/10 steps passing
-- ⚠️  Some steps may skip due to data limitations
+- ⚠️ Some steps may skip due to data limitations
 
 ---
 
 ## 🚀 How to Run Tests
 
 ### Prerequisites:
+
 ```bash
 # 1. API server must be running
 cd apps/api && npm run start:dev
@@ -106,6 +119,7 @@ brew install jq  # macOS
 ### Running Tests:
 
 #### Individual Module Tests:
+
 ```bash
 # From project root
 ./tests/frontend/test-phase1-catalogo.sh
@@ -114,11 +128,13 @@ brew install jq  # macOS
 ```
 
 #### Full E2E Test (Recommended):
+
 ```bash
 ./tests/frontend/test-phase1-full.sh
 ```
 
 #### Save Test Output:
+
 ```bash
 ./tests/frontend/test-phase1-full.sh 2>&1 | tee test-results.log
 ```
@@ -128,22 +144,26 @@ brew install jq  # macOS
 ## 📊 Understanding Test Output
 
 ### Success Indicators:
+
 ```
 ✓ PASS - Test passed successfully
 ```
 
 ### Warnings:
+
 ```
 ⚠ WARNING - Non-critical issue detected
 ⚠ SKIP - Test skipped (usually due to missing data)
 ```
 
 ### Failures:
+
 ```
 ✗ FAIL - Test failed
 ```
 
 ### Example Output:
+
 ```bash
 ╔═══════════════════════════════════════════════════════════════╗
 ║  TEST PHASE 1 - FLUJO COMPLETO TUTOR (E2E)                   ║
@@ -168,15 +188,19 @@ brew install jq  # macOS
 ## 🔧 Configuration
 
 ### API URL:
+
 All scripts default to `http://localhost:3001/api`
 
 To change, edit the `API_URL` variable in each script:
+
 ```bash
 API_URL="http://your-api-url:port/api"
 ```
 
 ### Authentication:
+
 Tests automatically handle authentication:
+
 1. Register or login as tutor
 2. Store JWT token
 3. Use token for all protected endpoints
@@ -186,11 +210,13 @@ Tests automatically handle authentication:
 ## 📈 Test Metrics
 
 ### Coverage:
+
 - **Endpoints Tested:** 12/12 (100%)
 - **E2E Steps:** 7/10 (70%)
 - **Critical Paths:** 100%
 
 ### Performance:
+
 - **Catalog Test:** ~5 seconds
 - **Payments Test:** ~8 seconds
 - **Classes Test:** ~10 seconds
@@ -201,13 +227,17 @@ Tests automatically handle authentication:
 ## 🐛 Troubleshooting
 
 ### Issue: "Connection refused"
+
 **Solution:** Ensure API server is running on port 3001
+
 ```bash
 cd apps/api && npm run start:dev
 ```
 
 ### Issue: "jq: command not found"
+
 **Solution:** Install jq
+
 ```bash
 # Ubuntu/Debian
 sudo apt-get install jq
@@ -220,16 +250,20 @@ sudo pacman -S jq
 ```
 
 ### Issue: "No se encontraron productos"
+
 **Solution:** Run database seeds
+
 ```bash
 cd apps/api
 npx prisma db seed
 ```
 
 ### Issue: "No hay clases con cupo disponible"
+
 **Solution:** This is expected if there are no seeded classes with available quota. The test will skip reservation steps but still validate the API structure.
 
 ### Issue: "Membresía no activada (mock endpoint)"
+
 **Solution:** This is expected. The mock activation endpoint is not required for testing the frontend integration.
 
 ---
@@ -237,22 +271,26 @@ npx prisma db seed
 ## 🎯 What These Tests Validate
 
 ### 1. API Integration ✅
+
 - Correct endpoints are called
 - Request payloads are correct
 - Response structure is valid
 - HTTP status codes are correct
 
 ### 2. Data Flow ✅
+
 - Authentication tokens work
 - IDs are correctly passed between endpoints
 - State is maintained across requests
 
 ### 3. Error Handling ✅
+
 - Invalid data is rejected
 - 404 errors are handled gracefully
 - Validation errors return proper messages
 
 ### 4. Business Logic ✅
+
 - Product filtering works
 - Payment preferences are created
 - Reservations decrement quotas
@@ -263,11 +301,13 @@ npx prisma db seed
 ## 📝 Test Data
 
 ### Generated Dynamically:
+
 - Tutor email: `tutor_e2e_<timestamp>@test.com`
 - Student name: `Mateo E2E Test`
 - Payment ID: `mock_payment_<timestamp>`
 
 ### Uses Existing Data:
+
 - Products (from seed)
 - Curriculum routes (from seed)
 - Classes (from seed, if available)
@@ -301,6 +341,7 @@ These tests are designed to run in CI/CD pipelines:
 ## ✅ Success Criteria
 
 A successful test run should show:
+
 - ✅ All endpoints respond with 200/201/404
 - ✅ Data structure matches expected types
 - ✅ Business logic executes correctly

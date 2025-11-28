@@ -26,11 +26,13 @@
 ### Tecnologías Principales
 
 **Monorepo:**
+
 - **Gestor:** npm workspaces (v10.2.4)
 - **Build Tool:** Turbo (v2.0.0)
 - **Node:** >= 18.0.0
 
 **Frontend:**
+
 - **Framework:** Next.js 15.5.4 (App Router)
 - **React:** 19.1.0
 - **Compiler:** Turbopack
@@ -44,6 +46,7 @@
 - **Testing:** Vitest 4.0.3 + Playwright 1.56.0
 
 **Backend:**
+
 - **Framework:** NestJS 11.0.1
 - **Node:** TypeScript 5.7.3
 - **ORM:** Prisma 6.17.1
@@ -57,6 +60,7 @@
 - **Testing:** Jest 30.0.0
 
 **Shared:**
+
 - **Package:** @mateatletas/contracts (schemas Zod compartidos)
 
 ### Arquitectura
@@ -102,6 +106,7 @@ mateatletas/
 2. **React Query (Moderno):** Cache, invalidación automática, polling
 
 **Ejemplo Portal Docente (Notificaciones):**
+
 ```
 [Componente NotificationCenter]
    ↓
@@ -236,23 +241,25 @@ Aplicados en orden:
 
 **Base:** `/api/notificaciones`
 
-| Método | Ruta | Guard | Descripción |
-|--------|------|-------|-------------|
-| GET | `/` | Docente | Listar notificaciones (query: soloNoLeidas) |
-| GET | `/count` | Docente | Contar no leídas |
-| PATCH | `/:id/leer` | Docente | Marcar como leída |
-| PATCH | `/leer-todas` | Docente | Marcar todas leídas |
-| DELETE | `/:id` | Docente | Eliminar notificación |
+| Método | Ruta          | Guard   | Descripción                                 |
+| ------ | ------------- | ------- | ------------------------------------------- |
+| GET    | `/`           | Docente | Listar notificaciones (query: soloNoLeidas) |
+| GET    | `/count`      | Docente | Contar no leídas                            |
+| PATCH  | `/:id/leer`   | Docente | Marcar como leída                           |
+| PATCH  | `/leer-todas` | Docente | Marcar todas leídas                         |
+| DELETE | `/:id`        | Docente | Eliminar notificación                       |
 
 ### 3.6. Sistema de Logging
 
 **Winston Logger:**
+
 - Logs estructurados con contexto
 - Rotación diaria de archivos
 - Niveles: error, warn, info, http, debug
 - Metadata con userId, userRole, operation, etc.
 
 **Uso:**
+
 ```typescript
 this.logger.log('Operación exitosa', { userId, operation: 'crear_clase' });
 this.logger.error('Error en validación', error);
@@ -374,12 +381,12 @@ apps/web/src/
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
   timeout: 10000,
-  withCredentials: true,  // ⚠️ CRÍTICO: Envía cookies httpOnly
+  withCredentials: true, // ⚠️ CRÍTICO: Envía cookies httpOnly
 });
 
 // Response Interceptor
 apiClient.interceptors.response.use(
-  (response) => response.data,  // ⚠️ Retorna solo data
+  (response) => response.data, // ⚠️ Retorna solo data
   (error) => {
     if (error.response?.status === 401) {
       // Redirige a login si no está en página de auth
@@ -389,11 +396,12 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 ```
 
 **Importante:**
+
 - `withCredentials: true` es esencial para cookies httpOnly
 - El interceptor retorna `response.data` directamente
 - Redirección automática a `/login` en 401
@@ -413,6 +421,7 @@ export async function getNotificaciones(soloNoLeidas?: boolean) {
 ```
 
 **Características:**
+
 - Todas las funciones son async
 - Validación con Zod en todas las responses
 - Type-safe con TypeScript
@@ -426,39 +435,40 @@ export async function getNotificaciones(soloNoLeidas?: boolean) {
 
 #### **Usuarios del Sistema**
 
-| Modelo | Descripción | Roles | Campos Clave |
-|--------|-------------|-------|--------------|
-| **Tutor** | Padres/Tutores | `["tutor"]` | username, email, password_hash, roles |
-| **Estudiante** | Alumnos | `["estudiante"]` | username, email, password_hash, avatar_url, equipo_id |
-| **Docente** | Profesores | `["docente"]`, `["docente", "admin"]` | email, password_hash, roles, disponibilidad_horaria |
-| **Admin** | Administradores | `["admin"]`, `["admin", "docente"]` | email, password_hash, roles |
+| Modelo         | Descripción     | Roles                                 | Campos Clave                                          |
+| -------------- | --------------- | ------------------------------------- | ----------------------------------------------------- |
+| **Tutor**      | Padres/Tutores  | `["tutor"]`                           | username, email, password_hash, roles                 |
+| **Estudiante** | Alumnos         | `["estudiante"]`                      | username, email, password_hash, avatar_url, equipo_id |
+| **Docente**    | Profesores      | `["docente"]`, `["docente", "admin"]` | email, password_hash, roles, disponibilidad_horaria   |
+| **Admin**      | Administradores | `["admin"]`, `["admin", "docente"]`   | email, password_hash, roles                           |
 
 **Multi-Rol:**
+
 - Docentes pueden ser admin simultáneamente
 - Admins pueden ser docente simultáneamente
 - Campo `roles` es JSON array: `["docente", "admin"]`
 
 #### **Sistema de Clases**
 
-| Modelo | Descripción | Relaciones |
-|--------|-------------|------------|
-| **Clase** | Clase one-time programada | docente, producto?, rutaCurricular?, sector? |
-| **ClaseGrupo** | Grupo recurrente (comisión) | grupo, docente, rutaCurricular?, sector |
-| **InscripcionClase** | Reserva de estudiante a Clase | estudiante, tutor, clase |
-| **InscripcionClaseGrupo** | Inscripción a ClaseGrupo | estudiante, tutor, claseGrupo |
-| **Asistencia** | Asistencia a Clase | estudiante, clase |
-| **AsistenciaClaseGrupo** | Asistencia a ClaseGrupo en fecha específica | estudiante, claseGrupo, fecha |
+| Modelo                    | Descripción                                 | Relaciones                                   |
+| ------------------------- | ------------------------------------------- | -------------------------------------------- |
+| **Clase**                 | Clase one-time programada                   | docente, producto?, rutaCurricular?, sector? |
+| **ClaseGrupo**            | Grupo recurrente (comisión)                 | grupo, docente, rutaCurricular?, sector      |
+| **InscripcionClase**      | Reserva de estudiante a Clase               | estudiante, tutor, clase                     |
+| **InscripcionClaseGrupo** | Inscripción a ClaseGrupo                    | estudiante, tutor, claseGrupo                |
+| **Asistencia**            | Asistencia a Clase                          | estudiante, clase                            |
+| **AsistenciaClaseGrupo**  | Asistencia a ClaseGrupo en fecha específica | estudiante, claseGrupo, fecha                |
 
 #### **Gamificación**
 
-| Modelo | Descripción |
-|--------|-------------|
-| **Equipo** | Equipos (Fénix, Dragón, Tigre, Águila) |
-| **LogroEstudiante** | Logros desbloqueados |
-| **RachaEstudiante** | Racha de días consecutivos |
-| **PuntosPadre** | Puntos acumulados del padre/tutor |
-| **RecursosEstudiante** | XP, monedas, gemas |
-| **ItemObtenido** | Items comprados en tienda |
+| Modelo                 | Descripción                            |
+| ---------------------- | -------------------------------------- |
+| **Equipo**             | Equipos (Fénix, Dragón, Tigre, Águila) |
+| **LogroEstudiante**    | Logros desbloqueados                   |
+| **RachaEstudiante**    | Racha de días consecutivos             |
+| **PuntosPadre**        | Puntos acumulados del padre/tutor      |
+| **RecursosEstudiante** | XP, monedas, gemas                     |
+| **ItemObtenido**       | Items comprados en tienda              |
 
 #### **Notificaciones**
 
@@ -491,6 +501,7 @@ enum TipoNotificacion {
 ```
 
 **⚠️ Limitación Actual:**
+
 - Solo tiene `docente_id`, no hay campo genérico `usuario_id`
 - No puede notificar a estudiantes, tutores o admins directamente
 
@@ -532,21 +543,25 @@ model Tarea {
 ### 5.2. Índices Importantes
 
 **Notificaciones:**
+
 - `[docente_id, leida]` - Para queries "no leídas por docente"
 - `[docente_id, createdAt]` - Para ordenar por fecha
 
 **Clases:**
+
 - `[docente_id]` - Clases por docente
 - `[fecha_hora_inicio]` - Ordenar por fecha
 - `[estado]` - Filtrar por estado
 
 **Estudiantes:**
+
 - `[tutor_id]` - Estudiantes por tutor
 - `[equipo_id]` - Estudiantes por equipo
 
 ### 5.3. Relaciones Cascade
 
 **OnDelete: Cascade:**
+
 - Tutor → Estudiantes (si borras tutor, se borran sus estudiantes)
 - Estudiante → Asistencias, Logros, Puntos, etc.
 - Docente → Notificaciones, Eventos
@@ -562,22 +577,23 @@ model Tarea {
 
 **Rutas:**
 
-| Ruta | Archivo | Descripción |
-|------|---------|-------------|
-| `/admin/dashboard` | `admin/dashboard/page.tsx` | Dashboard principal |
-| `/admin/usuarios` | `admin/usuarios/page.tsx` | Gestión de usuarios (tutores, docentes, admins) |
-| `/admin/credenciales` | `admin/credenciales/page.tsx` | Ver/resetear passwords temporales |
-| `/admin/clases` | `admin/clases/page.tsx` | Gestión de clases y clubes |
-| `/admin/clases/[id]` | `admin/clases/[id]/page.tsx` | Detalle de clase |
-| `/admin/estudiantes` | `admin/estudiantes/page.tsx` | Gestión de estudiantes |
-| `/admin/planificaciones` | `admin/planificaciones/page.tsx` | Planificaciones pedagógicas |
-| `/admin/planificaciones-simples` | `admin/planificaciones-simples/page.tsx` | Planificaciones simplificadas |
-| `/admin/planificaciones-simples/[codigo]` | `admin/planificaciones-simples/[codigo]/page.tsx` | Ver planificación |
-| `/admin/sectores-rutas` | `admin/sectores-rutas/page.tsx` | Sectores y rutas curriculares |
-| `/admin/pagos` | `admin/pagos/page.tsx` | Gestión de pagos |
-| `/admin/reportes` | `admin/reportes/page.tsx` | Reportes y estadísticas |
+| Ruta                                      | Archivo                                           | Descripción                                     |
+| ----------------------------------------- | ------------------------------------------------- | ----------------------------------------------- |
+| `/admin/dashboard`                        | `admin/dashboard/page.tsx`                        | Dashboard principal                             |
+| `/admin/usuarios`                         | `admin/usuarios/page.tsx`                         | Gestión de usuarios (tutores, docentes, admins) |
+| `/admin/credenciales`                     | `admin/credenciales/page.tsx`                     | Ver/resetear passwords temporales               |
+| `/admin/clases`                           | `admin/clases/page.tsx`                           | Gestión de clases y clubes                      |
+| `/admin/clases/[id]`                      | `admin/clases/[id]/page.tsx`                      | Detalle de clase                                |
+| `/admin/estudiantes`                      | `admin/estudiantes/page.tsx`                      | Gestión de estudiantes                          |
+| `/admin/planificaciones`                  | `admin/planificaciones/page.tsx`                  | Planificaciones pedagógicas                     |
+| `/admin/planificaciones-simples`          | `admin/planificaciones-simples/page.tsx`          | Planificaciones simplificadas                   |
+| `/admin/planificaciones-simples/[codigo]` | `admin/planificaciones-simples/[codigo]/page.tsx` | Ver planificación                               |
+| `/admin/sectores-rutas`                   | `admin/sectores-rutas/page.tsx`                   | Sectores y rutas curriculares                   |
+| `/admin/pagos`                            | `admin/pagos/page.tsx`                            | Gestión de pagos                                |
+| `/admin/reportes`                         | `admin/reportes/page.tsx`                         | Reportes y estadísticas                         |
 
 **Características UI:**
+
 - Sidebar colapsable
 - Gradientes vibrantes por sección
 - Badges de notificaciones
@@ -585,6 +601,7 @@ model Tarea {
 - Dark mode disabled (tema fixed)
 
 **Auth Guard:**
+
 - Verifica `user.role === 'admin'` o `selectedRole === 'admin'`
 - Redirige según rol activo del usuario
 
@@ -594,30 +611,33 @@ model Tarea {
 
 **Rutas:**
 
-| Ruta | Archivo | Descripción |
-|------|---------|-------------|
-| `/docente/dashboard` | `docente/dashboard/page.tsx` | Dashboard docente |
-| `/docente/calendario` | `docente/calendario/page.tsx` | Calendario de eventos |
-| `/docente/observaciones` | `docente/observaciones/page.tsx` | Observaciones de estudiantes |
-| `/docente/planificaciones` | `docente/planificaciones/page.tsx` | Planificaciones asignadas |
-| `/docente/grupos/[id]` | `docente/grupos/[id]/page.tsx` | Detalle de grupo/comisión |
-| `/docente/clases/[id]/asistencia` | `docente/clases/[id]/asistencia/page.tsx` | Tomar asistencia |
-| `/docente/clase/[id]/sala` | `docente/clase/[id]/sala/page.tsx` | Sala de clase virtual |
-| `/docente/perfil` | `docente/perfil/page.tsx` | Perfil del docente |
+| Ruta                              | Archivo                                   | Descripción                  |
+| --------------------------------- | ----------------------------------------- | ---------------------------- |
+| `/docente/dashboard`              | `docente/dashboard/page.tsx`              | Dashboard docente            |
+| `/docente/calendario`             | `docente/calendario/page.tsx`             | Calendario de eventos        |
+| `/docente/observaciones`          | `docente/observaciones/page.tsx`          | Observaciones de estudiantes |
+| `/docente/planificaciones`        | `docente/planificaciones/page.tsx`        | Planificaciones asignadas    |
+| `/docente/grupos/[id]`            | `docente/grupos/[id]/page.tsx`            | Detalle de grupo/comisión    |
+| `/docente/clases/[id]/asistencia` | `docente/clases/[id]/asistencia/page.tsx` | Tomar asistencia             |
+| `/docente/clase/[id]/sala`        | `docente/clase/[id]/sala/page.tsx`        | Sala de clase virtual        |
+| `/docente/perfil`                 | `docente/perfil/page.tsx`                 | Perfil del docente           |
 
 **Características UI:**
+
 - NotificationCenter con polling (30s)
 - Theme toggle (light/dark)
 - Sidebar responsive
 - Toast notifications (react-hot-toast)
 
 **Sistema de Notificaciones:**
+
 - **Componente:** `components/docente/NotificationCenter.tsx`
 - **Hook:** `lib/hooks/useNotificaciones.ts` (React Query)
 - **Store (deprecado):** `store/notificaciones.store.ts`
 - **Backend:** `/api/notificaciones` (5 endpoints)
 
 **Auth Guard:**
+
 - Verifica `user.role === 'docente'` o `selectedRole === 'docente'`
 
 ### 6.3. Portal Estudiante (`/estudiante`)
@@ -626,29 +646,31 @@ model Tarea {
 
 **Rutas:**
 
-| Ruta | Archivo | Descripción |
-|------|---------|-------------|
-| `/estudiante/crear-avatar` | `estudiante/crear-avatar/page.tsx` | Ready Player Me avatar creator |
-| `/estudiante/gimnasio` | `estudiante/gimnasio/page.tsx` | Hub principal (Brawl Stars style) |
-| `/estudiante/planificaciones/[codigo]` | `estudiante/planificaciones/[codigo]/page.tsx` | Ver planificación interactiva |
+| Ruta                                   | Archivo                                        | Descripción                       |
+| -------------------------------------- | ---------------------------------------------- | --------------------------------- |
+| `/estudiante/crear-avatar`             | `estudiante/crear-avatar/page.tsx`             | Ready Player Me avatar creator    |
+| `/estudiante/gimnasio`                 | `estudiante/gimnasio/page.tsx`                 | Hub principal (Brawl Stars style) |
+| `/estudiante/planificaciones/[codigo]` | `estudiante/planificaciones/[codigo]/page.tsx` | Ver planificación interactiva     |
 
 **Hub Views (dentro de `/estudiante/gimnasio`):**
 
-| View | Archivo | Descripción |
-|------|---------|-------------|
-| **HubView** | `views/HubView.tsx` | Pantalla principal con avatar 3D |
-| **NotificacionesView** | `views/NotificacionesView.tsx` | Notificaciones gamificadas |
-| **MiGrupoView** | `views/MiGrupoView.tsx` | Compañeros de equipo |
-| **MiProgresoView** | `views/MiProgresoView.tsx` | Estadísticas y logros |
-| **TiendaView** | `views/TiendaView.tsx` | Comprar items con gemas |
-| **PerfilView** | `views/PerfilView.tsx` | Perfil del estudiante |
+| View                   | Archivo                        | Descripción                      |
+| ---------------------- | ------------------------------ | -------------------------------- |
+| **HubView**            | `views/HubView.tsx`            | Pantalla principal con avatar 3D |
+| **NotificacionesView** | `views/NotificacionesView.tsx` | Notificaciones gamificadas       |
+| **MiGrupoView**        | `views/MiGrupoView.tsx`        | Compañeros de equipo             |
+| **MiProgresoView**     | `views/MiProgresoView.tsx`     | Estadísticas y logros            |
+| **TiendaView**         | `views/TiendaView.tsx`         | Comprar items con gemas          |
+| **PerfilView**         | `views/PerfilView.tsx`         | Perfil del estudiante            |
 
 **Overlays (modales fullscreen):**
+
 - **PlanificacionView** - Ver actividades semanales
 - **ClaseSincronicaQuimica** - Clase sincrónica (demo)
 - **MisionView** - Misiones diarias/semanales
 
 **Características UI:**
+
 - Estilo Brawl Stars (vibrante, cartoon, gamificado)
 - Avatar 3D con AnimatedAvatar3D (Ready Player Me + animations)
 - Confetti explosions, sonidos, partículas
@@ -656,6 +678,7 @@ model Tarea {
 - Sin sistema real de notificaciones backend
 
 **Auth Guard:**
+
 - Verifica `user.role === 'estudiante'`
 - Verifica que tenga `avatar_url` (si no, redirige a `/crear-avatar`)
 
@@ -664,6 +687,7 @@ model Tarea {
 **Layout:** Layout antiguo (pre-migración)
 
 Rutas en proceso de migración:
+
 - `/dashboard`
 - `/catalogo`
 - `/clases`
@@ -678,11 +702,11 @@ Rutas en proceso de migración:
 
 ### 6.5. Rutas Públicas
 
-| Ruta | Descripción |
-|------|-------------|
-| `/` | Landing page |
-| `/login` | Login multi-rol |
-| `/register` | Registro de tutores |
+| Ruta        | Descripción             |
+| ----------- | ----------------------- |
+| `/`         | Landing page            |
+| `/login`    | Login multi-rol         |
+| `/register` | Registro de tutores     |
 | `/showcase` | Showcase de componentes |
 
 ---
@@ -693,35 +717,37 @@ Rutas en proceso de migración:
 
 **Ubicación:** `src/store/*.store.ts`
 
-| Store | Propósito | Estado |
-|-------|-----------|--------|
-| `auth.store.ts` | Autenticación, user, token | ✅ Activo |
-| `admin.store.ts` | Estado del panel admin | ✅ Activo |
-| `docente.store.ts` | Estado del portal docente | ✅ Activo |
-| `estudiantes.store.ts` | Lista de estudiantes | ✅ Activo |
-| `clases.store.ts` | Lista de clases | ✅ Activo |
-| `gamificacion.store.ts` | Estado de gamificación | ✅ Activo |
-| `notificaciones.store.ts` | Notificaciones docente | ⚠️ Deprecado (migrar a React Query) |
-| `calendario.store.ts` | Eventos del calendario | ✅ Activo |
-| `pagos.store.ts` | Estado de pagos | ✅ Activo |
-| `catalogo.store.ts` | Catálogo de productos | ✅ Activo |
-| `equipos.store.ts` | Equipos de gamificación | ✅ Activo |
-| `sectores.store.ts` | Sectores (Matemática/Programación) | ✅ Activo |
-| `asistencia.store.ts` | Asistencias | ✅ Activo |
-| `cursos.store.ts` | Cursos y lecciones | ✅ Activo |
+| Store                     | Propósito                          | Estado                              |
+| ------------------------- | ---------------------------------- | ----------------------------------- |
+| `auth.store.ts`           | Autenticación, user, token         | ✅ Activo                           |
+| `admin.store.ts`          | Estado del panel admin             | ✅ Activo                           |
+| `docente.store.ts`        | Estado del portal docente          | ✅ Activo                           |
+| `estudiantes.store.ts`    | Lista de estudiantes               | ✅ Activo                           |
+| `clases.store.ts`         | Lista de clases                    | ✅ Activo                           |
+| `gamificacion.store.ts`   | Estado de gamificación             | ✅ Activo                           |
+| `notificaciones.store.ts` | Notificaciones docente             | ⚠️ Deprecado (migrar a React Query) |
+| `calendario.store.ts`     | Eventos del calendario             | ✅ Activo                           |
+| `pagos.store.ts`          | Estado de pagos                    | ✅ Activo                           |
+| `catalogo.store.ts`       | Catálogo de productos              | ✅ Activo                           |
+| `equipos.store.ts`        | Equipos de gamificación            | ✅ Activo                           |
+| `sectores.store.ts`       | Sectores (Matemática/Programación) | ✅ Activo                           |
+| `asistencia.store.ts`     | Asistencias                        | ✅ Activo                           |
+| `cursos.store.ts`         | Cursos y lecciones                 | ✅ Activo                           |
 
 **Características:**
+
 - Persist middleware (localStorage)
 - Acciones async
 - Type-safe con TypeScript
 
 **Ejemplo (auth.store.ts):**
+
 ```typescript
 interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  selectedRole: UserRole | null;  // Para multi-rol
+  selectedRole: UserRole | null; // Para multi-rol
 
   login: (email, password) => Promise<void>;
   logout: () => Promise<void>;
@@ -744,6 +770,7 @@ interface AuthState {
 **Hooks Implementados:**
 
 **Portal Docente (Notificaciones):**
+
 - `useNotificaciones()` - Query para listar
 - `useNotificacionesCount()` - Query para contador
 - `useMarcarNotificacionLeida()` - Mutation
@@ -752,6 +779,7 @@ interface AuthState {
 - `useNotificationCenter()` - Hook combinado con polling
 
 **Beneficios vs Zustand:**
+
 - Cache automático
 - Invalidación inteligente
 - Background refetching (polling)
@@ -760,6 +788,7 @@ interface AuthState {
 - DevTools integradas
 
 **Ejemplo:**
+
 ```typescript
 const { data: notificaciones, isLoading } = useNotificaciones(false);
 
@@ -772,6 +801,7 @@ marcarLeida.mutate(notificationId);
 **Ubicación:** `src/lib/api/*.api.ts`
 
 **Patrón Estándar:**
+
 ```typescript
 // 1. Importar axios configurado
 import apiClient from '../axios';
@@ -782,7 +812,7 @@ import { responseSchema } from '../schemas/...';
 // 3. Definir función async
 export async function getNombreRecurso() {
   const response = await apiClient.get('/endpoint');
-  return responseSchema.parse(response);  // Validar con Zod
+  return responseSchema.parse(response); // Validar con Zod
 }
 
 // 4. Helpers visuales (opcional)
@@ -792,6 +822,7 @@ export function getIconoByTipo(tipo: string): string {
 ```
 
 **APIs Disponibles:**
+
 - auth.api.ts
 - admin.api.ts
 - estudiantes.api.ts
@@ -819,6 +850,7 @@ export function getIconoByTipo(tipo: string): string {
 **Ubicación:** `packages/contracts/src/schemas/`
 
 Schemas compartidos entre frontend y backend:
+
 - `notificacion.schema.ts`
 - `clase.schema.ts`
 - `estudiante.schema.ts`
@@ -826,6 +858,7 @@ Schemas compartidos entre frontend y backend:
 - etc.
 
 **Beneficios:**
+
 - Type-safety compartida
 - Validación consistente
 - Single source of truth
@@ -842,29 +875,30 @@ Schemas compartidos entre frontend y backend:
 
 **Componentes Base:**
 
-| Componente | Archivo | Propósito |
-|------------|---------|-----------|
-| Button | `Button.tsx` | Botones con variantes (primary, secondary, ghost) |
-| Card | `Card.tsx` | Cards con glassmorphism |
-| Modal | `Modal.tsx` | Modales con backdrop |
-| Input | `Input.tsx` | Inputs con validación |
-| Select | `Select.tsx` | Selects customizados |
-| Avatar | `Avatar.tsx` | Avatares circulares |
-| StudentAvatar | `StudentAvatar.tsx` | Avatar de estudiante con gradiente |
-| Badge | `Badge.tsx` | Badges de estado/notificaciones |
-| Toast | `Toast.tsx` | Sistema de toasts (react-hot-toast) |
-| AnimatedCounter | `AnimatedCounter.tsx` | Contador animado |
-| FloatingCard | `FloatingCard.tsx` | Cards flotantes |
-| MagneticButton | `MagneticButton.tsx` | Botones con efecto magnético |
-| ThemeToggle | `ThemeToggle.tsx` | Toggle light/dark |
-| Breadcrumbs | `Breadcrumbs.tsx` | Navegación breadcrumb |
-| TypingCode | `TypingCode.tsx` | Animación de código |
+| Componente      | Archivo               | Propósito                                         |
+| --------------- | --------------------- | ------------------------------------------------- |
+| Button          | `Button.tsx`          | Botones con variantes (primary, secondary, ghost) |
+| Card            | `Card.tsx`            | Cards con glassmorphism                           |
+| Modal           | `Modal.tsx`           | Modales con backdrop                              |
+| Input           | `Input.tsx`           | Inputs con validación                             |
+| Select          | `Select.tsx`          | Selects customizados                              |
+| Avatar          | `Avatar.tsx`          | Avatares circulares                               |
+| StudentAvatar   | `StudentAvatar.tsx`   | Avatar de estudiante con gradiente                |
+| Badge           | `Badge.tsx`           | Badges de estado/notificaciones                   |
+| Toast           | `Toast.tsx`           | Sistema de toasts (react-hot-toast)               |
+| AnimatedCounter | `AnimatedCounter.tsx` | Contador animado                                  |
+| FloatingCard    | `FloatingCard.tsx`    | Cards flotantes                                   |
+| MagneticButton  | `MagneticButton.tsx`  | Botones con efecto magnético                      |
+| ThemeToggle     | `ThemeToggle.tsx`     | Toggle light/dark                                 |
+| Breadcrumbs     | `Breadcrumbs.tsx`     | Navegación breadcrumb                             |
+| TypingCode      | `TypingCode.tsx`      | Animación de código                               |
 
 **Iconos:** Lucide React (v0.545.0)
 
 ### 8.2. Estilos por Portal
 
 **Portal Admin:**
+
 - Fondo: Gradientes dinámicos + blur
 - Sidebar: Estilo macOS/Windows 11
 - Colores: Vibrantes (violet, blue, emerald, orange, pink)
@@ -872,6 +906,7 @@ Schemas compartidos entre frontend y backend:
 - Animaciones: Suaves (hover states)
 
 **Portal Docente:**
+
 - Fondo: Gradientes suaves (purple → blue)
 - Glassmorphism: Elegante
 - Sombras: Profundas
@@ -879,6 +914,7 @@ Schemas compartidos entre frontend y backend:
 - Dark mode: Funcional
 
 **Portal Estudiante:**
+
 - Estilo: Brawl Stars (cartoon, vibrante)
 - Fondo: Animado con partículas/estrellas
 - Colores: Neones, brillantes
@@ -888,14 +924,17 @@ Schemas compartidos entre frontend y backend:
 ### 8.3. Sistema de Modales/Overlays
 
 **Portal Admin:**
+
 - Modales estándar con backdrop
 - Componente: `components/ui/Modal.tsx`
 
 **Portal Docente:**
+
 - Modales glassmorphism
 - NotificationCenter: Dropdown con backdrop
 
 **Portal Estudiante:**
+
 - Overlays fullscreen (slide from right)
 - Componente: `components/OverlayManager.tsx`
 - Ejemplos: PlanificacionView, MisionView
@@ -903,11 +942,13 @@ Schemas compartidos entre frontend y backend:
 ### 8.4. Sistema de Notificaciones UI
 
 **Portal Admin:**
+
 - Panel hardcodeado (3 notificaciones demo)
 - Sin integración real
 - Ubicación: Topbar derecha
 
 **Portal Docente:**
+
 - **Componente:** `components/docente/NotificationCenter.tsx`
 - **Features:**
   - Badge con contador de no leídas
@@ -921,6 +962,7 @@ Schemas compartidos entre frontend y backend:
 - **Ubicación:** Topbar derecha
 
 **Portal Estudiante:**
+
 - **View:** `views/NotificacionesView.tsx`
 - **Características:**
   - Notificaciones "virtuales" (construidas desde otros endpoints)
@@ -934,6 +976,7 @@ Schemas compartidos entre frontend y backend:
 **Library:** Framer Motion 12.23.24
 
 **Uso:**
+
 - Transiciones de página
 - Hover states
 - Modales (fade + scale)
@@ -941,6 +984,7 @@ Schemas compartidos entre frontend y backend:
 - Confetti explosions (canvas-confetti)
 
 **Ejemplo:**
+
 ```tsx
 <motion.div
   initial={{ opacity: 0, y: 20 }}
@@ -954,11 +998,13 @@ Schemas compartidos entre frontend y backend:
 ### 8.6. Charts y Visualizaciones
 
 **Libraries:**
+
 - Chart.js 4.5.1
 - react-chartjs-2 5.3.0
 - Recharts 3.2.1
 
 **Uso:**
+
 - Dashboard admin (gráficos profesionales)
 - Dashboard docente (estadísticas)
 - Portal estudiante (progreso, XP)
@@ -971,13 +1017,13 @@ Schemas compartidos entre frontend y backend:
 
 **Fuente:** `notificaciones.service.ts`
 
-| Evento | Trigger | Método | Usuario Destino |
-|--------|---------|--------|-----------------|
-| **Clase Próxima** | 24h antes de clase | `notificarClaseProxima()` | Docente |
-| **Asistencia Pendiente** | Post-clase sin asistencia | `notificarAsistenciaPendiente()` | Docente |
-| **Estudiante Alerta** | Rendimiento bajo | `notificarEstudianteAlerta()` | Docente |
-| **Clase Cancelada** | Admin/Docente cancela | `notificarClaseCancelada()` | Docente |
-| **Logro Desbloqueado** | Estudiante logra objetivo | `notificarLogroEstudiante()` | Docente |
+| Evento                   | Trigger                   | Método                           | Usuario Destino |
+| ------------------------ | ------------------------- | -------------------------------- | --------------- |
+| **Clase Próxima**        | 24h antes de clase        | `notificarClaseProxima()`        | Docente         |
+| **Asistencia Pendiente** | Post-clase sin asistencia | `notificarAsistenciaPendiente()` | Docente         |
+| **Estudiante Alerta**    | Rendimiento bajo          | `notificarEstudianteAlerta()`    | Docente         |
+| **Clase Cancelada**      | Admin/Docente cancela     | `notificarClaseCancelada()`      | Docente         |
+| **Logro Desbloqueado**   | Estudiante logra objetivo | `notificarLogroEstudiante()`     | Docente         |
 
 **Ejemplo de Integración:**
 
@@ -987,16 +1033,12 @@ Promise.allSettled([
   // Operación principal
   this.prisma.clase.update({
     where: { id },
-    data: { estado: EstadoClase.Cancelada }
+    data: { estado: EstadoClase.Cancelada },
   }),
 
   // Notificación secundaria
-  this.notificacionesService.notificarClaseCancelada(
-    clase.docente_id,
-    id,
-    claseTitulo
-  )
-])
+  this.notificacionesService.notificarClaseCancelada(clase.docente_id, id, claseTitulo),
+]);
 ```
 
 ### 9.2. Sistema de Logging (Winston)
@@ -1004,11 +1046,13 @@ Promise.allSettled([
 **Configuración:** `common/logger/logger.service.ts`
 
 **Características:**
+
 - Logs estructurados con contexto
 - Rotación diaria de archivos
 - Metadata enriquecida
 
 **Campos de Metadata:**
+
 - `eventType` - Tipo de evento
 - `operation` - Operación realizada
 - `userId` - ID del usuario
@@ -1020,6 +1064,7 @@ Promise.allSettled([
 - `userAgent` - User agent
 
 **Niveles:**
+
 - `error` - Errores críticos
 - `warn` - Advertencias
 - `info` - Información general
@@ -1027,13 +1072,14 @@ Promise.allSettled([
 - `debug` - Debugging detallado
 
 **Ejemplo:**
+
 ```typescript
 this.logger.log('Clase cancelada', {
   eventType: 'clase_cancelada',
   operation: 'cancelar_clase',
   userId: docente.id,
   userRole: 'docente',
-  claseId: clase.id
+  claseId: clase.id,
 });
 ```
 
@@ -1042,11 +1088,13 @@ this.logger.log('Clase cancelada', {
 **Archivo:** `common/interceptors/logging.interceptor.ts`
 
 **Función:**
+
 - Registra TODAS las requests HTTP
 - Calcula duración
 - Incluye método, URL, status code, userId
 
 **Output:**
+
 ```
 [HTTP] GET /api/notificaciones 200 - 45ms - userId: abc123
 ```
@@ -1056,6 +1104,7 @@ this.logger.log('Clase cancelada', {
 **Modelo:** `Evento` (Prisma)
 
 **Tipos:**
+
 - **CLASE** - Referencias a clases del sistema
 - **TAREA** - Tareas pedagógicas con subtareas, archivos, recurrencia
 - **RECORDATORIO** - Recordatorios simples
@@ -1064,6 +1113,7 @@ this.logger.log('Clase cancelada', {
 **Servicio:** `eventos.service.ts`
 
 **Features:**
+
 - CRUD completo
 - Filtrado por fechas, tipo, categoría
 - Búsqueda
@@ -1075,6 +1125,7 @@ this.logger.log('Clase cancelada', {
 **⚠️ No hay tabla de logs de actividad del usuario**
 
 **Potencial implementación:**
+
 ```prisma
 model ActividadUsuario {
   id         String   @id @default(cuid())
@@ -1118,14 +1169,15 @@ model ActividadUsuario {
 
 ### 10.2. Roles del Sistema
 
-| Rol | Tabla | Descripción |
-|-----|-------|-------------|
-| **tutor** | Tutor | Padres que gestionan estudiantes y pagos |
+| Rol            | Tabla      | Descripción                                  |
+| -------------- | ---------- | -------------------------------------------- |
+| **tutor**      | Tutor      | Padres que gestionan estudiantes y pagos     |
 | **estudiante** | Estudiante | Alumnos que acceden al portal de aprendizaje |
-| **docente** | Docente | Profesores que dictan clases |
-| **admin** | Admin | Administradores del sistema |
+| **docente**    | Docente    | Profesores que dictan clases                 |
+| **admin**      | Admin      | Administradores del sistema                  |
 
 **Multi-Rol:**
+
 - Docentes pueden tener `roles: ["docente", "admin"]`
 - Admins pueden tener `roles: ["admin", "docente"]`
 - Frontend maneja `selectedRole` para cambiar entre roles
@@ -1133,21 +1185,25 @@ model ActividadUsuario {
 ### 10.3. Guards y Estrategias
 
 **JWT Strategy:**
+
 - Extrae token de cookie `auth_token`
 - Valida con JwtService
 - Adjunta `user` al request
 
 **Guards:**
+
 1. **JwtAuthGuard** - Verifica que el usuario esté autenticado
 2. **RolesGuard** - Verifica que el usuario tenga el rol requerido
 3. **TokenBlacklistGuard** - Verifica que el token no esté invalidado
 
 **Decorators:**
+
 - `@Public()` - Excluye de autenticación
 - `@Roles('admin', 'docente')` - Requiere roles específicos
 - `@GetUser()` - Extrae el usuario del request
 
 **Ejemplo:**
+
 ```typescript
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.Docente)
@@ -1160,6 +1216,7 @@ async getMisClases(@GetUser() user) {
 ### 10.4. Cambio de Contraseña Forzado
 
 **Flujo:**
+
 1. Admin crea usuario con `password_temporal`
 2. Usuario ve `debe_cambiar_password: true`
 3. Frontend redirige a página de cambio de contraseña
@@ -1170,12 +1227,14 @@ async getMisClases(@GetUser() user) {
 ### 10.5. Logout y Token Blacklist
 
 **Flujo:**
+
 1. Usuario hace logout
 2. Backend agrega token a blacklist (Redis)
 3. Frontend limpia store
 4. Cookie se elimina (max-age 0)
 
 **TokenBlacklistGuard:**
+
 - Verifica en cada request que el token no esté en blacklist
 - Si está, retorna 401
 
@@ -1278,11 +1337,7 @@ export class NotificacionesService {
   }
 
   // 🆕 Método para listar por usuario (cualquier tipo)
-  async findByUsuario(
-    usuario_id: string,
-    usuario_tipo: UsuarioTipo,
-    soloNoLeidas?: boolean
-  ) {
+  async findByUsuario(usuario_id: string, usuario_tipo: UsuarioTipo, soloNoLeidas?: boolean) {
     return this.prisma.notificacion.findMany({
       where: {
         usuario_id,
@@ -1294,10 +1349,7 @@ export class NotificacionesService {
   }
 
   // Métodos específicos por tipo de notificación
-  async notificarLogrosDesbloqueados(
-    estudiante_id: string,
-    logro: Logro
-  ) {
+  async notificarLogrosDesbloqueados(estudiante_id: string, logro: Logro) {
     // Notificar al estudiante
     await this.create({
       usuario_id: estudiante_id,
@@ -1323,10 +1375,7 @@ export class NotificacionesService {
     });
   }
 
-  async notificarPagoRecibido(
-    tutor_id: string,
-    pago: Pago
-  ) {
+  async notificarPagoRecibido(tutor_id: string, pago: Pago) {
     await this.create({
       usuario_id: tutor_id,
       usuario_tipo: UsuarioTipo.Tutor,
@@ -1337,10 +1386,7 @@ export class NotificacionesService {
     });
   }
 
-  async notificarAdminEstudianteNuevo(
-    admin_id: string,
-    estudiante: Estudiante
-  ) {
+  async notificarAdminEstudianteNuevo(admin_id: string, estudiante: Estudiante) {
     await this.create({
       usuario_id: admin_id,
       usuario_tipo: UsuarioTipo.Admin,
@@ -1361,18 +1407,11 @@ export class NotificacionesService {
 export class NotificacionesController {
   // 🆕 Endpoint genérico (detecta rol del usuario)
   @Get()
-  async findAll(
-    @GetUser() user,
-    @Query('soloNoLeidas') soloNoLeidas?: string
-  ) {
+  async findAll(@GetUser() user, @Query('soloNoLeidas') soloNoLeidas?: string) {
     // Determinar tipo de usuario desde JWT
     const usuario_tipo = this.mapRoleToUsuarioTipo(user.role);
 
-    return this.notificacionesService.findByUsuario(
-      user.id,
-      usuario_tipo,
-      soloNoLeidas === 'true'
-    );
+    return this.notificacionesService.findByUsuario(user.id, usuario_tipo, soloNoLeidas === 'true');
   }
 
   @Get('/count')
@@ -1390,19 +1429,21 @@ export class NotificacionesController {
   @Patch('/leer-todas')
   async marcarTodasLeidas(@GetUser() user) {
     const usuario_tipo = this.mapRoleToUsuarioTipo(user.role);
-    return this.notificacionesService.marcarTodasComoLeidas(
-      user.id,
-      usuario_tipo
-    );
+    return this.notificacionesService.marcarTodasComoLeidas(user.id, usuario_tipo);
   }
 
   private mapRoleToUsuarioTipo(role: string): UsuarioTipo {
     switch (role) {
-      case 'tutor': return UsuarioTipo.Tutor;
-      case 'estudiante': return UsuarioTipo.Estudiante;
-      case 'docente': return UsuarioTipo.Docente;
-      case 'admin': return UsuarioTipo.Admin;
-      default: throw new BadRequestException('Rol inválido');
+      case 'tutor':
+        return UsuarioTipo.Tutor;
+      case 'estudiante':
+        return UsuarioTipo.Estudiante;
+      case 'docente':
+        return UsuarioTipo.Docente;
+      case 'admin':
+        return UsuarioTipo.Admin;
+      default:
+        throw new BadRequestException('Rol inválido');
     }
   }
 }
@@ -1433,14 +1474,8 @@ interface NotificationCenterProps {
 }
 
 export function NotificationCenter({ variant }: NotificationCenterProps) {
-  const {
-    notificaciones,
-    count,
-    isLoading,
-    marcarLeida,
-    marcarTodas,
-    eliminar,
-  } = useNotificationCenter();
+  const { notificaciones, count, isLoading, marcarLeida, marcarTodas, eliminar } =
+    useNotificationCenter();
 
   // Adaptar estilos según variant
   const styles = getStylesByVariant(variant);
@@ -1454,7 +1489,7 @@ export function NotificationCenter({ variant }: NotificationCenterProps) {
 
       {/* Dropdown con notificaciones */}
       <div className={styles.dropdown}>
-        {notificaciones.map(n => (
+        {notificaciones.map((n) => (
           <NotificationItem
             key={n.id}
             notification={n}
@@ -1488,6 +1523,7 @@ export function NotificationCenter({ variant }: NotificationCenterProps) {
 ### 11.3. Eventos a Notificar por Rol
 
 #### **Admin:**
+
 - Nuevo estudiante registrado
 - Nueva reserva de clase
 - Cancelación de reserva
@@ -1496,6 +1532,7 @@ export function NotificationCenter({ variant }: NotificationCenterProps) {
 - Alerta de sistema
 
 #### **Docente:**
+
 - Clase próxima (24h antes)
 - Asistencia pendiente
 - Estudiante con alerta
@@ -1504,6 +1541,7 @@ export function NotificationCenter({ variant }: NotificationCenterProps) {
 - Logro desbloqueado por estudiante
 
 #### **Estudiante:**
+
 - Logro desbloqueado
 - Clase próxima
 - Clase cancelada
@@ -1512,6 +1550,7 @@ export function NotificationCenter({ variant }: NotificationCenterProps) {
 - Recompensa obtenida
 
 #### **Tutor (Padre):**
+
 - Logro desbloqueado por hijo/a
 - Asistencia registrada
 - Pago próximo a vencer
@@ -1522,6 +1561,7 @@ export function NotificationCenter({ variant }: NotificationCenterProps) {
 ### 11.4. Roadmap de Implementación
 
 **Fase 1: Migración del Modelo (1-2 días)**
+
 - [ ] Crear migración Prisma para extender `Notificacion`
 - [ ] Agregar campos `usuario_id`, `usuario_tipo`
 - [ ] Alinear enum `TipoNotificacion`
@@ -1529,31 +1569,37 @@ export function NotificationCenter({ variant }: NotificationCenterProps) {
 - [ ] Migrar datos existentes
 
 **Fase 2: Backend Unificado (2-3 días)**
+
 - [ ] Refactorizar `NotificacionesService` con métodos genéricos
 - [ ] Actualizar `NotificacionesController` para soportar todos los roles
 - [ ] Agregar tests E2E para cada rol
 - [ ] Integrar notificaciones en eventos críticos del sistema
 
 **Fase 3: Frontend - Portal Admin (1 día)**
+
 - [ ] Reemplazar panel hardcodeado con `NotificationCenter`
 - [ ] Conectar a API real
 - [ ] Implementar React Query hooks
 
 **Fase 4: Frontend - Portal Estudiante (1 día)**
+
 - [ ] Migrar `NotificacionesView` a usar API real
 - [ ] Mantener UI gamificada
 - [ ] Agregar persistencia de estado leído/no leído
 
 **Fase 5: Frontend - Portal Tutor (1 día)**
+
 - [ ] Crear `NotificationCenter` para tutores
 - [ ] Integrar en layout del portal protegido
 
 **Fase 6: Real-Time (Opcional, 3-5 días)**
+
 - [ ] Agregar WebSocket gateway (NestJS)
 - [ ] Implementar Server-Sent Events (SSE)
 - [ ] Migrar de polling a eventos en tiempo real
 
 **Fase 7: Features Avanzados (Opcional, 5-7 días)**
+
 - [ ] Sistema de preferencias de notificaciones
 - [ ] Templates de email personalizados
 - [ ] CRON jobs para recordatorios
@@ -1563,16 +1609,19 @@ export function NotificationCenter({ variant }: NotificationCenterProps) {
 ### 11.5. Consideraciones de Performance
 
 **Backend:**
+
 - Índices en `[usuario_id, leida]` y `[usuario_id, createdAt]`
 - Paginación en listados (limit/offset)
 - Cache de contador de no leídas (Redis, TTL 30s)
 
 **Frontend:**
+
 - React Query con staleTime: 30s
 - Optimistic updates para UX instantáneo
 - Virtualización para listas largas (react-window)
 
 **Real-Time:**
+
 - WebSocket solo para usuarios activos
 - Fallback a polling si WebSocket falla
 - Heartbeat cada 30s para mantener conexión
@@ -1584,6 +1633,7 @@ export function NotificationCenter({ variant }: NotificationCenterProps) {
 El ecosistema Mateatletas está construido con arquitectura moderna y sólida:
 
 ✅ **Fortalezas:**
+
 - Monorepo bien estructurado (Turbo + npm workspaces)
 - Backend robusto (NestJS + Prisma + PostgreSQL)
 - Frontend moderno (Next.js 14 + React Query + Zustand)
@@ -1593,6 +1643,7 @@ El ecosistema Mateatletas está construido con arquitectura moderna y sólida:
 - Sistema de notificaciones funcional (Portal Docente)
 
 ⚠️ **Áreas de Mejora:**
+
 - Extender notificaciones a todos los roles
 - Migrar de polling a WebSocket (real-time)
 - Completar migración de Zustand a React Query

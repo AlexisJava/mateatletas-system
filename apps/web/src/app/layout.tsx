@@ -55,15 +55,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" style={{ backgroundColor: '#0a0a0f' }} className="dark">
-      <body className={`${nunito.variable} ${lilitaOne.variable} ${orbitron.variable} ${rajdhani.variable} antialiased text-white min-h-screen`} style={{ background: 'transparent' }}>
+      <body
+        className={`${nunito.variable} ${lilitaOne.variable} ${orbitron.variable} ${rajdhani.variable} antialiased text-white min-h-screen`}
+        style={{ background: 'transparent' }}
+      >
         {/* Fondo cosmos MEGA PREMIUM */}
         <CosmosBackground />
 
         {/* Contenido del sitio */}
         <div className="relative z-10">
-          <QueryProvider>
-            {children}
-          </QueryProvider>
+          <QueryProvider>{children}</QueryProvider>
           <Toaster position="top-right" richColors />
         </div>
       </body>

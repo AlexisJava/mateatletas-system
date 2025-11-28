@@ -30,12 +30,12 @@ export default function Pregunta3({ respuestas, setRespuestas }: Pregunta3Props)
     const yaSeleccionado = juegosActuales.includes(juego);
 
     const nuevosJuegos = yaSeleccionado
-      ? juegosActuales.filter(j => j !== juego)
+      ? juegosActuales.filter((j) => j !== juego)
       : [...juegosActuales, juego];
 
     setRespuestas({
       ...respuestas,
-      juegos_favoritos: nuevosJuegos
+      juegos_favoritos: nuevosJuegos,
     });
   };
 
@@ -44,12 +44,12 @@ export default function Pregunta3({ respuestas, setRespuestas }: Pregunta3Props)
     const yaSeleccionado = contenidoActual.includes(contenido);
 
     const nuevoContenido = yaSeleccionado
-      ? contenidoActual.filter(c => c !== contenido)
+      ? contenidoActual.filter((c) => c !== contenido)
       : [...contenidoActual, contenido];
 
     setRespuestas({
       ...respuestas,
-      contenido_consume: nuevoContenido
+      contenido_consume: nuevoContenido,
     });
   };
 
@@ -69,9 +69,7 @@ export default function Pregunta3({ respuestas, setRespuestas }: Pregunta3Props)
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
                 ¿Cuáles son sus juegos favoritos? 🎮
               </h2>
-              <p className="text-slate-400 text-lg">
-                Esto nos da pistas clave sobre sus intereses
-              </p>
+              <p className="text-slate-400 text-lg">Esto nos da pistas clave sobre sus intereses</p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 max-w-5xl mx-auto w-full">
@@ -85,9 +83,10 @@ export default function Pregunta3({ respuestas, setRespuestas }: Pregunta3Props)
                     className={`
                       px-4 py-6 rounded-xl font-semibold text-center transition-all
                       border-2 flex flex-col items-center gap-2
-                      ${isSelected
-                        ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-400 shadow-lg'
-                        : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-400 shadow-lg'
+                          : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
                       }
                     `}
                     whileHover={{ scale: 1.05 }}
@@ -132,9 +131,7 @@ export default function Pregunta3({ respuestas, setRespuestas }: Pregunta3Props)
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
                 ¿Qué videos mira en YouTube/TikTok?
               </h2>
-              <p className="text-slate-400 text-lg">
-                Nos ayuda a entender sus intereses
-              </p>
+              <p className="text-slate-400 text-lg">Nos ayuda a entender sus intereses</p>
             </div>
 
             <div className="grid grid-cols-3 md:grid-cols-4 gap-3 max-w-5xl mx-auto w-full">
@@ -148,9 +145,10 @@ export default function Pregunta3({ respuestas, setRespuestas }: Pregunta3Props)
                     className={`
                       px-4 py-5 rounded-xl font-semibold text-center transition-all
                       border-2 flex flex-col items-center gap-2
-                      ${isSelected
-                        ? 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400 shadow-lg'
-                        : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-400 shadow-lg'
+                          : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
                       }
                     `}
                     whileHover={{ scale: 1.05 }}
@@ -203,9 +201,7 @@ export default function Pregunta3({ respuestas, setRespuestas }: Pregunta3Props)
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
                 Cuando crea algo, ¿cómo lo hace?
               </h2>
-              <p className="text-slate-400 text-lg">
-                En Minecraft, dibujos, Legos, etc.
-              </p>
+              <p className="text-slate-400 text-lg">En Minecraft, dibujos, Legos, etc.</p>
             </div>
 
             <div className="grid gap-4 max-w-4xl mx-auto w-full">
@@ -218,15 +214,16 @@ export default function Pregunta3({ respuestas, setRespuestas }: Pregunta3Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        estilo_creativo: opcion.value as any
+                        estilo_creativo: opcion.value as any,
                       });
                     }}
                     className={`
                       px-8 py-6 rounded-2xl font-semibold text-left transition-all
                       border-2 flex items-center gap-4
-                      ${isSelected
-                        ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400 scale-[1.02]'
-                        : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
+                      ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400 scale-[1.02]'
+                          : 'bg-slate-800/50 border-slate-700 hover:border-slate-600'
                       }
                     `}
                     whileHover={{ scale: 1.01 }}

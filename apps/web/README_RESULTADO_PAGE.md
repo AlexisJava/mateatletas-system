@@ -102,6 +102,7 @@ Esta es la página **MÁS IMPORTANTE** del funnel de conversión. Aquí es donde
 ## 🎨 Diseño y Estética
 
 ### Colores Principales
+
 - **Background:** `slate-950/900` (degradado)
 - **Cards:** `slate-900/60` con `backdrop-blur-xl`
 - **Acentos:** Gradientes `cyan-500` → `purple-500` → `pink-500`
@@ -109,11 +110,13 @@ Esta es la página **MÁS IMPORTANTE** del funnel de conversión. Aquí es donde
 - **Texto:** `white` (títulos), `slate-300/400` (body)
 
 ### Tipografía
+
 - **Títulos:** `font-black` (900), `text-4xl` a `text-6xl`
 - **Subtítulos:** `font-bold` (700), `text-xl` a `text-2xl`
 - **Body:** `font-normal` (400), `text-base` a `text-lg`
 
 ### Animaciones
+
 - **Biblioteca:** Framer Motion
 - **Entrada:** `opacity: 0 → 1`, `y: 20 → 0`
 - **Stagger:** Delay de 0.1-0.2s entre elementos
@@ -140,28 +143,28 @@ Estos mensajes aparecen **múltiples veces** en la página:
 
 ```typescript
 // Page view inicial
-trackResultadoPageView(rutaId, rutaNombre)
+trackResultadoPageView(rutaId, rutaNombre);
 
 // Clicks en comprar
-trackComprarClick('ruta_completa' | 'individual', precio, moneda)
+trackComprarClick('ruta_completa' | 'individual', precio, moneda);
 
 // Scroll depth (25%, 50%, 75%, 100%)
-trackScrollDepth(percentage)
+trackScrollDepth(percentage);
 
 // Expandir curso en timeline
-trackCursoExpand(cursoId, cursoNombre)
+trackCursoExpand(cursoId, cursoNombre);
 
 // Cambio de cantidad de hijos
-trackMultipleHijoChange(cantidad, precioTotal)
+trackMultipleHijoChange(cantidad, precioTotal);
 
 // Expandir FAQ
-trackFAQExpand(pregunta, index)
+trackFAQExpand(pregunta, index);
 
 // Click en ruta alternativa
-trackRutaAlternativaClick(rutaId, rutaNombre)
+trackRutaAlternativaClick(rutaId, rutaNombre);
 
 // Cambio de moneda
-trackMonedaChange('USD' | 'ARS')
+trackMonedaChange('USD' | 'ARS');
 ```
 
 ### Métricas Objetivo
@@ -178,6 +181,7 @@ trackMonedaChange('USD' | 'ARS')
 ## 🧪 Testing Checklist
 
 ### Funcionalidad
+
 - [ ] Header muestra datos del quiz correctamente
 - [ ] Timeline muestra 4 cursos en orden
 - [ ] Cards de cursos se expanden/colapsan
@@ -188,6 +192,7 @@ trackMonedaChange('USD' | 'ARS')
 - [ ] Todos los botones "Inscribir" funcionan
 
 ### Responsive
+
 - [ ] Mobile (320px - 480px) ✅
 - [ ] Tablet (768px - 1024px) ✅
 - [ ] Desktop (1024px+) ✅
@@ -195,12 +200,14 @@ trackMonedaChange('USD' | 'ARS')
 - [ ] Grid stack correctamente ✅
 
 ### Performance
+
 - [ ] Animaciones 60fps ✅
 - [ ] Sin layout shifts ✅
 - [ ] Lighthouse > 85 ⏳
 - [ ] Sin errores de consola ✅
 
 ### Conversión
+
 - [ ] CTA imposible de ignorar ✅
 - [ ] Ahorro destacado múltiples veces ✅
 - [ ] Garantía reduce ansiedad ✅
@@ -239,6 +246,7 @@ trackMonedaChange('USD' | 'ARS')
 ## 💡 Tips de Conversión
 
 ### Lo que FUNCIONA
+
 1. **Personalización:** Usar el nombre del estudiante 5+ veces
 2. **Ahorro destacado:** $75.000 es un número grande y llamativo
 3. **Garantía sin riesgo:** Elimina fricción de compra
@@ -246,6 +254,7 @@ trackMonedaChange('USD' | 'ARS')
 5. **Urgencia sutil:** "Ya está todo organizado para [nombre]"
 
 ### Lo que NO hacer
+
 1. ❌ Agregar más opciones de pago (confunde)
 2. ❌ Poner precio muy arriba (asustar antes de ver valor)
 3. ❌ Testimonios genéricos o falsos

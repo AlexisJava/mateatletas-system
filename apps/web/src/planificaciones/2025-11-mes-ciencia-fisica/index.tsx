@@ -77,22 +77,21 @@ export default function MesMatematicaFisica() {
 // CONTENIDO
 // ============================================================================
 function ContenidoPlanificacion() {
-  const {
-    progreso,
-    guardarEstado,
-  } = usePlanificacion();
+  const { progreso, guardarEstado } = usePlanificacion();
 
   // Estado local del juego
   const [estadoLocal, setEstadoLocal] = useState<EstadoFisica>(() => {
     const estadoGuardado = progreso?.estadoGuardado as EstadoFisica | null;
-    return estadoGuardado || {
-      actividadActual: 1,
-      puntosActividad: [0, 0, 0, 0],
-      estrellasActividad: [0, 0, 0, 0],
-      tiempoActividad: [0, 0, 0, 0],
-      maquinasConstruidas: [],
-      mejorRacha: 0,
-    };
+    return (
+      estadoGuardado || {
+        actividadActual: 1,
+        puntosActividad: [0, 0, 0, 0],
+        estrellasActividad: [0, 0, 0, 0],
+        tiempoActividad: [0, 0, 0, 0],
+        maquinasConstruidas: [],
+        mejorRacha: 0,
+      }
+    );
   });
 
   // Actividad actual
@@ -160,17 +159,19 @@ function ContenidoPlanificacion() {
   return (
     <div className="min-h-screen bg-slate-950 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-
         {/* Header con Grid Pattern */}
         <div className="relative rounded-2xl overflow-hidden border-2 border-slate-700/50 bg-slate-900/50">
           {/* Grid Pattern Background */}
-          <div className="absolute inset-0 opacity-30" style={{
-            backgroundImage: `
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage: `
               linear-gradient(rgba(100, 116, 139, 0.1) 1px, transparent 1px),
               linear-gradient(90deg, rgba(100, 116, 139, 0.1) 1px, transparent 1px)
             `,
-            backgroundSize: '32px 32px'
-          }} />
+              backgroundSize: '32px 32px',
+            }}
+          />
 
           <div className="relative p-6">
             <div className="flex items-start justify-between">
@@ -197,14 +198,18 @@ function ContenidoPlanificacion() {
                     <Star className="w-5 h-5 text-yellow-400" fill="currentColor" />
                     <span className="text-2xl font-black text-yellow-400">{estrellasTotal}</span>
                   </div>
-                  <p className="text-[10px] font-bold text-yellow-400/60 uppercase text-center">Estrellas</p>
+                  <p className="text-[10px] font-bold text-yellow-400/60 uppercase text-center">
+                    Estrellas
+                  </p>
                 </div>
                 <div className="px-4 py-2 rounded-xl bg-purple-500/10 border-2 border-purple-500/30">
                   <div className="flex items-center gap-2 mb-0.5">
                     <Trophy className="w-5 h-5 text-purple-400" fill="currentColor" />
                     <span className="text-2xl font-black text-purple-400">{puntosTotal}</span>
                   </div>
-                  <p className="text-[10px] font-bold text-purple-400/60 uppercase text-center">Puntos</p>
+                  <p className="text-[10px] font-bold text-purple-400/60 uppercase text-center">
+                    Puntos
+                  </p>
                 </div>
               </div>
             </div>
@@ -212,9 +217,9 @@ function ContenidoPlanificacion() {
             {/* Narrativa */}
             <div className="mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
               <p className="text-sm text-amber-100 leading-relaxed">
-                ⚡ <strong>MISIÓN:</strong> Eres físico experimental y debes diseñar máquinas, calcular fuerzas,
-                velocidades y energías para resolver desafíos del mundo real como construir puentes,
-                lanzar cohetes y optimizar trayectorias.
+                ⚡ <strong>MISIÓN:</strong> Eres físico experimental y debes diseñar máquinas,
+                calcular fuerzas, velocidades y energías para resolver desafíos del mundo real como
+                construir puentes, lanzar cohetes y optimizar trayectorias.
               </p>
             </div>
           </div>
@@ -228,7 +233,7 @@ function ContenidoPlanificacion() {
               ACTIVIDADES DISPONIBLES
             </h3>
             <span className="text-sm text-slate-400 font-medium">
-              {actividades.filter(a => !a.bloqueada).length} de {actividades.length} desbloqueadas
+              {actividades.filter((a) => !a.bloqueada).length} de {actividades.length} desbloqueadas
             </span>
           </div>
 
@@ -243,24 +248,30 @@ function ContenidoPlanificacion() {
                   actividadActual === actividad.numero
                     ? 'scale-105'
                     : actividad.bloqueada
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:scale-[1.02] opacity-90 hover:opacity-100'
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:scale-[1.02] opacity-90 hover:opacity-100'
                 }`}
               >
                 {/* Card */}
-                <div className={`relative rounded-2xl overflow-hidden border-4 transition-all ${
-                  actividadActual === actividad.numero
-                    ? 'border-cyan-500 shadow-2xl shadow-cyan-500/20'
-                    : 'border-slate-700/50 shadow-xl'
-                }`}>
-
+                <div
+                  className={`relative rounded-2xl overflow-hidden border-4 transition-all ${
+                    actividadActual === actividad.numero
+                      ? 'border-cyan-500 shadow-2xl shadow-cyan-500/20'
+                      : 'border-slate-700/50 shadow-xl'
+                  }`}
+                >
                   {/* Header colorido */}
-                  <div className={`${
-                    actividad.numero === 1 ? 'bg-amber-600' :
-                    actividad.numero === 2 ? 'bg-red-600' :
-                    actividad.numero === 3 ? 'bg-rose-600' :
-                    'bg-orange-600'
-                  } p-4`}>
+                  <div
+                    className={`${
+                      actividad.numero === 1
+                        ? 'bg-amber-600'
+                        : actividad.numero === 2
+                          ? 'bg-red-600'
+                          : actividad.numero === 3
+                            ? 'bg-rose-600'
+                            : 'bg-orange-600'
+                    } p-4`}
+                  >
                     <div className="flex items-start justify-between mb-3">
                       {/* Número */}
                       <div className="w-12 h-12 rounded-xl bg-black/40 backdrop-blur-sm flex items-center justify-center border-2 border-white/20">
@@ -269,8 +280,12 @@ function ContenidoPlanificacion() {
 
                       {/* Puntos */}
                       <div className="text-right">
-                        <div className="text-3xl font-black text-white leading-none">+{actividad.puntos}</div>
-                        <div className="text-xs font-bold text-white/80 uppercase tracking-wide">PUNTOS</div>
+                        <div className="text-3xl font-black text-white leading-none">
+                          +{actividad.puntos}
+                        </div>
+                        <div className="text-xs font-bold text-white/80 uppercase tracking-wide">
+                          PUNTOS
+                        </div>
                       </div>
                     </div>
 
@@ -288,13 +303,16 @@ function ContenidoPlanificacion() {
                   {/* Body con grid pattern */}
                   <div className="relative bg-slate-800 p-4">
                     {/* Grid Pattern Sutil */}
-                    <div className="absolute inset-0 opacity-20" style={{
-                      backgroundImage: `
+                    <div
+                      className="absolute inset-0 opacity-20"
+                      style={{
+                        backgroundImage: `
                         linear-gradient(rgba(100, 116, 139, 0.15) 1px, transparent 1px),
                         linear-gradient(90deg, rgba(100, 116, 139, 0.15) 1px, transparent 1px)
                       `,
-                      backgroundSize: '24px 24px'
-                    }} />
+                        backgroundSize: '24px 24px',
+                      }}
+                    />
 
                     {/* Descripción */}
                     <p className="relative text-sm text-slate-300 mb-4 leading-relaxed">
@@ -307,7 +325,7 @@ function ContenidoPlanificacion() {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-green-400 font-bold">Completado</span>
                           <span className="text-green-300">
-                            {(estadoLocal.puntosActividad?.[actividad.numero - 1] ?? 0)} pts
+                            {estadoLocal.puntosActividad?.[actividad.numero - 1] ?? 0} pts
                           </span>
                         </div>
                       </div>
@@ -379,16 +397,10 @@ function ActividadContent({ numero }: ActividadContentProps) {
       <div className="w-24 h-24 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-6">
         <Zap className="w-12 h-12 text-amber-500" />
       </div>
-      <h3 className="text-2xl font-black text-white mb-2">
-        ACTIVIDAD {numero}
-      </h3>
-      <p className="text-slate-400 mb-6">
-        Contenido de la actividad en desarrollo...
-      </p>
+      <h3 className="text-2xl font-black text-white mb-2">ACTIVIDAD {numero}</h3>
+      <p className="text-slate-400 mb-6">Contenido de la actividad en desarrollo...</p>
       <div className="inline-block px-6 py-3 rounded-xl bg-slate-800 border border-slate-700">
-        <p className="text-sm text-slate-400">
-          Próximamente: Simulador interactivo de física
-        </p>
+        <p className="text-sm text-slate-400">Próximamente: Simulador interactivo de física</p>
       </div>
     </div>
   );

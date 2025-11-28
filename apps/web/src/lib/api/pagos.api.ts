@@ -26,15 +26,12 @@ import { preferenciaPagoSchema, inscripcionesCursoListSchema } from '@/lib/schem
  * Crear preferencia de pago para suscripción
  * POST /api/pagos/suscripcion
  */
-export const crearPreferenciaSuscripcion = async (
-  productoId: string,
-): Promise<PreferenciaPago> => {
+export const crearPreferenciaSuscripcion = async (productoId: string): Promise<PreferenciaPago> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.post(
-      '/pagos/suscripcion',
-      { producto_id: productoId } as CrearPreferenciaSuscripcionRequest,
-    );
+    const response = await axios.post('/pagos/suscripcion', {
+      producto_id: productoId,
+    } as CrearPreferenciaSuscripcionRequest);
     return preferenciaPagoSchema.parse(response) as PreferenciaPago;
   } catch (error) {
     console.error('Error al crear la preferencia de suscripción:', error);
@@ -84,17 +81,11 @@ export const getMembresiaActual = async (): Promise<Membresia | null> => {
  * Obtener estado de una membresía específica
  * GET /api/pagos/membresia/:id/estado
  */
-export const getEstadoMembresia = async (
-  membresiaId: string,
-): Promise<EstadoMembresiaResponse> => {
+export const getEstadoMembresia = async (membresiaId: string): Promise<EstadoMembresiaResponse> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.get(
-      `/pagos/membresia/${membresiaId}/estado`,
-    );
-    return estadoMembresiaResponseSchema.parse(
-      response,
-    ) as EstadoMembresiaResponse;
+    const response = await axios.get(`/pagos/membresia/${membresiaId}/estado`);
+    return estadoMembresiaResponseSchema.parse(response) as EstadoMembresiaResponse;
   } catch (error) {
     console.error('Error al obtener el estado de la membresía:', error);
     throw error;
@@ -120,14 +111,10 @@ export const getInscripciones = async (): Promise<InscripcionCurso[]> => {
  * Activar membresía manualmente (MOCK para desarrollo)
  * POST /api/pagos/mock/activar-membresia/:id
  */
-export const activarMembresiaManual = async (
-  membresiaId: string,
-): Promise<Membresia> => {
+export const activarMembresiaManual = async (membresiaId: string): Promise<Membresia> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.post(
-      `/pagos/mock/activar-membresia/${membresiaId}`,
-    );
+    const response = await axios.post(`/pagos/mock/activar-membresia/${membresiaId}`);
     return membresiaSchema.parse(response) as Membresia;
   } catch (error) {
     console.error('Error al activar manualmente la membresía:', error);
@@ -218,7 +205,9 @@ export const getHistorialCambios = async (): Promise<HistorialCambioPrecios[]> =
 export const getInscripcionesPendientes = async (): Promise<InscripcionMensualConRelaciones[]> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.get<InscripcionMensualConRelaciones[]>('/pagos/inscripciones/pendientes');
+    const response = await axios.get<InscripcionMensualConRelaciones[]>(
+      '/pagos/inscripciones/pendientes',
+    );
     return response;
   } catch (error) {
     console.error('Error al obtener las inscripciones pendientes:', error);
@@ -251,11 +240,14 @@ export const getEstudiantesConDescuentos = async (): Promise<EstudianteConDescue
  * @returns Configuración actualizada
  */
 export const updateConfiguracionPrecios = async (
-  data: ActualizarConfiguracionRequest
+  data: ActualizarConfiguracionRequest,
 ): Promise<ConfiguracionPrecios> => {
   try {
     // El interceptor ya retorna response.data directamente
-    const response = await axios.post<ConfiguracionPrecios>('/pagos/configuracion/actualizar', data);
+    const response = await axios.post<ConfiguracionPrecios>(
+      '/pagos/configuracion/actualizar',
+      data,
+    );
     return response;
   } catch (error) {
     console.error('Error al actualizar la configuración de precios:', error);

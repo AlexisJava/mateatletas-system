@@ -5,6 +5,7 @@
 ### Problemas Resueltos
 
 #### 1. **TypeScript Path Mappings**
+
 - **Problema**: Los paths en `tsconfig.json` usaban rutas relativas (`../../packages/...`) que fallaban en Vercel
 - **Solución**: Eliminados los path mappings custom, ahora usa resolución estándar de `node_modules`
 - **Archivos modificados**:
@@ -13,11 +14,13 @@
   - `packages/shared/tsconfig.json`
 
 #### 2. **Node.js Version Warning**
+
 - **Problema**: `"node": ">=18.0.0"` causaba warnings de auto-upgrade
 - **Solución**: Cambiado a `"node": "20.x"` (versión específica)
 - **Archivo modificado**: `package.json` (root)
 
 #### 3. **Configuración de Vercel Optimizada**
+
 - Agregado `vercel.json` con:
   - `--legacy-peer-deps` para dependencias peer
   - `NODE_OPTIONS=--max-old-space-size=4096` para builds grandes
@@ -26,11 +29,13 @@
 ## Verificación Local
 
 Build local exitoso:
+
 ```bash
 npm run build
 ```
 
 **Resultado esperado**:
+
 ```
 ✓ @mateatletas/contracts: compiled
 ✓ @mateatletas/shared: compiled
@@ -45,21 +50,26 @@ npm run build
 Asegúrate de configurar en Vercel Dashboard > Settings > Environment Variables:
 
 ### Database
+
 - `DATABASE_URL` (Production DB)
 - `DATABASE_URL_NON_POOLING` (Direct connection)
 
 ### Auth & Security
+
 - `JWT_SECRET`
 - `SESSION_SECRET`
 
 ### API URLs
+
 - `NEXT_PUBLIC_API_URL`
 
 ### Payments (MercadoPago)
+
 - `MERCADOPAGO_ACCESS_TOKEN`
 - `MERCADOPAGO_PUBLIC_KEY`
 
 ### Redis (opcional)
+
 - `REDIS_HOST`
 - `REDIS_PORT`
 - `REDIS_PASSWORD`
@@ -67,6 +77,7 @@ Asegúrate de configurar en Vercel Dashboard > Settings > Environment Variables:
 ## Comandos de Deploy
 
 ### Deploy a Production
+
 ```bash
 git add .
 git commit -m "fix: resolver errores de deployment Vercel"
@@ -76,6 +87,7 @@ git push origin main
 Vercel detectará el push y ejecutará el build automáticamente.
 
 ### Verificar Build en Vercel
+
 1. Ve a tu dashboard de Vercel
 2. Selecciona el proyecto "mateatletas-ecosystem"
 3. Verifica que el build termine con éxito
@@ -90,6 +102,7 @@ Vercel detectará el push y ejecutará el build automáticamente.
    - Verifica que no haya espacios extra o caracteres especiales
 
 2. **Revisar logs de build**:
+
    ```
    Vercel Dashboard > Deployments > [Failed Build] > View Build Logs
    ```

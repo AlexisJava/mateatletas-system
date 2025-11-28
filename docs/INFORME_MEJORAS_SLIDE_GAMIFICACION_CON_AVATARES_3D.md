@@ -19,6 +19,7 @@ Este informe analiza el estado actual del slide y propone **15 mejoras concretas
 ### Estructura Actual
 
 **Layout (Implementado):**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  HEADER (10vh)                                              │
@@ -48,12 +49,14 @@ Este informe analiza el estado actual del slide y propone **15 mejoras concretas
 ### Interactividad Actual del Avatar
 
 **Eventos Implementados:**
+
 - **Hover** → Wave animation (saluda)
 - **Click** → Animación aleatoria (clapping, dance, victory)
 - **Idle** → Animaciones automáticas cada 10-15s
 - **Racha >= 3 días** → Efecto de fuego (partículas)
 
 **Animaciones Usadas Actualmente:**
+
 - ⚠️ **Limitado a 3-4 animaciones genéricas**
 - ⚠️ No usa el 90% de las 30 animaciones disponibles
 - ⚠️ No hay contexto narrativo en las animaciones
@@ -61,6 +64,7 @@ Este informe analiza el estado actual del slide y propone **15 mejoras concretas
 ### Sistema de Gamificación Actual
 
 **Datos Mostrados:**
+
 - Nivel (1-10) con badge visual
 - Puntos XP con barra de progreso (ej: 450/1000)
 - 3 Stats Cards:
@@ -70,6 +74,7 @@ Este informe analiza el estado actual del slide y propone **15 mejoras concretas
 - Grupo/Comunidad (🔥 Fénix, 🐉 Dragón, 🐯 Tigre, 🦅 Águila)
 
 **Limitaciones Identificadas:**
+
 - ❌ Stats cards son estáticas (no animadas)
 - ❌ No hay feedback visual cuando ganas puntos
 - ❌ Barra de XP no anima el progreso
@@ -84,6 +89,7 @@ Este informe analiza el estado actual del slide y propone **15 mejoras concretas
 ### Inventario de Animaciones Disponibles
 
 **Distribución:**
+
 ```
 📦 Total: 30 animaciones GLB
 
@@ -107,24 +113,28 @@ Por Puntos Requeridos:
 ### Casos de Uso Potenciales
 
 **1. Reacciones Contextuales:**
+
 - Ganas 50 puntos → Avatar baila (dance animation)
 - Subes de nivel → Avatar celebra (victory animation)
 - Desbloqueas logro → Avatar aplaude (clapping animation)
 - Racha de 5 días → Avatar hace gesto épico (locomotion animation)
 
 **2. Feedback Visual Inmediato:**
+
 - Completas ejercicio → Avatar asiente satisfecho (expression)
 - Fallas ejercicio → Avatar piensa (thinking expression)
 - Entras al gimnasio → Avatar saluda (wave)
 - Inactividad → Avatar se aburre (idle variation)
 
 **3. Narrativa del Progreso:**
+
 - Nivel 1-3: Solo idle animations
 - Nivel 4-6: Desbloqueas expresiones
 - Nivel 7-9: Desbloqueas bailes
 - Nivel 10: Todas las animaciones + exclusivas
 
 **4. Personalización del Avatar:**
+
 - Estudiante elige "animación favorita" para victoria
 - Animación de entrada personalizada
 - Animaciones exclusivas por logros épicos
@@ -144,6 +154,7 @@ El avatar solo tiene 3-4 animaciones genéricas sin contexto.
 Implementar sistema de eventos que dispare animaciones específicas según la acción del estudiante.
 
 **Implementación:**
+
 ```typescript
 // apps/web/src/app/estudiante/gimnasio/hooks/useAvatarReactions.ts
 
@@ -187,6 +198,7 @@ export function useAvatarReactions() {
 ```
 
 **Integración en HubView:**
+
 ```typescript
 // En HubView.tsx
 
@@ -204,13 +216,16 @@ useEffect(() => {
 
 // Cuando el estudiante gana puntos:
 const handlePointsGained = (amount: number) => {
-  window.dispatchEvent(new CustomEvent('avatar:reaction', {
-    detail: { type: 'POINTS_GAINED', data: { amount } }
-  }));
+  window.dispatchEvent(
+    new CustomEvent('avatar:reaction', {
+      detail: { type: 'POINTS_GAINED', data: { amount } },
+    }),
+  );
 };
 ```
 
 **Impacto:**
+
 - ✅ Avatar reacciona a TODAS las acciones del estudiante
 - ✅ Uso de 15+ animaciones diferentes
 - ✅ Feedback visual inmediato y satisfactorio
@@ -229,6 +244,7 @@ Subir de nivel solo actualiza el número, sin celebración visual.
 Fullscreen overlay con animación épica del avatar cuando subes de nivel.
 
 **Diseño:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
@@ -248,6 +264,7 @@ Fullscreen overlay con animación épica del avatar cuando subes de nivel.
 ```
 
 **Implementación:**
+
 ```typescript
 // apps/web/src/app/estudiante/gimnasio/components/LevelUpModal.tsx
 
@@ -313,6 +330,7 @@ export function LevelUpModal({ newLevel, levelName, unlockedAnimations, onClose 
 ```
 
 **Impacto:**
+
 - ✅ Momento épico memorable
 - ✅ Muestra claramente las recompensas
 - ✅ Incentivo visual para seguir progresando
@@ -331,6 +349,7 @@ Las 30 animaciones existen pero el estudiante no sabe que puede desbloquearlas.
 Nueva vista "MIS ANIMACIONES" en el overlay stack que muestre todas las animaciones como colección.
 
 **Diseño:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  MIS ANIMACIONES                                     [ X ]   │
@@ -365,6 +384,7 @@ Nueva vista "MIS ANIMACIONES" en el overlay stack que muestre todas las animacio
 ```
 
 **Implementación:**
+
 ```typescript
 // apps/web/src/app/estudiante/gimnasio/overlays/MisAnimacionesView.tsx
 
@@ -441,6 +461,7 @@ export function MisAnimacionesView() {
 ```
 
 **Impacto:**
+
 - ✅ Visibilidad total de las animaciones
 - ✅ Incentivo claro para ganar puntos
 - ✅ Sensación de colección (como Pokémon)
@@ -459,6 +480,7 @@ La barra de XP es estática, no muestra visualmente cuando ganas puntos.
 Barra animada que crece con efecto de partículas y sonido al ganar XP.
 
 **Implementación:**
+
 ```typescript
 // apps/web/src/app/estudiante/gimnasio/components/AnimatedXPBar.tsx
 
@@ -568,6 +590,7 @@ export function AnimatedXPBar({ currentXP, requiredXP, onLevelUp }: AnimatedXPBa
 ```
 
 **Impacto:**
+
 - ✅ Feedback visual inmediato al ganar XP
 - ✅ Sensación de progreso satisfactoria
 - ✅ Efecto "juice" (micro-interacciones placenteras)
@@ -586,6 +609,7 @@ El estudiante no puede personalizar cómo reacciona su avatar.
 Permitir al estudiante elegir animaciones favoritas para eventos específicos.
 
 **Diseño:**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  PERSONALIZAR AVATAR                                        │
@@ -613,6 +637,7 @@ Permitir al estudiante elegir animaciones favoritas para eventos específicos.
 ```
 
 **Implementación:**
+
 ```typescript
 // Backend: apps/api/src/estudiantes/estudiantes.service.ts
 
@@ -698,6 +723,7 @@ export function PersonalizarAvatarView() {
 ```
 
 **Impacto:**
+
 - ✅ Personalización profunda
 - ✅ Ownership del avatar ("es MI avatar")
 - ✅ Replay value (cambiar preferencias)
@@ -715,6 +741,7 @@ export function PersonalizarAvatarView() {
 Cada logro desbloquea una animación exclusiva temática.
 
 **Ejemplos:**
+
 - 🏆 "Maestro de Equipo" → Animación de liderazgo (apuntar al frente)
 - 🔥 "Racha de Fuego" → Animación de energía (puños arriba)
 - 📚 "Matemático Dedicado" → Animación de pensar (mano en barbilla)
@@ -730,6 +757,7 @@ Cada logro desbloquea una animación exclusiva temática.
 El avatar te habla (con globos de texto) y anima según tu progreso.
 
 **Mensajes Contextuales:**
+
 - Llevas 3 días sin jugar → Avatar: "¡Te extrañé! ¿Jugamos?"
 - Estás a 50 XP de subir → Avatar: "¡Casi lo logras! 💪"
 - Completaste 5 ejercicios seguidos → Avatar: "¡Imparable! 🔥"
@@ -745,6 +773,7 @@ El avatar te habla (con globos de texto) y anima según tu progreso.
 Usar webcam para detectar movimientos básicos y que el avatar los imite.
 
 **Casos de Uso:**
+
 - Celebración de estudiante → Avatar celebra también
 - Ejercicios físicos (brain breaks) → Avatar guía movimientos
 
@@ -758,6 +787,7 @@ Usar webcam para detectar movimientos básicos y que el avatar los imite.
 Música de fondo que cambia según el nivel del estudiante.
 
 **Escalado:**
+
 - Nivel 1-3: Música suave y motivadora
 - Nivel 4-6: Música más épica y energética
 - Nivel 7-9: Música de batalla intensa
@@ -773,6 +803,7 @@ Música de fondo que cambia según el nivel del estudiante.
 El avatar gana efectos visuales según progreso.
 
 **Ejemplos:**
+
 - Nivel 5: Aura azul
 - Nivel 7: Aura dorada
 - Nivel 10: Aura arcoíris + partículas
@@ -791,6 +822,7 @@ El avatar gana efectos visuales según progreso.
 Screenshots automáticos cuando subes de nivel, con tu avatar celebrando.
 
 **Features:**
+
 - Álbum de fotos de progreso
 - Compartir en redes sociales
 - Descargar como wallpaper
@@ -805,6 +837,7 @@ Screenshots automáticos cuando subes de nivel, con tu avatar celebrando.
 Ver avatares fantasma de tu equipo en segundo plano, celebrando juntos.
 
 **Diseño:**
+
 ```
 Tu avatar (100% opacidad) en primer plano
 3-4 avatares de compañeros (30% opacidad) detrás
@@ -821,6 +854,7 @@ Cuando tu equipo gana, todos celebran sincronizados
 Juegos rápidos (30s) donde controlas tu avatar.
 
 **Ejemplos:**
+
 - Saltar obstáculos mientras resuelves multiplicaciones
 - Bailar al ritmo (rhythm game) con tu avatar
 - Carreras de avatares (multiplayer)
@@ -835,6 +869,7 @@ Juegos rápidos (30s) donde controlas tu avatar.
 El avatar "habla" mensajes motivacionales con voz sintética.
 
 **Implementación:**
+
 - API de Text-to-Speech (ElevenLabs, Google TTS)
 - Animación de labios básica
 - Mensajes contextuales
@@ -849,6 +884,7 @@ El avatar "habla" mensajes motivacionales con voz sintética.
 Modo donde el estudiante puede jugar con su avatar sin restricciones.
 
 **Features:**
+
 - Probar todas las animaciones desbloqueadas
 - Cambiar fondos (escenarios)
 - Grabar videos cortos
@@ -887,6 +923,7 @@ Modo donde el estudiante puede jugar con su avatar sin restricciones.
 ## 🎯 ROADMAP SUGERIDO (12 semanas)
 
 ### Fase 1: Fundaciones (Semanas 1-4)
+
 **Objetivo:** Sistema de reacciones funcionando + galería básica
 
 - ✅ Semana 1-2: Implementar mejora #1 (Reacciones Contextuales)
@@ -898,6 +935,7 @@ Modo donde el estudiante puede jugar con su avatar sin restricciones.
 ---
 
 ### Fase 2: Personalización (Semanas 5-7)
+
 **Objetivo:** Estudiante puede personalizar su experiencia
 
 - ✅ Semana 5-6: Implementar mejora #3 (Galería de Animaciones)
@@ -908,6 +946,7 @@ Modo donde el estudiante puede jugar con su avatar sin restricciones.
 ---
 
 ### Fase 3: Engagement (Semanas 8-10)
+
 **Objetivo:** Aumentar engagement y retention
 
 - ✅ Semana 8: Implementar mejora #6 (Animaciones por Logro)
@@ -919,6 +958,7 @@ Modo donde el estudiante puede jugar con su avatar sin restricciones.
 ---
 
 ### Fase 4: Polish (Semanas 11-12)
+
 **Objetivo:** Pulir y agregar "wow factor"
 
 - ✅ Semana 11: Implementar mejora #10 (Avatar Evolution)
@@ -931,6 +971,7 @@ Modo donde el estudiante puede jugar con su avatar sin restricciones.
 ## 💰 ESTIMACIÓN DE COSTOS
 
 **Desarrollo:**
+
 - Fase 1: 80 horas x $30/hora = $2,400 USD
 - Fase 2: 60 horas x $30/hora = $1,800 USD
 - Fase 3: 70 horas x $30/hora = $2,100 USD
@@ -939,6 +980,7 @@ Modo donde el estudiante puede jugar con su avatar sin restricciones.
 **Total:** $7,800 USD (260 horas)
 
 **Costos Operacionales:**
+
 - Vercel Blob Storage: $0 (ya cubierto con 30 animaciones)
 - Text-to-Speech API (opcional): $20-50/mes
 - CDN bandwidth: $0 (incluido en Vercel)
@@ -948,16 +990,19 @@ Modo donde el estudiante puede jugar con su avatar sin restricciones.
 ## 📈 MÉTRICAS DE ÉXITO
 
 **Engagement:**
+
 - [ ] +40% tiempo promedio en dashboard
 - [ ] +30% frecuencia de visitas semanales
 - [ ] +50% interacciones con avatar por sesión
 
 **Satisfacción:**
+
 - [ ] 90%+ estudiantes dicen "me gusta mi avatar"
 - [ ] 80%+ personalizan animaciones
 - [ ] 70%+ comparten momentos épicos
 
 **Retención:**
+
 - [ ] -20% churn rate
 - [ ] +25% estudiantes activos mensuales
 - [ ] +35% sesiones consecutivas (racha)
@@ -967,21 +1012,25 @@ Modo donde el estudiante puede jugar con su avatar sin restricciones.
 ## 🚀 RECOMENDACIONES FINALES
 
 ### Empezar por lo Esencial:
+
 1. **Mejora #1 (Reacciones Contextuales)** → Fundación del sistema
 2. **Mejora #4 (XP Animada)** → Feedback inmediato
 3. **Mejora #2 (LevelUp Modal)** → Momento wow
 
 ### Quick Wins (1 semana):
+
 - Agregar 2-3 animaciones más al sistema actual
 - Animar la barra de XP con partículas
 - Agregar sonidos a las interacciones
 
 ### Long-term Vision:
+
 - Avatar como "compañero de aventura" del estudiante
 - Sistema de progreso visual y satisfactorio
 - Experiencia compartible y memorable
 
 ### Riesgos a Considerar:
+
 - ⚠️ Sobrecargar con animaciones (puede ser abrumador)
 - ⚠️ Performance en dispositivos móviles antiguos
 - ⚠️ Animaciones no apropiadas para el contexto educativo
@@ -991,14 +1040,17 @@ Modo donde el estudiante puede jugar con su avatar sin restricciones.
 ## 📚 RECURSOS TÉCNICOS
 
 **Animaciones:**
+
 - [animations-config.json](apps/web/public/animations-config.json) - Config de 30 animaciones
 - [Vercel Blob Storage](https://vercel.com/alexis-figueroas-projects-d4fb75f1/mateatletas-ecosystem/stores)
 
 **Documentación:**
+
 - [animations-setup.md](docs/animations-setup.md) - Setup completo
 - [RESUMEN_PORTAL_ESTUDIANTE.md](docs/RESUMEN_PORTAL_ESTUDIANTE.md) - Estado actual
 
 **Codebase:**
+
 - `apps/web/src/app/estudiante/gimnasio/views/HubView.tsx` - Vista principal
 - `apps/web/src/app/estudiante/gimnasio/page.tsx` - Página wrapper
 - `apps/web/src/app/estudiante/gimnasio/contexts/OverlayStackProvider.tsx` - Overlay system

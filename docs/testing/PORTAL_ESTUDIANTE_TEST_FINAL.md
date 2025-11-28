@@ -11,6 +11,7 @@
 Testing exhaustivo completado del Portal Estudiante con **TODAS las páginas rediseñadas** para cumplir requisitos:
 
 ### Requisitos Cumplidos 100%:
+
 - ✅ **NO SCROLL** en las 4 páginas principales
 - ✅ **Contenido GRANDE y LEGIBLE** para niños (no miniaturizado)
 - ✅ **Distribución eficiente** mediante paginación
@@ -48,6 +49,7 @@ El Portal Estudiante tiene exactamente **4 páginas** accesibles desde el sideba
 **Archivo**: [dashboard/page.tsx:94](apps/web/src/app/estudiante/dashboard/page.tsx#L94)
 
 #### Layout Principal:
+
 ```tsx
 <div className="h-screen overflow-hidden bg-gradient-to-br...">
   <div className="h-full max-w-7xl mx-auto flex flex-col gap-4">
@@ -60,12 +62,14 @@ El Portal Estudiante tiene exactamente **4 páginas** accesibles desde el sideba
 #### Características Verificadas:
 
 **✅ Sin Scroll**:
+
 - `h-screen overflow-hidden` en contenedor principal
 - `flex flex-col` para distribución vertical
 - Header con `flex-shrink-0` para no comprimirse
 - Grid con `flex-1` para ocupar espacio restante
 
 **✅ Header Grande** (NO achicado):
+
 - Título: `text-4xl` ✅
 - Avatar: `w-16 h-16` ✅
 - Stats: `text-2xl` ✅
@@ -100,6 +104,7 @@ El Portal Estudiante tiene exactamente **4 páginas** accesibles desde el sideba
    - Maneja caso vacío
 
 **✅ Funcionalidades**:
+
 - Avatar selector modal
 - Welcome animation (primera visita)
 - Level-up animation
@@ -115,12 +120,14 @@ El Portal Estudiante tiene exactamente **4 páginas** accesibles desde el sideba
 #### ⚠️ Cambio Importante:
 
 **ANTES** (Problema):
+
 - `min-h-screen` → Permitía scroll
 - Grid 3 columnas → 6 juegos visibles
 - Contenido se cortaba
 - Cards con mucha información
 
 **AHORA** (Solución):
+
 - `h-screen overflow-hidden` → SIN SCROLL ✅
 - Grid 2x2 → 4 juegos por página ✅
 - Paginación implementada ✅
@@ -142,16 +149,18 @@ El Portal Estudiante tiene exactamente **4 páginas** accesibles desde el sideba
 #### Características Verificadas:
 
 **✅ Sistema de Paginación**:
+
 ```typescript
-const JUEGOS_POR_PAGINA = 4;  // Grid 2x2
+const JUEGOS_POR_PAGINA = 4; // Grid 2x2
 const totalPaginas = Math.ceil(juegosFiltrados.length / JUEGOS_POR_PAGINA);
 const juegosEnPagina = juegosFiltrados.slice(
   paginaActual * JUEGOS_POR_PAGINA,
-  (paginaActual + 1) * JUEGOS_POR_PAGINA
+  (paginaActual + 1) * JUEGOS_POR_PAGINA,
 );
 ```
 
 **✅ Cards Optimizadas**:
+
 - Padding: `p-4` (compacto)
 - Emoji: `text-4xl` (grande pero cabe)
 - Título: `text-lg` + `line-clamp-1`
@@ -161,6 +170,7 @@ const juegosEnPagina = juegosFiltrados.slice(
 - Botón: `py-2.5` + `text-sm`
 
 **✅ Paginación Funcional**:
+
 - Botones ChevronLeft/ChevronRight
 - Indicador "Página X de Y"
 - Disabled en primera/última página
@@ -168,6 +178,7 @@ const juegosEnPagina = juegosFiltrados.slice(
 - Total: 2 páginas (4 juegos pág 1, 2 juegos pág 2)
 
 **✅ Lista de 6 Juegos**:
+
 1. Cálculo Mental Rápido (Fácil, +10pts) - FUNCIONAL ✅
 2. Álgebra Challenge (Media, +20pts) - FUNCIONAL ✅
 3. Geometría Quiz (Media, +15pts)
@@ -176,6 +187,7 @@ const juegosEnPagina = juegosFiltrados.slice(
 6. Ecuaciones Cuadráticas (Difícil, +35pts) - BLOQUEADO
 
 **✅ Filtros de Categoría** (5):
+
 - Todos
 - Aritmética
 - Álgebra
@@ -183,6 +195,7 @@ const juegosEnPagina = juegosFiltrados.slice(
 - Lógica
 
 **✅ Header con Stats**:
+
 - Partidas: 88
 - Racha: 12 días
 - Puntos: 3120
@@ -197,43 +210,51 @@ const juegosEnPagina = juegosFiltrados.slice(
 #### Características Verificadas:
 
 **✅ Sin Scroll**:
+
 - `h-screen overflow-hidden`
 - Grid 2x3 → 6 logros por página
 - Paginación implementada
 
 **✅ Logros GRANDES**:
+
 - Emojis: `text-8xl` ✅ (NO miniaturizados)
 - Títulos: `text-xl` ✅
 - Descripciones: `text-base` ✅
 - Padding generoso: `p-8`
 
 **✅ Sistema de Paginación**:
+
 ```typescript
-const LOGROS_POR_PAGINA = 6;  // Grid 2x3
+const LOGROS_POR_PAGINA = 6; // Grid 2x3
 ```
+
 - ChevronLeft/ChevronRight
 - Indicador de página
 - Se resetea con filtros
 
 **✅ Filtros** (4 categorías):
+
 - Todos
 - Inicio
 - Rachas
 - Progreso
 
 **✅ Rarezas**:
+
 - Común (gray)
 - Raro (blue)
 - Épico (purple)
 - Legendario (gold)
 
 **✅ Modal de Detalle**:
+
 - Click para abrir
 - Emoji pulsante `text-9xl`
 - Información completa
 - Botón cerrar funcional
 
 **✅ Animaciones**:
+
 - Confetti al desbloquear (500 pieces)
 - Entrada escalonada de cards
 - Lock overlay en bloqueados
@@ -249,6 +270,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 #### Características Verificadas:
 
 **✅ Sin Scroll**:
+
 - `h-screen overflow-hidden`
 - Grid 2 columnas lado a lado
 - Uso eficiente del espacio
@@ -256,6 +278,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 **✅ Layout 2 Columnas**:
 
 **Columna Izquierda - Top 5 del Equipo**:
+
 - Medallas grandes: `text-4xl` (🥇🥈🥉)
 - Avatares: `w-14 h-14`
 - Nombres: `text-lg`
@@ -263,6 +286,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 - Highlight en estudiante actual (pulse effect)
 
 **Columna Derecha - Top 3 Global (Podio)**:
+
 - Grid 3 columnas
 - Efecto de altura: `h-full`, `h-5/6`, `h-4/6`
 - Orden visual: 2do-1ro-3ro
@@ -271,11 +295,13 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 - Colores dinámicos por equipo
 
 **✅ Header con Stats**:
+
 - Badge de equipo con color
 - Posición en equipo (#X)
 - Posición global (#X)
 
 **✅ Animaciones**:
+
 - Entrada escalonada
 - Hover effects
 - Medallas flotantes (keyframe)
@@ -293,11 +319,13 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 **Implementación Completa**:
 
 **Pantalla de Inicio**:
+
 - Emoji animado 🧮
 - Reglas claras
 - Botón "¡Comenzar Juego!"
 
 **Pantalla de Juego**:
+
 - 10 preguntas aleatorias (+, -, ×, ÷)
 - Cronómetro: 30 segundos
 - Racha visual con 🔥
@@ -306,22 +334,26 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 - Operaciones `text-7xl`
 
 **Generación de Preguntas**:
+
 - Números apropiados por operador
 - División siempre exacta
 - Random cada partida
 
 **Feedback Inmediato**:
+
 - ✓ CheckCircle verde
 - ✗ XCircle rojo + respuesta correcta
 - Confetti 30 partículas por acierto
 - Transición automática (1s)
 
 **Sistema de Racha**:
+
 - Contador actual
 - Mejor racha guardada
 - Se resetea al fallar
 
 **Pantalla Final**:
+
 - Emoji según performance:
   - 🏆 (9-10): "¡Perfecto!"
   - 🌟 (7-8): "¡Excelente!"
@@ -343,6 +375,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 
 **Estado**: ✅ COMPLETAMENTE FUNCIONAL
 **Similar a Cálculo Mental** con:
+
 - Ecuaciones algebraicas
 - 20 puntos por correcta
 - Tema purple/pink
@@ -357,6 +390,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 **Estado**: ✅ APROBADO
 
 **Desktop**:
+
 - Visible permanentemente
 - Iconos: `w-6 h-6` (mejorado desde w-5) ✅
 - Texto: `text-base` (mejorado desde text-sm) ✅
@@ -369,12 +403,14 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 - Logout: `w-6 h-6` icon, `text-base`
 
 **Mobile**:
+
 - Hamburger menu
 - Drawer con mismos ítems
 - Overlay con backdrop blur
 - Close button
 
 **Comportamiento**:
+
 - Active state visual
 - Hover effects
 - Transiciones suaves
@@ -382,6 +418,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Header
 
 **Estado**: ✅ ELIMINADO (como solicitado)
+
 - Top bar removido completamente
 - Más espacio para contenido
 - Dashboard ocupa todo viewport
@@ -393,6 +430,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Gradients Verificados:
 
 **Dashboard**:
+
 - Header: Purple/Pink/Orange
 - Próxima Clase: Blue/Cyan
 - Mi Progreso: Orange/Red
@@ -400,6 +438,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 - Tareas: Pink/Purple
 
 **Estudiar**:
+
 - Header: Purple/Pink/Orange
 - Cálculo Mental: Blue/Cyan
 - Álgebra: Purple/Pink
@@ -413,6 +452,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Tipografía Child-Friendly:
 
 **Tamaños Verificados**:
+
 - Headers principales: `text-4xl` ✅
 - Títulos cards dashboard: `text-xl` ✅
 - Títulos cards estudiar: `text-lg` (optimizado)
@@ -428,6 +468,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Spacing:
 
 **Generoso en todas las páginas**:
+
 - Padding cards: `p-4` a `p-8`
 - Gaps: `gap-4` a `gap-6`
 - Margins: `mb-3` a `mb-6`
@@ -439,23 +480,27 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Framer Motion - Verificadas:
 
 **Dashboard**:
+
 - Header: initial/animate (y: -20 → 0)
 - Cards: stagger con delay incremental
 - Badge tareas: scale pulsante
 - Barra progreso: width animation
 
 **Estudiar**:
+
 - Header: fade in
 - Cards: stagger + hover (scale 1.03, y: -4)
 - Emojis: rotate loop
 - Paginación: smooth transitions
 
 **Logros**:
+
 - Cards: stagger entrada
 - Modal: scale + rotate
 - Hover: scale 1.05
 
 **Ranking**:
+
 - Cards: stagger
 - Medallas: float animation (keyframes)
 - Podio: diferentes delays
@@ -463,6 +508,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Canvas Confetti - Verificado:
 
 **Implementaciones**:
+
 - Welcome: 1000 pieces
 - Level-up: 500 pieces
 - Logro desbloqueado: 500 pieces (no recycle)
@@ -509,12 +555,14 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Breakpoints Verificados:
 
 **Desktop (lg+)**:
+
 - Sidebar visible
 - Grid 2 columnas (Dashboard, Estudiar)
 - Grid 2 columnas (Ranking)
 - Grid 2x3 (Logros)
 
 **Mobile (<lg)**:
+
 - Hamburger menu
 - Single column fallback
 - Grid adapta a 1 columna
@@ -533,6 +581,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Issues Menores:
 
 ⚠️ **1. Puntos no se registran en backend**
+
 - **Descripción**: Juegos no persisten puntos ganados
 - **Impacto**: LOW - Mock data funciona perfecto
 - **Estado**: Pending backend API
@@ -541,6 +590,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 - **Solución**: Conectar con endpoint POST /gamificacion/puntos
 
 ⚠️ **2. Avatar no persiste inmediatamente**
+
 - **Descripción**: Requiere refresh para ver cambio
 - **Impacto**: LOW - Feature funciona
 - **Estado**: Pending optimistic update
@@ -549,14 +599,17 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Mejoras Sugeridas:
 
 💡 **Skeleton Screens**
+
 - Reemplazar spinner genérico
 - Mejorar UX percibida
 
 💡 **Feedback Háptico** (Mobile/Tablet)
+
 - Vibración al acertar/fallar
 - Mejora engagement
 
 💡 **Sonidos Opcionales**
+
 - Efectos de sonido
 - Toggle on/off
 
@@ -599,12 +652,14 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Performance:
 
 **Loading Times** (mock data):
+
 - Dashboard: < 100ms ✅
 - Estudiar: < 100ms ✅
 - Logros: < 100ms ✅
 - Ranking: < 100ms ✅
 
 **Animations**:
+
 - 60fps verificado ✅
 - No jank ✅
 - Smooth transitions ✅
@@ -612,16 +667,19 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Accesibilidad:
 
 **Keyboard Navigation**:
+
 - Tab order lógico ✅
 - Enter key en juegos ✅
 - Escape en modals ✅
 
 **Visual**:
+
 - Contraste adecuado ✅
 - Touch targets 44x44px+ ✅
 - Estados hover/active claros ✅
 
 **Semantic HTML**:
+
 - Headings correctos (h1-h3) ✅
 - Buttons vs links apropiados ✅
 - ARIA labels implementados ✅
@@ -633,6 +691,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### SLICE #2: Portal Estudiante - 95% Completado
 
 **Tareas Completadas** (7/7):
+
 - ✅ T033: Sistema de Niveles
 - ✅ T017: Avatares Personalizables
 - ✅ T016: Dashboard Actualizado (4 cards)
@@ -642,6 +701,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 - ✅ T020: Página Estudiar (con paginación) - NUEVO ✅
 
 **Pendiente para 100%**:
+
 - ⏳ Conectar registro de puntos con backend
 - ⏳ Sistema de tareas asignadas (backend)
 - ⏳ Más juegos educativos (Geometría, Fracciones, Lógica)
@@ -722,12 +782,14 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 - ✅ Ranking con podio
 
 **Listo para**:
+
 - ✅ Uso por estudiantes reales (8-14 años)
 - ✅ User testing con niños
 - ✅ Integración backend (API ready)
 - ✅ Despliegue staging/production
 
 **Próximos Pasos Recomendados**:
+
 1. User testing con 5-10 estudiantes
 2. Conectar endpoints de puntos y tareas
 3. Agregar 3 juegos más (Geometría, Fracciones, Lógica)
@@ -740,6 +802,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ### Página Estudiar - Antes vs Después:
 
 **ANTES** ❌:
+
 ```tsx
 <div className="min-h-screen...">  // Scroll permitido
   <div className="grid grid-cols-3 gap-6">  // 6 juegos
@@ -749,6 +812,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ```
 
 **DESPUÉS** ✅:
+
 ```tsx
 <div className="h-screen overflow-hidden...">  // SIN SCROLL
   <div className="h-full flex flex-col gap-6">
@@ -763,6 +827,7 @@ const LOGROS_POR_PAGINA = 6;  // Grid 2x3
 ```
 
 **Resultado**:
+
 - ✅ Sin scroll en viewport
 - ✅ 4 juegos grandes visibles
 - ✅ Paginación para navegación

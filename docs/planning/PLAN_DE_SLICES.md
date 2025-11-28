@@ -5,6 +5,7 @@
 **Definición de Slice:** Conjunto cohesivo de tareas que entregan valor funcional completo, respetando dependencias técnicas y minimizando bloqueos entre equipos/desarrolladores.
 
 **Principios:**
+
 1. ✅ Cada slice es **desplegable** y **demostrable**
 2. ✅ Dependencias técnicas resueltas primero
 3. ✅ Valor incremental en cada entrega
@@ -54,12 +55,12 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (4)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T001 | Landing Page Pública | PÚBLICO | 2 |
-| T002 | Formulario de Registro/Inscripción Público | PÚBLICO | 2 |
-| T067 | Integración Pago → Activación Automática | SISTEMA | 1 |
-| T068 | Mostrar Cupos Disponibles en Frontend | SISTEMA | 0.5 |
+| ID   | Tarea                                      | Instancia | Días |
+| ---- | ------------------------------------------ | --------- | ---- |
+| T001 | Landing Page Pública                       | PÚBLICO   | 2    |
+| T002 | Formulario de Registro/Inscripción Público | PÚBLICO   | 2    |
+| T067 | Integración Pago → Activación Automática   | SISTEMA   | 1    |
+| T068 | Mostrar Cupos Disponibles en Frontend      | SISTEMA   | 0.5  |
 
 ## Entregables
 
@@ -94,15 +95,15 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (7)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T016 | Portal Completo del Estudiante | ESTUDIANTE | 2 |
-| T017 | Sistema de Avatares Personalizables | ESTUDIANTE | 1 |
-| T018 | Tablero de Actividades con Cards | ESTUDIANTE | 1 |
-| T019 | Animación de Bienvenida Personalizada | ESTUDIANTE | 0.5 |
-| T033 | Sistema de Niveles con Nombres Creativos | ESTUDIANTE | 1 |
-| T034 | Notificación y Animación de Level-Up | ESTUDIANTE | 1 |
-| T015 | Visualización de Insignias y Gamificación | TUTOR (compartido) | 1 |
+| ID   | Tarea                                     | Instancia          | Días |
+| ---- | ----------------------------------------- | ------------------ | ---- |
+| T016 | Portal Completo del Estudiante            | ESTUDIANTE         | 2    |
+| T017 | Sistema de Avatares Personalizables       | ESTUDIANTE         | 1    |
+| T018 | Tablero de Actividades con Cards          | ESTUDIANTE         | 1    |
+| T019 | Animación de Bienvenida Personalizada     | ESTUDIANTE         | 0.5  |
+| T033 | Sistema de Niveles con Nombres Creativos  | ESTUDIANTE         | 1    |
+| T034 | Notificación y Animación de Level-Up      | ESTUDIANTE         | 1    |
+| T015 | Visualización de Insignias y Gamificación | TUTOR (compartido) | 1    |
 
 ## Entregables
 
@@ -140,16 +141,16 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (8)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T023 | Widget Próxima Clase con Countdown | ESTUDIANTE | 1 |
-| T024 | Botón Dinámico Entrar a Clase | ESTUDIANTE | 0.5 |
-| T025 | Integración Videollamada con Auto-Join | ESTUDIANTE | 2 |
-| T041 | Integración Videollamadas + Tracking Conectados | DOCENTE | 2 |
-| T035 | Panel Detallado de Grupo | DOCENTE | 1.5 |
-| T080 | Registro Automático de Asistencia | SISTEMA | 1 |
-| T044 | Asignación Rápida de Insignias Durante Clase | DOCENTE | 1 |
-| T030 | Modal Resumen Post-Clase | ESTUDIANTE | 1 |
+| ID   | Tarea                                           | Instancia  | Días |
+| ---- | ----------------------------------------------- | ---------- | ---- |
+| T023 | Widget Próxima Clase con Countdown              | ESTUDIANTE | 1    |
+| T024 | Botón Dinámico Entrar a Clase                   | ESTUDIANTE | 0.5  |
+| T025 | Integración Videollamada con Auto-Join          | ESTUDIANTE | 2    |
+| T041 | Integración Videollamadas + Tracking Conectados | DOCENTE    | 2    |
+| T035 | Panel Detallado de Grupo                        | DOCENTE    | 1.5  |
+| T080 | Registro Automático de Asistencia               | SISTEMA    | 1    |
+| T044 | Asignación Rápida de Insignias Durante Clase    | DOCENTE    | 1    |
+| T030 | Modal Resumen Post-Clase                        | ESTUDIANTE | 1    |
 
 ## Entregables
 
@@ -187,13 +188,13 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (5)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T003 | Widget de Bienvenida Personalizado | TUTOR | 1 |
-| T004 | Panel de Progreso Detallado del Hijo | TUTOR | 2 |
-| T005 | Vista de Suscripción y Pagos | TUTOR | 1.5 |
-| T013 | Resumen Automático Post-Clase para Tutor | TUTOR | 1 |
-| T081 | Generación Automática de Resumen de Clase | SISTEMA | 1 |
+| ID   | Tarea                                     | Instancia | Días |
+| ---- | ----------------------------------------- | --------- | ---- |
+| T003 | Widget de Bienvenida Personalizado        | TUTOR     | 1    |
+| T004 | Panel de Progreso Detallado del Hijo      | TUTOR     | 2    |
+| T005 | Vista de Suscripción y Pagos              | TUTOR     | 1.5  |
+| T013 | Resumen Automático Post-Clase para Tutor  | TUTOR     | 1    |
+| T081 | Generación Automática de Resumen de Clase | SISTEMA   | 1    |
 
 ## Entregables
 
@@ -227,14 +228,14 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (6)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T037 | Dashboard Estadísticas Docente Funcional | DOCENTE | 2 |
-| T040 | Perfil Detallado del Estudiante | DOCENTE | 1.5 |
-| T046 | Modal de Cierre de Clase + Observaciones para IA | DOCENTE | 1 |
-| T047 | Dashboard Resultados Diagnósticos | DOCENTE | 1 |
-| T036 | Enriquecer Notificaciones | DOCENTE | 0.5 |
-| T079 | Sistema de Métricas por Clase | SISTEMA | 1 |
+| ID   | Tarea                                            | Instancia | Días |
+| ---- | ------------------------------------------------ | --------- | ---- |
+| T037 | Dashboard Estadísticas Docente Funcional         | DOCENTE   | 2    |
+| T040 | Perfil Detallado del Estudiante                  | DOCENTE   | 1.5  |
+| T046 | Modal de Cierre de Clase + Observaciones para IA | DOCENTE   | 1    |
+| T047 | Dashboard Resultados Diagnósticos                | DOCENTE   | 1    |
+| T036 | Enriquecer Notificaciones                        | DOCENTE   | 0.5  |
+| T079 | Sistema de Métricas por Clase                    | SISTEMA   | 1    |
 
 ## Entregables
 
@@ -268,14 +269,14 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (6)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T020 | Módulo de Evaluación Diagnóstica Gamificada | ESTUDIANTE | 2 |
-| T021 | Algoritmo Adaptativo de Dificultad | ESTUDIANTE | 2 |
-| T022 | Análisis Automático de Resultados + Envío | ESTUDIANTE | 1.5 |
-| T038 | Test de Rendimiento Inicial (Vista Docente) | DOCENTE | 1 |
-| T039 | Gráficos de Fortalezas/Debilidades | DOCENTE | 1.5 |
-| T008 | Gráficas de Progreso por Competencias | TUTOR | 1 |
+| ID   | Tarea                                       | Instancia  | Días |
+| ---- | ------------------------------------------- | ---------- | ---- |
+| T020 | Módulo de Evaluación Diagnóstica Gamificada | ESTUDIANTE | 2    |
+| T021 | Algoritmo Adaptativo de Dificultad          | ESTUDIANTE | 2    |
+| T022 | Análisis Automático de Resultados + Envío   | ESTUDIANTE | 1.5  |
+| T038 | Test de Rendimiento Inicial (Vista Docente) | DOCENTE    | 1    |
+| T039 | Gráficos de Fortalezas/Debilidades          | DOCENTE    | 1.5  |
+| T008 | Gráficas de Progreso por Competencias       | TUTOR      | 1    |
 
 ## Entregables
 
@@ -312,14 +313,14 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (6)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T027 | Animaciones en Tiempo Real (Celebraciones) | ESTUDIANTE | 1.5 |
-| T045 | Animaciones en Tiempo Real (Vista Docente) | DOCENTE | 0.5 |
-| T009 | Sistema de Recompensas Familiares | TUTOR | 2 |
-| T010 | Compartir Logros (Tarjetas Visuales) | TUTOR | 1.5 |
-| T032 | Buzón de Mensajes (Recibir de Tutor) | ESTUDIANTE | 1 |
-| T014 | Tracking Tiempo de Práctica Semanal | TUTOR | 1 |
+| ID   | Tarea                                      | Instancia  | Días |
+| ---- | ------------------------------------------ | ---------- | ---- |
+| T027 | Animaciones en Tiempo Real (Celebraciones) | ESTUDIANTE | 1.5  |
+| T045 | Animaciones en Tiempo Real (Vista Docente) | DOCENTE    | 0.5  |
+| T009 | Sistema de Recompensas Familiares          | TUTOR      | 2    |
+| T010 | Compartir Logros (Tarjetas Visuales)       | TUTOR      | 1.5  |
+| T032 | Buzón de Mensajes (Recibir de Tutor)       | ESTUDIANTE | 1    |
+| T014 | Tracking Tiempo de Práctica Semanal        | TUTOR      | 1    |
 
 ## Entregables
 
@@ -354,10 +355,10 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (2)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T007 | Sistema de Mensajería Interna Tutor ↔ Docente | TUTOR | 3 |
-| T006 | Comentarios de Docente Visibles para Tutor | TUTOR | 2 |
+| ID   | Tarea                                          | Instancia | Días |
+| ---- | ---------------------------------------------- | --------- | ---- |
+| T007 | Sistema de Mensajería Interna Tutor ↔ Docente | TUTOR     | 3    |
+| T006 | Comentarios de Docente Visibles para Tutor     | TUTOR     | 2    |
 
 ## Entregables
 
@@ -393,18 +394,18 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (10)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T049 | Dashboard Global de KPIs | ADMIN | 2 |
-| T050 | Tracking de Aciertos por Clase/Estudiante | ADMIN | 1 |
-| T051 | Índices de Compromiso (ICD, ICE) | ADMIN | 1.5 |
-| T052 | Gráficas Temporales de Crecimiento | ADMIN | 1 |
-| T055 | Sistema de Proyecciones Financieras | ADMIN | 1.5 |
-| T056 | Cálculo de Retención Histórica | ADMIN | 1 |
-| T057 | Gestión Automatizada de Cobranza (Dunning) | ADMIN | 1.5 |
-| T058 | Métricas de Morosidad y Liquidez | ADMIN | 0.5 |
-| T053 | Generación Automática de Reportes PDF | ADMIN | 1.5 |
-| T054 | Email Service para Envíos Automáticos | ADMIN | 1 |
+| ID   | Tarea                                      | Instancia | Días |
+| ---- | ------------------------------------------ | --------- | ---- |
+| T049 | Dashboard Global de KPIs                   | ADMIN     | 2    |
+| T050 | Tracking de Aciertos por Clase/Estudiante  | ADMIN     | 1    |
+| T051 | Índices de Compromiso (ICD, ICE)           | ADMIN     | 1.5  |
+| T052 | Gráficas Temporales de Crecimiento         | ADMIN     | 1    |
+| T055 | Sistema de Proyecciones Financieras        | ADMIN     | 1.5  |
+| T056 | Cálculo de Retención Histórica             | ADMIN     | 1    |
+| T057 | Gestión Automatizada de Cobranza (Dunning) | ADMIN     | 1.5  |
+| T058 | Métricas de Morosidad y Liquidez           | ADMIN     | 0.5  |
+| T053 | Generación Automática de Reportes PDF      | ADMIN     | 1.5  |
+| T054 | Email Service para Envíos Automáticos      | ADMIN     | 1    |
 
 ## Entregables
 
@@ -444,16 +445,16 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (8)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T077 | WebSockets para Eventos en Tiempo Real | SISTEMA | 2 |
-| T026 | Tablero de Desafíos en Vivo (WebSockets) | ESTUDIANTE | 2 |
-| T028 | Barra de Puntos en Vivo Durante Clase | ESTUDIANTE | 1 |
-| T029 | Leaderboard de Equipos en Tiempo Real | ESTUDIANTE | 1.5 |
-| T042 | Sistema de Gamificación en Vivo | DOCENTE | 2 |
-| T043 | Contador Grupal y Puntos de Equipo | DOCENTE | 1 |
-| T012 | Vista Parental en Vivo Durante Clase | TUTOR | 1.5 |
-| T031 | Sistema de Métricas por Sesión | ESTUDIANTE | 1 |
+| ID   | Tarea                                    | Instancia  | Días |
+| ---- | ---------------------------------------- | ---------- | ---- |
+| T077 | WebSockets para Eventos en Tiempo Real   | SISTEMA    | 2    |
+| T026 | Tablero de Desafíos en Vivo (WebSockets) | ESTUDIANTE | 2    |
+| T028 | Barra de Puntos en Vivo Durante Clase    | ESTUDIANTE | 1    |
+| T029 | Leaderboard de Equipos en Tiempo Real    | ESTUDIANTE | 1.5  |
+| T042 | Sistema de Gamificación en Vivo          | DOCENTE    | 2    |
+| T043 | Contador Grupal y Puntos de Equipo       | DOCENTE    | 1    |
+| T012 | Vista Parental en Vivo Durante Clase     | TUTOR      | 1.5  |
+| T031 | Sistema de Métricas por Sesión           | ESTUDIANTE | 1    |
 
 ## Entregables
 
@@ -492,17 +493,17 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (9)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T059 | Sistema de Cron Jobs / Scheduled Tasks | SISTEMA | 1 |
-| T060 | Backups Automáticos de Base de Datos | SISTEMA | 0.5 |
-| T061 | APM y Monitoring de Sistema | SISTEMA | 1 |
-| T062 | Limpieza Automática de Datos Huérfanos | SISTEMA | 0.5 |
-| T063 | Detección de Suscripciones por Vencer | SISTEMA | 0.5 |
-| T064 | Recordatorios Escalonados de Pago | SISTEMA | 1 |
-| T065 | Resumen Semanal Automático a Familias | SISTEMA | 1 |
-| T066 | Notificaciones Proactivas del Sistema | SISTEMA | 1 |
-| T011 | Notificaciones Push (PWA/Firebase) | TUTOR | 1.5 |
+| ID   | Tarea                                  | Instancia | Días |
+| ---- | -------------------------------------- | --------- | ---- |
+| T059 | Sistema de Cron Jobs / Scheduled Tasks | SISTEMA   | 1    |
+| T060 | Backups Automáticos de Base de Datos   | SISTEMA   | 0.5  |
+| T061 | APM y Monitoring de Sistema            | SISTEMA   | 1    |
+| T062 | Limpieza Automática de Datos Huérfanos | SISTEMA   | 0.5  |
+| T063 | Detección de Suscripciones por Vencer  | SISTEMA   | 0.5  |
+| T064 | Recordatorios Escalonados de Pago      | SISTEMA   | 1    |
+| T065 | Resumen Semanal Automático a Familias  | SISTEMA   | 1    |
+| T066 | Notificaciones Proactivas del Sistema  | SISTEMA   | 1    |
+| T011 | Notificaciones Push (PWA/Firebase)     | TUTOR     | 1.5  |
 
 ## Entregables
 
@@ -542,18 +543,18 @@ SLICE 12: Inteligencia Artificial
 
 ## Tareas Incluidas (10)
 
-| ID | Tarea | Instancia | Días |
-|----|-------|-----------|------|
-| T069 | Pipeline de Ingesta de Datos para AI | SISTEMA | 2 |
-| T070 | Modelo de Análisis de Debilidades | SISTEMA | 2 |
-| T071 | Motor de Correlaciones | SISTEMA | 1.5 |
-| T072 | Segmentación Inteligente de Usuarios | SISTEMA | 1.5 |
-| T073 | Recomendaciones Automáticas Operativas | SISTEMA | 1.5 |
-| T074 | Forecasting con Machine Learning | SISTEMA | 2 |
-| T075 | AI con Contexto Personalizado por Alumno | SISTEMA | 2 |
-| T076 | Feed Interno de Recomendaciones AI | SISTEMA | 1 |
-| T078 | Módulo IA Adaptativa + Perfil Acumulativo | SISTEMA | 2 |
-| T082 | Informe Automático AI sobre Debilidades | SISTEMA | 1 |
+| ID   | Tarea                                     | Instancia | Días |
+| ---- | ----------------------------------------- | --------- | ---- |
+| T069 | Pipeline de Ingesta de Datos para AI      | SISTEMA   | 2    |
+| T070 | Modelo de Análisis de Debilidades         | SISTEMA   | 2    |
+| T071 | Motor de Correlaciones                    | SISTEMA   | 1.5  |
+| T072 | Segmentación Inteligente de Usuarios      | SISTEMA   | 1.5  |
+| T073 | Recomendaciones Automáticas Operativas    | SISTEMA   | 1.5  |
+| T074 | Forecasting con Machine Learning          | SISTEMA   | 2    |
+| T075 | AI con Contexto Personalizado por Alumno  | SISTEMA   | 2    |
+| T076 | Feed Interno de Recomendaciones AI        | SISTEMA   | 1    |
+| T078 | Módulo IA Adaptativa + Perfil Acumulativo | SISTEMA   | 2    |
+| T082 | Informe Automático AI sobre Debilidades   | SISTEMA   | 1    |
 
 ## Entregables
 
@@ -587,20 +588,20 @@ SLICE 12: Inteligencia Artificial
 
 ## Duración Total
 
-| Slice | Duración | Tipo | Dependencia |
-|-------|----------|------|-------------|
-| SLICE 1 | 1 semana | CRÍTICO | - |
-| SLICE 2 | 1.5 semanas | CRÍTICO | SLICE 1 |
-| SLICE 3 | 1.5 semanas | CRÍTICO | SLICE 2 |
-| SLICE 4 | 1 semana | ALTO | SLICE 3 |
-| SLICE 5 | 1 semana | ALTO | SLICE 3 |
-| SLICE 6 | 1.5 semanas | CRÍTICO | SLICE 2, 5 |
-| SLICE 7 | 1 semana | MEDIO | SLICE 2, 3 |
-| SLICE 8 | 1 semana | MEDIO | SLICE 4, 5 |
-| SLICE 9 | 1.5 semanas | ALTO | SLICE 1, 6 |
-| SLICE 10 | 1.5 semanas | MEDIO | SLICE 3, 5 |
-| SLICE 11 | 1 semana | ALTO | SLICE 9 |
-| SLICE 12 | 2 semanas | BAJO | Todos |
+| Slice    | Duración    | Tipo    | Dependencia |
+| -------- | ----------- | ------- | ----------- |
+| SLICE 1  | 1 semana    | CRÍTICO | -           |
+| SLICE 2  | 1.5 semanas | CRÍTICO | SLICE 1     |
+| SLICE 3  | 1.5 semanas | CRÍTICO | SLICE 2     |
+| SLICE 4  | 1 semana    | ALTO    | SLICE 3     |
+| SLICE 5  | 1 semana    | ALTO    | SLICE 3     |
+| SLICE 6  | 1.5 semanas | CRÍTICO | SLICE 2, 5  |
+| SLICE 7  | 1 semana    | MEDIO   | SLICE 2, 3  |
+| SLICE 8  | 1 semana    | MEDIO   | SLICE 4, 5  |
+| SLICE 9  | 1.5 semanas | ALTO    | SLICE 1, 6  |
+| SLICE 10 | 1.5 semanas | MEDIO   | SLICE 3, 5  |
+| SLICE 11 | 1 semana    | ALTO    | SLICE 9     |
+| SLICE 12 | 2 semanas   | BAJO    | Todos       |
 
 **Total (secuencial):** ~15 semanas (3.5 meses)
 
@@ -609,29 +610,36 @@ SLICE 12: Inteligencia Artificial
 ## Estrategia de Paralelización
 
 ### Sprint 1-2 (Semanas 1-2)
+
 - SLICE 1 (público)
 - Inicio de SLICE 2 (estudiante)
 
 ### Sprint 3-4 (Semanas 3-4)
+
 - SLICE 2 (completar estudiante)
 - SLICE 3 (clase base)
 
 ### Sprint 5-6 (Semanas 5-6)
+
 - SLICE 4 (tutor) en paralelo con SLICE 5 (docente)
 
 ### Sprint 7-8 (Semanas 7-8)
+
 - SLICE 6 (evaluación)
 - SLICE 7 (gamificación) en paralelo
 
 ### Sprint 9-10 (Semanas 9-10)
+
 - SLICE 8 (mensajería)
 - SLICE 9 (admin)
 
 ### Sprint 11-12 (Semanas 11-12)
+
 - SLICE 10 (websockets)
 - SLICE 11 (automatización)
 
 ### Sprint 13-14 (Semanas 13-14) - OPCIONAL
+
 - SLICE 12 (IA) - puede ser fase 2
 
 ---
@@ -641,6 +649,7 @@ SLICE 12: Inteligencia Artificial
 Para lanzar rápido, el **MVP mínimo viable** incluye:
 
 ## MVP = SLICES 1, 2, 3, 4
+
 **Duración:** 5-6 semanas
 
 **Funcionalidad:**
@@ -651,6 +660,7 @@ Para lanzar rápido, el **MVP mínimo viable** incluye:
 ✅ Panel docente básico
 
 **Con esto ya podés:**
+
 - Vender y cobrar
 - Dar clases online
 - Familias ven progreso
@@ -663,12 +673,14 @@ Para lanzar rápido, el **MVP mínimo viable** incluye:
 Para cada slice, seguir este protocolo:
 
 ## Antes de Empezar
+
 - [ ] Revisar tareas del slice
 - [ ] Verificar dependencias técnicas
 - [ ] Crear rama de git `feature/slice-N`
 - [ ] Actualizar documentación técnica
 
 ## Durante Desarrollo
+
 - [ ] Implementar backend primero
 - [ ] Testear endpoints con Postman/Insomnia
 - [ ] Implementar frontend
@@ -677,6 +689,7 @@ Para cada slice, seguir este protocolo:
 - [ ] Code review
 
 ## Antes de Mergear
+
 - [ ] Todos los tests pasan
 - [ ] Documentación actualizada
 - [ ] Demo funcional grabada
@@ -692,15 +705,19 @@ Para cada slice, seguir este protocolo:
 **Plan sugerido:**
 
 ### Fase 1: MVP (6 semanas)
+
 SLICES 1, 2, 3, 4
 
 ### Fase 2: Completar Experiencia (6 semanas)
+
 SLICES 5, 6, 7, 8
 
 ### Fase 3: Escalabilidad (4 semanas)
+
 SLICES 9, 10, 11
 
 ### Fase 4: IA (2 semanas)
+
 SLICE 12
 
 **Total:** 18 semanas (~4.5 meses para producto completo)

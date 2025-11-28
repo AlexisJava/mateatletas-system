@@ -92,9 +92,7 @@ export function ProductCard({ producto, onClick }: ProductCardProps) {
         </h3>
 
         {/* Descripción */}
-        <p className="text-gray-600 text-sm line-clamp-3 min-h-[3.75rem]">
-          {producto.descripcion}
-        </p>
+        <p className="text-gray-600 text-sm line-clamp-3 min-h-[3.75rem]">{producto.descripcion}</p>
 
         {/* Precio y duración */}
         <div className="pt-2 border-t-2 border-gray-200">
@@ -103,9 +101,7 @@ export function ProductCard({ producto, onClick }: ProductCardProps) {
               ${producto.precio}
             </span>
             {producto.duracion_dias && (
-              <span className="text-sm text-gray-600">
-                / {producto.duracion_dias} días
-              </span>
+              <span className="text-sm text-gray-600">/ {producto.duracion_dias} días</span>
             )}
           </div>
 

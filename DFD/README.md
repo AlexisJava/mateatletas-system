@@ -119,30 +119,36 @@ DFD/
 ## 🔍 Los 21 Flujos Documentados
 
 ### MÓDULO 1: Clases Individuales
+
 1. Creación de Clase Individual
 2. Asignación Masiva de Estudiantes
 3. Reserva de Clase por Tutor
 4. Cancelación de Reserva
 
 ### MÓDULO 2: Grupos Recurrentes
+
 5. Creación de ClaseGrupo
 6. Inscripción a ClaseGrupo
 
 ### MÓDULO 3: Asistencia
+
 7. Registro Asistencia Individual
 8. Registro Asistencia Grupo
 
 ### MÓDULO 4: Gamificación
+
 9. Otorgamiento de Puntos
 10. Desbloqueo de Logro
 
 ### MÓDULO 5: Pagos
+
 11. Cálculo de Precio
 12. Creación de Inscripciones Mensuales
 13. Pago de Inscripción
 14. Métricas de Dashboard
 
 ### MÓDULO 6: Planificaciones
+
 15. Creación de Planificación Mensual
 16. Creación de Actividad Semanal
 17. Publicación de Planificación
@@ -151,6 +157,7 @@ DFD/
 20. Actualización de Progreso
 
 ### MÓDULO 7: Notificaciones
+
 21. Sistema de Notificaciones
 
 ---
@@ -158,6 +165,7 @@ DFD/
 ## 📊 Cascadas Críticas Documentadas
 
 ### Cascada 1: Asistencia → Gamificación
+
 ```
 Docente registra asistencia
   → Estudiante +X puntos
@@ -168,6 +176,7 @@ Docente registra asistencia
 ```
 
 ### Cascada 2: Pago → Acceso
+
 ```
 Tutor paga inscripción
   → UPDATE estado_pago = "Pagado"

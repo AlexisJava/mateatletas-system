@@ -37,6 +37,7 @@
 ```
 
 ### Características Mobile:
+
 - **Header:** 5vh compacto (solo recursos + nivel)
 - **Main:** 85vh dividido 50/50
   - **Izquierda:** Avatar 3D gigante (50% ancho, 100% alto)
@@ -73,6 +74,7 @@
 ```
 
 ### Características Tablet:
+
 - **Header:** 5vh con logo central
 - **Main:** 85vh dividido 50/50
   - **Izquierda:** Avatar 3D gigante (50%, 100% alto)
@@ -110,6 +112,7 @@
 ```
 
 ### Características Desktop:
+
 - **Header:** 5vh con todo
 - **Sidebar Lateral:** 8 botones (left 4, right 4)
 - **Main:** 85vh dividido 50/50
@@ -128,7 +131,25 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { AnimatedAvatar3D } from '@/components/3d/AnimatedAvatar3D';
-import { Home, Brain, BookOpen, Trophy, ShoppingBag, Menu, Coins, Flame, Star, Zap, Target, Calendar, Users, BarChart3, Bell, LogOut, Sparkles } from 'lucide-react';
+import {
+  Home,
+  Brain,
+  BookOpen,
+  Trophy,
+  ShoppingBag,
+  Menu,
+  Coins,
+  Flame,
+  Star,
+  Zap,
+  Target,
+  Calendar,
+  Users,
+  BarChart3,
+  Bell,
+  LogOut,
+  Sparkles,
+} from 'lucide-react';
 
 export function HubView({ onNavigate, estudiante }: HubViewProps) {
   const { deviceType } = useDeviceType();
@@ -139,10 +160,8 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex flex-col">
-
       {/* ========== HEADER MINIMALISTA (5vh) ========== */}
       <header className="relative z-30 h-[5vh] px-4 flex items-center justify-between bg-black/30 backdrop-blur-sm border-b border-white/10">
-
         {/* Izquierda: Avatar + nombre (SOLO EN TABLET/DESKTOP) */}
         {deviceType !== 'mobile' && (
           <div className="flex items-center gap-2">
@@ -185,21 +204,31 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
           {/* Sidebar Izquierda */}
           <nav className="fixed left-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-50">
             {NAV_LEFT.slice(0, 4).map((item) => (
-              <SidebarButton key={item.id} item={item} isActive={activeView === item.id} onClick={() => {
-                if (item.overlayId) openOverlay(item.overlayId);
-                else setActiveView(item.id);
-              }} />
+              <SidebarButton
+                key={item.id}
+                item={item}
+                isActive={activeView === item.id}
+                onClick={() => {
+                  if (item.overlayId) openOverlay(item.overlayId);
+                  else setActiveView(item.id);
+                }}
+              />
             ))}
           </nav>
 
           {/* Sidebar Derecha */}
           <nav className="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-50">
             {NAV_RIGHT.slice(0, 4).map((item) => (
-              <SidebarButton key={item.id} item={item} isActive={activeView === item.id} onClick={() => {
-                if (item.id === 'cerrar-sesion') setShowLogoutModal(true);
-                else if (item.overlayId) openOverlay(item.overlayId);
-                else setActiveView(item.id);
-              }} />
+              <SidebarButton
+                key={item.id}
+                item={item}
+                isActive={activeView === item.id}
+                onClick={() => {
+                  if (item.id === 'cerrar-sesion') setShowLogoutModal(true);
+                  else if (item.overlayId) openOverlay(item.overlayId);
+                  else setActiveView(item.id);
+                }}
+              />
             ))}
           </nav>
         </>
@@ -208,17 +237,16 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
       {/* ========== MAIN CONTENT 50/50 (85vh) ========== */}
       <div className="flex-1 flex items-center px-4 relative z-10">
         <div className="w-full h-full flex gap-4">
-
           {/* ========== LADO IZQUIERDO - AVATAR GIGANTE (50%) ========== */}
           <div className="w-1/2 h-full relative flex items-center justify-center">
-
             {/* Resplandor animado gigante */}
             <motion.div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
               style={{
                 width: deviceType === 'mobile' ? '400px' : '600px',
                 height: deviceType === 'mobile' ? '400px' : '600px',
-                background: 'radial-gradient(circle, rgba(139, 92, 246, 0.5) 0%, rgba(99, 102, 241, 0.4) 25%, rgba(168, 85, 247, 0.3) 50%, transparent 70%)',
+                background:
+                  'radial-gradient(circle, rgba(139, 92, 246, 0.5) 0%, rgba(99, 102, 241, 0.4) 25%, rgba(168, 85, 247, 0.3) 50%, transparent 70%)',
                 filter: 'blur(50px)',
               }}
               animate={{
@@ -233,10 +261,14 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
             />
 
             {/* Avatar 3D GIGANTE */}
-            <div className="relative z-20 w-full h-full cursor-pointer" onClick={() => {
-              const clickUrl = 'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
-              triggerAnimation(clickUrl, 4000);
-            }}>
+            <div
+              className="relative z-20 w-full h-full cursor-pointer"
+              onClick={() => {
+                const clickUrl =
+                  'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb';
+                triggerAnimation(clickUrl, 4000);
+              }}
+            >
               {isMounted && estudiante.avatar_url && (
                 <AnimatedAvatar3D
                   avatarUrl={estudiante.avatar_url}
@@ -256,7 +288,6 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
           {/* ========== LADO DERECHO - INFO (50%) ========== */}
           <div className="w-1/2 h-full flex flex-col justify-center gap-4 py-4">
-
             {/* Badge de nivel */}
             <motion.div
               initial={{ scale: 0 }}
@@ -264,14 +295,20 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               transition={{ delay: 0.2, type: 'spring' }}
               className="flex justify-center"
             >
-              <div className={`
+              <div
+                className={`
                 bg-gradient-to-r from-purple-600 to-pink-600
                 rounded-2xl border-3 border-white shadow-2xl
                 ${deviceType === 'mobile' ? 'px-4 py-2' : 'px-6 py-3'}
-              `}>
+              `}
+              >
                 <div className="text-center">
-                  <div className="text-white/80 text-[10px] font-bold uppercase tracking-wider">Nivel</div>
-                  <div className={`text-white font-black ${deviceType === 'mobile' ? 'text-3xl' : 'text-5xl'}`}>
+                  <div className="text-white/80 text-[10px] font-bold uppercase tracking-wider">
+                    Nivel
+                  </div>
+                  <div
+                    className={`text-white font-black ${deviceType === 'mobile' ? 'text-3xl' : 'text-5xl'}`}
+                  >
                     {nivelCalculado}
                   </div>
                 </div>
@@ -288,7 +325,9 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-white text-xs font-black">NIVEL {nivelCalculado}</span>
-                  <span className="text-cyan-300 text-xs font-bold">NIVEL {nivelCalculado + 1}</span>
+                  <span className="text-cyan-300 text-xs font-bold">
+                    NIVEL {nivelCalculado + 1}
+                  </span>
                 </div>
                 <div className="h-3 bg-black/40 rounded-full overflow-hidden border border-white/10">
                   <motion.div
@@ -312,9 +351,24 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                 transition={{ delay: 0.4 }}
                 className="grid grid-cols-3 gap-2"
               >
-                <StatCardMini icon={<Zap className="w-4 h-4" />} value={`${racha_dias}d`} label="RACHA" gradient="from-orange-500 to-red-600" />
-                <StatCardMini icon={<Trophy className="w-4 h-4" />} value="12/50" label="LOGROS" gradient="from-yellow-500 to-amber-600" />
-                <StatCardMini icon={<Target className="w-4 h-4" />} value="85%" label="ÁLGEBRA" gradient="from-purple-500 to-pink-600" />
+                <StatCardMini
+                  icon={<Zap className="w-4 h-4" />}
+                  value={`${racha_dias}d`}
+                  label="RACHA"
+                  gradient="from-orange-500 to-red-600"
+                />
+                <StatCardMini
+                  icon={<Trophy className="w-4 h-4" />}
+                  value="12/50"
+                  label="LOGROS"
+                  gradient="from-yellow-500 to-amber-600"
+                />
+                <StatCardMini
+                  icon={<Target className="w-4 h-4" />}
+                  value="85%"
+                  label="ÁLGEBRA"
+                  gradient="from-purple-500 to-pink-600"
+                />
               </motion.div>
             )}
 
@@ -356,27 +410,25 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                       {esHoy ? 'HOY' : format(fecha, 'dd/MM')} • {format(fecha, 'HH:mm')} hs
                     </div>
                   </div>
-                  {esHoy && (
-                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                  )}
+                  {esHoy && <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
                 </div>
               </motion.div>
             )}
-
           </div>
         </div>
       </div>
 
       {/* ========== BOTTOM BAR ÉPICO (10vh) ========== */}
       <div className="relative z-30 h-[10vh] px-4 flex items-center gap-3 bg-gradient-to-r from-slate-900/98 via-purple-900/98 to-slate-900/98 backdrop-blur-2xl border-t-2 border-white/30">
-
         {/* MOBILE: XP Bar + Botón Menú */}
         {deviceType === 'mobile' && (
           <>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-white text-xs font-black">NIVEL {nivelCalculado}</span>
-                <span className="text-white/70 text-xs font-bold">{xpEnNivelActual}/{xpNecesarioParaSiguienteNivel} XP</span>
+                <span className="text-white/70 text-xs font-bold">
+                  {xpEnNivelActual}/{xpNecesarioParaSiguienteNivel} XP
+                </span>
               </div>
               <div className="h-3 bg-black/40 rounded-full overflow-hidden border border-white/10">
                 <motion.div
@@ -387,7 +439,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                       '0 0 20px rgba(251, 191, 36, 0.6)',
                       '0 0 40px rgba(251, 191, 36, 0.9)',
                       '0 0 20px rgba(251, 191, 36, 0.6)',
-                    ]
+                    ],
                   }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
@@ -425,14 +477,21 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   />
                 </motion.div>
               </div>
-              <div className="text-white/70 text-xs font-bold mt-1">{xpEnNivelActual} / {xpNecesarioParaSiguienteNivel} XP</div>
+              <div className="text-white/70 text-xs font-bold mt-1">
+                {xpEnNivelActual} / {xpNecesarioParaSiguienteNivel} XP
+              </div>
             </div>
 
             <div className="flex-[0.4] flex items-center justify-evenly">
               <NavIconButton icon={<Home />} label="HUB" isActive />
               <NavIconButton icon={<Brain />} label="ENTRENAR" badge={3} />
               <NavIconButton icon={<Trophy />} label="LOGROS" />
-              <NavIconButton icon={<Menu />} label="MENÚ" isMenu onClick={() => setShowMenuModal(true)} />
+              <NavIconButton
+                icon={<Menu />}
+                label="MENÚ"
+                isMenu
+                onClick={() => setShowMenuModal(true)}
+              />
             </div>
           </>
         )}
@@ -442,7 +501,9 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">
               <span className="text-white text-lg font-black">NIVEL {nivelCalculado}</span>
-              <span className="text-cyan-300 text-base font-bold">¡A {xpNecesarioParaSiguienteNivel - xpEnNivelActual} XP del siguiente nivel! 🔥</span>
+              <span className="text-cyan-300 text-base font-bold">
+                ¡A {xpNecesarioParaSiguienteNivel - xpEnNivelActual} XP del siguiente nivel! 🔥
+              </span>
               <span className="text-white text-lg font-black">NIVEL {nivelCalculado + 1}</span>
             </div>
             <div className="h-6 bg-black/40 rounded-full overflow-hidden border-2 border-white/10 relative">
@@ -454,7 +515,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                     '0 0 30px rgba(251, 191, 36, 0.6), 0 0 60px rgba(251, 191, 36, 0.3)',
                     '0 0 50px rgba(251, 191, 36, 0.9), 0 0 100px rgba(251, 191, 36, 0.5)',
                     '0 0 30px rgba(251, 191, 36, 0.6), 0 0 60px rgba(251, 191, 36, 0.3)',
-                  ]
+                  ],
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
@@ -476,7 +537,6 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 
       {/* ========== MENÚ MODAL ÉPICO ========== */}
       {/* ... código del MenuModal ... */}
-
     </div>
   );
 }
@@ -484,7 +544,9 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
 // Componentes auxiliares
 function StatCardMini({ icon, value, label, gradient }: any) {
   return (
-    <div className={`bg-gradient-to-br ${gradient} rounded-xl p-2 border-2 border-white/20 text-center`}>
+    <div
+      className={`bg-gradient-to-br ${gradient} rounded-xl p-2 border-2 border-white/20 text-center`}
+    >
       <div className="text-white mb-1">{icon}</div>
       <div className="text-white text-sm font-black">{value}</div>
       <div className="text-white/80 text-[9px] font-bold uppercase">{label}</div>
@@ -530,18 +592,23 @@ function NavIconButton({ icon, label, badge, isActive, isMenu, onClick }: any) {
           <span className="text-white text-[8px] font-black">{badge}</span>
         </div>
       )}
-      <div className={`
+      <div
+        className={`
         w-12 h-12 rounded-xl flex items-center justify-center border-2 transition-all
-        ${isActive
-          ? 'bg-gradient-to-br from-cyan-500 via-purple-600 to-pink-600 border-white shadow-[0_0_20px_rgba(139,92,246,0.8)]'
-          : isMenu
-            ? 'bg-gradient-to-br from-orange-500 to-red-600 border-white/30'
-            : 'bg-slate-700 border-white/20'
+        ${
+          isActive
+            ? 'bg-gradient-to-br from-cyan-500 via-purple-600 to-pink-600 border-white shadow-[0_0_20px_rgba(139,92,246,0.8)]'
+            : isMenu
+              ? 'bg-gradient-to-br from-orange-500 to-red-600 border-white/30'
+              : 'bg-slate-700 border-white/20'
         }
-      `}>
+      `}
+      >
         <div className="text-white">{icon}</div>
       </div>
-      <span className={`text-[9px] font-bold uppercase ${isActive ? 'text-white' : 'text-white/70'}`}>
+      <span
+        className={`text-[9px] font-bold uppercase ${isActive ? 'text-white' : 'text-white/70'}`}
+      >
         {label}
       </span>
     </motion.button>

@@ -1,6 +1,7 @@
 ## Reservas (Inscripciones a Clase)
 
 #### Prompt de desarrollo
+
 ```text
 Implement the **Reservas (Inscripción a Clase)** sub-slice.
 
@@ -10,11 +11,11 @@ Implement the **Reservas (Inscripción a Clase)** sub-slice.
   - `Inscripcion` linking Estudiante and Clase, fields: `id`, `claseId`, `estudianteId`, `estadoAsistencia` (enum: 'Pendiente','Asistio','Ausente'), `observacionesDocente` (String?, for feedback).
   - (We can repurpose `Inscripcion` from earlier architecture snippet or define anew.)
 - **InscripcionesService**:
-  - `crearInscripcion(tutorId, estudianteId, claseId)`: 
+  - `crearInscripcion(tutorId, estudianteId, claseId)`:
     * Verify the estudiante belongs to tutor (to avoid booking someone else's child).
     * Verify Clase.estado == 'Programada' && fecha >= now (not in past or canceled).
     * Check class is not full: cuposOcupados < cuposMaximo.
-    * **Check membership and course eligibility**: 
+    * **Check membership and course eligibility**:
       - If clase.productoId is null (normal class), ensure tutor has active membership (Pagos slice).
       - If clase.productoId is not null (course class), ensure an InscripcionCurso exists for estudianteId & that product (from Pagos).
     * If all good: create Inscripcion record with estadoAsistencia 'Pendiente', observacionesDocente null.
@@ -295,3 +296,4 @@ Frontend (Reservas)
         Ensure teacher cannot see this if not their class: the guard and service cover it.
 
 Now proceed to final subslice: Asistencia (marking attendance and giving feedback).
+```

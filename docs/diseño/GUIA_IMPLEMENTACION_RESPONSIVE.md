@@ -20,7 +20,7 @@ Ya que el proyecto usa Tailwind v4 con PostCSS, no hay archivo `tailwind.config.
 Crear archivo: `apps/web/src/app/globals.css` (o ampliar el existente):
 
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* ========== TEMA PERSONALIZADO ========== */
 @theme {
@@ -489,7 +489,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   onClick={() =>
                     triggerAnimation(
                       'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_001.glb',
-                      3000
+                      3000,
                     )
                   }
                   delay={0.1}
@@ -504,7 +504,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   onClick={() =>
                     triggerAnimation(
                       'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_002.glb',
-                      3000
+                      3000,
                     )
                   }
                   delay={0.2}
@@ -519,7 +519,7 @@ export function HubView({ onNavigate, estudiante }: HubViewProps) {
                   onClick={() =>
                     triggerAnimation(
                       'https://bx0qberriuipqy7z.public.blob.vercel-storage.com/animations/masculine/idle/M_Standing_Idle_Variations_005.glb',
-                      3500
+                      3500,
                     )
                   }
                   delay={0.3}
@@ -942,7 +942,9 @@ function Avatar() {
         ? '(max-width: 1023px) 50vw'
         : '50vw';
 
-  return <Image src={avatarUrl} alt="Avatar" sizes={sizes} quality={deviceType === 'mobile' ? 75 : 90} />;
+  return (
+    <Image src={avatarUrl} alt="Avatar" sizes={sizes} quality={deviceType === 'mobile' ? 75 : 90} />
+  );
 }
 ```
 

@@ -38,7 +38,11 @@ export const useClassesStore = create<ClassesStore>((set, get) => ({
       const { data } = await adminApi.getAllClasses();
       set({ classes: data, isLoading: false });
     } catch (error: unknown) {
-      set({ error: getErrorMessage(error, 'Error loading classes'), classes: [], isLoading: false });
+      set({
+        error: getErrorMessage(error, 'Error loading classes'),
+        classes: [],
+        isLoading: false,
+      });
     }
   },
 

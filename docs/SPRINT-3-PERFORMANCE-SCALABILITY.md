@@ -7,9 +7,11 @@
 **Estado**: ✅ **COMPLETADO - 100% Exitoso**
 
 ### Objetivo del Sprint
+
 Optimizar el rendimiento del sistema de inscripciones para manejar picos de tráfico (100+ webhooks simultáneos), reducir latencia de endpoints críticos, y agregar observability completa para detectar degradación de performance antes de que afecte a los usuarios.
 
 ### Resultados
+
 - ✅ **4 Pasos Completados**: PASO 3.1, 3.2, 3.3, 3.4
 - ✅ **135+ Tests Nuevos**: 100% pasando (30 + 22 + 0 + 57 + tests previos)
 - ✅ **5 Commits Atómicos**: Con documentación técnica detallada
@@ -18,23 +20,26 @@ Optimizar el rendimiento del sistema de inscripciones para manejar picos de trá
 - ✅ **Performance Mejorada**: 95% reducción en latencia de webhooks
 
 ### Métricas de Impacto
-| Métrica | Antes | Después | Mejora |
-|---------|-------|---------|--------|
-| **Latencia Webhooks** | 800-1200ms | <50ms | **95% ⬇️** |
-| **Throughput** | 100 webhooks/min | 1000+ webhooks/min | **10x ⬆️** |
-| **Validación Monto** | 800-1200ms | ~10ms | **99% ⬇️** |
-| **Queries DB** | N consultas/req | 60-80% menos | **60-80% ⬇️** |
-| **Búsquedas Index** | O(n) scan completo | O(log n) B-Tree | **Logarítmico** |
-| **Uptime en Picos** | 90% | 99.9% | **99.9% ⬆️** |
+
+| Métrica               | Antes              | Después            | Mejora          |
+| --------------------- | ------------------ | ------------------ | --------------- |
+| **Latencia Webhooks** | 800-1200ms         | <50ms              | **95% ⬇️**      |
+| **Throughput**        | 100 webhooks/min   | 1000+ webhooks/min | **10x ⬆️**      |
+| **Validación Monto**  | 800-1200ms         | ~10ms              | **99% ⬇️**      |
+| **Queries DB**        | N consultas/req    | 60-80% menos       | **60-80% ⬇️**   |
+| **Búsquedas Index**   | O(n) scan completo | O(log n) B-Tree    | **Logarítmico** |
+| **Uptime en Picos**   | 90%                | 99.9%              | **99.9% ⬆️**    |
 
 ---
 
 ## 🎯 Contexto del Sprint
 
 ### Estado Pre-Sprint 3
+
 Después del Sprint 2, habíamos resuelto todas las vulnerabilidades de seguridad críticas y agregado capas de protección adicionales. Sin embargo, durante pruebas de carga identificamos **cuellos de botella de performance**:
 
 #### Problemas Identificados
+
 1. 🔴 **Webhooks Síncronos Lentos**:
    - Endpoint procesa todo el webhook antes de responder
    - 800-1200ms de latencia → MercadoPago hace retry pensando que falló
@@ -107,7 +112,9 @@ PROBLEMAS:
 **Tests**: 93/93 pasando (30 + 35 + 28)
 
 #### Problema Resuelto
+
 Sin cache, cada validación de monto consultaba la base de datos:
+
 - **800-1200ms de latencia** por validación
 - **60-80% de queries redundantes** (misma inscripción validada múltiples veces)
 - **Base de datos saturada** durante picos de tráfico
@@ -116,6 +123,7 @@ Sin cache, cada validación de monto consultaba la base de datos:
 #### Solución Implementada
 
 ##### 1. RedisModule + RedisService
+
 ```typescript
 // apps/api/src/core/redis/redis.service.ts (277 líneas)
 @Injectable()
@@ -123,19 +131,20 @@ export class RedisService {
   private client: Redis;
 
   // Métodos principales
-  async get<T>(key: string): Promise<T | null>
-  async set(key: string, value: any, ttlSeconds?: number): Promise<void>
-  async del(key: string): Promise<void>
-  async exists(key: string): Promise<boolean>
+  async get<T>(key: string): Promise<T | null>;
+  async set(key: string, value: any, ttlSeconds?: number): Promise<void>;
+  async del(key: string): Promise<void>;
+  async exists(key: string): Promise<boolean>;
 
   // Métodos de administración
-  async ttl(key: string): Promise<number>
-  async keys(pattern: string): Promise<string[]>
-  async flushAll(): Promise<void>
+  async ttl(key: string): Promise<number>;
+  async keys(pattern: string): Promise<string[]>;
+  async flushAll(): Promise<void>;
 }
 ```
 
 **Características**:
+
 - ✅ **Auto-reconnect**: Reconexión automática si Redis cae
 - ✅ **Event handling**: onConnect, onReady, onError
 - ✅ **Serialización**: JSON automático para objetos complejos
@@ -145,6 +154,7 @@ export class RedisService {
 - ✅ **30 tests pasando**: Cobertura completa
 
 ##### 2. Payment Amount Validator Caching
+
 ```typescript
 // apps/api/src/inscripciones-2026/pagos/services/payment-amount-validator.service.ts
 async validatePaymentAmount(paymentId: string): Promise<boolean> {
@@ -168,12 +178,14 @@ async invalidateCache(paymentId: string): Promise<void> {
 ```
 
 **Estrategia de Cache**:
+
 - ✅ **TTL**: 5 minutos (300 segundos)
 - ✅ **Invalidación**: Post-procesamiento de pago
 - ✅ **Cache-aside pattern**: Lazy loading
 - ✅ **35 tests pasando**: Edge cases, TTL, invalidación
 
 ##### 3. Webhook Idempotency Caching
+
 ```typescript
 // apps/api/src/inscripciones-2026/pagos/services/webhook-idempotency.service.ts
 async isWebhookProcessed(paymentId: string): Promise<boolean> {
@@ -194,6 +206,7 @@ async isWebhookProcessed(paymentId: string): Promise<boolean> {
 ```
 
 **Estrategia de Cache**:
+
 - ✅ **TTL**: 24 horas (86400 segundos)
 - ✅ **Write-through**: Actualiza cache después de procesar
 - ✅ **Doble verificación**: Cache + DB para máxima confiabilidad
@@ -208,12 +221,12 @@ services:
     image: redis:7-alpine
     container_name: mateatletas-redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis-data:/data
     command: redis-server --appendonly yes
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 3s
       retries: 5
@@ -231,14 +244,15 @@ REDIS_PASSWORD=  # Opcional
 
 #### Mejoras de Performance
 
-| Operación | Sin Cache | Con Cache | Mejora |
-|-----------|-----------|-----------|--------|
-| **Validación Monto** | 800-1200ms | ~10ms | **99% ⬇️** |
-| **Check Idempotency** | 150-300ms | ~5ms | **98% ⬇️** |
-| **Queries a DB** | 100% | 20-40% | **60-80% ⬇️** |
-| **Cache Hit Rate** | N/A | 60-80% | **60-80% hits** |
+| Operación             | Sin Cache  | Con Cache | Mejora          |
+| --------------------- | ---------- | --------- | --------------- |
+| **Validación Monto**  | 800-1200ms | ~10ms     | **99% ⬇️**      |
+| **Check Idempotency** | 150-300ms  | ~5ms      | **98% ⬇️**      |
+| **Queries a DB**      | 100%       | 20-40%    | **60-80% ⬇️**   |
+| **Cache Hit Rate**    | N/A        | 60-80%    | **60-80% hits** |
 
 #### Estándares Cumplidos
+
 - **OWASP A04:2021**: Insecure Design (performance degradation)
 - **ISO 27001 A.12.1.3**: Capacity management
 - **NIST 800-53 SC-5**: Denial of Service Protection
@@ -254,7 +268,9 @@ REDIS_PASSWORD=  # Opcional
 **Migraciones**: 18 migraciones aplicadas (16 pendientes + 1 nueva + 1 reparada)
 
 #### Problema Resuelto
+
 El procesamiento síncrono de webhooks causaba:
+
 - **800-1200ms de latencia** → MercadoPago hace retry innecesarios
 - **Throughput limitado**: Solo 100 webhooks/min antes de saturarse
 - **Servidor se satura** con 100+ webhooks simultáneos
@@ -305,6 +321,7 @@ VENTAJAS:
 ```
 
 ##### 1. WebhookQueueModule
+
 ```typescript
 // apps/api/src/queues/webhook-queue.module.ts (79 líneas)
 @Module({
@@ -318,8 +335,8 @@ VENTAJAS:
           password: configService.get<string>('REDIS_PASSWORD'),
         },
         defaultJobOptions: {
-          removeOnComplete: 100,  // Mantener últimos 100 exitosos
-          removeOnFail: 500,      // Mantener últimos 500 fallidos (debugging)
+          removeOnComplete: 100, // Mantener últimos 100 exitosos
+          removeOnFail: 500, // Mantener últimos 500 fallidos (debugging)
         },
       }),
       inject: [ConfigService],
@@ -327,16 +344,16 @@ VENTAJAS:
     BullModule.registerQueue({
       name: 'webhooks',
       defaultJobOptions: {
-        attempts: 3,           // 3 reintentos
+        attempts: 3, // 3 reintentos
         backoff: {
           type: 'exponential',
-          delay: 2000,         // 2s → 4s → 8s
+          delay: 2000, // 2s → 4s → 8s
         },
       },
     }),
     Inscripciones2026Module,
   ],
-  controllers: [QueueMetricsController],  // PASO 3.4
+  controllers: [QueueMetricsController], // PASO 3.4
   providers: [WebhookQueueService, WebhookProcessor, QueueHealthIndicator],
   exports: [WebhookQueueService, QueueHealthIndicator],
 })
@@ -344,12 +361,14 @@ export class WebhookQueueModule {}
 ```
 
 **Configuración de Retry**:
+
 - ✅ **Attempts**: 3 intentos máximos
 - ✅ **Backoff**: Exponencial (2s, 4s, 8s)
 - ✅ **Dead Letter Queue**: Jobs fallidos se mantienen 500 para debugging
 - ✅ **Auto-cleanup**: Jobs exitosos se limpian después de 100
 
 ##### 2. WebhookQueueService
+
 ```typescript
 // apps/api/src/queues/webhook-queue.service.ts (176 líneas)
 @Injectable()
@@ -364,7 +383,7 @@ export class WebhookQueueService {
     const paymentId = webhookData.data?.id;
 
     await this.webhookQueue.add('process-webhook', webhookData, {
-      jobId: paymentId,      // ✅ IDEMPOTENCY: payment_id como ID único
+      jobId: paymentId, // ✅ IDEMPOTENCY: payment_id como ID único
       priority: 1,
       attempts: 3,
       backoff: {
@@ -415,11 +434,13 @@ export class WebhookQueueService {
 ```
 
 **Idempotencia**:
+
 - ✅ **jobId = payment_id**: Mismo payment_id → reemplaza job anterior
 - ✅ **Previene duplicados**: Bull rechaza jobs con mismo jobId
 - ✅ **Complementa DB check**: Doble capa de protección
 
 **12 tests pasando**:
+
 1. ✅ Agregar webhook a queue
 2. ✅ Idempotency con jobId
 3. ✅ Estadísticas de queue
@@ -434,13 +455,12 @@ export class WebhookQueueService {
 12. ✅ Queue name correcto
 
 ##### 3. WebhookProcessor
+
 ```typescript
 // apps/api/src/queues/processors/webhook.processor.ts (133 líneas)
 @Processor('webhooks')
 export class WebhookProcessor {
-  constructor(
-    private readonly inscripciones2026Service: Inscripciones2026Service,
-  ) {}
+  constructor(private readonly inscripciones2026Service: Inscripciones2026Service) {}
 
   @Process('process-webhook')
   async handleWebhook(job: Job<MercadoPagoWebhookDto>): Promise<void> {
@@ -451,10 +471,7 @@ export class WebhookProcessor {
       await this.inscripciones2026Service.procesarWebhookMercadoPago(data);
     } catch (error) {
       // ✅ Log error para debugging
-      this.logger.error(
-        `Error procesando webhook job ${job.id}: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Error procesando webhook job ${job.id}: ${error.message}`, error.stack);
       throw error; // ✅ Re-throw para que Bull maneje retry
     }
   }
@@ -479,12 +496,14 @@ export class WebhookProcessor {
 ```
 
 **Event Handlers**:
+
 - ✅ **@OnQueueActive**: Log cuando job comienza
 - ✅ **@OnQueueCompleted**: Log cuando job termina exitosamente
 - ✅ **@OnQueueFailed**: Log cuando job falla después de 3 reintentos
 - ✅ **Error handling**: Re-throw para trigger retry automático
 
 **10 tests pasando**:
+
 1. ✅ Processor registrado correctamente
 2. ✅ Procesa webhook exitosamente
 3. ✅ Reusa lógica del servicio
@@ -497,6 +516,7 @@ export class WebhookProcessor {
 10. ✅ Error propagation
 
 ##### 4. Controller Integration
+
 ```typescript
 // apps/api/src/inscripciones-2026/inscripciones-2026.controller.ts
 @Post('webhook/mercadopago')
@@ -517,12 +537,14 @@ async procesarWebhookMercadoPago(
 ```
 
 **Cambios**:
+
 - ✅ **Antes**: Procesaba síncrono (800-1200ms)
 - ✅ **Después**: Agrega a queue (<50ms)
 - ✅ **Rate limiting**: Mantiene guard del Sprint 2
 - ✅ **Respuesta inmediata**: MercadoPago no hace retry innecesario
 
 ##### 5. Database Migration
+
 ```typescript
 // apps/api/prisma/migrations/20251122221133_add_ip_address_to_pagos/migration.sql
 -- Agregar campo faltante para fraud detection (Sprint 2)
@@ -530,30 +552,34 @@ ALTER TABLE "pagos_inscripciones_2026" ADD COLUMN "ip_address" TEXT;
 ```
 
 **Migraciones Aplicadas**:
+
 - ✅ **18 migraciones totales**
 - ✅ **16 pendientes** marcadas como aplicadas
 - ✅ **1 nueva** (ip_address)
 - ✅ **1 reparada** (colonia_verano_2026)
 
 **Test desactivado corregido**:
+
 ```typescript
 // apps/api/src/inscripciones-2026/__tests__/inscripciones-2026-unique-payment-id.spec.ts
 // ANTES: describe.skip('Inscripciones2026 - Unique Constraint', () => {
 // DESPUÉS: describe('Inscripciones2026 - Unique Constraint mercadopago_payment_id', () => {
 ```
+
 - ✅ **4 tests** ahora ejecutándose correctamente
 
 #### Mejoras de Performance
 
-| Métrica | Antes | Después | Mejora |
-|---------|-------|---------|--------|
-| **Latencia Endpoint** | 800-1200ms | <50ms | **95% ⬇️** |
-| **Throughput** | 100 webhooks/min | 1000+ webhooks/min | **10x ⬆️** |
-| **Uptime en Picos** | 90% | 99.9% | **99.9% ⬆️** |
-| **Retry Automático** | Manual | 3 intentos auto | **100% ⬆️** |
-| **Jobs Concurrentes** | 1 (síncrono) | 10-20 (async) | **10-20x ⬆️** |
+| Métrica               | Antes            | Después            | Mejora        |
+| --------------------- | ---------------- | ------------------ | ------------- |
+| **Latencia Endpoint** | 800-1200ms       | <50ms              | **95% ⬇️**    |
+| **Throughput**        | 100 webhooks/min | 1000+ webhooks/min | **10x ⬆️**    |
+| **Uptime en Picos**   | 90%              | 99.9%              | **99.9% ⬆️**  |
+| **Retry Automático**  | Manual           | 3 intentos auto    | **100% ⬆️**   |
+| **Jobs Concurrentes** | 1 (síncrono)     | 10-20 (async)      | **10-20x ⬆️** |
 
 #### Dependencias Agregadas
+
 ```json
 {
   "bull": "^4.16.3",
@@ -562,6 +588,7 @@ ALTER TABLE "pagos_inscripciones_2026" ADD COLUMN "ip_address" TEXT;
 ```
 
 #### Estándares Cumplidos
+
 - **12 Factor App - VIII**: Concurrency (scale out via process model)
 - **OWASP A04:2021**: Insecure Design (async processing)
 - **ISO 27001 A.12.1.3**: Capacity management
@@ -577,7 +604,9 @@ ALTER TABLE "pagos_inscripciones_2026" ADD COLUMN "ip_address" TEXT;
 **Migraciones**: 1 nueva (5 índices)
 
 #### Problema Resuelto
+
 Las búsquedas frecuentes hacían **full table scans** (O(n)):
+
 - **Login de estudiantes**: `WHERE pin = 'ABC123'` → scan completo de tabla
 - **Validación duplicados tutores**: `WHERE dni = '12345678'` → scan completo
 - **Dashboard de tutor**: `WHERE tutor_id = X AND estado = 'activa'` → scan sin índice
@@ -628,51 +657,59 @@ WHERE "email" IS NOT NULL;
 #### Tipos de Índices Utilizados
 
 ##### 1. B-Tree Index (Standard)
+
 ```sql
 CREATE INDEX "estudiantes_inscripciones_2026_pin_idx"
 ON "estudiantes_inscripciones_2026"("pin");
 ```
+
 - ✅ **Complejidad**: O(log n) vs O(n)
 - ✅ **Uso**: Búsquedas exactas (WHERE pin = 'ABC123')
 - ✅ **Performance**: ~60% más rápido
 
 ##### 2. Partial Index
+
 ```sql
 CREATE INDEX "tutores_dni_idx"
 ON "tutores"("dni")
 WHERE "dni" IS NOT NULL;  -- Solo indexa non-null
 ```
+
 - ✅ **Ventaja**: Índice más pequeño (solo valores relevantes)
 - ✅ **Espacio**: 30-40% menos espacio que índice completo
 - ✅ **Performance**: Igual velocidad, menor overhead
 
 ##### 3. Composite Index
+
 ```sql
 CREATE INDEX "inscripciones_2026_tutor_id_estado_idx"
 ON "inscripciones_2026"("tutor_id", "estado");
 ```
+
 - ✅ **Ventaja**: Optimiza queries con ambos campos
 - ✅ **Uso**: `WHERE tutor_id = X AND estado = 'activa'`
 - ✅ **Performance**: 50-70% más rápido que índices separados
 
 #### Análisis de Impacto
 
-| Query | Antes | Después | Mejora |
-|-------|-------|---------|--------|
-| **Login Estudiante (PIN)** | 150-300ms | 5-15ms | **90-95% ⬇️** |
-| **Validación DNI Tutor** | 100-200ms | 3-10ms | **95% ⬇️** |
-| **Dashboard Tutor** | 200-400ms | 20-50ms | **85-90% ⬇️** |
-| **Login Email** | 150-300ms | 5-15ms | **90-95% ⬇️** |
+| Query                      | Antes     | Después | Mejora        |
+| -------------------------- | --------- | ------- | ------------- |
+| **Login Estudiante (PIN)** | 150-300ms | 5-15ms  | **90-95% ⬇️** |
+| **Validación DNI Tutor**   | 100-200ms | 3-10ms  | **95% ⬇️**    |
+| **Dashboard Tutor**        | 200-400ms | 20-50ms | **85-90% ⬇️** |
+| **Login Email**            | 150-300ms | 5-15ms  | **90-95% ⬇️** |
 
 #### Trade-offs Considerados
 
 **Ventajas**:
+
 - ✅ Búsquedas 40-60% más rápidas
 - ✅ Complejidad logarítmica O(log n)
 - ✅ Partial indexes reducen espacio
 - ✅ Composite index optimiza queries combinadas
 
 **Costos**:
+
 - ⚠️ Overhead en INSERT/UPDATE: <5% (aceptable)
 - ⚠️ Espacio adicional: ~500KB (negligible)
 - ⚠️ Maintenance: Auto-mantenidos por PostgreSQL
@@ -694,6 +731,7 @@ ORDER BY tablename, indexname;
 ```
 
 #### Estándares Cumplidos
+
 - **OWASP A04:2021**: Insecure Design (performance optimization)
 - **ISO 27001 A.12.1.3**: Capacity management
 - **Database Design Best Practices**: Indexing strategy
@@ -709,7 +747,9 @@ ORDER BY tablename, indexname;
 **Líneas**: 1,443 insertadas
 
 #### Problema Resuelto
+
 Sin observability, era imposible detectar degradación de performance:
+
 - 🔴 **No hay métricas de latencia** por endpoint
 - 🔴 **No hay alertas automáticas** de endpoints lentos
 - 🔴 **No hay visibilidad** del estado de la queue
@@ -763,6 +803,7 @@ Sin observability, era imposible detectar degradación de performance:
 ```
 
 ##### 1. PerformanceLoggingInterceptor
+
 ```typescript
 // apps/api/src/shared/interceptors/performance-logging.interceptor.ts (132 líneas)
 @Injectable()
@@ -824,16 +865,18 @@ export class PerformanceLoggingInterceptor implements NestInterceptor {
 ```
 
 **Características**:
+
 - ✅ **Medición automática**: Intercepta todos los requests HTTP
 - ✅ **Threshold-based logging**:
   - <1s → LOG (✅)
   - 1-3s → WARN (⚠️)
-  - >3s → ERROR (🔴)
+  - > 3s → ERROR (🔴)
 - ✅ **Métricas estructuradas**: JSON para Datadog/Prometheus
 - ✅ **Error tracking**: Captura errores con latencia
 - ✅ **Production-ready**: Solo emite en producción
 
 **11 tests pasando**:
+
 1. ✅ Mide latencia correctamente
 2. ✅ Log normal (<1s)
 3. ✅ WARN en requests lentos (>1s)
@@ -847,6 +890,7 @@ export class PerformanceLoggingInterceptor implements NestInterceptor {
 11. ✅ Maneja diferentes status codes
 
 **Uso**:
+
 ```typescript
 // En main.ts (aplicación global)
 app.useGlobalInterceptors(new PerformanceLoggingInterceptor());
@@ -858,6 +902,7 @@ export class Inscripciones2026Controller { ... }
 ```
 
 ##### 2. QueueHealthIndicator
+
 ```typescript
 // apps/api/src/queues/health/queue-health.indicator.ts (134 líneas)
 @Injectable()
@@ -894,9 +939,7 @@ export class QueueHealthIndicator extends HealthIndicator {
       const isHealthy = this.evaluateHealth(waiting, active, failed, failedRate);
 
       if (!isHealthy) {
-        throw new Error(
-          `Queue unhealthy: ${waiting} waiting, ${failedRate.toFixed(2)}% failed`,
-        );
+        throw new Error(`Queue unhealthy: ${waiting} waiting, ${failedRate.toFixed(2)}% failed`);
       }
 
       return this.getStatus(key, true, {
@@ -933,7 +976,7 @@ export class QueueHealthIndicator extends HealthIndicator {
     failed: number,
     failedRate: number,
   ): boolean {
-    const WAITING_THRESHOLD = 200;    // Jobs en espera
+    const WAITING_THRESHOLD = 200; // Jobs en espera
     const FAILED_RATE_THRESHOLD = 25; // 25% de fallos
 
     return !(waiting > WAITING_THRESHOLD || failedRate > FAILED_RATE_THRESHOLD);
@@ -942,16 +985,18 @@ export class QueueHealthIndicator extends HealthIndicator {
 ```
 
 **Características**:
+
 - ✅ **Integración @nestjs/terminus**: Health checks estándar
 - ✅ **Redis check**: Verifica conexión con ping/pong
 - ✅ **Queue metrics**: waiting, active, failed, completed, delayed
 - ✅ **Failure rate calculation**: % de jobs fallidos
 - ✅ **Thresholds**:
-  - >200 waiting jobs → UNHEALTHY
-  - >25% failure rate → UNHEALTHY
+  - > 200 waiting jobs → UNHEALTHY
+  - > 25% failure rate → UNHEALTHY
 - ✅ **HealthIndicatorResult**: Formato estándar de terminus
 
 **25 tests pasando**:
+
 1. ✅ Healthy status con métricas normales
 2. ✅ Verifica conexión Redis
 3. ✅ Error cuando Redis desconectado
@@ -979,6 +1024,7 @@ export class QueueHealthIndicator extends HealthIndicator {
 25. ✅ Throws HealthCheckError para terminus
 
 **Uso**:
+
 ```typescript
 // En health.controller.ts
 @Controller('health')
@@ -1016,6 +1062,7 @@ export class HealthController {
 ```
 
 ##### 3. QueueMetricsController
+
 ```typescript
 // apps/api/src/queues/queue-metrics.controller.ts (160 líneas)
 @ApiTags('Queue Metrics')
@@ -1087,6 +1134,7 @@ export class QueueMetricsController {
 ```
 
 **Características**:
+
 - ✅ **GET /queues/metrics/stats**: Dashboard en tiempo real
   - waiting, active, completed, failed, delayed
   - Health status: healthy/degraded/critical
@@ -1103,6 +1151,7 @@ export class QueueMetricsController {
   - critical: >200 waiting o >25% failed
 
 **21 tests pasando**:
+
 1. ✅ Retorna estadísticas con health status
 2. ✅ Calcula failure rate correctamente
 3. ✅ Maneja 0% failure rate
@@ -1157,6 +1206,7 @@ export class QueueMetricsController {
 ```
 
 ##### 4. WebhookQueueModule Update
+
 ```typescript
 // apps/api/src/queues/webhook-queue.module.ts (actualizado)
 @Module({
@@ -1215,18 +1265,19 @@ GET /health                   → Overall system health
 
 #### Métricas Capturadas
 
-| Métrica | Fuente | Endpoint | Uso |
-|---------|--------|----------|-----|
-| **HTTP Latency** | PerformanceLoggingInterceptor | Todos | Detectar endpoints lentos |
-| **HTTP Status** | PerformanceLoggingInterceptor | Todos | Detectar errores |
-| **Queue Waiting** | QueueMetricsController | /queues/metrics/stats | Detectar backlog |
-| **Queue Active** | QueueMetricsController | /queues/metrics/stats | Monitorear procesamiento |
-| **Queue Failed** | QueueMetricsController | /queues/metrics/stats | Detectar fallos |
-| **Failure Rate** | QueueMetricsController | /queues/metrics/stats | Tasa de éxito/fallo |
-| **Health Status** | QueueHealthIndicator | /health | K8s/Docker health checks |
-| **Redis Connection** | QueueHealthIndicator | /health | Detectar Redis down |
+| Métrica              | Fuente                        | Endpoint              | Uso                       |
+| -------------------- | ----------------------------- | --------------------- | ------------------------- |
+| **HTTP Latency**     | PerformanceLoggingInterceptor | Todos                 | Detectar endpoints lentos |
+| **HTTP Status**      | PerformanceLoggingInterceptor | Todos                 | Detectar errores          |
+| **Queue Waiting**    | QueueMetricsController        | /queues/metrics/stats | Detectar backlog          |
+| **Queue Active**     | QueueMetricsController        | /queues/metrics/stats | Monitorear procesamiento  |
+| **Queue Failed**     | QueueMetricsController        | /queues/metrics/stats | Detectar fallos           |
+| **Failure Rate**     | QueueMetricsController        | /queues/metrics/stats | Tasa de éxito/fallo       |
+| **Health Status**    | QueueHealthIndicator          | /health               | K8s/Docker health checks  |
+| **Redis Connection** | QueueHealthIndicator          | /health               | Detectar Redis down       |
 
 #### Dependencias Agregadas
+
 ```json
 {
   "@nestjs/terminus": "^10.2.3"
@@ -1236,6 +1287,7 @@ GET /health                   → Overall system health
 #### Próximos Pasos de Integración
 
 1. **Datadog APM**:
+
 ```typescript
 // En emitMetrics()
 import * as dd from 'dd-trace';
@@ -1247,6 +1299,7 @@ dd.trace('http.request', {
 ```
 
 2. **Prometheus**:
+
 ```typescript
 import { Counter, Histogram } from 'prom-client';
 
@@ -1260,25 +1313,31 @@ httpRequestDuration.observe({ method, route: url, status_code: statusCode }, lat
 ```
 
 3. **CloudWatch (AWS)**:
+
 ```typescript
 import { CloudWatch } from 'aws-sdk';
 const cloudwatch = new CloudWatch();
 
-await cloudwatch.putMetricData({
-  Namespace: 'MateAtletas/API',
-  MetricData: [{
-    MetricName: 'HTTPLatency',
-    Value: latency,
-    Unit: 'Milliseconds',
-    Dimensions: [
-      { Name: 'Endpoint', Value: url },
-      { Name: 'Method', Value: method },
+await cloudwatch
+  .putMetricData({
+    Namespace: 'MateAtletas/API',
+    MetricData: [
+      {
+        MetricName: 'HTTPLatency',
+        Value: latency,
+        Unit: 'Milliseconds',
+        Dimensions: [
+          { Name: 'Endpoint', Value: url },
+          { Name: 'Method', Value: method },
+        ],
+      },
     ],
-  }],
-}).promise();
+  })
+  .promise();
 ```
 
 #### Estándares Cumplidos
+
 - **12 Factor App - XI**: Logs (treat logs as event streams)
 - **OWASP A09:2021**: Security Logging and Monitoring Failures
 - **ISO 27001 A.12.4.1**: Event logging
@@ -1290,6 +1349,7 @@ await cloudwatch.putMetricData({
 ## 🎯 Resultados Finales del Sprint 3
 
 ### Commits del Sprint
+
 ```bash
 git log --oneline --graph
 * 409e2ba feat(monitoring): implementar observability para sistema de queues (PASO 3.4)
@@ -1300,12 +1360,14 @@ git log --oneline --graph
 ```
 
 ### Estadísticas Totales
+
 ```bash
 git diff --stat 9163c47..409e2ba
 28 files changed, 4737 insertions(+), 33 deletions(-)
 ```
 
 ### Tests Totales
+
 - **Sprint 1**: ~70 tests
 - **Sprint 2**: +41 tests → 111 tests
 - **Sprint 3**: +135 tests → **246 tests** ✅
@@ -1313,11 +1375,13 @@ git diff --stat 9163c47..409e2ba
 ### Archivos Creados/Modificados
 
 #### Core Infrastructure (PASO 3.1)
+
 - ✅ `apps/api/src/core/redis/redis.module.ts` (53 líneas)
 - ✅ `apps/api/src/core/redis/redis.service.ts` (277 líneas)
 - ✅ `apps/api/src/core/redis/__tests__/redis.service.spec.ts` (371 líneas)
 
 #### Queue System (PASO 3.2)
+
 - ✅ `apps/api/src/queues/webhook-queue.module.ts` (79 líneas)
 - ✅ `apps/api/src/queues/webhook-queue.service.ts` (176 líneas)
 - ✅ `apps/api/src/queues/processors/webhook.processor.ts` (133 líneas)
@@ -1325,12 +1389,14 @@ git diff --stat 9163c47..409e2ba
 - ✅ `apps/api/src/queues/__tests__/webhook.processor.spec.ts` (249 líneas)
 
 #### Caching Implementations (PASO 3.1)
+
 - ✅ `apps/api/src/inscripciones-2026/pagos/services/payment-amount-validator.service.ts` (actualizado +180 líneas)
 - ✅ `apps/api/src/inscripciones-2026/pagos/services/webhook-idempotency.service.ts` (actualizado +75 líneas)
 - ✅ `apps/api/src/inscripciones-2026/pagos/__tests__/payment-amount-validator-caching.spec.ts` (528 líneas)
 - ✅ `apps/api/src/inscripciones-2026/pagos/__tests__/webhook-idempotency-caching.spec.ts` (345 líneas)
 
 #### Monitoring & Observability (PASO 3.4)
+
 - ✅ `apps/api/src/shared/interceptors/performance-logging.interceptor.ts` (132 líneas)
 - ✅ `apps/api/src/shared/interceptors/__tests__/performance-logging.interceptor.spec.ts` (316 líneas)
 - ✅ `apps/api/src/queues/health/queue-health.indicator.ts` (134 líneas)
@@ -1339,15 +1405,18 @@ git diff --stat 9163c47..409e2ba
 - ✅ `apps/api/src/queues/__tests__/queue-metrics.controller.spec.ts` (395 líneas)
 
 #### Database Migrations (PASO 3.2 + 3.3)
+
 - ✅ `apps/api/prisma/migrations/20251122221133_add_ip_address_to_pagos/migration.sql` (3 líneas)
 - ✅ `apps/api/prisma/migrations/20251122222002_add_performance_indexes/migration.sql` (84 líneas)
 
 #### Configuration
+
 - ✅ `docker-compose.yml` (+17 líneas - Redis service)
 - ✅ `apps/api/package.json` (+4 dependencias)
 - ✅ `yarn.lock` (+325 líneas)
 
 ### Dependencias Agregadas
+
 ```json
 {
   "ioredis": "^5.4.1",
@@ -1363,37 +1432,37 @@ git diff --stat 9163c47..409e2ba
 
 ### Performance Metrics
 
-| Métrica | Pre-Sprint 3 | Post-Sprint 3 | Mejora |
-|---------|-------------|---------------|--------|
-| **Webhook Endpoint Latency** | 800-1200ms | <50ms | **95% ⬇️** |
-| **Validación Monto** | 800-1200ms | ~10ms | **99% ⬇️** |
-| **Idempotency Check** | 150-300ms | ~5ms | **98% ⬇️** |
-| **Login Estudiante (PIN)** | 150-300ms | 5-15ms | **90-95% ⬇️** |
-| **Validación DNI Tutor** | 100-200ms | 3-10ms | **95% ⬇️** |
-| **Dashboard Tutor** | 200-400ms | 20-50ms | **85-90% ⬇️** |
-| **Throughput Webhooks** | 100/min | 1000+/min | **10x ⬆️** |
-| **DB Queries** | 100% | 20-40% | **60-80% ⬇️** |
-| **Uptime en Picos** | 90% | 99.9% | **99.9% ⬆️** |
+| Métrica                      | Pre-Sprint 3 | Post-Sprint 3 | Mejora        |
+| ---------------------------- | ------------ | ------------- | ------------- |
+| **Webhook Endpoint Latency** | 800-1200ms   | <50ms         | **95% ⬇️**    |
+| **Validación Monto**         | 800-1200ms   | ~10ms         | **99% ⬇️**    |
+| **Idempotency Check**        | 150-300ms    | ~5ms          | **98% ⬇️**    |
+| **Login Estudiante (PIN)**   | 150-300ms    | 5-15ms        | **90-95% ⬇️** |
+| **Validación DNI Tutor**     | 100-200ms    | 3-10ms        | **95% ⬇️**    |
+| **Dashboard Tutor**          | 200-400ms    | 20-50ms       | **85-90% ⬇️** |
+| **Throughput Webhooks**      | 100/min      | 1000+/min     | **10x ⬆️**    |
+| **DB Queries**               | 100%         | 20-40%        | **60-80% ⬇️** |
+| **Uptime en Picos**          | 90%          | 99.9%         | **99.9% ⬆️**  |
 
 ### Capacity Planning
 
-| Recurso | Antes | Después | Impacto |
-|---------|-------|---------|---------|
-| **Webhooks Concurrentes** | 10-20 (saturación) | 100+ (sin saturación) | **5-10x ⬆️** |
-| **CPU Usage en Picos** | 85-95% | 30-50% | **50% ⬇️** |
-| **DB Connections** | 50-100 | 10-30 | **70% ⬇️** |
-| **Redis Memory** | N/A | ~50MB | Nuevo recurso |
+| Recurso                   | Antes              | Después               | Impacto       |
+| ------------------------- | ------------------ | --------------------- | ------------- |
+| **Webhooks Concurrentes** | 10-20 (saturación) | 100+ (sin saturación) | **5-10x ⬆️**  |
+| **CPU Usage en Picos**    | 85-95%             | 30-50%                | **50% ⬇️**    |
+| **DB Connections**        | 50-100             | 10-30                 | **70% ⬇️**    |
+| **Redis Memory**          | N/A                | ~50MB                 | Nuevo recurso |
 
 ### Observability Coverage
 
-| Aspecto | Antes | Después |
-|---------|-------|---------|
+| Aspecto                   | Antes | Después                |
+| ------------------------- | ----- | ---------------------- |
 | **HTTP Latency Tracking** | ❌ No | ✅ Todos los endpoints |
-| **Queue Metrics** | ❌ No | ✅ Real-time dashboard |
-| **Health Checks** | ❌ No | ✅ /health endpoint |
-| **Dead Letter Queue** | ❌ No | ✅ /metrics/failed |
-| **Alertas Automáticas** | ❌ No | ✅ Threshold-based |
-| **Failure Rate** | ❌ No | ✅ % calculado |
+| **Queue Metrics**         | ❌ No | ✅ Real-time dashboard |
+| **Health Checks**         | ❌ No | ✅ /health endpoint    |
+| **Dead Letter Queue**     | ❌ No | ✅ /metrics/failed     |
+| **Alertas Automáticas**   | ❌ No | ✅ Threshold-based     |
+| **Failure Rate**          | ❌ No | ✅ % calculado         |
 
 ---
 
@@ -1402,6 +1471,7 @@ git diff --stat 9163c47..409e2ba
 ### Requisitos de Infraestructura
 
 #### 1. Redis Server
+
 ```bash
 # Docker (desarrollo)
 docker-compose up -d redis
@@ -1412,6 +1482,7 @@ docker-compose up -d redis
 ```
 
 **Variables de entorno**:
+
 ```bash
 REDIS_HOST=your-redis-host.redis.io
 REDIS_PORT=6379
@@ -1419,6 +1490,7 @@ REDIS_PASSWORD=your-redis-password  # Opcional
 ```
 
 #### 2. Verificación de Dependencias
+
 ```bash
 # Instalar dependencias
 npm install
@@ -1428,6 +1500,7 @@ npm ls ioredis bull @nestjs/bull @nestjs/terminus
 ```
 
 #### 3. Database Migrations
+
 ```bash
 # Aplicar migraciones pendientes
 npx prisma migrate deploy
@@ -1442,6 +1515,7 @@ psql $DATABASE_URL -c "
 ### Post-Deployment Verification
 
 #### 1. Health Checks
+
 ```bash
 # Verificar health endpoint
 curl http://your-app.com/health
@@ -1460,6 +1534,7 @@ curl http://your-app.com/health
 ```
 
 #### 2. Queue Metrics
+
 ```bash
 # Stats en tiempo real
 curl http://your-app.com/queues/metrics/stats
@@ -1469,6 +1544,7 @@ curl http://your-app.com/queues/metrics/failed
 ```
 
 #### 3. Performance Logs
+
 ```bash
 # Verificar logs de latencia
 tail -f logs/app.log | grep PerformanceMonitor
@@ -1481,6 +1557,7 @@ tail -f logs/app.log | grep PerformanceMonitor
 ### Monitoring Integration (Opcional)
 
 #### Datadog
+
 ```typescript
 // main.ts
 import * as dd from 'dd-trace';
@@ -1491,6 +1568,7 @@ dd.init({
 ```
 
 #### Prometheus
+
 ```typescript
 // Agregar PrometheusModule
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
@@ -1504,6 +1582,7 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 ```
 
 #### CloudWatch (AWS)
+
 ```bash
 # Configurar CloudWatch Agent
 aws cloudwatch put-metric-data \
@@ -1520,24 +1599,29 @@ aws cloudwatch put-metric-data \
 ### Decisiones de Diseño
 
 #### 1. Redis como Cache Layer
+
 **Decisión**: Usar Redis en lugar de cache in-memory (ej: node-cache)
 
 **Pros**:
+
 - ✅ Compartido entre múltiples instancias (horizontal scaling)
 - ✅ Persistencia configurable (AOF/RDB)
 - ✅ TTL nativo y eficiente
 - ✅ Mismo Redis para Bull Queue (menos infraestructura)
 
 **Cons**:
+
 - ⚠️ Dependencia externa adicional
 - ⚠️ Network latency (mínimo, ~1-2ms)
 
 **Conclusión**: Valió la pena por escalabilidad
 
 #### 2. Bull Queue vs Custom Worker
+
 **Decisión**: Usar Bull en lugar de implementar worker propio
 
 **Pros**:
+
 - ✅ Retry automático con exponential backoff
 - ✅ Idempotencia built-in (jobId)
 - ✅ Dashboard UI (Bull-Board)
@@ -1545,44 +1629,51 @@ aws cloudwatch put-metric-data \
 - ✅ Métricas out-of-the-box
 
 **Cons**:
+
 - ⚠️ Dependencia de librería third-party
 - ⚠️ Learning curve
 
 **Conclusión**: Ahorro de 500+ líneas de código custom
 
 #### 3. Partial vs Full Indexes
+
 **Decisión**: Usar partial indexes para campos nullable
 
 **Pros**:
+
 - ✅ 30-40% menos espacio
 - ✅ Mismo performance
 - ✅ Menor overhead en writes
 
 **Cons**:
+
 - ⚠️ Solo funciona en PostgreSQL (no MySQL)
 
 **Conclusión**: Optimización significativa sin trade-offs
 
 #### 4. Observability First
+
 **Decisión**: Implementar monitoring desde el inicio (no después)
 
 **Pros**:
+
 - ✅ Visibilidad inmediata de performance
 - ✅ Detecta regresiones temprano
 - ✅ Facilita debugging en producción
 
 **Cons**:
+
 - ⚠️ Overhead mínimo (<1% CPU)
 
 **Conclusión**: Crítico para producción
 
 ### Trade-offs Aceptados
 
-| Trade-off | Justificación |
-|-----------|---------------|
-| **Redis como dependencia** | Escalabilidad > Simplicidad |
-| **Overhead de índices (<5%)** | Query speed > Write speed |
-| **Latencia de queue (~10ms)** | Throughput > Latencia mínima |
+| Trade-off                     | Justificación                      |
+| ----------------------------- | ---------------------------------- |
+| **Redis como dependencia**    | Escalabilidad > Simplicidad        |
+| **Overhead de índices (<5%)** | Query speed > Write speed          |
+| **Latencia de queue (~10ms)** | Throughput > Latencia mínima       |
 | **Cache invalidation manual** | Performance > Consistency eventual |
 
 ---
@@ -1590,30 +1681,35 @@ aws cloudwatch put-metric-data \
 ## 🎓 Conocimientos Técnicos Adquiridos
 
 ### Redis Patterns
+
 - Cache-aside pattern (lazy loading)
 - Write-through pattern (update cache on write)
 - TTL management
 - Key naming conventions (`entity:id:field`)
 
 ### Bull Queue
+
 - Idempotency con jobId
 - Exponential backoff retry
 - Event-driven architecture
 - Dead letter queue pattern
 
 ### PostgreSQL Optimization
+
 - B-Tree indexes
 - Partial indexes
 - Composite indexes
 - Query planning (EXPLAIN ANALYZE)
 
 ### NestJS Interceptors
+
 - ExecutionContext API
 - RxJS operators (tap, map)
 - Global vs local interceptors
 - Performance monitoring patterns
 
 ### Health Checks
+
 - @nestjs/terminus integration
 - HealthIndicator pattern
 - Kubernetes liveness/readiness probes
@@ -1624,6 +1720,7 @@ aws cloudwatch put-metric-data \
 ## 🔮 Próximos Pasos (Fuera de Sprint 3)
 
 ### Optimizaciones Adicionales
+
 1. **Connection Pooling**: Optimizar pool size de PostgreSQL
 2. **Query Optimization**: Analizar queries lentas con EXPLAIN
 3. **CDN**: Agregar CloudFlare/CloudFront para assets estáticos
@@ -1631,6 +1728,7 @@ aws cloudwatch put-metric-data \
 5. **Lazy Loading**: Implementar pagination en dashboards
 
 ### Monitoring Avanzado
+
 1. **APM Integration**: Conectar Datadog/New Relic
 2. **Distributed Tracing**: OpenTelemetry
 3. **Custom Dashboards**: Grafana + Prometheus
@@ -1638,6 +1736,7 @@ aws cloudwatch put-metric-data \
 5. **Error Tracking**: Sentry integration
 
 ### Scalability
+
 1. **Horizontal Scaling**: Multiple instances + load balancer
 2. **Database Replica**: Read replicas para queries pesadas
 3. **Queue Workers**: Workers dedicados (separar API de workers)
@@ -1649,6 +1748,7 @@ aws cloudwatch put-metric-data \
 ## 📚 Referencias y Documentación
 
 ### Documentación Oficial
+
 - [Bull Queue Docs](https://github.com/OptimalBits/bull)
 - [Redis Best Practices](https://redis.io/docs/manual/patterns/)
 - [PostgreSQL Indexes](https://www.postgresql.org/docs/current/indexes.html)
@@ -1656,12 +1756,14 @@ aws cloudwatch put-metric-data \
 - [NestJS Terminus Health Checks](https://docs.nestjs.com/recipes/terminus)
 
 ### Artículos de Referencia
+
 - [Caching Strategies](https://aws.amazon.com/caching/best-practices/)
 - [Queue-Based Load Leveling](https://learn.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling)
 - [Database Indexing Strategies](https://use-the-index-luke.com/)
 - [Observability Engineering](https://www.oreilly.com/library/view/observability-engineering/9781492076438/)
 
 ### Estándares Cumplidos
+
 - **OWASP Top 10 2021**: A04 (Insecure Design), A09 (Logging Failures)
 - **ISO 27001**: A.12.1.3 (Capacity), A.12.4.1 (Event Logging)
 - **NIST 800-53**: SC-5 (DoS Protection), AU-2 (Audit Events)
@@ -1673,6 +1775,7 @@ aws cloudwatch put-metric-data \
 ## ✅ Checklist de Completitud
 
 ### Funcionalidad
+
 - [x] Redis caching implementado y testeado
 - [x] Bull queue funcionando con retry
 - [x] Índices de DB creados y verificados
@@ -1681,6 +1784,7 @@ aws cloudwatch put-metric-data \
 - [x] Metrics dashboard disponible
 
 ### Testing
+
 - [x] 135+ tests nuevos pasando
 - [x] Zero regresión en tests anteriores
 - [x] Coverage de edge cases
@@ -1689,6 +1793,7 @@ aws cloudwatch put-metric-data \
 - [x] Tests de health checks
 
 ### Documentación
+
 - [x] README actualizado
 - [x] Swagger/OpenAPI actualizado
 - [x] Comentarios en código
@@ -1697,6 +1802,7 @@ aws cloudwatch put-metric-data \
 - [x] Architecture diagrams
 
 ### DevOps
+
 - [x] Docker Compose con Redis
 - [x] Variables de entorno documentadas
 - [x] Migraciones aplicadas
@@ -1711,6 +1817,7 @@ aws cloudwatch put-metric-data \
 El **Sprint 3** logró transformar un sistema que apenas manejaba 100 webhooks/min con alta latencia, en un sistema robusto capaz de procesar **1000+ webhooks/min** con **<50ms de latencia**.
 
 ### Logros Principales
+
 1. ✅ **95% reducción en latencia** de webhooks críticos
 2. ✅ **10x incremento en throughput** (100 → 1000+ req/min)
 3. ✅ **99% reducción en queries redundantes** mediante caching
@@ -1718,7 +1825,9 @@ El **Sprint 3** logró transformar un sistema que apenas manejaba 100 webhooks/m
 5. ✅ **Zero downtime** durante picos de tráfico
 
 ### Preparación para Producción
+
 El sistema ahora está **production-ready** con:
+
 - Caching inteligente (Redis)
 - Procesamiento asíncrono (Bull Queue)
 - Búsquedas optimizadas (DB Indexes)
@@ -1727,6 +1836,7 @@ El sistema ahora está **production-ready** con:
 - Dead letter queue para debugging
 
 ### Próximos Sprints Sugeridos
+
 - **Sprint 4**: Integraciones externas (email, SMS, pagos adicionales)
 - **Sprint 5**: Dashboard administrativo avanzado
 - **Sprint 6**: Mobile app / PWA
