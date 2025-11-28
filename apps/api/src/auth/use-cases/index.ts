@@ -6,3 +6,6 @@ export type { LoginResult } from './login.use-case';
 
 export { LoginEstudianteUseCase } from './login-estudiante.use-case';
 export type { LoginEstudianteResult } from './login-estudiante.use-case';
+
+export { CompleteMfaLoginUseCase } from './complete-mfa-login.use-case';
+export type { CompleteMfaLoginResult } from './complete-mfa-login.use-case';
