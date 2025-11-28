@@ -16,11 +16,11 @@
 | Coverage actual   | 40.78%                      |
 | Coverage objetivo | 80% en codigo nuevo         |
 
-## ESTADO ACTUAL (Post-SLICE 2)
+## ESTADO ACTUAL (Post-SLICE 3)
 
 | Metrica        | Valor                       |
 | -------------- | --------------------------- |
-| Tests pasando  | 1404                        |
+| Tests pasando  | 1504 (+34 tiers)            |
 | Tests fallando | 0 (6 Redis solo localmente) |
 | Tests skipped  | 157                         |
 | Errores TS     | 0                           |
@@ -32,6 +32,7 @@
 - FASE 1.5 completada - Estabilizacion de tests
 - `8e9fe2d` - SLICE 1: CASAS completado
 - `27a3714` - SLICE 2: MUNDOS completado
+- `e34b11f` - SLICE 3: TIERS completado
 
 ---
 
@@ -63,8 +64,8 @@ Cada slice incluye:
 | --- | --------------- | ---------- | -------------------- | ------------- |
 | 1   | CASAS           | Critico    | Ninguna              | ✅ COMPLETADO |
 | 2   | MUNDOS          | Critico    | Casas                | ✅ COMPLETADO |
-| 3   | TIERS           | Critico    | Mundos               | Pendiente     |
-| 4   | ONBOARDING      | Critico    | Casas, Mundos, Tiers | Pendiente     |
+| 3   | TIERS           | Critico    | Mundos               | ✅ COMPLETADO |
+| 4   | ONBOARDING      | Critico    | Casas, Mundos, Tiers | En progreso   |
 | 5   | PLANIFICACIONES | Critico    | Mundos               | Pendiente     |
 | 6   | GAMIFICACION    | Importante | Casas                | Pendiente     |
 | 7   | CAMPUS VIRTUAL  | Importante | Casas, Gamificacion  | Pendiente     |
@@ -251,7 +252,43 @@ Sistema de 3 tiers: ARCADE ($30k), ARCADE+ ($60k), PRO ($75k).
 
 ---
 
-## SLICES 4-10
+## SLICE 4: ONBOARDING
+
+### Alcance
+
+Flujo de primera vez del estudiante despues de que el padre paga.
+
+### Flujo Completo (de MATEATLETAS_2026_ESPECIFICACION.md)
+
+1. **Seleccion de Mundo(s)** - Segun tier (ARCADE: 1, ARCADE+: 3, PRO: 1 async + 1 sync)
+2. **Test de Ubicacion** - Determina casa y nivel interno
+3. **Confirmacion de Casa** - Ve su casa asignada
+4. **Crear Avatar 2D** - Personalizacion para campus virtual
+
+### Tareas Backend
+
+| #   | Tarea                                                 | Estado    |
+| --- | ----------------------------------------------------- | --------- |
+| 4.1 | Crear enum OnboardingEstado                           | Pendiente |
+| 4.2 | Agregar estado onboarding a EstudianteInscripcion2026 | Pendiente |
+| 4.3 | Crear modelo EstudianteMundoNivel                     | Pendiente |
+| 4.4 | Crear modelo TestUbicacionResultado                   | Pendiente |
+| 4.5 | Crear OnboardingService                               | Pendiente |
+| 4.6 | Crear OnboardingController                            | Pendiente |
+| 4.7 | Implementar logica de asignacion de nivel             | Pendiente |
+| 4.8 | Implementar logica de bajada de casa                  | Pendiente |
+| 4.9 | Migracion y seeds                                     | Pendiente |
+
+### TODOs para despues (no bloquean MVP)
+
+- [ ] Cargar preguntas reales del test de ubicacion (Mate/Progra/Ciencias)
+- [ ] Diseno visual del sistema de avatares 2D
+- [ ] Reglas anti-frustracion: retest cada 7 dias
+- [ ] Algoritmo adaptativo de preguntas segun respuestas
+
+---
+
+## SLICES 5-10
 
 (Detalle a completar cuando lleguemos a cada slice)
 
@@ -274,7 +311,7 @@ Sistema de 3 tiers: ARCADE ($30k), ARCADE+ ($60k), PRO ($75k).
 | --------- | --------------- | -------------------- | ---------------- |
 | 1. Casas  | 41              | 83                   | 28/11/2025       |
 | 2. Mundos | 21              | 0                    | 28/11/2025       |
-| 3. Tiers  | -               | -                    | -                |
+| 3. Tiers  | 34              | 0                    | 28/11/2025       |
 
 ---
 
@@ -319,4 +356,4 @@ git reset --hard <commit-hash>
 ---
 
 **Ultima actualizacion:** 2025-11-28
-**Proximo slice:** 3. TIERS
+**Proximo slice:** 4. ONBOARDING

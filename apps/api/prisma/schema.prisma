@@ -156,6 +156,10 @@ model Estudiante {
   colonia_inscripciones     ColoniaEstudiante[]
   EstudianteInscripcion2026 EstudianteInscripcion2026[]
 
+  /// ONBOARDING 2026
+  niveles_por_mundo    EstudianteMundoNivel[]
+  tests_ubicacion      TestUbicacionResultado[]
+
   @@map("estudiantes")
 }
 
@@ -233,6 +237,10 @@ model Casa {
   /// Estudiantes que pertenecen a esta casa
   estudiantes Estudiante[]
 
+  /// ONBOARDING 2026 - Tests de ubicación
+  tests_casa_original TestUbicacionResultado[] @relation("TestCasaOriginal")
+  tests_casa_asignada TestUbicacionResultado[] @relation("TestCasaAsignada")
+
   @@map("casas")
 }
 
@@ -268,6 +276,10 @@ model Mundo {
   createdAt DateTime @default(now())
   /// Timestamp de última actualización del registro
   updatedAt DateTime @updatedAt
+
+  /// ONBOARDING 2026 - Relaciones
+  estudiantes_nivel EstudianteMundoNivel[]
+  tests_ubicacion   TestUbicacionResultado[]
 
   // Nota: Relación con planificaciones se agregará en SLICE 5
 
@@ -366,6 +378,92 @@ model CambioTierPendiente {
   @@index([estado])
   @@index([fecha_efectiva])
   @@map("cambios_tier_pendientes")
+}
+
+/// Nivel del estudiante en cada mundo (2026)
+/// Un estudiante puede tener diferentes niveles en cada mundo
+/// Ej: "Intermedio en Matemática" y "Básico en Programación"
+model EstudianteMundoNivel {
+  /// Identificador único del registro
+  id String @id @default(cuid())
+
+  /// ID del estudiante
+  estudiante_id String
+
+  /// ID del mundo
+  mundo_id String
+
+  /// Nivel interno asignado en este mundo
+  nivel_interno NivelInterno @default(BASICO)
+
+  /// Fecha de asignación del nivel
+  fecha_asignacion DateTime @default(now())
+
+  /// Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  estudiante Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  mundo      Mundo      @relation(fields: [mundo_id], references: [id], onDelete: Cascade)
+
+  /// Un estudiante solo puede tener un nivel por mundo
+  @@unique([estudiante_id, mundo_id])
+  @@index([estudiante_id])
+  @@index([mundo_id])
+  @@map("estudiante_mundo_niveles")
+}
+
+/// Resultado del test de ubicación (2026)
+/// Registra el diagnóstico inicial del estudiante por mundo
+/// Determina casa y nivel interno
+model TestUbicacionResultado {
+  /// Identificador único del resultado
+  id String @id @default(cuid())
+
+  /// ID del estudiante que hizo el test
+  estudiante_id String
+
+  /// ID del mundo para el cual se hizo el test
+  mundo_id String
+
+  /// Total de preguntas en el test
+  preguntas_total Int
+
+  /// Cantidad de respuestas correctas
+  respuestas_correctas Int
+
+  /// Puntaje final (0-100)
+  puntaje Float
+
+  /// Nivel interno asignado basado en el puntaje
+  nivel_asignado NivelInterno
+
+  /// ID de la casa original (por edad)
+  casa_original_id String?
+
+  /// ID de la casa final asignada (puede ser menor si bajó)
+  casa_asignada_id String?
+
+  /// Indica si el estudiante bajó de casa por el test
+  bajo_de_casa Boolean @default(false)
+
+  /// Fecha de completado del test
+  fecha_completado DateTime @default(now())
+
+  /// Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Relaciones
+  estudiante    Estudiante @relation(fields: [estudiante_id], references: [id], onDelete: Cascade)
+  mundo         Mundo      @relation(fields: [mundo_id], references: [id], onDelete: Cascade)
+  casa_original Casa?      @relation("TestCasaOriginal", fields: [casa_original_id], references: [id])
+  casa_asignada Casa?      @relation("TestCasaAsignada", fields: [casa_asignada_id], references: [id])
+
+  @@index([estudiante_id])
+  @@index([mundo_id])
+  @@map("test_ubicacion_resultados")
 }
 
 /// Modelo para docentes (profesores) de la plataforma
@@ -1437,6 +1535,19 @@ enum NivelInterno {
   OLIMPICO // Nivel olímpico (solo Vertex y Pulsar en Mat/Prog)
 
   @@map("nivel_interno")
+}
+
+/// Enum para estado del onboarding del estudiante (2026)
+/// Flujo: PENDIENTE -> SELECCION_MUNDOS -> TEST_UBICACION -> CONFIRMACION_CASA -> CREACION_AVATAR -> COMPLETADO
+enum OnboardingEstado {
+  PENDIENTE // Recién inscrito, no ha empezado
+  SELECCION_MUNDOS // Eligiendo mundos según tier
+  TEST_UBICACION // Haciendo test diagnóstico
+  CONFIRMACION_CASA // Viendo casa asignada
+  CREACION_AVATAR // Personalizando avatar 2D
+  COMPLETADO // Listo para usar la plataforma
+
+  @@map("onboarding_estado")
 }
 
 /// Enum para tipos de tier de suscripción (2026)
@@ -2900,6 +3011,21 @@ model EstudianteInscripcion2026 {
   /// ID del tier de suscripción (ARCADE, ARCADE_PLUS, PRO)
   /// Nullable para inscripciones legacy y migraciones
   tier_id String?
+
+  /// Estado del onboarding (flujo de primera vez)
+  /// PENDIENTE -> SELECCION_MUNDOS -> TEST_UBICACION -> CONFIRMACION_CASA -> CREACION_AVATAR -> COMPLETADO
+  onboarding_estado OnboardingEstado @default(PENDIENTE)
+
+  /// Fecha en que completó el onboarding
+  onboarding_completado_at DateTime?
+
+  /// Configuración del avatar 2D (JSON con opciones de personalización)
+  /// TODO: Definir estructura cuando se diseñe el sistema de avatares
+  avatar_config Json?
+
+  /// Mundos seleccionados por el estudiante (IDs de mundos)
+  /// Se guardan durante el onboarding paso SELECCION_MUNDOS
+  mundos_seleccionados String[] @default([])
 
   /// Timestamps
   createdAt DateTime @default(now())
