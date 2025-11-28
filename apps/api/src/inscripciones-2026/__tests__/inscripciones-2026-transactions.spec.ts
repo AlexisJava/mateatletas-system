@@ -6,9 +6,10 @@ import { ConfigService } from '@nestjs/config';
 import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
 import { PinGeneratorService } from '../../shared/services/pin-generator.service';
 import { TutorCreationService } from '../../shared/services/tutor-creation.service';
-import { MercadoPagoWebhookProcessorService } from '../../shared/services/mercadopago-webhook-processor.service';
-import { WebhookIdempotencyService } from '../../pagos/services/webhook-idempotency.service';
-import { PaymentAmountValidatorService } from '../../pagos/services/payment-amount-validator.service';
+import {
+  ValidarInscripcionUseCase,
+  ProcesarWebhookInscripcionUseCase,
+} from '../use-cases';
 import {
   BadRequestException,
   InternalServerErrorException,
@@ -303,23 +304,23 @@ describe('Inscripciones2026Service - createInscripcion2026 Transacciones Atómic
           },
         },
         {
-          provide: WebhookIdempotencyService,
+          provide: ValidarInscripcionUseCase,
           useValue: {
-            checkIdempotency: jest
-              .fn()
-              .mockResolvedValue({ isProcessed: false }),
-            markAsProcessed: jest.fn().mockResolvedValue(undefined),
+            execute: jest.fn().mockReturnValue({
+              isValid: true,
+              inscripcionFee: 25000,
+              monthlyTotal: 158400,
+              siblingDiscount: 12,
+              cursosPerStudent: [1, 2],
+            }),
           },
         },
         {
-          provide: PaymentAmountValidatorService,
+          provide: ProcesarWebhookInscripcionUseCase,
           useValue: {
-            validatePaymentAmount: jest
-              .fn()
-              .mockResolvedValue({ isValid: true }),
+            execute: jest.fn(),
           },
         },
-        MercadoPagoWebhookProcessorService,
       ],
     }).compile();
 

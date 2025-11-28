@@ -1,7 +1,6 @@
 import {
   Injectable,
   BadRequestException,
-  ConflictException,
   Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -18,20 +17,10 @@ import {
 import { PrismaService } from '../core/database/prisma.service';
 import { MercadoPagoService } from '../pagos/mercadopago.service';
 import { MercadoPagoWebhookDto } from '../pagos/dto/mercadopago-webhook.dto';
-import { WebhookIdempotencyService } from '../pagos/services/webhook-idempotency.service';
-import { PaymentAmountValidatorService } from '../pagos/services/payment-amount-validator.service';
-import {
-  parseLegacyExternalReference,
-  TipoExternalReference,
-  PRECIOS,
-  DESCUENTOS,
-  PricingHelpers,
-  DEFAULT_ROLES,
-} from '../domain/constants';
+import { PRECIOS, DESCUENTOS, DEFAULT_ROLES } from '../domain/constants';
 import { PricingCalculatorService } from '../domain/services/pricing-calculator.service';
 import { PinGeneratorService } from '../shared/services/pin-generator.service';
 import { TutorCreationService } from '../shared/services/tutor-creation.service';
-import { MercadoPagoWebhookProcessorService } from '../shared/services/mercadopago-webhook-processor.service';
 import {
   CreateInscripcion2026Dto,
   CreateInscripcion2026Response,
@@ -41,6 +30,10 @@ import {
   TutorDataDto,
   EstudianteInscripcionDto,
 } from './dto/create-inscripcion-2026.dto';
+import {
+  ValidarInscripcionUseCase,
+  ProcesarWebhookInscripcionUseCase,
+} from './use-cases';
 
 /**
  * Representa un estudiante creado en la transacción con sus datos relacionados
@@ -65,6 +58,16 @@ interface TransactionResult {
   mundosCount: number;
 }
 
+/**
+ * Inscripciones2026Service
+ *
+ * Facade que orquesta la lógica de inscripciones 2026.
+ * Delega responsabilidades a use-cases especializados:
+ * - ValidarInscripcionUseCase: Validación y cálculo de precios
+ * - ProcesarWebhookInscripcionUseCase: Procesamiento de webhooks MercadoPago
+ *
+ * Refactorizado desde 1063 líneas para reducir complejidad.
+ */
 @Injectable()
 export class Inscripciones2026Service {
   private readonly logger = new Logger(Inscripciones2026Service.name);
@@ -76,9 +79,9 @@ export class Inscripciones2026Service {
     private readonly pricingCalculator: PricingCalculatorService,
     private readonly pinGenerator: PinGeneratorService,
     private readonly tutorCreation: TutorCreationService,
-    private readonly webhookProcessor: MercadoPagoWebhookProcessorService,
-    private readonly webhookIdempotency: WebhookIdempotencyService,
-    private readonly amountValidator: PaymentAmountValidatorService,
+    // Use-cases
+    private readonly validarInscripcionUseCase: ValidarInscripcionUseCase,
+    private readonly procesarWebhookUseCase: ProcesarWebhookInscripcionUseCase,
   ) {}
 
   /**
@@ -119,127 +122,6 @@ export class Inscripciones2026Service {
     // Agregar sufijo aleatorio de 4 dígitos para garantizar unicidad
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     return `${baseUsername}${randomSuffix}`;
-  }
-
-  /**
-   * Convierte TipoInscripcion2026 a tipo esperado por PricingCalculator
-   */
-  private mapTipoToPricing(
-    tipo: TipoInscripcion2026,
-  ): 'COLONIA' | 'CICLO_2026' | 'PACK_COMPLETO' {
-    switch (tipo) {
-      case TipoInscripcion2026.COLONIA:
-        return 'COLONIA';
-      case TipoInscripcion2026.CICLO_2026:
-        return 'CICLO_2026';
-      case TipoInscripcion2026.PACK_COMPLETO:
-        return 'PACK_COMPLETO';
-      default:
-        throw new BadRequestException(`Tipo de inscripción inválido: ${tipo}`);
-    }
-  }
-
-  /**
-   * Calcula el monto de inscripción según el tipo
-   */
-  private calculateInscriptionFee(tipo: TipoInscripcion2026): number {
-    return this.pricingCalculator.calcularTarifaInscripcion(
-      this.mapTipoToPricing(tipo),
-    );
-  }
-
-  /**
-   * Calcula el descuento por hermanos (solo aplica a cuota mensual)
-   * 2 hermanos: 12%
-   * 3+ hermanos: 24%
-   *
-   * @deprecated Usar pricingCalculator.calcularDescuentoInscripcion2026()
-   */
-  private calculateSiblingDiscount(numEstudiantes: number): number {
-    return this.pricingCalculator.calcularDescuentoInscripcion2026(
-      numEstudiantes,
-    );
-  }
-
-  /**
-   * Calcula el descuento por múltiples cursos en Colonia
-   * 2 cursos: 12% de descuento en el segundo curso
-   *
-   * @deprecated Usar DESCUENTOS.COLONIA.SEGUNDO_CURSO desde domain/constants
-   */
-  private calculateCourseDiscount(numCursos: number): number {
-    if (numCursos === 2) return DESCUENTOS.COLONIA.SEGUNDO_CURSO;
-    return 0;
-  }
-
-  /**
-   * Calcula el total mensual según tipo de inscripción y descuentos
-   */
-  private calculateMonthlyTotal(
-    tipo: TipoInscripcion2026,
-    numEstudiantes: number,
-    cursosPerStudent: number[], // array con cantidad de cursos por estudiante
-  ): { total: number; descuento: number } {
-    return this.pricingCalculator.calcularTotalInscripcion2026(
-      this.mapTipoToPricing(tipo),
-      numEstudiantes,
-      cursosPerStudent,
-    );
-  }
-
-  /**
-   * Valida que los datos sean consistentes según el tipo de inscripción
-   */
-  private validateInscriptionData(dto: CreateInscripcion2026Dto): void {
-    const { tipo_inscripcion, estudiantes } = dto;
-
-    estudiantes.forEach((estudiante, index) => {
-      const hasCursos =
-        estudiante.cursos_seleccionados &&
-        estudiante.cursos_seleccionados.length > 0;
-      const hasMundo = !!estudiante.mundo_seleccionado;
-
-      switch (tipo_inscripcion) {
-        case TipoInscripcion2026.COLONIA:
-          if (!hasCursos) {
-            throw new BadRequestException(
-              `Estudiante ${index + 1}: Debe seleccionar al menos 1 curso de Colonia`,
-            );
-          }
-          if (hasMundo) {
-            throw new BadRequestException(
-              `Estudiante ${index + 1}: No debe seleccionar mundo STEAM para Colonia`,
-            );
-          }
-          break;
-
-        case TipoInscripcion2026.CICLO_2026:
-          if (!hasMundo) {
-            throw new BadRequestException(
-              `Estudiante ${index + 1}: Debe seleccionar un mundo STEAM para Ciclo 2026`,
-            );
-          }
-          if (hasCursos) {
-            throw new BadRequestException(
-              `Estudiante ${index + 1}: No debe seleccionar cursos de Colonia para Ciclo 2026`,
-            );
-          }
-          break;
-
-        case TipoInscripcion2026.PACK_COMPLETO:
-          if (!hasCursos) {
-            throw new BadRequestException(
-              `Estudiante ${index + 1}: Debe seleccionar al menos 1 curso de Colonia para Pack Completo`,
-            );
-          }
-          if (!hasMundo) {
-            throw new BadRequestException(
-              `Estudiante ${index + 1}: Debe seleccionar un mundo STEAM para Pack Completo`,
-            );
-          }
-          break;
-      }
-    });
   }
 
   /**
@@ -618,29 +500,17 @@ export class Inscripciones2026Service {
    * Crea una nueva inscripción 2026 con transacción atómica completa
    *
    * Flujo:
-   * 1. Validaciones (sin DB)
-   * 2. Cálculos (sin DB)
-   * 3. MercadoPago.createPreference() ← PRIMERO (fail-fast)
-   * 4. $transaction con timeout y isolation level
-   * 5. Retornar respuesta
+   * 1. Validaciones y cálculos (delega a ValidarInscripcionUseCase)
+   * 2. MercadoPago.createPreference() ← PRIMERO (fail-fast)
+   * 3. $transaction con timeout y isolation level
+   * 4. Retornar respuesta
    */
   async createInscripcion2026(
     dto: CreateInscripcion2026Dto,
   ): Promise<CreateInscripcion2026Response> {
-    // 1️⃣ Validaciones (sin DB)
-    this.validateInscriptionData(dto);
-
-    // 2️⃣ Cálculos (sin DB)
-    const inscripcionFee = this.calculateInscriptionFee(dto.tipo_inscripcion);
-    const cursosPerStudent = dto.estudiantes.map(
-      (e) => e.cursos_seleccionados?.length || 0,
-    );
-    const { total: monthlyTotal, descuento: siblingDiscount } =
-      this.calculateMonthlyTotal(
-        dto.tipo_inscripcion,
-        dto.estudiantes.length,
-        cursosPerStudent,
-      );
+    // 1️⃣ Validaciones y cálculos (delega a use-case)
+    const validacion = this.validarInscripcionUseCase.execute(dto);
+    const { inscripcionFee, monthlyTotal, siblingDiscount } = validacion;
 
     // 3️⃣ CRÍTICO: Crear preferencia MercadoPago PRIMERO (fail-fast)
     const backendUrl =
@@ -822,242 +692,13 @@ export class Inscripciones2026Service {
   /**
    * Procesa webhook de MercadoPago para pagos de Inscripción 2026
    *
-   * Utiliza el servicio compartido MercadoPagoWebhookProcessorService
-   * y proporciona callbacks específicos para la lógica de Inscripciones2026.
+   * Delega al ProcesarWebhookInscripcionUseCase que maneja:
+   * - Validación de idempotencia
+   * - Validación de montos (anti-fraude)
+   * - Actualización atómica de estados
+   * - Historial de cambios
    */
   async procesarWebhookMercadoPago(webhookData: MercadoPagoWebhookDto) {
-    const paymentId: string = webhookData.data.id;
-
-    // ✅ VALIDACIÓN: Verificar que payment_id existe
-    if (!paymentId) {
-      this.logger.error('❌ Webhook rechazado: payment_id faltante');
-      throw new BadRequestException('payment_id is required');
-    }
-
-    this.logger.log(
-      `📨 Webhook recibido: ${webhookData.type} - ${webhookData.action}, payment_id=${paymentId}`,
-    );
-
-    // ✅ SEGURIDAD: Verificar idempotencia (prevenir procesamiento duplicado)
-    // OWASP A04:2021 - Insecure Design
-    const alreadyProcessed: boolean =
-      await this.webhookIdempotency.wasProcessed(paymentId);
-
-    if (alreadyProcessed) {
-      this.logger.warn(
-        `⏭️ Webhook duplicado ignorado (idempotencia): payment_id=${paymentId}`,
-      );
-      return {
-        success: true,
-        message: 'Already processed (idempotent)',
-        paymentId,
-      };
-    }
-
-    // Procesar webhook normalmente
-    const result = await this.webhookProcessor.processWebhook(
-      webhookData,
-      TipoExternalReference.INSCRIPCION_2026,
-      // Callback: Buscar pago en DB
-      async (parsed) => {
-        if (!parsed) {
-          throw new Error('Failed to parse external reference');
-        }
-        const { inscripcionId } = parsed.ids;
-
-        const pago = await this.prisma.pagoInscripcion2026.findFirst({
-          where: {
-            inscripcion_id: inscripcionId,
-            tipo: 'inscripcion',
-          },
-          include: {
-            inscripcion: true,
-          },
-        });
-
-        if (!pago) {
-          this.logger.error(
-            `❌ No se encontró el pago para inscripción ${inscripcionId}`,
-          );
-        }
-
-        return pago;
-      },
-      // Callback: Actualizar pago e inscripción
-      async (pago, context) => {
-        if (!context.parsedReference) {
-          throw new Error('Invalid parsed reference');
-        }
-        const inscripcionId = context.parsedReference.ids.inscripcionId;
-        if (!inscripcionId) {
-          throw new Error('inscripcionId no encontrado en parsed reference');
-        }
-
-        // Mapear estado de MercadoPago a estado interno
-        const nuevoEstadoPago = this.webhookProcessor.mapPaymentStatus(
-          context.paymentStatus,
-        );
-
-        // ✅ SEGURIDAD: Validar monto del pago ANTES de aprobar
-        // OWASP A04:2021 - Insecure Design
-        // PCI DSS Req 6.5.10 - Broken Authentication
-        if (
-          context.paymentStatus === 'approved' &&
-          context.payment.transaction_amount !== undefined
-        ) {
-          const receivedAmount: number = Number(
-            context.payment.transaction_amount,
-          );
-
-          const validation =
-            await this.amountValidator.validatePagoInscripcion2026(
-              pago.id,
-              receivedAmount,
-            );
-
-          if (!validation.isValid) {
-            this.logger.error(
-              `🚨 FRAUDE DETECTADO - Monto inválido en pago ${pago.id}\n` +
-                `  Esperado: $${validation.expectedAmount.toFixed(2)}\n` +
-                `  Recibido: $${validation.receivedAmount.toFixed(2)}\n` +
-                `  Diferencia: $${validation.difference?.toFixed(2)}\n` +
-                `  Razón: ${validation.reason}`,
-            );
-
-            throw new BadRequestException(
-              `Payment amount validation failed: ${validation.reason}`,
-            );
-          }
-
-          this.logger.log(
-            `✅ Validación de monto exitosa: pago_id=${pago.id}, ` +
-              `esperado=$${validation.expectedAmount.toFixed(2)}, ` +
-              `recibido=$${validation.receivedAmount.toFixed(2)}`,
-          );
-        }
-
-        // Determinar estado de inscripción según estado del pago
-        let nuevoEstadoInscripcion = 'pending';
-        switch (nuevoEstadoPago) {
-          case 'paid':
-            nuevoEstadoInscripcion = 'active';
-            break;
-          case 'failed':
-            nuevoEstadoInscripcion = 'payment_failed';
-            break;
-          case 'pending':
-            nuevoEstadoInscripcion = 'pending';
-            break;
-        }
-
-        // ✅ TRANSACCIÓN ATÓMICA: Todas las operaciones de DB en un solo commit
-        // OWASP A04:2021 - Insecure Design
-        // ISO 27001 A.12.6.1 - Management of technical vulnerabilities
-        // Si alguna operación falla, TODAS se revierten automáticamente (ACID compliance)
-        await this.prisma.$transaction(async (tx) => {
-          // 1. Actualizar pago en DB
-          await tx.pagoInscripcion2026.update({
-            where: { id: pago.id },
-            data: {
-              estado: nuevoEstadoPago,
-              mercadopago_payment_id: context.payment.id?.toString(),
-              fecha_pago:
-                context.paymentStatus === 'approved' ? new Date() : undefined,
-            },
-          });
-
-          // 2. Actualizar estado de la inscripción si cambió
-          if (nuevoEstadoInscripcion !== pago.inscripcion.estado) {
-            // Buscar inscripción actual
-            const inscripcion = await tx.inscripcion2026.findUnique({
-              where: { id: inscripcionId },
-            });
-
-            if (!inscripcion) {
-              throw new BadRequestException('Inscripción no encontrada');
-            }
-
-            // Actualizar estado de inscripción
-            await tx.inscripcion2026.update({
-              where: { id: inscripcionId },
-              data: { estado: nuevoEstadoInscripcion },
-            });
-
-            // Crear registro de historial
-            await tx.historialEstadoInscripcion2026.create({
-              data: {
-                inscripcion_id: inscripcionId,
-                estado_anterior: inscripcion.estado,
-                estado_nuevo: nuevoEstadoInscripcion,
-                razon: `Pago ${nuevoEstadoPago} - MercadoPago Payment ID: ${context.payment.id}`,
-                realizado_por: 'mercadopago-webhook',
-              },
-            });
-          }
-        });
-
-        this.logger.log(
-          `✅ Pago procesado exitosamente - Inscripción ${inscripcionId} → Estado: ${nuevoEstadoInscripcion}`,
-        );
-
-        return {
-          success: true,
-          inscripcionId,
-          paymentStatus: nuevoEstadoPago,
-          inscripcionStatus: nuevoEstadoInscripcion,
-        };
-      },
-    );
-
-    // ✅ SEGURIDAD: Marcar webhook como procesado (solo si fue exitoso)
-    // OWASP A04:2021 - Insecure Design
-    if (
-      result &&
-      typeof result === 'object' &&
-      'success' in result &&
-      result.success !== false
-    ) {
-      // Extraer externalReference del resultado si está disponible
-      const externalRef: string =
-        'externalReference' in result &&
-        typeof result.externalReference === 'string'
-          ? result.externalReference
-          : paymentId;
-
-      try {
-        await this.webhookIdempotency.markAsProcessed({
-          paymentId,
-          webhookType: 'inscripcion2026',
-          status: webhookData.action || 'unknown',
-          externalReference: externalRef,
-        });
-
-        this.logger.log(
-          `✅ Webhook marcado como procesado: payment_id=${paymentId}`,
-        );
-      } catch (error: unknown) {
-        // Si falla por unique constraint (P2002), significa que otro proceso ya lo marcó (race condition)
-        // Esto es OK, simplemente logueamos y continuamos
-        if (
-          error &&
-          typeof error === 'object' &&
-          'code' in error &&
-          error.code === 'P2002'
-        ) {
-          this.logger.warn(
-            `⚠️ Race condition al marcar webhook: payment_id=${paymentId}. Otro proceso ya lo procesó.`,
-          );
-        } else {
-          // Otros errores sí son problemáticos, pero no detenemos el flujo
-          const message =
-            error instanceof Error ? error.message : 'Unknown error';
-          this.logger.error(
-            `❌ Error al marcar webhook como procesado: ${message}, payment_id=${paymentId}`,
-          );
-        }
-      }
-    }
-
-    return result;
+    return this.procesarWebhookUseCase.execute(webhookData);
   }
 }

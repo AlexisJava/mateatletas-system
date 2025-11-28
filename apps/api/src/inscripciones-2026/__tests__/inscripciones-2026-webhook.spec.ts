@@ -7,39 +7,32 @@ import { ConfigService } from '@nestjs/config';
 import { PricingCalculatorService } from '../../domain/services/pricing-calculator.service';
 import { PinGeneratorService } from '../../shared/services/pin-generator.service';
 import { TutorCreationService } from '../../shared/services/tutor-creation.service';
-import { MercadoPagoWebhookProcessorService } from '../../shared/services/mercadopago-webhook-processor.service';
 import { MercadoPagoWebhookDto } from '../../pagos/dto/mercadopago-webhook.dto';
-import { WebhookIdempotencyService } from '../../pagos/services/webhook-idempotency.service';
-import { PaymentAmountValidatorService } from '../../pagos/services/payment-amount-validator.service';
+import {
+  ValidarInscripcionUseCase,
+  ProcesarWebhookInscripcionUseCase,
+} from '../use-cases';
 
 /**
- * TESTS EXHAUSTIVOS PARA WEBHOOK INSCRIPCIONES 2026
+ * TESTS PARA WEBHOOK INSCRIPCIONES 2026 - SERVICE FACADE
+ *
+ * NOTA: Los tests detallados de la lógica de webhook están en:
+ * - procesar-webhook-inscripcion.use-case.spec.ts
+ *
+ * Este archivo prueba que el service facade delega correctamente
+ * al ProcesarWebhookInscripcionUseCase.
  *
  * Cobertura:
- * - procesarWebhookMercadoPago(): Procesamiento completo de webhook
- * - Parsing de external_reference
- * - Actualización de estados según payment status
- * - Manejo de errores y edge cases
- * - Validación de tipos de notificación
- * - Integración con MercadoPago API
- * - Actualización de historial
- *
- * Casos de Prueba:
- * - Webhook tipo "payment" con estado "approved"
- * - Webhook tipo "payment" con estado "rejected"
- * - Webhook tipo "payment" con estado "pending"
- * - Webhook tipo "payment" con estado "cancelled"
- * - Webhook tipo diferente a "payment" (merchant_order, etc)
- * - External reference inválida
- * - Pago no encontrado en DB
- * - Errores de MercadoPago API
- * - Estados desconocidos
+ * - Delegación correcta al use-case
+ * - Propagación de respuestas exitosas
+ * - Propagación de errores
+ * - Diferentes tipos de webhook
+ * - Diferentes estados de pago
  */
 
-describe('Inscripciones2026Service - Webhook Processing', () => {
+describe('Inscripciones2026Service - Webhook Processing (Facade)', () => {
   let service: Inscripciones2026Service;
-  let prismaService: PrismaService;
-  let mercadoPagoService: MercadoPagoService;
+  let procesarWebhookUseCase: ProcesarWebhookInscripcionUseCase;
 
   // Mock data
   const mockWebhookData: MercadoPagoWebhookDto = {
@@ -48,362 +41,113 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
     data: {
       id: '123456789',
     },
-    live_mode: 'true',
+    live_mode: true,
     date_created: '2024-01-15T10:30:00Z',
+    id: 'webhook-test-id',
+    user_id: '123456',
+    api_version: 'v1',
   };
 
-  const mockPaymentApproved = {
-    id: 123456789,
-    status: 'approved',
-    external_reference:
-      'inscripcion2026-inscabc123-tutor-tutorxyz789-tipo-COLONIA',
-    transaction_amount: 25000,
-    date_approved: '2024-01-15T10:30:00Z',
+  const mockPrismaService = {
+    pagoInscripcion2026: { findFirst: jest.fn(), update: jest.fn() },
+    inscripcion2026: { findUnique: jest.fn(), update: jest.fn() },
+    historialEstadoInscripcion2026: { create: jest.fn() },
+    $transaction: jest.fn(),
   };
 
-  const mockPaymentRejected = {
-    id: 123456789,
-    status: 'rejected',
-    external_reference:
-      'inscripcion2026-inscabc123-tutor-tutorxyz789-tipo-COLONIA',
-    transaction_amount: 25000,
+  const mockMercadoPagoService = {
+    getPayment: jest.fn(),
+    isMockMode: jest.fn().mockReturnValue(false),
+    createPreference: jest.fn(),
+    buildInscripcion2026PreferenceData: jest.fn(),
   };
 
-  const mockPagoInscripcion = {
-    id: 'pago123',
-    inscripcion_id: 'inscabc123',
-    tipo: 'inscripcion',
-    monto: 25000,
-    estado: 'pending',
-    mercadopago_preference_id: 'pref-123',
-    mercadopago_payment_id: null,
-    fecha_pago: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    inscripcion: {
-      id: 'inscabc123',
-      tutor_id: 'tutorxyz789',
-      tipo_inscripcion: 'COLONIA',
-      estado: 'pending',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
+  const mockConfigService = {
+    get: jest.fn((key: string) => {
+      if (key === 'BACKEND_URL') return 'http://localhost:3001';
+      if (key === 'FRONTEND_URL') return 'http://localhost:3000';
+      return null;
+    }),
+  };
+
+  const mockPricingCalculator = {
+    calcularTarifaInscripcion: jest.fn().mockReturnValue(25000),
+    calcularTotalInscripcion2026: jest
+      .fn()
+      .mockReturnValue({ total: 158400, descuento: 12 }),
+    aplicarDescuento: jest.fn((base, desc) => base * (1 - desc / 100)),
+  };
+
+  const mockPinGenerator = {
+    generateUniquePin: jest
+      .fn()
+      .mockImplementation(async () =>
+        Math.floor(1000 + Math.random() * 9000).toString(),
+      ),
+  };
+
+  const mockTutorCreation = {
+    hashPassword: jest.fn().mockResolvedValue('$2b$10$hashedpassword'),
+    validateUniqueEmail: jest.fn(),
+  };
+
+  const mockValidarInscripcionUseCase = {
+    execute: jest.fn().mockReturnValue({
+      isValid: true,
+      inscripcionFee: 25000,
+      monthlyTotal: 158400,
+      siblingDiscount: 12,
+      cursosPerStudent: [1],
+    }),
+  };
+
+  const mockProcesarWebhookUseCase = {
+    execute: jest.fn(),
   };
 
   beforeEach(async () => {
-    // Crear mocks compartidos que serán usados tanto en prismaService como en el tx context
-    const pagoUpdateMock = jest.fn();
-    const inscripcionFindUniqueMock = jest.fn();
-    const inscripcionUpdateMock = jest.fn();
-    const historialCreateMock = jest.fn();
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         Inscripciones2026Service,
+        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: MercadoPagoService, useValue: mockMercadoPagoService },
+        { provide: ConfigService, useValue: mockConfigService },
+        { provide: PricingCalculatorService, useValue: mockPricingCalculator },
+        { provide: PinGeneratorService, useValue: mockPinGenerator },
+        { provide: TutorCreationService, useValue: mockTutorCreation },
         {
-          provide: PrismaService,
-          useValue: {
-            pagoInscripcion2026: {
-              findFirst: jest.fn(),
-              update: pagoUpdateMock,
-            },
-            inscripcion2026: {
-              findUnique: inscripcionFindUniqueMock,
-              update: inscripcionUpdateMock,
-            },
-            historialEstadoInscripcion2026: {
-              create: historialCreateMock,
-            },
-            $transaction: jest.fn((callback: (tx: any) => any) => {
-              // Mock transaction context usando los MISMOS mocks compartidos
-              const tx = {
-                pagoInscripcion2026: {
-                  update: pagoUpdateMock,
-                },
-                inscripcion2026: {
-                  findUnique: inscripcionFindUniqueMock,
-                  update: inscripcionUpdateMock,
-                },
-                historialEstadoInscripcion2026: {
-                  create: historialCreateMock,
-                },
-              };
-              return callback(tx);
-            }),
-          },
+          provide: ValidarInscripcionUseCase,
+          useValue: mockValidarInscripcionUseCase,
         },
         {
-          provide: MercadoPagoService,
-          useValue: {
-            getPayment: jest.fn(),
-            isMockMode: jest.fn().mockReturnValue(false),
-          },
-        },
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => {
-              if (key === 'BACKEND_URL') return 'http://localhost:3001';
-              if (key === 'FRONTEND_URL') return 'http://localhost:3000';
-              return null;
-            }),
-          },
-        },
-        {
-          provide: PricingCalculatorService,
-          useValue: {
-            calcularTarifaInscripcion: jest.fn().mockReturnValue(25000),
-            calcularTotalInscripcion2026: jest
-              .fn()
-              .mockReturnValue({ total: 158400, descuento: 12 }),
-            aplicarDescuento: jest.fn((base, desc) => base * (1 - desc / 100)),
-          },
-        },
-        {
-          provide: PinGeneratorService,
-          useValue: {
-            generateUniquePin: jest
-              .fn()
-              .mockImplementation(async () =>
-                Math.floor(1000 + Math.random() * 9000).toString(),
-              ),
-          },
-        },
-        {
-          provide: TutorCreationService,
-          useValue: {
-            hashPassword: jest.fn().mockResolvedValue('$2b$10$hashedpassword'),
-            validateUniqueEmail: jest.fn(),
-          },
-        },
-        // Provide the real webhook processor since it's just a thin wrapper
-        // We mock MercadoPagoService.getPayment which is what the processor calls
-        MercadoPagoWebhookProcessorService,
-        {
-          provide: WebhookIdempotencyService,
-          useValue: {
-            wasProcessed: jest.fn().mockResolvedValue(false),
-            markAsProcessed: jest.fn().mockResolvedValue(undefined),
-          },
-        },
-        {
-          provide: PaymentAmountValidatorService,
-          useValue: {
-            validatePagoInscripcion2026: jest.fn().mockResolvedValue({
-              isValid: true,
-              expectedAmount: 25000,
-              receivedAmount: 25000,
-              difference: 0,
-            }),
-          },
+          provide: ProcesarWebhookInscripcionUseCase,
+          useValue: mockProcesarWebhookUseCase,
         },
       ],
     }).compile();
 
     service = module.get<Inscripciones2026Service>(Inscripciones2026Service);
-    prismaService = module.get<PrismaService>(PrismaService);
-    mercadoPagoService = module.get<MercadoPagoService>(MercadoPagoService);
+    procesarWebhookUseCase = module.get<ProcesarWebhookInscripcionUseCase>(
+      ProcesarWebhookInscripcionUseCase,
+    );
 
     jest.clearAllMocks();
   });
 
-  describe('Webhook Type Validation', () => {
-    it('should ignore non-payment webhooks', async () => {
-      const webhookData = {
-        ...mockWebhookData,
-        type: 'merchant_order',
-      };
-
-      const result = await service.procesarWebhookMercadoPago(webhookData);
-
-      expect(result).toEqual({
-        success: false,
-        message: 'Webhook type not handled',
+  describe('Webhook Delegation to UseCase', () => {
+    it('should delegate webhook processing to ProcesarWebhookInscripcionUseCase', async () => {
+      mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+        success: true,
+        inscripcionId: 'inscabc123',
+        paymentStatus: 'paid',
+        inscripcionStatus: 'active',
       });
-      expect(mercadoPagoService.getPayment).not.toHaveBeenCalled();
-    });
-
-    it('should process payment webhooks', async () => {
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(mockPaymentApproved);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.inscripcion2026, 'findUnique')
-        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest
-        .spyOn(prismaService.inscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest
-        .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
-        .mockResolvedValue({} as any);
-
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(mercadoPagoService.getPayment).toHaveBeenCalledWith('123456789');
-    });
-  });
-
-  describe('External Reference Parsing', () => {
-    it('should correctly parse inscripcion2026 external reference', async () => {
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(mockPaymentApproved);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.inscripcion2026, 'findUnique')
-        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest
-        .spyOn(prismaService.inscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest
-        .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
-        .mockResolvedValue({} as any);
-
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(prismaService.pagoInscripcion2026.findFirst).toHaveBeenCalledWith({
-        where: {
-          inscripcion_id: 'inscabc123',
-          tipo: 'inscripcion',
-        },
-        include: {
-          inscripcion: true,
-        },
-      });
-    });
-
-    it('should reject external reference without inscripcion2026 prefix', async () => {
-      const paymentInvalidRef = {
-        ...mockPaymentApproved,
-        external_reference: 'membresia-123-tutor-456',
-      };
-
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(paymentInvalidRef);
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      expect(result).toEqual({
-        success: false,
-        message: 'Invalid external_reference format',
-      });
-      expect(
-        prismaService.pagoInscripcion2026.findFirst,
-      ).not.toHaveBeenCalled();
-    });
-
-    it('should handle null external reference', async () => {
-      const paymentNullRef = {
-        ...mockPaymentApproved,
-        external_reference: null,
-      };
-
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(paymentNullRef);
-
-      const result = await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(result).toEqual({
-        success: false,
-        message: 'Payment without external_reference',
-      });
-    });
-
-    it('should handle malformed external reference', async () => {
-      const paymentMalformedRef = {
-        ...mockPaymentApproved,
-        external_reference: 'inscripcion2026-', // Sin ID
-      };
-
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(paymentMalformedRef);
-
-      const result = await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(result).toEqual({
-        success: false,
-        message: 'Invalid external_reference format',
-      });
-    });
-  });
-
-  describe('Payment Status Processing - APPROVED', () => {
-    beforeEach(() => {
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(mockPaymentApproved);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.inscripcion2026, 'findUnique')
-        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest
-        .spyOn(prismaService.inscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest
-        .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
-        .mockResolvedValue({} as any);
-    });
-
-    it('should update pago to "paid" when payment is approved', async () => {
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(prismaService.pagoInscripcion2026.update).toHaveBeenCalledWith({
-        where: { id: 'pago123' },
-        data: {
-          estado: 'paid',
-          mercadopago_payment_id: '123456789',
-          fecha_pago: expect.any(Date),
-        },
-      });
-    });
-
-    it('should update inscripcion to "active" when payment is approved', async () => {
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(prismaService.inscripcion2026.update).toHaveBeenCalledWith({
-        where: { id: 'inscabc123' },
-        data: { estado: 'active' },
-      });
-    });
-
-    it('should create historial entry when payment is approved', async () => {
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(
-        prismaService.historialEstadoInscripcion2026.create,
-      ).toHaveBeenCalledWith({
-        data: {
-          inscripcion_id: 'inscabc123',
-          estado_anterior: 'pending',
-          estado_nuevo: 'active',
-          razon: expect.stringContaining('Pago paid'),
-          realizado_por: 'mercadopago-webhook',
-        },
-      });
-    });
-
-    it('should return success response when payment is approved', async () => {
-      const result = await service.procesarWebhookMercadoPago(mockWebhookData);
-
+      expect(procesarWebhookUseCase.execute).toHaveBeenCalledWith(
+        mockWebhookData,
+      );
       expect(result).toEqual({
         success: true,
         inscripcionId: 'inscabc123',
@@ -411,161 +155,151 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
         inscripcionStatus: 'active',
       });
     });
-  });
 
-  describe('Payment Status Processing - REJECTED', () => {
-    beforeEach(() => {
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(mockPaymentRejected);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.inscripcion2026, 'findUnique')
-        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest
-        .spyOn(prismaService.inscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest
-        .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
-        .mockResolvedValue({} as any);
-    });
-
-    it('should update pago to "failed" when payment is rejected', async () => {
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(prismaService.pagoInscripcion2026.update).toHaveBeenCalledWith({
-        where: { id: 'pago123' },
-        data: {
-          estado: 'failed',
-          mercadopago_payment_id: '123456789',
-          fecha_pago: undefined,
-        },
-      });
-    });
-
-    it('should update inscripcion to "payment_failed" when payment is rejected', async () => {
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(prismaService.inscripcion2026.update).toHaveBeenCalledWith({
-        where: { id: 'inscabc123' },
-        data: { estado: 'payment_failed' },
-      });
-    });
-  });
-
-  describe('Payment Status Processing - CANCELLED', () => {
-    it('should handle cancelled payment same as rejected', async () => {
-      const paymentCancelled = {
-        ...mockPaymentRejected,
-        status: 'cancelled',
+    it('should pass exact webhook data to use-case without modification', async () => {
+      const specificWebhookData: MercadoPagoWebhookDto = {
+        action: 'payment.created',
+        type: 'payment',
+        data: { id: 'specific-payment-id-12345' },
+        live_mode: false,
+        date_created: '2024-06-15T15:45:00Z',
+        id: 'webhook-specific-id',
+        user_id: '999888',
+        api_version: 'v2',
       };
 
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(paymentCancelled);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.inscripcion2026, 'findUnique')
-        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest
-        .spyOn(prismaService.inscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-      jest
-        .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
-        .mockResolvedValue({} as any);
-
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(prismaService.pagoInscripcion2026.update).toHaveBeenCalledWith({
-        where: { id: 'pago123' },
-        data: {
-          estado: 'failed',
-          mercadopago_payment_id: '123456789',
-          fecha_pago: undefined,
-        },
-      });
-    });
-  });
-
-  describe('Payment Status Processing - PENDING', () => {
-    it('should keep estado as "pending" when payment is pending', async () => {
-      const paymentPending = {
-        ...mockPaymentApproved,
-        status: 'pending',
-      };
-
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(paymentPending);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion as any);
-
-      // Estado ya es pending, no debería actualizar inscripcion
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(prismaService.pagoInscripcion2026.update).toHaveBeenCalledWith({
-        where: { id: 'pago123' },
-        data: {
-          estado: 'pending',
-          mercadopago_payment_id: '123456789',
-          fecha_pago: undefined,
-        },
+      mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+        success: true,
+        paymentId: 'specific-payment-id-12345',
       });
 
-      // No debería llamar a update de inscripcion porque el estado es el mismo
-      expect(prismaService.inscripcion2026.update).not.toHaveBeenCalled();
-    });
+      await service.procesarWebhookMercadoPago(specificWebhookData);
 
-    it('should handle "in_process" status as pending', async () => {
-      const paymentInProcess = {
-        ...mockPaymentApproved,
-        status: 'in_process',
-      };
-
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(paymentInProcess);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion as any);
-
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      expect(prismaService.pagoInscripcion2026.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            estado: 'pending',
-          }),
-        }),
+      expect(procesarWebhookUseCase.execute).toHaveBeenCalledWith(
+        specificWebhookData,
       );
     });
   });
 
-  describe('Error Handling', () => {
-    it('should throw BadRequestException when pago not found', async () => {
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(mockPaymentApproved);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-        .mockResolvedValue(null);
+  describe('Webhook Type Handling via UseCase', () => {
+    it('should return use-case response for non-payment webhooks', async () => {
+      const merchantOrderWebhook = {
+        ...mockWebhookData,
+        type: 'merchant_order',
+      };
+
+      mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+        success: false,
+        message: 'Webhook type not handled',
+      });
+
+      const result =
+        await service.procesarWebhookMercadoPago(merchantOrderWebhook);
+
+      expect(result).toEqual({
+        success: false,
+        message: 'Webhook type not handled',
+      });
+    });
+  });
+
+  describe('Payment Status Processing via UseCase', () => {
+    it('should return approved payment result from use-case', async () => {
+      mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+        success: true,
+        inscripcionId: 'ins-123',
+        paymentStatus: 'paid',
+        inscripcionStatus: 'active',
+      });
+
+      const result = await service.procesarWebhookMercadoPago(mockWebhookData);
+
+      expect(result).toEqual({
+        success: true,
+        inscripcionId: 'ins-123',
+        paymentStatus: 'paid',
+        inscripcionStatus: 'active',
+      });
+    });
+
+    it('should return rejected payment result from use-case', async () => {
+      mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+        success: true,
+        inscripcionId: 'ins-456',
+        paymentStatus: 'failed',
+        inscripcionStatus: 'payment_failed',
+      });
+
+      const result = await service.procesarWebhookMercadoPago(mockWebhookData);
+
+      expect(result.paymentStatus).toBe('failed');
+      expect(result.inscripcionStatus).toBe('payment_failed');
+    });
+
+    it('should return pending payment result from use-case', async () => {
+      mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+        success: true,
+        inscripcionId: 'ins-789',
+        paymentStatus: 'pending',
+        inscripcionStatus: 'pending',
+      });
+
+      const result = await service.procesarWebhookMercadoPago(mockWebhookData);
+
+      expect(result.paymentStatus).toBe('pending');
+      expect(result.inscripcionStatus).toBe('pending');
+    });
+  });
+
+  describe('Idempotency Handling via UseCase', () => {
+    it('should return idempotent response from use-case for duplicate webhooks', async () => {
+      mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+        success: true,
+        message: 'Already processed (idempotent)',
+        paymentId: '123456789',
+      });
+
+      const result = await service.procesarWebhookMercadoPago(mockWebhookData);
+
+      expect(result).toEqual({
+        success: true,
+        message: 'Already processed (idempotent)',
+        paymentId: '123456789',
+      });
+    });
+  });
+
+  describe('Error Handling via UseCase', () => {
+    it('should propagate BadRequestException from use-case for missing payment_id', async () => {
+      mockProcesarWebhookUseCase.execute.mockRejectedValue(
+        new BadRequestException('payment_id is required'),
+      );
+
+      await expect(
+        service.procesarWebhookMercadoPago(mockWebhookData),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.procesarWebhookMercadoPago(mockWebhookData),
+      ).rejects.toThrow('payment_id is required');
+    });
+
+    it('should propagate BadRequestException from use-case for fraud detection', async () => {
+      mockProcesarWebhookUseCase.execute.mockRejectedValueOnce(
+        new BadRequestException(
+          'Payment amount validation failed: Amount mismatch',
+        ),
+      );
+
+      await expect(
+        service.procesarWebhookMercadoPago(mockWebhookData),
+      ).rejects.toThrow('Payment amount validation failed');
+    });
+
+    it('should propagate use-case response for payment not found', async () => {
+      mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+        success: false,
+        message: 'Payment not found in database',
+      });
 
       const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
@@ -575,126 +309,81 @@ describe('Inscripciones2026Service - Webhook Processing', () => {
       });
     });
 
-    it('should handle MercadoPago API errors', async () => {
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockRejectedValue(new Error('API Error'));
+    it('should propagate use-case response for invalid external reference', async () => {
+      mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+        success: false,
+        message: 'Invalid external_reference format',
+      });
 
-      await expect(
-        service.procesarWebhookMercadoPago(mockWebhookData),
-      ).rejects.toThrow(BadRequestException);
+      const result = await service.procesarWebhookMercadoPago(mockWebhookData);
+
+      expect(result).toEqual({
+        success: false,
+        message: 'Invalid external_reference format',
+      });
     });
 
-    it('should handle database errors gracefully', async () => {
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(mockPaymentApproved);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-        .mockRejectedValue(new Error('DB Error'));
+    it('should propagate use-case response for null external reference', async () => {
+      mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+        success: false,
+        message: 'Payment without external_reference',
+      });
 
-      await expect(
-        service.procesarWebhookMercadoPago(mockWebhookData),
-      ).rejects.toThrow(BadRequestException);
+      const result = await service.procesarWebhookMercadoPago(mockWebhookData);
+
+      expect(result).toEqual({
+        success: false,
+        message: 'Payment without external_reference',
+      });
     });
 
-    it('should handle unknown payment status', async () => {
-      const paymentUnknown = {
-        ...mockPaymentApproved,
-        status: 'unknown_status',
-      };
-
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(paymentUnknown);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-        .mockResolvedValue(mockPagoInscripcion as any);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion as any);
-
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      // Debe usar 'pending' como fallback
-      expect(prismaService.pagoInscripcion2026.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            estado: 'pending',
-          }),
-        }),
+    it('should propagate generic errors from use-case', async () => {
+      mockProcesarWebhookUseCase.execute.mockRejectedValueOnce(
+        new Error('Unexpected error in use-case'),
       );
+
+      await expect(
+        service.procesarWebhookMercadoPago(mockWebhookData),
+      ).rejects.toThrow('Unexpected error in use-case');
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle inscripcion with multiple tipos (COLONIA, CICLO, PACK)', async () => {
+  describe('Edge Cases via UseCase', () => {
+    it('should handle different inscription types via use-case', async () => {
       const testCases = [
-        'inscripcion2026-id1-tutor-t1-tipo-COLONIA',
-        'inscripcion2026-id2-tutor-t2-tipo-CICLO_2026',
-        'inscripcion2026-id3-tutor-t3-tipo-PACK_COMPLETO',
+        { tipo: 'COLONIA', inscripcionId: 'ins-colonia' },
+        { tipo: 'CICLO_2026', inscripcionId: 'ins-ciclo' },
+        { tipo: 'PACK_COMPLETO', inscripcionId: 'ins-pack' },
       ];
 
-      for (const externalRef of testCases) {
-        const payment = {
-          ...mockPaymentApproved,
-          external_reference: externalRef,
-        };
-        const inscripcionId = externalRef.split('-')[1];
-
-        jest.spyOn(mercadoPagoService, 'getPayment').mockResolvedValue(payment);
-        jest
-          .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-          .mockResolvedValue({
-            ...mockPagoInscripcion,
-            inscripcion_id: inscripcionId,
-          } as any);
-        jest
-          .spyOn(prismaService.pagoInscripcion2026, 'update')
-          .mockResolvedValue(mockPagoInscripcion as any);
-        jest
-          .spyOn(prismaService.inscripcion2026, 'findUnique')
-          .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-        jest
-          .spyOn(prismaService.inscripcion2026, 'update')
-          .mockResolvedValue(mockPagoInscripcion.inscripcion as any);
-        jest
-          .spyOn(prismaService.historialEstadoInscripcion2026, 'create')
-          .mockResolvedValue({} as any);
+      for (const testCase of testCases) {
+        mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+          success: true,
+          inscripcionId: testCase.inscripcionId,
+          paymentStatus: 'paid',
+          inscripcionStatus: 'active',
+        });
 
         const result =
           await service.procesarWebhookMercadoPago(mockWebhookData);
 
-        expect(result.inscripcionId).toBe(inscripcionId);
+        expect(result.inscripcionId).toBe(testCase.inscripcionId);
       }
     });
 
-    it('should not update inscripcion if estado is already correct', async () => {
-      const pagoConEstadoActivo = {
-        ...mockPagoInscripcion,
-        inscripcion: {
-          ...mockPagoInscripcion.inscripcion,
-          estado: 'active', // Ya activo
-        },
-      };
+    it('should handle already active inscription via use-case', async () => {
+      mockProcesarWebhookUseCase.execute.mockResolvedValueOnce({
+        success: true,
+        inscripcionId: 'ins-already-active',
+        paymentStatus: 'paid',
+        inscripcionStatus: 'active',
+        message: 'State unchanged - already active',
+      });
 
-      jest
-        .spyOn(mercadoPagoService, 'getPayment')
-        .mockResolvedValue(mockPaymentApproved);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'findFirst')
-        .mockResolvedValue(pagoConEstadoActivo as any);
-      jest
-        .spyOn(prismaService.pagoInscripcion2026, 'update')
-        .mockResolvedValue(mockPagoInscripcion as any);
+      const result = await service.procesarWebhookMercadoPago(mockWebhookData);
 
-      await service.procesarWebhookMercadoPago(mockWebhookData);
-
-      // No debe actualizar inscripcion si el estado ya es correcto
-      expect(prismaService.inscripcion2026.update).not.toHaveBeenCalled();
-      expect(
-        prismaService.historialEstadoInscripcion2026.create,
-      ).not.toHaveBeenCalled();
+      expect(result.success).toBe(true);
+      expect(result.inscripcionStatus).toBe('active');
     });
   });
 });
