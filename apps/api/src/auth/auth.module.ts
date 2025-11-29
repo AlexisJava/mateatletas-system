@@ -16,6 +16,15 @@ import { TokenBlacklistService } from './token-blacklist.service';
 import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
 import { MfaModule } from './mfa/mfa.module';
 import { LoginAttemptService } from './services/login-attempt.service';
+// Use-cases
+import {
+  ValidateCredentialsUseCase,
+  LoginUseCase,
+  LoginEstudianteUseCase,
+  CompleteMfaLoginUseCase,
+  CambiarPasswordUseCase,
+  GetProfileUseCase,
+} from './use-cases';
 
 /**
  * Módulo de autenticación
@@ -88,6 +97,13 @@ import { LoginAttemptService } from './services/login-attempt.service';
     TokenBlacklistGuard,
     // Login Attempt Tracking (Brute Force Protection)
     LoginAttemptService,
+    // Use-cases (facade pattern)
+    ValidateCredentialsUseCase,
+    LoginUseCase,
+    LoginEstudianteUseCase,
+    CompleteMfaLoginUseCase,
+    CambiarPasswordUseCase,
+    GetProfileUseCase,
   ],
   exports: [
     JwtStrategy,
