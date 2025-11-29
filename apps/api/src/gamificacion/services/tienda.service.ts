@@ -1,3 +1,13 @@
+/**
+ * @deprecated 2025 - Sistema de canje de cursos externos obsoleto.
+ * El modelo 2026 usa suscripciones por tier (ARCADE/ARCADE+/PRO).
+ * Las monedas son solo para cosméticos en tienda de avatar.
+ * NO INVERTIR TIEMPO EN ESTE ARCHIVO.
+ *
+ * Ver: docs/MODELO_TIERS_2026.md
+ * Tienda de avatar: apps/api/src/tienda/tienda.service.ts
+ */
+
 import {
   Injectable,
   BadRequestException,
@@ -9,7 +19,7 @@ import { PrismaService } from '../../core/database/prisma.service';
 import { RecursosService } from './recursos.service';
 
 /**
- * Servicio de Tienda - Sistema de canjes de cursos
+ * @deprecated - Sistema de canjes de cursos externos (OBSOLETO)
  *
  * Flujo completo de canje:
  * 1. Estudiante solicita canje con sus monedas
