@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { GuardarSemanaService } from '../guardar-semana.service';
 import { ValidarSemanaService } from '../validar-semana.service';
 import { PrismaService } from '../../../../core/database/prisma.service';
@@ -259,10 +259,7 @@ describe('GuardarSemanaService', () => {
         );
       });
 
-      // BUG: Debería ser BadRequestException, no NotFoundException
-      // El servicio lanza NotFoundException para errores de validación (línea 77)
-      // lo cual es semánticamente incorrecto
-      it('debe lanzar NotFoundException cuando la validación falla (BUG: debería ser BadRequestException)', async () => {
+      it('debe lanzar BadRequestException cuando la validación falla', async () => {
         // Arrange
         const dto: GuardarSemanaDto = { contenido: crearContenidoValidoMock() };
         jest
@@ -291,7 +288,7 @@ describe('GuardarSemanaService', () => {
 
         // Act & Assert
         await expect(service.ejecutar('curso-1', 1, dto)).rejects.toThrow(
-          NotFoundException,
+          BadRequestException,
         );
         await expect(service.ejecutar('curso-1', 1, dto)).rejects.toThrow(
           'Validación fallida',

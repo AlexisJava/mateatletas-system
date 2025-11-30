@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { GuardarSemanaDto } from '../../dto/guardar-semana.dto';
 import {
@@ -74,7 +78,7 @@ export class GuardarSemanaService {
       const erroresMsgs = validacion.errores
         .map((e) => `${e.ubicacion}: ${e.mensaje}`)
         .join('; ');
-      throw new NotFoundException(`Validación fallida: ${erroresMsgs}`);
+      throw new BadRequestException(`Validación fallida: ${erroresMsgs}`);
     }
 
     const contenido = dto.contenido as unknown as SemanaContenidoJson;
