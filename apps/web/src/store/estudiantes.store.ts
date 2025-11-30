@@ -30,14 +30,14 @@ interface EstudiantesState {
   limit: number;
 
   // Acciones
-  fetchEstudiantes: (params?: QueryEstudiantesParams) => Promise<void>;
-  fetchEstudianteById: (id: string) => Promise<void>;
-  createEstudiante: (data: CreateEstudianteData) => Promise<Estudiante>;
-  updateEstudiante: (id: string, data: UpdateEstudianteData) => Promise<void>;
-  deleteEstudiante: (id: string) => Promise<void>;
+  fetchEstudiantes: (_params?: QueryEstudiantesParams) => Promise<void>;
+  fetchEstudianteById: (_id: string) => Promise<void>;
+  createEstudiante: (_data: CreateEstudianteData) => Promise<Estudiante>;
+  updateEstudiante: (_id: string, _data: UpdateEstudianteData) => Promise<void>;
+  deleteEstudiante: (_id: string) => Promise<void>;
   fetchEquipos: () => Promise<void>;
   clearError: () => void;
-  setEstudianteActual: (estudiante: Estudiante | null) => void;
+  setEstudianteActual: (_estudiante: Estudiante | null) => void;
 }
 
 /**

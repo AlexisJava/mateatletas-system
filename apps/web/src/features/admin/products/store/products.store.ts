@@ -9,10 +9,10 @@ interface ProductsStore {
   isLoading: boolean;
   error: string | null;
 
-  fetchProducts: (includeInactive?: boolean) => Promise<void>;
-  createProduct: (data: CrearProductoDto) => Promise<boolean>;
-  updateProduct: (id: string, data: ActualizarProductoDto) => Promise<boolean>;
-  deleteProduct: (id: string, hardDelete?: boolean) => Promise<boolean>;
+  fetchProducts: (_includeInactive?: boolean) => Promise<void>;
+  createProduct: (_data: CrearProductoDto) => Promise<boolean>;
+  updateProduct: (_id: string, _data: ActualizarProductoDto) => Promise<boolean>;
+  deleteProduct: (_id: string, _hardDelete?: boolean) => Promise<boolean>;
   clearError: () => void;
   reset: () => void;
 }

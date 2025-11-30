@@ -29,13 +29,13 @@ interface EquiposState {
   error: string | null;
 
   // Acciones
-  fetchEquipos: (params?: QueryEquiposDto) => Promise<void>;
-  fetchEquipoById: (id: string) => Promise<void>;
-  createEquipo: (data: CreateEquipoDto) => Promise<Equipo>;
-  updateEquipo: (id: string, data: UpdateEquipoDto) => Promise<Equipo>;
-  deleteEquipo: (id: string) => Promise<void>;
+  fetchEquipos: (_params?: QueryEquiposDto) => Promise<void>;
+  fetchEquipoById: (_id: string) => Promise<void>;
+  createEquipo: (_data: CreateEquipoDto) => Promise<Equipo>;
+  updateEquipo: (_id: string, _data: UpdateEquipoDto) => Promise<Equipo>;
+  deleteEquipo: (_id: string) => Promise<void>;
   fetchEstadisticas: () => Promise<void>;
-  recalcularPuntos: (id: string) => Promise<Equipo>;
+  recalcularPuntos: (_id: string) => Promise<Equipo>;
   clearError: () => void;
   clearEquipoActual: () => void;
 }

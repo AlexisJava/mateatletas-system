@@ -25,6 +25,7 @@ const eslintConfig = [
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+          args: 'after-used',
           ignoreRestSiblings: true,
         },
       ],
@@ -33,6 +34,7 @@ const eslintConfig = [
         {
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+          args: 'after-used',
           ignoreRestSiblings: true,
         },
       ],

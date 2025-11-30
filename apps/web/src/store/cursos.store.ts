@@ -26,17 +26,17 @@ interface CursosStore {
 
   // Actions - Estudiante
   fetchMisCursos: () => Promise<void>;
-  fetchProgresoCurso: (productoId: string) => Promise<void>;
-  fetchSiguienteLeccion: (productoId: string) => Promise<void>;
+  fetchProgresoCurso: (_productoId: string) => Promise<void>;
+  fetchSiguienteLeccion: (_productoId: string) => Promise<void>;
   completarLeccion: (
-    leccionId: string,
-    data?: cursosApi.CompletarLeccionDto,
+    _leccionId: string,
+    _data?: cursosApi.CompletarLeccionDto,
   ) => Promise<{ success: boolean; puntos?: number; logro?: Logro }>;
 
   // Actions - General
-  fetchModulosByCurso: (productoId: string) => Promise<void>;
-  fetchLeccion: (leccionId: string) => Promise<void>;
-  setCursoActual: (curso: Producto) => Promise<void>;
+  fetchModulosByCurso: (_productoId: string) => Promise<void>;
+  fetchLeccion: (_leccionId: string) => Promise<void>;
+  setCursoActual: (_curso: Producto) => Promise<void>;
 
   // Utilities
   clearError: () => void;

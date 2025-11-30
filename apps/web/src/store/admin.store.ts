@@ -31,18 +31,18 @@ interface AdminStore {
   fetchStats: () => Promise<void>;
   fetchUsers: () => Promise<void>;
   fetchClasses: () => Promise<void>;
-  fetchProducts: (includeInactive?: boolean) => Promise<void>;
-  createClass: (data: CrearClaseDto) => Promise<boolean>;
-  cancelarClase: (claseId: string) => Promise<boolean>;
-  createProduct: (data: CrearProductoDto) => Promise<boolean>;
-  updateProduct: (id: string, data: ActualizarProductoDto) => Promise<boolean>;
-  deleteProduct: (id: string, hardDelete?: boolean) => Promise<boolean>;
-  changeUserRole: (userId: string, role: 'tutor' | 'docente' | 'admin') => Promise<boolean>;
+  fetchProducts: (_includeInactive?: boolean) => Promise<void>;
+  createClass: (_data: CrearClaseDto) => Promise<boolean>;
+  cancelarClase: (_claseId: string) => Promise<boolean>;
+  createProduct: (_data: CrearProductoDto) => Promise<boolean>;
+  updateProduct: (_id: string, _data: ActualizarProductoDto) => Promise<boolean>;
+  deleteProduct: (_id: string, _hardDelete?: boolean) => Promise<boolean>;
+  changeUserRole: (_userId: string, _role: 'tutor' | 'docente' | 'admin') => Promise<boolean>;
   updateUserRoles: (
-    userId: string,
-    roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[],
+    _userId: string,
+    _roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[],
   ) => Promise<boolean>;
-  deleteUser: (userId: string) => Promise<boolean>;
+  deleteUser: (_userId: string) => Promise<boolean>;
   clearError: () => void;
   reset: () => void;
 }

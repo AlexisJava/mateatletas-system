@@ -55,7 +55,7 @@ interface AsistenciaStore {
    * Obtiene la lista de asistencia de una clase
    * @param claseId ID de la clase
    */
-  fetchListaAsistencia: (claseId: string) => Promise<void>;
+  fetchListaAsistencia: (_claseId: string) => Promise<void>;
 
   /**
    * Marca la asistencia de un estudiante
@@ -65,22 +65,22 @@ interface AsistenciaStore {
    * @returns true si se marcó correctamente
    */
   marcarAsistencia: (
-    claseId: string,
-    estudianteId: string,
-    data: MarcarAsistenciaDto,
+    _claseId: string,
+    _estudianteId: string,
+    _data: MarcarAsistenciaDto,
   ) => Promise<boolean>;
 
   /**
    * Obtiene las estadísticas de una clase
    * @param claseId ID de la clase
    */
-  fetchEstadisticas: (claseId: string) => Promise<void>;
+  fetchEstadisticas: (_claseId: string) => Promise<void>;
 
   /**
    * Obtiene el historial de asistencia de un estudiante
    * @param estudianteId ID del estudiante
    */
-  fetchHistorialEstudiante: (estudianteId: string) => Promise<void>;
+  fetchHistorialEstudiante: (_estudianteId: string) => Promise<void>;
 
   /**
    * Obtiene el resumen global del docente autenticado

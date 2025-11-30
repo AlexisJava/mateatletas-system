@@ -31,32 +31,32 @@ interface CalendarioState {
   tipoModalCreacion: TipoEvento | null;
 
   // Acciones - Crear
-  crearTarea: (data: CreateTareaDto) => Promise<void>;
-  crearRecordatorio: (data: CreateRecordatorioDto) => Promise<void>;
-  crearNota: (data: CreateNotaDto) => Promise<void>;
+  crearTarea: (_data: CreateTareaDto) => Promise<void>;
+  crearRecordatorio: (_data: CreateRecordatorioDto) => Promise<void>;
+  crearNota: (_data: CreateNotaDto) => Promise<void>;
 
   // Acciones - Leer
-  cargarEventos: (filtros?: FiltrosCalendario) => Promise<void>;
-  cargarEvento: (id: string) => Promise<void>;
+  cargarEventos: (_filtros?: FiltrosCalendario) => Promise<void>;
+  cargarEvento: (_id: string) => Promise<void>;
   cargarVistaAgenda: () => Promise<void>;
-  cargarVistaSemana: (fecha?: string) => Promise<void>;
+  cargarVistaSemana: (_fecha?: string) => Promise<void>;
   cargarEstadisticas: () => Promise<void>;
 
   // Acciones - Actualizar
-  actualizarTarea: (id: string, data: Partial<CreateTareaDto>) => Promise<void>;
-  actualizarRecordatorio: (id: string, data: Partial<CreateRecordatorioDto>) => Promise<void>;
-  actualizarNota: (id: string, data: Partial<CreateNotaDto>) => Promise<void>;
-  actualizarFechas: (id: string, fecha_inicio: string, fecha_fin: string) => Promise<void>;
+  actualizarTarea: (_id: string, _data: Partial<CreateTareaDto>) => Promise<void>;
+  actualizarRecordatorio: (_id: string, _data: Partial<CreateRecordatorioDto>) => Promise<void>;
+  actualizarNota: (_id: string, _data: Partial<CreateNotaDto>) => Promise<void>;
+  actualizarFechas: (_id: string, _fecha_inicio: string, _fecha_fin: string) => Promise<void>;
 
   // Acciones - Eliminar
-  eliminarEvento: (id: string) => Promise<void>;
+  eliminarEvento: (_id: string) => Promise<void>;
 
   // Acciones - UI
-  setVistaActiva: (vista: 'agenda' | 'semana') => void;
-  setFiltros: (filtros: Partial<FiltrosCalendario>) => void;
+  setVistaActiva: (_vista: 'agenda' | 'semana') => void;
+  setFiltros: (_filtros: Partial<FiltrosCalendario>) => void;
   limpiarFiltros: () => void;
-  setEventoSeleccionado: (evento: Evento | null) => void;
-  abrirModalCreacion: (tipo: TipoEvento) => void;
+  setEventoSeleccionado: (_evento: Evento | null) => void;
+  abrirModalCreacion: (_tipo: TipoEvento) => void;
   cerrarModal: () => void;
 }
 

@@ -29,12 +29,12 @@ interface GamificacionState {
   logroRecienDesbloqueado: Logro | null;
 
   // Actions
-  fetchDashboard: (estudianteId: string) => Promise<void>;
-  fetchLogros: (estudianteId: string) => Promise<void>;
-  fetchPuntos: (estudianteId: string) => Promise<void>;
-  fetchRanking: (estudianteId: string) => Promise<void>;
-  fetchProgreso: (estudianteId: string) => Promise<void>;
-  desbloquearLogro: (logroId: string) => Promise<void>;
+  fetchDashboard: (_estudianteId: string) => Promise<void>;
+  fetchLogros: (_estudianteId: string) => Promise<void>;
+  fetchPuntos: (_estudianteId: string) => Promise<void>;
+  fetchRanking: (_estudianteId: string) => Promise<void>;
+  fetchProgreso: (_estudianteId: string) => Promise<void>;
+  desbloquearLogro: (_logroId: string) => Promise<void>;
   clearLogroModal: () => void;
 }
 

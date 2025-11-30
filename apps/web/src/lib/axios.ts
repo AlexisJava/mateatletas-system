@@ -1,9 +1,4 @@
-import axios, {
-  AxiosError,
-  AxiosInstance,
-  type AxiosRequestConfig,
-  InternalAxiosRequestConfig,
-} from 'axios';
+import axios, { AxiosError, AxiosInstance, type AxiosRequestConfig } from 'axios';
 
 import type { JsonValue, RequestData } from '@/types/common';
 
@@ -18,23 +13,23 @@ import type { JsonValue, RequestData } from '@/types/common';
  */
 
 type ApiClient = Omit<AxiosInstance, 'get' | 'post' | 'put' | 'patch' | 'delete'> & {
-  get<T = JsonValue, D = RequestData>(url: string, config?: AxiosRequestConfig<D>): Promise<T>;
+  get<T = JsonValue, D = RequestData>(_url: string, _config?: AxiosRequestConfig<D>): Promise<T>;
   post<T = JsonValue, D = RequestData>(
-    url: string,
-    data?: D,
-    config?: AxiosRequestConfig<D>,
+    _url: string,
+    _data?: D,
+    _config?: AxiosRequestConfig<D>,
   ): Promise<T>;
   put<T = JsonValue, D = RequestData>(
-    url: string,
-    data?: D,
-    config?: AxiosRequestConfig<D>,
+    _url: string,
+    _data?: D,
+    _config?: AxiosRequestConfig<D>,
   ): Promise<T>;
   patch<T = JsonValue, D = RequestData>(
-    url: string,
-    data?: D,
-    config?: AxiosRequestConfig<D>,
+    _url: string,
+    _data?: D,
+    _config?: AxiosRequestConfig<D>,
   ): Promise<T>;
-  delete<T = JsonValue, D = RequestData>(url: string, config?: AxiosRequestConfig<D>): Promise<T>;
+  delete<T = JsonValue, D = RequestData>(_url: string, _config?: AxiosRequestConfig<D>): Promise<T>;
 };
 
 const apiClient: ApiClient = axios.create({

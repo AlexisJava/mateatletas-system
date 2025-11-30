@@ -18,9 +18,9 @@ interface PagosStore {
   // Actions
   fetchMembresiaActual: () => Promise<void>;
   fetchInscripciones: () => Promise<void>;
-  crearPreferenciaSuscripcion: (productoId: string) => Promise<string | null>;
-  crearPreferenciaCurso: (productoId: string, estudianteId: string) => Promise<string | null>;
-  activarMembresiaManual: (membresiaId: string) => Promise<void>;
+  crearPreferenciaSuscripcion: (_productoId: string) => Promise<string | null>;
+  crearPreferenciaCurso: (_productoId: string, _estudianteId: string) => Promise<string | null>;
+  activarMembresiaManual: (_membresiaId: string) => Promise<void>;
   clearError: () => void;
   reset: () => void;
 }

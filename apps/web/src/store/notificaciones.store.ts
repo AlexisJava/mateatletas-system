@@ -26,11 +26,11 @@ interface NotificacionesState {
   error: string | null;
 
   // Actions
-  fetchNotificaciones: (soloNoLeidas?: boolean) => Promise<void>;
+  fetchNotificaciones: (_soloNoLeidas?: boolean) => Promise<void>;
   fetchCount: () => Promise<void>;
-  marcarComoLeida: (id: string) => Promise<void>;
+  marcarComoLeida: (_id: string) => Promise<void>;
   marcarTodasLeidas: () => Promise<void>;
-  eliminar: (id: string) => Promise<void>;
+  eliminar: (_id: string) => Promise<void>;
   resetError: () => void;
 }
 

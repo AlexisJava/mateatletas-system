@@ -28,11 +28,11 @@ interface ClasesStore {
   fetchClases: () => Promise<void>;
   fetchMisReservas: () => Promise<void>;
   fetchRutasCurriculares: () => Promise<void>;
-  setFiltros: (filtros: Partial<FiltroClases>) => void;
+  setFiltros: (_filtros: Partial<FiltroClases>) => void;
   resetFiltros: () => void;
-  reservarClase: (claseId: string, data: CrearReservaDto) => Promise<boolean>;
-  cancelarReserva: (inscripcionId: string) => Promise<boolean>;
-  setClaseSeleccionada: (clase: ClaseConRelaciones | null) => void;
+  reservarClase: (_claseId: string, _data: CrearReservaDto) => Promise<boolean>;
+  cancelarReserva: (_inscripcionId: string) => Promise<boolean>;
+  setClaseSeleccionada: (_clase: ClaseConRelaciones | null) => void;
   getClasesFiltradas: () => Clase[];
 }
 

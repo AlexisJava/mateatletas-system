@@ -9,12 +9,12 @@ interface UsersStore {
   error: string | null;
 
   fetchUsers: () => Promise<void>;
-  changeUserRole: (userId: string, role: 'tutor' | 'docente' | 'admin') => Promise<boolean>;
+  changeUserRole: (_userId: string, _role: 'tutor' | 'docente' | 'admin') => Promise<boolean>;
   updateUserRoles: (
-    userId: string,
-    roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[],
+    _userId: string,
+    _roles: ('tutor' | 'docente' | 'admin' | 'estudiante')[],
   ) => Promise<boolean>;
-  deleteUser: (userId: string) => Promise<boolean>;
+  deleteUser: (_userId: string) => Promise<boolean>;
   clearError: () => void;
   reset: () => void;
 }

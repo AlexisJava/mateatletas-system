@@ -27,25 +27,25 @@ interface PlanificacionesState {
   success: string | null;
 
   fetchPlanificaciones: (
-    filters?: PlanificacionFilters,
-    pagination?: PaginationOptions,
+    _filters?: PlanificacionFilters,
+    _pagination?: PaginationOptions,
   ) => Promise<void>;
-  fetchPlanificacionById: (id: string) => Promise<PlanificacionDetalle | null>;
-  createPlanificacion: (data: CreatePlanificacionRequest) => Promise<boolean>;
-  updatePlanificacion: (id: string, data: UpdatePlanificacionRequest) => Promise<boolean>;
-  deletePlanificacion: (id: string) => Promise<boolean>;
+  fetchPlanificacionById: (_id: string) => Promise<PlanificacionDetalle | null>;
+  createPlanificacion: (_data: CreatePlanificacionRequest) => Promise<boolean>;
+  updatePlanificacion: (_id: string, _data: UpdatePlanificacionRequest) => Promise<boolean>;
+  deletePlanificacion: (_id: string) => Promise<boolean>;
   addActividad: (
-    planificacionId: string,
-    data: CreateActividadRequest,
+    _planificacionId: string,
+    _data: CreateActividadRequest,
   ) => Promise<Actividad | null>;
   updateActividad: (
-    planificacionId: string,
-    actividadId: string,
-    data: Partial<CreateActividadRequest>,
+    _planificacionId: string,
+    _actividadId: string,
+    _data: Partial<CreateActividadRequest>,
   ) => Promise<Actividad | null>;
-  deleteActividad: (planificacionId: string, actividadId: string) => Promise<boolean>;
-  setFilters: (filters: PlanificacionFilters) => void;
-  setPage: (page: number) => void;
+  deleteActividad: (_planificacionId: string, _actividadId: string) => Promise<boolean>;
+  setFilters: (_filters: PlanificacionFilters) => void;
+  setPage: (_page: number) => void;
   clearMessages: () => void;
   resetDetalle: () => void;
 }

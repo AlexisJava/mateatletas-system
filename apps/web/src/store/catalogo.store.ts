@@ -17,9 +17,9 @@ interface CatalogoStore {
 
   // Actions
   fetchProductos: () => Promise<void>;
-  fetchProductoPorId: (id: string) => Promise<void>;
-  setFiltro: (filtro: FiltroProducto) => void;
-  setProductoSeleccionado: (producto: Producto | null) => void;
+  fetchProductoPorId: (_id: string) => Promise<void>;
+  setFiltro: (_filtro: FiltroProducto) => void;
+  setProductoSeleccionado: (_producto: Producto | null) => void;
   getProductosFiltrados: () => Producto[];
   clearError: () => void;
 }

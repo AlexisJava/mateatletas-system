@@ -41,14 +41,14 @@ interface AuthState {
   selectedRole: UserRole | null; // Rol activo cuando el usuario tiene múltiples roles
 
   // Acciones
-  login: (email: string, password: string) => Promise<User>;
-  loginEstudiante: (username: string, password: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  login: (_email: string, _password: string) => Promise<User>;
+  loginEstudiante: (_username: string, _password: string) => Promise<void>;
+  register: (_data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
-  setUser: (user: User) => void;
-  setSelectedRole: (role: UserRole) => void;
-  cambiarPassword: (passwordActual: string, nuevaPassword: string) => Promise<void>;
+  setUser: (_user: User) => void;
+  setSelectedRole: (_role: UserRole) => void;
+  cambiarPassword: (_passwordActual: string, _nuevaPassword: string) => Promise<void>;
 }
 
 /**

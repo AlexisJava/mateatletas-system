@@ -25,22 +25,25 @@ interface SectoresState {
 
   // Actions - Sectores
   fetchSectores: () => Promise<void>;
-  crearSector: (data: CreateSectorDto) => Promise<Sector | null>;
-  actualizarSector: (id: string, data: UpdateSectorDto) => Promise<Sector | null>;
-  eliminarSector: (id: string) => Promise<boolean>;
+  crearSector: (_data: CreateSectorDto) => Promise<Sector | null>;
+  actualizarSector: (_id: string, _data: UpdateSectorDto) => Promise<Sector | null>;
+  eliminarSector: (_id: string) => Promise<boolean>;
 
   // Actions - Rutas
-  fetchRutas: (sectorId?: string) => Promise<void>;
-  crearRuta: (data: CreateRutaEspecialidadDto) => Promise<RutaEspecialidad | null>;
-  actualizarRuta: (id: string, data: UpdateRutaEspecialidadDto) => Promise<RutaEspecialidad | null>;
-  eliminarRuta: (id: string) => Promise<boolean>;
+  fetchRutas: (_sectorId?: string) => Promise<void>;
+  crearRuta: (_data: CreateRutaEspecialidadDto) => Promise<RutaEspecialidad | null>;
+  actualizarRuta: (
+    _id: string,
+    _data: UpdateRutaEspecialidadDto,
+  ) => Promise<RutaEspecialidad | null>;
+  eliminarRuta: (_id: string) => Promise<boolean>;
 
   // Actions - Docentes
-  asignarRutasDocente: (docenteId: string, data: AsignarRutasDocenteDto) => Promise<boolean>;
-  obtenerRutasDocente: (docenteId: string) => Promise<DocenteRuta[]>;
+  asignarRutasDocente: (_docenteId: string, _data: AsignarRutasDocenteDto) => Promise<boolean>;
+  obtenerRutasDocente: (_docenteId: string) => Promise<DocenteRuta[]>;
 
   // Helpers
-  getRutasBySector: (sectorId: string) => RutaEspecialidad[];
+  getRutasBySector: (_sectorId: string) => RutaEspecialidad[];
   clearError: () => void;
 }
 

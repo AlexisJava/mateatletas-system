@@ -21,8 +21,8 @@ interface ClassesStore {
   error: string | null;
 
   fetchClasses: () => Promise<void>;
-  createClass: (data: CrearClaseDto) => Promise<boolean>;
-  cancelClass: (claseId: string) => Promise<boolean>;
+  createClass: (_data: CrearClaseDto) => Promise<boolean>;
+  cancelClass: (_claseId: string) => Promise<boolean>;
   clearError: () => void;
   reset: () => void;
 }

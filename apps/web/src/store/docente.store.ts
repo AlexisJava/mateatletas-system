@@ -38,20 +38,20 @@ interface DocenteStore {
    * Obtiene las clases del docente autenticado
    * @param incluirPasadas Si incluir clases finalizadas/canceladas
    */
-  fetchMisClases: (incluirPasadas?: boolean) => Promise<void>;
+  fetchMisClases: (_incluirPasadas?: boolean) => Promise<void>;
 
   /**
    * Obtiene los detalles de una clase específica
    * @param claseId ID de la clase
    */
-  fetchClaseDetalle: (claseId: string) => Promise<void>;
+  fetchClaseDetalle: (_claseId: string) => Promise<void>;
 
   /**
    * Cancela una clase
    * @param claseId ID de la clase
    * @returns true si se canceló correctamente
    */
-  cancelarClase: (claseId: string) => Promise<boolean>;
+  cancelarClase: (_claseId: string) => Promise<boolean>;
 
   /**
    * Alterna el filtro de clases pasadas
