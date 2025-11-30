@@ -4,11 +4,23 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
+ * Google Analytics gtag type
+ */
+type GtagCommand = 'event' | 'config' | 'set' | 'js';
+type GtagEventParams = Record<string, string | number | boolean | undefined>;
+
+interface WindowWithGtag extends Window {
+  gtag?: (command: GtagCommand, action: string, params?: GtagEventParams) => void;
+}
+
+declare const window: WindowWithGtag;
+
+/**
  * Track page view de la página de resultados
  */
 export function trackResultadoPageView(rutaId: string, rutaNombre: string) {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'page_view', {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'page_view', {
       page_title: 'Resultado Quiz',
       page_path: '/cursos-online/asincronicos/resultado',
       ruta_id: rutaId,
@@ -33,8 +45,8 @@ export function trackComprarClick(
   precio: number,
   moneda: 'USD' | 'ARS',
 ) {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'click_comprar', {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'click_comprar', {
       opcion_elegida: opcion,
       precio: precio,
       moneda: moneda,
@@ -57,8 +69,8 @@ export function trackComprarClick(
  * Track scroll depth (profundidad de scroll)
  */
 export function trackScrollDepth(percentage: number) {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'scroll', {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'scroll', {
       scroll_depth: percentage,
       event_category: 'engagement',
     });
@@ -74,8 +86,8 @@ export function trackScrollDepth(percentage: number) {
  * Track cuando el usuario expande un curso en el timeline
  */
 export function trackCursoExpand(cursoId: string, cursoNombre: string) {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'curso_expand', {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'curso_expand', {
       curso_id: cursoId,
       curso_nombre: cursoNombre,
       event_category: 'engagement',
@@ -95,8 +107,8 @@ export function trackCursoExpand(cursoId: string, cursoNombre: string) {
  * Track cuando el usuario cambia la cantidad de hijos
  */
 export function trackMultipleHijoChange(cantidad: number, precioTotal: number) {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'multiple_hijo_change', {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'multiple_hijo_change', {
       cantidad_hijos: cantidad,
       precio_total: precioTotal,
       event_category: 'engagement',
@@ -116,8 +128,8 @@ export function trackMultipleHijoChange(cantidad: number, precioTotal: number) {
  * Track cuando el usuario expande una FAQ
  */
 export function trackFAQExpand(pregunta: string, index: number) {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'faq_expand', {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'faq_expand', {
       pregunta: pregunta,
       index: index,
       event_category: 'engagement',
@@ -137,8 +149,8 @@ export function trackFAQExpand(pregunta: string, index: number) {
  * Track cuando el usuario ve una ruta alternativa
  */
 export function trackRutaAlternativaClick(rutaId: string, rutaNombre: string) {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'ruta_alternativa_click', {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'ruta_alternativa_click', {
       ruta_id: rutaId,
       ruta_nombre: rutaNombre,
       event_category: 'engagement',
@@ -158,8 +170,8 @@ export function trackRutaAlternativaClick(rutaId: string, rutaNombre: string) {
  * Track cuando el usuario cambia la moneda
  */
 export function trackMonedaChange(moneda: 'USD' | 'ARS') {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'moneda_change', {
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'moneda_change', {
       moneda: moneda,
       event_category: 'engagement',
     });

@@ -103,7 +103,7 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        nivel_motivacion: opcion.value as any,
+                        nivel_motivacion: opcion.value,
                       });
                       setTimeout(() => setSubStep(3), 300);
                     }}
@@ -167,7 +167,7 @@ export default function Pregunta5({ respuestas, setRespuestas }: Pregunta5Props)
                     onClick={() =>
                       setRespuestas({
                         ...respuestas,
-                        tiempo_disponible: opcion.value as any,
+                        tiempo_disponible: opcion.value,
                       })
                     }
                     className={`

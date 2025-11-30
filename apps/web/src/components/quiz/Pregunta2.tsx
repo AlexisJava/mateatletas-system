@@ -70,7 +70,7 @@ export default function Pregunta2({ respuestas, setRespuestas }: Pregunta2Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        personalidad_problema: opcion.value as any,
+                        personalidad_problema: opcion.value,
                       });
                       // Auto-avanzar después de 300ms
                       setTimeout(() => handlePersonalidadNext(), 300);

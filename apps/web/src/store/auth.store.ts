@@ -52,6 +52,15 @@ interface AuthState {
 }
 
 /**
+ * Tipo para el estado persistido en localStorage
+ */
+interface PersistedAuthState {
+  user?: User | null;
+  token?: string | null;
+  selectedRole?: UserRole | null; // Legacy field, removed in v2
+}
+
+/**
  * Store de autenticación con Zustand
  *
  * Características:
@@ -273,15 +282,16 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
       }),
       // Migración automática cuando cambia la versión
-      migrate: (persistedState: any, version: number) => {
+      migrate: (persistedState: unknown, version: number) => {
+        const state = persistedState as PersistedAuthState;
         // Si la versión persistida es < 2, limpiar selectedRole del localStorage viejo
         if (version < 2) {
           // Eliminar selectedRole si existe en el estado viejo
-          if (persistedState && 'selectedRole' in persistedState) {
-            delete persistedState.selectedRole;
+          if (state && 'selectedRole' in state) {
+            delete state.selectedRole;
           }
         }
-        return persistedState;
+        return state;
       },
       // Callback después de rehidratar: calcular isAuthenticated basado en user
       onRehydrateStorage: () => (state) => {

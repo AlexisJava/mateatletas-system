@@ -214,7 +214,7 @@ export default function Pregunta3({ respuestas, setRespuestas }: Pregunta3Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        estilo_creativo: opcion.value as any,
+                        estilo_creativo: opcion.value,
                       });
                     }}
                     className={`

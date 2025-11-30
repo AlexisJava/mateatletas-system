@@ -46,7 +46,7 @@ export default function Pregunta4({ respuestas, setRespuestas }: Pregunta4Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        nivel_programacion: opcion.value as any,
+                        nivel_programacion: opcion.value,
                       });
                       setTimeout(() => setSubStep(2), 300);
                     }}
@@ -96,7 +96,7 @@ export default function Pregunta4({ respuestas, setRespuestas }: Pregunta4Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        nivel_mate_escuela: opcion.value as any,
+                        nivel_mate_escuela: opcion.value,
                       });
                       setTimeout(() => setSubStep(3), 300);
                     }}
@@ -155,7 +155,7 @@ export default function Pregunta4({ respuestas, setRespuestas }: Pregunta4Props)
                     onClick={() => {
                       setRespuestas({
                         ...respuestas,
-                        disfruta_desafios: opcion.value as any,
+                        disfruta_desafios: opcion.value,
                       });
                     }}
                     className={`
