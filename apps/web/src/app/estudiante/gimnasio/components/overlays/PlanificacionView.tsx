@@ -86,7 +86,7 @@ interface PS5CardProps {
   semana: Semana;
   onClick: () => void;
   index: number;
-  onHoverChange: (theme: 'quimica' | 'astronomia' | 'fisica' | 'informatica' | null) => void;
+  onHoverChange: (_theme: 'quimica' | 'astronomia' | 'fisica' | 'informatica' | null) => void;
 }
 
 function PS5Card({ semana, onClick, index, onHoverChange }: PS5CardProps) {

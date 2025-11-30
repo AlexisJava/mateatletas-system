@@ -20,7 +20,7 @@ interface MenuModalProps {
   isOpen: boolean;
   onClose: () => void;
   navButtons: NavButton[];
-  onNavigate: (overlayId: string | null, buttonId: string) => void;
+  onNavigate: (_overlayId: string | null, _buttonId: string) => void;
 }
 
 /**

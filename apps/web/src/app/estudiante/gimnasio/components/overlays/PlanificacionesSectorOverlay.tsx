@@ -167,7 +167,7 @@ export function PlanificacionesSectorOverlay({ config }: PlanificacionesSectorPr
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {planificaciones.map((planificacion, index) => {
                 const esBloqueada = planificacion.estado === 'bloqueada';
-                const progreso = Math.round(
+                const _progreso = Math.round(
                   (planificacion.actividades_completadas / planificacion.total_actividades) * 100,
                 );
 

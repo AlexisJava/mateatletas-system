@@ -92,7 +92,7 @@
     "@vitejs/plugin-react": "^5.1.0",
     "@vitest/ui": "^4.0.3",
     "axe-core": "^4.11.0",
-    "eslint": "^9",
+    "eslint": "^8.57.0",
     "eslint-config-next": "15.5.4",
     "happy-dom": "^20.0.8",
     "jsdom": "^27.0.1",

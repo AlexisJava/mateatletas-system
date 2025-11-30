@@ -12,7 +12,7 @@ import type { PreguntaVerdaderoFalso } from '../../types/actividad.types';
 
 export interface VerdaderoFalsoQuestionProps {
   pregunta: PreguntaVerdaderoFalso;
-  onRespuesta: (esCorrecta: boolean, respuestaUsuario: boolean) => void;
+  onRespuesta: (_esCorrecta: boolean, _respuestaUsuario: boolean) => void;
   disabled?: boolean;
   mostrarExplicacion?: boolean;
 }

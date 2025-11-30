@@ -8,7 +8,7 @@ interface HeroSectionProps {
   onInscribe: () => void;
 }
 
-export default function HeroSection({ onInscribe }: HeroSectionProps) {
+export default function HeroSection({ onInscribe: _onInscribe }: HeroSectionProps) {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
       {/* Cosmos Background */}

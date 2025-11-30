@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck - TODO: Fix type null vs string mismatch in mapPlanificacionListItem
 /**
  * API Client para Planificaciones Mensuales
  *

@@ -40,7 +40,7 @@ export default function MisHijosTab({ estudiantes }: Props) {
       );
       const parsed = estudianteDetalleSchema.parse(response);
       setStudentDetail(parsed);
-    } catch (error) {
+    } catch {
       // Error loading student detail
     } finally {
       setLoading(false);

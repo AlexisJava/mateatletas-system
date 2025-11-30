@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck - TODO: Fix ExportableData type compatibility with formatters
 /**
  * Utilidades profesionales para exportación de datos
  * Soporta CSV, Excel y PDF

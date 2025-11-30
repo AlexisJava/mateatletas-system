@@ -12,7 +12,7 @@ import type { PreguntaMultipleChoice } from '../../types/actividad.types';
 
 export interface MultipleChoiceQuestionProps {
   pregunta: PreguntaMultipleChoice;
-  onRespuesta: (esCorrecta: boolean, opcionSeleccionada: string) => void;
+  onRespuesta: (_esCorrecta: boolean, _opcionSeleccionada: string) => void;
   disabled?: boolean;
   mostrarExplicacion?: boolean;
 }

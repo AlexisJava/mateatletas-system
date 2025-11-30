@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { Edit, Trash2, Eye } from 'lucide-react';

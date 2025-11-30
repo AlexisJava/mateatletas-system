@@ -75,7 +75,7 @@ function GimnasioContent({ avatarUrl }: { avatarUrl: string | null }) {
 }
 
 export default function GimnasioPage() {
-  const { user } = useAuthStore();
+  const { user: _user } = useAuthStore();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isLoadingAvatar, setIsLoadingAvatar] = useState(true);
   const hasLoadedAvatar = useRef(false);

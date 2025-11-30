@@ -46,7 +46,7 @@ export function MiGrupoView({ estudiante }: MiGrupoViewProps) {
   // Calcular datos del grupo
   const nombreGrupo = companeros.length > 0 ? 'Mi Grupo' : 'Sin Grupo';
   const misPuntos = dashboard?.stats.puntosToales || 0;
-  const clasesAsistidas = dashboard?.stats.clasesAsistidas || 0;
+  const _clasesAsistidas = dashboard?.stats.clasesAsistidas || 0;
   const rachaActual = dashboard?.stats.racha || 0;
 
   if (loading) {

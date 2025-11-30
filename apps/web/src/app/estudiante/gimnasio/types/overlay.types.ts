@@ -89,13 +89,13 @@ export interface OverlayStackContextType {
   stack: OverlayConfig[];
 
   /** Agregar overlay al stack (push navigation) */
-  push: (config: OverlayConfig) => void;
+  push: (_config: OverlayConfig) => void;
 
   /** Remover overlay del top del stack (back navigation) */
   pop: () => void;
 
   /** Reemplazar overlay top sin animación de back */
-  replace: (config: OverlayConfig) => void;
+  replace: (_config: OverlayConfig) => void;
 
   /** Limpiar todo el stack (volver a HubView) */
   clear: () => void;

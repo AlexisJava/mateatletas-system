@@ -8,7 +8,7 @@ import {
 } from '@/types/planificacion.types';
 
 interface PlanificacionFiltersProps {
-  onFilterChange: (filters: Filters) => void;
+  onFilterChange: (_filters: Filters) => void;
   isLoading?: boolean;
 }
 

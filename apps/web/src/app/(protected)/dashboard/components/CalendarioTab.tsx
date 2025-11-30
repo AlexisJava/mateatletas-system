@@ -50,7 +50,7 @@ export default function CalendarioTab() {
       });
       const parsed = calendarioResponseSchema.parse(response);
       setCalendarioData(parsed);
-    } catch (error) {
+    } catch {
       // Error loading calendar
     } finally {
       setLoading(false);

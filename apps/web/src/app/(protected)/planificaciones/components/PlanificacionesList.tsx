@@ -8,8 +8,8 @@ interface PlanificacionesListProps {
   isLoading: boolean;
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
-  onViewPlanificacion: (id: string) => void;
+  onPageChange: (_page: number) => void;
+  onViewPlanificacion: (_id: string) => void;
 }
 
 const ESTADO_BADGES: Record<

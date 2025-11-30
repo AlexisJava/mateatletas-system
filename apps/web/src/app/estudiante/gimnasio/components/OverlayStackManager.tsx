@@ -147,7 +147,7 @@ const NotificacionesOverlay: OverlayComponent = ({ estudiante }) => (
   />
 );
 const ProximamenteOverlay: OverlayComponent = () => <ProximamenteView />;
-const CursosOverlay: OverlayComponent = ({ estudiante }) => (
+const _CursosOverlay: OverlayComponent = ({ estudiante }) => (
   <CursosView
     estudiante={{
       id: estudiante.id ?? '',

@@ -12,7 +12,7 @@ import type { PreguntaFillBlank } from '../../types/actividad.types';
 
 export interface FillBlankQuestionProps {
   pregunta: PreguntaFillBlank;
-  onRespuesta: (esCorrecta: boolean, respuestaUsuario: string) => void;
+  onRespuesta: (_esCorrecta: boolean, _respuestaUsuario: string) => void;
   disabled?: boolean;
   mostrarExplicacion?: boolean;
 }

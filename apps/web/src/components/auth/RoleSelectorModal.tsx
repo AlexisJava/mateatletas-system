@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface RoleSelectorModalProps {
   roles: string[];
-  onSelectRole: (role: 'admin' | 'docente') => void;
+  onSelectRole: (_role: 'admin' | 'docente') => void;
 }
 
 const ROLE_CONFIG = {

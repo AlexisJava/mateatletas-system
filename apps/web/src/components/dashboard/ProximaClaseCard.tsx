@@ -1,8 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Calendar, User, MapPin } from 'lucide-react';
-import { format, formatDistanceToNow } from 'date-fns';
+import { Calendar, User } from 'lucide-react';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 /**

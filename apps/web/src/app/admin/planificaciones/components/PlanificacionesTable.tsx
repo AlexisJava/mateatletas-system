@@ -8,8 +8,8 @@ interface PlanificacionesTableProps {
   isLoading: boolean;
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
-  onViewDetails: (id: string) => void;
+  onPageChange: (_page: number) => void;
+  onViewDetails: (_id: string) => void;
 }
 
 // ============================================================
@@ -208,7 +208,7 @@ const getPlanificacionRowData = (planificacion: PlanificacionListItem): Planific
 const DesktopTableRow: React.FC<{
   data: PlanificacionRowData;
   index: number;
-  onViewDetails: (id: string) => void;
+  onViewDetails: (_id: string) => void;
 }> = ({ data, index, onViewDetails }) => {
   const { planificacion, grupoCodigo, grupoColor, estadoColor, estadoLabel } = data;
 
@@ -275,7 +275,7 @@ const DesktopTableRow: React.FC<{
 const MobileCard: React.FC<{
   data: PlanificacionRowData;
   index: number;
-  onViewDetails: (id: string) => void;
+  onViewDetails: (_id: string) => void;
 }> = ({ data, index, onViewDetails }) => {
   const { planificacion, grupoCodigo, grupoColor, estadoColor, estadoLabel } = data;
 
@@ -333,7 +333,7 @@ const MobileCard: React.FC<{
 const Pagination: React.FC<{
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  onPageChange: (_page: number) => void;
 }> = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 

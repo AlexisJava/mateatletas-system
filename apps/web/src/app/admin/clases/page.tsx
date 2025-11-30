@@ -112,7 +112,7 @@ export default function AdminGruposClasesPage() {
     fetchGrupos();
   }, [filtroEstado]);
 
-  const extractEntity = <T,>(payload: T | { data?: T }): T => {
+  const _extractEntity = <T,>(payload: T | { data?: T }): T => {
     if (payload && typeof payload === 'object' && 'data' in payload) {
       const data = (payload as { data?: T }).data;
       if (data !== undefined) {

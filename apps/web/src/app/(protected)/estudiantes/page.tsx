@@ -32,7 +32,7 @@ export default function EstudiantesPage() {
     if (confirm('¿Estás seguro de eliminar este estudiante?')) {
       try {
         await deleteEstudiante(id);
-      } catch (error) {
+      } catch {
         // Error deleting student
       }
     }

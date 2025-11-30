@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck - TODO: Fix type mismatches between schemas and API responses
 /**
  * API Client para Pagos y MercadoPago
  */
