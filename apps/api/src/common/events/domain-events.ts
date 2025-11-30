@@ -45,7 +45,7 @@ export class UserLoggedInEvent {
   constructor(
     public readonly userId: string,
     public readonly userType: 'tutor' | 'docente' | 'admin' | 'estudiante',
-    public readonly email: string,
+    public readonly email: string | null,
     public readonly esPrimerLogin: boolean,
   ) {}
 }

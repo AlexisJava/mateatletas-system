@@ -7,7 +7,7 @@ import { Role } from '../decorators/roles.decorator';
  */
 interface TutorProfile {
   id: string;
-  email: string;
+  email: string | null;
   nombre: string;
   apellido: string;
   dni?: string | null;

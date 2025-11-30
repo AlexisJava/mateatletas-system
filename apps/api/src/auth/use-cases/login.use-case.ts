@@ -34,7 +34,7 @@ interface TutorLoginResult {
   access_token: string;
   user: {
     id: string;
-    email: string;
+    email: string | null;
     nombre: string;
     apellido: string;
     dni: string | null;
@@ -54,7 +54,7 @@ interface DocenteLoginResult {
   access_token: string;
   user: {
     id: string;
-    email: string;
+    email: string | null;
     nombre: string;
     apellido: string;
     titulo: string | null;
@@ -72,7 +72,7 @@ interface AdminLoginResult {
   access_token: string;
   user: {
     id: string;
-    email: string;
+    email: string | null;
     nombre: string;
     apellido: string;
     fecha_registro: Date;
@@ -92,7 +92,7 @@ interface MfaRequiredResult {
   mfa_token: string;
   user: {
     id: string;
-    email: string;
+    email: string | null;
     nombre: string;
     apellido: string;
   };
@@ -235,7 +235,7 @@ export class LoginUseCase {
   /**
    * Genera token temporal para MFA (5 minutos)
    */
-  private generateMfaToken(userId: string, email: string): string {
+  private generateMfaToken(userId: string, email: string | null): string {
     const payload = {
       sub: userId,
       email,
@@ -344,7 +344,7 @@ export class LoginUseCase {
    */
   private generateJwtToken(
     userId: string,
-    email: string,
+    email: string | null,
     roles: string[],
   ): string {
     const payload = {

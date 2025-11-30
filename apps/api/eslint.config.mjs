@@ -28,7 +28,6 @@ export default tseslint.config(
     rules: {
       // ===== PROHIBIR any Y ts-ignore =====
       '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-unsafe-any': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'error',
       '@typescript-eslint/no-unsafe-call': 'error',
       '@typescript-eslint/no-unsafe-member-access': 'error',
@@ -68,7 +67,7 @@ export default tseslint.config(
       ],
 
       // ===== PREVENIR DEBUG CODE =====
-      'no-console': ['error', { allow: [] }],
+      'no-console': 'error',
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
     },
   },

@@ -32,6 +32,7 @@ import { Inscripciones2026Module } from './inscripciones-2026/inscripciones-2026
 import { TiersModule } from './tiers/tiers.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { AuditModule } from './audit/audit.module';
+import { StudioModule } from './studio/studio.module';
 
 /**
  * AppModule
@@ -86,6 +87,7 @@ import { AuditModule } from './audit/audit.module';
     TiersModule,
     OnboardingModule,
     HealthModule,
+    StudioModule, // Planificador de Cursos
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,1 +1,35 @@
-npx lint-staged
+#!/bin/sh
+
+echo "🚔 ROBOCOP: Verificando calidad de código..."
+
+# ============================================================================
+# TypeScript - 0 errores (API)
+# ============================================================================
+echo "→ Verificando TypeScript (API)..."
+cd apps/api && npx tsc --noEmit
+TS_EXIT=$?
+cd ../..
+
+if [ $TS_EXIT -ne 0 ]; then
+  echo ""
+  echo "❌ BLOQUEADO: Errores de TypeScript."
+  echo "   Arreglar antes de commitear."
+  echo ""
+  exit 1
+fi
+
+# ============================================================================
+# lint-staged (ESLint + Prettier en archivos cambiados)
+# ============================================================================
+echo "→ Verificando código con lint-staged..."
+npx lint-staged || {
+  echo ""
+  echo "❌ BLOQUEADO: Errores de ESLint o formato."
+  echo "   Arreglar antes de commitear."
+  echo ""
+  exit 1
+}
+
+echo ""
+echo "✅ ROBOCOP: Todo OK. Commit permitido."
+echo ""

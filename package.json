@@ -62,8 +62,12 @@
     "railway:logs": "railway logs",
     "railway:connect": "railway connect Postgres-yuMB",
     "prepare": "husky",
-    "typecheck": "turbo run type-check",
-    "lint:strict": "turbo run lint -- --max-warnings=0",
+    "typecheck": "npx tsc --noEmit",
+    "typecheck:all": "turbo run type-check",
+    "lint:strict": "cd apps/api && npx eslint --max-warnings=0 'src/**/*.ts'",
+    "lint:all": "turbo run lint -- --max-warnings=0",
+    "quality": "npm run typecheck && npm run lint:strict",
+    "quality:full": "npm run quality && npm run test:api",
     "validate": "bash scripts/validate.sh"
   },
   "devDependencies": {

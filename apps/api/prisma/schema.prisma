@@ -3415,3 +3415,303 @@ model SecretRotation {
   @@index([version])
   @@map("secret_rotations")
 }
+
+// ============================================================================
+// MATEATLETAS STUDIO - PLANIFICADOR DE CURSOS
+// Modelos para el sistema de creación y gestión de cursos
+// Documentación: docs/MATEATLETAS_STUDIO.md
+// ============================================================================
+
+/// Categoría de curso en Studio
+/// Define si es una experiencia temática o contenido curricular
+enum CategoriaStudio {
+  EXPERIENCIA // Cursos temáticos narrativos (Harry Potter, Minecraft, etc.)
+  CURRICULAR // Cursos alineados a currículum escolar
+
+  @@map("categoria_studio")
+}
+
+/// Tipo de experiencia temática
+/// Solo aplica cuando categoria = EXPERIENCIA
+enum TipoExperienciaStudio {
+  NARRATIVO // Historia con protagonista y misiones
+  EXPEDICION // Exploración de mundos/escenarios
+  LABORATORIO // Experimentos guiados
+  SIMULACION // Simuladores interactivos
+  PROYECTO // Construcción paso a paso
+  DESAFIO // Competencias y retos
+
+  @@map("tipo_experiencia_studio")
+}
+
+/// Materia curricular
+/// Solo aplica cuando categoria = CURRICULAR
+enum MateriaStudio {
+  MATEMATICA_ESCOLAR // Matemáticas según currículum
+  FISICA // Física escolar
+  QUIMICA // Química escolar
+  PROGRAMACION // Programación estructurada
+
+  @@map("materia_studio")
+}
+
+/// Estado del curso en el flujo de trabajo
+enum EstadoCursoStudio {
+  DRAFT // Recién creado, wizard completado
+  EN_PROGRESO // Cargando semanas
+  EN_REVISION // Todas las semanas completas, esperando aprobación
+  PUBLICADO // Disponible para estudiantes
+
+  @@map("estado_curso_studio")
+}
+
+/// Estado de una semana individual
+enum EstadoSemanaStudio {
+  VACIA // Sin contenido cargado
+  COMPLETA // JSON validado y guardado
+
+  @@map("estado_semana_studio")
+}
+
+/// Tipo de recurso multimedia en Studio
+/// Diferente de TipoRecurso (que es XP/MONEDAS)
+enum TipoRecursoStudio {
+  IMAGEN // PNG, JPG, WEBP, SVG
+  AUDIO // MP3, WAV, OGG
+  VIDEO // MP4, WEBM
+  DOCUMENTO // PDF
+
+  @@map("tipo_recurso_studio")
+}
+
+/// Curso del Studio (plantilla madre)
+/// Representa un curso completo creado en el planificador
+model CursoStudio {
+  /// Identificador único del curso
+  id String @id @default(cuid())
+
+  /// Nombre del curso
+  /// Ejemplo: "La Química de Harry Potter"
+  nombre String
+
+  /// Descripción del curso
+  /// Ejemplo: "Aprende química básica preparando pociones mágicas"
+  descripcion String @db.Text
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // CLASIFICACIÓN
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Categoría del curso (Experiencia o Curricular)
+  categoria CategoriaStudio
+
+  /// Mundo STEAM al que pertenece
+  /// Reutiliza el enum existente MundoTipo
+  mundo MundoTipo
+
+  /// Casa objetivo (rango de edad)
+  /// Reutiliza el enum existente CasaTipo
+  casa CasaTipo
+
+  /// Tier mínimo requerido para acceder
+  /// Reutiliza el enum existente TierNombre
+  tier_minimo TierNombre
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TIPO ESPECÍFICO (uno u otro según categoría)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Tipo de experiencia (solo si categoria = EXPERIENCIA)
+  tipo_experiencia TipoExperienciaStudio?
+
+  /// Materia curricular (solo si categoria = CURRICULAR)
+  materia MateriaStudio?
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // ESTÉTICA
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Estética base del curso
+  /// Ejemplo: "Harry Potter", "Minecraft", "Ciencia Ficción"
+  estetica_base String
+
+  /// Variante de la estética (opcional)
+  /// Ejemplo: "Hogwarts", "Nether", "Espacial"
+  estetica_variante String?
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // DURACIÓN
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Cantidad total de semanas del curso
+  /// Rango: 1-12
+  cantidad_semanas Int
+
+  /// Actividades por semana
+  /// Rango: 1-5
+  actividades_por_semana Int
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // ESTADO
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Estado actual del curso en el flujo de trabajo
+  estado EstadoCursoStudio @default(DRAFT)
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // CONFIGURACIÓN DE PUBLICACIÓN
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Mostrar en landing del mundo correspondiente
+  landing_mundo Boolean @default(false)
+
+  /// Mostrar en landing principal (destacado)
+  landing_home Boolean @default(false)
+
+  /// Disponible en catálogo interno para docentes
+  catalogo_interno Boolean @default(false)
+
+  /// Notificar a usuarios de tiers inferiores sobre este curso
+  notificar_upgrade Boolean @default(false)
+
+  /// Fecha a partir de la cual se puede vender/promocionar
+  fecha_venta DateTime?
+
+  /// Fecha a partir de la cual está disponible para estudiantes
+  fecha_disponible DateTime?
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // RELACIONES
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Semanas del curso
+  semanas SemanaStudio[]
+
+  /// Recursos multimedia asociados
+  recursos RecursoStudio[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // TIMESTAMPS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Fecha de creación
+  creado_en DateTime @default(now())
+
+  /// Fecha de última actualización
+  actualizado_en DateTime @updatedAt
+
+  @@index([categoria])
+  @@index([mundo])
+  @@index([casa])
+  @@index([estado])
+  @@map("cursos_studio")
+}
+
+/// Semana de un curso Studio
+/// Contiene el JSON completo con actividades y bloques
+model SemanaStudio {
+  /// Identificador único de la semana
+  id String @id @default(cuid())
+
+  /// ID del curso al que pertenece
+  curso_id String
+
+  /// Relación con el curso
+  curso CursoStudio @relation(fields: [curso_id], references: [id], onDelete: Cascade)
+
+  /// Número de semana dentro del curso (1-indexed)
+  numero Int
+
+  /// Nombre de la semana (opcional hasta que se cargue contenido)
+  /// Ejemplo: "Tu Primera Poción"
+  nombre String?
+
+  /// Descripción de la semana (opcional hasta que se cargue contenido)
+  descripcion String? @db.Text
+
+  /// Contenido completo de la semana en formato JSON
+  /// Sigue el schema definido en docs/MATEATLETAS_STUDIO.md Sección 6
+  /// Incluye: actividades, bloques, gamificación, recursos
+  contenido Json?
+
+  /// Estado de la semana
+  estado EstadoSemanaStudio @default(VACIA)
+
+  /// Fecha de creación
+  creado_en DateTime @default(now())
+
+  /// Fecha de última actualización
+  actualizado_en DateTime @updatedAt
+
+  /// Restricción: número de semana único por curso
+  @@unique([curso_id, numero])
+  @@index([curso_id])
+  @@index([estado])
+  @@map("semanas_studio")
+}
+
+/// Recurso multimedia de un curso Studio
+/// Imágenes, audios, videos y documentos usados en el contenido
+model RecursoStudio {
+  /// Identificador único del recurso
+  id String @id @default(cuid())
+
+  /// ID del curso al que pertenece
+  curso_id String
+
+  /// Relación con el curso
+  curso CursoStudio @relation(fields: [curso_id], references: [id], onDelete: Cascade)
+
+  /// Tipo de recurso
+  tipo TipoRecursoStudio
+
+  /// Nombre original del archivo
+  /// Ejemplo: "aula_pociones.png"
+  nombre String
+
+  /// Path del archivo en el servidor
+  /// Ejemplo: "/uploads/cursos/abc123/imagenes/aula_pociones.png"
+  archivo String
+
+  /// Tamaño del archivo en bytes
+  tamanio_bytes Int
+
+  /// Fecha de subida
+  creado_en DateTime @default(now())
+
+  @@index([curso_id])
+  @@index([tipo])
+  @@map("recursos_studio")
+}
+
+/// Badge personalizado creado en Studio
+/// Los badges predefinidos del sistema están en código, estos son custom
+model BadgeCustomStudio {
+  /// Identificador único del badge
+  id String @id @default(cuid())
+
+  /// ID del curso al que pertenece (null = disponible para todos)
+  curso_id String?
+
+  /// Nombre del badge
+  /// Ejemplo: "Maestro de Pociones"
+  nombre String
+
+  /// Descripción del badge
+  /// Ejemplo: "Completaste todas las actividades de pociones sin errores"
+  descripcion String @db.Text
+
+  /// Path al archivo de imagen/icono del badge
+  /// Ejemplo: "/uploads/badges/maestro_pociones.png"
+  icono String
+
+  /// Si está disponible en la biblioteca para reutilizar en otros cursos
+  en_biblioteca Boolean @default(false)
+
+  /// Fecha de creación
+  creado_en DateTime @default(now())
+
+  @@index([curso_id])
+  @@index([en_biblioteca])
+  @@map("badges_custom_studio")
+}

@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 /**
  * Datos de casa incluidos en la respuesta
  */
-interface CasaData {
+export interface CasaData {
   id: string;
   nombre: string;
   colorPrimary: string;
@@ -19,11 +19,11 @@ interface CasaData {
 /**
  * Datos de tutor incluidos en la respuesta
  */
-interface TutorData {
+export interface TutorData {
   id: string;
   nombre: string;
   apellido: string;
-  email: string;
+  email: string | null;
 }
 
 /**
