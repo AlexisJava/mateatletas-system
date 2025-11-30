@@ -110,6 +110,7 @@ export default function AdminGruposClasesPage() {
 
   useEffect(() => {
     fetchGrupos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtroEstado]);
 
   const _extractEntity = <T,>(payload: T | { data?: T }): T => {

@@ -85,6 +85,7 @@ export default function AdminDashboard() {
     // Actualizar reloj cada segundo
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!mounted) {

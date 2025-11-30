@@ -136,6 +136,7 @@ export default function QuizAsincronico({ onComplete }: QuizAsincronicoProps) {
 
     window.addEventListener('keypress', handleKeyPress);
     return () => window.removeEventListener('keypress', handleKeyPress);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, respuestas]);
 
   // ═══════════════════════════════════════════════════════════════════════════

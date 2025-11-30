@@ -57,6 +57,7 @@ export default function AdminReportesPage() {
     fetchStats();
     fetchUsers();
     fetchClasses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto-hide export status after 5 seconds

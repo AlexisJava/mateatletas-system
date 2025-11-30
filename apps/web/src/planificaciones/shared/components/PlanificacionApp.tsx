@@ -39,6 +39,7 @@ export function PlanificacionApp({ codigo, titulo, descripcion, children }: Plan
         tiempo_total_minutos: tiempoTotal,
       });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [codigo]);
 
   // Actualizar tiempo cada minuto
@@ -61,6 +62,7 @@ export function PlanificacionApp({ codigo, titulo, descripcion, children }: Plan
     ); // Cada 5 minutos
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

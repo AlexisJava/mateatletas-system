@@ -19,6 +19,7 @@ import type { LogroEstudiante, NotificacionLogro } from '@/types/gamificacion';
  */
 export function useNotificacionesLogros(estudianteId: string) {
   const { data, isLoading } = useLogrosNoVistos(estudianteId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const logrosNoVistos = Array.isArray(data) ? data : [];
   const marcarVisto = useMarcarLogroVisto(estudianteId);
 

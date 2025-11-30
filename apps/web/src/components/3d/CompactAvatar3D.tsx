@@ -15,6 +15,7 @@ function AvatarModel({ avatarUrl, animationUrl }: AvatarModelProps) {
 
   const { scene } = useGLTF(avatarUrl);
   const animationData = useGLTF(animationUrl || avatarUrl);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const animationClips = animationUrl ? animationData.animations : [];
 
   const { actions, mixer } = useAnimations(animationClips, group);

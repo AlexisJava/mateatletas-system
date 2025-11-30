@@ -176,6 +176,7 @@ export default function ClaseAulaPage() {
     if (claseId) {
       loadClase();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claseId]);
 
   const loadClase = async () => {

@@ -36,26 +36,26 @@ export default function CalendarioTab() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const loadCalendario = async () => {
+      try {
+        setLoading(true);
+        const response = await apiClient.get<CalendarioResponse>('/clases/calendario', {
+          params: {
+            mes: mesSeleccionado,
+            anio: anioSeleccionado,
+          },
+        });
+        const parsed = calendarioResponseSchema.parse(response);
+        setCalendarioData(parsed);
+      } catch {
+        // Error loading calendar
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadCalendario();
   }, [mesSeleccionado, anioSeleccionado]);
-
-  const loadCalendario = async () => {
-    try {
-      setLoading(true);
-      const response = await apiClient.get<CalendarioResponse>('/clases/calendario', {
-        params: {
-          mes: mesSeleccionado,
-          anio: anioSeleccionado,
-        },
-      });
-      const parsed = calendarioResponseSchema.parse(response);
-      setCalendarioData(parsed);
-    } catch {
-      // Error loading calendar
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleMesAnterior = () => {
     if (mesSeleccionado === 1) {

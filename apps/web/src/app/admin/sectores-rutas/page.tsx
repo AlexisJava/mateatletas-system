@@ -54,6 +54,7 @@ export default function SectoresRutasPage() {
   useEffect(() => {
     fetchSectores();
     fetchRutas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ============================================================================

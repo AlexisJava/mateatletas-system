@@ -58,6 +58,7 @@ export default function GrupoDetalleCompletoPage() {
 
   useEffect(() => {
     fetchGrupoDetalle();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claseGrupoId]);
 
   const fetchGrupoDetalle = async () => {

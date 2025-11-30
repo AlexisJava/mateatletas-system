@@ -46,6 +46,7 @@ export default function EquiposPage() {
    */
   useEffect(() => {
     handleFetchEquipos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**

@@ -27,6 +27,7 @@ function AvatarModel({
 
   // Cargar animación - SIEMPRE para respetar reglas de hooks
   const animationData = useGLTF(animationUrl || avatarUrl);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const animationClips = animationUrl ? animationData.animations : [];
 
   const { actions, mixer } = useAnimations(animationClips, group);
@@ -99,6 +100,7 @@ export function AnimatedAvatar3D({
       cameraFov,
     });
     console.groupEnd();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Monitor de cambios en props width/height

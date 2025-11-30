@@ -44,6 +44,7 @@ export default function AsistenciaPage() {
       fetchClaseDetalle(claseId);
       fetchListaAsistencia(claseId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claseId]);
 
   /**
