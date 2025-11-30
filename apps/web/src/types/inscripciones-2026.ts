@@ -6,6 +6,7 @@
 /**
  * Tipo de inscripción disponible para 2026
  */
+/* eslint-disable no-unused-vars */
 export enum TipoInscripcion2026 {
   COLONIA = 'colonia',
   CICLO_2026 = 'ciclo2026',
@@ -30,6 +31,7 @@ export enum EstadoInscripcion {
   BLOCKED = 'blocked',
   CANCELLED = 'cancelled',
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Datos del padre/madre/tutor al crear inscripción

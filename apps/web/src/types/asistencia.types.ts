@@ -7,12 +7,14 @@ import { Clase, RutaCurricular } from './clases.types';
 /**
  * Estado de asistencia de un estudiante
  */
+/* eslint-disable no-unused-vars */
 export enum EstadoAsistencia {
   Presente = 'Presente',
   Ausente = 'Ausente',
   Justificado = 'Justificado',
   Tardanza = 'Tardanza',
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Registro de asistencia

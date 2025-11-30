@@ -10,6 +10,7 @@ import type { ErrorLike, JsonValue } from '@/types/common';
 /**
  * Códigos de error estandarizados
  */
+/* eslint-disable no-unused-vars */
 export enum ErrorCode {
   // Errores de red
   NETWORK_ERROR = 'NETWORK_ERROR',
@@ -21,23 +22,21 @@ export enum ErrorCode {
 
   // Errores de validación
   VALIDATION_ERROR = 'VALIDATION_ERROR',
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   INVALID_INPUT = 'INVALID_INPUT',
 
   // Errores de negocio
   NOT_FOUND = 'NOT_FOUND',
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ALREADY_EXISTS = 'ALREADY_EXISTS',
   CONFLICT = 'CONFLICT',
 
   // Errores de servidor
   SERVER_ERROR = 'SERVER_ERROR',
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   DATABASE_ERROR = 'DATABASE_ERROR',
 
   // Errores desconocidos
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
 }
+/* eslint-enable no-unused-vars */
 
 /**
  * Interfaz base para errores

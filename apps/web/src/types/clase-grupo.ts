@@ -2,6 +2,7 @@
  * Tipos para ClaseGrupos (grupos de clases recurrentes)
  */
 
+/* eslint-disable no-unused-vars */
 export enum TipoClaseGrupo {
   GRUPO_REGULAR = 'GRUPO_REGULAR',
   CURSO_TEMPORAL = 'CURSO_TEMPORAL',
@@ -16,6 +17,7 @@ export enum DiaSemana {
   SABADO = 'SABADO',
   DOMINGO = 'DOMINGO',
 }
+/* eslint-enable no-unused-vars */
 
 export const DIA_SEMANA_LABELS: Record<DiaSemana, string> = {
   [DiaSemana.LUNES]: 'Lunes',

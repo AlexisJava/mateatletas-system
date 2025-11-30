@@ -2,6 +2,7 @@
 
 import type { ClaseListado } from '@/types/admin-clases.types';
 
+/* eslint-disable no-unused-vars */
 export enum TipoEvento {
   CLASE = 'CLASE',
   TAREA = 'TAREA',
@@ -22,6 +23,7 @@ export enum PrioridadTarea {
   ALTA = 'ALTA',
   URGENTE = 'URGENTE',
 }
+/* eslint-enable no-unused-vars */
 
 export interface Subtarea {
   id: string;
