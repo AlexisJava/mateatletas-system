@@ -24,13 +24,9 @@ import type { SidebarProps, AppShellVariant, NavigationItem } from './types';
 import { VARIANT_THEMES } from './types';
 
 /**
- * Hook para determinar si una ruta está activa
+ * Helper para determinar si una ruta está activa
  */
-function useIsActiveRoute(
-  currentPath: string,
-  itemHref: string,
-  variant: AppShellVariant,
-): boolean {
+function isActiveRoute(currentPath: string, itemHref: string, variant: AppShellVariant): boolean {
   // Para dashboard, considerar tanto /variant como /variant/dashboard
   const basePath = `/${variant}`;
   const dashboardPath = `/${variant}/dashboard`;
@@ -160,7 +156,7 @@ const NavItem = memo(function NavItem({
   collapsed,
   onMobileClose,
 }: NavItemProps) {
-  const theme = VARIANT_THEMES[variant];
+  const _theme = VARIANT_THEMES[variant];
   const Icon = item.icon;
 
   // Estilos específicos por variante
@@ -409,7 +405,7 @@ export const Sidebar = memo(function Sidebar({
             key={item.href}
             item={item}
             variant={variant}
-            isActive={useIsActiveRoute(currentPath, item.href, variant)}
+            isActive={isActiveRoute(currentPath, item.href, variant)}
             collapsed={collapsed && !isMobile}
             onMobileClose={isMobile ? onMobileClose : undefined}
           />

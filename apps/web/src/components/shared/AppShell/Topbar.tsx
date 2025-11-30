@@ -18,7 +18,7 @@
 
 import { memo } from 'react';
 import { Menu, Bell, Sun, Moon } from 'lucide-react';
-import { useTheme } from '@/lib/theme/ThemeContext';
+import { useThemeSafe } from '@/lib/theme/ThemeContext';
 import type { TopbarProps } from './types';
 import { VARIANT_THEMES } from './types';
 
@@ -36,7 +36,7 @@ const NotificationButton = memo(function NotificationButton({
   count,
   onClick,
 }: NotificationButtonProps) {
-  const theme = VARIANT_THEMES[variant];
+  const _theme = VARIANT_THEMES[variant];
 
   if (variant === 'admin') {
     return (
@@ -93,41 +93,37 @@ interface ThemeToggleProps {
 }
 
 const ThemeToggle = memo(function ThemeToggle({ variant }: ThemeToggleProps) {
-  // Solo intentamos usar el hook si estamos en una variante que lo soporta
-  // En otros casos, simplemente no renderizamos nada
-  try {
-    const { theme, toggleTheme } = useTheme();
+  // Hook llamado incondicionalmente (regla de hooks)
+  const themeContext = useThemeSafe();
 
-    if (variant === 'admin') {
-      // Admin no tiene tema toggle por defecto (siempre oscuro)
-      return null;
-    }
-
-    return (
-      <button
-        onClick={toggleTheme}
-        className={`p-2.5 rounded-xl ${
-          variant === 'docente'
-            ? 'bg-purple-100/60 dark:bg-purple-900/40 hover:bg-purple-200/70 dark:hover:bg-purple-800/50 border border-purple-300/40 dark:border-purple-600/40'
-            : 'bg-gray-100 hover:bg-gray-200 border border-gray-200'
-        } backdrop-blur-sm shadow-sm transition-all duration-200`}
-        aria-label="Toggle theme"
-      >
-        {theme === 'dark' ? (
-          <Sun className="w-[18px] h-[18px] text-amber-400" />
-        ) : (
-          <Moon
-            className={`w-[18px] h-[18px] ${
-              variant === 'docente' ? 'text-purple-700' : 'text-gray-700'
-            }`}
-          />
-        )}
-      </button>
-    );
-  } catch {
-    // Si no hay ThemeProvider, no mostramos el toggle
+  // Si no hay ThemeProvider o es admin, no mostramos el toggle
+  if (!themeContext || variant === 'admin') {
     return null;
   }
+
+  const { theme, toggleTheme } = themeContext;
+
+  return (
+    <button
+      onClick={toggleTheme}
+      className={`p-2.5 rounded-xl ${
+        variant === 'docente'
+          ? 'bg-purple-100/60 dark:bg-purple-900/40 hover:bg-purple-200/70 dark:hover:bg-purple-800/50 border border-purple-300/40 dark:border-purple-600/40'
+          : 'bg-gray-100 hover:bg-gray-200 border border-gray-200'
+      } backdrop-blur-sm shadow-sm transition-all duration-200`}
+      aria-label="Toggle theme"
+    >
+      {theme === 'dark' ? (
+        <Sun className="w-[18px] h-[18px] text-amber-400" />
+      ) : (
+        <Moon
+          className={`w-[18px] h-[18px] ${
+            variant === 'docente' ? 'text-purple-700' : 'text-gray-700'
+          }`}
+        />
+      )}
+    </button>
+  );
 });
 
 /**

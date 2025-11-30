@@ -57,3 +57,11 @@ export function useTheme() {
   }
   return context;
 }
+
+/**
+ * Hook seguro que retorna null si no hay ThemeProvider
+ * Útil para componentes que pueden renderizarse fuera del provider
+ */
+export function useThemeSafe() {
+  return useContext(ThemeContext);
+}

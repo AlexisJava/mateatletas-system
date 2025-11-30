@@ -31,24 +31,24 @@ export function PlanificacionClient({
 }: PlanificacionClientProps) {
   // Determinar código: desde prop o desde config
   const codigoDesdeConfig = config?.type === 'planificacion' ? config.codigo : undefined;
-  const codigo = codigoProp ?? codigoDesdeConfig;
+  const codigo = codigoProp ?? codigoDesdeConfig ?? '';
 
   // Obtener usuario del store (fallback si no viene desde overlay)
   const { user } = useAuthStore();
   const estudiante = estudianteProp || user;
 
+  // Cargar planificación dinámicamente (hook debe llamarse incondicionalmente)
+  const { isLoading, error, component: PlanificacionComponent } = usePlanificacionLoader(codigo);
+
+  // Validar código después del hook
   if (!codigo) {
-    const codigoFallback = codigoProp ?? codigoDesdeConfig ?? '';
     return (
       <ErrorPlanificacion
         error={new Error('Debes seleccionar una planificación para continuar')}
-        codigo={codigoFallback}
+        codigo={codigo}
       />
     );
   }
-
-  // Cargar planificación dinámicamente
-  const { isLoading, error, component: PlanificacionComponent } = usePlanificacionLoader(codigo);
 
   // Loading state
   if (isLoading) {
