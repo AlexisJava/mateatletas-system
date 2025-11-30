@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useEffect } from 'react';
@@ -30,8 +29,8 @@ export default function EstudianteProfilePage() {
       try {
         await deleteEstudiante(id);
         router.push('/estudiantes');
-      } catch (error) {
-        // Error deleting student
+      } catch {
+        // Error deleting student - silently handled
       }
     }
   };
@@ -68,7 +67,7 @@ export default function EstudianteProfilePage() {
       <Card className="p-8">
         <div className="flex items-start gap-6 mb-8">
           <Avatar
-            src={estudianteActual.foto_url}
+            src={estudianteActual.foto_url ?? undefined}
             alt={`${estudianteActual.nombre} ${estudianteActual.apellido}`}
             size="xl"
             fallback={`${estudianteActual.nombre.charAt(0)}${estudianteActual.apellido.charAt(0)}`}

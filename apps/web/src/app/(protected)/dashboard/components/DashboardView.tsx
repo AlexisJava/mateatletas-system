@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState } from 'react';
@@ -38,7 +37,12 @@ interface DashboardViewProps {
 
 type TabType = 'dashboard' | 'hijos' | 'calendario' | 'pagos' | 'ayuda';
 
-export default function DashboardView({ user, estudiantes, dashboardData }: DashboardViewProps) {
+export default function DashboardView({
+  user,
+  estudiantes,
+  clases: _clases,
+  dashboardData,
+}: DashboardViewProps) {
   const router = useRouter();
   const { logout } = useAuthStore();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
