@@ -32,22 +32,23 @@ export class ActualizarCursoService {
     }
 
     // Construir objeto de actualización solo con campos presentes
+    // Nota: Prisma usa snake_case para los campos de la DB
     const updateData: Record<string, unknown> = {};
 
     if (dto.nombre !== undefined) updateData.nombre = dto.nombre;
     if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;
     if (dto.tipoExperiencia !== undefined)
-      updateData.tipoExperiencia = dto.tipoExperiencia;
+      updateData.tipo_experiencia = dto.tipoExperiencia;
     if (dto.materia !== undefined) updateData.materia = dto.materia;
     if (dto.esteticaBase !== undefined)
-      updateData.esteticaBase = dto.esteticaBase;
+      updateData.estetica_base = dto.esteticaBase;
     if (dto.esteticaVariante !== undefined)
-      updateData.esteticaVariante = dto.esteticaVariante;
+      updateData.estetica_variante = dto.esteticaVariante;
     if (dto.cantidadSemanas !== undefined)
-      updateData.cantidadSemanas = dto.cantidadSemanas;
+      updateData.cantidad_semanas = dto.cantidadSemanas;
     if (dto.actividadesPorSemana !== undefined)
-      updateData.actividadesPorSemana = dto.actividadesPorSemana;
-    if (dto.tierMinimo !== undefined) updateData.tierMinimo = dto.tierMinimo;
+      updateData.actividades_por_semana = dto.actividadesPorSemana;
+    if (dto.tierMinimo !== undefined) updateData.tier_minimo = dto.tierMinimo;
 
     await this.prisma.cursoStudio.update({
       where: { id: cursoId },
