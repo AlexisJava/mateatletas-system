@@ -672,7 +672,11 @@ function StepCourseSelection({
 
   // Helper: Check if student age matches course age range
   const matchesAgeRange = (edad: number, ageRange: string): boolean => {
-    const [min, max] = ageRange.split('-').map((n) => parseInt(n));
+    const parts = ageRange.split('-').map((n) => parseInt(n));
+    const minValue = parts[0];
+    const maxValue = parts[1];
+    const min = minValue !== undefined ? minValue : 0;
+    const max = maxValue !== undefined ? maxValue : min;
     return edad >= min && edad <= max;
   };
 
@@ -709,8 +713,9 @@ function StepCourseSelection({
                 );
                 const canSelect = !isSelected && (estudiante.cursos_seleccionados?.length || 0) < 2;
                 const scheduleKey = `${estIndex}-${course.id}`;
+                const firstSchedule = course.schedules[0];
                 const selectedScheduleId =
-                  selectedCourseSchedules[scheduleKey] || course.schedules[0].id;
+                  selectedCourseSchedules[scheduleKey] || firstSchedule?.id || '';
 
                 return (
                   <div key={course.id} className="space-y-2">
@@ -719,13 +724,18 @@ function StepCourseSelection({
                       onClick={() => {
                         if (course.schedules.length === 1) {
                           // Solo un horario, seleccionar directamente
-                          const updated = [...estudiantes];
-                          const currentCourses = updated[estIndex].cursos_seleccionados || [];
                           const schedule = course.schedules[0];
+                          if (!schedule) return;
+
+                          const updated = [...estudiantes];
+                          const est = updated[estIndex];
+                          if (!est) return;
+
+                          const currentCourses = est.cursos_seleccionados || [];
 
                           if (isSelected) {
                             // Remove course
-                            updated[estIndex].cursos_seleccionados = currentCourses.filter(
+                            est.cursos_seleccionados = currentCourses.filter(
                               (c) => !c.course_id.startsWith(course.id),
                             );
                           } else if (canSelect) {
@@ -738,10 +748,7 @@ function StepCourseSelection({
                               day_of_week: schedule.dayOfWeek,
                               time_slot: schedule.timeSlot,
                             };
-                            updated[estIndex].cursos_seleccionados = [
-                              ...currentCourses,
-                              courseSelection,
-                            ];
+                            est.cursos_seleccionados = [...currentCourses, courseSelection];
                           }
 
                           onChange(updated);
@@ -763,10 +770,10 @@ function StepCourseSelection({
                           <p className="text-xs text-gray-500 dark:text-gray-500 mb-1">
                             {course.area}
                           </p>
-                          {course.schedules.length === 1 ? (
+                          {course.schedules.length === 1 && firstSchedule ? (
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {course.schedules[0].dayOfWeek} • {course.schedules[0].timeSlot} •
-                              Profe {course.schedules[0].instructor}
+                              {firstSchedule.dayOfWeek} • {firstSchedule.timeSlot} • Profe{' '}
+                              {firstSchedule.instructor}
                             </p>
                           ) : (
                             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -797,7 +804,10 @@ function StepCourseSelection({
                               // Si ya está seleccionado este curso, actualizar con el nuevo horario
                               if (isSelected) {
                                 const updated = [...estudiantes];
-                                const currentCourses = updated[estIndex].cursos_seleccionados || [];
+                                const est = updated[estIndex];
+                                if (!est) return;
+
+                                const currentCourses = est.cursos_seleccionados || [];
 
                                 const courseSelection: CourseSelection = {
                                   course_id: schedule.id,
@@ -808,7 +818,7 @@ function StepCourseSelection({
                                   time_slot: schedule.timeSlot,
                                 };
 
-                                updated[estIndex].cursos_seleccionados = [
+                                est.cursos_seleccionados = [
                                   ...currentCourses.filter(
                                     (c) => !c.course_id.startsWith(course.id),
                                   ),
@@ -819,7 +829,10 @@ function StepCourseSelection({
                               } else if (canSelect) {
                                 // Seleccionar curso con este horario
                                 const updated = [...estudiantes];
-                                const currentCourses = updated[estIndex].cursos_seleccionados || [];
+                                const est = updated[estIndex];
+                                if (!est) return;
+
+                                const currentCourses = est.cursos_seleccionados || [];
 
                                 const courseSelection: CourseSelection = {
                                   course_id: schedule.id,
@@ -830,10 +843,7 @@ function StepCourseSelection({
                                   time_slot: schedule.timeSlot,
                                 };
 
-                                updated[estIndex].cursos_seleccionados = [
-                                  ...currentCourses,
-                                  courseSelection,
-                                ];
+                                est.cursos_seleccionados = [...currentCourses, courseSelection];
                                 onChange(updated);
                               }
                             }}
@@ -920,7 +930,9 @@ function StepMundoSelection({
                 key={mundo.value}
                 onClick={() => {
                   const updated = [...estudiantes];
-                  updated[estIndex].mundo_seleccionado = mundo.value;
+                  const est = updated[estIndex];
+                  if (!est) return;
+                  est.mundo_seleccionado = mundo.value;
                   onChange(updated);
                 }}
                 className={`p-4 rounded-lg border-2 transition-all ${

@@ -13,7 +13,8 @@ import { chromium, FullConfig } from '@playwright/test';
 async function globalSetup(config: FullConfig) {
   console.log('🚀 Playwright Global Setup - Iniciando...');
 
-  const { baseURL } = config.projects[0].use;
+  const firstProject = config.projects[0];
+  const baseURL = firstProject?.use?.baseURL;
 
   // === 1. Verificar que la aplicación está disponible ===
   console.log(`📡 Verificando que ${baseURL} está disponible...`);
@@ -56,7 +57,7 @@ async function globalSetup(config: FullConfig) {
   // await execSync('yarn workspace api db:seed:test', { stdio: 'inherit' });
 
   // === 4. Verificar variables de entorno críticas ===
-  const requiredEnvVars = [
+  const requiredEnvVars: string[] = [
     // 'NEXT_PUBLIC_API_URL',
     // 'DATABASE_URL',
   ];

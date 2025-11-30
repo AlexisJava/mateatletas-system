@@ -87,6 +87,7 @@
     "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
+    "@types/multer": "^2.0.0",
     "@types/node": "^22.10.7",
     "@types/pdfkit": "^0.17.3",
     "@types/qrcode": "^1.5.6",

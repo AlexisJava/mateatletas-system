@@ -30,15 +30,43 @@ export function recomendarRuta(
 
   // Fallback si no hay rutas compatibles
   if (rutasCompatibles.length === 0) {
-    const fallback = todasLasRutas.find(
-      (r) => respuestas.edad >= r.edad_minima && respuestas.edad <= r.edad_maxima,
-    );
+    const fallback =
+      todasLasRutas.find(
+        (r) => respuestas.edad >= r.edad_minima && respuestas.edad <= r.edad_maxima,
+      ) ?? todasLasRutas[0];
+
+    // Si no hay ninguna ruta disponible, retornamos un resultado vacío
+    if (fallback === undefined) {
+      return {
+        ruta_principal: {
+          id: '',
+          nombre: 'Sin ruta disponible',
+          descripcion: 'No hay rutas disponibles en este momento',
+          emoji: '❓',
+          area_principal: 'programacion',
+          edad_minima: 0,
+          edad_maxima: 99,
+          intereses_requeridos: [],
+          objetivos_match: [],
+          nivel_estudiante: 'principiante',
+          cursos: [],
+          duracion_total_meses: 0,
+          total_clases: 0,
+          resultado_final: '',
+          precio_usd: 0,
+          precio_ars: 0,
+        },
+        score_match: 0,
+        alternativas: [],
+        mensaje_personalizado: 'No hay rutas disponibles en este momento.',
+      };
+    }
 
     return {
-      ruta_principal: fallback || todasLasRutas[0],
+      ruta_principal: fallback,
       score_match: 50,
       alternativas: [],
-      mensaje_personalizado: generarMensajeGenerico(respuestas, fallback || todasLasRutas[0]),
+      mensaje_personalizado: generarMensajeGenerico(respuestas, fallback),
     };
   }
 
@@ -62,7 +90,24 @@ export function recomendarRuta(
   // ═══════════════════════════════════════════════════════════════════════════
   // PASO 4: SELECCIONAR - Principal y alternativas
   // ═══════════════════════════════════════════════════════════════════════════
-  const principal = rutasConScore[0];
+  const primerResultado = rutasConScore[0];
+
+  // Garantía: rutasCompatibles.length > 0, por lo que rutasConScore siempre tiene elementos
+  // Pero TypeScript no puede inferirlo, así que manejamos el caso explícitamente
+  if (primerResultado === undefined) {
+    const primeraRutaCompatible = rutasCompatibles[0];
+    if (primeraRutaCompatible === undefined) {
+      // Este caso nunca debería ocurrir, pero satisface a TypeScript
+      throw new Error('Error interno: rutasCompatibles vacío después de verificación');
+    }
+    return {
+      ruta_principal: primeraRutaCompatible,
+      score_match: 50,
+      alternativas: [],
+      mensaje_personalizado: generarMensajeGenerico(respuestas, primeraRutaCompatible),
+    };
+  }
+
   const alternativas = rutasConScore
     .slice(1, 4) // Máximo 3 alternativas
     .filter((r) => r.score >= 60) // Solo alternativas con buen match
@@ -71,11 +116,11 @@ export function recomendarRuta(
   // ═══════════════════════════════════════════════════════════════════════════
   // PASO 5: GENERAR MENSAJE PERSONALIZADO
   // ═══════════════════════════════════════════════════════════════════════════
-  const mensaje = generarMensajePersonalizado(respuestas, principal.ruta);
+  const mensaje = generarMensajePersonalizado(respuestas, primerResultado.ruta);
 
   return {
-    ruta_principal: principal.ruta,
-    score_match: principal.score,
+    ruta_principal: primerResultado.ruta,
+    score_match: primerResultado.score,
     alternativas,
     mensaje_personalizado: mensaje,
   };

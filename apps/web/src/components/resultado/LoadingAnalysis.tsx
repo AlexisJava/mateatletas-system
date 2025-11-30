@@ -145,14 +145,16 @@ export default function LoadingAnalysis({ respuestas }: LoadingAnalysisProps) {
 
   // Auto-avanzar los pasos
   useEffect(() => {
-    if (currentStep < steps.length) {
+    const currentStepData = steps[currentStep];
+    if (currentStep < steps.length && currentStepData) {
       const timer = setTimeout(() => {
-        setCompletedSteps((prev) => [...prev, steps[currentStep].id]);
+        setCompletedSteps((prev) => [...prev, currentStepData.id]);
         setCurrentStep((prev) => prev + 1);
-      }, steps[currentStep].duration);
+      }, currentStepData.duration);
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [currentStep, steps]);
 
   const progress = (currentStep / steps.length) * 100;

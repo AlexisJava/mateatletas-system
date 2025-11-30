@@ -31,6 +31,7 @@ export function AchievementToast({
       }, 5000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [show, onClose]);
 
   if (!isVisible) return null;

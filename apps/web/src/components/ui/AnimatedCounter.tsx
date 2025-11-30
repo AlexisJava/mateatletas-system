@@ -13,25 +13,26 @@ export function AnimatedCounter({ value, suffix = '' }: AnimatedCounterProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let timer: ReturnType<typeof setInterval> | null = null;
+
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (entry && entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           let start = 0;
           const end = targetValue;
           const duration = 2000;
           const increment = end / (duration / 16);
 
-          const timer = setInterval(() => {
+          timer = setInterval(() => {
             start += increment;
             if (start >= end) {
               setCount(end);
-              clearInterval(timer);
+              if (timer) clearInterval(timer);
             } else {
               setCount(Math.floor(start));
             }
           }, 16);
-          return () => clearInterval(timer);
         }
       },
       { threshold: 0.5 },
@@ -39,7 +40,10 @@ export function AnimatedCounter({ value, suffix = '' }: AnimatedCounterProps) {
 
     if (ref.current) observer.observe(ref.current);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (timer) clearInterval(timer);
+    };
   }, [targetValue]);
 
   return (

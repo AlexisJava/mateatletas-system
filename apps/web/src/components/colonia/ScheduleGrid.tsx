@@ -11,10 +11,14 @@ export default function ScheduleGrid() {
 
   // Helper function to calculate duration
   const calculateDuration = (timeSlot: string): number => {
-    const [start, end] = timeSlot.split('-').map((time) => {
-      const [hours, minutes] = time.split(':').map(Number);
+    const times = timeSlot.split('-').map((time) => {
+      const parts = time.split(':').map(Number);
+      const hours = parts[0] ?? 0;
+      const minutes = parts[1] ?? 0;
       return hours * 60 + minutes;
     });
+    const start = times[0] ?? 0;
+    const end = times[1] ?? 0;
     return end - start;
   };
 
@@ -32,8 +36,8 @@ export default function ScheduleGrid() {
     }
     // Sort by time slot
     return results.sort((a, b) => {
-      const timeA = a.schedule.timeSlot.split('-')[0];
-      const timeB = b.schedule.timeSlot.split('-')[0];
+      const timeA = a.schedule.timeSlot.split('-')[0] ?? '';
+      const timeB = b.schedule.timeSlot.split('-')[0] ?? '';
       return timeA.localeCompare(timeB);
     });
   };
@@ -93,17 +97,14 @@ export default function ScheduleGrid() {
               }}
             >
               {/* Slides - One per day */}
-              {days.map((day, dayIndex) => {
+              {days.map((day) => {
                 const coursesForDay = getAllCoursesForDay(day);
 
                 return (
                   <div key={day} className="w-full flex-shrink-0 px-4" style={{ minWidth: '100%' }}>
                     {/* Courses List */}
                     <div className="space-y-3">
-                      {coursesForDay.map(({ course, schedule }, index) => {
-                        const startHour = parseInt(schedule.timeSlot.split(':')[0]);
-                        const isAfternoon = startHour >= 12;
-
+                      {coursesForDay.map(({ course, schedule }) => {
                         return (
                           <div
                             key={schedule.id}

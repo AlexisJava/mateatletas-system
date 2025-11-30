@@ -211,7 +211,11 @@ export default function InscriptionForm({ onClose }: InscriptionFormProps) {
     if (!edad) return [];
 
     return COURSES.filter((course) => {
-      const [min, max] = course.ageRange.split('-').map(Number);
+      const parts = course.ageRange.split('-').map(Number);
+      const minValue = parts[0];
+      const maxValue = parts[1];
+      const min = minValue !== undefined ? minValue : 0;
+      const max = maxValue !== undefined ? maxValue : min;
       return edad >= min && edad <= max;
     });
   };

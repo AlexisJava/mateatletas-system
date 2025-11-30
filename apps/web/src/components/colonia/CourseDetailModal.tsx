@@ -138,28 +138,34 @@ export default function CourseDetailModal({ course, onClose, onInscribe }: Cours
               </div>
             </div>
           ) : (
-            <div className="mb-8">
-              <div className="flex flex-wrap gap-6 text-sm p-5 rounded-xl bg-white/5 border border-white/10">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-white/60" />
-                  <span className="text-white/80 font-medium">{course.schedules[0].dayOfWeek}</span>
+            (() => {
+              const firstSchedule = course.schedules[0];
+              if (!firstSchedule) return null;
+              return (
+                <div className="mb-8">
+                  <div className="flex flex-wrap gap-6 text-sm p-5 rounded-xl bg-white/5 border border-white/10">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-5 h-5 text-white/60" />
+                      <span className="text-white/80 font-medium">{firstSchedule.dayOfWeek}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-white/60" />
+                      <span className="text-white/80 font-medium">{firstSchedule.timeSlot}</span>
+                    </div>
+                    <div
+                      className="flex items-center gap-2 px-3 py-1 rounded-full"
+                      style={{
+                        backgroundColor: `${course.color}20`,
+                      }}
+                    >
+                      <span className="text-sm font-bold" style={{ color: course.color }}>
+                        Profe {firstSchedule.instructor}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-white/60" />
-                  <span className="text-white/80 font-medium">{course.schedules[0].timeSlot}</span>
-                </div>
-                <div
-                  className="flex items-center gap-2 px-3 py-1 rounded-full"
-                  style={{
-                    backgroundColor: `${course.color}20`,
-                  }}
-                >
-                  <span className="text-sm font-bold" style={{ color: course.color }}>
-                    Profe {course.schedules[0].instructor}
-                  </span>
-                </div>
-              </div>
-            </div>
+              );
+            })()
           )}
 
           {/* Descripción */}

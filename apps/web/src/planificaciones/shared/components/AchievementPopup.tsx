@@ -16,6 +16,7 @@ export function AchievementPopup({ achievement, visible, onClose }: AchievementP
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [visible, onClose]);
 
   if (!visible) return null;

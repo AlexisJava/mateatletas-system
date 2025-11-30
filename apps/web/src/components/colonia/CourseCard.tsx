@@ -72,7 +72,7 @@ export default function CourseCard({ course, index, onInscribe }: CourseCardProp
             <span className="text-white/80 font-medium">
               {course.schedules.length > 1
                 ? 'Múltiples horarios disponibles'
-                : course.schedules[0].dayOfWeek}
+                : (course.schedules[0]?.dayOfWeek ?? 'Sin horario')}
             </span>
           </div>
           <div className="flex items-center gap-3 text-sm">
@@ -80,29 +80,31 @@ export default function CourseCard({ course, index, onInscribe }: CourseCardProp
             <span className="text-white/80 font-medium">
               {course.schedules.length > 1
                 ? `${course.schedules.length} opciones`
-                : course.schedules[0].timeSlot}
+                : (course.schedules[0]?.timeSlot ?? 'Sin horario')}
             </span>
           </div>
         </div>
 
         {/* Instructor */}
-        <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/10">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-black"
-            style={{
-              backgroundColor: `${course.color}30`,
-              color: course.color,
-            }}
-          >
-            {course.schedules[0].instructor[0]}
-          </div>
-          <div>
-            <div className="text-xs text-white/50">Instructor</div>
-            <div className="text-sm font-bold text-white">
-              Profe {course.schedules[0].instructor}
+        {course.schedules.length > 0 && course.schedules[0] && (
+          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/10">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-black"
+              style={{
+                backgroundColor: `${course.color}30`,
+                color: course.color,
+              }}
+            >
+              {course.schedules[0].instructor[0]}
+            </div>
+            <div>
+              <div className="text-xs text-white/50">Instructor</div>
+              <div className="text-sm font-bold text-white">
+                Profe {course.schedules[0].instructor}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Buttons */}
         <div className="grid grid-cols-2 gap-3">

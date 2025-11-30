@@ -80,12 +80,14 @@ export default defineConfig({
     video: 'retain-on-failure',
 
     /* HAR recording - captura requests/responses para debugging */
-    recordHar: CI
-      ? undefined
+    ...(CI
+      ? {}
       : {
-          mode: 'minimal',
-          path: 'test-results/hars/',
-        },
+          recordHar: {
+            mode: 'minimal' as const,
+            path: 'test-results/hars/',
+          },
+        }),
 
     /* Configuraciones adicionales */
     actionTimeout: 10000, // Timeout para acciones individuales

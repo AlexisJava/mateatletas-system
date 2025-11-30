@@ -65,6 +65,7 @@ export default function AdminReportesPage() {
       const timer = setTimeout(() => setExportStatus(null), 5000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [exportStatus]);
 
   const handleExportUsers = async (format: 'excel' | 'csv' | 'pdf') => {

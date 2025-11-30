@@ -50,6 +50,7 @@ export default function CrearAvatarPage() {
         clearTimeout(timer);
       };
     }
+    return undefined;
   }, [paso]);
 
   const handleAvatarExported = (event: AvatarExportedEvent) => {

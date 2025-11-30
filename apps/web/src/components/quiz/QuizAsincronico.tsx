@@ -158,7 +158,7 @@ export default function QuizAsincronico({ onComplete }: QuizAsincronicoProps) {
 
   const pageTransition = {
     duration: 0.3,
-    ease: 'easeOut',
+    ease: 'easeOut' as const,
   };
 
   // ═══════════════════════════════════════════════════════════════════════════

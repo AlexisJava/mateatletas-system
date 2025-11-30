@@ -18,8 +18,13 @@ export default function CourseCatalog({ onInscribe }: CourseCatalogProps) {
   // Helper: Check if a specific age falls within a course's age range
   const ageMatchesRange = (selectedRange: AgeRange, courseRange: AgeRange): boolean => {
     // Si seleccionaste un rango específico, necesitamos ver si hay solapamiento
-    const [selectedMin, selectedMax] = selectedRange.split('-').map((n) => parseInt(n));
-    const [courseMin, courseMax] = courseRange.split('-').map((n) => parseInt(n));
+    const selectedParts = selectedRange.split('-').map((n) => parseInt(n));
+    const courseParts = courseRange.split('-').map((n) => parseInt(n));
+
+    const selectedMin = selectedParts[0] ?? 0;
+    const selectedMax = selectedParts[1] ?? selectedMin;
+    const courseMin = courseParts[0] ?? 0;
+    const courseMax = courseParts[1] ?? courseMin;
 
     // Hay solapamiento si: el rango seleccionado y el rango del curso se tocan
     // Ejemplo: seleccionado 8-9, curso 8-12 → hay solapamiento

@@ -14,9 +14,9 @@ interface QuizSubmissionPayload {
   edad: number;
 
   // Respuestas del quiz
-  interes_principal: string[];
-  nivel_actual: string;
-  objetivo: string[];
+  actividades_tiempo_libre: string[];
+  nivel_programacion: string;
+  objetivo_principal: string;
   tiempo_disponible: string;
 
   // Resultado de la recomendación
@@ -44,9 +44,9 @@ export async function enviarQuizAlBackend(
     const payload: QuizSubmissionPayload = {
       nombre_estudiante: respuestas.nombre_estudiante,
       edad: respuestas.edad,
-      interes_principal: respuestas.interes_principal,
-      nivel_actual: respuestas.nivel_actual,
-      objetivo: respuestas.objetivo,
+      actividades_tiempo_libre: respuestas.actividades_tiempo_libre ?? [],
+      nivel_programacion: respuestas.nivel_programacion ?? 'nunca',
+      objetivo_principal: respuestas.objetivo_principal,
       tiempo_disponible: respuestas.tiempo_disponible,
       ruta_recomendada_id: resultado.ruta_principal.id,
       ruta_recomendada_nombre: resultado.ruta_principal.nombre,
