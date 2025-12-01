@@ -1,7 +1,10 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useStudioWizardStore } from '@/store/studio-wizard.store';
+import { generarYDescargarPlantilla } from '@/store/studio-wizard-template';
 import { NavigationButtons } from './shared';
 
 const EMOJIS = {
@@ -30,12 +33,29 @@ const COLOR_CLASSES = {
 } as const;
 
 export function WizardPaso6() {
-  const { datos, isSubmitting, irAPaso, pasoAnterior, crearCurso } = useStudioWizardStore();
+  const router = useRouter();
+  const { datos, isSubmitting, submitError, irAPaso, pasoAnterior, crearCurso, resetWizard } =
+    useStudioWizardStore();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleCrearCurso = async () => {
     const cursoId = await crearCurso();
+
     if (cursoId) {
-      alert(`Curso creado con ID: ${cursoId}`);
+      // Generar y descargar la plantilla JSON
+      generarYDescargarPlantilla(cursoId, datos);
+
+      // Mostrar mensaje de éxito
+      setSuccessMessage('Curso creado. Plantilla descargada.');
+
+      // Esperar un momento para que el usuario vea el mensaje
+      setTimeout(() => {
+        // Resetear el wizard
+        resetWizard();
+
+        // Redirigir a la página del curso
+        router.push(`/admin/studio/${cursoId}`);
+      }, 2000);
     }
   };
 
@@ -210,13 +230,41 @@ export function WizardPaso6() {
         </div>
       </div>
 
+      {/* Mensajes de estado */}
+      {successMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-3 p-3 rounded-lg bg-emerald-500/20 border border-emerald-500/30"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-emerald-400 text-lg">✓</span>
+            <span className="text-emerald-300 text-sm font-medium">{successMessage}</span>
+          </div>
+          <p className="text-emerald-300/60 text-xs mt-1">Redirigiendo al editor del curso...</p>
+        </motion.div>
+      )}
+
+      {submitError && !successMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-3 p-3 rounded-lg bg-red-500/20 border border-red-500/30"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-red-400 text-lg">✕</span>
+            <span className="text-red-300 text-sm font-medium">{submitError}</span>
+          </div>
+        </motion.div>
+      )}
+
       {/* Botones de acción */}
       <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
         <NavigationButtons
           onBack={pasoAnterior}
           onNext={handleCrearCurso}
-          nextLabel="CREAR CURSO"
-          isSubmitting={isSubmitting}
+          nextLabel={successMessage ? 'CREADO ✓' : 'CREAR CURSO'}
+          isSubmitting={isSubmitting || !!successMessage}
           variant="submit"
         />
       </div>

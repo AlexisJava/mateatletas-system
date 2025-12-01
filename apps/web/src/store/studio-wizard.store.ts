@@ -4,6 +4,8 @@
  */
 
 import { create } from 'zustand';
+import { apiClient } from '@/lib/axios';
+import { AxiosError } from 'axios';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TIPOS (alineados con Prisma pero definidos localmente para el frontend)
@@ -418,7 +420,7 @@ export const useStudioWizardStore = create<WizardStore>((set, get) => ({
   // ─────────────────────────────────────────────────────────────────────────────
 
   crearCurso: async (): Promise<string | null> => {
-    const { validarTodo, datos: _datos } = get();
+    const { validarTodo, datos } = get();
 
     // Validar todo antes de enviar
     if (!validarTodo()) {
@@ -428,29 +430,47 @@ export const useStudioWizardStore = create<WizardStore>((set, get) => ({
     set({ isSubmitting: true, submitError: null });
 
     try {
-      // TODO: Implementar llamada real al API
-      // const response = await apiClient.post('/studio/cursos', {
-      //   categoria: datos.categoria,
-      //   casa: datos.casa,
-      //   mundo: datos.mundo,
-      //   tipoExperiencia: datos.tipoExperiencia,
-      //   materia: datos.materia,
-      //   nombre: datos.nombre,
-      //   descripcion: datos.descripcion,
-      //   esteticaBase: datos.esteticaBase,
-      //   esteticaVariante: datos.esteticaVariante || undefined,
-      //   cantidadSemanas: datos.cantidadSemanas,
-      //   actividadesPorSemana: datos.actividadesPorSemana,
-      //   tierMinimo: datos.tierMinimo,
-      // });
+      // Preparar el body según el DTO del backend
+      const body = {
+        categoria: datos.categoria,
+        casa: datos.casa,
+        mundo: datos.mundo,
+        // tipoExperiencia solo si es EXPERIENCIA
+        ...(datos.categoria === 'EXPERIENCIA' && datos.tipoExperiencia
+          ? { tipoExperiencia: datos.tipoExperiencia }
+          : {}),
+        // materia solo si es CURRICULAR
+        ...(datos.categoria === 'CURRICULAR' && datos.materia ? { materia: datos.materia } : {}),
+        nombre: datos.nombre,
+        descripcion: datos.descripcion,
+        esteticaBase: datos.esteticaBase,
+        // esteticaVariante solo si tiene valor
+        ...(datos.esteticaVariante ? { esteticaVariante: datos.esteticaVariante } : {}),
+        cantidadSemanas: datos.cantidadSemanas,
+        actividadesPorSemana: datos.actividadesPorSemana,
+        tierMinimo: datos.tierMinimo,
+      };
 
-      // Mock response por ahora
-      const mockCursoId = `curso-${Date.now()}`;
+      // Llamada real al API - la cookie httpOnly se envía automáticamente
+      const response = await apiClient.post<{ id: string }>('/studio/cursos', body);
 
       set({ isSubmitting: false });
-      return mockCursoId;
+      return response.id;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al crear el curso';
+      // Extraer mensaje de error del backend
+      let errorMessage = 'Error al crear el curso';
+
+      if (error instanceof AxiosError && error.response?.data) {
+        const data = error.response.data as { message?: string | string[] };
+        if (Array.isArray(data.message)) {
+          errorMessage = data.message.join(', ');
+        } else if (typeof data.message === 'string') {
+          errorMessage = data.message;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       set({ isSubmitting: false, submitError: errorMessage });
       return null;
     }

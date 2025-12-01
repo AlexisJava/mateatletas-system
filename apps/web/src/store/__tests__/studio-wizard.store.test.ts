@@ -3,7 +3,15 @@
  * TDD: Estos tests se escriben ANTES de la implementación
  */
 
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useStudioWizardStore } from '../studio-wizard.store';
+
+// Mock del apiClient
+vi.mock('@/lib/axios', () => ({
+  apiClient: {
+    post: vi.fn().mockResolvedValue({ id: 'curso-mock-123' }),
+  },
+}));
 
 // Helper para resetear el store entre tests
 const resetStore = () => {
@@ -908,7 +916,7 @@ describe('StudioWizardStore', () => {
       expect(resultado).not.toBeNull();
     });
 
-    it('debe retornar cursoId mock si todo es válido', async () => {
+    it('debe retornar cursoId del backend si todo es válido', async () => {
       const store = useStudioWizardStore.getState();
       // Completar todos los campos
       store.setCategoria('EXPERIENCIA');
@@ -924,7 +932,8 @@ describe('StudioWizardStore', () => {
 
       const resultado = await store.crearCurso();
 
-      expect(resultado).toMatch(/^curso-\d+$/);
+      // Ahora retorna el id del mock del apiClient
+      expect(resultado).toBe('curso-mock-123');
     });
 
     it('debe setear isSubmitting false al terminar exitosamente', async () => {
