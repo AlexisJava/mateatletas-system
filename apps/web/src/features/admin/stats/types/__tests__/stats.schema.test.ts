@@ -13,6 +13,8 @@ describe('SystemStatsSchema', () => {
         clasesActivas: 75,
         totalProductos: 10,
         ingresosTotal: 50000,
+        pagosPendientes: 5,
+        inscripcionesActivas: 25,
       };
 
       const result = SystemStatsSchema.safeParse(validData);
@@ -33,6 +35,8 @@ describe('SystemStatsSchema', () => {
         clasesActivas: 0,
         totalProductos: 0,
         ingresosTotal: 0,
+        pagosPendientes: 0,
+        inscripcionesActivas: 0,
       };
 
       const result = SystemStatsSchema.safeParse(zeroData);
@@ -52,6 +56,8 @@ describe('SystemStatsSchema', () => {
         clasesActivas: 75,
         totalProductos: 10,
         ingresosTotal: 50000,
+        pagosPendientes: 5,
+        inscripcionesActivas: 25,
       };
 
       const result = SystemStatsSchema.safeParse(invalidData);
@@ -81,6 +87,8 @@ describe('SystemStatsSchema', () => {
         clasesActivas: 75,
         totalProductos: 10,
         ingresosTotal: 50000,
+        pagosPendientes: 5,
+        inscripcionesActivas: 25,
       };
 
       const result = SystemStatsSchema.safeParse(wrongTypeData);
@@ -100,6 +108,8 @@ describe('SystemStatsSchema', () => {
         clasesActivas: 75,
         totalProductos: 10,
         ingresosTotal: 50000,
+        pagosPendientes: 5,
+        inscripcionesActivas: 25,
       };
 
       const parsed = parseSystemStats(validData);
@@ -127,6 +137,8 @@ describe('SystemStatsSchema', () => {
         clasesActivas: 75,
         totalProductos: 10,
         ingresosTotal: 50000,
+        pagosPendientes: 5,
+        inscripcionesActivas: 25,
       };
 
       const result = safeParseSystemStats(validData);

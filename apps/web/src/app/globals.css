@@ -157,6 +157,12 @@ h6 {
   font-family: var(--font-nunito);
 }
 
+/* Studio: IBM Plex Mono para estética Mission Control */
+.studio-typography,
+.studio-typography * {
+  font-family: var(--font-ibm-plex-mono), ui-monospace, monospace !important;
+}
+
 /* ==========================================
    SCROLLBAR STYLING
    ========================================== */

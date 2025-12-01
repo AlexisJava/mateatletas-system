@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Nunito, Lilita_One, Orbitron, Rajdhani } from 'next/font/google';
+import { Nunito, Lilita_One, Orbitron, Rajdhani, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import './animations.css';
 import '@/components/backgrounds/CosmosBackgroundGlobal.css';
@@ -40,6 +40,14 @@ const rajdhani = Rajdhani({
   display: 'swap',
 });
 
+// IBM Plex Mono: Fuente técnica/industrial para Studio (Mission Control aesthetic)
+const ibmPlexMono = IBM_Plex_Mono({
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-ibm-plex-mono',
+  subsets: ['latin'],
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: 'Mateatletas - Platform for Athletes',
   description:
@@ -56,7 +64,7 @@ export default function RootLayout({
   return (
     <html lang="es" style={{ backgroundColor: '#0a0a0f' }} className="dark">
       <body
-        className={`${nunito.variable} ${lilitaOne.variable} ${orbitron.variable} ${rajdhani.variable} antialiased text-white min-h-screen`}
+        className={`${nunito.variable} ${lilitaOne.variable} ${orbitron.variable} ${rajdhani.variable} ${ibmPlexMono.variable} antialiased text-white min-h-screen`}
         style={{ background: 'transparent' }}
       >
         {/* Fondo cosmos MEGA PREMIUM */}

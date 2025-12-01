@@ -31,6 +31,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^5.2.2",
     "@lottiefiles/dotlottie-react": "^0.17.5",
     "@mateatletas/contracts": "workspace:^",
     "@mui/icons-material": "^7.3.4",
@@ -66,6 +67,7 @@
     "react-confetti-explosion": "^3.0.3",
     "react-countup": "^6.5.3",
     "react-dom": "19.1.0",
+    "react-hook-form": "^7.67.0",
     "react-hot-toast": "^2.6.0",
     "react-katex": "^3.1.0",
     "recharts": "^3.2.1",
@@ -90,6 +92,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.1.0",
+    "@vitest/coverage-v8": "^4.0.14",
     "@vitest/ui": "^4.0.3",
     "axe-core": "^4.11.0",
     "eslint": "^8.57.0",

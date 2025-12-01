@@ -97,6 +97,7 @@ describe('ErrorFactory', () => {
   describe('fromAxiosError', () => {
     it('debe convertir error 401', () => {
       const axiosError = {
+        isAxiosError: true,
         response: {
           status: 401,
           data: {
@@ -114,6 +115,7 @@ describe('ErrorFactory', () => {
 
     it('debe convertir error 404', () => {
       const axiosError = {
+        isAxiosError: true,
         response: {
           status: 404,
           data: {
@@ -131,6 +133,7 @@ describe('ErrorFactory', () => {
 
     it('debe convertir error 500', () => {
       const axiosError = {
+        isAxiosError: true,
         response: {
           status: 500,
           data: {
@@ -148,6 +151,7 @@ describe('ErrorFactory', () => {
 
     it('debe manejar timeout', () => {
       const axiosError = {
+        isAxiosError: true,
         code: 'ECONNABORTED',
         message: 'Timeout',
       };
@@ -160,6 +164,7 @@ describe('ErrorFactory', () => {
 
     it('debe manejar error sin respuesta', () => {
       const axiosError = {
+        isAxiosError: true,
         message: 'Network Error',
       };
 

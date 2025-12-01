@@ -39,33 +39,34 @@ export default function PagosTab() {
   // Modal de detalle
   const [selectedInscripcion, setSelectedInscripcion] = useState<InscripcionMensual | null>(null);
 
-  useEffect(() => {
-    const loadInscripciones = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const loadInscripciones = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const params: { periodo?: string; estadoPago?: EstadoPago } = {};
+      const params: { periodo?: string; estadoPago?: EstadoPago } = {};
 
-        if (selectedPeriodo) {
-          params.periodo = selectedPeriodo;
-        }
-
-        if (selectedEstado) {
-          params.estadoPago = selectedEstado;
-        }
-
-        const response = await getMisInscripciones(params);
-        setData(response);
-      } catch (err) {
-        console.error('Error loading inscripciones:', err);
-        setError('Error al cargar los pagos. Por favor, intentá de nuevo.');
-      } finally {
-        setLoading(false);
+      if (selectedPeriodo) {
+        params.periodo = selectedPeriodo;
       }
-    };
 
+      if (selectedEstado) {
+        params.estadoPago = selectedEstado;
+      }
+
+      const response = await getMisInscripciones(params);
+      setData(response);
+    } catch (err) {
+      console.error('Error loading inscripciones:', err);
+      setError('Error al cargar los pagos. Por favor, intentá de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadInscripciones();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriodo, selectedEstado]);
 
   /**

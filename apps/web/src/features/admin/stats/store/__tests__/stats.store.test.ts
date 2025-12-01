@@ -42,6 +42,8 @@ describe('StatsStore', () => {
         clasesActivas: 75,
         totalProductos: 10,
         ingresosTotal: 50000,
+        pagosPendientes: 5,
+        inscripcionesActivas: 25,
       };
 
       vi.mocked(adminApi.getSystemStats).mockResolvedValue(mockStats);
@@ -71,6 +73,8 @@ describe('StatsStore', () => {
                 clasesActivas: 75,
                 totalProductos: 10,
                 ingresosTotal: 50000,
+                pagosPendientes: 5,
+                inscripcionesActivas: 25,
               });
             }, 100);
           }),
@@ -102,8 +106,8 @@ describe('StatsStore', () => {
       expect(state.stats).toBeNull();
       expect(state.isLoading).toBe(false);
       expect(state.error).not.toBeNull();
-      // El ErrorFactory convierte Error básicos en NETWORK_ERROR si no hay response
-      expect(state.error?.code).toBe(ErrorCode.NETWORK_ERROR);
+      // Un Error simple sin isAxiosError se convierte en UNKNOWN_ERROR
+      expect(state.error?.code).toBe(ErrorCode.UNKNOWN_ERROR);
     });
 
     it('debe manejar errores de validación Zod', async () => {
@@ -157,6 +161,8 @@ describe('StatsStore', () => {
           clasesActivas: 75,
           totalProductos: 10,
           ingresosTotal: 50000,
+          pagosPendientes: 5,
+          inscripcionesActivas: 25,
         },
         isLoading: true,
         error: {
