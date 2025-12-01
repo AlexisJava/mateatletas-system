@@ -9,134 +9,37 @@ import {
   BloqueJson,
   CasaTipo,
 } from '../../interfaces';
+import { CatalogoService } from '../../catalogo/catalogo.service';
 
-/**
- * Contexto para validación de semana
- */
+/** Contexto para validación de semana */
 export interface ValidacionContexto {
   casa: CasaTipo;
   numeroSemanaEsperado: number;
   actividadesEsperadas: number;
 }
 
-/**
- * Servicio para validar contenido de semanas
- * Responsabilidad única: Validar JSON de semana según las reglas del documento
- *
- * Referencia: docs/MATEATLETAS_STUDIO.md Sección 9
- */
+/** Servicio para validar contenido de semanas (docs/MATEATLETAS_STUDIO.md Sección 9) */
 @Injectable()
 export class ValidarSemanaService {
-  /**
-   * Catálogo de componentes válidos
-   * TODO: Mover a un servicio/archivo separado cuando el catálogo crezca
-   */
-  private readonly componentesValidos = new Set([
-    // Interactivos básicos (1-15)
-    'DragDrop',
-    'FillBlanks',
-    'Matching',
-    'MultipleChoice',
-    'NumberInput',
-    'Ordering',
-    'Slider',
-    'TextInput',
-    'TrueFalse',
-    'ColorPicker',
-    'DrawingCanvas',
-    'SortingBins',
-    'Hotspot',
-    'Timeline',
-    'Puzzle',
-    // Simuladores (16-40)
-    'Calculator',
-    'GraphPlotter',
-    'GeoBoard',
-    'FractionCircles',
-    'NumberLine',
-    'BaseBlocks',
-    'PatternMaker',
-    'SymmetryMirror',
-    'AngleMeasurer',
-    'AreaBuilder',
-    'StateMatterSim',
-    'WaveSim',
-    'CircuitBuilder',
-    'PendulumLab',
-    'ProjectileMotion',
-    'GravitySim',
-    'ReactionBalancer',
-    'MoleculeBuild',
-    'PeriodicTable',
-    'ConcentrationSim',
-    // Editores de código (41-55)
-    'ScratchJr',
-    'Blockly',
-    'PythonTurtle',
-    'PythonConsole',
-    'JavaScriptPlayground',
-    'HTMLPreview',
-    'CSSPlayground',
-    'SQLSandbox',
-    'GitSimulator',
-    'AlgorithmVisualizer',
-    'DataStructureViz',
-    'DebugChallenge',
-    'CodeDiff',
-    'RegexTester',
-    'JSONValidator',
-    // Contenido estático (56-70)
-    'TextBlock',
-    'ImageDisplay',
-    'VideoEmbed',
-    'CodeSnippet',
-    'MathFormula',
-    'Table',
-    'List',
-    'Accordion',
-    'Tabs',
-    'Carousel',
-    'Tooltip',
-    'Callout',
-    'Quote',
-    'Divider',
-    'Spacer',
-    // Multimedia (71-80)
-    'AudioPlayer',
-    'VideoPlayer',
-    'ImageGallery',
-    'Slideshow',
-    'Animation',
-    'Quiz',
-    'Survey',
-    'ChallengeMode',
-    'Leaderboard',
-    'Timer',
-    // Gamificación (81-91)
-    'ProgressBar',
-    'XPCounter',
-    'BadgeDisplay',
-    'AchievementUnlock',
-    'StreakTracker',
-    'LevelIndicator',
-    'StarRating',
-    'CoinCounter',
-    'MissionTracker',
-    'RewardAnimation',
-    'CelebrationEffect',
-    // Nuevos componentes (92-95)
-    'InteractivePresentation',
-    'NarrationWithTracking',
-    'StepAnimation',
-    'Checkpoint',
-  ]);
+  private componentesHabilitadosCache: Set<string> | null = null;
 
-  /**
-   * Valida el contenido de una semana
-   * @param contenido JSON a validar
-   * @param contexto Contexto con información del curso
-   * @returns Resultado de validación
-   */
+  constructor(private readonly catalogoService: CatalogoService) {}
+
+  private async getComponentesHabilitados(): Promise<Set<string>> {
+    if (this.componentesHabilitadosCache) {
+      return this.componentesHabilitadosCache;
+    }
+    const componentes = await this.catalogoService.listarHabilitados();
+    this.componentesHabilitadosCache = new Set(componentes.map((c) => c.tipo));
+    return this.componentesHabilitadosCache;
+  }
+
+  /** Limpia el cache de componentes */
+  clearCache(): void {
+    this.componentesHabilitadosCache = null;
+  }
+
+  /** Valida el contenido de una semana */
   async ejecutar(
     contenido: Record<string, unknown>,
     contexto: ValidacionContexto,
@@ -144,6 +47,9 @@ export class ValidarSemanaService {
     const errores: ValidacionError[] = [];
     const warnings: ValidacionWarning[] = [];
     const info: ValidacionInfo[] = [];
+
+    // Cargar componentes habilitados una sola vez
+    const componentesHabilitados = await this.getComponentesHabilitados();
 
     const semana = contenido as unknown as SemanaContenidoJson;
 
@@ -164,7 +70,13 @@ export class ValidarSemanaService {
     // Validar cada actividad
     if (semana.actividades) {
       semana.actividades.forEach((act, idx) => {
-        this.validarActividad(act, idx, contexto.casa, errores, warnings);
+        this.validarActividad(
+          act,
+          idx,
+          componentesHabilitados,
+          errores,
+          warnings,
+        );
       });
     }
 
@@ -269,7 +181,7 @@ export class ValidarSemanaService {
   private validarActividad(
     actividad: ActividadJson,
     idx: number,
-    casa: CasaTipo,
+    componentesHabilitados: Set<string>,
     errores: ValidacionError[],
     warnings: ValidacionWarning[],
   ): void {
@@ -317,7 +229,7 @@ export class ValidarSemanaService {
           bloque,
           bloqueIdx,
           ubicacionBase,
-          casa,
+          componentesHabilitados,
           errores,
           warnings,
         );
@@ -341,20 +253,18 @@ export class ValidarSemanaService {
     bloque: BloqueJson,
     idx: number,
     ubicacionBase: string,
-    casa: CasaTipo,
+    componentesHabilitados: Set<string>,
     errores: ValidacionError[],
     warnings: ValidacionWarning[],
   ): void {
     const ubicacion = `${ubicacionBase}.bloque_${idx + 1}`;
 
-    // Componente existe en catálogo
-    if (!this.componentesValidos.has(bloque.componente)) {
+    // Componente debe estar habilitado en el catálogo
+    if (!componentesHabilitados.has(bloque.componente)) {
       errores.push({
         tipo: 'error',
         ubicacion: `${ubicacion}.componente`,
-        mensaje: `Componente "${bloque.componente}" no existe en el catálogo`,
-        sugerencia:
-          'Ver docs/MATEATLETAS_STUDIO.md Sección 7 para componentes disponibles',
+        mensaje: `Componente "${bloque.componente}" no está habilitado. Habilitalo en la Biblioteca o usá otro componente.`,
       });
     }
 
@@ -388,9 +298,6 @@ export class ValidarSemanaService {
         mensaje: 'minimoParaAprobar debe estar entre 70 y 100',
       });
     }
-
-    // TODO: Validar componente por casa (advertencia si no es apropiado)
-    // Esto requiere una tabla de compatibilidad componente/casa
   }
 
   private validarOrdenBloques(

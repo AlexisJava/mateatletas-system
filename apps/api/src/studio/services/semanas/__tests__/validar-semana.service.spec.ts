@@ -3,7 +3,8 @@ import {
   ValidarSemanaService,
   ValidacionContexto,
 } from '../validar-semana.service';
-import { CasaTipo } from '@prisma/client';
+import { CatalogoService } from '../../../catalogo/catalogo.service';
+import { CasaTipo, CategoriaComponente } from '@prisma/client';
 import {
   SemanaContenidoJson,
   ActividadJson,
@@ -12,6 +13,43 @@ import {
 
 describe('ValidarSemanaService', () => {
   let service: ValidarSemanaService;
+  let catalogoService: jest.Mocked<CatalogoService>;
+
+  // Componentes habilitados mock (simula la BD)
+  const componentesHabilitadosMock = [
+    {
+      id: '1',
+      tipo: 'TextBlock',
+      nombre: 'Texto',
+      categoria: CategoriaComponente.CONTENIDO,
+      habilitado: true,
+      implementado: true,
+    },
+    {
+      id: '2',
+      tipo: 'Quiz',
+      nombre: 'Quiz',
+      categoria: CategoriaComponente.INTERACTIVO,
+      habilitado: true,
+      implementado: true,
+    },
+    {
+      id: '3',
+      tipo: 'DragDrop',
+      nombre: 'Drag Drop',
+      categoria: CategoriaComponente.INTERACTIVO,
+      habilitado: true,
+      implementado: true,
+    },
+    {
+      id: '4',
+      tipo: 'MultipleChoice',
+      nombre: 'Opción Múltiple',
+      categoria: CategoriaComponente.INTERACTIVO,
+      habilitado: true,
+      implementado: true,
+    },
+  ];
 
   // Factory para crear contenido de semana válido
   const crearSemanaValidaMock = (
@@ -72,11 +110,21 @@ describe('ValidarSemanaService', () => {
   };
 
   beforeEach(async () => {
+    const mockCatalogoService = {
+      listarHabilitados: jest
+        .fn()
+        .mockResolvedValue(componentesHabilitadosMock),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ValidarSemanaService],
+      providers: [
+        ValidarSemanaService,
+        { provide: CatalogoService, useValue: mockCatalogoService },
+      ],
     }).compile();
 
     service = module.get<ValidarSemanaService>(ValidarSemanaService);
+    catalogoService = module.get(CatalogoService);
   });
 
   it('debe estar definido', () => {
@@ -416,7 +464,7 @@ describe('ValidarSemanaService', () => {
         expect(result.errores).toContainEqual(
           expect.objectContaining({
             ubicacion: expect.stringContaining('componente'),
-            mensaje: expect.stringContaining('no existe en el catálogo'),
+            mensaje: expect.stringContaining('no está habilitado'),
           }),
         );
       });
@@ -604,7 +652,7 @@ describe('ValidarSemanaService', () => {
         // Assert
         expect(result.valido).toBe(true);
         const erroresComponente = result.errores.filter((e) =>
-          e.mensaje.includes('catálogo'),
+          e.mensaje.includes('habilitado'),
         );
         expect(erroresComponente).toHaveLength(0);
       });
