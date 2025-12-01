@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { CatalogoModule } from './catalogo/catalogo.module';
 
 // Controllers
 import { CursosController } from './controllers/cursos.controller';
@@ -43,7 +44,7 @@ import { EliminarRecursoService } from './services/recursos/eliminar-recurso.ser
  * - docs/PLAN_CONSTRUCCION_STUDIO.md - Plan de implementación
  */
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, CatalogoModule],
   controllers: [CursosController, SemanasController, RecursosController],
   providers: [
     // Cursos
