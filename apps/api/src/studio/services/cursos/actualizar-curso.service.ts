@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service';
 import { ActualizarCursoDto } from '../../dto/actualizar-curso.dto';
 import { CursoCompleto } from '../../interfaces';
@@ -33,7 +34,7 @@ export class ActualizarCursoService {
 
     // Construir objeto de actualización solo con campos presentes
     // Nota: Prisma usa snake_case para los campos de la DB
-    const updateData: Record<string, unknown> = {};
+    const updateData: Prisma.CursoStudioUpdateInput = {};
 
     if (dto.nombre !== undefined) updateData.nombre = dto.nombre;
     if (dto.descripcion !== undefined) updateData.descripcion = dto.descripcion;

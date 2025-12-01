@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
+  Library,
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -286,13 +287,22 @@ export default function StudioPage() {
             Crea y administra cursos interactivos para el club
           </p>
         </div>
-        <Link
-          href="/admin/studio/nuevo"
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-lg transition-all shadow-lg shadow-orange-500/30"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nuevo Curso</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/studio/biblioteca"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.03] border border-white/10 hover:border-white/20 text-white/70 hover:text-white rounded-lg transition-colors"
+          >
+            <Library className="w-4 h-4" />
+            <span className="text-sm font-medium">Biblioteca</span>
+          </Link>
+          <Link
+            href="/admin/studio/nuevo"
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-lg transition-all shadow-lg shadow-orange-500/30"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Nuevo Curso</span>
+          </Link>
+        </div>
       </div>
 
       {/* Stats Grid */}

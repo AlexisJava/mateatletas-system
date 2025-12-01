@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../core/database/prisma.service';
 import {
   CursoListItem,
@@ -32,7 +33,7 @@ export class ListarCursosService {
    * @returns Lista de cursos resumidos
    */
   async ejecutar(filtros?: ListarCursosFiltros): Promise<CursoListItem[]> {
-    const where: Record<string, unknown> = {};
+    const where: Prisma.CursoStudioWhereInput = {};
 
     if (filtros?.estado) {
       where.estado = filtros.estado;
