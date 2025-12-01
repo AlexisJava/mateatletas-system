@@ -242,11 +242,15 @@ function SemanaCard({
   isExpanded,
   onToggle,
   actividadesPorSemana,
+  cursoId,
+  onSaveSuccess,
 }: {
   semana: SemanaResumen;
   isExpanded: boolean;
   onToggle: () => void;
   actividadesPorSemana: number;
+  cursoId: string;
+  onSaveSuccess: () => void;
 }) {
   const config = ESTADO_SEMANA_CONFIG[semana.estado];
   const Icon = config.icon;
@@ -293,7 +297,12 @@ function SemanaCard({
             <div className="px-4 pb-4 border-t border-white/5">
               <div className="pt-4">
                 {semana.estado === 'VACIA' ? (
-                  <JsonUploadZone semanaId={semana.id} semanaNumero={semana.numero} />
+                  <JsonUploadZone
+                    semanaId={semana.id}
+                    semanaNumero={semana.numero}
+                    cursoId={cursoId}
+                    onSaveSuccess={onSaveSuccess}
+                  />
                 ) : (
                   <SemanaPreview semanaId={semana.id} />
                 )}
@@ -306,7 +315,17 @@ function SemanaCard({
   );
 }
 
-function JsonUploadZone({ semanaId, semanaNumero }: { semanaId: string; semanaNumero: number }) {
+function JsonUploadZone({
+  semanaId,
+  semanaNumero,
+  cursoId,
+  onSaveSuccess,
+}: {
+  semanaId: string;
+  semanaNumero: number;
+  cursoId: string;
+  onSaveSuccess: () => void;
+}) {
   const [isDragging, setIsDragging] = useState(false);
   const [jsonContent, setJsonContent] = useState<string>('');
   const [showTextarea, setShowTextarea] = useState(false);
@@ -383,11 +402,13 @@ function JsonUploadZone({ semanaId, semanaNumero }: { semanaId: string; semanaNu
         <JsonEditor
           semanaId={semanaId}
           semanaNumero={semanaNumero}
+          cursoId={cursoId}
           initialContent={jsonContent}
           onCancel={() => {
             setShowTextarea(false);
             setJsonContent('');
           }}
+          onSaveSuccess={onSaveSuccess}
         />
       )}
     </div>
@@ -397,16 +418,22 @@ function JsonUploadZone({ semanaId, semanaNumero }: { semanaId: string; semanaNu
 function JsonEditor({
   semanaId,
   semanaNumero,
+  cursoId,
   initialContent,
   onCancel,
+  onSaveSuccess,
 }: {
   semanaId: string;
   semanaNumero: number;
+  cursoId: string;
   initialContent: string;
   onCancel: () => void;
+  onSaveSuccess: () => void;
 }) {
   const [content, setContent] = useState(initialContent);
   const [isValidating, setIsValidating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [validationResult, setValidationResult] = useState<{
     valid: boolean;
     errors: string[];
@@ -415,6 +442,7 @@ function JsonEditor({
   const validateJson = () => {
     setIsValidating(true);
     setValidationResult(null);
+    setSaveError(null);
 
     try {
       const parsed = JSON.parse(content);
@@ -459,10 +487,23 @@ function JsonEditor({
   };
 
   const handleSave = async () => {
-    if (!validationResult?.valid) return;
+    if (!validationResult?.valid || isSaving) return;
 
-    // TODO: Llamar al endpoint PUT /api/studio/cursos/:cursoId/semanas/:numero
-    console.log('Guardando semana', semanaId, content);
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      const contenido = JSON.parse(content);
+      await apiClient.put(`/studio/cursos/${cursoId}/semanas/${semanaNumero}`, { contenido });
+      onSaveSuccess();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Error al guardar la semana. Intentá de nuevo.';
+      setSaveError(errorMessage);
+      console.error('Error guardando semana:', semanaId, err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -517,11 +558,21 @@ function JsonEditor({
         </div>
       )}
 
+      {/* Error de guardado */}
+      {saveError && (
+        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-400" />
+            <span className="text-sm text-red-400">{saveError}</span>
+          </div>
+        </div>
+      )}
+
       {/* Botones */}
       <div className="flex items-center gap-3">
         <button
           onClick={validateJson}
-          disabled={!content.trim() || isValidating}
+          disabled={!content.trim() || isValidating || isSaving}
           className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/[0.05] border border-white/10 rounded-lg text-sm text-white/70 hover:bg-white/[0.08] hover:text-white disabled:opacity-50 transition-colors"
         >
           {isValidating ? (
@@ -533,11 +584,11 @@ function JsonEditor({
         </button>
         <button
           onClick={handleSave}
-          disabled={!validationResult?.valid}
+          disabled={!validationResult?.valid || isSaving}
           className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/50 rounded-lg text-sm font-medium text-white disabled:opacity-50 transition-colors"
         >
-          <Upload className="w-4 h-4" />
-          Guardar Semana
+          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+          {isSaving ? 'Guardando...' : 'Guardar Semana'}
         </button>
       </div>
     </div>
@@ -659,6 +710,8 @@ export default function CursoEditorPage() {
                   setExpandedSemana(expandedSemana === semana.numero ? null : semana.numero)
                 }
                 actividadesPorSemana={curso.actividadesPorSemana}
+                cursoId={cursoId}
+                onSaveSuccess={fetchCurso}
               />
             ))}
           </div>
