@@ -3484,6 +3484,19 @@ enum TipoRecursoStudio {
   @@map("tipo_recurso_studio")
 }
 
+/// Categoría de componente del catálogo Studio
+/// Agrupa los 95+ componentes por tipo funcional
+enum CategoriaComponente {
+  INTERACTIVO // DragDrop, MultipleChoice, FillBlanks, etc.
+  CONTENIDO // TextBlock, ImageDisplay, VideoEmbed, etc.
+  EDITOR_CODIGO // ScratchJr, Blockly, PythonTurtle, etc.
+  MULTIMEDIA // AudioPlayer, VideoPlayer, ImageGallery, etc.
+  GAMIFICACION // ProgressBar, XPCounter, BadgeDisplay, etc.
+  EVALUACION // Quiz, Survey, ChallengeMode, etc.
+
+  @@map("categoria_componente")
+}
+
 /// Curso del Studio (plantilla madre)
 /// Representa un curso completo creado en el planificador
 model CursoStudio {
@@ -3714,4 +3727,57 @@ model BadgeCustomStudio {
   @@index([curso_id])
   @@index([en_biblioteca])
   @@map("badges_custom_studio")
+}
+
+/// Catálogo de componentes disponibles en Studio
+/// Almacena los 95+ tipos de componentes que pueden usarse en bloques de actividades
+model ComponenteCatalogo {
+  /// Identificador único del componente
+  id String @id @default(cuid())
+
+  /// Tipo único del componente (clave para renderizado)
+  /// Ejemplo: "MultipleChoice", "DragDrop", "VideoPlayer"
+  tipo String @unique
+
+  /// Nombre legible para mostrar en UI
+  /// Ejemplo: "Opción Múltiple", "Arrastrar y Soltar"
+  nombre String
+
+  /// Descripción del componente para el editor
+  descripcion String
+
+  /// Categoría funcional del componente
+  categoria CategoriaComponente
+
+  /// Icono del componente (nombre de Lucide icon o path a SVG)
+  /// Ejemplo: "list-checks", "move", "play-circle"
+  icono String
+
+  /// JSON Schema de configuración del componente
+  /// Define qué props acepta el componente y sus tipos
+  configSchema Json
+
+  /// Ejemplo de configuración válida
+  /// Sirve como plantilla para nuevos bloques
+  ejemploConfig Json
+
+  /// Propiedades adicionales del componente (metadata, tags, etc.)
+  propiedades Json?
+
+  /// Si el componente está implementado en el frontend
+  implementado Boolean @default(false)
+
+  /// Si el componente está habilitado para uso en producción
+  habilitado Boolean @default(false)
+
+  /// Orden de aparición en el selector de componentes
+  orden Int @default(0)
+
+  /// Fecha de creación
+  createdAt DateTime @default(now())
+
+  /// Fecha de última actualización
+  updatedAt DateTime @updatedAt
+
+  @@map("componentes_catalogo")
 }
