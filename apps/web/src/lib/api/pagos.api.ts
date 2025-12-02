@@ -153,9 +153,9 @@ export const getMetricasDashboard = async (params?: {
   const url = `/pagos/dashboard/metricas${queryString ? `?${queryString}` : ''}`;
 
   try {
-    // El interceptor ya retorna response.data directamente
-    const response = await axios.get<MetricasDashboardResponse>(url);
-    return response;
+    // El interceptor retorna response.data, pero el backend envuelve en { data, metadata }
+    const response = await axios.get<{ data: MetricasDashboardResponse }>(url);
+    return (response as unknown as { data: MetricasDashboardResponse }).data;
   } catch (error) {
     console.error('Error al obtener las métricas del dashboard de pagos:', error);
     throw error;
@@ -170,9 +170,9 @@ export const getMetricasDashboard = async (params?: {
  */
 export const getConfiguracionPrecios = async (): Promise<ConfiguracionPrecios> => {
   try {
-    // El interceptor ya retorna response.data directamente
-    const response = await axios.get<ConfiguracionPrecios>('/pagos/configuracion');
-    return response;
+    // El interceptor retorna response.data, pero el backend envuelve en { data, metadata }
+    const response = await axios.get<{ data: ConfiguracionPrecios }>('/pagos/configuracion');
+    return (response as unknown as { data: ConfiguracionPrecios }).data;
   } catch (error) {
     console.error('Error al obtener la configuración de precios:', error);
     throw error;
@@ -187,9 +187,11 @@ export const getConfiguracionPrecios = async (): Promise<ConfiguracionPrecios> =
  */
 export const getHistorialCambios = async (): Promise<HistorialCambioPrecios[]> => {
   try {
-    // El interceptor ya retorna response.data directamente
-    const response = await axios.get<HistorialCambioPrecios[]>('/pagos/historial-cambios');
-    return response;
+    // El interceptor retorna response.data, pero el backend envuelve en { data, metadata }
+    const response = await axios.get<{ data: HistorialCambioPrecios[] }>(
+      '/pagos/historial-cambios',
+    );
+    return (response as unknown as { data: HistorialCambioPrecios[] }).data;
   } catch (error) {
     console.error('Error al obtener el historial de cambios de precios:', error);
     throw error;
@@ -204,11 +206,11 @@ export const getHistorialCambios = async (): Promise<HistorialCambioPrecios[]> =
  */
 export const getInscripcionesPendientes = async (): Promise<InscripcionMensualConRelaciones[]> => {
   try {
-    // El interceptor ya retorna response.data directamente
-    const response = await axios.get<InscripcionMensualConRelaciones[]>(
+    // El interceptor retorna response.data, pero el backend envuelve en { data, metadata }
+    const response = await axios.get<{ data: InscripcionMensualConRelaciones[] }>(
       '/pagos/inscripciones/pendientes',
     );
-    return response;
+    return (response as unknown as { data: InscripcionMensualConRelaciones[] }).data;
   } catch (error) {
     console.error('Error al obtener las inscripciones pendientes:', error);
     throw error;
@@ -223,9 +225,11 @@ export const getInscripcionesPendientes = async (): Promise<InscripcionMensualCo
  */
 export const getEstudiantesConDescuentos = async (): Promise<EstudianteConDescuento[]> => {
   try {
-    // El interceptor ya retorna response.data directamente
-    const response = await axios.get<EstudianteConDescuento[]>('/pagos/estudiantes-descuentos');
-    return response;
+    // El interceptor retorna response.data, pero el backend envuelve en { data, metadata }
+    const response = await axios.get<{ data: EstudianteConDescuento[] }>(
+      '/pagos/estudiantes-descuentos',
+    );
+    return (response as unknown as { data: EstudianteConDescuento[] }).data;
   } catch (error) {
     console.error('Error al obtener los estudiantes con descuentos:', error);
     throw error;
