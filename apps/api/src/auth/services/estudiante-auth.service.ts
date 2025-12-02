@@ -29,10 +29,10 @@ export interface EstudianteLoginResult {
     animacion_idle_url: string | null;
     puntos_totales: number;
     nivel_actual: number;
-    equipo: {
+    casa: {
       id: string;
       nombre: string;
-      color_primario: string;
+      colorPrimary: string;
     } | null;
     tutor: {
       id: string;
@@ -98,11 +98,11 @@ export class EstudianteAuthService {
             email: true,
           },
         },
-        equipo: {
+        casa: {
           select: {
             id: true,
             nombre: true,
-            color_primario: true,
+            colorPrimary: true,
           },
         },
       },
@@ -164,7 +164,7 @@ export class EstudianteAuthService {
         animacion_idle_url: estudiante.animacion_idle_url,
         puntos_totales: estudiante.puntos_totales,
         nivel_actual: estudiante.nivel_actual,
-        equipo: estudiante.equipo,
+        casa: estudiante.casa,
         tutor: estudiante.tutor,
         role: Role.ESTUDIANTE,
         roles: finalRoles,

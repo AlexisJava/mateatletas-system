@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Prisma, DiaSemana } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service';
 import { DocenteBusinessValidator } from '../validators/docente-business.validator';
@@ -167,12 +167,15 @@ export class DocenteStatsService {
     });
 
     // Construir mapa de estudiantes con sus grupos
-    const estudiantesUnicosMap = new Map();
+    const estudiantesUnicosMap = new Map<string, EstudianteConGrupos>();
     estudiantes.forEach((est) => {
       const gruposDelEstudiante = inscripciones
         .filter((i) => i.estudiante_id === est.id)
         .map((i) => grupos.find((g) => g.id === i.clase_grupo_id))
-        .filter((g) => g !== undefined);
+        .filter(
+          (g): g is { id: string; nombre: string; codigo: string } =>
+            g !== undefined,
+        );
 
       estudiantesUnicosMap.set(est.id, {
         ...est,
@@ -180,7 +183,9 @@ export class DocenteStatsService {
       });
     });
 
-    const estudiantesUnicos = Array.from(estudiantesUnicosMap.values());
+    const estudiantesUnicos: EstudianteConGrupos[] = Array.from(
+      estudiantesUnicosMap.values(),
+    );
 
     // Ejecutar cálculos en paralelo
     const [
@@ -240,7 +245,7 @@ export class DocenteStatsService {
     for (const claseGrupo of clasesGrupo) {
       const [horas, minutos] = claseGrupo.hora_inicio.split(':').map(Number);
       const fechaHoraClase = new Date(now);
-      fechaHoraClase.setHours(horas, minutos, 0, 0);
+      fechaHoraClase.setHours(horas ?? 0, minutos ?? 0, 0, 0);
 
       const minutosParaEmpezar = Math.floor(
         (fechaHoraClase.getTime() - now.getTime()) / (60 * 1000),
@@ -249,7 +254,10 @@ export class DocenteStatsService {
       // Solo considerar si falta menos de 60 minutos o empezó hace menos de 10 minutos
       if (minutosParaEmpezar <= 60 && minutosParaEmpezar >= -10) {
         const [horaFin, minFin] = claseGrupo.hora_fin.split(':').map(Number);
-        const duracion = horaFin * 60 + minFin - (horas * 60 + minutos);
+        const duracion =
+          (horaFin ?? 0) * 60 +
+          (minFin ?? 0) -
+          ((horas ?? 0) * 60 + (minutos ?? 0));
 
         return {
           id: claseGrupo.id,
@@ -680,7 +688,7 @@ export class DocenteStatsService {
   private async calcularRankingGrupos(
     docenteId: string,
     inscripciones: Array<{ estudiante_id: string; clase_grupo_id: string }>,
-    gruposIds: string[],
+    _gruposIds: string[],
   ) {
     const gruposDelDocente = await this.prisma.claseGrupo.findMany({
       where: {
@@ -776,7 +784,7 @@ export class DocenteStatsService {
 
   private async calcularAsistenciaPorEstudiante(
     estudiantesUnicos: EstudianteConGrupos[],
-    estudiantesIds: string[],
+    _estudiantesIds: string[],
   ): Promise<AsistenciaEstudiante[]> {
     return await Promise.all(
       estudiantesUnicos.map(async (est) => {

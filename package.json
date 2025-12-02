@@ -93,7 +93,14 @@
     "npm": ">=10.0.0"
   },
   "lint-staged": {
-    "apps/**/*.{ts,tsx}": "prettier --write",
+    "apps/api/**/*.ts": [
+      "eslint --config apps/api/eslint.config.mjs --max-warnings=0",
+      "prettier --write"
+    ],
+    "apps/web/**/*.{ts,tsx}": [
+      "eslint --config apps/web/eslint.config.mjs --max-warnings=0",
+      "prettier --write"
+    ],
     "packages/**/*.{ts,tsx}": "prettier --write",
     "**/*.{json,md,yml,yaml}": "prettier --write"
   },

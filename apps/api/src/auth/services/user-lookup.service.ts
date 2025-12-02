@@ -5,7 +5,7 @@ import {
   Docente,
   Admin as AdminModel,
   Estudiante,
-  Equipo,
+  Casa,
 } from '@prisma/client';
 
 // ============================================================================
@@ -98,14 +98,11 @@ export interface UserForPasswordChange {
 }
 
 /**
- * Estudiante con relaciones incluidas (tutor y equipo)
+ * Estudiante con relaciones incluidas (tutor y casa)
  */
 export interface EstudianteWithRelations extends Estudiante {
   tutor: Pick<Tutor, 'id' | 'nombre' | 'apellido' | 'email'> | null;
-  equipo: Pick<
-    Equipo,
-    'id' | 'nombre' | 'color_primario' | 'color_secundario'
-  > | null;
+  casa: Pick<Casa, 'id' | 'nombre' | 'colorPrimary' | 'colorSecondary'> | null;
 }
 
 // ============================================================================
@@ -180,7 +177,7 @@ const ESTUDIANTE_PROFILE_SELECT = {
   fotoUrl: true,
   puntos_totales: true,
   nivel_actual: true,
-  equipoId: true,
+  casaId: true,
   tutor_id: true,
   createdAt: true,
   updatedAt: true,
@@ -270,7 +267,7 @@ export class UserLookupService {
   // ==========================================================================
 
   /**
-   * Busca un estudiante por username con relaciones (tutor y equipo)
+   * Busca un estudiante por username con relaciones (tutor y casa)
    * Usado por loginEstudiante() y loginWithUsername()
    *
    * @param username - Username del estudiante
@@ -290,12 +287,12 @@ export class UserLookupService {
             email: true,
           },
         },
-        equipo: {
+        casa: {
           select: {
             id: true,
             nombre: true,
-            color_primario: true,
-            color_secundario: true,
+            colorPrimary: true,
+            colorSecondary: true,
           },
         },
       },

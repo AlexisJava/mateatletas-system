@@ -102,7 +102,7 @@ export class TokenService {
     const payload: TokenPayload = {
       sub: userId,
       email,
-      role: normalizedRoles[0],
+      role: normalizedRoles[0] ?? Role.TUTOR,
       roles: normalizedRoles,
     };
 
@@ -226,8 +226,8 @@ export class TokenService {
       return 3600; // default 1 hour
     }
 
-    const value = parseInt(match[1], 10);
-    const unit = match[2];
+    const value = parseInt(match[1] ?? '0', 10);
+    const unit = match[2] ?? 's';
 
     switch (unit) {
       case 's':

@@ -1,3 +1,9 @@
+// @ts-check
+/**
+ * ESLint Config - Web (Next.js)
+ *
+ * Hereda de la config maestra del monorepo + reglas específicas para Next.js/React
+ */
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { FlatCompat } from '@eslint/eslintrc';
@@ -10,7 +16,14 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  // ============================================================================
+  // NEXT.JS CONFIG BASE
+  // ============================================================================
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
+
+  // ============================================================================
+  // IGNORES
+  // ============================================================================
   {
     ignores: [
       'node_modules/**',
@@ -23,30 +36,47 @@ const eslintConfig = [
       '**/*.d.ts',
     ],
   },
+
+  // ============================================================================
+  // REGLAS ESTRICTAS
+  // ============================================================================
   {
     rules: {
-      // ===== PROHIBIR any =====
+      // ===== 🚫 PROHIBIDO: any =====
       '@typescript-eslint/no-explicit-any': 'error',
 
-      // ===== VARIABLES NO USADAS =====
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          args: 'after-used',
-          ignoreRestSiblings: true,
-        },
-      ],
-      'no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          args: 'after-used',
-          ignoreRestSiblings: true,
-        },
-      ],
+      // ===== 🚫 PROHIBIDO: @ts-ignore, @ts-nocheck =====
+      '@typescript-eslint/ban-ts-comment': ['error', {
+        'ts-expect-error': 'allow-with-description',
+        'ts-ignore': true,
+        'ts-nocheck': true,
+        'ts-check': false,
+        minimumDescriptionLength: 10,
+      }],
+
+      // ===== 🚫 PROHIBIDO: console.* en producción =====
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+
+      // ===== 🚫 PROHIBIDO: variables sin usar =====
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+      }],
+      'no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        args: 'after-used',
+        ignoreRestSiblings: true,
+      }],
+
+      // ===== CÓDIGO LIMPIO =====
+      'no-debugger': 'error',
+      'no-alert': 'error',
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'eqeqeq': ['error', 'always'],
 
       // ===== HOOKS DE REACT =====
       'react-hooks/exhaustive-deps': 'warn',

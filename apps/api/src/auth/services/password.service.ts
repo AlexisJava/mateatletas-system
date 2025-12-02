@@ -131,7 +131,7 @@ export class PasswordService {
         );
         return 0;
       }
-      return parseInt(parts[2], 10);
+      return parseInt(parts[2] ?? '0', 10);
     } catch {
       this.logger.error('Error extracting rounds from hash');
       return 0;
@@ -216,10 +216,10 @@ export class PasswordService {
 
     // Asegurar al menos uno de cada tipo
     let password =
-      uppercase[Math.floor(Math.random() * uppercase.length)] +
-      lowercase[Math.floor(Math.random() * lowercase.length)] +
-      numbers[Math.floor(Math.random() * numbers.length)] +
-      special[Math.floor(Math.random() * special.length)];
+      (uppercase[Math.floor(Math.random() * uppercase.length)] ?? 'A') +
+      (lowercase[Math.floor(Math.random() * lowercase.length)] ?? 'a') +
+      (numbers[Math.floor(Math.random() * numbers.length)] ?? '2') +
+      (special[Math.floor(Math.random() * special.length)] ?? '@');
 
     // Completar con caracteres aleatorios
     const allChars = uppercase + lowercase + numbers + special;

@@ -190,7 +190,7 @@ export class AuthService {
           fotoUrl: true,
           puntos_totales: true,
           nivel_actual: true,
-          equipoId: true,
+          casaId: true,
           tutor_id: true,
           createdAt: true,
           updatedAt: true,

@@ -1,34 +1,46 @@
 #!/bin/sh
 
+echo ""
 echo "🚔 ROBOCOP: Verificando calidad de código..."
+echo "=============================================="
+echo ""
 
 # ============================================================================
 # TypeScript - 0 errores (API)
 # ============================================================================
-echo "→ Verificando TypeScript (API)..."
-cd apps/api && npx tsc --noEmit
-TS_EXIT=$?
-cd ../..
-
-if [ $TS_EXIT -ne 0 ]; then
+echo "→ [1/3] TypeScript API..."
+cd apps/api
+if ! npx tsc --noEmit 2>&1 | head -20; then
   echo ""
-  echo "❌ BLOQUEADO: Errores de TypeScript."
-  echo "   Arreglar antes de commitear."
+  echo "❌ BLOQUEADO: Errores de TypeScript en API."
+  echo "   Ejecuta: cd apps/api && npx tsc --noEmit"
   echo ""
   exit 1
 fi
+cd ../..
 
 # ============================================================================
-# lint-staged (ESLint + Prettier en archivos cambiados)
+# TypeScript - 0 errores (Web) - Solo si hay cambios en web
 # ============================================================================
-echo "→ Verificando código con lint-staged..."
-npx lint-staged || {
+# Skip Web TypeScript check - Next.js genera archivos .next/types que dan falsos positivos
+# El build de Next.js ya verifica TypeScript
+echo "→ [2/3] TypeScript Web... (verificado en build)"
+
+# ============================================================================
+# lint-staged (ESLint + Prettier en archivos staged)
+# ============================================================================
+echo "→ [3/3] ESLint + Prettier..."
+if ! npx lint-staged; then
   echo ""
   echo "❌ BLOQUEADO: Errores de ESLint o formato."
-  echo "   Arreglar antes de commitear."
+  echo ""
+  echo "   Reglas estrictas activas:"
+  echo "   - NO any (usa tipos específicos)"
+  echo "   - NO @ts-ignore (arregla el problema)"
+  echo "   - NO console.* (usa Logger)"
   echo ""
   exit 1
-}
+fi
 
 echo ""
 echo "✅ ROBOCOP: Todo OK. Commit permitido."

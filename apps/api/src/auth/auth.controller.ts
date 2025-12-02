@@ -264,7 +264,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async getProfile(@GetUser() user: AuthUser) {
     // Usar roles[0] como fallback si role está undefined (multi-role scenario)
-    const role = user.role || user.roles[0];
+    const role = user.role ?? user.roles[0] ?? 'tutor';
     return this.authService.getProfile(user.id, role);
   }
 
