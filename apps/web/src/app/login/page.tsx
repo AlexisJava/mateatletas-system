@@ -10,17 +10,15 @@ import {
   LogIn,
   Mail,
   Lock,
-  Heart,
-  Users,
-  Shield,
+  Sparkles,
 } from 'lucide-react';
 import { useAuthStore, type UserRole, type LoginResult } from '@/store/auth.store';
 import RoleSelectorModal from '@/components/auth/RoleSelectorModal';
 
 /**
- * Login Page - Unificado para Tutores, Docentes y Admins
- * Ultra-premium cosmos design con soporte multi-rol y MFA
- * Ruta: /login
+ * Login Page - Unificado para todos los usuarios
+ * Tutores, Docentes, Admins usan el mismo formulario
+ * El backend determina el rol y redirige automáticamente
  */
 export default function LoginPage() {
   const router = useRouter();
@@ -70,7 +68,6 @@ export default function LoginPage() {
 
       // Verificar si se requiere MFA
       if (!result.success && result.mfaRequired) {
-        // Redirigir a página MFA (TODO: implementar)
         setError('Se requiere verificación MFA. Contacte al administrador.');
         setLoading(false);
         return;
@@ -150,186 +147,130 @@ export default function LoginPage() {
         />
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - Centered */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left Side - Message */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center lg:text-left"
-            >
-              <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-[#0ea5e9]/20 to-[#10b981]/20 border border-[#0ea5e9]/30 mb-8">
-                <Heart className="w-4 h-4 text-[#0ea5e9] animate-pulse" />
-                <span className="text-xs font-black text-[#0ea5e9] uppercase tracking-widest">
-                  Portal Familias
-                </span>
-              </div>
+        <div className="w-full max-w-md">
+          {/* Login Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="relative card-glass rounded-3xl border-2 border-white/10 p-10">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#0ea5e9]/5 to-[#10b981]/5 rounded-3xl pointer-events-none" />
 
-              <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
-                BIENVENIDO
-                <br />
-                <span className="title-gradient">DE VUELTA</span>
-              </h1>
+              <div className="relative z-10">
+                {/* Header */}
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0ea5e9] to-[#10b981] mb-4 shadow-2xl">
+                    <Sparkles className="w-8 h-8 text-white" />
+                  </div>
+                  <h2 className="text-3xl font-black text-white mb-2">Mateatletas</h2>
+                  <p className="text-white/60">Ingresá con tu email y contraseña</p>
+                </div>
 
-              <p className="text-xl text-white/70 mb-8 leading-relaxed">
-                Accede al panel para seguir el progreso de tus hijos,
-                <br />
-                gestionar cursos y estar al día con todo.
-              </p>
-
-              <div className="grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0">
-                {[
-                  { icon: Users, label: 'Mis Hijos' },
-                  { icon: Shield, label: 'Seguro' },
-                  { icon: Heart, label: 'Confiable' },
-                ].map((item, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 + i * 0.1 }}
-                    className="card-glass p-4 rounded-2xl border border-white/10 text-center"
-                  >
-                    <item.icon className="w-8 h-8 text-[#0ea5e9] mx-auto mb-2" />
-                    <div className="text-xs text-white/50">{item.label}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Right Side - Login Form */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="relative card-glass rounded-3xl border-2 border-white/10 p-10">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#0ea5e9]/5 to-[#10b981]/5 rounded-3xl pointer-events-none" />
-
-                <div className="relative z-10">
-                  {/* Header */}
-                  <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0ea5e9] to-[#10b981] mb-4 shadow-2xl">
-                      <Heart className="w-8 h-8 text-white" />
+                {/* Login Form */}
+                <form onSubmit={handleLogin} className="space-y-6">
+                  {/* Email Field */}
+                  <div>
+                    <label className="block text-sm font-bold text-white/80 mb-2">
+                      Email
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                        <Mail className="w-5 h-5 text-[#0ea5e9]" />
+                      </div>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full pl-12 pr-4 py-4 bg-black/30 border-2 border-white/10 rounded-2xl text-white placeholder-white/40 focus:outline-none focus:border-[#0ea5e9] transition-all"
+                        placeholder="tu@email.com"
+                        required
+                        disabled={loading}
+                      />
                     </div>
-                    <h2 className="text-3xl font-black text-white mb-2">Ingreso Familias</h2>
-                    <p className="text-white/60">Ingresa con tu email y contraseña</p>
                   </div>
 
-                  {/* Login Form */}
-                  <form onSubmit={handleLogin} className="space-y-6">
-                    {/* Email Field */}
-                    <div>
-                      <label className="block text-sm font-bold text-white/80 mb-2">
-                        Email
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                          <Mail className="w-5 h-5 text-[#0ea5e9]" />
-                        </div>
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="w-full pl-12 pr-4 py-4 bg-black/30 border-2 border-white/10 rounded-2xl text-white placeholder-white/40 focus:outline-none focus:border-[#0ea5e9] transition-all"
-                          placeholder="tu@email.com"
-                          required
-                          disabled={loading}
-                        />
+                  {/* Password Field */}
+                  <div>
+                    <label className="block text-sm font-bold text-white/80 mb-2">
+                      Contraseña
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                        <Lock className="w-5 h-5 text-[#0ea5e9]" />
                       </div>
-                    </div>
-
-                    {/* Password Field */}
-                    <div>
-                      <label className="block text-sm font-bold text-white/80 mb-2">
-                        Contraseña
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                          <Lock className="w-5 h-5 text-[#0ea5e9]" />
-                        </div>
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          className="w-full pl-12 pr-12 py-4 bg-black/30 border-2 border-white/10 rounded-2xl text-white placeholder-white/40 focus:outline-none focus:border-[#0ea5e9] transition-all"
-                          placeholder="Tu contraseña"
-                          required
-                          disabled={loading}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-4 flex items-center text-white/40 hover:text-white transition-colors"
-                          disabled={loading}
-                        >
-                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Error Message */}
-                    {error && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl"
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full pl-12 pr-12 py-4 bg-black/30 border-2 border-white/10 rounded-2xl text-white placeholder-white/40 focus:outline-none focus:border-[#0ea5e9] transition-all"
+                        placeholder="Tu contraseña"
+                        required
+                        disabled={loading}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-4 flex items-center text-white/40 hover:text-white transition-colors"
+                        disabled={loading}
                       >
-                        <p className="text-sm text-red-400 text-center">{error}</p>
-                      </motion.div>
-                    )}
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                  </div>
 
-                    {/* Login Button */}
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full btn-pulse flex items-center justify-center gap-3"
+                  {/* Error Message */}
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl"
                     >
-                      {loading ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span>Ingresando...</span>
-                        </>
-                      ) : (
-                        <>
-                          <LogIn className="w-5 h-5" />
-                          <span>INGRESAR</span>
-                        </>
-                      )}
-                    </button>
-                  </form>
+                      <p className="text-sm text-red-400 text-center">{error}</p>
+                    </motion.div>
+                  )}
 
-                  {/* Footer Links */}
-                  <div className="mt-8 pt-6 border-t border-white/10 text-center space-y-3">
-                    <p className="text-sm text-white/60">
-                      ¿No tienes cuenta?{' '}
-                      <Link
-                        href="/register"
-                        className="text-[#0ea5e9] hover:text-[#10b981] transition-colors font-bold"
-                      >
-                        Crear cuenta
-                      </Link>
-                    </p>
-                    <div className="flex items-center justify-center gap-4 text-xs text-white/40">
-                      <Link href="/estudiante-login" className="hover:text-white transition-colors">
-                        Soy Estudiante
-                      </Link>
-                    </div>
-                  </div>
+                  {/* Login Button */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full btn-pulse flex items-center justify-center gap-3"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Ingresando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="w-5 h-5" />
+                        <span>INGRESAR</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {/* Footer - Solo link a estudiantes */}
+                <div className="mt-8 pt-6 border-t border-white/10 text-center">
+                  <Link
+                    href="/estudiante-login"
+                    className="text-sm text-white/40 hover:text-white transition-colors"
+                  >
+                    ¿Sos estudiante? Ingresá acá
+                  </Link>
                 </div>
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
 
           {/* Back to Home */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8 }}
-            className="text-center mt-12"
+            className="text-center mt-8"
           >
             <Link
               href="/"

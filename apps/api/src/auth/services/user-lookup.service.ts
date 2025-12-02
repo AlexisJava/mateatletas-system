@@ -102,7 +102,10 @@ export interface UserForPasswordChange {
  */
 export interface EstudianteWithRelations extends Estudiante {
   tutor: Pick<Tutor, 'id' | 'nombre' | 'apellido' | 'email'> | null;
-  equipo: Pick<Equipo, 'id' | 'nombre' | 'color_primario' | 'color_secundario'> | null;
+  equipo: Pick<
+    Equipo,
+    'id' | 'nombre' | 'color_primario' | 'color_secundario'
+  > | null;
 }
 
 // ============================================================================
@@ -321,9 +324,10 @@ export class UserLookupService {
    * @param username - Username del usuario
    * @returns Usuario encontrado con su tipo, o null
    */
-  async findByUsername(
-    username: string,
-  ): Promise<{ user: Estudiante | Tutor; userType: 'estudiante' | 'tutor' } | null> {
+  async findByUsername(username: string): Promise<{
+    user: Estudiante | Tutor;
+    userType: 'estudiante' | 'tutor';
+  } | null> {
     // 1. Buscar como estudiante primero
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { username },

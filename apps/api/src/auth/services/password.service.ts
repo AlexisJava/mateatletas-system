@@ -52,7 +52,8 @@ export class PasswordService {
    * Se usa cuando el usuario no existe para que bcrypt.compare
    * siempre tome el mismo tiempo
    */
-  readonly DUMMY_HASH = '$2b$12$K4o0xTkH6xQ.0Z3Xm5qPxOq8q5k5kK6kK7kK8kK9kKAkKBkKCkKDe';
+  readonly DUMMY_HASH =
+    '$2b$12$K4o0xTkH6xQ.0Z3Xm5qPxOq8q5k5kK6kK7kK8kK9kKAkKBkKCkKDe';
 
   /**
    * Hashea una contraseña usando bcrypt

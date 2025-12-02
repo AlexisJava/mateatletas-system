@@ -71,7 +71,7 @@ export class CsrfProtectionGuard implements CanActivate {
     ...(process.env.FRONTEND_URL
       ? process.env.FRONTEND_URL.split(',').map((url) => url.trim())
       : ['https://mateatletas.com']),
-  ].filter(Boolean) as string[];
+  ].filter(Boolean);
 
   constructor(private reflector: Reflector) {
     // CRÍTICO: Validar que FRONTEND_URL esté configurado en producción

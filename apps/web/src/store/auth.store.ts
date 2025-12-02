@@ -102,7 +102,14 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, selectedRole: null, mfaPending: null });
 
         try {
-          const response = await authApi.login({ email, password });
+          const rawResponse = await authApi.login({ email, password });
+
+          // El backend envuelve respuestas en { data, metadata }
+          // Extraer data si existe, sino usar la respuesta directa
+          const response =
+            rawResponse && typeof rawResponse === 'object' && 'data' in rawResponse
+              ? (rawResponse as { data: typeof rawResponse }).data
+              : rawResponse;
 
           // Verificar si se requiere MFA (solo admins)
           if (isLoginMfaRequired(response)) {
@@ -121,7 +128,10 @@ export const useAuthStore = create<AuthState>()(
           // Login exitoso - usar type guard para acceso seguro
           if (isLoginSuccess(response)) {
             const authUser = response.user;
-            const roles = response.roles as UserRole[];
+            // Normalizar roles a minúsculas (backend envía ADMIN, DOCENTE, etc.)
+            const roles = response.roles.map((r) =>
+              r.toLowerCase(),
+            ) as UserRole[];
 
             // Mapear AuthUser a User del store
             const user: User = {
@@ -129,7 +139,7 @@ export const useAuthStore = create<AuthState>()(
               email: authUser.email,
               nombre: authUser.nombre,
               apellido: authUser.apellido,
-              role: authUser.role as UserRole,
+              role: authUser.role.toLowerCase() as UserRole,
               roles: roles,
               debe_cambiar_password: authUser.debe_cambiar_password,
               dni: authUser.dni,

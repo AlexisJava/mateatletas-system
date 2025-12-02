@@ -152,7 +152,10 @@ export class AuthController {
     }
 
     // Login exitoso - configurar cookie httpOnly
-    const loginResult = result as { access_token: string; user: unknown };
+    const loginResult = result as {
+      access_token: string;
+      user: { roles?: string[]; [key: string]: unknown };
+    };
     res.cookie('auth-token', loginResult.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -161,7 +164,11 @@ export class AuthController {
       path: '/',
     });
 
-    return { user: loginResult.user };
+    // Devolver user y roles en la raíz para el frontend
+    return {
+      user: loginResult.user,
+      roles: loginResult.user.roles ?? [],
+    };
   }
 
   /**

@@ -1,10 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, DiaSemana } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service';
-import {
-  parseHorario,
-  calcularDuracionMinutos,
-} from '../../common/utils/time.utils';
 import { DocenteBusinessValidator } from '../validators/docente-business.validator';
 import {
   DashboardDocenteResponse,
@@ -242,7 +238,7 @@ export class DocenteStatsService {
 
     // Buscar la clase más próxima de hoy
     for (const claseGrupo of clasesGrupo) {
-      const { horas, minutos } = parseHorario(claseGrupo.hora_inicio);
+      const [horas, minutos] = claseGrupo.hora_inicio.split(':').map(Number);
       const fechaHoraClase = new Date(now);
       fechaHoraClase.setHours(horas, minutos, 0, 0);
 
@@ -252,10 +248,8 @@ export class DocenteStatsService {
 
       // Solo considerar si falta menos de 60 minutos o empezó hace menos de 10 minutos
       if (minutosParaEmpezar <= 60 && minutosParaEmpezar >= -10) {
-        const duracion = calcularDuracionMinutos(
-          claseGrupo.hora_inicio,
-          claseGrupo.hora_fin,
-        );
+        const [horaFin, minFin] = claseGrupo.hora_fin.split(':').map(Number);
+        const duracion = horaFin * 60 + minFin - (horas * 60 + minutos);
 
         return {
           id: claseGrupo.id,
@@ -656,11 +650,31 @@ export class DocenteStatsService {
 
   private async calcularEstudiantesSinTareas(
     estudiantesUnicos: EstudianteConGrupos[],
-    _estudiantesIdsUnicos: string[],
+    estudiantesIdsUnicos: string[],
   ) {
-    // TODO: ProgresoEstudiantePlanificacion será implementado en FASE 2 del refactor 2026
-    // Por ahora retornamos los primeros 20 estudiantes como placeholder
-    return estudiantesUnicos.slice(0, 20);
+    const progresoActividades =
+      await this.prisma.progresoEstudianteActividad.findMany({
+        where: {
+          estudiante_id: {
+            in: estudiantesIdsUnicos,
+          },
+          iniciado: true,
+        },
+        select: {
+          estudiante_id: true,
+        },
+        distinct: ['estudiante_id'],
+      });
+
+    const estudiantesConProgreso = new Set(
+      progresoActividades.map(
+        (p: { estudiante_id: string }) => p.estudiante_id,
+      ),
+    );
+
+    return estudiantesUnicos
+      .filter((est) => !estudiantesConProgreso.has(est.id))
+      .slice(0, 20);
   }
 
   private async calcularRankingGrupos(
