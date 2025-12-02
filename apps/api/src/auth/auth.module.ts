@@ -19,6 +19,12 @@ import { LoginAttemptService } from './services/login-attempt.service';
 import { TokenService } from './services/token.service';
 import { PasswordService } from './services/password.service';
 import { UserLookupService } from './services/user-lookup.service';
+// FASE 2: Servicios de autenticación por tipo de usuario
+import { TutorAuthService } from './services/tutor-auth.service';
+import { DocenteAuthService } from './services/docente-auth.service';
+import { AdminAuthService } from './services/admin-auth.service';
+import { EstudianteAuthService } from './services/estudiante-auth.service';
+import { AuthOrchestratorService } from './services/auth-orchestrator.service';
 
 /**
  * Módulo de autenticación
@@ -63,7 +69,8 @@ import { UserLookupService } from './services/user-lookup.service';
         // En desarrollo: tokens de larga duración (7d) para evitar re-login constante
         // En producción: tokens de corta duración (1h) para mayor seguridad
         const nodeEnv = config.get<string>('NODE_ENV') || 'development';
-        const defaultExpiration: string = nodeEnv === 'production' ? '1h' : '7d';
+        const defaultExpiration: string =
+          nodeEnv === 'production' ? '1h' : '7d';
         const expiresIn: string =
           config.get<string>('JWT_EXPIRATION') || defaultExpiration;
 
@@ -96,6 +103,12 @@ import { UserLookupService } from './services/user-lookup.service';
     PasswordService,
     // User Lookup Service (centralized user search across tables)
     UserLookupService,
+    // FASE 2: Servicios de autenticación por tipo de usuario
+    TutorAuthService,
+    DocenteAuthService,
+    AdminAuthService,
+    EstudianteAuthService,
+    AuthOrchestratorService,
   ],
   exports: [
     JwtStrategy,

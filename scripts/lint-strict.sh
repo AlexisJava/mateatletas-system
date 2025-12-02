@@ -30,7 +30,7 @@ for file in $FILES; do
     fi
 
     # Ejecutar ESLint con --max-warnings=0
-    npx eslint --fix --max-warnings=0 "$RELATIVE_FILE" || {
+    npx eslint --fix --max-warnings=0 --no-warn-ignored "$RELATIVE_FILE" || {
       echo ""
       echo "❌ COMMIT BLOCKED"
       echo "   File: $file"

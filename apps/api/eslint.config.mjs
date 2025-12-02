@@ -6,7 +6,12 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs'],
+    ignores: [
+      'eslint.config.mjs',
+      '**/__tests__/**',
+      '**/*.spec.ts',
+      '**/*.e2e-spec.ts',
+    ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -33,7 +38,7 @@ export default tseslint.config(
       "prettier/prettier": ["error", { endOfLine: "auto" }],
 
       // ===== REGLAS ESTRICTAS PARA PREVENIR DEBUG CODE =====
-      'no-console': ['error', { allow: [] }], // Prohibir console.* (usar Logger)
+      'no-console': 'error', // Prohibir console.* (usar Logger)
       '@typescript-eslint/no-unused-vars': ['error', {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
