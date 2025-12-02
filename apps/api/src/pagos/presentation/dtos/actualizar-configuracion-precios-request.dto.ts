@@ -14,9 +14,18 @@ import { Type } from 'class-transformer';
  * DTO de Request para actualizar configuración de precios
  * Presentation Layer - Validación HTTP con class-validator
  *
+ * Sistema de Tiers 2026:
+ * - Arcade: $30.000/mes - 1 mundo async
+ * - Arcade+: $60.000/mes - 3 mundos async
+ * - Pro: $75.000/mes - 1 mundo async + 1 mundo sync con docente
+ *
+ * Descuentos familiares:
+ * - 2do hermano: 12%
+ * - 3er hermano en adelante: 20%
+ *
  * IMPORTANTE:
- * - Los precios en ARS DEBEN ser números enteros (sin centavos) para contabilidad
- * - Solo los porcentajes pueden tener decimales
+ * - Los precios en ARS DEBEN ser números enteros (sin centavos)
+ * - Los porcentajes pueden tener decimales
  * - Se convertirán a Decimal en el Service antes de llamar al Use Case
  */
 export class ActualizarConfiguracionPreciosRequestDto {
@@ -27,83 +36,58 @@ export class ActualizarConfiguracionPreciosRequestDto {
   @IsString()
   adminId!: string;
 
+  // =========================================================================
+  // PRECIOS POR TIER (Sistema 2026)
+  // =========================================================================
+
   @ApiProperty({
-    description:
-      'Nuevo precio de Club Matemáticas (debe ser entero, sin centavos)',
-    example: 52000,
+    description: 'Precio mensual del Tier Arcade (1 mundo async, sin docente)',
+    example: 30000,
     required: false,
   })
   @IsOptional()
   @IsInt({
-    message:
-      'El precio de Club Matemáticas debe ser un número entero (sin centavos)',
+    message: 'El precio de Arcade debe ser un número entero (sin centavos)',
   })
   @Min(0)
   @Type(() => Number)
-  precioClubMatematicas?: number;
+  precioArcade?: number;
 
   @ApiProperty({
     description:
-      'Nuevo precio de Cursos Especializados (debe ser entero, sin centavos)',
-    example: 57000,
+      'Precio mensual del Tier Arcade+ (3 mundos async, sin docente)',
+    example: 60000,
     required: false,
   })
   @IsOptional()
   @IsInt({
-    message:
-      'El precio de Cursos Especializados debe ser un número entero (sin centavos)',
+    message: 'El precio de Arcade+ debe ser un número entero (sin centavos)',
   })
   @Min(0)
   @Type(() => Number)
-  precioCursosEspecializados?: number;
+  precioArcadePlus?: number;
 
   @ApiProperty({
     description:
-      'Nuevo precio para múltiples actividades (debe ser entero, sin centavos)',
-    example: 46000,
+      'Precio mensual del Tier Pro (1 mundo async + 1 mundo sync con docente)',
+    example: 75000,
     required: false,
   })
   @IsOptional()
   @IsInt({
-    message:
-      'El precio para múltiples actividades debe ser un número entero (sin centavos)',
+    message: 'El precio de Pro debe ser un número entero (sin centavos)',
   })
   @Min(0)
   @Type(() => Number)
-  precioMultipleActividades?: number;
+  precioPro?: number;
+
+  // =========================================================================
+  // DESCUENTOS FAMILIARES
+  // =========================================================================
 
   @ApiProperty({
-    description: 'Nuevo precio hermanos básico (debe ser entero, sin centavos)',
-    example: 46000,
-    required: false,
-  })
-  @IsOptional()
-  @IsInt({
-    message:
-      'El precio hermanos básico debe ser un número entero (sin centavos)',
-  })
-  @Min(0)
-  @Type(() => Number)
-  precioHermanosBasico?: number;
-
-  @ApiProperty({
-    description:
-      'Nuevo precio hermanos múltiple (debe ser entero, sin centavos)',
-    example: 40000,
-    required: false,
-  })
-  @IsOptional()
-  @IsInt({
-    message:
-      'El precio hermanos múltiple debe ser un número entero (sin centavos)',
-  })
-  @Min(0)
-  @Type(() => Number)
-  precioHermanosMultiple?: number;
-
-  @ApiProperty({
-    description: 'Nuevo porcentaje de descuento AACREA',
-    example: 25,
+    description: 'Porcentaje de descuento para el 2do hermano',
+    example: 12,
     required: false,
   })
   @IsOptional()
@@ -111,16 +95,23 @@ export class ActualizarConfiguracionPreciosRequestDto {
   @Min(0)
   @Max(100)
   @Type(() => Number)
-  descuentoAacreaPorcentaje?: number;
+  descuentoHermano2?: number;
 
   @ApiProperty({
-    description: 'Estado del descuento AACREA',
-    example: true,
+    description: 'Porcentaje de descuento para el 3er hermano en adelante',
+    example: 20,
     required: false,
   })
   @IsOptional()
-  @IsBoolean()
-  descuentoAacreaActivo?: boolean;
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  @Type(() => Number)
+  descuentoHermano3Mas?: number;
+
+  // =========================================================================
+  // CONFIGURACIÓN DE NOTIFICACIONES
+  // =========================================================================
 
   @ApiProperty({
     description: 'Día de vencimiento (1-31)',
@@ -155,9 +146,13 @@ export class ActualizarConfiguracionPreciosRequestDto {
   @IsBoolean()
   notificacionesActivas?: boolean;
 
+  // =========================================================================
+  // AUDITORÍA
+  // =========================================================================
+
   @ApiProperty({
     description: 'Motivo del cambio (para auditoría)',
-    example: 'Ajuste inflacionario trimestral',
+    example: 'Ajuste de precios para ciclo 2026',
     required: false,
   })
   @IsOptional()

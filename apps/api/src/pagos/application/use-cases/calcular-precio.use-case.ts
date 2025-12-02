@@ -242,18 +242,19 @@ export class CalcularPrecioUseCase {
 
     const totalDescuentos = subtotal.minus(totalFinal);
 
-    // Analizar tipos de descuentos aplicados
+    // Analizar tipos de descuentos aplicados (Sistema Tiers 2026)
     const tiposDescuento = new Set(calculos.map((c) => c.tipoDescuento));
 
+    // Descuentos familiares (Sistema Tiers 2026)
     const tieneDescuentoHermanos =
-      tiposDescuento.has(TipoDescuento.HERMANOS_BASICO) ||
-      tiposDescuento.has(TipoDescuento.HERMANOS_MULTIPLE);
+      tiposDescuento.has(TipoDescuento.HERMANO_2) ||
+      tiposDescuento.has(TipoDescuento.HERMANO_3_MAS);
 
-    const tieneDescuentoMultipleActividades = tiposDescuento.has(
-      TipoDescuento.MULTIPLE_ACTIVIDADES,
-    );
+    // Legacy: Ya no aplica en Tiers 2026
+    const tieneDescuentoMultipleActividades = false;
 
-    const tieneDescuentoAACREA = tiposDescuento.has(TipoDescuento.AACREA);
+    // Legacy: Ya no existe descuento AACREA en Tiers 2026
+    const tieneDescuentoAACREA = false;
 
     // Calcular totales
     const totalActividades = calculos.length;

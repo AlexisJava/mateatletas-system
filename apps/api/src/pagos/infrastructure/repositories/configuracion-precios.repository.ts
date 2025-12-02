@@ -12,6 +12,15 @@ import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
  * Implementación del repositorio de Configuración de Precios
  * Infrastructure Layer - Implementa interface del Domain Layer
  *
+ * Sistema de Tiers 2026:
+ * - Arcade: $30.000/mes - 1 mundo async
+ * - Arcade+: $60.000/mes - 3 mundos async
+ * - Pro: $75.000/mes - 1 mundo async + 1 mundo sync con docente
+ *
+ * Descuentos familiares:
+ * - 2do hermano: 12%
+ * - 3er hermano en adelante: 20%
+ *
  * Responsabilidades:
  * - Convertir entre tipos de Prisma y tipos del Domain
  * - Manejar persistencia con PrismaService
@@ -128,25 +137,19 @@ export class ConfiguracionPreciosRepository
     config: Prisma.ConfiguracionPreciosGetPayload<object>,
   ): ConfiguracionPrecios {
     return {
-      precioClubMatematicas: new Decimal(
-        config.precio_club_matematicas.toString(),
+      // Precios por Tier (Sistema 2026)
+      precioArcade: new Decimal(config.precio_arcade.toString()),
+      precioArcadePlus: new Decimal(config.precio_arcade_plus.toString()),
+      precioPro: new Decimal(config.precio_pro.toString()),
+      // Descuentos familiares
+      descuentoHermano2: new Decimal(config.descuento_hermano_2.toString()),
+      descuentoHermano3Mas: new Decimal(
+        config.descuento_hermano_3_mas.toString(),
       ),
-      precioCursosEspecializados: new Decimal(
-        config.precio_cursos_especializados.toString(),
-      ),
-      precioMultipleActividades: new Decimal(
-        config.precio_multiple_actividades.toString(),
-      ),
-      precioHermanosBasico: new Decimal(
-        config.precio_hermanos_basico.toString(),
-      ),
-      precioHermanosMultiple: new Decimal(
-        config.precio_hermanos_multiple.toString(),
-      ),
-      descuentoAacreaPorcentaje: new Decimal(
-        config.descuento_aacrea_porcentaje.toString(),
-      ),
-      descuentoAacreaActivo: config.descuento_aacrea_activo,
+      // Configuración de notificaciones
+      diaVencimiento: config.dia_vencimiento,
+      diasAntesRecordatorio: config.dias_antes_recordatorio,
+      notificacionesActivas: config.notificaciones_activas,
     };
   }
 
@@ -156,30 +159,37 @@ export class ConfiguracionPreciosRepository
    */
   private mapearDomainAPrisma(
     config: Partial<ConfiguracionPrecios>,
-  ): Record<string, any> {
-    const resultado: Record<string, any> = {};
+  ): Record<string, unknown> {
+    const resultado: Record<string, unknown> = {};
 
-    if (config.precioClubMatematicas !== undefined) {
-      resultado.precio_club_matematicas = config.precioClubMatematicas;
+    // Precios por Tier
+    if (config.precioArcade !== undefined) {
+      resultado.precio_arcade = config.precioArcade;
     }
-    if (config.precioCursosEspecializados !== undefined) {
-      resultado.precio_cursos_especializados =
-        config.precioCursosEspecializados;
+    if (config.precioArcadePlus !== undefined) {
+      resultado.precio_arcade_plus = config.precioArcadePlus;
     }
-    if (config.precioMultipleActividades !== undefined) {
-      resultado.precio_multiple_actividades = config.precioMultipleActividades;
+    if (config.precioPro !== undefined) {
+      resultado.precio_pro = config.precioPro;
     }
-    if (config.precioHermanosBasico !== undefined) {
-      resultado.precio_hermanos_basico = config.precioHermanosBasico;
+
+    // Descuentos familiares
+    if (config.descuentoHermano2 !== undefined) {
+      resultado.descuento_hermano_2 = config.descuentoHermano2;
     }
-    if (config.precioHermanosMultiple !== undefined) {
-      resultado.precio_hermanos_multiple = config.precioHermanosMultiple;
+    if (config.descuentoHermano3Mas !== undefined) {
+      resultado.descuento_hermano_3_mas = config.descuentoHermano3Mas;
     }
-    if (config.descuentoAacreaPorcentaje !== undefined) {
-      resultado.descuento_aacrea_porcentaje = config.descuentoAacreaPorcentaje;
+
+    // Configuración de notificaciones
+    if (config.diaVencimiento !== undefined) {
+      resultado.dia_vencimiento = config.diaVencimiento;
     }
-    if (config.descuentoAacreaActivo !== undefined) {
-      resultado.descuento_aacrea_activo = config.descuentoAacreaActivo;
+    if (config.diasAntesRecordatorio !== undefined) {
+      resultado.dias_antes_recordatorio = config.diasAntesRecordatorio;
+    }
+    if (config.notificacionesActivas !== undefined) {
+      resultado.notificaciones_activas = config.notificacionesActivas;
     }
 
     return resultado;
@@ -191,18 +201,19 @@ export class ConfiguracionPreciosRepository
    */
   private extraerValoresParaHistorial(
     config: Prisma.ConfiguracionPreciosGetPayload<object>,
-  ): Record<string, string | boolean> {
+  ): Record<string, string | boolean | number> {
     return {
-      precio_club_matematicas: config.precio_club_matematicas.toString(),
-      precio_cursos_especializados:
-        config.precio_cursos_especializados.toString(),
-      precio_multiple_actividades:
-        config.precio_multiple_actividades.toString(),
-      precio_hermanos_basico: config.precio_hermanos_basico.toString(),
-      precio_hermanos_multiple: config.precio_hermanos_multiple.toString(),
-      descuento_aacrea_porcentaje:
-        config.descuento_aacrea_porcentaje.toString(),
-      descuento_aacrea_activo: config.descuento_aacrea_activo,
+      // Precios por Tier
+      precio_arcade: config.precio_arcade.toString(),
+      precio_arcade_plus: config.precio_arcade_plus.toString(),
+      precio_pro: config.precio_pro.toString(),
+      // Descuentos familiares
+      descuento_hermano_2: config.descuento_hermano_2.toString(),
+      descuento_hermano_3_mas: config.descuento_hermano_3_mas.toString(),
+      // Configuración de notificaciones
+      dia_vencimiento: config.dia_vencimiento,
+      dias_antes_recordatorio: config.dias_antes_recordatorio,
+      notificaciones_activas: config.notificaciones_activas,
     };
   }
 }

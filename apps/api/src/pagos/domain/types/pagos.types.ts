@@ -11,14 +11,13 @@ import { Decimal } from '@prisma/client/runtime/library';
 
 /**
  * Tipos de descuento aplicables
+ * Sistema de Tiers 2026: Descuentos familiares únicamente
  * Debe coincidir exactamente con enum TipoDescuento en schema.prisma
  */
 export enum TipoDescuento {
   NINGUNO = 'NINGUNO',
-  MULTIPLE_ACTIVIDADES = 'MULTIPLE_ACTIVIDADES',
-  HERMANOS_BASICO = 'HERMANOS_BASICO',
-  HERMANOS_MULTIPLE = 'HERMANOS_MULTIPLE',
-  AACREA = 'AACREA',
+  HERMANO_2 = 'HERMANO_2', // 12% descuento segundo hermano
+  HERMANO_3_MAS = 'HERMANO_3_MAS', // 20% descuento tercer hermano en adelante
   BECA = 'BECA',
 }
 
@@ -59,16 +58,27 @@ export type MetodoPago = 'Efectivo' | 'Transferencia' | 'MercadoPago' | 'Otro';
 
 /**
  * Configuración global de precios
- * Valores que puede actualizar el administrador
+ * Sistema de Tiers 2026:
+ * - Arcade: $30.000/mes - 1 mundo async
+ * - Arcade+: $60.000/mes - 3 mundos async
+ * - Pro: $75.000/mes - 1 mundo async + 1 mundo sync con docente
+ *
+ * Descuentos familiares:
+ * - 2do hermano: 12%
+ * - 3er hermano en adelante: 20%
  */
 export interface ConfiguracionPrecios {
-  readonly precioClubMatematicas: Decimal;
-  readonly precioCursosEspecializados: Decimal;
-  readonly precioMultipleActividades: Decimal;
-  readonly precioHermanosBasico: Decimal;
-  readonly precioHermanosMultiple: Decimal;
-  readonly descuentoAacreaPorcentaje: Decimal;
-  readonly descuentoAacreaActivo: boolean;
+  // Precios por Tier (Sistema 2026)
+  readonly precioArcade: Decimal;
+  readonly precioArcadePlus: Decimal;
+  readonly precioPro: Decimal;
+  // Descuentos familiares
+  readonly descuentoHermano2: Decimal;
+  readonly descuentoHermano3Mas: Decimal;
+  // Configuración de notificaciones
+  readonly diaVencimiento: number;
+  readonly diasAntesRecordatorio: number;
+  readonly notificacionesActivas: boolean;
 }
 
 /**
@@ -111,15 +121,21 @@ export interface TotalMensualOutput {
 
 /**
  * DTO para crear/actualizar configuración de precios
+ * Sistema de Tiers 2026
  */
 export interface ActualizarConfiguracionPreciosDto {
-  readonly precioClubMatematicas?: number;
-  readonly precioCursosEspecializados?: number;
-  readonly precioMultipleActividades?: number;
-  readonly precioHermanosBasico?: number;
-  readonly precioHermanosMultiple?: number;
-  readonly descuentoAacreaPorcentaje?: number;
-  readonly descuentoAacreaActivo?: boolean;
+  // Precios por Tier
+  readonly precioArcade?: number;
+  readonly precioArcadePlus?: number;
+  readonly precioPro?: number;
+  // Descuentos familiares
+  readonly descuentoHermano2?: number;
+  readonly descuentoHermano3Mas?: number;
+  // Configuración de notificaciones
+  readonly diaVencimiento?: number;
+  readonly diasAntesRecordatorio?: number;
+  readonly notificacionesActivas?: boolean;
+  // Auditoría
   readonly motivoCambio: string;
 }
 

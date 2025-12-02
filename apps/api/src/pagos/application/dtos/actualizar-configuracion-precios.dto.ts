@@ -3,6 +3,7 @@ import { Decimal } from 'decimal.js';
 /**
  * DTO de entrada para actualizar la configuración de precios
  * Input del use case ActualizarConfiguracionPreciosUseCase
+ * Sistema de Tiers 2026
  */
 export interface ActualizarConfiguracionPreciosInputDTO {
   /**
@@ -12,20 +13,18 @@ export interface ActualizarConfiguracionPreciosInputDTO {
   readonly adminId: string;
 
   /**
-   * Nuevos valores de precios (todos opcionales)
+   * Precios por Tier (todos opcionales)
    * Solo se actualizan los campos enviados
    */
-  readonly precioClubMatematicas?: Decimal;
-  readonly precioCursosEspecializados?: Decimal;
-  readonly precioMultipleActividades?: Decimal;
-  readonly precioHermanosBasico?: Decimal;
-  readonly precioHermanosMultiple?: Decimal;
+  readonly precioArcade?: Decimal;
+  readonly precioArcadePlus?: Decimal;
+  readonly precioPro?: Decimal;
 
   /**
-   * Configuración de descuento AACREA
+   * Descuentos familiares
    */
-  readonly descuentoAacreaPorcentaje?: Decimal;
-  readonly descuentoAacreaActivo?: boolean;
+  readonly descuentoHermano2?: Decimal;
+  readonly descuentoHermano3Mas?: Decimal;
 
   /**
    * Configuración de notificaciones
@@ -64,18 +63,21 @@ export interface ActualizarConfiguracionPreciosOutputDTO {
 
 /**
  * Representa la configuración de precios completa
+ * Sistema de Tiers 2026
  */
 export interface ConfiguracionPreciosDTO {
-  readonly precioClubMatematicas: Decimal;
-  readonly precioCursosEspecializados: Decimal;
-  readonly precioMultipleActividades: Decimal;
-  readonly precioHermanosBasico: Decimal;
-  readonly precioHermanosMultiple: Decimal;
-  readonly descuentoAacreaPorcentaje: Decimal;
-  readonly descuentoAacreaActivo: boolean;
+  // Precios por Tier
+  readonly precioArcade: Decimal;
+  readonly precioArcadePlus: Decimal;
+  readonly precioPro: Decimal;
+  // Descuentos familiares
+  readonly descuentoHermano2: Decimal;
+  readonly descuentoHermano3Mas: Decimal;
+  // Configuración de notificaciones
   readonly diaVencimiento: number;
   readonly diasAntesRecordatorio: number;
   readonly notificacionesActivas: boolean;
+  // Metadata
   readonly actualizadoEn: Date;
 }
 

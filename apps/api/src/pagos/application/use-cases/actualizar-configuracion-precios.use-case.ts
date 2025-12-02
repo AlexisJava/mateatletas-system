@@ -12,6 +12,15 @@ import { ConfiguracionPrecios } from '../../domain/types/pagos.types';
 /**
  * Use Case: Actualizar Configuración de Precios
  *
+ * Sistema de Tiers 2026:
+ * - Arcade: $30.000/mes - 1 mundo async
+ * - Arcade+: $60.000/mes - 3 mundos async
+ * - Pro: $75.000/mes - 1 mundo async + 1 mundo sync con docente
+ *
+ * Descuentos familiares:
+ * - 2do hermano: 12%
+ * - 3er hermano en adelante: 20%
+ *
  * Responsabilidades (Application Layer):
  * 1. Validar que existe configuración actual
  * 2. Validar cambios propuestos (rangos válidos, etc.)
@@ -84,13 +93,11 @@ export class ActualizarConfiguracionPreciosUseCase {
    * Valida los valores de los cambios propuestos
    */
   private validarCambios(input: ActualizarConfiguracionPreciosInputDTO): void {
-    // Validar precios no negativos
+    // Validar precios de Tiers no negativos
     const precios = [
-      input.precioClubMatematicas,
-      input.precioCursosEspecializados,
-      input.precioMultipleActividades,
-      input.precioHermanosBasico,
-      input.precioHermanosMultiple,
+      input.precioArcade,
+      input.precioArcadePlus,
+      input.precioPro,
     ].filter(Boolean);
 
     for (const precio of precios) {
@@ -99,11 +106,20 @@ export class ActualizarConfiguracionPreciosUseCase {
       }
     }
 
-    // Validar porcentaje de descuento AACREA
-    if (input.descuentoAacreaPorcentaje !== undefined) {
-      const porcentaje = input.descuentoAacreaPorcentaje;
-      if (porcentaje.lessThan(0) || porcentaje.greaterThan(100)) {
-        throw new Error('El porcentaje de descuento debe estar entre 0 y 100');
+    // Validar descuentos familiares (porcentajes)
+    const descuentos = [
+      { valor: input.descuentoHermano2, nombre: 'descuento segundo hermano' },
+      {
+        valor: input.descuentoHermano3Mas,
+        nombre: 'descuento tercer hermano en adelante',
+      },
+    ];
+
+    for (const descuento of descuentos) {
+      if (descuento.valor !== undefined) {
+        if (descuento.valor.lessThan(0) || descuento.valor.greaterThan(100)) {
+          throw new Error(`El ${descuento.nombre} debe estar entre 0 y 100`);
+        }
       }
     }
 
@@ -133,112 +149,90 @@ export class ActualizarConfiguracionPreciosUseCase {
   ): CambioRealizadoDTO[] {
     const cambios: CambioRealizadoDTO[] = [];
 
-    // Comparar precios
+    // Comparar precios de Tiers
     if (
-      propuesto.precioClubMatematicas &&
-      !propuesto.precioClubMatematicas.equals(actual.precioClubMatematicas)
+      propuesto.precioArcade &&
+      !propuesto.precioArcade.equals(actual.precioArcade)
     ) {
       cambios.push({
-        campo: 'precioClubMatematicas',
-        valorAnterior: actual.precioClubMatematicas,
-        valorNuevo: propuesto.precioClubMatematicas,
+        campo: 'precioArcade',
+        valorAnterior: actual.precioArcade,
+        valorNuevo: propuesto.precioArcade,
       });
     }
 
     if (
-      propuesto.precioCursosEspecializados &&
-      !propuesto.precioCursosEspecializados.equals(
-        actual.precioCursosEspecializados,
-      )
+      propuesto.precioArcadePlus &&
+      !propuesto.precioArcadePlus.equals(actual.precioArcadePlus)
     ) {
       cambios.push({
-        campo: 'precioCursosEspecializados',
-        valorAnterior: actual.precioCursosEspecializados,
-        valorNuevo: propuesto.precioCursosEspecializados,
+        campo: 'precioArcadePlus',
+        valorAnterior: actual.precioArcadePlus,
+        valorNuevo: propuesto.precioArcadePlus,
+      });
+    }
+
+    if (propuesto.precioPro && !propuesto.precioPro.equals(actual.precioPro)) {
+      cambios.push({
+        campo: 'precioPro',
+        valorAnterior: actual.precioPro,
+        valorNuevo: propuesto.precioPro,
+      });
+    }
+
+    // Comparar descuentos familiares
+    if (
+      propuesto.descuentoHermano2 &&
+      !propuesto.descuentoHermano2.equals(actual.descuentoHermano2)
+    ) {
+      cambios.push({
+        campo: 'descuentoHermano2',
+        valorAnterior: actual.descuentoHermano2,
+        valorNuevo: propuesto.descuentoHermano2,
       });
     }
 
     if (
-      propuesto.precioMultipleActividades &&
-      !propuesto.precioMultipleActividades.equals(
-        actual.precioMultipleActividades,
-      )
+      propuesto.descuentoHermano3Mas &&
+      !propuesto.descuentoHermano3Mas.equals(actual.descuentoHermano3Mas)
     ) {
       cambios.push({
-        campo: 'precioMultipleActividades',
-        valorAnterior: actual.precioMultipleActividades,
-        valorNuevo: propuesto.precioMultipleActividades,
-      });
-    }
-
-    if (
-      propuesto.precioHermanosBasico &&
-      !propuesto.precioHermanosBasico.equals(actual.precioHermanosBasico)
-    ) {
-      cambios.push({
-        campo: 'precioHermanosBasico',
-        valorAnterior: actual.precioHermanosBasico,
-        valorNuevo: propuesto.precioHermanosBasico,
-      });
-    }
-
-    if (
-      propuesto.precioHermanosMultiple &&
-      !propuesto.precioHermanosMultiple.equals(actual.precioHermanosMultiple)
-    ) {
-      cambios.push({
-        campo: 'precioHermanosMultiple',
-        valorAnterior: actual.precioHermanosMultiple,
-        valorNuevo: propuesto.precioHermanosMultiple,
-      });
-    }
-
-    // Comparar descuento AACREA
-    if (
-      propuesto.descuentoAacreaPorcentaje &&
-      !propuesto.descuentoAacreaPorcentaje.equals(
-        actual.descuentoAacreaPorcentaje,
-      )
-    ) {
-      cambios.push({
-        campo: 'descuentoAacreaPorcentaje',
-        valorAnterior: actual.descuentoAacreaPorcentaje,
-        valorNuevo: propuesto.descuentoAacreaPorcentaje,
-      });
-    }
-
-    if (
-      propuesto.descuentoAacreaActivo !== undefined &&
-      propuesto.descuentoAacreaActivo !== actual.descuentoAacreaActivo
-    ) {
-      cambios.push({
-        campo: 'descuentoAacreaActivo',
-        valorAnterior: actual.descuentoAacreaActivo,
-        valorNuevo: propuesto.descuentoAacreaActivo,
+        campo: 'descuentoHermano3Mas',
+        valorAnterior: actual.descuentoHermano3Mas,
+        valorNuevo: propuesto.descuentoHermano3Mas,
       });
     }
 
     // Comparar configuración de notificaciones
-    if (propuesto.diaVencimiento !== undefined) {
+    if (
+      propuesto.diaVencimiento !== undefined &&
+      propuesto.diaVencimiento !== actual.diaVencimiento
+    ) {
       cambios.push({
         campo: 'diaVencimiento',
-        valorAnterior: 15, // Valor por defecto del schema
+        valorAnterior: actual.diaVencimiento,
         valorNuevo: propuesto.diaVencimiento,
       });
     }
 
-    if (propuesto.diasAntesRecordatorio !== undefined) {
+    if (
+      propuesto.diasAntesRecordatorio !== undefined &&
+      propuesto.diasAntesRecordatorio !== actual.diasAntesRecordatorio
+    ) {
       cambios.push({
         campo: 'diasAntesRecordatorio',
-        valorAnterior: 5, // Valor por defecto del schema
+        valorAnterior: actual.diasAntesRecordatorio,
         valorNuevo: propuesto.diasAntesRecordatorio,
       });
     }
 
-    if (propuesto.notificacionesActivas !== undefined) {
+    if (
+      propuesto.notificacionesActivas !== undefined &&
+      propuesto.notificacionesActivas !== actual.notificacionesActivas
+    ) {
       cambios.push({
         campo: 'notificacionesActivas',
-        valorAnterior: true, // Valor por defecto del schema
+        valorAnterior: actual.notificacionesActivas,
         valorNuevo: propuesto.notificacionesActivas,
       });
     }
@@ -249,62 +243,47 @@ export class ActualizarConfiguracionPreciosUseCase {
   /**
    * Construye el objeto de actualización parcial
    *
-   * IMPORTANTE: Los precios con descuento se calculan AUTOMÁTICAMENTE
-   * cuando se actualiza el precio base (Club Matemáticas)
-   *
-   * Porcentajes de descuento FIJOS:
-   * - Múltiples Actividades: 12% descuento
-   * - Hermanos Básico: 12% descuento
-   * - Hermanos Múltiple: 24% descuento
+   * Sistema de Tiers 2026:
+   * - Los precios de cada Tier son independientes
+   * - Los descuentos familiares se aplican sobre cualquier Tier
    *
    * CONTABILIDAD: Los precios en ARS deben ser enteros (sin centavos)
-   * Por eso usamos .toDecimalPlaces(0, Decimal.ROUND_HALF_UP) para redondear
    */
   private construirActualizacion(
     input: ActualizarConfiguracionPreciosInputDTO,
   ): Partial<ConfiguracionPrecios> {
-    // Usamos un objeto mutable interno y luego lo retornamos con type assertion
-    const actualizacion: Record<string, Decimal | boolean> = {};
+    const actualizacion: Record<string, Decimal | boolean | number> = {};
 
-    // Precio base Club Matemáticas
-    if (input.precioClubMatematicas) {
-      actualizacion.precioClubMatematicas = input.precioClubMatematicas;
-
-      // CALCULAR AUTOMÁTICAMENTE los precios con descuento
-      // Múltiples Actividades = Club Mat - 12% (redondeado a entero)
-      actualizacion.precioMultipleActividades = input.precioClubMatematicas
-        .mul(88) // 100 - 12 = 88
-        .div(100)
-        .toDecimalPlaces(0, Decimal.ROUND_HALF_UP);
-
-      // Hermanos Básico = Club Mat - 12% (redondeado a entero)
-      actualizacion.precioHermanosBasico = input.precioClubMatematicas
-        .mul(88)
-        .div(100)
-        .toDecimalPlaces(0, Decimal.ROUND_HALF_UP);
-
-      // Hermanos Múltiple = Club Mat - 24% (redondeado a entero)
-      actualizacion.precioHermanosMultiple = input.precioClubMatematicas
-        .mul(76) // 100 - 24 = 76
-        .div(100)
-        .toDecimalPlaces(0, Decimal.ROUND_HALF_UP);
+    // Precios por Tier
+    if (input.precioArcade) {
+      actualizacion.precioArcade = input.precioArcade;
+    }
+    if (input.precioArcadePlus) {
+      actualizacion.precioArcadePlus = input.precioArcadePlus;
+    }
+    if (input.precioPro) {
+      actualizacion.precioPro = input.precioPro;
     }
 
-    // Precio Cursos Especializados (independiente)
-    if (input.precioCursosEspecializados) {
-      actualizacion.precioCursosEspecializados =
-        input.precioCursosEspecializados;
+    // Descuentos familiares
+    if (input.descuentoHermano2) {
+      actualizacion.descuentoHermano2 = input.descuentoHermano2;
+    }
+    if (input.descuentoHermano3Mas) {
+      actualizacion.descuentoHermano3Mas = input.descuentoHermano3Mas;
     }
 
-    // Descuento AACREA
-    if (input.descuentoAacreaPorcentaje) {
-      actualizacion.descuentoAacreaPorcentaje = input.descuentoAacreaPorcentaje;
+    // Configuración de notificaciones
+    if (input.diaVencimiento !== undefined) {
+      actualizacion.diaVencimiento = input.diaVencimiento;
     }
-    if (input.descuentoAacreaActivo !== undefined) {
-      actualizacion.descuentoAacreaActivo = input.descuentoAacreaActivo;
+    if (input.diasAntesRecordatorio !== undefined) {
+      actualizacion.diasAntesRecordatorio = input.diasAntesRecordatorio;
+    }
+    if (input.notificacionesActivas !== undefined) {
+      actualizacion.notificacionesActivas = input.notificacionesActivas;
     }
 
-    // Type assertion segura porque sabemos que los valores son correctos
     return actualizacion as Partial<ConfiguracionPrecios>;
   }
 
@@ -315,16 +294,18 @@ export class ActualizarConfiguracionPreciosUseCase {
     config: ConfiguracionPrecios,
   ): ConfiguracionPreciosDTO {
     return {
-      precioClubMatematicas: config.precioClubMatematicas,
-      precioCursosEspecializados: config.precioCursosEspecializados,
-      precioMultipleActividades: config.precioMultipleActividades,
-      precioHermanosBasico: config.precioHermanosBasico,
-      precioHermanosMultiple: config.precioHermanosMultiple,
-      descuentoAacreaPorcentaje: config.descuentoAacreaPorcentaje,
-      descuentoAacreaActivo: config.descuentoAacreaActivo,
-      diaVencimiento: 15, // TODO: obtener del config cuando esté en el domain type
-      diasAntesRecordatorio: 5,
-      notificacionesActivas: true,
+      // Precios por Tier
+      precioArcade: config.precioArcade,
+      precioArcadePlus: config.precioArcadePlus,
+      precioPro: config.precioPro,
+      // Descuentos familiares
+      descuentoHermano2: config.descuentoHermano2,
+      descuentoHermano3Mas: config.descuentoHermano3Mas,
+      // Configuración de notificaciones
+      diaVencimiento: config.diaVencimiento,
+      diasAntesRecordatorio: config.diasAntesRecordatorio,
+      notificacionesActivas: config.notificacionesActivas,
+      // Metadata
       actualizadoEn: new Date(),
     };
   }

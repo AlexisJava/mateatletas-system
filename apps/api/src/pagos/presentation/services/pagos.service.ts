@@ -9,9 +9,10 @@ import { InscripcionMensualRepository } from '../../infrastructure/repositories/
 import { MercadoPagoService } from '../../mercadopago.service';
 import { PrismaService } from '../../../core/database/prisma.service';
 import {
-  EstadoMercadoPago,
+  EstadoPago as EstadoPagoMP,
   mapearEstadoMercadoPago,
 } from '../../../domain/constants';
+import { EstadoPago } from '../../domain/types/pagos.types';
 import {
   CalcularPrecioInputDTO,
   CalcularPrecioOutputDTO,
@@ -82,6 +83,7 @@ export class PagosService {
   /**
    * Actualiza la configuración de precios
    * Convierte numbers a Decimals antes de llamar al Use Case
+   * Sistema de Tiers 2026
    */
   async actualizarConfiguracionPrecios(
     requestDto: ActualizarConfiguracionPreciosRequestDto,
@@ -90,25 +92,24 @@ export class PagosService {
     // IMPORTANTE: Convertir numbers a Decimals
     const applicationDto: ActualizarConfiguracionPreciosInputDTO = {
       adminId: requestDto.adminId,
-      precioClubMatematicas: requestDto.precioClubMatematicas
-        ? new Decimal(requestDto.precioClubMatematicas)
+      // Precios por Tier (Sistema 2026)
+      precioArcade: requestDto.precioArcade
+        ? new Decimal(requestDto.precioArcade)
         : undefined,
-      precioCursosEspecializados: requestDto.precioCursosEspecializados
-        ? new Decimal(requestDto.precioCursosEspecializados)
+      precioArcadePlus: requestDto.precioArcadePlus
+        ? new Decimal(requestDto.precioArcadePlus)
         : undefined,
-      precioMultipleActividades: requestDto.precioMultipleActividades
-        ? new Decimal(requestDto.precioMultipleActividades)
+      precioPro: requestDto.precioPro
+        ? new Decimal(requestDto.precioPro)
         : undefined,
-      precioHermanosBasico: requestDto.precioHermanosBasico
-        ? new Decimal(requestDto.precioHermanosBasico)
+      // Descuentos familiares
+      descuentoHermano2: requestDto.descuentoHermano2
+        ? new Decimal(requestDto.descuentoHermano2)
         : undefined,
-      precioHermanosMultiple: requestDto.precioHermanosMultiple
-        ? new Decimal(requestDto.precioHermanosMultiple)
+      descuentoHermano3Mas: requestDto.descuentoHermano3Mas
+        ? new Decimal(requestDto.descuentoHermano3Mas)
         : undefined,
-      descuentoAacreaPorcentaje: requestDto.descuentoAacreaPorcentaje
-        ? new Decimal(requestDto.descuentoAacreaPorcentaje)
-        : undefined,
-      descuentoAacreaActivo: requestDto.descuentoAacreaActivo,
+      // Configuración de notificaciones
       diaVencimiento: requestDto.diaVencimiento,
       diasAntesRecordatorio: requestDto.diasAntesRecordatorio,
       notificacionesActivas: requestDto.notificacionesActivas,
@@ -184,7 +185,7 @@ export class PagosService {
       await this.inscripcionRepo.obtenerInscripcionesPorPeriodo(periodo);
 
     // Filtrar solo pendientes
-    return inscripciones.filter((i) => i.estadoPago === 'Pendiente');
+    return inscripciones.filter((i) => i.estadoPago === EstadoPago.Pendiente);
   }
 
   /**
@@ -305,11 +306,11 @@ export class PagosService {
     let nuevoEstado: 'Activa' | 'Pendiente' | 'Cancelada' = 'Pendiente';
 
     switch (estadoPago) {
-      case 'PAGADO':
+      case EstadoPagoMP.PAGADO:
         nuevoEstado = 'Activa';
         break;
-      case 'CANCELADO':
-      case 'RECHAZADO':
+      case EstadoPagoMP.CANCELADO:
+      case EstadoPagoMP.RECHAZADO:
         nuevoEstado = 'Pendiente'; // Permitir reintentar
         break;
       default:
@@ -366,11 +367,11 @@ export class PagosService {
     let nuevoEstado: 'Pagado' | 'Pendiente' = 'Pendiente';
 
     switch (estadoPago) {
-      case 'PAGADO':
+      case EstadoPagoMP.PAGADO:
         nuevoEstado = 'Pagado';
         break;
-      case 'CANCELADO':
-      case 'RECHAZADO':
+      case EstadoPagoMP.CANCELADO:
+      case EstadoPagoMP.RECHAZADO:
         nuevoEstado = 'Pendiente'; // Permitir reintentar
         break;
       default:

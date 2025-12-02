@@ -570,6 +570,25 @@ model Admin {
   @@map("admins")
 }
 
+/// Registro de intentos de login para seguridad y rate limiting
+/// Almacena tanto intentos exitosos como fallidos para auditoría
+model LoginAttempt {
+  /// Identificador único del intento
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Email usado en el intento de login
+  email     String   @db.VarChar(255)
+  /// Dirección IP desde donde se hizo el intento
+  ip        String   @db.VarChar(45)
+  /// Si el intento fue exitoso o no
+  success   Boolean  @default(false)
+  /// Timestamp del intento
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([email], name: "idx_login_attempts_email")
+  @@index([createdAt], name: "idx_login_attempts_created_at")
+  @@map("login_attempts")
+}
+
 /// Modelo para productos del catálogo
 /// Representa los productos que se pueden comprar: suscripciones, cursos, recursos
 model Producto {
@@ -1649,22 +1668,19 @@ enum PrioridadTarea {
 
 /// Configuración global de precios (Tabla singleton)
 /// Solo existe UN registro con id="singleton"
+/// Sistema de Tiers 2026: Arcade, Arcade+, Pro
 model ConfiguracionPrecios {
   /// ID fijo "singleton" para garantizar un solo registro
   id String @id @default("singleton")
 
-  /// Precios base por tipo de producto
-  precio_club_matematicas      Decimal @default(50000) @db.Decimal(10, 2)
-  precio_cursos_especializados Decimal @default(55000) @db.Decimal(10, 2)
+  /// Precios por Tier (Sistema 2026)
+  precio_arcade      Decimal @default(30000) @db.Decimal(10, 2)
+  precio_arcade_plus Decimal @default(60000) @db.Decimal(10, 2)
+  precio_pro         Decimal @default(75000) @db.Decimal(10, 2)
 
-  /// Precios con descuentos configurables
-  precio_multiple_actividades Decimal @default(44000) @db.Decimal(10, 2)
-  precio_hermanos_basico      Decimal @default(44000) @db.Decimal(10, 2)
-  precio_hermanos_multiple    Decimal @default(38000) @db.Decimal(10, 2)
-
-  /// Descuento AACREA (Asociación Altas Capacidades)
-  descuento_aacrea_porcentaje Decimal @default(20) @db.Decimal(5, 2)
-  descuento_aacrea_activo     Boolean @default(true)
+  /// Descuentos familiares
+  descuento_hermano_2    Decimal @default(12) @db.Decimal(5, 2) // 12% segundo hermano
+  descuento_hermano_3_mas Decimal @default(20) @db.Decimal(5, 2) // 20% tercer hermano en adelante
 
   /// Configuración de notificaciones
   dia_vencimiento         Int     @default(15)
@@ -1798,10 +1814,8 @@ model Beca {
 /// Tipos de descuento aplicables
 enum TipoDescuento {
   NINGUNO
-  MULTIPLE_ACTIVIDADES
-  HERMANOS_BASICO
-  HERMANOS_MULTIPLE
-  AACREA
+  HERMANO_2        // 12% descuento segundo hermano
+  HERMANO_3_MAS    // 20% descuento tercer hermano en adelante
   BECA
 
   @@map("tipo_descuento")
@@ -3485,14 +3499,16 @@ enum TipoRecursoStudio {
 }
 
 /// Categoría de componente del catálogo Studio
-/// Agrupa los 95+ componentes por tipo funcional
+/// Agrupa los 95 componentes por tipo funcional según MATEATLETAS_STUDIO.md
 enum CategoriaComponente {
-  INTERACTIVO // DragDrop, MultipleChoice, FillBlanks, etc.
-  CONTENIDO // TextBlock, ImageDisplay, VideoEmbed, etc.
-  EDITOR_CODIGO // ScratchJr, Blockly, PythonTurtle, etc.
-  MULTIMEDIA // AudioPlayer, VideoPlayer, ImageGallery, etc.
-  GAMIFICACION // ProgressBar, XPCounter, BadgeDisplay, etc.
-  EVALUACION // Quiz, Survey, ChallengeMode, etc.
+  INTERACTIVO // DragDrop, MultipleChoice, FillBlanks, etc. (15)
+  MOTRICIDAD_FINA // PinchZoom, RotateGesture, TracePath, etc. (10)
+  SIMULADOR // MoleculeBuilder3D, GravitySandbox, CellExplorer, etc. (25)
+  EDITOR_CODIGO // BlockEditor, PythonEditor, LuaEditor, etc. (10)
+  CREATIVO // PixelArtEditor, VectorDrawing, 3DModeler, etc. (10)
+  MULTIMEDIA // VideoPlayer, AudioPlayer, InteractivePresentation, etc. (9)
+  EVALUACION // Quiz, PracticeMode, ChallengeMode, etc. (8)
+  MULTIPLAYER // SharedWhiteboard, TeamChallenge, DebateArena, etc. (8)
 
   @@map("categoria_componente")
 }

@@ -140,15 +140,20 @@ export type MetricasDashboardResponse = z.infer<typeof metricasDashboardResponse
 
 /**
  * Configuración de precios editable por administradores.
+ * Sistema de Tiers 2026: Arcade ($30k), Arcade+ ($60k), Pro ($75k)
  */
 export const configuracionPreciosSchema = z.object({
-  precioClubMatematicas: z.string(),
-  precioCursosEspecializados: z.string(),
-  precioMultipleActividades: z.string(),
-  precioHermanosBasico: z.string(),
-  precioHermanosMultiple: z.string(),
-  descuentoAacreaPorcentaje: z.string(),
-  descuentoAacreaActivo: z.boolean(),
+  // Precios por Tier (Sistema 2026)
+  precioArcade: z.string(),
+  precioArcadePlus: z.string(),
+  precioPro: z.string(),
+  // Descuentos familiares
+  descuentoHermano2: z.string(), // 12% segundo hermano
+  descuentoHermano3Mas: z.string(), // 20% tercer hermano en adelante
+  // Configuración de notificaciones
+  diaVencimiento: z.number().int().min(1).max(31),
+  diasAntesRecordatorio: z.number().int().nonnegative(),
+  notificacionesActivas: z.boolean(),
 });
 
 export type ConfiguracionPrecios = z.infer<typeof configuracionPreciosSchema>;
@@ -210,16 +215,18 @@ export type EstudianteConDescuento = z.infer<typeof estudianteConDescuentoSchema
 
 /**
  * Request para actualizar configuración de precios.
+ * Sistema de Tiers 2026
  */
 export const actualizarConfiguracionPreciosSchema = z.object({
   adminId: z.string(),
-  precioClubMatematicas: z.number().optional(),
-  precioCursosEspecializados: z.number().optional(),
-  precioMultipleActividades: z.number().optional(),
-  precioHermanosBasico: z.number().optional(),
-  precioHermanosMultiple: z.number().optional(),
-  descuentoAacreaPorcentaje: z.number().optional(),
-  descuentoAacreaActivo: z.boolean().optional(),
+  // Precios por Tier
+  precioArcade: z.number().optional(),
+  precioArcadePlus: z.number().optional(),
+  precioPro: z.number().optional(),
+  // Descuentos familiares
+  descuentoHermano2: z.number().optional(),
+  descuentoHermano3Mas: z.number().optional(),
+  // Configuración de notificaciones
   diaVencimiento: z.number().int().min(1).max(31).optional(),
   diasAntesRecordatorio: z.number().int().nonnegative().optional(),
   notificacionesActivas: z.boolean().optional(),
