@@ -180,15 +180,12 @@ export default function CredencialesPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
-            <Key className="w-8 h-8 text-amber-400" />
-            Credenciales de Acceso
-          </h1>
-          <p className="text-white/60 mt-1 text-sm">
+          <h1 className="text-2xl font-bold text-[var(--admin-text)]">Credenciales de Acceso</h1>
+          <p className="text-sm text-[var(--admin-text-muted)] mt-1">
             Gestión de credenciales de primer ingreso para todos los usuarios
           </p>
         </div>
@@ -196,39 +193,39 @@ export default function CredencialesPage() {
         <div className="flex gap-3">
           <button
             onClick={() => setShowPasswords(!showPasswords)}
-            className="px-4 py-2 backdrop-blur-xl bg-purple-500/[0.08] border border-purple-500/30 hover:bg-purple-500/20 text-white/90 rounded-xl font-semibold transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2"
+            className="admin-btn admin-btn-secondary flex items-center gap-2"
           >
             {showPasswords ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            {showPasswords ? 'Ocultar' : 'Mostrar'} Contraseñas
+            {showPasswords ? 'Ocultar' : 'Mostrar'}
           </button>
 
           <div className="relative">
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="px-4 py-2 backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/30 hover:bg-emerald-500/20 text-white/90 rounded-xl font-semibold transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2"
+              className="admin-btn admin-btn-secondary flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               Exportar
             </button>
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 backdrop-blur-xl bg-gradient-to-br from-emerald-900/95 to-teal-900/95 rounded-xl shadow-2xl shadow-emerald-500/20 border border-emerald-500/30 overflow-hidden z-20">
+              <div className="absolute right-0 mt-2 w-48 bg-[var(--admin-surface-2)] rounded-lg shadow-lg border border-[var(--admin-border)] py-1 z-20">
                 <button
                   onClick={() => handleExport('excel')}
-                  className="block w-full text-left px-4 py-2 text-white/90 hover:bg-green-500/20 transition-all text-sm font-medium border-b border-emerald-500/20"
+                  className="w-full px-4 py-2 text-left hover:bg-[var(--admin-surface-3)] text-sm text-[var(--admin-text)] transition-colors flex items-center gap-2"
                 >
-                  📊 Excel (.xlsx)
+                  <span className="text-[var(--status-success)]">📊</span> Excel (.xlsx)
                 </button>
                 <button
                   onClick={() => handleExport('csv')}
-                  className="block w-full text-left px-4 py-2 text-white/90 hover:bg-blue-500/20 transition-all text-sm font-medium border-b border-emerald-500/20"
+                  className="w-full px-4 py-2 text-left hover:bg-[var(--admin-surface-3)] text-sm text-[var(--admin-text)] transition-colors flex items-center gap-2"
                 >
-                  📄 CSV (.csv)
+                  <span className="text-[var(--status-info)]">📄</span> CSV (.csv)
                 </button>
                 <button
                   onClick={() => handleExport('pdf')}
-                  className="block w-full text-left px-4 py-2 text-white/90 hover:bg-red-500/20 transition-all text-sm font-medium"
+                  className="w-full px-4 py-2 text-left hover:bg-[var(--admin-surface-3)] text-sm text-[var(--admin-text)] transition-colors flex items-center gap-2"
                 >
-                  📕 PDF (.pdf)
+                  <span className="text-[var(--status-danger)]">📕</span> PDF (.pdf)
                 </button>
               </div>
             )}

@@ -46,37 +46,46 @@ const eslintConfig = [
       '@typescript-eslint/no-explicit-any': 'error',
 
       // ===== 🚫 PROHIBIDO: @ts-ignore, @ts-nocheck =====
-      '@typescript-eslint/ban-ts-comment': ['error', {
-        'ts-expect-error': 'allow-with-description',
-        'ts-ignore': true,
-        'ts-nocheck': true,
-        'ts-check': false,
-        minimumDescriptionLength: 10,
-      }],
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        {
+          'ts-expect-error': 'allow-with-description',
+          'ts-ignore': true,
+          'ts-nocheck': true,
+          'ts-check': false,
+          minimumDescriptionLength: 10,
+        },
+      ],
 
       // ===== 🚫 PROHIBIDO: console.* en producción =====
       'no-console': ['error', { allow: ['warn', 'error'] }],
 
       // ===== 🚫 PROHIBIDO: variables sin usar =====
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_',
-        ignoreRestSiblings: true,
-      }],
-      'no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        args: 'after-used',
-        ignoreRestSiblings: true,
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          ignoreRestSiblings: true,
+        },
+      ],
 
       // ===== CÓDIGO LIMPIO =====
       'no-debugger': 'error',
       'no-alert': 'error',
       'no-var': 'error',
       'prefer-const': 'error',
-      'eqeqeq': ['error', 'always'],
+      eqeqeq: ['error', 'always'],
 
       // ===== HOOKS DE REACT =====
       'react-hooks/exhaustive-deps': 'warn',

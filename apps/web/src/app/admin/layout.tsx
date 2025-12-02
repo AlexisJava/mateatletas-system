@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { useAuthStore } from '@/store/auth.store';
 import { ProtectedLayout } from '@/components/shared/ProtectedLayout';
 import { LoadingScreen } from '@/components/shared/LoadingScreen';
@@ -16,83 +17,63 @@ import {
   Bell,
   Menu,
   X,
-  Crown,
-  Zap,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle2,
-  AlertCircle,
-  Info,
   Key,
-  Palette,
+  Sparkles,
+  ChevronRight,
+  Settings,
+  Search,
+  ClipboardList,
 } from 'lucide-react';
 
 /**
- * 🚀 MATEATLETAS OS - Layout Principal
- *
- * Sistema Operativo del Club con:
- * - Sidebar estilo macOS/Windows 11
- * - Fondo dinámico con gradientes
- * - Topbar con información viva
- * - Diseño moderno y colorido
+ * Admin Layout v2.0 - Mission Control Design
+ * Clean, professional, functional
  */
 
-const navItems = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  badge?: number | null;
+}
+
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
+
+const navSections: NavSection[] = [
   {
-    href: '/admin/dashboard',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-    color: 'from-violet-500 to-purple-500',
-    badge: null,
+    title: 'Principal',
+    items: [
+      { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      {
+        href: '/admin/inscripciones-2026',
+        label: 'Inscripciones 2026',
+        icon: ClipboardList,
+        badge: null,
+      },
+    ],
   },
   {
-    href: '/admin/usuarios',
-    label: 'Usuarios',
-    icon: Users,
-    color: 'from-blue-500 to-cyan-500',
-    badge: null,
+    title: 'Gestión',
+    items: [
+      { href: '/admin/usuarios', label: 'Usuarios', icon: Users },
+      { href: '/admin/estudiantes', label: 'Estudiantes', icon: GraduationCap },
+      { href: '/admin/clases', label: 'Clubes y Cursos', icon: BookOpen },
+      { href: '/admin/credenciales', label: 'Credenciales', icon: Key },
+    ],
   },
   {
-    href: '/admin/credenciales',
-    label: 'Credenciales',
-    icon: Key,
-    color: 'from-amber-500 to-orange-500',
-    badge: null,
+    title: 'Finanzas',
+    items: [
+      { href: '/admin/pagos', label: 'Pagos', icon: CreditCard },
+      { href: '/admin/reportes', label: 'Reportes', icon: BarChart3 },
+    ],
   },
   {
-    href: '/admin/clases',
-    label: 'Clubes y Cursos',
-    icon: BookOpen,
-    color: 'from-emerald-500 to-teal-500',
-    badge: null,
-  },
-  {
-    href: '/admin/estudiantes',
-    label: 'Estudiantes',
-    icon: GraduationCap,
-    color: 'from-teal-500 to-cyan-500',
-    badge: null,
-  },
-  {
-    href: '/admin/studio',
-    label: 'Studio',
-    icon: Palette,
-    color: 'from-pink-500 to-rose-500',
-    badge: null,
-  },
-  {
-    href: '/admin/pagos',
-    label: 'Pagos',
-    icon: CreditCard,
-    color: 'from-green-500 to-emerald-500',
-    badge: null,
-  },
-  {
-    href: '/admin/reportes',
-    label: 'Reportes',
-    icon: BarChart3,
-    color: 'from-orange-500 to-red-500',
-    badge: null,
+    title: 'Contenido',
+    items: [{ href: '/admin/studio', label: 'Studio', icon: Sparkles }],
   },
 ];
 
@@ -104,16 +85,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 }
 
-/**
- * Contenido interno del AdminLayout - Solo UI, sin lógica de auth
- */
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -127,407 +103,239 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     return pathname?.startsWith(route);
   };
 
+  // Get current page info
+  const currentItem = navSections.flatMap((s) => s.items).find((item) => isActiveRoute(item.href));
+
   return (
-    <div className="h-screen relative overflow-hidden">
-      {/* FONDO TIPO SISTEMA OPERATIVO */}
-      {/* Gradiente base oscuro elegante */}
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-black" />
+    <div className="h-screen bg-[var(--admin-bg)] flex overflow-hidden" data-admin="true">
+      {/* Sidebar - Desktop */}
+      <aside className="hidden lg:flex lg:flex-col w-64 bg-[var(--admin-surface-0)] border-r border-[var(--admin-border)]">
+        {/* Logo */}
+        <div className="h-16 flex items-center px-5 border-b border-[var(--admin-border)]">
+          <Link href="/admin" className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <span className="text-[15px] font-bold text-[var(--admin-text)]">Mateatletas</span>
+              <span className="block text-[11px] text-[var(--admin-text-muted)] -mt-0.5">
+                Admin Panel
+              </span>
+            </div>
+          </Link>
+        </div>
 
-      {/* Gradientes de colores dinámicos */}
-      <div className="fixed inset-0 bg-gradient-to-tr from-violet-900/20 via-transparent to-blue-900/20" />
-      <div className="fixed inset-0 bg-gradient-to-bl from-emerald-900/10 via-transparent to-transparent" />
-
-      {/* Grid sutil de fondo */}
-      <div
-        className="fixed inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `
-              linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
-            `,
-          backgroundSize: '50px 50px',
-        }}
-      />
-
-      {/* Orbes de luz flotantes */}
-      <div className="fixed top-0 right-0 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-pulse" />
-      <div className="fixed bottom-0 left-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse animation-delay-2000" />
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse animation-delay-4000" />
-
-      <div className="relative z-10 h-full">
-        <div className="flex h-full overflow-hidden">
-          {/* SIDEBAR ESTILO macOS */}
-          <aside className="hidden md:flex md:flex-shrink-0">
-            <div
-              className={`flex flex-col ${sidebarCollapsed ? 'w-20' : 'w-72'} backdrop-blur-2xl bg-white/5 border-r border-white/10 shadow-2xl transition-all duration-300`}
-            >
-              {/* Logo y Branding */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
-                {!sidebarCollapsed ? (
-                  <>
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-violet-500 to-purple-500 blur-lg opacity-50" />
-                        <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 flex items-center justify-center shadow-2xl shadow-violet-500/50">
-                          <Crown className="w-7 h-7 text-white" strokeWidth={2.5} />
-                        </div>
-                      </div>
-                      <div>
-                        <h1 className="text-lg font-black bg-gradient-to-r from-white to-violet-200 bg-clip-text text-transparent">
-                          Mateatletas OS
-                        </h1>
-                        <p className="text-xs text-white/50 font-bold">Admin Portal</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setSidebarCollapsed(true)}
-                      className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                      title="Colapsar sidebar"
-                    >
-                      <ChevronLeft className="w-5 h-5 text-white/70" strokeWidth={2.5} />
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => setSidebarCollapsed(false)}
-                    className="mx-auto p-2 rounded-lg hover:bg-white/10 transition-colors"
-                    title="Expandir sidebar"
-                  >
-                    <ChevronRight className="w-5 h-5 text-white/70" strokeWidth={2.5} />
-                  </button>
-                )}
-              </div>
-
-              {/* Navigation */}
-              <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-hide">
-                {navItems.map((item) => {
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin">
+          {navSections.map((section) => (
+            <div key={section.title}>
+              <h3 className="px-3 mb-2 text-[11px] font-semibold text-[var(--admin-text-muted)] uppercase tracking-wider">
+                {section.title}
+              </h3>
+              <div className="space-y-1">
+                {section.items.map((item) => {
                   const Icon = item.icon;
                   const isActive = isActiveRoute(item.href);
 
                   return (
-                    <a
+                    <Link
                       key={item.href}
                       href={item.href}
                       className={`
-                          group relative flex items-center rounded-xl
-                          transition-all duration-300
-                          ${sidebarCollapsed ? 'justify-center px-2 py-3.5' : 'gap-4 px-4 py-3.5'}
-                          ${isActive ? 'bg-white/10 shadow-lg' : 'hover:bg-white/5'}
-                        `}
+                        group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-medium transition-all duration-150
+                        ${
+                          isActive
+                            ? 'bg-[var(--admin-accent-muted)] text-[var(--admin-accent)]'
+                            : 'text-[var(--admin-text-secondary)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface-2)]'
+                        }
+                      `}
                     >
-                      {/* Barra lateral de color cuando está activo - solo en modo expandido */}
-                      {isActive && !sidebarCollapsed && (
-                        <div
-                          className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b ${item.color} rounded-r-full`}
-                        />
+                      <Icon
+                        className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? 'text-[var(--admin-accent)]' : ''}`}
+                      />
+                      <span className="flex-1">{item.label}</span>
+                      {item.badge !== undefined && item.badge !== null && (
+                        <span className="px-2 py-0.5 text-[11px] font-semibold bg-[var(--status-danger)] text-white rounded-full">
+                          {item.badge}
+                        </span>
                       )}
-
-                      {/* Icono con gradiente */}
-                      <div className="relative flex-shrink-0">
-                        {isActive && (
-                          <div
-                            className={`absolute inset-0 bg-gradient-to-br ${item.color} blur-md opacity-50`}
-                          />
-                        )}
-                        <div
-                          className={`relative w-10 h-10 rounded-lg ${isActive ? `bg-gradient-to-br ${item.color}` : 'bg-white/5'} flex items-center justify-center transition-all duration-300 group-hover:scale-110`}
-                        >
-                          <Icon className="w-5 h-5 text-white" strokeWidth={2.5} />
-                        </div>
-                      </div>
-
-                      {/* Label - Solo visible cuando no está colapsado */}
-                      {!sidebarCollapsed && (
-                        <>
-                          <span
-                            className={`text-base font-bold ${isActive ? 'text-white' : 'text-white/60 group-hover:text-white'} transition-colors`}
-                          >
-                            {item.label}
-                          </span>
-
-                          {/* Badge */}
-                          {item.badge && (
-                            <div className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                              {item.badge}
-                            </div>
-                          )}
-                        </>
+                      {isActive && (
+                        <ChevronRight className="w-4 h-4 text-[var(--admin-accent)] opacity-60" />
                       )}
-
-                      {/* Badge cuando está colapsado - solo un punto */}
-                      {sidebarCollapsed && item.badge && (
-                        <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                      )}
-                    </a>
+                    </Link>
                   );
                 })}
-              </nav>
-
-              {/* User Section */}
-              <div className="border-t border-white/10 p-4">
-                {!sidebarCollapsed ? (
-                  <>
-                    {/* User Info - Expandido */}
-                    <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-white/5 backdrop-blur-sm">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-500 blur-md opacity-50" />
-                        <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-emerald-500/50">
-                          {user?.nombre?.charAt(0).toUpperCase() || 'A'}
-                        </div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-white truncate">
-                          {user?.nombre} {user?.apellido}
-                        </p>
-                        <p className="text-xs text-white/50 font-medium">Administrador</p>
-                      </div>
-                      <Zap className="w-4 h-4 text-amber-400" />
-                    </div>
-
-                    {/* Logout Button */}
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-white/70 hover:text-white bg-white/5 hover:bg-red-500/20 rounded-xl transition-all duration-200 border border-white/10 hover:border-red-500/50 group"
-                    >
-                      <LogOut
-                        className="w-5 h-5 group-hover:text-red-400 transition-colors"
-                        strokeWidth={2.5}
-                      />
-                      Cerrar sesión
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    {/* User Info - Colapsado (solo avatar) */}
-                    <div className="flex flex-col items-center gap-3 mb-4">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-500 blur-md opacity-50" />
-                        <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-emerald-500/50">
-                          {user?.nombre?.charAt(0).toUpperCase() || 'A'}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Logout Button - Colapsado (solo icono) */}
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center justify-center p-3 text-white/70 hover:text-white bg-white/5 hover:bg-red-500/20 rounded-xl transition-all duration-200 border border-white/10 hover:border-red-500/50 group"
-                      title="Cerrar sesión"
-                    >
-                      <LogOut
-                        className="w-5 h-5 group-hover:text-red-400 transition-colors"
-                        strokeWidth={2.5}
-                      />
-                    </button>
-                  </>
-                )}
               </div>
             </div>
-          </aside>
+          ))}
+        </nav>
 
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Top Bar estilo OS */}
-            <header className="h-16 backdrop-blur-2xl bg-white/5 border-b border-white/10 shadow-lg">
-              <div className="h-full px-6 flex items-center justify-between">
-                {/* Mobile Menu Button */}
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="md:hidden p-2 rounded-xl hover:bg-white/10 transition-colors"
-                >
-                  <Menu className="w-5 h-5 text-white" />
-                </button>
+        {/* User section */}
+        <div className="p-3 border-t border-[var(--admin-border)]">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--admin-surface-1)]">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm">
+              {user?.nombre?.charAt(0).toUpperCase() || 'A'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-semibold text-[var(--admin-text)] truncate">
+                {user?.nombre} {user?.apellido}
+              </p>
+              <p className="text-[11px] text-[var(--admin-text-muted)]">Administrador</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-lg text-[var(--admin-text-muted)] hover:text-[var(--status-danger)] hover:bg-[var(--status-danger-muted)] transition-colors"
+              title="Cerrar sesión"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </aside>
 
-                {/* Page Title */}
-                <div className="hidden md:flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
-                    {navItems.find((item) => isActiveRoute(item.href))?.icon && (
-                      <>
-                        {(() => {
-                          const ActiveIcon = navItems.find((item) =>
-                            isActiveRoute(item.href),
-                          )!.icon;
-                          return <ActiveIcon className="w-5 h-5 text-white" strokeWidth={2.5} />;
-                        })()}
-                      </>
-                    )}
-                  </div>
-                  <h2 className="text-lg font-black text-white">
-                    {navItems.find((item) => isActiveRoute(item.href))?.label || 'Dashboard'}
-                  </h2>
-                </div>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Header */}
+        <header className="h-16 flex items-center justify-between px-4 lg:px-6 bg-[var(--admin-surface-0)] border-b border-[var(--admin-border)]">
+          {/* Left: Mobile menu + breadcrumb */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 -ml-2 rounded-lg text-[var(--admin-text-secondary)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface-2)] transition-colors"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
 
-                {/* Actions */}
-                <div className="flex items-center gap-3">
-                  <NotificationButton
-                    count={3}
-                    onClick={() => setNotificationsOpen(!notificationsOpen)}
-                  />
-                </div>
-              </div>
-            </header>
-
-            {/* Page Content - CON SCROLL */}
-            <main className="flex-1 overflow-y-auto relative">
-              <div className="min-h-full w-full p-6">{children}</div>
-
-              {/* Panel de Notificaciones */}
-              {notificationsOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 bg-black/20 z-40"
-                    onClick={() => setNotificationsOpen(false)}
-                  />
-                  <div className="fixed top-20 right-6 w-96 backdrop-blur-2xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl z-50 overflow-hidden">
-                    <div className="p-5 border-b border-white/10">
-                      <h3 className="text-lg font-black text-white">Notificaciones</h3>
-                      <p className="text-xs text-white/50 mt-1">Tienes 3 notificaciones nuevas</p>
-                    </div>
-
-                    <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
-                      {/* Notificación 1 */}
-                      <div className="p-4 border-b border-white/10 hover:bg-white/5 transition-colors cursor-pointer">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center flex-shrink-0">
-                            <AlertCircle className="w-5 h-5 text-white" strokeWidth={2.5} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-white mb-1">
-                              3 clases sin docente
-                            </p>
-                            <p className="text-xs text-white/60">Programadas para esta semana</p>
-                            <p className="text-xs text-white/40 mt-1">Hace 5 minutos</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Notificación 2 */}
-                      <div className="p-4 border-b border-white/10 hover:bg-white/5 transition-colors cursor-pointer">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center flex-shrink-0">
-                            <CheckCircle2 className="w-5 h-5 text-white" strokeWidth={2.5} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-white mb-1">
-                              15 nuevos estudiantes
-                            </p>
-                            <p className="text-xs text-white/60">Registrados este mes</p>
-                            <p className="text-xs text-white/40 mt-1">Hace 1 hora</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Notificación 3 */}
-                      <div className="p-4 hover:bg-white/5 transition-colors cursor-pointer">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-                            <Info className="w-5 h-5 text-white" strokeWidth={2.5} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-white mb-1">
-                              Actualización disponible
-                            </p>
-                            <p className="text-xs text-white/60">Nueva versión de Mateatletas OS</p>
-                            <p className="text-xs text-white/40 mt-1">Hace 2 horas</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-3 border-t border-white/10">
-                      <button className="w-full px-4 py-2 text-sm font-bold text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors">
-                        Ver todas las notificaciones
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-            </main>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-[var(--admin-text-muted)]">Admin</span>
+              <ChevronRight className="w-4 h-4 text-[var(--admin-text-disabled)]" />
+              <span className="font-medium text-[var(--admin-text)]">
+                {currentItem?.label || 'Dashboard'}
+              </span>
+            </div>
           </div>
 
-          {/* Mobile Sidebar Overlay */}
-          {sidebarOpen && (
-            <>
-              <div
-                className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 md:hidden transition-opacity"
-                onClick={() => setSidebarOpen(false)}
-              />
-              <div className="fixed inset-y-0 left-0 w-72 backdrop-blur-2xl bg-white/5 z-50 md:hidden border-r border-white/10 shadow-2xl">
-                {/* Mobile Sidebar content (same as desktop) */}
-                <div className="flex flex-col h-full">
-                  <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg">
-                        <Crown className="w-7 h-7 text-white" />
-                      </div>
-                      <div>
-                        <h1 className="text-lg font-black text-white">Mateatletas OS</h1>
-                        <p className="text-xs text-white/50">Admin Portal</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setSidebarOpen(false)}
-                      className="p-2 rounded-xl hover:bg-white/10"
-                    >
-                      <X className="w-5 h-5 text-white" />
-                    </button>
-                  </div>
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2">
+            {/* Search */}
+            <button className="p-2 rounded-lg text-[var(--admin-text-muted)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface-2)] transition-colors">
+              <Search className="w-5 h-5" />
+            </button>
 
-                  <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-                    {navItems.map((item) => {
+            {/* Notifications */}
+            <button className="relative p-2 rounded-lg text-[var(--admin-text-muted)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface-2)] transition-colors">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[var(--status-danger)] rounded-full" />
+            </button>
+
+            {/* Settings */}
+            <button className="p-2 rounded-lg text-[var(--admin-text-muted)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface-2)] transition-colors">
+              <Settings className="w-5 h-5" />
+            </button>
+
+            {/* Mobile user avatar */}
+            <div className="lg:hidden w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold text-xs">
+              {user?.nombre?.charAt(0).toUpperCase() || 'A'}
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto bg-[var(--admin-bg)]">
+          <div className="p-4 lg:p-6">{children}</div>
+        </main>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <aside className="fixed inset-y-0 left-0 w-72 bg-[var(--admin-surface-0)] border-r border-[var(--admin-border)] z-50 lg:hidden flex flex-col animate-slide-up">
+            {/* Header */}
+            <div className="h-16 flex items-center justify-between px-5 border-b border-[var(--admin-border)]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-[15px] font-bold text-[var(--admin-text)]">Mateatletas</span>
+              </div>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 rounded-lg text-[var(--admin-text-muted)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface-2)]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin">
+              {navSections.map((section) => (
+                <div key={section.title}>
+                  <h3 className="px-3 mb-2 text-[11px] font-semibold text-[var(--admin-text-muted)] uppercase tracking-wider">
+                    {section.title}
+                  </h3>
+                  <div className="space-y-1">
+                    {section.items.map((item) => {
                       const Icon = item.icon;
                       const isActive = isActiveRoute(item.href);
+
                       return (
-                        <a
+                        <Link
                           key={item.href}
                           href={item.href}
                           onClick={() => setSidebarOpen(false)}
-                          className={`flex items-center gap-4 px-4 py-3 rounded-xl ${isActive ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                          className={`
+                            flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-medium transition-all
+                            ${
+                              isActive
+                                ? 'bg-[var(--admin-accent-muted)] text-[var(--admin-accent)]'
+                                : 'text-[var(--admin-text-secondary)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface-2)]'
+                            }
+                          `}
                         >
-                          <div
-                            className={`w-10 h-10 rounded-lg ${isActive ? `bg-gradient-to-br ${item.color}` : 'bg-white/5'} flex items-center justify-center`}
-                          >
-                            <Icon className="w-5 h-5 text-white" />
-                          </div>
-                          <span
-                            className={`text-base font-bold ${isActive ? 'text-white' : 'text-white/60'}`}
-                          >
-                            {item.label}
-                          </span>
-                          {item.badge && (
-                            <div className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                          <Icon
+                            className={`w-[18px] h-[18px] ${isActive ? 'text-[var(--admin-accent)]' : ''}`}
+                          />
+                          <span className="flex-1">{item.label}</span>
+                          {item.badge !== undefined && item.badge !== null && (
+                            <span className="px-2 py-0.5 text-[11px] font-semibold bg-[var(--status-danger)] text-white rounded-full">
                               {item.badge}
-                            </div>
+                            </span>
                           )}
-                        </a>
+                        </Link>
                       );
                     })}
-                  </nav>
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+              ))}
+            </nav>
 
-function NotificationButton({ count, onClick }: { count: number; onClick?: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="relative p-3 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-200 group"
-    >
-      <Bell
-        className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300"
-        strokeWidth={2.5}
-      />
-      {count > 0 && (
-        <span className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-red-500 to-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg shadow-red-500/50 animate-pulse">
-          {count}
-        </span>
+            {/* User */}
+            <div className="p-3 border-t border-[var(--admin-border)]">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-[var(--admin-surface-1)]">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm">
+                  {user?.nombre?.charAt(0).toUpperCase() || 'A'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold text-[var(--admin-text)] truncate">
+                    {user?.nombre} {user?.apellido}
+                  </p>
+                  <p className="text-[11px] text-[var(--admin-text-muted)]">Administrador</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-lg text-[var(--admin-text-muted)] hover:text-[var(--status-danger)] hover:bg-[var(--status-danger-muted)] transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </aside>
+        </>
       )}
-    </button>
+    </div>
   );
 }

@@ -4,709 +4,395 @@ import { useEffect, useState } from 'react';
 import { useStats, useStatsLoading, useFetchStats } from '@/features/admin/stats';
 import { useAuthStore } from '@/store/auth.store';
 import {
+  Users,
   GraduationCap,
-  BookOpen,
-  TrendingUp,
-  Activity,
   DollarSign,
-  UserPlus,
-  ArrowUpRight,
-  Star,
-  Award,
-  BarChart3,
-  MapPin,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  ArrowRight,
   Calendar,
+  AlertCircle,
+  CheckCircle,
+  CreditCard,
+  Activity,
 } from 'lucide-react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  TooltipItem,
-  ArcElement,
-} from 'chart.js';
-import { Bar, Doughnut } from 'react-chartjs-2';
-
-// Registrar componentes de Chart.js
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
+import Link from 'next/link';
 
 /**
- * 🚀 MATEATLETAS OS - Dashboard Administrativo
- *
- * Sistema Operativo del Club - Diseño IMPRESIONANTE
- * - Cards con colores vibrantes únicos
- * - Efectos visuales de última generación
- * - Glassmorphism moderno
- * - Animaciones suaves
- *
- * ⚠️ ENDPOINTS PENDIENTES DE IMPLEMENTAR:
- * 1. GET /admin/stats/top-courses - Top 5 cursos más elegidos
- * 2. GET /admin/stats/geographic-distribution?region=argentina|latinoamerica - Distribución geográfica
- * 3. GET /admin/stats/upcoming-courses - Próximos inicios de cursos
- * 4. GET /admin/stats/teacher-updates - Novedades de docentes
- * 5. GET /admin/stats/trends - Cálculo de % de crecimiento vs mes anterior
- *
- * 📊 DATOS ACTUALES:
- * - ✅ Stats principales (totalEstudiantes, totalUsuarios, ingresosTotal) - Conectado
- * - ❌ Top courses - Arrays vacíos (waiting backend)
- * - ❌ Distribución geográfica - Arrays vacíos (waiting backend)
- * - ❌ Próximos inicios - Arrays vacíos (waiting backend)
- * - ❌ Novedades docentes - Arrays vacíos (waiting backend)
- * - ❌ Trends (%) - null (waiting backend)
+ * Admin Dashboard v2.0
+ * Clean, professional, data-focused
  */
+
+interface StatCardProps {
+  label: string;
+  value: string | number;
+  change?: number | null;
+  changeLabel?: string;
+  icon: typeof Users;
+  status?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+}
+
+function StatCard({
+  label,
+  value,
+  change,
+  changeLabel,
+  icon: Icon,
+  status = 'neutral',
+}: StatCardProps) {
+  const statusColors = {
+    success: 'text-[var(--status-success)]',
+    warning: 'text-[var(--status-warning)]',
+    danger: 'text-[var(--status-danger)]',
+    info: 'text-[var(--status-info)]',
+    neutral: 'text-[var(--admin-accent)]',
+  };
+
+  const bgColors = {
+    success: 'bg-[var(--status-success-muted)]',
+    warning: 'bg-[var(--status-warning-muted)]',
+    danger: 'bg-[var(--status-danger-muted)]',
+    info: 'bg-[var(--status-info-muted)]',
+    neutral: 'bg-[var(--admin-accent-muted)]',
+  };
+
+  return (
+    <div className="admin-stat-card group">
+      <div className="flex items-start justify-between mb-4">
+        <div
+          className={`w-10 h-10 rounded-lg ${bgColors[status]} flex items-center justify-center`}
+        >
+          <Icon className={`w-5 h-5 ${statusColors[status]}`} />
+        </div>
+        {change !== undefined && change !== null && (
+          <div
+            className={`flex items-center gap-1 text-xs font-medium ${change >= 0 ? 'text-[var(--status-success)]' : 'text-[var(--status-danger)]'}`}
+          >
+            {change >= 0 ? (
+              <TrendingUp className="w-3.5 h-3.5" />
+            ) : (
+              <TrendingDown className="w-3.5 h-3.5" />
+            )}
+            <span>
+              {change >= 0 ? '+' : ''}
+              {change}%
+            </span>
+          </div>
+        )}
+      </div>
+      <div>
+        <p className="text-2xl font-bold text-[var(--admin-text)] mb-1">{value}</p>
+        <p className="text-sm text-[var(--admin-text-muted)]">{label}</p>
+        {changeLabel && (
+          <p className="text-xs text-[var(--admin-text-disabled)] mt-1">{changeLabel}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface QuickActionProps {
+  href: string;
+  label: string;
+  description: string;
+  icon: typeof Users;
+}
+
+function QuickAction({ href, label, description, icon: Icon }: QuickActionProps) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center gap-4 p-4 rounded-lg bg-[var(--admin-surface-1)] border border-[var(--admin-border)] hover:border-[var(--admin-border-accent)] hover:bg-[var(--admin-surface-2)] transition-all duration-200"
+    >
+      <div className="w-10 h-10 rounded-lg bg-[var(--admin-accent-muted)] flex items-center justify-center flex-shrink-0">
+        <Icon className="w-5 h-5 text-[var(--admin-accent)]" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-[var(--admin-text)] group-hover:text-[var(--admin-accent)] transition-colors">
+          {label}
+        </p>
+        <p className="text-xs text-[var(--admin-text-muted)]">{description}</p>
+      </div>
+      <ArrowRight className="w-4 h-4 text-[var(--admin-text-disabled)] group-hover:text-[var(--admin-accent)] group-hover:translate-x-1 transition-all" />
+    </Link>
+  );
+}
+
+interface AlertItemProps {
+  type: 'warning' | 'info' | 'success';
+  title: string;
+  description: string;
+  action?: string;
+  href?: string;
+}
+
+function AlertItem({ type, title, description, action, href }: AlertItemProps) {
+  const icons = {
+    warning: AlertCircle,
+    info: Activity,
+    success: CheckCircle,
+  };
+  const colors = {
+    warning: 'text-[var(--status-warning)] bg-[var(--status-warning-muted)]',
+    info: 'text-[var(--status-info)] bg-[var(--status-info-muted)]',
+    success: 'text-[var(--status-success)] bg-[var(--status-success-muted)]',
+  };
+  const Icon = icons[type];
+
+  const content = (
+    <div className="flex items-start gap-3 p-4 rounded-lg bg-[var(--admin-surface-1)] border border-[var(--admin-border)] hover:border-[var(--admin-border-accent)] transition-colors">
+      <div
+        className={`w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0 ${colors[type]}`}
+      >
+        <Icon className="w-4 h-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-[var(--admin-text)]">{title}</p>
+        <p className="text-xs text-[var(--admin-text-muted)] mt-0.5">{description}</p>
+        {action && (
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--admin-accent)] mt-2">
+            {action}
+            <ArrowRight className="w-3 h-3" />
+          </span>
+        )}
+      </div>
+    </div>
+  );
+
+  if (href) {
+    return <Link href={href}>{content}</Link>;
+  }
+  return content;
+}
+
 export default function AdminDashboard() {
   const stats = useStats();
   const isLoading = useStatsLoading();
   const fetchStats = useFetchStats();
   const { user } = useAuthStore();
   const [greeting, setGreeting] = useState('Bienvenido');
-  const [mounted, setMounted] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [selectedStat, setSelectedStat] = useState<{
-    label: string;
-    value: string | number;
-    fullValue: number;
-  } | null>(null);
-  const [regionFilter, setRegionFilter] = useState<'argentina' | 'latinoamerica'>('argentina');
+  const [currentDate, setCurrentDate] = useState('');
 
   useEffect(() => {
-    setMounted(true);
     fetchStats();
 
-    // Saludo dinámico
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Buenos días');
     else if (hour < 20) setGreeting('Buenas tardes');
     else setGreeting('Buenas noches');
 
-    // Actualizar reloj cada segundo
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setCurrentDate(
+      new Date().toLocaleDateString('es-AR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+    );
+  }, [fetchStats]);
 
-  if (!mounted) {
-    return null;
-  }
-
-  // Función para formatear números grandes
-  const formatLargeNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(1)}M`;
-    } else if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}K`;
-    }
-    return num.toString();
-  };
-
-  // Calcular valores reales desde el backend
-  const totalEstudiantes = stats?.totalEstudiantes || 0;
-  const ingresosActuales = stats?.ingresosTotal || 0;
-  const pagosPendientes = stats?.pagosPendientes || 0;
-  const inscripcionesActivas = stats?.inscripcionesActivas || 0;
-
-  // Stats con COLORES VIBRANTES únicos para cada uno - NUEVA ORGANIZACIÓN
-  const mainStats = [
-    {
-      label: 'Total Estudiantes',
-      displayValue: formatLargeNumber(totalEstudiantes),
-      fullValue: totalEstudiantes,
-      icon: UserPlus,
-      trend: null, // TODO: Calcular desde backend comparando con mes anterior
-      trendUp: true,
-      // MORADO VIBRANTE
-      bgGradient: 'from-violet-500 via-purple-500 to-fuchsia-500',
-      cardBg: 'from-violet-500/20 via-purple-500/20 to-fuchsia-500/20',
-      borderColor: 'border-violet-400/50',
-      shadowColor: 'shadow-violet-500/50',
-      glowColor: 'shadow-violet-500/30',
-      iconBg: 'from-violet-400 to-purple-500',
-    },
-    {
-      label: 'Inscripciones Activas (Mes)',
-      displayValue: formatLargeNumber(inscripcionesActivas),
-      fullValue: inscripcionesActivas,
-      icon: GraduationCap,
-      trend: null, // TODO: Calcular desde backend comparando con mes anterior
-      trendUp: true,
-      // AZUL BRILLANTE
-      bgGradient: 'from-blue-500 via-cyan-500 to-teal-500',
-      cardBg: 'from-blue-500/20 via-cyan-500/20 to-teal-500/20',
-      borderColor: 'border-blue-400/50',
-      shadowColor: 'shadow-blue-500/50',
-      glowColor: 'shadow-cyan-500/30',
-      iconBg: 'from-blue-400 to-cyan-500',
-    },
-    {
-      label: 'Pagos Pendientes',
-      displayValue: `$${formatLargeNumber(pagosPendientes)}`,
-      fullValue: pagosPendientes,
-      icon: TrendingUp,
-      trend: null, // TODO: Calcular desde backend comparando con mes anterior
-      trendUp: false,
-      // NARANJA ALERTA
-      bgGradient: 'from-orange-500 via-red-500 to-pink-500',
-      cardBg: 'from-orange-500/20 via-red-500/20 to-pink-500/20',
-      borderColor: 'border-orange-400/50',
-      shadowColor: 'shadow-orange-500/50',
-      glowColor: 'shadow-red-500/30',
-      iconBg: 'from-orange-400 to-red-500',
-    },
-    {
-      label: 'Ingresos del Mes',
-      displayValue: `$${formatLargeNumber(ingresosActuales)}`,
-      fullValue: ingresosActuales,
-      icon: DollarSign,
-      trend: null, // TODO: Calcular desde backend comparando con mes anterior
-      trendUp: true,
-      // VERDE ESMERALDA
-      bgGradient: 'from-emerald-500 via-green-500 to-teal-500',
-      cardBg: 'from-emerald-500/20 via-green-500/20 to-teal-500/20',
-      borderColor: 'border-emerald-400/50',
-      shadowColor: 'shadow-emerald-500/50',
-      glowColor: 'shadow-green-500/30',
-      iconBg: 'from-emerald-400 to-green-500',
-    },
-  ];
-
-  // TODO: Obtener desde backend - GET /admin/stats/top-courses
-  // Cursos más elegidos - Data para gráfico
-  const topCourses: Array<{
-    id: number;
-    name: string;
-    students: number;
-    color: string;
-    percentage: number;
-  }> = [];
-
-  // TODO: Obtener desde backend - GET /admin/stats/geographic-distribution?region=argentina
-  const argentineProvinces: Array<{
-    id: number;
-    name: string;
-    students: number;
-    color: string;
-    percentage: number;
-  }> = [];
-
-  // TODO: Obtener desde backend - GET /admin/stats/geographic-distribution?region=latinoamerica
-  const latinamericaCountries: Array<{
-    id: number;
-    name: string;
-    students: number;
-    color: string;
-    percentage: number;
-  }> = [];
-
-  // Seleccionar datos según el filtro
-  const topLocations = regionFilter === 'argentina' ? argentineProvinces : latinamericaCountries;
-
-  // TODO: Obtener desde backend - GET /admin/stats/upcoming-courses
-  const upcomingStarts: Array<{
-    id: number;
-    course: string;
-    date: string;
-    students: number;
-    icon: typeof BookOpen;
-    gradient: string;
-  }> = [];
-
-  // TODO: Obtener desde backend - GET /admin/stats/teacher-updates
-  const teacherUpdates: Array<{
-    id: number;
-    title: string;
-    name: string;
-    specialty: string;
-    icon: typeof UserPlus | typeof Award | typeof Star;
-    gradient: string;
-  }> = [];
-
-  // Configuración del gráfico de barras - Cursos Más Elegidos
-  const coursesChartData = {
-    labels: topCourses.map((c) => c.name),
-    datasets: [
-      {
-        label: 'Estudiantes',
-        data: topCourses.map((c) => c.students),
-        backgroundColor: [
-          'rgba(139, 92, 246, 0.8)', // Violet
-          'rgba(59, 130, 246, 0.8)', // Blue
-          'rgba(16, 185, 129, 0.8)', // Emerald
-          'rgba(251, 191, 36, 0.8)', // Amber
-          'rgba(249, 115, 22, 0.8)', // Orange
-        ],
-        borderColor: [
-          'rgba(139, 92, 246, 1)',
-          'rgba(59, 130, 246, 1)',
-          'rgba(16, 185, 129, 1)',
-          'rgba(251, 191, 36, 1)',
-          'rgba(249, 115, 22, 1)',
-        ],
-        borderWidth: 2,
-        borderRadius: 8,
-      },
-    ],
-  };
-
-  const coursesChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        padding: 16,
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: 'rgba(255, 255, 255, 0.3)',
-        borderWidth: 1,
-        displayColors: true,
-        callbacks: {
-          label: function (context: TooltipItem<'bar'>) {
-            return `${context.parsed.y} estudiantes`;
-          },
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
-        },
-        ticks: {
-          color: 'rgba(255, 255, 255, 0.7)',
-          font: {
-            size: 12,
-            weight: 'bold' as const,
-          },
-        },
-      },
-      x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          display: false, // Ocultar labels del eje X - solo tooltips
-        },
-      },
-    },
-  };
-
-  // Configuración del gráfico de dona - Provincias/Países
-  const locationsChartData = {
-    labels: topLocations.map((l) => l.name),
-    datasets: [
-      {
-        label: 'Estudiantes',
-        data: topLocations.map((l) => l.students),
-        backgroundColor: [
-          'rgba(139, 92, 246, 0.8)',
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(251, 191, 36, 0.8)',
-          'rgba(249, 115, 22, 0.8)',
-        ],
-        borderColor: [
-          'rgba(139, 92, 246, 1)',
-          'rgba(59, 130, 246, 1)',
-          'rgba(16, 185, 129, 1)',
-          'rgba(251, 191, 36, 1)',
-          'rgba(249, 115, 22, 1)',
-        ],
-        borderWidth: 2,
-      },
-    ],
-  };
-
-  const locationsChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'right' as const,
-        labels: {
-          color: 'rgba(255, 255, 255, 0.8)',
-          padding: 15,
-          font: {
-            size: 12,
-            weight: 'bold' as const,
-          },
-        },
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        padding: 12,
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-        borderWidth: 1,
-      },
-    },
+  const formatCurrency = (num: number): string => {
+    if (num >= 1000000) return `$${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `$${(num / 1000).toFixed(0)}K`;
+    return `$${num.toLocaleString('es-AR')}`;
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-[60vh]">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-violet-500/20 border-t-violet-500 mb-4"></div>
-          <p className="text-base text-slate-300 font-medium">Cargando Mateatletas OS...</p>
+          <div className="w-10 h-10 border-2 border-[var(--admin-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-[var(--admin-text-muted)]">Cargando dashboard...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="flex flex-col relative">
-      {/* Partículas flotantes de fondo */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-2 h-2 bg-violet-400 rounded-full animate-ping opacity-20" />
-        <div className="absolute top-40 right-40 w-2 h-2 bg-blue-400 rounded-full animate-ping opacity-20 animation-delay-2000" />
-        <div className="absolute bottom-40 left-60 w-2 h-2 bg-emerald-400 rounded-full animate-ping opacity-20 animation-delay-4000" />
-        <div className="absolute bottom-20 right-20 w-2 h-2 bg-amber-400 rounded-full animate-ping opacity-20 animation-delay-1000" />
-      </div>
+  const totalEstudiantes = stats?.totalEstudiantes || 0;
+  const ingresosTotal = stats?.ingresosTotal || 0;
+  const pagosPendientes = stats?.pagosPendientes || 0;
+  const inscripcionesActivas = stats?.inscripcionesActivas || 0;
 
-      {/* Header estilo OS - Más compacto */}
-      <div className="flex items-center justify-between mb-6 relative z-10 max-w-full">
-        <div className="flex-shrink-0">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-violet-200 to-blue-200 bg-clip-text text-transparent drop-shadow-lg mb-1">
+  return (
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--admin-text)]">
             {greeting}, {user?.nombre || 'Admin'}
           </h1>
-          <p className="text-sm text-slate-300 font-medium">
-            Tu centro de comando de Mateatletas Club
-          </p>
+          <p className="text-sm text-[var(--admin-text-muted)] mt-1 capitalize">{currentDate}</p>
         </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--status-success-muted)] text-[var(--status-success)]">
+            <div className="w-2 h-2 rounded-full bg-[var(--status-success)] animate-pulse" />
+            <span className="text-xs font-medium">Sistema operativo</span>
+          </div>
+        </div>
+      </div>
 
-        {/* Reloj en tiempo real estilo OS */}
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <div className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
-            <div className="flex items-center gap-2.5">
-              <Activity className="w-4 h-4 text-emerald-400" />
-              <div className="text-right">
-                <div className="text-xs text-slate-400 font-medium">Sistema</div>
-                <div className="text-xs text-white font-bold">Operativo</div>
-              </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
+        <StatCard
+          label="Total Estudiantes"
+          value={totalEstudiantes.toLocaleString('es-AR')}
+          change={null}
+          changeLabel="vs mes anterior"
+          icon={Users}
+          status="info"
+        />
+        <StatCard
+          label="Inscripciones Activas"
+          value={inscripcionesActivas.toLocaleString('es-AR')}
+          change={null}
+          changeLabel="este mes"
+          icon={GraduationCap}
+          status="success"
+        />
+        <StatCard
+          label="Pagos Pendientes"
+          value={formatCurrency(pagosPendientes)}
+          change={null}
+          icon={Clock}
+          status="warning"
+        />
+        <StatCard
+          label="Ingresos del Mes"
+          value={formatCurrency(ingresosTotal)}
+          change={null}
+          changeLabel="vs mes anterior"
+          icon={DollarSign}
+          status="success"
+        />
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Quick Actions */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Quick Actions */}
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--admin-text)] mb-4">
+              Acciones rápidas
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <QuickAction
+                href="/admin/inscripciones-2026"
+                label="Gestionar Inscripciones"
+                description="Colonia 2026"
+                icon={GraduationCap}
+              />
+              <QuickAction
+                href="/admin/pagos"
+                label="Registrar Pago"
+                description="Pagos manuales"
+                icon={CreditCard}
+              />
+              <QuickAction
+                href="/admin/estudiantes"
+                label="Ver Estudiantes"
+                description="Lista completa"
+                icon={Users}
+              />
+              <QuickAction
+                href="/admin/reportes"
+                label="Generar Reporte"
+                description="Exportar datos"
+                icon={TrendingUp}
+              />
             </div>
           </div>
 
-          <div className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-500/10 via-blue-500/10 to-emerald-500/10 backdrop-blur-xl border border-white/20 shadow-xl">
-            <div className="text-right">
-              <div className="text-xs text-slate-400 font-medium">
-                {currentTime.toLocaleDateString('es-AR', {
-                  weekday: 'short',
-                  day: '2-digit',
-                  month: 'short',
-                })}
+          {/* Colonia 2026 Highlight */}
+          <div className="p-5 rounded-xl bg-gradient-to-r from-[var(--admin-accent-muted)] to-[var(--status-info-muted)] border border-[var(--admin-border-accent)]">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[var(--admin-accent)] flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-6 h-6 text-black" />
               </div>
-              <div className="text-xs text-white font-bold tabular-nums">
-                {currentTime.toLocaleTimeString('es-AR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                })}
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-[var(--admin-text)]">
+                  Colonia de Verano 2026
+                </h3>
+                <p className="text-sm text-[var(--admin-text-secondary)] mt-1">
+                  Inscripciones abiertas para Enero y Febrero. Gestiona las inscripciones, tiers y
+                  pagos desde el panel dedicado.
+                </p>
+                <Link
+                  href="/admin/inscripciones-2026"
+                  className="inline-flex items-center gap-2 mt-3 text-sm font-medium text-[var(--admin-accent)] hover:underline"
+                >
+                  Ir a Inscripciones 2026
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Alerts & Activity */}
+        <div className="space-y-6">
+          {/* System Alerts */}
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--admin-text)] mb-4">
+              Alertas del sistema
+            </h2>
+            <div className="space-y-3">
+              {pagosPendientes > 0 && (
+                <AlertItem
+                  type="warning"
+                  title={`${formatCurrency(pagosPendientes)} en pagos pendientes`}
+                  description="Revisar inscripciones sin confirmar pago"
+                  action="Ver pagos"
+                  href="/admin/pagos"
+                />
+              )}
+              <AlertItem
+                type="info"
+                title="Colonia 2026 activa"
+                description="Las inscripciones están abiertas"
+                action="Gestionar"
+                href="/admin/inscripciones-2026"
+              />
+              <AlertItem
+                type="success"
+                title="Sistema funcionando correctamente"
+                description="Todos los servicios operativos"
+              />
+            </div>
+          </div>
+
+          {/* Quick Stats Summary */}
+          <div className="p-4 rounded-xl bg-[var(--admin-surface-1)] border border-[var(--admin-border)]">
+            <h3 className="text-sm font-semibold text-[var(--admin-text)] mb-3">Resumen rápido</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[var(--admin-text-muted)]">Estudiantes totales</span>
+                <span className="text-sm font-medium text-[var(--admin-text)]">
+                  {totalEstudiantes}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[var(--admin-text-muted)]">
+                  Inscripciones activas
+                </span>
+                <span className="text-sm font-medium text-[var(--admin-text)]">
+                  {inscripcionesActivas}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[var(--admin-text-muted)]">Tasa de conversión</span>
+                <span className="text-sm font-medium text-[var(--status-success)]">
+                  {totalEstudiantes > 0
+                    ? Math.round((inscripcionesActivas / totalEstudiantes) * 100)
+                    : 0}
+                  %
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Contenedor principal */}
-      <div className="flex flex-col gap-6 relative z-10">
-        {/* Stats Grid - SUPER COLORIDAS CON ORGANIZACIÓN PERFECTA */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {mainStats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={stat.label}
-                onClick={() =>
-                  setSelectedStat({
-                    label: stat.label,
-                    value: stat.displayValue,
-                    fullValue: stat.fullValue,
-                  })
-                }
-                className="group relative rounded-2xl transition-all duration-300 cursor-pointer"
-                style={{
-                  animationDelay: `${index * 100}ms`,
-                }}
-              >
-                {/* Fondo con gradiente colorido */}
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${stat.cardBg} backdrop-blur-xl rounded-2xl`}
-                />
-
-                {/* Borde brillante */}
-                <div
-                  className={`absolute inset-0 rounded-2xl border-2 ${stat.borderColor} transition-all duration-300 group-hover:shadow-xl ${stat.shadowColor}`}
-                />
-
-                {/* Contenido */}
-                <div className="relative p-5">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-white/60 mb-2.5 font-bold uppercase tracking-wide">
-                        {stat.label}
-                      </p>
-                      <p className="text-4xl font-black text-white mb-3 drop-shadow-lg leading-none">
-                        {stat.displayValue}
-                      </p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full ${stat.trendUp ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}
-                        >
-                          <ArrowUpRight
-                            className={`w-3.5 h-3.5 ${stat.trendUp ? 'text-emerald-300' : 'text-red-300 rotate-90'}`}
-                            strokeWidth={2.5}
-                          />
-                          <span
-                            className={`text-xs font-bold ${stat.trendUp ? 'text-emerald-300' : 'text-red-300'}`}
-                          >
-                            {stat.trend}
-                          </span>
-                        </div>
-                        <span className="text-xs text-white/40 font-medium">vs mes anterior</span>
-                      </div>
-                    </div>
-
-                    {/* Icono */}
-                    <div className="relative flex-shrink-0 ml-3">
-                      <div
-                        className={`w-14 h-14 rounded-xl bg-gradient-to-br ${stat.iconBg} flex items-center justify-center shadow-lg ${stat.shadowColor}`}
-                      >
-                        <Icon className="w-7 h-7 text-white" strokeWidth={2.5} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Grid asimétrico: Cursos (2/3) y Provincias (1/3) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Cursos Más Elegidos - Gráfico de Barras CON CHART.JS (2/3 del espacio) */}
-          <div className="lg:col-span-2 relative overflow-hidden rounded-2xl flex flex-col min-h-[400px]">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-2xl" />
-            <div className="absolute inset-0 rounded-2xl border-2 border-white/20" />
-
-            <div className="relative p-5 flex flex-col h-full">
-              <div className="flex items-center gap-2.5 mb-4 flex-shrink-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
-                  <BarChart3 className="w-5 h-5 text-white" strokeWidth={2.5} />
-                </div>
-                <h2 className="text-xl font-black text-white">Cursos Más Elegidos</h2>
-                <div className="ml-auto text-xs text-white/50 font-bold">
-                  {topCourses.reduce((acc, c) => acc + c.students, 0)} estudiantes
-                </div>
-              </div>
-
-              <div className="flex-1 min-h-0">
-                <Bar data={coursesChartData} options={coursesChartOptions} />
-              </div>
-            </div>
-          </div>
-
-          {/* Distribución por Provincias - Gráfico de Dona CON CHART.JS (1/3 del espacio) */}
-          <div className="relative overflow-hidden rounded-2xl flex flex-col min-h-[400px]">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-2xl" />
-            <div className="absolute inset-0 rounded-2xl border-2 border-white/20" />
-
-            <div className="relative p-5 flex flex-col h-full">
-              <div className="flex items-center gap-2.5 mb-3 flex-shrink-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                  <MapPin className="w-5 h-5 text-white" strokeWidth={2.5} />
-                </div>
-                <h2 className="text-lg font-black text-white">
-                  {regionFilter === 'argentina' ? 'Provincias' : 'Países'}
-                </h2>
-              </div>
-
-              {/* Filtro Argentina / Latinoamérica */}
-              <div className="flex gap-2 mb-3 flex-shrink-0">
-                <button
-                  onClick={() => setRegionFilter('argentina')}
-                  className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${
-                    regionFilter === 'argentina'
-                      ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30'
-                      : 'bg-white/5 text-white/60 hover:bg-white/10'
-                  }`}
-                >
-                  Argentina
-                </button>
-                <button
-                  onClick={() => setRegionFilter('latinoamerica')}
-                  className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-all duration-200 ${
-                    regionFilter === 'latinoamerica'
-                      ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-500/30'
-                      : 'bg-white/5 text-white/60 hover:bg-white/10'
-                  }`}
-                >
-                  LATAM
-                </button>
-              </div>
-
-              <div className="flex-1 min-h-0 flex items-center justify-center">
-                <div className="w-full h-full">
-                  <Doughnut data={locationsChartData} options={locationsChartOptions} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Grid de 2 columnas: Próximos Inicios y Novedades Docentes */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* Próximos Inicios de Cursos */}
-          <div className="relative overflow-hidden rounded-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-2xl" />
-            <div className="absolute inset-0 rounded-2xl border-2 border-white/20" />
-
-            <div className="relative p-5">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                  <Calendar className="w-5 h-5 text-white" strokeWidth={2.5} />
-                </div>
-                <h2 className="text-xl font-black text-white">Próximos Inicios</h2>
-                <div className="ml-auto text-xs text-white/50 font-bold">
-                  {upcomingStarts.length} cursos
-                </div>
-              </div>
-
-              <div className="space-y-2.5">
-                {upcomingStarts.map((start, index) => {
-                  const Icon = start.icon;
-                  return (
-                    <div
-                      key={start.id}
-                      className="relative group"
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <div className="absolute inset-0 bg-white/5 backdrop-blur-sm rounded-xl" />
-                      <div className="absolute inset-0 rounded-xl border border-white/10 group-hover:border-white/30 transition-all" />
-
-                      <div className="relative p-3.5">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-10 h-10 rounded-lg bg-gradient-to-br ${start.gradient} flex items-center justify-center flex-shrink-0 shadow-md`}
-                          >
-                            <Icon className="w-5 h-5 text-white" strokeWidth={2.5} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-white leading-tight">
-                              {start.course}
-                            </p>
-                            <p className="text-xs text-white/60 mt-0.5">
-                              {start.students} estudiantes inscritos
-                            </p>
-                          </div>
-                          <div className="text-right flex-shrink-0">
-                            <p className="text-xs font-bold text-emerald-400">{start.date}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Novedades Docentes */}
-          <div className="relative overflow-hidden rounded-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-2xl" />
-            <div className="absolute inset-0 rounded-2xl border-2 border-white/20" />
-
-            <div className="relative p-5">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                  <Award className="w-5 h-5 text-white" strokeWidth={2.5} />
-                </div>
-                <h2 className="text-xl font-black text-white">Novedades Docentes</h2>
-                <div className="ml-auto text-xs text-white/50 font-bold">
-                  Últimas {teacherUpdates.length}
-                </div>
-              </div>
-
-              <div className="space-y-2.5">
-                {teacherUpdates.map((update, index) => {
-                  const Icon = update.icon;
-                  return (
-                    <div
-                      key={update.id}
-                      className="relative group"
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <div className="absolute inset-0 bg-white/5 backdrop-blur-sm rounded-xl" />
-                      <div className="absolute inset-0 rounded-xl border border-white/10 group-hover:border-white/30 transition-all" />
-
-                      <div className="relative p-3.5">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-10 h-10 rounded-lg bg-gradient-to-br ${update.gradient} flex items-center justify-center flex-shrink-0 shadow-md`}
-                          >
-                            <Icon className="w-5 h-5 text-white" strokeWidth={2.5} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-white leading-tight">
-                              {update.title}
-                            </p>
-                            <p className="text-xs text-white/60 mt-0.5">{update.name}</p>
-                            <p className="text-xs text-white/40 mt-0.5">{update.specialty}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Modal para mostrar número completo */}
-      {selectedStat && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-            onClick={() => setSelectedStat(null)}
-          />
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md">
-            <div className="relative overflow-hidden rounded-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl" />
-              <div className="absolute inset-0 rounded-2xl border-2 border-white/30" />
-
-              <div className="relative p-8">
-                <h3 className="text-xl font-black text-white mb-2">{selectedStat.label}</h3>
-                <p className="text-sm text-white/60 mb-6">Valor completo</p>
-
-                <div className="bg-white/5 rounded-xl p-6 border border-white/20 mb-6">
-                  <p className="text-5xl font-black text-white text-center break-all">
-                    {typeof selectedStat.fullValue === 'number'
-                      ? selectedStat.label.includes('Ingreso')
-                        ? `$${selectedStat.fullValue.toLocaleString('es-AR')}`
-                        : selectedStat.fullValue.toLocaleString('es-AR')
-                      : selectedStat.fullValue}
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => setSelectedStat(null)}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white font-bold rounded-xl transition-all duration-200 shadow-lg shadow-violet-500/30"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 }

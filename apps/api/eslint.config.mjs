@@ -59,24 +59,30 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
 
       // ===== 🚫 PROHIBIDO: @ts-ignore, @ts-nocheck =====
-      '@typescript-eslint/ban-ts-comment': ['error', {
-        'ts-expect-error': 'allow-with-description',
-        'ts-ignore': true,
-        'ts-nocheck': true,
-        'ts-check': false,
-        minimumDescriptionLength: 10,
-      }],
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        {
+          'ts-expect-error': 'allow-with-description',
+          'ts-ignore': true,
+          'ts-nocheck': true,
+          'ts-check': false,
+          minimumDescriptionLength: 10,
+        },
+      ],
 
       // ===== 🚫 PROHIBIDO: console.* (usar Logger de NestJS) =====
       'no-console': 'error',
 
       // ===== 🚫 PROHIBIDO: variables sin usar =====
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_',
-        ignoreRestSiblings: true,
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
 
       // ===== REGLAS TYPE-CHECKED (warn para código legacy, arreglar gradualmente) =====
       '@typescript-eslint/no-floating-promises': 'warn',
@@ -90,7 +96,7 @@ export default tseslint.config(
       'no-debugger': 'error',
       'no-var': 'error',
       'prefer-const': 'error',
-      'eqeqeq': ['error', 'always'],
+      eqeqeq: ['error', 'always'],
 
       // ===== PRETTIER =====
       'prettier/prettier': ['error', { endOfLine: 'auto' }],

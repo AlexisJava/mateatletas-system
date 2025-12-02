@@ -1,147 +1,127 @@
 @import 'tailwindcss';
 
-/* ============================================
-   CRITICAL: FORCE DARK BACKGROUND EVERYWHERE
-   ============================================ */
+/* ════════════════════════════════════════════════════════════════════════════
+   MATEATLETAS DESIGN SYSTEM v2.0
+   Mission Control Aesthetic - Professional Admin Dashboard
+   ════════════════════════════════════════════════════════════════════════════ */
+
 html {
-  background: #0a0a0f !important;
-  background-color: #0a0a0f !important;
+  background: #09090b !important;
 }
 
 body {
   background: transparent !important;
   min-height: 100vh;
+  color: var(--foreground);
+  font-family: var(--font-nunito);
+  font-weight: 400;
 }
 
-/* Prevent white flashes */
-#__next {
-  background: transparent;
-  min-height: 100vh;
-}
-
+#__next,
 main {
   background: transparent;
   min-height: 100vh;
 }
 
 @theme inline {
-  /* Fuentes */
   --font-nunito: 'Nunito', sans-serif;
+  --font-inter:
+    'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    sans-serif;
   --font-sans: var(--font-nunito);
 }
 
+/* ════════════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   ════════════════════════════════════════════════════════════════════════════ */
+
 :root {
-  /* Ecosistema del Tutor - MODO OSCURO POR DEFECTO */
-  --background: #000000; /* Negro puro */
-  --foreground: #f1f5f9; /* Texto claro */
-  --background-card: #1e293b; /* Cards oscuros */
-  --border-subtle: #334155; /* Bordes en oscuro */
+  /* ─────────────────────────────────────────────
+     BASE SYSTEM - Zinc Scale (Neutral)
+     ───────────────────────────────────────────── */
+  --background: #09090b;
+  --foreground: #fafafa;
+  --background-card: #18181b;
+  --border-subtle: #27272a;
 
-  /* Portal Docente - Modo Claro con Purple Gradients */
-  --docente-bg-gradient-start: #f0f4ff; /* Azul muy claro */
-  --docente-bg-gradient-mid: #f5f3ff; /* Púrpura muy claro */
-  --docente-bg-gradient-end: #fdf4ff; /* Rosa muy claro */
-  --docente-bg-card: #ffffff; /* Cards blancos */
-  --docente-bg-hover: #f8f9fc; /* Hover state */
-  --docente-border: #e5e7eb; /* Bordes sutiles */
-  --docente-text: #1e1b4b; /* Texto principal (indigo oscuro) */
-  --docente-text-muted: #6b7280; /* Texto secundario */
-  --docente-shadow: rgba(99, 102, 241, 0.1);
-  --docente-glass-bg: rgba(255, 255, 255, 0.65);
-  --docente-glass-border: rgba(139, 92, 246, 0.15);
-  --docente-accent: #8b5cf6; /* Púrpura vibrante */
-  --docente-accent-hover: #7c3aed; /* Púrpura oscuro */
+  /* ─────────────────────────────────────────────
+     ADMIN PORTAL - Emerald Mission Control
+     ───────────────────────────────────────────── */
 
-  /* Portal Admin - Verde Esmeralda (Matching Landing) */
-  --admin-bg-gradient-start: #000000;
-  --admin-bg-gradient-mid: #064e3b;
-  --admin-bg-gradient-end: #022c22;
-  --admin-bg-card: rgba(16, 185, 129, 0.05);
-  --admin-bg-hover: rgba(16, 185, 129, 0.1);
-  --admin-border: rgba(16, 185, 129, 0.2);
-  --admin-text: #f1f5f9;
-  --admin-text-muted: rgba(255, 255, 255, 0.6);
-  --admin-shadow: rgba(16, 185, 129, 0.2);
-  --admin-glass-bg: rgba(16, 185, 129, 0.05);
-  --admin-glass-border: rgba(16, 185, 129, 0.2);
+  /* Surfaces - Layered depth system */
+  --admin-bg: #09090b;
+  --admin-surface-0: #0c0c0e;
+  --admin-surface-1: #111113;
+  --admin-surface-2: #18181b;
+  --admin-surface-3: #1f1f23;
+  --admin-surface-hover: #27272a;
+
+  /* Borders - Subtle hierarchy */
+  --admin-border: #27272a;
+  --admin-border-subtle: #1c1c1f;
+  --admin-border-accent: rgba(16, 185, 129, 0.4);
+
+  /* Text - Clear hierarchy */
+  --admin-text: #fafafa;
+  --admin-text-secondary: #a1a1aa;
+  --admin-text-muted: #71717a;
+  --admin-text-disabled: #52525b;
+
+  /* Accent - Emerald (Primary Action) */
   --admin-accent: #10b981;
   --admin-accent-hover: #059669;
+  --admin-accent-muted: rgba(16, 185, 129, 0.12);
+  --admin-accent-glow: rgba(16, 185, 129, 0.25);
 
-  /* Portal Estudiante - Modo Claro con Turquoise Gradients */
-  --estudiante-bg-gradient-start: #ecfeff; /* Cyan muy claro */
-  --estudiante-bg-gradient-mid: #f0fdfa; /* Teal muy claro */
-  --estudiante-bg-gradient-end: #f0f9ff; /* Sky muy claro */
-  --estudiante-bg-card: #ffffff; /* Cards blancos */
-  --estudiante-bg-hover: #f0fdf9; /* Hover state */
-  --estudiante-border: #e5e7eb; /* Bordes sutiles */
-  --estudiante-text: #134e4a; /* Texto principal (teal oscuro) */
-  --estudiante-text-muted: #6b7280; /* Texto secundario */
-  --estudiante-shadow: rgba(20, 184, 166, 0.1);
-  --estudiante-glass-bg: rgba(255, 255, 255, 0.65);
-  --estudiante-glass-border: rgba(20, 184, 166, 0.15);
-  --estudiante-accent: #14b8a6; /* Turquesa vibrante */
-  --estudiante-accent-hover: #0d9488; /* Turquesa oscuro */
+  /* Status Colors - Semantic meaning */
+  --status-success: #22c55e;
+  --status-success-muted: rgba(34, 197, 94, 0.12);
+  --status-warning: #f59e0b;
+  --status-warning-muted: rgba(245, 158, 11, 0.12);
+  --status-danger: #ef4444;
+  --status-danger-muted: rgba(239, 68, 68, 0.12);
+  --status-info: #3b82f6;
+  --status-info-muted: rgba(59, 130, 246, 0.12);
+  --status-pending: #a855f7;
+  --status-pending-muted: rgba(168, 85, 247, 0.12);
+
+  /* Shadows - Depth system */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 24px rgba(16, 185, 129, 0.15);
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 2px var(--admin-bg), 0 0 0 4px var(--admin-accent);
+
+  /* ─────────────────────────────────────────────
+     PORTAL DOCENTE - Purple Professional
+     ───────────────────────────────────────────── */
+  --docente-bg: #0c0a12;
+  --docente-surface: #12101a;
+  --docente-accent: #8b5cf6;
+  --docente-accent-hover: #7c3aed;
+  --docente-text: #fafafa;
+  --docente-text-muted: #a78bfa;
+  --docente-border: #27242f;
+
+  /* ─────────────────────────────────────────────
+     PORTAL ESTUDIANTE - Teal Friendly
+     ───────────────────────────────────────────── */
+  --estudiante-bg: #0a1210;
+  --estudiante-surface: #0f1a17;
+  --estudiante-accent: #14b8a6;
+  --estudiante-accent-hover: #0d9488;
+  --estudiante-text: #fafafa;
+  --estudiante-text-muted: #5eead4;
+  --estudiante-border: #1c2b27;
 }
 
-.dark {
-  /* Modo Oscuro - Purple/Violet Theme */
-  --background: #0f0a1f; /* Casi negro con tinte púrpura */
-  --foreground: #f1f5f9; /* Texto claro */
-  --background-card: #1e293b; /* Cards oscuros */
-  --border-subtle: #334155; /* Bordes en oscuro */
-
-  /* Portal Docente - Modo Oscuro Purple Dream */
-  --docente-bg-gradient-start: #0f0a1f; /* Púrpura muy oscuro */
-  --docente-bg-gradient-mid: #1e1b4b; /* Indigo oscuro */
-  --docente-bg-gradient-end: #312e81; /* Indigo medio */
-  --docente-bg-card: #1e1b4b; /* Cards con tinte púrpura */
-  --docente-bg-hover: #2e2a5f; /* Hover state */
-  --docente-border: #3730a3; /* Bordes púrpura */
-  --docente-text: #f1f5f9; /* Texto claro */
-  --docente-text-muted: #a5b4fc; /* Texto secundario indigo claro */
-  --docente-shadow: rgba(139, 92, 246, 0.25);
-  --docente-glass-bg: rgba(30, 27, 75, 0.6);
-  --docente-glass-border: rgba(167, 139, 250, 0.2);
-  --docente-accent: #a78bfa; /* Púrpura claro */
-  --docente-accent-hover: #8b5cf6; /* Púrpura vibrante */
-
-  /* Portal Admin - Verde Esmeralda Oscuro (Dark Mode) */
-  --admin-bg-gradient-start: #000000;
-  --admin-bg-gradient-mid: #022c22;
-  --admin-bg-gradient-end: #064e3b;
-  --admin-bg-card: rgba(16, 185, 129, 0.08);
-  --admin-bg-hover: rgba(16, 185, 129, 0.15);
-  --admin-border: rgba(16, 185, 129, 0.3);
-  --admin-text: #f1f5f9;
-  --admin-text-muted: rgba(255, 255, 255, 0.6);
-  --admin-shadow: rgba(16, 185, 129, 0.3);
-  --admin-glass-bg: rgba(16, 185, 129, 0.1);
-  --admin-glass-border: rgba(52, 211, 153, 0.3);
-  --admin-accent: #34d399;
-  --admin-accent-hover: #10b981;
-
-  /* Portal Estudiante - Modo Oscuro Turquoise Dream */
-  --estudiante-bg-gradient-start: #042f2e; /* Teal muy oscuro */
-  --estudiante-bg-gradient-mid: #134e4a; /* Teal oscuro */
-  --estudiante-bg-gradient-end: #115e59; /* Teal medio */
-  --estudiante-bg-card: #134e4a; /* Cards con tinte teal */
-  --estudiante-bg-hover: #1e5e5b; /* Hover state */
-  --estudiante-border: #0f766e; /* Bordes teal */
-  --estudiante-text: #f1f5f9; /* Texto claro */
-  --estudiante-text-muted: #5eead4; /* Texto secundario teal claro */
-  --estudiante-shadow: rgba(20, 184, 166, 0.25);
-  --estudiante-glass-bg: rgba(19, 78, 74, 0.6);
-  --estudiante-glass-border: rgba(94, 234, 212, 0.2);
-  --estudiante-accent: #2dd4bf; /* Turquesa claro */
-  --estudiante-accent-hover: #14b8a6; /* Turquesa vibrante */
-}
-
-body {
-  /* Background ahora se maneja con CosmosBackground component */
-  color: var(--foreground);
-  font-family: var(--font-nunito);
-  font-weight: 400; /* Peso normal por defecto */
-}
+/* ════════════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY
+   ════════════════════════════════════════════════════════════════════════════ */
 
 h1,
 h2,
@@ -150,22 +130,328 @@ h4,
 h5,
 h6 {
   font-family: var(--font-nunito);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-/* Aplicar Nunito globalmente como fuente oficial de Mateatletas Club */
-* {
-  font-family: var(--font-nunito);
-}
-
-/* Studio: IBM Plex Mono para estética Mission Control */
+/* Monospace for technical content */
+.font-mono,
+code,
+pre,
 .studio-typography,
 .studio-typography * {
-  font-family: var(--font-ibm-plex-mono), ui-monospace, monospace !important;
+  font-family: var(--font-ibm-plex-mono), ui-monospace, 'SF Mono', monospace !important;
 }
 
-/* ==========================================
+/* ════════════════════════════════════════════════════════════════════════════
+   ADMIN TYPOGRAPHY - Inter for professional look
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Admin portal uses Inter instead of Nunito */
+[class*='admin'],
+.admin-layout,
+[data-admin='true'] {
+  font-family: var(--font-inter);
+}
+
+/* Admin-specific heading styles */
+[class*='admin'] h1,
+[class*='admin'] h2,
+[class*='admin'] h3,
+[class*='admin'] h4,
+[class*='admin'] h5,
+[class*='admin'] h6 {
+  font-family: var(--font-inter);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ADMIN COMPONENT STYLES
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Card base */
+.admin-card {
+  background: var(--admin-surface-1);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.admin-card:hover {
+  border-color: var(--admin-border-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Button variants */
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  outline: none;
+}
+
+.admin-btn:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.admin-btn-primary {
+  background: var(--admin-accent);
+  color: #000;
+}
+
+.admin-btn-primary:hover {
+  background: var(--admin-accent-hover);
+}
+
+.admin-btn-secondary {
+  background: var(--admin-surface-2);
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border);
+}
+
+.admin-btn-secondary:hover {
+  background: var(--admin-surface-hover);
+  border-color: var(--admin-text-muted);
+}
+
+.admin-btn-ghost {
+  background: transparent;
+  color: var(--admin-text-secondary);
+}
+
+.admin-btn-ghost:hover {
+  background: var(--admin-surface-2);
+  color: var(--admin-text);
+}
+
+.admin-btn-danger {
+  background: var(--status-danger-muted);
+  color: var(--status-danger);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.admin-btn-danger:hover {
+  background: var(--status-danger);
+  color: #fff;
+}
+
+/* Icon button (for table actions) */
+.admin-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-btn-icon:hover {
+  transform: scale(1.05);
+}
+
+.admin-btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Input styles */
+.admin-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--admin-surface-0);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  color: var(--admin-text);
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+
+.admin-input::placeholder {
+  color: var(--admin-text-disabled);
+}
+
+.admin-input:hover {
+  border-color: var(--admin-text-muted);
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-accent-muted);
+}
+
+/* Select/Dropdown styles */
+.admin-select {
+  width: 100%;
+  padding: 10px 36px 10px 14px;
+  background: var(--admin-surface-0);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  color: var(--admin-text);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.admin-select:hover {
+  border-color: var(--admin-text-muted);
+}
+
+.admin-select:focus {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-accent-muted);
+}
+
+.admin-select option {
+  background: var(--admin-surface-1);
+  color: var(--admin-text);
+  padding: 10px;
+}
+
+.admin-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Empty state styles */
+.admin-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.admin-empty-state-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--admin-surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.admin-empty-state-icon svg {
+  width: 28px;
+  height: 28px;
+  color: var(--admin-text-muted);
+}
+
+.admin-empty-state-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--admin-text);
+  margin-bottom: 4px;
+}
+
+.admin-empty-state-description {
+  font-size: 14px;
+  color: var(--admin-text-muted);
+  max-width: 320px;
+  margin-bottom: 16px;
+}
+
+/* Badge/Status indicators */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.admin-badge-success {
+  background: var(--status-success-muted);
+  color: var(--status-success);
+}
+
+.admin-badge-warning {
+  background: var(--status-warning-muted);
+  color: var(--status-warning);
+}
+
+.admin-badge-danger {
+  background: var(--status-danger-muted);
+  color: var(--status-danger);
+}
+
+.admin-badge-info {
+  background: var(--status-info-muted);
+  color: var(--status-info);
+}
+
+.admin-badge-pending {
+  background: var(--status-pending-muted);
+  color: var(--status-pending);
+}
+
+.admin-badge-neutral {
+  background: var(--admin-surface-2);
+  color: var(--admin-text-muted);
+}
+
+.admin-badge-purple {
+  background: var(--status-pending-muted);
+  color: var(--status-pending);
+}
+
+/* Stat card */
+.admin-stat-card {
+  background: var(--admin-surface-1);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--admin-accent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.admin-stat-card:hover::before {
+  opacity: 1;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
    SCROLLBAR STYLING
-   ========================================== */
+   ════════════════════════════════════════════════════════════════════════════ */
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
@@ -176,9 +462,9 @@ h6 {
   scrollbar-width: none;
 }
 
-/* Custom Scrollbar - Thin with emerald/slate colors */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -186,10 +472,130 @@ h6 {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgb(51 65 85 / 1); /* slate-700 */
+  background: var(--admin-border);
   border-radius: 3px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgb(71 85 105 / 1); /* slate-600 */
+  background: var(--admin-text-muted);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ════════════════════════════════════════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--admin-accent-glow);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px var(--admin-accent-glow);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Stagger children animations */
+.stagger-children > * {
+  animation: slideUp 0.4s ease-out backwards;
+}
+
+.stagger-children > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.stagger-children > *:nth-child(2) {
+  animation-delay: 50ms;
+}
+.stagger-children > *:nth-child(3) {
+  animation-delay: 100ms;
+}
+.stagger-children > *:nth-child(4) {
+  animation-delay: 150ms;
+}
+.stagger-children > *:nth-child(5) {
+  animation-delay: 200ms;
+}
+.stagger-children > *:nth-child(6) {
+  animation-delay: 250ms;
+}
+.stagger-children > *:nth-child(7) {
+  animation-delay: 300ms;
+}
+.stagger-children > *:nth-child(8) {
+  animation-delay: 350ms;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TABLE STYLES
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.admin-table thead {
+  background: var(--admin-surface-0);
+}
+
+.admin-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--admin-text-muted);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--admin-border-subtle);
+  color: var(--admin-text);
+  font-size: 14px;
+}
+
+.admin-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.admin-table tbody tr:hover {
+  background: var(--admin-surface-1);
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
 }

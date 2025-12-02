@@ -59,10 +59,12 @@ Se identificaron **4 PROBLEMAS CRÍTICOS** que causan el comportamiento de "redi
 ### P2: Uso de `<a>` en lugar de `<Link>` en Sidebar
 
 **Ubicación**: `/apps/web/src/app/admin/layout.tsx`
+
 - Línea ~219 (sidebar desktop)
 - Línea ~475 (sidebar mobile)
 
 **Código problemático**:
+
 ```typescript
 <a
   key={item.href}
@@ -72,6 +74,7 @@ Se identificaron **4 PROBLEMAS CRÍTICOS** que causan el comportamiento de "redi
 ```
 
 **Impacto**:
+
 - Cada click en sidebar hace **reload completo de página**
 - El layout se **remonta** (componente se destruye y recrea)
 - El `useEffect` se ejecuta de nuevo
@@ -79,6 +82,7 @@ Se identificaron **4 PROBLEMAS CRÍTICOS** que causan el comportamiento de "redi
 - Esto puede causar redirecciones inesperadas
 
 **Solución**: Cambiar a `<Link>` de Next.js:
+
 ```typescript
 import Link from 'next/link';
 
@@ -96,6 +100,7 @@ import Link from 'next/link';
 **Ubicación**: `/apps/web/src/app/admin/layout.tsx` líneas 59-123
 
 **Código problemático**:
+
 ```typescript
 useEffect(() => {
   const validateAuth = async () => {
@@ -103,7 +108,7 @@ useEffect(() => {
 
     // Si tiene otro rol activo, REDIRIGIR
     if (user && activeRole && activeRole !== 'admin') {
-      router.replace(redirectPath);  // ← REDIRECCIÓN PROBLEMÁTICA
+      router.replace(redirectPath); // ← REDIRECCIÓN PROBLEMÁTICA
       return;
     }
 
@@ -114,6 +119,7 @@ useEffect(() => {
 ```
 
 **Problema**:
+
 - Se ejecuta en CADA navegación (porque `<a>` causa remount)
 - La condición `activeRole !== 'admin'` puede fallar si `selectedRole` está desincronizado
 - Causa redirecciones incluso para admins legítimos
@@ -127,6 +133,7 @@ useEffect(() => {
 **Ubicación**: `/apps/web/src/app/admin/layout.tsx` línea 69
 
 **Código problemático**:
+
 ```typescript
 const activeRole = selectedRole || user?.role;
 
@@ -138,6 +145,7 @@ if (user && activeRole && activeRole !== 'admin') {
 **Problema**: Si un admin tiene múltiples roles (`roles: ['admin', 'docente']`) y por alguna razón `selectedRole = 'docente'`, será redirigido fuera del admin aunque tiene permisos.
 
 **Solución correcta**:
+
 ```typescript
 const userRoles = user?.roles || [user?.role];
 if (user && !userRoles.includes('admin')) {
@@ -189,7 +197,7 @@ const isActiveRoute = (route: string) => {
   if (route === '/admin/dashboard') {
     return pathname === '/admin' || pathname === '/admin/dashboard';
   }
-  return pathname?.startsWith(route);  // Puede dar falsos positivos
+  return pathname?.startsWith(route); // Puede dar falsos positivos
 };
 ```
 
@@ -201,39 +209,39 @@ const isActiveRoute = (route: string) => {
 
 ### Prioridad 1 (CRÍTICO)
 
-| # | Tarea | Archivo | Líneas |
-|---|-------|---------|--------|
-| 1 | Crear `/admin/page.tsx` | nuevo archivo | - |
-| 2 | Cambiar `<a>` a `<Link>` (desktop) | layout.tsx | ~219 |
-| 3 | Cambiar `<a>` a `<Link>` (mobile) | layout.tsx | ~475 |
-| 4 | Arreglar lógica de validación de rol | layout.tsx | 69-84 |
+| #   | Tarea                                | Archivo       | Líneas |
+| --- | ------------------------------------ | ------------- | ------ |
+| 1   | Crear `/admin/page.tsx`              | nuevo archivo | -      |
+| 2   | Cambiar `<a>` a `<Link>` (desktop)   | layout.tsx    | ~219   |
+| 3   | Cambiar `<a>` a `<Link>` (mobile)    | layout.tsx    | ~475   |
+| 4   | Arreglar lógica de validación de rol | layout.tsx    | 69-84  |
 
 ### Prioridad 2 (ALTA)
 
-| # | Tarea | Archivo |
-|---|-------|---------|
-| 5 | Agregar validación de auth a cada página | todas las pages |
-| 6 | Mejorar `isActiveRoute` | layout.tsx |
+| #   | Tarea                                    | Archivo         |
+| --- | ---------------------------------------- | --------------- |
+| 5   | Agregar validación de auth a cada página | todas las pages |
+| 6   | Mejorar `isActiveRoute`                  | layout.tsx      |
 
 ### Prioridad 3 (MEDIA)
 
-| # | Tarea | Archivo |
-|---|-------|---------|
-| 7 | Verificar persistencia de `selectedRole` | auth.store.ts |
-| 8 | Limpiar console.logs de debug | varios |
+| #   | Tarea                                    | Archivo       |
+| --- | ---------------------------------------- | ------------- |
+| 7   | Verificar persistencia de `selectedRole` | auth.store.ts |
+| 8   | Limpiar console.logs de debug            | varios        |
 
 ---
 
 ## 6. ARCHIVOS AFECTADOS
 
-| Archivo | Problema | Severidad |
-|---------|----------|-----------|
-| `/admin/page.tsx` | NO EXISTE | CRÍTICA |
-| `/admin/layout.tsx` | Usa `<a>` líneas 219, 475 | CRÍTICA |
-| `/admin/layout.tsx` | Redirección agresiva líneas 59-123 | CRÍTICA |
-| `/admin/layout.tsx` | Lógica de rol línea 69 | CRÍTICA |
-| Todas `/admin/**/page.tsx` | Sin validación individual | ALTA |
-| `/store/auth.store.ts` | selectedRole desincronizado | MEDIA |
+| Archivo                    | Problema                           | Severidad |
+| -------------------------- | ---------------------------------- | --------- |
+| `/admin/page.tsx`          | NO EXISTE                          | CRÍTICA   |
+| `/admin/layout.tsx`        | Usa `<a>` líneas 219, 475          | CRÍTICA   |
+| `/admin/layout.tsx`        | Redirección agresiva líneas 59-123 | CRÍTICA   |
+| `/admin/layout.tsx`        | Lógica de rol línea 69             | CRÍTICA   |
+| Todas `/admin/**/page.tsx` | Sin validación individual          | ALTA      |
+| `/store/auth.store.ts`     | selectedRole desincronizado        | MEDIA     |
 
 ---
 

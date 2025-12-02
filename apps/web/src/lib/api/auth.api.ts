@@ -92,18 +92,14 @@ export type LoginResponse = LoginSuccessResponse | LoginMfaRequiredResponse;
 /**
  * Type guard para verificar si la respuesta requiere MFA
  */
-export function isLoginMfaRequired(
-  response: LoginResponse,
-): response is LoginMfaRequiredResponse {
+export function isLoginMfaRequired(response: LoginResponse): response is LoginMfaRequiredResponse {
   return 'requires_mfa' in response && response.requires_mfa === true;
 }
 
 /**
  * Type guard para verificar si el login fue exitoso
  */
-export function isLoginSuccess(
-  response: LoginResponse,
-): response is LoginSuccessResponse {
+export function isLoginSuccess(response: LoginResponse): response is LoginSuccessResponse {
   return 'user' in response && !('requires_mfa' in response);
 }
 

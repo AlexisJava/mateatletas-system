@@ -283,19 +283,19 @@ export default function AdminGruposClasesPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 bg-clip-text text-transparent">
-            📚 Clubes y Cursos
-          </h1>
-          <p className="text-white/60 mt-1">Gestiona clubes, cursos y sus horarios</p>
+          <h1 className="text-2xl font-bold text-[var(--admin-text)]">Clubes y Cursos</h1>
+          <p className="text-sm text-[var(--admin-text-muted)] mt-1">
+            Gestiona clubes, cursos y sus horarios
+          </p>
         </div>
 
         <button
           onClick={() => setShowCreateGrupoModal(true)}
-          className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-bold transition-all shadow-lg shadow-purple-500/30 flex items-center gap-2"
+          className="admin-btn admin-btn-primary flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           Crear Club/Curso
@@ -303,13 +303,13 @@ export default function AdminGruposClasesPage() {
       </div>
 
       {/* Filtros de Estado */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 flex-wrap">
         <button
           onClick={() => setFiltroEstado('activos')}
-          className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+          className={`flex items-center gap-2 px-4 py-2.5 font-medium text-sm transition-all rounded-lg ${
             filtroEstado === 'activos'
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30'
-              : 'bg-white/5 text-white/60 hover:bg-white/10'
+              ? 'bg-[var(--admin-accent)] text-black'
+              : 'bg-[var(--admin-surface-1)] text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-2)] hover:text-[var(--admin-text)] border border-[var(--admin-border)]'
           }`}
         >
           <BookOpen className="w-4 h-4" />
@@ -317,10 +317,10 @@ export default function AdminGruposClasesPage() {
         </button>
         <button
           onClick={() => setFiltroEstado('archivados')}
-          className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+          className={`flex items-center gap-2 px-4 py-2.5 font-medium text-sm transition-all rounded-lg ${
             filtroEstado === 'archivados'
-              ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-500/30'
-              : 'bg-white/5 text-white/60 hover:bg-white/10'
+              ? 'bg-[var(--status-warning)] text-black'
+              : 'bg-[var(--admin-surface-1)] text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-2)] hover:text-[var(--admin-text)] border border-[var(--admin-border)]'
           }`}
         >
           <Archive className="w-4 h-4" />
@@ -328,10 +328,10 @@ export default function AdminGruposClasesPage() {
         </button>
         <button
           onClick={() => setFiltroEstado('todos')}
-          className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+          className={`flex items-center gap-2 px-4 py-2.5 font-medium text-sm transition-all rounded-lg ${
             filtroEstado === 'todos'
-              ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg shadow-violet-500/30'
-              : 'bg-white/5 text-white/60 hover:bg-white/10'
+              ? 'bg-[var(--status-info)] text-black'
+              : 'bg-[var(--admin-surface-1)] text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-2)] hover:text-[var(--admin-text)] border border-[var(--admin-border)]'
           }`}
         >
           Todos
@@ -340,16 +340,18 @@ export default function AdminGruposClasesPage() {
 
       {/* Error */}
       {error && (
-        <div className="mb-4 backdrop-blur-xl bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg">
-          ⚠️ {error}
+        <div className="p-4 rounded-lg bg-[var(--status-danger-muted)] border border-[var(--status-danger)]/30 text-[var(--status-danger)]">
+          {error}
         </div>
       )}
 
       {/* Loading */}
       {isLoading && (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4" />
-          <p className="text-white/60">Cargando grupos...</p>
+        <div className="flex items-center justify-center h-[40vh]">
+          <div className="text-center">
+            <div className="w-10 h-10 border-2 border-[var(--admin-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-sm text-[var(--admin-text-muted)]">Cargando grupos...</p>
+          </div>
         </div>
       )}
 

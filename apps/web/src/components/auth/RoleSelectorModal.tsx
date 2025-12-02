@@ -9,13 +9,16 @@ interface RoleSelectorModalProps {
   onSelectRole: (role: UserRole) => void;
 }
 
-const ROLE_CONFIG: Record<UserRole, {
-  label: string;
-  description: string;
-  icon: typeof Shield;
-  gradient: string;
-  shadow: string;
-}> = {
+const ROLE_CONFIG: Record<
+  UserRole,
+  {
+    label: string;
+    description: string;
+    icon: typeof Shield;
+    gradient: string;
+    shadow: string;
+  }
+> = {
   admin: {
     label: 'Administrador',
     description: 'Gestionar sistema, usuarios y configuración',
@@ -101,9 +104,7 @@ export default function RoleSelectorModal({ roles, onSelectRole }: RoleSelectorM
                       <Icon className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1 text-left">
-                      <div className="text-2xl font-black text-white mb-1">
-                        {config.label}
-                      </div>
+                      <div className="text-2xl font-black text-white mb-1">{config.label}</div>
                       <div className="text-base text-white/90 font-medium">
                         {config.description}
                       </div>

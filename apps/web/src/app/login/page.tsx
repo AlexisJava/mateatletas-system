@@ -4,14 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {
-  Eye,
-  EyeOff,
-  LogIn,
-  Mail,
-  Lock,
-  Sparkles,
-} from 'lucide-react';
+import { Eye, EyeOff, LogIn, Mail, Lock, Sparkles } from 'lucide-react';
 import { useAuthStore, type UserRole, type LoginResult } from '@/store/auth.store';
 import RoleSelectorModal from '@/components/auth/RoleSelectorModal';
 
@@ -119,7 +112,7 @@ export default function LoginPage() {
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: 'easeInOut',
           }}
         />
         <motion.div
@@ -131,7 +124,7 @@ export default function LoginPage() {
           transition={{
             duration: 10,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: 'easeInOut',
           }}
         />
 
@@ -173,9 +166,7 @@ export default function LoginPage() {
                 <form onSubmit={handleLogin} className="space-y-6">
                   {/* Email Field */}
                   <div>
-                    <label className="block text-sm font-bold text-white/80 mb-2">
-                      Email
-                    </label>
+                    <label className="block text-sm font-bold text-white/80 mb-2">Email</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                         <Mail className="w-5 h-5 text-[#0ea5e9]" />
@@ -194,9 +185,7 @@ export default function LoginPage() {
 
                   {/* Password Field */}
                   <div>
-                    <label className="block text-sm font-bold text-white/80 mb-2">
-                      Contraseña
-                    </label>
+                    <label className="block text-sm font-bold text-white/80 mb-2">Contraseña</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                         <Lock className="w-5 h-5 text-[#0ea5e9]" />
@@ -216,7 +205,11 @@ export default function LoginPage() {
                         className="absolute inset-y-0 right-4 flex items-center text-white/40 hover:text-white transition-colors"
                         disabled={loading}
                       >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        {showPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -284,10 +277,7 @@ export default function LoginPage() {
 
       {/* Role Selector Modal */}
       {showRoleSelector && (
-        <RoleSelectorModal
-          roles={availableRoles}
-          onSelectRole={handleRoleSelection}
-        />
+        <RoleSelectorModal roles={availableRoles} onSelectRole={handleRoleSelection} />
       )}
     </div>
   );

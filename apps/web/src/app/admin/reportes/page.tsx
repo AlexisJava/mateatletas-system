@@ -136,15 +136,21 @@ export default function AdminReportesPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-[#ff6b35]"></div>
-        <p className="mt-4 text-gray-600">Cargando reportes...</p>
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center">
+          <div className="w-10 h-10 border-2 border-[var(--admin-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-[var(--admin-text-muted)]">Cargando reportes...</p>
+        </div>
       </div>
     );
   }
 
+  // Ensure arrays are valid before filtering
+  const safeUsers = Array.isArray(users) ? users : [];
+  const safeClasses = Array.isArray(classes) ? classes : [];
+
   // Filter data based on date range
-  const filteredUsers = users.filter((u) => {
+  const filteredUsers = safeUsers.filter((u) => {
     const userDate = new Date(u.createdAt);
     const startDate = new Date(dateRange.start);
     const endDate = new Date(dateRange.end);
@@ -152,7 +158,7 @@ export default function AdminReportesPage() {
     return userDate >= startDate && userDate <= endDate;
   });
 
-  const filteredClasses = classes.filter((c) => {
+  const filteredClasses = safeClasses.filter((c) => {
     const classDate = new Date(c.fecha_hora_inicio || c.fecha_hora_inicio);
     const startDate = new Date(dateRange.start);
     const endDate = new Date(dateRange.end);
@@ -238,25 +244,27 @@ export default function AdminReportesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-start">
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#2a1a5e]">Reportes y Analytics</h1>
-          <p className="text-gray-600 mt-1">Visualizá métricas y estadísticas del sistema</p>
+          <h1 className="text-2xl font-bold text-[var(--admin-text)]">Reportes y Analytics</h1>
+          <p className="text-sm text-[var(--admin-text-muted)] mt-1">
+            Visualizá métricas y estadísticas del sistema
+          </p>
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="px-4 py-2 bg-[#ff6b35] text-white rounded-lg hover:bg-[#f7b801] transition-colors font-semibold flex items-center gap-2"
+          className="admin-btn admin-btn-secondary flex items-center gap-2"
         >
-          <span>{showFilters ? '🔼' : '🔽'}</span>
+          <span>{showFilters ? '▲' : '▼'}</span>
           Filtros de Fecha
         </button>
       </div>
 
       {/* Date Range Filters */}
       {showFilters && (
-        <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6 border-2 border-[#ff6b35]">
-          <h3 className="text-lg font-bold text-[#2a1a5e] mb-4">Rango de Fechas</h3>
+        <div className="admin-card p-6">
+          <h3 className="text-lg font-semibold text-[var(--admin-text)] mb-4">Rango de Fechas</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Inicio</label>

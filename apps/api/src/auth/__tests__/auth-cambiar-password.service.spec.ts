@@ -65,21 +65,31 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
         {
           provide: PasswordService,
           useValue: {
-            hash: jest.fn().mockImplementation((password: string) =>
-              bcrypt.hash(password, 10),
-            ),
-            verify: jest.fn().mockImplementation(
-              (password: string, hash: string) => bcrypt.compare(password, hash),
-            ),
-            verifyWithTimingProtection: jest.fn().mockImplementation(
-              async (password: string, hash: string | null) => {
-                if (!hash) {
-                  return { isValid: false, needsRehash: false, currentRounds: 0 };
-                }
-                const isValid = await bcrypt.compare(password, hash);
-                return { isValid, needsRehash: false, currentRounds: 12 };
-              },
-            ),
+            hash: jest
+              .fn()
+              .mockImplementation((password: string) =>
+                bcrypt.hash(password, 10),
+              ),
+            verify: jest
+              .fn()
+              .mockImplementation((password: string, hash: string) =>
+                bcrypt.compare(password, hash),
+              ),
+            verifyWithTimingProtection: jest
+              .fn()
+              .mockImplementation(
+                async (password: string, hash: string | null) => {
+                  if (!hash) {
+                    return {
+                      isValid: false,
+                      needsRehash: false,
+                      currentRounds: 0,
+                    };
+                  }
+                  const isValid = await bcrypt.compare(password, hash);
+                  return { isValid, needsRehash: false, currentRounds: 12 };
+                },
+              ),
             BCRYPT_ROUNDS: 12,
           },
         },

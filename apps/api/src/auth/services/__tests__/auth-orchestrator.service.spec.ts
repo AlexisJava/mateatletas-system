@@ -270,7 +270,10 @@ describe('AuthOrchestratorService', () => {
     it('should use default IP when not provided', async () => {
       estudianteAuth.login.mockResolvedValue(mockEstudianteLoginResult);
 
-      await service.loginEstudiante({ username: 'pedro.martinez', password: 'password123' });
+      await service.loginEstudiante({
+        username: 'pedro.martinez',
+        password: 'password123',
+      });
 
       expect(estudianteAuth.login).toHaveBeenCalledWith(
         'pedro.martinez',

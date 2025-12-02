@@ -93,7 +93,11 @@ describe('AdminAuthService', () => {
       tokenService.generateAccessToken.mockReturnValue('jwt-token');
       loginAttemptService.checkAndRecordAttempt.mockResolvedValue(undefined);
 
-      const result = await service.login('admin@test.com', 'password123', '127.0.0.1');
+      const result = await service.login(
+        'admin@test.com',
+        'password123',
+        '127.0.0.1',
+      );
 
       expect(isMfaRequired(result)).toBe(false);
       if (!isMfaRequired(result)) {
@@ -123,13 +127,19 @@ describe('AdminAuthService', () => {
       tokenService.generateMfaToken.mockReturnValue('mfa-pending-token');
       loginAttemptService.checkAndRecordAttempt.mockResolvedValue(undefined);
 
-      const result = await service.login('admin@test.com', 'password123', '127.0.0.1');
+      const result = await service.login(
+        'admin@test.com',
+        'password123',
+        '127.0.0.1',
+      );
 
       expect(isMfaRequired(result)).toBe(true);
       if (isMfaRequired(result)) {
         expect(result.requires_mfa).toBe(true);
         expect(result.mfa_token).toBe('mfa-pending-token');
-        expect(result.message).toBe('Verificación MFA requerida. Por favor ingresa tu código de autenticación.');
+        expect(result.message).toBe(
+          'Verificación MFA requerida. Por favor ingresa tu código de autenticación.',
+        );
       }
       expect(tokenService.generateMfaToken).toHaveBeenCalledWith(
         'admin-mfa-123',

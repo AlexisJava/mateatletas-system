@@ -248,7 +248,8 @@ export default function StudioPage() {
         apiClient.get<EstadisticasCursos>('/studio/cursos/estadisticas'),
       ]);
 
-      setCursos(cursosRes);
+      // Ensure cursos is always an array
+      setCursos(Array.isArray(cursosRes) ? cursosRes : []);
       setEstadisticas(statsRes);
     } catch (err) {
       setError('Error al cargar los cursos');
@@ -275,29 +276,26 @@ export default function StudioPage() {
     : 0;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-5 h-5 text-orange-500" />
-            <h1 className="text-2xl font-bold text-white">Mateatletas Studio</h1>
-          </div>
-          <p className="text-sm text-white/50">
+          <h1 className="text-2xl font-bold text-[var(--admin-text)]">Mateatletas Studio</h1>
+          <p className="text-sm text-[var(--admin-text-muted)] mt-1">
             Crea y administra cursos interactivos para el club
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Link
             href="/admin/studio/biblioteca"
-            className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.03] border border-white/10 hover:border-white/20 text-white/70 hover:text-white rounded-lg transition-colors"
+            className="admin-btn admin-btn-secondary flex items-center gap-2"
           >
             <Library className="w-4 h-4" />
-            <span className="text-sm font-medium">Biblioteca</span>
+            <span>Biblioteca</span>
           </Link>
           <Link
             href="/admin/studio/nuevo"
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-lg transition-all shadow-lg shadow-orange-500/30"
+            className="admin-btn admin-btn-primary flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             <span>Nuevo Curso</span>

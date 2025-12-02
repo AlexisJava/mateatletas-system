@@ -131,7 +131,8 @@ describe('PasswordService', () => {
 
   describe('getRoundsFromHash', () => {
     it('should extract rounds from valid bcrypt hash', () => {
-      const hash = '$2b$12$K4o0xTkH6xQ.0Z3Xm5qPxOq8q5k5kK6kK7kK8kK9kKAkKBkKCkKDe';
+      const hash =
+        '$2b$12$K4o0xTkH6xQ.0Z3Xm5qPxOq8q5k5kK6kK7kK8kK9kKAkKBkKCkKDe';
 
       const rounds = service.getRoundsFromHash(hash);
 
@@ -147,8 +148,10 @@ describe('PasswordService', () => {
     });
 
     it('should handle hash with different rounds', () => {
-      const hash10 = '$2b$10$K4o0xTkH6xQ.0Z3Xm5qPxOq8q5k5kK6kK7kK8kK9kKAkKBkKCkKDe';
-      const hash14 = '$2b$14$K4o0xTkH6xQ.0Z3Xm5qPxOq8q5k5kK6kK7kK8kK9kKAkKBkKCkKDe';
+      const hash10 =
+        '$2b$10$K4o0xTkH6xQ.0Z3Xm5qPxOq8q5k5kK6kK7kK8kK9kKAkKBkKCkKDe';
+      const hash14 =
+        '$2b$14$K4o0xTkH6xQ.0Z3Xm5qPxOq8q5k5kK6kK7kK8kK9kKAkKBkKCkKDe';
 
       expect(service.getRoundsFromHash(hash10)).toBe(10);
       expect(service.getRoundsFromHash(hash14)).toBe(14);
@@ -157,7 +160,8 @@ describe('PasswordService', () => {
 
   describe('needsRehash', () => {
     it('should return true for hash with fewer rounds than current standard', () => {
-      const oldHash = '$2b$10$K4o0xTkH6xQ.0Z3Xm5qPxOq8q5k5kK6kK7kK8kK9kKAkKBkKCkKDe';
+      const oldHash =
+        '$2b$10$K4o0xTkH6xQ.0Z3Xm5qPxOq8q5k5kK6kK7kK8kK9kKAkKBkKCkKDe';
 
       const result = service.needsRehash(oldHash);
 

@@ -159,12 +159,33 @@ export const getAllClasses = async (): Promise<ClasesResponse> => {
       return parsed.data;
     }
 
-    // Fallback: si no tiene meta, extraer solo el array y envolver
-    const list = clasesListSchema.parse(response).map((clase) => ({
-      ...clase,
-      ruta_curricular: clase.ruta_curricular ?? clase.rutaCurricular ?? undefined,
-    }));
-    return { data: list, meta: undefined };
+    // Fallback: manejar diferentes estructuras de respuesta
+    // Caso 1: response es un array directo
+    if (Array.isArray(response)) {
+      const list = clasesListSchema.parse(response).map((clase) => ({
+        ...clase,
+        ruta_curricular: clase.ruta_curricular ?? clase.rutaCurricular ?? undefined,
+      }));
+      return { data: list, meta: undefined };
+    }
+
+    // Caso 2: response es un objeto con .data que es un array
+    if (
+      response &&
+      typeof response === 'object' &&
+      'data' in response &&
+      Array.isArray(response.data)
+    ) {
+      const list = clasesListSchema.parse(response.data).map((clase) => ({
+        ...clase,
+        ruta_curricular: clase.ruta_curricular ?? clase.rutaCurricular ?? undefined,
+      }));
+      return { data: list, meta: undefined };
+    }
+
+    // Si no se puede parsear, retornar vacío
+    console.warn('getAllClasses: Formato de respuesta inesperado', response);
+    return { data: [], meta: undefined };
   } catch (error) {
     console.error('Error al obtener todas las clases para administración:', error);
     throw error;

@@ -20,10 +20,23 @@ import {
 } from '@/lib/utils/export.utils';
 import { getErrorMessage } from '@/lib/utils/error.utils';
 import { toErrorLike } from '@/types/common';
-import { Users, Crown, Plus, Download, Eye, Trash2, UserCog, X, DollarSign } from 'lucide-react';
+import {
+  Users,
+  Crown,
+  Plus,
+  Download,
+  Eye,
+  Trash2,
+  UserCog,
+  X,
+  DollarSign,
+  FileSpreadsheet,
+  FileText,
+} from 'lucide-react';
 import CreateDocenteForm from '@/components/admin/CreateDocenteForm';
 import ViewEditDocenteModal from '@/components/admin/ViewEditDocenteModal';
 import MultiRoleModal from '@/components/admin/MultiRoleModal';
+import { EmptyState } from '@/components/admin/EmptyState';
 
 type TabType = 'tutores' | 'personal';
 type ModalType =
@@ -70,16 +83,19 @@ export default function UsuariosPage() {
     void fetchUsers();
   }, [fetchUsers]);
 
+  // Ensure users is always an array before filtering
+  const safeUsers = Array.isArray(users) ? users : [];
+
   // Filtrar usuarios según el tab activo
-  const tutores = users.filter((u) => u.role === 'tutor');
-  const personal = users.filter((u) => u.role === 'docente' || u.role === 'admin');
+  const tutores = safeUsers.filter((u) => u.role === 'tutor');
+  const personal = safeUsers.filter((u) => u.role === 'docente' || u.role === 'admin');
 
   const displayedUsers = activeTab === 'tutores' ? tutores : personal;
 
   const roleColors: Record<string, string> = {
-    admin: 'bg-gradient-to-r from-purple-600 to-violet-600 text-white',
-    docente: 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white',
-    tutor: 'bg-gradient-to-r from-green-600 to-emerald-600 text-white',
+    admin: 'admin-badge-purple',
+    docente: 'admin-badge-info',
+    tutor: 'admin-badge-success',
   };
 
   const roleLabels: Record<string, string> = {
@@ -349,91 +365,82 @@ export default function UsuariosPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-cyan-500/10 rounded-3xl blur-3xl"></div>
-        <div className="relative backdrop-blur-xl bg-white/5 rounded-3xl border border-white/10 p-8 shadow-2xl">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-4xl font-black bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent mb-3">
-                Gestión de Usuarios
-              </h1>
-              <p className="text-white/70 text-lg font-medium">
-                Administrá la comunidad completa de Mateatletas
-              </p>
-            </div>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--admin-text)]">Gestión de Usuarios</h1>
+          <p className="text-sm text-[var(--admin-text-muted)] mt-1">
+            Administrá la comunidad completa de Mateatletas
+          </p>
+        </div>
 
-            <div className="flex gap-3 items-center">
-              {/* Crear Nuevo (solo en Personal del Club) */}
-              {activeTab === 'personal' && (
+        <div className="flex gap-3 items-center">
+          {activeTab === 'personal' && (
+            <button
+              onClick={() => setModalType('createDocente')}
+              className="admin-btn admin-btn-primary flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Crear Nuevo
+            </button>
+          )}
+
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="admin-btn admin-btn-secondary flex items-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Exportar
+            </button>
+
+            {showExportMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-[var(--admin-surface-2)] rounded-lg shadow-lg border border-[var(--admin-border)] py-1 z-10">
                 <button
-                  onClick={() => setModalType('createDocente')}
-                  className="px-6 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all flex items-center gap-2"
+                  onClick={() => handleExport('excel')}
+                  className="w-full px-4 py-2 text-left hover:bg-[var(--admin-surface-3)] text-sm text-[var(--admin-text)] transition-colors flex items-center gap-2"
                 >
-                  <Plus className="w-5 h-5" />
-                  Crear Nuevo
+                  <FileSpreadsheet className="w-4 h-4 text-[var(--status-success)]" />
+                  Exportar a Excel
                 </button>
-              )}
-
-              {/* Export Button */}
-              <div className="relative">
                 <button
-                  onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl font-bold hover:shadow-2xl hover:shadow-blue-500/50 hover:scale-105 transition-all flex items-center gap-2"
+                  onClick={() => handleExport('csv')}
+                  className="w-full px-4 py-2 text-left hover:bg-[var(--admin-surface-3)] text-sm text-[var(--admin-text)] transition-colors flex items-center gap-2"
                 >
-                  <Download className="w-5 h-5" />
-                  Exportar
+                  <FileText className="w-4 h-4 text-[var(--status-info)]" />
+                  Exportar a CSV
                 </button>
-
-                {showExportMenu && (
-                  <div className="absolute right-0 mt-2 w-56 backdrop-blur-2xl bg-slate-900/90 rounded-2xl shadow-2xl border border-white/10 py-2 z-10">
-                    <button
-                      onClick={() => handleExport('excel')}
-                      className="w-full px-5 py-3 text-left hover:bg-white/10 text-sm font-bold text-white transition-colors flex items-center gap-2"
-                    >
-                      <span className="text-green-400">📊</span> Exportar a Excel
-                    </button>
-                    <button
-                      onClick={() => handleExport('csv')}
-                      className="w-full px-5 py-3 text-left hover:bg-white/10 text-sm font-bold text-white transition-colors flex items-center gap-2"
-                    >
-                      <span className="text-blue-400">📄</span> Exportar a CSV
-                    </button>
-                    <button
-                      onClick={() => handleExport('pdf')}
-                      className="w-full px-5 py-3 text-left hover:bg-white/10 text-sm font-bold text-white transition-colors flex items-center gap-2"
-                    >
-                      <span className="text-red-400">📕</span> Exportar a PDF
-                    </button>
-                  </div>
-                )}
+                <button
+                  onClick={() => handleExport('pdf')}
+                  className="w-full px-4 py-2 text-left hover:bg-[var(--admin-surface-3)] text-sm text-[var(--admin-text)] transition-colors flex items-center gap-2"
+                >
+                  <FileText className="w-4 h-4 text-[var(--status-danger)]" />
+                  Exportar a PDF
+                </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4">
+      <div className="flex gap-2">
         <button
           onClick={() => setActiveTab('tutores')}
-          className={`group relative flex items-center gap-3 px-8 py-4 font-bold text-base transition-all rounded-2xl overflow-hidden ${
+          className={`flex items-center gap-2 px-4 py-2.5 font-medium text-sm transition-all rounded-lg ${
             activeTab === 'tutores'
-              ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-2xl shadow-blue-500/40 scale-105'
-              : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 border border-white/10'
+              ? 'bg-[var(--admin-accent)] text-black'
+              : 'bg-[var(--admin-surface-1)] text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-2)] hover:text-[var(--admin-text)] border border-[var(--admin-border)]'
           }`}
         >
-          {activeTab === 'tutores' && (
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent animate-pulse"></div>
-          )}
-          <Users
-            className={`${activeTab === 'tutores' ? 'w-6 h-6' : 'w-5 h-5'} relative z-10 transition-all`}
-          />
-          <span className="relative z-10">Tutores</span>
+          <Users className="w-4 h-4" />
+          Tutores
           <span
-            className={`relative z-10 px-3 py-1 rounded-xl text-sm font-black ${
-              activeTab === 'tutores' ? 'bg-white/25' : 'bg-white/10'
+            className={`px-2 py-0.5 rounded text-xs font-semibold ${
+              activeTab === 'tutores'
+                ? 'bg-black/20 text-black'
+                : 'bg-[var(--admin-surface-3)] text-[var(--admin-text-muted)]'
             }`}
           >
             {tutores.length}
@@ -442,22 +449,19 @@ export default function UsuariosPage() {
 
         <button
           onClick={() => setActiveTab('personal')}
-          className={`group relative flex items-center gap-3 px-8 py-4 font-bold text-base transition-all rounded-2xl overflow-hidden ${
+          className={`flex items-center gap-2 px-4 py-2.5 font-medium text-sm transition-all rounded-lg ${
             activeTab === 'personal'
-              ? 'bg-gradient-to-br from-purple-600 to-violet-700 text-white shadow-2xl shadow-purple-500/40 scale-105'
-              : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80 border border-white/10'
+              ? 'bg-[var(--admin-accent)] text-black'
+              : 'bg-[var(--admin-surface-1)] text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-2)] hover:text-[var(--admin-text)] border border-[var(--admin-border)]'
           }`}
         >
-          {activeTab === 'personal' && (
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-transparent animate-pulse"></div>
-          )}
-          <Crown
-            className={`${activeTab === 'personal' ? 'w-6 h-6' : 'w-5 h-5'} relative z-10 transition-all`}
-          />
-          <span className="relative z-10">Personal del Club</span>
+          <Crown className="w-4 h-4" />
+          Personal del Club
           <span
-            className={`relative z-10 px-3 py-1 rounded-xl text-sm font-black ${
-              activeTab === 'personal' ? 'bg-white/25' : 'bg-white/10'
+            className={`px-2 py-0.5 rounded text-xs font-semibold ${
+              activeTab === 'personal'
+                ? 'bg-black/20 text-black'
+                : 'bg-[var(--admin-surface-3)] text-[var(--admin-text-muted)]'
             }`}
           >
             {personal.length}
@@ -467,94 +471,96 @@ export default function UsuariosPage() {
 
       {/* Error Message */}
       {error && (
-        <div className="backdrop-blur-xl bg-red-100/80 dark:bg-red-950/60 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl">
+        <div className="p-4 rounded-lg bg-[var(--status-danger-muted)] border border-[var(--status-danger)]/30 text-[var(--status-danger)]">
           {error}
         </div>
       )}
 
       {/* Users Table */}
       {isLoading ? (
-        <div className="text-center py-20">
-          <div className="inline-block animate-spin rounded-full h-20 w-20 border-4 border-white/10 border-t-purple-500"></div>
-          <p className="mt-6 text-white/70 font-bold text-lg">Cargando usuarios...</p>
+        <div className="flex items-center justify-center h-[40vh]">
+          <div className="text-center">
+            <div className="w-10 h-10 border-2 border-[var(--admin-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-sm text-[var(--admin-text-muted)]">Cargando usuarios...</p>
+          </div>
         </div>
       ) : displayedUsers.length === 0 ? (
-        <div className="backdrop-blur-xl bg-white/5 rounded-3xl shadow-2xl border border-white/10 p-20 text-center">
-          <div className="text-6xl mb-4">👥</div>
-          <p className="text-white/60 text-xl font-bold">No hay usuarios en esta categoría</p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title="No hay usuarios en esta categoría"
+          description={
+            activeTab === 'personal'
+              ? 'Creá el primer docente o administrador para comenzar'
+              : 'Los tutores aparecerán aquí cuando se registren'
+          }
+          action={
+            activeTab === 'personal'
+              ? { label: 'Crear Usuario', onClick: () => setModalType('createDocente') }
+              : undefined
+          }
+        />
       ) : (
-        <div className="backdrop-blur-xl bg-white/5 rounded-3xl shadow-2xl border border-white/10 overflow-hidden">
+        <div className="admin-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead className="bg-gradient-to-r from-white/10 to-white/5 border-b border-white/10">
+            <table className="admin-table">
+              <thead>
                 <tr>
-                  <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
-                    Usuario
-                  </th>
-                  <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
-                    Username
-                  </th>
-                  {activeTab === 'tutores' && (
-                    <th className="px-8 py-5 text-left text-xs font-black text-white uppercase tracking-wider">
-                      Credencial
-                    </th>
-                  )}
-                  <th className="px-8 py-5 text-right text-xs font-black text-white uppercase tracking-wider">
-                    Acciones
-                  </th>
+                  <th>Usuario</th>
+                  <th>Username</th>
+                  {activeTab === 'tutores' && <th>Credencial</th>}
+                  <th className="text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody>
                 {displayedUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-white/5 transition-all group">
-                    <td className="px-8 py-5 whitespace-nowrap">
-                      <div className="flex items-center gap-4">
-                        <div className="relative flex-shrink-0 h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-purple-500/30 group-hover:shadow-2xl group-hover:shadow-purple-500/50 transition-all">
+                  <tr key={user.id}>
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-[var(--admin-accent-muted)] flex items-center justify-center text-[var(--admin-accent)] font-semibold">
                           {user.nombre?.charAt(0)?.toUpperCase() || 'U'}
                         </div>
                         <div>
-                          <div className="font-bold text-white text-base">
+                          <div className="font-medium text-[var(--admin-text)]">
                             {user.nombre} {user.apellido}
                           </div>
-                          <div className="text-xs text-white/40 font-mono mt-1">
-                            ID: {user.id.slice(0, 8)}...
+                          <div className="text-xs text-[var(--admin-text-disabled)] font-mono">
+                            {user.id.slice(0, 8)}...
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-5 whitespace-nowrap">
-                      <div className="text-sm text-cyan-400 font-mono font-bold">
+                    <td>
+                      <span className="text-sm font-mono text-[var(--admin-text-secondary)]">
                         {user.username ||
                           `${user.nombre.toLowerCase()}.${user.apellido.toLowerCase()}`}
-                      </div>
+                      </span>
                     </td>
                     {activeTab === 'tutores' && (
-                      <td className="px-8 py-5 whitespace-nowrap">
+                      <td>
                         {user.password_temporal ? (
-                          <div className="flex items-center gap-2">
-                            <span className="px-3 py-1 bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 text-xs font-mono font-bold rounded-lg">
-                              {user.password_temporal}
-                            </span>
-                          </div>
+                          <span className="admin-badge-warning font-mono text-xs">
+                            {user.password_temporal}
+                          </span>
                         ) : (
-                          <span className="text-white/30 text-xs italic">Ya cambió contraseña</span>
+                          <span className="text-[var(--admin-text-disabled)] text-xs">
+                            Ya cambió contraseña
+                          </span>
                         )}
                       </td>
                     )}
-                    <td className="px-8 py-5 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2">
+                    <td>
+                      <div className="flex items-center justify-end gap-1">
                         {activeTab === 'tutores' && (
                           <button
                             onClick={() => handleRegistrarPago(user.id)}
                             disabled={pagoLoading === user.id}
-                            className="p-3 text-green-400 hover:bg-green-500/20 rounded-xl transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="admin-btn-icon text-[var(--status-success)] hover:bg-[var(--status-success-muted)]"
                             title="Registrar pago"
                           >
                             {pagoLoading === user.id ? (
-                              <div className="w-5 h-5 border-2 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+                              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                             ) : (
-                              <DollarSign className="w-5 h-5" />
+                              <DollarSign className="w-4 h-4" />
                             )}
                           </button>
                         )}
@@ -566,24 +572,24 @@ export default function UsuariosPage() {
                               openModal('view', user);
                             }
                           }}
-                          className="p-3 text-blue-400 hover:bg-blue-500/20 rounded-xl transition-all hover:scale-110"
+                          className="admin-btn-icon text-[var(--status-info)] hover:bg-[var(--status-info-muted)]"
                           title="Ver detalles"
                         >
-                          <Eye className="w-5 h-5" />
+                          <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => openModal('roles', user)}
-                          className="p-3 text-purple-400 hover:bg-purple-500/20 rounded-xl transition-all hover:scale-110"
+                          className="admin-btn-icon text-[var(--admin-accent)] hover:bg-[var(--admin-accent-muted)]"
                           title="Gestionar roles"
                         >
-                          <UserCog className="w-5 h-5" />
+                          <UserCog className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => openModal('delete', user)}
-                          className="p-3 text-red-400 hover:bg-red-500/20 rounded-xl transition-all hover:scale-110"
+                          className="admin-btn-icon text-[var(--status-danger)] hover:bg-[var(--status-danger-muted)]"
                           title="Eliminar"
                         >
-                          <Trash2 className="w-5 h-5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>

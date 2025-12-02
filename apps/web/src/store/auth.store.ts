@@ -63,10 +63,7 @@ interface AuthState {
   setUser: (_user: User) => void;
   setSelectedRole: (_role: UserRole) => void;
   clearMfaPending: () => void;
-  cambiarPassword: (
-    _passwordActual: string,
-    _nuevaPassword: string,
-  ) => Promise<void>;
+  cambiarPassword: (_passwordActual: string, _nuevaPassword: string) => Promise<void>;
 }
 
 /**
@@ -129,9 +126,7 @@ export const useAuthStore = create<AuthState>()(
           if (isLoginSuccess(response)) {
             const authUser = response.user;
             // Normalizar roles a minúsculas (backend envía ADMIN, DOCENTE, etc.)
-            const roles = response.roles.map((r) =>
-              r.toLowerCase(),
-            ) as UserRole[];
+            const roles = response.roles.map((r) => r.toLowerCase()) as UserRole[];
 
             // Mapear AuthUser a User del store
             const user: User = {
@@ -346,10 +341,7 @@ export const useAuthStore = create<AuthState>()(
        * @param nuevaPassword - Nueva contraseña
        * @throws Error si la contraseña actual es incorrecta
        */
-      cambiarPassword: async (
-        passwordActual: string,
-        nuevaPassword: string,
-      ) => {
+      cambiarPassword: async (passwordActual: string, nuevaPassword: string) => {
         set({ isLoading: true });
 
         try {

@@ -87,7 +87,11 @@ describe('DocenteAuthService', () => {
       tokenService.generateAccessToken.mockReturnValue('jwt-token');
       loginAttemptService.checkAndRecordAttempt.mockResolvedValue(undefined);
 
-      const result = await service.login('docente@test.com', 'password123', '127.0.0.1');
+      const result = await service.login(
+        'docente@test.com',
+        'password123',
+        '127.0.0.1',
+      );
 
       expect(result.access_token).toBe('jwt-token');
       expect(result.user.id).toBe('docente-123');
@@ -206,7 +210,11 @@ describe('DocenteAuthService', () => {
       });
       tokenService.generateAccessToken.mockReturnValue('jwt-token');
 
-      const result = await service.login('docente@test.com', 'password123', '127.0.0.1');
+      const result = await service.login(
+        'docente@test.com',
+        'password123',
+        '127.0.0.1',
+      );
 
       expect(result.user.titulo).toBeNull();
       expect(result.user.bio).toBeNull();

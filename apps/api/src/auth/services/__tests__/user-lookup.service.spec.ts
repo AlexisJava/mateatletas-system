@@ -117,7 +117,9 @@ describe('UserLookupService', () => {
 
   describe('findByEmail', () => {
     it('should find tutor by email', async () => {
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as never);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as never);
 
       const result = await service.findByEmail('tutor@test.com');
 
@@ -129,7 +131,9 @@ describe('UserLookupService', () => {
 
     it('should find docente by email if tutor not found', async () => {
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(mockDocente as never);
+      jest
+        .spyOn(prisma.docente, 'findUnique')
+        .mockResolvedValue(mockDocente as never);
 
       const result = await service.findByEmail('docente@test.com');
 
@@ -142,7 +146,9 @@ describe('UserLookupService', () => {
     it('should find admin by email if tutor and docente not found', async () => {
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
       jest.spyOn(prisma.docente, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.admin, 'findUnique').mockResolvedValue(mockAdmin as never);
+      jest
+        .spyOn(prisma.admin, 'findUnique')
+        .mockResolvedValue(mockAdmin as never);
 
       const result = await service.findByEmail('admin@test.com');
 
@@ -168,11 +174,23 @@ describe('UserLookupService', () => {
     it('should find estudiante by username with relations', async () => {
       const estudianteWithRelations = {
         ...mockEstudiante,
-        tutor: { id: 'tutor-123', nombre: 'Juan', apellido: 'Perez', email: 'tutor@test.com' },
-        equipo: { id: 'equipo-1', nombre: 'Fenix', color_primario: '#FF0000', color_secundario: '#FFA500' },
+        tutor: {
+          id: 'tutor-123',
+          nombre: 'Juan',
+          apellido: 'Perez',
+          email: 'tutor@test.com',
+        },
+        equipo: {
+          id: 'equipo-1',
+          nombre: 'Fenix',
+          color_primario: '#FF0000',
+          color_secundario: '#FFA500',
+        },
       };
 
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(estudianteWithRelations as never);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(estudianteWithRelations as never);
 
       const result = await service.findEstudianteByUsername('estudiante.test');
 
@@ -193,7 +211,9 @@ describe('UserLookupService', () => {
 
   describe('findTutorByUsername', () => {
     it('should find tutor by username', async () => {
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as never);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as never);
 
       const result = await service.findTutorByUsername('tutor.test');
 
@@ -212,7 +232,9 @@ describe('UserLookupService', () => {
 
   describe('findByUsername', () => {
     it('should find estudiante first by username', async () => {
-      jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(mockEstudiante as never);
+      jest
+        .spyOn(prisma.estudiante, 'findUnique')
+        .mockResolvedValue(mockEstudiante as never);
 
       const result = await service.findByUsername('estudiante.test');
 
@@ -222,7 +244,9 @@ describe('UserLookupService', () => {
 
     it('should find tutor by username if estudiante not found', async () => {
       jest.spyOn(prisma.estudiante, 'findUnique').mockResolvedValue(null);
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as never);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as never);
 
       const result = await service.findByUsername('tutor.test');
 
@@ -317,7 +341,9 @@ describe('UserLookupService', () => {
 
   describe('findAdminById', () => {
     it('should find admin by ID', async () => {
-      jest.spyOn(prisma.admin, 'findUnique').mockResolvedValue(mockAdmin as never);
+      jest
+        .spyOn(prisma.admin, 'findUnique')
+        .mockResolvedValue(mockAdmin as never);
 
       const result = await service.findAdminById('admin-123');
 
@@ -336,7 +362,9 @@ describe('UserLookupService', () => {
 
   describe('findTutorById', () => {
     it('should find tutor by ID', async () => {
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(mockTutor as never);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue(mockTutor as never);
 
       const result = await service.findTutorById('tutor-123');
 
@@ -446,9 +474,15 @@ describe('UserLookupService', () => {
 
   describe('updatePasswordHash', () => {
     it('should update estudiante password hash', async () => {
-      const updateSpy = jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({} as never);
+      const updateSpy = jest
+        .spyOn(prisma.estudiante, 'update')
+        .mockResolvedValue({} as never);
 
-      await service.updatePasswordHash('estudiante-123', 'estudiante', '$2b$12$newhash');
+      await service.updatePasswordHash(
+        'estudiante-123',
+        'estudiante',
+        '$2b$12$newhash',
+      );
 
       expect(updateSpy).toHaveBeenCalledWith({
         where: { id: 'estudiante-123' },
@@ -457,7 +491,9 @@ describe('UserLookupService', () => {
     });
 
     it('should update tutor password hash', async () => {
-      const updateSpy = jest.spyOn(prisma.tutor, 'update').mockResolvedValue({} as never);
+      const updateSpy = jest
+        .spyOn(prisma.tutor, 'update')
+        .mockResolvedValue({} as never);
 
       await service.updatePasswordHash('tutor-123', 'tutor', '$2b$12$newhash');
 
@@ -468,9 +504,15 @@ describe('UserLookupService', () => {
     });
 
     it('should update docente password hash', async () => {
-      const updateSpy = jest.spyOn(prisma.docente, 'update').mockResolvedValue({} as never);
+      const updateSpy = jest
+        .spyOn(prisma.docente, 'update')
+        .mockResolvedValue({} as never);
 
-      await service.updatePasswordHash('docente-123', 'docente', '$2b$12$newhash');
+      await service.updatePasswordHash(
+        'docente-123',
+        'docente',
+        '$2b$12$newhash',
+      );
 
       expect(updateSpy).toHaveBeenCalledWith({
         where: { id: 'docente-123' },
@@ -479,7 +521,9 @@ describe('UserLookupService', () => {
     });
 
     it('should update admin password hash', async () => {
-      const updateSpy = jest.spyOn(prisma.admin, 'update').mockResolvedValue({} as never);
+      const updateSpy = jest
+        .spyOn(prisma.admin, 'update')
+        .mockResolvedValue({} as never);
 
       await service.updatePasswordHash('admin-123', 'admin', '$2b$12$newhash');
 
@@ -499,9 +543,15 @@ describe('UserLookupService', () => {
     };
 
     it('should update estudiante password data', async () => {
-      const updateSpy = jest.spyOn(prisma.estudiante, 'update').mockResolvedValue({} as never);
+      const updateSpy = jest
+        .spyOn(prisma.estudiante, 'update')
+        .mockResolvedValue({} as never);
 
-      await service.updatePasswordData('estudiante-123', 'estudiante', updateData);
+      await service.updatePasswordData(
+        'estudiante-123',
+        'estudiante',
+        updateData,
+      );
 
       expect(updateSpy).toHaveBeenCalledWith({
         where: { id: 'estudiante-123' },
@@ -510,7 +560,9 @@ describe('UserLookupService', () => {
     });
 
     it('should update tutor password data', async () => {
-      const updateSpy = jest.spyOn(prisma.tutor, 'update').mockResolvedValue({} as never);
+      const updateSpy = jest
+        .spyOn(prisma.tutor, 'update')
+        .mockResolvedValue({} as never);
 
       await service.updatePasswordData('tutor-123', 'tutor', updateData);
 
@@ -523,7 +575,9 @@ describe('UserLookupService', () => {
 
   describe('updateAdminMfaBackupCodes', () => {
     it('should update admin MFA backup codes', async () => {
-      const updateSpy = jest.spyOn(prisma.admin, 'update').mockResolvedValue({} as never);
+      const updateSpy = jest
+        .spyOn(prisma.admin, 'update')
+        .mockResolvedValue({} as never);
       const newCodes = ['code1', 'code2', 'code3'];
 
       await service.updateAdminMfaBackupCodes('admin-123', newCodes);
@@ -537,7 +591,9 @@ describe('UserLookupService', () => {
 
   describe('emailExistsForTutor', () => {
     it('should return true if email exists', async () => {
-      jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue({ id: 'tutor-123' } as never);
+      jest
+        .spyOn(prisma.tutor, 'findUnique')
+        .mockResolvedValue({ id: 'tutor-123' } as never);
 
       const result = await service.emailExistsForTutor('tutor@test.com');
 

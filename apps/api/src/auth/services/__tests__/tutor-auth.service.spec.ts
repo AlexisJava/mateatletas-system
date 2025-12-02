@@ -86,7 +86,11 @@ describe('TutorAuthService', () => {
       tokenService.generateAccessToken.mockReturnValue('jwt-token');
       loginAttemptService.checkAndRecordAttempt.mockResolvedValue(undefined);
 
-      const result = await service.login('tutor@test.com', 'password123', '127.0.0.1');
+      const result = await service.login(
+        'tutor@test.com',
+        'password123',
+        '127.0.0.1',
+      );
 
       expect(result.access_token).toBe('jwt-token');
       expect(result.user.id).toBe('tutor-123');
@@ -197,7 +201,11 @@ describe('TutorAuthService', () => {
       });
       tokenService.generateAccessToken.mockReturnValue('jwt-token');
 
-      const result = await service.login('tutor@test.com', 'password123', '127.0.0.1');
+      const result = await service.login(
+        'tutor@test.com',
+        'password123',
+        '127.0.0.1',
+      );
 
       expect(result.user.roles).toContain(Role.TUTOR);
       expect(tokenService.generateAccessToken).toHaveBeenCalledWith(

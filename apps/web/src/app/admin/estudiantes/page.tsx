@@ -4,7 +4,15 @@ import { useEffect, useState } from 'react';
 import { getErrorMessage } from '@/lib/utils/error-handler';
 import apiClient from '@/lib/axios';
 import AgregarEstudianteModal from '@/components/admin/AgregarEstudianteModal';
-import { UserPlus } from 'lucide-react';
+import { EmptyState } from '@/components/admin/EmptyState';
+import {
+  UserPlus,
+  GraduationCap,
+  Code,
+  Calculator,
+  FlaskConical,
+  ClipboardList,
+} from 'lucide-react';
 
 interface Estudiante {
   id: string;
@@ -14,7 +22,7 @@ interface Estudiante {
   nivelEscolar: string;
   nivel_actual: number;
   puntos_totales: number;
-  avatar_url?: string; // Avatar 3D de Ready Player Me
+  avatar_url?: string;
   tutor: {
     id: string;
     nombre: string;
@@ -59,14 +67,14 @@ interface Sector {
   icono: string;
 }
 
+type SectorTab = 'Programación' | 'Matemática' | 'Ciencias' | 'Preinscriptos';
+
 export default function AdminEstudiantesPage() {
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [sectores, setSectores] = useState<Sector[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sectorActivo, setSectorActivo] = useState<
-    'Programación' | 'Matemática' | 'Ciencias' | 'Preinscriptos'
-  >('Matemática');
+  const [sectorActivo, setSectorActivo] = useState<SectorTab>('Matemática');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [sectorIdParaModal, setSectorIdParaModal] = useState<string>('');
 
@@ -80,21 +88,17 @@ export default function AdminEstudiantesPage() {
     try {
       setIsLoading(true);
       setError(null);
-      // Endpoint para admin que trae TODOS los estudiantes SIN límite
       const response = await apiClient.get<{ data?: Estudiante[] } | Estudiante[]>(
         '/admin/estudiantes',
       );
-      console.log('📊 Respuesta del servidor:', response);
-      // El backend devuelve { data: [], metadata: {} }
       const estudiantes = (response as { data?: Estudiante[] })?.data
         ? (response as { data: Estudiante[] }).data
         : Array.isArray(response)
           ? response
           : [];
-      console.log('👥 Estudiantes procesados:', estudiantes.length);
       setEstudiantes(estudiantes as Estudiante[]);
     } catch (err) {
-      console.error('❌ Error al cargar estudiantes:', err);
+      console.error('Error al cargar estudiantes:', err);
       setError(getErrorMessage(err as Error, 'Error al cargar estudiantes'));
     } finally {
       setIsLoading(false);
@@ -122,39 +126,15 @@ export default function AdminEstudiantesPage() {
   };
 
   const handleAbrirModal = (nombreSector: string) => {
-    // Mapear nombre de botón a nombre real del sector
     const nombreSectorReal = nombreSector === 'Ciencias' ? 'Divulgación Científica' : nombreSector;
     const sector = sectores.find((s) => s.nombre === nombreSectorReal);
     if (sector) {
-      console.log(`[DEBUG] Abriendo modal para sector: ${nombreSectorReal} con ID: ${sector.id}`);
       setSectorIdParaModal(sector.id);
       setIsModalOpen(true);
     } else {
-      console.error(
-        `[ERROR] No se encontró el sector: ${nombreSectorReal}. Sectores disponibles:`,
-        sectores,
-      );
       setError(`No se pudo abrir el modal: sector "${nombreSectorReal}" no encontrado`);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-emerald-500/20 border-t-emerald-400 mb-4"></div>
-        <p className="text-white/60 font-medium">Cargando estudiantes...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="backdrop-blur-xl bg-red-500/10 border border-red-500/30 rounded-xl p-6">
-        <h3 className="text-xl font-bold text-red-300 mb-2">Error</h3>
-        <p className="text-red-200">{error}</p>
-      </div>
-    );
-  }
 
   // Separar estudiantes por sector
   const estudiantesProgramacion = estudiantes.filter(
@@ -166,149 +146,6 @@ export default function AdminEstudiantesPage() {
   );
   const estudiantesSinSector = estudiantes.filter((est) => !est.sector);
 
-  const renderTablaEstudiantes = (
-    listaEstudiantes: Estudiante[],
-    titulo: string,
-    icono: string,
-  ) => {
-    if (listaEstudiantes.length === 0) {
-      return (
-        <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl border border-emerald-500/20 shadow-2xl shadow-emerald-500/10 p-8 text-center">
-          <span className="text-4xl mb-2 block">{icono}</span>
-          <p className="text-white/60 text-sm">No hay estudiantes en {titulo}</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="backdrop-blur-xl bg-emerald-500/[0.05] rounded-xl border border-emerald-500/20 shadow-2xl shadow-emerald-500/10 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-emerald-500/20">
-            <thead className="bg-gradient-to-r from-emerald-600/20 to-teal-600/20">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
-                  Estudiante
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
-                  Avatar 3D
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
-                  Edad
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
-                  Grupos
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
-                  Horario
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
-                  Puntos
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-emerald-100 uppercase tracking-wider">
-                  Tutor
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-emerald-500/10">
-              {listaEstudiantes.map((estudiante) => {
-                const initials =
-                  `${estudiante.nombre.charAt(0)}${estudiante.apellido.charAt(0)}`.toUpperCase();
-                return (
-                  <tr key={estudiante.id} className="hover:bg-emerald-500/[0.08] transition-all">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold shadow-lg shadow-emerald-500/30">
-                          {initials}
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold text-white">
-                            {estudiante.nombre} {estudiante.apellido}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {estudiante.avatar_url ? (
-                        <div className="relative group">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg overflow-hidden">
-                            <iframe
-                              src={`https://models.readyplayer.me/${estudiante.avatar_url.split('/').pop()}?scene=halfbody-portrait-v1&meshLod=1`}
-                              className="w-full h-full border-none scale-125"
-                              title={`Avatar de ${estudiante.nombre}`}
-                              sandbox="allow-scripts allow-same-origin"
-                              loading="lazy"
-                            />
-                          </div>
-                          {/* Tooltip hover */}
-                          <div className="absolute left-0 top-full mt-2 z-50 hidden group-hover:block">
-                            <div className="w-40 h-40 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 shadow-2xl overflow-hidden border-2 border-white/20">
-                              <iframe
-                                src={`https://models.readyplayer.me/${estudiante.avatar_url.split('/').pop()}?scene=fullbody-portrait-v1-transparent&meshLod=1`}
-                                className="w-full h-full border-none"
-                                title={`Avatar de ${estudiante.nombre}`}
-                                sandbox="allow-scripts allow-same-origin"
-                                loading="lazy"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
-                          <span className="text-white/30 text-xs">Sin avatar</span>
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
-                      {estudiante.edad} años
-                    </td>
-                    <td className="px-6 py-4">
-                      {estudiante.inscripciones_grupos &&
-                      estudiante.inscripciones_grupos.length > 0 ? (
-                        <div className="flex flex-col gap-1">
-                          {estudiante.inscripciones_grupos.map((insc) => (
-                            <span
-                              key={insc.id}
-                              className="px-2 py-1 rounded-lg bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-semibold"
-                            >
-                              {insc.grupo.codigo} - {insc.grupo.nombre}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-white/40 text-xs">Sin grupo</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {estudiante.inscripciones_grupos &&
-                      estudiante.inscripciones_grupos.length > 0 ? (
-                        <div className="flex flex-col gap-1">
-                          {estudiante.inscripciones_grupos.map((insc) => (
-                            <span key={insc.id} className="text-xs text-white/60">
-                              {insc.clase_grupo.dia_semana} {insc.clase_grupo.hora_inicio}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-white/40 text-xs">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-amber-400">
-                      {estudiante.puntos_totales} pts
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
-                      {estudiante.tutor.nombre} {estudiante.tutor.apellido}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  // Obtener estudiantes del sector activo
   const estudiantesActivos =
     sectorActivo === 'Programación'
       ? estudiantesProgramacion
@@ -318,108 +155,214 @@ export default function AdminEstudiantesPage() {
           ? estudiantesCiencias
           : estudiantesSinSector;
 
-  const iconoActivo =
-    sectorActivo === 'Programación'
-      ? '💻'
-      : sectorActivo === 'Matemática'
-        ? '🧮'
-        : sectorActivo === 'Ciencias'
-          ? '🔬'
-          : '📝';
+  const sectorConfig: Record<SectorTab, { icon: typeof Calculator; count: number }> = {
+    Matemática: { icon: Calculator, count: estudiantesMatematica.length },
+    Programación: { icon: Code, count: estudiantesProgramacion.length },
+    Ciencias: { icon: FlaskConical, count: estudiantesCiencias.length },
+    Preinscriptos: { icon: ClipboardList, count: estudiantesSinSector.length },
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="text-center">
+          <div className="w-10 h-10 border-2 border-[var(--admin-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-[var(--admin-text-muted)]">Cargando estudiantes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 rounded-lg bg-[var(--status-danger-muted)] border border-[var(--status-danger)]/30 text-[var(--status-danger)]">
+        <h3 className="font-semibold mb-1">Error</h3>
+        <p className="text-sm">{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Todos los Estudiantes</h1>
-          <p className="text-white/60 mt-1 text-sm">
-            Gestión completa de estudiantes de la plataforma ({estudiantes.length} total)
+          <h1 className="text-2xl font-bold text-[var(--admin-text)]">Estudiantes</h1>
+          <p className="text-sm text-[var(--admin-text-muted)] mt-1">
+            Gestión completa de estudiantes ({estudiantes.length} total)
           </p>
         </div>
-        <div className="px-6 py-3 rounded-xl backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/20 text-emerald-100 font-bold shadow-lg shadow-emerald-500/10">
-          {estudiantesActivos.length} Mostrando
+        <div className="flex items-center gap-3">
+          <span className="admin-badge-info">{estudiantesActivos.length} mostrando</span>
+          {sectorActivo !== 'Preinscriptos' && (
+            <button
+              onClick={() => handleAbrirModal(sectorActivo)}
+              className="admin-btn admin-btn-primary flex items-center gap-2"
+            >
+              <UserPlus className="w-4 h-4" />
+              Añadir Estudiante
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Botones de Sectores */}
-      <div className="flex gap-3 flex-wrap">
-        <button
-          onClick={() => setSectorActivo('Matemática')}
-          className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all ${
-            sectorActivo === 'Matemática'
-              ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30'
-              : 'backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/20 text-white/70 hover:bg-emerald-500/20'
-          }`}
-        >
-          <span className="text-2xl">🧮</span>
-          <div className="text-left">
-            <div className="text-sm font-bold">Matemática</div>
-            <div className="text-xs opacity-80">{estudiantesMatematica.length} estudiantes</div>
-          </div>
-        </button>
+      {/* Sector Tabs */}
+      <div className="flex gap-2 flex-wrap">
+        {(Object.keys(sectorConfig) as SectorTab[]).map((sector) => {
+          const config = sectorConfig[sector];
+          const Icon = config.icon;
+          const isActive = sectorActivo === sector;
 
-        <button
-          onClick={() => setSectorActivo('Programación')}
-          className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all ${
-            sectorActivo === 'Programación'
-              ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg shadow-purple-500/30'
-              : 'backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/20 text-white/70 hover:bg-emerald-500/20'
-          }`}
-        >
-          <span className="text-2xl">💻</span>
-          <div className="text-left">
-            <div className="text-sm font-bold">Programación</div>
-            <div className="text-xs opacity-80">{estudiantesProgramacion.length} estudiantes</div>
-          </div>
-        </button>
-
-        <button
-          onClick={() => setSectorActivo('Ciencias')}
-          className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all ${
-            sectorActivo === 'Ciencias'
-              ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg shadow-green-500/30'
-              : 'backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/20 text-white/70 hover:bg-emerald-500/20'
-          }`}
-        >
-          <span className="text-2xl">🔬</span>
-          <div className="text-left">
-            <div className="text-sm font-bold">Ciencias</div>
-            <div className="text-xs opacity-80">{estudiantesCiencias.length} estudiantes</div>
-          </div>
-        </button>
-
-        <button
-          onClick={() => setSectorActivo('Preinscriptos')}
-          className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all ${
-            sectorActivo === 'Preinscriptos'
-              ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30'
-              : 'backdrop-blur-xl bg-emerald-500/[0.08] border border-emerald-500/20 text-white/70 hover:bg-emerald-500/20'
-          }`}
-        >
-          <span className="text-2xl">📝</span>
-          <div className="text-left">
-            <div className="text-sm font-bold">Preinscriptos</div>
-            <div className="text-xs opacity-80">{estudiantesSinSector.length} estudiantes</div>
-          </div>
-        </button>
+          return (
+            <button
+              key={sector}
+              onClick={() => setSectorActivo(sector)}
+              className={`flex items-center gap-2 px-4 py-2.5 font-medium text-sm transition-all rounded-lg ${
+                isActive
+                  ? 'bg-[var(--admin-accent)] text-black'
+                  : 'bg-[var(--admin-surface-1)] text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-2)] hover:text-[var(--admin-text)] border border-[var(--admin-border)]'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {sector}
+              <span
+                className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                  isActive
+                    ? 'bg-black/20 text-black'
+                    : 'bg-[var(--admin-surface-3)] text-[var(--admin-text-muted)]'
+                }`}
+              >
+                {config.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Botón Añadir Estudiante */}
-      {sectorActivo !== 'Preinscriptos' && (
-        <div className="flex justify-end">
-          <button
-            onClick={() => handleAbrirModal(sectorActivo)}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-xl hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/30"
-          >
-            <UserPlus className="w-5 h-5" />
-            Añadir Estudiante
-          </button>
+      {/* Table */}
+      {estudiantesActivos.length === 0 ? (
+        <EmptyState
+          icon={GraduationCap}
+          title={`No hay estudiantes en ${sectorActivo}`}
+          description={
+            sectorActivo === 'Preinscriptos'
+              ? 'Los estudiantes preinscriptos aparecerán aquí'
+              : 'Añadí el primer estudiante a este sector'
+          }
+          action={
+            sectorActivo !== 'Preinscriptos'
+              ? { label: 'Añadir Estudiante', onClick: () => handleAbrirModal(sectorActivo) }
+              : undefined
+          }
+        />
+      ) : (
+        <div className="admin-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Estudiante</th>
+                  <th>Avatar</th>
+                  <th>Edad</th>
+                  <th>Grupos</th>
+                  <th>Horario</th>
+                  <th>Puntos</th>
+                  <th>Tutor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {estudiantesActivos.map((estudiante) => {
+                  const initials =
+                    `${estudiante.nombre.charAt(0)}${estudiante.apellido.charAt(0)}`.toUpperCase();
+                  return (
+                    <tr key={estudiante.id}>
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-[var(--admin-accent-muted)] flex items-center justify-center text-[var(--admin-accent)] font-semibold">
+                            {initials}
+                          </div>
+                          <div>
+                            <div className="font-medium text-[var(--admin-text)]">
+                              {estudiante.nombre} {estudiante.apellido}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        {estudiante.avatar_url ? (
+                          <div className="relative group">
+                            <div className="w-10 h-10 rounded-lg bg-[var(--status-pending-muted)] flex items-center justify-center overflow-hidden">
+                              <iframe
+                                src={`https://models.readyplayer.me/${estudiante.avatar_url.split('/').pop()}?scene=halfbody-portrait-v1&meshLod=1`}
+                                className="w-full h-full border-none scale-125"
+                                title={`Avatar de ${estudiante.nombre}`}
+                                sandbox="allow-scripts allow-same-origin"
+                                loading="lazy"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-[var(--admin-surface-2)] flex items-center justify-center">
+                            <span className="text-[var(--admin-text-disabled)] text-xs">-</span>
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        <span className="text-[var(--admin-text-secondary)]">
+                          {estudiante.edad} años
+                        </span>
+                      </td>
+                      <td>
+                        {estudiante.inscripciones_grupos &&
+                        estudiante.inscripciones_grupos.length > 0 ? (
+                          <div className="flex flex-col gap-1">
+                            {estudiante.inscripciones_grupos.map((insc) => (
+                              <span key={insc.id} className="admin-badge-info text-xs">
+                                {insc.grupo.codigo}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-[var(--admin-text-disabled)] text-xs">
+                            Sin grupo
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        {estudiante.inscripciones_grupos &&
+                        estudiante.inscripciones_grupos.length > 0 ? (
+                          <div className="flex flex-col gap-1">
+                            {estudiante.inscripciones_grupos.map((insc) => (
+                              <span
+                                key={insc.id}
+                                className="text-xs text-[var(--admin-text-muted)]"
+                              >
+                                {insc.clase_grupo.dia_semana} {insc.clase_grupo.hora_inicio}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-[var(--admin-text-disabled)]">-</span>
+                        )}
+                      </td>
+                      <td>
+                        <span className="font-semibold text-[var(--status-warning)]">
+                          {estudiante.puntos_totales} pts
+                        </span>
+                      </td>
+                      <td>
+                        <span className="text-[var(--admin-text-secondary)]">
+                          {estudiante.tutor.nombre} {estudiante.tutor.apellido}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
-
-      {/* Tabla de estudiantes del sector activo */}
-      <div>{renderTablaEstudiantes(estudiantesActivos, sectorActivo, iconoActivo)}</div>
 
       {/* Modal Agregar Estudiante */}
       <AgregarEstudianteModal
