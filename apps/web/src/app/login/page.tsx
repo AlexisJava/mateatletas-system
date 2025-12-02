@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
-  Sparkles,
   Eye,
   EyeOff,
   LogIn,
@@ -15,22 +14,51 @@ import {
   Users,
   Shield,
 } from 'lucide-react';
-import { useAuthStore } from '@/store/auth.store';
+import { useAuthStore, type UserRole, type LoginResult } from '@/store/auth.store';
+import RoleSelectorModal from '@/components/auth/RoleSelectorModal';
 
 /**
- * Login Page - Tutores (Padres/Madres)
- * Ultra-premium cosmos design
+ * Login Page - Unificado para Tutores, Docentes y Admins
+ * Ultra-premium cosmos design con soporte multi-rol y MFA
  * Ruta: /login
  */
-export default function TutorLoginPage() {
+export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { login, setSelectedRole } = useAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const [availableRoles, setAvailableRoles] = useState<UserRole[]>([]);
+
+  /**
+   * Determina la ruta de redirección según el rol
+   */
+  const getRedirectPath = (role: UserRole): string => {
+    switch (role) {
+      case 'admin':
+        return '/admin/dashboard';
+      case 'docente':
+        return '/docente/dashboard';
+      case 'estudiante':
+        return '/estudiante/dashboard';
+      case 'tutor':
+      default:
+        return '/dashboard';
+    }
+  };
+
+  /**
+   * Maneja la selección de rol cuando el usuario tiene múltiples roles
+   */
+  const handleRoleSelection = (role: UserRole) => {
+    setSelectedRole(role);
+    setShowRoleSelector(false);
+    router.push(getRedirectPath(role));
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +66,33 @@ export default function TutorLoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
-      router.push('/dashboard');
+      const result: LoginResult = await login(email, password);
+
+      // Verificar si se requiere MFA
+      if (!result.success && result.mfaRequired) {
+        // Redirigir a página MFA (TODO: implementar)
+        setError('Se requiere verificación MFA. Contacte al administrador.');
+        setLoading(false);
+        return;
+      }
+
+      // Login exitoso
+      if (result.success) {
+        const { user, roles } = result;
+
+        // Si tiene múltiples roles, mostrar selector
+        if (roles.length > 1) {
+          setAvailableRoles(roles);
+          setShowRoleSelector(true);
+          setLoading(false);
+          return;
+        }
+
+        // Si solo tiene un rol, redirigir directamente
+        const primaryRole = roles[0] ?? user.role;
+        setSelectedRole(primaryRole);
+        router.push(getRedirectPath(primaryRole));
+      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -264,10 +317,6 @@ export default function TutorLoginPage() {
                       <Link href="/estudiante-login" className="hover:text-white transition-colors">
                         Soy Estudiante
                       </Link>
-                      <span>•</span>
-                      <Link href="/docente-login" className="hover:text-white transition-colors">
-                        Soy Docente
-                      </Link>
                     </div>
                   </div>
                 </div>
@@ -291,6 +340,14 @@ export default function TutorLoginPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Role Selector Modal */}
+      {showRoleSelector && (
+        <RoleSelectorModal
+          roles={availableRoles}
+          onSelectRole={handleRoleSelection}
+        />
+      )}
     </div>
   );
 }

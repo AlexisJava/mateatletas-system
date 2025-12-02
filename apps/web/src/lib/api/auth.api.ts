@@ -67,9 +67,44 @@ export interface RegisterResponse {
   user: AuthUser;
 }
 
-export interface LoginResponse {
-  access_token: string; // Token JWT para autenticación
+/**
+ * Response de login exitoso (sin MFA)
+ */
+export interface LoginSuccessResponse {
   user: AuthUser;
+  roles: AuthRole[];
+}
+
+/**
+ * Response cuando MFA es requerido
+ */
+export interface LoginMfaRequiredResponse {
+  requires_mfa: true;
+  mfa_token: string;
+  message: string;
+}
+
+/**
+ * Union type para todas las posibles respuestas de login
+ */
+export type LoginResponse = LoginSuccessResponse | LoginMfaRequiredResponse;
+
+/**
+ * Type guard para verificar si la respuesta requiere MFA
+ */
+export function isLoginMfaRequired(
+  response: LoginResponse,
+): response is LoginMfaRequiredResponse {
+  return 'requires_mfa' in response && response.requires_mfa === true;
+}
+
+/**
+ * Type guard para verificar si el login fue exitoso
+ */
+export function isLoginSuccess(
+  response: LoginResponse,
+): response is LoginSuccessResponse {
+  return 'user' in response && !('requires_mfa' in response);
 }
 
 export interface LogoutResponse {

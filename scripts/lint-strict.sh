@@ -13,37 +13,64 @@ fi
 
 echo "🔍 Running strict TypeScript checks on staged files..."
 
+# Separar archivos por app
+API_FILES=""
+WEB_FILES=""
+
 for file in $FILES; do
-  # Solo verificar archivos .ts y .tsx
   if [[ $file == *.ts ]] || [[ $file == *.tsx ]]; then
-    echo "  Checking: $file"
-
-    # Cambiar a directorio correcto (api o web)
     if [[ $file == apps/api/* ]]; then
-      cd apps/api
       RELATIVE_FILE="${file#apps/api/}"
+      API_FILES="$API_FILES $RELATIVE_FILE"
     elif [[ $file == apps/web/* ]]; then
-      cd apps/web
       RELATIVE_FILE="${file#apps/web/}"
-    else
-      continue
+      WEB_FILES="$WEB_FILES $RELATIVE_FILE"
     fi
-
-    # Ejecutar ESLint con --max-warnings=0
-    npx eslint --fix --max-warnings=0 --no-warn-ignored "$RELATIVE_FILE" || {
-      echo ""
-      echo "❌ COMMIT BLOCKED"
-      echo "   File: $file"
-      echo "   Reason: Contains ESLint warnings (any, unused vars, etc.)"
-      echo ""
-      echo "Fix the warnings and try again."
-      echo "Or skip with: git commit --no-verify"
-      exit 1
-    }
-
-    # Volver a raíz
-    cd ../..
   fi
 done
 
+# Lint archivos de API
+if [ -n "$API_FILES" ]; then
+  echo ""
+  echo "📦 Checking API files..."
+  cd apps/api
+
+  # Usar npm run lint que funciona correctamente con ESLint 9
+  # El flag -- permite pasar argumentos adicionales
+  if ! npm run lint -- --max-warnings=0 $API_FILES; then
+    echo ""
+    echo "❌ COMMIT BLOCKED"
+    echo "   App: apps/api"
+    echo "   Reason: Contains ESLint warnings (any, unused vars, etc.)"
+    echo ""
+    echo "Fix the warnings and try again."
+    echo "Or skip with: git commit --no-verify"
+    exit 1
+  fi
+
+  cd ../..
+fi
+
+# Lint archivos de Web
+if [ -n "$WEB_FILES" ]; then
+  echo ""
+  echo "🌐 Checking Web files..."
+  cd apps/web
+
+  # Usar npm run lint que funciona correctamente con ESLint 9
+  if ! npm run lint -- --max-warnings=0 $WEB_FILES; then
+    echo ""
+    echo "❌ COMMIT BLOCKED"
+    echo "   App: apps/web"
+    echo "   Reason: Contains ESLint warnings (any, unused vars, etc.)"
+    echo ""
+    echo "Fix the warnings and try again."
+    echo "Or skip with: git commit --no-verify"
+    exit 1
+  fi
+
+  cd ../..
+fi
+
+echo ""
 echo "✅ All checks passed!"
