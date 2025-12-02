@@ -237,9 +237,9 @@ export default function AdminReportesPage() {
     const itemLabel = label ?? item.name ?? '';
 
     return (
-      <div className="bg-emerald-500/[0.05] p-3 rounded-lg shadow-lg border border-gray-200">
-        <p className="text-sm font-semibold text-[#2a1a5e]">{itemLabel}</p>
-        <p className="text-sm text-gray-600">
+      <div className="bg-[var(--admin-surface-1)] p-3 rounded-lg shadow-lg border border-[var(--admin-border)]">
+        <p className="text-sm font-semibold text-[var(--admin-text)]">{itemLabel}</p>
+        <p className="text-sm text-[var(--admin-text-muted)]">
           {item.name}: <span className="font-bold">{item.value}</span>
         </p>
       </div>
@@ -270,21 +270,25 @@ export default function AdminReportesPage() {
           <h3 className="text-lg font-semibold text-[var(--admin-text)] mb-4">Rango de Fechas</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Inicio</label>
+              <label className="block text-sm font-medium text-[var(--admin-text-secondary)] mb-2">
+                Fecha Inicio
+              </label>
               <input
                 type="date"
                 value={dateRange.start}
                 onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
+                className="w-full px-4 py-2 bg-[var(--admin-surface-2)] border border-[var(--admin-border)] rounded-lg text-[var(--admin-text)] focus:ring-2 focus:ring-[var(--admin-accent)]/50 focus:border-[var(--admin-accent)]"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Fecha Fin</label>
+              <label className="block text-sm font-medium text-[var(--admin-text-secondary)] mb-2">
+                Fecha Fin
+              </label>
               <input
                 type="date"
                 value={dateRange.end}
                 onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent"
+                className="w-full px-4 py-2 bg-[var(--admin-surface-2)] border border-[var(--admin-border)] rounded-lg text-[var(--admin-text)] focus:ring-2 focus:ring-[var(--admin-accent)]/50 focus:border-[var(--admin-accent)]"
               />
             </div>
             <div className="flex gap-2">
@@ -296,7 +300,7 @@ export default function AdminReportesPage() {
                     end: formatDateInput(new Date()),
                   });
                 }}
-                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-semibold"
+                className="flex-1 admin-btn admin-btn-secondary text-sm"
               >
                 Último Mes
               </button>
@@ -308,14 +312,14 @@ export default function AdminReportesPage() {
                     end: formatDateInput(new Date()),
                   });
                 }}
-                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-semibold"
+                className="flex-1 admin-btn admin-btn-secondary text-sm"
               >
                 Últimos 6 Meses
               </button>
             </div>
           </div>
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-800">
+          <div className="mt-4 p-3 bg-[var(--status-info-muted)] rounded-lg border border-[var(--status-info)]/30">
+            <p className="text-sm text-[var(--status-info)]">
               <strong>Mostrando:</strong> {filteredUsers.length} usuarios y {filteredClasses.length}{' '}
               clases en el rango seleccionado
             </p>
@@ -353,8 +357,8 @@ export default function AdminReportesPage() {
       {/* Advanced Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Users Distribution - Pie Chart */}
-        <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">
+        <div className="admin-card p-6">
+          <h3 className="text-xl font-bold text-[var(--admin-text)] mb-4">
             Distribución de Usuarios por Rol
           </h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -385,22 +389,28 @@ export default function AdminReportesPage() {
           <div className="mt-4 flex justify-center gap-6">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-blue-500"></div>
-              <span className="text-sm text-gray-600">Tutores: {usersByRole.tutores}</span>
+              <span className="text-sm text-[var(--admin-text-muted)]">
+                Tutores: {usersByRole.tutores}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-purple-500"></div>
-              <span className="text-sm text-gray-600">Docentes: {usersByRole.docentes}</span>
+              <span className="text-sm text-[var(--admin-text-muted)]">
+                Docentes: {usersByRole.docentes}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-red-500"></div>
-              <span className="text-sm text-gray-600">Admins: {usersByRole.admins}</span>
+              <span className="text-sm text-[var(--admin-text-muted)]">
+                Admins: {usersByRole.admins}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Classes Status - Pie Chart */}
-        <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">Estado de Clases</h3>
+        <div className="admin-card p-6">
+          <h3 className="text-xl font-bold text-[var(--admin-text)] mb-4">Estado de Clases</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -429,13 +439,13 @@ export default function AdminReportesPage() {
           <div className="mt-4 flex justify-center gap-6">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-green-500"></div>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-[var(--admin-text-muted)]">
                 Programadas: {classesByStatus.programadas}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-full bg-red-500"></div>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-[var(--admin-text-muted)]">
                 Canceladas: {classesByStatus.canceladas}
               </span>
             </div>
@@ -536,23 +546,23 @@ export default function AdminReportesPage() {
       </div>
 
       {/* User Growth Trend - Line Chart */}
-      <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
-        <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">
+      <div className="admin-card p-6">
+        <h3 className="text-xl font-bold text-[var(--admin-text)] mb-4">
           Crecimiento de Usuarios (Últimos 6 Meses)
         </h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={userGrowthData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '12px' }} />
-            <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--admin-border)" />
+            <XAxis dataKey="month" stroke="var(--admin-text-muted)" style={{ fontSize: '12px' }} />
+            <YAxis stroke="var(--admin-text-muted)" style={{ fontSize: '12px' }} />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: '14px' }} iconType="line" />
             <Line
               type="monotone"
               dataKey="usuarios"
-              stroke="#ff6b35"
+              stroke="var(--admin-accent)"
               strokeWidth={3}
-              dot={{ fill: '#ff6b35', r: 6 }}
+              dot={{ fill: 'var(--admin-accent)', r: 6 }}
               activeDot={{ r: 8 }}
               name="Usuarios"
               animationBegin={0}
@@ -564,20 +574,22 @@ export default function AdminReportesPage() {
 
       {/* Classes by Curriculum Route - Bar Chart */}
       {routeData.length > 0 && (
-        <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-[#2a1a5e] mb-4">Clases por Ruta Curricular</h3>
+        <div className="admin-card p-6">
+          <h3 className="text-xl font-bold text-[var(--admin-text)] mb-4">
+            Clases por Ruta Curricular
+          </h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={routeData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--admin-border)" />
               <XAxis
                 dataKey="name"
-                stroke="#6b7280"
+                stroke="var(--admin-text-muted)"
                 style={{ fontSize: '12px' }}
                 angle={-45}
                 textAnchor="end"
                 height={100}
               />
-              <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
+              <YAxis stroke="var(--admin-text-muted)" style={{ fontSize: '12px' }} />
               <Tooltip content={<CustomTooltip />} />
               <Legend wrapperStyle={{ fontSize: '14px' }} />
               <Bar
@@ -594,67 +606,73 @@ export default function AdminReportesPage() {
       )}
 
       {/* Quick Stats Grid */}
-      <div className="bg-emerald-500/[0.05] rounded-lg shadow-md p-6">
-        <h3 className="text-xl font-bold text-[#2a1a5e] mb-6">
+      <div className="admin-card p-6">
+        <h3 className="text-xl font-bold text-[var(--admin-text)] mb-6">
           Resumen Ejecutivo (Rango Seleccionado)
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-3xl font-bold text-[#2a1a5e]">{classesByStatus.programadas}</div>
-            <div className="text-sm text-gray-600 mt-1">Clases Programadas</div>
+          <div className="text-center p-4 bg-[var(--admin-surface-2)] rounded-lg">
+            <div className="text-3xl font-bold text-[var(--admin-text)]">
+              {classesByStatus.programadas}
+            </div>
+            <div className="text-sm text-[var(--admin-text-muted)] mt-1">Clases Programadas</div>
           </div>
 
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-3xl font-bold text-[#2a1a5e]">{usersByRole.tutores}</div>
-            <div className="text-sm text-gray-600 mt-1">Tutores</div>
+          <div className="text-center p-4 bg-[var(--admin-surface-2)] rounded-lg">
+            <div className="text-3xl font-bold text-[var(--admin-text)]">{usersByRole.tutores}</div>
+            <div className="text-sm text-[var(--admin-text-muted)] mt-1">Tutores</div>
           </div>
 
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-3xl font-bold text-[#2a1a5e]">{filteredUsers.length}</div>
-            <div className="text-sm text-gray-600 mt-1">Total Usuarios</div>
+          <div className="text-center p-4 bg-[var(--admin-surface-2)] rounded-lg">
+            <div className="text-3xl font-bold text-[var(--admin-text)]">
+              {filteredUsers.length}
+            </div>
+            <div className="text-sm text-[var(--admin-text-muted)] mt-1">Total Usuarios</div>
           </div>
 
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-3xl font-bold text-[#2a1a5e]">
+          <div className="text-center p-4 bg-[var(--admin-surface-2)] rounded-lg">
+            <div className="text-3xl font-bold text-[var(--admin-text)]">
               {filteredClasses.length > 0
                 ? ((classesByStatus.programadas / filteredClasses.length) * 100).toFixed(0)
                 : 0}
               %
             </div>
-            <div className="text-sm text-gray-600 mt-1">Tasa de Clases Activas</div>
+            <div className="text-sm text-[var(--admin-text-muted)] mt-1">
+              Tasa de Clases Activas
+            </div>
           </div>
         </div>
       </div>
 
       {/* Export Section */}
-      <div className="bg-gradient-to-br from-[#2a1a5e] to-[#4a3a7e] rounded-lg p-8 text-white">
-        <h3 className="text-2xl font-bold mb-2">Exportar Reportes</h3>
-        <p className="text-sm opacity-90 mb-4">
+      <div className="admin-card p-8 bg-gradient-to-br from-[var(--admin-surface-1)] to-[var(--admin-surface-2)]">
+        <h3 className="text-2xl font-bold text-[var(--admin-text)] mb-2">Exportar Reportes</h3>
+        <p className="text-sm text-[var(--admin-text-muted)] mb-6">
           Descargá reportes detallados en diferentes formatos
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Exportar Usuarios */}
-          <div className="bg-emerald-500/[0.05]/10 rounded-lg p-4">
-            <h4 className="font-bold mb-3 flex items-center gap-2">
+          <div className="bg-[var(--admin-surface-2)] rounded-lg p-4 border border-[var(--admin-border)]">
+            <h4 className="font-bold text-[var(--admin-text)] mb-3 flex items-center gap-2">
               <span>👥</span> Usuarios
             </h4>
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => handleExportUsers('excel')}
-                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
+                className="admin-btn admin-btn-secondary text-sm"
               >
                 📊 Excel
               </button>
               <button
                 onClick={() => handleExportUsers('csv')}
-                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
+                className="admin-btn admin-btn-secondary text-sm"
               >
                 📄 CSV
               </button>
               <button
                 onClick={() => handleExportUsers('pdf')}
-                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
+                className="admin-btn admin-btn-secondary text-sm"
               >
                 📕 PDF
               </button>
@@ -662,26 +680,26 @@ export default function AdminReportesPage() {
           </div>
 
           {/* Exportar Clases */}
-          <div className="bg-emerald-500/[0.05]/10 rounded-lg p-4">
-            <h4 className="font-bold mb-3 flex items-center gap-2">
+          <div className="bg-[var(--admin-surface-2)] rounded-lg p-4 border border-[var(--admin-border)]">
+            <h4 className="font-bold text-[var(--admin-text)] mb-3 flex items-center gap-2">
               <span>📚</span> Clases
             </h4>
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => handleExportClasses('excel')}
-                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
+                className="admin-btn admin-btn-secondary text-sm"
               >
                 📊 Excel
               </button>
               <button
                 onClick={() => handleExportClasses('csv')}
-                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
+                className="admin-btn admin-btn-secondary text-sm"
               >
                 📄 CSV
               </button>
               <button
                 onClick={() => handleExportClasses('pdf')}
-                className="px-4 py-2 bg-emerald-500/[0.05]/20 hover:bg-emerald-500/[0.05]/30 rounded-lg font-semibold transition-all text-sm"
+                className="admin-btn admin-btn-secondary text-sm"
               >
                 📕 PDF
               </button>
@@ -689,18 +707,20 @@ export default function AdminReportesPage() {
           </div>
 
           {/* Reporte Completo */}
-          <div className="bg-emerald-500/[0.05]/10 rounded-lg p-4">
-            <h4 className="font-bold mb-3 flex items-center gap-2">
+          <div className="bg-[var(--admin-surface-2)] rounded-lg p-4 border border-[var(--admin-border)]">
+            <h4 className="font-bold text-[var(--admin-text)] mb-3 flex items-center gap-2">
               <span>📈</span> Reporte Completo
             </h4>
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleGenerateFullReport}
-                className="px-4 py-2 bg-gradient-to-r from-[#ff6b35] to-[#f7b801] hover:opacity-90 rounded-lg font-semibold transition-all text-sm"
+                className="admin-btn admin-btn-primary text-sm"
               >
                 🎯 Generar PDF Completo
               </button>
-              <p className="text-xs opacity-75 mt-2">Incluye todos los datos del sistema</p>
+              <p className="text-xs text-[var(--admin-text-muted)] mt-2">
+                Incluye todos los datos del sistema
+              </p>
             </div>
           </div>
         </div>
@@ -708,10 +728,14 @@ export default function AdminReportesPage() {
         {exportStatus && (
           <div
             className={`mt-4 p-3 rounded-lg ${
-              exportStatus.success ? 'bg-green-500/20' : 'bg-red-500/20'
+              exportStatus.success
+                ? 'bg-[var(--status-success-muted)] border border-[var(--status-success)]/30'
+                : 'bg-[var(--status-danger-muted)] border border-[var(--status-danger)]/30'
             }`}
           >
-            <p className="text-sm font-semibold">
+            <p
+              className={`text-sm font-semibold ${exportStatus.success ? 'text-[var(--status-success)]' : 'text-[var(--status-danger)]'}`}
+            >
               {exportStatus.success ? '✅' : '❌'} {exportStatus.message}
             </p>
           </div>
