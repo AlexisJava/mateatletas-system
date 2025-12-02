@@ -24,7 +24,7 @@ import {
   AlertCircle,
   Info,
   Key,
-  Calendar,
+  Palette,
 } from 'lucide-react';
 
 /**
@@ -74,9 +74,9 @@ const navItems = [
     badge: null,
   },
   {
-    href: '/admin/planificaciones',
-    label: 'Planificaciones',
-    icon: Calendar,
+    href: '/admin/studio',
+    label: 'Studio',
+    icon: Palette,
     color: 'from-pink-500 to-rose-500',
     badge: null,
   },
