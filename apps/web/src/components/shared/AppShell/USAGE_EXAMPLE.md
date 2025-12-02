@@ -44,28 +44,16 @@ const navItems: NavigationItem[] = [
     color: 'from-blue-500 to-cyan-500',
   },
   {
-    href: '/admin/credenciales',
-    label: 'Credenciales',
-    icon: Key,
-    color: 'from-amber-500 to-orange-500',
-  },
-  {
-    href: '/admin/clases',
-    label: 'Clubes y Cursos',
-    icon: BookOpen,
-    color: 'from-emerald-500 to-teal-500',
-  },
-  {
     href: '/admin/estudiantes',
     label: 'Estudiantes',
     icon: GraduationCap,
     color: 'from-teal-500 to-cyan-500',
   },
   {
-    href: '/admin/planificaciones',
-    label: 'Planificaciones',
-    icon: Calendar,
-    color: 'from-pink-500 to-rose-500',
+    href: '/admin/credenciales',
+    label: 'Credenciales',
+    icon: Key,
+    color: 'from-amber-500 to-orange-500',
   },
   {
     href: '/admin/pagos',

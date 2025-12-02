@@ -22,7 +22,6 @@ import {
 } from '@/lib/schemas/clase.schema';
 import { docentesListSchema } from '@/lib/schemas/docente.schema';
 import { rutasListSchema } from '@/lib/schemas/ruta.schema';
-import { sectoresListSchema } from '@/lib/schemas/sector.schema';
 import { productoSchema, productosListSchema } from '@/lib/schemas/producto.schema';
 
 export const getDashboard = async (): Promise<DashboardData> => {
@@ -264,17 +263,6 @@ export const getDocentes = async () => {
     return docentesListSchema.parse(response);
   } catch (error) {
     console.error('Error al obtener los docentes (admin):', error);
-    throw error;
-  }
-};
-
-export const getSectores = async () => {
-  try {
-    // El interceptor ya retorna response.data directamente
-    const response = await axios.get('/admin/sectores');
-    return sectoresListSchema.parse(response);
-  } catch (error) {
-    console.error('Error al obtener los sectores (admin):', error);
     throw error;
   }
 };

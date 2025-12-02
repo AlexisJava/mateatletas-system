@@ -1,9 +1,18 @@
 import { z } from 'zod';
-import { sectorSchema } from './sector.schema';
+
+/**
+ * Schema simplificado de Sector para uso interno
+ * (El módulo sectores fue eliminado pero ruta.schema aún se usa)
+ */
+const sectorSchemaInternal = z.object({
+  id: z.string(),
+  nombre: z.string(),
+  color: z.string().optional(),
+  activo: z.boolean().optional(),
+});
 
 /**
  * Schema de DocenteRuta (relación docente-ruta)
- * Coincide con DocenteRuta en types/sectores.types.ts
  */
 export const docenteRutaSchema = z.object({
   id: z.string(),
@@ -13,8 +22,8 @@ export const docenteRutaSchema = z.object({
   asignadoEn: z.string(),
 
   // Relaciones opcionales
-  ruta: z.lazy(() => z.unknown()).optional(), // RutaEspecialidad - lazy to avoid circular dependency
-  sector: sectorSchema.optional(),
+  ruta: z.lazy(() => z.unknown()).optional(),
+  sector: sectorSchemaInternal.optional(),
   docente: z
     .object({
       id: z.string(),
@@ -41,7 +50,7 @@ export const rutaEspecialidadSchema = z.object({
   color: z.string().optional(), // Color de la ruta (puede venir del backend)
 
   // Relaciones opcionales
-  sector: sectorSchema.optional(),
+  sector: sectorSchemaInternal.optional(),
   docentes: z.array(docenteRutaSchema).optional(),
   _count: z
     .object({

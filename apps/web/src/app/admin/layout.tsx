@@ -9,7 +9,6 @@ import { LoadingScreen } from '@/components/shared/LoadingScreen';
 import {
   LayoutDashboard,
   Users,
-  BookOpen,
   GraduationCap,
   CreditCard,
   BarChart3,
@@ -60,7 +59,6 @@ const navSections: NavSection[] = [
     items: [
       { href: '/admin/usuarios', label: 'Usuarios', icon: Users },
       { href: '/admin/estudiantes', label: 'Estudiantes', icon: GraduationCap },
-      { href: '/admin/clases', label: 'Clubes y Cursos', icon: BookOpen },
       { href: '/admin/credenciales', label: 'Credenciales', icon: Key },
     ],
   },
