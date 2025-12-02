@@ -111,7 +111,7 @@ describe('AuthController', () => {
           path: '/',
         }),
       );
-      expect(result).toEqual({ user: mockUser });
+      expect(result).toEqual({ user: mockUser, roles: [Role.TUTOR] });
       expect(authOrchestrator.login).toHaveBeenCalledWith(dto, mockIp);
     });
 
