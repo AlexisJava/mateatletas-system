@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useStats, useStatsLoading, useFetchStats } from '@/features/admin/stats';
 import { useAuthStore } from '@/store/auth.store';
+import apiClient from '@/lib/axios';
 import {
   Users,
   GraduationCap,
@@ -16,13 +17,66 @@ import {
   CheckCircle,
   CreditCard,
   Activity,
+  Sparkles,
+  Zap,
+  Rocket,
 } from 'lucide-react';
 import Link from 'next/link';
 
 /**
- * Admin Dashboard v2.0
- * Clean, professional, data-focused
+ * Admin Dashboard v2.0 - Modelo 2026
+ * Con métricas de Casas: Quantum, Vertex, Pulsar
  */
+
+/**
+ * Configuración de las Casas 2026
+ * Basado en rangos de edad del modelo Mateatletas 2026
+ */
+const CASAS_CONFIG = {
+  Quantum: {
+    edadMin: 6,
+    edadMax: 9,
+    color: '#8B5CF6', // Violeta
+    emoji: '⚛️',
+    descripcion: 'Exploradores (6-9 años)',
+    icon: Sparkles,
+  },
+  Vertex: {
+    edadMin: 10,
+    edadMax: 12,
+    color: '#10B981', // Verde
+    emoji: '🔷',
+    descripcion: 'Constructores (10-12 años)',
+    icon: Zap,
+  },
+  Pulsar: {
+    edadMin: 13,
+    edadMax: 17,
+    color: '#F59E0B', // Naranja
+    emoji: '💫',
+    descripcion: 'Dominadores (13-17 años)',
+    icon: Rocket,
+  },
+} as const;
+
+type CasaName = keyof typeof CASAS_CONFIG;
+
+interface CasaDistribution {
+  Quantum: number;
+  Vertex: number;
+  Pulsar: number;
+  SinCasa: number;
+}
+
+/**
+ * Determina la casa basándose en la edad del estudiante
+ */
+const getCasaByEdad = (edad: number): CasaName | null => {
+  if (edad >= 6 && edad <= 9) return 'Quantum';
+  if (edad >= 10 && edad <= 12) return 'Vertex';
+  if (edad >= 13 && edad <= 17) return 'Pulsar';
+  return null;
+};
 
 interface StatCardProps {
   label: string;
@@ -173,9 +227,16 @@ export default function AdminDashboard() {
   const { user } = useAuthStore();
   const [greeting, setGreeting] = useState('Bienvenido');
   const [currentDate, setCurrentDate] = useState('');
+  const [casaDistribution, setCasaDistribution] = useState<CasaDistribution>({
+    Quantum: 0,
+    Vertex: 0,
+    Pulsar: 0,
+    SinCasa: 0,
+  });
 
   useEffect(() => {
     fetchStats();
+    loadCasaDistribution();
 
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Buenos días');
@@ -191,6 +252,46 @@ export default function AdminDashboard() {
       }),
     );
   }, [fetchStats]);
+
+  /**
+   * Carga la distribución de estudiantes por Casa
+   */
+  const loadCasaDistribution = async () => {
+    try {
+      interface EstudianteBasico {
+        edad: number;
+        casa?: { nombre: string } | null;
+      }
+      const response = await apiClient.get<{ data?: EstudianteBasico[] } | EstudianteBasico[]>(
+        '/admin/estudiantes',
+      );
+      const data = (response as { data?: EstudianteBasico[] })?.data
+        ? (response as { data: EstudianteBasico[] }).data
+        : Array.isArray(response)
+          ? response
+          : [];
+
+      // Calcular distribución por Casa
+      const distribution: CasaDistribution = {
+        Quantum: 0,
+        Vertex: 0,
+        Pulsar: 0,
+        SinCasa: 0,
+      };
+
+      data.forEach((est) => {
+        const casaNombre = est.casa?.nombre || getCasaByEdad(est.edad);
+        if (casaNombre === 'Quantum') distribution.Quantum++;
+        else if (casaNombre === 'Vertex') distribution.Vertex++;
+        else if (casaNombre === 'Pulsar') distribution.Pulsar++;
+        else distribution.SinCasa++;
+      });
+
+      setCasaDistribution(distribution);
+    } catch (error) {
+      console.error('Error al cargar distribución de casas:', error);
+    }
+  };
 
   const formatCurrency = (num: number): string => {
     if (num >= 1000000) return `$${(num / 1000000).toFixed(1)}M`;
@@ -301,6 +402,78 @@ export default function AdminDashboard() {
                 description="Exportar datos"
                 icon={TrendingUp}
               />
+            </div>
+          </div>
+
+          {/* Distribución por Casas 2026 */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-[var(--admin-text)]">
+                Distribución por Casa
+              </h2>
+              <Link
+                href="/admin/estudiantes"
+                className="text-xs text-[var(--admin-accent)] hover:underline"
+              >
+                Ver todos
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {(['Quantum', 'Vertex', 'Pulsar'] as const).map((casa) => {
+                const config = CASAS_CONFIG[casa];
+                const count = casaDistribution[casa];
+                const total =
+                  casaDistribution.Quantum +
+                  casaDistribution.Vertex +
+                  casaDistribution.Pulsar +
+                  casaDistribution.SinCasa;
+                const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+                const Icon = config.icon;
+
+                return (
+                  <div
+                    key={casa}
+                    className="p-4 rounded-xl border transition-all hover:scale-[1.02]"
+                    style={{
+                      backgroundColor: `${config.color}08`,
+                      borderColor: `${config.color}25`,
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div
+                        className="w-9 h-9 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: `${config.color}20` }}
+                      >
+                        <Icon className="w-4.5 h-4.5" style={{ color: config.color }} />
+                      </div>
+                      <span className="text-xl font-bold" style={{ color: config.color }}>
+                        {count}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-sm">{config.emoji}</span>
+                        <h3 className="font-semibold text-[var(--admin-text)] text-sm">
+                          Casa {casa}
+                        </h3>
+                      </div>
+                      <p className="text-xs text-[var(--admin-text-muted)]">{config.descripcion}</p>
+                      <div className="mt-2 h-1.5 rounded-full bg-[var(--admin-surface-2)] overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${percentage}%`,
+                            backgroundColor: config.color,
+                          }}
+                        />
+                      </div>
+                      <p className="text-xs text-[var(--admin-text-disabled)] mt-1">
+                        {percentage}% del total
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
