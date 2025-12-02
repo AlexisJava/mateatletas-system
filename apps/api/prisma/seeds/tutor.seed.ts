@@ -57,7 +57,7 @@ export async function seedTutor(prisma: PrismaClient) {
         nombre: estData.nombre,
         apellido: estData.apellido,
         edad: estData.edad,
-        nivel_escolar: estData.nivel_escolar,
+        nivelEscolar: estData.nivel_escolar,
         email: estData.email,
         password_hash: estudianteHashedPassword,
         tutor_id: tutor.id,
