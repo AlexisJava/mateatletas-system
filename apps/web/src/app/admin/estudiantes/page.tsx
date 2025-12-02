@@ -3,16 +3,17 @@
 import { useEffect, useState } from 'react';
 import { getErrorMessage } from '@/lib/utils/error-handler';
 import apiClient from '@/lib/axios';
-import AgregarEstudianteModal from '@/components/admin/AgregarEstudianteModal';
 import { EmptyState } from '@/components/admin/EmptyState';
-import {
-  UserPlus,
-  GraduationCap,
-  Code,
-  Calculator,
-  FlaskConical,
-  ClipboardList,
-} from 'lucide-react';
+import { GraduationCap, Sparkles, Zap, Rocket, Search, Users } from 'lucide-react';
+
+/**
+ * Tipos para el modelo 2026
+ * Casa: QUANTUM (6-9), VERTEX (10-12), PULSAR (13-17)
+ */
+interface Casa {
+  nombre: string;
+  colorPrimary: string;
+}
 
 interface Estudiante {
   id: string;
@@ -29,59 +30,51 @@ interface Estudiante {
     apellido: string;
     email: string;
   };
-  equipo?: {
-    nombre: string;
-    color_primario: string;
-  };
-  sector?: {
-    id: string;
-    nombre: string;
-    color: string;
-    icono: string;
-  };
-  inscripciones_grupos?: Array<{
-    id: string;
-    fecha_inscripcion: string;
-    clase_grupo: {
-      id: string;
-      codigo: string;
-      nombre: string;
-      dia_semana: string;
-      hora_inicio: string;
-      hora_fin: string;
-      activo: boolean;
-    };
-    grupo: {
-      id: string;
-      codigo: string;
-      nombre: string;
-      descripcion: string;
-    };
-  }>;
+  casa?: Casa;
 }
 
-interface Sector {
-  id: string;
-  nombre: string;
-  color: string;
-  icono: string;
-}
+type CasaTab = 'Todos' | 'Quantum' | 'Vertex' | 'Pulsar' | 'Sin Casa';
 
-type SectorTab = 'Programación' | 'Matemática' | 'Ciencias' | 'Preinscriptos';
+/**
+ * Configuración de las Casas 2026
+ * Basado en rangos de edad del modelo Mateatletas 2026
+ */
+const CASAS_CONFIG: Record<
+  Exclude<CasaTab, 'Todos' | 'Sin Casa'>,
+  { edadMin: number; edadMax: number; color: string; emoji: string; descripcion: string }
+> = {
+  Quantum: {
+    edadMin: 6,
+    edadMax: 9,
+    color: '#8B5CF6', // Violeta
+    emoji: '⚛️',
+    descripcion: 'Exploradores (6-9 años)',
+  },
+  Vertex: {
+    edadMin: 10,
+    edadMax: 12,
+    color: '#10B981', // Verde
+    emoji: '🔷',
+    descripcion: 'Constructores (10-12 años)',
+  },
+  Pulsar: {
+    edadMin: 13,
+    edadMax: 17,
+    color: '#F59E0B', // Naranja
+    emoji: '💫',
+    descripcion: 'Dominadores (13-17 años)',
+  },
+};
 
 export default function AdminEstudiantesPage() {
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
-  const [sectores, setSectores] = useState<Sector[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sectorActivo, setSectorActivo] = useState<SectorTab>('Matemática');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [sectorIdParaModal, setSectorIdParaModal] = useState<string>('');
+  const [casaActiva, setCasaActiva] = useState<CasaTab>('Todos');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadEstudiantes();
-    loadSectores();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadEstudiantes = async () => {
@@ -91,12 +84,12 @@ export default function AdminEstudiantesPage() {
       const response = await apiClient.get<{ data?: Estudiante[] } | Estudiante[]>(
         '/admin/estudiantes',
       );
-      const estudiantes = (response as { data?: Estudiante[] })?.data
+      const data = (response as { data?: Estudiante[] })?.data
         ? (response as { data: Estudiante[] }).data
         : Array.isArray(response)
           ? response
           : [];
-      setEstudiantes(estudiantes as Estudiante[]);
+      setEstudiantes(data as Estudiante[]);
     } catch (err) {
       console.error('Error al cargar estudiantes:', err);
       setError(getErrorMessage(err as Error, 'Error al cargar estudiantes'));
@@ -105,62 +98,53 @@ export default function AdminEstudiantesPage() {
     }
   };
 
-  const isSectoresPayload = (value: Sector[] | { data?: Sector[] }): value is { data?: Sector[] } =>
-    typeof value === 'object' && value !== null && !Array.isArray(value);
-
-  const loadSectores = async () => {
-    try {
-      const response = await apiClient.get<Sector[] | { data?: Sector[] }>('/admin/sectores');
-
-      let sectoresData: Sector[] = [];
-      if (Array.isArray(response)) {
-        sectoresData = response;
-      } else if (isSectoresPayload(response) && Array.isArray(response.data)) {
-        sectoresData = response.data;
-      }
-
-      setSectores(sectoresData);
-    } catch (err) {
-      console.error('Error al cargar sectores:', err);
-    }
+  /**
+   * Determina la casa basándose en la edad del estudiante
+   * Usa el modelo 2026: Quantum (6-9), Vertex (10-12), Pulsar (13-17)
+   */
+  const getCasaByEdad = (edad: number): 'Quantum' | 'Vertex' | 'Pulsar' | null => {
+    if (edad >= 6 && edad <= 9) return 'Quantum';
+    if (edad >= 10 && edad <= 12) return 'Vertex';
+    if (edad >= 13 && edad <= 17) return 'Pulsar';
+    return null;
   };
 
-  const handleAbrirModal = (nombreSector: string) => {
-    const nombreSectorReal = nombreSector === 'Ciencias' ? 'Divulgación Científica' : nombreSector;
-    const sector = sectores.find((s) => s.nombre === nombreSectorReal);
-    if (sector) {
-      setSectorIdParaModal(sector.id);
-      setIsModalOpen(true);
-    } else {
-      setError(`No se pudo abrir el modal: sector "${nombreSectorReal}" no encontrado`);
-    }
-  };
+  // Filtrar estudiantes por búsqueda
+  const estudiantesFiltrados = estudiantes.filter((est) => {
+    const fullName = `${est.nombre} ${est.apellido}`.toLowerCase();
+    const tutorName = `${est.tutor.nombre} ${est.tutor.apellido}`.toLowerCase();
+    const search = searchTerm.toLowerCase();
+    return fullName.includes(search) || tutorName.includes(search);
+  });
 
-  // Separar estudiantes por sector
-  const estudiantesProgramacion = estudiantes.filter(
-    (est) => est.sector?.nombre === 'Programación',
-  );
-  const estudiantesMatematica = estudiantes.filter((est) => est.sector?.nombre === 'Matemática');
-  const estudiantesCiencias = estudiantes.filter(
-    (est) => est.sector?.nombre === 'Divulgación Científica' || est.sector?.nombre === 'Ciencias',
-  );
-  const estudiantesSinSector = estudiantes.filter((est) => !est.sector);
+  // Agrupar por casa (basado en edad o casa asignada)
+  const estudiantesPorCasa = {
+    Quantum: estudiantesFiltrados.filter(
+      (est) => est.casa?.nombre === 'Quantum' || getCasaByEdad(est.edad) === 'Quantum',
+    ),
+    Vertex: estudiantesFiltrados.filter(
+      (est) => est.casa?.nombre === 'Vertex' || getCasaByEdad(est.edad) === 'Vertex',
+    ),
+    Pulsar: estudiantesFiltrados.filter(
+      (est) => est.casa?.nombre === 'Pulsar' || getCasaByEdad(est.edad) === 'Pulsar',
+    ),
+    'Sin Casa': estudiantesFiltrados.filter((est) => !est.casa && getCasaByEdad(est.edad) === null),
+  };
 
   const estudiantesActivos =
-    sectorActivo === 'Programación'
-      ? estudiantesProgramacion
-      : sectorActivo === 'Matemática'
-        ? estudiantesMatematica
-        : sectorActivo === 'Ciencias'
-          ? estudiantesCiencias
-          : estudiantesSinSector;
+    casaActiva === 'Todos'
+      ? estudiantesFiltrados
+      : casaActiva === 'Sin Casa'
+        ? estudiantesPorCasa['Sin Casa']
+        : estudiantesPorCasa[casaActiva as keyof typeof estudiantesPorCasa];
 
-  const sectorConfig: Record<SectorTab, { icon: typeof Calculator; count: number }> = {
-    Matemática: { icon: Calculator, count: estudiantesMatematica.length },
-    Programación: { icon: Code, count: estudiantesProgramacion.length },
-    Ciencias: { icon: FlaskConical, count: estudiantesCiencias.length },
-    Preinscriptos: { icon: ClipboardList, count: estudiantesSinSector.length },
-  };
+  const tabsConfig: { key: CasaTab; icon: typeof Sparkles; count: number }[] = [
+    { key: 'Todos', icon: Users, count: estudiantesFiltrados.length },
+    { key: 'Quantum', icon: Sparkles, count: estudiantesPorCasa.Quantum.length },
+    { key: 'Vertex', icon: Zap, count: estudiantesPorCasa.Vertex.length },
+    { key: 'Pulsar', icon: Rocket, count: estudiantesPorCasa.Pulsar.length },
+    { key: 'Sin Casa', icon: GraduationCap, count: estudiantesPorCasa['Sin Casa'].length },
+  ];
 
   if (isLoading) {
     return (
@@ -189,42 +173,43 @@ export default function AdminEstudiantesPage() {
         <div>
           <h1 className="text-2xl font-bold text-[var(--admin-text)]">Estudiantes</h1>
           <p className="text-sm text-[var(--admin-text-muted)] mt-1">
-            Gestión completa de estudiantes ({estudiantes.length} total)
+            Gestión de estudiantes por Casa ({estudiantes.length} total)
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="admin-badge-info">{estudiantesActivos.length} mostrando</span>
-          {sectorActivo !== 'Preinscriptos' && (
-            <button
-              onClick={() => handleAbrirModal(sectorActivo)}
-              className="admin-btn admin-btn-primary flex items-center gap-2"
-            >
-              <UserPlus className="w-4 h-4" />
-              Añadir Estudiante
-            </button>
-          )}
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--admin-text-muted)]" />
+          <input
+            type="text"
+            placeholder="Buscar estudiante o tutor..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 pr-4 py-2 w-full sm:w-64 rounded-lg bg-[var(--admin-surface-1)] border border-[var(--admin-border)] text-[var(--admin-text)] placeholder:text-[var(--admin-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-accent)]/50"
+          />
         </div>
       </div>
 
-      {/* Sector Tabs */}
+      {/* Casa Tabs */}
       <div className="flex gap-2 flex-wrap">
-        {(Object.keys(sectorConfig) as SectorTab[]).map((sector) => {
-          const config = sectorConfig[sector];
-          const Icon = config.icon;
-          const isActive = sectorActivo === sector;
+        {tabsConfig.map(({ key, icon: Icon, count }) => {
+          const isActive = casaActiva === key;
+          const casaConfig = key !== 'Todos' && key !== 'Sin Casa' ? CASAS_CONFIG[key] : null;
 
           return (
             <button
-              key={sector}
-              onClick={() => setSectorActivo(sector)}
+              key={key}
+              onClick={() => setCasaActiva(key)}
               className={`flex items-center gap-2 px-4 py-2.5 font-medium text-sm transition-all rounded-lg ${
                 isActive
                   ? 'bg-[var(--admin-accent)] text-black'
                   : 'bg-[var(--admin-surface-1)] text-[var(--admin-text-muted)] hover:bg-[var(--admin-surface-2)] hover:text-[var(--admin-text)] border border-[var(--admin-border)]'
               }`}
+              title={casaConfig?.descripcion}
             >
               <Icon className="w-4 h-4" />
-              {sector}
+              {key}
+              {casaConfig && <span className="text-xs opacity-70">{casaConfig.emoji}</span>}
               <span
                 className={`px-2 py-0.5 rounded text-xs font-semibold ${
                   isActive
@@ -232,27 +217,46 @@ export default function AdminEstudiantesPage() {
                     : 'bg-[var(--admin-surface-3)] text-[var(--admin-text-muted)]'
                 }`}
               >
-                {config.count}
+                {count}
               </span>
             </button>
           );
         })}
       </div>
 
+      {/* Info de Casa seleccionada */}
+      {casaActiva !== 'Todos' && casaActiva !== 'Sin Casa' && (
+        <div
+          className="p-3 rounded-lg border"
+          style={{
+            backgroundColor: `${CASAS_CONFIG[casaActiva].color}10`,
+            borderColor: `${CASAS_CONFIG[casaActiva].color}30`,
+          }}
+        >
+          <p className="text-sm" style={{ color: CASAS_CONFIG[casaActiva].color }}>
+            <span className="font-semibold">
+              {CASAS_CONFIG[casaActiva].emoji} Casa {casaActiva}:
+            </span>{' '}
+            {CASAS_CONFIG[casaActiva].descripcion}
+          </p>
+        </div>
+      )}
+
       {/* Table */}
       {estudiantesActivos.length === 0 ? (
         <EmptyState
           icon={GraduationCap}
-          title={`No hay estudiantes en ${sectorActivo}`}
-          description={
-            sectorActivo === 'Preinscriptos'
-              ? 'Los estudiantes preinscriptos aparecerán aquí'
-              : 'Añadí el primer estudiante a este sector'
+          title={
+            searchTerm
+              ? 'No se encontraron resultados'
+              : casaActiva === 'Todos'
+                ? 'No hay estudiantes registrados'
+                : `No hay estudiantes en ${casaActiva}`
           }
-          action={
-            sectorActivo !== 'Preinscriptos'
-              ? { label: 'Añadir Estudiante', onClick: () => handleAbrirModal(sectorActivo) }
-              : undefined
+          description={
+            searchTerm
+              ? 'Intentá con otro término de búsqueda'
+              : 'Los estudiantes aparecerán aquí cuando se registren'
           }
         />
       ) : (
@@ -262,10 +266,9 @@ export default function AdminEstudiantesPage() {
               <thead>
                 <tr>
                   <th>Estudiante</th>
-                  <th>Avatar</th>
                   <th>Edad</th>
-                  <th>Grupos</th>
-                  <th>Horario</th>
+                  <th>Casa</th>
+                  <th>Nivel</th>
                   <th>Puntos</th>
                   <th>Tutor</th>
                 </tr>
@@ -274,38 +277,37 @@ export default function AdminEstudiantesPage() {
                 {estudiantesActivos.map((estudiante) => {
                   const initials =
                     `${estudiante.nombre.charAt(0)}${estudiante.apellido.charAt(0)}`.toUpperCase();
+                  const casaCalculada = getCasaByEdad(estudiante.edad);
+                  const casaNombre = estudiante.casa?.nombre || casaCalculada;
+                  const casaConfig =
+                    casaNombre && casaNombre !== 'Sin Casa'
+                      ? CASAS_CONFIG[casaNombre as keyof typeof CASAS_CONFIG]
+                      : null;
+
                   return (
                     <tr key={estudiante.id}>
                       <td>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-[var(--admin-accent-muted)] flex items-center justify-center text-[var(--admin-accent)] font-semibold">
+                          <div
+                            className="w-10 h-10 rounded-lg flex items-center justify-center font-semibold"
+                            style={{
+                              backgroundColor: casaConfig
+                                ? `${casaConfig.color}20`
+                                : 'var(--admin-surface-2)',
+                              color: casaConfig?.color || 'var(--admin-text-muted)',
+                            }}
+                          >
                             {initials}
                           </div>
                           <div>
                             <div className="font-medium text-[var(--admin-text)]">
                               {estudiante.nombre} {estudiante.apellido}
                             </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        {estudiante.avatar_url ? (
-                          <div className="relative group">
-                            <div className="w-10 h-10 rounded-lg bg-[var(--status-pending-muted)] flex items-center justify-center overflow-hidden">
-                              <iframe
-                                src={`https://models.readyplayer.me/${estudiante.avatar_url.split('/').pop()}?scene=halfbody-portrait-v1&meshLod=1`}
-                                className="w-full h-full border-none scale-125"
-                                title={`Avatar de ${estudiante.nombre}`}
-                                sandbox="allow-scripts allow-same-origin"
-                                loading="lazy"
-                              />
+                            <div className="text-xs text-[var(--admin-text-muted)]">
+                              {estudiante.nivelEscolar}
                             </div>
                           </div>
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-[var(--admin-surface-2)] flex items-center justify-center">
-                            <span className="text-[var(--admin-text-disabled)] text-xs">-</span>
-                          </div>
-                        )}
+                        </div>
                       </td>
                       <td>
                         <span className="text-[var(--admin-text-secondary)]">
@@ -313,47 +315,41 @@ export default function AdminEstudiantesPage() {
                         </span>
                       </td>
                       <td>
-                        {estudiante.inscripciones_grupos &&
-                        estudiante.inscripciones_grupos.length > 0 ? (
-                          <div className="flex flex-col gap-1">
-                            {estudiante.inscripciones_grupos.map((insc) => (
-                              <span key={insc.id} className="admin-badge-info text-xs">
-                                {insc.grupo.codigo}
-                              </span>
-                            ))}
-                          </div>
+                        {casaNombre ? (
+                          <span
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                            style={{
+                              backgroundColor: casaConfig
+                                ? `${casaConfig.color}20`
+                                : 'var(--admin-surface-2)',
+                              color: casaConfig?.color || 'var(--admin-text-muted)',
+                            }}
+                          >
+                            {casaConfig?.emoji} {casaNombre}
+                          </span>
                         ) : (
                           <span className="text-[var(--admin-text-disabled)] text-xs">
-                            Sin grupo
+                            Sin asignar
                           </span>
                         )}
                       </td>
                       <td>
-                        {estudiante.inscripciones_grupos &&
-                        estudiante.inscripciones_grupos.length > 0 ? (
-                          <div className="flex flex-col gap-1">
-                            {estudiante.inscripciones_grupos.map((insc) => (
-                              <span
-                                key={insc.id}
-                                className="text-xs text-[var(--admin-text-muted)]"
-                              >
-                                {insc.clase_grupo.dia_semana} {insc.clase_grupo.hora_inicio}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-[var(--admin-text-disabled)]">-</span>
-                        )}
+                        <span className="admin-badge-info">Nivel {estudiante.nivel_actual}</span>
                       </td>
                       <td>
                         <span className="font-semibold text-[var(--status-warning)]">
-                          {estudiante.puntos_totales} pts
+                          {estudiante.puntos_totales.toLocaleString()} pts
                         </span>
                       </td>
                       <td>
-                        <span className="text-[var(--admin-text-secondary)]">
-                          {estudiante.tutor.nombre} {estudiante.tutor.apellido}
-                        </span>
+                        <div>
+                          <div className="text-[var(--admin-text-secondary)]">
+                            {estudiante.tutor.nombre} {estudiante.tutor.apellido}
+                          </div>
+                          <div className="text-xs text-[var(--admin-text-muted)]">
+                            {estudiante.tutor.email}
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -364,17 +360,33 @@ export default function AdminEstudiantesPage() {
         </div>
       )}
 
-      {/* Modal Agregar Estudiante */}
-      <AgregarEstudianteModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={() => {
-          loadEstudiantes();
-          setIsModalOpen(false);
-        }}
-        sectorId={sectorIdParaModal}
-        sectorNombre={sectorActivo}
-      />
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {(['Quantum', 'Vertex', 'Pulsar'] as const).map((casa) => {
+          const config = CASAS_CONFIG[casa];
+          const count = estudiantesPorCasa[casa].length;
+
+          return (
+            <div
+              key={casa}
+              className="p-4 rounded-xl border"
+              style={{
+                backgroundColor: `${config.color}08`,
+                borderColor: `${config.color}20`,
+              }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-2xl">{config.emoji}</span>
+                <span className="text-2xl font-bold" style={{ color: config.color }}>
+                  {count}
+                </span>
+              </div>
+              <h3 className="font-semibold text-[var(--admin-text)]">Casa {casa}</h3>
+              <p className="text-xs text-[var(--admin-text-muted)]">{config.descripcion}</p>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
