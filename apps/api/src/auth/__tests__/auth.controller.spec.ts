@@ -114,7 +114,8 @@ describe('AuthController', () => {
       });
       const { response, cookie } = createMockResponse();
 
-      const result = await controller.login(dto, response);
+      const mockIp = '127.0.0.1';
+      const result = await controller.login(dto, response, mockIp);
 
       expect(cookie).toHaveBeenCalledWith(
         'auth-token',
@@ -123,24 +124,24 @@ describe('AuthController', () => {
           httpOnly: true,
           secure: false,
           sameSite: 'lax',
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: 60 * 60 * 1000, // 1 hora (cambio de seguridad)
           path: '/',
         }),
       );
       expect(result).toEqual({ user: mockUser });
-      expect(authService.login).toHaveBeenCalledWith(dto);
+      expect(authService.login).toHaveBeenCalledWith(dto, mockIp);
     });
   });
 
   describe('loginEstudiante', () => {
     it('should mirror tutor login behavior for estudiantes', async () => {
-      const dto: LoginDto = {
-        email: 'student@test.com',
+      const dto = {
+        username: 'pedro.martinez',
         password: 'Secret123!',
       };
       const mockUser = {
         id: 'student-1',
-        email: dto.email,
+        email: 'pedro.martinez@test.com',
         nombre: 'Ana',
         apellido: 'García',
         edad: 12,
@@ -165,7 +166,8 @@ describe('AuthController', () => {
       });
       const { response, cookie } = createMockResponse();
 
-      const result = await controller.loginEstudiante(dto, response);
+      const mockIp = '127.0.0.1';
+      const result = await controller.loginEstudiante(dto, response, mockIp);
 
       expect(cookie).toHaveBeenCalledWith(
         'auth-token',
@@ -174,12 +176,12 @@ describe('AuthController', () => {
           httpOnly: true,
           secure: false,
           sameSite: 'lax',
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: 60 * 60 * 1000, // 1 hora (cambio de seguridad)
           path: '/',
         }),
       );
       expect(result).toEqual({ user: mockUser });
-      expect(authService.loginEstudiante).toHaveBeenCalledWith(dto);
+      expect(authService.loginEstudiante).toHaveBeenCalledWith(dto, mockIp);
     });
   });
 

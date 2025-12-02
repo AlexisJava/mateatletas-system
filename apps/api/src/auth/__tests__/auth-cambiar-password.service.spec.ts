@@ -2,10 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../auth.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { LogrosService } from '../../gamificacion/services/logros.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { LoginAttemptService } from '../services/login-attempt.service';
+import { TokenService } from '../services/token.service';
+import { PasswordService } from '../services/password.service';
+import { UserLookupService } from '../services/user-lookup.service';
 
 describe('AuthService - Cambiar Password (TDD RED)', () => {
   let service: AuthService;
@@ -41,17 +43,60 @@ describe('AuthService - Cambiar Password (TDD RED)', () => {
           },
         },
         {
-          provide: LogrosService,
-          useValue: {
-            asignarLogroBienvenida: jest.fn().mockResolvedValue(undefined),
-            getLogrosDisponibles: jest.fn().mockResolvedValue([]),
-          },
-        },
-        {
           provide: EventEmitter2,
           useValue: {
             emit: jest.fn(),
             on: jest.fn(),
+          },
+        },
+        {
+          provide: LoginAttemptService,
+          useValue: {
+            checkAndRecordAttempt: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: TokenService,
+          useValue: {
+            generateAccessToken: jest.fn().mockReturnValue('mock-jwt-token'),
+            generateMfaToken: jest.fn().mockReturnValue('mock-mfa-token'),
+          },
+        },
+        {
+          provide: PasswordService,
+          useValue: {
+            hash: jest.fn().mockImplementation((password: string) =>
+              bcrypt.hash(password, 10),
+            ),
+            verify: jest.fn().mockImplementation(
+              (password: string, hash: string) => bcrypt.compare(password, hash),
+            ),
+            verifyWithTimingProtection: jest.fn().mockImplementation(
+              async (password: string, hash: string | null) => {
+                if (!hash) {
+                  return { isValid: false, needsRehash: false, currentRounds: 0 };
+                }
+                const isValid = await bcrypt.compare(password, hash);
+                return { isValid, needsRehash: false, currentRounds: 12 };
+              },
+            ),
+            BCRYPT_ROUNDS: 12,
+          },
+        },
+        {
+          provide: UserLookupService,
+          useValue: {
+            findByEmail: jest.fn(),
+            findByUsername: jest.fn(),
+            findByIdForPasswordChange: jest.fn(),
+            findEstudianteByUsername: jest.fn(),
+            findTutorByUsername: jest.fn(),
+            findAdminById: jest.fn(),
+            findTutorById: jest.fn(),
+            getProfile: jest.fn(),
+            updatePasswordHash: jest.fn(),
+            updatePasswordData: jest.fn(),
+            emailExistsForTutor: jest.fn(),
           },
         },
       ],

@@ -16,6 +16,9 @@ import { TokenBlacklistService } from './token-blacklist.service';
 import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
 import { MfaModule } from './mfa/mfa.module';
 import { LoginAttemptService } from './services/login-attempt.service';
+import { TokenService } from './services/token.service';
+import { PasswordService } from './services/password.service';
+import { UserLookupService } from './services/user-lookup.service';
 
 /**
  * Módulo de autenticación
@@ -87,12 +90,21 @@ import { LoginAttemptService } from './services/login-attempt.service';
     TokenBlacklistGuard,
     // Login Attempt Tracking (Brute Force Protection)
     LoginAttemptService,
+    // Token Service (JWT generation and cookie management)
+    TokenService,
+    // Password Service (hashing, verification, strength validation)
+    PasswordService,
+    // User Lookup Service (centralized user search across tables)
+    UserLookupService,
   ],
   exports: [
     JwtStrategy,
     PassportModule,
     TokenBlacklistService,
     TokenBlacklistGuard,
+    TokenService,
+    PasswordService,
+    UserLookupService,
   ],
 })
 export class AuthModule {}

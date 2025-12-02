@@ -3,12 +3,17 @@ import {
   ConflictException,
   UnauthorizedException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AuthService } from '../auth.service';
 import { PrismaService } from '../../core/database/prisma.service';
 import { Role } from '../decorators/roles.decorator';
+import { LoginAttemptService } from '../services/login-attempt.service';
+import { TokenService } from '../services/token.service';
+import { PasswordService } from '../services/password.service';
+import { UserLookupService } from '../services/user-lookup.service';
 
 /**
  * AuthService - COMPREHENSIVE TESTS
@@ -149,6 +154,48 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
             emit: jest.fn(),
           },
         },
+        {
+          provide: LoginAttemptService,
+          useValue: {
+            checkAndRecordAttempt: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: TokenService,
+          useValue: {
+            generateAccessToken: jest.fn().mockReturnValue('mock_jwt_token'),
+            generateMfaToken: jest.fn().mockReturnValue('mock_mfa_token'),
+          },
+        },
+        {
+          provide: PasswordService,
+          useValue: {
+            hash: jest.fn().mockResolvedValue('hashed_password'),
+            verify: jest.fn().mockResolvedValue(true),
+            verifyWithTimingProtection: jest.fn().mockResolvedValue({
+              isValid: true,
+              needsRehash: false,
+              currentRounds: 12,
+            }),
+            BCRYPT_ROUNDS: 12,
+          },
+        },
+        {
+          provide: UserLookupService,
+          useValue: {
+            findByEmail: jest.fn(),
+            findByUsername: jest.fn(),
+            findByIdForPasswordChange: jest.fn(),
+            findEstudianteByUsername: jest.fn(),
+            findTutorByUsername: jest.fn(),
+            findAdminById: jest.fn(),
+            findTutorById: jest.fn(),
+            getProfile: jest.fn(),
+            updatePasswordHash: jest.fn(),
+            updatePasswordData: jest.fn(),
+            emailExistsForTutor: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -207,7 +254,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       );
     });
 
-    it('should hash password with bcrypt during registration', async () => {
+    it('should hash password with PasswordService during registration', async () => {
       // Arrange
       const registerDto = {
         email: 'nuevo@test.com',
@@ -216,8 +263,9 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         apellido: 'Usuario',
       };
 
+      const passwordService = (service as any).passwordService;
+
       jest.spyOn(prisma.tutor, 'findUnique').mockResolvedValue(null);
-      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_password');
       jest.spyOn(prisma.tutor, 'create').mockResolvedValue({
         id: 'new-tutor-id',
         email: registerDto.email,
@@ -232,11 +280,11 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       // Act
       await service.register(registerDto);
 
-      // Assert
-      expect(bcrypt.hash).toHaveBeenCalledWith('PlainTextPassword123!', 12);
+      // Assert - Ahora usa PasswordService.hash en lugar de bcrypt directamente
+      expect(passwordService.hash).toHaveBeenCalledWith('PlainTextPassword123!');
     });
 
-    it('should throw ConflictException when email already exists', async () => {
+    it('should throw BadRequestException when email already exists (security: generic message)', async () => {
       // Arrange
       const registerDto = {
         email: 'existing@test.com',
@@ -250,11 +298,12 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         .mockResolvedValue(mockTutor as any);
 
       // Act & Assert
+      // SECURITY: Mensaje genérico para no revelar si email existe (user enumeration)
       await expect(service.register(registerDto)).rejects.toThrow(
-        ConflictException,
+        BadRequestException,
       );
       await expect(service.register(registerDto)).rejects.toThrow(
-        'El email ya está registrado',
+        'Error en el registro. Verifica los datos ingresados.',
       );
       expect(prisma.tutor.create).not.toHaveBeenCalled();
     });
@@ -385,7 +434,7 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
     it('should use default role "estudiante" when roles array is empty', async () => {
       // Arrange
       const loginDto = {
-        email: 'estudiante@test.com',
+        username: 'pedro.martinez',
         password: 'EstudiantePass123!',
       };
 
@@ -400,16 +449,11 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
-      await service.loginEstudiante(loginDto);
+      const result = await service.loginEstudiante(loginDto);
 
-      // Assert
-      expect(jwtService.sign).toHaveBeenCalledWith(
-        expect.objectContaining({
-          sub: mockEstudiante.id,
-          email: mockEstudiante.username, // loginEstudiante uses username as email
-          roles: [Role.ESTUDIANTE],
-        }),
-      );
+      // Assert - El servicio ahora usa TokenService, verificamos el resultado
+      expect(result.access_token).toBe('mock_jwt_token');
+      expect(result.user.role).toBe(Role.ESTUDIANTE);
     });
   });
 
@@ -539,16 +583,12 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       // Act
-      await service.login(loginDto);
+      const result = await service.login(loginDto);
 
-      // Assert
-      expect(jwtService.sign).toHaveBeenCalledWith(
-        expect.objectContaining({
-          sub: mockAdmin.id,
-          email: mockAdmin.email,
-          roles: [Role.ADMIN, Role.DOCENTE],
-        }),
-      );
+      // Assert - El servicio ahora usa TokenService, verificamos el resultado
+      expect(result.access_token).toBe('mock_jwt_token');
+      expect(result.user.roles).toContain(Role.ADMIN);
+      expect(result.user.roles).toContain(Role.DOCENTE);
     });
   });
 
@@ -595,6 +635,14 @@ describe('AuthService - COMPREHENSIVE TESTS', () => {
         .spyOn(prisma.tutor, 'findUnique')
         .mockResolvedValue(mockTutor as any);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      // El servicio ahora usa PasswordService.verifyWithTimingProtection
+      const passwordService = (service as any).passwordService;
+      passwordService.verifyWithTimingProtection.mockResolvedValue({
+        isValid: false,
+        needsRehash: false,
+        currentRounds: 12,
+      });
 
       // Act
       const result = await service.validateUser(

@@ -119,14 +119,18 @@ describe('TokenBlacklistService', () => {
       expect(result).toBe(false);
     });
 
-    it('should return false and log when cache manager throws', async () => {
+    it('should throw UnauthorizedException when cache manager throws (fail-closed security)', async () => {
+      // SECURITY: Si Redis falla, es más seguro bloquear el acceso (fail-closed)
+      // que permitir tokens potencialmente blacklisted (fail-open)
       cacheManager.get.mockRejectedValue(new Error('redis down'));
       const loggerSpy = jest.spyOn(service['logger'], 'error');
 
-      await expect(service.isBlacklisted(mockToken)).resolves.toBe(false);
+      await expect(service.isBlacklisted(mockToken)).rejects.toThrow(
+        'Servicio temporalmente no disponible',
+      );
 
       expect(loggerSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error al verificar blacklist'),
+        expect.stringContaining('Redis caído - bloqueando por seguridad'),
         expect.any(String),
       );
     });

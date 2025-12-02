@@ -1,6 +1,5 @@
 import {
   Injectable,
-  ConflictException,
   UnauthorizedException,
   NotFoundException,
   Logger,
@@ -15,24 +14,18 @@ import { LoginEstudianteDto } from './dto/login-estudiante.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from './decorators/roles.decorator';
 import { parseUserRoles } from '../common/utils/role.utils';
-import { Tutor, Docente, Admin as AdminModel } from '@prisma/client';
+import { Admin as AdminModel } from '@prisma/client';
 import { EstudiantePrimerLoginEvent, UserLoggedInEvent, UserRegisteredEvent } from '../common/events';
 import { LoginAttemptService } from './services/login-attempt.service';
-
-type AuthenticatedUser = Tutor | Docente | AdminModel;
-
-// Type guards usando campos ÚNICOS de cada modelo
-// - Tutor: solo él tiene 'ha_completado_onboarding'
-// - Docente: solo él tiene 'titulo'
-// - Admin: detectado por eliminación
-const isTutorUser = (user: AuthenticatedUser): user is Tutor =>
-  'ha_completado_onboarding' in user;
-
-const isDocenteUser = (user: AuthenticatedUser): user is Docente =>
-  'titulo' in user;
-
-const isAdminUser = (user: AuthenticatedUser): user is AdminModel =>
-  !isTutorUser(user) && !isDocenteUser(user);
+import { TokenService } from './services/token.service';
+import { PasswordService } from './services/password.service';
+import {
+  UserLookupService,
+  isTutorUser,
+  isDocenteUser,
+  isAdminUser,
+  AuthenticatedUser,
+} from './services/user-lookup.service';
 
 /**
  * Servicio de autenticación para tutores
@@ -41,32 +34,27 @@ const isAdminUser = (user: AuthenticatedUser): user is AdminModel =>
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private readonly BCRYPT_ROUNDS = 12; // ✅ NIST SP 800-63B 2025 (updated from 10)
 
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
     private eventEmitter: EventEmitter2,
     private loginAttemptService: LoginAttemptService,
+    private tokenService: TokenService,
+    private passwordService: PasswordService,
+    private userLookupService: UserLookupService,
   ) {}
+
+  // ============================================================================
+  // TOKEN GENERATION - Delegado a TokenService
+  // ============================================================================
 
   /**
    * Genera un token temporal para verificación MFA
-   * Este token es válido solo 5 minutos y solo para el endpoint de verificación MFA
-   * @param userId - ID del usuario
-   * @param email - Email del usuario
-   * @returns Token JWT temporal
+   * @deprecated Usar tokenService.generateMfaToken() directamente
    */
   private generateMfaToken(userId: string, email: string): string {
-    const payload = {
-      sub: userId,
-      email,
-      type: 'mfa_pending', // Tipo especial para distinguir de tokens regulares
-    };
-
-    return this.jwtService.sign(payload, {
-      expiresIn: '5m', // Token válido solo 5 minutos
-    });
+    return this.tokenService.generateMfaToken(userId, email);
   }
 
   /**
@@ -87,8 +75,8 @@ export class AuthService {
       throw new BadRequestException('Error en el registro. Verifica los datos ingresados.');
     }
 
-    // 2. Hashear la contraseña con bcrypt
-    const passwordHash = await bcrypt.hash(password, this.BCRYPT_ROUNDS);
+    // 2. Hashear la contraseña con PasswordService
+    const passwordHash = await this.passwordService.hash(password);
 
     // 3. Crear el tutor en la base de datos
     const tutor = await this.prisma.tutor.create({
@@ -395,23 +383,23 @@ export class AuthService {
         return null;
       }
 
-      const isPasswordValid = await bcrypt.compare(
+      // Usar PasswordService con protección contra timing attacks y auto-rehash
+      const verifyResult = await this.passwordService.verifyWithTimingProtection(
         password,
         tutor.password_hash,
       );
 
-      if (!isPasswordValid) {
+      if (!verifyResult.isValid) {
         return null;
       }
 
       // ✅ SECURITY: Rehash password if using old rounds (gradual migration)
-      const currentRounds = this.getRoundsFromHash(tutor.password_hash);
-      if (currentRounds < this.BCRYPT_ROUNDS) {
+      if (verifyResult.needsRehash) {
         this.logger.log(
-          `Rehashing password for tutor ${tutor.id} from ${currentRounds} to ${this.BCRYPT_ROUNDS} rounds`
+          `Rehashing password for tutor ${tutor.id} from ${verifyResult.currentRounds} to ${this.passwordService.BCRYPT_ROUNDS} rounds`
         );
 
-        const newHash = await bcrypt.hash(password, this.BCRYPT_ROUNDS);
+        const newHash = await this.passwordService.hash(password);
 
         // Update hash in database (non-blocking, fire-and-forget)
         this.prisma.tutor.update({
@@ -433,30 +421,6 @@ export class AuthService {
       // Log del error sin exponer detalles al cliente
       this.logger.error('Error en validateUser', error instanceof Error ? error.stack : error);
       return null;
-    }
-  }
-
-  /**
-   * Extrae el número de rounds de un hash de bcrypt
-   *
-   * Formato de bcrypt hash: $2b$XX$... donde XX es el número de rounds
-   * Ejemplo: $2b$12$abcdef... -> 12 rounds
-   *
-   * @param hash - Hash de bcrypt
-   * @returns Número de rounds usado en el hash
-   * @private
-   */
-  private getRoundsFromHash(hash: string): number {
-    try {
-      const parts = hash.split('$');
-      if (parts.length < 3) {
-        this.logger.warn(`Invalid bcrypt hash format: ${hash.substring(0, 10)}...`);
-        return 0;
-      }
-      return parseInt(parts[2], 10);
-    } catch (error) {
-      this.logger.error('Error extracting rounds from hash', error instanceof Error ? error.stack : error);
-      return 0;
     }
   }
 
@@ -653,7 +617,7 @@ export class AuthService {
     const usuario = estudiante || tutor || docente || admin;
 
     // 2. Verificar que la contraseña actual sea correcta
-    const passwordValida = await bcrypt.compare(
+    const passwordValida = await this.passwordService.verify(
       passwordActual,
       usuario!.password_hash!,
     );
@@ -663,7 +627,7 @@ export class AuthService {
     }
 
     // 3. Hashear la nueva contraseña
-    const nuevoHash = await bcrypt.hash(nuevaPassword, this.BCRYPT_ROUNDS);
+    const nuevoHash = await this.passwordService.hash(nuevaPassword);
 
     // 4. Actualizar el usuario
     const updateData = {
@@ -732,8 +696,8 @@ export class AuthService {
     });
 
     if (estudiante) {
-      // Verificar contraseña
-      const passwordValida = await bcrypt.compare(
+      // Verificar contraseña usando PasswordService
+      const passwordValida = await this.passwordService.verify(
         password,
         estudiante.password_hash || '',
       );
@@ -809,8 +773,8 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    // Verificar contraseña
-    const passwordValida = await bcrypt.compare(password, tutor.password_hash);
+    // Verificar contraseña usando PasswordService
+    const passwordValida = await this.passwordService.verify(password, tutor.password_hash);
 
     if (!passwordValida) {
       throw new UnauthorizedException('Credenciales inválidas');
@@ -959,28 +923,13 @@ export class AuthService {
 
   /**
    * Genera un token JWT para un usuario
-   * @param userId - ID del usuario
-   * @param email - Email del usuario
-   * @param roles - Array de roles del usuario (por ejemplo: ['admin', 'docente'])
-   * @returns Token JWT firmado
-   * @private
+   * @deprecated Usar tokenService.generateAccessToken() directamente
    */
   private generateJwtToken(
     userId: string,
     email: string,
     roles: Role[] | Role = [Role.TUTOR],
   ): string {
-    // Normalizar roles a array si viene como un único rol (retrocompatibilidad)
-    const rolesArray = Array.isArray(roles) ? roles : [roles];
-    const normalizedRoles = rolesArray.length > 0 ? rolesArray : [Role.TUTOR];
-
-    const payload = {
-      sub: userId, // Subject (ID del usuario)
-      email,
-      role: normalizedRoles[0], // Rol principal (primer rol del array) - para backward compatibility
-      roles: normalizedRoles, // Array completo de roles - soporte multi-rol
-    };
-
-    return this.jwtService.sign(payload);
+    return this.tokenService.generateAccessToken(userId, email, roles);
   }
 }
