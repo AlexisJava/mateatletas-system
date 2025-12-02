@@ -139,20 +139,33 @@ describe('Bcrypt Security - Salt Rounds', () => {
 /**
  * Helper para extraer rounds de un hash de bcrypt
  * Útil para debugging y testing
+ *
+ * Formato bcrypt: $2b$XX$... donde XX es el número de rounds
+ * Ejemplo: $2b$12$abcdef... -> 12 rounds
  */
 export function extractRoundsFromHash(hash: string): number {
-  if (!hash || hash.length < 7) {
-    throw new Error('Invalid bcrypt hash: too short');
+  if (!hash || typeof hash !== 'string') {
+    throw new Error('Invalid bcrypt hash format: hash is empty or not a string');
   }
+
   const parts = hash.split('$');
-  // bcrypt hash format: $2b$XX$... (parts: ['', '2b', 'XX', 'rest'])
-  if (parts.length < 4 || !parts[2]) {
-    throw new Error('Invalid bcrypt hash format');
+
+  // Formato válido: ['', '2b', '12', 'salt+hash...']
+  // Mínimo 4 partes para un hash válido completo
+  if (parts.length < 4) {
+    throw new Error(`Invalid bcrypt hash format: expected at least 4 parts, got ${parts.length}`);
   }
-  const rounds = parseInt(parts[2], 10);
-  if (isNaN(rounds) || rounds < 1) {
-    throw new Error('Invalid bcrypt rounds value');
+
+  const roundsStr = parts[2];
+  if (!roundsStr || roundsStr.trim() === '') {
+    throw new Error('Invalid bcrypt hash format: rounds section is empty');
   }
+
+  const rounds = parseInt(roundsStr, 10);
+  if (isNaN(rounds) || rounds <= 0) {
+    throw new Error(`Invalid bcrypt hash format: rounds "${roundsStr}" is not a valid positive number`);
+  }
+
   return rounds;
 }
 

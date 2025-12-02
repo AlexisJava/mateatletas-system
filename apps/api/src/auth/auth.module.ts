@@ -16,15 +16,15 @@ import { TokenBlacklistService } from './token-blacklist.service';
 import { TokenBlacklistGuard } from './guards/token-blacklist.guard';
 import { MfaModule } from './mfa/mfa.module';
 import { LoginAttemptService } from './services/login-attempt.service';
-// Use-cases
-import {
-  ValidateCredentialsUseCase,
-  LoginUseCase,
-  LoginEstudianteUseCase,
-  CompleteMfaLoginUseCase,
-  CambiarPasswordUseCase,
-  GetProfileUseCase,
-} from './use-cases';
+import { TokenService } from './services/token.service';
+import { PasswordService } from './services/password.service';
+import { UserLookupService } from './services/user-lookup.service';
+// FASE 2: Servicios de autenticación por tipo de usuario
+import { TutorAuthService } from './services/tutor-auth.service';
+import { DocenteAuthService } from './services/docente-auth.service';
+import { AdminAuthService } from './services/admin-auth.service';
+import { EstudianteAuthService } from './services/estudiante-auth.service';
+import { AuthOrchestratorService } from './services/auth-orchestrator.service';
 
 /**
  * Módulo de autenticación
@@ -97,19 +97,27 @@ import {
     TokenBlacklistGuard,
     // Login Attempt Tracking (Brute Force Protection)
     LoginAttemptService,
-    // Use-cases (facade pattern)
-    ValidateCredentialsUseCase,
-    LoginUseCase,
-    LoginEstudianteUseCase,
-    CompleteMfaLoginUseCase,
-    CambiarPasswordUseCase,
-    GetProfileUseCase,
+    // Token Service (JWT generation and cookie management)
+    TokenService,
+    // Password Service (hashing, verification, strength validation)
+    PasswordService,
+    // User Lookup Service (centralized user search across tables)
+    UserLookupService,
+    // FASE 2: Servicios de autenticación por tipo de usuario
+    TutorAuthService,
+    DocenteAuthService,
+    AdminAuthService,
+    EstudianteAuthService,
+    AuthOrchestratorService,
   ],
   exports: [
     JwtStrategy,
     PassportModule,
     TokenBlacklistService,
     TokenBlacklistGuard,
+    TokenService,
+    PasswordService,
+    UserLookupService,
   ],
 })
 export class AuthModule {}

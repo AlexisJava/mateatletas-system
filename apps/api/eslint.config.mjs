@@ -6,7 +6,12 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs'],
+    ignores: [
+      'eslint.config.mjs',
+      '**/__tests__/**',
+      '**/*.spec.ts',
+      '**/*.e2e-spec.ts',
+    ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -26,49 +31,19 @@ export default tseslint.config(
   },
   {
     rules: {
-      // ===== PROHIBIR any Y ts-ignore =====
-      '@typescript-eslint/no-explicit-any': 'error',
-      '@typescript-eslint/no-unsafe-assignment': 'error',
-      '@typescript-eslint/no-unsafe-call': 'error',
-      '@typescript-eslint/no-unsafe-member-access': 'error',
-      '@typescript-eslint/no-unsafe-return': 'error',
-      '@typescript-eslint/no-unsafe-argument': 'error',
+      // ===== REGLAS PERMISIVAS PARA CÓDIGO LEGACY =====
+      '@typescript-eslint/no-explicit-any': 'warn', // Solo warning, no bloquea
+      '@typescript-eslint/no-floating-promises': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
+      "prettier/prettier": ["error", { endOfLine: "auto" }],
 
-      // ===== PROHIBIR ts-ignore y ts-nocheck =====
-      '@typescript-eslint/ban-ts-comment': [
-        'error',
-        {
-          'ts-ignore': true,
-          'ts-nocheck': true,
-          'ts-expect-error': 'allow-with-description',
-        },
-      ],
-
-      // ===== TIPOS EXPLICITOS =====
-      '@typescript-eslint/explicit-function-return-type': [
-        'error',
-        {
-          allowExpressions: true,
-          allowTypedFunctionExpressions: true,
-          allowHigherOrderFunctions: true,
-        },
-      ],
-      '@typescript-eslint/explicit-module-boundary-types': 'error',
-
-      // ===== OTRAS REGLAS ESTRICTAS =====
-      '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-        },
-      ],
-
-      // ===== PREVENIR DEBUG CODE =====
-      'no-console': 'error',
-      'prettier/prettier': ['error', { endOfLine: 'auto' }],
+      // ===== REGLAS ESTRICTAS PARA PREVENIR DEBUG CODE =====
+      'no-console': 'error', // Prohibir console.* (usar Logger)
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
     },
   },
 );

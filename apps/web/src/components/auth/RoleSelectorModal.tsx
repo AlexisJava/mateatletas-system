@@ -1,14 +1,21 @@
 'use client';
 
-import { Shield, GraduationCap } from 'lucide-react';
+import { Shield, GraduationCap, Heart, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { UserRole } from '@/store/auth.store';
 
 interface RoleSelectorModalProps {
-  roles: string[];
-  onSelectRole: (_role: 'admin' | 'docente') => void;
+  roles: UserRole[];
+  onSelectRole: (role: UserRole) => void;
 }
 
-const ROLE_CONFIG = {
+const ROLE_CONFIG: Record<UserRole, {
+  label: string;
+  description: string;
+  icon: typeof Shield;
+  gradient: string;
+  shadow: string;
+}> = {
   admin: {
     label: 'Administrador',
     description: 'Gestionar sistema, usuarios y configuración',
@@ -23,17 +30,29 @@ const ROLE_CONFIG = {
     gradient: 'from-blue-600 to-cyan-600',
     shadow: 'shadow-blue-500/50',
   },
-} as const;
+  tutor: {
+    label: 'Padre/Madre',
+    description: 'Ver progreso de tus hijos y gestionar inscripciones',
+    icon: Heart,
+    gradient: 'from-emerald-600 to-teal-600',
+    shadow: 'shadow-emerald-500/50',
+  },
+  estudiante: {
+    label: 'Estudiante',
+    description: 'Acceder a clases, ejercicios y tu perfil',
+    icon: Users,
+    gradient: 'from-orange-600 to-amber-600',
+    shadow: 'shadow-orange-500/50',
+  },
+};
 
 /**
  * Modal para seleccionar el rol con el que iniciar sesión
  * Se muestra cuando el usuario tiene múltiples roles (ej: ADMIN + DOCENTE)
  */
 export default function RoleSelectorModal({ roles, onSelectRole }: RoleSelectorModalProps) {
-  // Filtrar solo roles válidos (admin y docente)
-  const availableRoles = roles
-    .map((r) => r.toLowerCase())
-    .filter((r): r is 'admin' | 'docente' => r === 'admin' || r === 'docente');
+  // Filtrar solo roles válidos que tienen configuración
+  const availableRoles = roles.filter((role): role is UserRole => role in ROLE_CONFIG);
 
   return (
     <AnimatePresence>
@@ -82,7 +101,9 @@ export default function RoleSelectorModal({ roles, onSelectRole }: RoleSelectorM
                       <Icon className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1 text-left">
-                      <div className="text-2xl font-black text-white mb-1">{config.label}</div>
+                      <div className="text-2xl font-black text-white mb-1">
+                        {config.label}
+                      </div>
                       <div className="text-base text-white/90 font-medium">
                         {config.description}
                       </div>

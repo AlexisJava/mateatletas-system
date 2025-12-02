@@ -1,140 +1,55 @@
 import {
   Injectable,
-  BadRequestException,
   UnauthorizedException,
+  NotFoundException,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { authenticator } from 'otplib';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../core/database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { LoginEstudianteDto } from './dto/login-estudiante.dto';
-import * as bcrypt from 'bcrypt';
 import { Role } from './decorators/roles.decorator';
 import { parseUserRoles } from '../common/utils/role.utils';
-import {
-  EstudiantePrimerLoginEvent,
-  UserLoggedInEvent,
-  UserRegisteredEvent,
-} from '../common/events';
-
-// Use-cases
-import {
-  ValidateCredentialsUseCase,
-  LoginUseCase,
-  LoginEstudianteUseCase,
-  CompleteMfaLoginUseCase,
-  CambiarPasswordUseCase,
-  GetProfileUseCase,
-} from './use-cases';
+import { UserLoggedInEvent, UserRegisteredEvent } from '../common/events';
+import { TokenService } from './services/token.service';
+import { PasswordService } from './services/password.service';
 
 /**
- * AuthService - Facade
+ * AuthService - Servicio de autenticación reducido
  *
- * Este servicio actúa como facade, delegando la lógica de negocio
- * a use-cases especializados. Mantiene la misma interfaz pública
- * para no romper los controllers existentes.
+ * Responsabilidades:
+ * - Registro de tutores
+ * - Obtener perfil de usuario
+ * - Cambio de contraseña
+ * - Completar login MFA
  *
- * Use-cases delegados:
- * - ValidateCredentialsUseCase: Validación de credenciales con migración de bcrypt
- * - LoginUseCase: Login unificado para Tutor/Docente/Admin con MFA
- * - LoginEstudianteUseCase: Login de estudiantes por username
- * - CompleteMfaLoginUseCase: Verificación de códigos MFA
- * - CambiarPasswordUseCase: Cambio de contraseña para todos los usuarios
- * - GetProfileUseCase: Obtención de perfil por rol
+ * NOTA: Los métodos login() y loginEstudiante() fueron migrados a:
+ * - TutorAuthService
+ * - DocenteAuthService
+ * - AdminAuthService
+ * - EstudianteAuthService
+ * - AuthOrchestratorService (orquestador)
  */
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private readonly BCRYPT_ROUNDS = 12;
 
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService,
-    private readonly eventEmitter: EventEmitter2,
-    // Use-cases
-    private readonly validateCredentialsUseCase: ValidateCredentialsUseCase,
-    private readonly loginUseCase: LoginUseCase,
-    private readonly loginEstudianteUseCase: LoginEstudianteUseCase,
-    private readonly completeMfaLoginUseCase: CompleteMfaLoginUseCase,
-    private readonly cambiarPasswordUseCase: CambiarPasswordUseCase,
-    private readonly getProfileUseCase: GetProfileUseCase,
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+    private eventEmitter: EventEmitter2,
+    private tokenService: TokenService,
+    private passwordService: PasswordService,
   ) {}
-
-  // ============================================================
-  // MÉTODOS DELEGADOS A USE-CASES
-  // ============================================================
-
-  /**
-   * Valida credenciales de un tutor
-   * @delegate ValidateCredentialsUseCase
-   */
-  async validateUser(email: string, password: string) {
-    return this.validateCredentialsUseCase.execute(email, password);
-  }
-
-  /**
-   * Login unificado para Tutor/Docente/Admin
-   * @delegate LoginUseCase
-   */
-  async login(loginDto: LoginDto, ip: string = 'unknown') {
-    return this.loginUseCase.execute(loginDto, ip);
-  }
-
-  /**
-   * Login de estudiante por username
-   * @delegate LoginEstudianteUseCase
-   */
-  async loginEstudiante(
-    loginEstudianteDto: LoginEstudianteDto,
-    ip: string = 'unknown',
-  ) {
-    return this.loginEstudianteUseCase.execute(loginEstudianteDto, ip);
-  }
-
-  /**
-   * Completa el login verificando código MFA
-   * @delegate CompleteMfaLoginUseCase
-   */
-  async completeMfaLogin(
-    mfaToken: string,
-    totpCode?: string,
-    backupCode?: string,
-  ) {
-    return this.completeMfaLoginUseCase.execute(mfaToken, totpCode, backupCode);
-  }
-
-  /**
-   * Cambia la contraseña de un usuario
-   * @delegate CambiarPasswordUseCase
-   */
-  async cambiarPassword(
-    userId: string,
-    passwordActual: string,
-    nuevaPassword: string,
-  ) {
-    return this.cambiarPasswordUseCase.execute(
-      userId,
-      passwordActual,
-      nuevaPassword,
-    );
-  }
-
-  /**
-   * Obtiene el perfil de un usuario según su rol
-   * @delegate GetProfileUseCase
-   */
-  async getProfile(userId: string, role: string) {
-    return this.getProfileUseCase.execute(userId, role);
-  }
-
-  // ============================================================
-  // MÉTODOS QUE PERMANECEN EN EL SERVICE (sin use-case aún)
-  // ============================================================
 
   /**
    * Registra un nuevo tutor en la plataforma
+   * @param registerDto - Datos del tutor a registrar
+   * @returns Datos del tutor registrado (sin password_hash)
+   * @throws BadRequestException si el email ya existe
    */
   async register(registerDto: RegisterDto) {
     const { email, password, nombre, apellido, dni, telefono } = registerDto;
@@ -150,10 +65,10 @@ export class AuthService {
       );
     }
 
-    // 2. Hashear la contraseña
-    const passwordHash = await bcrypt.hash(password, this.BCRYPT_ROUNDS);
+    // 2. Hashear la contraseña con PasswordService
+    const passwordHash = await this.passwordService.hash(password);
 
-    // 3. Crear el tutor
+    // 3. Crear el tutor en la base de datos
     const tutor = await this.prisma.tutor.create({
       data: {
         email,
@@ -179,7 +94,7 @@ export class AuthService {
       },
     });
 
-    // 4. Emitir evento de registro
+    // 4. Emitir evento de registro exitoso
     this.eventEmitter.emit(
       'user.registered',
       new UserRegisteredEvent(
@@ -191,7 +106,9 @@ export class AuthService {
       ),
     );
 
-    this.logger.log(`Tutor registrado: ${tutor.id} (${tutor.email})`);
+    this.logger.log(
+      `Tutor registrado exitosamente: ${tutor.id} (${tutor.email})`,
+    );
 
     return {
       message: 'Tutor registrado exitosamente',
@@ -203,144 +120,366 @@ export class AuthService {
   }
 
   /**
-   * Login con username para estudiantes y tutores
-   * (método legacy, se mantiene por compatibilidad)
+   * Obtiene el perfil de un usuario por su ID y rol
+   * @param userId - ID del usuario
+   * @param role - Rol del usuario
+   * @returns Datos del usuario (sin password_hash)
+   * @throws NotFoundException si el usuario no existe
    */
-  async loginWithUsername(username: string, password: string) {
-    // 1. Buscar como estudiante
-    const estudiante = await this.prisma.estudiante.findUnique({
-      where: { username },
-      include: {
-        tutor: {
-          select: { id: true, nombre: true, apellido: true },
+  async getProfile(userId: string, role: string) {
+    if (role === 'docente' || role === (Role.DOCENTE as string)) {
+      const docente = await this.prisma.docente.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          nombre: true,
+          apellido: true,
+          titulo: true,
+          bio: true,
+          createdAt: true,
+          updatedAt: true,
+          debe_cambiar_password: true,
         },
-        casa: {
-          select: {
-            id: true,
-            nombre: true,
-            colorPrimary: true,
-            colorSecondary: true,
-          },
-        },
-      },
-    });
-
-    if (estudiante) {
-      const passwordValida = await bcrypt.compare(
-        password,
-        estudiante.password_hash || '',
-      );
-
-      if (!passwordValida) {
-        throw new UnauthorizedException('Credenciales inválidas');
-      }
-
-      // Verificar primer login
-      const logrosDesbloqueados = await this.prisma.logroEstudiante.count({
-        where: { estudiante_id: estudiante.id },
       });
-      const esPrimerLogin = logrosDesbloqueados === 0;
 
-      // Emitir eventos
-      this.eventEmitter.emit(
-        'estudiante.logged-in',
-        new UserLoggedInEvent(
-          estudiante.id,
-          'estudiante',
-          estudiante.email || estudiante.username || '',
-          esPrimerLogin,
-        ),
-      );
-
-      if (esPrimerLogin) {
-        this.eventEmitter.emit(
-          'estudiante.primer-login',
-          new EstudiantePrimerLoginEvent(
-            estudiante.id,
-            estudiante.username || estudiante.id,
-          ),
-        );
+      if (!docente) {
+        throw new NotFoundException('Docente no encontrado');
       }
-
-      const roles = parseUserRoles(estudiante.roles);
-      const token = this.generateJwtToken(
-        estudiante.id,
-        estudiante.username || estudiante.email || estudiante.id,
-        roles,
-      );
 
       return {
-        access_token: token,
-        user: {
-          id: estudiante.id,
-          username: estudiante.username,
-          nombre: estudiante.nombre,
-          apellido: estudiante.apellido,
-          edad: estudiante.edad,
-          nivelEscolar: estudiante.nivelEscolar,
-          avatar_gradient: estudiante.avatar_gradient,
-          puntos_totales: estudiante.puntos_totales,
-          casa: estudiante.casa,
-          tutor: estudiante.tutor,
-          debe_cambiar_password: estudiante.debe_cambiar_password,
-          roles,
-        },
+        ...docente,
+        role: Role.DOCENTE,
       };
     }
 
-    // 2. Buscar como tutor
+    if (role === 'admin' || role === (Role.ADMIN as string)) {
+      const admin = await this.prisma.admin.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          nombre: true,
+          apellido: true,
+          fecha_registro: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      if (!admin) {
+        throw new NotFoundException('Admin no encontrado');
+      }
+
+      return {
+        ...admin,
+        role: Role.ADMIN,
+      };
+    }
+
+    if (role === 'estudiante' || role === (Role.ESTUDIANTE as string)) {
+      const estudiante = await this.prisma.estudiante.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          nombre: true,
+          apellido: true,
+          edad: true,
+          nivelEscolar: true,
+          fotoUrl: true,
+          puntos_totales: true,
+          nivel_actual: true,
+          equipoId: true,
+          tutor_id: true,
+          createdAt: true,
+          updatedAt: true,
+          debe_cambiar_password: true,
+        },
+      });
+
+      if (!estudiante) {
+        throw new NotFoundException('Estudiante no encontrado');
+      }
+
+      return {
+        ...estudiante,
+        role: Role.ESTUDIANTE,
+      };
+    }
+
+    // Por defecto, asumir que es tutor
     const tutor = await this.prisma.tutor.findUnique({
-      where: { username },
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        nombre: true,
+        apellido: true,
+        dni: true,
+        telefono: true,
+        fecha_registro: true,
+        ha_completado_onboarding: true,
+        createdAt: true,
+        updatedAt: true,
+        debe_cambiar_password: true,
+      },
     });
 
     if (!tutor) {
-      throw new UnauthorizedException('Credenciales inválidas');
+      throw new NotFoundException('Tutor no encontrado');
     }
-
-    const passwordValida = await bcrypt.compare(password, tutor.password_hash);
-    if (!passwordValida) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-
-    const roles = parseUserRoles(tutor.roles);
-    const token = this.generateJwtToken(tutor.id, tutor.email || '', roles);
 
     return {
-      access_token: token,
-      user: {
-        id: tutor.id,
-        username: tutor.username,
-        email: tutor.email,
-        nombre: tutor.nombre,
-        apellido: tutor.apellido,
-        debe_cambiar_password: tutor.debe_cambiar_password,
-        roles,
-      },
+      ...tutor,
+      role: Role.TUTOR,
     };
   }
 
-  // ============================================================
-  // MÉTODOS PRIVADOS
-  // ============================================================
-
   /**
-   * Genera un token JWT
+   * Cambia la contraseña de un usuario (estudiante, tutor, docente o admin)
+   * @param userId - ID del usuario
+   * @param passwordActual - Contraseña actual del usuario
+   * @param nuevaPassword - Nueva contraseña a establecer
+   * @throws UnauthorizedException si la contraseña actual es incorrecta
    */
-  private generateJwtToken(
+  async cambiarPassword(
     userId: string,
-    email: string,
-    roles: Role[] | Role = [Role.TUTOR],
-  ): string {
-    const rolesArray = Array.isArray(roles) ? roles : [roles];
-    const normalizedRoles = rolesArray.length > 0 ? rolesArray : [Role.TUTOR];
+    passwordActual: string,
+    nuevaPassword: string,
+  ) {
+    // 1. Buscar el usuario (puede ser estudiante, tutor, docente o admin)
+    const estudiante = await this.prisma.estudiante.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        password_hash: true,
+        password_temporal: true,
+        debe_cambiar_password: true,
+      },
+    });
 
-    const payload = {
-      sub: userId,
-      email,
-      role: normalizedRoles[0],
-      roles: normalizedRoles,
+    let tutor = null;
+    let docente = null;
+    let admin = null;
+    let tipoUsuario: 'estudiante' | 'tutor' | 'docente' | 'admin' =
+      'estudiante';
+
+    if (!estudiante) {
+      tutor = await this.prisma.tutor.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          password_hash: true,
+          password_temporal: true,
+          debe_cambiar_password: true,
+        },
+      });
+      tipoUsuario = 'tutor';
+
+      if (!tutor) {
+        docente = await this.prisma.docente.findUnique({
+          where: { id: userId },
+          select: {
+            id: true,
+            password_hash: true,
+            password_temporal: true,
+            debe_cambiar_password: true,
+          },
+        });
+        tipoUsuario = 'docente';
+
+        if (!docente) {
+          admin = await this.prisma.admin.findUnique({
+            where: { id: userId },
+            select: {
+              id: true,
+              password_hash: true,
+              password_temporal: true,
+              debe_cambiar_password: true,
+            },
+          });
+          tipoUsuario = 'admin';
+
+          if (!admin) {
+            throw new NotFoundException('Usuario no encontrado');
+          }
+        }
+      }
+    }
+
+    const usuario = estudiante || tutor || docente || admin;
+
+    // 2. Verificar que la contraseña actual sea correcta
+    const passwordValida = await this.passwordService.verify(
+      passwordActual,
+      usuario!.password_hash!,
+    );
+
+    if (!passwordValida) {
+      throw new UnauthorizedException('Contraseña actual incorrecta');
+    }
+
+    // 3. Hashear la nueva contraseña
+    const nuevoHash = await this.passwordService.hash(nuevaPassword);
+
+    // 4. Actualizar el usuario
+    const updateData = {
+      password_hash: nuevoHash,
+      password_temporal: null,
+      debe_cambiar_password: false,
+      fecha_ultimo_cambio: new Date(),
     };
 
-    return this.jwtService.sign(payload);
+    if (tipoUsuario === 'estudiante') {
+      await this.prisma.estudiante.update({
+        where: { id: userId },
+        data: updateData,
+      });
+    } else if (tipoUsuario === 'tutor') {
+      await this.prisma.tutor.update({
+        where: { id: userId },
+        data: updateData,
+      });
+    } else if (tipoUsuario === 'docente') {
+      await this.prisma.docente.update({
+        where: { id: userId },
+        data: updateData,
+      });
+    } else {
+      await this.prisma.admin.update({
+        where: { id: userId },
+        data: updateData,
+      });
+    }
+
+    return {
+      success: true,
+      message: 'Contraseña actualizada exitosamente',
+    };
+  }
+
+  /**
+   * Completa el login verificando el código MFA
+   *
+   * @param mfaToken - Token temporal MFA recibido en el login inicial
+   * @param totpCode - Código TOTP de 6 dígitos (opcional)
+   * @param backupCode - Código de backup (opcional)
+   * @returns Token JWT final y datos del usuario
+   * @throws UnauthorizedException si el token es inválido o el código es incorrecto
+   */
+  async completeMfaLogin(
+    mfaToken: string,
+    totpCode?: string,
+    backupCode?: string,
+  ) {
+    // 1. Verificar y decodificar el token temporal MFA
+    let payload: { sub: string; email: string; type: string };
+    try {
+      payload = this.jwtService.verify(mfaToken);
+    } catch {
+      throw new UnauthorizedException('Token MFA inválido o expirado');
+    }
+
+    // 2. Verificar que sea un token MFA válido
+    if (payload.type !== 'mfa_pending') {
+      throw new UnauthorizedException('Token MFA inválido');
+    }
+
+    const userId = payload.sub;
+
+    // 3. Obtener el admin de la base de datos
+    const admin = await this.prisma.admin.findUnique({
+      where: { id: userId },
+    });
+
+    if (!admin) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    if (!admin.mfa_enabled || !admin.mfa_secret) {
+      throw new UnauthorizedException(
+        'MFA no está habilitado para este usuario',
+      );
+    }
+
+    // 4. Verificar el código TOTP o backup code
+    let isValid = false;
+
+    if (totpCode) {
+      // Verificar código TOTP
+      authenticator.options = {
+        window: 1,
+        step: 30,
+      };
+      isValid = authenticator.verify({
+        token: totpCode,
+        secret: admin.mfa_secret,
+      });
+    } else if (backupCode) {
+      // Verificar backup code
+      for (const [index, hashedCode] of admin.mfa_backup_codes.entries()) {
+        const isMatch = await bcrypt.compare(backupCode, hashedCode);
+        if (isMatch) {
+          isValid = true;
+          // Eliminar el código usado (single-use)
+          const updatedCodes = admin.mfa_backup_codes.filter(
+            (_, i) => i !== index,
+          );
+          await this.prisma.admin.update({
+            where: { id: userId },
+            data: { mfa_backup_codes: updatedCodes },
+          });
+          this.logger.warn(
+            `Código de backup usado para ${admin.email}. Códigos restantes: ${updatedCodes.length}`,
+          );
+          break;
+        }
+      }
+    }
+
+    if (!isValid) {
+      this.logger.warn(
+        `Código MFA inválido para usuario ${admin.email} (${userId})`,
+      );
+      throw new UnauthorizedException(
+        'Código de verificación inválido. Por favor intenta nuevamente.',
+      );
+    }
+
+    // 5. Generar token JWT final
+    const userRoles = parseUserRoles(admin.roles);
+    const finalRoles = userRoles.length > 0 ? userRoles : [Role.ADMIN];
+
+    const accessToken = this.tokenService.generateAccessToken(
+      userId,
+      admin.email,
+      finalRoles,
+    );
+
+    // 6. Emitir evento de login exitoso
+    this.eventEmitter.emit(
+      'user.logged-in',
+      new UserLoggedInEvent(userId, 'admin', admin.email, false),
+    );
+
+    this.logger.log(`Login MFA completado exitosamente para ${admin.email}`);
+
+    // 7. Retornar token y datos del usuario
+    return {
+      access_token: accessToken,
+      user: {
+        id: admin.id,
+        email: admin.email,
+        nombre: admin.nombre,
+        apellido: admin.apellido,
+        fecha_registro: admin.fecha_registro,
+        dni: admin.dni ?? null,
+        telefono: admin.telefono ?? null,
+        role: Role.ADMIN,
+        roles: finalRoles,
+        debe_cambiar_password: admin.debe_cambiar_password,
+      },
+    };
   }
 }

@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { authApi, RegisterData } from '@/lib/api/auth.api';
+import {
+  authApi,
+  RegisterData,
+  LoginMfaRequiredResponse,
+  isLoginMfaRequired,
+  isLoginSuccess,
+} from '@/lib/api/auth.api';
 
 /**
  * Interface del usuario (versión simplificada para el store)
@@ -30,6 +36,13 @@ export interface User {
 }
 
 /**
+ * Resultado del login - puede ser exitoso o requerir MFA
+ */
+export type LoginResult =
+  | { success: true; user: User; roles: UserRole[] }
+  | { success: false; mfaRequired: true; mfaToken: string; message: string };
+
+/**
  * Interface del estado de autenticación
  */
 interface AuthState {
@@ -39,25 +52,21 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   selectedRole: UserRole | null; // Rol activo cuando el usuario tiene múltiples roles
+  mfaPending: LoginMfaRequiredResponse | null; // Estado MFA pendiente
 
   // Acciones
-  login: (_email: string, _password: string) => Promise<User>;
-  loginEstudiante: (_username: string, _password: string) => Promise<void>;
+  login: (_email: string, _password: string) => Promise<LoginResult>;
+  loginEstudiante: (_username: string, _password: string) => Promise<User>;
   register: (_data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   setUser: (_user: User) => void;
   setSelectedRole: (_role: UserRole) => void;
-  cambiarPassword: (_passwordActual: string, _nuevaPassword: string) => Promise<void>;
-}
-
-/**
- * Tipo para el estado persistido en localStorage
- */
-interface PersistedAuthState {
-  user?: User | null;
-  token?: string | null;
-  selectedRole?: UserRole | null; // Legacy field, removed in v2
+  clearMfaPending: () => void;
+  cambiarPassword: (
+    _passwordActual: string,
+    _nuevaPassword: string,
+  ) => Promise<void>;
 }
 
 /**
@@ -78,38 +87,77 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       selectedRole: null,
+      mfaPending: null,
 
       /**
-       * Login: Autentica al usuario
+       * Login: Autentica al usuario (tutor/docente/admin)
        * ✅ SECURITY FIX: El token viaja SOLO en httpOnly cookie (no localStorage)
        * El backend configura la cookie automáticamente en la respuesta
        * @param email - Email del usuario
        * @param password - Contraseña del usuario
+       * @returns LoginResult - éxito con user/roles o MFA requerido
        * @throws Error si las credenciales son inválidas
        */
-      login: async (email: string, password: string) => {
-        set({ isLoading: true, selectedRole: null });
+      login: async (email: string, password: string): Promise<LoginResult> => {
+        set({ isLoading: true, selectedRole: null, mfaPending: null });
 
         try {
           const response = await authApi.login({ email, password });
 
-          // ✅ NO guardar token en localStorage (vulnerabilidad XSS)
-          // El token ya está en httpOnly cookie enviada por el backend
+          // Verificar si se requiere MFA (solo admins)
+          if (isLoginMfaRequired(response)) {
+            set({
+              isLoading: false,
+              mfaPending: response,
+            });
+            return {
+              success: false,
+              mfaRequired: true,
+              mfaToken: response.mfa_token,
+              message: response.message,
+            };
+          }
 
-          const user = response.user as User;
+          // Login exitoso - usar type guard para acceso seguro
+          if (isLoginSuccess(response)) {
+            const authUser = response.user;
+            const roles = response.roles as UserRole[];
 
-          set({
-            user,
-            token: null, // ✅ No almacenar token en memoria/localStorage
-            isAuthenticated: true,
-            isLoading: false,
-            selectedRole: null,
-          });
+            // Mapear AuthUser a User del store
+            const user: User = {
+              id: authUser.id,
+              email: authUser.email,
+              nombre: authUser.nombre,
+              apellido: authUser.apellido,
+              role: authUser.role as UserRole,
+              roles: roles,
+              debe_cambiar_password: authUser.debe_cambiar_password,
+              dni: authUser.dni,
+              telefono: authUser.telefono,
+              fecha_registro: authUser.fecha_registro,
+              ha_completado_onboarding: authUser.ha_completado_onboarding,
+              titulo: authUser.titulo,
+              bio: authUser.bio,
+              puntos_totales: authUser.puntos_totales,
+              nivel_actual: authUser.nivel_actual,
+            };
 
-          // Retornar el user para que el componente pueda acceder al rol inmediatamente
-          return user;
+            set({
+              user,
+              token: null, // ✅ No almacenar token en memoria/localStorage
+              isAuthenticated: true,
+              isLoading: false,
+              selectedRole: null,
+              mfaPending: null,
+            });
+
+            return { success: true, user, roles };
+          }
+
+          // Caso imposible pero TypeScript lo requiere
+          throw new Error('Respuesta de login inesperada');
         } catch (error: unknown) {
-          set({ isLoading: false });
+          set({ isLoading: false, mfaPending: null });
           throw error;
         }
       },
@@ -120,27 +168,47 @@ export const useAuthStore = create<AuthState>()(
        * El backend configura la cookie automáticamente en la respuesta
        * @param username - Username del estudiante
        * @param password - Contraseña del estudiante
+       * @returns User - datos del estudiante autenticado
        * @throws Error si las credenciales son inválidas
        */
-      loginEstudiante: async (username: string, password: string) => {
+      loginEstudiante: async (username: string, password: string): Promise<User> => {
         set({ isLoading: true });
 
         try {
           const response = await authApi.loginEstudiante({ username, password });
 
-          // ✅ NO guardar token en localStorage (vulnerabilidad XSS)
-          // El token ya está en httpOnly cookie enviada por el backend
+          // Estudiantes no tienen MFA, pero usamos type guard por consistencia
+          if (!isLoginSuccess(response)) {
+            throw new Error('Respuesta de login inesperada');
+          }
 
-          // Actualizar estado sin token
+          const authUser = response.user;
+
+          // Mapear AuthUser a User del store
+          const user: User = {
+            id: authUser.id,
+            email: authUser.email,
+            nombre: authUser.nombre,
+            apellido: authUser.apellido,
+            role: 'estudiante',
+            roles: ['estudiante'],
+            debe_cambiar_password: authUser.debe_cambiar_password,
+            puntos_totales: authUser.puntos_totales,
+            nivel_actual: authUser.nivel_actual,
+            avatar_url: authUser.foto_url,
+          };
+
           set({
-            user: response.user as User,
+            user,
             token: null, // ✅ No almacenar token en memoria/localStorage
             isAuthenticated: true,
             isLoading: false,
           });
+
+          return user;
         } catch (error: unknown) {
           set({ isLoading: false });
-          throw error; // Propagar error para manejo en componente
+          throw error;
         }
       },
 
@@ -177,7 +245,8 @@ export const useAuthStore = create<AuthState>()(
           // Ignorar errores del backend en logout
           console.error('Error en logout del backend:', error);
         } finally {
-          // ✅ NO limpiar localStorage porque no guardamos token ahí
+          // Limpiar localStorage para asegurar estado limpio
+          localStorage.removeItem('auth-storage');
 
           // Limpiar estado completamente
           set({
@@ -185,7 +254,8 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             isAuthenticated: false,
             isLoading: false,
-            selectedRole: null, // CRÍTICO: Reset selectedRole para próximo login
+            selectedRole: null,
+            mfaPending: null,
           });
         }
       },
@@ -193,7 +263,7 @@ export const useAuthStore = create<AuthState>()(
       /**
        * CheckAuth: Verifica si hay una sesión activa al cargar la app
        * Intenta obtener el perfil del usuario (el token va en la cookie httpOnly)
-       * Si el token es inválido o expiró, limpia el estado
+       * Si el token es inválido o expiró, llama a logout() para limpiar completamente
        */
       checkAuth: async () => {
         set({ isLoading: true });
@@ -203,22 +273,35 @@ export const useAuthStore = create<AuthState>()(
           // El token se envía automáticamente como cookie httpOnly
           const profile = await authApi.getProfile();
 
+          // Mapear AuthUser a User del store
+          const user: User = {
+            id: profile.id,
+            email: profile.email,
+            nombre: profile.nombre,
+            apellido: profile.apellido,
+            role: profile.role as UserRole,
+            debe_cambiar_password: profile.debe_cambiar_password,
+            dni: profile.dni,
+            telefono: profile.telefono,
+            fecha_registro: profile.fecha_registro,
+            ha_completado_onboarding: profile.ha_completado_onboarding,
+            titulo: profile.titulo,
+            bio: profile.bio,
+            puntos_totales: profile.puntos_totales,
+            nivel_actual: profile.nivel_actual,
+          };
+
           // Actualizar estado con los datos del usuario
           set({
-            user: profile as User,
-            token: null, // No guardamos token en el store
+            user,
+            token: null,
             isAuthenticated: true,
             isLoading: false,
           });
         } catch {
           // Token inválido, expirado o no existe
-          // El interceptor ya redirigió a /login si fue 401
-          set({
-            user: null,
-            token: null,
-            isAuthenticated: false,
-            isLoading: false,
-          });
+          // Llamar a logout() para limpiar estado y localStorage completamente
+          await get().logout();
         }
       },
 
@@ -240,12 +323,23 @@ export const useAuthStore = create<AuthState>()(
       },
 
       /**
+       * ClearMfaPending: Limpia el estado de MFA pendiente
+       * Útil cuando el usuario cancela el flujo MFA
+       */
+      clearMfaPending: () => {
+        set({ mfaPending: null });
+      },
+
+      /**
        * CambiarPassword: Cambia la contraseña del usuario autenticado
        * @param passwordActual - Contraseña actual
        * @param nuevaPassword - Nueva contraseña
        * @throws Error si la contraseña actual es incorrecta
        */
-      cambiarPassword: async (passwordActual: string, nuevaPassword: string) => {
+      cambiarPassword: async (
+        passwordActual: string,
+        nuevaPassword: string,
+      ) => {
         set({ isLoading: true });
 
         try {
@@ -283,15 +377,16 @@ export const useAuthStore = create<AuthState>()(
       }),
       // Migración automática cuando cambia la versión
       migrate: (persistedState: unknown, version: number) => {
-        const state = persistedState as PersistedAuthState;
         // Si la versión persistida es < 2, limpiar selectedRole del localStorage viejo
         if (version < 2) {
           // Eliminar selectedRole si existe en el estado viejo
+          const state = persistedState as Record<string, unknown> | null;
           if (state && 'selectedRole' in state) {
             delete state.selectedRole;
           }
+          return state;
         }
-        return state;
+        return persistedState as Partial<AuthState>;
       },
       // Callback después de rehidratar: calcular isAuthenticated basado en user
       onRehydrateStorage: () => (state) => {

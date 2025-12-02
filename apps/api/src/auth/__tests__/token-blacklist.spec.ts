@@ -119,8 +119,9 @@ describe('TokenBlacklistService', () => {
       expect(result).toBe(false);
     });
 
-    it('should throw UnauthorizedException when cache manager fails (fail-secure)', async () => {
-      // Diseño fail-secure: si Redis falla, bloquear por seguridad
+    it('should throw UnauthorizedException when cache manager throws (fail-closed security)', async () => {
+      // SECURITY: Si Redis falla, es más seguro bloquear el acceso (fail-closed)
+      // que permitir tokens potencialmente blacklisted (fail-open)
       cacheManager.get.mockRejectedValue(new Error('redis down'));
       const loggerSpy = jest.spyOn(service['logger'], 'error');
 
