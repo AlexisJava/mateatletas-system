@@ -7,29 +7,31 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { authenticator } from 'otplib';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../core/database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { LoginEstudianteDto } from './dto/login-estudiante.dto';
-import * as bcrypt from 'bcrypt';
 import { Role } from './decorators/roles.decorator';
 import { parseUserRoles } from '../common/utils/role.utils';
-import { Admin as AdminModel } from '@prisma/client';
-import { EstudiantePrimerLoginEvent, UserLoggedInEvent, UserRegisteredEvent } from '../common/events';
-import { LoginAttemptService } from './services/login-attempt.service';
+import { UserLoggedInEvent, UserRegisteredEvent } from '../common/events';
 import { TokenService } from './services/token.service';
 import { PasswordService } from './services/password.service';
-import {
-  UserLookupService,
-  isTutorUser,
-  isDocenteUser,
-  isAdminUser,
-  AuthenticatedUser,
-} from './services/user-lookup.service';
 
 /**
- * Servicio de autenticación para tutores
- * Maneja registro, login, validación y generación de tokens JWT
+ * AuthService - Servicio de autenticación reducido
+ *
+ * Responsabilidades:
+ * - Registro de tutores
+ * - Obtener perfil de usuario
+ * - Cambio de contraseña
+ * - Completar login MFA
+ *
+ * NOTA: Los métodos login() y loginEstudiante() fueron migrados a:
+ * - TutorAuthService
+ * - DocenteAuthService
+ * - AdminAuthService
+ * - EstudianteAuthService
+ * - AuthOrchestratorService (orquestador)
  */
 @Injectable()
 export class AuthService {
@@ -39,29 +41,15 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private eventEmitter: EventEmitter2,
-    private loginAttemptService: LoginAttemptService,
     private tokenService: TokenService,
     private passwordService: PasswordService,
-    private userLookupService: UserLookupService,
   ) {}
-
-  // ============================================================================
-  // TOKEN GENERATION - Delegado a TokenService
-  // ============================================================================
-
-  /**
-   * Genera un token temporal para verificación MFA
-   * @deprecated Usar tokenService.generateMfaToken() directamente
-   */
-  private generateMfaToken(userId: string, email: string): string {
-    return this.tokenService.generateMfaToken(userId, email);
-  }
 
   /**
    * Registra un nuevo tutor en la plataforma
    * @param registerDto - Datos del tutor a registrar
    * @returns Datos del tutor registrado (sin password_hash)
-   * @throws ConflictException si el email ya existe
+   * @throws BadRequestException si el email ya existe
    */
   async register(registerDto: RegisterDto) {
     const { email, password, nombre, apellido, dni, telefono } = registerDto;
@@ -72,7 +60,9 @@ export class AuthService {
     });
 
     if (existingTutor) {
-      throw new BadRequestException('Error en el registro. Verifica los datos ingresados.');
+      throw new BadRequestException(
+        'Error en el registro. Verifica los datos ingresados.',
+      );
     }
 
     // 2. Hashear la contraseña con PasswordService
@@ -90,7 +80,6 @@ export class AuthService {
         fecha_registro: new Date(),
         ha_completado_onboarding: false,
       },
-      // IMPORTANTE: NO seleccionar password_hash por seguridad
       select: {
         id: true,
         email: true,
@@ -106,7 +95,6 @@ export class AuthService {
     });
 
     // 4. Emitir evento de registro exitoso
-    // Este evento será escuchado por GamificacionModule para asignar casa y logros
     this.eventEmitter.emit(
       'user.registered',
       new UserRegisteredEvent(
@@ -118,7 +106,9 @@ export class AuthService {
       ),
     );
 
-    this.logger.log(`Tutor registrado exitosamente: ${tutor.id} (${tutor.email})`);
+    this.logger.log(
+      `Tutor registrado exitosamente: ${tutor.id} (${tutor.email})`,
+    );
 
     return {
       message: 'Tutor registrado exitosamente',
@@ -130,309 +120,14 @@ export class AuthService {
   }
 
   /**
-   * Autentica un estudiante con sus credenciales propias (username + password)
-   * @param loginEstudianteDto - Credenciales del estudiante (username, password)
-   * @returns Token JWT y datos del estudiante
-   * @throws UnauthorizedException si las credenciales son inválidas
-   */
-  async loginEstudiante(loginEstudianteDto: LoginEstudianteDto, ip: string = 'unknown') {
-    const { username, password } = loginEstudianteDto;
-
-    // 1. Buscar estudiante por username
-    const estudiante = await this.prisma.estudiante.findUnique({
-      where: { username },
-      include: {
-        tutor: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            email: true,
-          },
-        },
-        equipo: {
-          select: {
-            id: true,
-            nombre: true,
-            color_primario: true,
-          },
-        },
-      },
-    });
-
-    // 2. Protección contra timing attack: ejecutar bcrypt SIEMPRE
-    const dummyHash = '$2b$12$dummyhashforunknownusers1234567890ab';
-    const hashToCompare = estudiante?.password_hash || dummyHash;
-    const isPasswordValid = await bcrypt.compare(password, hashToCompare);
-
-    // 3. Verificar que el estudiante exista, tenga credenciales y password válido
-    if (!estudiante || !estudiante.password_hash || !estudiante.username || !isPasswordValid) {
-      // Registrar intento fallido y verificar lockout
-      await this.loginAttemptService.checkAndRecordAttempt(username, ip, false);
-      this.logger.warn(`Intento de login fallido: username=${username}, ip=${ip}, reason=credenciales_invalidas`);
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-
-    // Registrar intento exitoso y limpiar intentos fallidos previos
-    await this.loginAttemptService.checkAndRecordAttempt(username, ip, true);
-
-    // 4. Obtener roles del estudiante desde la BD - usando utility segura
-    const estudianteRoles = parseUserRoles(estudiante.roles);
-    const finalRoles =
-      estudianteRoles.length > 0 ? estudianteRoles : [Role.ESTUDIANTE];
-
-    // 5. Generar token JWT (usar username en lugar de email)
-    const accessToken = this.generateJwtToken(
-      estudiante.id,
-      estudiante.username || estudiante.email || estudiante.id,
-      finalRoles,
-    );
-
-    // 5. Retornar token y datos del estudiante
-    return {
-      access_token: accessToken,
-      user: {
-        id: estudiante.id,
-        email: estudiante.email || estudiante.username, // Fallback a username si no tiene email
-        nombre: estudiante.nombre,
-        apellido: estudiante.apellido,
-        edad: estudiante.edad,
-        nivelEscolar: estudiante.nivelEscolar,
-        fotoUrl: estudiante.fotoUrl,
-        avatarUrl: estudiante.avatarUrl, // Avatar 3D de Ready Player Me
-        animacion_idle_url: estudiante.animacion_idle_url, // Animación idle seleccionada
-        puntos_totales: estudiante.puntos_totales,
-        nivel_actual: estudiante.nivel_actual,
-        equipo: estudiante.equipo,
-        tutor: estudiante.tutor,
-        role: Role.ESTUDIANTE,
-        debe_cambiar_password: estudiante.debe_cambiar_password,
-      },
-    };
-  }
-
-  /**
-   * Autentica un usuario (tutor, docente o admin)
-   * @param loginDto - Credenciales del usuario
-   * @returns Token JWT y datos del usuario
-   * @throws UnauthorizedException si las credenciales son inválidas
-   */
-  async login(loginDto: LoginDto, ip: string = 'unknown') {
-    const { email, password } = loginDto;
-
-    // 1. Intentar buscar como tutor primero
-    let user: AuthenticatedUser | null = await this.prisma.tutor.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      user = await this.prisma.docente.findUnique({
-        where: { email },
-      });
-    }
-
-    let adminUser: AdminModel | null = null;
-    if (!user) {
-      adminUser = await this.prisma.admin.findUnique({
-        where: { email },
-      });
-      user = adminUser;
-    }
-
-    // 4. Protección contra timing attack: ejecutar bcrypt SIEMPRE
-    const dummyHash = '$2b$12$dummyhashforunknownusers1234567890ab';
-    const hashToCompare = user?.password_hash || dummyHash;
-    const isPasswordValid = await bcrypt.compare(password, hashToCompare);
-
-    // 5. Verificar que el usuario exista y el password sea válido
-    if (!user || !isPasswordValid) {
-      // Registrar intento fallido y verificar lockout
-      await this.loginAttemptService.checkAndRecordAttempt(email, ip, false);
-      this.logger.warn(`Intento de login fallido: email=${email}, ip=${ip}, reason=credenciales_invalidas`);
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-
-    // Registrar intento exitoso y limpiar intentos fallidos previos
-    await this.loginAttemptService.checkAndRecordAttempt(email, ip, true);
-
-    // 5.5. Si es admin y tiene MFA habilitado, retornar token temporal
-    if (adminUser && isAdminUser(user) && adminUser.mfa_enabled) {
-      this.logger.log(`Admin ${user.email} requiere verificación MFA`);
-
-      const mfaToken = this.generateMfaToken(user.id, user.email);
-
-      return {
-        requires_mfa: true,
-        mfa_token: mfaToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          nombre: user.nombre,
-          apellido: user.apellido,
-        },
-        message: 'Verificación MFA requerida. Por favor ingresa tu código de autenticación.',
-      };
-    }
-
-    // 6. Obtener roles del usuario desde la BD (puede tener múltiples roles) - usando utility segura
-    const userRoles = parseUserRoles(user.roles);
-    const detectedRole = isTutorUser(user)
-      ? Role.TUTOR
-      : isDocenteUser(user)
-        ? Role.DOCENTE
-        : Role.ADMIN;
-    const finalUserRoles = userRoles.length > 0 ? userRoles : [detectedRole];
-
-    if (!user.email) {
-      throw new UnauthorizedException('El usuario no tiene email configurado');
-    }
-
-    // 7. Emitir evento de login exitoso
-    const userType = isTutorUser(user) ? 'tutor' : isDocenteUser(user) ? 'docente' : 'admin';
-    this.eventEmitter.emit(
-      'user.logged-in',
-      new UserLoggedInEvent(
-        user.id,
-        userType,
-        user.email,
-        false, // Los tutores/docentes/admins no tienen "primer login"
-      ),
-    );
-
-    // 8. Generar token JWT con todos los roles del usuario
-    const accessToken = this.generateJwtToken(
-      user.id,
-      user.email,
-      finalUserRoles,
-    );
-
-    // 9. Retornar token y datos del usuario (estructura diferente según rol)
-    if (isTutorUser(user)) {
-      return {
-        access_token: accessToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          nombre: user.nombre,
-          apellido: user.apellido,
-          dni: user.dni ?? null,
-          telefono: user.telefono ?? null,
-          fecha_registro: user.fecha_registro,
-          ha_completado_onboarding: user.ha_completado_onboarding,
-          role: Role.TUTOR,
-          roles: finalUserRoles, // Array de todos los roles del usuario
-          debe_cambiar_password: user.debe_cambiar_password,
-        },
-      };
-    }
-
-    if (isDocenteUser(user)) {
-      return {
-        access_token: accessToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          nombre: user.nombre,
-          apellido: user.apellido,
-          titulo: user.titulo ?? null,
-          bio: user.bio ?? null,
-          role: Role.DOCENTE,
-          roles: finalUserRoles, // Array de todos los roles del usuario
-          debe_cambiar_password: user.debe_cambiar_password,
-        },
-      };
-    }
-
-    // Si llegamos acá, es Admin
-    return {
-      access_token: accessToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        nombre: user.nombre,
-        apellido: user.apellido,
-        fecha_registro: user.fecha_registro,
-        dni: isAdminUser(user) ? (user.dni ?? null) : null,
-        telefono: isAdminUser(user) ? (user.telefono ?? null) : null,
-        role: Role.ADMIN,
-        roles: finalUserRoles, // Array de todos los roles del usuario
-        debe_cambiar_password: isAdminUser(user)
-          ? user.debe_cambiar_password
-          : false,
-      },
-    };
-  }
-
-  /**
-   * Valida un usuario por email y password
-   * Método auxiliar usado por estrategias de autenticación
-   *
-   * ✅ SECURITY ENHANCEMENT: Rehashes passwords with old rounds (gradual migration)
-   *
-   * @param email - Email del tutor
-   * @param password - Contraseña en texto plano
-   * @returns Tutor si es válido, null si no
-   */
-  async validateUser(email: string, password: string) {
-    try {
-      const tutor = await this.prisma.tutor.findUnique({
-        where: { email },
-      });
-
-      if (!tutor) {
-        return null;
-      }
-
-      // Usar PasswordService con protección contra timing attacks y auto-rehash
-      const verifyResult = await this.passwordService.verifyWithTimingProtection(
-        password,
-        tutor.password_hash,
-      );
-
-      if (!verifyResult.isValid) {
-        return null;
-      }
-
-      // ✅ SECURITY: Rehash password if using old rounds (gradual migration)
-      if (verifyResult.needsRehash) {
-        this.logger.log(
-          `Rehashing password for tutor ${tutor.id} from ${verifyResult.currentRounds} to ${this.passwordService.BCRYPT_ROUNDS} rounds`
-        );
-
-        const newHash = await this.passwordService.hash(password);
-
-        // Update hash in database (non-blocking, fire-and-forget)
-        this.prisma.tutor.update({
-          where: { id: tutor.id },
-          data: { password_hash: newHash }
-        }).catch(error => {
-          this.logger.error(
-            `Failed to rehash password for tutor ${tutor.id}`,
-            error instanceof Error ? error.stack : error
-          );
-        });
-      }
-
-      // Retornar tutor sin password_hash
-      const { password_hash, ...result } = tutor;
-      void password_hash;
-      return result;
-    } catch (error) {
-      // Log del error sin exponer detalles al cliente
-      this.logger.error('Error en validateUser', error instanceof Error ? error.stack : error);
-      return null;
-    }
-  }
-
-  /**
-   * Obtiene el perfil de un tutor por su ID
-   * @param userId - ID del tutor
-   * @returns Datos del tutor (sin password_hash)
-   * @throws NotFoundException si el tutor no existe
+   * Obtiene el perfil de un usuario por su ID y rol
+   * @param userId - ID del usuario
+   * @param role - Rol del usuario
+   * @returns Datos del usuario (sin password_hash)
+   * @throws NotFoundException si el usuario no existe
    */
   async getProfile(userId: string, role: string) {
-    // Comparar directamente con strings en lugar de usar el enum
-    if (role === 'docente' || role === Role.DOCENTE) {
+    if (role === 'docente' || role === (Role.DOCENTE as string)) {
       const docente = await this.prisma.docente.findUnique({
         where: { id: userId },
         select: {
@@ -458,7 +153,7 @@ export class AuthService {
       };
     }
 
-    if (role === 'admin' || role === Role.ADMIN) {
+    if (role === 'admin' || role === (Role.ADMIN as string)) {
       const admin = await this.prisma.admin.findUnique({
         where: { id: userId },
         select: {
@@ -482,7 +177,7 @@ export class AuthService {
       };
     }
 
-    if (role === 'estudiante' || role === Role.ESTUDIANTE) {
+    if (role === 'estudiante' || role === (Role.ESTUDIANTE as string)) {
       const estudiante = await this.prisma.estudiante.findUnique({
         where: { id: userId },
         select: {
@@ -528,7 +223,6 @@ export class AuthService {
         createdAt: true,
         updatedAt: true,
         debe_cambiar_password: true,
-        // IMPORTANTE: NO seleccionar password_hash
       },
     });
 
@@ -543,7 +237,7 @@ export class AuthService {
   }
 
   /**
-   * Cambia la contraseña de un usuario (estudiante o tutor)
+   * Cambia la contraseña de un usuario (estudiante, tutor, docente o admin)
    * @param userId - ID del usuario
    * @param passwordActual - Contraseña actual del usuario
    * @param nuevaPassword - Nueva contraseña a establecer
@@ -554,7 +248,7 @@ export class AuthService {
     passwordActual: string,
     nuevaPassword: string,
   ) {
-    // 1. Buscar el usuario (puede ser estudiante, tutor o docente)
+    // 1. Buscar el usuario (puede ser estudiante, tutor, docente o admin)
     const estudiante = await this.prisma.estudiante.findUnique({
       where: { id: userId },
       select: {
@@ -653,7 +347,6 @@ export class AuthService {
         data: updateData,
       });
     } else {
-      // admin
       await this.prisma.admin.update({
         where: { id: userId },
         data: updateData,
@@ -663,137 +356,6 @@ export class AuthService {
     return {
       success: true,
       message: 'Contraseña actualizada exitosamente',
-    };
-  }
-
-  /**
-   * Login con username para estudiantes y tutores
-   * @param username - Username del usuario
-   * @param password - Contraseña o PIN del usuario
-   * @returns Token JWT y datos del usuario
-   */
-  async loginWithUsername(username: string, password: string) {
-    // 1. Buscar primero como estudiante
-    const estudiante = await this.prisma.estudiante.findUnique({
-      where: { username },
-      include: {
-        tutor: {
-          select: {
-            id: true,
-            nombre: true,
-            apellido: true,
-          },
-        },
-        equipo: {
-          select: {
-            id: true,
-            nombre: true,
-            color_primario: true,
-            color_secundario: true,
-          },
-        },
-      },
-    });
-
-    if (estudiante) {
-      // Verificar contraseña usando PasswordService
-      const passwordValida = await this.passwordService.verify(
-        password,
-        estudiante.password_hash || '',
-      );
-
-      if (!passwordValida) {
-        throw new UnauthorizedException('Credenciales inválidas');
-      }
-
-      // Verificar si es el primer login (no tiene logros desbloqueados)
-      const logrosDesbloqueados = await this.prisma.logroEstudiante.count({
-        where: { estudiante_id: estudiante.id },
-      });
-
-      const esPrimerLogin = logrosDesbloqueados === 0;
-
-      // Emitir evento de login de estudiante
-      this.eventEmitter.emit(
-        'estudiante.logged-in',
-        new UserLoggedInEvent(
-          estudiante.id,
-          'estudiante',
-          estudiante.email || estudiante.username || '',
-          esPrimerLogin,
-        ),
-      );
-
-      // Emitir evento específico de primer login si aplica
-      if (esPrimerLogin) {
-        this.eventEmitter.emit(
-          'estudiante.primer-login',
-          new EstudiantePrimerLoginEvent(
-            estudiante.id,
-            estudiante.username || estudiante.id,
-          ),
-        );
-        this.logger.log(
-          `Primer login detectado para estudiante ${estudiante.id}`,
-        );
-      }
-
-      const roles = parseUserRoles(estudiante.roles);
-      const token = this.generateJwtToken(
-        estudiante.id,
-        estudiante.username || estudiante.email || estudiante.id,
-        roles,
-      );
-
-      return {
-        access_token: token,
-        user: {
-          id: estudiante.id,
-          username: estudiante.username,
-          nombre: estudiante.nombre,
-          apellido: estudiante.apellido,
-          edad: estudiante.edad,
-          nivelEscolar: estudiante.nivelEscolar,
-          avatar_gradient: estudiante.avatar_gradient,
-          puntos_totales: estudiante.puntos_totales,
-          equipo: estudiante.equipo,
-          tutor: estudiante.tutor,
-          debe_cambiar_password: estudiante.debe_cambiar_password,
-          roles,
-        },
-      };
-    }
-
-    // 2. Si no es estudiante, buscar como tutor
-    const tutor = await this.prisma.tutor.findUnique({
-      where: { username },
-    });
-
-    if (!tutor) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-
-    // Verificar contraseña usando PasswordService
-    const passwordValida = await this.passwordService.verify(password, tutor.password_hash);
-
-    if (!passwordValida) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-
-    const roles = parseUserRoles(tutor.roles);
-    const token = this.generateJwtToken(tutor.id, tutor.email || '', roles);
-
-    return {
-      access_token: token,
-      user: {
-        id: tutor.id,
-        username: tutor.username,
-        email: tutor.email,
-        nombre: tutor.nombre,
-        apellido: tutor.apellido,
-        debe_cambiar_password: tutor.debe_cambiar_password,
-        roles,
-      },
     };
   }
 
@@ -814,11 +376,7 @@ export class AuthService {
     // 1. Verificar y decodificar el token temporal MFA
     let payload: { sub: string; email: string; type: string };
     try {
-      payload = this.jwtService.verify(mfaToken) as {
-        sub: string;
-        email: string;
-        type: string;
-      };
+      payload = this.jwtService.verify(mfaToken);
     } catch {
       throw new UnauthorizedException('Token MFA inválido o expirado');
     }
@@ -840,7 +398,9 @@ export class AuthService {
     }
 
     if (!admin.mfa_enabled || !admin.mfa_secret) {
-      throw new UnauthorizedException('MFA no está habilitado para este usuario');
+      throw new UnauthorizedException(
+        'MFA no está habilitado para este usuario',
+      );
     }
 
     // 4. Verificar el código TOTP o backup code
@@ -848,7 +408,6 @@ export class AuthService {
 
     if (totpCode) {
       // Verificar código TOTP
-      const authenticator = require('otplib').authenticator;
       authenticator.options = {
         window: 1,
         step: 30,
@@ -859,7 +418,6 @@ export class AuthService {
       });
     } else if (backupCode) {
       // Verificar backup code
-      const bcrypt = require('bcrypt');
       for (const [index, hashedCode] of admin.mfa_backup_codes.entries()) {
         const isMatch = await bcrypt.compare(backupCode, hashedCode);
         if (isMatch) {
@@ -873,7 +431,7 @@ export class AuthService {
             data: { mfa_backup_codes: updatedCodes },
           });
           this.logger.warn(
-            `⚠️ Código de backup usado para ${admin.email}. Códigos restantes: ${updatedCodes.length}`,
+            `Código de backup usado para ${admin.email}. Códigos restantes: ${updatedCodes.length}`,
           );
           break;
         }
@@ -881,8 +439,8 @@ export class AuthService {
     }
 
     if (!isValid) {
-      this.logger.error(
-        `❌ Código MFA inválido para usuario ${admin.email} (${userId})`,
+      this.logger.warn(
+        `Código MFA inválido para usuario ${admin.email} (${userId})`,
       );
       throw new UnauthorizedException(
         'Código de verificación inválido. Por favor intenta nuevamente.',
@@ -893,7 +451,11 @@ export class AuthService {
     const userRoles = parseUserRoles(admin.roles);
     const finalRoles = userRoles.length > 0 ? userRoles : [Role.ADMIN];
 
-    const accessToken = this.generateJwtToken(userId, admin.email, finalRoles);
+    const accessToken = this.tokenService.generateAccessToken(
+      userId,
+      admin.email,
+      finalRoles,
+    );
 
     // 6. Emitir evento de login exitoso
     this.eventEmitter.emit(
@@ -901,7 +463,7 @@ export class AuthService {
       new UserLoggedInEvent(userId, 'admin', admin.email, false),
     );
 
-    this.logger.log(`✅ Login MFA completado exitosamente para ${admin.email}`);
+    this.logger.log(`Login MFA completado exitosamente para ${admin.email}`);
 
     // 7. Retornar token y datos del usuario
     return {
@@ -919,17 +481,5 @@ export class AuthService {
         debe_cambiar_password: admin.debe_cambiar_password,
       },
     };
-  }
-
-  /**
-   * Genera un token JWT para un usuario
-   * @deprecated Usar tokenService.generateAccessToken() directamente
-   */
-  private generateJwtToken(
-    userId: string,
-    email: string,
-    roles: Role[] | Role = [Role.TUTOR],
-  ): string {
-    return this.tokenService.generateAccessToken(userId, email, roles);
   }
 }

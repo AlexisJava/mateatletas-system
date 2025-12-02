@@ -109,15 +109,18 @@ export class EstudianteAuthService {
     });
 
     // 2. Verificar password con timing attack protection
-    const verificationResult = await this.passwordService.verifyWithTimingProtection(
-      password,
-      estudiante?.password_hash ?? null,
-    );
+    const verificationResult =
+      await this.passwordService.verifyWithTimingProtection(
+        password,
+        estudiante?.password_hash ?? null,
+      );
 
     // 3. Validar credenciales
     if (!estudiante || !estudiante.username || !verificationResult.isValid) {
       await this.loginAttemptService.checkAndRecordAttempt(username, ip, false);
-      this.logger.warn(`Login fallido estudiante: username=${username}, ip=${ip}`);
+      this.logger.warn(
+        `Login fallido estudiante: username=${username}, ip=${ip}`,
+      );
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
@@ -143,7 +146,9 @@ export class EstudianteAuthService {
     // 8. Detectar primer login y emitir eventos
     await this.emitLoginEvents(estudiante);
 
-    this.logger.log(`Login exitoso estudiante: ${estudiante.id} (${estudiante.username})`);
+    this.logger.log(
+      `Login exitoso estudiante: ${estudiante.id} (${estudiante.username})`,
+    );
 
     return {
       access_token: accessToken,

@@ -80,10 +80,11 @@ export class TutorAuthService {
     });
 
     // 2. Verificar password con timing attack protection
-    const verificationResult = await this.passwordService.verifyWithTimingProtection(
-      password,
-      tutor?.password_hash ?? null,
-    );
+    const verificationResult =
+      await this.passwordService.verifyWithTimingProtection(
+        password,
+        tutor?.password_hash ?? null,
+      );
 
     // 3. Validar credenciales
     if (!tutor || !verificationResult.isValid) {

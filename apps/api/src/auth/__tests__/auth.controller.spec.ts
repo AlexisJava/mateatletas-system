@@ -1,13 +1,22 @@
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
+import { AuthOrchestratorService } from '../services/auth-orchestrator.service';
 import { TokenBlacklistService } from '../token-blacklist.service';
 import { LoginDto } from '../dto/login.dto';
 import { Request, Response } from 'express';
 import { Role } from '../decorators/roles.decorator';
 
+/**
+ * AuthController Tests (Post-Refactor)
+ *
+ * El controller ahora usa:
+ * - AuthOrchestratorService para login() y loginEstudiante()
+ * - AuthService para register(), getProfile(), cambiarPassword(), completeMfaLogin()
+ */
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: jest.Mocked<AuthService>;
+  let authOrchestrator: jest.Mocked<AuthOrchestratorService>;
   let tokenBlacklistService: jest.Mocked<TokenBlacklistService>;
   let originalNodeEnv: string | undefined;
 
@@ -30,14 +39,17 @@ describe('AuthController', () => {
 
   beforeEach(() => {
     authService = {
+      register: jest.fn(),
+      getProfile: jest.fn(),
+      cambiarPassword: jest.fn(),
+      completeMfaLogin: jest.fn(),
+    } as unknown as jest.Mocked<AuthService>;
+
+    authOrchestrator = {
       login: jest.fn(),
       loginEstudiante: jest.fn(),
-      register: jest.fn(),
-      validateUser: jest.fn(),
-      getProfile: jest.fn(),
-      generateJwtToken: jest.fn(),
-      cambiarPassword: jest.fn(),
-    } as unknown as jest.Mocked<AuthService>;
+      requiresMfa: jest.fn().mockReturnValue(false),
+    } as unknown as jest.Mocked<AuthOrchestratorService>;
 
     tokenBlacklistService = {
       addToBlacklist: jest.fn(),
@@ -46,7 +58,139 @@ describe('AuthController', () => {
       isUserBlacklisted: jest.fn(),
     } as unknown as jest.Mocked<TokenBlacklistService>;
 
-    controller = new AuthController(authService, tokenBlacklistService);
+    controller = new AuthController(
+      authService,
+      authOrchestrator,
+      tokenBlacklistService,
+    );
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    process.env.NODE_ENV = originalNodeEnv;
+  });
+
+  describe('login', () => {
+    it('should set httpOnly cookie with JWT and return user payload', async () => {
+      const dto: LoginDto = { email: 'demo@test.com', password: 'Secret123!' };
+      const mockUser = {
+        id: 'user-1',
+        email: dto.email,
+        nombre: 'Demo',
+        apellido: 'Usuario',
+        fecha_registro: new Date('2024-01-01T00:00:00Z'),
+        dni: null,
+        telefono: null,
+        role: 'Tutor',
+        roles: [Role.TUTOR] as Role[],
+        debe_cambiar_password: false,
+      };
+
+      authOrchestrator.login.mockResolvedValue({
+        access_token: 'token-123',
+        user: mockUser,
+      });
+      authOrchestrator.requiresMfa.mockReturnValue(false);
+
+      const { response, cookie } = createMockResponse();
+      const mockIp = '127.0.0.1';
+
+      const result = await controller.login(dto, response, mockIp);
+
+      expect(cookie).toHaveBeenCalledWith(
+        'auth-token',
+        'token-123',
+        expect.objectContaining({
+          httpOnly: true,
+          secure: false,
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 1000,
+          path: '/',
+        }),
+      );
+      expect(result).toEqual({ user: mockUser });
+      expect(authOrchestrator.login).toHaveBeenCalledWith(dto, mockIp);
+    });
+
+    it('should return MFA response when MFA is required', async () => {
+      const dto: LoginDto = { email: 'admin@test.com', password: 'Secret123!' };
+      const mfaResponse = {
+        requires_mfa: true as const,
+        mfa_token: 'mfa-pending-token',
+        message: 'Verificación MFA requerida',
+      };
+
+      authOrchestrator.login.mockResolvedValue(mfaResponse);
+      authOrchestrator.requiresMfa.mockReturnValue(true);
+
+      const { response, cookie } = createMockResponse();
+      const mockIp = '127.0.0.1';
+
+      const result = await controller.login(dto, response, mockIp);
+
+      expect(cookie).not.toHaveBeenCalled();
+      expect(result).toEqual(mfaResponse);
+    });
+  });
+
+  describe('loginEstudiante', () => {
+    it('should mirror tutor login behavior for estudiantes', async () => {
+      const dto = {
+        username: 'pedro.martinez',
+        password: 'Secret123!',
+      };
+      const mockUser = {
+        id: 'student-1',
+        email: 'pedro.martinez@test.com',
+        nombre: 'Ana',
+        apellido: 'García',
+        edad: 12,
+        nivel_escolar: 'Secundaria',
+        foto_url: null,
+        puntos_totales: 0,
+        nivel_actual: 1,
+        equipo: null,
+        tutor: {
+          id: 'tutor-1',
+          nombre: 'Tutor',
+          apellido: 'Test',
+          email: 'tutor@test.com',
+        },
+        role: 'Estudiante',
+        roles: [Role.ESTUDIANTE] as Role[],
+        debe_cambiar_password: false,
+      };
+
+      authOrchestrator.loginEstudiante.mockResolvedValue({
+        access_token: 'student-token',
+        user: mockUser,
+      });
+
+      const { response, cookie } = createMockResponse();
+      const mockIp = '127.0.0.1';
+
+      const result = await controller.loginEstudiante(dto, response, mockIp);
+
+      expect(cookie).toHaveBeenCalledWith(
+        'auth-token',
+        'student-token',
+        expect.objectContaining({
+          httpOnly: true,
+          secure: false,
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 1000,
+          path: '/',
+        }),
+      );
+      expect(result).toEqual({ user: mockUser });
+      expect(authOrchestrator.loginEstudiante).toHaveBeenCalledWith(
+        dto,
+        mockIp,
+      );
+    });
   });
 
   describe('changePassword', () => {
@@ -85,106 +229,6 @@ describe('AuthController', () => {
     });
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  afterAll(() => {
-    process.env.NODE_ENV = originalNodeEnv;
-  });
-
-  describe('login', () => {
-    it('should set httpOnly cookie with JWT and return user payload', async () => {
-      const dto: LoginDto = { email: 'demo@test.com', password: 'Secret123!' };
-      const mockUser = {
-        id: 'user-1',
-        email: dto.email,
-        nombre: 'Demo',
-        apellido: 'Usuario',
-        fecha_registro: new Date('2024-01-01T00:00:00Z'),
-        dni: null,
-        telefono: null,
-        role: 'Tutor',
-        roles: [Role.TUTOR] as Role[],
-        debe_cambiar_password: false,
-      };
-      authService.login.mockResolvedValue({
-        access_token: 'token-123',
-        user: mockUser,
-      });
-      const { response, cookie } = createMockResponse();
-
-      const mockIp = '127.0.0.1';
-      const result = await controller.login(dto, response, mockIp);
-
-      expect(cookie).toHaveBeenCalledWith(
-        'auth-token',
-        'token-123',
-        expect.objectContaining({
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 1000, // 1 hora (cambio de seguridad)
-          path: '/',
-        }),
-      );
-      expect(result).toEqual({ user: mockUser });
-      expect(authService.login).toHaveBeenCalledWith(dto, mockIp);
-    });
-  });
-
-  describe('loginEstudiante', () => {
-    it('should mirror tutor login behavior for estudiantes', async () => {
-      const dto = {
-        username: 'pedro.martinez',
-        password: 'Secret123!',
-      };
-      const mockUser = {
-        id: 'student-1',
-        email: 'pedro.martinez@test.com',
-        nombre: 'Ana',
-        apellido: 'García',
-        edad: 12,
-        nivel_escolar: 'Secundaria',
-        foto_url: null,
-        puntos_totales: 0,
-        nivel_actual: 1,
-        equipo: null,
-        tutor: {
-          id: 'tutor-1',
-          nombre: 'Tutor',
-          apellido: 'Test',
-          email: 'tutor@test.com',
-        },
-        role: 'Estudiante',
-        roles: [Role.ESTUDIANTE] as Role[],
-        debe_cambiar_password: false,
-      };
-      authService.loginEstudiante.mockResolvedValue({
-        access_token: 'student-token',
-        user: mockUser,
-      });
-      const { response, cookie } = createMockResponse();
-
-      const mockIp = '127.0.0.1';
-      const result = await controller.loginEstudiante(dto, response, mockIp);
-
-      expect(cookie).toHaveBeenCalledWith(
-        'auth-token',
-        'student-token',
-        expect.objectContaining({
-          httpOnly: true,
-          secure: false,
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 1000, // 1 hora (cambio de seguridad)
-          path: '/',
-        }),
-      );
-      expect(result).toEqual({ user: mockUser });
-      expect(authService.loginEstudiante).toHaveBeenCalledWith(dto, mockIp);
-    });
-  });
-
   describe('logout', () => {
     it('should blacklist the token and clear the cookie when Authorization header exists', async () => {
       const req = {
@@ -220,6 +264,31 @@ describe('AuthController', () => {
       await controller.logout(req, response);
 
       expect(tokenBlacklistService.addToBlacklist).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getProfile', () => {
+    it('should return user profile', async () => {
+      const user = {
+        id: 'user-123',
+        email: 'test@example.com',
+        role: Role.TUTOR,
+        roles: [Role.TUTOR],
+      };
+      const mockProfile = {
+        id: 'user-123',
+        email: 'test@example.com',
+        nombre: 'Test',
+        apellido: 'User',
+        role: Role.TUTOR,
+      };
+
+      authService.getProfile.mockResolvedValue(mockProfile);
+
+      const result = await controller.getProfile(user as any);
+
+      expect(authService.getProfile).toHaveBeenCalledWith(user.id, Role.TUTOR);
+      expect(result).toEqual(mockProfile);
     });
   });
 });

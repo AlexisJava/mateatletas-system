@@ -20,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
+import { AuthOrchestratorService } from './services/auth-orchestrator.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginEstudianteDto } from './dto/login-estudiante.dto';
@@ -48,6 +49,7 @@ import { RequireCsrf } from '../common/decorators';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly authOrchestrator: AuthOrchestratorService,
     private readonly tokenBlacklistService: TokenBlacklistService,
   ) {}
 
@@ -142,40 +144,24 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Ip() ip: string,
   ) {
-    console.log('🔐 [LOGIN] Iniciando login para:', loginDto.email);
-    console.log('🌍 [LOGIN] NODE_ENV:', process.env.NODE_ENV);
-    console.log('🌍 [LOGIN] IP del cliente:', ip);
+    const result = await this.authOrchestrator.login(loginDto, ip);
 
-    const result = await this.authService.login(loginDto, ip);
-    console.log('✅ [LOGIN] Login exitoso para usuario ID:', result.user.id);
-    console.log('🎫 [LOGIN] Token generado (primeros 20 chars):', result.access_token?.substring(0, 20) + '...');
+    // Si requiere MFA, devolver respuesta sin cookie
+    if (this.authOrchestrator.requiresMfa(result)) {
+      return result;
+    }
 
-    const cookieConfig = {
-      httpOnly: true, // No accesible desde JavaScript
-      secure: false, // false en desarrollo (true requeriría HTTPS)
-      sameSite: 'lax' as const, // 'lax' funciona en localhost mismo dominio
-      // NOTA: domain comentado temporalmente - frontend y backend están en dominios diferentes
-      // Para que las cookies funcionen entre Railway y Vercel, NO especificar domain
-      // TODO: Configurar api.mateatletasclub.com.ar en Railway, luego descomentar:
-      // domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
-      maxAge: 60 * 60 * 1000, // 1 hora, igual que JWT en producción
+    // Login exitoso - configurar cookie httpOnly
+    const loginResult = result as { access_token: string; user: unknown };
+    res.cookie('auth-token', loginResult.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      maxAge: 60 * 60 * 1000, // 1 hora
       path: '/',
-    } as any;
-
-    console.log('🍪 [LOGIN] Configuración de cookie:', {
-      httpOnly: cookieConfig.httpOnly,
-      secure: cookieConfig.secure,
-      sameSite: cookieConfig.sameSite,
-      maxAge: cookieConfig.maxAge,
-      path: cookieConfig.path,
     });
 
-    // Configurar cookie httpOnly
-    res.cookie('auth-token', result.access_token, cookieConfig);
-    console.log('✅ [LOGIN] Cookie "auth-token" establecida correctamente');
-
-    // Retornar solo el user (el token va en la cookie)
-    return { user: result.user };
+    return { user: loginResult.user };
   }
 
   /**
@@ -212,25 +198,20 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Ip() ip: string,
   ) {
-    // ✅ SECURITY FIX: Removido logging de credenciales
-    // El logger global con redaction ya maneja el logging seguro
-
-    const result = await this.authService.loginEstudiante(loginEstudianteDto, ip);
+    const result = await this.authOrchestrator.loginEstudiante(
+      loginEstudianteDto,
+      ip,
+    );
 
     // Configurar cookie httpOnly
     res.cookie('auth-token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const, // lax funciona con proxy (mismo origen en desarrollo)
-      // NOTA: domain comentado temporalmente - frontend y backend están en dominios diferentes
-      // Para que las cookies funcionen entre Railway y Vercel, NO especificar domain
-      // TODO: Configurar api.mateatletasclub.com.ar en Railway, luego descomentar:
-      // domain: process.env.NODE_ENV === 'production' ? '.mateatletasclub.com.ar' : undefined,
-      maxAge: 60 * 60 * 1000, // 1 hora, igual que JWT en producción
+      sameSite: 'lax' as const,
+      maxAge: 60 * 60 * 1000, // 1 hora
       path: '/',
     });
 
-    // Retornar solo el user (el token va en la cookie)
     return { user: result.user };
   }
 
@@ -274,17 +255,10 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async getProfile(@GetUser() user: AuthUser, @Req() req: Request) {
-    console.log('👤 [PROFILE] Request recibido');
-    console.log('🍪 [PROFILE] Cookies recibidas:', req.cookies);
-    console.log('🔑 [PROFILE] Header Authorization:', req.headers.authorization ? 'Presente' : 'Ausente');
-    console.log('✅ [PROFILE] Usuario autenticado:', { id: user.id, email: user.email, role: user.role });
-
+  async getProfile(@GetUser() user: AuthUser) {
     // Usar roles[0] como fallback si role está undefined (multi-role scenario)
     const role = user.role || user.roles[0];
-    const profile = await this.authService.getProfile(user.id, role);
-    console.log('✅ [PROFILE] Perfil obtenido exitosamente');
-    return profile;
+    return this.authService.getProfile(user.id, role);
   }
 
   /**
@@ -379,7 +353,8 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Token MFA inválido/expirado o código de verificación incorrecto',
+    description:
+      'Token MFA inválido/expirado o código de verificación incorrecto',
   })
   @ApiBody({ type: CompleteMfaLoginDto })
   @Post('complete-mfa-login')
