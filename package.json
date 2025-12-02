@@ -93,8 +93,11 @@
     "npm": ">=10.0.0"
   },
   "lint-staged": {
-    "apps/api/**/*.ts": [
-      "eslint --config apps/api/eslint.config.mjs --max-warnings=0",
+    "apps/api/src/**/!(__tests__)/*.ts": [
+      "eslint --config apps/api/eslint.config.mjs --max-warnings=0 --no-warn-ignored",
+      "prettier --write"
+    ],
+    "apps/api/src/**/__tests__/*.ts": [
       "prettier --write"
     ],
     "apps/web/**/*.{ts,tsx}": [

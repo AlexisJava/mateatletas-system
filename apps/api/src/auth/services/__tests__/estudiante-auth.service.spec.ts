@@ -23,8 +23,8 @@ describe('EstudianteAuthService', () => {
     email: 'tutor@test.com',
   };
 
-  const mockEquipo = {
-    id: 'equipo-123',
+  const mockCasa = {
+    id: 'casa-123',
     nombre: 'Los Matemáticos',
     color_primario: '#FF5733',
   };
@@ -46,7 +46,7 @@ describe('EstudianteAuthService', () => {
     debe_cambiar_password: false,
     roles: 'Estudiante',
     tutor: mockTutor,
-    equipo: mockEquipo,
+    casa: mockCasa,
   };
 
   beforeEach(async () => {
@@ -109,7 +109,11 @@ describe('EstudianteAuthService', () => {
       loginAttemptService.checkAndRecordAttempt.mockResolvedValue(undefined);
       (prisma.logroEstudiante.count as jest.Mock).mockResolvedValue(5);
 
-      const result = await service.login('pedro.martinez', 'password123', '127.0.0.1');
+      const result = await service.login(
+        'pedro.martinez',
+        'password123',
+        '127.0.0.1',
+      );
 
       expect(result.access_token).toBe('jwt-token');
       expect(result.user.id).toBe('estudiante-123');
@@ -120,7 +124,7 @@ describe('EstudianteAuthService', () => {
       expect(result.user.nivelEscolar).toBe('Secundaria');
       expect(result.user.puntos_totales).toBe(100);
       expect(result.user.nivel_actual).toBe(2);
-      expect(result.user.equipo).toEqual(mockEquipo);
+      expect(result.user.casa).toEqual(mockCasa);
       expect(result.user.tutor).toEqual(mockTutor);
       expect(result.user.role).toBe(Role.ESTUDIANTE);
       expect(result.user.roles).toContain(Role.ESTUDIANTE);
@@ -173,7 +177,9 @@ describe('EstudianteAuthService', () => {
 
     it('should throw UnauthorizedException when estudiante has no username', async () => {
       const estudianteWithoutUsername = { ...mockEstudiante, username: null };
-      prisma.estudiante.findUnique.mockResolvedValue(estudianteWithoutUsername as any);
+      prisma.estudiante.findUnique.mockResolvedValue(
+        estudianteWithoutUsername as any,
+      );
       passwordService.verifyWithTimingProtection.mockResolvedValue({
         isValid: true,
         needsRehash: false,
@@ -245,7 +251,9 @@ describe('EstudianteAuthService', () => {
 
     it('should use username as email fallback when email is null', async () => {
       const estudianteWithoutEmail = { ...mockEstudiante, email: null };
-      prisma.estudiante.findUnique.mockResolvedValue(estudianteWithoutEmail as any);
+      prisma.estudiante.findUnique.mockResolvedValue(
+        estudianteWithoutEmail as any,
+      );
       passwordService.verifyWithTimingProtection.mockResolvedValue({
         isValid: true,
         needsRehash: false,
@@ -253,18 +261,24 @@ describe('EstudianteAuthService', () => {
       tokenService.generateAccessToken.mockReturnValue('jwt-token');
       (prisma.logroEstudiante.count as jest.Mock).mockResolvedValue(1);
 
-      const result = await service.login('pedro.martinez', 'password123', '127.0.0.1');
+      const result = await service.login(
+        'pedro.martinez',
+        'password123',
+        '127.0.0.1',
+      );
 
       expect(result.user.email).toBe('pedro.martinez');
     });
 
-    it('should handle estudiante without tutor and equipo', async () => {
+    it('should handle estudiante without tutor and casa', async () => {
       const estudianteSinRelaciones = {
         ...mockEstudiante,
         tutor: null,
-        equipo: null,
+        casa: null,
       };
-      prisma.estudiante.findUnique.mockResolvedValue(estudianteSinRelaciones as any);
+      prisma.estudiante.findUnique.mockResolvedValue(
+        estudianteSinRelaciones as any,
+      );
       passwordService.verifyWithTimingProtection.mockResolvedValue({
         isValid: true,
         needsRehash: false,
@@ -272,10 +286,14 @@ describe('EstudianteAuthService', () => {
       tokenService.generateAccessToken.mockReturnValue('jwt-token');
       (prisma.logroEstudiante.count as jest.Mock).mockResolvedValue(1);
 
-      const result = await service.login('pedro.martinez', 'password123', '127.0.0.1');
+      const result = await service.login(
+        'pedro.martinez',
+        'password123',
+        '127.0.0.1',
+      );
 
       expect(result.user.tutor).toBeNull();
-      expect(result.user.equipo).toBeNull();
+      expect(result.user.casa).toBeNull();
     });
 
     it('should use default IP when not provided', async () => {
