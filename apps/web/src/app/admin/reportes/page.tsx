@@ -5,7 +5,6 @@ import { useStats, useFetchStats, useStatsLoading } from '@/features/admin/stats
 import { useUsers, useFetchUsers } from '@/features/admin/users';
 import { useClasses, useFetchClasses } from '@/features/admin/classes';
 import { useFetchDashboard } from '@/features/admin/dashboard';
-import apiClient from '@/lib/axios';
 import {
   exportToExcel,
   exportToCSV,
@@ -32,53 +31,8 @@ import {
 } from 'recharts';
 import type { Payload as TooltipPayload } from 'recharts/types/component/DefaultTooltipContent';
 import type { ReporteAdmin } from '@/types/reportes.types';
-import { Sparkles, Zap, Rocket } from 'lucide-react';
-
-/**
- * Configuración de las Casas 2026
- */
-const CASAS_CONFIG = {
-  Quantum: {
-    edadMin: 6,
-    edadMax: 9,
-    color: '#8B5CF6',
-    emoji: '⚛️',
-    descripcion: 'Exploradores (6-9 años)',
-    icon: Sparkles,
-  },
-  Vertex: {
-    edadMin: 10,
-    edadMax: 12,
-    color: '#10B981',
-    emoji: '🔷',
-    descripcion: 'Constructores (10-12 años)',
-    icon: Zap,
-  },
-  Pulsar: {
-    edadMin: 13,
-    edadMax: 17,
-    color: '#F59E0B',
-    emoji: '💫',
-    descripcion: 'Dominadores (13-17 años)',
-    icon: Rocket,
-  },
-} as const;
-
-type CasaName = keyof typeof CASAS_CONFIG;
-
-interface CasaDistribution {
-  Quantum: number;
-  Vertex: number;
-  Pulsar: number;
-  SinCasa: number;
-}
-
-const getCasaByEdad = (edad: number): CasaName | null => {
-  if (edad >= 6 && edad <= 9) return 'Quantum';
-  if (edad >= 10 && edad <= 12) return 'Vertex';
-  if (edad >= 13 && edad <= 17) return 'Pulsar';
-  return null;
-};
+import { useCasaDistribution } from '@/hooks/useCasaDistribution';
+import { CASAS_CONFIG, CASA_NAMES, getCasaPercentage } from '@/lib/constants/casas-2026';
 
 export default function AdminReportesPage() {
   const stats = useStats();
@@ -89,6 +43,7 @@ export default function AdminReportesPage() {
   const fetchUsers = useFetchUsers();
   const fetchClasses = useFetchClasses();
   const isLoading = useStatsLoading();
+  const { distribution: casaDistribution } = useCasaDistribution();
   const formatDateInput = (date: Date) => date.toISOString().substring(0, 10);
   const now = new Date();
   const [exportStatus, setExportStatus] = useState<{ success: boolean; message: string } | null>(
@@ -99,60 +54,14 @@ export default function AdminReportesPage() {
     end: formatDateInput(now),
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [casaDistribution, setCasaDistribution] = useState<CasaDistribution>({
-    Quantum: 0,
-    Vertex: 0,
-    Pulsar: 0,
-    SinCasa: 0,
-  });
 
   useEffect(() => {
     fetchDashboard();
     fetchStats();
     fetchUsers();
     fetchClasses();
-    loadCasaDistribution();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  /**
-   * Carga la distribución de estudiantes por Casa
-   */
-  const loadCasaDistribution = async () => {
-    try {
-      interface EstudianteBasico {
-        edad: number;
-        casa?: { nombre: string } | null;
-      }
-      const response = await apiClient.get<{ data?: EstudianteBasico[] } | EstudianteBasico[]>(
-        '/admin/estudiantes',
-      );
-      const data = (response as { data?: EstudianteBasico[] })?.data
-        ? (response as { data: EstudianteBasico[] }).data
-        : Array.isArray(response)
-          ? response
-          : [];
-
-      const distribution: CasaDistribution = {
-        Quantum: 0,
-        Vertex: 0,
-        Pulsar: 0,
-        SinCasa: 0,
-      };
-
-      data.forEach((est) => {
-        const casaNombre = est.casa?.nombre || getCasaByEdad(est.edad);
-        if (casaNombre === 'Quantum') distribution.Quantum++;
-        else if (casaNombre === 'Vertex') distribution.Vertex++;
-        else if (casaNombre === 'Pulsar') distribution.Pulsar++;
-        else distribution.SinCasa++;
-      });
-
-      setCasaDistribution(distribution);
-    } catch (error) {
-      console.error('Error al cargar distribución de casas:', error);
-    }
-  };
 
   // Auto-hide export status after 5 seconds
   useEffect(() => {
@@ -590,15 +499,10 @@ export default function AdminReportesPage() {
           </BarChart>
         </ResponsiveContainer>
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {(['Quantum', 'Vertex', 'Pulsar'] as const).map((casa) => {
+          {CASA_NAMES.map((casa) => {
             const config = CASAS_CONFIG[casa];
             const count = casaDistribution[casa];
-            const total =
-              casaDistribution.Quantum +
-              casaDistribution.Vertex +
-              casaDistribution.Pulsar +
-              casaDistribution.SinCasa;
-            const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+            const percentage = getCasaPercentage(casaDistribution, casa);
 
             return (
               <div

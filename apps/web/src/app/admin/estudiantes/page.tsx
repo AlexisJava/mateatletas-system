@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { getErrorMessage } from '@/lib/utils/error-handler';
 import apiClient from '@/lib/axios';
 import { EmptyState } from '@/components/admin/EmptyState';
-import { GraduationCap, Sparkles, Zap, Rocket, Search, Users } from 'lucide-react';
+import { GraduationCap, Search, Users, Sparkles, Zap, Rocket } from 'lucide-react';
+import { CASAS_CONFIG, getCasaByEdad, type CasaName } from '@/lib/constants/casas-2026';
 
 /**
  * Tipos para el modelo 2026
- * Casa: QUANTUM (6-9), VERTEX (10-12), PULSAR (13-17)
  */
 interface Casa {
   nombre: string;
@@ -33,38 +33,7 @@ interface Estudiante {
   casa?: Casa;
 }
 
-type CasaTab = 'Todos' | 'Quantum' | 'Vertex' | 'Pulsar' | 'Sin Casa';
-
-/**
- * Configuración de las Casas 2026
- * Basado en rangos de edad del modelo Mateatletas 2026
- */
-const CASAS_CONFIG: Record<
-  Exclude<CasaTab, 'Todos' | 'Sin Casa'>,
-  { edadMin: number; edadMax: number; color: string; emoji: string; descripcion: string }
-> = {
-  Quantum: {
-    edadMin: 6,
-    edadMax: 9,
-    color: '#8B5CF6', // Violeta
-    emoji: '⚛️',
-    descripcion: 'Exploradores (6-9 años)',
-  },
-  Vertex: {
-    edadMin: 10,
-    edadMax: 12,
-    color: '#10B981', // Verde
-    emoji: '🔷',
-    descripcion: 'Constructores (10-12 años)',
-  },
-  Pulsar: {
-    edadMin: 13,
-    edadMax: 17,
-    color: '#F59E0B', // Naranja
-    emoji: '💫',
-    descripcion: 'Dominadores (13-17 años)',
-  },
-};
+type CasaTab = 'Todos' | CasaName | 'Sin Casa';
 
 export default function AdminEstudiantesPage() {
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
@@ -96,17 +65,6 @@ export default function AdminEstudiantesPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  /**
-   * Determina la casa basándose en la edad del estudiante
-   * Usa el modelo 2026: Quantum (6-9), Vertex (10-12), Pulsar (13-17)
-   */
-  const getCasaByEdad = (edad: number): 'Quantum' | 'Vertex' | 'Pulsar' | null => {
-    if (edad >= 6 && edad <= 9) return 'Quantum';
-    if (edad >= 10 && edad <= 12) return 'Vertex';
-    if (edad >= 13 && edad <= 17) return 'Pulsar';
-    return null;
   };
 
   // Filtrar estudiantes por búsqueda
