@@ -143,3 +143,51 @@ export interface MatchingPairsState {
   /** Si debe mostrar respuestas correctas */
   mostrarRespuestas: boolean;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ORDER SEQUENCE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Elemento de la secuencia a ordenar */
+export interface OrderSequenceElement {
+  /** ID único del elemento */
+  id: string;
+  /** Contenido a mostrar */
+  contenido: string;
+  /** Posición correcta (1-indexed) */
+  ordenCorrecto: number;
+}
+
+/** Feedback para OrderSequence */
+export interface OrderSequenceFeedback {
+  /** Mensaje cuando el orden es correcto */
+  correcto: string;
+  /** Mensaje cuando el orden es incorrecto */
+  incorrecto: string;
+}
+
+/** Configuración del componente OrderSequence */
+export interface OrderSequenceConfig {
+  /** Instrucción para el estudiante */
+  instruccion: string;
+  /** Elementos a ordenar */
+  elementos: OrderSequenceElement[];
+  /** Mensajes de feedback */
+  feedback: OrderSequenceFeedback;
+  /** Número máximo de intentos (opcional) */
+  intentosMaximos?: number;
+  /** Mostrar respuestas correctas después de N intentos (opcional) */
+  mostrarRespuestasTras?: number;
+}
+
+/** Estado interno del componente OrderSequence */
+export interface OrderSequenceState {
+  /** IDs de elementos en el orden actual del usuario */
+  ordenActual: string[];
+  /** Si ya se verificó */
+  verificado: boolean;
+  /** Número de intentos */
+  intentos: number;
+  /** Si debe mostrar respuestas correctas */
+  mostrarRespuestas: boolean;
+}

@@ -13,6 +13,7 @@ import { FillBlanksPreview } from './previews/FillBlanksPreview';
 import { VideoPlayerPreview } from './previews/VideoPlayerPreview';
 import { DragAndDropPreview } from './previews/DragAndDropPreview';
 import { MatchingPairsPreview } from './previews/MatchingPairsPreview';
+import { OrderSequencePreview } from './previews/OrderSequencePreview';
 
 // Registrar previews de componentes implementados
 registerPreview('MultipleChoice', MultipleChoicePreview);
@@ -20,10 +21,11 @@ registerPreview('FillBlanks', FillBlanksPreview);
 registerPreview('VideoPlayer', VideoPlayerPreview);
 registerPreview('DragAndDrop', DragAndDropPreview);
 registerPreview('MatchingPairs', MatchingPairsPreview);
+registerPreview('OrderSequence', OrderSequencePreview);
 
 // Log para desarrollo
 if (process.env.NODE_ENV === 'development') {
   console.log(
-    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs',
+    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence',
   );
 }

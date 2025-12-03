@@ -77,10 +77,20 @@ const INTERACTIVOS: ComponenteData[] = [
     icono: '📋',
     configSchema: {},
     ejemploConfig: {
-      elementos: ['Observar', 'Hipótesis', 'Experimentar', 'Concluir'],
+      instruccion: 'Ordena los pasos del método científico',
+      elementos: [
+        { id: 'e1', contenido: 'Observación', ordenCorrecto: 1 },
+        { id: 'e2', contenido: 'Hipótesis', ordenCorrecto: 2 },
+        { id: 'e3', contenido: 'Experimentación', ordenCorrecto: 3 },
+        { id: 'e4', contenido: 'Conclusión', ordenCorrecto: 4 },
+      ],
+      feedback: {
+        correcto: '¡Excelente! El orden es correcto.',
+        incorrecto: 'El orden no es correcto. Inténtalo de nuevo.',
+      },
     },
-    implementado: false,
-    habilitado: false,
+    implementado: true,
+    habilitado: true,
     orden: 3,
   },
   {

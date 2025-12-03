@@ -10,3 +10,4 @@ export { FillBlanksPreview } from './FillBlanksPreview';
 export { VideoPlayerPreview } from './VideoPlayerPreview';
 export { DragAndDropPreview } from './DragAndDropPreview';
 export { MatchingPairsPreview } from './MatchingPairsPreview';
+export { OrderSequencePreview } from './OrderSequencePreview';
