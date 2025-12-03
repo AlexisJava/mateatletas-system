@@ -16,6 +16,7 @@ import { MatchingPairsPreview } from './previews/MatchingPairsPreview';
 import { OrderSequencePreview } from './previews/OrderSequencePreview';
 import { SliderPreview } from './previews/SliderPreview';
 import { ToggleSwitchPreview } from './previews/ToggleSwitchPreview';
+import { NumberInputPreview } from './previews/NumberInputPreview';
 
 // Registrar previews de componentes implementados
 registerPreview('MultipleChoice', MultipleChoicePreview);
@@ -26,10 +27,11 @@ registerPreview('MatchingPairs', MatchingPairsPreview);
 registerPreview('OrderSequence', OrderSequencePreview);
 registerPreview('Slider', SliderPreview);
 registerPreview('ToggleSwitch', ToggleSwitchPreview);
+registerPreview('NumberInput', NumberInputPreview);
 
 // Log para desarrollo
 if (process.env.NODE_ENV === 'development') {
   console.log(
-    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence, Slider, ToggleSwitch',
+    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs, OrderSequence, Slider, ToggleSwitch, NumberInput',
   );
 }

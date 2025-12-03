@@ -199,8 +199,10 @@ describe('Slider', () => {
 
       expect(onComplete).toHaveBeenCalledWith(
         expect.objectContaining({
-          correcto: expect.any(Boolean),
-          valor: expect.any(Number),
+          completado: true,
+          puntuacion: expect.any(Number),
+          respuesta: expect.any(Number),
+          intentos: expect.any(Number),
         }),
       );
     });
@@ -212,11 +214,8 @@ describe('Slider', () => {
 
       fireEvent.change(slider, { target: { value: '60' } });
 
-      expect(onProgress).toHaveBeenCalledWith(
-        expect.objectContaining({
-          valor: 60,
-        }),
-      );
+      // onProgress recibe un porcentaje (0-100)
+      expect(onProgress).toHaveBeenCalledWith(expect.any(Number));
     });
   });
 

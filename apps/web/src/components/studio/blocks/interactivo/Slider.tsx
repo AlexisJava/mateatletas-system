@@ -2,15 +2,7 @@
 
 import React, { ReactElement, useState, useCallback, useMemo } from 'react';
 import type { SliderConfig } from './types';
-
-interface StudioBlockProps {
-  id: string;
-  config: SliderConfig;
-  modo: 'estudiante' | 'editor' | 'preview';
-  disabled?: boolean;
-  onComplete?: (result: { correcto: boolean; valor: number }) => void;
-  onProgress?: (progress: { valor: number }) => void;
-}
+import type { StudioBlockProps } from '../types';
 
 function isValueCorrect(value: number, config: SliderConfig): boolean {
   if (config.valorCorrecto === undefined) return true;
@@ -30,7 +22,7 @@ export function Slider({
   disabled = false,
   onComplete,
   onProgress,
-}: StudioBlockProps): ReactElement {
+}: StudioBlockProps<SliderConfig>): ReactElement {
   const [valorActual, setValorActual] = useState(config.valorInicial);
   const [verificado, setVerificado] = useState(false);
   const [intentos, setIntentos] = useState(0);
@@ -52,16 +44,24 @@ export function Slider({
       if (!isInteractive) return;
       const newValue = Number(e.target.value);
       setValorActual(newValue);
-      onProgress?.({ valor: newValue });
+      // Reportar progreso como porcentaje
+      const progressPercent = ((newValue - config.min) / (config.max - config.min)) * 100;
+      onProgress?.(progressPercent);
     },
-    [isInteractive, onProgress],
+    [isInteractive, onProgress, config.min, config.max],
   );
 
   const handleVerify = useCallback(() => {
     setVerificado(true);
     setIntentos((prev) => prev + 1);
-    onComplete?.({ correcto: isCorrect, valor: valorActual });
-  }, [isCorrect, valorActual, onComplete]);
+    onComplete?.({
+      completado: true,
+      puntuacion: isCorrect ? 100 : 0,
+      respuesta: valorActual,
+      tiempoMs: 0,
+      intentos: intentos + 1,
+    });
+  }, [isCorrect, valorActual, onComplete, intentos]);
 
   const handleRetry = useCallback(() => {
     setVerificado(false);

@@ -2,15 +2,7 @@
 
 import React, { ReactElement, useState, useCallback, useMemo } from 'react';
 import type { ToggleSwitchConfig } from './types';
-
-interface StudioBlockProps {
-  id: string;
-  config: ToggleSwitchConfig;
-  modo: 'estudiante' | 'editor' | 'preview';
-  disabled?: boolean;
-  onComplete?: (result: { correcto: boolean; valor: boolean }) => void;
-  onProgress?: (progress: { valor: boolean }) => void;
-}
+import type { StudioBlockProps } from '../types';
 
 export function ToggleSwitch({
   id,
@@ -19,7 +11,7 @@ export function ToggleSwitch({
   disabled = false,
   onComplete,
   onProgress,
-}: StudioBlockProps): ReactElement {
+}: StudioBlockProps<ToggleSwitchConfig>): ReactElement {
   const [valorActual, setValorActual] = useState(config.valorInicial);
   const [verificado, setVerificado] = useState(false);
   const [intentos, setIntentos] = useState(0);
@@ -47,7 +39,8 @@ export function ToggleSwitch({
     if (!isInteractive) return;
     const newValue = !valorActual;
     setValorActual(newValue);
-    onProgress?.({ valor: newValue });
+    // Reportar progreso: 100 si hay interacción
+    onProgress?.(newValue ? 100 : 50);
   }, [isInteractive, valorActual, onProgress]);
 
   const handleKeyDown = useCallback(
@@ -63,8 +56,14 @@ export function ToggleSwitch({
   const handleVerify = useCallback(() => {
     setVerificado(true);
     setIntentos((prev) => prev + 1);
-    onComplete?.({ correcto: isCorrect, valor: valorActual });
-  }, [isCorrect, valorActual, onComplete]);
+    onComplete?.({
+      completado: true,
+      puntuacion: isCorrect ? 100 : 0,
+      respuesta: valorActual,
+      tiempoMs: 0,
+      intentos: intentos + 1,
+    });
+  }, [isCorrect, valorActual, onComplete, intentos]);
 
   const handleRetry = useCallback(() => {
     setVerificado(false);

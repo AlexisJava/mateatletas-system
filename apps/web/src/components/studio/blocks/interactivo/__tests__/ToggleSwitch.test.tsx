@@ -206,8 +206,10 @@ describe('ToggleSwitch', () => {
 
       expect(onComplete).toHaveBeenCalledWith(
         expect.objectContaining({
-          correcto: expect.any(Boolean),
-          valor: expect.any(Boolean),
+          completado: true,
+          puntuacion: expect.any(Number),
+          respuesta: expect.any(Boolean),
+          intentos: expect.any(Number),
         }),
       );
     });
@@ -219,11 +221,8 @@ describe('ToggleSwitch', () => {
 
       fireEvent.click(toggle);
 
-      expect(onProgress).toHaveBeenCalledWith(
-        expect.objectContaining({
-          valor: true,
-        }),
-      );
+      // onProgress recibe un porcentaje (0-100)
+      expect(onProgress).toHaveBeenCalledWith(expect.any(Number));
     });
   });
 

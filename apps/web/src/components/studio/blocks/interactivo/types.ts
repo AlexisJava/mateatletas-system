@@ -299,3 +299,59 @@ export interface ToggleSwitchState {
   /** Si debe mostrar la respuesta correcta */
   mostrarRespuesta: boolean;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// NUMBER INPUT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Feedback para NumberInput */
+export interface NumberInputFeedback {
+  /** Mensaje cuando el valor es correcto */
+  correcto: string;
+  /** Mensaje cuando el valor es incorrecto */
+  incorrecto: string;
+}
+
+/** Configuración del componente NumberInput */
+export interface NumberInputConfig {
+  /** Instrucción para el estudiante */
+  instruccion: string;
+  /** Etiqueta del campo */
+  label: string;
+  /** Valor mínimo permitido */
+  min: number;
+  /** Valor máximo permitido */
+  max: number;
+  /** Valor correcto (opcional, si no se especifica es modo libre) */
+  valorCorrecto?: number;
+  /** Tolerancia para aceptar respuesta como correcta (default: 0) */
+  tolerancia?: number;
+  /** Número de decimales permitidos (default: 0 = enteros) */
+  decimales?: number;
+  /** Unidad a mostrar (ej: "g/mol", "kg", "m") */
+  unidad?: string;
+  /** Descripción adicional */
+  descripcion?: string;
+  /** Placeholder del input */
+  placeholder?: string;
+  /** Mensajes de feedback (solo si hay valorCorrecto) */
+  feedback?: NumberInputFeedback;
+  /** Número máximo de intentos (opcional) */
+  intentosMaximos?: number;
+  /** Mostrar respuesta correcta después de N intentos (opcional) */
+  mostrarRespuestaTras?: number;
+}
+
+/** Estado interno del componente NumberInput */
+export interface NumberInputState {
+  /** Valor actual del input */
+  valorActual: number | null;
+  /** Si ya se verificó */
+  verificado: boolean;
+  /** Número de intentos */
+  intentos: number;
+  /** Si debe mostrar la respuesta correcta */
+  mostrarRespuesta: boolean;
+  /** Mensaje de error de validación */
+  error: string | null;
+}
