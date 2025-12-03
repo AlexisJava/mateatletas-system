@@ -251,3 +251,51 @@ export interface SliderState {
   /** Si debe mostrar la respuesta correcta */
   mostrarRespuesta: boolean;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TOGGLE SWITCH
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Feedback para ToggleSwitch */
+export interface ToggleSwitchFeedback {
+  /** Mensaje cuando el valor es correcto */
+  correcto: string;
+  /** Mensaje cuando el valor es incorrecto */
+  incorrecto: string;
+}
+
+/** Configuración del componente ToggleSwitch */
+export interface ToggleSwitchConfig {
+  /** Instrucción para el estudiante */
+  instruccion: string;
+  /** Etiqueta del toggle */
+  label: string;
+  /** Valor inicial (true = on, false = off) */
+  valorInicial: boolean;
+  /** Valor correcto (opcional, si no se especifica es modo exploración) */
+  valorCorrecto?: boolean;
+  /** Descripción adicional del toggle */
+  descripcion?: string;
+  /** Etiqueta personalizada para estado OFF (default: "Off") */
+  labelOff?: string;
+  /** Etiqueta personalizada para estado ON (default: "On") */
+  labelOn?: string;
+  /** Mensajes de feedback (solo si hay valorCorrecto) */
+  feedback?: ToggleSwitchFeedback;
+  /** Número máximo de intentos (opcional) */
+  intentosMaximos?: number;
+  /** Mostrar respuesta correcta después de N intentos (opcional) */
+  mostrarRespuestaTras?: number;
+}
+
+/** Estado interno del componente ToggleSwitch */
+export interface ToggleSwitchState {
+  /** Valor actual del toggle */
+  valorActual: boolean;
+  /** Si ya se verificó */
+  verificado: boolean;
+  /** Número de intentos */
+  intentos: number;
+  /** Si debe mostrar la respuesta correcta */
+  mostrarRespuesta: boolean;
+}

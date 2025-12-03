@@ -12,3 +12,4 @@ export { DragAndDropPreview } from './DragAndDropPreview';
 export { MatchingPairsPreview } from './MatchingPairsPreview';
 export { OrderSequencePreview } from './OrderSequencePreview';
 export { SliderPreview } from './SliderPreview';
+export { ToggleSwitchPreview } from './ToggleSwitchPreview';
