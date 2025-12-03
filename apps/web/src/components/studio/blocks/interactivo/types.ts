@@ -87,16 +87,59 @@ export interface SortingGameConfig {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// MATCHING PAIRS (futuro)
+// MATCHING PAIRS
 // ═══════════════════════════════════════════════════════════════════════════════
+
+/** Par de elementos a conectar */
+export interface MatchingPair {
+  /** ID único del par */
+  id: string;
+  /** Contenido del lado izquierdo */
+  izquierda: string;
+  /** Contenido del lado derecho */
+  derecha: string;
+}
+
+/** Feedback para MatchingPairs */
+export interface MatchingPairsFeedback {
+  /** Mensaje cuando todas las conexiones son correctas */
+  correcto: string;
+  /** Mensaje cuando hay conexiones incorrectas */
+  incorrecto: string;
+}
 
 /** Configuración del componente MatchingPairs */
 export interface MatchingPairsConfig {
+  /** Instrucción para el estudiante */
   instruccion: string;
-  pares: Array<{
-    id: string;
-    izquierda: { contenido: string; tipo: DragElementType };
-    derecha: { contenido: string; tipo: DragElementType };
-  }>;
-  feedback: DragDropFeedback;
+  /** Pares a conectar */
+  pares: MatchingPair[];
+  /** Mensajes de feedback */
+  feedback: MatchingPairsFeedback;
+  /** Número máximo de intentos (opcional) */
+  intentosMaximos?: number;
+  /** Mostrar respuestas correctas después de N intentos (opcional) */
+  mostrarRespuestasTras?: number;
+}
+
+/** Conexión realizada por el usuario */
+export interface MatchingConnection {
+  /** ID del item izquierdo */
+  leftId: string;
+  /** ID del item derecho */
+  rightId: string;
+}
+
+/** Estado interno del componente MatchingPairs */
+export interface MatchingPairsState {
+  /** Conexiones realizadas */
+  connections: MatchingConnection[];
+  /** Item seleccionado actualmente (null si ninguno) */
+  selectedItem: { side: 'left' | 'right'; pairId: string } | null;
+  /** Si ya se verificó */
+  verificado: boolean;
+  /** Número de intentos */
+  intentos: number;
+  /** Si debe mostrar respuestas correctas */
+  mostrarRespuestas: boolean;
 }

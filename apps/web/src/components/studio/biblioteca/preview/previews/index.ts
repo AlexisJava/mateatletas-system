@@ -8,3 +8,5 @@
 export { MultipleChoicePreview } from './MultipleChoicePreview';
 export { FillBlanksPreview } from './FillBlanksPreview';
 export { VideoPlayerPreview } from './VideoPlayerPreview';
+export { DragAndDropPreview } from './DragAndDropPreview';
+export { MatchingPairsPreview } from './MatchingPairsPreview';

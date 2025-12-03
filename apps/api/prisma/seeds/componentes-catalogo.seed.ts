@@ -54,13 +54,19 @@ const INTERACTIVOS: ComponenteData[] = [
     icono: '🔗',
     configSchema: {},
     ejemploConfig: {
+      instruccion: 'Conecta cada fórmula con su nombre',
       pares: [
-        { izquierda: 'H2O', derecha: 'Agua' },
-        { izquierda: 'NaCl', derecha: 'Sal' },
+        { id: 'p1', izquierda: 'H₂O', derecha: 'Agua' },
+        { id: 'p2', izquierda: 'NaCl', derecha: 'Sal' },
+        { id: 'p3', izquierda: 'CO₂', derecha: 'Dióxido de carbono' },
       ],
+      feedback: {
+        correcto: '¡Excelente! Todas las conexiones son correctas.',
+        incorrecto: 'Algunas conexiones no son correctas.',
+      },
     },
-    implementado: false,
-    habilitado: false,
+    implementado: true,
+    habilitado: true,
     orden: 2,
   },
   {

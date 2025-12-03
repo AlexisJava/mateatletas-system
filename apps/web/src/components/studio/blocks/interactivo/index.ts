@@ -6,10 +6,13 @@
 
 export * from './types';
 export { DragAndDrop } from './DragAndDrop';
+export { MatchingPairs } from './MatchingPairs';
 
 // Register components
 import { registrarBloque } from '../registry';
 import { DragAndDrop } from './DragAndDrop';
-import type { DragAndDropConfig } from './types';
+import { MatchingPairs } from './MatchingPairs';
+import type { DragAndDropConfig, MatchingPairsConfig } from './types';
 
 registrarBloque<DragAndDropConfig>('DragAndDrop', DragAndDrop);
+registrarBloque<MatchingPairsConfig>('MatchingPairs', MatchingPairs);
