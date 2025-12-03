@@ -21,18 +21,29 @@ interface ComponenteData {
 // ═══════════════════════════════════════════════════════════════════════════
 const INTERACTIVOS: ComponenteData[] = [
   {
-    tipo: 'DragDropZone',
+    tipo: 'DragAndDrop',
     nombre: 'Arrastrar y Soltar',
-    descripcion: 'Arrastrar elementos a zonas objetivo',
+    descripcion: 'Arrastrar elementos a zonas objetivo con verificación',
     categoria: CategoriaComponente.INTERACTIVO,
     icono: '🎯',
     configSchema: {},
     ejemploConfig: {
-      items: [{ id: '1', contenido: 'Sólido' }],
-      zonas: [{ id: 'z1', nombre: 'Estados de materia' }],
+      instruccion: 'Arrastra cada número a su categoría correcta',
+      elementos: [
+        { id: 'e1', contenido: '2', tipo: 'texto', zonaCorrecta: 'pares' },
+        { id: 'e2', contenido: '3', tipo: 'texto', zonaCorrecta: 'impares' },
+      ],
+      zonas: [
+        { id: 'pares', etiqueta: 'Números Pares', aceptaMultiples: true },
+        { id: 'impares', etiqueta: 'Números Impares', aceptaMultiples: true },
+      ],
+      feedback: {
+        correcto: '¡Excelente!',
+        incorrecto: 'Intenta de nuevo',
+      },
     },
-    implementado: false,
-    habilitado: false,
+    implementado: true,
+    habilitado: true,
     orden: 1,
   },
   {
