@@ -12,16 +12,18 @@ import { MultipleChoicePreview } from './previews/MultipleChoicePreview';
 import { FillBlanksPreview } from './previews/FillBlanksPreview';
 import { VideoPlayerPreview } from './previews/VideoPlayerPreview';
 import { DragAndDropPreview } from './previews/DragAndDropPreview';
+import { MatchingPairsPreview } from './previews/MatchingPairsPreview';
 
 // Registrar previews de componentes implementados
 registerPreview('MultipleChoice', MultipleChoicePreview);
 registerPreview('FillBlanks', FillBlanksPreview);
 registerPreview('VideoPlayer', VideoPlayerPreview);
 registerPreview('DragAndDrop', DragAndDropPreview);
+registerPreview('MatchingPairs', MatchingPairsPreview);
 
 // Log para desarrollo
 if (process.env.NODE_ENV === 'development') {
   console.log(
-    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop',
+    '[Studio] Previews registrados: MultipleChoice, FillBlanks, VideoPlayer, DragAndDrop, MatchingPairs',
   );
 }
