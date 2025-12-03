@@ -191,3 +191,63 @@ export interface OrderSequenceState {
   /** Si debe mostrar respuestas correctas */
   mostrarRespuestas: boolean;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SLIDER
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Marcador en el slider */
+export interface SliderMarker {
+  /** Valor donde mostrar el marcador */
+  valor: number;
+  /** Etiqueta del marcador */
+  etiqueta: string;
+}
+
+/** Feedback para Slider */
+export interface SliderFeedback {
+  /** Mensaje cuando el valor es correcto */
+  correcto: string;
+  /** Mensaje cuando el valor es incorrecto */
+  incorrecto: string;
+}
+
+/** Configuración del componente Slider */
+export interface SliderConfig {
+  /** Instrucción para el estudiante */
+  instruccion: string;
+  /** Valor mínimo */
+  min: number;
+  /** Valor máximo */
+  max: number;
+  /** Incremento del paso */
+  paso: number;
+  /** Valor inicial del slider */
+  valorInicial: number;
+  /** Valor correcto (opcional, si no se especifica es modo exploración libre) */
+  valorCorrecto?: number;
+  /** Tolerancia para aceptar respuesta como correcta (default: 0) */
+  tolerancia?: number;
+  /** Unidad a mostrar (ej: "°C", "kg", "%") */
+  unidad?: string;
+  /** Marcadores opcionales en el slider */
+  marcadores?: SliderMarker[];
+  /** Mensajes de feedback (solo si hay valorCorrecto) */
+  feedback?: SliderFeedback;
+  /** Número máximo de intentos (opcional) */
+  intentosMaximos?: number;
+  /** Mostrar respuesta correcta después de N intentos (opcional) */
+  mostrarRespuestaTras?: number;
+}
+
+/** Estado interno del componente Slider */
+export interface SliderState {
+  /** Valor actual del slider */
+  valorActual: number;
+  /** Si ya se verificó */
+  verificado: boolean;
+  /** Número de intentos */
+  intentos: number;
+  /** Si debe mostrar la respuesta correcta */
+  mostrarRespuesta: boolean;
+}
