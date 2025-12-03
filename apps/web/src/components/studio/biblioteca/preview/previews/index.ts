@@ -14,3 +14,4 @@ export { OrderSequencePreview } from './OrderSequencePreview';
 export { SliderPreview } from './SliderPreview';
 export { ToggleSwitchPreview } from './ToggleSwitchPreview';
 export { NumberInputPreview } from './NumberInputPreview';
+export { TextInputPreview } from './TextInputPreview';

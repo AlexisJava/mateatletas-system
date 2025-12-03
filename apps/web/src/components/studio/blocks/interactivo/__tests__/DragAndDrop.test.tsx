@@ -175,7 +175,10 @@ describe('DragAndDrop', () => {
       fireEvent.click(verifyButton);
 
       // Debe mostrar algún feedback (correcto o incorrecto)
-      const feedbackElements = document.querySelectorAll('.bg-green-100, .bg-red-100');
+      // El componente usa bg-green-900/30 y bg-red-900/30 para feedback
+      const feedbackElements = document.querySelectorAll(
+        '[class*="bg-green-900"], [class*="bg-red-900"]',
+      );
       expect(feedbackElements.length).toBeGreaterThan(0);
     });
 
@@ -250,9 +253,11 @@ describe('DragAndDrop', () => {
     it('should_display_config_summary', () => {
       renderWithTheme(<DragAndDrop id="test-1" config={mockConfig} modo="editor" />);
 
-      // Debe mostrar resumen de la configuración
-      expect(screen.getByText(/3 elementos/i)).toBeInTheDocument();
-      expect(screen.getByText(/2 zonas/i)).toBeInTheDocument();
+      // Debe mostrar resumen de la configuración (Elementos: 3, Zonas: 2)
+      expect(screen.getByText('Elementos:')).toBeInTheDocument();
+      expect(screen.getByText('3')).toBeInTheDocument();
+      expect(screen.getByText('Zonas:')).toBeInTheDocument();
+      expect(screen.getByText('2')).toBeInTheDocument();
     });
   });
 
@@ -272,11 +277,21 @@ describe('DragAndDrop', () => {
         />,
       );
 
-      // Verificar varias veces con respuestas incorrectas
-      const verifyButton = screen.getByRole('button', { name: /verificar/i });
+      // Colocar un elemento incorrectamente para poder verificar
+      const element = screen.getByText('2').closest('[draggable="true"]');
+      const wrongZone = screen.getByTestId('dropzone-impares'); // pares en zona de impares
 
+      if (element && wrongZone) {
+        const dataTransfer = createMockDataTransfer();
+        fireDragStart(element, dataTransfer);
+        fireDrop(wrongZone, dataTransfer);
+      }
+
+      const verifyButton = screen.getByRole('button', { name: /verificar/i });
       fireEvent.click(verifyButton);
-      expect(screen.getByText(/intento 1/i)).toBeInTheDocument();
+
+      // Debe mostrar el feedback de incorrecto
+      expect(screen.queryAllByText(mockConfig.feedback.incorrecto).length).toBeGreaterThan(0);
     });
 
     it('should_show_correct_answers_after_max_attempts', () => {
@@ -295,17 +310,37 @@ describe('DragAndDrop', () => {
         />,
       );
 
-      const verifyButton = screen.getByRole('button', { name: /verificar/i });
+      // Colocar elemento incorrectamente
+      const element = screen.getByText('2').closest('[draggable="true"]');
+      const wrongZone = screen.getByTestId('dropzone-impares');
+
+      if (element && wrongZone) {
+        const dataTransfer = createMockDataTransfer();
+        fireDragStart(element, dataTransfer);
+        fireDrop(wrongZone, dataTransfer);
+      }
 
       // Primer intento
-      fireEvent.click(verifyButton);
-
-      // Segundo intento (debe mostrar respuestas)
-      const retryButton = screen.getByRole('button', { name: /intentar/i });
-      fireEvent.click(retryButton);
       fireEvent.click(screen.getByRole('button', { name: /verificar/i }));
 
-      // Debe mostrar las respuestas correctas
+      // Debe mostrar botón reintentar
+      const retryButton = screen.getByRole('button', { name: /reintentar/i });
+      fireEvent.click(retryButton);
+
+      // Colocar de nuevo incorrectamente
+      const element2 = screen.getByText('2').closest('[draggable="true"]');
+      const wrongZone2 = screen.getByTestId('dropzone-impares');
+
+      if (element2 && wrongZone2) {
+        const dataTransfer = createMockDataTransfer();
+        fireDragStart(element2, dataTransfer);
+        fireDrop(wrongZone2, dataTransfer);
+      }
+
+      // Segundo intento (debe mostrar respuestas)
+      fireEvent.click(screen.getByRole('button', { name: /verificar/i }));
+
+      // Después de max intentos, debe mostrar las respuestas correctas
       expect(screen.getByTestId('correct-answers')).toBeInTheDocument();
     });
   });

@@ -355,3 +355,183 @@ export interface NumberInputState {
   /** Mensaje de error de validación */
   error: string | null;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TEXT INPUT
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Feedback para TextInput */
+export interface TextInputFeedback {
+  /** Mensaje cuando la respuesta es correcta */
+  correcto: string;
+  /** Mensaje cuando la respuesta es incorrecta */
+  incorrecto: string;
+}
+
+/** Configuración del componente TextInput */
+export interface TextInputConfig {
+  /** Instrucción para el estudiante */
+  instruccion: string;
+  /** Etiqueta del campo */
+  label: string;
+  /** Placeholder del input */
+  placeholder?: string;
+  /** Respuesta correcta (opcional, si no se especifica es modo libre) */
+  respuestaCorrecta?: string;
+  /** Respuestas alternativas aceptadas */
+  respuestasAlternativas?: string[];
+  /** Si la comparación es case-sensitive (default: false) */
+  caseSensitive?: boolean;
+  /** Descripción adicional */
+  descripcion?: string;
+  /** Longitud máxima del texto */
+  maxLength?: number;
+  /** Si es textarea multilínea */
+  multiline?: boolean;
+  /** Filas del textarea (si multiline es true) */
+  rows?: number;
+  /** Patrón regex para validación */
+  patron?: string;
+  /** Mensaje de error cuando no cumple el patrón */
+  mensajePatron?: string;
+  /** Mensajes de feedback (solo si hay respuestaCorrecta) */
+  feedback?: TextInputFeedback;
+  /** Número máximo de intentos (opcional) */
+  intentosMaximos?: number;
+  /** Mostrar respuesta correcta después de N intentos (opcional) */
+  mostrarRespuestaTras?: number;
+}
+
+/** Estado interno del componente TextInput */
+export interface TextInputState {
+  /** Valor actual del input */
+  valorActual: string;
+  /** Si ya se verificó */
+  verificado: boolean;
+  /** Número de intentos */
+  intentos: number;
+  /** Si debe mostrar la respuesta correcta */
+  mostrarRespuesta: boolean;
+  /** Mensaje de error de validación */
+  error: string | null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PIE CHART
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Dato para un segmento del gráfico circular */
+export interface PieChartDato {
+  /** ID único del segmento */
+  id: string;
+  /** Etiqueta del segmento */
+  label: string;
+  /** Valor numérico */
+  valor: number;
+  /** Color del segmento (opcional, usa paleta por defecto) */
+  color?: string;
+}
+
+/** Feedback para PieChart */
+export interface PieChartFeedback {
+  /** Mensaje cuando la selección es correcta */
+  correcto: string;
+  /** Mensaje cuando la selección es incorrecta */
+  incorrecto: string;
+}
+
+/** Configuración del componente PieChart */
+export interface PieChartConfig {
+  /** Instrucción para el estudiante */
+  instruccion: string;
+  /** Título del gráfico */
+  titulo?: string;
+  /** Datos para el gráfico */
+  datos: PieChartDato[];
+  /** Mostrar porcentajes en las etiquetas */
+  mostrarPorcentaje?: boolean;
+  /** Mostrar leyenda */
+  mostrarLeyenda?: boolean;
+  /** Descripción adicional */
+  descripcion?: string;
+  /** Pregunta para modo interactivo (opcional) */
+  pregunta?: string;
+  /** ID del segmento correcto (si es interactivo) */
+  segmentoCorrectoId?: string;
+  /** Mensajes de feedback (solo si hay segmentoCorrectoId) */
+  feedback?: PieChartFeedback;
+  /** Número máximo de intentos (opcional) */
+  intentosMaximos?: number;
+}
+
+/** Estado interno del componente PieChart */
+export interface PieChartState {
+  /** ID del segmento seleccionado */
+  segmentoSeleccionado: string | null;
+  /** Si ya se verificó */
+  verificado: boolean;
+  /** Número de intentos */
+  intentos: number;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BAR GRAPH
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Dato para una barra del gráfico */
+export interface BarGraphDato {
+  /** ID único de la barra */
+  id: string;
+  /** Etiqueta de la barra */
+  label: string;
+  /** Valor numérico */
+  valor: number;
+  /** Color de la barra (opcional) */
+  color?: string;
+}
+
+/** Feedback para BarGraph */
+export interface BarGraphFeedback {
+  /** Mensaje cuando la selección es correcta */
+  correcto: string;
+  /** Mensaje cuando la selección es incorrecta */
+  incorrecto: string;
+}
+
+/** Configuración del componente BarGraph */
+export interface BarGraphConfig {
+  /** Instrucción para el estudiante */
+  instruccion: string;
+  /** Título del gráfico */
+  titulo?: string;
+  /** Datos para el gráfico */
+  datos: BarGraphDato[];
+  /** Etiqueta del eje X */
+  ejeX?: string;
+  /** Etiqueta del eje Y */
+  ejeY?: string;
+  /** Mostrar valores sobre las barras */
+  mostrarValores?: boolean;
+  /** Descripción adicional */
+  descripcion?: string;
+  /** Orientación de las barras */
+  orientacion?: 'vertical' | 'horizontal';
+  /** Pregunta para modo interactivo (opcional) */
+  pregunta?: string;
+  /** ID de la barra correcta (si es interactivo) */
+  barraCorrectaId?: string;
+  /** Mensajes de feedback (solo si hay barraCorrectaId) */
+  feedback?: BarGraphFeedback;
+  /** Número máximo de intentos (opcional) */
+  intentosMaximos?: number;
+}
+
+/** Estado interno del componente BarGraph */
+export interface BarGraphState {
+  /** ID de la barra seleccionada */
+  barraSeleccionada: string | null;
+  /** Si ya se verificó */
+  verificado: boolean;
+  /** Número de intentos */
+  intentos: number;
+}
