@@ -11,20 +11,24 @@ interface Props {
 
 const CATEGORIA_LABELS: Record<BloqueCategoria, string> = {
   INTERACTIVO: 'Interactivos',
-  CONTENIDO: 'Contenido',
-  EDITOR_CODIGO: 'Editor de código',
+  MOTRICIDAD_FINA: 'Motricidad Fina',
+  SIMULADOR: 'Simuladores',
+  EDITOR_CODIGO: 'Editor de Código',
+  CREATIVO: 'Creativos',
   MULTIMEDIA: 'Multimedia',
-  GAMIFICACION: 'Gamificación',
   EVALUACION: 'Evaluación',
+  MULTIPLAYER: 'Multiplayer',
 };
 
 const CATEGORIA_ORDEN: BloqueCategoria[] = [
-  'CONTENIDO',
   'INTERACTIVO',
-  'MULTIMEDIA',
+  'MOTRICIDAD_FINA',
+  'SIMULADOR',
   'EDITOR_CODIGO',
-  'GAMIFICACION',
+  'CREATIVO',
+  'MULTIMEDIA',
   'EVALUACION',
+  'MULTIPLAYER',
 ];
 
 export function ComponentePicker({ componentes, onSeleccionar }: Props): React.ReactElement {

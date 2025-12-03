@@ -430,6 +430,8 @@ export const useStudioWizardStore = create<WizardStore>((set, get) => ({
     set({ isSubmitting: true, submitError: null });
 
     try {
+      console.log('[Studio Wizard] Iniciando creación de curso...');
+
       // Preparar el body según el DTO del backend
       const body = {
         categoria: datos.categoria,
@@ -454,7 +456,18 @@ export const useStudioWizardStore = create<WizardStore>((set, get) => ({
       // Llamada real al API - la cookie httpOnly se envía automáticamente
       const response = await apiClient.post<{ id: string }>('/studio/cursos', body);
 
+      console.log('[Studio Wizard] Respuesta del servidor:', response);
+
       set({ isSubmitting: false });
+
+      // Verificar que tenemos el id
+      if (!response || !response.id) {
+        console.error('[Studio Wizard] Respuesta sin ID:', response);
+        set({ submitError: 'El servidor no devolvió un ID válido' });
+        return null;
+      }
+
+      console.log('[Studio Wizard] Curso creado con ID:', response.id);
       return response.id;
     } catch (error) {
       // Extraer mensaje de error del backend

@@ -67,7 +67,17 @@ const apiClient: ApiClient = axios.create({
  */
 apiClient.interceptors.response.use(
   (response) => {
-    return response.data;
+    // El backend envuelve todas las respuestas en { data: ..., metadata: { timestamp } }
+    // Extraemos response.data del axios, y luego .data del wrapper del backend
+    const axiosData = response.data;
+
+    // Si la respuesta tiene el formato del backend { data: ... }, extraer data
+    if (axiosData && typeof axiosData === 'object' && 'data' in axiosData) {
+      return axiosData.data;
+    }
+
+    // Si no tiene el formato wrapper, devolver tal cual
+    return axiosData;
   },
   (error: AxiosError<{ message?: string; errors?: Record<string, string[]> }>) => {
     // Verificar si estamos en el navegador

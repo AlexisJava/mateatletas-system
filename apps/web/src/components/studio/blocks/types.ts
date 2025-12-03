@@ -6,14 +6,16 @@ export type BloqueEstado = 'idle' | 'en-progreso' | 'completado' | 'error';
 /** Modo de renderizado */
 export type BloqueModo = 'preview' | 'estudiante' | 'editor';
 
-/** Categorías del catálogo */
+/** Categorías del catálogo (95 componentes en 8 categorías) */
 export type BloqueCategoria =
-  | 'INTERACTIVO'
-  | 'CONTENIDO'
-  | 'EDITOR_CODIGO'
-  | 'MULTIMEDIA'
-  | 'GAMIFICACION'
-  | 'EVALUACION';
+  | 'INTERACTIVO' // 15 componentes
+  | 'MOTRICIDAD_FINA' // 10 componentes
+  | 'SIMULADOR' // 25 componentes
+  | 'EDITOR_CODIGO' // 10 componentes
+  | 'CREATIVO' // 10 componentes
+  | 'MULTIMEDIA' // 9 componentes
+  | 'EVALUACION' // 8 componentes
+  | 'MULTIPLAYER'; // 8 componentes
 
 /** Resultado al completar un bloque */
 export interface BloqueResultado {

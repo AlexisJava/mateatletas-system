@@ -12,11 +12,13 @@ interface Props {
 
 const CATEGORIA_COLORS: Record<string, string> = {
   INTERACTIVO: 'bg-purple-100 text-purple-700',
-  CONTENIDO: 'bg-blue-100 text-blue-700',
+  MOTRICIDAD_FINA: 'bg-pink-100 text-pink-700',
+  SIMULADOR: 'bg-cyan-100 text-cyan-700',
   EDITOR_CODIGO: 'bg-green-100 text-green-700',
+  CREATIVO: 'bg-amber-100 text-amber-700',
   MULTIMEDIA: 'bg-orange-100 text-orange-700',
-  GAMIFICACION: 'bg-yellow-100 text-yellow-700',
   EVALUACION: 'bg-red-100 text-red-700',
+  MULTIPLAYER: 'bg-indigo-100 text-indigo-700',
 };
 
 export function ComponenteCard({

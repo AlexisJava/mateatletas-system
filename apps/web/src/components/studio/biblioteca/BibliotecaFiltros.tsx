@@ -23,14 +23,16 @@ interface Props {
   contadores: Contadores;
 }
 
-const CATEGORIAS: Array<{ value: BloqueCategoria | 'TODAS'; label: string }> = [
-  { value: 'TODAS', label: 'Todas' },
-  { value: 'INTERACTIVO', label: 'Interactivos' },
-  { value: 'CONTENIDO', label: 'Contenido' },
-  { value: 'EDITOR_CODIGO', label: 'Editor código' },
-  { value: 'MULTIMEDIA', label: 'Multimedia' },
-  { value: 'GAMIFICACION', label: 'Gamificación' },
-  { value: 'EVALUACION', label: 'Evaluación' },
+const CATEGORIAS: Array<{ value: BloqueCategoria | 'TODAS'; label: string; count: number }> = [
+  { value: 'TODAS', label: 'Todas', count: 95 },
+  { value: 'INTERACTIVO', label: 'Interactivos', count: 15 },
+  { value: 'MOTRICIDAD_FINA', label: 'Motricidad Fina', count: 10 },
+  { value: 'SIMULADOR', label: 'Simuladores', count: 25 },
+  { value: 'EDITOR_CODIGO', label: 'Editor Código', count: 10 },
+  { value: 'CREATIVO', label: 'Creativos', count: 10 },
+  { value: 'MULTIMEDIA', label: 'Multimedia', count: 9 },
+  { value: 'EVALUACION', label: 'Evaluación', count: 8 },
+  { value: 'MULTIPLAYER', label: 'Multiplayer', count: 8 },
 ];
 
 const ESTADOS: Array<{ value: EstadoFiltro; label: string; contadorKey: keyof Contadores }> = [
